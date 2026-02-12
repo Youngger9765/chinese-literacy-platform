@@ -448,7 +448,9 @@ Azure Speech SDK：$200/月（100 位學生使用）
 
 ### 教學理論
 - NotebookLM 閱讀科學資料庫：https://notebooklm.google.com/notebook/a641cf27-2195-44f9-afd4-94508fb75cd0
-- 柯華葳《語言、語文與閱讀》
+- 柯華葳教授閱讀研究中心：https://www.hwaweiko.tw/
+- 數位讀寫網（柯華葳教授指導）：https://eliteracy.twnread.org.tw/
+- 紀念柯華葳老師：https://eliteracy.twnread.org.tw/web/Memoryko.aspx
 
 ### 參考專案
 - 朗朗上口產品介紹：`docs/LANGLANGSHANGKOU_PRODUCT_INTRO.md`
