@@ -144,12 +144,27 @@ Duotopia（技術架構 + 商用驗證）
 - ✅ 合規機制（隱私、資料保護）
 - ✅ Azure Speech SDK 整合（設定為 zh-TW）
 
-**技術棧**：
+**技術棧建議**：
+
+**Web 優先策略**（推薦）
 - 後端：FastAPI / Node.js + Express
-- 前端：Next.js (教師端) + Flutter (學生端)
+- 前端：Next.js（教師端 + 學生端統一使用 Web）
 - 資料庫：PostgreSQL + Redis
 - 語音：Azure Speech SDK (zh-TW)
 - 部署：Vercel / AWS / GCP
+
+**為什麼 Web 優先？**
+- ✅ 開發簡單：一套程式碼，全平台通用
+- ✅ 學習曲線低：兩位高中生更容易上手
+- ✅ 維護容易：不需要維護多個平台版本
+- ✅ 快速迭代：改一次就全平台更新
+- ✅ 跨裝置：電腦、平板、手機瀏覽器都可用
+- ✅ 未來彈性：需要時可用 PWA 或 Capacitor 轉 iOS/Android
+
+**若未來需要原生 App**：
+- 選項 1：PWA (Progressive Web App) - 免重寫，直接封裝
+- 選項 2：Capacitor - Web 轉原生，保留 Web 程式碼
+- 選項 3：Flutter - 需重寫，但效能最佳（最後選擇）
 
 **交付成果**：
 - 教師可建立學校、班級、學生
@@ -434,7 +449,8 @@ Azure Speech SDK：$200/月（100 位學生使用）
 - Azure Speech SDK：https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support
 - Next.js：https://nextjs.org/docs
 - FastAPI：https://fastapi.tiangolo.com/
-- Flutter：https://flutter.dev/docs
+- PWA (Progressive Web App)：https://web.dev/progressive-web-apps/
+- Capacitor (Web to Native)：https://capacitorjs.com/
 
 ### 教學理論
 - NotebookLM 閱讀科學資料庫：https://notebooklm.google.com/notebook/a641cf27-2195-44f9-afd4-94508fb75cd0
