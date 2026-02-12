@@ -196,12 +196,14 @@
 
 ### 可直接使用的 Open Data
 
-| 資源 | 授權 | 商業使用 | 下載方式 |
-|------|------|---------|---------|
-| **教育部常用字（4,808 個）** | CC BY-ND 3.0 | ❌ | [筆順學習網](https://stroke-order.learningweb.moe.edu.tw/) |
-| **筆順 SVG 檔案（6,063 個）** | CC BY-ND 3.0 | ❌ | [筆順學習網](https://stroke-order.learningweb.moe.edu.tw/) |
-| **國語辭典資料** | CC BY-ND 3.0 | ❌ | [g0v/moedict-data](https://github.com/g0v/moedict-data) |
-| **成語典資料** | CC BY-ND 3.0 | ❌ | [教育部成語典](https://dict.idioms.moe.edu.tw/) |
+| 資源 | 數量 | 授權 | 商業使用 | 下載方式 |
+|------|------|------|---------|---------|
+| **方大哥筆順 JSON（最推薦）** ⭐ | 9,606 字 | 待確認 | 待確認 | [GitHub](https://github.com/Shinjou/learning-to-read-chinese/tree/1.8.10%2B10-unreleased/lib/assets/svg) |
+| **教育部常用字** | 4,808 字 | CC BY-NC-ND 3.0 | ❌ | [筆順學習網](https://stroke-order.learningweb.moe.edu.tw/) |
+| **教育部筆順 SVG** | 6,063 字 | CC BY-NC-ND 3.0 | ❌ | [筆順學習網](https://stroke-order.learningweb.moe.edu.tw/) |
+| **Hanzi Writer 資料** | 6,000+ 字 | MIT / Arphic | ✅ | [GitHub](https://github.com/chanind/hanzi-writer) |
+| **國語辭典資料** | 16 萬詞 | CC BY-ND 3.0 | ❌ | [g0v/moedict-data](https://github.com/g0v/moedict-data) |
+| **成語典資料** | 4 萬+ 則 | CC BY-ND 3.0 | ❌ | [教育部成語典](https://dict.idioms.moe.edu.tw/) |
 
 **重要限制**：
 - **BY（姓名標示）**：必須標示「中華民國教育部」
@@ -236,11 +238,50 @@
 
 ### 筆順功能
 
-**推薦方案**：**Hanzi Writer**（開源、MIT 授權）
-- GitHub: https://github.com/chanind/hanzi-writer
-- 完全可商業使用
-- 支援繁簡體
-- 活躍維護（58 個版本）
+#### **方案 A（最推薦）：方大哥 Flutter App 筆順資料** ⭐
+
+**來源**：[learning-to-read-chinese](https://github.com/Shinjou/learning-to-read-chinese/tree/1.8.10%2B10-unreleased/lib/assets/svg)
+
+**核心優勢**：
+- ✅ **9,606 個中文字筆順 JSON**（比教育部 6,063 個多 3,543 個）
+- ✅ **方大哥自己的專案**，授權無虞
+- ✅ **JSON 格式**，直接可用於 Web（Canvas/SVG 渲染）
+- ✅ **包含 medians（中心線）**，可用於手寫辨識比對
+- ✅ **涵蓋注音符號**（ㄅㄆㄇㄈ...）
+
+**資料格式**：
+```json
+{
+  "strokes": ["M 483 736 Q 504 715 ...", "M 474 477 Q ..."],  // SVG 路徑
+  "medians": [[483,736,504,715,...], [474,477,...]]           // 中心線座標
+}
+```
+
+**實作方式**：
+1. 從 GitHub 下載需要的字的 JSON（如：`人.json`、`清.json`）
+2. 使用 Canvas 或 SVG 渲染筆順動畫
+3. 使用 medians 資料進行手寫辨識比對
+
+**教學流程參考**（方大哥已驗證）：
+- **Look** → **Listen** → **Write** → **Use** → **Speak**
+- 符合曾世杰教授教學理念
+- 可直接套用到我們的 PRD
+
+**注意事項**：
+- ⚠️ 需與方大哥確認授權方式
+- ⚠️ 資料量大（9,606 個檔案），需評估載入策略（按需載入 vs. 全部預載）
+
+---
+
+#### **方案 B（備案）：Hanzi Writer**（開源、MIT 授權）
+
+**GitHub**: https://github.com/chanind/hanzi-writer
+
+**優勢**：
+- ✅ 完全可商業使用
+- ✅ 支援繁簡體
+- ✅ 活躍維護（58 個版本）
+- ✅ 開箱即用（NPM 套件）
 
 **資料來源**：
 - Make Me A Hanzi 專案（6,000+ 繁體字筆順資料）
@@ -259,6 +300,11 @@ const writer = HanziWriter.create('character-target-div', '清', {
 writer.animateCharacter()  // 播放筆順動畫
 writer.quiz()  // 手寫測驗
 ```
+
+**使用時機**：
+- 方大哥資料授權有問題時
+- 需要開箱即用的套件時
+- 6,000+ 字已足夠時（國小常用字約 4,808 個）
 
 ---
 
@@ -305,6 +351,7 @@ writer.quiz()  // 手寫測驗
 - [教育部重編國語辭典](https://dict.revised.moe.edu.tw/)
 
 ### 開源專案
+- [方大哥 learning-to-read-chinese - 9,606 字筆順 JSON](https://github.com/Shinjou/learning-to-read-chinese) ⭐ **最推薦**
 - [Hanzi Writer - 筆順動畫庫](https://github.com/chanind/hanzi-writer)
 - [g0v 萌典資料](https://github.com/g0v/moedict-data)
 - [Make Me A Hanzi - 筆順資料](https://github.com/skishore/makemeahanzi)
@@ -315,4 +362,6 @@ writer.quiz()  // 手寫測驗
 **維護者**：Young Tsai
 **最後更新**：2026-02-13
 
-**核心理念**：善用政府開放資源，結合開源技術，打造教育工具。
+**核心理念**：善用政府開放資源，結合開源技術與方大哥已驗證的教學模組，打造教育工具。
+
+**重要發現**：方大哥的 Flutter App 已包含 9,606 個中文字筆順 JSON 資料，且經過實際教學驗證（Look → Listen → Write → Use → Speak 流程），建議優先使用。
