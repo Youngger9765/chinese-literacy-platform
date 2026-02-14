@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中文閱讀平台 - 6個月三軌執行計劃（精簡實作版）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .strategy-banner {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .strategy-banner h2 {
+            color: #92400e;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .strategy-banner p {
+            color: #78350f;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .constraints {
+            background: #f9fafb;
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+
+        .constraints h3 {
+            color: #dc2626;
+            margin-bottom: 0.75rem;
+        }
+
+        .constraints ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .constraints li {
+            padding: 0.5rem 0;
+            color: #4b5563;
+        }
+
+        .constraints li:before {
+            content: "⚠️ ";
+            margin-right: 0.5rem;
+        }
+
+        /* 軌道標題 */
+        .track-headers {
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+            padding-bottom: 1rem;
+        }
+
+        .track-header {
+            padding: 1.25rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .header-time {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        }
+
+        .header-company {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .header-product {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .header-team {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        /* Phase 分隔 */
+        .phase-separator {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 1rem 1.5rem;
+            margin: 2rem 0 1rem 0;
+            border-radius: 10px;
+            border-left: 5px solid #4a5568;
+        }
+
+        .phase-separator h2 {
+            font-size: 1.3rem;
+            color: #1a202c;
+            font-weight: 700;
+        }
+
+        /* 時間軸行 */
+        .timeline-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: start;
+        }
+
+        .week-label {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+            position: sticky;
+            top: 80px;
+        }
+
+        /* 卡片樣式 */
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #e2e8f0;
+            transition: all 0.3s ease;
+            min-height: 100px;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .track-company .card {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .track-product .card {
+            border-left-color: #3b82f6;
+            background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+        }
+
+        .track-team .card {
+            border-left-color: #f59e0b;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 0.75rem;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            color: #4a5568;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* 標籤 */
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .capability-tag {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .feature-tag {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .tech-tag {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .tool-tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            font-weight: 600;
+        }
+
+        .moat-badge {
+            background: #065f46;
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .value-badge {
+            background: #7c2d12;
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .speed-badge {
+            background: #dc2626;
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        /* Milestone */
+        .milestone-row {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        }
+
+        .milestone-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+
+        .milestone-desc {
+            color: #78350f;
+            font-size: 1rem;
+        }
+
+        ul {
+            margin-left: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        li {
+            margin-bottom: 0.25rem;
+            line-height: 1.4;
+        }
+
+        .person {
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1600px) {
+            .timeline-row {
+                grid-template-columns: 90px 1fr 1fr 1fr;
+            }
+            .track-headers {
+                grid-template-columns: 90px 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .timeline-row {
+                grid-template-columns: 1fr;
+            }
+            .track-headers {
+                grid-template-columns: 1fr;
+            }
+            .week-label {
+                position: static;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 中文閱讀平台 - 6個月三軌執行計劃</h1>
+        <div class="subtitle">市場推廣 × 產品功能開發 × 團隊成長路徑（2026/2-8 精簡實作版）</div>
+
+        <!-- 策略橫幅 -->
+        <div class="strategy-banner">
+            <h2>💡 精簡實作策略：用現成工具加速，而非從零開發</h2>
+            <p><strong>核心理念：</strong>所有功能都保留（朗讀分析、蘇格拉底對話、Agent 系統、校班師生課、作業模式、自學模式），但使用 <span class="highlight">Firebase</span>、<span class="highlight">Firebase Hosting</span>、<span class="highlight">Vertex AI (Gemini)</span> 等現成工具快速實作，每個功能先求「能用、能展示、能驗證價值」，後續可迭代優化。</p>
+        </div>
+
+        <!-- 現實限制 -->
+        <div class="constraints">
+            <h3>⏱️ 現實限制</h3>
+            <ul>
+                <li><strong>團隊：</strong>1 位架構師 + 2 位高中生實習生（每週 8-10 小時）</li>
+                <li><strong>時間：</strong>2026/2/17 - 8/31（約 28 週），總工時約 450-560 小時</li>
+                <li><strong>目標：</strong>8 月底交付完整可用產品，所有核心功能必須有</li>
+                <li><strong>策略：</strong>借鑑 Duotopia 校班師生課經驗 + AI 工具加速開發</li>
+            </ul>
+        </div>
+
+        <!-- 軌道標題 -->
+        <div class="track-headers">
+            <div class="track-header header-time">⏰ 時間</div>
+            <div class="track-header header-company">🏢 市場推廣<br><small style="font-size:0.8rem;">社群擴散 × 技術背書</small></div>
+            <div class="track-header header-product">📱 產品發展<br><small style="font-size:0.8rem;">功能完整但實作精簡</small></div>
+            <div class="track-header header-team">👥 團隊發展<br><small style="font-size:0.8rem;">學習現代開發方式</small></div>
+        </div>
+
+        <!-- Phase 0 -->
+        <div class="phase-separator">
+            <h2>📍 Phase 0: 熱身期 - 團隊建立與期待對齊（2 月，含過年）</h2>
+        </div>
+
+        <!-- Week 1 -->
+        <div class="timeline-row">
+            <div class="week-label">Week 1<br><small style="font-size:0.75rem;">2/3-2/9</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🤝 教育組織網絡對接</div>
+                    <div class="card-content">
+                        <span class="capability-tag">CoLab 合作社</span>
+                        <span class="capability-tag">KIST×學思達</span>
+                        <span class="capability-tag">閱讀素養</span>
+                        <p style="margin-top:0.75rem;"><strong>核心夥伴：</strong>曾世杰教授、均一 Academy、方大哥。</p>
+                        <p style="margin-top:0.5rem;"><strong>教育組織網絡：</strong></p>
+                        <p>• 教育創新合作社 CoLab（誠致KIST+均一+TFT）</p>
+                        <p>• KIST×學思達合作（張輝誠顧問，800份教材，3.5萬學生）</p>
+                        <p>• 學思達教育基金會（4.5萬教師社群，開放共備）</p>
+                        <p>• 品學堂（閱讀理解、素養教育專業）</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📋 專案啟動</div>
+                    <div class="card-content">
+                        <span class="feature-tag">Kickoff Meeting</span>
+                        <span class="feature-tag">需求確認</span>
+                        <span class="feature-tag">里程碑規劃</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 與方大哥對齊期待、確認專案範圍</p>
+                        <p style="margin-top:0.5rem;">了解均一 Academy 可提供的資源與支持</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 團隊建立</div>
+                    <div class="card-content">
+                        <span class="tech-tag">自我介紹</span>
+                        <span class="tech-tag">技能盤點</span>
+                        <span class="tech-tag">分工討論</span>
+                        <p style="margin-top:0.75rem;"><strong>目標：</strong>認識彼此、建立信任、了解各自強項</p>
+                        <p style="margin-top:0.5rem;">工程師（靖杭、啟翔）分享：過去經驗、想學什麼、期待什麼角色</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 2 -->
+        <div class="timeline-row">
+            <div class="week-label">Week 2<br><small style="font-size:0.75rem;">2/10-2/16<br>🧧 過年</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏢 價值交換 & 推廣夥伴</div>
+                    <div class="card-content">
+                        <span class="capability-tag">均一 Academy</span>
+                        <span class="capability-tag">曾世杰教授</span>
+                        <span class="capability-tag">技術學習</span>
+                        <p style="margin-top:0.75rem;"><strong>核心夥伴價值交換：</strong></p>
+                        <p>• 均一：我們用Google全家桶，未來可整合進均一生態</p>
+                        <p>• 曾教授：驗證閱讀理論，我們提供實證數據</p>
+                        <p style="margin-top:0.75rem;"><strong>技術自學資源：</strong></p>
+                        <p>• Google Cloud Skills Boost 免費課程（Firebase、Vertex AI）</p>
+                        <p>• Firebase、Vertex AI 官方文件</p>
+                        <p>• 開源專案參考（GitHub）</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📚 知識脈絡 & 程式碼研究</div>
+                    <div class="card-content">
+                        <span class="feature-tag">閱讀方程式</span>
+                        <span class="feature-tag">程式碼研究</span>
+                        <span class="feature-tag">功能拆解</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 理解曾教授理論（閱讀能力 = 識字解碼 × 背景知識）</p>
+                        <p style="margin-top:0.5rem;"><strong>🔍 研究方大哥「學國語 App」程式碼：</strong></p>
+                        <p>• GitHub: learning-to-read-chinese (Flutter)</p>
+                        <p>• <strong>已實現功能</strong>：朗讀練習、偵錯功能、生字學習、注音符號切換</p>
+                        <p>• <strong>可借鑒的</strong>：UI/UX設計邏輯、文本比對演算法、生字學習模組設計</p>
+                        <p>• <strong>目標</strong>：不重複造輪子，善用現有基礎建設</p>
+                        <p style="margin-top:0.5rem;">研讀「朗朗上口」開發經驗、Duotopia 校班師生課模組</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 AI 基礎建設對齊</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Claude Code</span>
+                        <span class="tech-tag">Cursor</span>
+                        <span class="tech-tag">共享 Agents</span>
+                        <span class="tech-tag">共享 Skills</span>
+                        <p style="margin-top:0.75rem;"><strong>🔥 新時代開發方式：</strong>一開始就對齊 AI！</p>
+                        <p style="margin-top:0.5rem;">架構師分享 Claude Code Agents & Skills 配置，讓整個團隊使用相同的 AI 工具</p>
+                        <p style="margin-top:0.5rem;">工程師：安裝 Claude Code / Cursor，匯入共享配置</p>
+                        <p style="margin-top:0.5rem;">目標：<strong>開發更有一致性、更有共識</strong></p>
+                        <p style="margin-top:0.5rem;"><em>（過年期間可彈性休息，實習生勞健保辦理）</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 3 -->
+        <div class="timeline-row">
+            <div class="week-label">Week 3<br><small style="font-size:0.75rem;">2/17-2/23</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🤖 AI 基礎建設 & 技術資源</div>
+                    <div class="card-content">
+                        <span class="capability-tag">Claude Code Agents</span>
+                        <span class="capability-tag">Google 官方文件</span>
+                        <span class="capability-tag">開源專案</span>
+                        <p style="margin-top:0.75rem;"><strong>AI 工作流程：</strong>分享 Agents & Skills，建立開發一致性。</p>
+                        <p style="margin-top:0.5rem;"><strong>技術資源善用：</strong></p>
+                        <p>• Firebase 官方文件與範例程式</p>
+                        <p>• GitHub 開源專案參考（教育類、語音辨識）</p>
+                        <p>• Google Cloud 技術社群（台灣 Firebase/GCP 社群）</p>
+                        <div class="speed-badge">⚡ 策略：站在巨人肩膀上</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🔧 開發環境建立</div>
+                    <div class="card-content">
+                        <span class="tool-tag">GitHub</span>
+                        <span class="tool-tag">Firebase</span>
+                        <span class="tool-tag">Firebase Hosting</span>
+                        <span class="tool-tag">shadcn/ui</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 專案架構設計、Firebase 專案建立、GitHub repo</p>
+                        <p style="margin-top:0.5rem;">建立 Next.js + Firebase 開發環境，Firebase Hosting 自動部署</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 AI 協作實戰</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Claude Code Agents</span>
+                        <span class="tech-tag">共享 Skills</span>
+                        <span class="tech-tag">Git 工作流程</span>
+                        <span class="tech-tag">GitHub Actions</span>
+                        <p style="margin-top:0.75rem;"><strong>🤖 AI 驅動開發：</strong>使用共享的 Agents & Skills 協作</p>
+                        <p style="margin-top:0.5rem;">實戰練習：用 Claude Code 開 Branch、寫程式、提交 PR</p>
+                        <p style="margin-top:0.5rem;">學習 Young 的「GitHub Issues + AI Agent 自動化」工作流程</p>
+                        <p style="margin-top:0.5rem;"><strong>目標：</strong>建立團隊 AI 開發共識與一致性</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 4 -->
+        <div class="timeline-row">
+            <div class="week-label">Week 4<br><small style="font-size:0.75rem;">2/24-3/2</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🎯 技術整合 & 市場探勘</div>
+                    <div class="card-content">
+                        <span class="capability-tag">語音 API</span>
+                        <span class="capability-tag">學校資源</span>
+                        <span class="capability-tag">教育市場</span>
+                        <p style="margin-top:0.75rem;"><strong>技術驗證：</strong>Azure Speech SDK 整合、成本控制。</p>
+                        <p style="margin-top:0.5rem;"><strong>市場資源探勘：</strong></p>
+                        <p>• 學校合作機會（種子學校、試點班級）</p>
+                        <p>• 教師社群（Facebook 教師社團、LINE 群組）</p>
+                        <p>• 教育展覽/會議（如：未來教育展）探勘</p>
+                        <p>• 教育創新獎/競賽機會探勘</p>
+                        <div class="moat-badge">🛡️ 策略：技術 + 市場雙軌</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🧪 技術可行性驗證</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Azure Speech SDK</span>
+                        <span class="feature-tag">兒童語音測試</span>
+                        <span class="feature-tag">成本估算</span>
+                        <span class="feature-tag">課文準備</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Azure Speech SDK 測試、準確率評估、成本分析</p>
+                        <p style="margin-top:0.5rem;">準備測試用課文（公版文章、或曾教授提供的範例課文）</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 前端基礎</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Next.js 14</span>
+                        <span class="tech-tag">React 基礎</span>
+                        <span class="tech-tag">Tailwind CSS</span>
+                        <span class="tech-tag">shadcn/ui</span>
+                        <p style="margin-top:0.75rem;">工程師學習：現代前端開發（使用現成元件庫）</p>
+                        <p style="margin-top:0.5rem;">為 3 月正式開發做準備</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">🎯 Demo 1 - 熱身期總結</div>
+            <div class="milestone-desc">團隊建立 ✅ + 環境設定 ✅ + AI 基礎建設對齊 ✅ + Azure Speech SDK 驗證 ✅ + 課文素材準備 ✅ + 工具鏈就緒 ✅</div>
+        </div>
+
+        <!-- Phase 1 -->
+        <div class="phase-separator">
+            <h2>📍 Phase 1: 核心功能 - 朗讀分析 + Socratic Agent（3-4 月）</h2>
+        </div>
+
+        <!-- Week 5-7 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>5-7<br><small style="font-size:0.75rem;">3/3-3/23</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">📚 Firebase & 親子天下推廣</div>
+                    <div class="card-content">
+                        <span class="capability-tag">Firebase</span>
+                        <span class="capability-tag">親子天下</span>
+                        <span class="capability-tag">教師影響力</span>
+                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>Firebase 全端服務能力建立。</p>
+                        <p style="margin-top:0.5rem;"><strong>三月推廣資源（Young演講）：</strong></p>
+                        <p>• 親子天下演講（三月）：向全台教師展示產品</p>
+                        <p>• 學思達：幫助「表達」訓練 → 4.5萬教師社群推廣</p>
+                        <p>• KIST：幫助偏鄉學生識字 → 學校網絡試點</p>
+                        <p>• TFT：幫助偏鄉學生閱讀 → 教師口碑推薦</p>
+                        <div class="speed-badge">⚡ 演講曝光 + 價值交換</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🗄️ 資料庫設計與實作</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Firebase Database</span>
+                        <span class="feature-tag">Schema 設計</span>
+                        <span class="feature-tag">Row Level Security</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Firebase Database Schema、RLS 權限設定</p>
+                        <p style="margin-top:0.5rem;"><strong>📋 參考方大哥學國語 App 資料結構：</strong></p>
+                        <p>• 學生、課文、錄音、學習記錄等資料表設計</p>
+                        <p>• 注音符號切換狀態儲存</p>
+                        <p>• 生字學習進度追蹤</p>
+                        <p style="margin-top:0.5rem;">工程師：學習 Firebase Client、Next.js 整合</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 Firebase 全端開發</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Firebase Client</span>
+                        <span class="tech-tag">PostgreSQL</span>
+                        <span class="tech-tag">Row Level Security</span>
+                        <span class="tech-tag">shadcn/ui</span>
+                        <p style="margin-top:0.75rem;">工程師學習：用 Firebase 快速建立全端應用</p>
+                        <p style="margin-top:0.5rem;">建立基礎頁面：課文列表、學習記錄</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 8-10 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>8-10<br><small style="font-size:0.75rem;">3/24-4/13</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🎤 語音 API & 種子用戶</div>
+                    <div class="card-content">
+                        <span class="capability-tag">語音處理</span>
+                        <span class="capability-tag">Demo展示</span>
+                        <span class="capability-tag">口碑傳播</span>
+                        <p style="margin-top:0.75rem;"><strong>技術整合：</strong>語音辨識與文本比對 pipeline。</p>
+                        <p style="margin-top:0.5rem;"><strong>價值展示 → 口碑推廣：</strong></p>
+                        <p>• 學校Demo（讓老師看到學生進步，自然推薦）</p>
+                        <p>• 種子教師共創（他們的反饋改進產品 → 成為推廣者）</p>
+                        <p>• KIST教師試用（國文教師，偏鄉學生最需要）</p>
+                        <div class="moat-badge">🛡️ 用效果說話，不靠補助</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🎤 朗讀分析功能</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Azure Speech SDK</span>
+                        <span class="feature-tag">錄音上傳</span>
+                        <span class="feature-tag">文本比對</span>
+                        <span class="feature-tag">錯誤標記</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Azure Speech SDK 整合、Python difflib 文本比對</p>
+                        <p style="margin-top:0.5rem;"><strong>💡 借鑒方大哥學國語 App：</strong></p>
+                        <p>• <strong>文本比對演算法</strong>：Flutter 實作邏輯 → 改寫成 TypeScript</p>
+                        <p>• <strong>UI/UX 設計</strong>：錯誤顯示方式（紅字標記、橘色遺漏）</p>
+                        <p>• <strong>注音符號切換</strong>：Space 快捷鍵邏輯</p>
+                        <p style="margin-top:0.5rem;">工程師：錄音介面（Web Audio API）、錯誤顯示 UI</p>
+                        <p style="margin-top:0.5rem;">功能：學生朗讀 → AI 辨識 → 比對原文 → 顯示錯誤</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 音訊處理與 API 整合</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Web Audio API</span>
+                        <span class="tech-tag">MediaRecorder</span>
+                        <span class="tech-tag">Fetch API</span>
+                        <span class="tech-tag">非同步處理</span>
+                        <p style="margin-top:0.75rem;">工程師：錄音按鈕、波形顯示、上傳進度</p>
+                        <p style="margin-top:0.5rem;">學習如何整合第三方 API（Whisper）</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 11-13 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>11-13<br><small style="font-size:0.75rem;">4/14-5/4</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🤖 Google案例 & 品學堂</div>
+                    <div class="card-content">
+                        <span class="capability-tag">Google Partner</span>
+                        <span class="capability-tag">技術背書</span>
+                        <span class="capability-tag">媒體曝光</span>
+                        <p style="margin-top:0.75rem;"><strong>成為Google技術案例：</strong></p>
+                        <p>• 使用Firebase + Vertex AI全套Google技術</p>
+                        <p>• 接洽Google Cloud Taiwan成為教育案例</p>
+                        <p>• Google媒體宣傳（技術部落格、案例展示）</p>
+                        <p style="margin-top:0.5rem;"><strong>品學堂價值交換：</strong></p>
+                        <p>• 我們：補足朗讀環節 / 他們：中學網絡推廣</p>
+                        <div class="moat-badge">🛡️ Google背書 > 自我宣傳</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">💬 蘇格拉底對話 Agent</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Vertex AI (Gemini)</span>
+                        <span class="tool-tag">Function Calling</span>
+                        <span class="feature-tag">問題生成</span>
+                        <span class="feature-tag">對話管理</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Gemini Function Calling 設計、Socratic Prompt 設計</p>
+                        <p style="margin-top:0.5rem;">工程師：對話介面、氣泡設計、訊息列表</p>
+                        <p style="margin-top:0.5rem;">功能：朗讀完成 → AI 提問 → 學生回答 → AI 引導思考</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 LLM 與對話 UI</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Gemini API</span>
+                        <span class="tech-tag">Vertex AI (Gemini)</span>
+                        <span class="tech-tag">Streaming UI</span>
+                        <span class="tech-tag">狀態管理</span>
+                        <p style="margin-top:0.75rem;">工程師：對話氣泡、Streaming 顯示、對話歷史</p>
+                        <p style="margin-top:0.5rem;">學習 Gemini API 與 Function Calling 整合</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">🎯 Demo 2 - 自學模式 MVP</div>
+            <div class="milestone-desc">學生可選課文 → 朗讀錄音 → AI 分析正確率（Azure Speech SDK）→ 蘇格拉底對話（Gemini Function Calling）→ 查看學習記錄（Firebase）</div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="phase-separator">
+            <h2>📍 Phase 2: 校班師生課架構（5-6 月）</h2>
+        </div>
+
+        <!-- Week 14-16 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>14-16<br><small style="font-size:0.75rem;">5/5-5/25</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏢 多租戶 & CoLab試點</div>
+                    <div class="card-content">
+                        <span class="capability-tag">Firebase RLS</span>
+                        <span class="capability-tag">KIST試點</span>
+                        <span class="capability-tag">教師共創</span>
+                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>Firebase RLS 多租戶架構。</p>
+                        <p style="margin-top:0.5rem;"><strong>CoLab價值共創：</strong></p>
+                        <p>• 我們：幫助KIST學生提升閱讀（免費提供）</p>
+                        <p>• CoLab：KIST學校試點、教師反饋改進產品</p>
+                        <p>• 成果：成為CoLab教學模組之一 → 6校推廣</p>
+                        <div class="speed-badge">⚡ 共創 > 索取</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🏫 學校/班級管理</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Firebase RLS</span>
+                        <span class="feature-tag">學校建立</span>
+                        <span class="feature-tag">班級管理</span>
+                        <span class="feature-tag">學生匯入</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Firebase RLS 權限設計（學校 → 班級 → 學生）</p>
+                        <p style="margin-top:0.5rem;">工程師：班級管理介面、學生列表、匯入功能</p>
+                        <p style="margin-top:0.5rem;">借鑑 Duotopia 校班師生課模組經驗</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 權限與資料隔離</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Firebase RLS</span>
+                        <span class="tech-tag">PostgreSQL Policies</span>
+                        <span class="tech-tag">資料關聯</span>
+                        <p style="margin-top:0.75rem;">工程師：學習 Row Level Security 概念</p>
+                        <p style="margin-top:0.5rem;">建立班級管理頁面、學生列表頁面</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 17-18 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>17-18<br><small style="font-size:0.75rem;">5/26-6/8</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">👨‍🏫 教師工具 & 案例展示</div>
+                    <div class="card-content">
+                        <span class="capability-tag">Firebase Functions</span>
+                        <span class="capability-tag">成功案例</span>
+                        <span class="capability-tag">影響力擴散</span>
+                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>Firebase Functions 教師工具開發。</p>
+                        <p style="margin-top:0.5rem;"><strong>案例展示 → 自然曝光：</strong></p>
+                        <p>• KIST學校成功案例（學生進步數據 → CoLab主動分享）</p>
+                        <p>• 學思達教師見證（課堂應用 → 4.5萬社群擴散）</p>
+                        <p>• 教育展覽展示（被動參與，不主動推銷）</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">👨‍🏫 教師介面</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Firebase Functions</span>
+                        <span class="tool-tag">Recharts</span>
+                        <span class="feature-tag">班級儀表板</span>
+                        <span class="feature-tag">學生進度</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 資料聚合 API（Firebase Functions）</p>
+                        <p style="margin-top:0.5rem;">工程師：教師儀表板、班級報表、進度圖表（Recharts）</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 資料視覺化</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Recharts</span>
+                        <span class="tech-tag">Chart.js</span>
+                        <span class="tech-tag">資料聚合</span>
+                        <p style="margin-top:0.75rem;">工程師：學習圖表視覺化（使用現成圖表庫）</p>
+                        <p style="margin-top:0.5rem;">建立教師儀表板、班級報表</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">🎯 Demo 3 - 校班師生課完成</div>
+            <div class="milestone-desc">學校管理員建立學校 → 教師建立班級 → 匯入學生 → 學生學習 → 教師查看報表（Firebase RLS 自動權限隔離）</div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="phase-separator">
+            <h2>📍 Phase 3: 作業模式與自學優化（6-7 月）</h2>
+        </div>
+
+        <!-- Week 19-20 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>19-20<br><small style="font-size:0.75rem;">6/9-6/22</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">📝 學習扶助 & 政府推廣</div>
+                    <div class="card-content">
+                        <span class="capability-tag">學習扶助</span>
+                        <span class="capability-tag">政府背書</span>
+                        <span class="capability-tag">官方通路</span>
+                        <p style="margin-top:0.75rem;"><strong>⭐ 2026暑假黃金時機（7-8月）：</strong></p>
+                        <p>• <strong>80節課</strong>（vs 寒假20節、學期72節）</p>
+                        <p>• 6月Beta完成 → 7月開始試點（時程完美配合）</p>
+                        <p>• 學生最需要（暑假學習滑坡高風險期）</p>
+                        <p>• 數據量足夠（可做統計分析、證明成效）</p>
+                        <p style="margin-top:0.75rem;"><strong>三階段策略：</strong></p>
+                        <p>• <strong>7-8月</strong>：2-3所學校試點（CoLab KIST優先）</p>
+                        <p>• <strong>9月</strong>：收集數據、產出成效報告</p>
+                        <p>• <strong>10-12月</strong>：申請列入PRIORI官方推薦</p>
+                        <p style="margin-top:0.5rem;"><strong>學校自主權：</strong></p>
+                        <p>• 不需等官方推薦，學校可直接選用新工具</p>
+                        <p>• 我們免費提供 → 學校零成本（政府補助支付教師）</p>
+                        <p>• 有數據後2027年列入官方推薦 → 規模化推廣</p>
+                        <div class="moat-badge">🛡️ 暑假試點 → 數據背書 → 官方推薦</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📝 作業模式</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Firebase Realtime</span>
+                        <span class="tool-tag">Gmail API / Gmail API</span>
+                        <span class="feature-tag">作業指派</span>
+                        <span class="feature-tag">截止日</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 作業系統 API、Email 提醒（Gmail API）</p>
+                        <p style="margin-top:0.5rem;">工程師：作業列表、繳交介面、通知系統</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 Realtime 與通知</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Firebase Realtime</span>
+                        <span class="tech-tag">Email API</span>
+                        <span class="tech-tag">推播通知</span>
+                        <p style="margin-top:0.75rem;">工程師：即時更新、Email 整合</p>
+                        <p style="margin-top:0.5rem;">建立作業系統介面</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 21-22 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>21-22<br><small style="font-size:0.75rem;">6/23-7/6</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🤝 暑假學習扶助準備（開始洽談）</div>
+                    <div class="card-content">
+                        <span class="capability-tag">學校洽談</span>
+                        <span class="capability-tag">合作備忘錄</span>
+                        <span class="capability-tag">試點準備</span>
+                        <p style="margin-top:0.75rem;"><strong>⭐ 關鍵行動（為7-8月暑假做準備）：</strong></p>
+                        <p>• 洽談2-3所學校（CoLab KIST優先）</p>
+                        <p>• 說明暑假學習扶助合作方案（80節課）</p>
+                        <p>• 強調：免費提供、政府補助支付教師、零風險</p>
+                        <p style="margin-top:0.5rem;"><strong>時程優勢：</strong></p>
+                        <p>• 6月底Beta完成 → 7月暑假開始（完美配合）</p>
+                        <p>• 80節課足夠驗證成效（vs 寒假20節）</p>
+                        <div class="moat-badge">🎯 現在洽談 → 7月開始試點</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📊 自學模式優化</div>
+                    <div class="card-content">
+                        <span class="feature-tag">學習記錄</span>
+                        <span class="feature-tag">進度視覺化</span>
+                        <span class="feature-tag">錯誤詞彙追蹤</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 學習記錄追蹤、錯誤分析</p>
+                        <p style="margin-top:0.5rem;">工程師：學習曲線圖、進度儀表板、錯誤詞彙列表</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 資料分析與視覺化</div>
+                    <div class="card-content">
+                        <span class="tech-tag">資料聚合</span>
+                        <span class="tech-tag">Recharts 進階</span>
+                        <span class="tech-tag">趨勢分析</span>
+                        <p style="margin-top:0.75rem;">工程師：學習曲線、進度追蹤、多維圖表</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">🎯 Demo 4 - 完整功能展示</div>
+            <div class="milestone-desc">自學模式 + 作業模式 + 校班師生課 + 學習歷程追蹤 - 所有核心功能完成！</div>
+        </div>
+
+        <!-- Phase 4 -->
+        <div class="phase-separator">
+            <h2>📍 Phase 4: 整合、測試與交付（7-8 月）</h2>
+        </div>
+
+        <!-- Week 23-24 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>23-24<br><small style="font-size:0.75rem;">7/7-7/20</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">✅ 暑假試點確認 & Beta測試</div>
+                    <div class="card-content">
+                        <span class="capability-tag">合作確認</span>
+                        <span class="capability-tag">教師培訓</span>
+                        <span class="capability-tag">技術準備</span>
+                        <p style="margin-top:0.75rem;"><strong>⭐ 暑假試點最後準備：</strong></p>
+                        <p>• 確認2-3所學校合作（簽署備忘錄）</p>
+                        <p>• 準備教師培訓教材（如何使用平台）</p>
+                        <p>• 建立技術支援流程（暑假24/7待命）</p>
+                        <p>• 設計數據收集表格（學生進步追蹤）</p>
+                        <p style="margin-top:0.5rem;"><strong>Beta測試重點：</strong></p>
+                        <p>• 50-100人同時使用壓力測試</p>
+                        <p>• 監控與備援機制測試</p>
+                        <p>• 種子教師試用回饋（最後優化機會）</p>
+                        <div class="moat-badge">🎯 Beta通過 → 7月暑假正式開始</div>
+                        <div class="speed-badge">⚡ 數據說話，不靠資源</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🔐 OAuth 登錄系統</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Firebase Auth</span>
+                        <span class="feature-tag">Google OAuth</span>
+                        <span class="feature-tag">Session 管理</span>
+                        <span class="feature-tag">權限驗證</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Firebase Auth 設定（一鍵 Google OAuth）</p>
+                        <p style="margin-top:0.5rem;">工程師：登錄介面、受保護路由、權限控制</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 認證與安全</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Firebase Auth</span>
+                        <span class="tech-tag">OAuth 2.0</span>
+                        <span class="tech-tag">Session & JWT</span>
+                        <span class="tech-tag">路由保護</span>
+                        <p style="margin-top:0.75rem;">工程師：學習現代認證方式（不用自己寫）</p>
+                        <p style="margin-top:0.5rem;">實作登錄流程、受保護頁面</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 25-26 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>25-26<br><small style="font-size:0.75rem;">7/21-8/3</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🧪 測試 & 共創社群</div>
+                    <div class="card-content">
+                        <span class="capability-tag">品質保證</span>
+                        <span class="capability-tag">教師共創</span>
+                        <span class="capability-tag">口碑傳播</span>
+                        <p style="margin-top:0.75rem;"><strong>技術測試：</strong>E2E測試、效能優化、Bug修復。</p>
+                        <p style="margin-top:0.5rem;"><strong>共創社群 → 自然推廣：</strong></p>
+                        <p>• 種子教師：不是Beta測試者，是共創夥伴</p>
+                        <p>• 他們的反饋改進產品 → 成為產品主人</p>
+                        <p>• 產品主人自然推薦 → 比廣告更有效</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🧪 整合測試與優化</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Playwright</span>
+                        <span class="feature-tag">E2E 測試</span>
+                        <span class="feature-tag">效能優化</span>
+                        <span class="feature-tag">Bug 修復</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Playwright 測試框架、效能監控</p>
+                        <p style="margin-top:0.5rem;">全員：測試完整使用者流程、修復 Bug、優化體驗</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 測試與除錯</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Playwright</span>
+                        <span class="tech-tag">DevTools</span>
+                        <span class="tech-tag">效能分析</span>
+                        <p style="margin-top:0.75rem;">工程師：學習測試思維、除錯技巧</p>
+                        <p style="margin-top:0.5rem;">完整測試所有功能</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 27-28 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>27-28<br><small style="font-size:0.75rem;">8/4-8/31</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🔥 暑假學習扶助進行中（7-8月）</div>
+                    <div class="card-content">
+                        <span class="capability-tag">試點運行</span>
+                        <span class="capability-tag">數據收集</span>
+                        <span class="capability-tag">成效驗證</span>
+                        <p style="margin-top:0.75rem;"><strong>⭐ 80節課正在進行：</strong></p>
+                        <ul>
+                            <li>✅ 2-3所學校試點運行（CoLab KIST）</li>
+                            <li>✅ 50-100位學生密集練習</li>
+                            <li>✅ 即時技術支援（24/7待命）</li>
+                            <li>✅ 每週數據報告（追蹤學生進步）</li>
+                        </ul>
+                        <p style="margin-top:0.75rem;"><strong>8月底收集成果：</strong></p>
+                        <ul>
+                            <li>📊 學生朗讀能力提升數據（目標20-30%）</li>
+                            <li>📝 教師訪談回饋（使用心得、推薦意願）</li>
+                            <li>📖 成功案例（5-10個學生進步故事）</li>
+                            <li>🎯 9月產出成效報告 → 10-12月申請官方推薦</li>
+                        </ul>
+                        <div class="value-badge">💡 暑假試點 → 數據背書 → 2027規模化</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🚀 正式部署與交付</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Firebase Hosting Production</span>
+                        <span class="tool-tag">Firebase Production</span>
+                        <span class="feature-tag">正式上線</span>
+                        <span class="feature-tag">文件整理</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 正式環境部署、監控設定、成本控制</p>
+                        <p style="margin-top:0.5rem;">工程師：使用手冊、Demo 準備、交接文件</p>
+                        <p style="margin-top:0.5rem;">準備向方大哥、均一 Academy、曾教授展示</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 全端工程師養成完成</div>
+                    <div class="card-content">
+                        <p><strong>6個月成長總結：</strong></p>
+                        <ul>
+                            <li>✅ 高中生 → 全端工程師</li>
+                            <li>✅ Git 協作 + GitHub 工作流程</li>
+                            <li>✅ Next.js + Firebase 全端開發</li>
+                            <li>✅ LLM API 整合經驗</li>
+                            <li>✅ 完整產品開發經歷</li>
+                            <li>✅ 實習薪酬 + 作品集</li>
+                        </ul>
+                        <p style="margin-top:0.75rem;"><strong>🎉 具備獨立接案能力！</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">🎯 Demo 5 - 正式交付 🎉</div>
+            <div class="milestone-desc">完整產品上線 → 所有功能齊全（朗讀分析 + Socratic Agent + 校班師生課 + 作業模式 + 自學模式）→ 均一 Academy 驗收 → 專案成功！</div>
+        </div>
+
+        <!-- 總結 -->
+        <div class="phase-separator">
+            <h2>🎊 精簡實作策略總結</h2>
+        </div>
+
+        <div style="background: #f9fafb; padding: 2rem; border-radius: 12px; margin-top: 2rem;">
+            <h3 style="color: #1a202c; margin-bottom: 1rem;">✅ 所有功能都保留，但實作方式精簡</h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                <div>
+                    <h4 style="color: #059669; margin-bottom: 0.75rem;">🛠️ 使用的現成工具</h4>
+                    <ul style="color: #4b5563; line-height: 1.8;">
+                        <li><strong>Firebase:</strong> Database + Auth + Storage + Realtime + RLS</li>
+                        <li><strong>Firebase Hosting:</strong> 零配置部署 + 自動 HTTPS + CDN</li>
+                        <li><strong>Azure Speech SDK:</strong> 語音辨識（可彈性選擇 Google Speech 或 ElevenLabs）</li>
+                        <li><strong>Vertex AI (Gemini):</strong> Function Calling + AI Agent</li>
+                        <li><strong>shadcn/ui:</strong> 美觀的 React 元件庫</li>
+                        <li><strong>Recharts:</strong> 圖表視覺化</li>
+                        <li><strong>Gmail API:</strong> Email 服務</li>
+                        <li><strong>Playwright:</strong> E2E 測試</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 style="color: #dc2626; margin-bottom: 0.75rem;">⚡ 節省的時間</h4>
+                    <ul style="color: #4b5563; line-height: 1.8;">
+                        <li><strong>後端 API:</strong> 3 週 → 0 週（Firebase 內建）</li>
+                        <li><strong>語音辨識:</strong> 3 週 → 1 週（用 API）</li>
+                        <li><strong>Agent 框架:</strong> 4 週 → 2 週（Gemini Function Calling）</li>
+                        <li><strong>權限系統:</strong> 2 週 → 0.5 週（RLS）</li>
+                        <li><strong>OAuth:</strong> 1 週 → 0.5 週（Firebase Auth）</li>
+                        <li><strong>UI 元件:</strong> 2 週 → 0.5 週（shadcn/ui）</li>
+                        <li><strong>總計節省:</strong> 約 <strong>10 週</strong> 開發時間！</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px;">
+                <h4 style="color: #92400e; margin-bottom: 0.75rem;">🎯 關鍵成功因素</h4>
+                <ol style="color: #78350f; line-height: 1.8;">
+                    <li><strong>🤖 AI 基礎建設：</strong>一開始就對齊 AI！分享 Claude Code Agents & Skills，讓團隊開發更有一致性與共識</li>
+                    <li><strong>善用 AI 工具:</strong> Claude Code、Cursor 加速開發，用 AI 寫程式而非純手寫</li>
+                    <li><strong>借鑑現有經驗:</strong> 朗朗上口 + Duotopia 校班師生課模組</li>
+                    <li><strong>使用現成服務:</strong> 不重複造輪子，站在巨人肩膀上</li>
+                    <li><strong>MVP 思維:</strong> 先求有再求好，快速迭代</li>
+                    <li><strong>Young 指導:</strong> 架構師把關技術決策 + 分享 AI 配置，高中生專注實作</li>
+                </ol>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 8px;">
+                <h3 style="color: #1e40af; margin-bottom: 0.5rem;">🚀 28 週，450-560 小時，完整產品交付！</h3>
+                <p style="color: #1e3a8a; font-size: 1.1rem;">所有功能都有（朗讀分析、Socratic Agent、校班師生課、作業模式、自學模式）<br>但用最快的方式實作到「能用、能展示、能驗證價值」</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Generated with <a href="https://claude.ai/code" target="_blank">Claude Code</a> via <a href="https://happy.engineering" target="_blank">Happy</a></strong></p>
+            <p style="margin-top: 0.5rem;">Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</p>
+            <p>Co-Authored-By: Happy &lt;yesreply@happy.engineering&gt;</p>
+            <p style="margin-top: 1rem; font-size: 0.85rem;">專案贊助：均一 Academy | 理論指導：曾世杰教授</p>
+        </div>
+    </div>
+</body>
+</html>
