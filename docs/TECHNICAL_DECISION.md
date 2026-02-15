@@ -153,27 +153,40 @@ Duotopia（技術架構 + 商用驗證）
 - ✅ 合規機制（隱私、資料保護）
 - ✅ Azure Speech SDK 整合（設定為 zh-TW）
 
-**技術棧建議**：
+**技術棧：Google 全家桶 + Azure Speech SDK**
 
-**Web 優先策略**（推薦）
-- 後端：FastAPI / Node.js + Express
-- 前端：Next.js（教師端 + 學生端統一使用 Web）
-- 資料庫：PostgreSQL + Redis
-- 語音：Azure Speech SDK (zh-TW)
-- 部署：Vercel / AWS / GCP
+**核心原則**：全面使用 Google 原生服務，唯一例外是語音辨識（Azure Speech SDK，已在 Duotopia 驗證）。
 
-**為什麼 Web 優先？**
-- ✅ 開發簡單：一套程式碼，全平台通用
-- ✅ 學習曲線低：兩位高中生更容易上手
-- ✅ 維護容易：不需要維護多個平台版本
-- ✅ 快速迭代：改一次就全平台更新
-- ✅ 跨裝置：電腦、平板、手機瀏覽器都可用
-- ✅ 未來彈性：需要時可用 PWA 或 Capacitor 轉 iOS/Android
+| 層面 | 技術選擇 | 理由 |
+|------|---------|------|
+| **前端** | Next.js 16 + shadcn/ui + Recharts | Web 優先，跨平台通用 |
+| **後端** | Firebase Functions | 免寫 API server，事件驅動 |
+| **資料庫** | Firestore | 即時同步，RLS 權限內建 |
+| **認證** | Firebase Auth（Google OAuth） | 一鍵登入，免密碼管理 |
+| **檔案儲存** | Firebase Storage | 錄音檔、課文檔案 |
+| **AI/LLM** | Vertex AI (Gemini) + Function Calling | 蘇格拉底對話 Agent |
+| **語音辨識** | Azure Speech SDK (zh-TW) | ⚠️ 唯一非 Google 服務，Duotopia 已驗證 |
+| **手寫辨識** | Google ML Kit | 生字書寫練習（P2） |
+| **部署** | Firebase Hosting | 零配置 + 自動 HTTPS + CDN |
+| **測試** | Playwright | E2E 測試 |
+| **CI/CD** | GitHub Actions | 自動部署到 Firebase Hosting |
 
-**若未來需要原生 App**：
-- 選項 1：PWA (Progressive Web App) - 免重寫，直接封裝
-- 選項 2：Capacitor - Web 轉原生，保留 Web 程式碼
-- 選項 3：Flutter - 需重寫，但效能最佳（最後選擇）
+**為什麼 Google 全家桶？**
+- ✅ **統一帳號**：一個 GCP Project 管理所有服務
+- ✅ **省時間**：免寫後端 API、認證、權限（~10 週）
+- ✅ **學習曲線低**：高中生只需學 Firebase SDK，不用學 FastAPI + PostgreSQL
+- ✅ **即時同步**：Firestore realtime listener，教師端即時看到學生練習
+- ✅ **成本可控**：Firebase 免費額度足夠 MVP（50 位學生）
+- ✅ **未來整合均一**：均一也用 Google 技術棧，生態相容
+
+**為什麼語音辨識用 Azure 不用 Google？**
+- Duotopia 已驗證 Azure Speech SDK 繁體中文準確率 > 90%
+- Google Speech-to-Text (Chirp 3) 為備選方案（若 Azure 成本過高可切換）
+- 兩者 API 介面類似，切換成本低
+
+**Web 優先策略**：
+- ✅ 一套程式碼，全平台通用（電腦、平板、手機）
+- ✅ 未來需要原生 App：PWA → Capacitor → Flutter（漸進升級）
 
 **交付成果**：
 - 教師可建立學校、班級、學生
@@ -244,17 +257,23 @@ Duotopia（技術架構 + 商用驗證）
 ### 雲端服務成本（6 個月）
 
 ```
-AWS / GCP 基礎架構：$100/月
+Firebase (Blaze Plan)：$0-50/月（免費額度涵蓋 MVP）
+  - Firestore: 50K reads/day 免費
+  - Auth: 免費
+  - Hosting: 10GB/month 免費
+  - Functions: 2M invocations/month 免費
+  - Storage: 5GB 免費
 Azure Speech SDK：$200/月（100 位學生使用）
+Vertex AI (Gemini)：$50-100/月（蘇格拉底對話）
 其他服務：$50/月
 
-6 個月總計：$350 × 6 = $2,100
+6 個月總計：$300-400 × 6 = $1,800-2,400
 ```
 
 ### 總成本估算
 
 ```
-雲端服務：$2,100
+雲端服務：~$2,100
 其他成本：$30,000（網域、測試裝置）
 -------------------
 總計：約 $32,100
@@ -439,12 +458,15 @@ Azure Speech SDK：$200/月（100 位學生使用）
 
 ## 📚 參考資源
 
-### 技術文檔
+### 技術文檔（Google 全家桶）
+- Firebase：https://firebase.google.com/docs
+- Firestore：https://firebase.google.com/docs/firestore
+- Firebase Auth：https://firebase.google.com/docs/auth
+- Firebase Functions：https://firebase.google.com/docs/functions
+- Firebase Hosting：https://firebase.google.com/docs/hosting
+- Vertex AI (Gemini)：https://cloud.google.com/vertex-ai/docs
 - Azure Speech SDK：https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support
 - Next.js：https://nextjs.org/docs
-- FastAPI：https://fastapi.tiangolo.com/
-- PWA (Progressive Web App)：https://web.dev/progressive-web-apps/
-- Capacitor (Web to Native)：https://capacitorjs.com/
 
 ### 教學理論
 - NotebookLM 閱讀科學資料庫：https://notebooklm.google.com/notebook/a641cf27-2195-44f9-afd4-94508fb75cd0

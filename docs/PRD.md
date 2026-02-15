@@ -623,10 +623,10 @@
 - [ ] 部件拆解
 - [ ] 例句展示
 - [ ] 發音練習（錄音比對）
-- [ ] 書寫練習（僅平板，觸控書寫）
+- [ ] 書寫練習（僅平板，觸控書寫，Google ML Kit）
 
-**蘇格拉底對話系統**（Phase 3）：
-- [ ] AI 驅動的理解力對話（OpenAI GPT-4o / Claude 3.5 Sonnet）
+**蘇格拉底對話系統**（Phase 2）：
+- [ ] AI 驅動的理解力對話（Vertex AI Gemini + Function Calling）
 - [ ] 語音輸入支援（學生口語回答）
 - [ ] 對話歷史紀錄
 - [ ] 理解力評分
@@ -928,15 +928,18 @@
 
 ## 📐 技術約束（Technical Constraints）
 
-### 技術棧選擇
+### 技術棧選擇（Google 全家桶）
 
-**後端**：FastAPI（Python）或 Node.js + Express
-**前端**：Next.js 14 + TypeScript
-**資料庫**：PostgreSQL + Redis
-**語音識別**：Azure Speech SDK (zh-TW)
-**AI 對話**：OpenAI GPT-4o 或 Claude 3.5 Sonnet
+**前端**：Next.js 16 + TypeScript + shadcn/ui
+**後端**：Firebase Functions
+**資料庫**：Firestore（即時同步 + RLS 權限）
+**認證**：Firebase Auth（Google OAuth）
+**檔案儲存**：Firebase Storage（錄音檔）
+**部署**：Firebase Hosting（自動 HTTPS + CDN）
+**語音識別**：Azure Speech SDK (zh-TW)（⚠️ 唯一非 Google 服務）
+**AI 對話**：Vertex AI (Gemini) + Function Calling
 
-**理由**：基於 Duotopia 成功經驗，快速建置並降低學習曲線
+**理由**：Google 全家桶統一管理，免寫後端 API，高中生學習曲線最低
 
 ---
 
