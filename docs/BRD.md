@@ -42,6 +42,47 @@
 
 ---
 
+### 國際市場機會（Phase 2+）
+
+> 詳見 [G2 國際市場機會分析](market-research/g2-international-market-opportunity.md)
+> 詳見 [Alpha School & SEMI 戰略分析](market-research/alpha-school-semi-strategic-analysis.md)
+
+**市場定位**：除台灣 K-12 國語文教育外，平台的 Voice AI + 教師整合技術可延伸至：
+
+1. **對外華語教學（TCFL）市場**：服務學習中文的外國專業人士
+   - 目標客群：外交官、半導體高管、情報分析師、跨國企業戰略家
+   - 痛點：現有工具（Skritter、TCB、Hack Chinese）無法達到「戰略級」語言能力（ILR 3）
+   - 解決方案：AI 工具 + 台灣師資混合教學（50/50）
+   - 定價：$300-500/月（vs 傳統語言學校 $1,000-3,000/月）
+
+2. **半導體供應鏈雙語教育**：台積電 AZ 廠家庭、SEMI 學校構想
+   - 台積電 AZ 廠投資 650 億美元，帶來 5,000-8,000 台灣家庭遷移
+   - 子女教育需求：1,000-2,000 位 K-12 學生需要「中文沉浸環境」
+   - SEMI 學校 = Alpha School 模式（AI 2hr Learning）+ 中文全日沉浸
+   - 市場規模：$1,200 萬美元/年（僅 TSMC AZ 廠）
+
+3. **混合教學模式授權**：將 App + 真人教師的混合框架授權給語言學校
+   - 核心技術：Voice AI 引擎 + 教師管理系統 + 學習歷程追蹤
+   - 授權對象：語言學校、企業培訓機構、國際學校
+   - 收費模式：SaaS 訂閱 + 技術授權費
+
+**參考案例**：
+- **Speak**（Voice AI 語言學習）：$100M ARR, $1B 估值（2024）
+- **Alpha School**（AI 2hr Learning）：$1.75 億營收，K-12 全覆蓋
+- **HelloChinese**（華語二語學習）：語音辨識技術成熟，但不適合台灣課綱
+
+**台灣師資的戰略價值**：
+- **半導體中文**：台灣用語（晶片/資訊）vs 大陸用語（芯片/信息）
+- **語用能力**：理解「我們會再研究」= 禮貌性拒絕，非真要研究
+- **地緣政治素養**：「一中原則」vs「一個中國政策」語言差異
+- **民主詞彙**：選舉、人權、公民社會（台灣日常對話，大陸受限）
+
+**延伸閱讀**：
+- [EdTech 工具專業度極限分析](market-research/edtech-tool-professional-limits.md)
+- [混合學習 1000 小時框架](pedagogy/hybrid-learning-1000hr-framework.md)
+
+---
+
 ## 📊 市場分析
 
 ### 市場規模（TAM/SAM/SOM）
