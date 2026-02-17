@@ -1,6 +1,6 @@
 # 閱讀理解平台 — 方大哥產品構想
 
-> 來源：方大哥 (張靖杭) Google Doc
+> 來源：方大哥 (GitHub: Shinjou) Google Doc
 > 原始連結：https://docs.google.com/document/d/1Qd1P_ARgYsPGgSpMG8WQmxEZstQff3tikO0fXhsQe_U/
 > 歸檔日期：2026-02-17
 > 說明：此文件隨時會更新，以 Google Doc 為最新版本
