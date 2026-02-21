@@ -365,7 +365,503 @@
         <!-- 策略橫幅 -->
         <div class="strategy-banner">
             <h2>💡 精簡實作策略：用現成工具加速，而非從零開發</h2>
-            <p><strong>核心理念：</strong>所有功能都保留（朗讀分析、蘇格拉底對話、Agent 系統、校班師生課、作業模式、自學模式），但使用 <span class="highlight">Firebase</span>、<span class="highlight">Firebase Hosting</span>、<span class="highlight">Vertex AI (Gemini)</span> 等現成工具快速實作，每個功能先求「能用、能展示、能驗證價值」，後續可迭代優化。</p>
+            <p><strong>核心理念：</strong>所有功能都保留（朗讀分析、蘇格拉底對話、Agent 系統、校班師生課、作業模式、自學模式），但使用 <span class="highlight">React + Vite + FastAPI</span>、<span class="highlight">Cloud Run (GCP)</span>、<span class="highlight">Gemini (FastAPI backend)</span> 等現成工具快速實作，每個功能先求「能用、能展示、能驗證價值」，後續可迭代優化。</p>
+        </div>
+
+        <!-- 平台六大模組架構 -->
+        <style>
+            .module-arch {
+                margin-bottom: 2rem;
+                padding: 2.5rem;
+                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                border-radius: 16px;
+                border: 1px solid #e2e8f0;
+            }
+
+            .module-arch-title {
+                text-align: center;
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #1a202c;
+                margin-bottom: 0.25rem;
+            }
+
+            .module-arch-subtitle {
+                text-align: center;
+                font-size: 1rem;
+                color: #718096;
+                margin-bottom: 2rem;
+            }
+
+            /* Progress indicator */
+            .arch-progress {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                margin-bottom: 2rem;
+                padding: 0.75rem 1.5rem;
+                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                border: 2px solid #f59e0b;
+                border-radius: 10px;
+                max-width: 520px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .arch-progress-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .arch-progress-dot.active {
+                background: #7c3aed;
+                box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
+                animation: archPulse 2s infinite;
+            }
+
+            .arch-progress-dot.upcoming {
+                background: #cbd5e1;
+            }
+
+            @keyframes archPulse {
+                0%, 100% { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3); }
+                50% { box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.15); }
+            }
+
+            .arch-progress-label {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: #92400e;
+            }
+
+            /* Phase legend */
+            .arch-legend {
+                display: flex;
+                justify-content: center;
+                gap: 1.25rem;
+                margin-bottom: 2rem;
+                flex-wrap: wrap;
+            }
+
+            .arch-legend-item {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                font-size: 0.85rem;
+                color: #4a5568;
+            }
+
+            .arch-legend-color {
+                width: 14px;
+                height: 14px;
+                border-radius: 4px;
+                flex-shrink: 0;
+            }
+
+            /* Module diagram grid */
+            .module-diagram {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: auto auto auto;
+                gap: 1rem;
+                max-width: 960px;
+                margin: 0 auto;
+                position: relative;
+            }
+
+            /* Module block */
+            .mod-block {
+                border-radius: 12px;
+                padding: 1.25rem;
+                position: relative;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .mod-block:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            }
+
+            .mod-block .mod-number {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.9);
+                font-weight: 700;
+                font-size: 0.85rem;
+                margin-right: 0.5rem;
+                flex-shrink: 0;
+            }
+
+            .mod-block .mod-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .mod-block .mod-name {
+                font-weight: 700;
+                font-size: 1.05rem;
+            }
+
+            .mod-block .mod-phase-badge {
+                display: inline-block;
+                padding: 0.15rem 0.6rem;
+                border-radius: 10px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                background: rgba(255,255,255,0.85);
+                margin-left: auto;
+                flex-shrink: 0;
+            }
+
+            .mod-block .mod-features {
+                list-style: none;
+                padding: 0;
+                margin: 0.5rem 0 0 0;
+            }
+
+            .mod-block .mod-features li {
+                font-size: 0.85rem;
+                padding: 0.15rem 0;
+                opacity: 0.9;
+                line-height: 1.4;
+            }
+
+            .mod-block .mod-features li::before {
+                content: "- ";
+                opacity: 0.6;
+            }
+
+            /* Phase colors */
+            .mod-phase-0 {
+                background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+                border: 2px solid #8b5cf6;
+                color: #4c1d95;
+            }
+            .mod-phase-0 .mod-number { color: #7c3aed; }
+            .mod-phase-0 .mod-phase-badge { color: #6d28d9; border: 1px solid #c4b5fd; }
+
+            .mod-phase-1 {
+                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+                border: 2px solid #3b82f6;
+                color: #1e3a8a;
+            }
+            .mod-phase-1 .mod-number { color: #2563eb; }
+            .mod-phase-1 .mod-phase-badge { color: #1d4ed8; border: 1px solid #93c5fd; }
+
+            .mod-phase-2 {
+                background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+                border: 2px solid #22c55e;
+                color: #14532d;
+            }
+            .mod-phase-2 .mod-number { color: #16a34a; }
+            .mod-phase-2 .mod-phase-badge { color: #15803d; border: 1px solid #86efac; }
+
+            .mod-phase-23 {
+                background: linear-gradient(135deg, #dcfce7 0%, #fef3c7 100%);
+                border: 2px solid #22c55e;
+                border-image: linear-gradient(135deg, #22c55e, #f59e0b) 1;
+                border-style: solid;
+                border-width: 2px;
+                border-radius: 12px;
+                color: #14532d;
+            }
+            .mod-phase-23 .mod-number { color: #16a34a; }
+            .mod-phase-23 .mod-phase-badge { color: #92400e; border: 1px solid #fcd34d; }
+
+            .mod-phase-34 {
+                background: linear-gradient(135deg, #ffedd5 0%, #fecaca 100%);
+                border: 2px solid #f97316;
+                color: #7c2d12;
+            }
+            .mod-phase-34 .mod-number { color: #ea580c; }
+            .mod-phase-34 .mod-phase-badge { color: #c2410c; border: 1px solid #fdba74; }
+
+            /* Grid placement */
+            .mod-gamification {
+                grid-column: 1 / -1;
+                grid-row: 1;
+            }
+
+            .mod-school {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .mod-frontend {
+                grid-column: 2;
+                grid-row: 2;
+            }
+
+            .mod-analytics {
+                grid-column: 3;
+                grid-row: 2;
+            }
+
+            .mod-agent {
+                grid-column: 2;
+                grid-row: 3;
+            }
+
+            .mod-admin {
+                grid-column: 1 / -1;
+                grid-row: 4;
+            }
+
+            /* Connection arrows using CSS pseudo-elements */
+            .arch-connections {
+                position: relative;
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: auto auto auto auto;
+                gap: 1rem;
+                max-width: 960px;
+                margin: 0 auto;
+            }
+
+            /* Arrow indicators between rows */
+            .arch-arrow-row {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 2rem;
+                padding: 0.3rem 0;
+                color: #94a3b8;
+                font-size: 0.8rem;
+            }
+
+            .arch-arrow-row .arrow-segment {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                color: #64748b;
+                font-size: 0.78rem;
+                font-weight: 500;
+            }
+
+            .arch-arrow-row .arrow-icon {
+                font-size: 1.1rem;
+                line-height: 1;
+            }
+
+            /* Wrap indicator for gamification */
+            .mod-gamification-inner {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.75rem;
+            }
+
+            .mod-gamification .wrap-label {
+                font-size: 0.78rem;
+                opacity: 0.7;
+                writing-mode: vertical-rl;
+                text-orientation: mixed;
+                letter-spacing: 0.1em;
+            }
+
+            .mod-gamification .wrap-content {
+                flex: 1;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .arch-connections {
+                    grid-template-columns: 1fr;
+                }
+                .mod-gamification,
+                .mod-school,
+                .mod-frontend,
+                .mod-analytics,
+                .mod-agent,
+                .mod-admin {
+                    grid-column: 1;
+                    grid-row: auto;
+                }
+                .arch-arrow-row {
+                    flex-direction: column;
+                    gap: 0.25rem;
+                }
+            }
+        </style>
+
+        <div class="module-arch">
+            <div class="module-arch-title">📦 平台六大模組架構</div>
+            <div class="module-arch-subtitle">模組關係 × 開發進度 × Phase 對應</div>
+
+            <!-- Progress indicator -->
+            <div class="arch-progress">
+                <span class="arch-progress-dot active" title="Phase 0"></span>
+                <span class="arch-progress-dot upcoming" title="Phase 1"></span>
+                <span class="arch-progress-dot upcoming" title="Phase 2"></span>
+                <span class="arch-progress-dot upcoming" title="Phase 3"></span>
+                <span class="arch-progress-dot upcoming" title="Phase 4"></span>
+                <span class="arch-progress-label">目前進度：Week 3 / Phase 0（熱身期）</span>
+            </div>
+
+            <!-- Phase legend -->
+            <div class="arch-legend">
+                <div class="arch-legend-item">
+                    <div class="arch-legend-color" style="background: #8b5cf6;"></div>
+                    Phase 0 基礎建設
+                </div>
+                <div class="arch-legend-item">
+                    <div class="arch-legend-color" style="background: #3b82f6;"></div>
+                    Phase 1 核心功能
+                </div>
+                <div class="arch-legend-item">
+                    <div class="arch-legend-color" style="background: #22c55e;"></div>
+                    Phase 2 校班架構
+                </div>
+                <div class="arch-legend-item">
+                    <div class="arch-legend-color" style="background: #f97316;"></div>
+                    Phase 3 作業優化
+                </div>
+                <div class="arch-legend-item">
+                    <div class="arch-legend-color" style="background: #ef4444;"></div>
+                    Phase 4 整合交付
+                </div>
+            </div>
+
+            <!-- Module architecture diagram -->
+            <div class="arch-connections">
+
+                <!-- Row 1: Gamification (enhancement layer wrapping top) -->
+                <div class="mod-block mod-phase-34 mod-gamification">
+                    <div class="mod-gamification-inner">
+                        <div class="wrap-label">增強層 ↕</div>
+                        <div class="wrap-content">
+                            <div class="mod-header">
+                                <span class="mod-number">5</span>
+                                <span class="mod-name">🎮 遊戲化（Gamification）</span>
+                                <span class="mod-phase-badge">Phase 3-4 ｜ W19-24</span>
+                            </div>
+                            <ul class="mod-features">
+                                <li>激勵機制：徽章、積分、排行榜</li>
+                                <li>動機增強：連續天數、成就解鎖</li>
+                                <li>包裹模組 1（前台）+ 模組 4（校班）強化學習體驗</li>
+                            </ul>
+                        </div>
+                        <div class="wrap-label">↕ 包裹</div>
+                    </div>
+                </div>
+
+                <!-- Arrow row: gamification wraps down -->
+                <div class="arch-arrow-row">
+                    <span class="arrow-segment"><span class="arrow-icon">↙</span> 包裹模組 4</span>
+                    <span class="arrow-segment"><span class="arrow-icon">⬇</span> 包裹模組 1</span>
+                    <span class="arrow-segment">包裹模組 4 <span class="arrow-icon">↘</span></span>
+                </div>
+
+                <!-- Row 2: School | Frontend (core) | Analytics -->
+                <div class="mod-block mod-phase-23 mod-school" style="border: 2px solid #22c55e;">
+                    <div class="mod-header">
+                        <span class="mod-number">4</span>
+                        <span class="mod-name">🏫 校班師生課介面</span>
+                        <span class="mod-phase-badge">Phase 2-3 ｜ W14-20</span>
+                    </div>
+                    <ul class="mod-features">
+                        <li>自學模式 / 作業模式</li>
+                        <li>學校→班級→學生層級</li>
+                        <li>教師管理與指派</li>
+                    </ul>
+                    <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 1 ｜ 連接：模組 3</div>
+                </div>
+
+                <div class="mod-block mod-phase-1 mod-frontend" style="border-width: 3px; box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);">
+                    <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #2563eb; color: white; padding: 0.15rem 0.75rem; border-radius: 8px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;">核心模組</div>
+                    <div class="mod-header" style="margin-top: 0.25rem;">
+                        <span class="mod-number">1</span>
+                        <span class="mod-name">📖 前台學習模組</span>
+                        <span class="mod-phase-badge">Phase 1 ｜ W5-10</span>
+                    </div>
+                    <ul class="mod-features">
+                        <li>逐段朗讀 + 全文朗讀</li>
+                        <li>生字練習 + 注音切換</li>
+                        <li>課文理解 + 文本比對</li>
+                    </ul>
+                    <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 6（後台）提供課文</div>
+                </div>
+
+                <div class="mod-block mod-phase-2 mod-analytics">
+                    <div class="mod-header">
+                        <span class="mod-number">3</span>
+                        <span class="mod-name">📊 歷程及報告模組</span>
+                        <span class="mod-phase-badge">Phase 2 ｜ W17-18</span>
+                    </div>
+                    <ul class="mod-features">
+                        <li>學習儀表板 + 進度追蹤</li>
+                        <li>完整報告（班級 / 個人）</li>
+                        <li>錯誤詞彙分析與趨勢</li>
+                    </ul>
+                    <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 1 + 4 的學習資料</div>
+                </div>
+
+                <!-- Arrow row: middle connections -->
+                <div class="arch-arrow-row">
+                    <span class="arrow-segment">模組 4 <span class="arrow-icon">→</span> 模組 1</span>
+                    <span class="arrow-segment">模組 1 <span class="arrow-icon">→</span> 模組 3（資料流）</span>
+                    <span class="arrow-segment">模組 4 <span class="arrow-icon">⤳</span> 模組 3（資料流）</span>
+                </div>
+
+                <!-- Row 3: Agent Builder (below frontend) -->
+                <div style="grid-column: 1; grid-row: 5;"></div>
+                <div class="mod-block mod-phase-1 mod-agent" style="grid-column: 2; grid-row: 5;">
+                    <div class="mod-header">
+                        <span class="mod-number">2</span>
+                        <span class="mod-name">🤖 Agent Builder</span>
+                        <span class="mod-phase-badge">Phase 1 ｜ W11-13</span>
+                    </div>
+                    <ul class="mod-features">
+                        <li>蘇格拉底式對話引導</li>
+                        <li>朗讀擷取 + 即時回饋</li>
+                        <li>Gemini Function Calling</li>
+                    </ul>
+                    <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 1（前台）完成後串接</div>
+                </div>
+                <div style="grid-column: 3; grid-row: 5;"></div>
+
+                <!-- Arrow row: agent to frontend -->
+                <div class="arch-arrow-row" style="grid-row: 6;">
+                    <span class="arrow-segment"><span class="arrow-icon">⬆</span> 模組 2 承接模組 1 的朗讀結果</span>
+                </div>
+
+                <!-- Row 4: Admin Backend (foundation) -->
+                <div class="mod-block mod-phase-0 mod-admin" style="grid-row: 7;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="flex: 1;">
+                            <div class="mod-header">
+                                <span class="mod-number">6</span>
+                                <span class="mod-name">🗄️ 後台（Admin Backend）</span>
+                                <span class="mod-phase-badge">Phase 0-1 ｜ W3-7</span>
+                            </div>
+                            <ul class="mod-features" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 1rem;">
+                                <li>課文上架管理</li>
+                                <li>知識樹編輯</li>
+                                <li>PostgreSQL Schema 設計</li>
+                                <li>內容管理後台</li>
+                                <li>SQLAlchemy 權限架構</li>
+                                <li>所有模組的基礎</li>
+                            </ul>
+                        </div>
+                        <div style="text-align: center; padding: 0.5rem 1rem; background: rgba(139, 92, 246, 0.15); border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #6d28d9; flex-shrink: 0;">
+                            基礎層<br>
+                            <span style="font-size: 1.2rem;">⬆ ⬆ ⬆</span><br>
+                            供應所有模組
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <!-- 現實限制 -->
@@ -455,8 +951,8 @@
                         <p>• 均一：我們用Google全家桶，未來可整合進均一生態</p>
                         <p>• 曾教授：驗證閱讀理論，我們提供實證數據</p>
                         <p style="margin-top:0.75rem;"><strong>技術自學資源：</strong></p>
-                        <p>• Google Cloud Skills Boost 免費課程（Firebase、Vertex AI）</p>
-                        <p>• Firebase、Vertex AI 官方文件</p>
+                        <p>• Google Cloud Skills Boost 免費課程（Cloud Run、Gemini）</p>
+                        <p>• FastAPI、PostgreSQL、Gemini 官方文件</p>
                         <p>• 開源專案參考（GitHub）</p>
                     </div>
                 </div>
@@ -495,7 +991,7 @@
 
                         <p style="margin-top:0.75rem;"><strong>☁️ GCP 基礎建設：</strong></p>
                         <p style="margin-top:0.5rem;">• 建立 GCP Project（中文閱讀平台）</p>
-                        <p>• Firebase 專案設定（Firestore、Storage、Authentication）</p>
+                        <p>• GCP Project + Cloud Run 設定（PostgreSQL、Cloud Storage、Google OAuth）</p>
                         <p>• 設定團隊成員權限（Owner/Editor 角色分配）</p>
                         <p>• 啟用必要 API（Speech-to-Text、Vertex AI）</p>
 
@@ -525,9 +1021,9 @@
                         <span class="capability-tag">開源專案</span>
                         <p style="margin-top:0.75rem;"><strong>AI 工作流程：</strong>分享 Agents & Skills，建立開發一致性。</p>
                         <p style="margin-top:0.5rem;"><strong>技術資源善用：</strong></p>
-                        <p>• Firebase 官方文件與範例程式</p>
+                        <p>• FastAPI、PostgreSQL 官方文件與範例程式</p>
                         <p>• GitHub 開源專案參考（教育類、語音辨識）</p>
-                        <p>• Google Cloud 技術社群（台灣 Firebase/GCP 社群）</p>
+                        <p>• Google Cloud 技術社群（台灣 GCP 社群）</p>
                         <div class="speed-badge">⚡ 策略：站在巨人肩膀上</div>
                     </div>
                 </div>
@@ -538,11 +1034,11 @@
                     <div class="card-title">🔧 開發環境建立</div>
                     <div class="card-content">
                         <span class="tool-tag">GitHub</span>
-                        <span class="tool-tag">Firebase</span>
-                        <span class="tool-tag">Firebase Hosting</span>
+                        <span class="tool-tag">FastAPI</span>
+                        <span class="tool-tag">Cloud Run</span>
                         <span class="tool-tag">shadcn/ui</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 專案架構設計、Firebase 專案建立、GitHub repo</p>
-                        <p style="margin-top:0.5rem;">建立 Next.js + Firebase 開發環境，Firebase Hosting 自動部署</p>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 專案架構設計、GCP Project + Cloud Run 設定、GitHub repo</p>
+                        <p style="margin-top:0.5rem;">建立 React + Vite + FastAPI 開發環境，Cloud Run 自動部署（GitHub Actions）</p>
                     </div>
                 </div>
             </div>
@@ -609,7 +1105,7 @@
                 <div class="card">
                     <div class="card-title">🎓 前端基礎</div>
                     <div class="card-content">
-                        <span class="tech-tag">Next.js 16</span>
+                        <span class="tech-tag">React 19 + Vite</span>
                         <span class="tech-tag">React 基礎</span>
                         <span class="tech-tag">Tailwind CSS</span>
                         <span class="tech-tag">shadcn/ui</span>
@@ -636,12 +1132,12 @@
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">📚 Firebase & 親子天下推廣</div>
+                    <div class="card-title">📚 React + FastAPI & 親子天下推廣</div>
                     <div class="card-content">
-                        <span class="capability-tag">Firebase</span>
+                        <span class="capability-tag">React + FastAPI</span>
                         <span class="capability-tag">親子天下</span>
                         <span class="capability-tag">教師影響力</span>
-                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>Firebase 全端服務能力建立。</p>
+                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>React + FastAPI 全端服務能力建立。</p>
                         <p style="margin-top:0.5rem;"><strong>三月推廣資源（Young演講）：</strong></p>
                         <p>• 親子天下演講（三月）：向全台教師展示產品</p>
                         <p>• 學思達：幫助「表達」訓練 → 4.5萬教師社群推廣</p>
@@ -656,28 +1152,28 @@
                 <div class="card">
                     <div class="card-title">🗄️ 資料庫設計與實作</div>
                     <div class="card-content">
-                        <span class="tool-tag">Firebase Database</span>
+                        <span class="tool-tag">PostgreSQL + SQLAlchemy</span>
                         <span class="feature-tag">Schema 設計</span>
-                        <span class="feature-tag">Row Level Security</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Firebase Database Schema、RLS 權限設定</p>
+                        <span class="feature-tag">SQLAlchemy 權限 middleware</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> PostgreSQL Schema、SQLAlchemy middleware 權限設定</p>
                         <p style="margin-top:0.5rem;"><strong>📋 參考方大哥學國語 App 資料結構：</strong></p>
                         <p>• 學生、課文、錄音、學習記錄等資料表設計</p>
                         <p>• 注音符號切換狀態儲存</p>
                         <p>• 生字學習進度追蹤</p>
-                        <p style="margin-top:0.5rem;">工程師：學習 Firebase Client、Next.js 整合</p>
+                        <p style="margin-top:0.5rem;">工程師：學習 FastAPI Client SDK、React + Vite 整合</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 Firebase 全端開發</div>
+                    <div class="card-title">🎓 React + FastAPI 全端開發</div>
                     <div class="card-content">
-                        <span class="tech-tag">Firebase Client</span>
+                        <span class="tech-tag">FastAPI Client SDK</span>
                         <span class="tech-tag">PostgreSQL</span>
-                        <span class="tech-tag">Row Level Security</span>
+                        <span class="tech-tag">SQLAlchemy 權限 middleware</span>
                         <span class="tech-tag">shadcn/ui</span>
-                        <p style="margin-top:0.75rem;">工程師學習：用 Firebase 快速建立全端應用</p>
+                        <p style="margin-top:0.75rem;">工程師學習：用 React + FastAPI 快速建立全端應用</p>
                         <p style="margin-top:0.5rem;">建立基礎頁面：課文列表、學習記錄</p>
                     </div>
                 </div>
@@ -751,7 +1247,7 @@
                         <span class="capability-tag">技術背書</span>
                         <span class="capability-tag">媒體曝光</span>
                         <p style="margin-top:0.75rem;"><strong>成為Google技術案例：</strong></p>
-                        <p>• 使用Firebase + Vertex AI全套Google技術</p>
+                        <p>• 使用 GCP 全套技術（Cloud Run + PostgreSQL + Gemini）</p>
                         <p>• 接洽Google Cloud Taiwan成為教育案例</p>
                         <p>• Google媒體宣傳（技術部落格、案例展示）</p>
                         <p style="margin-top:0.5rem;"><strong>品學堂價值交換：</strong></p>
@@ -793,7 +1289,7 @@
 
         <div class="milestone-row">
             <div class="milestone-title">🎯 Demo 2 - 自學模式 MVP</div>
-            <div class="milestone-desc">學生可選課文 → 朗讀錄音 → AI 分析正確率（Azure Speech SDK）→ 蘇格拉底對話（Gemini Function Calling）→ 查看學習記錄（Firebase）</div>
+            <div class="milestone-desc">學生可選課文 → 朗讀錄音 → AI 分析正確率（Azure Speech SDK）→ 蘇格拉底對話（Gemini Function Calling）→ 查看學習記錄（PostgreSQL）</div>
         </div>
 
         <!-- Phase 2 -->
@@ -809,10 +1305,10 @@
                 <div class="card">
                     <div class="card-title">🏢 多租戶 & CoLab試點</div>
                     <div class="card-content">
-                        <span class="capability-tag">Firebase RLS</span>
+                        <span class="capability-tag">SQLAlchemy 權限控制</span>
                         <span class="capability-tag">KIST試點</span>
                         <span class="capability-tag">教師共創</span>
-                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>Firebase RLS 多租戶架構。</p>
+                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>SQLAlchemy middleware 多租戶權限架構。</p>
                         <p style="margin-top:0.5rem;"><strong>CoLab價值共創：</strong></p>
                         <p>• 我們：幫助KIST學生提升閱讀（免費提供）</p>
                         <p>• CoLab：KIST學校試點、教師反饋改進產品</p>
@@ -826,11 +1322,11 @@
                 <div class="card">
                     <div class="card-title">🏫 學校/班級管理</div>
                     <div class="card-content">
-                        <span class="tool-tag">Firebase RLS</span>
+                        <span class="tool-tag">SQLAlchemy middleware</span>
                         <span class="feature-tag">學校建立</span>
                         <span class="feature-tag">班級管理</span>
                         <span class="feature-tag">學生匯入</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Firebase RLS 權限設計（學校 → 班級 → 學生）</p>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> SQLAlchemy middleware 權限設計（學校 → 班級 → 學生）</p>
                         <p style="margin-top:0.5rem;">工程師：班級管理介面、學生列表、匯入功能</p>
                         <p style="margin-top:0.5rem;">借鑑 Duotopia 校班師生課模組經驗</p>
                     </div>
@@ -841,10 +1337,10 @@
                 <div class="card">
                     <div class="card-title">🎓 權限與資料隔離</div>
                     <div class="card-content">
-                        <span class="tech-tag">Firebase RLS</span>
+                        <span class="tech-tag">SQLAlchemy middleware</span>
                         <span class="tech-tag">PostgreSQL Policies</span>
                         <span class="tech-tag">資料關聯</span>
-                        <p style="margin-top:0.75rem;">工程師：學習 Row Level Security 概念</p>
+                        <p style="margin-top:0.75rem;">工程師：學習 SQLAlchemy 權限 middleware 概念</p>
                         <p style="margin-top:0.5rem;">建立班級管理頁面、學生列表頁面</p>
                     </div>
                 </div>
@@ -859,10 +1355,10 @@
                 <div class="card">
                     <div class="card-title">👨‍🏫 教師工具 & 案例展示</div>
                     <div class="card-content">
-                        <span class="capability-tag">Firebase Functions</span>
+                        <span class="capability-tag">FastAPI endpoints</span>
                         <span class="capability-tag">成功案例</span>
                         <span class="capability-tag">影響力擴散</span>
-                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>Firebase Functions 教師工具開發。</p>
+                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>FastAPI endpoints 教師工具開發。</p>
                         <p style="margin-top:0.5rem;"><strong>案例展示 → 自然曝光：</strong></p>
                         <p>• KIST學校成功案例（學生進步數據 → CoLab主動分享）</p>
                         <p>• 學思達教師見證（課堂應用 → 4.5萬社群擴散）</p>
@@ -875,11 +1371,11 @@
                 <div class="card">
                     <div class="card-title">👨‍🏫 教師介面</div>
                     <div class="card-content">
-                        <span class="tool-tag">Firebase Functions</span>
+                        <span class="tool-tag">FastAPI endpoints</span>
                         <span class="tool-tag">Recharts</span>
                         <span class="feature-tag">班級儀表板</span>
                         <span class="feature-tag">學生進度</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 資料聚合 API（Firebase Functions）</p>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 資料聚合 API（FastAPI endpoints）</p>
                         <p style="margin-top:0.5rem;">工程師：教師儀表板、班級報表、進度圖表（Recharts）</p>
                     </div>
                 </div>
@@ -901,7 +1397,7 @@
 
         <div class="milestone-row">
             <div class="milestone-title">🎯 Demo 3 - 校班師生課完成</div>
-            <div class="milestone-desc">學校管理員建立學校 → 教師建立班級 → 匯入學生 → 學生學習 → 教師查看報表（Firebase RLS 自動權限隔離）</div>
+            <div class="milestone-desc">學校管理員建立學校 → 教師建立班級 → 匯入學生 → 學生學習 → 教師查看報表（SQLAlchemy middleware 自動權限隔離）</div>
         </div>
 
         <!-- Phase 3 -->
@@ -942,8 +1438,7 @@
                 <div class="card">
                     <div class="card-title">📝 作業模式</div>
                     <div class="card-content">
-                        <span class="tool-tag">Firebase Realtime</span>
-                        <span class="tool-tag">Gmail API / Gmail API</span>
+                        <span class="tool-tag">Gmail API</span>
                         <span class="feature-tag">作業指派</span>
                         <span class="feature-tag">截止日</span>
                         <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 作業系統 API、Email 提醒（Gmail API）</p>
@@ -954,12 +1449,12 @@
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 Realtime 與通知</div>
+                    <div class="card-title">🎓 通知與作業系統</div>
                     <div class="card-content">
-                        <span class="tech-tag">Firebase Realtime</span>
                         <span class="tech-tag">Email API</span>
                         <span class="tech-tag">推播通知</span>
-                        <p style="margin-top:0.75rem;">工程師：即時更新、Email 整合</p>
+                        <span class="tech-tag">FastAPI endpoints</span>
+                        <p style="margin-top:0.75rem;">工程師：Email 整合、作業 API 串接</p>
                         <p style="margin-top:0.5rem;">建立作業系統介面</p>
                     </div>
                 </div>
@@ -1055,11 +1550,11 @@
                 <div class="card">
                     <div class="card-title">🔐 OAuth 登錄系統</div>
                     <div class="card-content">
-                        <span class="tool-tag">Firebase Auth</span>
+                        <span class="tool-tag">Google OAuth (FastAPI)</span>
                         <span class="feature-tag">Google OAuth</span>
                         <span class="feature-tag">Session 管理</span>
                         <span class="feature-tag">權限驗證</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Firebase Auth 設定（一鍵 Google OAuth）</p>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Google OAuth (FastAPI) 設定</p>
                         <p style="margin-top:0.5rem;">工程師：登錄介面、受保護路由、權限控制</p>
                     </div>
                 </div>
@@ -1069,7 +1564,7 @@
                 <div class="card">
                     <div class="card-title">🎓 認證與安全</div>
                     <div class="card-content">
-                        <span class="tech-tag">Firebase Auth</span>
+                        <span class="tech-tag">Google OAuth (FastAPI)</span>
                         <span class="tech-tag">OAuth 2.0</span>
                         <span class="tech-tag">Session & JWT</span>
                         <span class="tech-tag">路由保護</span>
@@ -1162,8 +1657,8 @@
                 <div class="card">
                     <div class="card-title">🚀 正式部署與交付</div>
                     <div class="card-content">
-                        <span class="tool-tag">Firebase Hosting Production</span>
-                        <span class="tool-tag">Firebase Production</span>
+                        <span class="tool-tag">Cloud Run Production</span>
+                        <span class="tool-tag">GCP Production</span>
                         <span class="feature-tag">正式上線</span>
                         <span class="feature-tag">文件整理</span>
                         <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 正式環境部署、監控設定、成本控制</p>
@@ -1181,7 +1676,7 @@
                         <ul>
                             <li>✅ 高中生 → 全端工程師</li>
                             <li>✅ Git 協作 + GitHub 工作流程</li>
-                            <li>✅ Next.js + Firebase 全端開發</li>
+                            <li>✅ React + Vite + FastAPI 全端開發</li>
                             <li>✅ LLM API 整合經驗</li>
                             <li>✅ 完整產品開發經歷</li>
                             <li>✅ 實習薪酬 + 作品集</li>
@@ -1209,8 +1704,10 @@
                 <div>
                     <h4 style="color: #059669; margin-bottom: 0.75rem;">🛠️ 使用的現成工具</h4>
                     <ul style="color: #4b5563; line-height: 1.8;">
-                        <li><strong>Firebase:</strong> Database + Auth + Storage + Realtime + RLS</li>
-                        <li><strong>Firebase Hosting:</strong> 零配置部署 + 自動 HTTPS + CDN</li>
+                        <li><strong>PostgreSQL + SQLAlchemy:</strong> Database + ORM + 權限 middleware</li>
+                        <li><strong>FastAPI:</strong> 後端 API + Google OAuth + 快速開發</li>
+                        <li><strong>Cloud Run (GCP):</strong> 自動部署（GitHub Actions）+ HTTPS + 自動擴展</li>
+                        <li><strong>Google OAuth:</strong> 登入認證</li>
                         <li><strong>Azure Speech SDK:</strong> 語音辨識（可彈性選擇 Google Speech 或 ElevenLabs）</li>
                         <li><strong>Vertex AI (Gemini):</strong> Function Calling + AI Agent</li>
                         <li><strong>shadcn/ui:</strong> 美觀的 React 元件庫</li>
@@ -1223,13 +1720,13 @@
                 <div>
                     <h4 style="color: #dc2626; margin-bottom: 0.75rem;">⚡ 節省的時間</h4>
                     <ul style="color: #4b5563; line-height: 1.8;">
-                        <li><strong>後端 API:</strong> 3 週 → 0 週（Firebase 內建）</li>
+                        <li><strong>後端 API:</strong> 3 週 → 1 週（FastAPI 快速開發）</li>
                         <li><strong>語音辨識:</strong> 3 週 → 1 週（用 API）</li>
                         <li><strong>Agent 框架:</strong> 4 週 → 2 週（Gemini Function Calling）</li>
-                        <li><strong>權限系統:</strong> 2 週 → 0.5 週（RLS）</li>
-                        <li><strong>OAuth:</strong> 1 週 → 0.5 週（Firebase Auth）</li>
+                        <li><strong>權限系統:</strong> 2 週 → 0.5 週（SQLAlchemy middleware）</li>
+                        <li><strong>OAuth:</strong> 1 週 → 0.5 週（Google OAuth (FastAPI)）</li>
                         <li><strong>UI 元件:</strong> 2 週 → 0.5 週（shadcn/ui）</li>
-                        <li><strong>總計節省:</strong> 約 <strong>10 週</strong> 開發時間！</li>
+                        <li><strong>總計節省:</strong> 約 <strong>9 週</strong> 開發時間！</li>
                     </ul>
                 </div>
             </div>
