@@ -84,6 +84,10 @@ class ComprehensionChatRequest(BaseModel):
     story_title: str
     story_text: str
     student_answer: str | None = Field(None, max_length=500)  # None = start session
+    # Optional reading results from LiveTutor (Issue #17)
+    mispronounced_words: list[str] | None = None
+    accuracy: float | None = Field(None, ge=0, le=100)
+    cpm: float | None = Field(None, gt=0)
 
 
 class ComprehensionChatResponse(BaseModel):
@@ -109,6 +113,9 @@ async def comprehension_chat(payload: ComprehensionChatRequest):
                 session_id=payload.session_id,
                 story_title=payload.story_title,
                 story_text=payload.story_text,
+                mispronounced_words=payload.mispronounced_words,
+                accuracy=payload.accuracy,
+                cpm=payload.cpm,
             )
         else:
             result = await socratic_agent.process_answer(

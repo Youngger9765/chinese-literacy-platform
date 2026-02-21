@@ -25,6 +25,10 @@ class SessionState:
     total_attempts: int = 0
     current_phase: str = "factual"  # factual -> inferential -> evaluative
     created_at: float = field(default_factory=time.time)
+    # Optional reading results from LiveTutor (Issue #17)
+    mispronounced_words: list[str] | None = None
+    accuracy: float | None = None
+    cpm: float | None = None
 
 
 class SessionStore:
@@ -126,13 +130,26 @@ class SocraticAgent:
         numbered_text = "\n".join(
             f"[第{i}段] {p}" for i, p in enumerate(paragraphs) if p.strip()
         )
+
+        # Build reading info section if data is available (Issue #17)
+        reading_info = ""
+        if state.mispronounced_words or state.accuracy is not None or state.cpm is not None:
+            reading_info = "\n學生朗讀資訊：\n"
+            if state.accuracy is not None:
+                reading_info += f"- 正確率：{state.accuracy:.1f}%\n"
+            if state.cpm is not None:
+                reading_info += f"- 語速：{state.cpm:.0f} 字/分鐘\n"
+            if state.mispronounced_words:
+                reading_info += f"- 讀錯的字：{', '.join(state.mispronounced_words)}\n"
+            reading_info += "→ 提問時可以特別關注這些字相關的段落和內容\n"
+
         return f"""你是一位溫暖、鼓勵學生的繁體中文閱讀助教，擅長用蘇格拉底式問答引導學生深入理解課文。
 
 課文標題：{state.story_title}
 
 課文內容（每段前標有段落索引）：
 {numbered_text}
-
+{reading_info}
 你的任務：
 1. 評估學生的回答是否展現了對問題的理解
 2. 給予簡短、溫暖的回饋（1-2句）
@@ -178,13 +195,22 @@ class SocraticAgent:
 - 問題長度：15-40 個字"""
 
     async def start_session(
-        self, session_id: str, story_title: str, story_text: str
+        self,
+        session_id: str,
+        story_title: str,
+        story_text: str,
+        mispronounced_words: list[str] | None = None,
+        accuracy: float | None = None,
+        cpm: float | None = None,
     ) -> AgentResponse:
         """Start a new session — generate the first question."""
         state = SessionState(
             session_id=session_id,
             story_title=story_title,
             story_text=story_text,
+            mispronounced_words=mispronounced_words,
+            accuracy=accuracy,
+            cpm=cpm,
         )
 
         system_prompt = self._build_system_prompt(state)
