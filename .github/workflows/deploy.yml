@@ -48,7 +48,6 @@ jobs:
           VERSION="v0.$(date +%Y%m%d%H%M)"
           BUILD_ID=$(gcloud builds submit \
             --tag "${{ env.REGISTRY }}/backend:${VERSION}" \
-            --tag "${{ env.REGISTRY }}/backend:latest" \
             --project ${{ env.PROJECT_ID }} \
             --async \
             ./backend \
@@ -126,7 +125,6 @@ jobs:
           VERSION="v0.$(date +%Y%m%d%H%M)"
           BUILD_ID=$(gcloud builds submit \
             --tag "${{ env.REGISTRY }}/frontend:${VERSION}" \
-            --tag "${{ env.REGISTRY }}/frontend:latest" \
             --project ${{ env.PROJECT_ID }} \
             --async \
             ./frontend \
