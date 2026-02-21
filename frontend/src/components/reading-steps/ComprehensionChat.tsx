@@ -115,6 +115,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         storyTitle: story.title,
         storyText,
         studentAnswer: null,
+        // Pass reading results from LiveTutor (Issue #17)
+        mispronouncedWords: attempt.mispronouncedWords,
+        accuracy: attempt.accuracy,
+        cpm: attempt.cpm,
       });
       setConversation([{ role: 'ai', text: result.question }]);
       applyServerState(result);
@@ -124,7 +128,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [story.content, story.title, sessionId, applyServerState]);
+  }, [story.content, story.title, sessionId, attempt, applyServerState]);
 
   // Resizable right panel
   useEffect(() => {
