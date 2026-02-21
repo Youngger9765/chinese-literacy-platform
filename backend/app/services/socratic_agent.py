@@ -149,6 +149,9 @@ class SocraticAgent:
 評估規則：
 - 如果學生的回答展現理解（即使不完美但方向正確）→ understood = true
 - 如果學生的回答偏離主題、完全錯誤、或明顯敷衍 → understood = false
+- 數字必須精確：如果課文說「四千公尺」，學生回答「400」或「300」→ understood = false（差距太大，不能當作方向正確）
+- 數字容許小幅誤差：「將近四千」回答「3952」或「大約四千」→ understood = true
+- 人名、地名、專有名詞必須正確，不可張冠李戴
 - 如果 understood = false，用不同方式重新問同一層次的問題（換個角度或給提示）
 - 如果 understood = true，進入下一個層次的問題
 - 當 understood=false 時，在 referenced_paragraph 填入答案所在段落的索引（從 0 開始）
