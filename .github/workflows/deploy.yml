@@ -46,11 +46,37 @@ jobs:
       - name: Build & push backend image
         run: |
           VERSION="v0.$(date +%Y%m%d%H%M)"
-          gcloud builds submit \
+          BUILD_ID=$(gcloud builds submit \
             --tag "${{ env.REGISTRY }}/backend:${VERSION}" \
             --tag "${{ env.REGISTRY }}/backend:latest" \
             --project ${{ env.PROJECT_ID }} \
-            ./backend
+            --async \
+            ./backend \
+            --format='value(id)')
+          echo "Backend build started: $BUILD_ID"
+
+          # Poll for build completion
+          for i in {1..60}; do
+            STATUS=$(gcloud builds describe $BUILD_ID --project ${{ env.PROJECT_ID }} --format='value(status)')
+            echo "Attempt $i/60: Build status = $STATUS"
+
+            if [ "$STATUS" = "SUCCESS" ]; then
+              echo "Backend build completed successfully"
+              break
+            elif [ "$STATUS" = "FAILURE" ] || [ "$STATUS" = "TIMEOUT" ] || [ "$STATUS" = "CANCELLED" ]; then
+              echo "Backend build failed with status: $STATUS"
+              gcloud builds log $BUILD_ID --project ${{ env.PROJECT_ID }}
+              exit 1
+            fi
+
+            sleep 10
+          done
+
+          if [ "$STATUS" != "SUCCESS" ]; then
+            echo "Backend build timed out after 10 minutes"
+            exit 1
+          fi
+
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Deploy backend to Cloud Run
@@ -98,11 +124,37 @@ jobs:
       - name: Build & push frontend image
         run: |
           VERSION="v0.$(date +%Y%m%d%H%M)"
-          gcloud builds submit \
+          BUILD_ID=$(gcloud builds submit \
             --tag "${{ env.REGISTRY }}/frontend:${VERSION}" \
             --tag "${{ env.REGISTRY }}/frontend:latest" \
             --project ${{ env.PROJECT_ID }} \
-            ./frontend
+            --async \
+            ./frontend \
+            --format='value(id)')
+          echo "Frontend build started: $BUILD_ID"
+
+          # Poll for build completion
+          for i in {1..60}; do
+            STATUS=$(gcloud builds describe $BUILD_ID --project ${{ env.PROJECT_ID }} --format='value(status)')
+            echo "Attempt $i/60: Build status = $STATUS"
+
+            if [ "$STATUS" = "SUCCESS" ]; then
+              echo "Frontend build completed successfully"
+              break
+            elif [ "$STATUS" = "FAILURE" ] || [ "$STATUS" = "TIMEOUT" ] || [ "$STATUS" = "CANCELLED" ]; then
+              echo "Frontend build failed with status: $STATUS"
+              gcloud builds log $BUILD_ID --project ${{ env.PROJECT_ID }}
+              exit 1
+            fi
+
+            sleep 10
+          done
+
+          if [ "$STATUS" != "SUCCESS" ]; then
+            echo "Frontend build timed out after 10 minutes"
+            exit 1
+          fi
+
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Deploy frontend to Cloud Run
