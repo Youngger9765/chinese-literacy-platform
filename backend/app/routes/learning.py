@@ -125,6 +125,8 @@ async def comprehension_chat(payload: ComprehensionChatRequest):
     except ValueError as e:
         status = 429 if "Rate limit" in str(e) else 422
         raise HTTPException(status_code=status, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         logger.error("Comprehension chat error: %s", e)
         raise HTTPException(status_code=500, detail="AI service error")

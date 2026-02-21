@@ -25,6 +25,7 @@ class SessionState:
     total_attempts: int = 0
     current_phase: str = "factual"  # factual -> inferential -> evaluative
     created_at: float = field(default_factory=time.time)
+    consecutive_errors: int = 0
     # Optional reading results from LiveTutor (Issue #17)
     mispronounced_words: list[str] | None = None
     accuracy: float | None = None
@@ -124,6 +125,7 @@ class SocraticAgent:
     REQUIRED_UNDERSTOOD = 5
     MAX_ANSWER_LENGTH = 500
     MAX_HISTORY_TURNS = 10
+    MAX_CONSECUTIVE_ERRORS = 3
 
     def _build_system_prompt(self, state: SessionState) -> str:
         paragraphs = state.story_text.split("\n")
@@ -331,10 +333,19 @@ class SocraticAgent:
             if not question or not question.strip():
                 question = _fallback_question(state)
 
+            state.consecutive_errors = 0  # Reset on success
+
         except Exception as e:
-            logger.warning("AI service error in process_answer: %s", e)
-            understood = True  # Give benefit of doubt on error
-            feedback = "謝謝你的回答！"
+            state.consecutive_errors += 1
+            logger.warning("AI service error in process_answer (attempt %d/%d): %s",
+                          state.consecutive_errors, self.MAX_CONSECUTIVE_ERRORS, e)
+
+            if state.consecutive_errors >= self.MAX_CONSECUTIVE_ERRORS:
+                _store.save(state)
+                raise RuntimeError("AI 服務暫時無法使用，請稍後再試。") from e
+
+            understood = False  # Don't auto-pass on error; re-ask instead
+            feedback = "讓我再想一下，請你再回答一次好嗎？"
             question = _fallback_question(state)
             phase = state.current_phase
             referenced_paragraph = None
