@@ -67,7 +67,8 @@ jobs:
             --cpu=1 \
             --min-instances=0 \
             --max-instances=1 \
-            --timeout=300s
+            --timeout=300s \
+            --set-env-vars="ALLOWED_ORIGINS=*"
 
       - name: Verify backend health
         run: |
