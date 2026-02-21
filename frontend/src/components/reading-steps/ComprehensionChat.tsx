@@ -116,9 +116,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         storyText,
         studentAnswer: null,
         // Pass reading results from LiveTutor (Issue #17)
-        mispronouncedWords: attempt.mispronouncedWords,
-        accuracy: attempt.accuracy,
-        cpm: attempt.cpm,
+        // Filter out 0/empty values to avoid backend validation errors (Issue #48)
+        mispronouncedWords: attempt.mispronouncedWords?.length ? attempt.mispronouncedWords : undefined,
+        accuracy: attempt.accuracy || undefined,
+        cpm: attempt.cpm || undefined,
       });
       setConversation([{ role: 'ai', text: result.question }]);
       applyServerState(result);
