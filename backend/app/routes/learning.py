@@ -94,6 +94,7 @@ class ComprehensionChatResponse(BaseModel):
     required_count: int
     phase: str
     is_complete: bool
+    referenced_paragraph: int | None = None
 
 
 @router.post("/comprehension/chat", response_model=ComprehensionChatResponse)
@@ -128,4 +129,5 @@ async def comprehension_chat(payload: ComprehensionChatRequest):
         required_count=result.required_count,
         phase=result.phase,
         is_complete=result.is_complete,
+        referenced_paragraph=result.referenced_paragraph,
     )

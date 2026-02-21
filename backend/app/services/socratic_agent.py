@@ -77,6 +77,11 @@ EVALUATION_SCHEMA = {
             "enum": ["factual", "inferential", "evaluative"],
             "description": "The phase of the next question",
         },
+        "referenced_paragraph": {
+            "type": "INTEGER",
+            "description": "答錯時，答案所在的段落索引（從 0 開始）。答對時為 null。",
+            "nullable": True,
+        },
     },
     "required": ["understood", "feedback", "question", "phase"],
 }
@@ -93,6 +98,7 @@ class AgentResponse:
     required_count: int
     phase: str
     is_complete: bool
+    referenced_paragraph: int | None = None
 
 
 class SocraticAgent:
@@ -116,6 +122,8 @@ class SocraticAgent:
 - 如果學生的回答偏離主題、完全錯誤、或明顯敷衍（如「不知道」「隨便」）→ understood = false
 - 如果 understood = false，用不同方式重新問同一層次的問題（換個角度或給提示）
 - 如果 understood = true，進入下一個層次的問題
+- 當 understood=false 時，在 referenced_paragraph 填入答案所在段落的索引（從 0 開始）
+- 當 understood=true 時，referenced_paragraph 設為 null
 
 問題層次（由淺入深）：
 - factual：事實性問題（誰、什麼、在哪裡、發生什麼事）
@@ -223,15 +231,18 @@ class SocraticAgent:
             feedback = result.get("feedback", "")
             question = result.get("question", "")
             phase = result.get("phase", state.current_phase)
+            referenced_paragraph = result.get("referenced_paragraph")
         except Exception as e:
             logger.warning("AI service error in process_answer: %s", e)
             understood = True  # Give benefit of doubt on error
             feedback = "謝謝你的回答！"
             question = _fallback_question(state)
             phase = state.current_phase
+            referenced_paragraph = None
 
         if understood:
             state.understood_count += 1
+            referenced_paragraph = None  # Clear on correct answer
             # Advance phase if understood
             current_idx = (
                 PHASE_ORDER.index(state.current_phase)
@@ -257,6 +268,7 @@ class SocraticAgent:
             required_count=self.REQUIRED_UNDERSTOOD,
             phase=phase,
             is_complete=is_complete,
+            referenced_paragraph=referenced_paragraph,
         )
 
 

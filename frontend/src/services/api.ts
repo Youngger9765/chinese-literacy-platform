@@ -70,6 +70,7 @@ export interface ChatResponse {
   required_count: number;
   phase: string;
   is_complete: boolean;
+  referenced_paragraph: number | null;
 }
 
 export async function sendComprehensionChat(payload: {

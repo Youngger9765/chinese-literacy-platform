@@ -37,6 +37,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [understoodCount, setUnderstoodCount] = useState(0);
   const [requiredCount, setRequiredCount] = useState(3);
   const [isSessionComplete, setIsSessionComplete] = useState(false);
+  const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -80,11 +81,27 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation, isLoading]);
 
+  const paragraphRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   // Helper to apply server response to local state
   const applyServerState = useCallback((result: ChatResponse) => {
     setUnderstoodCount(result.understood_count);
     setRequiredCount(result.required_count);
     setIsSessionComplete(result.is_complete);
+
+    // Highlight referenced paragraph on wrong answer
+    if (result.understood === false && result.referenced_paragraph != null) {
+      setHighlightedParagraph(result.referenced_paragraph);
+      // Auto-scroll to highlighted paragraph
+      setTimeout(() => {
+        paragraphRefs.current[result.referenced_paragraph!]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }, 100);
+    } else {
+      setHighlightedParagraph(null);
+    }
   }, []);
 
   // Fetch the first question from the server (no student answer)
@@ -154,6 +171,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     setInputText('');
     setIsLoading(true);
     setError(null);
+    setHighlightedParagraph(null);
 
     try {
       const storyText = story.content.join('\n');
@@ -251,7 +269,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             {story.content.map((line, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl p-6 border border-transparent hover:border-[#30363d] hover:bg-[#161b22]/40 transition-all"
+                ref={el => { paragraphRefs.current[idx] = el; }}
+                className={`rounded-2xl p-6 border transition-all ${
+                  highlightedParagraph === idx
+                    ? 'border-amber-500/60 bg-amber-900/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
+                    : 'border-transparent hover:border-[#30363d] hover:bg-[#161b22]/40'
+                }`}
               >
                 <p className="text-2xl lg:text-3xl text-slate-300 leading-[2.6]">
                   {zhuyinLines ? zhuyinLines[idx] : line}
