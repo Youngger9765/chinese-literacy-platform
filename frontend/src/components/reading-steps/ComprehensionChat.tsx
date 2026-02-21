@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt } from '../../types';
-import { sendComprehensionChat, ChatResponse } from '../../services/api';
+import { sendComprehensionChat, ChatResponse, SessionExpiredError } from '../../services/api';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 
 interface ComprehensionChatProps {
@@ -205,8 +205,16 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       }
 
       setConversation(prev => [...prev, ...newMessages]);
-    } catch {
-      setError('無法連線到伺服器，請確認後端已啟動。');
+    } catch (err) {
+      if (err instanceof SessionExpiredError) {
+        // Session expired after backend redeploy — auto-rebuild
+        setConversation([]);
+        setInputText(text); // Preserve their answer for re-submit
+        await fetchFirstQuestion();
+        setError('對話已重新開始，請再送出一次你的回答。');
+      } else {
+        setError('無法連線到伺服器，請確認後端已啟動。');
+      }
     } finally {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
