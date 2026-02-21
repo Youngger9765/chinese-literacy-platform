@@ -7,6 +7,13 @@
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
+export class SessionExpiredError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SessionExpiredError';
+  }
+}
+
 export async function fetchStories() {
   const res = await fetch(`${API_BASE}/api/stories`);
   if (!res.ok) throw new Error(`fetchStories failed: ${res.status}`);
@@ -95,6 +102,14 @@ export async function sendComprehensionChat(payload: {
       cpm: payload.cpm,
     }),
   });
+  if (res.status === 422) {
+    const body = await res.json().catch(() => ({ detail: '' }));
+    const detail = body.detail ?? '';
+    if (detail.includes('not found') || detail.includes('expired')) {
+      throw new SessionExpiredError(detail);
+    }
+    throw new Error(detail || `sendComprehensionChat failed: 422`);
+  }
   if (!res.ok) throw new Error(`sendComprehensionChat failed: ${res.status}`);
   return res.json();
 }
