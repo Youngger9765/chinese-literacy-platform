@@ -160,7 +160,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                     key={ch}
                     onClick={() => handlePractice(ch)}
                     className={[
-                      `relative flex flex-col items-center justify-center ${zhuyinActive ? 'aspect-[3/4]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95`,
+                      `relative flex flex-col items-center justify-center ${zhuyinActive ? 'aspect-[3/5]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95`,
                       isPracticed
                         ? 'bg-emerald-900/30 border-emerald-700/50 text-emerald-300'
                         : isSuggested
@@ -168,7 +168,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                           : 'bg-[#161b22] border-[#30363d] text-slate-200 hover:bg-[#21262d] hover:border-indigo-500/40',
                     ].join(' ')}
                   >
-                    <span className={`text-2xl font-bold ${zhuyinActive ? 'leading-[2.6]' : 'leading-none'}`}>
+                    <span className={`text-3xl font-bold ${zhuyinActive ? 'leading-[3.6]' : 'leading-none'}`}>
                     {processZhuyin(ch)}
                   </span>
 
