@@ -78,6 +78,9 @@ export async function sendComprehensionChat(payload: {
   storyTitle: string;
   storyText: string;
   studentAnswer: string | null;
+  mispronouncedWords?: string[];
+  accuracy?: number;
+  cpm?: number;
 }): Promise<ChatResponse> {
   const res = await fetch(`${API_BASE}/api/comprehension/chat`, {
     method: 'POST',
@@ -87,6 +90,9 @@ export async function sendComprehensionChat(payload: {
       story_title: payload.storyTitle,
       story_text: payload.storyText,
       student_answer: payload.studentAnswer,
+      mispronounced_words: payload.mispronouncedWords,
+      accuracy: payload.accuracy,
+      cpm: payload.cpm,
     }),
   });
   if (!res.ok) throw new Error(`sendComprehensionChat failed: ${res.status}`);

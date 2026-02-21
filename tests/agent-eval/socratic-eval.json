@@ -1,0 +1,192 @@
+{
+  "suite_name": "socratic-eval",
+  "description": "Socratic dialogue answer evaluation accuracy",
+  "endpoint": "/api/comprehension/chat",
+  "setup": {
+    "story_title": "神祕的玉山",
+    "story_text": "玉山是台灣最高的一座山，也是東北亞的第一高峰。它的高度將近四千公尺，山頂在冬天時常會覆蓋著白雪。\n玉山擁有豐富的生態環境，可以看到許多特有的植物。保護這片美麗的山林，是我們每一個人的責任。",
+    "warmup_answers": ["玉山是台灣最高的山，也是東北亞第一高峰"]
+  },
+  "cases": [
+    {
+      "id": "num-400-for-4000",
+      "input": "400",
+      "expected_understood": false,
+      "category": "number-precision",
+      "note": "Bug: AI accepted 400 as correct for 4000 (10x off)",
+      "added": "2026-02-22",
+      "source": "user-report"
+    },
+    {
+      "id": "num-300-for-4000",
+      "input": "300",
+      "expected_understood": false,
+      "category": "number-precision",
+      "note": "300 is 13x off from 4000",
+      "added": "2026-02-22",
+      "source": "bug-fix"
+    },
+    {
+      "id": "num-chinese-400",
+      "input": "四百",
+      "expected_understood": false,
+      "category": "number-precision",
+      "note": "Chinese numeral 400, still wrong",
+      "added": "2026-02-22",
+      "source": "bug-fix"
+    },
+    {
+      "id": "num-40-for-4000",
+      "input": "40",
+      "expected_understood": false,
+      "category": "number-precision",
+      "note": "40 is 100x off from 4000",
+      "added": "2026-02-22",
+      "source": "bug-fix"
+    },
+    {
+      "id": "correct-approx-chinese",
+      "input": "大約四千公尺",
+      "expected_understood": true,
+      "category": "factual-correct",
+      "note": "Correct approximate answer in Chinese",
+      "added": "2026-02-22",
+      "source": "regression-prevention"
+    },
+    {
+      "id": "correct-quote-original",
+      "input": "將近四千公尺",
+      "expected_understood": true,
+      "category": "factual-correct",
+      "note": "Direct quote from text",
+      "added": "2026-02-22",
+      "source": "regression-prevention"
+    },
+    {
+      "id": "correct-arabic-4000",
+      "input": "接近4000公尺",
+      "expected_understood": true,
+      "category": "factual-correct",
+      "note": "Arabic numeral, correct value",
+      "added": "2026-02-22",
+      "source": "regression-prevention"
+    },
+    {
+      "id": "correct-3952",
+      "input": "3952公尺",
+      "expected_understood": true,
+      "category": "boundary",
+      "note": "Actual height of Yushan, precise is OK",
+      "added": "2026-02-22",
+      "source": "proactive"
+    },
+    {
+      "id": "boundary-2000",
+      "input": "2000",
+      "expected_understood": false,
+      "category": "boundary",
+      "note": "2000 is half of 4000, too far off",
+      "added": "2026-02-22",
+      "source": "proactive"
+    },
+    {
+      "id": "lazy-dunno",
+      "input": "不知道",
+      "expected_understood": false,
+      "category": "lazy-answer",
+      "note": "Classic lazy answer",
+      "added": "2026-02-22",
+      "source": "regression-prevention"
+    },
+    {
+      "id": "lazy-whatever",
+      "input": "隨便",
+      "expected_understood": false,
+      "category": "lazy-answer",
+      "note": "Dismissive answer",
+      "added": "2026-02-22",
+      "source": "regression-prevention"
+    },
+    {
+      "id": "lazy-single-char",
+      "input": "嗯",
+      "expected_understood": false,
+      "category": "lazy-answer",
+      "note": "Single character non-answer",
+      "added": "2026-02-22",
+      "source": "proactive"
+    },
+    {
+      "id": "wrong-location",
+      "input": "玉山在日本",
+      "expected_understood": false,
+      "category": "factual-wrong",
+      "note": "Wrong location, should be Taiwan",
+      "added": "2026-02-22",
+      "source": "proactive"
+    },
+    {
+      "id": "vague-mountain",
+      "input": "高山",
+      "expected_understood": false,
+      "category": "too-vague",
+      "note": "Bug: AI accepted '高山' for '東北亞第一高峰'. Too vague, no specific info from text",
+      "added": "2026-02-22",
+      "source": "user-report"
+    },
+    {
+      "id": "vague-very-high",
+      "input": "很高",
+      "expected_understood": false,
+      "category": "too-vague",
+      "note": "Common sense answer, doesn't prove student read the text",
+      "added": "2026-02-22",
+      "source": "proactive"
+    },
+    {
+      "id": "vague-taiwan-mountain",
+      "input": "台灣的山",
+      "expected_understood": false,
+      "category": "too-vague",
+      "note": "Technically correct but too vague, missing key detail",
+      "added": "2026-02-22",
+      "source": "proactive"
+    },
+    {
+      "id": "correct-northeast-asia",
+      "input": "東北亞第一高峰",
+      "expected_understood": true,
+      "category": "factual-correct",
+      "note": "Exact answer from text — regression check for vague fix",
+      "added": "2026-02-22",
+      "source": "regression-prevention"
+    },
+    {
+      "id": "correct-taiwan-highest",
+      "input": "台灣最高的山",
+      "expected_understood": true,
+      "category": "factual-correct",
+      "note": "Specific enough — directly from text",
+      "added": "2026-02-22",
+      "source": "regression-prevention"
+    },
+    {
+      "id": "correct-snow",
+      "input": "冬天山頂會覆蓋白雪",
+      "expected_understood": true,
+      "category": "factual-correct",
+      "note": "Correct factual answer about winter snow",
+      "added": "2026-02-22",
+      "source": "proactive"
+    },
+    {
+      "id": "correct-ecology",
+      "input": "玉山有豐富的生態環境和許多特有植物",
+      "expected_understood": true,
+      "category": "factual-correct",
+      "note": "Correct answer about ecology from paragraph 2",
+      "added": "2026-02-22",
+      "source": "proactive"
+    }
+  ]
+}
