@@ -59,3 +59,36 @@ export async function askComprehensionQuestion(payload: {
   if (!res.ok) throw new Error(`askComprehensionQuestion failed: ${res.status}`);
   return res.json();
 }
+
+// --- New Comprehension Chat API (Issue #1: answer evaluation) ---
+
+export interface ChatResponse {
+  question: string;
+  feedback: string | null;
+  understood: boolean | null;
+  understood_count: number;
+  required_count: number;
+  phase: string;
+  is_complete: boolean;
+  referenced_paragraph: number | null;
+}
+
+export async function sendComprehensionChat(payload: {
+  sessionId: string;
+  storyTitle: string;
+  storyText: string;
+  studentAnswer: string | null;
+}): Promise<ChatResponse> {
+  const res = await fetch(`${API_BASE}/api/comprehension/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      session_id: payload.sessionId,
+      story_title: payload.storyTitle,
+      story_text: payload.storyText,
+      student_answer: payload.studentAnswer,
+    }),
+  });
+  if (!res.ok) throw new Error(`sendComprehensionChat failed: ${res.status}`);
+  return res.json();
+}

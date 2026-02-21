@@ -9,10 +9,20 @@ Rules (from CLAUDE.md):
   - STT/TTS use browser-native APIs and are NOT routed through here.
 """
 
+import asyncio
+import json
+import logging
+
 from google import genai
 from google.genai import types as genai_types
 
 from ..config import settings
+
+logger = logging.getLogger(__name__)
+
+MAX_RETRIES = 3
+RETRY_BASE_DELAY = 1.0  # seconds
+GEMINI_TIMEOUT = 30  # seconds
 
 
 def _get_client() -> genai.Client:
@@ -20,6 +30,56 @@ def _get_client() -> genai.Client:
     return genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
 
 
+async def generate_structured_response(
+    system_prompt: str,
+    contents: list[genai_types.Content],
+    response_schema: dict,
+    max_tokens: int = 256,
+    temperature: float = 0.7,
+) -> dict:
+    """Call Gemini with JSON mode, return parsed dict.
+
+    Uses response_mime_type="application/json" and response_schema
+    to get structured JSON output from Gemini.
+    """
+    client = _get_client()
+    last_error = None
+
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    client.models.generate_content,
+                    model="gemini-2.0-flash",
+                    contents=contents,
+                    config=genai_types.GenerateContentConfig(
+                        system_instruction=system_prompt,
+                        response_mime_type="application/json",
+                        response_schema=response_schema,
+                        max_output_tokens=max_tokens,
+                        temperature=temperature,
+                    ),
+                ),
+                timeout=GEMINI_TIMEOUT,
+            )
+            return json.loads(response.text)
+        except asyncio.TimeoutError:
+            logger.error("Gemini API timeout after %ds", GEMINI_TIMEOUT)
+            raise TimeoutError(f"AI response timeout ({GEMINI_TIMEOUT}s)")
+        except Exception as e:
+            last_error = e
+            if attempt < MAX_RETRIES - 1:
+                delay = RETRY_BASE_DELAY * (2 ** attempt)
+                logger.warning("Gemini API attempt %d failed: %s. Retrying in %.1fs", attempt + 1, e, delay)
+                await asyncio.sleep(delay)
+            else:
+                logger.error("Gemini API failed after %d attempts: %s", MAX_RETRIES, e)
+
+    raise last_error
+
+
+# Deprecated: use SocraticAgent.process_answer() for new code.
+# Kept for backward compatibility with POST /comprehension/question.
 async def generate_socratic_question(
     story_title: str,
     story_text: str,

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt } from '../../types';
-import { askComprehensionQuestion, ConversationTurn } from '../../services/api';
+import { sendComprehensionChat, ChatResponse } from '../../services/api';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 
 interface ComprehensionChatProps {
@@ -12,7 +12,10 @@ interface ComprehensionChatProps {
   onBack: () => void;
 }
 
-const REQUIRED_ANSWERS = 3;
+type ChatMessage =
+  | { role: 'ai'; text: string }
+  | { role: 'student'; text: string }
+  | { role: 'feedback'; text: string; understood: boolean };
 
 const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   story,
@@ -22,13 +25,20 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   onFinish,
   onBack,
 }) => {
-  const [conversation, setConversation] = useState<ConversationTurn[]>([]);
+  const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [studentAnswerCount, setStudentAnswerCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
   const [zhuyinReady, setZhuyinReady] = useState(false);
+
+  // Server-driven session state
+  const [sessionId] = useState(() => crypto.randomUUID());
+  const [understoodCount, setUnderstoodCount] = useState(0);
+  const [requiredCount, setRequiredCount] = useState(3);
+  const [isSessionComplete, setIsSessionComplete] = useState(false);
+  const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
+
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const initializedRef = useRef(false);
@@ -66,36 +76,55 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     }
   }, [story.content, zhuyinActive]);
 
-  const isComplete = studentAnswerCount >= REQUIRED_ANSWERS;
-
   // Scroll to bottom whenever conversation updates
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation, isLoading]);
 
-  // Ask the backend for the next question and append to conversation
-  const fetchNextQuestion = useCallback(
-    async (currentConversation: ConversationTurn[]) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const storyText = story.content.join('\n');
-        const result = await askComprehensionQuestion({
-          storyTitle: story.title,
-          storyText,
-          conversation: currentConversation,
+  const paragraphRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Helper to apply server response to local state
+  const applyServerState = useCallback((result: ChatResponse) => {
+    setUnderstoodCount(result.understood_count);
+    setRequiredCount(result.required_count);
+    setIsSessionComplete(result.is_complete);
+
+    // Highlight referenced paragraph on wrong answer
+    if (result.understood === false && result.referenced_paragraph != null) {
+      setHighlightedParagraph(result.referenced_paragraph);
+      // Auto-scroll to highlighted paragraph
+      setTimeout(() => {
+        paragraphRefs.current[result.referenced_paragraph!]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
         });
-        const aiTurn: ConversationTurn = { role: 'ai', text: result.question };
-        setConversation(prev => [...prev, aiTurn]);
-      } catch {
-        setError('無法連線到伺服器，請確認後端已啟動。');
-      } finally {
-        setIsLoading(false);
-        setTimeout(() => inputRef.current?.focus(), 100);
-      }
-    },
-    [story.content, story.title],
-  );
+      }, 100);
+    } else {
+      setHighlightedParagraph(null);
+    }
+  }, []);
+
+  // Fetch the first question from the server (no student answer)
+  const fetchFirstQuestion = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const storyText = story.content.join('\n');
+      const result = await sendComprehensionChat({
+        sessionId,
+        storyTitle: story.title,
+        storyText,
+        studentAnswer: null,
+      });
+      setConversation([{ role: 'ai', text: result.question }]);
+      applyServerState(result);
+    } catch {
+      setError('無法連線到伺服器，請確認後端已啟動。');
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [story.content, story.title, sessionId, applyServerState]);
 
   // Resizable right panel
   useEffect(() => {
@@ -130,23 +159,70 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
-    fetchNextQuestion([]);
+    fetchFirstQuestion();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const text = inputText.trim();
-    if (!text || isLoading || isComplete) return;
+    if (!text || isLoading || isSessionComplete) return;
 
-    const studentTurn: ConversationTurn = { role: 'student', text };
-    const newConversation = [...conversation, studentTurn];
-    const newCount = studentAnswerCount + 1;
-
-    setConversation(newConversation);
+    const studentTurn: ChatMessage = { role: 'student', text };
+    setConversation(prev => [...prev, studentTurn]);
     setInputText('');
-    setStudentAnswerCount(newCount);
+    setIsLoading(true);
+    setError(null);
+    setHighlightedParagraph(null);
 
-    if (newCount < REQUIRED_ANSWERS) {
-      fetchNextQuestion(newConversation);
+    try {
+      const storyText = story.content.join('\n');
+      const result = await sendComprehensionChat({
+        sessionId,
+        storyTitle: story.title,
+        storyText,
+        studentAnswer: text,
+      });
+
+      applyServerState(result);
+
+      const newMessages: ChatMessage[] = [];
+
+      // Add feedback if present
+      if (result.feedback && result.understood !== null) {
+        newMessages.push({
+          role: 'feedback',
+          text: result.feedback,
+          understood: result.understood,
+        });
+      }
+
+      // Add next AI question if session is not complete
+      if (!result.is_complete) {
+        newMessages.push({ role: 'ai', text: result.question });
+      }
+
+      setConversation(prev => [...prev, ...newMessages]);
+    } catch {
+      setError('無法連線到伺服器，請確認後端已啟動。');
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    if (conversation.length === 0) {
+      fetchFirstQuestion();
+    } else {
+      // Find the last student message to re-submit
+      const lastStudentTurn = [...conversation].reverse().find(t => t.role === 'student');
+      if (lastStudentTurn) {
+        // Remove the last student turn and re-submit
+        setConversation(prev => prev.slice(0, prev.length - 1));
+        setInputText(lastStudentTurn.text);
+      } else {
+        fetchFirstQuestion();
+      }
     }
   };
 
@@ -193,7 +269,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             {story.content.map((line, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl p-6 border border-transparent hover:border-[#30363d] hover:bg-[#161b22]/40 transition-all"
+                ref={el => { paragraphRefs.current[idx] = el; }}
+                className={`rounded-2xl p-6 border transition-all ${
+                  highlightedParagraph === idx
+                    ? 'border-amber-500/60 bg-amber-900/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
+                    : 'border-transparent hover:border-[#30363d] hover:bg-[#161b22]/40'
+                }`}
               >
                 <p className={`text-2xl lg:text-3xl text-slate-300 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
@@ -224,7 +305,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           </span>
           <div className="flex-1" />
           <span className="text-[10px] text-slate-600">
-            {studentAnswerCount} / {REQUIRED_ANSWERS} 題
+            {understoodCount} / {requiredCount} 理解
           </span>
           <button
             onClick={onFinish}
@@ -252,32 +333,49 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           </div>
 
           {/* Conversation turns */}
-          {conversation.map((turn, i) => (
-            <div key={i} className={`flex gap-2.5 ${turn.role === 'student' ? 'flex-row-reverse' : ''}`}>
-              {turn.role === 'ai' ? (
-                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
-                  <span className="text-white text-[10px] font-bold">AI</span>
+          {conversation.map((turn, i) => {
+            // Feedback message
+            if (turn.role === 'feedback') {
+              return (
+                <div key={i} className={`mx-10 rounded-xl px-3.5 py-2 text-sm border ${
+                  turn.understood
+                    ? 'bg-emerald-900/20 border-emerald-700/40 text-emerald-300'
+                    : 'bg-amber-900/20 border-amber-700/40 text-amber-300'
+                }`}>
+                  <span className="mr-1.5">{turn.understood ? '✓' : '💡'}</span>
+                  {processZhuyin(turn.text)}
                 </div>
-              ) : (
-                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-              )}
-              <div className={`max-w-[85%] flex flex-col ${turn.role === 'student' ? 'items-end' : ''}`}>
-                <div className={[
-                  'rounded-2xl px-4 py-3',
-                  turn.role === 'ai'
-                    ? 'bg-[#161b22] border border-[#30363d] rounded-tl-sm text-slate-300'
-                    : 'bg-indigo-600 rounded-tr-sm text-white',
-                ].join(' ')}>
-                  <p className={`text-lg leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>{processZhuyin(turn.text)}</p>
+              );
+            }
+
+            // AI or student message
+            return (
+              <div key={i} className={`flex gap-2.5 ${turn.role === 'student' ? 'flex-row-reverse' : ''}`}>
+                {turn.role === 'ai' ? (
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">AI</span>
+                  </div>
+                ) : (
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center">
+                    <svg className="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                )}
+                <div className={`max-w-[85%] flex flex-col ${turn.role === 'student' ? 'items-end' : ''}`}>
+                  <div className={[
+                    'rounded-2xl px-4 py-3',
+                    turn.role === 'ai'
+                      ? 'bg-[#161b22] border border-[#30363d] rounded-tl-sm text-slate-300'
+                      : 'bg-indigo-600 rounded-tr-sm text-white',
+                  ].join(' ')}>
+                    <p className={`text-lg leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>{processZhuyin(turn.text)}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* Loading indicator */}
           {isLoading && (
@@ -298,7 +396,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             <div className="bg-red-900/30 border border-red-700/40 rounded-xl px-3.5 py-2.5 text-sm text-red-300">
               {error}
               <button
-                onClick={() => fetchNextQuestion(conversation)}
+                onClick={handleRetry}
                 className="ml-2 underline hover:no-underline"
               >
                 重試
@@ -307,9 +405,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           )}
 
           {/* Completion message */}
-          {isComplete && !isLoading && (
+          {isSessionComplete && !isLoading && (
             <div className="bg-emerald-900/30 border border-emerald-700/40 rounded-2xl p-4 text-center">
-              <p className="text-emerald-300 font-bold text-sm">太棒了！你回答了 {REQUIRED_ANSWERS} 個問題！</p>
+              <p className="text-emerald-300 font-bold text-sm">太棒了！你展現了很好的理解力！</p>
               <p className="text-emerald-400/70 text-xs mt-1">你對課文的理解很好，繼續下一步吧！</p>
             </div>
           )}
@@ -319,7 +417,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
         {/* Bottom: input or proceed button */}
         <div className="shrink-0 bg-[#161b22] border-t border-[#30363d] p-3">
-          {isComplete ? (
+          {isSessionComplete ? (
             <div className="flex items-center justify-between gap-2">
               <button
                 onClick={onBack}
@@ -346,12 +444,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 onKeyDown={handleKeyDown}
                 placeholder="輸入你的回答……（Enter 送出）"
                 rows={2}
-                disabled={isLoading || isComplete}
+                disabled={isLoading || isSessionComplete}
                 className="flex-1 bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-base text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 resize-none disabled:opacity-50"
               />
               <button
                 onClick={handleSubmit}
-                disabled={!inputText.trim() || isLoading || isComplete}
+                disabled={!inputText.trim() || isLoading || isSessionComplete}
                 className="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white flex items-center justify-center transition-all active:scale-95"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
