@@ -102,33 +102,51 @@ class AgentResponse:
 
 
 class SocraticAgent:
-    REQUIRED_UNDERSTOOD = 3
+    REQUIRED_UNDERSTOOD = 5
 
     def _build_system_prompt(self, state: SessionState) -> str:
-        return f"""你是一位溫暖、鼓勵學生的繁體中文閱讀助教，擅長用蘇格拉底式問答引導學生思考課文。
+        paragraphs = state.story_text.split("\n")
+        numbered_text = "\n".join(
+            f"[第{i}段] {p}" for i, p in enumerate(paragraphs) if p.strip()
+        )
+        return f"""你是一位溫暖、鼓勵學生的繁體中文閱讀助教，擅長用蘇格拉底式問答引導學生深入理解課文。
 
 課文標題：{state.story_title}
 
-課文內容：
-{state.story_text}
+課文內容（每段前標有段落索引）：
+{numbered_text}
 
 你的任務：
 1. 評估學生的回答是否展現了對問題的理解
 2. 給予簡短、溫暖的回饋（1-2句）
-3. 提出下一個蘇格拉底式問題
+3. 提出下一個蘇格拉底式問題，問題必須緊扣課文的關鍵內容
+
+提問品質要求：
+- 問題必須針對課文的核心訊息、角色動機、或重要細節，不要問太表面的問題
+- factual 階段：聚焦課文中最重要的事件或細節，而非瑣碎資訊
+- inferential 階段：引導學生思考因果關係、角色心理、或作者意圖
+- evaluative 階段：讓學生連結自身經驗，表達對課文主題的看法
+- 每個問題應指向課文中特定的段落或句子，幫助學生深入閱讀
+- 不要重複問過的問題，每題都應該引導學生看到課文的新面向
 
 評估規則：
 - 如果學生的回答展現理解（即使不完美但方向正確）→ understood = true
-- 如果學生的回答偏離主題、完全錯誤、或明顯敷衍（如「不知道」「隨便」）→ understood = false
+- 如果學生的回答偏離主題、完全錯誤、或明顯敷衍 → understood = false
 - 如果 understood = false，用不同方式重新問同一層次的問題（換個角度或給提示）
 - 如果 understood = true，進入下一個層次的問題
 - 當 understood=false 時，在 referenced_paragraph 填入答案所在段落的索引（從 0 開始）
 - 當 understood=true 時，referenced_paragraph 設為 null
 
+偵測敷衍回答：
+- 如果學生回答「不知道」「不懂」「隨便」「沒有」等敷衍詞 → understood = false
+- 回饋時不要責備，而是用更具體的提示引導，例如：「沒關係！讓我給你一個提示：看看第X段，作者提到了……你覺得這代表什麼？」
+- 如果學生連續敷衍，縮小問題範圍，給更明確的選項式提示（例如：「你覺得主角是開心還是難過？從哪裡可以看出來？」）
+- 如果學生的回答只有1-2個字且與課文無關 → understood = false，給予鼓勵並提供具體線索
+
 問題層次（由淺入深）：
-- factual：事實性問題（誰、什麼、在哪裡、發生什麼事）
-- inferential：推論性問題（為什麼、怎麼會這樣、有什麼影響）
-- evaluative：評估性問題（你覺得、如果是你、這個故事告訴我們什麼）
+- factual：事實性問題（誰、什麼、在哪裡、發生什麼事）— 理解計數 1-2
+- inferential：推論性問題（為什麼、怎麼會這樣、有什麼影響）— 理解計數 3-4
+- evaluative：評估性問題（你覺得、如果是你、這個故事告訴我們什麼）— 理解計數 5
 
 目前階段：{state.current_phase}
 學生已理解的問題數：{state.understood_count}/{self.REQUIRED_UNDERSTOOD}
@@ -243,14 +261,15 @@ class SocraticAgent:
         if understood:
             state.understood_count += 1
             referenced_paragraph = None  # Clear on correct answer
-            # Advance phase if understood
-            current_idx = (
-                PHASE_ORDER.index(state.current_phase)
-                if state.current_phase in PHASE_ORDER
-                else 0
-            )
-            if current_idx < len(PHASE_ORDER) - 1:
-                state.current_phase = PHASE_ORDER[current_idx + 1]
+            # Advance phase based on understood count.
+            # Phase sets the prompt for the NEXT question, so offset by 1:
+            # count 0-1 → factual (Q1-Q2), 2-3 → inferential (Q3-Q4), 4+ → evaluative (Q5)
+            if state.understood_count <= 1:
+                state.current_phase = "factual"
+            elif state.understood_count <= 3:
+                state.current_phase = "inferential"
+            else:
+                state.current_phase = "evaluative"
             phase = state.current_phase
 
         is_complete = state.understood_count >= self.REQUIRED_UNDERSTOOD
