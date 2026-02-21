@@ -1,2 +1,16 @@
 # Private notes (strategy, personal context)
 private/
+
+# Environment variables (secrets)
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/

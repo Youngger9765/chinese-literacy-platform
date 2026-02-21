@@ -1,0 +1,113 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: lingoleap-dev
+  REGION: asia-east1
+  REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
+  BACKEND_SERVICE: lingoleap-backend
+  FRONTEND_SERVICE: lingoleap-frontend
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+
+  deploy-backend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build & push backend image
+        run: |
+          VERSION="v0.$(date +%Y%m%d%H%M)"
+          gcloud builds submit \
+            --tag "${{ env.REGISTRY }}/backend:${VERSION}" \
+            --project ${{ env.PROJECT_ID }} \
+            ./backend
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Deploy backend to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.BACKEND_SERVICE }} \
+            --image "${{ env.REGISTRY }}/backend:${{ env.VERSION }}" \
+            --platform managed \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      - name: Verify backend health
+        run: |
+          URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format='value(status.url)')
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL/")
+          echo "Backend health: $STATUS"
+          [ "$STATUS" = "200" ] || exit 1
+
+  deploy-frontend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build & push frontend image
+        run: |
+          VERSION="v0.$(date +%Y%m%d%H%M)"
+          gcloud builds submit \
+            --tag "${{ env.REGISTRY }}/frontend:${VERSION}" \
+            --project ${{ env.PROJECT_ID }} \
+            ./frontend
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Deploy frontend to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
+            --image "${{ env.REGISTRY }}/frontend:${{ env.VERSION }}" \
+            --platform managed \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --port 8080
+
+      - name: Verify frontend health
+        run: |
+          URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format='value(status.url)')
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL/")
+          echo "Frontend health: $STATUS"
+          [ "$STATUS" = "200" ] || exit 1
