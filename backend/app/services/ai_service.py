@@ -50,7 +50,7 @@ async def generate_structured_response(
             response = await asyncio.wait_for(
                 asyncio.to_thread(
                     client.models.generate_content,
-                    model="gemini-2.0-flash",
+                    model="gemini-2.5-flash-preview-05-20",
                     contents=contents,
                     config=genai_types.GenerateContentConfig(
                         system_instruction=system_prompt,
@@ -147,7 +147,7 @@ async def generate_socratic_question(
 
     client = _get_client()
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash-preview-05-20",
         contents=contents,
         config=genai_types.GenerateContentConfig(
             system_instruction=system_prompt,
