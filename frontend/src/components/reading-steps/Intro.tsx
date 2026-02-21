@@ -133,11 +133,11 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </span>
                 <span className="text-[10px] text-slate-600">Lv.{story.level}</span>
               </div>
-              <h1 className="text-2xl font-black text-white leading-[2.4]">
+              <h1 className={`text-2xl font-black text-white leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                 {processZhuyin(story.title)}
               </h1>
               {story.intro && (
-                <p className="text-xs text-slate-400 leading-[2.4]">
+                <p className={`text-base leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''} text-slate-400`}>
                   {processZhuyin(story.intro.author)}
                 </p>
               )}
@@ -153,7 +153,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </svg>
                 <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">課文簡介</span>
               </div>
-              <p className="text-slate-300 text-base leading-[2.4]">
+              <p className={`text-slate-300 text-xl leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                 {processZhuyin(story.intro.background)}
               </p>
 
@@ -162,7 +162,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 {isSpeaking ? (
                   <button
                     onClick={stopSpeaking}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-amber-800/50 text-amber-300 border border-amber-700/40 transition-all"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-amber-800/50 text-amber-300 border border-amber-700/40 transition-all"
                   >
                     <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -173,7 +173,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 ) : (
                   <button
                     onClick={speakIntro}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 border border-[#30363d] transition-all active:scale-95"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 border border-[#30363d] transition-all active:scale-95"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
@@ -196,7 +196,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
       <div className="flex-shrink-0 bg-[#161b22] border-t border-[#30363d] px-6 py-4 flex items-center justify-between">
         <button
           onClick={onBack}
-          className="px-4 py-2 rounded-xl text-sm text-slate-500 hover:text-slate-300 transition-colors"
+          className="px-4 py-3 rounded-xl text-base text-slate-500 hover:text-slate-300 transition-colors"
         >
           返回圖書館
         </button>
@@ -205,7 +205,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             stopSpeaking();
             onStartReading();
           }}
-          className="px-8 py-3 rounded-xl font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
+          className="px-8 py-3 rounded-xl font-bold text-base bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
           開始逐段朗讀
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

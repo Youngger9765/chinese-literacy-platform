@@ -160,7 +160,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                     key={ch}
                     onClick={() => handlePractice(ch)}
                     className={[
-                      `relative flex flex-col items-center justify-center ${zhuyinActive ? 'aspect-[3/4]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95`,
+                      `relative flex flex-col items-center justify-center ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95`,
                       isPracticed
                         ? 'bg-emerald-900/30 border-emerald-700/50 text-emerald-300'
                         : isSuggested
@@ -168,7 +168,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                           : 'bg-[#161b22] border-[#30363d] text-slate-200 hover:bg-[#21262d] hover:border-indigo-500/40',
                     ].join(' ')}
                   >
-                    <span className={`text-2xl font-bold ${zhuyinActive ? 'leading-[2.6]' : 'leading-none'}`}>
+                    <span className={`text-3xl font-bold leading-[2.8] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}>
                     {processZhuyin(ch)}
                   </span>
 
@@ -222,13 +222,13 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       <div className="flex-shrink-0 bg-[#161b22] border-t border-[#30363d] px-6 py-4 flex items-center justify-between">
         <button
           onClick={onBack}
-          className="px-4 py-2 rounded-xl text-sm text-slate-400 hover:text-slate-200 transition-colors"
+          className="px-4 py-3 rounded-xl text-base text-slate-400 hover:text-slate-200 transition-colors"
         >
           回到朗讀
         </button>
         <button
           onClick={onFinish}
-          className="px-8 py-3 rounded-xl font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
+          className="px-8 py-3 rounded-xl font-bold text-base bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
           {practicedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

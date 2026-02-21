@@ -195,7 +195,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 key={idx}
                 className="rounded-2xl p-6 border border-transparent hover:border-[#30363d] hover:bg-[#161b22]/40 transition-all"
               >
-                <p className="text-2xl lg:text-3xl text-slate-300 leading-[2.6]">
+                <p className={`text-2xl lg:text-3xl text-slate-300 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
                 </p>
               </div>
@@ -235,7 +235,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         </div>
 
         {/* Chat messages */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-black/10">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-black/10">
 
           {/* Intro message */}
           <div className="flex gap-2.5 pt-1">
@@ -243,8 +243,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               <span className="text-white text-[10px] font-bold">AI</span>
             </div>
             <div className="flex-1">
-              <div className="bg-[#161b22] border border-[#30363d] rounded-2xl rounded-tl-sm px-3.5 py-2.5">
-                <p className={`text-sm text-slate-300 ${zhuyinActive ? 'leading-[2.4]' : 'leading-relaxed'}`}>
+              <div className="bg-[#161b22] border border-[#30363d] rounded-2xl rounded-tl-sm px-4 py-3">
+                <p className={`text-lg text-slate-300 leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
                   {processZhuyin(`你剛才讀完了《${story.title}》，做得很棒！我想問你幾個關於課文的問題，幫助你更深入理解。準備好了嗎？`)}
                 </p>
               </div>
@@ -268,12 +268,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               )}
               <div className={`max-w-[85%] flex flex-col ${turn.role === 'student' ? 'items-end' : ''}`}>
                 <div className={[
-                  'rounded-2xl px-3.5 py-2.5',
+                  'rounded-2xl px-4 py-3',
                   turn.role === 'ai'
                     ? 'bg-[#161b22] border border-[#30363d] rounded-tl-sm text-slate-300'
                     : 'bg-indigo-600 rounded-tr-sm text-white',
                 ].join(' ')}>
-                  <p className={`text-sm ${zhuyinActive ? 'leading-[2.4]' : 'leading-relaxed'}`}>{processZhuyin(turn.text)}</p>
+                  <p className={`text-lg leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>{processZhuyin(turn.text)}</p>
                 </div>
               </div>
             </div>
@@ -323,13 +323,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             <div className="flex items-center justify-between gap-2">
               <button
                 onClick={onBack}
-                className="px-3 py-2 rounded-xl text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                className="px-3 py-3 rounded-xl text-base text-slate-500 hover:text-slate-300 transition-colors"
               >
                 ← 回到朗讀
               </button>
               <button
                 onClick={onFinish}
-                className="flex-1 py-2.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="flex-1 py-3 rounded-xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 繼續，生字練習
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,7 +347,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 placeholder="輸入你的回答……（Enter 送出）"
                 rows={2}
                 disabled={isLoading || isComplete}
-                className="flex-1 bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 resize-none disabled:opacity-50"
+                className="flex-1 bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-base text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 resize-none disabled:opacity-50"
               />
               <button
                 onClick={handleSubmit}
