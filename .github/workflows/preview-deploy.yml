@@ -59,27 +59,42 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker asia-east1-docker.pkg.dev
 
+      - name: Extract issue number from branch
+        id: issue
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          # Extract issue number from branch name: feature/issue-{N}-* or fix/issue-{N}-*
+          ISSUE_NUM=$(echo "$BRANCH" | grep -oP '(?<=issue-)\d+' || echo "")
+          if [ -z "$ISSUE_NUM" ]; then
+            # Fallback to PR number if branch doesn't follow convention
+            ISSUE_NUM=${{ github.event.pull_request.number }}
+            echo "⚠️ Could not extract issue number from branch '$BRANCH', using PR number: $ISSUE_NUM"
+          else
+            echo "✅ Extracted issue number: $ISSUE_NUM from branch: $BRANCH"
+          fi
+          echo "num=${ISSUE_NUM}" >> $GITHUB_OUTPUT
+
       - name: Set service names
         run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          echo "BACKEND_SERVICE=lingoleap-backend-pr-${PR_NUMBER}" >> $GITHUB_ENV
-          echo "FRONTEND_SERVICE=lingoleap-frontend-pr-${PR_NUMBER}" >> $GITHUB_ENV
-          echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+          ISSUE_NUM=${{ steps.issue.outputs.num }}
+          echo "BACKEND_SERVICE=lingoleap-backend-issue-${ISSUE_NUM}" >> $GITHUB_ENV
+          echo "FRONTEND_SERVICE=lingoleap-frontend-issue-${ISSUE_NUM}" >> $GITHUB_ENV
+          echo "ISSUE_NUM=${ISSUE_NUM}" >> $GITHUB_ENV
 
       # --- Backend ---
       - name: Build & push backend preview image
         if: needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened'
         run: |
           docker build \
-            -t "${{ env.REGISTRY }}/backend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}" \
+            -t "${{ env.REGISTRY }}/backend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
             ./backend
-          docker push "${{ env.REGISTRY }}/backend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}"
+          docker push "${{ env.REGISTRY }}/backend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}"
 
       - name: Deploy backend preview
         if: needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened'
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
-            --image "${{ env.REGISTRY }}/backend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}" \
+            --image "${{ env.REGISTRY }}/backend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
@@ -116,15 +131,15 @@ jobs:
         run: |
           docker build \
             --build-arg VITE_API_URL=${{ steps.backend-url.outputs.url }} \
-            -t "${{ env.REGISTRY }}/frontend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}" \
+            -t "${{ env.REGISTRY }}/frontend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
             ./frontend
-          docker push "${{ env.REGISTRY }}/frontend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}"
+          docker push "${{ env.REGISTRY }}/frontend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}"
 
       - name: Deploy frontend preview
         if: needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened'
         run: |
           gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
-            --image "${{ env.REGISTRY }}/frontend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}" \
+            --image "${{ env.REGISTRY }}/frontend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
@@ -211,11 +226,21 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Extract issue number from branch
+        id: issue
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          ISSUE_NUM=$(echo "$BRANCH" | grep -oP '(?<=issue-)\d+' || echo "")
+          if [ -z "$ISSUE_NUM" ]; then
+            ISSUE_NUM=${{ github.event.pull_request.number }}
+          fi
+          echo "num=${ISSUE_NUM}" >> $GITHUB_OUTPUT
+
       - name: Set service names
         run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          echo "BACKEND_SERVICE=lingoleap-backend-pr-${PR_NUMBER}" >> $GITHUB_ENV
-          echo "FRONTEND_SERVICE=lingoleap-frontend-pr-${PR_NUMBER}" >> $GITHUB_ENV
+          ISSUE_NUM=${{ steps.issue.outputs.num }}
+          echo "BACKEND_SERVICE=lingoleap-backend-issue-${ISSUE_NUM}" >> $GITHUB_ENV
+          echo "FRONTEND_SERVICE=lingoleap-frontend-issue-${ISSUE_NUM}" >> $GITHUB_ENV
 
       - name: Delete preview backend
         run: |
