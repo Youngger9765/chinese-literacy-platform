@@ -31,9 +31,12 @@ class SessionStore:
     """In-memory session store with 30-minute TTL cleanup."""
 
     TTL_SECONDS = 30 * 60
+    RATE_LIMIT = 30  # max requests per minute per session
+    RATE_WINDOW = 60  # seconds
 
     def __init__(self):
         self._sessions: dict[str, SessionState] = {}
+        self._rate_counts: dict[str, list[float]] = {}  # session_id -> [timestamps]
 
     def get(self, session_id: str) -> SessionState | None:
         self._cleanup()
@@ -50,6 +53,18 @@ class SessionStore:
         ]
         for sid in expired:
             del self._sessions[sid]
+
+    def check_rate_limit(self, session_id: str) -> bool:
+        """Return True if rate limit exceeded."""
+        now = time.time()
+        timestamps = self._rate_counts.get(session_id, [])
+        # Remove old timestamps
+        timestamps = [t for t in timestamps if now - t < self.RATE_WINDOW]
+        if len(timestamps) >= self.RATE_LIMIT:
+            return True
+        timestamps.append(now)
+        self._rate_counts[session_id] = timestamps
+        return False
 
 
 # Module-level singleton
@@ -103,6 +118,8 @@ class AgentResponse:
 
 class SocraticAgent:
     REQUIRED_UNDERSTOOD = 5
+    MAX_ANSWER_LENGTH = 500
+    MAX_HISTORY_TURNS = 10
 
     def _build_system_prompt(self, state: SessionState) -> str:
         paragraphs = state.story_text.split("\n")
@@ -206,12 +223,28 @@ class SocraticAgent:
         self, session_id: str, student_answer: str
     ) -> AgentResponse:
         """Process a student's answer, evaluate understanding, return next question."""
+        # Rate limiting check
+        if _store.check_rate_limit(session_id):
+            raise ValueError("Rate limit exceeded. Please wait before sending another answer.")
+
+        # Input validation
+        if not student_answer or not student_answer.strip():
+            raise ValueError("Answer cannot be empty")
+        if len(student_answer) > self.MAX_ANSWER_LENGTH:
+            raise ValueError(f"Answer too long (max {self.MAX_ANSWER_LENGTH} characters)")
+        student_answer = student_answer.strip()
+
         state = _store.get(session_id)
         if state is None:
             raise ValueError(f"Session {session_id} not found or expired")
 
         state.conversation.append({"role": "student", "text": student_answer})
         state.total_attempts += 1
+
+        # Truncate conversation history to keep only last N turns
+        if len(state.conversation) > self.MAX_HISTORY_TURNS:
+            # Keep first turn (initial question) + last MAX_HISTORY_TURNS-1 turns
+            state.conversation = [state.conversation[0]] + state.conversation[-(self.MAX_HISTORY_TURNS - 1):]
 
         system_prompt = self._build_system_prompt(state)
 
@@ -250,6 +283,23 @@ class SocraticAgent:
             question = result.get("question", "")
             phase = result.get("phase", state.current_phase)
             referenced_paragraph = result.get("referenced_paragraph")
+
+            # Validate referenced_paragraph bounds
+            num_paragraphs = len([p for p in state.story_text.split("\n") if p.strip()])
+            if referenced_paragraph is not None:
+                if not isinstance(referenced_paragraph, int) or referenced_paragraph < 0 or referenced_paragraph >= num_paragraphs:
+                    logger.warning("Invalid referenced_paragraph %s (max %d), resetting to None", referenced_paragraph, num_paragraphs - 1)
+                    referenced_paragraph = None
+
+            # Validate phase
+            if phase not in PHASE_ORDER:
+                logger.warning("Invalid phase '%s', using current: %s", phase, state.current_phase)
+                phase = state.current_phase
+
+            # Validate question is non-empty
+            if not question or not question.strip():
+                question = _fallback_question(state)
+
         except Exception as e:
             logger.warning("AI service error in process_answer: %s", e)
             understood = True  # Give benefit of doubt on error
