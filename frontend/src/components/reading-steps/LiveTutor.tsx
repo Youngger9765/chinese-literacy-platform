@@ -704,7 +704,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         </div>
 
         <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
-          <div className="max-w-3xl mx-auto space-y-16">
+          <div className="max-w-3xl mx-auto space-y-10">
             {story.content.map((line, idx) => (
               <div
                 key={idx}
@@ -716,7 +716,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 }`}
               >
                 <p
-                  className={`text-2xl lg:text-3xl ${zhuyinActive ? 'leading-[3.6]' : 'leading-relaxed'} ${
+                  className={`text-2xl lg:text-3xl ${zhuyinActive ? 'leading-[2.8] tracking-[0.4em]' : 'leading-relaxed'} ${
                     idx === currentLineIndex ? 'text-white font-bold' : 'text-slate-400'
                   }`}
                 >
@@ -766,7 +766,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               </span>
               <div
                 className={`px-4 py-3 rounded-2xl text-lg max-w-[90%] shadow-lg ${
-                  zhuyinActive ? 'leading-[3.2]' : 'leading-relaxed'
+                  zhuyinActive ? 'leading-[2.6] tracking-[0.3em]' : 'leading-relaxed'
                 } ${
                   m.role === 'user'
                     ? 'bg-indigo-600 text-white rounded-tr-none'
@@ -783,7 +783,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <span className="text-[9px] font-bold text-green-500 mb-0.5 uppercase animate-pulse">
                 LISTENING
               </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-green-900/30 text-green-200 border border-green-700/30 rounded-tl-none ${zhuyinActive ? 'leading-[3.2]' : 'leading-relaxed'}`}>
+              <div className={`px-4 py-3 rounded-2xl text-lg bg-green-900/30 text-green-200 border border-green-700/30 rounded-tl-none ${zhuyinActive ? 'leading-[2.6] tracking-[0.3em]' : 'leading-relaxed'}`}>
                 {processZhuyin('請朗讀上方的段落')}
               </div>
             </div>
@@ -794,7 +794,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <span className="text-[9px] font-bold text-indigo-500 mb-0.5 uppercase animate-pulse">
                 LISTENING...
               </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-indigo-600/60 text-indigo-100 rounded-tr-none max-w-[90%] border border-indigo-500/30 ${zhuyinActive ? 'leading-[3.2]' : 'leading-relaxed'}`}>
+              <div className={`px-4 py-3 rounded-2xl text-lg bg-indigo-600/60 text-indigo-100 rounded-tr-none max-w-[90%] border border-indigo-500/30 ${zhuyinActive ? 'leading-[2.6] tracking-[0.3em]' : 'leading-relaxed'}`}>
                 {processZhuyin(streamingUserInput)}
               </div>
             </div>
@@ -805,7 +805,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <span className="text-[9px] font-bold text-indigo-500 mb-0.5 uppercase animate-pulse">
                 NEXT...
               </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-[#21262d] text-indigo-300 border border-indigo-900/30 rounded-tl-none ${zhuyinActive ? 'leading-[3.2]' : 'leading-relaxed'}`}>
+              <div className={`px-4 py-3 rounded-2xl text-lg bg-[#21262d] text-indigo-300 border border-indigo-900/30 rounded-tl-none ${zhuyinActive ? 'leading-[2.6] tracking-[0.3em]' : 'leading-relaxed'}`}>
                 {processZhuyin('正在前往下一段...')}
               </div>
             </div>
@@ -814,7 +814,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
         {/* Controls */}
         <div className="flex-shrink-0 p-3 bg-[#161b22] border-t border-[#30363d] space-y-2">
-          <div className={`min-h-[3rem] p-2 rounded-lg bg-black/40 border border-[#30363d] text-base text-indigo-300 overflow-hidden ${zhuyinActive ? 'leading-[3.2]' : 'leading-relaxed'}`}>
+          <div className={`min-h-[3rem] p-2 rounded-lg bg-black/40 border border-[#30363d] text-base text-indigo-300 overflow-hidden ${zhuyinActive ? 'leading-[2.6] tracking-[0.3em]' : 'leading-relaxed'}`}>
             {streamingUserInput ? processZhuyin(streamingUserInput) : (
               <span className="text-slate-800 italic">
                 {processZhuyin(isPreparing ? '正在準備語音辨識...' : isSessionActive ? '正在聆聽您的朗讀...' : '點擊「開始朗讀」開始')}
@@ -927,7 +927,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               }}
               disabled={currentLineIndex === 0}
               className={`flex-1 py-3 rounded-lg text-base font-bold border border-[#30363d] ${
-                zhuyinActive ? 'leading-[3.2]' : ''
+                zhuyinActive ? 'leading-[2.6] tracking-[0.2em]' : ''
               } ${
                 currentLineIndex === 0
                   ? 'bg-slate-900 text-slate-700 cursor-not-allowed'
@@ -945,7 +945,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   handleFinish();
                 }
               }}
-              className={`flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg text-base font-bold border border-[#30363d] ${zhuyinActive ? 'leading-[3.2]' : ''}`}
+              className={`flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg text-base font-bold border border-[#30363d] ${zhuyinActive ? 'leading-[2.6] tracking-[0.2em]' : ''}`}
             >
               {processZhuyin(currentLineIndex === story.content.length - 1 ? '觀看總結報告' : '下一段')}
             </button>
@@ -954,7 +954,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           {isSessionActive && (
             <button
               onClick={stopSession}
-              className={`w-full py-1.5 rounded-lg text-base font-bold text-slate-600 hover:text-slate-400 transition-colors ${zhuyinActive ? 'leading-[3.2]' : ''}`}
+              className={`w-full py-1.5 rounded-lg text-base font-bold text-slate-600 hover:text-slate-400 transition-colors ${zhuyinActive ? 'leading-[2.6] tracking-[0.2em]' : ''}`}
             >
               {processZhuyin('停止朗讀')}
             </button>

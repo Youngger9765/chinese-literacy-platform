@@ -290,13 +290,13 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
         {/* All paragraphs */}
         <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
-          <div className="max-w-3xl mx-auto space-y-14">
+          <div className="max-w-3xl mx-auto space-y-10">
             {story.content.map((line, idx) => (
               <div
                 key={idx}
                 className="rounded-2xl p-6 border border-transparent hover:border-[#30363d] hover:bg-[#161b22]/30 transition-all"
               >
-                <p className={`text-2xl lg:text-3xl text-slate-200 ${zhuyinActive ? 'leading-[3.6]' : 'leading-relaxed'}`}>
+                <p className={`text-2xl lg:text-3xl text-slate-200 ${zhuyinActive ? 'leading-[2.8] tracking-[0.4em]' : 'leading-relaxed'}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
                 </p>
               </div>

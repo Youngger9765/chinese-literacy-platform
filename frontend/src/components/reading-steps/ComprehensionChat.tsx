@@ -189,13 +189,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
         {/* Story content — all paragraphs visible for reference */}
         <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
-          <div className="max-w-3xl mx-auto space-y-14">
+          <div className="max-w-3xl mx-auto space-y-10">
             {story.content.map((line, idx) => (
               <div
                 key={idx}
                 className="rounded-2xl p-6 border border-transparent hover:border-[#30363d] hover:bg-[#161b22]/40 transition-all"
               >
-                <p className={`text-2xl lg:text-3xl text-slate-300 ${zhuyinActive ? 'leading-[3.6]' : 'leading-relaxed'}`}>
+                <p className={`text-2xl lg:text-3xl text-slate-300 ${zhuyinActive ? 'leading-[2.8] tracking-[0.4em]' : 'leading-relaxed'}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
                 </p>
               </div>
@@ -244,7 +244,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             </div>
             <div className="flex-1">
               <div className="bg-[#161b22] border border-[#30363d] rounded-2xl rounded-tl-sm px-4 py-3">
-                <p className={`text-lg text-slate-300 ${zhuyinActive ? 'leading-[3.2]' : 'leading-relaxed'}`}>
+                <p className={`text-lg text-slate-300 ${zhuyinActive ? 'leading-[2.6] tracking-[0.3em]' : 'leading-relaxed'}`}>
                   {processZhuyin(`你剛才讀完了《${story.title}》，做得很棒！我想問你幾個關於課文的問題，幫助你更深入理解。準備好了嗎？`)}
                 </p>
               </div>
@@ -273,7 +273,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     ? 'bg-[#161b22] border border-[#30363d] rounded-tl-sm text-slate-300'
                     : 'bg-indigo-600 rounded-tr-sm text-white',
                 ].join(' ')}>
-                  <p className={`text-lg ${zhuyinActive ? 'leading-[3.2]' : 'leading-relaxed'}`}>{processZhuyin(turn.text)}</p>
+                  <p className={`text-lg ${zhuyinActive ? 'leading-[2.6] tracking-[0.3em]' : 'leading-relaxed'}`}>{processZhuyin(turn.text)}</p>
                 </div>
               </div>
             </div>

@@ -168,7 +168,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                           : 'bg-[#161b22] border-[#30363d] text-slate-200 hover:bg-[#21262d] hover:border-indigo-500/40',
                     ].join(' ')}
                   >
-                    <span className={`text-3xl font-bold ${zhuyinActive ? 'leading-[3.6]' : 'leading-none'}`}>
+                    <span className={`text-3xl font-bold ${zhuyinActive ? 'leading-[2.8] tracking-[0.2em]' : 'leading-none'}`}>
                     {processZhuyin(ch)}
                   </span>
 

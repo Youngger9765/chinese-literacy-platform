@@ -133,11 +133,11 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </span>
                 <span className="text-[10px] text-slate-600">Lv.{story.level}</span>
               </div>
-              <h1 className={`text-2xl font-black text-white ${zhuyinActive ? 'leading-[3.6]' : 'leading-normal'}`}>
+              <h1 className={`text-2xl font-black text-white ${zhuyinActive ? 'leading-[2.8] tracking-[0.4em]' : 'leading-normal'}`}>
                 {processZhuyin(story.title)}
               </h1>
               {story.intro && (
-                <p className={`text-base ${zhuyinActive ? 'leading-[3.6]' : 'leading-relaxed'} text-slate-400`}>
+                <p className={`text-base ${zhuyinActive ? 'leading-[2.8] tracking-[0.3em]' : 'leading-relaxed'} text-slate-400`}>
                   {processZhuyin(story.intro.author)}
                 </p>
               )}
@@ -153,7 +153,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </svg>
                 <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">課文簡介</span>
               </div>
-              <p className={`text-slate-300 text-xl ${zhuyinActive ? 'leading-[3.6]' : 'leading-relaxed'}`}>
+              <p className={`text-slate-300 text-xl ${zhuyinActive ? 'leading-[2.8] tracking-[0.4em]' : 'leading-relaxed'}`}>
                 {processZhuyin(story.intro.background)}
               </p>
 
