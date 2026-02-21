@@ -17,7 +17,7 @@ from ..config import settings
 
 def _get_client() -> genai.Client:
     """Return a Gemini client via Vertex AI (uses Cloud Run service account)."""
-    return genai.Client(vertexai=True, project="lingoleap-dev", location="asia-east1")
+    return genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
 
 
 async def generate_socratic_question(
