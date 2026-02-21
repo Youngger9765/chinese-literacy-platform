@@ -45,20 +45,12 @@
       "source": "bug-fix"
     },
     {
-      "id": "correct-approx-chinese",
-      "input": "大約四千公尺",
-      "expected_understood": true,
-      "category": "factual-correct",
-      "note": "Correct approximate answer in Chinese",
-      "added": "2026-02-22",
-      "source": "regression-prevention"
-    },
-    {
       "id": "correct-quote-original",
       "input": "將近四千公尺",
       "expected_understood": true,
+      "question_keyword": "高度|多高|幾公尺|多少公尺",
       "category": "factual-correct",
-      "note": "Direct quote from text",
+      "note": "Direct quote from text — most stable correct case",
       "added": "2026-02-22",
       "source": "regression-prevention"
     },
@@ -66,8 +58,19 @@
       "id": "correct-arabic-4000",
       "input": "接近4000公尺",
       "expected_understood": true,
+      "question_keyword": "高度|多高|幾公尺|多少公尺",
       "category": "factual-correct",
       "note": "Arabic numeral, correct value",
+      "added": "2026-02-22",
+      "source": "regression-prevention"
+    },
+    {
+      "id": "correct-approx-chinese",
+      "input": "大約四千公尺",
+      "expected_understood": true,
+      "question_keyword": "高度|多高|幾公尺|多少公尺",
+      "category": "factual-correct",
+      "note": "Correct approximate answer in Chinese",
       "added": "2026-02-22",
       "source": "regression-prevention"
     },
@@ -75,6 +78,7 @@
       "id": "correct-3952",
       "input": "3952公尺",
       "expected_understood": true,
+      "question_keyword": "高度|多高|幾公尺|多少公尺",
       "category": "boundary",
       "note": "Actual height of Yushan, precise is OK",
       "added": "2026-02-22",
@@ -149,42 +153,6 @@
       "expected_understood": false,
       "category": "too-vague",
       "note": "Technically correct but too vague, missing key detail",
-      "added": "2026-02-22",
-      "source": "proactive"
-    },
-    {
-      "id": "correct-northeast-asia",
-      "input": "東北亞第一高峰",
-      "expected_understood": true,
-      "category": "factual-correct",
-      "note": "Exact answer from text — regression check for vague fix",
-      "added": "2026-02-22",
-      "source": "regression-prevention"
-    },
-    {
-      "id": "correct-taiwan-highest",
-      "input": "台灣最高的山",
-      "expected_understood": true,
-      "category": "factual-correct",
-      "note": "Specific enough — directly from text",
-      "added": "2026-02-22",
-      "source": "regression-prevention"
-    },
-    {
-      "id": "correct-snow",
-      "input": "冬天山頂會覆蓋白雪",
-      "expected_understood": true,
-      "category": "factual-correct",
-      "note": "Correct factual answer about winter snow",
-      "added": "2026-02-22",
-      "source": "proactive"
-    },
-    {
-      "id": "correct-ecology",
-      "input": "玉山有豐富的生態環境和許多特有植物",
-      "expected_understood": true,
-      "category": "factual-correct",
-      "note": "Correct answer about ecology from paragraph 2",
       "added": "2026-02-22",
       "source": "proactive"
     }

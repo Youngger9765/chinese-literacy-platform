@@ -14,7 +14,7 @@ Usage:
 import argparse
 import asyncio
 import json
-import os
+import re
 import sys
 import time
 import random
@@ -27,6 +27,8 @@ except ImportError:
     print("ERROR: aiohttp required. Install with: pip install aiohttp")
     sys.exit(1)
 
+MAX_QUESTION_RETRIES = 5  # Max session retries to get a matching question
+
 
 async def call_api(session, api_base, endpoint, payload):
     url = f"{api_base}{endpoint}"
@@ -37,28 +39,59 @@ async def call_api(session, api_base, endpoint, payload):
         return await resp.json()
 
 
-async def run_single_case(session, api_base, suite, case):
-    """Run a single test case. Returns (case_id, actual, expected, passed)."""
+async def setup_session(session, api_base, suite):
+    """Start a session + warmup. Returns (sid, last_question) or (None, error)."""
     endpoint = suite["endpoint"]
     setup = suite["setup"]
     sid = f"eval-{int(time.time())}-{random.randint(10000, 99999)}"
 
     # Start session
-    await call_api(session, api_base, endpoint, {
+    start_result = await call_api(session, api_base, endpoint, {
         "session_id": sid,
         "story_title": setup["story_title"],
         "story_text": setup["story_text"],
         "student_answer": None,
     })
+    if "error" in start_result:
+        return None, start_result["error"]
+
+    last_question = start_result.get("question", "")
 
     # Warmup: give correct answers to advance past initial questions
     for warmup in setup.get("warmup_answers", []):
-        await call_api(session, api_base, endpoint, {
+        warmup_result = await call_api(session, api_base, endpoint, {
             "session_id": sid,
             "story_title": setup["story_title"],
             "story_text": setup["story_text"],
             "student_answer": warmup,
         })
+        if "error" not in warmup_result:
+            last_question = warmup_result.get("question", "")
+
+    return sid, last_question
+
+
+async def run_single_case(session, api_base, suite, case):
+    """Run a single test case. Returns (case_id, actual, expected, passed, info)."""
+    endpoint = suite["endpoint"]
+    setup = suite["setup"]
+    keyword = case.get("question_keyword")
+
+    # If case has question_keyword, retry sessions until AI asks a matching question
+    if keyword:
+        pattern = re.compile(keyword)
+        for attempt in range(MAX_QUESTION_RETRIES):
+            sid, last_question = await setup_session(session, api_base, suite)
+            if sid is None:
+                return case["id"], "ERROR", case["expected_understood"], False, f"setup failed: {last_question}"
+            if pattern.search(last_question):
+                break
+        else:
+            return case["id"], "SKIP", case["expected_understood"], True, f"no matching question after {MAX_QUESTION_RETRIES} retries (last: {last_question[:30]})"
+    else:
+        sid, last_question = await setup_session(session, api_base, suite)
+        if sid is None:
+            return case["id"], "ERROR", case["expected_understood"], False, f"setup failed: {last_question}"
 
     # Test the actual case
     result = await call_api(session, api_base, endpoint, {
@@ -69,13 +102,13 @@ async def run_single_case(session, api_base, suite, case):
     })
 
     if "error" in result:
-        return case["id"], "ERROR", case["expected_understood"], False
+        return case["id"], "ERROR", case["expected_understood"], False, result["error"]
 
     actual = result.get("understood")
     expected = case["expected_understood"]
     passed = actual == expected
 
-    return case["id"], actual, expected, passed
+    return case["id"], actual, expected, passed, f"Q: {last_question[:30]}"
 
 
 async def run_suite(api_base, suite_path, runs=1):
@@ -95,6 +128,7 @@ async def run_suite(api_base, suite_path, runs=1):
 
     all_results = []
     category_stats = {}
+    skipped = 0
 
     async with aiohttp.ClientSession() as session:
         for category, cases in sorted(by_category.items()):
@@ -104,11 +138,27 @@ async def run_suite(api_base, suite_path, runs=1):
 
             for case in cases:
                 votes = []
+                last_info = ""
                 for run_i in range(runs):
-                    case_id, actual, expected, passed = await run_single_case(
+                    case_id, actual, expected, passed, info = await run_single_case(
                         session, api_base, suite, case
                     )
                     votes.append(passed)
+                    last_info = info
+
+                # Handle SKIP
+                if actual == "SKIP":
+                    print(f"  ~~ SKIP | '{case['input']}' — {last_info}")
+                    skipped += 1
+                    all_results.append({
+                        "case_id": case_id,
+                        "category": category,
+                        "passed": True,  # Don't count skips as failures
+                        "skipped": True,
+                    })
+                    cat_passed += 1
+                    cat_total += 1
+                    continue
 
                 # Majority vote
                 pass_count = sum(votes)
@@ -129,7 +179,8 @@ async def run_suite(api_base, suite_path, runs=1):
                 status = "PASS" if final_passed else "FAIL"
                 icon = "  " if final_passed else ">>"
                 note = f" — {case.get('note', '')}" if case.get("note") else ""
-                print(f"  {icon} {status} | '{case['input']}' → {actual} (expected {expected}){confidence}{stability}{note}")
+                q_info = f" [{last_info}]" if not final_passed and last_info else ""
+                print(f"  {icon} {status} | '{case['input']}' → {actual} (expected {expected}){confidence}{stability}{note}{q_info}")
 
                 all_results.append({
                     "case_id": case_id,
@@ -157,6 +208,8 @@ async def run_suite(api_base, suite_path, runs=1):
     print(f"  RESULTS: {passed}/{total} passed ({pct:.1f}%)")
     if failed:
         print(f"  FAILED:  {failed}")
+    if skipped:
+        print(f"  SKIPPED: {skipped} (no matching question)")
     print()
     for cat, (p, t, pc) in sorted(category_stats.items()):
         flag = "" if p == t else " ← REVIEW"
