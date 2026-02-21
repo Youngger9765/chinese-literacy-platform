@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from ..services.ai_service import generate_socratic_question
 from ..services.socratic_agent import socratic_agent
@@ -83,7 +83,7 @@ class ComprehensionChatRequest(BaseModel):
     session_id: str
     story_title: str
     story_text: str
-    student_answer: str | None = None  # None = start session
+    student_answer: str | None = Field(None, max_length=500)  # None = start session
 
 
 class ComprehensionChatResponse(BaseModel):
@@ -116,7 +116,8 @@ async def comprehension_chat(payload: ComprehensionChatRequest):
                 student_answer=payload.student_answer,
             )
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        status = 429 if "Rate limit" in str(e) else 422
+        raise HTTPException(status_code=status, detail=str(e))
     except Exception as e:
         logger.error("Comprehension chat error: %s", e)
         raise HTTPException(status_code=500, detail="AI service error")
