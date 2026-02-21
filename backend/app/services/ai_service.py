@@ -9,6 +9,8 @@ Rules (from CLAUDE.md):
   - STT/TTS use browser-native APIs and are NOT routed through here.
 """
 
+import json
+
 from google import genai
 from google.genai import types as genai_types
 
@@ -20,6 +22,35 @@ def _get_client() -> genai.Client:
     return genai.Client(vertexai=True, project="lingoleap-dev", location="asia-east1")
 
 
+async def generate_structured_response(
+    system_prompt: str,
+    contents: list[genai_types.Content],
+    response_schema: dict,
+    max_tokens: int = 256,
+    temperature: float = 0.7,
+) -> dict:
+    """Call Gemini with JSON mode, return parsed dict.
+
+    Uses response_mime_type="application/json" and response_schema
+    to get structured JSON output from Gemini.
+    """
+    client = _get_client()
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=contents,
+        config=genai_types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            response_mime_type="application/json",
+            response_schema=response_schema,
+            max_output_tokens=max_tokens,
+            temperature=temperature,
+        ),
+    )
+    return json.loads(response.text)
+
+
+# Deprecated: use SocraticAgent.process_answer() for new code.
+# Kept for backward compatibility with POST /comprehension/question.
 async def generate_socratic_question(
     story_title: str,
     story_text: str,

@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from ..services.ai_service import generate_socratic_question
+from ..services.socratic_agent import socratic_agent
 
 router = APIRouter(tags=["learning"])
 logger = logging.getLogger(__name__)
@@ -54,9 +55,9 @@ async def get_comprehension_question(payload: ComprehensionRequest):
             story_text=payload.story_text,
             conversation=conversation,
         )
-    except RuntimeError as e:
-        # API key not configured — return a fallback question so demo still works
-        logger.warning("AI service not configured: %s", e)
+    except Exception as e:
+        # AI service unavailable (auth, network, etc.) — return a fallback question
+        logger.warning("AI service error: %s", e)
         question = _fallback_question(payload.conversation)
 
     # Count how many AI turns have been in the conversation (including this new one)
@@ -74,3 +75,57 @@ def _fallback_question(conversation: list[ConversationTurn]) -> str:
         "讀完這篇課文，你有什麼感想？如果是你，你會怎麼做？",
     ]
     return fallback[min(ai_count, len(fallback) - 1)]
+
+
+# ── Step 3b: Socratic Comprehension Chat (with evaluation) ───────────────────
+
+class ComprehensionChatRequest(BaseModel):
+    session_id: str
+    story_title: str
+    story_text: str
+    student_answer: str | None = None  # None = start session
+
+
+class ComprehensionChatResponse(BaseModel):
+    question: str
+    feedback: str | None = None
+    understood: bool | None = None
+    understood_count: int
+    required_count: int
+    phase: str
+    is_complete: bool
+
+
+@router.post("/comprehension/chat", response_model=ComprehensionChatResponse)
+async def comprehension_chat(payload: ComprehensionChatRequest):
+    """
+    Socratic dialogue with answer evaluation.
+    Send student_answer=null to start a new session and get the first question.
+    """
+    try:
+        if payload.student_answer is None:
+            result = await socratic_agent.start_session(
+                session_id=payload.session_id,
+                story_title=payload.story_title,
+                story_text=payload.story_text,
+            )
+        else:
+            result = await socratic_agent.process_answer(
+                session_id=payload.session_id,
+                student_answer=payload.student_answer,
+            )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error("Comprehension chat error: %s", e)
+        raise HTTPException(status_code=500, detail="AI service error")
+
+    return ComprehensionChatResponse(
+        question=result.question,
+        feedback=result.feedback,
+        understood=result.understood,
+        understood_count=result.understood_count,
+        required_count=result.required_count,
+        phase=result.phase,
+        is_complete=result.is_complete,
+    )
