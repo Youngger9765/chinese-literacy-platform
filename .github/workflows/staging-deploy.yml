@@ -1,16 +1,16 @@
-name: Deploy to Production
+name: Deploy to Staging
 
 on:
   push:
-    branches: [main]
+    branches: [staging]
   workflow_dispatch:
 
 env:
   PROJECT_ID: lingoleap-dev
   REGION: asia-east1
   REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
-  BACKEND_SERVICE: lingoleap-backend
-  FRONTEND_SERVICE: lingoleap-frontend
+  BACKEND_SERVICE: lingoleap-backend-staging
+  FRONTEND_SERVICE: lingoleap-frontend-staging
 
 jobs:
   detect-changes:
@@ -43,27 +43,30 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker asia-east1-docker.pkg.dev
+
       - name: Build & push backend image
         run: |
-          VERSION="v0.$(date +%Y%m%d%H%M)"
-          gcloud builds submit \
-            --tag "${{ env.REGISTRY }}/backend:${VERSION}" \
-            --tag "${{ env.REGISTRY }}/backend:latest" \
-            --project ${{ env.PROJECT_ID }} \
+          docker build \
+            -t "${{ env.REGISTRY }}/backend:staging-${{ github.sha }}" \
+            -t "${{ env.REGISTRY }}/backend:staging-latest" \
             ./backend
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          docker push "${{ env.REGISTRY }}/backend:staging-${{ github.sha }}"
+          docker push "${{ env.REGISTRY }}/backend:staging-latest"
 
-      - name: Deploy backend to Cloud Run
+      - name: Deploy backend to Cloud Run (Staging)
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
-            --image "${{ env.REGISTRY }}/backend:${{ env.VERSION }}" \
+            --image "${{ env.REGISTRY }}/backend:staging-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
-            --memory=512Mi \
+            --allow-unauthenticated \
+            --memory=256Mi \
             --cpu=1 \
             --min-instances=0 \
-            --max-instances=3 \
+            --max-instances=1 \
             --timeout=300s
 
       - name: Verify backend health
@@ -82,8 +85,10 @@ jobs:
           exit 1
 
   deploy-frontend:
-    needs: detect-changes
-    if: needs.detect-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+    needs: [detect-changes, deploy-backend]
+    if: |
+      always() &&
+      (needs.detect-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -95,28 +100,46 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker asia-east1-docker.pkg.dev
+
+      - name: Resolve staging backend URL
+        id: backend-url
+        run: |
+          URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format='value(status.url)' 2>/dev/null || echo "")
+          if [ -z "$URL" ]; then
+            # Fallback to production backend if staging backend doesn't exist yet
+            URL="https://lingoleap-backend-958347263320.asia-east1.run.app"
+          fi
+          echo "url=${URL}" >> $GITHUB_OUTPUT
+          echo "Staging frontend will use backend: ${URL}"
+
       - name: Build & push frontend image
         run: |
-          VERSION="v0.$(date +%Y%m%d%H%M)"
-          gcloud builds submit \
-            --tag "${{ env.REGISTRY }}/frontend:${VERSION}" \
-            --tag "${{ env.REGISTRY }}/frontend:latest" \
-            --project ${{ env.PROJECT_ID }} \
+          docker build \
+            --build-arg VITE_API_URL=${{ steps.backend-url.outputs.url }} \
+            -t "${{ env.REGISTRY }}/frontend:staging-${{ github.sha }}" \
+            -t "${{ env.REGISTRY }}/frontend:staging-latest" \
             ./frontend
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          docker push "${{ env.REGISTRY }}/frontend:staging-${{ github.sha }}"
+          docker push "${{ env.REGISTRY }}/frontend:staging-latest"
 
-      - name: Deploy frontend to Cloud Run
+      - name: Deploy frontend to Cloud Run (Staging)
         run: |
           gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
-            --image "${{ env.REGISTRY }}/frontend:${{ env.VERSION }}" \
+            --image "${{ env.REGISTRY }}/frontend:staging-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
+            --allow-unauthenticated \
             --port 8080 \
-            --memory=512Mi \
+            --memory=256Mi \
             --cpu=1 \
             --min-instances=0 \
-            --max-instances=3 \
+            --max-instances=1 \
             --timeout=300s
 
       - name: Verify frontend health
@@ -134,11 +157,19 @@ jobs:
           echo "Frontend health check failed"
           exit 1
 
-      - name: Show deployment summary
+      - name: Show staging deployment summary
         if: always()
         run: |
-          echo "## Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          FRONTEND_URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format='value(status.url)' 2>/dev/null || echo "N/A")
+          BACKEND_URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format='value(status.url)' 2>/dev/null || echo "N/A")
+          echo "## Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Frontend:** https://lingoleap-frontend-958347263320.asia-east1.run.app" >> $GITHUB_STEP_SUMMARY
-          echo "**Backend:** https://lingoleap-backend-958347263320.asia-east1.run.app" >> $GITHUB_STEP_SUMMARY
+          echo "**Frontend:** ${FRONTEND_URL}" >> $GITHUB_STEP_SUMMARY
+          echo "**Backend:** ${BACKEND_URL}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY

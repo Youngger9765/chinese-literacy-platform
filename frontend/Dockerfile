@@ -4,7 +4,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
 COPY . .
-ENV VITE_API_URL=https://lingoleap-backend-958347263320.asia-east1.run.app
+ARG VITE_API_URL=https://lingoleap-backend-958347263320.asia-east1.run.app
+ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
 # Stage 2: Serve with nginx

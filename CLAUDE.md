@@ -51,9 +51,48 @@ gcloud config configurations activate lingoleap
 | Cloud SQL | `lingoleap-db` (PostgreSQL 15, asia-east1, db-f1-micro) |
 | Artifact Registry | `asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap/` |
 
+### Git Branch Strategy
+
+```
+feature/*  ──PR──>  staging  ──PR──>  main
+    │                  │                │
+    ▼                  ▼                ▼
+PR Preview          Staging         Production
+(ephemeral)       (persistent)     (persistent)
+```
+
+| Branch | Environment | Auto-Deploy | Trigger |
+|--------|-------------|-------------|---------|
+| main | Production | Yes | push to main |
+| staging | Staging | Yes | push to staging |
+| feature/* | PR Preview | Yes | PR opened/updated |
+
+#### Workflow
+
+1. Create feature branch from `staging`
+2. Develop and test locally
+3. Open PR to `staging` (auto-deploys preview)
+4. Test on preview URL (posted as PR comment)
+5. Merge to `staging` for team testing
+6. Create PR from `staging` to `main`
+7. Merge to `main` for production release
+
+#### Environment URLs
+
+| Environment | Frontend | Backend |
+|-------------|----------|---------|
+| Production | `lingoleap-frontend-xxx.run.app` | `lingoleap-backend-xxx.run.app` |
+| Staging | `lingoleap-frontend-staging-xxx.run.app` | `lingoleap-backend-staging-xxx.run.app` |
+| PR Preview | `lingoleap-frontend-pr-{N}-xxx.run.app` | `lingoleap-backend-pr-{N}-xxx.run.app` |
+
 ### CI/CD
 
-Push to `main` → GitHub Actions 自動部署（`deploy.yml`）。
+| Workflow | Trigger | Deploys |
+|----------|---------|---------|
+| `deploy.yml` | Push to `main` | Production (backend + frontend) |
+| `staging-deploy.yml` | Push to `staging` | Staging (backend + frontend) |
+| `preview-deploy.yml` | PR opened/updated/closed | PR Preview (ephemeral, auto-cleanup) |
+
 - `backend/**` 變更 → rebuild + deploy backend
 - `frontend/**` 變更 → rebuild + deploy frontend
 - Secret: `GCP_SA_KEY` (service account for CI/CD)

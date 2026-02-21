@@ -1,0 +1,259 @@
+name: PR Preview Deploy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+env:
+  PROJECT_ID: lingoleap-dev
+  REGION: asia-east1
+  REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+
+  deploy-preview:
+    name: Deploy PR Preview
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker asia-east1-docker.pkg.dev
+
+      - name: Set service names
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          echo "BACKEND_SERVICE=lingoleap-backend-pr-${PR_NUMBER}" >> $GITHUB_ENV
+          echo "FRONTEND_SERVICE=lingoleap-frontend-pr-${PR_NUMBER}" >> $GITHUB_ENV
+          echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+
+      # --- Backend ---
+      - name: Build & push backend preview image
+        if: needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened'
+        run: |
+          docker build \
+            -t "${{ env.REGISTRY }}/backend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}" \
+            ./backend
+          docker push "${{ env.REGISTRY }}/backend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}"
+
+      - name: Deploy backend preview
+        if: needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened'
+        run: |
+          gcloud run deploy ${{ env.BACKEND_SERVICE }} \
+            --image "${{ env.REGISTRY }}/backend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}" \
+            --platform managed \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --allow-unauthenticated \
+            --memory=256Mi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=1 \
+            --timeout=300s
+
+      - name: Get backend preview URL
+        id: backend-url
+        run: |
+          # Try to get the PR-specific backend, fall back to staging, then production
+          URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format='value(status.url)' 2>/dev/null || echo "")
+          if [ -z "$URL" ]; then
+            URL=$(gcloud run services describe lingoleap-backend-staging \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} \
+              --format='value(status.url)' 2>/dev/null || echo "")
+          fi
+          if [ -z "$URL" ]; then
+            URL="https://lingoleap-backend-958347263320.asia-east1.run.app"
+          fi
+          echo "url=${URL}" >> $GITHUB_OUTPUT
+          echo "Preview frontend will use backend: ${URL}"
+
+      # --- Frontend ---
+      - name: Build & push frontend preview image
+        if: needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened'
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=${{ steps.backend-url.outputs.url }} \
+            -t "${{ env.REGISTRY }}/frontend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}" \
+            ./frontend
+          docker push "${{ env.REGISTRY }}/frontend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}"
+
+      - name: Deploy frontend preview
+        if: needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened'
+        run: |
+          gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
+            --image "${{ env.REGISTRY }}/frontend:pr-${{ env.PR_NUMBER }}-${{ github.sha }}" \
+            --platform managed \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --allow-unauthenticated \
+            --port 8080 \
+            --memory=256Mi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=1 \
+            --timeout=300s
+
+      - name: Get preview URLs
+        id: preview-urls
+        run: |
+          FRONTEND_URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format='value(status.url)' 2>/dev/null || echo "N/A")
+          BACKEND_URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --format='value(status.url)' 2>/dev/null || echo "N/A")
+          echo "frontend_url=${FRONTEND_URL}" >> $GITHUB_OUTPUT
+          echo "backend_url=${BACKEND_URL}" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with preview URLs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const frontendUrl = '${{ steps.preview-urls.outputs.frontend_url }}';
+            const backendUrl = '${{ steps.preview-urls.outputs.backend_url }}';
+
+            // Find existing bot comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Preview Deployment')
+            );
+
+            const body = `## Preview Deployment
+
+            | Service | URL |
+            |---------|-----|
+            | Frontend | ${frontendUrl} |
+            | Backend API | ${backendUrl} |
+            | Commit | \`${context.sha.substring(0, 7)}\` |
+            | Updated | ${new Date().toISOString()} |
+
+            > PR preview environments are automatically deleted when the PR is closed.`;
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
+
+  cleanup-preview:
+    name: Cleanup PR Preview
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed'
+
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Set service names
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          echo "BACKEND_SERVICE=lingoleap-backend-pr-${PR_NUMBER}" >> $GITHUB_ENV
+          echo "FRONTEND_SERVICE=lingoleap-frontend-pr-${PR_NUMBER}" >> $GITHUB_ENV
+
+      - name: Delete preview backend
+        run: |
+          if gcloud run services describe ${{ env.BACKEND_SERVICE }} --region=${{ env.REGION }} --project=${{ env.PROJECT_ID }} 2>/dev/null; then
+            gcloud run services delete ${{ env.BACKEND_SERVICE }} \
+              --region=${{ env.REGION }} \
+              --project=${{ env.PROJECT_ID }} \
+              --quiet
+            echo "Deleted preview backend: ${{ env.BACKEND_SERVICE }}"
+          else
+            echo "Preview backend ${{ env.BACKEND_SERVICE }} not found, skipping"
+          fi
+
+      - name: Delete preview frontend
+        run: |
+          if gcloud run services describe ${{ env.FRONTEND_SERVICE }} --region=${{ env.REGION }} --project=${{ env.PROJECT_ID }} 2>/dev/null; then
+            gcloud run services delete ${{ env.FRONTEND_SERVICE }} \
+              --region=${{ env.REGION }} \
+              --project=${{ env.PROJECT_ID }} \
+              --quiet
+            echo "Deleted preview frontend: ${{ env.FRONTEND_SERVICE }}"
+          else
+            echo "Preview frontend ${{ env.FRONTEND_SERVICE }} not found, skipping"
+          fi
+
+      - name: Comment PR about cleanup
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## Preview Cleanup Complete
+
+              The preview environments for this PR have been deleted.
+
+              **Deleted at:** ${new Date().toISOString()}`
+            });
