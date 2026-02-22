@@ -6,11 +6,15 @@
 
 ## [Unreleased]
 
-- 朗讀結果→蘇格拉底對話串接 (#17)
-- 蘇格拉底對話答錯判定加嚴 (#44)
-- Gemini 升級 2.5-flash-preview
+- Preview 環境自動清理 + 每週定期掃描
 
 ## 2026-02-22
+
+- 朗讀結果→蘇格拉底對話串接 (#17)
+- 蘇格拉底對話答錯判定加嚴 (#44)
+- Gemini 升級 2.5-flash
+- 跳過朗讀進對話不再 422 (#48)
+- 422 expired 後自動重建 session (#49)
 
 - Gemini API region 從 asia-east1 改為 us-central1 (#32)
 - CI/CD 改為 async Cloud Build + polling，解決 deploy timeout (#35)
