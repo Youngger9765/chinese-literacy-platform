@@ -839,7 +839,7 @@
         <div class="xp-container">
             <div class="xp-header">
                 <span class="xp-label">總經驗值 Total XP</span>
-                <span class="xp-value" id="xpValue">0 / 810 XP</span>
+                <span class="xp-value" id="xpValue">0 / 790 XP</span>
             </div>
             <div class="xp-bar-bg">
                 <div class="xp-bar-fill" id="xpBar"></div>
@@ -911,7 +911,7 @@
 
     <script>
         const STORAGE_KEY = 'lingoleap-quest-progress';
-        const TOTAL_XP = 810;
+        const TOTAL_XP = 790;
 
         const achievements = [
             { id: 'first-level', icon: '🌟', name: '新手上路', desc: 'Complete Level 1', check: state => state.levels['1']?.completed },
@@ -996,7 +996,7 @@
                 icon: '⚔️',
                 title: '裝備準備',
                 subtitle: 'Gear Up',
-                xp: 100,
+                xp: 80,
                 challenges: [
                     {
                         id: '1',
@@ -1050,13 +1050,6 @@
                         ],
                         correct: 2
                     },
-                    {
-                        id: '5',
-                        type: 'fill',
-                        xp: 20,
-                        question: 'VS Code 推薦安裝的三個擴充套件（任選一個英文名稱）What\'s one recommended VS Code extension?',
-                        acceptable: ['eslint', 'tailwind', 'python', 'tailwind css intellisense']
-                    }
                 ]
             },
             {
@@ -1487,7 +1480,9 @@
             } else {
                 gameState.wrongAnswers++;
                 const [levelId] = challengeId.split('-');
-                if (!gameState.levels[levelId]) gameState.levels[levelId] = { wrongCount: 0 };
+                if (!gameState.levels[levelId]) {
+                    gameState.levels[levelId] = { completed: false, xp: 0, challenges: {}, wrongCount: 0 };
+                }
                 gameState.levels[levelId].wrongCount = (gameState.levels[levelId].wrongCount || 0) + 1;
                 saveState();
             }
@@ -1518,7 +1513,9 @@
             } else {
                 gameState.wrongAnswers++;
                 const [levelId] = challengeId.split('-');
-                if (!gameState.levels[levelId]) gameState.levels[levelId] = { wrongCount: 0 };
+                if (!gameState.levels[levelId]) {
+                    gameState.levels[levelId] = { completed: false, xp: 0, challenges: {}, wrongCount: 0 };
+                }
                 gameState.levels[levelId].wrongCount = (gameState.levels[levelId].wrongCount || 0) + 1;
                 saveState();
             }
@@ -1568,7 +1565,9 @@
             } else {
                 gameState.wrongAnswers++;
                 const [levelId] = challengeId.split('-');
-                if (!gameState.levels[levelId]) gameState.levels[levelId] = { wrongCount: 0 };
+                if (!gameState.levels[levelId]) {
+                    gameState.levels[levelId] = { completed: false, xp: 0, challenges: {}, wrongCount: 0 };
+                }
                 gameState.levels[levelId].wrongCount = (gameState.levels[levelId].wrongCount || 0) + 1;
                 saveState();
             }
@@ -1618,7 +1617,19 @@
                 checkAchievements();
                 saveState();
 
-                document.getElementById(`challenge-${levelId}-${challengeId}`).classList.add('completed');
+                const currentEl = document.getElementById(`challenge-${levelId}-${challengeId}`);
+                currentEl.classList.add('completed');
+
+                // Scroll to next challenge
+                if (!allChallengesComplete) {
+                    const nextChId = String(parseInt(challengeId) + 1);
+                    const nextEl = document.getElementById(`challenge-${levelId}-${nextChId}`);
+                    if (nextEl) {
+                        setTimeout(() => {
+                            nextEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                    }
+                }
             }
         }
 
@@ -1651,6 +1662,14 @@
             document.getElementById('levelCompleteOverlay').classList.remove('show');
             renderLevelMap();
             renderLevels();
+
+            // Scroll to next level
+            const nextLevelEl = document.getElementById(`level-${gameState.currentLevel}`);
+            if (nextLevelEl) {
+                setTimeout(() => {
+                    nextLevelEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
             checkCertificate();
         }
 
