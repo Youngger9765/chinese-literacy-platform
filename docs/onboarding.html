@@ -1482,6 +1482,7 @@
                 `;
             } else if (challenge.type === 'ordering') {
                 content = `
+                    <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:0.75rem;">👆 點選兩個項目可以交換位置，排成正確順序後按「確認」</p>
                     <div class="ordering-list" id="ordering-${challengeId}">
                         ${challenge.items.map((item, idx) => `
                             <div class="ordering-item" onclick="selectOrderingItem('${challengeId}', ${idx})">
