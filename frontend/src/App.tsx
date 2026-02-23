@@ -56,7 +56,7 @@ const App: React.FC = () => {
       <header className="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-4 shrink-0">
         {/* Logo */}
         <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => setView(AppView.HOME)}>
-          <div className="bg-indigo-600 w-6 h-6 rounded flex items-center justify-center">
+          <div className="bg-accent w-6 h-6 rounded flex items-center justify-center">
             <span className="text-white font-bold text-xs">L</span>
           </div>
           <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
@@ -69,7 +69,7 @@ const App: React.FC = () => {
             onClick={() => setView(AppView.HOME)}
             className={`px-2 py-1 rounded transition-colors ${
               view === AppView.HOME
-                ? 'bg-indigo-600 text-white'
+                ? 'bg-accent text-white'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
@@ -95,14 +95,14 @@ const App: React.FC = () => {
                   onClick={() => !isDisabled && setView(targetView)}
                   className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
                     isActive
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-accent text-white'
                       : isDisabled
                       ? 'text-gray-400 cursor-not-allowed'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
                   <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
-                    isActive ? 'bg-white text-indigo-600' : isDisabled ? 'bg-gray-300 text-gray-400' : 'bg-gray-200 text-gray-900'
+                    isActive ? 'bg-white text-accent' : isDisabled ? 'bg-gray-300 text-gray-400' : 'bg-gray-200 text-gray-900'
                   }`}>
                     {step}
                   </span>
@@ -130,7 +130,7 @@ const App: React.FC = () => {
             <p className="text-gray-600 max-w-md">準備好開始今天的朗讀挑戰了嗎？</p>
             <button 
               onClick={() => setView(AppView.LIBRARY)}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-xl font-bold shadow-2xl transition-all"
+              className="bg-accent hover:bg-accent-hover text-white px-10 py-4 rounded-xl font-bold shadow-2xl transition-all"
             >
               進入圖書館
             </button>
@@ -215,12 +215,12 @@ const App: React.FC = () => {
                   onChange={e => setWriteInput(e.target.value.slice(-1))}
                   placeholder="輸入一個字"
                   maxLength={1}
-                  className="w-24 h-12 text-center text-2xl bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-indigo-500"
+                  className="w-24 h-12 text-center text-2xl bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-accent"
                 />
                 <button
                   onClick={() => { if (writeInput) setWritingChar(writeInput); }}
                   disabled={!writeInput}
-                  className="px-6 h-12 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-lg font-bold transition-all"
+                  className="px-6 h-12 bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-lg font-bold transition-all"
                 >
                   開始
                 </button>

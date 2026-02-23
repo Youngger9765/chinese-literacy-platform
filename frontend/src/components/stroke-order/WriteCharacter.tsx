@@ -356,7 +356,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-[#0d1117]">
-        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -368,7 +368,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         {onBack && (
           <button
             onClick={onBack}
-            className="text-indigo-400 hover:text-indigo-300 font-bold"
+            className="text-accent-light hover:text-accent-light font-bold"
           >
             返回
           </button>
@@ -397,7 +397,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         {isComplete && onComplete && (
           <button
             onClick={onComplete}
-            className="text-indigo-400 hover:text-indigo-300 text-sm font-bold"
+            className="text-accent-light hover:text-accent-light text-sm font-bold"
           >
             完成 →
           </button>
@@ -515,7 +515,7 @@ function CtrlBtn({ icon, label, active, glow, disabled, onClick }: {
         'flex flex-col items-center gap-1 px-5 py-2.5 rounded-xl transition-all',
         disabled ? 'opacity-30 cursor-not-allowed' : 'hover:bg-slate-800 active:scale-95',
         glow ? 'ring-2 ring-yellow-400/70 bg-slate-800/50' : '',
-        active ? 'text-indigo-400' : 'text-slate-400',
+        active ? 'text-accent-light' : 'text-slate-400',
       ].join(' ')}
     >
       <span className="text-2xl leading-none">{icon}</span>
