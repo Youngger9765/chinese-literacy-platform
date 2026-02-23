@@ -105,7 +105,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
   return (
     <div
-      className="flex-1 flex flex-col bg-[#0d1117] overflow-hidden"
+      className="flex-1 flex flex-col bg-amber-50 overflow-hidden"
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
@@ -113,12 +113,12 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       }}
     >
       {/* Tab bar — VS Code style */}
-      <div className="h-9 bg-[#161b22] border-b border-[#30363d] flex items-center px-2 gap-2 shrink-0">
-        <div className="h-full px-4 flex items-center bg-[#0d1117] border-t-2 border-indigo-500 border-x border-[#30363d] text-xs text-slate-200 gap-2">
+      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
+        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-indigo-500 border-x border-gray-200 text-xs text-gray-800 gap-2">
           {story.filename} — 生字練習
         </div>
         <div className="flex-1" />
-        <span className="text-[10px] text-slate-500">
+        <span className="text-[10px] text-gray-500">
           已練習 {practicedChars.size} / {displayChars.length} 字
         </span>
         <button
@@ -126,7 +126,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           className={`px-2.5 py-1 rounded text-xs transition-colors ${
             zhuyinEnabled && zhuyinReady
               ? 'bg-indigo-600/80 text-white hover:bg-indigo-500'
-              : 'bg-[#30363d] text-slate-400 hover:bg-[#3d444d]'
+              : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
           }`}
         >
           注音 {zhuyinEnabled ? 'ON' : 'OFF'}
@@ -139,8 +139,8 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
           {/* Header */}
           <div>
-            <h2 className="text-xl font-black text-white mb-1">生字練習</h2>
-            <p className="text-sm text-slate-400">
+            <h2 className="text-xl font-black text-gray-900 mb-1">生字練習</h2>
+            <p className="text-sm text-gray-600">
               {needPracticeSet.size > 0
                 ? `朗讀時漏掉了以下 ${Math.min(needPracticeSet.size, 12)} 個字，點一點來練習筆順吧！`
                 : '讀得很棒！沒有漏字。想再練習這篇的字嗎？'}
@@ -149,7 +149,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
           {/* Character grid */}
           {displayChars.length === 0 ? (
-            <div className="text-slate-600 text-sm py-8 text-center">這篇課文的漢字沒有筆順資料</div>
+            <div className="text-gray-400 text-sm py-8 text-center">這篇課文的漢字沒有筆順資料</div>
           ) : (
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
               {displayChars.map(ch => {
@@ -162,10 +162,10 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                     className={[
                       `relative flex flex-col items-center justify-center ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95`,
                       isPracticed
-                        ? 'bg-emerald-900/30 border-emerald-700/50 text-emerald-300'
+                        ? 'bg-emerald-50 border-emerald-700/50 text-emerald-800'
                         : isSuggested
                           ? 'bg-amber-900/30 border-amber-600/60 text-amber-200 ring-1 ring-amber-500/30 hover:bg-amber-900/50'
-                          : 'bg-[#161b22] border-[#30363d] text-slate-200 hover:bg-[#21262d] hover:border-indigo-500/40',
+                          : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-indigo-500/40',
                     ].join(' ')}
                   >
                     <span className={`text-3xl font-bold leading-[2.8] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}>
@@ -197,7 +197,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
           {/* Legend */}
           {needPracticeSet.size > 0 && (
-            <div className="flex items-center gap-4 text-[10px] text-slate-600">
+            <div className="flex items-center gap-4 text-[10px] text-gray-400">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 bg-amber-500 rounded-full" />
                 建議練習
@@ -211,18 +211,18 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
           {/* Completion message */}
           {allDone && (
-            <div className="bg-emerald-900/30 border border-emerald-700/40 rounded-2xl p-4 text-center">
-              <p className="text-emerald-300 font-bold">太棒了！所有生字都練習完了！</p>
+            <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center">
+              <p className="text-emerald-800 font-bold">太棒了！所有生字都練習完了！</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Bottom actions */}
-      <div className="flex-shrink-0 bg-[#161b22] border-t border-[#30363d] px-6 py-4 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
         <button
           onClick={onBack}
-          className="px-4 py-3 rounded-xl text-base text-slate-400 hover:text-slate-200 transition-colors"
+          className="px-4 py-3 rounded-xl text-base text-gray-600 hover:text-gray-800 transition-colors"
         >
           回到朗讀
         </button>
