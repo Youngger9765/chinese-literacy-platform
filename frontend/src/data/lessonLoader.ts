@@ -50,8 +50,8 @@ function mapGenreToCategory(genre: string): 'Fable' | 'Science' | 'History' | 'D
 function parsedLessonToStory(parsed: ParsedLesson): Story {
   const { lesson_number, grade, title, genre, reading_strategy, paragraphs, vocabulary, char_count, source_file } = parsed;
 
-  // Generate stable seeded thumbnail
-  const thumbnail = `https://picsum.photos/seed/lesson-${grade}-${lesson_number}/400/300`;
+  // Use AI-generated thumbnail from public/images/lessons/
+  const thumbnail = `/images/lessons/lesson-${lesson_number}.webp`;
 
   // Map category
   const category = mapGenreToCategory(genre);
