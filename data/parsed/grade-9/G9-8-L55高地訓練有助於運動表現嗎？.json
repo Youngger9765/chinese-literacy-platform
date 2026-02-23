@@ -75,12 +75,6 @@
   ],
   "multiple_choice": [
     {
-      "question": "依文中所述，下列哪一個圖是「血栓」？(血栓為血管堵住，所以為A)",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "根據課文，運動員接受高地訓練可能有什麼好處？",
       "options": [
         "高地稀薄的空氣，可能有助於提升運動員的心肺耐力。",
@@ -123,7 +117,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 5,
+  "multiple_choice_count": 4,
   "reading_benchmark": {
     "levels": [
       {

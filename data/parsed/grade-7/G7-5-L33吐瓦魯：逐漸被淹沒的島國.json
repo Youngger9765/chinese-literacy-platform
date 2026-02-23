@@ -69,47 +69,12 @@
   "fill_in_blank": [],
   "multiple_choice": [
     {
-      "question": "反思的能力很重要，它能幫助我們發現自己的問題，進而思考：我可以怎麼做？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "反思很重要，但該怎麼做呢？反思也可以透過步驟來練習喔！接下來我們要介紹4F反思法。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "事實（Facts）：看見了什麼事實？可以透過不同角度來描述這個事件。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "感受（Feeling）：對於你所看見的事實，你有什麼樣的感受？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "發現（Finding）：做更深入的思考，有新的發現。像是為什麼這件事會發生？從這個事件你學到什麼？過去生活中有沒有發生類似的事件？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "未來（Future）：將前面的思考應用在未來的生活中。這個事件對你未來有什麼影響？你可以有哪些行動來預防不好的結果？或是有哪些行動可以複製他人的成功？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "下列選項「  」中的語詞，何者使用正確？",
       "options": [
         "烏俄戰爭持續不斷，讓許多人「流離失所」，甚至失去性命。",
         "妹妹從山腳下「鳥瞰」山上的樹林，覺得風景真是美麗極了。",
-        "運動鞋特賣會開始了，小翔「首當其衝」，第一個衝進會場。"
+        "運動鞋特賣會開始了，小翔「首當其衝」，第一個衝進會場。",
+        "大雄因作業沒完成而被老師處罰，遭受「池魚之殃」，真倒楣。"
       ],
       "answer": null,
       "explanation": null
@@ -158,7 +123,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 11,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

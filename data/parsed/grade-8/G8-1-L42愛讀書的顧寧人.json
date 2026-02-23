@@ -15,18 +15,27 @@
   ],
   "paragraph_count": 4,
   "char_count": 253,
-  "vocabulary": [],
-  "vocabulary_count": 0,
-  "fill_in_blank": [],
-  "multiple_choice": [
+  "vocabulary": [
     {
-      "question": "（  ）1.下列成語，何者最適合用來形容顧寧人先生的讀書態度？\n(A)旁徵博引",
-      "options": [],
-      "answer": null,
-      "explanation": null
+      "word": "少",
+      "definition": "ㄕㄠˇ；Ａ稍微；旅店少休／\n到旅店稍微休息後",
+      "type": "多義字"
+    },
+    {
+      "word": "少",
+      "definition": "ㄕㄠˇ；Ｂ缺少或很少；但少閑人如吾兩人耳／\n只是缺少有閒情的人像我們兩人罷了",
+      "type": "多義字"
+    },
+    {
+      "word": "少",
+      "definition": "ㄕㄠˋ；Ｃ小或\n年幼、年輕的；少負絕異之資／\n年少時就擁有超越一般人的資質",
+      "type": "多義字"
     }
   ],
-  "multiple_choice_count": 1,
+  "vocabulary_count": 3,
+  "fill_in_blank": [],
+  "multiple_choice": [],
+  "multiple_choice_count": 0,
   "reading_benchmark": {
     "levels": [
       {
@@ -45,6 +54,6 @@
   },
   "source_file": "G8-1-L42愛讀書的顧寧人.docx",
   "flags": [
-    "NO_VOCABULARY"
+    "NO_MC_QUESTIONS"
   ]
 }

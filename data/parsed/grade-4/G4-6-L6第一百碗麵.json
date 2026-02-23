@@ -57,12 +57,6 @@
   "fill_in_blank": [],
   "multiple_choice": [
     {
-      "question": "有個貧窮的大學生，總在自助餐店快要打烊時，才走進店裡點了一碗白飯。他小心翼翼的詢問老闆：「請問可以幫我淋點滷肉汁嗎？」老闆笑咪咪地回：「當然沒有問題！」吃完那碗白飯後，大學生不好意思的問：「可以再給我一碗白飯嗎？我想要帶去學校當明天的午餐。」老闆接過餐盒，偷偷的把店裡的滷肉和滷蛋放在餐盒下方，並且裝了滿滿的白飯。老闆娘好奇老闆為什麼要把滷肉和滷蛋放在便當盒最下面，不放上方呢？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "下列選項「  」中的語詞，何者使用正確？",
       "options": [
         "小夫捉弄胖虎，胖虎氣炸了，「熱氣騰騰」的跑去找他算帳。",
@@ -117,7 +111,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 6,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

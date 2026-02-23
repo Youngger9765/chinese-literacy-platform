@@ -18,18 +18,27 @@
   ],
   "paragraph_count": 7,
   "char_count": 633,
-  "vocabulary": [],
-  "vocabulary_count": 0,
-  "fill_in_blank": [],
-  "multiple_choice": [
+  "vocabulary": [
     {
-      "question": "（    ）1.下列選項「」中字，何者字音、字義完全正確？",
-      "options": [],
-      "answer": null,
-      "explanation": null
+      "word": "聞",
+      "definition": "ㄨㄣˊ；Ａ聽到、聽說；予聞之也久／\n我聽說他的事很久了",
+      "type": "多義字"
+    },
+    {
+      "word": "聞",
+      "definition": "ㄨㄣˊ；Ｂ有名、著稱；吾愛孟夫子，風流天下聞／\n我喜愛孟先生，他的瀟灑天下有名",
+      "type": "多義字"
+    },
+    {
+      "word": "聞",
+      "definition": "ㄨㄣˊ；Ｃ聽見的事情、消息；不能稱前時之聞／\n不能符合先前的傳聞",
+      "type": "多義字"
     }
   ],
-  "multiple_choice_count": 1,
+  "vocabulary_count": 3,
+  "fill_in_blank": [],
+  "multiple_choice": [],
+  "multiple_choice_count": 0,
   "reading_benchmark": {
     "levels": [
       {
@@ -48,6 +57,6 @@
   },
   "source_file": "G8-2-L43從天才跌為凡人的神童.docx",
   "flags": [
-    "NO_VOCABULARY"
+    "NO_MC_QUESTIONS"
   ]
 }

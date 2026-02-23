@@ -24,75 +24,8 @@
   "vocabulary": [],
   "vocabulary_count": 0,
   "fill_in_blank": [],
-  "multiple_choice": [
-    {
-      "question": "剛才我看的硯臺有個八哥眼，現在為何沒有了",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "斷句，看到「句號。」或「問號？」就畫/。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "斷句。用紅筆在上文句號「。」或問號「?」的地方畫 /。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "關於本文，下列敘述何者正確？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "斷句。用紅筆在上文句號「。」或問號「?」的地方畫 /。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "關於上文的描述，下列何者正確？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "下列選項「」中字，何者字音、字義完全正確？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "根據「陸公買硯」一文，關於陸盧峰這個人的敘述下列何者正確？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "「淳于恭，北海人。人有盜刈1恭禾者，恭見之，念其愧，因伏草中，至去乃起。」根據這則故事，下列敘述何者最恰當？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "根據「陸公買硯」一文，下列關於故事中人物的敘述，何者最恰當？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "下列何者不可能是「陸公買硯」一文的寓意？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    }
-  ],
-  "multiple_choice_count": 11,
+  "multiple_choice": [],
+  "multiple_choice_count": 0,
   "reading_benchmark": {
     "levels": [
       {
@@ -111,6 +44,7 @@
   },
   "source_file": "G8-6-L47陸公買硯.docx",
   "flags": [
-    "NO_VOCABULARY"
+    "NO_VOCABULARY",
+    "NO_MC_QUESTIONS"
   ]
 }

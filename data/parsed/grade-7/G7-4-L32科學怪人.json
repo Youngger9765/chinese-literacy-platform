@@ -68,12 +68,6 @@
   "fill_in_blank": [],
   "multiple_choice": [
     {
-      "question": "換你試試看：你認為書名的「科學怪人」是指怪物，還是那位瘋狂科學家呢？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "請問怪物的名字是什麼？",
       "options": [
         "弗蘭肯斯坦。  B.瑪麗•雪萊。",
@@ -127,7 +121,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 6,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

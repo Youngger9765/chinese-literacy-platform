@@ -87,47 +87,12 @@
   "fill_in_blank": [],
   "multiple_choice": [
     {
-      "question": "這篇文章屬於議論文，文章主題在討論：心理生病了，是「壞事」導致的嗎？作者用三個故事來說明他的想法，卻未在故事中直接說出他的答案。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "標題一探究竟：「心理出狀況，是壞事導致的嗎？」",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "你發現這三個故事的共同主題了嗎？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "最後再問一次：心理生病了，真的是「壞事」導致的嗎？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "本文關鍵問題是：「心理出狀況，是壞事導致的嗎？」",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "接下來要從三個故事中分別找出這些線索，推論出各段落的主旨，準備好了嗎？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "下列選項「  」中的語詞，何者使用正確？",
       "options": [
         "他因為酒駕撞到行道樹而受重傷，真是「無妄之災」。",
         "便利商店裡的熱狗，在架子上「輾轉反側」轉個不停。",
-        "他因為一次考試失敗就「一蹶不振」，從此放棄學習。"
+        "他因為一次考試失敗就「一蹶不振」，從此放棄學習。",
+        "小明睡覺姿勢不良，起床右半邊都麻痺，「半身不遂」。"
       ],
       "answer": null,
       "explanation": null
@@ -176,7 +141,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 11,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

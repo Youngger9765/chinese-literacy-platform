@@ -99,29 +99,12 @@
   ],
   "multiple_choice": [
     {
-      "question": "當文章篇幅很長時，該怎麼找出課文大意呢？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "先區分出這篇文章的「故事體結構」分別是哪些段落。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "是怎麼得到照顧黑猩猩的機會呢？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "下列選項「  」中的語詞，何者使用正確？",
       "options": [
         "小雅騎車跌倒，膝蓋在柏油路上摩擦受傷，傷口「深不可測」。",
         "小麗參加運動會的百公尺短跑，「馬不停蹄」的奪得第一名。",
-        "小洛因為口渴，便到冰箱隨手拿了一瓶「夢寐以求」的水來喝。"
+        "小洛因為口渴，便到冰箱隨手拿了一瓶「夢寐以求」的水來喝。",
+        "爸媽時常「掛慮」離家住校的小成，擔心他飲食或作息不夠正常。"
       ],
       "answer": null,
       "explanation": null
@@ -171,7 +154,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 8,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

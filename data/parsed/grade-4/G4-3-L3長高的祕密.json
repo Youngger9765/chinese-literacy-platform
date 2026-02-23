@@ -84,30 +84,6 @@
   ],
   "multiple_choice": [
     {
-      "question": "（１）請問小傑跟阿光的車哪裡一樣?都跑得【很快　　　　　】",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "（２）哪裡不一樣？小傑的車【還很省油　　　　　　】",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "（３）誰的車子比較好？【□小傑　□阿光】，因為車子多了【會省油】的優點。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "（4）小傑的車子「不但」跑得很快，「還」很省油。請問「」裡的詞叫做",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "請問文中第四段提到「適當的運動也是要長高相當重要的一環。」，請問「一環」最可能的解釋是什麼?",
       "options": [
         "圓形而中空的東西。（玉環）",
@@ -163,7 +139,7 @@
       "explanation": "少了蔬菜"
     }
   ],
-  "multiple_choice_count": 9,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

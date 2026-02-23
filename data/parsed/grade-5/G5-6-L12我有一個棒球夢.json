@@ -53,12 +53,6 @@
   "fill_in_blank": [],
   "multiple_choice": [
     {
-      "question": "為什麼時間管理這麼重要？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "依據本文，下列哪一個成語最能形容職棒選手面臨的「職業競爭」？",
       "options": [
         "精湛出色。",
@@ -112,7 +106,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 6,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

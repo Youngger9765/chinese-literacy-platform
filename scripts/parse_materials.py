@@ -62,29 +62,29 @@ def load_metadata() -> dict:
 
 
 def extract_story_from_table(doc: Document) -> tuple[str, list[str]]:
-    """Extract story text from Table 0 (standard format)."""
+    """Extract story text from Table 0 (standard format).
+    For multi-text lessons, concatenates stories from multiple tables."""
     if not doc.tables:
         return "", []
 
-    t0 = doc.tables[0]
-    cell_text = t0.cell(0, 0).text.strip()
+    all_paragraphs = []
 
-    # If table 0 doesn't look like story (e.g. "第1次計時"), fallback
-    if "計時" in cell_text or len(cell_text) < 50:
-        return "", []
+    for t in doc.tables:
+        # Story tables: 1 row, 1-2 columns, cell(0,0) has >50 chars of text
+        if len(t.rows) != 1 or len(t.columns) > 2:
+            continue
+        cell_text = t.cell(0, 0).text.strip()
+        cell_start = cell_text[:20]
+        if len(cell_text) < 50 or "計時" in cell_start or "影片" in cell_start:
+            continue
 
-    # Clean up the text
-    text = cell_text
-    # Remove word count markers (numbers at right margin in col 1)
-    # Split into paragraphs by double newline or indentation
-    paragraphs = []
-    for chunk in re.split(r'\n\s*\n|\n(?=　)', text):
-        chunk = chunk.strip()
-        if chunk and not re.match(r'^\d+$', chunk):
-            paragraphs.append(chunk)
+        for chunk in re.split(r'\n\s*\n|\n(?=　)', cell_text):
+            chunk = chunk.strip()
+            if chunk and not re.match(r'^\d+$', chunk):
+                all_paragraphs.append(chunk)
 
-    full_text = "\n".join(paragraphs)
-    return full_text, paragraphs
+    full_text = "\n".join(all_paragraphs)
+    return full_text, all_paragraphs
 
 
 def extract_story_from_paragraphs(doc: Document) -> tuple[str, list[str]]:
@@ -138,7 +138,6 @@ def extract_vocabulary(doc: Document) -> list[dict]:
             if '選出最適合的答案' in text or '根據文章內容' in text:
                 break
             if '將正確的詞語代號' in text or '填入空格' in text:
-                # This is the fill-in-the-blank section, stop vocab
                 break
 
             # Parse "(1) 詞語 ：解釋" pattern
@@ -148,11 +147,71 @@ def extract_vocabulary(doc: Document) -> list[dict]:
                     "word": m.group(2).strip(),
                     "definition": m.group(3).strip(),
                 })
-            # Also handle "＊" notes
             elif text.startswith('*') or text.startswith('＊'):
                 if vocab:
                     vocab[-1]["note"] = text.lstrip('*＊').strip()
 
+    # Fallback: extract 多義字 from tables (classical texts like G8)
+    if not vocab:
+        vocab = _extract_vocab_from_tables(doc)
+
+    # Fallback: extract inline definitions from paragraphs (classical texts)
+    if not vocab:
+        vocab = _extract_inline_definitions(doc)
+
+    return vocab
+
+
+def _extract_vocab_from_tables(doc: Document) -> list[dict]:
+    """Extract vocabulary from 多義字 tables (used in classical text lessons)."""
+    vocab = []
+    for t in doc.tables:
+        cell00 = t.cell(0, 0).text.strip()
+        if '多義字' not in cell00 and '字義' not in cell00:
+            continue
+        # Multi-meaning char tables: col 0 = char, other cols = meanings
+        for ri in range(t.rows.__len__()):
+            try:
+                word = t.cell(ri, 0).text.strip()
+                if word in ('多義字', '字義', '文章結構', '') or len(word) > 4:
+                    continue
+                meanings = []
+                for ci in range(1, len(t.columns)):
+                    m = t.cell(ri, ci).text.strip()
+                    if m and m not in ('', word):
+                        meanings.append(m)
+                if meanings:
+                    vocab.append({
+                        "word": word,
+                        "definition": "；".join(meanings),
+                        "type": "多義字",
+                    })
+            except Exception:
+                continue
+    return vocab
+
+
+def _extract_inline_definitions(doc: Document) -> list[dict]:
+    """Extract inline definitions like '雨，當動詞，表示落下的意思' from paragraphs."""
+    vocab = []
+    for p in doc.paragraphs:
+        text = p.text.strip()
+        # Pattern: "word：definition" or "word，meaning的意思"
+        m = re.match(r'^(\S{1,4})[：:，]\s*(?:有「|當|表示|意思是)(.+?)(?:的意思|。|$)', text)
+        if m and len(m.group(1)) <= 4:
+            vocab.append({
+                "word": m.group(1),
+                "definition": m.group(2).strip().rstrip('。'),
+                "type": "inline",
+            })
+        # Pattern: "word：有「meaning」的意思"
+        m2 = re.match(r'^(\S{1,4})[：:]有「(.+?)」的意思', text)
+        if m2:
+            vocab.append({
+                "word": m2.group(1),
+                "definition": m2.group(2),
+                "type": "inline",
+            })
     return vocab
 
 
@@ -198,6 +257,7 @@ def extract_multiple_choice(doc: Document) -> list[dict]:
     """Extract multiple choice comprehension questions."""
     questions = []
     current_q = None
+    in_mc_section = False
 
     for p in doc.paragraphs:
         text = p.text.strip()
@@ -208,19 +268,48 @@ def extract_multiple_choice(doc: Document) -> list[dict]:
 
         # Detect MC section start
         if '選出最適合的答案' in text or '根據文章內容' in text:
+            in_mc_section = True
             continue
 
-        # Question line (starts with number or is List Paragraph with question mark)
+        # Stop at non-MC sections (word search, video links)
+        if in_mc_section and ('找一找' in text or '影片連結' in text or '圈出' in text):
+            break
+
+        # Classical text MC: （　）N. pattern
+        classical_q = re.match(r'^[（(]\s*[）)]\s*(\d+)\.\s*(.+)', text)
+
+        # Question line detection
         is_question = (
-            ('?' in text or '？' in text or '為何' in text or '請問' in text or '哪' in text)
+            ('?' in text or '？' in text or '為何' in text or '請問' in text
+             or '哪' in text or '何者' in text or '下列' in text)
             and not re.match(r'^[A-DＡ-Ｄ][\.\．、]', text)
             and len(text) > 10
         )
 
-        is_option = re.match(r'^[A-DＡ-Ｄ][\.\．、]?\s*', text) and style == "List Paragraph"
+        is_option = bool(re.match(r'^[A-DＡ-Ｄ][\.\．、]?\s*', text))
 
-        if is_question and style == "List Paragraph":
-            if current_q:
+        if classical_q and in_mc_section:
+            if current_q and current_q["options"]:
+                questions.append(current_q)
+            current_q = {
+                "question": classical_q.group(2),
+                "options": [],
+                "answer": None,
+                "explanation": None,
+            }
+        elif is_question and style == "List Paragraph":
+            # Standard MC question (List Paragraph style)
+            if current_q and current_q["options"]:
+                questions.append(current_q)
+            current_q = {
+                "question": text,
+                "options": [],
+                "answer": None,
+                "explanation": None,
+            }
+        elif is_question and in_mc_section:
+            # MC question in section but not List Paragraph style
+            if current_q and current_q["options"]:
                 questions.append(current_q)
             current_q = {
                 "question": text,
@@ -229,15 +318,12 @@ def extract_multiple_choice(doc: Document) -> list[dict]:
                 "explanation": None,
             }
         elif is_option and current_q is not None:
-            # Check for answer indicator (parenthetical explanation)
             option_text = text
             explanation = None
             exp_match = re.search(r'[（(](.+?)[）)]', text)
 
-            # Clean option letter prefix
             option_clean = re.sub(r'^[A-DＡ-Ｄ][\.\．、]?\s*', '', option_text)
 
-            # If has explanation in parens, this is likely the answer
             if exp_match and len(exp_match.group(1)) > 3:
                 explanation = exp_match.group(1)
                 option_clean = re.sub(r'[（(].+?[）)]', '', option_clean).strip()

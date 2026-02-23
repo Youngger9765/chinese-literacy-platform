@@ -79,18 +79,6 @@
   "fill_in_blank": [],
   "multiple_choice": [
     {
-      "question": "1.生活中已經有許多落實「環保3R」例子，請依照你對環保3R的理解，判斷下列情境為「環保3R」中的哪一種R，以上列的ABC代號為選項作答。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "2.請問在生活中，我們可以做什麼行動落實環保?（自由發揮）",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "下列語詞何者使用正確？",
       "options": [
         "在車禍現場，他大聲「呼籲」旁人請救護車前來救援。",
@@ -144,7 +132,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 7,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

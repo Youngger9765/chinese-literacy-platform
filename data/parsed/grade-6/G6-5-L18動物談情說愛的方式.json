@@ -95,35 +95,12 @@
   ],
   "multiple_choice": [
     {
-      "question": "如何找出「小主題」以及小主題下方的「舉例與重要細節」呢？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "潮濕溫暖的夏夜，嘓嘓嘓、嘓嘓嘓，雄蛙奮力的在池塘裡展現歌喉，只為求得雌蛙的青睞，以完成繁衍的天職。雄蛙求偶的鳴叫聲響遍池畔，也引來競爭對手的爭強鬥勝。是否能順利成為心儀對象的「青蛙王子」？雄蛙們可要各憑本事才行。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "找出舉例：可以發現整段都在描寫的動物是青蛙，跟動物有關的詞彙有雄蛙、雌蛙和青蛙，這時要選擇哪個最貼近「用歌聲求偶」的小主題呢？是誰用歌聲在求偶呢？ ☐雄蛙  ☐雌蛙",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "找出舉例：整段都在描寫的動物是【  雌蛾  】。\n（若動物有多種詞彙，可思考是誰「用歌氣味求偶」呢？）",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "下列選項「  」中的語詞，何者使用正確？",
       "options": [
         "小狗一直追著自己的尾巴跑，「尾隨而至」的模樣，真是可愛極了！",
         "家裡換了新的窗簾和新的沙發後，整個環境令全家人「耳目一新」。",
-        "王阿姨的兒子小時候不小心走失了，於是她上網「招親」找兒子。"
+        "王阿姨的兒子小時候不小心走失了，於是她上網「招親」找兒子。",
+        "姊姊參加繪畫比賽，帶著常用畫具和粉彩筆，準備「粉墨登場」。"
       ],
       "answer": null,
       "explanation": null
@@ -172,7 +149,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 9,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

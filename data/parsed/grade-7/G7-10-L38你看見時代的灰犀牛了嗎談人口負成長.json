@@ -127,38 +127,13 @@
   ],
   "multiple_choice": [
     {
-      "question": "你聽過資料視覺化嗎？它是將複雜的資訊以圖表的方式呈現，讓讀者能更容易的理解訊息。我們已在「L22基因的特別禮物」學過長條圖及圓形圖。本課我們要來學習折線圖。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "2.下圖二是Ａ牌奶粉近幾年來市場占有率的折線圖，請問：",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "(4)圖二告訴我們「Ａ牌奶粉在市場的佔有率」和「年份」有什麼關係？  Ａ牌奶粉在市場的佔有率呈現逐年成長的趨勢",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "(2)請問幾歲到幾歲小倫的體重有下降（　7 ）歲～（　8　）歲，下降了幾公斤？ （　2 ）公斤。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "(3)小倫體重最重和最輕相差多少公斤？（　16 ）公斤。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "依據本文的定義：「灰犀牛指的是正在發生、明明可見的負面事件，但因為沒有急迫性，大家卻視而不見。」請問何者狀況不是灰犀牛？",
-      "options": [],
+      "options": [
+        "少子化。",
+        "高齡化。",
+        "氣候變遷。",
+        "俄烏戰爭。"
+      ],
       "answer": null,
       "explanation": null
     },
@@ -196,7 +171,7 @@
       "explanation": "由國家邊境開放政策可知，是讓外來的人口移民臺灣，以增加人口數，故答案為Ｂ"
     }
   ],
-  "multiple_choice_count": 9,
+  "multiple_choice_count": 4,
   "reading_benchmark": {
     "levels": [
       {

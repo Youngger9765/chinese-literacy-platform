@@ -21,114 +21,22 @@
   ],
   "paragraph_count": 10,
   "char_count": 569,
-  "vocabulary": [],
-  "vocabulary_count": 0,
-  "fill_in_blank": [],
-  "multiple_choice": [
+  "vocabulary": [
     {
-      "question": "商人心想：這張氏既然叫「不良」，為何反而受上天庇佑",
-      "options": [],
-      "answer": null,
-      "explanation": null
+      "word": "盈",
+      "definition": "滿」",
+      "type": "inline"
     },
     {
-      "question": "雹止後，誰「入村」？ A.賈人某 B.張氏 C.貧民 D.村民",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "誰「訪問其人」？ A.賈人某 B.張氏 C.貧民 D.村民",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "誰「且問取名之義」？ A.賈人某 B.張氏 C.貧民 D.村民",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "誰「償」?  A.賈人某 B.張氏 C.貧民 D.村民",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "誰「多寡不較」?  A.賈人某 B.張氏 C.貧民 D.村民",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "誰「悉納之」?   A.賈人某 B.張氏 C.貧民 D.村民",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "誰「未嘗執概取盈」?  A.賈人某 B.張氏 C.貧民 D.村民",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "誰「盜刈」? A.人 B.淳于恭",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "承上，「盜刈」了什麼？ A.淳于恭 B.淳于恭的禾",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "誰「念其愧」?  A.人 B.淳于恭",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "誰「因伏草中」?  A.人 B.淳于恭",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "「至去乃起」一句有兩個動詞。請問：誰「去」、誰「起」，主語依序應是誰?  A.人、淳于恭 B.淳于恭、人",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "（   ）1.下列選項「」中字，何者字音、字義完全正確？",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "（   ）2.課文中的商人把「不量」誤以為是「不良」，從而產生疑惑，這就是諧音雙關。請問下列何者造成誤解的原因與課文商人相同?",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "(B)客人：「我買了這麼多，可以送我點什麼吧?」",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
-      "question": "(C)老師：「壽司是Sushi，那『握壽司』跟『散壽司』的英文怎麼說?」",
-      "options": [],
-      "answer": null,
-      "explanation": null
+      "word": "盈",
+      "definition": "滿",
+      "type": "inline"
     }
   ],
-  "multiple_choice_count": 17,
+  "vocabulary_count": 2,
+  "fill_in_blank": [],
+  "multiple_choice": [],
+  "multiple_choice_count": 0,
   "reading_benchmark": {
     "levels": [
       {
@@ -147,6 +55,6 @@
   },
   "source_file": "G8-5-L46不量田.docx",
   "flags": [
-    "NO_VOCABULARY"
+    "NO_MC_QUESTIONS"
   ]
 }

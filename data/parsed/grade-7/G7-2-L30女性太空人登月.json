@@ -88,12 +88,6 @@
   "fill_in_blank": [],
   "multiple_choice": [
     {
-      "question": "(1)確認比較的對象：是什麼和什麼比較？寫在表格對象列。",
-      "options": [],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "下列語詞何者用法使用正確？　　　　　　　　　　　(邏輯錯誤）",
       "options": [
         "老師上課時，說了一段「意味深長」的話，逗得大家哈哈大笑。",
@@ -149,7 +143,7 @@
       "explanation": "文中並未提到"
     }
   ],
-  "multiple_choice_count": 6,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {
