@@ -38,8 +38,8 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
           onClick={() => setSelectedGrade(null)}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             selectedGrade === null
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-500'
+              ? 'bg-accent text-white'
+              : 'bg-white text-gray-600 border border-gray-200 hover:border-accent'
           }`}
         >
           全部
@@ -50,8 +50,8 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
             onClick={() => setSelectedGrade(grade)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedGrade === grade
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-500'
+                ? 'bg-accent text-white'
+                : 'bg-white text-gray-600 border border-gray-200 hover:border-accent'
             }`}
           >
             G{grade}
@@ -64,7 +64,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
         {stories.map((story) => (
           <div
             key={story.id}
-            className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-indigo-500 transition-all cursor-pointer group shadow-sm"
+            className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-accent transition-all cursor-pointer group shadow-sm"
             onClick={() => onStartReading(story)}
           >
             <div className="h-40 overflow-hidden relative">
@@ -75,7 +75,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
               />
               {/* Grade badge */}
               {story.grade && (
-                <div className="absolute top-2 right-2 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded">
+                <div className="absolute top-2 right-2 bg-accent text-white text-xs font-bold px-2 py-1 rounded">
                   G{story.grade}
                 </div>
               )}

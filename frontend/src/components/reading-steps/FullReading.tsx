@@ -273,7 +273,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
         {/* Tab bar */}
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-indigo-500 border-x border-gray-200 text-xs text-gray-800">
+          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800">
             {story.filename}
           </div>
           <div className="flex-1" />
@@ -309,7 +309,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       {/* Resizable divider */}
       <div
         onMouseDown={onDividerMouseDown}
-        className="w-1 flex-shrink-0 bg-gray-200 hover:bg-indigo-500 cursor-col-resize transition-colors"
+        className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
       />
 
       {/* RIGHT: Recording panel */}
@@ -319,7 +319,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       >
         {/* Header */}
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4">
-          <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">全文朗讀</span>
+          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">全文朗讀</span>
         </div>
 
         {/* Content */}
@@ -340,8 +340,8 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {/* Live transcript */}
           {isSessionActive && streamingTranscript && (
             <div className="flex flex-col gap-1">
-              <span className="text-[9px] font-bold text-indigo-400 uppercase animate-pulse">LISTENING...</span>
-              <div className="bg-indigo-600/20 border border-indigo-500/30 rounded-xl px-3 py-2.5 text-base text-indigo-200 leading-relaxed">
+              <span className="text-[9px] font-bold text-accent-light uppercase animate-pulse">LISTENING...</span>
+              <div className="bg-accent/20 border border-accent/30 rounded-xl px-3 py-2.5 text-base text-accent-bg-subtle leading-relaxed">
                 {streamingTranscript}
               </div>
             </div>
@@ -471,7 +471,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               </button>
               <button
                 onClick={startSession}
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                className="flex-1 py-3 rounded-xl text-base font-bold bg-accent hover:bg-accent-hover text-white transition-all flex items-center justify-center gap-1.5 active:scale-95"
               >
                 <div className="w-2.5 h-2.5 bg-white rounded-full" />
                 開始朗讀

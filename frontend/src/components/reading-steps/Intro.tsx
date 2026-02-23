@@ -102,7 +102,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         <span className="text-gray-300 text-xs">›</span>
         <span className="text-xs text-gray-600">{story.title}</span>
         <span className="text-gray-300 text-xs">›</span>
-        <span className="text-xs text-indigo-400 font-bold">簡介</span>
+        <span className="text-xs text-accent-light font-bold">簡介</span>
         <div className="flex-1" />
         <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
@@ -120,7 +120,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             />
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-300 uppercase tracking-widest">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-accent-bg-subtle text-accent-hover border border-accent-bg-subtle uppercase tracking-widest">
                   {CATEGORY_LABEL[story.category] ?? story.category}
                 </span>
                 <span className="text-[10px] text-gray-400">Lv.{story.level}</span>
@@ -140,10 +140,10 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           {story.intro ? (
             <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">課文簡介</span>
+                <span className="text-xs font-bold text-accent-light uppercase tracking-widest">課文簡介</span>
               </div>
               <p className={`text-gray-900 text-xl leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                 {processZhuyin(story.intro.background)}
@@ -197,7 +197,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             stopSpeaking();
             onStartReading();
           }}
-          className="px-8 py-3 rounded-xl font-bold text-base bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
+          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
           開始逐段朗讀
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
