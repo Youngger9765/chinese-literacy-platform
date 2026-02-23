@@ -160,7 +160,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                           : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-accent/40',
                     ].join(' ')}
                   >
-                    <span className={`text-3xl font-bold leading-[5rem] lg:leading-[5rem] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}>
+                    <span className={`text-3xl font-bold leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}>
                     {processZhuyin(ch)}
                   </span>
 
