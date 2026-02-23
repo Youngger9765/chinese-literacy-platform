@@ -261,7 +261,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
   return (
     <div
-      className="flex flex-1 h-full bg-[#0d1117] overflow-hidden"
+      className="flex flex-1 h-full bg-amber-50 overflow-hidden"
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
@@ -269,10 +269,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       }}
     >
       {/* LEFT: Full story text */}
-      <div className="flex-1 flex flex-col bg-[#0d1117] min-w-0">
+      <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
         {/* Tab bar */}
-        <div className="h-9 bg-[#161b22] border-b border-[#30363d] flex items-center px-2 gap-2 shrink-0">
-          <div className="h-full px-4 flex items-center bg-[#0d1117] border-t-2 border-indigo-500 border-x border-[#30363d] text-xs text-slate-200">
+        <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
+          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-indigo-500 border-x border-gray-200 text-xs text-gray-800">
             {story.filename}
           </div>
           <div className="flex-1" />
@@ -281,7 +281,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             className={`px-2.5 py-1 rounded text-xs transition-colors ${
               zhuyinEnabled && zhuyinReady
                 ? 'bg-indigo-600/80 text-white hover:bg-indigo-500'
-                : 'bg-[#30363d] text-slate-400 hover:bg-[#3d444d]'
+                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
             }`}
           >
             注音 {zhuyinEnabled ? 'ON' : 'OFF'}
@@ -294,9 +294,9 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             {story.content.map((line, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl p-6 border border-transparent hover:border-[#30363d] hover:bg-[#161b22]/30 transition-all"
+                className="rounded-2xl p-6 border border-transparent hover:border-gray-200 hover:bg-white/30 transition-all"
               >
-                <p className={`text-2xl lg:text-3xl text-slate-200 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                <p className={`text-2xl lg:text-3xl text-gray-800 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
                 </p>
               </div>
@@ -305,10 +305,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
         </div>
 
         {/* Status bar */}
-        <div className="h-7 bg-[#161b22] border-t border-[#30363d] flex items-center px-4 text-[10px] text-slate-500 uppercase shrink-0">
+        <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 text-[10px] text-gray-500 uppercase shrink-0">
           <span>共 {story.content.length} 段 · {story.title}</span>
           <div className="flex-1" />
-          <span className={isSessionActive ? 'text-green-500 font-bold' : isPreparing ? 'text-yellow-500 font-bold' : 'text-slate-700'}>
+          <span className={isSessionActive ? 'text-green-500 font-bold' : isPreparing ? 'text-yellow-500 font-bold' : 'text-gray-300'}>
             {isSessionActive ? '• LISTENING' : isPreparing ? '• PREPARING' : '• IDLE'}
           </span>
         </div>
@@ -317,29 +317,29 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       {/* Resizable divider */}
       <div
         onMouseDown={onDividerMouseDown}
-        className="w-1 flex-shrink-0 bg-[#30363d] hover:bg-indigo-500 cursor-col-resize transition-colors"
+        className="w-1 flex-shrink-0 bg-gray-200 hover:bg-indigo-500 cursor-col-resize transition-colors"
       />
 
       {/* RIGHT: Recording panel */}
       <div
-        className="flex-shrink-0 bg-[#0d1117] flex flex-col h-full min-h-0"
+        className="flex-shrink-0 bg-amber-50 flex flex-col h-full min-h-0"
         style={{ width: rightPanelWidth }}
       >
         {/* Header */}
-        <div className="h-9 shrink-0 bg-[#161b22] border-b border-[#30363d] flex items-center px-4">
+        <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4">
           <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">全文朗讀</span>
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-black/10">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-gray-50">
 
           {/* Instructions */}
           {!result && !isSessionActive && !isPreparing && (
-            <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-4">
-              <p className="text-xs text-slate-400 leading-relaxed">
+            <div className="bg-white border border-gray-200 rounded-2xl p-4">
+              <p className="text-xs text-gray-600 leading-relaxed">
                 請從頭到尾朗讀整篇課文。讀完後按「完成朗讀」送出。
               </p>
-              <p className="text-[10px] text-slate-600 mt-2">
+              <p className="text-[10px] text-gray-400 mt-2">
                 標準比逐段朗讀寬鬆，放輕鬆自然地讀吧！
               </p>
             </div>
@@ -369,25 +369,25 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             <div className="space-y-4">
               <div className="flex flex-col items-center gap-3 py-4">
                 <div className={`w-24 h-24 rounded-full flex items-center justify-center border-4 ${
-                  percent >= 75 ? 'border-emerald-500 text-emerald-300'
-                  : percent >= 55 ? 'border-amber-500 text-amber-300'
+                  percent >= 75 ? 'border-emerald-500 text-emerald-800'
+                  : percent >= 55 ? 'border-amber-500 text-amber-800'
                   : 'border-red-500/60 text-red-300'
                 }`}>
                   <span className="text-2xl font-black">{percent}%</span>
                 </div>
                 <p className={`text-sm font-bold text-center ${
-                  percent >= 75 ? 'text-emerald-300'
-                  : percent >= 55 ? 'text-amber-300'
-                  : 'text-slate-400'
+                  percent >= 75 ? 'text-emerald-800'
+                  : percent >= 55 ? 'text-amber-800'
+                  : 'text-gray-600'
                 }`}>
                   {result.feedback}
                 </p>
               </div>
 
               {streamingTranscript && (
-                <div className="bg-[#161b22] border border-[#30363d] rounded-xl px-3 py-2.5">
-                  <p className="text-[10px] text-slate-500 mb-1 uppercase tracking-widest">你說的</p>
-                  <p className="text-xs text-slate-400 leading-relaxed line-clamp-6">{streamingTranscript}</p>
+                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
+                  <p className="text-[10px] text-gray-500 mb-1 uppercase tracking-widest">你說的</p>
+                  <p className="text-xs text-gray-600 leading-relaxed line-clamp-6">{streamingTranscript}</p>
                 </div>
               )}
             </div>
@@ -395,14 +395,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
         </div>
 
         {/* Controls */}
-        <div className="shrink-0 p-3 bg-[#161b22] border-t border-[#30363d] space-y-2">
+        <div className="shrink-0 p-3 bg-white border-t border-gray-200 space-y-2">
           {micError && <div className="text-[10px] text-rose-400 px-1 pb-1">{micError}</div>}
 
           {result ? (
             <div className="space-y-2">
               <button
                 onClick={() => { setResult(null); setStreamingTranscript(''); }}
-                className="w-full py-3 rounded-xl text-base font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition-all active:scale-95"
+                className="w-full py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all active:scale-95"
               >
                 再試一次
               </button>
@@ -417,7 +417,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               </button>
             </div>
           ) : isPreparing ? (
-            <button disabled className="w-full py-3 rounded-xl text-base font-bold bg-slate-800 text-slate-500 cursor-wait flex items-center justify-center gap-2">
+            <button disabled className="w-full py-3 rounded-xl text-base font-bold bg-gray-300 text-gray-500 cursor-wait flex items-center justify-center gap-2">
               <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
               準備中...
             </button>
@@ -428,7 +428,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               className={`w-full py-3 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 ${
                 streamingTranscript
                   ? 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95'
-                  : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-400 cursor-not-allowed'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -458,7 +458,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               {/* 停止 */}
               <button
                 onClick={stopTts}
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                className="flex-1 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95"
               >
                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
@@ -470,7 +470,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             <div className="flex gap-2">
               <button
                 onClick={speakFullStory}
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                className="flex-1 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95"
               >
                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
@@ -489,7 +489,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
           <button
             onClick={onBack}
-            className="w-full py-1.5 rounded-lg text-xs text-slate-600 hover:text-slate-400 transition-colors"
+            className="w-full py-1.5 rounded-lg text-xs text-gray-400 hover:text-gray-600 transition-colors"
           >
             ← 返回生字練習
           </button>

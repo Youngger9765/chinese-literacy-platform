@@ -248,7 +248,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   return (
     <div
-      className="flex flex-1 h-full bg-[#0d1117] overflow-hidden"
+      className="flex flex-1 h-full bg-amber-50 overflow-hidden"
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
@@ -257,10 +257,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     >
 
       {/* LEFT: Story text panel */}
-      <div className="flex-1 flex flex-col bg-[#0d1117] min-w-0">
+      <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
         {/* Tab bar */}
-        <div className="h-9 bg-[#161b22] border-b border-[#30363d] flex items-center px-2 gap-2 shrink-0">
-          <div className="h-full px-4 flex items-center bg-[#0d1117] border-t-2 border-indigo-500 border-x border-[#30363d] text-xs text-slate-200 gap-2">
+        <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
+          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-indigo-500 border-x border-gray-200 text-xs text-gray-800 gap-2">
             {story.filename}
           </div>
           <div className="flex-1" />
@@ -269,7 +269,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             className={`px-2.5 py-1 rounded text-xs transition-colors ${
               zhuyinEnabled && zhuyinReady
                 ? 'bg-indigo-600/80 text-white hover:bg-indigo-500'
-                : 'bg-[#30363d] text-slate-400 hover:bg-[#3d444d]'
+                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
             }`}
           >
             注音 {zhuyinEnabled ? 'ON' : 'OFF'}
@@ -286,10 +286,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 className={`rounded-2xl p-6 border transition-all ${
                   highlightedParagraph === idx
                     ? 'border-amber-500/60 bg-amber-900/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
-                    : 'border-transparent hover:border-[#30363d] hover:bg-[#161b22]/40'
+                    : 'border-transparent hover:border-gray-200 hover:bg-white/40'
                 }`}
               >
-                <p className={`text-2xl lg:text-3xl text-slate-300 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                <p className={`text-2xl lg:text-3xl text-gray-900 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
                 </p>
               </div>
@@ -298,7 +298,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         </div>
 
         {/* Status bar */}
-        <div className="h-7 bg-[#161b22] border-t border-[#30363d] flex items-center px-4 text-[10px] text-slate-500 uppercase shrink-0">
+        <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 text-[10px] text-gray-500 uppercase shrink-0">
           <span>共 {story.content.length} 段 · {story.title}</span>
         </div>
       </div>
@@ -306,30 +306,30 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       {/* Resizable divider */}
       <div
         onMouseDown={onDividerMouseDown}
-        className="w-1 flex-shrink-0 bg-[#30363d] hover:bg-indigo-500 cursor-col-resize transition-colors"
+        className="w-1 flex-shrink-0 bg-gray-200 hover:bg-indigo-500 cursor-col-resize transition-colors"
       />
 
       {/* RIGHT: AI Tutor chat panel */}
-      <div className="flex-shrink-0 bg-[#0d1117] flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
+      <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
         {/* Panel header */}
-        <div className="h-9 shrink-0 bg-[#161b22] border-b border-[#30363d] flex items-center px-4 gap-3">
+        <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
           <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
             AI Tutor
           </span>
           <div className="flex-1" />
-          <span className="text-[10px] text-slate-600">
+          <span className="text-[10px] text-gray-600">
             {understoodCount} / {requiredCount} 理解
           </span>
           <button
             onClick={onFinish}
-            className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors"
+            className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors"
           >
             跳過
           </button>
         </div>
 
         {/* Chat messages */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-black/10">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50">
 
           {/* Intro message */}
           <div className="flex gap-2.5 pt-1">
@@ -337,8 +337,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               <span className="text-white text-[10px] font-bold">AI</span>
             </div>
             <div className="flex-1">
-              <div className="bg-[#161b22] border border-[#30363d] rounded-2xl rounded-tl-sm px-4 py-3">
-                <p className={`text-lg text-slate-300 leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
+              <div className="bg-indigo-50 border border-indigo-200 rounded-2xl rounded-tl-sm px-4 py-3">
+                <p className={`text-lg text-indigo-900 leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
                   {processZhuyin(`你剛才讀完了《${story.title}》，做得很棒！我想問你幾個關於課文的問題，幫助你更深入理解。準備好了嗎？`)}
                 </p>
               </div>
@@ -352,8 +352,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               return (
                 <div key={i} className={`mx-10 rounded-xl px-3.5 py-2 text-sm border ${
                   turn.understood
-                    ? 'bg-emerald-900/20 border-emerald-700/40 text-emerald-300'
-                    : 'bg-amber-900/20 border-amber-700/40 text-amber-300'
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                    : 'bg-amber-50 border-amber-300 text-amber-800'
                 }`}>
                   <span className="mr-1.5">{turn.understood ? '✓' : '💡'}</span>
                   {processZhuyin(turn.text)}
@@ -369,8 +369,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     <span className="text-white text-[10px] font-bold">AI</span>
                   </div>
                 ) : (
-                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center">
-                    <svg className="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
+                    <svg className="w-3.5 h-3.5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -380,7 +380,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                   <div className={[
                     'rounded-2xl px-4 py-3',
                     turn.role === 'ai'
-                      ? 'bg-[#161b22] border border-[#30363d] rounded-tl-sm text-slate-300'
+                      ? 'bg-indigo-50 border border-indigo-200 rounded-tl-sm text-indigo-900'
                       : 'bg-indigo-600 rounded-tr-sm text-white',
                   ].join(' ')}>
                     <p className={`text-lg leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>{processZhuyin(turn.text)}</p>
@@ -396,10 +396,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               <div className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
                 <span className="text-white text-[10px] font-bold">AI</span>
               </div>
-              <div className="bg-[#161b22] border border-[#30363d] rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0ms]" />
-                <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:300ms]" />
+              <div className="bg-indigo-50 border border-indigo-200 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:300ms]" />
               </div>
             </div>
           )}
@@ -419,9 +419,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
           {/* Completion message */}
           {isSessionComplete && !isLoading && (
-            <div className="bg-emerald-900/30 border border-emerald-700/40 rounded-2xl p-4 text-center">
-              <p className="text-emerald-300 font-bold text-sm">太棒了！你展現了很好的理解力！</p>
-              <p className="text-emerald-400/70 text-xs mt-1">你對課文的理解很好，繼續下一步吧！</p>
+            <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center">
+              <p className="text-emerald-800 font-bold text-sm">太棒了！你展現了很好的理解力！</p>
+              <p className="text-emerald-700 text-xs mt-1">你對課文的理解很好，繼續下一步吧！</p>
             </div>
           )}
 
@@ -429,12 +429,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         </div>
 
         {/* Bottom: input or proceed button */}
-        <div className="shrink-0 bg-[#161b22] border-t border-[#30363d] p-3">
+        <div className="shrink-0 bg-white border-t border-gray-200 p-3">
           {isSessionComplete ? (
             <div className="flex items-center justify-between gap-2">
               <button
                 onClick={onBack}
-                className="px-3 py-3 rounded-xl text-base text-slate-500 hover:text-slate-300 transition-colors"
+                className="px-3 py-3 rounded-xl text-base text-gray-500 hover:text-gray-900 transition-colors"
               >
                 ← 回到朗讀
               </button>
@@ -458,12 +458,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 placeholder="輸入你的回答……（Enter 送出）"
                 rows={2}
                 disabled={isLoading || isSessionComplete}
-                className="flex-1 bg-[#0d1117] border border-[#30363d] rounded-xl px-3 py-2 text-base text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 resize-none disabled:opacity-50"
+                className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 resize-none disabled:opacity-50"
               />
               <button
                 onClick={handleSubmit}
                 disabled={!inputText.trim() || isLoading || isSessionComplete}
-                className="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white flex items-center justify-center transition-all active:scale-95"
+                className="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
@@ -478,8 +478,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
       `}</style>
     </div>
   );

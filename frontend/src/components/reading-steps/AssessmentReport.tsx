@@ -79,7 +79,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ attempt, onRetry })
           恭喜完成練習！
         </div>
         <h2 className="text-4xl font-bold mb-2">好棒！你今天又進步了。</h2>
-        <p className="text-slate-500">讓我們看看這次朗讀的分析數據吧。</p>
+        <p className="text-gray-500">讓我們看看這次朗讀的分析數據吧。</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
@@ -103,18 +103,18 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ attempt, onRetry })
              </SafeResponsiveContainer>
              <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-4xl font-black text-indigo-600">{attempt.accuracy}%</span>
-                <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">準確度</span>
+                <span className="text-xs text-gray-600 font-bold uppercase tracking-widest">準確度</span>
              </div>
           </div>
           <div className="mt-8 grid grid-cols-2 gap-4 w-full">
-            <div className="bg-slate-50 p-4 rounded-2xl text-center">
-              <p className="text-xs text-slate-400 font-bold mb-1">朗讀速度</p>
-              <p className="text-xl font-bold text-slate-800">{attempt.cpm}</p>
-              <p className="text-[10px] text-slate-400">字/分鐘</p>
+            <div className="bg-gray-50 p-4 rounded-2xl text-center">
+              <p className="text-xs text-gray-600 font-bold mb-1">朗讀速度</p>
+              <p className="text-xl font-bold text-gray-800">{attempt.cpm}</p>
+              <p className="text-[10px] text-gray-600">字/分鐘</p>
             </div>
-            <div className="bg-slate-50 p-4 rounded-2xl text-center">
-              <p className="text-xs text-slate-400 font-bold mb-1">準確度</p>
-              <p className="text-xl font-bold text-slate-800">{attempt.accuracy}%</p>
+            <div className="bg-gray-50 p-4 rounded-2xl text-center">
+              <p className="text-xs text-gray-600 font-bold mb-1">準確度</p>
+              <p className="text-xl font-bold text-gray-800">{attempt.accuracy}%</p>
             </div>
           </div>
         </div>
