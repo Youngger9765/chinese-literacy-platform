@@ -16,6 +16,12 @@ export interface StoryIntro {
   background: string;
 }
 
+export interface VocabItem {
+  word: string;
+  definition: string;
+  note?: string;
+}
+
 export interface Story {
   id: string;
   title: string;
@@ -25,6 +31,11 @@ export interface Story {
   category: 'Fable' | 'Science' | 'History' | 'Daily';
   filename: string;
   intro?: StoryIntro;
+  grade?: number;               // 4-9
+  genre?: string;               // 記敘文/說明文/議論文
+  readingStrategy?: string;     // for future Intro enhancement
+  vocabulary?: VocabItem[];     // for future VocabPractice enhancement
+  charCount?: number;           // for reading benchmark
 }
 
 export interface ReadingAttempt {
