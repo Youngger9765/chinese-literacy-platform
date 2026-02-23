@@ -92,10 +92,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
     // Highlight referenced paragraph on wrong answer
     if (result.understood === false && result.referenced_paragraph != null) {
-      setHighlightedParagraph(result.referenced_paragraph);
+      setHighlightedParagraph(result.referenced_paragraph - 1);
       // Auto-scroll to highlighted paragraph
       setTimeout(() => {
-        paragraphRefs.current[result.referenced_paragraph!]?.scrollIntoView({
+        paragraphRefs.current[result.referenced_paragraph! - 1]?.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
         });
