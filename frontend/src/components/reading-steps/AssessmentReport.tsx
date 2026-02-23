@@ -63,14 +63,33 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ attempt, onRetry })
     { name: '朗讀速度 (CPM)', score: Math.min(attempt.cpm, 300) }, // cap for chart
   ];
 
-  // Friendly CPM description for young students
-  const cpmDescription = (() => {
-    const cpm = attempt.cpm;
-    if (cpm >= 200) return '你讀得很快很流利！';
-    if (cpm >= 120) return '速度適中，很棒！';
-    if (cpm >= 60) return '慢慢讀也很好，繼續練習會越來越快！';
-    return '不要急，慢慢來就好！';
-  })();
+  // Research-based CPM thresholds for 國小高年級～國中生
+  const getCpmFeedback = (cpm: number) => {
+    if (cpm >= 180) return { text: '非常流利！你讀得又快又準！', level: 'very-fast' };
+    if (cpm >= 130) return { text: '流利度很好，繼續保持！', level: 'fast' };
+    if (cpm >= 90) return { text: '速度適中，每天練習會越來越快！', level: 'medium' };
+    if (cpm >= 50) return { text: '慢慢來沒關係，多練習就會進步！', level: 'slow' };
+    return { text: '不要急，一個字一個字慢慢讀就好！', level: 'very-slow' };
+  };
+
+  const cpmFeedback = getCpmFeedback(attempt.cpm);
+
+  // Visual speed indicator segments
+  const speedSegments = [
+    { label: '慢', threshold: 50, color: 'bg-red-400' },
+    { label: '適中', threshold: 90, color: 'bg-amber-400' },
+    { label: '快', threshold: 130, color: 'bg-green-400' },
+    { label: '很快', threshold: 180, color: 'bg-emerald-400' }
+  ];
+
+  const getCurrentSegment = (cpm: number) => {
+    if (cpm < 50) return 0;
+    if (cpm < 90) return 1;
+    if (cpm < 130) return 2;
+    return 3;
+  };
+
+  const currentSegment = getCurrentSegment(attempt.cpm);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn">
@@ -108,9 +127,38 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ attempt, onRetry })
           </div>
           <div className="mt-8 grid grid-cols-2 gap-4 w-full">
             <div className="bg-gray-50 p-4 rounded-2xl text-center">
-              <p className="text-xs text-gray-600 font-bold mb-1">朗讀速度</p>
+              <p className="text-xs text-gray-600 font-bold mb-1 flex items-center justify-center gap-1">
+                朗讀速度
+                <span
+                  className="inline-block w-3 h-3 rounded-full bg-gray-400 text-white text-[8px] leading-[12px] cursor-help"
+                  title="CPM = 每分鐘朗讀的字數。國小高年級一般在 90-150 字/分鐘"
+                >
+                  ⓘ
+                </span>
+              </p>
               <p className="text-xl font-bold text-gray-800">{attempt.cpm}</p>
-              <p className="text-[10px] text-gray-600">字/分鐘</p>
+              <p className="text-[10px] text-gray-600 mb-2">字/分鐘</p>
+
+              {/* Visual speed indicator bar */}
+              <div className="mt-2 space-y-1">
+                <div className="flex gap-0.5">
+                  {speedSegments.map((segment, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex-1 h-2 rounded-sm ${
+                        idx === currentSegment
+                          ? segment.color
+                          : 'bg-gray-200'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-between text-[8px] text-gray-500">
+                  {speedSegments.map((segment, idx) => (
+                    <span key={idx} className="flex-1 text-center">{segment.label}</span>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="bg-gray-50 p-4 rounded-2xl text-center">
               <p className="text-xs text-gray-600 font-bold mb-1">準確度</p>
@@ -137,7 +185,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ attempt, onRetry })
               朗讀分析
             </h4>
             <p className="text-sm text-accent-hover/80 leading-relaxed">
-              你的朗讀速度是每分鐘 {attempt.cpm} 個字。{cpmDescription}
+              你的朗讀速度是每分鐘 {attempt.cpm} 個字。{cpmFeedback.text}
               字詞準確度達到 {attempt.accuracy}%，繼續保持！
             </p>
           </div>
