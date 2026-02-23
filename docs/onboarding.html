@@ -826,38 +826,6 @@
         a:hover {
             text-decoration: underline;
         }
-
-        /* Copy Button */
-        .code-wrapper {
-            position: relative;
-            display: block;
-            margin: 0.5rem 0;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            background: var(--border-color);
-            border: none;
-            color: var(--text-secondary);
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-
-        .copy-btn:hover {
-            background: var(--level-indigo);
-            color: white;
-        }
-
-        .copy-btn.copied {
-            background: var(--correct-green);
-            color: white;
-        }
     </style>
 </head>
 <body>
@@ -871,7 +839,7 @@
         <div class="xp-container">
             <div class="xp-header">
                 <span class="xp-label">總經驗值 Total XP</span>
-                <span class="xp-value" id="xpValue">0 / 770 XP</span>
+                <span class="xp-value" id="xpValue">0 / 810 XP</span>
             </div>
             <div class="xp-bar-bg">
                 <div class="xp-bar-fill" id="xpBar"></div>
@@ -943,7 +911,7 @@
 
     <script>
         const STORAGE_KEY = 'lingoleap-quest-progress';
-        const TOTAL_XP = 770;
+        const TOTAL_XP = 810;
 
         const achievements = [
             { id: 'first-level', icon: '🌟', name: '新手上路', desc: 'Complete Level 1', check: state => state.levels['1']?.completed },
@@ -1028,7 +996,7 @@
                 icon: '⚔️',
                 title: '裝備準備',
                 subtitle: 'Gear Up',
-                xp: 80,
+                xp: 100,
                 challenges: [
                     {
                         id: '1',
@@ -1082,6 +1050,13 @@
                         ],
                         correct: 2
                     },
+                    {
+                        id: '5',
+                        type: 'fill',
+                        xp: 20,
+                        question: 'VS Code 推薦安裝的三個擴充套件（任選一個英文名稱）What\'s one recommended VS Code extension?',
+                        acceptable: ['eslint', 'tailwind', 'python', 'tailwind css intellisense']
+                    }
                 ]
             },
             {
@@ -1089,35 +1064,44 @@
                 icon: '🏗️',
                 title: '基地建設',
                 subtitle: 'Environment Setup',
-                xp: 100,
+                xp: 120,
                 challenges: [
                     {
                         id: '1',
-                        type: 'verification',
-                        xp: 25,
-                        question: '在終端機執行以下指令安裝並啟動前端：<br><code style="display:block;background:#1c2128;padding:0.75rem;border-radius:6px;margin:0.5rem 0;border-left:3px solid var(--level-indigo)">cd frontend && npm install && npm run dev</code>你有看到 <strong>Local: http://localhost:3000</strong> 嗎？',
-                        buttonText: '有，我看到 localhost:3000 了 ✓'
+                        type: 'command',
+                        xp: 30,
+                        question: '輸入啟動前端開發伺服器的完整指令 Type the command to start the frontend dev server:',
+                        hint: '先進入 frontend 資料夾...',
+                        acceptable: ['cd frontend && npm install && npm run dev', 'npm run dev']
                     },
                     {
                         id: '2',
-                        type: 'verification',
-                        xp: 25,
-                        question: '開另一個終端機視窗，執行以下指令啟動後端：<br><code style="display:block;background:#1c2128;padding:0.75rem;border-radius:6px;margin:0.5rem 0;border-left:3px solid var(--level-indigo)">cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload</code>你有看到 <strong>Uvicorn running on http://127.0.0.1:8000</strong> 嗎？',
-                        buttonText: '有，後端也跑起來了 ✓'
+                        type: 'command',
+                        xp: 30,
+                        question: '輸入啟動後端伺服器的指令 Type the command to start the backend server:',
+                        hint: '使用 uvicorn...',
+                        acceptable: ['uvicorn app.main:app --reload', 'cd backend && uvicorn app.main:app --reload']
                     },
                     {
                         id: '3',
-                        type: 'verification',
-                        xp: 25,
-                        question: '打開瀏覽器，分別訪問：<br><code style="display:block;background:#1c2128;padding:0.75rem;border-radius:6px;margin:0.5rem 0;border-left:3px solid var(--level-indigo)">http://localhost:3000</code><code style="display:block;background:#1c2128;padding:0.75rem;border-radius:6px;margin:0.5rem 0;border-left:3px solid var(--level-indigo)">http://localhost:8000/docs</code>前端有看到 LingoLeap 頁面，後端有看到 FastAPI 文件頁面嗎？',
-                        buttonText: '兩個都看到了 ✓'
+                        type: 'fill',
+                        xp: 20,
+                        question: '前端開發伺服器的本地網址是？ What\'s the frontend local URL?',
+                        acceptable: ['localhost:3000', 'http://localhost:3000']
                     },
                     {
                         id: '4',
-                        type: 'verification',
-                        xp: 25,
-                        question: '⚠️ 這步需要先跟 Young 確認你的 Google 帳號已加入 GCP 專案權限。<br><br>確認有權限後，執行以下指令（用均一提供的公司帳號登入）：<br><code style="display:block;background:#1c2128;padding:0.75rem;border-radius:6px;margin:0.5rem 0;border-left:3px solid var(--level-indigo)">gcloud auth application-default login</code>瀏覽器會跳出 Google 登入頁面，登入完成後終端機有顯示 <strong>Credentials saved to file</strong> 嗎？',
-                        buttonText: 'Young 已幫我開好權限，認證完成了 ✓'
+                        type: 'fill',
+                        xp: 20,
+                        question: '後端 API 伺服器的本地網址是？ What\'s the backend local URL?',
+                        acceptable: ['localhost:8000', 'http://localhost:8000']
+                    },
+                    {
+                        id: '5',
+                        type: 'command',
+                        xp: 20,
+                        question: '輸入 GCP 認證指令 Type the GCP auth command for Vertex AI:',
+                        acceptable: ['gcloud auth application-default login']
                     }
                 ]
             },
@@ -1138,16 +1122,10 @@
                     },
                     {
                         id: '2',
-                        type: 'multiple',
+                        type: 'fill',
                         xp: 20,
-                        question: '如果你要做 Issue #42 的功能，分支名稱應該是？',
-                        options: [
-                            'feature/issue-42-add-login',
-                            'issue-42',
-                            'my-branch-42',
-                            'dev/42'
-                        ],
-                        correct: 0
+                        question: '如果你要做 Issue #42 的功能，分支名稱應該是？ Branch name for Issue #42 feature?',
+                        acceptable: ['feature/issue-42-']
                     },
                     {
                         id: '3',
@@ -1177,10 +1155,11 @@
                     },
                     {
                         id: '5',
-                        type: 'verification',
+                        type: 'command',
                         xp: 30,
-                        question: '在終端機試試看建立一個練習用的分支：<br><code style="display:block;background:#1c2128;padding:0.75rem;border-radius:6px;margin:0.5rem 0;border-left:3px solid var(--level-indigo)">git checkout -b feature/issue-99-practice staging</code>然後用 <code>git branch</code> 確認你在新分支上，完成後刪掉它：<br><code style="display:block;background:#1c2128;padding:0.75rem;border-radius:6px;margin:0.5rem 0;border-left:3px solid var(--level-indigo)">git checkout staging && git branch -d feature/issue-99-practice</code>',
-                        buttonText: '我成功建立並刪除練習分支了 ✓'
+                        question: '從 staging 建立新功能分支的指令是？ Command to create a feature branch from staging?',
+                        hint: 'git checkout -b ...',
+                        acceptable: ['git checkout -b feature/']
                     }
                 ]
             },
@@ -1235,16 +1214,10 @@
                     },
                     {
                         id: '5',
-                        type: 'multiple',
+                        type: 'fill',
                         xp: 30,
-                        question: '處理所有 AI 呼叫的後端檔案是哪個？',
-                        options: [
-                            'app/main.py',
-                            'app/services/ai_service.py',
-                            'app/routes/chat.py',
-                            'app/models/session.py'
-                        ],
-                        correct: 1
+                        question: '處理所有 AI 呼叫的後端檔案路徑是？ File path for AI service?',
+                        acceptable: ['app/services/ai_service.py', 'ai_service.py', 'backend/app/services/ai_service.py']
                     }
                 ]
             },
@@ -1278,16 +1251,10 @@
                     },
                     {
                         id: '3',
-                        type: 'multiple',
+                        type: 'command',
                         xp: 30,
-                        question: '建立 Issue #10 功能分支的正確指令是？',
-                        options: [
-                            'git checkout -b feature/issue-10-description staging',
-                            'git branch issue-10',
-                            'git checkout main && git branch feature-10',
-                            'git pull origin issue-10'
-                        ],
-                        correct: 0
+                        question: '輸入建立 Issue #10 功能分支的完整指令',
+                        acceptable: ['git checkout -b feature/issue-10']
                     },
                     {
                         id: '4',
@@ -1326,16 +1293,10 @@
                     },
                     {
                         id: '2',
-                        type: 'multiple',
+                        type: 'fill',
                         xp: 30,
                         question: '修 bug 的 commit 前綴是？',
-                        options: [
-                            'bug:',
-                            'fix:',
-                            'patch:',
-                            'hotfix:'
-                        ],
-                        correct: 1
+                        acceptable: ['fix:', 'fix']
                     },
                     {
                         id: '3',
@@ -1352,29 +1313,17 @@
                     },
                     {
                         id: '4',
-                        type: 'multiple',
+                        type: 'command',
                         xp: 30,
-                        question: '啟動後端伺服器（含自動重載）的正確指令是？',
-                        options: [
-                            'python app/main.py',
-                            'uvicorn app.main:app --reload',
-                            'flask run --reload',
-                            'npm run backend'
-                        ],
-                        correct: 1
+                        question: '輸入啟動後端伺服器（含自動重載）的指令',
+                        acceptable: ['uvicorn app.main:app --reload']
                     },
                     {
                         id: '5',
-                        type: 'multiple',
+                        type: 'fill',
                         xp: 30,
-                        question: '前端所有 API 呼叫都集中在哪個檔案？',
-                        options: [
-                            'src/App.tsx',
-                            'src/utils/http.ts',
-                            'src/services/api.ts',
-                            'src/config.ts'
-                        ],
-                        correct: 2
+                        question: '所有 API 呼叫都在前端哪個檔案？',
+                        acceptable: ['api.ts', 'services/api.ts', 'src/services/api.ts']
                     }
                 ]
             }
@@ -1482,7 +1431,6 @@
                 `;
             } else if (challenge.type === 'ordering') {
                 content = `
-                    <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:0.75rem;">👆 點選兩個項目可以交換位置，排成正確順序後按「確認」</p>
                     <div class="ordering-list" id="ordering-${challengeId}">
                         ${challenge.items.map((item, idx) => `
                             <div class="ordering-item" onclick="selectOrderingItem('${challengeId}', ${idx})">
@@ -1539,9 +1487,7 @@
             } else {
                 gameState.wrongAnswers++;
                 const [levelId] = challengeId.split('-');
-                if (!gameState.levels[levelId]) {
-                    gameState.levels[levelId] = { completed: false, xp: 0, challenges: {}, wrongCount: 0 };
-                }
+                if (!gameState.levels[levelId]) gameState.levels[levelId] = { wrongCount: 0 };
                 gameState.levels[levelId].wrongCount = (gameState.levels[levelId].wrongCount || 0) + 1;
                 saveState();
             }
@@ -1572,9 +1518,7 @@
             } else {
                 gameState.wrongAnswers++;
                 const [levelId] = challengeId.split('-');
-                if (!gameState.levels[levelId]) {
-                    gameState.levels[levelId] = { completed: false, xp: 0, challenges: {}, wrongCount: 0 };
-                }
+                if (!gameState.levels[levelId]) gameState.levels[levelId] = { wrongCount: 0 };
                 gameState.levels[levelId].wrongCount = (gameState.levels[levelId].wrongCount || 0) + 1;
                 saveState();
             }
@@ -1624,9 +1568,7 @@
             } else {
                 gameState.wrongAnswers++;
                 const [levelId] = challengeId.split('-');
-                if (!gameState.levels[levelId]) {
-                    gameState.levels[levelId] = { completed: false, xp: 0, challenges: {}, wrongCount: 0 };
-                }
+                if (!gameState.levels[levelId]) gameState.levels[levelId] = { wrongCount: 0 };
                 gameState.levels[levelId].wrongCount = (gameState.levels[levelId].wrongCount || 0) + 1;
                 saveState();
             }
@@ -1676,19 +1618,7 @@
                 checkAchievements();
                 saveState();
 
-                const currentEl = document.getElementById(`challenge-${levelId}-${challengeId}`);
-                currentEl.classList.add('completed');
-
-                // Scroll to next challenge
-                if (!allChallengesComplete) {
-                    const nextChId = String(parseInt(challengeId) + 1);
-                    const nextEl = document.getElementById(`challenge-${levelId}-${nextChId}`);
-                    if (nextEl) {
-                        setTimeout(() => {
-                            nextEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 300);
-                    }
-                }
+                document.getElementById(`challenge-${levelId}-${challengeId}`).classList.add('completed');
             }
         }
 
@@ -1721,14 +1651,6 @@
             document.getElementById('levelCompleteOverlay').classList.remove('show');
             renderLevelMap();
             renderLevels();
-
-            // Scroll to next level
-            const nextLevelEl = document.getElementById(`level-${gameState.currentLevel}`);
-            if (nextLevelEl) {
-                setTimeout(() => {
-                    nextLevelEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-            }
             checkCertificate();
         }
 
@@ -1788,40 +1710,7 @@
             }
         }
 
-        function addCopyButtons() {
-            document.querySelectorAll('code[style*="display:block"]').forEach(code => {
-                if (code.parentElement.classList.contains('code-wrapper')) return;
-                const wrapper = document.createElement('span');
-                wrapper.className = 'code-wrapper';
-                code.parentNode.insertBefore(wrapper, code);
-                wrapper.appendChild(code);
-
-                const btn = document.createElement('button');
-                btn.className = 'copy-btn';
-                btn.textContent = 'Copy';
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    navigator.clipboard.writeText(code.textContent).then(() => {
-                        btn.textContent = 'Copied!';
-                        btn.classList.add('copied');
-                        setTimeout(() => {
-                            btn.textContent = 'Copy';
-                            btn.classList.remove('copied');
-                        }, 1500);
-                    });
-                };
-                wrapper.appendChild(btn);
-            });
-        }
-
-        const origRenderLevels = renderLevels;
-        renderLevels = function() {
-            origRenderLevels();
-            addCopyButtons();
-        };
-
         initGame();
-        addCopyButtons();
     </script>
 </body>
 </html>
