@@ -286,7 +286,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             {story.content.map((line, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl p-6 pb-8 border-b border-gray-200 last:border-b-0 hover:bg-white/30 transition-all"
+                className="rounded-2xl px-6 py-12 border-b border-gray-200 last:border-b-0 hover:bg-white/30 transition-all"
               >
                 <p className={`text-2xl lg:text-3xl text-gray-800 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
