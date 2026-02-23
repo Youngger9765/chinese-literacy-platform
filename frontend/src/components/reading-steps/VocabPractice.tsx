@@ -115,7 +115,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     >
       {/* Tab bar — VS Code style */}
       <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-indigo-500 border-x border-gray-200 text-xs text-gray-800 gap-2">
+        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
           {story.filename} — 生字練習
         </div>
         <div className="flex-1" />
@@ -157,7 +157,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                         ? 'bg-emerald-50 border-emerald-700/50 text-emerald-800'
                         : isSuggested
                           ? 'bg-amber-900/30 border-amber-600/60 text-amber-200 ring-1 ring-amber-500/30 hover:bg-amber-900/50'
-                          : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-indigo-500/40',
+                          : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-accent/40',
                     ].join(' ')}
                   >
                     <span className={`text-3xl font-bold leading-[2.8] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}>
@@ -220,7 +220,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         </button>
         <button
           onClick={onFinish}
-          className="px-8 py-3 rounded-xl font-bold text-base bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
+          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
           {practicedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

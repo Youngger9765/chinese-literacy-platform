@@ -102,7 +102,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ attempt, onRetry })
                </PieChart>
              </SafeResponsiveContainer>
              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-black text-indigo-600">{attempt.accuracy}%</span>
+                <span className="text-4xl font-black text-accent">{attempt.accuracy}%</span>
                 <span className="text-xs text-gray-600 font-bold uppercase tracking-widest">準確度</span>
              </div>
           </div>
@@ -131,12 +131,12 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ attempt, onRetry })
               </BarChart>
             </SafeResponsiveContainer>
           </div>
-          <div className="mt-4 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-            <h4 className="text-sm font-bold text-indigo-800 mb-2 flex items-center gap-2">
+          <div className="mt-4 p-4 bg-accent-bg rounded-2xl border border-accent-bg-subtle">
+            <h4 className="text-sm font-bold text-accent-hover mb-2 flex items-center gap-2">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" /></svg>
               朗讀分析
             </h4>
-            <p className="text-sm text-indigo-900/80 leading-relaxed">
+            <p className="text-sm text-accent-hover/80 leading-relaxed">
               你的朗讀速度是每分鐘 {attempt.cpm} 個字。{cpmDescription}
               字詞準確度達到 {attempt.accuracy}%，繼續保持！
             </p>
@@ -144,15 +144,15 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ attempt, onRetry })
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+      <div className="bg-gradient-to-r from-accent to-violet-600 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
         <div>
           <h3 className="text-2xl font-bold">準備好讀下一個故事了嗎？</h3>
-          <p className="text-indigo-100">每天進步一點點，你就會變成閱讀小達人！</p>
+          <p className="text-accent-bg-subtle">每天進步一點點，你就會變成閱讀小達人！</p>
         </div>
         <div className="flex gap-4">
           <button 
             onClick={onRetry}
-            className="bg-white text-indigo-600 px-8 py-3 rounded-xl font-bold hover:shadow-lg transition-all"
+            className="bg-white text-accent px-8 py-3 rounded-xl font-bold hover:shadow-lg transition-all"
           >
             回圖書館
           </button>

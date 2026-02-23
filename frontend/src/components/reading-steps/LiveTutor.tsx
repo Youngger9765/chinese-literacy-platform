@@ -687,7 +687,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {/* CENTER: Editor */}
       <div className="flex-1 flex flex-col bg-amber-50">
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2">
-          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-indigo-500 border-x border-gray-200 text-xs text-gray-800 gap-2">
+          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
             {processZhuyin(story.filename)}
           </div>
           <div className="flex-1" />
@@ -702,7 +702,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 ref={idx === currentLineIndex ? activeLineRef : null}
                 className={`transition-all duration-700 rounded-2xl p-8 border ${
                   idx === currentLineIndex
-                    ? 'bg-indigo-500/5 border-indigo-500/40 shadow-[0_0_40px_rgba(99,102,241,0.1)] scale-[1.03]'
+                    ? 'bg-accent/5 border-accent/40 shadow-[0_0_40px_rgba(99,102,241,0.1)] scale-[1.03]'
                     : 'opacity-40 border-transparent'
                 }`}
               >
@@ -734,13 +734,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {/* Resizable divider */}
       <div
         onMouseDown={onDividerMouseDown}
-        className="w-1 flex-shrink-0 bg-gray-200 hover:bg-indigo-500 cursor-col-resize transition-colors"
+        className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
       />
 
       {/* RIGHT: Interaction panel */}
       <div className="flex-shrink-0 bg-amber-50 flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
         <div className="h-9 flex-shrink-0 bg-white border-b border-gray-200 flex items-center px-4">
-          <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">
             Live Feedback
           </span>
         </div>
@@ -760,7 +760,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   zhuyinActive ? 'tracking-[0.3em]' : ''
                 } ${
                   m.role === 'user'
-                    ? 'bg-indigo-600 text-white rounded-tr-none'
+                    ? 'bg-accent text-white rounded-tr-none'
                     : 'bg-gray-100 text-gray-800 border border-gray-200 rounded-tl-none'
                 }`}
               >
@@ -782,10 +782,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
           {streamingUserInput && (
             <div className="flex flex-col items-end">
-              <span className="text-[9px] font-bold text-indigo-500 mb-0.5 uppercase animate-pulse">
+              <span className="text-[9px] font-bold text-accent mb-0.5 uppercase animate-pulse">
                 LISTENING...
               </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-indigo-600/60 text-indigo-100 rounded-tr-none max-w-[90%] border border-indigo-500/30 leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
+              <div className={`px-4 py-3 rounded-2xl text-lg bg-accent/60 text-accent-bg-subtle rounded-tr-none max-w-[90%] border border-accent/30 leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
                 {processZhuyin(streamingUserInput)}
               </div>
             </div>
@@ -793,10 +793,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
           {isAdvancing && (
             <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-indigo-500 mb-0.5 uppercase animate-pulse">
+              <span className="text-[9px] font-bold text-accent mb-0.5 uppercase animate-pulse">
                 NEXT...
               </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-gray-100 text-indigo-300 border border-indigo-900/30 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
+              <div className={`px-4 py-3 rounded-2xl text-lg bg-gray-100 text-accent-light border border-accent-hover/30 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
                 {processZhuyin('正在前往下一段...')}
               </div>
             </div>
@@ -805,7 +805,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
         {/* Controls */}
         <div className="flex-shrink-0 p-3 bg-white border-t border-gray-200 space-y-2">
-          <div className={`min-h-[3rem] p-2 rounded-lg bg-black/40 border border-gray-200 text-base text-indigo-300 overflow-hidden leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
+          <div className={`min-h-[3rem] p-2 rounded-lg bg-black/40 border border-gray-200 text-base text-accent-light overflow-hidden leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
             {streamingUserInput ? processZhuyin(streamingUserInput) : (
               <span className="text-gray-800 italic">
                 {processZhuyin(isPreparing ? '正在準備語音辨識...' : isSessionActive ? '正在聆聽您的朗讀...' : '點擊「開始朗讀」開始')}
@@ -900,7 +900,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
                     isAdvancing
                       ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
-                      : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                      : 'bg-accent hover:bg-accent-hover text-white'
                   }`}
                 >
                   <div className="w-2.5 h-2.5 bg-white rounded-full" />

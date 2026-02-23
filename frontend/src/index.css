@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand / Accent */
+    --color-accent: 99 102 241;       /* indigo-600 */
+    --color-accent-hover: 79 70 229;  /* indigo-700 */
+    --color-accent-light: 129 140 248; /* indigo-400 */
+    --color-accent-bg: 238 242 255;   /* indigo-50 */
+    --color-accent-bg-subtle: 224 231 255; /* indigo-100 */
+
+    /* Status */
+    --color-success: 16 185 129;      /* emerald-500 */
+    --color-warning: 245 158 11;      /* amber-500 */
+    --color-error: 239 68 68;         /* red-500 */
+  }
+}

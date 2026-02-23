@@ -261,7 +261,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
         {/* Tab bar */}
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-indigo-500 border-x border-gray-200 text-xs text-gray-800 gap-2">
+          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
             {story.filename}
           </div>
           <div className="flex-1" />
@@ -298,14 +298,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       {/* Resizable divider */}
       <div
         onMouseDown={onDividerMouseDown}
-        className="w-1 flex-shrink-0 bg-gray-200 hover:bg-indigo-500 cursor-col-resize transition-colors"
+        className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
       />
 
       {/* RIGHT: AI Tutor chat panel */}
       <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
         {/* Panel header */}
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
-          <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">
             AI Tutor
           </span>
           <div className="flex-1" />
@@ -325,12 +325,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
           {/* Intro message */}
           <div className="flex gap-2.5 pt-1">
-            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
+            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
               <span className="text-white text-[10px] font-bold">AI</span>
             </div>
             <div className="flex-1">
-              <div className="bg-indigo-50 border border-indigo-200 rounded-2xl rounded-tl-sm px-4 py-3">
-                <p className={`text-lg text-indigo-900 leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
+              <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-4 py-3">
+                <p className={`text-lg text-accent-hover leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
                   {processZhuyin(`你剛才讀完了《${story.title}》，做得很棒！我想問你幾個關於課文的問題，幫助你更深入理解。準備好了嗎？`)}
                 </p>
               </div>
@@ -357,7 +357,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             return (
               <div key={i} className={`flex gap-2.5 ${turn.role === 'student' ? 'flex-row-reverse' : ''}`}>
                 {turn.role === 'ai' ? (
-                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
                     <span className="text-white text-[10px] font-bold">AI</span>
                   </div>
                 ) : (
@@ -372,8 +372,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                   <div className={[
                     'rounded-2xl px-4 py-3',
                     turn.role === 'ai'
-                      ? 'bg-indigo-50 border border-indigo-200 rounded-tl-sm text-indigo-900'
-                      : 'bg-indigo-600 rounded-tr-sm text-white',
+                      ? 'bg-accent-bg border border-accent-bg-subtle rounded-tl-sm text-accent-hover'
+                      : 'bg-accent rounded-tr-sm text-white',
                   ].join(' ')}>
                     <p className={`text-lg leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>{processZhuyin(turn.text)}</p>
                   </div>
@@ -385,13 +385,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           {/* Loading indicator */}
           {isLoading && (
             <div className="flex gap-2.5">
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
+              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
                 <span className="text-white text-[10px] font-bold">AI</span>
               </div>
-              <div className="bg-indigo-50 border border-indigo-200 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:300ms]" />
+              <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-accent-light rounded-full animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 bg-accent-light rounded-full animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 bg-accent-light rounded-full animate-bounce [animation-delay:300ms]" />
               </div>
             </div>
           )}
@@ -450,12 +450,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 placeholder="輸入你的回答……（Enter 送出）"
                 rows={2}
                 disabled={isLoading || isSessionComplete}
-                className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 resize-none disabled:opacity-50"
+                className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none disabled:opacity-50"
               />
               <button
                 onClick={handleSubmit}
                 disabled={!inputText.trim() || isLoading || isSessionComplete}
-                className="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95"
+                className="flex-shrink-0 w-10 h-10 rounded-xl bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"

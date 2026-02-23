@@ -10,7 +10,7 @@ export default function ZhuyinToggle({ enabled, ready, onToggle }: ZhuyinToggleP
       onClick={onToggle}
       className={`px-2.5 py-1 rounded text-xs transition-colors ${
         enabled && ready
-          ? 'bg-indigo-600/80 text-white hover:bg-indigo-500'
+          ? 'bg-accent/80 text-white hover:bg-accent-hover'
           : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
       }`}
       title={enabled ? '隱藏注音' : '顯示注音'}
