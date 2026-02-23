@@ -138,8 +138,7 @@ const App: React.FC = () => {
         )}
 
         {view === AppView.LIBRARY && (
-          <div className="p-8 max-w-7xl mx-auto w-full">
-            <h2 className="text-2xl font-bold text-white mb-8">選擇讀本</h2>
+          <div className="p-8 max-w-7xl mx-auto w-full overflow-y-auto">
             <StoryLibrary onStartReading={handleSelectStory} />
           </div>
         )}
