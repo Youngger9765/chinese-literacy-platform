@@ -398,7 +398,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
           {/* Error */}
           {error && (
-            <div className="bg-red-900/30 border border-red-700/40 rounded-xl px-3.5 py-2.5 text-sm text-red-300">
+            <div className="bg-red-900/30 border border-red-700/40 rounded-xl px-3.5 py-2.5 text-sm text-red-600">
               {error}
               <button
                 onClick={handleRetry}
