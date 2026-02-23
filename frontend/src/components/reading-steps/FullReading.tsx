@@ -286,7 +286,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             {story.content.map((line, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl p-6 border border-transparent hover:border-gray-200 hover:bg-white/30 transition-all"
+                className="rounded-2xl p-6 mb-2 border border-transparent hover:border-gray-200 hover:bg-white/30 transition-all"
               >
                 <p className={`text-2xl lg:text-3xl text-gray-800 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
@@ -328,10 +328,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {/* Instructions */}
           {!result && !isSessionActive && !isPreparing && (
             <div className="bg-white border border-gray-200 rounded-2xl p-4">
-              <p className="text-xs text-gray-600 leading-relaxed">
+              <p className="text-base text-gray-600 leading-relaxed">
                 請從頭到尾朗讀整篇課文。讀完後按「完成朗讀」送出。
               </p>
-              <p className="text-[10px] text-gray-400 mt-2">
+              <p className="text-sm text-gray-400 mt-2">
                 標準比逐段朗讀寬鬆，放輕鬆自然地讀吧！
               </p>
             </div>
