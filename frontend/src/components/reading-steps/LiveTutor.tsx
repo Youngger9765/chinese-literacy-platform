@@ -695,12 +695,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         </div>
 
         <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
-          <div className="max-w-3xl mx-auto space-y-10">
+          <div className="max-w-3xl mx-auto space-y-20">
             {story.content.map((line, idx) => (
               <div
                 key={idx}
                 ref={idx === currentLineIndex ? activeLineRef : null}
-                className={`transition-all duration-700 rounded-2xl p-8 border ${
+                className={`transition-all duration-700 rounded-2xl px-8 py-12 border ${
                   idx === currentLineIndex
                     ? 'bg-accent/5 border-accent/40 shadow-[0_0_40px_rgba(99,102,241,0.1)] scale-[1.03]'
                     : 'opacity-40 border-transparent'
