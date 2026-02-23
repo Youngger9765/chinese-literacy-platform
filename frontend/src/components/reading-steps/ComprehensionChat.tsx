@@ -281,7 +281,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     : 'border-transparent hover:border-gray-200 hover:bg-white/40'
                 }`}
               >
-                <p className={`text-2xl lg:text-3xl text-gray-900 leading-[4.5] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                <p className={`text-2xl lg:text-3xl text-gray-900 leading-[5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
                 </p>
               </div>
