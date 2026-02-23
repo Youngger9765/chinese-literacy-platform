@@ -80,7 +80,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
   return (
     <div
-      className="flex-1 flex flex-col bg-[#0d1117] overflow-hidden"
+      className="flex-1 flex flex-col bg-amber-50 overflow-hidden"
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
@@ -88,19 +88,19 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
       }}
     >
       {/* Top bar */}
-      <div className="h-9 bg-[#161b22] border-b border-[#30363d] flex items-center px-4 gap-3">
+      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
           </svg>
           圖書館
         </button>
-        <span className="text-slate-700 text-xs">›</span>
-        <span className="text-xs text-slate-400">{story.title}</span>
-        <span className="text-slate-700 text-xs">›</span>
+        <span className="text-gray-300 text-xs">›</span>
+        <span className="text-xs text-gray-600">{story.title}</span>
+        <span className="text-gray-300 text-xs">›</span>
         <span className="text-xs text-indigo-400 font-bold">簡介</span>
         <div className="flex-1" />
         <button
@@ -108,7 +108,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           className={`px-2.5 py-1 rounded text-xs transition-colors ${
             zhuyinEnabled && zhuyinReady
               ? 'bg-indigo-600/80 text-white hover:bg-indigo-500'
-              : 'bg-[#30363d] text-slate-400 hover:bg-[#3d444d]'
+              : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
           }`}
         >
           注音 {zhuyinEnabled ? 'ON' : 'OFF'}
@@ -124,20 +124,20 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             <img
               src={story.thumbnail}
               alt={story.title}
-              className="w-32 h-24 object-cover rounded-xl border border-[#30363d] flex-shrink-0"
+              className="w-32 h-24 object-cover rounded-xl border border-gray-200 flex-shrink-0"
             />
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700/40 uppercase tracking-widest">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-300 uppercase tracking-widest">
                   {CATEGORY_LABEL[story.category] ?? story.category}
                 </span>
-                <span className="text-[10px] text-slate-600">Lv.{story.level}</span>
+                <span className="text-[10px] text-gray-400">Lv.{story.level}</span>
               </div>
-              <h1 className={`text-2xl font-black text-white leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+              <h1 className={`text-2xl font-black text-gray-900 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                 {processZhuyin(story.title)}
               </h1>
               {story.intro && (
-                <p className={`text-base leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''} text-slate-400`}>
+                <p className={`text-base leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''} text-gray-600`}>
                   {processZhuyin(story.intro.author)}
                 </p>
               )}
@@ -146,14 +146,14 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
           {/* Background section */}
           {story.intro ? (
-            <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 space-y-4">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">課文簡介</span>
               </div>
-              <p className={`text-slate-300 text-xl leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+              <p className={`text-gray-900 text-xl leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                 {processZhuyin(story.intro.background)}
               </p>
 
@@ -162,7 +162,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 {isSpeaking ? (
                   <button
                     onClick={stopSpeaking}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-amber-800/50 text-amber-300 border border-amber-700/40 transition-all"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all"
                   >
                     <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -173,7 +173,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 ) : (
                   <button
                     onClick={speakIntro}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-slate-700 hover:bg-slate-600 text-slate-200 border border-[#30363d] transition-all active:scale-95"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 border border-gray-200 transition-all active:scale-95"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
@@ -184,7 +184,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               </div>
             </div>
           ) : (
-            <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 text-slate-500 text-sm">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
               這篇課文目前沒有簡介資料。
             </div>
           )}
@@ -193,10 +193,10 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
       </div>
 
       {/* Bottom action */}
-      <div className="flex-shrink-0 bg-[#161b22] border-t border-[#30363d] px-6 py-4 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
         <button
           onClick={onBack}
-          className="px-4 py-3 rounded-xl text-base text-slate-500 hover:text-slate-300 transition-colors"
+          className="px-4 py-3 rounded-xl text-base text-gray-500 hover:text-gray-900 transition-colors"
         >
           返回圖書館
         </button>

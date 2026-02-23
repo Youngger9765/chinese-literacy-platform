@@ -51,15 +51,15 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0d1117] text-slate-300 font-sans overflow-hidden">
+    <div className="h-screen flex flex-col bg-amber-50 text-gray-900 font-sans overflow-hidden">
       {/* Header */}
-      <header className="bg-[#161b22] border-b border-[#30363d] h-12 flex items-center justify-between px-4 shrink-0">
+      <header className="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-4 shrink-0">
         {/* Logo */}
         <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => setView(AppView.HOME)}>
           <div className="bg-indigo-600 w-6 h-6 rounded flex items-center justify-center">
             <span className="text-white font-bold text-xs">L</span>
           </div>
-          <span className="text-sm font-bold text-slate-200 hidden sm:block">AI Reading Tutor</span>
+          <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
         </div>
 
         {/* Step Navigation (upper right) */}
@@ -70,13 +70,13 @@ const App: React.FC = () => {
             className={`px-2 py-1 rounded transition-colors ${
               view === AppView.HOME
                 ? 'bg-indigo-600 text-white'
-                : 'text-slate-400 hover:text-white hover:bg-[#21262d]'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
             首頁
           </button>
 
-          <span className="text-slate-700 select-none">·</span>
+          <span className="text-gray-300 select-none">·</span>
 
           {/* Steps 1–6 */}
           {([
@@ -97,28 +97,28 @@ const App: React.FC = () => {
                     isActive
                       ? 'bg-indigo-600 text-white'
                       : isDisabled
-                      ? 'text-slate-700 cursor-not-allowed'
-                      : 'text-slate-400 hover:text-white hover:bg-[#21262d]'
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
                   <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
-                    isActive ? 'bg-white text-indigo-600' : isDisabled ? 'bg-slate-800 text-slate-600' : 'bg-slate-700 text-slate-300'
+                    isActive ? 'bg-white text-indigo-600' : isDisabled ? 'bg-gray-300 text-gray-400' : 'bg-gray-200 text-gray-900'
                   }`}>
                     {step}
                   </span>
                   <span className="hidden md:block">{label}</span>
                 </button>
                 {i < arr.length - 1 && (
-                  <span className="text-slate-700 select-none">·</span>
+                  <span className="text-gray-300 select-none">·</span>
                 )}
               </React.Fragment>
             );
           })}
 
           {/* User avatar */}
-          <div className="ml-3 flex items-center gap-1 pl-3 border-l border-[#30363d]">
-            <div className="w-6 h-6 rounded-full bg-slate-700"></div>
-            <span className="text-[10px] text-slate-500 hidden sm:block">Lv.12</span>
+          <div className="ml-3 flex items-center gap-1 pl-3 border-l border-gray-200">
+            <div className="w-6 h-6 rounded-full bg-gray-200"></div>
+            <span className="text-[10px] text-gray-500 hidden sm:block">Lv.12</span>
           </div>
         </nav>
       </header>
@@ -126,8 +126,8 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col overflow-hidden">
         {view === AppView.HOME && (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-6">
-            <h1 className="text-5xl font-black text-white">AI 朗讀助教</h1>
-            <p className="text-slate-400 max-w-md">準備好開始今天的朗讀挑戰了嗎？</p>
+            <h1 className="text-5xl font-black text-gray-900">AI 朗讀助教</h1>
+            <p className="text-gray-600 max-w-md">準備好開始今天的朗讀挑戰了嗎？</p>
             <button 
               onClick={() => setView(AppView.LIBRARY)}
               className="bg-indigo-600 hover:bg-indigo-500 text-white px-10 py-4 rounded-xl font-bold shadow-2xl transition-all"
@@ -206,8 +206,8 @@ const App: React.FC = () => {
             />
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center gap-6 p-8">
-              <h2 className="text-2xl font-bold text-white">寫字練習</h2>
-              <p className="text-slate-400 text-sm">輸入一個中文字，開始練習寫字</p>
+              <h2 className="text-2xl font-bold text-gray-900">寫字練習</h2>
+              <p className="text-gray-600 text-sm">輸入一個中文字，開始練習寫字</p>
               <div className="flex gap-3 items-center">
                 <input
                   type="text"
@@ -215,12 +215,12 @@ const App: React.FC = () => {
                   onChange={e => setWriteInput(e.target.value.slice(-1))}
                   placeholder="輸入一個字"
                   maxLength={1}
-                  className="w-24 h-12 text-center text-2xl bg-[#161b22] border border-[#30363d] rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                  className="w-24 h-12 text-center text-2xl bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-indigo-500"
                 />
                 <button
                   onClick={() => { if (writeInput) setWritingChar(writeInput); }}
                   disabled={!writeInput}
-                  className="px-6 h-12 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 text-white rounded-lg font-bold transition-all"
+                  className="px-6 h-12 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-lg font-bold transition-all"
                 >
                   開始
                 </button>
@@ -230,7 +230,7 @@ const App: React.FC = () => {
                   <button
                     key={ch}
                     onClick={() => setWritingChar(ch)}
-                    className="w-12 h-12 bg-[#21262d] hover:bg-[#30363d] text-white text-xl rounded-lg border border-[#30363d] transition-colors"
+                    className="w-12 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xl rounded-lg border border-gray-200 transition-colors"
                   >
                     {ch}
                   </button>
