@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from google.genai import types as genai_types
 
 from .ai_service import generate_structured_response
+from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +146,8 @@ class SocraticAgent:
                 reading_info += f"- 讀錯的字：{', '.join(state.mispronounced_words)}\n"
             reading_info += "→ 提問時可以特別關注這些字相關的段落和內容\n"
 
-        return f"""你是一位溫暖、鼓勵學生的繁體中文閱讀助教，擅長用蘇格拉底式問答引導學生深入理解課文。
+        return f"""{TUTOR_PERSONA}
+你擅長用蘇格拉底式問答引導學生深入理解課文。
 
 課文標題：{state.story_title}
 

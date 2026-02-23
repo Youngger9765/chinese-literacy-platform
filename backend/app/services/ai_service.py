@@ -17,6 +17,7 @@ from google import genai
 from google.genai import types as genai_types
 
 from ..config import settings
+from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +99,8 @@ async def generate_socratic_question(
     Returns:
         A single Socratic question as a string.
     """
-    system_prompt = f"""你是一位溫暖、鼓勵學生的繁體中文閱讀助教，擅長用蘇格拉底式問答引導學生思考課文。
+    system_prompt = f"""{TUTOR_PERSONA}
+你擅長用蘇格拉底式問答引導學生思考課文。
 
 課文標題：{story_title}
 

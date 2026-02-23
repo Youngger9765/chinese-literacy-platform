@@ -250,9 +250,9 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
     const matchRate = computeMatchRate(corrected, fullText);
 
     const feedback =
-      matchRate >= 0.75 ? '太流利了！全文朗讀表現非常棒！' :
-      matchRate >= 0.55 ? '讀得不錯！繼續練習會更好！' :
-      '再練習練習，下次一定更流利！';
+      matchRate >= 0.80 ? '太流利了！全文朗讀表現非常棒！' :
+      matchRate >= 0.60 ? '唸得不錯，過關！繼續練習會更好！' :
+      '再練習一次，你一定可以更流利！';
 
     setResult({ matchRate, feedback });
     setStreamingTranscript(cleanChineseText(transcript));
@@ -361,15 +361,15 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             <div className="space-y-4">
               <div className="flex flex-col items-center gap-3 py-4">
                 <div className={`w-24 h-24 rounded-full flex items-center justify-center border-4 ${
-                  percent >= 75 ? 'border-emerald-500 text-emerald-800'
-                  : percent >= 55 ? 'border-amber-500 text-amber-800'
+                  percent >= 80 ? 'border-emerald-500 text-emerald-800'
+                  : percent >= 60 ? 'border-amber-500 text-amber-800'
                   : 'border-red-500/60 text-red-300'
                 }`}>
                   <span className="text-2xl font-black">{percent}%</span>
                 </div>
                 <p className={`text-sm font-bold text-center ${
-                  percent >= 75 ? 'text-emerald-800'
-                  : percent >= 55 ? 'text-amber-800'
+                  percent >= 80 ? 'text-emerald-800'
+                  : percent >= 60 ? 'text-amber-800'
                   : 'text-gray-600'
                 }`}>
                   {result.feedback}
