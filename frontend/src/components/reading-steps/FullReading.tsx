@@ -282,11 +282,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
         {/* All paragraphs */}
         <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
-          <div className="max-w-3xl mx-auto space-y-10">
+          <div className="max-w-3xl mx-auto space-y-20">
             {story.content.map((line, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl p-6 mb-2 border border-transparent hover:border-gray-200 hover:bg-white/30 transition-all"
+                className="rounded-2xl p-6 pb-8 border-b border-gray-200 last:border-b-0 hover:bg-white/30 transition-all"
               >
                 <p className={`text-2xl lg:text-3xl text-gray-800 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
