@@ -785,7 +785,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <span className="text-[9px] font-bold text-accent mb-0.5 uppercase animate-pulse">
                 LISTENING...
               </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-accent/60 text-accent-bg-subtle rounded-tr-none max-w-[90%] border border-accent/30 leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
+              <div className={`px-4 py-3 rounded-2xl text-lg bg-accent/60 text-gray-800 rounded-tr-none max-w-[90%] border border-accent/30 leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
                 {processZhuyin(streamingUserInput)}
               </div>
             </div>
@@ -821,7 +821,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {/* 系統朗讀 disabled while mic is initializing */}
                 <button
                   disabled
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-300 cursor-not-allowed"
+                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
