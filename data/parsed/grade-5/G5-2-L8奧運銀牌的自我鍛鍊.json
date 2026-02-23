@@ -123,7 +123,14 @@
         "遇到挫折思考意義幫助成長。",
         "提早到校勤於練習精益求精。",
         "深深呼吸調整心情重新思考。",
-        "雙手緊握仔細觀察壓制對手。",
+        "雙手緊握仔細觀察壓制對手。"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "請你就作者觀點，試著為本文選出合適的結語。",
+      "options": [
         "思考會讓你的思想更強大。",
         "不怕你犯錯，只要你改過。",
         "人生要學習放慢腳步，才能欣賞沿途的美景。",
@@ -133,7 +140,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 4,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

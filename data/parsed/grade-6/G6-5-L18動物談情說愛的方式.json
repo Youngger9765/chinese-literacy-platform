@@ -111,7 +111,14 @@
         "求偶的方式十分多元",
         "求偶的時間各不相同",
         "求偶目的為繁衍後代",
-        "不同動物求偶地點皆相同。",
+        "不同動物求偶地點皆相同。"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "本文主旨為何？",
+      "options": [
         "作者對大自然被破壞感到憂心，希望大家能盡可能地愛護動物。",
         "作者非常喜愛動物，希望動物能多多繁衍，豐富大自然的風采。",
         "動物求偶的方式不一，目的都在繁衍後代，同時也讓自然更豐富。",
@@ -143,7 +150,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 4,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

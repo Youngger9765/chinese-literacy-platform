@@ -20,10 +20,6 @@
   "char_count": 1299,
   "vocabulary": [
     {
-      "word": "羅馬不󠇡是一󠇢天造成的",
-      "definition": "指的是任何一項偉大的表現，都要經過很長的時間，累積許多小成功後才能達成。"
-    },
-    {
       "word": "頻繁",
       "definition": "常常、屢次。"
     },
@@ -60,7 +56,7 @@
       "definition": "給予物質或金錢上的幫助。"
     }
   ],
-  "vocabulary_count": 10,
+  "vocabulary_count": 9,
   "fill_in_blank": [
     {
       "sentence": "他躲在湖濱草綠色的帳蓬裡，（ G ）著野鳥養育幼雛的行為。",

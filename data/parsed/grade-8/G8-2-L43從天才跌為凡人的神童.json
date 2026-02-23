@@ -52,7 +52,10 @@
     {
       "question": "根據本文，哪些地方可以看出方仲永的天才？",
       "options": [
-        "甲丁     (B)乙丙     (C)甲丙    (D)乙丁"
+        "甲丁",
+        "乙丙",
+        "甲丙",
+        "乙丁"
       ],
       "answer": null,
       "explanation": null

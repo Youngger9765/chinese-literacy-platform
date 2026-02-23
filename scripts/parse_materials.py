@@ -143,10 +143,14 @@ def extract_vocabulary(doc: Document) -> list[dict]:
             # Parse "(1) 詞語 ：解釋" pattern
             m = re.match(r'^\((\d+)\)\s*(.+?)\s*[：:]\s*(.+)$', text)
             if m:
-                vocab.append({
-                    "word": m.group(2).strip(),
-                    "definition": m.group(3).strip(),
-                })
+                word = m.group(2).strip()
+                # Filter out instruction text mistaken as vocab (real words <= 8 chars)
+                visible = re.sub(r'[\u200b-\u200f\ufe00-\ufe0f\U000e0000-\U000e01ff]', '', word)
+                if len(visible) <= 8:
+                    vocab.append({
+                        "word": word,
+                        "definition": m.group(3).strip(),
+                    })
             elif text.startswith('*') or text.startswith('＊'):
                 if vocab:
                     vocab[-1]["note"] = text.lstrip('*＊').strip()
@@ -333,17 +337,28 @@ def extract_multiple_choice(doc: Document) -> list[dict]:
         is_bare_opt = bool(re.match(r'^[A-DＡ-Ｄ](?=[\u4e00-\u9fff])', text))
         is_option = is_paren_opt or is_dot_opt or is_bare_opt
 
-        # Multi-option line: "A.xxx  B.xxx  C.xxx  D.xxx"
-        is_multi_opt = (is_dot_opt or is_bare_opt) and bool(
-            re.search(r'[\s　][B-DＢ-Ｄ][\.\．、]', text)
+        # Multi-option line: "A.xxx  B.xxx" or "(A)xxx  (B)xxx"
+        is_multi_opt = (
+            (is_dot_opt or is_bare_opt) and bool(
+                re.search(r'[\s　][B-DＢ-Ｄ][\.\．、]', text))
+        ) or (
+            is_paren_opt and bool(
+                re.search(r'[\s　][\(（][B-DＢ-Ｄ][\)）]', text))
         )
 
         # Question keyword detection (exclude option lines)
         is_question = (
-            ('?' in text or '？' in text or '為何' in text or '請問' in text
-             or '哪' in text or '何者' in text or '下列' in text)
+            ('?' in text or '？' in text or '為何' in text or '為什麼' in text
+             or '請問' in text or '哪' in text or '何者' in text or '下列' in text)
             and not is_option
-            and len(text) > 10
+            and len(text) > 5
+        )
+
+        # Broader question detection within MC section (catch non-standard patterns)
+        is_mc_question = (
+            in_mc_section and not is_option and len(text) > 10
+            and ('觀點' in text or '排出' in text or '順序' in text
+                 or '結語' in text or '主旨' in text)
         )
 
         # --- Process (order matters: specific patterns first) ---
@@ -357,15 +372,24 @@ def extract_multiple_choice(doc: Document) -> list[dict]:
             _new_q(text)
         elif is_question and in_mc_section:
             _new_q(text)
+        elif is_mc_question:
+            _new_q(text)
         elif is_multi_opt and current_q is not None:
-            # Split "A.xxx  B.xxx" into individual options
-            parts = re.split(r'[\s　]+(?=[A-DＡ-Ｄ][\.\．、])', text)
+            # Split "A.xxx  B.xxx" or "(A)xxx  (B)xxx" into individual options
+            if is_paren_opt:
+                parts = re.split(r'[\s　]+(?=[\(（][A-DＡ-Ｄ][\)）])', text)
+            else:
+                parts = re.split(r'[\s　]+(?=[A-DＡ-Ｄ][\.\．、])', text)
             for part in parts:
                 _add_option(part.strip())
         elif is_option and current_q is not None:
             _add_option(text)
 
     _save_q()
+
+    # Post-filter: remove entries with >6 options (chart-reading exercises, not real MC)
+    questions = [q for q in questions if len(q["options"]) <= 6]
+
     return questions
 
 
