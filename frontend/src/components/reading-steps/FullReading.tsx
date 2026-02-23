@@ -250,9 +250,9 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
     const matchRate = computeMatchRate(corrected, fullText);
 
     const feedback =
-      matchRate >= 0.75 ? '太流利了！全文朗讀表現非常棒！' :
-      matchRate >= 0.55 ? '讀得不錯！繼續練習會更好！' :
-      '再練習練習，下次一定更流利！';
+      matchRate >= 0.80 ? '太流利了！全文朗讀表現非常棒！' :
+      matchRate >= 0.60 ? '唸得不錯，過關！繼續練習會更好！' :
+      '再練習一次，你一定可以更流利！';
 
     setResult({ matchRate, feedback });
     setStreamingTranscript(cleanChineseText(transcript));
@@ -282,11 +282,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
         {/* All paragraphs */}
         <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
-          <div className="max-w-3xl mx-auto space-y-10">
+          <div className="max-w-3xl mx-auto space-y-20">
             {story.content.map((line, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl p-6 border border-transparent hover:border-gray-200 hover:bg-white/30 transition-all"
+                className="rounded-2xl p-6 pb-8 border-b border-gray-200 last:border-b-0 hover:bg-white/30 transition-all"
               >
                 <p className={`text-2xl lg:text-3xl text-gray-800 leading-[2.8] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
@@ -328,10 +328,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {/* Instructions */}
           {!result && !isSessionActive && !isPreparing && (
             <div className="bg-white border border-gray-200 rounded-2xl p-4">
-              <p className="text-xs text-gray-600 leading-relaxed">
+              <p className="text-base text-gray-600 leading-relaxed">
                 請從頭到尾朗讀整篇課文。讀完後按「完成朗讀」送出。
               </p>
-              <p className="text-[10px] text-gray-400 mt-2">
+              <p className="text-sm text-gray-400 mt-2">
                 標準比逐段朗讀寬鬆，放輕鬆自然地讀吧！
               </p>
             </div>
@@ -361,15 +361,15 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             <div className="space-y-4">
               <div className="flex flex-col items-center gap-3 py-4">
                 <div className={`w-24 h-24 rounded-full flex items-center justify-center border-4 ${
-                  percent >= 75 ? 'border-emerald-500 text-emerald-800'
-                  : percent >= 55 ? 'border-amber-500 text-amber-800'
+                  percent >= 80 ? 'border-emerald-500 text-emerald-800'
+                  : percent >= 60 ? 'border-amber-500 text-amber-800'
                   : 'border-red-500/60 text-red-300'
                 }`}>
                   <span className="text-2xl font-black">{percent}%</span>
                 </div>
                 <p className={`text-sm font-bold text-center ${
-                  percent >= 75 ? 'text-emerald-800'
-                  : percent >= 55 ? 'text-amber-800'
+                  percent >= 80 ? 'text-emerald-800'
+                  : percent >= 60 ? 'text-amber-800'
                   : 'text-gray-600'
                 }`}>
                   {result.feedback}

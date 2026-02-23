@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from google.genai import types as genai_types
 
 from .ai_service import generate_structured_response
+from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ EVALUATION_SCHEMA = {
         },
         "referenced_paragraph": {
             "type": "INTEGER",
-            "description": "答錯時，答案所在的段落索引（從 0 開始）。答對時為 null。",
+            "description": "答錯時，答案所在的段落編號（從 1 開始）。答對時為 null。",
             "nullable": True,
         },
     },
@@ -130,7 +131,7 @@ class SocraticAgent:
     def _build_system_prompt(self, state: SessionState) -> str:
         paragraphs = state.story_text.split("\n")
         numbered_text = "\n".join(
-            f"[第{i}段] {p}" for i, p in enumerate(paragraphs) if p.strip()
+            f"[第{i}段] {p}" for i, p in enumerate(paragraphs, 1) if p.strip()
         )
 
         # Build reading info section if data is available (Issue #17)
@@ -145,7 +146,8 @@ class SocraticAgent:
                 reading_info += f"- 讀錯的字：{', '.join(state.mispronounced_words)}\n"
             reading_info += "→ 提問時可以特別關注這些字相關的段落和內容\n"
 
-        return f"""你是一位溫暖、鼓勵學生的繁體中文閱讀助教，擅長用蘇格拉底式問答引導學生深入理解課文。
+        return f"""{TUTOR_PERSONA}
+你擅長用蘇格拉底式問答引導學生深入理解課文。
 
 課文標題：{state.story_title}
 
@@ -175,7 +177,7 @@ class SocraticAgent:
 - 人名、地名、專有名詞必須正確，不可張冠李戴
 - 如果 understood = false，用不同方式重新問同一層次的問題（換個角度或給提示）
 - 如果 understood = true，進入下一個層次的問題
-- 當 understood=false 時，在 referenced_paragraph 填入答案所在段落的索引（從 0 開始）
+- 當 understood=false 時，在 referenced_paragraph 填入答案所在段落的編號（從 1 開始，對應 [第N段]）
 - 當 understood=true 時，referenced_paragraph 設為 null
 
 偵測敷衍回答：
@@ -320,8 +322,8 @@ class SocraticAgent:
             # Validate referenced_paragraph bounds
             num_paragraphs = len([p for p in state.story_text.split("\n") if p.strip()])
             if referenced_paragraph is not None:
-                if not isinstance(referenced_paragraph, int) or referenced_paragraph < 0 or referenced_paragraph >= num_paragraphs:
-                    logger.warning("Invalid referenced_paragraph %s (max %d), resetting to None", referenced_paragraph, num_paragraphs - 1)
+                if not isinstance(referenced_paragraph, int) or referenced_paragraph < 1 or referenced_paragraph > num_paragraphs:
+                    logger.warning("Invalid referenced_paragraph %s (valid: 1-%d), resetting to None", referenced_paragraph, num_paragraphs)
                     referenced_paragraph = None
 
             # Validate phase
