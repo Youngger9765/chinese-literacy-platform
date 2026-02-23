@@ -24,8 +24,97 @@
   "vocabulary": [],
   "vocabulary_count": 0,
   "fill_in_blank": [],
-  "multiple_choice": [],
-  "multiple_choice_count": 0,
+  "multiple_choice": [
+    {
+      "question": "關於本文，下列敘述何者正確？",
+      "options": [
+        "醫者治好裨將的傷，但裨將不滿意，醫者只好跪地求饒",
+        "醫者剪去箭桿，治好裨將的傷，裨將因此跪地感謝他",
+        "雖然醫者醫術高明，但為人廉潔，只收取合理的酬勞",
+        "醫者認為自己剪去箭桿後，手術已完成，所以要求酬勞"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "關於上文的描述，下列何者正確？",
+      "options": [
+        "王夷甫嫉妒妻子比他有錢",
+        "王夷甫口是心非，實際上很愛錢",
+        "王夷甫用錢遶床是為了討好妻子",
+        "王夷甫把「錢」叫做「阿堵物」"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "下列選項「」中字，何者字音、字義完全正確？",
+      "options": [
+        "「嘗」於市遇一佳硯——ㄔㄤˊ，曾經",
+        "既「還」邸，使門人往——ㄏㄞˊ，還是",
+        "吾嫌其微「凸」——ㄊㄨ，突出",
+        "公大「惋」惜——ㄨㄢˇ，可惜。"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "根據「陸公買硯」一文，關於陸盧峰這個人的敘述下列何者正確？",
+      "options": [
+        "玩物喪志，優柔寡斷",
+        "寬厚仁愛，度量很大",
+        "管理下屬，恩威並濟",
+        "言出必行，做事果斷"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "「淳于恭，北海人。人有盜刈1恭禾者，恭見之，念其愧，因伏草中，至去乃起。」根據這則故事，下列敘述何者最恰當？",
+      "options": [
+        "當時五穀歉收，盜賊四處搶糧",
+        "淳于恭個性溫厚寬容，能體恤他人",
+        "北海地區盜賊兇悍，人民不敢與之對抗",
+        "淳于恭伏於草中，乃心中有愧，不欲見人"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "根據「陸公買硯」一文，下列關於故事中人物的敘述，何者最恰當？",
+      "options": [
+        "門人買錯硯臺卻不知道",
+        "陸公惋惜是因為石工技藝不佳",
+        "門人請人磨平硯眼是自作聰明",
+        "陸公對門人購硯的價格感到驚訝"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "下列何者不可能是「陸公買硯」一文的寓意？",
+      "options": [
+        "不聽老人言，吃虧在眼前",
+        "即使是好心也可能辦壞事",
+        "知人善任才不會反受其害",
+        "託人辦事，一定要先清楚溝通"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "下列哪一選項的閩南語俗諺可以形容課文中的僕人？",
+      "options": [
+        "目睭花花，匏仔看做菜瓜",
+        "生雞卵的無，放雞屎的一大堆",
+        "痟貪軁雞籠",
+        "好心予雷唚"
+      ],
+      "answer": null,
+      "explanation": null
+    }
+  ],
+  "multiple_choice_count": 8,
   "reading_benchmark": {
     "levels": [
       {
@@ -44,7 +133,6 @@
   },
   "source_file": "G8-6-L47陸公買硯.docx",
   "flags": [
-    "NO_VOCABULARY",
-    "NO_MC_QUESTIONS"
+    "NO_VOCABULARY"
   ]
 }

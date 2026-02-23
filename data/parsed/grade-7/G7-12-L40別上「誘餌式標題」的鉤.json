@@ -112,6 +112,17 @@
       "explanation": null
     },
     {
+      "question": "以下哪些是誘餌式標題的特徵？",
+      "options": [
+        "甲乙丙丁",
+        "乙丙丁戊",
+        "甲乙丙戊",
+        "甲丙丁戊。"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
       "question": "這篇文章的作者最想達成什麼目的？",
       "options": [
         "想要博取讀者的目光，對這篇文點讚。",
@@ -123,7 +134,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 4,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

@@ -81,14 +81,6 @@
       "explanation": null
     },
     {
-      "question": "根據本課「閱讀聚光燈」的推理練習，請問：下列何者比較能夠表示推理三要素之間的關係？（折線或曲線代表推理能力）",
-      "options": [
-        "B.            C.              D."
-      ],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "「這樣的觀察與推理，人人都辦得到，只要培養推論的習慣，你會開始以不一樣的眼光看這個世界」關於這段話的詮釋，下列何者正確？",
       "options": [
         "只要好好地觀察與推理，人人都可以成為名偵探。",
@@ -122,7 +114,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 5,
+  "multiple_choice_count": 4,
   "reading_benchmark": {
     "levels": [
       {

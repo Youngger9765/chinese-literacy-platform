@@ -259,15 +259,58 @@ def extract_multiple_choice(doc: Document) -> list[dict]:
     current_q = None
     in_mc_section = False
 
+    def _save_q():
+        nonlocal current_q
+        if current_q and current_q["options"]:
+            questions.append(current_q)
+        current_q = None
+
+    def _new_q(q_text):
+        nonlocal current_q
+        _save_q()
+        current_q = {
+            "question": q_text,
+            "options": [],
+            "answer": None,
+            "explanation": None,
+        }
+
+    def _add_option(raw):
+        if current_q is None:
+            return
+        # Strip option prefix: (A) or A. or Ａ．
+        clean = re.sub(
+            r'^(?:[\(（][A-DＡ-Ｄ][\)）]|[A-DＡ-Ｄ][\.\．、]?)\s*', '', raw
+        ).strip()
+        if not clean:
+            return
+        # Extract trailing teacher explanation （...3+ chars...）
+        exp = re.search(r'[（(]([^A-DＡ-Ｄ].{3,}?)[）)]\s*$', clean)
+        if exp:
+            current_q["answer"] = chr(ord('A') + len(current_q["options"]))
+            current_q["explanation"] = exp.group(1)
+            clean = clean[:exp.start()].strip()
+        if clean:
+            current_q["options"].append(clean)
+
+    # Build line list — split multi-line paragraphs so embedded options
+    # (e.g. "question\n(A)option" in one paragraph) are processed individually
+    lines = []
     for p in doc.paragraphs:
-        text = p.text.strip()
-        if not text:
-            continue
-
         style = p.style.name if p.style else ""
+        raw = p.text.strip()
+        if not raw:
+            continue
+        for line in raw.split('\n'):
+            line = line.strip()
+            if line:
+                lines.append((line, style))
 
-        # Detect MC section start
-        if '選出最適合的答案' in text or '根據文章內容' in text:
+    for text, style in lines:
+        # Detect MC section start (broader matching)
+        if ('選出' in text and ('答案' in text or '適合' in text or '正確' in text)) \
+                or ('根據' in text and '選出' in text) \
+                or text == '閱讀理解測驗':
             in_mc_section = True
             continue
 
@@ -275,66 +318,54 @@ def extract_multiple_choice(doc: Document) -> list[dict]:
         if in_mc_section and ('找一找' in text or '影片連結' in text or '圈出' in text):
             break
 
-        # Classical text MC: （　）N. pattern
-        classical_q = re.match(r'^[（(]\s*[）)]\s*(\d+)\.\s*(.+)', text)
+        # --- Question patterns ---
+        # Classical: （  ）N.question
+        classical_q = re.match(r'^[（(][　 ]*[）)]\s*(\d+)[\.\．]\s*(.+)', text)
+        # Multi-text: （　　）(N)question
+        multi_text_q = re.match(r'^[（(][　 ]*[）)]\s*[\(（](\d+)[\)）]\s*(.+)', text)
+        # Reversed: (N)（　　）question
+        reversed_q = re.match(r'^[\(（](\d+)[\)）]\s*[（(][　 ]*[）)]\s*(.+)', text)
 
-        # Question line detection
+        # --- Option patterns ---
+        is_paren_opt = bool(re.match(r'^[\(（][A-DＡ-Ｄ][\)）]', text))
+        is_dot_opt = bool(re.match(r'^[A-DＡ-Ｄ][\.\．、]', text))
+        # Handle missing dot: "D未解之謎" (letter + CJK, no dot)
+        is_bare_opt = bool(re.match(r'^[A-DＡ-Ｄ](?=[\u4e00-\u9fff])', text))
+        is_option = is_paren_opt or is_dot_opt or is_bare_opt
+
+        # Multi-option line: "A.xxx  B.xxx  C.xxx  D.xxx"
+        is_multi_opt = (is_dot_opt or is_bare_opt) and bool(
+            re.search(r'[\s　][B-DＢ-Ｄ][\.\．、]', text)
+        )
+
+        # Question keyword detection (exclude option lines)
         is_question = (
             ('?' in text or '？' in text or '為何' in text or '請問' in text
              or '哪' in text or '何者' in text or '下列' in text)
-            and not re.match(r'^[A-DＡ-Ｄ][\.\．、]', text)
+            and not is_option
             and len(text) > 10
         )
 
-        is_option = bool(re.match(r'^[A-DＡ-Ｄ][\.\．、]?\s*', text))
-
-        if classical_q and in_mc_section:
-            if current_q and current_q["options"]:
-                questions.append(current_q)
-            current_q = {
-                "question": classical_q.group(2),
-                "options": [],
-                "answer": None,
-                "explanation": None,
-            }
-        elif is_question and style == "List Paragraph":
-            # Standard MC question (List Paragraph style)
-            if current_q and current_q["options"]:
-                questions.append(current_q)
-            current_q = {
-                "question": text,
-                "options": [],
-                "answer": None,
-                "explanation": None,
-            }
+        # --- Process (order matters: specific patterns first) ---
+        if multi_text_q:
+            _new_q(multi_text_q.group(2))
+        elif reversed_q:
+            _new_q(reversed_q.group(2))
+        elif classical_q and in_mc_section:
+            _new_q(classical_q.group(2))
+        elif is_question and ('?' in text or '？' in text) and style == "List Paragraph":
+            _new_q(text)
         elif is_question and in_mc_section:
-            # MC question in section but not List Paragraph style
-            if current_q and current_q["options"]:
-                questions.append(current_q)
-            current_q = {
-                "question": text,
-                "options": [],
-                "answer": None,
-                "explanation": None,
-            }
+            _new_q(text)
+        elif is_multi_opt and current_q is not None:
+            # Split "A.xxx  B.xxx" into individual options
+            parts = re.split(r'[\s　]+(?=[A-DＡ-Ｄ][\.\．、])', text)
+            for part in parts:
+                _add_option(part.strip())
         elif is_option and current_q is not None:
-            option_text = text
-            explanation = None
-            exp_match = re.search(r'[（(](.+?)[）)]', text)
+            _add_option(text)
 
-            option_clean = re.sub(r'^[A-DＡ-Ｄ][\.\．、]?\s*', '', option_text)
-
-            if exp_match and len(exp_match.group(1)) > 3:
-                explanation = exp_match.group(1)
-                option_clean = re.sub(r'[（(].+?[）)]', '', option_clean).strip()
-                current_q["answer"] = chr(ord('A') + len(current_q["options"]))
-                current_q["explanation"] = explanation
-
-            current_q["options"].append(option_clean)
-
-    if current_q and current_q["options"]:
-        questions.append(current_q)
-
+    _save_q()
     return questions
 
 

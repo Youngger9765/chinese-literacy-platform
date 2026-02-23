@@ -35,8 +35,62 @@
   ],
   "vocabulary_count": 2,
   "fill_in_blank": [],
-  "multiple_choice": [],
-  "multiple_choice_count": 0,
+  "multiple_choice": [
+    {
+      "question": "下列選項「」中字，何者字音、字義完全正確？",
+      "options": [
+        "忽大雨「雹」——ㄅㄠˋ，冰雹",
+        "償時多寡不較，「悉」納之——ㄒㄧ，吸收",
+        "「蓋」張素豐——ㄍㄞˋ，大概",
+        "獨張氏諸田無「恙」——ㄧㄤˋ，異樣。"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "課文中的商人把「不量」誤以為是「不良」，從而產生疑惑，這就是諧音雙關。請問下列何者造成誤解的原因與課文商人相同?",
+      "options": [
+        "店員：「請問您是付清嗎?」；",
+        "客人：「我買了這麼多，可以送我點什麼吧?」",
+        "老師：「壽司是Sushi，那『握壽司』跟『散壽司』的英文怎麼說?」",
+        "老師：「寫功課時要多用點心，作業才寫得好。」"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "「物產豐富」中的「物產」是本句的主語。下列各選項「」中的語詞，何者不做主語使用？",
+      "options": [
+        "「四海」昇平     (B)「群魔」亂舞",
+        "「氣焰」囂張     (D)「百年」樹人"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "根據本文，「張田獨無恙」的原因最可能是下列何者？",
+      "options": [
+        "張氏行善積德，得到護佑",
+        "貧民虔誠祈願，感動上天",
+        "張氏田產甚多無法丈量，看不出損失",
+        "賈人福澤深厚，連帶使張田倖免於難。"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "下列哪一選項與本文的主旨最接近？",
+      "options": [
+        "天助自助者，自助者人恆助之",
+        "好心自有好報",
+        "人在做，天在看",
+        "謀事在人，成事在天"
+      ],
+      "answer": null,
+      "explanation": null
+    }
+  ],
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {
@@ -54,7 +108,5 @@
     ]
   },
   "source_file": "G8-5-L46不量田.docx",
-  "flags": [
-    "NO_MC_QUESTIONS"
-  ]
+  "flags": []
 }

@@ -92,14 +92,6 @@
   ],
   "multiple_choice": [
     {
-      "question": "🅑再回到課文讀讀看，這個解釋可能是哪個語詞的意思。",
-      "options": [
-        "肅然起敬   B爭論不休   C星光滿布    D崎嶇"
-      ],
-      "answer": null,
-      "explanation": null
-    },
-    {
       "question": "下列語詞何者使用正確？",
       "options": [
         "臺北一零一大樓在市中心「艱鉅」，格外引人注目。（矗立）",
@@ -126,10 +118,10 @@
       "options": [
         "一個摩艾石像是由多塊石頭拼湊而成。",
         "從山上到海邊石像的道路，大多崎嶇不平。",
-        "現代的起重機要豎立石像仍然極不容易。。"
+        "現代的起重機要豎立石像仍然極不容易。（文中第三段）。"
       ],
-      "answer": "C",
-      "explanation": "文中第三段"
+      "answer": "A",
+      "explanation": "第二段提到石像大多是一體成形"
     },
     {
       "question": "請問巨石陣與摩艾走路這兩篇文章，其共同的未解之謎為何?",
@@ -154,7 +146,7 @@
       "explanation": null
     }
   ],
-  "multiple_choice_count": 6,
+  "multiple_choice_count": 5,
   "reading_benchmark": null,
   "source_file": "G9-9.10-L56~57多文本-未解之謎-巨石陣+摩艾石像.docx",
   "flags": [

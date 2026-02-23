@@ -100,15 +100,29 @@
       "explanation": null
     },
     {
-      "question": "你覺得果醬男孩的哪些特質幫助他取得事業上的成就？\n甲、節儉；乙、不怕困難；丙、全力以赴；丁、喜愛動物；戊、堅持",
+      "question": "你覺得果醬男孩的哪些特質幫助他取得事業上的成就？",
       "options": [
-        "甲乙戊。 B.乙丙戊。 C.丙丁戊。 D.乙丙丁。"
+        "甲乙戊。",
+        "乙丙戊。",
+        "丙丁戊。",
+        "乙丙丁。"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "小美早上老是爬不起來，無法趕上晨練，她想運用問題解決流程來克服自己的困難，目前進行到第三步驟的思考解決方案，以下是她想到的解決方案，下面哪些解決方案可能可行而且有效？",
+      "options": [
+        "甲乙丙丁",
+        "乙丙丁",
+        "甲乙。",
+        "丁。"
       ],
       "answer": null,
       "explanation": null
     }
   ],
-  "multiple_choice_count": 4,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {

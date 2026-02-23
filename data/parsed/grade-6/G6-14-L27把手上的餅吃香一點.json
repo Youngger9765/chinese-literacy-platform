@@ -151,14 +151,27 @@
     {
       "question": "作者讀完湯姆歷險記的故事前，無論在什麼狀況，「總覺得別人擁有的東西比較好」，下面哪句俗諺語和作者以前的想法不同？",
       "options": [
-        "柿子你要挑軟的吃。  B.外國的月亮比較圓。",
-        "遠來的和尚會念經。  D.隔牆的蘋果比較甜。"
+        "柿子你要挑軟的吃。",
+        "外國的月亮比較圓。",
+        "遠來的和尚會念經。",
+        "隔牆的蘋果比較甜。"
+      ],
+      "answer": null,
+      "explanation": null
+    },
+    {
+      "question": "運動會，大家期待已久的大隊接力比賽，因為下雨而延期了，下面哪些想法是比較正向的呢？",
+      "options": [
+        "甲乙",
+        "乙丙",
+        "丙丁",
+        "甲丁。"
       ],
       "answer": null,
       "explanation": null
     }
   ],
-  "multiple_choice_count": 4,
+  "multiple_choice_count": 5,
   "reading_benchmark": {
     "levels": [
       {
