@@ -331,7 +331,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             <div className="flex-1">
               <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-4 py-3">
                 <p className={`text-lg text-accent-hover leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                  {processZhuyin(`你剛才讀完了《${story.title}》，做得很棒！我想問你幾個關於課文的問題，幫助你更深入理解。準備好了嗎？`)}
+                  {processZhuyin(`你剛才讀完了《${story.title}》，做得很棒！讓我們來聊聊課文的內容吧。`)}
                 </p>
               </div>
             </div>
