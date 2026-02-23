@@ -707,7 +707,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 }`}
               >
                 <p
-                  className={`text-2xl lg:text-3xl leading-[3.5] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
+                  className={`text-2xl lg:text-3xl leading-[4.5] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
                     idx === currentLineIndex ? 'text-gray-900 font-bold' : 'text-gray-600'
                   }`}
                 >
