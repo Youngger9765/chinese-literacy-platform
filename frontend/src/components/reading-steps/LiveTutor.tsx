@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Story, ReadingAttempt, LiveMessage } from '../../types';
 import { correctHomophones } from '../../utils/pinyin';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
+import ZhuyinToggle from '../ui/ZhuyinToggle';
 
 /* ------------------------------------------------------------------ */
 /*  Canned response pools — randomly selected to avoid repetition     */
@@ -690,17 +691,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             {processZhuyin(story.filename)}
           </div>
           <div className="flex-1" />
-          <button
-            onClick={() => setZhuyinEnabled(!zhuyinEnabled)}
-            className={`px-2.5 py-1 rounded text-xs transition-colors ${
-              zhuyinEnabled && zhuyinReady
-                ? 'bg-indigo-600/80 text-white hover:bg-indigo-500'
-                : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-            }`}
-            title={zhuyinEnabled ? '隱藏注音' : '顯示注音'}
-          >
-            注音 {zhuyinEnabled ? 'ON' : 'OFF'}
-          </button>
+          <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
         </div>
 
         <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">

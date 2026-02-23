@@ -4,6 +4,7 @@ import { Story, ReadingAttempt } from '../../types';
 import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
+import ZhuyinToggle from '../ui/ZhuyinToggle';
 
 interface VocabPracticeProps {
   story: Story;
@@ -121,16 +122,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         <span className="text-[10px] text-gray-500">
           已練習 {practicedChars.size} / {displayChars.length} 字
         </span>
-        <button
-          onClick={() => setZhuyinEnabled(!zhuyinEnabled)}
-          className={`px-2.5 py-1 rounded text-xs transition-colors ${
-            zhuyinEnabled && zhuyinReady
-              ? 'bg-indigo-600/80 text-white hover:bg-indigo-500'
-              : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-          }`}
-        >
-          注音 {zhuyinEnabled ? 'ON' : 'OFF'}
-        </button>
+        <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
 
       {/* Main content */}

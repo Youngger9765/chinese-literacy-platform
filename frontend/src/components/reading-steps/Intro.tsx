@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Story } from '../../types';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
+import ZhuyinToggle from '../ui/ZhuyinToggle';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -103,16 +104,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         <span className="text-gray-300 text-xs">›</span>
         <span className="text-xs text-indigo-400 font-bold">簡介</span>
         <div className="flex-1" />
-        <button
-          onClick={() => setZhuyinEnabled(!zhuyinEnabled)}
-          className={`px-2.5 py-1 rounded text-xs transition-colors ${
-            zhuyinEnabled && zhuyinReady
-              ? 'bg-indigo-600/80 text-white hover:bg-indigo-500'
-              : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-          }`}
-        >
-          注音 {zhuyinEnabled ? 'ON' : 'OFF'}
-        </button>
+        <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
 
       {/* Main content */}
