@@ -14,3 +14,6 @@ __pycache__/
 # Build outputs
 dist/
 build/
+
+# Raw teaching materials (1GB+, not for git)
+data/raw-materials/
