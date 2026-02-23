@@ -270,12 +270,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
         {/* Story content — all paragraphs visible for reference */}
         <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
-          <div className="max-w-3xl mx-auto space-y-10">
+          <div className="max-w-3xl mx-auto space-y-20">
             {story.content.map((line, idx) => (
               <div
                 key={idx}
                 ref={el => { paragraphRefs.current[idx] = el; }}
-                className={`rounded-2xl p-6 border transition-all ${
+                className={`rounded-2xl px-6 py-12 border transition-all ${
                   highlightedParagraph === idx
                     ? 'border-amber-500/60 bg-amber-900/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
                     : 'border-transparent hover:border-gray-200 hover:bg-white/40'
