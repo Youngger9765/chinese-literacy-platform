@@ -772,7 +772,7 @@
         <div class="xp-container">
             <div class="xp-header">
                 <span class="xp-label">總經驗值 Total XP</span>
-                <span class="xp-value" id="xpValue">0 / 810 XP</span>
+                <span class="xp-value" id="xpValue">0 / 850 XP</span>
             </div>
             <div class="xp-bar-bg">
                 <div class="xp-bar-fill" id="xpBar"></div>
@@ -838,8 +838,11 @@
 
     <script>
         const STORAGE_KEY = 'lingoleap-quest-progress';
-        const TOTAL_XP = 810;
+        const TOTAL_XP = 850;
 
+        // Challenge IDs are SEMANTIC (not numeric) so inserting/removing/reordering
+        // challenges won't break localStorage saved progress.
+        // Rule: never rename an existing ID. New challenges get new unique IDs.
         const levels = [
             {
                 id: '1',
@@ -849,7 +852,7 @@
                 xp: 100,
                 challenges: [
                     {
-                        id: '1',
+                        id: 'whatIs',
                         type: 'multiple',
                         xp: 20,
                         question: 'LingoLeap 是什麼？ What is LingoLeap?',
@@ -862,7 +865,7 @@
                         correct: 0
                     },
                     {
-                        id: '2',
+                        id: 'po',
                         type: 'multiple',
                         xp: 20,
                         question: '誰是產品負責人？ Who is the product owner?',
@@ -875,7 +878,7 @@
                         correct: 1
                     },
                     {
-                        id: '3',
+                        id: 'users',
                         type: 'multiple',
                         xp: 20,
                         question: '平台的主要服務對象是？ Who are the target users?',
@@ -888,7 +891,7 @@
                         correct: 1
                     },
                     {
-                        id: '4',
+                        id: 'visitProd',
                         type: 'verification',
                         xp: 20,
                         question: '打開正式環境網站，看看平台長什麼樣子！Visit the production site:',
@@ -896,7 +899,7 @@
                         buttonText: '我已經看過了 I\'ve visited it ✓'
                     },
                     {
-                        id: '5',
+                        id: 'youngRole',
                         type: 'multiple',
                         xp: 20,
                         question: 'Young 在團隊中的角色是？ What is Young\'s role?',
@@ -918,7 +921,7 @@
                 xp: 100,
                 challenges: [
                     {
-                        id: '1',
+                        id: 'feTool',
                         type: 'multiple',
                         xp: 20,
                         question: '前端開發需要哪個工具？ Which tool is needed for frontend?',
@@ -931,7 +934,7 @@
                         correct: 1
                     },
                     {
-                        id: '2',
+                        id: 'beTool',
                         type: 'multiple',
                         xp: 20,
                         question: '後端開發需要哪個工具？ Which tool is needed for backend?',
@@ -944,7 +947,7 @@
                         correct: 2
                     },
                     {
-                        id: '3',
+                        id: 'cloud',
                         type: 'multiple',
                         xp: 20,
                         question: '我們用什麼雲端平台？ Which cloud platform do we use?',
@@ -957,7 +960,7 @@
                         correct: 2
                     },
                     {
-                        id: '4',
+                        id: 'editor',
                         type: 'multiple',
                         xp: 20,
                         question: '推薦的程式編輯器是？ Recommended code editor?',
@@ -970,7 +973,7 @@
                         correct: 2
                     },
                     {
-                        id: '5',
+                        id: 'extension',
                         type: 'fill',
                         xp: 20,
                         question: 'VS Code 推薦安裝的三個擴充套件（任選一個英文名稱）What\'s one recommended VS Code extension?',
@@ -986,7 +989,7 @@
                 xp: 120,
                 challenges: [
                     {
-                        id: '1',
+                        id: 'feStart',
                         type: 'command',
                         xp: 30,
                         question: '輸入啟動前端開發伺服器的完整指令 Type the command to start the frontend dev server:',
@@ -994,7 +997,7 @@
                         acceptable: ['cd frontend && npm install && npm run dev', 'npm run dev']
                     },
                     {
-                        id: '2',
+                        id: 'beStart',
                         type: 'command',
                         xp: 30,
                         question: '輸入啟動後端伺服器的指令 Type the command to start the backend server:',
@@ -1002,21 +1005,21 @@
                         acceptable: ['uvicorn app.main:app --reload', 'cd backend && uvicorn app.main:app --reload']
                     },
                     {
-                        id: '3',
+                        id: 'feUrl',
                         type: 'fill',
                         xp: 20,
                         question: '前端開發伺服器的本地網址是？ What\'s the frontend local URL?',
                         acceptable: ['localhost:3000', 'http://localhost:3000']
                     },
                     {
-                        id: '4',
+                        id: 'beUrl',
                         type: 'fill',
                         xp: 20,
                         question: '後端 API 伺服器的本地網址是？ What\'s the backend local URL?',
                         acceptable: ['localhost:8000', 'http://localhost:8000']
                     },
                     {
-                        id: '5',
+                        id: 'gcpAuth',
                         type: 'command',
                         xp: 20,
                         question: '輸入 GCP 認證指令 Type the GCP auth command for Vertex AI:',
@@ -1032,7 +1035,7 @@
                 xp: 120,
                 challenges: [
                     {
-                        id: '1',
+                        id: 'mergeOrder',
                         type: 'ordering',
                         xp: 30,
                         question: '排出正確的分支合併順序 Order the branch merge flow:',
@@ -1040,14 +1043,14 @@
                         correct: ['feature/*', 'staging', 'main']
                     },
                     {
-                        id: '2',
+                        id: 'branchName',
                         type: 'fill',
                         xp: 20,
                         question: '如果你要做 Issue #42 的功能，分支名稱應該是？ Branch name for Issue #42 feature?',
                         acceptable: ['feature/issue-42-']
                     },
                     {
-                        id: '3',
+                        id: 'commitPrefix',
                         type: 'multiple',
                         xp: 20,
                         question: '新功能的 commit 前綴是？ Commit prefix for a new feature?',
@@ -1060,7 +1063,7 @@
                         correct: 1
                     },
                     {
-                        id: '4',
+                        id: 'prStrategy',
                         type: 'multiple',
                         xp: 20,
                         question: 'PR 合併方式是？ What merge strategy for PRs?',
@@ -1073,7 +1076,7 @@
                         correct: 2
                     },
                     {
-                        id: '5',
+                        id: 'newBranch',
                         type: 'command',
                         xp: 30,
                         question: '從 staging 建立新功能分支的指令是？ Command to create a feature branch from staging?',
@@ -1090,7 +1093,7 @@
                 xp: 120,
                 challenges: [
                     {
-                        id: '1',
+                        id: 'stepCount',
                         type: 'multiple',
                         xp: 20,
                         question: '平台有幾個學習步驟？ How many learning steps?',
@@ -1098,7 +1101,7 @@
                         correct: 2
                     },
                     {
-                        id: '2',
+                        id: 'stepOrder',
                         type: 'ordering',
                         xp: 30,
                         question: '排出正確的學習步驟順序 Order the learning steps:',
@@ -1106,7 +1109,7 @@
                         correct: ['簡介', '逐段朗讀', '生字練習', '課文理解', '全文朗讀', '報告']
                     },
                     {
-                        id: '3',
+                        id: 'framework',
                         type: 'multiple',
                         xp: 20,
                         question: '前端使用哪個框架？ Which frontend framework?',
@@ -1119,7 +1122,7 @@
                         correct: 2
                     },
                     {
-                        id: '4',
+                        id: 'aiModel',
                         type: 'multiple',
                         xp: 20,
                         question: 'AI 服務使用什麼模型？ Which AI model?',
@@ -1132,7 +1135,7 @@
                         correct: 2
                     },
                     {
-                        id: '5',
+                        id: 'aiPath',
                         type: 'fill',
                         xp: 30,
                         question: '處理所有 AI 呼叫的後端檔案路徑是？ File path for AI service?',
@@ -1144,22 +1147,30 @@
                 id: '6',
                 icon: '🚀',
                 title: '首次任務',
-                subtitle: 'First Mission',
-                xp: 100,
+                subtitle: 'First Mission — GitHub 實戰',
+                xp: 140,
                 challenges: [
                     {
-                        id: '1',
-                        type: 'ordering',
-                        xp: 30,
-                        question: '排出正確的 PR 工作流程 Order the PR workflow:',
-                        items: ['merge', 'push 到遠端', '等待 CI + preview', '建立功能分支', 'code review', '開 PR 到 staging'],
-                        correct: ['建立功能分支', 'push 到遠端', '開 PR 到 staging', '等待 CI + preview', 'code review', 'merge']
+                        id: 'browseIssues',
+                        type: 'verification',
+                        xp: 20,
+                        question: '打開 GitHub Issues 頁面，瀏覽目前所有的 Issue。注意每個 Issue 上的 label（標籤）和 milestone（里程碑）— 這是我們追蹤工作進度的地方：',
+                        link: 'https://github.com/Youngger9765/chinese-literacy-platform/issues',
+                        buttonText: '我已經看過 Issues 清單了 ✓'
                     },
                     {
-                        id: '2',
+                        id: 'projectBoard',
+                        type: 'verification',
+                        xp: 20,
+                        question: '打開 GitHub Project Board（看板），這裡用卡片方式顯示所有任務的狀態和分類，是團隊協作的核心工具：',
+                        link: 'https://github.com/users/Youngger9765/projects/4',
+                        buttonText: '我已經看過 Project Board 了 ✓'
+                    },
+                    {
+                        id: 'firstLabel',
                         type: 'multiple',
                         xp: 20,
-                        question: '應該選擇什麼標籤的 issue 作為第一個任務？',
+                        question: '應該選擇什麼標籤的 Issue 作為你的第一個任務？',
                         options: [
                             'critical',
                             'good first issue',
@@ -1169,14 +1180,22 @@
                         correct: 1
                     },
                     {
-                        id: '3',
+                        id: 'prWorkflow',
+                        type: 'ordering',
+                        xp: 30,
+                        question: '排出正確的 PR 工作流程 Order the PR workflow:',
+                        items: ['merge', 'push 到遠端', '等待 CI + preview', '建立功能分支', 'code review', '開 PR 到 staging'],
+                        correct: ['建立功能分支', 'push 到遠端', '開 PR 到 staging', '等待 CI + preview', 'code review', 'merge']
+                    },
+                    {
+                        id: 'issueBranch',
                         type: 'command',
                         xp: 30,
                         question: '輸入建立 Issue #10 功能分支的完整指令',
                         acceptable: ['git checkout -b feature/issue-10']
                     },
                     {
-                        id: '4',
+                        id: 'previewDeploy',
                         type: 'multiple',
                         xp: 20,
                         question: 'PR 開好後，預覽環境會怎麼產生？',
@@ -1198,7 +1217,7 @@
                 xp: 150,
                 challenges: [
                     {
-                        id: '1',
+                        id: 'beFramework',
                         type: 'multiple',
                         xp: 30,
                         question: '完整的技術棧中，後端框架是？',
@@ -1211,14 +1230,14 @@
                         correct: 2
                     },
                     {
-                        id: '2',
+                        id: 'bugPrefix',
                         type: 'fill',
                         xp: 30,
                         question: '修 bug 的 commit 前綴是？',
                         acceptable: ['fix:', 'fix']
                     },
                     {
-                        id: '3',
+                        id: 'deployPlatform',
                         type: 'multiple',
                         xp: 30,
                         question: '部署平台是？',
@@ -1231,14 +1250,14 @@
                         correct: 1
                     },
                     {
-                        id: '4',
+                        id: 'beReload',
                         type: 'command',
                         xp: 30,
                         question: '輸入啟動後端伺服器（含自動重載）的指令',
                         acceptable: ['uvicorn app.main:app --reload']
                     },
                     {
-                        id: '5',
+                        id: 'apiFile',
                         type: 'fill',
                         xp: 30,
                         question: '所有 API 呼叫都在前端哪個檔案？',
@@ -1266,8 +1285,53 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
         }
 
+        // Reconcile saved state with current challenge structure.
+        // Handles: new challenges added, challenges removed, XP values changed.
+        // Interns keep their completed challenges; only new ones need to be done.
+        function reconcileState() {
+            let recalculatedXP = 0;
+            let firstIncompleteLevel = levels.length + 1;
+
+            levels.forEach(level => {
+                const savedLevel = gameState.levels[level.id];
+                if (!savedLevel) {
+                    // Level never touched — it's incomplete
+                    if (parseInt(level.id) < firstIncompleteLevel) {
+                        firstIncompleteLevel = parseInt(level.id);
+                    }
+                    return;
+                }
+
+                if (!savedLevel.challenges) savedLevel.challenges = {};
+
+                let levelXP = 0;
+                let allComplete = true;
+
+                level.challenges.forEach(ch => {
+                    if (savedLevel.challenges[ch.id]) {
+                        levelXP += ch.xp;
+                    } else {
+                        allComplete = false;
+                    }
+                });
+
+                savedLevel.xp = levelXP;
+                savedLevel.completed = allComplete;
+                recalculatedXP += levelXP;
+
+                if (!allComplete && parseInt(level.id) < firstIncompleteLevel) {
+                    firstIncompleteLevel = parseInt(level.id);
+                }
+            });
+
+            gameState.totalXP = recalculatedXP;
+            gameState.currentLevel = firstIncompleteLevel;
+            saveState();
+        }
+
         function initGame() {
             loadState();
+            reconcileState();
             renderLevelMap();
             renderLevels();
             updateXPBar();
@@ -1397,13 +1461,13 @@
             showFeedback(challengeId, isCorrect, isCorrect ? '正確！Correct!' : '錯誤！Wrong answer. Try again.');
 
             if (isCorrect) {
-                const [levelId, chId] = challengeId.split('-');
+                const [levelId, chId] = challengeId.split('-', 2);
                 const level = levels.find(l => l.id === levelId);
                 const challenge = level.challenges.find(c => c.id === chId);
                 completeChallenge(levelId, chId, challenge.xp);
             } else {
                 gameState.wrongAnswers++;
-                const [levelId] = challengeId.split('-');
+                const [levelId] = challengeId.split('-', 2);
                 if (!gameState.levels[levelId]) gameState.levels[levelId] = { wrongCount: 0 };
                 gameState.levels[levelId].wrongCount = (gameState.levels[levelId].wrongCount || 0) + 1;
                 saveState();
@@ -1427,14 +1491,14 @@
             showFeedback(challengeId, isCorrect, isCorrect ? '正確！Correct!' : '錯誤！Wrong answer. Try again.');
 
             if (isCorrect) {
-                const [levelId, chId] = challengeId.split('-');
+                const [levelId, chId] = challengeId.split('-', 2);
                 const level = levels.find(l => l.id === levelId);
                 const challenge = level.challenges.find(c => c.id === chId);
                 completeChallenge(levelId, chId, challenge.xp);
                 input.disabled = true;
             } else {
                 gameState.wrongAnswers++;
-                const [levelId] = challengeId.split('-');
+                const [levelId] = challengeId.split('-', 2);
                 if (!gameState.levels[levelId]) gameState.levels[levelId] = { wrongCount: 0 };
                 gameState.levels[levelId].wrongCount = (gameState.levels[levelId].wrongCount || 0) + 1;
                 saveState();
@@ -1478,13 +1542,13 @@
             showFeedback(challengeId, isCorrect, isCorrect ? '正確！Correct!' : '錯誤！Wrong order. Click items to swap.');
 
             if (isCorrect) {
-                const [levelId, chId] = challengeId.split('-');
+                const [levelId, chId] = challengeId.split('-', 2);
                 const level = levels.find(l => l.id === levelId);
                 const challenge = level.challenges.find(c => c.id === chId);
                 completeChallenge(levelId, chId, challenge.xp);
             } else {
                 gameState.wrongAnswers++;
-                const [levelId] = challengeId.split('-');
+                const [levelId] = challengeId.split('-', 2);
                 if (!gameState.levels[levelId]) gameState.levels[levelId] = { wrongCount: 0 };
                 gameState.levels[levelId].wrongCount = (gameState.levels[levelId].wrongCount || 0) + 1;
                 saveState();
@@ -1492,7 +1556,7 @@
         }
 
         function checkVerification(challengeId) {
-            const [levelId, chId] = challengeId.split('-');
+            const [levelId, chId] = challengeId.split('-', 2);
             const level = levels.find(l => l.id === levelId);
             const challenge = level.challenges.find(c => c.id === chId);
             completeChallenge(levelId, chId, challenge.xp);
