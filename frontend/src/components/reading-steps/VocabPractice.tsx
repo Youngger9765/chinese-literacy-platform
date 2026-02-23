@@ -156,7 +156,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                       isPracticed
                         ? 'bg-emerald-50 border-emerald-700/50 text-emerald-800'
                         : isSuggested
-                          ? 'bg-amber-900/30 border-amber-600/60 text-amber-200 ring-1 ring-amber-500/30 hover:bg-amber-900/50'
+                          ? 'bg-amber-900/30 border-amber-600/60 text-amber-700 ring-1 ring-amber-500/30 hover:bg-amber-900/50'
                           : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-accent/40',
                     ].join(' ')}
                   >

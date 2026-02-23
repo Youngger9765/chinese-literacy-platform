@@ -350,7 +350,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {isSessionActive && !streamingTranscript && (
             <div className="flex flex-col gap-1">
               <span className="text-[9px] font-bold text-green-500 uppercase animate-pulse">LISTENING</span>
-              <div className="bg-green-900/20 border border-green-700/30 rounded-xl px-3 py-2.5 text-base text-green-300 leading-relaxed">
+              <div className="bg-green-900/20 border border-green-700/30 rounded-xl px-3 py-2.5 text-base text-gray-600 leading-relaxed">
                 請朗讀左側課文，從頭到尾…
               </div>
             </div>
