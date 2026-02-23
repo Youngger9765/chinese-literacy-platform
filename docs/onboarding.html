@@ -12,18 +12,19 @@
         }
 
         :root {
-            --bg-primary: #0d1117;
-            --bg-secondary: #161b22;
-            --border-color: #30363d;
-            --text-primary: #e6edf3;
-            --text-secondary: #8b949e;
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --border-color: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
             --xp-gold-start: #f59e0b;
             --xp-gold-end: #eab308;
             --level-indigo: #6366f1;
             --level-purple: #8b5cf6;
             --correct-green: #22c55e;
             --wrong-red: #ef4444;
-            --locked-gray: #3d444d;
+            --locked-gray: #cbd5e1;
+            --code-bg: #1e293b;
         }
 
         body {
@@ -68,7 +69,7 @@
             border-radius: 12px;
             padding: 1.25rem;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         }
 
         .xp-header {
@@ -212,7 +213,7 @@
             border-radius: 12px;
             padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
             transition: all 0.3s ease;
         }
 
@@ -591,69 +592,6 @@
             font-size: 1.125rem;
         }
 
-        /* Achievements */
-        .achievements-panel {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1rem;
-            max-width: 300px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-        }
-
-        .achievements-title {
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .achievement-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.625rem;
-            margin-bottom: 0.5rem;
-            background: var(--bg-primary);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .achievement-item.unlocked {
-            border-color: var(--xp-gold-start);
-            background: rgba(245, 158, 11, 0.05);
-        }
-
-        .achievement-item.locked {
-            opacity: 0.4;
-        }
-
-        .achievement-badge {
-            font-size: 1.5rem;
-        }
-
-        .achievement-info {
-            flex: 1;
-        }
-
-        .achievement-name {
-            font-size: 0.8125rem;
-            font-weight: 600;
-            margin-bottom: 0.125rem;
-        }
-
-        .achievement-desc {
-            font-size: 0.6875rem;
-            color: var(--text-secondary);
-        }
-
         /* Certificate */
         .certificate {
             background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
@@ -805,11 +743,6 @@
                 padding: 1.5rem;
             }
 
-            .achievements-panel {
-                position: static;
-                margin-bottom: 2rem;
-                max-width: 100%;
-            }
 
             .certificate-stats {
                 flex-direction: column;
@@ -844,12 +777,6 @@
             <div class="xp-bar-bg">
                 <div class="xp-bar-fill" id="xpBar"></div>
             </div>
-        </div>
-
-        <!-- Achievements Panel -->
-        <div class="achievements-panel">
-            <div class="achievements-title">🏆 成就 Achievements</div>
-            <div id="achievementsList"></div>
         </div>
 
         <!-- Level Map -->
@@ -912,14 +839,6 @@
     <script>
         const STORAGE_KEY = 'lingoleap-quest-progress';
         const TOTAL_XP = 810;
-
-        const achievements = [
-            { id: 'first-level', icon: '🌟', name: '新手上路', desc: 'Complete Level 1', check: state => state.levels['1']?.completed },
-            { id: 'speed-star', icon: '⚡', name: '速度之星', desc: '0 wrong answers in a level', check: state => Object.values(state.levels).some(l => l.completed && l.wrongCount === 0) },
-            { id: 'knowledge', icon: '🧠', name: '知識達人', desc: 'Reach 50% total XP', check: state => state.totalXP >= TOTAL_XP * 0.5 },
-            { id: 'graduate', icon: '🏆', name: '畢業典禮', desc: 'Complete all 7 levels', check: state => state.currentLevel > 7 },
-            { id: 'perfect', icon: '💯', name: '滿分通關', desc: '100% first-try accuracy', check: state => state.currentLevel > 7 && state.wrongAnswers === 0 }
-        ];
 
         const levels = [
             {
@@ -1333,7 +1252,6 @@
             currentLevel: 1,
             levels: {},
             totalXP: 0,
-            achievements: [],
             wrongAnswers: 0
         };
 
@@ -1352,7 +1270,6 @@
             loadState();
             renderLevelMap();
             renderLevels();
-            renderAchievements();
             updateXPBar();
             checkCertificate();
         }
@@ -1615,7 +1532,6 @@
                     showLevelComplete(level);
                 }
 
-                checkAchievements();
                 saveState();
 
                 document.getElementById(`challenge-${levelId}-${challengeId}`).classList.add('completed');
@@ -1654,31 +1570,6 @@
             checkCertificate();
         }
 
-        function checkAchievements() {
-            achievements.forEach(ach => {
-                if (!gameState.achievements.includes(ach.id) && ach.check(gameState)) {
-                    gameState.achievements.push(ach.id);
-                    showToast(ach.icon, '成就解鎖！', ach.name);
-                }
-            });
-            renderAchievements();
-        }
-
-        function renderAchievements() {
-            const list = document.getElementById('achievementsList');
-            list.innerHTML = achievements.map(ach => {
-                const unlocked = gameState.achievements.includes(ach.id);
-                return `
-                    <div class="achievement-item ${unlocked ? 'unlocked' : 'locked'}">
-                        <div class="achievement-badge">${ach.icon}</div>
-                        <div class="achievement-info">
-                            <div class="achievement-name">${ach.name}</div>
-                            <div class="achievement-desc">${ach.desc}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
 
         function showToast(icon, title, desc) {
             const toast = document.getElementById('toast');
@@ -1704,7 +1595,7 @@
         }
 
         function resetGame() {
-            if (confirm('確定要重置所有進度嗎？所有成就和經驗值都會消失！\n\nAre you sure you want to reset all progress? All achievements and XP will be lost!')) {
+            if (confirm('確定要重置所有進度嗎？經驗值都會消失！\n\nAre you sure you want to reset all progress?')) {
                 localStorage.removeItem(STORAGE_KEY);
                 location.reload();
             }
