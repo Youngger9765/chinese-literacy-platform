@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { AppView, Story, ReadingAttempt } from './types';
+import { AppView, Story, ReadingAttempt, LearningSession, ComprehensionResult, VocabResult, FullReadingResult } from './types';
 import { useIsMobile } from './hooks/useIsMobile';
 import StoryLibrary from './pages/student/StoryLibrary';
 import Intro from './components/reading-steps/Intro';
@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const [view, setView] = useState<AppView>(AppView.HOME);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [lastAttempt, setLastAttempt] = useState<ReadingAttempt | null>(null);
+  const [session, setSession] = useState<LearningSession | null>(null);
   const [writingChar, setWritingChar] = useState('');
   const [writeInput, setWriteInput] = useState('');
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
@@ -33,6 +34,14 @@ const App: React.FC = () => {
 
   const handleSelectStory = (story: Story) => {
     setSelectedStory(story);
+    setSession({
+      storyId: story.id,
+      startedAt: Date.now(),
+      readingAttempt: null,
+      comprehensionResult: null,
+      vocabResult: null,
+      fullReadingResult: null,
+    });
     setView(AppView.INTRO);
   };
 
@@ -42,14 +51,17 @@ const App: React.FC = () => {
 
   const handleFinishReading = (attempt: ReadingAttempt) => {
     setLastAttempt(attempt);
+    setSession(prev => prev ? { ...prev, readingAttempt: attempt } : null);
     setView(AppView.COMPREHENSION);
   };
 
-  const handleFinishComprehension = () => {
+  const handleFinishComprehension = (result: ComprehensionResult) => {
+    setSession(prev => prev ? { ...prev, comprehensionResult: result } : null);
     setView(AppView.VOCAB);
   };
 
-  const handleFinishVocab = () => {
+  const handleFinishVocab = (result: VocabResult) => {
+    setSession(prev => prev ? { ...prev, vocabResult: result } : null);
     setView(AppView.REPORT);
   };
 
@@ -267,14 +279,17 @@ const App: React.FC = () => {
             story={selectedStory}
             rightPanelWidth={rightPanelWidth}
             onPanelWidthChange={setRightPanelWidth}
-            onFinish={() => setView(AppView.REPORT)}
+            onFinish={(result: FullReadingResult) => {
+              setSession(prev => prev ? { ...prev, fullReadingResult: result } : null);
+              setView(AppView.REPORT);
+            }}
             onBack={() => setView(AppView.VOCAB)}
           />
         )}
 
         {view === AppView.REPORT && (
           <div className="p-8 max-w-4xl mx-auto w-full">
-             <AssessmentReport attempt={lastAttempt} onRetry={() => setView(AppView.LIBRARY)} />
+             <AssessmentReport session={session} onRetry={() => { setView(AppView.LIBRARY); setSession(null); setLastAttempt(null); }} />
           </div>
         )}
 

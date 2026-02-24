@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Story, ReadingAttempt } from '../../types';
+import { Story, ReadingAttempt, ComprehensionResult } from '../../types';
 import { sendComprehensionChat, ChatResponse, SessionExpiredError } from '../../services/api';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
@@ -10,7 +10,7 @@ interface ComprehensionChatProps {
   attempt: ReadingAttempt;
   rightPanelWidth: number;
   onPanelWidthChange: (w: number) => void;
-  onFinish: () => void;
+  onFinish: (result: ComprehensionResult) => void;
   onBack: () => void;
 }
 
@@ -386,7 +386,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             ← 回到朗讀
           </button>
           <button
-            onClick={onFinish}
+            onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
             className="flex-1 py-3 rounded-xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-2"
           >
             繼續，生字練習
@@ -496,7 +496,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 <span className="text-[10px] text-gray-600">
                   {understoodCount} / {requiredCount} 理解
                 </span>
-                <button onClick={onFinish} className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
+                <button onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })} className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
                   跳過
                 </button>
               </div>
@@ -571,7 +571,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 {understoodCount} / {requiredCount} 理解
               </span>
               <button
-                onClick={onFinish}
+                onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
                 className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors"
               >
                 跳過

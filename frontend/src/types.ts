@@ -48,6 +48,32 @@ export interface ReadingAttempt {
   timestamp: number;
 }
 
+export interface ComprehensionResult {
+  understoodCount: number;
+  requiredCount: number;
+  isComplete: boolean;
+  conversationLength: number;
+}
+
+export interface VocabResult {
+  practicedChars: string[];
+  totalChars: number;
+}
+
+export interface FullReadingResult {
+  matchRate: number;
+  feedback: string;
+}
+
+export interface LearningSession {
+  storyId: string;
+  startedAt: number;
+  readingAttempt: ReadingAttempt | null;
+  comprehensionResult: ComprehensionResult | null;
+  vocabResult: VocabResult | null;
+  fullReadingResult: FullReadingResult | null;
+}
+
 export interface LiveMessage {
   id: string;
   role: 'user' | 'model';

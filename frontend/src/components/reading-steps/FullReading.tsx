@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Story } from '../../types';
+import { Story, FullReadingResult } from '../../types';
 import { correctHomophones } from '../../utils/pinyin';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
@@ -48,7 +48,7 @@ interface FullReadingProps {
   story: Story;
   rightPanelWidth: number;
   onPanelWidthChange: (w: number) => void;
-  onFinish: () => void;
+  onFinish: (result: FullReadingResult) => void;
   onBack: () => void;
 }
 
@@ -422,7 +422,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                 再試一次
               </button>
               <button
-                onClick={onFinish}
+                onClick={() => onFinish({ matchRate: result!.matchRate, feedback: result!.feedback })}
                 className="w-full py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95"
               >
                 查看報告
