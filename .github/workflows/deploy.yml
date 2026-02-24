@@ -43,45 +43,22 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker asia-east1-docker.pkg.dev
+
       - name: Build & push backend image
         run: |
-          VERSION="v0.$(date +%Y%m%d%H%M)"
-          BUILD_ID=$(gcloud builds submit \
-            --tag "${{ env.REGISTRY }}/backend:${VERSION}" \
-            --project ${{ env.PROJECT_ID }} \
-            --async \
-            ./backend \
-            --format='value(id)')
-          echo "Backend build started: $BUILD_ID"
-
-          # Poll for build completion
-          for i in {1..60}; do
-            STATUS=$(gcloud builds describe $BUILD_ID --project ${{ env.PROJECT_ID }} --format='value(status)')
-            echo "Attempt $i/60: Build status = $STATUS"
-
-            if [ "$STATUS" = "SUCCESS" ]; then
-              echo "Backend build completed successfully"
-              break
-            elif [ "$STATUS" = "FAILURE" ] || [ "$STATUS" = "TIMEOUT" ] || [ "$STATUS" = "CANCELLED" ]; then
-              echo "Backend build failed with status: $STATUS"
-              gcloud builds log $BUILD_ID --project ${{ env.PROJECT_ID }}
-              exit 1
-            fi
-
-            sleep 10
-          done
-
-          if [ "$STATUS" != "SUCCESS" ]; then
-            echo "Backend build timed out after 10 minutes"
-            exit 1
-          fi
-
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          docker build \
+            -t "${{ env.REGISTRY }}/backend:prod-${{ github.sha }}" \
+            -t "${{ env.REGISTRY }}/backend:prod-latest" \
+            ./backend
+          docker push "${{ env.REGISTRY }}/backend:prod-${{ github.sha }}"
+          docker push "${{ env.REGISTRY }}/backend:prod-latest"
 
       - name: Deploy backend to Cloud Run
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
-            --image "${{ env.REGISTRY }}/backend:${{ env.VERSION }}" \
+            --image "${{ env.REGISTRY }}/backend:prod-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
@@ -120,45 +97,22 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker asia-east1-docker.pkg.dev
+
       - name: Build & push frontend image
         run: |
-          VERSION="v0.$(date +%Y%m%d%H%M)"
-          BUILD_ID=$(gcloud builds submit \
-            --tag "${{ env.REGISTRY }}/frontend:${VERSION}" \
-            --project ${{ env.PROJECT_ID }} \
-            --async \
-            ./frontend \
-            --format='value(id)')
-          echo "Frontend build started: $BUILD_ID"
-
-          # Poll for build completion
-          for i in {1..60}; do
-            STATUS=$(gcloud builds describe $BUILD_ID --project ${{ env.PROJECT_ID }} --format='value(status)')
-            echo "Attempt $i/60: Build status = $STATUS"
-
-            if [ "$STATUS" = "SUCCESS" ]; then
-              echo "Frontend build completed successfully"
-              break
-            elif [ "$STATUS" = "FAILURE" ] || [ "$STATUS" = "TIMEOUT" ] || [ "$STATUS" = "CANCELLED" ]; then
-              echo "Frontend build failed with status: $STATUS"
-              gcloud builds log $BUILD_ID --project ${{ env.PROJECT_ID }}
-              exit 1
-            fi
-
-            sleep 10
-          done
-
-          if [ "$STATUS" != "SUCCESS" ]; then
-            echo "Frontend build timed out after 10 minutes"
-            exit 1
-          fi
-
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          docker build \
+            -t "${{ env.REGISTRY }}/frontend:prod-${{ github.sha }}" \
+            -t "${{ env.REGISTRY }}/frontend:prod-latest" \
+            ./frontend
+          docker push "${{ env.REGISTRY }}/frontend:prod-${{ github.sha }}"
+          docker push "${{ env.REGISTRY }}/frontend:prod-latest"
 
       - name: Deploy frontend to Cloud Run
         run: |
           gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
-            --image "${{ env.REGISTRY }}/frontend:${{ env.VERSION }}" \
+            --image "${{ env.REGISTRY }}/frontend:prod-${{ github.sha }}" \
             --platform managed \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
