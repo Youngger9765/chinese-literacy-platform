@@ -112,7 +112,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
 
           {/* Hero: thumbnail + title */}
-          <div className="flex gap-6 items-start">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
             <img
               src={story.thumbnail}
               alt={story.title}
