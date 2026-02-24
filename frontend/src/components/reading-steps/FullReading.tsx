@@ -3,6 +3,7 @@ import { Story } from '../../types';
 import { correctHomophones } from '../../utils/pinyin';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 /* ---- Text helpers (same normalisation as LiveTutor) ---- */
 
@@ -52,6 +53,7 @@ interface FullReadingProps {
 }
 
 const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPanelWidthChange, onFinish, onBack }) => {
+  const isMobile = useIsMobile();
   const [isPreparing, setIsPreparing]           = useState(false);
   const [isSessionActive, setIsSessionActive]   = useState(false);
   const [isTtsSpeaking, setIsTtsSpeaking]       = useState(false);
@@ -104,11 +106,24 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isDraggingRef.current) return;
+      const delta = dragStartXRef.current - e.touches[0].clientX;
+      onPanelWidthChange(Math.max(240, Math.min(600, dragStartWidthRef.current + delta)));
+    };
+    const onTouchEnd = () => {
+      isDraggingRef.current = false;
+      document.body.style.userSelect = '';
+    };
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('touchmove', onTouchMove);
+    window.addEventListener('touchend', onTouchEnd);
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
     };
   }, []);
 
@@ -262,7 +277,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
   return (
     <div
-      className="flex flex-1 h-full bg-amber-50 overflow-hidden"
+      className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 h-full bg-amber-50 overflow-hidden`}
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
@@ -270,7 +285,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       }}
     >
       {/* LEFT: Full story text */}
-      <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
+      <div className={`flex flex-col bg-amber-50 min-w-0 ${isMobile ? 'h-[60vh]' : 'flex-1'}`}>
         {/* Tab bar */}
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
           <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800">
@@ -281,14 +296,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
         </div>
 
         {/* All paragraphs */}
-        <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
+        <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8 lg:p-16'} overflow-y-auto custom-scrollbar`}>
           <div className="max-w-3xl mx-auto space-y-20">
             {story.content.map((line, idx) => (
               <div
                 key={idx}
                 className="rounded-2xl px-6 py-12 border-b border-gray-200 last:border-b-0 hover:bg-white/30 transition-all"
               >
-                <p className={`text-2xl lg:text-3xl text-gray-800 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                <p className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} text-gray-800 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
                 </p>
               </div>
@@ -306,16 +321,24 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
         </div>
       </div>
 
-      {/* Resizable divider */}
-      <div
-        onMouseDown={onDividerMouseDown}
-        className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
-      />
+      {/* Resizable divider - hidden on mobile */}
+      {!isMobile && (
+        <div
+          onMouseDown={onDividerMouseDown}
+          onTouchStart={(e) => {
+            isDraggingRef.current = true;
+            dragStartXRef.current = e.touches[0].clientX;
+            dragStartWidthRef.current = rightPanelWidth;
+            document.body.style.userSelect = 'none';
+          }}
+          className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
+        />
+      )}
 
       {/* RIGHT: Recording panel */}
       <div
-        className="flex-shrink-0 bg-amber-50 flex flex-col h-full min-h-0"
-        style={{ width: rightPanelWidth }}
+        className={`bg-amber-50 flex flex-col min-h-0 ${isMobile ? 'flex-1' : 'flex-shrink-0 h-full'}`}
+        style={isMobile ? undefined : { width: rightPanelWidth }}
       >
         {/* Header */}
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4">

@@ -1,6 +1,15 @@
 
 import React, { useState } from 'react';
 import { AppView, Story, ReadingAttempt } from './types';
+import { useIsMobile } from './hooks/useIsMobile';
+import StoryLibrary from './pages/student/StoryLibrary';
+import Intro from './components/reading-steps/Intro';
+import LiveTutor from './components/reading-steps/LiveTutor';
+import VocabPractice from './components/reading-steps/VocabPractice';
+import ComprehensionChat from './components/reading-steps/ComprehensionChat';
+import FullReading from './components/reading-steps/FullReading';
+import AssessmentReport from './components/reading-steps/AssessmentReport';
+import WriteCharacter from './components/stroke-order/WriteCharacter';
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
   storyId: '',
@@ -11,14 +20,6 @@ const EMPTY_ATTEMPT: ReadingAttempt = {
   transcription: '',
   timestamp: 0,
 };
-import StoryLibrary from './pages/student/StoryLibrary';
-import Intro from './components/reading-steps/Intro';
-import LiveTutor from './components/reading-steps/LiveTutor';
-import VocabPractice from './components/reading-steps/VocabPractice';
-import ComprehensionChat from './components/reading-steps/ComprehensionChat';
-import FullReading from './components/reading-steps/FullReading';
-import AssessmentReport from './components/reading-steps/AssessmentReport';
-import WriteCharacter from './components/stroke-order/WriteCharacter';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>(AppView.HOME);
@@ -27,6 +28,8 @@ const App: React.FC = () => {
   const [writingChar, setWritingChar] = useState('');
   const [writeInput, setWriteInput] = useState('');
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleSelectStory = (story: Story) => {
     setSelectedStory(story);
@@ -50,6 +53,15 @@ const App: React.FC = () => {
     setView(AppView.REPORT);
   };
 
+  const steps = [
+    { step: 1, label: '簡介',    view: AppView.INTRO,         needsStory: true  },
+    { step: 2, label: '逐段朗讀', view: AppView.TUTOR,         needsStory: true  },
+    { step: 3, label: '生字練習', view: AppView.VOCAB,         needsStory: true  },
+    { step: 4, label: '課文理解', view: AppView.COMPREHENSION, needsStory: true  },
+    { step: 5, label: '全文朗讀', view: AppView.FULL_READING,  needsStory: true  },
+    { step: 6, label: '報告',    view: AppView.REPORT,        needsStory: false },
+  ] as const;
+
   return (
     <div className="h-screen flex flex-col bg-amber-50 text-gray-900 font-sans overflow-hidden">
       {/* Header */}
@@ -63,64 +75,133 @@ const App: React.FC = () => {
         </div>
 
         {/* Step Navigation (upper right) */}
-        <nav className="flex items-center gap-1 text-[11px] font-medium">
-          {/* 首頁 */}
-          <button
-            onClick={() => setView(AppView.HOME)}
-            className={`px-2 py-1 rounded transition-colors ${
-              view === AppView.HOME
-                ? 'bg-accent text-white'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-            }`}
-          >
-            首頁
-          </button>
-
-          <span className="text-gray-300 select-none">·</span>
-
-          {/* Steps 1–6 */}
-          {([
-            { step: 1, label: '簡介',    view: AppView.INTRO,         needsStory: true  },
-            { step: 2, label: '逐段朗讀', view: AppView.TUTOR,         needsStory: true  },
-            { step: 3, label: '生字練習', view: AppView.VOCAB,         needsStory: true  },
-            { step: 4, label: '課文理解', view: AppView.COMPREHENSION, needsStory: true  },
-            { step: 5, label: '全文朗讀', view: AppView.FULL_READING,  needsStory: true  },
-            { step: 6, label: '報告',    view: AppView.REPORT,        needsStory: false },
-          ] as const).map(({ step, label, view: targetView, needsStory }, i, arr) => {
-            const isActive = view === targetView;
-            const isDisabled = needsStory && !selectedStory;
-            return (
-              <React.Fragment key={targetView}>
+        {isMobile ? (
+          <nav className="flex items-center gap-1 text-[11px] font-medium relative">
+            {/* Compact step circles */}
+            {steps.map(({ step, view: targetView, needsStory }) => {
+              const isActive = view === targetView;
+              const isDisabled = needsStory && !selectedStory;
+              return (
                 <button
-                  onClick={() => !isDisabled && setView(targetView)}
-                  className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
-                    isActive
-                      ? 'bg-accent text-white'
-                      : isDisabled
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  key={targetView}
+                  onClick={() => { if (!isDisabled) { setView(targetView); setMobileNavOpen(false); } }}
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 transition-colors ${
+                    isActive ? 'bg-accent text-white' : isDisabled ? 'bg-gray-200 text-gray-400' : 'bg-gray-200 text-gray-600'
                   }`}
                 >
-                  <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
-                    isActive ? 'bg-white text-accent' : isDisabled ? 'bg-gray-300 text-gray-400' : 'bg-gray-200 text-gray-900'
-                  }`}>
-                    {step}
-                  </span>
-                  <span className="hidden md:block">{label}</span>
+                  {step}
                 </button>
-                {i < arr.length - 1 && (
-                  <span className="text-gray-300 select-none">·</span>
-                )}
-              </React.Fragment>
-            );
-          })}
+              );
+            })}
 
-          {/* User avatar */}
-          <div className="ml-3 flex items-center gap-1 pl-3 border-l border-gray-200">
-            <div className="w-6 h-6 rounded-full bg-gray-200"></div>
-            <span className="text-[10px] text-gray-500 hidden sm:block">Lv.12</span>
-          </div>
-        </nav>
+            {/* Hamburger */}
+            <button
+              onClick={() => setMobileNavOpen(!mobileNavOpen)}
+              className="ml-1 p-1 rounded hover:bg-gray-100 transition-colors"
+            >
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            {/* Dropdown */}
+            {mobileNavOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setMobileNavOpen(false)} />
+                <div className="absolute right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[160px]">
+                  <button
+                    onClick={() => { setView(AppView.HOME); setMobileNavOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-xs flex items-center gap-2 ${
+                      view === AppView.HOME ? 'bg-accent/10 text-accent font-bold' : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    首頁
+                  </button>
+                  {steps.map(({ step, label, view: targetView, needsStory }) => {
+                    const isActive = view === targetView;
+                    const isDisabled = needsStory && !selectedStory;
+                    return (
+                      <button
+                        key={targetView}
+                        onClick={() => { if (!isDisabled) { setView(targetView); setMobileNavOpen(false); } }}
+                        disabled={isDisabled}
+                        className={`w-full text-left px-3 py-2 text-xs flex items-center gap-2 ${
+                          isActive ? 'bg-accent/10 text-accent font-bold'
+                          : isDisabled ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
+                          isActive ? 'bg-accent text-white' : isDisabled ? 'bg-gray-200 text-gray-400' : 'bg-gray-200 text-gray-700'
+                        }`}>
+                          {step}
+                        </span>
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* Avatar */}
+            <div className="ml-2 flex items-center gap-1 pl-2 border-l border-gray-200">
+              <div className="w-6 h-6 rounded-full bg-gray-200"></div>
+            </div>
+          </nav>
+        ) : (
+          <nav className="flex items-center gap-1 text-[11px] font-medium">
+            {/* 首頁 */}
+            <button
+              onClick={() => setView(AppView.HOME)}
+              className={`px-2 py-1 rounded transition-colors ${
+                view === AppView.HOME
+                  ? 'bg-accent text-white'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              首頁
+            </button>
+
+            <span className="text-gray-300 select-none">·</span>
+
+            {/* Steps 1–6 */}
+            {steps.map(({ step, label, view: targetView, needsStory }, i, arr) => {
+              const isActive = view === targetView;
+              const isDisabled = needsStory && !selectedStory;
+              return (
+                <React.Fragment key={targetView}>
+                  <button
+                    onClick={() => !isDisabled && setView(targetView)}
+                    className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
+                      isActive
+                        ? 'bg-accent text-white'
+                        : isDisabled
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
+                      isActive ? 'bg-white text-accent' : isDisabled ? 'bg-gray-300 text-gray-400' : 'bg-gray-200 text-gray-900'
+                    }`}>
+                      {step}
+                    </span>
+                    <span className="hidden md:block">{label}</span>
+                  </button>
+                  {i < arr.length - 1 && (
+                    <span className="text-gray-300 select-none">·</span>
+                  )}
+                </React.Fragment>
+              );
+            })}
+
+            {/* User avatar */}
+            <div className="ml-3 flex items-center gap-1 pl-3 border-l border-gray-200">
+              <div className="w-6 h-6 rounded-full bg-gray-200"></div>
+              <span className="text-[10px] text-gray-500 hidden sm:block">Lv.12</span>
+            </div>
+          </nav>
+        )}
       </header>
 
       <main className="flex-1 flex flex-col overflow-hidden">

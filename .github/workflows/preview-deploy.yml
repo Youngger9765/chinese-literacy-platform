@@ -64,7 +64,7 @@ jobs:
         run: |
           BRANCH="${{ github.event.pull_request.head.ref }}"
           # Extract issue number from branch name: feature/issue-{N}-* or fix/issue-{N}-*
-          ISSUE_NUM=$(echo "$BRANCH" | grep -oP '(?<=issue-)\d+' || echo "")
+          ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
           if [ -z "$ISSUE_NUM" ]; then
             # Fallback to PR number if branch doesn't follow convention
             ISSUE_NUM=${{ github.event.pull_request.number }}
@@ -231,7 +231,7 @@ jobs:
         id: issue
         run: |
           BRANCH="${{ github.event.pull_request.head.ref }}"
-          ISSUE_NUM=$(echo "$BRANCH" | grep -oP '(?<=issue-)\d+' || echo "")
+          ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
           if [ -z "$ISSUE_NUM" ]; then
             ISSUE_NUM=${{ github.event.pull_request.number }}
           fi
