@@ -62,7 +62,7 @@ const App: React.FC = () => {
 
   const handleFinishVocab = (result: VocabResult) => {
     setSession(prev => prev ? { ...prev, vocabResult: result } : null);
-    setView(AppView.REPORT);
+    setView(AppView.FULL_READING);
   };
 
   const steps = [

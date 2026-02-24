@@ -134,7 +134,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, onRetry })
       {/* Step cards */}
       <div className="grid gap-6">
 
-        {/* Step 1: 逐段朗讀 */}
+        {/* Step 2: 逐段朗讀 */}
         <div className={`rounded-3xl border p-6 ${readingAttempt ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
           <div className="flex items-center gap-3 mb-4">
             <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${readingAttempt ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>
@@ -209,44 +209,6 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, onRetry })
           )}
         </div>
 
-        {/* Step 2: 課文理解 */}
-        <div className={`rounded-3xl border p-6 ${comprehensionResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>
-              4
-            </span>
-            <h3 className={`text-lg font-bold ${comprehensionResult ? 'text-gray-900' : 'text-gray-400'}`}>課文理解</h3>
-            {comprehensionResult?.isComplete && (
-              <span className="ml-auto bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">已完成</span>
-            )}
-            {!comprehensionResult && (
-              <span className="ml-auto text-xs text-gray-400 font-medium">未完成</span>
-            )}
-          </div>
-
-          {comprehensionResult ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-emerald-500 h-3 rounded-full transition-all"
-                    style={{ width: `${Math.min(100, Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100))}%` }}
-                  />
-                </div>
-                <span className="text-sm font-bold text-gray-700 shrink-0">
-                  {comprehensionResult.understoodCount} / {comprehensionResult.requiredCount}
-                </span>
-              </div>
-              <div className="flex gap-4 text-sm text-gray-600">
-                <span>對話輪數：{comprehensionResult.conversationLength} 回</span>
-                <span>理解率：{Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)}%</span>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400 py-4 text-center">此步驟尚未完成</p>
-          )}
-        </div>
-
         {/* Step 3: 生字練習 */}
         <div className={`rounded-3xl border p-6 ${vocabResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
           <div className="flex items-center gap-3 mb-4">
@@ -290,7 +252,48 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, onRetry })
           )}
         </div>
 
-        {/* Step 4: 全文朗讀 */}
+        {/* Step 4: 課文理解 */}
+        <div className={`rounded-3xl border p-6 ${comprehensionResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
+          <div className="flex items-center gap-3 mb-4">
+            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>
+              4
+            </span>
+            <h3 className={`text-lg font-bold ${comprehensionResult ? 'text-gray-900' : 'text-gray-400'}`}>課文理解</h3>
+            {comprehensionResult?.isComplete && (
+              <span className="ml-auto bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">已完成</span>
+            )}
+            {comprehensionResult && !comprehensionResult.isComplete && (
+              <span className="ml-auto bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">部分完成</span>
+            )}
+            {!comprehensionResult && (
+              <span className="ml-auto text-xs text-gray-400 font-medium">未完成</span>
+            )}
+          </div>
+
+          {comprehensionResult ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 bg-gray-200 rounded-full h-3">
+                  <div
+                    className="bg-emerald-500 h-3 rounded-full transition-all"
+                    style={{ width: `${Math.min(100, Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100))}%` }}
+                  />
+                </div>
+                <span className="text-sm font-bold text-gray-700 shrink-0">
+                  {comprehensionResult.understoodCount} / {comprehensionResult.requiredCount}
+                </span>
+              </div>
+              <div className="flex gap-4 text-sm text-gray-600">
+                <span>對話輪數：{comprehensionResult.conversationLength} 回</span>
+                <span>理解率：{Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)}%</span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 py-4 text-center">此步驟尚未完成</p>
+          )}
+        </div>
+
+        {/* Step 5: 全文朗讀 */}
         <div className={`rounded-3xl border p-6 ${fullReadingResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
           <div className="flex items-center gap-3 mb-4">
             <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${fullReadingResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>
