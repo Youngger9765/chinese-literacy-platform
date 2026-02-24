@@ -143,7 +143,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {displayChars.length === 0 ? (
             <div className="text-gray-400 text-sm py-8 text-center">這篇課文的漢字沒有筆順資料</div>
           ) : (
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
               {displayChars.map(ch => {
                 const isSuggested = needPracticeSet.has(ch);
                 const isPracticed = practicedChars.has(ch);
