@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://user:pass@localhost:5432/lingoleap"
     redis_url: str = "redis://localhost:6379"
     allowed_origins: str = "http://localhost:3000"
+    gcs_bucket: str = "lingoleap-assets"
+    gcs_public_url: str = "https://storage.googleapis.com/lingoleap-assets"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
