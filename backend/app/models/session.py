@@ -9,7 +9,7 @@ class LearningSession(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     student_id: Mapped[int] = mapped_column(ForeignKey("students.id"), nullable=False)
-    text_id: Mapped[int] = mapped_column(ForeignKey("texts.id"), nullable=False)
+    text_id: Mapped[int | None] = mapped_column(ForeignKey("texts.id"), nullable=True)
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

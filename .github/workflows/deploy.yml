@@ -66,7 +66,9 @@ jobs:
             --cpu=1 \
             --min-instances=0 \
             --max-instances=3 \
-            --timeout=300s
+            --timeout=300s \
+            --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-db \
+            --set-env-vars="ALLOWED_ORIGINS=*,DATABASE_URL=${{ secrets.DATABASE_URL }}"
 
       - name: Verify backend health
         run: |
