@@ -1,7 +1,9 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Story, ReadingAttempt, LiveMessage } from '../../types';
+import { Story, ReadingAttempt, LiveMessage, DiffToken } from '../../types';
 import { correctHomophones } from '../../utils/pinyin';
+import { diffCharacters, normalizeForComparison, cleanChineseText } from '../../utils/textDiff';
+import DiffDisplay from '../ui/DiffDisplay';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -96,103 +98,6 @@ const extractPracticeChars = (results: LineResult[], content: string[]): string[
 };
 
 /* ------------------------------------------------------------------ */
-/*  Text processing helpers                                           */
-/* ------------------------------------------------------------------ */
-
-const cleanChineseText = (text: string) => {
-  if (!text) return '';
-  return text
-    .replace(/([\u4e00-\u9fa5！，。？：；（）])\s+([\u4e00-\u9fa5！，。？：；（）])/g, '$1$2')
-    .replace(/([\u4e00-\u9fa5])\s+([\u4e00-\u9fa5])/g, '$1$2')
-    .trim();
-};
-
-/* ---- Arabic numeral → Chinese numeral conversion ---- */
-
-const CHINESE_DIGITS = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
-
-/**
- * Convert an integer to Chinese numeral string.
- * e.g. 4000 → "四千",  12 → "十二",  305 → "三百零五"
- */
-const intToChinese = (num: number): string => {
-  if (num === 0) return '零';
-  let n = num;
-  let result = '';
-
-  // 億
-  if (n >= 100_000_000) {
-    result += intToChinese(Math.floor(n / 100_000_000)) + '億';
-    n %= 100_000_000;
-    if (n > 0 && n < 10_000_000) result += '零';
-  }
-  // 萬
-  if (n >= 10_000) {
-    result += intToChinese(Math.floor(n / 10_000)) + '萬';
-    n %= 10_000;
-    if (n > 0 && n < 1_000) result += '零';
-  }
-  // 千
-  if (n >= 1_000) {
-    result += CHINESE_DIGITS[Math.floor(n / 1_000)] + '千';
-    n %= 1_000;
-    if (n > 0 && n < 100) result += '零';
-  }
-  // 百
-  if (n >= 100) {
-    result += CHINESE_DIGITS[Math.floor(n / 100)] + '百';
-    n %= 100;
-    if (n > 0 && n < 10) result += '零';
-  }
-  // 十
-  if (n >= 10) {
-    const tens = Math.floor(n / 10);
-    // Skip leading 一 only for 10-19 at the top level (十二, not 一十二)
-    if (tens > 1 || result.length > 0) {
-      result += CHINESE_DIGITS[tens];
-    }
-    result += '十';
-    n %= 10;
-  }
-  // 個位
-  if (n > 0) {
-    result += CHINESE_DIGITS[n];
-  }
-  return result;
-};
-
-/** Replace all Arabic numeral sequences in text with Chinese equivalents. */
-const normalizeNumbers = (text: string): string =>
-  text.replace(/\d+/g, (m) => intToChinese(parseInt(m, 10)));
-
-const normalizeForComparison = (text: string) =>
-  normalizeNumbers(cleanChineseText(text)).replace(/[「」『』，。！？：；、\s]/g, '');
-
-/**
- * Compute character-frequency match rate between spoken (after homophone
- * correction) and target text.  Returns 0–1.
- */
-const computeMatchRate = (spokenRaw: string, targetRaw: string): number => {
-  const spoken = normalizeForComparison(spokenRaw);
-  const target = normalizeForComparison(targetRaw);
-  if (!target) return 0;
-  if (!spoken) return 0;
-
-  const spokenFreq: Record<string, number> = {};
-  for (const ch of spoken) spokenFreq[ch] = (spokenFreq[ch] || 0) + 1;
-
-  let matched = 0;
-  for (const ch of target) {
-    if (spokenFreq[ch] && spokenFreq[ch] > 0) {
-      matched++;
-      spokenFreq[ch]--;
-    }
-  }
-
-  return matched / target.length;
-};
-
-/* ------------------------------------------------------------------ */
 /*  Per-line result tracking                                          */
 /* ------------------------------------------------------------------ */
 
@@ -202,6 +107,7 @@ interface LineResult {
   cpm: number;
   durationMs: number;
   transcript: string;
+  diffTokens: DiffToken[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -237,6 +143,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [zhuyinReady, setZhuyinReady] = useState(false);
   const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
   const [isTtsPaused, setIsTtsPaused] = useState(false);
+  const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
 
   const isAdvancingRef = useRef(false);
   const isDraggingRef = useRef(false);
@@ -373,8 +280,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     const targetForAlignment = normalizeForComparison(targetText);
     const corrected = correctHomophones(cleaned, targetForAlignment);
 
-    // Step 2: Match rate
-    const matchRate = computeMatchRate(corrected, targetText);
+    // Step 2: Diff analysis (LCS-based, replaces bag-of-words)
+    const diffResult = diffCharacters(corrected, targetText, { useHomophone: true });
+    const matchRate = diffResult.matchRate;
 
     // Step 3: Determine tier
     const isLastLine = lineIdx >= story.content.length - 1;
@@ -413,7 +321,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     const cpm = Math.round((targetChars / durationSec) * 60);
 
     // Step 7: Record line result
-    const result: LineResult = { lineIndex: lineIdx, matchRate, cpm, durationMs, transcript: cleaned };
+    const result: LineResult = { lineIndex: lineIdx, matchRate, cpm, durationMs, transcript: cleaned, diffTokens: diffResult.tokens };
+    setLastDiffTokens(diffResult.tokens);
     setLineResults(prev => [...prev, result]);
 
     // Step 8: Debug logging
@@ -460,6 +369,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           storyId: story.id, accuracy: Math.round(avgMatchRate * 100), fluency: overallCpm,
           cpm: overallCpm, mispronouncedWords: extractPracticeChars(allResults, story.content),
           transcription: allResults.map(r => r.transcript).join(' '), timestamp: Date.now(),
+          lineBreakdown: allResults.map(r => ({
+            lineIndex: r.lineIndex, matchRate: r.matchRate, cpm: r.cpm,
+            transcript: r.transcript, diffTokens: r.diffTokens,
+          })),
         });
       }, 2000);
     }
@@ -586,6 +499,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       rawSttRef.current = '';
       accumulatedTranscriptRef.current = '';
       setStreamingUserInput('');
+      setLastDiffTokens(null);
       sentenceStartTimeRef.current = Date.now();
       // Immediately restart — onend will also try but catch silently
       if (isSessionActiveRef.current) {
@@ -683,6 +597,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       storyId: story.id, accuracy: Math.round(avgMatchRate * 100), fluency: overallCpm,
       cpm: overallCpm, mispronouncedWords: extractPracticeChars(lineResults, story.content),
       transcription: lineResults.map(r => r.transcript).join(' '), timestamp: Date.now(),
+      lineBreakdown: lineResults.map(r => ({
+        lineIndex: r.lineIndex, matchRate: r.matchRate, cpm: r.cpm,
+        transcript: r.transcript, diffTokens: r.diffTokens,
+      })),
     });
   };
 
@@ -813,6 +731,17 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               </span>
               <div className={`px-4 py-3 rounded-2xl text-lg bg-accent/60 text-gray-800 rounded-tr-none max-w-[90%] border border-accent/30 leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
                 {processZhuyin(streamingUserInput)}
+              </div>
+            </div>
+          )}
+
+          {lastDiffTokens && !isAdvancing && !streamingUserInput && (
+            <div className="flex flex-col items-start">
+              <span className="text-[9px] font-bold text-gray-400 mb-0.5 uppercase">
+                DIFF
+              </span>
+              <div className="px-4 py-3 rounded-2xl bg-white border border-gray-200 rounded-tl-none max-w-[95%]">
+                <DiffDisplay tokens={lastDiffTokens} showLegend className="text-base" />
               </div>
             </div>
           )}

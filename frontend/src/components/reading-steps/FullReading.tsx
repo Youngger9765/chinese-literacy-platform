@@ -1,46 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Story, FullReadingResult } from '../../types';
+import { Story, FullReadingResult, DiffToken } from '../../types';
 import { correctHomophones } from '../../utils/pinyin';
+import { diffCharacters, normalizeForComparison, cleanChineseText } from '../../utils/textDiff';
+import DiffDisplay from '../ui/DiffDisplay';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
-
-/* ---- Text helpers (same normalisation as LiveTutor) ---- */
-
-const cleanChineseText = (text: string) => {
-  if (!text) return '';
-  return text
-    .replace(/([\u4e00-\u9fa5！，。？：；（）])\s+([\u4e00-\u9fa5！，。？：；（）])/g, '$1$2')
-    .replace(/([\u4e00-\u9fa5])\s+([\u4e00-\u9fa5])/g, '$1$2')
-    .trim();
-};
-
-const CHINESE_DIGITS = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
-const intToChinese = (num: number): string => {
-  if (num === 0) return '零';
-  let n = num; let result = '';
-  if (n >= 100_000_000) { result += intToChinese(Math.floor(n / 100_000_000)) + '億'; n %= 100_000_000; if (n > 0 && n < 10_000_000) result += '零'; }
-  if (n >= 10_000) { result += intToChinese(Math.floor(n / 10_000)) + '萬'; n %= 10_000; if (n > 0 && n < 1_000) result += '零'; }
-  if (n >= 1_000) { result += CHINESE_DIGITS[Math.floor(n / 1_000)] + '千'; n %= 1_000; if (n > 0 && n < 100) result += '零'; }
-  if (n >= 100) { result += CHINESE_DIGITS[Math.floor(n / 100)] + '百'; n %= 100; if (n > 0 && n < 10) result += '零'; }
-  if (n >= 10) { const tens = Math.floor(n / 10); if (tens > 1 || result.length > 0) result += CHINESE_DIGITS[tens]; result += '十'; n %= 10; }
-  if (n > 0) result += CHINESE_DIGITS[n];
-  return result;
-};
-const normalizeNumbers = (text: string) => text.replace(/\d+/g, m => intToChinese(parseInt(m, 10)));
-const normalizeForComparison = (text: string) =>
-  normalizeNumbers(cleanChineseText(text)).replace(/[「」『』，。！？：；、\s]/g, '');
-
-const computeMatchRate = (spokenRaw: string, targetRaw: string): number => {
-  const spoken = normalizeForComparison(spokenRaw);
-  const target = normalizeForComparison(targetRaw);
-  if (!target || !spoken) return 0;
-  const freq: Record<string, number> = {};
-  for (const ch of spoken) freq[ch] = (freq[ch] || 0) + 1;
-  let matched = 0;
-  for (const ch of target) { if (freq[ch] && freq[ch] > 0) { matched++; freq[ch]--; } }
-  return matched / target.length;
-};
 
 /* ------------------------------------------------------------------ */
 
@@ -60,7 +25,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
   const [isTtsPaused, setIsTtsPaused]           = useState(false);
   const [streamingTranscript, setStreamingTranscript] = useState('');
   const [micError, setMicError]                 = useState('');
-  const [result, setResult]                     = useState<{ matchRate: number; feedback: string } | null>(null);
+  const [result, setResult]                     = useState<{ matchRate: number; feedback: string; diffTokens: DiffToken[] } | null>(null);
   const [zhuyinEnabled, setZhuyinEnabled]       = useState(true);
   const [zhuyinReady, setZhuyinReady]           = useState(false);
 
@@ -262,14 +227,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
     const targetNorm = normalizeForComparison(fullText);
     const corrected = correctHomophones(cleanChineseText(transcript), targetNorm);
-    const matchRate = computeMatchRate(corrected, fullText);
+    const diffResult = diffCharacters(corrected, fullText, { useHomophone: true });
 
     const feedback =
-      matchRate >= 0.80 ? '太流利了！全文朗讀表現非常棒！' :
-      matchRate >= 0.60 ? '唸得不錯，過關！繼續練習會更好！' :
+      diffResult.matchRate >= 0.80 ? '太流利了！全文朗讀表現非常棒！' :
+      diffResult.matchRate >= 0.60 ? '唸得不錯，過關！繼續練習會更好！' :
       '再練習一次，你一定可以更流利！';
 
-    setResult({ matchRate, feedback });
+    setResult({ matchRate: diffResult.matchRate, feedback, diffTokens: diffResult.tokens });
     setStreamingTranscript(cleanChineseText(transcript));
   }, [fullText, stopSession]);
 
@@ -403,6 +368,13 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                 <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
                   <p className="text-[10px] text-gray-500 mb-1 uppercase tracking-widest">你說的</p>
                   <p className="text-xs text-gray-600 leading-relaxed line-clamp-6">{streamingTranscript}</p>
+                </div>
+              )}
+
+              {result.diffTokens && result.diffTokens.length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
+                  <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">逐字比對</p>
+                  <DiffDisplay tokens={result.diffTokens} showLegend />
                 </div>
               )}
             </div>
