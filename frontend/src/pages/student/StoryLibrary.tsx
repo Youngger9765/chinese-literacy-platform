@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Story } from '../../types';
-import { getAllLessons, getLessonsByGrade, getAvailableGrades } from '../../data/lessonLoader';
+import { fetchStories, fetchStory } from '../../services/api';
 
 interface StoryLibraryProps {
   onStartReading: (story: Story) => void;
@@ -12,21 +12,29 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const availableGrades = getAvailableGrades();
-  const allLessons = getAllLessons();
+  const [loadingStoryId, setLoadingStoryId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [allStories, setAllStories] = useState<Story[]>([]);
+  const [availableGrades, setAvailableGrades] = useState<number[]>([]);
 
-  // Simulate initial loading
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
+    fetchStories()
+      .then(({ stories, grades }) => {
+        setAllStories(stories);
+        setAvailableGrades(grades);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   // Filter by grade
   const filteredByGrade = selectedGrade
-    ? getLessonsByGrade(selectedGrade)
-    : allLessons;
+    ? allStories.filter((s) => s.grade === selectedGrade)
+    : allStories;
 
   // Filter by search query
   const filteredLessons = searchQuery
@@ -37,6 +45,18 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
 
   // Apply limit if provided
   const stories = limit ? filteredLessons.slice(0, limit) : filteredLessons;
+
+  const handleStoryClick = async (story: Story) => {
+    setLoadingStoryId(story.id);
+    try {
+      const fullStory = await fetchStory(story.id);
+      onStartReading(fullStory);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load story');
+    } finally {
+      setLoadingStoryId(null);
+    }
+  };
 
   // Skeleton card component
   const SkeletonCard = () => (
@@ -55,10 +75,23 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">選擇讀本</h2>
         <p className="text-gray-600 text-sm">
-          共 {allLessons.length} 篇文章
+          共 {allStories.length} 篇文章
           {selectedGrade && ` · 第 ${selectedGrade} 年級`}
         </p>
       </div>
+
+      {/* Error state */}
+      {error && (
+        <div className="text-center py-4 text-red-600 bg-red-50 rounded-lg">
+          <p>載入失敗：{error}</p>
+          <button
+            onClick={() => { setError(null); setIsLoading(true); fetchStories().then(({ stories, grades }) => { setAllStories(stories); setAvailableGrades(grades); }).catch((err) => setError(err.message)).finally(() => setIsLoading(false)); }}
+            className="mt-2 text-sm underline"
+          >
+            重試
+          </button>
+        </div>
+      )}
 
       {/* Grade filter tabs */}
       <div className="flex flex-wrap justify-center gap-2">
@@ -128,8 +161,10 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
           {stories.map((story) => (
             <div
               key={story.id}
-              className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-accent transition-all cursor-pointer group shadow-sm"
-              onClick={() => onStartReading(story)}
+              className={`bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-accent transition-all cursor-pointer group shadow-sm ${
+                loadingStoryId === story.id ? 'opacity-60 pointer-events-none' : ''
+              }`}
+              onClick={() => handleStoryClick(story)}
             >
               <div className="h-40 overflow-hidden relative">
                 <img
@@ -143,10 +178,18 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
                     G{story.grade}
                   </div>
                 )}
+                {/* Loading overlay */}
+                {loadingStoryId === story.id && (
+                  <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
               </div>
               <div className="p-4">
                 <h4 className="text-gray-900 font-bold mb-1">{story.title}</h4>
-                <div className="text-[10px] text-gray-500 font-mono">{story.filename}</div>
+                {story.filename && (
+                  <div className="text-[10px] text-gray-500 font-mono">{story.filename}</div>
+                )}
               </div>
             </div>
           ))}
@@ -154,7 +197,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
       )}
 
       {/* Empty state */}
-      {!isLoading && stories.length === 0 && (
+      {!isLoading && stories.length === 0 && !error && (
         <div className="text-center py-12 text-gray-600">
           <p>沒有找到符合條件的讀本</p>
         </div>

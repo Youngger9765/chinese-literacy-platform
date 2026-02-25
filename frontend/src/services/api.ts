@@ -5,6 +5,8 @@
  * Environment variable: VITE_API_URL (default: http://localhost:8000)
  */
 
+import type { Story } from '../types';
+
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export class SessionExpiredError extends Error {
@@ -14,16 +16,99 @@ export class SessionExpiredError extends Error {
   }
 }
 
-export async function fetchStories() {
-  const res = await fetch(`${API_BASE}/api/stories`);
-  if (!res.ok) throw new Error(`fetchStories failed: ${res.status}`);
-  return res.json();
+// --- Stories API response types ---
+
+interface ApiStoryIntro {
+  author: string;
+  background: string;
 }
 
-export async function fetchStory(id: string) {
+interface ApiVocabItem {
+  word: string;
+  definition: string;
+}
+
+interface ApiStoryListItem {
+  id: number;
+  lesson_number: number;
+  title: string;
+  grade: number;
+  grade_code: string;
+  genre: string;
+  category: string;
+  char_count: number;
+  thumbnail_url: string;
+  reading_strategy: string | null;
+  intro: ApiStoryIntro;
+}
+
+interface ApiStoryDetail extends ApiStoryListItem {
+  paragraphs: string[];
+  vocabulary: ApiVocabItem[] | null;
+  fill_in_blank: unknown;
+  multiple_choice: unknown;
+  reading_benchmark: unknown;
+  text_type: string;
+  source_file: string;
+}
+
+interface ApiStoryListResponse {
+  stories: ApiStoryListItem[];
+  total: number;
+  grades: number[];
+}
+
+function apiListItemToStory(item: ApiStoryListItem): Story {
+  return {
+    id: String(item.lesson_number),
+    title: item.title,
+    level: item.grade,
+    content: [],
+    thumbnail: item.thumbnail_url,
+    category: item.category as Story['category'],
+    filename: '',
+    intro: item.intro,
+    grade: item.grade,
+    genre: item.genre,
+    readingStrategy: item.reading_strategy ?? undefined,
+    charCount: item.char_count,
+  };
+}
+
+function apiDetailToStory(detail: ApiStoryDetail): Story {
+  return {
+    id: String(detail.lesson_number),
+    title: detail.title,
+    level: detail.grade,
+    content: detail.paragraphs,
+    thumbnail: detail.thumbnail_url,
+    category: detail.category as Story['category'],
+    filename: detail.source_file,
+    intro: detail.intro,
+    grade: detail.grade,
+    genre: detail.genre,
+    readingStrategy: detail.reading_strategy ?? undefined,
+    vocabulary: detail.vocabulary ?? undefined,
+    charCount: detail.char_count,
+  };
+}
+
+export async function fetchStories(): Promise<{ stories: Story[]; total: number; grades: number[] }> {
+  const res = await fetch(`${API_BASE}/api/stories`);
+  if (!res.ok) throw new Error(`fetchStories failed: ${res.status}`);
+  const data: ApiStoryListResponse = await res.json();
+  return {
+    stories: data.stories.map(apiListItemToStory),
+    total: data.total,
+    grades: data.grades,
+  };
+}
+
+export async function fetchStory(id: string): Promise<Story> {
   const res = await fetch(`${API_BASE}/api/stories/${id}`);
   if (!res.ok) throw new Error(`fetchStory failed: ${res.status}`);
-  return res.json();
+  const data: ApiStoryDetail = await res.json();
+  return apiDetailToStory(data);
 }
 
 export async function createLearningSession(payload: {
