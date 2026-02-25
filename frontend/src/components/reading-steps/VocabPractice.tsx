@@ -1,6 +1,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Story, ReadingAttempt } from '../../types';
+import { Story, ReadingAttempt, VocabResult } from '../../types';
 import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
@@ -9,7 +9,7 @@ import ZhuyinToggle from '../ui/ZhuyinToggle';
 interface VocabPracticeProps {
   story: Story;
   attempt: ReadingAttempt;
-  onFinish: () => void;
+  onFinish: (result: VocabResult) => void;
   onBack: () => void;
 }
 
@@ -219,7 +219,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           回到朗讀
         </button>
         <button
-          onClick={onFinish}
+          onClick={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
           className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
           {practicedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
