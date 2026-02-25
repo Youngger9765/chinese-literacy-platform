@@ -46,6 +46,23 @@ export interface ReadingAttempt {
   mispronouncedWords: string[];
   transcription: string;
   timestamp: number;
+  lineBreakdown?: LineBreakdown[];
+}
+
+export type DiffType = 'correct' | 'wrong' | 'missing' | 'extra';
+
+export interface DiffToken {
+  char: string;
+  type: DiffType;
+  expected?: string;
+}
+
+export interface LineBreakdown {
+  lineIndex: number;
+  matchRate: number;
+  cpm: number;
+  transcript: string;
+  diffTokens: DiffToken[];
 }
 
 export interface ComprehensionResult {
