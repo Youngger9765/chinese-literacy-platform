@@ -5,6 +5,7 @@ import type { Story } from '../../types';
 import DiffDisplay from '../ui/DiffDisplay';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
+import ExitTicket from './ExitTicket';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -627,6 +628,11 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             })}
           </div>
         </div>
+      )}
+
+      {/* ============ 出場卷 Exit Ticket ============ */}
+      {wrongTokens.length > 0 && story?.content && (
+        <ExitTicket wrongTokens={wrongTokens} storyContent={story.content} />
       )}
 
       {/* CTA */}
