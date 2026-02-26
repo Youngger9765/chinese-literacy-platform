@@ -36,6 +36,7 @@ export interface Story {
   readingStrategy?: string;     // for future Intro enhancement
   vocabulary?: VocabItem[];     // for future VocabPractice enhancement
   charCount?: number;           // for reading benchmark
+  readingBenchmark?: { levels: { threshold: string; feedback: string }[] };
 }
 
 export interface ReadingAttempt {
@@ -80,6 +81,9 @@ export interface VocabResult {
 export interface FullReadingResult {
   matchRate: number;
   feedback: string;
+  cpm?: number;
+  durationMs?: number;
+  errorBreakdown?: { correct: number; wrong: number; missing: number; extra: number };
   diffTokens?: DiffToken[];
   transcript?: string;
 }

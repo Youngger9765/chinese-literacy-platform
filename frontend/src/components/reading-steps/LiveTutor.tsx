@@ -315,10 +315,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       setStreak(newStreak);
     }
 
-    // Step 6: CPM
-    const targetChars = normalizeForComparison(targetText).length;
+    // Step 6: CPM (only count correctly-read characters)
     const durationSec = Math.max(durationMs / 1000, 0.5);
-    const cpm = Math.round((targetChars / durationSec) * 60);
+    const cpm = Math.round((diffResult.correctCount / durationSec) * 60);
 
     // Step 7: Record line result
     const result: LineResult = { lineIndex: lineIdx, matchRate, cpm, durationMs, transcript: cleaned, diffTokens: diffResult.tokens };
@@ -360,11 +359,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       setTimeout(() => {
         const allResults = [...lineResults, result];
         const avgMatchRate = allResults.reduce((s, r) => s + r.matchRate, 0) / allResults.length;
-        const totalChars = allResults.reduce(
-          (s, r) => s + normalizeForComparison(story.content[r.lineIndex] || '').length, 0
+        const totalCorrectChars = allResults.reduce(
+          (s, r) => s + r.diffTokens.filter(t => t.type === 'correct').length, 0
         );
         const totalDurationSec = allResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
-        const overallCpm = totalDurationSec > 0 ? Math.round((totalChars / totalDurationSec) * 60) : 0;
+        const overallCpm = totalDurationSec > 0 ? Math.round((totalCorrectChars / totalDurationSec) * 60) : 0;
         onFinish({
           storyId: story.id, accuracy: Math.round(avgMatchRate * 100), fluency: overallCpm,
           cpm: overallCpm, mispronouncedWords: extractPracticeChars(allResults, story.content),
@@ -588,11 +587,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     const avgMatchRate =
       lineResults.length > 0
         ? lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length : 0;
-    const totalChars = lineResults.reduce(
-      (s, r) => s + normalizeForComparison(story.content[r.lineIndex] || '').length, 0
+    const totalCorrectChars = lineResults.reduce(
+      (s, r) => s + r.diffTokens.filter(t => t.type === 'correct').length, 0
     );
     const totalDurationSec = lineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
-    const overallCpm = totalDurationSec > 0 ? Math.round((totalChars / totalDurationSec) * 60) : 0;
+    const overallCpm = totalDurationSec > 0 ? Math.round((totalCorrectChars / totalDurationSec) * 60) : 0;
     onFinish({
       storyId: story.id, accuracy: Math.round(avgMatchRate * 100), fluency: overallCpm,
       cpm: overallCpm, mispronouncedWords: extractPracticeChars(lineResults, story.content),
