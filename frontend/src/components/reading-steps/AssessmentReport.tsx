@@ -631,8 +631,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
       )}
 
       {/* ============ 出場卷 Exit Ticket ============ */}
-      {wrongTokens.length > 0 && story?.content && (
-        <ExitTicket wrongTokens={wrongTokens} storyContent={story.content} />
+      {(wrongTokens.length > 0 || missingChars.length > 0) && story?.content && (
+        <ExitTicket wrongTokens={wrongTokens} missingChars={missingChars} storyContent={story.content} />
       )}
 
       {/* CTA */}

@@ -8,6 +8,7 @@ interface WrongToken {
 
 interface ExitTicketProps {
   wrongTokens: WrongToken[];
+  missingChars: string[];
   storyContent: string[];
 }
 
@@ -27,9 +28,9 @@ const shuffle = <T,>(arr: T[]): T[] => {
   return a;
 };
 
-/** Generate up to 3 multiple-choice questions from wrong tokens */
-const generateQuestions = (wrongTokens: WrongToken[], storyContent: string[]): Question[] => {
-  if (wrongTokens.length === 0) return [];
+/** Generate up to 3 multiple-choice questions from wrong + missing tokens */
+const generateQuestions = (wrongTokens: WrongToken[], missingChars: string[], storyContent: string[]): Question[] => {
+  if (wrongTokens.length === 0 && missingChars.length === 0) return [];
 
   // Collect unique characters from the story for distractors
   const storyChars = new Set<string>();
@@ -39,11 +40,11 @@ const generateQuestions = (wrongTokens: WrongToken[], storyContent: string[]): Q
     }
   }
 
-  // Pick up to 3 wrong tokens
-  const selected = shuffle(wrongTokens).slice(0, 3);
+  const questions: Question[] = [];
 
-  return selected.map((token) => {
-    // Build distractor pool: other expected chars + story chars, excluding the correct answer
+  // Questions from wrong tokens: "你讀成了 X，正確的字應該是？"
+  for (const token of shuffle(wrongTokens)) {
+    if (questions.length >= 3) break;
     const distractorPool = new Set<string>();
     for (const t of wrongTokens) {
       if (t.expected !== token.expected) distractorPool.add(t.expected);
@@ -51,34 +52,56 @@ const generateQuestions = (wrongTokens: WrongToken[], storyContent: string[]): Q
     for (const ch of storyChars) {
       if (ch !== token.expected && ch !== token.char) distractorPool.add(ch);
     }
-
-    // Pick 3 distractors
     const distractors = shuffle([...distractorPool]).slice(0, 3);
-
-    // If not enough distractors, pad with the wrong char itself
     while (distractors.length < 3) {
       const fallback = String.fromCharCode(0x4e00 + Math.floor(Math.random() * 200));
       if (fallback !== token.expected && !distractors.includes(fallback)) {
         distractors.push(fallback);
       }
     }
-
-    return {
+    questions.push({
       prompt: `你讀成了「${token.char}」，正確的字應該是？`,
       correctAnswer: token.expected,
       options: shuffle([token.expected, ...distractors.slice(0, 3)]),
-    };
-  });
+    });
+  }
+
+  // Fill remaining slots with missing chars: "這個字怎麼唸？"
+  const usedChars = new Set(questions.map(q => q.correctAnswer));
+  for (const ch of shuffle(missingChars)) {
+    if (questions.length >= 3) break;
+    if (usedChars.has(ch)) continue;
+    usedChars.add(ch);
+
+    const distractorPool = new Set<string>();
+    for (const sc of storyChars) {
+      if (sc !== ch) distractorPool.add(sc);
+    }
+    const distractors = shuffle([...distractorPool]).slice(0, 3);
+    while (distractors.length < 3) {
+      const fallback = String.fromCharCode(0x4e00 + Math.floor(Math.random() * 200));
+      if (fallback !== ch && !distractors.includes(fallback)) {
+        distractors.push(fallback);
+      }
+    }
+    questions.push({
+      prompt: `你漏讀了一個字，是下面哪一個？`,
+      correctAnswer: ch,
+      options: shuffle([ch, ...distractors.slice(0, 3)]),
+    });
+  }
+
+  return questions;
 };
 
-const ExitTicket: React.FC<ExitTicketProps> = ({ wrongTokens, storyContent }) => {
+const ExitTicket: React.FC<ExitTicketProps> = ({ wrongTokens, missingChars, storyContent }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [answers, setAnswers] = useState<(string | null)[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
   const questions = useMemo(
-    () => generateQuestions(wrongTokens, storyContent),
-    [wrongTokens, storyContent],
+    () => generateQuestions(wrongTokens, missingChars, storyContent),
+    [wrongTokens, missingChars, storyContent],
   );
 
   // No wrong tokens = no exit ticket
