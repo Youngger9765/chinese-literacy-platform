@@ -289,7 +289,7 @@ const App: React.FC = () => {
 
         {view === AppView.REPORT && (
           <div className="p-8 max-w-4xl mx-auto w-full">
-             <AssessmentReport session={session} onRetry={() => { setView(AppView.LIBRARY); setSession(null); setLastAttempt(null); }} />
+             <AssessmentReport session={session} story={selectedStory} onRetry={() => { setView(AppView.LIBRARY); setSession(null); setLastAttempt(null); }} />
           </div>
         )}
 
