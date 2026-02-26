@@ -547,6 +547,68 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         </div>
       )}
 
+      {/* 逐段朗讀分析 (diff breakdown) */}
+      {readingAttempt?.lineBreakdown && readingAttempt.lineBreakdown.length > 0 && (
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-slate-100">
+            <h3 className="text-lg font-bold">逐段朗讀分析</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              點擊每一段可展開查看逐字比對結果
+            </p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {readingAttempt.lineBreakdown.map((line, idx) => {
+              const pct = Math.round(line.matchRate * 100);
+              const isExpanded = expandedLine === idx;
+              return (
+                <div key={idx}>
+                  <button
+                    onClick={() => setExpandedLine(isExpanded ? null : idx)}
+                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors text-left"
+                  >
+                    <span className="text-xs font-bold text-gray-400 w-8 shrink-0">
+                      #{idx + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-700 truncate">
+                        {line.transcript || '（未朗讀）'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className={`text-sm font-bold ${
+                        pct >= 80 ? 'text-emerald-600' : pct >= 60 ? 'text-amber-600' : 'text-red-500'
+                      }`}>
+                        {pct}%
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {line.cpm} 字/分
+                      </span>
+                      <svg
+                        className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </button>
+                  {isExpanded && line.diffTokens && (
+                    <div className="px-6 pb-4 pt-1">
+                      <DiffDisplay tokens={line.diffTokens} showLegend />
+                      <div className="flex gap-4 mt-3 text-xs text-gray-400">
+                        <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
+                        <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>
+                        <span>漏讀: {line.diffTokens.filter(t => t.type === 'missing').length} 字</span>
+                        <span>多讀: {line.diffTokens.filter(t => t.type === 'extra').length} 字</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* CTA */}
       <div className="bg-gradient-to-r from-accent to-violet-600 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
         <div>
