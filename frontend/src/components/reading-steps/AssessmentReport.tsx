@@ -1,13 +1,13 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { LearningSession } from '../../types';
+import type { Story } from '../../types';
 import DiffDisplay from '../ui/DiffDisplay';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
  * once the container has been measured with positive dimensions.
- * This prevents Recharts from logging warnings about negative width/height.
  */
 const SafeResponsiveContainer: React.FC<{
   children: React.ReactNode;
@@ -20,14 +20,11 @@ const SafeResponsiveContainer: React.FC<{
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-
     const check = () => {
       const { width: w, height: h } = el.getBoundingClientRect();
       if (w > 0 && h > 0) setReady(true);
     };
-
     check();
-
     const ro = new ResizeObserver(check);
     ro.observe(el);
     return () => ro.disconnect();
@@ -46,6 +43,7 @@ const SafeResponsiveContainer: React.FC<{
 
 interface AssessmentReportProps {
   session: LearningSession | null;
+  story?: Story | null;
   onRetry: () => void;
 }
 
@@ -72,15 +70,66 @@ const getCurrentSegment = (cpm: number) => {
   return 3;
 };
 
-const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, onRetry }) => {
+/** Speak a Chinese character/word using Web Speech API */
+const speakText = (text: string) => {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-TW';
+  u.rate = 0.8;
+  window.speechSynthesis.speak(u);
+};
+
+/** Generate practice suggestions based on performance */
+const generateSuggestions = (
+  wrongTokens: { char: string; expected: string }[],
+  accuracy: number,
+  cpm: number,
+): { icon: string; title: string; desc: string }[] => {
+  const suggestions: { icon: string; title: string; desc: string }[] = [];
+
+  if (wrongTokens.length > 0) {
+    suggestions.push({ icon: '🔊', title: '聽正確發音', desc: '點擊上方錯字詞旁的喇叭按鈕，反覆聆聽正確讀法。' });
+  }
+  if (accuracy < 80) {
+    suggestions.push({ icon: '🔄', title: '反覆練習錯誤詞語', desc: '把讀錯的字詞抄寫三遍，邊寫邊唸出聲音。' });
+  }
+  if (cpm > 180 && accuracy < 70) {
+    suggestions.push({ icon: '🐢', title: '放慢語速', desc: '你讀得很快但準確度不夠，試著放慢速度，把每個字唸清楚。' });
+  } else if (cpm < 90) {
+    suggestions.push({ icon: '⏱️', title: '提升朗讀速度', desc: '多朗讀幾次同一篇文章，熟悉內容後速度自然會加快。' });
+  }
+  suggestions.push({ icon: '📈', title: '追蹤改進', desc: '重新朗讀一次，看看這次能不能比上次進步！' });
+
+  return suggestions.slice(0, 4);
+};
+
+/** Section wrapper component for consistent styling */
+const Section: React.FC<{
+  number: number;
+  title: string;
+  children: React.ReactNode;
+  disabled?: boolean;
+}> = ({ number, title, children, disabled }) => (
+  <div className={`rounded-3xl border overflow-hidden ${disabled ? 'bg-gray-50 border-dashed border-gray-300' : 'bg-white border-slate-200 shadow-sm'}`}>
+    <div className={`px-6 py-4 border-b flex items-center gap-3 ${disabled ? 'border-gray-200' : 'border-slate-100'}`}>
+      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${disabled ? 'bg-gray-200 text-gray-400' : 'bg-accent text-white'}`}>
+        {number}
+      </span>
+      <h3 className={`text-lg font-bold ${disabled ? 'text-gray-400' : 'text-gray-900'}`}>{title}</h3>
+    </div>
+    <div className="p-6">
+      {children}
+    </div>
+  </div>
+);
+
+const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry }) => {
+  const [expandedLine, setExpandedLine] = useState<number | null>(null);
+
   if (!session) {
     return (
       <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 py-24 text-center">
         <p className="text-gray-500 text-lg">請先選擇課文開始學習</p>
-        <button
-          onClick={onRetry}
-          className="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded-xl font-bold transition-all"
-        >
+        <button onClick={onRetry} className="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded-xl font-bold transition-all">
           回圖書館
         </button>
       </div>
@@ -88,9 +137,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, onRetry })
   }
 
   const { readingAttempt, comprehensionResult, vocabResult, fullReadingResult } = session;
-  const [expandedLine, setExpandedLine] = useState<number | null>(null);
 
-  // Compute overall score from available steps
+  // Compute overall score
   const scores: number[] = [];
   if (readingAttempt) scores.push(readingAttempt.accuracy);
   if (comprehensionResult) scores.push(Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100));
@@ -98,26 +146,61 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, onRetry })
   if (fullReadingResult) scores.push(Math.round(fullReadingResult.matchRate * 100));
   const overallScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
 
-  // Reading attempt chart data
-  const scoreData = readingAttempt
-    ? [
-        { name: '字詞準確度', value: readingAttempt.accuracy, color: '#4f46e5' },
-        { name: '待改進', value: 100 - readingAttempt.accuracy, color: '#f1f5f9' },
-      ]
-    : null;
+  // Aggregate diff stats from lineBreakdown
+  const lineBreakdown = readingAttempt?.lineBreakdown ?? [];
+  const allLineDiffTokens = lineBreakdown.flatMap(l => l.diffTokens ?? []);
+  const segmentStats = {
+    correct: lineBreakdown.filter(l => l.matchRate >= 0.95).length,
+    wrong: lineBreakdown.filter(l => l.matchRate < 0.95 && l.transcript).length,
+    missing: lineBreakdown.filter(l => !l.transcript).length,
+    total: lineBreakdown.length,
+  };
 
-  const barData = readingAttempt
-    ? [
-        { name: '準確度', score: readingAttempt.accuracy },
-        { name: '朗讀速度 (CPM)', score: Math.min(readingAttempt.cpm, 300) },
-      ]
-    : null;
+  // Collect all wrong tokens for 環節四
+  const wrongTokens: { char: string; expected: string }[] = [];
+  const seen = new Set<string>();
+  for (const t of allLineDiffTokens) {
+    if (t.type === 'wrong' && t.expected) {
+      const key = `${t.char}->${t.expected}`;
+      if (!seen.has(key)) { seen.add(key); wrongTokens.push({ char: t.char, expected: t.expected }); }
+    }
+  }
+  // Also include fullReading wrong tokens
+  if (fullReadingResult?.diffTokens) {
+    for (const t of fullReadingResult.diffTokens) {
+      if (t.type === 'wrong' && t.expected) {
+        const key = `${t.char}->${t.expected}`;
+        if (!seen.has(key)) { seen.add(key); wrongTokens.push({ char: t.char, expected: t.expected }); }
+      }
+    }
+  }
 
-  const cpmFeedback = readingAttempt ? getCpmFeedback(readingAttempt.cpm) : null;
-  const currentSegment = readingAttempt ? getCurrentSegment(readingAttempt.cpm) : 0;
+  // Also collect missing chars
+  const missingChars: string[] = [];
+  const seenMissing = new Set<string>();
+  for (const t of allLineDiffTokens) {
+    if (t.type === 'missing' && !seenMissing.has(t.char)) {
+      seenMissing.add(t.char);
+      missingChars.push(t.char);
+    }
+  }
+
+  // Chart data for donut
+  const accuracy = readingAttempt?.accuracy ?? 0;
+  const scoreData = [
+    { name: '準確度', value: accuracy, color: '#4f46e5' },
+    { name: '待改進', value: 100 - accuracy, color: '#f1f5f9' },
+  ];
+
+  const cpm = readingAttempt?.cpm ?? 0;
+  const currentSegment = getCurrentSegment(cpm);
+  const fullMatchPct = fullReadingResult ? Math.round(fullReadingResult.matchRate * 100) : null;
+
+  // Practice suggestions
+  const suggestions = readingAttempt ? generateSuggestions(wrongTokens, accuracy, cpm) : [];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn">
+    <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
       {/* Header */}
       <div className="text-center">
         <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
@@ -125,6 +208,9 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, onRetry })
         </div>
         <h2 className="text-4xl font-bold mb-2">好棒！你今天又進步了。</h2>
         <p className="text-gray-500">讓我們看看這次學習的完整成果吧。</p>
+        {story && (
+          <p className="text-sm text-gray-400 mt-1">{story.title}</p>
+        )}
         {overallScore !== null && (
           <div className="mt-4 inline-flex items-center gap-2 bg-accent/10 text-accent px-5 py-2 rounded-full">
             <span className="text-sm font-bold">綜合成績</span>
@@ -133,261 +219,330 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, onRetry })
         )}
       </div>
 
-      {/* Step cards */}
-      <div className="grid gap-6">
-
-        {/* Step 2: 逐段朗讀 */}
-        <div className={`rounded-3xl border p-6 ${readingAttempt ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${readingAttempt ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>
-              2
-            </span>
-            <h3 className={`text-lg font-bold ${readingAttempt ? 'text-gray-900' : 'text-gray-400'}`}>逐段朗讀</h3>
-            {!readingAttempt && (
-              <span className="ml-auto text-xs text-gray-400 font-medium">未完成</span>
-            )}
-          </div>
-
-          {readingAttempt && scoreData && barData && cpmFeedback ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="flex flex-col items-center">
-                <div className="w-full h-40 relative">
+      {/* ============ 環節一：朗讀結果總覽 ============ */}
+      <Section number={1} title="朗讀結果總覽" disabled={!readingAttempt && !fullReadingResult}>
+        {readingAttempt || fullReadingResult ? (
+          <div className="space-y-4">
+            {/* 3 KPI Cards */}
+            <div className="grid grid-cols-3 gap-4">
+              {/* 準確度 */}
+              <div className="text-center p-4 bg-slate-50 rounded-2xl">
+                <div className="w-24 h-24 mx-auto relative">
                   <SafeResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie
-                        data={scoreData}
-                        innerRadius={50}
-                        outerRadius={70}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {scoreData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
+                      <Pie data={scoreData} innerRadius={30} outerRadius={42} paddingAngle={5} dataKey="value" startAngle={90} endAngle={-270}>
+                        {scoreData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                       </Pie>
                     </PieChart>
                   </SafeResponsiveContainer>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-black text-accent">{readingAttempt.accuracy}%</span>
-                    <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">準確度</span>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-lg font-black text-accent">{accuracy}%</span>
                   </div>
                 </div>
+                <p className="text-xs text-gray-500 font-bold mt-1">逐段準確度</p>
               </div>
 
-              <div className="space-y-3">
-                <div className="h-32">
-                  <SafeResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barData} layout="vertical" margin={{ left: 30, right: 20 }}>
-                      <XAxis type="number" hide domain={[0, 300]} />
-                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={110} />
-                      <Tooltip />
-                      <Bar dataKey="score" fill="#818cf8" radius={[0, 8, 8, 0]} barSize={20} />
-                    </BarChart>
-                  </SafeResponsiveContainer>
-                </div>
-
-                {/* Speed indicator */}
-                <div className="bg-gray-50 p-3 rounded-2xl">
-                  <p className="text-xs text-gray-600 font-bold mb-1">朗讀速度: {readingAttempt.cpm} 字/分鐘</p>
-                  <div className="flex gap-0.5 mb-1">
-                    {speedSegments.map((segment, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex-1 h-2 rounded-sm ${idx === currentSegment ? segment.color : 'bg-gray-200'}`}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex justify-between text-[8px] text-gray-500">
-                    {speedSegments.map((segment, idx) => (
-                      <span key={idx} className="flex-1 text-center">{segment.label}</span>
-                    ))}
-                  </div>
-                  <p className="text-xs text-gray-600 mt-2">{cpmFeedback.text}</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400 py-4 text-center">此步驟尚未完成</p>
-          )}
-        </div>
-
-        {/* Step 3: 生字練習 */}
-        <div className={`rounded-3xl border p-6 ${vocabResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${vocabResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>
-              3
-            </span>
-            <h3 className={`text-lg font-bold ${vocabResult ? 'text-gray-900' : 'text-gray-400'}`}>生字練習</h3>
-            {!vocabResult && (
-              <span className="ml-auto text-xs text-gray-400 font-medium">未完成</span>
-            )}
-          </div>
-
-          {vocabResult ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-accent h-3 rounded-full transition-all"
-                    style={{ width: vocabResult.totalChars > 0 ? `${Math.round((vocabResult.practicedChars.length / vocabResult.totalChars) * 100)}%` : '0%' }}
-                  />
-                </div>
-                <span className="text-sm font-bold text-gray-700 shrink-0">
-                  {vocabResult.practicedChars.length} / {vocabResult.totalChars}
-                </span>
-              </div>
-              {vocabResult.practicedChars.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {vocabResult.practicedChars.map(ch => (
-                    <span key={ch} className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-bold px-2 py-0.5 rounded-lg">
-                      {ch}
-                    </span>
+              {/* 語速 CPM */}
+              <div className="text-center p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center">
+                <span className="text-3xl font-black text-gray-900">{cpm}</span>
+                <span className="text-xs text-gray-500 font-bold">字/分鐘</span>
+                <div className="flex gap-0.5 mt-2 w-full max-w-[120px]">
+                  {speedSegments.map((seg, idx) => (
+                    <div key={idx} className={`flex-1 h-1.5 rounded-sm ${idx === currentSegment ? seg.color : 'bg-gray-200'}`} />
                   ))}
                 </div>
-              )}
-              {vocabResult.practicedChars.length === 0 && (
-                <p className="text-sm text-gray-500">本次未練習任何生字（跳過）</p>
-              )}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400 py-4 text-center">此步驟尚未完成</p>
-          )}
-        </div>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  {speedSegments[currentSegment]?.label}
+                </p>
+              </div>
 
-        {/* Step 4: 課文理解 */}
-        <div className={`rounded-3xl border p-6 ${comprehensionResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>
-              4
-            </span>
-            <h3 className={`text-lg font-bold ${comprehensionResult ? 'text-gray-900' : 'text-gray-400'}`}>課文理解</h3>
-            {comprehensionResult?.isComplete && (
-              <span className="ml-auto bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">已完成</span>
-            )}
-            {comprehensionResult && !comprehensionResult.isComplete && (
-              <span className="ml-auto bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">部分完成</span>
-            )}
-            {!comprehensionResult && (
-              <span className="ml-auto text-xs text-gray-400 font-medium">未完成</span>
+              {/* 全文匹配率 */}
+              <div className="text-center p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center">
+                {fullMatchPct !== null ? (
+                  <>
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${
+                      fullMatchPct >= 80 ? 'border-emerald-500 text-emerald-700' : fullMatchPct >= 60 ? 'border-amber-500 text-amber-700' : 'border-red-400 text-red-600'
+                    }`}>
+                      <span className="text-lg font-black">{fullMatchPct}%</span>
+                    </div>
+                    <p className="text-xs text-gray-500 font-bold mt-1">全文匹配</p>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-3xl font-black text-gray-300">--</span>
+                    <p className="text-xs text-gray-400 font-bold mt-1">全文匹配</p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Speed feedback */}
+            {readingAttempt && (
+              <p className="text-sm text-gray-600 text-center">{getCpmFeedback(cpm).text}</p>
             )}
           </div>
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-4">尚未完成朗讀練習</p>
+        )}
+      </Section>
 
-          {comprehensionResult ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-emerald-500 h-3 rounded-full transition-all"
-                    style={{ width: `${Math.min(100, Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100))}%` }}
-                  />
+      {/* ============ 環節二：錄音內容與智能分析 ============ */}
+      <Section number={2} title="錄音內容與智能分析" disabled={!readingAttempt}>
+        {readingAttempt ? (
+          <div className="space-y-4">
+            {/* Transcription text */}
+            {readingAttempt.transcription && (
+              <div>
+                <p className="text-xs text-gray-500 font-bold mb-2">語音轉文字</p>
+                <div className="bg-slate-50 rounded-2xl p-4 text-sm text-gray-700 leading-relaxed">
+                  {readingAttempt.transcription}
                 </div>
-                <span className="text-sm font-bold text-gray-700 shrink-0">
-                  {comprehensionResult.understoodCount} / {comprehensionResult.requiredCount}
-                </span>
               </div>
-              <div className="flex gap-4 text-sm text-gray-600">
-                <span>對話輪數：{comprehensionResult.conversationLength} 回</span>
-                <span>理解率：{Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)}%</span>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400 py-4 text-center">此步驟尚未完成</p>
-          )}
-        </div>
+            )}
 
-        {/* Step 5: 全文朗讀 */}
-        <div className={`rounded-3xl border p-6 ${fullReadingResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black ${fullReadingResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>
-              5
-            </span>
-            <h3 className={`text-lg font-bold ${fullReadingResult ? 'text-gray-900' : 'text-gray-400'}`}>全文朗讀</h3>
-            {!fullReadingResult && (
-              <span className="ml-auto text-xs text-gray-400 font-medium">未完成</span>
+            {/* 4 category cards */}
+            {lineBreakdown.length > 0 && (
+              <div>
+                <p className="text-xs text-gray-500 font-bold mb-2">朗讀分析</p>
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="bg-emerald-50 rounded-xl p-3 text-center">
+                    <span className="text-2xl font-black text-emerald-600">{segmentStats.correct}</span>
+                    <p className="text-xs text-emerald-600 font-bold mt-0.5">正確</p>
+                  </div>
+                  <div className="bg-red-50 rounded-xl p-3 text-center">
+                    <span className="text-2xl font-black text-red-500">{segmentStats.wrong}</span>
+                    <p className="text-xs text-red-500 font-bold mt-0.5">讀錯</p>
+                  </div>
+                  <div className="bg-amber-50 rounded-xl p-3 text-center">
+                    <span className="text-2xl font-black text-amber-600">{segmentStats.missing}</span>
+                    <p className="text-xs text-amber-600 font-bold mt-0.5">遺漏</p>
+                  </div>
+                  <div className="bg-blue-50 rounded-xl p-3 text-center">
+                    <span className="text-2xl font-black text-blue-600">{segmentStats.total}</span>
+                    <p className="text-xs text-blue-600 font-bold mt-0.5">總計</p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-4">尚未完成朗讀練習</p>
+        )}
+      </Section>
 
-          {fullReadingResult ? (
-            <div className="flex items-center gap-6">
-              <div className={`w-20 h-20 rounded-full flex items-center justify-center border-4 shrink-0 ${
-                fullReadingResult.matchRate >= 0.80 ? 'border-emerald-500 text-emerald-800'
-                : fullReadingResult.matchRate >= 0.60 ? 'border-amber-500 text-amber-800'
-                : 'border-red-400 text-red-600'
-              }`}>
-                <span className="text-xl font-black">{Math.round(fullReadingResult.matchRate * 100)}%</span>
-              </div>
-              <p className={`text-sm font-bold ${
-                fullReadingResult.matchRate >= 0.80 ? 'text-emerald-800'
-                : fullReadingResult.matchRate >= 0.60 ? 'text-amber-800'
-                : 'text-gray-600'
-              }`}>
-                {fullReadingResult.feedback}
-              </p>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400 py-4 text-center">此步驟尚未完成</p>
-          )}
-        </div>
-      </div>
-
-      {/* 逐段朗讀分析 (diff breakdown) */}
-      {readingAttempt?.lineBreakdown && readingAttempt.lineBreakdown.length > 0 && (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h3 className="text-lg font-bold">逐段朗讀分析</h3>
-            <p className="text-sm text-gray-500 mt-1">
+      {/* ============ 環節三：逐句分析對比 ============ */}
+      <Section number={3} title="逐句分析對比" disabled={lineBreakdown.length === 0}>
+        {lineBreakdown.length > 0 ? (
+          <div className="-mx-6 -mb-6">
+            <p className="text-xs text-gray-500 px-6 mb-3">
               點擊每一段可展開查看逐字比對結果
             </p>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {readingAttempt.lineBreakdown.map((line, idx) => {
-              const pct = Math.round(line.matchRate * 100);
-              const isExpanded = expandedLine === idx;
-              return (
-                <div key={idx}>
-                  <button
-                    onClick={() => setExpandedLine(isExpanded ? null : idx)}
-                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors text-left"
-                  >
-                    <span className="text-xs font-bold text-gray-400 w-8 shrink-0">
-                      #{idx + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-700 truncate">
-                        {line.transcript || '（未朗讀）'}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className={`text-sm font-bold ${
-                        pct >= 80 ? 'text-emerald-600' : pct >= 60 ? 'text-amber-600' : 'text-red-500'
-                      }`}>
-                        {pct}%
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {line.cpm} 字/分
-                      </span>
-                      <svg
-                        className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </button>
-                  {isExpanded && line.diffTokens && (
-                    <div className="px-6 pb-4 pt-1">
-                      <DiffDisplay tokens={line.diffTokens} showLegend />
-                      <div className="flex gap-4 mt-3 text-xs text-gray-400">
-                        <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
-                        <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>
-                        <span>漏讀: {line.diffTokens.filter(t => t.type === 'missing').length} 字</span>
-                        <span>多讀: {line.diffTokens.filter(t => t.type === 'extra').length} 字</span>
+            <div className="divide-y divide-slate-100">
+              {lineBreakdown.map((line, idx) => {
+                const pct = Math.round(line.matchRate * 100);
+                const isExpanded = expandedLine === idx;
+                return (
+                  <div key={idx}>
+                    <button
+                      onClick={() => setExpandedLine(isExpanded ? null : idx)}
+                      className="w-full px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors text-left"
+                    >
+                      <span className="text-xs font-bold text-gray-400 w-8 shrink-0">#{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700 truncate">{line.transcript || '（未朗讀）'}</p>
                       </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className={`text-sm font-bold ${pct >= 80 ? 'text-emerald-600' : pct >= 60 ? 'text-amber-600' : 'text-red-500'}`}>
+                          {pct}%
+                        </span>
+                        <span className="text-xs text-gray-400">{line.cpm} 字/分</span>
+                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </button>
+                    {isExpanded && line.diffTokens && (
+                      <div className="px-6 pb-4 pt-1">
+                        <DiffDisplay tokens={line.diffTokens} showLegend />
+                        <div className="flex gap-4 mt-3 text-xs text-gray-400">
+                          <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
+                          <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>
+                          <span>漏讀: {line.diffTokens.filter(t => t.type === 'missing').length} 字</span>
+                          <span>多讀: {line.diffTokens.filter(t => t.type === 'extra').length} 字</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Full reading diff (if available) */}
+            {fullReadingResult?.diffTokens && fullReadingResult.diffTokens.length > 0 && (
+              <div className="border-t border-slate-200 px-6 py-4">
+                <p className="text-xs text-gray-500 font-bold mb-2">全文朗讀比對</p>
+                <DiffDisplay tokens={fullReadingResult.diffTokens} showLegend />
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-4">尚無逐句比對資料</p>
+        )}
+      </Section>
+
+      {/* ============ 環節四：錯字詞練習清單 ============ */}
+      <Section number={4} title="錯字詞練習清單" disabled={wrongTokens.length === 0 && missingChars.length === 0}>
+        {wrongTokens.length > 0 || missingChars.length > 0 ? (
+          <div className="space-y-4">
+            {wrongTokens.length > 0 && (
+              <div>
+                <p className="text-xs text-gray-500 font-bold mb-2">讀錯的字（共 {wrongTokens.length} 個）</p>
+                <div>
+                  {wrongTokens.map((t, idx) => (
+                    <div key={idx} className="flex items-center gap-4 py-3 border-b border-slate-100 last:border-0">
+                      <div className="flex items-center gap-2 flex-1">
+                        <span className="text-red-500 line-through text-lg">{t.char}</span>
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                        <span className="text-emerald-600 font-bold text-lg">{t.expected}</span>
+                      </div>
+                      <button
+                        onClick={() => speakText(t.expected)}
+                        className="w-8 h-8 rounded-full bg-accent/10 text-accent flex items-center justify-center hover:bg-accent/20 transition-colors shrink-0"
+                        title="聽發音"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {missingChars.length > 0 && (
+              <div>
+                <p className="text-xs text-gray-500 font-bold mb-2">漏讀的字（共 {missingChars.length} 個）</p>
+                <div className="flex flex-wrap gap-2">
+                  {missingChars.slice(0, 20).map((ch, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => speakText(ch)}
+                      className="bg-amber-50 border border-amber-200 text-amber-800 text-sm font-bold px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors flex items-center gap-1"
+                    >
+                      {ch}
+                      <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                      </svg>
+                    </button>
+                  ))}
+                  {missingChars.length > 20 && (
+                    <span className="text-xs text-gray-400 self-center">...還有 {missingChars.length - 20} 個</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="bg-green-50 rounded-2xl p-6 text-center">
+            <p className="text-emerald-700 font-bold">
+              {readingAttempt ? '恭喜！沒有讀錯的字詞！' : '尚無朗讀資料'}
+            </p>
+          </div>
+        )}
+      </Section>
+
+      {/* ============ 環節五：練習建議 ============ */}
+      <Section number={5} title="練習建議" disabled={!readingAttempt}>
+        {suggestions.length > 0 ? (
+          <div className="space-y-3">
+            {suggestions.map((s, idx) => (
+              <div key={idx} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                <span className="text-2xl shrink-0">{s.icon}</span>
+                <div>
+                  <p className="font-bold text-sm text-gray-900">{s.title}</p>
+                  <p className="text-sm text-gray-500">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-4">完成朗讀練習後會產生建議</p>
+        )}
+      </Section>
+
+      {/* ============ 環節六：AI 詳細分析 (placeholder) ============ */}
+      <Section number={6} title="AI 詳細分析" disabled>
+        <div className="p-6 bg-gray-50 rounded-2xl text-center">
+          <span className="text-4xl mb-3 block">🤖</span>
+          <p className="text-sm text-gray-400 font-bold">AI 詳細分析</p>
+          <p className="text-xs text-gray-300 mt-1">即將推出 — 系統將分析錯誤根源並提供個別化學習建議</p>
+        </div>
+      </Section>
+
+      {/* ============ 補充資訊：生字練習 + 課文理解 ============ */}
+      {(vocabResult || comprehensionResult) && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">其他學習成果</h3>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* 生字練習 */}
+            <div className={`rounded-2xl border p-5 ${vocabResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${vocabResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>3</span>
+                <h4 className={`text-sm font-bold ${vocabResult ? 'text-gray-900' : 'text-gray-400'}`}>生字練習</h4>
+              </div>
+              {vocabResult ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div className="bg-accent h-2 rounded-full transition-all" style={{ width: vocabResult.totalChars > 0 ? `${Math.round((vocabResult.practicedChars.length / vocabResult.totalChars) * 100)}%` : '0%' }} />
+                    </div>
+                    <span className="text-xs font-bold text-gray-600">{vocabResult.practicedChars.length}/{vocabResult.totalChars}</span>
+                  </div>
+                  {vocabResult.practicedChars.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {vocabResult.practicedChars.map(ch => (
+                        <span key={ch} className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-1.5 py-0.5 rounded">
+                          {ch}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>
-              );
-            })}
+              ) : (
+                <p className="text-xs text-gray-400 text-center py-2">未完成</p>
+              )}
+            </div>
+
+            {/* 課文理解 */}
+            <div className={`rounded-2xl border p-5 ${comprehensionResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>4</span>
+                <h4 className={`text-sm font-bold ${comprehensionResult ? 'text-gray-900' : 'text-gray-400'}`}>課文理解</h4>
+                {comprehensionResult?.isComplete && (
+                  <span className="ml-auto bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">已完成</span>
+                )}
+              </div>
+              {comprehensionResult ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100))}%` }} />
+                    </div>
+                    <span className="text-xs font-bold text-gray-600">{comprehensionResult.understoodCount}/{comprehensionResult.requiredCount}</span>
+                  </div>
+                  <div className="flex gap-3 text-xs text-gray-500">
+                    <span>對話 {comprehensionResult.conversationLength} 回</span>
+                    <span>理解率 {Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)}%</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 text-center py-2">未完成</p>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -398,14 +553,9 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, onRetry })
           <h3 className="text-2xl font-bold">準備好讀下一個故事了嗎？</h3>
           <p className="text-white/80">每天進步一點點，你就會變成閱讀小達人！</p>
         </div>
-        <div className="flex gap-4">
-          <button
-            onClick={onRetry}
-            className="bg-white text-accent px-8 py-3 rounded-xl font-bold hover:shadow-lg transition-all"
-          >
-            回圖書館
-          </button>
-        </div>
+        <button onClick={onRetry} className="bg-white text-accent px-8 py-3 rounded-xl font-bold hover:shadow-lg transition-all">
+          回圖書館
+        </button>
       </div>
     </div>
   );

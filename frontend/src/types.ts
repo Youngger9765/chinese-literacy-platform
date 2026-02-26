@@ -80,6 +80,8 @@ export interface VocabResult {
 export interface FullReadingResult {
   matchRate: number;
   feedback: string;
+  diffTokens?: DiffToken[];
+  transcript?: string;
 }
 
 export interface LearningSession {
