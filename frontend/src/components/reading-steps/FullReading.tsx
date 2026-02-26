@@ -394,7 +394,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                 再試一次
               </button>
               <button
-                onClick={() => onFinish({ matchRate: result.matchRate, feedback: result.feedback })}
+                onClick={() => onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript })}
                 className="w-full py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95"
               >
                 查看報告
