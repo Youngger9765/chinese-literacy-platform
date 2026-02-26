@@ -47,7 +47,7 @@ interface ApiStoryDetail extends ApiStoryListItem {
   vocabulary: ApiVocabItem[] | null;
   fill_in_blank: unknown;
   multiple_choice: unknown;
-  reading_benchmark: unknown;
+  reading_benchmark: { levels: { threshold: string; feedback: string }[] } | null;
   text_type: string;
   source_file: string;
 }
@@ -90,6 +90,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     readingStrategy: detail.reading_strategy ?? undefined,
     vocabulary: detail.vocabulary ?? undefined,
     charCount: detail.char_count,
+    readingBenchmark: detail.reading_benchmark ?? undefined,
   };
 }
 
