@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Story, FullReadingResult, DiffToken } from '../../types';
-import { correctHomophones } from '../../utils/pinyin';
-import { diffCharacters, normalizeForComparison, cleanChineseText } from '../../utils/textDiff';
+import { cleanChineseText } from '../../utils/textDiff';
+import { analyzeFluency } from '../../utils/fluencyAnalyzer';
 import DiffDisplay from '../ui/DiffDisplay';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
@@ -25,7 +25,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
   const [isTtsPaused, setIsTtsPaused]           = useState(false);
   const [streamingTranscript, setStreamingTranscript] = useState('');
   const [micError, setMicError]                 = useState('');
-  const [result, setResult]                     = useState<{ matchRate: number; feedback: string; diffTokens: DiffToken[] } | null>(null);
+  const [result, setResult]                     = useState<{ matchRate: number; feedback: string; diffTokens: DiffToken[]; cpm: number; durationMs: number; errorBreakdown: { correct: number; wrong: number; missing: number; extra: number } } | null>(null);
   const [zhuyinEnabled, setZhuyinEnabled]       = useState(true);
   const [zhuyinReady, setZhuyinReady]           = useState(false);
 
@@ -36,6 +36,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
   const isDraggingRef             = useRef(false);
   const dragStartXRef             = useRef(0);
   const dragStartWidthRef         = useRef(0);
+  const startTimeRef              = useRef<number>(0);
 
   const zhuyinActive = zhuyinReady && zhuyinEnabled;
   const fullText = useMemo(() => story.content.join(''), [story.content]);
@@ -173,7 +174,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
     recognition.onstart = () => {
       setIsPreparing(false);
-      if (!isSessionActiveRef.current) { isSessionActiveRef.current = true; setIsSessionActive(true); }
+      if (!isSessionActiveRef.current) {
+        startTimeRef.current = Date.now();
+        isSessionActiveRef.current = true;
+        setIsSessionActive(true);
+      }
     };
 
     recognition.onresult = (event: any) => {
@@ -222,19 +227,24 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
   /* ---- Submit & evaluate ---- */
   const submitReading = useCallback(() => {
     const transcript = currentTranscriptRef.current;
+    const durationMs = Date.now() - startTimeRef.current;
     stopSession();
     if (!transcript.trim()) { setMicError('未偵測到語音，請再試一次。'); return; }
 
-    const targetNorm = normalizeForComparison(fullText);
-    const corrected = correctHomophones(cleanChineseText(transcript), targetNorm);
-    const diffResult = diffCharacters(corrected, fullText, { useHomophone: true });
+    const fluency = analyzeFluency({
+      spoken: cleanChineseText(transcript),
+      target: fullText,
+      durationMs,
+    });
 
-    const feedback =
-      diffResult.matchRate >= 0.80 ? '太流利了！全文朗讀表現非常棒！' :
-      diffResult.matchRate >= 0.60 ? '唸得不錯，過關！繼續練習會更好！' :
-      '再練習一次，你一定可以更流利！';
-
-    setResult({ matchRate: diffResult.matchRate, feedback, diffTokens: diffResult.tokens });
+    setResult({
+      matchRate: fluency.accuracy,
+      feedback: fluency.feedback,
+      diffTokens: fluency.diffTokens,
+      cpm: fluency.cpm,
+      durationMs: fluency.durationMs,
+      errorBreakdown: fluency.errorBreakdown,
+    });
     setStreamingTranscript(cleanChineseText(transcript));
   }, [fullText, stopSession]);
 
@@ -394,7 +404,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                 再試一次
               </button>
               <button
-                onClick={() => onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript })}
+                onClick={() => onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown })}
                 className="w-full py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95"
               >
                 查看報告

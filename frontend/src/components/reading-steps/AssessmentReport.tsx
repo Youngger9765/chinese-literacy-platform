@@ -4,6 +4,8 @@ import { LearningSession } from '../../types';
 import type { Story } from '../../types';
 import DiffDisplay from '../ui/DiffDisplay';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
+import ExitTicket from './ExitTicket';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -245,7 +247,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
               {/* 語速 CPM */}
               <div className="text-center p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center">
                 <span className="text-3xl font-black text-gray-900">{cpm}</span>
-                <span className="text-xs text-gray-500 font-bold">字/分鐘</span>
+                <span className="text-xs text-gray-500 font-bold">正確字數/分鐘</span>
                 <div className="flex gap-0.5 mt-2 w-full max-w-[120px]">
                   {speedSegments.map((seg, idx) => (
                     <div key={idx} className={`flex-1 h-1.5 rounded-sm ${idx === currentSegment ? seg.color : 'bg-gray-200'}`} />
@@ -266,6 +268,9 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                       <span className="text-lg font-black">{fullMatchPct}%</span>
                     </div>
                     <p className="text-xs text-gray-500 font-bold mt-1">全文匹配</p>
+                    {fullReadingResult?.cpm != null && (
+                      <p className="text-[10px] text-gray-400 mt-0.5">{fullReadingResult.cpm} 正確字數/分鐘</p>
+                    )}
                   </>
                 ) : (
                   <>
@@ -280,6 +285,14 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             {readingAttempt && (
               <p className="text-sm text-gray-600 text-center">{getCpmFeedback(cpm).text}</p>
             )}
+            {story?.readingBenchmark && (() => {
+              const levels = parseReadingBenchmark(story.readingBenchmark.levels);
+              const benchCpm = fullReadingResult?.cpm ?? cpm;
+              const benchFeedback = getBenchmarkFeedback(benchCpm, levels);
+              return benchFeedback ? (
+                <p className="text-xs text-gray-400 text-center mt-1">課本標準：{benchFeedback}</p>
+              ) : null;
+            })()}
           </div>
         ) : (
           <p className="text-sm text-gray-400 text-center py-4">尚未完成朗讀練習</p>
@@ -382,6 +395,14 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
               <div className="border-t border-slate-200 px-6 py-4">
                 <p className="text-xs text-gray-500 font-bold mb-2">全文朗讀比對</p>
                 <DiffDisplay tokens={fullReadingResult.diffTokens} showLegend />
+                {fullReadingResult.errorBreakdown && (
+                  <div className="flex gap-4 mt-3 text-xs text-gray-400">
+                    <span>正確: {fullReadingResult.errorBreakdown.correct} 字</span>
+                    <span>讀錯: {fullReadingResult.errorBreakdown.wrong} 字</span>
+                    <span>漏讀: {fullReadingResult.errorBreakdown.missing} 字</span>
+                    <span>多讀: {fullReadingResult.errorBreakdown.extra} 字</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -607,6 +628,11 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             })}
           </div>
         </div>
+      )}
+
+      {/* ============ 出場卷 Exit Ticket ============ */}
+      {wrongTokens.length > 0 && story?.content && (
+        <ExitTicket wrongTokens={wrongTokens} storyContent={story.content} />
       )}
 
       {/* CTA */}
