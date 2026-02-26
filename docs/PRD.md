@@ -2,7 +2,7 @@
 # 國語文閱讀學習平台
 
 > Product Requirements Document
-> Version 1.1 | 2026-02-24
+> Version 1.2 | 2026-02-26
 
 ---
 
@@ -597,21 +597,24 @@
   - [ ] 每段達標後解鎖下一段
   - [ ] 所有段落完成後，朗讀整篇文章
   - [ ] 錄音功能（每段獨立錄音）
-- [ ] 即時回饋系統（六大環節）
-  - [ ] 朗讀結果總覽
-  - [ ] 錄音播放與轉錄
-  - [ ] 逐句分析對比
-  - [ ] 錯字詞練習清單
-  - [ ] 練習建議
-  - [ ] AI 詳細分析
+- [x] 即時回饋系統（朗朗上口六環節，#107）
+  - [x] 環節一：朗讀結果總覽（準確度 / 語速 CPM / 全文匹配率）
+  - [x] 環節二：錄音內容與智能分析（錄音播放 + STT 轉錄）
+  - [x] 環節三：逐句分析對比（DiffDisplay 元件，LCS 演算法）
+  - [x] 環節四：錯字詞練習清單（含 TTS 發音按鈕）
+  - [x] 環節五：練習建議（規則式，根據 CPM + accuracy）
+  - [ ] 環節六：AI 詳細分析（placeholder，待接 Gemini）
+- [x] 出場卷 Exit Ticket — 報告底部學習驗收小測驗（#106）
+  - [x] 從朗讀錯字自動生成 3 題選擇題
+  - [x] 即時批改，選做不 blocking
 - [ ] 統計報告（個人學習曲線）
 - [ ] 練習紀錄查詢
 
 **核心技術**：
 - [ ] Azure Speech SDK 繁體中文語音識別
-- [ ] 朗讀流暢度分析（語速、正確率）
-- [ ] 錯誤偵測與分類（跳字、加字、讀錯）
-- [ ] 文本比對演算法
+- [x] 朗讀流暢度分析 — 正確字數 CPM 計算公式（Fluency Analyzer，#78）
+- [x] 錯誤偵測與分類（讀錯 / 漏讀 / 多讀）
+- [x] LCS 文字差異比對演算法（DiffDisplay 元件，#80）
 
 ---
 
@@ -928,18 +931,18 @@
 
 ## 📐 技術約束（Technical Constraints）
 
-### 技術棧選擇（Google 全家桶）
+### 技術棧選擇（現行架構）
 
-**前端**：Next.js 16 + TypeScript + shadcn/ui
-**後端**：Firebase Functions
-**資料庫**：Firestore（即時同步 + RLS 權限）
-**認證**：Firebase Auth（Google OAuth）
-**檔案儲存**：Firebase Storage（錄音檔）
-**部署**：Firebase Hosting（自動 HTTPS + CDN）
-**語音識別**：Azure Speech SDK (zh-TW)（⚠️ 唯一非 Google 服務）
-**AI 對話**：Vertex AI (Gemini) + Function Calling
+**前端**：React 19 + Vite + TypeScript + Tailwind CSS
+**後端**：FastAPI + SQLAlchemy + Python
+**資料庫**：PostgreSQL（Cloud SQL）
+**檔案儲存**：Google Cloud Storage（GCS，課文圖片）
+**課文資料**：YAML 檔案 → 後端 API（57 篇課文，#142）
+**部署**：GCP Cloud Run（Frontend + Backend 各一服務）
+**語音識別**：Azure Speech SDK (zh-TW)
+**AI 對話**：Vertex AI Gemini（gemini-2.5-flash，us-central1）+ Function Calling
 
-**理由**：Google 全家桶統一管理，免寫後端 API，高中生學習曲線最低
+**理由**：GCP Cloud Run 全托管，FastAPI 後端提供完整 REST API，支援 PostgreSQL 關聯資料模型
 
 ---
 
@@ -996,7 +999,7 @@
 
 - **教師端**：無需技術背景，3 分鐘內完成班級建立
 - **學生端**：國小低年級學生可獨立操作（大按鈕、清楚提示）
-- **響應式設計（RWD）**：支援手機（≥375px）、平板（≥768px）、桌面三種佈局，觸控目標 ≥44px
+- **響應式設計（RWD）**：✅ 已實作（#125）— 支援手機（≥375px）、平板（≥768px）、桌面三種佈局，觸控目標 ≥44px
 - **無障礙設計**：符合 WCAG 2.1 AA 標準（字體大小、顏色對比）
 
 ---
@@ -1300,10 +1303,10 @@
 
 ---
 
-**文件版本**：1.1
+**文件版本**：1.2
 **建立日期**：2026-02-13
 **維護者**：Young Tsai
-**最後更新**：2026-02-24
+**最後更新**：2026-02-26
 
 **核心理念**：用 AI 技術解決真實教學痛點，讓每位學生都能獲得個別化的閱讀指導。
 
@@ -1311,7 +1314,8 @@
 
 ## 📝 Changelog
 
-| 版本 | 日期 | 變更內容 | PR |
-|------|------|---------|-----|
-| 1.1 | 2026-02-24 | 新增 RWD 響應式設計支援（#125）：手機/平板/桌面三種佈局、Header 行動版導覽、雙面板元件垂直堆疊、ComprehensionChat Tab 切換、VocabPractice 響應式網格、44px 觸控目標 | #133 |
+| 版本 | 日期 | 變更內容 | Issues |
+|------|------|---------|--------|
+| 1.2 | 2026-02-26 | 更新功能清單：(1) 即時回饋系統更名為「朗朗上口六環節」並標記各環節完成狀態（#107）；(2) 新增出場卷 Exit Ticket（#106）；(3) 核心技術補充 Fluency Analyzer CPM 公式（#78）及 LCS DiffDisplay 演算法（#80）；(4) 技術棧更正為現行架構（React + FastAPI + PostgreSQL + GCS）；(5) 課文資料層從前端 JSON 改為後端 YAML + API（#142/#149/#154）；(6) RWD 標記已完成 | #78 #80 #106 #107 #142 #149 #154 |
+| 1.1 | 2026-02-24 | 新增 RWD 響應式設計支援（#125）：手機/平板/桌面三種佈局、Header 行動版導覽、雙面板元件垂直堆疊、ComprehensionChat Tab 切換、VocabPractice 響應式網格、44px 觸控目標 | #125 |
 | 1.0 | 2026-02-13 | 初始版本 | — |
