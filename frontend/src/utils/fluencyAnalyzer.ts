@@ -6,6 +6,7 @@ import type { DiffToken } from '../types';
 import { diffCharacters } from './textDiff';
 import { correctHomophones } from './pinyin';
 import { normalizeForComparison, cleanChineseText } from './textDiff';
+import { FULLREADING_CPM_PASS, FULLREADING_ACCURACY_PASS } from './personaConfig';
 
 export interface FluencyThresholds {
   cpmPass: number;
@@ -13,8 +14,8 @@ export interface FluencyThresholds {
 }
 
 export const DEFAULT_THRESHOLDS: FluencyThresholds = {
-  cpmPass: 120,
-  accuracyPass: 0.80,
+  cpmPass: FULLREADING_CPM_PASS,
+  accuracyPass: FULLREADING_ACCURACY_PASS,
 };
 
 export interface ErrorBreakdown {

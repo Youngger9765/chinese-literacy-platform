@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
 import DiffDisplay from '../ui/DiffDisplay';
+import { CPM_VERY_FAST, CPM_FAST, CPM_MEDIUM, CPM_SLOW } from '../../utils/personaConfig';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
 import ExitTicket from './ExitTicket';
@@ -50,26 +51,26 @@ interface AssessmentReportProps {
   onGoToVocab?: () => void;
 }
 
-// Research-based CPM thresholds for 國小高年級～國中生
+// CPM thresholds aligned with backend persona.py (Issue #54)
 const getCpmFeedback = (cpm: number) => {
-  if (cpm >= 180) return { text: '非常流利！你讀得又快又準！', level: 'very-fast' };
-  if (cpm >= 130) return { text: '流利度很好，繼續保持！', level: 'fast' };
-  if (cpm >= 90) return { text: '速度適中，每天練習會越來越快！', level: 'medium' };
-  if (cpm >= 50) return { text: '慢慢來沒關係，多練習就會進步！', level: 'slow' };
+  if (cpm >= CPM_VERY_FAST) return { text: '非常流利！你讀得又快又準！', level: 'very-fast' };
+  if (cpm >= CPM_FAST) return { text: '流利度很好，繼續保持！', level: 'fast' };
+  if (cpm >= CPM_MEDIUM) return { text: '速度適中，每天練習會越來越快！', level: 'medium' };
+  if (cpm >= CPM_SLOW) return { text: '慢慢來沒關係，多練習就會進步！', level: 'slow' };
   return { text: '不要急，一個字一個字慢慢讀就好！', level: 'very-slow' };
 };
 
 const speedSegments = [
-  { label: '慢', threshold: 50, color: 'bg-red-400' },
-  { label: '適中', threshold: 90, color: 'bg-amber-400' },
-  { label: '快', threshold: 130, color: 'bg-green-400' },
-  { label: '很快', threshold: 180, color: 'bg-emerald-400' },
+  { label: '慢', threshold: CPM_SLOW, color: 'bg-red-400' },
+  { label: '適中', threshold: CPM_MEDIUM, color: 'bg-amber-400' },
+  { label: '快', threshold: CPM_FAST, color: 'bg-green-400' },
+  { label: '很快', threshold: CPM_VERY_FAST, color: 'bg-emerald-400' },
 ];
 
 const getCurrentSegment = (cpm: number) => {
-  if (cpm < 50) return 0;
-  if (cpm < 90) return 1;
-  if (cpm < 130) return 2;
+  if (cpm < CPM_SLOW) return 0;
+  if (cpm < CPM_MEDIUM) return 1;
+  if (cpm < CPM_FAST) return 2;
   return 3;
 };
 
