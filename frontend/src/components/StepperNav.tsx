@@ -21,8 +21,8 @@ interface StepDef {
 const steps: StepDef[] = [
   { step: 1, label: '簡介',    view: AppView.INTRO,         needsStory: true  },
   { step: 2, label: '逐段朗讀', view: AppView.TUTOR,         needsStory: true  },
-  { step: 3, label: '生字練習', view: AppView.VOCAB,         needsStory: true  },
-  { step: 4, label: '課文理解', view: AppView.COMPREHENSION, needsStory: true  },
+  { step: 3, label: '課文理解', view: AppView.COMPREHENSION, needsStory: true  },
+  { step: 4, label: '生字練習', view: AppView.VOCAB,         needsStory: true  },
   { step: 5, label: '全文朗讀', view: AppView.FULL_READING,  needsStory: true  },
   { step: 6, label: '報告',    view: AppView.REPORT,        needsStory: false },
 ];
@@ -267,7 +267,7 @@ const StepperNav: React.FC<StepperNavProps> = ({
       {/* User avatar */}
       <div className="ml-3 flex items-center gap-1 pl-3 border-l border-gray-200">
         <div className="w-6 h-6 rounded-full bg-gray-200"></div>
-        <span className="text-[10px] text-gray-500 hidden sm:block">Lv.12</span>
+        <span className="text-[10px] text-gray-500 hidden sm:block">等級 12</span>
       </div>
     </nav>
   );
