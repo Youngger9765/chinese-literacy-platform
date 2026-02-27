@@ -91,6 +91,7 @@ export interface FullReadingResult {
 export interface LearningSession {
   storyId: string;
   startedAt: number;
+  introCompleted: boolean;
   readingAttempt: ReadingAttempt | null;
   comprehensionResult: ComprehensionResult | null;
   vocabResult: VocabResult | null;
