@@ -213,6 +213,21 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     }
   }, [story.content, zhuyinActive]);
 
+  /** Compute completed/current/locked status for each paragraph */
+  const lineStatuses = useMemo(() => {
+    const bestByLine = new Map<number, number>();
+    for (const r of lineResults) {
+      const prev = bestByLine.get(r.lineIndex) ?? 0;
+      if (r.matchRate > prev) bestByLine.set(r.lineIndex, r.matchRate);
+    }
+    return story.content.map((_, idx) => {
+      if (idx === currentLineIndex) return 'current';
+      if (idx < currentLineIndex) return 'completed';
+      if (bestByLine.has(idx) && (bestByLine.get(idx)! >= READING_PASS)) return 'completed';
+      return 'locked';
+    });
+  }, [story.content, lineResults, currentLineIndex]);
+
   /* ---- resizable right panel ---- */
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
@@ -636,9 +651,29 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 className={`transition-all duration-700 rounded-2xl px-8 py-12 border ${
                   idx === currentLineIndex
                     ? 'bg-accent/5 border-accent/40 shadow-[0_0_40px_rgba(99,102,241,0.1)] scale-[1.03]'
-                    : 'opacity-40 border-transparent'
+                    : lineStatuses[idx] === 'completed'
+                      ? 'opacity-60 bg-emerald-50/50 border-emerald-200/50'
+                      : 'opacity-30 border-transparent'
                 }`}
               >
+                <div className="flex items-center gap-2 mb-2">
+                  {lineStatuses[idx] === 'completed' && (
+                    <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  )}
+                  {lineStatuses[idx] === 'current' && (
+                    <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center shrink-0">
+                      <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                    </span>
+                  )}
+                  {lineStatuses[idx] === 'locked' && (
+                    <span className="w-5 h-5 rounded-full border-2 border-gray-300 shrink-0" />
+                  )}
+                  <span className="text-xs text-gray-400 font-bold">第 {idx + 1} 段</span>
+                </div>
                 <p
                   className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
                     idx === currentLineIndex ? 'text-gray-900 font-bold' : 'text-gray-600'
