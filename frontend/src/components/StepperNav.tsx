@@ -21,8 +21,8 @@ interface StepDef {
 const steps: StepDef[] = [
   { step: 1, label: '簡介',    view: AppView.INTRO,         needsStory: true  },
   { step: 2, label: '逐段朗讀', view: AppView.TUTOR,         needsStory: true  },
-  { step: 3, label: '生字練習', view: AppView.VOCAB,         needsStory: true  },
-  { step: 4, label: '課文理解', view: AppView.COMPREHENSION, needsStory: true  },
+  { step: 3, label: '課文理解', view: AppView.COMPREHENSION, needsStory: true  },
+  { step: 4, label: '生字練習', view: AppView.VOCAB,         needsStory: true  },
   { step: 5, label: '全文朗讀', view: AppView.FULL_READING,  needsStory: true  },
   { step: 6, label: '報告',    view: AppView.REPORT,        needsStory: false },
 ];
