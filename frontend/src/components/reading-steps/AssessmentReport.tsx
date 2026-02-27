@@ -106,25 +106,41 @@ const generateSuggestions = (
   return suggestions.slice(0, 4);
 };
 
-/** Section wrapper component for consistent styling */
+/** Section wrapper component for consistent styling — collapsible */
 const Section: React.FC<{
   number: number;
   title: string;
   children: React.ReactNode;
   disabled?: boolean;
-}> = ({ number, title, children, disabled }) => (
-  <div className={`rounded-3xl border overflow-hidden ${disabled ? 'bg-gray-50 border-dashed border-gray-300' : 'bg-white border-slate-200 shadow-sm'}`}>
-    <div className={`px-6 py-4 border-b flex items-center gap-3 ${disabled ? 'border-gray-200' : 'border-slate-100'}`}>
-      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${disabled ? 'bg-gray-200 text-gray-400' : 'bg-accent text-white'}`}>
-        {number}
-      </span>
-      <h3 className={`text-lg font-bold ${disabled ? 'text-gray-400' : 'text-gray-900'}`}>{title}</h3>
+  defaultExpanded?: boolean;
+}> = ({ number, title, children, disabled, defaultExpanded = true }) => {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
+  return (
+    <div className={`rounded-3xl border overflow-hidden ${disabled ? 'bg-gray-50 border-dashed border-gray-300' : 'bg-white border-slate-200 shadow-sm'}`}>
+      <button
+        type="button"
+        onClick={() => !disabled && setExpanded(!expanded)}
+        className={`w-full px-6 py-4 flex items-center gap-3 ${disabled ? 'border-gray-200 cursor-default' : 'border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors'} ${expanded ? 'border-b' : ''}`}
+      >
+        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${disabled ? 'bg-gray-200 text-gray-400' : 'bg-accent text-white'}`}>
+          {number}
+        </span>
+        <h3 className={`text-lg font-bold ${disabled ? 'text-gray-400' : 'text-gray-900'} text-left flex-1`}>{title}</h3>
+        {!disabled && (
+          <svg className={`w-5 h-5 text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        )}
+      </button>
+      {expanded && (
+        <div className="p-6">
+          {children}
+        </div>
+      )}
     </div>
-    <div className="p-6">
-      {children}
-    </div>
-  </div>
-);
+  );
+};
 
 const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
@@ -320,7 +336,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
       </Section>
 
       {/* ============ 環節二：錄音內容與智能分析 ============ */}
-      <Section number={2} title="錄音內容與智能分析" disabled={!readingAttempt && !fullReadingResult}>
+      <Section number={2} title="錄音內容與智能分析" disabled={!readingAttempt && !fullReadingResult} defaultExpanded={false}>
         {(readingAttempt || fullReadingResult) ? (
           <div className="space-y-4">
             {/* Transcription text */}
@@ -369,7 +385,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
       </Section>
 
       {/* ============ 環節三：逐句分析對比 ============ */}
-      <Section number={3} title="逐句分析對比" disabled={lineBreakdown.length === 0}>
+      <Section number={3} title="逐句分析對比" disabled={lineBreakdown.length === 0} defaultExpanded={false}>
         {lineBreakdown.length > 0 ? (
           <div className="-mx-6 -mb-6">
             <p className="text-xs text-gray-500 px-6 mb-3">
@@ -513,7 +529,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
       </Section>
 
       {/* ============ 環節五：練習建議 ============ */}
-      <Section number={5} title="練習建議" disabled={!readingAttempt}>
+      <Section number={5} title="練習建議" disabled={!readingAttempt} defaultExpanded={false}>
         {suggestions.length > 0 ? (
           <div className="space-y-3">
             {suggestions.map((s, idx) => (
@@ -532,7 +548,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
       </Section>
 
       {/* ============ 環節六：AI 詳細分析 (placeholder) ============ */}
-      <Section number={6} title="AI 詳細分析" disabled>
+      <Section number={6} title="AI 詳細分析" disabled defaultExpanded={false}>
         <div className="p-6 bg-gray-50 rounded-2xl text-center">
           <span className="text-4xl mb-3 block">🤖</span>
           <p className="text-sm text-gray-400 font-bold">AI 詳細分析</p>
@@ -601,68 +617,6 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                 <p className="text-xs text-gray-400 text-center py-2">未完成</p>
               )}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* 逐段朗讀分析 (diff breakdown) */}
-      {readingAttempt?.lineBreakdown && readingAttempt.lineBreakdown.length > 0 && (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h3 className="text-lg font-bold">逐段朗讀分析</h3>
-            <p className="text-sm text-gray-500 mt-1">
-              點擊每一段可展開查看逐字比對結果
-            </p>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {readingAttempt.lineBreakdown.map((line, idx) => {
-              const pct = Math.round(line.matchRate * 100);
-              const isExpanded = expandedLine === idx;
-              return (
-                <div key={idx}>
-                  <button
-                    onClick={() => setExpandedLine(isExpanded ? null : idx)}
-                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors text-left"
-                  >
-                    <span className="text-xs font-bold text-gray-400 w-8 shrink-0">
-                      #{idx + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-700 truncate">
-                        {line.transcript || '（未朗讀）'}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className={`text-sm font-bold ${
-                        pct >= 80 ? 'text-emerald-600' : pct >= 60 ? 'text-amber-600' : 'text-red-500'
-                      }`}>
-                        {pct}%
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {line.cpm} 字/分
-                      </span>
-                      <svg
-                        className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </button>
-                  {isExpanded && line.diffTokens && (
-                    <div className="px-6 pb-4 pt-1">
-                      <DiffDisplay tokens={line.diffTokens} showLegend />
-                      <div className="flex gap-4 mt-3 text-xs text-gray-400">
-                        <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
-                        <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>
-                        <span>漏讀: {line.diffTokens.filter(t => t.type === 'missing').length} 字</span>
-                        <span>多讀: {line.diffTokens.filter(t => t.type === 'extra').length} 字</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
           </div>
         </div>
       )}
