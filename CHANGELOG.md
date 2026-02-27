@@ -14,7 +14,6 @@
 - StepperNav 顯示完成狀態 + mini summaries (#167)
 - 錯字詞清單新增「前往生字練習」按鈕 (#81)
 - AI 助教人格門檻統一至前端 personaConfig (#54)
-- 教師/學生 JWT 驗證系統 (#82)（已 revert，待重做）
 
 ### Bug Fixes
 - StepperNav 步驟順序修正：課文理解↔生字練習對調 (#198)
@@ -51,7 +50,6 @@
 ### Features
 - RWD 響應式設計：手機/平板/桌面三種佈局 (#125)
 - StoryLibrary 搜尋 + skeleton loading
-- Step 6 報告頁 LearningSession state 架構 (#144)
 
 ### Bug Fixes
 - 注音字型行距修正：absolute rem line-height (#116, #118, #120, #122, #126)
