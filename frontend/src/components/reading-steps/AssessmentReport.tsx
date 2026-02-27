@@ -319,44 +319,55 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
       {/* ============ 環節二：錄音內容與智能分析 ============ */}
       <Section number={2} title="錄音內容與智能分析" disabled={!readingAttempt && !fullReadingResult}>
-        {(readingAttempt || fullReadingResult) ? (
-          <div className="space-y-4">
-            {/* Transcription text */}
-            {(readingAttempt?.transcription || fullReadingResult?.transcript) && (
-              <div>
-                <p className="text-xs text-gray-500 font-bold mb-2">語音轉文字</p>
-                <div className="bg-slate-50 rounded-2xl p-4 text-sm text-gray-700 leading-relaxed">
-                  {readingAttempt?.transcription ?? fullReadingResult?.transcript}
+        {(readingAttempt || fullReadingResult) ? (() => {
+          // Normalize: treat whitespace-only strings (e.g. '   ' from joining empty transcripts) as empty
+          const transcriptionText = (readingAttempt?.transcription ?? '').trim() || (fullReadingResult?.transcript ?? '').trim();
+          const hasTranscription = transcriptionText.length > 0;
+          const hasLineBreakdown = lineBreakdown.length > 0;
+          return (
+            <div className="space-y-4">
+              {/* Transcription text — only show if non-empty after trim */}
+              {hasTranscription && (
+                <div>
+                  <p className="text-xs text-gray-500 font-bold mb-2">語音轉文字</p>
+                  <div className="bg-slate-50 rounded-2xl p-4 text-sm text-gray-700 leading-relaxed">
+                    {transcriptionText}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* 4 category cards */}
-            {lineBreakdown.length > 0 && (
-              <div>
-                <p className="text-xs text-gray-500 font-bold mb-2">朗讀分析</p>
-                <div className="grid grid-cols-4 gap-3">
-                  <div className="bg-emerald-50 rounded-xl p-3 text-center">
-                    <span className="text-2xl font-black text-emerald-600">{segmentStats.correct}</span>
-                    <p className="text-xs text-emerald-600 font-bold mt-0.5">正確</p>
-                  </div>
-                  <div className="bg-red-50 rounded-xl p-3 text-center">
-                    <span className="text-2xl font-black text-red-500">{segmentStats.wrong}</span>
-                    <p className="text-xs text-red-500 font-bold mt-0.5">讀錯</p>
-                  </div>
-                  <div className="bg-amber-50 rounded-xl p-3 text-center">
-                    <span className="text-2xl font-black text-amber-600">{segmentStats.missing}</span>
-                    <p className="text-xs text-amber-600 font-bold mt-0.5">遺漏</p>
-                  </div>
-                  <div className="bg-blue-50 rounded-xl p-3 text-center">
-                    <span className="text-2xl font-black text-blue-600">{segmentStats.total}</span>
-                    <p className="text-xs text-blue-600 font-bold mt-0.5">總計</p>
+              {/* 4 category cards */}
+              {hasLineBreakdown && (
+                <div>
+                  <p className="text-xs text-gray-500 font-bold mb-2">朗讀分析</p>
+                  <div className="grid grid-cols-4 gap-3">
+                    <div className="bg-emerald-50 rounded-xl p-3 text-center">
+                      <span className="text-2xl font-black text-emerald-600">{segmentStats.correct}</span>
+                      <p className="text-xs text-emerald-600 font-bold mt-0.5">正確</p>
+                    </div>
+                    <div className="bg-red-50 rounded-xl p-3 text-center">
+                      <span className="text-2xl font-black text-red-500">{segmentStats.wrong}</span>
+                      <p className="text-xs text-red-500 font-bold mt-0.5">讀錯</p>
+                    </div>
+                    <div className="bg-amber-50 rounded-xl p-3 text-center">
+                      <span className="text-2xl font-black text-amber-600">{segmentStats.missing}</span>
+                      <p className="text-xs text-amber-600 font-bold mt-0.5">遺漏</p>
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-3 text-center">
+                      <span className="text-2xl font-black text-blue-600">{segmentStats.total}</span>
+                      <p className="text-xs text-blue-600 font-bold mt-0.5">總計</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ) : (
+              )}
+
+              {/* Fallback: no usable transcription or breakdown data (covers empty string AND whitespace-only) */}
+              {!hasTranscription && !hasLineBreakdown && (
+                <p className="text-sm text-gray-400 text-center py-4">語音辨識資料不足，準確度過低時建議重新朗讀</p>
+              )}
+            </div>
+          );
+        })() : (
           <p className="text-sm text-gray-400 text-center py-4">尚未完成朗讀練習</p>
         )}
       </Section>
