@@ -123,7 +123,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-accent-bg-subtle text-accent-hover border border-accent-bg-subtle uppercase tracking-widest">
                   {CATEGORY_LABEL[story.category] ?? story.category}
                 </span>
-                <span className="text-[10px] text-gray-400">Lv.{story.level}</span>
+                <span className="text-[10px] text-gray-400">難度 {story.level}</span>
               </div>
               <h1 className={`text-2xl font-black text-gray-900 leading-[3rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                 {processZhuyin(story.title)}

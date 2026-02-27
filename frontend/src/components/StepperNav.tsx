@@ -267,7 +267,7 @@ const StepperNav: React.FC<StepperNavProps> = ({
       {/* User avatar */}
       <div className="ml-3 flex items-center gap-1 pl-3 border-l border-gray-200">
         <div className="w-6 h-6 rounded-full bg-gray-200"></div>
-        <span className="text-[10px] text-gray-500 hidden sm:block">Lv.12</span>
+        <span className="text-[10px] text-gray-500 hidden sm:block">等級 12</span>
       </div>
     </nav>
   );
