@@ -1296,6 +1296,16 @@
 
 ## 📚 參考文件
 
+### 核心文件體系
+
+| 文件 | 說明 | 關聯 |
+|------|------|------|
+| [BRD.md](BRD.md) | 商業需求文檔 | 「為什麼做」— 商業目標、市場分析、推廣策略 |
+| [MRD.md](MRD.md) | 市場需求文檔 | 「市場要什麼」— TAM/SAM/SOM、競爭矩陣、Porter 五力 |
+| [TRD.md](TRD.md) | 技術規格文檔 | 「怎麼做」— 系統架構、API 規格、DB Schema |
+
+### 延伸文件
+
 - [技術決策文件 (TECHNICAL_DECISION.md)](./TECHNICAL_DECISION.md)
 - [開發時程表 (DEVELOPMENT_TIMELINE.md)](./DEVELOPMENT_TIMELINE.md)
 - [朗朗上口產品介紹 (LANGLANGSHANGKOU_PRODUCT_INTRO.md)](./LANGLANGSHANGKOU_PRODUCT_INTRO.md)
@@ -1303,10 +1313,10 @@
 
 ---
 
-**文件版本**：1.2
+**文件版本**：1.3
 **建立日期**：2026-02-13
 **維護者**：Young Tsai
-**最後更新**：2026-02-26
+**最後更新**：2026-02-27
 
 **核心理念**：用 AI 技術解決真實教學痛點，讓每位學生都能獲得個別化的閱讀指導。
 
@@ -1316,6 +1326,7 @@
 
 | 版本 | 日期 | 變更內容 | Issues |
 |------|------|---------|--------|
+| 1.3 | 2026-02-27 | 新增「核心文件體系」交叉引用（BRD↔MRD↔PRD↔TRD） | #197 |
 | 1.2 | 2026-02-26 | 更新功能清單：(1) 即時回饋系統更名為「朗朗上口六環節」並標記各環節完成狀態（#107）；(2) 新增出場卷 Exit Ticket（#106）；(3) 核心技術補充 Fluency Analyzer CPM 公式（#78）及 LCS DiffDisplay 演算法（#80）；(4) 技術棧更正為現行架構（React + FastAPI + PostgreSQL + GCS）；(5) 課文資料層從前端 JSON 改為後端 YAML + API（#142/#149/#154）；(6) RWD 標記已完成 | #78 #80 #106 #107 #142 #149 #154 |
 | 1.1 | 2026-02-24 | 新增 RWD 響應式設計支援（#125）：手機/平板/桌面三種佈局、Header 行動版導覽、雙面板元件垂直堆疊、ComprehensionChat Tab 切換、VocabPractice 響應式網格、44px 觸控目標 | #125 |
 | 1.0 | 2026-02-13 | 初始版本 | — |
