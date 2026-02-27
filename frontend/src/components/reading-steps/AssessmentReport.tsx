@@ -318,15 +318,15 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
       </Section>
 
       {/* ============ 環節二：錄音內容與智能分析 ============ */}
-      <Section number={2} title="錄音內容與智能分析" disabled={!readingAttempt}>
-        {readingAttempt ? (
+      <Section number={2} title="錄音內容與智能分析" disabled={!readingAttempt && !fullReadingResult}>
+        {(readingAttempt || fullReadingResult) ? (
           <div className="space-y-4">
             {/* Transcription text */}
-            {readingAttempt.transcription && (
+            {(readingAttempt?.transcription || fullReadingResult?.transcript) && (
               <div>
                 <p className="text-xs text-gray-500 font-bold mb-2">語音轉文字</p>
                 <div className="bg-slate-50 rounded-2xl p-4 text-sm text-gray-700 leading-relaxed">
-                  {readingAttempt.transcription}
+                  {readingAttempt?.transcription ?? fullReadingResult?.transcript}
                 </div>
               </div>
             )}

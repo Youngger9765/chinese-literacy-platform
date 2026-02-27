@@ -9,8 +9,6 @@ export enum AppView {
   FULL_READING = 'FULL_READING',
   REPORT = 'REPORT',
   WRITE = 'WRITE',
-  LOGIN = 'LOGIN',
-  REGISTER = 'REGISTER',
 }
 
 export interface StoryIntro {
@@ -104,13 +102,4 @@ export interface LiveMessage {
   role: 'user' | 'model';
   text: string;
   type: 'transcription' | 'feedback' | 'evaluation';
-}
-
-export interface AuthUser {
-  id: number;
-  name: string;
-  role: 'teacher' | 'student';
-  email?: string;
-  seat_number?: number;
-  class_code?: string;
 }
