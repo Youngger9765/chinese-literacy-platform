@@ -140,6 +140,24 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
   const { readingAttempt, comprehensionResult, vocabResult, fullReadingResult } = session;
 
+  // Empty state: session exists but no learning data completed yet
+  const hasNoData = !readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult;
+  if (hasNoData) {
+    return (
+      <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 py-24 text-center">
+        <span className="text-6xl">📖</span>
+        <h2 className="text-2xl font-bold text-gray-900">還沒有完成朗讀練習喔！</h2>
+        <p className="text-gray-500">請先完成「逐段朗讀」或「全文朗讀」，才能查看學習報告。</p>
+        <button
+          onClick={onRetry}
+          className="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded-xl font-bold transition-all"
+        >
+          回到課文
+        </button>
+      </div>
+    );
+  }
+
   // Compute overall score
   const scores: number[] = [];
   if (readingAttempt) scores.push(readingAttempt.accuracy);
