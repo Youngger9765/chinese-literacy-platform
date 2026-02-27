@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中文閱讀平台 - 6個月三軌執行計劃（精簡實作版）</title>
+    <title>LingoLeap - 6個月三軌執行計劃（精簡實作版）</title>
     <style>
         * {
             margin: 0;
@@ -359,13 +359,14 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎯 中文閱讀平台 - 6個月三軌執行計劃</h1>
+        <h1>🎯 LingoLeap — 6個月三軌執行計劃</h1>
         <div class="subtitle">市場推廣 × 產品功能開發 × 團隊成長路徑（2026/2-8 精簡實作版）</div>
+        <div style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem;">最後更新：2026-02-27 ｜ 唯一真相來源：GitHub Milestones</div>
 
         <!-- 策略橫幅 -->
         <div class="strategy-banner">
-            <h2>💡 精簡實作策略：用現成工具加速，而非從零開發</h2>
-            <p><strong>核心理念：</strong>所有功能都保留（朗讀分析、蘇格拉底對話、Agent 系統、校班師生課、作業模式、自學模式），但使用 <span class="highlight">React + Vite + FastAPI</span>、<span class="highlight">Cloud Run (GCP)</span>、<span class="highlight">Gemini (FastAPI backend)</span> 等現成工具快速實作，每個功能先求「能用、能展示、能驗證價值」，後續可迭代優化。</p>
+            <h2>💡 AI 驅動開發策略：Claude Code 作為 AI Dev Pair</h2>
+            <p><strong>核心技術棧：</strong><span class="highlight">React 19 + Vite + Tailwind</span>、<span class="highlight">FastAPI + PostgreSQL</span>、<span class="highlight">Cloud Run (GCP)</span>、<span class="highlight">Vertex AI Gemini 2.5 Flash</span>。所有功能都保留（朗讀分析、蘇格拉底對話、校班師生課、作業模式、自學模式），以 Claude Code 作為 AI Dev 加速 3-4x，每個功能先求「能用、能展示、能驗證價值」，後續持續迭代優化。</p>
         </div>
 
         <!-- 平台六大模組架構 -->
@@ -420,6 +421,10 @@
                 background: #7c3aed;
                 box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
                 animation: archPulse 2s infinite;
+            }
+
+            .arch-progress-dot.done {
+                background: #10b981;
             }
 
             .arch-progress-dot.upcoming {
@@ -696,39 +701,35 @@
 
         <div class="module-arch">
             <div class="module-arch-title">📦 平台六大模組架構</div>
-            <div class="module-arch-subtitle">模組關係 × 開發進度 × Phase 對應</div>
+            <div class="module-arch-subtitle">模組關係 × 開發進度 × Demo 對應</div>
 
             <!-- Progress indicator -->
             <div class="arch-progress">
-                <span class="arch-progress-dot active" title="Phase 0"></span>
-                <span class="arch-progress-dot upcoming" title="Phase 1"></span>
-                <span class="arch-progress-dot upcoming" title="Phase 2"></span>
-                <span class="arch-progress-dot upcoming" title="Phase 3"></span>
-                <span class="arch-progress-dot upcoming" title="Phase 4"></span>
-                <span class="arch-progress-label">目前進度：Week 3 / Phase 0（熱身期）</span>
+                <span class="arch-progress-dot done" title="Demo 1 完成"></span>
+                <span class="arch-progress-dot active" title="Demo 2 進行中"></span>
+                <span class="arch-progress-dot upcoming" title="Demo 3"></span>
+                <span class="arch-progress-dot upcoming" title="Demo 4"></span>
+                <span class="arch-progress-dot upcoming" title="Demo 5"></span>
+                <span class="arch-progress-label">目前進度：Demo 2 自學模式 MVP（90% 完成）</span>
             </div>
 
             <!-- Phase legend -->
             <div class="arch-legend">
                 <div class="arch-legend-item">
-                    <div class="arch-legend-color" style="background: #8b5cf6;"></div>
-                    Phase 0 基礎建設
+                    <div class="arch-legend-color" style="background: #10b981;"></div>
+                    Demo 1-2 基礎+自學（完成）
                 </div>
                 <div class="arch-legend-item">
                     <div class="arch-legend-color" style="background: #3b82f6;"></div>
-                    Phase 1 核心功能
+                    Demo 3 校班師生課（next）
                 </div>
                 <div class="arch-legend-item">
                     <div class="arch-legend-color" style="background: #22c55e;"></div>
-                    Phase 2 校班架構
+                    Demo 4 作業模式
                 </div>
                 <div class="arch-legend-item">
                     <div class="arch-legend-color" style="background: #f97316;"></div>
-                    Phase 3 作業優化
-                </div>
-                <div class="arch-legend-item">
-                    <div class="arch-legend-color" style="background: #ef4444;"></div>
-                    Phase 4 整合交付
+                    Demo 5 正式交付
                 </div>
             </div>
 
@@ -743,10 +744,10 @@
                             <div class="mod-header">
                                 <span class="mod-number">5</span>
                                 <span class="mod-name">🎮 遊戲化（Gamification）</span>
-                                <span class="mod-phase-badge">Phase 3-4 ｜ W19-24</span>
+                                <span class="mod-phase-badge">Demo 5 ｜ W23-26 ｜ 0%</span>
                             </div>
                             <ul class="mod-features">
-                                <li>激勵機制：徽章、積分、排行榜</li>
+                                <li>激勵機制：徽章、積分、排行榜（#26）</li>
                                 <li>動機增強：連續天數、成就解鎖</li>
                                 <li>包裹模組 1（前台）+ 模組 4（校班）強化學習體驗</li>
                             </ul>
@@ -763,16 +764,16 @@
                 </div>
 
                 <!-- Row 2: School | Frontend (core) | Analytics -->
-                <div class="mod-block mod-phase-23 mod-school" style="border: 2px solid #22c55e;">
+                <div class="mod-block mod-phase-23 mod-school" style="border: 2px solid #3b82f6;">
                     <div class="mod-header">
                         <span class="mod-number">4</span>
                         <span class="mod-name">🏫 校班師生課介面</span>
-                        <span class="mod-phase-badge">Phase 2-3 ｜ W14-20</span>
+                        <span class="mod-phase-badge">Demo 3 ｜ W9-18 ｜ 0%</span>
                     </div>
                     <ul class="mod-features">
-                        <li>自學模式 / 作業模式</li>
-                        <li>學校→班級→學生層級</li>
-                        <li>教師管理與指派</li>
+                        <li>自學模式 / 作業模式切換（#143）</li>
+                        <li>學校→班級→學生層級（#19, #20）</li>
+                        <li>教師管理與課文指派（#83, #84）</li>
                     </ul>
                     <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 1 ｜ 連接：模組 3</div>
                 </div>
@@ -782,12 +783,18 @@
                     <div class="mod-header" style="margin-top: 0.25rem;">
                         <span class="mod-number">1</span>
                         <span class="mod-name">📖 前台學習模組</span>
-                        <span class="mod-phase-badge">Phase 1 ｜ W5-10</span>
+                        <span class="mod-phase-badge">Demo 1-2 ｜ 90% ✅</span>
                     </div>
                     <ul class="mod-features">
-                        <li>逐段朗讀 + 全文朗讀</li>
-                        <li>生字練習 + 注音切換</li>
-                        <li>課文理解 + 文本比對</li>
+                        <li>✅ 逐段朗讀（LiveTutor + Web Speech API）</li>
+                        <li>✅ 生字練習（筆順 + 注音 BpmfIansui）</li>
+                        <li>✅ 課文理解（蘇格拉底 AI 5題3階段）</li>
+                        <li>✅ 全文朗讀 + 六環節即時回饋報告</li>
+                        <li>✅ LCS 逐字比對 + DiffDisplay（#80）</li>
+                        <li>✅ AI 助教「溫暖但堅定」人格（#54）</li>
+                        <li>✅ StepperNav 完成狀態（#167）</li>
+                        <li>✅ 錯字→生字練習連動（#81, #110）</li>
+                        <li>✅ RWD 響應式設計（#125）</li>
                     </ul>
                     <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 6（後台）提供課文</div>
                 </div>
@@ -796,12 +803,14 @@
                     <div class="mod-header">
                         <span class="mod-number">3</span>
                         <span class="mod-name">📊 歷程及報告模組</span>
-                        <span class="mod-phase-badge">Phase 2 ｜ W17-18</span>
+                        <span class="mod-phase-badge">Demo 2-3 ｜ 部分完成</span>
                     </div>
                     <ul class="mod-features">
-                        <li>學習儀表板 + 進度追蹤</li>
-                        <li>完整報告（班級 / 個人）</li>
-                        <li>錯誤詞彙分析與趨勢</li>
+                        <li>✅ 六環節診斷報告（AssessmentReport）</li>
+                        <li>✅ 流暢度分析 CPM + 正確率</li>
+                        <li>🔄 學習紀錄持久化（#171，Demo 3 關鍵）</li>
+                        <li>教師儀表板 + 班級報表（#22, #87）</li>
+                        <li>學習預警通知（#86）</li>
                     </ul>
                     <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 1 + 4 的學習資料</div>
                 </div>
@@ -819,14 +828,15 @@
                     <div class="mod-header">
                         <span class="mod-number">2</span>
                         <span class="mod-name">🤖 Agent Builder</span>
-                        <span class="mod-phase-badge">Phase 1 ｜ W11-13</span>
+                        <span class="mod-phase-badge">Demo 1-2 ｜ ✅ 完成</span>
                     </div>
                     <ul class="mod-features">
-                        <li>蘇格拉底式對話引導</li>
-                        <li>朗讀擷取 + 即時回饋</li>
-                        <li>Gemini Function Calling</li>
+                        <li>✅ 蘇格拉底式對話引導（5題3階段）</li>
+                        <li>✅ circuit breaker（3次失敗→503）</li>
+                        <li>✅ LCS 文字差異比對（DiffDisplay）</li>
+                        <li>✅ Gemini 2.5 Flash / Vertex AI</li>
                     </ul>
-                    <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 1（前台）完成後串接</div>
+                    <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">已串接模組 1（前台）朗讀結果</div>
                 </div>
                 <div style="grid-column: 3; grid-row: 5;"></div>
 
@@ -842,15 +852,15 @@
                             <div class="mod-header">
                                 <span class="mod-number">6</span>
                                 <span class="mod-name">🗄️ 後台（Admin Backend）</span>
-                                <span class="mod-phase-badge">Phase 0-1 ｜ W3-7</span>
+                                <span class="mod-phase-badge">Demo 1-2 部分完成</span>
                             </div>
                             <ul class="mod-features" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 1rem;">
-                                <li>課文上架管理</li>
-                                <li>知識樹編輯</li>
-                                <li>PostgreSQL Schema 設計</li>
-                                <li>內容管理後台</li>
-                                <li>SQLAlchemy 權限架構</li>
-                                <li>所有模組的基礎</li>
+                                <li>✅ Stories API（57篇課文 YAML）</li>
+                                <li>✅ PostgreSQL Schema 設計</li>
+                                <li>✅ Cloud Run 部署（GitHub Actions）</li>
+                                <li>🔄 帳號系統 Email+JWT（#82，Demo 3）</li>
+                                <li>🔄 多租戶 Middleware（#18，Demo 3）</li>
+                                <li>課文上架 Admin（#7，Demo 3）</li>
                             </ul>
                         </div>
                         <div style="text-align: center; padding: 0.5rem 1rem; background: rgba(139, 92, 246, 0.15); border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #6d28d9; flex-shrink: 0;">
@@ -868,10 +878,10 @@
         <div class="constraints">
             <h3>⏱️ 現實限制</h3>
             <ul>
-                <li><strong>團隊：</strong>1 位架構師 + 2 位高中生實習生（每週 8-10 小時）</li>
-                <li><strong>時間：</strong>2026/2/17 - 8/31（約 28 週），總工時約 450-560 小時</li>
+                <li><strong>團隊：</strong>Young (lead dev + 架構師) + Claude Code (AI dev) + 高中生實習團隊（2026/2/27 onboard）</li>
+                <li><strong>時間：</strong>2026/2/3 - 8/31（約 30 週），AI 驅動開發加速約 3-4x</li>
                 <li><strong>目標：</strong>8 月底交付完整可用產品，所有核心功能必須有</li>
-                <li><strong>策略：</strong>借鑑 Duotopia 校班師生課經驗 + AI 工具加速開發</li>
+                <li><strong>策略：</strong>AI 驅動開發 (Claude Code) + 借鑑 Duotopia 校班師生課經驗</li>
             </ul>
         </div>
 
@@ -883,14 +893,14 @@
             <div class="track-header header-team">👥 人才養成<br><small style="font-size:0.8rem;">基礎建設 × 技能培養</small></div>
         </div>
 
-        <!-- Phase 0 -->
+        <!-- 已完成：Demo 1 + Demo 2 進度 -->
         <div class="phase-separator">
-            <h2>📍 Phase 0: 熱身期 - 團隊建立與期待對齊（2 月，含過年）</h2>
+            <h2>✅ 已完成：Demo 1 基礎建設 + Demo 2 自學模式 MVP（2月）</h2>
         </div>
 
-        <!-- Week 1 -->
+        <!-- Week 1-2 -->
         <div class="timeline-row">
-            <div class="week-label">Week 1<br><small style="font-size:0.75rem;">2/3-2/9</small></div>
+            <div class="week-label">Week<br>1-2<br><small style="font-size:0.75rem;">2/3-2/16<br>🧧 過年</small></div>
 
             <div class="track-company">
                 <div class="card">
@@ -911,238 +921,111 @@
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">📋 專案啟動</div>
+                    <div class="card-title">📋 專案啟動 + 架構設計</div>
                     <div class="card-content">
                         <span class="feature-tag">Kickoff Meeting</span>
-                        <span class="feature-tag">需求確認</span>
-                        <span class="feature-tag">里程碑規劃</span>
+                        <span class="feature-tag">GCP Cloud Run 部署</span>
+                        <span class="feature-tag">Stories API（57篇）</span>
                         <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 與方大哥對齊期待、確認專案範圍</p>
-                        <p style="margin-top:0.5rem;">了解均一 Academy 可提供的資源與支持</p>
+                        <p style="margin-top:0.5rem;">✅ 建立 React 19 + Vite + FastAPI 開發環境</p>
+                        <p>✅ GCP Cloud Run 自動部署（GitHub Actions）</p>
+                        <p>✅ Stories API 完成（57篇課文 YAML 格式）</p>
+                        <p>✅ PostgreSQL Schema 初始設計</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 團隊建立</div>
-                    <div class="card-content">
-                        <span class="tech-tag">自我介紹</span>
-                        <span class="tech-tag">技能盤點</span>
-                        <span class="tech-tag">分工討論</span>
-                        <p style="margin-top:0.75rem;"><strong>目標：</strong>認識彼此、建立信任、了解各自強項</p>
-                        <p style="margin-top:0.5rem;">工程師（靖杭、啟翔）分享：過去經驗、想學什麼、期待什麼角色</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Week 2 -->
-        <div class="timeline-row">
-            <div class="week-label">Week 2<br><small style="font-size:0.75rem;">2/10-2/16<br>🧧 過年</small></div>
-
-            <div class="track-company">
-                <div class="card">
-                    <div class="card-title">🏢 價值交換 & 推廣夥伴</div>
-                    <div class="card-content">
-                        <span class="capability-tag">均一 Academy</span>
-                        <span class="capability-tag">曾世杰教授</span>
-                        <span class="capability-tag">技術學習</span>
-                        <p style="margin-top:0.75rem;"><strong>核心夥伴價值交換：</strong></p>
-                        <p>• 均一：我們用Google全家桶，未來可整合進均一生態</p>
-                        <p>• 曾教授：驗證閱讀理論，我們提供實證數據</p>
-                        <p style="margin-top:0.75rem;"><strong>技術自學資源：</strong></p>
-                        <p>• Google Cloud Skills Boost 免費課程（Cloud Run、Gemini）</p>
-                        <p>• FastAPI、PostgreSQL、Gemini 官方文件</p>
-                        <p>• 開源專案參考（GitHub）</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="track-product">
-                <div class="card">
-                    <div class="card-title">📚 知識脈絡 & 程式碼研究</div>
-                    <div class="card-content">
-                        <span class="feature-tag">閱讀方程式</span>
-                        <span class="feature-tag">程式碼研究</span>
-                        <span class="feature-tag">功能拆解</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 理解曾教授理論（閱讀能力 = 識字解碼 × 背景知識）</p>
-                        <p style="margin-top:0.5rem;"><strong>🔍 研究方大哥「學國語 App」程式碼：</strong></p>
-                        <p>• GitHub: learning-to-read-chinese (Flutter)</p>
-                        <p>• <strong>已實現功能</strong>：朗讀練習、偵錯功能、生字學習、注音符號切換</p>
-                        <p>• <strong>可借鑒的</strong>：UI/UX設計邏輯、文本比對演算法、生字學習模組設計</p>
-                        <p>• <strong>目標</strong>：不重複造輪子，善用現有基礎建設</p>
-                        <p style="margin-top:0.5rem;">研讀「朗朗上口」開發經驗、Duotopia 校班師生課模組</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="track-team">
-                <div class="card">
-                    <div class="card-title">🔧 基礎建設完整設定</div>
+                    <div class="card-title">🔧 環境建立</div>
                     <div class="card-content">
                         <span class="tech-tag">Claude Code</span>
-                        <span class="tech-tag">Cursor</span>
+                        <span class="tech-tag">Git Flow</span>
                         <span class="tech-tag">GCP</span>
                         <span class="tech-tag">GitHub</span>
-
-                        <p style="margin-top:0.75rem;"><strong>🤖 AI 基礎建設：</strong>一開始就對齊 AI！</p>
-                        <p style="margin-top:0.5rem;">• 架構師分享 Claude Code Agents & Skills 配置</p>
-                        <p>• 團隊成員：安裝 Claude Code / Cursor，匯入共享配置</p>
-
-                        <p style="margin-top:0.75rem;"><strong>☁️ GCP 基礎建設：</strong></p>
-                        <p style="margin-top:0.5rem;">• 建立 GCP Project（中文閱讀平台）</p>
-                        <p>• GCP Project + Cloud Run 設定（PostgreSQL、Cloud Storage、Google OAuth）</p>
-                        <p>• 設定團隊成員權限（Owner/Editor 角色分配）</p>
-                        <p>• 啟用必要 API（Speech-to-Text、Vertex AI）</p>
-
-                        <p style="margin-top:0.75rem;"><strong>🐙 GitHub 基礎建設：</strong></p>
-                        <p style="margin-top:0.5rem;">• 建立 GitHub Organization（chinese-literacy-platform）</p>
-                        <p>• Repository 設定（main/staging/feature 分支策略）</p>
-                        <p>• 團隊成員權限管理（Write/Maintain 權限）</p>
-                        <p>• 設定 Branch Protection Rules</p>
-
-                        <p style="margin-top:0.75rem;">目標：<strong>開發環境一致性、帳號權限就緒、基礎建設完備</strong></p>
-                        <p style="margin-top:0.5rem;"><em>（過年期間可彈性休息，實習生勞健保辦理）</em></p>
+                        <p style="margin-top:0.75rem;"><strong>AI 基礎建設：</strong>Claude Code Agents & Skills 配置</p>
+                        <p style="margin-top:0.5rem;">• Git 工作流程：feature/* → staging → main</p>
+                        <p>• GitHub Actions CI/CD 設定</p>
+                        <p>• 過年期間彈性休息</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Week 3 -->
+        <!-- Week 3-4 -->
         <div class="timeline-row">
-            <div class="week-label">Week 3<br><small style="font-size:0.75rem;">2/17-2/23</small></div>
+            <div class="week-label">Week<br>3-4<br><small style="font-size:0.75rem;">2/17-3/2</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">🤖 AI 基礎建設 & 技術資源</div>
+                    <div class="card-title">🤖 AI 工作流程分享 + 技術資源善用</div>
                     <div class="card-content">
                         <span class="capability-tag">Claude Code Agents</span>
                         <span class="capability-tag">Google 官方文件</span>
                         <span class="capability-tag">開源專案</span>
-                        <p style="margin-top:0.75rem;"><strong>AI 工作流程：</strong>分享 Agents & Skills，建立開發一致性。</p>
+                        <p style="margin-top:0.75rem;"><strong>AI 工作流程：</strong>分享 Agents & Skills，建立開發一致性</p>
                         <p style="margin-top:0.5rem;"><strong>技術資源善用：</strong></p>
                         <p>• FastAPI、PostgreSQL 官方文件與範例程式</p>
                         <p>• GitHub 開源專案參考（教育類、語音辨識）</p>
-                        <p>• Google Cloud 技術社群（台灣 GCP 社群）</p>
-                        <div class="speed-badge">⚡ 策略：站在巨人肩膀上</div>
+                        <div class="speed-badge">⚡ 策略：AI 驅動 3-4x 加速</div>
                     </div>
                 </div>
             </div>
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">🔧 開發環境建立</div>
+                    <div class="card-title">✅ 六步驟核心學習流程開發完成</div>
                     <div class="card-content">
-                        <span class="tool-tag">GitHub</span>
-                        <span class="tool-tag">FastAPI</span>
-                        <span class="tool-tag">Cloud Run</span>
-                        <span class="tool-tag">shadcn/ui</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 專案架構設計、GCP Project + Cloud Run 設定、GitHub repo</p>
-                        <p style="margin-top:0.5rem;">建立 React + Vite + FastAPI 開發環境，Cloud Run 自動部署（GitHub Actions）</p>
+                        <span class="tool-tag">React 19 + Vite</span>
+                        <span class="tool-tag">FastAPI + Gemini 2.5 Flash</span>
+                        <p style="margin-top:0.75rem;"><strong>已完成：</strong></p>
+                        <p>✅ 簡介頁</p>
+                        <p>✅ 逐段朗讀（LiveTutor + Web Speech API）</p>
+                        <p>✅ 課文理解（蘇格拉底 AI 對話，Gemini 5題3階段）</p>
+                        <p>✅ 生字練習（筆順 + 注音 BpmfIansui）</p>
+                        <p>✅ 全文朗讀</p>
+                        <p>✅ 報告（六環節即時回饋，AssessmentReport）</p>
+                        <p>✅ LCS 逐字比對 + DiffDisplay（#80）</p>
+                        <p>✅ 流暢度分析 CPM + 正確率</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 AI 協作實戰</div>
+                    <div class="card-title">🎓 Claude Code 配置分享 + Git 工作流程</div>
                     <div class="card-content">
                         <span class="tech-tag">Claude Code Agents</span>
                         <span class="tech-tag">共享 Skills</span>
-                        <span class="tech-tag">Git 工作流程</span>
-                        <span class="tech-tag">GitHub Actions</span>
-                        <p style="margin-top:0.75rem;"><strong>🤖 AI 驅動開發：</strong>使用共享的 Agents & Skills 協作</p>
+                        <span class="tech-tag">GitHub Issues</span>
+                        <p style="margin-top:0.75rem;"><strong>AI 驅動開發：</strong>使用共享的 Agents & Skills 協作</p>
                         <p style="margin-top:0.5rem;">實戰練習：用 Claude Code 開 Branch、寫程式、提交 PR</p>
-                        <p style="margin-top:0.5rem;">學習 Young 的「GitHub Issues + AI Agent 自動化」工作流程</p>
-                        <p style="margin-top:0.5rem;"><strong>目標：</strong>建立團隊 AI 開發共識與一致性</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Week 4 -->
-        <div class="timeline-row">
-            <div class="week-label">Week 4<br><small style="font-size:0.75rem;">2/24-3/2</small></div>
-
-            <div class="track-company">
-                <div class="card">
-                    <div class="card-title">🎯 技術整合 & 市場探勘</div>
-                    <div class="card-content">
-                        <span class="capability-tag">語音 API</span>
-                        <span class="capability-tag">學校資源</span>
-                        <span class="capability-tag">教育市場</span>
-                        <p style="margin-top:0.75rem;"><strong>技術驗證：</strong>Azure Speech SDK 整合、成本控制。</p>
-                        <p style="margin-top:0.5rem;"><strong>市場資源探勘：</strong></p>
-                        <p>• 學校合作機會（種子學校、試點班級）</p>
-                        <p>• 教師社群（Facebook 教師社團、LINE 群組）</p>
-                        <p>• 教育展覽/會議（如：未來教育展）探勘</p>
-                        <p>• 教育創新獎/競賽機會探勘</p>
-                        <div class="moat-badge">🛡️ 策略：技術 + 市場雙軌</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="track-product">
-                <div class="card">
-                    <div class="card-title">🧪 技術可行性驗證</div>
-                    <div class="card-content">
-                        <span class="tool-tag">語音辨識研究</span>
-                        <span class="feature-tag">兒童語音測試</span>
-                        <span class="feature-tag">成本估算</span>
-                        <span class="feature-tag">課文準備</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 語音辨識服務研究與測試</p>
-                        <p style="margin-top:0.5rem;"><strong>研究備選方案：</strong></p>
-                        <p>• Google Cloud Speech-to-Text (Chirp 3) - 與 GCP 整合</p>
-                        <p>• Azure Speech SDK</p>
-                        <p>• ElevenLabs Scribe</p>
-                        <p>• OpenAI Whisper</p>
-                        <p style="margin-top:0.5rem;">準備測試用課文（公版文章、或曾教授提供的範例課文）</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="track-team">
-                <div class="card">
-                    <div class="card-title">🎓 前端基礎</div>
-                    <div class="card-content">
-                        <span class="tech-tag">React 19 + Vite</span>
-                        <span class="tech-tag">React 基礎</span>
-                        <span class="tech-tag">Tailwind CSS</span>
-                        <span class="tech-tag">shadcn/ui</span>
-                        <p style="margin-top:0.75rem;">工程師學習：現代前端開發（使用現成元件庫）</p>
-                        <p style="margin-top:0.5rem;">為 3 月正式開發做準備</p>
+                        <p style="margin-top:0.5rem;">學習「GitHub Issues + AI Agent 自動化」工作流程</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="milestone-row">
-            <div class="milestone-title">🎯 Demo 1 - 熱身期總結</div>
-            <div class="milestone-desc">團隊建立 ✅ + 環境設定 ✅ + AI 基礎建設對齊 ✅ + Azure Speech SDK 驗證 ✅ + 課文素材準備 ✅ + 工具鏈就緒 ✅</div>
+            <div class="milestone-title">✅ Demo 1 Milestone — 基礎建設完成</div>
+            <div class="milestone-desc">環境設定 ✅ + AI 基礎建設對齊 ✅ + Stories API（57篇）✅ + Cloud Run 部署 ✅ + 六步驟學習流程雛形 ✅</div>
         </div>
 
-        <!-- Phase 1 -->
-        <div class="phase-separator">
-            <h2>📍 Phase 1: 核心功能 - 朗讀分析 + Socratic Agent（3-4 月）</h2>
-        </div>
-
-        <!-- Week 5-7 -->
+        <!-- Week 5-6 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>5-7<br><small style="font-size:0.75rem;">3/3-3/23</small></div>
+            <div class="week-label">Week<br>5-6<br><small style="font-size:0.75rem;">3/3-3/16<br>Demo 2<br>收尾</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">📚 React + FastAPI & 親子天下推廣</div>
+                    <div class="card-title">📚 親子天下演講準備</div>
                     <div class="card-content">
-                        <span class="capability-tag">React + FastAPI</span>
                         <span class="capability-tag">親子天下</span>
                         <span class="capability-tag">教師影響力</span>
-                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>React + FastAPI 全端服務能力建立。</p>
-                        <p style="margin-top:0.5rem;"><strong>三月推廣資源（Young演講）：</strong></p>
-                        <p>• 親子天下演講（三月）：向全台教師展示產品</p>
-                        <p>• 學思達：幫助「表達」訓練 → 4.5萬教師社群推廣</p>
+                        <span class="capability-tag">產品展示</span>
+                        <p style="margin-top:0.75rem;"><strong>三月推廣（Young 演講）：</strong></p>
+                        <p>• 親子天下演講：向全台教師展示產品</p>
+                        <p>• 學思達：幫助「表達」訓練 → 4.5萬教師社群</p>
                         <p>• KIST：幫助偏鄉學生識字 → 學校網絡試點</p>
-                        <p>• TFT：幫助偏鄉學生閱讀 → 教師口碑推薦</p>
                         <div class="speed-badge">⚡ 演講曝光 + 價值交換</div>
                     </div>
                 </div>
@@ -1150,52 +1033,63 @@
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">🗄️ 資料庫設計與實作</div>
+                    <div class="card-title">🔄 Demo 2 收尾（90% → 100%）</div>
                     <div class="card-content">
-                        <span class="tool-tag">PostgreSQL + SQLAlchemy</span>
-                        <span class="feature-tag">Schema 設計</span>
-                        <span class="feature-tag">SQLAlchemy 權限 middleware</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> PostgreSQL Schema、SQLAlchemy middleware 權限設定</p>
-                        <p style="margin-top:0.5rem;"><strong>📋 參考方大哥學國語 App 資料結構：</strong></p>
-                        <p>• 學生、課文、錄音、學習記錄等資料表設計</p>
-                        <p>• 注音符號切換狀態儲存</p>
-                        <p>• 生字學習進度追蹤</p>
-                        <p style="margin-top:0.5rem;">工程師：學習 FastAPI Client SDK、React + Vite 整合</p>
+                        <span class="tool-tag">AI 人格調整</span>
+                        <span class="feature-tag">UX 優化</span>
+                        <p style="margin-top:0.75rem;"><strong>已完成：</strong></p>
+                        <p>✅ AI 助教「溫暖但堅定」人格 (#54)</p>
+                        <p>✅ StepperNav 完成狀態 + mini-summaries (#167)</p>
+                        <p>✅ 錯字→生字練習連動 (#81, #110)</p>
+                        <p>✅ RWD 響應式設計 (#125)</p>
+                        <p style="margin-top:0.5rem;"><strong>剩餘（實習生認領）：</strong></p>
+                        <p>🔄 #139, #156, #168 Bug fix</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 React + FastAPI 全端開發</div>
+                    <div class="card-title">👥 高中生實習團隊 onboard（2/27）</div>
                     <div class="card-content">
-                        <span class="tech-tag">FastAPI Client SDK</span>
-                        <span class="tech-tag">PostgreSQL</span>
-                        <span class="tech-tag">SQLAlchemy 權限 middleware</span>
-                        <span class="tech-tag">shadcn/ui</span>
-                        <p style="margin-top:0.75rem;">工程師學習：用 React + FastAPI 快速建立全端應用</p>
-                        <p style="margin-top:0.5rem;">建立基礎頁面：課文列表、學習記錄</p>
+                        <span class="tech-tag">Git 工作流程</span>
+                        <span class="tech-tag">GitHub Issues</span>
+                        <span class="tech-tag">Bug fix 任務</span>
+                        <p style="margin-top:0.75rem;"><strong>首週任務：</strong></p>
+                        <p>• 環境建立（Node, Git, VS Code）</p>
+                        <p>• 認領 Bug fix issues（#139, #156, #168）</p>
+                        <p>• 學習 feature branch + PR 工作流程</p>
+                        <p style="margin-top:0.5rem;"><em>目標：第一個 PR merge</em></p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Week 8-10 -->
+        <div class="milestone-row">
+            <div class="milestone-title">🎯 Demo 2 Milestone（due 3/16, 90% 完成）— 自學模式 MVP</div>
+            <div class="milestone-desc">學生可選課文 → 六步驟學習（逐段朗讀→理解→生字→全文朗讀）→ 六環節診斷報告 ｜ AI 助教溫暖但堅定 ✅ ｜ LCS 逐字比對 ✅ ｜ 剩餘 3 issues 進行中</div>
+        </div>
+
+        <!-- Demo 3: 校班師生課 -->
+        <div class="phase-separator">
+            <h2>📍 Demo 3: 校班師生課完成（4月-6月，due 6/7）</h2>
+        </div>
+
+        <!-- Week 7-8 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>8-10<br><small style="font-size:0.75rem;">3/24-4/13</small></div>
+            <div class="week-label">Week<br>7-8<br><small style="font-size:0.75rem;">3/17-3/30<br>基礎建設</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">🎤 語音 API & 種子用戶</div>
+                    <div class="card-title">🏫 種子學校洽談</div>
                     <div class="card-content">
-                        <span class="capability-tag">語音處理</span>
-                        <span class="capability-tag">Demo展示</span>
-                        <span class="capability-tag">口碑傳播</span>
-                        <p style="margin-top:0.75rem;"><strong>技術整合：</strong>語音辨識與文本比對 pipeline。</p>
-                        <p style="margin-top:0.5rem;"><strong>價值展示 → 口碑推廣：</strong></p>
-                        <p>• 學校Demo（讓老師看到學生進步，自然推薦）</p>
-                        <p>• 種子教師共創（他們的反饋改進產品 → 成為推廣者）</p>
-                        <p>• KIST教師試用（國文教師，偏鄉學生最需要）</p>
+                        <span class="capability-tag">種子學校</span>
+                        <span class="capability-tag">教師共創</span>
+                        <span class="capability-tag">CoLab KIST</span>
+                        <p style="margin-top:0.75rem;"><strong>開始洽談合作學校：</strong></p>
+                        <p>• CoLab KIST 學校優先</p>
+                        <p>• 說明暑假學習扶助合作方案</p>
+                        <p>• 強調：免費提供、零風險</p>
                         <div class="moat-badge">🛡️ 用效果說話，不靠補助</div>
                     </div>
                 </div>
@@ -1203,113 +1097,47 @@
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">🎤 朗讀分析功能</div>
+                    <div class="card-title">🗄️ 學習紀錄持久化（關鍵路徑起點）</div>
                     <div class="card-content">
-                        <span class="tool-tag">Azure Speech SDK</span>
-                        <span class="feature-tag">錄音上傳</span>
-                        <span class="feature-tag">文本比對</span>
-                        <span class="feature-tag">錯誤標記</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Azure Speech SDK 整合、Python difflib 文本比對</p>
-                        <p style="margin-top:0.5rem;"><strong>💡 借鑒方大哥學國語 App：</strong></p>
-                        <p>• <strong>文本比對演算法</strong>：Flutter 實作邏輯 → 改寫成 TypeScript</p>
-                        <p>• <strong>UI/UX 設計</strong>：錯誤顯示方式（紅字標記、橘色遺漏）</p>
-                        <p>• <strong>注音符號切換</strong>：Space 快捷鍵邏輯</p>
-                        <p style="margin-top:0.5rem;">工程師：錄音介面（Web Audio API）、錯誤顯示 UI</p>
-                        <p style="margin-top:0.5rem;">功能：學生朗讀 → AI 辨識 → 比對原文 → 顯示錯誤</p>
+                        <span class="tool-tag">PostgreSQL + SQLAlchemy</span>
+                        <span class="feature-tag">#171 學習紀錄 DB</span>
+                        <span class="feature-tag">UX 改善</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #171 學習紀錄持久化（前端 session → 後端 DB）</p>
+                        <p style="margin-top:0.5rem;"><strong>UX 改善：</strong></p>
+                        <p>• #169 報告頁太長 → 精簡摺疊設計</p>
+                        <p>• #170 全文朗讀用途不明確 → 說明文案</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 音訊處理與 API 整合</div>
+                    <div class="card-title">🎓 實習生第一個功能任務</div>
                     <div class="card-content">
-                        <span class="tech-tag">Web Audio API</span>
-                        <span class="tech-tag">MediaRecorder</span>
-                        <span class="tech-tag">Fetch API</span>
-                        <span class="tech-tag">非同步處理</span>
-                        <p style="margin-top:0.75rem;">工程師：錄音按鈕、波形顯示、上傳進度</p>
-                        <p style="margin-top:0.5rem;">學習如何整合第三方 API（Whisper）</p>
+                        <span class="tech-tag">React 元件</span>
+                        <span class="tech-tag">Tailwind CSS</span>
+                        <span class="tech-tag">GitHub PR</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• #169 報告頁 UX 改善（精簡折疊）</p>
+                        <p>• #170 全文朗讀說明文案</p>
+                        <p style="margin-top:0.5rem;"><em>目標：獨立完成 PR + Review 流程</em></p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Week 11-13 -->
+        <!-- Week 9-11 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>11-13<br><small style="font-size:0.75rem;">4/14-5/4</small></div>
+            <div class="week-label">Week<br>9-11<br><small style="font-size:0.75rem;">3/31-4/20<br>帳號+權限</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">🤖 Google案例 & 品學堂</div>
+                    <div class="card-title">🤝 CoLab 合作社洽談 KIST 試點</div>
                     <div class="card-content">
-                        <span class="capability-tag">Google Partner</span>
-                        <span class="capability-tag">技術背書</span>
-                        <span class="capability-tag">媒體曝光</span>
-                        <p style="margin-top:0.75rem;"><strong>成為Google技術案例：</strong></p>
-                        <p>• 使用 GCP 全套技術（Cloud Run + PostgreSQL + Gemini）</p>
-                        <p>• 接洽Google Cloud Taiwan成為教育案例</p>
-                        <p>• Google媒體宣傳（技術部落格、案例展示）</p>
-                        <p style="margin-top:0.5rem;"><strong>品學堂價值交換：</strong></p>
-                        <p>• 我們：補足朗讀環節 / 他們：中學網絡推廣</p>
-                        <div class="moat-badge">🛡️ Google背書 > 自我宣傳</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="track-product">
-                <div class="card">
-                    <div class="card-title">💬 蘇格拉底對話 Agent</div>
-                    <div class="card-content">
-                        <span class="tool-tag">Vertex AI (Gemini)</span>
-                        <span class="tool-tag">Function Calling</span>
-                        <span class="feature-tag">問題生成</span>
-                        <span class="feature-tag">對話管理</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Gemini Function Calling 設計、Socratic Prompt 設計</p>
-                        <p style="margin-top:0.5rem;">工程師：對話介面、氣泡設計、訊息列表</p>
-                        <p style="margin-top:0.5rem;">功能：朗讀完成 → AI 提問 → 學生回答 → AI 引導思考</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="track-team">
-                <div class="card">
-                    <div class="card-title">🎓 LLM 與對話 UI</div>
-                    <div class="card-content">
-                        <span class="tech-tag">Gemini API</span>
-                        <span class="tech-tag">Vertex AI (Gemini)</span>
-                        <span class="tech-tag">Streaming UI</span>
-                        <span class="tech-tag">狀態管理</span>
-                        <p style="margin-top:0.75rem;">工程師：對話氣泡、Streaming 顯示、對話歷史</p>
-                        <p style="margin-top:0.5rem;">學習 Gemini API 與 Function Calling 整合</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="milestone-row">
-            <div class="milestone-title">🎯 Demo 2 - 自學模式 MVP</div>
-            <div class="milestone-desc">學生可選課文 → 朗讀錄音 → AI 分析正確率（Azure Speech SDK）→ 蘇格拉底對話（Gemini Function Calling）→ 查看學習記錄（PostgreSQL）</div>
-        </div>
-
-        <!-- Phase 2 -->
-        <div class="phase-separator">
-            <h2>📍 Phase 2: 校班師生課架構（5-6 月）</h2>
-        </div>
-
-        <!-- Week 14-16 -->
-        <div class="timeline-row">
-            <div class="week-label">Week<br>14-16<br><small style="font-size:0.75rem;">5/5-5/25</small></div>
-
-            <div class="track-company">
-                <div class="card">
-                    <div class="card-title">🏢 多租戶 & CoLab試點</div>
-                    <div class="card-content">
-                        <span class="capability-tag">SQLAlchemy 權限控制</span>
                         <span class="capability-tag">KIST試點</span>
                         <span class="capability-tag">教師共創</span>
-                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>SQLAlchemy middleware 多租戶權限架構。</p>
-                        <p style="margin-top:0.5rem;"><strong>CoLab價值共創：</strong></p>
+                        <span class="capability-tag">合作備忘錄</span>
+                        <p style="margin-top:0.75rem;"><strong>CoLab 價值共創：</strong></p>
                         <p>• 我們：幫助KIST學生提升閱讀（免費提供）</p>
                         <p>• CoLab：KIST學校試點、教師反饋改進產品</p>
                         <p>• 成果：成為CoLab教學模組之一 → 6校推廣</p>
@@ -1320,14 +1148,14 @@
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">🏫 學校/班級管理</div>
+                    <div class="card-title">🔐 帳號系統 + 多租戶權限</div>
                     <div class="card-content">
-                        <span class="tool-tag">SQLAlchemy middleware</span>
-                        <span class="feature-tag">學校建立</span>
-                        <span class="feature-tag">班級管理</span>
-                        <span class="feature-tag">學生匯入</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> SQLAlchemy middleware 權限設計（學校 → 班級 → 學生）</p>
-                        <p style="margin-top:0.5rem;">工程師：班級管理介面、學生列表、匯入功能</p>
+                        <span class="tool-tag">Email + Password → JWT</span>
+                        <span class="tool-tag">SQLAlchemy Middleware</span>
+                        <span class="feature-tag">#82 帳號系統</span>
+                        <span class="feature-tag">#18 多租戶</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #82 帳號系統（Email + Password → JWT auth + teacher/student 角色）</p>
+                        <p style="margin-top:0.5rem;">#18 SQLAlchemy 多租戶 Middleware（資料權限隔離）</p>
                         <p style="margin-top:0.5rem;">借鑑 Duotopia 校班師生課模組經驗</p>
                     </div>
                 </div>
@@ -1335,33 +1163,87 @@
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 權限與資料隔離</div>
+                    <div class="card-title">🎓 學習認證與權限概念</div>
                     <div class="card-content">
-                        <span class="tech-tag">SQLAlchemy middleware</span>
-                        <span class="tech-tag">PostgreSQL Policies</span>
-                        <span class="tech-tag">資料關聯</span>
-                        <p style="margin-top:0.75rem;">工程師：學習 SQLAlchemy 權限 middleware 概念</p>
-                        <p style="margin-top:0.5rem;">建立班級管理頁面、學生列表頁面</p>
+                        <span class="tech-tag">JWT</span>
+                        <span class="tech-tag">SQLAlchemy Middleware</span>
+                        <span class="tech-tag">角色管理</span>
+                        <p style="margin-top:0.75rem;">工程師：學習 JWT 認證概念</p>
+                        <p style="margin-top:0.5rem;">• Teacher / Student 角色差異</p>
+                        <p>• 受保護路由設計</p>
+                        <p>• 實作登錄介面 UI</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Week 17-18 -->
+        <!-- Week 12-14 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>17-18<br><small style="font-size:0.75rem;">5/26-6/8</small></div>
+            <div class="week-label">Week<br>12-14<br><small style="font-size:0.75rem;">4/21-5/11<br>校班管理</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">👨‍🏫 教師工具 & 案例展示</div>
+                    <div class="card-title">🔍 Google Partner 案例探勘</div>
                     <div class="card-content">
-                        <span class="capability-tag">FastAPI endpoints</span>
+                        <span class="capability-tag">Google Partner</span>
+                        <span class="capability-tag">技術背書</span>
+                        <span class="capability-tag">媒體曝光</span>
+                        <p style="margin-top:0.75rem;"><strong>成為 Google 技術案例：</strong></p>
+                        <p>• 使用 GCP 全套技術（Cloud Run + PostgreSQL + Gemini）</p>
+                        <p>• 接洽 Google Cloud Taiwan 成為教育案例</p>
+                        <p>• 媒體宣傳（技術部落格、案例展示）</p>
+                        <div class="moat-badge">🛡️ Google 背書 > 自我宣傳</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🏫 校班管理介面</div>
+                    <div class="card-content">
+                        <span class="tool-tag">SQLAlchemy Middleware</span>
+                        <span class="feature-tag">#19 學校+班級管理</span>
+                        <span class="feature-tag">#20 教師管理</span>
+                        <span class="feature-tag">#83 CSV 學生匯入</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #19 學校 + 班級管理介面、#20 教師管理 + 課文指派</p>
+                        <p style="margin-top:0.5rem;">#7 課文上架 API + Admin（取代 YAML）</p>
+                        <p>#83 CSV 學生名單匯入</p>
+                        <p>#108 教材上傳著作權確認</p>
+                        <p>#143 作業指派 + 副本策略</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生做校班管理前端</div>
+                    <div class="card-content">
+                        <span class="tech-tag">React 表單</span>
+                        <span class="tech-tag">CSV 匯入</span>
+                        <span class="tech-tag">Table UI</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• #19 學校/班級管理 UI</p>
+                        <p>• #83 CSV 學生名單匯入介面</p>
+                        <p style="margin-top:0.5rem;"><em>學習：表單驗證、Table 元件</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 15-17 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>15-17<br><small style="font-size:0.75rem;">5/12-6/1<br>教師端報告</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏫 學校 Demo 展示</div>
+                    <div class="card-content">
                         <span class="capability-tag">成功案例</span>
                         <span class="capability-tag">影響力擴散</span>
-                        <p style="margin-top:0.75rem;"><strong>技術能力：</strong>FastAPI endpoints 教師工具開發。</p>
-                        <p style="margin-top:0.5rem;"><strong>案例展示 → 自然曝光：</strong></p>
-                        <p>• KIST學校成功案例（學生進步數據 → CoLab主動分享）</p>
-                        <p>• 學思達教師見證（課堂應用 → 4.5萬社群擴散）</p>
+                        <span class="capability-tag">教師見證</span>
+                        <p style="margin-top:0.75rem;"><strong>案例展示 → 自然口碑：</strong></p>
+                        <p>• KIST 學校成功案例（學生進步數據）</p>
+                        <p>• 學思達教師見證（課堂應用）</p>
                         <p>• 教育展覽展示（被動參與，不主動推銷）</p>
                     </div>
                 </div>
@@ -1369,66 +1251,109 @@
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">👨‍🏫 教師介面</div>
+                    <div class="card-title">📊 教師儀表板 + 班級報表</div>
                     <div class="card-content">
-                        <span class="tool-tag">FastAPI endpoints</span>
                         <span class="tool-tag">Recharts</span>
-                        <span class="feature-tag">班級儀表板</span>
-                        <span class="feature-tag">學生進度</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 資料聚合 API（FastAPI endpoints）</p>
-                        <p style="margin-top:0.5rem;">工程師：教師儀表板、班級報表、進度圖表（Recharts）</p>
+                        <span class="feature-tag">#21 學習資料聚合 API</span>
+                        <span class="feature-tag">#22 教師儀表板</span>
+                        <span class="feature-tag">#87 班級熱力圖</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #21 學習資料聚合 API、#22 教師儀表板 + 班級報表</p>
+                        <p style="margin-top:0.5rem;">#84 課文目標設定</p>
+                        <p>#87 班級表現矩陣（學生×課文熱力圖）</p>
+                        <p>#86 學習預警通知（7天無進步→通知教師）</p>
+                        <p>#107 學習診斷報告</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 資料視覺化</div>
+                    <div class="card-title">🎓 實習生做儀表板 UI</div>
                     <div class="card-content">
                         <span class="tech-tag">Recharts</span>
-                        <span class="tech-tag">Chart.js</span>
-                        <span class="tech-tag">資料聚合</span>
-                        <p style="margin-top:0.75rem;">工程師：學習圖表視覺化（使用現成圖表庫）</p>
-                        <p style="margin-top:0.5rem;">建立教師儀表板、班級報表</p>
+                        <span class="tech-tag">資料視覺化</span>
+                        <span class="tech-tag">圖表元件</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• #22 教師儀表板前端 UI</p>
+                        <p>• 班級報表圖表元件</p>
+                        <p style="margin-top:0.5rem;"><em>學習：Recharts 資料視覺化</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 18 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>18<br><small style="font-size:0.75rem;">6/2-6/7<br>整合測試</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">📋 Demo 3 準備</div>
+                    <div class="card-content">
+                        <span class="capability-tag">Demo 展示準備</span>
+                        <p style="margin-top:0.75rem;">準備向方大哥、均一 Academy、曾教授展示</p>
+                        <p>• 學校管理→班級→學生完整流程</p>
+                        <p>• 教師報表展示</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🧪 Demo 3 整合測試 + Bug fix</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Playwright</span>
+                        <span class="feature-tag">E2E 測試</span>
+                        <span class="feature-tag">Bug fix</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 整合測試 + 穩定性修復</p>
+                        <p style="margin-top:0.5rem;">完整流程驗證：帳號→學校→班級→學生→報表</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🧪 全員測試</div>
+                    <div class="card-content">
+                        <span class="tech-tag">測試思維</span>
+                        <span class="tech-tag">除錯技巧</span>
+                        <p style="margin-top:0.75rem;">全員參與：測試完整使用者流程</p>
+                        <p>• 教師端 + 學生端完整走過</p>
+                        <p>• 回報 Bug 到 GitHub Issues</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="milestone-row">
-            <div class="milestone-title">🎯 Demo 3 - 校班師生課完成</div>
-            <div class="milestone-desc">學校管理員建立學校 → 教師建立班級 → 匯入學生 → 學生學習 → 教師查看報表（SQLAlchemy middleware 自動權限隔離）</div>
+            <div class="milestone-title">🎯 Demo 3 Milestone（due 6/7）— 校班師生課完成</div>
+            <div class="milestone-desc">帳號系統（Email+JWT）→ 學校管理 → 班級管理 → CSV 學生匯入 → 學生學習 → 教師查看報表 + 班級熱力圖（SQLAlchemy Middleware 自動權限隔離）</div>
         </div>
 
-        <!-- Phase 3 -->
+        <!-- Demo 4: 作業模式 + 學習優化 -->
         <div class="phase-separator">
-            <h2>📍 Phase 3: 作業模式與自學優化（6-7 月）</h2>
+            <h2>📍 Demo 4: 作業模式 + 學習優化（6月-7月，due 7/5）</h2>
         </div>
 
         <!-- Week 19-20 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>19-20<br><small style="font-size:0.75rem;">6/9-6/22</small></div>
+            <div class="week-label">Week<br>19-20<br><small style="font-size:0.75rem;">6/9-6/22<br>作業系統</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">📝 學習扶助 & 政府推廣</div>
+                    <div class="card-title">📝 暑假學習扶助準備 + 學校洽談</div>
                     <div class="card-content">
-                        <span class="capability-tag">學習扶助</span>
-                        <span class="capability-tag">政府背書</span>
-                        <span class="capability-tag">官方通路</span>
+                        <span class="capability-tag">暑假學習扶助</span>
+                        <span class="capability-tag">學校洽談</span>
+                        <span class="capability-tag">合作備忘錄</span>
                         <p style="margin-top:0.75rem;"><strong>⭐ 2026暑假黃金時機（7-8月）：</strong></p>
-                        <p>• <strong>80節課</strong>（vs 寒假20節、學期72節）</p>
-                        <p>• 6月Beta完成 → 7月開始試點（時程完美配合）</p>
-                        <p>• 學生最需要（暑假學習滑坡高風險期）</p>
-                        <p>• 數據量足夠（可做統計分析、證明成效）</p>
+                        <p>• 80節課（vs 寒假20節）</p>
+                        <p>• 7月開始試點（時程完美配合）</p>
+                        <p>• 數據量足夠（可做統計分析）</p>
                         <p style="margin-top:0.75rem;"><strong>三階段策略：</strong></p>
-                        <p>• <strong>7-8月</strong>：2-3所學校試點（CoLab KIST優先）</p>
-                        <p>• <strong>9月</strong>：收集數據、產出成效報告</p>
-                        <p>• <strong>10-12月</strong>：申請列入PRIORI官方推薦</p>
-                        <p style="margin-top:0.5rem;"><strong>學校自主權：</strong></p>
-                        <p>• 不需等官方推薦，學校可直接選用新工具</p>
-                        <p>• 我們免費提供 → 學校零成本（政府補助支付教師）</p>
-                        <p>• 有數據後2027年列入官方推薦 → 規模化推廣</p>
+                        <p>• 7-8月：2-3所學校試點（CoLab KIST優先）</p>
+                        <p>• 9月：收集數據、產出成效報告</p>
+                        <p>• 10-12月：申請列入 PRIORI 官方推薦</p>
                         <div class="moat-badge">🛡️ 暑假試點 → 數據背書 → 官方推薦</div>
                     </div>
                 </div>
@@ -1436,26 +1361,28 @@
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">📝 作業模式</div>
+                    <div class="card-title">📝 作業系統</div>
                     <div class="card-content">
-                        <span class="tool-tag">Gmail API</span>
-                        <span class="feature-tag">作業指派</span>
-                        <span class="feature-tag">截止日</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 作業系統 API、Email 提醒（Gmail API）</p>
-                        <p style="margin-top:0.5rem;">工程師：作業列表、繳交介面、通知系統</p>
+                        <span class="tool-tag">Email 通知</span>
+                        <span class="feature-tag">#23 作業系統（教師端）</span>
+                        <span class="feature-tag">#24 作業系統（學生端）</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #23 作業系統 — 教師端（指派課文、設截止日、查看繳交）</p>
+                        <p style="margin-top:0.5rem;">#24 作業系統 — 學生端 + Email 通知</p>
+                        <p>工程師：作業列表、繳交介面</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 通知與作業系統</div>
+                    <div class="card-title">🎓 作業系統前端</div>
                     <div class="card-content">
                         <span class="tech-tag">Email API</span>
-                        <span class="tech-tag">推播通知</span>
                         <span class="tech-tag">FastAPI endpoints</span>
-                        <p style="margin-top:0.75rem;">工程師：Email 整合、作業 API 串接</p>
-                        <p style="margin-top:0.5rem;">建立作業系統介面</p>
+                        <span class="tech-tag">通知系統</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• 作業系統學生端 UI</p>
+                        <p>• Email 通知整合</p>
                     </div>
                 </div>
             </div>
@@ -1463,113 +1390,115 @@
 
         <!-- Week 21-22 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>21-22<br><small style="font-size:0.75rem;">6/23-7/6</small></div>
+            <div class="week-label">Week<br>21-22<br><small style="font-size:0.75rem;">6/23-7/5<br>學習優化</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">🤝 暑假學習扶助準備（開始洽談）</div>
+                    <div class="card-title">✅ 暑假試點最終確認</div>
                     <div class="card-content">
-                        <span class="capability-tag">學校洽談</span>
-                        <span class="capability-tag">合作備忘錄</span>
-                        <span class="capability-tag">試點準備</span>
-                        <p style="margin-top:0.75rem;"><strong>⭐ 關鍵行動（為7-8月暑假做準備）：</strong></p>
-                        <p>• 洽談2-3所學校（CoLab KIST優先）</p>
-                        <p>• 說明暑假學習扶助合作方案（80節課）</p>
-                        <p>• 強調：免費提供、政府補助支付教師、零風險</p>
-                        <p style="margin-top:0.5rem;"><strong>時程優勢：</strong></p>
-                        <p>• 6月底Beta完成 → 7月暑假開始（完美配合）</p>
-                        <p>• 80節課足夠驗證成效（vs 寒假20節）</p>
-                        <div class="moat-badge">🎯 現在洽談 → 7月開始試點</div>
+                        <span class="capability-tag">學校確認</span>
+                        <span class="capability-tag">備忘錄簽署</span>
+                        <span class="capability-tag">教師培訓</span>
+                        <p style="margin-top:0.75rem;"><strong>⭐ 關鍵行動：</strong></p>
+                        <p>• 確認 2-3 所學校合作</p>
+                        <p>• 準備教師培訓教材</p>
+                        <p>• 7月暑假開始試點</p>
+                        <div class="moat-badge">🎯 現在確認 → 7月開始試點</div>
                     </div>
                 </div>
             </div>
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">📊 自學模式優化</div>
+                    <div class="card-title">📊 學習體驗優化</div>
                     <div class="card-content">
-                        <span class="feature-tag">學習記錄</span>
-                        <span class="feature-tag">進度視覺化</span>
-                        <span class="feature-tag">錯誤詞彙追蹤</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 學習記錄追蹤、錯誤分析</p>
-                        <p style="margin-top:0.5rem;">工程師：學習曲線圖、進度儀表板、錯誤詞彙列表</p>
+                        <span class="feature-tag">#25 自學模式優化</span>
+                        <span class="feature-tag">#91 卡點偵測</span>
+                        <span class="feature-tag">#93 學習曲線圖</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span></p>
+                        <p>• #25 自學模式優化</p>
+                        <p>• #91 卡點偵測 + 個別化學習建議</p>
+                        <p>• #90 教師特別教學指示</p>
+                        <p>• #93 學生學習曲線圖</p>
+                        <p>• #106 出場卷 — 報告底部學習驗收</p>
+                        <p>• #172 出場卷品質不穩定 fix</p>
+                        <p>• #92 課文自動刪除機制</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 資料分析與視覺化</div>
+                    <div class="card-title">🎓 學習曲線圖表開發</div>
                     <div class="card-content">
-                        <span class="tech-tag">資料聚合</span>
                         <span class="tech-tag">Recharts 進階</span>
                         <span class="tech-tag">趨勢分析</span>
-                        <p style="margin-top:0.75rem;">工程師：學習曲線、進度追蹤、多維圖表</p>
+                        <span class="tech-tag">多維圖表</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• #93 學習曲線圖元件</p>
+                        <p>• 進度追蹤視覺化</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="milestone-row">
-            <div class="milestone-title">🎯 Demo 4 - 完整功能展示</div>
-            <div class="milestone-desc">自學模式 + 作業模式 + 校班師生課 + 學習歷程追蹤 - 所有核心功能完成！</div>
+            <div class="milestone-title">🎯 Demo 4 Milestone（due 7/5）— 完整功能展示</div>
+            <div class="milestone-desc">自學模式 + 作業模式 + 校班師生課 + 學習歷程追蹤 + 個別化學習建議 — 所有核心功能完成！</div>
         </div>
 
-        <!-- Phase 4 -->
+        <!-- Demo 5: 正式交付 -->
         <div class="phase-separator">
-            <h2>📍 Phase 4: 整合、測試與交付（7-8 月）</h2>
+            <h2>📍 Demo 5: 正式交付（7月-8月，due 8/30）</h2>
         </div>
 
         <!-- Week 23-24 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>23-24<br><small style="font-size:0.75rem;">7/7-7/20</small></div>
+            <div class="week-label">Week<br>23-24<br><small style="font-size:0.75rem;">7/7-7/20<br>品質+認證</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">✅ 暑假試點確認 & Beta測試</div>
+                    <div class="card-title">🔥 暑假學習扶助試點開始</div>
                     <div class="card-content">
-                        <span class="capability-tag">合作確認</span>
+                        <span class="capability-tag">試點運行</span>
                         <span class="capability-tag">教師培訓</span>
-                        <span class="capability-tag">技術準備</span>
-                        <p style="margin-top:0.75rem;"><strong>⭐ 暑假試點最後準備：</strong></p>
-                        <p>• 確認2-3所學校合作（簽署備忘錄）</p>
+                        <span class="capability-tag">技術支援</span>
+                        <p style="margin-top:0.75rem;"><strong>⭐ 80節課正式開始：</strong></p>
+                        <p>• 2-3 所學校試點（CoLab KIST 優先）</p>
                         <p>• 準備教師培訓教材（如何使用平台）</p>
-                        <p>• 建立技術支援流程（暑假24/7待命）</p>
+                        <p>• 建立技術支援流程（暑假即時待命）</p>
                         <p>• 設計數據收集表格（學生進步追蹤）</p>
-                        <p style="margin-top:0.5rem;"><strong>Beta測試重點：</strong></p>
-                        <p>• 50-100人同時使用壓力測試</p>
-                        <p>• 監控與備援機制測試</p>
-                        <p>• 種子教師試用回饋（最後優化機會）</p>
-                        <div class="moat-badge">🎯 Beta通過 → 7月暑假正式開始</div>
-                        <div class="speed-badge">⚡ 數據說話，不靠資源</div>
                     </div>
                 </div>
             </div>
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">🔐 OAuth 登錄系統</div>
+                    <div class="card-title">🔐 品質 + 認證強化</div>
                     <div class="card-content">
-                        <span class="tool-tag">Google OAuth (FastAPI)</span>
-                        <span class="feature-tag">Google OAuth</span>
-                        <span class="feature-tag">Session 管理</span>
-                        <span class="feature-tag">權限驗證</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Google OAuth (FastAPI) 設定</p>
-                        <p style="margin-top:0.5rem;">工程師：登錄介面、受保護路由、權限控制</p>
+                        <span class="tool-tag">Google OAuth（#27）</span>
+                        <span class="feature-tag">#76 Azure Speech SDK</span>
+                        <span class="feature-tag">#77 學生端朗讀錄音</span>
+                        <span class="feature-tag">#94 使用條款</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span></p>
+                        <p>• #27 Google OAuth 登錄（取代 Email+Password）</p>
+                        <p>• #76 Azure Speech SDK（取代 Web Speech API）</p>
+                        <p>• #77 學生端朗讀錄音功能</p>
+                        <p>• #94 使用條款 + Email 網域驗證</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 認證與安全</div>
+                    <div class="card-title">🎓 OAuth 整合</div>
                     <div class="card-content">
-                        <span class="tech-tag">Google OAuth (FastAPI)</span>
+                        <span class="tech-tag">Google OAuth</span>
                         <span class="tech-tag">OAuth 2.0</span>
-                        <span class="tech-tag">Session & JWT</span>
                         <span class="tech-tag">路由保護</span>
-                        <p style="margin-top:0.75rem;">工程師：學習現代認證方式（不用自己寫）</p>
-                        <p style="margin-top:0.5rem;">實作登錄流程、受保護頁面</p>
+                        <p style="margin-top:0.75rem;">工程師：學習現代認證方式</p>
+                        <p>• Google OAuth 登錄流程</p>
+                        <p>• 受保護頁面實作</p>
                     </div>
                 </div>
             </div>
@@ -1577,34 +1506,38 @@
 
         <!-- Week 25-26 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>25-26<br><small style="font-size:0.75rem;">7/21-8/3</small></div>
+            <div class="week-label">Week<br>25-26<br><small style="font-size:0.75rem;">7/21-8/3<br>進階功能</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">🧪 測試 & 共創社群</div>
+                    <div class="card-title">📊 試點數據收集</div>
                     <div class="card-content">
-                        <span class="capability-tag">品質保證</span>
-                        <span class="capability-tag">教師共創</span>
-                        <span class="capability-tag">口碑傳播</span>
-                        <p style="margin-top:0.75rem;"><strong>技術測試：</strong>E2E測試、效能優化、Bug修復。</p>
-                        <p style="margin-top:0.5rem;"><strong>共創社群 → 自然推廣：</strong></p>
-                        <p>• 種子教師：不是Beta測試者，是共創夥伴</p>
-                        <p>• 他們的反饋改進產品 → 成為產品主人</p>
-                        <p>• 產品主人自然推薦 → 比廣告更有效</p>
+                        <span class="capability-tag">數據收集</span>
+                        <span class="capability-tag">成效驗證</span>
+                        <span class="capability-tag">教師訪談</span>
+                        <p style="margin-top:0.75rem;"><strong>收集試點數據：</strong></p>
+                        <p>• 學生朗讀能力提升數據（目標 20-30%）</p>
+                        <p>• 教師訪談回饋（使用心得）</p>
+                        <p>• 成功案例（5-10 個學生進步故事）</p>
+                        <div class="value-badge">💡 數據說話，不靠資源</div>
                     </div>
                 </div>
             </div>
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">🧪 整合測試與優化</div>
+                    <div class="card-title">📚 進階生字功能 + E2E 測試</div>
                     <div class="card-content">
-                        <span class="tool-tag">Playwright</span>
-                        <span class="feature-tag">E2E 測試</span>
-                        <span class="feature-tag">效能優化</span>
-                        <span class="feature-tag">Bug 修復</span>
-                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> Playwright 測試框架、效能監控</p>
-                        <p style="margin-top:0.5rem;">全員：測試完整使用者流程、修復 Bug、優化體驗</p>
+                        <span class="tool-tag">Playwright（#28）</span>
+                        <span class="feature-tag">#88 生字部件拆解</span>
+                        <span class="feature-tag">#89 生字發音練習</span>
+                        <span class="feature-tag">#109 生字造句</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span></p>
+                        <p>• #88 生字：部件拆解</p>
+                        <p>• #89 生字：發音練習</p>
+                        <p>• #109 生字：造句應用</p>
+                        <p>• #26 遊戲化激勵系統</p>
+                        <p>• #28 E2E 測試 + 效能優化（Playwright）</p>
                     </div>
                 </div>
             </div>
@@ -1616,36 +1549,37 @@
                         <span class="tech-tag">Playwright</span>
                         <span class="tech-tag">DevTools</span>
                         <span class="tech-tag">效能分析</span>
-                        <p style="margin-top:0.75rem;">工程師：學習測試思維、除錯技巧</p>
-                        <p style="margin-top:0.5rem;">完整測試所有功能</p>
+                        <p style="margin-top:0.75rem;">全員：</p>
+                        <p>• E2E 測試完整使用者流程</p>
+                        <p>• 效能分析與優化</p>
+                        <p>• Bug 回報與修復</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Week 27-28 -->
+        <!-- Week 27-30 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>27-28<br><small style="font-size:0.75rem;">8/4-8/31</small></div>
+            <div class="week-label">Week<br>27-30<br><small style="font-size:0.75rem;">8/4-8/30<br>交付</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">🔥 暑假學習扶助進行中（7-8月）</div>
+                    <div class="card-title">🔥 暑假試點進行中 + 數據報告</div>
                     <div class="card-content">
                         <span class="capability-tag">試點運行</span>
                         <span class="capability-tag">數據收集</span>
                         <span class="capability-tag">成效驗證</span>
-                        <p style="margin-top:0.75rem;"><strong>⭐ 80節課正在進行：</strong></p>
+                        <p style="margin-top:0.75rem;"><strong>⭐ 80節課進行中：</strong></p>
                         <ul>
                             <li>✅ 2-3所學校試點運行（CoLab KIST）</li>
-                            <li>✅ 50-100位學生密集練習</li>
-                            <li>✅ 即時技術支援（24/7待命）</li>
+                            <li>✅ 即時技術支援</li>
                             <li>✅ 每週數據報告（追蹤學生進步）</li>
                         </ul>
                         <p style="margin-top:0.75rem;"><strong>8月底收集成果：</strong></p>
                         <ul>
                             <li>📊 學生朗讀能力提升數據（目標20-30%）</li>
-                            <li>📝 教師訪談回饋（使用心得、推薦意願）</li>
-                            <li>📖 成功案例（5-10個學生進步故事）</li>
+                            <li>📝 教師訪談回饋</li>
+                            <li>📖 成功案例（5-10 個學生故事）</li>
                             <li>🎯 9月產出成效報告 → 10-12月申請官方推薦</li>
                         </ul>
                         <div class="value-badge">💡 暑假試點 → 數據背書 → 2027規模化</div>
@@ -1657,12 +1591,14 @@
                 <div class="card">
                     <div class="card-title">🚀 正式部署與交付</div>
                     <div class="card-content">
-                        <span class="tool-tag">Cloud Run Production</span>
-                        <span class="tool-tag">GCP Production</span>
+                        <span class="tool-tag">Cloud Run Production（#29）</span>
                         <span class="feature-tag">正式上線</span>
-                        <span class="feature-tag">文件整理</span>
+                        <span class="feature-tag">#30 使用手冊</span>
+                        <span class="feature-tag">MRD / TRD 文件</span>
                         <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 正式環境部署、監控設定、成本控制</p>
-                        <p style="margin-top:0.5rem;">工程師：使用手冊、Demo 準備、交接文件</p>
+                        <p style="margin-top:0.5rem;">#29 Production 部署 + 監控</p>
+                        <p>#30 使用手冊 + 交接文件</p>
+                        <p>#195 MRD、#196 TRD、#197 交叉引用</p>
                         <p style="margin-top:0.5rem;">準備向方大哥、均一 Academy、曾教授展示</p>
                     </div>
                 </div>
@@ -1676,7 +1612,8 @@
                         <ul>
                             <li>✅ 高中生 → 全端工程師</li>
                             <li>✅ Git 協作 + GitHub 工作流程</li>
-                            <li>✅ React + Vite + FastAPI 全端開發</li>
+                            <li>✅ React 19 + Vite + FastAPI 全端開發</li>
+                            <li>✅ AI 驅動開發（Claude Code）</li>
                             <li>✅ LLM API 整合經驗</li>
                             <li>✅ 完整產品開發經歷</li>
                             <li>✅ 實習薪酬 + 作品集</li>
@@ -1688,45 +1625,53 @@
         </div>
 
         <div class="milestone-row">
-            <div class="milestone-title">🎯 Demo 5 - 正式交付 🎉</div>
-            <div class="milestone-desc">完整產品上線 → 所有功能齊全（朗讀分析 + Socratic Agent + 校班師生課 + 作業模式 + 自學模式）→ 均一 Academy 驗收 → 專案成功！</div>
+            <div class="milestone-title">🎯 Demo 5 Milestone（due 8/30）— 正式交付 🎉</div>
+            <div class="milestone-desc">Google OAuth + Azure Speech SDK + E2E 測試（Playwright）+ 正式部署 + 使用手冊 → 完整產品上線 → 均一 Academy 驗收 → 專案成功！</div>
+        </div>
+
+        <!-- Post-launch -->
+        <div class="phase-separator">
+            <h2>🔮 Post-launch — 後續規劃（8月後）</h2>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; color: #14532d;">
+            <p style="font-weight: 700; margin-bottom: 0.5rem;">Demo 5 之後可加入的功能（依優先序）：</p>
+            <p>• <strong>#95 家長端</strong> — 查看孩子學習進度、接收學習通知</p>
+            <p>• <strong>#96 聽寫 + 書寫練習模組</strong> — 聽寫測驗、手寫辨識練習</p>
         </div>
 
         <!-- 總結 -->
         <div class="phase-separator">
-            <h2>🎊 精簡實作策略總結</h2>
+            <h2>🎊 AI 驅動開發策略總結</h2>
         </div>
 
         <div style="background: #f9fafb; padding: 2rem; border-radius: 12px; margin-top: 2rem;">
-            <h3 style="color: #1a202c; margin-bottom: 1rem;">✅ 所有功能都保留，但實作方式精簡</h3>
+            <h3 style="color: #1a202c; margin-bottom: 1rem;">✅ 所有功能都保留，Claude Code 作為 AI Dev 加速 3-4x</h3>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
                 <div>
                     <h4 style="color: #059669; margin-bottom: 0.75rem;">🛠️ 使用的現成工具</h4>
                     <ul style="color: #4b5563; line-height: 1.8;">
-                        <li><strong>PostgreSQL + SQLAlchemy:</strong> Database + ORM + 權限 middleware</li>
-                        <li><strong>FastAPI:</strong> 後端 API + Google OAuth + 快速開發</li>
-                        <li><strong>Cloud Run (GCP):</strong> 自動部署（GitHub Actions）+ HTTPS + 自動擴展</li>
-                        <li><strong>Google OAuth:</strong> 登入認證</li>
-                        <li><strong>Azure Speech SDK:</strong> 語音辨識（可彈性選擇 Google Speech 或 ElevenLabs）</li>
-                        <li><strong>Vertex AI (Gemini):</strong> Function Calling + AI Agent</li>
-                        <li><strong>shadcn/ui:</strong> 美觀的 React 元件庫</li>
-                        <li><strong>Recharts:</strong> 圖表視覺化</li>
-                        <li><strong>Gmail API:</strong> Email 服務</li>
-                        <li><strong>Playwright:</strong> E2E 測試</li>
+                        <li><strong>React 19 + Vite + Tailwind CSS:</strong> 現代前端框架（非 shadcn/ui）</li>
+                        <li><strong>FastAPI + SQLAlchemy:</strong> 後端 API + ORM + 權限 middleware</li>
+                        <li><strong>Cloud Run (GCP) + GitHub Actions:</strong> CI/CD 自動部署</li>
+                        <li><strong>Web Speech API:</strong> 瀏覽器內建語音辨識（Azure SDK 延後至 Demo 5）</li>
+                        <li><strong>Vertex AI Gemini 2.5 Flash:</strong> 蘇格拉底對話 + AI 分析</li>
+                        <li><strong>PostgreSQL (Cloud SQL):</strong> 資料持久化</li>
+                        <li><strong>Playwright:</strong> E2E 測試（Demo 5）</li>
+                        <li><strong>Google OAuth:</strong> 登入認證（Demo 5）</li>
                     </ul>
                 </div>
 
                 <div>
-                    <h4 style="color: #dc2626; margin-bottom: 0.75rem;">⚡ 節省的時間</h4>
+                    <h4 style="color: #dc2626; margin-bottom: 0.75rem;">⚡ AI 驅動開發節省的時間</h4>
                     <ul style="color: #4b5563; line-height: 1.8;">
-                        <li><strong>後端 API:</strong> 3 週 → 1 週（FastAPI 快速開發）</li>
-                        <li><strong>語音辨識:</strong> 3 週 → 1 週（用 API）</li>
-                        <li><strong>Agent 框架:</strong> 4 週 → 2 週（Gemini Function Calling）</li>
-                        <li><strong>權限系統:</strong> 2 週 → 0.5 週（SQLAlchemy middleware）</li>
-                        <li><strong>OAuth:</strong> 1 週 → 0.5 週（Google OAuth (FastAPI)）</li>
-                        <li><strong>UI 元件:</strong> 2 週 → 0.5 週（shadcn/ui）</li>
-                        <li><strong>總計節省:</strong> 約 <strong>9 週</strong> 開發時間！</li>
+                        <li><strong>後端 API:</strong> 3 週 → 1 週（FastAPI + Claude Code）</li>
+                        <li><strong>AI Agent 框架:</strong> 4 週 → 1 週（Gemini + Claude Code 加速）</li>
+                        <li><strong>UI 元件:</strong> 2 週 → 0.5 週（Tailwind + Claude Code 生成）</li>
+                        <li><strong>Bug fix:</strong> 1-2 天/bug → 2-4 小時（Claude Code 診斷）</li>
+                        <li><strong>六步驟核心流程:</strong> 估計 6 週 → 實際 3 週</li>
+                        <li><strong>總計節省:</strong> 約 <strong>40-50%</strong> 開發時間！</li>
                     </ul>
                 </div>
             </div>
@@ -1734,18 +1679,17 @@
             <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px;">
                 <h4 style="color: #92400e; margin-bottom: 0.75rem;">🎯 關鍵成功因素</h4>
                 <ol style="color: #78350f; line-height: 1.8;">
-                    <li><strong>🤖 AI 基礎建設：</strong>一開始就對齊 AI！分享 Claude Code Agents & Skills，讓團隊開發更有一致性與共識</li>
-                    <li><strong>善用 AI 工具:</strong> Claude Code、Cursor 加速開發，用 AI 寫程式而非純手寫</li>
-                    <li><strong>借鑑現有經驗:</strong> 朗朗上口 + Duotopia 校班師生課模組</li>
-                    <li><strong>使用現成服務:</strong> 不重複造輪子，站在巨人肩膀上</li>
-                    <li><strong>MVP 思維:</strong> 先求有再求好，快速迭代</li>
-                    <li><strong>Young 指導:</strong> 架構師把關技術決策 + 分享 AI 配置，高中生專注實作</li>
+                    <li><strong>🤖 AI 驅動開發:</strong> Claude Code 作為 AI Dev 加速 3-4x，Young 做架構決策 + AI 做實作</li>
+                    <li><strong>借鑑 Duotopia 經驗:</strong> 校班師生課模組直接借鑑，不重複造輪子</li>
+                    <li><strong>MVP 思維:</strong> 先求「能用、能展示、能驗證價值」，後續迭代優化</li>
+                    <li><strong>Young 架構師把關:</strong> 技術決策 + 程式碼 Review + 實習生指導</li>
+                    <li><strong>高中生實習團隊:</strong> 2/27 onboard，認領 UI 任務，釋放架構師時間</li>
                 </ol>
             </div>
 
             <div style="margin-top: 2rem; text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 8px;">
-                <h3 style="color: #1e40af; margin-bottom: 0.5rem;">🚀 28 週，450-560 小時，完整產品交付！</h3>
-                <p style="color: #1e3a8a; font-size: 1.1rem;">所有功能都有（朗讀分析、Socratic Agent、校班師生課、作業模式、自學模式）<br>但用最快的方式實作到「能用、能展示、能驗證價值」</p>
+                <h3 style="color: #1e40af; margin-bottom: 0.5rem;">🚀 30 週，AI 驅動開發，完整產品交付！</h3>
+                <p style="color: #1e3a8a; font-size: 1.1rem;">所有功能都有（朗讀分析、Socratic Agent、校班師生課、作業模式、自學模式）<br>Claude Code 作為 AI Dev 加速 3-4x，先求「能用、能展示、能驗證價值」</p>
             </div>
         </div>
 
