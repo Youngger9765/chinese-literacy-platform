@@ -45,7 +45,23 @@ const App: React.FC = () => {
   };
 
   const handleStartReading = () => {
-    setSession(prev => prev ? { ...prev, introCompleted: true } : null);
+    setSession(prev => {
+      if (prev) return { ...prev, introCompleted: true };
+      // Defensive: session can be null if user navigated via stepper after onRetry
+      // without re-selecting a story. Re-initialize from selectedStory.
+      if (selectedStory) {
+        return {
+          storyId: selectedStory.id,
+          startedAt: Date.now(),
+          introCompleted: true,
+          readingAttempt: null,
+          comprehensionResult: null,
+          vocabResult: null,
+          fullReadingResult: null,
+        };
+      }
+      return null;
+    });
     setView(AppView.TUTOR);
   };
 
@@ -159,7 +175,7 @@ const App: React.FC = () => {
 
         {view === AppView.REPORT && (
           <div className="p-8 max-w-4xl mx-auto w-full">
-             <AssessmentReport session={session} story={selectedStory} onRetry={() => { setView(AppView.LIBRARY); setSession(null); setLastAttempt(null); }} onGoToVocab={() => setView(AppView.VOCAB)} />
+             <AssessmentReport session={session} story={selectedStory} onRetry={() => { setView(AppView.LIBRARY); setSession(null); setLastAttempt(null); setSelectedStory(null); }} onGoToVocab={() => setView(AppView.VOCAB)} />
           </div>
         )}
 
