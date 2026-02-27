@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { AppView, Story, ReadingAttempt, LearningSession, ComprehensionResult, VocabResult, FullReadingResult } from './types';
 import { useIsMobile } from './hooks/useIsMobile';
-import { useAuth } from './context/AuthContext';
 import StoryLibrary from './pages/student/StoryLibrary';
 import Intro from './components/reading-steps/Intro';
 import LiveTutor from './components/reading-steps/LiveTutor';
@@ -11,8 +10,6 @@ import ComprehensionChat from './components/reading-steps/ComprehensionChat';
 import FullReading from './components/reading-steps/FullReading';
 import AssessmentReport from './components/reading-steps/AssessmentReport';
 import WriteCharacter from './components/stroke-order/WriteCharacter';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
   storyId: '',
@@ -34,7 +31,6 @@ const App: React.FC = () => {
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const isMobile = useIsMobile();
-  const auth = useAuth();
 
   const handleSelectStory = (story: Story) => {
     setSelectedStory(story);
@@ -162,22 +158,7 @@ const App: React.FC = () => {
 
             {/* Avatar */}
             <div className="ml-2 flex items-center gap-1 pl-2 border-l border-gray-200">
-              {auth.isAuthenticated ? (
-                <button
-                  onClick={() => auth.logout()}
-                  className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-[10px] font-bold"
-                  title={`${auth.user?.name} - 點擊登出`}
-                >
-                  {auth.user?.name.charAt(0)}
-                </button>
-              ) : (
-                <button
-                  onClick={() => { setView(AppView.LOGIN); setMobileNavOpen(false); }}
-                  className="text-[10px] text-accent font-bold"
-                >
-                  登入
-                </button>
-              )}
+              <div className="w-6 h-6 rounded-full bg-gray-200"></div>
             </div>
           </nav>
         ) : (
@@ -228,25 +209,8 @@ const App: React.FC = () => {
 
             {/* User avatar */}
             <div className="ml-3 flex items-center gap-1 pl-3 border-l border-gray-200">
-              {auth.isAuthenticated ? (
-                <>
-                  <button
-                    onClick={() => auth.logout()}
-                    className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-[10px] font-bold"
-                    title={`${auth.user?.name} - 點擊登出`}
-                  >
-                    {auth.user?.name.charAt(0)}
-                  </button>
-                  <span className="text-[10px] text-gray-500 hidden sm:block">{auth.user?.name}</span>
-                </>
-              ) : (
-                <button
-                  onClick={() => setView(AppView.LOGIN)}
-                  className="text-[10px] text-accent font-bold hover:underline"
-                >
-                  登入
-                </button>
-              )}
+              <div className="w-6 h-6 rounded-full bg-gray-200"></div>
+              <span className="text-[10px] text-gray-500 hidden sm:block">Lv.12</span>
             </div>
           </nav>
         )}
@@ -370,20 +334,6 @@ const App: React.FC = () => {
               </div>
             </div>
           )
-        )}
-
-        {view === AppView.LOGIN && (
-          <LoginPage
-            onLogin={(token, user) => { auth.login(token, user); setView(AppView.HOME); }}
-            onNavigate={setView}
-          />
-        )}
-
-        {view === AppView.REGISTER && (
-          <RegisterPage
-            onLogin={(token, user) => { auth.login(token, user); setView(AppView.HOME); }}
-            onNavigate={setView}
-          />
         )}
       </main>
     </div>

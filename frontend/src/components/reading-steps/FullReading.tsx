@@ -326,6 +326,9 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {/* Instructions */}
           {!result && !isSessionActive && !isPreparing && (
             <div className="bg-white border border-gray-200 rounded-2xl p-4">
+              <p className="text-base font-bold text-gray-800 leading-relaxed mb-2">
+                你剛才一段一段練習過了，現在試著從頭到尾讀完整篇文章，不要中斷！
+              </p>
               <p className="text-base text-gray-600 leading-relaxed">
                 請從頭到尾朗讀整篇課文。讀完後按「完成朗讀」送出。
               </p>
