@@ -47,6 +47,7 @@ interface AssessmentReportProps {
   session: LearningSession | null;
   story?: Story | null;
   onRetry: () => void;
+  onGoToVocab?: () => void;
 }
 
 // Research-based CPM thresholds for 國小高年級～國中生
@@ -124,7 +125,7 @@ const Section: React.FC<{
   </div>
 );
 
-const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry }) => {
+const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
 
   if (!session) {
@@ -482,6 +483,18 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                   )}
                 </div>
               </div>
+            )}
+
+            {onGoToVocab && (
+              <button
+                onClick={onGoToVocab}
+                className="w-full mt-2 flex items-center justify-center gap-2 py-3 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-sm rounded-xl transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                去生字練習
+              </button>
             )}
           </div>
         ) : (
