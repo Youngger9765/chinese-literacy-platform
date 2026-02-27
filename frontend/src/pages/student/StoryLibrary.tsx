@@ -52,7 +52,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
       const fullStory = await fetchStory(story.id);
       onStartReading(fullStory);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load story');
+      setError(err instanceof Error ? err.message : '無法載入課文');
     } finally {
       setLoadingStoryId(null);
     }
@@ -115,7 +115,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
                 : 'bg-white text-gray-600 border border-gray-200 hover:border-accent'
             }`}
           >
-            G{grade}
+            {grade}年級
           </button>
         ))}
       </div>
@@ -175,7 +175,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
                 {/* Grade badge */}
                 {story.grade && (
                   <div className="absolute top-2 right-2 bg-accent text-white text-xs font-bold px-2 py-1 rounded">
-                    G{story.grade}
+                    {story.grade}年級
                   </div>
                 )}
                 {/* Loading overlay */}
