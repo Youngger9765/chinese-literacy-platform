@@ -83,7 +83,6 @@ const App: React.FC = () => {
           <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
         </div>
 
-        {/* Step Navigation (upper right) */}
         <StepperNav
           currentView={view}
           session={session}
