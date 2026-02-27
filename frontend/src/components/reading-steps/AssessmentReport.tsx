@@ -355,6 +355,11 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                 </div>
               </div>
             )}
+
+            {/* Fallback: readingAttempt exists but no transcription or lineBreakdown data */}
+            {!readingAttempt?.transcription && !fullReadingResult?.transcript && lineBreakdown.length === 0 && (
+              <p className="text-sm text-gray-400 text-center py-4">語音辨識資料不足，準確度過低時建議重新朗讀</p>
+            )}
           </div>
         ) : (
           <p className="text-sm text-gray-400 text-center py-4">尚未完成朗讀練習</p>
