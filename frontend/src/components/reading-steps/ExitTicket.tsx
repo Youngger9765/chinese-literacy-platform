@@ -28,17 +28,15 @@ const shuffle = <T,>(arr: T[]): T[] => {
   return a;
 };
 
-const COMMON_PARTICLES = new Set(['的', '了', '在', '是', '有', '和', '與', '也', '都', '就', '把', '被', '讓', '給', '從', '到', '著', '過', '嗎', '呢', '吧', '啊', '嗎']);
-
 /** Generate up to 3 multiple-choice questions from wrong + missing tokens */
 const generateQuestions = (wrongTokens: WrongToken[], missingChars: string[], storyContent: string[]): Question[] => {
   if (wrongTokens.length === 0 && missingChars.length === 0) return [];
 
-  // Collect unique characters from the story for distractors, excluding common particles
+  // Collect unique characters from the story for distractors
   const storyChars = new Set<string>();
   for (const paragraph of storyContent) {
     for (const ch of paragraph) {
-      if (/[\u4e00-\u9fff]/.test(ch) && !COMMON_PARTICLES.has(ch)) storyChars.add(ch);
+      if (/[\u4e00-\u9fff]/.test(ch)) storyChars.add(ch);
     }
   }
 

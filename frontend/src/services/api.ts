@@ -5,7 +5,7 @@
  * Environment variable: VITE_API_URL (default: http://localhost:8000)
  */
 
-import type { Story } from '../types';
+import type { Story, AuthUser } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -197,5 +197,58 @@ export async function sendComprehensionChat(payload: {
     throw new Error(detail || `sendComprehensionChat failed: 422`);
   }
   if (!res.ok) throw new Error(`sendComprehensionChat failed: ${res.status}`);
+  return res.json();
+}
+
+// --- Auth API ---
+
+export async function loginTeacher(
+  email: string,
+  password: string,
+): Promise<{ access_token: string; user: AuthUser }> {
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ login_type: 'teacher', email, password }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: '登入失敗' }));
+    throw new Error(body.detail || '登入失敗');
+  }
+  return res.json();
+}
+
+export async function loginStudent(
+  classCode: string,
+  seatNumber: number,
+  password: string,
+): Promise<{ access_token: string; user: AuthUser }> {
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ login_type: 'student', class_code: classCode, seat_number: seatNumber, password }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: '登入失敗' }));
+    throw new Error(body.detail || '登入失敗');
+  }
+  return res.json();
+}
+
+export async function registerTeacher(
+  name: string,
+  email: string,
+  password: string,
+  schoolName: string,
+): Promise<{ access_token: string; user: AuthUser }> {
+  const res = await fetch(`${API_BASE}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password, school_name: schoolName }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: '註冊失敗' }));
+    throw new Error(body.detail || '註冊失敗');
+  }
   return res.json();
 }
