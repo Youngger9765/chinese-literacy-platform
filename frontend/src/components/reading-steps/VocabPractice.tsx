@@ -13,7 +13,7 @@ import DictionaryPanel from '../dictionary/DictionaryPanel';
 
 interface VocabPracticeProps {
   story: Story;
-  attempt: ReadingAttempt;
+  attempt: ReadingAttempt | null;
   onFinish: (result: VocabResult) => void;
   onBack: () => void;
 }
@@ -167,12 +167,12 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   }, [zhuyinActive]);
 
   const needPracticeSet = useMemo(
-    () => new Set(attempt.mispronouncedWords),
-    [attempt.mispronouncedWords],
+    () => new Set(attempt?.mispronouncedWords ?? []),
+    [attempt?.mispronouncedWords],
   );
 
   const displayChars = useMemo(() => {
-    const suggested = attempt.mispronouncedWords.filter(hasStrokeData);
+    const suggested = (attempt?.mispronouncedWords ?? []).filter(hasStrokeData);
 
     if (suggested.length > 0) {
       return suggested.slice(0, 12);
@@ -189,7 +189,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       }
     }
     return optional.slice(0, 12);
-  }, [story.content, attempt.mispronouncedWords]);
+  }, [story.content, attempt?.mispronouncedWords]);
 
   const handlePractice = (ch: string, mode: PracticeMode = 'stroke') => {
     setPracticingChar(ch);
@@ -316,9 +316,10 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {/* Header */}
           <div>
             <h2 className="text-xl font-black text-gray-900 mb-1">生字練習</h2>
-            <p className="text-sm text-gray-500">
-              {attempt.timestamp === 0
-                ? '還沒有朗讀紀錄，以下是這篇課文的生字，選一個模式開始練習吧！'
+
+            <p className="text-sm text-gray-600">
+              {attempt === null
+                ? '還沒有朗讀紀錄，以下是這篇課文的生字，點一點來練習筆順吧！'
                 : needPracticeSet.size > 0
                   ? `以下 ${Math.min(needPracticeSet.size, 12)} 個字可以再練習看看，選一個模式開始練習吧！`
                   : '讀得很棒！沒有漏字。想再練習這篇的字嗎？'}
