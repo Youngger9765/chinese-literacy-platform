@@ -324,11 +324,11 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         {(readingAttempt || fullReadingResult) ? (
           <div className="space-y-4">
             {/* Transcription text */}
-            {(readingAttempt?.transcription || fullReadingResult?.transcript) && (
+            {((readingAttempt?.transcription ?? '').trim() || (fullReadingResult?.transcript ?? '').trim()) && (
               <div>
                 <p className="text-xs text-gray-500 font-bold mb-2">語音轉文字</p>
                 <div className="bg-slate-50 rounded-2xl p-4 text-sm text-gray-700 leading-relaxed">
-                  {readingAttempt?.transcription ?? fullReadingResult?.transcript}
+                  {(readingAttempt?.transcription ?? '').trim() || (fullReadingResult?.transcript ?? '').trim()}
                 </div>
               </div>
             )}
@@ -358,8 +358,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
               </div>
             )}
 
-            {/* Fallback: readingAttempt exists but no transcription or lineBreakdown data */}
-            {!readingAttempt?.transcription && !fullReadingResult?.transcript && lineBreakdown.length === 0 && (
+            {/* Fallback: readingAttempt exists but no meaningful transcription or lineBreakdown data */}
+            {!(readingAttempt?.transcription ?? '').trim() && !(fullReadingResult?.transcript ?? '').trim() && lineBreakdown.length === 0 && (
               <p className="text-sm text-gray-400 text-center py-4">語音辨識資料不足，準確度過低時建議重新朗讀</p>
             )}
           </div>
