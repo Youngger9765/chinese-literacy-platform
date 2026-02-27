@@ -88,7 +88,7 @@ const App: React.FC = () => {
 
         {/* Step Navigation (upper right) */}
         {isMobile ? (
-          <nav className="flex items-center gap-1 text-[11px] font-medium relative">
+          <nav className="flex items-center gap-1 text-xs font-medium relative">
             {/* Compact step circles */}
             {steps.map(({ step, view: targetView, needsStory }) => {
               const isActive = view === targetView;
@@ -97,7 +97,7 @@ const App: React.FC = () => {
                 <button
                   key={targetView}
                   onClick={() => { if (!isDisabled) { setView(targetView); setMobileNavOpen(false); } }}
-                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 transition-colors ${
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
                     isActive ? 'bg-accent text-white' : isDisabled ? 'bg-gray-200 text-gray-400' : 'bg-gray-200 text-gray-600'
                   }`}
                 >
@@ -143,7 +143,7 @@ const App: React.FC = () => {
                           : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
+                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                           isActive ? 'bg-accent text-white' : isDisabled ? 'bg-gray-200 text-gray-400' : 'bg-gray-200 text-gray-700'
                         }`}>
                           {step}
@@ -162,7 +162,7 @@ const App: React.FC = () => {
             </div>
           </nav>
         ) : (
-          <nav className="flex items-center gap-1 text-[11px] font-medium">
+          <nav className="flex items-center gap-1 text-sm font-medium">
             {/* 首頁 */}
             <button
               onClick={() => setView(AppView.HOME)}
@@ -193,7 +193,7 @@ const App: React.FC = () => {
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
-                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
                       isActive ? 'bg-white text-accent' : isDisabled ? 'bg-gray-300 text-gray-400' : 'bg-gray-200 text-gray-900'
                     }`}>
                       {step}
