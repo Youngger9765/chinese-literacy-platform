@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:3000"
     gcs_bucket: str = "lingoleap-assets"
     gcs_public_url: str = "https://storage.googleapis.com/lingoleap-assets"
+    jwt_secret_key: str = ""
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 10080  # 7 days
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

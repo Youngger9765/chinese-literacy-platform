@@ -1,30 +1,63 @@
-"""
-Teacher / student / class management service.
+import secrets
+import string
 
-Stub: CRUD operations will be implemented once the DB layer and auth are set up.
-"""
+from sqlalchemy.orm import Session
 
-
-def create_teacher(email: str, name: str) -> dict:
-    """Stub: create a teacher account."""
-    raise NotImplementedError("create_teacher not yet implemented")
+from ..models.school import School, Teacher, Class, ClassStudent  # noqa: F401
+from ..models.student import Student
+from .auth_service import hash_password
 
 
-def get_teacher_by_email(email: str) -> dict | None:
-    """Stub: look up a teacher by email."""
-    raise NotImplementedError("get_teacher_by_email not yet implemented")
+def create_teacher(
+    db: Session, email: str, name: str, password_hash: str, school_id: int
+) -> Teacher:
+    teacher = Teacher(
+        school_id=school_id, email=email, name=name, password_hash=password_hash
+    )
+    db.add(teacher)
+    db.commit()
+    db.refresh(teacher)
+    return teacher
 
 
-def create_student(name: str, class_id: str) -> dict:
-    """Stub: add a student to a class."""
-    raise NotImplementedError("create_student not yet implemented")
+def get_teacher_by_email(db: Session, email: str) -> Teacher | None:
+    return db.query(Teacher).filter(Teacher.email == email).first()
 
 
-def get_students_in_class(class_id: str) -> list[dict]:
-    """Stub: list all students in a class."""
-    raise NotImplementedError("get_students_in_class not yet implemented")
+def create_student(db: Session, name: str, password: str) -> Student:
+    student = Student(
+        name=name, password_hash=hash_password(password)
+    )
+    db.add(student)
+    db.commit()
+    db.refresh(student)
+    return student
 
 
-def create_class(teacher_id: str, name: str) -> dict:
-    """Stub: create a new class."""
-    raise NotImplementedError("create_class not yet implemented")
+def get_students_in_class(db: Session, class_id: int) -> list[Student]:
+    rows = db.query(ClassStudent).filter(ClassStudent.class_id == class_id).all()
+    return [db.get(Student, r.student_id) for r in rows]
+
+
+def create_class(db: Session, teacher_id: int, name: str) -> Class:
+    cls = Class(
+        teacher_id=teacher_id, name=name, class_code=generate_class_code(db)
+    )
+    db.add(cls)
+    db.commit()
+    db.refresh(cls)
+    return cls
+
+
+def generate_class_code(db: Session) -> str:
+    chars = string.ascii_uppercase + string.digits
+    for _ in range(100):  # max retries
+        code = "".join(secrets.choice(chars) for _ in range(6))
+        if not db.query(Class).filter(Class.class_code == code).first():
+            return code
+    raise RuntimeError("Failed to generate unique class code")
+
+
+def generate_initial_password() -> str:
+    chars = string.ascii_letters + string.digits
+    return "".join(secrets.choice(chars) for _ in range(8))

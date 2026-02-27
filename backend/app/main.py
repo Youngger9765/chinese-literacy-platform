@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
-from .routes import stories, learning, users
+from .routes import stories, learning, users, auth
 
 app = FastAPI(
     title="LingoLeap AI Reading Tutor API",
@@ -20,6 +20,7 @@ app.add_middleware(
 app.include_router(stories.router, prefix="/api")
 app.include_router(learning.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
 
 
 @app.get("/")

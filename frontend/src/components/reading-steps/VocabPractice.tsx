@@ -133,11 +133,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           <div>
             <h2 className="text-xl font-black text-gray-900 mb-1">生字練習</h2>
             <p className="text-sm text-gray-600">
-              {attempt.timestamp === 0
-                ? '還沒有朗讀紀錄，以下是這篇課文的生字，點一點來練習筆順吧！'
-                : needPracticeSet.size > 0
-                  ? `朗讀時漏掉了以下 ${Math.min(needPracticeSet.size, 12)} 個字，點一點來練習筆順吧！`
-                  : '讀得很棒！沒有漏字。想再練習這篇的字嗎？'}
+              {needPracticeSet.size > 0
+                ? `朗讀時漏掉了以下 ${Math.min(needPracticeSet.size, 12)} 個字，點一點來練習筆順吧！`
+                : '讀得很棒！沒有漏字。想再練習這篇的字嗎？'}
             </p>
           </div>
 
