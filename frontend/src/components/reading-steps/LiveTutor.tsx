@@ -7,6 +7,7 @@ import DiffDisplay from '../ui/DiffDisplay';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
 
 /* ------------------------------------------------------------------ */
 /*  Canned response pools — randomly selected to avoid repetition     */
@@ -26,8 +27,8 @@ const TIER2_POOL = [
   '很好！下一段。',
   '不錯不錯！下一段。',
   '加油，繼續下一段！',
-  '好的，繼續下一段！',
-  '唸得可以喔！下一段。',
+  '很好！繼續加油！',
+  '讀得不錯喔！下一段。',
 ];
 
 const TIER3_POOL = [
@@ -287,8 +288,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     // Step 3: Determine tier
     const isLastLine = lineIdx >= story.content.length - 1;
     let tier: 1 | 2 | 3;
-    if (matchRate >= 0.8) tier = 1;
-    else if (matchRate >= 0.6) tier = 2;
+    if (matchRate >= READING_EXCELLENT) tier = 1;
+    else if (matchRate >= READING_PASS) tier = 2;
     else tier = 3;
 
     const shouldAdvance = tier <= 2 && !isLastLine;
