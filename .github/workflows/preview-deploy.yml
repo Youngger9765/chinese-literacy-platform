@@ -268,6 +268,32 @@ jobs:
             echo "Preview frontend ${{ env.FRONTEND_SERVICE }} not found, skipping"
           fi
 
+      - name: Delete preview images from Artifact Registry
+        run: |
+          ISSUE_NUM=${{ steps.issue.outputs.num }}
+          for PACKAGE in backend frontend; do
+            echo "=== Cleaning ${PACKAGE} issue-${ISSUE_NUM} images ==="
+            DIGESTS=$(gcloud artifacts docker images list \
+              "${{ env.REGISTRY }}/${PACKAGE}" \
+              --include-tags \
+              --filter="tags:issue-${ISSUE_NUM}-" \
+              --sort-by="~CREATE_TIME" \
+              --format="value(version)" 2>/dev/null || true)
+
+            if [ -z "$DIGESTS" ]; then
+              echo "No images found, skipping"
+              continue
+            fi
+
+            echo "$DIGESTS" | while read -r DIGEST; do
+              [ -z "$DIGEST" ] && continue
+              echo "DELETE: ${DIGEST:0:20}..."
+              gcloud artifacts docker images delete \
+                "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
+                --delete-tags --quiet 2>/dev/null || true
+            done
+          done
+
       - name: Comment PR about cleanup
         uses: actions/github-script@v7
         with:

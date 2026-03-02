@@ -175,3 +175,42 @@ jobs:
           echo "**Frontend:** ${FRONTEND_URL}" >> $GITHUB_STEP_SUMMARY
           echo "**Backend:** ${BACKEND_URL}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+  cleanup-images:
+    name: Cleanup old AR images
+    needs: [deploy-backend, deploy-frontend]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Delete old staging images (keep latest 3)
+        run: |
+          KEEP=3
+          for PACKAGE in backend frontend; do
+            echo "=== Cleaning ${PACKAGE} staging images ==="
+            DIGESTS=$(gcloud artifacts docker images list \
+              "${{ env.REGISTRY }}/${PACKAGE}" \
+              --include-tags \
+              --filter="tags:staging-" \
+              --sort-by="~CREATE_TIME" \
+              --format="value(version)" 2>/dev/null || true)
+
+            if [ -z "$DIGESTS" ]; then
+              echo "No images found, skipping"
+              continue
+            fi
+
+            TOTAL=$(echo "$DIGESTS" | wc -l | tr -d ' ')
+            echo "Found $TOTAL images, keeping latest $KEEP"
+
+            echo "$DIGESTS" | tail -n +$((KEEP + 1)) | while read -r DIGEST; do
+              [ -z "$DIGEST" ] && continue
+              echo "DELETE: ${DIGEST:0:20}..."
+              gcloud artifacts docker images delete \
+                "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
+                --delete-tags --quiet 2>/dev/null || true
+            done
+          done
