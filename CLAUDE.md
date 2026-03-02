@@ -98,6 +98,15 @@ PR Preview          Staging         Production
 - `frontend/**` 變更 → rebuild + deploy frontend
 - Secret: `GCP_SA_KEY` (service account for CI/CD)
 
+### Artifact Registry Image Cleanup（4 層防護）
+
+| 層級 | 機制 | 觸發時機 | 策略 |
+|------|------|---------|------|
+| Layer 1 | GCP cleanup-policy | 自動（背景） | untagged >7天刪除 + tagged 保留最新10個 |
+| Layer 2 | `deploy.yml` | push main | `prod-*` images 保留最新 3 個 |
+| Layer 3 | `staging-deploy.yml` | push staging | `staging-*` images 保留最新 3 個 |
+| Layer 4 | `preview-deploy.yml` | PR closed | `issue-N-*` images 全部刪除 |
+
 ### 手動部署
 
 ```bash
