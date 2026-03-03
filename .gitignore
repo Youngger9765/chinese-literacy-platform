@@ -2,6 +2,8 @@
 private/
 
 # Environment variables (secrets)
+venv/
+.venv/
 .env
 .env.local
 .env.production
@@ -17,3 +19,6 @@ build/
 
 # Raw teaching materials (1GB+, not for git)
 data/raw-materials/
+
+#macOS 垃圾文件
+.DS_Store
