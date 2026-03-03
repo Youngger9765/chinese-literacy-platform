@@ -269,7 +269,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Prevent submission during IME composition (Chinese/Japanese/Korean input)
-    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       handleSubmit();
     }
