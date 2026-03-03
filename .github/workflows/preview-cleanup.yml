@@ -1,4 +1,4 @@
-name: Cleanup Orphan Preview Services
+name: L3 Cleanup Orphan Previews (Cloud Run + AR)
 
 on:
   schedule:
@@ -8,14 +8,16 @@ on:
 permissions:
   contents: read
   pull-requests: read
+  issues: read
 
 env:
   PROJECT_ID: lingoleap-dev
   REGION: asia-east1
+  AR_REPO: lingoleap
 
 jobs:
   cleanup:
-    name: Delete orphan preview services
+    name: Delete orphan preview services & images
     runs-on: ubuntu-latest
 
     steps:
@@ -27,69 +29,91 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Find and delete orphan preview services
+      - name: Find and delete orphan previews
         uses: actions/github-script@v7
         with:
           script: |
             const { execSync } = require('child_process');
+            const region = process.env.REGION;
+            const projectId = process.env.PROJECT_ID;
+            const registry = `${region}-docker.pkg.dev/${projectId}/${process.env.AR_REPO}`;
 
-            // Get all preview services
-            const output = execSync(
-              `gcloud run services list --region=${process.env.REGION} --project=${process.env.PROJECT_ID} --format='value(name)'`
-            ).toString().trim();
-
-            const services = output.split('\n').filter(s =>
-              s.includes('-issue-') || s.includes('-pr-')
-            );
-
-            if (services.length === 0) {
-              console.log('No preview services found. All clean!');
-              return;
-            }
-
-            console.log(`Found ${services.length} preview services to check`);
-
-            // Get open PRs
-            const { data: openPRs } = await github.rest.pulls.list({
+            // Get open issues/PRs
+            const { data: openIssues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
+              per_page: 100,
             });
+            const activeNums = new Set(openIssues.map(i => String(i.number)));
+            console.log(`Active issues: ${[...activeNums].join(', ') || 'none'}`);
 
-            // Extract issue/PR numbers from open PRs
-            const activeNumbers = new Set();
-            for (const pr of openPRs) {
-              // PR number
-              activeNumbers.add(String(pr.number));
-              // Issue number from branch name
-              const match = pr.head.ref.match(/issue-(\d+)/);
-              if (match) activeNumbers.add(match[1]);
-            }
+            // === Part 1: Cloud Run Services ===
+            console.log('\n=== Cloud Run Services ===');
+            let svcOutput;
+            try {
+              svcOutput = execSync(
+                `gcloud run services list --region=${region} --project=${projectId} --format='value(name)'`
+              ).toString().trim();
+            } catch(e) { svcOutput = ''; }
 
-            console.log(`Active issue/PR numbers: ${[...activeNumbers].join(', ') || 'none'}`);
+            const services = svcOutput.split('\n').filter(s =>
+              s.includes('-issue-') || s.includes('-pr-')
+            );
 
-            let deleted = 0;
+            let svcDeleted = 0;
             for (const svc of services) {
-              // Extract number from service name
               const match = svc.match(/(?:issue|pr)-(\d+)/);
               if (!match) continue;
-
-              const num = match[1];
-              if (activeNumbers.has(num)) {
-                console.log(`KEEP: ${svc} (PR/issue #${num} still open)`);
+              if (activeNums.has(match[1])) {
+                console.log(`KEEP: ${svc} (issue #${match[1]} open)`);
                 continue;
               }
-
-              console.log(`DELETE: ${svc} (PR/issue #${num} closed/merged)`);
+              console.log(`DELETE: ${svc} (issue #${match[1]} closed)`);
               try {
                 execSync(
-                  `gcloud run services delete ${svc} --region=${process.env.REGION} --project=${process.env.PROJECT_ID} --quiet`,
+                  `gcloud run services delete ${svc} --region=${region} --project=${projectId} --quiet`,
                   { timeout: 60000 }
                 );
-                deleted++;
-              } catch (e) {
-                console.log(`  Failed to delete ${svc}: ${e.message}`);
+                svcDeleted++;
+              } catch(e) {
+                console.log(`  Failed: ${e.message}`);
               }
             }
+            console.log(`Cloud Run: ${svcDeleted} deleted, ${services.length - svcDeleted} kept`);
 
-            console.log(`\nCleanup complete: ${deleted} services deleted, ${services.length - deleted} kept`);
+            // === Part 2: AR Preview Tags ===
+            // lingoleap uses Strategy B: tags in shared packages (backend/frontend)
+            // Tags like: issue-{N}-{sha}, pr-{N}-{sha}
+            console.log('\n=== AR Preview Tags ===');
+            let tagDeleted = 0;
+
+            for (const sub of ['backend', 'frontend']) {
+              let tags;
+              try {
+                tags = execSync(
+                  `gcloud artifacts docker tags list "${registry}/${sub}" --format="value(tag)" 2>/dev/null`
+                ).toString().trim().split('\n').filter(t => /^(issue|pr)-/.test(t));
+              } catch(e) { continue; }
+
+              for (const tag of tags) {
+                const match = tag.match(/(?:issue|pr)-(\d+)/);
+                if (!match) continue;
+                if (activeNums.has(match[1])) {
+                  console.log(`KEEP: ${sub}:${tag} (issue #${match[1]} open)`);
+                  continue;
+                }
+                console.log(`UNTAG: ${sub}:${tag} (issue #${match[1]} closed)`);
+                try {
+                  execSync(
+                    `gcloud artifacts docker tags delete "${registry}/${sub}:${tag}" --quiet 2>/dev/null`
+                  );
+                  tagDeleted++;
+                } catch(e) {
+                  console.log(`  Failed: ${e.message}`);
+                }
+              }
+            }
+            console.log(`\nAR Tags: ${tagDeleted} untagged`);
+            console.log('L1 AR Policy will auto-clean untagged images within 7 days');
+            console.log(`\nTotal cleanup: ${svcDeleted} services + ${tagDeleted} tags`);
