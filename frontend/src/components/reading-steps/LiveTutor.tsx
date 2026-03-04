@@ -754,7 +754,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 LISTENING
               </span>
               <div className={`px-4 py-3 rounded-2xl text-lg bg-green-900/30 text-green-200 border border-green-700/30 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin('請朗讀上方的段落')}
+                {processZhuyin(`請閱讀左側文章的第${currentLineIndex + 1}段：${story.content[currentLineIndex].slice(0, 5)}...`)}
               </div>
             </div>
           )}
