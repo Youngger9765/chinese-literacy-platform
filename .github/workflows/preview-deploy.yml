@@ -104,8 +104,8 @@ jobs:
             --min-instances=0 \
             --max-instances=1 \
             --timeout=300s \
-            --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-db \
-            --set-env-vars="ALLOWED_ORIGINS=*,DATABASE_URL=${{ secrets.DATABASE_URL }}"
+            --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-preview-db \
+            --set-env-vars="ALLOWED_ORIGINS=*,DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }},RUN_MIGRATIONS=true"
 
       - name: Get backend preview URL
         id: backend-url
