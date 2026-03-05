@@ -8,13 +8,15 @@
 
 ## Young @Youngger9765
 
-### 3/3 ~ 3/5 這週
+### 3/3 ~ 3/6 這週
 
 | 狀態 | Issue | 做了什麼 |
 |------|-------|---------|
-| 🔧 | #223 統一用戶模型 | 把 Teacher/Student 合併成 users 表，加角色系統（8 種）、JWT 登入註冊、密碼加密、Alembic migration。PR #225 待 review |
+| 🔧 | #223 統一用戶模型 | users 表取代 Teacher/Student、RBAC 8 角色、JWT auth（bcrypt + HS256）、Alembic 手寫 migration（可逆）、Preview DB 建置、前端登入/註冊/auth gating、班級管理 API（7 endpoints）+ 前端 UI（Dashboard + Detail）、257 pytest + 7 Playwright E2E。PR #225 待 merge |
+| ✅ | #171 學習紀錄持久化 | 合併到 #223。learning_sessions 加 JSONB 欄位（reading/comprehension/vocab/full_reading_result）+ status/story_slug/overall_score。API CRUD 完成 |
 | ✅ | #221 code review | Review 靖杭的 IME fix，確認正確後 merge，簡化 isComposing 寫法 |
 | ✅ | 文件整理 | PRD-ORGANIZATION、DEMO2_GAP_ANALYSIS、.gitignore 清理 |
+| ✅ | 基礎設施 | 建立 Preview DB（lingoleap-preview-db）、Docker entrypoint 條件式 migration、preview-deploy.yml 更新 |
 
 ### 2/24 ~ 2/28 上週
 
@@ -68,4 +70,4 @@
 
 ---
 
-*最後更新：2026-03-05*
+*最後更新：2026-03-06*
