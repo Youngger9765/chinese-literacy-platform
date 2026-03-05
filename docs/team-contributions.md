@@ -10,17 +10,22 @@
 
 ### 3/3 ~ 3/5 這週
 
-- 設計並實作統一用戶模型 (#223)：把原本分開的 Teacher、Student 合併成一張 users 表，加上角色系統（8 種角色）、JWT 登入註冊、密碼加密，寫了完整的 migration → PR #225
-- Review 靖杭的中文輸入 bug 修復 (PR #221)，確認邏輯正確後 merge，順手簡化了寫法
-- 整理專案文件（PRD-ORGANIZATION、DEMO2_GAP_ANALYSIS），清理 .gitignore
+| 狀態 | Issue | 做了什麼 |
+|------|-------|---------|
+| 🔧 | #223 統一用戶模型 | 把 Teacher/Student 合併成 users 表，加角色系統（8 種）、JWT 登入註冊、密碼加密、Alembic migration。PR #225 待 review |
+| ✅ | #221 code review | Review 靖杭的 IME fix，確認正確後 merge，簡化 isComposing 寫法 |
+| ✅ | 文件整理 | PRD-ORGANIZATION、DEMO2_GAP_ANALYSIS、.gitignore 清理 |
 
 ### 2/24 ~ 2/28 上週
 
-- 朗讀段落進度條功能 (#85) — 讓學生看到每段的完成狀態 → PR #212 merged
-- 報告頁 UX 改善 (#169 #172) — 預設摺疊過長區段、改善離開考試的干擾選項 → PR #208 merged
-- 修復 Stepper 跳步問題 (#167 #173)、步驟順序錯誤 (#198)、英文標籤中文化 (#199)
-- 大量文件產出：MRD、TRD、BRD/PRD 一致性校正、ROADMAP、班師生管理 PRD、Copilot 開發指引
-- 2/27 帶 Onboarding 會議，分配任務給兩位學生
+| 狀態 | Issue | 做了什麼 |
+|------|-------|---------|
+| ✅ | #85 段落進度條 | LiveTutor 段落完成/進行中/鎖定狀態顯示。PR #212 merged |
+| ✅ | #169 #172 報告 UX | 預設摺疊過長區段、改善離開考試干擾選項。PR #208 merged |
+| ✅ | #167 #173 Stepper 修復 | session rebuild、retry reset、whitespace fallback |
+| ✅ | #198 #199 UI 修正 | StepperNav 步驟順序、英文→中文標籤 |
+| ✅ | 文件 | MRD、TRD、BRD/PRD 校正、ROADMAP、班師生管理 PRD、Copilot 指引（8 PRs） |
+| ✅ | Onboarding | 2/27 開發團隊 Onboarding 會議，分配任務給兩位學生 |
 
 ---
 
@@ -28,16 +33,20 @@
 
 ### 3/3 ~ 3/5 這週
 
-- ✅ **#216 中文輸入 Enter 送出 bug**：找到問題是 IME 組字中按 Enter 會觸發送出，加了 `isComposing` 判斷解決。PR #221 已 merge staging，一次過 review，做得不錯
-- 🔧 **#215 AI 指令區提示改善**：原本寫「請朗讀上方段落」，新用戶會搞不清楚要唸哪裡。改成「請閱讀左側文章的第1段：OOOOO...」，清楚很多 → PR #224 待 review
-- 🔧 **#217 語音朗讀功能**：自己研究了 Web Speech API，做出文字轉語音功能，還發現並修了「語音會連 emoji 一起唸」的問題。有在 issue 留詳細說明，但還沒開 PR
-- ⬜ #222 星星等級：還沒開始
+| 狀態 | Issue | 做了什麼 |
+|------|-------|---------|
+| ✅ | #216 中文輸入 Enter 送出 bug | IME 組字中按 Enter 會觸發送出，加了 isComposing 判斷解決。PR #221 merged staging，一次過 review |
+| 🔧 | #215 AI 指令區提示改善 | 提示從「請朗讀上方段落」改成「請閱讀左側文章的第1段：OOO...」，新用戶更清楚。PR #224 待 review |
+| 🔧 | #217 語音朗讀功能 | 自己研究 Web Speech API 做出 TTS，還修了語音會連 emoji 一起唸的問題。有在 issue 留說明，還沒開 PR |
+| ⬜ | #222 星星等級 | 還沒開始 |
 
 本週完成 1 個，進行中 2 個，未開始 1 個。整體不錯，會主動研究、會在 issue 留說明。
 
 ### 2/24 ~ 2/28 上週
 
-- 開始研究 #216 的 IME 問題
+| 狀態 | Issue | 做了什麼 |
+|------|-------|---------|
+| 🔧 | #216 | 開始研究 IME 問題 |
 
 ---
 
@@ -45,11 +54,13 @@
 
 ### 3/3 ~ 3/5 這週
 
-- ⬜ #220 改善生字練習 UX — 3/2 assign，目前沒有動靜
-- ⬜ #219 破音字注音顯示錯誤 — 3/2 assign，目前沒有動靜
-- ⬜ #218 朗讀段落進度條 — 3/2 assign，目前沒有動靜
+| 狀態 | Issue | 做了什麼 |
+|------|-------|---------|
+| ⬜ | #220 改善生字練習 UX | 3/2 assign，無 comment、無 PR |
+| ⬜ | #219 破音字注音顯示錯誤 | 3/2 assign，無 comment、無 PR |
+| ⬜ | #218 朗讀段落進度條 | 3/2 assign，無 comment、無 PR |
 
-本週完成 0 個。三個任務都沒有在 GitHub 上留任何 comment 或開 PR。明天開會要了解一下狀況，是不是遇到困難不知道怎麼問。
+本週完成 0 個。三個任務都沒有在 GitHub 上留任何動靜。明天開會了解狀況。
 
 ### 2/24 ~ 2/28 上週
 
