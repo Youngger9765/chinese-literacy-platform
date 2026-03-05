@@ -13,6 +13,8 @@ import AssessmentReport from './components/reading-steps/AssessmentReport';
 import WriteCharacter from './components/stroke-order/WriteCharacter';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import TeacherDashboard from './pages/teacher/TeacherDashboard';
+import ClassroomDetail from './pages/teacher/ClassroomDetail';
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
   storyId: '',
@@ -36,6 +38,7 @@ const AppShell: React.FC = () => {
   const [writingChar, setWritingChar] = useState('');
   const [writeInput, setWriteInput] = useState('');
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
+  const [selectedClassroomId, setSelectedClassroomId] = useState<number | null>(null);
 
   const handleSelectStory = (story: Story) => {
     setSelectedStory(story);
@@ -97,8 +100,22 @@ const AppShell: React.FC = () => {
           onNavigate={setView}
         />
 
-        {/* User info + Logout */}
+        {/* Nav links + User info + Logout */}
         <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => {
+              setView(AppView.TEACHER_DASHBOARD);
+              setSelectedClassroomId(null);
+            }}
+            className={`text-xs font-medium transition-colors ${
+              view === AppView.TEACHER_DASHBOARD || view === AppView.CLASSROOM_DETAIL
+                ? 'text-accent'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            班級管理
+          </button>
+          <div className="w-px h-4 bg-gray-200" />
           {user && (
             <span className="text-xs text-gray-500 hidden sm:block">
               {user.name}
@@ -231,6 +248,25 @@ const AppShell: React.FC = () => {
               </div>
             </div>
           )
+        )}
+
+        {view === AppView.TEACHER_DASHBOARD && (
+          <TeacherDashboard
+            onSelectClassroom={(id) => {
+              setSelectedClassroomId(id);
+              setView(AppView.CLASSROOM_DETAIL);
+            }}
+          />
+        )}
+
+        {view === AppView.CLASSROOM_DETAIL && selectedClassroomId != null && (
+          <ClassroomDetail
+            classroomId={selectedClassroomId}
+            onBack={() => {
+              setSelectedClassroomId(null);
+              setView(AppView.TEACHER_DASHBOARD);
+            }}
+          />
         )}
       </main>
     </div>

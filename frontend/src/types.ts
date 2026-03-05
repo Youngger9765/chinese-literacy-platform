@@ -9,6 +9,8 @@ export enum AppView {
   FULL_READING = 'FULL_READING',
   REPORT = 'REPORT',
   WRITE = 'WRITE',
+  TEACHER_DASHBOARD = 'TEACHER_DASHBOARD',
+  CLASSROOM_DETAIL = 'CLASSROOM_DETAIL',
 }
 
 export interface StoryIntro {
