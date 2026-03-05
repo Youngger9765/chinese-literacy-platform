@@ -67,6 +67,16 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Text-to-speech helper
+  const speakText = useCallback((text: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'zh-TW';
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  }, []);
   const initializedRef = useRef(false);
   const isDraggingRef = useRef(false);
   const storyScrollRef = useRef<number>(0);
@@ -158,6 +168,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       });
       setConversation([{ role: 'ai', text: result.question }]);
       applyServerState(result);
+      speakText(result.question);
     } catch {
       setError('無法連線到伺服器，請確認後端已啟動。');
     } finally {
@@ -264,6 +275,11 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       }
 
       setConversation(prev => [...prev, ...newMessages]);
+
+      // Only speak the main AI question (skip feedback/hints)
+      if (!result.is_complete && result.question) {
+        speakText(result.question);
+      }
     } catch (err) {
       if (err instanceof SessionExpiredError) {
         // Session expired after backend redeploy — auto-rebuild
