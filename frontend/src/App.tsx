@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { AppView, Story, ReadingAttempt, LearningSession, ComprehensionResult, VocabResult, FullReadingResult } from './types';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import StepperNav from './components/StepperNav';
 import StoryLibrary from './pages/student/StoryLibrary';
 import Intro from './components/reading-steps/Intro';
@@ -10,6 +11,8 @@ import ComprehensionChat from './components/reading-steps/ComprehensionChat';
 import FullReading from './components/reading-steps/FullReading';
 import AssessmentReport from './components/reading-steps/AssessmentReport';
 import WriteCharacter from './components/stroke-order/WriteCharacter';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
   storyId: '',
@@ -21,7 +24,11 @@ const EMPTY_ATTEMPT: ReadingAttempt = {
   timestamp: 0,
 };
 
-const App: React.FC = () => {
+type AuthPage = 'login' | 'register';
+
+/** The authenticated app shell — contains all learning flow. */
+const AppShell: React.FC = () => {
+  const { user, logout } = useAuth();
   const [view, setView] = useState<AppView>(AppView.HOME);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [lastAttempt, setLastAttempt] = useState<ReadingAttempt | null>(null);
@@ -89,6 +96,21 @@ const App: React.FC = () => {
           selectedStory={selectedStory}
           onNavigate={setView}
         />
+
+        {/* User info + Logout */}
+        <div className="flex items-center gap-3 shrink-0">
+          {user && (
+            <span className="text-xs text-gray-500 hidden sm:block">
+              {user.name}
+            </span>
+          )}
+          <button
+            onClick={logout}
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            登出
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 flex flex-col overflow-hidden">
@@ -96,7 +118,7 @@ const App: React.FC = () => {
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-6">
             <h1 className="text-5xl font-black text-gray-900">AI 朗讀助教</h1>
             <p className="text-gray-600 max-w-md">準備好開始今天的朗讀挑戰了嗎？</p>
-            <button 
+            <button
               onClick={() => setView(AppView.LIBRARY)}
               className="bg-accent hover:bg-accent-hover text-white px-10 py-4 rounded-xl font-bold shadow-2xl transition-all"
             >
@@ -213,6 +235,48 @@ const App: React.FC = () => {
       </main>
     </div>
   );
+};
+
+/** Root component — handles auth gating. */
+const App: React.FC = () => {
+  const [authPage, setAuthPage] = useState<AuthPage>('login');
+
+  return (
+    <AuthProvider>
+      <AuthGate authPage={authPage} onSetAuthPage={setAuthPage} />
+    </AuthProvider>
+  );
+};
+
+/** Inner gate that uses AuthContext — must be inside AuthProvider. */
+const AuthGate: React.FC<{
+  authPage: AuthPage;
+  onSetAuthPage: (page: AuthPage) => void;
+}> = ({ authPage, onSetAuthPage }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Loading state — show spinner while checking stored token
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-amber-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-gray-400">載入中...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Not authenticated — show login or register
+  if (!isAuthenticated) {
+    if (authPage === 'register') {
+      return <RegisterPage onSwitchToLogin={() => onSetAuthPage('login')} />;
+    }
+    return <LoginPage onSwitchToRegister={() => onSetAuthPage('register')} />;
+  }
+
+  // Authenticated — show the app
+  return <AppShell />;
 };
 
 export default App;

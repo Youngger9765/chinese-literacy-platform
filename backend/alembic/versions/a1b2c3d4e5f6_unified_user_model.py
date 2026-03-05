@@ -174,10 +174,19 @@ def upgrade() -> None:
         batch_op.create_foreign_key('fk_texts_created_by_id_users', 'users', ['created_by_id'], ['id'])
 
     # ──────────────────────────────────────────────
-    # 10. Update learning_sessions — repoint student FK, add columns
+    # 10. Update learning_sessions — repoint student FK, add columns + JSONB report fields (#171)
     # ──────────────────────────────────────────────
     op.add_column('learning_sessions', sa.Column('classroom_id', sa.Integer(), nullable=True))
     op.add_column('learning_sessions', sa.Column('started_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False))
+    op.add_column('learning_sessions', sa.Column('story_slug', sa.String(100), nullable=True))
+    op.add_column('learning_sessions', sa.Column('status', sa.String(20), nullable=False, server_default='in_progress'))
+    op.add_column('learning_sessions', sa.Column('overall_score', sa.Float(), nullable=True))
+    op.add_column('learning_sessions', sa.Column('reading_result', sa.JSON(), nullable=True))
+    op.add_column('learning_sessions', sa.Column('comprehension_result', sa.JSON(), nullable=True))
+    op.add_column('learning_sessions', sa.Column('vocab_result', sa.JSON(), nullable=True))
+    op.add_column('learning_sessions', sa.Column('full_reading_result', sa.JSON(), nullable=True))
+    op.create_index('ix_learning_sessions_story_slug', 'learning_sessions', ['story_slug'])
+    op.create_index('ix_learning_sessions_student_status', 'learning_sessions', ['student_id', 'status'])
 
     with op.batch_alter_table('learning_sessions', schema=None) as batch_op:
         # Drop old FK (unnamed, pointing to students)
@@ -263,6 +272,15 @@ def downgrade() -> None:
         batch_op.drop_constraint('fk_learning_sessions_student_id_users', type_='foreignkey')
         batch_op.create_foreign_key(None, 'students', ['student_id'], ['id'])
 
+    op.drop_index('ix_learning_sessions_student_status', table_name='learning_sessions')
+    op.drop_index('ix_learning_sessions_story_slug', table_name='learning_sessions')
+    op.drop_column('learning_sessions', 'full_reading_result')
+    op.drop_column('learning_sessions', 'vocab_result')
+    op.drop_column('learning_sessions', 'comprehension_result')
+    op.drop_column('learning_sessions', 'reading_result')
+    op.drop_column('learning_sessions', 'overall_score')
+    op.drop_column('learning_sessions', 'status')
+    op.drop_column('learning_sessions', 'story_slug')
     op.drop_column('learning_sessions', 'started_at')
     op.drop_column('learning_sessions', 'classroom_id')
 
