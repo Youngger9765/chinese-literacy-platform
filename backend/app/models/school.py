@@ -80,3 +80,24 @@ class ClassroomStudent(Base):
     # Relationships
     classroom: Mapped["Classroom"] = relationship("Classroom", back_populates="classroom_students")
     student: Mapped["User"] = relationship("User")
+
+
+class ClassroomText(Base):
+    __tablename__ = "classroom_texts"
+    __table_args__ = (UniqueConstraint("classroom_id", "text_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    classroom_id: Mapped[int] = mapped_column(
+        ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False
+    )
+    text_id: Mapped[str] = mapped_column(String(50), nullable=False)
+    assigned_by: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    assigned_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    # Relationships
+    classroom: Mapped["Classroom"] = relationship("Classroom")
+    assigner: Mapped["User | None"] = relationship("User")

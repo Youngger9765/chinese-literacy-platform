@@ -9,6 +9,17 @@ import {
   StudentInClassroomResponse,
   ClassroomApiError,
 } from '../../services/classroomApi';
+import StudentProgressTab from './StudentProgressTab';
+import TextManagementTab from './TextManagementTab';
+import StudentListTab from './StudentListTab';
+
+type TabKey = 'progress' | 'texts' | 'students';
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: 'progress', label: '學生進度' },
+  { key: 'texts', label: '課文管理' },
+  { key: 'students', label: '學生名單' },
+];
 
 interface ClassroomDetailProps {
   classroomId: number;
@@ -20,6 +31,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<TabKey>('progress');
 
   // Edit state
   const [isEditing, setIsEditing] = useState(false);
@@ -143,13 +155,11 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const handleRemoveStudent = async (student: StudentInClassroomResponse) => {
     if (!token) return;
 
-    // If not yet confirming this student, set confirmation
     if (removingStudentId !== student.id) {
       setRemovingStudentId(student.id);
       return;
     }
 
-    // Confirmed -- remove
     try {
       await removeStudent(token, classroomId, student.id);
       setRemovingStudentId(null);
@@ -331,78 +341,50 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
           )}
         </div>
 
-        {/* Student section */}
+        {/* Tabbed content card */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="font-bold text-gray-900">學生名單</h3>
-            <span className="text-sm text-gray-500">{classroom.students.length} 位</span>
-          </div>
-
-          {/* Add student form */}
-          <div className="p-5 border-b border-gray-100">
-            <form onSubmit={handleAddStudent} className="flex gap-3 items-end">
-              <div className="flex-1">
-                <label htmlFor="add-student-id" className="block text-sm font-medium text-gray-700 mb-1">
-                  新增學生
-                </label>
-                <input
-                  id="add-student-id"
-                  type="text"
-                  value={studentIdInput}
-                  onChange={(e) => {
-                    setStudentIdInput(e.target.value);
-                    setAddStudentError('');
-                  }}
-                  placeholder="輸入學生編號"
-                  className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isAddingStudent || !studentIdInput.trim()}
-                className="h-10 bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 rounded-lg font-medium text-sm transition-colors shrink-0"
-              >
-                {isAddingStudent ? '新增中...' : '新增'}
-              </button>
-            </form>
-            <p className="text-xs text-gray-400 mt-1">學生可在個人資料頁面查看自己的編號</p>
-            {addStudentError && (
-              <p className="text-red-600 text-sm mt-2">{addStudentError}</p>
-            )}
-          </div>
-
-          {classroom.students.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-bg rounded-xl mb-3">
-                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <p className="text-sm font-medium text-gray-700 mb-1">尚無學生</p>
-              <p className="text-xs text-gray-500">使用上方表單新增學生至班級</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-100">
-              {classroom.students.map((s) => (
-                <div key={s.id} className="px-5 py-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{s.name}</p>
-                    <p className="text-xs text-gray-500">{s.email}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400 hidden sm:inline">{formatDate(s.enrolled_at)}</span>
-                    {removingStudentId === s.id ? (
-                      <div className="flex gap-2">
-                        <button onClick={() => handleRemoveStudent(s)} className="text-xs text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer">確認移除</button>
-                        <button onClick={() => setRemovingStudentId(null)} className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">取消</button>
-                      </div>
-                    ) : (
-                      <button onClick={() => handleRemoveStudent(s)} className="text-xs text-gray-400 hover:text-red-600 transition-colors cursor-pointer">移除</button>
-                    )}
-                  </div>
-                </div>
+          {/* Tab bar */}
+          <div className="border-b border-gray-200">
+            <nav className="flex -mb-px" aria-label="Tabs">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
+                    activeTab === tab.key
+                      ? 'border-accent text-accent'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab.label}
+                </button>
               ))}
-            </div>
+            </nav>
+          </div>
+
+          {/* Tab content */}
+          {activeTab === 'progress' && (
+            <StudentProgressTab classroomId={classroomId} />
+          )}
+
+          {activeTab === 'texts' && (
+            <TextManagementTab classroomId={classroomId} />
+          )}
+
+          {activeTab === 'students' && (
+            <StudentListTab
+              classroom={classroom}
+              studentIdInput={studentIdInput}
+              setStudentIdInput={setStudentIdInput}
+              isAddingStudent={isAddingStudent}
+              addStudentError={addStudentError}
+              setAddStudentError={setAddStudentError}
+              onAddStudent={handleAddStudent}
+              removingStudentId={removingStudentId}
+              onRemoveStudent={handleRemoveStudent}
+              setRemovingStudentId={setRemovingStudentId}
+              formatDate={formatDate}
+            />
           )}
         </div>
       </div>

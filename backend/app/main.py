@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .routes import stories, learning, users, auth, classrooms, schools, organizations, roles
+from .routes.classroom_texts import router as classroom_texts_router
+from .routes.teacher import router as teacher_router
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +35,8 @@ app.include_router(classrooms.router, prefix="/api")
 app.include_router(schools.router, prefix="/api")
 app.include_router(organizations.router, prefix="/api")
 app.include_router(roles.router, prefix="/api")
+app.include_router(classroom_texts_router, prefix="/api", tags=["classroom-texts"])
+app.include_router(teacher_router, prefix="/api", tags=["teacher"])
 
 
 @app.on_event("startup")
