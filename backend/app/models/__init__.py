@@ -5,3 +5,4 @@ from .school import School, Classroom, ClassroomStudent, ClassroomText  # noqa: 
 from .text import Text, VisibilityLevel, TextStatus  # noqa: F401
 from .session import LearningSession, CharacterError  # noqa: F401
 from .assignment import Assignment, AssignmentSubmission  # noqa: F401
+from .points_log import OrganizationPointsLog  # noqa: F401

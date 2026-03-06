@@ -16,6 +16,9 @@ class OrganizationCreateRequest(BaseModel):
     contact_phone: str | None = None
     address: str | None = None
     settings: dict | None = None
+    total_points: int | None = None
+    subscription_start_date: datetime | None = None
+    subscription_end_date: datetime | None = None
 
 
 class OrganizationUpdateRequest(BaseModel):
@@ -29,6 +32,9 @@ class OrganizationUpdateRequest(BaseModel):
     contact_phone: str | None = None
     address: str | None = None
     settings: dict | None = None
+    total_points: int | None = None
+    subscription_start_date: datetime | None = None
+    subscription_end_date: datetime | None = None
 
 
 class OrganizationResponse(BaseModel):
@@ -45,6 +51,10 @@ class OrganizationResponse(BaseModel):
     contact_phone: str | None = None
     address: str | None = None
     settings: dict | None = None
+    total_points: int | None = None
+    used_points: int = 0
+    subscription_start_date: datetime | None = None
+    subscription_end_date: datetime | None = None
 
     model_config = {"from_attributes": True}
 
@@ -74,3 +84,21 @@ class OrgDashboardResponse(BaseModel):
     total_sessions: int
     completed_sessions: int
     school_stats: list[SchoolStatItem]
+
+
+class PointsLogResponse(BaseModel):
+    id: int
+    organization_id: str
+    user_id: int | None = None
+    user_name: str | None = None
+    points_used: int
+    feature_type: str
+    description: str | None = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class PointsLogListResponse(BaseModel):
+    items: list[PointsLogResponse]
+    total: int
