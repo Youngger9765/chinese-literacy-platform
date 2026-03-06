@@ -571,8 +571,7 @@ class TestRemoveStudent:
             f"/api/classrooms/{classroom_id}/students/{student1['user_id']}",
             headers=auth_header(teacher["token"]),
         )
-        assert resp.status_code == 200
-        assert resp.json()["message"] == "Student removed from classroom"
+        assert resp.status_code == 204
 
     def test_remove_student_not_in_classroom_returns_404(self, client, teacher, student1, school_id):
         create_resp = client.post(
@@ -759,7 +758,7 @@ class TestFullClassroomFlow:
             f"/api/classrooms/{classroom_id}/students/{stu1['user_id']}",
             headers=headers,
         )
-        assert remove_resp.status_code == 200
+        assert remove_resp.status_code == 204
 
         # 7. List students: should be 1
         list_resp2 = client.get(

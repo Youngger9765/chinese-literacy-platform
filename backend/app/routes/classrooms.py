@@ -1,7 +1,6 @@
 import logging
 import secrets
 import string
-from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_
@@ -303,7 +302,8 @@ def add_student_to_classroom(
 
 @router.delete(
     "/classrooms/{classroom_id}/students/{student_id}",
-    status_code=200,
+    status_code=204,
+    response_model=None,
 )
 def remove_student_from_classroom(
     classroom_id: int,
@@ -329,7 +329,7 @@ def remove_student_from_classroom(
     db.delete(cs)
     db.commit()
     logger.info("Removed student %d from classroom %d", student_id, classroom_id)
-    return {"message": "Student removed from classroom"}
+    return None
 
 
 @router.get(
@@ -495,7 +495,6 @@ def batch_create_students(
                 user_id=user.id,
                 school_id=classroom.school_id,
                 student_number=username.upper(),
-                birthdate=date(2015, 1, 1),  # placeholder
                 password_changed=False,
             )
             db.add(profile)

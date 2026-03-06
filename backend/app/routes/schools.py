@@ -1,10 +1,8 @@
 import logging
 import secrets
 import string
-from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
@@ -13,6 +11,7 @@ from ..models.organization import Organization
 from ..models.school import Classroom, School
 from ..models.user import Role, User, UserRole
 from ..schemas.school import (
+    SchoolClassroomResponse,
     SchoolCreateRequest,
     SchoolListResponse,
     SchoolResponse,
@@ -185,19 +184,6 @@ def regenerate_school_code(
 
 
 # -- School Classrooms --------------------------------------------------------
-
-
-class SchoolClassroomResponse(BaseModel):
-    """Classroom summary for school detail view (includes teacher name)."""
-
-    id: int
-    name: str
-    grade: int | None
-    is_active: bool
-    teacher_id: int
-    teacher_name: str
-    student_count: int
-    created_at: datetime
 
 
 @router.get(

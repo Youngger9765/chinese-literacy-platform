@@ -92,7 +92,7 @@ class StudentProfile(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
     school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False)
     student_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    birthdate: Mapped[date] = mapped_column(Date, nullable=False)
+    birthdate: Mapped[date | None] = mapped_column(Date, nullable=True)
     password_changed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     grade: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 3-9
 

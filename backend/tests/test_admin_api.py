@@ -444,7 +444,7 @@ class TestAdminClassroomAccess:
             f"/api/classrooms/{classroom_id}/students/{student2['user_id']}",
             headers=auth_header(admin_user["token"]),
         )
-        assert resp.status_code == 200
+        assert resp.status_code == 204
 
     def test_admin_can_list_students(self, client, admin_user, teacher, school_id):
         create_resp = client.post(
@@ -746,7 +746,7 @@ class TestAdminFullFlow:
             f"/api/classrooms/{classroom_id}/students/{student['user_id']}",
             headers=admin_headers,
         )
-        assert remove_resp.status_code == 200
+        assert remove_resp.status_code == 204
 
         # 8. Verify empty
         students_resp = client.get(

@@ -317,8 +317,7 @@ class TestRevokeRole:
             f"/api/roles/assignments/{assignment_id}",
             headers=auth_header(admin_user["token"]),
         )
-        assert resp.status_code == 200
-        assert resp.json()["message"] == "Role assignment revoked"
+        assert resp.status_code == 204
 
     def test_revoke_makes_role_inactive(self, client, admin_user):
         user = _register_user(client, "revoke_check")

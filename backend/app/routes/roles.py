@@ -112,7 +112,7 @@ def assign_role(
     return _user_role_to_response(user_role, role)
 
 
-@router.delete("/roles/assignments/{assignment_id}", status_code=200)
+@router.delete("/roles/assignments/{assignment_id}", status_code=204, response_model=None)
 def revoke_role(
     assignment_id: int,
     current_user: User = require_role("system_admin"),
@@ -129,7 +129,7 @@ def revoke_role(
         "Revoked role assignment %d by user %d",
         assignment_id, current_user.id,
     )
-    return {"message": "Role assignment revoked"}
+    return None
 
 
 @router.get("/users/{user_id}/roles", response_model=list[UserRoleDetailResponse])

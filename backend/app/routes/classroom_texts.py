@@ -131,7 +131,8 @@ def list_classroom_texts(
 
 @router.delete(
     "/classrooms/{classroom_id}/texts/{text_id}",
-    status_code=200,
+    status_code=204,
+    response_model=None,
 )
 def unassign_text_from_classroom(
     classroom_id: int,
@@ -160,4 +161,4 @@ def unassign_text_from_classroom(
         "Unassigned text %s from classroom %d (by user %d)",
         text_id, classroom_id, current_user.id,
     )
-    return {"message": "Text unassigned from classroom"}
+    return None

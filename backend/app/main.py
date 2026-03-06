@@ -1,5 +1,6 @@
 import logging
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,10 +14,18 @@ logger = logging.getLogger(__name__)
 if os.environ.get("ENVIRONMENT", "development") != "development" and settings.jwt_secret_key == "dev-secret-change-in-production":
     raise RuntimeError("JWT_SECRET_KEY must be set in production!")
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    seed_default_data()
+    yield
+
+
 app = FastAPI(
     title="LingoLeap AI Reading Tutor API",
     description="Backend API for the LingoLeap AI Reading Tutor platform",
     version="0.3.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -39,7 +48,6 @@ app.include_router(classroom_texts_router, prefix="/api", tags=["classroom-texts
 app.include_router(teacher_router, prefix="/api", tags=["teacher"])
 
 
-@app.on_event("startup")
 def seed_default_data():
     """Seed complete demo data: org → school → teacher → classroom → students.
 
