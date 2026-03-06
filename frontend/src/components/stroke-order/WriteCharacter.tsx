@@ -74,6 +74,8 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   const hintFrameRef = useRef(0);
   const hintStartRef = useRef(0);
   const isDrawingRef = useRef(false);
+  const isAutoLoopingRef = useRef(false);
+  const pendingAutoStartRef = useRef(false);
 
   /* ---- Off-screen canvas (created once, reused) ---- */
   const getOffCanvas = useCallback(() => {
@@ -114,6 +116,8 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     setPracticeLeft(4);
     setShowOutline(true);
     setToast('');
+    isAutoLoopingRef.current = false;
+    pendingAutoStartRef.current = false;
     r.current = {
       completedStrokes: 0, animStroke: -1, animProgress: 0,
       hintStroke: -1, hintProgress: 0, correctPaths: [], activeBrush: [],
@@ -125,6 +129,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       if (d) {
         setData(d);
         m.current.mistakes = new Array(d.nStrokes).fill(0);
+        pendingAutoStartRef.current = true;
       } else {
         setError(`「${character}」沒有筆順資料`);
       }
@@ -173,6 +178,12 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         r.current.animStroke = -1;
         r.current.completedStrokes = d2.nStrokes;
         doRender();
+        if (isAutoLoopingRef.current) {
+          setTimeout(() => {
+            if (isAutoLoopingRef.current) startAnimation();
+          }, 800);
+          return;
+        }
         setMode('idle');
         if (m.current.step === Step.ANIMATION) setStep(Step.PRACTICE_1);
         return;
@@ -204,6 +215,47 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     setMode('idle');
     if (m.current.step === Step.ANIMATION) setStep(Step.PRACTICE_1);
   }, [doRender]);
+
+  const handleBeginPractice = useCallback(() => {
+    isAutoLoopingRef.current = false;
+    cancelAnimationFrame(animFrameRef.current);
+    const d = m.current.data;
+    r.current.animStroke = -1;
+    r.current.animProgress = 0;
+    if (d) r.current.completedStrokes = d.nStrokes;
+    doRender();
+    setMode('idle');
+    setStep(Step.PRACTICE_1);
+  }, [doRender]);
+
+  const handleRetry = useCallback(() => {
+    if (!data) return;
+    cancelAnimationFrame(animFrameRef.current);
+    cancelAnimationFrame(hintFrameRef.current);
+    setStep(Step.ANIMATION);
+    setMode('idle');
+    setPracticeLeft(4);
+    setShowOutline(true);
+    setToast('');
+    r.current = {
+      completedStrokes: 0, animStroke: -1, animProgress: 0,
+      hintStroke: -1, hintProgress: 0, correctPaths: [], activeBrush: [],
+    };
+    m.current.showOutline = true;
+    m.current.mistakes = new Array(data.nStrokes).fill(0);
+    m.current.quizStroke = 0;
+    isAutoLoopingRef.current = true;
+    startAnimation();
+  }, [data, startAnimation]);
+
+  /* ---- Auto-start animation loop when data first loads ---- */
+  useEffect(() => {
+    if (data && pendingAutoStartRef.current) {
+      pendingAutoStartRef.current = false;
+      isAutoLoopingRef.current = true;
+      startAnimation();
+    }
+  }, [data, startAnimation]);
 
   /* ================================================================ */
   /*  Quiz (writing practice)                                          */
@@ -270,13 +322,18 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         if (s >= Step.PRACTICE_1 && s <= Step.PRACTICE_3) {
           const newLeft = pl - 1;
           setPracticeLeft(newLeft);
-          const nextStep = (s + 1) as Step;
-          setStep(nextStep);
-          setToast(
-            nextStep === Step.TOGGLE_OUTLINE
-              ? `恭喜筆畫正確！讓我們去掉邊框再練習 ${newLeft} 遍哦！`
-              : `恭喜筆畫正確！讓我們再練習 ${newLeft} 次哦！`,
-          );
+          if (s === Step.PRACTICE_3) {
+            // Auto-skip TOGGLE_OUTLINE — jump straight to no-outline practice
+            m.current.showOutline = false;
+            setShowOutline(false);
+            setStep(Step.PRACTICE_NO_OUTLINE);
+            setToast('👏 很棒！現在試著不看邊框，憑記憶寫一次！');
+            startQuiz();
+          } else {
+            const nextStep = (s + 1) as Step;
+            setStep(nextStep);
+            setToast(`恭喜筆畫正確！讓我們再練習 ${newLeft} 次哦！`);
+          }
         } else if (s === Step.PRACTICE_NO_OUTLINE) {
           setPracticeLeft(pl - 1);
           setStep(Step.COMPLETE);
@@ -291,7 +348,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         showHint();
       }
     }
-  }, [doRender, showHint]);
+  }, [doRender, showHint, startQuiz]);
 
   /* ================================================================ */
   /*  Pointer events (drawing)                                         */
@@ -340,14 +397,13 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
 
   const isComplete = step === Step.COMPLETE;
   const canAnimate =
-    mode === 'idle' && (step === Step.ANIMATION || isComplete);
+    mode === 'idle' && step !== Step.ANIMATION && !isComplete;
   const canPractice =
     mode === 'idle' &&
     ((step >= Step.PRACTICE_1 && step <= Step.PRACTICE_3) ||
-      step === Step.PRACTICE_NO_OUTLINE ||
-      isComplete);
+      step === Step.PRACTICE_NO_OUTLINE);
   const canToggleOutline =
-    mode === 'idle' && (step === Step.TOGGLE_OUTLINE || isComplete);
+    mode === 'idle' && step !== Step.ANIMATION && !isComplete;
 
   /* ================================================================ */
   /*  JSX                                                              */
@@ -394,18 +450,10 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         <h2 className="text-2xl font-bold text-white flex-1 text-center">
           寫一寫：{character}
         </h2>
-        {isComplete && onComplete && (
-          <button
-            onClick={onComplete}
-            className="text-accent-light hover:text-accent-light text-sm font-bold"
-          >
-            完成 →
-          </button>
-        )}
       </div>
 
       {/* Practice progress indicators */}
-      {!isComplete && (
+      {step !== Step.ANIMATION && !isComplete && (
         <div className="flex gap-1.5 items-center">
           {[4, 3, 2].map(n => (
             <div
@@ -434,6 +482,27 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
 
       {/* Canvas */}
       <div className="relative w-full max-w-lg aspect-square">
+        {isComplete && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0d1117]/95 rounded-xl z-10 gap-5 p-6">
+            <div className="text-6xl">🎉</div>
+            <p className="text-5xl font-black text-white">{character}</p>
+            <p className="text-xl font-bold text-emerald-400">練習完成！</p>
+            {onComplete && (
+              <button
+                onClick={onComplete}
+                className="mt-2 px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 text-base"
+              >
+                完成，回到練習清單
+              </button>
+            )}
+            <button
+              onClick={handleRetry}
+              className="px-6 py-2 text-slate-400 hover:text-white border border-slate-600 hover:border-slate-400 rounded-xl transition-all text-sm"
+            >
+              再練一次
+            </button>
+          </div>
+        )}
         <canvas
           ref={canvasRef}
           width={CANVAS_SIZE}
@@ -448,45 +517,51 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       </div>
 
       {/* Controls */}
-      <div className="flex gap-6 justify-center">
-        <CtrlBtn
-          icon={mode === 'animating' ? '⏸' : '▶'}
-          label="筆順"
-          active={mode === 'animating'}
-          glow={step === Step.ANIMATION && mode === 'idle'}
-          disabled={mode === 'quizzing' || (!canAnimate && mode !== 'animating')}
-          onClick={() => (mode === 'animating' ? stopAnimation() : startAnimation())}
-        />
-        <CtrlBtn
-          icon="✍️"
-          label="寫字"
-          active={mode === 'quizzing'}
-          glow={canPractice && mode !== 'quizzing'}
-          disabled={!canPractice && mode !== 'quizzing'}
-          onClick={() => {
-            if (mode === 'quizzing') {
-              setMode('idle');
-              r.current.correctPaths = [];
-              r.current.completedStrokes = 0;
-              m.current.quizStroke = 0;
-              doRender();
-            } else {
-              startQuiz();
-            }
-          }}
-        />
-        <CtrlBtn
-          icon={showOutline ? '👁' : '👁‍🗨'}
-          label="邊框"
-          active={!showOutline}
-          glow={step === Step.TOGGLE_OUTLINE}
-          disabled={!canToggleOutline}
-          onClick={() => {
-            setShowOutline(prev => !prev);
-            if (step === Step.TOGGLE_OUTLINE) setStep(Step.PRACTICE_NO_OUTLINE);
-          }}
-        />
-      </div>
+      {step === Step.ANIMATION ? (
+        <button
+          onClick={handleBeginPractice}
+          className="px-10 py-4 bg-accent hover:bg-accent-hover text-white font-black text-lg rounded-2xl shadow-xl transition-all active:scale-95 animate-pulse"
+        >
+          ✏️ 開始練習
+        </button>
+      ) : !isComplete && (
+        <div className="flex gap-6 justify-center">
+          <CtrlBtn
+            icon={mode === 'animating' ? '⏸' : '▶'}
+            label="筆順"
+            active={mode === 'animating'}
+            glow={false}
+            disabled={mode === 'quizzing' || (!canAnimate && mode !== 'animating')}
+            onClick={() => (mode === 'animating' ? stopAnimation() : startAnimation())}
+          />
+          <CtrlBtn
+            icon="✍️"
+            label="寫字"
+            active={mode === 'quizzing'}
+            glow={canPractice && mode !== 'quizzing'}
+            disabled={!canPractice && mode !== 'quizzing'}
+            onClick={() => {
+              if (mode === 'quizzing') {
+                setMode('idle');
+                r.current.correctPaths = [];
+                r.current.completedStrokes = 0;
+                m.current.quizStroke = 0;
+                doRender();
+              } else {
+                startQuiz();
+              }
+            }}
+          />
+          <CtrlBtn
+            icon={showOutline ? '👁' : '👁‍🗨'}
+            label="邊框"
+            active={!showOutline}
+            glow={false}
+            disabled={!canToggleOutline}
+            onClick={() => setShowOutline(prev => !prev)}
+          />
+        </div>
+      )}
 
       {/* Step guidance */}
       <StepGuidance step={step} mode={mode} />
@@ -526,17 +601,16 @@ function CtrlBtn({ icon, label, active, glow, disabled, onClick }: {
 
 function StepGuidance({ step, mode }: { step: Step; mode: string }) {
   let text = '';
-  if (mode === 'animating') text = '正在播放筆順動畫…';
+  if (mode === 'animating') text = '觀看筆順動畫，按「開始練習」開始書寫';
   else if (mode === 'quizzing') text = '請在格子裡寫出每一筆';
   else {
     switch (step) {
-      case Step.ANIMATION: text = '請先按「筆順」觀看筆畫順序'; break;
+      case Step.ANIMATION: text = '筆順動畫播放中…'; break;
       case Step.PRACTICE_1:
       case Step.PRACTICE_2:
       case Step.PRACTICE_3: text = '按「寫字」開始練習（有邊框）'; break;
-      case Step.TOGGLE_OUTLINE: text = '按「邊框」關閉邊框提示'; break;
       case Step.PRACTICE_NO_OUTLINE: text = '按「寫字」不看邊框再寫一次'; break;
-      case Step.COMPLETE: text = '太棒了！你已經學會怎麼寫這個字了'; break;
+      case Step.COMPLETE: text = ''; break;
     }
   }
   return text ? (
