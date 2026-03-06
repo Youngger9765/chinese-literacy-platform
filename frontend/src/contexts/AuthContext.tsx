@@ -8,9 +8,12 @@ interface AuthContextValue {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  mustChangePassword: boolean;
+  loginPassword: string | null;
+  login: (email: string, password: string) => Promise<{ mustChangePassword: boolean }>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
+  clearMustChangePassword: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -27,6 +30,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
   const [isLoading, setIsLoading] = useState(true);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
+  const [loginPassword, setLoginPassword] = useState<string | null>(null);
 
   // Load user from stored token on mount
   useEffect(() => {
@@ -62,14 +67,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [token]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string): Promise<{ mustChangePassword: boolean }> => {
     const response = await apiLogin(email, password);
     const newToken = response.access_token;
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
 
+    const needsPasswordChange = !!response.must_change_password;
+    if (needsPasswordChange) {
+      setMustChangePassword(true);
+      setLoginPassword(password);
+    }
+
     const userData = await getMe(newToken);
     setUser(userData);
+
+    return { mustChangePassword: needsPasswordChange };
   }, []);
 
   const register = useCallback(async (email: string, password: string, name: string) => {
@@ -86,6 +99,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
+    setMustChangePassword(false);
+    setLoginPassword(null);
+  }, []);
+
+  const clearMustChangePassword = useCallback(() => {
+    setMustChangePassword(false);
+    setLoginPassword(null);
   }, []);
 
   const value: AuthContextValue = {
@@ -93,9 +113,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     token,
     isAuthenticated: !!user,
     isLoading,
+    mustChangePassword,
+    loginPassword,
     login,
     register,
     logout,
+    clearMustChangePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

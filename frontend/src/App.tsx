@@ -11,6 +11,7 @@ import StoryLibrary from './pages/student/StoryLibrary';
 import WriteCharacter from './components/stroke-order/WriteCharacter';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import ClassroomDetail from './pages/teacher/ClassroomDetail';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -328,6 +329,16 @@ const App: React.FC = () => {
               <PublicOnlyRoute>
                 <RegisterPage />
               </PublicOnlyRoute>
+            }
+          />
+
+          {/* Change password (after first login) */}
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePasswordPage />
+              </ProtectedRoute>
             }
           />
 

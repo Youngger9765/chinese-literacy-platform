@@ -73,9 +73,9 @@ def seed_default_data():
             admin = User(email="admin@test.com", password_hash=hash_password("admin1234"), name="王管理員", is_active=True)
             teacher1 = User(email="teacher@test.com", password_hash=hash_password("teacher1234"), name="李老師", is_active=True)
             teacher2 = User(email="teacher2@test.com", password_hash=hash_password("teacher1234"), name="陳老師", is_active=True)
-            student1 = User(email="student@test.com", password_hash=hash_password("student1234"), name="小明", is_active=True)
-            student2 = User(email="student2@test.com", password_hash=hash_password("student1234"), name="小華", is_active=True)
-            student3 = User(email="student3@test.com", password_hash=hash_password("student1234"), name="小美", is_active=True)
+            student1 = User(email="student@test.com", password_hash=hash_password("student1234"), name="小明", is_active=True, username="student1")
+            student2 = User(email="student2@test.com", password_hash=hash_password("student1234"), name="小華", is_active=True, username="student2")
+            student3 = User(email="student3@test.com", password_hash=hash_password("student1234"), name="小美", is_active=True, username="student3")
             db.add_all([admin, teacher1, teacher2, student1, student2, student3])
             db.flush()
 

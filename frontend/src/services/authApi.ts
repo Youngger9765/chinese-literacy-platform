@@ -29,6 +29,7 @@ export function hasRole(user: AuthUser | null, ...roleNames: string[]): boolean 
 export interface AuthTokenResponse {
   access_token: string;
   token_type: string;
+  must_change_password?: boolean;
 }
 
 export class AuthError extends Error {

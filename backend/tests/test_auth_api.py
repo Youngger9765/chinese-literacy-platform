@@ -524,12 +524,14 @@ class TestLoginEndpoint:
         resp = client.post("/api/auth/login", json={})
         assert resp.status_code == 422
 
-    def test_login_invalid_email_format_returns_422(self, client):
+    def test_login_invalid_email_format_returns_401(self, client):
+        """Non-email strings are now treated as username lookups, so invalid
+        email format returns 401 (not found) instead of 422."""
         resp = client.post("/api/auth/login", json={
             "email": "not-an-email",
             "password": "SomePassword1!",
         })
-        assert resp.status_code == 422
+        assert resp.status_code == 401
 
     def test_login_updates_last_login_at(self, client, registered_user):
         """After login, the user's last_login_at should be set."""

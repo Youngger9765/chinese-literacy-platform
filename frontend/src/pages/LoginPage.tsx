@@ -28,13 +28,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
 
     setIsSubmitting(true);
     try {
-      await login(email.trim(), password);
-      // AuthContext sets isAuthenticated=true, ProtectedRoute will redirect
-      navigate(from, { replace: true });
+      const result = await login(email.trim(), password);
+      if (result.mustChangePassword) {
+        navigate('/change-password', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.status === 401) {
-          setError('電子郵件或密碼錯誤');
+          setError('帳號或密碼錯誤');
         } else {
           setError(err.message);
         }
@@ -70,18 +73,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
             </div>
           )}
 
-          {/* Email */}
+          {/* Account (Email or Username) */}
           <div>
             <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
-              電子郵件
+              帳號 (Email 或使用者名稱)
             </label>
             <input
               id="login-email"
-              type="email"
-              autoComplete="email"
+              type="text"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
+              placeholder="email@example.com 或 ABC1231"
               className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
           </div>
@@ -141,8 +144,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
                   setError('');
                   setIsSubmitting(true);
                   try {
-                    await login(acc.email, acc.pw);
-                    navigate(from, { replace: true });
+                    const result = await login(acc.email, acc.pw);
+                    if (result.mustChangePassword) {
+                      navigate('/change-password', { replace: true });
+                    } else {
+                      navigate(from, { replace: true });
+                    }
                   } catch (err) {
                     if (err instanceof AuthError) {
                       setError(err.message);

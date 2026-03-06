@@ -1,6 +1,7 @@
 import logging
 import secrets
 import string
+from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_
@@ -10,7 +11,7 @@ from ..auth.dependencies import get_current_user
 from ..auth.password import hash_password
 from ..database import get_db
 from ..models.school import Classroom, ClassroomStudent, School
-from ..models.user import Role, User, UserRole
+from ..models.user import Role, StudentProfile, User, UserRole
 from ..schemas.classroom import (
     BatchStudentCreateRequest,
     BatchStudentCreateResponse,
@@ -481,12 +482,23 @@ def batch_create_students(
             password = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
             user = User(
                 email=email,
+                username=username.upper(),
                 password_hash=hash_password(password),
                 name=item.name,
                 is_active=True,
             )
             db.add(user)
             db.flush()  # Get user.id
+
+            # Create student profile (use username as student_number for school-level uniqueness)
+            profile = StudentProfile(
+                user_id=user.id,
+                school_id=classroom.school_id,
+                student_number=username.upper(),
+                birthdate=date(2015, 1, 1),  # placeholder
+                password_changed=False,
+            )
+            db.add(profile)
 
             # Assign student role scoped to the classroom's school
             if student_role:
