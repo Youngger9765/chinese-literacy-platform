@@ -216,18 +216,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     if (m.current.step === Step.ANIMATION) setStep(Step.PRACTICE_1);
   }, [doRender]);
 
-  const handleBeginPractice = useCallback(() => {
-    isAutoLoopingRef.current = false;
-    cancelAnimationFrame(animFrameRef.current);
-    const d = m.current.data;
-    r.current.animStroke = -1;
-    r.current.animProgress = 0;
-    if (d) r.current.completedStrokes = d.nStrokes;
-    doRender();
-    setMode('idle');
-    setStep(Step.PRACTICE_1);
-  }, [doRender]);
-
   const handleRetry = useCallback(() => {
     if (!data) return;
     cancelAnimationFrame(animFrameRef.current);
@@ -275,6 +263,15 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     m.current.quizStroke = 0;
     doRender();
   }, [doRender]);
+
+  const handleBeginPractice = useCallback(() => {
+    isAutoLoopingRef.current = false;
+    cancelAnimationFrame(animFrameRef.current);
+    r.current.animStroke = -1;
+    r.current.animProgress = 0;
+    setStep(Step.PRACTICE_1);
+    startQuiz();
+  }, [startQuiz]);
 
   const showHint = useCallback(() => {
     const d = m.current.data;
@@ -333,6 +330,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
             const nextStep = (s + 1) as Step;
             setStep(nextStep);
             setToast(`恭喜筆畫正確！讓我們再練習 ${newLeft} 次哦！`);
+            startQuiz();
           }
         } else if (s === Step.PRACTICE_NO_OUTLINE) {
           setPracticeLeft(pl - 1);
@@ -396,14 +394,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   /* ================================================================ */
 
   const isComplete = step === Step.COMPLETE;
-  const canAnimate =
-    mode === 'idle' && step !== Step.ANIMATION && !isComplete;
-  const canPractice =
-    mode === 'idle' &&
-    ((step >= Step.PRACTICE_1 && step <= Step.PRACTICE_3) ||
-      step === Step.PRACTICE_NO_OUTLINE);
-  const canToggleOutline =
-    mode === 'idle' && step !== Step.ANIMATION && !isComplete;
 
   /* ================================================================ */
   /*  JSX                                                              */
@@ -517,50 +507,13 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       </div>
 
       {/* Controls */}
-      {step === Step.ANIMATION ? (
+      {step === Step.ANIMATION && (
         <button
           onClick={handleBeginPractice}
           className="px-10 py-4 bg-accent hover:bg-accent-hover text-white font-black text-lg rounded-2xl shadow-xl transition-all active:scale-95 animate-pulse"
         >
           ✏️ 開始練習
         </button>
-      ) : !isComplete && (
-        <div className="flex gap-6 justify-center">
-          <CtrlBtn
-            icon={mode === 'animating' ? '⏸' : '▶'}
-            label="筆順"
-            active={mode === 'animating'}
-            glow={false}
-            disabled={mode === 'quizzing' || (!canAnimate && mode !== 'animating')}
-            onClick={() => (mode === 'animating' ? stopAnimation() : startAnimation())}
-          />
-          <CtrlBtn
-            icon="✍️"
-            label="寫字"
-            active={mode === 'quizzing'}
-            glow={canPractice && mode !== 'quizzing'}
-            disabled={!canPractice && mode !== 'quizzing'}
-            onClick={() => {
-              if (mode === 'quizzing') {
-                setMode('idle');
-                r.current.correctPaths = [];
-                r.current.completedStrokes = 0;
-                m.current.quizStroke = 0;
-                doRender();
-              } else {
-                startQuiz();
-              }
-            }}
-          />
-          <CtrlBtn
-            icon={showOutline ? '👁' : '👁‍🗨'}
-            label="邊框"
-            active={!showOutline}
-            glow={false}
-            disabled={!canToggleOutline}
-            onClick={() => setShowOutline(prev => !prev)}
-          />
-        </div>
       )}
 
       {/* Step guidance */}
