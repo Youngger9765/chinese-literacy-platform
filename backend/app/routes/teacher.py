@@ -1,10 +1,13 @@
 """
 Teacher Dashboard API — classroom overview and student learning progress.
 """
+import csv
+import io
 import logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -296,3 +299,63 @@ def get_student_sessions(
         )
 
     return results
+
+
+@router.get("/teacher/classrooms/{classroom_id}/export")
+def export_classroom_report(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Export classroom student progress as a UTF-8 BOM CSV file."""
+    classroom = _get_classroom_or_404(classroom_id, db)
+    _require_owner_or_admin(classroom, current_user, db)
+
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+
+    output = io.StringIO()
+    # UTF-8 BOM for Excel compatibility
+    output.write("\ufeff")
+    writer = csv.writer(output)
+    writer.writerow(["學生姓名", "已完成課文數", "平均正確率", "總學習次數", "最近學習日期"])
+
+    for enrollment in enrollments:
+        student = enrollment.student
+
+        sessions = (
+            db.query(LearningSession)
+            .filter(LearningSession.student_id == student.id)
+            .all()
+        )
+
+        total_sessions = len(sessions)
+        completed_sessions = [s for s in sessions if s.status == "completed"]
+        completed_texts = len({s.story_slug for s in completed_sessions if s.story_slug})
+
+        scores = [s.accuracy for s in sessions if s.accuracy is not None]
+        avg_accuracy = f"{sum(scores) / len(scores):.1f}%" if scores else ""
+
+        latest = max(sessions, key=lambda s: s.started_at, default=None)
+        last_date = latest.started_at.strftime("%Y-%m-%d") if latest else ""
+
+        writer.writerow([
+            student.name,
+            completed_texts,
+            avg_accuracy,
+            total_sessions,
+            last_date,
+        ])
+
+    csv_content = output.getvalue()
+    output.close()
+
+    filename = f"classroom-{classroom_id}-report-{datetime.now().strftime('%Y%m%d')}.csv"
+    return StreamingResponse(
+        iter([csv_content.encode("utf-8-sig")]),
+        media_type="text/csv; charset=utf-8-sig",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
