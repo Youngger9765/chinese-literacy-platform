@@ -22,6 +22,7 @@ import ComprehensionPage from './pages/learning/ComprehensionPage';
 import VocabPage from './pages/learning/VocabPage';
 import FullReadingPage from './pages/learning/FullReadingPage';
 import ReportPage from './pages/learning/ReportPage';
+import JoinClassroomPage from './pages/JoinClassroomPage';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -265,6 +266,14 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               班級管理
             </button>
           )}
+          {!hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin') && (
+            <button
+              onClick={() => navigate('/join')}
+              className="text-xs font-medium transition-colors cursor-pointer text-gray-500 hover:text-gray-700"
+            >
+              加入班級
+            </button>
+          )}
           {hasRole(user, 'system_admin', 'org_owner', 'org_admin') && (
             <button
               onClick={() => navigate('/admin')}
@@ -400,6 +409,14 @@ const App: React.FC = () => {
                 <AppShell>
                   <AdminDashboard />
                 </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/join"
+            element={
+              <ProtectedRoute>
+                <JoinClassroomPage />
               </ProtectedRoute>
             }
           />

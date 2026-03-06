@@ -253,14 +253,20 @@ class TestListSchools:
         resp = client.get("/api/schools", headers=auth_header(user1["token"]))
         assert resp.status_code == 200
 
-    def test_list_returns_items_and_total(self, client, user1):
+    def test_list_returns_items_and_total(self, client, user1, admin_user):
+        # user1 has no org scope — sees empty list (correct scoping behaviour)
         resp = client.get("/api/schools", headers=auth_header(user1["token"]))
         data = resp.json()
         assert "items" in data
         assert "total" in data
         assert isinstance(data["items"], list)
         assert isinstance(data["total"], int)
-        assert data["total"] >= 1  # At least our created schools
+        assert data["total"] == 0
+
+        # admin_user (system_admin) sees all schools
+        resp_admin = client.get("/api/schools", headers=auth_header(admin_user["token"]))
+        admin_data = resp_admin.json()
+        assert admin_data["total"] >= 1
 
     def test_list_pagination(self, client, user1):
         resp = client.get(
@@ -281,7 +287,7 @@ class TestListSchools:
 
 
 class TestGetSchool:
-    def test_get_detail_success(self, client, admin_user, user1):
+    def test_get_detail_success(self, client, admin_user):
         create_resp = client.post(
             "/api/schools",
             json={"name": "Detail School"},
@@ -289,9 +295,10 @@ class TestGetSchool:
         )
         school_id = create_resp.json()["id"]
 
+        # admin_user (system_admin) can read any school
         resp = client.get(
             f"/api/schools/{school_id}",
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["id"] == school_id

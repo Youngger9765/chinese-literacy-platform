@@ -39,6 +39,18 @@ async def get_current_user(
     return user
 
 
+def get_user_org_ids(user: User) -> list[str] | None:
+    """Return list of org IDs the user is scoped to, or None if system_admin (sees all)."""
+    for ur in user.user_roles:
+        if ur.is_active and ur.role and ur.role.name == "system_admin":
+            return None  # system_admin sees everything
+    org_ids = []
+    for ur in user.user_roles:
+        if ur.is_active and ur.scope_type == "organization" and ur.scope_id:
+            org_ids.append(ur.scope_id)
+    return org_ids if org_ids else []
+
+
 def require_role(*role_names: str, scope_type: str | None = None, scope_id: str | None = None):
     """Dependency factory that checks if current user has any of the specified roles.
 

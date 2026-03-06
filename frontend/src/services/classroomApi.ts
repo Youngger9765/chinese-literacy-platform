@@ -195,6 +195,20 @@ export async function searchStudentsForClassroom(
   return handleResponse<StudentSearchResult[]>(res);
 }
 
+// --- Join classroom by code (student) ---
+
+export async function joinClassroomByCode(
+  token: string,
+  joinCode: string,
+): Promise<{ message: string; classroom_id: number; classroom_name: string }> {
+  const res = await fetch(`${API_BASE}/api/classrooms/join`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ join_code: joinCode }),
+  });
+  return handleResponse<{ message: string; classroom_id: number; classroom_name: string }>(res);
+}
+
 // --- Batch create students ---
 
 export interface BatchStudentInput {

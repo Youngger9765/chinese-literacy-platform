@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from ..auth.dependencies import get_current_user, require_role
+from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
 from ..database import get_db
 from ..models.organization import Organization
 from ..models.school import School
@@ -87,6 +87,9 @@ def list_organizations(
 ):
     """List all organizations."""
     query = db.query(Organization)
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None:  # None = system_admin, sees all
+        query = query.filter(Organization.id.in_(org_ids))
     total = query.count()
     items = (
         query.order_by(Organization.created_at.desc())
@@ -115,6 +118,9 @@ def get_organization(
 ):
     """Get organization detail with schools list."""
     org = _get_org_or_404(org_id, db)
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None and org.id not in org_ids:
+        raise HTTPException(status_code=403, detail="Not authorized for this organization")
     base = _org_to_response(org, _get_school_count(org, db))
 
     # Include the list of schools under this org
@@ -153,6 +159,9 @@ def update_organization(
 ):
     """Update organization fields."""
     org = _get_org_or_404(org_id, db)
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None and org.id not in org_ids:
+        raise HTTPException(status_code=403, detail="Not authorized for this organization")
 
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():

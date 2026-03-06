@@ -224,13 +224,19 @@ class TestListOrganizations:
         resp = client.get("/api/organizations", headers=auth_header(user1["token"]))
         assert resp.status_code == 200
 
-    def test_list_returns_items_and_total(self, client, user1):
+    def test_list_returns_items_and_total(self, client, user1, admin_user):
+        # user1 has no org scope — sees empty list (correct scoping behaviour)
         resp = client.get("/api/organizations", headers=auth_header(user1["token"]))
         data = resp.json()
         assert "items" in data
         assert "total" in data
         assert isinstance(data["items"], list)
-        assert data["total"] >= 1
+        assert data["total"] == 0
+
+        # admin_user (system_admin) sees all orgs
+        resp_admin = client.get("/api/organizations", headers=auth_header(admin_user["token"]))
+        admin_data = resp_admin.json()
+        assert admin_data["total"] >= 1
 
     def test_list_pagination(self, client, user1):
         resp = client.get(
@@ -251,7 +257,7 @@ class TestListOrganizations:
 
 
 class TestGetOrganization:
-    def test_get_detail_success(self, client, admin_user, user1):
+    def test_get_detail_success(self, client, admin_user):
         create_resp = client.post(
             "/api/organizations",
             json={"name": "Detail Org"},
@@ -259,9 +265,10 @@ class TestGetOrganization:
         )
         org_id = create_resp.json()["id"]
 
+        # admin_user (system_admin) can read any org
         resp = client.get(
             f"/api/organizations/{org_id}",
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -270,7 +277,7 @@ class TestGetOrganization:
         assert "schools" in data
         assert isinstance(data["schools"], list)
 
-    def test_get_detail_includes_schools(self, client, admin_user, user1):
+    def test_get_detail_includes_schools(self, client, admin_user):
         org_resp = client.post(
             "/api/organizations",
             json={"name": "Org With Schools"},
@@ -284,9 +291,10 @@ class TestGetOrganization:
             headers=auth_header(admin_user["token"]),
         )
 
+        # admin_user (system_admin) can read any org
         resp = client.get(
             f"/api/organizations/{org_id}",
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         data = resp.json()
         assert data["school_count"] == 1

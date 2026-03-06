@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
-from ..auth.dependencies import get_current_user, require_role
+from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
 from ..database import get_db
 from ..models.organization import Organization
 from ..models.school import Classroom, School
@@ -115,6 +115,9 @@ def list_schools(
 ):
     """List all schools."""
     query = db.query(School)
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None:  # None = system_admin, sees all
+        query = query.filter(School.organization_id.in_(org_ids))
     total = query.count()
     items = query.order_by(School.created_at.desc()).offset(offset).limit(limit).all()
     return SchoolListResponse(
@@ -131,6 +134,9 @@ def get_school(
 ):
     """Get school detail."""
     school = _get_school_or_404(school_id, db)
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None and school.organization_id not in org_ids:
+        raise HTTPException(status_code=403, detail="Not authorized for this school")
     return _school_to_response(school)
 
 
@@ -143,6 +149,9 @@ def update_school(
 ):
     """Update school fields."""
     school = _get_school_or_404(school_id, db)
+    org_ids = get_user_org_ids(current_user)
+    if org_ids is not None and school.organization_id not in org_ids:
+        raise HTTPException(status_code=403, detail="Not authorized for this school")
 
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():
