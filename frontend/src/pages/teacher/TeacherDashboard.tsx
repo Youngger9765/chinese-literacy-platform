@@ -131,6 +131,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="例：五年甲班"
                     required
+                    autoFocus
                     className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   />
                 </div>
@@ -145,9 +146,16 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                     className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   >
                     <option value="">未指定</option>
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((g) => (
-                      <option key={g} value={g}>{g} 年級</option>
-                    ))}
+                    <optgroup label="國小">
+                      {[1,2,3,4,5,6].map((g) => (
+                        <option key={g} value={g}>{g} 年級</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="國中">
+                      {[7,8,9].map((g) => (
+                        <option key={g} value={g}>{g} 年級</option>
+                      ))}
+                    </optgroup>
                   </select>
                 </div>
               </div>
@@ -205,14 +213,14 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
               <button
                 key={cr.id}
                 onClick={() => onSelectClassroom(cr.id)}
-                className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-left hover:border-accent hover:shadow-md transition-all group"
+                className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-left hover:border-accent hover:shadow-md transition-all group cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="font-bold text-gray-900 group-hover:text-accent transition-colors">
                     {cr.name}
                   </h3>
                   {!cr.is_active && (
-                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
                       已停用
                     </span>
                   )}

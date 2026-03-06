@@ -107,7 +107,7 @@ const AppShell: React.FC = () => {
               setView(AppView.TEACHER_DASHBOARD);
               setSelectedClassroomId(null);
             }}
-            className={`text-xs font-medium transition-colors ${
+            className={`text-xs font-medium transition-colors cursor-pointer ${
               view === AppView.TEACHER_DASHBOARD || view === AppView.CLASSROOM_DETAIL
                 ? 'text-accent'
                 : 'text-gray-500 hover:text-gray-700'

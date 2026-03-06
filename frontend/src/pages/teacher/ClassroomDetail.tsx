@@ -33,6 +33,9 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const [isAddingStudent, setIsAddingStudent] = useState(false);
   const [addStudentError, setAddStudentError] = useState('');
 
+  // Toggle active loading
+  const [isTogglingActive, setIsTogglingActive] = useState(false);
+
   // Remove confirmation
   const [removingStudentId, setRemovingStudentId] = useState<number | null>(null);
 
@@ -93,6 +96,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
   const handleToggleActive = async () => {
     if (!token || !classroom) return;
+    setIsTogglingActive(true);
     try {
       await updateClassroom(token, classroom.id, {
         is_active: !classroom.is_active,
@@ -104,6 +108,8 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
       } else {
         setError('更新狀態失敗');
       }
+    } finally {
+      setIsTogglingActive(false);
     }
   };
 
@@ -164,7 +170,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
   const BackButton = () => (
     <button
       onClick={onBack}
-      className="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1 transition-colors"
+      className="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1 transition-colors cursor-pointer"
     >
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -214,7 +220,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
             {error}
-            <button onClick={() => setError('')} className="ml-2 underline">關閉</button>
+            <button onClick={() => setError('')} className="ml-2 underline cursor-pointer">關閉</button>
           </div>
         )}
 
@@ -253,9 +259,16 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
                     className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   >
                     <option value="">未指定</option>
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((g) => (
-                      <option key={g} value={g}>{g} 年級</option>
-                    ))}
+                    <optgroup label="國小">
+                      {[1,2,3,4,5,6].map((g) => (
+                        <option key={g} value={g}>{g} 年級</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="國中">
+                      {[7,8,9].map((g) => (
+                        <option key={g} value={g}>{g} 年級</option>
+                      ))}
+                    </optgroup>
                   </select>
                 </div>
               </div>
@@ -296,19 +309,22 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={startEditing}
-                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors"
+                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   編輯
                 </button>
                 <button
                   onClick={handleToggleActive}
-                  className={`px-3 py-1.5 rounded-lg border text-sm transition-colors ${
+                  disabled={isTogglingActive}
+                  className={`px-3 py-1.5 rounded-lg border text-sm transition-colors cursor-pointer ${
+                    isTogglingActive ? 'opacity-50 cursor-not-allowed' : ''
+                  } ${
                     classroom.is_active
                       ? 'border-gray-300 text-gray-700 hover:bg-gray-50'
                       : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50'
                   }`}
                 >
-                  {classroom.is_active ? '停用' : '啟用'}
+                  {isTogglingActive ? '更新中...' : classroom.is_active ? '停用' : '啟用'}
                 </button>
               </div>
             </div>
@@ -337,7 +353,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
                     setStudentIdInput(e.target.value);
                     setAddStudentError('');
                   }}
-                  placeholder="輸入學生 ID"
+                  placeholder="輸入學生編號"
                   className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                 />
               </div>
@@ -349,13 +365,22 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
                 {isAddingStudent ? '新增中...' : '新增'}
               </button>
             </form>
+            <p className="text-xs text-gray-400 mt-1">學生可在個人資料頁面查看自己的編號</p>
             {addStudentError && (
               <p className="text-red-600 text-sm mt-2">{addStudentError}</p>
             )}
           </div>
 
           {classroom.students.length === 0 ? (
-            <div className="p-8 text-center text-gray-500 text-sm">尚無學生，使用上方表單新增學生</div>
+            <div className="p-8 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-bg rounded-xl mb-3">
+                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-gray-700 mb-1">尚無學生</p>
+              <p className="text-xs text-gray-500">使用上方表單新增學生至班級</p>
+            </div>
           ) : (
             <div className="divide-y divide-gray-100">
               {classroom.students.map((s) => (
@@ -368,11 +393,11 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
                     <span className="text-xs text-gray-400 hidden sm:inline">{formatDate(s.enrolled_at)}</span>
                     {removingStudentId === s.id ? (
                       <div className="flex gap-2">
-                        <button onClick={() => handleRemoveStudent(s)} className="text-xs text-red-600 font-medium hover:text-red-800 transition-colors">確認移除</button>
-                        <button onClick={() => setRemovingStudentId(null)} className="text-xs text-gray-500 hover:text-gray-700 transition-colors">取消</button>
+                        <button onClick={() => handleRemoveStudent(s)} className="text-xs text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer">確認移除</button>
+                        <button onClick={() => setRemovingStudentId(null)} className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">取消</button>
                       </div>
                     ) : (
-                      <button onClick={() => handleRemoveStudent(s)} className="text-xs text-gray-400 hover:text-red-600 transition-colors">移除</button>
+                      <button onClick={() => handleRemoveStudent(s)} className="text-xs text-gray-400 hover:text-red-600 transition-colors cursor-pointer">移除</button>
                     )}
                   </div>
                 </div>
