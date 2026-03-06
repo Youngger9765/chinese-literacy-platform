@@ -20,5 +20,9 @@ build/
 # Raw teaching materials (1GB+, not for git)
 data/raw-materials/
 
+# Test artifacts
+*.db
+frontend/test-results/
+
 # macOS
 .DS_Store
