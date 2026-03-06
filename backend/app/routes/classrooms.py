@@ -1,27 +1,58 @@
 import logging
+import random
+import string
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
+from ..auth.password import hash_password
 from ..database import get_db
 from ..models.school import Classroom, ClassroomStudent, School
 from ..models.user import Role, User, UserRole
 from ..schemas.classroom import (
+    BatchStudentCreateRequest,
+    BatchStudentCreateResponse,
+    BatchStudentError,
     ClassroomCreateRequest,
     ClassroomDetailResponse,
+    ClassroomJoinRequest,
     ClassroomListResponse,
     ClassroomResponse,
     ClassroomStudentAddRequest,
     ClassroomUpdateRequest,
+    CreatedStudentInfo,
     StudentInClassroomResponse,
+    StudentSearchRequest,
+    StudentSearchResult,
 )
 
 router = APIRouter(tags=["classrooms"])
 logger = logging.getLogger(__name__)
 
+_JOIN_CODE_LENGTH = 6
+_JOIN_CODE_CHARS = string.ascii_uppercase + string.digits
+_JOIN_CODE_MAX_RETRIES = 10
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
+
+def _generate_join_code(db: Session, length: int = _JOIN_CODE_LENGTH) -> str:
+    """Generate a unique random join code for a classroom.
+
+    Retries up to _JOIN_CODE_MAX_RETRIES times in case of collision.
+    """
+    for _ in range(_JOIN_CODE_MAX_RETRIES):
+        code = "".join(random.choices(_JOIN_CODE_CHARS, k=length))
+        existing = db.query(Classroom).filter(Classroom.join_code == code).first()
+        if existing is None:
+            return code
+    raise HTTPException(
+        status_code=500,
+        detail="Failed to generate unique join code after multiple retries",
+    )
 
 
 def _get_classroom_or_404(classroom_id: int, db: Session) -> Classroom:
@@ -79,6 +110,7 @@ def _classroom_to_response(classroom: Classroom) -> ClassroomResponse:
         school_id=classroom.school_id,
         teacher_id=classroom.teacher_id,
         grade=classroom.grade,
+        join_code=classroom.join_code,
         is_active=classroom.is_active,
         created_at=classroom.created_at,
         student_count=_student_count(classroom),
@@ -102,6 +134,7 @@ def _classroom_to_detail_response(classroom: Classroom) -> ClassroomDetailRespon
         school_id=classroom.school_id,
         teacher_id=classroom.teacher_id,
         grade=classroom.grade,
+        join_code=classroom.join_code,
         is_active=classroom.is_active,
         created_at=classroom.created_at,
         student_count=_student_count(classroom),
@@ -142,11 +175,13 @@ def create_classroom(
             raise HTTPException(status_code=404, detail="Teacher user not found")
         effective_teacher_id = payload.teacher_id
 
+    join_code = _generate_join_code(db)
     classroom = Classroom(
         name=payload.name,
         school_id=payload.school_id,
         teacher_id=effective_teacher_id,
         grade=payload.grade,
+        join_code=join_code,
     )
     db.add(classroom)
     db.commit()
@@ -313,4 +348,224 @@ def list_classroom_students(
             enrolled_at=cs.enrolled_at,
         )
         for cs in classroom.classroom_students
+    ]
+
+
+# ── Join Code Management ────────────────────────────────────────────────────
+
+
+@router.post(
+    "/classrooms/{classroom_id}/regenerate-code",
+    response_model=ClassroomResponse,
+)
+def regenerate_classroom_code(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Regenerate the join code for a classroom. Requires owner or admin."""
+    classroom = _get_classroom_or_404(classroom_id, db)
+    _require_owner_or_admin(classroom, current_user, db)
+
+    classroom.join_code = _generate_join_code(db)
+    db.commit()
+    db.refresh(classroom)
+    logger.info(
+        "Regenerated join code for classroom %d (by user %d)",
+        classroom_id, current_user.id,
+    )
+    return _classroom_to_response(classroom)
+
+
+@router.post("/classrooms/join", status_code=200, response_model=ClassroomResponse)
+def join_classroom_by_code(
+    payload: ClassroomJoinRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Join a classroom using a join code. Enrolls the current user as a student."""
+    classroom = (
+        db.query(Classroom)
+        .filter(Classroom.join_code == payload.join_code.upper())
+        .first()
+    )
+    if classroom is None:
+        raise HTTPException(status_code=404, detail="Invalid join code")
+
+    # Check for duplicate enrollment
+    existing = (
+        db.query(ClassroomStudent)
+        .filter(
+            ClassroomStudent.classroom_id == classroom.id,
+            ClassroomStudent.student_id == current_user.id,
+        )
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="Already enrolled in this classroom")
+
+    cs = ClassroomStudent(
+        classroom_id=classroom.id,
+        student_id=current_user.id,
+    )
+    db.add(cs)
+    db.commit()
+    db.refresh(classroom)
+    logger.info(
+        "User %d joined classroom %d via join code",
+        current_user.id, classroom.id,
+    )
+    return _classroom_to_response(classroom)
+
+
+# ── Batch Student Creation ──────────────────────────────────────────────────
+
+
+@router.post(
+    "/classrooms/{classroom_id}/students/batch",
+    status_code=201,
+    response_model=BatchStudentCreateResponse,
+)
+def batch_create_students(
+    classroom_id: int,
+    payload: BatchStudentCreateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Batch-create student accounts and enroll them in a classroom.
+
+    For each student, generates a unique email and random password.
+    Requires classroom owner or admin.
+    """
+    classroom = _get_classroom_or_404(classroom_id, db)
+    _require_owner_or_admin(classroom, current_user, db)
+
+    if not classroom.join_code:
+        raise HTTPException(
+            status_code=400,
+            detail="Classroom has no join code; cannot generate student usernames",
+        )
+
+    # Find the student role for assignment
+    student_role = db.query(Role).filter(Role.name == "student").first()
+
+    created: list[CreatedStudentInfo] = []
+    errors: list[BatchStudentError] = []
+
+    for item in payload.students:
+        try:
+            username = f"{classroom.join_code}{item.seat_number}"
+            email = f"{username.lower()}@student.lingoleap.local"
+
+            # Check if email already exists
+            existing_user = db.query(User).filter(User.email == email).first()
+            if existing_user:
+                errors.append(BatchStudentError(
+                    name=item.name,
+                    seat_number=item.seat_number,
+                    error=f"User with email {email} already exists",
+                ))
+                continue
+
+            # Generate random password (8-char uppercase + digits)
+            password = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            user = User(
+                email=email,
+                password_hash=hash_password(password),
+                name=item.name,
+                is_active=True,
+            )
+            db.add(user)
+            db.flush()  # Get user.id
+
+            # Assign student role scoped to the classroom's school
+            if student_role:
+                user_role = UserRole(
+                    user_id=user.id,
+                    role_id=student_role.id,
+                    scope_type="school",
+                    scope_id=str(classroom.school_id),
+                    granted_by=current_user.id,
+                )
+                db.add(user_role)
+
+            # Enroll in classroom
+            cs = ClassroomStudent(
+                classroom_id=classroom_id,
+                student_id=user.id,
+            )
+            db.add(cs)
+            db.flush()
+
+            created.append(CreatedStudentInfo(
+                name=item.name,
+                seat_number=item.seat_number,
+                username=username,
+                password=password,
+                user_id=user.id,
+            ))
+        except Exception as e:
+            logger.error(
+                "Error creating student %s (seat %s): %s",
+                item.name, item.seat_number, e,
+            )
+            errors.append(BatchStudentError(
+                name=item.name,
+                seat_number=item.seat_number,
+                error=str(e),
+            ))
+
+    db.commit()
+    logger.info(
+        "Batch created %d students for classroom %d (errors: %d)",
+        len(created), classroom_id, len(errors),
+    )
+    return BatchStudentCreateResponse(created=created, errors=errors)
+
+
+# ── Student Search ──────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/classrooms/{classroom_id}/students/search",
+    response_model=list[StudentSearchResult],
+)
+def search_students_for_classroom(
+    classroom_id: int,
+    payload: StudentSearchRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Search for users by name or email who are NOT already in this classroom.
+
+    Returns up to 10 matching results. Used by the 'add existing student' UI.
+    Requires classroom owner or admin.
+    """
+    classroom = _get_classroom_or_404(classroom_id, db)
+    _require_owner_or_admin(classroom, current_user, db)
+
+    # Get IDs of students already in this classroom
+    enrolled_ids_select = (
+        db.query(ClassroomStudent.student_id)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+    )
+
+    search_pattern = f"%{payload.query}%"
+    results = (
+        db.query(User)
+        .filter(
+            User.is_active == True,
+            User.id.notin_(enrolled_ids_select.scalar_subquery()),
+            or_(
+                User.name.ilike(search_pattern),
+                User.email.ilike(search_pattern),
+            ),
+        )
+        .limit(10)
+        .all()
+    )
+
+    return [
+        StudentSearchResult(id=u.id, name=u.name, email=u.email)
+        for u in results
     ]

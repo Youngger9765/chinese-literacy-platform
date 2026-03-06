@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getSchool,
   updateSchool,
   listSchoolClassrooms,
   listSchoolMembers,
+  regenerateSchoolCode,
   SchoolResponse,
   SchoolClassroomResponse,
   SchoolMemberResponse,
@@ -14,6 +15,8 @@ import {
   createClassroomAdmin,
   ClassroomApiError,
 } from '../../services/classroomApi';
+import { assignRole, RoleApiError } from '../../services/roleApi';
+import { listUsers, UserListItem } from '../../services/userApi';
 
 interface SchoolDetailPanelProps {
   schoolId: number;
@@ -55,6 +58,23 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
   // Teacher list for dropdown
   const [teachers, setTeachers] = useState<SchoolMemberResponse[]>([]);
   const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+
+  // School join code
+  const [schoolJoinCode, setSchoolJoinCode] = useState<string | null>(null);
+  const [isRegeneratingCode, setIsRegeneratingCode] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+
+  // Teacher section (all school members with teacher roles)
+  const [allTeacherMembers, setAllTeacherMembers] = useState<SchoolMemberResponse[]>([]);
+  const [isLoadingAllTeachers, setIsLoadingAllTeachers] = useState(true);
+
+  // Assign teacher search
+  const [showTeacherSearch, setShowTeacherSearch] = useState(false);
+  const [teacherSearchQuery, setTeacherSearchQuery] = useState('');
+  const [teacherSearchResults, setTeacherSearchResults] = useState<UserListItem[]>([]);
+  const [isSearchingTeachers, setIsSearchingTeachers] = useState(false);
+  const [assigningUserId, setAssigningUserId] = useState<number | null>(null);
+  const teacherSearchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadTeachers = useCallback(async () => {
     if (!token) return;
@@ -110,11 +130,26 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
     }
   }, [token, schoolId]);
 
+  const loadAllTeacherMembers = useCallback(async () => {
+    if (!token) return;
+    setIsLoadingAllTeachers(true);
+    try {
+      const members = await listSchoolMembers(token, schoolId);
+      const teacherRoles = ['teacher', 'school_admin', 'principal', 'director'];
+      setAllTeacherMembers(members.filter((m) => teacherRoles.includes(m.role_name)));
+    } catch {
+      setAllTeacherMembers([]);
+    } finally {
+      setIsLoadingAllTeachers(false);
+    }
+  }, [token, schoolId]);
+
   useEffect(() => {
     setIsEditing(false);
     loadSchool();
     loadClassrooms();
-  }, [loadSchool, loadClassrooms]);
+    loadAllTeacherMembers();
+  }, [loadSchool, loadClassrooms, loadAllTeacherMembers]);
 
   const startEditing = () => {
     if (!school) return;
@@ -213,6 +248,95 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
       }
     } finally {
       setIsSubmittingClassroom(false);
+    }
+  };
+
+  // --- School join code ---
+
+  const handleCopySchoolCode = async () => {
+    if (!schoolJoinCode) return;
+    try {
+      await navigator.clipboard.writeText(schoolJoinCode);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = schoolJoinCode;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    }
+  };
+
+  const handleRegenerateSchoolCode = async () => {
+    if (!token) return;
+    setIsRegeneratingCode(true);
+    try {
+      const result = await regenerateSchoolCode(token, schoolId);
+      setSchoolJoinCode(result.join_code);
+    } catch (err) {
+      if (err instanceof SchoolApiError) {
+        setError(err.message);
+      } else {
+        setError('產生加入代碼失敗');
+      }
+    } finally {
+      setIsRegeneratingCode(false);
+    }
+  };
+
+  // --- Teacher search / assign ---
+
+  const handleTeacherSearchInputChange = (value: string) => {
+    setTeacherSearchQuery(value);
+    if (teacherSearchTimeoutRef.current) clearTimeout(teacherSearchTimeoutRef.current);
+    if (value.trim().length >= 2) {
+      teacherSearchTimeoutRef.current = setTimeout(() => searchTeacherUsers(value), 300);
+    } else {
+      setTeacherSearchResults([]);
+    }
+  };
+
+  const searchTeacherUsers = async (query: string) => {
+    if (!token) return;
+    setIsSearchingTeachers(true);
+    try {
+      const result = await listUsers(token, { search: query.trim(), limit: 10 });
+      // Exclude users already assigned as teachers in this school
+      const existingIds = new Set(allTeacherMembers.map((m) => m.user_id));
+      setTeacherSearchResults(result.items.filter((u) => !existingIds.has(u.id)));
+    } catch {
+      setTeacherSearchResults([]);
+    } finally {
+      setIsSearchingTeachers(false);
+    }
+  };
+
+  const handleAssignTeacher = async (userId: number) => {
+    if (!token) return;
+    setAssigningUserId(userId);
+    try {
+      await assignRole(token, {
+        user_id: userId,
+        role_name: 'teacher',
+        scope_type: 'school',
+        scope_id: String(schoolId),
+      });
+      setTeacherSearchResults((prev) => prev.filter((u) => u.id !== userId));
+      await loadAllTeacherMembers();
+      // Also refresh the teacher dropdown for classroom creation
+      await loadTeachers();
+    } catch (err) {
+      if (err instanceof RoleApiError) {
+        setError(err.message);
+      } else {
+        setError('指派教師失敗');
+      }
+    } finally {
+      setAssigningUserId(null);
     }
   };
 
@@ -561,6 +685,151 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
                             }`}
                           >
                             {c.is_active ? '使用中' : '已停用'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* School join code card */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <h3 className="font-bold text-gray-900 mb-4">學校加入代碼</h3>
+          {schoolJoinCode ? (
+            <div className="flex items-center gap-3">
+              <div className="bg-gray-100 font-mono text-lg tracking-widest px-4 py-2 rounded-lg text-gray-900">
+                {schoolJoinCode}
+              </div>
+              <button
+                onClick={handleCopySchoolCode}
+                className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
+                title="複製代碼"
+              >
+                {codeCopied ? '已複製' : '複製'}
+              </button>
+              <button
+                onClick={handleRegenerateSchoolCode}
+                disabled={isRegeneratingCode}
+                className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRegeneratingCode ? '產生中...' : '重新產生'}
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-400">尚無加入代碼</span>
+              <button
+                onClick={handleRegenerateSchoolCode}
+                disabled={isRegeneratingCode}
+                className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRegeneratingCode ? '產生中...' : '產生代碼'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Teacher section */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+            <h3 className="font-bold text-gray-900">教師</h3>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500">{allTeacherMembers.length} 位</span>
+              {!showTeacherSearch && (
+                <button
+                  onClick={() => setShowTeacherSearch(true)}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  指派教師
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Teacher search panel */}
+          {showTeacherSearch && (
+            <div className="p-5 border-b border-gray-100 bg-gray-50/50">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-bold text-gray-900">搜尋使用者並指派為教師</h4>
+                <button
+                  onClick={() => { setShowTeacherSearch(false); setTeacherSearchQuery(''); setTeacherSearchResults([]); }}
+                  className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
+                >
+                  關閉
+                </button>
+              </div>
+              <input
+                type="text"
+                value={teacherSearchQuery}
+                onChange={(e) => handleTeacherSearchInputChange(e.target.value)}
+                placeholder="輸入姓名或 email 搜尋..."
+                autoFocus
+                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              />
+              {isSearchingTeachers && (
+                <div className="flex items-center gap-2 mt-3">
+                  <div className="w-3 h-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-xs text-gray-400">搜尋中...</span>
+                </div>
+              )}
+              {!isSearchingTeachers && teacherSearchResults.length > 0 && (
+                <div className="mt-3 divide-y divide-gray-100 border border-gray-200 rounded-lg bg-white overflow-hidden">
+                  {teacherSearchResults.map((user) => (
+                    <div key={user.id} className="px-4 py-2.5 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                      <button
+                        onClick={() => handleAssignTeacher(user.id)}
+                        disabled={assigningUserId === user.id}
+                        className="px-3 py-1 rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {assigningUserId === user.id ? '指派中...' : '指派'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {!isSearchingTeachers && teacherSearchQuery.trim().length >= 2 && teacherSearchResults.length === 0 && (
+                <p className="mt-3 text-xs text-gray-400">找不到符合的使用者</p>
+              )}
+            </div>
+          )}
+
+          <div className="p-5">
+            {isLoadingAllTeachers ? (
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3" />
+                <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2" />
+              </div>
+            ) : allTeacherMembers.length === 0 ? (
+              <p className="text-gray-400 text-sm text-center py-6">尚無教師</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 text-left text-gray-500">
+                      <th className="pb-2 font-medium">姓名</th>
+                      <th className="pb-2 font-medium">Email</th>
+                      <th className="pb-2 font-medium">角色</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {allTeacherMembers.map((m) => (
+                      <tr key={m.user_id}>
+                        <td className="py-2.5 text-gray-900 font-medium">{m.name}</td>
+                        <td className="py-2.5 text-gray-600">{m.email}</td>
+                        <td className="py-2.5">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-accent-bg text-accent">
+                            {m.role_display_name}
                           </span>
                         </td>
                       </tr>

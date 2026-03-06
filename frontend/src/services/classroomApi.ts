@@ -27,6 +27,8 @@ export interface StudentInClassroomResponse {
 
 export interface ClassroomDetailResponse extends ClassroomResponse {
   students: StudentInClassroomResponse[];
+  join_code?: string | null;
+  school_name?: string | null;
 }
 
 export interface ClassroomListResponse {
@@ -160,4 +162,78 @@ export async function removeStudent(
     },
   );
   return handleResponse<{ message: string }>(res);
+}
+
+// --- Regenerate join code ---
+
+export async function regenerateClassroomCode(
+  token: string,
+  classroomId: number,
+): Promise<{ join_code: string }> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/regenerate-code`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+    },
+  );
+  return handleResponse<{ join_code: string }>(res);
+}
+
+// --- Search students not in classroom ---
+
+export interface StudentSearchResult {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export async function searchStudentsForClassroom(
+  token: string,
+  classroomId: number,
+  query: string,
+): Promise<StudentSearchResult[]> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/search`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ query }),
+    },
+  );
+  return handleResponse<StudentSearchResult[]>(res);
+}
+
+// --- Batch create students ---
+
+export interface BatchStudentInput {
+  name: string;
+  seat_number?: string;
+}
+
+export interface BatchCreateResult {
+  created: {
+    name: string;
+    seat_number: string;
+    username: string;
+    password: string;
+    user_id: number;
+  }[];
+  errors: string[];
+}
+
+export async function batchCreateStudents(
+  token: string,
+  classroomId: number,
+  students: BatchStudentInput[],
+): Promise<BatchCreateResult> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/batch`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ students }),
+    },
+  );
+  return handleResponse<BatchCreateResult>(res);
 }

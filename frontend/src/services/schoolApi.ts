@@ -151,3 +151,19 @@ export async function listSchoolMembers(
   });
   return handleResponse<SchoolMemberResponse[]>(res);
 }
+
+// --- Regenerate join code ---
+
+export async function regenerateSchoolCode(
+  token: string,
+  schoolId: number,
+): Promise<{ join_code: string }> {
+  const res = await fetch(
+    `${API_BASE}/api/schools/${schoolId}/regenerate-code`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+    },
+  );
+  return handleResponse<{ join_code: string }>(res);
+}

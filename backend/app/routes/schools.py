@@ -1,4 +1,6 @@
 import logging
+import random
+import string
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -33,6 +35,24 @@ def _get_school_or_404(school_id: int, db: Session) -> School:
     return school
 
 
+_SCHOOL_JOIN_CODE_LENGTH = 8
+_SCHOOL_JOIN_CODE_CHARS = string.ascii_uppercase + string.digits
+_SCHOOL_JOIN_CODE_MAX_RETRIES = 10
+
+
+def _generate_school_join_code(db: Session) -> str:
+    """Generate a unique random join code for a school."""
+    for _ in range(_SCHOOL_JOIN_CODE_MAX_RETRIES):
+        code = "".join(random.choices(_SCHOOL_JOIN_CODE_CHARS, k=_SCHOOL_JOIN_CODE_LENGTH))
+        existing = db.query(School).filter(School.join_code == code).first()
+        if existing is None:
+            return code
+    raise HTTPException(
+        status_code=500,
+        detail="Failed to generate unique school join code after multiple retries",
+    )
+
+
 def _school_to_response(school: School) -> SchoolResponse:
     """Convert a School ORM object to a SchoolResponse."""
     return SchoolResponse(
@@ -42,6 +62,7 @@ def _school_to_response(school: School) -> SchoolResponse:
         organization_id=school.organization_id,
         address=school.address,
         phone=school.phone,
+        join_code=school.join_code,
         is_active=school.is_active,
         created_at=school.created_at,
     )
@@ -67,11 +88,13 @@ def create_school(
         if org is None:
             raise HTTPException(status_code=404, detail="Organization not found")
 
+    join_code = _generate_school_join_code(db)
     school = School(
         name=payload.name,
         organization_id=payload.organization_id,
         address=payload.address,
         phone=payload.phone,
+        join_code=join_code,
     )
     db.add(school)
     db.commit()
@@ -128,6 +151,27 @@ def update_school(
     db.commit()
     db.refresh(school)
     logger.info("Updated school %d: %s", school_id, list(update_data.keys()))
+    return _school_to_response(school)
+
+
+# -- School Join Code ---------------------------------------------------------
+
+
+@router.post("/schools/{school_id}/regenerate-code", response_model=SchoolResponse)
+def regenerate_school_code(
+    school_id: int,
+    current_user: User = require_role("system_admin", "org_admin"),
+    db: Session = Depends(get_db),
+):
+    """Regenerate the join code for a school. Requires admin."""
+    school = _get_school_or_404(school_id, db)
+    school.join_code = _generate_school_join_code(db)
+    db.commit()
+    db.refresh(school)
+    logger.info(
+        "Regenerated join code for school %d (by user %d)",
+        school_id, current_user.id,
+    )
     return _school_to_response(school)
 
 

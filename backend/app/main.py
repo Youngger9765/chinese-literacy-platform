@@ -38,6 +38,8 @@ def seed_default_data():
     Only runs when users table is empty (fresh DB).
     Wrapped in try/except so it doesn't crash during tests.
     """
+    import random
+    import string
     from .database import SessionLocal
     from .models.school import School, Classroom, ClassroomStudent
     from .models.organization import Organization
@@ -55,8 +57,11 @@ def seed_default_data():
             db.flush()
 
             # ── 2. Schools ──
-            school1 = School(name="台北市大安國小", organization_id=org.id, is_active=True, address="台北市大安區信義路四段1號")
-            school2 = School(name="新北市板橋國小", organization_id=org.id, is_active=True, address="新北市板橋區文化路一段23號")
+            def _gen_code(k):
+                return "".join(random.choices(string.ascii_uppercase + string.digits, k=k))
+
+            school1 = School(name="台北市大安國小", organization_id=org.id, is_active=True, address="台北市大安區信義路四段1號", join_code=_gen_code(8))
+            school2 = School(name="新北市板橋國小", organization_id=org.id, is_active=True, address="新北市板橋區文化路一段23號", join_code=_gen_code(8))
             db.add_all([school1, school2])
             db.flush()
 
@@ -95,9 +100,9 @@ def seed_default_data():
             db.flush()
 
             # ── 5. Classrooms ──
-            class_3a = Classroom(school_id=school1.id, teacher_id=teacher1.id, name="三年甲班", grade=3, is_active=True)
-            class_5b = Classroom(school_id=school1.id, teacher_id=teacher1.id, name="五年乙班", grade=5, is_active=True)
-            class_7a = Classroom(school_id=school2.id, teacher_id=teacher2.id, name="七年甲班", grade=7, is_active=True)
+            class_3a = Classroom(school_id=school1.id, teacher_id=teacher1.id, name="三年甲班", grade=3, is_active=True, join_code=_gen_code(6))
+            class_5b = Classroom(school_id=school1.id, teacher_id=teacher1.id, name="五年乙班", grade=5, is_active=True, join_code=_gen_code(6))
+            class_7a = Classroom(school_id=school2.id, teacher_id=teacher2.id, name="七年甲班", grade=7, is_active=True, join_code=_gen_code(6))
             db.add_all([class_3a, class_5b, class_7a])
             db.flush()
 

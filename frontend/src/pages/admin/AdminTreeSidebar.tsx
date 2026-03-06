@@ -7,6 +7,10 @@ import {
   OrganizationApiError,
 } from '../../services/organizationApi';
 import type { SchoolInOrgResponse } from '../../services/organizationApi';
+import {
+  listSchoolClassrooms,
+  SchoolClassroomResponse,
+} from '../../services/schoolApi';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -28,6 +32,12 @@ interface AdminTreeSidebarProps {
 
 interface OrgTreeData {
   schools: SchoolInOrgResponse[];
+  isLoading: boolean;
+  error: string;
+}
+
+interface SchoolTreeData {
+  classrooms: SchoolClassroomResponse[];
   isLoading: boolean;
   error: string;
 }
@@ -102,6 +112,12 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
   // Org children data (schools loaded on expand)
   const [orgData, setOrgData] = useState<Record<string, OrgTreeData>>({});
 
+  // Expanded state per school (keyed by school id)
+  const [expandedSchools, setExpandedSchools] = useState<Set<number>>(new Set());
+
+  // School children data (classrooms loaded on expand)
+  const [schoolData, setSchoolData] = useState<Record<number, SchoolTreeData>>({});
+
   // ── Load organizations ──────────────────────────────────────────────────
 
   const loadOrgs = useCallback(async () => {
@@ -130,6 +146,7 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
   useEffect(() => {
     if (refreshTrigger != null && refreshTrigger > 0) {
       setOrgData({});
+      setSchoolData({});
       loadOrgs();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -169,6 +186,40 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
       }
     }
   }, [orgData, token]);
+
+  // ── Expand / collapse school ─────────────────────────────────────────────
+
+  const toggleSchool = useCallback(async (schoolId: number) => {
+    setExpandedSchools(prev => {
+      const next = new Set(prev);
+      if (next.has(schoolId)) {
+        next.delete(schoolId);
+      } else {
+        next.add(schoolId);
+      }
+      return next;
+    });
+
+    // Fetch classrooms if not already loaded
+    if (!schoolData[schoolId] && token) {
+      setSchoolData(prev => ({
+        ...prev,
+        [schoolId]: { classrooms: [], isLoading: true, error: '' },
+      }));
+      try {
+        const classrooms = await listSchoolClassrooms(token, schoolId);
+        setSchoolData(prev => ({
+          ...prev,
+          [schoolId]: { classrooms, isLoading: false, error: '' },
+        }));
+      } catch {
+        setSchoolData(prev => ({
+          ...prev,
+          [schoolId]: { classrooms: [], isLoading: false, error: '載入班級失敗' },
+        }));
+      }
+    }
+  }, [schoolData, token]);
 
   // ── Selection helpers ───────────────────────────────────────────────────
 
@@ -372,30 +423,102 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
                     </div>
                   )}
 
-                  {/* School nodes */}
+                  {/* School nodes (expandable with classrooms) */}
                   {data && !data.isLoading && !data.error && data.schools.map((school) => {
                     const schoolSelected = isSelected('school', school.id);
+                    const isSchoolExpanded = expandedSchools.has(school.id);
+                    const sData = schoolData[school.id];
 
                     return (
-                      <button
-                        key={school.id}
-                        onClick={() => onSelectNode({ type: 'school', id: school.id })}
-                        className={`flex items-center gap-1.5 w-full px-2 py-1 mx-1 rounded-md text-left transition-colors cursor-pointer group ${
-                          schoolSelected
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'hover:bg-gray-50'
-                        }`}
-                      >
-                        <SchoolIcon className={schoolSelected ? 'text-emerald-500' : 'text-gray-400 group-hover:text-gray-500'} />
-                        <span className={`text-sm truncate ${
-                          schoolSelected ? 'font-semibold text-emerald-700' : 'text-gray-600'
-                        }`}>
-                          {school.display_name || school.name}
-                        </span>
-                        {!school.is_active && (
-                          <span className="text-[10px] text-gray-400 ml-auto shrink-0">停用</span>
+                      <div key={school.id}>
+                        <div
+                          className={`flex items-center gap-1 px-2 py-1 mx-1 rounded-md group transition-colors ${
+                            schoolSelected
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'hover:bg-gray-50'
+                          }`}
+                        >
+                          {/* Chevron toggle for school */}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleSchool(school.id); }}
+                            className="p-0.5 rounded hover:bg-gray-200/50 cursor-pointer shrink-0"
+                            aria-label={isSchoolExpanded ? '收合' : '展開'}
+                          >
+                            <ChevronIcon expanded={isSchoolExpanded} />
+                          </button>
+
+                          {/* School button */}
+                          <button
+                            onClick={() => onSelectNode({ type: 'school', id: school.id })}
+                            className="flex items-center gap-1.5 flex-1 min-w-0 py-0.5 cursor-pointer text-left"
+                          >
+                            <SchoolIcon className={schoolSelected ? 'text-emerald-500' : 'text-gray-400 group-hover:text-gray-500'} />
+                            <span className={`text-sm truncate ${
+                              schoolSelected ? 'font-semibold text-emerald-700' : 'text-gray-600'
+                            }`}>
+                              {school.display_name || school.name}
+                            </span>
+                            {!school.is_active && (
+                              <span className="text-[10px] text-gray-400 ml-auto shrink-0">停用</span>
+                            )}
+                          </button>
+                        </div>
+
+                        {/* Expanded children: classrooms */}
+                        {isSchoolExpanded && (
+                          <div className="ml-4">
+                            {/* Loading classrooms */}
+                            {sData?.isLoading && (
+                              <div className="pl-4 py-1">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                                  <span className="text-xs text-gray-400">載入中...</span>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Error loading classrooms */}
+                            {sData?.error && (
+                              <div className="pl-4 py-1">
+                                <span className="text-xs text-red-500">{sData.error}</span>
+                              </div>
+                            )}
+
+                            {/* Classroom nodes */}
+                            {sData && !sData.isLoading && !sData.error && sData.classrooms.map((cls) => {
+                              const clsSelected = isSelected('classroom', cls.id);
+
+                              return (
+                                <button
+                                  key={cls.id}
+                                  onClick={() => onSelectNode({ type: 'classroom', id: cls.id })}
+                                  className={`flex items-center gap-1.5 w-full pl-6 pr-2 py-0.5 mx-1 rounded-md text-left transition-colors cursor-pointer group ${
+                                    clsSelected
+                                      ? 'bg-sky-50 text-sky-700'
+                                      : 'hover:bg-gray-50'
+                                  }`}
+                                >
+                                  <span className={`text-xs truncate ${
+                                    clsSelected ? 'font-semibold text-sky-700' : 'text-gray-500'
+                                  }`}>
+                                    {cls.name}
+                                  </span>
+                                  {!cls.is_active && (
+                                    <span className="text-[10px] text-gray-400 ml-auto shrink-0">停用</span>
+                                  )}
+                                </button>
+                              );
+                            })}
+
+                            {/* No classrooms */}
+                            {sData && !sData.isLoading && !sData.error && sData.classrooms.length === 0 && (
+                              <div className="pl-6 py-1">
+                                <span className="text-xs text-gray-400">無班級</span>
+                              </div>
+                            )}
+                          </div>
                         )}
-                      </button>
+                      </div>
                     );
                   })}
 

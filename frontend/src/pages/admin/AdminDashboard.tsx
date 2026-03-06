@@ -61,7 +61,10 @@ const AdminDashboard: React.FC = () => {
           />
         )}
         {selectedNode?.type === 'classroom' && (
-          <ClassroomDetailPanel classroomId={selectedNode.id} />
+          <ClassroomDetailPanel
+            classroomId={selectedNode.id}
+            onBackToSchool={(schoolId) => setSelectedNode({ type: 'school', id: schoolId })}
+          />
         )}
         {selectedNode?.type === 'roles' && <RolesPanel />}
         {selectedNode?.type === 'users' && <UsersPanel />}

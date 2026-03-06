@@ -25,6 +25,7 @@ class SchoolResponse(BaseModel):
     organization_id: str | None = None
     address: str | None = None
     phone: str | None = None
+    join_code: str | None = None
     is_active: bool
     created_at: datetime
 
