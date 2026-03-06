@@ -46,8 +46,12 @@
 - [x] RolesPanel (8 role cards with scope badges)
 
 ### 測試
-- [x] 395 backend pytest (auth, admin, classrooms, join/batch, orgs, schools, roles)
+- [x] 441 backend pytest (auth, admin, classrooms, join/batch, orgs, schools, roles, teacher, classroom_texts)
 - [x] 42 E2E Playwright tests (full admin flow)
+- [x] 21 E2E Playwright tests (teacher dashboard flow)
+- [x] 14 E2E Playwright tests (student login + join flow)
+- [x] 21 backend tests for teacher API endpoints
+- [x] 25 backend tests for classroom text assignment API
 
 ### Code Review 修復
 - [x] C1: JWT secret production guard
@@ -86,8 +90,8 @@
 - [x] 後端: GET /api/classrooms/{id}/texts — 列出已指派課文
 - [x] 後端: DELETE /api/classrooms/{id}/texts/{text_id} — 取消指派
 - [x] 前端: TextManagementTab — 課文指派/移除 UI (在教師 ClassroomDetail)
-- [ ] 前端: 學生端只顯示已指派課文 (修改 stories 列表過濾) — 後續
-- [ ] 後端: LearningSession 建立時自動填入 classroom_id — 後續
+- [x] 前端: 學生端只顯示已指派課文 (修改 stories 列表過濾)
+- [x] 後端: LearningSession 建立時自動填入 classroom_id
 
 ---
 
@@ -136,28 +140,28 @@
 - [x] 刪除 frontend/src/pages/admin/SchoolDetail.tsx (被 SchoolDetailPanel.tsx 取代)
 
 ### 4.3 其他 Code Review 待辦
-- [ ] 後端: N+1 query in list_organizations (I1)
-- [ ] 後端: _student_count 用 len() 載入全集合 (I2)
-- [ ] 後端: joinedload + LIMIT pagination bug in list_users (I3)
-- [ ] 後端: Organization name 加 unique constraint (I6)
+- [x] 後端: N+1 query in list_organizations (I1)
+- [x] 後端: _student_count 用 len() 載入全集合 (I2)
+- [x] 後端: joinedload + LIMIT pagination bug in list_users (I3)
+- [x] 後端: Organization name 加 unique constraint (I6)
 - [ ] 後端: No rate limiting on login/register (I9)
-- [ ] 後端: SchoolClassroomResponse 移到 schemas/ (M2)
-- [ ] 後端: on_event("startup") deprecated → lifespan (M6)
-- [ ] 後端: StudentProfile.birthdate NOT NULL 但無 API 建立 (M8)
-- [ ] 後端: DELETE 回 204 instead of 200 + body (M9)
-- [ ] 前端: OrgDetailPanel 學校列表不可點擊 (不一致)
+- [x] 後端: SchoolClassroomResponse 移到 schemas/ (M2)
+- [x] 後端: on_event("startup") deprecated → lifespan (M6)
+- [x] 後端: StudentProfile.birthdate NOT NULL 但無 API 建立 (M8)
+- [x] 後端: DELETE 回 204 instead of 200 + body (M9)
+- [x] 前端: OrgDetailPanel 學校列表不可點擊 (不一致)
 - [ ] 前端: Sidebar 雙重 render path (collapsed vs expanded)
 - [ ] 前端: Inline SVG icons 重複 → 抽出共用
-- [ ] 前端: Toggle active 無確認對話框
+- [x] 前端: Toggle active 無確認對話框
 
 ---
 
 ## 驗收標準
 
-- [ ] 教師登入後可看到自己的班級和學生學習進度
-- [ ] 教師可指派課文給班級
-- [ ] 學生可用短帳號登入 (不需要完整 email)
-- [ ] 學生首次登入被要求改密碼
-- [ ] org_admin 只看到自己機構的資料
-- [ ] 所有 backend tests pass
-- [ ] E2E tests 覆蓋新功能
+- [x] 教師登入後可看到自己的班級和學生學習進度
+- [x] 教師可指派課文給班級
+- [x] 學生可用短帳號登入 (不需要完整 email)
+- [x] 學生首次登入被要求改密碼
+- [x] org_admin 只看到自己機構的資料
+- [x] 所有 backend tests pass (441 tests)
+- [x] E2E tests 覆蓋新功能 (77 tests)
