@@ -642,6 +642,30 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
         </div>
 
+        {/* Paragraph progress bar */}
+        <div className="px-6 py-2 bg-white border-b border-gray-100">
+          <div className="flex items-center gap-3 max-w-3xl mx-auto">
+            <span className="text-xs text-gray-400 shrink-0 font-medium">進度</span>
+            <div className="flex flex-1 gap-1 h-2">
+              {story.content.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`flex-1 rounded-full transition-all duration-500 ${
+                    lineStatuses[idx] === 'completed'
+                      ? 'bg-emerald-500'
+                      : lineStatuses[idx] === 'current'
+                      ? 'bg-accent'
+                      : 'bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-gray-400 shrink-0 tabular-nums">
+              {currentLineIndex + 1} / {story.content.length}
+            </span>
+          </div>
+        </div>
+
         <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8 lg:p-16'} overflow-y-auto custom-scrollbar`}>
           <div className="max-w-3xl mx-auto space-y-20">
             {story.content.map((line, idx) => (
