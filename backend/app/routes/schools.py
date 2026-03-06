@@ -1,12 +1,14 @@
 import logging
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user, require_role
 from ..database import get_db
 from ..models.organization import Organization
-from ..models.school import School
+from ..models.school import Classroom, School
 from ..models.user import User
 from ..schemas.school import (
     SchoolCreateRequest,
@@ -126,3 +128,54 @@ def update_school(
     db.refresh(school)
     logger.info("Updated school %d: %s", school_id, list(update_data.keys()))
     return _school_to_response(school)
+
+
+# -- School Classrooms --------------------------------------------------------
+
+
+class SchoolClassroomResponse(BaseModel):
+    """Classroom summary for school detail view (includes teacher name)."""
+
+    id: int
+    name: str
+    grade: int | None
+    is_active: bool
+    teacher_id: int
+    teacher_name: str
+    student_count: int
+    created_at: datetime
+
+
+@router.get(
+    "/schools/{school_id}/classrooms",
+    response_model=list[SchoolClassroomResponse],
+)
+def list_school_classrooms(
+    school_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """List all classrooms belonging to a school (admin view)."""
+    _get_school_or_404(school_id, db)
+
+    classrooms = (
+        db.query(Classroom)
+        .filter(Classroom.school_id == school_id)
+        .options(joinedload(Classroom.teacher), joinedload(Classroom.classroom_students))
+        .order_by(Classroom.created_at.desc())
+        .all()
+    )
+
+    return [
+        SchoolClassroomResponse(
+            id=c.id,
+            name=c.name,
+            grade=c.grade,
+            is_active=c.is_active,
+            teacher_id=c.teacher_id,
+            teacher_name=c.teacher.name,
+            student_count=len(c.classroom_students),
+            created_at=c.created_at,
+        )
+        for c in classrooms
+    ]

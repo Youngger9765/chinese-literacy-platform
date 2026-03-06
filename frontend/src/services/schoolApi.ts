@@ -23,6 +23,17 @@ export interface SchoolListResponse {
   total: number;
 }
 
+export interface SchoolClassroomResponse {
+  id: number;
+  name: string;
+  grade: number | null;
+  is_active: boolean;
+  teacher_id: number;
+  teacher_name: string;
+  student_count: number;
+  created_at: string;
+}
+
 // --- Error class ---
 
 export class SchoolApiError extends Error {
@@ -109,4 +120,14 @@ export async function updateSchool(
     body: JSON.stringify(data),
   });
   return handleResponse<SchoolResponse>(res);
+}
+
+export async function listSchoolClassrooms(
+  token: string,
+  schoolId: number,
+): Promise<SchoolClassroomResponse[]> {
+  const res = await fetch(`${API_BASE}/api/schools/${schoolId}/classrooms`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<SchoolClassroomResponse[]>(res);
 }

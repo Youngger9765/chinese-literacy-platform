@@ -3,7 +3,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   getSchool,
   updateSchool,
+  listSchoolClassrooms,
   SchoolResponse,
+  SchoolClassroomResponse,
   SchoolApiError,
 } from '../../services/schoolApi';
 
@@ -29,6 +31,29 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId }) => {
   // Toggle active loading
   const [isTogglingActive, setIsTogglingActive] = useState(false);
 
+  // Classroom list state
+  const [classrooms, setClassrooms] = useState<SchoolClassroomResponse[]>([]);
+  const [isLoadingClassrooms, setIsLoadingClassrooms] = useState(true);
+  const [classroomError, setClassroomError] = useState('');
+
+  const loadClassrooms = useCallback(async () => {
+    if (!token) return;
+    setIsLoadingClassrooms(true);
+    setClassroomError('');
+    try {
+      const data = await listSchoolClassrooms(token, schoolId);
+      setClassrooms(data);
+    } catch (err) {
+      if (err instanceof SchoolApiError) {
+        setClassroomError(err.message);
+      } else {
+        setClassroomError('無法載入班級資料');
+      }
+    } finally {
+      setIsLoadingClassrooms(false);
+    }
+  }, [token, schoolId]);
+
   const loadSchool = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
@@ -50,7 +75,8 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId }) => {
   useEffect(() => {
     setIsEditing(false);
     loadSchool();
-  }, [loadSchool]);
+    loadClassrooms();
+  }, [loadSchool, loadClassrooms]);
 
   const startEditing = () => {
     if (!school) return;
@@ -292,6 +318,66 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId }) => {
                   {isTogglingActive ? '更新中...' : school.is_active ? '停用' : '啟用'}
                 </button>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Classroom list */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <h3 className="text-base font-bold text-gray-900 mb-4">班級列表</h3>
+
+          {isLoadingClassrooms ? (
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3" />
+              <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2" />
+              <div className="h-4 bg-gray-200 animate-pulse rounded w-3/4" />
+            </div>
+          ) : classroomError ? (
+            <div className="text-center py-6">
+              <p className="text-red-600 text-sm">{classroomError}</p>
+              <button
+                onClick={loadClassrooms}
+                className="mt-2 text-sm text-red-600 underline hover:text-red-800 cursor-pointer"
+              >
+                重試
+              </button>
+            </div>
+          ) : classrooms.length === 0 ? (
+            <p className="text-gray-400 text-sm text-center py-6">尚無班級</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 text-left text-gray-500">
+                    <th className="pb-2 font-medium">班級名稱</th>
+                    <th className="pb-2 font-medium">年級</th>
+                    <th className="pb-2 font-medium">導師</th>
+                    <th className="pb-2 font-medium text-center">學生數</th>
+                    <th className="pb-2 font-medium text-center">狀態</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {classrooms.map((c) => (
+                    <tr key={c.id} className="hover:bg-gray-50/50">
+                      <td className="py-2.5 text-gray-900 font-medium">{c.name}</td>
+                      <td className="py-2.5 text-gray-600">{c.grade != null ? `${c.grade} 年級` : '-'}</td>
+                      <td className="py-2.5 text-gray-600">{c.teacher_name}</td>
+                      <td className="py-2.5 text-gray-600 text-center">{c.student_count}</td>
+                      <td className="py-2.5 text-center">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                            c.is_active
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-gray-100 text-gray-500'
+                          }`}
+                        >
+                          {c.is_active ? '使用中' : '已停用'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

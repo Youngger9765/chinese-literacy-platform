@@ -240,12 +240,14 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
         </div>
 
-        <StepperNav
-          currentView={currentView}
-          session={navSession}
-          selectedStory={navStory}
-          onNavigate={handleStepperNavigate}
-        />
+        {![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL].includes(currentView) && (
+          <StepperNav
+            currentView={currentView}
+            session={navSession}
+            selectedStory={navStory}
+            onNavigate={handleStepperNavigate}
+          />
+        )}
 
         {/* Nav links + User info + Logout */}
         <div className="flex items-center gap-3 shrink-0">
