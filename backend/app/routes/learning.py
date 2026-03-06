@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
+from ..models.school import ClassroomStudent
 from ..models.session import LearningSession
 from ..models.user import User
 from ..schemas.session import (
@@ -31,11 +32,20 @@ def create_learning_session(
     db: Session = Depends(get_db),
 ):
     """Create a new learning session for the authenticated student."""
+    # Auto-fill classroom_id from the student's first active enrollment (if any)
+    enrollment = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.student_id == current_user.id)
+        .first()
+    )
+    classroom_id = enrollment.classroom_id if enrollment else None
+
     session = LearningSession(
         student_id=current_user.id,
         story_slug=payload.story_slug,
         status="in_progress",
         current_step=1,
+        classroom_id=classroom_id,
     )
     db.add(session)
     db.commit()

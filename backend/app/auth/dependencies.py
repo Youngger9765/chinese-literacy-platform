@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Header, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -7,6 +7,27 @@ from ..models.user import User, UserRole, Role
 from .jwt import decode_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+
+
+async def get_optional_user(
+    authorization: str | None = Header(None),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Return the authenticated user, or None if no/invalid token is provided.
+
+    Unlike get_current_user, this dependency never raises 401 — it simply
+    returns None when the request is anonymous or the token is invalid.
+    """
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    try:
+        token = authorization.split(" ", 1)[1]
+        payload = decode_token(token)
+        user_id = int(payload["sub"])
+        user = db.query(User).filter(User.id == user_id, User.is_active == True).first()
+        return user
+    except Exception:
+        return None
 
 
 async def get_current_user(
