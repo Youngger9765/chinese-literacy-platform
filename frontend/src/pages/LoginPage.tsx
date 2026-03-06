@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthError } from '../services/authApi';
 
 interface LoginPageProps {
-  onSwitchToRegister: () => void;
+  onSwitchToRegister?: () => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,6 +29,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
     setIsSubmitting(true);
     try {
       await login(email.trim(), password);
+      // AuthContext sets isAuthenticated=true, ProtectedRoute will redirect
+      navigate(from, { replace: true });
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.status === 401) {
@@ -111,7 +117,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
           還沒有帳號？{' '}
           <button
             type="button"
-            onClick={onSwitchToRegister}
+            onClick={() => onSwitchToRegister ? onSwitchToRegister() : navigate('/register')}
             className="text-accent hover:text-accent-hover font-medium transition-colors"
           >
             註冊帳號
@@ -136,6 +142,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
                   setIsSubmitting(true);
                   try {
                     await login(acc.email, acc.pw);
+                    navigate(from, { replace: true });
                   } catch (err) {
                     if (err instanceof AuthError) {
                       setError(err.message);

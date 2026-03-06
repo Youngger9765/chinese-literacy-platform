@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthError } from '../services/authApi';
 
 interface RegisterPageProps {
-  onSwitchToLogin: () => void;
+  onSwitchToLogin?: () => void;
 }
 
 const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
+  const navigate = useNavigate();
   const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -45,6 +47,8 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
     setIsSubmitting(true);
     try {
       await register(email.trim(), password, name.trim());
+      // AuthContext sets isAuthenticated=true, ProtectedRoute will handle redirect
+      navigate('/', { replace: true });
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.status === 409 || err.message.includes('already')) {
@@ -163,7 +167,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
           已經有帳號？{' '}
           <button
             type="button"
-            onClick={onSwitchToLogin}
+            onClick={() => onSwitchToLogin ? onSwitchToLogin() : navigate('/login')}
             className="text-accent hover:text-accent-hover font-medium transition-colors"
           >
             登入

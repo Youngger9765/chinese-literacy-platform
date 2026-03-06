@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from ..auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user, require_role
 from ..database import get_db
 from ..models.user import Role, User, UserRole
 from ..schemas.role import (
@@ -58,7 +58,7 @@ def list_roles(
 @router.post("/roles/assign", status_code=201, response_model=UserRoleDetailResponse)
 def assign_role(
     payload: UserRoleAssignRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = require_role("system_admin"),
     db: Session = Depends(get_db),
 ):
     """Assign a role to a user."""
@@ -115,7 +115,7 @@ def assign_role(
 @router.delete("/roles/assignments/{assignment_id}", status_code=200)
 def revoke_role(
     assignment_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = require_role("system_admin"),
     db: Session = Depends(get_db),
 ):
     """Revoke a role assignment (soft delete by setting is_active=False)."""

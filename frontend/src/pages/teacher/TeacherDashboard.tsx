@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   listMyClassrooms,
@@ -12,7 +12,15 @@ interface TeacherDashboardProps {
 }
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+
+  // Derive school_id from user's teacher role
+  const teacherSchoolId = useMemo(() => {
+    const teacherRole = user?.roles.find(
+      (r) => r.role_name === 'teacher' && r.scope_type === 'school' && r.scope_id
+    );
+    return teacherRole?.scope_id ? parseInt(teacherRole.scope_id, 10) : null;
+  }, [user]);
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,10 +63,15 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
     setIsCreating(true);
     setCreateError('');
     try {
+      if (!teacherSchoolId) {
+        setCreateError('尚未指派學校，請聯繫管理員');
+        setIsCreating(false);
+        return;
+      }
       const grade = newGrade ? parseInt(newGrade, 10) : undefined;
       await createClassroom(token, {
         name: newName.trim(),
-        school_id: 1,
+        school_id: teacherSchoolId,
         grade,
       });
       setNewName('');

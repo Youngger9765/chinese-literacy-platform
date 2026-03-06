@@ -75,17 +75,22 @@ def seed_default_data():
             role_teacher = db.query(Role).filter(Role.name == "teacher").first()
             role_student = db.query(Role).filter(Role.name == "student").first()
 
+            role_org_admin = db.query(Role).filter(Role.name == "org_admin").first()
+
             role_assignments = []
             if role_admin:
                 role_assignments.append(UserRole(user_id=admin.id, role_id=role_admin.id, scope_type="platform"))
+            if role_org_admin:
+                role_assignments.append(UserRole(user_id=admin.id, role_id=role_org_admin.id, scope_type="organization", scope_id=str(org.id)))
             if role_teacher:
-                role_assignments.append(UserRole(user_id=admin.id, role_id=role_teacher.id, scope_type="platform"))
-                role_assignments.append(UserRole(user_id=teacher1.id, role_id=role_teacher.id, scope_type="platform"))
-                role_assignments.append(UserRole(user_id=teacher2.id, role_id=role_teacher.id, scope_type="platform"))
+                # admin also manages classrooms in school1
+                role_assignments.append(UserRole(user_id=admin.id, role_id=role_teacher.id, scope_type="school", scope_id=str(school1.id)))
+                role_assignments.append(UserRole(user_id=teacher1.id, role_id=role_teacher.id, scope_type="school", scope_id=str(school1.id)))
+                role_assignments.append(UserRole(user_id=teacher2.id, role_id=role_teacher.id, scope_type="school", scope_id=str(school2.id)))
             if role_student:
-                role_assignments.append(UserRole(user_id=student1.id, role_id=role_student.id, scope_type="platform"))
-                role_assignments.append(UserRole(user_id=student2.id, role_id=role_student.id, scope_type="platform"))
-                role_assignments.append(UserRole(user_id=student3.id, role_id=role_student.id, scope_type="platform"))
+                role_assignments.append(UserRole(user_id=student1.id, role_id=role_student.id, scope_type="school", scope_id=str(school1.id)))
+                role_assignments.append(UserRole(user_id=student2.id, role_id=role_student.id, scope_type="school", scope_id=str(school1.id)))
+                role_assignments.append(UserRole(user_id=student3.id, role_id=role_student.id, scope_type="school", scope_id=str(school1.id)))
             db.add_all(role_assignments)
             db.flush()
 

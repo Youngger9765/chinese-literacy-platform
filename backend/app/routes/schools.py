@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from ..auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user, require_role
 from ..database import get_db
 from ..models.organization import Organization
 from ..models.school import School
@@ -50,7 +50,7 @@ def _school_to_response(school: School) -> SchoolResponse:
 @router.post("/schools", status_code=201, response_model=SchoolResponse)
 def create_school(
     payload: SchoolCreateRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = require_role("system_admin", "org_admin"),
     db: Session = Depends(get_db),
 ):
     """Create a new school."""
@@ -112,7 +112,7 @@ def get_school(
 def update_school(
     school_id: int,
     payload: SchoolUpdateRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = require_role("system_admin", "org_admin"),
     db: Session = Depends(get_db),
 ):
     """Update school fields."""

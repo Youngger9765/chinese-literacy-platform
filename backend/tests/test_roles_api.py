@@ -29,7 +29,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role
+from app.models.user import Role, UserRole
 
 
 # ---------------------------------------------------------------------------
@@ -122,7 +122,20 @@ def _register_user(client, suffix: str) -> dict:
 
 @pytest.fixture(scope="module")
 def admin_user(client):
-    return _register_user(client, "role_admin")
+    user = _register_user(client, "role_admin")
+    # Assign system_admin role via DB
+    db = TestingSessionLocal()
+    role = db.query(Role).filter(Role.name == "system_admin").first()
+    user_role = UserRole(
+        user_id=user["user_id"],
+        role_id=role.id,
+        scope_type="platform",
+        scope_id=None,
+    )
+    db.add(user_role)
+    db.commit()
+    db.close()
+    return user
 
 
 @pytest.fixture(scope="module")
@@ -363,17 +376,17 @@ class TestListUserRoles:
 
     def test_list_user_roles_returns_assigned_roles(self, client, admin_user):
         user = _register_user(client, "multi_role")
-        # Already has 'teacher' from auto-assign
-        # Add 'system_admin'
-        client.post(
-            "/api/roles/assign",
-            json={
-                "user_id": user["user_id"],
-                "role_name": "system_admin",
-                "scope_type": "platform",
-            },
-            headers=auth_header(admin_user["token"]),
-        )
+        # Assign 'teacher' and 'system_admin' roles
+        for role_name in ("teacher", "system_admin"):
+            client.post(
+                "/api/roles/assign",
+                json={
+                    "user_id": user["user_id"],
+                    "role_name": role_name,
+                    "scope_type": "platform",
+                },
+                headers=auth_header(admin_user["token"]),
+            )
 
         resp = client.get(
             f"/api/users/{user['user_id']}/roles",
@@ -381,7 +394,7 @@ class TestListUserRoles:
         )
         data = resp.json()
         role_names = {r["role_name"] for r in data}
-        assert "teacher" in role_names  # auto-assigned on register
+        assert "teacher" in role_names
         assert "system_admin" in role_names
 
     def test_list_user_roles_has_expected_fields(self, client, admin_user, target_user):
@@ -415,27 +428,23 @@ class TestListUserRoles:
 
 
 # ===========================================================================
-# Auto-assign teacher role on registration
+# No auto-assign on registration (roles assigned by admin)
 # ===========================================================================
 
 
-class TestAutoAssignTeacherRole:
-    def test_new_user_has_teacher_role(self, client, admin_user):
-        user = _register_user(client, "auto_teacher")
+class TestNoAutoAssignOnRegister:
+    def test_new_user_has_no_roles(self, client, admin_user):
+        user = _register_user(client, "no_auto")
 
         resp = client.get(
             f"/api/users/{user['user_id']}/roles",
             headers=auth_header(admin_user["token"]),
         )
         data = resp.json()
-        assert len(data) >= 1
-        teacher_roles = [r for r in data if r["role_name"] == "teacher"]
-        assert len(teacher_roles) == 1
-        assert teacher_roles[0]["scope_type"] == "platform"
+        assert len(data) == 0
 
-    def test_auto_assigned_role_appears_in_me_endpoint(self, client):
-        user = _register_user(client, "me_teacher")
+    def test_new_user_me_endpoint_shows_empty_roles(self, client):
+        user = _register_user(client, "me_no_role")
         resp = client.get("/api/users/me", headers=auth_header(user["token"]))
         data = resp.json()
-        assert len(data["roles"]) >= 1
-        assert data["roles"][0]["role_name"] == "teacher"
+        assert len(data["roles"]) == 0

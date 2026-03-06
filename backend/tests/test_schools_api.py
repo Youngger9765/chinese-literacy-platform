@@ -29,7 +29,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role
+from app.models.user import Role, UserRole
 from app.models.organization import Organization
 
 
@@ -141,9 +141,31 @@ def _register_user(client, suffix: str) -> dict:
     return {"token": token, "user_id": me_resp.json()["id"]}
 
 
+def _make_admin(client, user_data: dict) -> dict:
+    """Assign system_admin role to a user via DB."""
+    db = TestingSessionLocal()
+    role = db.query(Role).filter(Role.name == "system_admin").first()
+    user_role = UserRole(
+        user_id=user_data["user_id"],
+        role_id=role.id,
+        scope_type="platform",
+        scope_id=None,
+    )
+    db.add(user_role)
+    db.commit()
+    db.close()
+    return user_data
+
+
 @pytest.fixture(scope="module")
 def user1(client):
     return _register_user(client, "school_user")
+
+
+@pytest.fixture(scope="module")
+def admin_user(client):
+    user = _register_user(client, "school_admin")
+    return _make_admin(client, user)
 
 
 # ===========================================================================
@@ -152,19 +174,19 @@ def user1(client):
 
 
 class TestCreateSchool:
-    def test_create_returns_201(self, client, user1):
+    def test_create_returns_201(self, client, admin_user):
         resp = client.post(
             "/api/schools",
             json={"name": "Test School A"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 201
 
-    def test_create_returns_school_data(self, client, user1):
+    def test_create_returns_school_data(self, client, admin_user):
         resp = client.post(
             "/api/schools",
             json={"name": "School B", "address": "123 Main St", "phone": "02-1234-5678"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         data = resp.json()
         assert data["name"] == "School B"
@@ -174,43 +196,51 @@ class TestCreateSchool:
         assert "id" in data
         assert "created_at" in data
 
-    def test_create_with_organization(self, client, user1, org_id):
+    def test_create_with_organization(self, client, admin_user, org_id):
         resp = client.post(
             "/api/schools",
             json={"name": "Org School", "organization_id": org_id},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 201
         assert resp.json()["organization_id"] == org_id
 
-    def test_create_with_nonexistent_org_returns_404(self, client, user1):
+    def test_create_with_nonexistent_org_returns_404(self, client, admin_user):
         resp = client.post(
             "/api/schools",
             json={"name": "Bad Org School", "organization_id": "nonexistent-uuid"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 404
         assert resp.json()["detail"] == "Organization not found"
 
-    def test_create_missing_name_returns_422(self, client, user1):
+    def test_create_missing_name_returns_422(self, client, admin_user):
         resp = client.post(
             "/api/schools",
             json={},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 422
 
-    def test_create_empty_name_returns_422(self, client, user1):
+    def test_create_empty_name_returns_422(self, client, admin_user):
         resp = client.post(
             "/api/schools",
             json={"name": ""},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 422
 
     def test_create_requires_auth(self, client):
         resp = client.post("/api/schools", json={"name": "No Auth"})
         assert resp.status_code == 401
+
+    def test_create_non_admin_returns_403(self, client, user1):
+        resp = client.post(
+            "/api/schools",
+            json={"name": "Forbidden School"},
+            headers=auth_header(user1["token"]),
+        )
+        assert resp.status_code == 403
 
 
 # ===========================================================================
@@ -251,12 +281,11 @@ class TestListSchools:
 
 
 class TestGetSchool:
-    def test_get_detail_success(self, client, user1):
-        # Create a school first
+    def test_get_detail_success(self, client, admin_user, user1):
         create_resp = client.post(
             "/api/schools",
             json={"name": "Detail School"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         school_id = create_resp.json()["id"]
 
@@ -287,60 +316,60 @@ class TestGetSchool:
 
 
 class TestUpdateSchool:
-    def test_update_name(self, client, user1):
+    def test_update_name(self, client, admin_user):
         create_resp = client.post(
             "/api/schools",
             json={"name": "Old School Name"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         school_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/schools/{school_id}",
             json={"name": "New School Name"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["name"] == "New School Name"
 
-    def test_update_address_and_phone(self, client, user1):
+    def test_update_address_and_phone(self, client, admin_user):
         create_resp = client.post(
             "/api/schools",
             json={"name": "Update Fields School"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         school_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/schools/{school_id}",
             json={"address": "456 Oak Ave", "phone": "03-9876-5432"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["address"] == "456 Oak Ave"
         assert resp.json()["phone"] == "03-9876-5432"
 
-    def test_deactivate_school(self, client, user1):
+    def test_deactivate_school(self, client, admin_user):
         create_resp = client.post(
             "/api/schools",
             json={"name": "Deactivate School"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         school_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/schools/{school_id}",
             json={"is_active": False},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["is_active"] is False
 
-    def test_update_nonexistent_returns_404(self, client, user1):
+    def test_update_nonexistent_returns_404(self, client, admin_user):
         resp = client.patch(
             "/api/schools/99999",
             json={"name": "Ghost"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 404
 

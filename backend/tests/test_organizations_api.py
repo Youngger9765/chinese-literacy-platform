@@ -29,7 +29,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role
+from app.models.user import Role, UserRole
 
 
 # ---------------------------------------------------------------------------
@@ -120,9 +120,31 @@ def _register_user(client, suffix: str) -> dict:
     return {"token": token, "user_id": me_resp.json()["id"]}
 
 
+def _make_admin(client, user_data: dict) -> dict:
+    """Assign system_admin role to a user via DB."""
+    db = TestingSessionLocal()
+    role = db.query(Role).filter(Role.name == "system_admin").first()
+    user_role = UserRole(
+        user_id=user_data["user_id"],
+        role_id=role.id,
+        scope_type="platform",
+        scope_id=None,
+    )
+    db.add(user_role)
+    db.commit()
+    db.close()
+    return user_data
+
+
 @pytest.fixture(scope="module")
 def user1(client):
     return _register_user(client, "org_user")
+
+
+@pytest.fixture(scope="module")
+def admin_user(client):
+    user = _register_user(client, "org_admin")
+    return _make_admin(client, user)
 
 
 # ===========================================================================
@@ -131,19 +153,19 @@ def user1(client):
 
 
 class TestCreateOrganization:
-    def test_create_returns_201(self, client, user1):
+    def test_create_returns_201(self, client, admin_user):
         resp = client.post(
             "/api/organizations",
             json={"name": "Test Org A"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 201
 
-    def test_create_returns_org_data(self, client, user1):
+    def test_create_returns_org_data(self, client, admin_user):
         resp = client.post(
             "/api/organizations",
             json={"name": "Org B", "display_name": "Organization B"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         data = resp.json()
         assert data["name"] == "Org B"
@@ -153,35 +175,43 @@ class TestCreateOrganization:
         assert "id" in data
         assert "created_at" in data
 
-    def test_create_generates_uuid_id(self, client, user1):
+    def test_create_generates_uuid_id(self, client, admin_user):
         resp = client.post(
             "/api/organizations",
             json={"name": "UUID Org"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         org_id = resp.json()["id"]
         assert isinstance(org_id, str)
         assert len(org_id) == 36  # UUID format
 
-    def test_create_missing_name_returns_422(self, client, user1):
+    def test_create_missing_name_returns_422(self, client, admin_user):
         resp = client.post(
             "/api/organizations",
             json={},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 422
 
-    def test_create_empty_name_returns_422(self, client, user1):
+    def test_create_empty_name_returns_422(self, client, admin_user):
         resp = client.post(
             "/api/organizations",
             json={"name": ""},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 422
 
     def test_create_requires_auth(self, client):
         resp = client.post("/api/organizations", json={"name": "No Auth"})
         assert resp.status_code == 401
+
+    def test_create_non_admin_returns_403(self, client, user1):
+        resp = client.post(
+            "/api/organizations",
+            json={"name": "Forbidden Org"},
+            headers=auth_header(user1["token"]),
+        )
+        assert resp.status_code == 403
 
 
 # ===========================================================================
@@ -221,11 +251,11 @@ class TestListOrganizations:
 
 
 class TestGetOrganization:
-    def test_get_detail_success(self, client, user1):
+    def test_get_detail_success(self, client, admin_user, user1):
         create_resp = client.post(
             "/api/organizations",
             json={"name": "Detail Org"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         org_id = create_resp.json()["id"]
 
@@ -240,19 +270,18 @@ class TestGetOrganization:
         assert "schools" in data
         assert isinstance(data["schools"], list)
 
-    def test_get_detail_includes_schools(self, client, user1):
-        # Create an org, then create a school under it
+    def test_get_detail_includes_schools(self, client, admin_user, user1):
         org_resp = client.post(
             "/api/organizations",
             json={"name": "Org With Schools"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         org_id = org_resp.json()["id"]
 
         client.post(
             "/api/schools",
             json={"name": "School Under Org", "organization_id": org_id},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
 
         resp = client.get(
@@ -283,62 +312,77 @@ class TestGetOrganization:
 
 
 class TestUpdateOrganization:
-    def test_update_name(self, client, user1):
+    def test_update_name(self, client, admin_user):
         create_resp = client.post(
             "/api/organizations",
             json={"name": "Old Org Name"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         org_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/organizations/{org_id}",
             json={"name": "New Org Name"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["name"] == "New Org Name"
 
-    def test_update_display_name(self, client, user1):
+    def test_update_display_name(self, client, admin_user):
         create_resp = client.post(
             "/api/organizations",
             json={"name": "Display Update Org"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         org_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/organizations/{org_id}",
             json={"display_name": "Pretty Name"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["display_name"] == "Pretty Name"
 
-    def test_deactivate_organization(self, client, user1):
+    def test_deactivate_organization(self, client, admin_user):
         create_resp = client.post(
             "/api/organizations",
             json={"name": "Deactivate Org"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         org_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/organizations/{org_id}",
             json={"is_active": False},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["is_active"] is False
 
-    def test_update_nonexistent_returns_404(self, client, user1):
+    def test_update_nonexistent_returns_404(self, client, admin_user):
         resp = client.patch(
             "/api/organizations/nonexistent-uuid",
             json={"name": "Ghost"},
-            headers=auth_header(user1["token"]),
+            headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 404
 
     def test_update_requires_auth(self, client):
         resp = client.patch("/api/organizations/some-id", json={"name": "No Auth"})
         assert resp.status_code == 401
+
+    def test_update_non_admin_returns_403(self, client, admin_user, user1):
+        create_resp = client.post(
+            "/api/organizations",
+            json={"name": "Admin Only Org"},
+            headers=auth_header(admin_user["token"]),
+        )
+        org_id = create_resp.json()["id"]
+
+        resp = client.patch(
+            f"/api/organizations/{org_id}",
+            json={"name": "Hacked Name"},
+            headers=auth_header(user1["token"]),
+        )
+        assert resp.status_code == 403
