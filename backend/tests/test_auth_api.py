@@ -18,6 +18,7 @@ Run with:
 import sys
 import os
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
 
 # Allow running pytest from the repo root or from backend/
@@ -920,3 +921,52 @@ class TestAuthFlow:
             "password": registered_user["password"],
         })
         assert resp1.json()["access_token"] != resp2.json()["access_token"]
+
+
+# ===========================================================================
+# Rate limiting tests
+# ===========================================================================
+
+
+class TestRateLimiting:
+    def test_login_rate_limit_exceeded(self, client, registered_user):
+        """Sending more than 10 login requests in a minute should return 429."""
+        from app.routes.auth import rate_limiter
+        rate_limiter.reset()
+
+        for i in range(10):
+            resp = client.post("/api/auth/login", json={
+                "email": registered_user["email"],
+                "password": registered_user["password"],
+            })
+            assert resp.status_code in (200, 401), f"Request {i+1} unexpected status {resp.status_code}"
+
+        # 11th request should be rate limited
+        resp = client.post("/api/auth/login", json={
+            "email": registered_user["email"],
+            "password": registered_user["password"],
+        })
+        assert resp.status_code == 429
+        assert resp.json()["detail"] == "Too many requests. Please try again later."
+
+    def test_register_rate_limit_exceeded(self, client):
+        """Sending more than 5 register requests in a minute should return 429."""
+        from app.routes.auth import rate_limiter
+        rate_limiter.reset()
+
+        for i in range(5):
+            resp = client.post("/api/auth/register", json={
+                "email": f"ratelimit_{i}_{uuid.uuid4().hex[:6]}@example.com",
+                "password": "StrongPass1!",
+                "name": f"Rate Limit User {i}",
+            })
+            assert resp.status_code in (201, 409), f"Request {i+1} unexpected status {resp.status_code}"
+
+        # 6th request should be rate limited
+        resp = client.post("/api/auth/register", json={
+            "email": f"ratelimit_extra_{uuid.uuid4().hex[:6]}@example.com",
+            "password": "StrongPass1!",
+            "name": "Rate Limit Extra",
+        })
+        assert resp.status_code == 429
+        assert resp.json()["detail"] == "Too many requests. Please try again later."

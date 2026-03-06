@@ -99,6 +99,27 @@ export async function assignText(
   return handleResponse<ClassroomTextItem>(res);
 }
 
+export interface StudentSession {
+  id: number;
+  story_title: string | null;
+  started_at: string;
+  completed_at: string | null;
+  overall_score: number | null;
+  status: string;
+}
+
+/** Get learning session history for a specific student. */
+export async function getStudentSessions(
+  token: string,
+  studentId: number,
+): Promise<StudentSession[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/sessions`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StudentSession[]>(res);
+}
+
 /** Unassign a text from a classroom. */
 export async function unassignText(
   token: string,

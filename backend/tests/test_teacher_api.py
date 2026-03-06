@@ -15,6 +15,7 @@ Run with:
 import sys
 import os
 import uuid
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -29,6 +30,7 @@ from app.database import get_db
 from app.models import Base
 from app.models.user import Role, UserRole
 from app.models.school import School
+from app.models.session import LearningSession
 
 
 # ---------------------------------------------------------------------------
@@ -105,6 +107,10 @@ def setup_db():
     _seed_roles(session)
     _test_school_id = _seed_school(session)
     session.close()
+
+    # Reset rate limiter so teacher tests aren't affected by auth test state
+    from app.routes.auth import rate_limiter
+    rate_limiter.reset()
 
     app.dependency_overrides[get_db] = _override_get_db
     yield
@@ -633,3 +639,164 @@ class TestTeacherDashboardFullFlow:
         for p in progress:
             assert p["total_sessions"] == 0
             assert p["last_session_date"] is None
+
+
+# ===========================================================================
+# GET /api/teacher/classrooms/{id}/stats — Classroom stats
+# ===========================================================================
+
+
+class TestGetClassroomStats:
+    def test_returns_200_with_correct_counts(self, client, teacher, student1, student2, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Stats Test Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+
+        # Add 2 students
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student2["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        # Create a recent session for student1
+        db = TestingSessionLocal()
+        session = LearningSession(
+            student_id=student1["user_id"],
+            story_slug="1",
+            status="completed",
+            started_at=datetime.now(timezone.utc) - timedelta(days=5),
+        )
+        db.add(session)
+        db.commit()
+        db.close()
+
+        resp = client.get(
+            f"/api/teacher/classrooms/{classroom_id}/stats",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total_students"] == 2
+        assert data["total_sessions"] >= 1
+        assert data["active_students"] >= 1
+        assert data["inactive_students"] == data["total_students"] - data["active_students"]
+
+    def test_empty_classroom_stats(self, client, teacher, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Empty Stats Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+
+        resp = client.get(
+            f"/api/teacher/classrooms/{classroom_id}/stats",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total_students"] == 0
+        assert data["total_sessions"] == 0
+        assert data["active_students"] == 0
+        assert data["inactive_students"] == 0
+
+    def test_returns_403_for_other_teacher(self, client, teacher, other_teacher, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Stats Forbidden Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+
+        resp = client.get(
+            f"/api/teacher/classrooms/{classroom_id}/stats",
+            headers=auth_header(other_teacher["token"]),
+        )
+        assert resp.status_code == 403
+
+    def test_requires_auth(self, client, teacher, school_id):
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Stats Auth Test", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+
+        resp = client.get(f"/api/teacher/classrooms/{classroom_id}/stats")
+        assert resp.status_code == 401
+
+
+# ===========================================================================
+# GET /api/teacher/students/{id}/sessions — Student session history
+# ===========================================================================
+
+
+class TestGetStudentSessions:
+    def test_returns_session_list(self, client, teacher, student1, school_id):
+        # Create classroom and enroll student
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Session History Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = create_resp.json()["id"]
+
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        # Create a learning session for the student
+        db = TestingSessionLocal()
+        session = LearningSession(
+            student_id=student1["user_id"],
+            story_slug="1",
+            status="in_progress",
+            started_at=datetime.now(timezone.utc),
+        )
+        db.add(session)
+        db.commit()
+        db.close()
+
+        resp = client.get(
+            f"/api/teacher/students/{student1['user_id']}/sessions",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data, list)
+        assert len(data) >= 1
+
+        item = data[0]
+        assert "id" in item
+        assert "started_at" in item
+        assert "status" in item
+
+    def test_returns_403_for_unauthorized_teacher(self, client, other_teacher, student1, school_id):
+        """other_teacher does not own a classroom containing student1 -> 403."""
+        resp = client.get(
+            f"/api/teacher/students/{student1['user_id']}/sessions",
+            headers=auth_header(other_teacher["token"]),
+        )
+        assert resp.status_code == 403
+
+    def test_returns_403_for_nonexistent_student(self, client, teacher):
+        resp = client.get(
+            "/api/teacher/students/99999/sessions",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 403
+
+    def test_requires_auth(self, client, student1):
+        resp = client.get(f"/api/teacher/students/{student1['user_id']}/sessions")
+        assert resp.status_code == 401

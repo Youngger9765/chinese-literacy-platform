@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { PlusIcon, SchoolIcon } from '../../components/icons';
 import {
   getOrganization,
   updateOrganization,
@@ -308,9 +309,7 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
                   onClick={() => setIsCreatingSchool(true)}
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
+                  <PlusIcon className="w-3.5 h-3.5" />
                   新增學校
                 </button>
               )}
@@ -393,9 +392,7 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
           {org.schools.length === 0 && !isCreatingSchool ? (
             <div className="p-8 text-center">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-bg rounded-xl mb-3">
-                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
+                <SchoolIcon className="w-6 h-6 text-accent" />
               </div>
               <p className="text-sm font-medium text-gray-700 mb-1">尚無所屬學校</p>
               <p className="text-xs text-gray-500">點擊上方「新增學校」按鈕建立</p>

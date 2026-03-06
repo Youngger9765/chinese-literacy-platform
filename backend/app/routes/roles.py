@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, require_role
@@ -93,6 +94,28 @@ def assign_role(
     )
     if existing:
         raise HTTPException(status_code=409, detail="Role already assigned to user")
+
+    # Check teacher_limit if assigning a teacher role to an organization
+    if role.name == "teacher" and payload.scope_type == "organization" and payload.scope_id:
+        from ..models.organization import Organization
+        org = db.query(Organization).filter(Organization.id == payload.scope_id).first()
+        if org and org.teacher_limit is not None:
+            current_teacher_count = (
+                db.query(func.count(UserRole.id))
+                .join(Role, UserRole.role_id == Role.id)
+                .filter(
+                    Role.name == "teacher",
+                    UserRole.scope_type == "organization",
+                    UserRole.scope_id == payload.scope_id,
+                    UserRole.is_active == True,
+                )
+                .scalar()
+            )
+            if current_teacher_count >= org.teacher_limit:
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"已達教師授權上限 ({org.teacher_limit})",
+                )
 
     user_role = UserRole(
         user_id=payload.user_id,

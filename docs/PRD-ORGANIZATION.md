@@ -516,6 +516,135 @@ def require_role(allowed_roles: list[str]):
 
 ---
 
+## 12. BDD 驗收標準
+
+> 以下驗收標準基於 Issue #223 的**實際實作**（unified user model + UserRole scope）而非本 PRD 原始規劃的 teacher_organizations / teacher_schools 架構。
+
+### Feature: 機構管理
+
+```gherkin
+@implemented
+Scenario: system_admin 建立機構
+  Given 使用者以 system_admin 角色登入
+  When 使用者送出 POST /api/organizations 包含 name 和 display_name
+  Then 回應 201 並包含新機構 UUID
+  And 機構 is_active 預設為 true
+
+@implemented
+Scenario: 建立機構名稱重複
+  Given 已存在名為「桃源補習班」的機構
+  When 使用者送出 POST /api/organizations 包含相同 name
+  Then 回應 409 Conflict
+
+@implemented
+Scenario: system_admin 列出所有機構
+  Given 使用者以 system_admin 角色登入
+  And 系統中有 3 個機構
+  When 使用者送出 GET /api/organizations
+  Then 回應 200 並包含 3 個機構
+  And 每個機構包含 school_count
+
+@implemented
+Scenario: org_admin 只看到自己機構
+  Given 使用者有 org_admin 角色且 scope_id 為機構 A
+  When 使用者送出 GET /api/organizations
+  Then 回應只包含機構 A
+  And 不包含其他機構
+
+@implemented
+Scenario: 編輯機構資料
+  Given 使用者以 system_admin 角色登入
+  When 使用者送出 PATCH /api/organizations/{org_id} 修改 display_name
+  Then 回應 200 並包含更新後的機構資料
+  And updated_at 已更新
+
+@implemented
+Scenario: 非授權角色無法建立機構
+  Given 使用者以 teacher 角色登入
+  When 使用者送出 POST /api/organizations
+  Then 回應 403 Forbidden
+```
+
+### Feature: 機構下學校管理
+
+```gherkin
+@implemented
+Scenario: 在機構下建立學校
+  Given 使用者以 system_admin 角色登入
+  And 機構 A 已存在
+  When 使用者送出 POST /api/schools 包含 organization_id 為機構 A
+  Then 回應 201 並包含學校資料
+  And 學校的 organization_id 指向機構 A
+  And 學校自動產生 join_code
+
+@implemented
+Scenario: 學校加入代碼重新產生
+  Given 使用者以 system_admin 角色登入
+  And 學校已有 join_code
+  When 使用者送出 POST /api/schools/{id}/regenerate-join-code
+  Then 回應 200 並包含新的 join_code
+  And 舊的 join_code 失效
+```
+
+### Feature: 角色管理（RBAC）
+
+```gherkin
+@implemented
+Scenario: system_admin 指派角色給使用者
+  Given 使用者以 system_admin 角色登入
+  And 目標使用者已存在
+  When 使用者送出 POST /api/roles/assign 包含 user_id、role_name、scope_type、scope_id
+  Then 回應 201 並包含角色指派記錄
+  And user_roles 表新增一筆記錄
+
+@implemented
+Scenario: 撤銷使用者角色
+  Given 使用者以 system_admin 角色登入
+  And 目標使用者有 org_admin 角色
+  When 使用者送出 DELETE /api/roles/{role_assignment_id}
+  Then 回應 200
+  And 該角色記錄 is_active 設為 false
+
+@implemented
+Scenario: org_admin 權限範圍過濾
+  Given 使用者有 org_admin 角色且 scope_id 為機構 A
+  When 使用者存取機構 B 的資源
+  Then 回應 403 Forbidden
+  And 使用者無法看到機構 B 的學校和班級
+
+@implemented
+Scenario: 未登入使用者存取受保護資源
+  Given 使用者未提供 JWT token
+  When 使用者送出 GET /api/organizations
+  Then 回應 401 Unauthorized
+
+@implemented
+Scenario: 列出所有可用角色
+  Given 使用者已登入
+  When 使用者送出 GET /api/roles
+  Then 回應 200 包含 8 個預定義角色
+  And 角色包含 system_admin、org_owner、org_admin、principal、director、teacher、student、staff
+```
+
+### Feature: 教師授權限制
+
+```gherkin
+@implemented
+Scenario: 超過 teacher_limit 時拒絕指派
+  Given 機構 A 的 teacher_limit 為 10
+  And 已有 10 位教師被指派到機構 A
+  When 使用者嘗試指派第 11 位教師
+  Then 回應 403 並提示已達教師授權上限
+
+@implemented
+Scenario: teacher_limit 為 NULL 時不限制
+  Given 機構 A 的 teacher_limit 為 NULL
+  When 使用者指派教師到機構 A
+  Then 指派成功，不受數量限制
+```
+
+---
+
 ## 附錄 A：Duotopia vs LingoLeap 差異
 
 | 面向 | Duotopia | LingoLeap（規劃） |

@@ -168,7 +168,6 @@ test('Screenshot 1: Report page default state - sections 1 and 4 open', async ({
   console.log(`\nExpanded sections: ${expandedSections.length}`);
   console.log(`Collapsed sections: ${collapsedSections.length}`);
 
-  return { sectionStates, expandedSections: expandedSections.length, collapsedSections: collapsedSections.length };
 });
 
 test('Screenshot 2: Verify chevron icons and toggle behavior', async ({ page }) => {

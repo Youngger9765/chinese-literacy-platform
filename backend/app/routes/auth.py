@@ -1,11 +1,12 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
 from ..auth.jwt import create_access_token
 from ..auth.password import hash_password, verify_password
+from ..auth.rate_limiter import InMemoryRateLimiter
 from ..database import get_db
 from ..models.user import User
 from ..schemas.auth import (
@@ -16,11 +17,16 @@ from ..schemas.auth import (
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+rate_limiter = InMemoryRateLimiter()
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-def register(req: RegisterRequest, db: Session = Depends(get_db)):
+def register(req: RegisterRequest, request: Request, db: Session = Depends(get_db)):
     """Register a new user account."""
+    client_ip = request.client.host if request.client else "unknown"
+    if not rate_limiter.check(f"register:{client_ip}", max_requests=5, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
     existing = db.query(User).filter(User.email == req.email).first()
     if existing:
         raise HTTPException(
@@ -42,12 +48,16 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(req: LoginRequest, db: Session = Depends(get_db)):
+def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     """Authenticate user and return JWT token.
 
     Accepts either an email address or a username in the `email` field.
     If the value contains '@', it is treated as an email; otherwise as a username.
     """
+    client_ip = request.client.host if request.client else "unknown"
+    if not rate_limiter.check(f"login:{client_ip}", max_requests=10, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
     if "@" in req.email:
         user = db.query(User).filter(User.email == req.email, User.is_active == True).first()
     else:

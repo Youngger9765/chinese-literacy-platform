@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { PlusIcon } from '../../components/icons';
 import {
   getSchool,
   updateSchool,
@@ -531,9 +532,7 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
                   onClick={handleStartCreatingClassroom}
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
+                  <PlusIcon className="w-3.5 h-3.5" />
                   新增班級
                 </button>
               )}
@@ -735,9 +734,7 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
                   onClick={() => setShowTeacherSearch(true)}
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
+                  <PlusIcon className="w-3.5 h-3.5" />
                   指派教師
                 </button>
               )}

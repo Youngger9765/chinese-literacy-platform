@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { PlusIcon, ChevronRightIcon } from '../../components/icons';
 import {
   getClassroomDetail,
   updateClassroom,
@@ -346,9 +347,7 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
             >
               {schoolName || '學校'}
             </button>
-            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRightIcon className="w-3.5 h-3.5 text-gray-400" />
             <span className="text-gray-700 font-medium">{classroom.name}</span>
           </nav>
         )}
@@ -505,9 +504,7 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
                     onClick={() => { setShowStudentSearch(true); setShowBatchCreate(false); }}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
+                    <PlusIcon className="w-3.5 h-3.5" />
                     新增學生
                   </button>
                   <button

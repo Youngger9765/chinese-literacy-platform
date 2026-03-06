@@ -9,18 +9,21 @@ from pydantic import BaseModel, Field
 class OrganizationCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
     display_name: str | None = None
+    teacher_limit: int | None = None
 
 
 class OrganizationUpdateRequest(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=200)
     display_name: str | None = None
     is_active: bool | None = None
+    teacher_limit: int | None = None
 
 
 class OrganizationResponse(BaseModel):
     id: str
     name: str
     display_name: str | None = None
+    teacher_limit: int | None = None
     is_active: bool
     created_at: datetime
     school_count: int = 0

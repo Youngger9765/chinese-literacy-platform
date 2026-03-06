@@ -5,6 +5,7 @@ import SchoolDetailPanel from './SchoolDetailPanel';
 import CreateOrgPanel from './CreateOrgPanel';
 import ClassroomDetailPanel from './ClassroomDetailPanel';
 import UsersPanel from './UsersPanel';
+import { BuildingIcon, ShieldIcon } from '../../components/icons';
 import {
   listRoles,
   RoleResponse,
@@ -79,9 +80,7 @@ const AdminDashboard: React.FC = () => {
 const AdminWelcome: React.FC = () => (
   <div className="flex flex-col items-center justify-center h-full p-8 text-center">
     <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-bg rounded-2xl mb-4">
-      <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-      </svg>
+      <BuildingIcon className="w-8 h-8 text-accent" />
     </div>
     <h2 className="text-xl font-bold text-gray-900 mb-2">系統管理</h2>
     <p className="text-sm text-gray-500 max-w-sm">
@@ -188,9 +187,7 @@ const RolesPanel: React.FC = () => {
         {!isLoading && !error && roles.length === 0 && (
           <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-bg rounded-2xl mb-4">
-              <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-              </svg>
+              <ShieldIcon className="w-8 h-8 text-accent" />
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">尚無角色定義</h3>
             <p className="text-sm text-gray-500">系統角色尚未建立</p>

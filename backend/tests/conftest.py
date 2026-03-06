@@ -25,3 +25,13 @@ def _patch_jsonb_columns():
 
 # Run once at import time, before any test creates tables.
 _patch_jsonb_columns()
+
+
+def pytest_runtest_setup(item):
+    """Reset the rate limiter before each test (including module-scoped fixtures).
+
+    Using a hook instead of a fixture ensures the reset happens before
+    module-scoped fixtures that call /api/auth/register.
+    """
+    from app.routes.auth import rate_limiter
+    rate_limiter.reset()

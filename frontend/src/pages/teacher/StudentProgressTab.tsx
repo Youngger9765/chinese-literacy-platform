@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getClassroomProgress,
+  getStudentSessions,
   StudentProgress,
+  StudentSession,
   TeacherApiError,
 } from '../../services/teacherApi';
 
@@ -15,6 +17,12 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [progress, setProgress] = useState<StudentProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Expand / session history state
+  const [expandedStudentId, setExpandedStudentId] = useState<number | null>(null);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const [sessions, setSessions] = useState<StudentSession[]>([]);
+  const sessionCache = useRef<Record<number, StudentSession[]>>({});
 
   const loadProgress = useCallback(async () => {
     if (!token) return;
@@ -45,6 +53,35 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     loadProgress();
   }, [loadProgress]);
 
+  const handleRowClick = useCallback(async (studentId: number) => {
+    // Toggle collapse if already expanded
+    if (expandedStudentId === studentId) {
+      setExpandedStudentId(null);
+      return;
+    }
+
+    setExpandedStudentId(studentId);
+
+    // Use cache if available
+    if (sessionCache.current[studentId]) {
+      setSessions(sessionCache.current[studentId]);
+      return;
+    }
+
+    if (!token) return;
+    setIsLoadingSessions(true);
+    setSessions([]);
+    try {
+      const data = await getStudentSessions(token, studentId);
+      sessionCache.current[studentId] = data;
+      setSessions(data);
+    } catch {
+      setSessions([]);
+    } finally {
+      setIsLoadingSessions(false);
+    }
+  }, [expandedStudentId, token]);
+
   const formatDate = (dateStr: string | null): string => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('zh-TW', {
@@ -52,6 +89,26 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  const formatScore = (score: number | null): string => {
+    if (score === null || score === undefined) return '-';
+    return `${Math.round(score)}%`;
+  };
+
+  const statusLabel = (status: string) => {
+    if (status === 'completed') {
+      return (
+        <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+          已完成
+        </span>
+      );
+    }
+    return (
+      <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-700">
+        進行中
+      </span>
+    );
   };
 
   if (isLoading) {
@@ -105,6 +162,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100 text-left text-gray-500">
+              <th className="pb-2 font-medium w-6"></th>
               <th className="pb-2 font-medium">學生姓名</th>
               <th className="pb-2 font-medium">最近練習日期</th>
               <th className="pb-2 font-medium">最近練習課文</th>
@@ -112,22 +170,81 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {progress.map((s) => (
-              <tr key={s.student_id}>
-                <td className="py-2.5 text-gray-900 font-medium">{s.student_name}</td>
-                <td className="py-2.5 text-gray-600">{formatDate(s.last_session_date)}</td>
-                <td className="py-2.5 text-gray-600">{s.last_text_title ?? '-'}</td>
-                <td className="py-2.5 text-gray-600 text-center">
-                  <span className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
-                    s.total_sessions > 0
-                      ? 'bg-accent-bg text-accent'
-                      : 'bg-gray-100 text-gray-500'
-                  }`}>
-                    {s.total_sessions}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {progress.map((s) => {
+              const isExpanded = expandedStudentId === s.student_id;
+              return (
+                <React.Fragment key={s.student_id}>
+                  <tr
+                    className="cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => handleRowClick(s.student_id)}
+                  >
+                    <td className="py-2.5 text-gray-400">
+                      <svg
+                        className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </td>
+                    <td className="py-2.5 text-gray-900 font-medium">{s.student_name}</td>
+                    <td className="py-2.5 text-gray-600">{formatDate(s.last_session_date)}</td>
+                    <td className="py-2.5 text-gray-600">{s.last_text_title ?? '-'}</td>
+                    <td className="py-2.5 text-gray-600 text-center">
+                      <span className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
+                        s.total_sessions > 0
+                          ? 'bg-accent-bg text-accent'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {s.total_sessions}
+                      </span>
+                    </td>
+                  </tr>
+                  {isExpanded && (
+                    <tr>
+                      <td colSpan={5} className="bg-gray-50 px-4 py-3">
+                        {isLoadingSessions ? (
+                          <div className="space-y-2">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                              <div key={i} className="flex gap-4">
+                                <div className="h-3 bg-gray-200 animate-pulse rounded w-1/3" />
+                                <div className="h-3 bg-gray-200 animate-pulse rounded w-1/5" />
+                                <div className="h-3 bg-gray-200 animate-pulse rounded w-1/6" />
+                                <div className="h-3 bg-gray-200 animate-pulse rounded w-1/6" />
+                              </div>
+                            ))}
+                          </div>
+                        ) : sessions.length === 0 ? (
+                          <p className="text-xs text-gray-500 text-center py-2">尚無練習記錄</p>
+                        ) : (
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="text-left text-gray-400">
+                                <th className="pb-1.5 font-medium">課文</th>
+                                <th className="pb-1.5 font-medium">日期</th>
+                                <th className="pb-1.5 font-medium text-center">分數</th>
+                                <th className="pb-1.5 font-medium text-center">狀態</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                              {sessions.map((sess) => (
+                                <tr key={sess.id}>
+                                  <td className="py-1.5 text-gray-700">{sess.story_title ?? '-'}</td>
+                                  <td className="py-1.5 text-gray-500">{formatDate(sess.started_at)}</td>
+                                  <td className="py-1.5 text-gray-700 text-center font-medium">{formatScore(sess.overall_score)}</td>
+                                  <td className="py-1.5 text-center">{statusLabel(sess.status)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>

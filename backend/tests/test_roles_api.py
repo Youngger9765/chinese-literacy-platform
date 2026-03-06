@@ -29,7 +29,9 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role, UserRole
+from app.models.user import Role, User, UserRole
+from app.models.organization import Organization
+from app.auth.password import hash_password
 
 
 # ---------------------------------------------------------------------------
@@ -447,3 +449,125 @@ class TestNoAutoAssignOnRegister:
         resp = client.get("/api/users/me", headers=auth_header(user["token"]))
         data = resp.json()
         assert len(data["roles"]) == 0
+
+
+# ===========================================================================
+# Teacher Limit Enforcement
+# ===========================================================================
+
+
+class TestTeacherLimit:
+    """Tests for Organization.teacher_limit enforcement in assign_role.
+
+    Creates users directly in DB to avoid hitting the registration rate limiter.
+    """
+
+    def _create_org(self, teacher_limit: int | None) -> str:
+        """Insert an Organization directly in DB and return its id."""
+        db = TestingSessionLocal()
+        org = Organization(name=f"limit_org_{uuid.uuid4().hex[:8]}", teacher_limit=teacher_limit)
+        db.add(org)
+        db.commit()
+        org_id = org.id
+        db.close()
+        return org_id
+
+    def _create_user_in_db(self, suffix: str) -> int:
+        """Insert a User directly in DB (bypasses rate limiter) and return user id."""
+        db = TestingSessionLocal()
+        unique = uuid.uuid4().hex[:8]
+        user = User(
+            email=f"{suffix}_{unique}@example.com",
+            password_hash=hash_password("SecurePass123!"),
+            name=f"{suffix.title()} {unique}",
+        )
+        db.add(user)
+        db.commit()
+        user_id = user.id
+        db.close()
+        return user_id
+
+    def test_teacher_limit_enforced(self, client, admin_user):
+        """Create org with teacher_limit=2, assign 2 teachers OK, 3rd -> 403."""
+        org_id = self._create_org(teacher_limit=2)
+
+        # Assign 2 teachers — should succeed
+        for i in range(2):
+            user_id = self._create_user_in_db(f"lim_teacher_{i}")
+            resp = client.post(
+                "/api/roles/assign",
+                json={
+                    "user_id": user_id,
+                    "role_name": "teacher",
+                    "scope_type": "organization",
+                    "scope_id": org_id,
+                },
+                headers=auth_header(admin_user["token"]),
+            )
+            assert resp.status_code == 201, f"Teacher {i+1} should succeed: {resp.text}"
+
+        # 3rd teacher — should fail with 403
+        user3_id = self._create_user_in_db("lim_teacher_3rd")
+        resp = client.post(
+            "/api/roles/assign",
+            json={
+                "user_id": user3_id,
+                "role_name": "teacher",
+                "scope_type": "organization",
+                "scope_id": org_id,
+            },
+            headers=auth_header(admin_user["token"]),
+        )
+        assert resp.status_code == 403
+        assert "已達教師授權上限" in resp.json()["detail"]
+        assert "(2)" in resp.json()["detail"]
+
+    def test_teacher_limit_null_unlimited(self, client, admin_user):
+        """teacher_limit=None means unlimited — assigning many teachers works."""
+        org_id = self._create_org(teacher_limit=None)
+
+        for i in range(5):
+            user_id = self._create_user_in_db(f"unlim_teacher_{i}")
+            resp = client.post(
+                "/api/roles/assign",
+                json={
+                    "user_id": user_id,
+                    "role_name": "teacher",
+                    "scope_type": "organization",
+                    "scope_id": org_id,
+                },
+                headers=auth_header(admin_user["token"]),
+            )
+            assert resp.status_code == 201, f"Teacher {i+1} should succeed with no limit: {resp.text}"
+
+    def test_teacher_limit_does_not_affect_other_roles(self, client, admin_user):
+        """org_admin role should NOT be limited by teacher_limit."""
+        org_id = self._create_org(teacher_limit=1)
+
+        # Fill the single teacher slot
+        t1_id = self._create_user_in_db("lim_only_teacher")
+        resp = client.post(
+            "/api/roles/assign",
+            json={
+                "user_id": t1_id,
+                "role_name": "teacher",
+                "scope_type": "organization",
+                "scope_id": org_id,
+            },
+            headers=auth_header(admin_user["token"]),
+        )
+        assert resp.status_code == 201
+
+        # Assigning org_admin should still work even though teacher_limit is reached
+        admin_id = self._create_user_in_db("lim_org_admin")
+        resp = client.post(
+            "/api/roles/assign",
+            json={
+                "user_id": admin_id,
+                "role_name": "org_admin",
+                "scope_type": "organization",
+                "scope_id": org_id,
+            },
+            headers=auth_header(admin_user["token"]),
+        )
+        assert resp.status_code == 201, f"org_admin should not be limited: {resp.text}"
