@@ -71,54 +71,58 @@
 ## P1 — 教師能用產品的前提
 
 ### 1.1 教師 Dashboard — 班級學習進度
-- [ ] 後端: GET /api/classrooms/{id}/progress — 回傳每位學生的最近學習記錄、準確率、最後練習日期
-- [ ] 後端: GET /api/classrooms/{id}/stats — 班級整體統計 (完成率、平均分、未練習人數)
-- [ ] 前端: TeacherDashboard 頁面 — 顯示教師所有班級的總覽
-- [ ] 前端: ClassroomProgressPanel — 學生學習進度列表 (可排序、可篩選)
-- [ ] 前端: 個別學生學習歷史 (點擊學生 → 看歷次 session 記錄)
-- [ ] 路由: /teacher/dashboard (教師角色限定)
+- [x] 後端: GET /api/teacher/classrooms — 教師班級列表 (含 student_count, text_count)
+- [x] 後端: GET /api/teacher/classrooms/{id}/progress — 學生學習進度
+- [x] 前端: TeacherDashboard 頁面 — 班級卡片總覽
+- [x] 前端: StudentProgressTab — 學生進度表 (按最近活動排序)
+- [x] 前端: ClassroomDetail 三分頁 (進度/課文/學生)
+- [x] 路由: /teacher + /teacher/classroom/:id (教師角色限定)
+- [ ] 前端: 個別學生學習歷史 (點擊學生 → 看歷次 session 記錄) — 後續
+- [ ] 後端: 班級整體統計 (完成率、平均分、未練習人數) — 後續
 
 ### 1.2 課文指派 — 把故事分配給班級
-- [ ] 後端: 新增 classroom_texts 關聯表 (classroom_id + text_id)
-- [ ] 後端: POST /api/classrooms/{id}/texts — 指派課文
-- [ ] 後端: GET /api/classrooms/{id}/texts — 列出已指派課文
-- [ ] 後端: DELETE /api/classrooms/{id}/texts/{text_id} — 取消指派
-- [ ] 前端: 課文指派 UI (在 SchoolDetailPanel 或 TeacherDashboard 中)
-- [ ] 前端: 學生端只顯示已指派課文 (修改 stories 列表過濾)
-- [ ] 後端: LearningSession 建立時自動填入 classroom_id
+- [x] 後端: 新增 classroom_texts 關聯表 (classroom_id + text_id) + migration
+- [x] 後端: POST /api/classrooms/{id}/texts — 指派課文
+- [x] 後端: GET /api/classrooms/{id}/texts — 列出已指派課文
+- [x] 後端: DELETE /api/classrooms/{id}/texts/{text_id} — 取消指派
+- [x] 前端: TextManagementTab — 課文指派/移除 UI (在教師 ClassroomDetail)
+- [ ] 前端: 學生端只顯示已指派課文 (修改 stories 列表過濾) — 後續
+- [ ] 後端: LearningSession 建立時自動填入 classroom_id — 後續
 
 ---
 
 ## P2 — 學生能登入
 
 ### 2.1 學生 username 登入
-- [ ] 後端: POST /api/auth/login 支援 username OR email 欄位
-- [ ] 後端: 批量建立學生時自動生成 username (格式: join_code + seat_number)
-- [ ] 後端: User model 加 username 欄位 (unique, nullable)
-- [ ] 前端: LoginPage 支援「帳號」欄位 (同時接受 email 和 username)
-- [ ] Alembic migration: ALTER TABLE users ADD COLUMN username
+- [x] 後端: POST /api/auth/login 支援 username OR email 欄位
+- [x] 後端: 批量建立學生時自動生成 username (join_code + seat_number)
+- [x] 後端: User model 加 username 欄位 (unique, nullable, indexed)
+- [x] 前端: LoginPage 支援「帳號」欄位 (同時接受 email 和 username)
+- [x] Alembic migration: ALTER TABLE users ADD COLUMN username
+- [x] 批量建立時同時建立 StudentProfile (school_id, password_changed=False)
 
 ### 2.2 首次登入改密碼
-- [ ] 後端: 登入時檢查 StudentProfile.password_changed
-- [ ] 後端: 若 password_changed=False，回傳 token + `must_change_password: true`
-- [ ] 前端: 攔截 must_change_password，強制跳轉改密碼頁
-- [ ] 前端: ChangePasswordPage (new_password + confirm)
-- [ ] 後端: change-password 成功後設 password_changed=True
+- [x] 後端: 登入時檢查 StudentProfile.password_changed
+- [x] 後端: 若 password_changed=False，回傳 token + `must_change_password: true`
+- [x] 前端: 攔截 must_change_password，強制跳轉 /change-password
+- [x] 前端: ChangePasswordPage (new_password + confirm, 8字元以上)
+- [x] 後端: change-password 成功後設 password_changed=True
 
 ---
 
 ## P3 — 多機構安全隔離
 
 ### 3.1 權限範圍過濾
-- [ ] 後端: GET /api/organizations — org_admin 只看到自己的機構
-- [ ] 後端: GET /api/schools — org_admin 只看到所屬機構的學校
-- [ ] 後端: School CRUD — org_admin 只能管理自己機構下的學校
-- [ ] 後端: 抽出 `get_user_scope()` helper，所有 list endpoint 套用
+- [x] 後端: get_user_org_ids() helper 抽出
+- [x] 後端: GET /api/organizations — org_admin 只看到自己的機構
+- [x] 後端: GET /api/schools — org_admin 只看到所屬機構的學校
+- [x] 後端: get/update org/school — 403 if 無權限
 
 ### 3.2 學生加入代碼 UI
-- [ ] 前端: /join 頁面 — 輸入加入代碼加入班級
-- [ ] 前端: 加入成功後顯示班級名稱 + 教師名稱
-- [ ] 路由: /join (登入後可存取)
+- [x] 前端: /join 頁面 — 輸入加入代碼加入班級
+- [x] 前端: 加入成功後顯示班級名稱 + 自動跳轉
+- [x] 路由: /join (登入後可存取)
+- [x] Nav: "加入班級" 按鈕 (學生角色可見)
 
 ---
 
@@ -129,7 +133,7 @@
 - [ ] 前端: 教師介面的「建立班級」入口 (在 TeacherDashboard 或 /teacher/classrooms)
 
 ### 4.2 清理死碼
-- [ ] 刪除 frontend/src/pages/admin/SchoolDetail.tsx (被 SchoolDetailPanel.tsx 取代)
+- [x] 刪除 frontend/src/pages/admin/SchoolDetail.tsx (被 SchoolDetailPanel.tsx 取代)
 
 ### 4.3 其他 Code Review 待辦
 - [ ] 後端: N+1 query in list_organizations (I1)
