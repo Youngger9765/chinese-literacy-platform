@@ -17,8 +17,6 @@ import RegisterPage from './pages/RegisterPage';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import ClassroomDetail from './pages/teacher/ClassroomDetail';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import SchoolDetail from './pages/admin/SchoolDetail';
-import OrganizationDetail from './pages/admin/OrganizationDetail';
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
   storyId: '',
@@ -43,8 +41,6 @@ const AppShell: React.FC = () => {
   const [writeInput, setWriteInput] = useState('');
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [selectedClassroomId, setSelectedClassroomId] = useState<number | null>(null);
-  const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<string | null>(null);
 
   const handleSelectStory = (story: Story) => {
     setSelectedStory(story);
@@ -127,11 +123,9 @@ const AppShell: React.FC = () => {
             <button
               onClick={() => {
                 setView(AppView.ADMIN_DASHBOARD);
-                setSelectedSchoolId(null);
-                setSelectedOrganizationId(null);
               }}
               className={`text-xs font-medium transition-colors cursor-pointer ${
-                view === AppView.ADMIN_DASHBOARD || view === AppView.SCHOOL_DETAIL || view === AppView.ORGANIZATION_DETAIL
+                view === AppView.ADMIN_DASHBOARD
                   ? 'text-accent'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
@@ -294,36 +288,7 @@ const AppShell: React.FC = () => {
         )}
 
         {view === AppView.ADMIN_DASHBOARD && (
-          <AdminDashboard
-            onSelectSchool={(id) => {
-              setSelectedSchoolId(id);
-              setView(AppView.SCHOOL_DETAIL);
-            }}
-            onSelectOrganization={(id) => {
-              setSelectedOrganizationId(id);
-              setView(AppView.ORGANIZATION_DETAIL);
-            }}
-          />
-        )}
-
-        {view === AppView.SCHOOL_DETAIL && selectedSchoolId != null && (
-          <SchoolDetail
-            schoolId={selectedSchoolId}
-            onBack={() => {
-              setSelectedSchoolId(null);
-              setView(AppView.ADMIN_DASHBOARD);
-            }}
-          />
-        )}
-
-        {view === AppView.ORGANIZATION_DETAIL && selectedOrganizationId != null && (
-          <OrganizationDetail
-            organizationId={selectedOrganizationId}
-            onBack={() => {
-              setSelectedOrganizationId(null);
-              setView(AppView.ADMIN_DASHBOARD);
-            }}
-          />
+          <AdminDashboard />
         )}
       </main>
     </div>
