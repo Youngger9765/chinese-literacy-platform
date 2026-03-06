@@ -7,7 +7,7 @@ from ..auth.dependencies import get_current_user
 from ..auth.jwt import create_access_token
 from ..auth.password import hash_password, verify_password
 from ..database import get_db
-from ..models.user import User
+from ..models.user import Role, User, UserRole
 from ..schemas.auth import (
     ChangePasswordRequest,
     LoginRequest,
@@ -36,6 +36,19 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    # Auto-assign 'teacher' role (temporary default until role selection during registration)
+    teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+    if teacher_role:
+        user_role = UserRole(
+            user_id=user.id,
+            role_id=teacher_role.id,
+            scope_type="platform",
+            scope_id=None,
+            granted_by=None,
+        )
+        db.add(user_role)
+        db.commit()
 
     token = create_access_token(user.id)
     return TokenResponse(access_token=token)

@@ -755,10 +755,13 @@ class TestGetMeEndpoint:
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
         assert isinstance(resp.json()["roles"], list)
 
-    def test_get_me_new_user_has_no_roles(self, client, registered_user):
-        """A freshly registered user has no roles assigned."""
+    def test_get_me_new_user_has_teacher_role(self, client, registered_user):
+        """A freshly registered user is auto-assigned the 'teacher' role."""
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
-        assert resp.json()["roles"] == []
+        roles = resp.json()["roles"]
+        assert len(roles) == 1
+        assert roles[0]["role_name"] == "teacher"
+        assert roles[0]["scope_type"] == "platform"
 
     def test_get_me_phone_is_null_by_default(self, client, registered_user):
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
