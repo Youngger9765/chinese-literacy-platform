@@ -34,7 +34,7 @@ const SCOPE_LEVEL_LABELS: Record<string, string> = {
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectSchool, onSelectOrganization }) => {
   const { token } = useAuth();
-  const [activeTab, setActiveTab] = useState<AdminTab>('schools');
+  const [activeTab, setActiveTab] = useState<AdminTab>('organizations');
 
   return (
     <div className="flex-1 overflow-y-auto p-6 sm:p-8">
@@ -42,14 +42,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSelectSchool, onSelec
         {/* Page header */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">系統管理</h1>
-          <p className="text-sm text-gray-500 mt-1">管理學校、機構與角色設定</p>
+          <p className="text-sm text-gray-500 mt-1">管理機構、學校與角色設定</p>
         </div>
 
         {/* Tab bar */}
         <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
           {([
-            { key: 'schools' as AdminTab, label: '學校管理' },
             { key: 'organizations' as AdminTab, label: '機構管理' },
+            { key: 'schools' as AdminTab, label: '學校管理' },
             { key: 'roles' as AdminTab, label: '角色管理' },
           ]).map(({ key, label }) => (
             <button

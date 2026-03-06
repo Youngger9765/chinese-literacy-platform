@@ -5,12 +5,25 @@
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
+export interface UserRole {
+  role_name: string;
+  role_display_name: string;
+  scope_type: string;
+  scope_id: string | null;
+}
+
 export interface AuthUser {
   id: number;
   email: string;
   name: string;
   is_active: boolean;
-  roles: string[];
+  roles: UserRole[];
+}
+
+/** Check if user has a specific role */
+export function hasRole(user: AuthUser | null, ...roleNames: string[]): boolean {
+  if (!user) return false;
+  return user.roles.some((r) => roleNames.includes(r.role_name));
 }
 
 export interface AuthTokenResponse {

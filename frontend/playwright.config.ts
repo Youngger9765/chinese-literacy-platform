@@ -7,7 +7,7 @@ export default defineConfig({
     timeout: 15_000,
   },
   use: {
-    baseURL: 'https://lingoleap-frontend-issue-223-oja2sffiya-de.a.run.app',
+    baseURL: 'https://lingoleap-frontend-issue-223-958347263320.asia-east1.run.app',
     headless: true,
     // Cloud Run cold starts can be slow
     navigationTimeout: 30_000,

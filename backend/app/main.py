@@ -33,68 +33,86 @@ app.include_router(roles.router, prefix="/api")
 
 @app.on_event("startup")
 def seed_default_data():
-    """Seed default school and test accounts if tables are empty.
+    """Seed complete demo data: org → school → teacher → classroom → students.
 
-    Wrapped in try/except so it doesn't crash during tests where the
-    production database is not available.
+    Only runs when users table is empty (fresh DB).
+    Wrapped in try/except so it doesn't crash during tests.
     """
     from .database import SessionLocal
-    from .models.school import School
+    from .models.school import School, Classroom, ClassroomStudent
+    from .models.organization import Organization
     from .models.user import User, Role, UserRole
     from .auth.password import hash_password
     try:
         db = SessionLocal()
         try:
-            # Seed default school
-            if db.query(School).count() == 0:
-                db.add(School(name="預設學校", is_active=True))
-                db.commit()
-                logger.info("Seeded default school: 預設學校")
+            if db.query(User).count() > 0:
+                return  # Already seeded
 
-            # Seed test accounts
-            if db.query(User).count() == 0:
-                teacher = User(
-                    email="teacher@test.com",
-                    password_hash=hash_password("teacher1234"),
-                    name="測試老師",
-                    is_active=True,
-                )
-                student = User(
-                    email="student@test.com",
-                    password_hash=hash_password("student1234"),
-                    name="測試學生",
-                    is_active=True,
-                )
-                admin = User(
-                    email="admin@test.com",
-                    password_hash=hash_password("admin1234"),
-                    name="系統管理員",
-                    is_active=True,
-                )
-                db.add_all([teacher, student, admin])
-                db.flush()
+            # ── 1. Organization ──
+            org = Organization(name="朗朗教育基金會", display_name="朗朗教育基金會", is_active=True)
+            db.add(org)
+            db.flush()
 
-                # Assign roles
-                teacher_role = db.query(Role).filter(Role.name == "teacher").first()
-                student_role = db.query(Role).filter(Role.name == "student").first()
-                admin_role = db.query(Role).filter(Role.name == "system_admin").first()
+            # ── 2. Schools ──
+            school1 = School(name="台北市大安國小", organization_id=org.id, is_active=True, address="台北市大安區信義路四段1號")
+            school2 = School(name="新北市板橋國小", organization_id=org.id, is_active=True, address="新北市板橋區文化路一段23號")
+            db.add_all([school1, school2])
+            db.flush()
 
-                if teacher_role:
-                    db.add(UserRole(user_id=teacher.id, role_id=teacher_role.id, scope_type="platform"))
-                if student_role:
-                    db.add(UserRole(user_id=student.id, role_id=student_role.id, scope_type="platform"))
-                if admin_role:
-                    db.add(UserRole(user_id=admin.id, role_id=admin_role.id, scope_type="platform"))
-                    # Admin also gets teacher role
-                    if teacher_role:
-                        db.add(UserRole(user_id=admin.id, role_id=teacher_role.id, scope_type="platform"))
+            # ── 3. Users ──
+            admin = User(email="admin@test.com", password_hash=hash_password("admin1234"), name="王管理員", is_active=True)
+            teacher1 = User(email="teacher@test.com", password_hash=hash_password("teacher1234"), name="李老師", is_active=True)
+            teacher2 = User(email="teacher2@test.com", password_hash=hash_password("teacher1234"), name="陳老師", is_active=True)
+            student1 = User(email="student@test.com", password_hash=hash_password("student1234"), name="小明", is_active=True)
+            student2 = User(email="student2@test.com", password_hash=hash_password("student1234"), name="小華", is_active=True)
+            student3 = User(email="student3@test.com", password_hash=hash_password("student1234"), name="小美", is_active=True)
+            db.add_all([admin, teacher1, teacher2, student1, student2, student3])
+            db.flush()
 
-                db.commit()
-                logger.info("Seeded test accounts: teacher@test.com, student@test.com, admin@test.com")
+            # ── 4. Role assignments ──
+            role_admin = db.query(Role).filter(Role.name == "system_admin").first()
+            role_teacher = db.query(Role).filter(Role.name == "teacher").first()
+            role_student = db.query(Role).filter(Role.name == "student").first()
+
+            role_assignments = []
+            if role_admin:
+                role_assignments.append(UserRole(user_id=admin.id, role_id=role_admin.id, scope_type="platform"))
+            if role_teacher:
+                role_assignments.append(UserRole(user_id=admin.id, role_id=role_teacher.id, scope_type="platform"))
+                role_assignments.append(UserRole(user_id=teacher1.id, role_id=role_teacher.id, scope_type="platform"))
+                role_assignments.append(UserRole(user_id=teacher2.id, role_id=role_teacher.id, scope_type="platform"))
+            if role_student:
+                role_assignments.append(UserRole(user_id=student1.id, role_id=role_student.id, scope_type="platform"))
+                role_assignments.append(UserRole(user_id=student2.id, role_id=role_student.id, scope_type="platform"))
+                role_assignments.append(UserRole(user_id=student3.id, role_id=role_student.id, scope_type="platform"))
+            db.add_all(role_assignments)
+            db.flush()
+
+            # ── 5. Classrooms ──
+            class_3a = Classroom(school_id=school1.id, teacher_id=teacher1.id, name="三年甲班", grade=3, is_active=True)
+            class_5b = Classroom(school_id=school1.id, teacher_id=teacher1.id, name="五年乙班", grade=5, is_active=True)
+            class_7a = Classroom(school_id=school2.id, teacher_id=teacher2.id, name="七年甲班", grade=7, is_active=True)
+            db.add_all([class_3a, class_5b, class_7a])
+            db.flush()
+
+            # ── 6. Enroll students ──
+            db.add_all([
+                ClassroomStudent(classroom_id=class_3a.id, student_id=student1.id),
+                ClassroomStudent(classroom_id=class_3a.id, student_id=student2.id),
+                ClassroomStudent(classroom_id=class_5b.id, student_id=student3.id),
+                ClassroomStudent(classroom_id=class_7a.id, student_id=student1.id),
+            ])
+
+            db.commit()
+            logger.info(
+                "Seeded demo data: 1 org, 2 schools, 3 classrooms, "
+                "6 users (admin/teacher1/teacher2/student1-3)"
+            )
         finally:
             db.close()
-    except Exception:
-        logger.debug("Skipping seed_default_data (DB not available)")
+    except Exception as e:
+        logger.debug("Skipping seed_default_data: %s", e)
 
 
 @app.get("/")

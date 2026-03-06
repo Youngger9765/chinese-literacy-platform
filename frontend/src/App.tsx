@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { AppView, Story, ReadingAttempt, LearningSession, ComprehensionResult, VocabResult, FullReadingResult } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { hasRole } from './services/authApi';
 import StepperNav from './components/StepperNav';
 import StoryLibrary from './pages/student/StoryLibrary';
 import Intro from './components/reading-steps/Intro';
@@ -107,7 +108,7 @@ const AppShell: React.FC = () => {
 
         {/* Nav links + User info + Logout */}
         <div className="flex items-center gap-3 shrink-0">
-          {user && user.roles.length > 0 && (
+          {hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
             <button
               onClick={() => {
                 setView(AppView.TEACHER_DASHBOARD);
@@ -122,20 +123,22 @@ const AppShell: React.FC = () => {
               班級管理
             </button>
           )}
-          <button
-            onClick={() => {
-              setView(AppView.ADMIN_DASHBOARD);
-              setSelectedSchoolId(null);
-              setSelectedOrganizationId(null);
-            }}
-            className={`text-xs font-medium transition-colors cursor-pointer ${
-              view === AppView.ADMIN_DASHBOARD || view === AppView.SCHOOL_DETAIL || view === AppView.ORGANIZATION_DETAIL
-                ? 'text-accent'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            系統管理
-          </button>
+          {hasRole(user, 'system_admin', 'org_owner', 'org_admin') && (
+            <button
+              onClick={() => {
+                setView(AppView.ADMIN_DASHBOARD);
+                setSelectedSchoolId(null);
+                setSelectedOrganizationId(null);
+              }}
+              className={`text-xs font-medium transition-colors cursor-pointer ${
+                view === AppView.ADMIN_DASHBOARD || view === AppView.SCHOOL_DETAIL || view === AppView.ORGANIZATION_DETAIL
+                  ? 'text-accent'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              系統管理
+            </button>
+          )}
           <div className="w-px h-4 bg-gray-200" />
           {user && (
             <span className="text-xs text-gray-500 hidden sm:block">
