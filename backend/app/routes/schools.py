@@ -9,13 +9,14 @@ from ..auth.dependencies import get_current_user, require_role
 from ..database import get_db
 from ..models.organization import Organization
 from ..models.school import Classroom, School
-from ..models.user import User
+from ..models.user import Role, User, UserRole
 from ..schemas.school import (
     SchoolCreateRequest,
     SchoolListResponse,
     SchoolResponse,
     SchoolUpdateRequest,
 )
+from ..schemas.user_admin import SchoolMemberResponse
 
 router = APIRouter(tags=["schools"])
 logger = logging.getLogger(__name__)
@@ -178,4 +179,44 @@ def list_school_classrooms(
             created_at=c.created_at,
         )
         for c in classrooms
+    ]
+
+
+# -- School Members -----------------------------------------------------------
+
+
+@router.get(
+    "/schools/{school_id}/members",
+    response_model=list[SchoolMemberResponse],
+)
+def list_school_members(
+    school_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """List all users who have a role scoped to this school."""
+    _get_school_or_404(school_id, db)
+
+    rows = (
+        db.query(User, Role, UserRole)
+        .join(UserRole, User.id == UserRole.user_id)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(
+            UserRole.scope_type == "school",
+            UserRole.scope_id == str(school_id),
+            UserRole.is_active == True,
+        )
+        .order_by(Role.name, User.name)
+        .all()
+    )
+
+    return [
+        SchoolMemberResponse(
+            user_id=user.id,
+            name=user.name,
+            email=user.email,
+            role_name=role.name,
+            role_display_name=role.display_name,
+        )
+        for user, role, _ in rows
     ]

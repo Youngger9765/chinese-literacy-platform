@@ -82,6 +82,18 @@ export async function createClassroom(
   return handleResponse<ClassroomResponse>(res);
 }
 
+export async function createClassroomAdmin(
+  token: string,
+  data: { name: string; school_id: number; grade?: number; teacher_id?: number },
+): Promise<ClassroomResponse> {
+  const res = await fetch(`${API_BASE}/api/classrooms`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });
+  return handleResponse<ClassroomResponse>(res);
+}
+
 export async function listMyClassrooms(
   token: string,
   params?: { limit?: number; offset?: number },

@@ -7,6 +7,7 @@ class ClassroomCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     school_id: int
     grade: int | None = Field(None, ge=1, le=12)
+    teacher_id: int | None = None  # Admin-only: create classroom for another teacher
 
 
 class ClassroomUpdateRequest(BaseModel):

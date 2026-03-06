@@ -13,13 +13,17 @@ import type { SchoolInOrgResponse } from '../../services/organizationApi';
 export type TreeNodeSelection =
   | { type: 'org'; id: string }
   | { type: 'school'; id: number }
-  | { type: 'roles'; id: 'roles' };
+  | { type: 'classroom'; id: number }
+  | { type: 'roles'; id: 'roles' }
+  | { type: 'users'; id: 'users' }
+  | { type: 'create_org'; id: 'create_org' };
 
 type TreeNodeType = TreeNodeSelection['type'];
 
 interface AdminTreeSidebarProps {
   selectedNode: TreeNodeSelection | null;
   onSelectNode: (node: TreeNodeSelection | null) => void;
+  refreshTrigger?: number;
 }
 
 interface OrgTreeData {
@@ -59,6 +63,12 @@ const ShieldIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
   </svg>
 );
 
+const UsersIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg className={`w-4 h-4 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+  </svg>
+);
+
 const CollapseIcon: React.FC<{ collapsed: boolean }> = ({ collapsed }) => (
   <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     {collapsed ? (
@@ -71,7 +81,13 @@ const CollapseIcon: React.FC<{ collapsed: boolean }> = ({ collapsed }) => (
 
 // ── Sidebar Component ───────────────────────────────────────────────────────
 
-const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSelectNode }) => {
+const PlusIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg className={`w-4 h-4 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+  </svg>
+);
+
+const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSelectNode, refreshTrigger }) => {
   const { token } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -109,6 +125,15 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
   useEffect(() => {
     loadOrgs();
   }, [loadOrgs]);
+
+  // Reload orgs and clear cached school data when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger != null && refreshTrigger > 0) {
+      setOrgData({});
+      loadOrgs();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshTrigger]);
 
   // ── Expand / collapse org ───────────────────────────────────────────────
 
@@ -157,10 +182,18 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
       <div className="w-12 bg-white border-r border-gray-200 flex flex-col items-center py-3 shrink-0">
         <button
           onClick={() => setIsCollapsed(false)}
-          className="p-1.5 rounded-md hover:bg-gray-100 transition-colors cursor-pointer mb-4"
+          className="p-1.5 rounded-md hover:bg-gray-100 transition-colors cursor-pointer mb-2"
           title="展開側邊欄"
         >
           <CollapseIcon collapsed={true} />
+        </button>
+
+        <button
+          onClick={() => onSelectNode({ type: 'create_org', id: 'create_org' })}
+          className="p-1.5 rounded-md hover:bg-accent-bg text-gray-400 hover:text-accent transition-colors cursor-pointer mb-3"
+          title="新增機構"
+        >
+          <PlusIcon />
         </button>
 
         {/* Org icons */}
@@ -185,7 +218,7 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
         {/* Roles icon */}
         <button
           onClick={() => onSelectNode({ type: 'roles', id: 'roles' })}
-          className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+          className={`p-1.5 rounded-md transition-colors cursor-pointer mb-1 ${
             isSelected('roles', 'roles')
               ? 'bg-amber-50 text-amber-600'
               : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
@@ -193,6 +226,19 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
           title="角色管理"
         >
           <ShieldIcon />
+        </button>
+
+        {/* Users icon */}
+        <button
+          onClick={() => onSelectNode({ type: 'users', id: 'users' })}
+          className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+            isSelected('users', 'users')
+              ? 'bg-indigo-50 text-indigo-600'
+              : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+          }`}
+          title="使用者管理"
+        >
+          <UsersIcon />
         </button>
       </div>
     );
@@ -207,13 +253,22 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
           管理架構
         </span>
-        <button
-          onClick={() => setIsCollapsed(true)}
-          className="p-1 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
-          title="收合側邊欄"
-        >
-          <CollapseIcon collapsed={false} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onSelectNode({ type: 'create_org', id: 'create_org' })}
+            className="p-1 rounded-md hover:bg-accent-bg text-gray-400 hover:text-accent transition-colors cursor-pointer"
+            title="新增機構"
+          >
+            <PlusIcon />
+          </button>
+          <button
+            onClick={() => setIsCollapsed(true)}
+            className="p-1 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
+            title="收合側邊欄"
+          >
+            <CollapseIcon collapsed={false} />
+          </button>
+        </div>
       </div>
 
       {/* Tree content (scrollable) */}
@@ -357,7 +412,7 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
         })}
       </div>
 
-      {/* Bottom fixed: roles management */}
+      {/* Bottom fixed: management links */}
       <div className="border-t border-gray-100 shrink-0">
         <button
           onClick={() => onSelectNode({ type: 'roles', id: 'roles' })}
@@ -370,6 +425,19 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
           <ShieldIcon className={isSelected('roles', 'roles') ? 'text-amber-500' : ''} />
           <span className={`text-sm ${isSelected('roles', 'roles') ? 'font-semibold' : ''}`}>
             角色管理
+          </span>
+        </button>
+        <button
+          onClick={() => onSelectNode({ type: 'users', id: 'users' })}
+          className={`flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${
+            isSelected('users', 'users')
+              ? 'bg-indigo-50 text-indigo-700'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+          }`}
+        >
+          <UsersIcon className={isSelected('users', 'users') ? 'text-indigo-500' : ''} />
+          <span className={`text-sm ${isSelected('users', 'users') ? 'font-semibold' : ''}`}>
+            使用者管理
           </span>
         </button>
       </div>

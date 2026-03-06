@@ -4,16 +4,24 @@ import {
   getSchool,
   updateSchool,
   listSchoolClassrooms,
+  listSchoolMembers,
   SchoolResponse,
   SchoolClassroomResponse,
+  SchoolMemberResponse,
   SchoolApiError,
 } from '../../services/schoolApi';
+import {
+  createClassroomAdmin,
+  ClassroomApiError,
+} from '../../services/classroomApi';
 
 interface SchoolDetailPanelProps {
   schoolId: number;
+  onSelectClassroom?: (classroomId: number) => void;
+  onClassroomCreated?: () => void;
 }
 
-const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId }) => {
+const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelectClassroom, onClassroomCreated }) => {
   const { token } = useAuth();
   const [school, setSchool] = useState<SchoolResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +43,36 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId }) => {
   const [classrooms, setClassrooms] = useState<SchoolClassroomResponse[]>([]);
   const [isLoadingClassrooms, setIsLoadingClassrooms] = useState(true);
   const [classroomError, setClassroomError] = useState('');
+
+  // Create classroom state
+  const [isCreatingClassroom, setIsCreatingClassroom] = useState(false);
+  const [newClassName, setNewClassName] = useState('');
+  const [newClassGrade, setNewClassGrade] = useState('');
+  const [newClassTeacherId, setNewClassTeacherId] = useState('');
+  const [isSubmittingClassroom, setIsSubmittingClassroom] = useState(false);
+  const [createClassroomError, setCreateClassroomError] = useState('');
+
+  // Teacher list for dropdown
+  const [teachers, setTeachers] = useState<SchoolMemberResponse[]>([]);
+  const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+
+  const loadTeachers = useCallback(async () => {
+    if (!token) return;
+    setIsLoadingTeachers(true);
+    try {
+      const members = await listSchoolMembers(token, schoolId);
+      // Filter to teachers only
+      const teacherMembers = members.filter(
+        (m) => m.role_name === 'teacher' || m.role_name === 'school_admin'
+      );
+      setTeachers(teacherMembers);
+    } catch {
+      // Silently fail - teacher dropdown will just be empty
+      setTeachers([]);
+    } finally {
+      setIsLoadingTeachers(false);
+    }
+  }, [token, schoolId]);
 
   const loadClassrooms = useCallback(async () => {
     if (!token) return;
@@ -130,6 +168,51 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId }) => {
       }
     } finally {
       setIsTogglingActive(false);
+    }
+  };
+
+  const resetClassroomForm = () => {
+    setIsCreatingClassroom(false);
+    setNewClassName('');
+    setNewClassGrade('');
+    setNewClassTeacherId('');
+    setCreateClassroomError('');
+  };
+
+  const handleStartCreatingClassroom = () => {
+    setIsCreatingClassroom(true);
+    loadTeachers();
+  };
+
+  const handleCreateClassroom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token || !newClassName.trim()) return;
+
+    setIsSubmittingClassroom(true);
+    setCreateClassroomError('');
+    try {
+      const data: { name: string; school_id: number; grade?: number; teacher_id?: number } = {
+        name: newClassName.trim(),
+        school_id: schoolId,
+      };
+      if (newClassGrade.trim()) {
+        data.grade = parseInt(newClassGrade, 10);
+      }
+      if (newClassTeacherId) {
+        data.teacher_id = parseInt(newClassTeacherId, 10);
+      }
+      await createClassroomAdmin(token, data);
+      resetClassroomForm();
+      await loadClassrooms();
+      onClassroomCreated?.();
+    } catch (err) {
+      if (err instanceof ClassroomApiError) {
+        setCreateClassroomError(err.message);
+      } else {
+        setCreateClassroomError('建立班級失敗');
+      }
+    } finally {
+      setIsSubmittingClassroom(false);
     }
   };
 
@@ -323,63 +406,170 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId }) => {
         </div>
 
         {/* Classroom list */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <h3 className="text-base font-bold text-gray-900 mb-4">班級列表</h3>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+            <h3 className="font-bold text-gray-900">班級列表</h3>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500">{classrooms.length} 班</span>
+              {!isCreatingClassroom && (
+                <button
+                  onClick={handleStartCreatingClassroom}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  新增班級
+                </button>
+              )}
+            </div>
+          </div>
 
-          {isLoadingClassrooms ? (
-            <div className="space-y-3">
-              <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3" />
-              <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2" />
-              <div className="h-4 bg-gray-200 animate-pulse rounded w-3/4" />
-            </div>
-          ) : classroomError ? (
-            <div className="text-center py-6">
-              <p className="text-red-600 text-sm">{classroomError}</p>
-              <button
-                onClick={loadClassrooms}
-                className="mt-2 text-sm text-red-600 underline hover:text-red-800 cursor-pointer"
-              >
-                重試
-              </button>
-            </div>
-          ) : classrooms.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-6">尚無班級</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100 text-left text-gray-500">
-                    <th className="pb-2 font-medium">班級名稱</th>
-                    <th className="pb-2 font-medium">年級</th>
-                    <th className="pb-2 font-medium">導師</th>
-                    <th className="pb-2 font-medium text-center">學生數</th>
-                    <th className="pb-2 font-medium text-center">狀態</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {classrooms.map((c) => (
-                    <tr key={c.id} className="hover:bg-gray-50/50">
-                      <td className="py-2.5 text-gray-900 font-medium">{c.name}</td>
-                      <td className="py-2.5 text-gray-600">{c.grade != null ? `${c.grade} 年級` : '-'}</td>
-                      <td className="py-2.5 text-gray-600">{c.teacher_name}</td>
-                      <td className="py-2.5 text-gray-600 text-center">{c.student_count}</td>
-                      <td className="py-2.5 text-center">
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                            c.is_active
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : 'bg-gray-100 text-gray-500'
-                          }`}
-                        >
-                          {c.is_active ? '使用中' : '已停用'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Create classroom inline form */}
+          {isCreatingClassroom && (
+            <div className="p-5 border-b border-gray-100 bg-gray-50/50">
+              <form onSubmit={handleCreateClassroom} className="space-y-4">
+                <h4 className="text-sm font-bold text-gray-900">新增班級</h4>
+                {createClassroomError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                    {createClassroomError}
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="new-class-name" className="block text-sm font-medium text-gray-700 mb-1">
+                      班級名稱 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="new-class-name"
+                      type="text"
+                      value={newClassName}
+                      onChange={(e) => setNewClassName(e.target.value)}
+                      required
+                      autoFocus
+                      placeholder="例：五年一班"
+                      className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="new-class-grade" className="block text-sm font-medium text-gray-700 mb-1">
+                      年級
+                    </label>
+                    <input
+                      id="new-class-grade"
+                      type="number"
+                      min={1}
+                      max={12}
+                      value={newClassGrade}
+                      onChange={(e) => setNewClassGrade(e.target.value)}
+                      placeholder="例：5"
+                      className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="new-class-teacher" className="block text-sm font-medium text-gray-700 mb-1">
+                      導師
+                    </label>
+                    <select
+                      id="new-class-teacher"
+                      value={newClassTeacherId}
+                      onChange={(e) => setNewClassTeacherId(e.target.value)}
+                      className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                    >
+                      <option value="">
+                        {isLoadingTeachers ? '載入中...' : '-- 選擇導師 --'}
+                      </option>
+                      {teachers.map((t) => (
+                        <option key={t.user_id} value={String(t.user_id)}>
+                          {t.name} ({t.role_display_name})
+                        </option>
+                      ))}
+                    </select>
+                    {!isLoadingTeachers && teachers.length === 0 && (
+                      <p className="text-xs text-gray-400 mt-1">尚無可選導師，請先指派教師角色</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={resetClassroomForm}
+                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingClassroom || !newClassName.trim()}
+                    className="bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
+                  >
+                    {isSubmittingClassroom ? '建立中...' : '建立班級'}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
+
+          <div className="p-5">
+            {isLoadingClassrooms ? (
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3" />
+                <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2" />
+                <div className="h-4 bg-gray-200 animate-pulse rounded w-3/4" />
+              </div>
+            ) : classroomError ? (
+              <div className="text-center py-6">
+                <p className="text-red-600 text-sm">{classroomError}</p>
+                <button
+                  onClick={loadClassrooms}
+                  className="mt-2 text-sm text-red-600 underline hover:text-red-800 cursor-pointer"
+                >
+                  重試
+                </button>
+              </div>
+            ) : classrooms.length === 0 ? (
+              <p className="text-gray-400 text-sm text-center py-6">尚無班級</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 text-left text-gray-500">
+                      <th className="pb-2 font-medium">班級名稱</th>
+                      <th className="pb-2 font-medium">年級</th>
+                      <th className="pb-2 font-medium">導師</th>
+                      <th className="pb-2 font-medium text-center">學生數</th>
+                      <th className="pb-2 font-medium text-center">狀態</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {classrooms.map((c) => (
+                      <tr
+                        key={c.id}
+                        onClick={() => onSelectClassroom?.(c.id)}
+                        className={`hover:bg-gray-50/50 ${onSelectClassroom ? 'cursor-pointer' : ''}`}
+                      >
+                        <td className="py-2.5 text-gray-900 font-medium">{c.name}</td>
+                        <td className="py-2.5 text-gray-600">{c.grade != null ? `${c.grade} 年級` : '-'}</td>
+                        <td className="py-2.5 text-gray-600">{c.teacher_name}</td>
+                        <td className="py-2.5 text-gray-600 text-center">{c.student_count}</td>
+                        <td className="py-2.5 text-center">
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                              c.is_active
+                                ? 'bg-emerald-50 text-emerald-700'
+                                : 'bg-gray-100 text-gray-500'
+                            }`}
+                          >
+                            {c.is_active ? '使用中' : '已停用'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

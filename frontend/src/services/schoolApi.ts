@@ -131,3 +131,23 @@ export async function listSchoolClassrooms(
   });
   return handleResponse<SchoolClassroomResponse[]>(res);
 }
+
+// --- School members ---
+
+export interface SchoolMemberResponse {
+  user_id: number;
+  name: string;
+  email: string;
+  role_name: string;
+  role_display_name: string;
+}
+
+export async function listSchoolMembers(
+  token: string,
+  schoolId: number,
+): Promise<SchoolMemberResponse[]> {
+  const res = await fetch(`${API_BASE}/api/schools/${schoolId}/members`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<SchoolMemberResponse[]>(res);
+}

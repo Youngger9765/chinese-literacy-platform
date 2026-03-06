@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import AdminTreeSidebar, { TreeNodeSelection } from './AdminTreeSidebar';
 import OrgDetailPanel from './OrgDetailPanel';
 import SchoolDetailPanel from './SchoolDetailPanel';
+import CreateOrgPanel from './CreateOrgPanel';
+import ClassroomDetailPanel from './ClassroomDetailPanel';
+import UsersPanel from './UsersPanel';
 import {
   listRoles,
   RoleResponse,
@@ -13,23 +16,55 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
   const [selectedNode, setSelectedNode] = useState<TreeNodeSelection | null>(null);
+  const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0);
+
+  const refreshSidebar = useCallback(() => {
+    setSidebarRefreshKey((prev) => prev + 1);
+  }, []);
+
+  const handleOrgCreated = useCallback((orgId: string) => {
+    refreshSidebar();
+    setSelectedNode({ type: 'org', id: orgId });
+  }, [refreshSidebar]);
+
+  const handleSelectClassroom = useCallback((classroomId: number) => {
+    setSelectedNode({ type: 'classroom', id: classroomId });
+  }, []);
 
   return (
     <div className="flex flex-1 overflow-hidden">
       <AdminTreeSidebar
         selectedNode={selectedNode}
         onSelectNode={setSelectedNode}
+        refreshTrigger={sidebarRefreshKey}
       />
 
       <div className="flex-1 overflow-y-auto">
         {!selectedNode && <AdminWelcome />}
+        {selectedNode?.type === 'create_org' && (
+          <CreateOrgPanel
+            onCreated={handleOrgCreated}
+            onCancel={() => setSelectedNode(null)}
+          />
+        )}
         {selectedNode?.type === 'org' && (
-          <OrgDetailPanel organizationId={selectedNode.id} />
+          <OrgDetailPanel
+            organizationId={selectedNode.id}
+            onSchoolCreated={refreshSidebar}
+          />
         )}
         {selectedNode?.type === 'school' && (
-          <SchoolDetailPanel schoolId={selectedNode.id} />
+          <SchoolDetailPanel
+            schoolId={selectedNode.id}
+            onSelectClassroom={handleSelectClassroom}
+            onClassroomCreated={refreshSidebar}
+          />
+        )}
+        {selectedNode?.type === 'classroom' && (
+          <ClassroomDetailPanel classroomId={selectedNode.id} />
         )}
         {selectedNode?.type === 'roles' && <RolesPanel />}
+        {selectedNode?.type === 'users' && <UsersPanel />}
       </div>
     </div>
   );
