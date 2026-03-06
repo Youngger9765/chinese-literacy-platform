@@ -1,5 +1,5 @@
 import logging
-import random
+import secrets
 import string
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -45,7 +45,7 @@ def _generate_join_code(db: Session, length: int = _JOIN_CODE_LENGTH) -> str:
     Retries up to _JOIN_CODE_MAX_RETRIES times in case of collision.
     """
     for _ in range(_JOIN_CODE_MAX_RETRIES):
-        code = "".join(random.choices(_JOIN_CODE_CHARS, k=length))
+        code = "".join(secrets.choice(_JOIN_CODE_CHARS) for _ in range(length))
         existing = db.query(Classroom).filter(Classroom.join_code == code).first()
         if existing is None:
             return code
@@ -389,7 +389,11 @@ def join_classroom_by_code(
         .filter(Classroom.join_code == payload.join_code.upper())
         .first()
     )
-    if classroom is None:
+    if classroom is None or not classroom.is_active:
+        raise HTTPException(status_code=404, detail="Invalid join code")
+
+    school = db.query(School).filter(School.id == classroom.school_id).first()
+    if school is None or not school.is_active:
         raise HTTPException(status_code=404, detail="Invalid join code")
 
     # Check for duplicate enrollment
@@ -454,12 +458,14 @@ def batch_create_students(
 
     for item in payload.students:
         try:
+            savepoint = db.begin_nested()
             username = f"{classroom.join_code}{item.seat_number}"
             email = f"{username.lower()}@student.lingoleap.local"
 
             # Check if email already exists
             existing_user = db.query(User).filter(User.email == email).first()
             if existing_user:
+                savepoint.rollback()
                 errors.append(BatchStudentError(
                     name=item.name,
                     seat_number=item.seat_number,
@@ -468,7 +474,7 @@ def batch_create_students(
                 continue
 
             # Generate random password (8-char uppercase + digits)
-            password = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            password = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
             user = User(
                 email=email,
                 password_hash=hash_password(password),
@@ -505,6 +511,7 @@ def batch_create_students(
                 user_id=user.id,
             ))
         except Exception as e:
+            savepoint.rollback()
             logger.error(
                 "Error creating student %s (seat %s): %s",
                 item.name, item.seat_number, e,

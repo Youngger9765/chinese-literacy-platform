@@ -67,7 +67,7 @@ def change_password(
     """Change the current user's password."""
     if not verify_password(req.old_password, current_user.password_hash):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Current password is incorrect",
         )
 

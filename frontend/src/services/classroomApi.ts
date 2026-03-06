@@ -74,18 +74,6 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export async function createClassroom(
   token: string,
-  data: { name: string; school_id: number; grade?: number },
-): Promise<ClassroomResponse> {
-  const res = await fetch(`${API_BASE}/api/classrooms`, {
-    method: 'POST',
-    headers: authHeaders(token),
-    body: JSON.stringify(data),
-  });
-  return handleResponse<ClassroomResponse>(res);
-}
-
-export async function createClassroomAdmin(
-  token: string,
   data: { name: string; school_id: number; grade?: number; teacher_id?: number },
 ): Promise<ClassroomResponse> {
   const res = await fetch(`${API_BASE}/api/classrooms`, {
@@ -95,6 +83,9 @@ export async function createClassroomAdmin(
   });
   return handleResponse<ClassroomResponse>(res);
 }
+
+/** @deprecated Use createClassroom instead -- same endpoint, kept for backward compatibility. */
+export const createClassroomAdmin = createClassroom;
 
 export async function listMyClassrooms(
   token: string,

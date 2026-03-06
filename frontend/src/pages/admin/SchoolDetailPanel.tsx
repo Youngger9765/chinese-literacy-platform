@@ -76,21 +76,24 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
   const [assigningUserId, setAssigningUserId] = useState<number | null>(null);
   const teacherSearchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const loadTeachers = useCallback(async () => {
+  const loadSchoolMembers = useCallback(async () => {
     if (!token) return;
     setIsLoadingTeachers(true);
+    setIsLoadingAllTeachers(true);
     try {
       const members = await listSchoolMembers(token, schoolId);
-      // Filter to teachers only
       const teacherMembers = members.filter(
         (m) => m.role_name === 'teacher' || m.role_name === 'school_admin'
       );
       setTeachers(teacherMembers);
+      const allTeacherRoles = ['teacher', 'school_admin', 'principal', 'director'];
+      setAllTeacherMembers(members.filter((m) => allTeacherRoles.includes(m.role_name)));
     } catch {
-      // Silently fail - teacher dropdown will just be empty
       setTeachers([]);
+      setAllTeacherMembers([]);
     } finally {
       setIsLoadingTeachers(false);
+      setIsLoadingAllTeachers(false);
     }
   }, [token, schoolId]);
 
@@ -130,26 +133,18 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
     }
   }, [token, schoolId]);
 
-  const loadAllTeacherMembers = useCallback(async () => {
-    if (!token) return;
-    setIsLoadingAllTeachers(true);
-    try {
-      const members = await listSchoolMembers(token, schoolId);
-      const teacherRoles = ['teacher', 'school_admin', 'principal', 'director'];
-      setAllTeacherMembers(members.filter((m) => teacherRoles.includes(m.role_name)));
-    } catch {
-      setAllTeacherMembers([]);
-    } finally {
-      setIsLoadingAllTeachers(false);
-    }
-  }, [token, schoolId]);
-
   useEffect(() => {
     setIsEditing(false);
     loadSchool();
     loadClassrooms();
-    loadAllTeacherMembers();
-  }, [loadSchool, loadClassrooms, loadAllTeacherMembers]);
+    loadSchoolMembers();
+  }, [loadSchool, loadClassrooms, loadSchoolMembers]);
+
+  useEffect(() => {
+    return () => {
+      if (teacherSearchTimeoutRef.current) clearTimeout(teacherSearchTimeoutRef.current);
+    };
+  }, []);
 
   const startEditing = () => {
     if (!school) return;
@@ -216,7 +211,7 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
 
   const handleStartCreatingClassroom = () => {
     setIsCreatingClassroom(true);
-    loadTeachers();
+    loadSchoolMembers();
   };
 
   const handleCreateClassroom = async (e: React.FormEvent) => {
@@ -260,14 +255,7 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
       setCodeCopied(true);
       setTimeout(() => setCodeCopied(false), 2000);
     } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = schoolJoinCode;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCodeCopied(true);
-      setTimeout(() => setCodeCopied(false), 2000);
+      setError('複製失敗，請手動複製');
     }
   };
 
@@ -326,9 +314,7 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
         scope_id: String(schoolId),
       });
       setTeacherSearchResults((prev) => prev.filter((u) => u.id !== userId));
-      await loadAllTeacherMembers();
-      // Also refresh the teacher dropdown for classroom creation
-      await loadTeachers();
+      await loadSchoolMembers();
     } catch (err) {
       if (err instanceof RoleApiError) {
         setError(err.message);

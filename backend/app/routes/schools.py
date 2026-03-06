@@ -1,5 +1,5 @@
 import logging
-import random
+import secrets
 import string
 from datetime import datetime
 
@@ -43,7 +43,7 @@ _SCHOOL_JOIN_CODE_MAX_RETRIES = 10
 def _generate_school_join_code(db: Session) -> str:
     """Generate a unique random join code for a school."""
     for _ in range(_SCHOOL_JOIN_CODE_MAX_RETRIES):
-        code = "".join(random.choices(_SCHOOL_JOIN_CODE_CHARS, k=_SCHOOL_JOIN_CODE_LENGTH))
+        code = "".join(secrets.choice(_SCHOOL_JOIN_CODE_CHARS) for _ in range(_SCHOOL_JOIN_CODE_LENGTH))
         existing = db.query(School).filter(School.join_code == code).first()
         if existing is None:
             return code

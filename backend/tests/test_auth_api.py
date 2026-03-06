@@ -638,7 +638,7 @@ class TestChangePasswordEndpoint:
         })
         assert login_resp.status_code == 401
 
-    def test_change_password_wrong_old_password_returns_400(self, client, registered_user):
+    def test_change_password_wrong_old_password_returns_401(self, client, registered_user):
         resp = client.post(
             "/api/auth/change-password",
             json={
@@ -647,7 +647,7 @@ class TestChangePasswordEndpoint:
             },
             headers=auth_header(registered_user["token"]),
         )
-        assert resp.status_code == 400
+        assert resp.status_code == 401
 
     def test_change_password_wrong_old_password_error_message(self, client, registered_user):
         resp = client.post(

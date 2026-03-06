@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     openai_api_key: str = ""
     gemini_api_key: str = ""
-    database_url: str = "postgresql://user:pass@localhost:5432/lingoleap"
+    database_url: str = "sqlite:///./test.db"
     redis_url: str = "redis://localhost:6379"
     allowed_origins: str = "http://localhost:3000"
     gcs_bucket: str = "lingoleap-assets"

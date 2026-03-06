@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +7,9 @@ from .config import settings
 from .routes import stories, learning, users, auth, classrooms, schools, organizations, roles
 
 logger = logging.getLogger(__name__)
+
+if os.environ.get("ENVIRONMENT", "development") != "development" and settings.jwt_secret_key == "dev-secret-change-in-production":
+    raise RuntimeError("JWT_SECRET_KEY must be set in production!")
 
 app = FastAPI(
     title="LingoLeap AI Reading Tutor API",
@@ -38,7 +42,7 @@ def seed_default_data():
     Only runs when users table is empty (fresh DB).
     Wrapped in try/except so it doesn't crash during tests.
     """
-    import random
+    import secrets
     import string
     from .database import SessionLocal
     from .models.school import School, Classroom, ClassroomStudent
@@ -58,7 +62,7 @@ def seed_default_data():
 
             # ── 2. Schools ──
             def _gen_code(k):
-                return "".join(random.choices(string.ascii_uppercase + string.digits, k=k))
+                return "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(k))
 
             school1 = School(name="台北市大安國小", organization_id=org.id, is_active=True, address="台北市大安區信義路四段1號", join_code=_gen_code(8))
             school2 = School(name="新北市板橋國小", organization_id=org.id, is_active=True, address="新北市板橋區文化路一段23號", join_code=_gen_code(8))
@@ -122,7 +126,7 @@ def seed_default_data():
         finally:
             db.close()
     except Exception as e:
-        logger.debug("Skipping seed_default_data: %s", e)
+        logger.warning("seed_default_data failed: %s", e)
 
 
 @app.get("/")

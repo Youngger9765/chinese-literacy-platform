@@ -139,6 +139,20 @@ def list_user_roles(
     db: Session = Depends(get_db),
 ):
     """List all active roles for a specific user."""
+    if current_user.id != user_id:
+        admin_roles = (
+            db.query(UserRole)
+            .join(Role)
+            .filter(
+                UserRole.user_id == current_user.id,
+                UserRole.is_active == True,
+                Role.name.in_(["system_admin", "org_admin"]),
+            )
+            .first()
+        )
+        if not admin_roles:
+            raise HTTPException(status_code=403, detail="Not authorized")
+
     # Verify target user exists
     target_user = db.query(User).filter(User.id == user_id).first()
     if target_user is None:

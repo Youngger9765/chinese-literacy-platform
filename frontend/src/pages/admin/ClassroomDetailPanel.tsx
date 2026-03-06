@@ -14,7 +14,6 @@ import {
   BatchStudentInput,
   BatchCreateResult,
 } from '../../services/classroomApi';
-import { getSchool, SchoolApiError } from '../../services/schoolApi';
 
 interface ClassroomDetailPanelProps {
   classroomId: number;
@@ -72,17 +71,7 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
       setClassroom(data);
       setJoinCode(data.join_code ?? null);
 
-      // Fetch school name for breadcrumb
-      if (data.school_id) {
-        try {
-          const school = await getSchool(token, data.school_id);
-          setSchoolName(school.display_name || school.name);
-        } catch (err) {
-          if (err instanceof SchoolApiError) {
-            setSchoolName('');
-          }
-        }
-      }
+      setSchoolName(data.school_name || '');
     } catch (err) {
       if (err instanceof ClassroomApiError) {
         setError(err.message);
@@ -97,6 +86,12 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
   useEffect(() => {
     loadClassroom();
   }, [loadClassroom]);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, []);
 
   // --- Edit handlers ---
 
@@ -162,15 +157,7 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
       setCodeCopied(true);
       setTimeout(() => setCodeCopied(false), 2000);
     } catch {
-      // Fallback for older browsers
-      const textarea = document.createElement('textarea');
-      textarea.value = joinCode;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCodeCopied(true);
-      setTimeout(() => setCodeCopied(false), 2000);
+      setError('複製失敗，請手動複製');
     }
   };
 

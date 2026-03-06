@@ -78,6 +78,7 @@ const UsersPanel: React.FC = () => {
 
   // Debounce timer ref
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // ── Load users ──────────────────────────────────────────────────────────
 
@@ -104,10 +105,15 @@ const UsersPanel: React.FC = () => {
     }
   }, [token]);
 
-  // Initial load and when page changes
   useEffect(() => {
-    loadUsers(searchQuery, page * pageSize);
-  }, [loadUsers, page]); // eslint-disable-line react-hooks/exhaustive-deps
+    loadUsers(debouncedSearch, page * pageSize);
+  }, [loadUsers, debouncedSearch, page]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   // Debounced search
   const handleSearchChange = (value: string) => {
@@ -115,7 +121,7 @@ const UsersPanel: React.FC = () => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(0);
-      loadUsers(value, 0);
+      setDebouncedSearch(value);
     }, 300);
   };
 
@@ -127,8 +133,8 @@ const UsersPanel: React.FC = () => {
   // Refresh a single user's roles after assign/revoke
   const refreshUserInList = useCallback(async () => {
     // Reload the whole list (simpler than patching a single item)
-    await loadUsers(searchQuery, page * pageSize);
-  }, [loadUsers, searchQuery, page]);
+    await loadUsers(debouncedSearch, page * pageSize);
+  }, [loadUsers, debouncedSearch, page]);
 
   const totalPages = Math.ceil(total / pageSize);
 
