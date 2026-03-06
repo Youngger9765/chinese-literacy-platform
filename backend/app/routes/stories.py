@@ -3,8 +3,13 @@ Stories API — serves platform lessons from in-memory YAML data.
 No database dependency for platform content.
 """
 
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Depends
+from sqlalchemy.orm import Session
 
+from ..database import get_db
+from ..models.user import User
+from ..models.school import ClassroomStudent, ClassroomText
+from ..auth.dependencies import get_optional_user
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
@@ -19,9 +24,36 @@ def list_stories(
     search: str | None = Query(None, max_length=100),
     page: int = Query(1, ge=1),
     page_size: int = Query(60, ge=1, le=100),
+    user: User | None = Depends(get_optional_user),
+    db: Session = Depends(get_db),
 ):
-    """List published platform stories with optional filters."""
-    results = search_lessons(grade=grade, genre=genre, category=category, search=search)
+    """List published platform stories with optional filters.
+
+    If the authenticated user is enrolled in classroom(s), only stories
+    assigned to those classrooms are returned. Anonymous users and users
+    without classroom enrollment see all stories (backward compatible).
+    """
+    all_results = search_lessons(grade=grade, genre=genre, category=category, search=search)
+
+    # Filter to classroom-assigned stories when the user is enrolled
+    results = all_results
+    if user is not None:
+        enrollments = (
+            db.query(ClassroomStudent.classroom_id)
+            .filter(ClassroomStudent.student_id == user.id)
+            .all()
+        )
+        if enrollments:
+            classroom_ids = [e.classroom_id for e in enrollments]
+            assigned_text_ids = (
+                db.query(ClassroomText.text_id)
+                .filter(ClassroomText.classroom_id.in_(classroom_ids))
+                .distinct()
+                .all()
+            )
+            # text_id is stored as String; compare against integer lesson_number
+            assigned_ids = {int(t.text_id) for t in assigned_text_ids}
+            results = [s for s in all_results if s["lesson_number"] in assigned_ids]
 
     total = len(results)
     start = (page - 1) * page_size

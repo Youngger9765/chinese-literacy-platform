@@ -16,4 +16,11 @@
     --color-warning: 245 158 11;      /* amber-500 */
     --color-error: 239 68 68;         /* red-500 */
   }
+
+  /* Form input color safety — prevents invisible text on Chrome Windows dark mode */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  select,
+  textarea {
+    @apply text-gray-900 bg-white;
+  }
 }

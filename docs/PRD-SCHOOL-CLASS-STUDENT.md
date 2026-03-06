@@ -2092,6 +2092,259 @@ frontend/src/
 
 ---
 
+## 10. BDD 驗收標準
+
+> 以下驗收標準基於 Issue #223 的**實際實作**（unified `users` 表 + `StudentProfile` + `UserRole(scope_type, scope_id)`），而非本 PRD 原始規劃的 `teachers` / `students` 分表架構。
+
+### Feature: 使用者認證（Auth）
+
+```gherkin
+@implemented
+Scenario: 使用者註冊
+  Given 使用者提供有效的 email、password 和 name
+  When 使用者送出 POST /api/auth/register
+  Then 回應 201 並包含 JWT access_token
+
+@implemented
+Scenario: 使用者以 email 登入
+  Given 使用者已註冊且帳號為 active
+  When 使用者送出 POST /api/auth/login 包含 email 和 password
+  Then 回應 200 並包含 JWT access_token
+  And last_login_at 已更新
+
+@implemented
+Scenario: 使用者以 username 登入
+  Given 使用者有 username 且帳號為 active
+  When 使用者送出 POST /api/auth/login 且 email 欄位填入 username
+  Then 回應 200 並包含 JWT access_token
+
+@implemented
+Scenario: 登入密碼錯誤
+  Given 使用者已註冊
+  When 使用者送出 POST /api/auth/login 包含錯誤密碼
+  Then 回應 401 Unauthorized 且訊息為 "Invalid email or password"
+
+@implemented
+Scenario: 註冊 email 重複
+  Given email "teacher@school.tw" 已被註冊
+  When 使用者送出 POST /api/auth/register 包含相同 email
+  Then 回應 409 Conflict 且訊息為 "Email already registered"
+
+@implemented
+Scenario: 修改密碼
+  Given 使用者已登入
+  When 使用者送出 POST /api/auth/change-password 包含正確的 old_password 和 new_password
+  Then 回應 200 且訊息為 "Password updated successfully"
+
+@implemented
+Scenario: 修改密碼時舊密碼錯誤
+  Given 使用者已登入
+  When 使用者送出 POST /api/auth/change-password 包含錯誤的 old_password
+  Then 回應 401 Unauthorized
+
+@implemented
+Scenario: 登入 rate limiting
+  Given 使用者連續嘗試登入超過 10 次/分鐘
+  When 使用者送出 POST /api/auth/login
+  Then 回應 429 Too Many Requests
+
+@implemented
+Scenario: 註冊 rate limiting
+  Given 同一 IP 連續註冊超過 5 次/分鐘
+  When 使用者送出 POST /api/auth/register
+  Then 回應 429 Too Many Requests
+```
+
+### Feature: 學生帳號
+
+```gherkin
+@implemented
+Scenario: 批量建立學生
+  Given 教師已登入且擁有班級 A
+  When 教師送出 POST /api/classrooms/{id}/students/batch 包含學生列表
+  Then 回應 201 包含 created_count 和每位學生的 username
+  And 每位學生的 username 由 join_code + seat_number 組成
+  And 每位學生的 must_change_password 為 true
+
+@implemented
+Scenario: 學生用 username 登入
+  Given 學生帳號已由批量建立
+  When 學生送出 POST /api/auth/login 且 email 欄位填入 username
+  Then 回應 200 包含 access_token
+  And must_change_password 為 true
+
+@implemented
+Scenario: 學生首次登入強制改密碼
+  Given 學生帳號的 password_changed 為 false
+  When 學生登入成功
+  Then 回應包含 must_change_password: true
+  And 前端引導學生修改密碼
+
+@implemented
+Scenario: 學生修改密碼後標記完成
+  Given 學生已登入且 password_changed 為 false
+  When 學生送出 POST /api/auth/change-password
+  Then password_changed 更新為 true
+  And 後續登入 must_change_password 為 false
+
+@implemented
+Scenario: 批量建立學生部分失敗
+  Given 教師送出批量建立請求
+  And 其中一位學生的 seat_number 重複
+  When 系統使用 DB savepoint 逐筆處理
+  Then 成功的學生被建立
+  And 失敗的學生回傳錯誤訊息（含失敗原因）
+  And 整體回應包含 created_count 和 errors 陣列
+```
+
+### Feature: 班級管理
+
+```gherkin
+@implemented
+Scenario: 教師建立班級
+  Given 教師已登入且有所屬學校
+  When 教師送出 POST /api/classrooms 包含 name、school_id、grade
+  Then 回應 201 包含班級資料
+  And 班級自動產生 6 碼 join_code
+  And teacher_id 設為該教師
+
+@implemented
+Scenario: 學生用加入代碼加入班級
+  Given 學生已登入
+  And 班級 A 的 join_code 為 "ABC123" 且 is_active 為 true
+  When 學生送出 POST /api/classrooms/join 包含 join_code "ABC123"
+  Then 回應 200
+  And classroom_students 新增一筆記錄
+
+@implemented
+Scenario: 加入代碼對應 inactive 班級
+  Given 班級的 is_active 為 false
+  When 學生送出 POST /api/classrooms/join 包含該班級的 join_code
+  Then 回應 404 或 400 拒絕加入
+
+@implemented
+Scenario: 重新產生班級加入代碼
+  Given 教師已登入且擁有班級 A
+  When 教師送出 POST /api/classrooms/{id}/regenerate-join-code
+  Then 回應 200 包含新的 join_code
+  And 舊的 join_code 失效
+
+@implemented
+Scenario: 非班級教師或管理員無法操作班級
+  Given 使用者不是班級的 teacher 也不是 admin
+  When 使用者嘗試修改或刪除班級
+  Then 回應 403 "Not your classroom"
+```
+
+### Feature: 課文指派
+
+```gherkin
+@implemented
+Scenario: 教師指派課文到班級
+  Given 教師已登入且擁有班級 A
+  When 教師送出 POST /api/classrooms/{id}/texts 包含 text_id
+  Then 回應 201 包含指派記錄
+  And classroom_texts 新增一筆記錄
+
+@implemented
+Scenario: 學生只看到已指派的課文
+  Given 班級 A 被指派了課文 X 和課文 Y
+  And 學生屬於班級 A
+  When 學生取得課文列表
+  Then 回應只包含課文 X 和課文 Y
+
+@implemented
+Scenario: 取消課文指派
+  Given 教師已登入且班級 A 有指派課文 X
+  When 教師送出 DELETE /api/classrooms/{id}/texts/{text_id}
+  Then 回應 200
+  And 該指派記錄被移除
+```
+
+### Feature: 教師 Dashboard
+
+```gherkin
+@implemented
+Scenario: 教師查看班級列表
+  Given 教師已登入且有 2 個班級
+  When 教師送出 GET /api/teacher/classrooms
+  Then 回應 200 包含 2 個班級
+  And 每個班級包含 student_count 和 assigned_text_count
+
+@implemented
+Scenario: 教師查看班級學生學習進度
+  Given 教師已登入且擁有班級 A
+  When 教師送出 GET /api/teacher/classrooms/{id}/students
+  Then 回應 200 包含每位學生的進度資料
+  And 每位學生包含 total_sessions、last_session_date、last_text_title
+
+@implemented
+Scenario: 教師查看班級統計
+  Given 教師已登入且擁有班級 A
+  When 教師送出 GET /api/teacher/classrooms/{id}/stats
+  Then 回應 200 包含 total_students、active_students、total_sessions
+
+@implemented
+Scenario: 教師查看學生學習歷史
+  Given 教師已登入且擁有班級 A
+  And 學生 B 屬於班級 A
+  When 教師送出 GET /api/teacher/students/{id}/sessions
+  Then 回應 200 包含該學生的學習記錄列表
+
+@implemented
+Scenario: 非授權教師存取其他班級
+  Given 教師 X 不是班級 A 的教師
+  And 教師 X 也不是 admin
+  When 教師 X 送出 GET /api/teacher/classrooms/{A_id}/students
+  Then 回應 403 Forbidden
+```
+
+### Feature: Admin 後台
+
+```gherkin
+@implemented
+Scenario: Admin 查看用戶列表
+  Given 使用者以 system_admin 角色登入
+  When 使用者送出 GET /api/users 包含 search 和 pagination 參數
+  Then 回應 200 包含用戶列表
+  And 每位用戶包含角色資訊
+  And 回應包含 total 和分頁資訊
+
+@implemented
+Scenario: Admin 指派角色
+  Given 使用者以 system_admin 角色登入
+  When 使用者送出 POST /api/roles/assign 包含 user_id、role_name、scope_type
+  Then 回應 201 包含角色指派記錄
+
+@implemented
+Scenario: Admin 撤銷角色
+  Given 使用者以 system_admin 角色登入
+  When 使用者送出 DELETE /api/roles/{assignment_id}
+  Then 回應 200 且角色 is_active 設為 false
+
+@implemented
+Scenario: Admin CRUD 學校
+  Given 使用者以 system_admin 角色登入
+  When 使用者送出 POST /api/schools 包含 name 和 organization_id
+  Then 回應 201 包含學校資料
+  And 學校自動產生 8 碼 join_code
+
+@implemented
+Scenario: Admin 建立班級並批量建立學生
+  Given 使用者以 system_admin 角色登入
+  And 學校和班級已存在
+  When 使用者送出 POST /api/classrooms/{id}/students/batch
+  Then 回應 201 包含 created_count 和 errors
+
+@implemented
+Scenario: 非 Admin 存取管理端點
+  Given 使用者以 teacher 角色登入
+  When 使用者送出 GET /api/users
+  Then 回應 403 Forbidden
+```
+
+---
+
 ## 附錄
 
 ### A. 業界 UX 參考
