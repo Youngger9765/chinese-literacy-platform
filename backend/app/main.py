@@ -6,7 +6,7 @@ from .routes import stories, learning, users, auth, classrooms
 app = FastAPI(
     title="LingoLeap AI Reading Tutor API",
     description="Backend API for the LingoLeap AI Reading Tutor platform",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 app.add_middleware(
