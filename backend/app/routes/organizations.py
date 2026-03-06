@@ -42,6 +42,13 @@ def _org_to_response(org: Organization, school_count: int) -> OrganizationRespon
         is_active=org.is_active,
         created_at=org.created_at,
         school_count=school_count,
+        teacher_limit=org.teacher_limit,
+        description=org.description,
+        tax_id=org.tax_id,
+        contact_email=org.contact_email,
+        contact_phone=org.contact_phone,
+        address=org.address,
+        settings=org.settings,
     )
 
 
@@ -64,9 +71,23 @@ def create_organization(
     db: Session = Depends(get_db),
 ):
     """Create a new organization."""
+    if payload.tax_id:
+        existing = db.query(Organization).filter(
+            Organization.tax_id == payload.tax_id,
+            Organization.is_active == True,
+        ).first()
+        if existing:
+            raise HTTPException(status_code=409, detail="統一編號已被其他機構使用")
     org = Organization(
         name=payload.name,
         display_name=payload.display_name,
+        teacher_limit=payload.teacher_limit,
+        description=payload.description,
+        tax_id=payload.tax_id,
+        contact_email=payload.contact_email,
+        contact_phone=payload.contact_phone,
+        address=payload.address,
+        settings=payload.settings,
     )
     db.add(org)
     db.commit()
@@ -162,6 +183,15 @@ def update_organization(
     org_ids = get_user_org_ids(current_user)
     if org_ids is not None and org.id not in org_ids:
         raise HTTPException(status_code=403, detail="Not authorized for this organization")
+
+    if payload.tax_id is not None:
+        existing = db.query(Organization).filter(
+            Organization.tax_id == payload.tax_id,
+            Organization.is_active == True,
+            Organization.id != org_id,
+        ).first()
+        if existing:
+            raise HTTPException(status_code=409, detail="統一編號已被其他機構使用")
 
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():
