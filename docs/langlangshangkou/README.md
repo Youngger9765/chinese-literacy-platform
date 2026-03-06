@@ -41,7 +41,7 @@
 ### 產品與開發
 
 - [../PRD.md](../PRD.md) - 產品需求文件（最重要，包含完整 User Stories 與 AC）
-- [../PEDAGOGY.md](../PEDAGOGY.md) - 教學理論（曾世杰教授教學法、Reading in the Brain）
+- [../PEDAGOGY.md](../PEDAGOGY.md) - 教學理論（閱讀科學教學法、Reading in the Brain）
 - [../DEVELOPMENT_GUIDE.md](../DEVELOPMENT_GUIDE.md) - 開發指南（方大哥的開發要求）
 - [../DEVELOPMENT_TIMELINE.md](../DEVELOPMENT_TIMELINE.md) - 開發時程（6 個月計畫）
 
@@ -72,5 +72,5 @@
 
 **專案負責人**: 方大哥
 **技術團隊**: 啟翔、張靖杭
-**教學顧問**: 曾世杰教授、陳淑麗教授
+**教學顧問**: [待補充]
 **最後更新**: 2026-02-13

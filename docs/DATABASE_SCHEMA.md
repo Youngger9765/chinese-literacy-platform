@@ -16,11 +16,11 @@
 - ✅ **學習模組**：朗讀、生字詞、蘇格拉底對話
 - ✅ **評估數據**：語速、準確率、錯誤分析、停頓偵測
 - ✅ **學習進度**：能力雷達圖、掌握度追蹤
-- ✅ **課文來源**：曾教授授權教材、教師自訂課文
+- ✅ **課文來源**：已授權教材、教師自訂課文
 
 ### 3. **可擴展性**
 - ✅ 未來可新增「聽力模組」「作文批改模組」
-- ✅ 支援多種課文來源（曾教授教材、教科書、自訂）
+- ✅ 支援多種課文來源（已授權教材、教科書、自訂）
 - ✅ 支援不同年級課綱（國小 1-6 年級）
 
 ---
@@ -276,7 +276,7 @@ CREATE INDEX idx_texts_difficulty_level ON texts(difficulty_level);
 
 **說明**：
 - `content_with_bopomofo`：PRD P0 功能（注音符號切換）
-- `source`：課文來源（曾教授教材、教師自訂、出版社）
+- `source`：課文來源（已授權教材、教師自訂、出版社）
 - `difficulty_level`：未來可做智能推薦（根據學生能力推薦適合難度）
 
 ---
@@ -303,7 +303,7 @@ CREATE INDEX idx_words_radical ON words(radical);
 ```
 
 **說明**：
-- `components`：部件教學法（曾教授教學法）
+- `components`：部件教學法（閱讀科學教學法）
 - `stroke_order_json`：方大哥 9,606 字筆順資料
 
 ---
@@ -675,7 +675,7 @@ WHERE sp.last_practice_at < NOW() - INTERVAL '7 days'
 ORDER BY sp.last_practice_at ASC;
 ```
 
-**說明**：曾教授「早期介入」原則
+**說明**：閱讀科學「早期介入」原則
 
 ---
 
