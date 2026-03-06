@@ -51,6 +51,7 @@ const AdminDashboard: React.FC = () => {
           <OrgDetailPanel
             organizationId={selectedNode.id}
             onSchoolCreated={refreshSidebar}
+            onSelectSchool={(schoolId) => setSelectedNode({ type: 'school', id: schoolId })}
           />
         )}
         {selectedNode?.type === 'school' && (

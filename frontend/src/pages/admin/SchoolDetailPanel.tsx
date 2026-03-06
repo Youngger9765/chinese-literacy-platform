@@ -184,6 +184,11 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
 
   const handleToggleActive = async () => {
     if (!token || !school) return;
+    const name = school.display_name || school.name;
+    const confirmed = school.is_active
+      ? window.confirm(`確定要停用「${name}」嗎？停用後將無法使用。`)
+      : window.confirm(`確定要啟用「${name}」嗎？`);
+    if (!confirmed) return;
     setIsTogglingActive(true);
     try {
       await updateSchool(token, school.id, {

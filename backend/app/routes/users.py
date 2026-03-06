@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from ..auth.dependencies import get_current_user, require_role
 from ..database import get_db
@@ -98,21 +98,13 @@ def list_users(
 
     users = (
         query.options(
-            joinedload(User.user_roles).joinedload(UserRole.role)
+            selectinload(User.user_roles).joinedload(UserRole.role)
         )
         .order_by(User.created_at.desc())
         .offset(offset)
         .limit(limit)
         .all()
     )
-
-    # De-duplicate due to joinedload producing duplicate rows
-    seen_ids: set[int] = set()
-    unique_users: list[User] = []
-    for u in users:
-        if u.id not in seen_ids:
-            seen_ids.add(u.id)
-            unique_users.append(u)
 
     items = [
         UserListItem(
@@ -123,7 +115,7 @@ def list_users(
             created_at=u.created_at,
             roles=_build_role_items(u),
         )
-        for u in unique_users
+        for u in users
     ]
 
     return UserListResponse(items=items, total=total)

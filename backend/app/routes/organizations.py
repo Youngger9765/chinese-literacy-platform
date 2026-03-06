@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, require_role
@@ -32,13 +33,8 @@ def _get_org_or_404(org_id: str, db: Session) -> Organization:
     return org
 
 
-def _org_to_response(org: Organization, db: Session) -> OrganizationResponse:
+def _org_to_response(org: Organization, school_count: int) -> OrganizationResponse:
     """Convert an Organization ORM object to an OrganizationResponse."""
-    school_count = (
-        db.query(School)
-        .filter(School.organization_id == org.id)
-        .count()
-    )
     return OrganizationResponse(
         id=org.id,
         name=org.name,
@@ -46,6 +42,15 @@ def _org_to_response(org: Organization, db: Session) -> OrganizationResponse:
         is_active=org.is_active,
         created_at=org.created_at,
         school_count=school_count,
+    )
+
+
+def _get_school_count(org: Organization, db: Session) -> int:
+    """Fetch the school count for a single org (used outside list context)."""
+    return (
+        db.query(func.count(School.id))
+        .filter(School.organization_id == org.id)
+        .scalar()
     )
 
 
@@ -70,7 +75,7 @@ def create_organization(
         "Created organization '%s' (id=%s) by user %d",
         org.name, org.id, current_user.id,
     )
-    return _org_to_response(org, db)
+    return _org_to_response(org, _get_school_count(org, db))
 
 
 @router.get("/organizations", response_model=OrganizationListResponse)
@@ -89,8 +94,15 @@ def list_organizations(
         .limit(limit)
         .all()
     )
+    # Single grouped COUNT query for all orgs in this page — avoids N+1
+    count_map = dict(
+        db.query(School.organization_id, func.count(School.id))
+        .filter(School.organization_id.in_([o.id for o in items]))
+        .group_by(School.organization_id)
+        .all()
+    )
     return OrganizationListResponse(
-        items=[_org_to_response(o, db) for o in items],
+        items=[_org_to_response(o, count_map.get(o.id, 0)) for o in items],
         total=total,
     )
 
@@ -103,7 +115,7 @@ def get_organization(
 ):
     """Get organization detail with schools list."""
     org = _get_org_or_404(org_id, db)
-    base = _org_to_response(org, db)
+    base = _org_to_response(org, _get_school_count(org, db))
 
     # Include the list of schools under this org
     schools = (
@@ -149,4 +161,4 @@ def update_organization(
     db.commit()
     db.refresh(org)
     logger.info("Updated organization %s: %s", org_id, list(update_data.keys()))
-    return _org_to_response(org, db)
+    return _org_to_response(org, _get_school_count(org, db))

@@ -14,9 +14,10 @@ import {
 interface OrgDetailPanelProps {
   organizationId: string;
   onSchoolCreated?: () => void;
+  onSelectSchool?: (schoolId: number) => void;
 }
 
-const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoolCreated }) => {
+const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoolCreated, onSelectSchool }) => {
   const { token } = useAuth();
   const [org, setOrg] = useState<OrganizationDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,6 +98,11 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
 
   const handleToggleActive = async () => {
     if (!token || !org) return;
+    const name = org.display_name || org.name;
+    const confirmed = org.is_active
+      ? window.confirm(`確定要停用「${name}」嗎？停用後將無法使用。`)
+      : window.confirm(`確定要啟用「${name}」嗎？`);
+    if (!confirmed) return;
     setIsTogglingActive(true);
     try {
       await updateOrganization(token, org.id, {
@@ -397,9 +403,13 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
           ) : org.schools.length > 0 ? (
             <div className="divide-y divide-gray-100">
               {org.schools.map((school) => (
-                <div key={school.id} className="px-5 py-3 flex items-center justify-between">
+                <div
+                  key={school.id}
+                  onClick={() => onSelectSchool?.(school.id)}
+                  className={`px-5 py-3 flex items-center justify-between ${onSelectSchool ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+                >
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className={`text-sm font-medium ${onSelectSchool ? 'text-accent hover:underline' : 'text-gray-900'}`}>
                       {school.display_name || school.name}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">

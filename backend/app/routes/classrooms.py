@@ -3,7 +3,7 @@ import secrets
 import string
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
@@ -97,12 +97,16 @@ def _is_admin(user_id: int, db: Session) -> bool:
     ) is not None
 
 
-def _student_count(classroom: Classroom) -> int:
-    """Return the number of enrolled students."""
-    return len(classroom.classroom_students)
+def _student_count(classroom: Classroom, db: Session) -> int:
+    """Return the number of enrolled students via a COUNT query."""
+    return (
+        db.query(func.count(ClassroomStudent.student_id))
+        .filter(ClassroomStudent.classroom_id == classroom.id)
+        .scalar()
+    )
 
 
-def _classroom_to_response(classroom: Classroom) -> ClassroomResponse:
+def _classroom_to_response(classroom: Classroom, db: Session) -> ClassroomResponse:
     """Convert a Classroom ORM object to a ClassroomResponse."""
     return ClassroomResponse(
         id=classroom.id,
@@ -113,7 +117,7 @@ def _classroom_to_response(classroom: Classroom) -> ClassroomResponse:
         join_code=classroom.join_code,
         is_active=classroom.is_active,
         created_at=classroom.created_at,
-        student_count=_student_count(classroom),
+        student_count=_student_count(classroom, db),
     )
 
 
@@ -137,7 +141,7 @@ def _classroom_to_detail_response(classroom: Classroom) -> ClassroomDetailRespon
         join_code=classroom.join_code,
         is_active=classroom.is_active,
         created_at=classroom.created_at,
-        student_count=_student_count(classroom),
+        student_count=len(students),
         students=students,
     )
 
@@ -190,7 +194,7 @@ def create_classroom(
         "Created classroom %d '%s' for teacher %d in school %d (by user %d)",
         classroom.id, classroom.name, effective_teacher_id, payload.school_id, current_user.id,
     )
-    return _classroom_to_response(classroom)
+    return _classroom_to_response(classroom, db)
 
 
 @router.get("/classrooms", response_model=ClassroomListResponse)
@@ -205,7 +209,7 @@ def list_my_classrooms(
     total = query.count()
     items = query.order_by(Classroom.created_at.desc()).offset(offset).limit(limit).all()
     return ClassroomListResponse(
-        items=[_classroom_to_response(c) for c in items],
+        items=[_classroom_to_response(c, db) for c in items],
         total=total,
     )
 
@@ -240,7 +244,7 @@ def update_classroom(
     db.commit()
     db.refresh(classroom)
     logger.info("Updated classroom %d: %s", classroom_id, list(update_data.keys()))
-    return _classroom_to_response(classroom)
+    return _classroom_to_response(classroom, db)
 
 
 # ── Classroom Student Management ─────────────────────────────────────────────
@@ -374,7 +378,7 @@ def regenerate_classroom_code(
         "Regenerated join code for classroom %d (by user %d)",
         classroom_id, current_user.id,
     )
-    return _classroom_to_response(classroom)
+    return _classroom_to_response(classroom, db)
 
 
 @router.post("/classrooms/join", status_code=200, response_model=ClassroomResponse)
@@ -419,7 +423,7 @@ def join_classroom_by_code(
         "User %d joined classroom %d via join code",
         current_user.id, classroom.id,
     )
-    return _classroom_to_response(classroom)
+    return _classroom_to_response(classroom, db)
 
 
 # ── Batch Student Creation ──────────────────────────────────────────────────
