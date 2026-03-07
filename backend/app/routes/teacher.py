@@ -303,7 +303,7 @@ def get_student_sessions(
 
 def _sanitize_csv_cell(value: str) -> str:
     """Prevent CSV formula injection by prefixing dangerous leading characters."""
-    if value and value[0] in ("=", "+", "-", "@"):
+    if isinstance(value, str) and value and value[0] in ("=", "+", "-", "@", "\t", "\r"):
         return "'" + value
     return value
 
@@ -371,6 +371,6 @@ def export_classroom_report(
     # utf-8-sig encoding adds the UTF-8 BOM (EF BB BF) — do NOT write \ufeff manually
     return StreamingResponse(
         iter([csv_content.encode("utf-8-sig")]),
-        media_type="text/csv; charset=utf-8",
+        media_type="text/csv; charset=UTF-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

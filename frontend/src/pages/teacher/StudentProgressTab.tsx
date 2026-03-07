@@ -68,8 +68,8 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch {
-      // silently ignore export errors
+    } catch (err) {
+      setError('匯出失敗，請稍後再試');
     } finally {
       setExporting(false);
     }

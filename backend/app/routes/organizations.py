@@ -334,7 +334,7 @@ _ADMIN_EXPORT_ROW_LIMIT = 10_000
 
 def _sanitize_csv_cell(value: str) -> str:
     """Prevent CSV formula injection by prefixing dangerous leading characters."""
-    if value and value[0] in ("=", "+", "-", "@"):
+    if isinstance(value, str) and value and value[0] in ("=", "+", "-", "@", "\t", "\r"):
         return "'" + value
     return value
 
@@ -350,7 +350,7 @@ def export_platform_report(
 
     Optional filters: school_id, classroom_id.
     Columns: 學校名稱, 班級名稱, 學生姓名, 已完成課文數, 平均正確率, 總學習次數, 最近學習日期
-    Returns X-Rows-Truncated: true header if the result set exceeds the row limit.
+    Raises 400 if result set exceeds the row limit (use filters to narrow).
     """
     query = db.query(ClassroomStudent).join(
         Classroom, ClassroomStudent.classroom_id == Classroom.id
@@ -363,9 +363,11 @@ def export_platform_report(
 
     # Apply row limit to prevent OOM on large datasets
     enrollments = query.limit(_ADMIN_EXPORT_ROW_LIMIT + 1).all()
-    truncated = len(enrollments) > _ADMIN_EXPORT_ROW_LIMIT
-    if truncated:
-        enrollments = enrollments[:_ADMIN_EXPORT_ROW_LIMIT]
+    if len(enrollments) > _ADMIN_EXPORT_ROW_LIMIT:
+        raise HTTPException(
+            status_code=400,
+            detail=f"匯出資料量過大，請加上 school_id 或 classroom_id 篩選條件（上限 {_ADMIN_EXPORT_ROW_LIMIT:,} 筆）",
+        )
 
     # Batch-load all sessions for these students in one query to avoid N+1
     student_ids = [e.student_id for e in enrollments]
@@ -418,13 +420,8 @@ def export_platform_report(
 
     filename = f"platform-report-{datetime.now().strftime('%Y%m%d')}.csv"
     # utf-8-sig encoding adds the UTF-8 BOM (EF BB BF) — do NOT write \ufeff manually
-    extra_headers: dict[str, str] = {
-        "Content-Disposition": f'attachment; filename="{filename}"',
-    }
-    if truncated:
-        extra_headers["X-Rows-Truncated"] = "true"
     return StreamingResponse(
         iter([csv_content.encode("utf-8-sig")]),
-        media_type="text/csv; charset=utf-8",
-        headers=extra_headers,
+        media_type="text/csv; charset=UTF-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
