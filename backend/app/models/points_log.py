@@ -9,7 +9,7 @@ class OrganizationPointsLog(Base):
     __tablename__ = "organization_points_log"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id"), nullable=False, index=True)
+    organization_id: Mapped[str] = mapped_column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
     user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     points_used: Mapped[int] = mapped_column(Integer, nullable=False)
     feature_type: Mapped[str] = mapped_column(String(50), nullable=False)
