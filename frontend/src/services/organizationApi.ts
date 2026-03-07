@@ -14,6 +14,12 @@ export interface OrganizationResponse {
   is_active: boolean;
   created_at: string;
   school_count: number;
+  description: string | null;
+  tax_id: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  address: string | null;
+  settings: Record<string, unknown> | null;
 }
 
 export interface SchoolInOrgResponse {
@@ -72,9 +78,18 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 // --- API functions ---
 
+export interface OrganizationBusinessFields {
+  description?: string;
+  tax_id?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  address?: string;
+  settings?: Record<string, unknown>;
+}
+
 export async function createOrganization(
   token: string,
-  data: { name: string; display_name?: string },
+  data: { name: string; display_name?: string } & OrganizationBusinessFields,
 ): Promise<OrganizationResponse> {
   const res = await fetch(`${API_BASE}/api/organizations`, {
     method: 'POST',
@@ -114,7 +129,7 @@ export async function getOrganization(
 export async function updateOrganization(
   token: string,
   organizationId: string,
-  data: { name?: string; display_name?: string; is_active?: boolean },
+  data: { name?: string; display_name?: string; is_active?: boolean } & OrganizationBusinessFields,
 ): Promise<OrganizationResponse> {
   const res = await fetch(`${API_BASE}/api/organizations/${organizationId}`, {
     method: 'PATCH',

@@ -28,6 +28,11 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDisplayName, setEditDisplayName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editTaxId, setEditTaxId] = useState('');
+  const [editContactEmail, setEditContactEmail] = useState('');
+  const [editContactPhone, setEditContactPhone] = useState('');
+  const [editAddress, setEditAddress] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [editError, setEditError] = useState('');
 
@@ -69,6 +74,11 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
     if (!org) return;
     setEditName(org.name);
     setEditDisplayName(org.display_name || '');
+    setEditDescription(org.description || '');
+    setEditTaxId(org.tax_id || '');
+    setEditContactEmail(org.contact_email || '');
+    setEditContactPhone(org.contact_phone || '');
+    setEditAddress(org.address || '');
     setEditError('');
     setIsEditing(true);
   };
@@ -83,6 +93,11 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
       await updateOrganization(token, org.id, {
         name: editName.trim(),
         display_name: editDisplayName.trim() || undefined,
+        description: editDescription.trim() || undefined,
+        tax_id: editTaxId.trim() || undefined,
+        contact_email: editContactEmail.trim() || undefined,
+        contact_phone: editContactPhone.trim() || undefined,
+        address: editAddress.trim() || undefined,
       });
       setIsEditing(false);
       await loadOrg();
@@ -238,6 +253,72 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
                     className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
                   />
                 </div>
+                <div>
+                  <label htmlFor="edit-org-tax-id" className="block text-sm font-medium text-gray-700 mb-1">
+                    統一編號
+                  </label>
+                  <input
+                    id="edit-org-tax-id"
+                    type="text"
+                    value={editTaxId}
+                    onChange={(e) => setEditTaxId(e.target.value)}
+                    placeholder="例：12345678"
+                    maxLength={20}
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="edit-org-email" className="block text-sm font-medium text-gray-700 mb-1">
+                    聯絡信箱
+                  </label>
+                  <input
+                    id="edit-org-email"
+                    type="email"
+                    value={editContactEmail}
+                    onChange={(e) => setEditContactEmail(e.target.value)}
+                    placeholder="contact@example.com"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="edit-org-phone" className="block text-sm font-medium text-gray-700 mb-1">
+                    聯絡電話
+                  </label>
+                  <input
+                    id="edit-org-phone"
+                    type="text"
+                    value={editContactPhone}
+                    onChange={(e) => setEditContactPhone(e.target.value)}
+                    placeholder="例：02-1234-5678"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="edit-org-address" className="block text-sm font-medium text-gray-700 mb-1">
+                    地址
+                  </label>
+                  <input
+                    id="edit-org-address"
+                    type="text"
+                    value={editAddress}
+                    onChange={(e) => setEditAddress(e.target.value)}
+                    placeholder="例：台北市中正區重慶南路一段122號"
+                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="edit-org-description" className="block text-sm font-medium text-gray-700 mb-1">
+                    備註說明
+                  </label>
+                  <textarea
+                    id="edit-org-description"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={3}
+                    placeholder="機構簡介或備註"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors resize-none"
+                  />
+                </div>
               </div>
               <div className="flex gap-3 justify-end">
                 <button
@@ -297,6 +378,45 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
             </div>
           )}
         </div>
+
+        {/* Business info card */}
+        {!isEditing && (org.description || org.tax_id || org.contact_email || org.contact_phone || org.address) && (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h3 className="font-bold text-gray-900 mb-4">商業資訊</h3>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+              {org.tax_id && (
+                <>
+                  <dt className="text-gray-500">統一編號</dt>
+                  <dd className="text-gray-900 font-mono">{org.tax_id}</dd>
+                </>
+              )}
+              {org.contact_email && (
+                <>
+                  <dt className="text-gray-500">聯絡信箱</dt>
+                  <dd className="text-gray-900">{org.contact_email}</dd>
+                </>
+              )}
+              {org.contact_phone && (
+                <>
+                  <dt className="text-gray-500">聯絡電話</dt>
+                  <dd className="text-gray-900">{org.contact_phone}</dd>
+                </>
+              )}
+              {org.address && (
+                <>
+                  <dt className="text-gray-500">地址</dt>
+                  <dd className="text-gray-900 sm:col-span-1">{org.address}</dd>
+                </>
+              )}
+              {org.description && (
+                <>
+                  <dt className="text-gray-500 sm:col-span-2 mt-1">備註說明</dt>
+                  <dd className="text-gray-700 sm:col-span-2 whitespace-pre-wrap">{org.description}</dd>
+                </>
+              )}
+            </dl>
+          </div>
+        )}
 
         {/* Schools in this org */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
