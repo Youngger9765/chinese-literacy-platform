@@ -9,8 +9,10 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
+from ..models.user import UserRole, Role
 from ..database import get_db
 from ..models.organization import Organization
+from ..models.points_log import OrganizationPointsLog
 from ..models.school import Classroom, ClassroomStudent, School
 from ..models.session import LearningSession
 from ..models.user import Role, User, UserRole
@@ -21,6 +23,8 @@ from ..schemas.organization import (
     OrganizationListResponse,
     OrganizationResponse,
     OrganizationUpdateRequest,
+    PointsLogListResponse,
+    PointsLogResponse,
     SchoolStatItem,
 )
 from ..schemas.school import SchoolResponse
@@ -46,6 +50,7 @@ def _org_to_response(org: Organization, school_count: int) -> OrganizationRespon
         id=org.id,
         name=org.name,
         display_name=org.display_name,
+        teacher_limit=org.teacher_limit,
         is_active=org.is_active,
         created_at=org.created_at,
         school_count=school_count,
@@ -56,6 +61,10 @@ def _org_to_response(org: Organization, school_count: int) -> OrganizationRespon
         contact_phone=org.contact_phone,
         address=org.address,
         settings=org.settings,
+        total_points=org.total_points,
+        used_points=org.used_points,
+        subscription_start_date=org.subscription_start_date,
+        subscription_end_date=org.subscription_end_date,
     )
 
 
@@ -95,6 +104,9 @@ def create_organization(
         contact_phone=payload.contact_phone,
         address=payload.address,
         settings=payload.settings,
+        total_points=payload.total_points,
+        subscription_start_date=payload.subscription_start_date,
+        subscription_end_date=payload.subscription_end_date,
     )
     db.add(org)
     db.commit()
@@ -425,3 +437,69 @@ def export_platform_report(
         media_type="text/csv; charset=UTF-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+# -- Points Logs --------------------------------------------------------------
+
+
+@router.get("/organizations/{org_id}/points/logs", response_model=PointsLogListResponse)
+def get_points_logs(
+    org_id: str,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """List points usage logs for an organization."""
+    org = _get_org_or_404(org_id, db)
+
+    # Permission: system_admin (sees all) or org_owner/org_admin for this org specifically
+    _ADMIN_ROLES = ("system_admin", "org_owner", "org_admin")
+    has_permission = (
+        db.query(UserRole)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(
+            UserRole.user_id == current_user.id,
+            UserRole.is_active == True,
+            Role.name.in_(_ADMIN_ROLES),
+        )
+        .filter(
+            (Role.name == "system_admin") |
+            ((UserRole.scope_type == "organization") & (UserRole.scope_id == org.id))
+        )
+        .first()
+    )
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Not authorized for this organization")
+
+    base_query = db.query(OrganizationPointsLog).filter(
+        OrganizationPointsLog.organization_id == org_id
+    )
+    total = base_query.count()
+    logs = (
+        base_query.order_by(OrganizationPointsLog.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    # Fetch user display names for log entries
+    user_ids = {log.user_id for log in logs if log.user_id is not None}
+    user_name_map: dict[int, str] = {}
+    if user_ids:
+        users = db.query(User.id, User.name).filter(User.id.in_(user_ids)).all()
+        user_name_map = {u.id: u.name for u in users}
+
+    items = [
+        PointsLogResponse(
+            id=log.id,
+            organization_id=log.organization_id,
+            user_id=log.user_id,
+            user_name=user_name_map.get(log.user_id) if log.user_id else None,
+            points_used=log.points_used,
+            feature_type=log.feature_type,
+            description=log.description,
+            created_at=log.created_at,
+        )
+        for log in logs
+    ]
+
+    return PointsLogListResponse(items=items, total=total)

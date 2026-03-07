@@ -4,7 +4,9 @@ import { PlusIcon, SchoolIcon } from '../../components/icons';
 import {
   getOrganization,
   updateOrganization,
+  getPointsLogs,
   OrganizationDetailResponse,
+  PointsLogResponse,
   OrganizationApiError,
 } from '../../services/organizationApi';
 import {
@@ -17,6 +19,8 @@ interface OrgDetailPanelProps {
   onSchoolCreated?: () => void;
   onSelectSchool?: (schoolId: number) => void;
 }
+
+const LOGS_PAGE_SIZE = 10;
 
 const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoolCreated, onSelectSchool }) => {
   const { token } = useAuth();
@@ -47,6 +51,12 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
   const [isSubmittingSchool, setIsSubmittingSchool] = useState(false);
   const [createSchoolError, setCreateSchoolError] = useState('');
 
+  // Points logs state
+  const [logs, setLogs] = useState<PointsLogResponse[]>([]);
+  const [logsTotal, setLogsTotal] = useState(0);
+  const [logsOffset, setLogsOffset] = useState(0);
+  const [logsLoading, setLogsLoading] = useState(false);
+
   const loadOrg = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
@@ -65,10 +75,32 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
     }
   }, [token, organizationId]);
 
+  const loadLogs = useCallback(async (offset: number) => {
+    if (!token) return;
+    setLogsLoading(true);
+    try {
+      const data = await getPointsLogs(token, organizationId, { limit: LOGS_PAGE_SIZE, offset });
+      if (offset === 0) {
+        setLogs(data.items);
+      } else {
+        setLogs((prev) => [...prev, ...data.items]);
+      }
+      setLogsTotal(data.total);
+      setLogsOffset(offset);
+    } catch {
+      // silently ignore log load errors
+    } finally {
+      setLogsLoading(false);
+    }
+  }, [token, organizationId]);
+
   useEffect(() => {
     setIsEditing(false);
+    setLogs([]);
+    setLogsOffset(0);
     loadOrg();
-  }, [loadOrg]);
+    loadLogs(0);
+  }, [loadOrg, loadLogs]);
 
   const startEditing = () => {
     if (!org) return;
@@ -174,6 +206,15 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
 
+  const formatDateTime = (dateStr: string) =>
+    new Date(dateStr).toLocaleString('zh-TW', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
   if (isLoading) {
     return (
       <div className="p-6 sm:p-8">
@@ -203,6 +244,11 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
   }
 
   if (!org) return null;
+
+  const remainingPoints = org.total_points != null ? org.total_points - org.used_points : null;
+  const usagePercent = org.total_points != null && org.total_points > 0
+    ? Math.min(100, Math.round((org.used_points / org.total_points) * 100))
+    : 0;
 
   return (
     <div className="p-6 sm:p-8">
@@ -417,6 +463,110 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
             </dl>
           </div>
         )}
+
+
+        {/* Points section — only show if total_points is set */}
+        {org.total_points != null && (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h3 className="font-bold text-gray-900 mb-4">點數使用狀況</h3>
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-gray-900">{org.total_points.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-1">總點數</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-amber-600">{org.used_points.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-1">已使用</p>
+              </div>
+              <div className="text-center">
+                <p className={`text-2xl font-bold ${(remainingPoints ?? 0) <= 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                  {(remainingPoints ?? 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">剩餘</p>
+              </div>
+            </div>
+            {/* Progress bar */}
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div
+                className={`h-2 rounded-full transition-all ${usagePercent >= 90 ? 'bg-red-500' : usagePercent >= 70 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                style={{ width: `${usagePercent}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1 text-right">{usagePercent}% 已使用</p>
+            {/* Subscription period */}
+            {(org.subscription_start_date || org.subscription_end_date) && (
+              <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-500">
+                <span className="font-medium text-gray-700">授權期間：</span>
+                {org.subscription_start_date ? formatDate(org.subscription_start_date) : '—'}
+                {' ~ '}
+                {org.subscription_end_date ? formatDate(org.subscription_end_date) : '—'}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Points log section */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="p-5 border-b border-gray-100">
+            <h3 className="font-bold text-gray-900">點數使用紀錄</h3>
+            <p className="text-xs text-gray-500 mt-0.5">共 {logsTotal} 筆</p>
+          </div>
+          {logs.length === 0 && !logsLoading ? (
+            <div className="p-8 text-center text-sm text-gray-400">尚無使用紀錄</div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                      <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">使用者</th>
+                      <th className="text-right px-5 py-3 text-xs font-medium text-gray-500">點數</th>
+                      <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">功能類型</th>
+                      <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">說明</th>
+                      <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">時間</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {logs.map((log) => (
+                      <tr key={log.id} className="hover:bg-gray-50/50">
+                        <td className="px-5 py-3 text-gray-700">
+                          {log.user_name ?? <span className="text-gray-400">—</span>}
+                        </td>
+                        <td className="px-5 py-3 text-right text-amber-700 font-medium">
+                          -{log.points_used}
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className="inline-block px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs">
+                            {log.feature_type}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-gray-500 max-w-xs truncate">
+                          {log.description ?? <span className="text-gray-300">—</span>}
+                        </td>
+                        <td className="px-5 py-3 text-gray-400 whitespace-nowrap">
+                          {formatDateTime(log.created_at)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* Load more */}
+              {logs.length < logsTotal && (
+                <div className="p-4 text-center border-t border-gray-100">
+                  <button
+                    onClick={() => loadLogs(logsOffset + LOGS_PAGE_SIZE)}
+                    disabled={logsLoading}
+                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  >
+                    {logsLoading ? '載入中...' : '載入更多'}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
 
         {/* Schools in this org */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">

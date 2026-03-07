@@ -20,6 +20,10 @@ export interface OrganizationResponse {
   contact_phone: string | null;
   address: string | null;
   settings: Record<string, unknown> | null;
+  total_points: number | null;
+  used_points: number;
+  subscription_start_date: string | null;
+  subscription_end_date: string | null;
 }
 
 export interface SchoolInOrgResponse {
@@ -39,6 +43,22 @@ export interface OrganizationDetailResponse extends OrganizationResponse {
 
 export interface OrganizationListResponse {
   items: OrganizationResponse[];
+  total: number;
+}
+
+export interface PointsLogResponse {
+  id: number;
+  organization_id: string;
+  user_id: number | null;
+  user_name: string | null;
+  points_used: number;
+  feature_type: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface PointsLogListResponse {
+  items: PointsLogResponse[];
   total: number;
 }
 
@@ -166,4 +186,22 @@ export async function getOrgDashboard(
     headers: { Authorization: `Bearer ${token}` },
   });
   return handleResponse<OrgDashboardResponse>(res);
+}
+
+export async function getPointsLogs(
+  token: string,
+  organizationId: string,
+  params?: { limit?: number; offset?: number },
+): Promise<PointsLogListResponse> {
+  const query = new URLSearchParams();
+  if (params?.limit != null) query.set('limit', String(params.limit));
+  if (params?.offset != null) query.set('offset', String(params.offset));
+
+  const qs = query.toString();
+  const url = `${API_BASE}/api/organizations/${organizationId}/points/logs${qs ? `?${qs}` : ''}`;
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<PointsLogListResponse>(res);
 }
