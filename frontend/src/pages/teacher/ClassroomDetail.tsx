@@ -12,12 +12,14 @@ import {
 import StudentProgressTab from './StudentProgressTab';
 import TextManagementTab from './TextManagementTab';
 import StudentListTab from './StudentListTab';
+import AssignmentTab from './AssignmentTab';
 
-type TabKey = 'progress' | 'texts' | 'students';
+type TabKey = 'progress' | 'texts' | 'assignments' | 'students';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'progress', label: '學生進度' },
   { key: 'texts', label: '課文管理' },
+  { key: 'assignments', label: '作業管理' },
   { key: 'students', label: '學生名單' },
 ];
 
@@ -369,6 +371,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
           {activeTab === 'texts' && (
             <TextManagementTab classroomId={classroomId} />
+          )}
+
+          {activeTab === 'assignments' && (
+            <AssignmentTab classroomId={classroomId} />
           )}
 
           {activeTab === 'students' && (

@@ -14,6 +14,7 @@ export function useAppView(): AppView {
   if (pathname === '/teacher') return AppView.TEACHER_DASHBOARD;
   if (pathname.startsWith('/teacher/classroom/')) return AppView.CLASSROOM_DETAIL;
   if (pathname === '/admin') return AppView.ADMIN_DASHBOARD;
+  if (pathname === '/assignments') return AppView.MY_ASSIGNMENTS;
 
   // Learning flow: /learn/:storyId/<step>
   if (pathname.includes('/learn/')) {
