@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   getClassroomProgress,
   getStudentSessions,
+  exportClassroomReport,
   StudentProgress,
   StudentSession,
   TeacherApiError,
@@ -17,6 +18,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [progress, setProgress] = useState<StudentProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   // Expand / session history state
   const [expandedStudentId, setExpandedStudentId] = useState<number | null>(null);
@@ -52,6 +54,26 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   useEffect(() => {
     loadProgress();
   }, [loadProgress]);
+
+  const handleExport = useCallback(async () => {
+    if (!token) return;
+    try {
+      setExporting(true);
+      const blob = await exportClassroomReport(token, classroomId);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `classroom-report-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError('匯出失敗，請稍後再試');
+    } finally {
+      setExporting(false);
+    }
+  }, [token, classroomId]);
 
   const handleRowClick = useCallback(async (studentId: number) => {
     // Toggle collapse if already expanded
@@ -158,6 +180,18 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
 
   return (
     <div className="p-5">
+      <div className="flex justify-end mb-3">
+        <button
+          onClick={handleExport}
+          disabled={exporting}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          {exporting ? '匯出中...' : '匯出 CSV'}
+        </button>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

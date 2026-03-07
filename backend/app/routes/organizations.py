@@ -1,15 +1,19 @@
+import csv
+import io
 import logging
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
 from ..database import get_db
 from ..models.organization import Organization
-from ..models.school import School, Classroom, ClassroomStudent
+from ..models.school import Classroom, ClassroomStudent, School
 from ..models.session import LearningSession
-from ..models.user import User, UserRole, Role
+from ..models.user import Role, User, UserRole
 from ..schemas.organization import (
     OrgDashboardResponse,
     OrganizationCreateRequest,
@@ -320,4 +324,104 @@ def get_organization_dashboard(
         total_sessions=sum(item.session_count for item in school_stats),
         completed_sessions=completed_sessions,
         school_stats=school_stats,
+    )
+
+
+# -- Admin Report Export -------------------------------------------------------
+
+_ADMIN_EXPORT_ROW_LIMIT = 10_000
+
+
+def _sanitize_csv_cell(value: str) -> str:
+    """Prevent CSV formula injection by prefixing dangerous leading characters."""
+    if isinstance(value, str) and value and value[0] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + value
+    return value
+
+
+@router.get("/admin/reports/export")
+def export_platform_report(
+    school_id: int | None = Query(None),
+    classroom_id: int | None = Query(None),
+    current_user: User = require_role("system_admin"),
+    db: Session = Depends(get_db),
+):
+    """Export platform-wide student progress as a UTF-8 BOM CSV (system_admin only).
+
+    Optional filters: school_id, classroom_id.
+    Columns: 學校名稱, 班級名稱, 學生姓名, 已完成課文數, 平均正確率, 總學習次數, 最近學習日期
+    Raises 400 if result set exceeds the row limit (use filters to narrow).
+    """
+    query = db.query(ClassroomStudent).join(
+        Classroom, ClassroomStudent.classroom_id == Classroom.id
+    ).join(School, Classroom.school_id == School.id)
+
+    if classroom_id is not None:
+        query = query.filter(ClassroomStudent.classroom_id == classroom_id)
+    elif school_id is not None:
+        query = query.filter(Classroom.school_id == school_id)
+
+    # Apply row limit to prevent OOM on large datasets
+    enrollments = query.limit(_ADMIN_EXPORT_ROW_LIMIT + 1).all()
+    if len(enrollments) > _ADMIN_EXPORT_ROW_LIMIT:
+        raise HTTPException(
+            status_code=400,
+            detail=f"匯出資料量過大，請加上 school_id 或 classroom_id 篩選條件（上限 {_ADMIN_EXPORT_ROW_LIMIT:,} 筆）",
+        )
+
+    # Batch-load all sessions for these students in one query to avoid N+1
+    student_ids = [e.student_id for e in enrollments]
+    all_sessions = (
+        db.query(LearningSession)
+        .filter(LearningSession.student_id.in_(student_ids))
+        .all()
+        if student_ids
+        else []
+    )
+    sessions_by_student: dict[int, list] = {}
+    for s in all_sessions:
+        sessions_by_student.setdefault(s.student_id, []).append(s)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "學校名稱", "班級名稱", "學生姓名",
+        "已完成課文數", "平均正確率", "總學習次數", "最近學習日期",
+    ])
+
+    for enrollment in enrollments:
+        student = enrollment.student
+        classroom = enrollment.classroom
+        school = classroom.school
+        sessions = sessions_by_student.get(student.id, [])
+
+        total_sessions = len(sessions)
+        completed_sessions = [s for s in sessions if s.status == "completed"]
+        completed_texts = len({s.story_slug for s in completed_sessions if s.story_slug})
+
+        scores = [s.accuracy for s in sessions if s.accuracy is not None]
+        avg_accuracy = f"{sum(scores) / len(scores):.1f}%" if scores else ""
+
+        latest = max(sessions, key=lambda s: s.started_at, default=None)
+        last_date = latest.started_at.strftime("%Y-%m-%d") if latest else ""
+
+        writer.writerow([
+            _sanitize_csv_cell(school.name),
+            _sanitize_csv_cell(classroom.name),
+            _sanitize_csv_cell(student.name),
+            completed_texts,
+            avg_accuracy,
+            total_sessions,
+            last_date,
+        ])
+
+    csv_content = output.getvalue()
+    output.close()
+
+    filename = f"platform-report-{datetime.now().strftime('%Y%m%d')}.csv"
+    # utf-8-sig encoding adds the UTF-8 BOM (EF BB BF) — do NOT write \ufeff manually
+    return StreamingResponse(
+        iter([csv_content.encode("utf-8-sig")]),
+        media_type="text/csv; charset=UTF-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

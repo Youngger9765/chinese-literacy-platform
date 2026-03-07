@@ -144,3 +144,12 @@ export async function unassignText(
     throw new TeacherApiError(message, res.status);
   }
 }
+
+/** Export classroom report as a CSV Blob. */
+export async function exportClassroomReport(token: string, classroomId: number): Promise<Blob> {
+  const res = await fetch(`${API_BASE}/api/teacher/classrooms/${classroomId}/export`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new TeacherApiError('Export failed', res.status);
+  return res.blob();
+}
