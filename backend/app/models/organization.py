@@ -2,15 +2,9 @@ from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import Integer, String, Boolean, DateTime, Text, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from .base import Base
-
-try:
-    from sqlalchemy.dialects.postgresql import JSONB
-    _JSONB = JSONB
-except ImportError:
-    from sqlalchemy import JSON
-    _JSONB = JSON
 
 
 class Organization(Base):
@@ -32,4 +26,4 @@ class Organization(Base):
     contact_email: Mapped[str | None] = mapped_column(String(200), nullable=True)
     contact_phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
     address: Mapped[str | None] = mapped_column(Text, nullable=True)
-    settings: Mapped[dict | None] = mapped_column(_JSONB, nullable=True)
+    settings: Mapped[dict | None] = mapped_column(JSONB, nullable=True)

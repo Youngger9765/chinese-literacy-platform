@@ -74,7 +74,7 @@ def create_organization(
     if payload.tax_id:
         existing = db.query(Organization).filter(
             Organization.tax_id == payload.tax_id,
-            Organization.is_active == True,
+            Organization.is_active.is_(True),
         ).first()
         if existing:
             raise HTTPException(status_code=409, detail="統一編號已被其他機構使用")
@@ -187,7 +187,7 @@ def update_organization(
     if payload.tax_id is not None:
         existing = db.query(Organization).filter(
             Organization.tax_id == payload.tax_id,
-            Organization.is_active == True,
+            Organization.is_active.is_(True),
             Organization.id != org_id,
         ).first()
         if existing:

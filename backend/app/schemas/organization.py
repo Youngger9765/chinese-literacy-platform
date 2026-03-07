@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class OrganizationCreateRequest(BaseModel):
@@ -12,7 +12,7 @@ class OrganizationCreateRequest(BaseModel):
     teacher_limit: int | None = None
     description: str | None = None
     tax_id: str | None = Field(None, max_length=20)
-    contact_email: str | None = None
+    contact_email: EmailStr | None = None
     contact_phone: str | None = None
     address: str | None = None
     settings: dict | None = None
@@ -25,7 +25,7 @@ class OrganizationUpdateRequest(BaseModel):
     teacher_limit: int | None = None
     description: str | None = None
     tax_id: str | None = Field(None, max_length=20)
-    contact_email: str | None = None
+    contact_email: EmailStr | None = None
     contact_phone: str | None = None
     address: str | None = None
     settings: dict | None = None
@@ -41,7 +41,7 @@ class OrganizationResponse(BaseModel):
     school_count: int = 0
     description: str | None = None
     tax_id: str | None = None
-    contact_email: str | None = None
+    contact_email: EmailStr | None = None
     contact_phone: str | None = None
     address: str | None = None
     settings: dict | None = None
