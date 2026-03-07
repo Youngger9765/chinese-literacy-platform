@@ -76,6 +76,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   const isDrawingRef = useRef(false);
   const isAutoLoopingRef = useRef(false);
   const pendingAutoStartRef = useRef(false);
+  const loopTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   /* ---- Off-screen canvas (created once, reused) ---- */
   const getOffCanvas = useCallback(() => {
@@ -139,6 +140,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     return () => {
       cancelAnimationFrame(animFrameRef.current);
       cancelAnimationFrame(hintFrameRef.current);
+      clearTimeout(loopTimerRef.current);
     };
   }, [character]);
 
@@ -179,7 +181,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         r.current.completedStrokes = d2.nStrokes;
         doRender();
         if (isAutoLoopingRef.current) {
-          setTimeout(() => {
+          loopTimerRef.current = setTimeout(() => {
             if (isAutoLoopingRef.current) startAnimation();
           }, 800);
           return;
@@ -216,10 +218,10 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     if (m.current.step === Step.ANIMATION) setStep(Step.PRACTICE_1);
   }, [doRender]);
 
-  const handleRetry = useCallback(() => {
-    if (!data) return;
+  const resetAndLoop = useCallback((d: CharacterStrokeData) => {
     cancelAnimationFrame(animFrameRef.current);
     cancelAnimationFrame(hintFrameRef.current);
+    clearTimeout(loopTimerRef.current);
     setStep(Step.ANIMATION);
     setMode('idle');
     setPracticeLeft(4);
@@ -230,11 +232,16 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       hintStroke: -1, hintProgress: 0, correctPaths: [], activeBrush: [],
     };
     m.current.showOutline = true;
-    m.current.mistakes = new Array(data.nStrokes).fill(0);
+    m.current.mistakes = new Array(d.nStrokes).fill(0);
     m.current.quizStroke = 0;
     isAutoLoopingRef.current = true;
     startAnimation();
-  }, [data, startAnimation]);
+  }, [startAnimation]);
+
+  const handleRetry = useCallback(() => {
+    if (!data) return;
+    resetAndLoop(data);
+  }, [data, resetAndLoop]);
 
   /* ---- Auto-start animation loop when data first loads ---- */
   useEffect(() => {
@@ -517,7 +524,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       )}
 
       {/* Step guidance */}
-      <StepGuidance step={step} mode={mode} />
+      <StepGuidance mode={mode} />
 
       {/* Toast */}
       {toast && (
@@ -531,41 +538,10 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
 
 /* ---- Sub-components ---- */
 
-function CtrlBtn({ icon, label, active, glow, disabled, onClick }: {
-  icon: string; label: string; active: boolean; glow: boolean;
-  disabled: boolean; onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={[
-        'flex flex-col items-center gap-1 px-5 py-2.5 rounded-xl transition-all',
-        disabled ? 'opacity-30 cursor-not-allowed' : 'hover:bg-slate-800 active:scale-95',
-        glow ? 'ring-2 ring-yellow-400/70 bg-slate-800/50' : '',
-        active ? 'text-accent-light' : 'text-slate-400',
-      ].join(' ')}
-    >
-      <span className="text-2xl leading-none">{icon}</span>
-      <span className="text-xs font-bold">{label}</span>
-    </button>
-  );
-}
-
-function StepGuidance({ step, mode }: { step: Step; mode: string }) {
+function StepGuidance({ mode }: { mode: string }) {
   let text = '';
   if (mode === 'animating') text = '觀看筆順動畫，按「開始練習」開始書寫';
   else if (mode === 'quizzing') text = '請在格子裡寫出每一筆';
-  else {
-    switch (step) {
-      case Step.ANIMATION: text = '筆順動畫播放中…'; break;
-      case Step.PRACTICE_1:
-      case Step.PRACTICE_2:
-      case Step.PRACTICE_3: text = '按「寫字」開始練習（有邊框）'; break;
-      case Step.PRACTICE_NO_OUTLINE: text = '按「寫字」不看邊框再寫一次'; break;
-      case Step.COMPLETE: text = ''; break;
-    }
-  }
   return text ? (
     <p className="text-xs text-slate-500 text-center max-w-xs">{text}</p>
   ) : null;
