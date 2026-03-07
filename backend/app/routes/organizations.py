@@ -329,6 +329,15 @@ def get_organization_dashboard(
 
 # -- Admin Report Export -------------------------------------------------------
 
+_ADMIN_EXPORT_ROW_LIMIT = 10_000
+
+
+def _sanitize_csv_cell(value: str) -> str:
+    """Prevent CSV formula injection by prefixing dangerous leading characters."""
+    if value and value[0] in ("=", "+", "-", "@"):
+        return "'" + value
+    return value
+
 
 @router.get("/admin/reports/export")
 def export_platform_report(
@@ -341,6 +350,7 @@ def export_platform_report(
 
     Optional filters: school_id, classroom_id.
     Columns: 學校名稱, 班級名稱, 學生姓名, 已完成課文數, 平均正確率, 總學習次數, 最近學習日期
+    Returns X-Rows-Truncated: true header if the result set exceeds the row limit.
     """
     query = db.query(ClassroomStudent).join(
         Classroom, ClassroomStudent.classroom_id == Classroom.id
@@ -351,10 +361,26 @@ def export_platform_report(
     elif school_id is not None:
         query = query.filter(Classroom.school_id == school_id)
 
-    enrollments = query.all()
+    # Apply row limit to prevent OOM on large datasets
+    enrollments = query.limit(_ADMIN_EXPORT_ROW_LIMIT + 1).all()
+    truncated = len(enrollments) > _ADMIN_EXPORT_ROW_LIMIT
+    if truncated:
+        enrollments = enrollments[:_ADMIN_EXPORT_ROW_LIMIT]
+
+    # Batch-load all sessions for these students in one query to avoid N+1
+    student_ids = [e.student_id for e in enrollments]
+    all_sessions = (
+        db.query(LearningSession)
+        .filter(LearningSession.student_id.in_(student_ids))
+        .all()
+        if student_ids
+        else []
+    )
+    sessions_by_student: dict[int, list] = {}
+    for s in all_sessions:
+        sessions_by_student.setdefault(s.student_id, []).append(s)
 
     output = io.StringIO()
-    output.write("\ufeff")
     writer = csv.writer(output)
     writer.writerow([
         "學校名稱", "班級名稱", "學生姓名",
@@ -365,12 +391,7 @@ def export_platform_report(
         student = enrollment.student
         classroom = enrollment.classroom
         school = classroom.school
-
-        sessions = (
-            db.query(LearningSession)
-            .filter(LearningSession.student_id == student.id)
-            .all()
-        )
+        sessions = sessions_by_student.get(student.id, [])
 
         total_sessions = len(sessions)
         completed_sessions = [s for s in sessions if s.status == "completed"]
@@ -383,9 +404,9 @@ def export_platform_report(
         last_date = latest.started_at.strftime("%Y-%m-%d") if latest else ""
 
         writer.writerow([
-            school.name,
-            classroom.name,
-            student.name,
+            _sanitize_csv_cell(school.name),
+            _sanitize_csv_cell(classroom.name),
+            _sanitize_csv_cell(student.name),
             completed_texts,
             avg_accuracy,
             total_sessions,
@@ -396,8 +417,14 @@ def export_platform_report(
     output.close()
 
     filename = f"platform-report-{datetime.now().strftime('%Y%m%d')}.csv"
+    # utf-8-sig encoding adds the UTF-8 BOM (EF BB BF) — do NOT write \ufeff manually
+    extra_headers: dict[str, str] = {
+        "Content-Disposition": f'attachment; filename="{filename}"',
+    }
+    if truncated:
+        extra_headers["X-Rows-Truncated"] = "true"
     return StreamingResponse(
         iter([csv_content.encode("utf-8-sig")]),
-        media_type="text/csv; charset=utf-8-sig",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        media_type="text/csv; charset=utf-8",
+        headers=extra_headers,
     )

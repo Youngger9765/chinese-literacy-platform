@@ -301,6 +301,13 @@ def get_student_sessions(
     return results
 
 
+def _sanitize_csv_cell(value: str) -> str:
+    """Prevent CSV formula injection by prefixing dangerous leading characters."""
+    if value and value[0] in ("=", "+", "-", "@"):
+        return "'" + value
+    return value
+
+
 @router.get("/teacher/classrooms/{classroom_id}/export")
 def export_classroom_report(
     classroom_id: int,
@@ -317,20 +324,27 @@ def export_classroom_report(
         .all()
     )
 
+    # Batch-load all sessions for students in this classroom to avoid N+1 queries
+    student_ids = [e.student_id for e in enrollments]
+    all_sessions = (
+        db.query(LearningSession)
+        .filter(LearningSession.student_id.in_(student_ids))
+        .all()
+        if student_ids
+        else []
+    )
+    # Group sessions by student_id in Python
+    sessions_by_student: dict[int, list] = {}
+    for s in all_sessions:
+        sessions_by_student.setdefault(s.student_id, []).append(s)
+
     output = io.StringIO()
-    # UTF-8 BOM for Excel compatibility
-    output.write("\ufeff")
     writer = csv.writer(output)
     writer.writerow(["學生姓名", "已完成課文數", "平均正確率", "總學習次數", "最近學習日期"])
 
     for enrollment in enrollments:
         student = enrollment.student
-
-        sessions = (
-            db.query(LearningSession)
-            .filter(LearningSession.student_id == student.id)
-            .all()
-        )
+        sessions = sessions_by_student.get(student.id, [])
 
         total_sessions = len(sessions)
         completed_sessions = [s for s in sessions if s.status == "completed"]
@@ -343,7 +357,7 @@ def export_classroom_report(
         last_date = latest.started_at.strftime("%Y-%m-%d") if latest else ""
 
         writer.writerow([
-            student.name,
+            _sanitize_csv_cell(student.name),
             completed_texts,
             avg_accuracy,
             total_sessions,
@@ -354,8 +368,9 @@ def export_classroom_report(
     output.close()
 
     filename = f"classroom-{classroom_id}-report-{datetime.now().strftime('%Y%m%d')}.csv"
+    # utf-8-sig encoding adds the UTF-8 BOM (EF BB BF) — do NOT write \ufeff manually
     return StreamingResponse(
         iter([csv_content.encode("utf-8-sig")]),
-        media_type="text/csv; charset=utf-8-sig",
+        media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
