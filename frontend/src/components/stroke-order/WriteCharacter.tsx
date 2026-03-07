@@ -21,7 +21,6 @@ enum Step {
   PRACTICE_1,
   PRACTICE_2,
   PRACTICE_3,
-  TOGGLE_OUTLINE,
   PRACTICE_NO_OUTLINE,
   COMPLETE,
 }
@@ -108,23 +107,29 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     renderStrokes(ctx, getOffCanvas(), state);
   }, [getOffCanvas]);
 
-  /* ---- Load character data ---- */
-  useEffect(() => {
-    setLoading(true);
-    setError('');
+  /* ---- Shared state reset (used by both initial load and retry) ---- */
+  const resetState = useCallback((nStrokes: number) => {
     setStep(Step.ANIMATION);
     setMode('idle');
     setPracticeLeft(4);
     setShowOutline(true);
     setToast('');
-    isAutoLoopingRef.current = false;
-    pendingAutoStartRef.current = false;
     r.current = {
       completedStrokes: 0, animStroke: -1, animProgress: 0,
       hintStroke: -1, hintProgress: 0, correctPaths: [], activeBrush: [],
     };
-    m.current.mistakes = [];
+    m.current.showOutline = true;
+    m.current.mistakes = new Array(nStrokes).fill(0);
     m.current.quizStroke = 0;
+  }, []);
+
+  /* ---- Load character data ---- */
+  useEffect(() => {
+    setLoading(true);
+    setError('');
+    resetState(0);
+    isAutoLoopingRef.current = false;
+    pendingAutoStartRef.current = false;
 
     loadCharacterStrokeData(character).then(d => {
       if (d) {
@@ -142,7 +147,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       cancelAnimationFrame(hintFrameRef.current);
       clearTimeout(loopTimerRef.current);
     };
-  }, [character]);
+  }, [character, resetState]);
 
   /* ---- Re-render when declarative state changes ---- */
   useEffect(() => {
@@ -207,41 +212,15 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     animFrameRef.current = requestAnimationFrame(tick);
   }, [doRender]);
 
-  const stopAnimation = useCallback(() => {
-    cancelAnimationFrame(animFrameRef.current);
-    const d = m.current.data;
-    r.current.animStroke = -1;
-    r.current.animProgress = 0;
-    if (d) r.current.completedStrokes = d.nStrokes;
-    doRender();
-    setMode('idle');
-    if (m.current.step === Step.ANIMATION) setStep(Step.PRACTICE_1);
-  }, [doRender]);
-
-  const resetAndLoop = useCallback((d: CharacterStrokeData) => {
+  const handleRetry = useCallback(() => {
+    if (!data) return;
     cancelAnimationFrame(animFrameRef.current);
     cancelAnimationFrame(hintFrameRef.current);
     clearTimeout(loopTimerRef.current);
-    setStep(Step.ANIMATION);
-    setMode('idle');
-    setPracticeLeft(4);
-    setShowOutline(true);
-    setToast('');
-    r.current = {
-      completedStrokes: 0, animStroke: -1, animProgress: 0,
-      hintStroke: -1, hintProgress: 0, correctPaths: [], activeBrush: [],
-    };
-    m.current.showOutline = true;
-    m.current.mistakes = new Array(d.nStrokes).fill(0);
-    m.current.quizStroke = 0;
+    resetState(data.nStrokes);
     isAutoLoopingRef.current = true;
     startAnimation();
-  }, [startAnimation]);
-
-  const handleRetry = useCallback(() => {
-    if (!data) return;
-    resetAndLoop(data);
-  }, [data, resetAndLoop]);
+  }, [data, resetState, startAnimation]);
 
   /* ---- Auto-start animation loop when data first loads ---- */
   useEffect(() => {
@@ -274,6 +253,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   const handleBeginPractice = useCallback(() => {
     isAutoLoopingRef.current = false;
     cancelAnimationFrame(animFrameRef.current);
+    clearTimeout(loopTimerRef.current);
     r.current.animStroke = -1;
     r.current.animProgress = 0;
     setStep(Step.PRACTICE_1);
@@ -327,7 +307,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
           const newLeft = pl - 1;
           setPracticeLeft(newLeft);
           if (s === Step.PRACTICE_3) {
-            // Auto-skip TOGGLE_OUTLINE — jump straight to no-outline practice
+            // Auto-advance to no-outline practice
             m.current.showOutline = false;
             setShowOutline(false);
             setStep(Step.PRACTICE_NO_OUTLINE);
@@ -471,10 +451,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
             }`}
           />
         </div>
-      )}
-
-      {isComplete && (
-        <div className="text-emerald-400 font-bold text-sm">練習完成！</div>
       )}
 
       {/* Canvas */}
