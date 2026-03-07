@@ -9,6 +9,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
+from ..models.user import UserRole, Role
 from ..database import get_db
 from ..models.organization import Organization
 from ..models.points_log import OrganizationPointsLog
@@ -449,9 +450,23 @@ def get_points_logs(
     """List points usage logs for an organization."""
     org = _get_org_or_404(org_id, db)
 
-    # Permission: system_admin or org member
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is not None and org.id not in org_ids:
+    # Permission: system_admin (sees all) or org_owner/org_admin for this org specifically
+    _ADMIN_ROLES = ("system_admin", "org_owner", "org_admin")
+    has_permission = (
+        db.query(UserRole)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(
+            UserRole.user_id == current_user.id,
+            UserRole.is_active == True,
+            Role.name.in_(_ADMIN_ROLES),
+        )
+        .filter(
+            (Role.name == "system_admin") |
+            ((UserRole.scope_type == "organization") & (UserRole.scope_id == org.id))
+        )
+        .first()
+    )
+    if not has_permission:
         raise HTTPException(status_code=403, detail="Not authorized for this organization")
 
     base_query = db.query(OrganizationPointsLog).filter(

@@ -16,7 +16,7 @@ def check_and_deduct_points(
     feature_type: str,
     description: str | None = None,
 ) -> OrganizationPointsLog:
-    org = db.query(Organization).filter(Organization.id == organization_id).first()
+    org = db.query(Organization).filter(Organization.id == organization_id).with_for_update().first()
     if org is None:
         raise ValueError("Organization not found")
 
