@@ -23,6 +23,7 @@ import VocabPage from './pages/learning/VocabPage';
 import FullReadingPage from './pages/learning/FullReadingPage';
 import ReportPage from './pages/learning/ReportPage';
 import JoinClassroomPage from './pages/JoinClassroomPage';
+import MyAssignments from './pages/student/MyAssignments';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -242,7 +243,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
         </div>
 
-        {![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL].includes(currentView) && (
+        {![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS].includes(currentView) && (
           <StepperNav
             currentView={currentView}
             session={navSession}
@@ -267,12 +268,24 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
           )}
           {!hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin') && (
-            <button
-              onClick={() => navigate('/join')}
-              className="text-xs font-medium transition-colors cursor-pointer text-gray-500 hover:text-gray-700"
-            >
-              加入班級
-            </button>
+            <>
+              <button
+                onClick={() => navigate('/assignments')}
+                className={`text-xs font-medium transition-colors cursor-pointer ${
+                  currentView === AppView.MY_ASSIGNMENTS
+                    ? 'text-accent'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                作業
+              </button>
+              <button
+                onClick={() => navigate('/join')}
+                className="text-xs font-medium transition-colors cursor-pointer text-gray-500 hover:text-gray-700"
+              >
+                加入班級
+              </button>
+            </>
           )}
           {hasRole(user, 'system_admin', 'org_owner', 'org_admin') && (
             <button
@@ -408,6 +421,16 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <AppShell>
                   <AdminDashboard />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assignments"
+            element={
+              <ProtectedRoute>
+                <AppShell>
+                  <MyAssignments />
                 </AppShell>
               </ProtectedRoute>
             }

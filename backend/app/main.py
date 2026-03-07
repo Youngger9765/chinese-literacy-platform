@@ -8,6 +8,7 @@ from .config import settings
 from .routes import stories, learning, users, auth, classrooms, schools, organizations, roles
 from .routes.classroom_texts import router as classroom_texts_router
 from .routes.teacher import router as teacher_router
+from .routes.assignments import router as assignments_router
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,7 @@ app.include_router(organizations.router, prefix="/api")
 app.include_router(roles.router, prefix="/api")
 app.include_router(classroom_texts_router, prefix="/api", tags=["classroom-texts"])
 app.include_router(teacher_router, prefix="/api", tags=["teacher"])
+app.include_router(assignments_router, prefix="/api", tags=["assignments"])
 
 
 def seed_default_data():
