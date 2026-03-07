@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminTreeSidebar, { TreeNodeSelection } from './AdminTreeSidebar';
 import OrgDetailPanel from './OrgDetailPanel';
+import OrgDashboardPanel from './OrgDashboardPanel';
 import SchoolDetailPanel from './SchoolDetailPanel';
 import CreateOrgPanel from './CreateOrgPanel';
 import ClassroomDetailPanel from './ClassroomDetailPanel';
@@ -13,11 +14,14 @@ import {
 } from '../../services/roleApi';
 import { useAuth } from '../../contexts/AuthContext';
 
+type OrgTab = 'detail' | 'dashboard';
+
 // ── Main AdminDashboard ─────────────────────────────────────────────────────
 
 const AdminDashboard: React.FC = () => {
   const [selectedNode, setSelectedNode] = useState<TreeNodeSelection | null>(null);
   const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0);
+  const [orgTab, setOrgTab] = useState<OrgTab>('detail');
 
   const refreshSidebar = useCallback(() => {
     setSidebarRefreshKey((prev) => prev + 1);
@@ -26,17 +30,25 @@ const AdminDashboard: React.FC = () => {
   const handleOrgCreated = useCallback((orgId: string) => {
     refreshSidebar();
     setSelectedNode({ type: 'org', id: orgId });
+    setOrgTab('detail');
   }, [refreshSidebar]);
 
   const handleSelectClassroom = useCallback((classroomId: number) => {
     setSelectedNode({ type: 'classroom', id: classroomId });
   }, []);
 
+  // Reset tab when switching org
+  const handleSelectNode = useCallback((node: TreeNodeSelection | null) => {
+    setSelectedNode(node);
+    if (node?.type !== 'org') return;
+    setOrgTab('detail');
+  }, []);
+
   return (
     <div className="flex flex-1 overflow-hidden">
       <AdminTreeSidebar
         selectedNode={selectedNode}
-        onSelectNode={setSelectedNode}
+        onSelectNode={handleSelectNode}
         refreshTrigger={sidebarRefreshKey}
       />
 
@@ -49,11 +61,46 @@ const AdminDashboard: React.FC = () => {
           />
         )}
         {selectedNode?.type === 'org' && (
-          <OrgDetailPanel
-            organizationId={selectedNode.id}
-            onSchoolCreated={refreshSidebar}
-            onSelectSchool={(schoolId) => setSelectedNode({ type: 'school', id: schoolId })}
-          />
+          <div className="flex flex-col h-full">
+            {/* Tab bar */}
+            <div className="border-b border-gray-200 bg-white px-6 pt-5 shrink-0">
+              <nav className="flex gap-1" role="tablist">
+                <button
+                  role="tab"
+                  aria-selected={orgTab === 'detail'}
+                  onClick={() => setOrgTab('detail')}
+                  className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors cursor-pointer ${
+                    orgTab === 'detail'
+                      ? 'border-accent text-accent'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  詳情
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={orgTab === 'dashboard'}
+                  onClick={() => setOrgTab('dashboard')}
+                  className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors cursor-pointer ${
+                    orgTab === 'dashboard'
+                      ? 'border-accent text-accent'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  儀表板
+                </button>
+              </nav>
+            </div>
+            {orgTab === 'detail' ? (
+              <OrgDetailPanel
+                organizationId={selectedNode.id}
+                onSchoolCreated={refreshSidebar}
+                onSelectSchool={(schoolId) => setSelectedNode({ type: 'school', id: schoolId })}
+              />
+            ) : (
+              <OrgDashboardPanel organizationId={selectedNode.id} />
+            )}
+          </div>
         )}
         {selectedNode?.type === 'school' && (
           <SchoolDetailPanel

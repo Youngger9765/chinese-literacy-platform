@@ -138,3 +138,32 @@ export async function updateOrganization(
   });
   return handleResponse<OrganizationResponse>(res);
 }
+
+// --- Dashboard ---
+
+export interface SchoolStatItem {
+  school_id: number;
+  school_name: string;
+  teacher_count: number;
+  student_count: number;
+  session_count: number;
+}
+
+export interface OrgDashboardResponse {
+  total_schools: number;
+  total_teachers: number;
+  total_students: number;
+  total_sessions: number;
+  completed_sessions: number;
+  school_stats: SchoolStatItem[];
+}
+
+export async function getOrgDashboard(
+  token: string,
+  orgId: string,
+): Promise<OrgDashboardResponse> {
+  const res = await fetch(`${API_BASE}/api/organizations/${orgId}/dashboard`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<OrgDashboardResponse>(res);
+}

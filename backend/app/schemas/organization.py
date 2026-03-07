@@ -57,3 +57,20 @@ class OrganizationDetailResponse(OrganizationResponse):
 class OrganizationListResponse(BaseModel):
     items: list[OrganizationResponse]
     total: int
+
+
+class SchoolStatItem(BaseModel):
+    school_id: int
+    school_name: str
+    teacher_count: int
+    student_count: int
+    session_count: int
+
+
+class OrgDashboardResponse(BaseModel):
+    total_schools: int
+    total_teachers: int
+    total_students: int
+    total_sessions: int
+    completed_sessions: int
+    school_stats: list[SchoolStatItem]
