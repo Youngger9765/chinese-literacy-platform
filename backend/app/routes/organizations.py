@@ -188,10 +188,22 @@ def get_organization_dashboard(
     """Return aggregate statistics for an organization."""
     org = _get_org_or_404(org_id, db)
 
-    # Permission check: org-level roles or system_admin
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is not None and org.id not in org_ids:
-        raise HTTPException(status_code=403, detail="Not authorized for this organization")
+    # Permission check: system_admin, org_owner, or org_admin only
+    is_system_admin = any(
+        ur.is_active and ur.role and ur.role.name == "system_admin"
+        for ur in current_user.user_roles
+    )
+    if not is_system_admin:
+        has_org_role = any(
+            ur.is_active
+            and ur.scope_type == "organization"
+            and ur.scope_id == str(org.id)
+            and ur.role
+            and ur.role.name in ("org_owner", "org_admin")
+            for ur in current_user.user_roles
+        )
+        if not has_org_role:
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
 
     schools = (
         db.query(School)
@@ -213,7 +225,7 @@ def get_organization_dashboard(
                 UserRole.scope_type == "school",
                 UserRole.scope_id.in_([str(sid) for sid in school_ids]),
                 UserRole.role_id == teacher_role_id,
-                UserRole.is_active == True,
+                UserRole.is_active.is_(True),
             )
             .group_by(UserRole.scope_id)
             .all()
