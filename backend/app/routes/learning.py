@@ -14,6 +14,7 @@ from ..schemas.session import (
     SessionCreateRequest,
     SessionDetailResponse,
     SessionListResponse,
+    SessionStatusResponse,
     SessionSummaryResponse,
     SessionUpdateRequest,
 )
@@ -107,6 +108,40 @@ def get_session_report(
 ):
     """Get session report (semantic alias for session detail)."""
     return get_session_detail(session_id, current_user, db)
+
+
+@router.get("/learning/sessions/{session_id}/status", response_model=SessionStatusResponse)
+def get_session_status(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get the resumable status of a learning session.
+
+    Returns whether the session can be resumed, the current step, and
+    whether it has been completed.  Used by the frontend to show the
+    "繼續上次的學習？" prompt.
+    """
+    session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.student_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your session")
+
+    is_completed = session.status == "completed" or session.completed_at is not None
+    is_resumable = not is_completed and session.status == "in_progress"
+
+    return SessionStatusResponse(
+        id=session.id,
+        story_slug=session.story_slug,
+        current_step=session.current_step,
+        status=session.status,
+        is_resumable=is_resumable,
+        is_completed=is_completed,
+        started_at=session.started_at,
+        completed_at=session.completed_at,
+    )
 
 
 @router.patch("/learning/sessions/{session_id}", response_model=SessionDetailResponse)

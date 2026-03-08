@@ -32,6 +32,7 @@ import DialogueHistory from './pages/student/DialogueHistory';
 import OnboardingGuide from './components/OnboardingGuide';
 import TermsModal from './components/TermsModal';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import SessionResumePrompt from './components/SessionResumePrompt';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -96,9 +97,10 @@ const HomePage: React.FC = () => {
   );
 };
 
-/** Library page — wraps StoryLibrary with navigation. */
+/** Library page — wraps StoryLibrary with navigation and session resume prompt. */
 const LibraryPage: React.FC = () => {
   const navigate = useNavigate();
+  const [showResumePrompt, setShowResumePrompt] = React.useState(true);
 
   const handleSelectStory = (story: Story) => {
     navigate(`/learn/${story.id}/intro`);
@@ -106,6 +108,9 @@ const LibraryPage: React.FC = () => {
 
   return (
     <div className="p-8 max-w-7xl mx-auto w-full overflow-y-auto">
+      {showResumePrompt && (
+        <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
+      )}
       <StoryLibrary onStartReading={handleSelectStory} />
     </div>
   );

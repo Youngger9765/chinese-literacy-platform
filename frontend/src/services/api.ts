@@ -127,6 +127,72 @@ export async function createLearningSession(payload: {
   return res.json();
 }
 
+// --- Session Resume API ---
+
+export interface SessionStatusResponse {
+  id: number;
+  story_slug: string | null;
+  current_step: number;
+  status: string;
+  is_resumable: boolean;
+  is_completed: boolean;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export async function getSessionStatus(
+  sessionId: number,
+  token: string,
+): Promise<SessionStatusResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/status`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 404) throw new Error('Session not found');
+  if (res.status === 403) throw new Error('Not your session');
+  if (!res.ok) throw new Error(`getSessionStatus failed: ${res.status}`);
+  return res.json();
+}
+
+// --- Active Session localStorage helpers ---
+
+export interface ActiveSessionRecord {
+  sessionId: number;
+  storyId: string;
+  currentStep: number;
+  timestamp: number;
+}
+
+const ACTIVE_SESSION_KEY_PREFIX = 'lingoleap-active-session-';
+
+export function saveActiveSession(userId: string, record: ActiveSessionRecord): void {
+  try {
+    localStorage.setItem(
+      `${ACTIVE_SESSION_KEY_PREFIX}${userId}`,
+      JSON.stringify(record),
+    );
+  } catch {
+    // localStorage unavailable (e.g. private browsing) — ignore silently
+  }
+}
+
+export function loadActiveSession(userId: string): ActiveSessionRecord | null {
+  try {
+    const raw = localStorage.getItem(`${ACTIVE_SESSION_KEY_PREFIX}${userId}`);
+    if (!raw) return null;
+    return JSON.parse(raw) as ActiveSessionRecord;
+  } catch {
+    return null;
+  }
+}
+
+export function clearActiveSession(userId: string): void {
+  try {
+    localStorage.removeItem(`${ACTIVE_SESSION_KEY_PREFIX}${userId}`);
+  } catch {
+    // ignore
+  }
+}
+
 export interface ConversationTurn {
   role: 'ai' | 'student';
   text: string;

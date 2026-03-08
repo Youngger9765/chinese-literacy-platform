@@ -44,3 +44,17 @@ class SessionDetailResponse(SessionSummaryResponse):
 class SessionListResponse(BaseModel):
     items: list[SessionSummaryResponse]
     total: int
+
+
+class SessionStatusResponse(BaseModel):
+    """Lightweight response for session resume check."""
+    id: int
+    story_slug: str | None
+    current_step: int
+    status: str
+    is_resumable: bool
+    is_completed: bool
+    started_at: datetime
+    completed_at: datetime | None
+
+    model_config = {"from_attributes": True}
