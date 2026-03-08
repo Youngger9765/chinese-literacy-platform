@@ -242,3 +242,58 @@ export async function batchCreateStudents(
   );
   return handleResponse<BatchCreateResult>(res);
 }
+
+// --- CSV Upload ---
+
+export interface CsvUploadError {
+  name: string;
+  seat_number: string;
+  error: string;
+}
+
+export interface CsvUploadResult {
+  created_count: number;
+  skipped_count: number;
+  errors: CsvUploadError[];
+  created: {
+    name: string;
+    seat_number: string;
+    username: string;
+    password: string;
+    user_id: number;
+  }[];
+}
+
+export async function uploadCsvStudents(
+  token: string,
+  classroomId: number,
+  file: File,
+): Promise<CsvUploadResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/students/upload-csv`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    },
+  );
+  return handleResponse<CsvUploadResult>(res);
+}
+
+export function downloadCsvTemplate(token: string): void {
+  const url = `${API_BASE}/api/classrooms/csv-template`;
+  fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    .then((res) => res.blob())
+    .then((blob) => {
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'student-import-template.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    });
+}
