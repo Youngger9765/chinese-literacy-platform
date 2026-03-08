@@ -6,6 +6,7 @@ import { diffCharacters, normalizeForComparison, cleanChineseText } from '../../
 import DiffDisplay from '../ui/DiffDisplay';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
+import FontSizeControl, { useFontSize } from '../ui/FontSizeControl';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
 
@@ -131,6 +132,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   onCancel,
 }) => {
   const isMobile = useIsMobile();
+  const { px: fontSizePx } = useFontSize();
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isPreparing, setIsPreparing] = useState(false);          // STT initializing
   const [isSessionActive, setIsSessionActive] = useState(false);  // mic actively recording
@@ -639,6 +641,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             {processZhuyin(story.filename)}
           </div>
           <div className="flex-1" />
+          <FontSizeControl />
           <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
         </div>
 
@@ -699,9 +702,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   <span className="text-xs text-gray-400 font-bold">第 {idx + 1} 段</span>
                 </div>
                 <p
-                  className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
+                  className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
                     idx === currentLineIndex ? 'text-gray-900 font-bold' : 'text-gray-600'
                   }`}
+                  style={{ fontSize: fontSizePx }}
                 >
                   {zhuyinLines ? zhuyinLines[idx] : line}
                 </p>
