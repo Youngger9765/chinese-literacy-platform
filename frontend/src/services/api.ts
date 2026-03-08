@@ -283,6 +283,48 @@ export interface ChatResponse {
   referenced_paragraph: number | null;
 }
 
+// --- Comprehension Scoring API (Issue #243) ---
+
+export interface ComprehensionScoreFeedback {
+  literal: string;
+  inferential: string;
+  evaluative: string;
+  overall: string;
+}
+
+export interface ComprehensionScoreResult {
+  comprehension_score: number;
+  literal_score: number;
+  inferential_score: number;
+  evaluative_score: number;
+  feedback: ComprehensionScoreFeedback;
+}
+
+export async function getComprehensionScore(
+  token: string,
+  sessionId: number,
+  payload: {
+    storyTitle: string;
+    storyText: string;
+    dialogueTurns: ConversationTurn[];
+  },
+): Promise<ComprehensionScoreResult> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/comprehension-score`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      story_title: payload.storyTitle,
+      story_text: payload.storyText,
+      dialogue_turns: payload.dialogueTurns,
+    }),
+  });
+  if (!res.ok) throw new Error(`getComprehensionScore failed: ${res.status}`);
+  return res.json();
+}
+
 export async function sendComprehensionChat(payload: {
   sessionId: string;
   storyTitle: string;

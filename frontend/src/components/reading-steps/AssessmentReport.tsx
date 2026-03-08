@@ -2,8 +2,10 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
+import type { ComprehensionScoreResult } from '../../services/api';
 import DiffDisplay from '../ui/DiffDisplay';
 import CelebrationOverlay from '../ui/CelebrationOverlay';
+import ComprehensionScoreCard from './ComprehensionScoreCard';
 import { CPM_VERY_FAST, CPM_FAST, CPM_MEDIUM, CPM_SLOW } from '../../utils/personaConfig';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
@@ -52,6 +54,8 @@ interface AssessmentReportProps {
   story?: Story | null;
   onRetry: () => void;
   onGoToVocab?: () => void;
+  comprehensionScores?: ComprehensionScoreResult | null;
+  comprehensionScoresLoading?: boolean;
 }
 
 // CPM thresholds aligned with backend persona.py (Issue #54)
@@ -150,7 +154,7 @@ const Section: React.FC<{
   );
 };
 
-const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab }) => {
+const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
 
   // Track lesson completion when a valid report is viewed.
@@ -569,8 +573,27 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         )}
       </Section>
 
-      {/* ============ 環節六：AI 詳細分析 ============ */}
-      <Section number={6} title="AI 詳細分析" defaultOpen={false} disabled={!readingAttempt && !fullReadingResult}>
+      {/* ============ 環節六：課文理解力評估 (Issue #243) ============ */}
+      <Section number={6} title="課文理解力評估" defaultOpen={true} disabled={!comprehensionScores && !comprehensionScoresLoading}>
+        {comprehensionScores || comprehensionScoresLoading ? (
+          <ComprehensionScoreCard
+            comprehensionScore={comprehensionScores?.comprehension_score ?? 0}
+            literalScore={comprehensionScores?.literal_score ?? 0}
+            inferentialScore={comprehensionScores?.inferential_score ?? 0}
+            evaluativeScore={comprehensionScores?.evaluative_score ?? 0}
+            feedback={comprehensionScores?.feedback ?? null}
+            loading={comprehensionScoresLoading}
+          />
+        ) : (
+          <div className="p-6 bg-gray-50 rounded-2xl text-center">
+            <p className="text-sm text-gray-400 font-bold">尚未完成課文理解對話</p>
+            <p className="text-xs text-gray-300 mt-1">完成蘇格拉底式對話後，系統將評估你的三層次理解力</p>
+          </div>
+        )}
+      </Section>
+
+      {/* ============ 環節七：AI 詳細分析 (Issue #241) ============ */}
+      <Section number={7} title="AI 詳細分析" defaultOpen={false} disabled={!readingAttempt && !fullReadingResult}>
         {(readingAttempt || fullReadingResult) ? (
           <AIAnalysisSection
             storyTitle={story?.title ?? ''}
