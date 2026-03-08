@@ -54,7 +54,6 @@ def _org_to_response(org: Organization, school_count: int) -> OrganizationRespon
         is_active=org.is_active,
         created_at=org.created_at,
         school_count=school_count,
-        teacher_limit=org.teacher_limit,
         description=org.description,
         tax_id=org.tax_id,
         contact_email=org.contact_email,
