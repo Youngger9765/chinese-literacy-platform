@@ -27,6 +27,7 @@ class ClassroomTextAssignRequest(BaseModel):
     # Optional expiry: ISO-8601 datetime string, e.g. "2025-07-31T23:59:59+08:00".
     # Defaults to None (no automatic cleanup for this assignment).
     expires_at: datetime | None = None
+    copyright_confirmed: bool = False
 
 
 class ClassroomTextResponse(BaseModel):
@@ -56,6 +57,10 @@ def assign_text_to_classroom(
     """Assign a platform story (text) to a classroom."""
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_owner_or_admin(classroom, current_user, db)
+
+    # Require copyright confirmation
+    if not payload.copyright_confirmed:
+        raise HTTPException(status_code=422, detail="copyright_confirmed must be true")
 
     # Validate that the story exists
     try:
