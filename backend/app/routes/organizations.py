@@ -9,6 +9,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
+from ..dependencies.tenant import _check_org_member
 from ..models.user import UserRole, Role
 from ..database import get_db
 from ..models.organization import Organization
@@ -54,7 +55,6 @@ def _org_to_response(org: Organization, school_count: int) -> OrganizationRespon
         is_active=org.is_active,
         created_at=org.created_at,
         school_count=school_count,
-        teacher_limit=org.teacher_limit,
         description=org.description,
         tax_id=org.tax_id,
         contact_email=org.contact_email,
@@ -158,9 +158,7 @@ def get_organization(
 ):
     """Get organization detail with schools list."""
     org = _get_org_or_404(org_id, db)
-    org_ids = get_user_org_ids(current_user)
-    if org_ids is not None and org.id not in org_ids:
-        raise HTTPException(status_code=403, detail="Not authorized for this organization")
+    _check_org_member(current_user, org_id, db)
     base = _org_to_response(org, _get_school_count(org, db))
 
     # Include the list of schools under this org

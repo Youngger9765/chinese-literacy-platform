@@ -9,6 +9,7 @@ from .routes import stories, learning, users, auth, classrooms, schools, organiz
 from .routes.classroom_texts import router as classroom_texts_router
 from .routes.teacher import router as teacher_router
 from .routes.assignments import router as assignments_router
+from .middleware.tenant import TenantMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# TenantMiddleware enriches request.state with org context (passive, no blocking)
+app.add_middleware(TenantMiddleware)
 
 app.include_router(stories.router, prefix="/api")
 app.include_router(learning.router, prefix="/api")
