@@ -7,12 +7,22 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // --- Response types ---
 
+export interface StudentTag {
+  id: number;
+  student_id: number;
+  teacher_id: number;
+  tag_name: string;
+  color: string;
+  created_at: string;
+}
+
 export interface StudentProgress {
   student_id: number;
   student_name: string;
   last_session_date: string | null;
   last_text_title: string | null;
   total_sessions: number;
+  tags: StudentTag[];
 }
 
 export interface ClassroomTextItem {
@@ -214,6 +224,63 @@ export async function getTimeStats(
     { headers: { Authorization: `Bearer ${token}` } },
   );
   return handleResponse<TimeStats>(res);
+}
+
+// --- Student Tag API ---
+
+/** List all tags for a student. */
+export async function getStudentTags(
+  token: string,
+  studentId: number,
+): Promise<StudentTag[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/tags`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StudentTag[]>(res);
+}
+
+/** Add a tag to a student. */
+export async function addStudentTag(
+  token: string,
+  studentId: number,
+  tagName: string,
+  color: string = 'gray',
+): Promise<StudentTag> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/tags`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ tag_name: tagName, color }),
+    },
+  );
+  return handleResponse<StudentTag>(res);
+}
+
+/** Remove a tag from a student. */
+export async function removeStudentTag(
+  token: string,
+  studentId: number,
+  tagName: string,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/tags/${encodeURIComponent(tagName)}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body.detail ?? body.message ?? message;
+    } catch {
+      // ignore
+    }
+    throw new TeacherApiError(message, res.status);
+  }
 }
 
 // --- Heatmap types ---

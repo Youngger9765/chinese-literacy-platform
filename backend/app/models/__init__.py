@@ -7,3 +7,4 @@ from .session import LearningSession, CharacterError, DialogueTurn  # noqa: F401
 from .assignment import Assignment, AssignmentSubmission  # noqa: F401
 from .points_log import OrganizationPointsLog  # noqa: F401
 from .feedback import Feedback  # noqa: F401
+from .student_tag import StudentTag  # noqa: F401
