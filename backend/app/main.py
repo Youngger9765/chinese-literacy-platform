@@ -16,6 +16,7 @@ from .routes import stories, learning, users, auth, classrooms, schools, organiz
 from .routes.classroom_texts import router as classroom_texts_router
 from .routes.teacher import router as teacher_router
 from .routes.assignments import router as assignments_router
+from .middleware.tenant import TenantMiddleware
 from .routes.feedback import router as feedback_router
 from .routes.jobs import router as jobs_router
 from .routes.privacy import router as privacy_router
@@ -188,6 +189,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# TenantMiddleware enriches request.state with org context (passive, no blocking)
+app.add_middleware(TenantMiddleware)
 
 # Logging middleware wraps everything (added after CORS so it runs outermost)
 app.add_middleware(RequestLoggingMiddleware)
