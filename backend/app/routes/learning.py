@@ -141,7 +141,7 @@ class ConversationTurn(BaseModel):
 
 class ComprehensionRequest(BaseModel):
     story_title: str
-    story_text: str            # paragraphs joined with "\n"
+    story_text: str = Field(..., max_length=10000)  # paragraphs joined with "\n"
     conversation: list[ConversationTurn] = []
 
 
@@ -155,7 +155,10 @@ class ComprehensionResponse(BaseModel):
     response_model=ComprehensionResponse,
     dependencies=[Depends(ai_limit_10_per_min)],
 )
-async def get_comprehension_question(payload: ComprehensionRequest):
+async def get_comprehension_question(
+    payload: ComprehensionRequest,
+    current_user: User = Depends(get_current_user),
+):
     """
     Generate the next Socratic question for a reading comprehension session.
 
@@ -223,7 +226,10 @@ class ComprehensionChatResponse(BaseModel):
     response_model=ComprehensionChatResponse,
     dependencies=[Depends(ai_limit_10_per_min)],
 )
-async def comprehension_chat(payload: ComprehensionChatRequest):
+async def comprehension_chat(
+    payload: ComprehensionChatRequest,
+    current_user: User = Depends(get_current_user),
+):
     """
     Socratic dialogue with answer evaluation.
 
