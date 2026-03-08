@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
 import DiffDisplay from '../ui/DiffDisplay';
+import CelebrationOverlay from '../ui/CelebrationOverlay';
 import { CPM_VERY_FAST, CPM_FAST, CPM_MEDIUM, CPM_SLOW } from '../../utils/personaConfig';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
@@ -258,6 +259,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
+      <CelebrationOverlay score={overallScore} />
       {/* Header */}
       <div className="text-center">
         <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
