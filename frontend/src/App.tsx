@@ -25,6 +25,7 @@ import FullReadingPage from './pages/learning/FullReadingPage';
 import ReportPage from './pages/learning/ReportPage';
 import JoinClassroomPage from './pages/JoinClassroomPage';
 import MyAssignments from './pages/student/MyAssignments';
+import TermsModal from './components/TermsModal';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 
 /** Redirect authenticated users away from auth pages. */
@@ -341,6 +342,29 @@ const LearningAppShell: React.FC = () => {
   );
 };
 
+/**
+ * TermsGate — renders TermsModal over the whole app when the authenticated
+ * user has not yet accepted the Terms of Service.
+ */
+const TermsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { needsTermsAcceptance, acceptTerms } = useAuth();
+
+  return (
+    <>
+      {children}
+      {needsTermsAcceptance && (
+        <TermsModal
+          onAccept={acceptTerms}
+          onAccepted={() => {
+            // AuthContext already updates user state after acceptTerms resolves.
+            // Nothing extra needed here.
+          }}
+        />
+      )}
+    </>
+  );
+};
+
 /** Root component with router and auth. */
 const App: React.FC = () => {
   return (
@@ -348,6 +372,7 @@ const App: React.FC = () => {
     <BrowserRouter>
       <AuthProvider>
         <LearningNavProvider>
+        <TermsGate>
         <Routes>
           {/* Public-only routes (redirect to / if already logged in) */}
           <Route
@@ -482,6 +507,7 @@ const App: React.FC = () => {
           {/* Catch-all: redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </TermsGate>
         </LearningNavProvider>
       </AuthProvider>
     </BrowserRouter>

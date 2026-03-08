@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login as apiLogin, register as apiRegister, getMe, AuthUser, AuthError } from '../services/authApi';
+import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, AuthUser, AuthError } from '../services/authApi';
 
 const TOKEN_KEY = 'lingoleap_token';
 
@@ -10,10 +10,12 @@ interface AuthContextValue {
   isLoading: boolean;
   mustChangePassword: boolean;
   loginPassword: string | null;
+  needsTermsAcceptance: boolean;
   login: (email: string, password: string) => Promise<{ mustChangePassword: boolean }>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
   clearMustChangePassword: () => void;
+  acceptTerms: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -108,6 +110,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoginPassword(null);
   }, []);
 
+  const acceptTerms = useCallback(async () => {
+    if (!token) throw new Error('Not authenticated');
+    const updatedUser = await apiAcceptTerms(token);
+    setUser(updatedUser);
+  }, [token]);
+
+  // Derived: user is authenticated but hasn't accepted terms
+  const needsTermsAcceptance = !!user && !user.terms_accepted;
+
   const value: AuthContextValue = {
     user,
     token,
@@ -115,10 +126,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     mustChangePassword,
     loginPassword,
+    needsTermsAcceptance,
     login,
     register,
     logout,
     clearMustChangePassword,
+    acceptTerms,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
