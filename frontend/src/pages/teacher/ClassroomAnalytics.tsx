@@ -18,13 +18,16 @@ import {
   getStudentSessions,
   getErrorVocab,
   getTimeStats,
+  getClassroomHeatmap,
   ClassroomStats,
   StudentProgress,
   StudentSession,
   ErrorVocabItem,
   TimeStats,
+  ClassroomHeatmap,
   TeacherApiError,
 } from '../../services/teacherApi';
+import HeatmapChart from '../../components/teacher/HeatmapChart';
 
 interface ClassroomAnalyticsProps {
   classroomId: number;
@@ -46,6 +49,7 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
   const [stats, setStats] = useState<ClassroomStats | null>(null);
   const [errorVocab, setErrorVocab] = useState<ErrorVocabItem[]>([]);
   const [timeStats, setTimeStats] = useState<TimeStats | null>(null);
+  const [heatmap, setHeatmap] = useState<ClassroomHeatmap | null>(null);
   const [accuracyData, setAccuracyData] = useState<AccuracyDataPoint[]>([]);
   const [studentNames, setStudentNames] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,16 +61,18 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
     setError('');
     try {
       // Fetch all data in parallel
-      const [statsData, errorData, timeData, progressData] = await Promise.all([
+      const [statsData, errorData, timeData, progressData, heatmapData] = await Promise.all([
         getClassroomStats(token, classroomId),
         getErrorVocab(token, classroomId),
         getTimeStats(token, classroomId),
         getClassroomProgress(token, classroomId),
+        getClassroomHeatmap(token, classroomId),
       ]);
 
       setStats(statsData);
       setErrorVocab(errorData);
       setTimeStats(timeData);
+      setHeatmap(heatmapData);
 
       // Build accuracy trend data from per-student sessions
       await buildAccuracyTrend(progressData);
@@ -249,6 +255,18 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
         ) : (
           <div className="text-center py-8 text-gray-400 text-sm">
             尚無已完成的學習記錄
+          </div>
+        )}
+      </div>
+
+      {/* Heatmap: student × story performance matrix */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">班級表現矩陣（學生 × 課文）</h3>
+        {heatmap ? (
+          <HeatmapChart data={heatmap} />
+        ) : (
+          <div className="text-center py-8 text-gray-400 text-sm">
+            尚無學習記錄
           </div>
         )}
       </div>
