@@ -9,12 +9,14 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 from .config import settings
 from .routes import stories, learning, users, auth, classrooms, schools, organizations, roles
 from .routes.classroom_texts import router as classroom_texts_router
 from .routes.teacher import router as teacher_router
 from .routes.assignments import router as assignments_router
+from .routes.privacy import router as privacy_router
 from .utils.logging_config import setup_logging
 
 # Initialise structured logging before anything else
@@ -22,8 +24,48 @@ setup_logging()
 
 logger = logging.getLogger(__name__)
 
-if os.environ.get("ENVIRONMENT", "development") != "development" and settings.jwt_secret_key == "dev-secret-change-in-production":
-    raise RuntimeError("JWT_SECRET_KEY must be set in production!")
+_env = os.environ.get("ENVIRONMENT", "development")
+_is_dev = _env in ("development", "preview")
+
+if settings.jwt_secret_key == "dev-secret-change-in-production":
+    if not _is_dev:
+        raise RuntimeError("JWT_SECRET_KEY must be set in production!")
+    else:
+        import warnings
+        warnings.warn("Using default JWT secret key — NOT suitable for production", stacklevel=2)
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Add OWASP-recommended security headers to every response."""
+
+    # CSP allows self, Google Fonts, Firebase Auth, and Vertex AI domains.
+    # 'unsafe-inline' is included for styles loaded by the React app (e.g. Tailwind
+    # inline styles) and may be tightened in a future iteration.
+    CSP = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://apis.google.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' "
+        "https://*.googleapis.com "
+        "https://*.firebaseapp.com "
+        "https://*.cloudfunctions.net "
+        "https://us-central1-aiplatform.googleapis.com; "
+        "frame-ancestors 'none';"
+    )
+
+    async def dispatch(self, request: Request, call_next) -> Response:
+        response = await call_next(request)
+        response.headers["Content-Security-Policy"] = self.CSP
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+        return response
 
 
 # ---------------------------------------------------------------------------
@@ -127,7 +169,13 @@ app = FastAPI(
     description="Backend API for the LingoLeap AI Reading Tutor platform",
     version="0.3.0",
     lifespan=lifespan,
+    docs_url="/docs" if _is_dev else None,
+    redoc_url="/redoc" if _is_dev else None,
 )
+
+# Security headers must be added before CORSMiddleware so they appear on
+# every response (including CORS preflight responses).
+app.add_middleware(SecurityHeadersMiddleware)
 
 # CORS must be added before the logging middleware so the OPTIONS pre-flight
 # is still handled correctly.
@@ -153,6 +201,7 @@ app.include_router(roles.router, prefix="/api")
 app.include_router(classroom_texts_router, prefix="/api", tags=["classroom-texts"])
 app.include_router(teacher_router, prefix="/api", tags=["teacher"])
 app.include_router(assignments_router, prefix="/api", tags=["assignments"])
+app.include_router(privacy_router, prefix="/api", tags=["privacy"])
 
 
 def seed_default_data():
