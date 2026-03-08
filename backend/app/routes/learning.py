@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
+from ..auth.rate_limiter import ai_limit_10_per_min, ai_limit_5_per_min
 from ..database import get_db
 from ..models.school import ClassroomStudent
 from ..models.session import LearningSession
@@ -149,10 +150,16 @@ class ComprehensionResponse(BaseModel):
     question_number: int       # how many AI questions have been asked so far (including this one)
 
 
-@router.post("/comprehension/question", response_model=ComprehensionResponse)
+@router.post(
+    "/comprehension/question",
+    response_model=ComprehensionResponse,
+    dependencies=[Depends(ai_limit_10_per_min)],
+)
 async def get_comprehension_question(payload: ComprehensionRequest):
     """
     Generate the next Socratic question for a reading comprehension session.
+
+    Rate limited: 10 requests per minute per user/IP.
 
     The frontend sends the full conversation history; this endpoint returns
     the next AI question. Call this after each student answer (and on initial
@@ -211,10 +218,17 @@ class ComprehensionChatResponse(BaseModel):
     referenced_paragraph: int | None = None
 
 
-@router.post("/comprehension/chat", response_model=ComprehensionChatResponse)
+@router.post(
+    "/comprehension/chat",
+    response_model=ComprehensionChatResponse,
+    dependencies=[Depends(ai_limit_10_per_min)],
+)
 async def comprehension_chat(payload: ComprehensionChatRequest):
     """
     Socratic dialogue with answer evaluation.
+
+    Rate limited: 10 requests per minute per user/IP.
+
     Send student_answer=null to start a new session and get the first question.
     """
     try:
