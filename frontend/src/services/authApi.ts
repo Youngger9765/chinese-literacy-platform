@@ -126,3 +126,39 @@ export async function changePassword(
     throw new AuthError(message, res.status);
   }
 }
+
+export interface ForgotPasswordResponse {
+  message: string;
+  reset_token: string;
+}
+
+export async function forgotPassword(identifier: string): Promise<ForgotPasswordResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identifier }),
+  });
+  return handleAuthResponse<ForgotPasswordResponse>(res);
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body.detail && typeof body.detail === 'object' && Array.isArray(body.detail.errors)) {
+        message = body.detail.errors.join('；');
+      } else {
+        message = body.detail ?? body.message ?? message;
+      }
+    } catch {
+      // ignore
+    }
+    throw new AuthError(message, res.status);
+  }
+}
