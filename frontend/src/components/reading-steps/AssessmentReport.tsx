@@ -8,6 +8,7 @@ import { CPM_VERY_FAST, CPM_FAST, CPM_MEDIUM, CPM_SLOW } from '../../utils/perso
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
 import ExitTicket from './ExitTicket';
+import { trackLearningEvent } from '../../utils/analytics';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -150,6 +151,19 @@ const Section: React.FC<{
 
 const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
+
+  // Track lesson completion when a valid report is viewed.
+  useEffect(() => {
+    if (!session) return;
+    const { readingAttempt, comprehensionResult, vocabResult, fullReadingResult } = session;
+    if (!readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult) return;
+    trackLearningEvent('complete_lesson', {
+      story_id: story?.id ?? '',
+      story_title: story?.title ?? '',
+    });
+  // Fire once per story session — storyId + startedAt identifies a unique session.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.storyId, session?.startedAt]);
 
   if (!session) {
     return (
