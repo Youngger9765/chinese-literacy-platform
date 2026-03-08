@@ -45,6 +45,8 @@ const TermsModal: React.FC<TermsModalProps> = ({ onAccepted, onAccept }) => {
     setError(null);
     try {
       await onAccept();
+      // Mark privacy consent so analytics may begin sending events.
+      localStorage.setItem('privacy_consent_accepted', 'true');
       onAccepted();
     } catch {
       setError('同意使用條款時發生錯誤，請稍後再試。');

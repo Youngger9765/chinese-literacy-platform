@@ -97,6 +97,14 @@ class ClassroomText(Base):
     assigned_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    # Auto-cleanup fields — set expires_at when assigning a text with a semester end date.
+    # The cleanup job soft-deletes rows where expires_at < now() and deleted_at is NULL.
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Relationships
     classroom: Mapped["Classroom"] = relationship("Classroom")

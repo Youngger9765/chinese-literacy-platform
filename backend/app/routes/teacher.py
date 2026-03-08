@@ -111,6 +111,62 @@ class TimeStatsResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class HeatmapStudentEntry(BaseModel):
+    id: int
+    name: str
+
+    model_config = {"from_attributes": True}
+
+
+class HeatmapStoryEntry(BaseModel):
+    id: str
+    title: str
+
+    model_config = {"from_attributes": True}
+
+
+class HeatmapScoreEntry(BaseModel):
+    student_id: int
+    story_id: str
+    score: float
+    status: str
+
+    model_config = {"from_attributes": True}
+
+
+class HeatmapResponse(BaseModel):
+    students: list[HeatmapStudentEntry]
+    stories: list[HeatmapStoryEntry]
+    scores: list[HeatmapScoreEntry]
+
+    model_config = {"from_attributes": True}
+
+
+class StudentAlertResponse(BaseModel):
+    student_id: int
+    student_name: str
+    alert_type: str  # "inactive" | "low_performance" | "declining"
+    detail: str
+    last_session_date: datetime | None
+
+    model_config = {"from_attributes": True}
+
+
+class LearningCurvePoint(BaseModel):
+    date: str  # ISO date string
+    score: float
+    story_title: str | None
+    session_id: int
+
+    model_config = {"from_attributes": True}
+
+
+class LearningCurveResponse(BaseModel):
+    data: list[LearningCurvePoint]
+
+    model_config = {"from_attributes": True}
+
+
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
 
@@ -545,6 +601,186 @@ def get_student_sessions(
     return results
 
 
+@router.get(
+    "/teacher/classrooms/{classroom_id}/alerts",
+    response_model=list[StudentAlertResponse],
+)
+def get_classroom_alerts(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Detect at-risk students in a classroom.
+
+    Alert types:
+    - inactive: no sessions in last 14 days
+    - low_performance: average score below 50
+    - declining: score declining trend (last 3 sessions decreasing)
+    """
+    _check_classroom_access(current_user, classroom_id, db)
+
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+
+    if not enrollments:
+        return []
+
+    now = datetime.now(timezone.utc)
+    fourteen_days_ago = now - timedelta(days=14)
+    alerts: list[StudentAlertResponse] = []
+
+    for enrollment in enrollments:
+        student = enrollment.student
+
+        # Fetch all completed sessions for this student (with a score), ordered asc
+        student_sessions = (
+            db.query(LearningSession)
+            .filter(
+                LearningSession.student_id == student.id,
+                LearningSession.overall_score.isnot(None),
+            )
+            .order_by(LearningSession.started_at.asc())
+            .all()
+        )
+
+        # Most recent session across all statuses (to determine last_session_date)
+        latest_session = (
+            db.query(LearningSession)
+            .filter(LearningSession.student_id == student.id)
+            .order_by(LearningSession.started_at.desc())
+            .first()
+        )
+        last_session_date = latest_session.started_at if latest_session else None
+
+        # ── Alert: inactive ──────────────────────────────────────────────────
+        def _make_aware(dt: datetime) -> datetime:
+            if dt.tzinfo is None:
+                return dt.replace(tzinfo=timezone.utc)
+            return dt
+
+        is_inactive = last_session_date is None or _make_aware(last_session_date) < fourteen_days_ago
+        if is_inactive:
+            days_since = (
+                int((now - _make_aware(last_session_date)).days)
+                if last_session_date
+                else None
+            )
+            detail = (
+                f"已 {days_since} 天未練習" if days_since is not None else "尚未開始練習"
+            )
+            alerts.append(
+                StudentAlertResponse(
+                    student_id=student.id,
+                    student_name=student.name,
+                    alert_type="inactive",
+                    detail=detail,
+                    last_session_date=last_session_date,
+                )
+            )
+            continue  # Skip further checks — inactive is highest priority
+
+        scores = [s.overall_score for s in student_sessions if s.overall_score is not None]
+
+        # ── Alert: low_performance ───────────────────────────────────────────
+        if scores:
+            avg_score = sum(scores) / len(scores)
+            if avg_score < 50:
+                alerts.append(
+                    StudentAlertResponse(
+                        student_id=student.id,
+                        student_name=student.name,
+                        alert_type="low_performance",
+                        detail=f"平均分數 {avg_score:.0f} 分（低於 50 分）",
+                        last_session_date=last_session_date,
+                    )
+                )
+                continue
+
+        # ── Alert: declining ─────────────────────────────────────────────────
+        if len(scores) >= 3:
+            last3 = scores[-3:]
+            if last3[0] > last3[1] > last3[2]:
+                alerts.append(
+                    StudentAlertResponse(
+                        student_id=student.id,
+                        student_name=student.name,
+                        alert_type="declining",
+                        detail=f"最近 3 次分數持續下降：{last3[0]:.0f} → {last3[1]:.0f} → {last3[2]:.0f}",
+                        last_session_date=last_session_date,
+                    )
+                )
+
+    return alerts
+
+
+@router.get(
+    "/teacher/students/{student_id}/learning-curve",
+    response_model=LearningCurveResponse,
+)
+def get_student_learning_curve(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return time-series learning data for a student.
+
+    Includes actual scores and rolling average over last 5 sessions.
+    Teacher must own a classroom containing this student.
+    """
+    # Verify teacher access
+    enrollment = (
+        db.query(ClassroomStudent)
+        .join(Classroom, ClassroomStudent.classroom_id == Classroom.id)
+        .filter(
+            ClassroomStudent.student_id == student_id,
+            Classroom.teacher_id == current_user.id,
+        )
+        .first()
+    )
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="Not authorized to view this student's data")
+
+    # Sessions with scores, ordered oldest first
+    sessions = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id == student_id,
+            LearningSession.overall_score.isnot(None),
+            LearningSession.status == "completed",
+        )
+        .order_by(LearningSession.started_at.asc())
+        .all()
+    )
+
+    if not sessions:
+        return LearningCurveResponse(data=[])
+
+    points: list[LearningCurvePoint] = []
+    for session in sessions:
+        story_title = None
+        if session.story_slug:
+            try:
+                story = get_lesson_by_id(int(session.story_slug))
+                if story:
+                    story_title = story["title"]
+            except (ValueError, TypeError):
+                story_title = session.story_slug
+
+        points.append(
+            LearningCurvePoint(
+                date=session.started_at.isoformat(),
+                score=round(session.overall_score, 1),
+                story_title=story_title,
+                session_id=session.id,
+            )
+        )
+
+    return LearningCurveResponse(data=points)
+
+
 def _sanitize_csv_cell(value: str) -> str:
     """Prevent CSV formula injection by prefixing dangerous leading characters."""
     if isinstance(value, str) and value and value[0] in ("=", "+", "-", "@", "\t", "\r"):
@@ -732,3 +968,99 @@ def remove_student_tag(
 
     db.delete(tag)
     db.commit()
+
+
+@router.get(
+    "/teacher/classrooms/{classroom_id}/heatmap",
+    response_model=HeatmapResponse,
+)
+def get_classroom_heatmap(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get student × story score heatmap for a classroom.
+
+    Returns students, stories, and best scores per (student, story) pair.
+    """
+    _check_classroom_access(current_user, classroom_id, db)
+
+    # Get all student IDs in this classroom
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+
+    if not enrollments:
+        return HeatmapResponse(students=[], stories=[], scores=[])
+
+    student_ids = [e.student_id for e in enrollments]
+    students_map = {e.student_id: e.student for e in enrollments}
+
+    # Query all sessions for classroom students with a story_slug and score
+    sessions = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.story_slug.isnot(None),
+        )
+        .all()
+    )
+
+    # Build best-score map: (student_id, story_slug) → best session
+    best_score_map: dict[tuple[int, str], LearningSession] = {}
+    for sess in sessions:
+        key = (sess.student_id, sess.story_slug)
+        existing = best_score_map.get(key)
+        if existing is None:
+            best_score_map[key] = sess
+        else:
+            # Prefer completed sessions; among same status, prefer higher score
+            existing_score = existing.overall_score or 0.0
+            new_score = sess.overall_score or 0.0
+            if sess.status == "completed" and existing.status != "completed":
+                best_score_map[key] = sess
+            elif sess.status == existing.status and new_score > existing_score:
+                best_score_map[key] = sess
+
+    # Collect unique story slugs and resolve titles
+    unique_story_slugs: list[str] = sorted(
+        {slug for _, slug in best_score_map.keys()}
+    )
+
+    stories: list[HeatmapStoryEntry] = []
+    for slug in unique_story_slugs:
+        title = slug
+        try:
+            story = get_lesson_by_id(int(slug))
+            if story:
+                title = story["title"]
+        except (ValueError, TypeError):
+            title = slug
+        stories.append(HeatmapStoryEntry(id=slug, title=title))
+
+    # Build student list in enrollment order
+    heatmap_students = [
+        HeatmapStudentEntry(id=s_id, name=students_map[s_id].name)
+        for s_id in student_ids
+    ]
+
+    # Build score entries
+    score_entries: list[HeatmapScoreEntry] = []
+    for (s_id, slug), sess in best_score_map.items():
+        score = round(sess.overall_score, 1) if sess.overall_score is not None else 0.0
+        score_entries.append(
+            HeatmapScoreEntry(
+                student_id=s_id,
+                story_id=slug,
+                score=score,
+                status=sess.status,
+            )
+        )
+
+    return HeatmapResponse(
+        students=heatmap_students,
+        stories=stories,
+        scores=score_entries,
+    )

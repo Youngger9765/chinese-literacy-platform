@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -7,7 +8,7 @@ from ..auth.dependencies import get_current_user
 from ..auth.rate_limiter import ai_limit_10_per_min, ai_limit_5_per_min
 from ..database import get_db
 from ..models.school import ClassroomStudent
-from ..models.session import LearningSession
+from ..models.session import LearningSession, DialogueTurn
 from ..models.user import User
 from ..schemas.session import (
     SessionCreateRequest,
@@ -208,6 +209,8 @@ class ComprehensionChatRequest(BaseModel):
     mispronounced_words: list[str] | None = None
     accuracy: float | None = Field(None, ge=0, le=100)
     cpm: float | None = Field(None, gt=0)
+    # Optional DB learning session ID — when provided, dialogue turns are persisted (Issue #242)
+    db_session_id: int | None = None
 
 
 class ComprehensionChatResponse(BaseModel):
@@ -229,6 +232,7 @@ class ComprehensionChatResponse(BaseModel):
 async def comprehension_chat(
     payload: ComprehensionChatRequest,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """
     Socratic dialogue with answer evaluation.
@@ -236,6 +240,8 @@ async def comprehension_chat(
     Rate limited: 10 requests per minute per user/IP.
 
     Send student_answer=null to start a new session and get the first question.
+    Optionally pass db_session_id (integer DB LearningSession PK) to persist
+    dialogue turns for later retrieval via GET /api/learning/sessions/{id}/dialogue.
     """
     try:
         if payload.student_answer is None:
@@ -261,6 +267,20 @@ async def comprehension_chat(
         logger.error("Comprehension chat error: %s", e)
         raise HTTPException(status_code=500, detail="AI service error")
 
+    # Persist dialogue turns when a DB session ID is provided (Issue #242)
+    if payload.db_session_id is not None:
+        try:
+            _persist_dialogue_turns(
+                db=db,
+                socratic_session_id=payload.session_id,
+                learning_session_id=payload.db_session_id,
+                student_answer=payload.student_answer,
+                result=result,
+            )
+        except Exception as e:
+            # Non-fatal — log and continue so the chat still works
+            logger.warning("Failed to persist dialogue turn: %s", e)
+
     return ComprehensionChatResponse(
         question=result.question,
         feedback=result.feedback,
@@ -270,4 +290,136 @@ async def comprehension_chat(
         phase=result.phase,
         is_complete=result.is_complete,
         referenced_paragraph=result.referenced_paragraph,
+    )
+
+
+def _persist_dialogue_turns(
+    db: Session,
+    socratic_session_id: str,
+    learning_session_id: int,
+    student_answer: str | None,
+    result,
+) -> None:
+    """Persist one round of dialogue turns to the DB.
+
+    Each call to comprehension_chat produces up to three turns:
+    1. Student answer (if not the first question)
+    2. AI feedback (if answer was evaluated)
+    3. AI question (always)
+
+    Turn order is derived from the current count of existing turns.
+    """
+    existing_count = (
+        db.query(DialogueTurn)
+        .filter(DialogueTurn.socratic_session_id == socratic_session_id)
+        .count()
+    )
+    order = existing_count
+    turns_to_add = []
+
+    if student_answer is not None:
+        # Student answer turn
+        turns_to_add.append(
+            DialogueTurn(
+                socratic_session_id=socratic_session_id,
+                learning_session_id=learning_session_id,
+                turn_order=order,
+                role="student",
+                text=student_answer,
+                phase=result.phase,
+            )
+        )
+        order += 1
+
+        # Feedback turn (if evaluation was done)
+        if result.feedback is not None and result.understood is not None:
+            turns_to_add.append(
+                DialogueTurn(
+                    socratic_session_id=socratic_session_id,
+                    learning_session_id=learning_session_id,
+                    turn_order=order,
+                    role="feedback",
+                    text=result.feedback,
+                    is_correct=result.understood,
+                    phase=result.phase,
+                )
+            )
+            order += 1
+    else:
+        # This is the first call (student_answer=None) — no student/feedback turns yet.
+        # The AI question below is the opening question.
+        pass
+
+    # AI question turn (always, unless session just completed)
+    if not result.is_complete or student_answer is None:
+        turns_to_add.append(
+            DialogueTurn(
+                socratic_session_id=socratic_session_id,
+                learning_session_id=learning_session_id,
+                turn_order=order,
+                role="ai",
+                text=result.question,
+                phase=result.phase,
+            )
+        )
+
+    if turns_to_add:
+        db.add_all(turns_to_add)
+        db.commit()
+
+
+# ── Dialogue history (Issue #242) ─────────────────────────────────────────────
+
+
+class DialogueTurnResponse(BaseModel):
+    id: int
+    turn_order: int
+    role: str
+    text: str
+    is_correct: bool | None
+    phase: str | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class DialogueHistoryResponse(BaseModel):
+    session_id: int
+    story_slug: str | None
+    turns: list[DialogueTurnResponse]
+    total: int
+
+
+@router.get(
+    "/learning/sessions/{session_id}/dialogue",
+    response_model=DialogueHistoryResponse,
+)
+def get_dialogue_history(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return the full Socratic dialogue Q&A history for a learning session.
+
+    Returns turns in order (turn_order ASC).
+    Returns an empty list if the session exists but has no recorded dialogue.
+    """
+    session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.student_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your session")
+
+    turns = (
+        db.query(DialogueTurn)
+        .filter(DialogueTurn.learning_session_id == session_id)
+        .order_by(DialogueTurn.turn_order)
+        .all()
+    )
+
+    return DialogueHistoryResponse(
+        session_id=session_id,
+        story_slug=session.story_slug,
+        turns=[DialogueTurnResponse.model_validate(t) for t in turns],
+        total=len(turns),
     )

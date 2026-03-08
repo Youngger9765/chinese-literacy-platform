@@ -18,13 +18,18 @@ import {
   getStudentSessions,
   getErrorVocab,
   getTimeStats,
+  getClassroomHeatmap,
+  getClassroomAlerts,
   ClassroomStats,
   StudentProgress,
   StudentSession,
   ErrorVocabItem,
   TimeStats,
+  ClassroomHeatmap,
+  StudentAlert,
   TeacherApiError,
 } from '../../services/teacherApi';
+import HeatmapChart from '../../components/teacher/HeatmapChart';
 
 interface ClassroomAnalyticsProps {
   classroomId: number;
@@ -46,8 +51,10 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
   const [stats, setStats] = useState<ClassroomStats | null>(null);
   const [errorVocab, setErrorVocab] = useState<ErrorVocabItem[]>([]);
   const [timeStats, setTimeStats] = useState<TimeStats | null>(null);
+  const [heatmap, setHeatmap] = useState<ClassroomHeatmap | null>(null);
   const [accuracyData, setAccuracyData] = useState<AccuracyDataPoint[]>([]);
   const [studentNames, setStudentNames] = useState<string[]>([]);
+  const [alerts, setAlerts] = useState<StudentAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -57,16 +64,20 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
     setError('');
     try {
       // Fetch all data in parallel
-      const [statsData, errorData, timeData, progressData] = await Promise.all([
+      const [statsData, errorData, timeData, progressData, heatmapData, alertsData] = await Promise.all([
         getClassroomStats(token, classroomId),
         getErrorVocab(token, classroomId),
         getTimeStats(token, classroomId),
         getClassroomProgress(token, classroomId),
+        getClassroomHeatmap(token, classroomId),
+        getClassroomAlerts(token, classroomId),
       ]);
 
       setStats(statsData);
       setErrorVocab(errorData);
       setTimeStats(timeData);
+      setHeatmap(heatmapData);
+      setAlerts(alertsData);
 
       // Build accuracy trend data from per-student sessions
       await buildAccuracyTrend(progressData);
@@ -184,6 +195,16 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
 
   return (
     <div className="p-5 space-y-6">
+      {/* Alert banner */}
+      {alerts.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-gray-700">學習預警</h3>
+          {alerts.map((alert) => (
+            <AlertCard key={`${alert.student_id}-${alert.alert_type}`} alert={alert} />
+          ))}
+        </div>
+      )}
+
       {/* Overview cards */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -253,6 +274,18 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
         )}
       </div>
 
+      {/* Heatmap: student × story performance matrix */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">班級表現矩陣（學生 × 課文）</h3>
+        {heatmap ? (
+          <HeatmapChart data={heatmap} />
+        ) : (
+          <div className="text-center py-8 text-gray-400 text-sm">
+            尚無學習記錄
+          </div>
+        )}
+      </div>
+
       {/* Error vocabulary bar chart */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <h3 className="text-sm font-semibold text-gray-700 mb-3">
@@ -298,6 +331,51 @@ const ClassroomAnalytics: React.FC<ClassroomAnalyticsProps> = ({ classroomId }) 
     </div>
   );
 };
+
+const ALERT_CONFIG: Record<
+  StudentAlert['alert_type'],
+  { bg: string; border: string; badge: string; badgeText: string; label: string }
+> = {
+  low_performance: {
+    bg: 'bg-red-50',
+    border: 'border-red-200',
+    badge: 'bg-red-100 text-red-700',
+    badgeText: '低分預警',
+    label: '查看詳情',
+  },
+  declining: {
+    bg: 'bg-orange-50',
+    border: 'border-orange-200',
+    badge: 'bg-orange-100 text-orange-700',
+    badgeText: '成績下滑',
+    label: '查看詳情',
+  },
+  inactive: {
+    bg: 'bg-gray-50',
+    border: 'border-gray-200',
+    badge: 'bg-gray-200 text-gray-600',
+    badgeText: '未活躍',
+    label: '查看詳情',
+  },
+};
+
+function AlertCard({ alert }: { alert: StudentAlert }) {
+  const cfg = ALERT_CONFIG[alert.alert_type];
+  return (
+    <div
+      className={`flex items-center justify-between rounded-lg border px-4 py-3 ${cfg.bg} ${cfg.border}`}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <span className={`shrink-0 inline-block px-2 py-0.5 rounded text-xs font-medium ${cfg.badge}`}>
+          {cfg.badgeText}
+        </span>
+        <span className="font-medium text-sm text-gray-900 truncate">{alert.student_name}</span>
+        <span className="text-xs text-gray-500 hidden sm:block truncate">{alert.detail}</span>
+      </div>
+      <span className="text-xs text-gray-500 sm:hidden ml-2 shrink-0">{alert.detail}</span>
+    </div>
+  );
+}
 
 function StatCard({
   label,
