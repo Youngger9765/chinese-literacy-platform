@@ -207,13 +207,10 @@ app.include_router(roles.router, prefix="/api")
 app.include_router(classroom_texts_router, prefix="/api", tags=["classroom-texts"])
 app.include_router(teacher_router, prefix="/api", tags=["teacher"])
 app.include_router(assignments_router, prefix="/api", tags=["assignments"])
-<<<<<<< HEAD
 app.include_router(admin_stories_router, prefix="/api", tags=["admin-stories"])
-=======
 app.include_router(feedback_router, prefix="/api", tags=["feedback"])
 app.include_router(jobs_router, prefix="/api", tags=["admin-jobs"])
 app.include_router(privacy_router, prefix="/api", tags=["privacy"])
->>>>>>> origin/staging
 
 
 def seed_default_data():

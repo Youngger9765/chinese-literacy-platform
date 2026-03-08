@@ -380,7 +380,7 @@ class TestRegisterEndpoint:
     def test_register_password_min_length_8_accepted(self, client):
         resp = client.post("/api/auth/register", json={
             "email": "minlen@example.com",
-            "password": "12345678",
+            "password": "Abcd1234",
             "name": "Min Length",
         })
         assert resp.status_code == 201
@@ -396,7 +396,7 @@ class TestRegisterEndpoint:
     def test_register_password_max_length_128_accepted(self, client):
         resp = client.post("/api/auth/register", json={
             "email": "maxlen@example.com",
-            "password": "A" * 128,
+            "password": "Abcd1234" + "x" * 120,
             "name": "Max Length",
         })
         assert resp.status_code == 201
@@ -750,9 +750,10 @@ class TestGetMeEndpoint:
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
         assert resp.json()["is_active"] is True
 
-    def test_get_me_email_verified_false_by_default(self, client, registered_user):
+    def test_get_me_email_verified_true_by_default(self, client, registered_user):
+        """Registration auto-verifies email (dev/test mode)."""
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
-        assert resp.json()["email_verified"] is False
+        assert resp.json()["email_verified"] is True
 
     def test_get_me_roles_is_list(self, client, registered_user):
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))

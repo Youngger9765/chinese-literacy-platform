@@ -32,7 +32,8 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role
+from app.models.user import Role, User
+from app.auth.dependencies import get_current_user
 from app.auth.rate_limiter import (
     InMemoryRateLimiter,
     ai_rate_limiter,
@@ -104,8 +105,12 @@ def setup_db():
     session.close()
 
     app.dependency_overrides[get_db] = _override_get_db
+    # Bypass auth for rate-limiting tests — we only care about 429 vs 200
+    _fake_user = User(id=999, email="ratelimit@test.com", name="Rate Tester", password_hash="x")
+    app.dependency_overrides[get_current_user] = lambda: _fake_user
     yield
     app.dependency_overrides.pop(get_db, None)
+    app.dependency_overrides.pop(get_current_user, None)
     Base.metadata.drop_all(bind=engine)
 
 
