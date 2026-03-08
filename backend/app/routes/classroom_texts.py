@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class ClassroomTextAssignRequest(BaseModel):
     text_id: str
+    copyright_confirmed: bool = False
 
 
 class ClassroomTextResponse(BaseModel):
@@ -52,6 +53,10 @@ def assign_text_to_classroom(
     """Assign a platform story (text) to a classroom."""
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_owner_or_admin(classroom, current_user, db)
+
+    # Require copyright confirmation
+    if not payload.copyright_confirmed:
+        raise HTTPException(status_code=422, detail="copyright_confirmed must be true")
 
     # Validate that the story exists
     try:

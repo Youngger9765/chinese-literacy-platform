@@ -112,13 +112,14 @@ export async function assignText(
   token: string,
   classroomId: number,
   textId: string,
+  copyrightConfirmed: boolean = false,
 ): Promise<ClassroomTextItem> {
   const res = await fetch(
     `${API_BASE}/api/classrooms/${classroomId}/texts`,
     {
       method: 'POST',
       headers: authHeaders(token),
-      body: JSON.stringify({ text_id: textId }),
+      body: JSON.stringify({ text_id: textId, copyright_confirmed: copyrightConfirmed }),
     },
   );
   return handleResponse<ClassroomTextItem>(res);
