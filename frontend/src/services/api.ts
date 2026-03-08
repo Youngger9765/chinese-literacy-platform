@@ -418,3 +418,73 @@ export interface LearningSummary {
   started_at: string;
   completed_at: string | null;
 }
+
+// --- Error Correction API (Issue #248) ---
+
+export interface ErrorPatternItem {
+  character: string;
+  total_error_count: number;
+  sessions_with_error: number;
+  last_error_date: string | null;
+  suggested_practice: boolean;
+  is_corrected: boolean;
+}
+
+export interface ErrorPatternsResponse {
+  patterns: ErrorPatternItem[];
+  total: number;
+}
+
+export interface RecommendedVocabItem {
+  character: string;
+  error_count: number;
+  related_words: string[];
+  zhuyin: string | null;
+}
+
+export interface RecommendedVocabResponse {
+  items: RecommendedVocabItem[];
+  total: number;
+}
+
+export interface ErrorCorrectionResponse {
+  id: number;
+  student_id: number;
+  character: string;
+  correction_type: string;
+  created_at: string;
+}
+
+export async function getErrorPatterns(token: string, studentId: number): Promise<ErrorPatternsResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/error-patterns`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getErrorPatterns failed: ${res.status}`);
+  return res.json();
+}
+
+export async function getRecommendedVocab(token: string, studentId: number): Promise<RecommendedVocabResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/recommended-vocab`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getRecommendedVocab failed: ${res.status}`);
+  return res.json();
+}
+
+export async function markErrorCorrected(
+  token: string,
+  studentId: number,
+  character: string,
+  type: string,
+): Promise<ErrorCorrectionResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/error-corrections`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ character, correction_type: type }),
+  });
+  if (!res.ok) throw new Error(`markErrorCorrected failed: ${res.status}`);
+  return res.json();
+}

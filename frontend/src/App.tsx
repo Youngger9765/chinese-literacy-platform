@@ -29,6 +29,7 @@ import JoinClassroomPage from './pages/JoinClassroomPage';
 import MyAssignments from './pages/student/MyAssignments';
 import LearningHistory from './pages/student/LearningHistory';
 import DialogueHistory from './pages/student/DialogueHistory';
+import MyVocabulary from './pages/student/MyVocabulary';
 import OnboardingGuide from './components/OnboardingGuide';
 import TermsModal from './components/TermsModal';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -281,7 +282,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
         </div>
 
-        {![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS, AppView.LEARNING_HISTORY, AppView.DIALOGUE_HISTORY].includes(currentView) && (
+        {![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS, AppView.MY_VOCABULARY, AppView.LEARNING_HISTORY, AppView.DIALOGUE_HISTORY].includes(currentView) && (
           <StepperNav
             currentView={currentView}
             session={navSession}
@@ -316,6 +317,16 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 }`}
               >
                 作業
+              </button>
+              <button
+                onClick={() => navigate('/vocabulary')}
+                className={`text-xs font-medium transition-colors cursor-pointer ${
+                  currentView === AppView.MY_VOCABULARY
+                    ? 'text-accent'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                我的生字
               </button>
               <button
                 onClick={() => navigate('/history')}
@@ -548,6 +559,16 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <AppShell>
                   <DialogueHistory />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vocabulary"
+            element={
+              <ProtectedRoute>
+                <AppShell>
+                  <MyVocabulary />
                 </AppShell>
               </ProtectedRoute>
             }
