@@ -17,6 +17,7 @@ export interface AuthUser {
   email: string;
   name: string;
   is_active: boolean;
+  onboarding_completed: boolean;
   roles: UserRole[];
 }
 

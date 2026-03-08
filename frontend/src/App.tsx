@@ -24,6 +24,7 @@ import FullReadingPage from './pages/learning/FullReadingPage';
 import ReportPage from './pages/learning/ReportPage';
 import JoinClassroomPage from './pages/JoinClassroomPage';
 import MyAssignments from './pages/student/MyAssignments';
+import OnboardingGuide from './components/OnboardingGuide';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -185,6 +186,31 @@ const TeacherDashboardPage: React.FC = () => {
   );
 };
 
+/** Onboarding overlay — shown once for students who haven't completed onboarding. */
+const OnboardingWrapper: React.FC = () => {
+  const { user, token, refreshUser } = useAuth();
+  const [dismissed, setDismissed] = useState(false);
+
+  const isStudent =
+    user !== null &&
+    !hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher');
+
+  const shouldShow = isStudent && user !== null && !user.onboarding_completed && !dismissed;
+
+  if (!shouldShow || !token) return null;
+
+  return (
+    <OnboardingGuide
+      userName={user.name}
+      token={token}
+      onComplete={() => {
+        setDismissed(true);
+        refreshUser();
+      }}
+    />
+  );
+};
+
 /** The authenticated app shell with header. */
 const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
@@ -313,6 +339,9 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
+
+      {/* Onboarding overlay for first-time students */}
+      <OnboardingWrapper />
     </div>
   );
 };

@@ -14,6 +14,8 @@ interface AuthContextValue {
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
   clearMustChangePassword: () => void;
+  /** Re-fetch user data from /api/users/me and update the context. */
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -108,6 +110,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoginPassword(null);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+    if (!storedToken) return;
+    try {
+      const userData = await getMe(storedToken);
+      setUser(userData);
+    } catch {
+      // Ignore — token may have expired; logout will handle that separately.
+    }
+  }, []);
+
   const value: AuthContextValue = {
     user,
     token,
@@ -119,6 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     register,
     logout,
     clearMustChangePassword,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

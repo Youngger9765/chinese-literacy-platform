@@ -20,6 +20,7 @@ class UserResponse(BaseModel):
     avatar_url: str | None = None
     is_active: bool
     email_verified: bool
+    onboarding_completed: bool = False
     last_login_at: datetime | None = None
     created_at: datetime
     roles: list[UserRoleResponse] = []
