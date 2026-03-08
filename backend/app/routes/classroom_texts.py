@@ -24,6 +24,9 @@ logger = logging.getLogger(__name__)
 
 class ClassroomTextAssignRequest(BaseModel):
     text_id: str
+    # Optional expiry: ISO-8601 datetime string, e.g. "2025-07-31T23:59:59+08:00".
+    # Defaults to None (no automatic cleanup for this assignment).
+    expires_at: datetime | None = None
     copyright_confirmed: bool = False
 
 
@@ -32,6 +35,7 @@ class ClassroomTextResponse(BaseModel):
     text_id: str
     title: str
     assigned_at: datetime
+    expires_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 
@@ -66,12 +70,13 @@ def assign_text_to_classroom(
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
-    # Check for duplicate assignment
+    # Check for duplicate assignment (including previously soft-deleted rows)
     existing = (
         db.query(ClassroomText)
         .filter(
             ClassroomText.classroom_id == classroom_id,
             ClassroomText.text_id == payload.text_id,
+            ClassroomText.deleted_at.is_(None),
         )
         .first()
     )
@@ -82,20 +87,22 @@ def assign_text_to_classroom(
         classroom_id=classroom_id,
         text_id=payload.text_id,
         assigned_by=current_user.id,
+        expires_at=payload.expires_at,
     )
     db.add(ct)
     db.commit()
     db.refresh(ct)
 
     logger.info(
-        "Assigned text %s to classroom %d (by user %d)",
-        payload.text_id, classroom_id, current_user.id,
+        "Assigned text %s to classroom %d (by user %d, expires_at=%s)",
+        payload.text_id, classroom_id, current_user.id, payload.expires_at,
     )
     return ClassroomTextResponse(
         id=ct.id,
         text_id=ct.text_id,
         title=story["title"],
         assigned_at=ct.assigned_at,
+        expires_at=ct.expires_at,
     )
 
 
@@ -108,13 +115,16 @@ def list_classroom_texts(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all texts assigned to a classroom."""
+    """List all active (not soft-deleted) texts assigned to a classroom."""
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_owner_or_admin(classroom, current_user, db)
 
     assignments = (
         db.query(ClassroomText)
-        .filter(ClassroomText.classroom_id == classroom_id)
+        .filter(
+            ClassroomText.classroom_id == classroom_id,
+            ClassroomText.deleted_at.is_(None),
+        )
         .order_by(ClassroomText.assigned_at.desc())
         .all()
     )
@@ -129,6 +139,7 @@ def list_classroom_texts(
                 text_id=ct.text_id,
                 title=title,
                 assigned_at=ct.assigned_at,
+                expires_at=ct.expires_at,
             )
         )
     return results
@@ -154,6 +165,7 @@ def unassign_text_from_classroom(
         .filter(
             ClassroomText.classroom_id == classroom_id,
             ClassroomText.text_id == text_id,
+            ClassroomText.deleted_at.is_(None),
         )
         .first()
     )
