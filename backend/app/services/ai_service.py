@@ -193,6 +193,102 @@ async def generate_socratic_question(
     return response.text.strip()
 
 
+async def generate_reading_analysis(session_data: dict) -> dict:
+    """Generate personalised reading diagnosis and improvement suggestions.
+
+    Uses Gemini to analyse student reading performance and return
+    structured feedback including strengths, areas for improvement,
+    practice suggestions, and encouragement.
+
+    Args:
+        session_data: Dict with keys: story_title, accuracy, cpm,
+                      error_chars (list[str]), total_characters.
+
+    Returns:
+        Dict with keys: analysis_summary, strengths, areas_for_improvement,
+                        practice_suggestions, encouragement_message.
+    """
+    story_title = session_data.get("story_title", "未知課文")
+    accuracy = session_data.get("accuracy", 0)
+    cpm = session_data.get("cpm", 0)
+    error_chars = session_data.get("error_chars", [])
+    total_characters = session_data.get("total_characters", 0)
+
+    error_chars_str = "、".join(error_chars) if error_chars else "無"
+
+    system_prompt = (
+        f"{TUTOR_PERSONA}\n\n"
+        "你同時也是一位國小國語文教學專家。請根據以下學生朗讀數據，"
+        "提供詳細的診斷分析和改善建議。\n\n"
+        "回覆規則：\n"
+        "- 必須使用臺灣繁體中文（zh-TW），嚴禁大陸用語\n"
+        "- 語氣溫暖、鼓勵，適合國小高年級至國中生\n"
+        "- 分析要具體，根據數據給出針對性建議\n"
+        "- 每項建議都要可執行"
+    )
+
+    user_prompt = (
+        f"學生朗讀資料：\n"
+        f"- 課文：{story_title}\n"
+        f"- 正確率：{accuracy}%\n"
+        f"- 朗讀速度：{cpm} 字/分鐘\n"
+        f"- 錯誤字：{error_chars_str}\n"
+        f"- 總字數：{total_characters}\n\n"
+        "請根據以上資料進行分析。"
+    )
+
+    response_schema = {
+        "type": "OBJECT",
+        "properties": {
+            "analysis_summary": {
+                "type": "STRING",
+                "description": "整體分析摘要（2-3句話）",
+            },
+            "strengths": {
+                "type": "ARRAY",
+                "items": {"type": "STRING"},
+                "description": "學生的優點（1-3項）",
+            },
+            "areas_for_improvement": {
+                "type": "ARRAY",
+                "items": {"type": "STRING"},
+                "description": "待改善的地方（1-3項）",
+            },
+            "practice_suggestions": {
+                "type": "ARRAY",
+                "items": {"type": "STRING"},
+                "description": "具體練習建議（2-4項）",
+            },
+            "encouragement_message": {
+                "type": "STRING",
+                "description": "鼓勵語（1句話）",
+            },
+        },
+        "required": [
+            "analysis_summary",
+            "strengths",
+            "areas_for_improvement",
+            "practice_suggestions",
+            "encouragement_message",
+        ],
+    }
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text=user_prompt)],
+        )
+    ]
+
+    return await generate_structured_response(
+        system_prompt=system_prompt,
+        contents=contents,
+        response_schema=response_schema,
+        max_tokens=1024,
+        temperature=0.7,
+    )
+
+
 async def generate_exit_ticket(text: str) -> list[dict]:
     """
     Generate exit-ticket questions for a story text.
