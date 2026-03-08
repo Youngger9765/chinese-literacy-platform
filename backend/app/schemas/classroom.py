@@ -100,3 +100,13 @@ class StudentSearchResult(BaseModel):
     email: str
 
     model_config = {"from_attributes": True}
+
+
+# ── CSV Upload ───────────────────────────────────────────────────────────────
+
+
+class CsvUploadResponse(BaseModel):
+    created_count: int
+    skipped_count: int
+    errors: list[BatchStudentError]
+    created: list[CreatedStudentInfo]

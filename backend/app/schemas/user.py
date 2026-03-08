@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 
 class UserRoleResponse(BaseModel):
@@ -22,10 +22,18 @@ class UserResponse(BaseModel):
     email_verified: bool
     onboarding_completed: bool = False
     last_login_at: datetime | None = None
+    terms_accepted_at: datetime | None = None
+    terms_version: str | None = None
+    terms_accepted: bool = False
     created_at: datetime
     roles: list[UserRoleResponse] = []
 
     model_config = {"from_attributes": True}
+
+    @model_validator(mode="after")
+    def compute_terms_accepted(self) -> "UserResponse":
+        self.terms_accepted = self.terms_accepted_at is not None
+        return self
 
 
 class StudentProfileResponse(BaseModel):
