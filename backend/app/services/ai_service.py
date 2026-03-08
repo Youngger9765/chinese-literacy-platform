@@ -65,16 +65,44 @@ async def generate_structured_response(
             )
             return json.loads(response.text)
         except asyncio.TimeoutError:
-            logger.error("Gemini API timeout after %ds", GEMINI_TIMEOUT)
+            logger.error(
+                "Gemini API timeout after %ds",
+                GEMINI_TIMEOUT,
+                extra={
+                    "event": "gemini_timeout",
+                    "timeout_seconds": GEMINI_TIMEOUT,
+                    "attempt": attempt + 1,
+                },
+            )
             raise TimeoutError(f"AI response timeout ({GEMINI_TIMEOUT}s)")
         except Exception as e:
             last_error = e
             if attempt < MAX_RETRIES - 1:
                 delay = RETRY_BASE_DELAY * (2 ** attempt)
-                logger.warning("Gemini API attempt %d failed: %s. Retrying in %.1fs", attempt + 1, e, delay)
+                logger.warning(
+                    "Gemini API attempt %d failed: %s. Retrying in %.1fs",
+                    attempt + 1,
+                    e,
+                    delay,
+                    extra={
+                        "event": "gemini_retry",
+                        "attempt": attempt + 1,
+                        "error": str(e),
+                        "retry_delay_seconds": delay,
+                    },
+                )
                 await asyncio.sleep(delay)
             else:
-                logger.error("Gemini API failed after %d attempts: %s", MAX_RETRIES, e)
+                logger.error(
+                    "Gemini API failed after %d attempts: %s",
+                    MAX_RETRIES,
+                    e,
+                    extra={
+                        "event": "gemini_failure",
+                        "total_attempts": MAX_RETRIES,
+                        "error": str(e),
+                    },
+                )
 
     raise last_error
 

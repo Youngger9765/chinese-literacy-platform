@@ -311,7 +311,7 @@ export class PolyphonicProcessor {
       }
     }
 
-    return [defaultIndex !== -1 ? defaultIndex : 0, false, false];
+    return [defaultIndex, false, false];
   }
 
   /** Check if a character is in the polyphonic data */
@@ -340,6 +340,45 @@ export class PolyphonicProcessor {
   /** Check if a single character is a CJK unified ideograph */
   private isChineseCharacter(char: string): boolean {
     return CHINESE_CHAR_REGEX.test(char);
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Style-set mapping
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Map a matched variant index returned by match() to the BpmfIansui font's
+   * stylistic-set code ('0000' = no selector = font default, 'ss01'..'ss05' = variants).
+   *
+   * @param matchIndex  Index j returned by match(): -1 means "no explicit pattern
+   *                    matched", 0..n means v[j] was the matched variant.
+   * @param defaultVariantIdx  The v[] index whose pronunciation the font renders
+   *                    by default ('0000').  Stored as `d` in poyin_db.json;
+   *                    defaults to 0 when the field is absent.
+   *
+   * Mapping rules:
+   *   j == -1              → treated as j=0 (no match falls back to v[0] reading)
+   *   j == defaultVariantIdx → '0000'  (explicit match on the default variant)
+   *   j <  defaultVariantIdx → 'ss0{j+1}'  (shift up to skip the default slot)
+   *   j >  defaultVariantIdx → 'ss0{j}'    (no shift needed)
+   *
+   * When defaultVariantIdx == 0 (the common case), this simplifies to:
+   *   j == -1 or j == 0  → '0000'
+   *   j > 0              → 'ss0{j}'
+   * which is identical to the original code.
+   */
+  private variantIndexToStyleSet(matchIndex: number, defaultVariantIdx: number): string {
+    // No explicit match: fall back to v[0] as the reading for unrecognized contexts.
+    const j = matchIndex === -1 ? 0 : matchIndex;
+
+    if (j === defaultVariantIdx) {
+      return '0000';
+    }
+    if (j < defaultVariantIdx) {
+      return `ss0${j + 1}`;
+    }
+    // j > defaultVariantIdx
+    return `ss0${j}`;
   }
 
   // ---------------------------------------------------------------------------
@@ -590,20 +629,18 @@ export class PolyphonicProcessor {
             );
             skipPrev = matchSkipPrev;
 
-            if (matchIndex !== 0 || skipNext) {
-              const newSs = matchIndex !== 0 ? `ss0${matchIndex}` : '';
-              if (newSs) {
-                result.push({ char: character, styleSet: newSs });
-              } else {
-                result.push({ char: character, styleSet: '0000' });
-              }
-              if (skipNext && i + 1 < length) {
-                result.push({ char: nextChar, styleSet: '0000' });
-                i += 1;
-                continue;
-              }
-            } else {
-              result.push({ char: character, styleSet: '0000' });
+            // defaultVariantIdx: which v[] index is the font's '0000' default.
+            // Stored as charData.d; falls back to 0 for characters where v[0]
+            // is the font default (the vast majority of polyphonic chars).
+            const defaultVariantIdx = charData.d ?? 0;
+            const newSs = this.variantIndexToStyleSet(matchIndex, defaultVariantIdx);
+
+            result.push({ char: character, styleSet: newSs });
+
+            if (skipNext && i + 1 < length) {
+              result.push({ char: nextChar, styleSet: '0000' });
+              i += 1;
+              continue;
             }
           } else {
             result.push({ char: character, styleSet: '0000' });

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Story } from '../../types';
 import { fetchStories, fetchStory } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface StoryLibraryProps {
   onStartReading: (story: Story) => void;
@@ -9,6 +10,7 @@ interface StoryLibraryProps {
 }
 
 const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) => {
+  const { token } = useAuth();
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -18,7 +20,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
   const [availableGrades, setAvailableGrades] = useState<number[]>([]);
 
   useEffect(() => {
-    fetchStories()
+    fetchStories(token ?? undefined)
       .then(({ stories, grades }) => {
         setAllStories(stories);
         setAvailableGrades(grades);
@@ -29,7 +31,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [token]);
 
   // Filter by grade
   const filteredByGrade = selectedGrade
@@ -85,7 +87,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit }) =>
         <div className="text-center py-4 text-red-600 bg-red-50 rounded-lg">
           <p>載入失敗：{error}</p>
           <button
-            onClick={() => { setError(null); setIsLoading(true); fetchStories().then(({ stories, grades }) => { setAllStories(stories); setAvailableGrades(grades); }).catch((err) => setError(err.message)).finally(() => setIsLoading(false)); }}
+            onClick={() => { setError(null); setIsLoading(true); fetchStories(token ?? undefined).then(({ stories, grades }) => { setAllStories(stories); setAvailableGrades(grades); }).catch((err) => setError(err.message)).finally(() => setIsLoading(false)); }}
             className="mt-2 text-sm underline"
           >
             重試

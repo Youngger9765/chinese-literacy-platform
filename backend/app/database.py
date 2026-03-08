@@ -3,9 +3,13 @@ from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
 from .config import settings
 
+_engine_kwargs = {}
+if not settings.database_url.startswith("sqlite"):
+    _engine_kwargs["pool_pre_ping"] = True
+
 engine = create_engine(
     settings.database_url,
-    # connection_args needed for SQLite only; not needed for PostgreSQL
+    **_engine_kwargs,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

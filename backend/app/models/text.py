@@ -94,13 +94,13 @@ class Text(Base):
         ForeignKey("schools.id"), nullable=True
     )
     class_id: Mapped[int | None] = mapped_column(
-        ForeignKey("classes.id"), nullable=True
+        ForeignKey("classrooms.id"), nullable=True
     )
     teacher_id: Mapped[int | None] = mapped_column(
-        ForeignKey("teachers.id"), nullable=True
+        ForeignKey("users.id"), nullable=True
     )
     created_by_id: Mapped[int | None] = mapped_column(
-        ForeignKey("teachers.id"), nullable=True
+        ForeignKey("users.id"), nullable=True
     )
 
     # === Fork/Copy ===
@@ -134,14 +134,14 @@ class Text(Base):
     school: Mapped["School | None"] = relationship(  # type: ignore[name-defined]
         "School", foreign_keys=[school_id]
     )
-    class_: Mapped["Class | None"] = relationship(  # type: ignore[name-defined]
-        "Class", foreign_keys=[class_id]
+    classroom: Mapped["Classroom | None"] = relationship(  # type: ignore[name-defined]
+        "Classroom", foreign_keys=[class_id]
     )
-    teacher: Mapped["Teacher | None"] = relationship(  # type: ignore[name-defined]
-        "Teacher", foreign_keys=[teacher_id]
+    teacher: Mapped["User | None"] = relationship(  # type: ignore[name-defined]
+        "User", foreign_keys=[teacher_id]
     )
-    created_by: Mapped["Teacher | None"] = relationship(  # type: ignore[name-defined]
-        "Teacher", foreign_keys=[created_by_id]
+    created_by: Mapped["User | None"] = relationship(  # type: ignore[name-defined]
+        "User", foreign_keys=[created_by_id]
     )
     forked_from: Mapped["Text | None"] = relationship(
         "Text", remote_side=[id], foreign_keys=[forked_from_id]

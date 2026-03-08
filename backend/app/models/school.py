@@ -1,4 +1,15 @@
-from sqlalchemy import String, Integer, ForeignKey, UniqueConstraint
+from datetime import datetime
+
+from sqlalchemy import (
+    String,
+    Integer,
+    Boolean,
+    JSON,
+    DateTime,
+    ForeignKey,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
@@ -8,41 +19,85 @@ class School(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
+    organization_id: Mapped[str | None] = mapped_column(
+        ForeignKey("organizations.id"), nullable=True
+    )
+    display_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    address: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    admin_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    join_code: Mapped[str | None] = mapped_column(String(20), unique=True, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    settings: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
-    teachers: Mapped[list["Teacher"]] = relationship("Teacher", back_populates="school")
+    # Relationships
+    organization: Mapped["Organization | None"] = relationship("Organization")
+    admin_user: Mapped["User | None"] = relationship("User")
+    classrooms: Mapped[list["Classroom"]] = relationship("Classroom", back_populates="school")
 
 
-class Teacher(Base):
-    __tablename__ = "teachers"
+class Classroom(Base):
+    __tablename__ = "classrooms"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False)
-    email: Mapped[str] = mapped_column(String(254), unique=True, nullable=False)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
+    grade: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    join_code: Mapped[str | None] = mapped_column(String(8), unique=True, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
-    school: Mapped[School] = relationship("School", back_populates="teachers")
-    classes: Mapped[list["Class"]] = relationship("Class", back_populates="teacher")
-
-
-class Class(Base):
-    __tablename__ = "classes"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    teacher_id: Mapped[int] = mapped_column(ForeignKey("teachers.id"), nullable=False)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-
-    teacher: Mapped[Teacher] = relationship("Teacher", back_populates="classes")
-    class_students: Mapped[list["ClassStudent"]] = relationship(
-        "ClassStudent", back_populates="class_"
+    # Relationships
+    school: Mapped["School"] = relationship("School", back_populates="classrooms")
+    teacher: Mapped["User"] = relationship("User")
+    classroom_students: Mapped[list["ClassroomStudent"]] = relationship(
+        "ClassroomStudent", back_populates="classroom"
     )
 
 
-class ClassStudent(Base):
-    __tablename__ = "class_students"
-    __table_args__ = (UniqueConstraint("class_id", "student_id"),)
+class ClassroomStudent(Base):
+    __tablename__ = "classroom_students"
+    __table_args__ = (UniqueConstraint("classroom_id", "student_id"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    class_id: Mapped[int] = mapped_column(ForeignKey("classes.id"), nullable=False)
-    student_id: Mapped[int] = mapped_column(ForeignKey("students.id"), nullable=False)
+    classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id"), nullable=False)
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    enrolled_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
-    class_: Mapped[Class] = relationship("Class", back_populates="class_students")
+    # Relationships
+    classroom: Mapped["Classroom"] = relationship("Classroom", back_populates="classroom_students")
+    student: Mapped["User"] = relationship("User")
+
+
+class ClassroomText(Base):
+    __tablename__ = "classroom_texts"
+    __table_args__ = (UniqueConstraint("classroom_id", "text_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    classroom_id: Mapped[int] = mapped_column(
+        ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False
+    )
+    text_id: Mapped[str] = mapped_column(String(50), nullable=False)
+    assigned_by: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    assigned_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    # Relationships
+    classroom: Mapped["Classroom"] = relationship("Classroom")
+    assigner: Mapped["User | None"] = relationship("User")

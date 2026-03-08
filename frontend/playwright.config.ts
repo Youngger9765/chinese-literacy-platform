@@ -2,9 +2,15 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
-  timeout: 60000,
+  timeout: 60_000,
+  expect: {
+    timeout: 15_000,
+  },
   use: {
+    baseURL: 'https://lingoleap-frontend-issue-223-958347263320.asia-east1.run.app',
     headless: true,
+    navigationTimeout: 30_000,
+    actionTimeout: 15_000,
   },
   projects: [
     {

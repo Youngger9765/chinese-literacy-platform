@@ -94,8 +94,10 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
   };
 }
 
-export async function fetchStories(): Promise<{ stories: Story[]; total: number; grades: number[] }> {
-  const res = await fetch(`${API_BASE}/api/stories`);
+export async function fetchStories(token?: string): Promise<{ stories: Story[]; total: number; grades: number[] }> {
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}/api/stories`, { headers });
   if (!res.ok) throw new Error(`fetchStories failed: ${res.status}`);
   const data: ApiStoryListResponse = await res.json();
   return {
