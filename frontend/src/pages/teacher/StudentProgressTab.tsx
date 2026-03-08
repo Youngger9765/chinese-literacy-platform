@@ -13,6 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   getClassroomProgress,
   getStudentSessions,
+  getStudentInstructions,
   exportClassroomReport,
   addStudentTag,
   removeStudentTag,
@@ -23,6 +24,7 @@ import {
   LearningCurvePoint,
   TeacherApiError,
 } from '../../services/teacherApi';
+import TeacherInstructionPanel from './TeacherInstructionPanel';
 
 interface StudentProgressTabProps {
   classroomId: number;
@@ -250,6 +252,10 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [sessions, setSessions] = useState<StudentSession[]>([]);
   const sessionCache = useRef<Record<number, StudentSession[]>>({});
 
+  // Instruction panel state
+  const [instructionTarget, setInstructionTarget] = useState<{ id: number; name: string } | null>(null);
+  const [instructionCounts, setInstructionCounts] = useState<Record<number, number>>({});
+
   // Tag management state
   const [tagManagerStudent, setTagManagerStudent] = useState<StudentProgress | null>(null);
 
@@ -286,6 +292,30 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   useEffect(() => {
     loadProgress();
   }, [loadProgress]);
+
+
+  // Load instruction counts for each student
+  const loadInstructionCounts = useCallback(async (students: StudentProgress[]) => {
+    if (!token || students.length === 0) return;
+    const counts: Record<number, number> = {};
+    await Promise.all(
+      students.map(async (s) => {
+        try {
+          const instructions = await getStudentInstructions(token, s.student_id);
+          counts[s.student_id] = instructions.length;
+        } catch {
+          counts[s.student_id] = 0;
+        }
+      }),
+    );
+    setInstructionCounts(counts);
+  }, [token]);
+
+  useEffect(() => {
+    if (progress.length > 0) {
+      loadInstructionCounts(progress);
+    }
+  }, [progress, loadInstructionCounts]);
 
   const handleExport = useCallback(async () => {
     if (!token) return;
@@ -486,6 +516,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
               <th className="pb-2 font-medium">最近練習日期</th>
               <th className="pb-2 font-medium">最近練習課文</th>
               <th className="pb-2 font-medium text-center">練習次數</th>
+              <th className="pb-2 font-medium text-center w-10">指示</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -546,10 +577,29 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                         {s.total_sessions}
                       </span>
                     </td>
+                    <td className="py-2.5 text-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInstructionTarget({ id: s.student_id, name: s.student_name });
+                        }}
+                        className="relative inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-amber-50 transition-colors group"
+                        title="AI 教學指示"
+                      >
+                        <svg className="w-4 h-4 text-gray-400 group-hover:text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        {(instructionCounts[s.student_id] ?? 0) > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-amber-500 rounded-full">
+                            {instructionCounts[s.student_id]}
+                          </span>
+                        )}
+                      </button>
+                    </td>
                   </tr>
                   {isExpanded && (
                     <tr>
-                      <td colSpan={5} className="bg-gray-50 px-4 py-3 space-y-4">
+                      <td colSpan={6} className="bg-gray-50 px-4 py-3 space-y-4">
                         {/* Learning curve chart */}
                         {isLoadingCurve ? (
                           <div className="h-40 bg-gray-200 animate-pulse rounded" />
@@ -641,6 +691,20 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
           </tbody>
         </table>
       </div>
+
+      {/* Teacher Instruction Panel Modal */}
+      {instructionTarget && (
+        <TeacherInstructionPanel
+          studentId={instructionTarget.id}
+          studentName={instructionTarget.name}
+          classroomId={classroomId}
+          onClose={() => {
+            setInstructionTarget(null);
+            // Refresh instruction counts when panel closes
+            loadInstructionCounts(progress);
+          }}
+        />
+      )}
     </div>
   );
 };

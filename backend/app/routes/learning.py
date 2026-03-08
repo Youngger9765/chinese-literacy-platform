@@ -9,6 +9,7 @@ from ..auth.rate_limiter import ai_limit_10_per_min, ai_limit_5_per_min
 from ..database import get_db
 from ..models.school import ClassroomStudent
 from ..models.session import LearningSession, DialogueTurn
+from ..models.teacher_instruction import TeacherInstruction
 from ..models.user import User
 from ..schemas.session import (
     SessionCreateRequest,
@@ -280,6 +281,21 @@ async def comprehension_chat(
     """
     try:
         if payload.student_answer is None:
+            # Fetch active teacher instructions for this student (Issue #90)
+            teacher_instructions_content: list[str] = []
+            try:
+                instructions = (
+                    db.query(TeacherInstruction)
+                    .filter(
+                        TeacherInstruction.student_id == current_user.id,
+                        TeacherInstruction.is_active == True,  # noqa: E712
+                    )
+                    .all()
+                )
+                teacher_instructions_content = [i.content for i in instructions]
+            except Exception as e:
+                logger.warning("Failed to fetch teacher instructions: %s", e)
+
             result = await socratic_agent.start_session(
                 session_id=payload.session_id,
                 story_title=payload.story_title,
@@ -287,6 +303,7 @@ async def comprehension_chat(
                 mispronounced_words=payload.mispronounced_words,
                 accuracy=payload.accuracy,
                 cpm=payload.cpm,
+                teacher_instructions=teacher_instructions_content or None,
             )
         else:
             result = await socratic_agent.process_answer(
