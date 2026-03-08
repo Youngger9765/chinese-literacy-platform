@@ -9,6 +9,7 @@ import {
   FullReadingResult,
 } from '../types';
 import { fetchStory } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
@@ -34,6 +35,8 @@ export interface LearningContext {
   handleFinishFullReading: (result: FullReadingResult) => void;
   handleRetry: () => void;
   emptyAttempt: ReadingAttempt;
+  /** DB LearningSession integer ID — set after the session is created in the DB (Issue #242) */
+  dbSessionId: number | null;
 }
 
 /**
@@ -41,10 +44,13 @@ export interface LearningContext {
  * Manages shared state: selectedStory, session, lastAttempt, rightPanelWidth.
  * Children access this state via useOutletContext<LearningContext>().
  */
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+
 const LearningLayout: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
   const navigate = useNavigate();
   const learningNav = useLearningNav();
+  const { token } = useAuth();
 
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [session, setSession] = useState<LearningSession | null>(null);
@@ -52,6 +58,8 @@ const LearningLayout: React.FC = () => {
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /** DB LearningSession integer ID — created when the user starts the intro (Issue #242) */
+  const [dbSessionId, setDbSessionId] = useState<number | null>(null);
 
   // Sync session/story to the nav context so the header StepperNav can read them
   useEffect(() => {
@@ -121,8 +129,28 @@ const LearningLayout: React.FC = () => {
       }
       return null;
     });
+
+    // Create a DB learning session so dialogue can be persisted (Issue #242)
+    if (token && storyId && dbSessionId === null) {
+      fetch(`${API_BASE}/api/learning/sessions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ story_slug: storyId }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.id) setDbSessionId(data.id);
+        })
+        .catch(() => {
+          // Non-fatal — dialogue won't be persisted but learning still works
+        });
+    }
+
     navigate(`/learn/${storyId}/tutor`);
-  }, [storyId, selectedStory, navigate]);
+  }, [storyId, selectedStory, navigate, token, dbSessionId]);
 
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
@@ -204,6 +232,7 @@ const LearningLayout: React.FC = () => {
     handleFinishFullReading,
     handleRetry,
     emptyAttempt: EMPTY_ATTEMPT,
+    dbSessionId,
   };
 
   return <Outlet context={ctx} />;

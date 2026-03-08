@@ -5,6 +5,7 @@ import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProc
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { getEncouragementMessage } from '../../utils/encouragement';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -13,6 +14,8 @@ interface ComprehensionChatProps {
   onPanelWidthChange: (w: number) => void;
   onFinish: (result: ComprehensionResult) => void;
   onBack: () => void;
+  /** DB LearningSession integer ID — when provided, dialogue turns are persisted (Issue #242) */
+  dbSessionId?: number;
 }
 
 type ChatMessage =
@@ -27,7 +30,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   onPanelWidthChange,
   onFinish,
   onBack,
+  dbSessionId,
 }) => {
+  const { token } = useAuth();
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -131,6 +136,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         mispronouncedWords: attempt.mispronouncedWords?.length ? attempt.mispronouncedWords : undefined,
         accuracy: attempt.accuracy || undefined,
         cpm: attempt.cpm || undefined,
+        // Persist dialogue to DB when DB session ID is available (Issue #242)
+        dbSessionId: dbSessionId ?? undefined,
+        token: token ?? undefined,
       });
       setConversation([{ role: 'ai', text: result.question }]);
       applyServerState(result);
@@ -214,6 +222,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         storyTitle: story.title,
         storyText,
         studentAnswer: text,
+        // Persist dialogue to DB when DB session ID is available (Issue #242)
+        dbSessionId: dbSessionId ?? undefined,
+        token: token ?? undefined,
       });
 
       applyServerState(result);
