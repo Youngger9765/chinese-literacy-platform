@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthError } from '../services/authApi';
+import { trackEvent } from '../utils/analytics';
 
 interface LoginPageProps {
   onSwitchToRegister?: () => void;
@@ -29,6 +30,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
     setIsSubmitting(true);
     try {
       const result = await login(email.trim(), password);
+      trackEvent('auth', 'login_success');
       if (result.mustChangePassword) {
         navigate('/change-password', { replace: true });
       } else {
