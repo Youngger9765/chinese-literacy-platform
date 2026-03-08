@@ -12,13 +12,15 @@ from .routes.assignments import router as assignments_router
 
 logger = logging.getLogger(__name__)
 
-_is_dev = os.environ.get("ENVIRONMENT", "development") == "development"
+_env = os.environ.get("ENVIRONMENT", "development")
+_is_dev = _env in ("development", "preview")
 
-if not _is_dev and settings.jwt_secret_key == "dev-secret-change-in-production":
-    raise RuntimeError("JWT_SECRET_KEY must be set in production!")
-elif _is_dev and settings.jwt_secret_key == "dev-secret-change-in-production":
-    import warnings
-    warnings.warn("Using default JWT secret key — NOT suitable for production", stacklevel=2)
+if settings.jwt_secret_key == "dev-secret-change-in-production":
+    if not _is_dev:
+        raise RuntimeError("JWT_SECRET_KEY must be set in production!")
+    else:
+        import warnings
+        warnings.warn("Using default JWT secret key — NOT suitable for production", stacklevel=2)
 
 
 @asynccontextmanager
