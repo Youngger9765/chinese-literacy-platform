@@ -289,6 +289,122 @@ async def generate_reading_analysis(session_data: dict) -> dict:
     )
 
 
+COMPREHENSION_SCORE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "comprehension_score": {
+            "type": "number",
+            "description": "Overall comprehension score 0-100",
+        },
+        "literal_score": {
+            "type": "number",
+            "description": "字面理解 score 0-100",
+        },
+        "inferential_score": {
+            "type": "number",
+            "description": "推論理解 score 0-100",
+        },
+        "evaluative_score": {
+            "type": "number",
+            "description": "評鑑理解 score 0-100",
+        },
+        "feedback": {
+            "type": "object",
+            "properties": {
+                "literal": {
+                    "type": "string",
+                    "description": "字面理解評語 (Traditional Chinese)",
+                },
+                "inferential": {
+                    "type": "string",
+                    "description": "推論理解評語 (Traditional Chinese)",
+                },
+                "evaluative": {
+                    "type": "string",
+                    "description": "評鑑理解評語 (Traditional Chinese)",
+                },
+                "overall": {
+                    "type": "string",
+                    "description": "整體評語 (Traditional Chinese)",
+                },
+            },
+            "required": ["literal", "inferential", "evaluative", "overall"],
+        },
+    },
+    "required": [
+        "comprehension_score",
+        "literal_score",
+        "inferential_score",
+        "evaluative_score",
+        "feedback",
+    ],
+}
+
+
+async def evaluate_comprehension(
+    dialogue_turns: list[dict],
+    story_context: dict,
+) -> dict:
+    """Evaluate student comprehension across 3 levels based on Socratic dialogue.
+
+    Args:
+        dialogue_turns: List of {"role": "ai"|"student", "text": str} dicts.
+        story_context: {"title": str, "summary": str} with story metadata.
+
+    Returns:
+        Dict with comprehension_score, literal_score, inferential_score,
+        evaluative_score, and feedback dict.
+    """
+    formatted_dialogue = "\n".join(
+        f"{'AI老師' if t['role'] == 'ai' else '學生'}: {t['text']}"
+        for t in dialogue_turns
+    )
+
+    system_prompt = f"""{TUTOR_PERSONA}
+你是國語文理解力評量專家。請根據以下蘇格拉底對話記錄，評估學生的三層次理解力。
+
+課文：{story_context['title']}
+課文內容摘要：{story_context['summary']}
+
+對話記錄：
+{formatted_dialogue}
+
+評分標準（0-100）：
+- literal_score（字面理解）：學生能否正確回答課文中明確提到的事實、人物、地點、事件？
+- inferential_score（推論理解）：學生能否推測因果關係、角色動機、或隱含的意義？
+- evaluative_score（評鑑理解）：學生能否連結自身經驗、提出觀點、或評論課文主題？
+
+評分規則：
+- 如果對話中沒有涉及某個層次的問題，給予 50 分（中間值）
+- 學生回答正確且詳細 → 80-100 分
+- 學生回答正確但簡略 → 60-79 分
+- 學生回答部分正確 → 40-59 分
+- 學生回答錯誤或敷衍 → 0-39 分
+- comprehension_score 是三個分數的加權平均（字面 30% + 推論 40% + 評鑑 30%）
+- 必須使用臺灣繁體中文（zh-TW）撰寫評語"""
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text="請根據以上對話記錄評估學生的理解力。")],
+        )
+    ]
+
+    result = await generate_structured_response(
+        system_prompt=system_prompt,
+        contents=contents,
+        response_schema=COMPREHENSION_SCORE_SCHEMA,
+        max_tokens=1024,
+        temperature=0.3,
+    )
+
+    # Clamp scores to 0-100 range
+    for key in ("comprehension_score", "literal_score", "inferential_score", "evaluative_score"):
+        val = result.get(key, 50)
+        result[key] = max(0, min(100, float(val)))
+
+    return result
+
 async def generate_exit_ticket(text: str) -> list[dict]:
     """
     Generate exit-ticket questions for a story text.

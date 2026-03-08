@@ -12,6 +12,7 @@ from ..models.school import ClassroomStudent
 from ..models.session import LearningSession, DialogueTurn
 from ..models.user import User
 from ..schemas.session import (
+    ComprehensionScoreResponse,
     SessionCreateRequest,
     SessionDetailResponse,
     SessionListResponse,
@@ -19,7 +20,7 @@ from ..schemas.session import (
     SessionSummaryResponse,
     SessionUpdateRequest,
 )
-from ..services.ai_service import generate_reading_analysis, generate_socratic_question
+from ..services.ai_service import evaluate_comprehension, generate_reading_analysis, generate_socratic_question
 from ..services.socratic_agent import socratic_agent
 
 router = APIRouter(tags=["learning"])
@@ -568,4 +569,99 @@ def get_dialogue_history(
         story_slug=session.story_slug,
         turns=[DialogueTurnResponse.model_validate(t) for t in turns],
         total=len(turns),
+    )
+
+
+# ── Comprehension Scoring (Issue #243) ────────────────────────────────────────
+
+
+class ComprehensionScoreRequest(BaseModel):
+    story_title: str
+    story_text: str = Field(..., max_length=10000)
+    dialogue_turns: list[ConversationTurn] = Field(..., min_length=1)
+
+
+@router.post(
+    "/learning/sessions/{session_id}/comprehension-score",
+    response_model=ComprehensionScoreResponse,
+    dependencies=[Depends(ai_limit_5_per_min)],
+)
+async def score_comprehension(
+    session_id: int,
+    payload: ComprehensionScoreRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Score a student's comprehension across 3 levels after Socratic dialogue.
+
+    Rate limited: 5 requests per minute per user/IP.
+
+    If scores already exist for this session (cached), returns them without
+    re-calling Gemini. Otherwise calls Gemini to evaluate and caches in DB.
+    """
+    session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.student_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your session")
+
+    # Return cached scores if they exist
+    if session.comprehension_score is not None:
+        feedback = {}
+        if session.comprehension_feedback:
+            try:
+                feedback = json.loads(session.comprehension_feedback)
+            except (json.JSONDecodeError, TypeError):
+                feedback = {}
+        return ComprehensionScoreResponse(
+            comprehension_score=session.comprehension_score,
+            literal_score=session.literal_score or 0,
+            inferential_score=session.inferential_score or 0,
+            evaluative_score=session.evaluative_score or 0,
+            feedback=feedback,
+        )
+
+    # Build story context
+    story_context = {
+        "title": payload.story_title,
+        "summary": payload.story_text[:500],  # Use first 500 chars as summary
+    }
+
+    # Build dialogue turns list
+    dialogue_turns = [t.model_dump() for t in payload.dialogue_turns]
+
+    try:
+        result = await evaluate_comprehension(
+            dialogue_turns=dialogue_turns,
+            story_context=story_context,
+        )
+    except Exception as e:
+        logger.error("Comprehension scoring error: %s", e)
+        raise HTTPException(status_code=503, detail="AI service unavailable")
+
+    # Cache scores in DB
+    session.comprehension_score = result["comprehension_score"]
+    session.literal_score = result["literal_score"]
+    session.inferential_score = result["inferential_score"]
+    session.evaluative_score = result["evaluative_score"]
+    session.comprehension_feedback = json.dumps(result.get("feedback", {}), ensure_ascii=False)
+    db.commit()
+    db.refresh(session)
+
+    logger.info(
+        "Scored comprehension for session %d: overall=%.1f, literal=%.1f, "
+        "inferential=%.1f, evaluative=%.1f",
+        session_id,
+        result["comprehension_score"],
+        result["literal_score"],
+        result["inferential_score"],
+        result["evaluative_score"],
+    )
+
+    return ComprehensionScoreResponse(
+        comprehension_score=result["comprehension_score"],
+        literal_score=result["literal_score"],
+        inferential_score=result["inferential_score"],
+        evaluative_score=result["evaluative_score"],
+        feedback=result.get("feedback", {}),
     )
