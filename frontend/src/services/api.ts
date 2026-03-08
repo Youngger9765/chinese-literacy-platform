@@ -221,6 +221,55 @@ export async function askComprehensionQuestion(payload: {
   return res.json();
 }
 
+// --- AI Reading Analysis API (Issue #241: Gemini reading diagnosis) ---
+
+export interface AIAnalysisResponse {
+  analysis_summary: string;
+  strengths: string[];
+  areas_for_improvement: string[];
+  practice_suggestions: string[];
+  encouragement_message: string;
+}
+
+/**
+ * Fetch AI reading analysis. Uses session-based endpoint when sessionId is
+ * available (with server-side caching), otherwise the standalone endpoint.
+ */
+export async function getAIAnalysis(
+  token: string,
+  payload: {
+    storyTitle: string;
+    accuracy: number;
+    cpm: number;
+    errorChars: string[];
+    totalCharacters: number;
+  },
+  sessionId?: number,
+): Promise<AIAnalysisResponse> {
+  const url = sessionId
+    ? `${API_BASE}/api/learning/sessions/${sessionId}/ai-analysis`
+    : `${API_BASE}/api/learning/ai-analysis`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      story_title: payload.storyTitle,
+      accuracy: payload.accuracy,
+      cpm: payload.cpm,
+      error_chars: payload.errorChars,
+      total_characters: payload.totalCharacters,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(body.detail || `AI analysis failed: ${res.status}`);
+  }
+  return res.json();
+}
+
 // --- New Comprehension Chat API (Issue #1: answer evaluation) ---
 
 export interface ChatResponse {

@@ -1,5 +1,6 @@
 from datetime import datetime
-from sqlalchemy import String, Integer, Float, Boolean, ForeignKey, DateTime, func
+
+from sqlalchemy import String, Integer, Float, Boolean, Text, ForeignKey, DateTime, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
@@ -21,6 +22,7 @@ class LearningSession(Base):
     comprehension_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     vocab_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     full_reading_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    ai_analysis: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

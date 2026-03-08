@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
 import DiffDisplay from '../ui/DiffDisplay';
@@ -9,6 +9,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
 import ExitTicket from './ExitTicket';
 import { trackLearningEvent } from '../../utils/analytics';
+import AIAnalysisSection from './AIAnalysisSection';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -568,13 +569,23 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         )}
       </Section>
 
-      {/* ============ 環節六：AI 詳細分析 (placeholder) ============ */}
-      <Section number={6} title="AI 詳細分析" defaultOpen={false} disabled>
-        <div className="p-6 bg-gray-50 rounded-2xl text-center">
-          <span className="text-4xl mb-3 block">🤖</span>
-          <p className="text-sm text-gray-400 font-bold">AI 詳細分析</p>
-          <p className="text-xs text-gray-300 mt-1">即將推出 — 系統將分析錯誤根源並提供個別化學習建議</p>
-        </div>
+      {/* ============ 環節六：AI 詳細分析 ============ */}
+      <Section number={6} title="AI 詳細分析" defaultOpen={false} disabled={!readingAttempt && !fullReadingResult}>
+        {(readingAttempt || fullReadingResult) ? (
+          <AIAnalysisSection
+            storyTitle={story?.title ?? ''}
+            accuracy={accuracy}
+            cpm={fullReadingResult?.cpm ?? cpm}
+            errorChars={wrongTokens.map(t => t.expected)}
+            totalCharacters={
+              fullReadingResult?.errorBreakdown
+                ? (fullReadingResult.errorBreakdown.correct + fullReadingResult.errorBreakdown.wrong + fullReadingResult.errorBreakdown.missing + fullReadingResult.errorBreakdown.extra)
+                : (readingAttempt?.lineBreakdown?.reduce((sum, l) => sum + (l.diffTokens?.length ?? 0), 0) ?? 0)
+            }
+          />
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-4">完成朗讀練習後可使用 AI 分析</p>
+        )}
       </Section>
 
       {/* ============ 補充資訊：生字練習 + 課文理解 ============ */}
