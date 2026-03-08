@@ -20,6 +20,7 @@ class UserResponse(BaseModel):
     avatar_url: str | None = None
     is_active: bool
     email_verified: bool
+    onboarding_completed: bool = False
     last_login_at: datetime | None = None
     terms_accepted_at: datetime | None = None
     terms_version: str | None = None

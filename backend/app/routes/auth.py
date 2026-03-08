@@ -84,6 +84,18 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     return TokenResponse(access_token=token, must_change_password=must_change)
 
 
+@router.post("/complete-onboarding")
+def complete_onboarding(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Mark the current user's onboarding as completed."""
+    current_user.onboarding_completed = True
+    db.commit()
+    db.refresh(current_user)
+    return {"message": "Onboarding completed", "onboarding_completed": True}
+
+
 @router.post("/change-password")
 def change_password(
     req: ChangePasswordRequest,
