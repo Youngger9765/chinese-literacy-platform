@@ -21,6 +21,7 @@ from .middleware.tenant import TenantMiddleware
 from .routes.feedback import router as feedback_router
 from .routes.jobs import router as jobs_router
 from .routes.privacy import router as privacy_router
+from .routes.cleanup import router as cleanup_router
 from .utils.logging_config import setup_logging
 
 # Initialise structured logging before anything else
@@ -211,6 +212,7 @@ app.include_router(admin_stories_router, prefix="/api", tags=["admin-stories"])
 app.include_router(feedback_router, prefix="/api", tags=["feedback"])
 app.include_router(jobs_router, prefix="/api", tags=["admin-jobs"])
 app.include_router(privacy_router, prefix="/api", tags=["privacy"])
+app.include_router(cleanup_router, prefix="/api", tags=["admin-cleanup"])
 
 
 def seed_default_data():
