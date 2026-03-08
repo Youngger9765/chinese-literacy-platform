@@ -4,6 +4,7 @@ import { sendComprehensionChat, ChatResponse, SessionExpiredError } from '../../
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { getEncouragementMessage } from '../../utils/encouragement';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -17,7 +18,7 @@ interface ComprehensionChatProps {
 type ChatMessage =
   | { role: 'ai'; text: string }
   | { role: 'student'; text: string }
-  | { role: 'feedback'; text: string; understood: boolean };
+  | { role: 'feedback'; text: string; understood: boolean; encouragement?: string };
 
 const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   story,
@@ -225,6 +226,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           role: 'feedback',
           text: result.feedback,
           understood: result.understood,
+          // Pick encouragement phrase at message-creation time so it stays stable on re-renders
+          encouragement: result.understood === false ? getEncouragementMessage() : undefined,
         });
       }
 
@@ -297,13 +300,22 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         // Feedback message
         if (turn.role === 'feedback') {
           return (
-            <div key={i} className={`mx-10 rounded-xl px-3.5 py-2 text-sm border ${
-              turn.understood
-                ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                : 'bg-amber-50 border-amber-300 text-amber-800'
-            }`}>
-              <span className="mr-1.5">{turn.understood ? '✓' : '💡'}</span>
-              {processZhuyin(turn.text)}
+            <div key={i} className="mx-10 space-y-1.5">
+              {/* Encouragement badge shown above hint when student answered incorrectly */}
+              {!turn.understood && turn.encouragement && (
+                <div className="animate-fade-in flex items-center gap-1.5 text-amber-700 text-xs font-semibold">
+                  <span>✨</span>
+                  <span>{processZhuyin(turn.encouragement)}</span>
+                </div>
+              )}
+              <div className={`rounded-xl px-3.5 py-2 text-sm border ${
+                turn.understood
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                  : 'bg-amber-50 border-amber-300 text-amber-800'
+              }`}>
+                <span className="mr-1.5">{turn.understood ? '✓' : '💡'}</span>
+                {processZhuyin(turn.text)}
+              </div>
             </div>
           );
         }
@@ -595,6 +607,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
       `}</style>
     </div>
   );

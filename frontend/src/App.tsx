@@ -1,17 +1,20 @@
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import { AppView, Story } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LearningNavProvider, useLearningNav } from './contexts/LearningNavContext';
 import { hasRole } from './services/authApi';
 import { useAppView } from './hooks/useAppView';
 import StepperNav from './components/StepperNav';
+import FeedbackButton from './components/FeedbackButton';
 import StoryLibrary from './pages/student/StoryLibrary';
 import WriteCharacter from './components/stroke-order/WriteCharacter';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
+import ForgotPassword from './pages/ForgotPassword';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import ClassroomDetail from './pages/teacher/ClassroomDetail';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -24,6 +27,9 @@ import FullReadingPage from './pages/learning/FullReadingPage';
 import ReportPage from './pages/learning/ReportPage';
 import JoinClassroomPage from './pages/JoinClassroomPage';
 import MyAssignments from './pages/student/MyAssignments';
+import OnboardingGuide from './components/OnboardingGuide';
+import TermsModal from './components/TermsModal';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -185,6 +191,31 @@ const TeacherDashboardPage: React.FC = () => {
   );
 };
 
+/** Onboarding overlay — shown once for students who haven't completed onboarding. */
+const OnboardingWrapper: React.FC = () => {
+  const { user, token, refreshUser } = useAuth();
+  const [dismissed, setDismissed] = useState(false);
+
+  const isStudent =
+    user !== null &&
+    !hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher');
+
+  const shouldShow = isStudent && user !== null && !user.onboarding_completed && !dismissed;
+
+  if (!shouldShow || !token) return null;
+
+  return (
+    <OnboardingGuide
+      userName={user.name}
+      token={token}
+      onComplete={() => {
+        setDismissed(true);
+        refreshUser();
+      }}
+    />
+  );
+};
+
 /** The authenticated app shell with header. */
 const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
@@ -313,6 +344,22 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
+
+      {/* Onboarding overlay for first-time students */}
+      <OnboardingWrapper />
+
+      {/* Feedback button — visible to all authenticated users */}
+      <FeedbackButton />
+
+      {/* Footer */}
+      <footer className="shrink-0 bg-white border-t border-gray-100 flex items-center justify-center py-1.5 px-4">
+        <button
+          onClick={() => navigate('/privacy')}
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          隱私政策
+        </button>
+      </footer>
     </div>
   );
 };
@@ -329,12 +376,37 @@ const LearningAppShell: React.FC = () => {
   );
 };
 
+/**
+ * TermsGate — renders TermsModal over the whole app when the authenticated
+ * user has not yet accepted the Terms of Service.
+ */
+const TermsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { needsTermsAcceptance, acceptTerms } = useAuth();
+
+  return (
+    <>
+      {children}
+      {needsTermsAcceptance && (
+        <TermsModal
+          onAccept={acceptTerms}
+          onAccepted={() => {
+            // AuthContext already updates user state after acceptTerms resolves.
+            // Nothing extra needed here.
+          }}
+        />
+      )}
+    </>
+  );
+};
+
 /** Root component with router and auth. */
 const App: React.FC = () => {
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <AuthProvider>
         <LearningNavProvider>
+        <TermsGate>
         <Routes>
           {/* Public-only routes (redirect to / if already logged in) */}
           <Route
@@ -350,6 +422,14 @@ const App: React.FC = () => {
             element={
               <PublicOnlyRoute>
                 <RegisterPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicOnlyRoute>
+                <ForgotPassword />
               </PublicOnlyRoute>
             }
           />
@@ -463,12 +543,17 @@ const App: React.FC = () => {
             <Route index element={<Navigate to="intro" replace />} />
           </Route>
 
+          {/* Privacy policy — public, no auth required */}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+
           {/* Catch-all: redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </TermsGate>
         </LearningNavProvider>
       </AuthProvider>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 

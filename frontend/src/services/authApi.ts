@@ -17,7 +17,11 @@ export interface AuthUser {
   email: string;
   name: string;
   is_active: boolean;
+  onboarding_completed: boolean;
   roles: UserRole[];
+  terms_accepted: boolean;
+  terms_accepted_at: string | null;
+  terms_version: string | null;
 }
 
 /** Check if user has a specific role */
@@ -87,6 +91,14 @@ export async function getMe(token: string): Promise<AuthUser> {
   return handleAuthResponse<AuthUser>(res);
 }
 
+export async function acceptTerms(token: string): Promise<AuthUser> {
+  const res = await fetch(`${API_BASE}/api/auth/accept-terms`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleAuthResponse<AuthUser>(res);
+}
+
 export async function changePassword(
   oldPassword: string,
   newPassword: string,
@@ -108,6 +120,42 @@ export async function changePassword(
     try {
       const body = await res.json();
       message = body.detail ?? body.message ?? message;
+    } catch {
+      // ignore
+    }
+    throw new AuthError(message, res.status);
+  }
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  reset_token: string;
+}
+
+export async function forgotPassword(identifier: string): Promise<ForgotPasswordResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identifier }),
+  });
+  return handleAuthResponse<ForgotPasswordResponse>(res);
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body.detail && typeof body.detail === 'object' && Array.isArray(body.detail.errors)) {
+        message = body.detail.errors.join('；');
+      } else {
+        message = body.detail ?? body.message ?? message;
+      }
     } catch {
       // ignore
     }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { changePassword, AuthError } from '../services/authApi';
+import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 
 const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -39,6 +40,16 @@ const ChangePasswordPage: React.FC = () => {
 
     if (newPassword.length < 8) {
       setError('新密碼至少需要 8 個字元');
+      return;
+    }
+
+    if (!/[a-zA-Z]/.test(newPassword)) {
+      setError('新密碼必須包含至少一個英文字母');
+      return;
+    }
+
+    if (!/\d/.test(newPassword)) {
+      setError('新密碼必須包含至少一個數字');
       return;
     }
 
@@ -108,9 +119,10 @@ const ChangePasswordPage: React.FC = () => {
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="至少 8 個字元"
+              placeholder="至少 8 個字元，包含英文字母與數字"
               className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
+            <PasswordStrengthIndicator password={newPassword} />
           </div>
 
           {/* Confirm Password */}
