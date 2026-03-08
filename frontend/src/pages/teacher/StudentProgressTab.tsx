@@ -4,7 +4,10 @@ import {
   getClassroomProgress,
   getStudentSessions,
   exportClassroomReport,
+  addStudentTag,
+  removeStudentTag,
   StudentProgress,
+  StudentTag,
   StudentSession,
   TeacherApiError,
 } from '../../services/teacherApi';
@@ -12,6 +15,215 @@ import {
 interface StudentProgressTabProps {
   classroomId: number;
 }
+
+// Predefined tags with their default colors
+const PREDEFINED_TAGS: { name: string; color: string }[] = [
+  { name: '需要關注', color: 'red' },
+  { name: '閱讀困難', color: 'orange' },
+  { name: '進步中', color: 'green' },
+  { name: '資優', color: 'blue' },
+];
+
+const TAG_COLOR_CLASSES: Record<string, string> = {
+  red: 'bg-red-100 text-red-700 border-red-200',
+  orange: 'bg-orange-100 text-orange-700 border-orange-200',
+  green: 'bg-green-100 text-green-700 border-green-200',
+  blue: 'bg-blue-100 text-blue-700 border-blue-200',
+  purple: 'bg-purple-100 text-purple-700 border-purple-200',
+  gray: 'bg-gray-100 text-gray-600 border-gray-200',
+};
+
+function tagColorClass(color: string): string {
+  return TAG_COLOR_CLASSES[color] ?? TAG_COLOR_CLASSES['gray'];
+}
+
+interface TagManagerProps {
+  studentId: number;
+  studentName: string;
+  currentTags: StudentTag[];
+  onClose: () => void;
+  onTagsChanged: (studentId: number, tags: StudentTag[]) => void;
+}
+
+const TagManager: React.FC<TagManagerProps> = ({
+  studentId,
+  studentName,
+  currentTags,
+  onClose,
+  onTagsChanged,
+}) => {
+  const { token } = useAuth();
+  const [tags, setTags] = useState<StudentTag[]>(currentTags);
+  const [customInput, setCustomInput] = useState('');
+  const [customColor, setCustomColor] = useState('gray');
+  const [saving, setSaving] = useState<string | null>(null);
+  const [error, setError] = useState('');
+
+  const handleAdd = async (tagName: string, color: string) => {
+    if (!token) return;
+    if (tags.some((t) => t.tag_name === tagName)) return; // already present
+    setSaving(tagName);
+    setError('');
+    try {
+      const newTag = await addStudentTag(token, studentId, tagName, color);
+      const updated = [...tags, newTag];
+      setTags(updated);
+      onTagsChanged(studentId, updated);
+    } catch (err) {
+      if (err instanceof TeacherApiError && err.status === 409) {
+        // tag already exists (race condition), silently ignore
+      } else {
+        setError('新增標籤失敗，請稍後再試');
+      }
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleRemove = async (tagName: string) => {
+    if (!token) return;
+    setSaving(tagName);
+    setError('');
+    try {
+      await removeStudentTag(token, studentId, tagName);
+      const updated = tags.filter((t) => t.tag_name !== tagName);
+      setTags(updated);
+      onTagsChanged(studentId, updated);
+    } catch {
+      setError('移除標籤失敗，請稍後再試');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleAddCustom = async () => {
+    const name = customInput.trim();
+    if (!name) return;
+    if (name.length > 50) {
+      setError('標籤名稱不能超過 50 字元');
+      return;
+    }
+    await handleAdd(name, customColor);
+    setCustomInput('');
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold text-gray-800">
+            管理標籤 — {studentName}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            aria-label="關閉"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Current tags */}
+        {tags.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs text-gray-500 mb-2">目前標籤</p>
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((t) => (
+                <span
+                  key={t.tag_name}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${tagColorClass(t.color)}`}
+                >
+                  {t.tag_name}
+                  <button
+                    onClick={() => handleRemove(t.tag_name)}
+                    disabled={saving === t.tag_name}
+                    className="ml-0.5 hover:opacity-70 disabled:opacity-40 cursor-pointer"
+                    aria-label={`移除 ${t.tag_name}`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Predefined tags */}
+        <div className="mb-4">
+          <p className="text-xs text-gray-500 mb-2">快速新增</p>
+          <div className="flex flex-wrap gap-1.5">
+            {PREDEFINED_TAGS.map((pt) => {
+              const isActive = tags.some((t) => t.tag_name === pt.name);
+              return (
+                <button
+                  key={pt.name}
+                  onClick={() => isActive ? handleRemove(pt.name) : handleAdd(pt.name, pt.color)}
+                  disabled={saving === pt.name}
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-opacity disabled:opacity-50 cursor-pointer ${
+                    isActive
+                      ? tagColorClass(pt.color)
+                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {isActive && (
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.172l7.879-7.879a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                  {pt.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Custom tag input */}
+        <div className="mb-3">
+          <p className="text-xs text-gray-500 mb-2">自訂標籤</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={customInput}
+              onChange={(e) => setCustomInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddCustom()}
+              placeholder="輸入標籤名稱..."
+              maxLength={50}
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+            <select
+              value={customColor}
+              onChange={(e) => setCustomColor(e.target.value)}
+              className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
+            >
+              <option value="gray">灰</option>
+              <option value="red">紅</option>
+              <option value="orange">橙</option>
+              <option value="green">綠</option>
+              <option value="blue">藍</option>
+              <option value="purple">紫</option>
+            </select>
+            <button
+              onClick={handleAddCustom}
+              disabled={!customInput.trim() || saving !== null}
+              className="px-3 py-1.5 text-sm font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              新增
+            </button>
+          </div>
+        </div>
+
+        {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      </div>
+    </div>
+  );
+};
 
 const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) => {
   const { token } = useAuth();
@@ -25,6 +237,9 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [sessions, setSessions] = useState<StudentSession[]>([]);
   const sessionCache = useRef<Record<number, StudentSession[]>>({});
+
+  // Tag management state
+  const [tagManagerStudent, setTagManagerStudent] = useState<StudentProgress | null>(null);
 
   const loadProgress = useCallback(async () => {
     if (!token) return;
@@ -68,7 +283,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch {
       setError('匯出失敗，請稍後再試');
     } finally {
       setExporting(false);
@@ -103,6 +318,17 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
       setIsLoadingSessions(false);
     }
   }, [expandedStudentId, token]);
+
+  // Update local tags after tag manager changes
+  const handleTagsChanged = useCallback((studentId: number, tags: StudentTag[]) => {
+    setProgress((prev) =>
+      prev.map((s) => (s.student_id === studentId ? { ...s, tags } : s))
+    );
+    // Update tag manager state so the modal reflects changes immediately
+    setTagManagerStudent((prev) =>
+      prev && prev.student_id === studentId ? { ...prev, tags } : prev
+    );
+  }, []);
 
   const formatDate = (dateStr: string | null): string => {
     if (!dateStr) return '-';
@@ -180,6 +406,17 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
 
   return (
     <div className="p-5">
+      {/* Tag Manager Modal */}
+      {tagManagerStudent && (
+        <TagManager
+          studentId={tagManagerStudent.student_id}
+          studentName={tagManagerStudent.student_name}
+          currentTags={tagManagerStudent.tags}
+          onClose={() => setTagManagerStudent(null)}
+          onTagsChanged={handleTagsChanged}
+        />
+      )}
+
       <div className="flex justify-end mb-3">
         <button
           onClick={handleExport}
@@ -222,7 +459,34 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </td>
-                    <td className="py-2.5 text-gray-900 font-medium">{s.student_name}</td>
+                    <td className="py-2.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-gray-900 font-medium">{s.student_name}</span>
+                        {/* Tag badges */}
+                        {s.tags.map((t) => (
+                          <span
+                            key={t.tag_name}
+                            className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium border ${tagColorClass(t.color)}`}
+                          >
+                            {t.tag_name}
+                          </span>
+                        ))}
+                        {/* Tag management button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTagManagerStudent(s);
+                          }}
+                          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs text-gray-400 border border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                          title="管理標籤"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          標籤
+                        </button>
+                      </div>
+                    </td>
                     <td className="py-2.5 text-gray-600">{formatDate(s.last_session_date)}</td>
                     <td className="py-2.5 text-gray-600">{s.last_text_title ?? '-'}</td>
                     <td className="py-2.5 text-gray-600 text-center">

@@ -17,6 +17,7 @@ from ..database import get_db
 from ..dependencies.tenant import _check_classroom_access
 from ..models.school import Classroom, ClassroomStudent, ClassroomText
 from ..models.session import CharacterError, LearningSession
+from ..models.student_tag import StudentTag
 from ..models.user import User
 from ..services.lesson_loader import get_lesson_by_id
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
@@ -26,6 +27,22 @@ logger = logging.getLogger(__name__)
 
 
 # ── Schemas ──────────────────────────────────────────────────────────────────
+
+
+class TagResponse(BaseModel):
+    id: int
+    student_id: int
+    teacher_id: int
+    tag_name: str
+    color: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class AddTagRequest(BaseModel):
+    tag_name: str
+    color: str = "gray"
 
 
 class TeacherClassroomResponse(BaseModel):
@@ -47,6 +64,7 @@ class StudentProgressResponse(BaseModel):
     last_session_date: datetime | None
     last_text_title: str | None
     total_sessions: int
+    tags: list[TagResponse] = []
 
     model_config = {"from_attributes": True}
 
@@ -165,6 +183,18 @@ def get_classroom_progress(
         .all()
     )
 
+    # Batch-load tags for all students to avoid N+1 queries
+    student_ids_in_classroom = [e.student_id for e in enrollments]
+    tags_by_student: dict[int, list[StudentTag]] = {}
+    if student_ids_in_classroom:
+        all_tags = (
+            db.query(StudentTag)
+            .filter(StudentTag.student_id.in_(student_ids_in_classroom))
+            .all()
+        )
+        for tag in all_tags:
+            tags_by_student.setdefault(tag.student_id, []).append(tag)
+
     results = []
     for enrollment in enrollments:
         student = enrollment.student
@@ -197,6 +227,7 @@ def get_classroom_progress(
                 except (ValueError, TypeError):
                     last_text_title = latest_session.story_slug
 
+        student_tags = tags_by_student.get(student.id, [])
         results.append(
             StudentProgressResponse(
                 student_id=student.id,
@@ -204,6 +235,17 @@ def get_classroom_progress(
                 last_session_date=last_session_date,
                 last_text_title=last_text_title,
                 total_sessions=total_sessions,
+                tags=[
+                    TagResponse(
+                        id=t.id,
+                        student_id=t.student_id,
+                        teacher_id=t.teacher_id,
+                        tag_name=t.tag_name,
+                        color=t.color,
+                        created_at=t.created_at,
+                    )
+                    for t in student_tags
+                ],
             )
         )
 
@@ -575,3 +617,118 @@ def export_classroom_report(
         media_type="text/csv; charset=UTF-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ── Student Tag Endpoints ─────────────────────────────────────────────────────
+
+
+def _require_teacher_owns_student(
+    teacher_id: int, student_id: int, db: Session
+) -> None:
+    """Raise 403 if the teacher does not own any classroom that contains this student."""
+    enrollment = (
+        db.query(ClassroomStudent)
+        .join(Classroom, ClassroomStudent.classroom_id == Classroom.id)
+        .filter(
+            ClassroomStudent.student_id == student_id,
+            Classroom.teacher_id == teacher_id,
+        )
+        .first()
+    )
+    if not enrollment:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to manage tags for this student",
+        )
+
+
+@router.get(
+    "/teacher/students/{student_id}/tags",
+    response_model=list[TagResponse],
+)
+def list_student_tags(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """List all tags for a student. Teacher must own a classroom containing this student."""
+    _require_teacher_owns_student(current_user.id, student_id, db)
+    tags = (
+        db.query(StudentTag)
+        .filter(StudentTag.student_id == student_id)
+        .order_by(StudentTag.created_at)
+        .all()
+    )
+    return tags
+
+
+@router.post(
+    "/teacher/students/{student_id}/tags",
+    response_model=TagResponse,
+    status_code=201,
+)
+def add_student_tag(
+    student_id: int,
+    payload: AddTagRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Add a tag to a student. Tag names are unique per student (UniqueConstraint)."""
+    _require_teacher_owns_student(current_user.id, student_id, db)
+
+    tag_name = payload.tag_name.strip()
+    if not tag_name:
+        raise HTTPException(status_code=422, detail="tag_name must not be blank")
+    if len(tag_name) > 50:
+        raise HTTPException(status_code=422, detail="tag_name must be 50 characters or fewer")
+
+    # Check for duplicate
+    existing = (
+        db.query(StudentTag)
+        .filter(
+            StudentTag.student_id == student_id,
+            StudentTag.tag_name == tag_name,
+        )
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="Tag already exists for this student")
+
+    tag = StudentTag(
+        student_id=student_id,
+        teacher_id=current_user.id,
+        tag_name=tag_name,
+        color=payload.color,
+    )
+    db.add(tag)
+    db.commit()
+    db.refresh(tag)
+    return tag
+
+
+@router.delete(
+    "/teacher/students/{student_id}/tags/{tag_name}",
+    status_code=204,
+)
+def remove_student_tag(
+    student_id: int,
+    tag_name: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Remove a tag from a student. Returns 204 on success or 404 if not found."""
+    _require_teacher_owns_student(current_user.id, student_id, db)
+
+    tag = (
+        db.query(StudentTag)
+        .filter(
+            StudentTag.student_id == student_id,
+            StudentTag.tag_name == tag_name,
+        )
+        .first()
+    )
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+
+    db.delete(tag)
+    db.commit()
