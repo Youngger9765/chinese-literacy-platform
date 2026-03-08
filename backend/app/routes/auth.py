@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+import secrets
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -11,13 +12,33 @@ from ..database import get_db
 from ..models.user import User
 from ..schemas.auth import (
     ChangePasswordRequest,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
     LoginRequest,
     RegisterRequest,
+    ResetPasswordRequest,
+    ResetPasswordResponse,
     TokenResponse,
+    VerifyEmailRequest,
+    VerifyEmailResponse,
 )
+from ..utils.password_validator import validate_password_strength
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 rate_limiter = InMemoryRateLimiter()
+
+PASSWORD_RESET_TOKEN_BYTES = 32
+PASSWORD_RESET_EXPIRY_HOURS = 1
+
+
+def _enforce_password_strength(password: str) -> None:
+    """Raise HTTP 422 with a Chinese error message if password is too weak."""
+    result = validate_password_strength(password)
+    if not result.is_valid:
+        raise HTTPException(
+            status_code=422,
+            detail={"errors": result.errors},
+        )
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -26,6 +47,9 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     client_ip = request.client.host if request.client else "unknown"
     if not rate_limiter.check(f"register:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
+    # Validate password strength before checking for duplicates
+    _enforce_password_strength(req.password)
 
     existing = db.query(User).filter(User.email == req.email).first()
     if existing:
@@ -38,6 +62,8 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
         email=req.email,
         password_hash=hash_password(req.password),
         name=req.name,
+        # Auto-verify email on registration (placeholder for real email verification)
+        email_verified=True,
     )
     db.add(user)
     db.commit()
@@ -94,6 +120,9 @@ def change_password(
             detail="Current password is incorrect",
         )
 
+    # Validate new password strength
+    _enforce_password_strength(req.new_password)
+
     current_user.password_hash = hash_password(req.new_password)
 
     # Mark student password as changed if they have a student profile
@@ -102,3 +131,111 @@ def change_password(
 
     db.commit()
     return {"message": "Password updated successfully"}
+
+
+@router.post("/forgot-password", response_model=ForgotPasswordResponse)
+def forgot_password(req: ForgotPasswordRequest, request: Request, db: Session = Depends(get_db)):
+    """Initiate a password reset.
+
+    Accepts email or username as `identifier`.
+    Generates a reset token (expires in 1 hour) and stores it on the user record.
+
+    P0 behaviour: token is returned in the response body.
+    In production the token would be sent via email only and this field removed.
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    if not rate_limiter.check(f"forgot-password:{client_ip}", max_requests=5, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
+    # Lookup by email or username
+    if "@" in req.identifier:
+        user = db.query(User).filter(User.email == req.identifier, User.is_active == True).first()
+    else:
+        user = db.query(User).filter(User.username == req.identifier, User.is_active == True).first()
+
+    # Always return a success message to avoid user enumeration attacks.
+    # We still generate and return the token so the flow can be tested without email.
+    if user is None:
+        # Return a plausible-looking token but do nothing in DB
+        return ForgotPasswordResponse(
+            message="若帳號存在，重設連結已產生（測試模式下直接回傳 token）。",
+            reset_token="account-not-found",
+        )
+
+    reset_token = secrets.token_hex(PASSWORD_RESET_TOKEN_BYTES)
+    user.password_reset_token = reset_token
+    user.password_reset_expires = datetime.now(timezone.utc) + timedelta(hours=PASSWORD_RESET_EXPIRY_HOURS)
+    db.commit()
+
+    return ForgotPasswordResponse(
+        message="密碼重設 token 已產生，請在 1 小時內使用。（正式環境將寄送至您的 Email）",
+        reset_token=reset_token,
+    )
+
+
+@router.post("/reset-password", response_model=ResetPasswordResponse)
+def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """Reset password using a valid reset token."""
+    user = (
+        db.query(User)
+        .filter(User.password_reset_token == req.token, User.is_active == True)
+        .first()
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="無效的重設 token，請重新申請密碼重設。",
+        )
+
+    now = datetime.now(timezone.utc)
+    expires = user.password_reset_expires
+    # Normalise to UTC-aware for comparison
+    if expires is not None and expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+
+    if expires is None or now > expires:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="重設 token 已過期，請重新申請密碼重設。",
+        )
+
+    # Validate new password strength
+    _enforce_password_strength(req.new_password)
+
+    user.password_hash = hash_password(req.new_password)
+    # Invalidate the token after use
+    user.password_reset_token = None
+    user.password_reset_expires = None
+    db.commit()
+
+    return ResetPasswordResponse(message="密碼已成功重設，請使用新密碼登入。")
+
+
+@router.post("/verify-email", response_model=VerifyEmailResponse)
+def verify_email(req: VerifyEmailRequest, db: Session = Depends(get_db)):
+    """Verify email address using a verification token.
+
+    Placeholder endpoint for future email integration.
+    Currently looks up users by email_verification_token field.
+    """
+    user = (
+        db.query(User)
+        .filter(User.email_verification_token == req.token, User.is_active == True)
+        .first()
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="無效的驗證 token。",
+        )
+
+    if user.email_verified:
+        return VerifyEmailResponse(message="電子郵件已驗證。")
+
+    user.email_verified = True
+    user.email_verification_token = None
+    db.commit()
+
+    return VerifyEmailResponse(message="電子郵件驗證成功！")

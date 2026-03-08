@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthError } from '../services/authApi';
+import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 
 interface RegisterPageProps {
   onSwitchToLogin?: () => void;
@@ -27,6 +28,12 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
     }
     if (password.length < 8) {
       return '密碼至少需要 8 個字元';
+    }
+    if (!/[a-zA-Z]/.test(password)) {
+      return '密碼必須包含至少一個英文字母';
+    }
+    if (!/\d/.test(password)) {
+      return '密碼必須包含至少一個數字';
     }
     if (password !== confirmPassword) {
       return '兩次輸入的密碼不一致';
@@ -131,9 +138,10 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="至少 8 個字元"
+              placeholder="至少 8 個字元，包含英文字母與數字"
               className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
             />
+            <PasswordStrengthIndicator password={password} />
           </div>
 
           {/* Confirm Password */}

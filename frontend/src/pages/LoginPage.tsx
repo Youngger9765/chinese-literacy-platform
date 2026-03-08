@@ -113,6 +113,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
           >
             {isSubmitting ? '登入中...' : '登入'}
           </button>
+
+          {/* Forgot Password link */}
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => navigate('/forgot-password')}
+              className="text-xs text-gray-400 hover:text-accent transition-colors"
+            >
+              忘記密碼？
+            </button>
+          </div>
         </form>
 
         {/* Switch to Register */}
