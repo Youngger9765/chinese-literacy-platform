@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from google.genai import types as genai_types
 
 from .ai_service import generate_structured_response
+from .input_sanitizer import sanitize_ai_input
 from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
@@ -268,6 +269,11 @@ class SocraticAgent:
         if len(student_answer) > self.MAX_ANSWER_LENGTH:
             raise ValueError(f"Answer too long (max {self.MAX_ANSWER_LENGTH} characters)")
         student_answer = student_answer.strip()
+
+        # Sanitize input to prevent prompt injection (Issue #270)
+        student_answer, _was_sanitized = sanitize_ai_input(
+            student_answer, user_id=session_id
+        )
 
         state = _store.get(session_id)
         if state is None:
