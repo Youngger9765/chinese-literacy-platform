@@ -3,10 +3,12 @@ import React, { useRef, useState, useEffect } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
 import DiffDisplay from '../ui/DiffDisplay';
+import CelebrationOverlay from '../ui/CelebrationOverlay';
 import { CPM_VERY_FAST, CPM_FAST, CPM_MEDIUM, CPM_SLOW } from '../../utils/personaConfig';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
 import ExitTicket from './ExitTicket';
+import { trackLearningEvent } from '../../utils/analytics';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -150,6 +152,19 @@ const Section: React.FC<{
 const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
 
+  // Track lesson completion when a valid report is viewed.
+  useEffect(() => {
+    if (!session) return;
+    const { readingAttempt, comprehensionResult, vocabResult, fullReadingResult } = session;
+    if (!readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult) return;
+    trackLearningEvent('complete_lesson', {
+      story_id: story?.id ?? '',
+      story_title: story?.title ?? '',
+    });
+  // Fire once per story session — storyId + startedAt identifies a unique session.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.storyId, session?.startedAt]);
+
   if (!session) {
     return (
       <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 py-24 text-center">
@@ -244,6 +259,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
+      <CelebrationOverlay score={overallScore} />
       {/* Header */}
       <div className="text-center">
         <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
