@@ -5,6 +5,21 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
 
+class ErrorCorrection(Base):
+    """Tracks when a student marks a character as practiced or mastered."""
+    __tablename__ = "error_corrections"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    character: Mapped[str] = mapped_column(String(10), nullable=False)
+    correction_type: Mapped[str] = mapped_column(String(20), default="practice")  # practice, mastered
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    student: Mapped["User"] = relationship("User")  # type: ignore[name-defined]
+
+
 class LearningSession(Base):
     __tablename__ = "learning_sessions"
 

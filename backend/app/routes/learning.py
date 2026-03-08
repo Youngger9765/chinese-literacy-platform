@@ -1,15 +1,16 @@
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
+from sqlalchemy import func as sa_func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
 from ..auth.rate_limiter import ai_limit_10_per_min, ai_limit_5_per_min
 from ..database import get_db
-from ..models.school import ClassroomStudent
-from ..models.session import LearningSession, DialogueTurn
+from ..models.school import Classroom, ClassroomStudent
+from ..models.session import CharacterError, ErrorCorrection, LearningSession, DialogueTurn
 from ..models.teacher_instruction import TeacherInstruction
 from ..models.user import User
 from ..schemas.session import (
@@ -682,3 +683,222 @@ async def score_comprehension(
         evaluative_score=result["evaluative_score"],
         feedback=result.get("feedback", {}),
     )
+
+
+# ── Error Correction Mechanism (Issue #248) ──────────────────────────────────
+
+
+class ErrorPatternItem(BaseModel):
+    character: str
+    total_error_count: int
+    sessions_with_error: int
+    last_error_date: datetime | None
+    suggested_practice: bool
+    is_corrected: bool
+
+
+class ErrorPatternsResponse(BaseModel):
+    patterns: list[ErrorPatternItem]
+    total: int
+
+
+class RecommendedVocabItem(BaseModel):
+    character: str
+    error_count: int
+    related_words: list[str]
+    zhuyin: str | None
+
+
+class RecommendedVocabResponse(BaseModel):
+    items: list[RecommendedVocabItem]
+    total: int
+
+
+class ErrorCorrectionRequest(BaseModel):
+    character: str = Field(..., min_length=1, max_length=10)
+    correction_type: str = Field("practice", pattern=r"^(practice|mastered)$")
+
+
+class ErrorCorrectionResponse(BaseModel):
+    id: int
+    student_id: int
+    character: str
+    correction_type: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+def _verify_student_access(
+    student_id: int,
+    current_user: User,
+    db: Session,
+) -> None:
+    """Verify the current user can access this student's data.
+
+    Allowed if:
+    - current_user IS the student
+    - current_user is a teacher of a classroom containing the student
+    """
+    if current_user.id == student_id:
+        return
+
+    # Check if current_user is a teacher of any classroom containing the student
+    teacher_access = (
+        db.query(Classroom)
+        .join(ClassroomStudent, ClassroomStudent.classroom_id == Classroom.id)
+        .filter(
+            ClassroomStudent.student_id == student_id,
+            Classroom.teacher_id == current_user.id,
+        )
+        .first()
+    )
+    if teacher_access:
+        return
+
+    raise HTTPException(status_code=403, detail="Access denied")
+
+
+@router.get("/learning/students/{student_id}/error-patterns", response_model=ErrorPatternsResponse)
+def get_error_patterns(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get characters that the student repeatedly gets wrong (error_count >= 2).
+
+    Returns characters sorted by error count descending.
+    """
+    _verify_student_access(student_id, current_user, db)
+
+    error_groups = (
+        db.query(
+            CharacterError.character,
+            sa_func.count(CharacterError.id).label("total_error_count"),
+            sa_func.count(sa_func.distinct(CharacterError.session_id)).label("sessions_with_error"),
+            sa_func.max(LearningSession.started_at).label("last_error_date"),
+        )
+        .join(LearningSession, CharacterError.session_id == LearningSession.id)
+        .filter(LearningSession.student_id == student_id)
+        .group_by(CharacterError.character)
+        .having(sa_func.count(CharacterError.id) >= 2)
+        .order_by(sa_func.count(CharacterError.id).desc())
+        .all()
+    )
+
+    mastered_chars = set()
+    mastered_rows = (
+        db.query(ErrorCorrection.character)
+        .filter(
+            ErrorCorrection.student_id == student_id,
+            ErrorCorrection.correction_type == "mastered",
+        )
+        .all()
+    )
+    for row in mastered_rows:
+        mastered_chars.add(row.character)
+
+    patterns = []
+    for row in error_groups:
+        is_corrected = row.character in mastered_chars
+        patterns.append(ErrorPatternItem(
+            character=row.character,
+            total_error_count=row.total_error_count,
+            sessions_with_error=row.sessions_with_error,
+            last_error_date=row.last_error_date,
+            suggested_practice=not is_corrected,
+            is_corrected=is_corrected,
+        ))
+
+    return ErrorPatternsResponse(patterns=patterns, total=len(patterns))
+
+
+@router.get("/learning/students/{student_id}/recommended-vocab", response_model=RecommendedVocabResponse)
+def get_recommended_vocab(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Recommend vocabulary for practice based on error patterns.
+
+    Returns top 10 most-errored characters from the last 30 days,
+    excluding characters already marked as mastered.
+    """
+    _verify_student_access(student_id, current_user, db)
+
+    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+
+    mastered_chars = set()
+    mastered_rows = (
+        db.query(ErrorCorrection.character)
+        .filter(
+            ErrorCorrection.student_id == student_id,
+            ErrorCorrection.correction_type == "mastered",
+        )
+        .all()
+    )
+    for row in mastered_rows:
+        mastered_chars.add(row.character)
+
+    error_groups = (
+        db.query(
+            CharacterError.character,
+            sa_func.count(CharacterError.id).label("error_count"),
+        )
+        .join(LearningSession, CharacterError.session_id == LearningSession.id)
+        .filter(
+            LearningSession.student_id == student_id,
+            LearningSession.started_at >= thirty_days_ago,
+        )
+        .group_by(CharacterError.character)
+        .order_by(sa_func.count(CharacterError.id).desc())
+        .all()
+    )
+
+    items = []
+    for row in error_groups:
+        if row.character in mastered_chars:
+            continue
+        if len(items) >= 10:
+            break
+        items.append(RecommendedVocabItem(
+            character=row.character,
+            error_count=row.error_count,
+            related_words=[],
+            zhuyin=None,
+        ))
+
+    return RecommendedVocabResponse(items=items, total=len(items))
+
+
+@router.post(
+    "/learning/students/{student_id}/error-corrections",
+    status_code=201,
+    response_model=ErrorCorrectionResponse,
+)
+def mark_error_corrected(
+    student_id: int,
+    payload: ErrorCorrectionRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Mark a character as practiced or mastered.
+
+    Only the student themselves can mark corrections.
+    """
+    if current_user.id != student_id:
+        raise HTTPException(status_code=403, detail="Can only mark corrections for yourself")
+
+    correction = ErrorCorrection(
+        student_id=student_id,
+        character=payload.character,
+        correction_type=payload.correction_type,
+    )
+    db.add(correction)
+    db.commit()
+    db.refresh(correction)
+    logger.info(
+        "Student %d marked '%s' as %s",
+        student_id, payload.character, payload.correction_type,
+    )
+    return correction
