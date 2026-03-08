@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import { AppView, Story } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LearningNavProvider, useLearningNav } from './contexts/LearningNavContext';
@@ -25,6 +26,7 @@ import ReportPage from './pages/learning/ReportPage';
 import JoinClassroomPage from './pages/JoinClassroomPage';
 import MyAssignments from './pages/student/MyAssignments';
 import TermsModal from './components/TermsModal';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -314,6 +316,16 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
+
+      {/* Footer */}
+      <footer className="shrink-0 bg-white border-t border-gray-100 flex items-center justify-center py-1.5 px-4">
+        <button
+          onClick={() => navigate('/privacy')}
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          隱私政策
+        </button>
+      </footer>
     </div>
   );
 };
@@ -356,6 +368,7 @@ const TermsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 /** Root component with router and auth. */
 const App: React.FC = () => {
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <AuthProvider>
         <LearningNavProvider>
@@ -488,6 +501,9 @@ const App: React.FC = () => {
             <Route index element={<Navigate to="intro" replace />} />
           </Route>
 
+          {/* Privacy policy — public, no auth required */}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+
           {/* Catch-all: redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -495,6 +511,7 @@ const App: React.FC = () => {
         </LearningNavProvider>
       </AuthProvider>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 
