@@ -138,46 +138,48 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
           </button>
         </p>
 
-        {/* Quick login buttons (dev/demo only) */}
-        <div className="mt-8 border-t border-gray-200 pt-6">
-          <p className="text-xs text-gray-400 text-center mb-3">快速登入（測試用）</p>
-          <div className="grid grid-cols-3 gap-2">
-            {([
-              { label: '管理員', desc: '王管理員', email: 'admin@test.com', pw: 'admin1234', color: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' },
-              { label: '教師', desc: '李老師', email: 'teacher@test.com', pw: 'teacher1234', color: 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100' },
-              { label: '學生', desc: '小明', email: 'student@test.com', pw: 'student1234', color: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100' },
-            ] as const).map((acc) => (
-              <button
-                key={acc.email}
-                type="button"
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setError('');
-                  setIsSubmitting(true);
-                  try {
-                    const result = await login(acc.email, acc.pw);
-                    if (result.mustChangePassword) {
-                      navigate('/change-password', { replace: true });
-                    } else {
-                      navigate(from, { replace: true });
+        {/* Quick login buttons (dev/demo only) — hidden in production */}
+        {import.meta.env.VITE_ENVIRONMENT === 'development' && (
+          <div className="mt-8 border-t border-gray-200 pt-6">
+            <p className="text-xs text-gray-400 text-center mb-3">快速登入（測試用）</p>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { label: '管理員', desc: '王管理員', email: 'admin@test.com', pw: 'admin1234', color: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' },
+                { label: '教師', desc: '李老師', email: 'teacher@test.com', pw: 'teacher1234', color: 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100' },
+                { label: '學生', desc: '小明', email: 'student@test.com', pw: 'student1234', color: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100' },
+              ] as const).map((acc) => (
+                <button
+                  key={acc.email}
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={async () => {
+                    setError('');
+                    setIsSubmitting(true);
+                    try {
+                      const result = await login(acc.email, acc.pw);
+                      if (result.mustChangePassword) {
+                        navigate('/change-password', { replace: true });
+                      } else {
+                        navigate(from, { replace: true });
+                      }
+                    } catch (err) {
+                      if (err instanceof AuthError) {
+                        setError(err.message);
+                      } else {
+                        setError('登入失敗');
+                      }
+                      setIsSubmitting(false);
                     }
-                  } catch (err) {
-                    if (err instanceof AuthError) {
-                      setError(err.message);
-                    } else {
-                      setError('登入失敗');
-                    }
-                    setIsSubmitting(false);
-                  }
-                }}
-                className={`border rounded-lg px-2 py-2.5 text-center transition-colors cursor-pointer disabled:opacity-50 ${acc.color}`}
-              >
-                <div className="text-xs font-bold">{acc.label}</div>
-                <div className="text-[10px] opacity-70 mt-0.5">{acc.desc}</div>
-              </button>
-            ))}
+                  }}
+                  className={`border rounded-lg px-2 py-2.5 text-center transition-colors cursor-pointer disabled:opacity-50 ${acc.color}`}
+                >
+                  <div className="text-xs font-bold">{acc.label}</div>
+                  <div className="text-[10px] opacity-70 mt-0.5">{acc.desc}</div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

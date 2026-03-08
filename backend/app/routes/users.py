@@ -68,7 +68,10 @@ def get_me(
         avatar_url=current_user.avatar_url,
         is_active=current_user.is_active,
         email_verified=current_user.email_verified,
+        onboarding_completed=current_user.onboarding_completed,
         last_login_at=current_user.last_login_at,
+        terms_accepted_at=current_user.terms_accepted_at,
+        terms_version=current_user.terms_version,
         created_at=current_user.created_at,
         roles=roles,
     )

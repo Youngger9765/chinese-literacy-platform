@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
+from ..dependencies.tenant import _check_classroom_access
 from ..models.school import Classroom, ClassroomStudent, ClassroomText
 from ..models.session import LearningSession
 from ..models.user import User
@@ -133,8 +134,7 @@ def get_classroom_progress(
     db: Session = Depends(get_db),
 ):
     """Get learning progress for all students in a classroom."""
-    classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    classroom = _check_classroom_access(current_user, classroom_id, db)
 
     # Get all students in the classroom
     enrollments = (
@@ -198,8 +198,7 @@ def get_classroom_stats(
     db: Session = Depends(get_db),
 ):
     """Get aggregate statistics for a classroom."""
-    classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    classroom = _check_classroom_access(current_user, classroom_id, db)
 
     # Get all student IDs in this classroom
     student_ids = [
@@ -315,8 +314,7 @@ def export_classroom_report(
     db: Session = Depends(get_db),
 ):
     """Export classroom student progress as a UTF-8 BOM CSV file."""
-    classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    classroom = _check_classroom_access(current_user, classroom_id, db)
 
     enrollments = (
         db.query(ClassroomStudent)
