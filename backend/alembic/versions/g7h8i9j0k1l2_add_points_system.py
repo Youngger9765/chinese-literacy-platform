@@ -1,8 +1,8 @@
 """add points system to organizations
 
-Revision ID: f6g7h8i9j0k1
+Revision ID: g7h8i9j0k1l2
 Revises: e5f6g7h8i9j0
-Create Date: 2026-03-07 18:00:00.000000
+Create Date: 2026-03-07 18:01:00.000000
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f6g7h8i9j0k1'
+revision: str = 'g7h8i9j0k1l2'
 down_revision: Union[str, None] = 'e5f6g7h8i9j0'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
