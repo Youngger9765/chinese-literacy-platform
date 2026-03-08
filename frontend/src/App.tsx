@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { trackPageView } from './utils/analytics';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AppView, Story } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -30,6 +31,15 @@ import MyAssignments from './pages/student/MyAssignments';
 import OnboardingGuide from './components/OnboardingGuide';
 import TermsModal from './components/TermsModal';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+
+/** Track page views on route changes. */
+const RouteTracker: React.FC = () => {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+  return null;
+};
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -404,6 +414,7 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
     <BrowserRouter>
+      <RouteTracker />
       <AuthProvider>
         <LearningNavProvider>
         <TermsGate>
