@@ -15,6 +15,9 @@ from ..schemas.auth import (
     RegisterRequest,
     TokenResponse,
 )
+from ..schemas.user import UserResponse
+
+CURRENT_TERMS_VERSION = "1.0"
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 rate_limiter = InMemoryRateLimiter()
@@ -102,3 +105,50 @@ def change_password(
 
     db.commit()
     return {"message": "Password updated successfully"}
+
+
+@router.post("/accept-terms", response_model=UserResponse)
+def accept_terms(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Record that the current user has accepted the terms of service."""
+    current_user.terms_accepted_at = datetime.now(timezone.utc)
+    current_user.terms_version = CURRENT_TERMS_VERSION
+    db.commit()
+    db.refresh(current_user)
+
+    # Build roles for response
+    from ..models.user import UserRole, Role as RoleModel
+    from ..schemas.user import UserRoleResponse
+
+    user_roles = (
+        db.query(UserRole, RoleModel)
+        .join(RoleModel, UserRole.role_id == RoleModel.id)
+        .filter(UserRole.user_id == current_user.id, UserRole.is_active == True)
+        .all()
+    )
+    roles = [
+        UserRoleResponse(
+            role_name=role.name,
+            role_display_name=role.display_name,
+            scope_type=ur.scope_type,
+            scope_id=ur.scope_id,
+        )
+        for ur, role in user_roles
+    ]
+
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        name=current_user.name,
+        phone=current_user.phone,
+        avatar_url=current_user.avatar_url,
+        is_active=current_user.is_active,
+        email_verified=current_user.email_verified,
+        last_login_at=current_user.last_login_at,
+        terms_accepted_at=current_user.terms_accepted_at,
+        terms_version=current_user.terms_version,
+        created_at=current_user.created_at,
+        roles=roles,
+    )

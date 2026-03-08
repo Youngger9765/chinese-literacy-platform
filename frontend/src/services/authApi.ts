@@ -18,6 +18,9 @@ export interface AuthUser {
   name: string;
   is_active: boolean;
   roles: UserRole[];
+  terms_accepted: boolean;
+  terms_accepted_at: string | null;
+  terms_version: string | null;
 }
 
 /** Check if user has a specific role */
@@ -82,6 +85,14 @@ export async function register(
 
 export async function getMe(token: string): Promise<AuthUser> {
   const res = await fetch(`${API_BASE}/api/users/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleAuthResponse<AuthUser>(res);
+}
+
+export async function acceptTerms(token: string): Promise<AuthUser> {
+  const res = await fetch(`${API_BASE}/api/auth/accept-terms`, {
+    method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
   });
   return handleAuthResponse<AuthUser>(res);
