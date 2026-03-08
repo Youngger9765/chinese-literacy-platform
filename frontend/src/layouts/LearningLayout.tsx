@@ -9,8 +9,8 @@ import {
   FullReadingResult,
 } from '../types';
 import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
-import { useLearningNav } from '../contexts/LearningNavContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useLearningNav } from '../contexts/LearningNavContext';
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
   storyId: '',
@@ -36,6 +36,8 @@ export interface LearningContext {
   handleRetry: () => void;
   handleSessionComplete: () => void;
   emptyAttempt: ReadingAttempt;
+  /** DB LearningSession integer ID — set after the session is created in the DB (Issue #242) */
+  dbSessionId: number | null;
 }
 
 /**
@@ -55,11 +57,13 @@ const STEP_PATH_TO_NUMBER: Record<string, number> = {
  * Manages shared state: selectedStory, session, lastAttempt, rightPanelWidth.
  * Children access this state via useOutletContext<LearningContext>().
  */
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+
 const LearningLayout: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
   const navigate = useNavigate();
   const learningNav = useLearningNav();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [session, setSession] = useState<LearningSession | null>(null);
@@ -67,6 +71,8 @@ const LearningLayout: React.FC = () => {
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /** DB LearningSession integer ID — created when the user starts the intro (Issue #242) */
+  const [dbSessionId, setDbSessionId] = useState<number | null>(null);
 
   /** Persist current step to localStorage for session resume. */
   const persistStep = useCallback(
@@ -166,8 +172,28 @@ const LearningLayout: React.FC = () => {
       return null;
     });
     persistStep(STEP_PATH_TO_NUMBER['tutor']);
+
+    // Create a DB learning session so dialogue can be persisted (Issue #242)
+    if (token && storyId && dbSessionId === null) {
+      fetch(`${API_BASE}/api/learning/sessions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ story_slug: storyId }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.id) setDbSessionId(data.id);
+        })
+        .catch(() => {
+          // Non-fatal — dialogue won't be persisted but learning still works
+        });
+    }
+
     navigate(`/learn/${storyId}/tutor`);
-  }, [storyId, selectedStory, navigate, persistStep]);
+  }, [storyId, selectedStory, navigate, persistStep, token, dbSessionId]);
 
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
@@ -260,6 +286,7 @@ const LearningLayout: React.FC = () => {
     handleRetry,
     handleSessionComplete,
     emptyAttempt: EMPTY_ATTEMPT,
+    dbSessionId,
   };
 
   return <Outlet context={ctx} />;

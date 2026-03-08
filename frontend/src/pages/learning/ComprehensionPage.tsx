@@ -12,6 +12,7 @@ const ComprehensionPage: React.FC = () => {
     setRightPanelWidth,
     handleFinishComprehension,
     emptyAttempt,
+    dbSessionId,
   } = useLearningContext();
   const navigate = useNavigate();
 
@@ -25,6 +26,7 @@ const ComprehensionPage: React.FC = () => {
       onPanelWidthChange={setRightPanelWidth}
       onFinish={handleFinishComprehension}
       onBack={() => navigate(`/learn/${storyId}/tutor`)}
+      dbSessionId={dbSessionId ?? undefined}
     />
   );
 };

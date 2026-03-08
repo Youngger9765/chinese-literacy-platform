@@ -7,12 +7,22 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // --- Response types ---
 
+export interface StudentTag {
+  id: number;
+  student_id: number;
+  teacher_id: number;
+  tag_name: string;
+  color: string;
+  created_at: string;
+}
+
 export interface StudentProgress {
   student_id: number;
   student_name: string;
   last_session_date: string | null;
   last_text_title: string | null;
   total_sessions: number;
+  tags: StudentTag[];
 }
 
 export interface ClassroomTextItem {
@@ -112,13 +122,14 @@ export async function assignText(
   token: string,
   classroomId: number,
   textId: string,
+  copyrightConfirmed: boolean = false,
 ): Promise<ClassroomTextItem> {
   const res = await fetch(
     `${API_BASE}/api/classrooms/${classroomId}/texts`,
     {
       method: 'POST',
       headers: authHeaders(token),
-      body: JSON.stringify({ text_id: textId }),
+      body: JSON.stringify({ text_id: textId, copyright_confirmed: copyrightConfirmed }),
     },
   );
   return handleResponse<ClassroomTextItem>(res);
@@ -213,4 +224,143 @@ export async function getTimeStats(
     { headers: { Authorization: `Bearer ${token}` } },
   );
   return handleResponse<TimeStats>(res);
+}
+
+// --- Student Tag API ---
+
+/** List all tags for a student. */
+export async function getStudentTags(
+  token: string,
+  studentId: number,
+): Promise<StudentTag[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/tags`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StudentTag[]>(res);
+}
+
+/** Add a tag to a student. */
+export async function addStudentTag(
+  token: string,
+  studentId: number,
+  tagName: string,
+  color: string = 'gray',
+): Promise<StudentTag> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/tags`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ tag_name: tagName, color }),
+    },
+  );
+  return handleResponse<StudentTag>(res);
+}
+
+/** Remove a tag from a student. */
+export async function removeStudentTag(
+  token: string,
+  studentId: number,
+  tagName: string,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/tags/${encodeURIComponent(tagName)}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body.detail ?? body.message ?? message;
+    } catch {
+      // ignore
+    }
+    throw new TeacherApiError(message, res.status);
+  }
+}
+
+// --- Heatmap types ---
+
+export interface HeatmapStudent {
+  id: number;
+  name: string;
+}
+
+export interface HeatmapStory {
+  id: string;
+  title: string;
+}
+
+export interface HeatmapScore {
+  student_id: number;
+  story_id: string;
+  score: number;
+  status: string;
+}
+
+export interface ClassroomHeatmap {
+  students: HeatmapStudent[];
+  stories: HeatmapStory[];
+  scores: HeatmapScore[];
+}
+
+/** Get student × story score heatmap for a classroom. */
+export async function getClassroomHeatmap(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomHeatmap> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/heatmap`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ClassroomHeatmap>(res);
+}
+
+// --- Alert & Learning Curve types ---
+
+export interface StudentAlert {
+  student_id: number;
+  student_name: string;
+  alert_type: 'inactive' | 'low_performance' | 'declining';
+  detail: string;
+  last_session_date: string | null;
+}
+
+export interface LearningCurvePoint {
+  date: string;
+  score: number;
+  story_title: string | null;
+  session_id: number;
+}
+
+export interface LearningCurveData {
+  data: LearningCurvePoint[];
+}
+
+/** Get at-risk student alerts for a classroom. */
+export async function getClassroomAlerts(
+  token: string,
+  classroomId: number,
+): Promise<StudentAlert[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/alerts`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StudentAlert[]>(res);
+}
+
+/** Get time-series learning curve data for a student. */
+export async function getStudentLearningCurve(
+  token: string,
+  studentId: number,
+): Promise<LearningCurveData> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/learning-curve`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<LearningCurveData>(res);
 }

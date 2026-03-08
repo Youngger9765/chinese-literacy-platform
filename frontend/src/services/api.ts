@@ -242,10 +242,15 @@ export async function sendComprehensionChat(payload: {
   mispronouncedWords?: string[];
   accuracy?: number;
   cpm?: number;
+  /** DB LearningSession integer ID — when provided, dialogue turns are persisted (Issue #242) */
+  dbSessionId?: number;
+  token?: string;
 }): Promise<ChatResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (payload.token) headers['Authorization'] = `Bearer ${payload.token}`;
   const res = await fetch(`${API_BASE}/api/comprehension/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({
       session_id: payload.sessionId,
       story_title: payload.storyTitle,
@@ -254,6 +259,7 @@ export async function sendComprehensionChat(payload: {
       mispronounced_words: payload.mispronouncedWords,
       accuracy: payload.accuracy,
       cpm: payload.cpm,
+      db_session_id: payload.dbSessionId ?? null,
     }),
   });
   if (res.status === 422) {
@@ -266,4 +272,58 @@ export async function sendComprehensionChat(payload: {
   }
   if (!res.ok) throw new Error(`sendComprehensionChat failed: ${res.status}`);
   return res.json();
+}
+
+// --- Dialogue history API (Issue #242) ---
+
+export interface DialogueTurnItem {
+  id: number;
+  turn_order: number;
+  role: 'ai' | 'student' | 'feedback';
+  text: string;
+  is_correct: boolean | null;
+  phase: string | null;
+  created_at: string;
+}
+
+export interface DialogueHistoryResponse {
+  session_id: number;
+  story_slug: string | null;
+  turns: DialogueTurnItem[];
+  total: number;
+}
+
+export async function fetchDialogueHistory(
+  token: string,
+  sessionId: number,
+): Promise<DialogueHistoryResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/dialogue`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`fetchDialogueHistory failed: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchLearningSessions(
+  token: string,
+  params?: { limit?: number; offset?: number },
+): Promise<{ items: LearningSummary[]; total: number }> {
+  const qs = new URLSearchParams();
+  if (params?.limit != null) qs.set('limit', String(params.limit));
+  if (params?.offset != null) qs.set('offset', String(params.offset));
+  const url = `${API_BASE}/api/learning/sessions${qs.toString() ? `?${qs}` : ''}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(`fetchLearningSessions failed: ${res.status}`);
+  return res.json();
+}
+
+export interface LearningSummary {
+  id: number;
+  story_slug: string | null;
+  status: string;
+  current_step: number;
+  accuracy: number | null;
+  overall_score: number | null;
+  started_at: string;
+  completed_at: string | null;
 }
