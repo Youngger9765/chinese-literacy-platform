@@ -1,11 +1,23 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getClassroomProgress,
   getStudentSessions,
   exportClassroomReport,
+  getStudentLearningCurve,
   StudentProgress,
   StudentSession,
+  LearningCurvePoint,
   TeacherApiError,
 } from '../../services/teacherApi';
 
@@ -25,6 +37,11 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [sessions, setSessions] = useState<StudentSession[]>([]);
   const sessionCache = useRef<Record<number, StudentSession[]>>({});
+
+  // Learning curve state
+  const [learningCurve, setLearningCurve] = useState<LearningCurvePoint[]>([]);
+  const [isLoadingCurve, setIsLoadingCurve] = useState(false);
+  const curveCache = useRef<Record<number, LearningCurvePoint[]>>({});
 
   const loadProgress = useCallback(async () => {
     if (!token) return;
@@ -83,26 +100,57 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     }
 
     setExpandedStudentId(studentId);
+    if (!token) return;
 
-    // Use cache if available
+    // Load session history (with cache)
     if (sessionCache.current[studentId]) {
       setSessions(sessionCache.current[studentId]);
-      return;
+    } else {
+      setIsLoadingSessions(true);
+      setSessions([]);
+      try {
+        const data = await getStudentSessions(token, studentId);
+        sessionCache.current[studentId] = data;
+        setSessions(data);
+      } catch {
+        setSessions([]);
+      } finally {
+        setIsLoadingSessions(false);
+      }
     }
 
-    if (!token) return;
-    setIsLoadingSessions(true);
-    setSessions([]);
-    try {
-      const data = await getStudentSessions(token, studentId);
-      sessionCache.current[studentId] = data;
-      setSessions(data);
-    } catch {
-      setSessions([]);
-    } finally {
-      setIsLoadingSessions(false);
+    // Load learning curve (with cache)
+    if (curveCache.current[studentId]) {
+      setLearningCurve(curveCache.current[studentId]);
+    } else {
+      setIsLoadingCurve(true);
+      setLearningCurve([]);
+      try {
+        const curveData = await getStudentLearningCurve(token, studentId);
+        curveCache.current[studentId] = curveData.data;
+        setLearningCurve(curveData.data);
+      } catch {
+        setLearningCurve([]);
+      } finally {
+        setIsLoadingCurve(false);
+      }
     }
   }, [expandedStudentId, token]);
+
+  /** Build chart-ready data with rolling average (window=5). */
+  const buildCurveChartData = (points: LearningCurvePoint[]) => {
+    return points.map((pt, idx) => {
+      const windowStart = Math.max(0, idx - 4);
+      const windowSlice = points.slice(windowStart, idx + 1);
+      const rollingAvg = windowSlice.reduce((sum, p) => sum + p.score, 0) / windowSlice.length;
+      return {
+        date: new Date(pt.date).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }),
+        score: pt.score,
+        rollingAvg: Math.round(rollingAvg * 10) / 10,
+        story_title: pt.story_title,
+      };
+    });
+  };
 
   const formatDate = (dateStr: string | null): string => {
     if (!dateStr) return '-';
@@ -237,7 +285,54 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                   </tr>
                   {isExpanded && (
                     <tr>
-                      <td colSpan={5} className="bg-gray-50 px-4 py-3">
+                      <td colSpan={5} className="bg-gray-50 px-4 py-3 space-y-4">
+                        {/* Learning curve chart */}
+                        {isLoadingCurve ? (
+                          <div className="h-40 bg-gray-200 animate-pulse rounded" />
+                        ) : learningCurve.length >= 2 ? (
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 mb-2">學習曲線</p>
+                            <ResponsiveContainer width="100%" height={180}>
+                              <LineChart data={buildCurveChartData(learningCurve)}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                                <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} width={28} />
+                                <Tooltip
+                                  formatter={(value: number, name: string) => {
+                                    if (name === 'score') return [value, '實際分數'];
+                                    if (name === 'rollingAvg') return [value, '5次均線'];
+                                    return [value, name];
+                                  }}
+                                  labelFormatter={(label) => `日期：${label}`}
+                                />
+                                <Legend
+                                  formatter={(value) =>
+                                    value === 'score' ? '實際分數' : '5次均線'
+                                  }
+                                />
+                                <Line
+                                  type="monotone"
+                                  dataKey="score"
+                                  stroke="#6366f1"
+                                  strokeWidth={2}
+                                  dot={{ r: 3 }}
+                                  connectNulls
+                                />
+                                <Line
+                                  type="monotone"
+                                  dataKey="rollingAvg"
+                                  stroke="#10b981"
+                                  strokeWidth={2}
+                                  dot={false}
+                                  strokeDasharray="5 3"
+                                  connectNulls
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                        ) : null}
+
+                        {/* Session history table */}
                         {isLoadingSessions ? (
                           <div className="space-y-2">
                             {Array.from({ length: 3 }).map((_, i) => (
