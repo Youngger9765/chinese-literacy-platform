@@ -6,6 +6,7 @@ import SchoolDetailPanel from './SchoolDetailPanel';
 import CreateOrgPanel from './CreateOrgPanel';
 import ClassroomDetailPanel from './ClassroomDetailPanel';
 import UsersPanel from './UsersPanel';
+import StoryManagementPanel from './StoryManagementPanel';
 import { BuildingIcon, ShieldIcon } from '../../components/icons';
 import {
   listRoles,
@@ -117,6 +118,7 @@ const AdminDashboard: React.FC = () => {
         )}
         {selectedNode?.type === 'roles' && <RolesPanel />}
         {selectedNode?.type === 'users' && <UsersPanel />}
+        {selectedNode?.type === 'stories' && <StoryManagementPanel />}
       </div>
     </div>
   );

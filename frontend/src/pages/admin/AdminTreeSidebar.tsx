@@ -21,6 +21,7 @@ export type TreeNodeSelection =
   | { type: 'classroom'; id: number }
   | { type: 'roles'; id: 'roles' }
   | { type: 'users'; id: 'users' }
+  | { type: 'stories'; id: 'stories' }
   | { type: 'create_org'; id: 'create_org' };
 
 type TreeNodeType = TreeNodeSelection['type'];
@@ -236,6 +237,21 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
 
         {/* Spacer */}
         <div className="flex-1" />
+
+        {/* Stories icon */}
+        <button
+          onClick={() => onSelectNode({ type: 'stories', id: 'stories' })}
+          className={`p-1.5 rounded-md transition-colors cursor-pointer mb-1 ${
+            isSelected('stories', 'stories')
+              ? 'bg-emerald-50 text-emerald-600'
+              : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+          }`}
+          title="課文管理"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </button>
 
         {/* Roles icon */}
         <button
@@ -508,6 +524,31 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
 
       {/* Bottom fixed: management links */}
       <div className="border-t border-gray-100 shrink-0">
+        <button
+          onClick={() => onSelectNode({ type: 'stories', id: 'stories' })}
+          className={`flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${
+            isSelected('stories', 'stories')
+              ? 'bg-emerald-50 text-emerald-700'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+          }`}
+        >
+          <svg
+            className={`w-4 h-4 ${isSelected('stories', 'stories') ? 'text-emerald-500' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            />
+          </svg>
+          <span className={`text-sm ${isSelected('stories', 'stories') ? 'font-semibold' : ''}`}>
+            課文管理
+          </span>
+        </button>
         <button
           onClick={() => onSelectNode({ type: 'roles', id: 'roles' })}
           className={`flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${

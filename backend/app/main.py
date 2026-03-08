@@ -16,6 +16,7 @@ from .routes import stories, learning, users, auth, classrooms, schools, organiz
 from .routes.classroom_texts import router as classroom_texts_router
 from .routes.teacher import router as teacher_router
 from .routes.assignments import router as assignments_router
+from .routes.admin_stories import router as admin_stories_router
 from .middleware.tenant import TenantMiddleware
 from .routes.feedback import router as feedback_router
 from .routes.jobs import router as jobs_router
@@ -206,9 +207,13 @@ app.include_router(roles.router, prefix="/api")
 app.include_router(classroom_texts_router, prefix="/api", tags=["classroom-texts"])
 app.include_router(teacher_router, prefix="/api", tags=["teacher"])
 app.include_router(assignments_router, prefix="/api", tags=["assignments"])
+<<<<<<< HEAD
+app.include_router(admin_stories_router, prefix="/api", tags=["admin-stories"])
+=======
 app.include_router(feedback_router, prefix="/api", tags=["feedback"])
 app.include_router(jobs_router, prefix="/api", tags=["admin-jobs"])
 app.include_router(privacy_router, prefix="/api", tags=["privacy"])
+>>>>>>> origin/staging
 
 
 def seed_default_data():
