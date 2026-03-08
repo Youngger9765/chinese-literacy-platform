@@ -12,8 +12,13 @@ from .routes.assignments import router as assignments_router
 
 logger = logging.getLogger(__name__)
 
-if os.environ.get("ENVIRONMENT", "development") != "development" and settings.jwt_secret_key == "dev-secret-change-in-production":
+_is_dev = os.environ.get("ENVIRONMENT", "development") == "development"
+
+if not _is_dev and settings.jwt_secret_key == "dev-secret-change-in-production":
     raise RuntimeError("JWT_SECRET_KEY must be set in production!")
+elif _is_dev and settings.jwt_secret_key == "dev-secret-change-in-production":
+    import warnings
+    warnings.warn("Using default JWT secret key — NOT suitable for production", stacklevel=2)
 
 
 @asynccontextmanager
@@ -27,6 +32,8 @@ app = FastAPI(
     description="Backend API for the LingoLeap AI Reading Tutor platform",
     version="0.3.0",
     lifespan=lifespan,
+    docs_url="/docs" if _is_dev else None,
+    redoc_url="/redoc" if _is_dev else None,
 )
 
 app.add_middleware(

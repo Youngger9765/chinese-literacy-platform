@@ -140,7 +140,7 @@ class ConversationTurn(BaseModel):
 
 class ComprehensionRequest(BaseModel):
     story_title: str
-    story_text: str            # paragraphs joined with "\n"
+    story_text: str = Field(..., max_length=10000)  # paragraphs joined with "\n"
     conversation: list[ConversationTurn] = []
 
 
@@ -150,7 +150,10 @@ class ComprehensionResponse(BaseModel):
 
 
 @router.post("/comprehension/question", response_model=ComprehensionResponse)
-async def get_comprehension_question(payload: ComprehensionRequest):
+async def get_comprehension_question(
+    payload: ComprehensionRequest,
+    current_user: User = Depends(get_current_user),
+):
     """
     Generate the next Socratic question for a reading comprehension session.
 
@@ -212,7 +215,10 @@ class ComprehensionChatResponse(BaseModel):
 
 
 @router.post("/comprehension/chat", response_model=ComprehensionChatResponse)
-async def comprehension_chat(payload: ComprehensionChatRequest):
+async def comprehension_chat(
+    payload: ComprehensionChatRequest,
+    current_user: User = Depends(get_current_user),
+):
     """
     Socratic dialogue with answer evaluation.
     Send student_answer=null to start a new session and get the first question.
