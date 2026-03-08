@@ -364,3 +364,89 @@ export async function getStudentLearningCurve(
   );
   return handleResponse<LearningCurveData>(res);
 }
+
+// --- Teacher Instructions (Individualized) ---
+
+export interface TeacherInstruction {
+  id: number;
+  teacher_id: number;
+  student_id: number;
+  classroom_id: number;
+  instruction_type: string;
+  content: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface InstructionCreateData {
+  classroom_id: number;
+  instruction_type: string;
+  content: string;
+}
+
+export interface InstructionUpdateData {
+  content?: string;
+  instruction_type?: string;
+  is_active?: boolean;
+}
+
+/** Create a special instruction for a student. */
+export async function createStudentInstruction(
+  token: string,
+  studentId: number,
+  data: InstructionCreateData,
+): Promise<TeacherInstruction> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/instructions`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify(data),
+    },
+  );
+  return handleResponse<TeacherInstruction>(res);
+}
+
+/** Get active instructions for a student. */
+export async function getStudentInstructions(
+  token: string,
+  studentId: number,
+): Promise<TeacherInstruction[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/instructions`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<TeacherInstruction[]>(res);
+}
+
+/** Update an instruction. */
+export async function updateInstruction(
+  token: string,
+  instructionId: number,
+  data: InstructionUpdateData,
+): Promise<TeacherInstruction> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/instructions/${instructionId}`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify(data),
+    },
+  );
+  return handleResponse<TeacherInstruction>(res);
+}
+
+/** Soft-delete an instruction. */
+export async function deleteInstruction(
+  token: string,
+  instructionId: number,
+): Promise<TeacherInstruction> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/instructions/${instructionId}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  return handleResponse<TeacherInstruction>(res);
+}
