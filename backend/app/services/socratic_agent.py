@@ -339,10 +339,31 @@ class SocraticAgent:
 
         except Exception as e:
             state.consecutive_errors += 1
-            logger.warning("AI service error in process_answer (attempt %d/%d): %s",
-                          state.consecutive_errors, self.MAX_CONSECUTIVE_ERRORS, e)
+            logger.warning(
+                "AI service error in process_answer (attempt %d/%d): %s",
+                state.consecutive_errors,
+                self.MAX_CONSECUTIVE_ERRORS,
+                e,
+                extra={
+                    "event": "socratic_ai_error",
+                    "consecutive_errors": state.consecutive_errors,
+                    "max_consecutive_errors": self.MAX_CONSECUTIVE_ERRORS,
+                    "session_id": session_id,
+                    "error": str(e),
+                },
+            )
 
             if state.consecutive_errors >= self.MAX_CONSECUTIVE_ERRORS:
+                logger.error(
+                    "Circuit breaker triggered: %d consecutive AI errors for session %s",
+                    state.consecutive_errors,
+                    session_id,
+                    extra={
+                        "event": "circuit_breaker_triggered",
+                        "consecutive_errors": state.consecutive_errors,
+                        "session_id": session_id,
+                    },
+                )
                 _store.save(state)
                 raise RuntimeError("AI 服務暫時無法使用，請稍後再試。") from e
 

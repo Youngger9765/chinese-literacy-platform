@@ -63,7 +63,11 @@ export interface BopomoSpelling {
 
 /** Polyphonic character entry from poyin_db.json */
 export interface PolyphonicEntry {
-  s: number;        // default tone index
+  s: number;        // number of variants (= len(v))
+  /** Index into v[] that maps to the font's default pronunciation ('0000', no selector).
+   *  Defaults to 0 when absent.  Set to 1 for characters whose font default is v[1]
+   *  (e.g. 行 → háng, 著 → zhù). */
+  d?: number;
   v?: string[];     // variation patterns
   f?: boolean;      // special flag
 }

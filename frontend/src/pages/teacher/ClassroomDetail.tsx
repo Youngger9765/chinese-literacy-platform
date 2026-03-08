@@ -380,6 +380,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
           {activeTab === 'students' && (
             <StudentListTab
               classroom={classroom}
+              token={token}
               studentIdInput={studentIdInput}
               setStudentIdInput={setStudentIdInput}
               isAddingStudent={isAddingStudent}
@@ -390,6 +391,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
               onRemoveStudent={handleRemoveStudent}
               setRemovingStudentId={setRemovingStudentId}
               formatDate={formatDate}
+              onStudentsImported={loadClassroom}
             />
           )}
         </div>
