@@ -56,6 +56,31 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export interface ClassroomStats {
+  total_students: number;
+  total_sessions: number;
+  active_students: number;
+  inactive_students: number;
+  avg_accuracy: number | null;
+  completion_rate: number;
+  avg_session_duration_minutes: number | null;
+}
+
+export interface ErrorVocabItem {
+  character: string;
+  error_type: string;
+  count: number;
+  student_count: number;
+}
+
+export interface TimeStats {
+  total_hours: number;
+  avg_minutes_per_session: number | null;
+  study_days: number;
+  sessions_this_week: number;
+  sessions_last_week: number;
+}
+
 // --- API functions ---
 
 /** Get student progress for a classroom. */
@@ -152,4 +177,40 @@ export async function exportClassroomReport(token: string, classroomId: number):
   });
   if (!res.ok) throw new TeacherApiError('Export failed', res.status);
   return res.blob();
+}
+
+/** Get classroom aggregate statistics. */
+export async function getClassroomStats(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomStats> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/stats`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ClassroomStats>(res);
+}
+
+/** Get top error vocabulary for a classroom. */
+export async function getErrorVocab(
+  token: string,
+  classroomId: number,
+): Promise<ErrorVocabItem[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/error-vocab`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ErrorVocabItem[]>(res);
+}
+
+/** Get learning time statistics for a classroom. */
+export async function getTimeStats(
+  token: string,
+  classroomId: number,
+): Promise<TimeStats> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/time-stats`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<TimeStats>(res);
 }
