@@ -215,3 +215,48 @@ export async function getTimeStats(
   );
   return handleResponse<TimeStats>(res);
 }
+
+// --- Alert & Learning Curve types ---
+
+export interface StudentAlert {
+  student_id: number;
+  student_name: string;
+  alert_type: 'inactive' | 'low_performance' | 'declining';
+  detail: string;
+  last_session_date: string | null;
+}
+
+export interface LearningCurvePoint {
+  date: string;
+  score: number;
+  story_title: string | null;
+  session_id: number;
+}
+
+export interface LearningCurveData {
+  data: LearningCurvePoint[];
+}
+
+/** Get at-risk student alerts for a classroom. */
+export async function getClassroomAlerts(
+  token: string,
+  classroomId: number,
+): Promise<StudentAlert[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/alerts`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StudentAlert[]>(res);
+}
+
+/** Get time-series learning curve data for a student. */
+export async function getStudentLearningCurve(
+  token: string,
+  studentId: number,
+): Promise<LearningCurveData> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/learning-curve`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<LearningCurveData>(res);
+}
