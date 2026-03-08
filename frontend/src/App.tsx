@@ -7,6 +7,7 @@ import { LearningNavProvider, useLearningNav } from './contexts/LearningNavConte
 import { hasRole } from './services/authApi';
 import { useAppView } from './hooks/useAppView';
 import StepperNav from './components/StepperNav';
+import FeedbackButton from './components/FeedbackButton';
 import StoryLibrary from './pages/student/StoryLibrary';
 import WriteCharacter from './components/stroke-order/WriteCharacter';
 import LoginPage from './pages/LoginPage';
@@ -313,6 +314,9 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
+
+      {/* Feedback button — visible to all authenticated users */}
+      <FeedbackButton />
     </div>
   );
 };
