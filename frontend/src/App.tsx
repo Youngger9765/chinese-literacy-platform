@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import { AppView, Story } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LearningNavProvider, useLearningNav } from './contexts/LearningNavContext';
@@ -332,6 +333,7 @@ const LearningAppShell: React.FC = () => {
 /** Root component with router and auth. */
 const App: React.FC = () => {
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <AuthProvider>
         <LearningNavProvider>
@@ -469,6 +471,7 @@ const App: React.FC = () => {
         </LearningNavProvider>
       </AuthProvider>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 
