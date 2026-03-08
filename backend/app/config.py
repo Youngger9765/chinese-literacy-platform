@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     gcs_public_url: str = "https://storage.googleapis.com/lingoleap-assets"
     jwt_secret_key: str = "dev-secret-change-in-production"
     jwt_algorithm: str = "HS256"
-    jwt_expire_minutes: int = 1440  # 24 hours
+    jwt_expire_minutes: int = 480  # 8 hours
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
