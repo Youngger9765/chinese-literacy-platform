@@ -93,6 +93,37 @@ class TimeStatsResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class HeatmapStudentEntry(BaseModel):
+    id: int
+    name: str
+
+    model_config = {"from_attributes": True}
+
+
+class HeatmapStoryEntry(BaseModel):
+    id: str
+    title: str
+
+    model_config = {"from_attributes": True}
+
+
+class HeatmapScoreEntry(BaseModel):
+    student_id: int
+    story_id: str
+    score: float
+    status: str
+
+    model_config = {"from_attributes": True}
+
+
+class HeatmapResponse(BaseModel):
+    students: list[HeatmapStudentEntry]
+    stories: list[HeatmapStoryEntry]
+    scores: list[HeatmapScoreEntry]
+
+    model_config = {"from_attributes": True}
+
+
 class StudentAlertResponse(BaseModel):
     student_id: int
     student_name: str
@@ -779,4 +810,100 @@ def export_classroom_report(
         iter([csv_content.encode("utf-8-sig")]),
         media_type="text/csv; charset=UTF-8",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get(
+    "/teacher/classrooms/{classroom_id}/heatmap",
+    response_model=HeatmapResponse,
+)
+def get_classroom_heatmap(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get student × story score heatmap for a classroom.
+
+    Returns students, stories, and best scores per (student, story) pair.
+    """
+    _check_classroom_access(current_user, classroom_id, db)
+
+    # Get all student IDs in this classroom
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+
+    if not enrollments:
+        return HeatmapResponse(students=[], stories=[], scores=[])
+
+    student_ids = [e.student_id for e in enrollments]
+    students_map = {e.student_id: e.student for e in enrollments}
+
+    # Query all sessions for classroom students with a story_slug and score
+    sessions = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.story_slug.isnot(None),
+        )
+        .all()
+    )
+
+    # Build best-score map: (student_id, story_slug) → best session
+    best_score_map: dict[tuple[int, str], LearningSession] = {}
+    for sess in sessions:
+        key = (sess.student_id, sess.story_slug)
+        existing = best_score_map.get(key)
+        if existing is None:
+            best_score_map[key] = sess
+        else:
+            # Prefer completed sessions; among same status, prefer higher score
+            existing_score = existing.overall_score or 0.0
+            new_score = sess.overall_score or 0.0
+            if sess.status == "completed" and existing.status != "completed":
+                best_score_map[key] = sess
+            elif sess.status == existing.status and new_score > existing_score:
+                best_score_map[key] = sess
+
+    # Collect unique story slugs and resolve titles
+    unique_story_slugs: list[str] = sorted(
+        {slug for _, slug in best_score_map.keys()}
+    )
+
+    stories: list[HeatmapStoryEntry] = []
+    for slug in unique_story_slugs:
+        title = slug
+        try:
+            story = get_lesson_by_id(int(slug))
+            if story:
+                title = story["title"]
+        except (ValueError, TypeError):
+            title = slug
+        stories.append(HeatmapStoryEntry(id=slug, title=title))
+
+    # Build student list in enrollment order
+    heatmap_students = [
+        HeatmapStudentEntry(id=s_id, name=students_map[s_id].name)
+        for s_id in student_ids
+    ]
+
+    # Build score entries
+    score_entries: list[HeatmapScoreEntry] = []
+    for (s_id, slug), sess in best_score_map.items():
+        score = round(sess.overall_score, 1) if sess.overall_score is not None else 0.0
+        score_entries.append(
+            HeatmapScoreEntry(
+                student_id=s_id,
+                story_id=slug,
+                score=score,
+                status=sess.status,
+            )
+        )
+
+    return HeatmapResponse(
+        students=heatmap_students,
+        stories=stories,
+        scores=score_entries,
     )

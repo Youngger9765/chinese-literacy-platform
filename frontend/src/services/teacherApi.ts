@@ -216,6 +216,43 @@ export async function getTimeStats(
   return handleResponse<TimeStats>(res);
 }
 
+// --- Heatmap types ---
+
+export interface HeatmapStudent {
+  id: number;
+  name: string;
+}
+
+export interface HeatmapStory {
+  id: string;
+  title: string;
+}
+
+export interface HeatmapScore {
+  student_id: number;
+  story_id: string;
+  score: number;
+  status: string;
+}
+
+export interface ClassroomHeatmap {
+  students: HeatmapStudent[];
+  stories: HeatmapStory[];
+  scores: HeatmapScore[];
+}
+
+/** Get student × story score heatmap for a classroom. */
+export async function getClassroomHeatmap(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomHeatmap> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/heatmap`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ClassroomHeatmap>(res);
+}
+
 // --- Alert & Learning Curve types ---
 
 export interface StudentAlert {
