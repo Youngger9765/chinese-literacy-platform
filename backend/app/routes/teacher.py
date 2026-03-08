@@ -16,7 +16,7 @@ from ..auth.dependencies import get_current_user
 from ..database import get_db
 from ..dependencies.tenant import _check_classroom_access
 from ..models.school import Classroom, ClassroomStudent, ClassroomText
-from ..models.session import LearningSession
+from ..models.session import CharacterError, LearningSession
 from ..models.user import User
 from ..services.lesson_loader import get_lesson_by_id
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
@@ -56,6 +56,9 @@ class ClassroomStatsResponse(BaseModel):
     total_sessions: int
     active_students: int
     inactive_students: int
+    avg_accuracy: float | None
+    completion_rate: float
+    avg_session_duration_minutes: float | None
 
     model_config = {"from_attributes": True}
 
@@ -67,6 +70,25 @@ class StudentSessionResponse(BaseModel):
     completed_at: datetime | None
     overall_score: float | None
     status: str
+
+    model_config = {"from_attributes": True}
+
+
+class ErrorVocabItem(BaseModel):
+    character: str
+    error_type: str
+    count: int
+    student_count: int
+
+    model_config = {"from_attributes": True}
+
+
+class TimeStatsResponse(BaseModel):
+    total_hours: float
+    avg_minutes_per_session: float | None
+    study_days: int
+    sessions_this_week: int
+    sessions_last_week: int
 
     model_config = {"from_attributes": True}
 
@@ -215,6 +237,9 @@ def get_classroom_stats(
             total_sessions=0,
             active_students=0,
             inactive_students=0,
+            avg_accuracy=None,
+            completion_rate=0.0,
+            avg_session_duration_minutes=None,
         )
 
     # Count total sessions for these students
@@ -237,11 +262,189 @@ def get_classroom_stats(
     )
     active_students = len(active_student_ids)
 
+    # Average accuracy from completed sessions' overall_score
+    avg_accuracy = (
+        db.query(func.avg(LearningSession.overall_score))
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.status == "completed",
+            LearningSession.overall_score.isnot(None),
+        )
+        .scalar()
+    )
+
+    # Completion rate = completed / total
+    completed_count = (
+        db.query(func.count(LearningSession.id))
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.status == "completed",
+        )
+        .scalar()
+    )
+    completion_rate = (completed_count / total_sessions) if total_sessions else 0.0
+
+    # Average session duration (completed sessions with both timestamps)
+    completed_sessions = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.status == "completed",
+            LearningSession.started_at.isnot(None),
+            LearningSession.completed_at.isnot(None),
+        )
+        .all()
+    )
+    avg_duration = None
+    if completed_sessions:
+        durations = []
+        for s in completed_sessions:
+            delta = (s.completed_at - s.started_at).total_seconds() / 60.0
+            if delta > 0:
+                durations.append(delta)
+        if durations:
+            avg_duration = round(sum(durations) / len(durations), 1)
+
     return ClassroomStatsResponse(
         total_students=total_students,
         total_sessions=total_sessions,
         active_students=active_students,
         inactive_students=total_students - active_students,
+        avg_accuracy=round(avg_accuracy, 1) if avg_accuracy is not None else None,
+        completion_rate=round(completion_rate, 2),
+        avg_session_duration_minutes=avg_duration,
+    )
+
+
+@router.get(
+    "/teacher/classrooms/{classroom_id}/error-vocab",
+    response_model=list[ErrorVocabItem],
+)
+def get_classroom_error_vocab(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get top 20 most frequent character errors for a classroom."""
+    classroom = _check_classroom_access(current_user, classroom_id, db)
+
+    student_ids = [
+        row[0]
+        for row in db.query(ClassroomStudent.student_id)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    ]
+
+    if not student_ids:
+        return []
+
+    # Query CharacterError joined through LearningSession, filtered by classroom students
+    rows = (
+        db.query(
+            CharacterError.character,
+            CharacterError.error_type,
+            func.count(CharacterError.id).label("count"),
+            func.count(func.distinct(LearningSession.student_id)).label("student_count"),
+        )
+        .join(LearningSession, CharacterError.session_id == LearningSession.id)
+        .filter(LearningSession.student_id.in_(student_ids))
+        .group_by(CharacterError.character, CharacterError.error_type)
+        .order_by(func.count(CharacterError.id).desc())
+        .limit(20)
+        .all()
+    )
+
+    return [
+        ErrorVocabItem(
+            character=row.character,
+            error_type=row.error_type,
+            count=row.count,
+            student_count=row.student_count,
+        )
+        for row in rows
+    ]
+
+
+@router.get(
+    "/teacher/classrooms/{classroom_id}/time-stats",
+    response_model=TimeStatsResponse,
+)
+def get_classroom_time_stats(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get learning time statistics for a classroom."""
+    classroom = _check_classroom_access(current_user, classroom_id, db)
+
+    student_ids = [
+        row[0]
+        for row in db.query(ClassroomStudent.student_id)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    ]
+
+    if not student_ids:
+        return TimeStatsResponse(
+            total_hours=0.0,
+            avg_minutes_per_session=None,
+            study_days=0,
+            sessions_this_week=0,
+            sessions_last_week=0,
+        )
+
+    # All sessions for classroom students
+    sessions = (
+        db.query(LearningSession)
+        .filter(LearningSession.student_id.in_(student_ids))
+        .all()
+    )
+
+    # Total hours and average duration from sessions with both timestamps
+    total_minutes = 0.0
+    duration_count = 0
+    for s in sessions:
+        if s.started_at and s.completed_at:
+            delta = (s.completed_at - s.started_at).total_seconds() / 60.0
+            if delta > 0:
+                total_minutes += delta
+                duration_count += 1
+
+    total_hours = round(total_minutes / 60.0, 1)
+    avg_minutes = round(total_minutes / duration_count, 1) if duration_count else None
+
+    # Distinct study days
+    study_days = len({s.started_at.date() for s in sessions if s.started_at})
+
+    # Sessions this week and last week
+    now = datetime.now(timezone.utc)
+    # Monday of this week
+    this_monday = (now - timedelta(days=now.weekday())).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    last_monday = this_monday - timedelta(days=7)
+
+    def _make_aware(dt: datetime) -> datetime:
+        """Ensure datetime is timezone-aware (handles SQLite naive datetimes)."""
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+
+    sessions_this_week = sum(
+        1 for s in sessions if s.started_at and _make_aware(s.started_at) >= this_monday
+    )
+    sessions_last_week = sum(
+        1
+        for s in sessions
+        if s.started_at and last_monday <= _make_aware(s.started_at) < this_monday
+    )
+
+    return TimeStatsResponse(
+        total_hours=total_hours,
+        avg_minutes_per_session=avg_minutes,
+        study_days=study_days,
+        sessions_this_week=sessions_this_week,
+        sessions_last_week=sessions_last_week,
     )
 
 
