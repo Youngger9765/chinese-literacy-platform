@@ -8,8 +8,9 @@ import {
   VocabResult,
   FullReadingResult,
 } from '../types';
-import { fetchStory } from '../services/api';
+import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
 import { useLearningNav } from '../contexts/LearningNavContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
   storyId: '',
@@ -33,8 +34,21 @@ export interface LearningContext {
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishFullReading: (result: FullReadingResult) => void;
   handleRetry: () => void;
+  handleSessionComplete: () => void;
   emptyAttempt: ReadingAttempt;
 }
+
+/**
+ * Map from step name in URL path to numeric step index (1-based, matching DB).
+ */
+const STEP_PATH_TO_NUMBER: Record<string, number> = {
+  intro: 1,
+  tutor: 2,
+  comprehension: 3,
+  vocab: 4,
+  'full-reading': 5,
+  report: 6,
+};
 
 /**
  * Wraps the learning flow routes (/learn/:storyId/*).
@@ -45,6 +59,7 @@ const LearningLayout: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
   const navigate = useNavigate();
   const learningNav = useLearningNav();
+  const { user } = useAuth();
 
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [session, setSession] = useState<LearningSession | null>(null);
@@ -52,6 +67,26 @@ const LearningLayout: React.FC = () => {
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  /** Persist current step to localStorage for session resume. */
+  const persistStep = useCallback(
+    (step: number) => {
+      if (!user || !storyId) return;
+      saveActiveSession(String(user.id), {
+        sessionId: 0, // no DB session ID in the current flow
+        storyId,
+        currentStep: step,
+        timestamp: Date.now(),
+      });
+    },
+    [user, storyId],
+  );
+
+  /** Clear active session from localStorage (called on completion). */
+  const clearPersistedSession = useCallback(() => {
+    if (!user) return;
+    clearActiveSession(String(user.id));
+  }, [user]);
 
   // Sync session/story to the nav context so the header StepperNav can read them
   useEffect(() => {
@@ -96,6 +131,15 @@ const LearningLayout: React.FC = () => {
             fullReadingResult: null,
           };
         });
+        // Persist step 1 (intro) as the starting point
+        if (user) {
+          saveActiveSession(String(user.id), {
+            sessionId: 0,
+            storyId,
+            currentStep: STEP_PATH_TO_NUMBER['intro'],
+            timestamp: Date.now(),
+          });
+        }
       })
       .catch((err) => {
         setError(err.message || 'Failed to load story');
@@ -121,48 +165,59 @@ const LearningLayout: React.FC = () => {
       }
       return null;
     });
+    persistStep(STEP_PATH_TO_NUMBER['tutor']);
     navigate(`/learn/${storyId}/tutor`);
-  }, [storyId, selectedStory, navigate]);
+  }, [storyId, selectedStory, navigate, persistStep]);
 
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
       setLastAttempt(attempt);
       setSession((prev) => (prev ? { ...prev, readingAttempt: attempt } : null));
+      persistStep(STEP_PATH_TO_NUMBER['comprehension']);
       navigate(`/learn/${storyId}/comprehension`);
     },
-    [storyId, navigate],
+    [storyId, navigate, persistStep],
   );
 
   const handleFinishComprehension = useCallback(
     (result: ComprehensionResult) => {
       setSession((prev) => (prev ? { ...prev, comprehensionResult: result } : null));
+      persistStep(STEP_PATH_TO_NUMBER['vocab']);
       navigate(`/learn/${storyId}/vocab`);
     },
-    [storyId, navigate],
+    [storyId, navigate, persistStep],
   );
 
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
       setSession((prev) => (prev ? { ...prev, vocabResult: result } : null));
+      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
       navigate(`/learn/${storyId}/full-reading`);
     },
-    [storyId, navigate],
+    [storyId, navigate, persistStep],
   );
 
   const handleFinishFullReading = useCallback(
     (result: FullReadingResult) => {
       setSession((prev) => (prev ? { ...prev, fullReadingResult: result } : null));
+      persistStep(STEP_PATH_TO_NUMBER['report']);
       navigate(`/learn/${storyId}/report`);
     },
-    [storyId, navigate],
+    [storyId, navigate, persistStep],
   );
 
   const handleRetry = useCallback(() => {
+    clearPersistedSession();
     setSession(null);
     setLastAttempt(null);
     setSelectedStory(null);
     navigate('/library');
-  }, [navigate]);
+  }, [navigate, clearPersistedSession]);
+
+  /** Called when a session is fully completed (report viewed). */
+  const handleSessionComplete = useCallback(() => {
+    clearPersistedSession();
+  }, [clearPersistedSession]);
 
   if (isLoading) {
     return (
@@ -203,6 +258,7 @@ const LearningLayout: React.FC = () => {
     handleFinishVocab,
     handleFinishFullReading,
     handleRetry,
+    handleSessionComplete,
     emptyAttempt: EMPTY_ATTEMPT,
   };
 
