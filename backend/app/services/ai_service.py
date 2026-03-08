@@ -17,6 +17,7 @@ from google import genai
 from google.genai import types as genai_types
 
 from ..config import settings
+from .input_sanitizer import sanitize_ai_input
 from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
@@ -159,10 +160,14 @@ async def generate_socratic_question(
 
     for turn in conversation:
         role = "model" if turn["role"] == "ai" else "user"
+        # Sanitize student inputs to prevent prompt injection (Issue #270)
+        text = turn["text"]
+        if turn["role"] == "student":
+            text, _ = sanitize_ai_input(text)
         contents.append(
             genai_types.Content(
                 role=role,
-                parts=[genai_types.Part(text=turn["text"])],
+                parts=[genai_types.Part(text=text)],
             )
         )
 
