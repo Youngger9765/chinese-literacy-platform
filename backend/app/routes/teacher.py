@@ -1238,7 +1238,6 @@ def delete_instruction(
     return instruction
 
 
-<<<<<<< HEAD
 # ── Classroom Stuck-Point Overview (Issue #91) ────────────────────────────────
 
 
