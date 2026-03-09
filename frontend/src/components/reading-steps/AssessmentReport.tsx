@@ -183,7 +183,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
     );
   }
 
-  const { readingAttempt, comprehensionResult, vocabResult, fullReadingResult } = session;
+  const { readingAttempt, comprehensionResult, vocabResult, dictationResult, fullReadingResult } = session;
 
   // Empty state: session exists but no learning data completed yet
   const hasNoData = !readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult;
@@ -208,6 +208,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   if (readingAttempt) scores.push(readingAttempt.accuracy);
   if (comprehensionResult) scores.push(Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100));
   if (vocabResult) scores.push(vocabResult.totalChars > 0 ? Math.round((vocabResult.practicedChars.length / vocabResult.totalChars) * 100) : 100);
+  if (dictationResult) scores.push(dictationResult.totalWords > 0 ? Math.round((dictationResult.correctCount / dictationResult.totalWords) * 100) : 0);
   if (fullReadingResult) scores.push(Math.round(fullReadingResult.matchRate * 100));
   const overallScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
 
@@ -642,8 +643,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         )}
       </Section>
 
-      {/* ============ 補充資訊：生字練習 + 課文理解 ============ */}
-      {(vocabResult || comprehensionResult) && (
+      {/* ============ 補充資訊：生字練習 + 聽寫練習 + 課文理解 ============ */}
+      {(vocabResult || dictationResult || comprehensionResult) && (
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">其他學習成果</h3>
 
@@ -677,10 +678,55 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
               )}
             </div>
 
+            {/* 聽寫練習 */}
+            {dictationResult && (
+              <div className="rounded-2xl border p-5 bg-white border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black bg-accent text-white">5</span>
+                  <h4 className="text-sm font-bold text-gray-900">聽寫練習</h4>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-emerald-500 h-2 rounded-full transition-all"
+                        style={{ width: dictationResult.totalWords > 0 ? `${Math.round((dictationResult.correctCount / dictationResult.totalWords) * 100)}%` : '0%' }}
+                      />
+                    </div>
+                    <span className="text-xs font-bold text-gray-600">{dictationResult.correctCount}/{dictationResult.totalWords}</span>
+                  </div>
+                  <div className="flex gap-3 text-xs text-gray-500">
+                    <span className="text-emerald-600 font-medium">正確 {dictationResult.correctCount}</span>
+                    {dictationResult.incorrectCount > 0 && (
+                      <span className="text-red-500 font-medium">錯誤 {dictationResult.incorrectCount}</span>
+                    )}
+                    {dictationResult.skippedCount > 0 && (
+                      <span className="text-gray-400">跳過 {dictationResult.skippedCount}</span>
+                    )}
+                  </div>
+                  {dictationResult.results.some(r => !r.isCorrect && !r.skipped) && (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">答錯的詞語</p>
+                      {dictationResult.results
+                        .filter(r => !r.isCorrect && !r.skipped)
+                        .map((r, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <span className="font-bold text-gray-900">{r.word}</span>
+                            <span className="text-gray-400">你答：</span>
+                            <span className="text-red-500">{r.studentAnswer || '（空白）'}</span>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* 課文理解 */}
             <div className={`rounded-2xl border p-5 ${comprehensionResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
               <div className="flex items-center gap-2 mb-3">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>4</span>
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>3</span>
                 <h4 className={`text-sm font-bold ${comprehensionResult ? 'text-gray-900' : 'text-gray-400'}`}>課文理解</h4>
                 {comprehensionResult?.isComplete && (
                   <span className="ml-auto bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">已完成</span>

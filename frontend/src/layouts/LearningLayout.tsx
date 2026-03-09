@@ -6,6 +6,7 @@ import {
   LearningSession,
   ComprehensionResult,
   VocabResult,
+  DictationResult,
   FullReadingResult,
 } from '../types';
 import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
@@ -33,6 +34,7 @@ export interface LearningContext {
   handleFinishReading: (attempt: ReadingAttempt) => void;
   handleFinishComprehension: (result: ComprehensionResult) => void;
   handleFinishVocab: (result: VocabResult) => void;
+  handleFinishDictation: (result: DictationResult) => void;
   handleFinishFullReading: (result: FullReadingResult) => void;
   handleRetry: () => void;
   handleSessionComplete: () => void;
@@ -53,8 +55,9 @@ const STEP_PATH_TO_NUMBER: Record<string, number> = {
   tutor: 2,
   comprehension: 3,
   vocab: 4,
-  'full-reading': 5,
-  report: 6,
+  dictation: 5,
+  'full-reading': 6,
+  report: 7,
 };
 
 /**
@@ -141,6 +144,7 @@ const LearningLayout: React.FC = () => {
             readingAttempt: null,
             comprehensionResult: null,
             vocabResult: null,
+            dictationResult: null,
             fullReadingResult: null,
           };
         });
@@ -173,6 +177,7 @@ const LearningLayout: React.FC = () => {
           readingAttempt: null,
           comprehensionResult: null,
           vocabResult: null,
+          dictationResult: null,
           fullReadingResult: null,
         };
       }
@@ -224,6 +229,15 @@ const LearningLayout: React.FC = () => {
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
       setSession((prev) => (prev ? { ...prev, vocabResult: result } : null));
+      persistStep(STEP_PATH_TO_NUMBER['dictation']);
+      navigate(`/learn/${storyId}/dictation`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishDictation = useCallback(
+    (result: DictationResult) => {
+      setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
       persistStep(STEP_PATH_TO_NUMBER['full-reading']);
       navigate(`/learn/${storyId}/full-reading`);
     },
@@ -319,6 +333,7 @@ const LearningLayout: React.FC = () => {
     handleFinishReading,
     handleFinishComprehension,
     handleFinishVocab,
+    handleFinishDictation,
     handleFinishFullReading,
     handleRetry,
     handleSessionComplete,

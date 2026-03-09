@@ -26,6 +26,7 @@ export function useAppView(): AppView {
     if (pathname.endsWith('/tutor')) return AppView.TUTOR;
     if (pathname.endsWith('/comprehension')) return AppView.COMPREHENSION;
     if (pathname.endsWith('/vocab')) return AppView.VOCAB;
+    if (pathname.endsWith('/dictation')) return AppView.DICTATION;
     if (pathname.endsWith('/full-reading')) return AppView.FULL_READING;
     if (pathname.endsWith('/report')) return AppView.REPORT;
   }

@@ -6,6 +6,7 @@ export enum AppView {
   TUTOR = 'TUTOR',
   COMPREHENSION = 'COMPREHENSION',
   VOCAB = 'VOCAB',
+  DICTATION = 'DICTATION',
   FULL_READING = 'FULL_READING',
   REPORT = 'REPORT',
   WRITE = 'WRITE',
@@ -85,6 +86,21 @@ export interface VocabResult {
   totalChars: number;
 }
 
+export interface DictationWordResult {
+  word: string;
+  studentAnswer: string;
+  isCorrect: boolean;
+  skipped: boolean;
+}
+
+export interface DictationResult {
+  totalWords: number;
+  correctCount: number;
+  incorrectCount: number;
+  skippedCount: number;
+  results: DictationWordResult[];
+}
+
 export interface FullReadingResult {
   matchRate: number;
   feedback: string;
@@ -102,6 +118,7 @@ export interface LearningSession {
   readingAttempt: ReadingAttempt | null;
   comprehensionResult: ComprehensionResult | null;
   vocabResult: VocabResult | null;
+  dictationResult: DictationResult | null;
   fullReadingResult: FullReadingResult | null;
   /** Paragraph indices (0-based) completed during LiveTutor (progressive unlock). */
   completedParagraphs?: number[];
