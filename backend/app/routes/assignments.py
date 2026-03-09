@@ -443,6 +443,39 @@ def grade_submission(
     )
 
 
+# ── Teacher Delete Endpoint ───────────────────────────────────────────────────
+
+
+@router.delete(
+    "/assignments/{assignment_id}",
+    status_code=204,
+)
+def delete_assignment(
+    assignment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete an assignment and all its submissions (cascade).
+
+    Only the classroom owner or a system admin can delete an assignment.
+    Returns 204 No Content on success.
+    """
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    _require_assignment_owner_or_admin(assignment, current_user, db)
+
+    db.delete(assignment)
+    db.commit()
+
+    logger.info(
+        "Teacher %d deleted assignment %d (classroom=%d)",
+        current_user.id, assignment_id, assignment.classroom_id,
+    )
+    # FastAPI returns empty 204 response automatically when status_code=204
+
+
 # ── Student Action Endpoints ─────────────────────────────────────────────────
 
 
@@ -564,10 +597,11 @@ def submit_assignment(
         classroom = (
             db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
         )
-        story_title = _resolve_story_title(assignment.story_id) or assignment.story_id
+        story_title = _resolve_title_for_assignment(assignment, db)
         return StudentAssignmentResponse(
             assignment_id=assignment.id,
             story_id=assignment.story_id,
+            text_id=assignment.text_id,
             story_title=story_title,
             title=assignment.title,
             description=assignment.description,
@@ -577,6 +611,11 @@ def submit_assignment(
             status=submission.status,
             submitted_at=submission.submitted_at,
             score=submission.score,
+            target_cpm=assignment.target_cpm,
+            target_accuracy=assignment.target_accuracy,
+            difficulty_label=assignment.difficulty_label,
+            effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+            effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
         )
 
     # Pull score from linked LearningSession if available
@@ -602,7 +641,7 @@ def submit_assignment(
     classroom = (
         db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
     )
-    story_title = _resolve_story_title(assignment.story_id) or assignment.story_id
+    story_title = _resolve_title_for_assignment(assignment, db)
 
     logger.info(
         "Student %d submitted assignment %d (score=%s)",
@@ -612,6 +651,7 @@ def submit_assignment(
     return StudentAssignmentResponse(
         assignment_id=assignment.id,
         story_id=assignment.story_id,
+        text_id=assignment.text_id,
         story_title=story_title,
         title=assignment.title,
         description=assignment.description,
@@ -621,4 +661,9 @@ def submit_assignment(
         status=submission.status,
         submitted_at=submission.submitted_at,
         score=submission.score,
+        target_cpm=assignment.target_cpm,
+        target_accuracy=assignment.target_accuracy,
+        difficulty_label=assignment.difficulty_label,
+        effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+        effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
     )

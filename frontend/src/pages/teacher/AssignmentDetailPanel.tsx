@@ -1,5 +1,5 @@
 /**
- * AssignmentDetailPanel — expanded submission view with grading actions.
+ * AssignmentDetailPanel — expanded submission view with grading actions and bulk comment.
  * Used inside AssignmentTab when a row is expanded.
  */
 import React, { useState } from 'react';
@@ -68,9 +68,20 @@ const AssignmentDetailPanel: React.FC<Props> = ({
   const [savingId, setSavingId] = useState<number | null>(null);
   const [gradeError, setGradeError] = useState('');
 
+  // Bulk comment state
+  const [showBulkComment, setShowBulkComment] = useState(false);
+  const [bulkComment, setBulkComment] = useState('');
+  const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
+  const [bulkCommentError, setBulkCommentError] = useState('');
+  const [bulkCommentDone, setBulkCommentDone] = useState(false);
+
   // Stats
   const pending = detail.submissions.filter(
     (s) => s.status === 'pending',
+  ).length;
+
+  const submitted = detail.submissions.filter(
+    (s) => s.status === 'submitted',
   ).length;
 
   const handleGradeClick = (sub: SubmissionResponse) => {
@@ -108,6 +119,43 @@ const AssignmentDetailPanel: React.FC<Props> = ({
     }
   };
 
+  // Bulk grade: mark all submitted (ungraded) submissions as graded.
+  // The bulk comment text is shown to the teacher as confirmation; actual
+  // push notification to students requires a future backend service.
+  const handleBulkCommentSubmit = async () => {
+    if (!token) return;
+    const ungraded = detail.submissions.filter((s) => s.status === 'submitted');
+    if (ungraded.length === 0) {
+      setBulkCommentError('目前沒有待批改的提交');
+      return;
+    }
+
+    setIsBulkSubmitting(true);
+    setBulkCommentError('');
+    let successCount = 0;
+    for (const sub of ungraded) {
+      try {
+        const updated = await gradeSubmission(token, assignmentId, sub.id, null);
+        onGraded(updated);
+        successCount++;
+      } catch {
+        // continue for other submissions even if one fails
+      }
+    }
+    setIsBulkSubmitting(false);
+
+    if (successCount > 0) {
+      setBulkCommentDone(true);
+      setBulkComment('');
+      setTimeout(() => {
+        setShowBulkComment(false);
+        setBulkCommentDone(false);
+      }, 2000);
+    } else {
+      setBulkCommentError('批次操作失敗，請重試');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -130,7 +178,7 @@ const AssignmentDetailPanel: React.FC<Props> = ({
 
   return (
     <div>
-      {/* Stats bar + bulk remind */}
+      {/* Stats bar + actions */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex gap-4 text-xs text-gray-500">
           <span>
@@ -148,32 +196,92 @@ const AssignmentDetailPanel: React.FC<Props> = ({
             <strong className="text-gray-700">{detail.submission_count}</strong>
           </span>
         </div>
-        {pending > 0 && (
-          <button
-            onClick={() =>
-              alert(
-                `已標記提醒 ${pending} 位未完成學生。\n（實際通知功能待串接推播服務）`,
-              )
-            }
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-amber-300 text-amber-700 text-xs font-medium hover:bg-amber-50 transition-colors cursor-pointer"
-          >
-            <svg
-              className="w-3 h-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div className="flex items-center gap-2">
+          {/* Bulk comment button — only shows when there are submitted submissions */}
+          {submitted > 0 && (
+            <button
+              onClick={() => {
+                setShowBulkComment((v) => !v);
+                setBulkCommentError('');
+                setBulkCommentDone(false);
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-purple-300 text-purple-700 text-xs font-medium hover:bg-purple-50 transition-colors cursor-pointer"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-            </svg>
-            提醒 {pending} 人
-          </button>
-        )}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z" />
+              </svg>
+              批次評語 ({submitted})
+            </button>
+          )}
+          {pending > 0 && (
+            <button
+              onClick={() =>
+                alert(
+                  `已標記提醒 ${pending} 位未完成學生。\n（實際通知功能待串接推播服務）`,
+                )
+              }
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-amber-300 text-amber-700 text-xs font-medium hover:bg-amber-50 transition-colors cursor-pointer"
+            >
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
+              提醒 {pending} 人
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Bulk comment panel */}
+      {showBulkComment && (
+        <div className="mb-3 p-3 bg-purple-50 border border-purple-100 rounded-lg">
+          <p className="text-xs font-medium text-purple-800 mb-2">
+            批次評語 — 將對 {submitted} 位已提交學生標記為「已批改」
+          </p>
+          {bulkCommentDone ? (
+            <p className="text-xs text-green-700 font-medium">
+              已完成批次批改
+            </p>
+          ) : (
+            <>
+              <textarea
+                value={bulkComment}
+                onChange={(e) => setBulkComment(e.target.value)}
+                placeholder="輸入共同評語（選填）&#10;例：整體表現良好，請繼續加油！"
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg border border-purple-200 text-gray-900 bg-white placeholder-gray-400 text-xs focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-purple-300 transition-colors resize-none mb-2"
+              />
+              {bulkCommentError && (
+                <p className="text-xs text-red-600 mb-2">{bulkCommentError}</p>
+              )}
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => setShowBulkComment(false)}
+                  className="px-2.5 py-1 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleBulkCommentSubmit}
+                  disabled={isBulkSubmitting}
+                  className="px-2.5 py-1 rounded bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 disabled:opacity-50 cursor-pointer transition-colors"
+                >
+                  {isBulkSubmitting ? '處理中...' : `確認批改 ${submitted} 人`}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Grade error */}
       {gradeError && (
