@@ -8,12 +8,15 @@ from ..auth.dependencies import get_current_user
 from ..auth.jwt import create_access_token
 from ..auth.password import hash_password, verify_password
 from ..auth.rate_limiter import InMemoryRateLimiter
+from ..config import settings
 from ..database import get_db
 from ..models.user import User
 from ..schemas.auth import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
     ForgotPasswordResponse,
+    GoogleLoginRequest,
+    GoogleLoginResponse,
     LoginRequest,
     RegisterRequest,
     ResetPasswordRequest,
@@ -254,6 +257,88 @@ def verify_email(req: VerifyEmailRequest, db: Session = Depends(get_db)):
     db.commit()
 
     return VerifyEmailResponse(message="電子郵件驗證成功！")
+
+
+
+@router.post("/google", response_model=GoogleLoginResponse)
+def google_login(req: GoogleLoginRequest, request: Request, db: Session = Depends(get_db)):
+    """Authenticate (or register) a user via Google Sign-In credential (id_token).
+
+    Flow:
+    1. Verify the id_token with Google's public keys.
+    2. If a user with matching google_id exists -> login.
+    3. Else if a user with matching email exists -> link the Google account.
+    4. Else -> create a new user account (email_verified=True, no password).
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    if not rate_limiter.check(f"google-login:{client_ip}", max_requests=20, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
+    if not settings.google_client_id:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google OAuth is not configured on this server.",
+        )
+
+    # Verify the Google id_token
+    try:
+        from google.oauth2 import id_token as google_id_token
+        from google.auth.transport import requests as google_requests
+
+        id_info = google_id_token.verify_oauth2_token(
+            req.credential,
+            google_requests.Request(),
+            settings.google_client_id,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid Google credential: {exc}",
+        )
+
+    google_sub = id_info["sub"]          # stable unique Google user ID
+    email: str = id_info.get("email", "")
+    name: str = id_info.get("name", "") or email.split("@")[0]
+    picture: str | None = id_info.get("picture")
+
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google account does not expose an email address.",
+        )
+
+    is_new_user = False
+
+    # 1. Look up by google_id (returning user)
+    user = db.query(User).filter(User.google_id == google_sub, User.is_active == True).first()
+
+    if user is None:
+        # 2. Look up by email (link existing account)
+        user = db.query(User).filter(User.email == email, User.is_active == True).first()
+        if user is not None:
+            user.google_id = google_sub
+            if picture and not user.avatar_url:
+                user.avatar_url = picture
+        else:
+            # 3. Create new account — no password (use a random unusable hash)
+            unusable_hash = hash_password(secrets.token_hex(32))
+            user = User(
+                email=email,
+                password_hash=unusable_hash,
+                name=name,
+                avatar_url=picture,
+                google_id=google_sub,
+                email_verified=True,  # Google already verified the email
+            )
+            db.add(user)
+            is_new_user = True
+
+    user.last_login_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(user)
+
+    token = create_access_token(user.id)
+    return GoogleLoginResponse(access_token=token, is_new_user=is_new_user)
 
 @router.post("/accept-terms", response_model=UserResponse)
 def accept_terms(

@@ -162,3 +162,18 @@ export async function resetPassword(token: string, newPassword: string): Promise
     throw new AuthError(message, res.status);
   }
 }
+
+export interface GoogleLoginResponse {
+  access_token: string;
+  token_type: string;
+  is_new_user: boolean;
+}
+
+export async function googleLogin(credential: string): Promise<GoogleLoginResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ credential }),
+  });
+  return handleAuthResponse<GoogleLoginResponse>(res);
+}

@@ -52,3 +52,13 @@ class VerifyEmailRequest(BaseModel):
 
 class VerifyEmailResponse(BaseModel):
     message: str
+
+class GoogleLoginRequest(BaseModel):
+    """Credential from Google Sign-In for Web (id_token issued by Google)."""
+    credential: str
+
+
+class GoogleLoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    is_new_user: bool = False
