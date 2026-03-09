@@ -39,8 +39,36 @@ class SessionDetailResponse(SessionSummaryResponse):
     comprehension_result: dict[str, Any] | None
     vocab_result: dict[str, Any] | None
     full_reading_result: dict[str, Any] | None
+    # 3-level comprehension scoring (Issue #243)
+    comprehension_score: float | None = None
+    literal_score: float | None = None
+    inferential_score: float | None = None
+    evaluative_score: float | None = None
+    comprehension_feedback: str | None = None
 
 
 class SessionListResponse(BaseModel):
     items: list[SessionSummaryResponse]
     total: int
+
+
+class SessionStatusResponse(BaseModel):
+    """Lightweight response for session resume check."""
+    id: int
+    story_slug: str | None
+    current_step: int
+    status: str
+    is_resumable: bool
+    is_completed: bool
+    started_at: datetime
+    completed_at: datetime | None
+
+    model_config = {"from_attributes": True}
+
+
+class ComprehensionScoreResponse(BaseModel):
+    comprehension_score: float = Field(..., ge=0, le=100)
+    literal_score: float = Field(..., ge=0, le=100)
+    inferential_score: float = Field(..., ge=0, le=100)
+    evaluative_score: float = Field(..., ge=0, le=100)
+    feedback: dict[str, str] = Field(default_factory=dict)

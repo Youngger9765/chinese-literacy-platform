@@ -23,6 +23,44 @@ async function resetToLoginPage(page: Page) {
   await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
 }
 
+/**
+ * Helper: accept terms modal if visible.
+ */
+async function acceptTermsIfVisible(page: Page) {
+  const termsHeading = page.locator('h2:has-text("使用條款同意書")');
+  if (await termsHeading.isVisible({ timeout: 1500 }).catch(() => false)) {
+    const checkboxes = page.locator('input[type="checkbox"]');
+    const count = await checkboxes.count();
+    for (let i = 0; i < count; i++) {
+      await checkboxes.nth(i).check();
+    }
+    await page.locator('button:has-text("我同意使用條款，進入平台")').click();
+    await expect(termsHeading).not.toBeVisible({ timeout: 5000 });
+  }
+}
+
+/**
+ * Helper: skip onboarding guide if visible.
+ */
+async function skipOnboardingIfVisible(page: Page) {
+  const skipBtn = page.locator('button:has-text("跳過")');
+  if (await skipBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+    await skipBtn.click();
+    await expect(skipBtn).not.toBeVisible({ timeout: 5000 });
+  }
+}
+
+/**
+ * Helper: dismiss all blocking modals (Terms, Onboarding).
+ * Waits for modals that may appear in sequence.
+ */
+async function dismissAllModals(page: Page) {
+  await acceptTermsIfVisible(page);
+  await skipOnboardingIfVisible(page);
+  // Check once more in case another modal appeared
+  await acceptTermsIfVisible(page);
+}
+
 /** Helper: register a new account and wait for the main app to appear. */
 async function registerAndWaitForApp(page: Page, email: string) {
   await page.locator('button:has-text("註冊帳號")').click();
@@ -34,7 +72,15 @@ async function registerAndWaitForApp(page: Page, email: string) {
   await page.locator('#register-confirm').fill(TEST_PASSWORD);
   await page.locator('button[type="submit"]:has-text("建立帳號")').click();
 
-  // Wait for redirect to main app (登出 button appears in the header)
+  // Wait for either terms modal or main app to appear
+  await Promise.race([
+    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
+    page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
+  ]);
+
+  await dismissAllModals(page);
+
+  // Wait for the main app to fully load
   await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
 }
 
@@ -46,6 +92,9 @@ async function registerAndWaitForApp(page: Page, email: string) {
  * we wait for either form to appear, then switch to login if needed.
  */
 async function logoutAndWaitForLoginPage(page: Page) {
+  // Dismiss any modals that might be blocking the logout button
+  await dismissAllModals(page);
+
   await page.locator('button:has-text("登出")').click();
 
   // Wait for either login or register page to appear
@@ -62,6 +111,24 @@ async function logoutAndWaitForLoginPage(page: Page) {
   }
 }
 
+/**
+ * Helper: login and handle post-login modals.
+ */
+async function loginAndWaitForApp(page: Page, email: string, password: string) {
+  await page.locator('#login-email').fill(email);
+  await page.locator('#login-password').fill(password);
+  await page.locator('button[type="submit"]:has-text("登入")').click();
+
+  // Wait for either terms modal or main app
+  await Promise.race([
+    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
+    page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
+  ]);
+
+  await dismissAllModals(page);
+  await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
+}
+
 // ---------------------------------------------------------------------------
 // 1. Login page loads
 // ---------------------------------------------------------------------------
@@ -70,7 +137,7 @@ test('1 - 登入頁載入', async ({ page }) => {
   await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
 
   // Should see the login form elements
-  await expect(page.locator('label:has-text("電子郵件")')).toBeVisible();
+  await expect(page.locator('label:has-text("帳號")')).toBeVisible();
   await expect(page.locator('label:has-text("密碼")')).toBeVisible();
   await expect(page.locator('button[type="submit"]:has-text("登入")')).toBeVisible();
   await expect(page.locator('button:has-text("註冊帳號")')).toBeVisible();
@@ -140,12 +207,9 @@ test('5 - 用已註冊帳號登入', async ({ page }) => {
   await logoutAndWaitForLoginPage(page);
 
   // Now login with the same credentials
-  await page.locator('#login-email').fill(email);
-  await page.locator('#login-password').fill(TEST_PASSWORD);
-  await page.locator('button[type="submit"]:has-text("登入")').click();
+  await loginAndWaitForApp(page, email, TEST_PASSWORD);
 
   // Should see the main app
-  await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
   await expect(page.locator('text=AI 朗讀助教')).toBeVisible();
 });
 
@@ -161,29 +225,24 @@ test('6 - 登入失敗（密碼錯誤）', async ({ page }) => {
   await page.locator('button[type="submit"]:has-text("登入")').click();
 
   // Should see error message
-  await expect(page.locator('text=電子郵件或密碼錯誤')).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator('text=帳號或密碼錯誤')).toBeVisible({ timeout: 15_000 });
 });
 
 // ---------------------------------------------------------------------------
 // 7. Duplicate registration
 // ---------------------------------------------------------------------------
 test('7 - 重複註冊', async ({ page }) => {
-  const email = `test-dup-${RUN_ID}@example.com`;
+  // Reuse the email from test 3 to avoid extra registration (rate limit: 5/min)
+  const email = `test-reg-${RUN_ID}@example.com`;
 
   await page.goto('/');
   await resetToLoginPage(page);
-
-  // First registration
-  await registerAndWaitForApp(page, email);
-
-  // Logout and go back to auth pages
-  await logoutAndWaitForLoginPage(page);
 
   // Switch to register page
   await page.locator('button:has-text("註冊帳號")').click();
   await expect(page.locator('text=建立你的帳號')).toBeVisible();
 
-  // Second registration with same email
+  // Try to register with same email as test 3
   await page.locator('#register-name').fill('Duplicate User');
   await page.locator('#register-email').fill(email);
   await page.locator('#register-password').fill(TEST_PASSWORD);

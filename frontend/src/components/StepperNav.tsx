@@ -23,8 +23,9 @@ const steps: StepDef[] = [
   { step: 2, label: '逐段朗讀', view: AppView.TUTOR,         needsStory: true  },
   { step: 3, label: '課文理解', view: AppView.COMPREHENSION, needsStory: true  },
   { step: 4, label: '生字練習', view: AppView.VOCAB,         needsStory: true  },
-  { step: 5, label: '全文朗讀', view: AppView.FULL_READING,  needsStory: true  },
-  { step: 6, label: '報告',    view: AppView.REPORT,        needsStory: false },
+  { step: 5, label: '聽寫練習', view: AppView.DICTATION,     needsStory: true  },
+  { step: 6, label: '全文朗讀', view: AppView.FULL_READING,  needsStory: true  },
+  { step: 7, label: '報告',    view: AppView.REPORT,        needsStory: false },
 ];
 
 function getStepStatus(
@@ -43,6 +44,7 @@ function getStepStatus(
       case AppView.INTRO:          return session.introCompleted;
       case AppView.TUTOR:          return session.readingAttempt !== null;
       case AppView.VOCAB:          return session.vocabResult !== null;
+      case AppView.DICTATION:      return session.dictationResult !== null;
       case AppView.COMPREHENSION:  return session.comprehensionResult !== null;
       case AppView.FULL_READING:   return session.fullReadingResult !== null;
       case AppView.REPORT:         return false; // destination step, never "completed"
@@ -67,6 +69,10 @@ function getMiniSummary(stepDef: StepDef, session: LearningSession | null): stri
     case AppView.COMPREHENSION: {
       const c = session.comprehensionResult;
       return c ? `${c.understoodCount}/${c.requiredCount} \u984C` : null;
+    }
+    case AppView.DICTATION: {
+      const d = session.dictationResult;
+      return d ? `${d.correctCount}/${d.totalWords} \u5C0D` : null;
     }
     case AppView.FULL_READING: {
       const f = session.fullReadingResult;

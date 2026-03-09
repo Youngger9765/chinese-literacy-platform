@@ -1,17 +1,243 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getClassroomProgress,
   getStudentSessions,
+  getStudentInstructions,
   exportClassroomReport,
+  addStudentTag,
+  removeStudentTag,
+  getStudentLearningCurve,
   StudentProgress,
+  StudentTag,
   StudentSession,
+  LearningCurvePoint,
   TeacherApiError,
 } from '../../services/teacherApi';
+import TeacherInstructionPanel from './TeacherInstructionPanel';
 
 interface StudentProgressTabProps {
   classroomId: number;
 }
+
+// Predefined tags with their default colors
+const PREDEFINED_TAGS: { name: string; color: string }[] = [
+  { name: '需要關注', color: 'red' },
+  { name: '閱讀困難', color: 'orange' },
+  { name: '進步中', color: 'green' },
+  { name: '資優', color: 'blue' },
+];
+
+const TAG_COLOR_CLASSES: Record<string, string> = {
+  red: 'bg-red-100 text-red-700 border-red-200',
+  orange: 'bg-orange-100 text-orange-700 border-orange-200',
+  green: 'bg-green-100 text-green-700 border-green-200',
+  blue: 'bg-blue-100 text-blue-700 border-blue-200',
+  purple: 'bg-purple-100 text-purple-700 border-purple-200',
+  gray: 'bg-gray-100 text-gray-600 border-gray-200',
+};
+
+function tagColorClass(color: string): string {
+  return TAG_COLOR_CLASSES[color] ?? TAG_COLOR_CLASSES['gray'];
+}
+
+interface TagManagerProps {
+  studentId: number;
+  studentName: string;
+  currentTags: StudentTag[];
+  onClose: () => void;
+  onTagsChanged: (studentId: number, tags: StudentTag[]) => void;
+}
+
+const TagManager: React.FC<TagManagerProps> = ({
+  studentId,
+  studentName,
+  currentTags,
+  onClose,
+  onTagsChanged,
+}) => {
+  const { token } = useAuth();
+  const [tags, setTags] = useState<StudentTag[]>(currentTags);
+  const [customInput, setCustomInput] = useState('');
+  const [customColor, setCustomColor] = useState('gray');
+  const [saving, setSaving] = useState<string | null>(null);
+  const [error, setError] = useState('');
+
+  const handleAdd = async (tagName: string, color: string) => {
+    if (!token) return;
+    if (tags.some((t) => t.tag_name === tagName)) return; // already present
+    setSaving(tagName);
+    setError('');
+    try {
+      const newTag = await addStudentTag(token, studentId, tagName, color);
+      const updated = [...tags, newTag];
+      setTags(updated);
+      onTagsChanged(studentId, updated);
+    } catch (err) {
+      if (err instanceof TeacherApiError && err.status === 409) {
+        // tag already exists (race condition), silently ignore
+      } else {
+        setError('新增標籤失敗，請稍後再試');
+      }
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleRemove = async (tagName: string) => {
+    if (!token) return;
+    setSaving(tagName);
+    setError('');
+    try {
+      await removeStudentTag(token, studentId, tagName);
+      const updated = tags.filter((t) => t.tag_name !== tagName);
+      setTags(updated);
+      onTagsChanged(studentId, updated);
+    } catch {
+      setError('移除標籤失敗，請稍後再試');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleAddCustom = async () => {
+    const name = customInput.trim();
+    if (!name) return;
+    if (name.length > 50) {
+      setError('標籤名稱不能超過 50 字元');
+      return;
+    }
+    await handleAdd(name, customColor);
+    setCustomInput('');
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold text-gray-800">
+            管理標籤 — {studentName}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            aria-label="關閉"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Current tags */}
+        {tags.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs text-gray-500 mb-2">目前標籤</p>
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((t) => (
+                <span
+                  key={t.tag_name}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${tagColorClass(t.color)}`}
+                >
+                  {t.tag_name}
+                  <button
+                    onClick={() => handleRemove(t.tag_name)}
+                    disabled={saving === t.tag_name}
+                    className="ml-0.5 hover:opacity-70 disabled:opacity-40 cursor-pointer"
+                    aria-label={`移除 ${t.tag_name}`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Predefined tags */}
+        <div className="mb-4">
+          <p className="text-xs text-gray-500 mb-2">快速新增</p>
+          <div className="flex flex-wrap gap-1.5">
+            {PREDEFINED_TAGS.map((pt) => {
+              const isActive = tags.some((t) => t.tag_name === pt.name);
+              return (
+                <button
+                  key={pt.name}
+                  onClick={() => isActive ? handleRemove(pt.name) : handleAdd(pt.name, pt.color)}
+                  disabled={saving === pt.name}
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-opacity disabled:opacity-50 cursor-pointer ${
+                    isActive
+                      ? tagColorClass(pt.color)
+                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {isActive && (
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.172l7.879-7.879a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                  {pt.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Custom tag input */}
+        <div className="mb-3">
+          <p className="text-xs text-gray-500 mb-2">自訂標籤</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={customInput}
+              onChange={(e) => setCustomInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddCustom()}
+              placeholder="輸入標籤名稱..."
+              maxLength={50}
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+            <select
+              value={customColor}
+              onChange={(e) => setCustomColor(e.target.value)}
+              className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
+            >
+              <option value="gray">灰</option>
+              <option value="red">紅</option>
+              <option value="orange">橙</option>
+              <option value="green">綠</option>
+              <option value="blue">藍</option>
+              <option value="purple">紫</option>
+            </select>
+            <button
+              onClick={handleAddCustom}
+              disabled={!customInput.trim() || saving !== null}
+              className="px-3 py-1.5 text-sm font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              新增
+            </button>
+          </div>
+        </div>
+
+        {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      </div>
+    </div>
+  );
+};
 
 const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) => {
   const { token } = useAuth();
@@ -25,6 +251,18 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [sessions, setSessions] = useState<StudentSession[]>([]);
   const sessionCache = useRef<Record<number, StudentSession[]>>({});
+
+  // Instruction panel state
+  const [instructionTarget, setInstructionTarget] = useState<{ id: number; name: string } | null>(null);
+  const [instructionCounts, setInstructionCounts] = useState<Record<number, number>>({});
+
+  // Tag management state
+  const [tagManagerStudent, setTagManagerStudent] = useState<StudentProgress | null>(null);
+
+  // Learning curve state
+  const [learningCurve, setLearningCurve] = useState<LearningCurvePoint[]>([]);
+  const [isLoadingCurve, setIsLoadingCurve] = useState(false);
+  const curveCache = useRef<Record<number, LearningCurvePoint[]>>({});
 
   const loadProgress = useCallback(async () => {
     if (!token) return;
@@ -55,6 +293,30 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     loadProgress();
   }, [loadProgress]);
 
+
+  // Load instruction counts for each student
+  const loadInstructionCounts = useCallback(async (students: StudentProgress[]) => {
+    if (!token || students.length === 0) return;
+    const counts: Record<number, number> = {};
+    await Promise.all(
+      students.map(async (s) => {
+        try {
+          const instructions = await getStudentInstructions(token, s.student_id);
+          counts[s.student_id] = instructions.length;
+        } catch {
+          counts[s.student_id] = 0;
+        }
+      }),
+    );
+    setInstructionCounts(counts);
+  }, [token]);
+
+  useEffect(() => {
+    if (progress.length > 0) {
+      loadInstructionCounts(progress);
+    }
+  }, [progress, loadInstructionCounts]);
+
   const handleExport = useCallback(async () => {
     if (!token) return;
     try {
@@ -83,26 +345,68 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     }
 
     setExpandedStudentId(studentId);
+    if (!token) return;
 
-    // Use cache if available
+    // Load session history (with cache)
     if (sessionCache.current[studentId]) {
       setSessions(sessionCache.current[studentId]);
-      return;
+    } else {
+      setIsLoadingSessions(true);
+      setSessions([]);
+      try {
+        const data = await getStudentSessions(token, studentId);
+        sessionCache.current[studentId] = data;
+        setSessions(data);
+      } catch {
+        setSessions([]);
+      } finally {
+        setIsLoadingSessions(false);
+      }
     }
 
-    if (!token) return;
-    setIsLoadingSessions(true);
-    setSessions([]);
-    try {
-      const data = await getStudentSessions(token, studentId);
-      sessionCache.current[studentId] = data;
-      setSessions(data);
-    } catch {
-      setSessions([]);
-    } finally {
-      setIsLoadingSessions(false);
+    // Load learning curve (with cache)
+    if (curveCache.current[studentId]) {
+      setLearningCurve(curveCache.current[studentId]);
+    } else {
+      setIsLoadingCurve(true);
+      setLearningCurve([]);
+      try {
+        const curveData = await getStudentLearningCurve(token, studentId);
+        curveCache.current[studentId] = curveData.data;
+        setLearningCurve(curveData.data);
+      } catch {
+        setLearningCurve([]);
+      } finally {
+        setIsLoadingCurve(false);
+      }
     }
   }, [expandedStudentId, token]);
+
+  // Update local tags after tag manager changes
+  const handleTagsChanged = useCallback((studentId: number, tags: StudentTag[]) => {
+    setProgress((prev) =>
+      prev.map((s) => (s.student_id === studentId ? { ...s, tags } : s))
+    );
+    // Update tag manager state so the modal reflects changes immediately
+    setTagManagerStudent((prev) =>
+      prev && prev.student_id === studentId ? { ...prev, tags } : prev
+    );
+  }, []);
+
+  /** Build chart-ready data with rolling average (window=5). */
+  const buildCurveChartData = (points: LearningCurvePoint[]) => {
+    return points.map((pt, idx) => {
+      const windowStart = Math.max(0, idx - 4);
+      const windowSlice = points.slice(windowStart, idx + 1);
+      const rollingAvg = windowSlice.reduce((sum, p) => sum + p.score, 0) / windowSlice.length;
+      return {
+        date: new Date(pt.date).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }),
+        score: pt.score,
+        rollingAvg: Math.round(rollingAvg * 10) / 10,
+        story_title: pt.story_title,
+      };
+    });
+  };
 
   const formatDate = (dateStr: string | null): string => {
     if (!dateStr) return '-';
@@ -180,6 +484,17 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
 
   return (
     <div className="p-5">
+      {/* Tag Manager Modal */}
+      {tagManagerStudent && (
+        <TagManager
+          studentId={tagManagerStudent.student_id}
+          studentName={tagManagerStudent.student_name}
+          currentTags={tagManagerStudent.tags}
+          onClose={() => setTagManagerStudent(null)}
+          onTagsChanged={handleTagsChanged}
+        />
+      )}
+
       <div className="flex justify-end mb-3">
         <button
           onClick={handleExport}
@@ -201,6 +516,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
               <th className="pb-2 font-medium">最近練習日期</th>
               <th className="pb-2 font-medium">最近練習課文</th>
               <th className="pb-2 font-medium text-center">練習次數</th>
+              <th className="pb-2 font-medium text-center w-10">指示</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -222,7 +538,34 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </td>
-                    <td className="py-2.5 text-gray-900 font-medium">{s.student_name}</td>
+                    <td className="py-2.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-gray-900 font-medium">{s.student_name}</span>
+                        {/* Tag badges */}
+                        {s.tags.map((t) => (
+                          <span
+                            key={t.tag_name}
+                            className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium border ${tagColorClass(t.color)}`}
+                          >
+                            {t.tag_name}
+                          </span>
+                        ))}
+                        {/* Tag management button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTagManagerStudent(s);
+                          }}
+                          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs text-gray-400 border border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                          title="管理標籤"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          標籤
+                        </button>
+                      </div>
+                    </td>
                     <td className="py-2.5 text-gray-600">{formatDate(s.last_session_date)}</td>
                     <td className="py-2.5 text-gray-600">{s.last_text_title ?? '-'}</td>
                     <td className="py-2.5 text-gray-600 text-center">
@@ -234,10 +577,76 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                         {s.total_sessions}
                       </span>
                     </td>
+                    <td className="py-2.5 text-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInstructionTarget({ id: s.student_id, name: s.student_name });
+                        }}
+                        className="relative inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-amber-50 transition-colors group"
+                        title="AI 教學指示"
+                      >
+                        <svg className="w-4 h-4 text-gray-400 group-hover:text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        {(instructionCounts[s.student_id] ?? 0) > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-amber-500 rounded-full">
+                            {instructionCounts[s.student_id]}
+                          </span>
+                        )}
+                      </button>
+                    </td>
                   </tr>
                   {isExpanded && (
                     <tr>
-                      <td colSpan={5} className="bg-gray-50 px-4 py-3">
+                      <td colSpan={6} className="bg-gray-50 px-4 py-3 space-y-4">
+                        {/* Learning curve chart */}
+                        {isLoadingCurve ? (
+                          <div className="h-40 bg-gray-200 animate-pulse rounded" />
+                        ) : learningCurve.length >= 2 ? (
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 mb-2">學習曲線</p>
+                            <ResponsiveContainer width="100%" height={180}>
+                              <LineChart data={buildCurveChartData(learningCurve)}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                                <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} width={28} />
+                                <Tooltip
+                                  formatter={(value: number, name: string) => {
+                                    if (name === 'score') return [value, '實際分數'];
+                                    if (name === 'rollingAvg') return [value, '5次均線'];
+                                    return [value, name];
+                                  }}
+                                  labelFormatter={(label) => `日期：${label}`}
+                                />
+                                <Legend
+                                  formatter={(value) =>
+                                    value === 'score' ? '實際分數' : '5次均線'
+                                  }
+                                />
+                                <Line
+                                  type="monotone"
+                                  dataKey="score"
+                                  stroke="#6366f1"
+                                  strokeWidth={2}
+                                  dot={{ r: 3 }}
+                                  connectNulls
+                                />
+                                <Line
+                                  type="monotone"
+                                  dataKey="rollingAvg"
+                                  stroke="#10b981"
+                                  strokeWidth={2}
+                                  dot={false}
+                                  strokeDasharray="5 3"
+                                  connectNulls
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                        ) : null}
+
+                        {/* Session history table */}
                         {isLoadingSessions ? (
                           <div className="space-y-2">
                             {Array.from({ length: 3 }).map((_, i) => (
@@ -282,6 +691,20 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
           </tbody>
         </table>
       </div>
+
+      {/* Teacher Instruction Panel Modal */}
+      {instructionTarget && (
+        <TeacherInstructionPanel
+          studentId={instructionTarget.id}
+          studentName={instructionTarget.name}
+          classroomId={classroomId}
+          onClose={() => {
+            setInstructionTarget(null);
+            // Refresh instruction counts when panel closes
+            loadInstructionCounts(progress);
+          }}
+        />
+      )}
     </div>
   );
 };

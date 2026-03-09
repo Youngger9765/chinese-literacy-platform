@@ -6,6 +6,7 @@ import DiffDisplay from '../ui/DiffDisplay';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 
 /* ------------------------------------------------------------------ */
 
@@ -40,6 +41,9 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
   const zhuyinActive = zhuyinReady && zhuyinEnabled;
   const fullText = useMemo(() => story.content.join(''), [story.content]);
+
+  /* ---- Audio recorder (for student playback review) ---- */
+  const audioRecorder = useAudioRecorder(120);
 
   /* ---- Zhuyin ---- */
   useEffect(() => {
@@ -213,6 +217,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
     accumulatedTranscriptRef.current = '';
     setStreamingTranscript('');
     recognition.start();
+    // Also start audio recording so student can replay
+    audioRecorder.startRecording().catch(() => {
+      // Recording is best-effort; STT continues even if recorder fails
+    });
   };
 
   const stopSession = useCallback(() => {
@@ -222,7 +230,8 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
     currentTranscriptRef.current = '';
     accumulatedTranscriptRef.current = '';
     setStreamingTranscript('');
-  }, []);
+    audioRecorder.stopRecording();
+  }, [audioRecorder]);
 
   /* ---- Submit & evaluate ---- */
   const submitReading = useCallback(() => {
@@ -390,6 +399,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                   <DiffDisplay tokens={result.diffTokens} showLegend />
                 </div>
               )}
+
+              {/* Audio playback — let student re-listen to their reading */}
+              {audioRecorder.audioUrl && (
+                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
+                  <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">重聽錄音</p>
+                  <audio src={audioRecorder.audioUrl} controls className="w-full h-9" aria-label="播放您的朗讀錄音" />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -401,7 +418,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {result ? (
             <div className="space-y-2">
               <button
-                onClick={() => { setResult(null); setStreamingTranscript(''); }}
+                onClick={() => { setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
                 className="w-full py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all active:scale-95"
               >
                 再試一次

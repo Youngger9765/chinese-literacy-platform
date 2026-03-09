@@ -1,0 +1,14 @@
+{
+  "_comment": "Known-safe vulnerability exceptions for security audit CI.",
+  "_instructions": [
+    "npm: add npm advisory IDs (e.g. '1234567') — matches npm audit advisory numbers",
+    "pip: add CVE/GHSA IDs (e.g. 'CVE-2023-12345' or 'GHSA-xxxx-yyyy-zzzz') — matches pip-audit vuln IDs",
+    "Each entry MUST include a justification comment in the _justifications section"
+  ],
+  "npm": [],
+  "pip": [],
+  "_justifications": {
+    "_example_npm_1234567": "esbuild dev-only advisory, not exploitable in production build output",
+    "_example_CVE-2023-99999": "affects feature X which we do not use; vendor patch not yet available"
+  }
+}

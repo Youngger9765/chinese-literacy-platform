@@ -5,16 +5,23 @@ import {
   getAssignmentDetail,
   createAssignment,
   updateAssignment,
+  deleteAssignment,
   AssignmentResponse,
   AssignmentDetailResponse,
+  SubmissionResponse,
   AssignmentApiError,
 } from '../../services/assignmentApi';
 import { fetchStories } from '../../services/api';
 import type { Story } from '../../types';
+import AssignmentDetailPanel from './AssignmentDetailPanel';
+import ReadingGoalsForm, { GoalsFormState } from '../../components/teacher/ReadingGoalsForm';
+import ReadingGoalsBadge from '../../components/ui/ReadingGoalsBadge';
 
 interface AssignmentTabProps {
   classroomId: number;
 }
+
+type StatusFilter = 'all' | 'active' | 'inactive' | 'overdue';
 
 const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const { token } = useAuth();
@@ -24,6 +31,9 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Status filter
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+
   // Create form
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [allStories, setAllStories] = useState<Story[]>([]);
@@ -32,6 +42,11 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formDueDate, setFormDueDate] = useState('');
+  const [formGoals, setFormGoals] = useState<GoalsFormState>({
+    target_cpm: null,
+    target_accuracy: null,
+    difficulty_label: null,
+  });
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
@@ -39,6 +54,10 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [expandedDetail, setExpandedDetail] = useState<AssignmentDetailResponse | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
+  // Delete state
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const loadAssignments = useCallback(async () => {
     if (!token) return;
@@ -82,6 +101,41 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
     return map;
   }, [allStories]);
 
+  // Suppress unused variable warning — storyMap used for future enhancements
+  void storyMap;
+
+  // Filtered assignments based on status tab
+  const filteredAssignments = useMemo(() => {
+    const now = new Date();
+    return assignments.filter((a) => {
+      switch (statusFilter) {
+        case 'active':
+          return a.is_active && (!a.due_date || new Date(a.due_date) >= now);
+        case 'inactive':
+          return !a.is_active;
+        case 'overdue':
+          return a.is_active && a.due_date != null && new Date(a.due_date) < now;
+        default:
+          return true;
+      }
+    });
+  }, [assignments, statusFilter]);
+
+  // Tab counts
+  const tabCounts = useMemo(() => {
+    const now = new Date();
+    return {
+      all: assignments.length,
+      active: assignments.filter(
+        (a) => a.is_active && (!a.due_date || new Date(a.due_date) >= now),
+      ).length,
+      inactive: assignments.filter((a) => !a.is_active).length,
+      overdue: assignments.filter(
+        (a) => a.is_active && a.due_date != null && new Date(a.due_date) < now,
+      ).length,
+    };
+  }, [assignments]);
+
   const handleOpenCreateForm = () => {
     setShowCreateForm(true);
     setCreateError('');
@@ -89,6 +143,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
     setFormTitle('');
     setFormDescription('');
     setFormDueDate('');
+    setFormGoals({ target_cpm: null, target_accuracy: null, difficulty_label: null });
     loadStories();
   };
 
@@ -104,6 +159,9 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
         title: formTitle.trim() || undefined,
         description: formDescription.trim() || undefined,
         due_date: formDueDate || undefined,
+        target_cpm: formGoals.target_cpm,
+        target_accuracy: formGoals.target_accuracy,
+        difficulty_label: formGoals.difficulty_label,
       });
       setShowCreateForm(false);
       await loadAssignments();
@@ -136,6 +194,29 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
     }
   };
 
+  const handleDelete = async (assignment: AssignmentResponse) => {
+    if (!token) return;
+    setDeletingId(assignment.id);
+    setConfirmDeleteId(null);
+    try {
+      await deleteAssignment(token, assignment.id);
+      setAssignments((prev) => prev.filter((a) => a.id !== assignment.id));
+      // If the deleted assignment was expanded, collapse it
+      if (expandedId === assignment.id) {
+        setExpandedId(null);
+        setExpandedDetail(null);
+      }
+    } catch (err) {
+      if (err instanceof AssignmentApiError) {
+        setError(err.message);
+      } else {
+        setError('刪除作業失敗');
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const handleRowClick = useCallback(
     async (assignmentId: number) => {
       if (expandedId === assignmentId) {
@@ -160,6 +241,29 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
     [expandedId, token],
   );
 
+  // Update a single submission in expandedDetail after grading
+  const handleGraded = useCallback((updated: SubmissionResponse) => {
+    setExpandedDetail((prev) => {
+      if (!prev) return prev;
+      const newSubs = prev.submissions.map((s) =>
+        s.id === updated.id ? updated : s,
+      );
+      const completedCount = newSubs.filter((s) =>
+        ['submitted', 'graded'].includes(s.status),
+      ).length;
+      return { ...prev, submissions: newSubs, completed_count: completedCount };
+    });
+    // Also update the summary row in assignments list
+    setAssignments((prev) =>
+      prev.map((a) => {
+        if (a.id !== expandedId) return a;
+        const completedCount = a.completed_count;
+        // If newly graded from submitted, count stays same (already counted)
+        return { ...a, completed_count: completedCount };
+      }),
+    );
+  }, [expandedId]);
+
   const formatDate = (dateStr: string | null): string => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('zh-TW', {
@@ -172,35 +276,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const isOverdue = (dueDateStr: string | null): boolean => {
     if (!dueDateStr) return false;
     return new Date(dueDateStr) < new Date();
-  };
-
-  const submissionStatusBadge = (status: string) => {
-    switch (status) {
-      case 'in_progress':
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
-            進行中
-          </span>
-        );
-      case 'submitted':
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
-            已提交
-          </span>
-        );
-      case 'graded':
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
-            已批改
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">
-            待完成
-          </span>
-        );
-    }
   };
 
   if (isLoading) {
@@ -232,6 +307,13 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
       </div>
     );
   }
+
+  const STATUS_TABS: { key: StatusFilter; label: string }[] = [
+    { key: 'all', label: '全部' },
+    { key: 'active', label: '進行中' },
+    { key: 'overdue', label: '已逾期' },
+    { key: 'inactive', label: '已停用' },
+  ];
 
   return (
     <div>
@@ -283,7 +365,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
           )}
 
           <form onSubmit={handleCreate} className="space-y-3">
-            {/* Story picker */}
             <div>
               <label htmlFor="assign-story" className="block text-sm font-medium text-gray-700 mb-1">
                 課文 <span className="text-red-500">*</span>
@@ -312,7 +393,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
               )}
             </div>
 
-            {/* Title */}
             <div>
               <label htmlFor="assign-title" className="block text-sm font-medium text-gray-700 mb-1">
                 作業標題（選填）
@@ -327,7 +407,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
               />
             </div>
 
-            {/* Description */}
             <div>
               <label htmlFor="assign-desc" className="block text-sm font-medium text-gray-700 mb-1">
                 說明（選填）
@@ -342,7 +421,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
               />
             </div>
 
-            {/* Due date */}
             <div>
               <label htmlFor="assign-due" className="block text-sm font-medium text-gray-700 mb-1">
                 截止日期（選填）
@@ -353,6 +431,19 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                 value={formDueDate}
                 onChange={(e) => setFormDueDate(e.target.value)}
                 className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              />
+            </div>
+
+            {/* Reading goals */}
+            <div className="border-t border-gray-100 pt-3">
+              <ReadingGoalsForm
+                value={formGoals}
+                onChange={setFormGoals}
+                grade={
+                  selectedStoryId
+                    ? storyMap.get(selectedStoryId)?.grade ?? null
+                    : null
+                }
               />
             </div>
 
@@ -377,21 +468,57 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
         </div>
       )}
 
+      {/* Status filter tabs */}
+      {assignments.length > 0 && (
+        <div className="px-5 pt-4 pb-0 flex gap-1 border-b border-gray-100">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key)}
+              className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-colors cursor-pointer border-b-2 -mb-px ${
+                statusFilter === tab.key
+                  ? 'border-accent text-accent bg-accent-bg'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {tab.label}
+              {tabCounts[tab.key] > 0 && (
+                <span
+                  className={`ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-xs ${
+                    statusFilter === tab.key
+                      ? 'bg-accent text-white'
+                      : 'bg-gray-200 text-gray-600'
+                  }`}
+                >
+                  {tabCounts[tab.key]}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Assignment list */}
-      {assignments.length === 0 ? (
+      {filteredAssignments.length === 0 ? (
         <div className="p-8 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-bg rounded-xl mb-3">
-            <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"
-              />
-            </svg>
-          </div>
-          <p className="text-sm font-medium text-gray-700 mb-1">尚未建立作業</p>
-          <p className="text-xs text-gray-500">點選「建立作業」為班級指派學習任務</p>
+          {assignments.length === 0 ? (
+            <>
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-accent-bg rounded-xl mb-3">
+                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"
+                  />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-gray-700 mb-1">尚未建立作業</p>
+              <p className="text-xs text-gray-500">點選「建立作業」為班級指派學習任務</p>
+            </>
+          ) : (
+            <p className="text-sm text-gray-500">此分類下沒有作業</p>
+          )}
         </div>
       ) : (
         <div className="p-5">
@@ -405,22 +532,28 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                   <th className="pb-2 font-medium">截止日期</th>
                   <th className="pb-2 font-medium text-center">完成率</th>
                   <th className="pb-2 font-medium text-center">狀態</th>
+                  <th className="pb-2 font-medium w-16"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {assignments.map((a) => {
+                {filteredAssignments.map((a) => {
                   const isExpanded = expandedId === a.id;
                   const displayTitle = a.title || a.story_title;
-                  const completionRate =
+                  const completionPct =
                     a.submission_count > 0
                       ? Math.round((a.completed_count / a.submission_count) * 100)
                       : 0;
+                  const isConfirmingDelete = confirmDeleteId === a.id;
+                  const isDeleting = deletingId === a.id;
 
                   return (
                     <React.Fragment key={a.id}>
                       <tr
                         className="cursor-pointer hover:bg-gray-50 transition-colors"
-                        onClick={() => handleRowClick(a.id)}
+                        onClick={() => {
+                          if (isConfirmingDelete) return;
+                          handleRowClick(a.id);
+                        }}
                       >
                         <td className="py-2.5 text-gray-400">
                           <svg
@@ -447,9 +580,9 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                         <td className="py-2.5 text-center">
                           <span
                             className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
-                              completionRate === 100
+                              completionPct === 100
                                 ? 'bg-green-100 text-green-700'
-                                : completionRate > 0
+                                : completionPct > 0
                                   ? 'bg-accent-bg text-accent'
                                   : 'bg-gray-100 text-gray-500'
                             }`}
@@ -472,59 +605,59 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                             {a.is_active ? '進行中' : '已停用'}
                           </button>
                         </td>
+                        <td className="py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                          {isConfirmingDelete ? (
+                            <div className="flex items-center gap-1 justify-center">
+                              <button
+                                onClick={() => handleDelete(a)}
+                                disabled={isDeleting}
+                                className="px-1.5 py-0.5 rounded bg-red-500 text-white text-xs font-medium hover:bg-red-600 disabled:opacity-50 cursor-pointer transition-colors"
+                              >
+                                {isDeleting ? '...' : '確認'}
+                              </button>
+                              <button
+                                onClick={() => setConfirmDeleteId(null)}
+                                className="px-1.5 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                              >
+                                取消
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmDeleteId(a.id)}
+                              className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                              title="刪除作業"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
+                        </td>
                       </tr>
 
-                      {/* Expanded detail: submissions */}
+                      {/* Expanded detail: grading panel */}
                       {isExpanded && (
                         <tr>
-                          <td colSpan={6} className="bg-gray-50 px-4 py-3">
-                            {isLoadingDetail ? (
-                              <div className="space-y-2">
-                                {Array.from({ length: 3 }).map((_, i) => (
-                                  <div key={i} className="flex gap-4">
-                                    <div className="h-3 bg-gray-200 animate-pulse rounded w-1/3" />
-                                    <div className="h-3 bg-gray-200 animate-pulse rounded w-1/5" />
-                                    <div className="h-3 bg-gray-200 animate-pulse rounded w-1/6" />
-                                  </div>
-                                ))}
-                              </div>
-                            ) : !expandedDetail ||
-                              expandedDetail.submissions.length === 0 ? (
-                              <p className="text-xs text-gray-500 text-center py-2">
-                                尚無學生提交記錄
-                              </p>
-                            ) : (
-                              <table className="w-full text-xs">
-                                <thead>
-                                  <tr className="text-left text-gray-400">
-                                    <th className="pb-1.5 font-medium">學生姓名</th>
-                                    <th className="pb-1.5 font-medium text-center">狀態</th>
-                                    <th className="pb-1.5 font-medium">提交時間</th>
-                                    <th className="pb-1.5 font-medium text-center">分數</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                  {expandedDetail.submissions.map((sub) => (
-                                    <tr key={sub.id}>
-                                      <td className="py-1.5 text-gray-700">
-                                        {sub.student_name}
-                                      </td>
-                                      <td className="py-1.5 text-center">
-                                        {submissionStatusBadge(sub.status)}
-                                      </td>
-                                      <td className="py-1.5 text-gray-500">
-                                        {formatDate(sub.submitted_at)}
-                                      </td>
-                                      <td className="py-1.5 text-gray-700 text-center font-medium">
-                                        {sub.score != null
-                                          ? `${Math.round(sub.score)}%`
-                                          : '-'}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            )}
+                          <td colSpan={7} className="bg-gray-50 px-4 py-3">
+                            {/* Reading goals preview */}
+                            <div className="mb-3">
+                              <ReadingGoalsBadge
+                                goals={{
+                                  effectiveCpm: a.effective_cpm,
+                                  effectiveAccuracy: a.effective_accuracy,
+                                  difficultyLabel: a.difficulty_label,
+                                  isCustom: a.target_cpm != null || a.target_accuracy != null,
+                                }}
+                                variant="compact"
+                              />
+                            </div>
+                            <AssignmentDetailPanel
+                              assignmentId={a.id}
+                              detail={expandedDetail!}
+                              isLoading={isLoadingDetail}
+                              onGraded={handleGraded}
+                            />
                           </td>
                         </tr>
                       )}

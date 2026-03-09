@@ -6,8 +6,11 @@ import { diffCharacters, normalizeForComparison, cleanChineseText } from '../../
 import DiffDisplay from '../ui/DiffDisplay';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
+import FontSizeControl, { useFontSize } from '../ui/FontSizeControl';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
+import RecordingButton from '../recording/RecordingButton';
+import ParagraphProgress, { ParagraphStatus } from './ParagraphProgress';
 
 /* ------------------------------------------------------------------ */
 /*  Canned response pools — randomly selected to avoid repetition     */
@@ -121,6 +124,10 @@ interface LiveTutorProps {
   onPanelWidthChange: (w: number) => void;
   onFinish: (attempt: ReadingAttempt) => void;
   onCancel: () => void;
+  /** Called each time a paragraph is completed (unlocked). Receives the index of the completed paragraph. */
+  onParagraphComplete?: (completedParagraphIndex: number) => void;
+  /** Initial set of completed paragraph indices (for session resume). */
+  initialCompletedParagraphs?: Set<number>;
 }
 
 const LiveTutor: React.FC<LiveTutorProps> = ({
@@ -129,8 +136,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   onPanelWidthChange,
   onFinish,
   onCancel,
+  onParagraphComplete,
+  initialCompletedParagraphs,
 }) => {
   const isMobile = useIsMobile();
+  const { px: fontSizePx } = useFontSize();
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isPreparing, setIsPreparing] = useState(false);          // STT initializing
   const [isSessionActive, setIsSessionActive] = useState(false);  // mic actively recording
@@ -145,6 +155,14 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
   const [isTtsPaused, setIsTtsPaused] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
+  const [showRecorder, setShowRecorder] = useState(false);
+
+  // Progressive unlock state — track which paragraphs have been passed (>= READING_PASS)
+  const [completedParagraphs, setCompletedParagraphs] = useState<Set<number>>(
+    initialCompletedParagraphs ?? new Set<number>()
+  );
+  // Celebration animation: shows briefly when a new paragraph is unlocked
+  const [celebratingIndex, setCelebratingIndex] = useState<number | null>(null);
 
   const isAdvancingRef = useRef(false);
   const isDraggingRef = useRef(false);
@@ -213,20 +231,26 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     }
   }, [story.content, zhuyinActive]);
 
-  /** Compute completed/current/locked status for each paragraph */
-  const lineStatuses = useMemo(() => {
-    const bestByLine = new Map<number, number>();
-    for (const r of lineResults) {
-      const prev = bestByLine.get(r.lineIndex) ?? 0;
-      if (r.matchRate > prev) bestByLine.set(r.lineIndex, r.matchRate);
-    }
+  /** Compute completed/current/locked status for each paragraph.
+   *  A paragraph is 'completed' only if it passed the READING_PASS threshold.
+   *  Paragraphs beyond the current unlocked index are 'locked'. */
+  const lineStatuses = useMemo<ParagraphStatus[]>(() => {
     return story.content.map((_, idx) => {
+      if (completedParagraphs.has(idx)) return 'completed';
       if (idx === currentLineIndex) return 'current';
-      if (idx < currentLineIndex) return 'completed';
-      if (bestByLine.has(idx) && (bestByLine.get(idx)! >= READING_PASS)) return 'completed';
       return 'locked';
     });
-  }, [story.content, lineResults, currentLineIndex]);
+  }, [story.content, completedParagraphs, currentLineIndex]);
+
+  /** Highest paragraph index that is unlocked (either completed or currently active). */
+  const maxUnlockedIndex = useMemo(() => {
+    // All completed paragraphs + current one
+    let max = currentLineIndex;
+    for (const idx of completedParagraphs) {
+      if (idx > max) max = idx;
+    }
+    return max;
+  }, [completedParagraphs, currentLineIndex]);
 
   /* ---- resizable right panel ---- */
   useEffect(() => {
@@ -365,13 +389,35 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       isAdvancingRef.current = true;
       setIsAdvancing(true);
       stopSession(); // stop mic so student sees [系統朗讀][開始朗讀] for the next paragraph
+
+      // Mark this paragraph as completed and notify parent
+      const nextIdx = lineIdx + 1;
+      setCompletedParagraphs(prev => {
+        const updated = new Set(prev);
+        updated.add(lineIdx);
+        return updated;
+      });
+      onParagraphComplete?.(lineIdx);
+
+      // Celebration animation for unlocking next paragraph
+      setCelebratingIndex(nextIdx);
+      setTimeout(() => setCelebratingIndex(null), 2000);
+
       setTimeout(() => {
-        setCurrentLineIndex(prev => prev + 1);
+        setCurrentLineIndex(nextIdx);
         isAdvancingRef.current = false;
         setIsAdvancing(false);
       }, 1500);
     } else if (shouldFinish) {
       stopSession();
+      // Mark final paragraph as completed
+      setCompletedParagraphs(prev => {
+        const updated = new Set(prev);
+        updated.add(lineIdx);
+        return updated;
+      });
+      onParagraphComplete?.(lineIdx);
+
       setTimeout(() => {
         const allResults = [...lineResults, result];
         const avgMatchRate = allResults.reduce((s, r) => s + r.matchRate, 0) / allResults.length;
@@ -639,74 +685,91 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             {processZhuyin(story.filename)}
           </div>
           <div className="flex-1" />
+          <FontSizeControl />
           <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
         </div>
 
         {/* Paragraph progress bar */}
-        <div className="px-6 py-2 bg-white border-b border-gray-100">
-          <div className="flex items-center gap-3 max-w-3xl mx-auto">
-            <span className="text-xs text-gray-400 shrink-0 font-medium">進度</span>
-            <div className="flex flex-1 gap-1 h-2">
-              {story.content.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`flex-1 rounded-full transition-all duration-500 ${
-                    lineStatuses[idx] === 'completed'
-                      ? 'bg-emerald-500'
-                      : lineStatuses[idx] === 'current'
-                      ? 'bg-accent'
-                      : 'bg-gray-200'
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-xs text-gray-400 shrink-0 tabular-nums">
-              {currentLineIndex + 1} / {story.content.length}
-            </span>
-          </div>
-        </div>
+        <ParagraphProgress
+          statuses={lineStatuses}
+          currentIndex={currentLineIndex}
+          onSelectParagraph={(idx) => {
+            // Only allow navigating to completed or current paragraphs (not locked)
+            if (lineStatuses[idx] === 'locked') return;
+            stopSession();
+            setCurrentLineIndex(idx);
+          }}
+        />
 
         <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8 lg:p-16'} overflow-y-auto custom-scrollbar`}>
           <div className="max-w-3xl mx-auto space-y-20">
-            {story.content.map((line, idx) => (
-              <div
-                key={idx}
-                ref={idx === currentLineIndex ? activeLineRef : null}
-                className={`transition-all duration-700 rounded-2xl px-8 py-12 border ${
-                  idx === currentLineIndex
-                    ? 'bg-accent/5 border-accent/40 shadow-[0_0_40px_rgba(99,102,241,0.1)] scale-[1.03]'
-                    : lineStatuses[idx] === 'completed'
-                      ? 'opacity-60 bg-emerald-50/50 border-emerald-200/50'
-                      : 'opacity-30 border-transparent'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  {lineStatuses[idx] === 'completed' && (
-                    <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </span>
-                  )}
-                  {lineStatuses[idx] === 'current' && (
-                    <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center shrink-0">
-                      <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                    </span>
-                  )}
-                  {lineStatuses[idx] === 'locked' && (
-                    <span className="w-5 h-5 rounded-full border-2 border-gray-300 shrink-0" />
-                  )}
-                  <span className="text-xs text-gray-400 font-bold">第 {idx + 1} 段</span>
-                </div>
-                <p
-                  className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
-                    idx === currentLineIndex ? 'text-gray-900 font-bold' : 'text-gray-600'
+            {story.content.map((line, idx) => {
+              const isCelebrating = celebratingIndex === idx;
+              const status = lineStatuses[idx];
+              return (
+                <div
+                  key={idx}
+                  ref={idx === currentLineIndex ? activeLineRef : null}
+                  className={`transition-all duration-700 rounded-2xl px-8 py-12 border ${
+                    isCelebrating
+                      ? 'bg-emerald-50 border-emerald-400 shadow-[0_0_40px_rgba(16,185,129,0.25)] scale-[1.04]'
+                      : status === 'current'
+                        ? 'bg-accent/5 border-accent/40 shadow-[0_0_40px_rgba(99,102,241,0.1)] scale-[1.03]'
+                        : status === 'completed'
+                          ? 'opacity-60 bg-emerald-50/50 border-emerald-200/50'
+                          : 'opacity-20 border-transparent'
                   }`}
                 >
-                  {zhuyinLines ? zhuyinLines[idx] : line}
-                </p>
-              </div>
-            ))}
+                  <div className="flex items-center gap-2 mb-2">
+                    {/* Status indicator */}
+                    {status === 'completed' && (
+                      <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                    )}
+                    {status === 'current' && (
+                      <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center shrink-0">
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                      </span>
+                    )}
+                    {status === 'locked' && (
+                      /* Lock icon for locked paragraphs */
+                      <span className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0">
+                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-400 font-bold">第 {idx + 1} 段</span>
+                    {/* Celebration label */}
+                    {isCelebrating && (
+                      <span className="ml-auto text-xs font-bold text-emerald-600 animate-bounce">
+                        解鎖了！
+                      </span>
+                    )}
+                    {/* Locked hint */}
+                    {status === 'locked' && (
+                      <span className="ml-auto text-[10px] text-gray-400">完成前一段後解鎖</span>
+                    )}
+                  </div>
+                  <p
+                    className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
+                      status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
+                    }`}
+                    style={{ fontSize: fontSizePx }}
+                  >
+                    {/* Show blurred text for locked paragraphs */}
+                    {status === 'locked' ? (
+                      <span className="blur-sm select-none">{zhuyinLines ? zhuyinLines[idx] : line}</span>
+                    ) : (
+                      zhuyinLines ? zhuyinLines[idx] : line
+                    )}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -924,11 +987,42 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             )}
           </div>
 
+          {/* Optional recording for student self-review */}
+          <div className="border-t border-gray-100 pt-2">
+            <button
+              onClick={() => setShowRecorder(prev => !prev)}
+              className="w-full flex items-center justify-between px-2 py-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              aria-expanded={showRecorder}
+            >
+              <span className="flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.938V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-1.062A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z" />
+                </svg>
+                錄音重聽（選用）
+              </span>
+              <svg
+                className={`w-3.5 h-3.5 transition-transform ${showRecorder ? 'rotate-180' : ''}`}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showRecorder && (
+              <div className="pt-2 pb-1">
+                <RecordingButton maxDurationSeconds={60} label="錄下這段朗讀，完成後可重聽" />
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-2">
+            {/* 上一段 — only navigate back to completed or current paragraphs */}
             <button
               onClick={() => {
-                stopSession();
-                setCurrentLineIndex(prev => Math.max(0, prev - 1));
+                const prevIdx = currentLineIndex - 1;
+                if (prevIdx >= 0 && (lineStatuses[prevIdx] === 'completed' || lineStatuses[prevIdx] === 'current')) {
+                  stopSession();
+                  setCurrentLineIndex(prevIdx);
+                }
               }}
               disabled={currentLineIndex === 0}
               className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${
@@ -941,19 +1035,52 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             >
               {processZhuyin('上一段')}
             </button>
-            <button
-              onClick={() => {
-                if (currentLineIndex < story.content.length - 1) {
-                  stopSession();
-                  setCurrentLineIndex(prev => prev + 1);
-                } else {
-                  handleFinish();
-                }
-              }}
-              className={`flex-1 py-3 bg-gray-300 hover:bg-gray-200 text-gray-600 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}
-            >
-              {processZhuyin(currentLineIndex === story.content.length - 1 ? '觀看總結報告' : '下一段')}
-            </button>
+
+            {/* 下一段 / 觀看總結報告 — gated by paragraph completion */}
+            {(() => {
+              const isLastLine = currentLineIndex === story.content.length - 1;
+              const allDone = completedParagraphs.size === story.content.length;
+              const nextUnlocked = !isLastLine && maxUnlockedIndex > currentLineIndex;
+
+              if (isLastLine) {
+                // Last paragraph: only show finish button when all paragraphs are done
+                return (
+                  <button
+                    onClick={handleFinish}
+                    disabled={!allDone}
+                    title={!allDone ? '完成所有段落後才能查看報告' : undefined}
+                    className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
+                      allDone
+                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                        : 'bg-gray-300 text-gray-300 cursor-not-allowed'
+                    }`}
+                  >
+                    {processZhuyin('觀看總結報告')}
+                  </button>
+                );
+              }
+
+              // Non-last paragraph: next paragraph is unlocked only if current is completed
+              return (
+                <button
+                  onClick={() => {
+                    if (nextUnlocked) {
+                      stopSession();
+                      setCurrentLineIndex(prev => prev + 1);
+                    }
+                  }}
+                  disabled={!nextUnlocked}
+                  title={!nextUnlocked ? '請先完成此段朗讀（正確率需達 60%）' : undefined}
+                  className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
+                    nextUnlocked
+                      ? 'bg-gray-300 hover:bg-gray-200 text-gray-600'
+                      : 'bg-gray-300 text-gray-300 cursor-not-allowed'
+                  }`}
+                >
+                  {processZhuyin('下一段')}
+                </button>
+              );
+            })()}
           </div>
 
           {isSessionActive && (

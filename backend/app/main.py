@@ -21,6 +21,11 @@ from .middleware.tenant import TenantMiddleware
 from .routes.feedback import router as feedback_router
 from .routes.jobs import router as jobs_router
 from .routes.privacy import router as privacy_router
+from .routes.cleanup import router as cleanup_router
+from .routes.dictionary import router as dictionary_router
+from .routes.parents import router as parents_router
+from .routes.gamification import router as gamification_router
+from .routes.health import router as health_router
 from .utils.logging_config import setup_logging
 
 # Initialise structured logging before anything else
@@ -52,6 +57,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "font-src 'self' https://fonts.gstatic.com; "
         "img-src 'self' data: https:; "
         "connect-src 'self' "
+        "https://*.run.app "
         "https://*.googleapis.com "
         "https://*.firebaseapp.com "
         "https://*.cloudfunctions.net "
@@ -211,6 +217,11 @@ app.include_router(admin_stories_router, prefix="/api", tags=["admin-stories"])
 app.include_router(feedback_router, prefix="/api", tags=["feedback"])
 app.include_router(jobs_router, prefix="/api", tags=["admin-jobs"])
 app.include_router(privacy_router, prefix="/api", tags=["privacy"])
+app.include_router(cleanup_router, prefix="/api", tags=["admin-cleanup"])
+app.include_router(dictionary_router, prefix="/api", tags=["dictionary"])
+app.include_router(parents_router, prefix="/api", tags=["parents"])
+app.include_router(gamification_router, prefix="/api", tags=["gamification"])
+app.include_router(health_router)
 
 
 def seed_default_data():

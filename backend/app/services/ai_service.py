@@ -17,6 +17,7 @@ from google import genai
 from google.genai import types as genai_types
 
 from ..config import settings
+from .input_sanitizer import sanitize_ai_input
 from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
@@ -159,10 +160,14 @@ async def generate_socratic_question(
 
     for turn in conversation:
         role = "model" if turn["role"] == "ai" else "user"
+        # Sanitize student inputs to prevent prompt injection (Issue #270)
+        text = turn["text"]
+        if turn["role"] == "student":
+            text, _ = sanitize_ai_input(text)
         contents.append(
             genai_types.Content(
                 role=role,
-                parts=[genai_types.Part(text=turn["text"])],
+                parts=[genai_types.Part(text=text)],
             )
         )
 
@@ -188,6 +193,218 @@ async def generate_socratic_question(
     return response.text.strip()
 
 
+async def generate_reading_analysis(session_data: dict) -> dict:
+    """Generate personalised reading diagnosis and improvement suggestions.
+
+    Uses Gemini to analyse student reading performance and return
+    structured feedback including strengths, areas for improvement,
+    practice suggestions, and encouragement.
+
+    Args:
+        session_data: Dict with keys: story_title, accuracy, cpm,
+                      error_chars (list[str]), total_characters.
+
+    Returns:
+        Dict with keys: analysis_summary, strengths, areas_for_improvement,
+                        practice_suggestions, encouragement_message.
+    """
+    story_title = session_data.get("story_title", "未知課文")
+    accuracy = session_data.get("accuracy", 0)
+    cpm = session_data.get("cpm", 0)
+    error_chars = session_data.get("error_chars", [])
+    total_characters = session_data.get("total_characters", 0)
+
+    error_chars_str = "、".join(error_chars) if error_chars else "無"
+
+    system_prompt = (
+        f"{TUTOR_PERSONA}\n\n"
+        "你同時也是一位國小國語文教學專家。請根據以下學生朗讀數據，"
+        "提供詳細的診斷分析和改善建議。\n\n"
+        "回覆規則：\n"
+        "- 必須使用臺灣繁體中文（zh-TW），嚴禁大陸用語\n"
+        "- 語氣溫暖、鼓勵，適合國小高年級至國中生\n"
+        "- 分析要具體，根據數據給出針對性建議\n"
+        "- 每項建議都要可執行"
+    )
+
+    user_prompt = (
+        f"學生朗讀資料：\n"
+        f"- 課文：{story_title}\n"
+        f"- 正確率：{accuracy}%\n"
+        f"- 朗讀速度：{cpm} 字/分鐘\n"
+        f"- 錯誤字：{error_chars_str}\n"
+        f"- 總字數：{total_characters}\n\n"
+        "請根據以上資料進行分析。"
+    )
+
+    response_schema = {
+        "type": "OBJECT",
+        "properties": {
+            "analysis_summary": {
+                "type": "STRING",
+                "description": "整體分析摘要（2-3句話）",
+            },
+            "strengths": {
+                "type": "ARRAY",
+                "items": {"type": "STRING"},
+                "description": "學生的優點（1-3項）",
+            },
+            "areas_for_improvement": {
+                "type": "ARRAY",
+                "items": {"type": "STRING"},
+                "description": "待改善的地方（1-3項）",
+            },
+            "practice_suggestions": {
+                "type": "ARRAY",
+                "items": {"type": "STRING"},
+                "description": "具體練習建議（2-4項）",
+            },
+            "encouragement_message": {
+                "type": "STRING",
+                "description": "鼓勵語（1句話）",
+            },
+        },
+        "required": [
+            "analysis_summary",
+            "strengths",
+            "areas_for_improvement",
+            "practice_suggestions",
+            "encouragement_message",
+        ],
+    }
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text=user_prompt)],
+        )
+    ]
+
+    return await generate_structured_response(
+        system_prompt=system_prompt,
+        contents=contents,
+        response_schema=response_schema,
+        max_tokens=2048,
+        temperature=0.7,
+    )
+
+
+COMPREHENSION_SCORE_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "comprehension_score": {
+            "type": "NUMBER",
+            "description": "Overall comprehension score 0-100",
+        },
+        "literal_score": {
+            "type": "NUMBER",
+            "description": "字面理解 score 0-100",
+        },
+        "inferential_score": {
+            "type": "NUMBER",
+            "description": "推論理解 score 0-100",
+        },
+        "evaluative_score": {
+            "type": "NUMBER",
+            "description": "評鑑理解 score 0-100",
+        },
+        "feedback": {
+            "type": "OBJECT",
+            "properties": {
+                "literal": {
+                    "type": "STRING",
+                    "description": "字面理解評語 (Traditional Chinese)",
+                },
+                "inferential": {
+                    "type": "STRING",
+                    "description": "推論理解評語 (Traditional Chinese)",
+                },
+                "evaluative": {
+                    "type": "STRING",
+                    "description": "評鑑理解評語 (Traditional Chinese)",
+                },
+                "overall": {
+                    "type": "STRING",
+                    "description": "整體評語 (Traditional Chinese)",
+                },
+            },
+            "required": ["literal", "inferential", "evaluative", "overall"],
+        },
+    },
+    "required": [
+        "comprehension_score",
+        "literal_score",
+        "inferential_score",
+        "evaluative_score",
+        "feedback",
+    ],
+}
+
+
+async def evaluate_comprehension(
+    dialogue_turns: list[dict],
+    story_context: dict,
+) -> dict:
+    """Evaluate student comprehension across 3 levels based on Socratic dialogue.
+
+    Args:
+        dialogue_turns: List of {"role": "ai"|"student", "text": str} dicts.
+        story_context: {"title": str, "summary": str} with story metadata.
+
+    Returns:
+        Dict with comprehension_score, literal_score, inferential_score,
+        evaluative_score, and feedback dict.
+    """
+    formatted_dialogue = "\n".join(
+        f"{'AI老師' if t['role'] == 'ai' else '學生'}: {t['text']}"
+        for t in dialogue_turns
+    )
+
+    system_prompt = f"""{TUTOR_PERSONA}
+你是國語文理解力評量專家。請根據以下蘇格拉底對話記錄，評估學生的三層次理解力。
+
+課文：{story_context['title']}
+課文內容摘要：{story_context['summary']}
+
+對話記錄：
+{formatted_dialogue}
+
+評分標準（0-100）：
+- literal_score（字面理解）：學生能否正確回答課文中明確提到的事實、人物、地點、事件？
+- inferential_score（推論理解）：學生能否推測因果關係、角色動機、或隱含的意義？
+- evaluative_score（評鑑理解）：學生能否連結自身經驗、提出觀點、或評論課文主題？
+
+評分規則：
+- 如果對話中沒有涉及某個層次的問題，給予 50 分（中間值）
+- 學生回答正確且詳細 → 80-100 分
+- 學生回答正確但簡略 → 60-79 分
+- 學生回答部分正確 → 40-59 分
+- 學生回答錯誤或敷衍 → 0-39 分
+- comprehension_score 是三個分數的加權平均（字面 30% + 推論 40% + 評鑑 30%）
+- 必須使用臺灣繁體中文（zh-TW）撰寫評語"""
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text="請根據以上對話記錄評估學生的理解力。")],
+        )
+    ]
+
+    result = await generate_structured_response(
+        system_prompt=system_prompt,
+        contents=contents,
+        response_schema=COMPREHENSION_SCORE_SCHEMA,
+        max_tokens=2048,
+        temperature=0.3,
+    )
+
+    # Clamp scores to 0-100 range
+    for key in ("comprehension_score", "literal_score", "inferential_score", "evaluative_score"):
+        val = result.get(key, 50)
+        result[key] = max(0, min(100, float(val)))
+
+    return result
+
 async def generate_exit_ticket(text: str) -> list[dict]:
     """
     Generate exit-ticket questions for a story text.
@@ -211,3 +428,138 @@ async def grade_exit_ticket(question: str, student_answer: str, reference_text: 
     """
     # TODO: implement with Gemini API (Step 6)
     return {"score": 0, "feedback": "批改功能尚未實作"}
+
+
+# ── Sentence Practice (Issue #109) ──────────────────────────────────────────
+
+EXAMPLE_SENTENCES_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "sentences": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "sentence": {"type": "string"},
+                    "explanation": {"type": "string"},
+                },
+                "required": ["sentence", "explanation"],
+            },
+            "minItems": 2,
+            "maxItems": 2,
+        }
+    },
+    "required": ["sentences"],
+}
+
+SENTENCE_VALIDATION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "is_correct": {"type": "boolean"},
+        "feedback": {"type": "string"},
+        "suggestion": {"type": "string"},
+    },
+    "required": ["is_correct", "feedback", "suggestion"],
+}
+
+
+async def generate_example_sentences(character: str, story_title: str) -> dict:
+    """Generate 2 example sentences for a Chinese character.
+
+    Returns {"sentences": [{"sentence": str, "explanation": str}, ...]}
+    Each sentence uses the target character in a contextually appropriate way
+    suited for elementary/middle school students.
+    """
+    safe_char = sanitize_ai_input(character)
+    safe_title = sanitize_ai_input(story_title)
+
+    system_prompt = f"""{TUTOR_PERSONA}
+
+你是一位專業的國語文教師，請為學生示範如何使用生字造句。
+
+目標生字：「{safe_char}」
+課文名稱：《{safe_title}》
+
+請造 2 個包含目標生字的例句，要求：
+1. 符合國小高年級～國中的語文程度
+2. 句子自然流暢，生動有趣
+3. 幫助學生理解這個字的用法
+4. 用繁體中文（zh-TW）
+
+請以 JSON 格式輸出，包含 sentences 陣列，每個元素有：
+- sentence（例句）
+- explanation（簡短說明這個字在句中的意思）"""
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text=f"請為生字「{safe_char}」造兩個例句。")],
+        )
+    ]
+
+    result = await generate_structured_response(
+        system_prompt=system_prompt,
+        contents=contents,
+        response_schema=EXAMPLE_SENTENCES_SCHEMA,
+        max_tokens=512,
+        temperature=0.8,
+    )
+    return result
+
+
+async def validate_student_sentence(
+    character: str,
+    student_sentence: str,
+    story_title: str,
+) -> dict:
+    """Validate a student's sentence for a given character.
+
+    Returns {"is_correct": bool, "feedback": str, "suggestion": str}
+    - is_correct: True if grammatically correct and uses the character appropriately
+    - feedback: encouraging feedback message (in Chinese)
+    - suggestion: improvement hint if not correct (empty string if correct)
+    """
+    safe_char = sanitize_ai_input(character)
+    safe_sentence = sanitize_ai_input(student_sentence)
+    safe_title = sanitize_ai_input(story_title)
+
+    system_prompt = f"""{TUTOR_PERSONA}
+
+你是一位親切的國語文老師，正在批改學生的造句練習。
+
+目標生字：「{safe_char}」
+課文：《{safe_title}》
+
+評估標準：
+1. 句子是否包含目標生字「{safe_char}」
+2. 句子是否語法正確、語意通順
+3. 目標生字的用法是否恰當
+4. 適合國小高年級～國中程度
+
+請給予鼓勵性的評語，用繁體中文（zh-TW）回覆。
+- 若造句正確：is_correct=true，給予鼓勵
+- 若有問題：is_correct=false，指出問題並提供改進建議
+
+注意：只要學生的句子基本語法正確、有使用目標生字，就算通過。
+不要過度嚴格，給予適度的鼓勵。"""
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text=f"學生的造句：「{safe_sentence}」\n請評估這個造句是否正確。")],
+        )
+    ]
+
+    result = await generate_structured_response(
+        system_prompt=system_prompt,
+        contents=contents,
+        response_schema=SENTENCE_VALIDATION_SCHEMA,
+        max_tokens=256,
+        temperature=0.3,
+    )
+
+    # Ensure suggestion is empty string if correct
+    if result.get("is_correct") and not result.get("suggestion"):
+        result["suggestion"] = ""
+
+    return result

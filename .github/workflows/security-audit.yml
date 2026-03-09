@@ -1,0 +1,170 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+  schedule:
+    # Weekly scan every Monday 09:00 UTC (17:00 Taiwan time)
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  npm-audit:
+    name: Frontend npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Load allowlist
+        id: allowlist
+        run: |
+          if [ -f .security-audit-allowlist.json ]; then
+            NPM_IGNORE=$(jq -r '.npm // [] | map("--ignore=" + .) | join(" ")' .security-audit-allowlist.json)
+            echo "npm_ignore=$NPM_IGNORE" >> "$GITHUB_OUTPUT"
+          else
+            echo "npm_ignore=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run npm audit (high/critical only)
+        working-directory: frontend
+        run: |
+          echo "## npm audit results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Run audit and capture exit code
+          IGNORE_FLAGS="${{ steps.allowlist.outputs.npm_ignore }}"
+
+          if npm audit --audit-level=high --json $IGNORE_FLAGS > /tmp/npm-audit.json 2>&1; then
+            echo "**Status**: No high/critical vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+            echo "npm audit passed — no high/critical vulnerabilities"
+          else
+            EXIT_CODE=$?
+            # Parse and display summary
+            CRITICAL=$(jq -r '.metadata.vulnerabilities.critical // 0' /tmp/npm-audit.json)
+            HIGH=$(jq -r '.metadata.vulnerabilities.high // 0' /tmp/npm-audit.json)
+            MODERATE=$(jq -r '.metadata.vulnerabilities.moderate // 0' /tmp/npm-audit.json)
+
+            echo "**Status**: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| High     | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| Moderate | $MODERATE (not blocking) |" >> $GITHUB_STEP_SUMMARY
+
+            echo "npm audit FAILED: Critical=$CRITICAL, High=$HIGH"
+            echo "Run 'npm audit' locally and fix or add to allowlist if known-safe"
+            exit $EXIT_CODE
+          fi
+
+      - name: Upload npm audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: /tmp/npm-audit.json
+          retention-days: 30
+
+  pip-audit:
+    name: Backend pip-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Load allowlist
+        id: allowlist
+        run: |
+          if [ -f .security-audit-allowlist.json ]; then
+            # Build --ignore-vuln flags from allowlist
+            IGNORE_FLAGS=$(jq -r '.pip // [] | map("--ignore-vuln " + .) | join(" ")' .security-audit-allowlist.json)
+            echo "pip_ignore=$IGNORE_FLAGS" >> "$GITHUB_OUTPUT"
+          else
+            echo "pip_ignore=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run pip-audit
+        run: |
+          echo "## pip-audit results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          IGNORE_FLAGS="${{ steps.allowlist.outputs.pip_ignore }}"
+
+          # Run pip-audit against requirements.txt only (no installed packages scope creep)
+          if pip-audit \
+            --requirement backend/requirements.txt \
+            --format json \
+            --output /tmp/pip-audit.json \
+            $IGNORE_FLAGS; then
+            echo "**Status**: No vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+            echo "pip-audit passed — no vulnerabilities found"
+          else
+            EXIT_CODE=$?
+            # Show vulnerability count
+            VULN_COUNT=$(jq '[.[] | .vulns | length] | add // 0' /tmp/pip-audit.json 2>/dev/null || echo "unknown")
+            echo "**Status**: FAILED — $VULN_COUNT vulnerable packages" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # List vulnerable packages
+            jq -r '.[] | select(.vulns | length > 0) | "- **\(.name)** \(.version): " + (.vulns | map(.id) | join(", "))' /tmp/pip-audit.json 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+            echo "pip-audit FAILED: $VULN_COUNT vulnerabilities found"
+            echo "Run 'pip-audit -r backend/requirements.txt' locally and fix or add CVE IDs to allowlist"
+            exit $EXIT_CODE
+          fi
+
+      - name: Upload pip-audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: /tmp/pip-audit.json
+          retention-days: 30
+
+  audit-summary:
+    name: Audit summary
+    needs: [npm-audit, pip-audit]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check audit results
+        run: |
+          NPM_STATUS="${{ needs.npm-audit.result }}"
+          PIP_STATUS="${{ needs.pip-audit.result }}"
+
+          echo "npm-audit: $NPM_STATUS"
+          echo "pip-audit: $PIP_STATUS"
+
+          if [ "$NPM_STATUS" = "failure" ] || [ "$PIP_STATUS" = "failure" ]; then
+            echo ""
+            echo "Security audit FAILED. Fix vulnerabilities or add known-safe CVEs to .security-audit-allowlist.json"
+            exit 1
+          fi
+
+          echo "All security audits passed."

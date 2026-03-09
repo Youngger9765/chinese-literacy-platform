@@ -33,6 +33,8 @@ class User(Base):
     password_reset_expires: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # Email verification token (placeholder for future email integration)
     email_verification_token: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Google OAuth — nullable so existing email/password users are unaffected
+    google_id: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True, index=True)
     terms_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     terms_version: Mapped[str | None] = mapped_column(String(20), nullable=True)
     privacy_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

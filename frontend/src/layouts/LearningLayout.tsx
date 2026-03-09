@@ -6,9 +6,12 @@ import {
   LearningSession,
   ComprehensionResult,
   VocabResult,
+  DictationResult,
   FullReadingResult,
 } from '../types';
-import { fetchStory } from '../services/api';
+import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
+import { submitAssignment } from '../services/assignmentApi';
+import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
@@ -31,20 +34,44 @@ export interface LearningContext {
   handleFinishReading: (attempt: ReadingAttempt) => void;
   handleFinishComprehension: (result: ComprehensionResult) => void;
   handleFinishVocab: (result: VocabResult) => void;
+  handleFinishDictation: (result: DictationResult) => void;
   handleFinishFullReading: (result: FullReadingResult) => void;
   handleRetry: () => void;
+  handleSessionComplete: () => void;
   emptyAttempt: ReadingAttempt;
+  /** DB LearningSession integer ID — set after the session is created in the DB (Issue #242) */
+  dbSessionId: number | null;
+  /** Set of paragraph indices completed during LiveTutor (progressive unlock, Issue #85). */
+  completedParagraphsSet: Set<number>;
+  /** Notify layout that a paragraph was completed (Issue #85). */
+  handleParagraphComplete: (paragraphIndex: number) => void;
 }
+
+/**
+ * Map from step name in URL path to numeric step index (1-based, matching DB).
+ */
+const STEP_PATH_TO_NUMBER: Record<string, number> = {
+  intro: 1,
+  tutor: 2,
+  comprehension: 3,
+  vocab: 4,
+  dictation: 5,
+  'full-reading': 6,
+  report: 7,
+};
 
 /**
  * Wraps the learning flow routes (/learn/:storyId/*).
  * Manages shared state: selectedStory, session, lastAttempt, rightPanelWidth.
  * Children access this state via useOutletContext<LearningContext>().
  */
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+
 const LearningLayout: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
   const navigate = useNavigate();
   const learningNav = useLearningNav();
+  const { user, token } = useAuth();
 
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [session, setSession] = useState<LearningSession | null>(null);
@@ -52,6 +79,30 @@ const LearningLayout: React.FC = () => {
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /** DB LearningSession integer ID — created when the user starts the intro (Issue #242) */
+  const [dbSessionId, setDbSessionId] = useState<number | null>(null);
+  /** Progressive paragraph unlock tracking (Issue #85). */
+  const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(new Set());
+
+  /** Persist current step to localStorage for session resume. */
+  const persistStep = useCallback(
+    (step: number) => {
+      if (!user || !storyId) return;
+      saveActiveSession(String(user.id), {
+        sessionId: 0, // no DB session ID in the current flow
+        storyId,
+        currentStep: step,
+        timestamp: Date.now(),
+      });
+    },
+    [user, storyId],
+  );
+
+  /** Clear active session from localStorage (called on completion). */
+  const clearPersistedSession = useCallback(() => {
+    if (!user) return;
+    clearActiveSession(String(user.id));
+  }, [user]);
 
   // Sync session/story to the nav context so the header StepperNav can read them
   useEffect(() => {
@@ -93,9 +144,19 @@ const LearningLayout: React.FC = () => {
             readingAttempt: null,
             comprehensionResult: null,
             vocabResult: null,
+            dictationResult: null,
             fullReadingResult: null,
           };
         });
+        // Persist step 1 (intro) as the starting point
+        if (user) {
+          saveActiveSession(String(user.id), {
+            sessionId: 0,
+            storyId,
+            currentStep: STEP_PATH_TO_NUMBER['intro'],
+            timestamp: Date.now(),
+          });
+        }
       })
       .catch((err) => {
         setError(err.message || 'Failed to load story');
@@ -116,53 +177,124 @@ const LearningLayout: React.FC = () => {
           readingAttempt: null,
           comprehensionResult: null,
           vocabResult: null,
+          dictationResult: null,
           fullReadingResult: null,
         };
       }
       return null;
     });
+    persistStep(STEP_PATH_TO_NUMBER['tutor']);
+
+    // Create a DB learning session so dialogue can be persisted (Issue #242)
+    if (token && storyId && dbSessionId === null) {
+      fetch(`${API_BASE}/api/learning/sessions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ story_slug: storyId }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.id) setDbSessionId(data.id);
+        })
+        .catch(() => {
+          // Non-fatal — dialogue won't be persisted but learning still works
+        });
+    }
+
     navigate(`/learn/${storyId}/tutor`);
-  }, [storyId, selectedStory, navigate]);
+  }, [storyId, selectedStory, navigate, persistStep, token, dbSessionId]);
 
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
       setLastAttempt(attempt);
       setSession((prev) => (prev ? { ...prev, readingAttempt: attempt } : null));
+      persistStep(STEP_PATH_TO_NUMBER['comprehension']);
       navigate(`/learn/${storyId}/comprehension`);
     },
-    [storyId, navigate],
+    [storyId, navigate, persistStep],
   );
 
   const handleFinishComprehension = useCallback(
     (result: ComprehensionResult) => {
       setSession((prev) => (prev ? { ...prev, comprehensionResult: result } : null));
+      persistStep(STEP_PATH_TO_NUMBER['vocab']);
       navigate(`/learn/${storyId}/vocab`);
     },
-    [storyId, navigate],
+    [storyId, navigate, persistStep],
   );
 
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
       setSession((prev) => (prev ? { ...prev, vocabResult: result } : null));
+      persistStep(STEP_PATH_TO_NUMBER['dictation']);
+      navigate(`/learn/${storyId}/dictation`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishDictation = useCallback(
+    (result: DictationResult) => {
+      setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
+      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
       navigate(`/learn/${storyId}/full-reading`);
     },
-    [storyId, navigate],
+    [storyId, navigate, persistStep],
   );
 
   const handleFinishFullReading = useCallback(
     (result: FullReadingResult) => {
       setSession((prev) => (prev ? { ...prev, fullReadingResult: result } : null));
+      persistStep(STEP_PATH_TO_NUMBER['report']);
       navigate(`/learn/${storyId}/report`);
     },
-    [storyId, navigate],
+    [storyId, navigate, persistStep],
   );
 
   const handleRetry = useCallback(() => {
+    clearPersistedSession();
     setSession(null);
     setLastAttempt(null);
     setSelectedStory(null);
     navigate('/library');
-  }, [navigate]);
+  }, [navigate, clearPersistedSession]);
+
+  /** Called when a session is fully completed (report viewed). Auto-submits if assignment active. */
+  const handleSessionComplete = useCallback(() => {
+    clearPersistedSession();
+
+    // Auto-submit assignment if this session was started from an assignment.
+    const assignmentIdStr = sessionStorage.getItem('activeAssignmentId');
+    if (assignmentIdStr && token) {
+      const assignmentId = parseInt(assignmentIdStr, 10);
+      if (!isNaN(assignmentId)) {
+        sessionStorage.removeItem('activeAssignmentId');
+        // Fire-and-forget: best-effort auto-submit; errors are silent to avoid disrupting the report view.
+        submitAssignment(token, assignmentId).catch((err) => {
+          console.warn('[LearningLayout] Auto-submit assignment failed:', err);
+        });
+      }
+    }
+  }, [clearPersistedSession, token]);
+
+  /** Mark a paragraph as completed in both local state and session (Issue #85). */
+  const handleParagraphComplete = useCallback((paragraphIndex: number) => {
+    setCompletedParagraphsSet((prev) => {
+      if (prev.has(paragraphIndex)) return prev;
+      const updated = new Set(prev);
+      updated.add(paragraphIndex);
+      return updated;
+    });
+    setSession((prev) => {
+      if (!prev) return prev;
+      const existing = new Set(prev.completedParagraphs ?? []);
+      if (existing.has(paragraphIndex)) return prev;
+      existing.add(paragraphIndex);
+      return { ...prev, completedParagraphs: Array.from(existing) };
+    });
+  }, []);
 
   if (isLoading) {
     return (
@@ -201,9 +333,14 @@ const LearningLayout: React.FC = () => {
     handleFinishReading,
     handleFinishComprehension,
     handleFinishVocab,
+    handleFinishDictation,
     handleFinishFullReading,
     handleRetry,
+    handleSessionComplete,
     emptyAttempt: EMPTY_ATTEMPT,
+    dbSessionId,
+    completedParagraphsSet,
+    handleParagraphComplete,
   };
 
   return <Outlet context={ctx} />;

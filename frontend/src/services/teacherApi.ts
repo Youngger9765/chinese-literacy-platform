@@ -7,12 +7,22 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // --- Response types ---
 
+export interface StudentTag {
+  id: number;
+  student_id: number;
+  teacher_id: number;
+  tag_name: string;
+  color: string;
+  created_at: string;
+}
+
 export interface StudentProgress {
   student_id: number;
   student_name: string;
   last_session_date: string | null;
   last_text_title: string | null;
   total_sessions: number;
+  tags: StudentTag[];
 }
 
 export interface ClassroomTextItem {
@@ -112,13 +122,14 @@ export async function assignText(
   token: string,
   classroomId: number,
   textId: string,
+  copyrightConfirmed: boolean = false,
 ): Promise<ClassroomTextItem> {
   const res = await fetch(
     `${API_BASE}/api/classrooms/${classroomId}/texts`,
     {
       method: 'POST',
       headers: authHeaders(token),
-      body: JSON.stringify({ text_id: textId }),
+      body: JSON.stringify({ text_id: textId, copyright_confirmed: copyrightConfirmed }),
     },
   );
   return handleResponse<ClassroomTextItem>(res);
@@ -213,4 +224,375 @@ export async function getTimeStats(
     { headers: { Authorization: `Bearer ${token}` } },
   );
   return handleResponse<TimeStats>(res);
+}
+
+// --- Student Tag API ---
+
+/** List all tags for a student. */
+export async function getStudentTags(
+  token: string,
+  studentId: number,
+): Promise<StudentTag[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/tags`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StudentTag[]>(res);
+}
+
+/** Add a tag to a student. */
+export async function addStudentTag(
+  token: string,
+  studentId: number,
+  tagName: string,
+  color: string = 'gray',
+): Promise<StudentTag> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/tags`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ tag_name: tagName, color }),
+    },
+  );
+  return handleResponse<StudentTag>(res);
+}
+
+/** Remove a tag from a student. */
+export async function removeStudentTag(
+  token: string,
+  studentId: number,
+  tagName: string,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/tags/${encodeURIComponent(tagName)}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body.detail ?? body.message ?? message;
+    } catch {
+      // ignore
+    }
+    throw new TeacherApiError(message, res.status);
+  }
+}
+
+// --- Heatmap types ---
+
+export interface HeatmapStudent {
+  id: number;
+  name: string;
+}
+
+export interface HeatmapStory {
+  id: string;
+  title: string;
+}
+
+export interface HeatmapScore {
+  student_id: number;
+  story_id: string;
+  score: number;
+  status: string;
+}
+
+export interface ClassroomHeatmap {
+  students: HeatmapStudent[];
+  stories: HeatmapStory[];
+  scores: HeatmapScore[];
+}
+
+/** Get student × story score heatmap for a classroom. */
+export async function getClassroomHeatmap(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomHeatmap> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/heatmap`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ClassroomHeatmap>(res);
+}
+
+// --- Alert & Learning Curve types ---
+
+export interface StudentAlert {
+  student_id: number;
+  student_name: string;
+  alert_type: 'inactive' | 'low_performance' | 'declining';
+  detail: string;
+  last_session_date: string | null;
+}
+
+export interface LearningCurvePoint {
+  date: string;
+  score: number;
+  story_title: string | null;
+  session_id: number;
+}
+
+export interface LearningCurveData {
+  data: LearningCurvePoint[];
+}
+
+/** Get at-risk student alerts for a classroom. */
+export async function getClassroomAlerts(
+  token: string,
+  classroomId: number,
+): Promise<StudentAlert[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/alerts`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StudentAlert[]>(res);
+}
+
+/** Get time-series learning curve data for a student. */
+export async function getStudentLearningCurve(
+  token: string,
+  studentId: number,
+): Promise<LearningCurveData> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/learning-curve`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<LearningCurveData>(res);
+}
+
+// --- Teacher Instructions (Individualized) ---
+
+export interface TeacherInstruction {
+  id: number;
+  teacher_id: number;
+  student_id: number;
+  classroom_id: number;
+  instruction_type: string;
+  content: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface InstructionCreateData {
+  classroom_id: number;
+  instruction_type: string;
+  content: string;
+}
+
+export interface InstructionUpdateData {
+  content?: string;
+  instruction_type?: string;
+  is_active?: boolean;
+}
+
+/** Create a special instruction for a student. */
+export async function createStudentInstruction(
+  token: string,
+  studentId: number,
+  data: InstructionCreateData,
+): Promise<TeacherInstruction> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/instructions`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify(data),
+    },
+  );
+  return handleResponse<TeacherInstruction>(res);
+}
+
+/** Get active instructions for a student. */
+export async function getStudentInstructions(
+  token: string,
+  studentId: number,
+): Promise<TeacherInstruction[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/instructions`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<TeacherInstruction[]>(res);
+}
+
+/** Update an instruction. */
+export async function updateInstruction(
+  token: string,
+  instructionId: number,
+  data: InstructionUpdateData,
+): Promise<TeacherInstruction> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/instructions/${instructionId}`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify(data),
+    },
+  );
+  return handleResponse<TeacherInstruction>(res);
+}
+
+/** Soft-delete an instruction. */
+export async function deleteInstruction(
+  token: string,
+  instructionId: number,
+): Promise<TeacherInstruction> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/instructions/${instructionId}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  return handleResponse<TeacherInstruction>(res);
+}
+
+// --- Notification Center ---
+
+export interface NotificationItem {
+  alert_key: string;
+  classroom_id: number;
+  classroom_name: string;
+  student_id: number;
+  student_name: string;
+  alert_type: 'inactive' | 'low_performance' | 'declining';
+  detail: string;
+  last_session_date: string | null;
+  is_read: boolean;
+  read_at: string | null;
+}
+
+export interface NotificationSummary {
+  total: number;
+  unread: number;
+  items: NotificationItem[];
+}
+
+/** Fetch all aggregated alerts across all teacher classrooms with read state. */
+export async function getTeacherNotifications(
+  token: string,
+): Promise<NotificationSummary> {
+  const res = await fetch(`${API_BASE}/api/teacher/notifications`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<NotificationSummary>(res);
+}
+
+/** Mark specific alert keys as read. */
+export async function markNotificationsRead(
+  token: string,
+  alertKeys: string[],
+): Promise<{ marked: number }> {
+  const res = await fetch(`${API_BASE}/api/teacher/notifications/mark-read`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ alert_keys: alertKeys }),
+  });
+  return handleResponse<{ marked: number }>(res);
+}
+
+/** Mark all current alerts as read. */
+export async function markAllNotificationsRead(
+  token: string,
+): Promise<{ marked: number }> {
+  const res = await fetch(`${API_BASE}/api/teacher/notifications/mark-all-read`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({}),
+  });
+  return handleResponse<{ marked: number }>(res);
+}
+
+// ── Cross-Text Analysis (Issue #253) ─────────────────────────────────────────
+
+export interface TextPerformanceSummary {
+  story_slug: string;
+  story_title: string | null;
+  attempt_count: number;
+  avg_score: number | null;
+  avg_accuracy: number | null;
+  avg_comprehension_score: number | null;
+  first_attempt_at: string | null;
+  last_attempt_at: string | null;
+}
+
+export interface RepeatedErrorChar {
+  char: string;
+  error_count: number;
+  story_count: number;
+  story_slugs: string[];
+}
+
+export interface StudentCrossTextPattern {
+  student_id: number;
+  student_name: string;
+  total_texts_attempted: number;
+  total_sessions: number;
+  overall_avg_score: number | null;
+  score_trend: Array<{
+    date: string;
+    score: number | null;
+    story_slug: string;
+    title: string | null;
+  }>;
+  text_performance: TextPerformanceSummary[];
+  repeated_error_chars: RepeatedErrorChar[];
+  strong_texts: string[];
+  weak_texts: string[];
+}
+
+export interface ClassroomCrossTextPattern {
+  classroom_id: number;
+  classroom_name: string;
+  total_students: number;
+  total_sessions: number;
+  text_difficulty_ranking: Array<{
+    story_slug: string;
+    title: string | null;
+    avg_score: number | null;
+    attempt_count: number;
+  }>;
+  class_score_trend: Array<{ date: string; avg_score: number }>;
+  common_error_chars: Array<{ char: string; student_count: number; total_errors: number }>;
+  student_patterns: StudentCrossTextPattern[];
+}
+
+/** Fetch cross-text learning pattern analysis for a classroom. */
+export async function getCrossTextAnalysis(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomCrossTextPattern> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/cross-text-analysis`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ClassroomCrossTextPattern>(res);
+}
+
+// ── At-Risk Students / Predictive Detection (Issue #254) ──────────────────────
+
+export interface AtRiskStudent {
+  student_id: number;
+  student_name: string;
+  risk_level: 'low' | 'medium' | 'high';
+  risk_factors: string[];
+  recommended_actions: string[];
+  confidence_score: number;
+  supporting_data: Record<string, unknown>;
+}
+
+/** Fetch predictive at-risk student list for a classroom. */
+export async function getAtRiskStudents(
+  token: string,
+  classroomId: number,
+): Promise<AtRiskStudent[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/at-risk-students`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<AtRiskStudent[]>(res);
 }

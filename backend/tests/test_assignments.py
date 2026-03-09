@@ -242,10 +242,8 @@ VALID_STORY_ID = "1"
 INVALID_STORY_ID = "99999"
 
 
-# ===========================================================================
-# POST /api/classrooms/{id}/assignments — Create assignment
-# ===========================================================================
-
+# ====================================================================# POST /api/classrooms/{id}/assignments — Create assignment
+# ====================================================================
 
 class TestCreateAssignment:
     def test_create_assignment_success(self, client, teacher, classroom_with_students):
@@ -352,10 +350,8 @@ class TestCreateAssignment:
         assert resp.status_code == 401
 
 
-# ===========================================================================
-# GET /api/classrooms/{id}/assignments — List assignments
-# ===========================================================================
-
+# ====================================================================# GET /api/classrooms/{id}/assignments — List assignments
+# ====================================================================
 
 class TestListAssignments:
     def test_list_classroom_assignments(self, client, teacher, classroom_with_students):
@@ -425,10 +421,8 @@ class TestListAssignments:
         assert resp.status_code == 403
 
 
-# ===========================================================================
-# GET /api/assignments/{id} — Assignment detail
-# ===========================================================================
-
+# ====================================================================# GET /api/assignments/{id} — Assignment detail
+# ====================================================================
 
 class TestGetAssignmentDetail:
     def test_get_assignment_detail_with_submissions(
@@ -493,10 +487,8 @@ class TestGetAssignmentDetail:
         assert resp.status_code == 403
 
 
-# ===========================================================================
-# PATCH /api/assignments/{id} — Update assignment
-# ===========================================================================
-
+# ====================================================================# PATCH /api/assignments/{id} — Update assignment
+# ====================================================================
 
 class TestUpdateAssignment:
     def test_update_assignment_title(self, client, teacher, classroom_with_students):
@@ -586,10 +578,8 @@ class TestUpdateAssignment:
         assert resp.status_code == 404
 
 
-# ===========================================================================
-# GET /api/assignments/my — Student: my assignments
-# ===========================================================================
-
+# ====================================================================# GET /api/assignments/my — Student: my assignments
+# ====================================================================
 
 class TestStudentMyAssignments:
     def test_student_get_my_assignments(
@@ -660,10 +650,8 @@ class TestStudentMyAssignments:
         assert resp.status_code == 401
 
 
-# ===========================================================================
-# POST /api/assignments/{id}/start — Student: start assignment
-# ===========================================================================
-
+# ====================================================================# POST /api/assignments/{id}/start — Student: start assignment
+# ====================================================================
 
 class TestStartAssignment:
     def test_student_start_assignment(
@@ -789,10 +777,8 @@ class TestStartAssignment:
         assert resp.status_code == 401
 
 
-# ===========================================================================
-# Edge cases
-# ===========================================================================
-
+# ====================================================================# Edge cases
+# ====================================================================
 
 class TestAssignmentEdgeCases:
     def test_unique_constraint_no_duplicate_submissions(
@@ -934,3 +920,358 @@ class TestAssignmentEdgeCases:
             headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
+
+
+# ====================================================================# DELETE /api/assignments/{id} — Delete assignment
+# ====================================================================
+
+class TestDeleteAssignment:
+    def test_delete_assignment_success(self, client, teacher, classroom_with_students):
+        """Teacher can delete their own assignment."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "To Be Deleted",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 204
+
+        # Verify it's gone
+        get_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert get_resp.status_code == 404
+
+    def test_delete_assignment_not_found(self, client, teacher):
+        """Deleting non-existent assignment returns 404."""
+        resp = client.delete(
+            "/api/assignments/99999",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 404
+
+    def test_delete_assignment_not_owner(
+        self, client, teacher, other_teacher, classroom_with_students
+    ):
+        """Non-owner teacher cannot delete another teacher's assignment."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Protected Assignment",
+# Student detail endpoint — GET /api/assignments/my/{id}
+# ====================================================================
+
+class TestStudentAssignmentDetail:
+    """Tests for GET /api/assignments/my/{assignment_id}."""
+
+    def _create_assignment(self, client, teacher, classroom_id, title="Detail Test"):
+        resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": title,
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201
+        return resp.json()["id"]
+
+    def test_student_can_get_own_assignment_detail(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        assignment_id = self._create_assignment(client, teacher, classroom_with_students)
+
+        resp = client.get(
+            f"/api/assignments/my/{assignment_id}",
+            headers=auth_header(student1["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["assignment_id"] == assignment_id
+        assert data["status"] == "pending"
+        assert "story_title" in data
+        assert "due_date" in data
+        assert "effective_cpm" in data
+        assert "effective_accuracy" in data
+
+    def test_student_cannot_get_other_students_assignment(
+        self, client, teacher, student1, student2, school_id
+    ):
+        """student2 should not be able to access an assignment they're not enrolled in."""
+        # Create a separate classroom with only student1
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Detail Test Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = cls_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student1["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        assignment_id = self._create_assignment(client, teacher, classroom_id, title="Private Assignment")
+
+        # student2 is not enrolled → should get 404
+        resp = client.get(
+            f"/api/assignments/my/{assignment_id}",
+            headers=auth_header(student2["token"]),
+        )
+        assert resp.status_code == 404
+
+    def test_student_detail_nonexistent_assignment(
+        self, client, student1
+    ):
+        resp = client.get(
+            "/api/assignments/my/99999",
+            headers=auth_header(student1["token"]),
+        )
+        assert resp.status_code == 404
+
+
+# ====================================================================# Submit assignment — POST /api/assignments/{id}/submit
+# ====================================================================
+
+class TestSubmitAssignment:
+    """Tests for the submit endpoint including bug fix verification."""
+
+    def _create_and_start(self, client, teacher, student, classroom_id):
+        """Helper: create an assignment and start it as the student."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Submit Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200
+        return assignment_id
+
+    def test_student_can_submit_assignment(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        assignment_id = self._create_and_start(client, teacher, student1, classroom_with_students)
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student1["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "submitted"
+        assert data["submitted_at"] is not None
+        # Bug fix: response must include text_id and reading goals
+        assert "text_id" in data
+        assert "effective_cpm" in data
+        assert "effective_accuracy" in data
+
+    def test_submit_idempotent_returns_correct_fields(
+        self, client, teacher, student2, classroom_with_students
+    ):
+        """Idempotent submit should also return all required fields (bug fix verification)."""
+        assignment_id = self._create_and_start(client, teacher, student2, classroom_with_students)
+
+        # First submit
+        resp1 = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student2["token"]),
+        )
+        assert resp1.status_code == 200
+
+        # Second submit (idempotent path)
+        resp2 = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student2["token"]),
+        )
+        assert resp2.status_code == 200
+        data = resp2.json()
+        assert data["status"] in ("submitted", "graded")
+        # Bug fix: idempotent path must also include text_id and reading goals
+        assert "text_id" in data
+        assert "effective_cpm" in data
+        assert "effective_accuracy" in data
+
+    def test_submit_unenrolled_student_returns_403(
+        self, client, teacher, school_id
+    ):
+        """Student not enrolled in the assignment should get 403."""
+        # Register a new student not in classroom
+        unenrolled = _register_user(client, "unenrolled_stu")
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Submit 403 Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        classroom_id = cls_resp.json()["id"]
+
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Submit 403 Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(other_teacher["token"]),
+        )
+        assert resp.status_code == 403
+
+    def test_delete_assignment_requires_auth(self, client, teacher, classroom_with_students):
+        """Unauthenticated delete returns 401."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(f"/api/assignments/{assignment_id}")
+        assert resp.status_code == 401
+
+    def test_delete_assignment_cascades_submissions(
+        self, client, teacher, classroom_with_students
+    ):
+        """Deleting an assignment also deletes all submissions (CASCADE)."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Cascade Delete Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+        # Should have 2 submissions (2 students enrolled)
+        assert create_resp.json()["submission_count"] == 2
+
+        # Delete assignment
+        del_resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert del_resp.status_code == 204
+
+        # Assignment is gone — 404 confirms cascade worked
+        get_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert get_resp.status_code == 404
+
+    def test_admin_can_delete_any_assignment(
+        self, client, teacher, admin_user, classroom_with_students
+    ):
+        """Admin can delete assignments they don't own."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Admin Delete Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(admin_user["token"]),
+        )
+        assert resp.status_code == 204
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(unenrolled["token"]),
+        )
+        assert resp.status_code == 403
+
+
+# ====================================================================# Notification service — unit tests (no HTTP needed)
+# ====================================================================
+
+class TestNotificationService:
+    """Unit tests for notification_service.py templates (log-only, no real email)."""
+
+    def test_send_new_assignment_notification_logs(self, caplog):
+        import logging
+        from app.services.notification_service import send_new_assignment_notification
+        from unittest.mock import MagicMock
+
+        mock_db = MagicMock()
+        with caplog.at_level(logging.INFO, logger="app.services.notification_service"):
+            send_new_assignment_notification(
+                student_id=1,
+                student_name="王小明",
+                story_title="大熊的讀書計畫",
+                classroom_name="五年三班",
+                due_date=None,
+                assignment_type="reading",
+                db=mock_db,
+            )
+        assert any("new_assignment" in r.message for r in caplog.records)
+
+    def test_send_due_date_reminder_logs(self, caplog):
+        import logging
+        from datetime import datetime, timezone
+        from app.services.notification_service import send_due_date_reminder
+        from unittest.mock import MagicMock
+
+        mock_db = MagicMock()
+        with caplog.at_level(logging.INFO, logger="app.services.notification_service"):
+            send_due_date_reminder(
+                student_id=2,
+                student_name="李小花",
+                story_title="虎姑婆",
+                due_date=datetime(2026, 4, 1, tzinfo=timezone.utc),
+                days_remaining=3,
+                db=mock_db,
+            )
+        assert any("due_date_reminder" in r.message for r in caplog.records)
+
+    def test_send_assignment_graded_notification_logs(self, caplog):
+        import logging
+        from app.services.notification_service import send_assignment_graded_notification
+        from unittest.mock import MagicMock
+
+        mock_db = MagicMock()
+        with caplog.at_level(logging.INFO, logger="app.services.notification_service"):
+            send_assignment_graded_notification(
+                student_id=3,
+                student_name="陳大寶",
+                story_title="海底世界",
+                score=88.5,
+                db=mock_db,
+            )
+        assert any("assignment_graded" in r.message for r in caplog.records)

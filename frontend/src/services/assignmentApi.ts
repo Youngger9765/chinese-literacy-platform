@@ -1,16 +1,37 @@
 /**
  * Assignment API service -- teacher assignment management & student assignment access.
- * Follows the same pattern as teacherApi.ts.
+ *
+ * 副本策略 (Copy Strategy):
+ * - story_id: YAML platform text (lesson_number string, e.g. "1"). Never forked.
+ * - text_id: DB text (texts table). Backend forks mutable texts at creation.
+ *   Exactly one of story_id or text_id is set on each assignment.
  */
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // --- Response types ---
 
-export interface AssignmentResponse {
+// Default reading goals (Issue #84) — mirrors backend defaults
+export const DEFAULT_TARGET_CPM = 150;
+export const DEFAULT_TARGET_ACCURACY = 90;
+
+export interface ReadingGoals {
+  target_cpm: number | null;
+  target_accuracy: number | null;
+  difficulty_label: string | null;
+  /** Effective value — defaults applied when teacher hasn't set custom ones. */
+  effective_cpm: number;
+  effective_accuracy: number;
+}
+
+export interface AssignmentResponse extends ReadingGoals {
   id: number;
   classroom_id: number;
-  story_id: string;
+  /** Set for YAML platform texts; null for DB texts. */
+  story_id: string | null;
+  /** Set for DB texts (points to fork for mutable texts); null for YAML texts. */
+  text_id: number | null;
+  /** Resolved display title (from YAML or DB). */
   story_title: string;
   title: string | null;
   description: string | null;
@@ -36,9 +57,10 @@ export interface AssignmentDetailResponse extends AssignmentResponse {
   submissions: SubmissionResponse[];
 }
 
-export interface StudentAssignmentResponse {
+export interface StudentAssignmentResponse extends ReadingGoals {
   assignment_id: number;
-  story_id: string;
+  story_id: string | null;
+  text_id: number | null;
   story_title: string;
   title: string | null;
   description: string | null;
@@ -52,7 +74,8 @@ export interface StudentAssignmentResponse {
 
 export interface StartAssignmentResponse {
   session_id: number;
-  story_id: string;
+  story_id: string | null;
+  text_id: number | null;
   status: string;
 }
 
@@ -92,16 +115,25 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 // --- API functions ---
 
-/** Create a new assignment for a classroom. */
+/**
+ * Create a new assignment for a classroom.
+ * Provide exactly one of story_id (YAML text) or text_id (DB text).
+ */
 export async function createAssignment(
   token: string,
   classroomId: number,
-  data: {
-    story_id: string;
+  data: (
+    | { story_id: string; text_id?: never }
+    | { text_id: number; story_id?: never }
+  ) & {
     title?: string;
     description?: string;
     assignment_type?: string;
     due_date?: string;
+    // Reading goals (Issue #84)
+    target_cpm?: number | null;
+    target_accuracy?: number | null;
+    difficulty_label?: string | null;
   },
 ): Promise<AssignmentResponse> {
   const res = await fetch(
@@ -139,7 +171,7 @@ export async function getAssignmentDetail(
   return handleResponse<AssignmentDetailResponse>(res);
 }
 
-/** Update an assignment. */
+/** Update an assignment (including reading goals). */
 export async function updateAssignment(
   token: string,
   assignmentId: number,
@@ -148,6 +180,10 @@ export async function updateAssignment(
     description?: string;
     due_date?: string | null;
     is_active?: boolean;
+    // Reading goals (Issue #84)
+    target_cpm?: number | null;
+    target_accuracy?: number | null;
+    difficulty_label?: string | null;
   },
 ): Promise<AssignmentResponse> {
   const res = await fetch(
@@ -172,6 +208,60 @@ export async function getMyAssignments(
   return handleResponse<StudentAssignmentResponse[]>(res);
 }
 
+/** Delete an assignment and all its submissions. Teacher or admin only. */
+export async function deleteAssignment(
+  token: string,
+  assignmentId: number,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/${assignmentId}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body.detail ?? body.message ?? message;
+    } catch {
+      // ignore JSON parse errors
+    }
+    throw new AssignmentApiError(message, res.status);
+  }
+}
+
+/** Get detail for one of the current student's assignments. */
+export async function getMyAssignmentDetail(
+  token: string,
+  assignmentId: number,
+): Promise<StudentAssignmentResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/my/${assignmentId}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StudentAssignmentResponse>(res);
+}
+
+/** Grade a student submission (teacher sets score, marks as graded). */
+export async function gradeSubmission(
+  token: string,
+  assignmentId: number,
+  submissionId: number,
+  score: number | null,
+): Promise<SubmissionResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/${assignmentId}/submissions/${submissionId}`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ score }),
+    },
+  );
+  return handleResponse<SubmissionResponse>(res);
+}
+
 /** Start an assignment (creates a learning session). */
 export async function startAssignment(
   token: string,
@@ -185,4 +275,23 @@ export async function startAssignment(
     },
   );
   return handleResponse<StartAssignmentResponse>(res);
+}
+
+/**
+ * Submit a completed assignment. Call this when the student reaches the report page.
+ * Idempotent: safe to call even if already submitted.
+ * TODO: Backend will send Email notification to teacher on submission (future implementation).
+ */
+export async function submitAssignment(
+  token: string,
+  assignmentId: number,
+): Promise<StudentAssignmentResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/${assignmentId}/submit`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+    },
+  );
+  return handleResponse<StudentAssignmentResponse>(res);
 }

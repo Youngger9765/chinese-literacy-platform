@@ -1,12 +1,20 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
+import type { ComprehensionScoreResult } from '../../services/api';
 import DiffDisplay from '../ui/DiffDisplay';
+import CelebrationOverlay from '../ui/CelebrationOverlay';
+import ComprehensionScoreCard from './ComprehensionScoreCard';
 import { CPM_VERY_FAST, CPM_FAST, CPM_MEDIUM, CPM_SLOW } from '../../utils/personaConfig';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
 import ExitTicket from './ExitTicket';
+import { trackLearningEvent } from '../../utils/analytics';
+import AIAnalysisSection from './AIAnalysisSection';
+import StarCelebration from '../gamification/StarCelebration';
+import { calcStarRating } from '../../utils/starRatingCalc';
+import GoalAchievementCard from '../ui/GoalAchievementCard';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -49,6 +57,10 @@ interface AssessmentReportProps {
   story?: Story | null;
   onRetry: () => void;
   onGoToVocab?: () => void;
+  comprehensionScores?: ComprehensionScoreResult | null;
+  comprehensionScoresLoading?: boolean;
+  /** Reading goals from assignment, if student is doing an assignment (Issue #84) */
+  readingGoals?: { effectiveCpm: number; effectiveAccuracy: number; difficultyLabel?: string | null } | null;
 }
 
 // CPM thresholds aligned with backend persona.py (Issue #54)
@@ -147,8 +159,21 @@ const Section: React.FC<{
   );
 };
 
-const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab }) => {
+const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
+
+  // Track lesson completion when a valid report is viewed.
+  useEffect(() => {
+    if (!session) return;
+    const { readingAttempt, comprehensionResult, vocabResult, fullReadingResult } = session;
+    if (!readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult) return;
+    trackLearningEvent('complete_lesson', {
+      story_id: story?.id ?? '',
+      story_title: story?.title ?? '',
+    });
+  // Fire once per story session — storyId + startedAt identifies a unique session.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.storyId, session?.startedAt]);
 
   if (!session) {
     return (
@@ -161,7 +186,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
     );
   }
 
-  const { readingAttempt, comprehensionResult, vocabResult, fullReadingResult } = session;
+  const { readingAttempt, comprehensionResult, vocabResult, dictationResult, fullReadingResult } = session;
 
   // Empty state: session exists but no learning data completed yet
   const hasNoData = !readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult;
@@ -186,6 +211,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   if (readingAttempt) scores.push(readingAttempt.accuracy);
   if (comprehensionResult) scores.push(Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100));
   if (vocabResult) scores.push(vocabResult.totalChars > 0 ? Math.round((vocabResult.practicedChars.length / vocabResult.totalChars) * 100) : 100);
+  if (dictationResult) scores.push(dictationResult.totalWords > 0 ? Math.round((dictationResult.correctCount / dictationResult.totalWords) * 100) : 0);
   if (fullReadingResult) scores.push(Math.round(fullReadingResult.matchRate * 100));
   const overallScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
 
@@ -242,8 +268,38 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   // Practice suggestions
   const suggestions = readingAttempt ? generateSuggestions(wrongTokens, accuracy, cpm) : [];
 
+  // --- Star rating calculation (Issue #222) ---
+  // Best available reading accuracy: prefer full reading match rate, fall back to per-segment accuracy
+  const bestReadingAccuracy =
+    fullMatchPct !== null ? fullMatchPct : readingAttempt ? accuracy : null;
+
+  // Comprehension score: use AI-evaluated score if available, else derive from dialogue result
+  const comprehensionPct = comprehensionScores
+    ? Math.round(comprehensionScores.comprehension_score)
+    : comprehensionResult
+    ? Math.round(
+        (comprehensionResult.understoodCount /
+          Math.max(comprehensionResult.requiredCount, 1)) *
+          100,
+      )
+    : null;
+
+  const starCount = calcStarRating({
+    readingAccuracy: bestReadingAccuracy,
+    comprehensionScore: comprehensionPct,
+  });
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
+      <CelebrationOverlay score={overallScore} />
+
+      {/* ============ 星星評級 Star Rating (Issue #222) ============ */}
+      <StarCelebration
+        stars={starCount}
+        readingAccuracy={bestReadingAccuracy}
+        comprehensionScore={comprehensionPct}
+      />
+
       {/* Header */}
       <div className="text-center">
         <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
@@ -334,6 +390,16 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                 <p className="text-xs text-gray-400 text-center mt-1">課本標準：{benchFeedback}</p>
               ) : null;
             })()}
+
+            {/* Goal achievement (Issue #84) — only shown when an assignment has goals */}
+            {readingGoals && (
+              <GoalAchievementCard
+                effectiveCpm={readingGoals.effectiveCpm}
+                effectiveAccuracy={readingGoals.effectiveAccuracy}
+                actualCpm={fullReadingResult?.cpm ?? readingAttempt?.cpm}
+                actualAccuracy={fullReadingResult ? Math.round(fullReadingResult.matchRate * 100) : readingAttempt?.accuracy}
+              />
+            )}
           </div>
         ) : (
           <p className="text-sm text-gray-400 text-center py-4">尚未完成朗讀練習</p>
@@ -552,17 +618,46 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         )}
       </Section>
 
-      {/* ============ 環節六：AI 詳細分析 (placeholder) ============ */}
-      <Section number={6} title="AI 詳細分析" defaultOpen={false} disabled>
-        <div className="p-6 bg-gray-50 rounded-2xl text-center">
-          <span className="text-4xl mb-3 block">🤖</span>
-          <p className="text-sm text-gray-400 font-bold">AI 詳細分析</p>
-          <p className="text-xs text-gray-300 mt-1">即將推出 — 系統將分析錯誤根源並提供個別化學習建議</p>
-        </div>
+      {/* ============ 環節六：課文理解力評估 (Issue #243) ============ */}
+      <Section number={6} title="課文理解力評估" defaultOpen={true} disabled={!comprehensionScores && !comprehensionScoresLoading}>
+        {comprehensionScores || comprehensionScoresLoading ? (
+          <ComprehensionScoreCard
+            comprehensionScore={comprehensionScores?.comprehension_score ?? 0}
+            literalScore={comprehensionScores?.literal_score ?? 0}
+            inferentialScore={comprehensionScores?.inferential_score ?? 0}
+            evaluativeScore={comprehensionScores?.evaluative_score ?? 0}
+            feedback={comprehensionScores?.feedback ?? null}
+            loading={comprehensionScoresLoading}
+          />
+        ) : (
+          <div className="p-6 bg-gray-50 rounded-2xl text-center">
+            <p className="text-sm text-gray-400 font-bold">尚未完成課文理解對話</p>
+            <p className="text-xs text-gray-300 mt-1">完成蘇格拉底式對話後，系統將評估你的三層次理解力</p>
+          </div>
+        )}
       </Section>
 
-      {/* ============ 補充資訊：生字練習 + 課文理解 ============ */}
-      {(vocabResult || comprehensionResult) && (
+      {/* ============ 環節七：AI 詳細分析 (Issue #241) ============ */}
+      <Section number={7} title="AI 詳細分析" defaultOpen={false} disabled={!readingAttempt && !fullReadingResult}>
+        {(readingAttempt || fullReadingResult) ? (
+          <AIAnalysisSection
+            storyTitle={story?.title ?? ''}
+            accuracy={accuracy}
+            cpm={fullReadingResult?.cpm ?? cpm}
+            errorChars={wrongTokens.map(t => t.expected)}
+            totalCharacters={
+              fullReadingResult?.errorBreakdown
+                ? (fullReadingResult.errorBreakdown.correct + fullReadingResult.errorBreakdown.wrong + fullReadingResult.errorBreakdown.missing + fullReadingResult.errorBreakdown.extra)
+                : (readingAttempt?.lineBreakdown?.reduce((sum, l) => sum + (l.diffTokens?.length ?? 0), 0) ?? 0)
+            }
+          />
+        ) : (
+          <p className="text-sm text-gray-400 text-center py-4">完成朗讀練習後可使用 AI 分析</p>
+        )}
+      </Section>
+
+      {/* ============ 補充資訊：生字練習 + 聽寫練習 + 課文理解 ============ */}
+      {(vocabResult || dictationResult || comprehensionResult) && (
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">其他學習成果</h3>
 
@@ -596,10 +691,55 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
               )}
             </div>
 
+            {/* 聽寫練習 */}
+            {dictationResult && (
+              <div className="rounded-2xl border p-5 bg-white border-slate-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black bg-accent text-white">5</span>
+                  <h4 className="text-sm font-bold text-gray-900">聽寫練習</h4>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-emerald-500 h-2 rounded-full transition-all"
+                        style={{ width: dictationResult.totalWords > 0 ? `${Math.round((dictationResult.correctCount / dictationResult.totalWords) * 100)}%` : '0%' }}
+                      />
+                    </div>
+                    <span className="text-xs font-bold text-gray-600">{dictationResult.correctCount}/{dictationResult.totalWords}</span>
+                  </div>
+                  <div className="flex gap-3 text-xs text-gray-500">
+                    <span className="text-emerald-600 font-medium">正確 {dictationResult.correctCount}</span>
+                    {dictationResult.incorrectCount > 0 && (
+                      <span className="text-red-500 font-medium">錯誤 {dictationResult.incorrectCount}</span>
+                    )}
+                    {dictationResult.skippedCount > 0 && (
+                      <span className="text-gray-400">跳過 {dictationResult.skippedCount}</span>
+                    )}
+                  </div>
+                  {dictationResult.results.some(r => !r.isCorrect && !r.skipped) && (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">答錯的詞語</p>
+                      {dictationResult.results
+                        .filter(r => !r.isCorrect && !r.skipped)
+                        .map((r, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <span className="font-bold text-gray-900">{r.word}</span>
+                            <span className="text-gray-400">你答：</span>
+                            <span className="text-red-500">{r.studentAnswer || '（空白）'}</span>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* 課文理解 */}
             <div className={`rounded-2xl border p-5 ${comprehensionResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
               <div className="flex items-center gap-2 mb-3">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>4</span>
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>3</span>
                 <h4 className={`text-sm font-bold ${comprehensionResult ? 'text-gray-900' : 'text-gray-400'}`}>課文理解</h4>
                 {comprehensionResult?.isComplete && (
                   <span className="ml-auto bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">已完成</span>

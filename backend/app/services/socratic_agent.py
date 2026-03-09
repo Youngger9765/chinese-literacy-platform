@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from google.genai import types as genai_types
 
 from .ai_service import generate_structured_response
+from .input_sanitizer import sanitize_ai_input
 from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,8 @@ class SessionState:
     mispronounced_words: list[str] | None = None
     accuracy: float | None = None
     cpm: float | None = None
+    # Teacher special instructions for individualized learning (Issue #90)
+    teacher_instructions: list[str] | None = None
 
 
 class SessionStore:
@@ -134,6 +137,14 @@ class SocraticAgent:
             f"[第{i}段] {p}" for i, p in enumerate(paragraphs, 1) if p.strip()
         )
 
+        # Build teacher instructions section if available (Issue #90)
+        teacher_instructions_section = ""
+        if state.teacher_instructions:
+            teacher_instructions_section = "\n教師特別指示：\n"
+            for instr in state.teacher_instructions:
+                teacher_instructions_section += f"- {instr}\n"
+            teacher_instructions_section += "→ 請根據以上指示調整你的教學方式\n"
+
         # Build reading info section if data is available (Issue #17)
         reading_info = ""
         if state.mispronounced_words or state.accuracy is not None or state.cpm is not None:
@@ -153,7 +164,7 @@ class SocraticAgent:
 
 課文內容（每段前標有段落索引）：
 {numbered_text}
-{reading_info}
+{reading_info}{teacher_instructions_section}
 你的任務：
 1. 評估學生的回答是否展現了對問題的理解
 2. 給予簡短、溫暖的回饋（1-2句）
@@ -208,6 +219,7 @@ class SocraticAgent:
         mispronounced_words: list[str] | None = None,
         accuracy: float | None = None,
         cpm: float | None = None,
+        teacher_instructions: list[str] | None = None,
     ) -> AgentResponse:
         """Start a new session — generate the first question."""
         state = SessionState(
@@ -217,6 +229,7 @@ class SocraticAgent:
             mispronounced_words=mispronounced_words,
             accuracy=accuracy,
             cpm=cpm,
+            teacher_instructions=teacher_instructions,
         )
 
         system_prompt = self._build_system_prompt(state)
@@ -268,6 +281,11 @@ class SocraticAgent:
         if len(student_answer) > self.MAX_ANSWER_LENGTH:
             raise ValueError(f"Answer too long (max {self.MAX_ANSWER_LENGTH} characters)")
         student_answer = student_answer.strip()
+
+        # Sanitize input to prevent prompt injection (Issue #270)
+        student_answer, _was_sanitized = sanitize_ai_input(
+            student_answer, user_id=session_id
+        )
 
         state = _store.get(session_id)
         if state is None:

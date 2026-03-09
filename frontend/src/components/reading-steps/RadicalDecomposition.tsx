@@ -1,0 +1,191 @@
+/**
+ * RadicalDecomposition
+ *
+ * Displays component (部件) breakdown for a single Chinese character,
+ * including radical meanings (形符/聲符) and related characters that share
+ * the same radical.
+ *
+ * Based on 部件教學法 by Prof. Tseng Shih-chieh (曾世杰教授).
+ */
+
+import React, { useState } from 'react';
+import {
+  getDecomposition,
+  getRadicalInfo,
+  getRelatedChars,
+  RadicalRole,
+  RelatedChar,
+} from '../../data/radicals';
+
+interface RadicalDecompositionProps {
+  /** The character to decompose */
+  char: string;
+}
+
+// Role badge colours
+const ROLE_STYLES: Record<RadicalRole, string> = {
+  '形符': 'bg-blue-100 text-blue-700 border-blue-200',
+  '聲符': 'bg-amber-100 text-amber-700 border-amber-200',
+  '部件': 'bg-gray-100 text-gray-600 border-gray-200',
+};
+
+const ROLE_DESCRIPTIONS: Record<RadicalRole, string> = {
+  '形符': '表示意義',
+  '聲符': '提示讀音',
+  '部件': '組成部分',
+};
+
+interface RelatedCharCardProps {
+  item: RelatedChar;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+const RelatedCharCard: React.FC<RelatedCharCardProps> = ({ item, isSelected, onClick }) => (
+  <button
+    onClick={onClick}
+    className={[
+      'flex flex-col items-center gap-1 px-3 py-2 rounded-xl border transition-all active:scale-95 text-left',
+      isSelected
+        ? 'bg-indigo-50 border-indigo-300 ring-1 ring-indigo-200'
+        : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300',
+    ].join(' ')}
+    aria-pressed={isSelected}
+  >
+    <span className="text-2xl font-bold text-gray-800 leading-none">{item.char}</span>
+    {isSelected && (
+      <span className="text-[10px] text-indigo-600 text-center leading-tight max-w-[5rem]">
+        {item.meaning}
+      </span>
+    )}
+  </button>
+);
+
+const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => {
+  const [selectedRelated, setSelectedRelated] = useState<RelatedChar | null>(null);
+  const [activeRadical, setActiveRadical] = useState<string | null>(null);
+
+  const decomp = getDecomposition(char);
+
+  if (!decomp) {
+    return null; // Silently skip characters not in the database
+  }
+
+  // Collect unique radicals from components
+  const uniqueRadicals = Array.from(new Set(decomp.components.map(c => c.radical)));
+
+  // Related chars from all form-radicals (形符) in decomposition, excluding current char
+  const primaryFormRadical = decomp.components.find(c => c.role === '形符')?.radical;
+  const displayRadical = activeRadical ?? primaryFormRadical ?? uniqueRadicals[0];
+  const relatedChars = displayRadical
+    ? getRelatedChars(displayRadical, char)
+    : [];
+  const displayRadicalInfo = displayRadical ? getRadicalInfo(displayRadical) : null;
+
+  const handleRelatedClick = (item: RelatedChar) => {
+    setSelectedRelated(prev => (prev?.char === item.char ? null : item));
+  };
+
+  const handleRadicalClick = (radical: string) => {
+    setActiveRadical(prev => (prev === radical ? null : radical));
+    setSelectedRelated(null);
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+      {/* Header */}
+      <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
+        <span className="text-base font-bold text-gray-700">部件拆解</span>
+        <span className="text-xs text-gray-400">點擊部件查看相關字</span>
+      </div>
+
+      <div className="p-4 space-y-4">
+        {/* Decomposition formula */}
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          {/* The character itself */}
+          <div className="flex flex-col items-center">
+            <span className="text-4xl font-black text-gray-900 leading-none">{char}</span>
+            <span className="text-[10px] text-gray-400 mt-1">目標字</span>
+          </div>
+
+          <span className="text-gray-400 text-xl font-light">=</span>
+
+          {/* Components */}
+          {decomp.components.map((comp, idx) => {
+            const info = getRadicalInfo(comp.radical);
+            const isActive = activeRadical === comp.radical || (!activeRadical && comp.radical === primaryFormRadical);
+            return (
+              <React.Fragment key={`${comp.radical}-${idx}`}>
+                {idx > 0 && <span className="text-gray-400 text-lg">+</span>}
+                <button
+                  onClick={() => handleRadicalClick(comp.radical)}
+                  className={[
+                    'flex flex-col items-center gap-1 px-3 py-2 rounded-xl border transition-all active:scale-95',
+                    isActive
+                      ? 'bg-indigo-50 border-indigo-300 ring-1 ring-indigo-200'
+                      : 'bg-gray-50 border-gray-200 hover:bg-indigo-50 hover:border-indigo-200',
+                  ].join(' ')}
+                  title={info?.meaning ?? comp.label}
+                >
+                  <span className="text-3xl font-bold text-gray-800 leading-none">{comp.radical}</span>
+                  <span
+                    className={`text-[9px] px-1.5 py-0.5 rounded-full border font-medium ${ROLE_STYLES[comp.role]}`}
+                  >
+                    {comp.role}
+                  </span>
+                  <span className="text-[10px] text-gray-500">{comp.label}</span>
+                </button>
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        {/* Active radical detail */}
+        {displayRadicalInfo && (
+          <div className="rounded-xl bg-indigo-50 border border-indigo-100 px-4 py-3 space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-lg font-bold text-indigo-800">{displayRadical}</span>
+              <span
+                className={`text-[9px] px-1.5 py-0.5 rounded-full border font-medium ${ROLE_STYLES[displayRadicalInfo.role]}`}
+              >
+                {displayRadicalInfo.role} — {ROLE_DESCRIPTIONS[displayRadicalInfo.role]}
+              </span>
+            </div>
+            <p className="text-sm text-indigo-700">{displayRadicalInfo.meaning}</p>
+          </div>
+        )}
+
+        {/* Related characters */}
+        {relatedChars.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-gray-600">含「{displayRadical}」的相關字</span>
+              <span className="text-[10px] text-gray-400">（點擊查看意思）</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {relatedChars.slice(0, 8).map(item => (
+                <RelatedCharCard
+                  key={item.char}
+                  item={item}
+                  isSelected={selectedRelated?.char === item.char}
+                  onClick={() => handleRelatedClick(item)}
+                />
+              ))}
+            </div>
+
+            {/* Selected character meaning popup */}
+            {selectedRelated && (
+              <div className="mt-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 text-sm text-gray-700">
+                <span className="font-bold text-gray-900">{selectedRelated.char}</span>
+                {' — '}
+                {selectedRelated.meaning}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default RadicalDecomposition;

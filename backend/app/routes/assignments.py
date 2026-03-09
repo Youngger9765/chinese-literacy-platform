@@ -1,7 +1,15 @@
 """
 Assignment System API — teachers create assignments, students complete them.
+
+副本策略 (Copy Strategy):
+- Platform YAML texts: assignment.story_id is set; no DB copy needed.
+- DB texts with platform visibility: assignment.text_id → original text.
+- DB texts with non-platform visibility: at creation we fork the text
+  (see services/assignment_copy_strategy.py) and assignment.text_id
+  points to the fork.
 """
 import logging
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -12,6 +20,7 @@ from ..database import get_db
 from ..models.assignment import Assignment, AssignmentSubmission
 from ..models.school import Classroom, ClassroomStudent
 from ..models.session import LearningSession
+from ..models.text import Text
 from ..models.user import User, UserRole, Role
 from ..schemas.assignment import (
     AssignmentCreateRequest,
@@ -19,11 +28,16 @@ from ..schemas.assignment import (
     AssignmentListResponse,
     AssignmentResponse,
     AssignmentUpdateRequest,
+    GradeSubmissionRequest,
     StartAssignmentResponse,
     StudentAssignmentResponse,
     SubmissionResponse,
+    DEFAULT_TARGET_CPM,
+    DEFAULT_TARGET_ACCURACY,
 )
+from ..services.assignment_copy_strategy import resolve_text_for_assignment
 from ..services.lesson_loader import get_lesson_by_id
+from ..services.notification_service import send_assignment_submitted_notification
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
 
 router = APIRouter(tags=["assignments"])
@@ -33,8 +47,8 @@ logger = logging.getLogger(__name__)
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 
-def _resolve_story_title(story_id: str) -> str | None:
-    """Resolve a story_id (lesson_number) to its title."""
+def _resolve_story_title_from_yaml(story_id: str) -> str | None:
+    """Resolve a YAML story_id (lesson_number) to its title."""
     try:
         story = get_lesson_by_id(int(story_id))
         if story:
@@ -44,9 +58,20 @@ def _resolve_story_title(story_id: str) -> str | None:
     return None
 
 
+def _resolve_title_for_assignment(assignment: Assignment, db: Session) -> str:
+    """Return the display title for an assignment's text source."""
+    if assignment.story_id is not None:
+        return _resolve_story_title_from_yaml(assignment.story_id) or assignment.story_id
+    if assignment.text_id is not None:
+        text = db.query(Text).filter(Text.id == assignment.text_id).first()
+        if text:
+            return text.title
+    return "(Unknown)"
+
+
 def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentResponse:
     """Convert an Assignment ORM object to an AssignmentResponse."""
-    story_title = _resolve_story_title(assignment.story_id) or assignment.story_id
+    story_title = _resolve_title_for_assignment(assignment, db)
 
     submission_count = (
         db.query(func.count(AssignmentSubmission.id))
@@ -67,6 +92,7 @@ def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentRe
         classroom_id=assignment.classroom_id,
         teacher_id=assignment.teacher_id,
         story_id=assignment.story_id,
+        text_id=assignment.text_id,
         story_title=story_title,
         title=assignment.title,
         description=assignment.description,
@@ -76,6 +102,12 @@ def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentRe
         created_at=assignment.created_at,
         submission_count=submission_count,
         completed_count=completed_count,
+        # Reading goals (Issue #84)
+        target_cpm=assignment.target_cpm,
+        target_accuracy=assignment.target_accuracy,
+        difficulty_label=assignment.difficulty_label,
+        effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+        effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
     )
 
 
@@ -139,12 +171,13 @@ def get_my_assignments(
         classroom = (
             db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
         )
-        story_title = _resolve_story_title(assignment.story_id) or assignment.story_id
+        story_title = _resolve_title_for_assignment(assignment, db)
 
         results.append(
             StudentAssignmentResponse(
                 assignment_id=assignment.id,
                 story_id=assignment.story_id,
+                text_id=assignment.text_id,
                 story_title=story_title,
                 title=assignment.title,
                 description=assignment.description,
@@ -154,10 +187,66 @@ def get_my_assignments(
                 status=sub.status,
                 submitted_at=sub.submitted_at,
                 score=sub.score,
+                # Reading goals (Issue #84)
+                target_cpm=assignment.target_cpm,
+                target_accuracy=assignment.target_accuracy,
+                difficulty_label=assignment.difficulty_label,
+                effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+                effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
             )
         )
 
     return results
+
+
+@router.get(
+    "/assignments/my/{assignment_id}",
+    response_model=StudentAssignmentResponse,
+)
+def get_my_assignment_detail(
+    assignment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get detail for one of the current student's assignments."""
+    submission = (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.assignment_id == assignment_id,
+            AssignmentSubmission.student_id == current_user.id,
+        )
+        .first()
+    )
+    if submission is None:
+        raise HTTPException(
+            status_code=404, detail="Assignment not found or not assigned to you"
+        )
+
+    assignment = submission.assignment
+    classroom = (
+        db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
+    )
+    story_title = _resolve_title_for_assignment(assignment, db)
+
+    return StudentAssignmentResponse(
+        assignment_id=assignment.id,
+        story_id=assignment.story_id,
+        text_id=assignment.text_id,
+        story_title=story_title,
+        title=assignment.title,
+        description=assignment.description,
+        assignment_type=assignment.assignment_type,
+        due_date=assignment.due_date,
+        classroom_name=classroom.name if classroom else "Unknown",
+        status=submission.status,
+        submitted_at=submission.submitted_at,
+        score=submission.score,
+        target_cpm=assignment.target_cpm,
+        target_accuracy=assignment.target_accuracy,
+        difficulty_label=assignment.difficulty_label,
+        effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+        effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
+    )
 
 
 # ── Teacher Endpoints ────────────────────────────────────────────────────────
@@ -176,29 +265,53 @@ def create_assignment(
 ):
     """Create a new assignment for a classroom.
 
-    Validates the story_id exists, creates the assignment, and
-    bulk-creates pending submissions for all enrolled students.
+    Applies the copy strategy:
+    - If story_id is provided: validates the YAML text exists, stores story_id.
+    - If text_id is provided: looks up the DB text, forks it if mutable
+      (non-platform visibility), stores text_id pointing to the fork.
+
+    Then bulk-creates pending submissions for all enrolled students.
     """
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_owner_or_admin(classroom, current_user, db)
 
-    # Validate story_id exists
-    try:
-        story = get_lesson_by_id(int(payload.story_id))
-    except (ValueError, TypeError):
-        story = None
-    if not story:
-        raise HTTPException(status_code=422, detail="Invalid story_id: story not found")
+    resolved_story_id: str | None = None
+    resolved_text_id: int | None = None
 
-    # Use classroom_id from path, not payload (payload.classroom_id is for schema consistency)
+    if payload.story_id is not None:
+        # --- Platform YAML text path ---
+        try:
+            story = get_lesson_by_id(int(payload.story_id))
+        except (ValueError, TypeError):
+            story = None
+        if not story:
+            raise HTTPException(status_code=422, detail="Invalid story_id: story not found")
+        resolved_story_id = payload.story_id
+
+    else:
+        # --- DB text path (with copy strategy) ---
+        text = db.query(Text).filter(Text.id == payload.text_id).first()
+        if text is None:
+            raise HTTPException(status_code=422, detail="Invalid text_id: text not found")
+
+        # Apply copy strategy: fork mutable texts
+        assigned_text = resolve_text_for_assignment(text, current_user.id, classroom_id, db)
+        db.flush()  # get assigned_text.id if it's a new fork
+        resolved_text_id = assigned_text.id
+
     assignment = Assignment(
         classroom_id=classroom_id,
         teacher_id=current_user.id,
-        story_id=payload.story_id,
+        story_id=resolved_story_id,
+        text_id=resolved_text_id,
         title=payload.title,
         description=payload.description,
         assignment_type=payload.assignment_type,
         due_date=payload.due_date,
+        # Reading goals (Issue #84)
+        target_cpm=payload.target_cpm,
+        target_accuracy=payload.target_accuracy,
+        difficulty_label=payload.difficulty_label,
     )
     db.add(assignment)
     db.flush()  # get assignment.id
@@ -221,8 +334,8 @@ def create_assignment(
     db.refresh(assignment)
 
     logger.info(
-        "Created assignment %d for classroom %d (story=%s, students=%d)",
-        assignment.id, classroom_id, payload.story_id, len(enrollments),
+        "Created assignment %d for classroom %d (story=%s, text_id=%s, students=%d)",
+        assignment.id, classroom_id, resolved_story_id, resolved_text_id, len(enrollments),
     )
     return _assignment_to_response(assignment, db)
 
@@ -309,7 +422,7 @@ def update_assignment(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Update assignment fields (title, description, due_date, is_active)."""
+    """Update assignment fields (title, description, due_date, is_active, reading goals)."""
     assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
     if assignment is None:
         raise HTTPException(status_code=404, detail="Assignment not found")
@@ -325,6 +438,94 @@ def update_assignment(
 
     logger.info("Updated assignment %d: %s", assignment_id, list(update_data.keys()))
     return _assignment_to_response(assignment, db)
+
+
+# ── Teacher Grading Endpoint ─────────────────────────────────────────────────
+
+
+@router.patch(
+    "/assignments/{assignment_id}/submissions/{submission_id}",
+    response_model=SubmissionResponse,
+)
+def grade_submission(
+    assignment_id: int,
+    submission_id: int,
+    payload: GradeSubmissionRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Grade a student submission. Teacher sets score and marks as 'graded'."""
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    _require_assignment_owner_or_admin(assignment, current_user, db)
+
+    submission = (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.id == submission_id,
+            AssignmentSubmission.assignment_id == assignment_id,
+        )
+        .first()
+    )
+    if submission is None:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    if payload.score is not None:
+        submission.score = payload.score
+    submission.status = "graded"
+
+    db.commit()
+    db.refresh(submission)
+
+    student = db.query(User).filter(User.id == submission.student_id).first()
+    logger.info(
+        "Teacher %d graded submission %d (score=%s)",
+        current_user.id, submission_id, payload.score,
+    )
+    return SubmissionResponse(
+        id=submission.id,
+        assignment_id=submission.assignment_id,
+        student_id=submission.student_id,
+        student_name=student.name if student else "Unknown",
+        status=submission.status,
+        submitted_at=submission.submitted_at,
+        score=submission.score,
+    )
+
+
+# ── Teacher Delete Endpoint ───────────────────────────────────────────────────
+
+
+@router.delete(
+    "/assignments/{assignment_id}",
+    status_code=204,
+)
+def delete_assignment(
+    assignment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete an assignment and all its submissions (cascade).
+
+    Only the classroom owner or a system admin can delete an assignment.
+    Returns 204 No Content on success.
+    """
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    _require_assignment_owner_or_admin(assignment, current_user, db)
+
+    db.delete(assignment)
+    db.commit()
+
+    logger.info(
+        "Teacher %d deleted assignment %d (classroom=%d)",
+        current_user.id, assignment_id, assignment.classroom_id,
+    )
+    # FastAPI returns empty 204 response automatically when status_code=204
 
 
 # ── Student Action Endpoints ─────────────────────────────────────────────────
@@ -374,13 +575,17 @@ def start_assignment(
         return StartAssignmentResponse(
             session_id=submission.session_id,
             story_id=assignment.story_id,
+            text_id=assignment.text_id,
             status="in_progress",
         )
+
+    # story_slug for LearningSession: use story_id (YAML) or text_id as string
+    story_slug = assignment.story_id or str(assignment.text_id)
 
     # Create a new LearningSession
     learning_session = LearningSession(
         student_id=current_user.id,
-        story_slug=assignment.story_id,
+        story_slug=story_slug,
         classroom_id=assignment.classroom_id,
         status="in_progress",
         current_step=1,
@@ -401,5 +606,125 @@ def start_assignment(
     return StartAssignmentResponse(
         session_id=learning_session.id,
         story_id=assignment.story_id,
+        text_id=assignment.text_id,
         status="in_progress",
+    )
+
+
+@router.post(
+    "/assignments/{assignment_id}/submit",
+    response_model=StudentAssignmentResponse,
+)
+def submit_assignment(
+    assignment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Mark an assignment as submitted after the student completes the learning flow.
+
+    Idempotent: if already submitted/graded, returns the current state without error.
+    Optionally pulls the accuracy score from the linked LearningSession.
+
+    TODO: Send Email notification to teacher when student submits (future implementation).
+    """
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    submission = (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.assignment_id == assignment_id,
+            AssignmentSubmission.student_id == current_user.id,
+        )
+        .first()
+    )
+    if submission is None:
+        raise HTTPException(
+            status_code=403, detail="You are not enrolled in this assignment"
+        )
+
+    # Idempotent: already submitted/graded, just return current state
+    if submission.status in ("submitted", "graded"):
+        classroom = (
+            db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
+        )
+        story_title = _resolve_title_for_assignment(assignment, db)
+        return StudentAssignmentResponse(
+            assignment_id=assignment.id,
+            story_id=assignment.story_id,
+            text_id=assignment.text_id,
+            story_title=story_title,
+            title=assignment.title,
+            description=assignment.description,
+            assignment_type=assignment.assignment_type,
+            due_date=assignment.due_date,
+            classroom_name=classroom.name if classroom else "Unknown",
+            status=submission.status,
+            submitted_at=submission.submitted_at,
+            score=submission.score,
+            target_cpm=assignment.target_cpm,
+            target_accuracy=assignment.target_accuracy,
+            difficulty_label=assignment.difficulty_label,
+            effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+            effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
+        )
+
+    # Pull score from linked LearningSession if available
+    score: float | None = None
+    if submission.session_id is not None:
+        learning_session = (
+            db.query(LearningSession)
+            .filter(LearningSession.id == submission.session_id)
+            .first()
+        )
+        if learning_session and learning_session.overall_score is not None:
+            score = float(learning_session.overall_score)
+
+    submission.status = "submitted"
+    submission.submitted_at = datetime.now(tz=timezone.utc)
+    if score is not None:
+        submission.score = score
+
+    db.commit()
+    db.refresh(submission)
+
+    classroom = (
+        db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
+    )
+    story_title = _resolve_title_for_assignment(assignment, db)
+
+    logger.info(
+        "Student %d submitted assignment %d (score=%s)",
+        current_user.id, assignment_id, score,
+    )
+
+    # Send notification to teacher (log-only for now)
+    send_assignment_submitted_notification(
+        student_id=current_user.id,
+        student_name=current_user.name or str(current_user.id),
+        assignment_id=assignment.id,
+        story_title=story_title,
+        teacher_id=assignment.teacher_id,
+        db=db,
+    )
+
+    return StudentAssignmentResponse(
+        assignment_id=assignment.id,
+        story_id=assignment.story_id,
+        text_id=assignment.text_id,
+        story_title=story_title,
+        title=assignment.title,
+        description=assignment.description,
+        assignment_type=assignment.assignment_type,
+        due_date=assignment.due_date,
+        classroom_name=classroom.name if classroom else "Unknown",
+        status=submission.status,
+        submitted_at=submission.submitted_at,
+        score=submission.score,
+        target_cpm=assignment.target_cpm,
+        target_accuracy=assignment.target_accuracy,
+        difficulty_label=assignment.difficulty_label,
+        effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+        effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
     )

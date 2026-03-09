@@ -317,7 +317,7 @@ class TestListTeacherClassrooms:
         # Assign a text
         client.post(
             f"/api/classrooms/{classroom_id}/texts",
-            json={"text_id": "1"},
+            json={"text_id": "1", "copyright_confirmed": True},
             headers=auth_header(teacher["token"]),
         )
 
@@ -603,7 +603,7 @@ class TestTeacherDashboardFullFlow:
         # Assign a text to alpha
         client.post(
             f"/api/classrooms/{cls_alpha_id}/texts",
-            json={"text_id": "1"},
+            json={"text_id": "1", "copyright_confirmed": True},
             headers=headers,
         )
 
