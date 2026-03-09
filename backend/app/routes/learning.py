@@ -13,6 +13,7 @@ from ..models.school import Classroom, ClassroomStudent
 from ..models.session import CharacterError, ErrorCorrection, LearningSession, DialogueTurn
 from ..models.teacher_instruction import TeacherInstruction
 from ..models.user import User
+from ..models.parent_link import ParentStudentLink
 from ..schemas.session import (
     ComprehensionScoreResponse,
     SessionCreateRequest,
@@ -746,6 +747,7 @@ def _verify_student_access(
     Allowed if:
     - current_user IS the student
     - current_user is a teacher of a classroom containing the student
+    - current_user is a parent linked to the student
     """
     if current_user.id == student_id:
         return
@@ -761,6 +763,19 @@ def _verify_student_access(
         .first()
     )
     if teacher_access:
+        return
+
+    # Check if current_user is a parent linked to this student
+    parent_link = (
+        db.query(ParentStudentLink)
+        .filter(
+            ParentStudentLink.parent_id == current_user.id,
+            ParentStudentLink.student_id == student_id,
+            ParentStudentLink.is_active == True,
+        )
+        .first()
+    )
+    if parent_link:
         return
 
     raise HTTPException(status_code=403, detail="Access denied")
@@ -955,9 +970,25 @@ def get_stuck_points(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Detect learning stuck-points for a student."""
+    """Detect learning stuck-points for a student.
+
+    Accessible by the student themselves or their teacher.
+
+    Returns:
+    - story_stuck: stories attempted 3+ times without >=5% accuracy improvement
+    - character_stuck: characters with 3+ errors across sessions (last 30 days)
+    - is_declining: True if last 3 sessions show strictly declining accuracy
+    - accuracy_trend: list of accuracy values (oldest to newest, last 10 sessions)
+    """
     _verify_student_access(student_id, current_user, db)
     data = detect_stuck_points(student_id, db)
+    logger.info(
+        "Stuck-point detection for student %d: %d story stuck, %d char stuck, declining=%s",
+        student_id,
+        len(data["story_stuck"]),
+        len(data["character_stuck"]),
+        data["is_declining"],
+    )
     return StuckPointsResponse(**data)
 
 

@@ -1,6 +1,71 @@
 import React, { useState } from 'react';
 import type { ClassroomDetailResponse, StudentInClassroomResponse } from '../../services/classroomApi';
 import CsvUploadModal from './CsvUploadModal';
+import { generateParentInviteCode } from '../../services/api';
+
+// ── Per-student parent invite button ─────────────────────────────────────────
+
+const ParentInviteButton: React.FC<{ token: string; studentId: number; studentName: string }> = ({
+  token,
+  studentId,
+  studentName,
+}) => {
+  const [code, setCode] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    setError('');
+    try {
+      const result = await generateParentInviteCode(token, studentId);
+      setCode(result.code);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '產生失敗');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  if (code) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs font-mono bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded">
+          {code}
+        </span>
+        <button
+          onClick={handleCopy}
+          className="text-xs text-indigo-500 hover:text-indigo-700 transition-colors cursor-pointer"
+          title={`複製 ${studentName} 的家長邀請碼`}
+        >
+          {copied ? '已複製' : '複製'}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-0.5">
+      <button
+        onClick={handleGenerate}
+        disabled={isGenerating}
+        className="text-xs text-indigo-500 hover:text-indigo-700 disabled:opacity-50 transition-colors cursor-pointer"
+      >
+        {isGenerating ? '產生中…' : '家長邀請碼'}
+      </button>
+      {error && <span className="text-xs text-red-500">{error}</span>}
+    </div>
+  );
+};
 
 interface StudentListTabProps {
   classroom: ClassroomDetailResponse;
@@ -112,6 +177,7 @@ const StudentListTab: React.FC<StudentListTabProps> = ({
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-gray-400 hidden sm:inline">{formatDate(s.enrolled_at)}</span>
+                <ParentInviteButton token={token} studentId={s.id} studentName={s.name} />
                 {removingStudentId === s.id ? (
                   <div className="flex gap-2">
                     <button onClick={() => onRemoveStudent(s)} className="text-xs text-red-600 font-medium hover:text-red-800 transition-colors cursor-pointer">確認移除</button>
