@@ -1,6 +1,6 @@
 """add teacher_notification_reads table for issue #256
 
-Revision ID: l2m3n4o5p6q7
+Revision ID: o5p6q7r8s9t0
 Revises: k1l2m3n4o5p6
 Create Date: 2026-03-09 14:00:00.000000
 
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = 'l2m3n4o5p6q7'
+revision: str = 'o5p6q7r8s9t0'
 down_revision: Union[str, None] = 'k1l2m3n4o5p6'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

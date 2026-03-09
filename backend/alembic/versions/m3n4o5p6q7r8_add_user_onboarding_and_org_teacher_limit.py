@@ -13,8 +13,8 @@ Covers manually ALTER TABLE'd columns that were missing from migration chain:
 Uses IF NOT EXISTS in raw SQL so the migration is safe on staging (columns
 already exist) and correct on fresh databases (columns don't exist yet).
 
-Revision ID: l2m3n4o5p6q7
-Revises: k1l2m3n4o5p6
+Revision ID: m3n4o5p6q7r8
+Revises: n4o5p6q7r8s9
 Create Date: 2026-03-09 14:00:00.000000
 
 """
@@ -24,8 +24,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = 'l2m3n4o5p6q7'
-down_revision: Union[str, None] = 'k1l2m3n4o5p6'
+revision: str = 'm3n4o5p6q7r8'
+down_revision: Union[str, None] = 'n4o5p6q7r8s9'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
