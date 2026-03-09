@@ -30,6 +30,7 @@ from ..schemas.teacher_instruction import (
 from ..models.user import User
 from ..services.lesson_loader import get_lesson_by_id
 from ..services.stuck_detection_service import build_recommendations, detect_stuck_points
+from ..services.prediction_service import predict_learning_difficulty
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
 
 router = APIRouter(tags=["teacher"])
@@ -173,6 +174,18 @@ class LearningCurvePoint(BaseModel):
 
 class LearningCurveResponse(BaseModel):
     data: list[LearningCurvePoint]
+
+    model_config = {"from_attributes": True}
+
+
+class AtRiskStudentResponse(BaseModel):
+    student_id: int
+    student_name: str
+    risk_level: str          # "low" | "medium" | "high"
+    risk_factors: list[str]
+    recommended_actions: list[str]
+    confidence_score: float
+    supporting_data: dict
 
     model_config = {"from_attributes": True}
 
@@ -789,6 +802,73 @@ def get_student_learning_curve(
         )
 
     return LearningCurveResponse(data=points)
+
+
+@router.get(
+    "/teacher/classrooms/{classroom_id}/at-risk-students",
+    response_model=list[AtRiskStudentResponse],
+)
+def get_at_risk_students(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Predict which students may struggle based on early learning patterns.
+
+    Uses a rule-based engine (Issue #254) that analyses:
+    - Low accuracy on first 2-3 stories
+    - High character error rate
+    - Declining accuracy trend
+    - Long inactivity gaps
+    - Multiple stuck-points
+
+    Returns all students in the classroom with their risk prediction.
+    Only medium/high risk students are highlighted by default; the frontend
+    may choose to show all or filter to at-risk only.
+    """
+    _check_classroom_access(current_user, classroom_id, db)
+
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+
+    if not enrollments:
+        return []
+
+    results: list[AtRiskStudentResponse] = []
+    for enrollment in enrollments:
+        student = enrollment.student
+        try:
+            prediction = predict_learning_difficulty(student.id, db)
+        except Exception:
+            logger.exception("Prediction failed for student %d", student.id)
+            prediction = {
+                "risk_level": "low",
+                "risk_factors": [],
+                "recommended_actions": [],
+                "confidence_score": 0.0,
+                "supporting_data": {"error": "prediction_unavailable"},
+            }
+
+        results.append(
+            AtRiskStudentResponse(
+                student_id=student.id,
+                student_name=student.name,
+                risk_level=prediction["risk_level"],
+                risk_factors=prediction["risk_factors"],
+                recommended_actions=prediction["recommended_actions"],
+                confidence_score=prediction["confidence_score"],
+                supporting_data=prediction["supporting_data"],
+            )
+        )
+
+    # Sort: high → medium → low, then alphabetical within same level
+    order = {"high": 0, "medium": 1, "low": 2}
+    results.sort(key=lambda r: (order.get(r.risk_level, 3), r.student_name))
+
+    return results
 
 
 def _sanitize_csv_cell(value: str) -> str:
