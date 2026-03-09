@@ -1,0 +1,214 @@
+name: Dependency Security Audit
+
+on:
+  pull_request:
+    branches: [staging, main]
+  schedule:
+    # Every Monday at 09:00 UTC (17:00 Taiwan time)
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  npm-audit:
+    name: npm audit (frontend)
+    runs-on: ubuntu-latest
+    outputs:
+      has_vulnerabilities: ${{ steps.audit.outputs.has_vulnerabilities }}
+      audit_summary: ${{ steps.audit.outputs.audit_summary }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run npm audit
+        id: audit
+        working-directory: frontend
+        run: |
+          set +e
+          # Run audit and capture output; --audit-level=high blocks on High+Critical
+          AUDIT_OUTPUT=$(npm audit --audit-level=high --json 2>&1)
+          AUDIT_EXIT=$?
+          set -e
+
+          # Parse summary from JSON
+          VULN_COUNT=$(echo "$AUDIT_OUTPUT" | jq -r '.metadata.vulnerabilities | (.high // 0) + (.critical // 0)' 2>/dev/null || echo "0")
+          TOTAL_COUNT=$(echo "$AUDIT_OUTPUT" | jq -r '.metadata.vulnerabilities | (.info // 0) + (.low // 0) + (.moderate // 0) + (.high // 0) + (.critical // 0)' 2>/dev/null || echo "0")
+
+          if [ "$AUDIT_EXIT" -ne 0 ]; then
+            echo "has_vulnerabilities=true" >> "$GITHUB_OUTPUT"
+            SUMMARY="npm audit found High/Critical vulnerabilities (total issues: $TOTAL_COUNT, high+critical: $VULN_COUNT)"
+          else
+            echo "has_vulnerabilities=false" >> "$GITHUB_OUTPUT"
+            SUMMARY="npm audit passed (total issues: $TOTAL_COUNT, no High/Critical found)"
+          fi
+
+          echo "audit_summary=$SUMMARY" >> "$GITHUB_OUTPUT"
+
+          # Save full output for report job
+          echo "$AUDIT_OUTPUT" > /tmp/npm-audit-output.json
+
+          # Print human-readable output
+          npm audit --audit-level=high 2>&1 || true
+
+          # Exit with original code to fail the job if high/critical found
+          exit $AUDIT_EXIT
+
+      - name: Upload npm audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-results
+          path: /tmp/npm-audit-output.json
+          retention-days: 30
+
+  pip-audit:
+    name: pip-audit (backend)
+    runs-on: ubuntu-latest
+    outputs:
+      has_vulnerabilities: ${{ steps.audit.outputs.has_vulnerabilities }}
+      audit_summary: ${{ steps.audit.outputs.audit_summary }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Run pip-audit
+        id: audit
+        run: |
+          set +e
+          # Run audit and capture output in JSON format
+          AUDIT_OUTPUT=$(pip-audit -r backend/requirements.txt --format json 2>&1)
+          AUDIT_EXIT=$?
+          set -e
+
+          # Parse vulnerability count
+          VULN_COUNT=$(echo "$AUDIT_OUTPUT" | jq -r '[.[] | select(.vulns | length > 0)] | length' 2>/dev/null || echo "0")
+
+          if [ "$AUDIT_EXIT" -ne 0 ]; then
+            echo "has_vulnerabilities=true" >> "$GITHUB_OUTPUT"
+            SUMMARY="pip-audit found $VULN_COUNT vulnerable package(s)"
+          else
+            echo "has_vulnerabilities=false" >> "$GITHUB_OUTPUT"
+            SUMMARY="pip-audit passed (no known vulnerabilities found)"
+          fi
+
+          echo "audit_summary=$SUMMARY" >> "$GITHUB_OUTPUT"
+
+          # Save JSON output for report job
+          echo "$AUDIT_OUTPUT" > /tmp/pip-audit-output.json
+
+          # Print human-readable output
+          pip-audit -r backend/requirements.txt 2>&1 || true
+
+          exit $AUDIT_EXIT
+
+      - name: Upload pip-audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-results
+          path: /tmp/pip-audit-output.json
+          retention-days: 30
+
+  report:
+    name: Report vulnerabilities
+    runs-on: ubuntu-latest
+    needs: [npm-audit, pip-audit]
+    if: always() && github.event_name == 'pull_request'
+    steps:
+      - name: Download npm audit results
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-audit-results
+          path: /tmp/artifacts/npm
+        continue-on-error: true
+
+      - name: Download pip-audit results
+        uses: actions/download-artifact@v4
+        with:
+          name: pip-audit-results
+          path: /tmp/artifacts/pip
+        continue-on-error: true
+
+      - name: Compose PR comment
+        id: compose
+        run: |
+          NPM_STATUS="${{ needs.npm-audit.result }}"
+          PIP_STATUS="${{ needs.pip-audit.result }}"
+          NPM_SUMMARY="${{ needs.npm-audit.outputs.audit_summary }}"
+          PIP_SUMMARY="${{ needs.pip-audit.outputs.audit_summary }}"
+
+          if [ "$NPM_STATUS" = "success" ]; then
+            NPM_ICON=":white_check_mark:"
+          else
+            NPM_ICON=":x:"
+          fi
+
+          if [ "$PIP_STATUS" = "success" ]; then
+            PIP_ICON=":white_check_mark:"
+          else
+            PIP_ICON=":x:"
+          fi
+
+          OVERALL_STATUS="passed"
+          if [ "$NPM_STATUS" != "success" ] || [ "$PIP_STATUS" != "success" ]; then
+            OVERALL_STATUS="found vulnerabilities"
+          fi
+
+          BODY="## :shield: Dependency Security Audit
+
+          Scan $OVERALL_STATUS. See details below.
+
+          | Tool | Status | Summary |
+          |------|--------|---------|
+          | npm audit (frontend) | $NPM_ICON | $NPM_SUMMARY |
+          | pip-audit (backend) | $PIP_ICON | $PIP_SUMMARY |
+
+          <details>
+          <summary>npm audit JSON output</summary>
+
+          \`\`\`json
+          $(cat /tmp/artifacts/npm/npm-audit-output.json 2>/dev/null | head -100 || echo 'No output available')
+          \`\`\`
+          </details>
+
+          <details>
+          <summary>pip-audit JSON output</summary>
+
+          \`\`\`json
+          $(cat /tmp/artifacts/pip/pip-audit-output.json 2>/dev/null | head -100 || echo 'No output available')
+          \`\`\`
+          </details>
+
+          > Audit run at: $(date -u '+%Y-%m-%d %H:%M UTC')"
+
+          echo "body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Post PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: security-audit
+          message: ${{ steps.compose.outputs.body }}
