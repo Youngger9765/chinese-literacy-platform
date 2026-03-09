@@ -70,7 +70,7 @@ test('1 - 登入頁載入', async ({ page }) => {
   await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
 
   // Should see the login form elements
-  await expect(page.locator('label:has-text("電子郵件")')).toBeVisible();
+  await expect(page.locator('label:has-text("帳號")')).toBeVisible();
   await expect(page.locator('label:has-text("密碼")')).toBeVisible();
   await expect(page.locator('button[type="submit"]:has-text("登入")')).toBeVisible();
   await expect(page.locator('button:has-text("註冊帳號")')).toBeVisible();
@@ -161,7 +161,7 @@ test('6 - 登入失敗（密碼錯誤）', async ({ page }) => {
   await page.locator('button[type="submit"]:has-text("登入")').click();
 
   // Should see error message
-  await expect(page.locator('text=電子郵件或密碼錯誤')).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator('text=帳號或密碼錯誤')).toBeVisible({ timeout: 15_000 });
 });
 
 // ---------------------------------------------------------------------------

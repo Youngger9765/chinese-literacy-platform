@@ -57,6 +57,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "font-src 'self' https://fonts.gstatic.com; "
         "img-src 'self' data: https:; "
         "connect-src 'self' "
+        "https://*.run.app "
         "https://*.googleapis.com "
         "https://*.firebaseapp.com "
         "https://*.cloudfunctions.net "
