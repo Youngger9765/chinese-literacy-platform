@@ -30,6 +30,7 @@ from ..services.ai_service import (
     generate_socratic_question,
     validate_student_sentence,
 )
+from ..services.listening_service import evaluate_retelling
 from ..services.socratic_agent import socratic_agent
 from ..services.stuck_detection_service import build_recommendations, detect_stuck_points
 from ..services.learning_path_service import recommend_next_stories
@@ -1518,5 +1519,67 @@ async def validate_sentence(
             payload.character, payload.student_sentence[:50], e,
         )
         raise HTTPException(status_code=503, detail="AI service unavailable")
+
+
+# ── Listening Comprehension (Issue #251) ─────────────────────────────────────
+
+
+class ListeningEvaluateRequest(BaseModel):
+    story_title: str = Field(..., max_length=200)
+    original_text: str = Field(..., max_length=10000)
+    student_retelling: str = Field(..., min_length=1, max_length=2000)
+
+
+class ListeningEvaluateResponse(BaseModel):
+    score: float
+    key_points_covered: list[str]
+    key_points_missed: list[str]
+    feedback: str
+    encouragement: str
+
+
+@router.post(
+    "/learning/listening/evaluate",
+    response_model=ListeningEvaluateResponse,
+    dependencies=[Depends(ai_limit_5_per_min)],
+)
+async def evaluate_listening_retelling(
+    payload: ListeningEvaluateRequest,
+    current_user: User = Depends(get_current_user),
+    _db: Session = Depends(get_db),
+):
+    """Evaluate a student's retelling of a story they listened to.
+
+    Uses Gemini AI to assess how completely the student captured key points
+    from the original text. Rate limited: 5 requests per minute.
+
+    Returns a score (0-100), covered/missed key points, and feedback.
+    """
+    try:
+        result = await evaluate_retelling(
+            original_text=payload.original_text,
+            student_retelling=payload.student_retelling,
+            story_title=payload.story_title,
+        )
+    except TimeoutError:
+        raise HTTPException(status_code=503, detail="AI service timeout")
+    except Exception as e:
+        logger.error("Listening evaluation failed: %s", e)
+        raise HTTPException(status_code=503, detail="AI service unavailable")
+
+    logger.info(
+        "Listening eval for user %d, story=%s: score=%.1f",
+        current_user.id,
+        payload.story_title,
+        result["score"],
+    )
+
+    return ListeningEvaluateResponse(
+        score=result["score"],
+        key_points_covered=result.get("key_points_covered", []),
+        key_points_missed=result.get("key_points_missed", []),
+        feedback=result.get("feedback", ""),
+        encouragement=result.get("encouragement", ""),
+    )
 
     return ValidateSentenceResponse(**result)

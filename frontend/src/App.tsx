@@ -57,6 +57,7 @@ const TutorPage = lazy(() => import('./pages/learning/TutorPage'));
 const ComprehensionPage = lazy(() => import('./pages/learning/ComprehensionPage'));
 const VocabPage = lazy(() => import('./pages/learning/VocabPage'));
 const DictationPage = lazy(() => import('./pages/learning/DictationPage'));
+const ListeningPage = lazy(() => import('./pages/learning/ListeningPage'));
 const FullReadingPage = lazy(() => import('./pages/learning/FullReadingPage'));
 const ReportPage = lazy(() => import('./pages/learning/ReportPage'));
 
@@ -773,6 +774,7 @@ const App: React.FC = () => {
             <Route path="comprehension" element={<ComprehensionPage />} />
             <Route path="vocab" element={<VocabPage />} />
             <Route path="dictation" element={<DictationPage />} />
+            <Route path="listening" element={<ListeningPage />} />
             <Route path="full-reading" element={<FullReadingPage />} />
             <Route path="report" element={<ReportPage />} />
             {/* Default: redirect to intro */}
