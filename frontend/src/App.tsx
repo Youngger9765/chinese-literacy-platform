@@ -35,6 +35,7 @@ import TermsModal from './components/TermsModal';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import SessionResumePrompt from './components/SessionResumePrompt';
 import StudentProgressDashboard from './components/student/StudentProgressDashboard';
+import NotificationBell from './components/teacher/NotificationBell';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -297,17 +298,22 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {/* Nav links + User info + Logout */}
         <div className="flex items-center gap-3 shrink-0">
           {hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
-            <button
-              onClick={() => navigate('/teacher')}
-              className={`text-xs font-medium transition-colors cursor-pointer ${
-                currentView === AppView.TEACHER_DASHBOARD ||
-                currentView === AppView.CLASSROOM_DETAIL
-                  ? 'text-accent'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              班級管理
-            </button>
+            <>
+              <button
+                onClick={() => navigate('/teacher')}
+                className={`text-xs font-medium transition-colors cursor-pointer ${
+                  currentView === AppView.TEACHER_DASHBOARD ||
+                  currentView === AppView.CLASSROOM_DETAIL
+                    ? 'text-accent'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                班級管理
+              </button>
+              <NotificationBell
+                onNavigateToStudent={(classroomId) => navigate(`/teacher/classroom/${classroomId}`)}
+              />
+            </>
           )}
           {!hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin') && (
             <>
