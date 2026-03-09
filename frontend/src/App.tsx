@@ -39,6 +39,7 @@ import SessionResumePrompt from './components/SessionResumePrompt';
 import StudentProgressDashboard from './components/student/StudentProgressDashboard';
 import NotificationBell from './components/teacher/NotificationBell';
 import ParentDashboard from './pages/parent/ParentDashboard';
+import HelpPage from './pages/HelpPage';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -725,6 +726,9 @@ const App: React.FC = () => {
 
           {/* Privacy policy — public, no auth required */}
           <Route path="/privacy" element={<PrivacyPolicy />} />
+
+          {/* Help / user manual — public, no auth required */}
+          <Route path="/help" element={<HelpPage />} />
 
           {/* Catch-all: redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
