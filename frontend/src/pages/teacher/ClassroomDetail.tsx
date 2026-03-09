@@ -14,12 +14,14 @@ import TextManagementTab from './TextManagementTab';
 import StudentListTab from './StudentListTab';
 import AssignmentTab from './AssignmentTab';
 import ClassroomAnalytics from './ClassroomAnalytics';
+import CrossTextAnalytics from './CrossTextAnalytics';
 
-type TabKey = 'progress' | 'texts' | 'assignments' | 'students' | 'analytics';
+type TabKey = 'progress' | 'texts' | 'assignments' | 'students' | 'analytics' | 'cross-text';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'progress', label: '學生進度' },
   { key: 'analytics', label: '學習分析' },
+  { key: 'cross-text', label: '跨課文分析' },
   { key: 'texts', label: '課文管理' },
   { key: 'assignments', label: '作業管理' },
   { key: 'students', label: '學生名單' },
@@ -373,6 +375,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
           {activeTab === 'analytics' && (
             <ClassroomAnalytics classroomId={classroomId} />
+          )}
+
+          {activeTab === 'cross-text' && (
+            <CrossTextAnalytics classroomId={classroomId} />
           )}
 
           {activeTab === 'texts' && (

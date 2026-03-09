@@ -506,3 +506,69 @@ export async function markAllNotificationsRead(
   });
   return handleResponse<{ marked: number }>(res);
 }
+
+// ── Cross-Text Analysis (Issue #253) ─────────────────────────────────────────
+
+export interface TextPerformanceSummary {
+  story_slug: string;
+  story_title: string | null;
+  attempt_count: number;
+  avg_score: number | null;
+  avg_accuracy: number | null;
+  avg_comprehension_score: number | null;
+  first_attempt_at: string | null;
+  last_attempt_at: string | null;
+}
+
+export interface RepeatedErrorChar {
+  char: string;
+  error_count: number;
+  story_count: number;
+  story_slugs: string[];
+}
+
+export interface StudentCrossTextPattern {
+  student_id: number;
+  student_name: string;
+  total_texts_attempted: number;
+  total_sessions: number;
+  overall_avg_score: number | null;
+  score_trend: Array<{
+    date: string;
+    score: number | null;
+    story_slug: string;
+    title: string | null;
+  }>;
+  text_performance: TextPerformanceSummary[];
+  repeated_error_chars: RepeatedErrorChar[];
+  strong_texts: string[];
+  weak_texts: string[];
+}
+
+export interface ClassroomCrossTextPattern {
+  classroom_id: number;
+  classroom_name: string;
+  total_students: number;
+  total_sessions: number;
+  text_difficulty_ranking: Array<{
+    story_slug: string;
+    title: string | null;
+    avg_score: number | null;
+    attempt_count: number;
+  }>;
+  class_score_trend: Array<{ date: string; avg_score: number }>;
+  common_error_chars: Array<{ char: string; student_count: number; total_errors: number }>;
+  student_patterns: StudentCrossTextPattern[];
+}
+
+/** Fetch cross-text learning pattern analysis for a classroom. */
+export async function getCrossTextAnalysis(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomCrossTextPattern> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/cross-text-analysis`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ClassroomCrossTextPattern>(res);
+}
