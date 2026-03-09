@@ -4,6 +4,7 @@ import { Story, ReadingAttempt, VocabResult } from '../../types';
 import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
 import PronunciationPractice from './PronunciationPractice';
+import SentencePractice from './SentencePractice';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import RadicalDecomposition from './RadicalDecomposition';
@@ -17,7 +18,7 @@ interface VocabPracticeProps {
   onBack: () => void;
 }
 
-type Phase = 'grid' | 'practice' | 'pronunciation';
+type Phase = 'grid' | 'practice' | 'pronunciation' | 'sentence';
 
 type PracticeMode = 'stroke' | 'pronunciation';
 
@@ -237,6 +238,18 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         character={practicingChar}
         onComplete={handlePracticeComplete}
         onBack={handlePracticeBack}
+      />
+    );
+  }
+
+  /* ── Sentence phase: compose sentences after stroke practice ── */
+  if (phase === 'sentence') {
+    return (
+      <SentencePractice
+        practicedChars={Array.from(practicedChars)}
+        storyTitle={story.title}
+        onFinish={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+        onBack={() => setPhase('grid')}
       />
     );
   }
@@ -531,6 +544,20 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </div>
           )}
 
+          {/* Sentence practice prompt when all done */}
+          {allDone && (
+            <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center">
+              <p className="text-emerald-800 font-bold mb-2">太棒了！所有生字都練習完了！</p>
+              <p className="text-emerald-700 text-sm mb-3">接下來，試著用這些生字各造兩個句子吧！</p>
+              <button
+                onClick={() => setPhase('sentence')}
+                className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
+              >
+                開始造句練習
+              </button>
+            </div>
+          )}
+
           {allDone && (
             <CompletionBanner
               count={practicedChars.size}
@@ -548,15 +575,25 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         >
           回到朗讀
         </button>
-        <button
-          onClick={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
-          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
-        >
-          {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-3">
+          {practicedChars.size > 0 && !allDone && (
+            <button
+              onClick={() => setPhase('sentence')}
+              className="px-5 py-3 rounded-xl font-bold text-base border border-accent text-accent hover:bg-accent/10 transition-all active:scale-95"
+            >
+              造句練習
+            </button>
+          )}
+          <button
+            onClick={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+            className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
+          >
+            {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );

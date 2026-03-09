@@ -428,3 +428,138 @@ async def grade_exit_ticket(question: str, student_answer: str, reference_text: 
     """
     # TODO: implement with Gemini API (Step 6)
     return {"score": 0, "feedback": "批改功能尚未實作"}
+
+
+# ── Sentence Practice (Issue #109) ──────────────────────────────────────────
+
+EXAMPLE_SENTENCES_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "sentences": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "sentence": {"type": "string"},
+                    "explanation": {"type": "string"},
+                },
+                "required": ["sentence", "explanation"],
+            },
+            "minItems": 2,
+            "maxItems": 2,
+        }
+    },
+    "required": ["sentences"],
+}
+
+SENTENCE_VALIDATION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "is_correct": {"type": "boolean"},
+        "feedback": {"type": "string"},
+        "suggestion": {"type": "string"},
+    },
+    "required": ["is_correct", "feedback", "suggestion"],
+}
+
+
+async def generate_example_sentences(character: str, story_title: str) -> dict:
+    """Generate 2 example sentences for a Chinese character.
+
+    Returns {"sentences": [{"sentence": str, "explanation": str}, ...]}
+    Each sentence uses the target character in a contextually appropriate way
+    suited for elementary/middle school students.
+    """
+    safe_char = sanitize_ai_input(character)
+    safe_title = sanitize_ai_input(story_title)
+
+    system_prompt = f"""{TUTOR_PERSONA}
+
+你是一位專業的國語文教師，請為學生示範如何使用生字造句。
+
+目標生字：「{safe_char}」
+課文名稱：《{safe_title}》
+
+請造 2 個包含目標生字的例句，要求：
+1. 符合國小高年級～國中的語文程度
+2. 句子自然流暢，生動有趣
+3. 幫助學生理解這個字的用法
+4. 用繁體中文（zh-TW）
+
+請以 JSON 格式輸出，包含 sentences 陣列，每個元素有：
+- sentence（例句）
+- explanation（簡短說明這個字在句中的意思）"""
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text=f"請為生字「{safe_char}」造兩個例句。")],
+        )
+    ]
+
+    result = await generate_structured_response(
+        system_prompt=system_prompt,
+        contents=contents,
+        response_schema=EXAMPLE_SENTENCES_SCHEMA,
+        max_tokens=512,
+        temperature=0.8,
+    )
+    return result
+
+
+async def validate_student_sentence(
+    character: str,
+    student_sentence: str,
+    story_title: str,
+) -> dict:
+    """Validate a student's sentence for a given character.
+
+    Returns {"is_correct": bool, "feedback": str, "suggestion": str}
+    - is_correct: True if grammatically correct and uses the character appropriately
+    - feedback: encouraging feedback message (in Chinese)
+    - suggestion: improvement hint if not correct (empty string if correct)
+    """
+    safe_char = sanitize_ai_input(character)
+    safe_sentence = sanitize_ai_input(student_sentence)
+    safe_title = sanitize_ai_input(story_title)
+
+    system_prompt = f"""{TUTOR_PERSONA}
+
+你是一位親切的國語文老師，正在批改學生的造句練習。
+
+目標生字：「{safe_char}」
+課文：《{safe_title}》
+
+評估標準：
+1. 句子是否包含目標生字「{safe_char}」
+2. 句子是否語法正確、語意通順
+3. 目標生字的用法是否恰當
+4. 適合國小高年級～國中程度
+
+請給予鼓勵性的評語，用繁體中文（zh-TW）回覆。
+- 若造句正確：is_correct=true，給予鼓勵
+- 若有問題：is_correct=false，指出問題並提供改進建議
+
+注意：只要學生的句子基本語法正確、有使用目標生字，就算通過。
+不要過度嚴格，給予適度的鼓勵。"""
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text=f"學生的造句：「{safe_sentence}」\n請評估這個造句是否正確。")],
+        )
+    ]
+
+    result = await generate_structured_response(
+        system_prompt=system_prompt,
+        contents=contents,
+        response_schema=SENTENCE_VALIDATION_SCHEMA,
+        max_tokens=256,
+        temperature=0.3,
+    )
+
+    # Ensure suggestion is empty string if correct
+    if result.get("is_correct") and not result.get("suggestion"):
+        result["suggestion"] = ""
+
+    return result
