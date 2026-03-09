@@ -4,8 +4,14 @@ import LiveTutor from '../../components/reading-steps/LiveTutor';
 import { useLearningContext } from '../../layouts/LearningLayout';
 
 const TutorPage: React.FC = () => {
-  const { selectedStory, rightPanelWidth, setRightPanelWidth, handleFinishReading } =
-    useLearningContext();
+  const {
+    selectedStory,
+    rightPanelWidth,
+    setRightPanelWidth,
+    handleFinishReading,
+    completedParagraphsSet,
+    handleParagraphComplete,
+  } = useLearningContext();
   const navigate = useNavigate();
 
   if (!selectedStory) return null;
@@ -17,6 +23,8 @@ const TutorPage: React.FC = () => {
       onPanelWidthChange={setRightPanelWidth}
       onFinish={handleFinishReading}
       onCancel={() => navigate('/library')}
+      onParagraphComplete={handleParagraphComplete}
+      initialCompletedParagraphs={completedParagraphsSet}
     />
   );
 };

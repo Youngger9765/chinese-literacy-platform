@@ -38,6 +38,10 @@ export interface LearningContext {
   emptyAttempt: ReadingAttempt;
   /** DB LearningSession integer ID — set after the session is created in the DB (Issue #242) */
   dbSessionId: number | null;
+  /** Set of paragraph indices completed during LiveTutor (progressive unlock, Issue #85). */
+  completedParagraphsSet: Set<number>;
+  /** Notify layout that a paragraph was completed (Issue #85). */
+  handleParagraphComplete: (paragraphIndex: number) => void;
 }
 
 /**
@@ -73,6 +77,8 @@ const LearningLayout: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   /** DB LearningSession integer ID — created when the user starts the intro (Issue #242) */
   const [dbSessionId, setDbSessionId] = useState<number | null>(null);
+  /** Progressive paragraph unlock tracking (Issue #85). */
+  const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(new Set());
 
   /** Persist current step to localStorage for session resume. */
   const persistStep = useCallback(
@@ -245,6 +251,23 @@ const LearningLayout: React.FC = () => {
     clearPersistedSession();
   }, [clearPersistedSession]);
 
+  /** Mark a paragraph as completed in both local state and session (Issue #85). */
+  const handleParagraphComplete = useCallback((paragraphIndex: number) => {
+    setCompletedParagraphsSet((prev) => {
+      if (prev.has(paragraphIndex)) return prev;
+      const updated = new Set(prev);
+      updated.add(paragraphIndex);
+      return updated;
+    });
+    setSession((prev) => {
+      if (!prev) return prev;
+      const existing = new Set(prev.completedParagraphs ?? []);
+      if (existing.has(paragraphIndex)) return prev;
+      existing.add(paragraphIndex);
+      return { ...prev, completedParagraphs: Array.from(existing) };
+    });
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -287,6 +310,8 @@ const LearningLayout: React.FC = () => {
     handleSessionComplete,
     emptyAttempt: EMPTY_ATTEMPT,
     dbSessionId,
+    completedParagraphsSet,
+    handleParagraphComplete,
   };
 
   return <Outlet context={ctx} />;

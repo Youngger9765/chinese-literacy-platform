@@ -103,6 +103,8 @@ export interface LearningSession {
   comprehensionResult: ComprehensionResult | null;
   vocabResult: VocabResult | null;
   fullReadingResult: FullReadingResult | null;
+  /** Paragraph indices (0-based) completed during LiveTutor (progressive unlock). */
+  completedParagraphs?: number[];
 }
 
 export interface LiveMessage {
