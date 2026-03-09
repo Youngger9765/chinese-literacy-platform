@@ -1,11 +1,12 @@
 
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AppView, Story } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LearningNavProvider, useLearningNav } from './contexts/LearningNavContext';
 import { hasRole } from './services/authApi';
+import { getMyAssignments } from './services/assignmentApi';
 import { useAppView } from './hooks/useAppView';
 import StepperNav from './components/StepperNav';
 import FeedbackButton from './components/FeedbackButton';
@@ -287,10 +288,33 @@ const OnboardingWrapper: React.FC = () => {
 
 /** The authenticated app shell with header. */
 const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, logout } = useAuth();
+  const { user, token, logout } = useAuth();
   const navigate = useNavigate();
   const currentView = useAppView();
   const { session: navSession, selectedStory: navStory } = useLearningNav();
+
+  // Pending assignment count for the student nav badge
+  const [pendingAssignmentCount, setPendingAssignmentCount] = useState(0);
+  const isStudentOnly =
+    user !== null &&
+    !hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher');
+
+  const refreshPendingCount = useCallback(async () => {
+    if (!token || !isStudentOnly) return;
+    try {
+      const assignments = await getMyAssignments(token);
+      const count = assignments.filter(
+        (a) => a.status === 'pending' || a.status === 'in_progress',
+      ).length;
+      setPendingAssignmentCount(count);
+    } catch {
+      // Silently ignore — badge is non-critical
+    }
+  }, [token, isStudentOnly]);
+
+  useEffect(() => {
+    refreshPendingCount();
+  }, [refreshPendingCount]);
 
   const handleStepperNavigate = (view: AppView) => {
     // Map AppView back to route paths for StepperNav clicks
@@ -404,13 +428,18 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 type="button"
                 onClick={() => navigate('/assignments')}
                 aria-current={currentView === AppView.MY_ASSIGNMENTS ? 'page' : undefined}
-                className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                className={`relative text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                   currentView === AppView.MY_ASSIGNMENTS
                     ? 'text-accent'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 作業
+                {pendingAssignmentCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5 leading-none">
+                    {pendingAssignmentCount > 9 ? '9+' : pendingAssignmentCount}
+                  </span>
+                )}
               </button>
               <button
                 type="button"

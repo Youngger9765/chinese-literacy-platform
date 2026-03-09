@@ -230,6 +230,16 @@ export async function deleteAssignment(
     }
     throw new AssignmentApiError(message, res.status);
   }
+/** Get detail for one of the current student's assignments. */
+export async function getMyAssignmentDetail(
+  token: string,
+  assignmentId: number,
+): Promise<StudentAssignmentResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/my/${assignmentId}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StudentAssignmentResponse>(res);
 }
 
 /** Grade a student submission (teacher sets score, marks as graded). */
