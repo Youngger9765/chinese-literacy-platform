@@ -187,6 +187,24 @@ export async function getMyAssignments(
   return handleResponse<StudentAssignmentResponse[]>(res);
 }
 
+/** Grade a student submission (teacher sets score, marks as graded). */
+export async function gradeSubmission(
+  token: string,
+  assignmentId: number,
+  submissionId: number,
+  score: number | null,
+): Promise<SubmissionResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/${assignmentId}/submissions/${submissionId}`,
+    {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify({ score }),
+    },
+  );
+  return handleResponse<SubmissionResponse>(res);
+}
+
 /** Start an assignment (creates a learning session). */
 export async function startAssignment(
   token: string,

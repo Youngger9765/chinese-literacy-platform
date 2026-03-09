@@ -27,6 +27,7 @@ from ..schemas.assignment import (
     AssignmentListResponse,
     AssignmentResponse,
     AssignmentUpdateRequest,
+    GradeSubmissionRequest,
     StartAssignmentResponse,
     StudentAssignmentResponse,
     SubmissionResponse,
@@ -367,6 +368,61 @@ def update_assignment(
 
     logger.info("Updated assignment %d: %s", assignment_id, list(update_data.keys()))
     return _assignment_to_response(assignment, db)
+
+
+# ── Teacher Grading Endpoint ─────────────────────────────────────────────────
+
+
+@router.patch(
+    "/assignments/{assignment_id}/submissions/{submission_id}",
+    response_model=SubmissionResponse,
+)
+def grade_submission(
+    assignment_id: int,
+    submission_id: int,
+    payload: GradeSubmissionRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Grade a student submission. Teacher sets score and marks as 'graded'."""
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    _require_assignment_owner_or_admin(assignment, current_user, db)
+
+    submission = (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.id == submission_id,
+            AssignmentSubmission.assignment_id == assignment_id,
+        )
+        .first()
+    )
+    if submission is None:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    if payload.score is not None:
+        submission.score = payload.score
+    submission.status = "graded"
+
+    db.commit()
+    db.refresh(submission)
+
+    student = db.query(User).filter(User.id == submission.student_id).first()
+    logger.info(
+        "Teacher %d graded submission %d (score=%s)",
+        current_user.id, submission_id, payload.score,
+    )
+    return SubmissionResponse(
+        id=submission.id,
+        assignment_id=submission.assignment_id,
+        student_id=submission.student_id,
+        student_name=student.name if student else "Unknown",
+        status=submission.status,
+        submitted_at=submission.submitted_at,
+        score=submission.score,
+    )
 
 
 # ── Student Action Endpoints ─────────────────────────────────────────────────
