@@ -493,7 +493,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                         </td>
                       </tr>
 
-<<<<<<< HEAD
                       {/* Expanded detail: grading panel */}
                       {isExpanded && (
                         <tr>

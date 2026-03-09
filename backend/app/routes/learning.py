@@ -1074,7 +1074,6 @@ class StudentProgressResponse(BaseModel):
     response_model=StudentProgressResponse,
 )
 def get_student_progress(
->>>>>>> bd772eb (feat: learning path engine with module completion tracking (Related to #257))
     student_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
