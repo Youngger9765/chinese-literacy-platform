@@ -1280,7 +1280,7 @@ def get_student_dashboard(
     sessions = (
         db.query(LearningSession)
         .filter(LearningSession.student_id == student_id)
-        .order_by(LearningSession.started_at.desc())
+        .order_by(LearningSession.started_at.desc(), LearningSession.id.desc())
         .all()
     )
 

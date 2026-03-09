@@ -17,6 +17,7 @@ export function useAppView(): AppView {
   if (pathname === '/assignments') return AppView.MY_ASSIGNMENTS;
   if (pathname === '/vocabulary') return AppView.MY_VOCABULARY;
   if (pathname === '/history') return AppView.LEARNING_HISTORY;
+  if (pathname === '/progress') return AppView.STUDENT_PROGRESS;
   if (pathname.startsWith('/sessions/') && pathname.endsWith('/dialogue')) return AppView.DIALOGUE_HISTORY;
 
 
