@@ -493,8 +493,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                         </td>
                       </tr>
 
-<<<<<<< HEAD
-                      {/* Expanded detail: grading panel */}
+                      {/* Expanded detail: reading goals + grading panel */}
                       {isExpanded && (
                         <tr>
                           <td colSpan={6} className="bg-gray-50 px-4 py-3">
