@@ -12,7 +12,8 @@
     "skipLibCheck": true,
     "types": [
       "node",
-      "vite/client"
+      "vite/client",
+      "dom-speech-recognition"
     ],
     "moduleResolution": "bundler",
     "isolatedModules": true,

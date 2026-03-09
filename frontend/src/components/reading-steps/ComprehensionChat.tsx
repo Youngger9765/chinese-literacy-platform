@@ -6,6 +6,7 @@ import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { getEncouragementMessage } from '../../utils/encouragement';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -50,6 +51,19 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [requiredCount, setRequiredCount] = useState(3);
   const [isSessionComplete, setIsSessionComplete] = useState(false);
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
+
+  // Speech recognition for voice input (Issue #217)
+  const {
+    status: speechStatus,
+    isSupported: speechSupported,
+    errorMessage: speechError,
+    startListening,
+    stopListening,
+  } = useSpeechRecognition('zh-TW', (finalText) => {
+    setInputText(prev => prev ? `${prev} ${finalText}` : finalText);
+  });
+
+  const isListening = speechStatus === 'listening';
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -420,28 +434,56 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           </button>
         </div>
       ) : (
-        <div className="flex gap-2 items-end">
-          <textarea
-            ref={inputRef}
-            value={inputText}
-            onChange={e => setInputText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="輸入你的回答……（Enter 送出）"
-            rows={2}
-            disabled={isLoading || isSessionComplete}
-            className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none disabled:opacity-50"
-          />
-          <button
-            onClick={handleSubmit}
-            disabled={!inputText.trim() || isLoading || isSessionComplete}
-            className="flex-shrink-0 w-11 h-11 rounded-xl bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-          </button>
-        </div>
+        <>
+          {/* Speech error hint */}
+          {speechError && (
+            <p className="text-xs text-red-500 mb-1.5 px-1">{speechError}</p>
+          )}
+          <div className="flex gap-2 items-end">
+            <textarea
+              ref={inputRef}
+              value={inputText}
+              onChange={e => setInputText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={isListening ? '正在聆聽……' : '輸入你的回答……（Enter 送出）'}
+              rows={2}
+              disabled={isLoading || isSessionComplete}
+              className={`flex-1 bg-white border rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none resize-none disabled:opacity-50 transition-colors ${
+                isListening ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-accent'
+              }`}
+            />
+            {/* Mic button — shown only when Speech API is supported */}
+            {speechSupported && (
+              <button
+                type="button"
+                onClick={isListening ? stopListening : startListening}
+                disabled={isLoading || isSessionComplete}
+                title={isListening ? '停止錄音' : '語音輸入'}
+                aria-label={isListening ? '停止錄音' : '語音輸入'}
+                className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-40 ${
+                  isListening
+                    ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse-mic'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                }`}
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V23h2v-2.06A9 9 0 0 0 21 12v-2h-2z" />
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={handleSubmit}
+              disabled={!inputText.trim() || isLoading || isSessionComplete}
+              className="flex-shrink-0 w-11 h-11 rounded-xl bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
@@ -620,6 +662,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+        @keyframes pulse-mic { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.75; transform: scale(0.92); } }
+        .animate-pulse-mic { animation: pulse-mic 1s ease-in-out infinite; }
       `}</style>
     </div>
   );
