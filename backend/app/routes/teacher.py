@@ -27,6 +27,7 @@ from ..schemas.teacher_instruction import (
 )
 from ..models.user import User
 from ..services.lesson_loader import get_lesson_by_id
+from ..services.stuck_detection_service import build_recommendations, detect_stuck_points
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
 
 router = APIRouter(tags=["teacher"])
@@ -1234,3 +1235,83 @@ def delete_instruction(
     db.refresh(instruction)
     logger.info("Soft-deleted instruction %d (teacher %d)", instruction_id, current_user.id)
     return instruction
+
+
+# ── Classroom Stuck-Point Overview (Issue #91) ────────────────────────────────
+
+
+class StudentStuckSummary(BaseModel):
+    student_id: int
+    student_name: str
+    story_stuck_count: int
+    character_stuck_count: int
+    is_declining: bool
+    top_stuck_characters: list[str]
+    top_recommendations: list[str]
+
+
+class ClassroomStuckResponse(BaseModel):
+    students: list[StudentStuckSummary]
+    total_stuck: int
+
+
+@router.get(
+    "/teacher/classrooms/{classroom_id}/stuck-overview",
+    response_model=ClassroomStuckResponse,
+)
+def get_classroom_stuck_overview(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return a stuck-point overview for all students in a classroom.
+
+    Only teachers with access to the classroom can call this.
+    Returns students who have at least one stuck-point indicator.
+    """
+    _check_classroom_access(current_user, classroom_id, db)
+
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+
+    summaries: list[StudentStuckSummary] = []
+    for enrollment in enrollments:
+        student = enrollment.student
+        stuck_data = detect_stuck_points(student.id, db)
+
+        has_stuck = (
+            bool(stuck_data["story_stuck"])
+            or bool(stuck_data["character_stuck"])
+            or stuck_data["is_declining"]
+        )
+        if not has_stuck:
+            continue
+
+        recs = build_recommendations(stuck_data)
+        top_rec_titles = [r["title"] for r in recs if r["type"] != "encouragement"][:2]
+        top_chars = [c["character"] for c in stuck_data["character_stuck"][:3]]
+
+        summaries.append(
+            StudentStuckSummary(
+                student_id=student.id,
+                student_name=student.name,
+                story_stuck_count=len(stuck_data["story_stuck"]),
+                character_stuck_count=len(stuck_data["character_stuck"]),
+                is_declining=stuck_data["is_declining"],
+                top_stuck_characters=top_chars,
+                top_recommendations=top_rec_titles,
+            )
+        )
+
+    logger.info(
+        "Stuck overview for classroom %d: %d students with stuck points",
+        classroom_id,
+        len(summaries),
+    )
+    return ClassroomStuckResponse(
+        students=summaries,
+        total_stuck=len(summaries),
+    )
