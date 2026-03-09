@@ -1,0 +1,748 @@
+/**
+ * Radical decomposition data for Chinese character education.
+ * Based on 部件教學法 (component-based character teaching method)
+ * advocated by Prof. Tseng Shih-chieh (曾世杰教授).
+ *
+ * Structure:
+ *   - radicalMap: radical character → { meaning, role, relatedChars }
+ *   - charDecomposition: character → array of component breakdowns
+ */
+
+export type RadicalRole = '形符' | '聲符' | '部件';
+
+export interface RadicalInfo {
+  /** Brief meaning of the radical */
+  meaning: string;
+  /** Semantic (形符) or phonetic (聲符) or generic component (部件) */
+  role: RadicalRole;
+  /** Characters that share this radical */
+  relatedChars: RelatedChar[];
+}
+
+export interface RelatedChar {
+  char: string;
+  meaning: string;
+}
+
+export interface CharComponent {
+  radical: string;
+  role: RadicalRole;
+  /** Short label shown in the decomposition display */
+  label: string;
+}
+
+export interface CharDecomposition {
+  /** Components that make up the character */
+  components: CharComponent[];
+  /** Plain-text decomposition formula, e.g. "氵 + 青" */
+  formula: string;
+}
+
+// ---------------------------------------------------------------------------
+// Radical database (常用部件庫)
+// ---------------------------------------------------------------------------
+
+export const radicalMap: Record<string, RadicalInfo> = {
+  // Water-related
+  '氵': {
+    meaning: '與水有關',
+    role: '形符',
+    relatedChars: [
+      { char: '清', meaning: '清澈，純潔' },
+      { char: '河', meaning: '河流，水道' },
+      { char: '海', meaning: '大海，廣闊的水域' },
+      { char: '湖', meaning: '湖泊，陸地中的水體' },
+      { char: '洗', meaning: '用水清洗' },
+      { char: '泳', meaning: '游泳，在水中活動' },
+      { char: '流', meaning: '流動，液體移動' },
+      { char: '漂', meaning: '漂浮，輕輕浮在水面' },
+    ],
+  },
+  '水': {
+    meaning: '水，液體',
+    role: '形符',
+    relatedChars: [
+      { char: '泉', meaning: '泉水，從地下湧出的水' },
+      { char: '永', meaning: '永遠，長久' },
+      { char: '冰', meaning: '冰，水結凍後的固體' },
+    ],
+  },
+
+  // Sun/day-related
+  '日': {
+    meaning: '太陽，白天',
+    role: '形符',
+    relatedChars: [
+      { char: '明', meaning: '光明，明亮' },
+      { char: '晴', meaning: '天氣晴朗，陽光充足' },
+      { char: '暗', meaning: '黑暗，光線不足' },
+      { char: '時', meaning: '時間，時刻' },
+      { char: '早', meaning: '早晨，時間靠前' },
+      { char: '暖', meaning: '溫暖，令人舒適的溫度' },
+      { char: '昨', meaning: '昨天，前一天' },
+      { char: '春', meaning: '春天，一年中第一個季節' },
+    ],
+  },
+
+  // Moon/month-related
+  '月': {
+    meaning: '月亮，月份',
+    role: '形符',
+    relatedChars: [
+      { char: '明', meaning: '光明，明亮（日＋月）' },
+      { char: '期', meaning: '期限，時間段落' },
+      { char: '朝', meaning: '早晨；朝向' },
+      { char: '朗', meaning: '明朗，清晰' },
+    ],
+  },
+
+  // Wood/tree-related
+  '木': {
+    meaning: '樹木，木材',
+    role: '形符',
+    relatedChars: [
+      { char: '樹', meaning: '樹木，植物' },
+      { char: '林', meaning: '樹林，多棵樹' },
+      { char: '森', meaning: '森林，茂密的樹林' },
+      { char: '桌', meaning: '桌子，家具' },
+      { char: '椅', meaning: '椅子，坐的家具' },
+      { char: '板', meaning: '木板，平整的木材' },
+      { char: '根', meaning: '根部，植物的基礎' },
+    ],
+  },
+
+  // Grass/plant-related
+  '艹': {
+    meaning: '草木，植物',
+    role: '形符',
+    relatedChars: [
+      { char: '花', meaning: '花朵，植物的花' },
+      { char: '草', meaning: '草地，植物' },
+      { char: '葉', meaning: '葉子，植物的葉片' },
+      { char: '菜', meaning: '蔬菜，食用植物' },
+      { char: '茶', meaning: '茶葉，飲料' },
+      { char: '苦', meaning: '苦味，艱難' },
+    ],
+  },
+
+  // Fire-related
+  '火': {
+    meaning: '火，熱',
+    role: '形符',
+    relatedChars: [
+      { char: '炎', meaning: '火焰，炎熱' },
+      { char: '烤', meaning: '烤熟，加熱食物' },
+      { char: '燈', meaning: '燈光，照明工具' },
+      { char: '焦', meaning: '燒焦，過度加熱' },
+    ],
+  },
+  '灬': {
+    meaning: '火，熱（底部形狀）',
+    role: '形符',
+    relatedChars: [
+      { char: '熱', meaning: '高溫，炎熱' },
+      { char: '煮', meaning: '烹煮，加熱食物' },
+      { char: '熟', meaning: '煮熟，成熟' },
+      { char: '照', meaning: '照射，光線照耀' },
+      { char: '煙', meaning: '煙霧，燃燒產生的氣體' },
+    ],
+  },
+
+  // Metal/gold-related
+  '金': {
+    meaning: '金屬，金錢',
+    role: '形符',
+    relatedChars: [
+      { char: '銀', meaning: '銀，貴金屬' },
+      { char: '鐵', meaning: '鐵，常見金屬' },
+      { char: '錢', meaning: '錢，貨幣' },
+      { char: '針', meaning: '針，細長的金屬物' },
+      { char: '鑰', meaning: '鑰匙，開鎖的工具' },
+    ],
+  },
+
+  // Earth/soil-related
+  '土': {
+    meaning: '土地，泥土',
+    role: '形符',
+    relatedChars: [
+      { char: '地', meaning: '地面，土地' },
+      { char: '城', meaning: '城市，有城牆的地方' },
+      { char: '堆', meaning: '堆積，聚集在一起' },
+      { char: '塊', meaning: '一塊，固體的一部分' },
+    ],
+  },
+
+  // Person-related
+  '人': {
+    meaning: '人，人類',
+    role: '形符',
+    relatedChars: [
+      { char: '從', meaning: '跟隨，從某處來' },
+      { char: '眾', meaning: '眾多，很多人' },
+      { char: '仁', meaning: '仁愛，善良' },
+    ],
+  },
+  '亻': {
+    meaning: '人，與人有關',
+    role: '形符',
+    relatedChars: [
+      { char: '你', meaning: '你，第二人稱' },
+      { char: '他', meaning: '他，第三人稱男性' },
+      { char: '們', meaning: '複數後綴，如我們' },
+      { char: '做', meaning: '做，製作，進行' },
+      { char: '休', meaning: '休息，停止工作' },
+      { char: '信', meaning: '信任，書信' },
+      { char: '借', meaning: '借用，暫時使用' },
+    ],
+  },
+
+  // Heart/mind-related
+  '心': {
+    meaning: '心，感情',
+    role: '形符',
+    relatedChars: [
+      { char: '想', meaning: '思想，想念' },
+      { char: '感', meaning: '感覺，情感' },
+      { char: '愛', meaning: '愛，喜愛' },
+      { char: '忘', meaning: '忘記，無法想起' },
+    ],
+  },
+  '忄': {
+    meaning: '心，感情（側旁）',
+    role: '形符',
+    relatedChars: [
+      { char: '快', meaning: '快樂，速度快' },
+      { char: '慢', meaning: '緩慢，速度不快' },
+      { char: '情', meaning: '感情，情況' },
+      { char: '恨', meaning: '恨，不喜歡' },
+      { char: '怕', meaning: '害怕，恐懼' },
+      { char: '忙', meaning: '忙碌，事情多' },
+    ],
+  },
+
+  // Mouth-related
+  '口': {
+    meaning: '嘴巴，開口',
+    role: '形符',
+    relatedChars: [
+      { char: '吃', meaning: '吃，進食' },
+      { char: '喝', meaning: '喝，飲用液體' },
+      { char: '唱', meaning: '唱歌，發出歌聲' },
+      { char: '叫', meaning: '叫喊，呼叫' },
+      { char: '說', meaning: '說話，表達' },
+      { char: '問', meaning: '提問，詢問' },
+      { char: '喜', meaning: '喜悅，高興' },
+    ],
+  },
+
+  // Eye-related
+  '目': {
+    meaning: '眼睛，視覺',
+    role: '形符',
+    relatedChars: [
+      { char: '看', meaning: '看，觀察' },
+      { char: '眼', meaning: '眼睛' },
+      { char: '睡', meaning: '睡覺，休眠' },
+      { char: '盲', meaning: '看不見，失明' },
+    ],
+  },
+
+  // Foot-related
+  '足': {
+    meaning: '腳，足夠',
+    role: '形符',
+    relatedChars: [
+      { char: '跑', meaning: '跑步，快速移動' },
+      { char: '跳', meaning: '跳躍，向上彈起' },
+      { char: '踢', meaning: '用腳踢' },
+      { char: '路', meaning: '道路，行走的地方' },
+    ],
+  },
+
+  // Hand-related
+  '手': {
+    meaning: '手，動作',
+    role: '形符',
+    relatedChars: [
+      { char: '拿', meaning: '拿取，用手持物' },
+      { char: '打', meaning: '打，擊打' },
+      { char: '推', meaning: '推動，施力移動' },
+    ],
+  },
+  '扌': {
+    meaning: '手，動作（側旁）',
+    role: '形符',
+    relatedChars: [
+      { char: '打', meaning: '打，擊打' },
+      { char: '拉', meaning: '拉，向自己方向施力' },
+      { char: '推', meaning: '推，向外施力' },
+      { char: '握', meaning: '握住，抓住' },
+      { char: '提', meaning: '提起，拿著' },
+      { char: '捉', meaning: '捉住，抓住' },
+    ],
+  },
+
+  // Speech-related
+  '言': {
+    meaning: '說話，言語',
+    role: '形符',
+    relatedChars: [
+      { char: '說', meaning: '說話' },
+      { char: '話', meaning: '話語，語言' },
+      { char: '語', meaning: '語言，話語' },
+      { char: '詩', meaning: '詩歌，文學形式' },
+    ],
+  },
+  '訁': {
+    meaning: '說話，言語（側旁）',
+    role: '形符',
+    relatedChars: [
+      { char: '說', meaning: '說話，表達意思' },
+      { char: '話', meaning: '話語，說出的內容' },
+      { char: '請', meaning: '請求，邀請' },
+      { char: '謝', meaning: '感謝，表示謝意' },
+      { char: '認', meaning: '認識，辨認' },
+      { char: '識', meaning: '認識，知識' },
+    ],
+  },
+
+  // Green/clear-related (phonetic example)
+  '青': {
+    meaning: '青色，清澈（聲旁）',
+    role: '聲符',
+    relatedChars: [
+      { char: '清', meaning: '清澈，純潔（氵＋青）' },
+      { char: '情', meaning: '感情，情況（忄＋青）' },
+      { char: '晴', meaning: '晴天，天空無雲（日＋青）' },
+      { char: '請', meaning: '請求，邀請（訁＋青）' },
+      { char: '靜', meaning: '安靜，沒有聲音' },
+    ],
+  },
+
+  // 文 character
+  '文': {
+    meaning: '文字，文化',
+    role: '形符',
+    relatedChars: [
+      { char: '字', meaning: '文字，字詞' },
+      { char: '句', meaning: '句子，一段話' },
+    ],
+  },
+
+  // 力 strength
+  '力': {
+    meaning: '力量，努力',
+    role: '形符',
+    relatedChars: [
+      { char: '勇', meaning: '勇敢，有膽量' },
+      { char: '努', meaning: '努力，用力去做' },
+      { char: '勤', meaning: '勤勞，認真努力' },
+    ],
+  },
+
+  // Mountain
+  '山': {
+    meaning: '山，高地',
+    role: '形符',
+    relatedChars: [
+      { char: '島', meaning: '島嶼，四面環水的陸地' },
+      { char: '峰', meaning: '山峰，山的頂部' },
+      { char: '峽', meaning: '峽谷，山間的通道' },
+    ],
+  },
+
+  // Rain
+  '雨': {
+    meaning: '雨，天氣現象',
+    role: '形符',
+    relatedChars: [
+      { char: '雪', meaning: '雪，白色的冰晶' },
+      { char: '雲', meaning: '雲，天空中的水氣' },
+      { char: '霧', meaning: '霧，低空的水氣' },
+      { char: '雷', meaning: '雷，打雷的聲音' },
+    ],
+  },
+
+  // Bird
+  '鳥': {
+    meaning: '鳥類，禽類',
+    role: '形符',
+    relatedChars: [
+      { char: '鴨', meaning: '鴨子，水禽' },
+      { char: '鵝', meaning: '鵝，大型水禽' },
+      { char: '雞', meaning: '雞，家禽' },
+    ],
+  },
+
+  // Child
+  '子': {
+    meaning: '孩子，小的',
+    role: '形符',
+    relatedChars: [
+      { char: '好', meaning: '好，美好' },
+      { char: '孩', meaning: '孩子，兒童' },
+      { char: '孫', meaning: '孫子，後代' },
+    ],
+  },
+
+  // Female
+  '女': {
+    meaning: '女性，女人',
+    role: '形符',
+    relatedChars: [
+      { char: '媽', meaning: '媽媽，母親' },
+      { char: '姐', meaning: '姐姐，年長的女性兄弟' },
+      { char: '妹', meaning: '妹妹，年幼的女性兄弟' },
+      { char: '她', meaning: '她，第三人稱女性' },
+    ],
+  },
+
+  // 見 see
+  '見': {
+    meaning: '看見，視覺',
+    role: '形符',
+    relatedChars: [
+      { char: '現', meaning: '現在，出現' },
+      { char: '覺', meaning: '感覺，察覺' },
+      { char: '視', meaning: '視覺，觀察' },
+    ],
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Character decomposition database (常用字部件拆解)
+// ---------------------------------------------------------------------------
+
+export const charDecomposition: Record<string, CharDecomposition> = {
+  '明': {
+    formula: '日 + 月',
+    components: [
+      { radical: '日', role: '形符', label: '太陽' },
+      { radical: '月', role: '形符', label: '月亮' },
+    ],
+  },
+  '清': {
+    formula: '氵 + 青',
+    components: [
+      { radical: '氵', role: '形符', label: '水旁' },
+      { radical: '青', role: '聲符', label: '讀音' },
+    ],
+  },
+  '情': {
+    formula: '忄 + 青',
+    components: [
+      { radical: '忄', role: '形符', label: '心旁' },
+      { radical: '青', role: '聲符', label: '讀音' },
+    ],
+  },
+  '晴': {
+    formula: '日 + 青',
+    components: [
+      { radical: '日', role: '形符', label: '太陽' },
+      { radical: '青', role: '聲符', label: '讀音' },
+    ],
+  },
+  '請': {
+    formula: '訁 + 青',
+    components: [
+      { radical: '訁', role: '形符', label: '言旁' },
+      { radical: '青', role: '聲符', label: '讀音' },
+    ],
+  },
+  '樹': {
+    formula: '木 + 尌',
+    components: [
+      { radical: '木', role: '形符', label: '木旁' },
+      { radical: '尌', role: '聲符', label: '讀音' },
+    ],
+  },
+  '林': {
+    formula: '木 + 木',
+    components: [
+      { radical: '木', role: '部件', label: '樹木' },
+      { radical: '木', role: '部件', label: '樹木' },
+    ],
+  },
+  '森': {
+    formula: '木 + 木 + 木',
+    components: [
+      { radical: '木', role: '部件', label: '樹木' },
+      { radical: '木', role: '部件', label: '樹木' },
+      { radical: '木', role: '部件', label: '樹木' },
+    ],
+  },
+  '花': {
+    formula: '艹 + 化',
+    components: [
+      { radical: '艹', role: '形符', label: '草頭' },
+      { radical: '化', role: '聲符', label: '讀音' },
+    ],
+  },
+  '草': {
+    formula: '艹 + 早',
+    components: [
+      { radical: '艹', role: '形符', label: '草頭' },
+      { radical: '早', role: '聲符', label: '讀音' },
+    ],
+  },
+  '海': {
+    formula: '氵 + 每',
+    components: [
+      { radical: '氵', role: '形符', label: '水旁' },
+      { radical: '每', role: '聲符', label: '讀音' },
+    ],
+  },
+  '河': {
+    formula: '氵 + 可',
+    components: [
+      { radical: '氵', role: '形符', label: '水旁' },
+      { radical: '可', role: '聲符', label: '讀音' },
+    ],
+  },
+  '湖': {
+    formula: '氵 + 胡',
+    components: [
+      { radical: '氵', role: '形符', label: '水旁' },
+      { radical: '胡', role: '聲符', label: '讀音' },
+    ],
+  },
+  '說': {
+    formula: '訁 + 兌',
+    components: [
+      { radical: '訁', role: '形符', label: '言旁' },
+      { radical: '兌', role: '聲符', label: '讀音' },
+    ],
+  },
+  '話': {
+    formula: '訁 + 舌',
+    components: [
+      { radical: '訁', role: '形符', label: '言旁' },
+      { radical: '舌', role: '部件', label: '舌頭' },
+    ],
+  },
+  '快': {
+    formula: '忄 + 夬',
+    components: [
+      { radical: '忄', role: '形符', label: '心旁' },
+      { radical: '夬', role: '聲符', label: '讀音' },
+    ],
+  },
+  '慢': {
+    formula: '忄 + 曼',
+    components: [
+      { radical: '忄', role: '形符', label: '心旁' },
+      { radical: '曼', role: '聲符', label: '讀音' },
+    ],
+  },
+  '想': {
+    formula: '相 + 心',
+    components: [
+      { radical: '相', role: '聲符', label: '讀音' },
+      { radical: '心', role: '形符', label: '心' },
+    ],
+  },
+  '愛': {
+    formula: '爫 + 心 + 友',
+    components: [
+      { radical: '爫', role: '部件', label: '爪部' },
+      { radical: '心', role: '形符', label: '心' },
+      { radical: '友', role: '部件', label: '友愛' },
+    ],
+  },
+  '您': {
+    formula: '你 + 心',
+    components: [
+      { radical: '你', role: '部件', label: '你' },
+      { radical: '心', role: '形符', label: '心' },
+    ],
+  },
+  '跑': {
+    formula: '足 + 包',
+    components: [
+      { radical: '足', role: '形符', label: '足旁' },
+      { radical: '包', role: '聲符', label: '讀音' },
+    ],
+  },
+  '跳': {
+    formula: '足 + 兆',
+    components: [
+      { radical: '足', role: '形符', label: '足旁' },
+      { radical: '兆', role: '聲符', label: '讀音' },
+    ],
+  },
+  '吃': {
+    formula: '口 + 乞',
+    components: [
+      { radical: '口', role: '形符', label: '口旁' },
+      { radical: '乞', role: '聲符', label: '讀音' },
+    ],
+  },
+  '喝': {
+    formula: '口 + 曷',
+    components: [
+      { radical: '口', role: '形符', label: '口旁' },
+      { radical: '曷', role: '聲符', label: '讀音' },
+    ],
+  },
+  '唱': {
+    formula: '口 + 昌',
+    components: [
+      { radical: '口', role: '形符', label: '口旁' },
+      { radical: '昌', role: '聲符', label: '讀音' },
+    ],
+  },
+  '媽': {
+    formula: '女 + 馬',
+    components: [
+      { radical: '女', role: '形符', label: '女旁' },
+      { radical: '馬', role: '聲符', label: '讀音' },
+    ],
+  },
+  '姐': {
+    formula: '女 + 且',
+    components: [
+      { radical: '女', role: '形符', label: '女旁' },
+      { radical: '且', role: '聲符', label: '讀音' },
+    ],
+  },
+  '妹': {
+    formula: '女 + 末',
+    components: [
+      { radical: '女', role: '形符', label: '女旁' },
+      { radical: '末', role: '聲符', label: '讀音' },
+    ],
+  },
+  '雪': {
+    formula: '雨 + 彐',
+    components: [
+      { radical: '雨', role: '形符', label: '雨字頭' },
+      { radical: '彐', role: '部件', label: '掃帚形' },
+    ],
+  },
+  '雲': {
+    formula: '雨 + 云',
+    components: [
+      { radical: '雨', role: '形符', label: '雨字頭' },
+      { radical: '云', role: '聲符', label: '讀音' },
+    ],
+  },
+  '好': {
+    formula: '女 + 子',
+    components: [
+      { radical: '女', role: '形符', label: '女旁' },
+      { radical: '子', role: '部件', label: '孩子' },
+    ],
+  },
+  '休': {
+    formula: '亻 + 木',
+    components: [
+      { radical: '亻', role: '形符', label: '人旁' },
+      { radical: '木', role: '部件', label: '樹木' },
+    ],
+  },
+  '信': {
+    formula: '亻 + 言',
+    components: [
+      { radical: '亻', role: '形符', label: '人旁' },
+      { radical: '言', role: '部件', label: '說話' },
+    ],
+  },
+  '勇': {
+    formula: '甬 + 力',
+    components: [
+      { radical: '甬', role: '聲符', label: '讀音' },
+      { radical: '力', role: '形符', label: '力量' },
+    ],
+  },
+  '早': {
+    formula: '日 + 十',
+    components: [
+      { radical: '日', role: '形符', label: '太陽' },
+      { radical: '十', role: '部件', label: '草芽' },
+    ],
+  },
+  '春': {
+    formula: '三 + 人 + 日',
+    components: [
+      { radical: '三', role: '部件', label: '草木' },
+      { radical: '人', role: '部件', label: '人' },
+      { radical: '日', role: '形符', label: '太陽' },
+    ],
+  },
+  '路': {
+    formula: '足 + 各',
+    components: [
+      { radical: '足', role: '形符', label: '足旁' },
+      { radical: '各', role: '聲符', label: '讀音' },
+    ],
+  },
+  '謝': {
+    formula: '訁 + 射',
+    components: [
+      { radical: '訁', role: '形符', label: '言旁' },
+      { radical: '射', role: '聲符', label: '讀音' },
+    ],
+  },
+  '認': {
+    formula: '訁 + 忍',
+    components: [
+      { radical: '訁', role: '形符', label: '言旁' },
+      { radical: '忍', role: '聲符', label: '讀音' },
+    ],
+  },
+  '熱': {
+    formula: '埶 + 灬',
+    components: [
+      { radical: '埶', role: '聲符', label: '讀音' },
+      { radical: '灬', role: '形符', label: '火底' },
+    ],
+  },
+  '照': {
+    formula: '昭 + 灬',
+    components: [
+      { radical: '昭', role: '聲符', label: '讀音' },
+      { radical: '灬', role: '形符', label: '火底' },
+    ],
+  },
+  '銀': {
+    formula: '金 + 艮',
+    components: [
+      { radical: '金', role: '形符', label: '金旁' },
+      { radical: '艮', role: '聲符', label: '讀音' },
+    ],
+  },
+  '鐵': {
+    formula: '金 + 𢧤',
+    components: [
+      { radical: '金', role: '形符', label: '金旁' },
+      { radical: '𢧤', role: '聲符', label: '讀音' },
+    ],
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Helper: look up decomposition for a character
+// ---------------------------------------------------------------------------
+
+/** Returns decomposition for a character, or null if not in database */
+export function getDecomposition(char: string): CharDecomposition | null {
+  return charDecomposition[char] ?? null;
+}
+
+/**
+ * Returns related characters for a given radical.
+ * Excludes the source character itself from the list.
+ */
+export function getRelatedChars(radical: string, excludeChar?: string): RelatedChar[] {
+  const info = radicalMap[radical];
+  if (!info) return [];
+  return excludeChar
+    ? info.relatedChars.filter(r => r.char !== excludeChar)
+    : info.relatedChars;
+}
+
+/** Returns radical info (meaning + role) */
+export function getRadicalInfo(radical: string): RadicalInfo | null {
+  return radicalMap[radical] ?? null;
+}

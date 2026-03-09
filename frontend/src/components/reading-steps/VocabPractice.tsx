@@ -5,6 +5,8 @@ import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
+import RadicalDecomposition from './RadicalDecomposition';
+import { getDecomposition } from '../../data/radicals';
 
 interface VocabPracticeProps {
   story: Story;
@@ -21,6 +23,8 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const [practicedChars, setPracticedChars] = useState<Set<string>>(new Set());
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
   const [zhuyinReady, setZhuyinReady] = useState(false);
+  /** Character whose radical panel is currently open */
+  const [radicalChar, setRadicalChar] = useState<string | null>(null);
 
   const zhuyinActive = zhuyinReady && zhuyinEnabled;
 
@@ -90,6 +94,11 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     setPhase('grid');
   };
 
+  /** Toggle the radical panel for a character. Long-press / secondary action. */
+  const handleRadicalToggle = (ch: string) => {
+    setRadicalChar(prev => (prev === ch ? null : ch));
+  };
+
   /* ── Practice phase: WriteCharacter fills the whole view ── */
   if (phase === 'practice') {
     return (
@@ -103,6 +112,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
   /* ── Grid phase: character selection ── */
   const allDone = displayChars.length > 0 && displayChars.every(ch => practicedChars.has(ch));
+
+  // Characters for which we have radical decomposition data
+  const charsWithRadical = displayChars.filter(ch => getDecomposition(ch) !== null);
 
   return (
     <div
@@ -149,57 +161,104 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               {displayChars.map(ch => {
                 const isSuggested = needPracticeSet.has(ch);
                 const isPracticed = practicedChars.has(ch);
+                const hasRadical = getDecomposition(ch) !== null;
+                const isRadicalOpen = radicalChar === ch;
                 return (
-                  <button
-                    key={ch}
-                    onClick={() => handlePractice(ch)}
-                    className={[
-                      `relative flex flex-col items-center justify-center ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95`,
-                      isPracticed
-                        ? 'bg-emerald-50 border-emerald-700/50 text-emerald-800'
-                        : isSuggested
-                          ? 'bg-amber-900/30 border-amber-600/60 text-amber-700 ring-1 ring-amber-500/30 hover:bg-amber-900/50'
-                          : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-accent/40',
-                    ].join(' ')}
-                  >
-                    <span className={`text-3xl font-bold leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}>
-                    {processZhuyin(ch)}
-                  </span>
-
-                    {/* Suggested badge */}
-                    {isSuggested && !isPracticed && (
-                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-[#0d1117]" />
-                    )}
-
-                    {/* Done checkmark */}
-                    {isPracticed && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-[#0d1117]">
-                        <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                        </svg>
+                  <div key={ch} className="relative">
+                    <button
+                      onClick={() => handlePractice(ch)}
+                      className={[
+                        `relative flex flex-col items-center justify-center w-full ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95`,
+                        isPracticed
+                          ? 'bg-emerald-50 border-emerald-700/50 text-emerald-800'
+                          : isSuggested
+                            ? 'bg-amber-900/30 border-amber-600/60 text-amber-700 ring-1 ring-amber-500/30 hover:bg-amber-900/50'
+                            : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-accent/40',
+                      ].join(' ')}
+                    >
+                      <span className={`text-3xl font-bold leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}>
+                        {processZhuyin(ch)}
                       </span>
-                    )}
 
-                    <span className="text-[9px] mt-1 opacity-60">
-                      {isPracticed ? '已練習' : '點我練習'}
-                    </span>
-                  </button>
+                      {/* Suggested badge */}
+                      {isSuggested && !isPracticed && (
+                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-[#0d1117]" />
+                      )}
+
+                      {/* Done checkmark */}
+                      {isPracticed && (
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-[#0d1117]">
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                      )}
+
+                      <span className="text-[9px] mt-1 opacity-60">
+                        {isPracticed ? '已練習' : '點我練習'}
+                      </span>
+                    </button>
+
+                    {/* Radical decomposition toggle button */}
+                    {hasRadical && (
+                      <button
+                        onClick={() => handleRadicalToggle(ch)}
+                        title="查看部件拆解"
+                        className={[
+                          'absolute -bottom-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center border text-[9px] font-bold transition-all',
+                          isRadicalOpen
+                            ? 'bg-indigo-500 border-indigo-600 text-white'
+                            : 'bg-indigo-100 border-indigo-200 text-indigo-600 hover:bg-indigo-200',
+                        ].join(' ')}
+                        aria-label={`查看「${ch}」的部件拆解`}
+                        aria-expanded={isRadicalOpen}
+                      >
+                        部
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>
           )}
 
           {/* Legend */}
-          {needPracticeSet.size > 0 && (
-            <div className="flex items-center gap-4 text-[10px] text-gray-400">
+          <div className="flex items-center gap-4 text-[10px] text-gray-400 flex-wrap">
+            {needPracticeSet.size > 0 && (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 bg-amber-500 rounded-full" />
+                  建議練習
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full" />
+                  已完成
+                </div>
+              </>
+            )}
+            {charsWithRadical.length > 0 && (
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 bg-amber-500 rounded-full" />
-                建議練習
+                <span className="w-5 h-5 bg-indigo-100 border border-indigo-200 text-indigo-600 rounded-full flex items-center justify-center text-[9px] font-bold">部</span>
+                點我查看部件拆解
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full" />
-                已完成
+            )}
+          </div>
+
+          {/* Radical decomposition panel */}
+          {radicalChar && (
+            <div className="animate-[fadeIn_0.2s_ease-in]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-gray-700">
+                  「{radicalChar}」的部件學習
+                </span>
+                <button
+                  onClick={() => setRadicalChar(null)}
+                  className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded"
+                >
+                  收起
+                </button>
               </div>
+              <RadicalDecomposition char={radicalChar} />
             </div>
           )}
 
