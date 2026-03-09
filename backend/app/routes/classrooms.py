@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from ..auth.dependencies import get_current_user
 from ..auth.password import hash_password
 from ..database import get_db
-from ..models.school import Classroom, ClassroomStudent, School
+from ..models.school import Classroom, ClassroomStudent, ClassroomTeacher, School
 from ..models.user import Role, StudentProfile, User, UserRole
 from ..schemas.classroom import (
     BatchStudentCreateRequest,
@@ -68,10 +68,47 @@ def _get_classroom_or_404(classroom_id: int, db: Session) -> Classroom:
 
 
 def _require_owner_or_admin(classroom: Classroom, current_user: User, db: Session) -> None:
-    """Allow classroom teacher OR system/org admin. Raise 403 otherwise."""
+    """Allow classroom teacher (primary) OR system/org admin. Raise 403 otherwise.
+
+    For co-teachers (assistants) use _require_member_or_admin which also allows assistants.
+    """
     if classroom.teacher_id == current_user.id:
         return
     # Check if user has admin role
+    admin_role = (
+        db.query(UserRole)
+        .join(Role)
+        .filter(
+            UserRole.user_id == current_user.id,
+            UserRole.is_active == True,
+            Role.name.in_(["system_admin", "org_admin"]),
+        )
+        .first()
+    )
+    if admin_role:
+        return
+    raise HTTPException(status_code=403, detail="Not your classroom")
+
+
+def _require_member_or_admin(classroom: Classroom, current_user: User, db: Session) -> None:
+    """Allow classroom owner, co-teachers (assistants), or system/org admins.
+
+    Used for read-only endpoints like viewing student progress.
+    """
+    if classroom.teacher_id == current_user.id:
+        return
+    # Check co-teacher membership
+    ct = (
+        db.query(ClassroomTeacher)
+        .filter(
+            ClassroomTeacher.classroom_id == classroom.id,
+            ClassroomTeacher.teacher_id == current_user.id,
+        )
+        .first()
+    )
+    if ct:
+        return
+    # Check admin role
     admin_role = (
         db.query(UserRole)
         .join(Role)
@@ -192,6 +229,16 @@ def create_classroom(
         join_code=join_code,
     )
     db.add(classroom)
+    db.flush()  # Get classroom.id before adding junction row
+
+    # Auto-insert primary teacher into classroom_teachers junction table
+    primary_ct = ClassroomTeacher(
+        classroom_id=classroom.id,
+        teacher_id=effective_teacher_id,
+        role="primary",
+        invited_by=current_user.id,
+    )
+    db.add(primary_ct)
     db.commit()
     db.refresh(classroom)
     logger.info(
@@ -208,8 +255,19 @@ def list_my_classrooms(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List classrooms owned by the current teacher."""
-    query = db.query(Classroom).filter(Classroom.teacher_id == current_user.id)
+    """List classrooms where the current teacher is owner or co-teacher."""
+    # Classrooms where user is co-teacher (via classroom_teachers)
+    co_teacher_classroom_ids = (
+        db.query(ClassroomTeacher.classroom_id)
+        .filter(ClassroomTeacher.teacher_id == current_user.id)
+        .scalar_subquery()
+    )
+    query = db.query(Classroom).filter(
+        or_(
+            Classroom.teacher_id == current_user.id,
+            Classroom.id.in_(co_teacher_classroom_ids),
+        )
+    )
     total = query.count()
     items = query.order_by(Classroom.created_at.desc()).offset(offset).limit(limit).all()
     return ClassroomListResponse(
@@ -251,9 +309,9 @@ def get_classroom_detail(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get classroom detail including student list. Only the classroom's teacher can access."""
+    """Get classroom detail including student list. Owner, co-teachers, and admins can access."""
     classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    _require_member_or_admin(classroom, current_user, db)
     return _classroom_to_detail_response(classroom)
 
 
@@ -372,9 +430,9 @@ def list_classroom_students(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all students enrolled in a classroom. Only the classroom's teacher can access."""
+    """List all students enrolled in a classroom. Owner, co-teachers, and admins can access."""
     classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    _require_member_or_admin(classroom, current_user, db)
 
     return [
         StudentInClassroomResponse(
