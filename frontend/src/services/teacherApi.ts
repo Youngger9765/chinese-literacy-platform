@@ -450,3 +450,32 @@ export async function deleteInstruction(
   );
   return handleResponse<TeacherInstruction>(res);
 }
+
+// --- Classroom stuck-point overview (Issue #91) ---
+
+export interface StudentStuckSummary {
+  student_id: number;
+  student_name: string;
+  story_stuck_count: number;
+  character_stuck_count: number;
+  is_declining: boolean;
+  top_stuck_characters: string[];
+  top_recommendations: string[];
+}
+
+export interface ClassroomStuckResponse {
+  students: StudentStuckSummary[];
+  total_stuck: number;
+}
+
+/** Get stuck-point overview for all students in a classroom. */
+export async function getClassroomStuckOverview(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomStuckResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/stuck-overview`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ClassroomStuckResponse>(res);
+}

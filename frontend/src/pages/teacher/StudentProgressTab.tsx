@@ -25,6 +25,7 @@ import {
   TeacherApiError,
 } from '../../services/teacherApi';
 import TeacherInstructionPanel from './TeacherInstructionPanel';
+import ClassroomStuckAlert from '../../components/teacher/ClassroomStuckAlert';
 
 interface StudentProgressTabProps {
   classroomId: number;
@@ -483,7 +484,10 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   }
 
   return (
-    <div className="p-5">
+    <div className="p-5 space-y-5">
+      {/* Stuck-point alert panel (Issue #91) */}
+      <ClassroomStuckAlert classroomId={classroomId} />
+
       {/* Tag Manager Modal */}
       {tagManagerStudent && (
         <TagManager

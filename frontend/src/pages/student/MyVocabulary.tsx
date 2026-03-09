@@ -1,13 +1,15 @@
 import React from 'react';
 import ErrorPatternsCard from '../../components/student/ErrorPatternsCard';
 import RecommendedVocab from '../../components/student/RecommendedVocab';
+import StuckPointsCard from '../../components/student/StuckPointsCard';
 
 /**
  * MyVocabulary page - "我的生字" (My Vocabulary) section.
  *
  * Shows:
- * 1. Recommended vocab to practice (top 10 most-errored characters)
- * 2. Full list of frequently-errored characters with correction tracking
+ * 1. Personalised learning suggestions based on stuck-point detection (Issue #91)
+ * 2. Recommended vocab to practice (top 10 most-errored characters)
+ * 3. Full list of frequently-errored characters with correction tracking
  */
 const MyVocabulary: React.FC = () => {
   return (
@@ -19,6 +21,7 @@ const MyVocabulary: React.FC = () => {
         </p>
       </div>
 
+      <StuckPointsCard />
       <RecommendedVocab />
       <ErrorPatternsCard />
     </div>

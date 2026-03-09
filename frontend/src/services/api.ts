@@ -488,3 +488,59 @@ export async function markErrorCorrected(
   if (!res.ok) throw new Error(`markErrorCorrected failed: ${res.status}`);
   return res.json();
 }
+
+// --- Stuck-point detection & recommendations (Issue #91) ---
+
+export interface StoryStuckItem {
+  story_slug: string;
+  attempt_count: number;
+  best_accuracy: number;
+  last_attempt: string;
+}
+
+export interface CharacterStuckItem {
+  character: string;
+  error_count: number;
+  last_error_date: string | null;
+}
+
+export interface StuckPointsResponse {
+  story_stuck: StoryStuckItem[];
+  character_stuck: CharacterStuckItem[];
+  is_declining: boolean;
+  accuracy_trend: number[];
+}
+
+export interface RecommendationItem {
+  type: string;
+  title: string;
+  description: string;
+  action: string;
+}
+
+export interface RecommendationsResponse {
+  recommendations: RecommendationItem[];
+  total: number;
+}
+
+export async function getStuckPoints(
+  token: string,
+  studentId: number,
+): Promise<StuckPointsResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/stuck-points`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getStuckPoints failed: ${res.status}`);
+  return res.json();
+}
+
+export async function getRecommendations(
+  token: string,
+  studentId: number,
+): Promise<RecommendationsResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/recommendations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getRecommendations failed: ${res.status}`);
+  return res.json();
+}
