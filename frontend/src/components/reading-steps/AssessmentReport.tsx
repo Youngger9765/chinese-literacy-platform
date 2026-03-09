@@ -12,6 +12,8 @@ import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluency
 import ExitTicket from './ExitTicket';
 import { trackLearningEvent } from '../../utils/analytics';
 import AIAnalysisSection from './AIAnalysisSection';
+import StarCelebration from '../gamification/StarCelebration';
+import { calcStarRating } from '../../utils/starRatingCalc';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -262,9 +264,38 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   // Practice suggestions
   const suggestions = readingAttempt ? generateSuggestions(wrongTokens, accuracy, cpm) : [];
 
+  // --- Star rating calculation (Issue #222) ---
+  // Best available reading accuracy: prefer full reading match rate, fall back to per-segment accuracy
+  const bestReadingAccuracy =
+    fullMatchPct !== null ? fullMatchPct : readingAttempt ? accuracy : null;
+
+  // Comprehension score: use AI-evaluated score if available, else derive from dialogue result
+  const comprehensionPct = comprehensionScores
+    ? Math.round(comprehensionScores.comprehension_score)
+    : comprehensionResult
+    ? Math.round(
+        (comprehensionResult.understoodCount /
+          Math.max(comprehensionResult.requiredCount, 1)) *
+          100,
+      )
+    : null;
+
+  const starCount = calcStarRating({
+    readingAccuracy: bestReadingAccuracy,
+    comprehensionScore: comprehensionPct,
+  });
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
       <CelebrationOverlay score={overallScore} />
+
+      {/* ============ 星星評級 Star Rating (Issue #222) ============ */}
+      <StarCelebration
+        stars={starCount}
+        readingAccuracy={bestReadingAccuracy}
+        comprehensionScore={comprehensionPct}
+      />
+
       {/* Header */}
       <div className="text-center">
         <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
