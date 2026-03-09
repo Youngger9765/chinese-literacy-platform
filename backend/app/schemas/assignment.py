@@ -19,6 +19,10 @@ class AssignmentUpdateRequest(BaseModel):
     is_active: bool | None = None
 
 
+class GradeSubmissionRequest(BaseModel):
+    score: float | None = Field(None, ge=0, le=100)
+
+
 class SubmissionResponse(BaseModel):
     id: int
     assignment_id: int

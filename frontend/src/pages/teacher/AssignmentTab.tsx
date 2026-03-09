@@ -7,10 +7,12 @@ import {
   updateAssignment,
   AssignmentResponse,
   AssignmentDetailResponse,
+  SubmissionResponse,
   AssignmentApiError,
 } from '../../services/assignmentApi';
 import { fetchStories } from '../../services/api';
 import type { Story } from '../../types';
+import AssignmentDetailPanel from './AssignmentDetailPanel';
 
 interface AssignmentTabProps {
   classroomId: number;
@@ -81,6 +83,9 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
     allStories.forEach((s) => map.set(s.id, s));
     return map;
   }, [allStories]);
+
+  // Suppress unused variable warning — storyMap used for future enhancements
+  void storyMap;
 
   const handleOpenCreateForm = () => {
     setShowCreateForm(true);
@@ -160,6 +165,29 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
     [expandedId, token],
   );
 
+  // Update a single submission in expandedDetail after grading
+  const handleGraded = useCallback((updated: SubmissionResponse) => {
+    setExpandedDetail((prev) => {
+      if (!prev) return prev;
+      const newSubs = prev.submissions.map((s) =>
+        s.id === updated.id ? updated : s,
+      );
+      const completedCount = newSubs.filter((s) =>
+        ['submitted', 'graded'].includes(s.status),
+      ).length;
+      return { ...prev, submissions: newSubs, completed_count: completedCount };
+    });
+    // Also update the summary row in assignments list
+    setAssignments((prev) =>
+      prev.map((a) => {
+        if (a.id !== expandedId) return a;
+        const completedCount = a.completed_count;
+        // If newly graded from submitted, count stays same (already counted)
+        return { ...a, completed_count: completedCount };
+      }),
+    );
+  }, [expandedId]);
+
   const formatDate = (dateStr: string | null): string => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('zh-TW', {
@@ -172,35 +200,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const isOverdue = (dueDateStr: string | null): boolean => {
     if (!dueDateStr) return false;
     return new Date(dueDateStr) < new Date();
-  };
-
-  const submissionStatusBadge = (status: string) => {
-    switch (status) {
-      case 'in_progress':
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
-            進行中
-          </span>
-        );
-      case 'submitted':
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
-            已提交
-          </span>
-        );
-      case 'graded':
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
-            已批改
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">
-            待完成
-          </span>
-        );
-    }
   };
 
   if (isLoading) {
@@ -283,7 +282,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
           )}
 
           <form onSubmit={handleCreate} className="space-y-3">
-            {/* Story picker */}
             <div>
               <label htmlFor="assign-story" className="block text-sm font-medium text-gray-700 mb-1">
                 課文 <span className="text-red-500">*</span>
@@ -312,7 +310,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
               )}
             </div>
 
-            {/* Title */}
             <div>
               <label htmlFor="assign-title" className="block text-sm font-medium text-gray-700 mb-1">
                 作業標題（選填）
@@ -327,7 +324,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
               />
             </div>
 
-            {/* Description */}
             <div>
               <label htmlFor="assign-desc" className="block text-sm font-medium text-gray-700 mb-1">
                 說明（選填）
@@ -342,7 +338,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
               />
             </div>
 
-            {/* Due date */}
             <div>
               <label htmlFor="assign-due" className="block text-sm font-medium text-gray-700 mb-1">
                 截止日期（選填）
@@ -356,7 +351,6 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
               />
             </div>
 
-            {/* Buttons */}
             <div className="flex gap-3 justify-end pt-1">
               <button
                 type="button"
@@ -411,7 +405,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                 {assignments.map((a) => {
                   const isExpanded = expandedId === a.id;
                   const displayTitle = a.title || a.story_title;
-                  const completionRate =
+                  const completionPct =
                     a.submission_count > 0
                       ? Math.round((a.completed_count / a.submission_count) * 100)
                       : 0;
@@ -447,9 +441,9 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                         <td className="py-2.5 text-center">
                           <span
                             className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
-                              completionRate === 100
+                              completionPct === 100
                                 ? 'bg-green-100 text-green-700'
-                                : completionRate > 0
+                                : completionPct > 0
                                   ? 'bg-accent-bg text-accent'
                                   : 'bg-gray-100 text-gray-500'
                             }`}
@@ -474,57 +468,16 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                         </td>
                       </tr>
 
-                      {/* Expanded detail: submissions */}
+                      {/* Expanded detail: grading panel */}
                       {isExpanded && (
                         <tr>
                           <td colSpan={6} className="bg-gray-50 px-4 py-3">
-                            {isLoadingDetail ? (
-                              <div className="space-y-2">
-                                {Array.from({ length: 3 }).map((_, i) => (
-                                  <div key={i} className="flex gap-4">
-                                    <div className="h-3 bg-gray-200 animate-pulse rounded w-1/3" />
-                                    <div className="h-3 bg-gray-200 animate-pulse rounded w-1/5" />
-                                    <div className="h-3 bg-gray-200 animate-pulse rounded w-1/6" />
-                                  </div>
-                                ))}
-                              </div>
-                            ) : !expandedDetail ||
-                              expandedDetail.submissions.length === 0 ? (
-                              <p className="text-xs text-gray-500 text-center py-2">
-                                尚無學生提交記錄
-                              </p>
-                            ) : (
-                              <table className="w-full text-xs">
-                                <thead>
-                                  <tr className="text-left text-gray-400">
-                                    <th className="pb-1.5 font-medium">學生姓名</th>
-                                    <th className="pb-1.5 font-medium text-center">狀態</th>
-                                    <th className="pb-1.5 font-medium">提交時間</th>
-                                    <th className="pb-1.5 font-medium text-center">分數</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                  {expandedDetail.submissions.map((sub) => (
-                                    <tr key={sub.id}>
-                                      <td className="py-1.5 text-gray-700">
-                                        {sub.student_name}
-                                      </td>
-                                      <td className="py-1.5 text-center">
-                                        {submissionStatusBadge(sub.status)}
-                                      </td>
-                                      <td className="py-1.5 text-gray-500">
-                                        {formatDate(sub.submitted_at)}
-                                      </td>
-                                      <td className="py-1.5 text-gray-700 text-center font-medium">
-                                        {sub.score != null
-                                          ? `${Math.round(sub.score)}%`
-                                          : '-'}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            )}
+                            <AssignmentDetailPanel
+                              assignmentId={a.id}
+                              detail={expandedDetail!}
+                              isLoading={isLoadingDetail}
+                              onGraded={handleGraded}
+                            />
                           </td>
                         </tr>
                       )}
