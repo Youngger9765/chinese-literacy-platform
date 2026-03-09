@@ -13,6 +13,8 @@ import {
 import { fetchStories } from '../../services/api';
 import type { Story } from '../../types';
 import AssignmentDetailPanel from './AssignmentDetailPanel';
+import ReadingGoalsForm, { GoalsFormState } from '../../components/teacher/ReadingGoalsForm';
+import ReadingGoalsBadge from '../../components/ui/ReadingGoalsBadge';
 
 interface AssignmentTabProps {
   classroomId: number;
@@ -34,6 +36,11 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formDueDate, setFormDueDate] = useState('');
+  const [formGoals, setFormGoals] = useState<GoalsFormState>({
+    target_cpm: null,
+    target_accuracy: null,
+    difficulty_label: null,
+  });
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
@@ -94,6 +101,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
     setFormTitle('');
     setFormDescription('');
     setFormDueDate('');
+    setFormGoals({ target_cpm: null, target_accuracy: null, difficulty_label: null });
     loadStories();
   };
 
@@ -109,6 +117,9 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
         title: formTitle.trim() || undefined,
         description: formDescription.trim() || undefined,
         due_date: formDueDate || undefined,
+        target_cpm: formGoals.target_cpm,
+        target_accuracy: formGoals.target_accuracy,
+        difficulty_label: formGoals.difficulty_label,
       });
       setShowCreateForm(false);
       await loadAssignments();
@@ -351,6 +362,20 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
               />
             </div>
 
+            {/* Reading goals */}
+            <div className="border-t border-gray-100 pt-3">
+              <ReadingGoalsForm
+                value={formGoals}
+                onChange={setFormGoals}
+                grade={
+                  selectedStoryId
+                    ? storyMap.get(selectedStoryId)?.grade ?? null
+                    : null
+                }
+              />
+            </div>
+
+            {/* Buttons */}
             <div className="flex gap-3 justify-end pt-1">
               <button
                 type="button"
@@ -468,10 +493,23 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                         </td>
                       </tr>
 
+<<<<<<< HEAD
                       {/* Expanded detail: grading panel */}
                       {isExpanded && (
                         <tr>
                           <td colSpan={6} className="bg-gray-50 px-4 py-3">
+                            {/* Reading goals preview */}
+                            <div className="mb-3">
+                              <ReadingGoalsBadge
+                                goals={{
+                                  effectiveCpm: a.effective_cpm,
+                                  effectiveAccuracy: a.effective_accuracy,
+                                  difficultyLabel: a.difficulty_label,
+                                  isCustom: a.target_cpm != null || a.target_accuracy != null,
+                                }}
+                                variant="compact"
+                              />
+                            </div>
                             <AssignmentDetailPanel
                               assignmentId={a.id}
                               detail={expandedDetail!}
