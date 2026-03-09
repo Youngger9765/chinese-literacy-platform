@@ -34,6 +34,7 @@ import OnboardingGuide from './components/OnboardingGuide';
 import TermsModal from './components/TermsModal';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import SessionResumePrompt from './components/SessionResumePrompt';
+import StudentProgressDashboard from './components/student/StudentProgressDashboard';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -98,10 +99,11 @@ const HomePage: React.FC = () => {
   );
 };
 
-/** Library page — wraps StoryLibrary with navigation and session resume prompt. */
+/** Library page — wraps StoryLibrary with dashboard + session resume prompt. */
 const LibraryPage: React.FC = () => {
   const navigate = useNavigate();
   const [showResumePrompt, setShowResumePrompt] = React.useState(true);
+  const [completedSlugs, setCompletedSlugs] = React.useState<string[]>([]);
 
   const handleSelectStory = (story: Story) => {
     navigate(`/learn/${story.id}/intro`);
@@ -112,7 +114,8 @@ const LibraryPage: React.FC = () => {
       {showResumePrompt && (
         <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
       )}
-      <StoryLibrary onStartReading={handleSelectStory} />
+      <StudentProgressDashboard onDashboardLoaded={setCompletedSlugs} />
+      <StoryLibrary onStartReading={handleSelectStory} completedSlugs={completedSlugs} />
     </div>
   );
 };
