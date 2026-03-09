@@ -32,6 +32,7 @@ from ..services.ai_service import (
 )
 from ..services.socratic_agent import socratic_agent
 from ..services.stuck_detection_service import build_recommendations, detect_stuck_points
+from ..services.learning_path_service import recommend_next_stories
 
 router = APIRouter(tags=["learning"])
 logger = logging.getLogger(__name__)
@@ -1229,6 +1230,54 @@ def get_recommendations(
     )
     return RecommendationsResponse(
         recommendations=[RecommendationItem(**r) for r in recs],
+        total=len(recs),
+    )
+
+
+# ── AI Learning Path Recommendations (Issue #252) ────────────────────────────
+
+
+class StoryRecommendationItem(BaseModel):
+    story_slug: str
+    title: str
+    grade: int
+    genre: str
+    difficulty_match_score: int
+    reason: str
+
+
+class StoryRecommendationsResponse(BaseModel):
+    recommendations: list[StoryRecommendationItem]
+    total: int
+
+
+@router.get(
+    "/learning/recommendations/{student_id}",
+    response_model=StoryRecommendationsResponse,
+)
+def get_story_recommendations(
+    student_id: int,
+    limit: int = Query(5, ge=1, le=20),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return AI-personalized story recommendations for a student (Issue #252).
+
+    Algorithmic (no ML model) — analyzes:
+      - Past LearningSession accuracy to estimate student grade level
+      - CharacterError records to find weak spots
+      - Unread stories scored by difficulty match + character coverage + variety
+
+    Accessible by the student themselves, their teacher, or their parent.
+    """
+    _verify_student_access(student_id, current_user, db)
+    recs = recommend_next_stories(student_id, db, limit=limit)
+    logger.info(
+        "Story recommendations for student %d: %d results",
+        student_id, len(recs),
+    )
+    return StoryRecommendationsResponse(
+        recommendations=[StoryRecommendationItem(**r) for r in recs],
         total=len(recs),
     )
 

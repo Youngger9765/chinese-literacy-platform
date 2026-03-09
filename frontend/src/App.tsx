@@ -18,6 +18,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import LearningLayout from './layouts/LearningLayout';
 import SessionResumePrompt from './components/SessionResumePrompt';
 import StudentProgressDashboard from './components/student/StudentProgressDashboard';
+import RecommendedStories from './components/student/RecommendedStories';
 import NotificationBell from './components/teacher/NotificationBell';
 
 // ---------------------------------------------------------------------------
@@ -157,6 +158,9 @@ const LibraryPage: React.FC = () => {
         <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
       )}
       <StudentProgressDashboard onDashboardLoaded={setCompletedSlugs} />
+      <div className="mt-6">
+        <RecommendedStories />
+      </div>
       <StoryLibrary onStartReading={handleSelectStory} completedSlugs={completedSlugs} />
     </div>
   );
