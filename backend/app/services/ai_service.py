@@ -284,47 +284,47 @@ async def generate_reading_analysis(session_data: dict) -> dict:
         system_prompt=system_prompt,
         contents=contents,
         response_schema=response_schema,
-        max_tokens=1024,
+        max_tokens=2048,
         temperature=0.7,
     )
 
 
 COMPREHENSION_SCORE_SCHEMA = {
-    "type": "object",
+    "type": "OBJECT",
     "properties": {
         "comprehension_score": {
-            "type": "number",
+            "type": "NUMBER",
             "description": "Overall comprehension score 0-100",
         },
         "literal_score": {
-            "type": "number",
+            "type": "NUMBER",
             "description": "字面理解 score 0-100",
         },
         "inferential_score": {
-            "type": "number",
+            "type": "NUMBER",
             "description": "推論理解 score 0-100",
         },
         "evaluative_score": {
-            "type": "number",
+            "type": "NUMBER",
             "description": "評鑑理解 score 0-100",
         },
         "feedback": {
-            "type": "object",
+            "type": "OBJECT",
             "properties": {
                 "literal": {
-                    "type": "string",
+                    "type": "STRING",
                     "description": "字面理解評語 (Traditional Chinese)",
                 },
                 "inferential": {
-                    "type": "string",
+                    "type": "STRING",
                     "description": "推論理解評語 (Traditional Chinese)",
                 },
                 "evaluative": {
-                    "type": "string",
+                    "type": "STRING",
                     "description": "評鑑理解評語 (Traditional Chinese)",
                 },
                 "overall": {
-                    "type": "string",
+                    "type": "STRING",
                     "description": "整體評語 (Traditional Chinese)",
                 },
             },
@@ -394,7 +394,7 @@ async def evaluate_comprehension(
         system_prompt=system_prompt,
         contents=contents,
         response_schema=COMPREHENSION_SCORE_SCHEMA,
-        max_tokens=1024,
+        max_tokens=2048,
         temperature=0.3,
     )
 
