@@ -19,6 +19,7 @@ import {
   TextProgressItem,
   StepStatusItem,
 } from '../../services/api';
+import CrossTextAnalysis from '../../components/analytics/CrossTextAnalysis';
 
 const STEP_ROUTE: Record<string, string> = {
   intro: 'intro',
@@ -225,6 +226,14 @@ const StudentProgress: React.FC = () => {
                 <TextCard key={t.story_slug} item={t} />
               ))}
             </div>
+
+            {/* Cross-text pattern analysis — shown after 2+ completed texts (Issue #253) */}
+            {data.texts_completed >= 2 && user && (
+              <div>
+                <h2 className="text-base font-bold text-gray-900 mb-3">跨課文學習分析</h2>
+                <CrossTextAnalysis studentId={user.id} />
+              </div>
+            )}
           </>
         )}
       </div>

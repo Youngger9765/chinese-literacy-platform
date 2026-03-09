@@ -32,6 +32,7 @@ from ..services.ai_service import (
 )
 from ..services.socratic_agent import socratic_agent
 from ..services.stuck_detection_service import build_recommendations, detect_stuck_points
+from ..services.cross_text_analysis_service import analyze_cross_text_patterns  # Issue #253
 
 router = APIRouter(tags=["learning"])
 logger = logging.getLogger(__name__)
@@ -1471,3 +1472,25 @@ async def validate_sentence(
         raise HTTPException(status_code=503, detail="AI service unavailable")
 
     return ValidateSentenceResponse(**result)
+
+
+# ── Cross-Text Analysis — student-facing (Issue #253) ─────────────────────────
+
+
+@router.get("/learning/cross-text-analysis/{student_id}")  # Issue #253
+def get_student_cross_text_analysis(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return cross-text learning pattern analysis for a student.
+
+    Access: the student themselves, their teacher, or their linked parent.
+    Uses _verify_student_access for consistent access control.
+    Issue #253.
+    """
+    target = db.query(User).filter(User.id == student_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="找不到此學生")
+    _verify_student_access(student_id, current_user, db)
+    return analyze_cross_text_patterns(student_id, db)

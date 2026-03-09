@@ -835,3 +835,68 @@ export async function reportSessionComplete(
   if (!res.ok) throw new Error(`reportSessionComplete failed: ${res.status}`);
   return res.json();
 }
+
+// ── Cross-Text Analysis — student-facing (Issue #253) ─────────────────────────
+
+export interface CrossTextVocabEntry {
+  session_index: number;
+  completed_at: string;
+  text_title: string;
+  new_words: number;
+  cumulative_words: number;
+}
+
+export interface CrossTextDifficultyEntry {
+  session_index: number;
+  completed_at: string;
+  text_title: string;
+  grade: number | null;
+  genre: string | null;
+  score: number | null;
+}
+
+export interface CrossTextErrorEntry {
+  character: string;
+  error_count: number;
+  text_count: number;
+  dominant_error_type: string;
+}
+
+export interface CrossTextGenreEntry {
+  label: string;
+  avg_score: number;
+  attempts: number;
+}
+
+export interface CrossTextAnalysisResult {
+  student_id: number;
+  total_completed_texts: number;
+  has_enough_data: boolean;
+  text_type_performance: {
+    by_genre: CrossTextGenreEntry[];
+    by_category: CrossTextGenreEntry[];
+    by_grade: Array<{ grade: number; avg_score: number; attempts: number }>;
+  };
+  vocabulary_growth: CrossTextVocabEntry[];
+  difficulty_progression: CrossTextDifficultyEntry[];
+  common_error_patterns: CrossTextErrorEntry[];
+  summary: {
+    strongest_genre: string | null;
+    weakest_genre: string | null;
+    total_vocabulary_words: number;
+    recurring_error_chars: number;
+  };
+}
+
+/** Fetch cross-text learning pattern analysis for a student. Issue #253. */
+export async function getCrossTextAnalysis(
+  token: string,
+  studentId: number,
+): Promise<CrossTextAnalysisResult> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/cross-text-analysis/${studentId}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`getCrossTextAnalysis failed: ${res.status}`);
+  return res.json();
+}
