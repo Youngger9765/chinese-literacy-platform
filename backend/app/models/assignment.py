@@ -16,6 +16,19 @@ from .base import Base
 
 
 class Assignment(Base):
+    """A reading assignment issued by a teacher to a classroom.
+
+    副本策略 (Copy Strategy):
+    - Platform texts (YAML-based, story_id set): stable, never edited → direct reference.
+      The assignment stores only story_id; no DB copy is needed.
+    - DB texts (texts table, text_id set): teacher/school-owned and may be edited.
+      At assignment creation the service calls `fork_text_for_assignment()` which creates
+      a frozen fork (forked_from_id set) so edits to the original do not affect
+      in-flight assignments. text_id then points to the fork, not the original.
+
+    Exactly one of story_id or text_id is set; the other is None.
+    """
+
     __tablename__ = "assignments"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -23,7 +36,15 @@ class Assignment(Base):
         ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False, index=True
     )
     teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    story_id: Mapped[str] = mapped_column(String(50), nullable=False)  # lesson_number as string
+
+    # --- Text source (exactly one of the two must be set) ---
+    # story_id: YAML platform text (lesson_number as string, e.g. "1", "57")
+    story_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    # text_id: DB text (texts table); points to the fork for non-platform texts
+    text_id: Mapped[int | None] = mapped_column(
+        ForeignKey("texts.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+
     title: Mapped[str | None] = mapped_column(String(200), nullable=True)  # custom title, fallback to story title
     description: Mapped[str | None] = mapped_column(Text, nullable=True)  # teacher instructions
     assignment_type: Mapped[str] = mapped_column(String(20), default="reading")  # "reading" | "comprehension"
@@ -36,6 +57,7 @@ class Assignment(Base):
     # Relationships
     classroom: Mapped["Classroom"] = relationship("Classroom", backref="assignments")  # type: ignore[name-defined]
     teacher: Mapped["User"] = relationship("User", foreign_keys=[teacher_id])  # type: ignore[name-defined]
+    text: Mapped["Text | None"] = relationship("Text", foreign_keys=[text_id])  # type: ignore[name-defined]
     submissions: Mapped[list["AssignmentSubmission"]] = relationship(
         "AssignmentSubmission", back_populates="assignment", cascade="all, delete-orphan"
     )

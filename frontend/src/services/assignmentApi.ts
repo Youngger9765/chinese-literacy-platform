@@ -1,6 +1,10 @@
 /**
  * Assignment API service -- teacher assignment management & student assignment access.
- * Follows the same pattern as teacherApi.ts.
+ *
+ * 副本策略 (Copy Strategy):
+ * - story_id: YAML platform text (lesson_number string, e.g. "1"). Never forked.
+ * - text_id: DB text (texts table). Backend forks mutable texts at creation.
+ *   Exactly one of story_id or text_id is set on each assignment.
  */
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
@@ -10,7 +14,11 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 export interface AssignmentResponse {
   id: number;
   classroom_id: number;
-  story_id: string;
+  /** Set for YAML platform texts; null for DB texts. */
+  story_id: string | null;
+  /** Set for DB texts (points to fork for mutable texts); null for YAML texts. */
+  text_id: number | null;
+  /** Resolved display title (from YAML or DB). */
   story_title: string;
   title: string | null;
   description: string | null;
@@ -38,7 +46,8 @@ export interface AssignmentDetailResponse extends AssignmentResponse {
 
 export interface StudentAssignmentResponse {
   assignment_id: number;
-  story_id: string;
+  story_id: string | null;
+  text_id: number | null;
   story_title: string;
   title: string | null;
   description: string | null;
@@ -52,7 +61,8 @@ export interface StudentAssignmentResponse {
 
 export interface StartAssignmentResponse {
   session_id: number;
-  story_id: string;
+  story_id: string | null;
+  text_id: number | null;
   status: string;
 }
 
@@ -92,12 +102,17 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 // --- API functions ---
 
-/** Create a new assignment for a classroom. */
+/**
+ * Create a new assignment for a classroom.
+ * Provide exactly one of story_id (YAML text) or text_id (DB text).
+ */
 export async function createAssignment(
   token: string,
   classroomId: number,
-  data: {
-    story_id: string;
+  data: (
+    | { story_id: string; text_id?: never }
+    | { text_id: number; story_id?: never }
+  ) & {
     title?: string;
     description?: string;
     assignment_type?: string;
