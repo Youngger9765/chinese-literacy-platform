@@ -9,6 +9,7 @@ import ZhuyinToggle from '../ui/ZhuyinToggle';
 import FontSizeControl, { useFontSize } from '../ui/FontSizeControl';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
+import RecordingButton from '../recording/RecordingButton';
 
 /* ------------------------------------------------------------------ */
 /*  Canned response pools — randomly selected to avoid repetition     */
@@ -147,6 +148,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
   const [isTtsPaused, setIsTtsPaused] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
+  const [showRecorder, setShowRecorder] = useState(false);
 
   const isAdvancingRef = useRef(false);
   const isDraggingRef = useRef(false);
@@ -925,6 +927,33 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   {processZhuyin(isAdvancing ? '請稍候...' : '開始朗讀')}
                 </button>
               </>
+            )}
+          </div>
+
+          {/* Optional recording for student self-review */}
+          <div className="border-t border-gray-100 pt-2">
+            <button
+              onClick={() => setShowRecorder(prev => !prev)}
+              className="w-full flex items-center justify-between px-2 py-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              aria-expanded={showRecorder}
+            >
+              <span className="flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.938V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-1.062A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z" />
+                </svg>
+                錄音重聽（選用）
+              </span>
+              <svg
+                className={`w-3.5 h-3.5 transition-transform ${showRecorder ? 'rotate-180' : ''}`}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showRecorder && (
+              <div className="pt-2 pb-1">
+                <RecordingButton maxDurationSeconds={60} label="錄下這段朗讀，完成後可重聽" />
+              </div>
             )}
           </div>
 
