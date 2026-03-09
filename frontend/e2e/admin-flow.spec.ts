@@ -15,28 +15,18 @@ import { test, expect, type Page } from '@playwright/test';
  *   - Students: 小明, 小華, 小美
  */
 
-const ADMIN_EMAIL = 'admin@test.com';
-const ADMIN_PASSWORD = 'admin1234';
 const RUN_ID = Date.now();
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-async function loginAsAdmin(page: Page) {
+/** Ensure admin is authenticated (uses saved storageState from auth.setup.ts). */
+async function ensureAuthenticated(page: Page) {
   await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
-
-  await page.locator('#login-email').fill(ADMIN_EMAIL);
-  await page.locator('#login-password').fill(ADMIN_PASSWORD);
-  await page.locator('button[type="submit"]:has-text("登入")').click();
-
   await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
 }
 
 async function goToAdmin(page: Page) {
-  await loginAsAdmin(page);
-  await page.locator('button:has-text("系統管理")').click();
+  await page.goto('/admin');
   // Wait for sidebar to load with org data
   await expect(page.locator('text=朗朗教育基金會').first()).toBeVisible({ timeout: 15_000 });
 }
@@ -77,7 +67,7 @@ async function navigateToClassroom(page: Page, schoolName: string, classroomName
 
 test.describe('Admin Dashboard - Navigation', () => {
   test('1.1 - Admin can see 系統管理 button after login', async ({ page }) => {
-    await loginAsAdmin(page);
+    await ensureAuthenticated(page);
     await expect(page.locator('button:has-text("系統管理")')).toBeVisible();
   });
 
@@ -247,6 +237,10 @@ test.describe('Admin Dashboard - Users Panel', () => {
     await goToAdmin(page);
     await page.locator('text=使用者管理').click();
     await expect(page.getByRole('heading', { name: '使用者管理' })).toBeVisible({ timeout: 10_000 });
+    // Search for admin user (may not be on first page with many E2E test accounts)
+    const searchInput = page.locator('input[placeholder*="搜尋"]');
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill('王管理員');
     await expect(page.locator('text=王管理員')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('text=admin@test.com')).toBeVisible();
   });
@@ -255,6 +249,10 @@ test.describe('Admin Dashboard - Users Panel', () => {
     await goToAdmin(page);
     await page.locator('text=使用者管理').click();
     await expect(page.getByRole('heading', { name: '使用者管理' })).toBeVisible({ timeout: 10_000 });
+    // Search for admin user to see role badges
+    const searchInput = page.locator('input[placeholder*="搜尋"]');
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill('王管理員');
     // Admin's role badge
     await expect(page.locator('span:has-text("系統管理員")')).toBeVisible({ timeout: 10_000 });
   });
@@ -277,8 +275,15 @@ test.describe('Admin Dashboard - Users Panel', () => {
     await goToAdmin(page);
     await page.locator('text=使用者管理').click();
     await expect(page.getByRole('heading', { name: '使用者管理' })).toBeVisible({ timeout: 10_000 });
+    // Search for admin user first (may not be on first page)
+    const searchInput = page.locator('input[placeholder*="搜尋"]');
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill('王管理員');
+    // Wait for search results to load (debounce 300ms + API)
+    await expect(page.locator('text=共 1 位使用者')).toBeVisible({ timeout: 10_000 });
 
-    await page.locator('text=管理角色').first().click();
+    // Click "管理角色" button (NOT sidebar "角色管理" link)
+    await page.locator('button:has-text("管理角色")').first().click();
     await expect(page.locator('text=目前角色')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('button:has-text("指派角色")')).toBeVisible();
   });
@@ -480,8 +485,13 @@ test.describe('Admin Dashboard - Role Assignment', () => {
     await goToAdmin(page);
     await page.locator('text=使用者管理').click();
     await expect(page.getByRole('heading', { name: '使用者管理' })).toBeVisible({ timeout: 10_000 });
+    // Search for a specific user so "管理角色" button is predictable
+    const searchInput = page.locator('input[placeholder*="搜尋"]');
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill('李老師');
+    await expect(page.locator('text=共 1 位使用者')).toBeVisible({ timeout: 10_000 });
 
-    await page.locator('text=管理角色').first().click();
+    await page.locator('button:has-text("管理角色")').first().click();
     await expect(page.locator('text=目前角色')).toBeVisible({ timeout: 10_000 });
 
     await page.locator('button:has-text("指派角色")').click();
@@ -498,8 +508,13 @@ test.describe('Admin Dashboard - Role Assignment', () => {
     await goToAdmin(page);
     await page.locator('text=使用者管理').click();
     await expect(page.getByRole('heading', { name: '使用者管理' })).toBeVisible({ timeout: 10_000 });
+    // Search for a specific user
+    const searchInput = page.locator('input[placeholder*="搜尋"]');
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill('李老師');
+    await expect(page.locator('text=共 1 位使用者')).toBeVisible({ timeout: 10_000 });
 
-    await page.locator('text=管理角色').first().click();
+    await page.locator('button:has-text("管理角色")').first().click();
     await expect(page.locator('text=目前角色')).toBeVisible({ timeout: 10_000 });
 
     await page.locator('button:has-text("指派角色")').click();

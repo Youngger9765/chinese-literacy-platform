@@ -28,7 +28,7 @@ async function resetToLoginPage(page: Page) {
  */
 async function acceptTermsIfVisible(page: Page) {
   const termsHeading = page.locator('h2:has-text("使用條款同意書")');
-  if (await termsHeading.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await termsHeading.isVisible({ timeout: 1500 }).catch(() => false)) {
     const checkboxes = page.locator('input[type="checkbox"]');
     const count = await checkboxes.count();
     for (let i = 0; i < count; i++) {
@@ -44,7 +44,7 @@ async function acceptTermsIfVisible(page: Page) {
  */
 async function skipOnboardingIfVisible(page: Page) {
   const skipBtn = page.locator('button:has-text("跳過")');
-  if (await skipBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await skipBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
     await skipBtn.click();
     await expect(skipBtn).not.toBeVisible({ timeout: 5000 });
   }
@@ -232,22 +232,17 @@ test('6 - 登入失敗（密碼錯誤）', async ({ page }) => {
 // 7. Duplicate registration
 // ---------------------------------------------------------------------------
 test('7 - 重複註冊', async ({ page }) => {
-  const email = `test-dup-${RUN_ID}@example.com`;
+  // Reuse the email from test 3 to avoid extra registration (rate limit: 5/min)
+  const email = `test-reg-${RUN_ID}@example.com`;
 
   await page.goto('/');
   await resetToLoginPage(page);
-
-  // First registration
-  await registerAndWaitForApp(page, email);
-
-  // Logout and go back to auth pages
-  await logoutAndWaitForLoginPage(page);
 
   // Switch to register page
   await page.locator('button:has-text("註冊帳號")').click();
   await expect(page.locator('text=建立你的帳號')).toBeVisible();
 
-  // Second registration with same email
+  // Try to register with same email as test 3
   await page.locator('#register-name').fill('Duplicate User');
   await page.locator('#register-email').fill(email);
   await page.locator('#register-password').fill(TEST_PASSWORD);

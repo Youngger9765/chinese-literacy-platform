@@ -23,9 +23,9 @@ export const TEACHER_PASSWORD = 'teacher1234';
  * Accept the Terms of Service modal if it's visible.
  * Checks all checkboxes and clicks the confirm button.
  */
-async function acceptTermsIfVisible(page: Page): Promise<void> {
+async function acceptTermsIfVisible(page: Page, waitMs = 3000): Promise<void> {
   const termsHeading = page.locator('h2:has-text("使用條款同意書")');
-  if (await termsHeading.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await termsHeading.isVisible({ timeout: waitMs }).catch(() => false)) {
     const checkboxes = page.locator('input[type="checkbox"]');
     const count = await checkboxes.count();
     for (let i = 0; i < count; i++) {
@@ -39,9 +39,9 @@ async function acceptTermsIfVisible(page: Page): Promise<void> {
 /**
  * Skip the Onboarding Guide modal if it's visible.
  */
-async function skipOnboardingIfVisible(page: Page): Promise<void> {
+async function skipOnboardingIfVisible(page: Page, waitMs = 2000): Promise<void> {
   const skipBtn = page.locator('button:has-text("跳過")');
-  if (await skipBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await skipBtn.isVisible({ timeout: waitMs }).catch(() => false)) {
     await skipBtn.click();
     await expect(skipBtn).not.toBeVisible({ timeout: 5000 });
   }

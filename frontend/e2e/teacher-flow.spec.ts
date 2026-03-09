@@ -3,8 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 /**
  * Teacher Dashboard E2E tests for LingoLeap preview environment.
  *
- * Tests the full teacher flow: login → 班級管理 button → /teacher dashboard
- * → classroom cards → classroom detail → tabs → create classroom form.
+ * Uses saved storageState from auth.setup.ts — no login needed per test.
  *
  * Seed data on preview:
  *   - Teacher: teacher@test.com / teacher1234 (李老師)
@@ -13,20 +12,14 @@ import { test, expect, type Page } from '@playwright/test';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-async function loginAsTeacher(page: Page) {
+/** Ensure teacher is authenticated and on the home page. */
+async function ensureAuthenticated(page: Page) {
   await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
-  await page.locator('#login-email').fill('teacher@test.com');
-  await page.locator('#login-password').fill('teacher1234');
-  await page.locator('button[type="submit"]:has-text("登入")').click();
   await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
 }
 
 async function goToTeacherDashboard(page: Page) {
-  await loginAsTeacher(page);
-  await page.locator('button:has-text("班級管理")').click();
+  await page.goto('/teacher');
   await expect(page.locator('h1:has-text("班級管理")')).toBeVisible({ timeout: 15_000 });
 }
 
@@ -44,24 +37,24 @@ async function navigateToClassroom(page: Page, classroomName: string) {
 
 test.describe('Teacher Dashboard - Navigation', () => {
   test('1.1 - Teacher login shows 班級管理 button', async ({ page }) => {
-    await loginAsTeacher(page);
+    await ensureAuthenticated(page);
     await expect(page.locator('button:has-text("班級管理")')).toBeVisible();
   });
 
   test('1.2 - Clicking 班級管理 navigates to /teacher', async ({ page }) => {
-    await loginAsTeacher(page);
+    await ensureAuthenticated(page);
     await page.locator('button:has-text("班級管理")').click();
     await expect(page.locator('h1:has-text("班級管理")')).toBeVisible({ timeout: 15_000 });
     expect(page.url()).toContain('/teacher');
   });
 
   test('1.3 - Teacher does NOT see 系統管理 button', async ({ page }) => {
-    await loginAsTeacher(page);
+    await ensureAuthenticated(page);
     await expect(page.locator('button:has-text("系統管理")')).not.toBeVisible();
   });
 
   test('1.4 - Teacher does NOT see 加入班級 button', async ({ page }) => {
-    await loginAsTeacher(page);
+    await ensureAuthenticated(page);
     // Teachers have teacher role so 加入班級 is hidden (only shown to plain students)
     await expect(page.locator('button:has-text("加入班級")')).not.toBeVisible();
   });
