@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "dev-secret-change-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 480  # 8 hours
+    google_client_id: str = ""  # set GOOGLE_CLIENT_ID env var in Cloud Run
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

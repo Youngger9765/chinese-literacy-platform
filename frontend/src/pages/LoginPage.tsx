@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthError } from '../services/authApi';
 import { trackEvent } from '../utils/analytics';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 interface LoginPageProps {
   onSwitchToRegister?: () => void;
@@ -12,7 +13,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -51,7 +52,26 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
     }
   };
 
+  const handleGoogleCredential = async (credential: string) => {
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await loginWithGoogle(credential);
+      trackEvent('auth', 'google_login_success');
+      navigate(from, { replace: true });
+    } catch (err) {
+      if (err instanceof AuthError) {
+        setError(err.message);
+      } else {
+        setError('Google 登入失敗，請稍後再試');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
+
     <div className="min-h-screen flex flex-col items-center justify-center bg-amber-50 px-4">
       <div className="w-full max-w-sm">
         {/* Logo / Brand */}
@@ -127,6 +147,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
             </button>
           </div>
         </form>
+
+        {/* Google Sign-In */}
+        <div className="mt-4">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-2 bg-amber-50 text-gray-400">或</span>
+            </div>
+          </div>
+          <div className="mt-4">
+            <GoogleSignInButton onCredential={handleGoogleCredential} width={352} />
+          </div>
+        </div>
 
         {/* Switch to Register */}
         <p className="text-center text-sm text-gray-500 mt-6">

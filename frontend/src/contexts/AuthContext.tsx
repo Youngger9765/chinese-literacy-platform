@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, AuthUser, AuthError } from '../services/authApi';
+import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, googleLogin as apiGoogleLogin, AuthUser, AuthError } from '../services/authApi';
 
 const TOKEN_KEY = 'lingoleap_token';
 
@@ -18,6 +18,7 @@ interface AuthContextValue {
   /** Re-fetch user data from /api/users/me and update the context. */
   refreshUser: () => Promise<void>;
   acceptTerms: () => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<{ isNewUser: boolean }>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -99,6 +100,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(userData);
   }, []);
 
+  const loginWithGoogle = useCallback(async (credential: string): Promise<{ isNewUser: boolean }> => {
+    const response = await apiGoogleLogin(credential);
+    const newToken = response.access_token;
+    localStorage.setItem(TOKEN_KEY, newToken);
+    setToken(newToken);
+    const userData = await getMe(newToken);
+    setUser(userData);
+    return { isNewUser: response.is_new_user };
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
@@ -146,6 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearMustChangePassword,
     refreshUser,
     acceptTerms,
+    loginWithGoogle,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
