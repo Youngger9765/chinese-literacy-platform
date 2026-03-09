@@ -230,6 +230,8 @@ export async function deleteAssignment(
     }
     throw new AssignmentApiError(message, res.status);
   }
+}
+
 /** Get detail for one of the current student's assignments. */
 export async function getMyAssignmentDetail(
   token: string,
