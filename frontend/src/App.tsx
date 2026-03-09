@@ -23,6 +23,7 @@ import IntroPage from './pages/learning/IntroPage';
 import TutorPage from './pages/learning/TutorPage';
 import ComprehensionPage from './pages/learning/ComprehensionPage';
 import VocabPage from './pages/learning/VocabPage';
+import DictationPage from './pages/learning/DictationPage';
 import FullReadingPage from './pages/learning/FullReadingPage';
 import ReportPage from './pages/learning/ReportPage';
 import JoinClassroomPage from './pages/JoinClassroomPage';
@@ -250,6 +251,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       case AppView.TUTOR:
       case AppView.COMPREHENSION:
       case AppView.VOCAB:
+      case AppView.DICTATION:
       case AppView.FULL_READING:
       case AppView.REPORT: {
         const match = window.location.pathname.match(/\/learn\/([^/]+)/);
@@ -260,6 +262,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             [AppView.TUTOR]: 'tutor',
             [AppView.COMPREHENSION]: 'comprehension',
             [AppView.VOCAB]: 'vocab',
+            [AppView.DICTATION]: 'dictation',
             [AppView.FULL_READING]: 'full-reading',
             [AppView.REPORT]: 'report',
           };
@@ -625,6 +628,7 @@ const App: React.FC = () => {
             <Route path="tutor" element={<TutorPage />} />
             <Route path="comprehension" element={<ComprehensionPage />} />
             <Route path="vocab" element={<VocabPage />} />
+            <Route path="dictation" element={<DictationPage />} />
             <Route path="full-reading" element={<FullReadingPage />} />
             <Route path="report" element={<ReportPage />} />
             {/* Default: redirect to intro */}
