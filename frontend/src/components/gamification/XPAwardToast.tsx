@@ -4,10 +4,31 @@
  * Auto-dismisses after 4 seconds or on button click.
  */
 import React, { useEffect, useState } from 'react';
-import type { SessionCompletionResult } from '../../services/gamificationApi';
+
+/** Minimal shape needed for the toast — compatible with both gamificationApi and api.ts results. */
+export interface XPAwardResult {
+  xp_earned: number;
+  xp_breakdown?: { event_type: string; xp: number; note: string }[];
+  new_total_xp: number;
+  level_info: {
+    level: number;
+    level_name: string;
+    total_xp: number;
+    progress_pct: number;
+    next_level_xp: number | null;
+    xp_to_next: number;
+    current_level_xp: number;
+  };
+  streak: {
+    current: number;
+    longest: number;
+  };
+  badges_unlocked: string[];
+  notes?: string[];
+}
 
 interface XPAwardToastProps {
-  result: SessionCompletionResult;
+  result: XPAwardResult;
   onDismiss: () => void;
 }
 

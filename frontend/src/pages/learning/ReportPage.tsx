@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AssessmentReport from '../../components/reading-steps/AssessmentReport';
-import XPAwardToast from '../../components/gamification/XPAwardToast';
+import XPAwardToast, { type XPAwardResult } from '../../components/gamification/XPAwardToast';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import { useAuth } from '../../contexts/AuthContext';
-import { awardSessionCompletion, type SessionCompletionResult } from '../../services/gamificationApi';
+import { reportSessionComplete } from '../../services/api';
 
 const ReportPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -12,40 +12,49 @@ const ReportPage: React.FC = () => {
   const { user, token } = useAuth();
   const navigate = useNavigate();
 
-  const [xpResult, setXpResult] = useState<SessionCompletionResult | null>(null);
+  const [xpResult, setXpResult] = useState<XPAwardResult | null>(null);
   const [showXpToast, setShowXpToast] = useState(false);
 
-  // Clear active session and award XP when report is reached
+  // Clear active session from localStorage when report is reached
   useEffect(() => {
     handleSessionComplete();
   }, [handleSessionComplete]);
 
-  // Award XP once we have a dbSessionId (set after backend session creation)
+  // Award XP once we have a confirmed backend session ID
   useEffect(() => {
     if (!dbSessionId || !token || !user?.id) return;
 
-    const readingAccuracy = session?.readingAttempt?.accuracy ?? null;
+    const readingAccuracy = session?.readingAttempt?.accuracy;
     const comprehensionPct = session?.comprehensionResult
       ? Math.round(
           (session.comprehensionResult.understoodCount /
             Math.max(session.comprehensionResult.requiredCount, 1)) *
             100
         )
-      : null;
-    const comprehensionPassed = comprehensionPct !== null && comprehensionPct >= 60;
+      : undefined;
+    const comprehensionPassed = comprehensionPct !== undefined && comprehensionPct >= 60;
 
-    awardSessionCompletion(parseInt(user.id, 10), dbSessionId, readingAccuracy, comprehensionPassed, token)
+    reportSessionComplete(Number(user.id), dbSessionId, token, {
+      readingAccuracy,
+      comprehensionPassed,
+    })
       .then((result) => {
         if (result.xp_earned > 0) {
-          setXpResult(result);
+          setXpResult({
+            xp_earned: result.xp_earned,
+            new_total_xp: result.new_total_xp,
+            level_info: result.level_info,
+            streak: result.streak,
+            badges_unlocked: result.badges_unlocked,
+          });
           setShowXpToast(true);
         }
       })
       .catch((err: Error) => {
-        // Non-critical — don't show error to student
+        // Non-critical — don't block student view
         console.warn('XP award failed (non-blocking):', err.message);
       });
-    // Only run once per report page load
+    // Run once per report page load — dbSessionId is the stable identifier
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbSessionId]);
 
