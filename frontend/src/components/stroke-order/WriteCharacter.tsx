@@ -25,6 +25,158 @@ enum Step {
   COMPLETE,
 }
 
+/* ================================================================ */
+/*  Confetti decoration for completion screen                        */
+/* ================================================================ */
+
+function ConfettiParticles() {
+  const pieces = [
+    { color: 'bg-yellow-400', anim: 'animate-confetti-drop-1', left: '20%', shape: 'rounded-sm w-3 h-3' },
+    { color: 'bg-pink-400',   anim: 'animate-confetti-drop-2', left: '50%', shape: 'rounded-full w-2.5 h-2.5' },
+    { color: 'bg-sky-400',    anim: 'animate-confetti-drop-3', left: '75%', shape: 'rounded-sm w-2 h-3' },
+    { color: 'bg-emerald-400',anim: 'animate-confetti-drop-1', left: '35%', shape: 'rounded-full w-2 h-2' },
+    { color: 'bg-violet-400', anim: 'animate-confetti-drop-2', left: '65%', shape: 'rounded-sm w-3 h-2' },
+    { color: 'bg-orange-400', anim: 'animate-confetti-drop-3', left: '85%', shape: 'rounded-full w-2.5 h-2.5' },
+  ];
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+      {pieces.map((p, i) => (
+        <div
+          key={i}
+          className={`absolute top-4 ${p.color} ${p.anim} ${p.shape} opacity-0`}
+          style={{ left: p.left }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ================================================================ */
+/*  Practice progress dots                                           */
+/* ================================================================ */
+
+interface ProgressDotsProps {
+  step: Step;
+  practiceLeft: number;
+}
+
+function ProgressDots({ step, practiceLeft }: ProgressDotsProps) {
+  if (step === Step.ANIMATION || step === Step.COMPLETE) return null;
+
+  // 3 bordered rounds + 1 no-outline round = 4 total
+  const dots = [
+    { label: '1', filled: practiceLeft < 4, isNoOutline: false },
+    { label: '2', filled: practiceLeft < 3, isNoOutline: false },
+    { label: '3', filled: practiceLeft < 2, isNoOutline: false },
+    { label: '無框', filled: practiceLeft < 1, isNoOutline: true },
+  ];
+
+  return (
+    <div className="flex items-center gap-2">
+      {dots.map((dot, i) => (
+        <React.Fragment key={i}>
+          {i === 3 && (
+            <div className="w-4 h-px bg-slate-600" />
+          )}
+          <div className="flex flex-col items-center gap-0.5">
+            <div
+              className={`flex items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                dot.isNoOutline ? 'w-7 h-7' : 'w-6 h-6'
+              } ${
+                dot.filled
+                  ? dot.isNoOutline
+                    ? 'border-violet-500 bg-violet-500'
+                    : 'border-orange-500 bg-orange-500'
+                  : 'border-slate-600 bg-transparent'
+              }`}
+            >
+              {dot.filled && (
+                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+            <span className={`text-[9px] ${dot.filled ? 'text-orange-400' : 'text-slate-600'}`}>
+              {dot.label}
+            </span>
+          </div>
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+/* ================================================================ */
+/*  Step guidance banner                                             */
+/* ================================================================ */
+
+interface StepGuidanceProps {
+  step: Step;
+  mode: string;
+  nStrokes: number;
+  completedStrokes: number;
+}
+
+function StepGuidance({ step, mode, nStrokes, completedStrokes }: StepGuidanceProps) {
+  if (step === Step.COMPLETE) return null;
+
+  let icon = '';
+  let text = '';
+  let subtext = '';
+  let colorClass = 'text-slate-400 border-slate-700';
+
+  if (step === Step.ANIMATION) {
+    icon = '👀';
+    text = '觀看筆順動畫';
+    subtext = '準備好了就按「開始練習」';
+    colorClass = 'text-sky-300 border-sky-900 bg-sky-950/40';
+  } else if (mode === 'quizzing') {
+    const remaining = nStrokes - completedStrokes;
+    const isNoOutline = step === Step.PRACTICE_NO_OUTLINE;
+    icon = isNoOutline ? '🧠' : '✏️';
+    text = isNoOutline ? '不看框線，憑記憶寫' : '跟著筆順，一筆一筆寫';
+    subtext = remaining > 0 ? `還有 ${remaining} 筆` : '最後一筆了！';
+    colorClass = isNoOutline
+      ? 'text-violet-300 border-violet-900 bg-violet-950/40'
+      : 'text-emerald-300 border-emerald-900 bg-emerald-950/40';
+  } else if (mode === 'idle' && step !== Step.ANIMATION) {
+    icon = '✅';
+    text = '這一輪寫完了！';
+    colorClass = 'text-emerald-300 border-emerald-900 bg-emerald-950/40';
+  }
+
+  if (!text) return null;
+
+  return (
+    <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm animate-slide-up-fast ${colorClass}`}>
+      <span>{icon}</span>
+      <span className="font-medium">{text}</span>
+      {subtext && <span className="opacity-60 text-xs">{subtext}</span>}
+    </div>
+  );
+}
+
+/* ================================================================ */
+/*  Toast notification                                               */
+/* ================================================================ */
+
+function Toast({ message, type }: { message: string; type: 'success' | 'error' | 'info' }) {
+  const colors = {
+    success: 'bg-emerald-600 text-white',
+    error: 'bg-red-600 text-white',
+    info: 'bg-slate-700 text-white',
+  };
+  return (
+    <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl shadow-2xl text-sm font-bold z-50 animate-toast-in whitespace-nowrap ${colors[type]}`}>
+      {message}
+    </div>
+  );
+}
+
+/* ================================================================ */
+/*  Main component                                                   */
+/* ================================================================ */
+
 const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, onBack }) => {
   /* ---- React state (drives UI controls) ---- */
   const [data, setData] = useState<CharacterStrokeData | null>(null);
@@ -34,7 +186,10 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   const [mode, setMode] = useState<'idle' | 'animating' | 'quizzing'>('idle');
   const [practiceLeft, setPracticeLeft] = useState(4);
   const [toast, setToast] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
   const [showOutline, setShowOutline] = useState(true);
+  const [canvasShake, setCanvasShake] = useState(false);
+  const [completedStrokesUI, setCompletedStrokesUI] = useState(0);
 
   /* ---- Refs for imperative canvas rendering ---- */
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -76,6 +231,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   const isAutoLoopingRef = useRef(false);
   const pendingAutoStartRef = useRef(false);
   const loopTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const shakeTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   /* ---- Off-screen canvas (created once, reused) ---- */
   const getOffCanvas = useCallback(() => {
@@ -114,6 +270,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     setPracticeLeft(4);
     setShowOutline(true);
     setToast('');
+    setCompletedStrokesUI(0);
     r.current = {
       completedStrokes: 0, animStroke: -1, animProgress: 0,
       hintStroke: -1, hintProgress: 0, correctPaths: [], activeBrush: [],
@@ -146,6 +303,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       cancelAnimationFrame(animFrameRef.current);
       cancelAnimationFrame(hintFrameRef.current);
       clearTimeout(loopTimerRef.current);
+      clearTimeout(shakeTimerRef.current);
     };
   }, [character, resetState]);
 
@@ -160,6 +318,26 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     const t = setTimeout(() => setToast(''), 3500);
     return () => clearTimeout(t);
   }, [toast]);
+
+  /* ---- Trigger shake animation ---- */
+  const triggerShake = useCallback(() => {
+    setCanvasShake(false);
+    clearTimeout(shakeTimerRef.current);
+    // Use rAF to allow React to clear the class first
+    requestAnimationFrame(() => {
+      setCanvasShake(true);
+      shakeTimerRef.current = setTimeout(() => setCanvasShake(false), 450);
+    });
+  }, []);
+
+  const showToast = useCallback((msg: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast('');
+    // slight delay to re-trigger animation
+    requestAnimationFrame(() => {
+      setToast(msg);
+      setToastType(type);
+    });
+  }, []);
 
   /* ================================================================ */
   /*  Animation                                                        */
@@ -247,6 +425,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     r.current.hintStroke = -1;
     m.current.mistakes = new Array(d.nStrokes).fill(0);
     m.current.quizStroke = 0;
+    setCompletedStrokesUI(0);
     doRender();
   }, [doRender]);
 
@@ -296,6 +475,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       r.current.correctPaths = [...r.current.correctPaths, points];
       m.current.quizStroke = stroke + 1;
       r.current.completedStrokes = stroke + 1;
+      setCompletedStrokesUI(stroke + 1);
       doRender();
 
       if (stroke + 1 >= d.nStrokes) {
@@ -311,29 +491,30 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
             m.current.showOutline = false;
             setShowOutline(false);
             setStep(Step.PRACTICE_NO_OUTLINE);
-            setToast('👏 很棒！現在試著不看邊框，憑記憶寫一次！');
+            showToast('👏 很棒！現在試著不看邊框，憑記憶寫一次！', 'info');
             startQuiz();
           } else {
             const nextStep = (s + 1) as Step;
             setStep(nextStep);
-            setToast(`恭喜筆畫正確！讓我們再練習 ${newLeft} 次哦！`);
+            showToast(`恭喜筆畫正確！讓我們再練習 ${newLeft} 次哦！`, 'success');
             startQuiz();
           }
         } else if (s === Step.PRACTICE_NO_OUTLINE) {
           setPracticeLeft(pl - 1);
           setStep(Step.COMPLETE);
-          setToast('恭喜筆畫正確！寫字練習完成！');
+          showToast('恭喜筆畫正確！寫字練習完成！', 'success');
         } else {
-          setToast('恭喜筆畫正確！');
+          showToast('恭喜筆畫正確！', 'success');
         }
       }
     } else {
       m.current.mistakes[stroke] = (m.current.mistakes[stroke] || 0) + 1;
+      triggerShake();
       if (m.current.mistakes[stroke] >= HINT_THRESHOLD) {
         showHint();
       }
     }
-  }, [doRender, showHint, startQuiz]);
+  }, [doRender, showHint, startQuiz, triggerShake, showToast]);
 
   /* ================================================================ */
   /*  Pointer events (drawing)                                         */
@@ -377,10 +558,11 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   }, [doRender, handleStrokeDrawn]);
 
   /* ================================================================ */
-  /*  Button logic                                                     */
+  /*  Derived values                                                   */
   /* ================================================================ */
 
   const isComplete = step === Step.COMPLETE;
+  const nStrokes = data?.nStrokes ?? 0;
 
   /* ================================================================ */
   /*  JSX                                                              */
@@ -417,65 +599,78 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         {onBack && (
           <button
             onClick={onBack}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-white transition-colors p-1"
+            aria-label="返回"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
         )}
-        <h2 className="text-2xl font-bold text-white flex-1 text-center">
-          寫一寫：{character}
-        </h2>
+        <div className="flex-1 text-center">
+          <h2 className="text-2xl font-bold text-white">
+            寫一寫：<span className="text-accent-light">{character}</span>
+          </h2>
+          {nStrokes > 0 && (
+            <p className="text-xs text-slate-500 mt-0.5">共 {nStrokes} 筆</p>
+          )}
+        </div>
+        {/* Spacer to balance back button */}
+        {onBack && <div className="w-8" />}
       </div>
 
-      {/* Practice progress indicators */}
-      {step !== Step.ANIMATION && !isComplete && (
-        <div className="flex gap-1.5 items-center">
-          {[4, 3, 2].map(n => (
+      {/* Progress dots */}
+      <ProgressDots step={step} practiceLeft={practiceLeft} />
+
+      {/* Stroke progress bar (during quiz) */}
+      {mode === 'quizzing' && nStrokes > 0 && (
+        <div className="w-full max-w-lg">
+          <div className="flex justify-between text-[10px] text-slate-500 mb-1">
+            <span>筆畫進度</span>
+            <span>{completedStrokesUI} / {nStrokes}</span>
+          </div>
+          <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
             <div
-              key={n}
-              className={`w-5 h-5 rounded-full border-2 transition-all ${
-                practiceLeft >= n
-                  ? 'border-slate-500 bg-transparent'
-                  : 'border-orange-500 bg-orange-500'
-              }`}
+              className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+              style={{ width: `${(completedStrokesUI / nStrokes) * 100}%` }}
             />
-          ))}
-          <div className="w-3" />
-          <div
-            className={`w-5 h-5 rounded-full border-2 transition-all ${
-              practiceLeft >= 1
-                ? 'border-slate-500 bg-transparent'
-                : 'border-orange-500 bg-orange-500'
-            }`}
-          />
+          </div>
         </div>
       )}
 
       {/* Canvas */}
-      <div className="relative w-full max-w-lg aspect-square">
+      <div
+        className={`relative w-full max-w-lg aspect-square ${canvasShake ? 'animate-shake' : ''}`}
+      >
+        {/* Completion overlay */}
         {isComplete && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0d1117]/95 rounded-xl z-10 gap-5 p-6">
-            <div className="text-6xl">🎉</div>
-            <p className="text-5xl font-black text-white">{character}</p>
-            <p className="text-xl font-bold text-emerald-400">練習完成！</p>
-            {onComplete && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0d1117]/95 rounded-xl z-10 gap-4 p-6 animate-fade-in">
+            <ConfettiParticles />
+            <div className="animate-star-burst text-6xl select-none">🎉</div>
+            <p className="text-6xl font-black text-white animate-pop">{character}</p>
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-xl font-bold text-emerald-400">練習完成！</p>
+              <p className="text-xs text-slate-400">很棒，{nStrokes} 筆全部正確</p>
+            </div>
+            <div className="flex flex-col gap-2 w-full max-w-xs mt-2">
+              {onComplete && (
+                <button
+                  onClick={onComplete}
+                  className="w-full px-8 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl shadow-lg transition-all active:scale-95 text-base"
+                >
+                  完成，回到練習清單
+                </button>
+              )}
               <button
-                onClick={onComplete}
-                className="mt-2 px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 text-base"
+                onClick={handleRetry}
+                className="w-full px-6 py-2.5 text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 rounded-2xl transition-all text-sm"
               >
-                完成，回到練習清單
+                再練一次
               </button>
-            )}
-            <button
-              onClick={handleRetry}
-              className="px-6 py-2 text-slate-400 hover:text-white border border-slate-600 hover:border-slate-400 rounded-xl transition-all text-sm"
-            >
-              再練一次
-            </button>
+            </div>
           </div>
         )}
+
         <canvas
           ref={canvasRef}
           width={CANVAS_SIZE}
@@ -489,7 +684,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         />
       </div>
 
-      {/* Controls */}
+      {/* Begin practice button (animation phase) */}
       {step === Step.ANIMATION && (
         <button
           onClick={handleBeginPractice}
@@ -500,27 +695,17 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       )}
 
       {/* Step guidance */}
-      <StepGuidance mode={mode} />
+      <StepGuidance
+        step={step}
+        mode={mode}
+        nStrokes={nStrokes}
+        completedStrokes={completedStrokesUI}
+      />
 
       {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-emerald-600 text-white rounded-xl shadow-2xl text-sm font-bold z-50 animate-bounce">
-          {toast}
-        </div>
-      )}
+      {toast && <Toast message={toast} type={toastType} />}
     </div>
   );
 };
-
-/* ---- Sub-components ---- */
-
-function StepGuidance({ mode }: { mode: string }) {
-  let text = '';
-  if (mode === 'animating') text = '觀看筆順動畫，按「開始練習」開始書寫';
-  else if (mode === 'quizzing') text = '請在格子裡寫出每一筆';
-  return text ? (
-    <p className="text-xs text-slate-500 text-center max-w-xs">{text}</p>
-  ) : null;
-}
 
 export default WriteCharacter;
