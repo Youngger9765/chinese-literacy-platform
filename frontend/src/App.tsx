@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AppView, Story } from './types';
@@ -15,32 +15,67 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import ForgotPassword from './pages/ForgotPassword';
-import TeacherDashboard from './pages/teacher/TeacherDashboard';
-import ClassroomDetail from './pages/teacher/ClassroomDetail';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import LearningLayout from './layouts/LearningLayout';
-import IntroPage from './pages/learning/IntroPage';
-import TutorPage from './pages/learning/TutorPage';
-import ComprehensionPage from './pages/learning/ComprehensionPage';
-import VocabPage from './pages/learning/VocabPage';
-import DictationPage from './pages/learning/DictationPage';
-import FullReadingPage from './pages/learning/FullReadingPage';
-import ReportPage from './pages/learning/ReportPage';
-import JoinClassroomPage from './pages/JoinClassroomPage';
-import MyAssignments from './pages/student/MyAssignments';
-import LearningHistory from './pages/student/LearningHistory';
-import StudentProgress from './pages/student/StudentProgress';
-import DialogueHistory from './pages/student/DialogueHistory';
-import MyVocabulary from './pages/student/MyVocabulary';
-import OnboardingGuide from './components/OnboardingGuide';
-import TermsModal from './components/TermsModal';
-import PrivacyPolicy from './pages/PrivacyPolicy';
 import SessionResumePrompt from './components/SessionResumePrompt';
 import StudentProgressDashboard from './components/student/StudentProgressDashboard';
 import NotificationBell from './components/teacher/NotificationBell';
-import ParentDashboard from './pages/parent/ParentDashboard';
-import HelpPage from './pages/HelpPage';
-import AchievementsPage from './pages/student/AchievementsPage';
+
+// ---------------------------------------------------------------------------
+// Route-level code splitting (lazy loading)
+// Heavy pages are split into separate JS chunks to reduce initial bundle size.
+// Each lazy import becomes its own chunk that loads on demand.
+// ---------------------------------------------------------------------------
+
+/** Route-level Suspense fallback — minimal spinner, matches app loading style. */
+const PageLoader: React.FC = () => (
+  <div className="flex-1 flex items-center justify-center bg-amber-50">
+    <div
+      className="flex flex-col items-center gap-3"
+      role="status"
+      aria-label="頁面載入中，請稍候"
+    >
+      <div
+        className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin"
+        aria-hidden="true"
+      />
+      <span className="text-sm text-gray-400">載入中...</span>
+    </div>
+  </div>
+);
+
+// Teacher pages — loaded on demand (not needed for student-only sessions)
+const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard'));
+const ClassroomDetail = lazy(() => import('./pages/teacher/ClassroomDetail'));
+
+// Admin page — loaded only for system_admin / org_admin roles
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+
+// Learning step pages — split per step so only the active step's code loads
+const IntroPage = lazy(() => import('./pages/learning/IntroPage'));
+const TutorPage = lazy(() => import('./pages/learning/TutorPage'));
+const ComprehensionPage = lazy(() => import('./pages/learning/ComprehensionPage'));
+const VocabPage = lazy(() => import('./pages/learning/VocabPage'));
+const DictationPage = lazy(() => import('./pages/learning/DictationPage'));
+const FullReadingPage = lazy(() => import('./pages/learning/FullReadingPage'));
+const ReportPage = lazy(() => import('./pages/learning/ReportPage'));
+
+// Student pages — infrequently accessed, split to reduce initial load
+const JoinClassroomPage = lazy(() => import('./pages/JoinClassroomPage'));
+const MyAssignments = lazy(() => import('./pages/student/MyAssignments'));
+const LearningHistory = lazy(() => import('./pages/student/LearningHistory'));
+const StudentProgress = lazy(() => import('./pages/student/StudentProgress'));
+const DialogueHistory = lazy(() => import('./pages/student/DialogueHistory'));
+const MyVocabulary = lazy(() => import('./pages/student/MyVocabulary'));
+const AchievementsPage = lazy(() => import('./pages/student/AchievementsPage'));
+
+// Parent dashboard — role-specific, split separately
+const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard'));
+
+// Utility pages — rarely visited after first load
+const OnboardingGuide = lazy(() => import('./components/OnboardingGuide'));
+const TermsModal = lazy(() => import('./components/TermsModal'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const HelpPage = lazy(() => import('./pages/HelpPage'));
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -472,7 +507,9 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </main>
 
       {/* Onboarding overlay for first-time students */}
-      <OnboardingWrapper />
+      <Suspense fallback={null}>
+        <OnboardingWrapper />
+      </Suspense>
 
       {/* Feedback button — visible to all authenticated users */}
       <FeedbackButton />
@@ -518,13 +555,15 @@ const TermsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <>
       {children}
       {needsTermsAcceptance && (
-        <TermsModal
-          onAccept={acceptTerms}
-          onAccepted={() => {
-            // AuthContext already updates user state after acceptTerms resolves.
-            // Nothing extra needed here.
-          }}
-        />
+        <Suspense fallback={null}>
+          <TermsModal
+            onAccept={acceptTerms}
+            onAccepted={() => {
+              // AuthContext already updates user state after acceptTerms resolves.
+              // Nothing extra needed here.
+            }}
+          />
+        </Suspense>
       )}
     </>
   );
@@ -538,6 +577,7 @@ const App: React.FC = () => {
       <AuthProvider>
         <LearningNavProvider>
         <TermsGate>
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public-only routes (redirect to / if already logged in) */}
           <Route
@@ -744,6 +784,7 @@ const App: React.FC = () => {
           {/* Catch-all: redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
         </TermsGate>
         </LearningNavProvider>
       </AuthProvider>
