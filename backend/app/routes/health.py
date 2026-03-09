@@ -61,19 +61,12 @@ def health_detailed(db: Session = Depends(get_db)):
         overall_healthy = False
 
     # ------------------------------------------------------------------
-    # 2. AI service check (Vertex AI SDK available + project configured)
+    # 2. AI service check (Vertex AI SDK available)
     # ------------------------------------------------------------------
     try:
         from google import genai  # noqa: F401
-        gcp_project = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCLOUD_PROJECT")
-        if gcp_project:
-            components["ai_service"] = {"status": "ok", "provider": "vertex_ai"}
-        else:
-            # SDK is installed but project not configured — warn, don't fail
-            components["ai_service"] = {
-                "status": "degraded",
-                "detail": "GOOGLE_CLOUD_PROJECT not set",
-            }
+        # ai_service.py hardcodes project="lingoleap-dev", no env var needed
+        components["ai_service"] = {"status": "ok", "provider": "vertex_ai"}
     except ImportError:
         logger.warning("Health check — google-genai SDK not installed")
         components["ai_service"] = {
