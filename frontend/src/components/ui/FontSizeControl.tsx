@@ -46,14 +46,21 @@ export default function FontSizeControl({ onChange }: FontSizeControlProps) {
   }, [level, onChange]);
 
   return (
-    <div className="flex items-center gap-1">
-      <span className="text-[10px] text-gray-400 select-none mr-0.5">字</span>
+    <div
+      className="flex items-center gap-1"
+      role="group"
+      aria-label="調整字體大小"
+    >
+      <span className="text-[10px] text-gray-400 select-none mr-0.5" aria-hidden="true">字</span>
       {LEVELS.map((l) => (
         <button
           key={l}
+          type="button"
           onClick={() => setLevel(l)}
           title={`字體大小：${LABELS[l]}`}
-          className={`w-6 h-6 rounded text-xs font-bold transition-colors ${
+          aria-label={`字體大小：${LABELS[l]}`}
+          aria-pressed={level === l}
+          className={`w-6 h-6 rounded text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
             level === l
               ? 'bg-accent text-white'
               : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
