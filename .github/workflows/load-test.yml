@@ -1,0 +1,76 @@
+name: Load Test (Manual)
+
+# Issue #260: 壓力測試 — 30 人同時朗讀分析
+# Manual trigger only — never runs on push/PR to avoid hitting staging unexpectedly.
+
+on:
+  workflow_dispatch:
+    inputs:
+      users:
+        description: "Number of concurrent users"
+        required: false
+        default: "30"
+      spawn_rate:
+        description: "Users spawned per second"
+        required: false
+        default: "5"
+      run_time:
+        description: "Test duration (e.g. 2m, 5m)"
+        required: false
+        default: "2m"
+      scenario:
+        description: "Locust user class to run"
+        required: false
+        default: "StudentReadingUser"
+        type: choice
+        options:
+          - StudentBrowsingUser
+          - StudentReadingUser
+          - TeacherDashboardUser
+          - MixedWorkloadUser
+
+jobs:
+  load-test:
+    name: "Locust (${{ inputs.scenario }}, ${{ inputs.users }} users, ${{ inputs.run_time }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: tests/load-testing/requirements.txt
+
+      - name: Install Locust
+        run: pip install -r tests/load-testing/requirements.txt
+
+      - name: Create reports directory
+        run: mkdir -p tests/load-testing/reports
+
+      - name: Run load test against staging
+        env:
+          BACKEND_URL: ${{ secrets.STAGING_BACKEND_URL }}
+        run: |
+          locust \
+            -f tests/load-testing/locustfile.py \
+            --host="${BACKEND_URL}" \
+            --users="${{ inputs.users }}" \
+            --spawn-rate="${{ inputs.spawn_rate }}" \
+            --run-time="${{ inputs.run_time }}" \
+            --headless \
+            --only-summary \
+            --html=tests/load-testing/reports/load-test-report.html \
+            "${{ inputs.scenario }}"
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "load-test-report-${{ inputs.scenario }}-${{ inputs.users }}u-${{ github.run_number }}"
+          path: tests/load-testing/reports/load-test-report.html
+          retention-days: 30

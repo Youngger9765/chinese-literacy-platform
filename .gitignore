@@ -24,5 +24,9 @@ data/raw-materials/
 *.db
 frontend/test-results/
 
+# Load test reports (generated artifacts — not committed)
+tests/load-testing/reports/
+tests/load-testing/.venv/
+
 # macOS
 .DS_Store
