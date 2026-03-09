@@ -35,7 +35,7 @@ from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
-from ..models.school import Classroom, School
+from ..models.school import Classroom, ClassroomTeacher, School
 from ..models.user import User
 
 logger = logging.getLogger(__name__)
@@ -164,6 +164,18 @@ def _check_classroom_access(user: User, classroom_id: int, db: Session) -> Class
 
     # Classroom owner always has access
     if classroom.teacher_id == user.id:
+        return classroom
+
+    # Co-teachers (assistants) have read access
+    co_teacher = (
+        db.query(ClassroomTeacher)
+        .filter(
+            ClassroomTeacher.classroom_id == classroom_id,
+            ClassroomTeacher.teacher_id == user.id,
+        )
+        .first()
+    )
+    if co_teacher:
         return classroom
 
     # org_admin/org_owner can access classrooms in their org

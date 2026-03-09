@@ -18,8 +18,9 @@ import ClassroomAnalytics from './ClassroomAnalytics';
 import CrossTextAnalytics from './CrossTextAnalytics';
 import AtRiskStudents from '../../components/teacher/AtRiskStudents';
 import ErrorHeatmapTab from './ErrorHeatmapTab';
+import CoTeachingTab from './CoTeachingTab';
 
-type TabKey = 'progress' | 'texts' | 'my-texts' | 'assignments' | 'students' | 'analytics' | 'cross-text' | 'at-risk' | 'error-heatmap';
+type TabKey = 'progress' | 'texts' | 'my-texts' | 'assignments' | 'students' | 'analytics' | 'cross-text' | 'at-risk' | 'error-heatmap' | 'teachers';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'progress', label: '學生進度' },
@@ -31,6 +32,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'my-texts', label: '我的課文' },
   { key: 'assignments', label: '作業管理' },
   { key: 'students', label: '學生名單' },
+  { key: 'teachers', label: '協同教師' },
 ];
 
 interface ClassroomDetailProps {
@@ -39,7 +41,7 @@ interface ClassroomDetailProps {
 }
 
 const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -422,6 +424,13 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
               setRemovingStudentId={setRemovingStudentId}
               formatDate={formatDate}
               onStudentsImported={loadClassroom}
+            />
+          )}
+
+          {activeTab === 'teachers' && (
+            <CoTeachingTab
+              classroomId={classroomId}
+              ownerId={classroom.teacher_id}
             />
           )}
         </div>
