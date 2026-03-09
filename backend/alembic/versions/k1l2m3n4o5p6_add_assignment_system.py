@@ -32,82 +32,56 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Use raw SQL with IF NOT EXISTS so migration is idempotent:
+    # safe on staging (tables already exist) and fresh preview DBs (may have
+    # partial alembic_version state from a previous failed migration run).
+
     # --- assignments table ---
-    op.create_table(
-        'assignments',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('classroom_id', sa.Integer(), nullable=False),
-        sa.Column('teacher_id', sa.Integer(), nullable=False),
-        # Text source: exactly one of story_id or text_id is set
-        sa.Column('story_id', sa.String(length=50), nullable=True),
-        sa.Column('text_id', sa.Integer(), nullable=True),
-        # Optional teacher customisation
-        sa.Column('title', sa.String(length=200), nullable=True),
-        sa.Column('description', sa.Text(), nullable=True),
-        sa.Column('assignment_type', sa.String(length=20), nullable=False, server_default='reading'),
-        sa.Column('due_date', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('is_active', sa.Boolean(), nullable=False, server_default=sa.text('true')),
-        sa.Column(
-            'created_at',
-            sa.DateTime(timezone=True),
-            server_default=sa.text('now()'),
-            nullable=False,
-        ),
-        sa.ForeignKeyConstraint(['classroom_id'], ['classrooms.id'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['teacher_id'], ['users.id']),
-        sa.ForeignKeyConstraint(['text_id'], ['texts.id'], ondelete='SET NULL'),
-        sa.PrimaryKeyConstraint('id'),
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS assignments (
+            id SERIAL PRIMARY KEY,
+            classroom_id INTEGER NOT NULL REFERENCES classrooms(id) ON DELETE CASCADE,
+            teacher_id INTEGER NOT NULL REFERENCES users(id),
+            story_id VARCHAR(50),
+            text_id INTEGER REFERENCES texts(id) ON DELETE SET NULL,
+            title VARCHAR(200),
+            description TEXT,
+            assignment_type VARCHAR(20) NOT NULL DEFAULT 'reading',
+            due_date TIMESTAMPTZ,
+            is_active BOOLEAN NOT NULL DEFAULT true,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """)
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_assignments_classroom_id ON assignments (classroom_id)"
     )
-    op.create_index(
-        op.f('ix_assignments_classroom_id'),
-        'assignments',
-        ['classroom_id'],
-        unique=False,
-    )
-    op.create_index(
-        op.f('ix_assignments_text_id'),
-        'assignments',
-        ['text_id'],
-        unique=False,
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_assignments_text_id ON assignments (text_id)"
     )
 
     # --- assignment_submissions table ---
-    op.create_table(
-        'assignment_submissions',
-        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column('assignment_id', sa.Integer(), nullable=False),
-        sa.Column('student_id', sa.Integer(), nullable=False),
-        sa.Column('status', sa.String(length=20), nullable=False, server_default='pending'),
-        sa.Column('session_id', sa.Integer(), nullable=True),
-        sa.Column('submitted_at', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('score', sa.Float(), nullable=True),
-        sa.Column(
-            'created_at',
-            sa.DateTime(timezone=True),
-            server_default=sa.text('now()'),
-            nullable=False,
-        ),
-        sa.ForeignKeyConstraint(['assignment_id'], ['assignments.id'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['session_id'], ['learning_sessions.id']),
-        sa.ForeignKeyConstraint(['student_id'], ['users.id']),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('assignment_id', 'student_id', name='uq_assignment_student'),
-    )
-    op.create_index(
-        op.f('ix_assignment_submissions_assignment_id'),
-        'assignment_submissions',
-        ['assignment_id'],
-        unique=False,
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS assignment_submissions (
+            id SERIAL PRIMARY KEY,
+            assignment_id INTEGER NOT NULL REFERENCES assignments(id) ON DELETE CASCADE,
+            student_id INTEGER NOT NULL REFERENCES users(id),
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            session_id INTEGER REFERENCES learning_sessions(id),
+            submitted_at TIMESTAMPTZ,
+            score FLOAT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            CONSTRAINT uq_assignment_student UNIQUE (assignment_id, student_id)
+        )
+    """)
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_assignment_submissions_assignment_id "
+        "ON assignment_submissions (assignment_id)"
     )
 
 
 def downgrade() -> None:
-    op.drop_index(
-        op.f('ix_assignment_submissions_assignment_id'),
-        table_name='assignment_submissions',
-    )
-    op.drop_table('assignment_submissions')
-
-    op.drop_index(op.f('ix_assignments_text_id'), table_name='assignments')
-    op.drop_index(op.f('ix_assignments_classroom_id'), table_name='assignments')
-    op.drop_table('assignments')
+    op.execute("DROP INDEX IF EXISTS ix_assignment_submissions_assignment_id")
+    op.execute("DROP TABLE IF EXISTS assignment_submissions")
+    op.execute("DROP INDEX IF EXISTS ix_assignments_text_id")
+    op.execute("DROP INDEX IF EXISTS ix_assignments_classroom_id")
+    op.execute("DROP TABLE IF EXISTS assignments")

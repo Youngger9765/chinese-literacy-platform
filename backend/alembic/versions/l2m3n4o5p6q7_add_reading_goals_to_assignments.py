@@ -17,9 +17,17 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('assignments', sa.Column('target_cpm', sa.Integer(), nullable=True))
-    op.add_column('assignments', sa.Column('target_accuracy', sa.Float(), nullable=True))
-    op.add_column('assignments', sa.Column('difficulty_label', sa.String(length=10), nullable=True))
+    # Use IF NOT EXISTS so this migration is safe whether or not the assignments
+    # table already has these columns (idempotent on re-run or partial migration state).
+    op.execute(
+        "ALTER TABLE assignments ADD COLUMN IF NOT EXISTS target_cpm INTEGER"
+    )
+    op.execute(
+        "ALTER TABLE assignments ADD COLUMN IF NOT EXISTS target_accuracy FLOAT"
+    )
+    op.execute(
+        "ALTER TABLE assignments ADD COLUMN IF NOT EXISTS difficulty_label VARCHAR(10)"
+    )
 
 
 def downgrade() -> None:
