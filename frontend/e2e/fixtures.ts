@@ -16,6 +16,50 @@ export const TEACHER_EMAIL = 'teacher@test.com';
 export const TEACHER_PASSWORD = 'teacher1234';
 
 // ---------------------------------------------------------------------------
+// Modal helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Accept the Terms of Service modal if it's visible.
+ * Checks all checkboxes and clicks the confirm button.
+ */
+async function acceptTermsIfVisible(page: Page): Promise<void> {
+  const termsHeading = page.locator('h2:has-text("使用條款同意書")');
+  if (await termsHeading.isVisible({ timeout: 3000 }).catch(() => false)) {
+    const checkboxes = page.locator('input[type="checkbox"]');
+    const count = await checkboxes.count();
+    for (let i = 0; i < count; i++) {
+      await checkboxes.nth(i).check();
+    }
+    await page.locator('button:has-text("我同意使用條款，進入平台")').click();
+    await expect(termsHeading).not.toBeVisible({ timeout: 5000 });
+  }
+}
+
+/**
+ * Skip the Onboarding Guide modal if it's visible.
+ */
+async function skipOnboardingIfVisible(page: Page): Promise<void> {
+  const skipBtn = page.locator('button:has-text("跳過")');
+  if (await skipBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await skipBtn.click();
+    await expect(skipBtn).not.toBeVisible({ timeout: 5000 });
+  }
+}
+
+/**
+ * Dismiss all blocking modals (Terms of Service, Onboarding Guide).
+ * Safe to call at any time — does nothing if no modal is visible.
+ * Exported so individual spec files can use it too.
+ */
+export async function dismissAllModals(page: Page): Promise<void> {
+  await acceptTermsIfVisible(page);
+  await skipOnboardingIfVisible(page);
+  // Check once more in case another modal appeared after the first was dismissed
+  await acceptTermsIfVisible(page);
+}
+
+// ---------------------------------------------------------------------------
 // Auth helpers
 // ---------------------------------------------------------------------------
 
@@ -52,6 +96,13 @@ export async function registerFreshUser(
   await page.locator('#register-confirm').fill(TEST_PASSWORD);
   await page.locator('button[type="submit"]:has-text("建立帳號")').click();
 
+  // Wait for either terms modal or main app
+  await Promise.race([
+    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
+    page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
+  ]);
+
+  await dismissAllModals(page);
   await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
   return email;
 }
@@ -70,6 +121,13 @@ export async function loginAsTeacher(page: Page): Promise<void> {
   await page.locator('#login-password').fill(TEACHER_PASSWORD);
   await page.locator('button[type="submit"]:has-text("登入")').click();
 
+  // Wait for either terms modal or main app
+  await Promise.race([
+    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
+    page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
+  ]);
+
+  await dismissAllModals(page);
   await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
 }
 
@@ -82,6 +140,14 @@ export async function loginAs(page: Page, email: string, password: string): Prom
   await page.locator('#login-email').fill(email);
   await page.locator('#login-password').fill(password);
   await page.locator('button[type="submit"]:has-text("登入")').click();
+
+  // Wait for either terms modal or main app
+  await Promise.race([
+    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
+    page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
+  ]);
+
+  await dismissAllModals(page);
   await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
 }
 
@@ -90,6 +156,9 @@ export async function loginAs(page: Page, email: string, password: string): Prom
  * If we land on the register page, switches back to login automatically.
  */
 export async function logoutAndWaitForLoginPage(page: Page): Promise<void> {
+  // Dismiss any modals that might be blocking the logout button
+  await dismissAllModals(page);
+
   await page.locator('button:has-text("登出")').click();
 
   await expect(
