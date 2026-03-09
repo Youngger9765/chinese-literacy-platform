@@ -89,23 +89,25 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
       }}
     >
       {/* Top bar */}
-      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
+      <nav aria-label="麵包屑導覽" className="h-9 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
         <button
+          type="button"
           onClick={onBack}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors"
+          aria-label="返回圖書館"
+          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
         >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
           </svg>
           圖書館
         </button>
-        <span className="text-gray-300 text-xs">›</span>
+        <span className="text-gray-300 text-xs" aria-hidden="true">›</span>
         <span className="text-xs text-gray-600">{story.title}</span>
-        <span className="text-gray-300 text-xs">›</span>
-        <span className="text-xs text-accent-light font-bold">簡介</span>
+        <span className="text-gray-300 text-xs" aria-hidden="true">›</span>
+        <span className="text-xs text-accent-light font-bold" aria-current="page">簡介</span>
         <div className="flex-1" />
         <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
-      </div>
+      </nav>
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto">
@@ -115,7 +117,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
             <img
               src={story.thumbnail}
-              alt={story.title}
+              alt={`《${story.title}》課文封面圖`}
               className="w-32 h-24 object-cover rounded-xl border border-gray-200 flex-shrink-0"
             />
             <div className="flex flex-col gap-2">
@@ -129,7 +131,10 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 {processZhuyin(story.title)}
               </h1>
               {story.intro && (
-                <p className={`text-base leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''} text-gray-600`}>
+                <p
+                  className={`text-base leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''} text-gray-600`}
+                  aria-label={`作者：${story.intro.author}`}
+                >
                   {processZhuyin(story.intro.author)}
                 </p>
               )}
@@ -153,10 +158,13 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               <div className="pt-2">
                 {isSpeaking ? (
                   <button
+                    type="button"
                     onClick={stopSpeaking}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all"
+                    aria-label="停止朗讀課文簡介"
+                    aria-pressed={true}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
                   >
-                    <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
                     </svg>
@@ -164,10 +172,13 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                   </button>
                 ) : (
                   <button
+                    type="button"
                     onClick={speakIntro}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 border border-gray-200 transition-all active:scale-95"
+                    aria-label="朗讀課文簡介"
+                    aria-pressed={false}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 border border-gray-200 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
                     </svg>
                     朗讀簡介
@@ -187,20 +198,22 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
       {/* Bottom action */}
       <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
         <button
+          type="button"
           onClick={onBack}
-          className="px-4 py-3 rounded-xl text-base text-gray-500 hover:text-gray-900 transition-colors"
+          className="px-4 py-3 rounded-xl text-base text-gray-500 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
         >
           返回圖書館
         </button>
         <button
+          type="button"
           onClick={() => {
             stopSpeaking();
             onStartReading();
           }}
-          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
+          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           開始逐段朗讀
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>

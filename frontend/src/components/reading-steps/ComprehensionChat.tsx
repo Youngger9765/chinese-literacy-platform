@@ -307,8 +307,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const renderChatMessages = () => (
     <>
       {/* Intro message */}
-      <div className="flex gap-2.5 pt-1">
-        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
+      <div className="flex gap-2.5 pt-1" role="log" aria-label="AI 助教開場白">
+        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center" aria-hidden="true">
           <span className="text-white text-[10px] font-bold">AI</span>
         </div>
         <div className="flex-1">
@@ -320,67 +320,76 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         </div>
       </div>
 
-      {/* Conversation turns */}
-      {conversation.map((turn, i) => {
-        // Feedback message
-        if (turn.role === 'feedback') {
+      {/* Conversation turns — live region so screen readers announce new messages */}
+      <div aria-live="polite" aria-atomic="false" aria-relevant="additions">
+        {conversation.map((turn, i) => {
+          // Feedback message
+          if (turn.role === 'feedback') {
+            return (
+              <div key={i} className="mx-10 space-y-1.5 mt-5">
+                {/* Encouragement badge shown above hint when student answered incorrectly */}
+                {!turn.understood && turn.encouragement && (
+                  <div className="animate-fade-in flex items-center gap-1.5 text-amber-700 text-xs font-semibold">
+                    <span aria-hidden="true">✨</span>
+                    <span>{processZhuyin(turn.encouragement)}</span>
+                  </div>
+                )}
+                <div
+                  role="status"
+                  aria-label={turn.understood ? '回答正確' : '提示'}
+                  className={`rounded-xl px-3.5 py-2 text-sm border ${
+                    turn.understood
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                      : 'bg-amber-50 border-amber-300 text-amber-800'
+                  }`}
+                >
+                  <span className="mr-1.5" aria-hidden="true">{turn.understood ? '✓' : '💡'}</span>
+                  {processZhuyin(turn.text)}
+                </div>
+              </div>
+            );
+          }
+
+          // AI or student message
           return (
-            <div key={i} className="mx-10 space-y-1.5">
-              {/* Encouragement badge shown above hint when student answered incorrectly */}
-              {!turn.understood && turn.encouragement && (
-                <div className="animate-fade-in flex items-center gap-1.5 text-amber-700 text-xs font-semibold">
-                  <span>✨</span>
-                  <span>{processZhuyin(turn.encouragement)}</span>
+            <div key={i} className={`flex gap-2.5 mt-5 ${turn.role === 'student' ? 'flex-row-reverse' : ''}`}>
+              {turn.role === 'ai' ? (
+                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center" aria-hidden="true">
+                  <span className="text-white text-[10px] font-bold">AI</span>
+                </div>
+              ) : (
+                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center" aria-hidden="true">
+                  <svg className="w-3.5 h-3.5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
               )}
-              <div className={`rounded-xl px-3.5 py-2 text-sm border ${
-                turn.understood
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                  : 'bg-amber-50 border-amber-300 text-amber-800'
-              }`}>
-                <span className="mr-1.5">{turn.understood ? '✓' : '💡'}</span>
-                {processZhuyin(turn.text)}
+              <div className={`max-w-[85%] flex flex-col ${turn.role === 'student' ? 'items-end' : ''}`}>
+                <div
+                  className={[
+                    'rounded-2xl px-4 py-3',
+                    turn.role === 'ai'
+                      ? 'bg-accent-bg border border-accent-bg-subtle rounded-tl-sm text-accent-hover'
+                      : 'bg-accent rounded-tr-sm text-white',
+                  ].join(' ')}
+                  aria-label={turn.role === 'ai' ? 'AI 助教' : '你的回答'}
+                >
+                  <p className={`text-lg leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>{processZhuyin(turn.text)}</p>
+                </div>
               </div>
             </div>
           );
-        }
-
-        // AI or student message
-        return (
-          <div key={i} className={`flex gap-2.5 ${turn.role === 'student' ? 'flex-row-reverse' : ''}`}>
-            {turn.role === 'ai' ? (
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
-                <span className="text-white text-[10px] font-bold">AI</span>
-              </div>
-            ) : (
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
-                <svg className="w-3.5 h-3.5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-            )}
-            <div className={`max-w-[85%] flex flex-col ${turn.role === 'student' ? 'items-end' : ''}`}>
-              <div className={[
-                'rounded-2xl px-4 py-3',
-                turn.role === 'ai'
-                  ? 'bg-accent-bg border border-accent-bg-subtle rounded-tl-sm text-accent-hover'
-                  : 'bg-accent rounded-tr-sm text-white',
-              ].join(' ')}>
-                <p className={`text-lg leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>{processZhuyin(turn.text)}</p>
-              </div>
-            </div>
-          </div>
-        );
-      })}
+        })}
+      </div>
 
       {/* Loading indicator */}
       {isLoading && (
-        <div className="flex gap-2.5">
-          <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
+        <div className="flex gap-2.5 mt-5" role="status" aria-label="AI 助教正在思考中">
+          <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center" aria-hidden="true">
             <span className="text-white text-[10px] font-bold">AI</span>
           </div>
-          <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+          <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5" aria-hidden="true">
             <span className="w-1.5 h-1.5 bg-accent-light rounded-full animate-bounce [animation-delay:0ms]" />
             <span className="w-1.5 h-1.5 bg-accent-light rounded-full animate-bounce [animation-delay:150ms]" />
             <span className="w-1.5 h-1.5 bg-accent-light rounded-full animate-bounce [animation-delay:300ms]" />
@@ -390,11 +399,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
       {/* Error */}
       {error && (
-        <div className="bg-red-900/30 border border-red-700/40 rounded-xl px-3.5 py-2.5 text-sm text-red-600">
+        <div role="alert" className="bg-red-900/30 border border-red-700/40 rounded-xl px-3.5 py-2.5 text-sm text-red-600 mt-5">
           {error}
           <button
+            type="button"
             onClick={handleRetry}
-            className="ml-2 underline hover:no-underline"
+            className="ml-2 underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 rounded"
           >
             重試
           </button>
@@ -403,7 +413,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
       {/* Completion message */}
       {isSessionComplete && !isLoading && (
-        <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center">
+        <div role="status" aria-live="polite" className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center mt-5">
           <p className="text-emerald-800 font-bold text-sm">太棒了！你展現了很好的理解力！</p>
           <p className="text-emerald-700 text-xs mt-1">你對課文的理解很好，繼續下一步吧！</p>
         </div>
@@ -418,17 +428,19 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       {isSessionComplete ? (
         <div className="flex items-center justify-between gap-2">
           <button
+            type="button"
             onClick={onBack}
-            className="px-3 py-3 rounded-xl text-base text-gray-500 hover:text-gray-900 transition-colors"
+            className="px-3 py-3 rounded-xl text-base text-gray-500 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
             ← 回到朗讀
           </button>
           <button
+            type="button"
             onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
-            className="flex-1 py-3 rounded-xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-2"
+            className="flex-1 py-3 rounded-xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1"
           >
             繼續，生字練習
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -440,7 +452,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             <p className="text-xs text-red-500 mb-1.5 px-1">{speechError}</p>
           )}
           <div className="flex gap-2 items-end">
+            <label htmlFor="comprehension-input" className="sr-only">輸入你對課文的回答</label>
             <textarea
+              id="comprehension-input"
               ref={inputRef}
               value={inputText}
               onChange={e => setInputText(e.target.value)}
@@ -448,7 +462,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               placeholder={isListening ? '正在聆聽……' : '輸入你的回答……（Enter 送出）'}
               rows={2}
               disabled={isLoading || isSessionComplete}
-              className={`flex-1 bg-white border rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none resize-none disabled:opacity-50 transition-colors ${
+              aria-disabled={isLoading || isSessionComplete}
+              aria-label="輸入你對課文的回答，按 Enter 送出"
+              className={`flex-1 bg-white border rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 resize-none disabled:opacity-50 transition-colors ${
                 isListening ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-accent'
               }`}
             />
@@ -460,24 +476,27 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 disabled={isLoading || isSessionComplete}
                 title={isListening ? '停止錄音' : '語音輸入'}
                 aria-label={isListening ? '停止錄音' : '語音輸入'}
-                className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-40 ${
+                className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                   isListening
                     ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse-mic'
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
                 }`}
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V23h2v-2.06A9 9 0 0 0 21 12v-2h-2z" />
                 </svg>
               </button>
             )}
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={!inputText.trim() || isLoading || isSessionComplete}
-              className="flex-shrink-0 w-11 h-11 rounded-xl bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95"
+              aria-disabled={!inputText.trim() || isLoading || isSessionComplete}
+              aria-label="送出回答"
+              className="flex-shrink-0 w-11 h-11 rounded-xl bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                   d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
@@ -501,10 +520,19 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         /* MOBILE: Tab-based layout */
         <>
           {/* Tab bar */}
-          <div className="flex bg-white border-b border-gray-200 shrink-0">
+          <div
+            role="tablist"
+            aria-label="課文與對話切換"
+            className="flex bg-white border-b border-gray-200 shrink-0"
+          >
             <button
+              type="button"
+              role="tab"
+              id="tab-story"
+              aria-controls="tabpanel-story"
+              aria-selected={activeTab === 'story'}
               onClick={() => setActiveTab('story')}
-              className={`flex-1 py-2 text-sm font-bold transition-colors ${
+              className={`flex-1 py-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset ${
                 activeTab === 'story'
                   ? 'text-accent border-b-2 border-accent'
                   : 'text-gray-500 hover:text-gray-700'
@@ -513,8 +541,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               課文
             </button>
             <button
+              type="button"
+              role="tab"
+              id="tab-chat"
+              aria-controls="tabpanel-chat"
+              aria-selected={activeTab === 'chat'}
               onClick={() => setActiveTab('chat')}
-              className={`flex-1 py-2 text-sm font-bold transition-colors ${
+              className={`flex-1 py-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset ${
                 activeTab === 'chat'
                   ? 'text-accent border-b-2 border-accent'
                   : 'text-gray-500 hover:text-gray-700'
@@ -529,7 +562,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
           {activeTab === 'story' ? (
             /* Story panel - full height */
-            <div className="flex-1 flex flex-col bg-amber-50 min-h-0">
+            <div
+              id="tabpanel-story"
+              role="tabpanel"
+              aria-labelledby="tab-story"
+              className="flex-1 flex flex-col bg-amber-50 min-h-0"
+            >
               <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
                 <div className="max-w-3xl mx-auto space-y-12">
                   {story.content.map((line, idx) => (
@@ -552,17 +590,31 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             </div>
           ) : (
             /* Chat panel - full height with input */
-            <div className="flex-1 flex flex-col min-h-0">
+            <div
+              id="tabpanel-chat"
+              role="tabpanel"
+              aria-labelledby="tab-chat"
+              className="flex-1 flex flex-col min-h-0"
+            >
               {/* Panel header with progress */}
               <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
                 <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">
                   AI Tutor
                 </span>
                 <div className="flex-1" />
-                <span className="text-[10px] text-gray-600">
+                <span
+                  className="text-[10px] text-gray-600"
+                  aria-label={`已理解 ${understoodCount} 題，共需 ${requiredCount} 題`}
+                  aria-live="polite"
+                >
                   {understoodCount} / {requiredCount} 理解
                 </span>
-                <button onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })} className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
+                  aria-label="跳過課文理解，繼續下一步"
+                  className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
+                >
                   跳過
                 </button>
               </div>
@@ -622,6 +674,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           <div
             onMouseDown={onDividerMouseDown}
             onTouchStart={onDividerTouchStart}
+            role="separator"
+            aria-label="拖曳調整面板寬度"
+            aria-orientation="vertical"
             className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
           />
 

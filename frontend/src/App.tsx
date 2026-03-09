@@ -46,8 +46,8 @@ const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-amber-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-3" role="status" aria-label="載入中，請稍候">
+          <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" aria-hidden="true" />
           <span className="text-sm text-gray-400">載入中...</span>
         </div>
       </div>
@@ -69,8 +69,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-amber-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-3" role="status" aria-label="載入中，請稍候">
+          <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" aria-hidden="true" />
           <span className="text-sm text-gray-400">載入中...</span>
         </div>
       </div>
@@ -93,8 +93,9 @@ const HomePage: React.FC = () => {
       <h1 className="text-5xl font-black text-gray-900">AI 朗讀助教</h1>
       <p className="text-gray-600 max-w-md">準備好開始今天的朗讀挑戰了嗎？</p>
       <button
+        type="button"
         onClick={() => navigate('/library')}
-        className="bg-accent hover:bg-accent-hover text-white px-10 py-4 rounded-xl font-bold shadow-2xl transition-all"
+        className="bg-accent hover:bg-accent-hover text-white px-10 py-4 rounded-xl font-bold shadow-2xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       >
         進入圖書館
       </button>
@@ -141,32 +142,43 @@ const WritePage: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-6 p-8">
       <h2 className="text-2xl font-bold text-gray-900">寫字練習</h2>
-      <p className="text-gray-600 text-sm">輸入一個中文字，開始練習寫字</p>
+      <p className="text-gray-600 text-sm" id="write-hint">輸入一個中文字，開始練習寫字</p>
       <div className="flex gap-3 items-center">
+        <label htmlFor="write-input" className="sr-only">輸入一個中文字</label>
         <input
+          id="write-input"
           type="text"
           value={writeInput}
           onChange={(e) => setWriteInput(e.target.value.slice(-1))}
           placeholder="輸入一個字"
           maxLength={1}
-          className="w-24 h-12 text-center text-2xl bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-accent"
+          aria-describedby="write-hint"
+          className="w-24 h-12 text-center text-2xl bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
         />
         <button
+          type="button"
           onClick={() => {
             if (writeInput) setWritingChar(writeInput);
           }}
           disabled={!writeInput}
-          className="px-6 h-12 bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-lg font-bold transition-all"
+          aria-disabled={!writeInput}
+          className="px-6 h-12 bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-lg font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           開始
         </button>
       </div>
-      <div className="flex gap-2 flex-wrap justify-center max-w-md">
+      <div
+        className="flex gap-2 flex-wrap justify-center max-w-md"
+        role="group"
+        aria-label="常用練習字"
+      >
         {['你', '好', '我', '大', '小', '中', '人', '天', '學', '是'].map((ch) => (
           <button
             key={ch}
+            type="button"
             onClick={() => setWritingChar(ch)}
-            className="w-12 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xl rounded-lg border border-gray-200 transition-colors"
+            aria-label={`練習「${ch}」字`}
+            className="w-12 h-12 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xl rounded-lg border border-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
             {ch}
           </button>
@@ -277,18 +289,32 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="h-screen flex flex-col bg-amber-50 text-gray-900 font-sans overflow-hidden">
+      {/* Skip-to-content link — visually hidden until focused (WCAG 2.4.1) */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-white focus:rounded focus:font-medium focus:text-sm focus:shadow-lg"
+      >
+        跳至主要內容
+      </a>
+
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-4 shrink-0">
-        {/* Logo */}
-        <div
-          className="flex items-center gap-2 cursor-pointer shrink-0"
+      <header
+        role="banner"
+        aria-label="應用程式標頭"
+        className="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-4 shrink-0"
+      >
+        {/* Logo — keyboard-accessible home link */}
+        <button
+          type="button"
+          className="flex items-center gap-2 shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           onClick={() => navigate('/')}
+          aria-label="LingoLeap 首頁"
         >
-          <div className="bg-accent w-6 h-6 rounded flex items-center justify-center">
+          <div className="bg-accent w-6 h-6 rounded flex items-center justify-center" aria-hidden="true">
             <span className="text-white font-bold text-xs">L</span>
           </div>
           <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
-        </div>
+        </button>
 
         {![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS, AppView.MY_VOCABULARY, AppView.LEARNING_HISTORY, AppView.DIALOGUE_HISTORY, AppView.STUDENT_PROGRESS].includes(currentView) && (
           <StepperNav
@@ -300,12 +326,22 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         )}
 
         {/* Nav links + User info + Logout */}
-        <div className="flex items-center gap-3 shrink-0">
+        <nav
+          role="navigation"
+          aria-label="主要導覽"
+          className="flex items-center gap-3 shrink-0"
+        >
           {hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
             <>
               <button
+                type="button"
                 onClick={() => navigate('/teacher')}
-                className={`text-xs font-medium transition-colors cursor-pointer ${
+                aria-current={
+                  currentView === AppView.TEACHER_DASHBOARD || currentView === AppView.CLASSROOM_DETAIL
+                    ? 'page'
+                    : undefined
+                }
+                className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                   currentView === AppView.TEACHER_DASHBOARD ||
                   currentView === AppView.CLASSROOM_DETAIL
                     ? 'text-accent'
@@ -322,8 +358,10 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {!hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin') && (
             <>
               <button
+                type="button"
                 onClick={() => navigate('/assignments')}
-                className={`text-xs font-medium transition-colors cursor-pointer ${
+                aria-current={currentView === AppView.MY_ASSIGNMENTS ? 'page' : undefined}
+                className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                   currentView === AppView.MY_ASSIGNMENTS
                     ? 'text-accent'
                     : 'text-gray-500 hover:text-gray-700'
@@ -332,8 +370,10 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 作業
               </button>
               <button
+                type="button"
                 onClick={() => navigate('/vocabulary')}
-                className={`text-xs font-medium transition-colors cursor-pointer ${
+                aria-current={currentView === AppView.MY_VOCABULARY ? 'page' : undefined}
+                className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                   currentView === AppView.MY_VOCABULARY
                     ? 'text-accent'
                     : 'text-gray-500 hover:text-gray-700'
@@ -342,8 +382,14 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 我的生字
               </button>
               <button
+                type="button"
                 onClick={() => navigate('/history')}
-                className={`text-xs font-medium transition-colors cursor-pointer ${
+                aria-current={
+                  currentView === AppView.LEARNING_HISTORY || currentView === AppView.DIALOGUE_HISTORY
+                    ? 'page'
+                    : undefined
+                }
+                className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                   currentView === AppView.LEARNING_HISTORY || currentView === AppView.DIALOGUE_HISTORY
                     ? 'text-accent'
                     : 'text-gray-500 hover:text-gray-700'
@@ -362,8 +408,9 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 學習進度
               </button>
               <button
+                type="button"
                 onClick={() => navigate('/join')}
-                className="text-xs font-medium transition-colors cursor-pointer text-gray-500 hover:text-gray-700"
+                className="text-xs font-medium transition-colors cursor-pointer text-gray-500 hover:text-gray-700 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
                 加入班級
               </button>
@@ -371,8 +418,10 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           )}
           {hasRole(user, 'system_admin', 'org_owner', 'org_admin') && (
             <button
+              type="button"
               onClick={() => navigate('/admin')}
-              className={`text-xs font-medium transition-colors cursor-pointer ${
+              aria-current={currentView === AppView.ADMIN_DASHBOARD ? 'page' : undefined}
+              className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                 currentView === AppView.ADMIN_DASHBOARD
                   ? 'text-accent'
                   : 'text-gray-500 hover:text-gray-700'
@@ -381,20 +430,31 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               系統管理
             </button>
           )}
-          <div className="w-px h-4 bg-gray-200" />
+          <div className="w-px h-4 bg-gray-200" aria-hidden="true" />
           {user && (
-            <span className="text-xs text-gray-500 hidden sm:block">{user.name}</span>
+            <span className="text-xs text-gray-500 hidden sm:block" aria-label={`已登入為 ${user.name}`}>
+              {user.name}
+            </span>
           )}
           <button
+            type="button"
             onClick={logout}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
             登出
           </button>
-        </div>
+        </nav>
       </header>
 
-      <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
+      <main
+        id="main-content"
+        role="main"
+        aria-label="主要內容"
+        className="flex-1 flex flex-col overflow-hidden"
+        tabIndex={-1}
+      >
+        {children}
+      </main>
 
       {/* Onboarding overlay for first-time students */}
       <OnboardingWrapper />
@@ -403,10 +463,15 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <FeedbackButton />
 
       {/* Footer */}
-      <footer className="shrink-0 bg-white border-t border-gray-100 flex items-center justify-center py-1.5 px-4">
+      <footer
+        role="contentinfo"
+        aria-label="頁尾"
+        className="shrink-0 bg-white border-t border-gray-100 flex items-center justify-center py-1.5 px-4"
+      >
         <button
+          type="button"
           onClick={() => navigate('/privacy')}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
         >
           隱私政策
         </button>
