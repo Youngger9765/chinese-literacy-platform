@@ -383,7 +383,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
         </button>
 
-        {![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS, AppView.MY_VOCABULARY, AppView.LEARNING_HISTORY, AppView.DIALOGUE_HISTORY, AppView.STUDENT_PROGRESS].includes(currentView) && (
+        {navStory && ![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS, AppView.MY_VOCABULARY, AppView.LEARNING_HISTORY, AppView.DIALOGUE_HISTORY, AppView.STUDENT_PROGRESS].includes(currentView) && (
           <StepperNav
             currentView={currentView}
             session={navSession}

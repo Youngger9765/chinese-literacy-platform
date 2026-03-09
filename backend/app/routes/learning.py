@@ -1330,6 +1330,12 @@ def get_student_dashboard(
     week_start = today_start - timedelta(days=today_start.weekday())  # Monday
     thirty_days_ago = today_start - timedelta(days=29)
 
+    def _ensure_aware(dt: datetime | None) -> datetime | None:
+        """Make naive datetimes UTC-aware to prevent comparison errors."""
+        if dt is None:
+            return None
+        return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
+
     # All sessions for this student
     all_sessions = (
         db.query(LearningSession)
@@ -1344,14 +1350,14 @@ def get_student_dashboard(
     scores = [s.overall_score for s in completed if s.overall_score is not None]
     avg_score = round(sum(scores) / len(scores), 1) if scores else None
 
-    today_sessions = sum(1 for s in completed if s.completed_at and s.completed_at >= today_start)
-    week_sessions = sum(1 for s in completed if s.completed_at and s.completed_at >= week_start)
+    today_sessions = sum(1 for s in completed if s.completed_at and _ensure_aware(s.completed_at) >= today_start)
+    week_sessions = sum(1 for s in completed if s.completed_at and _ensure_aware(s.completed_at) >= week_start)
 
     # Daily activity for past 30 days
     from collections import defaultdict
     day_sessions: dict[str, list[float]] = defaultdict(list)
     for s in completed:
-        if s.completed_at and s.completed_at >= thirty_days_ago:
+        if s.completed_at and _ensure_aware(s.completed_at) >= thirty_days_ago:
             day_key = s.completed_at.strftime("%Y-%m-%d")
             day_sessions[day_key].append(s.overall_score if s.overall_score is not None else 0)
 
