@@ -471,6 +471,35 @@ export async function getRecommendedVocab(token: string, studentId: number): Pro
   return res.json();
 }
 
+// --- AI Learning Path Recommendations API (Issue #252) ---
+
+export interface StoryRecommendationItem {
+  story_slug: string;
+  title: string;
+  grade: number;
+  genre: string;
+  difficulty_match_score: number;
+  reason: string;
+}
+
+export interface StoryRecommendationsResponse {
+  recommendations: StoryRecommendationItem[];
+  total: number;
+}
+
+export async function getStoryRecommendations(
+  token: string,
+  studentId: number,
+  limit = 5,
+): Promise<StoryRecommendationsResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/recommendations/${studentId}?limit=${limit}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`getStoryRecommendations failed: ${res.status}`);
+  return res.json();
+}
+
 // --- Student Progress API (Issue #257) ---
 
 export interface StepStatusItem {
