@@ -471,6 +471,53 @@ export async function getRecommendedVocab(token: string, studentId: number): Pro
   return res.json();
 }
 
+// --- Student Progress API (Issue #257) ---
+
+export interface StepStatusItem {
+  step_key: string;
+  step_label: string;
+  status: 'not_started' | 'in_progress' | 'completed';
+}
+
+export interface NextStepRec {
+  action: 'continue' | 'retry_step' | 'new_text';
+  step: string | null;
+  step_label?: string;
+  reason: string;
+}
+
+export interface TextProgressItem {
+  story_slug: string;
+  latest_session_id: number;
+  status: string;
+  steps: StepStatusItem[];
+  completion_pct: number;
+  overall_score: number | null;
+  accuracy: number | null;
+  started_at: string;
+  completed_at: string | null;
+  next_step: NextStepRec;
+}
+
+export interface StudentProgressResponse {
+  student_id: number;
+  texts_attempted: number;
+  texts_completed: number;
+  average_score: number | null;
+  texts: TextProgressItem[];
+}
+
+export async function getStudentProgress(
+  token: string,
+  studentId: number,
+): Promise<StudentProgressResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/progress`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getStudentProgress failed: ${res.status}`);
+  return res.json();
+}
+
 export async function markErrorCorrected(
   token: string,
   studentId: number,
