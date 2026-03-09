@@ -77,3 +77,4 @@ def downgrade() -> None:
     op.drop_column('assignments', 'difficulty_label')
     op.drop_column('assignments', 'target_accuracy')
     op.drop_column('assignments', 'target_cpm')
+# Hotfix
