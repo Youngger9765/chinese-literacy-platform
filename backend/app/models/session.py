@@ -1,8 +1,11 @@
 from datetime import datetime
-from sqlalchemy import String, Integer, Float, ForeignKey, DateTime, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, String, Integer, Float, ForeignKey, DateTime, func
+from sqlalchemy.dialects.postgresql import JSONB as PG_JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
+
+# Use JSONB on PostgreSQL, plain JSON on SQLite
+FlexibleJSON = JSON().with_variant(PG_JSONB(), "postgresql")
 
 
 class LearningSession(Base):
@@ -17,10 +20,10 @@ class LearningSession(Base):
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
     overall_score: Mapped[float | None] = mapped_column(Float, nullable=True)
-    reading_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    comprehension_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    vocab_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    full_reading_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    reading_result: Mapped[dict | None] = mapped_column(FlexibleJSON, nullable=True)
+    comprehension_result: Mapped[dict | None] = mapped_column(FlexibleJSON, nullable=True)
+    vocab_result: Mapped[dict | None] = mapped_column(FlexibleJSON, nullable=True)
+    full_reading_result: Mapped[dict | None] = mapped_column(FlexibleJSON, nullable=True)
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

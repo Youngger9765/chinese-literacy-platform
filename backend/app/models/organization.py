@@ -1,10 +1,13 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Integer, String, Boolean, DateTime, Text, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON, Integer, String, Boolean, DateTime, Text, func
+from sqlalchemy.dialects.postgresql import JSONB as PG_JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from .base import Base
+
+# Use JSONB on PostgreSQL, plain JSON on SQLite
+FlexibleJSON = JSON().with_variant(PG_JSONB(), "postgresql")
 
 
 class Organization(Base):
@@ -30,4 +33,4 @@ class Organization(Base):
     contact_email: Mapped[str | None] = mapped_column(String(200), nullable=True)
     contact_phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
     address: Mapped[str | None] = mapped_column(Text, nullable=True)
-    settings: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    settings: Mapped[dict | None] = mapped_column(FlexibleJSON, nullable=True)

@@ -50,7 +50,7 @@ def _org_to_response(org: Organization, school_count: int) -> OrganizationRespon
         id=org.id,
         name=org.name,
         display_name=org.display_name,
-        teacher_limit=org.teacher_limit,
+        # teacher_limit=org.teacher_limit, issue 309
         is_active=org.is_active,
         created_at=org.created_at,
         school_count=school_count,
