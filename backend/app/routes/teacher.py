@@ -1719,7 +1719,7 @@ def get_cross_text_analysis(
         .all()
     )
     student_ids = [s.id for s in student_rows]
-    student_map = {s.id: s.display_name or s.username for s in student_rows}
+    student_map = {s.id: s.name or s.username or s.email for s in student_rows}
 
     if not student_ids:
         return ClassroomCrossTextPattern(
