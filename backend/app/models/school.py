@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from sqlalchemy import (
     String,
@@ -12,6 +13,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
+
+# Valid roles for ClassroomTeacher junction table
+ClassroomTeacherRole = Literal["primary", "assistant"]
 
 
 class School(Base):
@@ -60,9 +64,12 @@ class Classroom(Base):
 
     # Relationships
     school: Mapped["School"] = relationship("School", back_populates="classrooms")
-    teacher: Mapped["User"] = relationship("User")
+    teacher: Mapped["User"] = relationship("User", foreign_keys="[Classroom.teacher_id]")
     classroom_students: Mapped[list["ClassroomStudent"]] = relationship(
         "ClassroomStudent", back_populates="classroom"
+    )
+    classroom_teachers: Mapped[list["ClassroomTeacher"]] = relationship(
+        "ClassroomTeacher", back_populates="classroom", cascade="all, delete-orphan"
     )
 
 
@@ -80,6 +87,35 @@ class ClassroomStudent(Base):
     # Relationships
     classroom: Mapped["Classroom"] = relationship("Classroom", back_populates="classroom_students")
     student: Mapped["User"] = relationship("User")
+
+
+class ClassroomTeacher(Base):
+    """Junction table: many teachers per classroom.
+
+    The primary teacher (owner) is always the one stored in Classroom.teacher_id.
+    This table tracks additional co-teachers with role='primary' (owner) or 'assistant'.
+    On classroom creation the owner is automatically inserted with role='primary'.
+    """
+
+    __tablename__ = "classroom_teachers"
+    __table_args__ = (UniqueConstraint("classroom_id", "teacher_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    classroom_id: Mapped[int] = mapped_column(
+        ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False
+    )
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    # "primary" = owner (Classroom.teacher_id), "assistant" = co-teacher
+    role: Mapped[str] = mapped_column(String(20), nullable=False, default="assistant")
+    invited_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    invited_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    # Relationships
+    classroom: Mapped["Classroom"] = relationship("Classroom", back_populates="classroom_teachers")
+    teacher: Mapped["User"] = relationship("User", foreign_keys=[teacher_id])
+    inviter: Mapped["User | None"] = relationship("User", foreign_keys=[invited_by])
 
 
 class ClassroomText(Base):
