@@ -450,3 +450,59 @@ export async function deleteInstruction(
   );
   return handleResponse<TeacherInstruction>(res);
 }
+
+// --- Notification Center ---
+
+export interface NotificationItem {
+  alert_key: string;
+  classroom_id: number;
+  classroom_name: string;
+  student_id: number;
+  student_name: string;
+  alert_type: 'inactive' | 'low_performance' | 'declining';
+  detail: string;
+  last_session_date: string | null;
+  is_read: boolean;
+  read_at: string | null;
+}
+
+export interface NotificationSummary {
+  total: number;
+  unread: number;
+  items: NotificationItem[];
+}
+
+/** Fetch all aggregated alerts across all teacher classrooms with read state. */
+export async function getTeacherNotifications(
+  token: string,
+): Promise<NotificationSummary> {
+  const res = await fetch(`${API_BASE}/api/teacher/notifications`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<NotificationSummary>(res);
+}
+
+/** Mark specific alert keys as read. */
+export async function markNotificationsRead(
+  token: string,
+  alertKeys: string[],
+): Promise<{ marked: number }> {
+  const res = await fetch(`${API_BASE}/api/teacher/notifications/mark-read`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ alert_keys: alertKeys }),
+  });
+  return handleResponse<{ marked: number }>(res);
+}
+
+/** Mark all current alerts as read. */
+export async function markAllNotificationsRead(
+  token: string,
+): Promise<{ marked: number }> {
+  const res = await fetch(`${API_BASE}/api/teacher/notifications/mark-all-read`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({}),
+  });
+  return handleResponse<{ marked: number }>(res);
+}
