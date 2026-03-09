@@ -22,7 +22,13 @@ from ..schemas.session import (
     SessionSummaryResponse,
     SessionUpdateRequest,
 )
-from ..services.ai_service import evaluate_comprehension, generate_reading_analysis, generate_socratic_question
+from ..services.ai_service import (
+    evaluate_comprehension,
+    generate_example_sentences,
+    generate_reading_analysis,
+    generate_socratic_question,
+    validate_student_sentence,
+)
 from ..services.socratic_agent import socratic_agent
 from ..services.stuck_detection_service import build_recommendations, detect_stuck_points
 
@@ -945,6 +951,15 @@ class RecommendationsResponse(BaseModel):
     response_model=StuckPointsResponse,
 )
 def get_stuck_points(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Detect learning stuck-points for a student."""
+    _verify_student_access(student_id, current_user, db)
+    data = detect_stuck_points(student_id, db)
+    return StuckPointsResponse(**data)
+
 
 # Step names for all 6 learning steps
 STEP_NAMES = {
@@ -1078,26 +1093,83 @@ def get_student_progress(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Detect learning stuck-points for a student.
+    """Return per-text completion progress for a student.
 
-    Accessible by the student themselves or their teacher.
+    Aggregates all learning sessions grouped by story_slug, keeping the
+    most-recent session per text to compute step completion status and
+    a rule-based next-step recommendation.
 
-    Returns:
-    - story_stuck: stories attempted 3+ times without ≥5% accuracy improvement
-    - character_stuck: characters with 3+ errors across sessions (last 30 days)
-    - is_declining: True if last 3 sessions show strictly declining accuracy
-    - accuracy_trend: list of accuracy values (oldest → newest, last 10 sessions)
+    Access: student themselves, or a teacher of their classroom.
     """
     _verify_student_access(student_id, current_user, db)
-    data = detect_stuck_points(student_id, db)
-    logger.info(
-        "Stuck-point detection for student %d: %d story stuck, %d char stuck, declining=%s",
-        student_id,
-        len(data["story_stuck"]),
-        len(data["character_stuck"]),
-        data["is_declining"],
+
+    sessions = (
+        db.query(LearningSession)
+        .filter(LearningSession.student_id == student_id)
+        .order_by(LearningSession.started_at.desc(), LearningSession.id.desc())
+        .all()
     )
-    return StuckPointsResponse(**data)
+
+    # Keep only the most recent session per story_slug
+    seen: set[str] = set()
+    latest_per_text: list[LearningSession] = []
+    for s in sessions:
+        slug = s.story_slug or f"session-{s.id}"
+        if slug not in seen:
+            seen.add(slug)
+            latest_per_text.append(s)
+
+    texts: list[TextProgressItem] = []
+    scores: list[float] = []
+
+    for s in latest_per_text:
+        slug = s.story_slug or f"session-{s.id}"
+        step_statuses = _compute_step_completion(s)
+        completed_count = sum(1 for v in step_statuses.values() if v == "completed")
+        completion_pct = round(completed_count / 6 * 100)
+
+        step_items = [
+            StepStatusItem(
+                step_key=key,
+                step_label=STEP_LABELS[num],
+                status=step_statuses[key],
+            )
+            for num, key in STEP_NAMES.items()
+        ]
+
+        next_step = _recommend_next_step(s)
+
+        if s.overall_score is not None:
+            scores.append(s.overall_score)
+
+        texts.append(TextProgressItem(
+            story_slug=slug,
+            latest_session_id=s.id,
+            status=s.status,
+            steps=step_items,
+            completion_pct=completion_pct,
+            overall_score=s.overall_score,
+            accuracy=s.accuracy,
+            started_at=s.started_at,
+            completed_at=s.completed_at,
+            next_step=next_step,
+        ))
+
+    texts_completed = sum(1 for t in texts if t.status == "completed")
+    average_score = round(sum(scores) / len(scores), 1) if scores else None
+
+    logger.info(
+        "Progress for student %d: %d texts, %d completed",
+        student_id, len(texts), texts_completed,
+    )
+
+    return StudentProgressResponse(
+        student_id=student_id,
+        texts_attempted=len(texts),
+        texts_completed=texts_completed,
+        average_score=average_score,
+        texts=texts,
+    )
 
 
 @router.get(
@@ -1266,80 +1338,105 @@ def get_student_dashboard(
         longest_streak=longest_streak,
         daily_activity=daily_activity,
         completed_story_slugs=completed_story_slugs,
-    """Return per-text completion progress for a student.
+    )
 
-    Aggregates all learning sessions grouped by story_slug, keeping the
-    most-recent session per text to compute step completion status and
-    a rule-based next-step recommendation.
 
-    Access: student themselves, or a teacher of their classroom.
+
+# ── Sentence Practice (Issue #109) ──────────────────────────────────────────
+
+
+class ExampleSentencesRequest(BaseModel):
+    character: str = Field(..., min_length=1, max_length=1, description="The Chinese character to generate sentences for")
+    story_title: str = Field(..., min_length=1, max_length=100)
+
+
+class ExampleSentenceItem(BaseModel):
+    sentence: str
+    explanation: str
+
+
+class ExampleSentencesResponse(BaseModel):
+    sentences: list[ExampleSentenceItem]
+
+
+class ValidateSentenceRequest(BaseModel):
+    character: str = Field(..., min_length=1, max_length=1, description="The target character that must appear in the sentence")
+    student_sentence: str = Field(..., min_length=1, max_length=200, description="The student's composed sentence")
+    story_title: str = Field(..., min_length=1, max_length=100)
+
+
+class ValidateSentenceResponse(BaseModel):
+    is_correct: bool
+    feedback: str
+    suggestion: str
+
+
+@router.post(
+    "/learning/sentence-practice/example-sentences",
+    response_model=ExampleSentencesResponse,
+    dependencies=[Depends(ai_limit_10_per_min)],
+)
+async def get_example_sentences(
+    payload: ExampleSentencesRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Generate 2 AI example sentences for a vocabulary character.
+
+    Used in the sentence practice phase after stroke order practice (Issue #109).
+    Rate limited: 10 requests per minute per user/IP.
     """
-    _verify_student_access(student_id, current_user, db)
+    try:
+        result = await generate_example_sentences(
+            character=payload.character,
+            story_title=payload.story_title,
+        )
+    except TimeoutError:
+        raise HTTPException(status_code=503, detail="AI service timeout")
+    except Exception as e:
+        logger.error("Example sentence generation failed for char=%s: %s", payload.character, e)
+        raise HTTPException(status_code=503, detail="AI service unavailable")
 
-    sessions = (
-        db.query(LearningSession)
-        .filter(LearningSession.student_id == student_id)
-        .order_by(LearningSession.started_at.desc(), LearningSession.id.desc())
-        .all()
+    return ExampleSentencesResponse(
+        sentences=[ExampleSentenceItem(**s) for s in result.get("sentences", [])],
     )
 
-    # Keep only the most recent session per story_slug
-    seen: set[str] = set()
-    latest_per_text: list[LearningSession] = []
-    for s in sessions:
-        slug = s.story_slug or f"session-{s.id}"
-        if slug not in seen:
-            seen.add(slug)
-            latest_per_text.append(s)
 
-    texts: list[TextProgressItem] = []
-    scores: list[float] = []
+@router.post(
+    "/learning/sentence-practice/validate",
+    response_model=ValidateSentenceResponse,
+    dependencies=[Depends(ai_limit_10_per_min)],
+)
+async def validate_sentence(
+    payload: ValidateSentenceRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Validate a student's composed sentence for a vocabulary character.
 
-    for s in latest_per_text:
-        slug = s.story_slug or f"session-{s.id}"
-        step_statuses = _compute_step_completion(s)
-        completed_count = sum(1 for v in step_statuses.values() if v == "completed")
-        completion_pct = round(completed_count / 6 * 100)
+    Returns AI feedback on whether the sentence is grammatically correct
+    and uses the target character appropriately (Issue #109).
+    Rate limited: 10 requests per minute per user/IP.
+    """
+    # Basic check: target character must appear in the sentence
+    if payload.character not in payload.student_sentence:
+        return ValidateSentenceResponse(
+            is_correct=False,
+            feedback="你的句子裡沒有包含目標生字喔！",
+            suggestion=f"請記得在句子中使用「{payload.character}」這個字。",
+        )
 
-        step_items = [
-            StepStatusItem(
-                step_key=key,
-                step_label=STEP_LABELS[num],
-                status=step_statuses[key],
-            )
-            for num, key in STEP_NAMES.items()
-        ]
+    try:
+        result = await validate_student_sentence(
+            character=payload.character,
+            student_sentence=payload.student_sentence,
+            story_title=payload.story_title,
+        )
+    except TimeoutError:
+        raise HTTPException(status_code=503, detail="AI service timeout")
+    except Exception as e:
+        logger.error(
+            "Sentence validation failed for char=%s sentence=%s: %s",
+            payload.character, payload.student_sentence[:50], e,
+        )
+        raise HTTPException(status_code=503, detail="AI service unavailable")
 
-        next_step = _recommend_next_step(s)
-
-        if s.overall_score is not None:
-            scores.append(s.overall_score)
-
-        texts.append(TextProgressItem(
-            story_slug=slug,
-            latest_session_id=s.id,
-            status=s.status,
-            steps=step_items,
-            completion_pct=completion_pct,
-            overall_score=s.overall_score,
-            accuracy=s.accuracy,
-            started_at=s.started_at,
-            completed_at=s.completed_at,
-            next_step=next_step,
-        ))
-
-    texts_completed = sum(1 for t in texts if t.status == "completed")
-    average_score = round(sum(scores) / len(scores), 1) if scores else None
-
-    logger.info(
-        "Progress for student %d: %d texts, %d completed",
-        student_id, len(texts), texts_completed,
-    )
-
-    return StudentProgressResponse(
-        student_id=student_id,
-        texts_attempted=len(texts),
-        texts_completed=texts_completed,
-        average_score=average_score,
-        texts=texts,
-    )
+    return ValidateSentenceResponse(**result)
