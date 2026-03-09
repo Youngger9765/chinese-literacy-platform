@@ -174,3 +174,4 @@ def build_recommendations(stuck_data: dict) -> list[dict]:
         })
 
     return recs
+# Stuck Detection
