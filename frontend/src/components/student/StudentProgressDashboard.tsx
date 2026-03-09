@@ -1,0 +1,227 @@
+/**
+ * StudentProgressDashboard — progress stats + learning curve chart.
+ *
+ * Shows:
+ * - Streak, total completed, weekly count, avg score
+ * - 30-day learning activity chart (Recharts ResponsiveLineChart)
+ *
+ * Issue #25
+ */
+
+import React, { useEffect, useState } from 'react';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from 'recharts';
+import { useAuth } from '../../contexts/AuthContext';
+import { fetchStudentDashboard, StudentDashboardData } from '../../services/api';
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatShortDate(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+// ── Stat card ────────────────────────────────────────────────────────────────
+
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  sub?: string;
+  icon: React.ReactNode;
+  highlight?: boolean;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ label, value, sub, icon, highlight }) => (
+  <div
+    className={`rounded-xl p-4 flex items-start gap-3 ${
+      highlight ? 'bg-accent text-white' : 'bg-white border border-gray-200'
+    }`}
+  >
+    <div
+      className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-lg ${
+        highlight ? 'bg-white/20' : 'bg-accent-bg'
+      }`}
+    >
+      {icon}
+    </div>
+    <div className="min-w-0">
+      <div className={`text-2xl font-bold leading-none ${highlight ? 'text-white' : 'text-gray-900'}`}>
+        {value}
+      </div>
+      <div className={`text-xs mt-0.5 ${highlight ? 'text-white/80' : 'text-gray-500'}`}>{label}</div>
+      {sub && (
+        <div className={`text-xs mt-0.5 ${highlight ? 'text-white/60' : 'text-gray-400'}`}>{sub}</div>
+      )}
+    </div>
+  </div>
+);
+
+// ── Custom tooltip for the chart ─────────────────────────────────────────────
+
+interface TooltipProps {
+  active?: boolean;
+  payload?: { value: number; name: string }[];
+  label?: string;
+}
+
+const ChartTooltip: React.FC<TooltipProps> = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  const sessions = payload.find((p) => p.name === 'sessions')?.value ?? 0;
+  const score = payload.find((p) => p.name === 'score')?.value;
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-md px-3 py-2 text-xs">
+      <p className="font-medium text-gray-700 mb-1">{label}</p>
+      <p className="text-gray-600">完成：{sessions} 篇</p>
+      {score != null && <p className="text-accent font-medium">平均分：{score}%</p>}
+    </div>
+  );
+};
+
+// ── Empty/new student state ───────────────────────────────────────────────────
+
+const NewStudentHint: React.FC = () => (
+  <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800 flex items-start gap-2">
+    <span className="text-base mt-0.5">👋</span>
+    <div>
+      <p className="font-medium">歡迎來到學習圖書館！</p>
+      <p className="mt-0.5 text-amber-700 text-xs">選一篇課文開始閱讀，完成後就能在這裡看到你的學習曲線。</p>
+    </div>
+  </div>
+);
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+interface StudentProgressDashboardProps {
+  /** Called with the set of completed story slugs so StoryLibrary can show badges. */
+  onDashboardLoaded?: (completedSlugs: string[]) => void;
+}
+
+const StudentProgressDashboard: React.FC<StudentProgressDashboardProps> = ({
+  onDashboardLoaded,
+}) => {
+  const { user, token } = useAuth();
+  const [data, setData] = useState<StudentDashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!user || !token) return;
+    fetchStudentDashboard(token, user.id)
+      .then((d) => {
+        setData(d);
+        onDashboardLoaded?.(d.completed_story_slugs);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setIsLoading(false));
+  }, [user, token, onDashboardLoaded]);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-gray-100 rounded-xl h-20 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    // Non-fatal — just hide the dashboard
+    return null;
+  }
+
+  const isNewStudent = data.total_sessions === 0;
+  const chartData = data.daily_activity.map((d) => ({
+    date: formatShortDate(d.date),
+    sessions: d.sessions_completed,
+    score: d.avg_score,
+  }));
+  const hasActivity = data.daily_activity.some((d) => d.sessions_completed > 0);
+
+  return (
+    <div className="space-y-4 mb-6">
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatCard
+          highlight
+          label="連續學習天數"
+          value={`${data.streak_days} 天`}
+          sub={data.longest_streak > data.streak_days ? `最長 ${data.longest_streak} 天` : undefined}
+          icon={<span>🔥</span>}
+        />
+        <StatCard
+          label="本週完成"
+          value={data.week_sessions}
+          sub="篇課文"
+          icon={<span>📅</span>}
+        />
+        <StatCard
+          label="累計完成"
+          value={data.completed_sessions}
+          sub={`共 ${data.total_sessions} 次練習`}
+          icon={<span>📚</span>}
+        />
+        <StatCard
+          label="平均分數"
+          value={data.avg_score != null ? `${data.avg_score}%` : '—'}
+          sub={data.avg_score != null ? '綜合評量' : '尚無記錄'}
+          icon={<span>⭐</span>}
+        />
+      </div>
+
+      {/* New student hint */}
+      {isNewStudent && <NewStudentHint />}
+
+      {/* 30-day activity chart */}
+      {hasActivity && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">近 30 天學習曲線</h3>
+          <ResponsiveContainer width="100%" height={120}>
+            <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+              <defs>
+                <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                interval={4}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                domain={[0, 100]}
+                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip content={<ChartTooltip />} />
+              <Area
+                type="monotone"
+                dataKey="score"
+                name="score"
+                stroke="#6366f1"
+                strokeWidth={2}
+                fill="url(#scoreGradient)"
+                dot={false}
+                connectNulls
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default StudentProgressDashboard;
