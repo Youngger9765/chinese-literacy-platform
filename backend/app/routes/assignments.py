@@ -31,6 +31,8 @@ from ..schemas.assignment import (
     StartAssignmentResponse,
     StudentAssignmentResponse,
     SubmissionResponse,
+    DEFAULT_TARGET_CPM,
+    DEFAULT_TARGET_ACCURACY,
 )
 from ..services.assignment_copy_strategy import resolve_text_for_assignment
 from ..services.lesson_loader import get_lesson_by_id
@@ -98,6 +100,12 @@ def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentRe
         created_at=assignment.created_at,
         submission_count=submission_count,
         completed_count=completed_count,
+        # Reading goals (Issue #84)
+        target_cpm=assignment.target_cpm,
+        target_accuracy=assignment.target_accuracy,
+        difficulty_label=assignment.difficulty_label,
+        effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+        effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
     )
 
 
@@ -177,6 +185,12 @@ def get_my_assignments(
                 status=sub.status,
                 submitted_at=sub.submitted_at,
                 score=sub.score,
+                # Reading goals (Issue #84)
+                target_cpm=assignment.target_cpm,
+                target_accuracy=assignment.target_accuracy,
+                difficulty_label=assignment.difficulty_label,
+                effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+                effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
             )
         )
 
@@ -242,6 +256,10 @@ def create_assignment(
         description=payload.description,
         assignment_type=payload.assignment_type,
         due_date=payload.due_date,
+        # Reading goals (Issue #84)
+        target_cpm=payload.target_cpm,
+        target_accuracy=payload.target_accuracy,
+        difficulty_label=payload.difficulty_label,
     )
     db.add(assignment)
     db.flush()  # get assignment.id
@@ -352,7 +370,7 @@ def update_assignment(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Update assignment fields (title, description, due_date, is_active)."""
+    """Update assignment fields (title, description, due_date, is_active, reading goals)."""
     assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
     if assignment is None:
         raise HTTPException(status_code=404, detail="Assignment not found")

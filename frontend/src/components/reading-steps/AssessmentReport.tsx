@@ -14,6 +14,7 @@ import { trackLearningEvent } from '../../utils/analytics';
 import AIAnalysisSection from './AIAnalysisSection';
 import StarCelebration from '../gamification/StarCelebration';
 import { calcStarRating } from '../../utils/starRatingCalc';
+import GoalAchievementCard from '../ui/GoalAchievementCard';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -58,6 +59,8 @@ interface AssessmentReportProps {
   onGoToVocab?: () => void;
   comprehensionScores?: ComprehensionScoreResult | null;
   comprehensionScoresLoading?: boolean;
+  /** Reading goals from assignment, if student is doing an assignment (Issue #84) */
+  readingGoals?: { effectiveCpm: number; effectiveAccuracy: number; difficultyLabel?: string | null } | null;
 }
 
 // CPM thresholds aligned with backend persona.py (Issue #54)
@@ -156,7 +159,7 @@ const Section: React.FC<{
   );
 };
 
-const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading }) => {
+const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
 
   // Track lesson completion when a valid report is viewed.
@@ -386,6 +389,16 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                 <p className="text-xs text-gray-400 text-center mt-1">課本標準：{benchFeedback}</p>
               ) : null;
             })()}
+
+            {/* Goal achievement (Issue #84) — only shown when an assignment has goals */}
+            {readingGoals && (
+              <GoalAchievementCard
+                effectiveCpm={readingGoals.effectiveCpm}
+                effectiveAccuracy={readingGoals.effectiveAccuracy}
+                actualCpm={fullReadingResult?.cpm ?? readingAttempt?.cpm}
+                actualAccuracy={fullReadingResult ? Math.round(fullReadingResult.matchRate * 100) : readingAttempt?.accuracy}
+              />
+            )}
           </div>
         ) : (
           <p className="text-sm text-gray-400 text-center py-4">尚未完成朗讀練習</p>

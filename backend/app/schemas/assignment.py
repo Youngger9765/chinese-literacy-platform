@@ -2,6 +2,10 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, model_validator
 
+# Default reading goals (Issue #84)
+DEFAULT_TARGET_CPM = 150        # 流暢朗讀標準：150-180 字/分
+DEFAULT_TARGET_ACCURACY = 90.0  # 正確率 > 90%
+
 
 class AssignmentCreateRequest(BaseModel):
     """Request body for creating an assignment.
@@ -18,6 +22,10 @@ class AssignmentCreateRequest(BaseModel):
     description: str | None = None
     assignment_type: str = Field("reading", pattern=r"^(reading|comprehension)$")
     due_date: datetime | None = None
+    # Reading goals (Issue #84) — optional; defaults applied at read time
+    target_cpm: int | None = Field(None, ge=30, le=600)
+    target_accuracy: float | None = Field(None, ge=0, le=100)
+    difficulty_label: str | None = None
 
     @model_validator(mode="after")
     def _exactly_one_text_source(self) -> "AssignmentCreateRequest":
@@ -33,6 +41,10 @@ class AssignmentUpdateRequest(BaseModel):
     description: str | None = None
     due_date: datetime | None = None
     is_active: bool | None = None
+    # Reading goals (Issue #84)
+    target_cpm: int | None = Field(None, ge=30, le=600)
+    target_accuracy: float | None = Field(None, ge=0, le=100)
+    difficulty_label: str | None = None
 
 
 class GradeSubmissionRequest(BaseModel):
@@ -67,6 +79,13 @@ class AssignmentResponse(BaseModel):
     created_at: datetime
     submission_count: int
     completed_count: int
+    # Reading goals (Issue #84)
+    target_cpm: int | None
+    target_accuracy: float | None
+    difficulty_label: str | None
+    # Effective goals — defaults filled in when teacher hasn't set custom ones
+    effective_cpm: int
+    effective_accuracy: float
 
     model_config = {"from_attributes": True}
 
@@ -93,6 +112,12 @@ class StudentAssignmentResponse(BaseModel):
     status: str
     submitted_at: datetime | None
     score: float | None
+    # Reading goals (Issue #84)
+    target_cpm: int | None
+    target_accuracy: float | None
+    difficulty_label: str | None
+    effective_cpm: int
+    effective_accuracy: float
 
     model_config = {"from_attributes": True}
 

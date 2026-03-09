@@ -50,6 +50,10 @@ class Assignment(Base):
     assignment_type: Mapped[str] = mapped_column(String(20), default="reading")  # "reading" | "comprehension"
     due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # Reading goals (Issue #84)
+    target_cpm: Mapped[int | None] = mapped_column(Integer, nullable=True)       # target chars/min; None = use default
+    target_accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)  # 0-100 %; None = use default
+    difficulty_label: Mapped[str | None] = mapped_column(String(10), nullable=True)  # 初級/中級/高級
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

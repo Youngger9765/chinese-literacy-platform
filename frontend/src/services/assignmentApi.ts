@@ -11,7 +11,20 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // --- Response types ---
 
-export interface AssignmentResponse {
+// Default reading goals (Issue #84) — mirrors backend defaults
+export const DEFAULT_TARGET_CPM = 150;
+export const DEFAULT_TARGET_ACCURACY = 90;
+
+export interface ReadingGoals {
+  target_cpm: number | null;
+  target_accuracy: number | null;
+  difficulty_label: string | null;
+  /** Effective value — defaults applied when teacher hasn't set custom ones. */
+  effective_cpm: number;
+  effective_accuracy: number;
+}
+
+export interface AssignmentResponse extends ReadingGoals {
   id: number;
   classroom_id: number;
   /** Set for YAML platform texts; null for DB texts. */
@@ -44,7 +57,7 @@ export interface AssignmentDetailResponse extends AssignmentResponse {
   submissions: SubmissionResponse[];
 }
 
-export interface StudentAssignmentResponse {
+export interface StudentAssignmentResponse extends ReadingGoals {
   assignment_id: number;
   story_id: string | null;
   text_id: number | null;
@@ -117,6 +130,10 @@ export async function createAssignment(
     description?: string;
     assignment_type?: string;
     due_date?: string;
+    // Reading goals (Issue #84)
+    target_cpm?: number | null;
+    target_accuracy?: number | null;
+    difficulty_label?: string | null;
   },
 ): Promise<AssignmentResponse> {
   const res = await fetch(
@@ -154,7 +171,7 @@ export async function getAssignmentDetail(
   return handleResponse<AssignmentDetailResponse>(res);
 }
 
-/** Update an assignment. */
+/** Update an assignment (including reading goals). */
 export async function updateAssignment(
   token: string,
   assignmentId: number,
@@ -163,6 +180,10 @@ export async function updateAssignment(
     description?: string;
     due_date?: string | null;
     is_active?: boolean;
+    // Reading goals (Issue #84)
+    target_cpm?: number | null;
+    target_accuracy?: number | null;
+    difficulty_label?: string | null;
   },
 ): Promise<AssignmentResponse> {
   const res = await fetch(
