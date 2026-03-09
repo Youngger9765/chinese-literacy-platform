@@ -572,3 +572,27 @@ export async function getCrossTextAnalysis(
   );
   return handleResponse<ClassroomCrossTextPattern>(res);
 }
+
+// ── At-Risk Students / Predictive Detection (Issue #254) ──────────────────────
+
+export interface AtRiskStudent {
+  student_id: number;
+  student_name: string;
+  risk_level: 'low' | 'medium' | 'high';
+  risk_factors: string[];
+  recommended_actions: string[];
+  confidence_score: number;
+  supporting_data: Record<string, unknown>;
+}
+
+/** Fetch predictive at-risk student list for a classroom. */
+export async function getAtRiskStudents(
+  token: string,
+  classroomId: number,
+): Promise<AtRiskStudent[]> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/at-risk-students`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<AtRiskStudent[]>(res);
+}
