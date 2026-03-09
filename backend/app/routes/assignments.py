@@ -9,6 +9,7 @@ Assignment System API — teachers create assignments, students complete them.
   points to the fork.
 """
 import logging
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -36,6 +37,7 @@ from ..schemas.assignment import (
 )
 from ..services.assignment_copy_strategy import resolve_text_for_assignment
 from ..services.lesson_loader import get_lesson_by_id
+from ..services.notification_service import send_assignment_submitted_notification
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
 
 router = APIRouter(tags=["assignments"])
@@ -195,6 +197,56 @@ def get_my_assignments(
         )
 
     return results
+
+
+@router.get(
+    "/assignments/my/{assignment_id}",
+    response_model=StudentAssignmentResponse,
+)
+def get_my_assignment_detail(
+    assignment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get detail for one of the current student's assignments."""
+    submission = (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.assignment_id == assignment_id,
+            AssignmentSubmission.student_id == current_user.id,
+        )
+        .first()
+    )
+    if submission is None:
+        raise HTTPException(
+            status_code=404, detail="Assignment not found or not assigned to you"
+        )
+
+    assignment = submission.assignment
+    classroom = (
+        db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
+    )
+    story_title = _resolve_title_for_assignment(assignment, db)
+
+    return StudentAssignmentResponse(
+        assignment_id=assignment.id,
+        story_id=assignment.story_id,
+        text_id=assignment.text_id,
+        story_title=story_title,
+        title=assignment.title,
+        description=assignment.description,
+        assignment_type=assignment.assignment_type,
+        due_date=assignment.due_date,
+        classroom_name=classroom.name if classroom else "Unknown",
+        status=submission.status,
+        submitted_at=submission.submitted_at,
+        score=submission.score,
+        target_cpm=assignment.target_cpm,
+        target_accuracy=assignment.target_accuracy,
+        difficulty_label=assignment.difficulty_label,
+        effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+        effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
+    )
 
 
 # ── Teacher Endpoints ────────────────────────────────────────────────────────
@@ -629,7 +681,6 @@ def submit_assignment(
         if learning_session and learning_session.overall_score is not None:
             score = float(learning_session.overall_score)
 
-    from datetime import timezone
     submission.status = "submitted"
     submission.submitted_at = datetime.now(tz=timezone.utc)
     if score is not None:
@@ -646,6 +697,16 @@ def submit_assignment(
     logger.info(
         "Student %d submitted assignment %d (score=%s)",
         current_user.id, assignment_id, score,
+    )
+
+    # Send notification to teacher (log-only for now)
+    send_assignment_submitted_notification(
+        student_id=current_user.id,
+        student_name=current_user.name or str(current_user.id),
+        assignment_id=assignment.id,
+        story_title=story_title,
+        teacher_id=assignment.teacher_id,
+        db=db,
     )
 
     return StudentAssignmentResponse(
