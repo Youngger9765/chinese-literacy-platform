@@ -21,6 +21,119 @@ type Phase = 'grid' | 'practice' | 'pronunciation';
 
 type PracticeMode = 'stroke' | 'pronunciation';
 
+/* ================================================================ */
+/*  Progress bar                                                     */
+/* ================================================================ */
+
+interface ProgressBarProps {
+  done: number;
+  total: number;
+}
+
+function ProgressBar({ done, total }: ProgressBarProps) {
+  if (total === 0) return null;
+  const pct = Math.round((done / total) * 100);
+  return (
+    <div className="w-full px-6 py-2 bg-white border-b border-gray-100">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-[10px] font-medium text-gray-500">練習進度</span>
+          <span className="text-[10px] font-bold text-gray-700">{done} / {total} 字</span>
+        </div>
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-emerald-500 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================ */
+/*  Completion celebration                                           */
+/* ================================================================ */
+
+interface CompletionBannerProps {
+  count: number;
+  onFinish: () => void;
+}
+
+function CompletionBanner({ count, onFinish }: CompletionBannerProps) {
+  return (
+    <div className="animate-slide-up bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-6 text-center space-y-3 shadow-lg">
+      <div className="flex justify-center gap-2 text-3xl select-none animate-pop">
+        <span>🌟</span><span>🎉</span><span>🌟</span>
+      </div>
+      <h3 className="text-2xl font-black text-emerald-800">全部完成！</h3>
+      <p className="text-emerald-700 text-sm">
+        你練習了 <span className="font-bold text-emerald-900">{count}</span> 個生字，太厲害了！
+      </p>
+      <button
+        onClick={onFinish}
+        className="w-full max-w-xs mx-auto mt-2 px-8 py-3.5 rounded-2xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+      >
+        查看學習報告
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+/* ================================================================ */
+/*  Character card                                                   */
+/* ================================================================ */
+
+interface CharCardProps {
+  label: string;
+  isSuggested: boolean;
+  isPracticed: boolean;
+  animDelay: number;
+  onClick: () => void;
+}
+
+function CharCard({ label, isSuggested, isPracticed, animDelay, onClick }: CharCardProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={[
+        'relative flex flex-col items-center justify-center aspect-square rounded-2xl border transition-all duration-200 active:scale-90 animate-card-in',
+        isPracticed
+          ? 'bg-emerald-50 border-emerald-400/70 text-emerald-800 shadow-sm'
+          : isSuggested
+            ? 'bg-amber-50 border-amber-500/60 text-amber-800 ring-1 ring-amber-400/30 hover:bg-amber-100 hover:border-amber-500 shadow-md hover:shadow-lg hover:-translate-y-0.5'
+            : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-50 hover:border-accent/40 hover:shadow-md hover:-translate-y-0.5',
+      ].join(' ')}
+      style={{ animationDelay: `${animDelay}ms`, opacity: 0 }}
+    >
+      <span className="text-3xl font-bold leading-none py-2">{label}</span>
+
+      {isSuggested && !isPracticed && (
+        <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-amber-500 rounded-full border-2 border-white shadow-sm" />
+      )}
+
+      {isPracticed && (
+        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm animate-pop">
+          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </span>
+      )}
+
+      <span className="text-[9px] mt-1 opacity-50 font-medium">
+        {isPracticed ? '已完成' : '點我練習'}
+      </span>
+    </button>
+  );
+}
+
+/* ================================================================ */
+/*  Main component                                                   */
+/* ================================================================ */
+
 const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish, onBack }) => {
   const [phase, setPhase] = useState<Phase>('grid');
   const [practicingChar, setPracticingChar] = useState('');
@@ -32,6 +145,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   /** Character whose radical panel is currently open */
   const [radicalChar, setRadicalChar] = useState<string | null>(null);
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
+  const [justCompleted, setJustCompleted] = useState('');
 
   const zhuyinActive = zhuyinReady && zhuyinEnabled;
 
@@ -51,29 +165,18 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     }
   }, [zhuyinActive]);
 
-  /** Characters from low-match-rate paragraphs (suggested practice) */
   const needPracticeSet = useMemo(
     () => new Set(attempt.mispronouncedWords),
     [attempt.mispronouncedWords],
   );
 
-  /**
-   * Build display character list:
-   * - If there are missed characters (mispronouncedWords): show ONLY those.
-   *   Don't mix in unrelated story characters — every card shown is a real miss.
-   * - If none missed (perfect reading): show optional story characters so the
-   *   student can still choose to practice.
-   * All characters are filtered to those with available stroke data.
-   */
   const displayChars = useMemo(() => {
     const suggested = attempt.mispronouncedWords.filter(hasStrokeData);
 
     if (suggested.length > 0) {
-      // Show only the chars the student actually missed
       return suggested.slice(0, 12);
     }
 
-    // No misses — optional story characters for extra practice
     const seen = new Set<string>();
     const optional: string[] = [];
     for (const line of story.content) {
@@ -90,10 +193,13 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const handlePractice = (ch: string, mode: PracticeMode = 'stroke') => {
     setPracticingChar(ch);
     setPhase(mode === 'stroke' ? 'practice' : 'pronunciation');
+    setJustCompleted('');
   };
 
   const handlePracticeComplete = () => {
-    setPracticedChars(prev => new Set(prev).add(practicingChar));
+    const ch = practicingChar;
+    setPracticedChars(prev => new Set(prev).add(ch));
+    setJustCompleted(ch);
     setPhase('grid');
   };
 
@@ -173,7 +279,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           : "'Iansui', 'Noto Sans TC', sans-serif",
       }}
     >
-      {/* Tab bar — VS Code style */}
+      {/* Tab bar */}
       <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
         <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
           {story.filename} — 生字練習
@@ -187,14 +293,17 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
 
+      {/* Progress bar */}
+      <ProgressBar done={practicedChars.size} total={displayChars.length} />
+
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto px-6 py-8">
+      <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="max-w-2xl mx-auto space-y-6">
 
           {/* Header */}
           <div>
             <h2 className="text-xl font-black text-gray-900 mb-1">生字練習</h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               {attempt.timestamp === 0
                 ? '還沒有朗讀紀錄，以下是這篇課文的生字，選一個模式開始練習吧！'
                 : needPracticeSet.size > 0
@@ -237,6 +346,16 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </button>
           </div>
 
+          {/* Just-completed flash */}
+          {justCompleted && (
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 animate-slide-up-fast">
+              <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>「<strong>{justCompleted}</strong>」練習完成！繼續加油！</span>
+            </div>
+          )}
+
           {/* Character grid */}
           {currentChars.length === 0 ? (
             <div className="text-gray-400 text-sm py-8 text-center">
@@ -246,7 +365,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-              {currentChars.map(ch => {
+              {currentChars.map((ch, idx) => {
                 const isSuggested = needPracticeSet.has(ch);
                 const isPracticed = currentPracticedSet.has(ch);
                 const hasRadical = activeTab === 'stroke' && getDecomposition(ch) !== null;
@@ -260,7 +379,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                       }}
                       onDoubleClick={() => handlePractice(ch, activeTab)}
                       className={[
-                        `relative flex flex-col items-center justify-center w-full ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95`,
+                        `relative flex flex-col items-center justify-center w-full ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95 animate-card-in`,
                         isSelected
                           ? 'ring-2 ring-indigo-500 ring-offset-1'
                           : '',
@@ -270,6 +389,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                             ? 'bg-amber-900/30 border-amber-600/60 text-amber-700 ring-1 ring-amber-500/30 hover:bg-amber-900/50'
                             : 'bg-white border-gray-200 text-gray-800 hover:bg-gray-100 hover:border-accent/40',
                       ].join(' ')}
+                      style={{ animationDelay: `${idx * 40}ms`, opacity: 0 }}
                     >
                       <span className={`text-3xl font-bold leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}>
                         {processZhuyin(ch)}
@@ -282,7 +402,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
                       {/* Done checkmark */}
                       {isPracticed && (
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-[#0d1117]">
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-[#0d1117] animate-pop">
                           <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                           </svg>
@@ -412,9 +532,10 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           )}
 
           {allDone && (
-            <div className="bg-blue-50 border border-blue-300 rounded-2xl p-4 text-center">
-              <p className="text-blue-800 font-bold">筆順和發音都練習完了，真厲害！</p>
-            </div>
+            <CompletionBanner
+              count={practicedChars.size}
+              onFinish={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+            />
           )}
         </div>
       </div>
@@ -423,7 +544,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
         <button
           onClick={onBack}
-          className="px-4 py-3 rounded-xl text-base text-gray-600 hover:text-gray-800 transition-colors"
+          className="px-4 py-3 rounded-xl text-base text-gray-500 hover:text-gray-800 transition-colors"
         >
           回到朗讀
         </button>
@@ -433,7 +554,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         >
           {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>
