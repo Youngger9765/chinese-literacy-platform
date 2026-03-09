@@ -219,3 +219,22 @@ export async function startAssignment(
   );
   return handleResponse<StartAssignmentResponse>(res);
 }
+
+/**
+ * Submit a completed assignment. Call this when the student reaches the report page.
+ * Idempotent: safe to call even if already submitted.
+ * TODO: Backend will send Email notification to teacher on submission (future implementation).
+ */
+export async function submitAssignment(
+  token: string,
+  assignmentId: number,
+): Promise<StudentAssignmentResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/${assignmentId}/submit`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+    },
+  );
+  return handleResponse<StudentAssignmentResponse>(res);
+}
