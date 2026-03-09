@@ -488,3 +488,35 @@ export async function markErrorCorrected(
   if (!res.ok) throw new Error(`markErrorCorrected failed: ${res.status}`);
   return res.json();
 }
+
+// --- Student Progress Dashboard (Issue #25) ---
+
+export interface DailyActivity {
+  date: string; // YYYY-MM-DD
+  sessions_completed: number;
+  avg_score: number | null;
+}
+
+export interface StudentDashboardData {
+  total_sessions: number;
+  completed_sessions: number;
+  avg_score: number | null;
+  today_sessions: number;
+  week_sessions: number;
+  streak_days: number;
+  longest_streak: number;
+  daily_activity: DailyActivity[];
+  completed_story_slugs: string[];
+}
+
+export async function fetchStudentDashboard(
+  token: string,
+  studentId: number,
+): Promise<StudentDashboardData> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/students/${studentId}/dashboard`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`fetchStudentDashboard failed: ${res.status}`);
+  return res.json();
+}
