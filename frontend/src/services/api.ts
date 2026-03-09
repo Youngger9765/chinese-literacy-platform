@@ -567,3 +567,53 @@ export async function fetchStudentDashboard(
   if (!res.ok) throw new Error(`fetchStudentDashboard failed: ${res.status}`);
   return res.json();
 }
+
+// ---------------------------------------------------------------------------
+// Dictionary API (issue #259: MOE dictionary integration)
+// ---------------------------------------------------------------------------
+
+export interface DictionaryDefinition {
+  type: string;
+  definition: string;
+  examples: string[];
+}
+
+export interface DictionaryEntry {
+  character: string;
+  zhuyin: string | null;
+  stroke_count: number | null;
+  definitions: DictionaryDefinition[];
+  cached: boolean;
+  not_found: boolean;
+  error?: string;
+}
+
+export interface DictionaryBatchResponse {
+  results: DictionaryEntry[];
+}
+
+/**
+ * Look up a single Chinese character from the MOE dictionary (cached).
+ * No authentication required.
+ */
+export async function lookupCharacter(character: string): Promise<DictionaryEntry> {
+  const res = await fetch(
+    `${API_BASE}/api/dictionary/character/${encodeURIComponent(character)}`,
+  );
+  if (!res.ok) throw new Error(`lookupCharacter failed: ${res.status}`);
+  return res.json();
+}
+
+/**
+ * Batch look up multiple Chinese characters (max 20, deduplication applied).
+ * No authentication required.
+ */
+export async function lookupCharactersBatch(characters: string[]): Promise<DictionaryBatchResponse> {
+  const res = await fetch(`${API_BASE}/api/dictionary/batch`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ characters }),
+  });
+  if (!res.ok) throw new Error(`lookupCharactersBatch failed: ${res.status}`);
+  return res.json();
+}

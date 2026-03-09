@@ -8,6 +8,7 @@ import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProc
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import RadicalDecomposition from './RadicalDecomposition';
 import { getDecomposition } from '../../data/radicals';
+import DictionaryPanel from '../dictionary/DictionaryPanel';
 
 interface VocabPracticeProps {
   story: Story;
@@ -30,6 +31,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const [zhuyinReady, setZhuyinReady] = useState(false);
   /** Character whose radical panel is currently open */
   const [radicalChar, setRadicalChar] = useState<string | null>(null);
+  const [selectedChar, setSelectedChar] = useState<string | null>(null);
 
   const zhuyinActive = zhuyinReady && zhuyinEnabled;
 
@@ -249,12 +251,19 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                 const isPracticed = currentPracticedSet.has(ch);
                 const hasRadical = activeTab === 'stroke' && getDecomposition(ch) !== null;
                 const isRadicalOpen = radicalChar === ch;
+                const isSelected = selectedChar === ch;
                 return (
                   <div key={ch} className="relative">
                     <button
-                      onClick={() => handlePractice(ch, activeTab)}
+                      onClick={() => {
+                        setSelectedChar(prev => prev === ch ? null : ch);
+                      }}
+                      onDoubleClick={() => handlePractice(ch, activeTab)}
                       className={[
                         `relative flex flex-col items-center justify-center w-full ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95`,
+                        isSelected
+                          ? 'ring-2 ring-indigo-500 ring-offset-1'
+                          : '',
                         isPracticed
                           ? 'bg-emerald-50 border-emerald-700/50 text-emerald-800'
                           : isSuggested
@@ -283,9 +292,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                       <span className="text-[9px] mt-1 opacity-60">
                         {isPracticed
                           ? '已練習'
-                          : activeTab === 'stroke'
-                            ? '點我練字'
-                            : '點我練音'}
+                          : isSelected
+                            ? '再點練習'
+                            : '點我查字'}
                       </span>
                     </button>
 
@@ -309,6 +318,33 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* Dictionary panel — shown when a character is selected */}
+          {selectedChar && (
+            <div className="bg-white border border-indigo-100 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
+                  教育部國語辭典
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handlePractice(selectedChar)}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-accent text-white hover:bg-accent-hover font-semibold transition-colors"
+                  >
+                    練習筆順
+                  </button>
+                  <button
+                    onClick={() => setSelectedChar(null)}
+                    className="text-xs px-2 py-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                    aria-label="關閉字典"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+              <DictionaryPanel character={selectedChar} />
             </div>
           )}
 
@@ -350,6 +386,13 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               </div>
               <RadicalDecomposition char={radicalChar} />
             </div>
+          )}
+
+          {/* Usage hint */}
+          {currentChars.length > 0 && !selectedChar && (
+            <p className="text-[10px] text-gray-400 text-center">
+              點一下字卡查字典，連點兩下練習{activeTab === 'stroke' ? '筆順' : '發音'}
+            </p>
           )}
 
           {/* Completion message per tab */}
