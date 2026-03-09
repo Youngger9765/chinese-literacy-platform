@@ -10,3 +10,4 @@ from .feedback import Feedback  # noqa: F401
 from .student_tag import StudentTag  # noqa: F401
 from .teacher_instruction import TeacherInstruction  # noqa: F401
 from .notification_read import TeacherNotificationRead  # noqa: F401
+from .dictionary import DictionaryCache  # noqa: F401
