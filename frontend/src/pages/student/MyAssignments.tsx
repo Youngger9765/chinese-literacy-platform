@@ -63,7 +63,9 @@ const MyAssignments: React.FC = () => {
     setStartingId(assignmentId);
     try {
       const result = await startAssignment(token, assignmentId);
-      navigate(`/learn/${result.story_id}/intro`);
+      // story_id is set for YAML texts; text_id for DB texts
+      const textKey = result.story_id ?? String(result.text_id);
+      navigate(`/learn/${textKey}/intro`);
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -133,7 +135,7 @@ const MyAssignments: React.FC = () => {
     if (a.status === 'in_progress') {
       return (
         <button
-          onClick={() => navigate(`/learn/${a.story_id}/intro`)}
+          onClick={() => navigate(`/learn/${a.story_id ?? a.text_id}/intro`)}
           className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
         >
           繼續
@@ -143,7 +145,7 @@ const MyAssignments: React.FC = () => {
     // submitted or graded
     return (
       <button
-        onClick={() => navigate(`/learn/${a.story_id}/report`)}
+        onClick={() => navigate(`/learn/${a.story_id ?? a.text_id}/report`)}
         className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
       >
         查看

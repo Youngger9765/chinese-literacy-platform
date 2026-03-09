@@ -1,15 +1,31 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class AssignmentCreateRequest(BaseModel):
+    """Request body for creating an assignment.
+
+    Exactly one of `story_id` (YAML platform text) or `text_id` (DB text)
+    must be provided.  The backend will apply the appropriate copy strategy.
+    """
     classroom_id: int
-    story_id: str = Field(..., min_length=1, max_length=50)
+    # YAML platform text — lesson_number as string (e.g. "1", "57")
+    story_id: str | None = Field(None, min_length=1, max_length=50)
+    # DB text — id in the texts table
+    text_id: int | None = None
     title: str | None = Field(None, max_length=200)
     description: str | None = None
     assignment_type: str = Field("reading", pattern=r"^(reading|comprehension)$")
     due_date: datetime | None = None
+
+    @model_validator(mode="after")
+    def _exactly_one_text_source(self) -> "AssignmentCreateRequest":
+        has_story = self.story_id is not None
+        has_text = self.text_id is not None
+        if has_story == has_text:  # both set, or neither set
+            raise ValueError("Exactly one of story_id or text_id must be provided")
+        return self
 
 
 class AssignmentUpdateRequest(BaseModel):
@@ -35,8 +51,10 @@ class AssignmentResponse(BaseModel):
     id: int
     classroom_id: int
     teacher_id: int
-    story_id: str
-    story_title: str
+    # Resolved text reference — always present after creation
+    story_id: str | None      # set for YAML platform texts
+    text_id: int | None       # set for DB texts (points to the fork if applicable)
+    story_title: str          # resolved display title (from YAML or DB)
     title: str | None
     description: str | None
     assignment_type: str
@@ -60,7 +78,8 @@ class AssignmentListResponse(BaseModel):
 
 class StudentAssignmentResponse(BaseModel):
     assignment_id: int
-    story_id: str
+    story_id: str | None
+    text_id: int | None
     story_title: str
     title: str | None
     description: str | None
@@ -76,5 +95,6 @@ class StudentAssignmentResponse(BaseModel):
 
 class StartAssignmentResponse(BaseModel):
     session_id: int
-    story_id: str
+    story_id: str | None      # set if platform text
+    text_id: int | None       # set if DB text
     status: str

@@ -1,5 +1,12 @@
 """
 Assignment System API — teachers create assignments, students complete them.
+
+副本策略 (Copy Strategy):
+- Platform YAML texts: assignment.story_id is set; no DB copy needed.
+- DB texts with platform visibility: assignment.text_id → original text.
+- DB texts with non-platform visibility: at creation we fork the text
+  (see services/assignment_copy_strategy.py) and assignment.text_id
+  points to the fork.
 """
 import logging
 
@@ -12,6 +19,7 @@ from ..database import get_db
 from ..models.assignment import Assignment, AssignmentSubmission
 from ..models.school import Classroom, ClassroomStudent
 from ..models.session import LearningSession
+from ..models.text import Text
 from ..models.user import User, UserRole, Role
 from ..schemas.assignment import (
     AssignmentCreateRequest,
@@ -23,6 +31,7 @@ from ..schemas.assignment import (
     StudentAssignmentResponse,
     SubmissionResponse,
 )
+from ..services.assignment_copy_strategy import resolve_text_for_assignment
 from ..services.lesson_loader import get_lesson_by_id
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
 
@@ -33,8 +42,8 @@ logger = logging.getLogger(__name__)
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 
-def _resolve_story_title(story_id: str) -> str | None:
-    """Resolve a story_id (lesson_number) to its title."""
+def _resolve_story_title_from_yaml(story_id: str) -> str | None:
+    """Resolve a YAML story_id (lesson_number) to its title."""
     try:
         story = get_lesson_by_id(int(story_id))
         if story:
@@ -44,9 +53,20 @@ def _resolve_story_title(story_id: str) -> str | None:
     return None
 
 
+def _resolve_title_for_assignment(assignment: Assignment, db: Session) -> str:
+    """Return the display title for an assignment's text source."""
+    if assignment.story_id is not None:
+        return _resolve_story_title_from_yaml(assignment.story_id) or assignment.story_id
+    if assignment.text_id is not None:
+        text = db.query(Text).filter(Text.id == assignment.text_id).first()
+        if text:
+            return text.title
+    return "(Unknown)"
+
+
 def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentResponse:
     """Convert an Assignment ORM object to an AssignmentResponse."""
-    story_title = _resolve_story_title(assignment.story_id) or assignment.story_id
+    story_title = _resolve_title_for_assignment(assignment, db)
 
     submission_count = (
         db.query(func.count(AssignmentSubmission.id))
@@ -67,6 +87,7 @@ def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentRe
         classroom_id=assignment.classroom_id,
         teacher_id=assignment.teacher_id,
         story_id=assignment.story_id,
+        text_id=assignment.text_id,
         story_title=story_title,
         title=assignment.title,
         description=assignment.description,
@@ -139,12 +160,13 @@ def get_my_assignments(
         classroom = (
             db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
         )
-        story_title = _resolve_story_title(assignment.story_id) or assignment.story_id
+        story_title = _resolve_title_for_assignment(assignment, db)
 
         results.append(
             StudentAssignmentResponse(
                 assignment_id=assignment.id,
                 story_id=assignment.story_id,
+                text_id=assignment.text_id,
                 story_title=story_title,
                 title=assignment.title,
                 description=assignment.description,
@@ -176,25 +198,45 @@ def create_assignment(
 ):
     """Create a new assignment for a classroom.
 
-    Validates the story_id exists, creates the assignment, and
-    bulk-creates pending submissions for all enrolled students.
+    Applies the copy strategy:
+    - If story_id is provided: validates the YAML text exists, stores story_id.
+    - If text_id is provided: looks up the DB text, forks it if mutable
+      (non-platform visibility), stores text_id pointing to the fork.
+
+    Then bulk-creates pending submissions for all enrolled students.
     """
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_owner_or_admin(classroom, current_user, db)
 
-    # Validate story_id exists
-    try:
-        story = get_lesson_by_id(int(payload.story_id))
-    except (ValueError, TypeError):
-        story = None
-    if not story:
-        raise HTTPException(status_code=422, detail="Invalid story_id: story not found")
+    resolved_story_id: str | None = None
+    resolved_text_id: int | None = None
 
-    # Use classroom_id from path, not payload (payload.classroom_id is for schema consistency)
+    if payload.story_id is not None:
+        # --- Platform YAML text path ---
+        try:
+            story = get_lesson_by_id(int(payload.story_id))
+        except (ValueError, TypeError):
+            story = None
+        if not story:
+            raise HTTPException(status_code=422, detail="Invalid story_id: story not found")
+        resolved_story_id = payload.story_id
+
+    else:
+        # --- DB text path (with copy strategy) ---
+        text = db.query(Text).filter(Text.id == payload.text_id).first()
+        if text is None:
+            raise HTTPException(status_code=422, detail="Invalid text_id: text not found")
+
+        # Apply copy strategy: fork mutable texts
+        assigned_text = resolve_text_for_assignment(text, current_user.id, classroom_id, db)
+        db.flush()  # get assigned_text.id if it's a new fork
+        resolved_text_id = assigned_text.id
+
     assignment = Assignment(
         classroom_id=classroom_id,
         teacher_id=current_user.id,
-        story_id=payload.story_id,
+        story_id=resolved_story_id,
+        text_id=resolved_text_id,
         title=payload.title,
         description=payload.description,
         assignment_type=payload.assignment_type,
@@ -221,8 +263,8 @@ def create_assignment(
     db.refresh(assignment)
 
     logger.info(
-        "Created assignment %d for classroom %d (story=%s, students=%d)",
-        assignment.id, classroom_id, payload.story_id, len(enrollments),
+        "Created assignment %d for classroom %d (story=%s, text_id=%s, students=%d)",
+        assignment.id, classroom_id, resolved_story_id, resolved_text_id, len(enrollments),
     )
     return _assignment_to_response(assignment, db)
 
@@ -374,13 +416,17 @@ def start_assignment(
         return StartAssignmentResponse(
             session_id=submission.session_id,
             story_id=assignment.story_id,
+            text_id=assignment.text_id,
             status="in_progress",
         )
+
+    # story_slug for LearningSession: use story_id (YAML) or text_id as string
+    story_slug = assignment.story_id or str(assignment.text_id)
 
     # Create a new LearningSession
     learning_session = LearningSession(
         student_id=current_user.id,
-        story_slug=assignment.story_id,
+        story_slug=story_slug,
         classroom_id=assignment.classroom_id,
         status="in_progress",
         current_step=1,
@@ -401,5 +447,6 @@ def start_assignment(
     return StartAssignmentResponse(
         session_id=learning_session.id,
         story_id=assignment.story_id,
+        text_id=assignment.text_id,
         status="in_progress",
     )
