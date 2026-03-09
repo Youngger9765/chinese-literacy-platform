@@ -9,6 +9,7 @@ import {
   FullReadingResult,
 } from '../types';
 import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
+import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
 
@@ -246,10 +247,23 @@ const LearningLayout: React.FC = () => {
     navigate('/library');
   }, [navigate, clearPersistedSession]);
 
-  /** Called when a session is fully completed (report viewed). */
+  /** Called when a session is fully completed (report viewed). Auto-submits if assignment active. */
   const handleSessionComplete = useCallback(() => {
     clearPersistedSession();
-  }, [clearPersistedSession]);
+
+    // Auto-submit assignment if this session was started from an assignment.
+    const assignmentIdStr = sessionStorage.getItem('activeAssignmentId');
+    if (assignmentIdStr && token) {
+      const assignmentId = parseInt(assignmentIdStr, 10);
+      if (!isNaN(assignmentId)) {
+        sessionStorage.removeItem('activeAssignmentId');
+        // Fire-and-forget: best-effort auto-submit; errors are silent to avoid disrupting the report view.
+        submitAssignment(token, assignmentId).catch((err) => {
+          console.warn('[LearningLayout] Auto-submit assignment failed:', err);
+        });
+      }
+    }
+  }, [clearPersistedSession, token]);
 
   /** Mark a paragraph as completed in both local state and session (Issue #85). */
   const handleParagraphComplete = useCallback((paragraphIndex: number) => {

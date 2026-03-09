@@ -63,6 +63,8 @@ const MyAssignments: React.FC = () => {
     setStartingId(assignmentId);
     try {
       const result = await startAssignment(token, assignmentId);
+      // Store assignment ID in sessionStorage so LearningLayout can auto-submit on completion.
+      sessionStorage.setItem('activeAssignmentId', String(assignmentId));
       // story_id is set for YAML texts; text_id for DB texts
       const textKey = result.story_id ?? String(result.text_id);
       navigate(`/learn/${textKey}/intro`);
@@ -135,7 +137,12 @@ const MyAssignments: React.FC = () => {
     if (a.status === 'in_progress') {
       return (
         <button
-          onClick={() => navigate(`/learn/${a.story_id ?? a.text_id}/intro`)}
+          onClick={() => {
+            // Restore assignment ID so LearningLayout can auto-submit on completion.
+            sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
+            // story_id is set for YAML texts; text_id for DB texts
+            navigate(`/learn/${a.story_id ?? a.text_id}/intro`);
+          }}
           className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
         >
           繼續

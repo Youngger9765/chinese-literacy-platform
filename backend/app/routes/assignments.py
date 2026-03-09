@@ -506,3 +506,101 @@ def start_assignment(
         text_id=assignment.text_id,
         status="in_progress",
     )
+
+
+@router.post(
+    "/assignments/{assignment_id}/submit",
+    response_model=StudentAssignmentResponse,
+)
+def submit_assignment(
+    assignment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Mark an assignment as submitted after the student completes the learning flow.
+
+    Idempotent: if already submitted/graded, returns the current state without error.
+    Optionally pulls the accuracy score from the linked LearningSession.
+
+    TODO: Send Email notification to teacher when student submits (future implementation).
+    """
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    submission = (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.assignment_id == assignment_id,
+            AssignmentSubmission.student_id == current_user.id,
+        )
+        .first()
+    )
+    if submission is None:
+        raise HTTPException(
+            status_code=403, detail="You are not enrolled in this assignment"
+        )
+
+    # Idempotent: already submitted/graded, just return current state
+    if submission.status in ("submitted", "graded"):
+        classroom = (
+            db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
+        )
+        story_title = _resolve_story_title(assignment.story_id) or assignment.story_id
+        return StudentAssignmentResponse(
+            assignment_id=assignment.id,
+            story_id=assignment.story_id,
+            story_title=story_title,
+            title=assignment.title,
+            description=assignment.description,
+            assignment_type=assignment.assignment_type,
+            due_date=assignment.due_date,
+            classroom_name=classroom.name if classroom else "Unknown",
+            status=submission.status,
+            submitted_at=submission.submitted_at,
+            score=submission.score,
+        )
+
+    # Pull score from linked LearningSession if available
+    score: float | None = None
+    if submission.session_id is not None:
+        learning_session = (
+            db.query(LearningSession)
+            .filter(LearningSession.id == submission.session_id)
+            .first()
+        )
+        if learning_session and learning_session.overall_score is not None:
+            score = float(learning_session.overall_score)
+
+    from datetime import timezone
+    submission.status = "submitted"
+    submission.submitted_at = datetime.now(tz=timezone.utc)
+    if score is not None:
+        submission.score = score
+
+    db.commit()
+    db.refresh(submission)
+
+    classroom = (
+        db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
+    )
+    story_title = _resolve_story_title(assignment.story_id) or assignment.story_id
+
+    logger.info(
+        "Student %d submitted assignment %d (score=%s)",
+        current_user.id, assignment_id, score,
+    )
+
+    return StudentAssignmentResponse(
+        assignment_id=assignment.id,
+        story_id=assignment.story_id,
+        story_title=story_title,
+        title=assignment.title,
+        description=assignment.description,
+        assignment_type=assignment.assignment_type,
+        due_date=assignment.due_date,
+        classroom_name=classroom.name if classroom else "Unknown",
+        status=submission.status,
+        submitted_at=submission.submitted_at,
+        score=submission.score,
+    )
