@@ -208,6 +208,30 @@ export async function getMyAssignments(
   return handleResponse<StudentAssignmentResponse[]>(res);
 }
 
+/** Delete an assignment and all its submissions. Teacher or admin only. */
+export async function deleteAssignment(
+  token: string,
+  assignmentId: number,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/${assignmentId}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const body = await res.json();
+      message = body.detail ?? body.message ?? message;
+    } catch {
+      // ignore JSON parse errors
+    }
+    throw new AssignmentApiError(message, res.status);
+  }
+}
+
 /** Grade a student submission (teacher sets score, marks as graded). */
 export async function gradeSubmission(
   token: string,

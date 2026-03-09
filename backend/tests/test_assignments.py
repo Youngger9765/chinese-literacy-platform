@@ -934,3 +934,132 @@ class TestAssignmentEdgeCases:
             headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 200
+
+
+# ===========================================================================
+# DELETE /api/assignments/{id} — Delete assignment
+# ===========================================================================
+
+
+class TestDeleteAssignment:
+    def test_delete_assignment_success(self, client, teacher, classroom_with_students):
+        """Teacher can delete their own assignment."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "To Be Deleted",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 204
+
+        # Verify it's gone
+        get_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert get_resp.status_code == 404
+
+    def test_delete_assignment_not_found(self, client, teacher):
+        """Deleting non-existent assignment returns 404."""
+        resp = client.delete(
+            "/api/assignments/99999",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 404
+
+    def test_delete_assignment_not_owner(
+        self, client, teacher, other_teacher, classroom_with_students
+    ):
+        """Non-owner teacher cannot delete another teacher's assignment."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Protected Assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(other_teacher["token"]),
+        )
+        assert resp.status_code == 403
+
+    def test_delete_assignment_requires_auth(self, client, teacher, classroom_with_students):
+        """Unauthenticated delete returns 401."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(f"/api/assignments/{assignment_id}")
+        assert resp.status_code == 401
+
+    def test_delete_assignment_cascades_submissions(
+        self, client, teacher, classroom_with_students
+    ):
+        """Deleting an assignment also deletes all submissions (CASCADE)."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Cascade Delete Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+        # Should have 2 submissions (2 students enrolled)
+        assert create_resp.json()["submission_count"] == 2
+
+        # Delete assignment
+        del_resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert del_resp.status_code == 204
+
+        # Assignment is gone — 404 confirms cascade worked
+        get_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert get_resp.status_code == 404
+
+    def test_admin_can_delete_any_assignment(
+        self, client, teacher, admin_user, classroom_with_students
+    ):
+        """Admin can delete assignments they don't own."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Admin Delete Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(admin_user["token"]),
+        )
+        assert resp.status_code == 204
