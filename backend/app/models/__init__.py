@@ -12,3 +12,4 @@ from .teacher_instruction import TeacherInstruction  # noqa: F401
 from .notification_read import TeacherNotificationRead  # noqa: F401
 from .dictionary import DictionaryCache  # noqa: F401
 from .parent_link import ParentInviteCode, ParentStudentLink  # noqa: F401
+from .gamification import StudentXPLog, StudentBadge, StudentStreak  # noqa: F401

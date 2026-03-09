@@ -40,6 +40,7 @@ import StudentProgressDashboard from './components/student/StudentProgressDashbo
 import NotificationBell from './components/teacher/NotificationBell';
 import ParentDashboard from './pages/parent/ParentDashboard';
 import HelpPage from './pages/HelpPage';
+import AchievementsPage from './pages/student/AchievementsPage';
 
 /** Redirect authenticated users away from auth pages. */
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -671,6 +672,16 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <AppShell>
                   <StudentProgress />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/achievements"
+            element={
+              <ProtectedRoute>
+                <AppShell>
+                  <AchievementsPage />
                 </AppShell>
               </ProtectedRoute>
             }
