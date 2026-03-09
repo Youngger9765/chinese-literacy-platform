@@ -22,6 +22,7 @@ from .routes.feedback import router as feedback_router
 from .routes.jobs import router as jobs_router
 from .routes.privacy import router as privacy_router
 from .routes.cleanup import router as cleanup_router
+from .routes.co_teaching import router as co_teaching_router
 from .utils.logging_config import setup_logging
 
 # Initialise structured logging before anything else
@@ -213,6 +214,7 @@ app.include_router(feedback_router, prefix="/api", tags=["feedback"])
 app.include_router(jobs_router, prefix="/api", tags=["admin-jobs"])
 app.include_router(privacy_router, prefix="/api", tags=["privacy"])
 app.include_router(cleanup_router, prefix="/api", tags=["admin-cleanup"])
+app.include_router(co_teaching_router, prefix="/api", tags=["co-teaching"])
 
 
 def seed_default_data():

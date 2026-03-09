@@ -14,8 +14,9 @@ import TextManagementTab from './TextManagementTab';
 import StudentListTab from './StudentListTab';
 import AssignmentTab from './AssignmentTab';
 import ClassroomAnalytics from './ClassroomAnalytics';
+import CoTeachingTab from './CoTeachingTab';
 
-type TabKey = 'progress' | 'texts' | 'assignments' | 'students' | 'analytics';
+type TabKey = 'progress' | 'texts' | 'assignments' | 'students' | 'analytics' | 'teachers';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'progress', label: '學生進度' },
@@ -23,6 +24,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'texts', label: '課文管理' },
   { key: 'assignments', label: '作業管理' },
   { key: 'students', label: '學生名單' },
+  { key: 'teachers', label: '協同教師' },
 ];
 
 interface ClassroomDetailProps {
@@ -31,7 +33,7 @@ interface ClassroomDetailProps {
 }
 
 const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -398,6 +400,13 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
               setRemovingStudentId={setRemovingStudentId}
               formatDate={formatDate}
               onStudentsImported={loadClassroom}
+            />
+          )}
+
+          {activeTab === 'teachers' && (
+            <CoTeachingTab
+              classroomId={classroomId}
+              ownerId={classroom.teacher_id}
             />
           )}
         </div>

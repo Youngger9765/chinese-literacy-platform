@@ -222,31 +222,41 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         {/* Classroom grid */}
         {!isLoading && !error && classrooms.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {classrooms.map((cr) => (
-              <button
-                key={cr.id}
-                onClick={() => onSelectClassroom(cr.id)}
-                className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-left hover:border-accent hover:shadow-md transition-all group cursor-pointer"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-bold text-gray-900 group-hover:text-accent transition-colors">
-                    {cr.name}
-                  </h3>
-                  {!cr.is_active && (
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      已停用
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5 text-sm text-gray-500">
-                  {cr.grade != null && (
-                    <p>{cr.grade} 年級</p>
-                  )}
-                  <p>{cr.student_count} 位學生</p>
-                  <p className="text-xs">{formatDate(cr.created_at)}</p>
-                </div>
-              </button>
-            ))}
+            {classrooms.map((cr) => {
+              const isCoTeacher = user?.id != null && cr.teacher_id !== user.id;
+              return (
+                <button
+                  key={cr.id}
+                  onClick={() => onSelectClassroom(cr.id)}
+                  className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-left hover:border-accent hover:shadow-md transition-all group cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="font-bold text-gray-900 group-hover:text-accent transition-colors">
+                      {cr.name}
+                    </h3>
+                    <div className="flex gap-1 flex-wrap justify-end">
+                      {isCoTeacher && (
+                        <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-200">
+                          協同教師
+                        </span>
+                      )}
+                      {!cr.is_active && (
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                          已停用
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5 text-sm text-gray-500">
+                    {cr.grade != null && (
+                      <p>{cr.grade} 年級</p>
+                    )}
+                    <p>{cr.student_count} 位學生</p>
+                    <p className="text-xs">{formatDate(cr.created_at)}</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
 
