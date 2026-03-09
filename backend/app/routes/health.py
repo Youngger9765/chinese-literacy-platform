@@ -64,7 +64,7 @@ def health_detailed(db: Session = Depends(get_db)):
     # 2. AI service check (Vertex AI SDK available + project configured)
     # ------------------------------------------------------------------
     try:
-        import google.cloud.aiplatform as aiplatform  # type: ignore
+        from google import genai  # noqa: F401
         gcp_project = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCLOUD_PROJECT")
         if gcp_project:
             components["ai_service"] = {"status": "ok", "provider": "vertex_ai"}
@@ -75,10 +75,10 @@ def health_detailed(db: Session = Depends(get_db)):
                 "detail": "GOOGLE_CLOUD_PROJECT not set",
             }
     except ImportError:
-        logger.warning("Health check — google-cloud-aiplatform SDK not installed")
+        logger.warning("Health check — google-genai SDK not installed")
         components["ai_service"] = {
             "status": "error",
-            "detail": "Vertex AI SDK not available",
+            "detail": "google-genai SDK not available",
         }
         overall_healthy = False
 
