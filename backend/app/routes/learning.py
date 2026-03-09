@@ -24,6 +24,7 @@ from ..schemas.session import (
 )
 from ..services.ai_service import evaluate_comprehension, generate_reading_analysis, generate_socratic_question
 from ..services.socratic_agent import socratic_agent
+from ..services.stuck_detection_service import build_recommendations, detect_stuck_points
 
 router = APIRouter(tags=["learning"])
 logger = logging.getLogger(__name__)
@@ -902,3 +903,99 @@ def mark_error_corrected(
         student_id, payload.character, payload.correction_type,
     )
     return correction
+
+
+# ── Stuck-Point Detection (Issue #91) ─────────────────────────────────────────
+
+
+class StoryStuckItem(BaseModel):
+    story_slug: str
+    attempt_count: int
+    best_accuracy: float
+    last_attempt: str
+
+
+class CharacterStuckItem(BaseModel):
+    character: str
+    error_count: int
+    last_error_date: str | None
+
+
+class StuckPointsResponse(BaseModel):
+    story_stuck: list[StoryStuckItem]
+    character_stuck: list[CharacterStuckItem]
+    is_declining: bool
+    accuracy_trend: list[float]
+
+
+class RecommendationItem(BaseModel):
+    type: str
+    title: str
+    description: str
+    action: str
+
+
+class RecommendationsResponse(BaseModel):
+    recommendations: list[RecommendationItem]
+    total: int
+
+
+@router.get(
+    "/learning/students/{student_id}/stuck-points",
+    response_model=StuckPointsResponse,
+)
+def get_stuck_points(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Detect learning stuck-points for a student.
+
+    Accessible by the student themselves or their teacher.
+
+    Returns:
+    - story_stuck: stories attempted 3+ times without ≥5% accuracy improvement
+    - character_stuck: characters with 3+ errors across sessions (last 30 days)
+    - is_declining: True if last 3 sessions show strictly declining accuracy
+    - accuracy_trend: list of accuracy values (oldest → newest, last 10 sessions)
+    """
+    _verify_student_access(student_id, current_user, db)
+    data = detect_stuck_points(student_id, db)
+    logger.info(
+        "Stuck-point detection for student %d: %d story stuck, %d char stuck, declining=%s",
+        student_id,
+        len(data["story_stuck"]),
+        len(data["character_stuck"]),
+        data["is_declining"],
+    )
+    return StuckPointsResponse(**data)
+
+
+@router.get(
+    "/learning/students/{student_id}/recommendations",
+    response_model=RecommendationsResponse,
+)
+def get_recommendations(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return personalised learning recommendations for a student.
+
+    Accessible by the student themselves or their teacher.
+
+    Rule-based recommendations derived from stuck-point analysis.
+    No AI call — always fast and always available.
+    """
+    _verify_student_access(student_id, current_user, db)
+    stuck_data = detect_stuck_points(student_id, db)
+    recs = build_recommendations(stuck_data)
+    logger.info(
+        "Generated %d recommendations for student %d",
+        len(recs),
+        student_id,
+    )
+    return RecommendationsResponse(
+        recommendations=[RecommendationItem(**r) for r in recs],
+        total=len(recs),
+    )
