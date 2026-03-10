@@ -1,11 +1,13 @@
-"""catch-up migration: gamification, parent links, feedback, column fixes
+"""catch-up migration: gamification, parent links, feedback, column + schema fixes
 
 Creates tables that were manually added via SQL but never tracked by Alembic:
 - student_xp_log, student_badges, student_streaks (gamification)
 - parent_invite_codes, parent_student_links (parent system)
 - feedbacks (user feedback)
 
-Also fixes column mismatches on dictionary_cache and teacher_notification_reads.
+Also fixes column mismatches on dictionary_cache and teacher_notification_reads,
+and aligns learning_sessions (timestamp→timestamptz, json→jsonb), adds missing
+UNIQUE constraints (texts, organizations, teacher_notification_reads).
 
 Uses IF NOT EXISTS / IF EXISTS guards so this migration is idempotent on
 databases where the tables already exist (staging/production).
@@ -211,6 +213,220 @@ def upgrade() -> None:
     # Drop notification_id if exists
     conn.execute(sa.text("""
         ALTER TABLE teacher_notification_reads DROP COLUMN IF EXISTS notification_id
+    """))
+
+    # ── 9. learning_sessions: completed_at timestamp → timestamptz ─────
+    conn.execute(sa.text("""
+        ALTER TABLE learning_sessions
+            ALTER COLUMN completed_at TYPE TIMESTAMPTZ USING completed_at AT TIME ZONE 'UTC'
+    """))
+
+    # ── 10. learning_sessions: json → jsonb for 4 result columns ───────
+    conn.execute(sa.text("""
+        ALTER TABLE learning_sessions
+            ALTER COLUMN reading_result TYPE JSONB USING reading_result::jsonb
+    """))
+    conn.execute(sa.text("""
+        ALTER TABLE learning_sessions
+            ALTER COLUMN comprehension_result TYPE JSONB USING comprehension_result::jsonb
+    """))
+    conn.execute(sa.text("""
+        ALTER TABLE learning_sessions
+            ALTER COLUMN vocab_result TYPE JSONB USING vocab_result::jsonb
+    """))
+    conn.execute(sa.text("""
+        ALTER TABLE learning_sessions
+            ALTER COLUMN full_reading_result TYPE JSONB USING full_reading_result::jsonb
+    """))
+
+    # ── 11. texts.lesson_number: add UNIQUE if missing ─────────────────
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE texts
+                ADD CONSTRAINT uq_texts_lesson_number UNIQUE (lesson_number);
+        EXCEPTION WHEN duplicate_table THEN NULL;
+        END $$
+    """))
+
+    # ── 12. organizations.name: add UNIQUE if missing ──────────────────
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE organizations
+                ADD CONSTRAINT uq_organizations_name UNIQUE (name);
+        EXCEPTION WHEN duplicate_table THEN NULL;
+        END $$
+    """))
+
+    # ── 13. teacher_notification_reads: add composite UNIQUE ───────────
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE teacher_notification_reads
+                ADD CONSTRAINT uq_teacher_alert_read UNIQUE (teacher_id, alert_key);
+        EXCEPTION WHEN duplicate_table THEN NULL;
+        END $$
+    """))
+
+    # ── 14. dictionary_cache.fetched_at: ensure NOT NULL ───────────────
+    conn.execute(sa.text("""
+        UPDATE dictionary_cache SET fetched_at = now() WHERE fetched_at IS NULL
+    """))
+    conn.execute(sa.text("""
+        ALTER TABLE dictionary_cache ALTER COLUMN fetched_at SET NOT NULL
+    """))
+    conn.execute(sa.text("""
+        ALTER TABLE dictionary_cache ALTER COLUMN fetched_at SET DEFAULT now()
+    """))
+
+    # ── 15. NOT NULL fixes (ORM says NOT NULL, DB allows NULL) ─────────
+    conn.execute(sa.text("""
+        UPDATE assignment_submissions SET status = 'pending' WHERE status IS NULL
+    """))
+    conn.execute(sa.text("""
+        ALTER TABLE assignment_submissions ALTER COLUMN status SET NOT NULL
+    """))
+    conn.execute(sa.text("""
+        UPDATE assignments SET assignment_type = 'reading' WHERE assignment_type IS NULL
+    """))
+    conn.execute(sa.text("""
+        ALTER TABLE assignments ALTER COLUMN assignment_type SET NOT NULL
+    """))
+    conn.execute(sa.text("""
+        UPDATE error_corrections SET correction_type = 'practice' WHERE correction_type IS NULL
+    """))
+    conn.execute(sa.text("""
+        ALTER TABLE error_corrections ALTER COLUMN correction_type SET NOT NULL
+    """))
+
+    # ── 16. Column type/length fixes ───────────────────────────────────
+    # parent_invite_codes.code: VARCHAR(20) → VARCHAR(12)
+    conn.execute(sa.text("""
+        ALTER TABLE parent_invite_codes ALTER COLUMN code TYPE VARCHAR(12)
+    """))
+    # teacher_notification_reads.alert_key: VARCHAR(50) → VARCHAR(200)
+    conn.execute(sa.text("""
+        ALTER TABLE teacher_notification_reads ALTER COLUMN alert_key TYPE VARCHAR(200)
+    """))
+    # teacher_notification_reads.read_at: NOT NULL → nullable (ORM has nullable=True)
+    conn.execute(sa.text("""
+        ALTER TABLE teacher_notification_reads ALTER COLUMN read_at DROP NOT NULL
+    """))
+
+    # ── 17. ON DELETE CASCADE fixes for FKs ────────────────────────────
+    # student_xp_log.student_id
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE student_xp_log DROP CONSTRAINT IF EXISTS student_xp_log_user_id_fkey;
+            ALTER TABLE student_xp_log DROP CONSTRAINT IF EXISTS student_xp_log_student_id_fkey;
+            ALTER TABLE student_xp_log
+                ADD CONSTRAINT student_xp_log_student_id_fkey
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE;
+        END $$
+    """))
+    # student_badges.student_id
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE student_badges DROP CONSTRAINT IF EXISTS student_badges_user_id_fkey;
+            ALTER TABLE student_badges DROP CONSTRAINT IF EXISTS student_badges_student_id_fkey;
+            ALTER TABLE student_badges
+                ADD CONSTRAINT student_badges_student_id_fkey
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE;
+        END $$
+    """))
+    # student_streaks.student_id
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE student_streaks DROP CONSTRAINT IF EXISTS student_streaks_user_id_fkey;
+            ALTER TABLE student_streaks DROP CONSTRAINT IF EXISTS student_streaks_student_id_fkey;
+            ALTER TABLE student_streaks
+                ADD CONSTRAINT student_streaks_student_id_fkey
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE;
+        END $$
+    """))
+    # parent_invite_codes.student_id
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE parent_invite_codes DROP CONSTRAINT IF EXISTS parent_invite_codes_student_id_fkey;
+            ALTER TABLE parent_invite_codes
+                ADD CONSTRAINT parent_invite_codes_student_id_fkey
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE;
+        END $$
+    """))
+    # parent_student_links.parent_id + student_id
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE parent_student_links DROP CONSTRAINT IF EXISTS parent_student_links_parent_id_fkey;
+            ALTER TABLE parent_student_links DROP CONSTRAINT IF EXISTS parent_student_links_student_id_fkey;
+            ALTER TABLE parent_student_links
+                ADD CONSTRAINT parent_student_links_parent_id_fkey
+                FOREIGN KEY (parent_id) REFERENCES users(id) ON DELETE CASCADE;
+            ALTER TABLE parent_student_links
+                ADD CONSTRAINT parent_student_links_student_id_fkey
+                FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE;
+        END $$
+    """))
+
+    # ── 18. Index fixes ────────────────────────────────────────────────
+    # Add missing indexes
+    conn.execute(sa.text("""
+        CREATE INDEX IF NOT EXISTS ix_classroom_texts_expires_at ON classroom_texts(expires_at)
+    """))
+    conn.execute(sa.text("""
+        CREATE INDEX IF NOT EXISTS ix_learning_sessions_student_id ON learning_sessions(student_id)
+    """))
+    # Remove stale composite index (replaced by single-column index above)
+    conn.execute(sa.text("""
+        DROP INDEX IF EXISTS ix_learning_sessions_student_status
+    """))
+    # Remove extra feedbacks index (ORM doesn't define it)
+    conn.execute(sa.text("""
+        DROP INDEX IF EXISTS ix_feedbacks_user_id
+    """))
+
+    # ── 19. Clean up duplicate unique constraints on student_streaks ───
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE student_streaks DROP CONSTRAINT IF EXISTS student_streaks_user_id_key;
+        END $$
+    """))
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE student_streaks DROP CONSTRAINT IF EXISTS student_streaks_student_id_key;
+        END $$
+    """))
+    # ORM defines unique=True on the column, Alembic expects a unique index
+    conn.execute(sa.text("""
+        CREATE UNIQUE INDEX IF NOT EXISTS ix_student_streaks_student_id ON student_streaks(student_id)
+    """))
+
+    # ── 20. Align unique constraints as indexes (Alembic convention) ───
+    # parent_invite_codes.code: constraint → unique index
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE parent_invite_codes DROP CONSTRAINT IF EXISTS parent_invite_codes_code_key;
+        END $$
+    """))
+    conn.execute(sa.text("""
+        CREATE UNIQUE INDEX IF NOT EXISTS ix_parent_invite_codes_code ON parent_invite_codes(code)
+    """))
+    # texts.lesson_number: drop redundant named constraint (unique index already exists)
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE texts DROP CONSTRAINT IF EXISTS uq_texts_lesson_number;
+        END $$
+    """))
+    # users: replace UNIQUE constraints with Alembic-style unique indexes
+    conn.execute(sa.text("""
+        DO $$ BEGIN
+            ALTER TABLE users DROP CONSTRAINT IF EXISTS uq_users_username;
+            ALTER TABLE users DROP CONSTRAINT IF EXISTS users_email_key;
+            ALTER TABLE users DROP CONSTRAINT IF EXISTS users_google_id_key;
+        END $$
+    """))
+    conn.execute(sa.text("""
+        DROP INDEX IF EXISTS ix_users_google_id
+    """))
+    conn.execute(sa.text("""
+        CREATE UNIQUE INDEX IF NOT EXISTS ix_users_google_id ON users(google_id)
     """))
 
 
