@@ -324,7 +324,7 @@ def get_student_summary(db: Session, student_id: int) -> dict:
             "current": streak.current_streak,
             "longest": streak.longest_streak,
             "last_activity_date": (
-                streak.last_activity_date.date().isoformat()
+                (streak.last_activity_date.date().isoformat() if isinstance(streak.last_activity_date, datetime) else streak.last_activity_date.isoformat())
                 if streak.last_activity_date
                 else None
             ),
