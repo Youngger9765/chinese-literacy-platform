@@ -82,9 +82,17 @@ def list_stories(
 
 
 @router.get("/stories/{story_id}", response_model=StoryDetail)
-def get_story(story_id: int):
-    """Get full story detail by ID (lesson_number)."""
-    story = get_lesson_by_id(story_id)
+def get_story(story_id: str):
+    """Get full story detail by ID (lesson_number).
+
+    Accepts a numeric string (e.g. "3"). Non-numeric or unknown IDs return 404.
+    This prevents 422 errors when legacy sessions store slug-format story_slugs.
+    """
+    try:
+        numeric_id = int(story_id)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=404, detail="Story not found")
+    story = get_lesson_by_id(numeric_id)
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
