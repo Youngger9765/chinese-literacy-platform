@@ -83,9 +83,6 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
             <span className="text-xs text-green-600 font-medium">已完成</span>
           )}
         </div>
-        {story.filename && (
-          <div className="text-[10px] text-gray-400 font-mono mt-1">{story.filename}</div>
-        )}
       </div>
     </div>
   );
