@@ -26,6 +26,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Search & sort
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'grade' | 'students'>('name');
+
   // Create form state
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newName, setNewName] = useState('');
@@ -121,6 +125,33 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             建立班級
           </button>
         </div>
+
+        {/* Search & sort */}
+        {!isLoading && classrooms.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="搜尋班級名稱..."
+                className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              />
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'name' | 'grade' | 'students')}
+              className="h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+            >
+              <option value="name">依名稱排序</option>
+              <option value="grade">依年級排序</option>
+              <option value="students">依人數排序</option>
+            </select>
+          </div>
+        )}
 
         {/* Create form */}
         {showCreateForm && (
@@ -220,9 +251,24 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         )}
 
         {/* Classroom grid */}
-        {!isLoading && !error && classrooms.length > 0 && (
+        {!isLoading && !error && classrooms.length > 0 && (() => {
+          const filtered = classrooms
+            .filter((cr) => !searchQuery || cr.name.toLowerCase().includes(searchQuery.toLowerCase()))
+            .sort((a, b) => {
+              if (sortBy === 'grade') return (a.grade ?? 99) - (b.grade ?? 99);
+              if (sortBy === 'students') return b.student_count - a.student_count;
+              return a.name.localeCompare(b.name, 'zh-TW');
+            });
+          if (filtered.length === 0) {
+            return (
+              <div className="text-center py-8 text-sm text-gray-500">
+                找不到符合「{searchQuery}」的班級
+              </div>
+            );
+          }
+          return (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {classrooms.map((cr) => {
+            {filtered.map((cr) => {
               const isCoTeacher = user?.id != null && cr.teacher_id !== user.id;
               return (
                 <button
@@ -258,7 +304,8 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
               );
             })}
           </div>
-        )}
+          );
+        })()}
 
         {/* Empty state */}
         {!isLoading && !error && classrooms.length === 0 && (
