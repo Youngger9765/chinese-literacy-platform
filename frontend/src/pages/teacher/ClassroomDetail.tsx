@@ -354,13 +354,13 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
         {/* Tabbed content card */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
           {/* Tab bar */}
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px" aria-label="Tabs">
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <nav className="flex -mb-px whitespace-nowrap" aria-label="Tabs">
               {TABS.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
+                  className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer shrink-0 ${
                     activeTab === tab.key
                       ? 'border-accent text-accent'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
