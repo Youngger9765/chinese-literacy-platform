@@ -7,6 +7,17 @@ import {
   StudentAssignmentResponse,
   AssignmentApiError,
 } from '../../services/assignmentApi';
+import { loadActiveSession } from '../../services/api';
+
+const STEP_NUMBER_TO_PATH: Record<number, string> = {
+  1: 'intro',
+  2: 'tutor',
+  3: 'comprehension',
+  4: 'vocab',
+  5: 'dictation',
+  6: 'full-reading',
+  7: 'report',
+};
 
 type FilterTab = 'pending' | 'completed' | 'all';
 
@@ -18,7 +29,7 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
 
 const MyAssignments: React.FC = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const [assignments, setAssignments] = useState<StudentAssignmentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -141,7 +152,11 @@ const MyAssignments: React.FC = () => {
             // Restore assignment ID so LearningLayout can auto-submit on completion.
             sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
             // story_id is set for YAML texts; text_id for DB texts
-            navigate(`/learn/${a.story_id ?? a.text_id}/intro`);
+            const textKey = a.story_id ?? a.text_id;
+            // Resume from last saved step if available
+            const saved = user ? loadActiveSession(String(user.id)) : null;
+            const savedStep = saved && saved.storyId === String(textKey) ? STEP_NUMBER_TO_PATH[saved.currentStep] : null;
+            navigate(`/learn/${textKey}/${savedStep || 'intro'}`);
           }}
           className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
         >

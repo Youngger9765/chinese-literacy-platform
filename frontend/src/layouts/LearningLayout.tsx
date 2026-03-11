@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Outlet, useParams, useNavigate, useOutletContext } from 'react-router-dom';
+import { Outlet, useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import {
   Story,
   ReadingAttempt,
