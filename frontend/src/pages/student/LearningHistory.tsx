@@ -180,7 +180,7 @@ const LearningHistory: React.FC = () => {
                           查看對話
                         </button>
                       )}
-                      {s.status === 'in_progress' && s.story_slug && (
+                      {s.status === 'in_progress' && s.story_slug && !isNaN(Number(s.story_slug)) && (
                         <button
                           onClick={() => navigate(`/learn/${s.story_slug}/intro`)}
                           className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer"

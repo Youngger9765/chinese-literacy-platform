@@ -8,11 +8,11 @@ import { Story } from '../../types';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export function getDifficulty(story: Story): Difficulty {
-  const level = story.level ?? (story.grade ? story.grade * 1.1 : null);
-  if (level == null) return 'medium';
-  if (level <= 3) return 'easy';
-  if (level <= 6) return 'medium';
-  return 'hard';
+  const grade = story.grade;
+  if (grade == null) return 'medium';
+  if (grade <= 5) return 'easy';   // 4-5年級
+  if (grade <= 7) return 'medium'; // 6-7年級
+  return 'hard';                   // 8-9年級
 }
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, { label: string; className: string }> = {

@@ -652,12 +652,21 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                                 variant="compact"
                               />
                             </div>
-                            <AssignmentDetailPanel
-                              assignmentId={a.id}
-                              detail={expandedDetail!}
-                              isLoading={isLoadingDetail}
-                              onGraded={handleGraded}
-                            />
+                            {expandedDetail ? (
+                              <AssignmentDetailPanel
+                                assignmentId={a.id}
+                                detail={expandedDetail}
+                                isLoading={isLoadingDetail}
+                                onGraded={handleGraded}
+                              />
+                            ) : isLoadingDetail ? (
+                              <div className="flex items-center gap-2 py-4 justify-center">
+                                <div className="w-4 h-4 border-2 border-gray-300 border-t-accent rounded-full animate-spin" />
+                                <span className="text-xs text-gray-500">載入中...</span>
+                              </div>
+                            ) : (
+                              <p className="text-xs text-gray-500 py-4 text-center">無法載入作業詳情</p>
+                            )}
                           </td>
                         </tr>
                       )}

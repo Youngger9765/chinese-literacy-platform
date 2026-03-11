@@ -53,6 +53,12 @@ const TextCard: React.FC<{ item: TextProgressItem }> = ({ item }) => {
       navigate('/library');
       return;
     }
+    // Guard: only navigate if story_slug is a numeric lesson_number.
+    // Legacy sessions may have slug-format story_slugs that the API cannot resolve.
+    if (!item.story_slug || isNaN(Number(item.story_slug))) {
+      navigate('/library');
+      return;
+    }
     const route = step ? STEP_ROUTE[step] ?? 'intro' : 'intro';
     navigate(`/learn/${item.story_slug}/${route}`);
   };

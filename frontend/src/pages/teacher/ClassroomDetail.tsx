@@ -11,13 +11,14 @@ import {
 } from '../../services/classroomApi';
 import StudentProgressTab from './StudentProgressTab';
 import TextManagementTab from './TextManagementTab';
+import MyTextsTab from './MyTextsTab';
 import StudentListTab from './StudentListTab';
 import AssignmentTab from './AssignmentTab';
 import ClassroomAnalytics from './ClassroomAnalytics';
 import CrossTextAnalytics from './CrossTextAnalytics';
 import AtRiskStudents from '../../components/teacher/AtRiskStudents';
 
-type TabKey = 'progress' | 'texts' | 'assignments' | 'students' | 'analytics' | 'cross-text' | 'at-risk';
+type TabKey = 'progress' | 'texts' | 'my-texts' | 'assignments' | 'students' | 'analytics' | 'cross-text' | 'at-risk';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'progress', label: '學生進度' },
@@ -25,6 +26,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'cross-text', label: '跨課文分析' },
   { key: 'at-risk', label: '早期介入' },
   { key: 'texts', label: '課文管理' },
+  { key: 'my-texts', label: '我的課文' },
   { key: 'assignments', label: '作業管理' },
   { key: 'students', label: '學生名單' },
 ];
@@ -389,6 +391,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
           {activeTab === 'texts' && (
             <TextManagementTab classroomId={classroomId} />
+          )}
+
+          {activeTab === 'my-texts' && (
+            <MyTextsTab />
           )}
 
           {activeTab === 'assignments' && (
