@@ -159,8 +159,10 @@ const LibraryPage: React.FC = () => {
       {showResumePrompt && (
         <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
       )}
-      <StudentProgressDashboard onDashboardLoaded={setCompletedSlugs} />
-      <div className="mt-6">
+      <div className="min-h-[120px]">
+        <StudentProgressDashboard onDashboardLoaded={setCompletedSlugs} />
+      </div>
+      <div className="mt-6 min-h-[200px]">
         <RecommendedStories />
       </div>
       <StoryLibrary onStartReading={handleSelectStory} completedSlugs={completedSlugs} />
