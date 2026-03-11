@@ -15,7 +15,11 @@ import {
 
 const GENRES = ['記敘文', '說明文', '議論文', '文言文', '應用文'];
 const GRADES = [4, 5, 6, 7, 8, 9];
-const TEXT_TYPES = ['單', '多*2', '多*3'];
+const TEXT_TYPES: { value: string; label: string }[] = [
+  { value: '單', label: '單篇文章' },
+  { value: '多*2', label: '雙篇對比文本' },
+  { value: '多*3', label: '三篇群文閱讀' },
+];
 
 interface VocabFormItem {
   word: string;
@@ -461,7 +465,7 @@ const MyTextsTab: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   >
                     {TEXT_TYPES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t.value} value={t.value}>{t.label}</option>
                     ))}
                   </select>
                 </div>
