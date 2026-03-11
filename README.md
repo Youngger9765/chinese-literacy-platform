@@ -1,120 +1,103 @@
-# 中文閱讀學習平台 (Chinese Literacy Platform)
+# LingoLeap 國語文閱讀學習平台
 
-基於閱讀科學的識字與理解訓練系統
+基於閱讀科學的 AI 朗讀教學工具，協助國小教師與學生提升閱讀流暢度。
 
-## 📖 項目簡介
-
-本平台旨在運用科學實證的閱讀教學方法，幫助學生建立紮實的中文識字與閱讀理解能力。平台設計基於**閱讀科學**的教學理論，結合台灣、香港及國際閱讀科學研究成果。
-
-### 核心理念
+## 核心理念
 
 **閱讀能力 = 識字解碼 × 背景知識**
 
-- **識字解碼**：自動化的字形辨識、字音轉換、流暢朗讀
-- **背景知識**：語彙理解、文本理解、高層次思考
+結合朗讀練習（識字自動化）與蘇格拉底式 AI 對話（深度理解），系統化提升學生閱讀能力。
 
-## 🎯 主要功能
+## 主要功能
+
+### 學生學習系統（8 步驟）
+1. **簡介** — 課文背景介紹
+2. **逐段朗讀** — AI 即時朗讀指導
+3. **課文理解** — 蘇格拉底式 AI 對話（5 題 3 階段）
+4. **生字練習** — 筆順 + 注音 + 部件拆解 + 發音練習
+5. **聽寫練習** — TTS 聽寫 + 即時批改
+6. **造句練習** — 生字造句應用
+7. **全文朗讀** — 完整流暢度評估
+8. **診斷報告** — 六環節 AI 分析報告
 
 ### 教師管理系統
-- 建立學校、班級、學生資料
-- 上傳教科書課文（含著作權管理）
-- 監控學生學習進度與卡點
-- 接收學習提醒與分析報告
-- 設定個別化教學指示
+- 班級管理 + 學生匯入（CSV / 邀請碼）
+- 教材指派 + 自建課文上傳
+- 作業系統（建立 / 批改 / 提醒）
+- 學習儀表板（進度分析、學習曲線、班級熱力圖）
+- 學習預警通知 + 個別化教學指示
+- 跨課文學習模式分析
 
-### 學生學習系統
-- **蘇格拉底式對話**：評估意義理解
-- **朗讀訓練**：段落 → 全文，建立流暢度
-- **智能偵錯**：即時比對朗讀與原文差異
-- **生字學習**：字型、字音、字義、筆順、筆畫練習（支援平板觸控）
-- **注音輔助**：可隨時開關的注音符號顯示
+### 學生端
+- 自學模式 + 作業模式
+- 遊戲化（XP、成就、連續登入）
+- 學習歷史 + 對話紀錄回顧
+- 個人生字本 + 錯字矯正推薦
+- 家長儀表板（查看孩子進度）
 
-## 📚 理論基礎
+## 技術架構
 
-本平台的設計基於以下閱讀科學著作：
+| 層級 | 技術 |
+|------|------|
+| 前端 | React 19 + Vite 6 + Tailwind CSS 3 + TypeScript |
+| 後端 | FastAPI + SQLAlchemy 2.0 + PostgreSQL 15 |
+| AI | Google Vertex AI Gemini 2.5 Flash |
+| 部署 | GCP Cloud Run + Cloud SQL + Artifact Registry |
+| CI/CD | GitHub Actions（push/PR 自動部署） |
+| 測試 | pytest + Playwright E2E + Locust 壓測 |
 
-### 必讀書籍
-1. **Reading in the Brain** - Stanislas Dehaene
-2. **語言、語文與閱讀** - 柯華葳
-3. **有效讀寫**
-
-### NotebookLM 資源
-所有理論書籍已整理至 [NotebookLM](https://notebooklm.google.com/notebook/a641cf27-2195-44f9-afd4-94508fb75cd0)，包含 Podcast 導讀。
-
-## 🏗️ 技術架構
+## 開發環境設置
 
 ### 前端
-- **學生端**：Flutter (已有基礎代碼: [learning-to-read-chinese](https://github.com/Shinjou/learning-to-read-chinese/tree/1.8.10%2B10-unreleased))
-- **教師端**：待定 (建議: Next.js / React)
+
+```bash
+cd frontend
+npm install
+npm run dev    # http://localhost:3000
+```
 
 ### 後端
-- 待定 (建議: Node.js / Python FastAPI)
 
-### 核心技術需求
-- 語音識別（朗讀偵錯）
-- 自然語言處理（蘇格拉底對話）
-- 手寫辨識（生字練習）
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload  # http://localhost:8000
+```
 
-## 📋 開發階段
+環境變數：複製 `.env.example` 到 `.env`，填入本地設定。
+AI 呼叫走 Vertex AI service account（需要 `gcloud auth application-default login`）。
 
-### Phase 1: MVP 雛形
-- [ ] 教師註冊、登入系統
-- [ ] 班級與學生管理
-- [ ] 課文上傳與管理
-- [ ] 學生朗讀基礎功能
-- [ ] 生字學習模組
+## Git Branch 策略
 
-### Phase 2: 核心功能
-- [ ] 蘇格拉底對話系統
-- [ ] 智能朗讀偵錯
-- [ ] 學習進度儀表板
-- [ ] 個別化學習路徑
-
-### Phase 3: 進階功能
-- [ ] 學習分析與預警
-- [ ] 多校區管理
-- [ ] 擴充課文來源（國語日報、香港教材等）
-
-## 🔒 著作權與資料保護
-
-### 教師使用同意書
-教師註冊時需同意以下條款：
-
-1. ✅ 建立的班級及學生與實體教學一致
-2. ✅ 上傳的課文來自學校合法採購的教科書
-3. ✅ 未使用任何未經授權的課文
-4. ✅ 系統將在學期結束後一週自動刪除課文文本
-
-### 學生資料保護
-- Email 驗證需符合學校網域
-- 學習數據僅供教師與平台使用
-- 符合 GDPR / 個資法規範
-
-## 📖 課文來源（規劃中）
-
-| 來源 | 狀態 | 說明 |
-|------|------|------|
-| 教科書 | 🟡 著作權待澄清 | 需與出版社洽談授權 |
-| 已授權教材 | 🟢 可用 | 教育專家授權教材 |
-| 香港中文大學 | 🟡 評估中 | 需確認授權方式 |
-| 國語日報 | 🟡 評估中 | 60 年以上文章可能進入公共領域 |
-
-## 🤝 貢獻指南
-
-歡迎對閱讀教育有熱情的開發者、教育工作者參與！
+```
+feature/*  ──PR──>  staging  ──PR──>  main
+    │                  │                │
+    ▼                  ▼                ▼
+PR Preview          Staging         Production
+(ephemeral)       (persistent)     (persistent)
+```
 
 詳見 [CONTRIBUTING.md](./CONTRIBUTING.md)
 
-## 📄 授權
+## 文件索引
 
-待定 (建議: MIT / Apache 2.0 + 教材內容另行授權)
+| 文件 | 說明 |
+|------|------|
+| [PRD.md](docs/PRD.md) | 產品需求文檔 |
+| [BRD.md](docs/BRD.md) | 商業需求文檔 |
+| [MRD.md](docs/MRD.md) | 市場需求文檔 |
+| [TRD.md](docs/TRD.md) | 技術規格文檔 |
+| [ROADMAP.md](docs/ROADMAP.md) | 開發路線圖 |
+| [CHANGELOG.md](CHANGELOG.md) | 功能變更記錄 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 開發流程與規範 |
 
-## 📞 聯絡方式
+## 團隊
 
-- **項目發起人**: [待補充]
-- **技術負責人**: [待補充]
-- **教學顧問**: [待補充]
+- **Young** @Youngger9765 — Lead Dev
+- **方大哥 / Shinjou** — Product Owner
+- **靖杭** @if-else-master — 實習生
+- **啟翔** @stgst — 實習生
 
----
+## 授權
 
-**Generated with [Claude Code](https://claude.ai/code) via [Happy](https://happy.engineering)**
+Private repository. All rights reserved.

@@ -2,7 +2,7 @@
 # 國語文閱讀學習平台（LingoLeap）
 
 > Technical Requirements Document
-> Version 1.0 | 2026-02-27
+> Version 2.0 | 2026-03-12
 
 ---
 
@@ -28,26 +28,30 @@
                                           └──────────────────────┘
 ```
 
-### 1.1 技術選型決策
+### 1.1 技術選型
 
 | 層級 | 技術 | 版本 | 選擇理由 |
 |------|------|------|----------|
-| Frontend Framework | React | 19.x | 生態系成熟、社群支援、團隊熟悉度 |
+| Frontend Framework | React | 19.x | 生態系成熟、社群支援 |
 | Build Tool | Vite | 6.x | 快速 HMR、ESM 原生支持 |
 | CSS Framework | Tailwind CSS | 3.4 | Utility-first、快速原型開發 |
+| Charts | Recharts | 3.7 | React 原生、教師儀表板圖表 |
 | Backend Framework | FastAPI | 0.115+ | 非同步、自動 OpenAPI、Pydantic 整合 |
 | ORM | SQLAlchemy | 2.0+ | Mapped columns、強型別 |
+| Migration | Alembic | 1.13+ | 版本化 DB migration |
 | Database | PostgreSQL | 15 | JSON 欄位支持、全文搜尋、Cloud SQL |
 | AI Model | Gemini 2.5 Flash | - | Vertex AI 原生、結構化 JSON 輸出 |
 | Cloud Platform | GCP | - | Cloud Run serverless、自動擴展 |
-| Container Registry | Artifact Registry | - | asia-east1、Docker 映像管理 |
+| E2E Testing | Playwright | - | 多瀏覽器、87 個測試案例 |
+| Load Testing | Locust | - | 30 concurrent users 壓測 |
 
 ### 1.2 設計原則
 
-1. **Stateless API**: 後端不存儲 request 間的狀態（除 Socratic session 暫存）
-2. **YAML-first Content**: 平台課文從 YAML 載入，不依賴 DB
-3. **AI Centralization**: 所有 AI 呼叫集中在 `ai_service.py`，前端不直接呼叫 AI
-4. **Browser-native Speech**: STT/TTS 使用 Web Speech API，不經後端
+1. **JWT Auth + RBAC**: 統一用戶模型、8 種角色、scope-based 權限
+2. **DB-first Content**: 教師上傳課文存 DB，平台課文從 YAML 載入
+3. **AI Centralization**: 所有 AI 呼叫集中在 `ai_service.py`
+4. **Browser-native Speech**: STT/TTS 使用 Web Speech API
+5. **Route-level Code Splitting**: React.lazy() 動態載入頁面
 
 ---
 
@@ -59,6 +63,7 @@
 {
   "react": "^19.2.4",
   "react-dom": "^19.2.4",
+  "react-router-dom": "^7.x",
   "recharts": "^3.7.0",
   "typescript": "~5.8.2",
   "vite": "^6.2.0",
@@ -68,39 +73,56 @@
 
 ### 2.2 應用狀態管理
 
-使用 React `useState` 管理 SPA 內部狀態，無外部 state library：
+- **AuthContext**: JWT token、用戶資訊、角色判斷
+- **React Router**: 路由級 code splitting（React.lazy）
+- **Local state**: 各頁面 useState + useCallback
 
-```typescript
-// App.tsx 核心狀態
-const [view, setView] = useState<AppView>(AppView.HOME);       // 當前頁面
-const [selectedStory, setSelectedStory] = useState<Story | null>(null);  // 選中課文
-const [session, setSession] = useState<LearningSession | null>(null);    // 學習階段
-const [lastAttempt, setLastAttempt] = useState<ReadingAttempt | null>(null); // 朗讀結果
-```
+### 2.3 頁面結構
 
-### 2.3 學習步驟元件
+| 頁面 | 路徑 | 角色 | 說明 |
+|------|------|------|------|
+| LoginPage | `/login` | 公開 | Email + Google OAuth |
+| RegisterPage | `/register` | 公開 | 註冊 + 密碼強度驗證 |
+| StoryLibrary | `/library` | 學生 | 課文列表 + 篩選 |
+| LearningFlow | `/learn/:slug` | 學生 | 8 步驟學習流程 |
+| MyAssignments | `/assignments` | 學生 | 作業列表 + 狀態 |
+| LearningHistory | `/history` | 學生 | 學習紀錄 + 對話回顧 |
+| MyVocabulary | `/vocabulary` | 學生 | 個人生字本 |
+| AchievementsPage | `/achievements` | 學生 | XP + 成就 + 排行榜 |
+| StudentProgress | `/progress/:slug` | 學生 | 單篇課文學習進度 |
+| TeacherDashboard | `/teacher` | 教師 | 班級管理入口 |
+| ClassroomDetail | `/teacher/:id` | 教師 | 8 tab 班級詳情 |
+| AdminDashboard | `/admin` | 管理員 | 組織/學校/角色管理 |
+| ParentDashboard | `/parent` | 家長 | 孩子學習進度 |
+| HelpPage | `/help` | 公開 | 使用手冊 |
 
-| 步驟 | 元件 | AppView | 說明 |
-|------|------|---------|------|
-| 0 | `StoryLibrary` | HOME | 課文列表 + 篩選 |
-| 1 | `Intro` | INTRO | 課文背景、作者介紹 |
-| 2 | `LiveTutor` | TUTOR | 逐段朗讀 + AI 即時回饋 |
-| 3 | `ComprehensionChat` | COMPREHENSION | 蘇格拉底式 AI 對話 |
-| 4 | `VocabPractice` | VOCAB | 生字練習 + 筆順 |
-| 5 | `FullReading` | FULL_READING | 全文流暢度朗讀 |
-| 6 | `AssessmentReport` | REPORT | 六環節診斷報告 |
+### 2.4 學習步驟元件
 
-### 2.4 步驟流轉
+| 步驟 | 元件 | 說明 |
+|------|------|------|
+| 1 | `Intro` | 課文背景、作者介紹 |
+| 2 | `LiveTutor` | 逐段朗讀 + AI 即時回饋 |
+| 3 | `ComprehensionChat` | 蘇格拉底式 AI 對話 |
+| 4 | `VocabPractice` | 筆順 + 部件拆解 + 發音練習 |
+| 5 | `DictationPractice` | 聽寫練習 |
+| 6 | `SentencePractice` | 造句練習 |
+| 7 | `FullReading` | 全文流暢度朗讀 |
+| 8 | `AssessmentReport` | 六環節 AI 診斷報告 |
 
-```
-HOME ──(選課文)──▶ INTRO ──(開始)──▶ TUTOR ──(完成朗讀)──▶ COMPREHENSION
-                                                            │
-    ◀──(回首頁)── REPORT ◀── FULL_READING ◀── VOCAB ◀──────┘
-```
+### 2.5 教師班級詳情 Tabs
 
-每個步驟完成後透過 callback 推進至下一步，並將結果存入 `session` 狀態。
+| Tab | 元件 | 說明 |
+|-----|------|------|
+| 學生進度 | `StudentProgressTab` | 學習曲線 + session 歷史 |
+| 學習分析 | `AnalyticsTab` | Recharts 統計圖表 |
+| 跨課文分析 | `CrossTextTab` | 學習模式分析 |
+| 預警學生 | `AtRiskTab` | 學習困難偵測 |
+| 教材管理 | `TextManagementTab` | 指派/取消平台課文 |
+| 我的課文 | `MyTextsTab` | 自建課文 CRUD |
+| 作業 | `AssignmentTab` | 作業管理 + 批改 |
+| 學生名單 | `StudentListTab` | 學生管理 + CSV 匯入 |
 
-### 2.5 API 呼叫層
+### 2.6 API 呼叫層
 
 所有後端呼叫集中在 `frontend/src/services/api.ts`：
 
@@ -110,22 +132,16 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 **SessionExpiredError 機制**：Cloud Run 重新部署會清除後端 in-memory session。前端遇到 422 "session not found" 時拋出 `SessionExpiredError`，由 `ComprehensionChat` 元件自動重建 session。
 
-### 2.6 語音技術
+### 2.7 語音技術
 
 | 功能 | 技術 | 說明 |
 |------|------|------|
-| 語音辨識 (STT) | Web Speech API (`SpeechRecognition`) | 瀏覽器原生、免費、中文支援 |
-| 語音合成 (TTS) | Web Speech API (`SpeechSynthesis`) | 瀏覽器原生範讀 |
+| 語音辨識 (STT) | Web Speech API | 瀏覽器原生、中文支援 |
+| 語音合成 (TTS) | Web Speech API | 瀏覽器原生範讀 + 聽寫 |
 | 流暢度分析 | `fluencyAnalyzer.ts` | 前端計算 CPM / 準確率 |
 | 文字差異比對 | `DiffDisplay.tsx` (LCS) | 原文 vs 辨識結果比對 |
-
-### 2.7 特殊元件
-
-| 元件 | 路徑 | 說明 |
-|------|------|------|
-| `WriteCharacter` | `components/stroke-order/` | 筆順練習（canvas 繪製） |
-| `DiffDisplay` | `components/ui/DiffDisplay.tsx` | LCS 差異比對顯示 |
-| `StepperNav` | `components/StepperNav.tsx` | 步驟導航列 |
+| 語音輸入 | `useSpeechRecognition` | ComprehensionChat 語音回答 |
+| 錄音 | `useAudioRecorder` | 學生朗讀錄音 + 回放 |
 
 ---
 
@@ -142,81 +158,91 @@ psycopg2-binary>=2.9
 google-genai>=1.0
 alembic>=1.13
 pyyaml>=6.0
+bcrypt>=4.0
+pyjwt>=2.0
 ```
 
-### 3.2 API 端點
+### 3.2 API 端點概覽（140+ endpoints）
 
-#### 3.2.1 Stories API（課文服務）
+#### Auth（9 endpoints）
+| Method | Path | 說明 |
+|--------|------|------|
+| POST | `/api/auth/register` | 註冊（Email + Password） |
+| POST | `/api/auth/login` | 登入（JWT） |
+| POST | `/api/auth/google` | Google OAuth 登入 |
+| POST | `/api/auth/change-password` | 修改密碼 |
+| POST | `/api/auth/forgot-password` | 忘記密碼 |
+| POST | `/api/auth/reset-password` | 重設密碼 |
+| POST | `/api/auth/verify-email` | Email 驗證 |
+| POST | `/api/auth/complete-onboarding` | 完成新手引導 |
+| POST | `/api/auth/accept-terms` | 接受使用條款 |
 
-| Method | Path | 說明 | 資料來源 |
-|--------|------|------|----------|
-| GET | `/api/stories` | 課文列表（分頁 + 篩選） | YAML in-memory |
-| GET | `/api/stories/{story_id}` | 課文詳情 | YAML in-memory |
+#### Classrooms（12 endpoints）
+| Method | Path | 說明 |
+|--------|------|------|
+| POST | `/api/classrooms` | 建立班級 |
+| GET | `/api/classrooms` | 我的班級列表 |
+| GET | `/api/classrooms/{id}` | 班級詳情 |
+| PATCH | `/api/classrooms/{id}` | 更新班級 |
+| POST | `/api/classrooms/{id}/students` | 加入學生 |
+| DELETE | `/api/classrooms/{id}/students/{sid}` | 移除學生 |
+| GET | `/api/classrooms/{id}/students` | 學生列表 |
+| POST | `/api/classrooms/join` | 學生加入班級（邀請碼） |
+| POST | `/api/classrooms/{id}/csv-import` | CSV 匯入學生 |
+| GET | `/api/classrooms/csv-template` | CSV 模板下載 |
+| POST | `/api/classrooms/{id}/invite-code` | 產生邀請碼 |
+| POST | `/api/classrooms/{id}/parent-invite` | 產生家長邀請碼 |
 
-**查詢參數** (`/api/stories`):
-- `grade`: int (1-12) — 年級篩選
-- `genre`: str — 文體篩選（記敘文/說明文/議論文/文言文/應用文）
-- `category`: str — 分類篩選
-- `search`: str (max 100) — 關鍵字搜尋
-- `page`: int (default 1) — 頁碼
-- `page_size`: int (default 60, max 100) — 每頁數量
+#### Assignments（10 endpoints）
+| Method | Path | 說明 |
+|--------|------|------|
+| POST | `/api/assignments` | 建立作業 |
+| GET | `/api/assignments` | 作業列表 |
+| GET | `/api/assignments/{id}` | 作業詳情 |
+| GET | `/api/assignments/{id}/submissions` | 提交列表 |
+| PATCH | `/api/assignments/{id}` | 更新作業（啟用/停用） |
+| DELETE | `/api/assignments/{id}` | 刪除作業 |
+| POST | `/api/assignments/{id}/start` | 學生開始作業 |
+| PATCH | `/api/assignments/submissions/{id}` | 批改（打分） |
+| POST | `/api/assignments/{id}/bulk-grade` | 批量批改 |
+| GET | `/api/assignments/my` | 學生的作業列表 |
 
-**回應結構**:
-```json
-{
-  "stories": [{ "id", "lesson_number", "title", "grade", "grade_code", "genre", "category", "char_count", "thumbnail_url", "reading_strategy", "intro" }],
-  "total": 57,
-  "grades": [4, 5, 6, 7, 8, 9]
-}
-```
+#### Learning（20+ endpoints）
+| Method | Path | 說明 |
+|--------|------|------|
+| POST | `/api/learning/sessions` | 建立學習 session |
+| GET | `/api/learning/sessions` | Session 列表 |
+| GET | `/api/learning/sessions/{id}` | Session 詳情 |
+| GET | `/api/learning/sessions/{id}/report` | Session 報告 |
+| GET | `/api/learning/sessions/{id}/status` | Session 狀態 |
+| PATCH | `/api/learning/sessions/{id}` | 更新 session |
+| POST | `/api/comprehension/chat` | 蘇格拉底式對話 |
+| POST | `/api/learning/sessions/{id}/listening-eval` | 聽力理解評估 |
+| GET | `/api/learning/students/{sid}/error-patterns` | 錯字模式 |
+| GET | `/api/learning/students/{sid}/recommended-vocab` | 推薦生字 |
+| GET | `/api/learning/students/{sid}/dashboard` | 學生儀表板 |
 
-#### 3.2.2 Learning API（學習服務）
+#### Teacher（15+ endpoints）
+教師端分析、學生進度、學習曲線、教學指示、標籤管理、通知中心等。
 
-| Method | Path | 說明 | 狀態 |
-|--------|------|------|------|
-| POST | `/api/learning-sessions` | 建立學習階段 | Stub（待 DB 整合） |
-| POST | `/api/comprehension/question` | 生成理解提問 | Deprecated（已被 chat 取代） |
-| POST | `/api/comprehension/chat` | 蘇格拉底式對話 | 完整實作 |
+#### Gamification（6 endpoints）
+XP 總覽、點數紀錄、成就列表、連續登入、排行榜、完成回報。
 
-**`/api/comprehension/chat` 請求**:
-```json
-{
-  "session_id": "uuid",
-  "story_title": "課文標題",
-  "story_text": "全文內容",
-  "student_answer": "學生回答（null = 開始新對話）",
-  "mispronounced_words": ["字1", "字2"],
-  "accuracy": 85.5,
-  "cpm": 120
-}
-```
-
-**`/api/comprehension/chat` 回應**:
-```json
-{
-  "question": "AI 提問",
-  "feedback": "回饋（可能為 null）",
-  "understood": true,
-  "understood_count": 3,
-  "required_count": 5,
-  "phase": "factual",
-  "is_complete": false,
-  "referenced_paragraph": 2
-}
-```
-
-#### 3.2.3 Users API
-
-| Method | Path | 說明 | 狀態 |
-|--------|------|------|------|
-| GET | `/api/users/me` | 當前用戶資訊 | Stub（待 Auth 實作） |
+#### 其他模組
+- **Classroom Texts**: 教材指派（3 endpoints）
+- **Admin Stories**: 課文管理 CRUD（5 endpoints）
+- **Dictionary**: 教育部字典查詢 + 快取（2 endpoints）
+- **Feedback**: 使用者回饋（3 endpoints）
+- **Parents**: 家長儀表板（1 endpoint）
+- **Organizations / Schools / Roles**: 組織管理
+- **Health**: 健康檢查（含 AI/DB 狀態）
+- **Jobs / Cleanup**: 背景任務 + 課文清理
 
 ### 3.3 AI 服務架構
 
-#### 3.3.1 集中式 AI 呼叫 (`ai_service.py`)
+#### 集中式 AI 呼叫 (`ai_service.py`)
 
 ```python
-# 唯一 AI 入口
 client = genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
 model = "gemini-2.5-flash"
 max_output_tokens = 1024
@@ -226,164 +252,95 @@ response_mime_type = "application/json"
 
 **重試策略**: 指數退避（1s → 2s → 4s），最多 3 次
 **超時**: 30 秒（asyncio.wait_for）
+**Prompt injection 防護**: `input_sanitizer.py` 過濾惡意輸入
 
-#### 3.3.2 蘇格拉底對話 Agent (`socratic_agent.py`)
+#### 蘇格拉底對話 Agent (`socratic_agent.py`)
 
 **Session 管理**: In-memory `SessionStore`（30 分鐘 TTL、自動清理）
 
 **對話階段**:
-1. `factual` — 事實理解（課文中明確寫到的）
-2. `inferential` — 推論理解（需要推理的）
-3. `evaluative` — 評價理解（個人觀點、價值判斷）
+1. `factual` — 事實理解
+2. `inferential` — 推論理解
+3. `evaluative` — 評價理解
 
-**通過機制**: 5 題 3 階段，每題評估 `understood: true/false`
+**通過機制**: 5 題 3 階段，3 級評分（understood/partial/not_understood）
 
 **安全機制**:
 - Rate limiting: 每 session 每分鐘最多 30 次請求
 - Circuit breaker: 連續 3 次 AI 錯誤 → RuntimeError → HTTP 503
 - Error fallback: `understood=False`（永不自動通過）
 
-#### 3.3.3 人格設定 (`persona.py`)
+### 3.4 服務層
 
-統一「溫暖但堅定」語氣（`TUTOR_PERSONA`），用於所有 AI 互動。
-
-### 3.4 課文資料管線
-
-```
-backend/data/stories/*.yaml  →  lesson_loader.py (startup 載入)  →  In-memory dict
-                                                                       │
-                                                              Stories API 查詢/回傳
-```
-
-57 篇課文從 YAML 載入，不需要 DB。每篇包含：
-- 基本資訊（title, grade, genre, category）
-- 課文段落（paragraphs[]）
-- 生字表（vocabulary[]）
-- 填空題（fill_in_blank[]）
-- 選擇題（multiple_choice[]）
-- 朗讀基準（reading_benchmark{}）
+| 服務 | 檔案 | 說明 |
+|------|------|------|
+| AI Service | `ai_service.py` | 所有 Gemini 呼叫 |
+| Socratic Agent | `socratic_agent.py` | 蘇格拉底對話 |
+| Gamification | `gamification_service.py` | XP/成就/連續登入 |
+| Prediction | `prediction_service.py` | 學習困難預測 |
+| Cross-text | `cross_text_analysis_service.py` | 跨課文分析 |
+| Listening | `listening_service.py` | 聽力理解評估 |
+| Learning Path | `learning_path_service.py` | 學習路徑推薦 |
+| Stuck Detection | `stuck_detection_service.py` | 卡點偵測 |
+| Dictionary | `dictionary_service.py` | 教育部字典 API + DB 快取 |
+| Notification | `notification_service.py` | 教師通知服務 |
+| Points | `points_service.py` | XP 計算 + 記錄 |
+| Text Cleanup | `text_cleanup_service.py` | 學期結束課文清理 |
+| Assignment Copy | `assignment_copy_strategy.py` | 作業副本策略 |
+| Input Sanitizer | `input_sanitizer.py` | Prompt injection 防護 |
+| User Service | `user_service.py` | 用戶 CRUD |
+| Lesson Loader | `lesson_loader.py` | YAML 課文載入 |
+| Persona | `persona.py` | AI 人格設定 |
 
 ---
 
 ## 4. 資料庫設計
 
-### 4.1 ER 圖
+### 4.1 ER 圖（簡化版）
 
 ```
-┌──────────┐     ┌──────────┐     ┌──────────────┐
-│  School   │────▶│  Teacher  │────▶│    Class      │
-│           │ 1:N │           │ 1:N │              │
-└──────────┘     └──────────┘     └──────┬───────┘
-                       │ 1:N              │
-                       ▼                  │ N:M (ClassStudent)
-                 ┌──────────┐             │
-                 │   Text    │        ┌───▼──────┐
-                 │ (課文)    │        │  Student   │
-                 └─────┬────┘        └────┬──────┘
-                       │                  │
-                       │ 1:N         1:N  │
-                       ▼                  ▼
-                 ┌─────────────────────────┐
-                 │    LearningSession       │
-                 │ (student_id, text_id)    │
-                 └──────────┬──────────────┘
-                            │ 1:N
-                            ▼
-                 ┌──────────────────┐
-                 │  CharacterError   │
-                 │ (character, type) │
-                 └──────────────────┘
+Organization ──1:N──▶ School ──1:N──▶ Classroom ──N:M──▶ Student (User)
+                                          │                    │
+                                     classroom_texts      learning_sessions
+                                          │                    │
+                                         Text          character_errors
+                                          │            dialogue_turns
+                                     assignments
+                                          │
+                                     submissions
 ```
 
-### 4.2 資料表定義
+### 4.2 資料表
 
-#### schools
-| 欄位 | 型別 | 約束 | 說明 |
-|------|------|------|------|
-| id | INTEGER | PK, AUTO | 學校 ID |
-| name | VARCHAR(200) | NOT NULL | 學校名稱 |
+| 表名 | 說明 | 主要欄位 |
+|------|------|----------|
+| `users` | 統一用戶（教師/學生/家長/管理員） | email, hashed_password, display_name, google_id |
+| `user_roles` | RBAC 角色 | user_id, role_name, scope_type, scope_id |
+| `organizations` | 組織 | name, code |
+| `schools` | 學校 | name, organization_id |
+| `classrooms` | 班級 | name, school_id, grade, invite_code |
+| `classroom_students` | 班級-學生關聯 | classroom_id, student_id |
+| `classroom_teachers` | 班級-教師關聯 | classroom_id, teacher_id |
+| `texts` | 課文（平台 + 教師自建） | title, paragraphs(JSON), vocabulary(JSON), visibility, grade |
+| `classroom_texts` | 班級-課文指派 | classroom_id, text_id, copyright_confirmed |
+| `learning_sessions` | 學習記錄 | student_id, text_id, status, current_step, reading_result(JSONB) |
+| `character_errors` | 錯字記錄 | session_id, character, error_type |
+| `dialogue_turns` | 對話紀錄 | session_id, role, content, understood |
+| `assignments` | 作業 | classroom_id, text_id, title, due_date, is_active |
+| `assignment_submissions` | 作業提交 | assignment_id, student_id, status, score |
+| `gamification_profiles` | 遊戲化 | user_id, total_xp, level, current_streak |
+| `achievements` | 成就解鎖 | user_id, achievement_type, unlocked_at |
+| `points_log` | XP 紀錄 | user_id, points, reason, session_id |
+| `student_tags` | 學生標籤 | student_id, classroom_id, tag_name, color |
+| `teacher_instructions` | 教學指示 | teacher_id, student_id, text_id, instruction |
+| `parent_links` | 家長-學生關聯 | parent_id, student_id, invite_code |
+| `notification_reads` | 通知已讀 | user_id, notification_type, notification_id |
+| `feedback` | 使用者回饋 | user_id, category, content, status |
+| `dictionary_cache` | 字典快取 | word, definition_json |
 
-#### teachers
-| 欄位 | 型別 | 約束 | 說明 |
-|------|------|------|------|
-| id | INTEGER | PK, AUTO | 教師 ID |
-| school_id | INTEGER | FK → schools.id, NOT NULL | 所屬學校 |
-| email | VARCHAR(254) | UNIQUE, NOT NULL | 電子信箱 |
-| name | VARCHAR(100) | NOT NULL | 姓名 |
+### 4.3 Migration
 
-#### classes
-| 欄位 | 型別 | 約束 | 說明 |
-|------|------|------|------|
-| id | INTEGER | PK, AUTO | 班級 ID |
-| teacher_id | INTEGER | FK → teachers.id, NOT NULL | 導師 |
-| name | VARCHAR(100) | NOT NULL | 班級名稱 |
-
-#### class_students（多對多關聯表）
-| 欄位 | 型別 | 約束 | 說明 |
-|------|------|------|------|
-| id | INTEGER | PK, AUTO | ID |
-| class_id | INTEGER | FK → classes.id, NOT NULL | 班級 |
-| student_id | INTEGER | FK → students.id, NOT NULL | 學生 |
-| | | UNIQUE(class_id, student_id) | 唯一約束 |
-
-#### students
-| 欄位 | 型別 | 約束 | 說明 |
-|------|------|------|------|
-| id | INTEGER | PK, AUTO | 學生 ID |
-| name | VARCHAR(100) | NOT NULL | 姓名 |
-
-#### texts（課文內容）
-| 欄位 | 型別 | 約束 | 說明 |
-|------|------|------|------|
-| id | INTEGER | PK, AUTO | 課文 ID |
-| title | VARCHAR(200) | NOT NULL | 標題 |
-| paragraphs | JSON | NOT NULL | 段落陣列 `string[]` |
-| full_text | TEXT | NULLABLE | 全文（搜尋用） |
-| char_count | INTEGER | NOT NULL, default 0 | 字數 |
-| grade | INTEGER | NOT NULL, INDEX | 年級 (4-9) |
-| grade_code | VARCHAR(10) | NOT NULL | 代碼 ("G4-1") |
-| genre | VARCHAR(20) | NOT NULL | 文體 |
-| text_type | VARCHAR(10) | NOT NULL, default "單" | 文本類型 |
-| category | VARCHAR(20) | NOT NULL | 分類 |
-| reading_strategy | VARCHAR(200) | NULLABLE | 閱讀策略 |
-| thumbnail_path | VARCHAR(500) | NULLABLE | 縮圖 GCS 路徑 |
-| vocabulary | JSON | NULLABLE | 生字表 `[{word, definition}]` |
-| fill_in_blank | JSON | NULLABLE | 填空題 `[{sentence, answer}]` |
-| multiple_choice | JSON | NULLABLE | 選擇題 `[{question, options[], answer, explanation}]` |
-| reading_benchmark | JSON | NULLABLE | 朗讀基準 `{levels[]}` |
-| visibility | ENUM | NOT NULL, default "platform" | 可見層級 |
-| school_id | INTEGER | FK → schools.id, NULLABLE | 學校擁有 |
-| class_id | INTEGER | FK → classes.id, NULLABLE | 班級擁有 |
-| teacher_id | INTEGER | FK → teachers.id, NULLABLE | 教師擁有 |
-| created_by_id | INTEGER | FK → teachers.id, NULLABLE | 建立者 |
-| forked_from_id | INTEGER | FK → texts.id, NULLABLE | Fork 來源 |
-| status | ENUM | NOT NULL, default "published" | 狀態 |
-| lesson_number | INTEGER | UNIQUE, INDEX, NULLABLE | 平台課文編號 |
-| source_file | VARCHAR(200) | NULLABLE | 來源 YAML |
-| created_at | DATETIME | NOT NULL | 建立時間 |
-| updated_at | DATETIME | NOT NULL | 更新時間 |
-
-**Visibility 層級**: `platform` → `organization` → `school` → `class` → `private`
-
-**Text Status**: `draft` → `published` → `archived`
-
-#### learning_sessions
-| 欄位 | 型別 | 約束 | 說明 |
-|------|------|------|------|
-| id | INTEGER | PK, AUTO | Session ID |
-| student_id | INTEGER | FK → students.id, NOT NULL | 學生 |
-| text_id | INTEGER | FK → texts.id, NULLABLE | 課文 |
-| current_step | INTEGER | NOT NULL, default 1 | 當前步驟 (1-6) |
-| accuracy | FLOAT | NULLABLE | 準確率 |
-| completed_at | DATETIME | NULLABLE | 完成時間 |
-
-#### character_errors
-| 欄位 | 型別 | 約束 | 說明 |
-|------|------|------|------|
-| id | INTEGER | PK, AUTO | ID |
-| session_id | INTEGER | FK → learning_sessions.id, NOT NULL | Session |
-| character | VARCHAR(4) | NOT NULL | 錯字 |
-| error_type | VARCHAR(50) | NOT NULL | 錯誤類型 |
+使用 Alembic 管理 DB schema 變更。CI/CD 通過 `RUN_MIGRATIONS=true` 環境變數控制是否在部署時執行 migration。
 
 ---
 
@@ -398,21 +355,9 @@ backend/data/stories/*.yaml  →  lesson_loader.py (startup 載入)  →  In-mem
 | Cloud SQL | lingoleap-db | asia-east1 | PostgreSQL 15, db-f1-micro |
 | Artifact Registry | lingoleap/ | asia-east1 | Docker images |
 | GCS | lingoleap-assets | - | 課文縮圖、媒體 |
-| Vertex AI | Gemini 2.5 Flash | us-central1 | AI 模型（asia-east1 無 Gemini） |
+| Vertex AI | Gemini 2.5 Flash | us-central1 | AI 模型 |
 
-### 5.2 環境配置
-
-| 環境變數 | 說明 | 預設值 |
-|----------|------|--------|
-| `DATABASE_URL` | PostgreSQL 連線 | `postgresql://user:pass@localhost:5432/lingoleap` |
-| `ALLOWED_ORIGINS` | CORS 白名單（逗號分隔） | `http://localhost:3000` |
-| `GCS_BUCKET` | GCS bucket 名稱 | `lingoleap-assets` |
-| `GCS_PUBLIC_URL` | GCS 公開 URL | `https://storage.googleapis.com/lingoleap-assets` |
-| `VITE_API_URL` | 前端 API base URL | `http://localhost:8000` |
-
-**注意**: AI 呼叫走 Vertex AI service account 驗證，不需要 API key。
-
-### 5.3 CI/CD Pipeline
+### 5.2 CI/CD Pipeline
 
 ```
 feature/*  ──PR──▶  staging  ──PR──▶  main
@@ -426,10 +371,11 @@ preview-deploy.yml  staging-deploy.yml  deploy.yml
 |----------|------|----------|
 | `deploy.yml` | push to `main` | Production |
 | `staging-deploy.yml` | push to `staging` | Staging |
-| `preview-deploy.yml` | PR opened/updated | PR Preview (ephemeral) |
-| `preview-cleanup.yml` | PR closed | 清理 Preview 資源 |
+| `preview-deploy.yml` | PR opened/updated/closed | PR Preview (ephemeral) |
 
 **變更偵測**: `backend/**` 變更 → rebuild backend; `frontend/**` 變更 → rebuild frontend
+
+**Image cleanup**: 4 層防護（GCP policy + deploy/staging/preview 各自清理）
 
 ---
 
@@ -437,83 +383,48 @@ preview-deploy.yml  staging-deploy.yml  deploy.yml
 
 ### 6.1 驗證與授權
 
-| 項目 | 現況 | 規劃 |
-|------|------|------|
-| 使用者驗證 | 未實作（`/api/users/me` 為 stub） | JWT + 角色系統 |
-| API 授權 | 無（所有端點公開） | RBAC（教師/學生/管理員） |
-| AI API 驗證 | Vertex AI service account（自動） | 維持 |
+| 項目 | 實作 |
+|------|------|
+| 使用者驗證 | JWT (HS256) + bcrypt 密碼雜湊 |
+| Google OAuth | Google Sign-In → 後端驗證 → JWT |
+| API 授權 | RBAC — 8 角色（super_admin, org_admin, school_admin, teacher, student, parent, observer, support） |
+| Scope-based | 每個角色有 scope_type（global/org/school/classroom）+ scope_id |
+| AI API | Vertex AI service account（自動驗證） |
+| Prompt injection | `input_sanitizer.py` 過濾惡意 prompt |
+| 安全掃描 | CI 整合 npm audit + pip-audit (#273) |
 
-### 6.2 CORS 設定
-
-```python
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.origins_list,  # 從環境變數
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-```
-
-### 6.3 輸入驗證
+### 6.2 輸入驗證
 
 - Pydantic V2 model 驗證所有 API 輸入
 - `student_answer`: max_length=500
 - `search`: max_length=100
-- `page_size`: max 100
-- `accuracy`: ge=0, le=100
+- AI 輸入經過 sanitizer 過濾
 
-### 6.4 Rate Limiting
+### 6.3 Rate Limiting
 
 - Socratic session: 30 requests/minute/session
 - 全局 rate limiting: 待實作
 
 ---
 
-## 7. 效能與可擴展性
+## 7. 測試
 
-### 7.1 現有優化
-
-| 項目 | 策略 |
-|------|------|
-| 課文載入 | Startup 一次載入 YAML → in-memory（O(1) 查詢） |
-| AI 呼叫 | async + thread pool（不阻塞 event loop） |
-| Session 清理 | TTL 30 分鐘自動過期 |
-| 前端打包 | Vite 6 tree-shaking + code splitting |
-
-### 7.2 已知限制
-
-| 限制 | 影響 | 改善方案 |
-|------|------|----------|
-| In-memory sessions | Cloud Run 重部署清除所有 session | 遷移至 Redis 或 DB |
-| 無 CDN | 前端靜態資源直接從 Cloud Run 提供 | Firebase Hosting / Cloud CDN |
-| 單一 AI region | Gemini 只在 us-central1 可用 | 等待 asia-east1 支援 |
-| 無快取 | 每次 API 呼叫都重新查詢 | 加入 Redis cache |
-
-### 7.3 擴展路線
-
-1. **Phase 1**（現在）: Cloud Run 自動擴展、in-memory 狀態
-2. **Phase 2**: Redis session store、CDN 靜態資源
-3. **Phase 3**: Read replica、connection pooling、API caching
+| 類型 | 工具 | 數量 | 說明 |
+|------|------|------|------|
+| Unit/Integration | pytest | 257+ | 後端 API + 服務測試 |
+| E2E | Playwright | 87 | 全流程瀏覽器測試 |
+| Load | Locust | - | 30 concurrent users 壓測 |
+| Security | npm audit + pip-audit | CI | 每次 PR 自動掃描 |
 
 ---
 
-## 8. 監控與可觀測性
+## 8. 監控
 
-### 8.1 現有
-
-- Cloud Run 內建 metrics（request count, latency, error rate）
-- Python `logging` module（stdout → Cloud Logging）
-- AI 呼叫 retry/timeout logging
-
-### 8.2 規劃
-
-| 項目 | 工具 | 優先級 |
-|------|------|--------|
-| Error tracking | Cloud Error Reporting | P1 |
-| APM | Cloud Trace | P2 |
-| Custom dashboards | Cloud Monitoring | P2 |
-| Uptime checks | Cloud Monitoring | P1 |
+- Cloud Run 內建 metrics
+- `/api/health` — 基本健康檢查
+- `/api/health/detailed` — DB + AI 連線狀態
+- GA4 Analytics 追蹤學習事件 (#246)
+- Production 部署腳本含自動健康檢查 (#29)
 
 ---
 
@@ -529,4 +440,4 @@ app.add_middleware(
 
 ---
 
-*TRD v1.0 | 2026-02-27 | 基於 codebase 實際狀態撰寫*
+*TRD v2.0 | 2026-03-12 | 基於 codebase 實際狀態更新*

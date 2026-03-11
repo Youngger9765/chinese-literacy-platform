@@ -13,7 +13,7 @@
 **相關文件**：
 - [BRD — 商業需求文檔](BRD.md)：商業目標、KPI、推廣策略
 - [PRD — 產品需求文檔](PRD.md)：產品功能規格
-- TRD — 技術規格文檔（建置中）
+- [TRD — 技術規格文檔](TRD.md)：系統架構、API、DB schema
 
 **資料來源**：
 - [市場分析報告](market-research/market-analysis.md)
