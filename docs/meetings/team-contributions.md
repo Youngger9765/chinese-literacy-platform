@@ -86,9 +86,9 @@
 | 狀態 | Issue | 做了什麼 |
 |------|-------|---------|
 | ✅ | #220 生字練習 UX | PR #229 merged 3/7（經過 4 次 review 才通過） |
-| ⬜ | #219 破音字注音 | 兩週未開始 |
+| ✅ | #219 破音字注音 | 已由 Young/Claude 透過 PR #290 修復（3/8 merged） |
 
-本週 1 個 merge。PR #229 經過 4 輪 review，code quality 有進步。但 #219 已指派兩週沒動靜，需要在會議上了解原因。
+本週 1 個 merge。PR #229 經過 4 輪 review，code quality 有進步。#219 由 lead 接手完成。
 
 ### 3/3 ~ 3/6
 
