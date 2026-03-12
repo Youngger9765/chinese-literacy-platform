@@ -134,21 +134,23 @@ cd frontend && npm install && npm run dev    # localhost:3000
 cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  # localhost:8000
 ```
 
-## 學習流程（6 步驟）
+## 學習流程（8 步驟）
 
-1. **簡介** — 課文背景介紹
+1. **簡介** — 課文背景介紹（Intro）
 2. **逐段朗讀** — AI 即時朗讀指導（LiveTutor）
-3. **生字練習** — 筆順練習 + 注音（VocabPractice + WriteCharacter）
-4. **課文理解** — 蘇格拉底式 AI 對話（ComprehensionChat）
-5. **全文朗讀** — 完整朗讀評估（FullReading）
-6. **報告** — 朗朗上口六環節診斷報告（AssessmentReport）：朗讀結果總覽 / 錄音內容與智能分析 / 逐句分析對比 / 錯字詞練習清單 / 練習建議 / AI 詳細分析
+3. **課文理解** — 蘇格拉底式 AI 對話（ComprehensionChat）
+4. **生字練習** — 筆順練習 + 注音（VocabPractice + WriteCharacter）
+5. **聽寫練習** — AI 唸字學生打字（DictationPractice）
+6. **造句練習** — AI 引導造句（SentencePractice）
+7. **全文朗讀** — 完整朗讀評估（FullReading）
+8. **報告** — 朗朗上口六環節診斷報告（AssessmentReport）
 
 ## 關鍵檔案
 
 | 檔案 | 說明 |
 |------|------|
 | `frontend/src/App.tsx` | 主路由 + 步驟導航 + LearningSession state |
-| `frontend/src/components/reading-steps/` | 6 步驟元件 |
+| `frontend/src/components/reading-steps/` | 8 步驟元件 |
 | `frontend/src/components/reading-steps/AssessmentReport.tsx` | 朗朗上口六環節診斷報告 |
 | `frontend/src/components/ui/DiffDisplay.tsx` | LCS 文字差異比對顯示（#80） |
 | `frontend/src/components/stroke-order/` | 筆順練習 |
@@ -157,9 +159,9 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 | `backend/app/main.py` | FastAPI 入口 |
 | `backend/app/services/ai_service.py` | Vertex AI Gemini 呼叫（gemini-2.5-flash, us-central1） |
 | `backend/app/services/socratic_agent.py` | 蘇格拉底對話 agent（5 題 3 階段 + circuit breaker） |
-| `backend/app/models/` | DB Schema（School, Student, Text, LearningSession） |
-| `backend/app/routes/stories.py` | Stories API（57 篇課文，YAML → API） |
-| `backend/app/routes/` | API 路由（stories, learning, users） |
+| `backend/app/services/gamification_service.py` | 遊戲化系統（XP/成就/連續登入） |
+| `backend/app/models/` | DB Schema（User, UserRole, Organization, School, Classroom, LearningSession） |
+| `backend/app/routes/` | API 路由（110+ endpoints：auth, classrooms, assignments, learning, teacher, gamification, parents） |
 | `backend/data/stories/` | 課文 YAML 來源檔（57 篇） |
 
 ## 參考專案

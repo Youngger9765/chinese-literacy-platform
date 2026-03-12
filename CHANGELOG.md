@@ -8,6 +8,124 @@
 
 （無）
 
+## 2026-03-09 ~ 2026-03-12
+
+### 新功能
+- 教師自建課文庫 UI「我的課文」— CRUD + 段落/生字編輯 + 預覽 (#368)
+- Catch-up migration：補齊手動建立的資料表 (#367)
+
+### 修正
+- Story slug 422 → 404 + 前端 legacy slug 防護 (#366)
+- 遊戲化 date() crash（date vs datetime 型別）
+- 課文難度篩選、作業 null crash、跨課文 display_name
+
+## 2026-03-06 ~ 2026-03-08
+
+### 新功能
+- 學生儀表板 500 修正（naive datetime）+ 首頁隱藏 stepper
+- CI/CD 加入 RUN_MIGRATIONS 開關 + E2E 測試腳本 + 實習生指南
+- Classroom teachers 表 + classroom_texts 欄位 migration
+
+### 修正
+- E2E 測試 87/87 全通過 — storageState auth、modal 處理、selector 修正
+- Terms modal + onboarding dismissal 加入 E2E fixtures
+- CSP connect-src 加入 *.run.app 以解除 API 呼叫阻擋
+- Health endpoint 移除不必要的 GOOGLE_CLOUD_PROJECT 檢查
+- IME 中文輸入 isComposing 修正 (#216)
+
+### 文件
+- 使用者旅程測試指南（手動 QA 用）
+
+## 2026-03-03 ~ 2026-03-05
+
+### 新功能（Demo 4 批量開發 — 44 PRs）
+
+**作業系統**
+- 教師作業管理系統 (#23)
+- 學生作業檢視 + 通知模板 (#24)
+- 教師作業批改 + 批量提醒 UI (#23)
+- 學生作業自動提交 + 繼續流程 (#24)
+- 作業副本策略 + DB migration (#143)
+
+**學習優化**
+- 自學模式優化 + 進度追蹤 (#25)
+- 卡點偵測 + 個別化學習建議 (#91)
+- 教師特別教學指示 + AI 蘇格拉底對話整合 (#90)
+- 課文目標設定（語速、正確率門檻）(#84)
+- 段落漸進式朗讀解鎖 (#85)
+- 學習路徑引擎 + 五模組完成度追蹤 (#257)
+- AI 個別化學習路徑推薦 (#252)
+- 預測學習困難偵測（規則引擎）(#254)
+- 跨課文學習模式分析 (#253)
+
+**遊戲化 & 互動**
+- 遊戲化系統：XP、成就、連續登入 (#26)
+- 星星等級顯示（完成 6 步驟後）(#222)
+- 學習完成慶祝動畫 (#272)
+- 學生字體大小調整 (#262)
+
+**帳號 & 安全**
+- Google OAuth 登錄 (#27)
+- 密碼強度驗證 + 忘記密碼流程 (#255)
+- 多租戶 middleware + 可重用 auth 依賴 (#18)
+- Prompt injection 防護 (#270)
+- 使用條款同意流程
+
+**教師端**
+- 教師儀表板 + 分析 API（Recharts）(#21, #22)
+- 班級表現熱力圖 (#87)
+- 班級警報 + 學生學習曲線 (#86, #93)
+- 教師通知中心 — 學習預警收件匣 (#256)
+- 學生標籤系統 (#299)
+- 多教師共同教學 (#244)
+- 著作權確認（指派課文時）(#108)
+- 課文上架 API + Admin 管理介面 (#7)
+- 課文自動清理（學期結束）(#92)
+
+**學生端**
+- 聽力理解模組（TTS + AI 評估）(#251)
+- 聽寫練習模組 (#96)
+- 造句練習 (#109)
+- 發音練習 + 錄音比對 (#89)
+- 部件拆解（生字學習）(#88)
+- 學生錄音 + 回放 (#77)
+- 語音輸入（STT → ComprehensionChat）(#217)
+- 錯字矯正機制 + 生字推薦 (#248)
+- 蘇格拉底對話歷史紀錄 (#242)
+- 3 級理解評分 (#243)
+- AI 朗讀診斷（報告第六環節）(#241)
+- Session 續接（中斷後繼續）(#271)
+- 學生 Onboarding 引導流程 (#264)
+- 教育部字典 API + DB 快取 (#259)
+- 家長儀表板 — 查看孩子學習進度 (#95)
+- 生字練習 UX 改善 + 動畫 (#220)
+
+**品質 & 基礎設施**
+- E2E 測試（Playwright）+ 路由級 code splitting (#28)
+- Production 部署腳本 + 監控 (#29)
+- Locust 壓力測試（30 concurrent users）(#260)
+- 安全掃描 CI（npm audit + pip-audit）(#273)
+- WCAG 2.1 AA 無障礙稽核 (#258)
+- GA4 Analytics 追蹤 (#246)
+
+**文件**
+- 使用手冊 + /help 頁面 (#30)
+- Beta 上線套件（指南、FAQ、支援模板）(#263)
+
+## 2026-02-28 ~ 2026-03-02
+
+### 新功能
+- 統一用戶模型：users 表取代 Teacher/Student + RBAC 8 角色 + JWT auth (#223)
+- 學習紀錄持久化：learning_sessions JSONB 欄位 (#171)
+- 班級管理 API（7 endpoints）+ 前端 Dashboard + Detail UI (#19)
+- Admin 樹狀側邊欄
+- Preview DB 建置（lingoleap-preview-db）
+- 257 pytest + 7 Playwright E2E
+
+### 修正
+- IME 中文輸入 Enter 送出 bug (#216)
+- AI 指令區提示改善 (#215)
+
 ## 2026-02-27
 
 ### 新功能
