@@ -804,6 +804,9 @@
                         <li style="color:#b45309;">🟡 P7 待做: 課文難度自動標註（字頻公式）</li>
                         <li style="color:#b45309;">🟡 P7 待做: 聽寫錯誤類型分析（同音/形近/遺漏）</li>
                         <li style="color:#b45309;">🟡 P7 待做: 蘇格拉底摘要環節</li>
+                        <li style="color:#b45309;">🟡 P7 待做: 錯題集（自動收集+分類+複習模式）</li>
+                        <li style="color:#b45309;">🟡 P7 待做: 課文小測驗（出題+作答+自動批改）</li>
+                        <li style="color:#b45309;">🟡 P7 待做: 行事曆（待辦+學習紀錄+連續天數）</li>
                         <li style="color:#2563eb;">🔵 Beta後: 口說表達（覆述/摘要）</li>
                         <li style="color:#2563eb;">🔵 Beta後: 閱讀策略引導（預測→澄清→摘要）</li>
                         <li style="color:#2563eb;">🔵 Beta後: 手寫辨識（目前僅鍵盤輸入）</li>
@@ -823,7 +826,9 @@
                         <li>✅ 教師儀表板 + 班級報表 + 學習預警</li>
                         <li style="color:#b45309;">🟡 P7: 報表匯出 CSV/Excel（#235）</li>
                         <li style="color:#b45309;">🟡 P7: ETL Pipeline + 追蹤事件預埋</li>
-                        <li style="color:#b45309;">🟡 P8: 班級弱點分析 + 每週摘要 email</li>
+                        <li style="color:#b45309;">🟡 P8: 前測/後測診斷系統</li>
+                        <li style="color:#b45309;">🟡 P8: 班級弱點分析 + 診斷報告（教師版）</li>
+                        <li style="color:#b45309;">🟡 P8: 每週摘要 email + 錯題複習排程</li>
                         <li style="color:#2563eb;">🔵 Beta後: 學習扶助成效報告（教育部格式）</li>
                         <li style="color:#2563eb;">🔵 Beta後: Sentry + GA4 + Cloud Monitoring</li>
                     </ul>
@@ -1513,8 +1518,8 @@
                     <div class="card-content">
                         <span class="tech-tag">Git Flow</span>
                         <span class="tech-tag">Code Review</span>
-                        <p style="margin-top:0.75rem;">靖杭：#430 對話 UI → #433 focus trap</p>
-                        <p>啟翔：#436 登入連結 → #432 成就頁</p>
+                        <p style="margin-top:0.75rem;">• #430 對話 UI → #433 focus trap</p>
+                        <p>• #436 登入連結 → #432 成就頁</p>
                     </div>
                 </div>
             </div>
@@ -1583,15 +1588,16 @@
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">🔐 安全 + 效能 + 核心功能</div>
+                    <div class="card-title">🔐 安全 + 效能 + 核心功能（4週）</div>
                     <div class="card-content">
                         <span class="feature-tag">Rate Limiting</span>
                         <span class="feature-tag">CDN</span>
-                        <span class="feature-tag">重複朗讀</span>
-                        <p style="margin-top:0.75rem;"><strong>安全：</strong>Rate Limiting、CSP、OWASP 掃描</p>
-                        <p><strong>效能：</strong>CDN、Redis 快取、Lighthouse ≥80</p>
-                        <p><strong>功能：</strong>課文難度標註、重複朗讀模式、報表匯出</p>
-                        <p><strong>數據：</strong>聽寫錯誤類型分析、蘇格拉底摘要</p>
+                        <span class="feature-tag">錯題集</span>
+                        <span class="feature-tag">行事曆</span>
+                        <p style="margin-top:0.75rem;"><strong>W1：</strong>API 重構 + CI Pipeline 基礎</p>
+                        <p><strong>W2：</strong>安全（Rate Limiting/CSP）+ CDN + 重複朗讀</p>
+                        <p><strong>W3：</strong>錯題集 + 課文小測驗 + 行事曆</p>
+                        <p><strong>W4：</strong>自動化測試 + 事件預埋 + ETL</p>
                     </div>
                 </div>
             </div>
@@ -1602,8 +1608,9 @@
                     <div class="card-content">
                         <span class="tech-tag">Lighthouse</span>
                         <span class="tech-tag">資料視覺化</span>
-                        <p style="margin-top:0.75rem;">靖杭：重複朗讀 UI + Lighthouse 優化</p>
-                        <p>啟翔：報表匯出前端 + 錯誤類型 UI</p>
+                        <p style="margin-top:0.75rem;">• 重複朗讀 UI + 行事曆元件</p>
+                        <p>• 錯題集前端 + 課文小測驗 UI</p>
+                        <p>• 報表匯出 + Lighthouse 優化</p>
                     </div>
                 </div>
             </div>
@@ -1630,16 +1637,16 @@
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">📊 可觀測性 + 教師自動化</div>
+                    <div class="card-title">📊 可觀測性 + 教師自動化 + 評量（4週）</div>
                     <div class="card-content">
                         <span class="feature-tag">Sentry</span>
                         <span class="feature-tag">GA4</span>
                         <span class="feature-tag">AI 出題</span>
-                        <span class="feature-tag">CMS</span>
-                        <p style="margin-top:0.75rem;"><strong>可觀測性：</strong>Sentry + GA4 + Cloud Monitoring</p>
-                        <p><strong>教師自動化：</strong>AI 自動出題、課文自動解析、每週摘要</p>
-                        <p><strong>內容：</strong>CMS 管理後台 MVP + 知識樹 data model</p>
-                        <p><strong>壓測：</strong>Locust 50 人同時</p>
+                        <span class="feature-tag">前測/後測</span>
+                        <p style="margin-top:0.75rem;"><strong>W1：</strong>Sentry + GA4 + Cloud Monitoring</p>
+                        <p><strong>W2：</strong>AI 自動出題 + 課文解析 + 前測/後測</p>
+                        <p><strong>W3：</strong>CMS 後台 + 知識樹 + 壓測 50 人</p>
+                        <p><strong>W4：</strong>每週摘要 email + 備份 + Beta 收尾</p>
                     </div>
                 </div>
             </div>
@@ -1650,8 +1657,9 @@
                     <div class="card-content">
                         <span class="tech-tag">GA4 埋點</span>
                         <span class="tech-tag">CMS 前端</span>
-                        <p style="margin-top:0.75rem;">靖杭：Onboarding UI + CMS 前端</p>
-                        <p>啟翔：GA4 事件埋點 + AI 出題結果 UI</p>
+                        <p style="margin-top:0.75rem;">• Onboarding UI + CMS 前端</p>
+                        <p>• 前測/後測 UI + 診斷報告</p>
+                        <p>• GA4 埋點 + AI 出題結果 UI</p>
                     </div>
                 </div>
             </div>
