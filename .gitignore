@@ -29,5 +29,8 @@ frontend/e2e/.auth/
 tests/load-testing/reports/
 tests/load-testing/.venv/
 
+# Claude worktrees (temporary, per-issue)
+.claude/worktrees/
+
 # macOS
 .DS_Store
