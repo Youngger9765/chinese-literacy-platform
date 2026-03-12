@@ -69,7 +69,7 @@ BRD ──────▶ MRD ──────▶ PRD ──────▶ TR
 
 | 文件 | 說明 |
 |------|------|
-| [team-contributions.md](team-contributions.md) | 每週貢獻紀錄 |
+| [team-contributions.md](meetings/team-contributions.md) | 每週貢獻紀錄 |
 | [meetings/](meetings/) | 會議記錄 |
 | [ROADMAP.md](ROADMAP.md) | 開發路線圖 v2.0 |
 
