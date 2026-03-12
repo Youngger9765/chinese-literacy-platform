@@ -8,7 +8,21 @@
 
 ## Young @Youngger9765
 
-### 3/3 ~ 3/6 這週
+### 3/7 ~ 3/12 這週
+
+| 狀態 | Issue | 做了什麼 |
+|------|-------|---------|
+| ✅ | Demo 4 批量開發 | 44 PRs merge 到 staging（作業系統、遊戲化、聽力、家長端、OAuth、E2E 等） |
+| ✅ | #368 教師自建課文 | 我的課文 CRUD + 段落/生字編輯 + 預覽 UI |
+| ✅ | #367 catch-up migration | 補齊手動建立的資料表 |
+| ✅ | Bug fixes × 4 | story slug 422→404、gamification date crash、difficulty filter、student dashboard 500 |
+| ✅ | E2E 測試 | 87/87 全通過，修正 storageState auth + modal handling |
+| ✅ | CI/CD | RUN_MIGRATIONS 開關 + CSP connect-src 修正 |
+| ✅ | 文件大更新 | CHANGELOG（+118 行）、README 重寫、TRD v2.0、ROADMAP v2.0、PRD v1.3、MRD 修正 |
+| ✅ | Issue 管理 | 開了 38+ 個 issue 給實習生（#401-#438），每個都附思考方向 |
+| ✅ | Code review | 靖杭 PR #230 review + merge |
+
+### 3/3 ~ 3/6 上週
 
 | 狀態 | Issue | 做了什麼 |
 |------|-------|---------|
@@ -36,7 +50,17 @@
 
 ## 靖杭 @if-else-master
 
-### 3/3 ~ 3/6 這週
+### 3/7 ~ 3/12 這週
+
+| 狀態 | Issue | 做了什麼 |
+|------|-------|---------|
+| ✅ | #222 星星等級 | PR #230 merged（由 Claude 協助 merge，靖杭 assign） |
+| 🔧 | #217 語音輸入 | 有在 issue 留修正說明（emoji 朗讀 bug），但尚未開 PR。功能已由 Claude 先實作並部署 |
+| 🔧 | PR #314 SQLite/PG 相容 | 自主發現本地 DB 相容問題，開了 PR。方向需討論（JSONB→JSON 改法可能影響效能） |
+
+本週沒有新的自己寫的 PR merge。但 PR #314 顯示開始理解後端，且會自主發現問題。
+
+### 3/3 ~ 3/6
 
 | 狀態 | Issue | 做了什麼 |
 |------|-------|---------|
@@ -57,7 +81,16 @@
 
 ## 啟翔 @stgst
 
-### 3/3 ~ 3/6 這週
+### 3/7 ~ 3/12 這週
+
+| 狀態 | Issue | 做了什麼 |
+|------|-------|---------|
+| ✅ | #220 生字練習 UX | PR #229 merged 3/7（經過 4 次 review 才通過） |
+| ⬜ | #219 破音字注音 | 兩週未開始 |
+
+本週 1 個 merge。PR #229 經過 4 輪 review，code quality 有進步。但 #219 已指派兩週沒動靜，需要在會議上了解原因。
+
+### 3/3 ~ 3/6
 
 | 狀態 | Issue | 做了什麼 |
 |------|-------|---------|
@@ -73,5 +106,4 @@
 
 ---
 
-*最後更新：2026-03-06*
-*⚠️ 3/6 之後的紀錄待補充 — 下次開會前更新*
+*最後更新：2026-03-12*
