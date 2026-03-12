@@ -710,7 +710,7 @@
                 <span class="arch-progress-dot done" title="Demo 3 完成（提前）"></span>
                 <span class="arch-progress-dot done" title="Demo 4 完成（提前）"></span>
                 <span class="arch-progress-dot active" title="UX 打磨期"></span>
-                <span class="arch-progress-label">目前進度：Demo 1-4 全部完成 ✅ ｜ 現在：UX 打磨 + 實習生練習期（3/12~）</span>
+                <span class="arch-progress-label">目前進度：Demo 1-4 全部完成 ✅ ｜ 現在：Phase 5 測試驗收 + Bug 修復（3/12~4/20）→ Phase 6-9 精修到 8/30</span>
             </div>
 
             <!-- Phase legend -->
@@ -729,7 +729,7 @@
                 </div>
                 <div class="arch-legend-item">
                     <div class="arch-legend-color" style="background: #f97316;"></div>
-                    UX 打磨 + 實習生練習（🔧 進行中）
+                    Phase 5-9 精修期（🔧 P5 測試驗收中）
                 </div>
             </div>
 
@@ -1447,159 +1447,230 @@
 
         <!-- Demo 5: 正式交付 -->
         <div class="phase-separator">
-            <h2 style="position: relative;">📍 UX 打磨 + 實習生練習（3/12~8/30）<span style="background: #ef4444; color: white; padding: 0.25rem 1rem; border-radius: 8px; font-size: 1rem; margin-left: 1rem; animation: pulse 2s infinite;">📍 WE ARE HERE (3/12)</span></h2>
-            <p style="margin-top: 0.5rem; color: #4a5568;">Demo 1-4 全部提前完成。原 Demo 5 計畫的 OAuth、E2E、部署腳本已在 Demo 4 完成。現在進入品質打磨：38+ issues 開放給實習生。</p>
+            <h2 style="position: relative;">📍 精修期 Phase 5-9（3/12~8/30）<span style="background: #ef4444; color: white; padding: 0.25rem 1rem; border-radius: 8px; font-size: 1rem; margin-left: 1rem; animation: pulse 2s infinite;">📍 WE ARE HERE — Phase 5 測試驗收</span></h2>
+            <p style="margin-top: 0.5rem; color: #4a5568;">Demo 1-4 全部提前完成（44 PRs）。進入 5 階段精修：<strong>P5 測試+Bug</strong>（~4/20）→ <strong>P6 UX+合規</strong>（~5/18）→ <strong>P7 安全+效能</strong>（~6/15）→ <strong>P8 Beta準備+功能增強</strong>（~7/13）→ <strong>P9 Beta試點+交付</strong>（~8/30）</p>
+            <p style="margin-top: 0.3rem; color: #6b7280; font-size: 0.95rem;">91 open issues：46 needs-testing、16 bugs、38 UX、19 features、4 infra</p>
             <style>@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }</style>
         </div>
 
-        <!-- Week 23-24 -->
+        <!-- Phase 5: 3/12~4/20 測試+Bug -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>23-24<br><small style="font-size:0.75rem;">7/7-7/20<br>品質+認證</small></div>
+            <div class="week-label">P5<br><small style="font-size:0.75rem;">3/12~4/20<br>測試+Bug</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">🔥 暑假學習扶助試點開始</div>
+                    <div class="card-title">📋 全角色人工測試</div>
                     <div class="card-content">
-                        <span class="capability-tag">試點運行</span>
-                        <span class="capability-tag">教師培訓</span>
-                        <span class="capability-tag">技術支援</span>
-                        <p style="margin-top:0.75rem;"><strong>⭐ 80節課正式開始：</strong></p>
-                        <p>• 2-3 所學校試點（CoLab KIST 優先）</p>
-                        <p>• 準備教師培訓教材（如何使用平台）</p>
-                        <p>• 建立技術支援流程（暑假即時待命）</p>
-                        <p>• 設計數據收集表格（學生進步追蹤）</p>
+                        <span class="capability-tag">5 角色測試</span>
+                        <span class="capability-tag">46 needs-testing</span>
+                        <p style="margin-top:0.75rem;"><strong>分角色驗收：</strong></p>
+                        <p>👨‍🏫 教師：建校→建班→指派→報表</p>
+                        <p>👨‍🎓 學生：8步驟學習→報告→作業</p>
+                        <p>👨‍💼 管理員：RBAC 權限→CSV 匯入</p>
+                        <p>👨‍👩‍👦 家長：查看進度→學習曲線</p>
+                        <p>🧑‍💻 自學：免登入→體驗核心功能</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">🔐 品質 + UX 打磨</div>
+                    <div class="card-title">🐛 16 Bug 清零</div>
                     <div class="card-content">
-                        <span class="tool-tag">✅ OAuth 已完成</span>
-                        <span class="feature-tag">38+ UX Issues</span>
+                        <span class="feature-tag">P0 核心 Bug</span>
+                        <span class="feature-tag">P1 體驗 Bug</span>
+                        <p style="margin-top:0.75rem;"><strong>P0：</strong>#445 React Hooks、#372 作業按鈕</p>
+                        <p><strong>P1：</strong>#380 手機 tab、#381 觸控目標、#384 layout shift</p>
+                        <p><strong>P2：</strong>#378 步驟文案、#382 假資料、#383 頭像</p>
+                        <p style="margin-top:0.5rem;"><strong>已實作待驗收：</strong>#77 #85 #88 #89 #90 #91 #96 #143</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生：Bug Fix 入門</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Git Flow</span>
+                        <span class="tech-tag">Code Review</span>
+                        <p style="margin-top:0.75rem;">靖杭：#430 對話 UI → #433 focus trap</p>
+                        <p>啟翔：#436 登入連結 → #432 成就頁</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 6: 4/21~5/18 UX+合規 -->
+        <div class="timeline-row">
+            <div class="week-label">P6<br><small style="font-size:0.75rem;">4/21~5/18<br>UX+合規</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏫 學校外展（平行）</div>
+                    <div class="card-content">
+                        <span class="capability-tag">CoLab KIST</span>
+                        <span class="capability-tag">教育雲研究</span>
+                        <p style="margin-top:0.75rem;">• 4月起聯繫 CoLab KIST 窗口</p>
+                        <p>• 介紹平台、詢問暑假參與意願</p>
+                        <p>• 教育雲 OpenID/OAuth 可行性調研</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🎨 UX 分級精修 + 合規</div>
+                    <div class="card-content">
+                        <span class="feature-tag">Tier 1 必修</span>
                         <span class="feature-tag">#94 使用條款</span>
-                        <p style="margin-top:0.75rem;"><strong>Demo 4 已提前完成：</strong></p>
-                        <p>✅ #27 Google OAuth 登錄</p>
-                        <p>✅ #77 學生端朗讀錄音</p>
-                        <p>✅ #255 密碼強度 + 忘記密碼</p>
-                        <p style="margin-top:0.5rem;"><strong>剩餘：</strong></p>
-                        <p>• #94 使用條款 + Email 網域驗證</p>
-                        <p>• <s>#76 Azure Speech SDK</s>（暫不做，Web Speech API 足夠）</p>
+                        <span class="feature-tag">WCAG AA</span>
+                        <p style="margin-top:0.75rem;"><strong>Tier 1：</strong>錄音音量、對話捲動、班級搜尋</p>
+                        <p><strong>合規：</strong>#94 使用條款 + 隱私政策 + 個資法</p>
+                        <p><strong>無障礙：</strong>觸控 44px、focus trap、鍵盤導航</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 OAuth 整合</div>
+                    <div class="card-title">🎓 實習生：UX 主力開發</div>
                     <div class="card-content">
-                        <span class="tech-tag">Google OAuth</span>
-                        <span class="tech-tag">OAuth 2.0</span>
-                        <span class="tech-tag">路由保護</span>
-                        <p style="margin-top:0.75rem;">工程師：學習現代認證方式</p>
-                        <p>• Google OAuth 登錄流程</p>
-                        <p>• 受保護頁面實作</p>
+                        <span class="tech-tag">a11y</span>
+                        <span class="tech-tag">UX 設計</span>
+                        <p style="margin-top:0.75rem;">每人每週 1-2 個 issue PR merge</p>
+                        <p>目標：累計各自 ≥ 8 個 PR</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Week 25-26 -->
+        <!-- Phase 7: 5/19~6/15 安全+效能 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>25-26<br><small style="font-size:0.75rem;">7/21-8/3<br>進階功能</small></div>
+            <div class="week-label">P7<br><small style="font-size:0.75rem;">5/19~6/15<br>安全+效能</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">📊 試點數據收集</div>
+                    <div class="card-title">🏫 學校確認</div>
                     <div class="card-content">
-                        <span class="capability-tag">數據收集</span>
-                        <span class="capability-tag">成效驗證</span>
-                        <span class="capability-tag">教師訪談</span>
-                        <p style="margin-top:0.75rem;"><strong>收集試點數據：</strong></p>
-                        <p>• 學生朗讀能力提升數據（目標 20-30%）</p>
-                        <p>• 教師訪談回饋（使用心得）</p>
-                        <p>• 成功案例（5-10 個學生進步故事）</p>
-                        <div class="value-badge">💡 數據說話，不靠資源</div>
+                        <span class="capability-tag">確認 2-3 校</span>
+                        <span class="capability-tag">對接教師</span>
+                        <p style="margin-top:0.75rem;">• 確認 2-3 校 + 對接教師</p>
+                        <p>• 討論暑假課文選擇</p>
+                        <p>• 開始準備家長同意書</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">✅ 以下功能已在 Demo 4 提前完成</div>
+                    <div class="card-title">🔐 安全 + 效能 + 核心功能</div>
                     <div class="card-content">
-                        <span class="tool-tag">全部提前完成</span>
-                        <p style="margin-top:0.75rem;">
-                        <p>✅ #88 生字：部件拆解</p>
-                        <p>✅ #89 生字：發音練習</p>
-                        <p>✅ #109 生字：造句應用</p>
-                        <p>✅ #26 遊戲化激勵系統（XP/成就/連續登入）</p>
-                        <p>✅ #28 E2E 測試 87/87 pass（Playwright）</p>
+                        <span class="feature-tag">Rate Limiting</span>
+                        <span class="feature-tag">CDN</span>
+                        <span class="feature-tag">重複朗讀</span>
+                        <p style="margin-top:0.75rem;"><strong>安全：</strong>Rate Limiting、CSP、OWASP 掃描</p>
+                        <p><strong>效能：</strong>CDN、Redis 快取、Lighthouse ≥80</p>
+                        <p><strong>功能：</strong>課文難度標註、重複朗讀模式、報表匯出</p>
+                        <p><strong>數據：</strong>聽寫錯誤類型分析、蘇格拉底摘要</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-team">
                 <div class="card">
-                    <div class="card-title">🎓 測試與除錯</div>
+                    <div class="card-title">🎓 實習生：效能 + 資料呈現</div>
                     <div class="card-content">
-                        <span class="tech-tag">Playwright</span>
-                        <span class="tech-tag">DevTools</span>
-                        <span class="tech-tag">效能分析</span>
-                        <p style="margin-top:0.75rem;">全員：</p>
-                        <p>• E2E 測試完整使用者流程</p>
-                        <p>• 效能分析與優化</p>
-                        <p>• Bug 回報與修復</p>
+                        <span class="tech-tag">Lighthouse</span>
+                        <span class="tech-tag">資料視覺化</span>
+                        <p style="margin-top:0.75rem;">靖杭：重複朗讀 UI + Lighthouse 優化</p>
+                        <p>啟翔：報表匯出前端 + 錯誤類型 UI</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Week 27-30 -->
+        <!-- Phase 8: 6/16~7/13 Beta準備+功能增強 -->
         <div class="timeline-row">
-            <div class="week-label">Week<br>27-30<br><small style="font-size:0.75rem;">8/4-8/30<br>交付</small></div>
+            <div class="week-label">P8<br><small style="font-size:0.75rem;">6/16~7/13<br>Beta準備</small></div>
 
             <div class="track-company">
                 <div class="card">
-                    <div class="card-title">🔥 暑假試點進行中 + 數據報告</div>
+                    <div class="card-title">📋 Beta 萬事俱備</div>
                     <div class="card-content">
-                        <span class="capability-tag">試點運行</span>
-                        <span class="capability-tag">數據收集</span>
-                        <span class="capability-tag">成效驗證</span>
-                        <p style="margin-top:0.75rem;"><strong>⭐ 80節課進行中：</strong></p>
-                        <ul>
-                            <li>✅ 2-3所學校試點運行（CoLab KIST）</li>
-                            <li>✅ 即時技術支援</li>
-                            <li>✅ 每週數據報告（追蹤學生進步）</li>
-                        </ul>
-                        <p style="margin-top:0.75rem;"><strong>8月底收集成果：</strong></p>
-                        <ul>
-                            <li>📊 學生朗讀能力提升數據（目標20-30%）</li>
-                            <li>📝 教師訪談回饋</li>
-                            <li>📖 成功案例（5-10 個學生故事）</li>
-                            <li>🎯 9月產出成效報告 → 10-12月申請官方推薦</li>
-                        </ul>
-                        <div class="value-badge">💡 暑假試點 → 數據背書 → 2027規模化</div>
+                        <span class="capability-tag">家長同意書</span>
+                        <span class="capability-tag">設備檢查</span>
+                        <span class="capability-tag">教師培訓</span>
+                        <p style="margin-top:0.75rem;">• 發家長同意書</p>
+                        <p>• 試點學校設備檢查（Chrome + 麥克風）</p>
+                        <p>• 教師培訓影片 + Onboarding 流程</p>
+                        <p>• 技術支援 SLA 定義</p>
                     </div>
                 </div>
             </div>
 
             <div class="track-product">
                 <div class="card">
-                    <div class="card-title">🧪 人工測試 + Beta 準備</div>
+                    <div class="card-title">📊 可觀測性 + 教師自動化</div>
                     <div class="card-content">
-                        <span class="tool-tag">✅ 部署已完成</span>
-                        <span class="feature-tag">人工測試</span>
-                        <span class="feature-tag">Beta 試點</span>
-                        <p style="margin-top:0.75rem;"><strong>Demo 4 已提前完成：</strong></p>
-                        <p>✅ #29 Production 部署 + 監控</p>
-                        <p>✅ #30 使用手冊</p>
-                        <p>✅ MRD / TRD / 文件交叉引用</p>
-                        <p style="margin-top:0.5rem;"><strong>此階段重點：</strong></p>
-                        <p>• 39 個 needs-testing issues 人工驗收</p>
-                        <p>• 分角色測試（教師/學生/管理員/家長）</p>
-                        <p>• Beta 試點準備（CoLab KIST 學校）</p>
+                        <span class="feature-tag">Sentry</span>
+                        <span class="feature-tag">GA4</span>
+                        <span class="feature-tag">AI 出題</span>
+                        <span class="feature-tag">CMS</span>
+                        <p style="margin-top:0.75rem;"><strong>可觀測性：</strong>Sentry + GA4 + Cloud Monitoring</p>
+                        <p><strong>教師自動化：</strong>AI 自動出題、課文自動解析、每週摘要</p>
+                        <p><strong>內容：</strong>CMS 管理後台 MVP + 知識樹 data model</p>
+                        <p><strong>壓測：</strong>Locust 50 人同時</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生：AI 功能 + 數據</div>
+                    <div class="card-content">
+                        <span class="tech-tag">GA4 埋點</span>
+                        <span class="tech-tag">CMS 前端</span>
+                        <p style="margin-top:0.75rem;">靖杭：Onboarding UI + CMS 前端</p>
+                        <p>啟翔：GA4 事件埋點 + AI 出題結果 UI</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 9: 7/14~8/30 Beta試點+交付 -->
+        <div class="timeline-row">
+            <div class="week-label">P9<br><small style="font-size:0.75rem;">7/14~8/30<br>Beta+交付</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🔥 暑假 Beta 試點 + 成效報告</div>
+                    <div class="card-content">
+                        <span class="capability-tag">2-3 校試點</span>
+                        <span class="capability-tag">50+ 學生</span>
+                        <span class="capability-tag">成效報告</span>
+                        <p style="margin-top:0.75rem;"><strong>7月：試點運行</strong></p>
+                        <p>• 2-3 所 CoLab KIST 學校</p>
+                        <p>• 每週：使用數據、教師回饋、Bug 回報</p>
+                        <p style="margin-top:0.5rem;"><strong>8月：成效報告</strong></p>
+                        <p>• 朗讀能力提升（目標 ≥20%）</p>
+                        <p>• 教師滿意度（目標 ≥4.0/5.0）</p>
+                        <p>• 5-10 個學生進步故事</p>
+                        <div class="value-badge">💡 9月成效報告 → 10-12月申請 PRIORI 推薦</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🔄 迭代修復 + 最終交付</div>
+                    <div class="card-content">
+                        <span class="feature-tag">即時修復</span>
+                        <span class="feature-tag">UX 微調</span>
+                        <span class="feature-tag">成效報告</span>
+                        <p style="margin-top:0.75rem;">• 試點回饋 Bug 48 小時內修復（P0）</p>
+                        <p>• UX 微調（根據真實使用行為）</p>
+                        <p>• AI 費用監控 + 效能優化</p>
+                        <p>• 成效報告自動生成（US-T09）</p>
                     </div>
                 </div>
             </div>
@@ -1614,9 +1685,8 @@
                             <li>✅ Git 協作 + GitHub 工作流程</li>
                             <li>✅ React 19 + Vite + FastAPI 全端開發</li>
                             <li>✅ AI 驅動開發（Claude Code）</li>
-                            <li>✅ LLM API 整合經驗</li>
-                            <li>✅ 完整產品開發經歷</li>
-                            <li>✅ 實習薪酬 + 作品集</li>
+                            <li>✅ GA4 / Sentry / 可觀測性實戰</li>
+                            <li>✅ 完整產品開發 → Beta → 成效報告</li>
                         </ul>
                         <p style="margin-top:0.75rem;"><strong>🎉 具備獨立接案能力！</strong></p>
                     </div>
@@ -1625,21 +1695,25 @@
         </div>
 
         <div class="milestone-row">
-            <div class="milestone-title">🎯 正式交付 Milestone（due 8/30）— UX 打磨 + Beta 🎉</div>
-            <div class="milestone-desc">OAuth ✅ E2E 測試 ✅ 部署腳本 ✅ 使用手冊 ✅ → 剩餘：38+ UX issues 由實習生處理 + 人工測試 + Beta 試點</div>
+            <div class="milestone-title">🎯 正式交付 Milestone（due 8/30）— Beta 試點完成 + 成效報告 🎉</div>
+            <div class="milestone-desc">Phase 5-9 完整精修：安全加固 + CDN + 教師自動化 + 可觀測性 + 2-3 校 Beta 試點 + 成效數據</div>
         </div>
 
         <!-- Post-launch -->
         <div class="phase-separator">
-            <h2>🔮 Post-launch — 後續規劃（8月後）</h2>
+            <h2>🔮 Post-Beta — 未來功能藍圖（9月+）</h2>
         </div>
 
         <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; color: #14532d;">
-            <p style="font-weight: 700; margin-bottom: 0.5rem;">後續可加入的功能（依優先序）：</p>
-            <p>• <strong>#95 家長端</strong> ✅ 已完成（Demo 4）</p>
-            <p>• <strong>#96 聽寫模組</strong> ✅ 已完成（Demo 4）</p>
-            <p>• <strong>#249 多語言朗讀</strong> — 暫不做（需外部資源）</p>
-            <p>• <strong>#250 教科書授權</strong> — 暫不做（需商業合作）</p>
+            <p style="font-weight: 700; margin-bottom: 0.5rem;">Beta 後功能規劃（詳見 ROADMAP.md）：</p>
+            <p>• <strong>RAG 後台</strong> — 課文/字典/教學知識向量化，AI 對話更精準</p>
+            <p>• <strong>模擬 Agent</strong> — AI 學伴、AI 模擬學生（教師練習用）、AI 出題助手</p>
+            <p>• <strong>學習扶助整合</strong> — PRIORI 對接、80 節課程包、成效報告格式</p>
+            <p>• <strong>考試題庫</strong> — 會考/學測考古題、素養題、AI 模擬考</p>
+            <p>• <strong>作文批改</strong> — 六級分評分、修改建議、寫作引導</p>
+            <p>• <strong>教師學堂</strong> — 閱讀科學研習、教學案例、共備資源庫</p>
+            <p>• <strong>國際市場</strong> — 多語言 UI、簡體中文、HSK 對標、半導體中文</p>
+            <p style="margin-top:0.5rem; color: #6b7280;">• <s>#249 多語言朗讀</s>（需外部資源）• <s>#250 教科書授權</s>（需商業合作）</p>
         </div>
 
         <!-- 總結 -->
