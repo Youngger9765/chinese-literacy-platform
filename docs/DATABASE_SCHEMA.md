@@ -1,7 +1,10 @@
-# 資料庫架構設計
+# 資料庫架構設計（早期設計文件）
 
+> ⚠️ **本文件為早期設計參考**，實際 schema 已大幅變動（統一用戶模型、RBAC、遊戲化等）。
+> **最新 schema 請見 [TRD.md](TRD.md) v2.0**。
+>
 > Database Schema Design for 朗朗上口
-> Version 1.0 | 2026-02-13
+> Version 1.0 | 2026-02-13 | ⚠️ 已過時
 
 ---
 
