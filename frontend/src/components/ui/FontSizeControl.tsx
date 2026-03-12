@@ -39,6 +39,9 @@ export default function FontSizeControl({ onChange }: FontSizeControlProps) {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, level);
+      // The browser's 'storage' event only fires for cross-tab writes, not same-tab.
+      // Dispatch a synthetic event so useFontSize() in the same page updates immediately.
+      window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY, newValue: level }));
     } catch {
       // ignore
     }
