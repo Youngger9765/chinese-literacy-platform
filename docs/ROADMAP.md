@@ -173,9 +173,9 @@ Demo 2-4 的核心功能已全部完成，現在進入品質打磨階段。
 | 文件 | 狀態 | 說明 |
 |------|------|------|
 | `平台架構設計/` | 📁 歷史參考 | 基於舊團隊假設，不再作為工作依據 |
-| `docs/DEVELOPMENT_TIMELINE.md` | 📁 歷史參考 | Phase 定義與實際開發順序不同 |
-| `docs/DEMO2_GAP_ANALYSIS.md` | 📁 歷史參考 | Demo 2 稽核報告 |
-| `docs/EXECUTION_STRATEGY.md` | 📁 歷史參考 | 早期執行策略 |
+| ~~`docs/DEVELOPMENT_TIMELINE.md`~~ | 🗑️ 已刪除 | 已由 ROADMAP v2.0 取代 |
+| ~~`docs/DEMO2_GAP_ANALYSIS.md`~~ | 🗑️ 已刪除 | Demo 2 稽核完成，已歸檔 |
+| ~~`docs/EXECUTION_STRATEGY.md`~~ | 🗑️ 已刪除 | 已由 ROADMAP v2.0 取代 |
 | `docs/ROADMAP.md` | ✅ **當前文件** | 以 GitHub Milestones 為準 |
 | GitHub Milestones | ✅ **唯一真相來源** | 所有 issue 追蹤以此為準 |
 

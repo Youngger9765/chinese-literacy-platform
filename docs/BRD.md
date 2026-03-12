@@ -1001,7 +1001,7 @@ Phase 4（2027 年起）：規模化推廣
 | [PRD.md](PRD.md) | 產品需求文檔 | BRD §商業目標 → PRD 功能清單如何實現 |
 | [TRD.md](TRD.md) | 技術規格文檔 | BRD §技術風險 → TRD 技術選型及架構 |
 | [TECHNICAL_DECISION.md](TECHNICAL_DECISION.md) | 技術決策紀錄 | 細部技術抉擇補充 |
-| [DEVELOPMENT_TIMELINE.md](DEVELOPMENT_TIMELINE.md) | 開發時程 | BRD §6 個月執行時程的詳細排程 |
+| [ROADMAP.md](ROADMAP.md) | 開發路線圖 | BRD §6 個月執行時程 → ROADMAP v2.0 |
 
 ---
 

@@ -12,7 +12,7 @@
 
 ## 二、Onboarding 確認（10 min）
 
-- 確認大家有沒有完成 [onboarding.html](../onboarding.html) 的內容
+- 確認大家有沒有完成 onboarding 的內容（原 onboarding.html 已移除）
 - 環境建好了嗎？Git / Node / VS Code
 - 有沒有卡關的地方？
 

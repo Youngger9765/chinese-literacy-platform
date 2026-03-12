@@ -436,7 +436,7 @@ preview-deploy.yml  staging-deploy.yml  deploy.yml
 | [MRD.md](MRD.md) | 市場需求 → 本文技術選型考量 |
 | [PRD.md](PRD.md) | 產品功能 → 本文 API 端點 + DB schema |
 | [TECHNICAL_DECISION.md](TECHNICAL_DECISION.md) | 技術決策紀錄（本文的詳細補充） |
-| [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) | 資料庫設計決策（本文 §4 的延伸） |
+| [PRD-SCHOOL-CLASS-STUDENT.md](PRD-SCHOOL-CLASS-STUDENT.md) | 學校班級學生資料模型（原 DATABASE_SCHEMA.md 已整併至 TRD §4） |
 
 ---
 
