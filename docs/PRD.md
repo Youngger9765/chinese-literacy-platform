@@ -2,7 +2,7 @@
 # 國語文閱讀學習平台
 
 > Product Requirements Document
-> Version 1.3 | 2026-03-12
+> Version 1.4 | 2026-03-12
 
 ---
 
@@ -1298,12 +1298,16 @@
 | [MRD.md](MRD.md) | 市場需求文檔 | 「市場要什麼」— TAM/SAM/SOM、競爭矩陣、Porter 五力 |
 | [TRD.md](TRD.md) | 技術規格文檔 | 「怎麼做」— 系統架構、API 規格、DB Schema |
 
+### 子 PRD 文件
+
+- [PRD-ORGANIZATION.md](./PRD-ORGANIZATION.md) — 機構層級管理（#223，已實作）
+- [PRD-SCHOOL-CLASS-STUDENT.md](./PRD-SCHOOL-CLASS-STUDENT.md) — 校班師生管理（#223，已實作）
+
 ### 延伸文件
 
 - [技術決策文件 (TECHNICAL_DECISION.md)](./TECHNICAL_DECISION.md)
-- [開發時程表 (DEVELOPMENT_TIMELINE.md)](./DEVELOPMENT_TIMELINE.md)
-- [朗朗上口產品介紹 (LANGLANGSHANGKOU_PRODUCT_INTRO.md)](./LANGLANGSHANGKOU_PRODUCT_INTRO.md)
 - [教學理論基礎 (PEDAGOGY.md)](./PEDAGOGY.md)
+- [ROADMAP.md](./ROADMAP.md) — 開發路線圖 v2.0
 
 ---
 
