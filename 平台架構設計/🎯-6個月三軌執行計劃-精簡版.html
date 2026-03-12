@@ -700,8 +700,8 @@
         </style>
 
         <div class="module-arch">
-            <div class="module-arch-title">📦 平台六大模組架構</div>
-            <div class="module-arch-subtitle">模組關係 × 開發進度 × Demo 對應</div>
+            <div class="module-arch-title">📦 平台模組架構（6 核心 + 未來擴充）</div>
+            <div class="module-arch-subtitle">模組關係 × 開發進度 × Phase 對應 ｜ 🟢 已完成 🟡 Phase 5-9 精修 🔵 Beta 後擴充</div>
 
             <!-- Progress indicator -->
             <div class="arch-progress">
@@ -744,12 +744,16 @@
                             <div class="mod-header">
                                 <span class="mod-number">5</span>
                                 <span class="mod-name">🎮 遊戲化（Gamification）</span>
-                                <span class="mod-phase-badge">Demo 4 ｜ ✅ 完成（#26 XP/成就/連續登入）</span>
+                                <span class="mod-phase-badge">Demo 4 ✅ ｜ 精修中 🟡</span>
                             </div>
                             <ul class="mod-features">
-                                <li>激勵機制：徽章、積分、排行榜（#26）</li>
-                                <li>動機增強：連續天數、成就解鎖</li>
-                                <li>包裹模組 1（前台）+ 模組 4（校班）強化學習體驗</li>
+                                <li>✅ 激勵機制：徽章、積分、排行榜（#26）</li>
+                                <li>✅ 動機增強：連續天數、成就解鎖</li>
+                                <li>✅ 包裹模組 1（前台）+ 模組 4（校班）</li>
+                                <li style="color:#b45309;">🟡 P6: 成就頁 RWD + 無障礙（#432）</li>
+                                <li style="color:#b45309;">🟡 P6: 成就頁入口優化（#377）</li>
+                                <li style="color:#2563eb;">🔵 Beta後: 班級排行榜 + 校際排行</li>
+                                <li style="color:#2563eb;">🔵 Beta後: 學習任務系統（每日/每週挑戰）</li>
                             </ul>
                         </div>
                         <div class="wrap-label">↕ 包裹</div>
@@ -768,12 +772,20 @@
                     <div class="mod-header">
                         <span class="mod-number">4</span>
                         <span class="mod-name">🏫 校班師生課介面</span>
-                        <span class="mod-phase-badge">Demo 3 ｜ ✅ 完成（提前 3/6）</span>
+                        <span class="mod-phase-badge">Demo 3 ✅ ｜ 精修中 🟡</span>
                     </div>
                     <ul class="mod-features">
-                        <li>自學模式 / 作業模式切換（#143）</li>
-                        <li>學校→班級→學生層級（#19, #20）</li>
-                        <li>教師管理與課文指派（#83, #84）</li>
+                        <li>✅ 自學模式 / 作業模式切換（#143）</li>
+                        <li>✅ 學校→班級→學生層級（#19, #20）</li>
+                        <li>✅ 教師管理與課文指派（#83, #84）</li>
+                        <li style="color:#b45309;">🟡 P6: 教育雲帳號整合研究</li>
+                        <li style="color:#b45309;">🟡 P6: 學生轉班/升級（保留學習紀錄）</li>
+                        <li style="color:#b45309;">🟡 P6: 家長帳號綁定學生</li>
+                        <li style="color:#b45309;">🟡 P7: 班級公告功能</li>
+                        <li style="color:#2563eb;">🔵 P8: 教師間課文分享</li>
+                        <li style="color:#2563eb;">🔵 P8/Beta: Google Classroom 整合（登入+班級同步）</li>
+                        <li style="color:#2563eb;">🔵 Beta後: 協同教學（多教師共管）</li>
+                        <li style="color:#2563eb;">🔵 Beta後: 學生標籤系統</li>
                     </ul>
                     <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 1 ｜ 連接：模組 3</div>
                 </div>
@@ -783,18 +795,19 @@
                     <div class="mod-header" style="margin-top: 0.25rem;">
                         <span class="mod-number">1</span>
                         <span class="mod-name">📖 前台學習模組</span>
-                        <span class="mod-phase-badge">Demo 1-2 ｜ ✅ 100% 完成</span>
+                        <span class="mod-phase-badge">Demo 1-2 基礎 ✅ ｜ 精修中 🟡</span>
                     </div>
                     <ul class="mod-features">
-                        <li>✅ 逐段朗讀（LiveTutor + Web Speech API）</li>
-                        <li>✅ 生字練習（筆順 + 注音 BpmfIansui）</li>
-                        <li>✅ 課文理解（蘇格拉底 AI 5題3階段）</li>
-                        <li>✅ 全文朗讀 + 六環節即時回饋報告</li>
-                        <li>✅ LCS 逐字比對 + DiffDisplay（#80）</li>
-                        <li>✅ AI 助教「溫暖但堅定」人格（#54）</li>
-                        <li>✅ StepperNav 完成狀態（#167）</li>
-                        <li>✅ 錯字→生字練習連動（#81, #110）</li>
-                        <li>✅ RWD 響應式設計（#125）</li>
+                        <li>✅ 八步驟學習流程（朗讀+理解+生字+聽寫+聽力+全文+報告）</li>
+                        <li>✅ 蘇格拉底 AI + LCS 比對 + RWD</li>
+                        <li style="color:#b45309;">🟡 P7 待做: 重複朗讀模式（進步曲線對比）</li>
+                        <li style="color:#b45309;">🟡 P7 待做: 課文難度自動標註（字頻公式）</li>
+                        <li style="color:#b45309;">🟡 P7 待做: 聽寫錯誤類型分析（同音/形近/遺漏）</li>
+                        <li style="color:#b45309;">🟡 P7 待做: 蘇格拉底摘要環節</li>
+                        <li style="color:#2563eb;">🔵 Beta後: 口說表達（覆述/摘要）</li>
+                        <li style="color:#2563eb;">🔵 Beta後: 閱讀策略引導（預測→澄清→摘要）</li>
+                        <li style="color:#2563eb;">🔵 Beta後: 手寫辨識（目前僅鍵盤輸入）</li>
+                        <li style="color:#2563eb;">🔵 Beta後: 段落寫作 + AI 批改</li>
                     </ul>
                     <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 6（後台）提供課文</div>
                 </div>
@@ -803,14 +816,16 @@
                     <div class="mod-header">
                         <span class="mod-number">3</span>
                         <span class="mod-name">📊 歷程及報告模組</span>
-                        <span class="mod-phase-badge">Demo 2-4 ｜ ✅ 完成</span>
+                        <span class="mod-phase-badge">Demo 2-4 ✅ ｜ 精修中 🟡</span>
                     </div>
                     <ul class="mod-features">
-                        <li>✅ 六環節診斷報告（AssessmentReport）</li>
-                        <li>✅ 流暢度分析 CPM + 正確率</li>
-                        <li>✅ 學習紀錄持久化（#171）</li>
-                        <li>✅ 教師儀表板 + 班級報表（#22, #87）</li>
-                        <li>✅ 學習預警通知（#86）</li>
+                        <li>✅ 六環節診斷報告 + 流暢度分析 CPM</li>
+                        <li>✅ 教師儀表板 + 班級報表 + 學習預警</li>
+                        <li style="color:#b45309;">🟡 P7: 報表匯出 CSV/Excel（#235）</li>
+                        <li style="color:#b45309;">🟡 P7: ETL Pipeline + 追蹤事件預埋</li>
+                        <li style="color:#b45309;">🟡 P8: 班級弱點分析 + 每週摘要 email</li>
+                        <li style="color:#2563eb;">🔵 Beta後: 學習扶助成效報告（教育部格式）</li>
+                        <li style="color:#2563eb;">🔵 Beta後: Sentry + GA4 + Cloud Monitoring</li>
                     </ul>
                     <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">需要：模組 1 + 4 的學習資料</div>
                 </div>
@@ -828,13 +843,15 @@
                     <div class="mod-header">
                         <span class="mod-number">2</span>
                         <span class="mod-name">🤖 Agent Builder</span>
-                        <span class="mod-phase-badge">Demo 1-2 ｜ ✅ 完成</span>
+                        <span class="mod-phase-badge">Demo 1-2 ✅ ｜ 精修中 🟡</span>
                     </div>
                     <ul class="mod-features">
-                        <li>✅ 蘇格拉底式對話引導（5題3階段）</li>
-                        <li>✅ circuit breaker（3次失敗→503）</li>
-                        <li>✅ LCS 文字差異比對（DiffDisplay）</li>
-                        <li>✅ Gemini 2.5 Flash / Vertex AI</li>
+                        <li>✅ 蘇格拉底對話 + circuit breaker + Gemini 2.5 Flash</li>
+                        <li>✅ LCS 文字差異比對 + 流暢度分析</li>
+                        <li style="color:#b45309;">🟡 P8: AI 自動出題（理解題+聽寫+造句）</li>
+                        <li style="color:#b45309;">🟡 P8: 課文自動解析（Word/PDF→課文）</li>
+                        <li style="color:#2563eb;">🔵 Beta後: RAG 知識庫（課文+字典+教學理論）</li>
+                        <li style="color:#2563eb;">🔵 Beta後: AI 學伴 + AI 模擬學生 + AI 出題助手</li>
                     </ul>
                     <div style="margin-top: 0.5rem; font-size: 0.78rem; opacity: 0.7;">已串接模組 1（前台）朗讀結果</div>
                 </div>
@@ -852,15 +869,18 @@
                             <div class="mod-header">
                                 <span class="mod-number">6</span>
                                 <span class="mod-name">🗄️ 後台（Admin Backend）</span>
-                                <span class="mod-phase-badge">Demo 1-4 ｜ ✅ 完成</span>
+                                <span class="mod-phase-badge">Demo 1-4 ✅ ｜ 精修中 🟡</span>
                             </div>
                             <ul class="mod-features" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 1rem;">
-                                <li>✅ Stories API（57篇課文 YAML）</li>
-                                <li>✅ PostgreSQL Schema 設計</li>
-                                <li>✅ Cloud Run 部署（GitHub Actions）</li>
-                                <li>✅ 帳號系統 JWT + RBAC 8 角色（#223）</li>
-                                <li>✅ 多租戶 Middleware（#18）</li>
-                                <li>✅ 課文上架 Admin（#7）</li>
+                                <li>✅ Stories API + JWT RBAC + 多租戶</li>
+                                <li>✅ Cloud Run + GitHub Actions CI/CD</li>
+                                <li style="color:#b45309;">🟡 P6: #94 使用條款 + 教育雲 + RWD 稽核</li>
+                                <li style="color:#b45309;">🟡 P6: UI 元件模組化（Design System）</li>
+                                <li style="color:#b45309;">🟡 P7: Rate Limiting + CDN + Redis</li>
+                                <li style="color:#b45309;">🟡 P7: API 重構（版本化+統一格式+錯誤碼）</li>
+                                <li style="color:#b45309;">🟡 P7: CI/CD 強化 + 自動化測試</li>
+                                <li style="color:#b45309;">🟡 P8: CMS 管理後台 + 知識樹 data model</li>
+                                <li style="color:#2563eb;">🔵 Beta後: 考試題庫 + 作文批改 + 教師學堂</li>
                             </ul>
                         </div>
                         <div style="text-align: center; padding: 0.5rem 1rem; background: rgba(139, 92, 246, 0.15); border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #6d28d9; flex-shrink: 0;">
@@ -1712,6 +1732,7 @@
             <p>• <strong>考試題庫</strong> — 會考/學測考古題、素養題、AI 模擬考</p>
             <p>• <strong>作文批改</strong> — 六級分評分、修改建議、寫作引導</p>
             <p>• <strong>教師學堂</strong> — 閱讀科學研習、教學案例、共備資源庫</p>
+            <p>• <strong>Google 生態整合</strong> — Classroom 作業同步+成績回傳、YouTube 範讀影片、Drive 課文匯入</p>
             <p>• <strong>國際市場</strong> — 多語言 UI、簡體中文、HSK 對標、半導體中文</p>
             <p style="margin-top:0.5rem; color: #6b7280;">• <s>#249 多語言朗讀</s>（需外部資源）• <s>#250 教科書授權</s>（需商業合作）</p>
         </div>

@@ -35,8 +35,8 @@
 | **Demo 3** — 校班師生課完成 | 6/7 | ✅ 完成（提前） | Auth + 班級 + 教師端 + 持久化 |
 | **Demo 4** — 完整功能展示 | 7/5 | ✅ 完成（提前） | 作業系統 + 遊戲化 + 進階功能 44 PRs |
 | **Phase 5** — 測試驗收 + Bug | 4/20 | 🔧 進行中 | needs-testing 46→0, bugs 16→0 |
-| **Phase 6** — UX 精修 + 合規 | 5/18 | ⬜ | 38 UX issues (分級) + 使用條款 + WCAG AA |
-| **Phase 7** — 安全 + 效能 + 核心功能 | 6/15 | ⬜ | 安全加固、CDN、報表匯出、重複朗讀 |
+| **Phase 6** — UX 精修 + 合規 | 5/18 | ⬜ | UX 分級 + 使用條款 + RWD 全頁面稽核 + UI 模組化 |
+| **Phase 7** — 安全 + 效能 + 核心功能 | 6/15 | ⬜ | 安全加固、CDN、API 重構、CI/CD 強化、自動化測試 |
 | **Phase 8** — Beta 準備 + 功能增強 | 7/13 | ⬜ | 可觀測性、教師自動化、CMS、培訓 |
 | **Phase 9** — Beta 試點 + 交付 | 8/30 | ⬜ | 2-3 校試點、成效報告、最終交付 |
 
@@ -166,8 +166,8 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 | Phase | 期間 | 目標 | 關鍵指標 |
 |-------|------|------|---------|
 | **Phase 5** 測試驗收 + Bug 修復 | 3/12 ~ 4/20 (5.5w) | 全角色人工測試 + 關鍵 Bug 清零 | needs-testing 46→0, bugs 16→0 |
-| **Phase 6** UX 精修 + 合規 | 4/21 ~ 5/18 (4w) | UX 分級打磨 + 使用條款 + WCAG AA | Tier 1 UX 全清, #94 上線 |
-| **Phase 7** 功能補完 + 安全強化 | 5/19 ~ 6/15 (4w) | 剩餘功能 + 安全/效能 | 報表匯出、Rate Limiting、Lighthouse ≥80 |
+| **Phase 6** UX 精修 + 合規 | 4/21 ~ 5/18 (4w) | UX 打磨 + 使用條款 + RWD 全頁面 + UI 模組化 | Tier 1 UX 全清, RWD 驗證, 共用元件庫 |
+| **Phase 7** 功能 + 安全 + 品質 | 5/19 ~ 6/15 (4w) | 安全/效能 + API 重構 + CI/CD + 自動化測試 | API v1, pytest ≥60%, Lighthouse ≥80 |
 | **Phase 8** Beta 準備 | 6/16 ~ 7/13 (4w) | 教師培訓 + 上線前準備 | 壓力測試、家長同意書、onboarding |
 | **Phase 9** Beta 試點 + 交付 | 7/14 ~ 8/30 (7w) | CoLab KIST 試點 + 迭代 + 交付 | 2-3 校、50+ 學生、教師滿意度 ≥4.0 |
 
@@ -257,7 +257,52 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 - 決定：Phase 7 是否實作（若文件齊全 + 成本低 → 做；否則 → Beta 後再議）
 - 目前已有：Google OAuth (#27 ✅)
 
-**6.5 實習生成長**
+**6.5 校班師生課功能補完**
+
+> Demo 3 完成基礎架構。以下是 Beta 前需要的補強。
+
+| 項目 | Phase | 說明 |
+|------|-------|------|
+| **學生轉班/升級** | P6 | 學年結束後學生升級到新班級，保留學習紀錄 |
+| **家長帳號綁定學生** | P6 | 家長註冊後如何連結到自己的小孩（驗證碼 or 教師邀請） |
+| **班級公告** | P7 | 教師發公告給全班（作業提醒、鼓勵訊息） |
+| **教師間課文分享** | P8 | 教師自建課文可分享給其他教師（社群功能前身） |
+| **協同教學** | Beta後 | 多位教師共管一個班級 |
+| **學生標籤系統** | Beta後 | 教師可標註學生特性（專注力不足、需關注等） |
+
+**6.5 RWD 全頁面響應式設計稽核**
+
+> Demo 2 做了基礎 RWD (#125)，但 Demo 3-4 新增的頁面（教師端、作業、管理後台、家長端）尚未完整驗證。
+
+| 頁面群組 | 頁面 | 現況 | 目標 |
+|----------|------|------|------|
+| **學習流程** | 8 步驟（Intro~Report）| ✅ 已 RWD | 驗證 + 微調 |
+| **教師端** | Dashboard、班級報表、熱力圖、作業管理 | ⚠️ 未驗證 | 手機/平板可操作 |
+| **管理後台** | 學校管理、課文管理、用戶管理 | ⚠️ 未驗證 | 至少 tablet 可用 |
+| **作業系統** | 作業列表、繳交、批改 | ⚠️ 未驗證 | 手機可繳交作業 |
+| **家長端** | 家長儀表板、學習曲線 | ⚠️ 未驗證 | 手機優先（家長常用手機） |
+| **帳號系統** | 登入/註冊/OAuth/忘記密碼 | ⚠️ 部分 | 手機流暢操作 |
+| **遊戲化** | 成就頁、排行榜、XP 動畫 | ⚠️ 未驗證 | 手機可查看 |
+| **課文庫** | 課文列表、篩選、搜尋 | ✅ 已 RWD | 驗證 + 微調 |
+
+**RWD 斷點規範**：
+- Mobile: 375px~767px（學生/家長主要裝置）
+- Tablet: 768px~1023px（教師課堂巡視用）
+- Desktop: 1024px+（教師辦公室使用）
+
+**6.6 UI 元件模組化（Design System 基礎）**
+
+> 目前 UI 元件散落在各頁面，重複代碼多。Phase 6 建立共用元件庫，Phase 7+ 持續擴充。
+
+| 項目 | 說明 | 效益 |
+|------|------|------|
+| **共用元件抽取** | Button、Modal、Toast、Table、Card、Badge 統一 | 減少重複代碼、維護一致性 |
+| **表單元件** | Input、Select、Checkbox、DatePicker 統一樣式 | 教師端大量表單受益 |
+| **Layout 元件** | PageLayout、Sidebar、Header 共用 | 新頁面開發加速 |
+| **元件文件** | Storybook 或簡易 Style Guide 頁面 | 實習生開發參考 |
+| **Tailwind 主題** | 統一 color tokens、spacing、typography | 品牌一致性 |
+
+**6.7 實習生成長**
 
 此階段實習生應能獨立完成中等難度 issue（含 code review 回饋後修正）。
 每人每週目標：1-2 個 issue PR merge。
@@ -267,6 +312,8 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 - [ ] #94 使用條款 + 隱私政策上線
 - [ ] WCAG 2.1 AA 關鍵項目達標（鍵盤導航、focus trap、觸控目標）
 - [ ] 教育雲帳號可行性報告完成
+- [ ] **RWD 稽核完成**：全頁面 mobile/tablet/desktop 驗證通過
+- [ ] **UI 共用元件**：Button/Modal/Toast/Table/Card 抽取完成
 - [ ] 實習生累計各自 merge ≥ 8 個 PR
 
 ---
@@ -307,7 +354,33 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 | **Lighthouse ≥ 80** | 首屏載入、LCP、CLS 優化 |
 | **Image 優化** | 課文縮圖 WebP + lazy loading |
 
-**7.4 資料管線（Beta 數據收集用）**
+**7.4 API 重構**
+
+> 110+ endpoints 在 Demo 2-4 快速開發，需要重構提升可維護性。
+
+| 項目 | 說明 | 效益 |
+|------|------|------|
+| **路由分層整理** | routes/ 拆分更細（目前 learning.py、teacher.py 過大） | 單檔 <300 行 |
+| **統一回應格式** | 所有 API 統一 `{data, error, meta}` 結構 | 前端 error handling 簡化 |
+| **API 版本化** | `/api/v1/` prefix，為 Beta 後迭代預留 | 不 breaking 現有前端 |
+| **Pydantic Schema 整理** | Request/Response schema 抽共用、消除重複 | 減少維護成本 |
+| **錯誤碼標準化** | 統一 error code enum（auth_001, story_001...） | 前端/後端/文件一致 |
+| **API 文件** | FastAPI 自帶 Swagger，補完 description + examples | 實習生/未來開發者可讀 |
+
+**7.5 CI/CD 強化 + 自動化測試**
+
+> 已有：GitHub Actions deploy + Playwright E2E（87 tests）。需要：更完整的自動化覆蓋。
+
+| 項目 | 說明 | 效益 |
+|------|------|------|
+| **後端單元測試** | pytest + 核心 service 覆蓋（ai_service, socratic_agent, gamification） | 重構安全網 |
+| **前端元件測試** | Vitest + React Testing Library（核心學習步驟元件） | UI 重構安全網 |
+| **API 整合測試** | pytest + TestClient（關鍵 API endpoints） | 部署前驗證 |
+| **CI Pipeline 強化** | PR 自動跑 lint + type check + unit test + E2E | 合併前品質門檻 |
+| **測試覆蓋率報告** | Coverage report 自動貼到 PR comment | 可視化進度 |
+| **Staging 自動驗證** | 部署後自動跑 smoke test（health check + 關鍵流程） | 部署信心 |
+
+**7.6 資料管線（Beta 數據收集用）**
 
 | 項目 | 說明 |
 |------|------|
@@ -315,9 +388,9 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 | **ETL Pipeline** | 學習紀錄 → 聚合表 → 分析用 view（materialized views） |
 | **報表匯出 (#235)** | 教師可匯出 CSV/Excel（班級成績、個人進度） |
 
-> 完整 Dashboard 強化（趨勢圖、管理員 Dashboard）移到 Phase 8 並行。
+> 完整 Dashboard 強化（趨勢圖、管理員 Dashboard）→ Phase 8。
 
-**7.5 實習生任務**
+**7.7 實習生任務**
 
 | 人 | 任務 | 學習目標 |
 |----|------|---------|
@@ -325,6 +398,7 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 | 靖杭 | Lighthouse 效能優化（圖片 lazy load、WebP 轉換） | 前端效能實戰 |
 | 啟翔 | 報表匯出前端（CSV 下載按鈕 + 表格預覽 UI） | 檔案處理 + API 串接 |
 | 啟翔 | 聽寫錯誤類型顯示 UI（錯誤分類標籤 + 統計圖） | 資料呈現 + Component 設計 |
+| 共同 | 前端元件測試（Vitest + RTL 各寫 5+ 測試） | 測試實戰 |
 
 **Phase 7 Exit Criteria**：
 - [ ] 報表匯出 + 課文難度標註 + 重複朗讀上線
@@ -333,6 +407,10 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 - [ ] 安全掃描 0 critical / 0 high
 - [ ] Beta 追蹤事件預埋完成
 - [ ] 聽寫錯誤類型分析 + 蘇格拉底摘要上線
+- [ ] **API 統一回應格式 + 版本化 + 錯誤碼**上線
+- [ ] **CI Pipeline**：PR 自動跑 lint + test，coverage report 貼 PR
+- [ ] **後端 pytest ≥ 60% 覆蓋**（核心 services）
+- [ ] **前端元件測試 ≥ 30 個**（核心學習步驟）
 
 ---
 
@@ -632,6 +710,21 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 
 > **為什麼重要**：MRD 5.2 差異化要素 #1 就是「閱讀科學理論 + 教學顧問驗證」。學堂是把這個優勢規模化的方式。教師用得好 → 推薦給其他教師 → organic growth。
 
+### 第三方平台整合
+
+| 平台 | 功能 | 說明 | 可行性 |
+|------|------|------|--------|
+| **Google Classroom** | 作業同步 | 教師在 Google Classroom 派作業 → LingoLeap 自動收到 | Google Classroom API (REST)，教育帳號免費用，台灣很多學校已在用 |
+| **Google Classroom** | 成績回傳 | LingoLeap 學習成績自動回傳 Google Classroom 成績簿 | Coursework API 支援 |
+| **Google Classroom** | 單一登入 | 用 Google Classroom 帳號登入 LingoLeap（已有 OAuth 基礎） | 已有 Google OAuth (#27)，延伸即可 |
+| **YouTube** | 範讀影片 | 課文配範讀影片（教師或專業朗讀者），學生跟讀 | YouTube Data API + 嵌入播放 |
+| **YouTube** | 教學影片庫 | 連結相關教學影片（部件教學、聲韻覺識） | YouTube 搜尋 API |
+| **Google Drive** | 課文匯入 | 從 Google Drive 直接匯入教師的 Word/PDF 課文 | Google Drive API |
+
+> **Google Classroom 整合特別有價值**：台灣學校已大量使用 Google Workspace for Education。如果 LingoLeap 能跟 Google Classroom 無縫整合，教師不用額外管理帳號和作業，大幅降低導入門檻。
+>
+> **建議時程**：Google Classroom 基礎整合（單一登入 + 班級同步）可考慮在 Phase 8 或 Beta 初期做，作業同步 + 成績回傳 Beta 後做。
+
 ### 國際市場功能（MRD Phase 2+）
 
 | 功能 | 目標市場 | 說明 |
@@ -656,4 +749,4 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 
 ---
 
-*Roadmap v3.2 | 2026-03-14 | Young Tsai*
+*Roadmap v3.3 | 2026-03-14 | Young Tsai*
