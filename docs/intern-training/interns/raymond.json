@@ -130,7 +130,7 @@
       "maxLevel": 5
     },
     "6": {
-      "level": 4,
+      "level": 5,
       "maxLevel": 5,
       "history": [
         {
@@ -147,11 +147,16 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "能獨立開發 React 元件，品質合格。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "獨立完成語音輸入/輸出功能"
         }
       ]
     },
     "7": {
-      "level": 4,
+      "level": 5,
       "maxLevel": 5,
       "history": [
         {
@@ -168,6 +173,11 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "能獨立使用 TypeScript 開發。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "獨立完成語音輸入/輸出功能"
         }
       ]
     },
@@ -188,7 +198,7 @@
       ]
     },
     "12": {
-      "level": 4,
+      "level": 5,
       "maxLevel": 5,
       "history": [
         {
@@ -205,14 +215,19 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "能獨立完成 API 串接功能。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "獨立完成語音輸入/輸出功能"
         }
       ]
     }
   },
   "recommendations": [
-    "學習 Git 工作流，參與 Code Review，提升團隊合作能力（Issue #9）",
-    "學習單元測試，確保程式碼品質（Issue #14）",
-    "學習效能優化，提升使用者體驗（Issue #17）"
+    "學習 Git 工作流，參與 Code Review (#9)",
+    "學習元件設計模式，提高程式碼品質 (#13)",
+    "學習撰寫測試，確保程式碼品質 (#14)"
   ],
   "summary": "Bug 修復流程完整扎實（#216 IME bug），JS 非同步與事件處理已具備，下一步重點是 commit 規範與 React 元件獨立開發能力"
 }

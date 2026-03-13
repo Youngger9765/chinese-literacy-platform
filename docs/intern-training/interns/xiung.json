@@ -76,7 +76,7 @@
       ]
     },
     "5": {
-      "level": 4,
+      "level": 5,
       "history": [
         {
           "date": "2026-03-08",
@@ -97,12 +97,17 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "多次修改程式碼，能理解程式邏輯。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "能快速定位問題並提出解決方案。"
         }
       ],
       "maxLevel": 5
     },
     "6": {
-      "level": 4,
+      "level": 5,
       "history": [
         {
           "date": "2026-03-10",
@@ -118,6 +123,11 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "獨立開發生字練習 UX，完成度高。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "多次獨立完成元件開發，並改善 UX。"
         }
       ],
       "maxLevel": 5
@@ -153,7 +163,7 @@
       ]
     },
     "10": {
-      "level": 4,
+      "level": 5,
       "history": [
         {
           "date": "2026-03-10",
@@ -169,12 +179,17 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "多次修復 bug，能獨立 debug。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "能獨立 debug 並修復多種 bug。"
         }
       ],
       "maxLevel": 5
     },
     "11": {
-      "level": 3,
+      "level": 4,
       "history": [
         {
           "date": "2026-03-13",
@@ -185,37 +200,63 @@
           "date": "2026-03-13",
           "level": 3,
           "reason": "能使用 useMemo 優化效能。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能熟練運用 useMemo, useCallback。"
         }
       ],
       "maxLevel": 5
     },
     "16": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-03-13",
           "level": 3,
           "reason": "能獨立完成功能開發。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "獨立完成多個 feature 開發。"
         }
       ]
     },
     "17": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-03-13",
           "level": 3,
           "reason": "開始有優化程式碼的意識。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能進行效能優化，例如使用 useMemo。"
+        }
+      ]
+    },
+    "15": {
+      "level": 4,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能給出有建設性的 code review 意見。"
         }
       ]
     }
   },
   "recommendations": [
-    "學習撰寫測試，確保程式碼品質（可從現有元件開始）。",
-    "嘗試 code review，學習他人程式碼。",
-    "研究 LingoLeap 的架構，理解資料流。"
+    "嘗試撰寫單元測試，提升程式碼品質（可從現有元件開始）。",
+    "研究 LingoLeap 的整體架構，了解資料流向。",
+    "主動協助其他實習生解決問題，提升指導能力。"
   ],
   "summary": "7 週內掌握完整開發工作流（Git/React/Hooks/Bug 修復），PR #229 和 #448 品質已達初階工程師標準，下一步目標 TypeScript 型別與元件設計模式"
 }
