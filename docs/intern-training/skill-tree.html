@@ -1204,6 +1204,12 @@ function isAvailable(skill) {
   return skill.prereqs.every(pid => getLevel(pid) >= 1);
 }
 
+// Embedded fallback data (auto-updated by skill-tree-updater.py)
+const FALLBACK_DATA = {
+  raymond: {"skills":{"1":{"level":3},"2":{"level":1},"3":{"level":3},"4":{"level":2},"5":{"level":4},"6":{"level":3},"7":{"level":3},"8":{"level":3},"10":{"level":4},"12":{"level":3}},"lastReview":"2026-03-13","recommendations":["學習 Git 工作流，參與 Code Review (#9)","學習 React 進階用法，例如 useEffect (#11)","研究專案架構，理解資料流 (#18)"]},
+  steven: {"skills":{"1":{"level":3},"2":{"level":2},"3":{"level":3},"4":{"level":2},"5":{"level":4},"6":{"level":4},"8":{"level":2},"9":{"level":3},"10":{"level":4},"11":{"level":3},"16":{"level":3},"17":{"level":3}},"lastReview":"2026-03-13","recommendations":["學習撰寫測試，確保程式碼品質（可從現有元件開始）。","嘗試 code review，學習他人程式碼。","研究 LingoLeap 的架構，理解資料流。"]}
+};
+
 async function loadInternData(internKey) {
   const intern = INTERNS[internKey];
   try {
@@ -1214,7 +1220,13 @@ async function loadInternData(internKey) {
     intern.lastReview = data.lastReview || '';
     intern.recommendations = data.recommendations || [];
   } catch (e) {
-    console.warn(`Failed to load ${intern.jsonFile}, using defaults`, e);
+    // Fallback for file:// protocol or fetch failure
+    const fb = FALLBACK_DATA[internKey];
+    if (fb) {
+      intern.skills = fb.skills || {};
+      intern.lastReview = fb.lastReview || '';
+      intern.recommendations = fb.recommendations || [];
+    }
   }
 }
 
