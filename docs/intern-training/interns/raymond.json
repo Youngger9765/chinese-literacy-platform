@@ -73,7 +73,7 @@
       ]
     },
     "5": {
-      "level": 4,
+      "level": 5,
       "history": [
         {
           "date": "2026-03-05",
@@ -94,12 +94,17 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "多次修改程式碼，熟悉專案。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "多次修改程式碼，且能理解程式碼。"
         }
       ],
       "maxLevel": 5
     },
     "10": {
-      "level": 4,
+      "level": 5,
       "history": [
         {
           "date": "2026-03-10",
@@ -115,12 +120,17 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "多次修復 Bug，能獨立 Debug。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "多次修復 Bug，且有重構意識。"
         }
       ],
       "maxLevel": 5
     },
     "6": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -132,11 +142,16 @@
           "date": "2026-03-13",
           "level": 3,
           "reason": "獨立開發語音輸入元件。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能獨立開發 React 元件，品質合格。"
         }
       ]
     },
     "7": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -148,6 +163,11 @@
           "date": "2026-03-13",
           "level": 3,
           "reason": "修改程式碼時有使用 TypeScript。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能獨立使用 TypeScript 開發。"
         }
       ]
     },
@@ -168,7 +188,7 @@
       ]
     },
     "12": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -180,14 +200,19 @@
           "date": "2026-03-13",
           "level": 3,
           "reason": "成功串接語音輸入 API。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能獨立完成 API 串接功能。"
         }
       ]
     }
   },
   "recommendations": [
-    "學習 Git 工作流，參與 Code Review (#9)",
-    "學習 React 進階用法，例如 useEffect (#11)",
-    "研究專案架構，理解資料流 (#18)"
+    "學習 Git 工作流，參與 Code Review，提升團隊合作能力（Issue #9）",
+    "學習單元測試，確保程式碼品質（Issue #14）",
+    "學習效能優化，提升使用者體驗（Issue #17）"
   ],
   "summary": "Bug 修復流程完整扎實（#216 IME bug），JS 非同步與事件處理已具備，下一步重點是 commit 規範與 React 元件獨立開發能力"
 }
