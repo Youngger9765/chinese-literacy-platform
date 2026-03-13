@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LingoLeap 實習生技能樹</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8f9fb;
+    --bg-card: #ffffff;
+    --bg-panel: #ffffff;
+    --border: #e2e5eb;
+    --text: #1e293b;
+    --text-dim: #94a3b8;
+    --green: #16a34a;
+    --green-glow: #16a34a30;
+    --blue: #2563eb;
+    --blue-glow: #2563eb30;
+    --purple: #7c3aed;
+    --purple-glow: #7c3aed30;
+    --gold: #d97706;
+    --gold-glow: #d9770630;
+    --locked: #e5e7eb;
+    --locked-text: #9ca3af;
+    --line-color: #d1d5db;
+    --line-active: #a3aab8;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 28px 20px 12px;
+    position: relative;
+  }
+  .header h1 {
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--green), var(--blue), var(--purple), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.02em;
+  }
+  .header p {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+
+  /* Progress Bar */
+  .progress-wrap {
+    max-width: 480px;
+    margin: 16px auto 8px;
+    padding: 0 20px;
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .progress-labels .xp-val {
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .progress-bar {
+    height: 10px;
+    background: var(--locked);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--green), var(--blue), var(--purple), var(--gold));
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .skill-count {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+  .skill-count span { color: var(--text); font-weight: 600; }
+
+  /* Tree */
+  .tree {
+    max-width: 820px;
+    margin: 20px auto 100px;
+    padding: 0 12px;
+    position: relative;
+  }
+
+  /* Tier */
+  .tier {
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .tier-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 0 4px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tier-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .tier-nodes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding-bottom: 20px;
+  }
+
+  /* Connector lines (between tiers) */
+  .tier-connector {
+    display: flex;
+    justify-content: center;
+    padding: 0 0 4px;
+  }
+  .tier-connector .line {
+    width: 2px;
+    height: 28px;
+    background: linear-gradient(to bottom, var(--line-active), var(--line-color));
+    border-radius: 1px;
+  }
+
+  /* Node */
+  .node {
+    width: 130px;
+    min-height: 80px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.3s;
+    border: 2px solid transparent;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .node:hover { transform: translateY(-3px); }
+  .node:active { transform: scale(0.97); }
+
+  .node .icon { font-size: 1.5rem; line-height: 1; }
+  .node .name { font-size: 0.78rem; font-weight: 600; line-height: 1.25; }
+  .node .xp-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.08);
+    color: inherit;
+    opacity: 0.8;
+  }
+
+  /* Completed checkmark */
+  .node .check {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    display: none;
+  }
+  .node.completed .check { display: flex; }
+
+  /* Tier color schemes */
+  .node.tier-1 {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border-color: var(--green);
+    box-shadow: 0 2px 8px var(--green-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    color: #166534;
+  }
+  .node.tier-1 .check { background: var(--green); }
+
+  .node.tier-2 {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-color: var(--blue);
+    box-shadow: 0 2px 8px var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    color: #1e40af;
+  }
+  .node.tier-2 .check { background: var(--blue); }
+
+  .node.tier-3 {
+    background: linear-gradient(135deg, #faf5ff, #ede9fe);
+    border-color: var(--purple);
+    box-shadow: 0 2px 8px var(--purple-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    color: #5b21b6;
+  }
+  .node.tier-3 .check { background: var(--purple); }
+
+  .node.tier-4 {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border-color: var(--gold);
+    box-shadow: 0 2px 8px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    color: #92400e;
+  }
+  .node.tier-4 .check { background: var(--gold); }
+
+  /* Locked */
+  .node.locked {
+    background: var(--locked);
+    border-color: #d1d5db;
+    box-shadow: none;
+    color: var(--locked-text);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .node.locked:hover { transform: none; }
+  .node.locked .lock-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
+    font-size: 0.65rem;
+  }
+
+  /* Pulse for available */
+  .node.available:not(.completed) {
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 16px var(--glow-color); }
+    50% { box-shadow: 0 0 28px var(--glow-color), 0 0 48px var(--glow-color); }
+  }
+  .node.tier-1.available:not(.completed) { --glow-color: var(--green-glow); }
+  .node.tier-2.available:not(.completed) { --glow-color: var(--blue-glow); }
+  .node.tier-3.available:not(.completed) { --glow-color: var(--purple-glow); }
+  .node.tier-4.available:not(.completed) { --glow-color: var(--gold-glow); }
+
+  /* Panel overlay */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(420px, 92vw);
+    height: 100%;
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border);
+    z-index: 101;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .panel.open { transform: translateX(0); }
+
+  .panel-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(0,0,0,0.05);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .panel-close:hover { background: rgba(0,0,0,0.1); }
+
+  .panel-content {
+    padding: 28px 24px 40px;
+  }
+  .panel-content h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .panel-content .tier-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+  .panel-content .desc {
+    color: #334155;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .panel-section {
+    margin-bottom: 18px;
+  }
+  .panel-section h3 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #475569;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .panel-section ul {
+    list-style: none;
+    padding: 0;
+  }
+  .panel-section li {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding-left: 16px;
+    position: relative;
+    color: #1e293b;
+  }
+  .panel-section li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #64748b;
+  }
+  .panel-section a {
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .panel-section a:hover { text-decoration: underline; }
+
+  .panel-xp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+  }
+
+  .complete-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .complete-btn.mark {
+    background: linear-gradient(135deg, var(--green), #16a34a);
+    color: #fff;
+  }
+  .complete-btn.mark:hover { box-shadow: 0 0 20px var(--green-glow); }
+  .complete-btn.unmark {
+    background: rgba(0,0,0,0.04);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .complete-btn.unmark:hover { background: rgba(0,0,0,0.08); }
+  .complete-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .prereq-warning {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    color: #dc2626;
+    margin-bottom: 16px;
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    z-index: 200;
+    pointer-events: none;
+    animation: confetti-fall 1.4s cubic-bezier(0.25, 0, 0.5, 1) forwards;
+  }
+  @keyframes confetti-fall {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(60vh) rotate(720deg) scale(0.3); }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .node { width: 105px; min-height: 70px; padding: 10px 6px; }
+    .node .icon { font-size: 1.3rem; }
+    .node .name { font-size: 0.72rem; }
+    .tier-nodes { gap: 8px; }
+    .panel-content { padding: 24px 16px 32px; }
+  }
+  @media (max-width: 380px) {
+    .node { width: 90px; min-height: 62px; }
+    .node .name { font-size: 0.65rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LingoLeap 實習生技能樹</h1>
+  <p>React + TypeScript + Tailwind -- 從零到獨立開發</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-labels">
+    <span>總經驗值</span>
+    <span class="xp-val" id="xp-display">0 / 600 XP</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+  </div>
+  <div class="skill-count">已完成 <span id="completed-count">0</span> / <span id="total-count">20</span> 技能</div>
+</div>
+
+<div class="tree" id="tree"></div>
+
+<div class="overlay" id="overlay"></div>
+<div class="panel" id="panel">
+  <button class="panel-close" id="panel-close">&times;</button>
+  <div class="panel-content" id="panel-content"></div>
+</div>
+
+<script>
+const SKILLS = [
+  // Tier 1
+  {
+    id: 1, tier: 1, icon: "\u{1F500}", name: "Git \u57FA\u790E",
+    desc: "clone, commit, push, pull \u2014\u2014 \u7248\u672C\u63A7\u5236\u7684\u6838\u5FC3\u6982\u5FF5\u3002\u80FD\u5920\u5C07\u7A0B\u5F0F\u78BC\u63A8\u9001\u5230 GitHub\uFF0C\u4E26\u8DDF\u4E0A\u5718\u968A\u7684\u6700\u65B0\u9032\u5EA6\u3002",
+    xp: 15, prereqs: [],
+    project: "\u5B8C\u6210 LingoLeap \u7684 fork \u548C\u9996\u6B21 commit\uFF0Cpush \u4E00\u500B\u7C21\u55AE\u7684\u4FEE\u6539\u5230\u81EA\u5DF1\u7684 fork",
+    resources: [
+      { title: "Git \u5165\u9580\u6559\u5B78\uFF08\u4E2D\u6587\uFF09", url: "https://backlog.com/git-tutorial/tw/" },
+      { title: "GitHub Skills", url: "https://skills.github.com/" }
+    ],
+    criteria: "\u80FD\u7368\u7ACB\u57F7\u884C git clone / add / commit / push / pull\uFF0C\u77E5\u9053 .gitignore \u7684\u4F5C\u7528"
+  },
+  {
+    id: 2, tier: 1, icon: "\u{1F3A8}", name: "HTML/CSS \u57FA\u790E",
+    desc: "\u7DB2\u9801\u7684\u9AA8\u67B6\u8207\u6A23\u5F0F\u3002\u638C\u63E1\u5E38\u7528\u6A19\u7C64\u3001CSS \u9078\u64C7\u5668\u3001Flexbox \u6392\u7248\uFF0C\u80FD\u5920\u5BEB\u51FA\u57FA\u672C\u7684\u7DB2\u9801\u7248\u578B\u3002",
+    xp: 15, prereqs: [],
+    project: "\u7528\u7D14 HTML/CSS \u5BEB\u4E00\u500B LingoLeap \u7684\u975C\u614B\u7248\u767B\u5165\u9801",
+    resources: [
+      { title: "MDN HTML \u5165\u9580", url: "https://developer.mozilla.org/zh-TW/docs/Learn/HTML" },
+      { title: "Flexbox Froggy", url: "https://flexboxfroggy.com/" }
+    ],
+    criteria: "\u80FD\u7528 Flexbox \u5BEB\u51FA\u57FA\u672C\u7248\u578B\uFF0C\u7406\u89E3 class / id \u9078\u64C7\u5668\uFF0C\u770B\u5F97\u61C2 CSS \u512A\u5148\u7D1A"
+  },
+  {
+    id: 3, tier: 1, icon: "\u26A1", name: "JavaScript \u57FA\u790E",
+    desc: "\u7A0B\u5F0F\u8A9E\u8A00\u6838\u5FC3\uFF1A\u8B8A\u6578\u3001\u51FD\u5F0F\u3001\u9663\u5217\u3001\u7269\u4EF6\u3001\u689D\u4EF6\u5224\u65B7\u3001\u8FF4\u5708\u3002\u9019\u662F\u6240\u6709\u524D\u7AEF\u958B\u767C\u7684\u5730\u57FA\u3002",
+    xp: 20, prereqs: [],
+    project: "\u7528 JS \u5BEB\u4E00\u500B\u5C0F\u5DE5\u5177\uFF1A\u8A08\u7B97\u6F22\u5B57\u5B57\u6578\u3001\u6A19\u8A3B\u6CE8\u97F3\uFF0C\u8DDF LingoLeap \u8AB2\u6587\u6578\u64DA\u4E92\u52D5",
+    resources: [
+      { title: "JavaScript.info \uFF08\u73FE\u4EE3\u6559\u5B78\uFF09", url: "https://javascript.info/" },
+      { title: "Eloquent JavaScript", url: "https://eloquentjavascript.net/" }
+    ],
+    criteria: "\u80FD\u7528 map/filter/reduce \u8655\u7406\u9663\u5217\uFF0C\u7406\u89E3\u89E3\u69CB\u8CE6\u503C\u3001\u7BAD\u982D\u51FD\u5F0F\u3001\u6A21\u7248\u5B57\u4E32"
+  },
+  {
+    id: 4, tier: 1, icon: "\u{1F6E0}\uFE0F", name: "\u958B\u767C\u74B0\u5883",
+    desc: "VS Code \u5FEB\u6377\u9375\u3001Node.js \u8207 npm \u5957\u4EF6\u7BA1\u7406\u3001\u7D42\u7AEF\u6A5F\u57FA\u672C\u6307\u4EE4\u3002\u5DE5\u6B32\u5584\u5176\u4E8B\uFF0C\u5FC5\u5148\u5229\u5176\u5668\u3002",
+    xp: 10, prereqs: [],
+    project: "\u5728\u672C\u5730\u6210\u529F\u555F\u52D5 LingoLeap frontend \u958B\u767C\u74B0\u5883\uFF08npm install + npm run dev\uFF09",
+    resources: [
+      { title: "VS Code \u5FEB\u6377\u9375\u5927\u5168", url: "https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf" },
+      { title: "npm \u5165\u9580", url: "https://docs.npmjs.com/getting-started" }
+    ],
+    criteria: "\u80FD\u7368\u7ACB\u8A2D\u5B9A\u958B\u767C\u74B0\u5883\uFF0C\u77E5\u9053 package.json \u7684\u4F5C\u7528\uFF0C\u6703\u7528 terminal \u57FA\u672C\u6307\u4EE4"
+  },
+  {
+    id: 5, tier: 1, icon: "\u{1F4D6}", name: "\u8B80\u61C2\u73FE\u6709\u7A0B\u5F0F\u78BC",
+    desc: "\u80FD\u770B\u61C2 React \u5143\u4EF6\u5728\u505A\u4EC0\u9EBC\uFF0C\u8FFD\u8E64\u8CC7\u6599\u6D41\u5411\uFF0C\u7406\u89E3 props \u50B3\u905E\u3002\u9019\u662F\u53C3\u8207\u5718\u968A\u958B\u767C\u7684\u7B2C\u4E00\u6B65\u3002",
+    xp: 15, prereqs: [],
+    project: "\u95B1\u8B80 LingoLeap \u7684 VocabPractice.tsx\uFF0C\u5BEB\u51FA\u5143\u4EF6\u6D41\u7A0B\u8AAA\u660E\u6587\u4EF6",
+    resources: [
+      { title: "React \u5B98\u65B9\u6587\u4EF6", url: "https://react.dev/learn" },
+      { title: "\u5982\u4F55\u95B1\u8B80\u958B\u6E90\u5C08\u6848", url: "https://github.com/readme/guides/how-to-contribute-to-open-source" }
+    ],
+    criteria: "\u80FD\u6307\u51FA\u5143\u4EF6\u7684 props / state / \u4E8B\u4EF6\u8655\u7406\u3001\u5B50\u5143\u4EF6\u95DC\u4FC2"
+  },
+
+  // Tier 2
+  {
+    id: 6, tier: 2, icon: "\u269B\uFE0F", name: "React \u5143\u4EF6\u958B\u767C",
+    desc: "JSX \u8A9E\u6CD5\u3001props \u50B3\u905E\u3001useState / \u4E8B\u4EF6\u8655\u7406\u3001\u689D\u4EF6\u6E32\u67D3\u3002\u80FD\u5920\u5F9E\u96F6\u5EFA\u7ACB\u53EF\u4E92\u52D5\u7684\u5143\u4EF6\u3002",
+    xp: 30, prereqs: [3, 5],
+    project: "\u958B\u767C LingoLeap \u7684\u8AB2\u6587\u5361\u7247\u5143\u4EF6\uFF08StoryCard\uFF09\uFF0C\u986F\u793A\u6A19\u984C / \u96E3\u5EA6 / \u9032\u5EA6",
+    resources: [
+      { title: "React \u5B98\u65B9\u6559\u5B78", url: "https://react.dev/learn" },
+      { title: "\u601D\u7DAD\u6A21\u5F0F\uFF1AThinking in React", url: "https://react.dev/learn/thinking-in-react" }
+    ],
+    criteria: "\u80FD\u7368\u7ACB\u5BEB\u51FA\u5E36\u6709 state \u8207 props \u7684 React \u5143\u4EF6\uFF0C\u4E26\u6B63\u78BA\u8655\u7406\u4E8B\u4EF6"
+  },
+  {
+    id: 7, tier: 2, icon: "\u{1F4DD}", name: "TypeScript",
+    desc: "\u578B\u5225\u6A19\u8A3B\u3001interface\u3001\u6CDB\u578B\u57FA\u790E\u3002\u8B93\u7DE8\u8F2F\u5668\u5E6B\u4F60\u6355\u6349\u932F\u8AA4\uFF0C\u5BEB\u51FA\u66F4\u5B89\u5168\u7684\u7A0B\u5F0F\u78BC\u3002",
+    xp: 25, prereqs: [3],
+    project: "\u5C07 LingoLeap \u7684\u4E00\u500B JS \u5DE5\u5177\u51FD\u5F0F\u8F49\u63DB\u70BA TypeScript\uFF0C\u52A0\u4E0A\u5B8C\u6574\u578B\u5225",
+    resources: [
+      { title: "TypeScript \u5165\u9580", url: "https://www.typescriptlang.org/docs/handbook/2/basic-types.html" },
+      { title: "React TypeScript Cheatsheet", url: "https://react-typescript-cheatsheet.netlify.app/" }
+    ],
+    criteria: "\u80FD\u7528 interface \u5B9A\u7FA9 props \u578B\u5225\uFF0C\u7406\u89E3 union types\u3001\u53EF\u9078\u5C6C\u6027\u3001\u6CDB\u578B\u57FA\u672C\u7528\u6CD5"
+  },
+  {
+    id: 8, tier: 2, icon: "\u{1F3AF}", name: "Tailwind CSS",
+    desc: "utility-first CSS \u67B6\u69CB\u3001\u97FF\u61C9\u5F0F\u8A2D\u8A08\u3001\u81EA\u8A02\u4E3B\u984C\u3002\u5FEB\u901F\u5BEB\u51FA\u7F8E\u89C0\u7684 UI\u3002",
+    xp: 20, prereqs: [2],
+    project: "\u7528 Tailwind \u91CD\u5BEB LingoLeap \u67D0\u500B\u9801\u9762\u7684\u6A23\u5F0F\uFF0C\u4E26\u652F\u63F4\u624B\u6A5F\u7248",
+    resources: [
+      { title: "Tailwind \u5B98\u65B9\u6587\u4EF6", url: "https://tailwindcss.com/docs" },
+      { title: "Tailwind Play \u7DF4\u7FD2\u5834", url: "https://play.tailwindcss.com/" }
+    ],
+    criteria: "\u80FD\u7528 Tailwind \u5BEB\u51FA\u97FF\u61C9\u5F0F\u7248\u578B\uFF0C\u7406\u89E3 sm/md/lg \u65B7\u9EDE\u3001hover/focus \u72C0\u614B"
+  },
+  {
+    id: 9, tier: 2, icon: "\u{1F33F}", name: "Git \u5DE5\u4F5C\u6D41",
+    desc: "branch \u7B56\u7565\u3001Pull Request\u3001code review\u3001\u89E3\u6C7A\u885D\u7A81\u3002\u5718\u968A\u5354\u4F5C\u7684\u6838\u5FC3\u6280\u80FD\u3002",
+    xp: 25, prereqs: [1],
+    project: "\u5B8C\u6210\u4E00\u500B\u5B8C\u6574\u7684 feature branch \u2192 PR \u2192 review \u2192 merge \u6D41\u7A0B",
+    resources: [
+      { title: "GitHub Flow \u6307\u5357", url: "https://docs.github.com/en/get-started/using-github/github-flow" },
+      { title: "\u5982\u4F55\u5BEB\u597D\u7684 PR", url: "https://github.blog/developer-skills/github/how-to-write-the-perfect-pull-request/" }
+    ],
+    criteria: "\u80FD\u7368\u7ACB\u5EFA\u7ACB branch\u3001\u63D0 PR\u3001\u89E3\u6C7A merge conflict\u3001\u56DE\u61C9 review \u610F\u898B"
+  },
+  {
+    id: 10, tier: 2, icon: "\u{1F41B}", name: "Bug \u4FEE\u5FA9",
+    desc: "\u95B1\u8B80\u932F\u8AA4\u8A0A\u606F\u3001\u4F7F\u7528 DevTools \u9664\u932F\u3001\u7CFB\u7D71\u6027\u5730\u91CD\u73FE\u554F\u984C\u3002\u8B93 bug \u7121\u8655\u85CF\u8EAB\u3002",
+    xp: 25, prereqs: [5, 4],
+    project: "\u4FEE\u5FA9 LingoLeap \u7684\u4E00\u500B\u771F\u5BE6 bug\uFF08\u53C3\u8003 GitHub Issues \u4E2D good-first-issue \u6A19\u7C64\uFF09",
+    resources: [
+      { title: "Chrome DevTools \u6307\u5357", url: "https://developer.chrome.com/docs/devtools" },
+      { title: "\u9664\u932F\u6280\u5DE7", url: "https://developer.chrome.com/docs/devtools/javascript" }
+    ],
+    criteria: "\u80FD\u91CD\u73FE bug\u3001\u7528 DevTools \u5B9A\u4F4D\u554F\u984C\u3001\u63D0\u4F9B\u4FEE\u5FA9\u4E26\u9A57\u8B49\u7D50\u679C"
+  },
+
+  // Tier 3
+  {
+    id: 11, tier: 3, icon: "\u{1F9EA}", name: "React \u9032\u968E",
+    desc: "useEffect \u751F\u547D\u9031\u671F\u3001useRef DOM \u64CD\u4F5C\u3001useMemo \u6548\u80FD\u512A\u5316\u3001Context \u72C0\u614B\u5171\u4EAB\u3002\u63A7\u5236\u8907\u96DC\u7684\u5143\u4EF6\u884C\u70BA\u3002",
+    xp: 35, prereqs: [6],
+    project: "\u512A\u5316 LingoLeap ComprehensionChat \u7684\u6548\u80FD\uFF08\u6E1B\u5C11\u91CD\u65B0\u6E32\u67D3\u3001\u52A0\u5165 loading \u72C0\u614B\uFF09",
+    resources: [
+      { title: "useEffect \u5B8C\u6574\u6307\u5357", url: "https://react.dev/learn/synchronizing-with-effects" },
+      { title: "Hooks API \u53C3\u8003", url: "https://react.dev/reference/react/hooks" }
+    ],
+    criteria: "\u80FD\u6B63\u78BA\u4F7F\u7528 useEffect \u6E05\u9664\u526F\u4F5C\u7528\u3001\u7528 useMemo \u907F\u514D\u4E0D\u5FC5\u8981\u8A08\u7B97\u3001\u7528 Context \u5171\u4EAB\u72C0\u614B"
+  },
+  {
+    id: 12, tier: 3, icon: "\u{1F310}", name: "API \u4E32\u63A5",
+    desc: "fetch / axios\u3001async/await\u3001\u932F\u8AA4\u8655\u7406\u3001loading \u72C0\u614B\u3002\u524D\u5F8C\u7AEF\u6E9D\u901A\u7684\u6A4B\u6A11\u3002",
+    xp: 30, prereqs: [6, 7],
+    project: "\u5C07 LingoLeap \u67D0\u500B\u529F\u80FD\u7684\u786C\u7DE8\u78BC\u8CC7\u6599\u6539\u70BA\u5F9E API \u53D6\u5F97\uFF0C\u52A0\u4E0A\u9069\u7576\u7684 loading / error \u8655\u7406",
+    resources: [
+      { title: "MDN Fetch API", url: "https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API" },
+      { title: "React \u8CC7\u6599\u7372\u53D6\u6A21\u5F0F", url: "https://react.dev/learn/synchronizing-with-effects#fetching-data" }
+    ],
+    criteria: "\u80FD\u7528 async/await \u547C\u53EB API\u3001\u8655\u7406 loading/error/success \u4E09\u7A2E\u72C0\u614B\u3001\u7406\u89E3 CORS"
+  },
+  {
+    id: 13, tier: 3, icon: "\u{1F9F1}", name: "\u5143\u4EF6\u8A2D\u8A08\u6A21\u5F0F",
+    desc: "\u8907\u5408\u5143\u4EF6\u3001render props\u3001custom hooks\u3002\u5BEB\u51FA\u53EF\u8907\u7528\u3001\u597D\u7DAD\u8B77\u7684\u7A0B\u5F0F\u78BC\u3002",
+    xp: 35, prereqs: [11],
+    project: "\u5C07 LingoLeap \u4E2D\u91CD\u8907\u7684\u908F\u8F2F\u62BD\u53D6\u70BA custom hook\uFF08\u4F8B\u5982 useAudioPlayback\u3001useStoryData\uFF09",
+    resources: [
+      { title: "Custom Hooks \u5B98\u65B9\u6307\u5357", url: "https://react.dev/learn/reusing-logic-with-custom-hooks" },
+      { title: "\u5143\u4EF6\u8A2D\u8A08\u539F\u5247", url: "https://www.patterns.dev/react" }
+    ],
+    criteria: "\u80FD\u5BEB\u51FA\u53EF\u8907\u7528\u7684 custom hook\uFF0C\u7406\u89E3\u95DC\u6CE8\u9EDE\u5206\u96E2\u3001\u55AE\u4E00\u8077\u8CAC\u539F\u5247"
+  },
+  {
+    id: 14, tier: 3, icon: "\u2705", name: "\u6E2C\u8A66",
+    desc: "\u624B\u52D5\u6E2C\u8A66 \u2192 \u5BEB\u6E2C\u8A66\u6848\u4F8B \u2192 Playwright E2E\u3002\u78BA\u4FDD\u7A0B\u5F0F\u78BC\u54C1\u8CEA\u7684\u6700\u5F8C\u4E00\u9053\u9632\u7DDA\u3002",
+    xp: 30, prereqs: [10, 6],
+    project: "\u70BA LingoLeap \u7684\u5B78\u7FD2\u6D41\u7A0B\u5BEB Playwright E2E \u6E2C\u8A66\uFF08\u53C3\u8003 #28\uFF09",
+    resources: [
+      { title: "Playwright \u5165\u9580", url: "https://playwright.dev/docs/intro" },
+      { title: "\u6E2C\u8A66\u6700\u4F73\u5BE6\u8E10", url: "https://kentcdodds.com/blog/write-tests" }
+    ],
+    criteria: "\u80FD\u5BEB\u51FA E2E \u6E2C\u8A66\u5834\u666F\u3001\u7406\u89E3\u6E2C\u8A66\u91D1\u5B57\u5854\u3001\u80FD\u7528 CI \u57F7\u884C\u6E2C\u8A66"
+  },
+  {
+    id: 15, tier: 3, icon: "\u{1F50D}", name: "Code Review",
+    desc: "\u80FD\u5BE9\u67E5\u5225\u4EBA\u7684 PR\u3001\u7D66\u5EFA\u8A2D\u6027\u56DE\u994B\u3002\u5F9E\u300C\u5BEB\u7A0B\u5F0F\u300D\u9032\u5316\u5230\u300C\u7406\u89E3\u7A0B\u5F0F\u300D\u7684\u95DC\u9375\u4E00\u6B65\u3002",
+    xp: 30, prereqs: [9, 6],
+    project: "\u5BE9\u67E5 3 \u500B\u5718\u968A\u6210\u54E1\u7684 PR\uFF0C\u63D0\u4F9B\u6709\u610F\u7FA9\u7684 review \u610F\u898B",
+    resources: [
+      { title: "Google Code Review \u6307\u5357", url: "https://google.github.io/eng-practices/review/" },
+      { title: "\u5982\u4F55\u7D66\u597D\u7684 Code Review", url: "https://mtlynch.io/code-review-love/" }
+    ],
+    criteria: "\u80FD\u6307\u51FA\u7A0B\u5F0F\u78BC\u554F\u984C\uFF08\u53EF\u8B80\u6027 / \u6548\u80FD / \u5B89\u5168\uFF09\u3001\u63D0\u4F9B\u5177\u9AD4\u6539\u5584\u5EFA\u8B70"
+  },
+
+  // Tier 4
+  {
+    id: 16, tier: 4, icon: "\u{1F680}", name: "\u7368\u7ACB\u958B\u767C\u529F\u80FD",
+    desc: "\u5F9E issue \u5230 PR \u5B8C\u6574\u6D41\u7A0B\uFF1A\u7406\u89E3\u9700\u6C42 \u2192 \u8A2D\u8A08 \u2192 \u5BE6\u4F5C \u2192 \u6E2C\u8A66 \u2192 PR\u3002\u771F\u6B63\u7684\u958B\u767C\u8005\u3002",
+    xp: 50, prereqs: [11, 12, 9],
+    project: "\u7368\u7ACB\u5B8C\u6210\u4E00\u500B LingoLeap Issue\uFF08\u5F9E\u7406\u89E3\u9700\u6C42\u5230 merge\uFF09",
+    resources: [
+      { title: "\u8EDF\u9AD4\u958B\u767C\u6D41\u7A0B", url: "https://www.atlassian.com/agile" },
+      { title: "\u5BEB\u597D\u7684 Commit Message", url: "https://www.conventionalcommits.org/" }
+    ],
+    criteria: "\u7368\u7ACB\u5B8C\u6210\u4E00\u500B\u4E2D\u7B49\u8907\u96DC\u5EA6\u7684 Issue\uFF0C\u5305\u542B\u5B8C\u6574\u7684 branch / commit / PR \u6D41\u7A0B"
+  },
+  {
+    id: 17, tier: 4, icon: "\u{1F3CE}\uFE0F", name: "\u6548\u80FD\u512A\u5316",
+    desc: "React.memo\u3001lazy loading\u3001bundle size \u5206\u6790\u3002\u8B93\u61C9\u7528\u7A0B\u5F0F\u8DD1\u5F97\u66F4\u5FEB\u3002",
+    xp: 40, prereqs: [11, 13],
+    project: "\u5206\u6790 LingoLeap \u7684 bundle size\uFF0C\u7528 lazy loading \u6E1B\u5C11\u9996\u6B21\u8F09\u5165\u6642\u9593",
+    resources: [
+      { title: "React \u6548\u80FD\u512A\u5316", url: "https://react.dev/learn/render-and-commit" },
+      { title: "Web Vitals \u6307\u5357", url: "https://web.dev/articles/vitals" }
+    ],
+    criteria: "\u80FD\u7528 React DevTools Profiler \u627E\u51FA\u6548\u80FD\u74F6\u9838\uFF0C\u61C9\u7528 code splitting \u6E1B\u5C11 bundle size"
+  },
+  {
+    id: 18, tier: 4, icon: "\u{1F3D7}\uFE0F", name: "\u67B6\u69CB\u7406\u89E3",
+    desc: "\u5168\u7AEF\u8CC7\u6599\u6D41\u3001API \u8A2D\u8A08\u3001DB schema\u3002\u4E0D\u53EA\u770B\u524D\u7AEF\uFF0C\u800C\u662F\u7406\u89E3\u6574\u500B\u7CFB\u7D71\u3002",
+    xp: 40, prereqs: [12, 14],
+    project: "\u756B\u51FA LingoLeap \u67D0\u500B\u529F\u80FD\u7684\u5B8C\u6574\u67B6\u69CB\u5716\uFF08\u524D\u7AEF \u2192 API \u2192 DB\uFF09",
+    resources: [
+      { title: "REST API \u8A2D\u8A08", url: "https://restfulapi.net/" },
+      { title: "\u7CFB\u7D71\u8A2D\u8A08\u5165\u9580", url: "https://github.com/donnemartin/system-design-primer" }
+    ],
+    criteria: "\u80FD\u89E3\u91CB API \u7AEF\u9EDE\u7684\u8A2D\u8A08\u908F\u8F2F\u3001\u7406\u89E3 DB \u95DC\u806F\u3001\u756B\u51FA\u8CC7\u6599\u6D41\u5716"
+  },
+  {
+    id: 19, tier: 4, icon: "\u{1F4DA}", name: "\u6280\u8853\u6587\u4EF6",
+    desc: "\u5BEB README\u3001ADR\u3001\u6280\u8853\u6C7A\u7B56\u6587\u4EF6\u3002\u597D\u7684\u6587\u4EF6\u662F\u5718\u968A\u5354\u4F5C\u7684\u57FA\u77F3\u3002",
+    xp: 30, prereqs: [15, 16],
+    project: "\u70BA\u81EA\u5DF1\u958B\u767C\u7684\u529F\u80FD\u5BEB\u4E00\u4EFD\u5B8C\u6574\u7684\u6280\u8853\u6587\u4EF6\uFF08\u5305\u542B\u67B6\u69CB\u5716 / \u4F7F\u7528\u65B9\u6CD5 / \u8A2D\u8A08\u6C7A\u7B56\uFF09",
+    resources: [
+      { title: "\u5BEB\u597D README", url: "https://www.makeareadme.com/" },
+      { title: "ADR \u6A21\u677F", url: "https://adr.github.io/" }
+    ],
+    criteria: "\u80FD\u5BEB\u51FA\u6E05\u6670\u7684 README\uFF08\u5305\u542B\u5B89\u88DD / \u4F7F\u7528 / API\uFF09\u3001\u8A18\u9304\u6280\u8853\u6C7A\u7B56\u7684\u7406\u7531"
+  },
+  {
+    id: 20, tier: 4, icon: "\u{1F91D}", name: "\u6307\u5C0E\u4ED6\u4EBA",
+    desc: "\u5E6B\u65B0\u6210\u54E1 onboard\u3001pair programming\u3002\u6559\u5225\u4EBA\u662F\u6700\u597D\u7684\u5B78\u7FD2\u3002",
+    xp: 50, prereqs: [15, 16],
+    project: "\u5E36\u9818\u4E00\u4F4D\u65B0\u6210\u54E1\u5B8C\u6210\u7B2C\u4E00\u500B PR\uFF0C\u6216\u7D44\u7E54\u4E00\u6B21\u6280\u8853\u5206\u4EAB",
+    resources: [
+      { title: "Pair Programming \u6307\u5357", url: "https://martinfowler.com/articles/on-pair-programming.html" },
+      { title: "\u6280\u8853\u6307\u5C0E\u6280\u5DE7", url: "https://www.codementor.io/blog/how-to-be-a-good-mentor" }
+    ],
+    criteria: "\u6210\u529F\u5E36\u9818\u4E00\u4F4D\u65B0\u6210\u54E1\u5B8C\u6210\u4ED6\u5011\u7684\u9996\u500B\u8CA2\u737B\uFF0C\u6216\u5B8C\u6210\u4E00\u6B21\u5718\u968A\u6280\u8853\u5206\u4EAB"
+  }
+];
+
+const TIER_META = {
+  1: { name: "\u57FA\u790E\u5165\u9580 Foundation", color: "var(--green)" },
+  2: { name: "\u5BE6\u6230\u6280\u80FD Practice", color: "var(--blue)" },
+  3: { name: "\u9032\u968E\u80FD\u529B Advanced", color: "var(--purple)" },
+  4: { name: "\u7368\u7ACB\u958B\u767C\u8005 Independent", color: "var(--gold)" }
+};
+
+const TOTAL_XP = SKILLS.reduce((s, sk) => s + sk.xp, 0);
+
+// State
+let completed = new Set();
+function loadState() {
+  try {
+    const raw = localStorage.getItem("lingoleap-skill-tree");
+    if (raw) completed = new Set(JSON.parse(raw));
+  } catch(e) {}
+}
+function saveState() {
+  localStorage.setItem("lingoleap-skill-tree", JSON.stringify([...completed]));
+}
+loadState();
+
+function isAvailable(skill) {
+  return skill.prereqs.every(pid => completed.has(pid));
+}
+
+function getEarnedXP() {
+  return SKILLS.filter(s => completed.has(s.id)).reduce((sum, s) => sum + s.xp, 0);
+}
+
+function updateProgress() {
+  const earned = getEarnedXP();
+  const pct = (earned / TOTAL_XP) * 100;
+  document.getElementById("xp-display").textContent = `${earned} / ${TOTAL_XP} XP`;
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("completed-count").textContent = completed.size;
+}
+
+// Confetti
+function spawnConfetti(x, y) {
+  const colors = ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b", "#ef4444", "#06b6d4"];
+  for (let i = 0; i < 40; i++) {
+    const el = document.createElement("div");
+    el.className = "confetti-piece";
+    el.style.left = (x + (Math.random() - 0.5) * 100) + "px";
+    el.style.top = (y + (Math.random() - 0.5) * 40) + "px";
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.width = (4 + Math.random() * 6) + "px";
+    el.style.height = (4 + Math.random() * 6) + "px";
+    el.style.animationDuration = (0.8 + Math.random() * 0.8) + "s";
+    el.style.animationDelay = (Math.random() * 0.2) + "s";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  }
+}
+
+// Render tree
+function renderTree() {
+  const tree = document.getElementById("tree");
+  tree.innerHTML = "";
+
+  for (let tier = 1; tier <= 4; tier++) {
+    if (tier > 1) {
+      const conn = document.createElement("div");
+      conn.className = "tier-connector";
+      conn.innerHTML = '<div class="line"></div>';
+      tree.appendChild(conn);
+    }
+
+    const tierDiv = document.createElement("div");
+    tierDiv.className = "tier";
+
+    const label = document.createElement("div");
+    label.className = "tier-label";
+    label.style.color = TIER_META[tier].color;
+    label.textContent = `Tier ${tier} \u2014 ${TIER_META[tier].name}`;
+    tierDiv.appendChild(label);
+
+    const nodesDiv = document.createElement("div");
+    nodesDiv.className = "tier-nodes";
+
+    SKILLS.filter(s => s.tier === tier).forEach(skill => {
+      const isComp = completed.has(skill.id);
+      const avail = isAvailable(skill);
+
+      const node = document.createElement("div");
+      node.className = `node tier-${tier}`;
+      if (isComp) node.classList.add("completed");
+      else if (avail) node.classList.add("available");
+      else node.classList.add("locked");
+
+      node.innerHTML = `
+        <div class="check">\u2713</div>
+        <div class="icon">${skill.icon}</div>
+        <div class="name">${skill.name}</div>
+        <div class="xp-badge">${skill.xp} XP</div>
+        ${!avail && !isComp ? '<div class="lock-icon">\u{1F512}</div>' : ''}
+      `;
+
+      node.addEventListener("click", () => openPanel(skill));
+      nodesDiv.appendChild(node);
+    });
+
+    tierDiv.appendChild(nodesDiv);
+    tree.appendChild(tierDiv);
+  }
+
+  updateProgress();
+}
+
+// Panel
+function openPanel(skill) {
+  const panel = document.getElementById("panel");
+  const overlay = document.getElementById("overlay");
+  const content = document.getElementById("panel-content");
+  const isComp = completed.has(skill.id);
+  const avail = isAvailable(skill);
+
+  const tierColor = TIER_META[skill.tier].color;
+  const tierName = TIER_META[skill.tier].name;
+
+  const prereqNames = skill.prereqs.map(pid => {
+    const ps = SKILLS.find(s => s.id === pid);
+    const done = completed.has(pid);
+    return `<span style="color: ${done ? 'var(--green)' : '#ef4444'}">${done ? '\u2713' : '\u2717'} ${ps.name}</span>`;
+  });
+
+  content.innerHTML = `
+    <div class="panel-xp" style="color: ${tierColor}">${skill.icon} ${skill.xp} XP</div>
+    <h2>${skill.name}</h2>
+    <span class="tier-tag" style="background: ${tierColor}22; color: ${tierColor}; border: 1px solid ${tierColor}44;">
+      Tier ${skill.tier} \u2014 ${tierName}
+    </span>
+    <p class="desc">${skill.desc}</p>
+
+    ${!avail && !isComp ? `
+      <div class="prereq-warning">
+        \u{1F512} \u9700\u8981\u5148\u5B8C\u6210\u4EE5\u4E0B\u6280\u80FD\uFF1A<br>${prereqNames.join('<br>')}
+      </div>
+    ` : ''}
+
+    ${prereqNames.length > 0 ? `
+      <div class="panel-section">
+        <h3>\u{1F517} \u524D\u7F6E\u6280\u80FD</h3>
+        <div style="font-size: 0.85rem; line-height: 1.8;">${prereqNames.join('<br>')}</div>
+      </div>
+    ` : ''}
+
+    <div class="panel-section">
+      <h3>\u{1F3AF} PBL \u5BE6\u4F5C\u5C08\u6848</h3>
+      <p style="font-size: 0.85rem; color: #1e293b; line-height: 1.6;">${skill.project}</p>
+    </div>
+
+    <div class="panel-section">
+      <h3>\u{1F4DA} \u5B78\u7FD2\u8CC7\u6E90</h3>
+      <ul>
+        ${skill.resources.map(r => `<li><a href="${r.url}" target="_blank" rel="noopener">${r.title}</a></li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="panel-section">
+      <h3>\u2705 \u5B8C\u6210\u689D\u4EF6</h3>
+      <ul style="list-style: none; padding: 0;">
+        ${skill.criteria.split('\u3001').map(c => c.trim()).filter(Boolean).map(c =>
+          `<li style="font-size: 0.85rem; color: #1e293b; line-height: 1.8; padding-left: 24px; position: relative;">
+            <span style="position: absolute; left: 0; top: 2px; width: 16px; height: 16px; border: 2px solid #d1d5db; border-radius: 4px; display: inline-block;"></span>
+            ${c}
+          </li>`
+        ).join('')}
+      </ul>
+    </div>
+
+    ${isComp ? `
+      <button class="complete-btn unmark" onclick="toggleSkill(${skill.id}, false)">\u53D6\u6D88\u5B8C\u6210</button>
+    ` : `
+      <button class="complete-btn mark" ${!avail ? 'disabled' : ''} onclick="toggleSkill(${skill.id}, true, event)">
+        ${avail ? '\u{1F3C6} \u6A19\u8A18\u70BA\u5DF2\u5B8C\u6210' : '\u{1F512} \u5C1A\u672A\u89E3\u9396'}
+      </button>
+    `}
+  `;
+
+  panel.classList.add("open");
+  overlay.classList.add("open");
+}
+
+function closePanel() {
+  document.getElementById("panel").classList.remove("open");
+  document.getElementById("overlay").classList.remove("open");
+}
+
+document.getElementById("panel-close").addEventListener("click", closePanel);
+document.getElementById("overlay").addEventListener("click", closePanel);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePanel(); });
+
+window.toggleSkill = function(id, markComplete, event) {
+  if (markComplete) {
+    completed.add(id);
+    // Confetti from button position
+    if (event) {
+      const rect = event.target.getBoundingClientRect();
+      spawnConfetti(rect.left + rect.width / 2, rect.top);
+    }
+  } else {
+    completed.delete(id);
+    // Also un-complete skills that depended on this
+    // (cascade only if they have no other path)
+  }
+  saveState();
+  renderTree();
+  // Reopen panel with updated state
+  const skill = SKILLS.find(s => s.id === id);
+  if (skill) setTimeout(() => openPanel(skill), 50);
+};
+
+// Init
+renderTree();
+</script>
+</body>
+</html>
