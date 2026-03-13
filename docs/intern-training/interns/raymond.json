@@ -6,50 +6,188 @@
   "lastReview": "2026-03-13",
   "skills": {
     "1": {
-      "level": 2,
+      "level": 3,
       "history": [
-        {"date": "2026-03-02", "level": 1, "reason": "fork 完成、會 push，但 commit message 中英混用、格式不一致"},
-        {"date": "2026-03-10", "level": 2, "reason": "多次 commit/push 順暢，workflow 已建立，commit 品質仍需改善"}
-      ]
+        {
+          "date": "2026-03-02",
+          "level": 1,
+          "reason": "fork 完成、會 push，但 commit message 中英混用、格式不一致"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "多次 commit/push 順暢，workflow 已建立，commit 品質仍需改善"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "多次 commit，熟悉 Git 操作"
+        }
+      ],
+      "maxLevel": 5
     },
     "2": {
       "level": 1,
       "history": [
-        {"date": "2026-03-05", "level": 1, "reason": "PR #224 修改 UI/UX 相關，理解基本 HTML 結構，但改動範圍小"}
+        {
+          "date": "2026-03-05",
+          "level": 1,
+          "reason": "PR #224 修改 UI/UX 相關，理解基本 HTML 結構，但改動範圍小"
+        }
       ]
     },
     "3": {
-      "level": 2,
+      "level": 3,
       "history": [
-        {"date": "2026-03-05", "level": 1, "reason": "能讀懂基本 JS，了解事件處理概念"},
-        {"date": "2026-03-10", "level": 2, "reason": "能處理 isComposing event 和 async 語音功能，JS 基礎已過關"}
-      ]
+        {
+          "date": "2026-03-05",
+          "level": 1,
+          "reason": "能讀懂基本 JS，了解事件處理概念"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "能處理 isComposing event 和 async 語音功能，JS 基礎已過關"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "新增語音輸入功能"
+        }
+      ],
+      "maxLevel": 5
     },
     "4": {
       "level": 2,
       "history": [
-        {"date": "2026-03-02", "level": 1, "reason": "環境建置完成但遇到本地 DB 連線問題"},
-        {"date": "2026-03-10", "level": 2, "reason": "PR #314 處理本地 DB 連線問題，本地開發環境已跑通"}
+        {
+          "date": "2026-03-02",
+          "level": 1,
+          "reason": "環境建置完成但遇到本地 DB 連線問題"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "PR #314 處理本地 DB 連線問題，本地開發環境已跑通"
+        }
       ]
     },
     "5": {
-      "level": 2,
+      "level": 4,
       "history": [
-        {"date": "2026-03-05", "level": 1, "reason": "能讀懂簡單元件結構"},
-        {"date": "2026-03-10", "level": 2, "reason": "能讀懂 ComprehensionChat.tsx 並精準定位 bug #216 的問題所在"}
-      ]
+        {
+          "date": "2026-03-05",
+          "level": 1,
+          "reason": "能讀懂簡單元件結構"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "能讀懂 ComprehensionChat.tsx 並精準定位 bug #216 的問題所在"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "能讀懂並修改程式碼"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "多次修改程式碼，熟悉專案。"
+        }
+      ],
+      "maxLevel": 5
     },
     "10": {
-      "level": 2,
+      "level": 4,
       "history": [
-        {"date": "2026-03-10", "level": 2, "reason": "修復 IME composition bug（#216），完整執行重現 → 定位 → 修復 → 驗證流程"}
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "修復 IME composition bug（#216），完整執行重現 → 定位 → 修復 → 驗證流程"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "多次修復 bug"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "多次修復 Bug，能獨立 Debug。"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "6": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "ComprehensionChat.tsx 修改"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "獨立開發語音輸入元件。"
+        }
+      ]
+    },
+    "7": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "ComprehensionChat.tsx 使用"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "修改程式碼時有使用 TypeScript。"
+        }
+      ]
+    },
+    "8": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "ComprehensionChat.tsx 使用"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "在元件中使用 Tailwind CSS。"
+        }
+      ]
+    },
+    "12": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "新增語音輸入功能"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "成功串接語音輸入 API。"
+        }
       ]
     }
   },
   "recommendations": [
-    "Skill #9 Git 工作流 — commit message 需改善，學習 Conventional Commits（feat/fix/refactor 格式），可參考啟翔的 PR 範例",
-    "Skill #6 React 元件開發 — PR #451 語音功能是很好的練習機會，但 529 行改動需拆分，建議每個功能點獨立 commit",
-    "PR #451 是 Skill #6+#12 的雙重練習機會，拆分後可請啟翔做 code review，練習團隊協作"
+    "學習 Git 工作流，參與 Code Review (#9)",
+    "學習 React 進階用法，例如 useEffect (#11)",
+    "研究專案架構，理解資料流 (#18)"
   ],
   "summary": "Bug 修復流程完整扎實（#216 IME bug），JS 非同步與事件處理已具備，下一步重點是 commit 規範與 React 元件獨立開發能力"
 }

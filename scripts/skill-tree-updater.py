@@ -17,7 +17,10 @@ import os
 import re
 import subprocess
 import sys
+import warnings
 from datetime import datetime, timedelta
+
+warnings.filterwarnings("ignore", message=".*deprecated.*", category=UserWarning)
 from pathlib import Path
 from typing import Any
 
@@ -32,12 +35,14 @@ INTERN_CONFIG: dict[str, dict[str, str]] = {
     "raymond": {
         "name": "Raymond",
         "github": "if-else-master",
-        "email": "",
+        "git_authors": ["if-else-master", "Raymond"],
+        "email": "78069313+if-else-master@users.noreply.github.com",
         "json_file": "raymond.json",
     },
     "steven": {
         "name": "Steven",
         "github": "stgst",
+        "git_authors": ["stgst", "xiung", "xiunG"],
         "email": "steven19790906@gmail.com",
         "json_file": "xiung.json",
     },
@@ -99,34 +104,48 @@ def stars(level: int, max_level: int = 5) -> str:
 # Git helpers
 # ---------------------------------------------------------------------------
 
-def git_log(author: str, days: int) -> list[dict[str, str]]:
-    """Return list of {hash, date, message} for an author within N days."""
+def git_log(authors: list[str], email: str, days: int) -> list[dict[str, str]]:
+    """Return list of {hash, date, message} for author(s) within N days."""
     since = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
-    cmd = [
-        "git", "log", "--all",
-        f"--author={author}",
-        f"--since={since}",
-        "--pretty=format:%H|||%ai|||%s",
-    ]
-    try:
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, cwd=REPO_ROOT, check=True,
-        )
-    except subprocess.CalledProcessError as exc:
-        print(f"{C.RED}git log failed for {author}: {exc}{C.RESET}")
-        return []
 
-    commits = []
-    for line in result.stdout.strip().splitlines():
-        if "|||" not in line:
+    # Collect commits from all author variants + email
+    seen_hashes: set[str] = set()
+    commits: list[dict[str, str]] = []
+
+    search_terms = list(authors)
+    if email:
+        search_terms.append(email)
+
+    for author in search_terms:
+        cmd = [
+            "git", "log", "--all",
+            f"--author={author}",
+            f"--since={since}",
+            "--pretty=format:%H|||%ai|||%s",
+        ]
+        try:
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, cwd=REPO_ROOT, check=True,
+            )
+        except subprocess.CalledProcessError:
             continue
-        parts = line.split("|||", 2)
-        if len(parts) == 3:
-            commits.append({
-                "hash": parts[0].strip(),
-                "date": parts[1].strip(),
-                "message": parts[2].strip(),
-            })
+
+        for line in result.stdout.strip().splitlines():
+            if "|||" not in line:
+                continue
+            parts = line.split("|||", 2)
+            if len(parts) == 3:
+                h = parts[0].strip()
+                if h not in seen_hashes:
+                    seen_hashes.add(h)
+                    commits.append({
+                        "hash": h,
+                        "date": parts[1].strip(),
+                        "message": parts[2].strip(),
+                    })
+
+    # Sort by date descending
+    commits.sort(key=lambda c: c["date"], reverse=True)
     return commits
 
 
@@ -221,10 +240,37 @@ def call_gemini(prompt: str) -> dict | None:
         print(f"{C.RED}Vertex AI init failed: {exc}{C.RESET}")
         sys.exit(1)
 
-    model = GenerativeModel("gemini-2.5-flash")
+    model = GenerativeModel("gemini-2.0-flash")
+
+    response_schema = {
+        "type": "object",
+        "properties": {
+            "skill_updates": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "skill_id": {"type": "integer"},
+                        "new_level": {"type": "integer"},
+                        "reason": {"type": "string"},
+                    },
+                    "required": ["skill_id", "new_level", "reason"],
+                },
+            },
+            "recommendations": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+            "summary": {"type": "string"},
+        },
+        "required": ["skill_updates", "recommendations", "summary"],
+    }
+
     gen_config = GenerationConfig(
-        max_output_tokens=1024,
+        max_output_tokens=4096,
         temperature=0.2,
+        response_mime_type="application/json",
+        response_schema=response_schema,
     )
 
     for attempt in range(2):
@@ -235,12 +281,16 @@ def call_gemini(prompt: str) -> dict | None:
             )
             text = response.text.strip()
             # Strip markdown code fences if present
-            text = re.sub(r"^```(?:json)?\s*", "", text)
-            text = re.sub(r"\s*```$", "", text)
+            text = re.sub(r"^```(?:json)?\s*\n?", "", text)
+            text = re.sub(r"\n?\s*```\s*$", "", text)
+            # Try to extract JSON object if surrounded by other text
+            json_match = re.search(r"\{[\s\S]*\}", text)
+            if json_match:
+                text = json_match.group(0)
             return json.loads(text)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             if attempt == 0:
-                print(f"   {C.YELLOW}Gemini JSON 格式錯誤，重試中...{C.RESET}")
+                print(f"   {C.YELLOW}Gemini JSON 格式錯誤: {e}，重試中...{C.RESET}")
                 continue
             print(f"   {C.RED}Gemini 回傳非 JSON 格式，跳過此評估{C.RESET}")
             return None
@@ -303,13 +353,13 @@ GitHub：@{intern_github}
 回覆格式（嚴格 JSON）：
 {{
   "skill_updates": [
-    {{"skill_id": 1, "new_level": 3, "reason": "具體原因"}}
+    {{"skill_id": 1, "new_level": 3, "reason": "簡短原因（20字以內）"}}
   ],
   "recommendations": ["建議1", "建議2"],
-  "summary": "一句話總結這段時間的成長"
+  "summary": "一句話總結（30字以內）"
 }}
 
-只輸出 JSON，不要其他文字。"""
+重要：reason 和 summary 必須簡短精煉，每個 reason 不超過 20 個中文字。只輸出 JSON。"""
 
 
 # ---------------------------------------------------------------------------
@@ -341,7 +391,8 @@ def evaluate_intern(
         intern_data["email"] = config["email"]
 
     # Get commits
-    commits = git_log(config["github"], days)
+    git_authors = config.get("git_authors", [config["github"]])
+    commits = git_log(git_authors, config.get("email", ""), days)
     if not commits:
         print(f"   {C.YELLOW}找不到任何 commits，跳過{C.RESET}")
         return False
