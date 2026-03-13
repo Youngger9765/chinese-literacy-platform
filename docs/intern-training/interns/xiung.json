@@ -1,0 +1,25 @@
+{
+  "name": "xiung (Steven)",
+  "github": "stgst",
+  "startDate": "2026-03-06",
+  "completed": [1, 2, 3, 4, 5, 6, 8, 9, 10, 11],
+  "lastReview": "2026-03-13",
+  "reviewNotes": {
+    "1": "Git 操作流暢，多次 commit/push",
+    "2": "修改 WriteCharacter.tsx 樣式，理解 CSS 結構",
+    "3": "使用 useMemo、setTimeout、state 管理，JS 進階能力已具備",
+    "4": "本地開發環境正常運作",
+    "5": "能讀懂 VocabPractice、WriteCharacter 等複雜元件",
+    "6": "PR #229 獨立重構 WriteCharacter（99+/120- 行），正確使用 state 和 event handling",
+    "8": "修改含 Tailwind 樣式的元件，理解 utility-first 概念",
+    "9": "PR 流程完整：feature branch → 多次 commit → PR → merge。commit message 品質佳（feat/fix/refactor 分類）",
+    "10": "PR #448 修復 React hooks 順序 bug（useMemo before conditional return），精準定位問題",
+    "11": "正確使用 useMemo 優化效能、理解 hooks 執行順序規則"
+  },
+  "recommendations": [
+    "下一步建議：Skill #7 TypeScript — 目前 commit 未見 type annotation 練習",
+    "Skill #13 元件設計模式 — 可以嘗試從 WriteCharacter 抽取 custom hook",
+    "Skill #12 API 串接 — 可以挑一個需要 fetch 的 Issue 來練",
+    "進度領先 Raymond，可考慮讓他帶 Raymond pair programming（Skill #20 前置）"
+  ]
+}

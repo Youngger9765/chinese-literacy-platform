@@ -8,24 +8,27 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f8f9fb;
+    --bg: #f8fafc;
     --bg-card: #ffffff;
-    --bg-panel: #ffffff;
-    --border: #e2e5eb;
+    --border: #e2e8f0;
     --text: #1e293b;
     --text-dim: #94a3b8;
-    --green: #16a34a;
-    --green-glow: #16a34a30;
-    --blue: #2563eb;
-    --blue-glow: #2563eb30;
-    --purple: #7c3aed;
-    --purple-glow: #7c3aed30;
-    --gold: #d97706;
-    --gold-glow: #d9770630;
-    --locked: #e5e7eb;
-    --locked-text: #9ca3af;
-    --line-color: #d1d5db;
-    --line-active: #a3aab8;
+    --text-mid: #64748b;
+    --green: #22c55e;
+    --green-light: #f0fdf4;
+    --green-glow: #22c55e30;
+    --blue: #3b82f6;
+    --blue-light: #eff6ff;
+    --blue-glow: #3b82f630;
+    --purple: #a855f7;
+    --purple-light: #faf5ff;
+    --purple-glow: #a855f730;
+    --gold: #f59e0b;
+    --gold-light: #fffbeb;
+    --gold-glow: #f59e0b30;
+    --locked-bg: #f1f5f9;
+    --locked-border: #cbd5e1;
+    --locked-text: #94a3b8;
   }
 
   body {
@@ -34,13 +37,19 @@
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 16px;
   }
 
   /* Header */
   .header {
     text-align: center;
-    padding: 28px 20px 12px;
-    position: relative;
+    padding: 32px 20px 16px;
   }
   .header h1 {
     font-size: clamp(1.4rem, 4vw, 2rem);
@@ -57,10 +66,110 @@
     margin-top: 4px;
   }
 
+  /* Profile Cards */
+  .profiles {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 16px auto 24px;
+    max-width: 640px;
+    padding: 0 16px;
+  }
+  .profile-card {
+    flex: 1;
+    min-width: 260px;
+    max-width: 310px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .profile-card:hover {
+    border-color: var(--blue);
+    box-shadow: 0 4px 16px rgba(59,130,246,0.1);
+  }
+  .profile-card.active {
+    border-color: var(--blue);
+    background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+    box-shadow: 0 4px 20px rgba(59,130,246,0.15);
+  }
+  .profile-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .profile-card:first-child .profile-avatar {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+  }
+  .profile-card:last-child .profile-avatar {
+    background: linear-gradient(135deg, #8b5cf6, #a855f7);
+  }
+  .profile-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .profile-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .profile-github {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+  .profile-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .profile-xp {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gold);
+    background: #fffbeb;
+    padding: 2px 8px;
+    border-radius: 8px;
+  }
+  .profile-date {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+  .profile-tier-bar {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .profile-tier-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--green), var(--blue), var(--purple), var(--gold));
+    transition: width 0.5s ease;
+  }
+
   /* Progress Bar */
   .progress-wrap {
-    max-width: 480px;
-    margin: 16px auto 8px;
+    max-width: 520px;
+    margin: 0 auto 8px;
     padding: 0 20px;
   }
   .progress-labels {
@@ -76,10 +185,9 @@
   }
   .progress-bar {
     height: 10px;
-    background: var(--locked);
+    background: #e2e8f0;
     border-radius: 5px;
     overflow: hidden;
-    position: relative;
   }
   .progress-fill {
     height: 100%;
@@ -99,7 +207,6 @@
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
   }
-
   .skill-count {
     text-align: center;
     font-size: 0.75rem;
@@ -110,16 +217,13 @@
 
   /* Tree */
   .tree {
-    max-width: 820px;
-    margin: 20px auto 100px;
+    max-width: 860px;
+    margin: 20px auto 0;
     padding: 0 12px;
-    position: relative;
   }
 
-  /* Tier */
   .tier {
     margin-bottom: 12px;
-    position: relative;
   }
   .tier-label {
     font-size: 0.7rem;
@@ -146,7 +250,6 @@
     padding-bottom: 20px;
   }
 
-  /* Connector lines (between tiers) */
   .tier-connector {
     display: flex;
     justify-content: center;
@@ -154,21 +257,24 @@
   }
   .tier-connector .line {
     width: 2px;
-    height: 28px;
-    background: linear-gradient(to bottom, var(--line-active), var(--line-color));
-    border-radius: 1px;
+    height: 24px;
+    background: repeating-linear-gradient(
+      to bottom,
+      #cbd5e1 0px, #cbd5e1 4px,
+      transparent 4px, transparent 8px
+    );
   }
 
   /* Node */
   .node {
     width: 130px;
     min-height: 80px;
-    border-radius: 12px;
+    border-radius: 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 5px;
     padding: 12px 8px;
     cursor: pointer;
     position: relative;
@@ -181,19 +287,19 @@
   .node:hover { transform: translateY(-3px); }
   .node:active { transform: scale(0.97); }
 
-  .node .icon { font-size: 1.5rem; line-height: 1; }
-  .node .name { font-size: 0.78rem; font-weight: 600; line-height: 1.25; }
+  .node .icon { font-size: 1.4rem; line-height: 1; }
+  .node .name { font-size: 0.76rem; font-weight: 600; line-height: 1.25; }
   .node .xp-badge {
     font-size: 0.6rem;
     font-weight: 700;
-    padding: 1px 6px;
+    padding: 1px 7px;
     border-radius: 8px;
-    background: rgba(0,0,0,0.08);
+    background: rgba(0,0,0,0.07);
     color: inherit;
     opacity: 0.8;
   }
 
-  /* Completed checkmark */
+  /* Check */
   .node .check {
     position: absolute;
     top: -6px;
@@ -201,25 +307,29 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     font-size: 0.7rem;
     font-weight: 900;
     color: #fff;
     box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-    display: none;
   }
   .node.completed .check { display: flex; }
 
-  /* Tier color schemes */
+  /* Tier colors */
   .node.tier-1 {
     background: linear-gradient(135deg, #f0fdf4, #dcfce7);
     border-color: var(--green);
     box-shadow: 0 2px 8px var(--green-glow), inset 0 1px 0 rgba(255,255,255,0.8);
     color: #166534;
   }
+  .node.tier-1.completed {
+    background: linear-gradient(135deg, var(--green), #16a34a);
+    color: #fff;
+  }
   .node.tier-1 .check { background: var(--green); }
+  .node.tier-1.completed .check { background: #fff; color: var(--green); }
 
   .node.tier-2 {
     background: linear-gradient(135deg, #eff6ff, #dbeafe);
@@ -227,15 +337,25 @@
     box-shadow: 0 2px 8px var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.8);
     color: #1e40af;
   }
+  .node.tier-2.completed {
+    background: linear-gradient(135deg, var(--blue), #2563eb);
+    color: #fff;
+  }
   .node.tier-2 .check { background: var(--blue); }
+  .node.tier-2.completed .check { background: #fff; color: var(--blue); }
 
   .node.tier-3 {
     background: linear-gradient(135deg, #faf5ff, #ede9fe);
     border-color: var(--purple);
     box-shadow: 0 2px 8px var(--purple-glow), inset 0 1px 0 rgba(255,255,255,0.8);
-    color: #5b21b6;
+    color: #6b21a8;
+  }
+  .node.tier-3.completed {
+    background: linear-gradient(135deg, var(--purple), #9333ea);
+    color: #fff;
   }
   .node.tier-3 .check { background: var(--purple); }
+  .node.tier-3.completed .check { background: #fff; color: var(--purple); }
 
   .node.tier-4 {
     background: linear-gradient(135deg, #fffbeb, #fef3c7);
@@ -243,23 +363,28 @@
     box-shadow: 0 2px 8px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,0.8);
     color: #92400e;
   }
+  .node.tier-4.completed {
+    background: linear-gradient(135deg, var(--gold), #d97706);
+    color: #fff;
+  }
   .node.tier-4 .check { background: var(--gold); }
+  .node.tier-4.completed .check { background: #fff; color: var(--gold); }
 
   /* Locked */
   .node.locked {
-    background: var(--locked);
-    border-color: #d1d5db;
+    background: var(--locked-bg);
+    border-color: var(--locked-border);
     box-shadow: none;
     color: var(--locked-text);
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.55;
   }
   .node.locked:hover { transform: none; }
   .node.locked .lock-icon {
     position: absolute;
     bottom: 4px;
     right: 6px;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
   }
 
   /* Pulse for available */
@@ -267,20 +392,20 @@
     animation: pulse 2.5s ease-in-out infinite;
   }
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 16px var(--glow-color); }
-    50% { box-shadow: 0 0 28px var(--glow-color), 0 0 48px var(--glow-color); }
+    0%, 100% { box-shadow: 0 2px 12px var(--glow-color); }
+    50% { box-shadow: 0 2px 24px var(--glow-color), 0 0 40px var(--glow-color); }
   }
   .node.tier-1.available:not(.completed) { --glow-color: var(--green-glow); }
   .node.tier-2.available:not(.completed) { --glow-color: var(--blue-glow); }
   .node.tier-3.available:not(.completed) { --glow-color: var(--purple-glow); }
   .node.tier-4.available:not(.completed) { --glow-color: var(--gold-glow); }
 
-  /* Panel overlay */
+  /* Overlay + Panel */
   .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.25);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(3px);
     z-index: 100;
     opacity: 0;
     pointer-events: none;
@@ -292,9 +417,9 @@
     position: fixed;
     top: 0;
     right: 0;
-    width: min(420px, 92vw);
+    width: min(450px, 94vw);
     height: 100%;
-    background: var(--bg-panel);
+    background: var(--bg-card);
     border-left: 1px solid var(--border);
     z-index: 101;
     transform: translateX(100%);
@@ -320,14 +445,48 @@
     align-items: center;
     justify-content: center;
     transition: background 0.15s;
+    z-index: 2;
   }
   .panel-close:hover { background: rgba(0,0,0,0.1); }
 
   .panel-content {
-    padding: 28px 24px 40px;
+    padding: 24px 24px 40px;
   }
+
+  /* Panel tabs */
+  .panel-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border);
+  }
+  .panel-tab {
+    flex: 1;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    user-select: none;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .panel-tab:hover { color: var(--text); }
+  .panel-tab.active {
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
   .panel-content h2 {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 700;
     margin-bottom: 4px;
   }
@@ -341,13 +500,13 @@
   }
   .panel-content .desc {
     color: #334155;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     line-height: 1.6;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 
   .panel-section {
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
   .panel-section h3 {
     font-size: 0.78rem;
@@ -369,17 +528,17 @@
     line-height: 1.6;
     padding-left: 16px;
     position: relative;
-    color: #1e293b;
+    color: var(--text);
   }
   .panel-section li::before {
     content: '';
     position: absolute;
     left: 0;
     top: 10px;
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
-    background: #64748b;
+    background: #94a3b8;
   }
   .panel-section a {
     color: var(--blue);
@@ -391,9 +550,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 800;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 
   .complete-btn {
@@ -401,7 +560,7 @@
     padding: 12px;
     border: none;
     border-radius: 10px;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
@@ -409,12 +568,13 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    margin-top: 8px;
   }
   .complete-btn.mark {
     background: linear-gradient(135deg, var(--green), #16a34a);
     color: #fff;
   }
-  .complete-btn.mark:hover { box-shadow: 0 0 20px var(--green-glow); }
+  .complete-btn.mark:hover { box-shadow: 0 4px 20px var(--green-glow); }
   .complete-btn.unmark {
     background: rgba(0,0,0,0.04);
     color: var(--text-dim);
@@ -429,53 +589,212 @@
   .prereq-warning {
     background: #fef2f2;
     border: 1px solid #fecaca;
-    border-radius: 8px;
-    padding: 10px 14px;
+    border-radius: 10px;
+    padding: 12px 14px;
     font-size: 0.8rem;
-    color: #dc2626;
+    color: #b91c1c;
     margin-bottom: 16px;
+    line-height: 1.6;
   }
 
-  /* Confetti */
-  .confetti-piece {
+  /* Criteria checkboxes */
+  .criteria-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .criteria-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #fff;
+    transition: all 0.15s;
+  }
+  .criteria-checkbox.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  /* Course outline */
+  .course-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--blue), #2563eb);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    margin-top: 8px;
+  }
+  .course-link-btn:hover {
+    box-shadow: 0 4px 20px var(--blue-glow);
+    transform: translateY(-1px);
+  }
+
+  /* Sections below tree */
+  .section-card {
+    max-width: 860px;
+    margin: 24px auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .section-card h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Recommended path */
+  .rec-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .rec-item:hover { border-color: var(--blue); }
+  .rec-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .rec-item-header .rec-icon {
+    font-size: 1.1rem;
+  }
+  .rec-item-header .rec-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .rec-item-header .rec-xp {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--gold);
+    background: #fffbeb;
+    padding: 1px 8px;
+    border-radius: 8px;
+    margin-left: auto;
+  }
+  .rec-item p {
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Git review report */
+  .review-grid {
+    display: grid;
+    gap: 10px;
+  }
+  .review-stat {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .review-stat-item {
+    background: var(--bg);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+  }
+  .review-stat-item strong {
+    font-size: 1.1rem;
+    color: var(--blue);
+    margin-right: 4px;
+  }
+  .review-section {
+    margin-bottom: 12px;
+  }
+  .review-section h4 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .review-section p {
+    font-size: 0.82rem;
+    color: #334155;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Confetti canvas */
+  #confetti-canvas {
     position: fixed;
-    width: 8px;
-    height: 8px;
-    border-radius: 2px;
-    z-index: 200;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
-    animation: confetti-fall 1.4s cubic-bezier(0.25, 0, 0.5, 1) forwards;
+    z-index: 200;
   }
-  @keyframes confetti-fall {
-    0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
-    100% { opacity: 0; transform: translateY(60vh) rotate(720deg) scale(0.3); }
-  }
+
+  .footer-spacer { height: 80px; }
 
   /* Responsive */
   @media (max-width: 600px) {
+    .profiles { padding: 0 12px; }
+    .profile-card { min-width: 220px; padding: 12px 14px; }
     .node { width: 105px; min-height: 70px; padding: 10px 6px; }
-    .node .icon { font-size: 1.3rem; }
+    .node .icon { font-size: 1.2rem; }
     .node .name { font-size: 0.72rem; }
     .tier-nodes { gap: 8px; }
-    .panel-content { padding: 24px 16px 32px; }
+    .panel-content { padding: 20px 16px 32px; }
+    .section-card { margin: 16px 12px; padding: 18px 14px; }
   }
   @media (max-width: 380px) {
-    .node { width: 90px; min-height: 62px; }
+    .profiles { gap: 8px; }
+    .profile-card { min-width: 0; padding: 10px 12px; gap: 10px; }
+    .profile-avatar { width: 42px; height: 42px; font-size: 1.2rem; }
+    .profile-name { font-size: 0.9rem; }
+    .node { width: 88px; min-height: 62px; }
     .node .name { font-size: 0.65rem; }
   }
 </style>
 </head>
 <body>
 
+<canvas id="confetti-canvas"></canvas>
+
 <div class="header">
   <h1>LingoLeap 實習生技能樹</h1>
   <p>React + TypeScript + Tailwind -- 從零到獨立開發</p>
 </div>
 
+<div class="profiles" id="profiles"></div>
+
 <div class="progress-wrap">
   <div class="progress-labels">
     <span>總經驗值</span>
-    <span class="xp-val" id="xp-display">0 / 600 XP</span>
+    <span class="xp-val" id="xp-display">0 / 530 XP</span>
   </div>
   <div class="progress-bar">
     <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
@@ -485,6 +804,18 @@
 
 <div class="tree" id="tree"></div>
 
+<div class="section-card" id="rec-section" style="display:none;">
+  <h2>&#x1F5FA;&#xFE0F; 建議學習路徑</h2>
+  <div id="rec-content"></div>
+</div>
+
+<div class="section-card" id="review-section" style="display:none;">
+  <h2>&#x1F4CA; Git Review 報告</h2>
+  <div id="review-content"></div>
+</div>
+
+<div class="footer-spacer"></div>
+
 <div class="overlay" id="overlay"></div>
 <div class="panel" id="panel">
   <button class="panel-close" id="panel-close">&times;</button>
@@ -492,257 +823,264 @@
 </div>
 
 <script>
+// === SKILL DATA ===
 const SKILLS = [
   // Tier 1
-  {
-    id: 1, tier: 1, icon: "\u{1F500}", name: "Git \u57FA\u790E",
-    desc: "clone, commit, push, pull \u2014\u2014 \u7248\u672C\u63A7\u5236\u7684\u6838\u5FC3\u6982\u5FF5\u3002\u80FD\u5920\u5C07\u7A0B\u5F0F\u78BC\u63A8\u9001\u5230 GitHub\uFF0C\u4E26\u8DDF\u4E0A\u5718\u968A\u7684\u6700\u65B0\u9032\u5EA6\u3002",
-    xp: 15, prereqs: [],
-    project: "\u5B8C\u6210 LingoLeap \u7684 fork \u548C\u9996\u6B21 commit\uFF0Cpush \u4E00\u500B\u7C21\u55AE\u7684\u4FEE\u6539\u5230\u81EA\u5DF1\u7684 fork",
-    resources: [
-      { title: "Git \u5165\u9580\u6559\u5B78\uFF08\u4E2D\u6587\uFF09", url: "https://backlog.com/git-tutorial/tw/" },
-      { title: "GitHub Skills", url: "https://skills.github.com/" }
-    ],
-    criteria: "\u80FD\u7368\u7ACB\u57F7\u884C git clone / add / commit / push / pull\uFF0C\u77E5\u9053 .gitignore \u7684\u4F5C\u7528"
+  { id:1, tier:1, icon:"\u{1F500}", name:"Git 基礎",
+    desc:"clone, commit, push, pull",
+    xp:10, prereqs:[],
+    project:"完成 LingoLeap 的 fork 和首次 commit，push 一個簡單的修改到自己的 fork",
+    criteria:"能獨立執行 git clone / add / commit / push / pull、知道 .gitignore 的作用",
+    courseFile:"tier1-git-basics.md",
+    courseOutline:["Git 是什麼？版本控制概念","clone / init 建立 repo","add / commit / push 基本流程","pull 與遠端同步",".gitignore 設定"]
   },
-  {
-    id: 2, tier: 1, icon: "\u{1F3A8}", name: "HTML/CSS \u57FA\u790E",
-    desc: "\u7DB2\u9801\u7684\u9AA8\u67B6\u8207\u6A23\u5F0F\u3002\u638C\u63E1\u5E38\u7528\u6A19\u7C64\u3001CSS \u9078\u64C7\u5668\u3001Flexbox \u6392\u7248\uFF0C\u80FD\u5920\u5BEB\u51FA\u57FA\u672C\u7684\u7DB2\u9801\u7248\u578B\u3002",
-    xp: 15, prereqs: [],
-    project: "\u7528\u7D14 HTML/CSS \u5BEB\u4E00\u500B LingoLeap \u7684\u975C\u614B\u7248\u767B\u5165\u9801",
-    resources: [
-      { title: "MDN HTML \u5165\u9580", url: "https://developer.mozilla.org/zh-TW/docs/Learn/HTML" },
-      { title: "Flexbox Froggy", url: "https://flexboxfroggy.com/" }
-    ],
-    criteria: "\u80FD\u7528 Flexbox \u5BEB\u51FA\u57FA\u672C\u7248\u578B\uFF0C\u7406\u89E3 class / id \u9078\u64C7\u5668\uFF0C\u770B\u5F97\u61C2 CSS \u512A\u5148\u7D1A"
+  { id:2, tier:1, icon:"\u{1F3A8}", name:"HTML/CSS 基礎",
+    desc:"標籤、選擇器、Flexbox",
+    xp:10, prereqs:[],
+    project:"用純 HTML/CSS 寫一個 LingoLeap 的靜態版登入頁",
+    criteria:"能用 Flexbox 寫出基本版型、理解 class / id 選擇器、看得懂 CSS 優先級",
+    courseFile:"tier1-html-css.md",
+    courseOutline:["HTML 語義化標籤","CSS 選擇器與優先級","Flexbox 排版系統","Box Model 與 spacing","實作：靜態登入頁"]
   },
-  {
-    id: 3, tier: 1, icon: "\u26A1", name: "JavaScript \u57FA\u790E",
-    desc: "\u7A0B\u5F0F\u8A9E\u8A00\u6838\u5FC3\uFF1A\u8B8A\u6578\u3001\u51FD\u5F0F\u3001\u9663\u5217\u3001\u7269\u4EF6\u3001\u689D\u4EF6\u5224\u65B7\u3001\u8FF4\u5708\u3002\u9019\u662F\u6240\u6709\u524D\u7AEF\u958B\u767C\u7684\u5730\u57FA\u3002",
-    xp: 20, prereqs: [],
-    project: "\u7528 JS \u5BEB\u4E00\u500B\u5C0F\u5DE5\u5177\uFF1A\u8A08\u7B97\u6F22\u5B57\u5B57\u6578\u3001\u6A19\u8A3B\u6CE8\u97F3\uFF0C\u8DDF LingoLeap \u8AB2\u6587\u6578\u64DA\u4E92\u52D5",
-    resources: [
-      { title: "JavaScript.info \uFF08\u73FE\u4EE3\u6559\u5B78\uFF09", url: "https://javascript.info/" },
-      { title: "Eloquent JavaScript", url: "https://eloquentjavascript.net/" }
-    ],
-    criteria: "\u80FD\u7528 map/filter/reduce \u8655\u7406\u9663\u5217\uFF0C\u7406\u89E3\u89E3\u69CB\u8CE6\u503C\u3001\u7BAD\u982D\u51FD\u5F0F\u3001\u6A21\u7248\u5B57\u4E32"
+  { id:3, tier:1, icon:"\u26A1", name:"JavaScript 基礎",
+    desc:"變數、函式、陣列、物件",
+    xp:15, prereqs:[],
+    project:"用 JS 寫一個小工具：計算漢字字數、標註注音，跟 LingoLeap 課文資料互動",
+    criteria:"能用 map/filter/reduce 處理陣列、理解解構賦值、箭頭函式、模板字串",
+    courseFile:"tier1-javascript.md",
+    courseOutline:["變數宣告 let/const","函式與箭頭函式","陣列方法 map/filter/reduce","物件與解構賦值","非同步基礎 Promise"]
   },
-  {
-    id: 4, tier: 1, icon: "\u{1F6E0}\uFE0F", name: "\u958B\u767C\u74B0\u5883",
-    desc: "VS Code \u5FEB\u6377\u9375\u3001Node.js \u8207 npm \u5957\u4EF6\u7BA1\u7406\u3001\u7D42\u7AEF\u6A5F\u57FA\u672C\u6307\u4EE4\u3002\u5DE5\u6B32\u5584\u5176\u4E8B\uFF0C\u5FC5\u5148\u5229\u5176\u5668\u3002",
-    xp: 10, prereqs: [],
-    project: "\u5728\u672C\u5730\u6210\u529F\u555F\u52D5 LingoLeap frontend \u958B\u767C\u74B0\u5883\uFF08npm install + npm run dev\uFF09",
-    resources: [
-      { title: "VS Code \u5FEB\u6377\u9375\u5927\u5168", url: "https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf" },
-      { title: "npm \u5165\u9580", url: "https://docs.npmjs.com/getting-started" }
-    ],
-    criteria: "\u80FD\u7368\u7ACB\u8A2D\u5B9A\u958B\u767C\u74B0\u5883\uFF0C\u77E5\u9053 package.json \u7684\u4F5C\u7528\uFF0C\u6703\u7528 terminal \u57FA\u672C\u6307\u4EE4"
+  { id:4, tier:1, icon:"\u{1F6E0}\uFE0F", name:"開發環境",
+    desc:"VS Code, Node.js, npm, terminal",
+    xp:10, prereqs:[],
+    project:"在本地成功啟動 LingoLeap frontend 開發環境（npm install + npm run dev）",
+    criteria:"能獨立設定開發環境、知道 package.json 的作用、會用 terminal 基本指令",
+    courseFile:"tier1-dev-environment.md",
+    courseOutline:["VS Code 安裝與快捷鍵","Node.js 與 npm 設定","package.json 結構解析","terminal 常用指令","啟動 LingoLeap 開發環境"]
   },
-  {
-    id: 5, tier: 1, icon: "\u{1F4D6}", name: "\u8B80\u61C2\u73FE\u6709\u7A0B\u5F0F\u78BC",
-    desc: "\u80FD\u770B\u61C2 React \u5143\u4EF6\u5728\u505A\u4EC0\u9EBC\uFF0C\u8FFD\u8E64\u8CC7\u6599\u6D41\u5411\uFF0C\u7406\u89E3 props \u50B3\u905E\u3002\u9019\u662F\u53C3\u8207\u5718\u968A\u958B\u767C\u7684\u7B2C\u4E00\u6B65\u3002",
-    xp: 15, prereqs: [],
-    project: "\u95B1\u8B80 LingoLeap \u7684 VocabPractice.tsx\uFF0C\u5BEB\u51FA\u5143\u4EF6\u6D41\u7A0B\u8AAA\u660E\u6587\u4EF6",
-    resources: [
-      { title: "React \u5B98\u65B9\u6587\u4EF6", url: "https://react.dev/learn" },
-      { title: "\u5982\u4F55\u95B1\u8B80\u958B\u6E90\u5C08\u6848", url: "https://github.com/readme/guides/how-to-contribute-to-open-source" }
-    ],
-    criteria: "\u80FD\u6307\u51FA\u5143\u4EF6\u7684 props / state / \u4E8B\u4EF6\u8655\u7406\u3001\u5B50\u5143\u4EF6\u95DC\u4FC2"
+  { id:5, tier:1, icon:"\u{1F4D6}", name:"讀懂現有程式碼",
+    desc:"能看懂 React 元件在做什麼",
+    xp:15, prereqs:[],
+    project:"閱讀 LingoLeap 的 VocabPractice.tsx，寫出元件流程說明文件",
+    criteria:"能指出元件的 props / state / 事件處理、子元件關係",
+    courseFile:"tier1-reading-code.md",
+    courseOutline:["如何閱讀 React 元件","追蹤 props 與 state 流向","辨識事件處理邏輯","理解元件之間的關係","實作：分析 VocabPractice"]
   },
-
   // Tier 2
-  {
-    id: 6, tier: 2, icon: "\u269B\uFE0F", name: "React \u5143\u4EF6\u958B\u767C",
-    desc: "JSX \u8A9E\u6CD5\u3001props \u50B3\u905E\u3001useState / \u4E8B\u4EF6\u8655\u7406\u3001\u689D\u4EF6\u6E32\u67D3\u3002\u80FD\u5920\u5F9E\u96F6\u5EFA\u7ACB\u53EF\u4E92\u52D5\u7684\u5143\u4EF6\u3002",
-    xp: 30, prereqs: [3, 5],
-    project: "\u958B\u767C LingoLeap \u7684\u8AB2\u6587\u5361\u7247\u5143\u4EF6\uFF08StoryCard\uFF09\uFF0C\u986F\u793A\u6A19\u984C / \u96E3\u5EA6 / \u9032\u5EA6",
-    resources: [
-      { title: "React \u5B98\u65B9\u6559\u5B78", url: "https://react.dev/learn" },
-      { title: "\u601D\u7DAD\u6A21\u5F0F\uFF1AThinking in React", url: "https://react.dev/learn/thinking-in-react" }
-    ],
-    criteria: "\u80FD\u7368\u7ACB\u5BEB\u51FA\u5E36\u6709 state \u8207 props \u7684 React \u5143\u4EF6\uFF0C\u4E26\u6B63\u78BA\u8655\u7406\u4E8B\u4EF6"
+  { id:6, tier:2, icon:"\u269B\uFE0F", name:"React 元件開發",
+    desc:"JSX, props, state, hooks",
+    xp:25, prereqs:[3,5],
+    project:"開發 LingoLeap 的課文卡片元件（StoryCard），顯示標題 / 難度 / 進度",
+    criteria:"能獨立寫出帶有 state 與 props 的 React 元件、並正確處理事件",
+    courseFile:"tier2-react-components.md",
+    courseOutline:["JSX 語法與表達式","Props 傳遞與型別","useState 狀態管理","事件處理與條件渲染","實作：StoryCard 元件"]
   },
-  {
-    id: 7, tier: 2, icon: "\u{1F4DD}", name: "TypeScript",
-    desc: "\u578B\u5225\u6A19\u8A3B\u3001interface\u3001\u6CDB\u578B\u57FA\u790E\u3002\u8B93\u7DE8\u8F2F\u5668\u5E6B\u4F60\u6355\u6349\u932F\u8AA4\uFF0C\u5BEB\u51FA\u66F4\u5B89\u5168\u7684\u7A0B\u5F0F\u78BC\u3002",
-    xp: 25, prereqs: [3],
-    project: "\u5C07 LingoLeap \u7684\u4E00\u500B JS \u5DE5\u5177\u51FD\u5F0F\u8F49\u63DB\u70BA TypeScript\uFF0C\u52A0\u4E0A\u5B8C\u6574\u578B\u5225",
-    resources: [
-      { title: "TypeScript \u5165\u9580", url: "https://www.typescriptlang.org/docs/handbook/2/basic-types.html" },
-      { title: "React TypeScript Cheatsheet", url: "https://react-typescript-cheatsheet.netlify.app/" }
-    ],
-    criteria: "\u80FD\u7528 interface \u5B9A\u7FA9 props \u578B\u5225\uFF0C\u7406\u89E3 union types\u3001\u53EF\u9078\u5C6C\u6027\u3001\u6CDB\u578B\u57FA\u672C\u7528\u6CD5"
+  { id:7, tier:2, icon:"\u{1F4DD}", name:"TypeScript",
+    desc:"型別、interface、泛型基礎",
+    xp:20, prereqs:[3],
+    project:"將 LingoLeap 的一個 JS 工具函式轉換為 TypeScript，加上完整型別",
+    criteria:"能用 interface 定義 props 型別、理解 union types、可選屬性、泛型基本用法",
+    courseFile:"tier2-typescript.md",
+    courseOutline:["基本型別與 type annotation","Interface 與 Type Alias","Union Types 與 Literal Types","泛型入門","React + TypeScript 實戰"]
   },
-  {
-    id: 8, tier: 2, icon: "\u{1F3AF}", name: "Tailwind CSS",
-    desc: "utility-first CSS \u67B6\u69CB\u3001\u97FF\u61C9\u5F0F\u8A2D\u8A08\u3001\u81EA\u8A02\u4E3B\u984C\u3002\u5FEB\u901F\u5BEB\u51FA\u7F8E\u89C0\u7684 UI\u3002",
-    xp: 20, prereqs: [2],
-    project: "\u7528 Tailwind \u91CD\u5BEB LingoLeap \u67D0\u500B\u9801\u9762\u7684\u6A23\u5F0F\uFF0C\u4E26\u652F\u63F4\u624B\u6A5F\u7248",
-    resources: [
-      { title: "Tailwind \u5B98\u65B9\u6587\u4EF6", url: "https://tailwindcss.com/docs" },
-      { title: "Tailwind Play \u7DF4\u7FD2\u5834", url: "https://play.tailwindcss.com/" }
-    ],
-    criteria: "\u80FD\u7528 Tailwind \u5BEB\u51FA\u97FF\u61C9\u5F0F\u7248\u578B\uFF0C\u7406\u89E3 sm/md/lg \u65B7\u9EDE\u3001hover/focus \u72C0\u614B"
+  { id:8, tier:2, icon:"\u{1F3AF}", name:"Tailwind CSS",
+    desc:"utility classes, responsive design",
+    xp:20, prereqs:[2],
+    project:"用 Tailwind 重寫 LingoLeap 某個頁面的樣式，並支援手機版",
+    criteria:"能用 Tailwind 寫出響應式版型、理解 sm/md/lg 斷點、hover/focus 狀態",
+    courseFile:"tier2-tailwind.md",
+    courseOutline:["Utility-first 概念","Spacing / Color / Typography","Responsive 斷點 sm/md/lg","hover / focus / group 狀態","實作：響應式頁面改造"]
   },
-  {
-    id: 9, tier: 2, icon: "\u{1F33F}", name: "Git \u5DE5\u4F5C\u6D41",
-    desc: "branch \u7B56\u7565\u3001Pull Request\u3001code review\u3001\u89E3\u6C7A\u885D\u7A81\u3002\u5718\u968A\u5354\u4F5C\u7684\u6838\u5FC3\u6280\u80FD\u3002",
-    xp: 25, prereqs: [1],
-    project: "\u5B8C\u6210\u4E00\u500B\u5B8C\u6574\u7684 feature branch \u2192 PR \u2192 review \u2192 merge \u6D41\u7A0B",
-    resources: [
-      { title: "GitHub Flow \u6307\u5357", url: "https://docs.github.com/en/get-started/using-github/github-flow" },
-      { title: "\u5982\u4F55\u5BEB\u597D\u7684 PR", url: "https://github.blog/developer-skills/github/how-to-write-the-perfect-pull-request/" }
-    ],
-    criteria: "\u80FD\u7368\u7ACB\u5EFA\u7ACB branch\u3001\u63D0 PR\u3001\u89E3\u6C7A merge conflict\u3001\u56DE\u61C9 review \u610F\u898B"
+  { id:9, tier:2, icon:"\u{1F33F}", name:"Git 工作流",
+    desc:"branch, PR, code review, conflict resolution",
+    xp:20, prereqs:[1],
+    project:"完成一個完整的 feature branch → PR → review → merge 流程",
+    criteria:"能獨立建立 branch、提 PR、解決 merge conflict、回應 review 意見",
+    courseFile:"tier2-git-workflow.md",
+    courseOutline:["Branch 策略與命名","Pull Request 最佳實踐","Code Review 流程","Merge Conflict 解決","Conventional Commits 格式"]
   },
-  {
-    id: 10, tier: 2, icon: "\u{1F41B}", name: "Bug \u4FEE\u5FA9",
-    desc: "\u95B1\u8B80\u932F\u8AA4\u8A0A\u606F\u3001\u4F7F\u7528 DevTools \u9664\u932F\u3001\u7CFB\u7D71\u6027\u5730\u91CD\u73FE\u554F\u984C\u3002\u8B93 bug \u7121\u8655\u85CF\u8EAB\u3002",
-    xp: 25, prereqs: [5, 4],
-    project: "\u4FEE\u5FA9 LingoLeap \u7684\u4E00\u500B\u771F\u5BE6 bug\uFF08\u53C3\u8003 GitHub Issues \u4E2D good-first-issue \u6A19\u7C64\uFF09",
-    resources: [
-      { title: "Chrome DevTools \u6307\u5357", url: "https://developer.chrome.com/docs/devtools" },
-      { title: "\u9664\u932F\u6280\u5DE7", url: "https://developer.chrome.com/docs/devtools/javascript" }
-    ],
-    criteria: "\u80FD\u91CD\u73FE bug\u3001\u7528 DevTools \u5B9A\u4F4D\u554F\u984C\u3001\u63D0\u4F9B\u4FEE\u5FA9\u4E26\u9A57\u8B49\u7D50\u679C"
+  { id:10, tier:2, icon:"\u{1F41B}", name:"Bug 修復",
+    desc:"讀錯誤訊息、DevTools、重現問題",
+    xp:25, prereqs:[4,5],
+    project:"修復 LingoLeap 的一個真實 bug（參考 GitHub Issues 中 good-first-issue 標籤）",
+    criteria:"能重現 bug、用 DevTools 定位問題、提供修復並驗證結果",
+    courseFile:"tier2-bug-fixing.md",
+    courseOutline:["閱讀錯誤訊息的技巧","Chrome DevTools 除錯","系統性重現問題","定位 Root Cause","驗證修復結果"]
   },
-
   // Tier 3
-  {
-    id: 11, tier: 3, icon: "\u{1F9EA}", name: "React \u9032\u968E",
-    desc: "useEffect \u751F\u547D\u9031\u671F\u3001useRef DOM \u64CD\u4F5C\u3001useMemo \u6548\u80FD\u512A\u5316\u3001Context \u72C0\u614B\u5171\u4EAB\u3002\u63A7\u5236\u8907\u96DC\u7684\u5143\u4EF6\u884C\u70BA\u3002",
-    xp: 35, prereqs: [6],
-    project: "\u512A\u5316 LingoLeap ComprehensionChat \u7684\u6548\u80FD\uFF08\u6E1B\u5C11\u91CD\u65B0\u6E32\u67D3\u3001\u52A0\u5165 loading \u72C0\u614B\uFF09",
-    resources: [
-      { title: "useEffect \u5B8C\u6574\u6307\u5357", url: "https://react.dev/learn/synchronizing-with-effects" },
-      { title: "Hooks API \u53C3\u8003", url: "https://react.dev/reference/react/hooks" }
-    ],
-    criteria: "\u80FD\u6B63\u78BA\u4F7F\u7528 useEffect \u6E05\u9664\u526F\u4F5C\u7528\u3001\u7528 useMemo \u907F\u514D\u4E0D\u5FC5\u8981\u8A08\u7B97\u3001\u7528 Context \u5171\u4EAB\u72C0\u614B"
+  { id:11, tier:3, icon:"\u{1F9EA}", name:"React 進階",
+    desc:"useEffect, useRef, useMemo, Context",
+    xp:35, prereqs:[6],
+    project:"優化 LingoLeap ComprehensionChat 的效能（減少重新渲染、加入 loading 狀態）",
+    criteria:"能正確使用 useEffect 清除副作用、用 useMemo 避免不必要計算、用 Context 共享狀態",
+    courseFile:"tier3-react-advanced.md",
+    courseOutline:["useEffect 生命週期與清除","useRef DOM 操作","useMemo / useCallback 優化","Context API 狀態共享","Hooks 執行順序規則"]
   },
-  {
-    id: 12, tier: 3, icon: "\u{1F310}", name: "API \u4E32\u63A5",
-    desc: "fetch / axios\u3001async/await\u3001\u932F\u8AA4\u8655\u7406\u3001loading \u72C0\u614B\u3002\u524D\u5F8C\u7AEF\u6E9D\u901A\u7684\u6A4B\u6A11\u3002",
-    xp: 30, prereqs: [6, 7],
-    project: "\u5C07 LingoLeap \u67D0\u500B\u529F\u80FD\u7684\u786C\u7DE8\u78BC\u8CC7\u6599\u6539\u70BA\u5F9E API \u53D6\u5F97\uFF0C\u52A0\u4E0A\u9069\u7576\u7684 loading / error \u8655\u7406",
-    resources: [
-      { title: "MDN Fetch API", url: "https://developer.mozilla.org/zh-TW/docs/Web/API/Fetch_API" },
-      { title: "React \u8CC7\u6599\u7372\u53D6\u6A21\u5F0F", url: "https://react.dev/learn/synchronizing-with-effects#fetching-data" }
-    ],
-    criteria: "\u80FD\u7528 async/await \u547C\u53EB API\u3001\u8655\u7406 loading/error/success \u4E09\u7A2E\u72C0\u614B\u3001\u7406\u89E3 CORS"
+  { id:12, tier:3, icon:"\u{1F310}", name:"API 串接",
+    desc:"fetch, async/await, error handling",
+    xp:30, prereqs:[6,7],
+    project:"將 LingoLeap 某個功能的硬編碼資料改為從 API 取得，加上適當的 loading / error 處理",
+    criteria:"能用 async/await 呼叫 API、處理 loading/error/success 三種狀態、理解 CORS",
+    courseFile:"tier3-api-integration.md",
+    courseOutline:["Fetch API 基礎","async/await 非同步處理","Loading / Error / Success 狀態","CORS 與 API 安全","實作：API 資料串接"]
   },
-  {
-    id: 13, tier: 3, icon: "\u{1F9F1}", name: "\u5143\u4EF6\u8A2D\u8A08\u6A21\u5F0F",
-    desc: "\u8907\u5408\u5143\u4EF6\u3001render props\u3001custom hooks\u3002\u5BEB\u51FA\u53EF\u8907\u7528\u3001\u597D\u7DAD\u8B77\u7684\u7A0B\u5F0F\u78BC\u3002",
-    xp: 35, prereqs: [11],
-    project: "\u5C07 LingoLeap \u4E2D\u91CD\u8907\u7684\u908F\u8F2F\u62BD\u53D6\u70BA custom hook\uFF08\u4F8B\u5982 useAudioPlayback\u3001useStoryData\uFF09",
-    resources: [
-      { title: "Custom Hooks \u5B98\u65B9\u6307\u5357", url: "https://react.dev/learn/reusing-logic-with-custom-hooks" },
-      { title: "\u5143\u4EF6\u8A2D\u8A08\u539F\u5247", url: "https://www.patterns.dev/react" }
-    ],
-    criteria: "\u80FD\u5BEB\u51FA\u53EF\u8907\u7528\u7684 custom hook\uFF0C\u7406\u89E3\u95DC\u6CE8\u9EDE\u5206\u96E2\u3001\u55AE\u4E00\u8077\u8CAC\u539F\u5247"
+  { id:13, tier:3, icon:"\u{1F9F1}", name:"元件設計模式",
+    desc:"複合元件、render props、custom hooks",
+    xp:35, prereqs:[6,11],
+    project:"將 LingoLeap 中重複的邏輯抽取為 custom hook（例如 useAudioPlayback、useStoryData）",
+    criteria:"能寫出可複用的 custom hook、理解關注點分離、單一職責原則",
+    courseFile:"tier3-component-patterns.md",
+    courseOutline:["Custom Hooks 設計","複合元件模式","關注點分離原則","單一職責與可複用性","實作：抽取 custom hook"]
   },
-  {
-    id: 14, tier: 3, icon: "\u2705", name: "\u6E2C\u8A66",
-    desc: "\u624B\u52D5\u6E2C\u8A66 \u2192 \u5BEB\u6E2C\u8A66\u6848\u4F8B \u2192 Playwright E2E\u3002\u78BA\u4FDD\u7A0B\u5F0F\u78BC\u54C1\u8CEA\u7684\u6700\u5F8C\u4E00\u9053\u9632\u7DDA\u3002",
-    xp: 30, prereqs: [10, 6],
-    project: "\u70BA LingoLeap \u7684\u5B78\u7FD2\u6D41\u7A0B\u5BEB Playwright E2E \u6E2C\u8A66\uFF08\u53C3\u8003 #28\uFF09",
-    resources: [
-      { title: "Playwright \u5165\u9580", url: "https://playwright.dev/docs/intro" },
-      { title: "\u6E2C\u8A66\u6700\u4F73\u5BE6\u8E10", url: "https://kentcdodds.com/blog/write-tests" }
-    ],
-    criteria: "\u80FD\u5BEB\u51FA E2E \u6E2C\u8A66\u5834\u666F\u3001\u7406\u89E3\u6E2C\u8A66\u91D1\u5B57\u5854\u3001\u80FD\u7528 CI \u57F7\u884C\u6E2C\u8A66"
+  { id:14, tier:3, icon:"\u2705", name:"測試",
+    desc:"手動測試→寫測試案例→Playwright E2E",
+    xp:30, prereqs:[10],
+    project:"為 LingoLeap 的學習流程寫 Playwright E2E 測試（參考 #28）",
+    criteria:"能寫出 E2E 測試場景、理解測試金字塔、能用 CI 執行測試",
+    courseFile:"tier3-testing.md",
+    courseOutline:["測試金字塔概念","手動測試→自動測試","Playwright 安裝與設定","E2E 測試撰寫","CI 整合測試"]
   },
-  {
-    id: 15, tier: 3, icon: "\u{1F50D}", name: "Code Review",
-    desc: "\u80FD\u5BE9\u67E5\u5225\u4EBA\u7684 PR\u3001\u7D66\u5EFA\u8A2D\u6027\u56DE\u994B\u3002\u5F9E\u300C\u5BEB\u7A0B\u5F0F\u300D\u9032\u5316\u5230\u300C\u7406\u89E3\u7A0B\u5F0F\u300D\u7684\u95DC\u9375\u4E00\u6B65\u3002",
-    xp: 30, prereqs: [9, 6],
-    project: "\u5BE9\u67E5 3 \u500B\u5718\u968A\u6210\u54E1\u7684 PR\uFF0C\u63D0\u4F9B\u6709\u610F\u7FA9\u7684 review \u610F\u898B",
-    resources: [
-      { title: "Google Code Review \u6307\u5357", url: "https://google.github.io/eng-practices/review/" },
-      { title: "\u5982\u4F55\u7D66\u597D\u7684 Code Review", url: "https://mtlynch.io/code-review-love/" }
-    ],
-    criteria: "\u80FD\u6307\u51FA\u7A0B\u5F0F\u78BC\u554F\u984C\uFF08\u53EF\u8B80\u6027 / \u6548\u80FD / \u5B89\u5168\uFF09\u3001\u63D0\u4F9B\u5177\u9AD4\u6539\u5584\u5EFA\u8B70"
+  { id:15, tier:3, icon:"\u{1F50D}", name:"Code Review",
+    desc:"能審查別人的 PR、給建設性回饋",
+    xp:25, prereqs:[9],
+    project:"審查 3 個團隊成員的 PR，提供有意義的 review 意見",
+    criteria:"能指出程式碼問題（可讀性 / 效能 / 安全）、提供具體改善建議",
+    courseFile:"tier3-code-review.md",
+    courseOutline:["Code Review 的目的","審查重點：正確性、可讀性、效能","如何寫建設性回饋","常見 code smell","實踐：Review 團隊 PR"]
   },
-
   // Tier 4
-  {
-    id: 16, tier: 4, icon: "\u{1F680}", name: "\u7368\u7ACB\u958B\u767C\u529F\u80FD",
-    desc: "\u5F9E issue \u5230 PR \u5B8C\u6574\u6D41\u7A0B\uFF1A\u7406\u89E3\u9700\u6C42 \u2192 \u8A2D\u8A08 \u2192 \u5BE6\u4F5C \u2192 \u6E2C\u8A66 \u2192 PR\u3002\u771F\u6B63\u7684\u958B\u767C\u8005\u3002",
-    xp: 50, prereqs: [11, 12, 9],
-    project: "\u7368\u7ACB\u5B8C\u6210\u4E00\u500B LingoLeap Issue\uFF08\u5F9E\u7406\u89E3\u9700\u6C42\u5230 merge\uFF09",
-    resources: [
-      { title: "\u8EDF\u9AD4\u958B\u767C\u6D41\u7A0B", url: "https://www.atlassian.com/agile" },
-      { title: "\u5BEB\u597D\u7684 Commit Message", url: "https://www.conventionalcommits.org/" }
-    ],
-    criteria: "\u7368\u7ACB\u5B8C\u6210\u4E00\u500B\u4E2D\u7B49\u8907\u96DC\u5EA6\u7684 Issue\uFF0C\u5305\u542B\u5B8C\u6574\u7684 branch / commit / PR \u6D41\u7A0B"
+  { id:16, tier:4, icon:"\u{1F680}", name:"獨立開發功能",
+    desc:"從 issue 到 PR 完整流程",
+    xp:50, prereqs:[11,12,14],
+    project:"獨立完成一個 LingoLeap Issue（從理解需求到 merge）",
+    criteria:"獨立完成一個中等複雜度的 Issue、包含完整的 branch / commit / PR 流程",
+    courseFile:"tier4-feature-development.md",
+    courseOutline:["理解需求與拆解任務","設計方案與技術選型","實作與自測","PR 與 Code Review","上線與驗證"]
   },
-  {
-    id: 17, tier: 4, icon: "\u{1F3CE}\uFE0F", name: "\u6548\u80FD\u512A\u5316",
-    desc: "React.memo\u3001lazy loading\u3001bundle size \u5206\u6790\u3002\u8B93\u61C9\u7528\u7A0B\u5F0F\u8DD1\u5F97\u66F4\u5FEB\u3002",
-    xp: 40, prereqs: [11, 13],
-    project: "\u5206\u6790 LingoLeap \u7684 bundle size\uFF0C\u7528 lazy loading \u6E1B\u5C11\u9996\u6B21\u8F09\u5165\u6642\u9593",
-    resources: [
-      { title: "React \u6548\u80FD\u512A\u5316", url: "https://react.dev/learn/render-and-commit" },
-      { title: "Web Vitals \u6307\u5357", url: "https://web.dev/articles/vitals" }
-    ],
-    criteria: "\u80FD\u7528 React DevTools Profiler \u627E\u51FA\u6548\u80FD\u74F6\u9838\uFF0C\u61C9\u7528 code splitting \u6E1B\u5C11 bundle size"
+  { id:17, tier:4, icon:"\u{1F3CE}\uFE0F", name:"效能優化",
+    desc:"React.memo, lazy loading, bundle size",
+    xp:40, prereqs:[11,13],
+    project:"分析 LingoLeap 的 bundle size，用 lazy loading 減少首次載入時間",
+    criteria:"能用 React DevTools Profiler 找出效能瓶頸、應用 code splitting 減少 bundle size",
+    courseFile:"tier4-performance.md",
+    courseOutline:["React DevTools Profiler","React.memo 與 re-render","Code Splitting 與 lazy()","Bundle 分析工具","Web Vitals 指標"]
   },
-  {
-    id: 18, tier: 4, icon: "\u{1F3D7}\uFE0F", name: "\u67B6\u69CB\u7406\u89E3",
-    desc: "\u5168\u7AEF\u8CC7\u6599\u6D41\u3001API \u8A2D\u8A08\u3001DB schema\u3002\u4E0D\u53EA\u770B\u524D\u7AEF\uFF0C\u800C\u662F\u7406\u89E3\u6574\u500B\u7CFB\u7D71\u3002",
-    xp: 40, prereqs: [12, 14],
-    project: "\u756B\u51FA LingoLeap \u67D0\u500B\u529F\u80FD\u7684\u5B8C\u6574\u67B6\u69CB\u5716\uFF08\u524D\u7AEF \u2192 API \u2192 DB\uFF09",
-    resources: [
-      { title: "REST API \u8A2D\u8A08", url: "https://restfulapi.net/" },
-      { title: "\u7CFB\u7D71\u8A2D\u8A08\u5165\u9580", url: "https://github.com/donnemartin/system-design-primer" }
-    ],
-    criteria: "\u80FD\u89E3\u91CB API \u7AEF\u9EDE\u7684\u8A2D\u8A08\u908F\u8F2F\u3001\u7406\u89E3 DB \u95DC\u806F\u3001\u756B\u51FA\u8CC7\u6599\u6D41\u5716"
+  { id:18, tier:4, icon:"\u{1F3D7}\uFE0F", name:"架構理解",
+    desc:"全端資料流、API設計、DB schema",
+    xp:40, prereqs:[12,13],
+    project:"畫出 LingoLeap 某個功能的完整架構圖（前端 → API → DB）",
+    criteria:"能解釋 API 端點的設計邏輯、理解 DB 關聯、畫出資料流圖",
+    courseFile:"tier4-architecture.md",
+    courseOutline:["全端資料流概覽","REST API 設計原則","DB Schema 與關聯","架構圖繪製","LingoLeap 架構分析"]
   },
-  {
-    id: 19, tier: 4, icon: "\u{1F4DA}", name: "\u6280\u8853\u6587\u4EF6",
-    desc: "\u5BEB README\u3001ADR\u3001\u6280\u8853\u6C7A\u7B56\u6587\u4EF6\u3002\u597D\u7684\u6587\u4EF6\u662F\u5718\u968A\u5354\u4F5C\u7684\u57FA\u77F3\u3002",
-    xp: 30, prereqs: [15, 16],
-    project: "\u70BA\u81EA\u5DF1\u958B\u767C\u7684\u529F\u80FD\u5BEB\u4E00\u4EFD\u5B8C\u6574\u7684\u6280\u8853\u6587\u4EF6\uFF08\u5305\u542B\u67B6\u69CB\u5716 / \u4F7F\u7528\u65B9\u6CD5 / \u8A2D\u8A08\u6C7A\u7B56\uFF09",
-    resources: [
-      { title: "\u5BEB\u597D README", url: "https://www.makeareadme.com/" },
-      { title: "ADR \u6A21\u677F", url: "https://adr.github.io/" }
-    ],
-    criteria: "\u80FD\u5BEB\u51FA\u6E05\u6670\u7684 README\uFF08\u5305\u542B\u5B89\u88DD / \u4F7F\u7528 / API\uFF09\u3001\u8A18\u9304\u6280\u8853\u6C7A\u7B56\u7684\u7406\u7531"
+  { id:19, tier:4, icon:"\u{1F4DA}", name:"技術文件",
+    desc:"寫 README、ADR、技術決策文件",
+    xp:30, prereqs:[15],
+    project:"為自己開發的功能寫一份完整的技術文件（包含架構圖 / 使用方法 / 設計決策）",
+    criteria:"能寫出清晰的 README（包含安裝 / 使用 / API）、記錄技術決策的理由",
+    courseFile:"tier4-documentation.md",
+    courseOutline:["好的 README 結構","ADR 決策記錄","API 文件撰寫","圖表與示意圖","實作：功能文件"]
   },
-  {
-    id: 20, tier: 4, icon: "\u{1F91D}", name: "\u6307\u5C0E\u4ED6\u4EBA",
-    desc: "\u5E6B\u65B0\u6210\u54E1 onboard\u3001pair programming\u3002\u6559\u5225\u4EBA\u662F\u6700\u597D\u7684\u5B78\u7FD2\u3002",
-    xp: 50, prereqs: [15, 16],
-    project: "\u5E36\u9818\u4E00\u4F4D\u65B0\u6210\u54E1\u5B8C\u6210\u7B2C\u4E00\u500B PR\uFF0C\u6216\u7D44\u7E54\u4E00\u6B21\u6280\u8853\u5206\u4EAB",
-    resources: [
-      { title: "Pair Programming \u6307\u5357", url: "https://martinfowler.com/articles/on-pair-programming.html" },
-      { title: "\u6280\u8853\u6307\u5C0E\u6280\u5DE7", url: "https://www.codementor.io/blog/how-to-be-a-good-mentor" }
-    ],
-    criteria: "\u6210\u529F\u5E36\u9818\u4E00\u4F4D\u65B0\u6210\u54E1\u5B8C\u6210\u4ED6\u5011\u7684\u9996\u500B\u8CA2\u737B\uFF0C\u6216\u5B8C\u6210\u4E00\u6B21\u5718\u968A\u6280\u8853\u5206\u4EAB"
+  { id:20, tier:4, icon:"\u{1F91D}", name:"指導他人",
+    desc:"幫新成員 onboard、pair programming",
+    xp:50, prereqs:[15,16],
+    project:"帶領一位新成員完成第一個 PR，或組織一次技術分享",
+    criteria:"成功帶領一位新成員完成他們的首個貢獻、或完成一次團隊技術分享",
+    courseFile:"tier4-mentoring.md",
+    courseOutline:["Pair Programming 技巧","如何引導而非直接給答案","Onboarding 流程設計","技術分享準備","建立學習文化"]
   }
 ];
 
 const TIER_META = {
-  1: { name: "\u57FA\u790E\u5165\u9580 Foundation", color: "var(--green)" },
-  2: { name: "\u5BE6\u6230\u6280\u80FD Practice", color: "var(--blue)" },
-  3: { name: "\u9032\u968E\u80FD\u529B Advanced", color: "var(--purple)" },
-  4: { name: "\u7368\u7ACB\u958B\u767C\u8005 Independent", color: "var(--gold)" }
+  1: { name:"基礎入門", color:"var(--green)", hex:"#22c55e" },
+  2: { name:"實戰技能", color:"var(--blue)", hex:"#3b82f6" },
+  3: { name:"進階能力", color:"var(--purple)", hex:"#a855f7" },
+  4: { name:"獨立開發者", color:"var(--gold)", hex:"#f59e0b" }
 };
 
 const TOTAL_XP = SKILLS.reduce((s, sk) => s + sk.xp, 0);
 
-// State
+// === INTERN DATA ===
+const INTERNS = {
+  raymond: {
+    key: "raymond",
+    name: "Raymond",
+    displayName: "靖杭",
+    github: "@if-else-master",
+    avatarChar: "靖",
+    startDate: "2026-03-02",
+    lastReview: "2026-03-13",
+    initialCompleted: [1,2,3,4,5,10],
+    review: {
+      commits: 7,
+      mergedPRs: 3,
+      activeSince: "2026-03-02",
+      strengths: "積極嘗試新功能（語音輸入/輸出）、能獨立修 bug (#216 IME)",
+      improve: "commit message 格式不一致（需學 Conventional Commits）、PR #451 改動太大需拆分、加強 React hooks",
+      nextIssue: "#371 StoryCard 顯示 filename（簡單 UI fix，練 Skill #6）"
+    }
+  },
+  steven: {
+    key: "steven",
+    name: "Steven",
+    displayName: "啟翔",
+    github: "@stgst",
+    avatarChar: "啟",
+    startDate: "2026-03-06",
+    lastReview: "2026-03-13",
+    initialCompleted: [1,2,3,4,5,6,8,9,10,11],
+    review: {
+      commits: 9,
+      mergedPRs: 3,
+      activeSince: "2026-03-06",
+      strengths: "程式碼品質高（refactoring、cleanup）、React hooks 理解深（useMemo 修復 #445）、UX 改善有深度",
+      improve: "還沒寫過測試（Skill #14）、TypeScript 型別可更嚴格（Skill #7）、可嘗試 API 串接（Skill #12）",
+      nextIssue: "#430 課文理解對話 UI/UX 改善（已 assign）"
+    }
+  }
+};
+
+// Recommended next skills per person (based on unlocked but not completed)
+const RECOMMENDATIONS = {
+  raymond: [
+    { skillId: 6, why: "PR #451 語音功能已在嘗試 React 開發，正式完成這個技能可以解鎖更多進階路徑", issue: "#371 StoryCard 顯示 filename" },
+    { skillId: 9, why: "commit message 格式需要改善，學習 Conventional Commits 和完整 PR 流程", issue: "任何 good-first-issue" },
+    { skillId: 8, why: "已有 HTML/CSS 基礎，學會 Tailwind 可以更快寫出響應式 UI", issue: "#430 UI 改善相關" }
+  ],
+  steven: [
+    { skillId: 7, why: "已有 JS 進階能力，加上 TypeScript 可以寫出更安全的程式碼", issue: "任何需要新增型別的 PR" },
+    { skillId: 13, why: "已掌握 React 進階 hooks，可以開始學習元件設計模式，從 WriteCharacter 抽取 custom hook", issue: "重構相關 Issue" },
+    { skillId: 12, why: "前端能力已很強，學會 API 串接可以獨立完成全端功能", issue: "需要 fetch 資料的 Issue" }
+  ]
+};
+
+// === STATE ===
+let currentIntern = "raymond";
 let completed = new Set();
-function loadState() {
+
+function storageKey(intern) {
+  return `lingoleap-skills-${intern}`;
+}
+
+function loadState(intern) {
+  const key = storageKey(intern);
   try {
-    const raw = localStorage.getItem("lingoleap-skill-tree");
-    if (raw) completed = new Set(JSON.parse(raw));
-  } catch(e) {}
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      completed = new Set(JSON.parse(raw));
+    } else {
+      // First load: initialize from embedded data
+      completed = new Set(INTERNS[intern].initialCompleted);
+      saveState(intern);
+    }
+  } catch(e) {
+    completed = new Set(INTERNS[intern].initialCompleted);
+  }
 }
-function saveState() {
-  localStorage.setItem("lingoleap-skill-tree", JSON.stringify([...completed]));
+
+function saveState(intern) {
+  localStorage.setItem(storageKey(intern), JSON.stringify([...completed]));
 }
-loadState();
 
 function isAvailable(skill) {
   return skill.prereqs.every(pid => completed.has(pid));
@@ -752,66 +1090,149 @@ function getEarnedXP() {
   return SKILLS.filter(s => completed.has(s.id)).reduce((sum, s) => sum + s.xp, 0);
 }
 
-function updateProgress() {
-  const earned = getEarnedXP();
-  const pct = (earned / TOTAL_XP) * 100;
-  document.getElementById("xp-display").textContent = `${earned} / ${TOTAL_XP} XP`;
-  document.getElementById("progress-fill").style.width = pct + "%";
-  document.getElementById("completed-count").textContent = completed.size;
+function switchIntern(key) {
+  currentIntern = key;
+  loadState(key);
+  renderProfiles();
+  renderTree();
+  renderRecommendations();
+  renderReview();
+  closePanel();
 }
 
-// Confetti
+// === CONFETTI ===
+const confettiCanvas = document.getElementById('confetti-canvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiAnimating = false;
+
+function resizeCanvas() {
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
 function spawnConfetti(x, y) {
-  const colors = ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b", "#ef4444", "#06b6d4"];
-  for (let i = 0; i < 40; i++) {
-    const el = document.createElement("div");
-    el.className = "confetti-piece";
-    el.style.left = (x + (Math.random() - 0.5) * 100) + "px";
-    el.style.top = (y + (Math.random() - 0.5) * 40) + "px";
-    el.style.background = colors[Math.floor(Math.random() * colors.length)];
-    el.style.width = (4 + Math.random() * 6) + "px";
-    el.style.height = (4 + Math.random() * 6) + "px";
-    el.style.animationDuration = (0.8 + Math.random() * 0.8) + "s";
-    el.style.animationDelay = (Math.random() * 0.2) + "s";
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 2000);
+  const colors = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899'];
+  for (let i = 0; i < 50; i++) {
+    const angle = (Math.random() * Math.PI * 2);
+    const speed = 3 + Math.random() * 6;
+    confettiParticles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 4,
+      w: 4 + Math.random() * 5,
+      h: 4 + Math.random() * 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 12,
+      life: 1,
+      decay: 0.012 + Math.random() * 0.008
+    });
+  }
+  if (!confettiAnimating) {
+    confettiAnimating = true;
+    animateConfetti();
   }
 }
 
-// Render tree
+function animateConfetti() {
+  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  confettiParticles = confettiParticles.filter(p => p.life > 0);
+  if (confettiParticles.length === 0) {
+    confettiAnimating = false;
+    return;
+  }
+  for (const p of confettiParticles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.15;
+    p.rotation += p.rotSpeed;
+    p.life -= p.decay;
+    confettiCtx.save();
+    confettiCtx.translate(p.x, p.y);
+    confettiCtx.rotate(p.rotation * Math.PI / 180);
+    confettiCtx.globalAlpha = p.life;
+    confettiCtx.fillStyle = p.color;
+    confettiCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    confettiCtx.restore();
+  }
+  requestAnimationFrame(animateConfetti);
+}
+
+// === RENDER PROFILES ===
+function renderProfiles() {
+  const container = document.getElementById('profiles');
+  container.innerHTML = '';
+  for (const [key, intern] of Object.entries(INTERNS)) {
+    const isActive = key === currentIntern;
+    // Calculate XP for this intern
+    let internCompleted;
+    try {
+      const raw = localStorage.getItem(storageKey(key));
+      internCompleted = raw ? new Set(JSON.parse(raw)) : new Set(intern.initialCompleted);
+    } catch(e) {
+      internCompleted = new Set(intern.initialCompleted);
+    }
+    const xp = SKILLS.filter(s => internCompleted.has(s.id)).reduce((sum, s) => sum + s.xp, 0);
+    const pct = (xp / TOTAL_XP) * 100;
+
+    const card = document.createElement('div');
+    card.className = `profile-card${isActive ? ' active' : ''}`;
+    card.innerHTML = `
+      <div class="profile-avatar">${intern.avatarChar}</div>
+      <div class="profile-info">
+        <div class="profile-name">${intern.name} (${intern.displayName})</div>
+        <div class="profile-github">${intern.github}</div>
+        <div class="profile-meta">
+          <span class="profile-xp">${xp} XP</span>
+          <span class="profile-date">上次評估: ${intern.lastReview}</span>
+        </div>
+        <div class="profile-tier-bar">
+          <div class="profile-tier-fill" style="width:${pct}%"></div>
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', () => switchIntern(key));
+    container.appendChild(card);
+  }
+}
+
+// === RENDER TREE ===
 function renderTree() {
-  const tree = document.getElementById("tree");
-  tree.innerHTML = "";
+  const tree = document.getElementById('tree');
+  tree.innerHTML = '';
 
   for (let tier = 1; tier <= 4; tier++) {
     if (tier > 1) {
-      const conn = document.createElement("div");
-      conn.className = "tier-connector";
+      const conn = document.createElement('div');
+      conn.className = 'tier-connector';
       conn.innerHTML = '<div class="line"></div>';
       tree.appendChild(conn);
     }
 
-    const tierDiv = document.createElement("div");
-    tierDiv.className = "tier";
+    const tierDiv = document.createElement('div');
+    tierDiv.className = 'tier';
 
-    const label = document.createElement("div");
-    label.className = "tier-label";
+    const label = document.createElement('div');
+    label.className = 'tier-label';
     label.style.color = TIER_META[tier].color;
     label.textContent = `Tier ${tier} \u2014 ${TIER_META[tier].name}`;
     tierDiv.appendChild(label);
 
-    const nodesDiv = document.createElement("div");
-    nodesDiv.className = "tier-nodes";
+    const nodesDiv = document.createElement('div');
+    nodesDiv.className = 'tier-nodes';
 
     SKILLS.filter(s => s.tier === tier).forEach(skill => {
       const isComp = completed.has(skill.id);
       const avail = isAvailable(skill);
 
-      const node = document.createElement("div");
+      const node = document.createElement('div');
       node.className = `node tier-${tier}`;
-      if (isComp) node.classList.add("completed");
-      else if (avail) node.classList.add("available");
-      else node.classList.add("locked");
+      if (isComp) node.classList.add('completed');
+      else if (avail) node.classList.add('available');
+      else node.classList.add('locked');
 
       node.innerHTML = `
         <div class="check">\u2713</div>
@@ -821,7 +1242,7 @@ function renderTree() {
         ${!avail && !isComp ? '<div class="lock-icon">\u{1F512}</div>' : ''}
       `;
 
-      node.addEventListener("click", () => openPanel(skill));
+      node.addEventListener('click', () => openPanel(skill));
       nodesDiv.appendChild(node);
     });
 
@@ -832,112 +1253,226 @@ function renderTree() {
   updateProgress();
 }
 
-// Panel
+function updateProgress() {
+  const earned = getEarnedXP();
+  const pct = (earned / TOTAL_XP) * 100;
+  document.getElementById('xp-display').textContent = `${earned} / ${TOTAL_XP} XP`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('completed-count').textContent = completed.size;
+}
+
+// === PANEL ===
+let currentPanelTab = 'progress';
+
 function openPanel(skill) {
-  const panel = document.getElementById("panel");
-  const overlay = document.getElementById("overlay");
-  const content = document.getElementById("panel-content");
+  const panel = document.getElementById('panel');
+  const overlay = document.getElementById('overlay');
+  const content = document.getElementById('panel-content');
   const isComp = completed.has(skill.id);
   const avail = isAvailable(skill);
-
   const tierColor = TIER_META[skill.tier].color;
   const tierName = TIER_META[skill.tier].name;
 
   const prereqNames = skill.prereqs.map(pid => {
     const ps = SKILLS.find(s => s.id === pid);
     const done = completed.has(pid);
-    return `<span style="color: ${done ? 'var(--green)' : '#ef4444'}">${done ? '\u2713' : '\u2717'} ${ps.name}</span>`;
+    return `<span style="color:${done ? 'var(--green)' : '#ef4444'}">${done ? '\u2713' : '\u2717'} ${ps.name}</span>`;
   });
 
+  const criteriaItems = skill.criteria.split('\u3001').map(c => c.trim()).filter(Boolean);
+  const courseOutlineHTML = skill.courseOutline.map(item =>
+    `<li>${item}</li>`
+  ).join('');
+
   content.innerHTML = `
-    <div class="panel-xp" style="color: ${tierColor}">${skill.icon} ${skill.xp} XP</div>
+    <div class="panel-xp" style="color:${tierColor}">${skill.icon} ${skill.xp} XP</div>
     <h2>${skill.name}</h2>
-    <span class="tier-tag" style="background: ${tierColor}22; color: ${tierColor}; border: 1px solid ${tierColor}44;">
+    <span class="tier-tag" style="background:${tierColor}15;color:${tierColor};border:1px solid ${tierColor}33;">
       Tier ${skill.tier} \u2014 ${tierName}
     </span>
     <p class="desc">${skill.desc}</p>
 
-    ${!avail && !isComp ? `
-      <div class="prereq-warning">
-        \u{1F512} \u9700\u8981\u5148\u5B8C\u6210\u4EE5\u4E0B\u6280\u80FD\uFF1A<br>${prereqNames.join('<br>')}
-      </div>
-    ` : ''}
+    <div class="panel-tabs">
+      <button class="panel-tab active" data-tab="progress" onclick="switchTab('progress', this)">進度</button>
+      <button class="panel-tab" data-tab="material" onclick="switchTab('material', this)">教材</button>
+    </div>
 
-    ${prereqNames.length > 0 ? `
+    <div class="tab-content active" id="tab-progress">
+      ${!avail && !isComp ? `
+        <div class="prereq-warning">
+          \u{1F512} 需要先完成以下技能：<br>${prereqNames.join('<br>')}
+        </div>
+      ` : ''}
+
+      ${prereqNames.length > 0 && (avail || isComp) ? `
+        <div class="panel-section">
+          <h3>\u{1F517} 前置技能</h3>
+          <div style="font-size:0.85rem;line-height:1.8;">${prereqNames.join('<br>')}</div>
+        </div>
+      ` : ''}
+
       <div class="panel-section">
-        <h3>\u{1F517} \u524D\u7F6E\u6280\u80FD</h3>
-        <div style="font-size: 0.85rem; line-height: 1.8;">${prereqNames.join('<br>')}</div>
+        <h3>\u{1F3AF} PBL 實作專案</h3>
+        <p style="font-size:0.85rem;color:var(--text);line-height:1.6;">${skill.project}</p>
       </div>
-    ` : ''}
 
-    <div class="panel-section">
-      <h3>\u{1F3AF} PBL \u5BE6\u4F5C\u5C08\u6848</h3>
-      <p style="font-size: 0.85rem; color: #1e293b; line-height: 1.6;">${skill.project}</p>
+      <div class="panel-section">
+        <h3>\u2705 完成條件</h3>
+        <div>
+          ${criteriaItems.map((c, i) => `
+            <div class="criteria-item">
+              <div class="criteria-checkbox ${isComp ? 'checked' : ''}">${isComp ? '\u2713' : ''}</div>
+              <span>${c}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      ${isComp ? `
+        <button class="complete-btn unmark" onclick="toggleSkill(${skill.id}, false)">取消完成</button>
+      ` : `
+        <button class="complete-btn mark" ${!avail ? 'disabled' : ''} onclick="toggleSkill(${skill.id}, true, event)">
+          ${avail ? '\u{1F3C6} 標記為已完成' : '\u{1F512} 尚未解鎖'}
+        </button>
+      `}
     </div>
 
-    <div class="panel-section">
-      <h3>\u{1F4DA} \u5B78\u7FD2\u8CC7\u6E90</h3>
-      <ul>
-        ${skill.resources.map(r => `<li><a href="${r.url}" target="_blank" rel="noopener">${r.title}</a></li>`).join('')}
-      </ul>
-    </div>
+    <div class="tab-content" id="tab-material">
+      <div class="panel-section">
+        <h3>\u{1F4C4} 課程檔案</h3>
+        <p style="font-size:0.85rem;color:var(--text-mid);margin-bottom:12px;">
+          courses/${skill.courseFile}
+        </p>
+      </div>
 
-    <div class="panel-section">
-      <h3>\u2705 \u5B8C\u6210\u689D\u4EF6</h3>
-      <ul style="list-style: none; padding: 0;">
-        ${skill.criteria.split('\u3001').map(c => c.trim()).filter(Boolean).map(c =>
-          `<li style="font-size: 0.85rem; color: #1e293b; line-height: 1.8; padding-left: 24px; position: relative;">
-            <span style="position: absolute; left: 0; top: 2px; width: 16px; height: 16px; border: 2px solid #d1d5db; border-radius: 4px; display: inline-block;"></span>
-            ${c}
-          </li>`
-        ).join('')}
-      </ul>
-    </div>
+      <div class="panel-section">
+        <h3>\u{1F4CB} 課程大綱</h3>
+        <ul style="list-style:none;padding:0;">
+          ${courseOutlineHTML}
+        </ul>
+      </div>
 
-    ${isComp ? `
-      <button class="complete-btn unmark" onclick="toggleSkill(${skill.id}, false)">\u53D6\u6D88\u5B8C\u6210</button>
-    ` : `
-      <button class="complete-btn mark" ${!avail ? 'disabled' : ''} onclick="toggleSkill(${skill.id}, true, event)">
-        ${avail ? '\u{1F3C6} \u6A19\u8A18\u70BA\u5DF2\u5B8C\u6210' : '\u{1F512} \u5C1A\u672A\u89E3\u9396'}
-      </button>
-    `}
+      <a href="courses/${skill.courseFile}" class="course-link-btn" target="_blank" rel="noopener">
+        開始學習 \u2192
+      </a>
+    </div>
   `;
 
-  panel.classList.add("open");
-  overlay.classList.add("open");
+  panel.classList.add('open');
+  overlay.classList.add('open');
 }
+
+window.switchTab = function(tabId, btn) {
+  const tabs = btn.parentElement.querySelectorAll('.panel-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  const contents = btn.closest('.panel-content').querySelectorAll('.tab-content');
+  contents.forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+};
 
 function closePanel() {
-  document.getElementById("panel").classList.remove("open");
-  document.getElementById("overlay").classList.remove("open");
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
 }
 
-document.getElementById("panel-close").addEventListener("click", closePanel);
-document.getElementById("overlay").addEventListener("click", closePanel);
-document.addEventListener("keydown", e => { if (e.key === "Escape") closePanel(); });
+document.getElementById('panel-close').addEventListener('click', closePanel);
+document.getElementById('overlay').addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
 window.toggleSkill = function(id, markComplete, event) {
   if (markComplete) {
     completed.add(id);
-    // Confetti from button position
     if (event) {
       const rect = event.target.getBoundingClientRect();
       spawnConfetti(rect.left + rect.width / 2, rect.top);
     }
   } else {
     completed.delete(id);
-    // Also un-complete skills that depended on this
-    // (cascade only if they have no other path)
   }
-  saveState();
+  saveState(currentIntern);
   renderTree();
-  // Reopen panel with updated state
+  renderProfiles();
+  renderRecommendations();
   const skill = SKILLS.find(s => s.id === id);
   if (skill) setTimeout(() => openPanel(skill), 50);
 };
 
-// Init
+// === RECOMMENDATIONS ===
+function renderRecommendations() {
+  const section = document.getElementById('rec-section');
+  const content = document.getElementById('rec-content');
+  const recs = RECOMMENDATIONS[currentIntern] || [];
+
+  // Filter to show only unlocked but not completed skills
+  const validRecs = recs.filter(r => {
+    const skill = SKILLS.find(s => s.id === r.skillId);
+    return skill && !completed.has(skill.id) && isAvailable(skill);
+  });
+
+  if (validRecs.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = '';
+  content.innerHTML = validRecs.map(r => {
+    const skill = SKILLS.find(s => s.id === r.skillId);
+    return `
+      <div class="rec-item">
+        <div class="rec-item-header">
+          <span class="rec-icon">${skill.icon}</span>
+          <span class="rec-name">Skill #${skill.id}: ${skill.name}</span>
+          <span class="rec-xp">${skill.xp} XP</span>
+        </div>
+        <p>${r.why}</p>
+        <p style="margin-top:4px;color:var(--blue);font-weight:600;font-size:0.8rem;">
+          練習 Issue: ${r.issue}
+        </p>
+      </div>
+    `;
+  }).join('');
+}
+
+// === GIT REVIEW REPORT ===
+function renderReview() {
+  const section = document.getElementById('review-section');
+  const content = document.getElementById('review-content');
+  const intern = INTERNS[currentIntern];
+  const r = intern.review;
+
+  section.style.display = '';
+  content.innerHTML = `
+    <div class="review-stat">
+      <div class="review-stat-item"><strong>${r.commits}</strong> Commits</div>
+      <div class="review-stat-item"><strong>${r.mergedPRs}</strong> Merged PRs</div>
+      <div class="review-stat-item">活躍自 <strong style="font-size:0.88rem;">${r.activeSince}</strong></div>
+    </div>
+
+    <div class="review-section">
+      <h4>\u{1F4AA} 強項</h4>
+      <p>${r.strengths}</p>
+    </div>
+
+    <div class="review-section">
+      <h4>\u{1F4C8} 建議加強</h4>
+      <p>${r.improve}</p>
+    </div>
+
+    <div class="review-section">
+      <h4>\u{1F3AF} 推薦下一個 Issue</h4>
+      <p style="color:var(--blue);font-weight:600;">${r.nextIssue}</p>
+    </div>
+  `;
+}
+
+// === INIT ===
+loadState(currentIntern);
+renderProfiles();
 renderTree();
+renderRecommendations();
+renderReview();
 </script>
 </body>
 </html>

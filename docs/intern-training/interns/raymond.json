@@ -1,0 +1,20 @@
+{
+  "name": "Raymond",
+  "github": "if-else-master",
+  "startDate": "2026-03-02",
+  "completed": [1, 2, 3, 4, 5, 10],
+  "lastReview": "2026-03-13",
+  "reviewNotes": {
+    "1": "fork + 多次 commit/push 完成。commit message 品質待加強（中英混用、格式不一致）",
+    "2": "PR #224 修改 UI/UX 相關，理解基本 HTML 結構",
+    "3": "能處理 isComposing event、async 語音功能，JS 基礎已過關",
+    "4": "本地開發環境已跑通（PR #314 處理本地 DB 連線）",
+    "5": "能讀懂 ComprehensionChat.tsx 並定位 bug（#216）",
+    "10": "修復 IME composition bug（#216），從重現到修復完整流程"
+  },
+  "recommendations": [
+    "下一步建議：Skill #6 React 元件開發 — PR #451 語音功能已在嘗試，但 529 行改動太大需拆分",
+    "Skill #9 Git 工作流 — commit message 需改善，學習 Conventional Commits",
+    "PR #451 是很好的 Skill #6+#12 練習機會，但需要 code review 指導拆分"
+  ]
+}
