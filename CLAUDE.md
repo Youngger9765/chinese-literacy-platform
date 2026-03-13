@@ -134,16 +134,21 @@ cd frontend && npm install && npm run dev    # localhost:3000
 cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  # localhost:8000
 ```
 
-## 學習流程（8 步驟）
+## 學習流程（7 步驟，StepperNav 定義）
 
 1. **簡介** — 課文背景介紹（Intro）
 2. **逐段朗讀** — AI 即時朗讀指導（LiveTutor）
 3. **課文理解** — 蘇格拉底式 AI 對話（ComprehensionChat）
 4. **生字練習** — 筆順練習 + 注音（VocabPractice + WriteCharacter）
 5. **聽寫練習** — AI 唸字學生打字（DictationPractice）
-6. **造句練習** — AI 引導造句（SentencePractice）
-7. **全文朗讀** — 完整朗讀評估（FullReading）
-8. **報告** — 朗朗上口六環節診斷報告（AssessmentReport）
+6. **全文朗讀** — 完整朗讀評估（FullReading）
+7. **報告** — 朗朗上口六環節診斷報告（AssessmentReport）
+
+### 其他練習元件（未在主流程 stepper 中）
+- **SentencePractice** — AI 引導造句
+- **ListeningPractice** — 聽力理解（TTS + AI 評估）
+- **PronunciationPractice** — 發音練習
+- **ExitTicket** — 學習出場券
 
 ## 關鍵檔案
 
@@ -160,9 +165,15 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 | `backend/app/services/ai_service.py` | Vertex AI Gemini 呼叫（gemini-2.5-flash, us-central1） |
 | `backend/app/services/socratic_agent.py` | 蘇格拉底對話 agent（5 題 3 階段 + circuit breaker） |
 | `backend/app/services/gamification_service.py` | 遊戲化系統（XP/成就/連續登入） |
-| `backend/app/models/` | DB Schema（User, UserRole, Organization, School, Classroom, LearningSession） |
-| `backend/app/routes/` | API 路由（110+ endpoints：auth, classrooms, assignments, learning, teacher, gamification, parents） |
-| `backend/data/stories/` | 課文 YAML 來源檔（57 篇） |
+| `backend/app/models/` | DB Schema（User, UserRole, Organization, School, Classroom, LearningSession, Assignment, Gamification, ParentLink, StudentTag, Feedback） |
+| `backend/app/services/prediction_service.py` | 預測學習困難（規則引擎） |
+| `backend/app/services/cross_text_analysis_service.py` | 跨課文學習模式分析 |
+| `backend/app/services/listening_service.py` | 聽力理解評估 |
+| `backend/app/services/learning_path_service.py` | AI 個別化學習路徑推薦 |
+| `backend/app/services/dictionary_service.py` | 字典查詢服務 |
+| `backend/app/services/input_sanitizer.py` | 輸入消毒 |
+| `backend/app/routes/` | API 路由（140+ endpoints：auth, classrooms, assignments, learning, teacher, gamification, parents, dictionary, feedback, jobs, privacy） |
+| `backend/data/lessons/` | 課文 YAML 來源檔（57 篇） |
 
 ## 參考專案
 

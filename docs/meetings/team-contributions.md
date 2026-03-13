@@ -8,6 +8,20 @@
 
 ---
 
+## 3/13 ~ 3/19
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | 文件更新 | P7→P8 feature 重分配、模組架構重設計、ROADMAP v3.3 |
+| Young | ✅ | 實習生技能樹 | 互動式 HTML 技能樹 + 20 堂教材 + PBL 課程 + review agent/skill |
+| Young | ✅ | 會議 3/13 | 平台實測 + AI 協作流程 + 減法開發策略 + 遊戲化願景 |
+| 靖杭 | 🔧 | #217 語音對話模式 | PR #451 open — 需 rebase + 改用 useSpeechRecognition hook |
+| 靖杭 | 🔧 | PR #314 SQLite/PG | 決議統一用 PG，PG 設好後可關閉此 PR |
+| 啟翔 | 🔧 | #262 字體大小即時同步 | PR #450 open — 需改用 CustomEvent 取代 StorageEvent |
+| 啟翔 | ✅ | #445 生字練習崩潰 | PR #448 merged (`434bcf0`) — useMemo hooks 順序修復 |
+
+---
+
 ## 3/7 ~ 3/12
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
@@ -62,4 +76,4 @@
 
 ---
 
-*最後更新：2026-03-12*
+*最後更新：2026-03-13*
