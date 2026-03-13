@@ -166,6 +166,62 @@ def git_show(commit_hash: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# GitHub issue/PR comments
+# ---------------------------------------------------------------------------
+
+MAX_COMMENT_CHARS = 500
+
+def gh_issue_comments(github_handle: str, days: int) -> list[dict[str, str]]:
+    """Fetch recent issue/PR comments by a GitHub user via `gh` CLI."""
+    since = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%dT00:00:00Z")
+    # Search for issue comments by author
+    cmd = [
+        "gh", "api", "--paginate",
+        f"/repos/Youngger9765/chinese-literacy-platform/issues/comments"
+        f"?since={since}&sort=created&direction=desc&per_page=100",
+    ]
+    try:
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, cwd=REPO_ROOT, timeout=30,
+        )
+        if result.returncode != 0:
+            return []
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        return []
+
+    try:
+        all_comments = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return []
+
+    if not isinstance(all_comments, list):
+        return []
+
+    # Filter by author
+    comments = []
+    for c in all_comments:
+        user = c.get("user", {}).get("login", "")
+        if user.lower() != github_handle.lower():
+            continue
+        body = c.get("body", "").strip()
+        if not body:
+            continue
+        # Truncate long comments
+        if len(body) > MAX_COMMENT_CHARS:
+            body = body[:MAX_COMMENT_CHARS] + "..."
+        issue_url = c.get("issue_url", "")
+        # Extract issue number from URL
+        issue_num = issue_url.rstrip("/").split("/")[-1] if issue_url else "?"
+        comments.append({
+            "issue": f"#{issue_num}",
+            "date": c.get("created_at", "")[:10],
+            "body": body,
+        })
+
+    return comments[:20]  # Cap at 20 comments
+
+
+# ---------------------------------------------------------------------------
 # JSON file I/O — migrate old format to new progressive format
 # ---------------------------------------------------------------------------
 
@@ -306,6 +362,7 @@ def build_prompt(
     intern_github: str,
     current_skills: dict,
     commits_text: str,
+    comments_text: str,
     days: int,
 ) -> str:
     skills_defs = json.dumps(
@@ -332,6 +389,9 @@ GitHub：@{intern_github}
 ## 最近的 Git Commits（過去 {days} 天）
 {commits_text}
 
+## GitHub Issue/PR 留言（過去 {days} 天）
+{comments_text if comments_text else "（無留言）"}
+
 ## 20 個技能定義
 {skills_defs}
 
@@ -344,7 +404,7 @@ GitHub：@{intern_github}
 
 ## 請你做以下事情：
 
-1. 分析這些 commits 展現了哪些技能
+1. 分析 commits 和 issue 留言展現了哪些技能（留言可反映：問題分析能力、溝通能力、code review 能力、架構理解等）
 2. 評估每個有變化的技能應該是什麼等級（1-5）
 3. 等級只能維持或上升，不能下降
 4. 如果證據不足，不要猜測，保持原等級
@@ -376,7 +436,7 @@ def evaluate_intern(
     json_path = INTERNS_DIR / config["json_file"]
 
     print(f"\n{'='*60}")
-    print(f"  評估 {config['name']} (@{config['github']}) 最近 {days} 天的 commits...")
+    print(f"  評估 {config['name']} (@{config['github']}) 最近 {days} 天...")
     print(f"{'='*60}")
 
     # Load current data
@@ -393,11 +453,19 @@ def evaluate_intern(
     # Get commits
     git_authors = config.get("git_authors", [config["github"]])
     commits = git_log(git_authors, config.get("email", ""), days)
-    if not commits:
-        print(f"   {C.YELLOW}找不到任何 commits，跳過{C.RESET}")
+
+    # Get issue/PR comments
+    comments = gh_issue_comments(config["github"], days)
+
+    if not commits and not comments:
+        print(f"   {C.YELLOW}找不到任何 commits 或留言，跳過{C.RESET}")
         return False
 
-    print(f"   找到 {C.CYAN}{len(commits)}{C.RESET} 個 commits\n")
+    if commits:
+        print(f"   找到 {C.CYAN}{len(commits)}{C.RESET} 個 commits")
+    if comments:
+        print(f"   找到 {C.CYAN}{len(comments)}{C.RESET} 則 issue 留言")
+    print()
 
     # Build commits text with diffs
     commits_parts = []
@@ -409,7 +477,15 @@ def evaluate_intern(
             f"Hash: {c['hash'][:8]}\n"
             f"```diff\n{diff}\n```\n"
         )
-    commits_text = "\n".join(commits_parts)
+    commits_text = "\n".join(commits_parts) if commits_parts else "（無 commits）"
+
+    # Build comments text
+    comments_parts = []
+    for i, c in enumerate(comments, 1):
+        comments_parts.append(
+            f"### 留言 {i} ({c['issue']}, {c['date']})\n{c['body']}\n"
+        )
+    comments_text = "\n".join(comments_parts)
 
     # Build prompt
     prompt = build_prompt(
@@ -417,11 +493,12 @@ def evaluate_intern(
         intern_github=config["github"],
         current_skills=intern_data.get("skills", {}),
         commits_text=commits_text,
+        comments_text=comments_text,
         days=days,
     )
 
     if dry_run:
-        print(f"   {C.YELLOW}[DRY RUN] 會送出的 prompt 長度: {len(prompt)} chars{C.RESET}")
+        print(f"   {C.YELLOW}[DRY RUN] Prompt: {len(prompt)} chars ({len(commits)} commits + {len(comments)} comments){C.RESET}")
         print(f"   {C.YELLOW}[DRY RUN] 跳過 Gemini 呼叫與 JSON 更新{C.RESET}")
         return True
 
