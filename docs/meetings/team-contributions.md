@@ -8,6 +8,17 @@
 
 ---
 
+## 3/13 ~ 3/19
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | 文件更新 | P7→P8 feature 重分配、模組架構重設計、ROADMAP v3.3 |
+| 靖杭 | 🔧 | #217 語音對話模式 | PR #451 open — ComprehensionChat 加語音輸入/輸出功能 |
+| 啟翔 | 🔧 | #262 字體大小即時同步 | PR #450 open — FontSizeControl 同分頁即時更新（StorageEvent） |
+| 啟翔 | 🔧 | #445 生字練習崩潰 | PR #448 open — VocabPractice useMemo 順序修復（React #300 hooks violation） |
+
+---
+
 ## 3/7 ~ 3/12
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
@@ -62,4 +73,4 @@
 
 ---
 
-*最後更新：2026-03-12*
+*最後更新：2026-03-13*
