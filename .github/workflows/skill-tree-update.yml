@@ -1,0 +1,57 @@
+name: Update Intern Skill Tree
+
+on:
+  schedule:
+    # Run daily at 15:00 UTC (23:00 UTC+8 Taiwan time)
+    - cron: '0 15 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  update-skill-tree:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for git log
+          ref: staging
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install google-cloud-aiplatform
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Run skill tree updater
+        run: python3 scripts/skill-tree-updater.py --intern all --days 1
+        env:
+          GOOGLE_CLOUD_PROJECT: lingoleap-dev
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet docs/intern-training/interns/; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push updates
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/intern-training/interns/
+          git commit -m "chore: auto-update intern skill tree ($(date +%Y-%m-%d))"
+          git push
