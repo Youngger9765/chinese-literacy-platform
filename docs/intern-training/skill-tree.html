@@ -317,6 +317,41 @@
   }
   .node.completed .check { display: flex; }
 
+  /* Star rating on nodes */
+  .node .stars {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .star-filled { color: #f59e0b; }
+  .star-empty { color: #d1d5db; }
+
+  /* Level-based node opacity */
+  .node.level-0 { opacity: 0.45; }
+  .node.level-1, .node.level-2 { opacity: 0.7; }
+  .node.level-3, .node.level-4 { opacity: 0.9; }
+  .node.level-5 { opacity: 1; }
+
+  /* Panel star display */
+  .panel-stars { font-size: 1.3rem; letter-spacing: 2px; margin: 4px 0 8px; }
+  .panel-level-name { font-size: 0.8rem; color: var(--text-mid); margin-bottom: 12px; }
+
+  /* History timeline */
+  .history-timeline { padding-left: 16px; border-left: 2px solid var(--border); margin: 8px 0; }
+  .history-entry { padding: 6px 0 6px 12px; position: relative; font-size: 0.82rem; line-height: 1.5; }
+  .history-entry::before {
+    content: '';
+    position: absolute;
+    left: -21px;
+    top: 12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+  .history-date { color: var(--text-dim); font-size: 0.75rem; }
+  .history-reason { color: var(--text); }
+
   /* Tier colors */
   .node.tier-1 {
     background: linear-gradient(135deg, #f0fdf4, #dcfce7);
@@ -759,6 +794,104 @@
 
   .footer-spacer { height: 80px; }
 
+  /* Star rating */
+  .star-rating {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .star-filled { color: #f59e0b; }
+  .star-empty { color: #d1d5db; }
+  .node .star-rating {
+    font-size: 0.6rem;
+    margin-top: -2px;
+  }
+
+  /* Level-based node opacity/saturation */
+  .node.level-0 {
+    background: var(--locked-bg);
+    border-color: var(--locked-border);
+    box-shadow: none;
+    color: var(--locked-text);
+    opacity: 0.55;
+  }
+  .node.level-0:hover { transform: none; }
+  .node.level-0 .lock-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
+    font-size: 0.6rem;
+  }
+  .node.level-low { opacity: 0.8; }
+  .node.level-mid { opacity: 0.95; }
+  .node.level-max { opacity: 1; }
+
+  /* Panel star display */
+  .panel-star-rating {
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    margin: 8px 0 4px;
+  }
+  .panel-star-rating .star-filled { color: #f59e0b; }
+  .panel-star-rating .star-empty { color: #d1d5db; }
+  .panel-level-label {
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    margin-bottom: 12px;
+  }
+
+  /* History timeline */
+  .history-timeline {
+    position: relative;
+    padding-left: 20px;
+  }
+  .history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--border);
+  }
+  .history-entry {
+    position: relative;
+    margin-bottom: 12px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  .history-entry::before {
+    content: '';
+    position: absolute;
+    left: -17px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+    border: 2px solid var(--bg-card);
+    box-shadow: 0 0 0 1px var(--border);
+  }
+  .history-entry:last-child::before {
+    background: var(--green);
+  }
+  .history-date {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-dim);
+  }
+  .history-level {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-left: 6px;
+  }
+  .history-reason {
+    color: var(--text);
+    margin-top: 2px;
+  }
+
   /* Responsive */
   @media (max-width: 600px) {
     .profiles { padding: 0 12px; }
@@ -1000,7 +1133,17 @@ const TIER_META = {
 
 const TOTAL_XP = SKILLS.reduce((s, sk) => s + sk.xp, 0);
 
-// === INTERN DATA ===
+// === LEVEL DEFINITIONS ===
+const LEVELS = {
+  0: "未接觸",
+  1: "初次接觸",
+  2: "理解概念",
+  3: "能獨立使用",
+  4: "熟練運用",
+  5: "可以教人"
+};
+
+// === INTERN CONFIG (for display + JSON file mapping) ===
 const INTERNS = {
   raymond: {
     key: "raymond",
@@ -1008,17 +1151,10 @@ const INTERNS = {
     displayName: "靖杭",
     github: "@if-else-master",
     avatarChar: "靖",
-    startDate: "2026-03-02",
-    lastReview: "2026-03-13",
-    initialCompleted: [1,2,3,4,5,10],
-    review: {
-      commits: 7,
-      mergedPRs: 3,
-      activeSince: "2026-03-02",
-      strengths: "積極嘗試新功能（語音輸入/輸出）、能獨立修 bug (#216 IME)",
-      improve: "commit message 格式不一致（需學 Conventional Commits）、PR #451 改動太大需拆分、加強 React hooks",
-      nextIssue: "#371 StoryCard 顯示 filename（簡單 UI fix，練 Skill #6）"
-    }
+    jsonFile: "interns/raymond.json",
+    skills: {},
+    lastReview: "",
+    recommendations: []
   },
   steven: {
     key: "steven",
@@ -1026,73 +1162,65 @@ const INTERNS = {
     displayName: "啟翔",
     github: "@stgst",
     avatarChar: "啟",
-    startDate: "2026-03-06",
-    lastReview: "2026-03-13",
-    initialCompleted: [1,2,3,4,5,6,8,9,10,11],
-    review: {
-      commits: 9,
-      mergedPRs: 3,
-      activeSince: "2026-03-06",
-      strengths: "程式碼品質高（refactoring、cleanup）、React hooks 理解深（useMemo 修復 #445）、UX 改善有深度",
-      improve: "還沒寫過測試（Skill #14）、TypeScript 型別可更嚴格（Skill #7）、可嘗試 API 串接（Skill #12）",
-      nextIssue: "#430 課文理解對話 UI/UX 改善（已 assign）"
-    }
+    jsonFile: "interns/xiung.json",
+    skills: {},
+    lastReview: "",
+    recommendations: []
   }
-};
-
-// Recommended next skills per person (based on unlocked but not completed)
-const RECOMMENDATIONS = {
-  raymond: [
-    { skillId: 6, why: "PR #451 語音功能已在嘗試 React 開發，正式完成這個技能可以解鎖更多進階路徑", issue: "#371 StoryCard 顯示 filename" },
-    { skillId: 9, why: "commit message 格式需要改善，學習 Conventional Commits 和完整 PR 流程", issue: "任何 good-first-issue" },
-    { skillId: 8, why: "已有 HTML/CSS 基礎，學會 Tailwind 可以更快寫出響應式 UI", issue: "#430 UI 改善相關" }
-  ],
-  steven: [
-    { skillId: 7, why: "已有 JS 進階能力，加上 TypeScript 可以寫出更安全的程式碼", issue: "任何需要新增型別的 PR" },
-    { skillId: 13, why: "已掌握 React 進階 hooks，可以開始學習元件設計模式，從 WriteCharacter 抽取 custom hook", issue: "重構相關 Issue" },
-    { skillId: 12, why: "前端能力已很強，學會 API 串接可以獨立完成全端功能", issue: "需要 fetch 資料的 Issue" }
-  ]
 };
 
 // === STATE ===
 let currentIntern = "raymond";
-let completed = new Set();
 
-function storageKey(intern) {
-  return `lingoleap-skills-${intern}`;
-}
-
-function loadState(intern) {
-  const key = storageKey(intern);
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) {
-      completed = new Set(JSON.parse(raw));
-    } else {
-      // First load: initialize from embedded data
-      completed = new Set(INTERNS[intern].initialCompleted);
-      saveState(intern);
-    }
-  } catch(e) {
-    completed = new Set(INTERNS[intern].initialCompleted);
+function starsHTML(level, max = 5) {
+  let html = '';
+  for (let i = 1; i <= max; i++) {
+    html += i <= level
+      ? '<span class="star-filled">\u2605</span>'
+      : '<span class="star-empty">\u2606</span>';
   }
+  return html;
 }
 
-function saveState(intern) {
-  localStorage.setItem(storageKey(intern), JSON.stringify([...completed]));
+function getLevel(skillId) {
+  const s = INTERNS[currentIntern].skills[String(skillId)];
+  return s ? (s.level || 0) : 0;
+}
+
+function getHistory(skillId) {
+  const s = INTERNS[currentIntern].skills[String(skillId)];
+  return s && s.history ? s.history : [];
+}
+
+function getWeightedXP(internKey) {
+  const intern = INTERNS[internKey];
+  return Math.round(SKILLS.reduce((sum, s) => {
+    const level = (intern.skills[String(s.id)] || {}).level || 0;
+    return sum + (level / 5) * s.xp;
+  }, 0));
 }
 
 function isAvailable(skill) {
-  return skill.prereqs.every(pid => completed.has(pid));
+  return skill.prereqs.every(pid => getLevel(pid) >= 1);
 }
 
-function getEarnedXP() {
-  return SKILLS.filter(s => completed.has(s.id)).reduce((sum, s) => sum + s.xp, 0);
+async function loadInternData(internKey) {
+  const intern = INTERNS[internKey];
+  try {
+    const res = await fetch(intern.jsonFile);
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    intern.skills = data.skills || {};
+    intern.lastReview = data.lastReview || '';
+    intern.recommendations = data.recommendations || [];
+  } catch (e) {
+    console.warn(`Failed to load ${intern.jsonFile}, using defaults`, e);
+  }
 }
 
-function switchIntern(key) {
+async function switchIntern(key) {
   currentIntern = key;
-  loadState(key);
+  await loadInternData(key);
   renderProfiles();
   renderTree();
   renderRecommendations();
@@ -1167,16 +1295,9 @@ function renderProfiles() {
   container.innerHTML = '';
   for (const [key, intern] of Object.entries(INTERNS)) {
     const isActive = key === currentIntern;
-    // Calculate XP for this intern
-    let internCompleted;
-    try {
-      const raw = localStorage.getItem(storageKey(key));
-      internCompleted = raw ? new Set(JSON.parse(raw)) : new Set(intern.initialCompleted);
-    } catch(e) {
-      internCompleted = new Set(intern.initialCompleted);
-    }
-    const xp = SKILLS.filter(s => internCompleted.has(s.id)).reduce((sum, s) => sum + s.xp, 0);
+    const xp = getWeightedXP(key);
     const pct = (xp / TOTAL_XP) * 100;
+    const skillCount = Object.keys(intern.skills).filter(sid => (intern.skills[sid].level || 0) > 0).length;
 
     const card = document.createElement('div');
     card.className = `profile-card${isActive ? ' active' : ''}`;
@@ -1186,8 +1307,8 @@ function renderProfiles() {
         <div class="profile-name">${intern.name} (${intern.displayName})</div>
         <div class="profile-github">${intern.github}</div>
         <div class="profile-meta">
-          <span class="profile-xp">${xp} XP</span>
-          <span class="profile-date">上次評估: ${intern.lastReview}</span>
+          <span class="profile-xp">${xp} / ${TOTAL_XP} XP</span>
+          <span class="profile-date">${skillCount}/20 技能${intern.lastReview ? ' | ' + intern.lastReview : ''}</span>
         </div>
         <div class="profile-tier-bar">
           <div class="profile-tier-fill" style="width:${pct}%"></div>
@@ -1225,12 +1346,13 @@ function renderTree() {
     nodesDiv.className = 'tier-nodes';
 
     SKILLS.filter(s => s.tier === tier).forEach(skill => {
-      const isComp = completed.has(skill.id);
+      const level = getLevel(skill.id);
       const avail = isAvailable(skill);
 
       const node = document.createElement('div');
-      node.className = `node tier-${tier}`;
-      if (isComp) node.classList.add('completed');
+      node.className = `node tier-${tier} level-${level}`;
+      if (level === 5) node.classList.add('completed');
+      else if (level > 0) node.classList.add('available');
       else if (avail) node.classList.add('available');
       else node.classList.add('locked');
 
@@ -1238,8 +1360,8 @@ function renderTree() {
         <div class="check">\u2713</div>
         <div class="icon">${skill.icon}</div>
         <div class="name">${skill.name}</div>
-        <div class="xp-badge">${skill.xp} XP</div>
-        ${!avail && !isComp ? '<div class="lock-icon">\u{1F512}</div>' : ''}
+        <div class="stars">${starsHTML(level)}</div>
+        ${level === 0 && !avail ? '<div class="lock-icon">\u{1F512}</div>' : ''}
       `;
 
       node.addEventListener('click', () => openPanel(skill));
@@ -1254,11 +1376,14 @@ function renderTree() {
 }
 
 function updateProgress() {
-  const earned = getEarnedXP();
+  const earned = getWeightedXP(currentIntern);
   const pct = (earned / TOTAL_XP) * 100;
+  const skillCount = Object.keys(INTERNS[currentIntern].skills).filter(sid =>
+    (INTERNS[currentIntern].skills[sid].level || 0) > 0
+  ).length;
   document.getElementById('xp-display').textContent = `${earned} / ${TOTAL_XP} XP`;
   document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('completed-count').textContent = completed.size;
+  document.getElementById('completed-count').textContent = skillCount;
 }
 
 // === PANEL ===
@@ -1268,15 +1393,16 @@ function openPanel(skill) {
   const panel = document.getElementById('panel');
   const overlay = document.getElementById('overlay');
   const content = document.getElementById('panel-content');
-  const isComp = completed.has(skill.id);
+  const level = getLevel(skill.id);
+  const history = getHistory(skill.id);
   const avail = isAvailable(skill);
   const tierColor = TIER_META[skill.tier].color;
   const tierName = TIER_META[skill.tier].name;
 
   const prereqNames = skill.prereqs.map(pid => {
     const ps = SKILLS.find(s => s.id === pid);
-    const done = completed.has(pid);
-    return `<span style="color:${done ? 'var(--green)' : '#ef4444'}">${done ? '\u2713' : '\u2717'} ${ps.name}</span>`;
+    const done = getLevel(pid) >= 1;
+    return `<span style="color:${done ? 'var(--green)' : '#ef4444'}">${done ? '\u2713' : '\u2717'} ${ps.name} ${starsHTML(getLevel(pid))}</span>`;
   });
 
   const criteriaItems = skill.criteria.split('\u3001').map(c => c.trim()).filter(Boolean);
@@ -1284,9 +1410,26 @@ function openPanel(skill) {
     `<li>${item}</li>`
   ).join('');
 
+  const historyHTML = history.length > 0
+    ? `<div class="panel-section">
+        <h3>\u{1F4C5} 成長歷程</h3>
+        <div class="history-timeline">
+          ${history.map(h => `
+            <div class="history-entry">
+              <span class="history-date">${h.date}</span>
+              ${starsHTML(h.level)}
+              <div class="history-reason">${h.reason}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`
+    : '';
+
   content.innerHTML = `
     <div class="panel-xp" style="color:${tierColor}">${skill.icon} ${skill.xp} XP</div>
     <h2>${skill.name}</h2>
+    <div class="panel-stars">${starsHTML(level)}</div>
+    <div class="panel-level-name">${LEVELS[level]} (${level}/5)</div>
     <span class="tier-tag" style="background:${tierColor}15;color:${tierColor};border:1px solid ${tierColor}33;">
       Tier ${skill.tier} \u2014 ${tierName}
     </span>
@@ -1298,18 +1441,20 @@ function openPanel(skill) {
     </div>
 
     <div class="tab-content active" id="tab-progress">
-      ${!avail && !isComp ? `
+      ${level === 0 && !avail ? `
         <div class="prereq-warning">
-          \u{1F512} 需要先完成以下技能：<br>${prereqNames.join('<br>')}
+          \u{1F512} 需要先接觸以下技能：<br>${prereqNames.join('<br>')}
         </div>
       ` : ''}
 
-      ${prereqNames.length > 0 && (avail || isComp) ? `
+      ${prereqNames.length > 0 && (avail || level > 0) ? `
         <div class="panel-section">
           <h3>\u{1F517} 前置技能</h3>
           <div style="font-size:0.85rem;line-height:1.8;">${prereqNames.join('<br>')}</div>
         </div>
       ` : ''}
+
+      ${historyHTML}
 
       <div class="panel-section">
         <h3>\u{1F3AF} PBL 實作專案</h3>
@@ -1321,20 +1466,12 @@ function openPanel(skill) {
         <div>
           ${criteriaItems.map((c, i) => `
             <div class="criteria-item">
-              <div class="criteria-checkbox ${isComp ? 'checked' : ''}">${isComp ? '\u2713' : ''}</div>
+              <div class="criteria-checkbox ${level >= 3 ? 'checked' : ''}">${level >= 3 ? '\u2713' : ''}</div>
               <span>${c}</span>
             </div>
           `).join('')}
         </div>
       </div>
-
-      ${isComp ? `
-        <button class="complete-btn unmark" onclick="toggleSkill(${skill.id}, false)">取消完成</button>
-      ` : `
-        <button class="complete-btn mark" ${!avail ? 'disabled' : ''} onclick="toggleSkill(${skill.id}, true, event)">
-          ${avail ? '\u{1F3C6} 標記為已完成' : '\u{1F512} 尚未解鎖'}
-        </button>
-      `}
     </div>
 
     <div class="tab-content" id="tab-material">
@@ -1352,7 +1489,7 @@ function openPanel(skill) {
         </ul>
       </div>
 
-      <a href="courses/${skill.courseFile}" class="course-link-btn" target="_blank" rel="noopener">
+      <a href="courses/viewer.html?file=${skill.courseFile}" class="course-link-btn" target="_blank" rel="noopener">
         開始學習 \u2192
       </a>
     </div>
@@ -1381,58 +1518,24 @@ document.getElementById('panel-close').addEventListener('click', closePanel);
 document.getElementById('overlay').addEventListener('click', closePanel);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
-window.toggleSkill = function(id, markComplete, event) {
-  if (markComplete) {
-    completed.add(id);
-    if (event) {
-      const rect = event.target.getBoundingClientRect();
-      spawnConfetti(rect.left + rect.width / 2, rect.top);
-    }
-  } else {
-    completed.delete(id);
-  }
-  saveState(currentIntern);
-  renderTree();
-  renderProfiles();
-  renderRecommendations();
-  const skill = SKILLS.find(s => s.id === id);
-  if (skill) setTimeout(() => openPanel(skill), 50);
-};
-
-// === RECOMMENDATIONS ===
+// === RECOMMENDATIONS (from JSON) ===
 function renderRecommendations() {
   const section = document.getElementById('rec-section');
   const content = document.getElementById('rec-content');
-  const recs = RECOMMENDATIONS[currentIntern] || [];
+  const intern = INTERNS[currentIntern];
+  const recs = intern.recommendations || [];
 
-  // Filter to show only unlocked but not completed skills
-  const validRecs = recs.filter(r => {
-    const skill = SKILLS.find(s => s.id === r.skillId);
-    return skill && !completed.has(skill.id) && isAvailable(skill);
-  });
-
-  if (validRecs.length === 0) {
+  if (recs.length === 0) {
     section.style.display = 'none';
     return;
   }
 
   section.style.display = '';
-  content.innerHTML = validRecs.map(r => {
-    const skill = SKILLS.find(s => s.id === r.skillId);
-    return `
-      <div class="rec-item">
-        <div class="rec-item-header">
-          <span class="rec-icon">${skill.icon}</span>
-          <span class="rec-name">Skill #${skill.id}: ${skill.name}</span>
-          <span class="rec-xp">${skill.xp} XP</span>
-        </div>
-        <p>${r.why}</p>
-        <p style="margin-top:4px;color:var(--blue);font-weight:600;font-size:0.8rem;">
-          練習 Issue: ${r.issue}
-        </p>
-      </div>
-    `;
-  }).join('');
+  content.innerHTML = recs.map(rec => `
+    <div class="rec-item">
+      <p>${rec}</p>
+    </div>
+  `).join('');
 }
 
 // === GIT REVIEW REPORT ===
@@ -1440,39 +1543,52 @@ function renderReview() {
   const section = document.getElementById('review-section');
   const content = document.getElementById('review-content');
   const intern = INTERNS[currentIntern];
-  const r = intern.review;
+  const skills = intern.skills;
+  const skillCount = Object.keys(skills).filter(sid => (skills[sid].level || 0) > 0).length;
+  const maxedCount = Object.values(skills).filter(s => s.level >= 5).length;
+
+  // Build summary from JSON data
+  const topSkills = Object.entries(skills)
+    .filter(([, s]) => s.level >= 3)
+    .map(([sid, s]) => {
+      const def = SKILLS.find(sk => sk.id === parseInt(sid));
+      return def ? `${def.icon} ${def.name} ${starsHTML(s.level)}` : null;
+    })
+    .filter(Boolean);
 
   section.style.display = '';
   content.innerHTML = `
     <div class="review-stat">
-      <div class="review-stat-item"><strong>${r.commits}</strong> Commits</div>
-      <div class="review-stat-item"><strong>${r.mergedPRs}</strong> Merged PRs</div>
-      <div class="review-stat-item">活躍自 <strong style="font-size:0.88rem;">${r.activeSince}</strong></div>
+      <div class="review-stat-item"><strong>${skillCount}</strong> 技能已接觸</div>
+      <div class="review-stat-item"><strong>${maxedCount}</strong> 技能滿星</div>
+      <div class="review-stat-item">評估 <strong style="font-size:0.88rem;">${intern.lastReview || 'N/A'}</strong></div>
     </div>
 
-    <div class="review-section">
-      <h4>\u{1F4AA} 強項</h4>
-      <p>${r.strengths}</p>
-    </div>
+    ${topSkills.length > 0 ? `
+      <div class="review-section">
+        <h4>\u{1F4AA} 強項技能 (\u2605\u2605\u2605 以上)</h4>
+        <div style="font-size:0.85rem;line-height:2;">${topSkills.join('<br>')}</div>
+      </div>
+    ` : ''}
 
-    <div class="review-section">
-      <h4>\u{1F4C8} 建議加強</h4>
-      <p>${r.improve}</p>
-    </div>
-
-    <div class="review-section">
-      <h4>\u{1F3AF} 推薦下一個 Issue</h4>
-      <p style="color:var(--blue);font-weight:600;">${r.nextIssue}</p>
-    </div>
+    ${intern.recommendations.length > 0 ? `
+      <div class="review-section">
+        <h4>\u{1F3AF} AI 建議</h4>
+        ${intern.recommendations.map(r => `<p style="font-size:0.85rem;margin-bottom:4px;">\u2022 ${r}</p>`).join('')}
+      </div>
+    ` : ''}
   `;
 }
 
 // === INIT ===
-loadState(currentIntern);
-renderProfiles();
-renderTree();
-renderRecommendations();
-renderReview();
+async function init() {
+  await Promise.all(Object.keys(INTERNS).map(k => loadInternData(k)));
+  renderProfiles();
+  renderTree();
+  renderRecommendations();
+  renderReview();
+}
+init();
 </script>
 </body>
 </html>
