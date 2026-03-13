@@ -50,7 +50,7 @@
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
   }
   .header h1 {
-    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-size: clamp(2.2rem, 6vw, 3.2rem);
     font-weight: 800;
     background: linear-gradient(135deg, var(--gold), #fbbf24, #f59e0b);
     -webkit-background-clip: text;
@@ -60,10 +60,11 @@
     text-shadow: 0 0 60px rgba(245, 158, 11, 0.3);
   }
   .header .subtitle {
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    margin-top: 8px;
+    color: var(--text-mid);
+    font-size: 1.15rem;
+    margin-top: 10px;
     font-style: italic;
+    font-weight: 500;
   }
 
   /* === PROFILE SWITCHER === */
@@ -74,12 +75,12 @@
     padding: 24px 16px;
   }
   .profile-btn {
-    padding: 10px 24px;
+    padding: 12px 28px;
     border: 2px solid var(--border);
     border-radius: 12px;
     background: var(--bg-card);
     color: var(--text);
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -103,7 +104,7 @@
     text-align: center;
   }
   .stat-value {
-    font-size: 1.8rem;
+    font-size: 2.4rem;
     font-weight: 800;
     background: linear-gradient(135deg, var(--gold), var(--cyan));
     -webkit-background-clip: text;
@@ -111,10 +112,12 @@
     background-clip: text;
   }
   .stat-label {
-    font-size: 0.75rem;
-    color: var(--text-dim);
+    font-size: 0.95rem;
+    color: var(--text-mid);
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-top: 2px;
   }
 
   /* === ACT DIVIDERS === */
@@ -135,24 +138,27 @@
     background: linear-gradient(90deg, transparent, var(--border), transparent);
   }
   .act-name {
-    font-size: 0.7rem;
+    font-size: 0.95rem;
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    color: var(--text-dim);
-    margin-bottom: 4px;
+    color: var(--text-mid);
+    margin-bottom: 6px;
+    font-weight: 600;
   }
   .act-title {
-    font-size: 1.4rem;
+    font-size: 1.9rem;
     font-weight: 700;
   }
   .act-1 .act-title { color: var(--green); }
   .act-2 .act-title { color: var(--blue); }
   .act-3 .act-title { color: var(--gold); }
   .act-desc {
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    margin-top: 4px;
+    font-size: 1.05rem;
+    color: var(--text-mid);
+    margin-top: 6px;
     font-style: italic;
+    font-weight: 400;
+    line-height: 1.5;
   }
 
   /* === TIMELINE === */
@@ -221,7 +227,7 @@
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 14px 16px;
+    padding: 18px 20px;
     transition: all 0.3s ease;
     cursor: default;
     position: relative;
@@ -251,13 +257,13 @@
     margin-bottom: 6px;
   }
   .event-icon {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     flex-shrink: 0;
   }
   .event-type-tag {
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: 6px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -268,40 +274,44 @@
   .tag-skillup { background: #78350f; color: #fcd34d; }
 
   .event-date {
-    font-size: 0.7rem;
-    color: var(--text-dim);
+    font-size: 0.9rem;
+    color: var(--text-mid);
     margin-left: auto;
+    font-weight: 500;
   }
   .event-title {
-    font-size: 0.88rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: var(--text);
-    line-height: 1.4;
-    margin-bottom: 4px;
+    line-height: 1.5;
+    margin-bottom: 6px;
   }
   .event-body {
-    font-size: 0.8rem;
+    font-size: 1.05rem;
     color: var(--text-mid);
-    line-height: 1.5;
+    line-height: 1.6;
+    font-weight: 400;
   }
 
   /* Skill-up stars */
   .skillup-stars {
-    font-size: 1rem;
-    letter-spacing: 2px;
-    margin: 6px 0;
+    font-size: 1.3rem;
+    letter-spacing: 3px;
+    margin: 8px 0;
   }
   .star-filled { color: #f59e0b; }
-  .star-empty { color: #4b5563; }
+  .star-empty { color: #6b7280; }
   .skillup-arrow {
     color: var(--gold);
     font-weight: 700;
-    margin: 0 6px;
+    margin: 0 8px;
+    font-size: 1.2rem;
   }
   .skillup-name {
-    font-size: 0.95rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--gold);
+    margin-bottom: 2px;
   }
 
   /* === MILESTONE (end) === */
@@ -310,8 +320,8 @@
     padding: 40px 20px;
   }
   .milestone-icon {
-    font-size: 3rem;
-    margin-bottom: 8px;
+    font-size: 3.5rem;
+    margin-bottom: 10px;
     animation: float 3s ease-in-out infinite;
   }
   @keyframes float {
@@ -319,9 +329,11 @@
     50% { transform: translateY(-10px); }
   }
   .milestone-text {
-    font-size: 1rem;
-    color: var(--text-dim);
+    font-size: 1.2rem;
+    color: var(--text-mid);
     font-style: italic;
+    line-height: 1.7;
+    font-weight: 400;
   }
   .milestone-text strong {
     color: var(--gold);
@@ -340,11 +352,12 @@
     position: fixed;
     top: 16px;
     left: 16px;
-    color: var(--text-dim);
+    color: var(--text-mid);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 1rem;
+    font-weight: 500;
     z-index: 10;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 8px;
     background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(8px);
@@ -359,7 +372,17 @@
     .event:nth-child(even) { flex-direction: row !important; }
     .event::before { left: 20px !important; }
     .stats-bar { gap: 16px; }
-    .stat-value { font-size: 1.4rem; }
+    .stat-value { font-size: 1.8rem; }
+    .stat-label { font-size: 0.85rem; }
+    .act-title { font-size: 1.5rem; }
+    .act-name { font-size: 0.85rem; }
+    .act-desc { font-size: 0.95rem; }
+    .event-body { font-size: 1rem; }
+    .event-title { font-size: 1.1rem; }
+    .skillup-name { font-size: 1.05rem; }
+    .skillup-stars { font-size: 1.15rem; }
+    .milestone-text { font-size: 1.1rem; }
+    .profile-btn { font-size: 1rem; padding: 10px 20px; }
   }
 </style>
 </head>

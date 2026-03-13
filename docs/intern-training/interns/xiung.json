@@ -258,5 +258,45 @@
     "研究 LingoLeap 的整體架構，了解資料流向。",
     "主動協助其他實習生解決問題，提升指導能力。"
   ],
-  "summary": "7 週內掌握完整開發工作流（Git/React/Hooks/Bug 修復），PR #229 和 #448 品質已達初階工程師標準，下一步目標 TypeScript 型別與元件設計模式"
+  "summary": "7 週內掌握完整開發工作流（Git/React/Hooks/Bug 修復），PR #229 和 #448 品質已達初階工程師標準，下一步目標 TypeScript 型別與元件設計模式",
+  "issues": [
+    {
+      "id": "環境建置",
+      "title": "Fork repo + 開發環境設定",
+      "date": "2026-03-06",
+      "type": "setup",
+      "contribution": "完成專案 fork、本地環境建置，獨立啟動 frontend/backend",
+      "skillsLearned": [1, 4],
+      "highlights": ["環境建置順利完成"]
+    },
+    {
+      "id": "#229",
+      "title": "生字練習寫字功能重構",
+      "date": "2026-03-10",
+      "type": "refactor",
+      "contribution": "重構 WriteCharacter 元件（+99/-120 行），改善生字練習的寫字 UX 體驗",
+      "skillsLearned": [2, 3, 6, 8, 9],
+      "highlights": ["大規模重構（+99/-120 行）", "正確使用 state、event handling", "元件設計清晰", "PR 流程完整"],
+      "linesChanged": "+99/-120"
+    },
+    {
+      "id": "#229 續",
+      "title": "生字練習 UX 持續優化",
+      "date": "2026-03-13",
+      "type": "feature",
+      "contribution": "使用 StorageEvent、setTimeout 等進階技巧持續優化生字練習體驗",
+      "skillsLearned": [3, 6, 16],
+      "highlights": ["使用 StorageEvent 跨 tab 同步", "複雜 state 管理", "JS 進階能力已具備"]
+    },
+    {
+      "id": "#448",
+      "title": "修復 React Hooks 順序 bug",
+      "date": "2026-03-13",
+      "type": "bugfix",
+      "contribution": "精準定位並修復 useMemo 在 conditional return 之前的 React Hooks 順序 bug",
+      "skillsLearned": [10, 11, 17],
+      "highlights": ["精準定位 hooks 順序問題", "正確使用 useMemo 優化效能", "理解 hooks 執行規則", "從重現到修復到驗證流程完整"],
+      "linesChanged": "+25/-15"
+    }
+  ]
 }
