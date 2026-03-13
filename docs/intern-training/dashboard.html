@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LingoLeap -- 實習生成長儀表板</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    min-height: 100vh;
+    overflow: hidden;
+    line-height: 1.5;
+  }
+
+  /* ==========================================
+     SHARED HEADER
+     ========================================== */
+  .dashboard-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    z-index: 10;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .dashboard-header .title-group { flex-shrink: 0; }
+  .dashboard-header h1 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #22c55e, #3b82f6, #a855f7, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.02em;
+  }
+  .dashboard-header .subtitle {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+  .dashboard-header .profiles {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .dashboard-header .profile-btn {
+    padding: 8px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1e293b;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dashboard-header .profile-btn:hover { border-color: #3b82f6; }
+  .dashboard-header .profile-btn.active {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+    box-shadow: 0 2px 12px rgba(59,130,246,0.15);
+  }
+  .dashboard-header .profile-btn .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .dashboard-header .profile-btn:nth-of-type(1) .avatar {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+  }
+  .dashboard-header .profile-btn:nth-of-type(2) .avatar {
+    background: linear-gradient(135deg, #8b5cf6, #a855f7);
+  }
+
+  /* ==========================================
+     SPLIT PANEL LAYOUT
+     ========================================== */
+  .dashboard-body {
+    display: flex;
+    height: calc(100vh - 72px);
+  }
+
+  /* ==========================================
+     ISSUE TIMELINE PANEL (LEFT - DARK)
+     ========================================== */
+  .timeline-panel {
+    width: 38%;
+    min-width: 320px;
+    max-width: 480px;
+    background: #0f172a;
+    color: #f1f5f9;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 1px solid #334155;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .timeline-panel::-webkit-scrollbar { width: 6px; }
+  .timeline-panel::-webkit-scrollbar-track { background: #1e293b; }
+  .timeline-panel::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+
+  /* Timeline Stats */
+  .timeline-panel .t-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 16px 12px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .timeline-panel .t-stat { text-align: center; }
+  .timeline-panel .t-stat-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f59e0b, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .timeline-panel .t-stat-label {
+    font-size: 0.65rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Timeline Section Title */
+  .timeline-panel .t-section-title {
+    text-align: center;
+    padding: 14px 12px 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Timeline container */
+  .timeline-panel .t-timeline {
+    position: relative;
+    padding: 12px 14px 40px 40px;
+  }
+  .timeline-panel .t-timeline::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, #6b7280, #22c55e, #3b82f6, #a855f7, #f59e0b);
+    opacity: 0.4;
+    border-radius: 2px;
+  }
+
+  /* Issue Card */
+  .timeline-panel .t-issue {
+    position: relative;
+    margin-bottom: 16px;
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: t-slide-in 0.5s forwards;
+  }
+  @keyframes t-slide-in {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Dot on the timeline */
+  .timeline-panel .t-issue::before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 14px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    z-index: 2;
+    transition: all 0.3s;
+  }
+  .timeline-panel .t-issue:hover::before {
+    width: 14px;
+    height: 14px;
+    left: -26px;
+    top: 13px;
+  }
+  .timeline-panel .t-issue.type-setup::before { background: #6b7280; box-shadow: 0 0 8px rgba(107,114,128,0.5); }
+  .timeline-panel .t-issue.type-feature::before { background: #22c55e; box-shadow: 0 0 10px rgba(34,197,94,0.5); }
+  .timeline-panel .t-issue.type-bugfix::before { background: #f97316; box-shadow: 0 0 10px rgba(249,115,22,0.5); }
+  .timeline-panel .t-issue.type-refactor::before { background: #a855f7; box-shadow: 0 0 10px rgba(168,85,247,0.5); }
+
+  /* Issue card body */
+  .timeline-panel .t-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: all 0.2s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .timeline-panel .t-card:hover {
+    border-color: #94a3b8;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Type-specific left border */
+  .timeline-panel .t-issue.type-setup .t-card { border-left: 3px solid #6b7280; }
+  .timeline-panel .t-issue.type-feature .t-card { border-left: 3px solid #22c55e; }
+  .timeline-panel .t-issue.type-bugfix .t-card { border-left: 3px solid #f97316; }
+  .timeline-panel .t-issue.type-refactor .t-card { border-left: 3px solid #a855f7; }
+
+  /* Card header */
+  .timeline-panel .t-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .timeline-panel .t-type-badge {
+    font-size: 0.58rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .t-type-badge.setup { background: #374151; color: #9ca3af; }
+  .t-type-badge.feature { background: #14532d; color: #86efac; }
+  .t-type-badge.bugfix { background: #7c2d12; color: #fdba74; }
+  .t-type-badge.refactor { background: #4c1d95; color: #c4b5fd; }
+  .timeline-panel .t-issue-id {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    font-family: "SF Mono", Monaco, monospace;
+  }
+  .timeline-panel .t-card-date {
+    font-size: 0.62rem;
+    color: #64748b;
+    margin-left: auto;
+  }
+
+  /* Card title */
+  .timeline-panel .t-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  /* Contribution section */
+  .timeline-panel .t-section-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 3px;
+  }
+  .timeline-panel .t-contribution {
+    font-size: 0.8rem;
+    color: #cbd5e1;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  /* Skill badges */
+  .timeline-panel .t-skill-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .timeline-panel .t-skill-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #1e3a5f;
+    color: #93c5fd;
+    border: 1px solid #2563eb40;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .timeline-panel .t-skill-badge .star-filled { color: #f59e0b; font-size: 0.6rem; }
+  .timeline-panel .t-skill-badge .star-empty { color: #4b5563; font-size: 0.6rem; }
+
+  /* Highlights */
+  .timeline-panel .t-highlights {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .timeline-panel .t-highlights li {
+    font-size: 0.75rem;
+    color: #a5f3fc;
+    line-height: 1.6;
+    padding-left: 14px;
+    position: relative;
+  }
+  .timeline-panel .t-highlights li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #22d3ee;
+  }
+
+  /* Lines changed */
+  .timeline-panel .t-lines-changed {
+    font-size: 0.68rem;
+    color: #64748b;
+    margin-top: 6px;
+    font-family: "SF Mono", Monaco, monospace;
+  }
+  .timeline-panel .t-lines-changed .added { color: #4ade80; }
+  .timeline-panel .t-lines-changed .removed { color: #f87171; }
+
+  /* Milestone footer */
+  .timeline-panel .t-milestone {
+    text-align: center;
+    padding: 24px 12px;
+  }
+  .timeline-panel .t-milestone-icon {
+    font-size: 2rem;
+    animation: t-float 3s ease-in-out infinite;
+  }
+  @keyframes t-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .timeline-panel .t-milestone-text {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    font-style: italic;
+    margin-top: 6px;
+  }
+  .timeline-panel .t-milestone-text strong { color: #f59e0b; }
+
+  /* ==========================================
+     SKILL TREE PANEL (RIGHT - LIGHT)
+     ========================================== */
+  .skilltree-panel {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #f8fafc;
+    color: #1e293b;
+  }
+  .skilltree-panel::-webkit-scrollbar { width: 6px; }
+  .skilltree-panel::-webkit-scrollbar-track { background: #f1f5f9; }
+  .skilltree-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+  .skilltree-panel {
+    --bg: #f8fafc;
+    --bg-card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-dim: #94a3b8;
+    --text-mid: #64748b;
+    --green: #22c55e;
+    --green-light: #f0fdf4;
+    --green-glow: #22c55e30;
+    --blue: #3b82f6;
+    --blue-light: #eff6ff;
+    --blue-glow: #3b82f630;
+    --purple: #a855f7;
+    --purple-light: #faf5ff;
+    --purple-glow: #a855f730;
+    --gold: #f59e0b;
+    --gold-light: #fffbeb;
+    --gold-glow: #f59e0b30;
+    --locked-bg: #f1f5f9;
+    --locked-border: #cbd5e1;
+    --locked-text: #94a3b8;
+  }
+
+  .skilltree-panel .st-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  /* Progress Bar */
+  .skilltree-panel .progress-wrap {
+    max-width: 520px;
+    margin: 16px auto 8px;
+    padding: 0 20px;
+  }
+  .skilltree-panel .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .skilltree-panel .progress-labels .xp-val {
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .skilltree-panel .progress-bar {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .skilltree-panel .progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--green), var(--blue), var(--purple), var(--gold));
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+  }
+  .skilltree-panel .progress-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    animation: st-shimmer 2s infinite;
+  }
+  @keyframes st-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .skilltree-panel .skill-count {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+  .skilltree-panel .skill-count span { color: var(--text); font-weight: 600; }
+
+  /* Tree */
+  .skilltree-panel .tree {
+    max-width: 860px;
+    margin: 20px auto 0;
+    padding: 0 12px;
+  }
+  .skilltree-panel .tier { margin-bottom: 12px; }
+  .skilltree-panel .tier-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 0 4px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .skilltree-panel .tier-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .skilltree-panel .tier-nodes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding-bottom: 20px;
+  }
+  .skilltree-panel .tier-connector {
+    display: flex;
+    justify-content: center;
+    padding: 0 0 4px;
+  }
+  .skilltree-panel .tier-connector .line {
+    width: 2px;
+    height: 24px;
+    background: repeating-linear-gradient(to bottom, #cbd5e1 0px, #cbd5e1 4px, transparent 4px, transparent 8px);
+  }
+
+  /* Node */
+  .skilltree-panel .node {
+    width: 130px;
+    min-height: 80px;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 12px 8px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.3s;
+    border: 2px solid transparent;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .skilltree-panel .node:hover { transform: translateY(-3px); }
+  .skilltree-panel .node:active { transform: scale(0.97); }
+  .skilltree-panel .node .icon { font-size: 1.4rem; line-height: 1; }
+  .skilltree-panel .node .name { font-size: 0.76rem; font-weight: 600; line-height: 1.25; }
+
+  /* Check badge */
+  .skilltree-panel .node .check {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+  .skilltree-panel .node.completed .check { display: flex; }
+
+  /* Star rating */
+  .star-filled { color: #f59e0b; }
+  .star-empty { color: #d1d5db; }
+  .skilltree-panel .node .stars {
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  /* Level-based node opacity */
+  .skilltree-panel .node.level-0 {
+    background: var(--locked-bg);
+    border-color: var(--locked-border);
+    box-shadow: none;
+    color: var(--locked-text);
+    opacity: 0.55;
+  }
+  .skilltree-panel .node.level-0:hover { transform: none; }
+  .skilltree-panel .node.level-0 .lock-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
+    font-size: 0.6rem;
+  }
+  .skilltree-panel .node.level-low { opacity: 0.8; }
+  .skilltree-panel .node.level-mid { opacity: 0.95; }
+  .skilltree-panel .node.level-max { opacity: 1; }
+
+  /* Tier colors */
+  .skilltree-panel .node.tier-1 {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border-color: var(--green);
+    box-shadow: 0 2px 8px var(--green-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    color: #166534;
+  }
+  .skilltree-panel .node.tier-1.completed {
+    background: linear-gradient(135deg, var(--green), #16a34a);
+    color: #fff;
+  }
+  .skilltree-panel .node.tier-1 .check { background: var(--green); }
+  .skilltree-panel .node.tier-1.completed .check { background: #fff; color: var(--green); }
+
+  .skilltree-panel .node.tier-2 {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-color: var(--blue);
+    box-shadow: 0 2px 8px var(--blue-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    color: #1e40af;
+  }
+  .skilltree-panel .node.tier-2.completed {
+    background: linear-gradient(135deg, var(--blue), #2563eb);
+    color: #fff;
+  }
+  .skilltree-panel .node.tier-2 .check { background: var(--blue); }
+  .skilltree-panel .node.tier-2.completed .check { background: #fff; color: var(--blue); }
+
+  .skilltree-panel .node.tier-3 {
+    background: linear-gradient(135deg, #faf5ff, #ede9fe);
+    border-color: var(--purple);
+    box-shadow: 0 2px 8px var(--purple-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    color: #6b21a8;
+  }
+  .skilltree-panel .node.tier-3.completed {
+    background: linear-gradient(135deg, var(--purple), #9333ea);
+    color: #fff;
+  }
+  .skilltree-panel .node.tier-3 .check { background: var(--purple); }
+  .skilltree-panel .node.tier-3.completed .check { background: #fff; color: var(--purple); }
+
+  .skilltree-panel .node.tier-4 {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border-color: var(--gold);
+    box-shadow: 0 2px 8px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    color: #92400e;
+  }
+  .skilltree-panel .node.tier-4.completed {
+    background: linear-gradient(135deg, var(--gold), #d97706);
+    color: #fff;
+  }
+  .skilltree-panel .node.tier-4 .check { background: var(--gold); }
+  .skilltree-panel .node.tier-4.completed .check { background: #fff; color: var(--gold); }
+
+  /* Locked */
+  .skilltree-panel .node.locked {
+    background: var(--locked-bg);
+    border-color: var(--locked-border);
+    box-shadow: none;
+    color: var(--locked-text);
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  .skilltree-panel .node.locked:hover { transform: none; }
+  .skilltree-panel .node.locked .lock-icon {
+    position: absolute;
+    bottom: 4px;
+    right: 6px;
+    font-size: 0.6rem;
+  }
+
+  /* Pulse for available */
+  .skilltree-panel .node.available:not(.completed) {
+    animation: st-pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes st-pulse {
+    0%, 100% { box-shadow: 0 2px 12px var(--glow-color); }
+    50% { box-shadow: 0 2px 24px var(--glow-color), 0 0 40px var(--glow-color); }
+  }
+  .skilltree-panel .node.tier-1.available:not(.completed) { --glow-color: var(--green-glow); }
+  .skilltree-panel .node.tier-2.available:not(.completed) { --glow-color: var(--blue-glow); }
+  .skilltree-panel .node.tier-3.available:not(.completed) { --glow-color: var(--purple-glow); }
+  .skilltree-panel .node.tier-4.available:not(.completed) { --glow-color: var(--gold-glow); }
+
+  /* Section cards */
+  .skilltree-panel .section-card {
+    max-width: 860px;
+    margin: 24px auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .skilltree-panel .section-card h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Recommended path */
+  .skilltree-panel .rec-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .skilltree-panel .rec-item:hover { border-color: var(--blue); }
+  .skilltree-panel .rec-item p {
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Git review report */
+  .skilltree-panel .review-stat {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .skilltree-panel .review-stat-item {
+    background: var(--bg);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+  }
+  .skilltree-panel .review-stat-item strong {
+    font-size: 1.1rem;
+    color: var(--blue);
+    margin-right: 4px;
+  }
+  .skilltree-panel .review-section {
+    margin-bottom: 12px;
+  }
+  .skilltree-panel .review-section h4 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .skilltree-panel .review-section p {
+    font-size: 0.82rem;
+    color: #334155;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .skilltree-panel .footer-spacer { height: 80px; }
+
+  /* ==========================================
+     OVERLAY + PANEL (skill detail)
+     ========================================== */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(3px);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(450px, 94vw);
+    height: 100%;
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    z-index: 101;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .panel.open { transform: translateX(0); }
+
+  .panel-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(0,0,0,0.05);
+    color: #1e293b;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    z-index: 2;
+  }
+  .panel-close:hover { background: rgba(0,0,0,0.1); }
+
+  .panel-content { padding: 24px 24px 40px; }
+
+  /* Panel tabs */
+  .panel-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .panel-tab {
+    flex: 1;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #94a3b8;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    user-select: none;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .panel-tab:hover { color: #1e293b; }
+  .panel-tab.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .panel-content h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .panel-content .tier-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+  .panel-content .desc {
+    color: #334155;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .panel-section { margin-bottom: 16px; }
+  .panel-section h3 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #475569;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .panel-section ul { list-style: none; padding: 0; }
+  .panel-section li {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding-left: 16px;
+    position: relative;
+    color: #1e293b;
+  }
+  .panel-section li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #94a3b8;
+  }
+  .panel-section a { color: #3b82f6; text-decoration: none; }
+  .panel-section a:hover { text-decoration: underline; }
+  .panel-xp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .panel-stars { font-size: 1.3rem; letter-spacing: 2px; margin: 4px 0 8px; }
+  .panel-level-name { font-size: 0.8rem; color: #64748b; margin-bottom: 12px; }
+  .panel-star-rating { font-size: 1.5rem; letter-spacing: 3px; margin: 8px 0 4px; }
+  .panel-star-rating .star-filled { color: #f59e0b; }
+  .panel-star-rating .star-empty { color: #d1d5db; }
+  .panel-level-label { font-size: 0.82rem; color: #64748b; margin-bottom: 12px; }
+
+  /* History timeline in panel */
+  .history-timeline {
+    position: relative;
+    padding-left: 20px;
+  }
+  .history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: #e2e8f0;
+  }
+  .history-entry {
+    position: relative;
+    margin-bottom: 12px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  .history-entry::before {
+    content: '';
+    position: absolute;
+    left: -17px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3b82f6;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px #e2e8f0;
+  }
+  .history-entry:last-child::before { background: #22c55e; }
+  .history-date { font-size: 0.72rem; font-weight: 600; color: #94a3b8; }
+  .history-level { font-size: 0.72rem; font-weight: 700; color: #f59e0b; margin-left: 6px; }
+  .history-reason { color: #1e293b; margin-top: 2px; }
+
+  /* Prereq warning */
+  .prereq-warning {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.8rem;
+    color: #b91c1c;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  /* Criteria checkboxes */
+  .criteria-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    color: #1e293b;
+    line-height: 1.5;
+  }
+  .criteria-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #fff;
+    transition: all 0.15s;
+  }
+  .criteria-checkbox.checked {
+    background: #22c55e;
+    border-color: #22c55e;
+  }
+
+  /* Course link */
+  .course-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    margin-top: 8px;
+  }
+  .course-link-btn:hover {
+    box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Confetti */
+  #confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 200;
+  }
+
+  /* ==========================================
+     RESPONSIVE
+     ========================================== */
+  @media (max-width: 768px) {
+    .dashboard-body {
+      flex-direction: column;
+      height: auto;
+      overflow: visible;
+    }
+    body { overflow: auto; }
+    .timeline-panel {
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      max-height: 50vh;
+      border-right: none;
+      border-bottom: 1px solid #334155;
+    }
+    .skilltree-panel {
+      max-height: none;
+      overflow-y: visible;
+    }
+    .dashboard-header {
+      padding: 12px 16px;
+      gap: 12px;
+    }
+    .dashboard-header h1 { font-size: 1.1rem; }
+    .skilltree-panel .node { width: 105px; min-height: 70px; padding: 10px 6px; }
+    .skilltree-panel .node .icon { font-size: 1.2rem; }
+    .skilltree-panel .node .name { font-size: 0.72rem; }
+    .skilltree-panel .tier-nodes { gap: 8px; }
+    .skilltree-panel .section-card { margin: 16px 12px; padding: 18px 14px; }
+    .panel-content { padding: 20px 16px 32px; }
+  }
+  @media (max-width: 480px) {
+    .dashboard-header .profiles { gap: 6px; }
+    .dashboard-header .profile-btn { padding: 6px 12px; font-size: 0.8rem; }
+    .dashboard-header .profile-btn .avatar { width: 24px; height: 24px; font-size: 0.7rem; }
+    .skilltree-panel .node { width: 88px; min-height: 62px; }
+    .skilltree-panel .node .name { font-size: 0.65rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- SHARED HEADER -->
+<div class="dashboard-header">
+  <div class="title-group">
+    <h1>LingoLeap -- 實習生成長儀表板</h1>
+    <div class="subtitle">Issue 貢獻時間軸 + 技能樹</div>
+  </div>
+  <div class="profiles" id="profiles"></div>
+</div>
+
+<!-- SPLIT PANELS -->
+<div class="dashboard-body">
+  <!-- LEFT: Issue Timeline (dark) -->
+  <div class="timeline-panel" id="timeline-panel">
+    <div class="t-stats" id="t-stats"></div>
+    <div class="t-section-title">&#x1F4CB; Issue 貢獻時間軸</div>
+    <div class="t-timeline" id="timeline-container"></div>
+  </div>
+
+  <!-- RIGHT: Skill Tree (light) -->
+  <div class="skilltree-panel" id="skilltree-panel">
+    <div class="progress-wrap">
+      <div class="progress-labels">
+        <span>總經驗值</span>
+        <span class="xp-val" id="xp-display">0 / 530 XP</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="skill-count">已完成 <span id="completed-count">0</span> / <span id="total-count">20</span> 技能</div>
+    </div>
+
+    <div class="tree" id="tree"></div>
+
+    <div class="section-card" id="rec-section" style="display:none;">
+      <h2>&#x1F5FA;&#xFE0F; 建議學習路徑</h2>
+      <div id="rec-content"></div>
+    </div>
+
+    <div class="section-card" id="review-section" style="display:none;">
+      <h2>&#x1F4CA; Git Review 報告</h2>
+      <div id="review-content"></div>
+    </div>
+
+    <div class="footer-spacer"></div>
+  </div>
+</div>
+
+<!-- SKILL DETAIL PANEL -->
+<div class="overlay" id="overlay"></div>
+<div class="panel" id="panel">
+  <button class="panel-close" id="panel-close">&times;</button>
+  <div class="panel-content" id="panel-content"></div>
+</div>
+
+<script>
+// =============================================
+// SHARED DATA
+// =============================================
+
+const SKILL_NAMES = {
+  1:"Git 基礎", 2:"HTML/CSS", 3:"JavaScript", 4:"開發環境", 5:"讀懂程式碼",
+  6:"React 元件", 7:"TypeScript", 8:"Tailwind", 9:"Git 工作流", 10:"Bug 修復",
+  11:"React 進階", 12:"API 串接", 13:"設計模式", 14:"測試", 15:"Code Review",
+  16:"獨立開發", 17:"效能優化", 18:"架構理解", 19:"技術文件", 20:"指導他人"
+};
+
+const SKILL_ICONS = {
+  1:"\u{1F500}", 2:"\u{1F3A8}", 3:"\u26A1", 4:"\u{1F6E0}\uFE0F", 5:"\u{1F4D6}",
+  6:"\u269B\uFE0F", 7:"\u{1F4DD}", 8:"\u{1F3AF}", 9:"\u{1F33F}", 10:"\u{1F41B}",
+  11:"\u{1F9EA}", 12:"\u{1F310}", 13:"\u{1F9F1}", 14:"\u2705", 15:"\u{1F50D}",
+  16:"\u{1F680}", 17:"\u{1F3CE}\uFE0F", 18:"\u{1F3D7}\uFE0F", 19:"\u{1F4DA}", 20:"\u{1F91D}"
+};
+
+const SKILLS = [
+  { id:1, tier:1, icon:"\u{1F500}", name:"Git 基礎", desc:"clone, commit, push, pull", xp:10, prereqs:[],
+    project:"完成 LingoLeap 的 fork 和首次 commit，push 一個簡單的修改到自己的 fork",
+    criteria:"能獨立執行 git clone / add / commit / push / pull、知道 .gitignore 的作用",
+    courseFile:"tier1-git-basics.md",
+    courseOutline:["Git 是什麼？版本控制概念","clone / init 建立 repo","add / commit / push 基本流程","pull 與遠端同步",".gitignore 設定"] },
+  { id:2, tier:1, icon:"\u{1F3A8}", name:"HTML/CSS 基礎", desc:"標籤、選擇器、Flexbox", xp:10, prereqs:[],
+    project:"用純 HTML/CSS 寫一個 LingoLeap 的靜態版登入頁",
+    criteria:"能用 Flexbox 寫出基本版型、理解 class / id 選擇器、看得懂 CSS 優先級",
+    courseFile:"tier1-html-css.md",
+    courseOutline:["HTML 語義化標籤","CSS 選擇器與優先級","Flexbox 排版系統","Box Model 與 spacing","實作：靜態登入頁"] },
+  { id:3, tier:1, icon:"\u26A1", name:"JavaScript 基礎", desc:"變數、函式、陣列、物件", xp:15, prereqs:[],
+    project:"用 JS 寫一個小工具：計算漢字字數、標註注音，跟 LingoLeap 課文資料互動",
+    criteria:"能用 map/filter/reduce 處理陣列、理解解構賦值、箭頭函式、模板字串",
+    courseFile:"tier1-javascript.md",
+    courseOutline:["變數宣告 let/const","函式與箭頭函式","陣列方法 map/filter/reduce","物件與解構賦值","非同步基礎 Promise"] },
+  { id:4, tier:1, icon:"\u{1F6E0}\uFE0F", name:"開發環境", desc:"VS Code, Node.js, npm, terminal", xp:10, prereqs:[],
+    project:"在本地成功啟動 LingoLeap frontend 開發環境（npm install + npm run dev）",
+    criteria:"能獨立設定開發環境、知道 package.json 的作用、會用 terminal 基本指令",
+    courseFile:"tier1-dev-environment.md",
+    courseOutline:["VS Code 安裝與快捷鍵","Node.js 與 npm 設定","package.json 結構解析","terminal 常用指令","啟動 LingoLeap 開發環境"] },
+  { id:5, tier:1, icon:"\u{1F4D6}", name:"讀懂現有程式碼", desc:"能看懂 React 元件在做什麼", xp:15, prereqs:[],
+    project:"閱讀 LingoLeap 的 VocabPractice.tsx，寫出元件流程說明文件",
+    criteria:"能指出元件的 props / state / 事件處理、子元件關係",
+    courseFile:"tier1-reading-code.md",
+    courseOutline:["如何閱讀 React 元件","追蹤 props 與 state 流向","辨識事件處理邏輯","理解元件之間的關係","實作：分析 VocabPractice"] },
+  { id:6, tier:2, icon:"\u269B\uFE0F", name:"React 元件開發", desc:"JSX, props, state, hooks", xp:25, prereqs:[3,5],
+    project:"開發 LingoLeap 的課文卡片元件（StoryCard），顯示標題 / 難度 / 進度",
+    criteria:"能獨立寫出帶有 state 與 props 的 React 元件、並正確處理事件",
+    courseFile:"tier2-react-components.md",
+    courseOutline:["JSX 語法與表達式","Props 傳遞與型別","useState 狀態管理","事件處理與條件渲染","實作：StoryCard 元件"] },
+  { id:7, tier:2, icon:"\u{1F4DD}", name:"TypeScript", desc:"型別、interface、泛型基礎", xp:20, prereqs:[3],
+    project:"將 LingoLeap 的一個 JS 工具函式轉換為 TypeScript，加上完整型別",
+    criteria:"能用 interface 定義 props 型別、理解 union types、可選屬性、泛型基本用法",
+    courseFile:"tier2-typescript.md",
+    courseOutline:["基本型別與 type annotation","Interface 與 Type Alias","Union Types 與 Literal Types","泛型入門","React + TypeScript 實戰"] },
+  { id:8, tier:2, icon:"\u{1F3AF}", name:"Tailwind CSS", desc:"utility classes, responsive design", xp:20, prereqs:[2],
+    project:"用 Tailwind 重寫 LingoLeap 某個頁面的樣式，並支援手機版",
+    criteria:"能用 Tailwind 寫出響應式版型、理解 sm/md/lg 斷點、hover/focus 狀態",
+    courseFile:"tier2-tailwind.md",
+    courseOutline:["Utility-first 概念","Spacing / Color / Typography","Responsive 斷點 sm/md/lg","hover / focus / group 狀態","實作：響應式頁面改造"] },
+  { id:9, tier:2, icon:"\u{1F33F}", name:"Git 工作流", desc:"branch, PR, code review, conflict resolution", xp:20, prereqs:[1],
+    project:"完成一個完整的 feature branch → PR → review → merge 流程",
+    criteria:"能獨立建立 branch、提 PR、解決 merge conflict、回應 review 意見",
+    courseFile:"tier2-git-workflow.md",
+    courseOutline:["Branch 策略與命名","Pull Request 最佳實踐","Code Review 流程","Merge Conflict 解決","Conventional Commits 格式"] },
+  { id:10, tier:2, icon:"\u{1F41B}", name:"Bug 修復", desc:"讀錯誤訊息、DevTools、重現問題", xp:25, prereqs:[4,5],
+    project:"修復 LingoLeap 的一個真實 bug（參考 GitHub Issues 中 good-first-issue 標籤）",
+    criteria:"能重現 bug、用 DevTools 定位問題、提供修復並驗證結果",
+    courseFile:"tier2-bug-fixing.md",
+    courseOutline:["閱讀錯誤訊息的技巧","Chrome DevTools 除錯","系統性重現問題","定位 Root Cause","驗證修復結果"] },
+  { id:11, tier:3, icon:"\u{1F9EA}", name:"React 進階", desc:"useEffect, useRef, useMemo, Context", xp:35, prereqs:[6],
+    project:"優化 LingoLeap ComprehensionChat 的效能（減少重新渲染、加入 loading 狀態）",
+    criteria:"能正確使用 useEffect 清除副作用、用 useMemo 避免不必要計算、用 Context 共享狀態",
+    courseFile:"tier3-react-advanced.md",
+    courseOutline:["useEffect 生命週期與清除","useRef DOM 操作","useMemo / useCallback 優化","Context API 狀態共享","Hooks 執行順序規則"] },
+  { id:12, tier:3, icon:"\u{1F310}", name:"API 串接", desc:"fetch, async/await, error handling", xp:30, prereqs:[6,7],
+    project:"將 LingoLeap 某個功能的硬編碼資料改為從 API 取得，加上適當的 loading / error 處理",
+    criteria:"能用 async/await 呼叫 API、處理 loading/error/success 三種狀態、理解 CORS",
+    courseFile:"tier3-api-integration.md",
+    courseOutline:["Fetch API 基礎","async/await 非同步處理","Loading / Error / Success 狀態","CORS 與 API 安全","實作：API 資料串接"] },
+  { id:13, tier:3, icon:"\u{1F9F1}", name:"元件設計模式", desc:"複合元件、render props、custom hooks", xp:35, prereqs:[6,11],
+    project:"將 LingoLeap 中重複的邏輯抽取為 custom hook（例如 useAudioPlayback、useStoryData）",
+    criteria:"能寫出可複用的 custom hook、理解關注點分離、單一職責原則",
+    courseFile:"tier3-component-patterns.md",
+    courseOutline:["Custom Hooks 設計","複合元件模式","關注點分離原則","單一職責與可複用性","實作：抽取 custom hook"] },
+  { id:14, tier:3, icon:"\u2705", name:"測試", desc:"手動測試→寫測試案例→Playwright E2E", xp:30, prereqs:[10],
+    project:"為 LingoLeap 的學習流程寫 Playwright E2E 測試（參考 #28）",
+    criteria:"能寫出 E2E 測試場景、理解測試金字塔、能用 CI 執行測試",
+    courseFile:"tier3-testing.md",
+    courseOutline:["測試金字塔概念","手動測試→自動測試","Playwright 安裝與設定","E2E 測試撰寫","CI 整合測試"] },
+  { id:15, tier:3, icon:"\u{1F50D}", name:"Code Review", desc:"能審查別人的 PR、給建設性回饋", xp:25, prereqs:[9],
+    project:"審查 3 個團隊成員的 PR，提供有意義的 review 意見",
+    criteria:"能指出程式碼問題（可讀性 / 效能 / 安全）、提供具體改善建議",
+    courseFile:"tier3-code-review.md",
+    courseOutline:["Code Review 的目的","審查重點：正確性、可讀性、效能","如何寫建設性回饋","常見 code smell","實踐：Review 團隊 PR"] },
+  { id:16, tier:4, icon:"\u{1F680}", name:"獨立開發功能", desc:"從 issue 到 PR 完整流程", xp:50, prereqs:[11,12,14],
+    project:"獨立完成一個 LingoLeap Issue（從理解需求到 merge）",
+    criteria:"獨立完成一個中等複雜度的 Issue、包含完整的 branch / commit / PR 流程",
+    courseFile:"tier4-feature-development.md",
+    courseOutline:["理解需求與拆解任務","設計方案與技術選型","實作與自測","PR 與 Code Review","上線與驗證"] },
+  { id:17, tier:4, icon:"\u{1F3CE}\uFE0F", name:"效能優化", desc:"React.memo, lazy loading, bundle size", xp:40, prereqs:[11,13],
+    project:"分析 LingoLeap 的 bundle size，用 lazy loading 減少首次載入時間",
+    criteria:"能用 React DevTools Profiler 找出效能瓶頸、應用 code splitting 減少 bundle size",
+    courseFile:"tier4-performance.md",
+    courseOutline:["React DevTools Profiler","React.memo 與 re-render","Code Splitting 與 lazy()","Bundle 分析工具","Web Vitals 指標"] },
+  { id:18, tier:4, icon:"\u{1F3D7}\uFE0F", name:"架構理解", desc:"全端資料流、API設計、DB schema", xp:40, prereqs:[12,13],
+    project:"畫出 LingoLeap 某個功能的完整架構圖（前端 → API → DB）",
+    criteria:"能解釋 API 端點的設計邏輯、理解 DB 關聯、畫出資料流圖",
+    courseFile:"tier4-architecture.md",
+    courseOutline:["全端資料流概覽","REST API 設計原則","DB Schema 與關聯","架構圖繪製","LingoLeap 架構分析"] },
+  { id:19, tier:4, icon:"\u{1F4DA}", name:"技術文件", desc:"寫 README、ADR、技術決策文件", xp:30, prereqs:[15],
+    project:"為自己開發的功能寫一份完整的技術文件（包含架構圖 / 使用方法 / 設計決策）",
+    criteria:"能寫出清晰的 README（包含安裝 / 使用 / API）、記錄技術決策的理由",
+    courseFile:"tier4-documentation.md",
+    courseOutline:["好的 README 結構","ADR 決策記錄","API 文件撰寫","圖表與示意圖","實作：功能文件"] },
+  { id:20, tier:4, icon:"\u{1F91D}", name:"指導他人", desc:"幫新成員 onboard、pair programming", xp:50, prereqs:[15,16],
+    project:"帶領一位新成員完成第一個 PR，或組織一次技術分享",
+    criteria:"成功帶領一位新成員完成他們的首個貢獻、或完成一次團隊技術分享",
+    courseFile:"tier4-mentoring.md",
+    courseOutline:["Pair Programming 技巧","如何引導而非直接給答案","Onboarding 流程設計","技術分享準備","建立學習文化"] }
+];
+
+const TIER_META = {
+  1: { name:"基礎入門", color:"var(--green)", hex:"#22c55e" },
+  2: { name:"實戰技能", color:"var(--blue)", hex:"#3b82f6" },
+  3: { name:"進階能力", color:"var(--purple)", hex:"#a855f7" },
+  4: { name:"獨立開發者", color:"var(--gold)", hex:"#f59e0b" }
+};
+
+const TOTAL_XP = SKILLS.reduce((s, sk) => s + sk.xp, 0);
+
+const LEVELS = {
+  0: "未接觸",
+  1: "初次接觸",
+  2: "理解概念",
+  3: "能獨立使用",
+  4: "熟練運用",
+  5: "可以教人"
+};
+
+// =============================================
+// INTERN CONFIG
+// =============================================
+const INTERNS = {
+  raymond: {
+    key: "raymond",
+    name: "Raymond",
+    displayName: "靖杭",
+    github: "@if-else-master",
+    avatarChar: "靖",
+    jsonFile: "interns/raymond.json",
+    skills: {},
+    lastReview: "",
+    recommendations: []
+  },
+  steven: {
+    key: "steven",
+    name: "Steven",
+    displayName: "啟翔",
+    github: "@stgst",
+    avatarChar: "啟",
+    jsonFile: "interns/xiung.json",
+    skills: {},
+    lastReview: "",
+    recommendations: []
+  }
+};
+
+// =============================================
+// ISSUE CONTRIBUTION DATA
+// =============================================
+const ISSUE_DATA = {
+  raymond: [
+    {
+      id: "環境建置",
+      title: "Fork repo + 開發環境設定",
+      date: "2026-03-02",
+      type: "setup",
+      contribution: "完成專案 fork、本地環境建置",
+      skillsLearned: [1, 4],
+      highlights: ["順利完成 fork 和 push"]
+    },
+    {
+      id: "#224",
+      title: "閱讀理解頁面 UI 修改",
+      date: "2026-03-05",
+      type: "feature",
+      contribution: "修改閱讀理解頁面 UI/UX，改善互動體驗",
+      skillsLearned: [2, 3, 5],
+      highlights: ["第一個 PR", "能讀懂基本 HTML/JS"]
+    },
+    {
+      id: "#216",
+      title: "修復 IME 輸入法 composition bug",
+      date: "2026-03-10",
+      type: "bugfix",
+      contribution: "修復中文輸入法在聊天介面的 composition 事件處理問題，影響所有中文使用者",
+      skillsLearned: [3, 5, 10],
+      highlights: ["完整執行 重現\u2192定位\u2192修復\u2192驗證 流程", "處理 isComposing event 和 async 語音功能", "Bug 修復流程扎實"],
+      linesChanged: "+32/-8"
+    },
+    {
+      id: "#314",
+      title: "本地 DB 連線問題修復",
+      date: "2026-03-10",
+      type: "bugfix",
+      contribution: "修復本地開發環境的資料庫連線問題，讓開發流程更順暢",
+      skillsLearned: [4],
+      highlights: ["本地開發環境完全跑通"]
+    },
+    {
+      id: "語音功能",
+      title: "語音輸入/輸出功能開發",
+      date: "2026-03-13",
+      type: "feature",
+      contribution: "為閱讀理解聊天介面新增語音輸入和語音輸出功能，大幅提升無障礙使用體驗",
+      skillsLearned: [6, 7, 8, 12],
+      highlights: ["獨立完成完整功能", "成功串接語音 API", "React 元件設計清晰", "TypeScript 使用正確"],
+      linesChanged: "+180/-20"
+    }
+  ],
+  steven: [
+    {
+      id: "環境建置",
+      title: "Fork repo + 開發環境設定",
+      date: "2026-03-06",
+      type: "setup",
+      contribution: "完成專案 fork、本地環境建置，獨立啟動 frontend/backend",
+      skillsLearned: [1, 4],
+      highlights: ["環境建置順利完成"]
+    },
+    {
+      id: "#229",
+      title: "生字練習寫字功能重構",
+      date: "2026-03-10",
+      type: "refactor",
+      contribution: "重構 WriteCharacter 元件（+99/-120 行），改善生字練習的寫字 UX 體驗",
+      skillsLearned: [2, 3, 6, 8, 9],
+      highlights: ["大規模重構（+99/-120 行）", "正確使用 state、event handling", "元件設計清晰", "PR 流程完整"],
+      linesChanged: "+99/-120"
+    },
+    {
+      id: "#229 續",
+      title: "生字練習 UX 持續優化",
+      date: "2026-03-13",
+      type: "feature",
+      contribution: "使用 StorageEvent、setTimeout 等進階技巧持續優化生字練習體驗",
+      skillsLearned: [3, 6, 16],
+      highlights: ["使用 StorageEvent 跨 tab 同步", "複雜 state 管理", "JS 進階能力已具備"]
+    },
+    {
+      id: "#448",
+      title: "修復 React Hooks 順序 bug",
+      date: "2026-03-13",
+      type: "bugfix",
+      contribution: "精準定位並修復 useMemo 在 conditional return 之前的 React Hooks 順序 bug",
+      skillsLearned: [10, 11, 17],
+      highlights: ["精準定位 hooks 順序問題", "正確使用 useMemo 優化效能", "理解 hooks 執行規則", "從重現到修復到驗證流程完整"],
+      linesChanged: "+25/-15"
+    }
+  ]
+};
+
+// Fallback skill data (with full history)
+const FALLBACK_DATA = {
+  raymond: {"skills":{"1":{"level":3,"history":[{"date":"2026-03-02","level":1,"reason":"fork 完成、會 push"},{"date":"2026-03-10","level":2,"reason":"多次 commit/push 順暢"},{"date":"2026-03-13","level":3,"reason":"多次 commit，熟悉 Git 操作"}]},"2":{"level":1,"history":[{"date":"2026-03-05","level":1,"reason":"PR #224 修改 HTML"}]},"3":{"level":3,"history":[{"date":"2026-03-05","level":1,"reason":"能讀懂基本 JS"},{"date":"2026-03-10","level":2,"reason":"處理 isComposing event 和 async 語音"},{"date":"2026-03-13","level":3,"reason":"獨立實作語音輸入功能"}]},"4":{"level":2,"history":[{"date":"2026-03-02","level":1,"reason":"環境建置完成"},{"date":"2026-03-10","level":2,"reason":"處理本地 DB 連線問題"}]},"5":{"level":5,"history":[{"date":"2026-03-05","level":1,"reason":"能讀懂簡單元件"},{"date":"2026-03-10","level":2,"reason":"能讀懂 ComprehensionChat.tsx"},{"date":"2026-03-13","level":3,"reason":"能讀懂並修改程式碼"},{"date":"2026-03-13","level":5,"reason":"多次修改程式碼，且能理解程式碼"}]},"6":{"level":5,"history":[{"date":"2026-03-13","level":2,"reason":"ComprehensionChat.tsx 修改"},{"date":"2026-03-13","level":5,"reason":"獨立完成語音輸入/輸出功能"}]},"7":{"level":5,"history":[{"date":"2026-03-13","level":2,"reason":"ComprehensionChat.tsx 使用"},{"date":"2026-03-13","level":5,"reason":"獨立完成語音輸入/輸出功能"}]},"8":{"level":3,"history":[{"date":"2026-03-13","level":2,"reason":"ComprehensionChat.tsx 使用"},{"date":"2026-03-13","level":3,"reason":"在元件中使用 Tailwind CSS"}]},"10":{"level":5,"history":[{"date":"2026-03-10","level":2,"reason":"修復 IME composition bug"},{"date":"2026-03-13","level":3,"reason":"多次修復 bug"},{"date":"2026-03-13","level":5,"reason":"多次修復 Bug，且有重構意識"}]},"12":{"level":5,"history":[{"date":"2026-03-13","level":2,"reason":"新增語音輸入功能"},{"date":"2026-03-13","level":5,"reason":"獨立完成語音輸入/輸出功能"}]}},"lastReview":"2026-03-13","recommendations":["學習 Git 工作流，參與 Code Review (#9)","學習元件設計模式，提高程式碼品質 (#13)","學習撰寫測試，確保程式碼品質 (#14)"]},
+  steven: {"skills":{"1":{"level":3,"history":[{"date":"2026-03-06","level":1,"reason":"完成 fork 和初次 push"},{"date":"2026-03-08","level":2,"reason":"多次 commit/push 流暢"},{"date":"2026-03-13","level":3,"reason":"多個 PR 完整走完流程"}]},"2":{"level":2,"history":[{"date":"2026-03-08","level":1,"reason":"能讀懂基本 HTML"},{"date":"2026-03-10","level":2,"reason":"修改 WriteCharacter.tsx 樣式"}]},"3":{"level":3,"history":[{"date":"2026-03-06","level":1,"reason":"能讀懂基本 JS"},{"date":"2026-03-10","level":2,"reason":"使用 setTimeout、state 管理"},{"date":"2026-03-13","level":3,"reason":"使用 StorageEvent、複雜 state 管理"}]},"4":{"level":2,"history":[{"date":"2026-03-06","level":1,"reason":"環境建置完成"},{"date":"2026-03-08","level":2,"reason":"本地開發環境正常"}]},"5":{"level":5,"history":[{"date":"2026-03-08","level":1,"reason":"能讀懂基本元件"},{"date":"2026-03-10","level":2,"reason":"能讀懂 VocabPractice 的 state 流"},{"date":"2026-03-13","level":3,"reason":"深度讀懂複雜元件"},{"date":"2026-03-13","level":5,"reason":"能快速定位問題並提出解決方案"}]},"6":{"level":5,"history":[{"date":"2026-03-10","level":2,"reason":"能修改現有元件"},{"date":"2026-03-13","level":3,"reason":"獨立重構 WriteCharacter"},{"date":"2026-03-13","level":5,"reason":"多次獨立完成元件開發"}]},"8":{"level":2,"history":[{"date":"2026-03-10","level":2,"reason":"修改含 Tailwind 樣式的元件"}]},"9":{"level":3,"history":[{"date":"2026-03-08","level":1,"reason":"開始使用 feature branch"},{"date":"2026-03-10","level":2,"reason":"PR 流程完整"},{"date":"2026-03-13","level":3,"reason":"commit message 品質佳"}]},"10":{"level":5,"history":[{"date":"2026-03-10","level":2,"reason":"能找到 bug 並修復"},{"date":"2026-03-13","level":3,"reason":"精準定位 React hooks 順序 bug"},{"date":"2026-03-13","level":5,"reason":"能獨立 debug 並修復多種 bug"}]},"11":{"level":4,"history":[{"date":"2026-03-13","level":2,"reason":"正確使用 useMemo"},{"date":"2026-03-13","level":4,"reason":"能熟練運用 useMemo, useCallback"}]},"15":{"level":4,"history":[{"date":"2026-03-13","level":4,"reason":"能給出有建設性的 code review 意見"}]},"16":{"level":4,"history":[{"date":"2026-03-13","level":3,"reason":"能獨立完成功能開發"},{"date":"2026-03-13","level":4,"reason":"獨立完成多個 feature 開發"}]},"17":{"level":4,"history":[{"date":"2026-03-13","level":3,"reason":"開始有優化程式碼的意識"},{"date":"2026-03-13","level":4,"reason":"能進行效能優化"}]}},"lastReview":"2026-03-13","recommendations":["嘗試撰寫單元測試，提升程式碼品質","研究 LingoLeap 的整體架構","主動協助其他實習生解決問題"]}
+};
+
+let currentIntern = "raymond";
+
+// =============================================
+// SHARED UTILITIES
+// =============================================
+
+function starsHTML(level, max = 5) {
+  let html = '';
+  for (let i = 1; i <= max; i++) {
+    html += i <= level
+      ? '<span class="star-filled">\u2605</span>'
+      : '<span class="star-empty">\u2606</span>';
+  }
+  return html;
+}
+
+function getLevel(skillId) {
+  const s = INTERNS[currentIntern].skills[String(skillId)];
+  return s ? (s.level || 0) : 0;
+}
+
+function getHistory(skillId) {
+  const s = INTERNS[currentIntern].skills[String(skillId)];
+  return s && s.history ? s.history : [];
+}
+
+function getWeightedXP(internKey) {
+  const intern = INTERNS[internKey];
+  return Math.round(SKILLS.reduce((sum, s) => {
+    const level = (intern.skills[String(s.id)] || {}).level || 0;
+    return sum + (level / 5) * s.xp;
+  }, 0));
+}
+
+function isAvailable(skill) {
+  return skill.prereqs.every(pid => getLevel(pid) >= 1);
+}
+
+// =============================================
+// DATA LOADING
+// =============================================
+
+async function loadInternData(internKey) {
+  const intern = INTERNS[internKey];
+  try {
+    const res = await fetch(intern.jsonFile);
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    intern.skills = data.skills || {};
+    intern.lastReview = data.lastReview || '';
+    intern.recommendations = data.recommendations || [];
+  } catch {
+    const fb = FALLBACK_DATA[internKey];
+    if (fb) {
+      intern.skills = JSON.parse(JSON.stringify(fb.skills || {}));
+      intern.lastReview = fb.lastReview || '';
+      intern.recommendations = fb.recommendations || [];
+    }
+  }
+}
+
+async function switchIntern(key) {
+  currentIntern = key;
+  await loadInternData(key);
+  renderAll();
+}
+
+// =============================================
+// CONFETTI
+// =============================================
+const confettiCanvas = document.getElementById('confetti-canvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+let confettiParticles = [];
+let confettiAnimating = false;
+
+function resizeConfettiCanvas() {
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeConfettiCanvas);
+resizeConfettiCanvas();
+
+function spawnConfetti(x, y) {
+  const colors = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899'];
+  for (let i = 0; i < 50; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 3 + Math.random() * 6;
+    confettiParticles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 4,
+      w: 4 + Math.random() * 5,
+      h: 4 + Math.random() * 5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 12,
+      life: 1,
+      decay: 0.012 + Math.random() * 0.008
+    });
+  }
+  if (!confettiAnimating) {
+    confettiAnimating = true;
+    animateConfetti();
+  }
+}
+
+function animateConfetti() {
+  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  confettiParticles = confettiParticles.filter(p => p.life > 0);
+  if (confettiParticles.length === 0) {
+    confettiAnimating = false;
+    return;
+  }
+  for (const p of confettiParticles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.15;
+    p.rotation += p.rotSpeed;
+    p.life -= p.decay;
+    confettiCtx.save();
+    confettiCtx.translate(p.x, p.y);
+    confettiCtx.rotate(p.rotation * Math.PI / 180);
+    confettiCtx.globalAlpha = p.life;
+    confettiCtx.fillStyle = p.color;
+    confettiCtx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    confettiCtx.restore();
+  }
+  requestAnimationFrame(animateConfetti);
+}
+
+// =============================================
+// RENDER: SHARED HEADER PROFILES
+// =============================================
+
+function renderProfiles() {
+  const container = document.getElementById('profiles');
+  container.innerHTML = '';
+  for (const [key, intern] of Object.entries(INTERNS)) {
+    const btn = document.createElement('button');
+    btn.className = `profile-btn${key === currentIntern ? ' active' : ''}`;
+    btn.innerHTML = `<span class="avatar">${intern.avatarChar}</span>${intern.displayName} (${intern.name})`;
+    btn.addEventListener('click', () => switchIntern(key));
+    container.appendChild(btn);
+  }
+}
+
+// =============================================
+// RENDER: ISSUE TIMELINE (LEFT PANEL)
+// =============================================
+
+const TYPE_CONFIG = {
+  setup:   { icon: "\u{1F527}", label: "SETUP",    cls: "setup" },
+  feature: { icon: "\u2728",    label: "FEATURE",  cls: "feature" },
+  bugfix:  { icon: "\u{1F41B}", label: "BUGFIX",   cls: "bugfix" },
+  refactor:{ icon: "\u267B\uFE0F", label: "REFACTOR", cls: "refactor" }
+};
+
+function renderTimelineStats() {
+  const issues = ISSUE_DATA[currentIntern] || [];
+  const features = issues.filter(i => i.type === 'feature').length;
+  const bugs = issues.filter(i => i.type === 'bugfix').length;
+  const totalLines = issues.reduce((sum, i) => {
+    if (!i.linesChanged) return sum;
+    const match = i.linesChanged.match(/\+(\d+)\/-(\d+)/);
+    return match ? sum + parseInt(match[1]) + parseInt(match[2]) : sum;
+  }, 0);
+
+  document.getElementById('t-stats').innerHTML = `
+    <div class="t-stat"><div class="t-stat-value">${issues.length}</div><div class="t-stat-label">Issues</div></div>
+    <div class="t-stat"><div class="t-stat-value">${features}</div><div class="t-stat-label">Features</div></div>
+    <div class="t-stat"><div class="t-stat-value">${bugs}</div><div class="t-stat-label">Bug Fixes</div></div>
+    <div class="t-stat"><div class="t-stat-value">${totalLines || '-'}</div><div class="t-stat-label">Lines</div></div>
+  `;
+}
+
+function renderTimeline() {
+  const container = document.getElementById('timeline-container');
+  const issues = ISSUE_DATA[currentIntern] || [];
+
+  if (issues.length === 0) {
+    container.innerHTML = '<div class="t-milestone"><div class="t-milestone-icon">\u{1F331}</div><div class="t-milestone-text">尚未有貢獻記錄...</div></div>';
+    return;
+  }
+
+  let html = '';
+  for (let i = 0; i < issues.length; i++) {
+    const issue = issues[i];
+    const tc = TYPE_CONFIG[issue.type] || TYPE_CONFIG.feature;
+
+    // Skill badges
+    const skillBadges = (issue.skillsLearned || []).map(sid => {
+      const name = SKILL_NAMES[sid] || `#${sid}`;
+      const level = getLevel(sid);
+      return `<span class="t-skill-badge">${name} ${starsHTML(level, 5)}</span>`;
+    }).join('');
+
+    // Highlights
+    const highlightsHTML = (issue.highlights || []).map(h =>
+      `<li>${h}</li>`
+    ).join('');
+
+    // Lines changed
+    let linesHTML = '';
+    if (issue.linesChanged) {
+      const match = issue.linesChanged.match(/(\+\d+)\/([-]\d+)/);
+      if (match) {
+        linesHTML = `<div class="t-lines-changed"><span class="added">${match[1]}</span> / <span class="removed">${match[2]}</span></div>`;
+      }
+    }
+
+    html += `
+      <div class="t-issue type-${tc.cls}" style="animation-delay: ${i * 0.1}s">
+        <div class="t-card">
+          <div class="t-card-header">
+            <span class="t-type-badge ${tc.cls}">${tc.icon} ${tc.label}</span>
+            <span class="t-issue-id">${issue.id}</span>
+            <span class="t-card-date">${issue.date}</span>
+          </div>
+          <div class="t-card-title">${issue.title}</div>
+
+          <div class="t-section-label">\u{1F4CC} 對平台的貢獻</div>
+          <div class="t-contribution">${issue.contribution}</div>
+
+          ${skillBadges ? `
+            <div class="t-section-label">\u{1F3AF} 學到的技能</div>
+            <div class="t-skill-badges">${skillBadges}</div>
+          ` : ''}
+
+          ${highlightsHTML ? `
+            <div class="t-section-label">\u2728 做得好的地方</div>
+            <ul class="t-highlights">${highlightsHTML}</ul>
+          ` : ''}
+
+          ${linesHTML}
+        </div>
+      </div>
+    `;
+  }
+
+  // Milestone footer
+  const intern = INTERNS[currentIntern];
+  html += `
+    <div class="t-milestone">
+      <div class="t-milestone-icon">${issues.length >= 4 ? '\u{1F680}' : '\u{1F6E1}\uFE0F'}</div>
+      <div class="t-milestone-text">
+        <strong>${intern.displayName}</strong> 的貢獻持續累積中...<br>
+        ${intern.recommendations.length > 0 ? '下一個挑戰：' + intern.recommendations[0] : ''}
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
+// =============================================
+// RENDER: SKILL TREE (RIGHT PANEL)
+// =============================================
+
+function renderTree() {
+  const tree = document.getElementById('tree');
+  tree.innerHTML = '';
+
+  for (let tier = 1; tier <= 4; tier++) {
+    if (tier > 1) {
+      const conn = document.createElement('div');
+      conn.className = 'tier-connector';
+      conn.innerHTML = '<div class="line"></div>';
+      tree.appendChild(conn);
+    }
+
+    const tierDiv = document.createElement('div');
+    tierDiv.className = 'tier';
+
+    const label = document.createElement('div');
+    label.className = 'tier-label';
+    label.style.color = TIER_META[tier].color;
+    label.textContent = `Tier ${tier} \u2014 ${TIER_META[tier].name}`;
+    tierDiv.appendChild(label);
+
+    const nodesDiv = document.createElement('div');
+    nodesDiv.className = 'tier-nodes';
+
+    SKILLS.filter(s => s.tier === tier).forEach(skill => {
+      const level = getLevel(skill.id);
+      const avail = isAvailable(skill);
+
+      const node = document.createElement('div');
+      node.className = `node tier-${tier} level-${level}`;
+      if (level === 5) node.classList.add('completed');
+      else if (level > 0) node.classList.add('available');
+      else if (avail) node.classList.add('available');
+      else node.classList.add('locked');
+
+      node.innerHTML = `
+        <div class="check">\u2713</div>
+        <div class="icon">${skill.icon}</div>
+        <div class="name">${skill.name}</div>
+        <div class="stars">${starsHTML(level)}</div>
+        ${level === 0 && !avail ? '<div class="lock-icon">\u{1F512}</div>' : ''}
+      `;
+
+      node.addEventListener('click', () => openPanel(skill));
+      nodesDiv.appendChild(node);
+    });
+
+    tierDiv.appendChild(nodesDiv);
+    tree.appendChild(tierDiv);
+  }
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const earned = getWeightedXP(currentIntern);
+  const pct = (earned / TOTAL_XP) * 100;
+  const skillCount = Object.keys(INTERNS[currentIntern].skills).filter(sid =>
+    (INTERNS[currentIntern].skills[sid].level || 0) > 0
+  ).length;
+  document.getElementById('xp-display').textContent = `${earned} / ${TOTAL_XP} XP`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('completed-count').textContent = skillCount;
+}
+
+// =============================================
+// SKILL DETAIL PANEL
+// =============================================
+
+function openPanel(skill) {
+  const panel = document.getElementById('panel');
+  const overlay = document.getElementById('overlay');
+  const content = document.getElementById('panel-content');
+  const level = getLevel(skill.id);
+  const history = getHistory(skill.id);
+  const avail = isAvailable(skill);
+  const tierColor = TIER_META[skill.tier].hex;
+  const tierName = TIER_META[skill.tier].name;
+
+  const prereqNames = skill.prereqs.map(pid => {
+    const ps = SKILLS.find(s => s.id === pid);
+    const done = getLevel(pid) >= 1;
+    return `<span style="color:${done ? '#22c55e' : '#ef4444'}">${done ? '\u2713' : '\u2717'} ${ps.name} ${starsHTML(getLevel(pid))}</span>`;
+  });
+
+  const criteriaItems = skill.criteria.split('\u3001').map(c => c.trim()).filter(Boolean);
+  const courseOutlineHTML = skill.courseOutline.map(item => `<li>${item}</li>`).join('');
+
+  const historyHTML = history.length > 0
+    ? `<div class="panel-section">
+        <h3>\u{1F4C5} 成長歷程</h3>
+        <div class="history-timeline">
+          ${history.map(h => `
+            <div class="history-entry">
+              <span class="history-date">${h.date}</span>
+              ${starsHTML(h.level)}
+              <div class="history-reason">${h.reason}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`
+    : '';
+
+  content.innerHTML = `
+    <div class="panel-xp" style="color:${tierColor}">${skill.icon} ${skill.xp} XP</div>
+    <h2>${skill.name}</h2>
+    <div class="panel-stars">${starsHTML(level)}</div>
+    <div class="panel-level-name">${LEVELS[level]} (${level}/5)</div>
+    <span class="tier-tag" style="background:${tierColor}15;color:${tierColor};border:1px solid ${tierColor}33;">
+      Tier ${skill.tier} \u2014 ${tierName}
+    </span>
+    <p class="desc">${skill.desc}</p>
+
+    <div class="panel-tabs">
+      <button class="panel-tab active" data-tab="progress" onclick="switchTab('progress', this)">進度</button>
+      <button class="panel-tab" data-tab="material" onclick="switchTab('material', this)">教材</button>
+    </div>
+
+    <div class="tab-content active" id="tab-progress">
+      ${level === 0 && !avail ? `
+        <div class="prereq-warning">
+          \u{1F512} 需要先接觸以下技能：<br>${prereqNames.join('<br>')}
+        </div>
+      ` : ''}
+
+      ${prereqNames.length > 0 && (avail || level > 0) ? `
+        <div class="panel-section">
+          <h3>\u{1F517} 前置技能</h3>
+          <div style="font-size:0.85rem;line-height:1.8;">${prereqNames.join('<br>')}</div>
+        </div>
+      ` : ''}
+
+      ${historyHTML}
+
+      <div class="panel-section">
+        <h3>\u{1F3AF} PBL 實作專案</h3>
+        <p style="font-size:0.85rem;color:#1e293b;line-height:1.6;">${skill.project}</p>
+      </div>
+
+      <div class="panel-section">
+        <h3>\u2705 完成條件</h3>
+        <div>
+          ${criteriaItems.map(c => `
+            <div class="criteria-item">
+              <div class="criteria-checkbox ${level >= 3 ? 'checked' : ''}">${level >= 3 ? '\u2713' : ''}</div>
+              <span>${c}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-material">
+      <div class="panel-section">
+        <h3>\u{1F4C4} 課程檔案</h3>
+        <p style="font-size:0.85rem;color:#64748b;margin-bottom:12px;">
+          courses/${skill.courseFile}
+        </p>
+      </div>
+
+      <div class="panel-section">
+        <h3>\u{1F4CB} 課程大綱</h3>
+        <ul style="list-style:none;padding:0;">
+          ${courseOutlineHTML}
+        </ul>
+      </div>
+
+      <a href="courses/viewer.html?file=${skill.courseFile}" class="course-link-btn" target="_blank" rel="noopener">
+        開始學習 \u2192
+      </a>
+    </div>
+  `;
+
+  panel.classList.add('open');
+  overlay.classList.add('open');
+}
+
+window.switchTab = function(tabId, btn) {
+  const tabs = btn.parentElement.querySelectorAll('.panel-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  const contents = btn.closest('.panel-content').querySelectorAll('.tab-content');
+  contents.forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+};
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+document.getElementById('panel-close').addEventListener('click', closePanel);
+document.getElementById('overlay').addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+// =============================================
+// RENDER: RECOMMENDATIONS & REVIEW
+// =============================================
+
+function renderRecommendations() {
+  const section = document.getElementById('rec-section');
+  const content = document.getElementById('rec-content');
+  const intern = INTERNS[currentIntern];
+  const recs = intern.recommendations || [];
+
+  if (recs.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = '';
+  content.innerHTML = recs.map(rec => `
+    <div class="rec-item">
+      <p>${rec}</p>
+    </div>
+  `).join('');
+}
+
+function renderReview() {
+  const section = document.getElementById('review-section');
+  const content = document.getElementById('review-content');
+  const intern = INTERNS[currentIntern];
+  const skills = intern.skills;
+  const skillCount = Object.keys(skills).filter(sid => (skills[sid].level || 0) > 0).length;
+  const maxedCount = Object.values(skills).filter(s => s.level >= 5).length;
+
+  const topSkills = Object.entries(skills)
+    .filter(([, s]) => s.level >= 3)
+    .map(([sid, s]) => {
+      const def = SKILLS.find(sk => sk.id === parseInt(sid));
+      return def ? `${def.icon} ${def.name} ${starsHTML(s.level)}` : null;
+    })
+    .filter(Boolean);
+
+  section.style.display = '';
+  content.innerHTML = `
+    <div class="review-stat">
+      <div class="review-stat-item"><strong>${skillCount}</strong> 技能已接觸</div>
+      <div class="review-stat-item"><strong>${maxedCount}</strong> 技能滿星</div>
+      <div class="review-stat-item">評估 <strong style="font-size:0.88rem;">${intern.lastReview || 'N/A'}</strong></div>
+    </div>
+
+    ${topSkills.length > 0 ? `
+      <div class="review-section">
+        <h4>\u{1F4AA} 強項技能 (\u2605\u2605\u2605 以上)</h4>
+        <div style="font-size:0.85rem;line-height:2;">${topSkills.join('<br>')}</div>
+      </div>
+    ` : ''}
+
+    ${intern.recommendations.length > 0 ? `
+      <div class="review-section">
+        <h4>\u{1F3AF} AI 建議</h4>
+        ${intern.recommendations.map(r => `<p style="font-size:0.85rem;margin-bottom:4px;">\u2022 ${r}</p>`).join('')}
+      </div>
+    ` : ''}
+  `;
+}
+
+// =============================================
+// RENDER ALL
+// =============================================
+
+function renderAll() {
+  renderProfiles();
+  renderTimelineStats();
+  renderTimeline();
+  renderTree();
+  renderRecommendations();
+  renderReview();
+  closePanel();
+}
+
+// =============================================
+// INIT
+// =============================================
+
+async function init() {
+  await Promise.all(Object.keys(INTERNS).map(k => loadInternData(k)));
+  renderAll();
+}
+init();
+</script>
+</body>
+</html>
