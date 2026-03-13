@@ -229,5 +229,54 @@
     "學習元件設計模式，提高程式碼品質 (#13)",
     "學習撰寫測試，確保程式碼品質 (#14)"
   ],
-  "summary": "Bug 修復流程完整扎實（#216 IME bug），JS 非同步與事件處理已具備，下一步重點是 commit 規範與 React 元件獨立開發能力"
+  "summary": "Bug 修復流程完整扎實（#216 IME bug），JS 非同步與事件處理已具備，下一步重點是 commit 規範與 React 元件獨立開發能力",
+  "issues": [
+    {
+      "id": "環境建置",
+      "title": "Fork repo + 開發環境設定",
+      "date": "2026-03-02",
+      "type": "setup",
+      "contribution": "完成專案 fork、本地環境建置",
+      "skillsLearned": [1, 4],
+      "highlights": ["順利完成 fork 和 push"]
+    },
+    {
+      "id": "#224",
+      "title": "閱讀理解頁面 UI 修改",
+      "date": "2026-03-05",
+      "type": "feature",
+      "contribution": "修改閱讀理解頁面 UI/UX，改善互動體驗",
+      "skillsLearned": [2, 3, 5],
+      "highlights": ["第一個 PR", "能讀懂基本 HTML/JS"]
+    },
+    {
+      "id": "#216",
+      "title": "修復 IME 輸入法 composition bug",
+      "date": "2026-03-10",
+      "type": "bugfix",
+      "contribution": "修復中文輸入法在聊天介面的 composition 事件處理問題，影響所有中文使用者",
+      "skillsLearned": [3, 5, 10],
+      "highlights": ["完整執行 重現→定位→修復→驗證 流程", "處理 isComposing event 和 async 語音功能", "Bug 修復流程扎實"],
+      "linesChanged": "+32/-8"
+    },
+    {
+      "id": "#314",
+      "title": "本地 DB 連線問題修復",
+      "date": "2026-03-10",
+      "type": "bugfix",
+      "contribution": "修復本地開發環境的資料庫連線問題，讓開發流程更順暢",
+      "skillsLearned": [4],
+      "highlights": ["本地開發環境完全跑通"]
+    },
+    {
+      "id": "語音功能",
+      "title": "語音輸入/輸出功能開發",
+      "date": "2026-03-13",
+      "type": "feature",
+      "contribution": "為閱讀理解聊天介面新增語音輸入和語音輸出功能，大幅提升無障礙使用體驗",
+      "skillsLearned": [6, 7, 8, 12],
+      "highlights": ["獨立完成完整功能", "成功串接語音 API", "React 元件設計清晰", "TypeScript 使用正確"],
+      "linesChanged": "+180/-20"
+    }
+  ]
 }

@@ -13,7 +13,8 @@
     color: #1e293b;
     min-height: 100vh;
     overflow: hidden;
-    line-height: 1.5;
+    line-height: 1.65;
+    font-size: 16px;
   }
 
   /* ==========================================
@@ -42,9 +43,10 @@
     letter-spacing: 0.02em;
   }
   .dashboard-header .subtitle {
-    font-size: 0.78rem;
-    color: #94a3b8;
+    font-size: 0.875rem;
+    color: #64748b;
     margin-top: 2px;
+    font-weight: 500;
   }
   .dashboard-header .profiles {
     display: flex;
@@ -58,7 +60,7 @@
     border-radius: 10px;
     background: #ffffff;
     color: #1e293b;
-    font-size: 0.88rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -66,7 +68,10 @@
     align-items: center;
     gap: 8px;
   }
-  .dashboard-header .profile-btn:hover { border-color: #3b82f6; }
+  .dashboard-header .profile-btn:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+  }
   .dashboard-header .profile-btn.active {
     border-color: #3b82f6;
     background: linear-gradient(135deg, #eff6ff, #f0f9ff);
@@ -128,7 +133,7 @@
   }
   .timeline-panel .t-stat { text-align: center; }
   .timeline-panel .t-stat-value {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 800;
     background: linear-gradient(135deg, #f59e0b, #06b6d4);
     -webkit-background-clip: text;
@@ -136,17 +141,19 @@
     background-clip: text;
   }
   .timeline-panel .t-stat-label {
-    font-size: 0.65rem;
-    color: #94a3b8;
+    font-size: 0.8rem;
+    color: #cbd5e1;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-top: 2px;
   }
 
   /* Timeline Section Title */
   .timeline-panel .t-section-title {
     text-align: center;
-    padding: 14px 12px 8px;
-    font-size: 0.95rem;
+    padding: 16px 12px 10px;
+    font-size: 1.05rem;
     font-weight: 700;
     background: linear-gradient(135deg, #f59e0b, #fbbf24);
     -webkit-background-clip: text;
@@ -238,10 +245,10 @@
     flex-wrap: wrap;
   }
   .timeline-panel .t-type-badge {
-    font-size: 0.58rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 5px;
+    padding: 3px 10px;
+    border-radius: 6px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -250,15 +257,16 @@
   .t-type-badge.bugfix { background: #7c2d12; color: #fdba74; }
   .t-type-badge.refactor { background: #4c1d95; color: #c4b5fd; }
   .timeline-panel .t-issue-id {
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: #94a3b8;
+    color: #cbd5e1;
     font-family: "SF Mono", Monaco, monospace;
   }
   .timeline-panel .t-card-date {
-    font-size: 0.62rem;
-    color: #64748b;
+    font-size: 0.8rem;
+    color: #94a3b8;
     margin-left: auto;
+    font-weight: 500;
   }
 
   /* Card title */
@@ -1239,6 +1247,7 @@ const INTERNS = {
     avatarChar: "靖",
     jsonFile: "interns/raymond.json",
     skills: {},
+    issues: [],
     lastReview: "",
     recommendations: []
   },
@@ -1250,6 +1259,7 @@ const INTERNS = {
     avatarChar: "啟",
     jsonFile: "interns/xiung.json",
     skills: {},
+    issues: [],
     lastReview: "",
     recommendations: []
   }
@@ -1405,6 +1415,7 @@ async function loadInternData(internKey) {
     if (!res.ok) throw new Error('fetch failed');
     const data = await res.json();
     intern.skills = data.skills || {};
+    intern.issues = data.issues || [];
     intern.lastReview = data.lastReview || '';
     intern.recommendations = data.recommendations || [];
   } catch {
@@ -1413,6 +1424,11 @@ async function loadInternData(internKey) {
       intern.skills = JSON.parse(JSON.stringify(fb.skills || {}));
       intern.lastReview = fb.lastReview || '';
       intern.recommendations = fb.recommendations || [];
+    }
+    // Fallback issues from hardcoded ISSUE_DATA
+    const fbIssues = ISSUE_DATA[internKey];
+    if (fbIssues) {
+      intern.issues = JSON.parse(JSON.stringify(fbIssues));
     }
   }
 }
@@ -1514,7 +1530,7 @@ const TYPE_CONFIG = {
 };
 
 function renderTimelineStats() {
-  const issues = ISSUE_DATA[currentIntern] || [];
+  const issues = INTERNS[currentIntern].issues || [];
   const features = issues.filter(i => i.type === 'feature').length;
   const bugs = issues.filter(i => i.type === 'bugfix').length;
   const totalLines = issues.reduce((sum, i) => {
@@ -1533,7 +1549,7 @@ function renderTimelineStats() {
 
 function renderTimeline() {
   const container = document.getElementById('timeline-container');
-  const issues = ISSUE_DATA[currentIntern] || [];
+  const issues = INTERNS[currentIntern].issues || [];
 
   if (issues.length === 0) {
     container.innerHTML = '<div class="t-milestone"><div class="t-milestone-icon">\u{1F331}</div><div class="t-milestone-text">尚未有貢獻記錄...</div></div>';

@@ -81,6 +81,7 @@ LEVELS: dict[int, str] = {
 }
 
 MAX_DIFF_LINES = 500
+GITHUB_REPO = "Youngger9765/chinese-literacy-platform"
 
 # ---------------------------------------------------------------------------
 # ANSI colors
@@ -222,6 +223,120 @@ def gh_issue_comments(github_handle: str, days: int) -> list[dict[str, str]]:
 
 
 # ---------------------------------------------------------------------------
+# GitHub Issues/PRs fetcher
+# ---------------------------------------------------------------------------
+
+def git_commit_stat(commit_hash: str) -> str:
+    """Return '+N/-M' line-change summary for a single commit."""
+    cmd = ["git", "show", "--stat", "--format=", commit_hash]
+    try:
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, cwd=REPO_ROOT, check=True,
+        )
+    except subprocess.CalledProcessError:
+        return ""
+    # Last non-empty line of --stat contains "N insertions(+), M deletions(-)"
+    for line in reversed(result.stdout.strip().splitlines()):
+        m = re.search(r"(\d+) insertion", line)
+        d = re.search(r"(\d+) deletion", line)
+        ins = m.group(1) if m else "0"
+        dels = d.group(1) if d else "0"
+        if m or d:
+            return f"+{ins}/-{dels}"
+    return ""
+
+
+def extract_issue_numbers(message: str) -> list[str]:
+    """Extract issue/PR numbers from commit message (e.g., '#224', 'fix #216')."""
+    return [f"#{m}" for m in re.findall(r"#(\d+)", message)]
+
+
+def gh_issues_and_prs(github_handle: str, days: int) -> list[dict]:
+    """Fetch issues assigned to / created by intern, and PRs created by intern."""
+    since = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%dT00:00:00Z")
+    items: list[dict] = []
+    seen: set[int] = set()
+
+    # Fetch issues (assigned or created by)
+    for query_type in ["assignee", "creator"]:
+        cmd = [
+            "gh", "api", "--paginate",
+            f"/repos/{GITHUB_REPO}/issues"
+            f"?{query_type}={github_handle}&since={since}"
+            f"&state=all&sort=created&direction=desc&per_page=100",
+        ]
+        try:
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, cwd=REPO_ROOT, timeout=30,
+            )
+            if result.returncode != 0:
+                continue
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            continue
+
+        try:
+            data = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            continue
+
+        if not isinstance(data, list):
+            continue
+
+        for item in data:
+            num = item.get("number", 0)
+            if num in seen:
+                continue
+            seen.add(num)
+
+            labels = [l.get("name", "") for l in item.get("labels", [])]
+            body = item.get("body", "") or ""
+            if len(body) > 500:
+                body = body[:500] + "..."
+
+            is_pr = "pull_request" in item
+            items.append({
+                "number": num,
+                "id": f"#{num}",
+                "title": item.get("title", ""),
+                "state": item.get("state", ""),
+                "created_at": (item.get("created_at") or "")[:10],
+                "closed_at": (item.get("closed_at") or "")[:10] if item.get("closed_at") else None,
+                "labels": labels,
+                "body": body,
+                "is_pr": is_pr,
+            })
+
+    # Sort by created_at ascending
+    items.sort(key=lambda x: x.get("created_at", ""))
+    return items
+
+
+def compute_lines_changed_by_issue(commits: list[dict]) -> dict[str, str]:
+    """Group commits by issue number and sum line changes.
+
+    Returns dict like {"#224": "+32/-8", "#216": "+50/-12"}.
+    """
+    issue_stats: dict[str, tuple[int, int]] = {}
+
+    for c in commits:
+        refs = extract_issue_numbers(c["message"])
+        if not refs:
+            continue
+        stat = git_commit_stat(c["hash"])
+        if not stat:
+            continue
+        m = re.match(r"\+(\d+)/-(\d+)", stat)
+        if not m:
+            continue
+        ins, dels = int(m.group(1)), int(m.group(2))
+        for ref in refs:
+            prev = issue_stats.get(ref, (0, 0))
+            issue_stats[ref] = (prev[0] + ins, prev[1] + dels)
+
+    return {k: f"+{v[0]}/-{v[1]}" for k, v in issue_stats.items()}
+
+
+# ---------------------------------------------------------------------------
 # JSON file I/O — migrate old format to new progressive format
 # ---------------------------------------------------------------------------
 
@@ -318,12 +433,37 @@ def call_gemini(prompt: str) -> dict | None:
                 "items": {"type": "string"},
             },
             "summary": {"type": "string"},
+            "issue_contributions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string"},
+                        "title": {"type": "string"},
+                        "date": {"type": "string"},
+                        "type": {"type": "string"},
+                        "contribution": {"type": "string"},
+                        "skillsLearned": {
+                            "type": "array",
+                            "items": {"type": "integer"},
+                        },
+                        "highlights": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                        },
+                        "linesChanged": {"type": "string"},
+                    },
+                    "required": ["id", "title", "date", "type",
+                                 "contribution", "skillsLearned", "highlights"],
+                },
+            },
         },
-        "required": ["skill_updates", "recommendations", "summary"],
+        "required": ["skill_updates", "recommendations", "summary",
+                     "issue_contributions"],
     }
 
     gen_config = GenerationConfig(
-        max_output_tokens=4096,
+        max_output_tokens=8192,
         temperature=0.2,
         response_mime_type="application/json",
         response_schema=response_schema,
@@ -363,6 +503,8 @@ def build_prompt(
     current_skills: dict,
     commits_text: str,
     comments_text: str,
+    issues_text: str,
+    lines_changed_by_issue: dict[str, str],
     days: int,
 ) -> str:
     skills_defs = json.dumps(
@@ -379,6 +521,8 @@ def build_prompt(
         indent=2,
     ) if current_skills else "{}"
 
+    lines_changed_json = json.dumps(lines_changed_by_issue, ensure_ascii=False)
+
     return f"""你是一個軟體實習生的技能評估助理。這些實習生是高中生，正在開發 LingoLeap 中文閱讀學習平台（React + TypeScript + Tailwind 前端）。
 
 ## 實習生資訊
@@ -392,6 +536,12 @@ GitHub：@{intern_github}
 ## GitHub Issue/PR 留言（過去 {days} 天）
 {comments_text if comments_text else "（無留言）"}
 
+## GitHub Issues/PRs（過去 {days} 天）
+{issues_text if issues_text else "（無 Issues/PRs）"}
+
+## 各 Issue 的程式碼修改量
+{lines_changed_json}
+
 ## 20 個技能定義
 {skills_defs}
 
@@ -404,11 +554,26 @@ GitHub：@{intern_github}
 
 ## 請你做以下事情：
 
+### Part 1: 技能評估
 1. 分析 commits 和 issue 留言展現了哪些技能（留言可反映：問題分析能力、溝通能力、code review 能力、架構理解等）
 2. 評估每個有變化的技能應該是什麼等級（1-5）
 3. 等級只能維持或上升，不能下降
 4. 如果證據不足，不要猜測，保持原等級
 5. 給出 2-3 個具體的下一步建議（包含推薦的 GitHub Issue 編號）
+
+### Part 2: Issue 貢獻分析
+分析這位實習生參與的每個 Issue/PR，產出 issue_contributions 陣列。對每個 Issue/PR：
+1. 從 commit messages 和 issue labels 推斷 type：
+   - commit 含 "fix:" 或 issue 有 "bug" label → "bugfix"
+   - commit 含 "feat:" 或 issue 有 "feature" label → "feature"
+   - commit 含 "refactor:" → "refactor"
+   - 環境設定相關 → "setup"
+   - 預設 → "feature"
+2. 用中文寫一句話描述這個 Issue 對平台的貢獻（contribution 欄位）
+3. 列出學到的技能 ID（skillsLearned，從 1-20 的技能定義中選）
+4. 列出 1-3 個做得好的地方（highlights，中文）
+5. 如果有對應的程式碼修改量資料，填入 linesChanged（格式："+N/-M"）
+6. date 填寫該 issue 最近一次有活動的日期
 
 回覆格式（嚴格 JSON）：
 {{
@@ -416,7 +581,19 @@ GitHub：@{intern_github}
     {{"skill_id": 1, "new_level": 3, "reason": "簡短原因（20字以內）"}}
   ],
   "recommendations": ["建議1", "建議2"],
-  "summary": "一句話總結（30字以內）"
+  "summary": "一句話總結（30字以內）",
+  "issue_contributions": [
+    {{
+      "id": "#224",
+      "title": "Issue 標題",
+      "date": "2026-03-05",
+      "type": "feature",
+      "contribution": "一句話描述對平台的貢獻（中文）",
+      "skillsLearned": [2, 3, 5],
+      "highlights": ["做得好的地方1", "做得好的地方2"],
+      "linesChanged": "+32/-8"
+    }}
+  ]
 }}
 
 重要：reason 和 summary 必須簡短精煉，每個 reason 不超過 20 個中文字。只輸出 JSON。"""
@@ -487,6 +664,28 @@ def evaluate_intern(
         )
     comments_text = "\n".join(comments_parts)
 
+    # Fetch issues/PRs
+    issues = gh_issues_and_prs(config["github"], days)
+    if issues:
+        print(f"   找到 {C.CYAN}{len(issues)}{C.RESET} 個 Issues/PRs")
+
+    # Build issues text
+    issues_parts = []
+    for i, iss in enumerate(issues, 1):
+        labels_str = ", ".join(iss["labels"]) if iss["labels"] else "（無 label）"
+        pr_tag = " [PR]" if iss["is_pr"] else ""
+        issues_parts.append(
+            f"### {iss['id']}{pr_tag}: {iss['title']}\n"
+            f"State: {iss['state']} | Created: {iss['created_at']}"
+            f"{' | Closed: ' + iss['closed_at'] if iss['closed_at'] else ''}\n"
+            f"Labels: {labels_str}\n"
+            f"Body: {iss['body'][:300] if iss['body'] else '（無內容）'}\n"
+        )
+    issues_text = "\n".join(issues_parts)
+
+    # Compute line changes grouped by issue number
+    lines_changed_by_issue = compute_lines_changed_by_issue(commits)
+
     # Build prompt
     prompt = build_prompt(
         intern_name=config["name"],
@@ -494,11 +693,16 @@ def evaluate_intern(
         current_skills=intern_data.get("skills", {}),
         commits_text=commits_text,
         comments_text=comments_text,
+        issues_text=issues_text,
+        lines_changed_by_issue=lines_changed_by_issue,
         days=days,
     )
 
     if dry_run:
-        print(f"   {C.YELLOW}[DRY RUN] Prompt: {len(prompt)} chars ({len(commits)} commits + {len(comments)} comments){C.RESET}")
+        print(f"   {C.YELLOW}[DRY RUN] Prompt: {len(prompt)} chars "
+              f"({len(commits)} commits + {len(comments)} comments + {len(issues)} issues){C.RESET}")
+        if lines_changed_by_issue:
+            print(f"   {C.YELLOW}[DRY RUN] Line changes by issue: {lines_changed_by_issue}{C.RESET}")
         print(f"   {C.YELLOW}[DRY RUN] 跳過 Gemini 呼叫與 JSON 更新{C.RESET}")
         return True
 
@@ -565,6 +769,35 @@ def evaluate_intern(
     intern_data["skills"] = current_skills
     intern_data["lastReview"] = today
     intern_data["recommendations"] = result.get("recommendations", [])
+
+    # Merge issue_contributions into existing issues (keep old, add/update new by id)
+    new_contributions = result.get("issue_contributions", [])
+    if new_contributions:
+        existing_issues: list[dict] = intern_data.get("issues", [])
+        existing_by_id = {iss["id"]: iss for iss in existing_issues}
+
+        for contrib in new_contributions:
+            cid = contrib.get("id", "")
+            if not cid:
+                continue
+            # Inject linesChanged from computed data if Gemini didn't provide it
+            if not contrib.get("linesChanged") and cid in lines_changed_by_issue:
+                contrib["linesChanged"] = lines_changed_by_issue[cid]
+            existing_by_id[cid] = contrib
+
+        # Sort by date ascending
+        merged = sorted(existing_by_id.values(), key=lambda x: x.get("date", ""))
+        intern_data["issues"] = merged
+
+        print(f"\n   {C.BOLD}Issue 貢獻：{C.RESET}")
+        for ic in new_contributions:
+            type_emoji = {"feature": "feat", "bugfix": "fix",
+                          "refactor": "refactor", "setup": "setup"}.get(
+                ic.get("type", ""), ic.get("type", ""))
+            lines = ic.get("linesChanged", "")
+            lines_str = f" ({lines})" if lines else ""
+            print(f"   {C.GREEN}   [{type_emoji}] {ic.get('id', '?')}: "
+                  f"{ic.get('contribution', '')}{lines_str}{C.RESET}")
 
     # Save
     save_intern_json(json_path, intern_data)
