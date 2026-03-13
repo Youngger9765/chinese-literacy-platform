@@ -191,6 +191,23 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     return optional.slice(0, 12);
   }, [story.content, attempt.mispronouncedWords]);
 
+  // Pronunciation tab: all characters are candidates (no stroke-data filter needed)
+  const pronunciationChars = useMemo(() => {
+    const suggested = attempt.mispronouncedWords.filter(ch => /[\u4e00-\u9fa5]/.test(ch));
+    if (suggested.length > 0) return suggested.slice(0, 12);
+    const seen = new Set<string>();
+    const optional: string[] = [];
+    for (const line of story.content) {
+      for (const ch of line) {
+        if (/[\u4e00-\u9fa5]/.test(ch) && !seen.has(ch)) {
+          optional.push(ch);
+          seen.add(ch);
+        }
+      }
+    }
+    return optional.slice(0, 12);
+  }, [story.content, attempt.mispronouncedWords]);
+
   const handlePractice = (ch: string, mode: PracticeMode = 'stroke') => {
     setPracticingChar(ch);
     setPhase(mode === 'stroke' ? 'practice' : 'pronunciation');
@@ -258,23 +275,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const strokeDone = displayChars.length > 0 && displayChars.every(ch => practicedChars.has(ch));
   const pronounceDone = displayChars.length > 0 && displayChars.every(ch => pronouncedChars.has(ch));
   const allDone = strokeDone && pronounceDone;
-
-  // Pronunciation tab: all characters are candidates (no stroke-data filter needed)
-  const pronunciationChars = useMemo(() => {
-    const suggested = attempt.mispronouncedWords.filter(ch => /[\u4e00-\u9fa5]/.test(ch));
-    if (suggested.length > 0) return suggested.slice(0, 12);
-    const seen = new Set<string>();
-    const optional: string[] = [];
-    for (const line of story.content) {
-      for (const ch of line) {
-        if (/[\u4e00-\u9fa5]/.test(ch) && !seen.has(ch)) {
-          optional.push(ch);
-          seen.add(ch);
-        }
-      }
-    }
-    return optional.slice(0, 12);
-  }, [story.content, attempt.mispronouncedWords]);
 
   const currentChars = activeTab === 'stroke' ? displayChars : pronunciationChars;
   const currentPracticedSet = activeTab === 'stroke' ? practicedChars : pronouncedChars;
