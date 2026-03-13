@@ -1408,26 +1408,29 @@ function isAvailable(skill) {
 
 async function loadInternData(internKey) {
   const intern = INTERNS[internKey];
+  // Always load hardcoded issue data first (works on file:// too)
+  const fbIssues = ISSUE_DATA[internKey];
+  if (fbIssues) {
+    intern.issues = JSON.parse(JSON.stringify(fbIssues));
+  }
+  // Always load fallback skill data first
+  const fb = FALLBACK_DATA[internKey];
+  if (fb) {
+    intern.skills = JSON.parse(JSON.stringify(fb.skills || {}));
+    intern.lastReview = fb.lastReview || '';
+    intern.recommendations = fb.recommendations || [];
+  }
+  // Then try fetch for latest data (overrides fallback if successful)
   try {
     const res = await fetch(intern.jsonFile);
     if (!res.ok) throw new Error('fetch failed');
     const data = await res.json();
-    intern.skills = data.skills || {};
-    intern.issues = data.issues || [];
-    intern.lastReview = data.lastReview || '';
-    intern.recommendations = data.recommendations || [];
+    intern.skills = data.skills || intern.skills;
+    intern.issues = data.issues || intern.issues;
+    intern.lastReview = data.lastReview || intern.lastReview;
+    intern.recommendations = data.recommendations || intern.recommendations;
   } catch {
-    const fb = FALLBACK_DATA[internKey];
-    if (fb) {
-      intern.skills = JSON.parse(JSON.stringify(fb.skills || {}));
-      intern.lastReview = fb.lastReview || '';
-      intern.recommendations = fb.recommendations || [];
-    }
-    // Fallback issues from hardcoded ISSUE_DATA
-    const fbIssues = ISSUE_DATA[internKey];
-    if (fbIssues) {
-      intern.issues = JSON.parse(JSON.stringify(fbIssues));
-    }
+    // fetch failed (e.g. file:// protocol) — fallback data already loaded above
   }
 }
 
