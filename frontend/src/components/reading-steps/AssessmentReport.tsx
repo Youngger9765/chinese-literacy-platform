@@ -61,6 +61,10 @@ interface AssessmentReportProps {
   comprehensionScoresLoading?: boolean;
   /** Reading goals from assignment, if student is doing an assignment (Issue #84) */
   readingGoals?: { effectiveCpm: number; effectiveAccuracy: number; difficultyLabel?: string | null } | null;
+  /** DB session ID — passed to ExitTicket for AI generation and persistence (Issue #463) */
+  dbSessionId?: number | null;
+  /** Auth token — passed to ExitTicket for API calls (Issue #463) */
+  token?: string | null;
 }
 
 // CPM thresholds aligned with backend persona.py (Issue #54)
@@ -159,7 +163,7 @@ const Section: React.FC<{
   );
 };
 
-const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals }) => {
+const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals, dbSessionId, token }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
 
   // Track lesson completion when a valid report is viewed.
@@ -830,7 +834,13 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
       {/* ============ 出場卷 Exit Ticket ============ */}
       {(wrongTokens.length > 0 || missingChars.length > 0) && story?.content && (
-        <ExitTicket wrongTokens={wrongTokens} missingChars={missingChars} storyContent={story.content} />
+        <ExitTicket
+          wrongTokens={wrongTokens}
+          missingChars={missingChars}
+          storyContent={story.content}
+          dbSessionId={dbSessionId}
+          token={token}
+        />
       )}
 
       {/* CTA */}
