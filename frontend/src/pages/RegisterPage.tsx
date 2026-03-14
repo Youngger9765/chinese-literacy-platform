@@ -103,7 +103,12 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
             <span className="text-white font-black text-2xl">L</span>
           </div>
           <h1 className="text-2xl font-black text-gray-900">AI 朗讀助教</h1>
-          <p className="text-gray-500 text-sm mt-1">建立你的帳號</p>
+          <p className="text-gray-500 text-sm mt-1">教師註冊</p>
+        </div>
+
+        {/* Student notice */}
+        <div className="bg-amber-100 border border-amber-300 text-amber-800 text-sm rounded-lg px-4 py-3 mb-2">
+          學生帳號由老師在班級管理中建立，請聯繫你的老師取得帳號。
         </div>
 
         {/* Form Card */}
