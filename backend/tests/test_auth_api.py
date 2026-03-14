@@ -441,6 +441,47 @@ class TestRegisterEndpoint:
         })
         assert login_resp.status_code == 200
 
+    def test_register_student_role_rejected_with_403(self, client):
+        """Students must NOT be able to self-register.
+        /auth/register is teacher-only (issue #457)."""
+        resp = client.post("/api/auth/register", json={
+            "email": "student_self@example.com",
+            "password": "StrongPass1!",
+            "name": "Student Self",
+            "role": "student",
+        })
+        assert resp.status_code == 403
+
+    def test_register_student_role_returns_correct_message(self, client):
+        """Error message should guide the student to ask their teacher."""
+        resp = client.post("/api/auth/register", json={
+            "email": "student_msg@example.com",
+            "password": "StrongPass1!",
+            "name": "Student Msg",
+            "role": "student",
+        })
+        assert resp.status_code == 403
+        assert "老師" in resp.json()["detail"]
+
+    def test_register_no_role_defaults_to_teacher_allowed(self, client):
+        """When no role is specified the endpoint registers a teacher (default flow)."""
+        resp = client.post("/api/auth/register", json={
+            "email": "norole_teacher@example.com",
+            "password": "StrongPass1!",
+            "name": "No Role Teacher",
+        })
+        assert resp.status_code == 201
+
+    def test_register_teacher_role_explicitly_allowed(self, client):
+        """Explicitly passing role=teacher should succeed."""
+        resp = client.post("/api/auth/register", json={
+            "email": "explicit_teacher@example.com",
+            "password": "StrongPass1!",
+            "name": "Explicit Teacher",
+            "role": "teacher",
+        })
+        assert resp.status_code == 201
+
 
 # ===========================================================================
 # Integration tests — POST /api/auth/login

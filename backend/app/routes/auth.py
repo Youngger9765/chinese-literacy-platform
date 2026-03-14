@@ -49,10 +49,22 @@ def _enforce_password_strength(password: str) -> None:
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def register(req: RegisterRequest, request: Request, db: Session = Depends(get_db)):
-    """Register a new user account."""
+    """Register a new teacher account.
+
+    This endpoint is for teacher self-registration only (issue #457).
+    Student accounts must be created by teachers via classroom management
+    (POST /classrooms/{id}/students or CSV upload).
+    """
     client_ip = request.client.host if request.client else "unknown"
     if not rate_limiter.check(f"register:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
+    # Block student self-registration. Students are created by teachers only.
+    if req.role is not None and req.role.lower() == "student":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="學生帳號由老師建立，請聯繫你的老師取得帳號。",
+        )
 
     # Validate password strength before checking for duplicates
     _enforce_password_strength(req.password)

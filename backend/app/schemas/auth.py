@@ -6,6 +6,9 @@ class RegisterRequest(BaseModel):
     # min_length removed here so auth route can return a descriptive Chinese error
     password: str = Field(..., min_length=1, max_length=128)
     name: str = Field(..., min_length=1, max_length=100)
+    # Optional role hint. Only "teacher" (or omitted) is allowed for self-registration.
+    # Students must be created by teachers via classroom management (issue #457).
+    role: str | None = Field(None, max_length=50)
 
 
 class LoginRequest(BaseModel):
