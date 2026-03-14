@@ -140,6 +140,38 @@ def _is_admin(user_id: int, db: Session) -> bool:
     ) is not None
 
 
+_SYNTHETIC_EMAIL_DOMAIN = "student.lingoleap.local"
+
+
+def _is_synthetic_email(email: str) -> bool:
+    """Return True for internally-generated synthetic student emails.
+
+    Synthetic emails use the ``@student.lingoleap.local`` domain and are
+    created by the batch / CSV import flows.  They should be exempt from
+    school-domain validation because the school may not have a real domain
+    configured yet.
+    """
+    return email.lower().endswith(f"@{_SYNTHETIC_EMAIL_DOMAIN}")
+
+
+def _check_email_domain(email: str, school_domain: str | None) -> str | None:
+    """Validate that *email* belongs to *school_domain*.
+
+    Returns a warning string if the domains do not match, otherwise None.
+    Skips validation when:
+    - school_domain is None / empty (school has no domain configured)
+    - email is synthetic (``@student.lingoleap.local``)
+    """
+    if not school_domain:
+        return None
+    if _is_synthetic_email(email):
+        return None
+    email_domain = email.split("@", 1)[-1].lower() if "@" in email else ""
+    if email_domain != school_domain.lower().lstrip("@"):
+        return f"學生 {email} 的 email 不屬於學校 domain ({school_domain})"
+    return None
+
+
 def _student_count(classroom: Classroom, db: Session) -> int:
     """Return the number of enrolled students via a COUNT query."""
     return (
@@ -586,8 +618,13 @@ def batch_create_students(
     # Find the student role for assignment
     student_role = db.query(Role).filter(Role.name == "student").first()
 
+    # Fetch school domain for email validation
+    school = db.query(School).filter(School.id == classroom.school_id).first()
+    school_domain = school.domain if school else None
+
     created: list[CreatedStudentInfo] = []
     errors: list[BatchStudentError] = []
+    warnings: list[str] = []
 
     for item in payload.students:
         try:
@@ -605,6 +642,11 @@ def batch_create_students(
                     error=f"User with email {email} already exists",
                 ))
                 continue
+
+            # Domain check — synthetic emails are always exempt
+            domain_warning = _check_email_domain(email, school_domain)
+            if domain_warning:
+                warnings.append(domain_warning)
 
             # Generate random password (8-char uppercase + digits)
             password = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
@@ -667,10 +709,10 @@ def batch_create_students(
 
     db.commit()
     logger.info(
-        "Batch created %d students for classroom %d (errors: %d)",
-        len(created), classroom_id, len(errors),
+        "Batch created %d students for classroom %d (errors: %d, warnings: %d)",
+        len(created), classroom_id, len(errors), len(warnings),
     )
-    return BatchStudentCreateResponse(created=created, errors=errors)
+    return BatchStudentCreateResponse(created=created, errors=errors, warnings=warnings)
 
 
 # ── Student Search ──────────────────────────────────────────────────────────
@@ -844,8 +886,13 @@ async def upload_csv_students(
     # ── 3. Batch-create students (same logic as JSON batch endpoint) ──────────
     student_role = db.query(Role).filter(Role.name == "student").first()
 
+    # Fetch school domain for email validation
+    school = db.query(School).filter(School.id == classroom.school_id).first()
+    school_domain = school.domain if school else None
+
     created: list[CreatedStudentInfo] = []
     errors: list[BatchStudentError] = []
+    warnings: list[str] = []
 
     # Carry forward parse errors as skipped entries
     for _name, _seat, err_msg in invalid_rows:
@@ -870,6 +917,11 @@ async def upload_csv_students(
                     error=f"座號 {seat_number} 已存在（帳號 {username} 重複）",
                 ))
                 continue
+
+            # Domain check — synthetic emails are always exempt
+            domain_warning = _check_email_domain(email, school_domain)
+            if domain_warning:
+                warnings.append(domain_warning)
 
             password = "".join(
                 secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8)
@@ -931,12 +983,13 @@ async def upload_csv_students(
     db.commit()
     skipped_count = len(errors)
     logger.info(
-        "CSV upload: created %d, skipped %d for classroom %d (by user %d)",
-        len(created), skipped_count, classroom_id, current_user.id,
+        "CSV upload: created %d, skipped %d, warnings %d for classroom %d (by user %d)",
+        len(created), skipped_count, len(warnings), classroom_id, current_user.id,
     )
     return CsvUploadResponse(
         created_count=len(created),
         skipped_count=skipped_count,
         errors=errors,
         created=created,
+        warnings=warnings,
     )
