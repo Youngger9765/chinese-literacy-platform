@@ -741,7 +741,7 @@ async def generate_example_sentences(character: str, story_title: str) -> dict:
         system_prompt=system_prompt,
         contents=contents,
         response_schema=EXAMPLE_SENTENCES_SCHEMA,
-        max_tokens=512,
+        max_tokens=2048,
         temperature=0.8,
     )
     return result
@@ -794,7 +794,7 @@ async def validate_student_sentence(
         system_prompt=system_prompt,
         contents=contents,
         response_schema=SENTENCE_VALIDATION_SCHEMA,
-        max_tokens=256,
+        max_tokens=1024,
         temperature=0.3,
     )
 
