@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { AuthError } from '../services/authApi';
+import { AuthError, resendVerification } from '../services/authApi';
 import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
@@ -18,6 +18,10 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // State for post-registration email verification flow (issue #460)
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+  const [devToken, setDevToken] = useState<string | null>(null);
+  const [resendStatus, setResendStatus] = useState<string | null>(null);
 
   const validate = (): string | null => {
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
@@ -54,9 +58,12 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
 
     setIsSubmitting(true);
     try {
-      await register(email.trim(), password, name.trim());
-      // AuthContext sets isAuthenticated=true, ProtectedRoute will handle redirect
-      navigate('/', { replace: true });
+      const result = await register(email.trim(), password, name.trim());
+      // Registration successful — user must verify email before logging in (issue #460)
+      setRegisteredEmail(email.trim());
+      if (result.verification_token) {
+        setDevToken(result.verification_token);
+      }
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.status === 409 || err.message.includes('already')) {
@@ -69,6 +76,20 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!registeredEmail) return;
+    setResendStatus(null);
+    try {
+      const result = await resendVerification(registeredEmail);
+      if (result.verification_token) {
+        setDevToken(result.verification_token);
+      }
+      setResendStatus('驗證信已重新發送。');
+    } catch {
+      setResendStatus('重新發送失敗，請稍後再試。');
     }
   };
 
@@ -92,6 +113,67 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
       setIsSubmitting(false);
     }
   };
+
+  // After successful registration, show email verification pending screen (issue #460)
+  if (registeredEmail) {
+    const apiBase = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-amber-50 px-4">
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-accent rounded-2xl mb-4">
+              <span className="text-white font-black text-2xl">L</span>
+            </div>
+            <h1 className="text-2xl font-black text-gray-900">AI 朗讀助教</h1>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center space-y-4">
+            <div className="text-4xl">📧</div>
+            <h2 className="text-lg font-bold text-gray-900">請驗證您的 Email</h2>
+            <p className="text-sm text-gray-600">
+              註冊成功！請檢查 <span className="font-medium text-gray-900">{registeredEmail}</span> 的信箱並點擊驗證連結完成驗證。
+            </p>
+
+            {/* Dev/staging mode: show verification link directly */}
+            {devToken && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-left">
+                <p className="text-xs font-semibold text-amber-700 mb-1">測試模式 — 驗證連結</p>
+                <a
+                  href={`${apiBase}/api/auth/verify-email?token=${devToken}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 underline break-all"
+                >
+                  點擊此連結驗證 Email
+                </a>
+                <p className="text-xs text-amber-600 mt-1">（正式環境將寄送至您的信箱，此連結不會出現）</p>
+              </div>
+            )}
+
+            {resendStatus && (
+              <p className="text-sm text-green-600">{resendStatus}</p>
+            )}
+
+            <button
+              type="button"
+              onClick={handleResendVerification}
+              className="w-full h-10 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+            >
+              重新發送驗證信
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onSwitchToLogin ? onSwitchToLogin() : navigate('/login')}
+              className="w-full h-10 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm font-bold transition-colors"
+            >
+              前往登入
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
 

@@ -125,7 +125,11 @@ def client():
 
 @pytest.fixture()
 def registered_user(client):
-    """Register a fresh user and return (email, password, token)."""
+    """Register a fresh user, verify their email, and return (email, password, token).
+
+    Updated for issue #460: register no longer auto-verifies or returns a token.
+    We use the verification_token returned in dev mode to verify, then login.
+    """
     import uuid
     unique = uuid.uuid4().hex[:8]
     email = f"testuser_{unique}@example.com"
@@ -137,7 +141,15 @@ def registered_user(client):
         "name": name,
     })
     assert resp.status_code == 201
-    token = resp.json()["access_token"]
+    # Verify email using the dev-mode token returned in the response
+    verification_token = resp.json()["verification_token"]
+    assert verification_token is not None
+    verify_resp = client.get(f"/api/auth/verify-email?token={verification_token}")
+    assert verify_resp.status_code == 200
+    # Now login to get a JWT token
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert login_resp.status_code == 200
+    token = login_resp.json()["access_token"]
     return {"email": email, "password": password, "name": name, "token": token}
 
 
@@ -274,37 +286,39 @@ class TestRegisterEndpoint:
         })
         assert resp.status_code == 201
 
-    def test_register_returns_token(self, client):
+    def test_register_returns_message(self, client):
+        """Issue #460: register now returns a message + verification_token (dev mode)."""
         resp = client.post("/api/auth/register", json={
             "email": "tokenuser@example.com",
             "password": "StrongPass1!",
             "name": "Token User",
         })
         data = resp.json()
-        assert "access_token" in data
-        assert isinstance(data["access_token"], str)
-        assert len(data["access_token"]) > 0
+        assert "message" in data
+        assert isinstance(data["message"], str)
+        assert len(data["message"]) > 0
 
-    def test_register_returns_token_type_bearer(self, client):
+    def test_register_returns_verification_token_in_dev_mode(self, client):
+        """Issue #460: dev mode returns verification_token in response body."""
         resp = client.post("/api/auth/register", json={
             "email": "beareruser@example.com",
             "password": "StrongPass1!",
             "name": "Bearer User",
         })
         data = resp.json()
-        assert data["token_type"] == "bearer"
+        assert "verification_token" in data
+        assert data["verification_token"] is not None
+        assert len(data["verification_token"]) > 0
 
-    def test_register_token_is_decodable(self, client):
+    def test_register_does_not_return_access_token(self, client):
+        """Issue #460: register no longer auto-logs in — no access_token in response."""
         resp = client.post("/api/auth/register", json={
             "email": "decodable@example.com",
             "password": "StrongPass1!",
             "name": "Decodable User",
         })
-        token = resp.json()["access_token"]
-        payload = decode_token(token)
-        assert "sub" in payload
-        # sub should be a positive integer as string
-        assert int(payload["sub"]) > 0
+        data = resp.json()
+        assert "access_token" not in data
 
     def test_register_duplicate_email_returns_409(self, client):
         payload = {
@@ -427,13 +441,17 @@ class TestRegisterEndpoint:
 
     def test_register_email_is_stored_normalized(self, client):
         """Pydantic EmailStr normalizes the email (e.g. lowercases domain).
-        Verify the user can log in with the normalized form."""
+        Verify the user can log in with the normalized form after email verification."""
         resp = client.post("/api/auth/register", json={
             "email": "CaseSense@Example.com",
             "password": "StrongPass1!",
             "name": "Case Test",
         })
         assert resp.status_code == 201
+        # Verify email first (issue #460 — required before login)
+        token = resp.json()["verification_token"]
+        verify_resp = client.get(f"/api/auth/verify-email?token={token}")
+        assert verify_resp.status_code == 200
         # Login with the normalized form should work
         login_resp = client.post("/api/auth/login", json={
             "email": "CaseSense@example.com",
@@ -536,7 +554,11 @@ class TestAutoSchoolCreation:
         })
         assert resp.status_code == 201
 
-        token = resp.json()["access_token"]
+        # Verify email and login to get a JWT (issue #460)
+        verification_token = resp.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={verification_token}")
+        login_resp = client.post("/api/auth/login", json={"email": email, "password": "StrongPass1!"})
+        token = login_resp.json()["access_token"]
         user_id = int(decode_token(token)["sub"])
 
         db = TestingSessionLocal()
@@ -596,7 +618,11 @@ class TestAutoSchoolCreation:
             teacher_role = db.query(Role).filter(Role.name == "teacher").first()
             assert teacher_role is not None
 
-            token2 = resp2.json()["access_token"]
+            # Verify email and login to get user2_id (issue #460)
+            vtoken2 = resp2.json()["verification_token"]
+            client.get(f"/api/auth/verify-email?token={vtoken2}")
+            login2 = client.post("/api/auth/login", json={"email": f"second@{domain}", "password": "StrongPass1!"})
+            token2 = login2.json()["access_token"]
             user2_id = int(decode_token(token2)["sub"])
 
             user2_role = (
@@ -659,7 +685,11 @@ class TestAutoSchoolCreation:
         })
         assert resp.status_code == 201
 
-        token = resp.json()["access_token"]
+        # Verify email and login to get user_id (issue #460)
+        vtoken = resp.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vtoken}")
+        login_resp = client.post("/api/auth/login", json={"email": email, "password": "StrongPass1!"})
+        token = login_resp.json()["access_token"]
         user_id = int(decode_token(token)["sub"])
 
         db = TestingSessionLocal()
@@ -820,13 +850,15 @@ class TestChangePasswordEndpoint:
 
     def test_change_password_new_password_works_for_login(self, client):
         """After changing password, user can log in with the new password."""
-        # Register
+        # Register and verify email (issue #460)
         reg_resp = client.post("/api/auth/register", json={
             "email": "changeme@example.com",
             "password": "OldPassword1!",
             "name": "Change Me",
         })
-        token = reg_resp.json()["access_token"]
+        vtoken = reg_resp.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vtoken}")
+        token = client.post("/api/auth/login", json={"email": "changeme@example.com", "password": "OldPassword1!"}).json()["access_token"]
 
         # Change password
         change_resp = client.post(
@@ -848,12 +880,15 @@ class TestChangePasswordEndpoint:
 
     def test_change_password_old_password_no_longer_works(self, client):
         """After changing password, old password should fail login."""
+        # Register and verify email (issue #460)
         reg_resp = client.post("/api/auth/register", json={
             "email": "oldnowork@example.com",
             "password": "OldPassword1!",
             "name": "Old No Work",
         })
-        token = reg_resp.json()["access_token"]
+        vtoken = reg_resp.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vtoken}")
+        token = client.post("/api/auth/login", json={"email": "oldnowork@example.com", "password": "OldPassword1!"}).json()["access_token"]
 
         client.post(
             "/api/auth/change-password",
@@ -1083,7 +1118,7 @@ class TestGetMeEndpoint:
 
 class TestAuthFlow:
     def test_register_then_login_then_get_me(self, client):
-        """Full flow: register -> login -> GET /users/me."""
+        """Full flow: register -> verify email -> login -> GET /users/me (issue #460)."""
         # Register
         reg_resp = client.post("/api/auth/register", json={
             "email": "fullflow@example.com",
@@ -1091,7 +1126,9 @@ class TestAuthFlow:
             "name": "Flow User",
         })
         assert reg_resp.status_code == 201
-        reg_token = reg_resp.json()["access_token"]
+        # Verify email before login (issue #460)
+        vtoken = reg_resp.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vtoken}")
 
         # Login
         login_resp = client.post("/api/auth/login", json={
@@ -1101,21 +1138,22 @@ class TestAuthFlow:
         assert login_resp.status_code == 200
         login_token = login_resp.json()["access_token"]
 
-        # Both tokens should work for GET /users/me
-        for token in [reg_token, login_token]:
-            me_resp = client.get("/api/users/me", headers=auth_header(token))
-            assert me_resp.status_code == 200
-            assert me_resp.json()["email"] == "fullflow@example.com"
-            assert me_resp.json()["name"] == "Flow User"
+        me_resp = client.get("/api/users/me", headers=auth_header(login_token))
+        assert me_resp.status_code == 200
+        assert me_resp.json()["email"] == "fullflow@example.com"
+        assert me_resp.json()["name"] == "Flow User"
 
     def test_register_change_password_login_with_new(self, client):
-        """Register -> change password -> login with new password."""
+        """Register -> verify email -> change password -> login with new password (issue #460)."""
         reg_resp = client.post("/api/auth/register", json={
             "email": "pwflow@example.com",
             "password": "OriginalPass1!",
             "name": "PW Flow",
         })
-        token = reg_resp.json()["access_token"]
+        # Verify email and login to get token (issue #460)
+        vtoken = reg_resp.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vtoken}")
+        token = client.post("/api/auth/login", json={"email": "pwflow@example.com", "password": "OriginalPass1!"}).json()["access_token"]
 
         # Change password
         change_resp = client.post(
@@ -1206,3 +1244,203 @@ class TestRateLimiting:
         })
         assert resp.status_code == 429
         assert resp.json()["detail"] == "Too many requests. Please try again later."
+
+
+# ===========================================================================
+# Integration tests — Email verification flow (issue #460)
+# ===========================================================================
+
+
+class TestEmailVerificationFlow:
+    """Tests for issue #460: token-based email verification."""
+
+    def _register(self, client, suffix: str = "") -> dict:
+        """Helper: register a fresh user and return response data."""
+        unique = uuid.uuid4().hex[:8]
+        email = f"evtest_{unique}{suffix}@verify.com"
+        resp = client.post("/api/auth/register", json={
+            "email": email,
+            "password": "StrongPass1!",
+            "name": f"Verify User {unique}",
+        })
+        assert resp.status_code == 201
+        data = resp.json()
+        data["email"] = email
+        data["password"] = "StrongPass1!"
+        return data
+
+    def test_register_sets_email_verified_false(self, client):
+        """Newly registered users should have email_verified=False in DB."""
+        from app.models.user import User as UserModel
+
+        data = self._register(client)
+        db = TestingSessionLocal()
+        try:
+            user = db.query(UserModel).filter(UserModel.email == data["email"]).first()
+            assert user is not None
+            assert user.email_verified is False
+        finally:
+            db.close()
+
+    def test_register_stores_verification_token_in_db(self, client):
+        """Newly registered users should have a non-null email_verification_token."""
+        from app.models.user import User as UserModel
+
+        data = self._register(client)
+        db = TestingSessionLocal()
+        try:
+            user = db.query(UserModel).filter(UserModel.email == data["email"]).first()
+            assert user is not None
+            assert user.email_verification_token is not None
+            assert len(user.email_verification_token) > 0
+        finally:
+            db.close()
+
+    def test_register_returns_verification_token(self, client):
+        """Register response should include verification_token in dev mode."""
+        data = self._register(client)
+        assert "verification_token" in data
+        assert data["verification_token"] is not None
+
+    def test_login_without_verification_returns_403(self, client):
+        """Unverified users should get 403 with Chinese message on login."""
+        data = self._register(client)
+        resp = client.post("/api/auth/login", json={
+            "email": data["email"],
+            "password": data["password"],
+        })
+        assert resp.status_code == 403
+        assert "驗證" in resp.json()["detail"]
+
+    def test_verify_email_get_endpoint_returns_200(self, client):
+        """GET /auth/verify-email?token=xxx should return 200."""
+        data = self._register(client)
+        resp = client.get(f"/api/auth/verify-email?token={data['verification_token']}")
+        assert resp.status_code == 200
+
+    def test_verify_email_sets_email_verified_true(self, client):
+        """After verification, email_verified should be True in DB."""
+        from app.models.user import User as UserModel
+
+        data = self._register(client)
+        client.get(f"/api/auth/verify-email?token={data['verification_token']}")
+        db = TestingSessionLocal()
+        try:
+            user = db.query(UserModel).filter(UserModel.email == data["email"]).first()
+            assert user.email_verified is True
+        finally:
+            db.close()
+
+    def test_verify_email_clears_token_from_db(self, client):
+        """After verification, email_verification_token should be cleared."""
+        from app.models.user import User as UserModel
+
+        data = self._register(client)
+        client.get(f"/api/auth/verify-email?token={data['verification_token']}")
+        db = TestingSessionLocal()
+        try:
+            user = db.query(UserModel).filter(UserModel.email == data["email"]).first()
+            assert user.email_verification_token is None
+        finally:
+            db.close()
+
+    def test_login_after_verification_returns_200(self, client):
+        """After verifying email, login should succeed."""
+        data = self._register(client)
+        client.get(f"/api/auth/verify-email?token={data['verification_token']}")
+        resp = client.post("/api/auth/login", json={
+            "email": data["email"],
+            "password": data["password"],
+        })
+        assert resp.status_code == 200
+        assert "access_token" in resp.json()
+
+    def test_verify_email_invalid_token_returns_400(self, client):
+        """An invalid or expired token should return 400."""
+        resp = client.get("/api/auth/verify-email?token=invalid-token-xyz")
+        assert resp.status_code == 400
+
+    def test_verify_email_already_verified_returns_200(self, client):
+        """Calling verify-email again on an already-verified user returns 200."""
+        data = self._register(client)
+        client.get(f"/api/auth/verify-email?token={data['verification_token']}")
+        # Calling again should still return 200 (idempotent)
+        resp = client.get(f"/api/auth/verify-email?token={data['verification_token']}")
+        # Token was cleared after first verify, so second call returns 400
+        assert resp.status_code in (200, 400)
+
+    def test_resend_verification_returns_new_token(self, client):
+        """POST /auth/resend-verification should return a new verification_token."""
+        data = self._register(client)
+        resp = client.post("/api/auth/resend-verification", json={"email": data["email"]})
+        assert resp.status_code == 200
+        body = resp.json()
+        assert "message" in body
+        assert body["verification_token"] is not None
+
+    def test_resend_verification_new_token_works_for_login(self, client):
+        """The new token from resend should allow login after verification."""
+        data = self._register(client)
+        # Get a new token via resend
+        resend_resp = client.post("/api/auth/resend-verification", json={"email": data["email"]})
+        new_token = resend_resp.json()["verification_token"]
+        # Verify with new token
+        client.get(f"/api/auth/verify-email?token={new_token}")
+        # Login should now work
+        login_resp = client.post("/api/auth/login", json={
+            "email": data["email"],
+            "password": data["password"],
+        })
+        assert login_resp.status_code == 200
+
+    def test_resend_verification_for_nonexistent_email_returns_200(self, client):
+        """Resend for unknown email should still return 200 (prevent enumeration)."""
+        resp = client.post("/api/auth/resend-verification", json={
+            "email": "nobody_exists@example.com",
+        })
+        assert resp.status_code == 200
+
+    def test_resend_verification_for_already_verified_returns_200(self, client):
+        """Resend for already-verified user returns 200 with no token."""
+        data = self._register(client)
+        client.get(f"/api/auth/verify-email?token={data['verification_token']}")
+        resp = client.post("/api/auth/resend-verification", json={"email": data["email"]})
+        assert resp.status_code == 200
+        # Already verified — no new token issued
+        assert resp.json()["verification_token"] is None
+
+    def test_batch_created_students_remain_verified(self, client):
+        """Students created by teachers keep email_verified=True (no real email).
+
+        This is the CRITICAL backward-compatibility test (issue #460 requirement):
+        batch-created student accounts must not be broken.
+        """
+        from app.models.user import User as UserModel
+        from app.auth.password import hash_password as _hash
+
+        # Simulate a batch-created student (email_verified=True, no verification token)
+        db = TestingSessionLocal()
+        try:
+            student = UserModel(
+                email=f"student_batch_{uuid.uuid4().hex[:6]}@school.edu.tw",
+                password_hash=_hash("StudentPass1!"),
+                name="Batch Student",
+                email_verified=True,  # set by teacher batch creation
+                email_verification_token=None,
+            )
+            db.add(student)
+            db.commit()
+            db.refresh(student)
+            student_email = student.email
+        finally:
+            db.close()
+
+        # Batch student should be able to login directly (no verification needed)
+        resp = client.post("/api/auth/login", json={
+            "email": student_email,
+            "password": "StudentPass1!",
+        })
+        assert resp.status_code == 200, (
+            f"Batch-created student should be able to login without email verification. "
+            f"Got {resp.status_code}: {resp.json()}"
+        )
