@@ -85,6 +85,7 @@ class BatchStudentError(BaseModel):
 class BatchStudentCreateResponse(BaseModel):
     created: list[CreatedStudentInfo]
     errors: list[BatchStudentError]
+    warnings: list[str] = []
 
 
 # ── Student Search ──────────────────────────────────────────────────────────
@@ -110,6 +111,7 @@ class CsvUploadResponse(BaseModel):
     skipped_count: int
     errors: list[BatchStudentError]
     created: list[CreatedStudentInfo]
+    warnings: list[str] = []
 
 
 # ── Student Enrolled Classrooms ───────────────────────────────────────────────
