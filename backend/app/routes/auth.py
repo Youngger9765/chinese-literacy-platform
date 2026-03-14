@@ -10,7 +10,8 @@ from ..auth.password import hash_password, verify_password
 from ..auth.rate_limiter import InMemoryRateLimiter
 from ..config import settings
 from ..database import get_db
-from ..models.user import User
+from ..models.user import User, UserRole, Role
+from ..models.school import School
 from ..schemas.auth import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
@@ -84,11 +85,63 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
         email_verified=True,
     )
     db.add(user)
+    db.flush()  # get user.id without committing yet
+
+    # Auto-create or join school based on email domain (issue #459)
+    _assign_teacher_to_school(db, user)
+
     db.commit()
     db.refresh(user)
 
     token = create_access_token(user.id)
     return TokenResponse(access_token=token)
+
+
+def _assign_teacher_to_school(db: Session, user: User) -> None:
+    """Auto-create a school for the teacher's email domain, or join an existing one.
+
+    Per 方大哥's spec: if this is the first teacher from a school domain,
+    the system auto-creates the school and makes the teacher the admin.
+    Subsequent teachers with the same domain are added to the existing school.
+    """
+    # Extract domain from email (e.g. "teacher@school.edu.tw" -> "school.edu.tw")
+    domain = user.email.split("@")[-1].lower()
+
+    # Check if a school with this domain already exists
+    school = db.query(School).filter(School.domain == domain).first()
+
+    if school is None:
+        # First teacher from this domain: create the school
+        school = School(
+            name=f"{domain} 學校",
+            domain=domain,
+            admin_user_id=user.id,
+        )
+        db.add(school)
+        db.flush()  # get school.id
+
+    # Assign teacher role scoped to this school
+    teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+    if teacher_role is not None:
+        # Avoid duplicate role assignment
+        existing_role = (
+            db.query(UserRole)
+            .filter(
+                UserRole.user_id == user.id,
+                UserRole.role_id == teacher_role.id,
+                UserRole.scope_type == "school",
+                UserRole.scope_id == str(school.id),
+            )
+            .first()
+        )
+        if existing_role is None:
+            user_role = UserRole(
+                user_id=user.id,
+                role_id=teacher_role.id,
+                scope_type="school",
+                scope_id=str(school.id),
+            )
+            db.add(user_role)
 
 
 @router.post("/login", response_model=TokenResponse)

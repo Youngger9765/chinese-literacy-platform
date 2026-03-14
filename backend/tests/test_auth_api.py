@@ -484,6 +484,194 @@ class TestRegisterEndpoint:
 
 
 # ===========================================================================
+# Integration tests — auto school creation on teacher register (issue #459)
+# ===========================================================================
+
+
+class TestAutoSchoolCreation:
+    """Tests for per-issue #459: first teacher from a domain auto-creates a school."""
+
+    def _fresh_email(self, domain: str, prefix: str = "teacher") -> str:
+        import uuid
+        return f"{prefix}_{uuid.uuid4().hex[:6]}@{domain}"
+
+    def test_register_creates_school_for_new_domain(self, client):
+        """First teacher from a new domain should trigger school creation."""
+        from app.models.school import School
+        from app.database import get_db as _get_db
+
+        domain = f"auto-{uuid.uuid4().hex[:6]}.edu.tw"
+        email = f"first@{domain}"
+
+        resp = client.post("/api/auth/register", json={
+            "email": email,
+            "password": "StrongPass1!",
+            "name": "First Teacher",
+        })
+        assert resp.status_code == 201
+
+        # Verify school was created in DB
+        db = TestingSessionLocal()
+        try:
+            school = db.query(School).filter(School.domain == domain).first()
+            assert school is not None, f"School with domain {domain} should have been created"
+            assert school.name == f"{domain} 學校"
+            assert school.domain == domain
+        finally:
+            db.close()
+
+    def test_register_assigns_teacher_role_to_new_school(self, client):
+        """Registered teacher should receive a teacher UserRole scoped to the new school."""
+        from app.models.school import School
+        from app.models.user import UserRole, Role
+        from app.auth.jwt import decode_token
+
+        domain = f"role-{uuid.uuid4().hex[:6]}.edu.tw"
+        email = f"roletest@{domain}"
+
+        resp = client.post("/api/auth/register", json={
+            "email": email,
+            "password": "StrongPass1!",
+            "name": "Role Test Teacher",
+        })
+        assert resp.status_code == 201
+
+        token = resp.json()["access_token"]
+        user_id = int(decode_token(token)["sub"])
+
+        db = TestingSessionLocal()
+        try:
+            school = db.query(School).filter(School.domain == domain).first()
+            assert school is not None
+
+            teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+            assert teacher_role is not None
+
+            user_role = (
+                db.query(UserRole)
+                .filter(
+                    UserRole.user_id == user_id,
+                    UserRole.role_id == teacher_role.id,
+                    UserRole.scope_type == "school",
+                    UserRole.scope_id == str(school.id),
+                )
+                .first()
+            )
+            assert user_role is not None, "Teacher should have a UserRole scoped to the school"
+        finally:
+            db.close()
+
+    def test_register_second_teacher_joins_existing_school(self, client):
+        """Second teacher from same domain joins existing school, no duplicate created."""
+        from app.models.school import School
+        from app.models.user import UserRole, Role
+        from app.auth.jwt import decode_token
+
+        domain = f"shared-{uuid.uuid4().hex[:6]}.edu.tw"
+
+        # Register first teacher
+        resp1 = client.post("/api/auth/register", json={
+            "email": f"first@{domain}",
+            "password": "StrongPass1!",
+            "name": "First Teacher",
+        })
+        assert resp1.status_code == 201
+
+        # Register second teacher with same domain
+        resp2 = client.post("/api/auth/register", json={
+            "email": f"second@{domain}",
+            "password": "StrongPass1!",
+            "name": "Second Teacher",
+        })
+        assert resp2.status_code == 201
+
+        db = TestingSessionLocal()
+        try:
+            # Only one school should exist for this domain
+            schools = db.query(School).filter(School.domain == domain).all()
+            assert len(schools) == 1, f"Expected 1 school for domain {domain}, got {len(schools)}"
+
+            # Both teachers should have a teacher role for that school
+            school = schools[0]
+            teacher_role = db.query(Role).filter(Role.name == "teacher").first()
+            assert teacher_role is not None
+
+            token2 = resp2.json()["access_token"]
+            user2_id = int(decode_token(token2)["sub"])
+
+            user2_role = (
+                db.query(UserRole)
+                .filter(
+                    UserRole.user_id == user2_id,
+                    UserRole.role_id == teacher_role.id,
+                    UserRole.scope_type == "school",
+                    UserRole.scope_id == str(school.id),
+                )
+                .first()
+            )
+            assert user2_role is not None, "Second teacher should also have a role in the same school"
+        finally:
+            db.close()
+
+    def test_register_different_domains_create_separate_schools(self, client):
+        """Teachers from different domains each get their own school."""
+        from app.models.school import School
+
+        unique = uuid.uuid4().hex[:6]
+        domain_a = f"school-a-{unique}.edu.tw"
+        domain_b = f"school-b-{unique}.edu.tw"
+
+        resp_a = client.post("/api/auth/register", json={
+            "email": f"teacher@{domain_a}",
+            "password": "StrongPass1!",
+            "name": "Teacher A",
+        })
+        resp_b = client.post("/api/auth/register", json={
+            "email": f"teacher@{domain_b}",
+            "password": "StrongPass1!",
+            "name": "Teacher B",
+        })
+        assert resp_a.status_code == 201
+        assert resp_b.status_code == 201
+
+        db = TestingSessionLocal()
+        try:
+            school_a = db.query(School).filter(School.domain == domain_a).first()
+            school_b = db.query(School).filter(School.domain == domain_b).first()
+            assert school_a is not None
+            assert school_b is not None
+            assert school_a.id != school_b.id
+        finally:
+            db.close()
+
+    def test_register_first_teacher_becomes_school_admin(self, client):
+        """The first teacher from a domain should be set as the school admin_user_id."""
+        from app.models.school import School
+        from app.auth.jwt import decode_token
+
+        domain = f"admin-{uuid.uuid4().hex[:6]}.edu.tw"
+        email = f"admin@{domain}"
+
+        resp = client.post("/api/auth/register", json={
+            "email": email,
+            "password": "StrongPass1!",
+            "name": "Admin Teacher",
+        })
+        assert resp.status_code == 201
+
+        token = resp.json()["access_token"]
+        user_id = int(decode_token(token)["sub"])
+
+        db = TestingSessionLocal()
+        try:
+            school = db.query(School).filter(School.domain == domain).first()
+            assert school is not None
+            assert school.admin_user_id == user_id, "First teacher should be set as school admin"
+        finally:
+            db.close()
+
+
+# ===========================================================================
 # Integration tests — POST /api/auth/login
 # ===========================================================================
 
@@ -800,11 +988,17 @@ class TestGetMeEndpoint:
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
         assert isinstance(resp.json()["roles"], list)
 
-    def test_get_me_new_user_has_no_roles(self, client, registered_user):
-        """A freshly registered user has no auto-assigned roles."""
+    def test_get_me_new_teacher_has_teacher_role(self, client, registered_user):
+        """A freshly registered teacher is auto-assigned a teacher role scoped to their school (issue #459)."""
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
         roles = resp.json()["roles"]
-        assert len(roles) == 0
+        # Auto-school creation assigns exactly one teacher role
+        assert len(roles) >= 1
+        role_names = [r["role_name"] for r in roles]
+        assert "teacher" in role_names
+        # The role should be scoped to a school
+        teacher_roles = [r for r in roles if r["role_name"] == "teacher"]
+        assert teacher_roles[0]["scope_type"] == "school"
 
     def test_get_me_phone_is_null_by_default(self, client, registered_user):
         resp = client.get("/api/users/me", headers=auth_header(registered_user["token"]))
