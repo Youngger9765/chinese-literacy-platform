@@ -18,7 +18,7 @@ interface VocabPracticeProps {
   onBack: () => void;
 }
 
-type Phase = 'grid' | 'practice' | 'pronunciation' | 'sentence';
+type Phase = 'confirm' | 'grid' | 'practice' | 'pronunciation' | 'sentence';
 
 type PracticeMode = 'stroke' | 'pronunciation';
 
@@ -136,7 +136,7 @@ function CharCard({ label, isSuggested, isPracticed, animDelay, onClick }: CharC
 /* ================================================================ */
 
 const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish, onBack }) => {
-  const [phase, setPhase] = useState<Phase>('grid');
+  const [phase, setPhase] = useState<Phase>('confirm');
   const [practicingChar, setPracticingChar] = useState('');
   const [practicedChars, setPracticedChars] = useState<Set<string>>(new Set());
   const [pronouncedChars, setPronoucedChars] = useState<Set<string>>(new Set());
@@ -234,6 +234,47 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const handleRadicalToggle = (ch: string) => {
     setRadicalChar(prev => (prev === ch ? null : ch));
   };
+
+  /* ── Confirm phase: ask student whether to start vocab practice ── */
+  if (phase === 'confirm') {
+    const suggestedCount = attempt.mispronouncedWords.filter(hasStrokeData).length;
+    const totalVocabCount = displayChars.length;
+    const charCount = suggestedCount > 0 ? suggestedCount : totalVocabCount;
+
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-amber-50 px-6 py-12">
+        <div className="max-w-sm w-full bg-white rounded-3xl shadow-lg border border-amber-100 p-8 flex flex-col items-center gap-6 text-center">
+          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-3xl select-none">
+            ✏️
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-gray-900 mb-2">
+              要練習這一課的生字嗎？
+            </h2>
+            <p className="text-sm text-gray-500">
+              {suggestedCount > 0
+                ? `剛才朗讀有 ${suggestedCount} 個字需要加強，要練習看看嗎？`
+                : `這一課有 ${charCount} 個生字，要練習嗎？`}
+            </p>
+          </div>
+          <div className="w-full flex flex-col gap-3">
+            <button
+              onClick={() => setPhase('grid')}
+              className="w-full py-3.5 rounded-2xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-md transition-all active:scale-95"
+            >
+              好！開始練習
+            </button>
+            <button
+              onClick={() => onFinish({ practicedChars: [], totalChars: charCount })}
+              className="w-full py-3 rounded-2xl font-semibold text-base text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all active:scale-95"
+            >
+              跳過
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   /* ── Pronunciation practice phase ── */
   if (phase === 'pronunciation') {
