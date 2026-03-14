@@ -148,7 +148,7 @@ async def generate_structured_response(
     system_prompt: str,
     contents: list[genai_types.Content],
     response_schema: dict,
-    max_tokens: int = 1024,
+    max_tokens: int = 4096,
     temperature: float = 0.7,
 ) -> dict:
     """Call Gemini with JSON mode, return parsed dict.
