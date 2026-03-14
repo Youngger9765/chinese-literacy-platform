@@ -32,6 +32,118 @@ def _get_client() -> genai.Client:
     return genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
 
 
+def _repair_json(raw: str) -> str | None:
+    """Attempt basic JSON repair on a potentially truncated/malformed string.
+
+    Strategy:
+    1. Strip markdown code fences (```json ... ```)
+    2. Walk forward tracking bracket depth and string state, recording every
+       position where the outermost bracket closes (depth == 0).
+    3. If the outermost bracket never closes (truncated mid-content), scan
+       backwards from the end for the last close bracket (`}` or `]`) that is
+       not inside a string. Truncate there, strip trailing commas, then append
+       the closing brackets needed to balance the open bracket stack.
+
+    Returns the repaired JSON string if successful, None otherwise.
+    """
+    text = raw.strip()
+
+    # Strip markdown code fences
+    if text.startswith("```"):
+        # Remove opening fence (```json or ```)
+        text = text[text.find("\n") + 1:] if "\n" in text else text[3:]
+    if text.endswith("```"):
+        text = text[: text.rfind("```")]
+    text = text.strip()
+
+    if not text:
+        return None
+
+    # Must start with a JSON container
+    if not text.startswith("{") and not text.startswith("["):
+        return None
+
+    # Walk forward tracking brackets and string state.
+    # Build a stack of open brackets and record positions where depth returns to 0.
+    last_balanced_pos = -1
+    # close_positions: list of (pos, bracket_stack_snapshot_after_close)
+    # We only need the last close position outside a string.
+    last_outer_close_pos = -1  # last pos of any `}` or `]` outside a string
+    in_string = False
+    escape_next = False
+    bracket_stack: list[str] = []
+
+    for i, ch in enumerate(text):
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch in ("{", "["):
+            bracket_stack.append(ch)
+        elif ch in ("}", "]"):
+            if bracket_stack:
+                bracket_stack.pop()
+            if not bracket_stack:
+                last_balanced_pos = i
+            # Record last close bracket outside a string regardless of depth
+            last_outer_close_pos = i
+
+    # Case 1: JSON was complete — return the complete portion
+    if last_balanced_pos != -1:
+        return text[: last_balanced_pos + 1]
+
+    # Case 2: Truncated — find the last close bracket, truncate there,
+    # strip trailing comma/whitespace, then close all open brackets.
+    if last_outer_close_pos == -1:
+        return None
+
+    truncated = text[: last_outer_close_pos + 1].rstrip().rstrip(",").rstrip()
+
+    # Rebuild bracket_stack for the truncated portion to know what to close
+    in_string = False
+    escape_next = False
+    close_stack: list[str] = []
+
+    for ch in truncated:
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch in ("{", "["):
+            close_stack.append(ch)
+        elif ch in ("}", "]"):
+            if close_stack:
+                close_stack.pop()
+
+    # Append the matching closing brackets in reverse
+    closing = ""
+    for opener in reversed(close_stack):
+        closing += "}" if opener == "{" else "]"
+
+    candidate = truncated + closing
+    try:
+        json.loads(candidate)
+        return candidate
+    except Exception:
+        pass
+
+    return None
+
+
 async def generate_structured_response(
     system_prompt: str,
     contents: list[genai_types.Content],
@@ -64,7 +176,43 @@ async def generate_structured_response(
                 ),
                 timeout=GEMINI_TIMEOUT,
             )
-            return json.loads(response.text)
+
+            # Log raw response for debugging (truncated to avoid log spam)
+            raw_text = response.text if response.text is not None else ""
+            logger.debug(
+                "Gemini raw response (first 500 chars): %s",
+                raw_text[:500],
+                extra={"event": "gemini_raw_response", "length": len(raw_text)},
+            )
+
+            if not raw_text:
+                raise ValueError("Gemini returned empty/None response text")
+
+            try:
+                return json.loads(raw_text)
+            except json.JSONDecodeError as json_err:
+                logger.warning(
+                    "JSON parse failed (%s), attempting repair. Raw (first 200): %s",
+                    json_err,
+                    raw_text[:200],
+                    extra={"event": "gemini_json_repair_attempt"},
+                )
+                repaired = _repair_json(raw_text)
+                if repaired is not None:
+                    try:
+                        result = json.loads(repaired)
+                        logger.warning(
+                            "JSON repair succeeded (original_len=%d, repaired_len=%d)",
+                            len(raw_text),
+                            len(repaired),
+                            extra={"event": "gemini_json_repair_success"},
+                        )
+                        return result
+                    except json.JSONDecodeError:
+                        pass
+                # Repair failed — raise original error so retry logic handles it
+                raise json_err
+
         except asyncio.TimeoutError:
             logger.error(
                 "Gemini API timeout after %ds",
@@ -495,7 +643,7 @@ async def generate_exit_ticket(
             system_prompt=_EXIT_TICKET_SYSTEM_PROMPT,
             contents=contents,
             response_schema=EXIT_TICKET_SCHEMA,
-            max_tokens=1024,
+            max_tokens=2048,
             temperature=0.5,
         )
         questions = result.get("questions", [])
