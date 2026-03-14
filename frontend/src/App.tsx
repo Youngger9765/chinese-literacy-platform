@@ -10,6 +10,7 @@ import { getMyAssignments } from './services/assignmentApi';
 import { useAppView } from './hooks/useAppView';
 import StepperNav from './components/StepperNav';
 import FeedbackButton from './components/FeedbackButton';
+import Sidebar from './components/Sidebar';
 import StoryLibrary from './pages/student/StoryLibrary';
 import WriteCharacter from './components/stroke-order/WriteCharacter';
 import LoginPage from './pages/LoginPage';
@@ -74,6 +75,10 @@ const AchievementsPage = lazy(() => import('./pages/student/AchievementsPage'));
 // Parent dashboard — role-specific, split separately
 const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard'));
 
+// New home pages for each role
+const StudentHome = lazy(() => import('./pages/student/StudentHome'));
+const TeacherHome = lazy(() => import('./pages/teacher/TeacherHome'));
+
 // Utility pages — rarely visited after first load
 const OnboardingGuide = lazy(() => import('./components/OnboardingGuide'));
 const TermsModal = lazy(() => import('./components/TermsModal'));
@@ -125,23 +130,23 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
-/** Home page content — landing page with "進入圖書館" button. */
+/**
+ * Home page — redirects to the appropriate home based on user role.
+ * Teacher → /teacher-home, Student → /student, else → /library
+ */
 const HomePage: React.FC = () => {
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-6">
-      <h1 className="text-5xl font-black text-gray-900">AI 朗讀助教</h1>
-      <p className="text-gray-600 max-w-md">準備好開始今天的朗讀挑戰了嗎？</p>
-      <button
-        type="button"
-        onClick={() => navigate('/library')}
-        className="bg-accent hover:bg-accent-hover text-white px-10 py-4 rounded-xl font-bold shadow-2xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-      >
-        進入圖書館
-      </button>
-    </div>
-  );
+  if (hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher')) {
+    return <Navigate to="/teacher-home" replace />;
+  }
+
+  if (user !== null) {
+    return <Navigate to="/student" replace />;
+  }
+
+  // Fallback (user still loading): show nothing, auth loading state handles it
+  return <Navigate to="/library" replace />;
 };
 
 /** Library page — wraps StoryLibrary with dashboard + session resume prompt. */
@@ -286,7 +291,7 @@ const OnboardingWrapper: React.FC = () => {
   );
 };
 
-/** The authenticated app shell with header. */
+/** The authenticated app shell with header + sidebar. */
 const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, token, logout } = useAuth();
   const navigate = useNavigate();
@@ -354,6 +359,14 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
   };
 
+  // Determine context title shown in header (between logo and user info)
+  const getContextTitle = (): string | null => {
+    if (navStory) return navStory.title;
+    return null;
+  };
+
+  const contextTitle = getContextTitle();
+
   return (
     <div className="h-screen flex flex-col bg-amber-50 text-gray-900 font-sans overflow-hidden">
       {/* Skip-to-content link — visually hidden until focused (WCAG 2.4.1) */}
@@ -364,11 +377,11 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         跳至主要內容
       </a>
 
-      {/* Header */}
+      {/* Header — slim: logo | stepper (when learning) | user info + logout */}
       <header
         role="banner"
         aria-label="應用程式標頭"
-        className="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-4 shrink-0"
+        className="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-4 shrink-0 z-30"
       >
         {/* Logo — keyboard-accessible home link */}
         <button
@@ -383,136 +396,28 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
         </button>
 
-        {navStory && ![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS, AppView.MY_VOCABULARY, AppView.LEARNING_HISTORY, AppView.DIALOGUE_HISTORY, AppView.STUDENT_PROGRESS].includes(currentView) && (
-          <StepperNav
-            currentView={currentView}
-            session={navSession}
-            selectedStory={navStory}
-            onNavigate={handleStepperNavigate}
-          />
-        )}
+        {/* Center: StepperNav in learning mode, or context title */}
+        <div className="flex-1 flex items-center justify-center px-4 min-w-0">
+          {navStory && ![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS, AppView.MY_VOCABULARY, AppView.LEARNING_HISTORY, AppView.DIALOGUE_HISTORY, AppView.STUDENT_PROGRESS, AppView.STUDENT_HOME, AppView.TEACHER_HOME].includes(currentView) ? (
+            <StepperNav
+              currentView={currentView}
+              session={navSession}
+              selectedStory={navStory}
+              onNavigate={handleStepperNavigate}
+            />
+          ) : contextTitle ? (
+            <span className="text-sm font-medium text-gray-500 truncate" aria-live="polite">
+              {contextTitle}
+            </span>
+          ) : null}
+        </div>
 
-        {/* Nav links + User info + Logout */}
-        <nav
-          role="navigation"
-          aria-label="主要導覽"
-          className="flex items-center gap-3 shrink-0"
-        >
+        {/* Right: NotificationBell (teacher) + user name + logout */}
+        <div className="flex items-center gap-3 shrink-0">
           {hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
-            <>
-              <button
-                type="button"
-                onClick={() => navigate('/teacher')}
-                aria-current={
-                  currentView === AppView.TEACHER_DASHBOARD || currentView === AppView.CLASSROOM_DETAIL
-                    ? 'page'
-                    : undefined
-                }
-                className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                  currentView === AppView.TEACHER_DASHBOARD ||
-                  currentView === AppView.CLASSROOM_DETAIL
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                班級管理
-              </button>
-              <NotificationBell
-                onNavigateToStudent={(classroomId) => navigate(`/teacher/classroom/${classroomId}`)}
-              />
-            </>
-          )}
-          {!hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin') && (
-            <>
-              <button
-                type="button"
-                onClick={() => navigate('/assignments')}
-                aria-current={currentView === AppView.MY_ASSIGNMENTS ? 'page' : undefined}
-                className={`relative text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                  currentView === AppView.MY_ASSIGNMENTS
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                作業
-                {pendingAssignmentCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5 leading-none">
-                    {pendingAssignmentCount > 9 ? '9+' : pendingAssignmentCount}
-                  </span>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/vocabulary')}
-                aria-current={currentView === AppView.MY_VOCABULARY ? 'page' : undefined}
-                className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                  currentView === AppView.MY_VOCABULARY
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                我的生字
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/history')}
-                aria-current={
-                  currentView === AppView.LEARNING_HISTORY || currentView === AppView.DIALOGUE_HISTORY
-                    ? 'page'
-                    : undefined
-                }
-                className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                  currentView === AppView.LEARNING_HISTORY || currentView === AppView.DIALOGUE_HISTORY
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                學習記錄
-              </button>
-              <button
-                onClick={() => navigate('/progress')}
-                className={`text-xs font-medium transition-colors cursor-pointer ${
-                  currentView === AppView.STUDENT_PROGRESS
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                學習進度
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/join')}
-                className="text-xs font-medium transition-colors cursor-pointer text-gray-500 hover:text-gray-700 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-              >
-                加入班級
-              </button>
-            </>
-          )}
-          {hasRole(user, 'parent') && !hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
-            <button
-              onClick={() => navigate('/parent')}
-              className={`text-xs font-medium transition-colors cursor-pointer ${
-                currentView === AppView.PARENT_DASHBOARD
-                  ? 'text-accent'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              孩子進度
-            </button>
-          )}
-          {hasRole(user, 'system_admin', 'org_owner', 'org_admin') && (
-            <button
-              type="button"
-              onClick={() => navigate('/admin')}
-              aria-current={currentView === AppView.ADMIN_DASHBOARD ? 'page' : undefined}
-              className={`text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                currentView === AppView.ADMIN_DASHBOARD
-                  ? 'text-accent'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              系統管理
-            </button>
+            <NotificationBell
+              onNavigateToStudent={(classroomId) => navigate(`/teacher/classroom/${classroomId}`)}
+            />
           )}
           <div className="w-px h-4 bg-gray-200" aria-hidden="true" />
           {user && (
@@ -527,18 +432,23 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           >
             登出
           </button>
-        </nav>
+        </div>
       </header>
 
-      <main
-        id="main-content"
-        role="main"
-        aria-label="主要內容"
-        className="flex-1 flex flex-col overflow-hidden"
-        tabIndex={-1}
-      >
-        {children}
-      </main>
+      {/* Body: sidebar + main content */}
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar pendingAssignmentCount={pendingAssignmentCount} />
+
+        <main
+          id="main-content"
+          role="main"
+          aria-label="主要內容"
+          className="flex-1 flex flex-col overflow-hidden pb-14 md:pb-0"
+          tabIndex={-1}
+        >
+          {children}
+        </main>
+      </div>
 
       {/* Onboarding overlay for first-time students */}
       <Suspense fallback={null}>
@@ -547,21 +457,6 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Feedback button — visible to all authenticated users */}
       <FeedbackButton />
-
-      {/* Footer */}
-      <footer
-        role="contentinfo"
-        aria-label="頁尾"
-        className="shrink-0 bg-white border-t border-gray-100 flex items-center justify-center py-1.5 px-4"
-      >
-        <button
-          type="button"
-          onClick={() => navigate('/privacy')}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-        >
-          隱私政策
-        </button>
-      </footer>
     </div>
   );
 };
@@ -656,6 +551,26 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <AppShell>
                   <HomePage />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student"
+            element={
+              <ProtectedRoute>
+                <AppShell>
+                  <StudentHome />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teacher-home"
+            element={
+              <ProtectedRoute>
+                <AppShell>
+                  <TeacherHome />
                 </AppShell>
               </ProtectedRoute>
             }
