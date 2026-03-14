@@ -905,3 +905,36 @@ export async function evaluateListeningRetelling(
   }
   return res.json();
 }
+
+// --- Student Enrolled Classrooms (Issue #462) ---
+
+export interface StudentEnrolledClassroom {
+  id: number;
+  name: string;
+  grade: number | null;
+  teacher_id: number;
+  teacher_name: string;
+  is_active: boolean;
+  enrolled_at: string;
+}
+
+export interface StudentEnrolledClassroomsResponse {
+  classrooms: StudentEnrolledClassroom[];
+  total: number;
+}
+
+/**
+ * Return the classrooms the current student is enrolled in.
+ * Calls GET /api/classrooms/my-enrollments.
+ */
+export async function fetchMyEnrolledClassrooms(
+  token: string,
+): Promise<StudentEnrolledClassroomsResponse> {
+  const res = await fetch(`${API_BASE}/api/classrooms/my-enrollments`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    throw new Error(`fetchMyEnrolledClassrooms failed: ${res.status}`);
+  }
+  return res.json();
+}
