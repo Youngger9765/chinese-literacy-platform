@@ -27,6 +27,8 @@ from ..schemas.classroom import (
     ClassroomUpdateRequest,
     CreatedStudentInfo,
     CsvUploadResponse,
+    StudentEnrolledClassroom,
+    StudentEnrolledClassroomsResponse,
     StudentInClassroomResponse,
     StudentSearchRequest,
     StudentSearchResult,
@@ -301,6 +303,43 @@ def download_csv_template(
         media_type="text/csv; charset=UTF-8",
         headers={"Content-Disposition": 'attachment; filename="student-import-template.csv"'},
     )
+
+
+@router.get("/classrooms/my-enrollments", response_model=StudentEnrolledClassroomsResponse)
+def list_my_enrolled_classrooms(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return the classrooms the current user is enrolled in as a student.
+
+    IMPORTANT: This route MUST appear before /classrooms/{classroom_id} so that
+    FastAPI does not try to parse 'my-enrollments' as an integer classroom_id.
+
+    Returns classroom details including teacher name for the student dashboard.
+    """
+    rows = (
+        db.query(ClassroomStudent, Classroom, User)
+        .join(Classroom, Classroom.id == ClassroomStudent.classroom_id)
+        .join(User, User.id == Classroom.teacher_id)
+        .filter(ClassroomStudent.student_id == current_user.id)
+        .order_by(ClassroomStudent.enrolled_at.desc())
+        .all()
+    )
+
+    classrooms = [
+        StudentEnrolledClassroom(
+            id=classroom.id,
+            name=classroom.name,
+            grade=classroom.grade,
+            teacher_id=classroom.teacher_id,
+            teacher_name=teacher.name,
+            is_active=classroom.is_active,
+            enrolled_at=cs.enrolled_at,
+        )
+        for cs, classroom, teacher in rows
+    ]
+
+    return StudentEnrolledClassroomsResponse(classrooms=classrooms, total=len(classrooms))
 
 
 @router.get("/classrooms/{classroom_id}", response_model=ClassroomDetailResponse)
