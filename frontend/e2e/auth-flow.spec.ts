@@ -61,10 +61,16 @@ async function dismissAllModals(page: Page) {
   await acceptTermsIfVisible(page);
 }
 
-/** Helper: register a new account and wait for the main app to appear. */
+/**
+ * Helper: register a new account and wait for the main app to appear.
+ *
+ * Flow (issue #460): register → verification pending screen → click dev token link
+ * → email verified → click "前往登入" → login with credentials → handle modals → app.
+ */
 async function registerAndWaitForApp(page: Page, email: string) {
   await page.locator('button:has-text("註冊帳號")').click();
-  await expect(page.locator('text=建立你的帳號')).toBeVisible();
+  // RegisterPage title changed from "建立你的帳號" to "教師註冊" (issue #457)
+  await expect(page.locator('text=教師註冊')).toBeVisible();
 
   await page.locator('#register-name').fill(TEST_NAME);
   await page.locator('#register-email').fill(email);
@@ -72,16 +78,30 @@ async function registerAndWaitForApp(page: Page, email: string) {
   await page.locator('#register-confirm').fill(TEST_PASSWORD);
   await page.locator('button[type="submit"]:has-text("建立帳號")').click();
 
-  // Wait for either terms modal or main app to appear
-  await Promise.race([
-    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
-    page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
-  ]);
+  // After submit: page shows verification pending screen (issue #460)
+  await expect(page.locator('h2:has-text("請驗證您的 Email")')).toBeVisible({ timeout: 30_000 });
 
-  await dismissAllModals(page);
+  // Dev/staging mode shows a verification link — extract the token and verify via API
+  const verifyLink = page.locator('a:has-text("點擊此連結驗證 Email")');
+  await expect(verifyLink).toBeVisible({ timeout: 10_000 });
+  const href = await verifyLink.getAttribute('href');
+  if (!href) throw new Error('Verification link href not found on page');
 
-  // Wait for the main app to fully load
-  await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
+  // Call the verification endpoint directly (link opens _blank, easier to fetch in-page)
+  const verifyResponse = await page.evaluate(async (url: string) => {
+    const res = await fetch(url);
+    return res.status;
+  }, href);
+  if (verifyResponse !== 200) {
+    throw new Error(`Email verification failed with HTTP ${verifyResponse}`);
+  }
+
+  // Click "前往登入" to switch to the login form
+  await page.locator('button:has-text("前往登入")').click();
+  await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 10_000 });
+
+  // Login with the registered credentials
+  await loginAndWaitForApp(page, email, TEST_PASSWORD);
 }
 
 /**
@@ -98,12 +118,13 @@ async function logoutAndWaitForLoginPage(page: Page) {
   await page.locator('button:has-text("登出")').click();
 
   // Wait for either login or register page to appear
+  // RegisterPage title changed to "教師註冊" (issue #457)
   await expect(
-    page.locator('text=登入你的帳號').or(page.locator('text=建立你的帳號'))
+    page.locator('text=登入你的帳號').or(page.locator('text=教師註冊'))
   ).toBeVisible({ timeout: 15_000 });
 
   // If we landed on the register page, switch to login
-  const onRegisterPage = await page.locator('text=建立你的帳號').isVisible();
+  const onRegisterPage = await page.locator('text=教師註冊').isVisible();
   if (onRegisterPage) {
     // The register page has a "登入" link at the bottom
     await page.locator('button:has-text("登入")').last().click();
@@ -152,8 +173,8 @@ test('2 - 切換到註冊頁', async ({ page }) => {
 
   await page.locator('button:has-text("註冊帳號")').click();
 
-  // Should see register form
-  await expect(page.locator('text=建立你的帳號')).toBeVisible();
+  // Should see register form — title changed to "教師註冊" (issue #457)
+  await expect(page.locator('text=教師註冊')).toBeVisible();
   await expect(page.locator('label:has-text("姓名")')).toBeVisible();
   await expect(page.locator('label:has-text("確認密碼")')).toBeVisible();
   await expect(page.locator('button[type="submit"]:has-text("建立帳號")')).toBeVisible();
@@ -170,8 +191,8 @@ test('3 - 註冊新帳號', async ({ page }) => {
 
   await registerAndWaitForApp(page, email);
 
-  // Should see the main app content
-  await expect(page.locator('text=AI 朗讀助教')).toBeVisible();
+  // Should be logged in and see the main app (logout button is visible)
+  await expect(page.locator('button:has-text("登出")')).toBeVisible();
 });
 
 // ---------------------------------------------------------------------------
@@ -209,8 +230,8 @@ test('5 - 用已註冊帳號登入', async ({ page }) => {
   // Now login with the same credentials
   await loginAndWaitForApp(page, email, TEST_PASSWORD);
 
-  // Should see the main app
-  await expect(page.locator('text=AI 朗讀助教')).toBeVisible();
+  // Should be logged in and see the main app (logout button is visible)
+  await expect(page.locator('button:has-text("登出")')).toBeVisible();
 });
 
 // ---------------------------------------------------------------------------
@@ -238,9 +259,9 @@ test('7 - 重複註冊', async ({ page }) => {
   await page.goto('/');
   await resetToLoginPage(page);
 
-  // Switch to register page
+  // Switch to register page — title changed to "教師註冊" (issue #457)
   await page.locator('button:has-text("註冊帳號")').click();
-  await expect(page.locator('text=建立你的帳號')).toBeVisible();
+  await expect(page.locator('text=教師註冊')).toBeVisible();
 
   // Try to register with same email as test 3
   await page.locator('#register-name').fill('Duplicate User');
