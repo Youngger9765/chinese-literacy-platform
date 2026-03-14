@@ -51,23 +51,16 @@ setup('authenticate as admin', async ({ page }) => {
   await page.context().storageState({ path: 'e2e/.auth/admin.json' });
 });
 
-setup('register and authenticate as student', async ({ page }) => {
-  const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-  const email = `e2e-student-setup-${runId}@example.com`;
-
+setup('authenticate as student', async ({ page }) => {
+  // Since #457 blocks student self-registration, use pre-seeded student account
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
 
-  await page.locator('button:has-text("註冊帳號")').click();
-  await expect(page.locator('text=建立你的帳號')).toBeVisible({ timeout: 10_000 });
-
-  await page.locator('#register-name').fill('E2E學生');
-  await page.locator('#register-email').fill(email);
-  await page.locator('#register-password').fill(STUDENT_PASSWORD);
-  await page.locator('#register-confirm').fill(STUDENT_PASSWORD);
-  await page.locator('button[type="submit"]:has-text("建立帳號")').click();
+  await page.locator('#login-email').fill('student@test.com');
+  await page.locator('#login-password').fill('student1234');
+  await page.locator('button[type="submit"]:has-text("登入")').click();
 
   await Promise.race([
     page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
