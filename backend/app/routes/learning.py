@@ -1661,7 +1661,7 @@ async def generate_session_exit_ticket(
     session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
-    if session.user_id != current_user.id:
+    if session.student_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
 
     result = await generate_exit_ticket_questions(
@@ -1705,7 +1705,7 @@ async def submit_session_exit_ticket(
     session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
-    if session.user_id != current_user.id:
+    if session.student_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
 
     total = payload.total_questions or len(payload.answers)
