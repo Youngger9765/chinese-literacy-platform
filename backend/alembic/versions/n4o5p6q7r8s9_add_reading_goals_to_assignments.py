@@ -17,17 +17,24 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # Use a DO block so the ALTER is skipped if the assignments table doesn't
+    # exist yet (can happen on preview DBs where alembic_version was seeded
+    # from a prior run but the actual schema was reset).
     op.execute(
-        "ALTER TABLE assignments ADD COLUMN IF NOT EXISTS "
-        "target_cpm INTEGER"
-    )
-    op.execute(
-        "ALTER TABLE assignments ADD COLUMN IF NOT EXISTS "
-        "target_accuracy FLOAT"
-    )
-    op.execute(
-        "ALTER TABLE assignments ADD COLUMN IF NOT EXISTS "
-        "difficulty_label VARCHAR(10)"
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'assignments'
+            ) THEN
+                ALTER TABLE assignments ADD COLUMN IF NOT EXISTS target_cpm INTEGER;
+                ALTER TABLE assignments ADD COLUMN IF NOT EXISTS target_accuracy FLOAT;
+                ALTER TABLE assignments ADD COLUMN IF NOT EXISTS difficulty_label VARCHAR(10);
+            END IF;
+        END
+        $$
+        """
     )
 
 

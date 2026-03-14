@@ -278,17 +278,33 @@ def upgrade() -> None:
     """))
 
     # ── 15. NOT NULL fixes (ORM says NOT NULL, DB allows NULL) ─────────
+    # Guard with IF EXISTS so this is safe on fresh preview DBs where
+    # assignment tables may not have been created yet.
     conn.execute(sa.text("""
-        UPDATE assignment_submissions SET status = 'pending' WHERE status IS NULL
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'assignment_submissions'
+            ) THEN
+                UPDATE assignment_submissions SET status = 'pending' WHERE status IS NULL;
+                ALTER TABLE assignment_submissions ALTER COLUMN status SET NOT NULL;
+            END IF;
+        END
+        $$
     """))
     conn.execute(sa.text("""
-        ALTER TABLE assignment_submissions ALTER COLUMN status SET NOT NULL
-    """))
-    conn.execute(sa.text("""
-        UPDATE assignments SET assignment_type = 'reading' WHERE assignment_type IS NULL
-    """))
-    conn.execute(sa.text("""
-        ALTER TABLE assignments ALTER COLUMN assignment_type SET NOT NULL
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'assignments'
+            ) THEN
+                UPDATE assignments SET assignment_type = 'reading' WHERE assignment_type IS NULL;
+                ALTER TABLE assignments ALTER COLUMN assignment_type SET NOT NULL;
+            END IF;
+        END
+        $$
     """))
     conn.execute(sa.text("""
         UPDATE error_corrections SET correction_type = 'practice' WHERE correction_type IS NULL
