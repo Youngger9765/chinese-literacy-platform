@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, googleLogin as apiGoogleLogin, AuthUser, AuthError } from '../services/authApi';
+import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, googleLogin as apiGoogleLogin, AuthUser, AuthError, RegisterResponse } from '../services/authApi';
 
 const TOKEN_KEY = 'lingoleap_token';
 
@@ -12,7 +12,7 @@ interface AuthContextValue {
   loginPassword: string | null;
   needsTermsAcceptance: boolean;
   login: (email: string, password: string) => Promise<{ mustChangePassword: boolean }>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<RegisterResponse>;
   logout: () => void;
   clearMustChangePassword: () => void;
   /** Re-fetch user data from /api/users/me and update the context. */
@@ -90,14 +90,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { mustChangePassword: needsPasswordChange };
   }, []);
 
-  const register = useCallback(async (email: string, password: string, name: string) => {
+  const register = useCallback(async (email: string, password: string, name: string): Promise<RegisterResponse> => {
+    // Registration no longer auto-logs in — user must verify email first (issue #460).
     const response = await apiRegister(email, password, name);
-    const newToken = response.access_token;
-    localStorage.setItem(TOKEN_KEY, newToken);
-    setToken(newToken);
-
-    const userData = await getMe(newToken);
-    setUser(userData);
+    return response;
   }, []);
 
   const loginWithGoogle = useCallback(async (credential: string): Promise<{ isNewUser: boolean }> => {

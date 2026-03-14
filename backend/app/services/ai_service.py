@@ -32,11 +32,123 @@ def _get_client() -> genai.Client:
     return genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
 
 
+def _repair_json(raw: str) -> str | None:
+    """Attempt basic JSON repair on a potentially truncated/malformed string.
+
+    Strategy:
+    1. Strip markdown code fences (```json ... ```)
+    2. Walk forward tracking bracket depth and string state, recording every
+       position where the outermost bracket closes (depth == 0).
+    3. If the outermost bracket never closes (truncated mid-content), scan
+       backwards from the end for the last close bracket (`}` or `]`) that is
+       not inside a string. Truncate there, strip trailing commas, then append
+       the closing brackets needed to balance the open bracket stack.
+
+    Returns the repaired JSON string if successful, None otherwise.
+    """
+    text = raw.strip()
+
+    # Strip markdown code fences
+    if text.startswith("```"):
+        # Remove opening fence (```json or ```)
+        text = text[text.find("\n") + 1:] if "\n" in text else text[3:]
+    if text.endswith("```"):
+        text = text[: text.rfind("```")]
+    text = text.strip()
+
+    if not text:
+        return None
+
+    # Must start with a JSON container
+    if not text.startswith("{") and not text.startswith("["):
+        return None
+
+    # Walk forward tracking brackets and string state.
+    # Build a stack of open brackets and record positions where depth returns to 0.
+    last_balanced_pos = -1
+    # close_positions: list of (pos, bracket_stack_snapshot_after_close)
+    # We only need the last close position outside a string.
+    last_outer_close_pos = -1  # last pos of any `}` or `]` outside a string
+    in_string = False
+    escape_next = False
+    bracket_stack: list[str] = []
+
+    for i, ch in enumerate(text):
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch in ("{", "["):
+            bracket_stack.append(ch)
+        elif ch in ("}", "]"):
+            if bracket_stack:
+                bracket_stack.pop()
+            if not bracket_stack:
+                last_balanced_pos = i
+            # Record last close bracket outside a string regardless of depth
+            last_outer_close_pos = i
+
+    # Case 1: JSON was complete — return the complete portion
+    if last_balanced_pos != -1:
+        return text[: last_balanced_pos + 1]
+
+    # Case 2: Truncated — find the last close bracket, truncate there,
+    # strip trailing comma/whitespace, then close all open brackets.
+    if last_outer_close_pos == -1:
+        return None
+
+    truncated = text[: last_outer_close_pos + 1].rstrip().rstrip(",").rstrip()
+
+    # Rebuild bracket_stack for the truncated portion to know what to close
+    in_string = False
+    escape_next = False
+    close_stack: list[str] = []
+
+    for ch in truncated:
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch in ("{", "["):
+            close_stack.append(ch)
+        elif ch in ("}", "]"):
+            if close_stack:
+                close_stack.pop()
+
+    # Append the matching closing brackets in reverse
+    closing = ""
+    for opener in reversed(close_stack):
+        closing += "}" if opener == "{" else "]"
+
+    candidate = truncated + closing
+    try:
+        json.loads(candidate)
+        return candidate
+    except Exception:
+        pass
+
+    return None
+
+
 async def generate_structured_response(
     system_prompt: str,
     contents: list[genai_types.Content],
     response_schema: dict,
-    max_tokens: int = 1024,
+    max_tokens: int = 4096,
     temperature: float = 0.7,
 ) -> dict:
     """Call Gemini with JSON mode, return parsed dict.
@@ -64,7 +176,43 @@ async def generate_structured_response(
                 ),
                 timeout=GEMINI_TIMEOUT,
             )
-            return json.loads(response.text)
+
+            # Log raw response for debugging (truncated to avoid log spam)
+            raw_text = response.text if response.text is not None else ""
+            logger.debug(
+                "Gemini raw response (first 500 chars): %s",
+                raw_text[:500],
+                extra={"event": "gemini_raw_response", "length": len(raw_text)},
+            )
+
+            if not raw_text:
+                raise ValueError("Gemini returned empty/None response text")
+
+            try:
+                return json.loads(raw_text)
+            except json.JSONDecodeError as json_err:
+                logger.warning(
+                    "JSON parse failed (%s), attempting repair. Raw (first 200): %s",
+                    json_err,
+                    raw_text[:200],
+                    extra={"event": "gemini_json_repair_attempt"},
+                )
+                repaired = _repair_json(raw_text)
+                if repaired is not None:
+                    try:
+                        result = json.loads(repaired)
+                        logger.warning(
+                            "JSON repair succeeded (original_len=%d, repaired_len=%d)",
+                            len(raw_text),
+                            len(repaired),
+                            extra={"event": "gemini_json_repair_success"},
+                        )
+                        return result
+                    except json.JSONDecodeError:
+                        pass
+                # Repair failed — raise original error so retry logic handles it
+                raise json_err
+
         except asyncio.TimeoutError:
             logger.error(
                 "Gemini API timeout after %ds",
@@ -405,29 +553,121 @@ async def evaluate_comprehension(
 
     return result
 
-async def generate_exit_ticket(text: str) -> list[dict]:
-    """
-    Generate exit-ticket questions for a story text.
-    Returns a list of question dicts: [{"question": str, "type": str}, ...]
+# ── Exit Ticket (Issue #463) ─────────────────────────────────────────────────
 
-    Stub: returns placeholder questions until implemented (Step 6).
+EXIT_TICKET_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "questions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "question": {"type": "string"},
+                    "options": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "minItems": 4,
+                        "maxItems": 4,
+                    },
+                    "correct_index": {"type": "integer"},
+                    "explanation": {"type": "string"},
+                },
+                "required": ["id", "question", "options", "correct_index", "explanation"],
+            },
+            "minItems": 3,
+            "maxItems": 5,
+        }
+    },
+    "required": ["questions"],
+}
+
+_EXIT_TICKET_SYSTEM_PROMPT = """你是一位專業的國語文教師，負責出「出場卷」測驗。
+
+根據課文內容，設計 3~5 題選擇題，測驗學生對課文的理解程度。
+題目類型應包含：
+1. 字面理解題（直接從課文找答案）
+2. 推論理解題（需要推理或推斷）
+3. 評價理解題（整體評價、主旨、道理）
+
+規則：
+- 每題有 4 個選項，只有一個正確答案
+- correct_index 從 0 開始（0=第一個選項, 1=第二個, 2=第三個, 3=第四個）
+- explanation 用中文說明正確答案的依據（1~2 句）
+- 題目難易度適合國小高年級～國中生
+- 嚴禁出現與課文無關的問題
+- 如果有提供學生讀錯的字，至少出一題考形近字辨識
+"""
+
+
+async def generate_exit_ticket(
+    text: str,
+    wrong_chars: list[str] | None = None,
+) -> dict:
     """
-    # TODO: implement with Gemini API (Step 6)
-    return [
-        {"question": "這篇文章的主角是誰？", "type": "short_answer"},
-        {"question": "作者想要告訴我們什麼道理？", "type": "short_answer"},
+    Generate exit-ticket multiple choice questions for a story text (Issue #463).
+
+    Uses Gemini 2.5 Flash to produce 3-5 multiple choice questions covering
+    literal comprehension, inferential comprehension, and evaluative comprehension
+    (三層次理解). If wrong_chars are provided, includes at least one character
+    recognition question based on the student's errors.
+
+    Args:
+        text: Story/lesson content (joined paragraphs)
+        wrong_chars: Optional list of characters the student mispronounced
+
+    Returns:
+        {"questions": [{"id", "question", "options", "correct_index", "explanation"}, ...]}
+        On AI failure: {"questions": [], "fallback": True}
+        NEVER returns auto-pass data on failure.
+    """
+    sanitized_text = sanitize_ai_input(text[:3000])
+    wrong_chars_info = ""
+    if wrong_chars:
+        wrong_chars_info = f"\n\n【學生朗讀時讀錯的字】：{', '.join(wrong_chars[:10])}\n請至少出一題考這些字的辨識（形近字選擇）。"
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[
+                genai_types.Part(
+                    text=f"以下是課文內容：\n\n{sanitized_text}{wrong_chars_info}\n\n請根據課文出 3~5 題選擇題。",
+                ),
+            ],
+        )
     ]
+
+    try:
+        result = await generate_structured_response(
+            system_prompt=_EXIT_TICKET_SYSTEM_PROMPT,
+            contents=contents,
+            response_schema=EXIT_TICKET_SCHEMA,
+            max_tokens=2048,
+            temperature=0.5,
+        )
+        questions = result.get("questions", [])
+        if not questions:
+            logger.warning("generate_exit_ticket: AI returned empty questions list")
+            return {"questions": [], "fallback": True}
+        # Clamp correct_index to valid range 0-3
+        for q in questions:
+            q["correct_index"] = max(0, min(3, int(q.get("correct_index", 0))))
+        return {"questions": questions}
+    except Exception as e:
+        logger.error("generate_exit_ticket AI call failed: %s", e)
+        return {"questions": [], "fallback": True}
 
 
 async def grade_exit_ticket(question: str, student_answer: str, reference_text: str) -> dict:
     """
     Grade a student's exit-ticket answer.
-    Returns {"score": int, "feedback": str} with score 0–100.
 
-    Stub: returns placeholder until implemented (Step 6).
+    For multiple-choice exit tickets, grading is done deterministically
+    by comparing selected_index to correct_index (handled in the route/service).
+    This function is preserved for potential future open-ended answer grading.
     """
-    # TODO: implement with Gemini API (Step 6)
-    return {"score": 0, "feedback": "批改功能尚未實作"}
+    return {"score": 0, "feedback": "此函式保留給未來開放式題型批改使用"}
 
 
 # ── Sentence Practice (Issue #109) ──────────────────────────────────────────
@@ -501,7 +741,7 @@ async def generate_example_sentences(character: str, story_title: str) -> dict:
         system_prompt=system_prompt,
         contents=contents,
         response_schema=EXAMPLE_SENTENCES_SCHEMA,
-        max_tokens=512,
+        max_tokens=2048,
         temperature=0.8,
     )
     return result
@@ -554,7 +794,7 @@ async def validate_student_sentence(
         system_prompt=system_prompt,
         contents=contents,
         response_schema=SENTENCE_VALIDATION_SCHEMA,
-        max_tokens=256,
+        max_tokens=1024,
         temperature=0.3,
     )
 

@@ -1,5 +1,10 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import {
+  generateExitTicket,
+  submitExitTicket,
+  type ExitTicketQuestion as ApiQuestion,
+} from '../../services/api';
 
 interface WrongToken {
   char: string;
@@ -10,12 +15,22 @@ interface ExitTicketProps {
   wrongTokens: WrongToken[];
   missingChars: string[];
   storyContent: string[];
+  /** DB session ID — required to call backend AI generation and persist results */
+  dbSessionId?: number | null;
+  /** Auth token — required to call backend endpoints */
+  token?: string | null;
 }
 
-interface Question {
-  prompt: string;
+// ── Local rule-based fallback (kept from original implementation) ─────────────
+
+interface LocalQuestion {
+  id: number;
+  question: string;
   correctAnswer: string;
   options: string[];
+  /** Always undefined for local questions (no server explanation) */
+  explanation?: string;
+  source: 'local';
 }
 
 /** Shuffle array using Fisher-Yates */
@@ -153,11 +168,14 @@ const CONFUSABLE_CHARS: Record<string, string[]> = {
   '字': ['子', '守', '宇'],
 };
 
-/** Generate up to 3 multiple-choice questions from wrong + missing tokens */
-const generateQuestions = (wrongTokens: WrongToken[], missingChars: string[], storyContent: string[]): Question[] => {
+/** Generate up to 3 multiple-choice questions from wrong + missing tokens (local fallback) */
+const generateLocalQuestions = (
+  wrongTokens: WrongToken[],
+  missingChars: string[],
+  storyContent: string[],
+): LocalQuestion[] => {
   if (wrongTokens.length === 0 && missingChars.length === 0) return [];
 
-  // Collect unique characters from the story for distractors, excluding common particles
   const storyChars = new Set<string>();
   for (const paragraph of storyContent) {
     for (const ch of paragraph) {
@@ -165,105 +183,199 @@ const generateQuestions = (wrongTokens: WrongToken[], missingChars: string[], st
     }
   }
 
-  const questions: Question[] = [];
+  const questions: LocalQuestion[] = [];
 
-  /**
-   * Build a distractor list for a given correct answer.
-   * Priority: 1) CONFUSABLE_CHARS map, 2) other wrongTokens, 3) storyChars, 4) random CJK fallback
-   */
   const buildDistractors = (correctAnswer: string, exclude: Set<string>): string[] => {
     const chosen: string[] = [];
     const seen = new Set<string>([correctAnswer, ...exclude]);
 
-    // Priority 1: confusable chars (form-similar / sound-similar)
     const confusables = CONFUSABLE_CHARS[correctAnswer] ?? [];
     for (const c of shuffle(confusables)) {
       if (!seen.has(c) && chosen.length < 3) { seen.add(c); chosen.push(c); }
     }
-
-    // Priority 2: other wrong tokens' expected chars
     for (const t of wrongTokens) {
       if (!seen.has(t.expected) && chosen.length < 3) { seen.add(t.expected); chosen.push(t.expected); }
     }
-
-    // Priority 3: story chars
     for (const c of shuffle([...storyChars])) {
       if (!seen.has(c) && chosen.length < 3) { seen.add(c); chosen.push(c); }
     }
-
-    // Priority 4: random CJK fallback
     while (chosen.length < 3) {
       const fallback = String.fromCharCode(0x4e00 + Math.floor(Math.random() * 200));
       if (!seen.has(fallback)) { seen.add(fallback); chosen.push(fallback); }
     }
-
     return chosen.slice(0, 3);
   };
 
-  // Questions from wrong tokens: "你讀成了 X，正確的字應該是？"
   for (const token of shuffle(wrongTokens)) {
     if (questions.length >= 3) break;
     const distractors = buildDistractors(token.expected, new Set([token.char]));
     questions.push({
-      prompt: `你讀成了「${token.char}」，正確的字應該是？`,
+      id: questions.length + 1,
+      question: `你讀成了「${token.char}」，正確的字應該是？`,
       correctAnswer: token.expected,
       options: shuffle([token.expected, ...distractors]),
+      source: 'local',
     });
   }
 
-  // Fill remaining slots with missing chars: "你漏讀了一個字，是下面哪一個？"
   const usedChars = new Set(questions.map(q => q.correctAnswer));
   for (const ch of shuffle(missingChars)) {
     if (questions.length >= 3) break;
     if (usedChars.has(ch)) continue;
     usedChars.add(ch);
-
     const distractors = buildDistractors(ch, new Set());
     questions.push({
-      prompt: `你漏讀了一個字，是下面哪一個？`,
+      id: questions.length + 1,
+      question: `你漏讀了一個字，是下面哪一個？`,
       correctAnswer: ch,
       options: shuffle([ch, ...distractors]),
+      source: 'local',
     });
   }
 
   return questions;
 };
 
-const ExitTicket: React.FC<ExitTicketProps> = ({ wrongTokens, missingChars, storyContent }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [answers, setAnswers] = useState<(string | null)[]>([]);
-  const [submitted, setSubmitted] = useState(false);
+// ── Unified question type for rendering ──────────────────────────────────────
 
-  const questions = useMemo(
-    () => generateQuestions(wrongTokens, missingChars, storyContent),
+interface UnifiedQuestion {
+  id: number;
+  question: string;
+  /** Index of the correct answer in options array */
+  correctIndex: number;
+  options: string[];
+  explanation?: string;
+  source: 'ai' | 'local';
+}
+
+/** Convert API question to unified format */
+const fromApiQuestion = (q: ApiQuestion): UnifiedQuestion => ({
+  id: q.id,
+  question: q.question,
+  correctIndex: q.correct_index,
+  options: q.options,
+  explanation: q.explanation,
+  source: 'ai',
+});
+
+/** Convert local question to unified format */
+const fromLocalQuestion = (q: LocalQuestion): UnifiedQuestion => ({
+  id: q.id,
+  question: q.question,
+  correctIndex: q.options.indexOf(q.correctAnswer),
+  options: q.options,
+  source: 'local',
+});
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+const ExitTicket: React.FC<ExitTicketProps> = ({
+  wrongTokens,
+  missingChars,
+  storyContent,
+  dbSessionId,
+  token,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [answers, setAnswers] = useState<(number | null)[]>([]);
+  const [submitted, setSubmitted] = useState(false);
+  const [questions, setQuestions] = useState<UnifiedQuestion[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Local fallback questions (memoized, same as original logic)
+  const localQuestions = useMemo(
+    () => generateLocalQuestions(wrongTokens, missingChars, storyContent),
     [wrongTokens, missingChars, storyContent],
   );
 
-  // No wrong tokens = no exit ticket
-  if (questions.length === 0) return null;
+  // Attempt AI generation on mount if we have session context
+  const fetchAiQuestions = useCallback(async () => {
+    if (!dbSessionId || !token || storyContent.length === 0) {
+      setQuestions(localQuestions.map(fromLocalQuestion));
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const wrongChars = wrongTokens.map(t => t.expected);
+      const result = await generateExitTicket(token, dbSessionId, storyContent, wrongChars);
+      if (result.source === 'ai' && result.questions.length > 0) {
+        setQuestions(result.questions.map(fromApiQuestion));
+      } else {
+        // AI unavailable — fall back to local
+        setQuestions(localQuestions.map(fromLocalQuestion));
+      }
+    } catch {
+      setQuestions(localQuestions.map(fromLocalQuestion));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dbSessionId, token, storyContent, wrongTokens, localQuestions]);
 
-  // Initialize answers array
-  if (answers.length !== questions.length) {
-    setAnswers(new Array(questions.length).fill(null));
-    return null;
+  useEffect(() => {
+    fetchAiQuestions();
+  }, [fetchAiQuestions]);
+
+  // Initialize answers when questions are loaded
+  useEffect(() => {
+    if (questions !== null) {
+      setAnswers(new Array(questions.length).fill(null));
+    }
+  }, [questions]);
+
+  // Not ready yet
+  if (questions === null || isLoading) {
+    if (!isLoading && localQuestions.length === 0) return null;
+    return (
+      <div className="rounded-3xl border border-amber-200 bg-amber-50/50 overflow-hidden">
+        <div className="px-6 py-4 flex items-center gap-3">
+          <span className="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-sm font-black shrink-0">
+            ✎
+          </span>
+          <h3 className="text-lg font-bold text-gray-900">學習出場卷</h3>
+          {isLoading && (
+            <span className="text-sm text-amber-600 animate-pulse">AI 正在出題中...</span>
+          )}
+        </div>
+      </div>
+    );
   }
 
+  if (questions.length === 0) return null;
+
+  if (answers.length !== questions.length) return null;
+
   const correctCount = submitted
-    ? answers.filter((a, i) => a === questions[i].correctAnswer).length
+    ? answers.filter((a, i) => a === questions[i].correctIndex).length
     : 0;
   const allAnswered = answers.every((a) => a !== null);
 
-  const handleSelect = (qIdx: number, option: string) => {
+  const handleSelect = (qIdx: number, optIdx: number) => {
     if (submitted) return;
     const next = [...answers];
-    next[qIdx] = option;
+    next[qIdx] = optIdx;
     setAnswers(next);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!allAnswered) return;
     setSubmitted(true);
+
+    // Persist results to backend (non-blocking)
+    if (dbSessionId && token) {
+      const score = Math.round(
+        (answers.filter((a, i) => a === questions[i].correctIndex).length / questions.length) * 100,
+      );
+      const answerPayload = answers.map((selectedIndex, i) => ({
+        question_id: questions[i].id,
+        selected_index: selectedIndex ?? 0,
+      }));
+      submitExitTicket(token, dbSessionId, answerPayload, score, questions.length).catch(() => {
+        // Non-critical — don't block student view on persist failure
+      });
+    }
   };
+
+  const hasAiQuestions = questions.some(q => q.source === 'ai');
 
   return (
     <div className="rounded-3xl border border-amber-200 bg-amber-50/50 overflow-hidden">
@@ -277,6 +389,11 @@ const ExitTicket: React.FC<ExitTicketProps> = ({ wrongTokens, missingChars, stor
             ✎
           </span>
           <h3 className="text-lg font-bold text-gray-900">學習出場卷</h3>
+          {hasAiQuestions && (
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">
+              AI 出題
+            </span>
+          )}
           {submitted && (
             <span className={`text-sm font-bold px-2 py-0.5 rounded-full ${
               correctCount === questions.length
@@ -299,18 +416,20 @@ const ExitTicket: React.FC<ExitTicketProps> = ({ wrongTokens, missingChars, stor
       {isOpen && (
         <div className="px-6 pb-6 space-y-5 border-t border-amber-200">
           <p className="text-sm text-gray-500 pt-4">
-            根據你剛才讀錯的字，來做個小測驗吧！
+            {hasAiQuestions
+              ? '根據課文內容，AI 出了幾道題，來測試一下你的理解吧！'
+              : '根據你剛才讀錯的字，來做個小測驗吧！'}
           </p>
 
           {questions.map((q, qIdx) => (
-            <div key={qIdx} className="space-y-2">
+            <div key={q.id} className="space-y-2">
               <p className="text-sm font-bold text-gray-800">
-                {qIdx + 1}. {q.prompt}
+                {qIdx + 1}. {q.question}
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {q.options.map((opt) => {
-                  const isSelected = answers[qIdx] === opt;
-                  const isCorrect = opt === q.correctAnswer;
+                {q.options.map((opt, optIdx) => {
+                  const isSelected = answers[qIdx] === optIdx;
+                  const isCorrect = optIdx === q.correctIndex;
                   let style = 'bg-white border-gray-200 hover:border-accent hover:bg-accent/5';
 
                   if (submitted) {
@@ -327,10 +446,10 @@ const ExitTicket: React.FC<ExitTicketProps> = ({ wrongTokens, missingChars, stor
 
                   return (
                     <button
-                      key={opt}
-                      onClick={() => handleSelect(qIdx, opt)}
+                      key={optIdx}
+                      onClick={() => handleSelect(qIdx, optIdx)}
                       disabled={submitted}
-                      className={`border-2 rounded-xl px-4 py-3 text-lg font-bold transition-all ${style}`}
+                      className={`border-2 rounded-xl px-4 py-3 text-base font-bold transition-all text-left ${style}`}
                     >
                       {opt}
                       {submitted && isCorrect && ' ✓'}
@@ -339,6 +458,12 @@ const ExitTicket: React.FC<ExitTicketProps> = ({ wrongTokens, missingChars, stor
                   );
                 })}
               </div>
+              {/* Show AI explanation after submit */}
+              {submitted && q.explanation && (
+                <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 mt-1">
+                  {q.explanation}
+                </p>
+              )}
             </div>
           ))}
 

@@ -71,17 +71,32 @@ export async function login(
   return handleAuthResponse<AuthTokenResponse>(res);
 }
 
+export interface RegisterResponse {
+  message: string;
+  /** Dev/staging mode only: token returned directly for testing. Null in production. */
+  verification_token: string | null;
+}
+
 export async function register(
   email: string,
   password: string,
   name: string,
-): Promise<AuthTokenResponse> {
+): Promise<RegisterResponse> {
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, name }),
   });
-  return handleAuthResponse<AuthTokenResponse>(res);
+  return handleAuthResponse<RegisterResponse>(res);
+}
+
+export async function resendVerification(email: string): Promise<{ message: string; verification_token: string | null }> {
+  const res = await fetch(`${API_BASE}/api/auth/resend-verification`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  return handleAuthResponse(res);
 }
 
 export async function getMe(token: string): Promise<AuthUser> {

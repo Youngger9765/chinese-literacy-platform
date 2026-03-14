@@ -9,6 +9,9 @@ export function useAppView(): AppView {
   const { pathname } = useLocation();
 
   if (pathname === '/') return AppView.HOME;
+  if (pathname === '/student') return AppView.STUDENT_HOME;
+  if (pathname === '/teacher-home') return AppView.TEACHER_HOME;
+  if (pathname === '/achievements') return AppView.ACHIEVEMENTS;
   if (pathname === '/library') return AppView.LIBRARY;
   if (pathname === '/write') return AppView.WRITE;
   if (pathname === '/teacher') return AppView.TEACHER_DASHBOARD;
