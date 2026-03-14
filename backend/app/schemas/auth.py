@@ -28,6 +28,17 @@ class TokenResponse(BaseModel):
     must_change_password: bool = False
 
 
+class RegisterResponse(BaseModel):
+    message: str
+    # Dev/staging mode: token returned directly so the flow can be tested without email.
+    # In production this field would be omitted and the token sent via email only.
+    verification_token: str | None = None
+
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
+
+
 class ForgotPasswordRequest(BaseModel):
     """Accepts email or username to initiate a password reset."""
     identifier: str = Field(..., min_length=1, max_length=254)
