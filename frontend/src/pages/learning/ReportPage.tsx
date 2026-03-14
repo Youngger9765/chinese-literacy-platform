@@ -70,6 +70,8 @@ const ReportPage: React.FC = () => {
         story={selectedStory}
         onRetry={handleRetry}
         onGoToVocab={() => navigate(`/learn/${storyId}/vocab`)}
+        dbSessionId={dbSessionId}
+        token={token}
       />
 
       {showXpToast && xpResult && (

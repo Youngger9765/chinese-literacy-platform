@@ -938,3 +938,93 @@ export async function fetchMyEnrolledClassrooms(
   }
   return res.json();
 }
+
+// ── Exit Ticket AI (Issue #463) ──────────────────────────────────────────────
+
+export interface ExitTicketQuestion {
+  id: number;
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
+}
+
+export interface ExitTicketGenerateResponse {
+  questions: ExitTicketQuestion[];
+  /** "ai" when Gemini generated the questions, "fallback" when AI was unavailable */
+  source: 'ai' | 'fallback';
+}
+
+export interface ExitTicketSubmitResponse {
+  score: number;
+  correct_count: number;
+  total: number;
+  passed: boolean;
+}
+
+/**
+ * Generate AI-powered exit ticket questions for a learning session.
+ * Calls POST /api/learning/sessions/{sessionId}/exit-ticket/generate
+ *
+ * Returns source="fallback" with empty questions if AI is unavailable —
+ * the caller should fall back to local rule-based generation in that case.
+ */
+export async function generateExitTicket(
+  token: string,
+  sessionId: number,
+  storyContent: string[],
+  wrongChars?: string[],
+): Promise<ExitTicketGenerateResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/sessions/${sessionId}/exit-ticket/generate`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        story_content: storyContent,
+        wrong_chars: wrongChars ?? [],
+      }),
+    },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(body.detail || `generateExitTicket failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+/**
+ * Submit and persist exit ticket answers for a learning session.
+ * Calls POST /api/learning/sessions/{sessionId}/exit-ticket/submit
+ */
+export async function submitExitTicket(
+  token: string,
+  sessionId: number,
+  answers: Array<{ question_id: number; selected_index: number }>,
+  score: number,
+  totalQuestions: number,
+): Promise<ExitTicketSubmitResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/sessions/${sessionId}/exit-ticket/submit`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        answers,
+        score,
+        total_questions: totalQuestions,
+      }),
+    },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(body.detail || `submitExitTicket failed: ${res.status}`);
+  }
+  return res.json();
+}
