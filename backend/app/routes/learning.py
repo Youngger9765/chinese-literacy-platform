@@ -1526,6 +1526,12 @@ async def validate_sentence(
         )
         raise HTTPException(status_code=503, detail="AI service unavailable")
 
+    return ValidateSentenceResponse(
+        is_correct=result.get("is_correct", True),
+        feedback=result.get("feedback", "做得好！"),
+        suggestion=result.get("suggestion", ""),
+    )
+
 
 # ── Listening Comprehension (Issue #251) ─────────────────────────────────────
 
