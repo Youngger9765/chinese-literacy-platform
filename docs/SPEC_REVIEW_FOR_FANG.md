@@ -126,7 +126,7 @@ UI 截圖確認：七步驟 StepperNav（簡介→逐段朗讀→課文理解→
 
 ## 七、已知小問題（不影響功能）
 
-| 問題 | 說明 | 影響 |
+| 問題 | 狀態 | 說明 |
 |------|------|------|
-| Seed 帳號未設 email_verified | #460 新增 email 驗證後，seed 資料未同步更新 | 已手動修正 staging DB，待補 code fix |
-| 聽力/造句 AI 服務偶爾 unavailable | Vertex AI 冷啟動或配額限制 | 重試即可，非功能缺陷 |
+| ~~Seed 帳號未設 email_verified~~ | ✅ 已修復 | PR #478 — seed 帳號加上 `email_verified=True` |
+| ~~AI 服務偶爾 unavailable~~ | ✅ 已修復 | PR #480 + 後續 commits — 提高 token limit (4096)、加 JSON repair fallback、Cloud Run 記憶體 256→512Mi |
