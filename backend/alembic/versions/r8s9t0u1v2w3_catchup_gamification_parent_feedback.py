@@ -430,7 +430,12 @@ def upgrade() -> None:
             ALTER TABLE texts DROP CONSTRAINT IF EXISTS uq_texts_lesson_number;
         END $$
     """))
-    # users: replace UNIQUE constraints with Alembic-style unique indexes
+    # users: ensure google_id column exists (was added manually to staging/production
+    # but never tracked in any Alembic migration — add it here for fresh DBs).
+    conn.execute(sa.text("""
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id VARCHAR(128)
+    """))
+    # Replace UNIQUE constraints with Alembic-style unique indexes
     conn.execute(sa.text("""
         DO $$ BEGIN
             ALTER TABLE users DROP CONSTRAINT IF EXISTS uq_users_username;
