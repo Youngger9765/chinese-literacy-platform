@@ -105,7 +105,7 @@ PBL 領域最被引用的框架，定義了 7 個 Essential Project Design Eleme
 
 這篇直接支撐我們的做法：
 - 程式教育 + PBL + AI = 三重加乘效果
-- 實習生的 engagement 確實很高（靖杭一週 merge 2 PR、啟翔主動分析 root cause）
+- 實習生的 engagement 確實很高（Ryan一週 merge 2 PR、Sean主動分析 root cause）
 - η² > 0.5 = 超過 50% 的變異量可歸因於 AI-PBL 介入
 
 ---
@@ -170,7 +170,7 @@ PBL 領域最被引用的框架，定義了 7 個 Essential Project Design Eleme
 |---------|-------------|
 | AI-PBL 效果量 Cohen's d = 1.30 | Claude Code + PBL 課程設計 |
 | AI 最大價值 = 個人化 + 持續回饋 | Skill Tree 個人化追蹤 + Code Review 持續回饋 |
-| Engagement η² = 0.694 | 靖杭一週 2 PR、啟翔主動 root cause 分析 |
+| Engagement η² = 0.694 | Ryan一週 2 PR、Sean主動 root cause 分析 |
 | PBL 需要 Authenticity | 真 GitHub Issue、真 Production、真用戶 |
 | PBL 需要 Public Product | GitHub contribution graph、備審作品集 |
 | Agile + PBL 天然契合 | 週一選 Issue → 週五 Review = 簡化版 Sprint |
