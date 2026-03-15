@@ -19,8 +19,6 @@ type ChatMessage =
   | { role: 'student'; text: string }
   | { role: 'feedback'; text: string; understood: boolean };
 
-type InputMode = 'voice' | 'keyboard';
-
 const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   story,
   attempt,
@@ -36,7 +34,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
   const [zhuyinReady, setZhuyinReady] = useState(false);
-  const [inputMode, setInputMode] = useState<InputMode>('voice');
   const [isVoicePreparing, setIsVoicePreparing] = useState(false);
   const [isListening, setIsListening] = useState(false);
 
@@ -50,31 +47,27 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [requiredCount, setRequiredCount] = useState(3);
   const [isSessionComplete, setIsSessionComplete] = useState(false);
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
+  const [offlineMode, setOfflineMode] = useState(false);
+  const [mockQuestionIndex, setMockQuestionIndex] = useState(0);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<any>(null);
-  const startVoiceInputRef = useRef<() => void>(() => {});
-  const autoSubmitRef = useRef<() => void>(() => {});
-  const autoSubmitTimerRef = useRef<number | null>(null);
   const isSubmittingRef = useRef(false);
   const isListeningRef = useRef(false);
+  const isComposingRef = useRef(false);
   const currentTranscriptRef = useRef('');
   const accumulatedTranscriptRef = useRef('');
 
   // Text-to-speech helper
-  const speakText = useCallback((text: string, autoStartVoiceInput = false) => {
+  const speakText = useCallback((text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'zh-TW';
     utterance.rate = 1;
     utterance.pitch = 1;
-    if (autoStartVoiceInput && inputMode === 'voice') {
-      utterance.onend = () => startVoiceInputRef.current();
-      utterance.onerror = () => startVoiceInputRef.current();
-    }
     window.speechSynthesis.speak(utterance);
-  }, [inputMode]);
+  }, []);
   const initializedRef = useRef(false);
   const isDraggingRef = useRef(false);
   const storyScrollRef = useRef<number>(0);
@@ -83,6 +76,27 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const dragStartWidthRef = useRef(384);
 
   const zhuyinActive = zhuyinReady && zhuyinEnabled;
+
+  const mockQuestions = useMemo(() => {
+    const source = story.content.filter((line) => line.trim().length > 0);
+    const q1 = '這篇課文主要在說什麼？請用你自己的話說說看。';
+    const q2 = source[0]
+      ? `回到第一段「${source[0].slice(0, 14)}...」，你覺得作者最想表達什麼？`
+      : '課文中哪一段讓你印象最深？為什麼？';
+    const q3 = '如果你是故事中的主角，你會怎麼做？請說出理由。';
+    return [q1, q2, q3];
+  }, [story.content]);
+
+  const switchToOfflineMode = useCallback((message?: string) => {
+    setOfflineMode(true);
+    setMockQuestionIndex(0);
+    setUnderstoodCount(0);
+    setRequiredCount(mockQuestions.length);
+    setIsSessionComplete(false);
+    setHighlightedParagraph(null);
+    setConversation([{ role: 'ai', text: mockQuestions[0] }]);
+    setError(message ?? '已切換為離線測試模式（不需連線 GCP）。');
+  }, [mockQuestions]);
 
   useEffect(() => {
     PolyphonicProcessor.instance.loadPolyphonicData()
@@ -94,10 +108,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   useEffect(() => {
     return () => {
       isListeningRef.current = false;
-      if (autoSubmitTimerRef.current != null) {
-        window.clearTimeout(autoSubmitTimerRef.current);
-        autoSubmitTimerRef.current = null;
-      }
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
@@ -183,14 +193,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       });
       setConversation([{ role: 'ai', text: result.question }]);
       applyServerState(result);
-      speakText(result.question, true);
     } catch {
-      setError('無法連線到伺服器，請確認後端已啟動。');
+      switchToOfflineMode('無法連線到伺服器，已啟用離線測試模式。');
     } finally {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [story.content, story.title, sessionId, attempt, applyServerState]);
+  }, [story.content, story.title, sessionId, attempt, applyServerState, switchToOfflineMode]);
 
   // Resizable right panel (mouse + touch)
   useEffect(() => {
@@ -264,11 +273,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       recognitionRef.current = null;
     }
 
-    if (autoSubmitTimerRef.current != null) {
-      window.clearTimeout(autoSubmitTimerRef.current);
-      autoSubmitTimerRef.current = null;
-    }
-
     const studentTurn: ChatMessage = { role: 'student', text };
     setConversation(prev => [...prev, studentTurn]);
     setInputText('');
@@ -277,6 +281,38 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     setIsLoading(true);
     setError(null);
     setHighlightedParagraph(null);
+
+    // Offline fallback mode for local testing without backend/GCP availability.
+    if (offlineMode) {
+      const isUnderstood = text.length >= 6;
+      const nextUnderstoodCount = understoodCount + (isUnderstood ? 1 : 0);
+      const nextQuestionIdx = mockQuestionIndex + 1;
+      const shouldComplete = nextQuestionIdx >= mockQuestions.length;
+
+      const newMessages: ChatMessage[] = [
+        {
+          role: 'feedback',
+          text: isUnderstood
+            ? '很好，你有抓到重點。'
+            : '再多說一點原因或細節，會更完整。',
+          understood: isUnderstood,
+        },
+      ];
+
+      if (!shouldComplete) {
+        newMessages.push({ role: 'ai', text: mockQuestions[nextQuestionIdx] });
+      }
+
+      setConversation(prev => [...prev, ...newMessages]);
+      setUnderstoodCount(nextUnderstoodCount);
+      setMockQuestionIndex(nextQuestionIdx);
+      setIsSessionComplete(shouldComplete);
+
+      isSubmittingRef.current = false;
+      setIsLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 100);
+      return;
+    }
 
     try {
       const storyText = story.content.join('\n');
@@ -306,11 +342,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       }
 
       setConversation(prev => [...prev, ...newMessages]);
-
-      // Only speak the main AI question (skip feedback/hints)
-      if (!result.is_complete && result.question) {
-        speakText(result.question, true);
-      }
     } catch (err) {
       if (err instanceof SessionExpiredError) {
         // Session expired after backend redeploy — auto-rebuild
@@ -319,14 +350,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         await fetchFirstQuestion();
         setError('對話已重新開始，請再送出一次你的回答。');
       } else {
-        setError('無法連線到伺服器，請確認後端已啟動。');
+        switchToOfflineMode('伺服器暫時不可用，已切換為離線測試模式。');
       }
     } finally {
       isSubmittingRef.current = false;
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [applyServerState, fetchFirstQuestion, inputText, isLoading, isSessionComplete, sessionId, speakText, story.content, story.title]);
+  }, [applyServerState, fetchFirstQuestion, inputText, isLoading, isSessionComplete, mockQuestionIndex, mockQuestions, offlineMode, sessionId, story.content, story.title, switchToOfflineMode, understoodCount]);
 
   const handleRetry = () => {
     setError(null);
@@ -346,8 +377,11 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Prevent submission during IME composition (Chinese/Japanese/Korean input)
-    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+    const nativeEvent = e.nativeEvent as KeyboardEvent;
+    const isImeComposing = isComposingRef.current || e.isComposing || nativeEvent.isComposing || nativeEvent.keyCode === 229;
+
+    // Enter sends; Shift+Enter inserts newline. Guard IME composition to avoid accidental send when confirming Chinese candidates.
+    if (e.key === 'Enter' && !e.shiftKey && !isImeComposing) {
       e.preventDefault();
       handleSubmit();
     }
@@ -357,10 +391,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     isListeningRef.current = false;
     setIsListening(false);
     setIsVoicePreparing(false);
-    if (autoSubmitTimerRef.current != null) {
-      window.clearTimeout(autoSubmitTimerRef.current);
-      autoSubmitTimerRef.current = null;
-    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -372,7 +402,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   }, []);
 
   const startVoiceInput = useCallback(() => {
-    if (inputMode !== 'voice' || isLoading || isSessionComplete || isListeningRef.current) return;
+    if (isLoading || isSessionComplete || isListeningRef.current) return;
 
     setVoiceError(null);
     setIsVoicePreparing(true);
@@ -396,20 +426,24 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     };
 
     recognition.onresult = (event: any) => {
-      let sessionTranscript = '';
-      for (let i = 0; i < event.results.length; i++) {
-        sessionTranscript += event.results[i][0].transcript;
+      let finalTranscript = '';
+      let interimTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const part = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += part;
+        } else {
+          interimTranscript += part;
+        }
       }
-      const merged = accumulatedTranscriptRef.current + sessionTranscript;
+
+      if (finalTranscript) {
+        accumulatedTranscriptRef.current += finalTranscript;
+      }
+
+      const merged = accumulatedTranscriptRef.current + interimTranscript;
       currentTranscriptRef.current = merged;
       setInputText(merged);
-
-      if (autoSubmitTimerRef.current != null) {
-        window.clearTimeout(autoSubmitTimerRef.current);
-      }
-      autoSubmitTimerRef.current = window.setTimeout(() => {
-        autoSubmitRef.current();
-      }, 1600);
     };
 
     recognition.onerror = (event: any) => {
@@ -425,7 +459,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
     recognition.onend = () => {
       if (isListeningRef.current) {
-        accumulatedTranscriptRef.current = currentTranscriptRef.current;
         try {
           recognition.start();
         } catch (_) {
@@ -451,32 +484,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       setVoiceError('語音辨識啟動失敗，請稍後再試。');
       recognitionRef.current = null;
     }
-  }, [inputMode, inputText, isLoading, isSessionComplete]);
-
-  useEffect(() => {
-    startVoiceInputRef.current = startVoiceInput;
-  }, [startVoiceInput]);
-
-  useEffect(() => {
-    autoSubmitRef.current = () => {
-      if (inputMode !== 'voice' || isLoading || isSessionComplete || isSubmittingRef.current) return;
-      const recognizedText = currentTranscriptRef.current.trim();
-      if (!recognizedText) return;
-      handleSubmit(recognizedText);
-    };
-  }, [handleSubmit, inputMode, isLoading, isSessionComplete]);
-
-  const switchInputMode = useCallback((mode: InputMode) => {
-    setInputMode(mode);
-    setVoiceError(null);
-
-    if (mode === 'keyboard') {
-      stopVoiceInput();
-      setTimeout(() => inputRef.current?.focus(), 100);
-    } else if (!isLoading && !isSessionComplete) {
-      startVoiceInputRef.current();
-    }
-  }, [isLoading, isSessionComplete, stopVoiceInput]);
+  }, [inputText, isLoading, isSessionComplete]);
 
   // Extract chat content to reuse in both mobile and desktop layouts
   const renderChatMessages = () => (
@@ -492,6 +500,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               {processZhuyin(`你剛才讀完了《${story.title}》，做得很棒！讓我們來聊聊課文的內容吧。`)}
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => speakText(`你剛才讀完了《${story.title}》，做得很棒！讓我們來聊聊課文的內容吧。`)}
+            className="mt-1 inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+          >
+            <span>🔊</span>
+            <span>播放</span>
+          </button>
         </div>
       </div>
 
@@ -535,6 +551,16 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               ].join(' ')}>
                 <p className={`text-lg leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>{processZhuyin(turn.text)}</p>
               </div>
+              {(turn.role === 'ai' || turn.role === 'student') && (
+                <button
+                  type="button"
+                  onClick={() => speakText(turn.text)}
+                  className="mt-1 inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 self-start"
+                >
+                  <span>🔊</span>
+                  <span>播放</span>
+                </button>
+              )}
             </div>
           </div>
         );
@@ -581,29 +607,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const renderInputArea = () => (
     <div className="shrink-0 bg-white border-t border-gray-200 p-3">
-      <div className="mb-2 flex gap-2">
-        <button
-          onClick={() => switchInputMode('voice')}
-          className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${
-            inputMode === 'voice'
-              ? 'bg-accent text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          語音輸入對話
-        </button>
-        <button
-          onClick={() => switchInputMode('keyboard')}
-          className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${
-            inputMode === 'keyboard'
-              ? 'bg-accent text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          鍵盤輸入
-        </button>
-      </div>
-
       {isSessionComplete ? (
         <div className="flex items-center justify-between gap-2">
           <button
@@ -623,55 +626,58 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           </button>
         </div>
       ) : (
-        <>
-          {inputMode === 'voice' ? (
-            <div className="space-y-2">
-              <div className="min-h-[64px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 leading-7">
-                {inputText.trim() ? inputText : 'AI 問完後會自動開啟語音輸入'}
-              </div>
-              <div className="flex gap-2 items-center justify-between text-xs">
-                <span className={isListening ? 'text-emerald-600' : 'text-gray-500'}>
-                  {isVoicePreparing ? '麥克風啟動中…' : isListening ? '麥克風聆聽中，停頓後會自動送出' : '等待語音輸入'}
-                </span>
-              </div>
-              <div className="flex gap-2 items-end">
-                <button
-                  onClick={handleSubmit}
-                  disabled={!inputText.trim() || isLoading || isSessionComplete}
-                  className="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-300 disabled:text-gray-400 text-white font-bold text-sm transition-all active:scale-95"
-                >
-                  送出回答
-                </button>
-              </div>
-              {voiceError && (
-                <div className="text-xs text-red-600">{voiceError}</div>
-              )}
-            </div>
-          ) : (
-            <div className="flex gap-2 items-end">
-              <textarea
-                ref={inputRef}
-                value={inputText}
-                onChange={e => setInputText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="輸入你的回答……（Enter 送出）"
-                rows={2}
-                disabled={isLoading || isSessionComplete}
-                className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none disabled:opacity-50"
-              />
-              <button
-                onClick={handleSubmit}
-                disabled={!inputText.trim() || isLoading || isSessionComplete}
-                className="flex-shrink-0 w-11 h-11 rounded-xl bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </button>
-            </div>
+        <div className="space-y-2">
+          <div className="flex gap-2 items-end">
+            <textarea
+              ref={inputRef}
+              value={inputText}
+              onChange={e => setInputText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onCompositionStart={() => {
+                isComposingRef.current = true;
+              }}
+              onCompositionEnd={() => {
+                isComposingRef.current = false;
+              }}
+              placeholder="輸入你的回答……（Enter 送出，Shift+Enter 換行）"
+              rows={2}
+              disabled={isLoading || isSessionComplete}
+              className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none disabled:opacity-50"
+            />
+            <button
+              type="button"
+              onClick={() => (isListening ? stopVoiceInput() : startVoiceInput())}
+              disabled={isLoading || isSessionComplete || isVoicePreparing}
+              className={`flex-shrink-0 w-11 h-11 rounded-xl text-white flex items-center justify-center transition-all active:scale-95 disabled:bg-gray-300 disabled:text-gray-400 ${
+                isListening ? 'bg-rose-500 hover:bg-rose-400' : 'bg-emerald-600 hover:bg-emerald-500'
+              }`}
+              title={isListening ? '停止語音輸入' : '啟動語音輸入'}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14a3 3 0 003-3V7a3 3 0 10-6 0v4a3 3 0 003 3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-14 0m7 7v3m-4 0h8" />
+              </svg>
+            </button>
+            <button
+              onClick={() => handleSubmit()}
+              disabled={!inputText.trim() || isLoading || isSessionComplete}
+              className="flex-shrink-0 w-11 h-11 rounded-xl bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </div>
+          <div className="flex gap-2 items-center justify-between text-xs">
+            <span className={isListening ? 'text-emerald-600' : 'text-gray-500'}>
+              {isVoicePreparing ? '麥克風啟動中…' : isListening ? '語音輸入中，完成後請按送出。' : '可直接鍵盤輸入，或按麥克風開始語音輸入。'}
+            </span>
+          </div>
+          {voiceError && (
+            <div className="text-xs text-red-600">{voiceError}</div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
