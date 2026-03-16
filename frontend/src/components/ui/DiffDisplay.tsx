@@ -12,6 +12,7 @@ interface DiffDisplayProps {
  *
  * Rendering rules:
  * - correct → normal text (inherit color)
+ * - forgiven→ blue background + dashed underline (accepted variation)
  * - wrong   → red background + white text, tooltip shows expected char
  * - missing → gray background + dashed underline (shows target char that was skipped)
  * - extra   → orange background + strikethrough (shows char that shouldn't be there)
@@ -54,9 +55,21 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
                       className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
                       aria-hidden="true"
                     >
-                      應該是「{token.expected}」
+                      {`應該是「${token.expected}」`}
                     </span>
                   )}
+                </span>
+              );
+            case 'forgiven':
+              return (
+                <span
+                  key={idx}
+                  className="bg-sky-100 text-sky-900 border-b-2 border-dashed border-sky-500 rounded-sm px-0.5 mx-px cursor-help"
+                  title={token.reason ? `通融：${token.reason}` : '通融判定'}
+                  aria-label={`通融：目標字「${token.char}」${token.spoken ? `，朗讀為「${token.spoken}」` : ''}${token.reason ? `，原因：${token.reason}` : ''}`}
+                  role="mark"
+                >
+                  {token.char}
                 </span>
               );
             case 'missing':
@@ -102,6 +115,10 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
           <span className="flex items-center gap-1" role="listitem">
             <span className="w-3 h-3 rounded-sm bg-error inline-block" aria-hidden="true" />
             讀錯
+          </span>
+          <span className="flex items-center gap-1" role="listitem">
+            <span className="w-3 h-3 rounded-sm bg-sky-100 border border-dashed border-sky-500 inline-block" aria-hidden="true" />
+            通融
           </span>
           <span className="flex items-center gap-1" role="listitem">
             <span className="w-3 h-3 rounded-sm bg-gray-200 border border-dashed border-gray-400 inline-block" aria-hidden="true" />
