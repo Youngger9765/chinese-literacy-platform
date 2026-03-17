@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { PlusIcon } from '../../components/icons';
+import SemesterPanel from './SemesterPanel';
 import {
   getSchool,
   updateSchool,
@@ -19,6 +20,8 @@ import {
 import { assignRole, RoleApiError } from '../../services/roleApi';
 import { listUsers, UserListItem } from '../../services/userApi';
 
+type SchoolTab = 'detail' | 'semesters';
+
 interface SchoolDetailPanelProps {
   schoolId: number;
   onSelectClassroom?: (classroomId: number) => void;
@@ -26,6 +29,7 @@ interface SchoolDetailPanelProps {
 }
 
 const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelectClassroom, onClassroomCreated }) => {
+  const [activeTab, setActiveTab] = useState<SchoolTab>('detail');
   const { token } = useAuth();
   const [school, setSchool] = useState<SchoolResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -367,7 +371,47 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
   if (!school) return null;
 
   return (
-    <div className="p-6 sm:p-8">
+    <div className="flex flex-col h-full">
+      {/* Tab bar */}
+      <div className="border-b border-gray-200 bg-white px-6 pt-4 shrink-0">
+        <nav className="flex gap-1" role="tablist">
+          <button
+            role="tab"
+            aria-selected={activeTab === 'detail'}
+            onClick={() => setActiveTab('detail')}
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors cursor-pointer ${
+              activeTab === 'detail'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            學校詳情
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === 'semesters'}
+            onClick={() => setActiveTab('semesters')}
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors cursor-pointer ${
+              activeTab === 'semesters'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            學期管理
+          </button>
+        </nav>
+      </div>
+
+      {/* Semester tab */}
+      {activeTab === 'semesters' && (
+        <div className="flex-1 overflow-y-auto">
+          <SemesterPanel schoolId={schoolId} />
+        </div>
+      )}
+
+      {/* Detail tab */}
+      {activeTab === 'detail' && (
+    <div className="p-6 sm:p-8 flex-1 overflow-y-auto">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Inline error */}
         {error && (
@@ -829,6 +873,8 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
           </div>
         </div>
       </div>
+    </div>
+      )}
     </div>
   );
 };
