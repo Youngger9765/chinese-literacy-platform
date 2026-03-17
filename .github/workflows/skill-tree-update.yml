@@ -34,7 +34,7 @@ jobs:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
       - name: Run skill tree updater
-        run: python3 scripts/skill-tree-updater.py --intern all --days 1
+        run: python3 scripts/skill-tree-updater.py --intern all --days 7
         env:
           GOOGLE_CLOUD_PROJECT: lingoleap-dev
 
