@@ -36,12 +36,12 @@ logger = logging.getLogger(__name__)
 _env = os.environ.get("ENVIRONMENT", "development")
 _is_dev = _env in ("development", "preview")
 
-if settings.jwt_secret_key == "dev-secret-change-in-production":
+if not settings.jwt_secret_key:
     if not _is_dev:
         raise RuntimeError("JWT_SECRET_KEY must be set in production!")
     else:
         import warnings
-        warnings.warn("Using default JWT secret key — NOT suitable for production", stacklevel=2)
+        warnings.warn("JWT_SECRET_KEY is empty — auth endpoints will fail. Set it in .env", stacklevel=2)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

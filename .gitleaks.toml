@@ -1,0 +1,38 @@
+# Gitleaks configuration for LingoLeap
+# https://github.com/gitleaks/gitleaks
+
+title = "LingoLeap Gitleaks Config"
+
+[extend]
+useDefault = true
+
+# Allowlist patterns that are NOT real secrets
+[allowlist]
+  description = "Known safe patterns"
+
+  # Test files, example configs, documentation
+  paths = [
+    '''(^|\/)tests\/''',
+    '''(^|\/)docs\/''',
+    '''\.md$''',
+    '''\.example$''',
+  ]
+
+  regexes = [
+    # Placeholder / example values
+    '''(?i)(example|placeholder|changeme|your[_-]?key|xxx+|test[_-]?key)''',
+    # Google Cloud Run service URLs (not secrets)
+    '''https://[\w-]+-\d+\.[\w-]+\.run\.app''',
+    # Firebase URLs
+    '''https://[\w-]+\.web\.app''',
+    # GCS public URLs
+    '''https://storage\.googleapis\.com/[\w-]+''',
+    # Artifact Registry paths
+    '''asia-east1-docker\.pkg\.dev/[\w-]+/[\w-]+''',
+    # SQLite local dev database
+    '''sqlite:///''',
+    # Redis localhost
+    '''redis://localhost''',
+    # Business email addresses in docs
+    '''[\w.]+@(junyiacademy|gmail|google)\.org''',
+  ]
