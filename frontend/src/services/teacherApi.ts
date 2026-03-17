@@ -419,6 +419,18 @@ export async function getStudentInstructions(
   return handleResponse<TeacherInstruction[]>(res);
 }
 
+/** Get active instruction counts for all students in a classroom (bulk, avoids N+1). */
+export async function getClassroomInstructionCounts(
+  token: string,
+  classroomId: number,
+): Promise<Record<number, number>> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/instruction-counts`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<Record<number, number>>(res);
+}
+
 /** Update an instruction. */
 export async function updateInstruction(
   token: string,
