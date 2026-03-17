@@ -3,6 +3,15 @@
  *
  * Provides reusable authentication helpers, test data factories,
  * page navigation utilities, and screenshot helpers shared across all spec files.
+ *
+ * Key exports:
+ *   takeScreenshot       — save a named screenshot with caption sidecar JSON
+ *   takeScreenshotOnFailure — capture a failure screenshot to test-results/
+ *   withScreenshotOnFailure — test body wrapper: auto-screenshot on failure
+ *   dismissAllModals     — close Terms-of-Service + Onboarding modals
+ *   ensureAuthenticated  — verify 登出 button is visible (uses storageState)
+ *   loginAsTeacher       — explicit login as seeded teacher account
+ *   goToLearningStep     — navigate directly to a /learn/:id/:step URL
  */
 
 import { type Page, expect } from '@playwright/test';
@@ -29,8 +38,14 @@ export const TEACHER_PASSWORD = 'teacher1234';
  * Take a screenshot with a standardized name and save caption metadata.
  * Screenshots are saved to e2e/screenshots/{module}/.
  *
+ * The module is derived from the first segment of the name:
+ *   "teacher-a1-login-page"  → screenshots/teacher/
+ *   "student-e1-home-page"   → screenshots/student/
+ *   "admin-h1-01-nav"        → screenshots/admin/
+ *   "infra-n1-health-check"  → screenshots/infra/
+ *
  * @param page - Playwright Page
- * @param name - Screenshot filename without extension (e.g. "m1-01-login-page")
+ * @param name - Screenshot filename without extension (e.g. "teacher-a1-login-page")
  * @param caption - Human-readable description of what the screenshot shows
  */
 export async function takeScreenshot(
@@ -38,7 +53,7 @@ export async function takeScreenshot(
   name: string,
   caption: string
 ): Promise<void> {
-  const module = name.split('-')[0]; // e.g. "m1" from "m1-01-login-page"
+  const module = name.split('-')[0]; // e.g. "teacher" from "teacher-a1-login-page"
   const dir = path.join(__dirname, 'screenshots', module);
   fs.mkdirSync(dir, { recursive: true });
 
@@ -51,6 +66,56 @@ export async function takeScreenshot(
   // Write caption as sidecar JSON for report generator
   const captionPath = path.join(dir, `${name}.caption.json`);
   fs.writeFileSync(captionPath, JSON.stringify({ name, caption, module }, null, 2));
+}
+
+/**
+ * Capture a failure screenshot to the Playwright test-results/ directory.
+ * The filename is `failure-{name}-{timestamp}.png`.
+ *
+ * Call this from a catch block or afterEach to preserve the page state on error.
+ *
+ * @param page - Playwright Page
+ * @param name - Descriptive slug for the failure (e.g. "m1-login-fail")
+ */
+export async function takeScreenshotOnFailure(page: Page, name: string): Promise<void> {
+  try {
+    const timestamp = Date.now();
+    const dir = path.join(__dirname, '..', 'test-results', 'failure-screenshots');
+    fs.mkdirSync(dir, { recursive: true });
+    await page.screenshot({
+      path: path.join(dir, `failure-${name}-${timestamp}.png`),
+      fullPage: true,
+      animations: 'disabled',
+    });
+  } catch {
+    // Never throw from error-handling path — swallow screenshot failures silently
+  }
+}
+
+/**
+ * Wrap a test body so that a full-page screenshot is automatically captured
+ * to test-results/failure-screenshots/ when the test fails.
+ *
+ * Usage:
+ *   test('my test', withScreenshotOnFailure('my-test-fail', async ({ page }) => {
+ *     // ... test steps ...
+ *   }));
+ *
+ * @param failureName - Slug used in the failure screenshot filename
+ * @param fn - The original test function
+ */
+export function withScreenshotOnFailure(
+  failureName: string,
+  fn: (args: { page: Page; request: unknown; [key: string]: unknown }) => Promise<void>
+): (args: { page: Page; request: unknown; [key: string]: unknown }) => Promise<void> {
+  return async (args) => {
+    try {
+      await fn(args);
+    } catch (err) {
+      await takeScreenshotOnFailure(args.page, failureName);
+      throw err;
+    }
+  };
 }
 
 // ---------------------------------------------------------------------------
