@@ -10,6 +10,7 @@ import {
   SubmissionResponse,
   AssignmentApiError,
 } from '../../services/assignmentApi';
+import { useToast } from '../../components/ui/Toast';
 
 interface Props {
   assignmentId: number;
@@ -63,6 +64,7 @@ const AssignmentDetailPanel: React.FC<Props> = ({
   onGraded,
 }) => {
   const { token } = useAuth();
+  const { toast, showToast } = useToast();
   const [gradingId, setGradingId] = useState<number | null>(null);
   const [gradeInput, setGradeInput] = useState<Record<number, string>>({});
   const [savingId, setSavingId] = useState<number | null>(null);
@@ -178,6 +180,7 @@ const AssignmentDetailPanel: React.FC<Props> = ({
 
   return (
     <div>
+      {toast}
       {/* Stats bar + actions */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex gap-4 text-xs text-gray-500">
@@ -216,8 +219,9 @@ const AssignmentDetailPanel: React.FC<Props> = ({
           {pending > 0 && (
             <button
               onClick={() =>
-                alert(
-                  `已標記提醒 ${pending} 位未完成學生。\n（實際通知功能待串接推播服務）`,
+                showToast(
+                  `已標記提醒 ${pending} 位未完成學生（實際通知功能待串接推播服務）`,
+                  'warning',
                 )
               }
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-amber-300 text-amber-700 text-xs font-medium hover:bg-amber-50 transition-colors cursor-pointer"
