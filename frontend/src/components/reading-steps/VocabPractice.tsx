@@ -39,10 +39,17 @@ function ProgressBar({ done, total }: ProgressBarProps) {
     <div className="w-full px-6 py-2 bg-white border-b border-gray-100">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] font-medium text-gray-500">練習進度</span>
-          <span className="text-[10px] font-bold text-gray-700">{done} / {total} 字</span>
+          <span className="text-[10px] font-medium text-gray-500" aria-hidden="true">練習進度</span>
+          <span className="text-[10px] font-bold text-gray-700" aria-hidden="true">{done} / {total} 字</span>
         </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          role="progressbar"
+          aria-valuenow={done}
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-label={`生字練習進度：已完成 ${done} 個，共 ${total} 個`}
+          className="h-2 bg-gray-100 rounded-full overflow-hidden"
+        >
           <div
             className="h-full bg-emerald-500 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${pct}%` }}

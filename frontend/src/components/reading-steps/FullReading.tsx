@@ -419,36 +419,39 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             <div className="space-y-2">
               <button
                 onClick={() => { setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
-                className="w-full py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all active:scale-95"
+                aria-label="重新開始全文朗讀"
+                className="w-full py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
                 再試一次
               </button>
               <button
                 onClick={() => onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown })}
-                className="w-full py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95"
+                aria-label="完成全文朗讀，查看學習報告"
+                className="w-full py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1"
               >
                 查看報告
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
           ) : isPreparing ? (
-            <button disabled className="w-full py-3 rounded-xl text-base font-bold bg-gray-300 text-gray-500 cursor-wait flex items-center justify-center gap-2">
-              <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+            <button disabled aria-label="正在準備語音辨識" aria-busy="true" className="w-full py-3 rounded-xl text-base font-bold bg-gray-300 text-gray-500 cursor-wait flex items-center justify-center gap-2">
+              <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
               準備中...
             </button>
           ) : isSessionActive ? (
             <button
               onClick={submitReading}
               disabled={!streamingTranscript}
-              className={`w-full py-3 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 ${
+              aria-label={!streamingTranscript ? '請先開始朗讀' : '完成朗讀並送出'}
+              className={`w-full py-3 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                 streamingTranscript
                   ? 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95'
                   : 'bg-gray-300 text-gray-400 cursor-not-allowed'
               }`}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
               </svg>
               完成朗讀
@@ -458,13 +461,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               {/* 暫停 / 繼續 */}
               <button
                 onClick={isTtsPaused ? resumeTts : pauseTts}
-                className={`flex-1 py-3 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95 ${
+                aria-label={isTtsPaused ? '繼續系統朗讀' : '暫停系統朗讀'}
+                className={`flex-1 py-3 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                   isTtsPaused
                     ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
                     : 'bg-amber-700 hover:bg-amber-600 text-white'
                 }`}
               >
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   {isTtsPaused
                     ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                     : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 9v6m4-6v6" />
@@ -475,9 +479,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               {/* 停止 */}
               <button
                 onClick={stopTts}
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                aria-label="停止系統朗讀"
+                className="flex-1 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
                 </svg>
                 停止
@@ -487,18 +492,20 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             <div className="flex gap-2">
               <button
                 onClick={speakFullStory}
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                aria-label="播放全文系統示範朗讀"
+                className="flex-1 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
                 </svg>
                 系統朗讀
               </button>
               <button
                 onClick={startSession}
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-accent hover:bg-accent-hover text-white transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                aria-label="開始全文朗讀，啟動語音辨識"
+                className="flex-1 py-3 rounded-xl text-base font-bold bg-accent hover:bg-accent-hover text-white transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
-                <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                <div className="w-2.5 h-2.5 bg-white rounded-full" aria-hidden="true" />
                 開始朗讀
               </button>
             </div>
@@ -506,7 +513,8 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
           <button
             onClick={onBack}
-            className="w-full py-1.5 rounded-lg text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="返回生字練習"
+            className="w-full py-1.5 rounded-lg text-xs text-gray-400 hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
             ← 返回生字練習
           </button>

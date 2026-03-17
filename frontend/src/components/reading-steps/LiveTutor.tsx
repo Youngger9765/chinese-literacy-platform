@@ -898,18 +898,21 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {/* 系統朗讀 disabled while mic is initializing */}
                 <button
                   disabled
+                  aria-label="系統朗讀（準備中，暫不可用）"
                   className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
                   </svg>
                   {processZhuyin('系統朗讀')}
                 </button>
                 <button
                   disabled
+                  aria-label="正在準備語音辨識"
+                  aria-busy="true"
                   className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-600 cursor-wait"
                 >
-                  <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
                   {processZhuyin('準備中...')}
                 </button>
               </>
@@ -917,13 +920,14 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <button
                 onClick={submitSentence}
                 disabled={isAdvancing || !streamingUserInput}
+                aria-label={isAdvancing ? '請稍候，正在處理' : '完成這段朗讀'}
                 className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
                   isAdvancing || !streamingUserInput
                     ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
                     : 'bg-emerald-600 hover:bg-emerald-500 text-white'
                 }`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
                 {processZhuyin(isAdvancing ? '請稍候...' : '完成這段')}
@@ -933,13 +937,14 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {/* 暫停 / 繼續 */}
                 <button
                   onClick={isTtsPaused ? resumeTts : pauseTts}
+                  aria-label={isTtsPaused ? '繼續系統朗讀' : '暫停系統朗讀'}
                   className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
                     isTtsPaused
                       ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
                       : 'bg-amber-700 hover:bg-amber-600 text-white'
                   }`}
                 >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     {isTtsPaused
                       ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                       : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 9v6m4-6v6" />
@@ -950,9 +955,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {/* 停止 */}
                 <button
                   onClick={stopTts}
+                  aria-label="停止系統朗讀"
                   className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95"
                 >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
                   </svg>
                   {processZhuyin('停止')}
@@ -963,9 +969,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {/* 系統朗讀 */}
                 <button
                   onClick={speakCurrentParagraph}
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95"
+                  aria-label="播放這段的系統示範朗讀"
+                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
                 >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
                   </svg>
                   {processZhuyin('系統朗讀')}
@@ -974,13 +981,14 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 <button
                   onClick={startSession}
                   disabled={isAdvancing}
-                  className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
+                  aria-label={isAdvancing ? '請稍候，正在處理' : '開始朗讀這段，啟動語音辨識'}
+                  className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                     isAdvancing
                       ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
                       : 'bg-accent hover:bg-accent-hover text-white'
                   }`}
                 >
-                  <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                  <div className="w-2.5 h-2.5 bg-white rounded-full" aria-hidden="true" />
                   {processZhuyin(isAdvancing ? '請稍候...' : '開始朗讀')}
                 </button>
               </>
@@ -991,8 +999,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           <div className="border-t border-gray-100 pt-2">
             <button
               onClick={() => setShowRecorder(prev => !prev)}
-              className="w-full flex items-center justify-between px-2 py-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label={showRecorder ? '收起錄音重聽功能' : '展開錄音重聽功能'}
               aria-expanded={showRecorder}
+              aria-controls="recorder-panel"
+              className="w-full flex items-center justify-between px-2 py-1 text-xs text-gray-400 hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
             >
               <span className="flex items-center gap-1">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
@@ -1008,7 +1018,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               </svg>
             </button>
             {showRecorder && (
-              <div className="pt-2 pb-1">
+              <div id="recorder-panel" className="pt-2 pb-1">
                 <RecordingButton maxDurationSeconds={60} label="錄下這段朗讀，完成後可重聽" />
               </div>
             )}
@@ -1025,7 +1035,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 }
               }}
               disabled={currentLineIndex === 0}
-              className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${
+              aria-label={currentLineIndex === 0 ? '已是第一段' : `返回第 ${currentLineIndex} 段`}
+              className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                 zhuyinActive ? 'tracking-[0.2em]' : ''
               } ${
                 currentLineIndex === 0
@@ -1048,8 +1059,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   <button
                     onClick={handleFinish}
                     disabled={!allDone}
-                    title={!allDone ? '完成所有段落後才能查看報告' : undefined}
-                    className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
+                    aria-label={!allDone ? '請完成所有段落後查看總結報告' : '查看朗讀總結報告'}
+                    className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
                       allDone
                         ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
                         : 'bg-gray-300 text-gray-300 cursor-not-allowed'
@@ -1070,8 +1081,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     }
                   }}
                   disabled={!nextUnlocked}
-                  title={!nextUnlocked ? '請先完成此段朗讀（正確率需達 60%）' : undefined}
-                  className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
+                  aria-label={!nextUnlocked ? '請先完成此段朗讀才能繼續（正確率需達 60%）' : `前往第 ${currentLineIndex + 2} 段`}
+                  className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
                     nextUnlocked
                       ? 'bg-gray-300 hover:bg-gray-200 text-gray-600'
                       : 'bg-gray-300 text-gray-300 cursor-not-allowed'
@@ -1086,7 +1097,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           {isSessionActive && (
             <button
               onClick={stopSession}
-              className={`w-full py-1.5 rounded-lg text-base font-bold text-gray-400 hover:text-gray-600 transition-colors leading-[2.6] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}
+              aria-label="停止目前的朗讀練習"
+              className={`w-full py-1.5 rounded-lg text-base font-bold text-gray-400 hover:text-gray-600 transition-colors leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}
             >
               {processZhuyin('停止朗讀')}
             </button>
