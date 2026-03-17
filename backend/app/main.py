@@ -169,53 +169,47 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             )
 
 
-class GlobalRateLimitMiddleware(BaseHTTPMiddleware):
-    """Global per-IP rate limiting middleware applied to all API endpoints.
+class GlobalRateLimitMiddleware:
+    """Pure ASGI middleware for global per-IP rate limiting on /api/* endpoints.
 
-    Limits:
-    - General endpoints: 60 requests / minute per IP
-    - Paths exempt from limiting: /health, /docs, /redoc, /openapi.json, /
-
-    This is an in-process (per-instance) limiter suitable for Cloud Run where
-    each instance independently handles traffic.  For cross-instance limiting,
-    a shared store such as Redis would be required.
-
-    Response headers added to every API response:
-    - X-RateLimit-Limit: the maximum allowed requests per window
-    - X-RateLimit-Remaining: remaining requests in the current window
-    - Retry-After: (429 only) seconds until the limit resets
+    Uses raw ASGI protocol instead of BaseHTTPMiddleware to guarantee headers
+    are injected before the response starts streaming (BaseHTTPMiddleware +
+    StreamingResponse can silently drop headers added after call_next).
     """
 
-    # Paths that are exempt from rate-limiting (exact match, not prefix).
     _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
-
-    # Global limit: 60 requests per minute per IP.
     LIMIT = 60
     WINDOW = 60  # seconds
 
-    async def dispatch(self, request: Request, call_next) -> Response:
-        path = request.url.path
+    def __init__(self, app):
+        self.app = app
 
-        # Skip rate limiting for exempt paths.
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        path = scope["path"]
+
+        # Skip rate limiting for exempt or non-API paths.
         if path in self._EXEMPT_PATHS or not path.startswith("/api"):
-            return await call_next(request)
+            await self.app(scope, receive, send)
+            return
 
-        # Extract real client IP: prefer X-Forwarded-For (set by Cloud Run /
-        # load balancers), fall back to request.client.host.
-        forwarded_for = request.headers.get("x-forwarded-for")
+        # Extract real client IP from headers.
+        headers_raw = dict(scope.get("headers", []))
+        forwarded_for = headers_raw.get(b"x-forwarded-for", b"").decode()
         if forwarded_for:
-            # X-Forwarded-For may contain a comma-separated list; the first
-            # entry is the original client IP.
             ip = forwarded_for.split(",")[0].strip()
         else:
-            client = request.client
-            ip = client.host if client else "unknown"
+            client = scope.get("client")
+            ip = client[0] if client else "unknown"
         key = f"global:ip:{ip}"
 
         info = general_rate_limiter.check_with_info(key, self.LIMIT, self.WINDOW)
 
         if not info.allowed:
-            return JSONResponse(
+            response = JSONResponse(
                 status_code=429,
                 content={
                     "detail": (
@@ -231,11 +225,21 @@ class GlobalRateLimitMiddleware(BaseHTTPMiddleware):
                     "X-RateLimit-Remaining": "0",
                 },
             )
+            await response(scope, receive, send)
+            return
 
-        response = await call_next(request)
-        response.headers["X-RateLimit-Limit"] = str(self.LIMIT)
-        response.headers["X-RateLimit-Remaining"] = str(info.remaining)
-        return response
+        # Inject rate-limit headers into the response.
+        extra_headers = [
+            (b"x-ratelimit-limit", str(self.LIMIT).encode()),
+            (b"x-ratelimit-remaining", str(info.remaining).encode()),
+        ]
+
+        async def send_with_headers(message):
+            if message["type"] == "http.response.start":
+                message["headers"] = list(message.get("headers", [])) + extra_headers
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
 
 
 @asynccontextmanager
