@@ -240,6 +240,24 @@ def seed_default_data():
     try:
         db = SessionLocal()
         try:
+            # Repair: ensure all known seed accounts have email_verified=True.
+            # This handles shared preview DBs that were seeded before #475 added
+            # email_verified=True to the seed constructor.
+            SEED_EMAILS = [
+                "admin@test.com", "teacher@test.com", "teacher2@test.com",
+                "student@test.com", "student2@test.com", "student3@test.com",
+            ]
+            unverified = (
+                db.query(User)
+                .filter(User.email.in_(SEED_EMAILS), User.email_verified.is_(False))
+                .all()
+            )
+            if unverified:
+                for u in unverified:
+                    u.email_verified = True
+                db.commit()
+                logger.info("seed_default_data: patched %d seed accounts to email_verified=True", len(unverified))
+
             if db.query(User).count() > 0:
                 return  # Already seeded
 
