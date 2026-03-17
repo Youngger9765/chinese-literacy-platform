@@ -783,19 +783,49 @@ def _verify_student_access(
     raise HTTPException(status_code=403, detail="Access denied")
 
 
+@router.get("/learning/students/{student_id}/story-slugs")
+def get_student_story_slugs(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get distinct story slugs from the student's learning sessions.
+
+    Used by the vocabulary filter dropdown to list courses the student has studied.
+    Returns slugs sorted alphabetically, excluding null values.
+    """
+    _verify_student_access(student_id, current_user, db)
+
+    rows = (
+        db.query(LearningSession.story_slug)
+        .filter(
+            LearningSession.student_id == student_id,
+            LearningSession.story_slug.isnot(None),
+        )
+        .distinct()
+        .order_by(LearningSession.story_slug)
+        .all()
+    )
+    slugs = [r.story_slug for r in rows]
+    return {"slugs": slugs, "total": len(slugs)}
+
+
 @router.get("/learning/students/{student_id}/error-patterns", response_model=ErrorPatternsResponse)
 def get_error_patterns(
     student_id: int,
+    story_slug: str | None = Query(None, description="Filter errors by story slug"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get characters that the student repeatedly gets wrong (error_count >= 2).
 
     Returns characters sorted by error count descending.
+    When story_slug is provided, only errors from sessions of that story are returned
+    (minimum error threshold is lowered to 1 for per-story view).
     """
     _verify_student_access(student_id, current_user, db)
 
-    error_groups = (
+    base_query = (
         db.query(
             CharacterError.character,
             sa_func.count(CharacterError.id).label("total_error_count"),
@@ -804,8 +834,18 @@ def get_error_patterns(
         )
         .join(LearningSession, CharacterError.session_id == LearningSession.id)
         .filter(LearningSession.student_id == student_id)
+    )
+
+    if story_slug:
+        base_query = base_query.filter(LearningSession.story_slug == story_slug)
+        min_errors = 1
+    else:
+        min_errors = 2
+
+    error_groups = (
+        base_query
         .group_by(CharacterError.character)
-        .having(sa_func.count(CharacterError.id) >= 2)
+        .having(sa_func.count(CharacterError.id) >= min_errors)
         .order_by(sa_func.count(CharacterError.id).desc())
         .all()
     )
