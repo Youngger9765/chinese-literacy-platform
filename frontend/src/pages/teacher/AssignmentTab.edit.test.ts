@@ -1,21 +1,10 @@
 /**
  * Unit tests for assignment edit feature (Issue #425)
  * Verifies that edit state helpers work correctly.
- * Run with: npx tsx src/pages/teacher/AssignmentTab.edit.test.ts
+ * Run with: npx vitest run AssignmentTab.edit --reporter=verbose
  */
 
-let passed = 0;
-let failed = 0;
-
-function assert(condition: boolean, label: string) {
-  if (condition) {
-    console.log(`  PASS: ${label}`);
-    passed++;
-  } else {
-    console.error(`  FAIL: ${label}`);
-    failed++;
-  }
-}
+import { describe, it, expect } from 'vitest';
 
 // ── Helper: parse due_date the same way handleOpenEdit does ──────────────────
 
@@ -26,67 +15,54 @@ function parseDueDateForInput(dueDateIso: string | null): string {
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
-console.log('\nAssignment Edit Feature — Unit Tests (Issue #425)\n');
+describe('Assignment Edit Feature (Issue #425)', () => {
+  describe('parseDueDateForInput', () => {
+    it('returns YYYY-MM-DD for ISO datetime', () => {
+      expect(parseDueDateForInput('2026-04-01T00:00:00Z')).toBe('2026-04-01');
+    });
 
-// Test 1: parseDueDateForInput with a valid ISO string
-assert(
-  parseDueDateForInput('2026-04-01T00:00:00Z') === '2026-04-01',
-  'parseDueDateForInput returns YYYY-MM-DD for ISO datetime',
-);
+    it('returns empty string for null', () => {
+      expect(parseDueDateForInput(null)).toBe('');
+    });
 
-// Test 2: parseDueDateForInput with null returns empty string
-assert(
-  parseDueDateForInput(null) === '',
-  'parseDueDateForInput returns empty string for null',
-);
+    it('returns empty string for empty input', () => {
+      expect(parseDueDateForInput('')).toBe('');
+    });
+  });
 
-// Test 3: parseDueDateForInput with empty string returns empty string
-assert(
-  parseDueDateForInput('') === '',
-  'parseDueDateForInput returns empty string for empty input',
-);
+  describe('due_date payload', () => {
+    it('passes non-empty date string through', () => {
+      const editDueDateFilled = '2026-05-31';
+      const dueDatePayload = editDueDateFilled || null;
+      expect(dueDatePayload).toBe('2026-05-31');
+    });
 
-// Test 4: due_date payload — non-empty string stays as-is
-const editDueDateFilled = '2026-05-31';
-const dueDatePayload = editDueDateFilled || null;
-assert(
-  dueDatePayload === '2026-05-31',
-  'due_date payload passes non-empty date string through',
-);
+    it('converts empty string to null (clears due date)', () => {
+      const editDueDateEmpty = '';
+      const dueDatePayloadEmpty = editDueDateEmpty || null;
+      expect(dueDatePayloadEmpty).toBeNull();
+    });
+  });
 
-// Test 5: due_date payload — empty string becomes null (clears the date)
-const editDueDateEmpty = '';
-const dueDatePayloadEmpty = editDueDateEmpty || null;
-assert(
-  dueDatePayloadEmpty === null,
-  'due_date payload converts empty string to null (clears due date)',
-);
+  describe('title trim', () => {
+    it('blank title trims to undefined (falls back to story title)', () => {
+      const editTitleBlank = '   ';
+      const titlePayload = editTitleBlank.trim() || undefined;
+      expect(titlePayload).toBeUndefined();
+    });
 
-// Test 6: title trim — blank title becomes undefined (uses story title)
-const editTitleBlank = '   ';
-const titlePayload = editTitleBlank.trim() || undefined;
-assert(
-  titlePayload === undefined,
-  'blank title trims to undefined (falls back to story title)',
-);
+    it('non-blank title is trimmed correctly', () => {
+      const editTitleWithSpaces = '  第一單元作業  ';
+      const titlePayloadTrimmed = editTitleWithSpaces.trim() || undefined;
+      expect(titlePayloadTrimmed).toBe('第一單元作業');
+    });
+  });
 
-// Test 7: title trim — non-blank title stays as trimmed value
-const editTitleWithSpaces = '  第一單元作業  ';
-const titlePayloadTrimmed = editTitleWithSpaces.trim() || undefined;
-assert(
-  titlePayloadTrimmed === '第一單元作業',
-  'non-blank title is trimmed correctly',
-);
-
-// Test 8: description trim — blank description becomes undefined
-const editDescBlank = '  ';
-const descPayload = editDescBlank.trim() || undefined;
-assert(
-  descPayload === undefined,
-  'blank description trims to undefined',
-);
-
-// ── Summary ──────────────────────────────────────────────────────────────────
-
-console.log(`\nResults: ${passed} passed, ${failed} failed\n`);
-if (failed > 0) process.exit(1);
+  describe('description trim', () => {
+    it('blank description trims to undefined', () => {
+      const editDescBlank = '  ';
+      const descPayload = editDescBlank.trim() || undefined;
+      expect(descPayload).toBeUndefined();
+    });
+  });
+});
