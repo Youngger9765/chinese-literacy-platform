@@ -59,6 +59,8 @@ const Header: React.FC<HeaderProps> = ({ onStepperNavigate }) => {
     AppView.STUDENT_PROGRESS,
     AppView.STUDENT_HOME,
     AppView.TEACHER_HOME,
+    AppView.STUDENT_CLASSROOM_DASHBOARD,
+    AppView.STUDENT_PROFILE,
   ];
 
   const showStepper = navStory != null && !learningViews.includes(currentView);
