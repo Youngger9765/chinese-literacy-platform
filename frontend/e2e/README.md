@@ -16,14 +16,25 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-### 3. 跑單一 suite
+### 3. 跑單一模組
 
 ```bash
-npm run test:e2e:auth      # 登入/註冊流程 (7 tests)
-npm run test:e2e:teacher   # 教師功能 (21 tests)
-npm run test:e2e:admin     # 管理員功能 (42 tests)
-npm run test:e2e:student   # 學生功能 (14 tests)
+npm run test:e2e:m1   # M1: 教師驗證流程 (7 tests)
+npm run test:e2e:m2   # M2: 教師班級管理 (17 tests)
+npm run test:e2e:m3   # M3: 學生核心功能 (17 tests)
+npm run test:e2e:m4   # M4: 系統管理員   (42 tests)
+npm run test:e2e:m5   # M5: 非功能性測試 (4 active tests)
+npm run test:e2e:m6   # M6: 六步驟學習   (19 tests)
 ```
+
+### 4. 查看 HTML 測試報告
+
+```bash
+npm run test:e2e              # 跑測試（自動產生 playwright-report/）
+npm run test:e2e:show-report  # 開啟瀏覽器查看 HTML 報告
+```
+
+報告包含：每個測試的截圖、失敗截圖、執行時間、錯誤訊息。
 
 ### 4. 用 UI 模式 debug（推薦！）
 
@@ -43,11 +54,51 @@ npm run test:e2e:headed
 
 ## 架構說明
 
+### 模組化架構（m1-m6）
+
 ```
 e2e/
 ├── auth.setup.ts          # 全局 setup — 登入 3 個角色，存 storageState
-├── fixtures.ts            # 共用 helpers（dismissAllModals, loginAs, ...）
-├── auth-flow.spec.ts      # 登入/註冊/登出測試（不用 storageState）
+├── fixtures.ts            # 共用 helpers（takeScreenshot, withScreenshotOnFailure, ...）
+├── m1-auth.spec.ts        # M1: 教師驗證流程（旅程 A）
+├── m2-teacher.spec.ts     # M2: 教師班級管理（旅程 B~D）
+├── m3-student.spec.ts     # M3: 學生核心功能（旅程 E, G）
+├── m4-admin.spec.ts       # M4: 系統管理員（旅程 H）
+├── m5-infra.spec.ts       # M5: 非功能性測試（N.1~N.10）
+├── m6-learning.spec.ts    # M6: 六步驟學習流程（旅程 F）
+├── screenshots/           # 里程碑截圖（按模組分類）
+│   ├── teacher/           # teacher-* 截圖
+│   ├── student/           # student-* 截圖
+│   ├── admin/             # admin-* 截圖
+│   └── infra/             # infra-* 截圖
+└── .auth/                 # storageState 檔案（gitignored）
+    ├── teacher.json
+    ├── admin.json
+    └── student.json
+```
+
+### 截圖策略
+
+| 截圖類型 | 位置 | 說明 |
+|---------|------|------|
+| 里程碑截圖 | `e2e/screenshots/{module}/` | `takeScreenshot()` 手動呼叫 |
+| 失敗截圖 | `test-results/failure-screenshots/` | `withScreenshotOnFailure()` 自動觸發 |
+| Playwright 內建截圖 | `test-results/` | `screenshot: 'on'` 每個 test 後自動截圖 |
+
+### 失敗自動截圖（withScreenshotOnFailure）
+
+所有 m1-m6 測試都用 `withScreenshotOnFailure()` 包裝：
+
+```ts
+test('我的測試', withScreenshotOnFailure('my-test-fail', async ({ page }) => {
+  // 如果這裡有錯誤，會自動截全頁截圖到 test-results/failure-screenshots/
+}));
+```
+
+### Legacy 檔案（已停用，保留歷史）
+
+```
+auth-flow.spec.ts      # 登入/註冊/登出測試（不用 storageState）
 ├── teacher-flow.spec.ts   # 教師功能測試（用 teacher.json）
 ├── admin-flow.spec.ts     # 管理員功能測試（用 admin.json）
 ├── student-flow.spec.ts   # 學生功能測試（用 student.json）
