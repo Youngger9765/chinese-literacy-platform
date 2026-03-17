@@ -89,14 +89,22 @@ def _override_get_db():
 
 
 def _register(client, name, email, password="Password123!"):
+    """Register a user, verify their email (dev-mode token), then login to get JWT."""
     r = client.post("/api/auth/register", json={
         "name": name,
         "email": email,
         "password": password,
-        "copyright_confirmed": True,
     })
     assert r.status_code in (200, 201), r.text
-    return r.json()["access_token"]
+    # Dev mode returns verification_token directly; verify it before login
+    verification_token = r.json().get("verification_token")
+    assert verification_token is not None, "Expected verification_token in dev mode response"
+    verify_r = client.get(f"/api/auth/verify-email?token={verification_token}")
+    assert verify_r.status_code == 200, verify_r.text
+    # Login to get access_token
+    login_r = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert login_r.status_code == 200, login_r.text
+    return login_r.json()["access_token"]
 
 
 def _create_classroom(client, token, school_id):
