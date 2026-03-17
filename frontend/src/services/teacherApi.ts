@@ -608,3 +608,69 @@ export async function getAtRiskStudents(
   );
   return handleResponse<AtRiskStudent[]>(res);
 }
+
+
+// ── Story Tags: difficulty + custom labels (Issue #422) ───────────────────────
+
+export interface StoryTagData {
+  story_ref: string;
+  difficulty_level: 'easy' | 'medium' | 'hard' | null;
+  custom_tags: string[];
+}
+
+export interface StoryTagUpsertRequest {
+  difficulty_level?: 'easy' | 'medium' | 'hard' | null;
+  custom_tags?: string[];
+}
+
+/** Get teacher's difficulty and custom tags for a story. */
+export async function getStoryTag(
+  token: string,
+  storyRef: string,
+): Promise<StoryTagData> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/story-tags/${encodeURIComponent(storyRef)}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StoryTagData>(res);
+}
+
+/** Set or update difficulty and custom tags for a story. */
+export async function upsertStoryTag(
+  token: string,
+  storyRef: string,
+  data: StoryTagUpsertRequest,
+): Promise<StoryTagData> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/story-tags/${encodeURIComponent(storyRef)}`,
+    {
+      method: 'PUT',
+      headers: authHeaders(token),
+      body: JSON.stringify(data),
+    },
+  );
+  return handleResponse<StoryTagData>(res);
+}
+
+/** Remove all custom tags and difficulty override for a story. */
+export async function deleteStoryTag(
+  token: string,
+  storyRef: string,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/story-tags/${encodeURIComponent(storyRef)}`,
+    { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok && res.status !== 404) {
+    const data = await res.json().catch(() => ({}));
+    throw new TeacherApiError(data.detail ?? 'Failed to delete story tag', res.status);
+  }
+}
+
+/** List all story tags created by the authenticated teacher. */
+export async function listStoryTags(token: string): Promise<StoryTagData[]> {
+  const res = await fetch(`${API_BASE}/api/teacher/story-tags`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<StoryTagData[]>(res);
+}

@@ -13,3 +13,4 @@ from .notification_read import TeacherNotificationRead  # noqa: F401
 from .dictionary import DictionaryCache  # noqa: F401
 from .parent_link import ParentInviteCode, ParentStudentLink  # noqa: F401
 from .gamification import StudentXPLog, StudentBadge, StudentStreak  # noqa: F401
+from .story_tag import StoryTag  # noqa: F401
