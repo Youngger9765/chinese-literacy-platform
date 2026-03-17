@@ -10,8 +10,14 @@ import { defineConfig, devices } from '@playwright/test';
  *
  * Auth strategy:
  *  - "setup" project logs in once per role and saves storageState
- *  - teacher-tests / admin-tests reuse saved state (no repeated logins)
- *  - auth-tests and student-tests register fresh accounts (no saved state)
+ *  - teacher.spec.ts Journey A tests register fresh accounts (no saved state)
+ *  - All other tests reuse saved state from setup
+ *
+ * Test structure (maps to QA Checklist Issues):
+ *  - teacher.spec.ts  ← #360 教師測試 (旅程 A~D)
+ *  - student.spec.ts  ← #361 學生測試 (旅程 E~G)
+ *  - admin.spec.ts    ← #362 管理員測試 (旅程 H)
+ *  - infra.spec.ts    ← #363 非功能性測試 (N.1~N.10)
  */
 const BASE_URL =
   process.env.PLAYWRIGHT_BASE_URL ||
@@ -24,63 +30,78 @@ export default defineConfig({
   expect: {
     timeout: 15_000,
   },
-  /* Run tests in files sequentially to avoid auth contention */
   fullyParallel: false,
-  /* Retry on CI only */
   retries: process.env.CI ? 1 : 0,
-  /* Reporter to use */
-  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
+  reporter: process.env.CI
+    ? [['github'], ['html', { open: 'never' }], ['json', { outputFile: 'test-results/results.json' }]]
+    : [['list'], ['json', { outputFile: 'test-results/results.json' }]],
   use: {
     baseURL: BASE_URL,
     headless: true,
     navigationTimeout: 30_000,
     actionTimeout: 15_000,
-    /* Capture screenshot only on failure */
-    screenshot: 'only-on-failure',
-    /* Collect trace when retrying failed test */
+    screenshot: 'on',
     trace: 'on-first-retry',
   },
+
+  /* Exclude legacy spec files — kept in git but not run */
+  testIgnore: [
+    '**/auth-flow.spec.ts',
+    '**/teacher-flow.spec.ts',
+    '**/teacher-dashboard.spec.ts',
+    '**/student-flow.spec.ts',
+    '**/story-selection.spec.ts',
+    '**/learning-flow.spec.ts',
+    '**/admin-flow.spec.ts',
+    '**/issue-*.spec.ts',
+    '**/preview-test.spec.ts',
+  ],
+
   projects: [
-    // Setup project: logs in and saves auth state files
+    // Setup: authenticate once per role
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
-    // Auth flow tests: no saved state (tests login/register themselves)
+    // #360 教師測試 (旅程 A~D)
     {
-      name: 'auth-tests',
-      testMatch: /auth-flow\.spec\.ts/,
-      use: { ...devices['Desktop Chrome'] },
-    },
-    // Student tests: reuse saved student auth state
-    {
-      name: 'student-tests',
-      testMatch: /student-flow\.spec\.ts/,
-      dependencies: ['setup'],
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'e2e/.auth/student.json',
-      },
-    },
-    // Teacher tests: reuse saved teacher auth state
-    {
-      name: 'teacher-tests',
-      testMatch: /teacher-flow\.spec\.ts/,
+      name: 'teacher',
+      testMatch: /teacher\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'e2e/.auth/teacher.json',
       },
     },
-    // Admin tests: reuse saved admin auth state
+    // #361 學生測試 (旅程 E~G)
     {
-      name: 'admin-tests',
-      testMatch: /admin-flow\.spec\.ts/,
+      name: 'student',
+      testMatch: /student\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'e2e/.auth/student.json',
+      },
+    },
+    // #362 管理員測試 (旅程 H)
+    {
+      name: 'admin',
+      testMatch: /admin\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'e2e/.auth/admin.json',
+      },
+    },
+    // #363 非功能性測試 (N.1~N.10)
+    {
+      name: 'infra',
+      testMatch: /infra\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'e2e/.auth/student.json',
       },
     },
   ],

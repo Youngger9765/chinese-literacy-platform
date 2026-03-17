@@ -24,6 +24,8 @@ data/raw-materials/
 *.db
 frontend/test-results/
 frontend/e2e/.auth/
+frontend/e2e/screenshots/
+frontend/e2e-report.html
 
 # Load test reports (generated artifacts — not committed)
 tests/load-testing/reports/
