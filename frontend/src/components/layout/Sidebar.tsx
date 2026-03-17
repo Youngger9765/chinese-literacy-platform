@@ -282,7 +282,9 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         { icon: '🏆', label: '成就', path: '/achievements' },
         { icon: '📖', label: '生字本', path: '/vocabulary' },
         { icon: '📝', label: '學習記錄', path: '/history' },
+        { icon: '🏫', label: '我的班級', path: '/classroom-dashboard' },
         { icon: '🔗', label: '加入班級', path: '/join' },
+        { icon: '👤', label: '個人檔案', path: '/profile' },
       ]
     : [];
 
