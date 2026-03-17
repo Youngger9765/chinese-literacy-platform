@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import {
   listMyTexts,
   createMyText,
@@ -77,6 +78,10 @@ const MyTextsTab: React.FC = () => {
   // Delete state
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Focus management for the Create/Edit modal
+  const formDialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(formDialogRef, showForm);
 
   const loadTexts = useCallback(async () => {
     if (!token) return;
@@ -402,7 +407,7 @@ const MyTextsTab: React.FC = () => {
           onKeyDown={(e) => { if (e.key === 'Escape') closeForm(); }}
           onClick={(e) => { if (e.target === e.currentTarget) closeForm(); }}
         >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4" role="dialog" aria-modal="true" aria-label={editingId !== null ? '編輯課文' : '新增課文'}>
+          <div ref={formDialogRef} className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4" role="dialog" aria-modal="true" aria-label={editingId !== null ? '編輯課文' : '新增課文'}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-base font-semibold text-gray-800">
                 {editingId !== null ? '編輯課文' : '新增課文'}
