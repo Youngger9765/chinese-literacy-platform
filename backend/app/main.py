@@ -186,8 +186,8 @@ class GlobalRateLimitMiddleware(BaseHTTPMiddleware):
     - Retry-After: (429 only) seconds until the limit resets
     """
 
-    # Paths that should never be rate-limited (health-checks, API docs).
-    _EXEMPT_PREFIXES = ("/health", "/docs", "/redoc", "/openapi.json", "/")
+    # Paths that are exempt from rate-limiting (exact match, not prefix).
+    _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
 
     # Global limit: 60 requests per minute per IP.
     LIMIT = 60
@@ -197,11 +197,19 @@ class GlobalRateLimitMiddleware(BaseHTTPMiddleware):
         path = request.url.path
 
         # Skip rate limiting for exempt paths.
-        if path in self._EXEMPT_PREFIXES or not path.startswith("/api"):
+        if path in self._EXEMPT_PATHS or not path.startswith("/api"):
             return await call_next(request)
 
-        client = request.client
-        ip = client.host if client else "unknown"
+        # Extract real client IP: prefer X-Forwarded-For (set by Cloud Run /
+        # load balancers), fall back to request.client.host.
+        forwarded_for = request.headers.get("x-forwarded-for")
+        if forwarded_for:
+            # X-Forwarded-For may contain a comma-separated list; the first
+            # entry is the original client IP.
+            ip = forwarded_for.split(",")[0].strip()
+        else:
+            client = request.client
+            ip = client.host if client else "unknown"
         key = f"global:ip:{ip}"
 
         info = general_rate_limiter.check_with_info(key, self.LIMIT, self.WINDOW)
@@ -249,8 +257,8 @@ app = FastAPI(
 # every response (including CORS preflight responses).
 app.add_middleware(SecurityHeadersMiddleware)
 
-# CORS must be added before the logging middleware so the OPTIONS pre-flight
-# is still handled correctly.
+# CORS — added after SecurityHeaders so CORS headers appear on all responses
+# including pre-flight OPTIONS.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.origins_list,
