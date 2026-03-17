@@ -6,9 +6,17 @@ import {
   unassignText,
   ClassroomTextItem,
   TeacherApiError,
+  StoryTagData,
 } from '../../services/teacherApi';
 import { fetchStories } from '../../services/api';
 import type { Story } from '../../types';
+import StoryTagEditor from '../../components/teacher/StoryTagEditor';
+
+const DIFFICULTY_LABEL: Record<string, { label: string; className: string }> = {
+  easy: { label: '入門', className: 'bg-green-100 text-green-700' },
+  medium: { label: '中階', className: 'bg-yellow-100 text-yellow-700' },
+  hard: { label: '進階', className: 'bg-red-100 text-red-700' },
+};
 
 interface TextManagementTabProps {
   classroomId: number;
@@ -35,6 +43,10 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
   // Unassign flow
   const [confirmUnassignId, setConfirmUnassignId] = useState<string | null>(null);
   const [unassigningTextId, setUnassigningTextId] = useState<string | null>(null);
+
+  // Tag editor
+  const [tagEditorStory, setTagEditorStory] = useState<{ ref: string; title: string } | null>(null);
+  const [storyTagMap, setStoryTagMap] = useState<Record<string, StoryTagData>>({});
 
   const loadTexts = useCallback(async () => {
     if (!token) return;
@@ -298,44 +310,76 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
           <p className="text-xs text-gray-500">點選「指派課文」為班級指定學習內容</p>
         </div>
       ) : (
+        <>
         <div className="divide-y divide-gray-100">
-          {assignedTexts.map((text) => (
-            <div key={text.text_id} className="px-5 py-3 flex items-center justify-between group">
-              <div>
-                <p className="text-sm font-medium text-gray-900">{text.title}</p>
-                <p className="text-xs text-gray-500">
-                  指派於 {formatDate(text.assigned_at)}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {confirmUnassignId === text.text_id ? (
-                  <div className="flex items-center gap-1.5">
+          {assignedTexts.map((text) => {
+            const tagData = storyTagMap[text.text_id];
+            return (
+              <div key={text.text_id} className="px-5 py-3 flex items-start justify-between group gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{text.title}</p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                    <span className="text-xs text-gray-400">指派於 {formatDate(text.assigned_at)}</span>
+                    {tagData?.difficulty_level && DIFFICULTY_LABEL[tagData.difficulty_level] && (
+                      <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${DIFFICULTY_LABEL[tagData.difficulty_level].className}`}>
+                        {DIFFICULTY_LABEL[tagData.difficulty_level].label}
+                      </span>
+                    )}
+                    {tagData?.custom_tags?.map((tag) => (
+                      <span key={tag} className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => setTagEditorStory({ ref: text.text_id, title: text.title })}
+                    className="px-2 py-0.5 rounded text-xs text-gray-400 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                    title="設定標籤"
+                  >
+                    標籤
+                  </button>
+                  {confirmUnassignId === text.text_id ? (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleUnassign(text.text_id)}
+                        disabled={unassigningTextId === text.text_id}
+                        className="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {unassigningTextId === text.text_id ? '移除中...' : '確認移除'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmUnassignId(null)}
+                        className="px-2 py-0.5 rounded text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
+                      >
+                        取消
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       onClick={() => handleUnassign(text.text_id)}
-                      disabled={unassigningTextId === text.text_id}
-                      className="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors cursor-pointer disabled:opacity-50"
+                      className="px-2 py-0.5 rounded text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                     >
-                      {unassigningTextId === text.text_id ? '移除中...' : '確認移除'}
+                      移除
                     </button>
-                    <button
-                      onClick={() => setConfirmUnassignId(null)}
-                      className="px-2 py-0.5 rounded text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
-                    >
-                      取消
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => handleUnassign(text.text_id)}
-                    className="px-2 py-0.5 rounded text-xs text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-                  >
-                    移除
-                  </button>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+        {tagEditorStory && (
+          <StoryTagEditor
+            storyRef={tagEditorStory.ref}
+            storyTitle={tagEditorStory.title}
+            onClose={() => setTagEditorStory(null)}
+            onSaved={(data) => {
+              setStoryTagMap((prev) => ({ ...prev, [tagEditorStory.ref]: data }));
+            }}
+          />
+        )}
+        </>
       )}
     </div>
   );

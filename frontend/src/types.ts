@@ -50,6 +50,10 @@ export interface Story {
   vocabulary?: VocabItem[];     // for future VocabPractice enhancement
   charCount?: number;           // for reading benchmark
   readingBenchmark?: { levels: { threshold: string; feedback: string }[] };
+  /** Teacher-defined difficulty override (overrides grade-based auto-detect). */
+  difficultyLevel?: 'easy' | 'medium' | 'hard';
+  /** Teacher-defined custom tags, e.g. ["重要考題", "期末複習"]. */
+  customTags?: string[];
 }
 
 export interface ReadingAttempt {

@@ -8,6 +8,10 @@ import { Story } from '../../types';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export function getDifficulty(story: Story): Difficulty {
+  // Teacher-defined difficulty takes priority over grade-based auto-detect
+  if (story.difficultyLevel === 'easy' || story.difficultyLevel === 'medium' || story.difficultyLevel === 'hard') {
+    return story.difficultyLevel;
+  }
   const grade = story.grade;
   if (grade == null) return 'medium';
   if (grade <= 5) return 'easy';   // 4-5年級
@@ -83,6 +87,18 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
             <span className="text-xs text-green-600 font-medium">已完成</span>
           )}
         </div>
+        {story.customTags && story.customTags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            {story.customTags.map((tag) => (
+              <span
+                key={tag}
+                className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
