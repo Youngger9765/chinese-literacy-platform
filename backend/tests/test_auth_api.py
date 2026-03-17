@@ -1444,3 +1444,216 @@ class TestEmailVerificationFlow:
             f"Batch-created student should be able to login without email verification. "
             f"Got {resp.status_code}: {resp.json()}"
         )
+
+
+# ===========================================================================
+# Integration tests — Email domain validation on teacher registration (#407)
+# ===========================================================================
+
+
+class TestEmailDomainValidation:
+    """Tests for issue #407: schools can restrict teacher registration by email domain."""
+
+    def _create_school_with_allowed_domains(self, domains: list[str], base_domain: str) -> "School":
+        """Helper: create a school in DB with allowed_email_domains set."""
+        from app.models.school import School as SchoolModel
+
+        db = TestingSessionLocal()
+        try:
+            school = SchoolModel(
+                name=f"{base_domain} 學校",
+                domain=base_domain,
+                allowed_email_domains=domains,
+            )
+            db.add(school)
+            db.commit()
+            db.refresh(school)
+            return school
+        finally:
+            db.close()
+
+    def test_school_without_domain_restriction_accepts_any_teacher(self, client):
+        """Schools with allowed_email_domains=None accept teachers from any domain."""
+        from app.models.school import School as SchoolModel
+
+        unique = uuid.uuid4().hex[:6]
+        domain = f"norestrict-{unique}.edu.tw"
+
+        # Create school with no domain restriction
+        db = TestingSessionLocal()
+        try:
+            school = SchoolModel(
+                name=f"{domain} 學校",
+                domain=domain,
+                allowed_email_domains=None,
+            )
+            db.add(school)
+            db.commit()
+        finally:
+            db.close()
+
+        # Teacher from this domain should be accepted
+        resp = client.post("/api/auth/register", json={
+            "email": f"teacher@{domain}",
+            "password": "StrongPass1!",
+            "name": "Free Teacher",
+        })
+        assert resp.status_code == 201
+
+    def test_school_with_empty_domain_list_accepts_any_teacher(self, client):
+        """Schools with allowed_email_domains=[] accept teachers from any domain."""
+        from app.models.school import School as SchoolModel
+
+        unique = uuid.uuid4().hex[:6]
+        domain = f"emptylist-{unique}.edu.tw"
+
+        db = TestingSessionLocal()
+        try:
+            school = SchoolModel(
+                name=f"{domain} 學校",
+                domain=domain,
+                allowed_email_domains=[],
+            )
+            db.add(school)
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.post("/api/auth/register", json={
+            "email": f"teacher@{domain}",
+            "password": "StrongPass1!",
+            "name": "Any Domain Teacher",
+        })
+        assert resp.status_code == 201
+
+    def test_school_with_allowed_domains_accepts_matching_teacher(self, client):
+        """Teacher whose domain is in allowed_email_domains should register successfully."""
+        unique = uuid.uuid4().hex[:6]
+        domain = f"allowed-{unique}.edu.tw"
+        self._create_school_with_allowed_domains([domain], domain)
+
+        resp = client.post("/api/auth/register", json={
+            "email": f"teacher@{domain}",
+            "password": "StrongPass1!",
+            "name": "Matching Teacher",
+        })
+        assert resp.status_code == 201
+
+    def test_school_with_allowed_domains_rejects_non_matching_teacher(self, client):
+        """Teacher whose domain is NOT in allowed_email_domains should get 403."""
+        unique = uuid.uuid4().hex[:6]
+        base_domain = f"strict-{unique}.edu.tw"
+        allowed_domain = f"allowed-{unique}.edu.tw"
+        # School domain is base_domain, but only allows teachers from allowed_domain
+        from app.models.school import School as SchoolModel
+        db = TestingSessionLocal()
+        try:
+            school = SchoolModel(
+                name=f"{base_domain} 學校",
+                domain=base_domain,
+                allowed_email_domains=[allowed_domain],
+            )
+            db.add(school)
+            db.commit()
+        finally:
+            db.close()
+
+        # Teacher from base_domain — not in allowed list
+        resp = client.post("/api/auth/register", json={
+            "email": f"outsider@{base_domain}",
+            "password": "StrongPass1!",
+            "name": "Outsider Teacher",
+        })
+        assert resp.status_code == 403
+
+    def test_domain_rejection_returns_chinese_error_message(self, client):
+        """The 403 error message should be in Chinese and mention the domain."""
+        unique = uuid.uuid4().hex[:6]
+        base_domain = f"errmsg-{unique}.edu.tw"
+        from app.models.school import School as SchoolModel
+        db = TestingSessionLocal()
+        try:
+            school = SchoolModel(
+                name=f"{base_domain} 學校",
+                domain=base_domain,
+                allowed_email_domains=["other-allowed.edu.tw"],
+            )
+            db.add(school)
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.post("/api/auth/register", json={
+            "email": f"teacher@{base_domain}",
+            "password": "StrongPass1!",
+            "name": "Domain Error Teacher",
+        })
+        assert resp.status_code == 403
+        detail = resp.json()["detail"]
+        # Error must mention the domain and be in Chinese
+        assert base_domain in detail
+        assert "網域" in detail or "學校" in detail
+
+    def test_domain_check_is_case_insensitive(self, client):
+        """Domain comparison should be case-insensitive (UPPER in allowed list matches lower in email)."""
+        unique = uuid.uuid4().hex[:6]
+        domain = f"casetest-{unique}.edu.tw"
+        # Store allowed domain in uppercase
+        self._create_school_with_allowed_domains([domain.upper()], domain)
+
+        # Register with lowercase domain in email
+        resp = client.post("/api/auth/register", json={
+            "email": f"teacher@{domain}",
+            "password": "StrongPass1!",
+            "name": "Case Insensitive Teacher",
+        })
+        assert resp.status_code == 201
+
+    def test_school_with_multiple_allowed_domains(self, client):
+        """School with multiple allowed domains should accept teachers from any of them."""
+        unique = uuid.uuid4().hex[:6]
+        primary_domain = f"primary-{unique}.edu.tw"
+        alias_domain = f"alias-{unique}.edu.tw"
+        from app.models.school import School as SchoolModel
+        db = TestingSessionLocal()
+        try:
+            school = SchoolModel(
+                name=f"{primary_domain} 學校",
+                domain=primary_domain,
+                allowed_email_domains=[primary_domain, alias_domain],
+            )
+            db.add(school)
+            db.commit()
+        finally:
+            db.close()
+
+        # Teacher from primary domain
+        resp1 = client.post("/api/auth/register", json={
+            "email": f"t1@{primary_domain}",
+            "password": "StrongPass1!",
+            "name": "Primary Domain Teacher",
+        })
+        assert resp1.status_code == 201
+
+        # Teacher from alias domain — NOT in school.domain, but in allowed list
+        # This teacher would trigger school creation for alias_domain since it's a new domain
+        # The alias_domain school won't have restrictions, so it's accepted
+        resp2 = client.post("/api/auth/register", json={
+            "email": f"t1@{alias_domain}",
+            "password": "StrongPass1!",
+            "name": "Alias Domain Teacher",
+        })
+        # alias_domain has no school yet → creates a new unrestricted school → 201
+        assert resp2.status_code == 201
+
+    def test_new_domain_always_allowed_creates_school(self, client):
+        """A teacher with a brand-new domain always creates a new school — no restriction."""
+        unique = uuid.uuid4().hex[:6]
+        brand_new_domain = f"brandnew-{unique}.edu.tw"
+
+        resp = client.post("/api/auth/register", json={
+            "email": f"pioneer@{brand_new_domain}",
+            "password": "StrongPass1!",
+            "name": "Pioneer Teacher",
+        })
+        assert resp.status_code == 201
