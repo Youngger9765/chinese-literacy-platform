@@ -1610,3 +1610,137 @@ class TestTeacherFeedback:
         )
         assert resp.status_code == 200
         assert resp.json()["teacher_feedback"] == "更新後的評語"
+
+
+# ---------------------------------------------------------------------------
+# Issue #414 — Reading goals in StartAssignmentResponse
+# ---------------------------------------------------------------------------
+
+class TestReadingGoalsInStartResponse:
+    """Tests that /start returns reading goals so the student knows the target
+    before and during the learning session (Issue #414)."""
+
+    @pytest.fixture
+    def setup(self, client, school_id):
+        """Create teacher + student + classroom + assignment with reading goals."""
+        teacher = _register_and_login(client, "rg414_teacher")
+        student = _register_and_login(client, "rg414_student")
+        _make_student_role(student["user_id"], school_id)
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            headers=auth_header(teacher["token"]),
+            json={"name": "Reading Goals 414 Class", "school_id": school_id},
+        )
+        classroom_id = cls_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+            json={"student_id": student["user_id"]},
+        )
+        # Create assignment WITH custom reading goals
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            headers=auth_header(teacher["token"]),
+            json={
+                "classroom_id": classroom_id,
+                "story_id": "1",
+                "target_cpm": 160,
+                "target_accuracy": 85.0,
+                "difficulty_label": "中級",
+            },
+        )
+        assignment_id = asn_resp.json()["id"]
+        return {
+            "teacher": teacher,
+            "student": student,
+            "classroom_id": classroom_id,
+            "assignment_id": assignment_id,
+        }
+
+    def test_start_response_includes_reading_goals(self, client, setup):
+        """StartAssignmentResponse must include effective_cpm, effective_accuracy,
+        target_cpm, target_accuracy, and difficulty_label (Issue #414)."""
+        resp = client.post(
+            f"/api/assignments/{setup['assignment_id']}/start",
+            headers=auth_header(setup["student"]["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+
+        # Core fields still present
+        assert "session_id" in data
+        assert "story_id" in data
+        assert "status" in data
+
+        # Reading goal fields (Issue #414)
+        assert "target_cpm" in data, "StartAssignmentResponse missing target_cpm"
+        assert "target_accuracy" in data, "StartAssignmentResponse missing target_accuracy"
+        assert "difficulty_label" in data, "StartAssignmentResponse missing difficulty_label"
+        assert "effective_cpm" in data, "StartAssignmentResponse missing effective_cpm"
+        assert "effective_accuracy" in data, "StartAssignmentResponse missing effective_accuracy"
+
+        assert data["target_cpm"] == 160
+        assert data["target_accuracy"] == 85.0
+        assert data["difficulty_label"] == "中級"
+        assert data["effective_cpm"] == 160
+        assert data["effective_accuracy"] == 85.0
+
+    def test_start_response_uses_defaults_when_no_goals_set(self, client, school_id):
+        """When teacher sets no reading goals, effective values use system defaults."""
+        teacher = _register_and_login(client, "rg414b_teacher")
+        student = _register_and_login(client, "rg414b_student")
+        _make_student_role(student["user_id"], school_id)
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            headers=auth_header(teacher["token"]),
+            json={"name": "Reading Goals 414b Class", "school_id": school_id},
+        )
+        classroom_id = cls_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+            json={"student_id": student["user_id"]},
+        )
+        # Create assignment WITHOUT reading goals
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            headers=auth_header(teacher["token"]),
+            json={"classroom_id": classroom_id, "story_id": "1"},
+        )
+        assignment_id = asn_resp.json()["id"]
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+
+        # target fields should be null (not set by teacher)
+        assert data["target_cpm"] is None
+        assert data["target_accuracy"] is None
+        assert data["difficulty_label"] is None
+
+        # effective fields should use system defaults
+        from app.schemas.assignment import DEFAULT_TARGET_CPM, DEFAULT_TARGET_ACCURACY
+        assert data["effective_cpm"] == DEFAULT_TARGET_CPM
+        assert data["effective_accuracy"] == DEFAULT_TARGET_ACCURACY
+
+    def test_start_idempotent_still_returns_goals(self, client, setup):
+        """Second call to /start (idempotent path) must also return reading goals."""
+        # First call — creates session
+        client.post(
+            f"/api/assignments/{setup['assignment_id']}/start",
+            headers=auth_header(setup["student"]["token"]),
+        )
+        # Second call — idempotent
+        resp = client.post(
+            f"/api/assignments/{setup['assignment_id']}/start",
+            headers=auth_header(setup["student"]["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "effective_cpm" in data
+        assert data["effective_cpm"] == 160

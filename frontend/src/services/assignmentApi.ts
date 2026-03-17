@@ -85,6 +85,12 @@ export interface StartAssignmentResponse {
   story_id: string | null;
   text_id: number | null;
   status: string;
+  // Reading goals (Issue #414) — returned so student knows the target
+  target_cpm: number | null;
+  target_accuracy: number | null;
+  difficulty_label: string | null;
+  effective_cpm: number;
+  effective_accuracy: number;
 }
 
 // --- Error class ---

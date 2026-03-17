@@ -31,6 +31,15 @@ const EMPTY_ATTEMPT: ReadingAttempt = {
   timestamp: 0,
 };
 
+/** Reading goals for an assignment session (Issue #414). */
+export interface AssignmentReadingGoals {
+  target_cpm: number | null;
+  target_accuracy: number | null;
+  difficulty_label: string | null;
+  effective_cpm: number;
+  effective_accuracy: number;
+}
+
 export interface LearningContext {
   selectedStory: Story | null;
   session: LearningSession | null;
@@ -52,6 +61,8 @@ export interface LearningContext {
   completedParagraphsSet: Set<number>;
   /** Notify layout that a paragraph was completed (Issue #85). */
   handleParagraphComplete: (paragraphIndex: number) => void;
+  /** Reading goals set by teacher for the active assignment (Issue #414). Null for free-play. */
+  assignmentReadingGoals: AssignmentReadingGoals | null;
 }
 
 /**
@@ -90,6 +101,15 @@ const LearningLayout: React.FC = () => {
   const [dbSessionId, setDbSessionId] = useState<number | null>(null);
   /** Progressive paragraph unlock tracking (Issue #85). */
   const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(new Set());
+  /** Reading goals from the active assignment, loaded from sessionStorage (Issue #414). */
+  const [assignmentReadingGoals, setAssignmentReadingGoals] = useState<AssignmentReadingGoals | null>(() => {
+    try {
+      const raw = sessionStorage.getItem('activeAssignmentGoals');
+      return raw ? (JSON.parse(raw) as AssignmentReadingGoals) : null;
+    } catch {
+      return null;
+    }
+  });
   /** Whether the session idle-timeout warning modal is visible (Issue #408). */
   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
   /** Ref to the idle-timer reset function so handleContinueLearning can call it. */
@@ -318,6 +338,7 @@ const LearningLayout: React.FC = () => {
       const assignmentId = parseInt(assignmentIdStr, 10);
       if (!isNaN(assignmentId)) {
         sessionStorage.removeItem('activeAssignmentId');
+        sessionStorage.removeItem('activeAssignmentGoals');
         // Fire-and-forget: best-effort auto-submit; errors are silent to avoid disrupting the report view.
         submitAssignment(token, assignmentId).catch((err) => {
           console.warn('[LearningLayout] Auto-submit assignment failed:', err);
@@ -388,6 +409,7 @@ const LearningLayout: React.FC = () => {
     dbSessionId,
     completedParagraphsSet,
     handleParagraphComplete,
+    assignmentReadingGoals,
   };
 
   return (
