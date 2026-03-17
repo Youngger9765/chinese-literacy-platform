@@ -414,12 +414,127 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           ) : null}
         </div>
 
-        {/* Right: NotificationBell (teacher) + user name + logout */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Nav links + User info + Logout */}
+        <nav
+          role="navigation"
+          aria-label="主要導覽"
+          className="flex items-center gap-1 shrink-0"
+        >
           {hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
-            <NotificationBell
-              onNavigateToStudent={(classroomId) => navigate(`/teacher/classroom/${classroomId}`)}
-            />
+            <>
+              <button
+                type="button"
+                onClick={() => navigate('/teacher')}
+                aria-current={
+                  currentView === AppView.TEACHER_DASHBOARD || currentView === AppView.CLASSROOM_DETAIL
+                    ? 'page'
+                    : undefined
+                }
+                className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                  currentView === AppView.TEACHER_DASHBOARD ||
+                  currentView === AppView.CLASSROOM_DETAIL
+                    ? 'text-accent'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                班級管理
+              </button>
+              <NotificationBell
+                onNavigateToStudent={(classroomId) => navigate(`/teacher/classroom/${classroomId}`)}
+              />
+            </>
+          )}
+          {!hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin') && (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate('/assignments')}
+                aria-current={currentView === AppView.MY_ASSIGNMENTS ? 'page' : undefined}
+                className={`relative text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                  currentView === AppView.MY_ASSIGNMENTS
+                    ? 'text-accent'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                作業
+                {pendingAssignmentCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5 leading-none">
+                    {pendingAssignmentCount > 9 ? '9+' : pendingAssignmentCount}
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/vocabulary')}
+                aria-current={currentView === AppView.MY_VOCABULARY ? 'page' : undefined}
+                className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                  currentView === AppView.MY_VOCABULARY
+                    ? 'text-accent'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                我的生字
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/history')}
+                aria-current={
+                  currentView === AppView.LEARNING_HISTORY || currentView === AppView.DIALOGUE_HISTORY
+                    ? 'page'
+                    : undefined
+                }
+                className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                  currentView === AppView.LEARNING_HISTORY || currentView === AppView.DIALOGUE_HISTORY
+                    ? 'text-accent'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                學習記錄
+              </button>
+              <button
+                onClick={() => navigate('/progress')}
+                className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center ${
+                  currentView === AppView.STUDENT_PROGRESS
+                    ? 'text-accent'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                學習進度
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/join')}
+                className="text-xs font-medium transition-colors cursor-pointer text-gray-500 hover:text-gray-700 rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+              >
+                加入班級
+              </button>
+            </>
+          )}
+          {hasRole(user, 'parent') && !hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
+            <button
+              onClick={() => navigate('/parent')}
+              className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center ${
+                currentView === AppView.PARENT_DASHBOARD
+                  ? 'text-accent'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              孩子進度
+            </button>
+          )}
+          {hasRole(user, 'system_admin', 'org_owner', 'org_admin') && (
+            <button
+              type="button"
+              onClick={() => navigate('/admin')}
+              aria-current={currentView === AppView.ADMIN_DASHBOARD ? 'page' : undefined}
+              className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                currentView === AppView.ADMIN_DASHBOARD
+                  ? 'text-accent'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              系統管理
+            </button>
           )}
           <div className="w-px h-4 bg-gray-200" aria-hidden="true" />
           {user && (
