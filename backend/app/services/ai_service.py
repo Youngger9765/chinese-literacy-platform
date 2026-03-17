@@ -177,25 +177,71 @@ async def generate_structured_response(
                 timeout=GEMINI_TIMEOUT,
             )
 
+            # Extract finish_reason for diagnostics (MAX_TOKENS = truncated output)
+            finish_reason = None
+            if response.candidates:
+                finish_reason = str(response.candidates[0].finish_reason)
+
             # Log raw response for debugging (truncated to avoid log spam)
             raw_text = response.text if response.text is not None else ""
             logger.debug(
-                "Gemini raw response (first 500 chars): %s",
+                "Gemini raw response finish_reason=%s length=%d (first 500 chars): %s",
+                finish_reason,
+                len(raw_text),
                 raw_text[:500],
-                extra={"event": "gemini_raw_response", "length": len(raw_text)},
+                extra={
+                    "event": "gemini_raw_response",
+                    "finish_reason": finish_reason,
+                    "length": len(raw_text),
+                },
             )
 
             if not raw_text:
                 raise ValueError("Gemini returned empty/None response text")
 
+            # When finish_reason is MAX_TOKENS the output was cut mid-stream.
+            # Attempt JSON repair immediately before trying json.loads so we
+            # can recover partial responses without burning a retry cycle.
+            if finish_reason == "FinishReason.MAX_TOKENS":
+                logger.warning(
+                    "Gemini finish_reason=MAX_TOKENS — output was truncated "
+                    "(max_tokens=%d, raw_len=%d). Attempting JSON repair.",
+                    max_tokens,
+                    len(raw_text),
+                    extra={
+                        "event": "gemini_max_tokens_truncation",
+                        "max_tokens": max_tokens,
+                        "raw_len": len(raw_text),
+                        "attempt": attempt + 1,
+                    },
+                )
+                repaired = _repair_json(raw_text)
+                if repaired is not None:
+                    try:
+                        result = json.loads(repaired)
+                        logger.warning(
+                            "JSON repair after MAX_TOKENS succeeded "
+                            "(original_len=%d, repaired_len=%d)",
+                            len(raw_text),
+                            len(repaired),
+                            extra={"event": "gemini_json_repair_success"},
+                        )
+                        return result
+                    except json.JSONDecodeError:
+                        pass
+                # Repair failed — fall through to regular json.loads which
+                # will raise and trigger the retry loop.
+
             try:
                 return json.loads(raw_text)
             except json.JSONDecodeError as json_err:
                 logger.warning(
-                    "JSON parse failed (%s), attempting repair. Raw (first 200): %s",
+                    "JSON parse failed finish_reason=%s (%s), attempting repair. "
+                    "Raw (first 200): %s",
+                    finish_reason,
                     json_err,
                     raw_text[:200],
-                    extra={"event": "gemini_json_repair_attempt"},
+                    extra={"event": "gemini_json_repair_attempt", "finish_reason": finish_reason},
                 )
                 repaired = _repair_json(raw_text)
                 if repaired is not None:
@@ -622,7 +668,7 @@ async def generate_exit_ticket(
         On AI failure: {"questions": [], "fallback": True}
         NEVER returns auto-pass data on failure.
     """
-    sanitized_text = sanitize_ai_input(text[:3000])
+    sanitized_text, _ = sanitize_ai_input(text[:3000])
     wrong_chars_info = ""
     if wrong_chars:
         wrong_chars_info = f"\n\n【學生朗讀時讀錯的字】：{', '.join(wrong_chars[:10])}\n請至少出一題考這些字的辨識（形近字選擇）。"
@@ -710,8 +756,8 @@ async def generate_example_sentences(character: str, story_title: str) -> dict:
     Each sentence uses the target character in a contextually appropriate way
     suited for elementary/middle school students.
     """
-    safe_char = sanitize_ai_input(character)
-    safe_title = sanitize_ai_input(story_title)
+    safe_char, _ = sanitize_ai_input(character)
+    safe_title, _ = sanitize_ai_input(story_title)
 
     system_prompt = f"""{TUTOR_PERSONA}
 
@@ -759,9 +805,9 @@ async def validate_student_sentence(
     - feedback: encouraging feedback message (in Chinese)
     - suggestion: improvement hint if not correct (empty string if correct)
     """
-    safe_char = sanitize_ai_input(character)
-    safe_sentence = sanitize_ai_input(student_sentence)
-    safe_title = sanitize_ai_input(story_title)
+    safe_char, _ = sanitize_ai_input(character)
+    safe_sentence, _ = sanitize_ai_input(student_sentence)
+    safe_title, _ = sanitize_ai_input(story_title)
 
     system_prompt = f"""{TUTOR_PERSONA}
 
