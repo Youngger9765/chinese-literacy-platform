@@ -5,6 +5,7 @@ import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
 import PronunciationPractice from './PronunciationPractice';
 import SentencePractice from './SentencePractice';
+import ZhuyinPhoneticGame from './ZhuyinPhoneticGame';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import RadicalDecomposition from './RadicalDecomposition';
@@ -18,9 +19,9 @@ interface VocabPracticeProps {
   onBack: () => void;
 }
 
-type Phase = 'confirm' | 'grid' | 'practice' | 'pronunciation' | 'sentence';
+type Phase = 'confirm' | 'grid' | 'practice' | 'pronunciation' | 'sentence' | 'zhuyin-game';
 
-type PracticeMode = 'stroke' | 'pronunciation';
+type PracticeMode = 'stroke' | 'pronunciation' | 'zhuyin';
 
 /* ================================================================ */
 /*  Progress bar                                                     */
@@ -312,14 +313,25 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     );
   }
 
+  /* ── Zhuyin phonetic game phase ── */
+  if (phase === 'zhuyin-game') {
+    return (
+      <ZhuyinPhoneticGame
+        story={story}
+        onFinish={() => setPhase('grid')}
+        onBack={() => setPhase('grid')}
+      />
+    );
+  }
+
   /* ── Grid phase: character selection ── */
   const strokeDone = displayChars.length > 0 && displayChars.every(ch => practicedChars.has(ch));
   const pronounceDone = displayChars.length > 0 && displayChars.every(ch => pronouncedChars.has(ch));
   const allDone = strokeDone && pronounceDone;
 
-  const currentChars = activeTab === 'stroke' ? displayChars : pronunciationChars;
-  const currentPracticedSet = activeTab === 'stroke' ? practicedChars : pronouncedChars;
-  const currentDone = activeTab === 'stroke' ? strokeDone : pronounceDone;
+  const currentChars = activeTab === 'stroke' ? displayChars : activeTab === 'pronunciation' ? pronunciationChars : [];
+  const currentPracticedSet = activeTab === 'stroke' ? practicedChars : activeTab === 'pronunciation' ? pronouncedChars : new Set<string>();
+  const currentDone = activeTab === 'stroke' ? strokeDone : activeTab === 'pronunciation' ? pronounceDone : false;
 
   // Characters for which we have radical decomposition data
   const charsWithRadical = displayChars.filter(ch => getDecomposition(ch) !== null);
@@ -342,7 +354,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         <span className="text-[10px] text-gray-500">
           {activeTab === 'stroke'
             ? `筆順 ${practicedChars.size} / ${displayChars.length}`
-            : `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`}
+            : activeTab === 'pronunciation'
+              ? `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`
+              : '注音遊戲'}
         </span>
         <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
@@ -398,10 +412,41 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               發音練習
               {pronounceDone && <span className="w-2 h-2 bg-emerald-500 rounded-full" />}
             </button>
+            <button
+              onClick={() => setActiveTab('zhuyin')}
+              className={[
+                'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
+                activeTab === 'zhuyin'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700',
+              ].join(' ')}
+            >
+              <span className="text-base leading-none select-none">ㄅ</span>
+              注音遊戲
+            </button>
           </div>
 
-          {/* Just-completed flash */}
-          {justCompleted && (
+          {/* Zhuyin phonetic game entry card */}
+          {activeTab === 'zhuyin' && (
+            <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 flex flex-col items-center gap-4 text-center">
+              <div className="text-4xl select-none">🎮</div>
+              <div>
+                <h3 className="font-black text-gray-900 text-base mb-1">注音聲韻覺識遊戲</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  練習聲母、韻母配對與拼音合成，<br />鞏固本課生字的注音能力
+                </p>
+              </div>
+              <button
+                onClick={() => setPhase('zhuyin-game')}
+                className="w-full max-w-xs py-3 rounded-2xl font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-all active:scale-95"
+              >
+                開始注音遊戲
+              </button>
+            </div>
+          )}
+
+          {/* Just-completed flash — only shown on stroke/pronunciation tabs */}
+          {justCompleted && activeTab !== 'zhuyin' && (
             <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 animate-slide-up-fast">
               <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -410,7 +455,8 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </div>
           )}
 
-          {/* Character grid */}
+          {/* Character grid — hidden when zhuyin game tab is active */}
+          {activeTab !== 'zhuyin' && <>{/* Character grid */}
           {currentChars.length === 0 ? (
             <div className="text-gray-400 text-sm py-8 text-center">
               {activeTab === 'stroke'
@@ -605,6 +651,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               onFinish={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
             />
           )}
+          </>}
         </div>
       </div>
 
