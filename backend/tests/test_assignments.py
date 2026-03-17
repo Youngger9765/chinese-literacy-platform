@@ -1415,3 +1415,198 @@ class TestSubmissionReadingMetrics:
         assert sub2["reading_accuracy"] is None
         assert sub2["reading_cpm"] is None
         assert sub2["reading_error_chars"] == []
+
+
+# ====================================================================
+# Teacher Feedback Tests (Issue #424)
+# ====================================================================
+
+def _register_and_login(client, suffix: str) -> dict:
+    """Register a user (new auth flow: register -> verify -> login) and return token + user_id.
+
+    Uses the verification_token returned in dev mode to bypass email,
+    then logs in to obtain a JWT access_token.
+    """
+    unique = uuid.uuid4().hex[:8]
+    email = f"{suffix}_{unique}@example.com"
+    password = "SecurePass123!"
+    name = f"{suffix.title()} {unique}"
+    reg_resp = client.post("/api/auth/register", json={
+        "email": email,
+        "password": password,
+        "name": name,
+    })
+    assert reg_resp.status_code == 201, reg_resp.json()
+    verification_token = reg_resp.json().get("verification_token")
+    if verification_token:
+        client.post("/api/auth/verify-email", json={"token": verification_token})
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert login_resp.status_code == 200, login_resp.json()
+    token = login_resp.json()["access_token"]
+    me_resp = client.get("/api/users/me", headers=auth_header(token))
+    user_id = me_resp.json()["id"]
+    return {"email": email, "name": name, "token": token, "user_id": user_id}
+
+
+class TestTeacherFeedback:
+    """Tests for per-student teacher feedback on assignment submissions (Issue #424)."""
+
+    @pytest.fixture(scope="class")
+    def setup(self, client, school_id):
+        """Create teacher, student, classroom, assignment, submission for feedback tests."""
+        teacher = _register_and_login(client, "fb_teacher")
+        student = _register_and_login(client, "fb_student")
+        _make_student_role(student["user_id"], school_id)
+
+        # Create classroom
+        cls_resp = client.post(
+            "/api/classrooms",
+            headers=auth_header(teacher["token"]),
+            json={"name": "Feedback Test Class", "school_id": school_id},
+        )
+        assert cls_resp.status_code == 201
+        classroom_id = cls_resp.json()["id"]
+
+        # Add student to classroom (one at a time)
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+            json={"student_id": student["user_id"]},
+        )
+
+        # Create assignment
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            headers=auth_header(teacher["token"]),
+            json={"classroom_id": classroom_id, "story_id": "1"},
+        )
+        assert asn_resp.status_code == 201
+        assignment_id = asn_resp.json()["id"]
+
+        # Student starts assignment
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200
+
+        # Student submits assignment
+        sub_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student["token"]),
+        )
+        assert sub_resp.status_code == 200
+
+        # Get submission id via detail
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert detail_resp.status_code == 200
+        submissions = detail_resp.json()["submissions"]
+        submission_id = submissions[0]["id"]
+
+        return {
+            "teacher": teacher,
+            "student": student,
+            "assignment_id": assignment_id,
+            "submission_id": submission_id,
+        }
+
+    def test_grade_with_feedback_persists(self, client, setup):
+        """Teacher can grade with feedback; feedback is returned in response."""
+        assignment_id = setup["assignment_id"]
+        submission_id = setup["submission_id"]
+        teacher_token = setup["teacher"]["token"]
+
+        resp = client.patch(
+            f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+            headers=auth_header(teacher_token),
+            json={"score": 85, "teacher_feedback": "很棒！朗讀流暢，繼續加油"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["score"] == 85
+        assert data["teacher_feedback"] == "很棒！朗讀流暢，繼續加油"
+        assert data["status"] == "graded"
+
+    def test_feedback_visible_in_assignment_detail(self, client, setup):
+        """Feedback saved appears in AssignmentDetailResponse submissions list."""
+        assignment_id = setup["assignment_id"]
+        submission_id = setup["submission_id"]
+        teacher_token = setup["teacher"]["token"]
+
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher_token),
+        )
+        assert detail_resp.status_code == 200
+        submissions = detail_resp.json()["submissions"]
+        sub = next(s for s in submissions if s["id"] == submission_id)
+        assert sub["teacher_feedback"] == "很棒！朗讀流暢，繼續加油"
+
+    def test_feedback_visible_to_student_in_my_assignments(self, client, setup):
+        """Student sees teacher feedback in GET /api/assignments/my."""
+        student_token = setup["student"]["token"]
+        assignment_id = setup["assignment_id"]
+
+        resp = client.get(
+            "/api/assignments/my",
+            headers=auth_header(student_token),
+        )
+        assert resp.status_code == 200
+        assignments = resp.json()
+        asn = next(a for a in assignments if a["assignment_id"] == assignment_id)
+        assert asn["teacher_feedback"] == "很棒！朗讀流暢，繼續加油"
+
+    def test_grade_without_feedback_leaves_feedback_null(self, client, school_id):
+        """Grading without sending teacher_feedback leaves the field null."""
+        teacher = _register_and_login(client, "fb2_teacher")
+        student = _register_and_login(client, "fb2_student")
+        _make_student_role(student["user_id"], school_id)
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            headers=auth_header(teacher["token"]),
+            json={"name": "Feedback Test Class 2", "school_id": school_id},
+        )
+        classroom_id = cls_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+            json={"student_id": student["user_id"]},
+        )
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            headers=auth_header(teacher["token"]),
+            json={"classroom_id": classroom_id, "story_id": "1"},
+        )
+        assignment_id = asn_resp.json()["id"]
+
+        client.post(f"/api/assignments/{assignment_id}/start", headers=auth_header(student["token"]))
+        client.post(f"/api/assignments/{assignment_id}/submit", headers=auth_header(student["token"]))
+
+        detail = client.get(f"/api/assignments/{assignment_id}", headers=auth_header(teacher["token"]))
+        submission_id = detail.json()["submissions"][0]["id"]
+
+        resp = client.patch(
+            f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+            headers=auth_header(teacher["token"]),
+            json={"score": 70},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["teacher_feedback"] is None
+
+    def test_update_feedback_overwrites_previous(self, client, setup):
+        """Sending a new teacher_feedback value replaces the old one."""
+        assignment_id = setup["assignment_id"]
+        submission_id = setup["submission_id"]
+        teacher_token = setup["teacher"]["token"]
+
+        resp = client.patch(
+            f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+            headers=auth_header(teacher_token),
+            json={"teacher_feedback": "更新後的評語"},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["teacher_feedback"] == "更新後的評語"

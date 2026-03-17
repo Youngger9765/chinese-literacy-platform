@@ -80,6 +80,7 @@ class AssignmentSubmission(Base):
     session_id: Mapped[int | None] = mapped_column(ForeignKey("learning_sessions.id"), nullable=True)
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     score: Mapped[float | None] = mapped_column(Float, nullable=True)  # from LearningSession accuracy
+    teacher_feedback: Mapped[str | None] = mapped_column(Text, nullable=True)  # per-student teacher comment (Issue #424)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

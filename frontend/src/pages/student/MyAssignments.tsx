@@ -302,6 +302,14 @@ const MyAssignments: React.FC = () => {
                       )}
                     </div>
 
+                    {/* Issue #424: per-student teacher feedback */}
+                    {a.teacher_feedback && (
+                      <div className="mt-2 px-2.5 py-2 bg-purple-50 border border-purple-100 rounded-lg">
+                        <p className="text-xs font-medium text-purple-700 mb-0.5">老師評語</p>
+                        <p className="text-xs text-gray-700">{a.teacher_feedback}</p>
+                      </div>
+                    )}
+
                     {a.description && (
                       <p className="text-xs text-gray-500 mt-1.5 line-clamp-2">
                         {a.description}

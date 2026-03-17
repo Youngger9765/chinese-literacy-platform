@@ -1,6 +1,8 @@
 /**
  * AssignmentDetailPanel — expanded submission view with grading actions and bulk comment.
  * Used inside AssignmentTab when a row is expanded.
+ *
+ * Issue #424: per-student teacher feedback textarea added to the grading UI.
  */
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -67,6 +69,8 @@ const AssignmentDetailPanel: React.FC<Props> = ({
   const { toast, showToast } = useToast();
   const [gradingId, setGradingId] = useState<number | null>(null);
   const [gradeInput, setGradeInput] = useState<Record<number, string>>({});
+  // Issue #424: per-student feedback text while grading
+  const [feedbackInput, setFeedbackInput] = useState<Record<number, string>>({});
   const [savingId, setSavingId] = useState<number | null>(null);
   const [gradeError, setGradeError] = useState('');
   // Track which submission row has reading metrics expanded (Issue #423)
@@ -94,6 +98,11 @@ const AssignmentDetailPanel: React.FC<Props> = ({
       ...prev,
       [sub.id]: sub.score != null ? String(Math.round(sub.score)) : '',
     }));
+    // Pre-fill feedback with existing value so teacher can edit it
+    setFeedbackInput((prev) => ({
+      ...prev,
+      [sub.id]: sub.teacher_feedback ?? '',
+    }));
     setGradeError('');
   };
 
@@ -106,10 +115,12 @@ const AssignmentDetailPanel: React.FC<Props> = ({
       return;
     }
 
+    const feedback = feedbackInput[sub.id]?.trim() || null;
+
     setSavingId(sub.id);
     setGradeError('');
     try {
-      const updated = await gradeSubmission(token, assignmentId, sub.id, score);
+      const updated = await gradeSubmission(token, assignmentId, sub.id, score, feedback);
       setGradingId(null);
       onGraded(updated);
     } catch (err) {
@@ -311,6 +322,7 @@ const AssignmentDetailPanel: React.FC<Props> = ({
             <th className="pb-1.5 font-medium">提交時間</th>
             <th className="pb-1.5 font-medium text-center">分數</th>
             <th className="pb-1.5 font-medium text-center">朗讀數據</th>
+            <th className="pb-1.5 font-medium">評語</th>
             <th className="pb-1.5 font-medium text-center">批改</th>
           </tr>
         </thead>
@@ -359,6 +371,32 @@ const AssignmentDetailPanel: React.FC<Props> = ({
                     <span className="text-gray-300">—</span>
                   )}
                 </td>
+                {/* Per-student feedback cell (Issue #424) */}
+                <td className="py-1.5 max-w-[200px]">
+                  {gradingId === sub.id ? (
+                    <textarea
+                      value={feedbackInput[sub.id] ?? ''}
+                      onChange={(e) =>
+                        setFeedbackInput((prev) => ({
+                          ...prev,
+                          [sub.id]: e.target.value,
+                        }))
+                      }
+                      placeholder="輸入個別評語（選填）"
+                      rows={2}
+                      className="w-full px-1.5 py-1 rounded border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none"
+                    />
+                  ) : sub.teacher_feedback ? (
+                    <span
+                      className="text-gray-600 line-clamp-2"
+                      title={sub.teacher_feedback}
+                    >
+                      {sub.teacher_feedback}
+                    </span>
+                  ) : (
+                    <span className="text-gray-300">—</span>
+                  )}
+                </td>
                 <td className="py-1.5 text-center">
                   {gradingId === sub.id ? (
                     <div className="flex items-center justify-center gap-1">
@@ -394,7 +432,7 @@ const AssignmentDetailPanel: React.FC<Props> = ({
               {/* Reading metrics expanded row (Issue #423) */}
               {expandedMetricsId === sub.id && (
                 <tr>
-                  <td colSpan={6} className="pb-2 pt-0">
+                  <td colSpan={7} className="pb-2 pt-0">
                     <div className="mx-1 p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
                       <p className="text-xs font-medium text-blue-800 mb-2">
                         朗讀學習數據 — {sub.student_name}

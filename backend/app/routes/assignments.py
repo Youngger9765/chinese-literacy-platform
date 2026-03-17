@@ -219,6 +219,7 @@ def get_my_assignments(
                 status=sub.status,
                 submitted_at=sub.submitted_at,
                 score=sub.score,
+                teacher_feedback=sub.teacher_feedback,  # Issue #424
                 # Reading goals (Issue #84)
                 target_cpm=assignment.target_cpm,
                 target_accuracy=assignment.target_accuracy,
@@ -273,6 +274,7 @@ def get_my_assignment_detail(
         status=submission.status,
         submitted_at=submission.submitted_at,
         score=submission.score,
+        teacher_feedback=submission.teacher_feedback,  # Issue #424
         target_cpm=assignment.target_cpm,
         target_accuracy=assignment.target_accuracy,
         difficulty_label=assignment.difficulty_label,
@@ -440,6 +442,7 @@ def get_assignment_detail(
                 reading_accuracy=r_accuracy,
                 reading_cpm=r_cpm,
                 reading_error_chars=r_error_chars,
+                teacher_feedback=sub.teacher_feedback,
             )
         )
 
@@ -511,6 +514,9 @@ def grade_submission(
 
     if payload.score is not None:
         submission.score = payload.score
+    # Persist per-student feedback (Issue #424); None keeps existing value unchanged
+    if payload.teacher_feedback is not None:
+        submission.teacher_feedback = payload.teacher_feedback
     submission.status = "graded"
 
     db.commit()
@@ -519,8 +525,9 @@ def grade_submission(
     student = db.query(User).filter(User.id == submission.student_id).first()
     r_accuracy, r_cpm, r_error_chars = _extract_reading_metrics(submission, db)
     logger.info(
-        "Teacher %d graded submission %d (score=%s)",
+        "Teacher %d graded submission %d (score=%s, feedback=%s)",
         current_user.id, submission_id, payload.score,
+        "set" if payload.teacher_feedback else "not set",
     )
     return SubmissionResponse(
         id=submission.id,
@@ -534,6 +541,7 @@ def grade_submission(
         reading_accuracy=r_accuracy,
         reading_cpm=r_cpm,
         reading_error_chars=r_error_chars,
+        teacher_feedback=submission.teacher_feedback,
     )
 
 
@@ -705,6 +713,7 @@ def submit_assignment(
             status=submission.status,
             submitted_at=submission.submitted_at,
             score=submission.score,
+            teacher_feedback=submission.teacher_feedback,  # Issue #424
             target_cpm=assignment.target_cpm,
             target_accuracy=assignment.target_accuracy,
             difficulty_label=assignment.difficulty_label,
@@ -764,6 +773,7 @@ def submit_assignment(
         status=submission.status,
         submitted_at=submission.submitted_at,
         score=submission.score,
+        teacher_feedback=submission.teacher_feedback,  # Issue #424
         target_cpm=assignment.target_cpm,
         target_accuracy=assignment.target_accuracy,
         difficulty_label=assignment.difficulty_label,
