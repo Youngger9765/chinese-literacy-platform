@@ -8,6 +8,18 @@ interface AIAnalysisSectionProps {
   cpm: number;
   errorChars: string[];
   totalCharacters: number;
+  /** DB session ID for server-side caching (Issue #415) */
+  dbSessionId?: number | null;
+  /** Comprehension score 0-100 from Socratic dialogue evaluation (Issue #415) */
+  comprehensionScore?: number | null;
+  /** Number of vocab characters practiced (Issue #415) */
+  vocabPracticedCount?: number | null;
+  /** Total vocab characters in lesson (Issue #415) */
+  vocabTotalCount?: number | null;
+  /** Dictation correct word count (Issue #415) */
+  dictationCorrectCount?: number | null;
+  /** Dictation total word count (Issue #415) */
+  dictationTotalCount?: number | null;
 }
 
 const AIAnalysisSection: React.FC<AIAnalysisSectionProps> = ({
@@ -16,6 +28,12 @@ const AIAnalysisSection: React.FC<AIAnalysisSectionProps> = ({
   cpm,
   errorChars,
   totalCharacters,
+  dbSessionId,
+  comprehensionScore,
+  vocabPracticedCount,
+  vocabTotalCount,
+  dictationCorrectCount,
+  dictationTotalCount,
 }) => {
   const { token } = useAuth();
   const [analysis, setAnalysis] = useState<AIAnalysisResponse | null>(null);
@@ -27,20 +45,29 @@ const AIAnalysisSection: React.FC<AIAnalysisSectionProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const result = await getAIAnalysis(token, {
-        storyTitle,
-        accuracy,
-        cpm,
-        errorChars,
-        totalCharacters,
-      });
+      const result = await getAIAnalysis(
+        token,
+        {
+          storyTitle,
+          accuracy,
+          cpm,
+          errorChars,
+          totalCharacters,
+          comprehensionScore,
+          vocabPracticedCount,
+          vocabTotalCount,
+          dictationCorrectCount,
+          dictationTotalCount,
+        },
+        dbSessionId ?? undefined,
+      );
       setAnalysis(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AI 分析失敗');
     } finally {
       setLoading(false);
     }
-  }, [token, storyTitle, accuracy, cpm, errorChars, totalCharacters]);
+  }, [token, storyTitle, accuracy, cpm, errorChars, totalCharacters, dbSessionId, comprehensionScore, vocabPracticedCount, vocabTotalCount, dictationCorrectCount, dictationTotalCount]);
 
   // Not logged in
   if (!token) {
