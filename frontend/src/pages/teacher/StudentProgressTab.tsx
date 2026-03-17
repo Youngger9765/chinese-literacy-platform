@@ -14,6 +14,7 @@ import {
   getClassroomProgress,
   getClassroomInstructionCounts,
   getStudentSessions,
+  getTeacherStudentDialogue,
   exportClassroomReport,
   addStudentTag,
   removeStudentTag,
@@ -21,6 +22,8 @@ import {
   StudentProgress,
   StudentTag,
   StudentSession,
+  TeacherDialogueTurn,
+  TeacherDialogueHistoryResponse,
   LearningCurvePoint,
   TeacherApiError,
 } from '../../services/teacherApi';
@@ -239,6 +242,125 @@ const TagManager: React.FC<TagManagerProps> = ({
   );
 };
 
+// ── Dialogue Modal (Issue #418) ────────────────────────────────────────────
+
+const PHASE_LABEL: Record<string, string> = {
+  factual: '事實理解',
+  inferential: '推論思考',
+  evaluative: '評估反思',
+};
+
+const DialogueModal: React.FC<{
+  data: TeacherDialogueHistoryResponse;
+  storyTitle: string | null;
+  studentName: string;
+  onClose: () => void;
+}> = ({ data, storyTitle, studentName, onClose }) => {
+  const headerTitle = storyTitle
+    ? `${studentName} — 《${storyTitle}》對話紀錄`
+    : `${studentName} — 對話紀錄`;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="學生對話紀錄"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 shrink-0">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-semibold text-gray-800 truncate">{headerTitle}</h2>
+            <p className="text-xs text-gray-400 mt-0.5">共 {data.total} 則訊息</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="關閉對話紀錄"
+            className="flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Turns */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          {data.turns.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-sm text-gray-500">這次學習沒有對話記錄</p>
+            </div>
+          ) : (
+            data.turns.map((turn) => <DialogueTurnRow key={turn.id} turn={turn} />)
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DialogueTurnRow: React.FC<{ turn: TeacherDialogueTurn }> = ({ turn }) => {
+  if (turn.role === 'ai') {
+    return (
+      <div className="flex gap-2.5">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-accent flex items-center justify-center mt-0.5">
+          <span className="text-white text-[9px] font-bold">AI</span>
+        </div>
+        <div className="flex-1 max-w-[85%]">
+          {turn.phase && (
+            <span className="inline-block mb-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent-bg text-accent">
+              {PHASE_LABEL[turn.phase] ?? turn.phase}
+            </span>
+          )}
+          <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-3.5 py-2.5">
+            <p className="text-sm text-accent-hover leading-relaxed">{turn.text}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (turn.role === 'student') {
+    return (
+      <div className="flex gap-2.5 flex-row-reverse">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mt-0.5">
+          <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <div className="max-w-[85%]">
+          <div className="bg-accent rounded-2xl rounded-tr-sm px-3.5 py-2.5">
+            <p className="text-sm text-white leading-relaxed">{turn.text}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (turn.role === 'feedback') {
+    return (
+      <div className="mx-8">
+        <div className={`rounded-xl px-3 py-2 text-xs border ${
+          turn.is_correct
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+            : 'bg-amber-50 border-amber-200 text-amber-800'
+        }`}>
+          <span className="mr-1">{turn.is_correct ? '✓' : '💡'}</span>
+          {turn.text}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// ── Main Component ─────────────────────────────────────────────────────────
+
 const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) => {
   const { token } = useAuth();
   const [progress, setProgress] = useState<StudentProgress[]>([]);
@@ -251,6 +373,14 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [sessions, setSessions] = useState<StudentSession[]>([]);
   const sessionCache = useRef<Record<number, StudentSession[]>>({});
+
+  // Dialogue modal state (Issue #418)
+  const [dialogueModal, setDialogueModal] = useState<{
+    data: TeacherDialogueHistoryResponse;
+    storyTitle: string | null;
+    studentName: string;
+  } | null>(null);
+  const [loadingDialogueSessionId, setLoadingDialogueSessionId] = useState<number | null>(null);
 
   // Instruction panel state
   const [instructionTarget, setInstructionTarget] = useState<{ id: number; name: string } | null>(null);
@@ -376,6 +506,25 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     }
   }, [expandedStudentId, token]);
 
+  // Load and show dialogue history for a session (Issue #418)
+  const handleViewDialogue = useCallback(async (
+    studentId: number,
+    sessionId: number,
+    storyTitle: string | null,
+    studentName: string,
+  ) => {
+    if (!token) return;
+    setLoadingDialogueSessionId(sessionId);
+    try {
+      const data = await getTeacherStudentDialogue(token, studentId, sessionId);
+      setDialogueModal({ data, storyTitle, studentName });
+    } catch {
+      // Non-fatal — silently fail
+    } finally {
+      setLoadingDialogueSessionId(null);
+    }
+  }, [token]);
+
   // Update local tags after tag manager changes
   const handleTagsChanged = useCallback((studentId: number, tags: StudentTag[]) => {
     setProgress((prev) =>
@@ -486,6 +635,16 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
           currentTags={tagManagerStudent.tags}
           onClose={() => setTagManagerStudent(null)}
           onTagsChanged={handleTagsChanged}
+        />
+      )}
+
+      {/* Dialogue History Modal (Issue #418) */}
+      {dialogueModal && (
+        <DialogueModal
+          data={dialogueModal.data}
+          storyTitle={dialogueModal.storyTitle}
+          studentName={dialogueModal.studentName}
+          onClose={() => setDialogueModal(null)}
         />
       )}
 
@@ -662,6 +821,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                                 <th className="pb-1.5 font-medium">日期</th>
                                 <th className="pb-1.5 font-medium text-center">分數</th>
                                 <th className="pb-1.5 font-medium text-center">狀態</th>
+                                <th className="pb-1.5 font-medium text-center">對話</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -671,6 +831,28 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                                   <td className="py-1.5 text-gray-500">{formatDate(sess.started_at)}</td>
                                   <td className="py-1.5 text-gray-700 text-center font-medium">{formatScore(sess.overall_score)}</td>
                                   <td className="py-1.5 text-center">{statusLabel(sess.status)}</td>
+                                  <td className="py-1.5 text-center">
+                                    <button
+                                      type="button"
+                                      disabled={loadingDialogueSessionId === sess.id}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleViewDialogue(s.student_id, sess.id, sess.story_title, s.student_name);
+                                      }}
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+                                      title="查看蘇格拉底對話記錄"
+                                    >
+                                      {loadingDialogueSessionId === sess.id ? (
+                                        <span className="w-2.5 h-2.5 border border-accent border-t-transparent rounded-full animate-spin" />
+                                      ) : (
+                                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                      )}
+                                      對話
+                                    </button>
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
