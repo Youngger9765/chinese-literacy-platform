@@ -191,6 +191,12 @@ class AIAnalysisRequest(BaseModel):
     cpm: float = Field(..., ge=0)
     error_chars: list[str] = Field(default_factory=list)
     total_characters: int = Field(..., ge=0)
+    # Optional enrichment fields — Issue #415: comprehensive AI analysis
+    comprehension_score: float | None = Field(None, ge=0, le=100)
+    vocab_practiced_count: int | None = Field(None, ge=0)
+    vocab_total_count: int | None = Field(None, ge=0)
+    dictation_correct_count: int | None = Field(None, ge=0)
+    dictation_total_count: int | None = Field(None, ge=0)
 
 
 class AIAnalysisResponse(BaseModel):
@@ -243,6 +249,12 @@ async def get_ai_analysis(
             "cpm": payload.cpm,
             "error_chars": payload.error_chars,
             "total_characters": payload.total_characters,
+            # Optional enrichment (Issue #415)
+            "comprehension_score": payload.comprehension_score,
+            "vocab_practiced_count": payload.vocab_practiced_count,
+            "vocab_total_count": payload.vocab_total_count,
+            "dictation_correct_count": payload.dictation_correct_count,
+            "dictation_total_count": payload.dictation_total_count,
         })
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
@@ -281,6 +293,12 @@ async def get_ai_analysis_standalone(
             "cpm": payload.cpm,
             "error_chars": payload.error_chars,
             "total_characters": payload.total_characters,
+            # Optional enrichment (Issue #415)
+            "comprehension_score": payload.comprehension_score,
+            "vocab_practiced_count": payload.vocab_practiced_count,
+            "vocab_total_count": payload.vocab_total_count,
+            "dictation_correct_count": payload.dictation_correct_count,
+            "dictation_total_count": payload.dictation_total_count,
         })
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")

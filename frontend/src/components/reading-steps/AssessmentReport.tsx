@@ -641,7 +641,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         )}
       </Section>
 
-      {/* ============ 環節七：AI 詳細分析 (Issue #241) ============ */}
+      {/* ============ 環節七：AI 詳細分析 (Issue #241, #415) ============ */}
       <Section number={7} title="AI 詳細分析" defaultOpen={false} disabled={!readingAttempt && !fullReadingResult}>
         {(readingAttempt || fullReadingResult) ? (
           <AIAnalysisSection
@@ -654,6 +654,18 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                 ? (fullReadingResult.errorBreakdown.correct + fullReadingResult.errorBreakdown.wrong + fullReadingResult.errorBreakdown.missing + fullReadingResult.errorBreakdown.extra)
                 : (readingAttempt?.lineBreakdown?.reduce((sum, l) => sum + (l.diffTokens?.length ?? 0), 0) ?? 0)
             }
+            dbSessionId={dbSessionId}
+            comprehensionScore={
+              comprehensionScores
+                ? comprehensionScores.comprehension_score
+                : comprehensionResult
+                ? Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)
+                : null
+            }
+            vocabPracticedCount={vocabResult?.practicedChars.length ?? null}
+            vocabTotalCount={vocabResult?.totalChars ?? null}
+            dictationCorrectCount={dictationResult?.correctCount ?? null}
+            dictationTotalCount={dictationResult?.totalWords ?? null}
           />
         ) : (
           <p className="text-sm text-gray-400 text-center py-4">完成朗讀練習後可使用 AI 分析</p>

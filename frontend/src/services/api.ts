@@ -234,6 +234,8 @@ export interface AIAnalysisResponse {
 /**
  * Fetch AI reading analysis. Uses session-based endpoint when sessionId is
  * available (with server-side caching), otherwise the standalone endpoint.
+ *
+ * Issue #415: accepts optional comprehension/vocab data for richer analysis.
  */
 export async function getAIAnalysis(
   token: string,
@@ -243,6 +245,16 @@ export async function getAIAnalysis(
     cpm: number;
     errorChars: string[];
     totalCharacters: number;
+    /** Optional — comprehension score 0-100 from Socratic dialogue evaluation */
+    comprehensionScore?: number | null;
+    /** Optional — number of vocab characters practiced */
+    vocabPracticedCount?: number | null;
+    /** Optional — total vocab characters in lesson */
+    vocabTotalCount?: number | null;
+    /** Optional — dictation correct word count */
+    dictationCorrectCount?: number | null;
+    /** Optional — dictation total word count */
+    dictationTotalCount?: number | null;
   },
   sessionId?: number,
 ): Promise<AIAnalysisResponse> {
@@ -261,6 +273,11 @@ export async function getAIAnalysis(
       cpm: payload.cpm,
       error_chars: payload.errorChars,
       total_characters: payload.totalCharacters,
+      comprehension_score: payload.comprehensionScore ?? null,
+      vocab_practiced_count: payload.vocabPracticedCount ?? null,
+      vocab_total_count: payload.vocabTotalCount ?? null,
+      dictation_correct_count: payload.dictationCorrectCount ?? null,
+      dictation_total_count: payload.dictationTotalCount ?? null,
     }),
   });
   if (!res.ok) {
