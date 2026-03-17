@@ -4,13 +4,12 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, usePa
 import ErrorBoundary from './components/ErrorBoundary';
 import { AppView, Story } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LearningNavProvider, useLearningNav } from './contexts/LearningNavContext';
-import { hasRole } from './services/authApi';
+import { LearningNavProvider } from './contexts/LearningNavContext';
 import { getMyAssignments } from './services/assignmentApi';
-import { useAppView } from './hooks/useAppView';
-import StepperNav from './components/StepperNav';
+import { hasRole } from './services/authApi';
 import FeedbackButton from './components/FeedbackButton';
-import Sidebar from './components/Sidebar';
+import Header from './components/layout/Header';
+import Sidebar from './components/layout/Sidebar';
 import StoryLibrary from './pages/student/StoryLibrary';
 import WriteCharacter from './components/stroke-order/WriteCharacter';
 import LoginPage from './pages/LoginPage';
@@ -21,7 +20,6 @@ import LearningLayout from './layouts/LearningLayout';
 import SessionResumePrompt from './components/SessionResumePrompt';
 import StudentProgressDashboard from './components/student/StudentProgressDashboard';
 import RecommendedStories from './components/student/RecommendedStories';
-import NotificationBell from './components/teacher/NotificationBell';
 
 // ---------------------------------------------------------------------------
 // Route-level code splitting (lazy loading)
@@ -295,10 +293,8 @@ const OnboardingWrapper: React.FC = () => {
 
 /** The authenticated app shell with header + sidebar. */
 const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, token, logout } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
-  const currentView = useAppView();
-  const { session: navSession, selectedStory: navStory } = useLearningNav();
 
   // Pending assignment count for the student nav badge
   const [pendingAssignmentCount, setPendingAssignmentCount] = useState(0);
@@ -361,14 +357,6 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
   };
 
-  // Determine context title shown in header (between logo and user info)
-  const getContextTitle = (): string | null => {
-    if (navStory) return navStory.title;
-    return null;
-  };
-
-  const contextTitle = getContextTitle();
-
   return (
     <div className="h-screen flex flex-col bg-amber-50 text-gray-900 font-sans overflow-hidden">
       {/* Skip-to-content link — visually hidden until focused (WCAG 2.4.1) */}
@@ -379,178 +367,8 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         跳至主要內容
       </a>
 
-      {/* Header — slim: logo | stepper (when learning) | user info + logout */}
-      <header
-        role="banner"
-        aria-label="應用程式標頭"
-        className="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-4 shrink-0 z-30"
-      >
-        {/* Logo — keyboard-accessible home link */}
-        <button
-          type="button"
-          className="flex items-center gap-2 shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-          onClick={() => navigate('/')}
-          aria-label="LingoLeap 首頁"
-        >
-          <div className="bg-accent w-6 h-6 rounded flex items-center justify-center" aria-hidden="true">
-            <span className="text-white font-bold text-xs">L</span>
-          </div>
-          <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
-        </button>
-
-        {/* Center: StepperNav in learning mode, or context title */}
-        <div className="flex-1 flex items-center justify-center px-4 min-w-0">
-          {navStory && ![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS, AppView.MY_VOCABULARY, AppView.LEARNING_HISTORY, AppView.DIALOGUE_HISTORY, AppView.STUDENT_PROGRESS, AppView.STUDENT_HOME, AppView.TEACHER_HOME].includes(currentView) ? (
-            <StepperNav
-              currentView={currentView}
-              session={navSession}
-              selectedStory={navStory}
-              onNavigate={handleStepperNavigate}
-            />
-          ) : contextTitle ? (
-            <span className="text-sm font-medium text-gray-500 truncate" aria-live="polite">
-              {contextTitle}
-            </span>
-          ) : null}
-        </div>
-
-        {/* Nav links + User info + Logout */}
-        <nav
-          role="navigation"
-          aria-label="主要導覽"
-          className="flex items-center gap-1 shrink-0"
-        >
-          {hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
-            <>
-              <button
-                type="button"
-                onClick={() => navigate('/teacher')}
-                aria-current={
-                  currentView === AppView.TEACHER_DASHBOARD || currentView === AppView.CLASSROOM_DETAIL
-                    ? 'page'
-                    : undefined
-                }
-                className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                  currentView === AppView.TEACHER_DASHBOARD ||
-                  currentView === AppView.CLASSROOM_DETAIL
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                班級管理
-              </button>
-              <NotificationBell
-                onNavigateToStudent={(classroomId) => navigate(`/teacher/classroom/${classroomId}`)}
-              />
-            </>
-          )}
-          {!hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin') && (
-            <>
-              <button
-                type="button"
-                onClick={() => navigate('/assignments')}
-                aria-current={currentView === AppView.MY_ASSIGNMENTS ? 'page' : undefined}
-                className={`relative text-xs font-medium transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                  currentView === AppView.MY_ASSIGNMENTS
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                作業
-                {pendingAssignmentCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2.5 min-w-[14px] h-3.5 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-0.5 leading-none">
-                    {pendingAssignmentCount > 9 ? '9+' : pendingAssignmentCount}
-                  </span>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/vocabulary')}
-                aria-current={currentView === AppView.MY_VOCABULARY ? 'page' : undefined}
-                className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                  currentView === AppView.MY_VOCABULARY
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                我的生字
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/history')}
-                aria-current={
-                  currentView === AppView.LEARNING_HISTORY || currentView === AppView.DIALOGUE_HISTORY
-                    ? 'page'
-                    : undefined
-                }
-                className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                  currentView === AppView.LEARNING_HISTORY || currentView === AppView.DIALOGUE_HISTORY
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                學習記錄
-              </button>
-              <button
-                onClick={() => navigate('/progress')}
-                className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center ${
-                  currentView === AppView.STUDENT_PROGRESS
-                    ? 'text-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                學習進度
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/join')}
-                className="text-xs font-medium transition-colors cursor-pointer text-gray-500 hover:text-gray-700 rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-              >
-                加入班級
-              </button>
-            </>
-          )}
-          {hasRole(user, 'parent') && !hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
-            <button
-              onClick={() => navigate('/parent')}
-              className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center ${
-                currentView === AppView.PARENT_DASHBOARD
-                  ? 'text-accent'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              孩子進度
-            </button>
-          )}
-          {hasRole(user, 'system_admin', 'org_owner', 'org_admin') && (
-            <button
-              type="button"
-              onClick={() => navigate('/admin')}
-              aria-current={currentView === AppView.ADMIN_DASHBOARD ? 'page' : undefined}
-              className={`text-xs font-medium transition-colors cursor-pointer rounded px-2 py-2 min-h-[44px] flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                currentView === AppView.ADMIN_DASHBOARD
-                  ? 'text-accent'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              系統管理
-            </button>
-          )}
-          <div className="w-px h-4 bg-gray-200" aria-hidden="true" />
-          {user && (
-            <span className="text-xs text-gray-500 hidden sm:block" aria-label={`已登入為 ${user.name}`}>
-              {user.name}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={logout}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-          >
-            登出
-          </button>
-        </nav>
-      </header>
+      {/* Header — extracted to components/layout/Header.tsx */}
+      <Header onStepperNavigate={handleStepperNavigate} />
 
       {/* Body: sidebar + main content */}
       <div className="flex-1 flex overflow-hidden">
