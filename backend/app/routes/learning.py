@@ -165,7 +165,12 @@ def update_session(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Update learning session progress (must be own session)."""
+    """Update learning session progress (must be own session).
+
+    When reading_result contains error_chars, automatically creates CharacterError
+    rows so that the error-patterns and recommended-vocab endpoints return real data
+    (Issue #248: repeated error detection).
+    """
     session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -175,6 +180,26 @@ def update_session(
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(session, field, value)
+
+    # Auto-persist CharacterError records from reading_result.error_chars (Issue #248)
+    if "reading_result" in update_data:
+        reading_result = update_data["reading_result"] or {}
+        error_chars = reading_result.get("error_chars", [])
+        if isinstance(error_chars, list) and error_chars:
+            # Delete any existing CharacterError rows for this session to avoid duplicates
+            # when the client patches reading_result more than once.
+            db.query(CharacterError).filter(CharacterError.session_id == session_id).delete()
+            for char in error_chars:
+                if isinstance(char, str) and char.strip():
+                    db.add(CharacterError(
+                        session_id=session_id,
+                        character=char.strip(),
+                        error_type="reading",
+                    ))
+            logger.info(
+                "Persisted %d CharacterError rows for session %d",
+                len(error_chars), session_id,
+            )
 
     db.commit()
     db.refresh(session)
@@ -984,6 +1009,71 @@ def mark_error_corrected(
         student_id, payload.character, payload.correction_type,
     )
     return correction
+
+
+class RepeatedErrorAlertItem(BaseModel):
+    character: str
+    error_count: int
+
+
+class RepeatedErrorAlertResponse(BaseModel):
+    alerts: list[RepeatedErrorAlertItem]
+    total: int
+
+
+REPEATED_ERROR_THRESHOLD = 3  # characters wrong ≥ this many times trigger a modal
+
+
+@router.get(
+    "/learning/students/{student_id}/repeated-errors-alert",
+    response_model=RepeatedErrorAlertResponse,
+)
+def get_repeated_errors_alert(
+    student_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return characters that have reached the ≥3 repeated-error threshold.
+
+    Used by the frontend to show the post-session modal:
+    「這個字你讀錯 3 次了，建議加強生字練習」
+
+    Characters already marked as mastered are excluded.
+    Results sorted by error_count descending.
+    """
+    _verify_student_access(student_id, current_user, db)
+
+    mastered_chars: set[str] = set()
+    for row in (
+        db.query(ErrorCorrection.character)
+        .filter(
+            ErrorCorrection.student_id == student_id,
+            ErrorCorrection.correction_type == "mastered",
+        )
+        .all()
+    ):
+        mastered_chars.add(row.character)
+
+    rows = (
+        db.query(
+            CharacterError.character,
+            sa_func.count(CharacterError.id).label("error_count"),
+        )
+        .join(LearningSession, CharacterError.session_id == LearningSession.id)
+        .filter(LearningSession.student_id == student_id)
+        .group_by(CharacterError.character)
+        .having(sa_func.count(CharacterError.id) >= REPEATED_ERROR_THRESHOLD)
+        .order_by(sa_func.count(CharacterError.id).desc())
+        .all()
+    )
+
+    alerts = [
+        RepeatedErrorAlertItem(character=row.character, error_count=row.error_count)
+        for row in rows
+        if row.character not in mastered_chars
+    ]
+
+    return RepeatedErrorAlertResponse(alerts=alerts, total=len(alerts))
 
 
 # ── Stuck-Point Detection (Issue #91) ─────────────────────────────────────────

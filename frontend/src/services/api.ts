@@ -601,6 +601,34 @@ export async function markErrorCorrected(
   return res.json();
 }
 
+// --- Repeated Error Alert (Issue #248) ---
+
+export interface RepeatedErrorAlertItem {
+  character: string;
+  error_count: number;
+}
+
+export interface RepeatedErrorAlertResponse {
+  alerts: RepeatedErrorAlertItem[];
+  total: number;
+}
+
+/**
+ * Fetch characters that have hit the ≥3 repeated-error threshold.
+ * Used to show a post-session modal directing the student to vocab practice.
+ */
+export async function getRepeatedErrorsAlert(
+  token: string,
+  studentId: number,
+): Promise<RepeatedErrorAlertResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/students/${studentId}/repeated-errors-alert`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`getRepeatedErrorsAlert failed: ${res.status}`);
+  return res.json();
+}
+
 // --- Student Progress Dashboard (Issue #25) ---
 
 export interface DailyActivity {
