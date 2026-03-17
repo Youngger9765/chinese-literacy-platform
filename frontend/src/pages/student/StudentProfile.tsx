@@ -241,7 +241,7 @@ const StudentProfile: React.FC = () => {
             <div className="px-4 py-3 flex justify-between text-sm">
               <span className="text-gray-500">Email 驗證</span>
               <span className="text-gray-900 font-medium">
-                {(user as any).email_verified ? '已驗證' : '未驗證'}
+                {'email_verified' in user && (user as Record<string, unknown>).email_verified ? '已驗證' : '未驗證'}
               </span>
             </div>
           </div>

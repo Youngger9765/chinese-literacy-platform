@@ -189,15 +189,21 @@ const StudentClassroomDashboard: React.FC = () => {
   useEffect(() => {
     if (!token) return;
 
-    Promise.all([
+    Promise.allSettled([
       fetchMyEnrolledClassrooms(token),
       getMyAssignments(token),
     ])
-      .then(([classroomsRes, assignmentsRes]) => {
-        setClassrooms(classroomsRes.classrooms);
-        setAssignments(assignmentsRes);
+      .then(([classroomsResult, assignmentsResult]) => {
+        if (classroomsResult.status === 'fulfilled') {
+          setClassrooms(classroomsResult.value.classrooms);
+        }
+        if (assignmentsResult.status === 'fulfilled') {
+          setAssignments(assignmentsResult.value);
+        }
+        if (classroomsResult.status === 'rejected' && assignmentsResult.status === 'rejected') {
+          setError('載入資料時發生錯誤，請稍後再試');
+        }
       })
-      .catch(() => setError('載入資料時發生錯誤，請稍後再試'))
       .finally(() => setLoading(false));
   }, [token]);
 
