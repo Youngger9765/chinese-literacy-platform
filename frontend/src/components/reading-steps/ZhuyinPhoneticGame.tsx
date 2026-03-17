@@ -110,8 +110,8 @@ function buildChoices(correct: string, pool: string[], count = 4): string[] {
 
 function LoadingState() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center py-12 gap-4">
-      <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin" />
+    <div className="flex-1 flex flex-col items-center justify-center py-12 gap-4" role="status" aria-label="載入注音資料中">
+      <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-500 rounded-full animate-spin" aria-hidden="true" />
       <p className="text-sm text-gray-500">載入注音資料中…</p>
     </div>
   );
@@ -304,17 +304,28 @@ function PickGame({ mode, questions, onFinish, onBack }: PickGameProps) {
     <div className="flex-1 flex flex-col bg-indigo-50">
       {/* Header */}
       <div className="h-9 bg-white border-b border-gray-200 flex items-center px-4 gap-2 shrink-0">
-        <button onClick={onBack} className="text-gray-400 hover:text-gray-700 transition-colors p-1">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button
+          onClick={onBack}
+          aria-label="返回生字練習"
+          className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <span className="text-xs text-gray-700 font-semibold flex-1">選{modeLabel}練習</span>
-        <span className="text-xs text-gray-400">{progress}</span>
+        <span className="text-xs text-gray-400" aria-label={`第 ${qIdx + 1} 題，共 ${questions.length} 題`}>{progress}</span>
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-1.5 bg-gray-200">
+      <div
+        role="progressbar"
+        aria-valuenow={qIdx + 1}
+        aria-valuemin={1}
+        aria-valuemax={questions.length}
+        aria-label={`練習進度：第 ${qIdx + 1} 題，共 ${questions.length} 題`}
+        className="w-full h-1.5 bg-gray-200"
+      >
         <div
           className="h-full bg-indigo-500 transition-all duration-500"
           style={{ width: `${((qIdx) / questions.length) * 100}%` }}
@@ -367,6 +378,8 @@ function PickGame({ mode, questions, onFinish, onBack }: PickGameProps) {
                 key={choice}
                 onClick={() => handleChoice(choice)}
                 disabled={answerState !== 'idle'}
+                aria-label={`選擇 ${choice}${answerState !== 'idle' && isCorrectChoice ? '（正確答案）' : answerState !== 'idle' && isSelected && !isCorrectChoice ? '（答錯）' : ''}`}
+                aria-pressed={isSelected ? true : undefined}
                 className={btnClass}
               >
                 {choice}
@@ -462,17 +475,28 @@ function ComposeGame({ questions, onFinish, onBack }: ComposeGameProps) {
     <div className="flex-1 flex flex-col bg-indigo-50">
       {/* Header */}
       <div className="h-9 bg-white border-b border-gray-200 flex items-center px-4 gap-2 shrink-0">
-        <button onClick={onBack} className="text-gray-400 hover:text-gray-700 transition-colors p-1">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button
+          onClick={onBack}
+          aria-label="返回生字練習"
+          className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <span className="text-xs text-gray-700 font-semibold flex-1">拼音合成練習</span>
-        <span className="text-xs text-gray-400">{progress}</span>
+        <span className="text-xs text-gray-400" aria-label={`第 ${qIdx + 1} 題，共 ${questions.length} 題`}>{progress}</span>
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-1.5 bg-gray-200">
+      <div
+        role="progressbar"
+        aria-valuenow={qIdx + 1}
+        aria-valuemin={1}
+        aria-valuemax={questions.length}
+        aria-label={`練習進度：第 ${qIdx + 1} 題，共 ${questions.length} 題`}
+        className="w-full h-1.5 bg-gray-200"
+      >
         <div
           className="h-full bg-indigo-500 transition-all duration-500"
           style={{ width: `${(qIdx / questions.length) * 100}%` }}

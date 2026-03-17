@@ -147,7 +147,10 @@ const StepperNav: React.FC<StepperNavProps> = ({
             <button
               key={stepDef.view}
               onClick={() => { if (status !== 'disabled') handleNavigate(stepDef.view); }}
-              className="shrink-0 transition-colors"
+              disabled={status === 'disabled'}
+              aria-label={`步驟 ${stepDef.step}：${stepDef.label}（${status === 'active' ? '目前' : status === 'completed' ? '已完成' : status === 'disabled' ? '未解鎖' : '未完成'}）`}
+              aria-current={status === 'active' ? 'step' : undefined}
+              className="shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded-full"
             >
               <StepCircle step={stepDef.step} status={status} size="sm" />
             </button>
@@ -157,7 +160,10 @@ const StepperNav: React.FC<StepperNavProps> = ({
         {/* Hamburger */}
         <button
           onClick={() => setMobileNavOpen(!mobileNavOpen)}
-          className="ml-1 p-1 rounded hover:bg-gray-100 transition-colors"
+          aria-label={mobileNavOpen ? '關閉導覽選單' : '展開導覽選單'}
+          aria-expanded={mobileNavOpen}
+          aria-haspopup="menu"
+          className="ml-1 p-1 rounded hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
         >
           <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -190,7 +196,8 @@ const StepperNav: React.FC<StepperNavProps> = ({
                     key={stepDef.view}
                     onClick={() => { if (!isDisabled) handleNavigate(stepDef.view); }}
                     disabled={isDisabled}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center gap-2 ${
+                    aria-current={isActive ? 'step' : undefined}
+                    className={`w-full text-left px-3 py-2 text-xs flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset ${
                       isActive ? 'bg-accent/10 text-accent font-bold'
                       : isDisabled ? 'text-gray-300 cursor-not-allowed'
                       : 'text-gray-700 hover:bg-gray-50'
@@ -226,7 +233,8 @@ const StepperNav: React.FC<StepperNavProps> = ({
       {/* Home */}
       <button
         onClick={() => onNavigate(AppView.HOME)}
-        className={`px-2 py-1 rounded transition-colors ${
+        aria-current={currentView === AppView.HOME ? 'page' : undefined}
+        className={`px-2 py-1 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
           currentView === AppView.HOME
             ? 'bg-accent text-white'
             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -248,7 +256,10 @@ const StepperNav: React.FC<StepperNavProps> = ({
           <React.Fragment key={stepDef.view}>
             <button
               onClick={() => !isDisabled && onNavigate(stepDef.view)}
-              className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
+              disabled={isDisabled}
+              aria-current={isActive ? 'step' : undefined}
+              aria-label={`步驟 ${stepDef.step}：${stepDef.label}（${isActive ? '目前' : isDisabled ? '未解鎖' : status === 'completed' ? '已完成' : '未完成'}）`}
+              className={`flex items-center gap-1 px-2 py-1 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                 isActive
                   ? 'bg-accent text-white'
                   : isDisabled
