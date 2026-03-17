@@ -17,7 +17,7 @@ from google import genai
 from google.genai import types as genai_types
 
 from ..config import settings
-from .input_sanitizer import sanitize_ai_input
+from .input_sanitizer import sanitize_ai_input, sanitize_dialogue_turns
 from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
@@ -549,9 +549,11 @@ async def evaluate_comprehension(
         Dict with comprehension_score, literal_score, inferential_score,
         evaluative_score, and feedback dict.
     """
+    # Sanitize student turns before including them in the AI prompt (Issue #270)
+    safe_turns = sanitize_dialogue_turns(dialogue_turns)
     formatted_dialogue = "\n".join(
         f"{'AI老師' if t['role'] == 'ai' else '學生'}: {t['text']}"
-        for t in dialogue_turns
+        for t in safe_turns
     )
 
     system_prompt = f"""{TUTOR_PERSONA}

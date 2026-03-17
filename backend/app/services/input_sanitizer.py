@@ -30,12 +30,25 @@ INJECTION_PATTERNS = [
     r"new\s+instructions?\s*:",
     r"override\s+(previous|all)",
     r"disregard\s+(previous|above|all)",
+    # Jailbreak / DAN / developer-mode patterns
+    r"jailbreak",
+    r"\bDAN\b",
+    r"developer\s+mode",
+    r"prompt\s*:",
+    # LLM special tokens used in injection payloads
+    r"\[INST\]",
+    r"\[/INST\]",
+    r"<\|system\|>",
+    r"<\|begin_of_text\|>",
     # Chinese equivalents
     r"忽略(之前|以上|所有)(的)?(指令|規則|提示)",
     r"你現在是",
     r"假裝(你是|成為)",
     r"新的指令",
     r"覆蓋(之前|所有)",
+    # Chinese jailbreak / developer mode
+    r"越獄",
+    r"啟用開發者模式",
 ]
 
 # Pre-compile patterns for performance
@@ -83,6 +96,34 @@ def sanitize_ai_input(text: str, user_id: str | None = None) -> tuple[str, bool]
         _log_injection_attempt(text, user_id)
 
     return sanitized, was_modified
+
+
+def sanitize_dialogue_turns(
+    turns: list[dict],
+    user_id: str | None = None,
+) -> list[dict]:
+    """
+    Sanitize student turns in a dialogue list.
+
+    AI turns are trusted (server-generated) and are returned unchanged.
+    Only turns with role == "student" are sanitized.
+
+    Args:
+        turns: List of {"role": "ai"|"student", "text": str} dicts.
+        user_id: Optional user identifier for logging.
+
+    Returns:
+        New list of turns with student turns sanitized.
+        The original list and its dicts are never mutated.
+    """
+    result = []
+    for turn in turns:
+        if turn.get("role") == "student":
+            sanitized_text, _ = sanitize_ai_input(turn["text"], user_id=user_id)
+            result.append({**turn, "text": sanitized_text})
+        else:
+            result.append(turn)
+    return result
 
 
 def is_safe_input(text: str) -> bool:
