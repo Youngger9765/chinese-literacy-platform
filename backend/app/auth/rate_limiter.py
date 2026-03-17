@@ -2,16 +2,34 @@
 
 Provides:
 - InMemoryRateLimiter: thread-safe, per-key sliding window limiter used by
-  auth routes and AI endpoint dependency guards.
+  auth routes, AI endpoint dependency guards, and the global middleware.
 - ai_rate_limiter: module-level singleton for AI/Gemini endpoint protection.
-- check_ai_rate_limit: FastAPI Depends factory that enforces per-user rate limits
-  on AI endpoints.
+- general_rate_limiter: module-level singleton for global per-IP rate limiting.
+- make_ai_rate_limit_dependency: FastAPI Depends factory for AI endpoint limits.
+- make_general_rate_limit_dependency: FastAPI Depends factory for general limits.
+
+Cloud Run note
+--------------
+Cloud Run can run multiple instances; this limiter is in-process only.
+For per-instance limiting that is transparent to users with Cloud Run's
+automatic load balancing, a per-instance limit of 60 req/min is reasonable —
+a single user's traffic is ordinarily served by one instance.  If shared-state
+limiting becomes a requirement, replace the store with Redis.
 """
 
 import threading
 import time
+from typing import NamedTuple
 
 from fastapi import Depends, HTTPException, Request
+
+
+class RateLimitInfo(NamedTuple):
+    """Result of a rate-limit check with metadata for response headers."""
+    allowed: bool
+    remaining: int          # requests remaining in current window
+    retry_after: int        # seconds until the oldest request expires (0 if allowed)
+    limit: int              # configured max_requests
 
 
 class InMemoryRateLimiter:
@@ -21,21 +39,43 @@ class InMemoryRateLimiter:
 
     def check(self, key: str, max_requests: int, window_seconds: int) -> bool:
         """Return True if the request is allowed, False if rate limit exceeded."""
+        return self.check_with_info(key, max_requests, window_seconds).allowed
+
+    def check_with_info(
+        self, key: str, max_requests: int, window_seconds: int
+    ) -> RateLimitInfo:
+        """Check the rate limit and return detailed info for response headers.
+
+        This is the primary implementation; :meth:`check` delegates here.
+        """
         now = time.monotonic()
         cutoff = now - window_seconds
 
         with self._lock:
             timestamps = self._store.get(key, [])
-            # Remove expired entries
+            # Remove expired entries (sliding window)
             timestamps = [t for t in timestamps if t > cutoff]
 
             if len(timestamps) >= max_requests:
                 self._store[key] = timestamps
-                return False
+                # Oldest request in window expires at timestamps[0] + window_seconds
+                retry_after = max(1, int(timestamps[0] + window_seconds - now) + 1)
+                return RateLimitInfo(
+                    allowed=False,
+                    remaining=0,
+                    retry_after=retry_after,
+                    limit=max_requests,
+                )
 
             timestamps.append(now)
             self._store[key] = timestamps
-            return True
+            remaining = max_requests - len(timestamps)
+            return RateLimitInfo(
+                allowed=True,
+                remaining=remaining,
+                retry_after=0,
+                limit=max_requests,
+            )
 
     def reset(self):
         """Clear all stored data. Useful for testing."""
@@ -43,12 +83,20 @@ class InMemoryRateLimiter:
             self._store.clear()
 
 
+# ---------------------------------------------------------------------------
+# Module-level singletons
+# ---------------------------------------------------------------------------
+
 # Singleton used for AI/Gemini endpoint rate limiting.
 ai_rate_limiter = InMemoryRateLimiter()
 
-# Singleton used for general API endpoint rate limiting (100 req/min per IP).
+# Singleton used for global per-IP rate limiting (middleware).
 general_rate_limiter = InMemoryRateLimiter()
 
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 def _get_client_key(request: Request) -> str:
     """Return a stable key for the current request client.
@@ -64,6 +112,10 @@ def _get_client_key(request: Request) -> str:
     ip = client.host if client else "unknown"
     return f"ip:{ip}"
 
+
+# ---------------------------------------------------------------------------
+# FastAPI dependency factories
+# ---------------------------------------------------------------------------
 
 def make_ai_rate_limit_dependency(max_requests: int = 10, window_seconds: int = 60):
     """Return a FastAPI dependency that enforces an AI endpoint rate limit.
@@ -111,7 +163,10 @@ def make_general_rate_limit_dependency(max_requests: int = 100, window_seconds: 
     return _dependency
 
 
-# Pre-built dependency instances for common limits.
+# ---------------------------------------------------------------------------
+# Pre-built dependency instances for common limits
+# ---------------------------------------------------------------------------
+
 # AI endpoints: 10 requests / minute per user
 ai_limit_10_per_min = make_ai_rate_limit_dependency(max_requests=10, window_seconds=60)
 # Strict AI endpoints (e.g. full-reading): 5 requests / minute per user

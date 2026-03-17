@@ -7,4 +7,4 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Migrations complete."
 fi
 
-exec uvicorn app.main:app --host 0.0.0.0 --port 8080
+exec uvicorn app.main:app --host 0.0.0.0 --port 8080 --proxy-headers --forwarded-allow-ips='*'

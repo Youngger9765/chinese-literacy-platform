@@ -1,17 +1,21 @@
 """
-Tests for API rate limiting — Issue #267.
+Tests for API rate limiting — Issue #267 / #420.
 
 Covers:
 - InMemoryRateLimiter.check() sliding window logic
+- InMemoryRateLimiter.check_with_info() with RateLimitInfo metadata
 - InMemoryRateLimiter.reset()
 - make_ai_rate_limit_dependency returns 429 when limit exceeded
 - make_general_rate_limit_dependency returns 429 when limit exceeded
 - /api/comprehension/question rate limit (10/min)
 - /api/comprehension/chat rate limit (10/min)
 - Auth endpoints retain their existing rate limits (login 10/min, register 5/min)
+- GlobalRateLimitMiddleware: 429 on /api/* when exceeded, 200 on exempt paths
+- GlobalRateLimitMiddleware: X-RateLimit-Limit / X-RateLimit-Remaining headers
+- GlobalRateLimitMiddleware: Retry-After header on 429
 
 Run with:
-    cd /path/to/chinese-literacy-platform-issue-267/backend
+    cd /path/to/chinese-literacy-platform/backend
     python -m pytest tests/test_rate_limiting.py -v
 """
 
@@ -36,6 +40,7 @@ from app.models.user import Role, User
 from app.auth.dependencies import get_current_user
 from app.auth.rate_limiter import (
     InMemoryRateLimiter,
+    RateLimitInfo,
     ai_rate_limiter,
     general_rate_limiter,
     make_ai_rate_limit_dependency,
@@ -492,3 +497,164 @@ class TestModuleConstants:
 
     def test_general_rate_limiter_is_instance_of_inmemory_rate_limiter(self):
         assert isinstance(general_rate_limiter, InMemoryRateLimiter)
+
+
+# ===========================================================================
+# Unit tests — RateLimitInfo / check_with_info
+# ===========================================================================
+
+
+class TestRateLimitInfo:
+    def test_check_with_info_allowed_returns_correct_remaining(self):
+        limiter = InMemoryRateLimiter()
+        info = limiter.check_with_info("k1", max_requests=5, window_seconds=60)
+        assert info.allowed is True
+        assert info.remaining == 4  # 5 - 1 consumed
+        assert info.limit == 5
+        assert info.retry_after == 0
+
+    def test_check_with_info_blocked_returns_zero_remaining(self):
+        limiter = InMemoryRateLimiter()
+        for _ in range(3):
+            limiter.check_with_info("k2", max_requests=3, window_seconds=60)
+        info = limiter.check_with_info("k2", max_requests=3, window_seconds=60)
+        assert info.allowed is False
+        assert info.remaining == 0
+        assert info.limit == 3
+        assert info.retry_after >= 1
+
+    def test_check_delegates_to_check_with_info(self):
+        limiter = InMemoryRateLimiter()
+        # check() should return True for first request
+        assert limiter.check("k3", max_requests=1, window_seconds=60) is True
+        # check() should return False for second request
+        assert limiter.check("k3", max_requests=1, window_seconds=60) is False
+
+    def test_rate_limit_info_is_named_tuple(self):
+        info = RateLimitInfo(allowed=True, remaining=5, retry_after=0, limit=10)
+        assert info.allowed is True
+        assert info.remaining == 5
+        assert info.retry_after == 0
+        assert info.limit == 10
+
+
+# ===========================================================================
+# Integration tests — GlobalRateLimitMiddleware
+# ===========================================================================
+
+
+class TestGlobalRateLimitMiddleware:
+    """Verify GlobalRateLimitMiddleware in main.py via TestClient."""
+
+    def test_api_endpoint_responds_200_within_limit(self, client):
+        """Normal /api requests within limit should return 200 (or other non-429)."""
+        general_rate_limiter.reset()
+        resp = client.get("/api/stories")
+        assert resp.status_code != 429
+
+    def test_api_endpoint_returns_rate_limit_headers(self, client):
+        """Every /api response should carry X-RateLimit-Limit and X-RateLimit-Remaining."""
+        general_rate_limiter.reset()
+        resp = client.get("/api/stories")
+        assert "x-ratelimit-limit" in resp.headers or "X-RateLimit-Limit" in resp.headers
+        # At least one of the two header name variants should be present
+        header_keys_lower = {k.lower() for k in resp.headers.keys()}
+        assert "x-ratelimit-limit" in header_keys_lower
+        assert "x-ratelimit-remaining" in header_keys_lower
+
+    def test_api_endpoint_returns_429_when_global_limit_exceeded(self, client):
+        """After exceeding 60 req/min per IP, the middleware should return 429."""
+        from app.main import GlobalRateLimitMiddleware
+        general_rate_limiter.reset()
+
+        # Exhaust the limit using the limiter directly (avoids slow HTTP loop)
+        ip = "testclient"  # TestClient uses "testclient" as client host
+        for _ in range(GlobalRateLimitMiddleware.LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{ip}",
+                GlobalRateLimitMiddleware.LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        # Next real request should be 429
+        resp = client.get("/api/stories")
+        assert resp.status_code == 429
+
+    def test_429_response_has_retry_after_header(self, client):
+        """429 responses must include Retry-After header."""
+        from app.main import GlobalRateLimitMiddleware
+        general_rate_limiter.reset()
+
+        ip = "testclient"
+        for _ in range(GlobalRateLimitMiddleware.LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{ip}",
+                GlobalRateLimitMiddleware.LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        resp = client.get("/api/stories")
+        assert resp.status_code == 429
+        header_keys_lower = {k.lower() for k in resp.headers.keys()}
+        assert "retry-after" in header_keys_lower
+
+    def test_429_response_body_contains_detail_and_retry_after(self, client):
+        """429 body should include 'detail' and 'retry_after' fields."""
+        from app.main import GlobalRateLimitMiddleware
+        general_rate_limiter.reset()
+
+        ip = "testclient"
+        for _ in range(GlobalRateLimitMiddleware.LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{ip}",
+                GlobalRateLimitMiddleware.LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        resp = client.get("/api/stories")
+        assert resp.status_code == 429
+        data = resp.json()
+        assert "detail" in data
+        assert "retry_after" in data
+        assert isinstance(data["retry_after"], int)
+        assert data["retry_after"] >= 1
+
+    def test_health_endpoint_is_exempt_from_rate_limiting(self, client):
+        """The /health endpoint must not be rate-limited."""
+        from app.main import GlobalRateLimitMiddleware
+        general_rate_limiter.reset()
+
+        ip = "testclient"
+        # Exhaust limit
+        for _ in range(GlobalRateLimitMiddleware.LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{ip}",
+                GlobalRateLimitMiddleware.LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        # /health should still respond (not 429)
+        resp = client.get("/health")
+        assert resp.status_code != 429
+
+    def test_root_endpoint_is_exempt_from_rate_limiting(self, client):
+        """The root / endpoint must not be rate-limited."""
+        from app.main import GlobalRateLimitMiddleware
+        general_rate_limiter.reset()
+
+        ip = "testclient"
+        for _ in range(GlobalRateLimitMiddleware.LIMIT):
+            general_rate_limiter.check_with_info(
+                f"global:ip:{ip}",
+                GlobalRateLimitMiddleware.LIMIT,
+                GlobalRateLimitMiddleware.WINDOW,
+            )
+
+        resp = client.get("/")
+        assert resp.status_code != 429
+
+    def test_global_limit_constants(self):
+        """Verify the configured limits match spec (60/min general)."""
+        from app.main import GlobalRateLimitMiddleware
+        assert GlobalRateLimitMiddleware.LIMIT == 60
+        assert GlobalRateLimitMiddleware.WINDOW == 60

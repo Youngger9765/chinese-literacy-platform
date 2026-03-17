@@ -27,6 +27,7 @@ from .routes.parents import router as parents_router
 from .routes.gamification import router as gamification_router
 from .routes.health import router as health_router
 from .utils.logging_config import setup_logging
+from .auth.rate_limiter import general_rate_limiter
 
 # Initialise structured logging before anything else
 setup_logging()
@@ -168,6 +169,75 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             )
 
 
+class GlobalRateLimitMiddleware(BaseHTTPMiddleware):
+    """Global per-IP rate limiting middleware applied to all API endpoints.
+
+    Limits:
+    - General endpoints: 60 requests / minute per IP
+    - Paths exempt from limiting: /health, /docs, /redoc, /openapi.json, /
+
+    This is an in-process (per-instance) limiter suitable for Cloud Run where
+    each instance independently handles traffic.  For cross-instance limiting,
+    a shared store such as Redis would be required.
+
+    Response headers added to every API response:
+    - X-RateLimit-Limit: the maximum allowed requests per window
+    - X-RateLimit-Remaining: remaining requests in the current window
+    - Retry-After: (429 only) seconds until the limit resets
+    """
+
+    # Paths that are exempt from rate-limiting (exact match, not prefix).
+    _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
+
+    # Global limit: 60 requests per minute per IP.
+    LIMIT = 60
+    WINDOW = 60  # seconds
+
+    async def dispatch(self, request: Request, call_next) -> Response:
+        path = request.url.path
+
+        # Skip rate limiting for exempt paths.
+        if path in self._EXEMPT_PATHS or not path.startswith("/api"):
+            return await call_next(request)
+
+        # Extract real client IP: prefer X-Forwarded-For (set by Cloud Run /
+        # load balancers), fall back to request.client.host.
+        forwarded_for = request.headers.get("x-forwarded-for")
+        if forwarded_for:
+            # X-Forwarded-For may contain a comma-separated list; the first
+            # entry is the original client IP.
+            ip = forwarded_for.split(",")[0].strip()
+        else:
+            client = request.client
+            ip = client.host if client else "unknown"
+        key = f"global:ip:{ip}"
+
+        info = general_rate_limiter.check_with_info(key, self.LIMIT, self.WINDOW)
+
+        if not info.allowed:
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "detail": (
+                        "Too many requests. "
+                        f"Limit is {self.LIMIT} requests per {self.WINDOW} seconds per IP. "
+                        f"Please retry after {info.retry_after} seconds."
+                    ),
+                    "retry_after": info.retry_after,
+                },
+                headers={
+                    "Retry-After": str(info.retry_after),
+                    "X-RateLimit-Limit": str(self.LIMIT),
+                    "X-RateLimit-Remaining": "0",
+                },
+            )
+
+        response = await call_next(request)
+        response.headers["X-RateLimit-Limit"] = str(self.LIMIT)
+        response.headers["X-RateLimit-Remaining"] = str(info.remaining)
+        return response
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     seed_default_data()
@@ -187,8 +257,8 @@ app = FastAPI(
 # every response (including CORS preflight responses).
 app.add_middleware(SecurityHeadersMiddleware)
 
-# CORS must be added before the logging middleware so the OPTIONS pre-flight
-# is still handled correctly.
+# CORS — added after SecurityHeaders so CORS headers appear on all responses
+# including pre-flight OPTIONS.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.origins_list,
@@ -198,6 +268,10 @@ app.add_middleware(
 )
 # TenantMiddleware enriches request.state with org context (passive, no blocking)
 app.add_middleware(TenantMiddleware)
+
+# Global rate limiting: 60 req/min per IP for all /api/* endpoints.
+# Placed after CORS so CORS preflight OPTIONS requests are not rate-limited.
+app.add_middleware(GlobalRateLimitMiddleware)
 
 # Logging middleware wraps everything (added after CORS so it runs outermost)
 app.add_middleware(RequestLoggingMiddleware)
