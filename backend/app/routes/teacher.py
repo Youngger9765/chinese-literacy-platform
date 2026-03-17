@@ -1255,54 +1255,6 @@ def list_student_instructions(
     return instructions
 
 
-@router.get(
-    "/teacher/classrooms/{classroom_id}/instruction-counts",
-    response_model=dict[int, int],
-)
-def get_classroom_instruction_counts(
-    classroom_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Get active instruction counts for all students in a classroom (bulk, avoids N+1).
-
-    Returns a mapping of student_id -> active_instruction_count.
-    Students with zero instructions are included with count 0.
-    """
-    classroom = _check_classroom_access(current_user, classroom_id, db)
-
-    # Get all student IDs enrolled in this classroom
-    student_ids = [
-        row[0]
-        for row in db.query(ClassroomStudent.student_id)
-        .filter(ClassroomStudent.classroom_id == classroom.id)
-        .all()
-    ]
-
-    if not student_ids:
-        return {}
-
-    # Single aggregated query: count active instructions per student
-    rows = (
-        db.query(
-            TeacherInstruction.student_id,
-            func.count(TeacherInstruction.id).label("cnt"),
-        )
-        .filter(
-            TeacherInstruction.student_id.in_(student_ids),
-            TeacherInstruction.teacher_id == current_user.id,
-            TeacherInstruction.is_active == True,  # noqa: E712
-        )
-        .group_by(TeacherInstruction.student_id)
-        .all()
-    )
-
-    counts_from_db = {row.student_id: row.cnt for row in rows}
-
-    # Include all students, defaulting to 0 for those with no instructions
-    return {sid: counts_from_db.get(sid, 0) for sid in student_ids}
-
-
 @router.patch(
     "/teacher/instructions/{instruction_id}",
     response_model=InstructionResponse,

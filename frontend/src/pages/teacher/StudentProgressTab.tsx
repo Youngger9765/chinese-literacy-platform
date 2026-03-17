@@ -12,8 +12,8 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getClassroomProgress,
-  getClassroomInstructionCounts,
   getStudentSessions,
+  getStudentInstructions,
   exportClassroomReport,
   addStudentTag,
   removeStudentTag,
@@ -294,16 +294,22 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   }, [loadProgress]);
 
 
-  // Load instruction counts for all students in one bulk request (avoids N+1)
-  const loadInstructionCounts = useCallback(async (_students: StudentProgress[]) => {
-    if (!token) return;
-    try {
-      const counts = await getClassroomInstructionCounts(token, classroomId);
-      setInstructionCounts(counts);
-    } catch {
-      // Non-fatal: leave counts at zero
-    }
-  }, [token, classroomId]);
+  // Load instruction counts for each student
+  const loadInstructionCounts = useCallback(async (students: StudentProgress[]) => {
+    if (!token || students.length === 0) return;
+    const counts: Record<number, number> = {};
+    await Promise.all(
+      students.map(async (s) => {
+        try {
+          const instructions = await getStudentInstructions(token, s.student_id);
+          counts[s.student_id] = instructions.length;
+        } catch {
+          counts[s.student_id] = 0;
+        }
+      }),
+    );
+    setInstructionCounts(counts);
+  }, [token]);
 
   useEffect(() => {
     if (progress.length > 0) {
