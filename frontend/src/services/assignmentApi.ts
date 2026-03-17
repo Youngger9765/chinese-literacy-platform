@@ -55,6 +55,8 @@ export interface SubmissionResponse {
   reading_accuracy: number | null;
   reading_cpm: number | null;
   reading_error_chars: string[];
+  /** Per-student teacher feedback, set when grading (Issue #424). */
+  teacher_feedback: string | null;
 }
 
 export interface AssignmentDetailResponse extends AssignmentResponse {
@@ -74,6 +76,8 @@ export interface StudentAssignmentResponse extends ReadingGoals {
   status: string;
   submitted_at: string | null;
   score: number | null;
+  /** Per-student teacher feedback visible to the student (Issue #424). */
+  teacher_feedback: string | null;
 }
 
 export interface StartAssignmentResponse {
@@ -254,13 +258,18 @@ export async function gradeSubmission(
   assignmentId: number,
   submissionId: number,
   score: number | null,
+  teacherFeedback?: string | null,
 ): Promise<SubmissionResponse> {
+  const body: { score: number | null; teacher_feedback?: string | null } = { score };
+  if (teacherFeedback !== undefined) {
+    body.teacher_feedback = teacherFeedback;
+  }
   const res = await fetch(
     `${API_BASE}/api/assignments/${assignmentId}/submissions/${submissionId}`,
     {
       method: 'PATCH',
       headers: authHeaders(token),
-      body: JSON.stringify({ score }),
+      body: JSON.stringify(body),
     },
   );
   return handleResponse<SubmissionResponse>(res);
