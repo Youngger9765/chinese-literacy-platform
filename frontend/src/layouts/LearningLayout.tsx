@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Outlet, useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import {
   Story,
@@ -13,6 +13,13 @@ import { fetchStory, saveActiveSession, clearActiveSession } from '../services/a
 import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
+import { useIdleTimer } from '../hooks/useIdleTimer';
+import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
+
+/** Idle time before showing warning modal (15 minutes). */
+const IDLE_WARNING_TIMEOUT_MS = 15 * 60 * 1000;
+/** Countdown duration shown in the warning modal (60 seconds). */
+const WARNING_COUNTDOWN_SECONDS = 60;
 
 const EMPTY_ATTEMPT: ReadingAttempt = {
   storyId: '',
@@ -83,6 +90,10 @@ const LearningLayout: React.FC = () => {
   const [dbSessionId, setDbSessionId] = useState<number | null>(null);
   /** Progressive paragraph unlock tracking (Issue #85). */
   const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(new Set());
+  /** Whether the session idle-timeout warning modal is visible (Issue #408). */
+  const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
+  /** Ref to the idle-timer reset function so handleContinueLearning can call it. */
+  const idleResetRef = useRef<(() => void) | null>(null);
 
   /** Persist current step to localStorage for session resume. */
   const persistStep = useCallback(
@@ -103,6 +114,42 @@ const LearningLayout: React.FC = () => {
     if (!user) return;
     clearActiveSession(String(user.id));
   }, [user]);
+
+  // ── Idle-timeout warning (Issue #408) ────────────────────────────────────
+
+  /** Show the warning modal when the user has been idle for IDLE_WARNING_TIMEOUT_MS. */
+  const handleIdleTimeout = useCallback(() => {
+    // Progress is already saved by persistStep on every step transition.
+    // Just show the warning so the student knows what's happening.
+    setShowTimeoutWarning(true);
+  }, []);
+
+  const { reset: resetIdleTimer } = useIdleTimer({
+    timeout: IDLE_WARNING_TIMEOUT_MS,
+    onIdle: handleIdleTimeout,
+    // Only active when the user is inside the learning flow with a loaded story
+    enabled: selectedStory !== null && !isLoading,
+  });
+
+  // Expose reset to the ref so the continue handler below can call it
+  useEffect(() => {
+    idleResetRef.current = resetIdleTimer;
+  }, [resetIdleTimer]);
+
+  /** User clicked "繼續學習" — hide warning and restart the idle timer. */
+  const handleContinueLearning = useCallback(() => {
+    setShowTimeoutWarning(false);
+    idleResetRef.current?.();
+  }, []);
+
+  /** User clicked "離開並儲存" or the countdown expired — navigate to library. */
+  const handleSessionExpired = useCallback(() => {
+    setShowTimeoutWarning(false);
+    // Progress was saved by persistStep; just navigate away.
+    navigate('/library');
+  }, [navigate]);
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Sync session/story to the nav context so the header StepperNav can read them
   useEffect(() => {
@@ -343,7 +390,17 @@ const LearningLayout: React.FC = () => {
     handleParagraphComplete,
   };
 
-  return <Outlet context={ctx} />;
+  return (
+    <>
+      <Outlet context={ctx} />
+      <SessionTimeoutWarning
+        visible={showTimeoutWarning}
+        countdownSeconds={WARNING_COUNTDOWN_SECONDS}
+        onContinue={handleContinueLearning}
+        onExpired={handleSessionExpired}
+      />
+    </>
+  );
 };
 
 /** Hook for child routes to access learning context. */
