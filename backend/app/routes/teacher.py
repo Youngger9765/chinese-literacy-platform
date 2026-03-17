@@ -192,6 +192,30 @@ class AtRiskStudentResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ErrorHeatmapStudentEntry(BaseModel):
+    id: int
+    name: str
+
+    model_config = {"from_attributes": True}
+
+
+class ErrorHeatmapErrorEntry(BaseModel):
+    student_id: int
+    character: str
+    error_count: int
+
+    model_config = {"from_attributes": True}
+
+
+class ErrorHeatmapResponse(BaseModel):
+    """Student × character error matrix for classroom teachers."""
+    students: list[ErrorHeatmapStudentEntry]
+    characters: list[str]  # sorted by total error count desc
+    errors: list[ErrorHeatmapErrorEntry]  # only non-zero cells
+
+    model_config = {"from_attributes": True}
+
+
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
 
@@ -486,6 +510,89 @@ def get_classroom_error_vocab(
         )
         for row in rows
     ]
+
+
+@router.get(
+    "/teacher/classrooms/{classroom_id}/error-heatmap",
+    response_model=ErrorHeatmapResponse,
+)
+def get_classroom_error_heatmap(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get student × character error matrix for a classroom.
+
+    Returns all enrolled students, all characters that have at least one error,
+    and non-zero (student, character) error counts.  Characters are ordered by
+    total error count descending so the most problematic characters appear first.
+    """
+    _check_classroom_access(current_user, classroom_id, db)
+
+    # Get enrolled students in enrollment order
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+    if not enrollments:
+        return ErrorHeatmapResponse(students=[], characters=[], errors=[])
+
+    student_ids = [e.student_id for e in enrollments]
+    students_map = {e.student_id: e.student for e in enrollments}
+
+    # Query aggregated error counts: (student_id, character) → count
+    rows = (
+        db.query(
+            LearningSession.student_id,
+            CharacterError.character,
+            func.count(CharacterError.id).label("error_count"),
+        )
+        .join(CharacterError, CharacterError.session_id == LearningSession.id)
+        .filter(LearningSession.student_id.in_(student_ids))
+        .group_by(LearningSession.student_id, CharacterError.character)
+        .all()
+    )
+
+    if not rows:
+        students = [
+            ErrorHeatmapStudentEntry(id=s_id, name=students_map[s_id].name)
+            for s_id in student_ids
+        ]
+        return ErrorHeatmapResponse(students=students, characters=[], errors=[])
+
+    # Build character → total error count for ordering
+    char_totals: dict[str, int] = defaultdict(int)
+    for row in rows:
+        char_totals[row.character] += row.error_count
+
+    # Sort characters by total errors descending, then alphabetically for stability
+    sorted_characters = sorted(
+        char_totals.keys(),
+        key=lambda c: (-char_totals[c], c),
+    )
+
+    # Build student list in enrollment order
+    students = [
+        ErrorHeatmapStudentEntry(id=s_id, name=students_map[s_id].name)
+        for s_id in student_ids
+    ]
+
+    # Build error entries (only non-zero cells)
+    error_entries = [
+        ErrorHeatmapErrorEntry(
+            student_id=row.student_id,
+            character=row.character,
+            error_count=row.error_count,
+        )
+        for row in rows
+    ]
+
+    return ErrorHeatmapResponse(
+        students=students,
+        characters=sorted_characters,
+        errors=error_entries,
+    )
 
 
 @router.get(
