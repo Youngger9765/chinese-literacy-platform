@@ -17,7 +17,7 @@ from ..auth.dependencies import get_current_user
 from ..database import get_db
 from ..dependencies.tenant import _check_classroom_access
 from ..models.school import Classroom, ClassroomStudent, ClassroomText
-from ..models.session import CharacterError, LearningSession, DialogueTurn
+from ..models.session import CharacterError, ErrorCorrection, LearningSession, DialogueTurn
 from ..models.student_tag import StudentTag
 from ..models.story_tag import StoryTag
 from ..models.teacher_instruction import TeacherInstruction
@@ -30,6 +30,7 @@ from ..schemas.teacher_instruction import (
     InstructionUpdate,
 )
 from ..models.user import User
+from ..models.gamification import StudentXPLog, StudentStreak
 from ..services.lesson_loader import get_lesson_by_id
 from ..services.stuck_detection_service import build_recommendations, detect_stuck_points
 from ..services.prediction_service import predict_learning_difficulty
@@ -1072,7 +1073,11 @@ def export_classroom_report(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Export classroom student progress as a UTF-8 BOM CSV file."""
+    """Export classroom student progress as a UTF-8 BOM CSV file.
+
+    Columns: 學生姓名, 已完成課文數, 平均正確率, 平均語速(CPM), 總學習次數,
+             已掌握生字, 連續學習天數, 累積XP, 最近學習日期
+    """
     classroom = _check_classroom_access(current_user, classroom_id, db)
 
     enrollments = (
@@ -1083,6 +1088,7 @@ def export_classroom_report(
 
     # Batch-load all sessions for students in this classroom to avoid N+1 queries
     student_ids = [e.student_id for e in enrollments]
+
     all_sessions = (
         db.query(LearningSession)
         .filter(LearningSession.student_id.in_(student_ids))
@@ -1095,9 +1101,54 @@ def export_classroom_report(
     for s in all_sessions:
         sessions_by_student.setdefault(s.student_id, []).append(s)
 
+    # Batch-load XP totals (sum of xp_earned per student)
+    xp_rows = (
+        db.query(StudentXPLog.student_id, func.sum(StudentXPLog.xp_earned).label("total_xp"))
+        .filter(StudentXPLog.student_id.in_(student_ids))
+        .group_by(StudentXPLog.student_id)
+        .all()
+        if student_ids
+        else []
+    )
+    xp_by_student: dict[int, int] = {row.student_id: int(row.total_xp) for row in xp_rows}
+
+    # Batch-load current streaks
+    streak_rows = (
+        db.query(StudentStreak)
+        .filter(StudentStreak.student_id.in_(student_ids))
+        .all()
+        if student_ids
+        else []
+    )
+    streak_by_student: dict[int, int] = {row.student_id: row.current_streak for row in streak_rows}
+
+    # Batch-load mastered character counts
+    mastered_rows = (
+        db.query(ErrorCorrection.student_id, func.count(ErrorCorrection.id).label("cnt"))
+        .filter(
+            ErrorCorrection.student_id.in_(student_ids),
+            ErrorCorrection.correction_type == "mastered",
+        )
+        .group_by(ErrorCorrection.student_id)
+        .all()
+        if student_ids
+        else []
+    )
+    mastered_by_student: dict[int, int] = {row.student_id: int(row.cnt) for row in mastered_rows}
+
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["學生姓名", "已完成課文數", "平均正確率", "總學習次數", "最近學習日期"])
+    writer.writerow([
+        "學生姓名",
+        "已完成課文數",
+        "平均正確率",
+        "平均語速(CPM)",
+        "總學習次數",
+        "已掌握生字",
+        "連續學習天數",
+        "累積XP",
+        "最近學習日期",
+    ])
 
     for enrollment in enrollments:
         student = enrollment.student
@@ -1110,6 +1161,14 @@ def export_classroom_report(
         scores = [s.accuracy for s in sessions if s.accuracy is not None]
         avg_accuracy = f"{sum(scores) / len(scores):.1f}%" if scores else ""
 
+        # Average CPM from reading_result JSONB field
+        cpm_values = [
+            s.reading_result["cpm"]
+            for s in sessions
+            if s.reading_result and isinstance(s.reading_result, dict) and s.reading_result.get("cpm") is not None
+        ]
+        avg_cpm = f"{sum(cpm_values) / len(cpm_values):.0f}" if cpm_values else ""
+
         latest = max(sessions, key=lambda s: s.started_at, default=None)
         last_date = latest.started_at.strftime("%Y-%m-%d") if latest else ""
 
@@ -1117,7 +1176,11 @@ def export_classroom_report(
             _sanitize_csv_cell(student.name),
             completed_texts,
             avg_accuracy,
+            avg_cpm,
             total_sessions,
+            mastered_by_student.get(student.id, 0),
+            streak_by_student.get(student.id, 0),
+            xp_by_student.get(student.id, 0),
             last_date,
         ])
 

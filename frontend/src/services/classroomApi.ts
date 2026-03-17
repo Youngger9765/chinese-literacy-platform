@@ -297,3 +297,28 @@ export function downloadCsvTemplate(token: string): void {
       URL.revokeObjectURL(blobUrl);
     });
 }
+
+// --- Export classroom report as CSV (#235) ---
+
+export function exportClassroomReport(token: string, classroomId: number): void {
+  const url = `${API_BASE}/api/teacher/classrooms/${classroomId}/export`;
+  fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    .then((res) => {
+      if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+      return res.blob();
+    })
+    .then((blob) => {
+      const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `classroom-${classroomId}-report-${today}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    })
+    .catch((err) => {
+      console.error('Failed to export classroom report:', err);
+    });
+}
