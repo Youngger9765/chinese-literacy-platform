@@ -17,14 +17,16 @@ import AssignmentTab from './AssignmentTab';
 import ClassroomAnalytics from './ClassroomAnalytics';
 import CrossTextAnalytics from './CrossTextAnalytics';
 import AtRiskStudents from '../../components/teacher/AtRiskStudents';
+import ErrorHeatmapTab from './ErrorHeatmapTab';
 
-type TabKey = 'progress' | 'texts' | 'my-texts' | 'assignments' | 'students' | 'analytics' | 'cross-text' | 'at-risk';
+type TabKey = 'progress' | 'texts' | 'my-texts' | 'assignments' | 'students' | 'analytics' | 'cross-text' | 'at-risk' | 'error-heatmap';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'progress', label: '學生進度' },
   { key: 'analytics', label: '學習分析' },
   { key: 'cross-text', label: '跨課文分析' },
   { key: 'at-risk', label: '早期介入' },
+  { key: 'error-heatmap', label: '錯字熱力圖' },
   { key: 'texts', label: '課文管理' },
   { key: 'my-texts', label: '我的課文' },
   { key: 'assignments', label: '作業管理' },
@@ -387,6 +389,10 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
           {activeTab === 'at-risk' && (
             <AtRiskStudents classroomId={classroomId} />
+          )}
+
+          {activeTab === 'error-heatmap' && (
+            <ErrorHeatmapTab classroomId={classroomId} />
           )}
 
           {activeTab === 'texts' && (

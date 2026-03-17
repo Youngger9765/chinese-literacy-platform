@@ -707,3 +707,34 @@ export async function listStoryTags(token: string): Promise<StoryTagData[]> {
   });
   return handleResponse<StoryTagData[]>(res);
 }
+
+// --- Error Heatmap types ---
+
+export interface ErrorHeatmapStudent {
+  id: number;
+  name: string;
+}
+
+export interface ErrorHeatmapError {
+  student_id: number;
+  character: string;
+  error_count: number;
+}
+
+export interface ClassroomErrorHeatmap {
+  students: ErrorHeatmapStudent[];
+  characters: string[];
+  errors: ErrorHeatmapError[];
+}
+
+/** Get student × character error heatmap for a classroom. */
+export async function getClassroomErrorHeatmap(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomErrorHeatmap> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/error-heatmap`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ClassroomErrorHeatmap>(res);
+}
