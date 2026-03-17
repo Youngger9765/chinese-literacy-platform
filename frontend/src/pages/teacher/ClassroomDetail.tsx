@@ -5,6 +5,7 @@ import {
   updateClassroom,
   addStudent,
   removeStudent,
+  exportClassroomReport,
   ClassroomDetailResponse,
   StudentInClassroomResponse,
   ClassroomApiError,
@@ -61,6 +62,9 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
   // Toggle active loading
   const [isTogglingActive, setIsTogglingActive] = useState(false);
+
+  // Export CSV
+  const [isExporting, setIsExporting] = useState(false);
 
   // Remove confirmation
   const [removingStudentId, setRemovingStudentId] = useState<number | null>(null);
@@ -137,6 +141,14 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     } finally {
       setIsTogglingActive(false);
     }
+  };
+
+  const handleExportCsv = () => {
+    if (!token || isExporting) return;
+    setIsExporting(true);
+    exportClassroomReport(token, classroomId);
+    // Reset after a short delay to re-enable the button
+    setTimeout(() => setIsExporting(false), 2000);
   };
 
   const handleAddStudent = async (e: React.FormEvent) => {
@@ -349,6 +361,15 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
                   }`}
                 >
                   {isTogglingActive ? '更新中...' : classroom.is_active ? '停用' : '啟用'}
+                </button>
+                <button
+                  onClick={handleExportCsv}
+                  disabled={isExporting}
+                  className={`px-3 py-1.5 rounded-lg border border-blue-300 text-blue-700 text-sm hover:bg-blue-50 transition-colors cursor-pointer ${
+                    isExporting ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isExporting ? '匯出中...' : '匯出 CSV'}
                 </button>
               </div>
             </div>
