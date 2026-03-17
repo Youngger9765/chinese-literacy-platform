@@ -17,7 +17,7 @@ from ..auth.dependencies import get_current_user
 from ..database import get_db
 from ..dependencies.tenant import _check_classroom_access
 from ..models.school import Classroom, ClassroomStudent, ClassroomText
-from ..models.session import CharacterError, LearningSession
+from ..models.session import CharacterError, LearningSession, DialogueTurn
 from ..models.student_tag import StudentTag
 from ..models.teacher_instruction import TeacherInstruction
 from ..models.notification_read import TeacherNotificationRead
@@ -623,6 +623,85 @@ def get_student_sessions(
         )
 
     return results
+
+
+# ── Teacher Dialogue History (Issue #418) ─────────────────────────────────────
+
+
+class TeacherDialogueTurnResponse(BaseModel):
+    id: int
+    turn_order: int
+    role: str
+    text: str
+    is_correct: bool | None
+    phase: str | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class TeacherDialogueHistoryResponse(BaseModel):
+    session_id: int
+    student_id: int
+    story_slug: str | None
+    turns: list[TeacherDialogueTurnResponse]
+    total: int
+
+
+@router.get(
+    "/teacher/students/{student_id}/sessions/{session_id}/dialogue",
+    response_model=TeacherDialogueHistoryResponse,
+)
+def get_teacher_student_dialogue(
+    student_id: int,
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return the Socratic dialogue history for a student's learning session.
+
+    The requesting teacher must own a classroom that contains the student.
+    Returns an empty turns list if the session exists but has no recorded dialogue.
+    """
+    # Verify teacher owns a classroom containing this student
+    enrollment = (
+        db.query(ClassroomStudent)
+        .join(Classroom, ClassroomStudent.classroom_id == Classroom.id)
+        .filter(
+            ClassroomStudent.student_id == student_id,
+            Classroom.teacher_id == current_user.id,
+        )
+        .first()
+    )
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="Not authorized to view this student's sessions")
+
+    # Verify the session belongs to the student
+    session = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.id == session_id,
+            LearningSession.student_id == student_id,
+        )
+        .first()
+    )
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    turns = (
+        db.query(DialogueTurn)
+        .filter(DialogueTurn.learning_session_id == session_id)
+        .order_by(DialogueTurn.turn_order)
+        .all()
+    )
+
+    return TeacherDialogueHistoryResponse(
+        session_id=session_id,
+        student_id=student_id,
+        story_slug=session.story_slug,
+        turns=[TeacherDialogueTurnResponse.model_validate(t) for t in turns],
+        total=len(turns),
+    )
 
 
 @router.get(

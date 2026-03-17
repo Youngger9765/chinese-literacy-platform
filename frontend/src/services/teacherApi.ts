@@ -156,6 +156,39 @@ export async function getStudentSessions(
   return handleResponse<StudentSession[]>(res);
 }
 
+// ── Dialogue history (Issue #418) ──────────────────────────────────────────
+
+export interface TeacherDialogueTurn {
+  id: number;
+  turn_order: number;
+  role: string;
+  text: string;
+  is_correct: boolean | null;
+  phase: string | null;
+  created_at: string;
+}
+
+export interface TeacherDialogueHistoryResponse {
+  session_id: number;
+  student_id: number;
+  story_slug: string | null;
+  turns: TeacherDialogueTurn[];
+  total: number;
+}
+
+/** Fetch Socratic dialogue history for a student session (teacher view). */
+export async function getTeacherStudentDialogue(
+  token: string,
+  studentId: number,
+  sessionId: number,
+): Promise<TeacherDialogueHistoryResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/sessions/${sessionId}/dialogue`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<TeacherDialogueHistoryResponse>(res);
+}
+
 /** Unassign a text from a classroom. */
 export async function unassignText(
   token: string,
