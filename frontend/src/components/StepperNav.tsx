@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppView, Story, LearningSession } from '../types';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useAuth } from '../contexts/AuthContext';
 
 interface StepperNavProps {
   currentView: AppView;
@@ -128,6 +129,8 @@ const StepperNav: React.FC<StepperNavProps> = ({
 }) => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const avatarInitial = user?.name?.charAt(0) ?? '?';
 
   const handleNavigate = (view: AppView) => {
     onNavigate(view);
@@ -209,7 +212,9 @@ const StepperNav: React.FC<StepperNavProps> = ({
 
         {/* Avatar */}
         <div className="ml-2 flex items-center gap-1 pl-2 border-l border-gray-200">
-          <div className="w-6 h-6 rounded-full bg-gray-200"></div>
+          <div className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-xs font-bold" aria-label={user?.name ?? '使用者'}>
+            {avatarInitial}
+          </div>
         </div>
       </nav>
     );
@@ -271,8 +276,11 @@ const StepperNav: React.FC<StepperNavProps> = ({
       })}
 
       {/* User avatar */}
-      <div className="ml-3 flex items-center pl-3 border-l border-gray-200">
-        <div className="w-6 h-6 rounded-full bg-gray-200"></div>
+      <div className="ml-3 flex items-center gap-1 pl-3 border-l border-gray-200">
+        <div className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-xs font-bold" aria-label={user?.name ?? '使用者'}>
+          {avatarInitial}
+        </div>
+        <span className="text-[10px] text-gray-500 hidden sm:block">{user?.name}</span>
       </div>
     </nav>
   );
