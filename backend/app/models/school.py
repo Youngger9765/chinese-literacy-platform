@@ -35,6 +35,12 @@ class School(Base):
     )
     join_code: Mapped[str | None] = mapped_column(String(20), unique=True, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    # Allowed email domains for teacher registration (issue #407).
+    # If set to a non-empty list, only teachers whose email domain appears in this list
+    # may join this school.  Stored as JSON list of lowercase domain strings,
+    # e.g. ["school.edu.tw", "mail.school.edu.tw"].
+    # When None or [] there is no domain restriction.
+    allowed_email_domains: Mapped[list | None] = mapped_column(JSON, nullable=True)
     settings: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

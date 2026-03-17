@@ -112,12 +112,47 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     )
 
 
+def _validate_teacher_email_domain(school: "School", email_domain: str) -> None:
+    """Raise HTTP 403 if the school has domain restrictions and the teacher's domain
+    is not in the allowed list.
+
+    Issue #407: schools may configure `allowed_email_domains` to restrict which
+    email domains teachers can use to join.  Schools with no configured domains
+    (None or empty list) accept any email domain.
+
+    Args:
+        school: The existing School record the teacher is trying to join.
+        email_domain: Lowercase domain extracted from the teacher's email.
+
+    Raises:
+        HTTPException 403: if the domain is not in the allowed list.
+    """
+    allowed: list[str] | None = school.allowed_email_domains
+    if not allowed:
+        # No restriction configured — any domain is welcome.
+        return
+
+    # Normalise list entries to lowercase for comparison.
+    allowed_lower = [d.lower() for d in allowed]
+    if email_domain not in allowed_lower:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                f"您的 Email 網域（@{email_domain}）不在此學校的允許清單中。"
+                "請聯繫學校管理員確認您的 Email 網域是否正確，或改用學校核准的 Email 地址註冊。"
+            ),
+        )
+
+
 def _assign_teacher_to_school(db: Session, user: User) -> None:
     """Auto-create a school for the teacher's email domain, or join an existing one.
 
     Per 方大哥's spec: if this is the first teacher from a school domain,
     the system auto-creates the school and makes the teacher the admin.
     Subsequent teachers with the same domain are added to the existing school.
+
+    Issue #407: if the existing school has `allowed_email_domains` configured,
+    the teacher's email domain must match; otherwise registration is rejected.
     """
     # Extract domain from email (e.g. "teacher@school.edu.tw" -> "school.edu.tw")
     domain = user.email.split("@")[-1].lower()
@@ -126,7 +161,7 @@ def _assign_teacher_to_school(db: Session, user: User) -> None:
     school = db.query(School).filter(School.domain == domain).first()
 
     if school is None:
-        # First teacher from this domain: create the school
+        # First teacher from this domain: create the school (no domain restriction applies)
         school = School(
             name=f"{domain} 學校",
             domain=domain,
@@ -134,6 +169,9 @@ def _assign_teacher_to_school(db: Session, user: User) -> None:
         )
         db.add(school)
         db.flush()  # get school.id
+    else:
+        # Existing school found — validate domain restriction before joining (issue #407)
+        _validate_teacher_email_domain(school, domain)
 
     # Assign teacher role scoped to this school
     teacher_role = db.query(Role).filter(Role.name == "teacher").first()
