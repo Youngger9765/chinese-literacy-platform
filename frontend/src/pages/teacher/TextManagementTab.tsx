@@ -4,6 +4,7 @@ import {
   getClassroomTexts,
   assignText,
   unassignText,
+  listStoryTags,
   ClassroomTextItem,
   TeacherApiError,
   StoryTagData,
@@ -82,6 +83,22 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
   useEffect(() => {
     loadTexts();
   }, [loadTexts]);
+
+  // Load existing story tags on mount
+  useEffect(() => {
+    if (!token) return;
+    listStoryTags(token)
+      .then((tags) => {
+        const map: Record<string, StoryTagData> = {};
+        for (const tag of tags) {
+          map[tag.story_ref] = tag;
+        }
+        setStoryTagMap(map);
+      })
+      .catch(() => {
+        // silent — tags are supplementary
+      });
+  }, [token]);
 
   // Filter out already-assigned stories
   const assignedTextIds = useMemo(
