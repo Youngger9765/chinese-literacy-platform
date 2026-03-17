@@ -549,7 +549,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           >
             登出
           </button>
-        </div>
+        </nav>
       </header>
 
       {/* Body: sidebar + main content */}
