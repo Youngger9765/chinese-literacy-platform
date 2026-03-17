@@ -310,10 +310,13 @@ def seed_default_data():
     """
     import secrets
     import string
+    from datetime import datetime, timezone, timedelta
     from .database import SessionLocal
     from .models.school import School, Classroom, ClassroomStudent
     from .models.organization import Organization
     from .models.user import User, Role, UserRole
+    from .models.session import LearningSession
+    from .models.gamification import StudentStreak, StudentXPLog
     from .auth.password import hash_password
     try:
         db = SessionLocal()
@@ -402,10 +405,166 @@ def seed_default_data():
                 ClassroomStudent(classroom_id=class_7a.id, student_id=student1.id),
             ])
 
+            # -- 7. Learning sessions for students (relative dates so dashboard always shows data) --
+            now_utc = datetime.now(tz=timezone.utc)
+
+            def _days_ago(n: float) -> datetime:
+                return now_utc - timedelta(days=n)
+
+            # student1: 5 completed sessions spread over last 7 days (today + 6 prior days)
+            sessions_student1 = [
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L01",
+                    status="completed",
+                    current_step=7,
+                    overall_score=70.0,
+                    started_at=_days_ago(6),
+                    completed_at=_days_ago(6),
+                ),
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L02",
+                    status="completed",
+                    current_step=7,
+                    overall_score=55.0,
+                    started_at=_days_ago(5),
+                    completed_at=_days_ago(5),
+                ),
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L03",
+                    status="completed",
+                    current_step=7,
+                    overall_score=80.0,
+                    started_at=_days_ago(3),
+                    completed_at=_days_ago(3),
+                ),
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L04",
+                    status="completed",
+                    current_step=7,
+                    overall_score=78.0,
+                    started_at=_days_ago(1),
+                    completed_at=_days_ago(1),
+                ),
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L05",
+                    status="completed",
+                    current_step=7,
+                    overall_score=60.0,
+                    started_at=_days_ago(0),
+                    completed_at=_days_ago(0),
+                ),
+            ]
+            # student2: 3 sessions this week
+            sessions_student2 = [
+                LearningSession(
+                    student_id=student2.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L01",
+                    status="completed",
+                    current_step=7,
+                    overall_score=85.0,
+                    started_at=_days_ago(4),
+                    completed_at=_days_ago(4),
+                ),
+                LearningSession(
+                    student_id=student2.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L02",
+                    status="completed",
+                    current_step=7,
+                    overall_score=90.0,
+                    started_at=_days_ago(2),
+                    completed_at=_days_ago(2),
+                ),
+                LearningSession(
+                    student_id=student2.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L03",
+                    status="completed",
+                    current_step=7,
+                    overall_score=75.0,
+                    started_at=_days_ago(0),
+                    completed_at=_days_ago(0),
+                ),
+            ]
+            # student3: 2 sessions this week
+            sessions_student3 = [
+                LearningSession(
+                    student_id=student3.id,
+                    classroom_id=class_5b.id,
+                    story_slug="L01",
+                    status="completed",
+                    current_step=7,
+                    overall_score=65.0,
+                    started_at=_days_ago(3),
+                    completed_at=_days_ago(3),
+                ),
+                LearningSession(
+                    student_id=student3.id,
+                    classroom_id=class_5b.id,
+                    story_slug="L02",
+                    status="completed",
+                    current_step=7,
+                    overall_score=72.0,
+                    started_at=_days_ago(1),
+                    completed_at=_days_ago(1),
+                ),
+            ]
+            all_sessions = sessions_student1 + sessions_student2 + sessions_student3
+            db.add_all(all_sessions)
+            db.flush()
+
+            # -- 8. Streak records matching the seeded sessions --
+            streak_student1 = StudentStreak(
+                student_id=student1.id,
+                current_streak=2,
+                longest_streak=5,
+                last_activity_date=now_utc,
+            )
+            streak_student2 = StudentStreak(
+                student_id=student2.id,
+                current_streak=1,
+                longest_streak=3,
+                last_activity_date=now_utc,
+            )
+            streak_student3 = StudentStreak(
+                student_id=student3.id,
+                current_streak=1,
+                longest_streak=2,
+                last_activity_date=_days_ago(1),
+            )
+            db.add_all([streak_student1, streak_student2, streak_student3])
+            db.flush()
+
+            # -- 9. XP log entries for student1 (one per completed session) --
+            xp_entries = [
+                StudentXPLog(
+                    student_id=student1.id,
+                    event_type="session_complete",
+                    xp_earned=20,
+                    session_id=sessions_student1[i].id,
+                    note=f"Completed {sessions_student1[i].story_slug}",
+                    created_at=sessions_student1[i].completed_at,
+                )
+                for i in range(len(sessions_student1))
+            ]
+            db.add_all(xp_entries)
+
             db.commit()
             logger.info(
                 "Seeded demo data: 1 org, 2 schools, 3 classrooms, "
-                "6 users (admin/teacher1/teacher2/student1-3)"
+                "6 users (admin/teacher1/teacher2/student1-3), "
+                "10 learning sessions with relative dates"
             )
         finally:
             db.close()
