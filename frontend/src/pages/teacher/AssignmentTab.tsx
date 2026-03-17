@@ -59,6 +59,14 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
+  // Edit state
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
+
   const loadAssignments = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
@@ -214,6 +222,47 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
       }
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleOpenEdit = (assignment: AssignmentResponse, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const dueDateValue = assignment.due_date
+      ? new Date(assignment.due_date).toISOString().slice(0, 10)
+      : '';
+    setEditingId(assignment.id);
+    setEditTitle(assignment.title || '');
+    setEditDescription(assignment.description || '');
+    setEditDueDate(dueDateValue);
+    setEditError('');
+    setConfirmDeleteId(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditError('');
+  };
+
+  const handleSaveEdit = async (assignmentId: number) => {
+    if (!token) return;
+    setIsSavingEdit(true);
+    setEditError('');
+    try {
+      const updated = await updateAssignment(token, assignmentId, {
+        title: editTitle.trim() || undefined,
+        description: editDescription.trim() || undefined,
+        due_date: editDueDate || null,
+      });
+      setAssignments((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+      setEditingId(null);
+    } catch (err) {
+      if (err instanceof AssignmentApiError) {
+        setEditError(err.message);
+      } else {
+        setEditError('儲存失敗，請再試一次');
+      }
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -545,13 +594,14 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                       : 0;
                   const isConfirmingDelete = confirmDeleteId === a.id;
                   const isDeleting = deletingId === a.id;
+                  const isEditing = editingId === a.id;
 
                   return (
                     <React.Fragment key={a.id}>
                       <tr
                         className="cursor-pointer hover:bg-gray-50 transition-colors"
                         onClick={() => {
-                          if (isConfirmingDelete) return;
+                          if (isConfirmingDelete || isEditing) return;
                           handleRowClick(a.id);
                         }}
                       >
@@ -623,18 +673,104 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                               </button>
                             </div>
                           ) : (
-                            <button
-                              onClick={() => setConfirmDeleteId(a.id)}
-                              className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-                              title="刪除作業"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+                            <div className="flex items-center gap-0.5 justify-center">
+                              <button
+                                onClick={(e) => handleOpenEdit(a, e)}
+                                className="p-1 rounded text-gray-400 hover:text-accent hover:bg-accent-bg transition-colors cursor-pointer"
+                                title="編輯作業"
+                                aria-label="編輯作業"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => setConfirmDeleteId(a.id)}
+                                className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                                title="刪除作業"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>
+
+                      {/* Inline edit form */}
+                      {isEditing && (
+                        <tr>
+                          <td colSpan={7} className="bg-blue-50 px-4 py-3 border-b border-blue-100">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-gray-800">編輯作業</span>
+                              <button
+                                onClick={handleCancelEdit}
+                                className="text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
+                              >
+                                取消
+                              </button>
+                            </div>
+                            {editError && (
+                              <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded px-3 py-2 mb-2">
+                                {editError}
+                              </div>
+                            )}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  作業標題
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editTitle}
+                                  onChange={(e) => setEditTitle(e.target.value)}
+                                  placeholder="留空則使用課文標題"
+                                  className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  說明
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editDescription}
+                                  onChange={(e) => setEditDescription(e.target.value)}
+                                  placeholder="作業說明（選填）"
+                                  className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  截止日期
+                                </label>
+                                <input
+                                  type="date"
+                                  value={editDueDate}
+                                  onChange={(e) => setEditDueDate(e.target.value)}
+                                  className="w-full h-9 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-end gap-2 mt-3">
+                              <button
+                                onClick={handleCancelEdit}
+                                className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                              >
+                                取消
+                              </button>
+                              <button
+                                onClick={() => handleSaveEdit(a.id)}
+                                disabled={isSavingEdit}
+                                className="px-4 py-1.5 rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium transition-colors cursor-pointer"
+                              >
+                                {isSavingEdit ? '儲存中...' : '儲存'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
 
                       {/* Expanded detail: grading panel */}
                       {isExpanded && (
