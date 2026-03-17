@@ -455,8 +455,27 @@ export interface ErrorCorrectionResponse {
   created_at: string;
 }
 
-export async function getErrorPatterns(token: string, studentId: number): Promise<ErrorPatternsResponse> {
-  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/error-patterns`, {
+export interface StudentStorySlugsResponse {
+  slugs: string[];
+  total: number;
+}
+
+export async function getStudentStorySlugs(token: string, studentId: number): Promise<StudentStorySlugsResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/story-slugs`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getStudentStorySlugs failed: ${res.status}`);
+  return res.json();
+}
+
+export async function getErrorPatterns(
+  token: string,
+  studentId: number,
+  storySlug?: string,
+): Promise<ErrorPatternsResponse> {
+  const url = new URL(`${API_BASE}/api/learning/students/${studentId}/error-patterns`);
+  if (storySlug) url.searchParams.set('story_slug', storySlug);
+  const res = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error(`getErrorPatterns failed: ${res.status}`);
