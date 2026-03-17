@@ -51,6 +51,10 @@ export interface SubmissionResponse {
   status: string;
   submitted_at: string | null;
   score: number | null;
+  // Reading metrics from linked LearningSession (Issue #423)
+  reading_accuracy: number | null;
+  reading_cpm: number | null;
+  reading_error_chars: string[];
 }
 
 export interface AssignmentDetailResponse extends AssignmentResponse {

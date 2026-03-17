@@ -137,6 +137,38 @@ def _has_role(user_id: int, role_name: str, db: Session) -> bool:
     ) is not None
 
 
+def _extract_reading_metrics(
+    sub: AssignmentSubmission, db: Session
+) -> tuple[float | None, float | None, list[str]]:
+    """Extract reading metrics (accuracy, cpm, error_chars) from the linked LearningSession.
+
+    Returns (reading_accuracy, reading_cpm, reading_error_chars).
+    All values are None/[] when no session exists or data hasn't been recorded yet.
+    """
+    if sub.session_id is None:
+        return None, None, []
+
+    session = (
+        db.query(LearningSession)
+        .filter(LearningSession.id == sub.session_id)
+        .first()
+    )
+    if session is None:
+        return None, None, []
+
+    accuracy = session.accuracy  # stored directly on session
+    cpm: float | None = None
+    error_chars: list[str] = []
+
+    if session.reading_result and isinstance(session.reading_result, dict):
+        cpm = session.reading_result.get("cpm")
+        raw_errors = session.reading_result.get("error_chars", [])
+        if isinstance(raw_errors, list):
+            error_chars = [str(c) for c in raw_errors]
+
+    return accuracy, cpm, error_chars
+
+
 # ── Student Endpoints (registered first to avoid path parameter conflicts) ───
 # /assignments/my must be registered before /assignments/{assignment_id}
 # so FastAPI doesn't try to parse "my" as an integer assignment_id.
@@ -394,6 +426,7 @@ def get_assignment_detail(
     submission_responses = []
     for sub in submissions:
         student = db.query(User).filter(User.id == sub.student_id).first()
+        r_accuracy, r_cpm, r_error_chars = _extract_reading_metrics(sub, db)
         submission_responses.append(
             SubmissionResponse(
                 id=sub.id,
@@ -403,6 +436,10 @@ def get_assignment_detail(
                 status=sub.status,
                 submitted_at=sub.submitted_at,
                 score=sub.score,
+                # Reading metrics (Issue #423)
+                reading_accuracy=r_accuracy,
+                reading_cpm=r_cpm,
+                reading_error_chars=r_error_chars,
             )
         )
 
@@ -480,6 +517,7 @@ def grade_submission(
     db.refresh(submission)
 
     student = db.query(User).filter(User.id == submission.student_id).first()
+    r_accuracy, r_cpm, r_error_chars = _extract_reading_metrics(submission, db)
     logger.info(
         "Teacher %d graded submission %d (score=%s)",
         current_user.id, submission_id, payload.score,
@@ -492,6 +530,10 @@ def grade_submission(
         status=submission.status,
         submitted_at=submission.submitted_at,
         score=submission.score,
+        # Reading metrics (Issue #423)
+        reading_accuracy=r_accuracy,
+        reading_cpm=r_cpm,
+        reading_error_chars=r_error_chars,
     )
 
 

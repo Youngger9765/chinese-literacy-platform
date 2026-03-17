@@ -69,6 +69,8 @@ const AssignmentDetailPanel: React.FC<Props> = ({
   const [gradeInput, setGradeInput] = useState<Record<number, string>>({});
   const [savingId, setSavingId] = useState<number | null>(null);
   const [gradeError, setGradeError] = useState('');
+  // Track which submission row has reading metrics expanded (Issue #423)
+  const [expandedMetricsId, setExpandedMetricsId] = useState<number | null>(null);
 
   // Bulk comment state
   const [showBulkComment, setShowBulkComment] = useState(false);
@@ -308,69 +310,135 @@ const AssignmentDetailPanel: React.FC<Props> = ({
             <th className="pb-1.5 font-medium text-center">狀態</th>
             <th className="pb-1.5 font-medium">提交時間</th>
             <th className="pb-1.5 font-medium text-center">分數</th>
+            <th className="pb-1.5 font-medium text-center">朗讀數據</th>
             <th className="pb-1.5 font-medium text-center">批改</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
           {detail.submissions.map((sub) => (
-            <tr key={sub.id}>
-              <td className="py-1.5 text-gray-700">{sub.student_name}</td>
-              <td className="py-1.5 text-center">{statusBadge(sub.status)}</td>
-              <td className="py-1.5 text-gray-500">{formatDate(sub.submitted_at)}</td>
-              <td className="py-1.5 text-gray-700 text-center font-medium">
-                {gradingId === sub.id ? (
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={gradeInput[sub.id] ?? ''}
-                    onChange={(e) =>
-                      setGradeInput((prev) => ({
-                        ...prev,
-                        [sub.id]: e.target.value,
-                      }))
-                    }
-                    className="w-16 h-6 px-1.5 rounded border border-gray-300 text-center text-xs focus:outline-none focus:border-accent"
-                    placeholder="0-100"
-                  />
-                ) : sub.score != null ? (
-                  `${Math.round(sub.score)}%`
-                ) : (
-                  '-'
-                )}
-              </td>
-              <td className="py-1.5 text-center">
-                {gradingId === sub.id ? (
-                  <div className="flex items-center justify-center gap-1">
+            <React.Fragment key={sub.id}>
+              <tr>
+                <td className="py-1.5 text-gray-700">{sub.student_name}</td>
+                <td className="py-1.5 text-center">{statusBadge(sub.status)}</td>
+                <td className="py-1.5 text-gray-500">{formatDate(sub.submitted_at)}</td>
+                <td className="py-1.5 text-gray-700 text-center font-medium">
+                  {gradingId === sub.id ? (
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={gradeInput[sub.id] ?? ''}
+                      onChange={(e) =>
+                        setGradeInput((prev) => ({
+                          ...prev,
+                          [sub.id]: e.target.value,
+                        }))
+                      }
+                      className="w-16 h-6 px-1.5 rounded border border-gray-300 text-center text-xs focus:outline-none focus:border-accent"
+                      placeholder="0-100"
+                    />
+                  ) : sub.score != null ? (
+                    `${Math.round(sub.score)}%`
+                  ) : (
+                    '-'
+                  )}
+                </td>
+                <td className="py-1.5 text-center">
+                  {/* Show expand button only when any reading data exists */}
+                  {sub.reading_accuracy != null || sub.reading_cpm != null || sub.reading_error_chars.length > 0 ? (
                     <button
-                      onClick={() => handleSaveGrade(sub)}
-                      disabled={savingId === sub.id}
-                      className="px-2 py-0.5 rounded bg-accent text-white text-xs font-medium hover:bg-accent-hover disabled:opacity-50 cursor-pointer transition-colors"
+                      onClick={() =>
+                        setExpandedMetricsId((prev) => (prev === sub.id ? null : sub.id))
+                      }
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-blue-200 text-blue-600 text-xs hover:bg-blue-50 cursor-pointer transition-colors"
+                      title="展開朗讀數據"
                     >
-                      {savingId === sub.id ? '...' : '儲存'}
+                      {expandedMetricsId === sub.id ? '收合' : '查看'}
                     </button>
+                  ) : (
+                    <span className="text-gray-300">—</span>
+                  )}
+                </td>
+                <td className="py-1.5 text-center">
+                  {gradingId === sub.id ? (
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        onClick={() => handleSaveGrade(sub)}
+                        disabled={savingId === sub.id}
+                        className="px-2 py-0.5 rounded bg-accent text-white text-xs font-medium hover:bg-accent-hover disabled:opacity-50 cursor-pointer transition-colors"
+                      >
+                        {savingId === sub.id ? '...' : '儲存'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setGradingId(null);
+                          setGradeError('');
+                        }}
+                        className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                      >
+                        取消
+                      </button>
+                    </div>
+                  ) : sub.status === 'submitted' || sub.status === 'graded' ? (
                     <button
-                      onClick={() => {
-                        setGradingId(null);
-                        setGradeError('');
-                      }}
+                      onClick={() => handleGradeClick(sub)}
                       className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
                     >
-                      取消
+                      {sub.status === 'graded' ? '重新批改' : '批改'}
                     </button>
-                  </div>
-                ) : sub.status === 'submitted' || sub.status === 'graded' ? (
-                  <button
-                    onClick={() => handleGradeClick(sub)}
-                    className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
-                  >
-                    {sub.status === 'graded' ? '重新批改' : '批改'}
-                  </button>
-                ) : (
-                  <span className="text-gray-300">—</span>
-                )}
-              </td>
-            </tr>
+                  ) : (
+                    <span className="text-gray-300">—</span>
+                  )}
+                </td>
+              </tr>
+              {/* Reading metrics expanded row (Issue #423) */}
+              {expandedMetricsId === sub.id && (
+                <tr>
+                  <td colSpan={6} className="pb-2 pt-0">
+                    <div className="mx-1 p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
+                      <p className="text-xs font-medium text-blue-800 mb-2">
+                        朗讀學習數據 — {sub.student_name}
+                      </p>
+                      <div className="flex flex-wrap gap-4">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-blue-700">
+                            {sub.reading_accuracy != null
+                              ? `${sub.reading_accuracy.toFixed(1)}%`
+                              : '—'}
+                          </div>
+                          <div className="text-xs text-gray-500">正確率</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-blue-700">
+                            {sub.reading_cpm != null
+                              ? `${Math.round(sub.reading_cpm)}`
+                              : '—'}
+                          </div>
+                          <div className="text-xs text-gray-500">語速（字/分）</div>
+                        </div>
+                        {sub.reading_error_chars.length > 0 && (
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">
+                              錯誤字詞（{sub.reading_error_chars.length} 個）
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {sub.reading_error_chars.map((ch, i) => (
+                                <span
+                                  key={i}
+                                  className="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-xs font-medium"
+                                >
+                                  {ch}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
           ))}
         </tbody>
       </table>
