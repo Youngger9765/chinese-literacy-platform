@@ -59,6 +59,10 @@ class SubmissionResponse(BaseModel):
     status: str
     submitted_at: datetime | None
     score: float | None
+    # Reading metrics from linked LearningSession (Issue #423)
+    reading_accuracy: float | None = None   # LiveTutor accuracy %
+    reading_cpm: float | None = None         # chars per minute from reading_result
+    reading_error_chars: list[str] = []      # mispronounced/skipped chars
 
     model_config = {"from_attributes": True}
 
