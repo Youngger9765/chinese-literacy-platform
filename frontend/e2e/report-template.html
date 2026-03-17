@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LingoLeap E2E QA Report</title>
+  <style>
+    /* ── Design tokens ───────────────────────────────────────────────────── */
+    :root {
+      --teal:        #37A6A9;
+      --teal-light:  #4ec4c7;
+      --teal-dim:    #275e60;
+      --navy:        #17335F;
+      --navy-light:  #1e4278;
+      --pass:        #22c55e;
+      --skip:        #f59e0b;
+      --fail:        #ef4444;
+      --pass-bg:     #f0fdf4;
+      --skip-bg:     #fffbeb;
+      --fail-bg:     #fef2f2;
+      --bg:          #f4f6f9;
+      --surface:     #ffffff;
+      --border:      #e2e8f0;
+      --text:        #1e293b;
+      --text-muted:  #64748b;
+      --radius:      8px;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md:   0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -1px rgba(0,0,0,.06);
+      --font:        system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+
+    /* ── Reset ───────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    a { color: var(--teal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Summary bar (sticky) ─────────────────────────────────────────────── */
+    .summary-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+
+    .summary-bar__title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .02em;
+      white-space: nowrap;
+      margin-right: 8px;
+    }
+    .summary-bar__title span {
+      color: var(--teal-light);
+    }
+
+    .summary-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(255,255,255,.12);
+    }
+    .stat-pill--total  { background: rgba(255,255,255,.18); }
+    .stat-pill--pass   { background: rgba(34,197,94,.22); color: #86efac; }
+    .stat-pill--skip   { background: rgba(245,158,11,.22); color: #fcd34d; }
+    .stat-pill--fail   { background: rgba(239,68,68,.22);  color: #fca5a5; }
+    .stat-pill .pill-num { font-size: 15px; }
+
+    .summary-bar__spacer { flex: 1; }
+
+    .summary-bar__time {
+      font-size: 11px;
+      color: rgba(255,255,255,.5);
+      white-space: nowrap;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      background: rgba(255,255,255,.12);
+      border-radius: 3px;
+      overflow: hidden;
+      display: flex;
+      margin-top: 2px;
+      /* flex: 1 1 100% forces it to a new row */
+      flex: 1 1 100%;
+    }
+    .progress-bar__pass { background: var(--pass); height: 100%; transition: width .3s; }
+    .progress-bar__skip { background: var(--skip); height: 100%; transition: width .3s; }
+    .progress-bar__fail { background: var(--fail); height: 100%; transition: width .3s; }
+
+    /* ── Tab strip ───────────────────────────────────────────────────────── */
+    .tab-strip {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 0 16px;
+    }
+    .tab-strip::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      flex-shrink: 0;
+      padding: 14px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color .15s, border-color .15s;
+      position: relative;
+    }
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(55,166,169,.06);
+    }
+    .tab-btn--active {
+      color: var(--teal);
+      border-bottom-color: var(--teal);
+      font-weight: 600;
+    }
+
+    .tab-fail-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--fail);
+      color: #fff;
+      border-radius: 9px;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      margin-left: 5px;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    /* ── Main content ────────────────────────────────────────────────────── */
+    .content-area {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    /* ── Tab panels ──────────────────────────────────────────────────────── */
+    .tab-panel         { display: none; }
+    .tab-panel--active { display: block; }
+
+    .empty-panel {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 60px 24px;
+      font-size: 15px;
+    }
+
+    /* ── Journey cards ───────────────────────────────────────────────────── */
+    .journey-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .journey-card.journey-has-fail  { border-left: 4px solid var(--fail); }
+    .journey-card.journey-all-skip  { border-left: 4px solid var(--skip); opacity: .85; }
+    .journey-card.journey-all-pass  { border-left: 4px solid var(--pass); }
+
+    .journey-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font);
+      text-align: left;
+      transition: background .12s;
+    }
+    .journey-header:hover { background: rgba(55,166,169,.05); }
+
+    .journey-letter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .journey-title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .journey-stats {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .journey-stats .stat-pass { color: var(--pass); font-weight: 600; }
+    .journey-stats .stat-fail { color: var(--fail); font-weight: 600; }
+    .journey-stats .stat-skip { color: var(--skip); font-weight: 600; }
+    .journey-stats .stat-total { color: var(--text-muted); }
+    .journey-stats .stat-sep   { color: var(--border); }
+
+    .journey-chevron {
+      font-size: 16px;
+      color: var(--text-muted);
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+    .journey-header[aria-expanded="false"] .journey-chevron {
+      transform: rotate(-90deg);
+    }
+
+    /* Journey body collapse */
+    .journey-body {
+      overflow: hidden;
+    }
+    .journey-header[aria-expanded="false"] + .journey-body {
+      display: none;
+    }
+
+    /* ── Test table ──────────────────────────────────────────────────────── */
+    .test-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .test-table tbody tr {
+      border-top: 1px solid var(--border);
+      transition: background .1s;
+    }
+    .test-table tbody tr:hover { background: rgba(55,166,169,.04); }
+
+    .test-row.test-pass { background: transparent; }
+    .test-row.test-skip { background: var(--skip-bg); }
+    .test-row.test-fail { background: var(--fail-bg); }
+
+    .test-status-cell {
+      width: 38px;
+      text-align: center;
+      padding: 10px 6px;
+      vertical-align: middle;
+    }
+    .test-title-cell {
+      padding: 10px 8px;
+      font-size: 13px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+    .test-screenshot-cell {
+      width: 100px;
+      padding: 8px 12px;
+      text-align: right;
+      vertical-align: middle;
+    }
+
+    /* Status icons */
+    .status-icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status-pass { background: var(--pass);  color: #fff; }
+    .status-skip { background: var(--skip);  color: #fff; }
+    .status-fail { background: var(--fail);  color: #fff; }
+
+    /* No screenshot placeholder */
+    .no-screenshot {
+      color: var(--border);
+      font-size: 16px;
+    }
+
+    /* ── Screenshot thumbnails ───────────────────────────────────────────── */
+    .screenshot-thumb {
+      display: inline-block;
+      width: 80px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      vertical-align: middle;
+    }
+    .screenshot-thumb:hover {
+      transform: scale(1.06);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ── Lightbox overlay ────────────────────────────────────────────────── */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,.82);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      padding: 24px;
+    }
+    #lightbox.lightbox--open {
+      display: flex;
+    }
+    #lightbox-img {
+      max-width: 92vw;
+      max-height: 78vh;
+      object-fit: contain;
+      border-radius: 6px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.6);
+    }
+    #lightbox-caption {
+      color: rgba(255,255,255,.88);
+      font-size: 14px;
+      text-align: center;
+      max-width: 720px;
+      line-height: 1.5;
+    }
+    #lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: rgba(255,255,255,.12);
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: background .15s;
+    }
+    #lightbox-close:hover { background: rgba(255,255,255,.25); }
+
+    /* ── Print styles ────────────────────────────────────────────────────── */
+    @media print {
+      .summary-bar  { position: static; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .tab-strip     { display: none; }
+      .tab-panel     { display: block !important; page-break-before: always; }
+      .tab-panel:first-of-type { page-break-before: avoid; }
+      .journey-body  { display: block !important; }
+      #lightbox      { display: none !important; }
+      .screenshot-thumb { cursor: default; }
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .summary-bar { padding: 10px 14px; gap: 10px; }
+      .summary-bar__title { font-size: 14px; }
+      .stat-pill { font-size: 12px; padding: 2px 8px; }
+      .journey-stats { display: none; }
+      .test-screenshot-cell { width: 70px; }
+      .screenshot-thumb { width: 64px; height: 42px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Sticky summary bar ─────────────────────────────────────────────────── -->
+<header class="summary-bar" role="banner">
+  <h1 class="summary-bar__title">
+    <span>LingoLeap</span> E2E QA Report
+  </h1>
+
+  <div class="summary-stats" role="status" aria-label="Test statistics">
+    <span class="stat-pill stat-pill--total">
+      <span class="pill-num">{{TOTAL}}</span> total
+    </span>
+    <span class="stat-pill stat-pill--pass">
+      <span class="pill-num">{{PASS}}</span> pass
+    </span>
+    <span class="stat-pill stat-pill--skip">
+      <span class="pill-num">{{SKIP}}</span> skip
+    </span>
+    <span class="stat-pill stat-pill--fail">
+      <span class="pill-num">{{FAIL}}</span> fail
+    </span>
+  </div>
+
+  <div class="summary-bar__spacer"></div>
+
+  <time class="summary-bar__time" datetime="">Generated {{TIMESTAMP}}</time>
+
+  <div class="progress-bar" role="progressbar" aria-label="Test results progress">
+    <div class="progress-bar__pass" style="width:{{PASS_PCT}}%"  title="{{PASS}} passed"></div>
+    <div class="progress-bar__skip" style="width:{{SKIP_PCT}}%"  title="{{SKIP}} skipped"></div>
+    <div class="progress-bar__fail" style="width:{{FAIL_PCT}}%"  title="{{FAIL}} failed"></div>
+  </div>
+</header>
+
+<!-- ── Tab strip ─────────────────────────────────────────────────────────── -->
+<nav class="tab-strip" role="tablist" aria-label="Test suites">
+  {{TABS_HTML}}
+</nav>
+
+<!-- ── Tab panels ────────────────────────────────────────────────────────── -->
+<main class="content-area">
+  {{CONTENT_HTML}}
+</main>
+
+<!-- ── Lightbox ──────────────────────────────────────────────────────────── -->
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot preview" onclick="closeLightbox(event)">
+  <button id="lightbox-close" onclick="closeLightbox()" aria-label="Close">✕</button>
+  <img id="lightbox-img" src="" alt="" />
+  <p id="lightbox-caption"></p>
+</div>
+
+<script>
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  function switchTab(tabId) {
+    // Deactivate all tabs + panels
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.classList.remove('tab-btn--active');
+      btn.setAttribute('aria-selected', 'false');
+    });
+    document.querySelectorAll('.tab-panel').forEach(function(panel) {
+      panel.classList.remove('tab-panel--active');
+    });
+
+    // Activate selected
+    var btn   = document.getElementById('tab-' + tabId);
+    var panel = document.getElementById('panel-' + tabId);
+    if (btn)   { btn.classList.add('tab-btn--active'); btn.setAttribute('aria-selected', 'true'); }
+    if (panel) { panel.classList.add('tab-panel--active'); }
+  }
+
+  // ── Journey collapse / expand ──────────────────────────────────────────────
+  function toggleJourney(btn) {
+    var expanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+  }
+
+  // ── Lightbox ───────────────────────────────────────────────────────────────
+  function openLightbox(img) {
+    var lb      = document.getElementById('lightbox');
+    var lbImg   = document.getElementById('lightbox-img');
+    var lbCap   = document.getElementById('lightbox-caption');
+    lbImg.src     = img.src;
+    lbImg.alt     = img.alt;
+    lbCap.textContent = img.dataset.caption || img.alt || '';
+    lb.classList.add('lightbox--open');
+    document.body.style.overflow = 'hidden';
+    lbImg.focus();
+  }
+
+  function closeLightbox(event) {
+    // If event is a click and the click target is the image itself, don't close
+    if (event && event.target && event.target.id === 'lightbox-img') return;
+    var lb = document.getElementById('lightbox');
+    lb.classList.remove('lightbox--open');
+    document.body.style.overflow = '';
+  }
+
+  // Delegate thumbnail clicks
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('screenshot-thumb')) {
+      openLightbox(e.target);
+    }
+  });
+
+  // Keyboard: Escape closes lightbox
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+</script>
+</body>
+</html>
