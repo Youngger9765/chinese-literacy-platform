@@ -627,6 +627,11 @@ def start_assignment(
             story_id=assignment.story_id,
             text_id=assignment.text_id,
             status="in_progress",
+            target_cpm=assignment.target_cpm,
+            target_accuracy=assignment.target_accuracy,
+            difficulty_label=assignment.difficulty_label,
+            effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+            effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
         )
 
     # story_slug for LearningSession: use story_id (YAML) or text_id as string
@@ -658,6 +663,11 @@ def start_assignment(
         story_id=assignment.story_id,
         text_id=assignment.text_id,
         status="in_progress",
+        target_cpm=assignment.target_cpm,
+        target_accuracy=assignment.target_accuracy,
+        difficulty_label=assignment.difficulty_label,
+        effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+        effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
     )
 
 

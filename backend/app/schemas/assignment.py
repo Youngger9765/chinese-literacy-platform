@@ -134,3 +134,9 @@ class StartAssignmentResponse(BaseModel):
     story_id: str | None      # set if platform text
     text_id: int | None       # set if DB text
     status: str
+    # Reading goals (Issue #414) — let student know the target before starting
+    target_cpm: int | None = None
+    target_accuracy: float | None = None
+    difficulty_label: str | None = None
+    effective_cpm: int = DEFAULT_TARGET_CPM
+    effective_accuracy: float = DEFAULT_TARGET_ACCURACY

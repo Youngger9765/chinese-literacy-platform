@@ -8,7 +8,7 @@ import { reportSessionComplete } from '../../services/api';
 
 const ReportPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
-  const { selectedStory, session, handleRetry, handleSessionComplete, dbSessionId } = useLearningContext();
+  const { selectedStory, session, handleRetry, handleSessionComplete, dbSessionId, assignmentReadingGoals } = useLearningContext();
   const { user, token } = useAuth();
   const navigate = useNavigate();
 
@@ -72,6 +72,15 @@ const ReportPage: React.FC = () => {
         onGoToVocab={() => navigate(`/learn/${storyId}/vocab`)}
         dbSessionId={dbSessionId}
         token={token}
+        readingGoals={
+          assignmentReadingGoals
+            ? {
+                effectiveCpm: assignmentReadingGoals.effective_cpm,
+                effectiveAccuracy: assignmentReadingGoals.effective_accuracy,
+                difficultyLabel: assignmentReadingGoals.difficulty_label,
+              }
+            : undefined
+        }
       />
 
       {showXpToast && xpResult && (
