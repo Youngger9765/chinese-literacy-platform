@@ -24,6 +24,8 @@ from ..schemas.session import (
     SessionUpdateRequest,
 )
 from ..services.ai_service import (
+    CONTENT_FILTER_FRIENDLY_MSG,
+    GeminiContentFilterError,
     evaluate_comprehension,
     generate_example_sentences,
     generate_reading_analysis,
@@ -281,6 +283,15 @@ async def get_ai_analysis(
             "dictation_correct_count": payload.dictation_correct_count,
             "dictation_total_count": payload.dictation_total_count,
         })
+    except GeminiContentFilterError:
+        logger.warning("Content filter blocked AI analysis for session %d", session_id)
+        return AIAnalysisResponse(
+            analysis_summary=CONTENT_FILTER_FRIENDLY_MSG,
+            strengths=[],
+            areas_for_improvement=[],
+            practice_suggestions=["換一篇課文再試試看"],
+            encouragement_message="你很棒，繼續加油！",
+        )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
     except Exception as e:
@@ -325,6 +336,15 @@ async def get_ai_analysis_standalone(
             "dictation_correct_count": payload.dictation_correct_count,
             "dictation_total_count": payload.dictation_total_count,
         })
+    except GeminiContentFilterError:
+        logger.warning("Content filter blocked standalone AI analysis for user %d", current_user.id)
+        return AIAnalysisResponse(
+            analysis_summary=CONTENT_FILTER_FRIENDLY_MSG,
+            strengths=[],
+            areas_for_improvement=[],
+            practice_suggestions=["換一篇課文再試試看"],
+            encouragement_message="你很棒，繼續加油！",
+        )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
     except Exception as e:
