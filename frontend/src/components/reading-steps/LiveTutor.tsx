@@ -396,7 +396,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     }
 
     if (!usedFallback) {
-      setStreak(tier <= 2 ? streak + 1 : 0);
+      setStreak(prev => tier <= 2 ? prev + 1 : 0)
       if (!effectiveFeedback) {
         if (tier === 1) effectiveFeedback = pick(TIER1_POOL);
         else if (tier === 2) effectiveFeedback = pick(TIER2_POOL);
@@ -409,19 +409,21 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setLastDiffTokens(diffTokens);
     setLineResults(prev => [...prev, result]);
 
-    // Step 7: Debug logging
-    console.group('%c[Evaluation]', 'color: cyan; font-weight: bold');
-    console.log('Line:', lineIdx, '/', story.content.length - 1);
-    console.log('Target:', targetText);
-    console.log('STT:', rawStt);
-    console.log('Method:', evaluationMethod);
-    console.log('Raw match rate:', (rawMatchRate * 100).toFixed(1) + '%');
-    console.log('Adjusted match rate:', (matchRate * 100).toFixed(1) + '%', '→ Tier', tier);
-    console.log('CPM:', cpm);
-    console.log('Duration:', (durationMs / 1000).toFixed(1) + 's');
-    console.log('Advance:', shouldAdvance, '| Finish:', shouldFinish);
-    console.log('Feedback:', effectiveFeedback);
-    console.groupEnd();
+    // Step 7: Debug logging (dev only)
+    if (import.meta.env.DEV) {
+      console.group('%c[Evaluation]', 'color: cyan; font-weight: bold');
+      console.log('Line:', lineIdx, '/', story.content.length - 1);
+      console.log('Target:', targetText);
+      console.log('STT:', rawStt);
+      console.log('Method:', evaluationMethod);
+      console.log('Raw match rate:', (rawMatchRate * 100).toFixed(1) + '%');
+      console.log('Adjusted match rate:', (matchRate * 100).toFixed(1) + '%', '→ Tier', tier);
+      console.log('CPM:', cpm);
+      console.log('Duration:', (durationMs / 1000).toFixed(1) + 's');
+      console.log('Advance:', shouldAdvance, '| Finish:', shouldFinish);
+      console.log('Feedback:', effectiveFeedback);
+      console.groupEnd();
+    }
 
     // Step 8: Commit messages
     const newMsgs: LiveMessage[] = [];
@@ -450,6 +452,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       setTimeout(() => setCelebratingIndex(null), 2000);
 
       setTimeout(() => {
+        setRetryCount(0);
         setCurrentLineIndex(nextIdx);
         isAdvancingRef.current = false;
         setIsAdvancing(false);
@@ -572,7 +575,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     recognition.onend = () => {
       if (isSessionActiveRef.current) {
         // Browser/API timed out — seamlessly reconnect
-        console.log('[SpeechRecognition] Auto-reconnecting…');
+        if (import.meta.env.DEV) {
+          console.log('[SpeechRecognition] Auto-reconnecting…');
+        }
         accumulatedTranscriptRef.current = currentTranscriptRef.current;
         try { recognition.start(); } catch (_) {}
       } else {
@@ -743,6 +748,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             // Only allow navigating to completed or current paragraphs (not locked)
             if (lineStatuses[idx] === 'locked') return;
             stopSession();
+            setRetryCount(0);
             setCurrentLineIndex(idx);
           }}
         />
@@ -1088,6 +1094,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 const prevIdx = currentLineIndex - 1;
                 if (prevIdx >= 0 && (lineStatuses[prevIdx] === 'completed' || lineStatuses[prevIdx] === 'current')) {
                   stopSession();
+                  setRetryCount(0);
                   setCurrentLineIndex(prevIdx);
                 }
               }}
@@ -1134,6 +1141,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   onClick={() => {
                     if (nextUnlocked) {
                       stopSession();
+                      setRetryCount(0);
                       setCurrentLineIndex(prev => prev + 1);
                     }
                   }}
