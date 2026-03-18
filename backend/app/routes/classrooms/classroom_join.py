@@ -20,36 +20,17 @@ router = APIRouter(tags=["classrooms"])
 logger = logging.getLogger(__name__)
 
 
-@router.post(
-    "/classrooms/{classroom_id}/regenerate-code",
-    response_model=ClassroomResponse,
-)
-def regenerate_classroom_code(
-    classroom_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Regenerate the join code for a classroom. Requires owner or admin."""
-    classroom = get_classroom_or_404(classroom_id, db)
-    require_owner_or_admin(classroom, current_user, db)
-
-    classroom.join_code = generate_join_code(db)
-    db.commit()
-    db.refresh(classroom)
-    logger.info(
-        "Regenerated join code for classroom %d (by user %d)",
-        classroom_id, current_user.id,
-    )
-    return classroom_to_response(classroom, db)
-
-
 @router.post("/classrooms/join", status_code=200, response_model=ClassroomResponse)
 def join_classroom_by_code(
     payload: ClassroomJoinRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Join a classroom using a join code. Enrolls the current user as a student."""
+    """Join a classroom using a join code. Enrolls the current user as a student.
+
+    IMPORTANT: This route MUST appear before /classrooms/{classroom_id}/regenerate-code
+    so that FastAPI does not treat "join" as a classroom_id.
+    """
     from ...models.school import School
 
     classroom = (
@@ -85,5 +66,28 @@ def join_classroom_by_code(
     logger.info(
         "User %d joined classroom %d via join code",
         current_user.id, classroom.id,
+    )
+    return classroom_to_response(classroom, db)
+
+
+@router.post(
+    "/classrooms/{classroom_id}/regenerate-code",
+    response_model=ClassroomResponse,
+)
+def regenerate_classroom_code(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Regenerate the join code for a classroom. Requires owner or admin."""
+    classroom = get_classroom_or_404(classroom_id, db)
+    require_owner_or_admin(classroom, current_user, db)
+
+    classroom.join_code = generate_join_code(db)
+    db.commit()
+    db.refresh(classroom)
+    logger.info(
+        "Regenerated join code for classroom %d (by user %d)",
+        classroom_id, current_user.id,
     )
     return classroom_to_response(classroom, db)

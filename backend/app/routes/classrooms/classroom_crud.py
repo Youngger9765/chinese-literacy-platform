@@ -16,6 +16,8 @@ from ...schemas.classroom import (
     ClassroomListResponse,
     ClassroomResponse,
     ClassroomUpdateRequest,
+    StudentEnrolledClassroom,
+    StudentEnrolledClassroomsResponse,
 )
 from .helpers import (
     classroom_to_detail_response,
@@ -172,7 +174,7 @@ def download_csv_template(
     )
 
 
-@router.get("/classrooms/my-enrollments")
+@router.get("/classrooms/my-enrollments", response_model=StudentEnrolledClassroomsResponse)
 def list_my_enrolled_classrooms(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -184,8 +186,6 @@ def list_my_enrolled_classrooms(
 
     Returns classroom details including teacher name for the student dashboard.
     """
-    from ...schemas.classroom import StudentEnrolledClassroom, StudentEnrolledClassroomsResponse
-
     rows = (
         db.query(ClassroomStudent, Classroom, User)
         .join(Classroom, Classroom.id == ClassroomStudent.classroom_id)
