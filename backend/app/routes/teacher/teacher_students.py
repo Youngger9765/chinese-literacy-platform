@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
+from ...dependencies.tenant import _check_classroom_access
 from ...models.school import Classroom, ClassroomStudent
 from ...models.session import DialogueTurn, LearningSession
 from ...models.student_tag import StudentTag
@@ -333,7 +334,6 @@ def get_classroom_stuck_overview(
     Only teachers with access to the classroom can call this.
     Returns students who have at least one stuck-point indicator.
     """
-    from ...dependencies.tenant import _check_classroom_access
     _check_classroom_access(current_user, classroom_id, db)
 
     enrollments = (

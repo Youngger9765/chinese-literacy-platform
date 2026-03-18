@@ -1,6 +1,6 @@
 """Teacher custom text library endpoints: my-texts CRUD."""
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -190,7 +190,7 @@ def update_my_text(
     if body.vocabulary is not None:
         text.vocabulary = body.vocabulary
 
-    text.updated_at = datetime.utcnow()
+    text.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(text)
     return _text_to_detail(text)
