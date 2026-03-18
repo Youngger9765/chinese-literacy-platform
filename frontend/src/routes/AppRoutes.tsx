@@ -19,15 +19,17 @@ import {
 } from '../pages/app/InlinePages';
 import PageLoader from '../components/ui/PageLoader';
 
+// Auth pages — eager-loaded (small, needed immediately on first visit)
+import LoginPage from '../pages/LoginPage';
+import RegisterPage from '../pages/RegisterPage';
+import ChangePasswordPage from '../pages/ChangePasswordPage';
+import ForgotPassword from '../pages/ForgotPassword';
+
 // ---------------------------------------------------------------------------
 // Route-level code splitting (lazy loading)
 // Heavy pages are split into separate JS chunks to reduce initial bundle size.
 // Each lazy import becomes its own chunk that loads on demand.
 // ---------------------------------------------------------------------------
-
-// Teacher pages — loaded on demand (not needed for student-only sessions)
-const TeacherDashboard = lazy(() => import('../pages/teacher/TeacherDashboard'));
-const ClassroomDetail = lazy(() => import('../pages/teacher/ClassroomDetail'));
 
 // Admin page — loaded only for system_admin / org_admin roles
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
@@ -59,12 +61,6 @@ const ParentDashboard = lazy(() => import('../pages/parent/ParentDashboard'));
 // New home pages for each role
 const StudentHome = lazy(() => import('../pages/student/StudentHome'));
 const TeacherHome = lazy(() => import('../pages/teacher/TeacherHome'));
-
-// Auth pages — eager-loaded (small, needed immediately on first visit)
-import LoginPage from '../pages/LoginPage';
-import RegisterPage from '../pages/RegisterPage';
-import ChangePasswordPage from '../pages/ChangePasswordPage';
-import ForgotPassword from '../pages/ForgotPassword';
 
 // Utility pages — rarely visited after first load
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
