@@ -4,13 +4,12 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, usePa
 import ErrorBoundary from './components/ErrorBoundary';
 import { AppView, Story } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LearningNavProvider, useLearningNav } from './contexts/LearningNavContext';
-import { hasRole } from './services/authApi';
+import { LearningNavProvider } from './contexts/LearningNavContext';
 import { getMyAssignments } from './services/assignmentApi';
-import { useAppView } from './hooks/useAppView';
-import StepperNav from './components/StepperNav';
+import { hasRole } from './services/authApi';
 import FeedbackButton from './components/FeedbackButton';
-import Sidebar from './components/Sidebar';
+import Header from './components/layout/Header';
+import Sidebar from './components/layout/Sidebar';
 import StoryLibrary from './pages/student/StoryLibrary';
 import WriteCharacter from './components/stroke-order/WriteCharacter';
 import LoginPage from './pages/LoginPage';
@@ -21,7 +20,6 @@ import LearningLayout from './layouts/LearningLayout';
 import SessionResumePrompt from './components/SessionResumePrompt';
 import StudentProgressDashboard from './components/student/StudentProgressDashboard';
 import RecommendedStories from './components/student/RecommendedStories';
-import NotificationBell from './components/teacher/NotificationBell';
 
 // ---------------------------------------------------------------------------
 // Route-level code splitting (lazy loading)
@@ -71,6 +69,8 @@ const StudentProgress = lazy(() => import('./pages/student/StudentProgress'));
 const DialogueHistory = lazy(() => import('./pages/student/DialogueHistory'));
 const MyVocabulary = lazy(() => import('./pages/student/MyVocabulary'));
 const AchievementsPage = lazy(() => import('./pages/student/AchievementsPage'));
+const StudentClassroomDashboard = lazy(() => import('./pages/student/StudentClassroomDashboard'));
+const StudentProfile = lazy(() => import('./pages/student/StudentProfile'));
 
 // Parent dashboard — role-specific, split separately
 const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard'));
@@ -164,8 +164,10 @@ const LibraryPage: React.FC = () => {
       {showResumePrompt && (
         <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
       )}
-      <StudentProgressDashboard onDashboardLoaded={setCompletedSlugs} />
-      <div className="mt-6">
+      <div className="min-h-[120px]">
+        <StudentProgressDashboard onDashboardLoaded={setCompletedSlugs} />
+      </div>
+      <div className="mt-6 min-h-[200px]">
         <RecommendedStories />
       </div>
       <StoryLibrary onStartReading={handleSelectStory} completedSlugs={completedSlugs} />
@@ -293,10 +295,8 @@ const OnboardingWrapper: React.FC = () => {
 
 /** The authenticated app shell with header + sidebar. */
 const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, token, logout } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
-  const currentView = useAppView();
-  const { session: navSession, selectedStory: navStory } = useLearningNav();
 
   // Pending assignment count for the student nav badge
   const [pendingAssignmentCount, setPendingAssignmentCount] = useState(0);
@@ -359,14 +359,6 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
   };
 
-  // Determine context title shown in header (between logo and user info)
-  const getContextTitle = (): string | null => {
-    if (navStory) return navStory.title;
-    return null;
-  };
-
-  const contextTitle = getContextTitle();
-
   return (
     <div className="h-screen flex flex-col bg-amber-50 text-gray-900 font-sans overflow-hidden">
       {/* Skip-to-content link — visually hidden until focused (WCAG 2.4.1) */}
@@ -377,63 +369,8 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         跳至主要內容
       </a>
 
-      {/* Header — slim: logo | stepper (when learning) | user info + logout */}
-      <header
-        role="banner"
-        aria-label="應用程式標頭"
-        className="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-4 shrink-0 z-30"
-      >
-        {/* Logo — keyboard-accessible home link */}
-        <button
-          type="button"
-          className="flex items-center gap-2 shrink-0 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-          onClick={() => navigate('/')}
-          aria-label="LingoLeap 首頁"
-        >
-          <div className="bg-accent w-6 h-6 rounded flex items-center justify-center" aria-hidden="true">
-            <span className="text-white font-bold text-xs">L</span>
-          </div>
-          <span className="text-sm font-bold text-gray-800 hidden sm:block">AI Reading Tutor</span>
-        </button>
-
-        {/* Center: StepperNav in learning mode, or context title */}
-        <div className="flex-1 flex items-center justify-center px-4 min-w-0">
-          {navStory && ![AppView.ADMIN_DASHBOARD, AppView.TEACHER_DASHBOARD, AppView.CLASSROOM_DETAIL, AppView.MY_ASSIGNMENTS, AppView.MY_VOCABULARY, AppView.LEARNING_HISTORY, AppView.DIALOGUE_HISTORY, AppView.STUDENT_PROGRESS, AppView.STUDENT_HOME, AppView.TEACHER_HOME].includes(currentView) ? (
-            <StepperNav
-              currentView={currentView}
-              session={navSession}
-              selectedStory={navStory}
-              onNavigate={handleStepperNavigate}
-            />
-          ) : contextTitle ? (
-            <span className="text-sm font-medium text-gray-500 truncate" aria-live="polite">
-              {contextTitle}
-            </span>
-          ) : null}
-        </div>
-
-        {/* Right: NotificationBell (teacher) + user name + logout */}
-        <div className="flex items-center gap-3 shrink-0">
-          {hasRole(user, 'teacher', 'system_admin', 'principal', 'director') && (
-            <NotificationBell
-              onNavigateToStudent={(classroomId) => navigate(`/teacher/classroom/${classroomId}`)}
-            />
-          )}
-          <div className="w-px h-4 bg-gray-200" aria-hidden="true" />
-          {user && (
-            <span className="text-xs text-gray-500 hidden sm:block" aria-label={`已登入為 ${user.name}`}>
-              {user.name}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={logout}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-          >
-            登出
-          </button>
-        </div>
-      </header>
+      {/* Header — extracted to components/layout/Header.tsx */}
+      <Header onStepperNavigate={handleStepperNavigate} />
 
       {/* Body: sidebar + main content */}
       <div className="flex-1 flex overflow-hidden">
@@ -671,6 +608,26 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <AppShell>
                   <AchievementsPage />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/classroom-dashboard"
+            element={
+              <ProtectedRoute>
+                <AppShell>
+                  <StudentClassroomDashboard />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <AppShell>
+                  <StudentProfile />
                 </AppShell>
               </ProtectedRoute>
             }

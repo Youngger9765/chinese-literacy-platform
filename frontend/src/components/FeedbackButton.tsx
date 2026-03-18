@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { submitFeedback, type FeedbackCategory } from '../services/feedbackApi';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const CATEGORY_OPTIONS: { value: FeedbackCategory; label: string }[] = [
   { value: 'bug', label: '問題回報' },
@@ -18,6 +19,24 @@ const FeedbackButton: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showTooltip, setShowTooltip] = useState(false);
 
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const isOpen = modalState !== 'idle';
+
+  // Focus trap — active when modal is open.
+  useFocusTrap(dialogRef, isOpen);
+
+  // Escape key closes the modal.
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   const openModal = () => {
     setCategory('bug');
     setTitle('');
@@ -28,6 +47,8 @@ const FeedbackButton: React.FC = () => {
 
   const closeModal = () => {
     setModalState('idle');
+    // Restore focus to the trigger button after a short delay to allow DOM update.
+    requestAnimationFrame(() => triggerRef.current?.focus());
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,6 +90,7 @@ const FeedbackButton: React.FC = () => {
             </div>
           )}
           <button
+            ref={triggerRef}
             onClick={openModal}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -94,15 +116,21 @@ const FeedbackButton: React.FC = () => {
       </div>
 
       {/* Modal overlay */}
-      {modalState !== 'idle' && (
+      {isOpen && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+          aria-modal="true"
+          role="dialog"
+          aria-labelledby="feedback-modal-title"
           onClick={(e) => {
             if (e.target === e.currentTarget) closeModal();
           }}
         >
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+          <div
+            ref={dialogRef}
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4"
+          >
 
             {/* Success state */}
             {modalState === 'success' && (
@@ -149,7 +177,7 @@ const FeedbackButton: React.FC = () => {
               <>
                 {/* Header */}
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-gray-900">回報問題</h2>
+                  <h2 id="feedback-modal-title" className="text-lg font-bold text-gray-900">回報問題</h2>
                   <button
                     onClick={closeModal}
                     className="text-gray-400 hover:text-gray-600 transition-colors"

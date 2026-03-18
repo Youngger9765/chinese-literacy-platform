@@ -2,6 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { getErrorPatterns, markErrorCorrected, type ErrorPatternItem } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
+interface Props {
+  storySlug?: string | null;
+  onBatchPractice?: (characters: string[]) => void;
+}
+
 /**
  * ErrorPatternsCard - Shows frequently-errored characters with severity coding.
  *
@@ -9,21 +14,24 @@ import { useAuth } from '../../contexts/AuthContext';
  * - 2-3 errors = yellow (warning)
  * - 4+ errors = red (critical)
  *
- * Students can mark characters as "practiced" or "mastered".
+ * When storySlug is provided, filters errors to that story only (threshold = 1 error).
+ * Supports batch selection for launching practice on multiple characters at once.
  */
-const ErrorPatternsCard: React.FC = () => {
+const ErrorPatternsCard: React.FC<Props> = ({ storySlug, onBatchPractice }) => {
   const { token, user } = useAuth();
   const [patterns, setPatterns] = useState<ErrorPatternItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const fetchPatterns = useCallback(async () => {
     if (!token || !user) return;
     try {
       setLoading(true);
       setError(null);
-      const data = await getErrorPatterns(token, user.id);
+      setSelected(new Set());
+      const data = await getErrorPatterns(token, user.id, storySlug ?? undefined);
       setPatterns(data.patterns);
     } catch (err) {
       setError('載入錯誤字型資料失敗');
@@ -31,7 +39,7 @@ const ErrorPatternsCard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [token, user]);
+  }, [token, user, storySlug]);
 
   useEffect(() => {
     fetchPatterns();
@@ -47,6 +55,34 @@ const ErrorPatternsCard: React.FC = () => {
       console.error('Failed to mark correction:', err);
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const toggleSelect = (character: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(character)) {
+        next.delete(character);
+      } else {
+        next.add(character);
+      }
+      return next;
+    });
+  };
+
+  const practiceablePatterns = patterns.filter((p) => !p.is_corrected);
+
+  const handleSelectAll = () => {
+    if (selected.size === practiceablePatterns.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(practiceablePatterns.map((p) => p.character)));
+    }
+  };
+
+  const handleBatchPractice = () => {
+    if (onBatchPractice && selected.size > 0) {
+      onBatchPractice(Array.from(selected));
     }
   };
 
@@ -84,14 +120,39 @@ const ErrorPatternsCard: React.FC = () => {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4">常見錯字</h3>
-        <p className="text-sm text-gray-500">目前沒有重複錯誤的字，繼續保持！</p>
+        <p className="text-sm text-gray-500">
+          {storySlug ? '這篇課文沒有需要加強的錯字' : '目前沒有重複錯誤的字，繼續保持！'}
+        </p>
       </div>
     );
   }
 
+  const allSelected =
+    practiceablePatterns.length > 0 && selected.size === practiceablePatterns.length;
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-4">常見錯字</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-gray-900">常見錯字</h3>
+        {onBatchPractice && practiceablePatterns.length > 0 && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSelectAll}
+              className="text-xs font-medium text-blue-600 hover:text-blue-800 underline"
+            >
+              {allSelected ? '取消全選' : '全選'}
+            </button>
+            {selected.size > 0 && (
+              <button
+                onClick={handleBatchPractice}
+                className="px-3 py-1.5 text-xs font-medium bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
+              >
+                批量練習 ({selected.size})
+              </button>
+            )}
+          </div>
+        )}
+      </div>
       <div className="space-y-3">
         {patterns.map((pattern) => (
           <div
@@ -102,7 +163,16 @@ const ErrorPatternsCard: React.FC = () => {
                 : getSeverityClass(pattern.total_error_count)
             }`}
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              {onBatchPractice && !pattern.is_corrected && (
+                <input
+                  type="checkbox"
+                  checked={selected.has(pattern.character)}
+                  onChange={() => toggleSelect(pattern.character)}
+                  className="w-4 h-4 rounded border-gray-300 text-accent cursor-pointer"
+                  aria-label={`選擇 ${pattern.character}`}
+                />
+              )}
               <span className="text-3xl font-bold text-gray-900">{pattern.character}</span>
               <div>
                 <div className="flex items-center gap-2">

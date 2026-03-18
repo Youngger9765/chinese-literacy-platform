@@ -35,6 +35,7 @@ from app.database import get_db
 from app.models import Base
 from app.models.user import Role
 from app.models.session import LearningSession, DialogueTurn
+from app.models.school import Classroom, ClassroomStudent, School
 
 # ---------------------------------------------------------------------------
 # SQLite in-memory test database
@@ -111,6 +112,11 @@ def client():
 
 
 def _register_user(client, suffix: str | None = None) -> dict:
+    """Register a teacher user (only teachers can self-register).
+
+    Uses the register → verify-email → login flow required since issue #460.
+    """
+    from app.auth.password import hash_password
     unique = suffix or uuid.uuid4().hex[:8]
     email = f"diag_user_{unique}@example.com"
     password = "SecurePass123!"
@@ -120,11 +126,60 @@ def _register_user(client, suffix: str | None = None) -> dict:
         "name": f"DialogueUser {unique}",
     })
     assert resp.status_code == 201, resp.text
+    # Verify email using dev-mode verification_token
+    verification_token = resp.json().get("verification_token")
+    if verification_token:
+        verify_resp = client.get(f"/api/auth/verify-email?token={verification_token}")
+        assert verify_resp.status_code == 200, verify_resp.text
+    # Login to get JWT
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert login_resp.status_code == 200, login_resp.text
+    token = login_resp.json()["access_token"]
+    me_resp = client.get("/api/users/me", headers={"Authorization": f"Bearer {token}"})
+    user_id = me_resp.json().get("id")
     return {
         "email": email,
         "password": password,
-        "token": resp.json()["access_token"],
+        "token": token,
+        "user_id": user_id,
     }
+
+
+def _create_student_in_db(client) -> dict:
+    """Create a student user directly in the DB (bypasses self-reg restriction).
+
+    Students cannot self-register since issue #457 — they're created by teachers
+    via batch import. For tests, we create them directly in the DB with
+    email_verified=True, then log in to get a JWT.
+    """
+    from app.auth.password import hash_password
+    from app.models.user import User as UserModel
+
+    unique = uuid.uuid4().hex[:8]
+    email = f"stu_diag_{unique}@example.com"
+    password = "SecurePass123!"
+
+    db = TestingSessionLocal()
+    try:
+        user = UserModel(
+            email=email,
+            password_hash=hash_password(password),
+            name=f"Student {unique}",
+            email_verified=True,
+            is_active=True,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        user_id = user.id
+    finally:
+        db.close()
+
+    # Login to get JWT
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert login_resp.status_code == 200, login_resp.text
+    token = login_resp.json()["access_token"]
+    return {"email": email, "password": password, "token": token, "user_id": user_id}
 
 
 def auth_header(token: str) -> dict:
@@ -536,3 +591,183 @@ class TestDialoguePersistence:
         assert data["total"] == 1
         assert data["turns"][0]["role"] == "ai"
         assert data["turns"][0]["text"] == "這篇課文的主角是誰？"
+
+
+# ---------------------------------------------------------------------------
+# GET /api/teacher/students/{student_id}/sessions/{session_id}/dialogue
+# Issue #418 — teacher can view student dialogue history
+# ---------------------------------------------------------------------------
+
+
+class TestTeacherDialogueHistory:
+    """Teacher endpoint for viewing a student's Socratic dialogue history."""
+
+    def _setup_teacher_student_classroom(self, client):
+        """
+        Register a teacher and student, create a classroom, enroll the student.
+        Returns (teacher_token, student_token, student_user_id, classroom_id).
+        """
+        teacher = _register_user(client)
+        student = _create_student_in_db(client)
+
+        teacher_id = teacher["user_id"]
+        student_id = student["user_id"]
+
+        # Create school, classroom owned by teacher, and enroll student directly in DB
+        db = TestingSessionLocal()
+        try:
+            school = School(name=f"Test School {uuid.uuid4().hex[:6]}")
+            db.add(school)
+            db.commit()
+            db.refresh(school)
+
+            classroom = Classroom(
+                name=f"Classroom for {teacher_id}",
+                teacher_id=teacher_id,
+                school_id=school.id,
+            )
+            db.add(classroom)
+            db.commit()
+            db.refresh(classroom)
+            classroom_id = classroom.id
+
+            enrollment = ClassroomStudent(
+                classroom_id=classroom_id,
+                student_id=student_id,
+            )
+            db.add(enrollment)
+            db.commit()
+        finally:
+            db.close()
+
+        return teacher["token"], student["token"], student_id, classroom_id
+
+    def test_teacher_can_view_student_dialogue(self, client):
+        """Teacher with classroom access can retrieve student's dialogue turns."""
+        teacher_token, student_token, student_id, _ = self._setup_teacher_student_classroom(client)
+
+        # Create a learning session for the student
+        session_resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "teacher-dialogue-story"},
+            headers=auth_header(student_token),
+        )
+        assert session_resp.status_code == 201, session_resp.text
+        session_id = session_resp.json()["id"]
+
+        # Seed some dialogue turns
+        db = TestingSessionLocal()
+        try:
+            socratic_id = str(uuid.uuid4())
+            db.add_all([
+                DialogueTurn(
+                    socratic_session_id=socratic_id,
+                    learning_session_id=session_id,
+                    turn_order=0,
+                    role="ai",
+                    text="這篇課文的主角是誰？",
+                    phase="factual",
+                ),
+                DialogueTurn(
+                    socratic_session_id=socratic_id,
+                    learning_session_id=session_id,
+                    turn_order=1,
+                    role="student",
+                    text="小英",
+                    phase="factual",
+                ),
+                DialogueTurn(
+                    socratic_session_id=socratic_id,
+                    learning_session_id=session_id,
+                    turn_order=2,
+                    role="feedback",
+                    text="答對了！",
+                    is_correct=True,
+                    phase="factual",
+                ),
+            ])
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.get(
+            f"/api/teacher/students/{student_id}/sessions/{session_id}/dialogue",
+            headers=auth_header(teacher_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["session_id"] == session_id
+        assert data["student_id"] == student_id
+        assert data["story_slug"] == "teacher-dialogue-story"
+        assert data["total"] == 3
+        turns = data["turns"]
+        assert [t["turn_order"] for t in turns] == [0, 1, 2]
+        assert turns[0]["role"] == "ai"
+        assert turns[1]["role"] == "student"
+        assert turns[2]["role"] == "feedback"
+        assert turns[2]["is_correct"] is True
+
+    def test_teacher_gets_empty_list_when_no_dialogue(self, client):
+        """Returns empty turns list when session has no dialogue recorded."""
+        teacher_token, student_token, student_id, _ = self._setup_teacher_student_classroom(client)
+
+        session_resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "no-dialogue-story"},
+            headers=auth_header(student_token),
+        )
+        session_id = session_resp.json()["id"]
+
+        resp = client.get(
+            f"/api/teacher/students/{student_id}/sessions/{session_id}/dialogue",
+            headers=auth_header(teacher_token),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 0
+        assert data["turns"] == []
+
+    def test_teacher_gets_404_for_wrong_student(self, client):
+        """Returns 404 when session_id doesn't belong to the specified student_id."""
+        teacher_token, student_token, student_id, _ = self._setup_teacher_student_classroom(client)
+
+        # Create session for student
+        session_resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "mismatch-story"},
+            headers=auth_header(student_token),
+        )
+        session_id = session_resp.json()["id"]
+
+        # Use a different (non-existent) student_id
+        resp = client.get(
+            f"/api/teacher/students/99999/sessions/{session_id}/dialogue",
+            headers=auth_header(teacher_token),
+        )
+        assert resp.status_code == 403  # 403 before 404 (student not in teacher's classroom)
+
+    def test_unauthorized_teacher_gets_403(self, client):
+        """A teacher without classroom access is blocked."""
+        _, student_token, student_id, _ = self._setup_teacher_student_classroom(client)
+
+        # Register a different teacher with no classrooms
+        other_teacher = _register_user(client)
+        other_teacher_token = other_teacher["token"]
+
+        session_resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "forbidden-story"},
+            headers=auth_header(student_token),
+        )
+        session_id = session_resp.json()["id"]
+
+        resp = client.get(
+            f"/api/teacher/students/{student_id}/sessions/{session_id}/dialogue",
+            headers=auth_header(other_teacher_token),
+        )
+        assert resp.status_code == 403
+
+    def test_unauthenticated_request_gets_401(self, client):
+        """Returns 401 when not authenticated."""
+        resp = client.get("/api/teacher/students/1/sessions/1/dialogue")
+        assert resp.status_code == 401

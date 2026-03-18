@@ -68,6 +68,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
       if (err instanceof AuthError) {
         if (err.status === 409 || err.message.includes('already')) {
           setError('此電子郵件已被註冊');
+        } else if (err.status === 403 && err.message.includes('網域')) {
+          // Issue #407: email domain not in school's allowed list
+          setError(err.message);
         } else {
           setError(err.message);
         }

@@ -26,7 +26,10 @@ from .routes.dictionary import router as dictionary_router
 from .routes.parents import router as parents_router
 from .routes.gamification import router as gamification_router
 from .routes.health import router as health_router
+from .routes.semesters import router as semesters_router
+from .routes.co_teaching import router as co_teaching_router
 from .utils.logging_config import setup_logging
+from .auth.rate_limiter import general_rate_limiter
 
 # Initialise structured logging before anything else
 setup_logging()
@@ -36,12 +39,12 @@ logger = logging.getLogger(__name__)
 _env = os.environ.get("ENVIRONMENT", "development")
 _is_dev = _env in ("development", "preview")
 
-if settings.jwt_secret_key == "dev-secret-change-in-production":
+if not settings.jwt_secret_key:
     if not _is_dev:
         raise RuntimeError("JWT_SECRET_KEY must be set in production!")
     else:
         import warnings
-        warnings.warn("Using default JWT secret key — NOT suitable for production", stacklevel=2)
+        warnings.warn("JWT_SECRET_KEY is empty — auth endpoints will fail. Set it in .env", stacklevel=2)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -168,6 +171,79 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             )
 
 
+class GlobalRateLimitMiddleware:
+    """Pure ASGI middleware for global per-IP rate limiting on /api/* endpoints.
+
+    Uses raw ASGI protocol instead of BaseHTTPMiddleware to guarantee headers
+    are injected before the response starts streaming (BaseHTTPMiddleware +
+    StreamingResponse can silently drop headers added after call_next).
+    """
+
+    _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
+    LIMIT = 60
+    WINDOW = 60  # seconds
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        path = scope["path"]
+
+        # Skip rate limiting for exempt or non-API paths.
+        if path in self._EXEMPT_PATHS or not path.startswith("/api"):
+            await self.app(scope, receive, send)
+            return
+
+        # Extract real client IP from headers.
+        headers_raw = dict(scope.get("headers", []))
+        forwarded_for = headers_raw.get(b"x-forwarded-for", b"").decode()
+        if forwarded_for:
+            ip = forwarded_for.split(",")[0].strip()
+        else:
+            client = scope.get("client")
+            ip = client[0] if client else "unknown"
+        key = f"global:ip:{ip}"
+
+        info = general_rate_limiter.check_with_info(key, self.LIMIT, self.WINDOW)
+
+        if not info.allowed:
+            response = JSONResponse(
+                status_code=429,
+                content={
+                    "detail": (
+                        "Too many requests. "
+                        f"Limit is {self.LIMIT} requests per {self.WINDOW} seconds per IP. "
+                        f"Please retry after {info.retry_after} seconds."
+                    ),
+                    "retry_after": info.retry_after,
+                },
+                headers={
+                    "Retry-After": str(info.retry_after),
+                    "X-RateLimit-Limit": str(self.LIMIT),
+                    "X-RateLimit-Remaining": "0",
+                },
+            )
+            await response(scope, receive, send)
+            return
+
+        # Inject rate-limit headers into the response.
+        extra_headers = [
+            (b"x-ratelimit-limit", str(self.LIMIT).encode()),
+            (b"x-ratelimit-remaining", str(info.remaining).encode()),
+        ]
+
+        async def send_with_headers(message):
+            if message["type"] == "http.response.start":
+                message["headers"] = list(message.get("headers", [])) + extra_headers
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     seed_default_data()
@@ -187,8 +263,8 @@ app = FastAPI(
 # every response (including CORS preflight responses).
 app.add_middleware(SecurityHeadersMiddleware)
 
-# CORS must be added before the logging middleware so the OPTIONS pre-flight
-# is still handled correctly.
+# CORS — added after SecurityHeaders so CORS headers appear on all responses
+# including pre-flight OPTIONS.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.origins_list,
@@ -198,6 +274,10 @@ app.add_middleware(
 )
 # TenantMiddleware enriches request.state with org context (passive, no blocking)
 app.add_middleware(TenantMiddleware)
+
+# Global rate limiting: 60 req/min per IP for all /api/* endpoints.
+# Placed after CORS so CORS preflight OPTIONS requests are not rate-limited.
+app.add_middleware(GlobalRateLimitMiddleware)
 
 # Logging middleware wraps everything (added after CORS so it runs outermost)
 app.add_middleware(RequestLoggingMiddleware)
@@ -222,6 +302,110 @@ app.include_router(dictionary_router, prefix="/api", tags=["dictionary"])
 app.include_router(parents_router, prefix="/api", tags=["parents"])
 app.include_router(gamification_router, prefix="/api", tags=["gamification"])
 app.include_router(health_router)
+app.include_router(semesters_router, prefix="/api", tags=["semesters"])
+app.include_router(co_teaching_router, prefix="/api", tags=["co-teaching"])
+
+
+def _patch_seed_assignments(db) -> None:
+    """Idempotent patch: create assignment seed data if teacher@test.com has none.
+
+    Safe to call on both fresh DBs (before users are seeded) and existing DBs.
+    Introduced in #528 to fix staging QA environments missing assignment data.
+    """
+    from datetime import datetime, timezone, timedelta
+    from .models.user import User
+    from .models.school import Classroom
+    from .models.session import LearningSession
+    from .models.assignment import Assignment, AssignmentSubmission
+
+    teacher = db.query(User).filter(User.email == "teacher@test.com").first()
+    if teacher is None:
+        return  # Users not seeded yet; full seed path will handle it
+
+    student = db.query(User).filter(User.email == "student@test.com").first()
+    if student is None:
+        return
+
+    classroom = (
+        db.query(Classroom)
+        .filter(Classroom.name == "三年甲班", Classroom.teacher_id == teacher.id)
+        .first()
+    )
+    if classroom is None:
+        return
+
+    # Already has assignments — nothing to do
+    existing = (
+        db.query(Assignment)
+        .filter(Assignment.classroom_id == classroom.id, Assignment.teacher_id == teacher.id)
+        .count()
+    )
+    if existing > 0:
+        return
+
+    now_utc = datetime.now(tz=timezone.utc)
+
+    # Assignment 1: pending (due date in the future)
+    assign_pending = Assignment(
+        classroom_id=classroom.id,
+        teacher_id=teacher.id,
+        story_id="L06",
+        title="第六課朗讀練習",
+        description="請完成第六課的朗讀與理解練習，注意發音準確度。",
+        assignment_type="reading",
+        due_date=now_utc + timedelta(days=7),
+        is_active=True,
+    )
+    db.add(assign_pending)
+    db.flush()
+
+    # Submission for pending assignment: student has not submitted yet
+    db.add(AssignmentSubmission(
+        assignment_id=assign_pending.id,
+        student_id=student.id,
+        status="pending",
+    ))
+
+    # Assignment 2: completed (due date in the past, student submitted)
+    assign_done = Assignment(
+        classroom_id=classroom.id,
+        teacher_id=teacher.id,
+        story_id="L04",
+        title="第四課閱讀理解",
+        description="完成第四課的蘇格拉底對話，達到 70 分以上為通過。",
+        assignment_type="comprehension",
+        due_date=now_utc - timedelta(days=3),
+        is_active=True,
+    )
+    db.add(assign_done)
+    db.flush()
+
+    # Link to an existing completed learning session for student1 (story L04)
+    completed_session = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id == student.id,
+            LearningSession.story_slug == "L04",
+            LearningSession.status == "completed",
+        )
+        .first()
+    )
+    sub_done = AssignmentSubmission(
+        assignment_id=assign_done.id,
+        student_id=student.id,
+        status="submitted",
+        submitted_at=now_utc - timedelta(days=2),
+        score=78.0,
+    )
+    if completed_session:
+        sub_done.session_id = completed_session.id
+    db.add(sub_done)
+
+    db.commit()
+    logger.info(
+        "seed_default_data (#528): patched assignment seed data — "
+        "2 assignments + 2 submissions for 三年甲班"
+    )
 
 
 def seed_default_data():
@@ -232,14 +416,41 @@ def seed_default_data():
     """
     import secrets
     import string
+    from datetime import datetime, timezone, timedelta
     from .database import SessionLocal
     from .models.school import School, Classroom, ClassroomStudent
     from .models.organization import Organization
     from .models.user import User, Role, UserRole
+    from .models.session import LearningSession
+    from .models.gamification import StudentStreak, StudentXPLog
+    from .models.assignment import Assignment, AssignmentSubmission
     from .auth.password import hash_password
     try:
         db = SessionLocal()
         try:
+            # Repair: ensure all known seed accounts have email_verified=True.
+            # This handles shared preview DBs that were seeded before #475 added
+            # email_verified=True to the seed constructor.
+            SEED_EMAILS = [
+                "admin@test.com", "teacher@test.com", "teacher2@test.com",
+                "student@test.com", "student2@test.com", "student3@test.com",
+            ]
+            unverified = (
+                db.query(User)
+                .filter(User.email.in_(SEED_EMAILS), User.email_verified.is_(False))
+                .all()
+            )
+            if unverified:
+                for u in unverified:
+                    u.email_verified = True
+                db.commit()
+                logger.info("seed_default_data: patched %d seed accounts to email_verified=True", len(unverified))
+
+            # Repair (#528): patch missing assignment seed data on existing DBs.
+            # Runs before the early-return so staging DBs get the fix even if
+            # users were already seeded before assignments were added.
+            _patch_seed_assignments(db)
+
             if db.query(User).count() > 0:
                 return  # Already seeded
 
@@ -306,10 +517,215 @@ def seed_default_data():
                 ClassroomStudent(classroom_id=class_7a.id, student_id=student1.id),
             ])
 
+            # -- 7. Learning sessions for students (relative dates so dashboard always shows data) --
+            now_utc = datetime.now(tz=timezone.utc)
+
+            def _days_ago(n: float) -> datetime:
+                return now_utc - timedelta(days=n)
+
+            # student1: 5 completed sessions spread over last 7 days (today + 6 prior days)
+            sessions_student1 = [
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L01",
+                    status="completed",
+                    current_step=7,
+                    overall_score=70.0,
+                    started_at=_days_ago(6),
+                    completed_at=_days_ago(6),
+                ),
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L02",
+                    status="completed",
+                    current_step=7,
+                    overall_score=55.0,
+                    started_at=_days_ago(5),
+                    completed_at=_days_ago(5),
+                ),
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L03",
+                    status="completed",
+                    current_step=7,
+                    overall_score=80.0,
+                    started_at=_days_ago(3),
+                    completed_at=_days_ago(3),
+                ),
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L04",
+                    status="completed",
+                    current_step=7,
+                    overall_score=78.0,
+                    started_at=_days_ago(1),
+                    completed_at=_days_ago(1),
+                ),
+                LearningSession(
+                    student_id=student1.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L05",
+                    status="completed",
+                    current_step=7,
+                    overall_score=60.0,
+                    started_at=_days_ago(0),
+                    completed_at=_days_ago(0),
+                ),
+            ]
+            # student2: 3 sessions this week
+            sessions_student2 = [
+                LearningSession(
+                    student_id=student2.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L01",
+                    status="completed",
+                    current_step=7,
+                    overall_score=85.0,
+                    started_at=_days_ago(4),
+                    completed_at=_days_ago(4),
+                ),
+                LearningSession(
+                    student_id=student2.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L02",
+                    status="completed",
+                    current_step=7,
+                    overall_score=90.0,
+                    started_at=_days_ago(2),
+                    completed_at=_days_ago(2),
+                ),
+                LearningSession(
+                    student_id=student2.id,
+                    classroom_id=class_3a.id,
+                    story_slug="L03",
+                    status="completed",
+                    current_step=7,
+                    overall_score=75.0,
+                    started_at=_days_ago(0),
+                    completed_at=_days_ago(0),
+                ),
+            ]
+            # student3: 2 sessions this week
+            sessions_student3 = [
+                LearningSession(
+                    student_id=student3.id,
+                    classroom_id=class_5b.id,
+                    story_slug="L01",
+                    status="completed",
+                    current_step=7,
+                    overall_score=65.0,
+                    started_at=_days_ago(3),
+                    completed_at=_days_ago(3),
+                ),
+                LearningSession(
+                    student_id=student3.id,
+                    classroom_id=class_5b.id,
+                    story_slug="L02",
+                    status="completed",
+                    current_step=7,
+                    overall_score=72.0,
+                    started_at=_days_ago(1),
+                    completed_at=_days_ago(1),
+                ),
+            ]
+            all_sessions = sessions_student1 + sessions_student2 + sessions_student3
+            db.add_all(all_sessions)
+            db.flush()
+
+            # -- 8. Streak records matching the seeded sessions --
+            streak_student1 = StudentStreak(
+                student_id=student1.id,
+                current_streak=2,
+                longest_streak=5,
+                last_activity_date=now_utc,
+            )
+            streak_student2 = StudentStreak(
+                student_id=student2.id,
+                current_streak=1,
+                longest_streak=3,
+                last_activity_date=now_utc,
+            )
+            streak_student3 = StudentStreak(
+                student_id=student3.id,
+                current_streak=1,
+                longest_streak=2,
+                last_activity_date=_days_ago(1),
+            )
+            db.add_all([streak_student1, streak_student2, streak_student3])
+            db.flush()
+
+            # -- 9. XP log entries for student1 (one per completed session) --
+            xp_entries = [
+                StudentXPLog(
+                    student_id=student1.id,
+                    event_type="session_complete",
+                    xp_earned=20,
+                    session_id=sessions_student1[i].id,
+                    note=f"Completed {sessions_student1[i].story_slug}",
+                    created_at=sessions_student1[i].completed_at,
+                )
+                for i in range(len(sessions_student1))
+            ]
+            db.add_all(xp_entries)
+
+            # -- 10. Assignments for 三年甲班 (Issue #528) --
+            # Assignment A: pending — due in 7 days, student has not submitted
+            assign_pending = Assignment(
+                classroom_id=class_3a.id,
+                teacher_id=teacher1.id,
+                story_id="L06",
+                title="第六課朗讀練習",
+                description="請完成第六課的朗讀與理解練習，注意發音準確度。",
+                assignment_type="reading",
+                due_date=now_utc + timedelta(days=7),
+                is_active=True,
+            )
+            db.add(assign_pending)
+            db.flush()
+            db.add(AssignmentSubmission(
+                assignment_id=assign_pending.id,
+                student_id=student1.id,
+                status="pending",
+            ))
+
+            # Assignment B: submitted — due 3 days ago, student submitted with score
+            assign_done = Assignment(
+                classroom_id=class_3a.id,
+                teacher_id=teacher1.id,
+                story_id="L04",
+                title="第四課閱讀理解",
+                description="完成第四課的蘇格拉底對話，達到 70 分以上為通過。",
+                assignment_type="comprehension",
+                due_date=now_utc - timedelta(days=3),
+                is_active=True,
+            )
+            db.add(assign_done)
+            db.flush()
+            # Link submission to the L04 learning session seeded above
+            l04_session = next(
+                (s for s in sessions_student1 if s.story_slug == "L04"), None
+            )
+            sub_done = AssignmentSubmission(
+                assignment_id=assign_done.id,
+                student_id=student1.id,
+                status="submitted",
+                submitted_at=now_utc - timedelta(days=2),
+                score=78.0,
+            )
+            if l04_session:
+                sub_done.session_id = l04_session.id
+            db.add(sub_done)
+
             db.commit()
             logger.info(
                 "Seeded demo data: 1 org, 2 schools, 3 classrooms, "
-                "6 users (admin/teacher1/teacher2/student1-3)"
+                "6 users (admin/teacher1/teacher2/student1-3), "
+                "10 learning sessions with relative dates, "
+                "2 assignments + 2 submissions for 三年甲班 (#528)"
             )
         finally:
             db.close()

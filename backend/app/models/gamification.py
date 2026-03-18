@@ -97,6 +97,12 @@ def level_progress(total_xp: int) -> dict:
 # ── Badge catalogue (defined in code) ────────────────────────────────────────
 
 BADGE_CATALOGUE = {
+    "first_session": {
+        "name": "初次學習",
+        "description": "完成第一次學習活動",
+        "icon": "star",
+        "color": "yellow",
+    },
     "first_story": {
         "name": "第一步",
         "description": "完成第一篇課文學習",

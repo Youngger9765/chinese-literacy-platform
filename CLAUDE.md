@@ -8,6 +8,24 @@
 **團隊**：Young (lead dev) + 方大哥/Shinjou (product owner) + 高中生實習團隊
 **用戶**：國小高年級～國中生 + 教師
 
+### Issue Assignee Policy (CRITICAL)
+
+**NEVER pick up or work on an issue that already has an assignee.**
+
+- Before starting any `#N` issue work, **check `gh issue view N` for assignees**
+- If assignee exists and is NOT you → **STOP. Do not touch it.**
+- If no assignee → proceed, and assign yourself before starting work
+- **Postmortem 2026-03-11**: 實習生已被 assign 的 issue 被 Claude 搶先做完，浪費實習生的學習機會。
+
+### Intern Issue Policy (CRITICAL)
+
+**標記 `intern-first` label 的 issue 保留給實習生，Claude 不要做。**
+
+- `intern-first` label = 實習生優先認領的 UI/UX 類任務
+- Claude 只做技術類（backend、infra、AI、performance）和沒有 `intern-first` label 的 issue
+- 實習生：靖杭 @if-else-master、啟翔 @stgst
+- **目的**：確保實習生有足夠的學習機會，不被 AI 搶走簡單任務
+
 ## Session 啟動必讀
 
 - `docs/PRD.md` — 產品需求文檔

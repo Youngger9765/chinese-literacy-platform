@@ -17,8 +17,9 @@ from ..auth.dependencies import get_current_user
 from ..database import get_db
 from ..dependencies.tenant import _check_classroom_access
 from ..models.school import Classroom, ClassroomStudent, ClassroomText
-from ..models.session import CharacterError, LearningSession
+from ..models.session import CharacterError, ErrorCorrection, LearningSession, DialogueTurn
 from ..models.student_tag import StudentTag
+from ..models.story_tag import StoryTag
 from ..models.teacher_instruction import TeacherInstruction
 from ..models.notification_read import TeacherNotificationRead
 from ..models.text import Text, TextStatus, VisibilityLevel
@@ -29,6 +30,7 @@ from ..schemas.teacher_instruction import (
     InstructionUpdate,
 )
 from ..models.user import User
+from ..models.gamification import StudentXPLog, StudentStreak
 from ..services.lesson_loader import get_lesson_by_id
 from ..services.stuck_detection_service import build_recommendations, detect_stuck_points
 from ..services.prediction_service import predict_learning_difficulty
@@ -187,6 +189,30 @@ class AtRiskStudentResponse(BaseModel):
     recommended_actions: list[str]
     confidence_score: float
     supporting_data: dict
+
+    model_config = {"from_attributes": True}
+
+
+class ErrorHeatmapStudentEntry(BaseModel):
+    id: int
+    name: str
+
+    model_config = {"from_attributes": True}
+
+
+class ErrorHeatmapErrorEntry(BaseModel):
+    student_id: int
+    character: str
+    error_count: int
+
+    model_config = {"from_attributes": True}
+
+
+class ErrorHeatmapResponse(BaseModel):
+    """Student × character error matrix for classroom teachers."""
+    students: list[ErrorHeatmapStudentEntry]
+    characters: list[str]  # sorted by total error count desc
+    errors: list[ErrorHeatmapErrorEntry]  # only non-zero cells
 
     model_config = {"from_attributes": True}
 
@@ -488,6 +514,89 @@ def get_classroom_error_vocab(
 
 
 @router.get(
+    "/teacher/classrooms/{classroom_id}/error-heatmap",
+    response_model=ErrorHeatmapResponse,
+)
+def get_classroom_error_heatmap(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get student × character error matrix for a classroom.
+
+    Returns all enrolled students, all characters that have at least one error,
+    and non-zero (student, character) error counts.  Characters are ordered by
+    total error count descending so the most problematic characters appear first.
+    """
+    _check_classroom_access(current_user, classroom_id, db)
+
+    # Get enrolled students in enrollment order
+    enrollments = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+    if not enrollments:
+        return ErrorHeatmapResponse(students=[], characters=[], errors=[])
+
+    student_ids = [e.student_id for e in enrollments]
+    students_map = {e.student_id: e.student for e in enrollments}
+
+    # Query aggregated error counts: (student_id, character) → count
+    rows = (
+        db.query(
+            LearningSession.student_id,
+            CharacterError.character,
+            func.count(CharacterError.id).label("error_count"),
+        )
+        .join(CharacterError, CharacterError.session_id == LearningSession.id)
+        .filter(LearningSession.student_id.in_(student_ids))
+        .group_by(LearningSession.student_id, CharacterError.character)
+        .all()
+    )
+
+    if not rows:
+        students = [
+            ErrorHeatmapStudentEntry(id=s_id, name=students_map[s_id].name)
+            for s_id in student_ids
+        ]
+        return ErrorHeatmapResponse(students=students, characters=[], errors=[])
+
+    # Build character → total error count for ordering
+    char_totals: dict[str, int] = defaultdict(int)
+    for row in rows:
+        char_totals[row.character] += row.error_count
+
+    # Sort characters by total errors descending, then alphabetically for stability
+    sorted_characters = sorted(
+        char_totals.keys(),
+        key=lambda c: (-char_totals[c], c),
+    )
+
+    # Build student list in enrollment order
+    students = [
+        ErrorHeatmapStudentEntry(id=s_id, name=students_map[s_id].name)
+        for s_id in student_ids
+    ]
+
+    # Build error entries (only non-zero cells)
+    error_entries = [
+        ErrorHeatmapErrorEntry(
+            student_id=row.student_id,
+            character=row.character,
+            error_count=row.error_count,
+        )
+        for row in rows
+    ]
+
+    return ErrorHeatmapResponse(
+        students=students,
+        characters=sorted_characters,
+        errors=error_entries,
+    )
+
+
+@router.get(
     "/teacher/classrooms/{classroom_id}/time-stats",
     response_model=TimeStatsResponse,
 )
@@ -623,6 +732,85 @@ def get_student_sessions(
         )
 
     return results
+
+
+# ── Teacher Dialogue History (Issue #418) ─────────────────────────────────────
+
+
+class TeacherDialogueTurnResponse(BaseModel):
+    id: int
+    turn_order: int
+    role: str
+    text: str
+    is_correct: bool | None
+    phase: str | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class TeacherDialogueHistoryResponse(BaseModel):
+    session_id: int
+    student_id: int
+    story_slug: str | None
+    turns: list[TeacherDialogueTurnResponse]
+    total: int
+
+
+@router.get(
+    "/teacher/students/{student_id}/sessions/{session_id}/dialogue",
+    response_model=TeacherDialogueHistoryResponse,
+)
+def get_teacher_student_dialogue(
+    student_id: int,
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return the Socratic dialogue history for a student's learning session.
+
+    The requesting teacher must own a classroom that contains the student.
+    Returns an empty turns list if the session exists but has no recorded dialogue.
+    """
+    # Verify teacher owns a classroom containing this student
+    enrollment = (
+        db.query(ClassroomStudent)
+        .join(Classroom, ClassroomStudent.classroom_id == Classroom.id)
+        .filter(
+            ClassroomStudent.student_id == student_id,
+            Classroom.teacher_id == current_user.id,
+        )
+        .first()
+    )
+    if not enrollment:
+        raise HTTPException(status_code=403, detail="Not authorized to view this student's sessions")
+
+    # Verify the session belongs to the student
+    session = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.id == session_id,
+            LearningSession.student_id == student_id,
+        )
+        .first()
+    )
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    turns = (
+        db.query(DialogueTurn)
+        .filter(DialogueTurn.learning_session_id == session_id)
+        .order_by(DialogueTurn.turn_order)
+        .all()
+    )
+
+    return TeacherDialogueHistoryResponse(
+        session_id=session_id,
+        student_id=student_id,
+        story_slug=session.story_slug,
+        turns=[TeacherDialogueTurnResponse.model_validate(t) for t in turns],
+        total=len(turns),
+    )
 
 
 @router.get(
@@ -885,7 +1073,11 @@ def export_classroom_report(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Export classroom student progress as a UTF-8 BOM CSV file."""
+    """Export classroom student progress as a UTF-8 BOM CSV file.
+
+    Columns: 學生姓名, 已完成課文數, 平均正確率, 平均語速(CPM), 總學習次數,
+             已掌握生字, 連續學習天數, 累積XP, 最近學習日期
+    """
     classroom = _check_classroom_access(current_user, classroom_id, db)
 
     enrollments = (
@@ -896,6 +1088,7 @@ def export_classroom_report(
 
     # Batch-load all sessions for students in this classroom to avoid N+1 queries
     student_ids = [e.student_id for e in enrollments]
+
     all_sessions = (
         db.query(LearningSession)
         .filter(LearningSession.student_id.in_(student_ids))
@@ -908,9 +1101,54 @@ def export_classroom_report(
     for s in all_sessions:
         sessions_by_student.setdefault(s.student_id, []).append(s)
 
+    # Batch-load XP totals (sum of xp_earned per student)
+    xp_rows = (
+        db.query(StudentXPLog.student_id, func.sum(StudentXPLog.xp_earned).label("total_xp"))
+        .filter(StudentXPLog.student_id.in_(student_ids))
+        .group_by(StudentXPLog.student_id)
+        .all()
+        if student_ids
+        else []
+    )
+    xp_by_student: dict[int, int] = {row.student_id: int(row.total_xp) for row in xp_rows}
+
+    # Batch-load current streaks
+    streak_rows = (
+        db.query(StudentStreak)
+        .filter(StudentStreak.student_id.in_(student_ids))
+        .all()
+        if student_ids
+        else []
+    )
+    streak_by_student: dict[int, int] = {row.student_id: row.current_streak for row in streak_rows}
+
+    # Batch-load mastered character counts
+    mastered_rows = (
+        db.query(ErrorCorrection.student_id, func.count(ErrorCorrection.id).label("cnt"))
+        .filter(
+            ErrorCorrection.student_id.in_(student_ids),
+            ErrorCorrection.correction_type == "mastered",
+        )
+        .group_by(ErrorCorrection.student_id)
+        .all()
+        if student_ids
+        else []
+    )
+    mastered_by_student: dict[int, int] = {row.student_id: int(row.cnt) for row in mastered_rows}
+
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["學生姓名", "已完成課文數", "平均正確率", "總學習次數", "最近學習日期"])
+    writer.writerow([
+        "學生姓名",
+        "已完成課文數",
+        "平均正確率",
+        "平均語速(CPM)",
+        "總學習次數",
+        "已掌握生字",
+        "連續學習天數",
+        "累積XP",
+        "最近學習日期",
+    ])
 
     for enrollment in enrollments:
         student = enrollment.student
@@ -923,6 +1161,14 @@ def export_classroom_report(
         scores = [s.accuracy for s in sessions if s.accuracy is not None]
         avg_accuracy = f"{sum(scores) / len(scores):.1f}%" if scores else ""
 
+        # Average CPM from reading_result JSONB field
+        cpm_values = [
+            s.reading_result["cpm"]
+            for s in sessions
+            if s.reading_result and isinstance(s.reading_result, dict) and s.reading_result.get("cpm") is not None
+        ]
+        avg_cpm = f"{sum(cpm_values) / len(cpm_values):.0f}" if cpm_values else ""
+
         latest = max(sessions, key=lambda s: s.started_at, default=None)
         last_date = latest.started_at.strftime("%Y-%m-%d") if latest else ""
 
@@ -930,7 +1176,11 @@ def export_classroom_report(
             _sanitize_csv_cell(student.name),
             completed_texts,
             avg_accuracy,
+            avg_cpm,
             total_sessions,
+            mastered_by_student.get(student.id, 0),
+            streak_by_student.get(student.id, 0),
+            xp_by_student.get(student.id, 0),
             last_date,
         ])
 
@@ -1253,6 +1503,54 @@ def list_student_instructions(
         .all()
     )
     return instructions
+
+
+@router.get(
+    "/teacher/classrooms/{classroom_id}/instruction-counts",
+    response_model=dict[int, int],
+)
+def get_classroom_instruction_counts(
+    classroom_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get active instruction counts for all students in a classroom (bulk, avoids N+1).
+
+    Returns a mapping of student_id -> active_instruction_count.
+    Students with zero instructions are included with count 0.
+    """
+    classroom = _check_classroom_access(current_user, classroom_id, db)
+
+    # Get all student IDs enrolled in this classroom
+    student_ids = [
+        row[0]
+        for row in db.query(ClassroomStudent.student_id)
+        .filter(ClassroomStudent.classroom_id == classroom.id)
+        .all()
+    ]
+
+    if not student_ids:
+        return {}
+
+    # Single aggregated query: count active instructions per student
+    rows = (
+        db.query(
+            TeacherInstruction.student_id,
+            func.count(TeacherInstruction.id).label("cnt"),
+        )
+        .filter(
+            TeacherInstruction.student_id.in_(student_ids),
+            TeacherInstruction.teacher_id == current_user.id,
+            TeacherInstruction.is_active == True,  # noqa: E712
+        )
+        .group_by(TeacherInstruction.student_id)
+        .all()
+    )
+
+    counts_from_db = {row.student_id: row.cnt for row in rows}
+
+    # Include all students, defaulting to 0 for those with no instructions
+    return {sid: counts_from_db.get(sid, 0) for sid in student_ids}
 
 
 @router.patch(
@@ -2180,3 +2478,165 @@ def delete_my_text(
     text = _get_text_or_404(text_id, current_user.id, db)
     db.delete(text)
     db.commit()
+
+
+# ── Story Tags (difficulty + custom labels) ───────────────────────────────────
+
+VALID_DIFFICULTY_LEVELS = {"easy", "medium", "hard"}
+MAX_CUSTOM_TAGS = 10
+MAX_TAG_LENGTH = 30
+
+
+class StoryTagUpsertRequest(BaseModel):
+    """Request body for setting difficulty and custom tags on a story."""
+    difficulty_level: str | None = None  # "easy" / "medium" / "hard" / null to clear
+    custom_tags: list[str] | None = None  # up to 10 tags, each max 30 chars
+
+
+class StoryTagResponse(BaseModel):
+    """Response schema for a story tag entry."""
+    story_ref: str
+    difficulty_level: str | None
+    custom_tags: list[str]
+
+    model_config = {"from_attributes": True}
+
+
+def _get_or_create_story_tag(
+    teacher_id: int, story_ref: str, db: Session
+) -> StoryTag:
+    tag = db.query(StoryTag).filter(
+        StoryTag.teacher_id == teacher_id,
+        StoryTag.story_ref == story_ref,
+    ).first()
+    if not tag:
+        tag = StoryTag(teacher_id=teacher_id, story_ref=story_ref)
+        db.add(tag)
+    return tag
+
+
+@router.get(
+    "/teacher/story-tags/{story_ref}",
+    response_model=StoryTagResponse,
+)
+def get_story_tag(
+    story_ref: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get the teacher's difficulty and custom tags for a story.
+
+    story_ref: lesson_number string for platform stories (e.g. "3"),
+               or "text:{id}" for teacher-created texts (e.g. "text:42").
+    Returns default values if no tag record exists yet.
+    """
+    tag = db.query(StoryTag).filter(
+        StoryTag.teacher_id == current_user.id,
+        StoryTag.story_ref == story_ref,
+    ).first()
+    if not tag:
+        return StoryTagResponse(
+            story_ref=story_ref,
+            difficulty_level=None,
+            custom_tags=[],
+        )
+    return StoryTagResponse(
+        story_ref=story_ref,
+        difficulty_level=tag.difficulty_level,
+        custom_tags=tag.custom_tags or [],
+    )
+
+
+@router.put(
+    "/teacher/story-tags/{story_ref}",
+    response_model=StoryTagResponse,
+)
+def upsert_story_tag(
+    story_ref: str,
+    body: StoryTagUpsertRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Set or update difficulty and custom tags for a story.
+
+    story_ref: lesson_number string for platform stories (e.g. "3"),
+               or "text:{id}" for teacher-created texts (e.g. "text:42").
+    Passing null for difficulty_level clears the override (falls back to auto-detect).
+    Passing an empty list for custom_tags clears all tags.
+    """
+    if body.difficulty_level is not None and body.difficulty_level not in VALID_DIFFICULTY_LEVELS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"difficulty_level must be one of: {sorted(VALID_DIFFICULTY_LEVELS)}",
+        )
+    if body.custom_tags is not None:
+        if len(body.custom_tags) > MAX_CUSTOM_TAGS:
+            raise HTTPException(
+                status_code=422,
+                detail=f"custom_tags cannot exceed {MAX_CUSTOM_TAGS} items",
+            )
+        for t in body.custom_tags:
+            if len(t.strip()) == 0:
+                raise HTTPException(status_code=422, detail="Tag names cannot be empty")
+            if len(t) > MAX_TAG_LENGTH:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Each tag must be {MAX_TAG_LENGTH} characters or fewer",
+                )
+
+    tag = _get_or_create_story_tag(current_user.id, story_ref, db)
+    if body.difficulty_level is not None or (
+        body.difficulty_level is None and "difficulty_level" in body.model_fields_set
+    ):
+        tag.difficulty_level = body.difficulty_level
+    if body.custom_tags is not None:
+        tag.custom_tags = [t.strip() for t in body.custom_tags if t.strip()]
+
+    db.commit()
+    db.refresh(tag)
+    return StoryTagResponse(
+        story_ref=story_ref,
+        difficulty_level=tag.difficulty_level,
+        custom_tags=tag.custom_tags or [],
+    )
+
+
+@router.delete(
+    "/teacher/story-tags/{story_ref}",
+    status_code=204,
+)
+def delete_story_tag(
+    story_ref: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Remove all custom tags and difficulty override for a story."""
+    tag = db.query(StoryTag).filter(
+        StoryTag.teacher_id == current_user.id,
+        StoryTag.story_ref == story_ref,
+    ).first()
+    if tag:
+        db.delete(tag)
+        db.commit()
+
+
+@router.get(
+    "/teacher/story-tags",
+    response_model=list[StoryTagResponse],
+)
+def list_story_tags(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """List all story tag settings created by the authenticated teacher."""
+    tags = db.query(StoryTag).filter(
+        StoryTag.teacher_id == current_user.id
+    ).order_by(StoryTag.updated_at.desc()).all()
+    return [
+        StoryTagResponse(
+            story_ref=t.story_ref,
+            difficulty_level=t.difficulty_level,
+            custom_tags=t.custom_tags or [],
+        )
+        for t in tags
+    ]

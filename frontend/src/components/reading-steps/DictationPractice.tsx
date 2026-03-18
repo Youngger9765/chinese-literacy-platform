@@ -82,7 +82,14 @@ function speakText(text: string, rate = 0.85): Promise<void> {
 // ---- Sub-components ----
 
 const ProgressBar: React.FC<{ current: number; total: number }> = ({ current, total }) => (
-  <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+  <div
+    role="progressbar"
+    aria-valuenow={current}
+    aria-valuemin={1}
+    aria-valuemax={total}
+    aria-label={`聽寫進度：第 ${current} 題，共 ${total} 題`}
+    className="w-full bg-gray-200 rounded-full h-1.5 mb-4"
+  >
     <div
       className="bg-accent h-1.5 rounded-full transition-all duration-500"
       style={{ width: `${(current / total) * 100}%` }}
@@ -335,13 +342,14 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
             <button
               onClick={playCurrentWord}
               disabled={isSpeaking || !ttsSupported}
-              className={`w-24 h-24 rounded-full flex flex-col items-center justify-center gap-2 transition-all
+              aria-label={isSpeaking ? '正在播放詞語音頻' : '播放詞語音頻'}
+              aria-pressed={isSpeaking}
+              className={`w-24 h-24 rounded-full flex flex-col items-center justify-center gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
                 ${isSpeaking
                   ? 'bg-accent/10 border-2 border-accent scale-110'
                   : 'bg-gray-50 border-2 border-gray-200 hover:border-accent hover:bg-accent/5 active:scale-95'
                 }
               `}
-              title="重播音頻"
             >
               <SpeakerIcon animate={isSpeaking} />
               <span className="text-xs text-gray-500">{isSpeaking ? '播放中...' : '點我播放'}</span>
@@ -349,16 +357,18 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
 
             {/* Answer input */}
             <div className="w-full space-y-3">
-              <label className="block text-xs text-gray-500 font-medium text-center">
+              <label htmlFor="dictation-answer-input" className="block text-xs text-gray-500 font-medium text-center">
                 輸入你聽到的詞語
               </label>
               <input
+                id="dictation-answer-input"
                 ref={inputRef}
                 type="text"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="在此輸入..."
+                aria-label="聽寫答案輸入框，輸入你聽到的詞語，按 Enter 提交"
                 className="w-full text-center text-2xl font-bold py-4 px-4 rounded-xl border-2 border-gray-200 focus:border-accent focus:outline-none bg-white text-gray-900 placeholder-gray-300 transition-colors"
                 autoComplete="off"
                 autoCorrect="off"

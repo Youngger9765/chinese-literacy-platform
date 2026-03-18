@@ -9,7 +9,8 @@ const TEACHER_EMAIL = 'teacher@test.com';
 const TEACHER_PASSWORD = 'teacher1234';
 const ADMIN_EMAIL = 'admin@test.com';
 const ADMIN_PASSWORD = 'admin1234';
-const STUDENT_PASSWORD = 'Student1234!';
+const STUDENT_EMAIL = 'student@test.com';
+const STUDENT_PASSWORD = 'student1234';
 
 setup('authenticate as teacher', async ({ page }) => {
   await page.goto('/');
@@ -52,14 +53,15 @@ setup('authenticate as admin', async ({ page }) => {
 });
 
 setup('authenticate as student', async ({ page }) => {
-  // Since #457 blocks student self-registration, use pre-seeded student account
+  // Use pre-seeded student account instead of self-registering.
+  // Student self-registration was blocked in #457; seed accounts have email_verified=True (#475).
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
 
-  await page.locator('#login-email').fill('student@test.com');
-  await page.locator('#login-password').fill('student1234');
+  await page.locator('#login-email').fill(STUDENT_EMAIL);
+  await page.locator('#login-password').fill(STUDENT_PASSWORD);
   await page.locator('button[type="submit"]:has-text("登入")').click();
 
   await Promise.race([

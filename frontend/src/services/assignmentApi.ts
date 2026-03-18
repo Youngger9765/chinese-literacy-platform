@@ -51,6 +51,12 @@ export interface SubmissionResponse {
   status: string;
   submitted_at: string | null;
   score: number | null;
+  // Reading metrics from linked LearningSession (Issue #423)
+  reading_accuracy: number | null;
+  reading_cpm: number | null;
+  reading_error_chars: string[];
+  /** Per-student teacher feedback, set when grading (Issue #424). */
+  teacher_feedback: string | null;
 }
 
 export interface AssignmentDetailResponse extends AssignmentResponse {
@@ -70,6 +76,8 @@ export interface StudentAssignmentResponse extends ReadingGoals {
   status: string;
   submitted_at: string | null;
   score: number | null;
+  /** Per-student teacher feedback visible to the student (Issue #424). */
+  teacher_feedback: string | null;
 }
 
 export interface StartAssignmentResponse {
@@ -77,6 +85,12 @@ export interface StartAssignmentResponse {
   story_id: string | null;
   text_id: number | null;
   status: string;
+  // Reading goals (Issue #414) — returned so student knows the target
+  target_cpm: number | null;
+  target_accuracy: number | null;
+  difficulty_label: string | null;
+  effective_cpm: number;
+  effective_accuracy: number;
 }
 
 // --- Error class ---
@@ -250,13 +264,18 @@ export async function gradeSubmission(
   assignmentId: number,
   submissionId: number,
   score: number | null,
+  teacherFeedback?: string | null,
 ): Promise<SubmissionResponse> {
+  const body: { score: number | null; teacher_feedback?: string | null } = { score };
+  if (teacherFeedback !== undefined) {
+    body.teacher_feedback = teacherFeedback;
+  }
   const res = await fetch(
     `${API_BASE}/api/assignments/${assignmentId}/submissions/${submissionId}`,
     {
       method: 'PATCH',
       headers: authHeaders(token),
-      body: JSON.stringify({ score }),
+      body: JSON.stringify(body),
     },
   );
   return handleResponse<SubmissionResponse>(res);

@@ -469,6 +469,24 @@ class TestGetStoryDetailEndpoint:
         assert "detail" in data
         assert data["detail"] == "Story not found"
 
+    def test_slug_format_returns_404_not_422(self, client):
+        """Legacy sessions stored slug-format story_slugs (e.g. 'long-gao-de-mi-mi-3').
+        The endpoint must return 404, not 422, so the frontend can handle it gracefully.
+        Regression test for #366.
+        """
+        resp = client.get("/api/stories/long-gao-de-mi-mi-3")
+        assert resp.status_code == 404
+
+    def test_slug_format_with_hyphens_returns_404(self, client):
+        """Another legacy slug format — must not crash with 422."""
+        resp = client.get("/api/stories/some-slug-title")
+        assert resp.status_code == 404
+
+    def test_alpha_only_id_returns_404_not_422(self, client):
+        """Purely alphabetic path params must return 404, not 422."""
+        resp = client.get("/api/stories/abc")
+        assert resp.status_code == 404
+
     def test_story_id_matches_lesson_number(self, client):
         resp = client.get("/api/stories/1")
         data = resp.json()

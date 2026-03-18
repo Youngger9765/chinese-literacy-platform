@@ -17,7 +17,7 @@ from google import genai
 from google.genai import types as genai_types
 
 from ..config import settings
-from .input_sanitizer import sanitize_ai_input
+from .input_sanitizer import sanitize_ai_input, sanitize_dialogue_turns
 from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
@@ -177,25 +177,71 @@ async def generate_structured_response(
                 timeout=GEMINI_TIMEOUT,
             )
 
+            # Extract finish_reason for diagnostics (MAX_TOKENS = truncated output)
+            finish_reason = None
+            if response.candidates:
+                finish_reason = str(response.candidates[0].finish_reason)
+
             # Log raw response for debugging (truncated to avoid log spam)
             raw_text = response.text if response.text is not None else ""
             logger.debug(
-                "Gemini raw response (first 500 chars): %s",
+                "Gemini raw response finish_reason=%s length=%d (first 500 chars): %s",
+                finish_reason,
+                len(raw_text),
                 raw_text[:500],
-                extra={"event": "gemini_raw_response", "length": len(raw_text)},
+                extra={
+                    "event": "gemini_raw_response",
+                    "finish_reason": finish_reason,
+                    "length": len(raw_text),
+                },
             )
 
             if not raw_text:
                 raise ValueError("Gemini returned empty/None response text")
 
+            # When finish_reason is MAX_TOKENS the output was cut mid-stream.
+            # Attempt JSON repair immediately before trying json.loads so we
+            # can recover partial responses without burning a retry cycle.
+            if finish_reason == "FinishReason.MAX_TOKENS":
+                logger.warning(
+                    "Gemini finish_reason=MAX_TOKENS — output was truncated "
+                    "(max_tokens=%d, raw_len=%d). Attempting JSON repair.",
+                    max_tokens,
+                    len(raw_text),
+                    extra={
+                        "event": "gemini_max_tokens_truncation",
+                        "max_tokens": max_tokens,
+                        "raw_len": len(raw_text),
+                        "attempt": attempt + 1,
+                    },
+                )
+                repaired = _repair_json(raw_text)
+                if repaired is not None:
+                    try:
+                        result = json.loads(repaired)
+                        logger.warning(
+                            "JSON repair after MAX_TOKENS succeeded "
+                            "(original_len=%d, repaired_len=%d)",
+                            len(raw_text),
+                            len(repaired),
+                            extra={"event": "gemini_json_repair_success"},
+                        )
+                        return result
+                    except json.JSONDecodeError:
+                        pass
+                # Repair failed — fall through to regular json.loads which
+                # will raise and trigger the retry loop.
+
             try:
                 return json.loads(raw_text)
             except json.JSONDecodeError as json_err:
                 logger.warning(
-                    "JSON parse failed (%s), attempting repair. Raw (first 200): %s",
+                    "JSON parse failed finish_reason=%s (%s), attempting repair. "
+                    "Raw (first 200): %s",
+                    finish_reason,
                     json_err,
                     raw_text[:200],
-                    extra={"event": "gemini_json_repair_attempt"},
+                    extra={"event": "gemini_json_repair_attempt", "finish_reason": finish_reason},
                 )
                 repaired = _repair_json(raw_text)
                 if repaired is not None:
@@ -349,8 +395,12 @@ async def generate_reading_analysis(session_data: dict) -> dict:
     practice suggestions, and encouragement.
 
     Args:
-        session_data: Dict with keys: story_title, accuracy, cpm,
-                      error_chars (list[str]), total_characters.
+        session_data: Dict with keys:
+            Required: story_title, accuracy, cpm, error_chars (list[str]),
+                      total_characters.
+            Optional (Issue #415): comprehension_score (float 0-100),
+                      vocab_practiced_count (int), vocab_total_count (int),
+                      dictation_correct_count (int), dictation_total_count (int).
 
     Returns:
         Dict with keys: analysis_summary, strengths, areas_for_improvement,
@@ -361,6 +411,13 @@ async def generate_reading_analysis(session_data: dict) -> dict:
     cpm = session_data.get("cpm", 0)
     error_chars = session_data.get("error_chars", [])
     total_characters = session_data.get("total_characters", 0)
+
+    # Optional enrichment fields (Issue #415)
+    comprehension_score: float | None = session_data.get("comprehension_score")
+    vocab_practiced: int | None = session_data.get("vocab_practiced_count")
+    vocab_total: int | None = session_data.get("vocab_total_count")
+    dictation_correct: int | None = session_data.get("dictation_correct_count")
+    dictation_total: int | None = session_data.get("dictation_total_count")
 
     error_chars_str = "、".join(error_chars) if error_chars else "無"
 
@@ -375,15 +432,42 @@ async def generate_reading_analysis(session_data: dict) -> dict:
         "- 每項建議都要可執行"
     )
 
-    user_prompt = (
-        f"學生朗讀資料：\n"
-        f"- 課文：{story_title}\n"
-        f"- 正確率：{accuracy}%\n"
-        f"- 朗讀速度：{cpm} 字/分鐘\n"
-        f"- 錯誤字：{error_chars_str}\n"
-        f"- 總字數：{total_characters}\n\n"
-        "請根據以上資料進行分析。"
+    # Build enriched prompt with all available data
+    user_prompt_lines = [
+        "學生學習資料：",
+        f"- 課文：{story_title}",
+        f"- 朗讀正確率：{accuracy}%",
+        f"- 朗讀速度：{cpm} 字/分鐘",
+        f"- 錯誤字：{error_chars_str}",
+        f"- 課文總字數：{total_characters}",
+    ]
+
+    # Append optional enrichment data when available (Issue #415)
+    if comprehension_score is not None:
+        user_prompt_lines.append(f"- 課文理解力評估：{comprehension_score:.0f}%")
+    if vocab_practiced is not None and vocab_total is not None:
+        pct = round(vocab_practiced / max(vocab_total, 1) * 100)
+        user_prompt_lines.append(
+            f"- 生字練習完成率：{pct}%（{vocab_practiced}/{vocab_total} 個生字）"
+        )
+    if dictation_correct is not None and dictation_total is not None:
+        d_pct = round(dictation_correct / max(dictation_total, 1) * 100)
+        user_prompt_lines.append(
+            f"- 聽寫練習正確率：{d_pct}%（{dictation_correct}/{dictation_total} 個詞語）"
+        )
+
+    has_enriched_data = any(
+        x is not None for x in [comprehension_score, vocab_practiced, dictation_correct]
     )
+    if has_enriched_data:
+        user_prompt_lines.append(
+            "\n請根據以上跨環節的整體學習表現進行綜合分析，"
+            "找出學生的強項和需要加強的地方，並給出具體可執行的改善建議。"
+        )
+    else:
+        user_prompt_lines.append("\n請根據以上資料進行分析。")
+
+    user_prompt = "\n".join(user_prompt_lines)
 
     response_schema = {
         "type": "OBJECT",
@@ -503,9 +587,11 @@ async def evaluate_comprehension(
         Dict with comprehension_score, literal_score, inferential_score,
         evaluative_score, and feedback dict.
     """
+    # Sanitize student turns before including them in the AI prompt (Issue #270)
+    safe_turns = sanitize_dialogue_turns(dialogue_turns)
     formatted_dialogue = "\n".join(
         f"{'AI老師' if t['role'] == 'ai' else '學生'}: {t['text']}"
-        for t in dialogue_turns
+        for t in safe_turns
     )
 
     system_prompt = f"""{TUTOR_PERSONA}
@@ -622,7 +708,7 @@ async def generate_exit_ticket(
         On AI failure: {"questions": [], "fallback": True}
         NEVER returns auto-pass data on failure.
     """
-    sanitized_text = sanitize_ai_input(text[:3000])
+    sanitized_text, _ = sanitize_ai_input(text[:3000])
     wrong_chars_info = ""
     if wrong_chars:
         wrong_chars_info = f"\n\n【學生朗讀時讀錯的字】：{', '.join(wrong_chars[:10])}\n請至少出一題考這些字的辨識（形近字選擇）。"
@@ -710,8 +796,8 @@ async def generate_example_sentences(character: str, story_title: str) -> dict:
     Each sentence uses the target character in a contextually appropriate way
     suited for elementary/middle school students.
     """
-    safe_char = sanitize_ai_input(character)
-    safe_title = sanitize_ai_input(story_title)
+    safe_char, _ = sanitize_ai_input(character)
+    safe_title, _ = sanitize_ai_input(story_title)
 
     system_prompt = f"""{TUTOR_PERSONA}
 
@@ -759,9 +845,9 @@ async def validate_student_sentence(
     - feedback: encouraging feedback message (in Chinese)
     - suggestion: improvement hint if not correct (empty string if correct)
     """
-    safe_char = sanitize_ai_input(character)
-    safe_sentence = sanitize_ai_input(student_sentence)
-    safe_title = sanitize_ai_input(story_title)
+    safe_char, _ = sanitize_ai_input(character)
+    safe_sentence, _ = sanitize_ai_input(student_sentence)
+    safe_title, _ = sanitize_ai_input(story_title)
 
     system_prompt = f"""{TUTOR_PERSONA}
 

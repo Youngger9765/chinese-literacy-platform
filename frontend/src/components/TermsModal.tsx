@@ -6,7 +6,8 @@
  * accepting.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface TermsModalProps {
   /** Called after the user successfully accepts terms (API call already done). */
@@ -28,6 +29,10 @@ const TermsModal: React.FC<TermsModalProps> = ({ onAccepted, onAccept }) => {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const dialogRef = useRef<HTMLDivElement>(null);
+  // TermsModal is always visible when mounted — focus trap is always active.
+  useFocusTrap(dialogRef, true);
 
   const allChecked = checked.every(Boolean);
 
@@ -57,11 +62,19 @@ const TermsModal: React.FC<TermsModalProps> = ({ onAccepted, onAccept }) => {
 
   return (
     /* Backdrop — non-dismissable (no onClick on backdrop) */
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      aria-modal="true"
+      role="dialog"
+      aria-labelledby="terms-modal-title"
+    >
+      <div
+        ref={dialogRef}
+        className="w-full max-w-lg rounded-2xl bg-white shadow-2xl flex flex-col max-h-[90vh]"
+      >
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900">使用條款同意書</h2>
+          <h2 id="terms-modal-title" className="text-xl font-bold text-gray-900">使用條款同意書</h2>
           <p className="mt-1 text-sm text-gray-500">
             請閱讀並勾選以下所有同意事項，方可使用本平台。
           </p>
