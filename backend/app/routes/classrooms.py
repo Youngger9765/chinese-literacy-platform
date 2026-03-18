@@ -7,7 +7,7 @@ import string
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user
 from ..auth.password import hash_password
@@ -304,8 +304,35 @@ def list_my_classrooms(
     )
     total = query.count()
     items = query.order_by(Classroom.created_at.desc()).offset(offset).limit(limit).all()
+
+    if not items:
+        return ClassroomListResponse(items=[], total=total)
+
+    # Batch-load student counts for all classrooms (avoid N COUNT queries)
+    classroom_ids = [c.id for c in items]
+    student_count_rows = (
+        db.query(ClassroomStudent.classroom_id, func.count(ClassroomStudent.id).label("cnt"))
+        .filter(ClassroomStudent.classroom_id.in_(classroom_ids))
+        .group_by(ClassroomStudent.classroom_id)
+        .all()
+    )
+    student_counts = {row.classroom_id: row.cnt for row in student_count_rows}
+
     return ClassroomListResponse(
-        items=[_classroom_to_response(c, db) for c in items],
+        items=[
+            ClassroomResponse(
+                id=c.id,
+                name=c.name,
+                school_id=c.school_id,
+                teacher_id=c.teacher_id,
+                grade=c.grade,
+                join_code=c.join_code,
+                is_active=c.is_active,
+                created_at=c.created_at,
+                student_count=student_counts.get(c.id, 0),
+            )
+            for c in items
+        ],
         total=total,
     )
 
@@ -381,7 +408,17 @@ def get_classroom_detail(
     db: Session = Depends(get_db),
 ):
     """Get classroom detail including student list. Owner, co-teachers, and admins can access."""
-    classroom = _get_classroom_or_404(classroom_id, db)
+    # Use joinedload to avoid N+1: classroom_students + each student in one query
+    classroom = (
+        db.query(Classroom)
+        .options(
+            joinedload(Classroom.classroom_students).joinedload(ClassroomStudent.student)
+        )
+        .filter(Classroom.id == classroom_id)
+        .first()
+    )
+    if classroom is None:
+        raise HTTPException(status_code=404, detail="Classroom not found")
     _require_member_or_admin(classroom, current_user, db)
     return _classroom_to_detail_response(classroom)
 
@@ -505,6 +542,14 @@ def list_classroom_students(
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_member_or_admin(classroom, current_user, db)
 
+    # joinedload to avoid N+1 on cs.student access
+    enrollments = (
+        db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .all()
+    )
+
     return [
         StudentInClassroomResponse(
             id=cs.student.id,
@@ -512,7 +557,7 @@ def list_classroom_students(
             email=cs.student.email,
             enrolled_at=cs.enrolled_at,
         )
-        for cs in classroom.classroom_students
+        for cs in enrollments
     ]
 
 
