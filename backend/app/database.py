@@ -6,6 +6,10 @@ from .config import settings
 _engine_kwargs = {}
 if not settings.database_url.startswith("sqlite"):
     _engine_kwargs["pool_pre_ping"] = True
+    _engine_kwargs["pool_size"] = 10
+    _engine_kwargs["max_overflow"] = 5
+    _engine_kwargs["pool_timeout"] = 30
+    _engine_kwargs["pool_recycle"] = 1800
 
 engine = create_engine(
     settings.database_url,
