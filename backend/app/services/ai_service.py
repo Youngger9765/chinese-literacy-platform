@@ -26,6 +26,74 @@ MAX_RETRIES = 3
 RETRY_BASE_DELAY = 1.0  # seconds
 GEMINI_TIMEOUT = 30  # seconds
 
+CONTENT_FILTER_FRIENDLY_MSG = "老師小幫手暫時無法回答這個問題，請試試其他問法"
+
+
+class GeminiContentFilterError(Exception):
+    """Raised when Gemini refuses a response due to its safety/content filter.
+
+    This is NOT an API error — Gemini returned a valid response, but blocked
+    the content. Callers should return a friendly fallback to the student
+    instead of a 500 error.
+    """
+
+
+def _check_safety_filter(response) -> None:
+    """Inspect a Gemini response and raise GeminiContentFilterError if blocked.
+
+    Checks three signals (in order of reliability):
+    1. response.candidates is empty — entire prompt was blocked
+    2. candidates[0].finish_reason == SAFETY — output was blocked mid-generation
+    3. response.prompt_feedback.block_reason is set — prompt-level block
+
+    Must be called BEFORE accessing response.text, which raises a confusing
+    ValueError when the response has no content due to safety filtering.
+    """
+    # Signal 1: no candidates at all (prompt-level block)
+    if not response.candidates:
+        block_reason = None
+        try:
+            block_reason = str(response.prompt_feedback.block_reason)
+        except Exception:
+            pass
+        logger.warning(
+            "Gemini content filter: no candidates returned (block_reason=%s)",
+            block_reason,
+            extra={"event": "gemini_content_filter", "block_reason": block_reason},
+        )
+        raise GeminiContentFilterError(
+            f"Gemini blocked response (no candidates, block_reason={block_reason})"
+        )
+
+    # Signal 2: finish_reason == SAFETY
+    finish_reason = str(response.candidates[0].finish_reason)
+    if "SAFETY" in finish_reason:
+        logger.warning(
+            "Gemini content filter: finish_reason=SAFETY",
+            extra={"event": "gemini_content_filter", "finish_reason": finish_reason},
+        )
+        raise GeminiContentFilterError(
+            f"Gemini blocked response (finish_reason={finish_reason})"
+        )
+
+    # Signal 3: prompt_feedback.block_reason set but candidates exist (edge case)
+    try:
+        block_reason = response.prompt_feedback.block_reason
+        if block_reason and str(block_reason) not in ("0", "BLOCK_REASON_UNSPECIFIED", "None"):
+            logger.warning(
+                "Gemini content filter: prompt_feedback.block_reason=%s",
+                block_reason,
+                extra={"event": "gemini_content_filter", "block_reason": str(block_reason)},
+            )
+            raise GeminiContentFilterError(
+                f"Gemini blocked response (prompt_feedback.block_reason={block_reason})"
+            )
+    except GeminiContentFilterError:
+        raise
+    except Exception:
+        # prompt_feedback attribute may not exist on all response types — safe to ignore
+        pass
+
 
 def _get_client() -> genai.Client:
     """Return a Gemini client via Vertex AI (uses Cloud Run service account)."""
@@ -177,6 +245,11 @@ async def generate_structured_response(
                 timeout=GEMINI_TIMEOUT,
             )
 
+            # Check for safety filter BEFORE accessing response.text.
+            # When Gemini blocks content, response.text raises a confusing
+            # ValueError. We intercept this with a clear, named exception.
+            _check_safety_filter(response)
+
             # Extract finish_reason for diagnostics (MAX_TOKENS = truncated output)
             finish_reason = None
             if response.candidates:
@@ -259,6 +332,10 @@ async def generate_structured_response(
                 # Repair failed — raise original error so retry logic handles it
                 raise json_err
 
+        except GeminiContentFilterError:
+            # Safety filter is deterministic — no point retrying.
+            # Propagate immediately so callers can return a friendly response.
+            raise
         except asyncio.TimeoutError:
             logger.error(
                 "Gemini API timeout after %ds",
@@ -384,6 +461,8 @@ async def generate_socratic_question(
             temperature=0.7,
         ),
     )
+    # Guard against safety filter before accessing response.text (#526)
+    _check_safety_filter(response)
     return response.text.strip()
 
 
