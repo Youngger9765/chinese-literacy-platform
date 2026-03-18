@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LingoLeap Brand Book</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #5B4FC4;
+    --primary-light: #7C6FD9;
+    --primary-dark: #4A3FA3;
+    --secondary: #F59E42;
+    --secondary-light: #F7B76B;
+    --bg: #FDF8F0;
+    --surface: #FFFFFF;
+    --surface-alt: #F9F5ED;
+    --text-primary: #1A1A2E;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --border: #E5E0D5;
+    --success: #22C55E;
+    --warning: #F59E42;
+    --error: #EF4444;
+    --info: #3B82F6;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* --- LAYOUT --- */
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 64px 32px;
+  }
+
+  .section {
+    margin-bottom: 80px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+
+  .section-desc {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 640px;
+    margin-bottom: 40px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+
+  @media (max-width: 768px) {
+    .page { padding: 32px 16px; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .hero-title { font-size: 36px !important; }
+  }
+
+  /* --- HERO --- */
+  .hero {
+    text-align: center;
+    padding: 80px 0 64px;
+  }
+
+  .hero-logo {
+    width: 72px;
+    height: 72px;
+    background: var(--primary);
+    border-radius: var(--radius-xl);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+
+  .hero-title {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .hero-tagline {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 80px;
+  }
+
+  /* --- PERSONALITY --- */
+  .personality-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+  }
+
+  .personality-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .personality-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .personality-card .tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    margin-bottom: 16px;
+  }
+
+  .tag-do { background: #ECFDF5; color: #059669; }
+  .tag-dont { background: #FEF2F2; color: #DC2626; }
+
+  /* --- COLOR --- */
+  .color-swatch {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .color-swatch .swatch-fill {
+    height: 100px;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .color-swatch .swatch-fill span {
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  .color-swatch .swatch-info {
+    padding: 12px;
+  }
+
+  .color-swatch .swatch-name {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .color-swatch .swatch-usage {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* --- TYPOGRAPHY --- */
+  .type-specimen {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 16px;
+  }
+
+  .type-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .type-sample-5xl { font-size: 48px; font-weight: 700; line-height: 1.1; }
+  .type-sample-3xl { font-size: 30px; font-weight: 700; line-height: 1.2; }
+  .type-sample-xl { font-size: 20px; font-weight: 500; line-height: 1.4; }
+  .type-sample-base { font-size: 16px; font-weight: 400; line-height: 1.6; }
+  .type-sample-sm { font-size: 14px; font-weight: 400; line-height: 1.5; color: var(--text-secondary); }
+
+  /* --- SPACING --- */
+  .spacing-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .spacing-bar {
+    background: var(--primary);
+    opacity: 0.15;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    transition: opacity 0.15s;
+  }
+
+  .spacing-bar:hover { opacity: 0.3; }
+
+  .spacing-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    width: 60px;
+    flex-shrink: 0;
+  }
+
+  .spacing-value {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 40px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  /* --- BUTTONS --- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
+    text-decoration: none;
+  }
+
+  .btn:hover { transform: translateY(-1px); }
+
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-light); }
+  .btn-secondary { background: var(--secondary); color: white; }
+  .btn-secondary:hover { background: var(--secondary-light); }
+  .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+  .btn-outline:hover { background: rgba(91,79,196,0.06); }
+  .btn-ghost { background: transparent; color: var(--primary); }
+  .btn-ghost:hover { background: rgba(91,79,196,0.06); }
+  .btn-danger { background: var(--error); color: white; }
+  .btn-danger:hover { background: #DC2626; }
+
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+  /* --- CARDS --- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: box-shadow 0.15s ease-out;
+  }
+
+  .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .card-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* --- MOCKUP SECTION --- */
+  .mockup-frame {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  }
+
+  .mockup-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mockup-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .mockup-body { padding: 32px; }
+
+  /* --- DIFF DEMO --- */
+  .diff-correct { background: rgba(34,197,94,0.1); padding: 2px 4px; border-radius: 3px; }
+  .diff-error { background: rgba(239,68,68,0.15); color: var(--error); padding: 2px 4px; border-radius: 3px; text-decoration: line-through; }
+  .diff-missing { background: rgba(245,158,66,0.15); color: #B45309; padding: 2px 4px; border-radius: 3px; }
+
+  /* --- RADIUS --- */
+  .radius-demo {
+    display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-end;
+  }
+
+  .radius-box {
+    width: 64px; height: 64px;
+    background: var(--primary);
+    opacity: 0.12;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .radius-item { text-align: center; }
+  .radius-item span { display: block; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+  /* --- STATES --- */
+  .state-card {
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+  }
+
+  .state-icon { font-size: 32px; margin-bottom: 12px; }
+  .state-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .state-desc { font-size: 13px; color: var(--text-secondary); }
+
+  .state-empty { background: var(--surface-alt); border: 1px dashed var(--border); }
+  .state-success { background: #ECFDF5; border: 1px solid #BBF7D0; }
+  .state-error { background: #FEF2F2; border: 1px solid #FECACA; }
+
+  /* --- VOICE --- */
+  .voice-example {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    position: relative;
+  }
+
+  .voice-example::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 9999px;
+  }
+
+  .voice-do::before { background: #ECFDF5; color: #059669; }
+  .voice-dont::before { background: #FEF2F2; color: #DC2626; }
+
+  .voice-example p {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* --- FOOTER --- */
+  .footer {
+    text-align: center;
+    padding: 48px 0;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-logo">L</div>
+    <div class="hero-title">LingoLeap</div>
+    <div class="hero-sub">國語文閱讀學習平台</div>
+    <div class="hero-tagline">Brand Book — Design System v1.0 / 2026-03-18</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BRAND PERSONALITY -->
+  <div class="section">
+    <div class="section-label">01 / Brand</div>
+    <div class="section-title">品牌人格</div>
+    <div class="section-desc">
+      LingoLeap 是一位溫暖但堅定的蘇格拉底助教 — 鼓勵學生但不放水，像好的兒童書店而不是遊樂園
+    </div>
+
+    <div class="grid-3">
+      <div class="personality-card">
+        <span class="tag tag-do">DO</span>
+        <h3>溫暖鼓勵</h3>
+        <p>「太棒了，你這次進步了 12%！」<br>「再試一次，你快達標了」<br>用琥珀色（陽光色）標示進步</p>
+      </div>
+      <div class="personality-card">
+        <span class="tag tag-do">DO</span>
+        <h3>清晰誠實</h3>
+        <p>「這三個字讀錯了：贏、祕、背」<br>「正確率 77%，目標是 90%」<br>用數據說話，不模糊帶過</p>
+      </div>
+      <div class="personality-card">
+        <span class="tag tag-dont">DON'T</span>
+        <h3>避免的語氣</h3>
+        <p>「答錯了！」（羞恥感）<br>「Error 500」（冷冰冰）<br>過多 emoji 裝飾（幼稚）<br>通用 AI 話術（沒有人味）</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLOR PALETTE -->
+  <div class="section">
+    <div class="section-label">02 / Color</div>
+    <div class="section-title">色彩系統</div>
+    <div class="section-desc">
+      紫藍 Primary 代表 AI 智慧與信任，琥珀 Secondary 代表溫暖鼓勵，暖米色背景對兒童眼睛友善
+    </div>
+
+    <div class="grid-4" style="margin-bottom: 24px;">
+      <div class="color-swatch">
+        <div class="swatch-fill" style="background: #5B4FC4;"><span>#5B4FC4</span></div>
+        <div class="swatch-info"><div class="swatch-name">Primary</div><div class="swatch-usage">CTA、導航、品牌色</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-fill" style="background: #F59E42;"><span>#F59E42</span></div>
+        <div class="swatch-info"><div class="swatch-name">Secondary</div><div class="swatch-usage">成就、XP、鼓勵</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-fill" style="background: #FDF8F0;"><span style="color: #6B7280; text-shadow: none;">#FDF8F0</span></div>
+        <div class="swatch-info"><div class="swatch-name">Background</div><div class="swatch-usage">頁面背景</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-fill" style="background: #1A1A2E;"><span>#1A1A2E</span></div>
+        <div class="swatch-info"><div class="swatch-name">Text</div><div class="swatch-usage">主要文字</div></div>
+      </div>
+    </div>
+
+    <div class="grid-4">
+      <div class="color-swatch">
+        <div class="swatch-fill" style="background: #22C55E; height: 64px;"><span>#22C55E</span></div>
+        <div class="swatch-info"><div class="swatch-name">Success</div><div class="swatch-usage">達標、正確</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-fill" style="background: #EF4444; height: 64px;"><span>#EF4444</span></div>
+        <div class="swatch-info"><div class="swatch-name">Error</div><div class="swatch-usage">錯誤、未達標</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-fill" style="background: #3B82F6; height: 64px;"><span>#3B82F6</span></div>
+        <div class="swatch-info"><div class="swatch-name">Info</div><div class="swatch-usage">提示資訊</div></div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-fill" style="background: #E5E0D5; height: 64px;"><span style="color: #6B7280; text-shadow: none;">#E5E0D5</span></div>
+        <div class="swatch-info"><div class="swatch-name">Border</div><div class="swatch-usage">邊框、分隔線</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPOGRAPHY -->
+  <div class="section">
+    <div class="section-label">03 / Typography</div>
+    <div class="section-title">字型系統</div>
+    <div class="section-desc">
+      Noto Sans TC — 繁體中文最佳支援，從 Hero 到正文一致的視覺語言
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-label">5xl / 48px / Bold — 特大展示</div>
+      <div class="type-sample-5xl">閱讀，讓世界更寬廣</div>
+    </div>
+    <div class="type-specimen">
+      <div class="type-label">3xl / 30px / Bold — Hero 標題</div>
+      <div class="type-sample-3xl">歡迎回來，小明！今天也來練習朗讀吧</div>
+    </div>
+    <div class="type-specimen">
+      <div class="type-label">xl / 20px / Medium — 區塊標題</div>
+      <div class="type-sample-xl">穿越極限的跑者 — 陳彥博的超級馬拉松之路</div>
+    </div>
+    <div class="type-specimen">
+      <div class="type-label">base / 16px / Regular — 正文</div>
+      <div class="type-sample-base">
+        「一個夢想如果可以被想像，那就有存在的價值。但重點是你要怎麼計劃並且執行。」臺灣極地超級馬拉松好手陳彥博說。他跑過沙漠、高山和冰原，是第一位勇奪四大極地超級馬拉松巡迴賽總冠軍的亞洲人
+      </div>
+    </div>
+    <div class="type-specimen">
+      <div class="type-label">sm / 14px / Regular — 次要內容</div>
+      <div class="type-sample-sm">記敘文 · 推論 · 指稱詞（代名詞）· 難度 4 · 四年級適用</div>
+    </div>
+  </div>
+
+  <!-- SPACING -->
+  <div class="section">
+    <div class="section-label">04 / Spacing</div>
+    <div class="section-title">間距系統</div>
+    <div class="section-desc">Base unit 4px，學生端 spacious、教師端 comfortable</div>
+
+    <div style="max-width: 500px;">
+      <div class="spacing-row"><span class="spacing-label">2xs</span><div class="spacing-bar" style="width: 2px;"></div><span class="spacing-value">2px</span></div>
+      <div class="spacing-row"><span class="spacing-label">xs</span><div class="spacing-bar" style="width: 4px;"></div><span class="spacing-value">4px</span></div>
+      <div class="spacing-row"><span class="spacing-label">sm</span><div class="spacing-bar" style="width: 16px;"></div><span class="spacing-value">8px</span></div>
+      <div class="spacing-row"><span class="spacing-label">md</span><div class="spacing-bar" style="width: 48px;"></div><span class="spacing-value">16px</span></div>
+      <div class="spacing-row"><span class="spacing-label">lg</span><div class="spacing-bar" style="width: 96px;"></div><span class="spacing-value">24px</span></div>
+      <div class="spacing-row"><span class="spacing-label">xl</span><div class="spacing-bar" style="width: 144px;"></div><span class="spacing-value">32px</span></div>
+      <div class="spacing-row"><span class="spacing-label">2xl</span><div class="spacing-bar" style="width: 216px;"></div><span class="spacing-value">48px</span></div>
+      <div class="spacing-row"><span class="spacing-label">3xl</span><div class="spacing-bar" style="width: 288px;"></div><span class="spacing-value">64px</span></div>
+    </div>
+  </div>
+
+  <!-- BORDER RADIUS -->
+  <div class="section">
+    <div class="section-label">05 / Radius</div>
+    <div class="section-title">圓角系統</div>
+
+    <div class="radius-demo">
+      <div class="radius-item"><div class="radius-box" style="border-radius: 4px;"></div><span>sm / 4px</span></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius: 8px;"></div><span>md / 8px</span></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius: 12px;"></div><span>lg / 12px</span></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius: 16px;"></div><span>xl / 16px</span></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius: 9999px;"></div><span>full</span></div>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="section">
+    <div class="section-label">06 / Components</div>
+    <div class="section-title">按鈕層級</div>
+    <div class="section-desc">從左到右權重遞減 — 一個畫面只有一個 Primary</div>
+
+    <div class="btn-row" style="margin-bottom: 32px;">
+      <button class="btn btn-primary">開始朗讀</button>
+      <button class="btn btn-secondary">查看成就</button>
+      <button class="btn btn-outline">返回列表</button>
+      <button class="btn btn-ghost">取消</button>
+      <button class="btn btn-danger">刪除班級</button>
+    </div>
+
+    <!-- Cards -->
+    <div class="section-title" style="font-size: 20px; margin-top: 48px;">卡片</div>
+    <div class="grid-3" style="margin-top: 24px;">
+      <div class="card">
+        <div class="card-title">穿越極限的跑者</div>
+        <div class="card-desc">四年級 · 記敘文 · 難度 4<br>正確率 77.8% · 14 次練習</div>
+      </div>
+      <div class="card">
+        <div class="card-title">第一百碗麵</div>
+        <div class="card-desc">四年級 · 記敘文 · 難度 4<br>尚未開始</div>
+      </div>
+      <div class="card">
+        <div class="card-title">贏得喝采的輸家</div>
+        <div class="card-desc">四年級 · 記敘文 · 難度 4<br>正確率 65% · 4 次練習</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATES -->
+  <div class="section">
+    <div class="section-label">07 / States</div>
+    <div class="section-title">狀態設計</div>
+    <div class="section-desc">每個功能都有 empty / success / error 三種狀態，不是事後想到</div>
+
+    <div class="grid-3">
+      <div class="state-card state-empty">
+        <div class="state-icon">📋</div>
+        <div class="state-title">目前沒有待完成的作業</div>
+        <div class="state-desc">老師指派的作業會顯示在這裡</div>
+      </div>
+      <div class="state-card state-success">
+        <div class="state-icon">🎉</div>
+        <div class="state-title">太棒了！全部達標</div>
+        <div class="state-desc">正確率 95%，超越目標 5%</div>
+      </div>
+      <div class="state-card state-error">
+        <div class="state-icon">💡</div>
+        <div class="state-title">出了點問題</div>
+        <div class="state-desc">請重新整理頁面，或稍後再試</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIFF DEMO -->
+  <div class="section">
+    <div class="section-label">08 / Reading Analysis</div>
+    <div class="section-title">朗讀差異比對</div>
+    <div class="section-desc">核心功能的色彩語言 — 讓學生一眼看出哪裡讀對、哪裡讀錯</div>
+
+    <div class="mockup-frame">
+      <div class="mockup-topbar">
+        <div class="mockup-dot"></div>
+        <div class="mockup-dot"></div>
+        <div class="mockup-dot"></div>
+        <span style="font-size: 13px; color: var(--text-muted); margin-left: 8px;">逐句分析對比</span>
+      </div>
+      <div class="mockup-body" style="font-size: 20px; line-height: 2;">
+        <span class="diff-correct">臺</span><span class="diff-correct">灣</span><span class="diff-correct">極</span><span class="diff-correct">地</span><span class="diff-correct">超</span><span class="diff-correct">級</span><span class="diff-correct">馬</span><span class="diff-correct">拉</span><span class="diff-correct">松</span><span class="diff-correct">好</span><span class="diff-correct">手</span><span class="diff-correct">陳</span><span class="diff-correct">彥</span><span class="diff-correct">博</span><span class="diff-correct">說</span>。<span class="diff-correct">他</span><span class="diff-correct">跑</span><span class="diff-correct">過</span><span class="diff-error">沙</span><span class="diff-error">漢</span><span class="diff-missing">漠</span>、<span class="diff-correct">高</span><span class="diff-correct">山</span><span class="diff-correct">和</span><span class="diff-error">冰</span><span class="diff-correct">原</span>
+        <div style="margin-top: 24px; font-size: 14px; display: flex; gap: 24px; color: var(--text-secondary);">
+          <span><span class="diff-correct" style="font-size: 12px;">　　</span> 正確</span>
+          <span><span class="diff-error" style="font-size: 12px; text-decoration: none;">　　</span> 讀錯</span>
+          <span><span class="diff-missing" style="font-size: 12px;">　　</span> 漏讀</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOICE -->
+  <div class="section">
+    <div class="section-label">09 / Voice</div>
+    <div class="section-title">語氣規範</div>
+    <div class="section-desc">溫暖但堅定 — 鼓勵學生，但用數據說真話</div>
+
+    <div class="grid-2">
+      <div class="voice-example voice-do" data-label="DO — 溫暖鼓勵">
+        <p>「你這次的正確率從 65% 進步到 77%，太棒了！再加油一下就能達標 90% 了」</p>
+      </div>
+      <div class="voice-example voice-dont" data-label="DON'T — 冷冰冰">
+        <p>「正確率：77.8%。未達標。目標：90%。請重新練習」</p>
+      </div>
+      <div class="voice-example voice-do" data-label="DO — 具體指導">
+        <p>「這三個字要多練習：贏（3次）、祕（2次）、背（1次）。點擊可以聽正確發音」</p>
+      </div>
+      <div class="voice-example voice-dont" data-label="DON'T — 模糊帶過">
+        <p>「部分字詞需要加強練習，請多努力」</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DUAL TRACK -->
+  <div class="section">
+    <div class="section-label">10 / Dual Track</div>
+    <div class="section-title">學生端 vs 教師端</div>
+    <div class="section-desc">同一個系統，兩種體驗密度</div>
+
+    <div class="grid-2">
+      <div class="mockup-frame">
+        <div class="mockup-topbar">
+          <div class="mockup-dot" style="background: var(--secondary);"></div>
+          <span style="font-size: 13px; color: var(--text-muted); margin-left: 8px;">學生端 — Spacious</span>
+        </div>
+        <div class="mockup-body" style="padding: 32px;">
+          <div style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">你好，小明！</div>
+          <div style="font-size: 16px; color: var(--text-secondary); margin-bottom: 32px;">今天也來練習朗讀吧，每天進步一點點</div>
+          <div style="display: flex; gap: 16px; margin-bottom: 32px;">
+            <div style="background: var(--primary); color: white; padding: 16px 24px; border-radius: var(--radius-lg); flex: 1; text-align: center;">
+              <div style="font-size: 28px; font-weight: 700;">5</div>
+              <div style="font-size: 13px; opacity: 0.8;">篇完成</div>
+            </div>
+            <div style="background: var(--secondary); color: white; padding: 16px 24px; border-radius: var(--radius-lg); flex: 1; text-align: center;">
+              <div style="font-size: 28px; font-weight: 700;">65.8%</div>
+              <div style="font-size: 13px; opacity: 0.8;">平均分數</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 16px;">開始閱讀</button>
+        </div>
+      </div>
+
+      <div class="mockup-frame">
+        <div class="mockup-topbar">
+          <div class="mockup-dot" style="background: var(--primary);"></div>
+          <span style="font-size: 13px; color: var(--text-muted); margin-left: 8px;">教師端 — Comfortable</span>
+        </div>
+        <div class="mockup-body" style="padding: 20px;">
+          <div style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">三年甲班</div>
+          <div style="display: flex; gap: 12px; margin-bottom: 16px; font-size: 13px;">
+            <span style="background: var(--surface-alt); padding: 4px 12px; border-radius: 9999px;">活躍 2/2</span>
+            <span style="background: var(--surface-alt); padding: 4px 12px; border-radius: 9999px;">正確率 77.8%</span>
+            <span style="background: var(--surface-alt); padding: 4px 12px; border-radius: 9999px;">完成率 50%</span>
+          </div>
+          <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted);">
+              <td style="padding: 8px 0;">學生</td>
+              <td>最近練習</td>
+              <td>練習次數</td>
+              <td>正確率</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding: 8px 0; font-weight: 500;">小明</td>
+              <td>3/18</td>
+              <td>14</td>
+              <td><span style="color: var(--warning);">77.8%</span></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: 500;">小華</td>
+              <td>3/8</td>
+              <td>4</td>
+              <td><span style="color: var(--error);">52.3%</span></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="footer">
+    LingoLeap Brand Book v1.0 — 2026-03-18<br>
+    Design System: DESIGN.md
+  </div>
+
+</div>
+
+</body>
+</html>
