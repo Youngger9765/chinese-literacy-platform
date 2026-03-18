@@ -15,7 +15,7 @@ from ...models.user import User
 from ...services.stuck_detection_service import detect_stuck_points
 from ._helpers import verify_student_access
 
-router = APIRouter(tags=["learning"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 

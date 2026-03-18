@@ -13,9 +13,9 @@ from ...auth.rate_limiter import ai_limit_5_per_min
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
-from ...services.ai_service import generate_reading_analysis
+from ...services.ai_service import generate_reading_analysis, GeminiContentFilterError, CONTENT_FILTER_FRIENDLY_MSG
 
-router = APIRouter(tags=["learning"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
@@ -90,6 +90,15 @@ async def get_ai_analysis(
             "dictation_correct_count": payload.dictation_correct_count,
             "dictation_total_count": payload.dictation_total_count,
         })
+    except GeminiContentFilterError:
+        logger.warning("Content filter blocked AI analysis for session %d", session_id)
+        return AIAnalysisResponse(
+            analysis_summary=CONTENT_FILTER_FRIENDLY_MSG,
+            strengths=[],
+            areas_for_improvement=[],
+            practice_suggestions=["換一篇課文再試試看"],
+            encouragement_message="你很棒，繼續加油！",
+        )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
     except Exception as e:
@@ -134,6 +143,15 @@ async def get_ai_analysis_standalone(
             "dictation_correct_count": payload.dictation_correct_count,
             "dictation_total_count": payload.dictation_total_count,
         })
+    except GeminiContentFilterError:
+        logger.warning("Content filter blocked standalone AI analysis for user %d", current_user.id)
+        return AIAnalysisResponse(
+            analysis_summary=CONTENT_FILTER_FRIENDLY_MSG,
+            strengths=[],
+            areas_for_improvement=[],
+            practice_suggestions=["換一篇課文再試試看"],
+            encouragement_message="你很棒，繼續加油！",
+        )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
     except Exception as e:

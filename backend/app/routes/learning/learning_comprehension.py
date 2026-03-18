@@ -18,7 +18,7 @@ from ...services.ai_service import generate_socratic_question
 from ...services.socratic_agent import socratic_agent
 from ._helpers import ConversationTurn
 
-router = APIRouter(tags=["learning"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 

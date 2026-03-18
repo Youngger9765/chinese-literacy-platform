@@ -19,7 +19,7 @@ from ...schemas.session import ComprehensionScoreResponse
 from ...services.ai_service import evaluate_comprehension
 from ._helpers import ConversationTurn
 
-router = APIRouter(tags=["learning"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 

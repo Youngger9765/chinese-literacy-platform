@@ -20,7 +20,7 @@ from ...schemas.session import (
     SessionUpdateRequest,
 )
 
-router = APIRouter(tags=["learning"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 

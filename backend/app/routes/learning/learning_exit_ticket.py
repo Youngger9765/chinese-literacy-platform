@@ -14,7 +14,7 @@ from ...models.session import LearningSession
 from ...models.user import User
 from ...services.exit_ticket_service import generate_exit_ticket_questions, calculate_score  # noqa: F401
 
-router = APIRouter(tags=["learning"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 

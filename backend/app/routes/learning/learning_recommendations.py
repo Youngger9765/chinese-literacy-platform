@@ -14,7 +14,7 @@ from ...services.stuck_detection_service import build_recommendations, detect_st
 from ...services.learning_path_service import recommend_next_stories
 from ._helpers import verify_student_access
 
-router = APIRouter(tags=["learning"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 

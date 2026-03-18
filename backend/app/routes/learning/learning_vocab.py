@@ -14,7 +14,7 @@ from ...models.user import User
 from ...services.ai_service import generate_example_sentences, validate_student_sentence
 from ...services.listening_service import evaluate_retelling
 
-router = APIRouter(tags=["learning"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 

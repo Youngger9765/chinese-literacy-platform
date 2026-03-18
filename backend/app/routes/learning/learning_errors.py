@@ -16,7 +16,7 @@ from ...models.session import CharacterError, ErrorCorrection, LearningSession
 from ...models.user import User
 from ._helpers import verify_student_access
 
-router = APIRouter(tags=["learning"])
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
