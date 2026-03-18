@@ -162,7 +162,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [story.content, story.title, sessionId, attempt, applyServerState]);
+  }, [story.content, story.title, sessionId, attempt, applyServerState, dbSessionId, token]);
 
   // Resizable right panel (mouse + touch)
   useEffect(() => {
@@ -211,12 +211,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     e.preventDefault();
   };
 
-  // Fetch the first question on mount
+  // Fetch the first question when auth token is ready
   useEffect(() => {
+    if (!token) return;
     if (initializedRef.current) return;
     initializedRef.current = true;
     fetchFirstQuestion();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchFirstQuestion, token]);
 
   const handleSubmit = async () => {
     const text = inputText.trim();

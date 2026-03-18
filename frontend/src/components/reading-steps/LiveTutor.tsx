@@ -11,6 +11,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
 import RecordingButton from '../recording/RecordingButton';
 import ParagraphProgress, { ParagraphStatus } from './ParagraphProgress';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 /* ------------------------------------------------------------------ */
 /*  Canned response pools — randomly selected to avoid repetition     */
@@ -143,7 +144,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const { px: fontSizePx } = useFontSize();
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isPreparing, setIsPreparing] = useState(false);          // STT initializing
-  const [isSessionActive, setIsSessionActive] = useState(false);  // mic actively recording
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [messages, setMessages] = useState<LiveMessage[]>([]);
   const [micError, setMicError] = useState('');
@@ -170,14 +170,27 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const dragStartWidthRef = useRef(320);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
-  const isSessionActiveRef = useRef(false);   // true while recording
+  const prevSpeechStatusRef = useRef<'idle' | 'listening' | 'error' | 'unsupported'>('idle');
   const sentenceStartTimeRef = useRef(0);     // when current sentence reading began
-  const currentTranscriptRef = useRef('');     // full transcript (accumulated + current session)
-  const rawSttRef = useRef('');               // raw STT output for logging
-  const accumulatedTranscriptRef = useRef(''); // transcript preserved across auto-reconnects
   const currentLineIndexRef = useRef(0);      // mirrors currentLineIndex for async callbacks
   const evaluateAndRespondRef = useRef<any>(null);
+
+  const {
+    status: speechStatus,
+    transcript: speechTranscript,
+    errorMessage: speechError,
+    isSupported: speechSupported,
+    startListening,
+    stopListening,
+    clearTranscript,
+  } = useSpeechRecognition('cmn-Hant-TW', undefined, {
+    continuous: true,
+    interimResults: true,
+    autoReconnect: true,
+    accumulateTranscript: true,
+  });
+
+  const isSessionActive = speechStatus === 'listening';
 
   /* ---- scroll helpers ---- */
   useEffect(() => {
@@ -189,6 +202,36 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       activeLineRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [currentLineIndex]);
+
+  useEffect(() => {
+    setStreamingUserInput(cleanChineseText(speechTranscript));
+  }, [speechTranscript]);
+
+  useEffect(() => {
+    if (!speechSupported) {
+      setMicError('您的瀏覽器不支援語音辨識，請使用 Chrome 瀏覽器。');
+      return;
+    }
+    setMicError(speechError || '');
+  }, [speechError, speechSupported]);
+
+  useEffect(() => {
+    if (speechStatus === 'listening' || speechStatus === 'error' || speechStatus === 'unsupported') {
+      setIsPreparing(false);
+    }
+
+    if (prevSpeechStatusRef.current !== 'listening' && speechStatus === 'listening') {
+      sentenceStartTimeRef.current = Date.now();
+      setMessages(prev => [...prev, {
+        id: 'ready-' + Date.now(),
+        role: 'model' as const,
+        text: '準備好了，請開始朗讀！',
+        type: 'feedback' as const,
+      }]);
+    }
+
+    prevSpeechStatusRef.current = speechStatus;
+  }, [speechStatus]);
 
   /* ---- pre-warm mic permission on mount (eliminates delay on first startSession) ---- */
   useEffect(() => {
@@ -297,10 +340,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /* ---- cleanup on unmount ---- */
   useEffect(() => {
     return () => {
-      isSessionActiveRef.current = false;
-      if (recognitionRef.current) {
-        try { recognitionRef.current.abort(); } catch (_) {}
-      }
       window.speechSynthesis?.cancel();
     };
   }, []);
@@ -453,138 +492,45 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /* ================================================================ */
 
   const startSession = () => {
-    if (isSessionActiveRef.current) return;
+    if (isSessionActive) return;
+    if (!speechSupported) {
+      setMicError('您的瀏覽器不支援語音辨識，請使用 Chrome 瀏覽器。');
+      return;
+    }
+
     window.speechSynthesis?.cancel();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
     setIsPreparing(true);
     setMicError('');
-
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setMicError('您的瀏覽器不支援語音辨識，請使用 Chrome 瀏覽器。');
-      setIsPreparing(false);
-      return;
-    }
-
-    // Note: mic permission is pre-warmed on mount. If not yet granted,
-    // recognition.start() will trigger the browser permission dialog and
-    // onerror('not-allowed') handles denial.
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'cmn-Hant-TW';  // BCP 47: Mandarin, Traditional script, Taiwan
-    recognition.continuous = true;       // KEEP listening — never cut off on pauses
-    recognition.interimResults = true;
-
-    recognition.onstart = () => {
-      setIsPreparing(false);
-      if (!isSessionActiveRef.current) {
-        // First start — set accurate sentence timer & show "ready" signal
-        sentenceStartTimeRef.current = Date.now();
-        isSessionActiveRef.current = true;
-        setIsSessionActive(true);
-        setMessages(prev => [...prev, {
-          id: 'ready-' + Date.now(),
-          role: 'model' as const,
-          text: '準備好了，請開始朗讀！',
-          type: 'feedback' as const,
-        }]);
-      }
-      // On reconnects / submitSentence restarts, isSessionActiveRef is already true → no-op
-    };
-
-    recognition.onresult = (event: any) => {
-      // Build transcript from this recognition session's results
-      let sessionTranscript = '';
-      for (let i = 0; i < event.results.length; i++) {
-        sessionTranscript += event.results[i][0].transcript;
-      }
-      // Combine with transcript accumulated from previous sessions (auto-reconnects)
-      const fullTranscript = accumulatedTranscriptRef.current + sessionTranscript;
-      rawSttRef.current = fullTranscript;
-      currentTranscriptRef.current = fullTranscript;
-      setStreamingUserInput(cleanChineseText(fullTranscript));
-    };
-
-    recognition.onerror = (event: any) => {
-      console.warn('SpeechRecognition error:', event.error);
-      if (event.error === 'not-allowed') {
-        setMicError('請允許麥克風權限後再試一次。');
-        isSessionActiveRef.current = false;
-        setIsSessionActive(false);
-        setIsPreparing(false);
-      } else if (event.error === 'audio-capture') {
-        setMicError('找不到麥克風，請確認麥克風已連接後再試一次。');
-        isSessionActiveRef.current = false;
-        setIsSessionActive(false);
-        setIsPreparing(false);
-      }
-      // Other errors (no-speech, network, aborted) → onend will handle reconnect
-    };
-
-    recognition.onend = () => {
-      if (isSessionActiveRef.current) {
-        // Browser/API timed out — seamlessly reconnect
-        console.log('[SpeechRecognition] Auto-reconnecting…');
-        accumulatedTranscriptRef.current = currentTranscriptRef.current;
-        try { recognition.start(); } catch (_) {}
-      } else {
-        // Session fully ended
-        setIsSessionActive(false);
-        setIsPreparing(false);
-        recognitionRef.current = null;
-      }
-    };
-
-    recognitionRef.current = recognition;
-    currentTranscriptRef.current = '';
-    rawSttRef.current = '';
-    accumulatedTranscriptRef.current = '';
+    clearTranscript();
     setStreamingUserInput('');
-
-    recognition.start();
-    // Note: isSessionActive & sentenceStartTimeRef are set in onstart once STT is truly ready
+    setLastDiffTokens(null);
+    sentenceStartTimeRef.current = Date.now();
+    startListening();
   };
 
   /** Submit the current sentence for evaluation. Recognition keeps running. */
   const submitSentence = useCallback(() => {
-    const transcript = currentTranscriptRef.current;
-    const rawStt = rawSttRef.current;
+    const rawStt = speechTranscript;
+    const transcript = cleanChineseText(rawStt);
     const durationMs = Date.now() - sentenceStartTimeRef.current;
 
-    // Reset transcript for next sentence & restart recognition (near-instant)
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch (_) {}
-      currentTranscriptRef.current = '';
-      rawSttRef.current = '';
-      accumulatedTranscriptRef.current = '';
-      setStreamingUserInput('');
-      setLastDiffTokens(null);
-      sentenceStartTimeRef.current = Date.now();
-      // Immediately restart — onend will also try but catch silently
-      if (isSessionActiveRef.current) {
-        try { recognitionRef.current.start(); } catch (_) {}
-      }
-    }
+    clearTranscript();
+    setStreamingUserInput('');
+    setLastDiffTokens(null);
+    sentenceStartTimeRef.current = Date.now();
 
     if (transcript) {
       evaluateAndRespondRef.current(transcript, rawStt, durationMs, currentLineIndexRef.current);
     }
-  }, []);
+  }, [speechTranscript, clearTranscript]);
 
   /** Stop the entire session (for navigation / story switching / finishing). */
   const stopSession = () => {
-    isSessionActiveRef.current = false;
-    setIsSessionActive(false);
+    stopListening();
+    clearTranscript();
     setIsPreparing(false);
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch (_) {}
-      recognitionRef.current = null;
-    }
-    currentTranscriptRef.current = '';
-    rawSttRef.current = '';
-    accumulatedTranscriptRef.current = '';
     setStreamingUserInput('');
   };
 
@@ -814,6 +760,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         {/* Chat area */}
         <div
           ref={scrollRef}
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions text"
+          aria-label="即時朗讀回饋訊息"
           className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50"
         >
           {messages.map(m => (
@@ -898,6 +848,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {/* 系統朗讀 disabled while mic is initializing */}
                 <button
                   disabled
+                  aria-label="系統朗讀（準備中，暫時不可用）"
                   className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -907,6 +858,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 </button>
                 <button
                   disabled
+                  aria-label="語音辨識準備中"
                   className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-600 cursor-wait"
                 >
                   <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
@@ -917,6 +869,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <button
                 onClick={submitSentence}
                 disabled={isAdvancing || !streamingUserInput}
+                aria-label={isAdvancing ? '請稍候，正在處理中' : '完成當前段落'}
                 className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
                   isAdvancing || !streamingUserInput
                     ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
@@ -933,6 +886,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {/* 暫停 / 繼續 */}
                 <button
                   onClick={isTtsPaused ? resumeTts : pauseTts}
+                  aria-label={isTtsPaused ? '繼續系統朗讀' : '暫停系統朗讀'}
                   className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
                     isTtsPaused
                       ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
@@ -950,6 +904,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {/* 停止 */}
                 <button
                   onClick={stopTts}
+                  aria-label="停止系統朗讀"
                   className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95"
                 >
                   <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -963,6 +918,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {/* 系統朗讀 */}
                 <button
                   onClick={speakCurrentParagraph}
+                  aria-label="播放系統朗讀"
                   className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95"
                 >
                   <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -974,6 +930,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 <button
                   onClick={startSession}
                   disabled={isAdvancing}
+                  aria-label={isAdvancing ? '請稍候，正在切換段落' : '開始朗讀'}
                   className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
                     isAdvancing
                       ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
@@ -991,6 +948,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           <div className="border-t border-gray-100 pt-2">
             <button
               onClick={() => setShowRecorder(prev => !prev)}
+              aria-label={showRecorder ? '收合錄音重聽選單' : '展開錄音重聽選單'}
               className="w-full flex items-center justify-between px-2 py-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
               aria-expanded={showRecorder}
             >
@@ -1025,6 +983,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 }
               }}
               disabled={currentLineIndex === 0}
+              aria-label="回到上一段"
               className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${
                 zhuyinActive ? 'tracking-[0.2em]' : ''
               } ${
@@ -1048,6 +1007,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   <button
                     onClick={handleFinish}
                     disabled={!allDone}
+                    aria-label="查看總結報告"
                     title={!allDone ? '完成所有段落後才能查看報告' : undefined}
                     className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
                       allDone
@@ -1070,6 +1030,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     }
                   }}
                   disabled={!nextUnlocked}
+                  aria-label="前往下一段"
                   title={!nextUnlocked ? '請先完成此段朗讀（正確率需達 60%）' : undefined}
                   className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
                     nextUnlocked
@@ -1086,6 +1047,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           {isSessionActive && (
             <button
               onClick={stopSession}
+              aria-label="停止朗讀"
               className={`w-full py-1.5 rounded-lg text-base font-bold text-gray-400 hover:text-gray-600 transition-colors leading-[2.6] ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}
             >
               {processZhuyin('停止朗讀')}
