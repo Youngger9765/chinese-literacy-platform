@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
@@ -282,15 +282,17 @@ def get_classroom_progress(
     """Get learning progress for all students in a classroom."""
     classroom = _check_classroom_access(current_user, classroom_id, db)
 
-    # Get all students in the classroom
+    # Get all students in the classroom — joinedload to avoid N+1 on enrollment.student
     enrollments = (
         db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .all()
     )
 
-    # Batch-load tags for all students to avoid N+1 queries
     student_ids_in_classroom = [e.student_id for e in enrollments]
+
+    # Batch-load tags for all students to avoid N+1 queries
     tags_by_student: dict[int, list[StudentTag]] = {}
     if student_ids_in_classroom:
         all_tags = (
@@ -301,24 +303,36 @@ def get_classroom_progress(
         for tag in all_tags:
             tags_by_student.setdefault(tag.student_id, []).append(tag)
 
+    # Batch-load session counts per student (single aggregation query, not N queries)
+    session_count_rows = (
+        db.query(LearningSession.student_id, func.count(LearningSession.id).label("cnt"))
+        .filter(LearningSession.student_id.in_(student_ids_in_classroom))
+        .group_by(LearningSession.student_id)
+        .all()
+        if student_ids_in_classroom else []
+    )
+    session_counts: dict[int, int] = {row.student_id: row.cnt for row in session_count_rows}
+
+    # Batch-load latest session per student using a window function approach:
+    # fetch all sessions ordered desc and keep only the first per student in Python.
+    all_sessions_for_latest = (
+        db.query(LearningSession)
+        .filter(LearningSession.student_id.in_(student_ids_in_classroom))
+        .order_by(LearningSession.student_id, LearningSession.started_at.desc())
+        .all()
+        if student_ids_in_classroom else []
+    )
+    latest_session_by_student: dict[int, LearningSession] = {}
+    for s in all_sessions_for_latest:
+        if s.student_id not in latest_session_by_student:
+            latest_session_by_student[s.student_id] = s
+
     results = []
     for enrollment in enrollments:
         student = enrollment.student
 
-        # Get total session count for this student
-        total_sessions = (
-            db.query(func.count(LearningSession.id))
-            .filter(LearningSession.student_id == student.id)
-            .scalar()
-        )
-
-        # Get the most recent session for this student
-        latest_session = (
-            db.query(LearningSession)
-            .filter(LearningSession.student_id == student.id)
-            .order_by(LearningSession.started_at.desc())
-            .first()
-        )
+        total_sessions = session_counts.get(student.id, 0)
+        latest_session = latest_session_by_student.get(student.id)
 
         last_session_date = None
         last_text_title = None
@@ -833,6 +847,7 @@ def get_classroom_alerts(
 
     enrollments = (
         db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .all()
     )
@@ -840,31 +855,43 @@ def get_classroom_alerts(
     if not enrollments:
         return []
 
+    student_ids = [e.student_id for e in enrollments]
     now = datetime.now(timezone.utc)
     fourteen_days_ago = now - timedelta(days=14)
+
+    # Batch-load all scored sessions for alert analysis (single query instead of N)
+    all_scored_sessions = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.overall_score.isnot(None),
+        )
+        .order_by(LearningSession.student_id, LearningSession.started_at.asc())
+        .all()
+    )
+    scored_sessions_by_student: dict[int, list[LearningSession]] = {}
+    for s in all_scored_sessions:
+        scored_sessions_by_student.setdefault(s.student_id, []).append(s)
+
+    # Batch-load latest session per student (single query instead of N)
+    all_sessions_ordered = (
+        db.query(LearningSession)
+        .filter(LearningSession.student_id.in_(student_ids))
+        .order_by(LearningSession.student_id, LearningSession.started_at.desc())
+        .all()
+    )
+    latest_session_by_student: dict[int, LearningSession] = {}
+    for s in all_sessions_ordered:
+        if s.student_id not in latest_session_by_student:
+            latest_session_by_student[s.student_id] = s
+
     alerts: list[StudentAlertResponse] = []
 
     for enrollment in enrollments:
         student = enrollment.student
 
-        # Fetch all completed sessions for this student (with a score), ordered asc
-        student_sessions = (
-            db.query(LearningSession)
-            .filter(
-                LearningSession.student_id == student.id,
-                LearningSession.overall_score.isnot(None),
-            )
-            .order_by(LearningSession.started_at.asc())
-            .all()
-        )
-
-        # Most recent session across all statuses (to determine last_session_date)
-        latest_session = (
-            db.query(LearningSession)
-            .filter(LearningSession.student_id == student.id)
-            .order_by(LearningSession.started_at.desc())
-            .first()
-        )
+        student_sessions = scored_sessions_by_student.get(student.id, [])
+        latest_session = latest_session_by_student.get(student.id)
         last_session_date = latest_session.started_at if latest_session else None
 
         # ── Alert: inactive ──────────────────────────────────────────────────
@@ -1019,6 +1046,7 @@ def get_at_risk_students(
 
     enrollments = (
         db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .all()
     )
@@ -1654,6 +1682,7 @@ def get_classroom_stuck_overview(
 
     enrollments = (
         db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .all()
     )
@@ -1744,29 +1773,54 @@ def _build_classroom_alerts_for_teacher(
     def _make_aware(dt: datetime) -> datetime:
         return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
 
-    for classroom in classrooms:
-        enrollments = (
-            db.query(ClassroomStudent)
-            .filter(ClassroomStudent.classroom_id == classroom.id)
-            .all()
+    # Batch-load all enrollments across all classrooms in a single query (avoid N per-classroom queries)
+    all_classroom_ids = [c.id for c in classrooms]
+    all_enrollments = (
+        db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
+        .filter(ClassroomStudent.classroom_id.in_(all_classroom_ids))
+        .all()
+        if all_classroom_ids else []
+    )
+    enrollments_by_classroom: dict[int, list[ClassroomStudent]] = {}
+    for e in all_enrollments:
+        enrollments_by_classroom.setdefault(e.classroom_id, []).append(e)
+
+    all_student_ids = list({e.student_id for e in all_enrollments})
+
+    # Batch-load all scored sessions and latest sessions for all students at once
+    all_scored_sessions_notif = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id.in_(all_student_ids),
+            LearningSession.overall_score.isnot(None),
         )
+        .order_by(LearningSession.student_id, LearningSession.started_at.asc())
+        .all()
+        if all_student_ids else []
+    )
+    scored_sessions_by_student_notif: dict[int, list[LearningSession]] = {}
+    for s in all_scored_sessions_notif:
+        scored_sessions_by_student_notif.setdefault(s.student_id, []).append(s)
+
+    all_sessions_for_latest_notif = (
+        db.query(LearningSession)
+        .filter(LearningSession.student_id.in_(all_student_ids))
+        .order_by(LearningSession.student_id, LearningSession.started_at.desc())
+        .all()
+        if all_student_ids else []
+    )
+    latest_session_by_student_notif: dict[int, LearningSession] = {}
+    for s in all_sessions_for_latest_notif:
+        if s.student_id not in latest_session_by_student_notif:
+            latest_session_by_student_notif[s.student_id] = s
+
+    for classroom in classrooms:
+        enrollments = enrollments_by_classroom.get(classroom.id, [])
         for enrollment in enrollments:
             student = enrollment.student
-            student_sessions = (
-                db.query(LearningSession)
-                .filter(
-                    LearningSession.student_id == student.id,
-                    LearningSession.overall_score.isnot(None),
-                )
-                .order_by(LearningSession.started_at.asc())
-                .all()
-            )
-            latest_session = (
-                db.query(LearningSession)
-                .filter(LearningSession.student_id == student.id)
-                .order_by(LearningSession.started_at.desc())
-                .first()
-            )
+            student_sessions = scored_sessions_by_student_notif.get(student.id, [])
+            latest_session = latest_session_by_student_notif.get(student.id)
             last_session_date = latest_session.started_at if latest_session else None
 
             is_inactive = last_session_date is None or _make_aware(last_session_date) < fourteen_days_ago
