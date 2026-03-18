@@ -144,6 +144,31 @@ class TestLevelProgressEdge:
             assert result["progress_pct"] <= 100
 
 
+class TestBadgeCatalogue:
+    """Tests for badge catalogue completeness — issue #527."""
+
+    def test_first_session_badge_exists(self):
+        assert "first_session" in BADGE_CATALOGUE
+
+    def test_first_session_has_chinese_name(self):
+        badge = BADGE_CATALOGUE["first_session"]
+        assert "name" in badge
+        # Name must not be the raw English key
+        assert badge["name"] != "first_session"
+        # Should contain at least one CJK character
+        assert any("\u4e00" <= ch <= "\u9fff" for ch in badge["name"])
+
+    def test_all_badges_have_chinese_names(self):
+        """Regression: every badge in BADGE_CATALOGUE must have a non-empty Chinese name."""
+        for key, info in BADGE_CATALOGUE.items():
+            name = info.get("name", "")
+            assert name, f"Badge {key!r} is missing 'name'"
+            assert name != key, f"Badge {key!r} name is the same as the key (raw English)"
+            assert any("\u4e00" <= ch <= "\u9fff" for ch in name), (
+                f"Badge {key!r} name {name!r} has no Chinese characters"
+            )
+
+
 # ── Integration tests: process_session_completion ─────────────────────────────
 
 
