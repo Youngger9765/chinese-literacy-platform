@@ -306,6 +306,108 @@ app.include_router(semesters_router, prefix="/api", tags=["semesters"])
 app.include_router(co_teaching_router, prefix="/api", tags=["co-teaching"])
 
 
+def _patch_seed_assignments(db) -> None:
+    """Idempotent patch: create assignment seed data if teacher@test.com has none.
+
+    Safe to call on both fresh DBs (before users are seeded) and existing DBs.
+    Introduced in #528 to fix staging QA environments missing assignment data.
+    """
+    from datetime import datetime, timezone, timedelta
+    from .models.user import User
+    from .models.school import Classroom
+    from .models.session import LearningSession
+    from .models.assignment import Assignment, AssignmentSubmission
+
+    teacher = db.query(User).filter(User.email == "teacher@test.com").first()
+    if teacher is None:
+        return  # Users not seeded yet; full seed path will handle it
+
+    student = db.query(User).filter(User.email == "student@test.com").first()
+    if student is None:
+        return
+
+    classroom = (
+        db.query(Classroom)
+        .filter(Classroom.name == "三年甲班", Classroom.teacher_id == teacher.id)
+        .first()
+    )
+    if classroom is None:
+        return
+
+    # Already has assignments — nothing to do
+    existing = (
+        db.query(Assignment)
+        .filter(Assignment.classroom_id == classroom.id, Assignment.teacher_id == teacher.id)
+        .count()
+    )
+    if existing > 0:
+        return
+
+    now_utc = datetime.now(tz=timezone.utc)
+
+    # Assignment 1: pending (due date in the future)
+    assign_pending = Assignment(
+        classroom_id=classroom.id,
+        teacher_id=teacher.id,
+        story_id="L06",
+        title="第六課朗讀練習",
+        description="請完成第六課的朗讀與理解練習，注意發音準確度。",
+        assignment_type="reading",
+        due_date=now_utc + timedelta(days=7),
+        is_active=True,
+    )
+    db.add(assign_pending)
+    db.flush()
+
+    # Submission for pending assignment: student has not submitted yet
+    db.add(AssignmentSubmission(
+        assignment_id=assign_pending.id,
+        student_id=student.id,
+        status="pending",
+    ))
+
+    # Assignment 2: completed (due date in the past, student submitted)
+    assign_done = Assignment(
+        classroom_id=classroom.id,
+        teacher_id=teacher.id,
+        story_id="L04",
+        title="第四課閱讀理解",
+        description="完成第四課的蘇格拉底對話，達到 70 分以上為通過。",
+        assignment_type="comprehension",
+        due_date=now_utc - timedelta(days=3),
+        is_active=True,
+    )
+    db.add(assign_done)
+    db.flush()
+
+    # Link to an existing completed learning session for student1 (story L04)
+    completed_session = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id == student.id,
+            LearningSession.story_slug == "L04",
+            LearningSession.status == "completed",
+        )
+        .first()
+    )
+    sub_done = AssignmentSubmission(
+        assignment_id=assign_done.id,
+        student_id=student.id,
+        status="submitted",
+        submitted_at=now_utc - timedelta(days=2),
+        score=78.0,
+    )
+    if completed_session:
+        sub_done.session_id = completed_session.id
+    db.add(sub_done)
+
+    db.commit()
+    logger.info(
+        "seed_default_data (#528): patched assignment seed data — "
+        "2 assignments + 2 submissions for 三年甲班"
+    )
+
+
 def seed_default_data():
     """Seed complete demo data: org -> school -> teacher -> classroom -> students.
 
@@ -321,6 +423,7 @@ def seed_default_data():
     from .models.user import User, Role, UserRole
     from .models.session import LearningSession
     from .models.gamification import StudentStreak, StudentXPLog
+    from .models.assignment import Assignment, AssignmentSubmission
     from .auth.password import hash_password
     try:
         db = SessionLocal()
@@ -342,6 +445,11 @@ def seed_default_data():
                     u.email_verified = True
                 db.commit()
                 logger.info("seed_default_data: patched %d seed accounts to email_verified=True", len(unverified))
+
+            # Repair (#528): patch missing assignment seed data on existing DBs.
+            # Runs before the early-return so staging DBs get the fix even if
+            # users were already seeded before assignments were added.
+            _patch_seed_assignments(db)
 
             if db.query(User).count() > 0:
                 return  # Already seeded
@@ -564,11 +672,60 @@ def seed_default_data():
             ]
             db.add_all(xp_entries)
 
+            # -- 10. Assignments for 三年甲班 (Issue #528) --
+            # Assignment A: pending — due in 7 days, student has not submitted
+            assign_pending = Assignment(
+                classroom_id=class_3a.id,
+                teacher_id=teacher1.id,
+                story_id="L06",
+                title="第六課朗讀練習",
+                description="請完成第六課的朗讀與理解練習，注意發音準確度。",
+                assignment_type="reading",
+                due_date=now_utc + timedelta(days=7),
+                is_active=True,
+            )
+            db.add(assign_pending)
+            db.flush()
+            db.add(AssignmentSubmission(
+                assignment_id=assign_pending.id,
+                student_id=student1.id,
+                status="pending",
+            ))
+
+            # Assignment B: submitted — due 3 days ago, student submitted with score
+            assign_done = Assignment(
+                classroom_id=class_3a.id,
+                teacher_id=teacher1.id,
+                story_id="L04",
+                title="第四課閱讀理解",
+                description="完成第四課的蘇格拉底對話，達到 70 分以上為通過。",
+                assignment_type="comprehension",
+                due_date=now_utc - timedelta(days=3),
+                is_active=True,
+            )
+            db.add(assign_done)
+            db.flush()
+            # Link submission to the L04 learning session seeded above
+            l04_session = next(
+                (s for s in sessions_student1 if s.story_slug == "L04"), None
+            )
+            sub_done = AssignmentSubmission(
+                assignment_id=assign_done.id,
+                student_id=student1.id,
+                status="submitted",
+                submitted_at=now_utc - timedelta(days=2),
+                score=78.0,
+            )
+            if l04_session:
+                sub_done.session_id = l04_session.id
+            db.add(sub_done)
+
             db.commit()
             logger.info(
                 "Seeded demo data: 1 org, 2 schools, 3 classrooms, "
                 "6 users (admin/teacher1/teacher2/student1-3), "
-                "10 learning sessions with relative dates"
+                "10 learning sessions with relative dates, "
+                "2 assignments + 2 submissions for 三年甲班 (#528)"
             )
         finally:
             db.close()
