@@ -172,44 +172,70 @@ const OrgDashboardPanel: React.FC<OrgDashboardPanelProps> = ({ organizationId })
               <p className="text-xs text-gray-500">請先在「詳情」頁新增學校</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      學校名稱
-                    </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      教師數
-                    </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      學生數
-                    </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      學習次數
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {data.school_stats.map((school) => (
-                    <tr key={school.school_id} className="hover:bg-gray-50">
-                      <td className="px-5 py-3 font-medium text-gray-900">
-                        {school.school_name}
-                      </td>
-                      <td className="px-5 py-3 text-right text-gray-700">
-                        {school.teacher_count}
-                      </td>
-                      <td className="px-5 py-3 text-right text-gray-700">
-                        {school.student_count}
-                      </td>
-                      <td className="px-5 py-3 text-right text-gray-700">
-                        {school.session_count}
-                      </td>
+            <>
+              {/* Mobile card view */}
+              <div className="md:hidden p-4 space-y-3">
+                {data.school_stats.map((school) => (
+                  <div key={school.school_id} className="bg-white rounded-lg border border-gray-200 p-4 space-y-2">
+                    <span className="font-medium text-gray-900 text-sm">{school.school_name}</span>
+                    <div className="grid grid-cols-3 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-400 text-xs">教師數</span>
+                        <p className="text-gray-700 font-medium">{school.teacher_count}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-400 text-xs">學生數</span>
+                        <p className="text-gray-700 font-medium">{school.student_count}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-400 text-xs">學習次數</span>
+                        <p className="text-gray-700 font-medium">{school.session_count}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table view */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        學校名稱
+                      </th>
+                      <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        教師數
+                      </th>
+                      <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        學生數
+                      </th>
+                      <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        學習次數
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {data.school_stats.map((school) => (
+                      <tr key={school.school_id} className="hover:bg-gray-50">
+                        <td className="px-5 py-3 font-medium text-gray-900">
+                          {school.school_name}
+                        </td>
+                        <td className="px-5 py-3 text-right text-gray-700">
+                          {school.teacher_count}
+                        </td>
+                        <td className="px-5 py-3 text-right text-gray-700">
+                          {school.student_count}
+                        </td>
+                        <td className="px-5 py-3 text-right text-gray-700">
+                          {school.session_count}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>

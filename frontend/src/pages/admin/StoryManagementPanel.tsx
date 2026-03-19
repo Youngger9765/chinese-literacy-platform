@@ -327,81 +327,130 @@ const StoryManagementPanel: React.FC = () => {
 
         {/* Table */}
         {!isLoading && !loadError && (
-          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-16">
-                    編號
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    標題
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">
-                    年級
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">
-                    文體
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">
-                    段落數
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">
-                    字數
-                  </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">
-                    操作
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {stories.map((story) => (
-                  <tr key={story.lesson_number} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-gray-500">
-                      {story.lesson_number}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {story.title}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {story.grade_code}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {story.genre}
-                    </td>
-                    <td className="px-4 py-3 text-gray-500">
-                      {story.paragraph_count}
-                    </td>
-                    <td className="px-4 py-3 text-gray-500">
-                      {story.char_count}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => openEditModal(story)}
-                        className="text-accent hover:underline text-xs font-medium cursor-pointer mr-3"
-                      >
-                        編輯
-                      </button>
-                      <button
-                        onClick={() => openDeleteConfirm(story)}
-                        className="text-red-500 hover:underline text-xs font-medium cursor-pointer"
-                      >
-                        刪除
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+          <>
+            {stories.length === 0 ? (
+              <div className="rounded-xl border border-gray-200 shadow-sm px-4 py-12 text-center text-gray-400 text-sm bg-white">
+                {searchQuery || gradeFilter ? '找不到符合條件的課文' : '尚無課文'}
+              </div>
+            ) : (
+              <>
+                {/* Mobile card view */}
+                <div className="md:hidden space-y-3">
+                  {stories.map((story) => (
+                    <div key={story.lesson_number} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-2.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900 text-sm">{story.title}</p>
+                          <p className="text-xs text-gray-400 font-mono mt-0.5">L{story.lesson_number}</p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => openEditModal(story)}
+                            className="text-accent hover:underline text-xs font-medium cursor-pointer"
+                          >
+                            編輯
+                          </button>
+                          <button
+                            onClick={() => openDeleteConfirm(story)}
+                            className="text-red-500 hover:underline text-xs font-medium cursor-pointer"
+                          >
+                            刪除
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2 text-xs">
+                        <div>
+                          <span className="text-gray-400">年級</span>
+                          <p className="text-gray-700">{story.grade_code}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">文體</span>
+                          <p className="text-gray-700">{story.genre}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">段落</span>
+                          <p className="text-gray-700">{story.paragraph_count}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">字數</span>
+                          <p className="text-gray-700">{story.char_count}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-                {stories.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-gray-400 text-sm">
-                      {searchQuery || gradeFilter ? '找不到符合條件的課文' : '尚無課文'}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                {/* Desktop table view */}
+                <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200">
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-16">
+                          編號
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                          標題
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">
+                          年級
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">
+                          文體
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">
+                          段落數
+                        </th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">
+                          字數
+                        </th>
+                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">
+                          操作
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {stories.map((story) => (
+                        <tr key={story.lesson_number} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 font-mono text-gray-500">
+                            {story.lesson_number}
+                          </td>
+                          <td className="px-4 py-3 font-medium text-gray-900">
+                            {story.title}
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">
+                            {story.grade_code}
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">
+                            {story.genre}
+                          </td>
+                          <td className="px-4 py-3 text-gray-500">
+                            {story.paragraph_count}
+                          </td>
+                          <td className="px-4 py-3 text-gray-500">
+                            {story.char_count}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => openEditModal(story)}
+                              className="text-accent hover:underline text-xs font-medium cursor-pointer mr-3"
+                            >
+                              編輯
+                            </button>
+                            <button
+                              onClick={() => openDeleteConfirm(story)}
+                              className="text-red-500 hover:underline text-xs font-medium cursor-pointer"
+                            >
+                              刪除
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </>
         )}
       </div>
 

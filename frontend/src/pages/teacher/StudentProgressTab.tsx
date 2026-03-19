@@ -660,7 +660,170 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
           {exporting ? '匯出中...' : '匯出 CSV'}
         </button>
       </div>
-      <div className="overflow-x-auto">
+      {/* Mobile card view */}
+      <div className="md:hidden space-y-3">
+        {progress.map((s) => {
+          const isExpanded = expandedStudentId === s.student_id;
+          return (
+            <div key={s.student_id}>
+              <div
+                className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer hover:border-gray-300 transition-colors"
+                onClick={() => handleRowClick(s.student_id)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <svg
+                        className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-90' : ''}`}
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span className="font-medium text-gray-900">{s.student_name}</span>
+                      {s.tags.map((t) => (
+                        <span
+                          key={t.tag_name}
+                          className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium border ${tagColorClass(t.color)}`}
+                        >
+                          {t.tag_name}
+                        </span>
+                      ))}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setTagManagerStudent(s); }}
+                        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs text-gray-400 border border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                        title="管理標籤"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        標籤
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setInstructionTarget({ id: s.student_id, name: s.student_name }); }}
+                    className="relative inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-amber-50 transition-colors group shrink-0"
+                    title="AI 教學指示"
+                  >
+                    <svg className="w-4 h-4 text-gray-400 group-hover:text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    {(instructionCounts[s.student_id] ?? 0) > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-amber-500 rounded-full">
+                        {instructionCounts[s.student_id]}
+                      </span>
+                    )}
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mt-3">
+                  <div>
+                    <span className="text-xs text-gray-400">最近練習日期</span>
+                    <p className="text-gray-700">{formatDate(s.last_session_date)}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400">最近課文</span>
+                    <p className="text-gray-700 truncate">{s.last_text_title ?? '-'}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400">練習次數</span>
+                    <p>
+                      <span className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
+                        s.total_sessions > 0 ? 'bg-accent-bg text-accent' : 'bg-gray-100 text-gray-500'
+                      }`}>{s.total_sessions}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {isExpanded && (
+                <div className="mt-2 bg-gray-50 rounded-lg p-3 space-y-4">
+                  {isLoadingCurve ? (
+                    <div className="h-40 bg-gray-200 animate-pulse rounded" />
+                  ) : learningCurve.length >= 2 ? (
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 mb-2">學習曲線</p>
+                      <ResponsiveContainer width="100%" height={180}>
+                        <LineChart data={buildCurveChartData(learningCurve)}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                          <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} width={28} />
+                          <Tooltip
+                            formatter={(value: number, name: string) => {
+                              if (name === 'score') return [value, '實際分數'];
+                              if (name === 'rollingAvg') return [value, '5次均線'];
+                              return [value, name];
+                            }}
+                            labelFormatter={(label) => `日期：${label}`}
+                          />
+                          <Legend formatter={(value) => value === 'score' ? '實際分數' : '5次均線'} />
+                          <Line type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                          <Line type="monotone" dataKey="rollingAvg" stroke="#10b981" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null}
+
+                  {isLoadingSessions ? (
+                    <div className="space-y-2">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="h-16 bg-gray-200 animate-pulse rounded-lg" />
+                      ))}
+                    </div>
+                  ) : sessions.length === 0 ? (
+                    <p className="text-xs text-gray-500 text-center py-2">尚無練習記錄</p>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-gray-500">練習記錄</p>
+                      {sessions.map((sess) => (
+                        <div key={sess.id} className="bg-white rounded-lg border border-gray-100 p-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-gray-700 text-sm truncate">{sess.story_title ?? '-'}</span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {statusLabel(sess.status)}
+                              <button
+                                type="button"
+                                disabled={loadingDialogueSessionId === sess.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewDialogue(s.student_id, sess.id, sess.story_title, s.student_name);
+                                }}
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="查看蘇格拉底對話記錄"
+                              >
+                                {loadingDialogueSessionId === sess.id ? (
+                                  <span className="w-2.5 h-2.5 border border-accent border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                  </svg>
+                                )}
+                                對話
+                              </button>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+                            <div>
+                              <span className="text-gray-400">日期</span>
+                              <p className="text-gray-600">{formatDate(sess.started_at)}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">分數</span>
+                              <p className="text-gray-700 font-medium">{formatScore(sess.overall_score)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop table view */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100 text-left text-gray-500">
@@ -814,6 +977,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                         ) : sessions.length === 0 ? (
                           <p className="text-xs text-gray-500 text-center py-2">尚無練習記錄</p>
                         ) : (
+                          <div className="overflow-x-auto">
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="text-left text-gray-400">
@@ -857,6 +1021,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                               ))}
                             </tbody>
                           </table>
+                          </div>
                         )}
                       </td>
                     </tr>
