@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Story } from '../../types';
 import { fetchStories, fetchStory } from '../../services/api';
+import { getClassroomTexts } from '../../services/teacherApi';
 import { useAuth } from '../../contexts/AuthContext';
 import StoryCard, { Difficulty, DIFFICULTY_CONFIG, getDifficulty } from '../../components/student/StoryCard';
 
@@ -10,6 +11,8 @@ interface StoryLibraryProps {
   limit?: number;
   /** Slugs of already-completed stories — shows completion badge on card. */
   completedSlugs?: string[];
+  /** When set, show only texts assigned to this classroom (from 我的班級→課文庫). */
+  classroomId?: number | null;
 }
 
 // ── Skeleton card ─────────────────────────────────────────────────────────────
@@ -26,7 +29,12 @@ const SkeletonCard = () => (
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit, completedSlugs = [] }) => {
+const StoryLibrary: React.FC<StoryLibraryProps> = ({
+  onStartReading,
+  limit,
+  completedSlugs = [],
+  classroomId = null,
+}) => {
   const { token } = useAuth();
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
@@ -37,18 +45,45 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit, comp
   const [error, setError] = useState<string | null>(null);
   const [allStories, setAllStories] = useState<Story[]>([]);
   const [availableGrades, setAvailableGrades] = useState<number[]>([]);
+  const [classroomFilterLabel, setClassroomFilterLabel] = useState<string | null>(null);
 
   const completedSet = new Set(completedSlugs);
 
   useEffect(() => {
-    fetchStories(token ?? undefined)
-      .then(({ stories, grades }) => {
-        setAllStories(stories);
-        setAvailableGrades(grades);
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setIsLoading(false));
-  }, [token]);
+    if (!token) return;
+    if (classroomId != null && !isNaN(classroomId)) {
+      getClassroomTexts(token, classroomId)
+        .then((items) => {
+          const stories: Story[] = items.map((ct) => ({
+            id: ct.text_id,
+            title: ct.title,
+            level: 0,
+            content: [],
+            thumbnail: '',
+            category: 'reading',
+            filename: '',
+            intro: { author: '', background: '' },
+            grade: 0,
+            genre: '',
+            charCount: 0,
+          }));
+          setAllStories(stories);
+          setAvailableGrades([]);
+          setClassroomFilterLabel('班級課文');
+        })
+        .catch((err) => setError(err.message ?? '無法載入班級課文'))
+        .finally(() => setIsLoading(false));
+    } else {
+      fetchStories(token)
+        .then(({ stories, grades }) => {
+          setAllStories(stories);
+          setAvailableGrades(grades);
+          setClassroomFilterLabel(null);
+        })
+        .catch((err) => setError(err.message))
+        .finally(() => setIsLoading(false));
+    }
+  }, [token, classroomId]);
 
   // Chain of filters
   let filtered = allStories;
@@ -80,10 +115,32 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit, comp
   const handleRetry = () => {
     setError(null);
     setIsLoading(true);
-    fetchStories(token ?? undefined)
-      .then(({ stories, grades }) => { setAllStories(stories); setAvailableGrades(grades); })
-      .catch((err) => setError(err.message))
-      .finally(() => setIsLoading(false));
+    if (classroomId != null && !isNaN(classroomId) && token) {
+      getClassroomTexts(token, classroomId)
+        .then((items) => {
+          const stories: Story[] = items.map((ct) => ({
+            id: ct.text_id,
+            title: ct.title,
+            level: 0,
+            content: [],
+            thumbnail: '',
+            category: 'reading',
+            filename: '',
+            intro: { author: '', background: '' },
+            grade: 0,
+            genre: '',
+            charCount: 0,
+          }));
+          setAllStories(stories);
+        })
+        .catch((err) => setError(err.message ?? '無法載入班級課文'))
+        .finally(() => setIsLoading(false));
+    } else {
+      fetchStories(token ?? undefined)
+        .then(({ stories, grades }) => { setAllStories(stories); setAvailableGrades(grades); })
+        .catch((err) => setError(err.message))
+        .finally(() => setIsLoading(false));
+    }
   };
 
   const clearFilters = () => {
@@ -100,9 +157,11 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit, comp
       {/* Header */}
       <div className="flex items-end justify-between flex-wrap gap-2">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">選擇讀本</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {classroomFilterLabel ?? '選擇讀本'}
+          </h2>
           <p className="text-gray-500 text-sm mt-0.5">
-            共 {allStories.length} 篇
+            {classroomFilterLabel ? '此班級已指派的課文 · ' : ''}共 {allStories.length} 篇
             {completedCount > 0 && (
               <span className="ml-2 text-green-600">· 已讀 {completedCount} 篇</span>
             )}
@@ -130,7 +189,8 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit, comp
         </div>
       )}
 
-      {/* Grade + Difficulty filter tabs */}
+      {/* Grade + Difficulty filter tabs — hidden when viewing classroom texts */}
+      {!classroomFilterLabel && (
       <div className="flex flex-wrap gap-2 items-center">
         <button
           onClick={() => setSelectedGrade(null)}
@@ -169,6 +229,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({ onStartReading, limit, comp
           );
         })}
       </div>
+      )}
 
       {/* Search bar */}
       <div className="max-w-md">

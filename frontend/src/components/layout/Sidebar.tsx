@@ -273,6 +273,8 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   const isParent = hasRole(user, 'parent') && !isTeacher;
   const isStudentOnly = !isTeacher;
 
+  const roleLabel = isAdmin ? '管理員' : isTeacher ? '老師' : isParent ? '家長' : '學生';
+
   const studentItems: NavItem[] = isStudentOnly
     ? [
         { icon: '🏠', label: '主頁', path: '/student' },
@@ -321,6 +323,21 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           ${collapsed ? 'w-14' : 'w-56'}
         `}
       >
+        {/* User + role (Issue #556) */}
+        {user && (
+          <div className={`shrink-0 border-b border-gray-100 py-3 ${collapsed ? 'px-2 flex justify-center' : 'px-3'}`}>
+            <div className={`flex items-center gap-2 ${collapsed ? 'flex-col' : ''}`}>
+              <span className="text-lg shrink-0" aria-hidden="true">👤</span>
+              {!collapsed && (
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                  <p className="text-xs text-gray-500">{roleLabel}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Collapse toggle */}
         <div className={`flex items-center py-3 shrink-0 ${collapsed ? 'justify-center px-2' : 'justify-end px-3'}`}>
           <button
