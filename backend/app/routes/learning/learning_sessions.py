@@ -3,6 +3,7 @@
 Handles creating, listing, getting, and updating learning sessions.
 """
 import logging
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -60,6 +61,10 @@ def create_learning_session(
 def list_my_sessions(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    status: Optional[str] = Query(
+        None,
+        description="Comma-separated statuses to filter by, e.g. 'in_progress' or 'completed,abandoned'",
+    ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -67,6 +72,10 @@ def list_my_sessions(
     query = db.query(LearningSession).filter(
         LearningSession.student_id == current_user.id,
     )
+    if status:
+        statuses = [s.strip() for s in status.split(",") if s.strip()]
+        if statuses:
+            query = query.filter(LearningSession.status.in_(statuses))
     total = query.count()
     items = (
         query

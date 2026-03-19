@@ -414,11 +414,12 @@ export async function fetchDialogueHistory(
 
 export async function fetchLearningSessions(
   token: string,
-  params?: { limit?: number; offset?: number },
+  params?: { limit?: number; offset?: number; status?: string },
 ): Promise<{ items: LearningSummary[]; total: number }> {
   const qs = new URLSearchParams();
   if (params?.limit != null) qs.set('limit', String(params.limit));
   if (params?.offset != null) qs.set('offset', String(params.offset));
+  if (params?.status) qs.set('status', params.status);
   const url = `${API_BASE}/api/learning/sessions${qs.toString() ? `?${qs}` : ''}`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error(`fetchLearningSessions failed: ${res.status}`);
