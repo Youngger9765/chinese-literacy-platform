@@ -69,6 +69,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const initializedRef = useRef(false);
   const isDraggingRef = useRef(false);
+  const storyScrollRef = useRef<number>(0);
+  const storyPanelRef = useRef<HTMLDivElement>(null);
   const dragStartXRef = useRef(0);
   const dragStartWidthRef = useRef(384);
 
@@ -531,7 +533,15 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               id="tab-story"
               aria-controls="tabpanel-story"
               aria-selected={activeTab === 'story'}
-              onClick={() => setActiveTab('story')}
+              onClick={() => {
+                setActiveTab('story');
+                // Restore scroll position after React renders the panel
+                requestAnimationFrame(() => {
+                  if (storyPanelRef.current) {
+                    storyPanelRef.current.scrollTop = storyScrollRef.current;
+                  }
+                });
+              }}
               className={`flex-1 py-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset ${
                 activeTab === 'story'
                   ? 'text-accent border-b-2 border-accent'
@@ -546,7 +556,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               id="tab-chat"
               aria-controls="tabpanel-chat"
               aria-selected={activeTab === 'chat'}
-              onClick={() => setActiveTab('chat')}
+              onClick={() => {
+                // Save story scroll position before switching
+                if (storyPanelRef.current) {
+                  storyScrollRef.current = storyPanelRef.current.scrollTop;
+                }
+                setActiveTab('chat');
+              }}
               className={`flex-1 py-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset ${
                 activeTab === 'chat'
                   ? 'text-accent border-b-2 border-accent'
@@ -568,7 +584,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               aria-labelledby="tab-story"
               className="flex-1 flex flex-col bg-amber-50 min-h-0"
             >
-              <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
+              <div ref={storyPanelRef} className="flex-1 p-4 overflow-y-auto custom-scrollbar">
                 <div className="max-w-3xl mx-auto space-y-12">
                   {story.content.map((line, idx) => (
                     <div
