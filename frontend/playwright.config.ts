@@ -43,6 +43,7 @@ const BASE_URL =
   'https://lingoleap-frontend-staging-958347263320.asia-east1.run.app';
 
 export default defineConfig({
+  globalTeardown: './e2e/global-teardown.ts',
   testDir: './e2e',
   timeout: 60_000,
   expect: {
