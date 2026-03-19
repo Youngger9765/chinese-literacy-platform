@@ -11,7 +11,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { hasRole } from '../../services/authApi';
+import { useWorkspace, type WorkspaceView } from '../../contexts/WorkspaceContext';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -260,26 +260,25 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   );
 
   // ---------------------------------------------------------------------------
-  // Build nav items based on roles
+  // Workspace context — determines which nav items to show
   // ---------------------------------------------------------------------------
 
-  const isTeacher = hasRole(
-    user,
-    'teacher',
-    'system_admin',
-    'principal',
-    'director',
-    'org_owner',
-    'org_admin',
-    'homeroom_teacher',
-  );
-  const isAdmin = hasRole(user, 'system_admin', 'org_owner', 'org_admin');
-  const isParent = hasRole(user, 'parent') && !isTeacher;
-  const isStudentOnly = !isTeacher;
+  const { activeView, setActiveView, availableViews, hasMultipleViews } = useWorkspace();
 
-  const roleLabel = isAdmin ? '管理員' : isTeacher ? '老師' : isParent ? '家長' : '學生';
+  const VIEW_LABELS: Record<WorkspaceView, { icon: string; label: string }> = {
+    admin: { icon: '⚙️', label: '管理員' },
+    teacher: { icon: '🏫', label: '老師' },
+    student: { icon: '📚', label: '學生' },
+    parent: { icon: '👨‍👩‍👧', label: '家長' },
+  };
 
-  const studentItems: NavItem[] = isStudentOnly
+  const roleLabel = VIEW_LABELS[activeView].label;
+
+  // ---------------------------------------------------------------------------
+  // Build nav items based on active workspace view
+  // ---------------------------------------------------------------------------
+
+  const studentItems: NavItem[] = activeView === 'student'
     ? [
         { icon: '🏠', label: '主頁', path: '/student' },
         { icon: '📚', label: '圖書館', path: '/library' },
@@ -294,7 +293,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
       ]
     : [];
 
-  const teacherItems: NavItem[] = isTeacher
+  const teacherItems: NavItem[] = activeView === 'teacher' || activeView === 'admin'
     ? [
         { icon: '🏠', label: '主頁', path: '/teacher-home' },
         { icon: '🏫', label: '班級管理', path: '/teacher' },
@@ -303,11 +302,11 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
       ]
     : [];
 
-  const adminItems: NavItem[] = isAdmin
+  const adminItems: NavItem[] = activeView === 'admin'
     ? [{ icon: '⚙️', label: '系統管理', path: '/admin' }]
     : [];
 
-  const parentItems: NavItem[] = isParent
+  const parentItems: NavItem[] = activeView === 'parent'
     ? [{ icon: '👨‍👩‍👧', label: '孩子進度', path: '/parent' }]
     : [];
 
@@ -329,15 +328,36 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           ${collapsed ? 'w-14' : 'w-56'}
         `}
       >
-        {/* User + role (Issue #556) */}
+        {/* User + role switcher (Issue #556, #557) */}
         {user && (
           <div className={`shrink-0 border-b border-gray-100 py-3 ${collapsed ? 'px-2 flex justify-center' : 'px-3'}`}>
             <div className={`flex items-center gap-2 ${collapsed ? 'flex-col' : ''}`}>
               <span className="text-lg shrink-0" aria-hidden="true">👤</span>
               {!collapsed && (
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                  <p className="text-xs text-gray-500">{roleLabel}</p>
+                  {hasMultipleViews ? (
+                    <select
+                      value={activeView}
+                      onChange={(e) => {
+                        setActiveView(e.target.value as WorkspaceView);
+                        const home: Record<WorkspaceView, string> = {
+                          teacher: '/teacher-home', student: '/student',
+                          admin: '/admin', parent: '/parent',
+                        };
+                        navigate(home[e.target.value as WorkspaceView]);
+                      }}
+                      className="mt-0.5 text-xs text-gray-500 bg-transparent border border-gray-200 rounded px-1.5 py-0.5 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-accent w-full"
+                    >
+                      {availableViews.map((v) => (
+                        <option key={v} value={v}>
+                          {VIEW_LABELS[v].icon} {VIEW_LABELS[v].label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="text-xs text-gray-500">{roleLabel}</p>
+                  )}
                 </div>
               )}
             </div>

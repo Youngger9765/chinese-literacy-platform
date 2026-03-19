@@ -11,6 +11,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
+import { WorkspaceProvider } from './contexts/WorkspaceContext';
 import { LearningNavProvider } from './contexts/LearningNavContext';
 import TermsGate from './components/auth/TermsGate';
 import AppRoutes from './routes/AppRoutes';
@@ -21,11 +22,13 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <LearningNavProvider>
-            <TermsGate>
-              <AppRoutes />
-            </TermsGate>
-          </LearningNavProvider>
+          <WorkspaceProvider>
+            <LearningNavProvider>
+              <TermsGate>
+                <AppRoutes />
+              </TermsGate>
+            </LearningNavProvider>
+          </WorkspaceProvider>
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>

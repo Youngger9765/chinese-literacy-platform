@@ -24,10 +24,28 @@ export interface AuthUser {
   terms_version: string | null;
 }
 
-/** Check if user has a specific role */
+/** Check if user has a specific role (ignores scope). */
 export function hasRole(user: AuthUser | null, ...roleNames: string[]): boolean {
   if (!user) return false;
   return user.roles.some((r) => roleNames.includes(r.role_name));
+}
+
+/**
+ * Check if user has a role scoped to a specific school.
+ * Falls back to platform-scoped roles (e.g. system_admin).
+ */
+export function hasRoleInSchool(
+  user: AuthUser | null,
+  schoolId: number | null,
+  ...roleNames: string[]
+): boolean {
+  if (!user) return false;
+  return user.roles.some((r) => {
+    if (!roleNames.includes(r.role_name)) return false;
+    if (r.scope_type === 'platform') return true;
+    if (r.scope_type === 'school' && schoolId != null && r.scope_id === String(schoolId)) return true;
+    return false;
+  });
 }
 
 export interface AuthTokenResponse {

@@ -14,6 +14,7 @@ import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-
 import { lazy } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasRole } from '../../services/authApi';
+import { useWorkspace } from '../../contexts/WorkspaceContext';
 import StoryLibrary from '../student/StoryLibrary';
 import WriteCharacter from '../../components/stroke-order/WriteCharacter';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
@@ -32,16 +33,18 @@ const OnboardingGuide = lazy(() => import('../../components/OnboardingGuide'));
  * Returns null while auth is loading to prevent flash redirects.
  */
 export const HomePage: React.FC = () => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  const { activeView } = useWorkspace();
 
-  // Wait for auth to resolve before redirecting — prevents flash on load
   if (isLoading || !isAuthenticated) return null;
 
-  if (hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher')) {
-    return <Navigate to="/teacher-home" replace />;
-  }
-
-  return <Navigate to="/student" replace />;
+  const homeMap: Record<string, string> = {
+    admin: '/admin',
+    teacher: '/teacher-home',
+    student: '/student',
+    parent: '/parent',
+  };
+  return <Navigate to={homeMap[activeView] ?? '/student'} replace />;
 };
 
 interface RecentPracticeItem {
