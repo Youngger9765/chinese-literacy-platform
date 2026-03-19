@@ -12,7 +12,6 @@ import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import FeedbackButton from '../FeedbackButton';
 import LearningLayout from '../../layouts/LearningLayout';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 
@@ -113,8 +112,6 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
         <OnboardingWrapper />
       </Suspense>
 
-      {/* Feedback button — visible to all authenticated users */}
-      <FeedbackButton />
     </div>
   );
 };
