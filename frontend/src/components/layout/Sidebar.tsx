@@ -42,6 +42,10 @@ function isActive(pathname: string, path: string): boolean {
   if (path === '/student' || path === '/teacher-home') {
     return pathname === path;
   }
+  // /teacher matches only dashboard and classroom detail, not /teacher/my-texts or /teacher/assignments
+  if (path === '/teacher') {
+    return pathname === '/teacher' || /^\/teacher\/classroom\/\d+/.test(pathname);
+  }
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 
@@ -294,6 +298,8 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
     ? [
         { icon: '🏠', label: '主頁', path: '/teacher-home' },
         { icon: '🏫', label: '班級管理', path: '/teacher' },
+        { icon: '📖', label: '我的課文', path: '/teacher/my-texts' },
+        { icon: '📋', label: '作業管理', path: '/teacher/assignments' },
       ]
     : [];
 
