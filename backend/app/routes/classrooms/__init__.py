@@ -14,6 +14,12 @@ so that ``main.py`` can continue to use ``classrooms.router`` without changes.
 
 from fastapi import APIRouter
 
+# Re-export helpers that external modules (classroom_texts, assignments,
+# co_teaching, teacher) import by old underscore-prefixed names.
+from .helpers import get_classroom_or_404 as _get_classroom_or_404  # noqa: F401
+from .helpers import require_owner_or_admin as _require_owner_or_admin  # noqa: F401
+from .helpers import is_admin as _is_admin  # noqa: F401
+
 from .classroom_batch import router as _batch_router
 from .classroom_crud import router as _crud_router
 from .classroom_csv import router as _csv_router
