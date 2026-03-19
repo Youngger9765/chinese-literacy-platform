@@ -135,7 +135,11 @@ const LearningHistory: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      const data = await fetchLearningSessions(token, { limit: LIMIT, offset: off, status: tabToStatusFilter(activeTab) });
+      const data = await fetchLearningSessions(token, {
+        limit: LIMIT,
+        offset: off,
+        status: tabToStatusFilter(activeTab),
+      });
       setSessions(data.items);
       setTotal(data.total);
       setTabTotals((prev) => ({ ...prev, [activeTab]: data.total }));
