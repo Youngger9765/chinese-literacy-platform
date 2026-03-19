@@ -13,7 +13,7 @@ interface TeacherDashboardProps {
 }
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { activeSchoolId: teacherSchoolId } = useWorkspace();
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [total, setTotal] = useState(0);
