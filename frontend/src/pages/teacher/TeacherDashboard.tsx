@@ -26,7 +26,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Search & sort
+  // Search & sort state
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'grade' | 'students'>('name');
 
@@ -36,6 +36,16 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   const [newGrade, setNewGrade] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+
+  const filteredClassrooms = useMemo(() => {
+    return classrooms
+      .filter((cr) => !searchQuery || cr.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      .sort((a, b) => {
+        if (sortBy === 'grade') return (a.grade ?? 99) - (b.grade ?? 99);
+        if (sortBy === 'students') return b.student_count - a.student_count;
+        return a.name.localeCompare(b.name, 'zh-TW');
+      });
+  }, [classrooms, searchQuery, sortBy]);
 
   const loadClassrooms = useCallback(async () => {
     if (!token) return;
@@ -191,12 +201,12 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                   >
                     <option value="">未指定</option>
                     <optgroup label="國小">
-                      {[1,2,3,4,5,6].map((g) => (
+                      {[1, 2, 3, 4, 5, 6].map((g) => (
                         <option key={g} value={g}>{g} 年級</option>
                       ))}
                     </optgroup>
                     <optgroup label="國中">
-                      {[7,8,9].map((g) => (
+                      {[7, 8, 9].map((g) => (
                         <option key={g} value={g}>{g} 年級</option>
                       ))}
                     </optgroup>
@@ -250,25 +260,17 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
           </div>
         )}
 
+        {/* No search results */}
+        {!isLoading && !error && classrooms.length > 0 && filteredClassrooms.length === 0 && (
+          <div className="text-center py-8 text-sm text-gray-500">
+            找不到符合「{searchQuery}」的班級
+          </div>
+        )}
+
         {/* Classroom grid */}
-        {!isLoading && !error && classrooms.length > 0 && (() => {
-          const filtered = classrooms
-            .filter((cr) => !searchQuery || cr.name.toLowerCase().includes(searchQuery.toLowerCase()))
-            .sort((a, b) => {
-              if (sortBy === 'grade') return (a.grade ?? 99) - (b.grade ?? 99);
-              if (sortBy === 'students') return b.student_count - a.student_count;
-              return a.name.localeCompare(b.name, 'zh-TW');
-            });
-          if (filtered.length === 0) {
-            return (
-              <div className="text-center py-8 text-sm text-gray-500">
-                找不到符合「{searchQuery}」的班級
-              </div>
-            );
-          }
-          return (
+        {!isLoading && !error && filteredClassrooms.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((cr) => {
+            {filteredClassrooms.map((cr) => {
               const isCoTeacher = user?.id != null && cr.teacher_id !== user.id;
               return (
                 <button
@@ -304,8 +306,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
               );
             })}
           </div>
-          );
-        })()}
+        )}
 
         {/* Empty state */}
         {!isLoading && !error && classrooms.length === 0 && (
