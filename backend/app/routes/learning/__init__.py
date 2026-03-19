@@ -27,6 +27,8 @@ from .learning_errors import router as errors_router
 from .learning_progress import router as progress_router
 from .learning_recommendations import router as recommendations_router
 from .learning_dashboard import router as dashboard_router
+# Re-export symbols that parents.py imports by name
+from .learning_dashboard import DashboardResponse, get_student_dashboard  # noqa: F401
 from .learning_vocab import router as vocab_router
 from .learning_exit_ticket import router as exit_ticket_router
 
