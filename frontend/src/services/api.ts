@@ -472,8 +472,14 @@ export interface ErrorCorrectionResponse {
   created_at: string;
 }
 
+export interface StorySlugItem {
+  slug: string;
+  title: string;
+}
+
 export interface StudentStorySlugsResponse {
   slugs: string[];
+  stories: StorySlugItem[];
   total: number;
 }
 

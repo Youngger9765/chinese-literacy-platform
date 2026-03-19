@@ -14,6 +14,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.session import CharacterError, ErrorCorrection, LearningSession
 from ...models.user import User
+from ...services.lesson_loader import get_lesson_by_id
 from ._helpers import verify_student_access
 
 router = APIRouter()
@@ -87,7 +88,7 @@ def get_student_story_slugs(
     """Get distinct story slugs from the student's learning sessions.
 
     Used by the vocabulary filter dropdown to list courses the student has studied.
-    Returns slugs sorted alphabetically, excluding null values.
+    Returns slugs with resolved titles sorted alphabetically, excluding null values.
     """
     verify_student_access(student_id, current_user, db)
 
@@ -101,8 +102,20 @@ def get_student_story_slugs(
         .order_by(LearningSession.story_slug)
         .all()
     )
-    slugs = [r.story_slug for r in rows]
-    return {"slugs": slugs, "total": len(slugs)}
+    slugs = []
+    stories = []
+    for r in rows:
+        slug = r.story_slug
+        slugs.append(slug)
+        title = slug
+        try:
+            story = get_lesson_by_id(int(slug))
+            if story:
+                title = story["title"]
+        except (ValueError, TypeError):
+            pass
+        stories.append({"slug": slug, "title": title})
+    return {"slugs": slugs, "stories": stories, "total": len(slugs)}
 
 
 @router.get("/learning/students/{student_id}/error-patterns", response_model=ErrorPatternsResponse)
