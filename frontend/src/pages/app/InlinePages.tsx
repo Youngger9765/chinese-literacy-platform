@@ -29,20 +29,19 @@ const OnboardingGuide = lazy(() => import('../../components/OnboardingGuide'));
 /**
  * Home page — redirects to the appropriate home based on user role.
  * Teacher → /teacher-home, Student → /student, else → /library
+ * Returns null while auth is loading to prevent flash redirects.
  */
 export const HomePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  // Wait for auth to resolve before redirecting — prevents flash on load
+  if (isLoading || !isAuthenticated) return null;
 
   if (hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher')) {
     return <Navigate to="/teacher-home" replace />;
   }
 
-  if (user !== null) {
-    return <Navigate to="/student" replace />;
-  }
-
-  // Fallback (user still loading): show nothing, auth loading state handles it
-  return <Navigate to="/library" replace />;
+  return <Navigate to="/student" replace />;
 };
 
 /** Library page — wraps StoryLibrary with dashboard + session resume prompt. */
