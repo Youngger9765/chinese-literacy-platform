@@ -61,6 +61,8 @@ const ParentDashboard = lazy(() => import('../pages/parent/ParentDashboard'));
 // New home pages for each role
 const StudentHome = lazy(() => import('../pages/student/StudentHome'));
 const TeacherHome = lazy(() => import('../pages/teacher/TeacherHome'));
+const TeacherMyTextsPage = lazy(() => import('../pages/teacher/TeacherMyTextsPage'));
+const TeacherAssignmentsPage = lazy(() => import('../pages/teacher/TeacherAssignmentsPage'));
 const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 
 // Utility pages — rarely visited after first load
@@ -175,6 +177,26 @@ const AppRoutes: React.FC = () => (
           <ProtectedRoute>
             <AppShell>
               <ClassroomDetailPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/my-texts"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <TeacherMyTextsPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/assignments"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <TeacherAssignmentsPage />
             </AppShell>
           </ProtectedRoute>
         }
