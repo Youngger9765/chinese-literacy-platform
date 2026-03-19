@@ -61,6 +61,7 @@ const ParentDashboard = lazy(() => import('../pages/parent/ParentDashboard'));
 // New home pages for each role
 const StudentHome = lazy(() => import('../pages/student/StudentHome'));
 const TeacherHome = lazy(() => import('../pages/teacher/TeacherHome'));
+const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 
 // Utility pages — rarely visited after first load
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
@@ -313,6 +314,8 @@ const AppRoutes: React.FC = () => (
 
       {/* Help / user manual — public, no auth required */}
       <Route path="/help" element={<HelpPage />} />
+      <Route path="/hub" element={<ProjectHubPage />} />
+      <Route path="/docs" element={<ProjectHubPage />} />
 
       {/* Catch-all: redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
