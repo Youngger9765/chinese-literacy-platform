@@ -64,6 +64,7 @@ function mapSessionToRecentItem(session: LearningSummary): RecentPracticeItem {
 
 /** Library page — wraps StoryLibrary with resume prompt, recommendations, and recent practice list. */
 export const LibraryPage: React.FC = () => {
+  const { token } = useAuth();
   const navigate = useNavigate();
   const [showResumePrompt, setShowResumePrompt] = useState(true);
   const [recentPractice, setRecentPractice] = useState<RecentPracticeItem[]>([]);
@@ -75,22 +76,18 @@ export const LibraryPage: React.FC = () => {
   };
 
   const loadRecentPractice = useCallback(async () => {
+    if (!token) return;
     try {
       setIsLoadingRecent(true);
       setRecentError(null);
-      const { items } = await fetchLearningSessions(
-        // token is injected by auth context via Authorization header in api.ts
-        // LibraryPage is under ProtectedRoute so token is always present
-        (window as any).undefined,
-        { limit: 5 },
-      );
+      const { items } = await fetchLearningSessions(token, { limit: 5 });
       setRecentPractice(items.map(mapSessionToRecentItem));
     } catch (err) {
       setRecentError(err instanceof Error ? err.message : '載入最近練習失敗');
     } finally {
       setIsLoadingRecent(false);
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     void loadRecentPractice();
