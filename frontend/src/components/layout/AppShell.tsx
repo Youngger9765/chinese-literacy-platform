@@ -103,7 +103,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
           id="main-content"
           role="main"
           aria-label="主要內容"
-          className="flex-1 flex flex-col overflow-hidden pb-14 md:pb-0"
+          className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0"
           tabIndex={-1}
         >
           {children}
