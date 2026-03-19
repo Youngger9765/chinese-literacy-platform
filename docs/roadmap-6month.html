@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LingoLeap - 6個月三軌執行計劃（精簡實作版）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .strategy-banner {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .strategy-banner h2 {
+            color: #92400e;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .strategy-banner p {
+            color: #78350f;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .constraints {
+            background: #f9fafb;
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+
+        .constraints h3 {
+            color: #dc2626;
+            margin-bottom: 0.75rem;
+        }
+
+        .constraints ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .constraints li {
+            padding: 0.5rem 0;
+            color: #4b5563;
+        }
+
+        .constraints li:before {
+            content: "⚠️ ";
+            margin-right: 0.5rem;
+        }
+
+        /* 軌道標題 */
+        .track-headers {
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+            padding-bottom: 1rem;
+        }
+
+        .track-header {
+            padding: 1.25rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .header-time {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        }
+
+        .header-company {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .header-product {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .header-team {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        /* Phase 分隔 */
+        .phase-separator {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 1rem 1.5rem;
+            margin: 2rem 0 1rem 0;
+            border-radius: 10px;
+            border-left: 5px solid #4a5568;
+        }
+
+        .phase-separator h2 {
+            font-size: 1.3rem;
+            color: #1a202c;
+            font-weight: 700;
+        }
+
+        /* 時間軸行 */
+        .timeline-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: start;
+        }
+
+        .week-label {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+            position: sticky;
+            top: 80px;
+        }
+
+        /* 卡片樣式 */
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #e2e8f0;
+            transition: all 0.3s ease;
+            min-height: 100px;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .track-company .card {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .track-product .card {
+            border-left-color: #3b82f6;
+            background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+        }
+
+        .track-team .card {
+            border-left-color: #f59e0b;
+            background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 0.75rem;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            color: #4a5568;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* 標籤 */
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .capability-tag {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .feature-tag {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .tech-tag {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .tool-tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            font-weight: 600;
+        }
+
+        .moat-badge {
+            background: #065f46;
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .value-badge {
+            background: #7c2d12;
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .speed-badge {
+            background: #dc2626;
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        /* Milestone */
+        .milestone-row {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        }
+
+        .milestone-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+
+        .milestone-desc {
+            color: #78350f;
+            font-size: 1rem;
+        }
+
+        ul {
+            margin-left: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        li {
+            margin-bottom: 0.25rem;
+            line-height: 1.4;
+        }
+
+        .person {
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1600px) {
+            .timeline-row {
+                grid-template-columns: 90px 1fr 1fr 1fr;
+            }
+            .track-headers {
+                grid-template-columns: 90px 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .timeline-row {
+                grid-template-columns: 1fr;
+            }
+            .track-headers {
+                grid-template-columns: 1fr;
+            }
+            .week-label {
+                position: static;
+            }
+        }
+
+        /* === Mobile RWD === */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                line-height: 1.3;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .strategy-banner {
+                padding: 1rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .strategy-banner h2 {
+                font-size: 1.15rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .strategy-banner p {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            .constraints {
+                padding: 1rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .constraints h3 {
+                font-size: 1rem;
+            }
+
+            .constraints li {
+                font-size: 0.9rem;
+                padding: 0.35rem 0;
+            }
+
+            /* Hide sticky track headers on mobile — tracks are stacked in single column */
+            .track-headers {
+                display: none;
+            }
+
+            .timeline-row {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .week-label {
+                position: static;
+                padding: 0.75rem;
+                font-size: 0.9rem;
+                border-radius: 8px;
+            }
+
+            .card {
+                min-height: auto;
+                padding: 1rem;
+            }
+
+            .card-title {
+                font-size: 0.95rem;
+                flex-wrap: wrap;
+            }
+
+            .card-content {
+                font-size: 0.88rem;
+            }
+
+            .phase-separator {
+                margin: 1.25rem 0 0.75rem 0;
+                padding: 0.75rem 1rem;
+            }
+
+            .phase-separator h2 {
+                font-size: 1.1rem;
+            }
+
+            .milestone-row {
+                margin: 1.25rem 0;
+                padding: 1rem;
+            }
+
+            .milestone-title {
+                font-size: 1.1rem;
+            }
+
+            .milestone-desc {
+                font-size: 0.88rem;
+            }
+
+            /* Tags and badges wrap properly */
+            .tag {
+                font-size: 0.78rem;
+                padding: 0.2rem 0.55rem;
+                margin-right: 0.35rem;
+                margin-bottom: 0.35rem;
+            }
+
+            .moat-badge,
+            .value-badge,
+            .speed-badge {
+                font-size: 0.78rem;
+                padding: 0.25rem 0.6rem;
+            }
+
+            .highlight {
+                font-size: 0.88rem;
+                display: inline-block;
+                margin: 0.15rem 0;
+            }
+
+            ul {
+                margin-left: 1rem;
+            }
+
+            li {
+                font-size: 0.88rem;
+            }
+
+            .footer {
+                margin-top: 2rem;
+                padding-top: 1.25rem;
+                font-size: 0.82rem;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 LingoLeap — 6個月三軌執行計劃</h1>
+        <div class="subtitle">學校外展 × 產品功能開發 × 團隊成長路徑（2026/2-8 精簡實作版）</div>
+        <div style="text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem;">最後更新：2026-03-12 ｜ 唯一真相來源：GitHub Milestones</div>
+
+        <!-- 策略橫幅 -->
+        <div class="strategy-banner">
+            <h2>💡 AI 驅動開發策略：Claude Code 作為 AI Dev Pair</h2>
+            <p><strong>核心技術棧：</strong><span class="highlight">React 19 + Vite + Tailwind</span>、<span class="highlight">FastAPI + PostgreSQL</span>、<span class="highlight">Cloud Run (GCP)</span>、<span class="highlight">Vertex AI Gemini 2.5 Flash</span>。所有功能都保留（朗讀分析、蘇格拉底對話、校班師生課、作業模式、自學模式），以 Claude Code 作為 AI Dev 加速 3-4x，每個功能先求「能用、能展示、能驗證價值」，後續持續迭代優化。</p>
+        </div>
+
+        <!-- 平台六大模組架構 -->
+        <style>
+            .module-arch {
+                margin-bottom: 2rem;
+                padding: 2.5rem;
+                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                border-radius: 16px;
+                border: 1px solid #e2e8f0;
+            }
+
+            .module-arch-title {
+                text-align: center;
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #1a202c;
+                margin-bottom: 0.25rem;
+            }
+
+            .module-arch-subtitle {
+                text-align: center;
+                font-size: 1rem;
+                color: #718096;
+                margin-bottom: 2rem;
+            }
+
+            /* Progress indicator */
+            .arch-progress {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                margin-bottom: 2rem;
+                padding: 0.75rem 1.5rem;
+                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                border: 2px solid #f59e0b;
+                border-radius: 10px;
+                max-width: 520px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .arch-progress-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .arch-progress-dot.active {
+                background: #7c3aed;
+                box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
+                animation: archPulse 2s infinite;
+            }
+
+            .arch-progress-dot.done {
+                background: #10b981;
+            }
+
+            .arch-progress-dot.upcoming {
+                background: #cbd5e1;
+            }
+
+            @keyframes archPulse {
+                0%, 100% { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3); }
+                50% { box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.15); }
+            }
+
+            .arch-progress-label {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: #92400e;
+            }
+
+            /* Phase legend */
+            .arch-legend {
+                display: flex;
+                justify-content: center;
+                gap: 1.25rem;
+                margin-bottom: 2rem;
+                flex-wrap: wrap;
+            }
+
+            .arch-legend-item {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+                font-size: 0.85rem;
+                color: #4a5568;
+            }
+
+            .arch-legend-color {
+                width: 14px;
+                height: 14px;
+                border-radius: 4px;
+                flex-shrink: 0;
+            }
+
+            /* === Module Architecture v3: master-detail layout === */
+            .arch-layout {
+                display: grid;
+                grid-template-columns: 1fr 380px;
+                gap: 1.5rem;
+                max-width: 1100px;
+                margin: 0 auto;
+                align-items: start;
+            }
+
+            /* Left: module cards grid */
+            .arch-cards {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 0.6rem;
+            }
+            .arch-cards-span3 { grid-column: 1 / -1; }
+
+            /* Arrow rows */
+            .arch-arrow-row {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 1.5rem;
+                padding: 0.1rem 0;
+                font-size: 0.72rem;
+                color: #94a3b8;
+            }
+            .arch-arrow-row .arr { font-size: 1rem; color: #64748b; }
+
+            /* Module card (compact, clickable) */
+            .mod-card {
+                background: #fff;
+                border: 2px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 0.6rem 0.75rem;
+                cursor: pointer;
+                user-select: none;
+                transition: all 0.15s;
+                position: relative;
+            }
+            .mod-card:hover { border-color: #93c5fd; background: #f8fafc; }
+            .mod-card.active { border-color: #3b82f6; background: #eff6ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+            .mod-card.mod-core { border-color: #93c5fd; }
+            .mod-card.mod-wrap { border-color: #c4b5fd; border-style: dashed; }
+            .mod-card.mod-base { border-color: #a78bfa; }
+
+            .mod-card-row {
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+            .mod-card-num {
+                width: 22px; height: 22px;
+                border-radius: 5px;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 0.7rem; font-weight: 700; color: #fff;
+                flex-shrink: 0;
+            }
+            .mod-card-num.c-blue { background: #3b82f6; }
+            .mod-card-num.c-green { background: #10b981; }
+            .mod-card-num.c-purple { background: #8b5cf6; }
+            .mod-card-num.c-pink { background: #ec4899; }
+            .mod-card-num.c-slate { background: #64748b; }
+
+            .mod-card-name {
+                font-weight: 600; font-size: 0.82rem; color: #1e293b;
+                flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+
+            /* Progress bar */
+            .mod-progress {
+                display: flex;
+                gap: 2px;
+                margin-top: 0.35rem;
+                height: 4px;
+                border-radius: 2px;
+                overflow: hidden;
+            }
+            .mod-progress-seg { height: 100%; border-radius: 1px; }
+            .mod-progress-seg.pg-done { background: #22c55e; }
+            .mod-progress-seg.pg-wip  { background: #f59e0b; }
+            .mod-progress-seg.pg-future { background: #93c5fd; }
+
+            .mod-card-sub {
+                display: flex;
+                align-items: center;
+                gap: 0.35rem;
+                margin-top: 0.25rem;
+            }
+            .mod-stat {
+                font-size: 0.62rem; font-weight: 600;
+                padding: 0.1rem 0.35rem;
+                border-radius: 4px;
+                white-space: nowrap;
+            }
+            .mod-stat.st-done { background: #dcfce7; color: #166534; }
+            .mod-stat.st-wip  { background: #fef3c7; color: #92400e; }
+            .mod-stat.st-future { background: #dbeafe; color: #1e40af; }
+
+            .mod-badge {
+                font-size: 0.58rem; font-weight: 600;
+                padding: 0.08rem 0.35rem; border-radius: 3px;
+                margin-left: auto;
+            }
+            .mod-badge.badge-core { background: #2563eb; color: #fff; }
+            .mod-badge.badge-wrap { background: rgba(139,92,246,0.15); color: #7c3aed; }
+            .mod-badge.badge-base { background: rgba(139,92,246,0.1); color: #6d28d9; }
+
+            /* Right: detail panel */
+            .mod-detail-panel {
+                background: #fff;
+                border: 2px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 1.25rem;
+                min-height: 300px;
+                position: sticky;
+                top: 2rem;
+                transition: border-color 0.2s;
+            }
+            .mod-detail-panel.has-selection { border-color: #3b82f6; }
+
+            .mod-detail-empty {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 200px;
+                color: #94a3b8;
+                font-size: 0.9rem;
+            }
+            .mod-detail-title {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin-bottom: 0.75rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid #f1f5f9;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .mod-detail-title .mod-card-num { width: 26px; height: 26px; font-size: 0.8rem; }
+
+            .mod-detail-list {
+                list-style: none; padding: 0; margin: 0;
+            }
+            .mod-detail-list li {
+                padding: 0.3rem 0;
+                font-size: 0.82rem;
+                color: #475569;
+                line-height: 1.5;
+                border-bottom: 1px solid #f8fafc;
+            }
+            .mod-detail-list li:last-child { border-bottom: none; }
+            .mod-detail-foot {
+                margin-top: 0.75rem;
+                padding-top: 0.5rem;
+                border-top: 1px solid #f1f5f9;
+                font-size: 0.75rem;
+                color: #94a3b8;
+                font-style: italic;
+            }
+
+            /* Responsive */
+            @media (max-width: 900px) {
+                .arch-layout {
+                    grid-template-columns: 1fr;
+                }
+                .mod-detail-panel {
+                    position: static;
+                }
+                .arch-cards { grid-template-columns: 1fr 1fr; }
+            }
+            @media (max-width: 768px) {
+                .module-arch {
+                    padding: 1rem;
+                    border-radius: 10px;
+                }
+
+                .module-arch-title {
+                    font-size: 1.25rem;
+                }
+
+                .module-arch-subtitle {
+                    font-size: 0.82rem;
+                    margin-bottom: 1.25rem;
+                }
+
+                .arch-progress {
+                    flex-wrap: wrap;
+                    padding: 0.6rem 0.75rem;
+                    max-width: 100%;
+                }
+
+                .arch-progress-label {
+                    font-size: 0.78rem;
+                    line-height: 1.4;
+                    text-align: center;
+                }
+
+                .arch-legend {
+                    gap: 0.6rem;
+                    margin-bottom: 1.25rem;
+                }
+
+                .arch-legend-item {
+                    font-size: 0.75rem;
+                }
+
+                .arch-layout {
+                    grid-template-columns: 1fr;
+                    gap: 1rem;
+                }
+
+                .arch-cards {
+                    grid-template-columns: 1fr;
+                }
+
+                .arch-cards-span3 {
+                    grid-column: 1;
+                }
+
+                .arch-arrow-row {
+                    flex-direction: column;
+                    gap: 0.15rem;
+                }
+
+                .mod-detail-panel {
+                    position: static;
+                    min-height: auto;
+                }
+
+                .mod-card {
+                    padding: 0.5rem 0.65rem;
+                }
+
+                .mod-card-name {
+                    font-size: 0.8rem;
+                    white-space: normal;
+                }
+
+                .mod-detail-title {
+                    font-size: 0.95rem;
+                }
+
+                .mod-detail-list li {
+                    font-size: 0.78rem;
+                }
+
+                .mod-detail-foot {
+                    font-size: 0.7rem;
+                }
+            }
+
+            @media (max-width: 600px) {
+                .arch-cards { grid-template-columns: 1fr; }
+                .arch-cards-span3 { grid-column: 1; }
+                .arch-arrow-row { flex-direction: column; gap: 0.15rem; }
+            }
+        </style>
+
+        <div class="module-arch">
+            <div class="module-arch-title">📦 平台模組架構（6 核心 + 未來擴充）</div>
+            <div class="module-arch-subtitle">模組關係 × 開發進度 × Phase 對應 ｜ 🟢 已完成 🟡 Phase 5-9 精修 🔵 Beta 後擴充</div>
+
+            <!-- Progress indicator -->
+            <div class="arch-progress">
+                <span class="arch-progress-dot done" title="Demo 1 完成"></span>
+                <span class="arch-progress-dot done" title="Demo 2 完成"></span>
+                <span class="arch-progress-dot done" title="Demo 3 完成（提前）"></span>
+                <span class="arch-progress-dot done" title="Demo 4 完成（提前）"></span>
+                <span class="arch-progress-dot active" title="UX 打磨期"></span>
+                <span class="arch-progress-label">目前進度：Demo 1-4 全部完成 ✅ ｜ 現在：Phase 5 測試驗收 + Bug 修復（3/12~4/20）→ Phase 6-9 精修到 8/30</span>
+            </div>
+
+            <!-- Phase legend -->
+            <div class="arch-legend">
+                <div class="arch-legend-item">
+                    <div class="arch-legend-color" style="background: #10b981;"></div>
+                    Demo 1-2 基礎+自學（✅ 完成 3/9）
+                </div>
+                <div class="arch-legend-item">
+                    <div class="arch-legend-color" style="background: #3b82f6;"></div>
+                    Demo 3 校班師生課（✅ 完成 3/6，提前）
+                </div>
+                <div class="arch-legend-item">
+                    <div class="arch-legend-color" style="background: #22c55e;"></div>
+                    Demo 4 作業+進階（✅ 完成 3/9，提前，44 PRs）
+                </div>
+                <div class="arch-legend-item">
+                    <div class="arch-legend-color" style="background: #f97316;"></div>
+                    Phase 5-9 精修期（🔧 P5 測試驗收中）
+                </div>
+            </div>
+
+            <!-- Module architecture v3: master-detail -->
+            <div class="arch-layout">
+
+                <!-- LEFT: module cards -->
+                <div class="arch-cards">
+
+                    <!-- Row 1: Gamification (enhancement layer, full width) -->
+                    <div class="mod-card mod-wrap arch-cards-span3" data-mod="5" onclick="showMod(this)">
+                        <div class="mod-card-row">
+                            <span class="mod-card-num c-pink">5</span>
+                            <span class="mod-card-name">🎮 遊戲化</span>
+                            <span class="mod-badge badge-wrap">增強層</span>
+                        </div>
+                        <div class="mod-progress">
+                            <div class="mod-progress-seg pg-done" style="flex:3;"></div>
+                            <div class="mod-progress-seg pg-wip" style="flex:2;"></div>
+                            <div class="mod-progress-seg pg-future" style="flex:2;"></div>
+                        </div>
+                        <div class="mod-card-sub">
+                            <span class="mod-stat st-done">✅ 3</span>
+                            <span class="mod-stat st-wip">🟡 2</span>
+                            <span class="mod-stat st-future">🔵 2</span>
+                        </div>
+                    </div>
+
+                    <!-- Arrow: wraps -->
+                    <div class="arch-arrow-row">
+                        <span><span class="arr">↙</span> 包裹 M4</span>
+                        <span><span class="arr">⬇</span> 包裹 M1</span>
+                        <span>包裹 M4 <span class="arr">↘</span></span>
+                    </div>
+
+                    <!-- Row 2: School | Frontend | Analytics -->
+                    <div class="mod-card" data-mod="4" onclick="showMod(this)">
+                        <div class="mod-card-row">
+                            <span class="mod-card-num c-blue">4</span>
+                            <span class="mod-card-name">🏫 校班師生課</span>
+                        </div>
+                        <div class="mod-progress">
+                            <div class="mod-progress-seg pg-done" style="flex:3;"></div>
+                            <div class="mod-progress-seg pg-wip" style="flex:4;"></div>
+                            <div class="mod-progress-seg pg-future" style="flex:4;"></div>
+                        </div>
+                        <div class="mod-card-sub">
+                            <span class="mod-stat st-done">✅ 3</span>
+                            <span class="mod-stat st-wip">🟡 4</span>
+                            <span class="mod-stat st-future">🔵 4</span>
+                        </div>
+                    </div>
+
+                    <div class="mod-card mod-core" data-mod="1" onclick="showMod(this)">
+                        <div class="mod-card-row">
+                            <span class="mod-card-num c-blue">1</span>
+                            <span class="mod-card-name">📖 前台學習</span>
+                            <span class="mod-badge badge-core">核心</span>
+                        </div>
+                        <div class="mod-progress">
+                            <div class="mod-progress-seg pg-done" style="flex:2;"></div>
+                            <div class="mod-progress-seg pg-wip" style="flex:7;"></div>
+                            <div class="mod-progress-seg pg-future" style="flex:4;"></div>
+                        </div>
+                        <div class="mod-card-sub">
+                            <span class="mod-stat st-done">✅ 2</span>
+                            <span class="mod-stat st-wip">🟡 7</span>
+                            <span class="mod-stat st-future">🔵 4</span>
+                        </div>
+                    </div>
+
+                    <div class="mod-card" data-mod="3" onclick="showMod(this)">
+                        <div class="mod-card-row">
+                            <span class="mod-card-num c-green">3</span>
+                            <span class="mod-card-name">📊 歷程報告</span>
+                        </div>
+                        <div class="mod-progress">
+                            <div class="mod-progress-seg pg-done" style="flex:2;"></div>
+                            <div class="mod-progress-seg pg-wip" style="flex:5;"></div>
+                            <div class="mod-progress-seg pg-future" style="flex:2;"></div>
+                        </div>
+                        <div class="mod-card-sub">
+                            <span class="mod-stat st-done">✅ 2</span>
+                            <span class="mod-stat st-wip">🟡 5</span>
+                            <span class="mod-stat st-future">🔵 2</span>
+                        </div>
+                    </div>
+
+                    <!-- Arrow: data flow -->
+                    <div class="arch-arrow-row">
+                        <span>M4 <span class="arr">→</span> M1</span>
+                        <span>M1 <span class="arr">→</span> M3</span>
+                        <span>M4 <span class="arr">⤳</span> M3</span>
+                    </div>
+
+                    <!-- Row 3: Agent Builder (center) -->
+                    <div></div>
+                    <div class="mod-card" data-mod="2" onclick="showMod(this)">
+                        <div class="mod-card-row">
+                            <span class="mod-card-num c-purple">2</span>
+                            <span class="mod-card-name">🤖 Agent Builder</span>
+                        </div>
+                        <div class="mod-progress">
+                            <div class="mod-progress-seg pg-done" style="flex:2;"></div>
+                            <div class="mod-progress-seg pg-wip" style="flex:2;"></div>
+                            <div class="mod-progress-seg pg-future" style="flex:2;"></div>
+                        </div>
+                        <div class="mod-card-sub">
+                            <span class="mod-stat st-done">✅ 2</span>
+                            <span class="mod-stat st-wip">🟡 2</span>
+                            <span class="mod-stat st-future">🔵 2</span>
+                        </div>
+                    </div>
+                    <div></div>
+
+                    <!-- Arrow -->
+                    <div class="arch-arrow-row">
+                        <span><span class="arr">⬆</span> M2 承接 M1 朗讀結果</span>
+                    </div>
+
+                    <!-- Row 4: Admin Backend (foundation, full width) -->
+                    <div class="mod-card mod-base arch-cards-span3" data-mod="6" onclick="showMod(this)">
+                        <div class="mod-card-row">
+                            <span class="mod-card-num c-slate">6</span>
+                            <span class="mod-card-name">🗄️ 後台 Admin Backend</span>
+                            <span class="mod-badge badge-base">基礎層</span>
+                        </div>
+                        <div class="mod-progress">
+                            <div class="mod-progress-seg pg-done" style="flex:2;"></div>
+                            <div class="mod-progress-seg pg-wip" style="flex:6;"></div>
+                            <div class="mod-progress-seg pg-future" style="flex:1;"></div>
+                        </div>
+                        <div class="mod-card-sub">
+                            <span class="mod-stat st-done">✅ 2</span>
+                            <span class="mod-stat st-wip">🟡 6</span>
+                            <span class="mod-stat st-future">🔵 1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: detail panel -->
+                <div class="mod-detail-panel" id="modDetailPanel">
+                    <div class="mod-detail-empty" id="modDetailEmpty">
+                        👈 點選左邊模組查看詳情
+                    </div>
+                    <div id="modDetailContent" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- Module detail data (hidden) -->
+            <script>
+            const MOD_DATA = {
+                5: {
+                    icon: '🎮', name: '遊戲化 Gamification', numClass: 'c-pink',
+                    note: '增強層 — 包裹模組 1（前台）+ 模組 4（校班）',
+                    items: [
+                        { s: 'done', t: '激勵機制：徽章、積分、排行榜（#26）' },
+                        { s: 'done', t: '動機增強：連續天數、成就解鎖' },
+                        { s: 'done', t: '包裹模組 1（前台）+ 模組 4（校班）' },
+                        { s: 'wip',  t: 'P6: 成就頁 RWD + 無障礙（#432）' },
+                        { s: 'wip',  t: 'P6: 成就頁入口優化（#377）' },
+                        { s: 'future', t: 'Beta後: 班級排行榜 + 校際排行' },
+                        { s: 'future', t: 'Beta後: 學習任務系統（每日/每週挑戰）' },
+                    ]
+                },
+                4: {
+                    icon: '🏫', name: '校班師生課介面', numClass: 'c-blue',
+                    note: '需要：M1 ｜ 連接：M3',
+                    items: [
+                        { s: 'done', t: '自學 / 作業模式切換（#143）' },
+                        { s: 'done', t: '學校→班級→學生層級（#19, #20）' },
+                        { s: 'done', t: '教師管理與課文指派（#83, #84）' },
+                        { s: 'wip',  t: 'P6: 教育雲帳號整合研究' },
+                        { s: 'wip',  t: 'P6: 學生轉班/升級（保留學習紀錄）' },
+                        { s: 'wip',  t: 'P6: 家長帳號綁定學生' },
+                        { s: 'wip',  t: 'P7: 班級公告功能' },
+                        { s: 'future', t: 'P8: 教師間課文分享' },
+                        { s: 'future', t: 'P8/Beta: Google Classroom 整合（登入+班級同步）' },
+                        { s: 'future', t: 'Beta後: 協同教學（多教師共管）' },
+                        { s: 'future', t: 'Beta後: 學生標籤系統' },
+                    ]
+                },
+                1: {
+                    icon: '📖', name: '前台學習模組', numClass: 'c-blue',
+                    note: '核心模組 ｜ 需要：M6（後台）提供課文',
+                    items: [
+                        { s: 'done', t: '八步驟學習流程（朗讀+理解+生字+聽寫+聽力+全文+報告）' },
+                        { s: 'done', t: '蘇格拉底 AI + LCS 比對 + RWD' },
+                        { s: 'wip',  t: 'P7: 重複朗讀模式（進步曲線對比）' },
+                        { s: 'wip',  t: 'P7: 課文難度自動標註（字頻公式）' },
+                        { s: 'wip',  t: 'P7: 聽寫錯誤類型分析（同音/形近/遺漏）' },
+                        { s: 'wip',  t: 'P8: 蘇格拉底摘要環節' },
+                        { s: 'wip',  t: 'P8: 錯題集（自動收集+分類+複習模式）' },
+                        { s: 'wip',  t: 'P8: 課文小測驗（出題+作答+自動批改）' },
+                        { s: 'wip',  t: 'P8: 行事曆（待辦+學習紀錄+連續天數）' },
+                        { s: 'future', t: 'Beta後: 口說表達（覆述/摘要）' },
+                        { s: 'future', t: 'Beta後: 閱讀策略引導（預測→澄清→摘要）' },
+                        { s: 'future', t: 'Beta後: 手寫辨識（目前僅鍵盤輸入）' },
+                        { s: 'future', t: 'Beta後: 段落寫作 + AI 批改' },
+                    ]
+                },
+                3: {
+                    icon: '📊', name: '歷程及報告模組', numClass: 'c-green',
+                    note: '需要：M1 + M4 的學習資料',
+                    items: [
+                        { s: 'done', t: '六環節診斷報告 + 流暢度分析 CPM' },
+                        { s: 'done', t: '教師儀表板 + 班級報表 + 學習預警' },
+                        { s: 'wip',  t: 'P7: 報表匯出 CSV/Excel（#235）' },
+                        { s: 'wip',  t: 'P7: ETL Pipeline + 追蹤事件預埋' },
+                        { s: 'wip',  t: 'P8: 前測/後測診斷系統' },
+                        { s: 'wip',  t: 'P8: 班級弱點分析 + 診斷報告（教師版）' },
+                        { s: 'wip',  t: 'P8: 每週摘要 email + 錯題複習排程' },
+                        { s: 'future', t: 'Beta後: 學習扶助成效報告（教育部格式）' },
+                        { s: 'future', t: 'Beta後: Sentry + GA4 + Cloud Monitoring' },
+                    ]
+                },
+                2: {
+                    icon: '🤖', name: 'Agent Builder', numClass: 'c-purple',
+                    note: '已串接 M1（前台）朗讀結果',
+                    items: [
+                        { s: 'done', t: '蘇格拉底對話 + circuit breaker + Gemini 2.5 Flash' },
+                        { s: 'done', t: 'LCS 文字差異比對 + 流暢度分析' },
+                        { s: 'wip',  t: 'P8: AI 自動出題（理解題+聽寫+造句）' },
+                        { s: 'wip',  t: 'P8: 課文自動解析（Word/PDF→課文）' },
+                        { s: 'future', t: 'Beta後: RAG 知識庫（課文+字典+教學理論）' },
+                        { s: 'future', t: 'Beta後: AI 學伴 + AI 模擬學生 + AI 出題助手' },
+                    ]
+                },
+                6: {
+                    icon: '🗄️', name: '後台 Admin Backend', numClass: 'c-slate',
+                    note: '基礎層 — 供應所有模組',
+                    items: [
+                        { s: 'done', t: 'Stories API + JWT RBAC + 多租戶' },
+                        { s: 'done', t: 'Cloud Run + GitHub Actions CI/CD' },
+                        { s: 'wip',  t: 'P6: 使用條款 + 教育雲 + RWD 稽核' },
+                        { s: 'wip',  t: 'P6: UI 元件模組化（Design System）' },
+                        { s: 'wip',  t: 'P7: Rate Limiting + CDN + Redis' },
+                        { s: 'wip',  t: 'P7: API 重構（版本化+統一格式+錯誤碼）' },
+                        { s: 'wip',  t: 'P7: CI/CD 強化 + 自動化測試' },
+                        { s: 'wip',  t: 'P8: CMS 管理後台 + 知識樹 data model' },
+                        { s: 'future', t: 'Beta後: 考試題庫 + 作文批改 + 教師學堂' },
+                    ]
+                },
+            };
+
+            const STATUS = {
+                done:   { icon: '✅', color: '#166534' },
+                wip:    { icon: '🟡', color: '#b45309' },
+                future: { icon: '🔵', color: '#2563eb' },
+            };
+
+            function showMod(el) {
+                // highlight active card
+                document.querySelectorAll('.mod-card').forEach(c => c.classList.remove('active'));
+                el.classList.add('active');
+
+                const id = el.dataset.mod;
+                const d = MOD_DATA[id];
+                if (!d) return;
+
+                const panel = document.getElementById('modDetailPanel');
+                const empty = document.getElementById('modDetailEmpty');
+                const content = document.getElementById('modDetailContent');
+
+                panel.classList.add('has-selection');
+                empty.style.display = 'none';
+                content.style.display = 'block';
+
+                let html = `<div class="mod-detail-title">
+                    <span class="mod-card-num ${d.numClass}">${id}</span>
+                    ${d.icon} ${d.name}
+                </div>`;
+                html += '<ul class="mod-detail-list">';
+                d.items.forEach(item => {
+                    const st = STATUS[item.s];
+                    const color = item.s === 'done' ? '' : ` style="color:${st.color}"`;
+                    html += `<li${color}>${st.icon} ${item.t}</li>`;
+                });
+                html += '</ul>';
+                html += `<div class="mod-detail-foot">${d.note}</div>`;
+
+                content.innerHTML = html;
+            }
+            </script>
+        </div>
+
+        <!-- 現實限制 -->
+        <div class="constraints">
+            <h3>⏱️ 現實限制</h3>
+            <ul>
+                <li><strong>團隊：</strong>Young (lead dev + 架構師) + Claude Code (AI dev) + 高中生實習團隊（2026/2/27 onboard）</li>
+                <li><strong>時間：</strong>2026/2/3 - 8/31（約 30 週），AI 驅動開發加速約 3-4x</li>
+                <li><strong>目標：</strong>8 月底交付完整可用產品，所有核心功能必須有</li>
+                <li><strong>策略：</strong>AI 驅動開發 (Claude Code) + 借鑑 Duotopia 校班師生課經驗</li>
+            </ul>
+        </div>
+
+        <!-- 軌道標題 -->
+        <div class="track-headers">
+            <div class="track-header header-time">⏰ 時間</div>
+            <div class="track-header header-company">🏢 學校外展<br><small style="font-size:0.8rem;">合作洽談 × Beta 準備</small></div>
+            <div class="track-header header-product">📱 產品發展<br><small style="font-size:0.8rem;">功能完整但實作精簡</small></div>
+            <div class="track-header header-team">👥 人才養成<br><small style="font-size:0.8rem;">基礎建設 × 技能培養</small></div>
+        </div>
+
+        <!-- 已完成：Demo 1 + Demo 2 進度 -->
+        <div class="phase-separator">
+            <h2>✅ 已完成：Demo 1 基礎建設 + Demo 2 自學模式 MVP（2月）✅ 100%</h2>
+        </div>
+
+        <!-- Week 1-2 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>1-2<br><small style="font-size:0.75rem;">2/3-2/16<br>🧧 過年</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🤝 核心夥伴對接</div>
+                    <div class="card-content">
+                        <span class="capability-tag">CoLab 合作社</span>
+                        <span class="capability-tag">KIST</span>
+                        <p style="margin-top:0.75rem;">✅ 核心夥伴：方大哥、教學顧問、均一 Academy</p>
+                        <p>✅ CoLab（誠致KIST+均一+TFT）初步接觸</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📋 專案啟動 + 架構設計</div>
+                    <div class="card-content">
+                        <span class="feature-tag">Kickoff Meeting</span>
+                        <span class="feature-tag">GCP Cloud Run 部署</span>
+                        <span class="feature-tag">Stories API（57篇）</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 與方大哥對齊期待、確認專案範圍</p>
+                        <p style="margin-top:0.5rem;">✅ 建立 React 19 + Vite + FastAPI 開發環境</p>
+                        <p>✅ GCP Cloud Run 自動部署（GitHub Actions）</p>
+                        <p>✅ Stories API 完成（57篇課文 YAML 格式）</p>
+                        <p>✅ PostgreSQL Schema 初始設計</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🔧 環境建立</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Claude Code</span>
+                        <span class="tech-tag">Git Flow</span>
+                        <span class="tech-tag">GCP</span>
+                        <span class="tech-tag">GitHub</span>
+                        <p style="margin-top:0.75rem;"><strong>AI 基礎建設：</strong>Claude Code Agents & Skills 配置</p>
+                        <p style="margin-top:0.5rem;">• Git 工作流程：feature/* → staging → main</p>
+                        <p>• GitHub Actions CI/CD 設定</p>
+                        <p>• 過年期間彈性休息</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 3-4 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>3-4<br><small style="font-size:0.75rem;">2/17-3/2</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">（產品開發中）</div>
+                    <div class="card-content">
+                        <p style="color:#94a3b8;">此階段專注產品開發，無外展活動</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">✅ 六步驟核心學習流程開發完成</div>
+                    <div class="card-content">
+                        <span class="tool-tag">React 19 + Vite</span>
+                        <span class="tool-tag">FastAPI + Gemini 2.5 Flash</span>
+                        <p style="margin-top:0.75rem;"><strong>已完成：</strong></p>
+                        <p>✅ 簡介頁</p>
+                        <p>✅ 逐段朗讀（LiveTutor + Web Speech API）</p>
+                        <p>✅ 課文理解（蘇格拉底 AI 對話，Gemini 5題3階段）</p>
+                        <p>✅ 生字練習（筆順 + 注音 BpmfIansui）</p>
+                        <p>✅ 全文朗讀</p>
+                        <p>✅ 報告（六環節即時回饋，AssessmentReport）</p>
+                        <p>✅ LCS 逐字比對 + DiffDisplay（#80）</p>
+                        <p>✅ 流暢度分析 CPM + 正確率</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 Claude Code 配置分享 + Git 工作流程</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Claude Code Agents</span>
+                        <span class="tech-tag">共享 Skills</span>
+                        <span class="tech-tag">GitHub Issues</span>
+                        <p style="margin-top:0.75rem;"><strong>AI 驅動開發：</strong>使用共享的 Agents & Skills 協作</p>
+                        <p style="margin-top:0.5rem;">實戰練習：用 Claude Code 開 Branch、寫程式、提交 PR</p>
+                        <p style="margin-top:0.5rem;">學習「GitHub Issues + AI Agent 自動化」工作流程</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">✅ Demo 1 Milestone — 基礎建設完成</div>
+            <div class="milestone-desc">環境設定 ✅ + AI 基礎建設對齊 ✅ + Stories API（57篇）✅ + Cloud Run 部署 ✅ + 六步驟學習流程雛形 ✅</div>
+        </div>
+
+        <!-- Week 5-6 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>5-6<br><small style="font-size:0.75rem;">3/3-3/16<br>Demo 2<br>收尾</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">（產品開發中）</div>
+                    <div class="card-content">
+                        <p style="color:#94a3b8;">此階段專注產品開發，無外展活動</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">✅ Demo 2 收尾（100% 完成）</div>
+                    <div class="card-content">
+                        <span class="tool-tag">AI 人格調整</span>
+                        <span class="feature-tag">UX 優化</span>
+                        <p style="margin-top:0.75rem;"><strong>全部完成：</strong></p>
+                        <p>✅ AI 助教「溫暖但堅定」人格 (#54)</p>
+                        <p>✅ StepperNav 完成狀態 + mini-summaries (#167)</p>
+                        <p>✅ 錯字→生字練習連動 (#81, #110)</p>
+                        <p>✅ RWD 響應式設計 (#125)</p>
+                        <p>✅ #139, #156, #168 Bug fix</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">👥 高中生實習團隊 onboard（2/27）</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Git 工作流程</span>
+                        <span class="tech-tag">GitHub Issues</span>
+                        <span class="tech-tag">Bug fix 任務</span>
+                        <p style="margin-top:0.75rem;"><strong>首週任務：</strong></p>
+                        <p>• 環境建立（Node, Git, VS Code）</p>
+                        <p>• 認領 Bug fix issues（#139, #156, #168）</p>
+                        <p>• 學習 feature branch + PR 工作流程</p>
+                        <p style="margin-top:0.5rem;"><em>目標：第一個 PR merge</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">✅ Demo 2 Milestone（completed 3/9）— 自學模式 MVP</div>
+            <div class="milestone-desc">學生可選課文 → 六步驟學習（逐段朗讀→理解→生字→全文朗讀）→ 六環節診斷報告 ｜ AI 助教溫暖但堅定 ✅ ｜ LCS 逐字比對 ✅ ｜ 全部完成 ✅</div>
+        </div>
+
+        <!-- Demo 3: 校班師生課 -->
+        <div class="phase-separator">
+            <h2>✅ Demo 3: 校班師生課完成（completed 3/6，提前 3 個月）</h2>
+        </div>
+
+        <!-- Week 7-8 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>7-8<br><small style="font-size:0.75rem;">3/17-3/30<br>基礎建設</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏫 開始洽談 CoLab KIST</div>
+                    <div class="card-content">
+                        <span class="capability-tag">CoLab KIST</span>
+                        <p style="margin-top:0.75rem;">• 優先洽談 CoLab KIST 學校</p>
+                        <p>• 說明暑假學習扶助合作方案</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🗄️ 學習紀錄持久化（關鍵路徑起點）</div>
+                    <div class="card-content">
+                        <span class="tool-tag">PostgreSQL + SQLAlchemy</span>
+                        <span class="feature-tag">#171 學習紀錄 DB</span>
+                        <span class="feature-tag">UX 改善</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #171 學習紀錄持久化（前端 session → 後端 DB）</p>
+                        <p style="margin-top:0.5rem;"><strong>UX 改善：</strong></p>
+                        <p>• #169 報告頁太長 → 精簡摺疊設計</p>
+                        <p>• #170 全文朗讀用途不明確 → 說明文案</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生第一個功能任務</div>
+                    <div class="card-content">
+                        <span class="tech-tag">React 元件</span>
+                        <span class="tech-tag">Tailwind CSS</span>
+                        <span class="tech-tag">GitHub PR</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• #169 報告頁 UX 改善（精簡折疊）</p>
+                        <p>• #170 全文朗讀說明文案</p>
+                        <p style="margin-top:0.5rem;"><em>目標：獨立完成 PR + Review 流程</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 9-11 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>9-11<br><small style="font-size:0.75rem;">3/31-4/20<br>帳號+權限</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🤝 持續洽談 CoLab KIST</div>
+                    <div class="card-content">
+                        <span class="capability-tag">KIST 試點</span>
+                        <p style="margin-top:0.75rem;">• 持續與 CoLab 討論暑假合作細節</p>
+                        <p>• 確認試點學校意願 + 教師窗口</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🔐 帳號系統 + 多租戶權限</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Email + Password → JWT</span>
+                        <span class="tool-tag">SQLAlchemy Middleware</span>
+                        <span class="feature-tag">#82 帳號系統</span>
+                        <span class="feature-tag">#18 多租戶</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #82 帳號系統（Email + Password → JWT auth + teacher/student 角色）</p>
+                        <p style="margin-top:0.5rem;">#18 SQLAlchemy 多租戶 Middleware（資料權限隔離）</p>
+                        <p style="margin-top:0.5rem;">借鑑 Duotopia 校班師生課模組經驗</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 學習認證與權限概念</div>
+                    <div class="card-content">
+                        <span class="tech-tag">JWT</span>
+                        <span class="tech-tag">SQLAlchemy Middleware</span>
+                        <span class="tech-tag">角色管理</span>
+                        <p style="margin-top:0.75rem;">工程師：學習 JWT 認證概念</p>
+                        <p style="margin-top:0.5rem;">• Teacher / Student 角色差異</p>
+                        <p>• 受保護路由設計</p>
+                        <p>• 實作登錄介面 UI</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 12-14 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>12-14<br><small style="font-size:0.75rem;">4/21-5/11<br>校班管理</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏫 學校洽談持續</div>
+                    <div class="card-content">
+                        <span class="capability-tag">CoLab KIST</span>
+                        <p style="margin-top:0.75rem;">• 確認暑假課文選擇需求</p>
+                        <p>• 了解學校設備狀況（Chrome + 麥克風）</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🏫 校班管理介面</div>
+                    <div class="card-content">
+                        <span class="tool-tag">SQLAlchemy Middleware</span>
+                        <span class="feature-tag">#19 學校+班級管理</span>
+                        <span class="feature-tag">#20 教師管理</span>
+                        <span class="feature-tag">#83 CSV 學生匯入</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #19 學校 + 班級管理介面、#20 教師管理 + 課文指派</p>
+                        <p style="margin-top:0.5rem;">#7 課文上架 API + Admin（取代 YAML）</p>
+                        <p>#83 CSV 學生名單匯入</p>
+                        <p>#108 教材上傳著作權確認</p>
+                        <p>#143 作業指派 + 副本策略</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生做校班管理前端</div>
+                    <div class="card-content">
+                        <span class="tech-tag">React 表單</span>
+                        <span class="tech-tag">CSV 匯入</span>
+                        <span class="tech-tag">Table UI</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• #19 學校/班級管理 UI</p>
+                        <p>• #83 CSV 學生名單匯入介面</p>
+                        <p style="margin-top:0.5rem;"><em>學習：表單驗證、Table 元件</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 15-17 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>15-17<br><small style="font-size:0.75rem;">5/12-6/1<br>教師端報告</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏫 向教師展示產品進度</div>
+                    <div class="card-content">
+                        <span class="capability-tag">教師回饋</span>
+                        <p style="margin-top:0.75rem;">• 向合作教師展示校班管理 + 報表功能</p>
+                        <p>• 收集教師回饋調整優先順序</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📊 教師儀表板 + 班級報表</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Recharts</span>
+                        <span class="feature-tag">#21 學習資料聚合 API</span>
+                        <span class="feature-tag">#22 教師儀表板</span>
+                        <span class="feature-tag">#87 班級熱力圖</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #21 學習資料聚合 API、#22 教師儀表板 + 班級報表</p>
+                        <p style="margin-top:0.5rem;">#84 課文目標設定</p>
+                        <p>#87 班級表現矩陣（學生×課文熱力圖）</p>
+                        <p>#86 學習預警通知（7天無進步→通知教師）</p>
+                        <p>#107 學習診斷報告</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生做儀表板 UI</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Recharts</span>
+                        <span class="tech-tag">資料視覺化</span>
+                        <span class="tech-tag">圖表元件</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• #22 教師儀表板前端 UI</p>
+                        <p>• 班級報表圖表元件</p>
+                        <p style="margin-top:0.5rem;"><em>學習：Recharts 資料視覺化</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 18 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>18<br><small style="font-size:0.75rem;">6/2-6/7<br>整合測試</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">📋 Demo 3 準備</div>
+                    <div class="card-content">
+                        <span class="capability-tag">Demo 展示準備</span>
+                        <p style="margin-top:0.75rem;">準備向方大哥、均一 Academy、教學顧問展示</p>
+                        <p>• 學校管理→班級→學生完整流程</p>
+                        <p>• 教師報表展示</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🧪 Demo 3 整合測試 + Bug fix</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Playwright</span>
+                        <span class="feature-tag">E2E 測試</span>
+                        <span class="feature-tag">Bug fix</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> 整合測試 + 穩定性修復</p>
+                        <p style="margin-top:0.5rem;">完整流程驗證：帳號→學校→班級→學生→報表</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🧪 全員測試</div>
+                    <div class="card-content">
+                        <span class="tech-tag">測試思維</span>
+                        <span class="tech-tag">除錯技巧</span>
+                        <p style="margin-top:0.75rem;">全員參與：測試完整使用者流程</p>
+                        <p>• 教師端 + 學生端完整走過</p>
+                        <p>• 回報 Bug 到 GitHub Issues</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">✅ Demo 3 Milestone（completed 3/6）— 校班師生課完成</div>
+            <div class="milestone-desc">統一用戶模型 + JWT + RBAC 8 角色（#223）→ 學校管理 → 班級管理 → CSV 學生匯入 → 教師儀表板 + 班級熱力圖 ✅ 全部 18 issues 完成</div>
+        </div>
+
+        <!-- Demo 4: 作業模式 + 學習優化 -->
+        <div class="phase-separator">
+            <h2>✅ Demo 4: 作業模式 + 學習優化（completed 3/9，提前 4 個月，44 PRs）</h2>
+        </div>
+
+        <!-- Week 19-20 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>19-20<br><small style="font-size:0.75rem;">6/9-6/22<br>作業系統</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">📝 暑假試點準備</div>
+                    <div class="card-content">
+                        <span class="capability-tag">暑假學習扶助</span>
+                        <span class="capability-tag">CoLab KIST</span>
+                        <p style="margin-top:0.75rem;">• 目標：7-8月 2-3 校試點（CoLab KIST 優先）</p>
+                        <p>• 與學校確認暑假課程安排</p>
+                        <p>• 討論課文選擇 + 使用方式</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📝 作業系統</div>
+                    <div class="card-content">
+                        <span class="tool-tag">Email 通知</span>
+                        <span class="feature-tag">#23 作業系統（教師端）</span>
+                        <span class="feature-tag">#24 作業系統（學生端）</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span> #23 作業系統 — 教師端（指派課文、設截止日、查看繳交）</p>
+                        <p style="margin-top:0.5rem;">#24 作業系統 — 學生端 + Email 通知</p>
+                        <p>工程師：作業列表、繳交介面</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 作業系統前端</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Email API</span>
+                        <span class="tech-tag">FastAPI endpoints</span>
+                        <span class="tech-tag">通知系統</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• 作業系統學生端 UI</p>
+                        <p>• Email 通知整合</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 21-22 -->
+        <div class="timeline-row">
+            <div class="week-label">Week<br>21-22<br><small style="font-size:0.75rem;">6/23-7/5<br>學習優化</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏫 學校合作確認</div>
+                    <div class="card-content">
+                        <span class="capability-tag">學校確認</span>
+                        <p style="margin-top:0.75rem;">• 確認 2-3 校暑假合作意願</p>
+                        <p>• 準備教師培訓材料</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📊 學習體驗優化</div>
+                    <div class="card-content">
+                        <span class="feature-tag">#25 自學模式優化</span>
+                        <span class="feature-tag">#91 卡點偵測</span>
+                        <span class="feature-tag">#93 學習曲線圖</span>
+                        <p style="margin-top:0.75rem;"><span class="person">架構師:</span></p>
+                        <p>• #25 自學模式優化</p>
+                        <p>• #91 卡點偵測 + 個別化學習建議</p>
+                        <p>• #90 教師特別教學指示</p>
+                        <p>• #93 學生學習曲線圖</p>
+                        <p>• #106 出場卷 — 報告底部學習驗收</p>
+                        <p>• #172 出場卷品質不穩定 fix</p>
+                        <p>• #92 課文自動刪除機制</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 學習曲線圖表開發</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Recharts 進階</span>
+                        <span class="tech-tag">趨勢分析</span>
+                        <span class="tech-tag">多維圖表</span>
+                        <p style="margin-top:0.75rem;">實習生認領：</p>
+                        <p>• #93 學習曲線圖元件</p>
+                        <p>• 進度追蹤視覺化</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">✅ Demo 4 Milestone（completed 3/9）— 完整功能展示</div>
+            <div class="milestone-desc">44 PRs merge 到 staging：作業系統 + 遊戲化 + 聽力/聽寫/造句 + AI 學習路徑 + OAuth + E2E 測試 + 家長端 + 安全掃描 — 所有核心功能完成！✅</div>
+        </div>
+
+        <!-- Demo 5: 正式交付 -->
+        <div class="phase-separator">
+            <h2 style="position: relative;">📍 精修期 Phase 5-9（3/12~8/30）<span style="background: #ef4444; color: white; padding: 0.25rem 1rem; border-radius: 8px; font-size: 1rem; margin-left: 1rem; animation: pulse 2s infinite;">📍 WE ARE HERE — Phase 5 測試驗收</span></h2>
+            <p style="margin-top: 0.5rem; color: #4a5568;">Demo 1-4 全部提前完成（44 PRs）。進入 5 階段精修：<strong>P5 測試+Bug</strong>（~4/20）→ <strong>P6 UX+合規</strong>（~5/18）→ <strong>P7 安全+效能+技術品質</strong>（~6/15）→ <strong>P8 進階功能+Beta準備</strong>（~7/13）→ <strong>P9 Beta試點+交付</strong>（~8/30）</p>
+            <p style="margin-top: 0.3rem; color: #6b7280; font-size: 0.95rem;">91 open issues：46 needs-testing、16 bugs、38 UX、19 features、4 infra</p>
+            <style>@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }</style>
+        </div>
+
+        <!-- Phase 5: 3/12~4/20 測試+Bug -->
+        <div class="timeline-row">
+            <div class="week-label">P5<br><small style="font-size:0.75rem;">3/12~4/20<br>測試+Bug</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">（專注測試修復）</div>
+                    <div class="card-content">
+                        <p style="color:#94a3b8;">此階段專注測試驗收，無外展活動</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📋 全角色測試 + 🐛 Bug 清零</div>
+                    <div class="card-content">
+                        <span class="feature-tag">5 角色測試</span>
+                        <span class="feature-tag">46 needs-testing</span>
+                        <span class="feature-tag">16 bugs</span>
+                        <p style="margin-top:0.75rem;"><strong>分角色驗收：</strong>教師/學生/管理員/家長/自學</p>
+                        <p><strong>P0：</strong>#445 React Hooks、#372 作業按鈕</p>
+                        <p><strong>P1：</strong>#380 手機 tab、#381 觸控目標、#384 layout shift</p>
+                        <p style="margin-top:0.5rem;"><strong>已實作待驗收：</strong>#77 #85 #88 #89 #90 #91 #96 #143</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生：Bug Fix 入門 + 技能樹</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Git Flow</span>
+                        <span class="tech-tag">Code Review</span>
+                        <span class="tech-tag" style="background:#fef3c7;color:#92400e;">技能樹追蹤</span>
+                        <p style="margin-top:0.75rem;">• #430 對話 UI → #433 focus trap</p>
+                        <p>• #436 登入連結 → #432 成就頁</p>
+                        <p style="margin-top:0.75rem; padding:0.5rem; background:#f0fdf4; border-radius:6px; font-size:0.9rem;">
+                            🌳 <strong><a href="../docs/intern-training/skill-tree.html" style="color:#16a34a;">實習生技能樹</a></strong>：20 技能 × 5 星等級<br>
+                            每日自動評估（Vertex AI Gemini）+ <a href="../docs/intern-training/courses/viewer.html" style="color:#2563eb;">PBL 教材</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 6: 4/21~5/18 UX+合規 -->
+        <div class="timeline-row">
+            <div class="week-label">P6<br><small style="font-size:0.75rem;">4/21~5/18<br>UX+合規</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏫 學校外展（平行）</div>
+                    <div class="card-content">
+                        <span class="capability-tag">CoLab KIST</span>
+                        <span class="capability-tag">教育雲研究</span>
+                        <p style="margin-top:0.75rem;">• 4月起聯繫 CoLab KIST 窗口</p>
+                        <p>• 介紹平台、詢問暑假參與意願</p>
+                        <p>• 教育雲 OpenID/OAuth 可行性調研</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🎨 UX 分級精修 + 合規</div>
+                    <div class="card-content">
+                        <span class="feature-tag">Tier 1 必修</span>
+                        <span class="feature-tag">#94 使用條款</span>
+                        <span class="feature-tag">WCAG AA</span>
+                        <p style="margin-top:0.75rem;"><strong>Tier 1：</strong>錄音音量、對話捲動、班級搜尋</p>
+                        <p><strong>合規：</strong>#94 使用條款 + 隱私政策 + 個資法</p>
+                        <p><strong>無障礙：</strong>觸控 44px、focus trap、鍵盤導航</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生：UX 主力開發</div>
+                    <div class="card-content">
+                        <span class="tech-tag">a11y</span>
+                        <span class="tech-tag">UX 設計</span>
+                        <p style="margin-top:0.75rem;">每人每週 1-2 個 issue PR merge</p>
+                        <p>目標：累計各自 ≥ 8 個 PR</p>
+                        <p style="font-size:0.85rem;color:#6b7280;margin-top:0.5rem;">🌳 技能目標：Tailwind ★3 / React 元件 ★3 / Git 工作流 ★4</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 7: 5/19~6/15 安全+效能 -->
+        <div class="timeline-row">
+            <div class="week-label">P7<br><small style="font-size:0.75rem;">5/19~6/15<br>安全+效能</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🏫 學校確認</div>
+                    <div class="card-content">
+                        <span class="capability-tag">確認 2-3 校</span>
+                        <span class="capability-tag">對接教師</span>
+                        <p style="margin-top:0.75rem;">• 確認 2-3 校 + 對接教師</p>
+                        <p>• 討論暑假課文選擇</p>
+                        <p>• 開始準備家長同意書</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🔐 安全 + 效能 + 技術品質（4週）</div>
+                    <div class="card-content">
+                        <span class="feature-tag">Rate Limiting</span>
+                        <span class="feature-tag">CDN</span>
+                        <span class="feature-tag">API 重構</span>
+                        <span class="feature-tag">CI/CD</span>
+                        <p style="margin-top:0.75rem;"><strong>W1：</strong>API 重構（統一格式+版本化+路由拆分）</p>
+                        <p><strong>W2：</strong>安全強化（Rate Limiting/CSP/加密）+ CI Pipeline</p>
+                        <p><strong>W3：</strong>CDN + Redis 快取 + 後端 pytest</p>
+                        <p><strong>W4：</strong>事件預埋 + ETL + 自動化測試收尾</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生：效能 + 測試</div>
+                    <div class="card-content">
+                        <span class="tech-tag">Lighthouse</span>
+                        <span class="tech-tag">Vitest</span>
+                        <p style="margin-top:0.75rem;">• Lighthouse 效能優化（WebP + lazy load）</p>
+                        <p>• 重複朗讀 UI + 報表匯出前端</p>
+                        <p>• 聽寫錯誤類型 UI + 前端元件測試</p>
+                        <p style="font-size:0.85rem;color:#6b7280;margin-top:0.5rem;">🌳 技能目標：測試 ★3 / 效能優化 ★3 / React 進階 ★4</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 8: 6/16~7/13 Beta準備+功能增強 -->
+        <div class="timeline-row">
+            <div class="week-label">P8<br><small style="font-size:0.75rem;">6/16~7/13<br>Beta準備</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">📋 Beta 萬事俱備</div>
+                    <div class="card-content">
+                        <span class="capability-tag">家長同意書</span>
+                        <span class="capability-tag">設備檢查</span>
+                        <span class="capability-tag">教師培訓</span>
+                        <p style="margin-top:0.75rem;">• 發家長同意書</p>
+                        <p>• 試點學校設備檢查（Chrome + 麥克風）</p>
+                        <p>• 教師培訓影片 + Onboarding 流程</p>
+                        <p>• 技術支援 SLA 定義</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">📊 進階功能 + 可觀測性 + Beta 準備（4週）</div>
+                    <div class="card-content">
+                        <span class="feature-tag">錯題集</span>
+                        <span class="feature-tag">小測驗</span>
+                        <span class="feature-tag">行事曆</span>
+                        <span class="feature-tag">Sentry</span>
+                        <span class="feature-tag">AI 出題</span>
+                        <p style="margin-top:0.75rem;"><strong>W1：</strong>Sentry + GA4 + 錯題集後端</p>
+                        <p><strong>W2：</strong>課文小測驗 + 行事曆 + 錯誤訂正</p>
+                        <p><strong>W3：</strong>AI 自動出題 + 課文解析 + CMS + 壓測</p>
+                        <p><strong>W4：</strong>每週摘要 email + 備份 + Beta 收尾</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 實習生：評量 + 數據 (獨立開發)</div>
+                    <div class="card-content">
+                        <span class="tech-tag">錯題集</span>
+                        <span class="tech-tag">行事曆</span>
+                        <p style="margin-top:0.75rem;">• 錯題集前端 + Onboarding UI</p>
+                        <p>• 小測驗 UI + 行事曆基礎版</p>
+                        <p>• AI 出題結果 UI + CMS 前端 + GA4 埋點</p>
+                        <p style="font-size:0.85rem;color:#6b7280;margin-top:0.5rem;">🌳 技能目標：獨立開發 ★4 / API 串接 ★3 / 架構理解 ★3</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 9: 7/14~8/30 Beta試點+交付 -->
+        <div class="timeline-row">
+            <div class="week-label">P9<br><small style="font-size:0.75rem;">7/14~8/30<br>Beta+交付</small></div>
+
+            <div class="track-company">
+                <div class="card">
+                    <div class="card-title">🔥 暑假 Beta 試點</div>
+                    <div class="card-content">
+                        <span class="capability-tag">2-3 校試點</span>
+                        <span class="capability-tag">50+ 學生</span>
+                        <p style="margin-top:0.75rem;"><strong>7月：試點運行</strong></p>
+                        <p>• 2-3 所 CoLab KIST 學校</p>
+                        <p>• 每週收集：使用數據、教師回饋、Bug 回報</p>
+                        <p style="margin-top:0.5rem;"><strong>8月：收集成效數據</strong></p>
+                        <p>• 朗讀能力前後測比較</p>
+                        <p>• 教師使用回饋</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-product">
+                <div class="card">
+                    <div class="card-title">🔄 迭代修復 + 最終交付</div>
+                    <div class="card-content">
+                        <span class="feature-tag">即時修復</span>
+                        <span class="feature-tag">UX 微調</span>
+                        <span class="feature-tag">成效報告</span>
+                        <p style="margin-top:0.75rem;">• 試點回饋 Bug 48 小時內修復（P0）</p>
+                        <p>• UX 微調（根據真實使用行為）</p>
+                        <p>• AI 費用監控 + 效能優化</p>
+                        <p>• 成效報告自動生成（US-T09）</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-team">
+                <div class="card">
+                    <div class="card-title">🎓 全端工程師養成完成</div>
+                    <div class="card-content">
+                        <p><strong>6個月成長總結：</strong></p>
+                        <ul>
+                            <li>✅ 高中生 → 全端工程師</li>
+                            <li>✅ Git 協作 + GitHub 工作流程</li>
+                            <li>✅ React 19 + Vite + FastAPI 全端開發</li>
+                            <li>✅ AI 驅動開發（Claude Code）</li>
+                            <li>✅ GA4 / Sentry / 可觀測性實戰</li>
+                            <li>✅ 完整產品開發 → Beta → 成效報告</li>
+                        </ul>
+                        <p style="margin-top:0.75rem;"><strong>🎉 具備獨立接案能力！</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="milestone-row">
+            <div class="milestone-title">🎯 正式交付 Milestone（due 8/30）— Beta 試點完成 + 成效報告 🎉</div>
+            <div class="milestone-desc">Phase 5-9 完整精修：安全加固 + CDN + 教師自動化 + 可觀測性 + 2-3 校 Beta 試點 + 成效數據</div>
+        </div>
+
+        <!-- Post-launch -->
+        <div class="phase-separator">
+            <h2>🔮 Post-Beta — 未來功能藍圖（9月+）</h2>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; color: #14532d;">
+            <p style="font-weight: 700; margin-bottom: 0.5rem;">Beta 後功能規劃（詳見 ROADMAP.md）：</p>
+            <p>• <strong>RAG 後台</strong> — 課文/字典/教學知識向量化，AI 對話更精準</p>
+            <p>• <strong>模擬 Agent</strong> — AI 學伴、AI 模擬學生（教師練習用）、AI 出題助手</p>
+            <p>• <strong>學習扶助整合</strong> — 成效報告格式、課程包設計</p>
+            <p>• <strong>考試題庫</strong> — 會考/學測考古題、素養題、AI 模擬考</p>
+            <p>• <strong>作文批改</strong> — 六級分評分、修改建議、寫作引導</p>
+            <p>• <strong>教師學堂</strong> — 閱讀科學研習、教學案例、共備資源庫</p>
+            <p>• <strong>Google 生態整合</strong> — Classroom 作業同步+成績回傳、YouTube 範讀影片、Drive 課文匯入</p>
+            <p style="margin-top:0.5rem; color: #6b7280;">• <s>#249 多語言朗讀</s>（需外部資源）• <s>#250 教科書授權</s>（需商業合作）</p>
+        </div>
+
+        <!-- 總結 -->
+        <div class="phase-separator">
+            <h2>🎊 AI 驅動開發策略總結</h2>
+        </div>
+
+        <div style="background: #f9fafb; padding: 2rem; border-radius: 12px; margin-top: 2rem;">
+            <h3 style="color: #1a202c; margin-bottom: 1rem;">✅ 所有功能都保留，Claude Code 作為 AI Dev 加速 3-4x</h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                <div>
+                    <h4 style="color: #059669; margin-bottom: 0.75rem;">🛠️ 使用的現成工具</h4>
+                    <ul style="color: #4b5563; line-height: 1.8;">
+                        <li><strong>React 19 + Vite + Tailwind CSS:</strong> 現代前端框架（非 shadcn/ui）</li>
+                        <li><strong>FastAPI + SQLAlchemy:</strong> 後端 API + ORM + 權限 middleware</li>
+                        <li><strong>Cloud Run (GCP) + GitHub Actions:</strong> CI/CD 自動部署</li>
+                        <li><strong>Web Speech API:</strong> 瀏覽器內建語音辨識（Azure SDK 暫不做）</li>
+                        <li><strong>Vertex AI Gemini 2.5 Flash:</strong> 蘇格拉底對話 + AI 分析</li>
+                        <li><strong>PostgreSQL (Cloud SQL):</strong> 資料持久化</li>
+                        <li><strong>Playwright:</strong> E2E 測試（✅ Demo 4 完成，87/87 pass）</li>
+                        <li><strong>Google OAuth:</strong> 登入認證（✅ Demo 4 完成）</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 style="color: #dc2626; margin-bottom: 0.75rem;">⚡ AI 驅動開發節省的時間</h4>
+                    <ul style="color: #4b5563; line-height: 1.8;">
+                        <li><strong>後端 API:</strong> 3 週 → 1 週（FastAPI + Claude Code）</li>
+                        <li><strong>AI Agent 框架:</strong> 4 週 → 1 週（Gemini + Claude Code 加速）</li>
+                        <li><strong>UI 元件:</strong> 2 週 → 0.5 週（Tailwind + Claude Code 生成）</li>
+                        <li><strong>Bug fix:</strong> 1-2 天/bug → 2-4 小時（Claude Code 診斷）</li>
+                        <li><strong>八步驟核心流程:</strong> 估計 6 週 → 實際 3 週</li>
+                        <li><strong>總計節省:</strong> 約 <strong>40-50%</strong> 開發時間！</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px;">
+                <h4 style="color: #92400e; margin-bottom: 0.75rem;">🎯 關鍵成功因素</h4>
+                <ol style="color: #78350f; line-height: 1.8;">
+                    <li><strong>🤖 AI 驅動開發:</strong> Claude Code 作為 AI Dev 加速 3-4x，Young 做架構決策 + AI 做實作</li>
+                    <li><strong>借鑑 Duotopia 經驗:</strong> 校班師生課模組直接借鑑，不重複造輪子</li>
+                    <li><strong>MVP 思維:</strong> 先求「能用、能展示、能驗證價值」，後續迭代優化</li>
+                    <li><strong>Young 架構師把關:</strong> 技術決策 + 程式碼 Review + 實習生指導</li>
+                    <li><strong>高中生實習團隊:</strong> 2/27 onboard，認領 UI 任務，釋放架構師時間。<a href="docs/intern-training/skill-tree.html" style="color:#16a34a;">技能樹系統</a>追蹤 20 技能（★1-5 漸進等級），每日 Gemini 自動評估 + PBL 教材</li>
+                </ol>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 8px;">
+                <h3 style="color: #1e40af; margin-bottom: 0.5rem;">🚀 原定 30 週，實際 5 週完成 Demo 1-4！AI 驅動開發的威力</h3>
+                <p style="color: #1e3a8a; font-size: 1.1rem;">所有功能都有（朗讀分析、Socratic Agent、校班師生課、作業模式、自學模式、遊戲化、聽力/聽寫/造句、家長端）<br>Claude Code 作為 AI Dev，Demo 2-4 共 44 PRs 在 3 天內 merge 到 staging ⚡</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Generated with <a href="https://claude.ai/code" target="_blank">Claude Code</a> via <a href="https://happy.engineering" target="_blank">Happy</a></strong></p>
+            <p style="margin-top: 0.5rem;">Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</p>
+            <p>Co-Authored-By: Happy &lt;yesreply@happy.engineering&gt;</p>
+            <p style="margin-top: 1rem; font-size: 0.85rem;">專案贊助：均一 Academy | 理論指導：教學顧問</p>
+        </div>
+    </div>
+</body>
+</html>
