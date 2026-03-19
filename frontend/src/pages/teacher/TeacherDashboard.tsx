@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useWorkspace } from '../../contexts/WorkspaceContext';
 import {
   listMyClassrooms,
   createClassroom,
@@ -12,15 +13,8 @@ interface TeacherDashboardProps {
 }
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }) => {
-  const { token, user } = useAuth();
-
-  // Derive school_id from user's teacher role
-  const teacherSchoolId = useMemo(() => {
-    const teacherRole = user?.roles.find(
-      (r) => r.role_name === 'teacher' && r.scope_type === 'school' && r.scope_id
-    );
-    return teacherRole?.scope_id ? parseInt(teacherRole.scope_id, 10) : null;
-  }, [user]);
+  const { token } = useAuth();
+  const { activeSchoolId: teacherSchoolId } = useWorkspace();
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);

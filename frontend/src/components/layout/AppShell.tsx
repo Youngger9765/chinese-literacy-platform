@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { hasRole } from '../../services/authApi';
+import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
 import Header from './Header';
@@ -18,17 +18,15 @@ import { OnboardingWrapper } from '../../pages/app/InlinePages';
 
 /** The authenticated app shell with header + sidebar. */
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, token } = useAuth();
+  const { token } = useAuth();
+  const { activeView } = useWorkspace();
   const navigate = useNavigate();
 
   // Pending assignment count for the student nav badge
   const [pendingAssignmentCount, setPendingAssignmentCount] = useState(0);
-  const isStudentOnly =
-    user !== null &&
-    !hasRole(user, 'teacher', 'system_admin', 'principal', 'director', 'org_owner', 'org_admin', 'homeroom_teacher');
 
   const refreshPendingCount = useCallback(async () => {
-    if (!token || !isStudentOnly) return;
+    if (!token || activeView !== 'student') return;
     try {
       const assignments = await getMyAssignments(token);
       const count = assignments.filter(
@@ -38,7 +36,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
     } catch {
       // Silently ignore — badge is non-critical
     }
-  }, [token, isStudentOnly]);
+  }, [token, activeView]);
 
   useEffect(() => {
     refreshPendingCount();
