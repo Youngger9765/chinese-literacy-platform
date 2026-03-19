@@ -9,6 +9,7 @@ export interface AudioRecorderState {
   errorMessage: string;
   elapsedSeconds: number;
   remainingSeconds: number;
+  volumeLevel: number;
 }
 
 export interface AudioRecorderActions {
@@ -173,9 +174,11 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
         analyserRef.current.getByteFrequencyData(dataArray);
         const avg = dataArray.reduce((sum, v) => sum + v, 0) / dataArray.length;
         setVolumeLevel(Math.min(1, avg / 128));
-        rafRef.current = requestAnimationFrame(updateVolume);
+        if (rafRef.current !== null) {
+          rafRef.current = requestAnimationFrame(updateVolume);
+        }
       };
-      updateVolume();
+      rafRef.current = requestAnimationFrame(updateVolume);
     } catch {
       // Volume monitoring is non-critical
     }
@@ -206,6 +209,7 @@ export function useAudioRecorder(maxDurationSeconds = MAX_DURATION_SECONDS): Aud
   useEffect(() => {
     return () => {
       stopTimer();
+      stopVolumeMonitor();
       releaseStream();
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
