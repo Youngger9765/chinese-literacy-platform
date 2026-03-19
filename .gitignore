@@ -23,6 +23,7 @@ data/raw-materials/
 # Test artifacts
 *.db
 frontend/test-results/
+frontend/playwright-report/
 frontend/e2e/.auth/
 frontend/e2e/screenshots/
 frontend/e2e-report.html

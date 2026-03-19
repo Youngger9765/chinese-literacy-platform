@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
-from ..models.school import Classroom, ClassroomText
+from ..models.school import Classroom, ClassroomStudent, ClassroomText
 from ..models.user import User
 from ..services.lesson_loader import get_lesson_by_id
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
@@ -115,9 +115,25 @@ def list_classroom_texts(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List all active (not soft-deleted) texts assigned to a classroom."""
+    """List all active (not soft-deleted) texts assigned to a classroom.
+
+    Allowed: classroom teacher, org/system admin, or student enrolled in the classroom.
+    """
     classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin(classroom, current_user, db)
+    try:
+        _require_owner_or_admin(classroom, current_user, db)
+    except HTTPException:
+        # Student: allow if enrolled in this classroom
+        enrolled = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == classroom_id,
+                ClassroomStudent.student_id == current_user.id,
+            )
+            .first()
+        )
+        if not enrolled:
+            raise
 
     assignments = (
         db.query(ClassroomText)

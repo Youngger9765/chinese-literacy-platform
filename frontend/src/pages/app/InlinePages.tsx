@@ -10,7 +10,7 @@
  * - OnboardingWrapper    — first-time student onboarding overlay
  */
 import React, { Suspense, useState, useEffect, useCallback } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { lazy } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasRole } from '../../services/authApi';
@@ -66,6 +66,9 @@ function mapSessionToRecentItem(session: LearningSummary): RecentPracticeItem {
 export const LibraryPage: React.FC = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const classroomId = searchParams.get('classroom');
+  const classroomIdNum = classroomId ? parseInt(classroomId, 10) : null;
   const [showResumePrompt, setShowResumePrompt] = useState(true);
   const [recentPractice, setRecentPractice] = useState<RecentPracticeItem[]>([]);
   const [isLoadingRecent, setIsLoadingRecent] = useState(true);
@@ -149,7 +152,7 @@ export const LibraryPage: React.FC = () => {
         )}
       </section>
       <div className="mt-8">
-        <StoryLibrary onStartReading={handleSelectStory} />
+        <StoryLibrary onStartReading={handleSelectStory} classroomId={classroomIdNum} />
       </div>
     </div>
   );
