@@ -74,6 +74,7 @@ export interface Story {
   fillInBlank?: FillInBlankItem[];           // ④ 語詞應用（PDF 現成資料）
   multipleChoice?: MultipleChoiceItem[];     // ⑦ 閱讀理解選擇題（PDF 現成資料）
   vocabBank?: Record<string, string>;        // { A: "疑難雜症", ... } for fillInBlank
+  knowledgeVideoUrl?: string;               // ⑨ 知識補給站 YouTube URL
 }
 
 export interface ReadingAttempt {

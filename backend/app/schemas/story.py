@@ -46,6 +46,7 @@ class StoryDetail(StoryListItem):
     fill_in_blank: Optional[list[dict]] = None
     multiple_choice: Optional[list[dict]] = None
     vocab_bank: Optional[dict] = None  # letter → word mapping for fill_in_blank (#615)
+    knowledge_video_url: Optional[str] = None  # ⑨ 知識補給站 YouTube URL (#615)
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     text_type: str = "單"
     source_file: Optional[str] = None

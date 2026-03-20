@@ -117,6 +117,7 @@ def get_story(story_id: str):
         fill_in_blank=story["fill_in_blank"],
         multiple_choice=story["multiple_choice"],
         vocab_bank=story.get("vocab_bank"),
+        knowledge_video_url=story.get("knowledge_video_url"),
         reading_benchmark=story["reading_benchmark"],
         text_type=story["text_type"],
         source_file=story["source_file"],
