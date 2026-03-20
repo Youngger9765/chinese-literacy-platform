@@ -1,11 +1,26 @@
 /**
  * E2E test fixtures and helpers for LingoLeap.
  *
- * Provides reusable authentication helpers, test data factories, and
- * page navigation utilities shared across all spec files.
+ * Provides reusable authentication helpers, test data factories,
+ * page navigation utilities, and screenshot helpers shared across all spec files.
+ *
+ * Key exports:
+ *   takeScreenshot       — save a named screenshot with caption sidecar JSON
+ *   takeScreenshotOnFailure — capture a failure screenshot to test-results/
+ *   withScreenshotOnFailure — test body wrapper: auto-screenshot on failure
+ *   dismissAllModals     — close Terms-of-Service + Onboarding modals
+ *   ensureAuthenticated  — verify 登出 button is visible (uses storageState)
+ *   loginAsTeacher       — explicit login as seeded teacher account
+ *   goToLearningStep     — navigate directly to a /learn/:id/:step URL
  */
 
 import { type Page, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -16,12 +31,99 @@ export const TEACHER_EMAIL = 'teacher@test.com';
 export const TEACHER_PASSWORD = 'teacher1234';
 
 // ---------------------------------------------------------------------------
+// Screenshot helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Take a screenshot with a standardized name and save caption metadata.
+ * Screenshots are saved to e2e/screenshots/{module}/.
+ *
+ * The module is derived from the first segment of the name:
+ *   "teacher-a1-login-page"  → screenshots/teacher/
+ *   "student-e1-home-page"   → screenshots/student/
+ *   "admin-h1-01-nav"        → screenshots/admin/
+ *   "infra-n1-health-check"  → screenshots/infra/
+ *
+ * @param page - Playwright Page
+ * @param name - Screenshot filename without extension (e.g. "teacher-a1-login-page")
+ * @param caption - Human-readable description of what the screenshot shows
+ */
+export async function takeScreenshot(
+  page: Page,
+  name: string,
+  caption: string
+): Promise<void> {
+  const module = name.split('-')[0]; // e.g. "teacher" from "teacher-a1-login-page"
+  const dir = path.join(__dirname, 'screenshots', module);
+  fs.mkdirSync(dir, { recursive: true });
+
+  await page.screenshot({
+    path: path.join(dir, `${name}.png`),
+    fullPage: false,
+    animations: 'disabled',
+  });
+
+  // Write caption as sidecar JSON for report generator
+  const captionPath = path.join(dir, `${name}.caption.json`);
+  fs.writeFileSync(captionPath, JSON.stringify({ name, caption, module }, null, 2));
+}
+
+/**
+ * Capture a failure screenshot to the Playwright test-results/ directory.
+ * The filename is `failure-{name}-{timestamp}.png`.
+ *
+ * Call this from a catch block or afterEach to preserve the page state on error.
+ *
+ * @param page - Playwright Page
+ * @param name - Descriptive slug for the failure (e.g. "m1-login-fail")
+ */
+export async function takeScreenshotOnFailure(page: Page, name: string): Promise<void> {
+  try {
+    const timestamp = Date.now();
+    const dir = path.join(__dirname, '..', 'test-results', 'failure-screenshots');
+    fs.mkdirSync(dir, { recursive: true });
+    await page.screenshot({
+      path: path.join(dir, `failure-${name}-${timestamp}.png`),
+      fullPage: true,
+      animations: 'disabled',
+    });
+  } catch {
+    // Never throw from error-handling path — swallow screenshot failures silently
+  }
+}
+
+/**
+ * Wrap a test body so that a full-page screenshot is automatically captured
+ * to test-results/failure-screenshots/ when the test fails.
+ *
+ * Usage:
+ *   test('my test', withScreenshotOnFailure('my-test-fail', async ({ page }) => {
+ *     // ... test steps ...
+ *   }));
+ *
+ * @param failureName - Slug used in the failure screenshot filename
+ * @param fn - The original test function
+ */
+export function withScreenshotOnFailure(
+  failureName: string,
+  fn: (args: { page: Page; request: unknown; [key: string]: unknown }) => Promise<void>
+): (args: { page: Page; request: unknown; [key: string]: unknown }) => Promise<void> {
+  return async (args) => {
+    try {
+      await fn(args);
+    } catch (err) {
+      await takeScreenshotOnFailure(args.page, failureName);
+      throw err;
+    }
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Modal helpers
 // ---------------------------------------------------------------------------
 
 /**
  * Accept the Terms of Service modal if it's visible.
- * Checks all checkboxes and clicks the confirm button.
  */
 async function acceptTermsIfVisible(page: Page, waitMs = 3000): Promise<void> {
   const termsHeading = page.locator('h2:has-text("使用條款同意書")');
@@ -49,13 +151,10 @@ async function skipOnboardingIfVisible(page: Page, waitMs = 2000): Promise<void>
 
 /**
  * Dismiss all blocking modals (Terms of Service, Onboarding Guide).
- * Safe to call at any time — does nothing if no modal is visible.
- * Exported so individual spec files can use it too.
  */
 export async function dismissAllModals(page: Page): Promise<void> {
   await acceptTermsIfVisible(page);
   await skipOnboardingIfVisible(page);
-  // Check once more in case another modal appeared after the first was dismissed
   await acceptTermsIfVisible(page);
 }
 
@@ -65,17 +164,17 @@ export async function dismissAllModals(page: Page): Promise<void> {
 
 /**
  * Clear localStorage and reload to guarantee a clean unauthenticated state.
- * Waits for the login page to be visible before returning.
  */
 export async function resetToLoginPage(page: Page): Promise<void> {
-  await page.evaluate(() => localStorage.clear());
   await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
   await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
 }
 
 /**
  * Register a brand-new account with a unique timestamp+random email.
- * Returns the email that was registered so callers can log in with it later.
+ * Returns the email that was registered.
  */
 export async function registerFreshUser(
   page: Page,
@@ -96,7 +195,6 @@ export async function registerFreshUser(
   await page.locator('#register-confirm').fill(TEST_PASSWORD);
   await page.locator('button[type="submit"]:has-text("建立帳號")').click();
 
-  // Wait for either terms modal or main app
   await Promise.race([
     page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
     page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
@@ -109,7 +207,6 @@ export async function registerFreshUser(
 
 /**
  * Login with the seeded teacher account.
- * Waits for the authenticated app shell (登出 button) before returning.
  */
 export async function loginAsTeacher(page: Page): Promise<void> {
   await page.goto('/');
@@ -121,7 +218,6 @@ export async function loginAsTeacher(page: Page): Promise<void> {
   await page.locator('#login-password').fill(TEACHER_PASSWORD);
   await page.locator('button[type="submit"]:has-text("登入")').click();
 
-  // Wait for either terms modal or main app
   await Promise.race([
     page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
     page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
@@ -133,7 +229,6 @@ export async function loginAsTeacher(page: Page): Promise<void> {
 
 /**
  * Login with an arbitrary email + password.
- * Waits for the authenticated app shell before returning.
  */
 export async function loginAs(page: Page, email: string, password: string): Promise<void> {
   await resetToLoginPage(page);
@@ -141,7 +236,6 @@ export async function loginAs(page: Page, email: string, password: string): Prom
   await page.locator('#login-password').fill(password);
   await page.locator('button[type="submit"]:has-text("登入")').click();
 
-  // Wait for either terms modal or main app
   await Promise.race([
     page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
     page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
@@ -153,12 +247,9 @@ export async function loginAs(page: Page, email: string, password: string): Prom
 
 /**
  * Click logout and wait until an auth page (login or register) is visible.
- * If we land on the register page, switches back to login automatically.
  */
 export async function logoutAndWaitForLoginPage(page: Page): Promise<void> {
-  // Dismiss any modals that might be blocking the logout button
   await dismissAllModals(page);
-
   await page.locator('button:has-text("登出")').click();
 
   await expect(
@@ -178,11 +269,9 @@ export async function logoutAndWaitForLoginPage(page: Page): Promise<void> {
 
 /**
  * Navigate to the story library page.
- * Caller must already be authenticated.
  */
 export async function goToLibrary(page: Page): Promise<void> {
   await page.goto('/library');
-  // Wait for StoryLibrary to render — it shows at least one story card or empty state
   await expect(
     page.locator('[data-testid="story-card"]').first().or(page.locator('text=目前沒有課文'))
   ).toBeVisible({ timeout: 20_000 });
@@ -190,7 +279,6 @@ export async function goToLibrary(page: Page): Promise<void> {
 
 /**
  * Navigate to the teacher dashboard.
- * Caller must already be authenticated as a teacher.
  */
 export async function goToTeacherDashboard(page: Page): Promise<void> {
   await page.locator('button:has-text("班級管理")').click();
@@ -199,12 +287,46 @@ export async function goToTeacherDashboard(page: Page): Promise<void> {
 
 /**
  * Navigate to a specific learning step for a given story slug.
- * Caller must already be authenticated.
  */
 export async function goToLearningStep(
   page: Page,
   storyId: string,
-  step: 'intro' | 'tutor' | 'comprehension' | 'vocab' | 'dictation' | 'full-reading' | 'report'
+  step: 'intro' | 'tutor' | 'comprehension' | 'vocab' | 'dictation' | 'listening' | 'full-reading' | 'report'
 ): Promise<void> {
   await page.goto(`/learn/${storyId}/${step}`);
+}
+
+/**
+ * Get the first story slug by navigating to the library and clicking the first card.
+ * Returns the storyId extracted from the URL.
+ */
+export async function getFirstStorySlug(page: Page): Promise<string> {
+  await page.goto('/library');
+  await expect(page.locator('h3').first()).toBeVisible({ timeout: 20_000 });
+
+  const firstCard = page.locator('button').filter({ has: page.locator('h3') }).first();
+  if ((await firstCard.count()) > 0) {
+    await firstCard.click();
+  } else {
+    await page.locator('h3').first().click();
+  }
+
+  await expect(page).toHaveURL(/\/learn\/.+\/intro/, { timeout: 20_000 });
+  const url = page.url();
+  const match = url.match(/\/learn\/([^/]+)\/intro/);
+  return match?.[1] ?? '';
+}
+
+/**
+ * Ensure page is authenticated (has 登出 button visible).
+ */
+export async function ensureAuthenticated(page: Page): Promise<void> {
+  await page.goto('/');
+  // Wait for page to settle — terms/onboarding modals may appear after API calls
+  await Promise.race([
+    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 5_000 }).catch(() => null),
+    page.waitForSelector('button:has-text("登出")', { timeout: 5_000 }).catch(() => null),
+  ]);
+  await dismissAllModals(page);
+  await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
 }

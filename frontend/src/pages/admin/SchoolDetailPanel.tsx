@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { PlusIcon } from '../../components/icons';
+import SemesterPanel from './SemesterPanel';
 import {
   getSchool,
   updateSchool,
@@ -19,6 +20,8 @@ import {
 import { assignRole, RoleApiError } from '../../services/roleApi';
 import { listUsers, UserListItem } from '../../services/userApi';
 
+type SchoolTab = 'detail' | 'semesters';
+
 interface SchoolDetailPanelProps {
   schoolId: number;
   onSelectClassroom?: (classroomId: number) => void;
@@ -26,6 +29,7 @@ interface SchoolDetailPanelProps {
 }
 
 const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelectClassroom, onClassroomCreated }) => {
+  const [activeTab, setActiveTab] = useState<SchoolTab>('detail');
   const { token } = useAuth();
   const [school, setSchool] = useState<SchoolResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -367,7 +371,47 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
   if (!school) return null;
 
   return (
-    <div className="p-6 sm:p-8">
+    <div className="flex flex-col h-full">
+      {/* Tab bar */}
+      <div className="border-b border-gray-200 bg-white px-6 pt-4 shrink-0">
+        <nav className="flex gap-1" role="tablist">
+          <button
+            role="tab"
+            aria-selected={activeTab === 'detail'}
+            onClick={() => setActiveTab('detail')}
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors cursor-pointer ${
+              activeTab === 'detail'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            學校詳情
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === 'semesters'}
+            onClick={() => setActiveTab('semesters')}
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors cursor-pointer ${
+              activeTab === 'semesters'
+                ? 'border-accent text-accent'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            學期管理
+          </button>
+        </nav>
+      </div>
+
+      {/* Semester tab */}
+      {activeTab === 'semesters' && (
+        <div className="flex-1 overflow-y-auto">
+          <SemesterPanel schoolId={schoolId} />
+        </div>
+      )}
+
+      {/* Detail tab */}
+      {activeTab === 'detail' && (
+    <div className="p-6 sm:p-8 flex-1 overflow-y-auto">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Inline error */}
         {error && (
@@ -644,44 +688,85 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
             ) : classrooms.length === 0 ? (
               <p className="text-gray-400 text-sm text-center py-6">尚無班級</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-100 text-left text-gray-500">
-                      <th className="pb-2 font-medium">班級名稱</th>
-                      <th className="pb-2 font-medium">年級</th>
-                      <th className="pb-2 font-medium">導師</th>
-                      <th className="pb-2 font-medium text-center">學生數</th>
-                      <th className="pb-2 font-medium text-center">狀態</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {classrooms.map((c) => (
-                      <tr
-                        key={c.id}
-                        onClick={() => onSelectClassroom?.(c.id)}
-                        className={`hover:bg-gray-50/50 ${onSelectClassroom ? 'cursor-pointer' : ''}`}
-                      >
-                        <td className="py-2.5 text-gray-900 font-medium">{c.name}</td>
-                        <td className="py-2.5 text-gray-600">{c.grade != null ? `${c.grade} 年級` : '-'}</td>
-                        <td className="py-2.5 text-gray-600">{c.teacher_name}</td>
-                        <td className="py-2.5 text-gray-600 text-center">{c.student_count}</td>
-                        <td className="py-2.5 text-center">
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                              c.is_active
-                                ? 'bg-emerald-50 text-emerald-700'
-                                : 'bg-gray-100 text-gray-500'
-                            }`}
-                          >
-                            {c.is_active ? '使用中' : '已停用'}
-                          </span>
-                        </td>
+              <>
+                {/* Mobile card view */}
+                <div className="md:hidden space-y-3">
+                  {classrooms.map((c) => (
+                    <div
+                      key={c.id}
+                      onClick={() => onSelectClassroom?.(c.id)}
+                      className={`bg-white rounded-lg border border-gray-200 p-4 space-y-2 ${onSelectClassroom ? 'cursor-pointer active:bg-gray-50' : ''}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-900">{c.name}</span>
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                            c.is_active
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-gray-100 text-gray-500'
+                          }`}
+                        >
+                          {c.is_active ? '使用中' : '已停用'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div>
+                          <span className="text-gray-400 text-xs">年級</span>
+                          <p className="text-gray-700">{c.grade != null ? `${c.grade} 年級` : '-'}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 text-xs">導師</span>
+                          <p className="text-gray-700">{c.teacher_name || '-'}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400 text-xs">學生數</span>
+                          <p className="text-gray-700">{c.student_count}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop table view */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100 text-left text-gray-500">
+                        <th className="pb-2 font-medium">班級名稱</th>
+                        <th className="pb-2 font-medium">年級</th>
+                        <th className="pb-2 font-medium">導師</th>
+                        <th className="pb-2 font-medium text-center">學生數</th>
+                        <th className="pb-2 font-medium text-center">狀態</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {classrooms.map((c) => (
+                        <tr
+                          key={c.id}
+                          onClick={() => onSelectClassroom?.(c.id)}
+                          className={`hover:bg-gray-50/50 ${onSelectClassroom ? 'cursor-pointer' : ''}`}
+                        >
+                          <td className="py-2.5 text-gray-900 font-medium">{c.name}</td>
+                          <td className="py-2.5 text-gray-600">{c.grade != null ? `${c.grade} 年級` : '-'}</td>
+                          <td className="py-2.5 text-gray-600">{c.teacher_name}</td>
+                          <td className="py-2.5 text-gray-600 text-center">{c.student_count}</td>
+                          <td className="py-2.5 text-center">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                                c.is_active
+                                  ? 'bg-emerald-50 text-emerald-700'
+                                  : 'bg-gray-100 text-gray-500'
+                              }`}
+                            >
+                              {c.is_active ? '使用中' : '已停用'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -801,34 +886,54 @@ const SchoolDetailPanel: React.FC<SchoolDetailPanelProps> = ({ schoolId, onSelec
             ) : allTeacherMembers.length === 0 ? (
               <p className="text-gray-400 text-sm text-center py-6">尚無教師</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-100 text-left text-gray-500">
-                      <th className="pb-2 font-medium">姓名</th>
-                      <th className="pb-2 font-medium">Email</th>
-                      <th className="pb-2 font-medium">角色</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {allTeacherMembers.map((m) => (
-                      <tr key={m.user_id}>
-                        <td className="py-2.5 text-gray-900 font-medium">{m.name}</td>
-                        <td className="py-2.5 text-gray-600">{m.email}</td>
-                        <td className="py-2.5">
-                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-accent-bg text-accent">
-                            {m.role_display_name}
-                          </span>
-                        </td>
+              <>
+                {/* Mobile card view */}
+                <div className="md:hidden space-y-3">
+                  {allTeacherMembers.map((m) => (
+                    <div key={m.user_id} className="bg-white rounded-lg border border-gray-200 p-4 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-900">{m.name}</span>
+                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-accent-bg text-accent">
+                          {m.role_display_name}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 truncate">{m.email}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop table view */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100 text-left text-gray-500">
+                        <th className="pb-2 font-medium">姓名</th>
+                        <th className="pb-2 font-medium">Email</th>
+                        <th className="pb-2 font-medium">角色</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {allTeacherMembers.map((m) => (
+                        <tr key={m.user_id}>
+                          <td className="py-2.5 text-gray-900 font-medium">{m.name}</td>
+                          <td className="py-2.5 text-gray-600">{m.email}</td>
+                          <td className="py-2.5">
+                            <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-accent-bg text-accent">
+                              {m.role_display_name}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>
       </div>
+    </div>
+      )}
     </div>
   );
 };

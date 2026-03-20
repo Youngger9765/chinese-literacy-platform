@@ -85,6 +85,7 @@ class BatchStudentError(BaseModel):
 class BatchStudentCreateResponse(BaseModel):
     created: list[CreatedStudentInfo]
     errors: list[BatchStudentError]
+    warnings: list[str] = []
 
 
 # ── Student Search ──────────────────────────────────────────────────────────
@@ -110,3 +111,26 @@ class CsvUploadResponse(BaseModel):
     skipped_count: int
     errors: list[BatchStudentError]
     created: list[CreatedStudentInfo]
+    warnings: list[str] = []
+
+
+# ── Student Enrolled Classrooms ───────────────────────────────────────────────
+
+
+class StudentEnrolledClassroom(BaseModel):
+    """Classroom info from the student's perspective, including teacher name."""
+
+    id: int
+    name: str
+    grade: int | None
+    teacher_id: int
+    teacher_name: str
+    is_active: bool
+    enrolled_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class StudentEnrolledClassroomsResponse(BaseModel):
+    classrooms: list[StudentEnrolledClassroom]
+    total: int

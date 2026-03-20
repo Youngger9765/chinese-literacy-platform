@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LingoLeap — 英雄旅程</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f172a;
+    --bg-card: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --text-mid: #cbd5e1;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --purple: #a855f7;
+    --gold: #f59e0b;
+    --red: #ef4444;
+    --cyan: #06b6d4;
+    --pink: #ec4899;
+    --path-color: #334155;
+    --path-glow: #3b82f640;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === HEADER === */
+  .header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .header h1 {
+    font-size: clamp(2.2rem, 6vw, 3.2rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gold), #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 60px rgba(245, 158, 11, 0.3);
+  }
+  .header .subtitle {
+    color: var(--text-mid);
+    font-size: 1.15rem;
+    margin-top: 10px;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  /* === PROFILE SWITCHER === */
+  .profiles {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  .profile-btn {
+    padding: 12px 28px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .profile-btn:hover { border-color: var(--gold); }
+  .profile-btn.active {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, #78350f, #92400e);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+  }
+
+  /* === STATS BAR === */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-value {
+    font-size: 2.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gold), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-label {
+    font-size: 0.95rem;
+    color: var(--text-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  /* === ACT DIVIDERS === */
+  .act-divider {
+    text-align: center;
+    padding: 40px 20px 20px;
+    position: relative;
+  }
+  .act-divider::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-width: 400px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .act-name {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--text-mid);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .act-title {
+    font-size: 1.9rem;
+    font-weight: 700;
+  }
+  .act-1 .act-title { color: var(--green); }
+  .act-2 .act-title { color: var(--blue); }
+  .act-3 .act-title { color: var(--gold); }
+  .act-desc {
+    font-size: 1.05rem;
+    color: var(--text-mid);
+    margin-top: 6px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* === TIMELINE === */
+  .timeline {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--green), var(--blue), var(--purple), var(--gold));
+    transform: translateX(-50%);
+    opacity: 0.4;
+  }
+
+  /* === EVENT NODE === */
+  .event {
+    position: relative;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .event.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .event:nth-child(odd) { flex-direction: row; padding-right: calc(50% + 30px); }
+  .event:nth-child(even) { flex-direction: row-reverse; padding-left: calc(50% + 30px); }
+
+  /* Center dot */
+  .event::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 16px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    box-shadow: 0 0 12px var(--path-glow);
+    transition: all 0.3s;
+  }
+  .event:hover::before {
+    width: 18px;
+    height: 18px;
+    top: 14px;
+  }
+  .event.type-commit::before { background: var(--blue); box-shadow: 0 0 12px rgba(59,130,246,0.5); }
+  .event.type-pr::before { background: var(--green); box-shadow: 0 0 12px rgba(34,197,94,0.5); }
+  .event.type-comment::before { background: var(--cyan); box-shadow: 0 0 12px rgba(6,182,212,0.5); }
+  .event.type-skillup::before { background: var(--gold); box-shadow: 0 0 20px rgba(245,158,11,0.6); width: 18px; height: 18px; top: 14px; }
+
+  /* Card */
+  .event-card {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    transition: all 0.3s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .event-card:hover {
+    border-color: var(--text-dim);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
+  }
+  .event.type-skillup .event-card {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, #1e293b, #27200e);
+  }
+  .event.type-skillup .event-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(245,158,11,0.08), transparent 70%);
+    pointer-events: none;
+  }
+
+  .event-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .event-icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+  .event-type-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .tag-commit { background: #1e3a5f; color: #93c5fd; }
+  .tag-pr { background: #14532d; color: #86efac; }
+  .tag-comment { background: #164e63; color: #67e8f9; }
+  .tag-skillup { background: #78350f; color: #fcd34d; }
+
+  .event-date {
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    margin-left: auto;
+    font-weight: 500;
+  }
+  .event-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .event-body {
+    font-size: 1.05rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  /* Skill-up stars */
+  .skillup-stars {
+    font-size: 1.3rem;
+    letter-spacing: 3px;
+    margin: 8px 0;
+  }
+  .star-filled { color: #f59e0b; }
+  .star-empty { color: #6b7280; }
+  .skillup-arrow {
+    color: var(--gold);
+    font-weight: 700;
+    margin: 0 8px;
+    font-size: 1.2rem;
+  }
+  .skillup-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 2px;
+  }
+
+  /* === MILESTONE (end) === */
+  .milestone {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .milestone-icon {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .milestone-text {
+    font-size: 1.2rem;
+    color: var(--text-mid);
+    font-style: italic;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+  .milestone-text strong {
+    color: var(--gold);
+  }
+
+  /* === PARTICLE BG === */
+  #particles {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* === BACK LINK === */
+  .back-link {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    color: var(--text-mid);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    z-index: 10;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(8px);
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--gold); }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 640px) {
+    .timeline::before { left: 20px; }
+    .event { padding-right: 0 !important; padding-left: 48px !important; flex-direction: row !important; }
+    .event:nth-child(even) { flex-direction: row !important; }
+    .event::before { left: 20px !important; }
+    .stats-bar { gap: 16px; }
+    .stat-value { font-size: 1.8rem; }
+    .stat-label { font-size: 0.85rem; }
+    .act-title { font-size: 1.5rem; }
+    .act-name { font-size: 0.85rem; }
+    .act-desc { font-size: 0.95rem; }
+    .event-body { font-size: 1rem; }
+    .event-title { font-size: 1.1rem; }
+    .skillup-name { font-size: 1.05rem; }
+    .skillup-stars { font-size: 1.15rem; }
+    .milestone-text { font-size: 1.1rem; }
+    .profile-btn { font-size: 1rem; padding: 10px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<a href="skill-tree.html" class="back-link">&larr; 技能樹</a>
+
+<div class="header">
+  <h1>&#x2694;&#xFE0F; 英雄旅程</h1>
+  <p class="subtitle">每一行程式碼，都是成長的足跡</p>
+</div>
+
+<div class="profiles" id="profiles"></div>
+<div class="stats-bar" id="stats-bar"></div>
+<div id="journey-container"></div>
+
+<script>
+// === SKILL DEFINITIONS ===
+const SKILL_NAMES = {
+  1:"Git 基礎", 2:"HTML/CSS", 3:"JavaScript", 4:"開發環境", 5:"讀懂程式碼",
+  6:"React 元件", 7:"TypeScript", 8:"Tailwind", 9:"Git 工作流", 10:"Bug 修復",
+  11:"React 進階", 12:"API 串接", 13:"設計模式", 14:"測試", 15:"Code Review",
+  16:"獨立開發", 17:"效能優化", 18:"架構理解", 19:"技術文件", 20:"指導他人"
+};
+
+const SKILL_ICONS = {
+  1:"\u{1F500}", 2:"\u{1F3A8}", 3:"\u26A1", 4:"\u{1F6E0}\uFE0F", 5:"\u{1F4D6}",
+  6:"\u269B\uFE0F", 7:"\u{1F4DD}", 8:"\u{1F3AF}", 9:"\u{1F33F}", 10:"\u{1F41B}",
+  11:"\u{1F9EA}", 12:"\u{1F310}", 13:"\u{1F9F1}", 14:"\u2705", 15:"\u{1F50D}",
+  16:"\u{1F680}", 17:"\u{1F3CE}\uFE0F", 18:"\u{1F3D7}\uFE0F", 19:"\u{1F4DA}", 20:"\u{1F91D}"
+};
+
+// === INTERN CONFIG ===
+const INTERNS = {
+  raymond: {
+    name: "Raymond", displayName: "靖杭", github: "if-else-master",
+    jsonFile: "interns/raymond.json", skills: {}, lastReview: "", recommendations: []
+  },
+  steven: {
+    name: "Steven", displayName: "啟翔", github: "stgst",
+    jsonFile: "interns/xiung.json", skills: {}, lastReview: "", recommendations: []
+  }
+};
+
+// Fallback data
+const FALLBACK = {
+  raymond: {"skills":{"1":{"level":3,"history":[{"date":"2026-03-02","level":1,"reason":"fork 完成、會 push"},{"date":"2026-03-10","level":2,"reason":"多次 commit/push 順暢"},{"date":"2026-03-13","level":3,"reason":"多次 commit，熟悉 Git 操作"}]},"2":{"level":1,"history":[{"date":"2026-03-05","level":1,"reason":"PR #224 修改 HTML"}]},"3":{"level":3,"history":[{"date":"2026-03-05","level":1,"reason":"能讀懂基本 JS"},{"date":"2026-03-10","level":2,"reason":"處理 isComposing event 和 async 語音"},{"date":"2026-03-13","level":3,"reason":"獨立實作語音輸入功能"}]},"4":{"level":2,"history":[{"date":"2026-03-02","level":1,"reason":"環境建置完成"},{"date":"2026-03-10","level":2,"reason":"處理本地 DB 連線問題"}]},"5":{"level":5,"history":[{"date":"2026-03-05","level":1,"reason":"能讀懂簡單元件"},{"date":"2026-03-10","level":2,"reason":"能讀懂 ComprehensionChat.tsx"},{"date":"2026-03-13","level":3,"reason":"能讀懂並修改程式碼"},{"date":"2026-03-13","level":5,"reason":"多次修改程式碼，且能理解程式碼"}]},"6":{"level":5,"history":[{"date":"2026-03-13","level":2,"reason":"ComprehensionChat.tsx 修改"},{"date":"2026-03-13","level":5,"reason":"獨立完成語音輸入/輸出功能"}]},"7":{"level":5,"history":[{"date":"2026-03-13","level":2,"reason":"ComprehensionChat.tsx 使用"},{"date":"2026-03-13","level":5,"reason":"獨立完成語音輸入/輸出功能"}]},"8":{"level":3,"history":[{"date":"2026-03-13","level":2,"reason":"ComprehensionChat.tsx 使用"},{"date":"2026-03-13","level":3,"reason":"在元件中使用 Tailwind CSS"}]},"10":{"level":5,"history":[{"date":"2026-03-10","level":2,"reason":"修復 IME composition bug"},{"date":"2026-03-13","level":3,"reason":"多次修復 bug"},{"date":"2026-03-13","level":5,"reason":"多次修復 Bug，且有重構意識"}]},"12":{"level":5,"history":[{"date":"2026-03-13","level":2,"reason":"新增語音輸入功能"},{"date":"2026-03-13","level":5,"reason":"獨立完成語音輸入/輸出功能"}]}},"lastReview":"2026-03-13","recommendations":["學習 Git 工作流，參與 Code Review (#9)","學習元件設計模式，提高程式碼品質 (#13)","學習撰寫測試，確保程式碼品質 (#14)"]},
+  steven: {"skills":{"1":{"level":3,"history":[{"date":"2026-03-06","level":1,"reason":"完成 fork 和初次 push"},{"date":"2026-03-08","level":2,"reason":"多次 commit/push 流暢"},{"date":"2026-03-13","level":3,"reason":"多個 PR 完整走完流程"}]},"2":{"level":2,"history":[{"date":"2026-03-08","level":1,"reason":"能讀懂基本 HTML"},{"date":"2026-03-10","level":2,"reason":"修改 WriteCharacter.tsx 樣式"}]},"3":{"level":3,"history":[{"date":"2026-03-06","level":1,"reason":"能讀懂基本 JS"},{"date":"2026-03-10","level":2,"reason":"使用 setTimeout、state 管理"},{"date":"2026-03-13","level":3,"reason":"使用 StorageEvent、複雜 state 管理"}]},"4":{"level":2,"history":[{"date":"2026-03-06","level":1,"reason":"環境建置完成"},{"date":"2026-03-08","level":2,"reason":"本地開發環境正常"}]},"5":{"level":5,"history":[{"date":"2026-03-08","level":1,"reason":"能讀懂基本元件"},{"date":"2026-03-10","level":2,"reason":"能讀懂 VocabPractice 的 state 流"},{"date":"2026-03-13","level":3,"reason":"深度讀懂複雜元件"},{"date":"2026-03-13","level":5,"reason":"能快速定位問題並提出解決方案"}]},"6":{"level":5,"history":[{"date":"2026-03-10","level":2,"reason":"能修改現有元件"},{"date":"2026-03-13","level":3,"reason":"獨立重構 WriteCharacter"},{"date":"2026-03-13","level":5,"reason":"多次獨立完成元件開發"}]},"8":{"level":2,"history":[{"date":"2026-03-10","level":2,"reason":"修改含 Tailwind 樣式的元件"}]},"9":{"level":3,"history":[{"date":"2026-03-08","level":1,"reason":"開始使用 feature branch"},{"date":"2026-03-10","level":2,"reason":"PR 流程完整"},{"date":"2026-03-13","level":3,"reason":"commit message 品質佳"}]},"10":{"level":5,"history":[{"date":"2026-03-10","level":2,"reason":"能找到 bug 並修復"},{"date":"2026-03-13","level":3,"reason":"精準定位 React hooks 順序 bug"},{"date":"2026-03-13","level":5,"reason":"能獨立 debug 並修復多種 bug"}]},"11":{"level":4,"history":[{"date":"2026-03-13","level":2,"reason":"正確使用 useMemo"},{"date":"2026-03-13","level":4,"reason":"能熟練運用 useMemo, useCallback"}]},"15":{"level":4,"history":[{"date":"2026-03-13","level":4,"reason":"能給出有建設性的 code review 意見"}]},"16":{"level":4,"history":[{"date":"2026-03-13","level":3,"reason":"能獨立完成功能開發"},{"date":"2026-03-13","level":4,"reason":"獨立完成多個 feature 開發"}]},"17":{"level":4,"history":[{"date":"2026-03-13","level":3,"reason":"開始有優化程式碼的意識"},{"date":"2026-03-13","level":4,"reason":"能進行效能優化"}]}},"lastReview":"2026-03-13","recommendations":["嘗試撰寫單元測試，提升程式碼品質","研究 LingoLeap 的整體架構","主動協助其他實習生解決問題"]}
+};
+
+let currentIntern = "raymond";
+
+function starsHTML(level, max = 5) {
+  let h = '';
+  for (let i = 1; i <= max; i++) {
+    h += i <= level ? '<span class="star-filled">\u2605</span>' : '<span class="star-empty">\u2606</span>';
+  }
+  return h;
+}
+
+async function loadInternData(key) {
+  const intern = INTERNS[key];
+  try {
+    const res = await fetch(intern.jsonFile);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    intern.skills = data.skills || {};
+    intern.lastReview = data.lastReview || '';
+    intern.recommendations = data.recommendations || [];
+  } catch {
+    const fb = FALLBACK[key];
+    if (fb) {
+      intern.skills = fb.skills || {};
+      intern.lastReview = fb.lastReview || '';
+      intern.recommendations = fb.recommendations || [];
+    }
+  }
+}
+
+// === BUILD JOURNEY EVENTS FROM HISTORY ===
+function buildEvents(internKey) {
+  const intern = INTERNS[internKey];
+  const events = [];
+
+  // Extract all history entries across all skills
+  for (const [sid, skillData] of Object.entries(intern.skills)) {
+    const history = skillData.history || [];
+    for (const entry of history) {
+      events.push({
+        type: 'skillup',
+        date: entry.date,
+        skillId: parseInt(sid),
+        skillName: SKILL_NAMES[parseInt(sid)] || `Skill #${sid}`,
+        skillIcon: SKILL_ICONS[parseInt(sid)] || '\u2B50',
+        level: entry.level,
+        prevLevel: 0, // will be computed
+        reason: entry.reason
+      });
+    }
+  }
+
+  // Compute prevLevel for each skill-up
+  const skillLevels = {};
+  events.sort((a, b) => a.date.localeCompare(b.date) || a.skillId - b.skillId);
+  for (const e of events) {
+    if (e.type === 'skillup') {
+      e.prevLevel = skillLevels[e.skillId] || 0;
+      skillLevels[e.skillId] = e.level;
+    }
+  }
+
+  return events;
+}
+
+function getAct(level) {
+  if (level <= 2) return 1;
+  if (level <= 4) return 2;
+  return 3;
+}
+
+// === RENDER ===
+function renderProfiles() {
+  const container = document.getElementById('profiles');
+  container.innerHTML = '';
+  for (const [key, intern] of Object.entries(INTERNS)) {
+    const btn = document.createElement('button');
+    btn.className = `profile-btn${key === currentIntern ? ' active' : ''}`;
+    btn.textContent = `${intern.displayName} (${intern.name})`;
+    btn.addEventListener('click', async () => {
+      currentIntern = key;
+      await loadInternData(key);
+      renderAll();
+    });
+    container.appendChild(btn);
+  }
+}
+
+function renderStats() {
+  const intern = INTERNS[currentIntern];
+  const skills = intern.skills;
+  const skillCount = Object.keys(skills).filter(s => (skills[s].level || 0) > 0).length;
+  const maxed = Object.values(skills).filter(s => s.level >= 5).length;
+  const totalEvents = Object.values(skills).reduce((sum, s) => sum + (s.history || []).length, 0);
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat"><div class="stat-value">${skillCount}</div><div class="stat-label">技能解鎖</div></div>
+    <div class="stat"><div class="stat-value">${maxed}</div><div class="stat-label">滿星精通</div></div>
+    <div class="stat"><div class="stat-value">${totalEvents}</div><div class="stat-label">成長事件</div></div>
+  `;
+}
+
+function renderJourney() {
+  const container = document.getElementById('journey-container');
+  const events = buildEvents(currentIntern);
+
+  if (events.length === 0) {
+    container.innerHTML = '<div class="milestone"><div class="milestone-icon">\u{1F331}</div><div class="milestone-text">旅程即將開始...</div></div>';
+    return;
+  }
+
+  let html = '';
+  let currentAct = 0;
+
+  const actInfo = {
+    1: { name: '第一幕', title: '\u{1F331} 啟程 The Departure', desc: '踏出第一步，探索未知的程式世界' },
+    2: { name: '第二幕', title: '\u26A1 試煉 The Trials', desc: '面對挑戰，在錯誤中成長' },
+    3: { name: '第三幕', title: '\u{1F451} 歸來 The Return', desc: '帶著力量歸來，成為能教導他人的勇者' }
+  };
+
+  for (let i = 0; i < events.length; i++) {
+    const e = events[i];
+    const act = getAct(e.level);
+
+    // Act divider
+    if (act > currentAct) {
+      currentAct = act;
+      const info = actInfo[act];
+      html += `
+        <div class="act-divider act-${act}">
+          <div class="act-name">${info.name}</div>
+          <div class="act-title">${info.title}</div>
+          <div class="act-desc">${info.desc}</div>
+        </div>
+      `;
+    }
+
+    // Event card
+    html += `
+      <div class="timeline"><div class="event type-${e.type}" data-index="${i}">
+        <div class="event-card">
+          <div class="event-header">
+            <span class="event-icon">${e.skillIcon}</span>
+            <span class="event-type-tag tag-skillup">\u2B06 LEVEL UP</span>
+            <span class="event-date">${e.date}</span>
+          </div>
+          <div class="skillup-name">${e.skillName}</div>
+          <div class="skillup-stars">
+            ${starsHTML(e.prevLevel)}<span class="skillup-arrow">&rarr;</span>${starsHTML(e.level)}
+          </div>
+          <div class="event-body">${e.reason}</div>
+        </div>
+      </div></div>
+    `;
+  }
+
+  // End milestone
+  const intern = INTERNS[currentIntern];
+  const maxed = Object.values(intern.skills).filter(s => s.level >= 5).length;
+  html += `
+    <div class="milestone">
+      <div class="milestone-icon">${maxed >= 3 ? '\u{1F451}' : '\u{1F6E1}\uFE0F'}</div>
+      <div class="milestone-text">
+        <strong>${intern.displayName}</strong> 的旅程仍在繼續...<br>
+        ${intern.recommendations.length > 0 ? '下一個挑戰：' + intern.recommendations[0] : ''}
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+
+  // Animate in
+  requestAnimationFrame(() => {
+    const nodes = document.querySelectorAll('.event');
+    nodes.forEach((node, i) => {
+      setTimeout(() => node.classList.add('visible'), i * 120);
+    });
+  });
+}
+
+function renderAll() {
+  renderProfiles();
+  renderStats();
+  renderJourney();
+}
+
+// === PARTICLES ===
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function initParticles() {
+  particles = [];
+  for (let i = 0; i < 40; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: 1 + Math.random() * 2,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -0.2 - Math.random() * 0.3,
+      alpha: 0.1 + Math.random() * 0.4,
+      color: ['#f59e0b', '#3b82f6', '#22c55e', '#a855f7'][Math.floor(Math.random() * 4)]
+    });
+  }
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (const p of particles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+    if (p.x < -10 || p.x > canvas.width + 10) { p.x = Math.random() * canvas.width; }
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.alpha;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(animateParticles);
+}
+
+// === SCROLL ANIMATION ===
+function observeEvents() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.event').forEach(el => observer.observe(el));
+}
+
+// === INIT ===
+async function init() {
+  await Promise.all(Object.keys(INTERNS).map(k => loadInternData(k)));
+  renderAll();
+  initParticles();
+  animateParticles();
+  // Re-observe after render
+  setTimeout(observeEvents, 500);
+}
+init();
+</script>
+</body>
+</html>

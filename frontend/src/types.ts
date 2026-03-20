@@ -19,6 +19,11 @@ export enum AppView {
   MY_VOCABULARY = 'MY_VOCABULARY',
   STUDENT_PROGRESS = 'STUDENT_PROGRESS',
   PARENT_DASHBOARD = 'PARENT_DASHBOARD',
+  STUDENT_HOME = 'STUDENT_HOME',
+  TEACHER_HOME = 'TEACHER_HOME',
+  ACHIEVEMENTS = 'ACHIEVEMENTS',
+  STUDENT_CLASSROOM_DASHBOARD = 'STUDENT_CLASSROOM_DASHBOARD',
+  STUDENT_PROFILE = 'STUDENT_PROFILE',
 }
 
 export interface StoryIntro {
@@ -47,6 +52,10 @@ export interface Story {
   vocabulary?: VocabItem[];     // for future VocabPractice enhancement
   charCount?: number;           // for reading benchmark
   readingBenchmark?: { levels: { threshold: string; feedback: string }[] };
+  /** Teacher-defined difficulty override (overrides grade-based auto-detect). */
+  difficultyLevel?: 'easy' | 'medium' | 'hard';
+  /** Teacher-defined custom tags, e.g. ["重要考題", "期末複習"]. */
+  customTags?: string[];
 }
 
 export interface ReadingAttempt {

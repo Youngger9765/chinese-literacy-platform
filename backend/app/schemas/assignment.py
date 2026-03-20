@@ -49,6 +49,7 @@ class AssignmentUpdateRequest(BaseModel):
 
 class GradeSubmissionRequest(BaseModel):
     score: float | None = Field(None, ge=0, le=100)
+    teacher_feedback: str | None = Field(None, max_length=2000)  # per-student feedback (Issue #424)
 
 
 class SubmissionResponse(BaseModel):
@@ -59,6 +60,11 @@ class SubmissionResponse(BaseModel):
     status: str
     submitted_at: datetime | None
     score: float | None
+    # Reading metrics from linked LearningSession (Issue #423)
+    reading_accuracy: float | None = None   # LiveTutor accuracy %
+    reading_cpm: float | None = None         # chars per minute from reading_result
+    reading_error_chars: list[str] = []      # mispronounced/skipped chars
+    teacher_feedback: str | None = None  # per-student teacher feedback (Issue #424)
 
     model_config = {"from_attributes": True}
 
@@ -112,6 +118,7 @@ class StudentAssignmentResponse(BaseModel):
     status: str
     submitted_at: datetime | None
     score: float | None
+    teacher_feedback: str | None  # per-student teacher feedback (Issue #424)
     # Reading goals (Issue #84)
     target_cpm: int | None
     target_accuracy: float | None
@@ -127,3 +134,9 @@ class StartAssignmentResponse(BaseModel):
     story_id: str | None      # set if platform text
     text_id: int | None       # set if DB text
     status: str
+    # Reading goals (Issue #414) — let student know the target before starting
+    target_cpm: int | None = None
+    target_accuracy: float | None = None
+    difficulty_label: str | None = None
+    effective_cpm: int = DEFAULT_TARGET_CPM
+    effective_accuracy: float = DEFAULT_TARGET_ACCURACY

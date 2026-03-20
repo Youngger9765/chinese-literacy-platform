@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useWorkspace } from '../../contexts/WorkspaceContext';
 import {
   listMyClassrooms,
   createClassroom,
@@ -13,18 +14,15 @@ interface TeacherDashboardProps {
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }) => {
   const { token, user } = useAuth();
-
-  // Derive school_id from user's teacher role
-  const teacherSchoolId = useMemo(() => {
-    const teacherRole = user?.roles.find(
-      (r) => r.role_name === 'teacher' && r.scope_type === 'school' && r.scope_id
-    );
-    return teacherRole?.scope_id ? parseInt(teacherRole.scope_id, 10) : null;
-  }, [user]);
+  const { activeSchoolId: teacherSchoolId } = useWorkspace();
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Search & sort state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'grade' | 'students'>('name');
 
   // Create form state
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -32,6 +30,16 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   const [newGrade, setNewGrade] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+
+  const filteredClassrooms = useMemo(() => {
+    return classrooms
+      .filter((cr) => !searchQuery || cr.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      .sort((a, b) => {
+        if (sortBy === 'grade') return (a.grade ?? 99) - (b.grade ?? 99);
+        if (sortBy === 'students') return b.student_count - a.student_count;
+        return a.name.localeCompare(b.name, 'zh-TW');
+      });
+  }, [classrooms, searchQuery, sortBy]);
 
   const loadClassrooms = useCallback(async () => {
     if (!token) return;
@@ -122,6 +130,33 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
           </button>
         </div>
 
+        {/* Search & sort */}
+        {!isLoading && classrooms.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="搜尋班級名稱..."
+                className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+              />
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'name' | 'grade' | 'students')}
+              className="h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
+            >
+              <option value="name">依名稱排序</option>
+              <option value="grade">依年級排序</option>
+              <option value="students">依人數排序</option>
+            </select>
+          </div>
+        )}
+
         {/* Create form */}
         {showCreateForm && (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
@@ -160,12 +195,12 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                   >
                     <option value="">未指定</option>
                     <optgroup label="國小">
-                      {[1,2,3,4,5,6].map((g) => (
+                      {[1, 2, 3, 4, 5, 6].map((g) => (
                         <option key={g} value={g}>{g} 年級</option>
                       ))}
                     </optgroup>
                     <optgroup label="國中">
-                      {[7,8,9].map((g) => (
+                      {[7, 8, 9].map((g) => (
                         <option key={g} value={g}>{g} 年級</option>
                       ))}
                     </optgroup>
@@ -219,34 +254,51 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
           </div>
         )}
 
+        {/* No search results */}
+        {!isLoading && !error && classrooms.length > 0 && filteredClassrooms.length === 0 && (
+          <div className="text-center py-8 text-sm text-gray-500">
+            找不到符合「{searchQuery}」的班級
+          </div>
+        )}
+
         {/* Classroom grid */}
-        {!isLoading && !error && classrooms.length > 0 && (
+        {!isLoading && !error && filteredClassrooms.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {classrooms.map((cr) => (
-              <button
-                key={cr.id}
-                onClick={() => onSelectClassroom(cr.id)}
-                className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-left hover:border-accent hover:shadow-md transition-all group cursor-pointer"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-bold text-gray-900 group-hover:text-accent transition-colors">
-                    {cr.name}
-                  </h3>
-                  {!cr.is_active && (
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      已停用
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1.5 text-sm text-gray-500">
-                  {cr.grade != null && (
-                    <p>{cr.grade} 年級</p>
-                  )}
-                  <p>{cr.student_count} 位學生</p>
-                  <p className="text-xs">{formatDate(cr.created_at)}</p>
-                </div>
-              </button>
-            ))}
+            {filteredClassrooms.map((cr) => {
+              const isCoTeacher = user?.id != null && cr.teacher_id !== user.id;
+              return (
+                <button
+                  key={cr.id}
+                  onClick={() => onSelectClassroom(cr.id)}
+                  className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-left hover:border-accent hover:shadow-md transition-all group cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="font-bold text-gray-900 group-hover:text-accent transition-colors">
+                      {cr.name}
+                    </h3>
+                    <div className="flex gap-1 flex-wrap justify-end">
+                      {isCoTeacher && (
+                        <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-200">
+                          協同教師
+                        </span>
+                      )}
+                      {!cr.is_active && (
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                          已停用
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5 text-sm text-gray-500">
+                    {cr.grade != null && (
+                      <p>{cr.grade} 年級</p>
+                    )}
+                    <p>{cr.student_count} 位學生</p>
+                    <p className="text-xs">{formatDate(cr.created_at)}</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
 

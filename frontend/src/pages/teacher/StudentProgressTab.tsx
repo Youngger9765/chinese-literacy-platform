@@ -12,8 +12,9 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getClassroomProgress,
+  getClassroomInstructionCounts,
   getStudentSessions,
-  getStudentInstructions,
+  getTeacherStudentDialogue,
   exportClassroomReport,
   addStudentTag,
   removeStudentTag,
@@ -21,6 +22,8 @@ import {
   StudentProgress,
   StudentTag,
   StudentSession,
+  TeacherDialogueTurn,
+  TeacherDialogueHistoryResponse,
   LearningCurvePoint,
   TeacherApiError,
 } from '../../services/teacherApi';
@@ -239,6 +242,125 @@ const TagManager: React.FC<TagManagerProps> = ({
   );
 };
 
+// ── Dialogue Modal (Issue #418) ────────────────────────────────────────────
+
+const PHASE_LABEL: Record<string, string> = {
+  factual: '事實理解',
+  inferential: '推論思考',
+  evaluative: '評估反思',
+};
+
+const DialogueModal: React.FC<{
+  data: TeacherDialogueHistoryResponse;
+  storyTitle: string | null;
+  studentName: string;
+  onClose: () => void;
+}> = ({ data, storyTitle, studentName, onClose }) => {
+  const headerTitle = storyTitle
+    ? `${studentName} — 《${storyTitle}》對話紀錄`
+    : `${studentName} — 對話紀錄`;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="學生對話紀錄"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 shrink-0">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-semibold text-gray-800 truncate">{headerTitle}</h2>
+            <p className="text-xs text-gray-400 mt-0.5">共 {data.total} 則訊息</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="關閉對話紀錄"
+            className="flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Turns */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          {data.turns.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-sm text-gray-500">這次學習沒有對話記錄</p>
+            </div>
+          ) : (
+            data.turns.map((turn) => <DialogueTurnRow key={turn.id} turn={turn} />)
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DialogueTurnRow: React.FC<{ turn: TeacherDialogueTurn }> = ({ turn }) => {
+  if (turn.role === 'ai') {
+    return (
+      <div className="flex gap-2.5">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-accent flex items-center justify-center mt-0.5">
+          <span className="text-white text-[9px] font-bold">AI</span>
+        </div>
+        <div className="flex-1 max-w-[85%]">
+          {turn.phase && (
+            <span className="inline-block mb-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent-bg text-accent">
+              {PHASE_LABEL[turn.phase] ?? turn.phase}
+            </span>
+          )}
+          <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-3.5 py-2.5">
+            <p className="text-sm text-accent-hover leading-relaxed">{turn.text}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (turn.role === 'student') {
+    return (
+      <div className="flex gap-2.5 flex-row-reverse">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center mt-0.5">
+          <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <div className="max-w-[85%]">
+          <div className="bg-accent rounded-2xl rounded-tr-sm px-3.5 py-2.5">
+            <p className="text-sm text-white leading-relaxed">{turn.text}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (turn.role === 'feedback') {
+    return (
+      <div className="mx-8">
+        <div className={`rounded-xl px-3 py-2 text-xs border ${
+          turn.is_correct
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+            : 'bg-amber-50 border-amber-200 text-amber-800'
+        }`}>
+          <span className="mr-1">{turn.is_correct ? '✓' : '💡'}</span>
+          {turn.text}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// ── Main Component ─────────────────────────────────────────────────────────
+
 const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) => {
   const { token } = useAuth();
   const [progress, setProgress] = useState<StudentProgress[]>([]);
@@ -251,6 +373,14 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [sessions, setSessions] = useState<StudentSession[]>([]);
   const sessionCache = useRef<Record<number, StudentSession[]>>({});
+
+  // Dialogue modal state (Issue #418)
+  const [dialogueModal, setDialogueModal] = useState<{
+    data: TeacherDialogueHistoryResponse;
+    storyTitle: string | null;
+    studentName: string;
+  } | null>(null);
+  const [loadingDialogueSessionId, setLoadingDialogueSessionId] = useState<number | null>(null);
 
   // Instruction panel state
   const [instructionTarget, setInstructionTarget] = useState<{ id: number; name: string } | null>(null);
@@ -294,22 +424,16 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   }, [loadProgress]);
 
 
-  // Load instruction counts for each student
-  const loadInstructionCounts = useCallback(async (students: StudentProgress[]) => {
-    if (!token || students.length === 0) return;
-    const counts: Record<number, number> = {};
-    await Promise.all(
-      students.map(async (s) => {
-        try {
-          const instructions = await getStudentInstructions(token, s.student_id);
-          counts[s.student_id] = instructions.length;
-        } catch {
-          counts[s.student_id] = 0;
-        }
-      }),
-    );
-    setInstructionCounts(counts);
-  }, [token]);
+  // Load instruction counts for all students in one bulk request (avoids N+1)
+  const loadInstructionCounts = useCallback(async (_students: StudentProgress[]) => {
+    if (!token) return;
+    try {
+      const counts = await getClassroomInstructionCounts(token, classroomId);
+      setInstructionCounts(counts);
+    } catch {
+      // Non-fatal: leave counts at zero
+    }
+  }, [token, classroomId]);
 
   useEffect(() => {
     if (progress.length > 0) {
@@ -381,6 +505,25 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
       }
     }
   }, [expandedStudentId, token]);
+
+  // Load and show dialogue history for a session (Issue #418)
+  const handleViewDialogue = useCallback(async (
+    studentId: number,
+    sessionId: number,
+    storyTitle: string | null,
+    studentName: string,
+  ) => {
+    if (!token) return;
+    setLoadingDialogueSessionId(sessionId);
+    try {
+      const data = await getTeacherStudentDialogue(token, studentId, sessionId);
+      setDialogueModal({ data, storyTitle, studentName });
+    } catch {
+      // Non-fatal — silently fail
+    } finally {
+      setLoadingDialogueSessionId(null);
+    }
+  }, [token]);
 
   // Update local tags after tag manager changes
   const handleTagsChanged = useCallback((studentId: number, tags: StudentTag[]) => {
@@ -495,6 +638,16 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
         />
       )}
 
+      {/* Dialogue History Modal (Issue #418) */}
+      {dialogueModal && (
+        <DialogueModal
+          data={dialogueModal.data}
+          storyTitle={dialogueModal.storyTitle}
+          studentName={dialogueModal.studentName}
+          onClose={() => setDialogueModal(null)}
+        />
+      )}
+
       <div className="flex justify-end mb-3">
         <button
           onClick={handleExport}
@@ -507,7 +660,170 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
           {exporting ? '匯出中...' : '匯出 CSV'}
         </button>
       </div>
-      <div className="overflow-x-auto">
+      {/* Mobile card view */}
+      <div className="md:hidden space-y-3">
+        {progress.map((s) => {
+          const isExpanded = expandedStudentId === s.student_id;
+          return (
+            <div key={s.student_id}>
+              <div
+                className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer hover:border-gray-300 transition-colors"
+                onClick={() => handleRowClick(s.student_id)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <svg
+                        className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-90' : ''}`}
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span className="font-medium text-gray-900">{s.student_name}</span>
+                      {s.tags.map((t) => (
+                        <span
+                          key={t.tag_name}
+                          className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium border ${tagColorClass(t.color)}`}
+                        >
+                          {t.tag_name}
+                        </span>
+                      ))}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setTagManagerStudent(s); }}
+                        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs text-gray-400 border border-dashed border-gray-300 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                        title="管理標籤"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        標籤
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setInstructionTarget({ id: s.student_id, name: s.student_name }); }}
+                    className="relative inline-flex items-center justify-center p-1.5 rounded-lg hover:bg-amber-50 transition-colors group shrink-0"
+                    title="AI 教學指示"
+                  >
+                    <svg className="w-4 h-4 text-gray-400 group-hover:text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    {(instructionCounts[s.student_id] ?? 0) > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-amber-500 rounded-full">
+                        {instructionCounts[s.student_id]}
+                      </span>
+                    )}
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mt-3">
+                  <div>
+                    <span className="text-xs text-gray-400">最近練習日期</span>
+                    <p className="text-gray-700">{formatDate(s.last_session_date)}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400">最近課文</span>
+                    <p className="text-gray-700 truncate">{s.last_text_title ?? '-'}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400">練習次數</span>
+                    <p>
+                      <span className={`inline-block min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-medium ${
+                        s.total_sessions > 0 ? 'bg-accent-bg text-accent' : 'bg-gray-100 text-gray-500'
+                      }`}>{s.total_sessions}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {isExpanded && (
+                <div className="mt-2 bg-gray-50 rounded-lg p-3 space-y-4">
+                  {isLoadingCurve ? (
+                    <div className="h-40 bg-gray-200 animate-pulse rounded" />
+                  ) : learningCurve.length >= 2 ? (
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 mb-2">學習曲線</p>
+                      <ResponsiveContainer width="100%" height={180}>
+                        <LineChart data={buildCurveChartData(learningCurve)}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                          <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} width={28} />
+                          <Tooltip
+                            formatter={(value: number, name: string) => {
+                              if (name === 'score') return [value, '實際分數'];
+                              if (name === 'rollingAvg') return [value, '5次均線'];
+                              return [value, name];
+                            }}
+                            labelFormatter={(label) => `日期：${label}`}
+                          />
+                          <Legend formatter={(value) => value === 'score' ? '實際分數' : '5次均線'} />
+                          <Line type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                          <Line type="monotone" dataKey="rollingAvg" stroke="#10b981" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null}
+
+                  {isLoadingSessions ? (
+                    <div className="space-y-2">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="h-16 bg-gray-200 animate-pulse rounded-lg" />
+                      ))}
+                    </div>
+                  ) : sessions.length === 0 ? (
+                    <p className="text-xs text-gray-500 text-center py-2">尚無練習記錄</p>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-gray-500">練習記錄</p>
+                      {sessions.map((sess) => (
+                        <div key={sess.id} className="bg-white rounded-lg border border-gray-100 p-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-gray-700 text-sm truncate">{sess.story_title ?? '-'}</span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {statusLabel(sess.status)}
+                              <button
+                                type="button"
+                                disabled={loadingDialogueSessionId === sess.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewDialogue(s.student_id, sess.id, sess.story_title, s.student_name);
+                                }}
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="查看蘇格拉底對話記錄"
+                              >
+                                {loadingDialogueSessionId === sess.id ? (
+                                  <span className="w-2.5 h-2.5 border border-accent border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                  </svg>
+                                )}
+                                對話
+                              </button>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+                            <div>
+                              <span className="text-gray-400">日期</span>
+                              <p className="text-gray-600">{formatDate(sess.started_at)}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">分數</span>
+                              <p className="text-gray-700 font-medium">{formatScore(sess.overall_score)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop table view */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100 text-left text-gray-500">
@@ -661,6 +977,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                         ) : sessions.length === 0 ? (
                           <p className="text-xs text-gray-500 text-center py-2">尚無練習記錄</p>
                         ) : (
+                          <div className="overflow-x-auto">
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="text-left text-gray-400">
@@ -668,6 +985,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                                 <th className="pb-1.5 font-medium">日期</th>
                                 <th className="pb-1.5 font-medium text-center">分數</th>
                                 <th className="pb-1.5 font-medium text-center">狀態</th>
+                                <th className="pb-1.5 font-medium text-center">對話</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -677,10 +995,33 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                                   <td className="py-1.5 text-gray-500">{formatDate(sess.started_at)}</td>
                                   <td className="py-1.5 text-gray-700 text-center font-medium">{formatScore(sess.overall_score)}</td>
                                   <td className="py-1.5 text-center">{statusLabel(sess.status)}</td>
+                                  <td className="py-1.5 text-center">
+                                    <button
+                                      type="button"
+                                      disabled={loadingDialogueSessionId === sess.id}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleViewDialogue(s.student_id, sess.id, sess.story_title, s.student_name);
+                                      }}
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+                                      title="查看蘇格拉底對話記錄"
+                                    >
+                                      {loadingDialogueSessionId === sess.id ? (
+                                        <span className="w-2.5 h-2.5 border border-accent border-t-transparent rounded-full animate-spin" />
+                                      ) : (
+                                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                      )}
+                                      對話
+                                    </button>
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
+                          </div>
                         )}
                       </td>
                     </tr>

@@ -6,6 +6,9 @@ class RegisterRequest(BaseModel):
     # min_length removed here so auth route can return a descriptive Chinese error
     password: str = Field(..., min_length=1, max_length=128)
     name: str = Field(..., min_length=1, max_length=100)
+    # Optional role hint. Only "teacher" (or omitted) is allowed for self-registration.
+    # Students must be created by teachers via classroom management (issue #457).
+    role: str | None = Field(None, max_length=50)
 
 
 class LoginRequest(BaseModel):
@@ -23,6 +26,17 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     must_change_password: bool = False
+
+
+class RegisterResponse(BaseModel):
+    message: str
+    # Dev/staging mode: token returned directly so the flow can be tested without email.
+    # In production this field would be omitted and the token sent via email only.
+    verification_token: str | None = None
+
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
 
 
 class ForgotPasswordRequest(BaseModel):

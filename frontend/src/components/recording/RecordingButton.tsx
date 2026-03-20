@@ -30,6 +30,7 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
     errorMessage,
     elapsedSeconds,
     remainingSeconds,
+    volumeLevel,
     startRecording,
     stopRecording,
     clearRecording,
@@ -83,9 +84,11 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
         {isRequesting && (
           <button
             disabled
+            aria-label="等待麥克風授權"
+            aria-busy="true"
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-400 text-white font-semibold text-sm shadow cursor-not-allowed"
           >
-            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
@@ -109,13 +112,26 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
 
         {/* Recording status indicator */}
         {isRecording && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" role="status" aria-label={`錄音中，已錄 ${formatTime(elapsedSeconds)}`}>
             {/* Pulsing red dot */}
-            <span className="relative flex h-3 w-3">
+            <span className="relative flex h-3 w-3" aria-hidden="true">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
             </span>
+            {/* Volume indicator — 5 bars */}
+            <div className="flex items-end gap-0.5 h-4" aria-label={`音量 ${Math.round(volumeLevel * 100)}%`}>
+              {[0.1, 0.25, 0.45, 0.65, 0.85].map((threshold, i) => (
+                <div
+                  key={i}
+                  className={`w-1 rounded-sm transition-all duration-75 ${
+                    volumeLevel >= threshold ? 'bg-green-500' : 'bg-gray-300'
+                  }`}
+                  style={{ height: `${8 + i * 2}px` }}
+                />
+              ))}
+            </div>
             <span
+              aria-hidden="true"
               className={`text-sm font-mono font-semibold tabular-nums ${
                 urgentCountdown ? 'text-red-600' : warningCountdown ? 'text-orange-500' : 'text-gray-700'
               }`}
@@ -128,6 +144,9 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
         {/* Countdown warning when recording */}
         {(urgentCountdown || warningCountdown) && (
           <span
+            role="timer"
+            aria-label={`剩餘錄音時間 ${formatTime(remainingSeconds)}`}
+            aria-live="polite"
             className={`text-xs font-medium px-2 py-0.5 rounded-full ${
               urgentCountdown
                 ? 'bg-red-100 text-red-700'

@@ -331,7 +331,7 @@ class TestExportClassroomReport:
         assert student2["name"] in lines[1]
 
     def test_csv_has_expected_columns(self, client, teacher, school_id):
-        """CSV header must contain all required column names."""
+        """CSV header must contain all required column names including new gamification fields."""
         create_resp = client.post(
             "/api/classrooms",
             json={"name": "Columns Check Class", "school_id": school_id},
@@ -346,11 +346,17 @@ class TestExportClassroomReport:
         assert resp.status_code == 200
         content = resp.content.decode("utf-8-sig")
         header = content.splitlines()[0]
+        # Core progress columns
         assert "學生姓名" in header
         assert "已完成課文數" in header
         assert "平均正確率" in header
         assert "總學習次數" in header
         assert "最近學習日期" in header
+        # New gamification/performance columns (#235)
+        assert "平均語速(CPM)" in header
+        assert "已掌握生字" in header
+        assert "連續學習天數" in header
+        assert "累積XP" in header
 
     def test_requires_auth(self, client, teacher, school_id):
         create_resp = client.post(

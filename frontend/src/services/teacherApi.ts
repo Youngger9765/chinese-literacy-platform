@@ -156,6 +156,39 @@ export async function getStudentSessions(
   return handleResponse<StudentSession[]>(res);
 }
 
+// ── Dialogue history (Issue #418) ──────────────────────────────────────────
+
+export interface TeacherDialogueTurn {
+  id: number;
+  turn_order: number;
+  role: string;
+  text: string;
+  is_correct: boolean | null;
+  phase: string | null;
+  created_at: string;
+}
+
+export interface TeacherDialogueHistoryResponse {
+  session_id: number;
+  student_id: number;
+  story_slug: string | null;
+  turns: TeacherDialogueTurn[];
+  total: number;
+}
+
+/** Fetch Socratic dialogue history for a student session (teacher view). */
+export async function getTeacherStudentDialogue(
+  token: string,
+  studentId: number,
+  sessionId: number,
+): Promise<TeacherDialogueHistoryResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/sessions/${sessionId}/dialogue`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<TeacherDialogueHistoryResponse>(res);
+}
+
 /** Unassign a text from a classroom. */
 export async function unassignText(
   token: string,
@@ -419,6 +452,18 @@ export async function getStudentInstructions(
   return handleResponse<TeacherInstruction[]>(res);
 }
 
+/** Get active instruction counts for all students in a classroom (bulk, avoids N+1). */
+export async function getClassroomInstructionCounts(
+  token: string,
+  classroomId: number,
+): Promise<Record<number, number>> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/instruction-counts`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<Record<number, number>>(res);
+}
+
 /** Update an instruction. */
 export async function updateInstruction(
   token: string,
@@ -595,4 +640,101 @@ export async function getAtRiskStudents(
     { headers: { Authorization: `Bearer ${token}` } },
   );
   return handleResponse<AtRiskStudent[]>(res);
+}
+
+
+// ── Story Tags: difficulty + custom labels (Issue #422) ───────────────────────
+
+export interface StoryTagData {
+  story_ref: string;
+  difficulty_level: 'easy' | 'medium' | 'hard' | null;
+  custom_tags: string[];
+}
+
+export interface StoryTagUpsertRequest {
+  difficulty_level?: 'easy' | 'medium' | 'hard' | null;
+  custom_tags?: string[];
+}
+
+/** Get teacher's difficulty and custom tags for a story. */
+export async function getStoryTag(
+  token: string,
+  storyRef: string,
+): Promise<StoryTagData> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/story-tags/${encodeURIComponent(storyRef)}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<StoryTagData>(res);
+}
+
+/** Set or update difficulty and custom tags for a story. */
+export async function upsertStoryTag(
+  token: string,
+  storyRef: string,
+  data: StoryTagUpsertRequest,
+): Promise<StoryTagData> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/story-tags/${encodeURIComponent(storyRef)}`,
+    {
+      method: 'PUT',
+      headers: authHeaders(token),
+      body: JSON.stringify(data),
+    },
+  );
+  return handleResponse<StoryTagData>(res);
+}
+
+/** Remove all custom tags and difficulty override for a story. */
+export async function deleteStoryTag(
+  token: string,
+  storyRef: string,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/story-tags/${encodeURIComponent(storyRef)}`,
+    { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok && res.status !== 404) {
+    const data = await res.json().catch(() => ({}));
+    throw new TeacherApiError(data.detail ?? 'Failed to delete story tag', res.status);
+  }
+}
+
+/** List all story tags created by the authenticated teacher. */
+export async function listStoryTags(token: string): Promise<StoryTagData[]> {
+  const res = await fetch(`${API_BASE}/api/teacher/story-tags`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<StoryTagData[]>(res);
+}
+
+// --- Error Heatmap types ---
+
+export interface ErrorHeatmapStudent {
+  id: number;
+  name: string;
+}
+
+export interface ErrorHeatmapError {
+  student_id: number;
+  character: string;
+  error_count: number;
+}
+
+export interface ClassroomErrorHeatmap {
+  students: ErrorHeatmapStudent[];
+  characters: string[];
+  errors: ErrorHeatmapError[];
+}
+
+/** Get student × character error heatmap for a classroom. */
+export async function getClassroomErrorHeatmap(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomErrorHeatmap> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/classrooms/${classroomId}/error-heatmap`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<ClassroomErrorHeatmap>(res);
 }

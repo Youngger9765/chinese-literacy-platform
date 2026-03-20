@@ -234,6 +234,8 @@ export interface AIAnalysisResponse {
 /**
  * Fetch AI reading analysis. Uses session-based endpoint when sessionId is
  * available (with server-side caching), otherwise the standalone endpoint.
+ *
+ * Issue #415: accepts optional comprehension/vocab data for richer analysis.
  */
 export async function getAIAnalysis(
   token: string,
@@ -243,6 +245,16 @@ export async function getAIAnalysis(
     cpm: number;
     errorChars: string[];
     totalCharacters: number;
+    /** Optional — comprehension score 0-100 from Socratic dialogue evaluation */
+    comprehensionScore?: number | null;
+    /** Optional — number of vocab characters practiced */
+    vocabPracticedCount?: number | null;
+    /** Optional — total vocab characters in lesson */
+    vocabTotalCount?: number | null;
+    /** Optional — dictation correct word count */
+    dictationCorrectCount?: number | null;
+    /** Optional — dictation total word count */
+    dictationTotalCount?: number | null;
   },
   sessionId?: number,
 ): Promise<AIAnalysisResponse> {
@@ -261,6 +273,11 @@ export async function getAIAnalysis(
       cpm: payload.cpm,
       error_chars: payload.errorChars,
       total_characters: payload.totalCharacters,
+      comprehension_score: payload.comprehensionScore ?? null,
+      vocab_practiced_count: payload.vocabPracticedCount ?? null,
+      vocab_total_count: payload.vocabTotalCount ?? null,
+      dictation_correct_count: payload.dictationCorrectCount ?? null,
+      dictation_total_count: payload.dictationTotalCount ?? null,
     }),
   });
   if (!res.ok) {
@@ -397,11 +414,12 @@ export async function fetchDialogueHistory(
 
 export async function fetchLearningSessions(
   token: string,
-  params?: { limit?: number; offset?: number },
+  params?: { limit?: number; offset?: number; status?: string },
 ): Promise<{ items: LearningSummary[]; total: number }> {
   const qs = new URLSearchParams();
   if (params?.limit != null) qs.set('limit', String(params.limit));
   if (params?.offset != null) qs.set('offset', String(params.offset));
+  if (params?.status) qs.set('status', params.status);
   const url = `${API_BASE}/api/learning/sessions${qs.toString() ? `?${qs}` : ''}`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error(`fetchLearningSessions failed: ${res.status}`);
@@ -455,8 +473,33 @@ export interface ErrorCorrectionResponse {
   created_at: string;
 }
 
-export async function getErrorPatterns(token: string, studentId: number): Promise<ErrorPatternsResponse> {
-  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/error-patterns`, {
+export interface StorySlugItem {
+  slug: string;
+  title: string;
+}
+
+export interface StudentStorySlugsResponse {
+  slugs: string[];
+  stories: StorySlugItem[];
+  total: number;
+}
+
+export async function getStudentStorySlugs(token: string, studentId: number): Promise<StudentStorySlugsResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/story-slugs`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getStudentStorySlugs failed: ${res.status}`);
+  return res.json();
+}
+
+export async function getErrorPatterns(
+  token: string,
+  studentId: number,
+  storySlug?: string,
+): Promise<ErrorPatternsResponse> {
+  const url = new URL(`${API_BASE}/api/learning/students/${studentId}/error-patterns`);
+  if (storySlug) url.searchParams.set('story_slug', storySlug);
+  const res = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error(`getErrorPatterns failed: ${res.status}`);
@@ -562,6 +605,34 @@ export async function markErrorCorrected(
     body: JSON.stringify({ character, correction_type: type }),
   });
   if (!res.ok) throw new Error(`markErrorCorrected failed: ${res.status}`);
+  return res.json();
+}
+
+// --- Repeated Error Alert (Issue #248) ---
+
+export interface RepeatedErrorAlertItem {
+  character: string;
+  error_count: number;
+}
+
+export interface RepeatedErrorAlertResponse {
+  alerts: RepeatedErrorAlertItem[];
+  total: number;
+}
+
+/**
+ * Fetch characters that have hit the ≥3 repeated-error threshold.
+ * Used to show a post-session modal directing the student to vocab practice.
+ */
+export async function getRepeatedErrorsAlert(
+  token: string,
+  studentId: number,
+): Promise<RepeatedErrorAlertResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/students/${studentId}/repeated-errors-alert`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`getRepeatedErrorsAlert failed: ${res.status}`);
   return res.json();
 }
 
@@ -902,6 +973,129 @@ export async function evaluateListeningRetelling(
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: 'Unknown error' }));
     throw new Error(body.detail || `Listening evaluation failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+// --- Student Enrolled Classrooms (Issue #462) ---
+
+export interface StudentEnrolledClassroom {
+  id: number;
+  name: string;
+  grade: number | null;
+  teacher_id: number;
+  teacher_name: string;
+  is_active: boolean;
+  enrolled_at: string;
+}
+
+export interface StudentEnrolledClassroomsResponse {
+  classrooms: StudentEnrolledClassroom[];
+  total: number;
+}
+
+/**
+ * Return the classrooms the current student is enrolled in.
+ * Calls GET /api/classrooms/my-enrollments.
+ */
+export async function fetchMyEnrolledClassrooms(
+  token: string,
+): Promise<StudentEnrolledClassroomsResponse> {
+  const res = await fetch(`${API_BASE}/api/classrooms/my-enrollments`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    throw new Error(`fetchMyEnrolledClassrooms failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+// ── Exit Ticket AI (Issue #463) ──────────────────────────────────────────────
+
+export interface ExitTicketQuestion {
+  id: number;
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
+}
+
+export interface ExitTicketGenerateResponse {
+  questions: ExitTicketQuestion[];
+  /** "ai" when Gemini generated the questions, "fallback" when AI was unavailable */
+  source: 'ai' | 'fallback';
+}
+
+export interface ExitTicketSubmitResponse {
+  score: number;
+  correct_count: number;
+  total: number;
+  passed: boolean;
+}
+
+/**
+ * Generate AI-powered exit ticket questions for a learning session.
+ * Calls POST /api/learning/sessions/{sessionId}/exit-ticket/generate
+ *
+ * Returns source="fallback" with empty questions if AI is unavailable —
+ * the caller should fall back to local rule-based generation in that case.
+ */
+export async function generateExitTicket(
+  token: string,
+  sessionId: number,
+  storyContent: string[],
+  wrongChars?: string[],
+): Promise<ExitTicketGenerateResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/sessions/${sessionId}/exit-ticket/generate`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        story_content: storyContent,
+        wrong_chars: wrongChars ?? [],
+      }),
+    },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(body.detail || `generateExitTicket failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+/**
+ * Submit and persist exit ticket answers for a learning session.
+ * Calls POST /api/learning/sessions/{sessionId}/exit-ticket/submit
+ */
+export async function submitExitTicket(
+  token: string,
+  sessionId: number,
+  answers: Array<{ question_id: number; selected_index: number }>,
+  score: number,
+  totalQuestions: number,
+): Promise<ExitTicketSubmitResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/sessions/${sessionId}/exit-ticket/submit`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        answers,
+        score,
+        total_questions: totalQuestions,
+      }),
+    },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(body.detail || `submitExitTicket failed: ${res.status}`);
   }
   return res.json();
 }

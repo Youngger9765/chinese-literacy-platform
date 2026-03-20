@@ -282,6 +282,58 @@ export async function uploadCsvStudents(
   return handleResponse<CsvUploadResult>(res);
 }
 
+// --- Co-teaching API ---
+
+export interface ClassroomTeacherResponse {
+  id: number;
+  classroom_id: number;
+  teacher_id: number;
+  teacher_name: string;
+  teacher_email: string;
+  role: 'primary' | 'assistant';
+  invited_at: string;
+}
+
+export async function listClassroomTeachers(
+  token: string,
+  classroomId: number,
+): Promise<ClassroomTeacherResponse[]> {
+  const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/teachers`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return handleResponse<ClassroomTeacherResponse[]>(res);
+}
+
+export async function inviteCoTeacher(
+  token: string,
+  classroomId: number,
+  email: string,
+): Promise<ClassroomTeacherResponse> {
+  const res = await fetch(`${API_BASE}/api/classrooms/${classroomId}/teachers`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ email }),
+  });
+  return handleResponse<ClassroomTeacherResponse>(res);
+}
+
+export async function removeCoTeacher(
+  token: string,
+  classroomId: number,
+  teacherId: number,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/classrooms/${classroomId}/teachers/${teacherId}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!res.ok && res.status !== 204) {
+    await handleResponse<void>(res);
+  }
+}
+
 export function downloadCsvTemplate(token: string): void {
   const url = `${API_BASE}/api/classrooms/csv-template`;
   fetch(url, { headers: { Authorization: `Bearer ${token}` } })
@@ -295,5 +347,30 @@ export function downloadCsvTemplate(token: string): void {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
+    });
+}
+
+// --- Export classroom report as CSV (#235) ---
+
+export function exportClassroomReport(token: string, classroomId: number): void {
+  const url = `${API_BASE}/api/teacher/classrooms/${classroomId}/export`;
+  fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    .then((res) => {
+      if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+      return res.blob();
+    })
+    .then((blob) => {
+      const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `classroom-${classroomId}-report-${today}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    })
+    .catch((err) => {
+      console.error('Failed to export classroom report:', err);
     });
 }

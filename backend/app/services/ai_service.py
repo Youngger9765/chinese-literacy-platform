@@ -17,7 +17,7 @@ from google import genai
 from google.genai import types as genai_types
 
 from ..config import settings
-from .input_sanitizer import sanitize_ai_input
+from .input_sanitizer import sanitize_ai_input, sanitize_dialogue_turns
 from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
@@ -26,17 +26,197 @@ MAX_RETRIES = 3
 RETRY_BASE_DELAY = 1.0  # seconds
 GEMINI_TIMEOUT = 30  # seconds
 
+CONTENT_FILTER_FRIENDLY_MSG = "老師小幫手暫時無法回答這個問題，請試試其他問法"
+
+
+class GeminiContentFilterError(Exception):
+    """Raised when Gemini refuses a response due to its safety/content filter.
+
+    This is NOT an API error — Gemini returned a valid response, but blocked
+    the content. Callers should return a friendly fallback to the student
+    instead of a 500 error.
+    """
+
+
+def _check_safety_filter(response) -> None:
+    """Inspect a Gemini response and raise GeminiContentFilterError if blocked.
+
+    Checks three signals (in order of reliability):
+    1. response.candidates is empty — entire prompt was blocked
+    2. candidates[0].finish_reason == SAFETY — output was blocked mid-generation
+    3. response.prompt_feedback.block_reason is set — prompt-level block
+
+    Must be called BEFORE accessing response.text, which raises a confusing
+    ValueError when the response has no content due to safety filtering.
+    """
+    # Signal 1: no candidates at all (prompt-level block)
+    if not response.candidates:
+        block_reason = None
+        try:
+            block_reason = str(response.prompt_feedback.block_reason)
+        except Exception:
+            pass
+        logger.warning(
+            "Gemini content filter: no candidates returned (block_reason=%s)",
+            block_reason,
+            extra={"event": "gemini_content_filter", "block_reason": block_reason},
+        )
+        raise GeminiContentFilterError(
+            f"Gemini blocked response (no candidates, block_reason={block_reason})"
+        )
+
+    # Signal 2: finish_reason == SAFETY
+    finish_reason = str(response.candidates[0].finish_reason)
+    if "SAFETY" in finish_reason:
+        logger.warning(
+            "Gemini content filter: finish_reason=SAFETY",
+            extra={"event": "gemini_content_filter", "finish_reason": finish_reason},
+        )
+        raise GeminiContentFilterError(
+            f"Gemini blocked response (finish_reason={finish_reason})"
+        )
+
+    # Signal 3: prompt_feedback.block_reason set but candidates exist (edge case)
+    try:
+        block_reason = response.prompt_feedback.block_reason
+        if block_reason and str(block_reason) not in ("0", "BLOCK_REASON_UNSPECIFIED", "None"):
+            logger.warning(
+                "Gemini content filter: prompt_feedback.block_reason=%s",
+                block_reason,
+                extra={"event": "gemini_content_filter", "block_reason": str(block_reason)},
+            )
+            raise GeminiContentFilterError(
+                f"Gemini blocked response (prompt_feedback.block_reason={block_reason})"
+            )
+    except GeminiContentFilterError:
+        raise
+    except Exception:
+        # prompt_feedback attribute may not exist on all response types — safe to ignore
+        pass
+
 
 def _get_client() -> genai.Client:
     """Return a Gemini client via Vertex AI (uses Cloud Run service account)."""
     return genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
 
 
+def _repair_json(raw: str) -> str | None:
+    """Attempt basic JSON repair on a potentially truncated/malformed string.
+
+    Strategy:
+    1. Strip markdown code fences (```json ... ```)
+    2. Walk forward tracking bracket depth and string state, recording every
+       position where the outermost bracket closes (depth == 0).
+    3. If the outermost bracket never closes (truncated mid-content), scan
+       backwards from the end for the last close bracket (`}` or `]`) that is
+       not inside a string. Truncate there, strip trailing commas, then append
+       the closing brackets needed to balance the open bracket stack.
+
+    Returns the repaired JSON string if successful, None otherwise.
+    """
+    text = raw.strip()
+
+    # Strip markdown code fences
+    if text.startswith("```"):
+        # Remove opening fence (```json or ```)
+        text = text[text.find("\n") + 1:] if "\n" in text else text[3:]
+    if text.endswith("```"):
+        text = text[: text.rfind("```")]
+    text = text.strip()
+
+    if not text:
+        return None
+
+    # Must start with a JSON container
+    if not text.startswith("{") and not text.startswith("["):
+        return None
+
+    # Walk forward tracking brackets and string state.
+    # Build a stack of open brackets and record positions where depth returns to 0.
+    last_balanced_pos = -1
+    # close_positions: list of (pos, bracket_stack_snapshot_after_close)
+    # We only need the last close position outside a string.
+    last_outer_close_pos = -1  # last pos of any `}` or `]` outside a string
+    in_string = False
+    escape_next = False
+    bracket_stack: list[str] = []
+
+    for i, ch in enumerate(text):
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch in ("{", "["):
+            bracket_stack.append(ch)
+        elif ch in ("}", "]"):
+            if bracket_stack:
+                bracket_stack.pop()
+            if not bracket_stack:
+                last_balanced_pos = i
+            # Record last close bracket outside a string regardless of depth
+            last_outer_close_pos = i
+
+    # Case 1: JSON was complete — return the complete portion
+    if last_balanced_pos != -1:
+        return text[: last_balanced_pos + 1]
+
+    # Case 2: Truncated — find the last close bracket, truncate there,
+    # strip trailing comma/whitespace, then close all open brackets.
+    if last_outer_close_pos == -1:
+        return None
+
+    truncated = text[: last_outer_close_pos + 1].rstrip().rstrip(",").rstrip()
+
+    # Rebuild bracket_stack for the truncated portion to know what to close
+    in_string = False
+    escape_next = False
+    close_stack: list[str] = []
+
+    for ch in truncated:
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch in ("{", "["):
+            close_stack.append(ch)
+        elif ch in ("}", "]"):
+            if close_stack:
+                close_stack.pop()
+
+    # Append the matching closing brackets in reverse
+    closing = ""
+    for opener in reversed(close_stack):
+        closing += "}" if opener == "{" else "]"
+
+    candidate = truncated + closing
+    try:
+        json.loads(candidate)
+        return candidate
+    except Exception:
+        pass
+
+    return None
+
+
 async def generate_structured_response(
     system_prompt: str,
     contents: list[genai_types.Content],
     response_schema: dict,
-    max_tokens: int = 1024,
+    max_tokens: int = 4096,
     temperature: float = 0.7,
 ) -> dict:
     """Call Gemini with JSON mode, return parsed dict.
@@ -64,7 +244,98 @@ async def generate_structured_response(
                 ),
                 timeout=GEMINI_TIMEOUT,
             )
-            return json.loads(response.text)
+
+            # Check for safety filter BEFORE accessing response.text.
+            # When Gemini blocks content, response.text raises a confusing
+            # ValueError. We intercept this with a clear, named exception.
+            _check_safety_filter(response)
+
+            # Extract finish_reason for diagnostics (MAX_TOKENS = truncated output)
+            finish_reason = None
+            if response.candidates:
+                finish_reason = str(response.candidates[0].finish_reason)
+
+            # Log raw response for debugging (truncated to avoid log spam)
+            raw_text = response.text if response.text is not None else ""
+            logger.debug(
+                "Gemini raw response finish_reason=%s length=%d (first 500 chars): %s",
+                finish_reason,
+                len(raw_text),
+                raw_text[:500],
+                extra={
+                    "event": "gemini_raw_response",
+                    "finish_reason": finish_reason,
+                    "length": len(raw_text),
+                },
+            )
+
+            if not raw_text:
+                raise ValueError("Gemini returned empty/None response text")
+
+            # When finish_reason is MAX_TOKENS the output was cut mid-stream.
+            # Attempt JSON repair immediately before trying json.loads so we
+            # can recover partial responses without burning a retry cycle.
+            if finish_reason == "FinishReason.MAX_TOKENS":
+                logger.warning(
+                    "Gemini finish_reason=MAX_TOKENS — output was truncated "
+                    "(max_tokens=%d, raw_len=%d). Attempting JSON repair.",
+                    max_tokens,
+                    len(raw_text),
+                    extra={
+                        "event": "gemini_max_tokens_truncation",
+                        "max_tokens": max_tokens,
+                        "raw_len": len(raw_text),
+                        "attempt": attempt + 1,
+                    },
+                )
+                repaired = _repair_json(raw_text)
+                if repaired is not None:
+                    try:
+                        result = json.loads(repaired)
+                        logger.warning(
+                            "JSON repair after MAX_TOKENS succeeded "
+                            "(original_len=%d, repaired_len=%d)",
+                            len(raw_text),
+                            len(repaired),
+                            extra={"event": "gemini_json_repair_success"},
+                        )
+                        return result
+                    except json.JSONDecodeError:
+                        pass
+                # Repair failed — fall through to regular json.loads which
+                # will raise and trigger the retry loop.
+
+            try:
+                return json.loads(raw_text)
+            except json.JSONDecodeError as json_err:
+                logger.warning(
+                    "JSON parse failed finish_reason=%s (%s), attempting repair. "
+                    "Raw (first 200): %s",
+                    finish_reason,
+                    json_err,
+                    raw_text[:200],
+                    extra={"event": "gemini_json_repair_attempt", "finish_reason": finish_reason},
+                )
+                repaired = _repair_json(raw_text)
+                if repaired is not None:
+                    try:
+                        result = json.loads(repaired)
+                        logger.warning(
+                            "JSON repair succeeded (original_len=%d, repaired_len=%d)",
+                            len(raw_text),
+                            len(repaired),
+                            extra={"event": "gemini_json_repair_success"},
+                        )
+                        return result
+                    except json.JSONDecodeError:
+                        pass
+                # Repair failed — raise original error so retry logic handles it
+                raise json_err
+
+        except GeminiContentFilterError:
+            # Safety filter is deterministic — no point retrying.
+            # Propagate immediately so callers can return a friendly response.
+            raise
         except asyncio.TimeoutError:
             logger.error(
                 "Gemini API timeout after %ds",
@@ -190,6 +461,8 @@ async def generate_socratic_question(
             temperature=0.7,
         ),
     )
+    # Guard against safety filter before accessing response.text (#526)
+    _check_safety_filter(response)
     return response.text.strip()
 
 
@@ -201,8 +474,12 @@ async def generate_reading_analysis(session_data: dict) -> dict:
     practice suggestions, and encouragement.
 
     Args:
-        session_data: Dict with keys: story_title, accuracy, cpm,
-                      error_chars (list[str]), total_characters.
+        session_data: Dict with keys:
+            Required: story_title, accuracy, cpm, error_chars (list[str]),
+                      total_characters.
+            Optional (Issue #415): comprehension_score (float 0-100),
+                      vocab_practiced_count (int), vocab_total_count (int),
+                      dictation_correct_count (int), dictation_total_count (int).
 
     Returns:
         Dict with keys: analysis_summary, strengths, areas_for_improvement,
@@ -213,6 +490,13 @@ async def generate_reading_analysis(session_data: dict) -> dict:
     cpm = session_data.get("cpm", 0)
     error_chars = session_data.get("error_chars", [])
     total_characters = session_data.get("total_characters", 0)
+
+    # Optional enrichment fields (Issue #415)
+    comprehension_score: float | None = session_data.get("comprehension_score")
+    vocab_practiced: int | None = session_data.get("vocab_practiced_count")
+    vocab_total: int | None = session_data.get("vocab_total_count")
+    dictation_correct: int | None = session_data.get("dictation_correct_count")
+    dictation_total: int | None = session_data.get("dictation_total_count")
 
     error_chars_str = "、".join(error_chars) if error_chars else "無"
 
@@ -227,15 +511,42 @@ async def generate_reading_analysis(session_data: dict) -> dict:
         "- 每項建議都要可執行"
     )
 
-    user_prompt = (
-        f"學生朗讀資料：\n"
-        f"- 課文：{story_title}\n"
-        f"- 正確率：{accuracy}%\n"
-        f"- 朗讀速度：{cpm} 字/分鐘\n"
-        f"- 錯誤字：{error_chars_str}\n"
-        f"- 總字數：{total_characters}\n\n"
-        "請根據以上資料進行分析。"
+    # Build enriched prompt with all available data
+    user_prompt_lines = [
+        "學生學習資料：",
+        f"- 課文：{story_title}",
+        f"- 朗讀正確率：{accuracy}%",
+        f"- 朗讀速度：{cpm} 字/分鐘",
+        f"- 錯誤字：{error_chars_str}",
+        f"- 課文總字數：{total_characters}",
+    ]
+
+    # Append optional enrichment data when available (Issue #415)
+    if comprehension_score is not None:
+        user_prompt_lines.append(f"- 課文理解力評估：{comprehension_score:.0f}%")
+    if vocab_practiced is not None and vocab_total is not None:
+        pct = round(vocab_practiced / max(vocab_total, 1) * 100)
+        user_prompt_lines.append(
+            f"- 生字練習完成率：{pct}%（{vocab_practiced}/{vocab_total} 個生字）"
+        )
+    if dictation_correct is not None and dictation_total is not None:
+        d_pct = round(dictation_correct / max(dictation_total, 1) * 100)
+        user_prompt_lines.append(
+            f"- 聽寫練習正確率：{d_pct}%（{dictation_correct}/{dictation_total} 個詞語）"
+        )
+
+    has_enriched_data = any(
+        x is not None for x in [comprehension_score, vocab_practiced, dictation_correct]
     )
+    if has_enriched_data:
+        user_prompt_lines.append(
+            "\n請根據以上跨環節的整體學習表現進行綜合分析，"
+            "找出學生的強項和需要加強的地方，並給出具體可執行的改善建議。"
+        )
+    else:
+        user_prompt_lines.append("\n請根據以上資料進行分析。")
+
+    user_prompt = "\n".join(user_prompt_lines)
 
     response_schema = {
         "type": "OBJECT",
@@ -355,9 +666,11 @@ async def evaluate_comprehension(
         Dict with comprehension_score, literal_score, inferential_score,
         evaluative_score, and feedback dict.
     """
+    # Sanitize student turns before including them in the AI prompt (Issue #270)
+    safe_turns = sanitize_dialogue_turns(dialogue_turns)
     formatted_dialogue = "\n".join(
         f"{'AI老師' if t['role'] == 'ai' else '學生'}: {t['text']}"
-        for t in dialogue_turns
+        for t in safe_turns
     )
 
     system_prompt = f"""{TUTOR_PERSONA}
@@ -405,29 +718,121 @@ async def evaluate_comprehension(
 
     return result
 
-async def generate_exit_ticket(text: str) -> list[dict]:
-    """
-    Generate exit-ticket questions for a story text.
-    Returns a list of question dicts: [{"question": str, "type": str}, ...]
+# ── Exit Ticket (Issue #463) ─────────────────────────────────────────────────
 
-    Stub: returns placeholder questions until implemented (Step 6).
+EXIT_TICKET_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "questions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "question": {"type": "string"},
+                    "options": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "minItems": 4,
+                        "maxItems": 4,
+                    },
+                    "correct_index": {"type": "integer"},
+                    "explanation": {"type": "string"},
+                },
+                "required": ["id", "question", "options", "correct_index", "explanation"],
+            },
+            "minItems": 3,
+            "maxItems": 5,
+        }
+    },
+    "required": ["questions"],
+}
+
+_EXIT_TICKET_SYSTEM_PROMPT = """你是一位專業的國語文教師，負責出「出場卷」測驗。
+
+根據課文內容，設計 3~5 題選擇題，測驗學生對課文的理解程度。
+題目類型應包含：
+1. 字面理解題（直接從課文找答案）
+2. 推論理解題（需要推理或推斷）
+3. 評價理解題（整體評價、主旨、道理）
+
+規則：
+- 每題有 4 個選項，只有一個正確答案
+- correct_index 從 0 開始（0=第一個選項, 1=第二個, 2=第三個, 3=第四個）
+- explanation 用中文說明正確答案的依據（1~2 句）
+- 題目難易度適合國小高年級～國中生
+- 嚴禁出現與課文無關的問題
+- 如果有提供學生讀錯的字，至少出一題考形近字辨識
+"""
+
+
+async def generate_exit_ticket(
+    text: str,
+    wrong_chars: list[str] | None = None,
+) -> dict:
     """
-    # TODO: implement with Gemini API (Step 6)
-    return [
-        {"question": "這篇文章的主角是誰？", "type": "short_answer"},
-        {"question": "作者想要告訴我們什麼道理？", "type": "short_answer"},
+    Generate exit-ticket multiple choice questions for a story text (Issue #463).
+
+    Uses Gemini 2.5 Flash to produce 3-5 multiple choice questions covering
+    literal comprehension, inferential comprehension, and evaluative comprehension
+    (三層次理解). If wrong_chars are provided, includes at least one character
+    recognition question based on the student's errors.
+
+    Args:
+        text: Story/lesson content (joined paragraphs)
+        wrong_chars: Optional list of characters the student mispronounced
+
+    Returns:
+        {"questions": [{"id", "question", "options", "correct_index", "explanation"}, ...]}
+        On AI failure: {"questions": [], "fallback": True}
+        NEVER returns auto-pass data on failure.
+    """
+    sanitized_text, _ = sanitize_ai_input(text[:3000])
+    wrong_chars_info = ""
+    if wrong_chars:
+        wrong_chars_info = f"\n\n【學生朗讀時讀錯的字】：{', '.join(wrong_chars[:10])}\n請至少出一題考這些字的辨識（形近字選擇）。"
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[
+                genai_types.Part(
+                    text=f"以下是課文內容：\n\n{sanitized_text}{wrong_chars_info}\n\n請根據課文出 3~5 題選擇題。",
+                ),
+            ],
+        )
     ]
+
+    try:
+        result = await generate_structured_response(
+            system_prompt=_EXIT_TICKET_SYSTEM_PROMPT,
+            contents=contents,
+            response_schema=EXIT_TICKET_SCHEMA,
+            max_tokens=2048,
+            temperature=0.5,
+        )
+        questions = result.get("questions", [])
+        if not questions:
+            logger.warning("generate_exit_ticket: AI returned empty questions list")
+            return {"questions": [], "fallback": True}
+        # Clamp correct_index to valid range 0-3
+        for q in questions:
+            q["correct_index"] = max(0, min(3, int(q.get("correct_index", 0))))
+        return {"questions": questions}
+    except Exception as e:
+        logger.error("generate_exit_ticket AI call failed: %s", e)
+        return {"questions": [], "fallback": True}
 
 
 async def grade_exit_ticket(question: str, student_answer: str, reference_text: str) -> dict:
     """
     Grade a student's exit-ticket answer.
-    Returns {"score": int, "feedback": str} with score 0–100.
 
-    Stub: returns placeholder until implemented (Step 6).
+    For multiple-choice exit tickets, grading is done deterministically
+    by comparing selected_index to correct_index (handled in the route/service).
+    This function is preserved for potential future open-ended answer grading.
     """
-    # TODO: implement with Gemini API (Step 6)
-    return {"score": 0, "feedback": "批改功能尚未實作"}
+    return {"score": 0, "feedback": "此函式保留給未來開放式題型批改使用"}
 
 
 # ── Sentence Practice (Issue #109) ──────────────────────────────────────────
@@ -470,8 +875,8 @@ async def generate_example_sentences(character: str, story_title: str) -> dict:
     Each sentence uses the target character in a contextually appropriate way
     suited for elementary/middle school students.
     """
-    safe_char = sanitize_ai_input(character)
-    safe_title = sanitize_ai_input(story_title)
+    safe_char, _ = sanitize_ai_input(character)
+    safe_title, _ = sanitize_ai_input(story_title)
 
     system_prompt = f"""{TUTOR_PERSONA}
 
@@ -501,7 +906,7 @@ async def generate_example_sentences(character: str, story_title: str) -> dict:
         system_prompt=system_prompt,
         contents=contents,
         response_schema=EXAMPLE_SENTENCES_SCHEMA,
-        max_tokens=512,
+        max_tokens=2048,
         temperature=0.8,
     )
     return result
@@ -519,9 +924,9 @@ async def validate_student_sentence(
     - feedback: encouraging feedback message (in Chinese)
     - suggestion: improvement hint if not correct (empty string if correct)
     """
-    safe_char = sanitize_ai_input(character)
-    safe_sentence = sanitize_ai_input(student_sentence)
-    safe_title = sanitize_ai_input(story_title)
+    safe_char, _ = sanitize_ai_input(character)
+    safe_sentence, _ = sanitize_ai_input(student_sentence)
+    safe_title, _ = sanitize_ai_input(story_title)
 
     system_prompt = f"""{TUTOR_PERSONA}
 
@@ -554,7 +959,7 @@ async def validate_student_sentence(
         system_prompt=system_prompt,
         contents=contents,
         response_schema=SENTENCE_VALIDATION_SCHEMA,
-        max_tokens=256,
+        max_tokens=1024,
         temperature=0.3,
     )
 

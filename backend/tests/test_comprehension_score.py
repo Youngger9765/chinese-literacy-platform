@@ -121,7 +121,11 @@ def client():
 
 
 def _register_user(client, suffix: str | None = None) -> dict:
-    """Register a user and return {email, password, token, name}."""
+    """Register a user, verify email (dev mode), login, and return {email, password, token, name}.
+
+    Updated for Issue #460: register no longer auto-verifies or returns an access token.
+    We use the verification_token returned in dev mode to verify, then login.
+    """
     unique = suffix or uuid.uuid4().hex[:8]
     email = f"comp_score_{unique}@example.com"
     password = "SecurePass123!"
@@ -132,11 +136,23 @@ def _register_user(client, suffix: str | None = None) -> dict:
         "name": name,
     })
     assert resp.status_code == 201, resp.text
+
+    # Verify email using the dev-mode verification_token
+    verification_token = resp.json()["verification_token"]
+    assert verification_token is not None
+    verify_resp = client.get(f"/api/auth/verify-email?token={verification_token}")
+    assert verify_resp.status_code == 200, verify_resp.text
+
+    # Login to get a JWT access token
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert login_resp.status_code == 200, login_resp.text
+    token = login_resp.json()["access_token"]
+
     return {
         "email": email,
         "password": password,
         "name": name,
-        "token": resp.json()["access_token"],
+        "token": token,
     }
 
 

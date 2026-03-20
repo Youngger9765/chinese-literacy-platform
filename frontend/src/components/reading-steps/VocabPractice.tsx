@@ -5,6 +5,7 @@ import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
 import PronunciationPractice from './PronunciationPractice';
 import SentencePractice from './SentencePractice';
+import ZhuyinPhoneticGame from './ZhuyinPhoneticGame';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import RadicalDecomposition from './RadicalDecomposition';
@@ -13,14 +14,14 @@ import DictionaryPanel from '../dictionary/DictionaryPanel';
 
 interface VocabPracticeProps {
   story: Story;
-  attempt: ReadingAttempt;
+  attempt: ReadingAttempt | null;
   onFinish: (result: VocabResult) => void;
   onBack: () => void;
 }
 
-type Phase = 'grid' | 'practice' | 'pronunciation' | 'sentence';
+type Phase = 'confirm' | 'grid' | 'practice' | 'pronunciation' | 'sentence' | 'zhuyin-game';
 
-type PracticeMode = 'stroke' | 'pronunciation';
+type PracticeMode = 'stroke' | 'pronunciation' | 'zhuyin';
 
 /* ================================================================ */
 /*  Progress bar                                                     */
@@ -38,10 +39,17 @@ function ProgressBar({ done, total }: ProgressBarProps) {
     <div className="w-full px-6 py-2 bg-white border-b border-gray-100">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] font-medium text-gray-500">練習進度</span>
-          <span className="text-[10px] font-bold text-gray-700">{done} / {total} 字</span>
+          <span className="text-[10px] font-medium text-gray-500" aria-hidden="true">練習進度</span>
+          <span className="text-[10px] font-bold text-gray-700" aria-hidden="true">{done} / {total} 字</span>
         </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          role="progressbar"
+          aria-valuenow={done}
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-label={`生字練習進度：已完成 ${done} 個，共 ${total} 個`}
+          className="h-2 bg-gray-100 rounded-full overflow-hidden"
+        >
           <div
             className="h-full bg-emerald-500 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${pct}%` }}
@@ -136,7 +144,7 @@ function CharCard({ label, isSuggested, isPracticed, animDelay, onClick }: CharC
 /* ================================================================ */
 
 const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish, onBack }) => {
-  const [phase, setPhase] = useState<Phase>('grid');
+  const [phase, setPhase] = useState<Phase>('confirm');
   const [practicingChar, setPracticingChar] = useState('');
   const [practicedChars, setPracticedChars] = useState<Set<string>>(new Set());
   const [pronouncedChars, setPronoucedChars] = useState<Set<string>>(new Set());
@@ -167,12 +175,12 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   }, [zhuyinActive]);
 
   const needPracticeSet = useMemo(
-    () => new Set(attempt.mispronouncedWords),
-    [attempt.mispronouncedWords],
+    () => new Set(attempt?.mispronouncedWords ?? []),
+    [attempt?.mispronouncedWords],
   );
 
   const displayChars = useMemo(() => {
-    const suggested = attempt.mispronouncedWords.filter(hasStrokeData);
+    const suggested = (attempt?.mispronouncedWords ?? []).filter(hasStrokeData);
 
     if (suggested.length > 0) {
       return suggested.slice(0, 12);
@@ -183,6 +191,23 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     for (const line of story.content) {
       for (const ch of line) {
         if (/[\u4e00-\u9fa5]/.test(ch) && hasStrokeData(ch) && !seen.has(ch)) {
+          optional.push(ch);
+          seen.add(ch);
+        }
+      }
+    }
+    return optional.slice(0, 12);
+  }, [story.content, attempt?.mispronouncedWords]);
+
+  // Pronunciation tab: all characters are candidates (no stroke-data filter needed)
+  const pronunciationChars = useMemo(() => {
+    const suggested = attempt.mispronouncedWords.filter(ch => /[\u4e00-\u9fa5]/.test(ch));
+    if (suggested.length > 0) return suggested.slice(0, 12);
+    const seen = new Set<string>();
+    const optional: string[] = [];
+    for (const line of story.content) {
+      for (const ch of line) {
+        if (/[\u4e00-\u9fa5]/.test(ch) && !seen.has(ch)) {
           optional.push(ch);
           seen.add(ch);
         }
@@ -217,6 +242,47 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const handleRadicalToggle = (ch: string) => {
     setRadicalChar(prev => (prev === ch ? null : ch));
   };
+
+  /* ── Confirm phase: ask student whether to start vocab practice ── */
+  if (phase === 'confirm') {
+    const suggestedCount = attempt.mispronouncedWords.filter(hasStrokeData).length;
+    const totalVocabCount = displayChars.length;
+    const charCount = suggestedCount > 0 ? suggestedCount : totalVocabCount;
+
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-amber-50 px-6 py-12">
+        <div className="max-w-sm w-full bg-white rounded-3xl shadow-lg border border-amber-100 p-8 flex flex-col items-center gap-6 text-center">
+          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-3xl select-none">
+            ✏️
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-gray-900 mb-2">
+              要練習這一課的生字嗎？
+            </h2>
+            <p className="text-sm text-gray-500">
+              {suggestedCount > 0
+                ? `剛才朗讀有 ${suggestedCount} 個字需要加強，要練習看看嗎？`
+                : `這一課有 ${charCount} 個生字，要練習嗎？`}
+            </p>
+          </div>
+          <div className="w-full flex flex-col gap-3">
+            <button
+              onClick={() => setPhase('grid')}
+              className="w-full py-3.5 rounded-2xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-md transition-all active:scale-95"
+            >
+              好！開始練習
+            </button>
+            <button
+              onClick={() => onFinish({ practicedChars: [], totalChars: charCount })}
+              className="w-full py-3 rounded-2xl font-semibold text-base text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all active:scale-95"
+            >
+              跳過
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   /* ── Pronunciation practice phase ── */
   if (phase === 'pronunciation') {
@@ -254,31 +320,25 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     );
   }
 
+  /* ── Zhuyin phonetic game phase ── */
+  if (phase === 'zhuyin-game') {
+    return (
+      <ZhuyinPhoneticGame
+        story={story}
+        onFinish={() => setPhase('grid')}
+        onBack={() => setPhase('grid')}
+      />
+    );
+  }
+
   /* ── Grid phase: character selection ── */
   const strokeDone = displayChars.length > 0 && displayChars.every(ch => practicedChars.has(ch));
   const pronounceDone = displayChars.length > 0 && displayChars.every(ch => pronouncedChars.has(ch));
   const allDone = strokeDone && pronounceDone;
 
-  // Pronunciation tab: all characters are candidates (no stroke-data filter needed)
-  const pronunciationChars = useMemo(() => {
-    const suggested = attempt.mispronouncedWords.filter(ch => /[\u4e00-\u9fa5]/.test(ch));
-    if (suggested.length > 0) return suggested.slice(0, 12);
-    const seen = new Set<string>();
-    const optional: string[] = [];
-    for (const line of story.content) {
-      for (const ch of line) {
-        if (/[\u4e00-\u9fa5]/.test(ch) && !seen.has(ch)) {
-          optional.push(ch);
-          seen.add(ch);
-        }
-      }
-    }
-    return optional.slice(0, 12);
-  }, [story.content, attempt.mispronouncedWords]);
-
-  const currentChars = activeTab === 'stroke' ? displayChars : pronunciationChars;
-  const currentPracticedSet = activeTab === 'stroke' ? practicedChars : pronouncedChars;
-  const currentDone = activeTab === 'stroke' ? strokeDone : pronounceDone;
+  const currentChars = activeTab === 'stroke' ? displayChars : activeTab === 'pronunciation' ? pronunciationChars : [];
+  const currentPracticedSet = activeTab === 'stroke' ? practicedChars : activeTab === 'pronunciation' ? pronouncedChars : new Set<string>();
+  const currentDone = activeTab === 'stroke' ? strokeDone : activeTab === 'pronunciation' ? pronounceDone : false;
 
   // Characters for which we have radical decomposition data
   const charsWithRadical = displayChars.filter(ch => getDecomposition(ch) !== null);
@@ -301,7 +361,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         <span className="text-[10px] text-gray-500">
           {activeTab === 'stroke'
             ? `筆順 ${practicedChars.size} / ${displayChars.length}`
-            : `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`}
+            : activeTab === 'pronunciation'
+              ? `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`
+              : '注音遊戲'}
         </span>
         <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
@@ -316,9 +378,10 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {/* Header */}
           <div>
             <h2 className="text-xl font-black text-gray-900 mb-1">生字練習</h2>
-            <p className="text-sm text-gray-500">
-              {attempt.timestamp === 0
-                ? '還沒有朗讀紀錄，以下是這篇課文的生字，選一個模式開始練習吧！'
+
+            <p className="text-sm text-gray-600">
+              {attempt === null
+                ? '還沒有朗讀紀錄，以下是這篇課文的生字，點一點來練習筆順吧！'
                 : needPracticeSet.size > 0
                   ? `以下 ${Math.min(needPracticeSet.size, 12)} 個字可以再練習看看，選一個模式開始練習吧！`
                   : '讀得很棒！沒有漏字。想再練習這篇的字嗎？'}
@@ -357,10 +420,41 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               發音練習
               {pronounceDone && <span className="w-2 h-2 bg-emerald-500 rounded-full" />}
             </button>
+            <button
+              onClick={() => setActiveTab('zhuyin')}
+              className={[
+                'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
+                activeTab === 'zhuyin'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700',
+              ].join(' ')}
+            >
+              <span className="text-base leading-none select-none">ㄅ</span>
+              注音遊戲
+            </button>
           </div>
 
-          {/* Just-completed flash */}
-          {justCompleted && (
+          {/* Zhuyin phonetic game entry card */}
+          {activeTab === 'zhuyin' && (
+            <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 flex flex-col items-center gap-4 text-center">
+              <div className="text-4xl select-none">🎮</div>
+              <div>
+                <h3 className="font-black text-gray-900 text-base mb-1">注音聲韻覺識遊戲</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  練習聲母、韻母配對與拼音合成，<br />鞏固本課生字的注音能力
+                </p>
+              </div>
+              <button
+                onClick={() => setPhase('zhuyin-game')}
+                className="w-full max-w-xs py-3 rounded-2xl font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-all active:scale-95"
+              >
+                開始注音遊戲
+              </button>
+            </div>
+          )}
+
+          {/* Just-completed flash — only shown on stroke/pronunciation tabs */}
+          {justCompleted && activeTab !== 'zhuyin' && (
             <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 animate-slide-up-fast">
               <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -369,7 +463,8 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </div>
           )}
 
-          {/* Character grid */}
+          {/* Character grid — hidden when zhuyin game tab is active */}
+          {activeTab !== 'zhuyin' && <>{/* Character grid */}
           {currentChars.length === 0 ? (
             <div className="text-gray-400 text-sm py-8 text-center">
               {activeTab === 'stroke'
@@ -564,6 +659,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               onFinish={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
             />
           )}
+          </>}
         </div>
       </div>
 

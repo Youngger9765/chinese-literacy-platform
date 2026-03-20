@@ -1,8 +1,10 @@
 
-import React, { useRef, useState, useEffect, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
 import type { ComprehensionScoreResult } from '../../services/api';
+import { getRepeatedErrorsAlert } from '../../services/api';
+import type { RepeatedErrorAlertItem } from '../../services/api';
 import DiffDisplay from '../ui/DiffDisplay';
 import CelebrationOverlay from '../ui/CelebrationOverlay';
 import ComprehensionScoreCard from './ComprehensionScoreCard';
@@ -15,6 +17,7 @@ import AIAnalysisSection from './AIAnalysisSection';
 import StarCelebration from '../gamification/StarCelebration';
 import { calcStarRating } from '../../utils/starRatingCalc';
 import GoalAchievementCard from '../ui/GoalAchievementCard';
+import RepeatedErrorAlertModal from '../student/RepeatedErrorAlertModal';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -61,6 +64,10 @@ interface AssessmentReportProps {
   comprehensionScoresLoading?: boolean;
   /** Reading goals from assignment, if student is doing an assignment (Issue #84) */
   readingGoals?: { effectiveCpm: number; effectiveAccuracy: number; difficultyLabel?: string | null } | null;
+  /** DB session ID — passed to ExitTicket for AI generation and persistence (Issue #463) */
+  dbSessionId?: number | null;
+  /** Auth token — passed to ExitTicket for API calls (Issue #463) */
+  token?: string | null;
 }
 
 // CPM thresholds aligned with backend persona.py (Issue #54)
@@ -159,8 +166,34 @@ const Section: React.FC<{
   );
 };
 
-const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals }) => {
+const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals, dbSessionId, token }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
+
+  // Repeated error alert modal state (Issue #248)
+  const [repeatedAlerts, setRepeatedAlerts] = useState<RepeatedErrorAlertItem[]>([]);
+  const [showRepeatedAlert, setShowRepeatedAlert] = useState(false);
+  const alertFetchedRef = useRef(false);
+
+  const fetchRepeatedAlerts = useCallback(async () => {
+    if (!token || !dbSessionId || alertFetchedRef.current) return;
+    alertFetchedRef.current = true;
+    try {
+      // We need the studentId — derive it by calling the alert endpoint via
+      // the token. The endpoint URL requires studentId, so we get it from the
+      // JWT claims via the /users/me endpoint or pass studentId as a prop.
+      // For now, use a workaround: decode the JWT student_id from the token.
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const studentId: number | undefined = payload?.user_id ?? payload?.sub;
+      if (!studentId) return;
+      const data = await getRepeatedErrorsAlert(token, Number(studentId));
+      if (data.total > 0) {
+        setRepeatedAlerts(data.alerts);
+        setShowRepeatedAlert(true);
+      }
+    } catch {
+      // Non-critical: silently ignore errors so the report page still works
+    }
+  }, [token, dbSessionId]);
 
   // Track lesson completion when a valid report is viewed.
   useEffect(() => {
@@ -174,6 +207,11 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   // Fire once per story session — storyId + startedAt identifies a unique session.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.storyId, session?.startedAt]);
+
+  // Fetch repeated error alerts once when the report mounts (Issue #248)
+  useEffect(() => {
+    fetchRepeatedAlerts();
+  }, [fetchRepeatedAlerts]);
 
   if (!session) {
     return (
@@ -291,6 +329,14 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
+      {/* Repeated error alert modal (Issue #248) */}
+      {showRepeatedAlert && repeatedAlerts.length > 0 && (
+        <RepeatedErrorAlertModal
+          alerts={repeatedAlerts}
+          onDismiss={() => setShowRepeatedAlert(false)}
+        />
+      )}
+
       <CelebrationOverlay score={overallScore} />
 
       {/* ============ 星星評級 Star Rating (Issue #222) ============ */}
@@ -637,7 +683,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         )}
       </Section>
 
-      {/* ============ 環節七：AI 詳細分析 (Issue #241) ============ */}
+      {/* ============ 環節七：AI 詳細分析 (Issue #241, #415) ============ */}
       <Section number={7} title="AI 詳細分析" defaultOpen={false} disabled={!readingAttempt && !fullReadingResult}>
         {(readingAttempt || fullReadingResult) ? (
           <AIAnalysisSection
@@ -650,6 +696,18 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                 ? (fullReadingResult.errorBreakdown.correct + fullReadingResult.errorBreakdown.wrong + fullReadingResult.errorBreakdown.missing + fullReadingResult.errorBreakdown.extra)
                 : (readingAttempt?.lineBreakdown?.reduce((sum, l) => sum + (l.diffTokens?.length ?? 0), 0) ?? 0)
             }
+            dbSessionId={dbSessionId}
+            comprehensionScore={
+              comprehensionScores
+                ? comprehensionScores.comprehension_score
+                : comprehensionResult
+                ? Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)
+                : null
+            }
+            vocabPracticedCount={vocabResult?.practicedChars.length ?? null}
+            vocabTotalCount={vocabResult?.totalChars ?? null}
+            dictationCorrectCount={dictationResult?.correctCount ?? null}
+            dictationTotalCount={dictationResult?.totalWords ?? null}
           />
         ) : (
           <p className="text-sm text-gray-400 text-center py-4">完成朗讀練習後可使用 AI 分析</p>
@@ -830,7 +888,13 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
       {/* ============ 出場卷 Exit Ticket ============ */}
       {(wrongTokens.length > 0 || missingChars.length > 0) && story?.content && (
-        <ExitTicket wrongTokens={wrongTokens} missingChars={missingChars} storyContent={story.content} />
+        <ExitTicket
+          wrongTokens={wrongTokens}
+          missingChars={missingChars}
+          storyContent={story.content}
+          dbSessionId={dbSessionId}
+          token={token}
+        />
       )}
 
       {/* CTA */}

@@ -9,6 +9,9 @@ export function useAppView(): AppView {
   const { pathname } = useLocation();
 
   if (pathname === '/') return AppView.HOME;
+  if (pathname === '/student') return AppView.STUDENT_HOME;
+  if (pathname === '/teacher-home') return AppView.TEACHER_HOME;
+  if (pathname === '/achievements') return AppView.ACHIEVEMENTS;
   if (pathname === '/library') return AppView.LIBRARY;
   if (pathname === '/write') return AppView.WRITE;
   if (pathname === '/teacher') return AppView.TEACHER_DASHBOARD;
@@ -20,7 +23,8 @@ export function useAppView(): AppView {
   if (pathname === '/progress') return AppView.STUDENT_PROGRESS;
   if (pathname === '/parent') return AppView.PARENT_DASHBOARD;
   if (pathname.startsWith('/sessions/') && pathname.endsWith('/dialogue')) return AppView.DIALOGUE_HISTORY;
-
+  if (pathname === '/classroom-dashboard') return AppView.STUDENT_CLASSROOM_DASHBOARD;
+  if (pathname === '/profile') return AppView.STUDENT_PROFILE;
 
   // Learning flow: /learn/:storyId/<step>
   if (pathname.includes('/learn/')) {

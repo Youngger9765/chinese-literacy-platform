@@ -109,7 +109,10 @@ def client():
 
 
 def _register_user(client, suffix: str | None = None) -> dict:
-    """Register a user and return {email, password, token, name, id}."""
+    """Register a user and return {email, password, token, name, id}.
+
+    Uses the new auth flow: register -> verify-email (dev mode token) -> login.
+    """
     unique = suffix or uuid.uuid4().hex[:8]
     email = f"err_user_{unique}@example.com"
     password = "SecurePass123!"
@@ -120,8 +123,15 @@ def _register_user(client, suffix: str | None = None) -> dict:
         "name": name,
     })
     assert resp.status_code == 201, resp.text
-    data = resp.json()
-    token = data["access_token"]
+    # Dev mode returns a verification_token to bypass email confirmation
+    verification_token = resp.json().get("verification_token")
+    assert verification_token is not None, "Expected dev-mode verification_token"
+    verify_resp = client.get(f"/api/auth/verify-email?token={verification_token}")
+    assert verify_resp.status_code == 200, verify_resp.text
+    # Now login to obtain a JWT
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert login_resp.status_code == 200, login_resp.text
+    token = login_resp.json()["access_token"]
 
     # Get user ID from /api/users/me
     me_resp = client.get("/api/users/me", headers={"Authorization": f"Bearer {token}"})
@@ -479,3 +489,375 @@ class TestErrorCorrections:
         assert len(star_pattern) == 1
         assert star_pattern[0]["is_corrected"] is True
         assert star_pattern[0]["suggested_practice"] is False
+
+
+# ===========================================================================
+# GET /api/learning/students/{id}/story-slugs  (Issue #438)
+# ===========================================================================
+
+
+class TestStudentStorySlugs:
+    def test_returns_200(self, client, student_a, seeded_errors):
+        resp = client.get(
+            f"/api/learning/students/{student_a['id']}/story-slugs",
+            headers=auth_header(student_a["token"]),
+        )
+        assert resp.status_code == 200
+
+    def test_returns_distinct_slugs(self, client, student_a, seeded_errors):
+        """Should return distinct story_slug values from the student's sessions."""
+        resp = client.get(
+            f"/api/learning/students/{student_a['id']}/story-slugs",
+            headers=auth_header(student_a["token"]),
+        )
+        data = resp.json()
+        assert "slugs" in data
+        assert "total" in data
+        # seeded_errors uses "test-story" slug
+        assert "test-story" in data["slugs"]
+
+    def test_no_duplicates(self, client, student_a, seeded_errors):
+        """Multiple sessions with same slug should produce only one entry."""
+        resp = client.get(
+            f"/api/learning/students/{student_a['id']}/story-slugs",
+            headers=auth_header(student_a["token"]),
+        )
+        data = resp.json()
+        assert len(data["slugs"]) == len(set(data["slugs"]))
+
+    def test_requires_auth(self, client, student_a):
+        resp = client.get(f"/api/learning/students/{student_a['id']}/story-slugs")
+        assert resp.status_code == 401
+
+    def test_access_denied_for_other_student(self, client, student_a, student_b):
+        resp = client.get(
+            f"/api/learning/students/{student_b['id']}/story-slugs",
+            headers=auth_header(student_a["token"]),
+        )
+        assert resp.status_code == 403
+
+
+# ===========================================================================
+# GET /api/learning/students/{id}/error-patterns?story_slug=  (Issue #438)
+# ===========================================================================
+
+
+class TestErrorPatternsStoryFilter:
+    def test_filter_by_existing_slug_returns_errors(self, client, seeded_errors):
+        """When filtering by a slug that has errors, results should be returned."""
+        user = _register_user(client, "slug_filter_a")
+        db = TestingSessionLocal()
+        try:
+            # Create session for slug "story-A" with 2 errors on '月'
+            sess = LearningSession(
+                student_id=user["id"],
+                story_slug="story-A",
+                status="completed",
+                current_step=6,
+            )
+            db.add(sess)
+            db.flush()
+            for _ in range(2):
+                db.add(CharacterError(session_id=sess.id, character="月", error_type="mispronunciation"))
+            # Create session for slug "story-B" with 2 errors on '日'
+            sess2 = LearningSession(
+                student_id=user["id"],
+                story_slug="story-B",
+                status="completed",
+                current_step=6,
+            )
+            db.add(sess2)
+            db.flush()
+            for _ in range(2):
+                db.add(CharacterError(session_id=sess2.id, character="日", error_type="mispronunciation"))
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.get(
+            f"/api/learning/students/{user['id']}/error-patterns?story_slug=story-A",
+            headers=auth_header(user["token"]),
+        )
+        data = resp.json()
+        chars = [p["character"] for p in data["patterns"]]
+        assert "月" in chars
+        # '日' is from story-B only, should not appear
+        assert "日" not in chars
+
+    def test_filter_lowered_threshold(self, client, seeded_errors):
+        """When filtering by story, even single-occurrence errors should appear."""
+        user = _register_user(client, "slug_filter_b")
+        db = TestingSessionLocal()
+        try:
+            sess = LearningSession(
+                student_id=user["id"],
+                story_slug="story-C",
+                status="completed",
+                current_step=6,
+            )
+            db.add(sess)
+            db.flush()
+            # Only 1 error on '花' — normally filtered out without story_slug
+            db.add(CharacterError(session_id=sess.id, character="花", error_type="mispronunciation"))
+            db.commit()
+        finally:
+            db.close()
+
+        # Without filter: '花' should NOT appear (only 1 error)
+        resp_all = client.get(
+            f"/api/learning/students/{user['id']}/error-patterns",
+            headers=auth_header(user["token"]),
+        )
+        all_chars = [p["character"] for p in resp_all.json()["patterns"]]
+        assert "花" not in all_chars
+
+        # With story filter: '花' SHOULD appear (threshold = 1)
+        resp_filtered = client.get(
+            f"/api/learning/students/{user['id']}/error-patterns?story_slug=story-C",
+            headers=auth_header(user["token"]),
+        )
+        filtered_chars = [p["character"] for p in resp_filtered.json()["patterns"]]
+        assert "花" in filtered_chars
+
+    def test_filter_nonexistent_slug_returns_empty(self, client, student_a, seeded_errors):
+        """Filtering by a slug that has no errors should return an empty list."""
+        resp = client.get(
+            f"/api/learning/students/{student_a['id']}/error-patterns?story_slug=nonexistent-story",
+            headers=auth_header(student_a["token"]),
+        )
+        data = resp.json()
+        assert data["total"] == 0
+
+
+# ===========================================================================
+# Auto-persist CharacterErrors when PATCH /sessions/{id} saves reading_result
+# (Issue #248 — ensure error_chars in reading_result become CharacterError rows)
+# ===========================================================================
+
+class TestAutoCharacterErrorPersist:
+    """When reading_result (containing error_chars) is saved via PATCH /sessions/{id},
+    the backend must automatically create CharacterError records so that the
+    error-patterns and recommended-vocab endpoints return real data.
+    """
+
+    def test_patch_with_reading_result_creates_character_errors(self, client, student_a):
+        """CharacterError rows are created when reading_result.error_chars is saved."""
+        # Create a session
+        session_resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "auto-persist-test"},
+            headers=auth_header(student_a["token"]),
+        )
+        assert session_resp.status_code == 201, session_resp.text
+        session_id = session_resp.json()["id"]
+
+        # Patch with reading_result containing error_chars
+        patch_resp = client.patch(
+            f"/api/learning/sessions/{session_id}",
+            json={
+                "reading_result": {
+                    "match_rate": 75.0,
+                    "error_chars": ["水", "火"],
+                    "cpm": 120,
+                },
+            },
+            headers=auth_header(student_a["token"]),
+        )
+        assert patch_resp.status_code == 200, patch_resp.text
+
+        # Now the error-patterns endpoint should see these characters
+        patterns_resp = client.get(
+            f"/api/learning/students/{student_a['id']}/error-patterns?story_slug=auto-persist-test",
+            headers=auth_header(student_a["token"]),
+        )
+        assert patterns_resp.status_code == 200, patterns_resp.text
+        chars = [p["character"] for p in patterns_resp.json()["patterns"]]
+        assert "水" in chars
+        assert "火" in chars
+
+    def test_patch_without_error_chars_does_not_create_records(self, client, student_a):
+        """PATCH with reading_result but no error_chars should not create CharacterError rows."""
+        db = TestingSessionLocal()
+        try:
+            before_count = db.query(CharacterError).count()
+        finally:
+            db.close()
+
+        session_resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "no-errors-test"},
+            headers=auth_header(student_a["token"]),
+        )
+        session_id = session_resp.json()["id"]
+
+        client.patch(
+            f"/api/learning/sessions/{session_id}",
+            json={"reading_result": {"match_rate": 95.0, "error_chars": [], "cpm": 150}},
+            headers=auth_header(student_a["token"]),
+        )
+
+        db = TestingSessionLocal()
+        try:
+            after_count = db.query(CharacterError).count()
+        finally:
+            db.close()
+
+        assert after_count == before_count
+
+    def test_patch_without_reading_result_does_not_create_records(self, client, student_a):
+        """PATCH that does not include reading_result should not create CharacterError rows."""
+        db = TestingSessionLocal()
+        try:
+            before_count = db.query(CharacterError).count()
+        finally:
+            db.close()
+
+        session_resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "no-reading-result-test"},
+            headers=auth_header(student_a["token"]),
+        )
+        session_id = session_resp.json()["id"]
+
+        client.patch(
+            f"/api/learning/sessions/{session_id}",
+            json={"current_step": 2},
+            headers=auth_header(student_a["token"]),
+        )
+
+        db = TestingSessionLocal()
+        try:
+            after_count = db.query(CharacterError).count()
+        finally:
+            db.close()
+
+        assert after_count == before_count
+
+
+# ===========================================================================
+# GET /api/learning/students/{id}/repeated-errors-alert
+# Returns characters that have hit the ≥3 error threshold (Issue #248 modal)
+# ===========================================================================
+
+@pytest.fixture(scope="module")
+def alert_user_high(client):
+    """Isolated user with ≥3 repeated errors for alert tests."""
+    user = _register_user(client, "alert_high")
+    db = TestingSessionLocal()
+    try:
+        # '月' in 3 sessions (threshold reached), '日' in 2 sessions (below threshold)
+        _create_session_with_errors(db, user["id"], ["月", "日"])
+        _create_session_with_errors(db, user["id"], ["月", "日"])
+        _create_session_with_errors(db, user["id"], ["月"])
+    finally:
+        db.close()
+    return user
+
+
+@pytest.fixture(scope="module")
+def alert_user_low(client):
+    """Isolated user with only 1 error per character — should have no alerts."""
+    user = _register_user(client, "alert_low")
+    db = TestingSessionLocal()
+    try:
+        _create_session_with_errors(db, user["id"], ["木", "石"])
+    finally:
+        db.close()
+    return user
+
+
+class TestRepeatedErrorsAlert:
+    """Endpoint that returns characters meeting the ≥3 repeated-error threshold.
+
+    Used by the frontend to show a post-session modal: 「這個字你讀錯 3 次了」
+    Uses dedicated isolated users (alert_user_high / alert_user_low) to avoid
+    interference from mastered-char side-effects in other test classes.
+    """
+
+    def test_returns_200(self, client, alert_user_high):
+        """Endpoint responds with 200 OK."""
+        resp = client.get(
+            f"/api/learning/students/{alert_user_high['id']}/repeated-errors-alert",
+            headers=auth_header(alert_user_high["token"]),
+        )
+        assert resp.status_code == 200, resp.text
+
+    def test_response_has_alerts_field(self, client, alert_user_high):
+        """Response contains 'alerts' list and 'total' count."""
+        resp = client.get(
+            f"/api/learning/students/{alert_user_high['id']}/repeated-errors-alert",
+            headers=auth_header(alert_user_high["token"]),
+        )
+        data = resp.json()
+        assert "alerts" in data
+        assert "total" in data
+
+    def test_only_chars_with_3_or_more_errors(self, client, alert_user_high):
+        """Only characters with ≥3 errors appear in alerts.
+
+        alert_user_high: '月' has 3 errors, '日' has 2.
+        Only '月' should appear.
+        """
+        resp = client.get(
+            f"/api/learning/students/{alert_user_high['id']}/repeated-errors-alert",
+            headers=auth_header(alert_user_high["token"]),
+        )
+        data = resp.json()
+        chars = [a["character"] for a in data["alerts"]]
+        assert "月" in chars
+        # '日' (2 errors) should NOT appear in the ≥3 alert
+        assert "日" not in chars
+
+    def test_alert_item_fields(self, client, alert_user_high):
+        """Each alert item has character and error_count fields."""
+        resp = client.get(
+            f"/api/learning/students/{alert_user_high['id']}/repeated-errors-alert",
+            headers=auth_header(alert_user_high["token"]),
+        )
+        data = resp.json()
+        assert data["total"] >= 1
+        item = data["alerts"][0]
+        assert "character" in item
+        assert "error_count" in item
+        assert item["error_count"] >= 3
+
+    def test_mastered_chars_excluded(self, client, alert_user_high):
+        """Characters already marked as mastered should not appear in alerts."""
+        # Mark '月' as mastered
+        client.post(
+            f"/api/learning/students/{alert_user_high['id']}/error-corrections",
+            json={"character": "月", "correction_type": "mastered"},
+            headers=auth_header(alert_user_high["token"]),
+        )
+        resp = client.get(
+            f"/api/learning/students/{alert_user_high['id']}/repeated-errors-alert",
+            headers=auth_header(alert_user_high["token"]),
+        )
+        data = resp.json()
+        chars = [a["character"] for a in data["alerts"]]
+        assert "月" not in chars
+
+    def test_requires_auth(self, client, alert_user_high):
+        """Unauthenticated request returns 401."""
+        resp = client.get(
+            f"/api/learning/students/{alert_user_high['id']}/repeated-errors-alert"
+        )
+        assert resp.status_code == 401
+
+    def test_access_denied_for_other_student(self, client, alert_user_high, alert_user_low):
+        """Cannot view another student's alerts."""
+        resp = client.get(
+            f"/api/learning/students/{alert_user_low['id']}/repeated-errors-alert",
+            headers=auth_header(alert_user_high["token"]),
+        )
+        assert resp.status_code == 403
+
+    def test_empty_when_no_alerts(self, client, alert_user_low):
+        """Student with no repeated chars (all < 3) returns empty alerts."""
+        resp = client.get(
+            f"/api/learning/students/{alert_user_low['id']}/repeated-errors-alert",
+            headers=auth_header(alert_user_low["token"]),
+        )
+        data = resp.json()
+        assert data["total"] == 0
+        assert data["alerts"] == []

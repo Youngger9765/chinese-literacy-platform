@@ -118,7 +118,7 @@ chore: update CI/CD workflow
 ```
 frontend/
   src/
-    components/reading-steps/   # 六大學習步驟元件
+    components/reading-steps/   # 8 大學習步驟元件
     components/stroke-order/    # 筆順練習
     components/zhuyin/          # 注音處理（BpmfIansui font）
     services/api.ts             # API 呼叫層（所有 fetch 都在這）
@@ -145,13 +145,15 @@ backend/
 
 ---
 
-## 六大模組對應
+## 模組對應
 
 | 模組 | GitHub Label | 說明 |
 |------|-------------|------|
-| 前台學習 | `mod:frontend-learning` | 逐段朗讀、生字練習、課文理解、全文朗讀 |
+| 前台學習 | `mod:frontend-learning` | 8 步驟：朗讀、理解、生字、聽寫、造句、全文朗讀 |
 | Agent Builder | `mod:agent-builder` | 蘇格拉底對話、朗讀即時回饋 |
 | 歷程及報告 | `mod:reports` | 儀表板 + 完整報告 |
 | 校班師生課 | `mod:school-class` | 自學 / 作業模式 |
-| 遊戲化 | `mod:gamification` | 激勵機制 |
-| 後台 | `mod:admin-backend` | 課文上架、知識樹編輯 |
+| 遊戲化 | `mod:gamification` | XP、成就、連續登入 |
+| 帳號安全 | `mod:auth` | JWT + RBAC 8 角色 + Google OAuth |
+| 後台 | `mod:admin-backend` | 課文上架、組織/學校/班級管理 |
+| 家長端 | `mod:parents` | 家長儀表板、學習報告 |

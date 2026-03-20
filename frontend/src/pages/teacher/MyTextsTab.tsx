@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import {
   listMyTexts,
   createMyText,
@@ -15,7 +16,11 @@ import {
 
 const GENRES = ['記敘文', '說明文', '議論文', '文言文', '應用文'];
 const GRADES = [4, 5, 6, 7, 8, 9];
-const TEXT_TYPES = ['單', '多*2', '多*3'];
+const TEXT_TYPES: { value: string; label: string }[] = [
+  { value: '單', label: '單篇文章' },
+  { value: '多*2', label: '雙篇對比文本' },
+  { value: '多*3', label: '三篇群文閱讀' },
+];
 
 interface VocabFormItem {
   word: string;
@@ -73,6 +78,10 @@ const MyTextsTab: React.FC = () => {
   // Delete state
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Focus management for the Create/Edit modal
+  const formDialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(formDialogRef, showForm);
 
   const loadTexts = useCallback(async () => {
     if (!token) return;
@@ -257,7 +266,7 @@ const MyTextsTab: React.FC = () => {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-4">
+    <div className="p-5 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -393,8 +402,12 @@ const MyTextsTab: React.FC = () => {
 
       {/* ── Create/Edit Modal ─────────────────────────────────────────── */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 overflow-y-auto py-8">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4">
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 overflow-y-auto py-8"
+          onKeyDown={(e) => { if (e.key === 'Escape') closeForm(); }}
+          onClick={(e) => { if (e.target === e.currentTarget) closeForm(); }}
+        >
+          <div ref={formDialogRef} className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4" role="dialog" aria-modal="true" aria-label={editingId !== null ? '編輯課文' : '新增課文'}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-base font-semibold text-gray-800">
                 {editingId !== null ? '編輯課文' : '新增課文'}
@@ -422,6 +435,7 @@ const MyTextsTab: React.FC = () => {
                     value={form.title}
                     onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
                     placeholder="請輸入課文標題"
+                    autoFocus
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     required
                   />
@@ -461,7 +475,7 @@ const MyTextsTab: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   >
                     {TEXT_TYPES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t.value} value={t.value}>{t.label}</option>
                     ))}
                   </select>
                 </div>

@@ -43,7 +43,7 @@
 - [../PRD.md](../PRD.md) - 產品需求文件（最重要，包含完整 User Stories 與 AC）
 - [../PEDAGOGY.md](../PEDAGOGY.md) - 教學理論（閱讀科學教學法、Reading in the Brain）
 - [../DEVELOPMENT_GUIDE.md](../DEVELOPMENT_GUIDE.md) - 開發指南（方大哥的開發要求）
-- [../DEVELOPMENT_TIMELINE.md](../DEVELOPMENT_TIMELINE.md) - 開發時程（6 個月計畫）
+- [../ROADMAP.md](../ROADMAP.md) - 開發路線圖 v2.0（原 DEVELOPMENT_TIMELINE.md 已刪除）
 
 ### 技術與資源
 

@@ -1,3 +1,7 @@
+"""App config — env vars for CORS, DB, JWT, etc.
+
+ALLOWED_ORIGINS: comma-separated frontend origins (Production: lingoleap-frontend-*.run.app, lingoleap-dev.web.app)
+"""
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,7 +13,7 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:3000"
     gcs_bucket: str = "lingoleap-assets"
     gcs_public_url: str = "https://storage.googleapis.com/lingoleap-assets"
-    jwt_secret_key: str = "dev-secret-change-in-production"
+    jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 480  # 8 hours
     google_client_id: str = ""  # set GOOGLE_CLIENT_ID env var in Cloud Run

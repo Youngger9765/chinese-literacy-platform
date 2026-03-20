@@ -28,10 +28,16 @@ _patch_jsonb_columns()
 
 
 def pytest_runtest_setup(item):
-    """Reset the rate limiter before each test (including module-scoped fixtures).
+    """Reset rate limiters before each test (including module-scoped fixtures).
 
     Using a hook instead of a fixture ensures the reset happens before
     module-scoped fixtures that call /api/auth/register.
     """
     from app.routes.auth import rate_limiter
     rate_limiter.reset()
+    # Also reset the global per-IP rate limiter so tests don't hit 429
+    try:
+        from app.auth.rate_limiter import general_rate_limiter
+        general_rate_limiter.reset()
+    except (ImportError, AttributeError):
+        pass

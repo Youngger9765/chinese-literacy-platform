@@ -142,7 +142,15 @@ def _register_user(client, suffix: str) -> dict:
         "name": name,
     })
     assert resp.status_code == 201
-    token = resp.json()["access_token"]
+    # Verify email using the dev-mode token returned in the response
+    verification_token = resp.json()["verification_token"]
+    assert verification_token is not None
+    verify_resp = client.get(f"/api/auth/verify-email?token={verification_token}")
+    assert verify_resp.status_code == 200
+    # Login to get a JWT token
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert login_resp.status_code == 200
+    token = login_resp.json()["access_token"]
     me_resp = client.get("/api/users/me", headers=auth_header(token))
     user_id = me_resp.json()["id"]
     return {"email": email, "name": name, "token": token, "user_id": user_id}
@@ -970,6 +978,20 @@ class TestDeleteAssignment:
                 "classroom_id": classroom_with_students,
                 "story_id": VALID_STORY_ID,
                 "title": "Protected Assignment",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.delete(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(other_teacher["token"]),
+        )
+        assert resp.status_code == 403
+
+
+# ====================================================================
 # Student detail endpoint — GET /api/assignments/my/{id}
 # ====================================================================
 
@@ -1275,3 +1297,450 @@ class TestNotificationService:
                 db=mock_db,
             )
         assert any("assignment_graded" in r.message for r in caplog.records)
+
+
+# ====================================================================
+# Issue #423 — Teacher grading: reading metrics visible in submission
+# ====================================================================
+
+class TestSubmissionReadingMetrics:
+    """Verify that SubmissionResponse includes reading metrics (accuracy, cpm, error_chars)
+    pulled from the linked LearningSession when available."""
+
+    def _create_assignment_and_start(self, client, teacher, student, classroom_id):
+        """Create assignment, start it as student. Returns (assignment_id, session_id)."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Reading Metrics Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200
+        session_id = start_resp.json()["session_id"]
+        return assignment_id, session_id
+
+    def test_submission_response_has_reading_metrics_fields(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        """SubmissionResponse must always include reading_metrics fields (nullable)."""
+        assignment_id, _ = self._create_assignment_and_start(
+            client, teacher, student1, classroom_with_students
+        )
+        resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        subs = resp.json()["submissions"]
+        # student1 has a submission
+        sub1 = next((s for s in subs if s["student_id"] == student1["user_id"]), None)
+        assert sub1 is not None
+        # reading metrics fields must be present
+        assert "reading_accuracy" in sub1
+        assert "reading_cpm" in sub1
+        assert "reading_error_chars" in sub1
+
+    def test_submission_reading_metrics_populated_after_session_update(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        """After the student updates their session with reading data,
+        the teacher sees the metrics in the submission response."""
+        assignment_id, session_id = self._create_assignment_and_start(
+            client, teacher, student1, classroom_with_students
+        )
+
+        # Student updates the session with reading data
+        patch_resp = client.patch(
+            f"/api/learning/sessions/{session_id}",
+            json={
+                "accuracy": 85.5,
+                "reading_result": {
+                    "cpm": 142.3,
+                    "accuracy": 85.5,
+                    "error_chars": ["的", "了"],
+                },
+            },
+            headers=auth_header(student1["token"]),
+        )
+        assert patch_resp.status_code == 200
+
+        # Teacher views assignment detail — reading metrics must be present
+        resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        subs = resp.json()["submissions"]
+        sub1 = next((s for s in subs if s["student_id"] == student1["user_id"]), None)
+        assert sub1 is not None
+        assert sub1["reading_accuracy"] == pytest.approx(85.5, abs=0.1)
+        assert sub1["reading_cpm"] == pytest.approx(142.3, abs=0.1)
+        assert sub1["reading_error_chars"] == ["的", "了"]
+
+    def test_submission_reading_metrics_null_when_no_session(
+        self, client, teacher, student2, classroom_with_students
+    ):
+        """A pending submission (no session started) must have null reading metrics."""
+        # Create a NEW assignment so student2 has a fresh pending submission
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Reading Metrics Null Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+
+        resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 200
+        subs = resp.json()["submissions"]
+        sub2 = next((s for s in subs if s["student_id"] == student2["user_id"]), None)
+        assert sub2 is not None
+        assert sub2["reading_accuracy"] is None
+        assert sub2["reading_cpm"] is None
+        assert sub2["reading_error_chars"] == []
+
+
+# ====================================================================
+# Teacher Feedback Tests (Issue #424)
+# ====================================================================
+
+def _register_and_login(client, suffix: str) -> dict:
+    """Register a user (new auth flow: register -> verify -> login) and return token + user_id.
+
+    Uses the verification_token returned in dev mode to bypass email,
+    then logs in to obtain a JWT access_token.
+    """
+    unique = uuid.uuid4().hex[:8]
+    email = f"{suffix}_{unique}@example.com"
+    password = "SecurePass123!"
+    name = f"{suffix.title()} {unique}"
+    reg_resp = client.post("/api/auth/register", json={
+        "email": email,
+        "password": password,
+        "name": name,
+    })
+    assert reg_resp.status_code == 201, reg_resp.json()
+    verification_token = reg_resp.json().get("verification_token")
+    if verification_token:
+        client.post("/api/auth/verify-email", json={"token": verification_token})
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert login_resp.status_code == 200, login_resp.json()
+    token = login_resp.json()["access_token"]
+    me_resp = client.get("/api/users/me", headers=auth_header(token))
+    user_id = me_resp.json()["id"]
+    return {"email": email, "name": name, "token": token, "user_id": user_id}
+
+
+class TestTeacherFeedback:
+    """Tests for per-student teacher feedback on assignment submissions (Issue #424)."""
+
+    @pytest.fixture(scope="class")
+    def setup(self, client, school_id):
+        """Create teacher, student, classroom, assignment, submission for feedback tests."""
+        teacher = _register_and_login(client, "fb_teacher")
+        student = _register_and_login(client, "fb_student")
+        _make_student_role(student["user_id"], school_id)
+
+        # Create classroom
+        cls_resp = client.post(
+            "/api/classrooms",
+            headers=auth_header(teacher["token"]),
+            json={"name": "Feedback Test Class", "school_id": school_id},
+        )
+        assert cls_resp.status_code == 201
+        classroom_id = cls_resp.json()["id"]
+
+        # Add student to classroom (one at a time)
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+            json={"student_id": student["user_id"]},
+        )
+
+        # Create assignment
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            headers=auth_header(teacher["token"]),
+            json={"classroom_id": classroom_id, "story_id": "1"},
+        )
+        assert asn_resp.status_code == 201
+        assignment_id = asn_resp.json()["id"]
+
+        # Student starts assignment
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert start_resp.status_code == 200
+
+        # Student submits assignment
+        sub_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(student["token"]),
+        )
+        assert sub_resp.status_code == 200
+
+        # Get submission id via detail
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher["token"]),
+        )
+        assert detail_resp.status_code == 200
+        submissions = detail_resp.json()["submissions"]
+        submission_id = submissions[0]["id"]
+
+        return {
+            "teacher": teacher,
+            "student": student,
+            "assignment_id": assignment_id,
+            "submission_id": submission_id,
+        }
+
+    def test_grade_with_feedback_persists(self, client, setup):
+        """Teacher can grade with feedback; feedback is returned in response."""
+        assignment_id = setup["assignment_id"]
+        submission_id = setup["submission_id"]
+        teacher_token = setup["teacher"]["token"]
+
+        resp = client.patch(
+            f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+            headers=auth_header(teacher_token),
+            json={"score": 85, "teacher_feedback": "很棒！朗讀流暢，繼續加油"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["score"] == 85
+        assert data["teacher_feedback"] == "很棒！朗讀流暢，繼續加油"
+        assert data["status"] == "graded"
+
+    def test_feedback_visible_in_assignment_detail(self, client, setup):
+        """Feedback saved appears in AssignmentDetailResponse submissions list."""
+        assignment_id = setup["assignment_id"]
+        submission_id = setup["submission_id"]
+        teacher_token = setup["teacher"]["token"]
+
+        detail_resp = client.get(
+            f"/api/assignments/{assignment_id}",
+            headers=auth_header(teacher_token),
+        )
+        assert detail_resp.status_code == 200
+        submissions = detail_resp.json()["submissions"]
+        sub = next(s for s in submissions if s["id"] == submission_id)
+        assert sub["teacher_feedback"] == "很棒！朗讀流暢，繼續加油"
+
+    def test_feedback_visible_to_student_in_my_assignments(self, client, setup):
+        """Student sees teacher feedback in GET /api/assignments/my."""
+        student_token = setup["student"]["token"]
+        assignment_id = setup["assignment_id"]
+
+        resp = client.get(
+            "/api/assignments/my",
+            headers=auth_header(student_token),
+        )
+        assert resp.status_code == 200
+        assignments = resp.json()
+        asn = next(a for a in assignments if a["assignment_id"] == assignment_id)
+        assert asn["teacher_feedback"] == "很棒！朗讀流暢，繼續加油"
+
+    def test_grade_without_feedback_leaves_feedback_null(self, client, school_id):
+        """Grading without sending teacher_feedback leaves the field null."""
+        teacher = _register_and_login(client, "fb2_teacher")
+        student = _register_and_login(client, "fb2_student")
+        _make_student_role(student["user_id"], school_id)
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            headers=auth_header(teacher["token"]),
+            json={"name": "Feedback Test Class 2", "school_id": school_id},
+        )
+        classroom_id = cls_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+            json={"student_id": student["user_id"]},
+        )
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            headers=auth_header(teacher["token"]),
+            json={"classroom_id": classroom_id, "story_id": "1"},
+        )
+        assignment_id = asn_resp.json()["id"]
+
+        client.post(f"/api/assignments/{assignment_id}/start", headers=auth_header(student["token"]))
+        client.post(f"/api/assignments/{assignment_id}/submit", headers=auth_header(student["token"]))
+
+        detail = client.get(f"/api/assignments/{assignment_id}", headers=auth_header(teacher["token"]))
+        submission_id = detail.json()["submissions"][0]["id"]
+
+        resp = client.patch(
+            f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+            headers=auth_header(teacher["token"]),
+            json={"score": 70},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["teacher_feedback"] is None
+
+    def test_update_feedback_overwrites_previous(self, client, setup):
+        """Sending a new teacher_feedback value replaces the old one."""
+        assignment_id = setup["assignment_id"]
+        submission_id = setup["submission_id"]
+        teacher_token = setup["teacher"]["token"]
+
+        resp = client.patch(
+            f"/api/assignments/{assignment_id}/submissions/{submission_id}",
+            headers=auth_header(teacher_token),
+            json={"teacher_feedback": "更新後的評語"},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["teacher_feedback"] == "更新後的評語"
+
+
+# ---------------------------------------------------------------------------
+# Issue #414 — Reading goals in StartAssignmentResponse
+# ---------------------------------------------------------------------------
+
+class TestReadingGoalsInStartResponse:
+    """Tests that /start returns reading goals so the student knows the target
+    before and during the learning session (Issue #414)."""
+
+    @pytest.fixture
+    def setup(self, client, school_id):
+        """Create teacher + student + classroom + assignment with reading goals."""
+        teacher = _register_and_login(client, "rg414_teacher")
+        student = _register_and_login(client, "rg414_student")
+        _make_student_role(student["user_id"], school_id)
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            headers=auth_header(teacher["token"]),
+            json={"name": "Reading Goals 414 Class", "school_id": school_id},
+        )
+        classroom_id = cls_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+            json={"student_id": student["user_id"]},
+        )
+        # Create assignment WITH custom reading goals
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            headers=auth_header(teacher["token"]),
+            json={
+                "classroom_id": classroom_id,
+                "story_id": "1",
+                "target_cpm": 160,
+                "target_accuracy": 85.0,
+                "difficulty_label": "中級",
+            },
+        )
+        assignment_id = asn_resp.json()["id"]
+        return {
+            "teacher": teacher,
+            "student": student,
+            "classroom_id": classroom_id,
+            "assignment_id": assignment_id,
+        }
+
+    def test_start_response_includes_reading_goals(self, client, setup):
+        """StartAssignmentResponse must include effective_cpm, effective_accuracy,
+        target_cpm, target_accuracy, and difficulty_label (Issue #414)."""
+        resp = client.post(
+            f"/api/assignments/{setup['assignment_id']}/start",
+            headers=auth_header(setup["student"]["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+
+        # Core fields still present
+        assert "session_id" in data
+        assert "story_id" in data
+        assert "status" in data
+
+        # Reading goal fields (Issue #414)
+        assert "target_cpm" in data, "StartAssignmentResponse missing target_cpm"
+        assert "target_accuracy" in data, "StartAssignmentResponse missing target_accuracy"
+        assert "difficulty_label" in data, "StartAssignmentResponse missing difficulty_label"
+        assert "effective_cpm" in data, "StartAssignmentResponse missing effective_cpm"
+        assert "effective_accuracy" in data, "StartAssignmentResponse missing effective_accuracy"
+
+        assert data["target_cpm"] == 160
+        assert data["target_accuracy"] == 85.0
+        assert data["difficulty_label"] == "中級"
+        assert data["effective_cpm"] == 160
+        assert data["effective_accuracy"] == 85.0
+
+    def test_start_response_uses_defaults_when_no_goals_set(self, client, school_id):
+        """When teacher sets no reading goals, effective values use system defaults."""
+        teacher = _register_and_login(client, "rg414b_teacher")
+        student = _register_and_login(client, "rg414b_student")
+        _make_student_role(student["user_id"], school_id)
+
+        cls_resp = client.post(
+            "/api/classrooms",
+            headers=auth_header(teacher["token"]),
+            json={"name": "Reading Goals 414b Class", "school_id": school_id},
+        )
+        classroom_id = cls_resp.json()["id"]
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            headers=auth_header(teacher["token"]),
+            json={"student_id": student["user_id"]},
+        )
+        # Create assignment WITHOUT reading goals
+        asn_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            headers=auth_header(teacher["token"]),
+            json={"classroom_id": classroom_id, "story_id": "1"},
+        )
+        assignment_id = asn_resp.json()["id"]
+
+        resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+
+        # target fields should be null (not set by teacher)
+        assert data["target_cpm"] is None
+        assert data["target_accuracy"] is None
+        assert data["difficulty_label"] is None
+
+        # effective fields should use system defaults
+        from app.schemas.assignment import DEFAULT_TARGET_CPM, DEFAULT_TARGET_ACCURACY
+        assert data["effective_cpm"] == DEFAULT_TARGET_CPM
+        assert data["effective_accuracy"] == DEFAULT_TARGET_ACCURACY
+
+    def test_start_idempotent_still_returns_goals(self, client, setup):
+        """Second call to /start (idempotent path) must also return reading goals."""
+        # First call — creates session
+        client.post(
+            f"/api/assignments/{setup['assignment_id']}/start",
+            headers=auth_header(setup["student"]["token"]),
+        )
+        # Second call — idempotent
+        resp = client.post(
+            f"/api/assignments/{setup['assignment_id']}/start",
+            headers=auth_header(setup["student"]["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "effective_cpm" in data
+        assert data["effective_cpm"] == 160

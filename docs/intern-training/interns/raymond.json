@@ -1,0 +1,282 @@
+{
+  "name": "Raymond",
+  "github": "if-else-master",
+  "email": "78069313+if-else-master@users.noreply.github.com",
+  "startDate": "2026-03-02",
+  "lastReview": "2026-03-13",
+  "skills": {
+    "1": {
+      "level": 3,
+      "history": [
+        {
+          "date": "2026-03-02",
+          "level": 1,
+          "reason": "fork 完成、會 push，但 commit message 中英混用、格式不一致"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "多次 commit/push 順暢，workflow 已建立，commit 品質仍需改善"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "多次 commit，熟悉 Git 操作"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "2": {
+      "level": 1,
+      "history": [
+        {
+          "date": "2026-03-05",
+          "level": 1,
+          "reason": "PR #224 修改 UI/UX 相關，理解基本 HTML 結構，但改動範圍小"
+        }
+      ]
+    },
+    "3": {
+      "level": 3,
+      "history": [
+        {
+          "date": "2026-03-05",
+          "level": 1,
+          "reason": "能讀懂基本 JS，了解事件處理概念"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "能處理 isComposing event 和 async 語音功能，JS 基礎已過關"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "新增語音輸入功能"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "4": {
+      "level": 2,
+      "history": [
+        {
+          "date": "2026-03-02",
+          "level": 1,
+          "reason": "環境建置完成但遇到本地 DB 連線問題"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "PR #314 處理本地 DB 連線問題，本地開發環境已跑通"
+        }
+      ]
+    },
+    "5": {
+      "level": 5,
+      "history": [
+        {
+          "date": "2026-03-05",
+          "level": 1,
+          "reason": "能讀懂簡單元件結構"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "能讀懂 ComprehensionChat.tsx 並精準定位 bug #216 的問題所在"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "能讀懂並修改程式碼"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "多次修改程式碼，熟悉專案。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "多次修改程式碼，且能理解程式碼。"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "10": {
+      "level": 5,
+      "history": [
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "修復 IME composition bug（#216），完整執行重現 → 定位 → 修復 → 驗證流程"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "多次修復 bug"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "多次修復 Bug，能獨立 Debug。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "多次修復 Bug，且有重構意識。"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "6": {
+      "level": 5,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "ComprehensionChat.tsx 修改"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "獨立開發語音輸入元件。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能獨立開發 React 元件，品質合格。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "獨立完成語音輸入/輸出功能"
+        }
+      ]
+    },
+    "7": {
+      "level": 5,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "ComprehensionChat.tsx 使用"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "修改程式碼時有使用 TypeScript。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能獨立使用 TypeScript 開發。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "獨立完成語音輸入/輸出功能"
+        }
+      ]
+    },
+    "8": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "ComprehensionChat.tsx 使用"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "在元件中使用 Tailwind CSS。"
+        }
+      ]
+    },
+    "12": {
+      "level": 5,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "新增語音輸入功能"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "成功串接語音輸入 API。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能獨立完成 API 串接功能。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "獨立完成語音輸入/輸出功能"
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    "學習 Git 工作流，參與 Code Review (#9)",
+    "學習元件設計模式，提高程式碼品質 (#13)",
+    "學習撰寫測試，確保程式碼品質 (#14)"
+  ],
+  "summary": "Bug 修復流程完整扎實（#216 IME bug），JS 非同步與事件處理已具備，下一步重點是 commit 規範與 React 元件獨立開發能力",
+  "issues": [
+    {
+      "id": "環境建置",
+      "title": "Fork repo + 開發環境設定",
+      "date": "2026-03-02",
+      "type": "setup",
+      "contribution": "完成專案 fork、本地環境建置",
+      "skillsLearned": [1, 4],
+      "highlights": ["順利完成 fork 和 push"]
+    },
+    {
+      "id": "#224",
+      "title": "閱讀理解頁面 UI 修改",
+      "date": "2026-03-05",
+      "type": "feature",
+      "contribution": "修改閱讀理解頁面 UI/UX，改善互動體驗",
+      "skillsLearned": [2, 3, 5],
+      "highlights": ["第一個 PR", "能讀懂基本 HTML/JS"]
+    },
+    {
+      "id": "#216",
+      "title": "修復 IME 輸入法 composition bug",
+      "date": "2026-03-10",
+      "type": "bugfix",
+      "contribution": "修復中文輸入法在聊天介面的 composition 事件處理問題，影響所有中文使用者",
+      "skillsLearned": [3, 5, 10],
+      "highlights": ["完整執行 重現→定位→修復→驗證 流程", "處理 isComposing event 和 async 語音功能", "Bug 修復流程扎實"],
+      "linesChanged": "+32/-8"
+    },
+    {
+      "id": "#314",
+      "title": "本地 DB 連線問題修復",
+      "date": "2026-03-10",
+      "type": "bugfix",
+      "contribution": "修復本地開發環境的資料庫連線問題，讓開發流程更順暢",
+      "skillsLearned": [4],
+      "highlights": ["本地開發環境完全跑通"]
+    },
+    {
+      "id": "語音功能",
+      "title": "語音輸入/輸出功能開發",
+      "date": "2026-03-13",
+      "type": "feature",
+      "contribution": "為閱讀理解聊天介面新增語音輸入和語音輸出功能，大幅提升無障礙使用體驗",
+      "skillsLearned": [6, 7, 8, 12],
+      "highlights": ["獨立完成完整功能", "成功串接語音 API", "React 元件設計清晰", "TypeScript 使用正確"],
+      "linesChanged": "+180/-20"
+    }
+  ]
+}

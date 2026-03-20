@@ -144,6 +144,18 @@ def _register_user(client, suffix: str | None = None) -> dict:
         "name": name,
     })
     assert resp.status_code == 201, resp.text
+    verification_token = resp.json()["verification_token"]
+
+    resp = client.post("/api/auth/verify-email", json={
+        "token": verification_token,
+    })
+    assert resp.status_code == 200, resp.text
+
+    resp = client.post("/api/auth/login", json={
+        "email": email,
+        "password": password,
+    })
+    assert resp.status_code == 200, resp.text
     return {
         "email": email,
         "password": password,
@@ -372,3 +384,96 @@ class TestStandaloneAIAnalysis:
             "practice_suggestions", "encouragement_message",
         }
         assert set(data.keys()) == expected_keys
+
+    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    def test_standalone_accepts_comprehension_and_vocab_data(self, mock_gen, client, user_a):
+        """Issue #415: AI analysis should accept optional comprehension and vocab data."""
+        mock_gen.return_value = MOCK_ANALYSIS
+
+        rich_payload = {
+            **ANALYSIS_PAYLOAD,
+            "comprehension_score": 78.0,
+            "vocab_practiced_count": 5,
+            "vocab_total_count": 8,
+            "dictation_correct_count": 6,
+            "dictation_total_count": 8,
+        }
+        resp = client.post(
+            "/api/learning/ai-analysis",
+            json=rich_payload,
+            headers=auth_header(user_a["token"]),
+        )
+        assert resp.status_code == 200
+        # Verify the extra fields were passed through to generate_reading_analysis
+        call_kwargs = mock_gen.call_args[0][0]
+        assert call_kwargs.get("comprehension_score") == 78.0
+        assert call_kwargs.get("vocab_practiced_count") == 5
+        assert call_kwargs.get("vocab_total_count") == 8
+
+
+# ===========================================================================
+# generate_reading_analysis — enriched prompt (Issue #415)
+# ===========================================================================
+
+
+class TestGenerateReadingAnalysisEnrichedPrompt:
+    """Tests that the AI service includes comprehension/vocab data in the prompt."""
+
+    @patch("app.services.ai_service.generate_structured_response", new_callable=AsyncMock)
+    def test_prompt_includes_comprehension_score_when_provided(self, mock_structured):
+        """Issue #415: comprehension_score should appear in the AI prompt."""
+        import asyncio
+        from app.services.ai_service import generate_reading_analysis
+
+        mock_structured.return_value = {
+            "analysis_summary": "Test",
+            "strengths": ["Good"],
+            "areas_for_improvement": ["Work harder"],
+            "practice_suggestions": ["Practice daily"],
+            "encouragement_message": "Keep going!",
+        }
+
+        session_data = {
+            "story_title": "Test Story",
+            "accuracy": 80.0,
+            "cpm": 100.0,
+            "error_chars": [],
+            "total_characters": 150,
+            "comprehension_score": 75.0,
+        }
+
+        asyncio.get_event_loop().run_until_complete(generate_reading_analysis(session_data))
+
+        # The system_prompt passed to generate_structured_response should mention comprehension
+        call_args = mock_structured.call_args
+        system_prompt = call_args[1].get("system_prompt") or call_args[0][0]
+        user_content = str(call_args)
+        assert "75" in user_content  # comprehension score appears somewhere in the call
+
+    @patch("app.services.ai_service.generate_structured_response", new_callable=AsyncMock)
+    def test_prompt_works_without_optional_fields(self, mock_structured):
+        """Issue #415: analysis should still work with only reading data."""
+        import asyncio
+        from app.services.ai_service import generate_reading_analysis
+
+        mock_structured.return_value = {
+            "analysis_summary": "Test",
+            "strengths": ["Good"],
+            "areas_for_improvement": ["Work harder"],
+            "practice_suggestions": ["Practice daily"],
+            "encouragement_message": "Keep going!",
+        }
+
+        session_data = {
+            "story_title": "Test Story",
+            "accuracy": 80.0,
+            "cpm": 100.0,
+            "error_chars": [],
+            "total_characters": 150,
+            # No comprehension_score, vocab data, etc.
+        }
+
+        result = asyncio.get_event_loop().run_until_complete(
+            generate_reading_analysis(session_data)
+        )
+        assert result["analysis_summary"] == "Test"

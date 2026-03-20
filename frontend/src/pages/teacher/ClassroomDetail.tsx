@@ -5,30 +5,31 @@ import {
   updateClassroom,
   addStudent,
   removeStudent,
+  exportClassroomReport,
   ClassroomDetailResponse,
   StudentInClassroomResponse,
   ClassroomApiError,
 } from '../../services/classroomApi';
 import StudentProgressTab from './StudentProgressTab';
 import TextManagementTab from './TextManagementTab';
-import MyTextsTab from './MyTextsTab';
 import StudentListTab from './StudentListTab';
-import AssignmentTab from './AssignmentTab';
 import ClassroomAnalytics from './ClassroomAnalytics';
 import CrossTextAnalytics from './CrossTextAnalytics';
 import AtRiskStudents from '../../components/teacher/AtRiskStudents';
+import ErrorHeatmapTab from './ErrorHeatmapTab';
+import CoTeachingTab from './CoTeachingTab';
 
-type TabKey = 'progress' | 'texts' | 'my-texts' | 'assignments' | 'students' | 'analytics' | 'cross-text' | 'at-risk';
+type TabKey = 'progress' | 'texts' | 'students' | 'analytics' | 'cross-text' | 'at-risk' | 'error-heatmap' | 'teachers';
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'progress', label: '學生進度' },
-  { key: 'analytics', label: '學習分析' },
-  { key: 'cross-text', label: '跨課文分析' },
-  { key: 'at-risk', label: '早期介入' },
-  { key: 'texts', label: '課文管理' },
-  { key: 'my-texts', label: '我的課文' },
-  { key: 'assignments', label: '作業管理' },
-  { key: 'students', label: '學生名單' },
+const TABS: { key: TabKey; label: string; group?: 'core' | 'analysis' | 'other' }[] = [
+  { key: 'progress', label: '學生進度', group: 'core' },
+  { key: 'students', label: '學生名單', group: 'core' },
+  { key: 'texts', label: '課文管理', group: 'core' },
+  { key: 'analytics', label: '學習分析', group: 'analysis' },
+  { key: 'cross-text', label: '跨課文分析', group: 'analysis' },
+  { key: 'at-risk', label: '早期介入', group: 'analysis' },
+  { key: 'error-heatmap', label: '錯字熱力圖', group: 'analysis' },
+  { key: 'teachers', label: '協同教師', group: 'other' },
 ];
 
 interface ClassroomDetailProps {
@@ -37,7 +38,7 @@ interface ClassroomDetailProps {
 }
 
 const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [classroom, setClassroom] = useState<ClassroomDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -57,6 +58,9 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
   // Toggle active loading
   const [isTogglingActive, setIsTogglingActive] = useState(false);
+
+  // Export CSV
+  const [isExporting, setIsExporting] = useState(false);
 
   // Remove confirmation
   const [removingStudentId, setRemovingStudentId] = useState<number | null>(null);
@@ -133,6 +137,14 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
     } finally {
       setIsTogglingActive(false);
     }
+  };
+
+  const handleExportCsv = () => {
+    if (!token || isExporting) return;
+    setIsExporting(true);
+    exportClassroomReport(token, classroomId);
+    // Reset after a short delay to re-enable the button
+    setTimeout(() => setIsExporting(false), 2000);
   };
 
   const handleAddStudent = async (e: React.FormEvent) => {
@@ -346,6 +358,15 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
                 >
                   {isTogglingActive ? '更新中...' : classroom.is_active ? '停用' : '啟用'}
                 </button>
+                <button
+                  onClick={handleExportCsv}
+                  disabled={isExporting}
+                  className={`px-3 py-1.5 rounded-lg border border-blue-300 text-blue-700 text-sm hover:bg-blue-50 transition-colors cursor-pointer ${
+                    isExporting ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isExporting ? '匯出中...' : '匯出 CSV'}
+                </button>
               </div>
             </div>
           )}
@@ -354,21 +375,32 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
         {/* Tabbed content card */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
           {/* Tab bar */}
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px" aria-label="Tabs">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
-                    activeTab === tab.key
-                      ? 'border-accent text-accent'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <nav className="flex -mb-px whitespace-nowrap items-center" aria-label="Tabs">
+              {TABS.map((tab, i) => {
+                const prevGroup = TABS[i - 1]?.group;
+                const showDivider = prevGroup && prevGroup !== tab.group;
+                return (
+                  <React.Fragment key={tab.key}>
+                    {showDivider && (
+                      <span
+                        className="shrink-0 w-px h-5 bg-gray-200 mx-1"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <button
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer shrink-0 ${
+                        activeTab === tab.key
+                          ? 'border-accent text-accent'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  </React.Fragment>
+                );
+              })}
             </nav>
           </div>
 
@@ -389,16 +421,12 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
             <AtRiskStudents classroomId={classroomId} />
           )}
 
+          {activeTab === 'error-heatmap' && (
+            <ErrorHeatmapTab classroomId={classroomId} />
+          )}
+
           {activeTab === 'texts' && (
             <TextManagementTab classroomId={classroomId} />
-          )}
-
-          {activeTab === 'my-texts' && (
-            <MyTextsTab />
-          )}
-
-          {activeTab === 'assignments' && (
-            <AssignmentTab classroomId={classroomId} />
           )}
 
           {activeTab === 'students' && (
@@ -416,6 +444,13 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
               setRemovingStudentId={setRemovingStudentId}
               formatDate={formatDate}
               onStudentsImported={loadClassroom}
+            />
+          )}
+
+          {activeTab === 'teachers' && (
+            <CoTeachingTab
+              classroomId={classroomId}
+              ownerId={classroom.teacher_id}
             />
           )}
         </div>

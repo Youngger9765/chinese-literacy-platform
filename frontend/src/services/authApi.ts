@@ -24,10 +24,28 @@ export interface AuthUser {
   terms_version: string | null;
 }
 
-/** Check if user has a specific role */
+/** Check if user has a specific role (ignores scope). */
 export function hasRole(user: AuthUser | null, ...roleNames: string[]): boolean {
   if (!user) return false;
   return user.roles.some((r) => roleNames.includes(r.role_name));
+}
+
+/**
+ * Check if user has a role scoped to a specific school.
+ * Falls back to platform-scoped roles (e.g. system_admin).
+ */
+export function hasRoleInSchool(
+  user: AuthUser | null,
+  schoolId: number | null,
+  ...roleNames: string[]
+): boolean {
+  if (!user) return false;
+  return user.roles.some((r) => {
+    if (!roleNames.includes(r.role_name)) return false;
+    if (r.scope_type === 'platform') return true;
+    if (r.scope_type === 'school' && schoolId != null && r.scope_id === String(schoolId)) return true;
+    return false;
+  });
 }
 
 export interface AuthTokenResponse {
@@ -71,17 +89,32 @@ export async function login(
   return handleAuthResponse<AuthTokenResponse>(res);
 }
 
+export interface RegisterResponse {
+  message: string;
+  /** Dev/staging mode only: token returned directly for testing. Null in production. */
+  verification_token: string | null;
+}
+
 export async function register(
   email: string,
   password: string,
   name: string,
-): Promise<AuthTokenResponse> {
+): Promise<RegisterResponse> {
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, name }),
   });
-  return handleAuthResponse<AuthTokenResponse>(res);
+  return handleAuthResponse<RegisterResponse>(res);
+}
+
+export async function resendVerification(email: string): Promise<{ message: string; verification_token: string | null }> {
+  const res = await fetch(`${API_BASE}/api/auth/resend-verification`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  return handleAuthResponse(res);
 }
 
 export async function getMe(token: string): Promise<AuthUser> {

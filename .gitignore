@@ -23,11 +23,17 @@ data/raw-materials/
 # Test artifacts
 *.db
 frontend/test-results/
+frontend/playwright-report/
 frontend/e2e/.auth/
+frontend/e2e/screenshots/
+frontend/e2e-report.html
 
 # Load test reports (generated artifacts — not committed)
 tests/load-testing/reports/
 tests/load-testing/.venv/
+
+# Claude worktrees (temporary, per-issue)
+.claude/worktrees/
 
 # macOS
 .DS_Store

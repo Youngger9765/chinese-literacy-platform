@@ -195,7 +195,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                   <p className="text-xs font-medium text-gray-500 mb-2">
                     預覽（前 {Math.min(previewRows.length, MAX_PREVIEW_ROWS)} 筆）：
                   </p>
-                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="border border-gray-200 rounded-lg overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-gray-50 text-left">
@@ -246,7 +246,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
               {uploadResult.created.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-gray-500 mb-2">帳號資訊（請妥善保存）：</p>
-                  <div className="border border-gray-200 rounded-lg overflow-hidden max-h-48 overflow-y-auto">
+                  <div className="border border-gray-200 rounded-lg max-h-48 overflow-x-auto overflow-y-auto">
                     <table className="w-full text-xs">
                       <thead className="bg-gray-50 sticky top-0">
                         <tr>

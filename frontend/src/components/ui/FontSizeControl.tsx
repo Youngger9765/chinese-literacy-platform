@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export type FontSizeLevel = 'small' | 'medium' | 'large';
 
 const STORAGE_KEY = 'lingoleap-font-size';
 const DEFAULT_LEVEL: FontSizeLevel = 'medium';
+export const FONT_SIZE_EVENT = 'lingoleap:font-size-change';
 
 export const FONT_SIZE_PX: Record<FontSizeLevel, number> = {
   small: 14,
@@ -19,10 +20,14 @@ const LABELS: Record<FontSizeLevel, string> = {
   large: '大',
 };
 
+function isFontSizeLevel(value: unknown): value is FontSizeLevel {
+  return value === 'small' || value === 'medium' || value === 'large';
+}
+
 function readStoredLevel(): FontSizeLevel {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'small' || stored === 'medium' || stored === 'large') return stored;
+    if (isFontSizeLevel(stored)) return stored;
   } catch {
     // ignore
   }
@@ -35,15 +40,21 @@ interface FontSizeControlProps {
 
 export default function FontSizeControl({ onChange }: FontSizeControlProps) {
   const [level, setLevel] = useState<FontSizeLevel>(readStoredLevel);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, level);
+      window.dispatchEvent(new CustomEvent(FONT_SIZE_EVENT, { detail: { level } }));
     } catch {
       // ignore
     }
-    onChange?.(level, FONT_SIZE_PX[level]);
-  }, [level, onChange]);
+    onChangeRef.current?.(level, FONT_SIZE_PX[level]);
+  }, [level]);
 
   return (
     <div
@@ -78,9 +89,25 @@ export function useFontSize(): { level: FontSizeLevel; px: number } {
   const [level, setLevel] = useState<FontSizeLevel>(readStoredLevel);
 
   useEffect(() => {
-    const handler = () => setLevel(readStoredLevel());
-    window.addEventListener('storage', handler);
-    return () => window.removeEventListener('storage', handler);
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY) {
+        setLevel(readStoredLevel());
+      }
+    };
+    const handleFontSizeChange = (event: Event) => {
+      const nextLevel = (event as CustomEvent<{ level?: unknown }>).detail?.level;
+      if (isFontSizeLevel(nextLevel)) {
+        setLevel(nextLevel);
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener(FONT_SIZE_EVENT, handleFontSizeChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener(FONT_SIZE_EVENT, handleFontSizeChange);
+    };
   }, []);
 
   return { level, px: FONT_SIZE_PX[level] };

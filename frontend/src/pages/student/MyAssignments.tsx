@@ -7,6 +7,18 @@ import {
   StudentAssignmentResponse,
   AssignmentApiError,
 } from '../../services/assignmentApi';
+import { loadActiveSession } from '../../services/api';
+import ReadingGoalsBadge from '../../components/ui/ReadingGoalsBadge';
+
+const STEP_NUMBER_TO_PATH: Record<number, string> = {
+  1: 'intro',
+  2: 'tutor',
+  3: 'comprehension',
+  4: 'vocab',
+  5: 'dictation',
+  6: 'full-reading',
+  7: 'report',
+};
 
 type FilterTab = 'pending' | 'completed' | 'all';
 
@@ -18,7 +30,7 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
 
 const MyAssignments: React.FC = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const [assignments, setAssignments] = useState<StudentAssignmentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,6 +77,17 @@ const MyAssignments: React.FC = () => {
       const result = await startAssignment(token, assignmentId);
       // Store assignment ID in sessionStorage so LearningLayout can auto-submit on completion.
       sessionStorage.setItem('activeAssignmentId', String(assignmentId));
+      // Store reading goals so LearningLayout can pass them to AssessmentReport (Issue #414).
+      sessionStorage.setItem(
+        'activeAssignmentGoals',
+        JSON.stringify({
+          target_cpm: result.target_cpm,
+          target_accuracy: result.target_accuracy,
+          difficulty_label: result.difficulty_label,
+          effective_cpm: result.effective_cpm,
+          effective_accuracy: result.effective_accuracy,
+        }),
+      );
       // story_id is set for YAML texts; text_id for DB texts
       const textKey = result.story_id ?? String(result.text_id);
       navigate(`/learn/${textKey}/intro`);
@@ -140,8 +163,23 @@ const MyAssignments: React.FC = () => {
           onClick={() => {
             // Restore assignment ID so LearningLayout can auto-submit on completion.
             sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
+            // Restore reading goals so AssessmentReport can show goal comparison (Issue #414).
+            sessionStorage.setItem(
+              'activeAssignmentGoals',
+              JSON.stringify({
+                target_cpm: a.target_cpm,
+                target_accuracy: a.target_accuracy,
+                difficulty_label: a.difficulty_label,
+                effective_cpm: a.effective_cpm,
+                effective_accuracy: a.effective_accuracy,
+              }),
+            );
             // story_id is set for YAML texts; text_id for DB texts
-            navigate(`/learn/${a.story_id ?? a.text_id}/intro`);
+            const textKey = a.story_id ?? a.text_id;
+            // Resume from last saved step if available
+            const saved = user ? loadActiveSession(String(user.id)) : null;
+            const savedStep = saved && saved.storyId === String(textKey) ? STEP_NUMBER_TO_PATH[saved.currentStep] : null;
+            navigate(`/learn/${textKey}/${savedStep || 'intro'}`);
           }}
           className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
         >
@@ -286,6 +324,27 @@ const MyAssignments: React.FC = () => {
                         </span>
                       )}
                     </div>
+
+                    {/* Reading goals badge (Issue #414) */}
+                    <div className="mt-2">
+                      <ReadingGoalsBadge
+                        goals={{
+                          effectiveCpm: a.effective_cpm,
+                          effectiveAccuracy: a.effective_accuracy,
+                          difficultyLabel: a.difficulty_label,
+                          isCustom: a.target_cpm != null || a.target_accuracy != null,
+                        }}
+                        variant="compact"
+                      />
+                    </div>
+
+                    {/* Issue #424: per-student teacher feedback */}
+                    {a.teacher_feedback && (
+                      <div className="mt-2 px-2.5 py-2 bg-purple-50 border border-purple-100 rounded-lg">
+                        <p className="text-xs font-medium text-purple-700 mb-0.5">老師評語</p>
+                        <p className="text-xs text-gray-700">{a.teacher_feedback}</p>
+                      </div>
+                    )}
 
                     {a.description && (
                       <p className="text-xs text-gray-500 mt-1.5 line-clamp-2">

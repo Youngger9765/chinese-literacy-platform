@@ -220,6 +220,34 @@ def update_organization(
     return _org_to_response(org, _get_school_count(org, db))
 
 
+@router.delete("/organizations/{org_id}", status_code=204)
+def delete_organization(
+    org_id: str,
+    current_user: User = require_role("system_admin"),
+    db: Session = Depends(get_db),
+):
+    """Hard-delete an organization (system_admin only). Fails if schools exist."""
+    org = _get_org_or_404(org_id, db)
+    school_count = _get_school_count(org, db)
+    if school_count > 0:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot delete: organization has {school_count} school(s). Remove schools first.",
+        )
+    user_role_count = (
+        db.query(UserRole)
+        .filter(UserRole.scope_type == "organization", UserRole.scope_id == str(org.id))
+        .count()
+    )
+    if user_role_count > 0:
+        db.query(UserRole).filter(
+            UserRole.scope_type == "organization", UserRole.scope_id == str(org.id)
+        ).delete()
+    db.delete(org)
+    db.commit()
+    logger.info("Deleted organization %s (%s) by user %s", org_id, org.name, current_user.id)
+
+
 # -- Dashboard ----------------------------------------------------------------
 
 
