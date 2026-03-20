@@ -95,6 +95,9 @@ class ComprehensionChatRequest(BaseModel):
     cpm: float | None = Field(None, gt=0)
     # Optional DB learning session ID — when provided, dialogue turns are persisted (Issue #242)
     db_session_id: int | None = None
+    # Genre-aware Socratic (#615)
+    genre: str | None = None
+    reading_strategy: str | None = None
 
 
 class ComprehensionChatResponse(BaseModel):
@@ -152,6 +155,8 @@ async def comprehension_chat(
                 accuracy=payload.accuracy,
                 cpm=payload.cpm,
                 teacher_instructions=teacher_instructions_content or None,
+                genre=payload.genre,
+                reading_strategy=payload.reading_strategy,
             )
         else:
             result = await socratic_agent.process_answer(
