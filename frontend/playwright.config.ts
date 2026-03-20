@@ -99,8 +99,10 @@ export default defineConfig({
     '**/infra.spec.ts',
     '**/story-selection.spec.ts',
     '**/learning-flow.spec.ts',
-    // One-off issue debug specs
-    '**/issue-*.spec.ts',
+    // One-off issue debug specs (keep old ones ignored; issue-571 is allowed via project testMatch)
+    '**/issue-169-*.spec.ts',
+    '**/issue-173-*.spec.ts',
+    '**/issue-208-*.spec.ts',
     '**/preview-test.spec.ts',
   ],
 
@@ -177,6 +179,17 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'e2e/.auth/student.json',
+      },
+    },
+
+    // ── Issue #571: 行動版 Workspace 切換 ────────────────────────────────────
+    {
+      name: 'issue-571',
+      testMatch: /issue-571-mobile-workspace-switcher\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Pixel 5'],
+        storageState: 'e2e/.auth/teacher.json',
       },
     },
   ],

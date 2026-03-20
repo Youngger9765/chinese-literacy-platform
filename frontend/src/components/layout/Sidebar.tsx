@@ -107,6 +107,12 @@ interface MobileTabBarProps {
   extraItems: NavItem[];
   pathname: string;
   onNavigate: (path: string) => void;
+  // Workspace switching (Issue #571)
+  hasMultipleViews: boolean;
+  activeView: WorkspaceView;
+  availableViews: WorkspaceView[];
+  viewLabels: Record<WorkspaceView, { icon: string; label: string }>;
+  onSwitchView: (view: WorkspaceView) => void;
 }
 
 const MobileTabBar: React.FC<MobileTabBarProps> = ({
@@ -115,12 +121,20 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
   extraItems,
   pathname,
   onNavigate,
+  hasMultipleViews,
+  activeView,
+  availableViews,
+  viewLabels,
+  onSwitchView,
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const allItems = [...studentItems, ...teacherItems];
   // Show top 4 items + "更多" tab
   const topItems = allItems.slice(0, 4);
   const moreItems = [...allItems.slice(4), ...extraItems];
+
+  // Show the "更多" button if there are overflow nav items OR if multi-role switching is available
+  const showMoreButton = moreItems.length > 0 || hasMultipleViews;
 
   return (
     <>
@@ -154,7 +168,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
             <span>{item.label}</span>
           </button>
         ))}
-        {moreItems.length > 0 && (
+        {showMoreButton && (
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
@@ -183,30 +197,70 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
             className="fixed bottom-14 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl p-4 md:hidden animate-slide-up"
           >
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" aria-hidden="true" />
-            <div className="grid grid-cols-3 gap-3">
-              {moreItems.map((item) => (
-                <button
-                  key={item.path}
-                  type="button"
-                  onClick={() => {
-                    onNavigate(item.path);
-                    setDrawerOpen(false);
-                  }}
-                  aria-label={item.label}
-                  className={`
-                    flex flex-col items-center gap-1 p-3 rounded-xl text-sm font-medium transition-colors
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
-                    ${isActive(pathname, item.path)
-                      ? 'bg-accent-bg text-accent'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                    }
-                  `}
-                >
-                  <span className="text-2xl" aria-hidden="true">{item.icon}</span>
-                  <span className="text-xs">{item.label}</span>
-                </button>
-              ))}
-            </div>
+
+            {/* Workspace / role switcher — only shown when user has multiple roles (Issue #571) */}
+            {hasMultipleViews && (
+              <div className="mb-4">
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                  切換身分
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {availableViews.map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => {
+                        onSwitchView(v);
+                        setDrawerOpen(false);
+                      }}
+                      aria-label={`切換至${viewLabels[v].label}`}
+                      aria-pressed={v === activeView}
+                      className={`
+                        flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors
+                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
+                        ${v === activeView
+                          ? 'bg-accent text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }
+                      `}
+                    >
+                      <span aria-hidden="true">{viewLabels[v].icon}</span>
+                      <span>{viewLabels[v].label}</span>
+                    </button>
+                  ))}
+                </div>
+                {moreItems.length > 0 && (
+                  <div className="mt-3 border-t border-gray-100" aria-hidden="true" />
+                )}
+              </div>
+            )}
+
+            {moreItems.length > 0 && (
+              <div className="grid grid-cols-3 gap-3">
+                {moreItems.map((item) => (
+                  <button
+                    key={item.path}
+                    type="button"
+                    onClick={() => {
+                      onNavigate(item.path);
+                      setDrawerOpen(false);
+                    }}
+                    aria-label={item.label}
+                    className={`
+                      flex flex-col items-center gap-1 p-3 rounded-xl text-sm font-medium transition-colors
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
+                      ${isActive(pathname, item.path)
+                        ? 'bg-accent-bg text-accent'
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                      }
+                    `}
+                  >
+                    <span className="text-2xl" aria-hidden="true">{item.icon}</span>
+                    <span className="text-xs">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}
@@ -441,6 +495,18 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         extraItems={extraItems}
         pathname={pathname}
         onNavigate={handleNavigate}
+        hasMultipleViews={hasMultipleViews}
+        activeView={activeView}
+        availableViews={availableViews}
+        viewLabels={VIEW_LABELS}
+        onSwitchView={(view) => {
+          setActiveView(view);
+          const home: Record<WorkspaceView, string> = {
+            teacher: '/teacher-home', student: '/student',
+            admin: '/admin', parent: '/parent',
+          };
+          navigate(home[view]);
+        }}
       />
     </>
   );

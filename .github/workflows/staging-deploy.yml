@@ -187,12 +187,12 @@ jobs:
       - name: Wait for Cloud Run to be ready
         run: sleep 15
 
-      - name: Smoke test /health (expect 200)
+      - name: Smoke test /api/health (expect 200)
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/health")
-          echo "/health -> $STATUS"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/health")
+          echo "/api/health -> $STATUS"
           if [ "$STATUS" != "200" ]; then
-            echo "FAIL: /health returned $STATUS, expected 200"
+            echo "FAIL: /api/health returned $STATUS, expected 200"
             exit 1
           fi
 
