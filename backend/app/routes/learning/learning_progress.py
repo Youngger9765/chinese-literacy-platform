@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
@@ -179,6 +179,7 @@ class StepStatusItem(BaseModel):
 
 class TextProgressItem(BaseModel):
     story_slug: str
+    story_title: str | None  # human-readable title, e.g. "第六課 牛頓的故事"
     latest_session_id: int
     status: str  # in_progress | completed | abandoned
     steps: list[StepStatusItem]
@@ -219,6 +220,7 @@ def get_student_progress(
 
     sessions = (
         db.query(LearningSession)
+        .options(joinedload(LearningSession.text))
         .filter(LearningSession.student_id == student_id)
         .order_by(LearningSession.started_at.desc(), LearningSession.id.desc())
         .all()
@@ -256,8 +258,14 @@ def get_student_progress(
         if s.overall_score is not None:
             scores.append(s.overall_score)
 
+        # Resolve human-readable title from the related Text record if available
+        story_title: str | None = None
+        if s.text is not None:
+            story_title = s.text.title
+
         texts.append(TextProgressItem(
             story_slug=slug,
+            story_title=story_title,
             latest_session_id=s.id,
             status=s.status,
             steps=step_items,

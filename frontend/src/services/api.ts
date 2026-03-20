@@ -606,6 +606,7 @@ export interface NextStepRec {
 
 export interface TextProgressItem {
   story_slug: string;
+  story_title: string | null;
   latest_session_id: number;
   status: string;
   steps: StepStatusItem[];
