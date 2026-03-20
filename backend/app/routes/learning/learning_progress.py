@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
@@ -220,6 +220,7 @@ def get_student_progress(
 
     sessions = (
         db.query(LearningSession)
+        .options(joinedload(LearningSession.text))
         .filter(LearningSession.student_id == student_id)
         .order_by(LearningSession.started_at.desc(), LearningSession.id.desc())
         .all()
