@@ -131,6 +131,8 @@ const TextCard: React.FC<{ item: TextProgressItem }> = ({ item }) => {
 
 // ── Main page ──────────────────────────────────────────────────────────────
 
+type ProgressTab = 'in_progress' | 'completed';
+
 const StudentProgress: React.FC = () => {
   const { token, user } = useAuth();
   const navigate = useNavigate();
@@ -138,6 +140,7 @@ const StudentProgress: React.FC = () => {
   const [data, setData] = useState<StudentProgressResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<ProgressTab>('in_progress');
 
   const load = useCallback(async () => {
     if (!token || !user) return;
@@ -225,12 +228,65 @@ const StudentProgress: React.FC = () => {
               </div>
             )}
 
-            {/* Text cards */}
-            <div className="space-y-3">
-              {data.texts.map((t) => (
-                <TextCard key={t.story_slug} item={t} />
-              ))}
-            </div>
+            {/* Tab bar */}
+            {data.texts.length > 0 && (() => {
+              const inProgressTexts = data.texts.filter((t) => t.status !== 'completed');
+              const completedTexts = data.texts.filter((t) => t.status === 'completed');
+              const filteredTexts = activeTab === 'completed' ? completedTexts : inProgressTexts;
+              return (
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <div className="border-b border-gray-200 overflow-x-auto">
+                    <nav className="flex -mb-px whitespace-nowrap" aria-label="Tabs">
+                      <button
+                        onClick={() => setActiveTab('in_progress')}
+                        className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer shrink-0 ${
+                          activeTab === 'in_progress'
+                            ? 'border-accent text-accent'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        嘗試中
+                        <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+                          activeTab === 'in_progress'
+                            ? 'bg-accent/10 text-accent'
+                            : 'bg-gray-100 text-gray-500'
+                        }`}>
+                          {inProgressTexts.length}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('completed')}
+                        className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer shrink-0 ${
+                          activeTab === 'completed'
+                            ? 'border-accent text-accent'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        已完成
+                        <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+                          activeTab === 'completed'
+                            ? 'bg-accent/10 text-accent'
+                            : 'bg-gray-100 text-gray-500'
+                        }`}>
+                          {completedTexts.length}
+                        </span>
+                      </button>
+                    </nav>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {filteredTexts.length === 0 ? (
+                      <p className="text-sm text-gray-500 text-center py-8">
+                        {activeTab === 'in_progress' ? '沒有進行中的課文' : '還沒有完成任何課文'}
+                      </p>
+                    ) : (
+                      filteredTexts.map((t) => (
+                        <TextCard key={t.story_slug} item={t} />
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
           </>
         )}
       </div>
