@@ -84,10 +84,14 @@ def list_my_sessions(
         .limit(limit)
         .all()
     )
-    return SessionListResponse(
-        items=[SessionSummaryResponse.model_validate(s) for s in items],
-        total=total,
-    )
+    summaries = []
+    for s in items:
+        summary = SessionSummaryResponse.model_validate(s)
+        # Resolve human-readable title from the linked Text record (if available)
+        if s.text is not None:
+            summary.story_title = s.text.title
+        summaries.append(summary)
+    return SessionListResponse(items=summaries, total=total)
 
 
 @router.get("/learning/sessions/{session_id}", response_model=SessionDetailResponse)

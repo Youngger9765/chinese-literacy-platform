@@ -475,6 +475,7 @@ export async function fetchLearningSessions(
 export interface LearningSummary {
   id: number;
   story_slug: string | null;
+  story_title: string | null;
   status: string;
   current_step: number;
   accuracy: number | null;

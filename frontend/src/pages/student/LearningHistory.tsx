@@ -72,7 +72,7 @@ const SessionCard: React.FC<{ s: LearningSummary; onNavigate: (path: string) => 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-medium text-gray-900 truncate">
-              {s.story_slug ?? '未知課文'}
+              {s.story_title ?? s.story_slug ?? '未知課文'}
             </h3>
             <StatusBadge status={s.status} />
           </div>
