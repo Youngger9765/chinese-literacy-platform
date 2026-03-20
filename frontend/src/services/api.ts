@@ -5,7 +5,7 @@
  * Environment variable: VITE_API_URL (default: http://localhost:8000)
  */
 
-import type { Story } from '../types';
+import type { ReadingEvaluateResponse, Story } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -141,6 +141,35 @@ export async function createLearningSession(payload: {
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error(`createLearningSession failed: ${res.status}`);
+  return res.json();
+}
+
+// --- Reading Evaluation API (Issue #454, frontend integration) ---
+
+export async function evaluateReading(
+  spokenText: string,
+  targetText: string,
+  durationMs?: number,
+  token?: string,
+): Promise<ReadingEvaluateResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/api/reading/evaluate`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      spoken_text: spokenText,
+      target_text: targetText,
+      duration_ms: durationMs,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `evaluateReading failed: ${res.status}`);
+  }
+
   return res.json();
 }
 

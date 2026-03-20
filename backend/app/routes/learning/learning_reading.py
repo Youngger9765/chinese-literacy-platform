@@ -9,11 +9,12 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
-from ...auth.rate_limiter import ai_limit_5_per_min
+from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
 from ...services.ai_service import generate_reading_analysis, GeminiContentFilterError, CONTENT_FILTER_FRIENDLY_MSG
+from ...services.reading_evaluation_service import evaluate_reading_with_ai
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -234,3 +235,91 @@ async def get_ai_analysis_standalone(
 
     logger.info("Generated standalone AI analysis for user %d", current_user.id)
     return AIAnalysisResponse(**analysis)
+
+
+# ── Reading Evaluation (Issue #454) ─────────────────────────────────────────
+
+
+class ReadingEvaluateRequest(BaseModel):
+    spoken_text: str = Field(..., description="STT 轉錄結果")
+    target_text: str = Field(..., description="課文原文")
+    duration_ms: int | None = Field(None, description="朗讀時長（毫秒，選填）")
+
+
+class DiffToken(BaseModel):
+    char: str
+    type: str  # "correct" | "forgiven" | "wrong" | "missing" | "extra"
+    spoken: str | None = None
+    reason: str | None = None
+
+
+class ReadingEvalStats(BaseModel):
+    correct_count: int
+    forgiven_count: int
+    wrong_count: int
+    missing_count: int
+    extra_count: int
+
+
+class ReadingEvalThresholds(BaseModel):
+    reading_pass: float
+    reading_excellent: float
+
+
+class ReadingEvaluateResponse(BaseModel):
+    match_rate: float
+    adjusted_match_rate: float
+    tier: int
+    feedback: str
+    cpm: float | None = None
+    diff_tokens: list[DiffToken]
+    stats: ReadingEvalStats
+    thresholds: ReadingEvalThresholds
+    evaluation_method: str  # "ai" | "fallback"
+
+
+@router.post(
+    "/reading/evaluate",
+    response_model=ReadingEvaluateResponse,
+    dependencies=[Depends(ai_limit_10_per_min)],
+    summary="AI 語義朗讀評分 (Issue #454)",
+    description=(
+        "使用 Gemini 2.5 Flash 對學生朗讀進行語義級評分。\n"
+        "支援同音字、近音字、語氣詞通融，並回傳逐字 diff_tokens。\n"
+        "無狀態（不需 session_id）。AI 失敗時自動 fallback 到規則引擎。"
+    ),
+)
+async def evaluate_reading_endpoint(
+    payload: ReadingEvaluateRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Stateless AI reading evaluation. Rate limited: 10 requests per minute."""
+    logger.info(
+        "Reading eval request: user=%d target_len=%d spoken_len=%d",
+        current_user.id,
+        len(payload.target_text),
+        len(payload.spoken_text),
+        extra={
+            "event": "reading_eval_request",
+            "user_id": current_user.id,
+            "target_length": len(payload.target_text),
+        },
+    )
+
+    result = await evaluate_reading_with_ai(
+        spoken_text=payload.spoken_text,
+        target_text=payload.target_text,
+        duration_ms=payload.duration_ms,
+    )
+
+    return ReadingEvaluateResponse(
+        match_rate=result["match_rate"],
+        adjusted_match_rate=result["adjusted_match_rate"],
+        tier=result["tier"],
+        feedback=result["feedback"],
+        cpm=result.get("cpm"),
+        diff_tokens=[DiffToken(**t) for t in result["diff_tokens"]],
+        stats=ReadingEvalStats(**result["stats"]),
+        thresholds=ReadingEvalThresholds(**result["thresholds"]),
+        evaluation_method=result["evaluation_method"],
+    )
