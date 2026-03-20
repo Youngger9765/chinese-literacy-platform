@@ -3,6 +3,8 @@
  * Wraps /api/teacher/my-texts endpoints.
  */
 
+import { onApiUnauthorized } from './sessionGuard';
+
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
 export class TeacherTextsApiError extends Error {
@@ -17,6 +19,7 @@ export class TeacherTextsApiError extends Error {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
+    onApiUnauthorized(res);
     let detail = `HTTP ${res.status}`;
     try {
       const body = await res.json();
