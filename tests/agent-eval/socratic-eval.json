@@ -155,6 +155,16 @@
       "note": "Technically correct but too vague, missing key detail",
       "added": "2026-02-22",
       "source": "proactive"
+    },
+    {
+      "id": "no-unit-jianjin-4000",
+      "input": "將近四千",
+      "expected_understood": true,
+      "question_keyword": "高度|多高|幾公尺|多少公尺",
+      "category": "boundary",
+      "note": "Exact phrasing from story text, no unit — should pass. Fixed: A had bug here",
+      "added": "2026-03-21",
+      "source": "pk-experiment"
     }
   ]
 }
