@@ -4,7 +4,7 @@ import io
 import logging
 from datetime import datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -16,6 +16,7 @@ from ...models.school import ClassroomStudent
 from ...models.session import CharacterError, ErrorCorrection, LearningSession
 from ...models.gamification import StudentStreak, StudentXPLog
 from ...models.user import User
+from ...services.audit_logger import AuditAction, audit_log_endpoint
 from .teacher_schemas import ErrorVocabItem
 
 router = APIRouter(tags=["teacher"])
@@ -81,6 +82,7 @@ def get_classroom_error_vocab(
 @router.get("/teacher/classrooms/{classroom_id}/export")
 def export_classroom_report(
     classroom_id: int,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -90,6 +92,12 @@ def export_classroom_report(
              已掌握生字, 連續學習天數, 累積XP, 最近學習日期
     """
     classroom = _check_classroom_access(current_user, classroom_id, db)
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.EXPORT_REPORT,
+        user_id=current_user.id,
+        target_student_id=None,
+    )
 
     enrollments = (
         db.query(ClassroomStudent)
