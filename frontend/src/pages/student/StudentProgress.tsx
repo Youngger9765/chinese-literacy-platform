@@ -82,7 +82,7 @@ const TextCard: React.FC<{ item: TextProgressItem }> = ({ item }) => {
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-gray-900 truncate">{item.story_slug}</p>
+          <p className="text-sm font-semibold text-gray-900 truncate">{item.story_title ?? item.story_slug}</p>
           <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
             <span>開始：{new Date(item.started_at).toLocaleDateString('zh-TW')}</span>
             {item.overall_score != null && (
