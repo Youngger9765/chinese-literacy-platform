@@ -85,11 +85,14 @@ def list_stories(
 def get_story(story_id: str):
     """Get full story detail by ID (lesson_number).
 
-    Accepts a numeric string (e.g. "3"). Non-numeric or unknown IDs return 404.
+    Accepts a numeric string (e.g. "3") or L-prefixed format (e.g. "L06").
+    Non-numeric or unknown IDs return 404.
     This prevents 422 errors when legacy sessions store slug-format story_slugs.
     """
+    # Normalize "L06" → "6" format (assignments store story_id with L-prefix)
+    normalized = story_id.lstrip("Ll")
     try:
-        numeric_id = int(story_id)
+        numeric_id = int(normalized)
     except (ValueError, TypeError):
         raise HTTPException(status_code=404, detail="Story not found")
     story = get_lesson_by_id(numeric_id)

@@ -7,7 +7,11 @@
  *   Exactly one of story_id or text_id is set on each assignment.
  */
 
+import { onApiUnauthorized } from './sessionGuard';
+
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+
+const inFlightMyAssignments = new Map<string, Promise<StudentAssignmentResponse[]>>();
 
 // --- Response types ---
 
@@ -115,6 +119,7 @@ function authHeaders(token: string): Record<string, string> {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
+    onApiUnauthorized(res);
     let message = `Request failed: ${res.status}`;
     try {
       const body = await res.json();
@@ -215,11 +220,24 @@ export async function updateAssignment(
 export async function getMyAssignments(
   token: string,
 ): Promise<StudentAssignmentResponse[]> {
-  const res = await fetch(
-    `${API_BASE}/api/assignments/my`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<StudentAssignmentResponse[]>(res);
+  const existing = inFlightMyAssignments.get(token);
+  if (existing) {
+    return existing;
+  }
+
+  const request = (async () => {
+    const res = await fetch(
+      `${API_BASE}/api/assignments/my`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    return handleResponse<StudentAssignmentResponse[]>(res);
+  })();
+  inFlightMyAssignments.set(token, request);
+  try {
+    return await request;
+  } finally {
+    inFlightMyAssignments.delete(token);
+  }
 }
 
 /** Delete an assignment and all its submissions. Teacher or admin only. */
@@ -235,6 +253,7 @@ export async function deleteAssignment(
     },
   );
   if (!res.ok) {
+    onApiUnauthorized(res);
     let message = `Request failed: ${res.status}`;
     try {
       const body = await res.json();

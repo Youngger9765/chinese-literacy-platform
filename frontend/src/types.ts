@@ -69,12 +69,39 @@ export interface ReadingAttempt {
   lineBreakdown?: LineBreakdown[];
 }
 
-export type DiffType = 'correct' | 'wrong' | 'missing' | 'extra';
+export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra';
 
 export interface DiffToken {
   char: string;
   type: DiffType;
   expected?: string;
+  spoken?: string;
+  reason?: string;
+}
+
+export interface ReadingEvalStats {
+  correct_count: number;
+  forgiven_count: number;
+  wrong_count: number;
+  missing_count: number;
+  extra_count: number;
+}
+
+export interface ReadingEvalThresholds {
+  reading_pass: number;
+  reading_excellent: number;
+}
+
+export interface ReadingEvaluateResponse {
+  match_rate: number;
+  adjusted_match_rate: number;
+  tier: 1 | 2 | 3;
+  feedback: string;
+  cpm: number | null;
+  diff_tokens: DiffToken[];
+  stats: ReadingEvalStats;
+  thresholds: ReadingEvalThresholds;
+  evaluation_method: 'ai' | 'fallback';
 }
 
 export interface LineBreakdown {

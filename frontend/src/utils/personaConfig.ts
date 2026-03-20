@@ -3,7 +3,8 @@
  * Issue #54: Unified "warm but firm" AI tutor persona across all steps.
  */
 
-// LiveTutor per-line reading thresholds
+// LiveTutor per-line reading thresholds (frontend fallback defaults).
+// Primary thresholds should come from backend /api/reading/evaluate response.
 export const READING_EXCELLENT = 0.80; // ≥80%: 很棒
 export const READING_PASS = 0.60; // ≥60%: 很好，過關
 // <60%: 重唸

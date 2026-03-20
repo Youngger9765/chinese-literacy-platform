@@ -4,7 +4,7 @@
  * Sessions are split into "進行中" and "已完成" tabs.
  *
  * Route: /history
- * Issue #242, #553
+ * Issue #242, #553, #580
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -72,7 +72,7 @@ const SessionCard: React.FC<{ s: LearningSummary; onNavigate: (path: string) => 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-medium text-gray-900 truncate">
-              {s.story_slug ?? '未知課文'}
+              {s.story_title ?? s.story_slug ?? '未知課文'}
             </h3>
             <StatusBadge status={s.status} />
           </div>
@@ -95,7 +95,15 @@ const SessionCard: React.FC<{ s: LearningSummary; onNavigate: (path: string) => 
 
         {/* Actions */}
         <div className="flex flex-col gap-2 shrink-0">
-          {hasDialogue && (
+          {s.status === 'completed' && (
+            <button
+              onClick={() => onNavigate(`/sessions/${s.id}/report`)}
+              className="px-3 py-1.5 rounded-lg border border-accent text-accent text-xs font-medium hover:bg-accent-bg transition-colors cursor-pointer"
+            >
+              查看報告
+            </button>
+          )}
+          {hasDialogue && s.status !== 'completed' && (
             <button
               onClick={() => onNavigate(`/sessions/${s.id}/dialogue`)}
               className="px-3 py-1.5 rounded-lg border border-accent text-accent text-xs font-medium hover:bg-accent-bg transition-colors cursor-pointer"
@@ -106,7 +114,7 @@ const SessionCard: React.FC<{ s: LearningSummary; onNavigate: (path: string) => 
           {s.status === 'in_progress' && s.story_slug && !isNaN(Number(s.story_slug)) && (
             <button
               onClick={() => onNavigate(`/learn/${s.story_slug}/intro`)}
-              className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 text-xs font-medium transition-colors cursor-pointer"
             >
               繼續
             </button>
@@ -162,8 +170,19 @@ const LearningHistory: React.FC = () => {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Page title */}
         <div>
-          <h1 className="text-xl font-bold text-gray-900">學習記錄</h1>
-          <p className="text-sm text-gray-500 mt-1">查看過去的課文學習和理解對話</p>
+          <h1 className="text-xl font-bold text-gray-900">對話記錄</h1>
+          <p className="text-sm text-gray-500 mt-1">每次學習的詳細紀錄，可查看 AI 課文理解對話</p>
+        </div>
+
+        {/* Cross-link to /progress */}
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 text-sm">
+          <span className="text-blue-700">想追蹤每篇課文的六步驟完成狀況？</span>
+          <button
+            onClick={() => navigate('/progress')}
+            className="ml-3 shrink-0 text-xs font-medium text-blue-600 hover:text-blue-800 underline cursor-pointer"
+          >
+            前往學習進度
+          </button>
         </div>
 
         {/* Error */}

@@ -3,6 +3,8 @@
  * Follows the same pattern as classroomApi.ts.
  */
 
+import { onApiUnauthorized } from './sessionGuard';
+
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // --- Response types ---
@@ -54,6 +56,7 @@ function authHeaders(token: string): Record<string, string> {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
+    onApiUnauthorized(res);
     let message = `Request failed: ${res.status}`;
     try {
       const body = await res.json();
@@ -203,6 +206,7 @@ export async function unassignText(
     },
   );
   if (!res.ok) {
+    onApiUnauthorized(res);
     let message = `Request failed: ${res.status}`;
     try {
       const body = await res.json();
@@ -219,7 +223,10 @@ export async function exportClassroomReport(token: string, classroomId: number):
   const res = await fetch(`${API_BASE}/api/teacher/classrooms/${classroomId}/export`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!res.ok) throw new TeacherApiError('Export failed', res.status);
+  if (!res.ok) {
+    onApiUnauthorized(res);
+    throw new TeacherApiError('Export failed', res.status);
+  }
   return res.blob();
 }
 
@@ -305,6 +312,7 @@ export async function removeStudentTag(
     },
   );
   if (!res.ok) {
+    onApiUnauthorized(res);
     let message = `Request failed: ${res.status}`;
     try {
       const body = await res.json();

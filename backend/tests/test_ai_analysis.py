@@ -30,6 +30,7 @@ from app.main import app
 from app.database import get_db
 from app.models import Base
 from app.models.user import Role
+from app.models.session import LearningSession
 
 # ---------------------------------------------------------------------------
 # Test database setup
@@ -194,7 +195,7 @@ def _create_session(client, token: str, slug: str = "ai-test") -> int:
 
 
 class TestSessionBasedAIAnalysis:
-    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_returns_analysis_for_valid_session(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS
         session_id = _create_session(client, user_a["token"], "analysis-valid")
@@ -213,7 +214,7 @@ class TestSessionBasedAIAnalysis:
         assert data["encouragement_message"] == MOCK_ANALYSIS["encouragement_message"]
         mock_gen.assert_called_once()
 
-    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_cached_analysis_returned_without_calling_gemini(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS
         session_id = _create_session(client, user_a["token"], "analysis-cache")
@@ -265,7 +266,7 @@ class TestSessionBasedAIAnalysis:
         )
         assert resp.status_code == 401
 
-    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_response_schema(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS
         session_id = _create_session(client, user_a["token"], "analysis-schema")
@@ -285,7 +286,7 @@ class TestSessionBasedAIAnalysis:
         assert len(data["strengths"]) > 0
         assert len(data["practice_suggestions"]) > 0
 
-    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_503_when_gemini_fails(self, mock_gen, client, user_a):
         mock_gen.side_effect = RuntimeError("Gemini connection error")
         session_id = _create_session(client, user_a["token"], "analysis-503")
@@ -298,7 +299,7 @@ class TestSessionBasedAIAnalysis:
         assert resp.status_code == 503
         assert "AI service" in resp.json()["detail"]
 
-    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_503_on_timeout(self, mock_gen, client, user_a):
         mock_gen.side_effect = TimeoutError("AI response timeout (30s)")
         session_id = _create_session(client, user_a["token"], "analysis-timeout")
@@ -311,6 +312,42 @@ class TestSessionBasedAIAnalysis:
         assert resp.status_code == 503
         assert "timeout" in resp.json()["detail"].lower()
 
+    @patch(
+        "app.routes.learning.learning_reading.generate_reading_analysis",
+        new_callable=AsyncMock,
+    )
+    def test_legacy_cache_skipped_when_enrichment_added_issue_540(
+        self, mock_gen, client, user_a
+    ):
+        """#540: Flat cached analysis must not win once client sends comprehension/vocab data."""
+        mock_gen.return_value = MOCK_ANALYSIS
+        session_id = _create_session(client, user_a["token"], "analysis-540-legacy")
+
+        db = TestingSessionLocal()
+        row = db.query(LearningSession).filter(LearningSession.id == session_id).one()
+        row.ai_analysis = json.dumps(MOCK_ANALYSIS, ensure_ascii=False)
+        db.commit()
+        db.close()
+
+        rich_payload = {**ANALYSIS_PAYLOAD, "comprehension_score": 82.0}
+        resp = client.post(
+            f"/api/learning/sessions/{session_id}/ai-analysis",
+            json=rich_payload,
+            headers=auth_header(user_a["token"]),
+        )
+        assert resp.status_code == 200
+        mock_gen.assert_called_once()
+
+        # Second identical request hits v2 cache — no extra Gemini call
+        resp2 = client.post(
+            f"/api/learning/sessions/{session_id}/ai-analysis",
+            json=rich_payload,
+            headers=auth_header(user_a["token"]),
+        )
+        assert resp2.status_code == 200
+        assert resp2.json() == resp.json()
+        assert mock_gen.call_count == 1
+
 
 # ===========================================================================
 # POST /api/learning/ai-analysis — Standalone
@@ -318,7 +355,7 @@ class TestSessionBasedAIAnalysis:
 
 
 class TestStandaloneAIAnalysis:
-    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_standalone_returns_analysis(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS
 
@@ -340,7 +377,7 @@ class TestStandaloneAIAnalysis:
         )
         assert resp.status_code == 401
 
-    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_standalone_503_when_gemini_fails(self, mock_gen, client, user_a):
         mock_gen.side_effect = RuntimeError("Gemini unavailable")
 
@@ -369,7 +406,7 @@ class TestStandaloneAIAnalysis:
         )
         assert resp.status_code == 422
 
-    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_standalone_response_schema(self, mock_gen, client, user_a):
         mock_gen.return_value = MOCK_ANALYSIS
 
@@ -385,7 +422,7 @@ class TestStandaloneAIAnalysis:
         }
         assert set(data.keys()) == expected_keys
 
-    @patch("app.routes.learning.generate_reading_analysis", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_reading.generate_reading_analysis", new_callable=AsyncMock)
     def test_standalone_accepts_comprehension_and_vocab_data(self, mock_gen, client, user_a):
         """Issue #415: AI analysis should accept optional comprehension and vocab data."""
         mock_gen.return_value = MOCK_ANALYSIS

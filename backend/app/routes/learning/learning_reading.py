@@ -9,14 +9,27 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
-from ...auth.rate_limiter import ai_limit_5_per_min
+from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
 from ...services.ai_service import generate_reading_analysis, GeminiContentFilterError, CONTENT_FILTER_FRIENDLY_MSG
+from ...services.reading_evaluation_service import evaluate_reading_with_ai
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+# Session.ai_analysis cache: v2 wraps response + enrichment fingerprint so we can
+# invalidate when the client sends richer data (Fixes #540 — stale cache after
+# comprehension/vocab/dictation completes).
+AI_ANALYSIS_CACHE_V2 = "ai_analysis_v2"
+_LEGACY_ANALYSIS_KEYS = frozenset({
+    "analysis_summary",
+    "strengths",
+    "areas_for_improvement",
+    "practice_suggestions",
+    "encouragement_message",
+})
 
 
 class AIAnalysisRequest(BaseModel):
@@ -41,6 +54,67 @@ class AIAnalysisResponse(BaseModel):
     encouragement_message: str
 
 
+def _enrichment_cache_signature(payload: AIAnalysisRequest) -> str:
+    """Stable string for comparing which optional metrics were included in the request."""
+    c = payload.comprehension_score
+    if c is not None:
+        c = round(float(c), 4)
+    parts = [
+        c,
+        payload.vocab_practiced_count,
+        payload.vocab_total_count,
+        payload.dictation_correct_count,
+        payload.dictation_total_count,
+    ]
+    return json.dumps(parts, separators=(",", ":"), ensure_ascii=False)
+
+
+def _try_return_cached_ai_analysis(
+    raw: str | None,
+    payload: AIAnalysisRequest,
+) -> AIAnalysisResponse | None:
+    """Return cached AIAnalysisResponse if still valid for this payload; else None."""
+    if not raw:
+        return None
+    try:
+        data = json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        return None
+    if not isinstance(data, dict):
+        return None
+
+    sig = _enrichment_cache_signature(payload)
+
+    if data.get("format") == AI_ANALYSIS_CACHE_V2:
+        if data.get("enrichment_sig") == sig:
+            resp = data.get("response")
+            if isinstance(resp, dict) and _LEGACY_ANALYSIS_KEYS.issubset(resp.keys()):
+                return AIAnalysisResponse(**{k: resp[k] for k in _LEGACY_ANALYSIS_KEYS})
+        return None
+
+    # Legacy: flat response JSON only (pre-#540). If the client now sends any
+    # enrichment, ignore cache — it was generated without cross-step context.
+    if _LEGACY_ANALYSIS_KEYS.issubset(data.keys()):
+        if sig != "[null,null,null,null,null]":
+            logger.info("Ignoring legacy AI analysis cache — request has enrichment data")
+            return None
+        try:
+            return AIAnalysisResponse(**{k: data[k] for k in _LEGACY_ANALYSIS_KEYS})
+        except Exception:
+            return None
+
+    return None
+
+
+def _wrap_ai_analysis_for_cache(analysis: dict, payload: AIAnalysisRequest) -> str:
+    wrapped = {
+        "format": AI_ANALYSIS_CACHE_V2,
+        "enrichment_sig": _enrichment_cache_signature(payload),
+        "response": analysis,
+    }
+    return json.dumps(wrapped, ensure_ascii=False)
+
+
 @router.post(
     "/learning/sessions/{session_id}/ai-analysis",
     response_model=AIAnalysisResponse,
@@ -54,9 +128,10 @@ async def get_ai_analysis(
 ):
     """Generate AI reading diagnosis and improvement suggestions.
 
-    If the session already has a cached analysis, returns it immediately
-    without calling Gemini again. Otherwise calls Gemini and caches the
-    result in the session's ai_analysis column.
+    Caches in ``session.ai_analysis`` with an enrichment fingerprint (#540).
+    Legacy flat JSON caches are ignored when the client sends comprehension /
+    vocab / dictation metrics so the report can regenerate after later steps
+    complete.
 
     Rate limited: 5 requests per minute per user/IP.
     """
@@ -66,13 +141,13 @@ async def get_ai_analysis(
     if session.student_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your session")
 
-    # Return cached result if available
+    cached_resp = _try_return_cached_ai_analysis(session.ai_analysis, payload)
+    if cached_resp is not None:
+        return cached_resp
     if session.ai_analysis:
         try:
-            cached = json.loads(session.ai_analysis)
-            return AIAnalysisResponse(**cached)
+            json.loads(session.ai_analysis)
         except (json.JSONDecodeError, TypeError):
-            # Corrupted cache — regenerate
             logger.warning("Corrupted ai_analysis cache for session %d, regenerating", session_id)
 
     # Call Gemini
@@ -105,8 +180,8 @@ async def get_ai_analysis(
         logger.error("AI analysis generation failed for session %d: %s", session_id, e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
 
-    # Cache the result
-    session.ai_analysis = json.dumps(analysis, ensure_ascii=False)
+    # Cache the result (versioned + enrichment fingerprint — #540)
+    session.ai_analysis = _wrap_ai_analysis_for_cache(analysis, payload)
     db.commit()
 
     logger.info("Generated AI analysis for session %d", session_id)
@@ -160,3 +235,91 @@ async def get_ai_analysis_standalone(
 
     logger.info("Generated standalone AI analysis for user %d", current_user.id)
     return AIAnalysisResponse(**analysis)
+
+
+# ── Reading Evaluation (Issue #454) ─────────────────────────────────────────
+
+
+class ReadingEvaluateRequest(BaseModel):
+    spoken_text: str = Field(..., description="STT 轉錄結果")
+    target_text: str = Field(..., description="課文原文")
+    duration_ms: int | None = Field(None, description="朗讀時長（毫秒，選填）")
+
+
+class DiffToken(BaseModel):
+    char: str
+    type: str  # "correct" | "forgiven" | "wrong" | "missing" | "extra"
+    spoken: str | None = None
+    reason: str | None = None
+
+
+class ReadingEvalStats(BaseModel):
+    correct_count: int
+    forgiven_count: int
+    wrong_count: int
+    missing_count: int
+    extra_count: int
+
+
+class ReadingEvalThresholds(BaseModel):
+    reading_pass: float
+    reading_excellent: float
+
+
+class ReadingEvaluateResponse(BaseModel):
+    match_rate: float
+    adjusted_match_rate: float
+    tier: int
+    feedback: str
+    cpm: float | None = None
+    diff_tokens: list[DiffToken]
+    stats: ReadingEvalStats
+    thresholds: ReadingEvalThresholds
+    evaluation_method: str  # "ai" | "fallback"
+
+
+@router.post(
+    "/reading/evaluate",
+    response_model=ReadingEvaluateResponse,
+    dependencies=[Depends(ai_limit_10_per_min)],
+    summary="AI 語義朗讀評分 (Issue #454)",
+    description=(
+        "使用 Gemini 2.5 Flash 對學生朗讀進行語義級評分。\n"
+        "支援同音字、近音字、語氣詞通融，並回傳逐字 diff_tokens。\n"
+        "無狀態（不需 session_id）。AI 失敗時自動 fallback 到規則引擎。"
+    ),
+)
+async def evaluate_reading_endpoint(
+    payload: ReadingEvaluateRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Stateless AI reading evaluation. Rate limited: 10 requests per minute."""
+    logger.info(
+        "Reading eval request: user=%d target_len=%d spoken_len=%d",
+        current_user.id,
+        len(payload.target_text),
+        len(payload.spoken_text),
+        extra={
+            "event": "reading_eval_request",
+            "user_id": current_user.id,
+            "target_length": len(payload.target_text),
+        },
+    )
+
+    result = await evaluate_reading_with_ai(
+        spoken_text=payload.spoken_text,
+        target_text=payload.target_text,
+        duration_ms=payload.duration_ms,
+    )
+
+    return ReadingEvaluateResponse(
+        match_rate=result["match_rate"],
+        adjusted_match_rate=result["adjusted_match_rate"],
+        tier=result["tier"],
+        feedback=result["feedback"],
+        cpm=result.get("cpm"),
+        diff_tokens=[DiffToken(**t) for t in result["diff_tokens"]],
+        stats=ReadingEvalStats(**result["stats"]),
+        thresholds=ReadingEvalThresholds(**result["thresholds"]),
+        evaluation_method=result["evaluation_method"],
+    )

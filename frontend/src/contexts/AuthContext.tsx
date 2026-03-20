@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, googleLogin as apiGoogleLogin, AuthUser, AuthError, RegisterResponse } from '../services/authApi';
+import { SESSION_UNAUTHORIZED_EVENT } from '../services/sessionGuard';
 
 const TOKEN_KEY = 'lingoleap_token';
 
@@ -113,6 +114,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setMustChangePassword(false);
     setLoginPassword(null);
   }, []);
+
+  // Any service that gets 401 (expired / invalid JWT) should fire this event so we
+  // don't keep showing "logged in" while classroom tabs fail.
+  useEffect(() => {
+    const handler = () => {
+      logout();
+    };
+    window.addEventListener(SESSION_UNAUTHORIZED_EVENT, handler);
+    return () => window.removeEventListener(SESSION_UNAUTHORIZED_EVENT, handler);
+  }, [logout]);
 
   const clearMustChangePassword = useCallback(() => {
     setMustChangePassword(false);

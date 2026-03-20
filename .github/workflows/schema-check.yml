@@ -1,0 +1,32 @@
+name: Schema Drift Check
+
+on:
+  pull_request:
+    paths:
+      - 'backend/app/models/**'
+      - 'backend/alembic/versions/**'
+      - 'backend/scripts/check_model_coverage.py'
+  push:
+    branches:
+      - staging
+      - main
+    paths:
+      - 'backend/app/models/**'
+      - 'backend/alembic/versions/**'
+
+jobs:
+  schema-drift:
+    name: Detect Model / Migration Drift
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run schema drift check
+        run: python backend/scripts/check_model_coverage.py

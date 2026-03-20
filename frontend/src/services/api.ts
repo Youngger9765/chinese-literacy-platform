@@ -5,9 +5,12 @@
  * Environment variable: VITE_API_URL (default: http://localhost:8000)
  */
 
-import type { Story } from '../types';
+import type { ReadingEvaluateResponse, Story } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+
+const inFlightStoryById = new Map<string, Promise<Story>>();
+const inFlightStudentProgress = new Map<string, Promise<StudentProgressResponse>>();
 
 export class SessionExpiredError extends Error {
   constructor(message: string) {
@@ -108,10 +111,24 @@ export async function fetchStories(token?: string): Promise<{ stories: Story[]; 
 }
 
 export async function fetchStory(id: string): Promise<Story> {
-  const res = await fetch(`${API_BASE}/api/stories/${id}`);
-  if (!res.ok) throw new Error(`fetchStory failed: ${res.status}`);
-  const data: ApiStoryDetail = await res.json();
-  return apiDetailToStory(data);
+  const existing = inFlightStoryById.get(id);
+  if (existing) {
+    return existing;
+  }
+
+  const request = (async () => {
+    const res = await fetch(`${API_BASE}/api/stories/${id}`);
+    if (!res.ok) throw new Error(`fetchStory failed: ${res.status}`);
+    const data: ApiStoryDetail = await res.json();
+    return apiDetailToStory(data);
+  })();
+
+  inFlightStoryById.set(id, request);
+  try {
+    return await request;
+  } finally {
+    inFlightStoryById.delete(id);
+  }
 }
 
 export async function createLearningSession(payload: {
@@ -124,6 +141,35 @@ export async function createLearningSession(payload: {
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error(`createLearningSession failed: ${res.status}`);
+  return res.json();
+}
+
+// --- Reading Evaluation API (Issue #454, frontend integration) ---
+
+export async function evaluateReading(
+  spokenText: string,
+  targetText: string,
+  durationMs?: number,
+  token?: string,
+): Promise<ReadingEvaluateResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/api/reading/evaluate`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      spoken_text: spokenText,
+      target_text: targetText,
+      duration_ms: durationMs,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `evaluateReading failed: ${res.status}`);
+  }
+
   return res.json();
 }
 
@@ -429,12 +475,46 @@ export async function fetchLearningSessions(
 export interface LearningSummary {
   id: number;
   story_slug: string | null;
+  story_title: string | null;
   status: string;
   current_step: number;
   accuracy: number | null;
   overall_score: number | null;
   started_at: string;
   completed_at: string | null;
+}
+
+// --- Session Detail / Report (Issue #580) ---
+
+export interface SessionDetailResponse {
+  id: number;
+  story_slug: string | null;
+  status: string;
+  current_step: number;
+  accuracy: number | null;
+  overall_score: number | null;
+  started_at: string;
+  completed_at: string | null;
+  reading_result: Record<string, unknown> | null;
+  comprehension_result: Record<string, unknown> | null;
+  vocab_result: Record<string, unknown> | null;
+  full_reading_result: Record<string, unknown> | null;
+  comprehension_score: number | null;
+  literal_score: number | null;
+  inferential_score: number | null;
+  evaluative_score: number | null;
+  comprehension_feedback: string | null;
+}
+
+export async function fetchSessionReport(
+  token: string,
+  sessionId: number,
+): Promise<SessionDetailResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/report`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`fetchSessionReport failed: ${res.status}`);
+  return res.json();
 }
 
 // --- Error Correction API (Issue #248) ---
@@ -560,6 +640,7 @@ export interface NextStepRec {
 
 export interface TextProgressItem {
   story_slug: string;
+  story_title: string | null;
   latest_session_id: number;
   status: string;
   steps: StepStatusItem[];
@@ -583,11 +664,26 @@ export async function getStudentProgress(
   token: string,
   studentId: number,
 ): Promise<StudentProgressResponse> {
-  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/progress`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error(`getStudentProgress failed: ${res.status}`);
-  return res.json();
+  const key = `${studentId}:${token}`;
+  const existing = inFlightStudentProgress.get(key);
+  if (existing) {
+    return existing;
+  }
+
+  const request = (async () => {
+    const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/progress`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(`getStudentProgress failed: ${res.status}`);
+    return res.json() as Promise<StudentProgressResponse>;
+  })();
+
+  inFlightStudentProgress.set(key, request);
+  try {
+    return await request;
+  } finally {
+    inFlightStudentProgress.delete(key);
+  }
 }
 
 export async function markErrorCorrected(
