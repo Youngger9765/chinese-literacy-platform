@@ -7,6 +7,7 @@ import {
   ClassroomResponse,
   ClassroomApiError,
 } from '../../services/classroomApi';
+import SchoolSwitcher from '../../components/teacher/SchoolSwitcher';
 
 interface TeacherDashboardProps {
   onSelectClassroom: (classroomId: number) => void;
@@ -14,9 +15,8 @@ interface TeacherDashboardProps {
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }) => {
   const { token, user } = useAuth();
-  const { activeSchoolId: teacherSchoolId } = useWorkspace();
+  const { activeSchoolId: teacherSchoolId, hasMultipleSchools } = useWorkspace();
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
-  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -31,15 +31,22 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
-  const filteredClassrooms = useMemo(() => {
-    return classrooms
+  /**
+   * When the teacher is in multiple schools, filter classrooms to the
+   * currently-selected school. Single-school teachers see all classrooms.
+   */
+  const visibleClassrooms = useMemo(() => {
+    const base = hasMultipleSchools && teacherSchoolId != null
+      ? classrooms.filter((cr) => cr.school_id === teacherSchoolId)
+      : classrooms;
+    return base
       .filter((cr) => !searchQuery || cr.name.toLowerCase().includes(searchQuery.toLowerCase()))
       .sort((a, b) => {
         if (sortBy === 'grade') return (a.grade ?? 99) - (b.grade ?? 99);
         if (sortBy === 'students') return b.student_count - a.student_count;
         return a.name.localeCompare(b.name, 'zh-TW');
       });
-  }, [classrooms, searchQuery, sortBy]);
+  }, [classrooms, searchQuery, sortBy, hasMultipleSchools, teacherSchoolId]);
 
   const loadClassrooms = useCallback(async () => {
     if (!token) return;
@@ -48,7 +55,6 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
     try {
       const data = await listMyClassrooms(token);
       setClassrooms(data.items);
-      setTotal(data.total);
     } catch (err) {
       if (err instanceof ClassroomApiError) {
         setError(err.message);
@@ -111,23 +117,32 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
     </div>
   );
 
+  // Count used in the subtitle: visible after school filter, before text search
+  const schoolFilteredCount = hasMultipleSchools && teacherSchoolId != null
+    ? classrooms.filter((cr) => cr.school_id === teacherSchoolId).length
+    : classrooms.length;
+
   return (
     <div className="flex-1 overflow-y-auto p-6 sm:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Page header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">班級管理</h1>
             <p className="text-sm text-gray-500 mt-1">
-              {isLoading ? '載入中...' : `共 ${total} 個班級`}
+              {isLoading ? '載入中...' : `共 ${schoolFilteredCount} 個班級`}
             </p>
           </div>
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors"
-          >
-            建立班級
-          </button>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            {/* School switcher — only shown when teacher belongs to multiple schools */}
+            <SchoolSwitcher />
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-accent hover:bg-accent-hover text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
+            >
+              建立班級
+            </button>
+          </div>
         </div>
 
         {/* Search & sort */}
@@ -255,16 +270,23 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         )}
 
         {/* No search results */}
-        {!isLoading && !error && classrooms.length > 0 && filteredClassrooms.length === 0 && (
+        {!isLoading && !error && visibleClassrooms.length === 0 && classrooms.length > 0 && searchQuery && (
           <div className="text-center py-8 text-sm text-gray-500">
             找不到符合「{searchQuery}」的班級
           </div>
         )}
 
+        {/* No classrooms in selected school (multi-school, no text query) */}
+        {!isLoading && !error && visibleClassrooms.length === 0 && classrooms.length > 0 && !searchQuery && hasMultipleSchools && (
+          <div className="text-center py-8 text-sm text-gray-500">
+            此學校目前沒有班級
+          </div>
+        )}
+
         {/* Classroom grid */}
-        {!isLoading && !error && filteredClassrooms.length > 0 && (
+        {!isLoading && !error && visibleClassrooms.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredClassrooms.map((cr) => {
+            {visibleClassrooms.map((cr) => {
               const isCoTeacher = user?.id != null && cr.teacher_id !== user.id;
               return (
                 <button
@@ -302,7 +324,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
           </div>
         )}
 
-        {/* Empty state */}
+        {/* Empty state — no classrooms at all */}
         {!isLoading && !error && classrooms.length === 0 && (
           <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-bg rounded-2xl mb-4">
