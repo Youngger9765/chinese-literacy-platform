@@ -49,9 +49,12 @@ logger = logging.getLogger(__name__)
 
 
 def _resolve_story_title_from_yaml(story_id: str) -> str | None:
-    """Resolve a YAML story_id (lesson_number) to its title."""
+    """Resolve a YAML story_id (lesson_number) to its title.
+
+    Accepts both numeric strings ("6") and L-prefixed format ("L06").
+    """
     try:
-        story = get_lesson_by_id(int(story_id))
+        story = get_lesson_by_id(int(story_id.lstrip("Ll")))
         if story:
             return story["title"]
     except (ValueError, TypeError):
@@ -321,8 +324,9 @@ def create_assignment(
 
     if payload.story_id is not None:
         # --- Platform YAML text path ---
+        # Normalize L-prefix format ("L06" → "6") before int() conversion
         try:
-            story = get_lesson_by_id(int(payload.story_id))
+            story = get_lesson_by_id(int(payload.story_id.lstrip("Ll")))
         except (ValueError, TypeError):
             story = None
         if not story:
