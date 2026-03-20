@@ -13,7 +13,11 @@ class AssignmentCreateRequest(BaseModel):
     Exactly one of `story_id` (YAML platform text) or `text_id` (DB text)
     must be provided.  The backend will apply the appropriate copy strategy.
     """
-    classroom_id: int
+    # Classroom id is carried by the path parameter in
+    # POST /api/classrooms/{classroom_id}/assignments.
+    # Keep this optional for backward compatibility with older clients
+    # that still send classroom_id in the request body.
+    classroom_id: int | None = None
     # YAML platform text — lesson_number as string (e.g. "1", "57")
     story_id: str | None = Field(None, min_length=1, max_length=50)
     # DB text — id in the texts table

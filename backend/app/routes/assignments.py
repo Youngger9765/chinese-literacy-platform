@@ -12,6 +12,7 @@ import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -306,6 +307,12 @@ def create_assignment(
 
     Then bulk-creates pending submissions for all enrolled students.
     """
+    if payload.classroom_id is not None and payload.classroom_id != classroom_id:
+        raise HTTPException(
+            status_code=422,
+            detail="classroom_id in request body must match classroom_id in path",
+        )
+
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_owner_or_admin(classroom, current_user, db)
 
@@ -356,7 +363,13 @@ def create_assignment(
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .all()
     )
+    # Defensive dedupe: legacy/corrupt data may contain repeated student links.
+    # Avoid unique constraint conflicts on (assignment_id, student_id).
+    unique_student_ids: set[int] = set()
     for enrollment in enrollments:
+        if enrollment.student_id in unique_student_ids:
+            continue
+        unique_student_ids.add(enrollment.student_id)
         submission = AssignmentSubmission(
             assignment_id=assignment.id,
             student_id=enrollment.student_id,
@@ -364,7 +377,14 @@ def create_assignment(
         )
         db.add(submission)
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=422,
+            detail="Failed to create assignment due to invalid or conflicting classroom/student data",
+        )
     db.refresh(assignment)
 
     logger.info(

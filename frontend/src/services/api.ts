@@ -9,6 +9,9 @@ import type { Story } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
+const inFlightStoryById = new Map<string, Promise<Story>>();
+const inFlightStudentProgress = new Map<string, Promise<StudentProgressResponse>>();
+
 export class SessionExpiredError extends Error {
   constructor(message: string) {
     super(message);
@@ -108,10 +111,24 @@ export async function fetchStories(token?: string): Promise<{ stories: Story[]; 
 }
 
 export async function fetchStory(id: string): Promise<Story> {
-  const res = await fetch(`${API_BASE}/api/stories/${id}`);
-  if (!res.ok) throw new Error(`fetchStory failed: ${res.status}`);
-  const data: ApiStoryDetail = await res.json();
-  return apiDetailToStory(data);
+  const existing = inFlightStoryById.get(id);
+  if (existing) {
+    return existing;
+  }
+
+  const request = (async () => {
+    const res = await fetch(`${API_BASE}/api/stories/${id}`);
+    if (!res.ok) throw new Error(`fetchStory failed: ${res.status}`);
+    const data: ApiStoryDetail = await res.json();
+    return apiDetailToStory(data);
+  })();
+
+  inFlightStoryById.set(id, request);
+  try {
+    return await request;
+  } finally {
+    inFlightStoryById.delete(id);
+  }
 }
 
 export async function createLearningSession(payload: {
@@ -583,11 +600,26 @@ export async function getStudentProgress(
   token: string,
   studentId: number,
 ): Promise<StudentProgressResponse> {
-  const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/progress`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error(`getStudentProgress failed: ${res.status}`);
-  return res.json();
+  const key = `${studentId}:${token}`;
+  const existing = inFlightStudentProgress.get(key);
+  if (existing) {
+    return existing;
+  }
+
+  const request = (async () => {
+    const res = await fetch(`${API_BASE}/api/learning/students/${studentId}/progress`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(`getStudentProgress failed: ${res.status}`);
+    return res.json() as Promise<StudentProgressResponse>;
+  })();
+
+  inFlightStudentProgress.set(key, request);
+  try {
+    return await request;
+  } finally {
+    inFlightStudentProgress.delete(key);
+  }
 }
 
 export async function markErrorCorrected(
