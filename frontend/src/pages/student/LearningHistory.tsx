@@ -4,7 +4,7 @@
  * Sessions are split into "進行中" and "已完成" tabs.
  *
  * Route: /history
- * Issue #242, #553
+ * Issue #242, #553, #580
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -95,7 +95,15 @@ const SessionCard: React.FC<{ s: LearningSummary; onNavigate: (path: string) => 
 
         {/* Actions */}
         <div className="flex flex-col gap-2 shrink-0">
-          {hasDialogue && (
+          {s.status === 'completed' && s.story_slug && (
+            <button
+              onClick={() => onNavigate(`/learn/${s.story_slug}/report`)}
+              className="px-3 py-1.5 rounded-lg border border-accent text-accent text-xs font-medium hover:bg-accent-bg transition-colors cursor-pointer"
+            >
+              查看報告
+            </button>
+          )}
+          {hasDialogue && s.status !== 'completed' && (
             <button
               onClick={() => onNavigate(`/sessions/${s.id}/dialogue`)}
               className="px-3 py-1.5 rounded-lg border border-accent text-accent text-xs font-medium hover:bg-accent-bg transition-colors cursor-pointer"
