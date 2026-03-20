@@ -169,6 +169,17 @@ const StudentProgress: React.FC = () => {
           <p className="text-sm text-gray-500 mt-1">追蹤每篇課文的六步驟完成狀況</p>
         </div>
 
+        {/* Cross-link to /history */}
+        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm">
+          <span className="text-gray-600">想查看每次學習的 AI 對話紀錄？</span>
+          <button
+            onClick={() => navigate('/history')}
+            className="ml-3 shrink-0 text-xs font-medium text-gray-500 hover:text-gray-700 underline cursor-pointer"
+          >
+            前往對話記錄
+          </button>
+        </div>
+
         {/* Error */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">

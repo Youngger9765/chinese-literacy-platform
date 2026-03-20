@@ -114,7 +114,7 @@ const SessionCard: React.FC<{ s: LearningSummary; onNavigate: (path: string) => 
           {s.status === 'in_progress' && s.story_slug && !isNaN(Number(s.story_slug)) && (
             <button
               onClick={() => onNavigate(`/learn/${s.story_slug}/intro`)}
-              className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg border border-blue-400 text-blue-600 hover:bg-blue-50 text-xs font-medium transition-colors cursor-pointer"
             >
               繼續
             </button>
@@ -170,8 +170,19 @@ const LearningHistory: React.FC = () => {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Page title */}
         <div>
-          <h1 className="text-xl font-bold text-gray-900">學習記錄</h1>
-          <p className="text-sm text-gray-500 mt-1">查看過去的課文學習和理解對話</p>
+          <h1 className="text-xl font-bold text-gray-900">對話記錄</h1>
+          <p className="text-sm text-gray-500 mt-1">每次學習的詳細紀錄，可查看 AI 課文理解對話</p>
+        </div>
+
+        {/* Cross-link to /progress */}
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 text-sm">
+          <span className="text-blue-700">想追蹤每篇課文的六步驟完成狀況？</span>
+          <button
+            onClick={() => navigate('/progress')}
+            className="ml-3 shrink-0 text-xs font-medium text-blue-600 hover:text-blue-800 underline cursor-pointer"
+          >
+            前往學習進度
+          </button>
         </div>
 
         {/* Error */}
