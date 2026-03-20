@@ -254,6 +254,22 @@ INVALID_STORY_ID = "99999"
 # ====================================================================
 
 class TestCreateAssignment:
+    def test_create_assignment_without_body_classroom_id(
+        self, client, teacher, classroom_with_students
+    ):
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "story_id": VALID_STORY_ID,
+                "title": "Path Param Classroom Only",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201
+        data = resp.json()
+        assert data["classroom_id"] == classroom_with_students
+        assert data["story_id"] == VALID_STORY_ID
+
     def test_create_assignment_success(self, client, teacher, classroom_with_students):
         resp = client.post(
             f"/api/classrooms/{classroom_with_students}/assignments",

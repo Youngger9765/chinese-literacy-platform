@@ -180,7 +180,10 @@ class GlobalRateLimitMiddleware:
     """
 
     _EXEMPT_PATHS = ("/health", "/docs", "/redoc", "/openapi.json", "/")
-    LIMIT = 60
+    # Read operations are much burstier during UI navigation (route mounts,
+    # parallel data loaders, prefetch). Keep write operations stricter.
+    READ_LIMIT = 300
+    WRITE_LIMIT = 90
     WINDOW = 60  # seconds
 
     def __init__(self, app):
@@ -206,9 +209,12 @@ class GlobalRateLimitMiddleware:
         else:
             client = scope.get("client")
             ip = client[0] if client else "unknown"
-        key = f"global:ip:{ip}"
+        method = scope.get("method", "GET").upper()
+        is_read = method in ("GET", "HEAD", "OPTIONS")
+        limit = self.READ_LIMIT if is_read else self.WRITE_LIMIT
+        key = f"global:ip:{ip}:{'read' if is_read else 'write'}"
 
-        info = general_rate_limiter.check_with_info(key, self.LIMIT, self.WINDOW)
+        info = general_rate_limiter.check_with_info(key, limit, self.WINDOW)
 
         if not info.allowed:
             response = JSONResponse(
@@ -216,14 +222,14 @@ class GlobalRateLimitMiddleware:
                 content={
                     "detail": (
                         "Too many requests. "
-                        f"Limit is {self.LIMIT} requests per {self.WINDOW} seconds per IP. "
+                        f"Limit is {limit} requests per {self.WINDOW} seconds per IP. "
                         f"Please retry after {info.retry_after} seconds."
                     ),
                     "retry_after": info.retry_after,
                 },
                 headers={
                     "Retry-After": str(info.retry_after),
-                    "X-RateLimit-Limit": str(self.LIMIT),
+                    "X-RateLimit-Limit": str(limit),
                     "X-RateLimit-Remaining": "0",
                 },
             )
@@ -232,7 +238,7 @@ class GlobalRateLimitMiddleware:
 
         # Inject rate-limit headers into the response.
         extra_headers = [
-            (b"x-ratelimit-limit", str(self.LIMIT).encode()),
+            (b"x-ratelimit-limit", str(limit).encode()),
             (b"x-ratelimit-remaining", str(info.remaining).encode()),
         ]
 
@@ -275,7 +281,7 @@ app.add_middleware(
 # TenantMiddleware enriches request.state with org context (passive, no blocking)
 app.add_middleware(TenantMiddleware)
 
-# Global rate limiting: 60 req/min per IP for all /api/* endpoints.
+# Global rate limiting: 300 read req/min + 90 write req/min per IP for /api/*.
 # Placed after CORS so CORS preflight OPTIONS requests are not rate-limited.
 app.add_middleware(GlobalRateLimitMiddleware)
 

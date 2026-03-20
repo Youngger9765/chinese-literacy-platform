@@ -11,6 +11,8 @@ import { onApiUnauthorized } from './sessionGuard';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
+const inFlightMyAssignments = new Map<string, Promise<StudentAssignmentResponse[]>>();
+
 // --- Response types ---
 
 // Default reading goals (Issue #84) — mirrors backend defaults
@@ -218,11 +220,24 @@ export async function updateAssignment(
 export async function getMyAssignments(
   token: string,
 ): Promise<StudentAssignmentResponse[]> {
-  const res = await fetch(
-    `${API_BASE}/api/assignments/my`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return handleResponse<StudentAssignmentResponse[]>(res);
+  const existing = inFlightMyAssignments.get(token);
+  if (existing) {
+    return existing;
+  }
+
+  const request = (async () => {
+    const res = await fetch(
+      `${API_BASE}/api/assignments/my`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    return handleResponse<StudentAssignmentResponse[]>(res);
+  })();
+  inFlightMyAssignments.set(token, request);
+  try {
+    return await request;
+  } finally {
+    inFlightMyAssignments.delete(token);
+  }
 }
 
 /** Delete an assignment and all its submissions. Teacher or admin only. */
