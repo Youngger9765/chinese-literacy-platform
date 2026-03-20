@@ -77,7 +77,17 @@ def register_user(client: TestClient, email: str, password: str, name: str = "Te
     return client.post("/api/auth/register", json={"email": email, "password": password, "name": name})
 
 
+def register_and_verify(client: TestClient, email: str, password: str, name: str = "Test User"):
+    """Register a user and verify their email so they can log in."""
+    resp = client.post("/api/auth/register", json={"email": email, "password": password, "name": name})
+    assert resp.status_code == 201
+    token = resp.json()["verification_token"]
+    client.post("/api/auth/verify-email", json={"token": token})
+    return resp
+
+
 def get_auth_token(client: TestClient, email: str, password: str) -> str:
+    register_and_verify(client, email, password)
     resp = client.post("/api/auth/login", json={"email": email, "password": password})
     return resp.json()["access_token"]
 
@@ -153,7 +163,7 @@ class TestRegisterPasswordStrength:
     def test_register_valid_password_succeeds(self, client):
         resp = register_user(client, "user@example.com", "secure123")
         assert resp.status_code == 201
-        assert "access_token" in resp.json()
+        assert "verification_token" in resp.json()  # email verification required (#460)
 
     def test_register_too_short_fails(self, client):
         resp = register_user(client, "user@example.com", "abc1")
@@ -190,7 +200,6 @@ class TestRegisterPasswordStrength:
 class TestChangePasswordStrength:
 
     def test_change_to_weak_password_fails(self, client):
-        register_user(client, "user@example.com", "secure123")
         token = get_auth_token(client, "user@example.com", "secure123")
 
         resp = client.post(
@@ -201,7 +210,6 @@ class TestChangePasswordStrength:
         assert resp.status_code == 422
 
     def test_change_to_strong_password_succeeds(self, client):
-        register_user(client, "user@example.com", "secure123")
         token = get_auth_token(client, "user@example.com", "secure123")
 
         resp = client.post(
@@ -246,7 +254,7 @@ class TestForgotPasswordFlow:
         assert resp.json()["reset_token"] != "account-not-found"
 
     def test_reset_password_with_valid_token(self, client):
-        register_user(client, "user@example.com", "secure123")
+        register_and_verify(client, "user@example.com", "secure123")
 
         # Get reset token
         forgot_resp = client.post("/api/auth/forgot-password", json={"identifier": "user@example.com"})
@@ -260,7 +268,7 @@ class TestForgotPasswordFlow:
         assert resp.status_code == 200
         assert "成功" in resp.json()["message"]
 
-        # Can login with new password
+        # Can login with new password (email already verified)
         login_resp = client.post("/api/auth/login", json={"email": "user@example.com", "password": "newSecure99"})
         assert login_resp.status_code == 200
 
