@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-03-13",
+  "lastReview": "2026-03-20",
   "skills": {
     "1": {
       "level": 3,
@@ -27,14 +27,20 @@
       "maxLevel": 5
     },
     "2": {
-      "level": 1,
+      "level": 2,
       "history": [
         {
           "date": "2026-03-05",
           "level": 1,
           "reason": "PR #224 修改 UI/UX 相關，理解基本 HTML 結構，但改動範圍小"
+        },
+        {
+          "date": "2026-03-20",
+          "level": 2,
+          "reason": "PR #575 改善教師留言按鈕 UI，將 emoji 改為文字按鈕，理解可讀性與使用者體驗，對 HTML 元素的語意使用更有意識"
         }
-      ]
+      ],
+      "maxLevel": 5
     },
     "3": {
       "level": 3,
@@ -70,7 +76,8 @@
           "level": 2,
           "reason": "PR #314 處理本地 DB 連線問題，本地開發環境已跑通"
         }
-      ]
+      ],
+      "maxLevel": 5
     },
     "5": {
       "level": 5,
@@ -93,38 +100,12 @@
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "多次修改程式碼，熟悉專案。"
+          "reason": "多次修改程式碼，熟悉專案"
         },
         {
           "date": "2026-03-13",
           "level": 5,
-          "reason": "多次修改程式碼，且能理解程式碼。"
-        }
-      ],
-      "maxLevel": 5
-    },
-    "10": {
-      "level": 5,
-      "history": [
-        {
-          "date": "2026-03-10",
-          "level": 2,
-          "reason": "修復 IME composition bug（#216），完整執行重現 → 定位 → 修復 → 驗證流程"
-        },
-        {
-          "date": "2026-03-13",
-          "level": 3,
-          "reason": "多次修復 bug"
-        },
-        {
-          "date": "2026-03-13",
-          "level": 4,
-          "reason": "多次修復 Bug，能獨立 Debug。"
-        },
-        {
-          "date": "2026-03-13",
-          "level": 5,
-          "reason": "多次修復 Bug，且有重構意識。"
+          "reason": "多次修改程式碼，且能理解程式碼"
         }
       ],
       "maxLevel": 5
@@ -141,12 +122,12 @@
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "獨立開發語音輸入元件。"
+          "reason": "獨立開發語音輸入元件"
         },
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "能獨立開發 React 元件，品質合格。"
+          "reason": "能獨立開發 React 元件，品質合格"
         },
         {
           "date": "2026-03-13",
@@ -167,12 +148,12 @@
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "修改程式碼時有使用 TypeScript。"
+          "reason": "修改程式碼時有使用 TypeScript"
         },
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "能獨立使用 TypeScript 開發。"
+          "reason": "能獨立使用 TypeScript 開發"
         },
         {
           "date": "2026-03-13",
@@ -193,9 +174,46 @@
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "在元件中使用 Tailwind CSS。"
+          "reason": "在元件中使用 Tailwind CSS"
         }
       ]
+    },
+    "9": {
+      "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-20",
+          "level": 1,
+          "reason": "PR #573 和 PR #575 皆使用 feature branch + PR 流程，commit message 格式遵循 conventional commits（fix: 前綴），工作流程完整"
+        }
+      ]
+    },
+    "10": {
+      "level": 5,
+      "history": [
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "修復 IME composition bug（#216），完整執行重現 → 定位 → 修復 → 驗證流程"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "多次修復 bug"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "多次修復 Bug，能獨立 Debug"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "多次修復 Bug，且有重構意識"
+        }
+      ],
+      "maxLevel": 5
     },
     "12": {
       "level": 5,
@@ -209,12 +227,12 @@
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "成功串接語音輸入 API。"
+          "reason": "成功串接語音輸入 API"
         },
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "能獨立完成 API 串接功能。"
+          "reason": "能獨立完成 API 串接功能"
         },
         {
           "date": "2026-03-13",
@@ -222,14 +240,26 @@
           "reason": "獨立完成語音輸入/輸出功能"
         }
       ]
+    },
+    "14": {
+      "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-20",
+          "level": 1,
+          "reason": "PR #573 新增 backend/tests/test_assignments.py，第一次主動撰寫測試，覆蓋作業發派的 API 行為驗證"
+        }
+      ]
     }
   },
   "recommendations": [
-    "學習 Git 工作流，參與 Code Review (#9)",
-    "學習元件設計模式，提高程式碼品質 (#13)",
-    "學習撰寫測試，確保程式碼品質 (#14)"
+    "Git 工作流（#9）已解鎖，下一步試著在 PR 留言中說明測試方式或截圖，讓 reviewer 更容易理解你的修改",
+    "測試（#14）剛起步，可以為下一個 bug fix 加上 happy path 和 edge case 的測試，練習 TDD 流程",
+    "Tailwind CSS（#8）目前 level 3，挑戰用 Tailwind 做響應式設計（sm:/md:/lg: 前綴），完成後可升級",
+    "考慮挑戰技能 #13（元件設計模式）— PR #573 已經展現跨層理解能力，下一步可以嘗試抽出共用元件或 custom hook"
   ],
-  "summary": "Bug 修復流程完整扎實（#216 IME bug），JS 非同步與事件處理已具備，下一步重點是 commit 規範與 React 元件獨立開發能力",
+  "summary": "PR #573 展現全端能力：理解 API schema 設計、定位 422 錯誤根因、修改前後端並補寫測試，是迄今最完整的一次 bug fix。PR #575 展現對 UI 可讀性的主動意識。新解鎖技能 9（Git 工作流）和技能 14（測試），目前已確認解鎖 12 項技能",
   "issues": [
     {
       "id": "環境建置",
@@ -277,6 +307,25 @@
       "skillsLearned": [6, 7, 8, 12],
       "highlights": ["獨立完成完整功能", "成功串接語音 API", "React 元件設計清晰", "TypeScript 使用正確"],
       "linesChanged": "+180/-20"
+    },
+    {
+      "id": "#568",
+      "title": "修復教師發派作業功能（PR #573）",
+      "date": "2026-03-20",
+      "type": "bugfix",
+      "contribution": "定位並修復作業 API 的 422 錯誤：後端 schema 仍要求 classroom_id 在 body，但 API 已改為 path parameter 傳遞，導致教師無法發派作業。修改 assignments.py、assignment.py schema，並補寫 test_assignments.py 驗證修正",
+      "skillsLearned": [9, 10, 12, 14],
+      "highlights": ["跨越 frontend + backend + 測試三個層面", "第一次主動撰寫後端測試", "理解 API schema 設計與 path parameter 差異", "conventional commit 格式正確"],
+      "linesChanged": "+多行/-多行"
+    },
+    {
+      "id": "#574",
+      "title": "提升留言按鈕 UI 可讀性（PR #575）",
+      "date": "2026-03-20",
+      "type": "bugfix",
+      "contribution": "主動發現教師留言功能只有 emoji，使用者不容易識別，改為文字按鈕提升可讀性",
+      "skillsLearned": [2, 8],
+      "highlights": ["主動發現 UX 問題並提 issue 修復", "改善按鈕語意與可讀性"]
     }
   ]
 }
