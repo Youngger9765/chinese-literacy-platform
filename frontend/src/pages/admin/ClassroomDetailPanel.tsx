@@ -604,7 +604,30 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
                           下載登入資訊
                         </button>
                       </div>
-                      <div className="overflow-x-auto">
+                      {/* Mobile card view */}
+                      <div className="md:hidden space-y-2">
+                        {batchResult.created.map((s) => (
+                          <div key={s.user_id} className="bg-green-50 rounded-lg border border-green-200 p-3 space-y-1.5 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium text-green-900">{s.name}</span>
+                              <span className="text-green-600">座號 {s.seat_number || '-'}</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <span className="text-green-500">帳號</span>
+                                <p className="text-green-800 font-mono break-all">{s.username}</p>
+                              </div>
+                              <div>
+                                <span className="text-green-500">密碼</span>
+                                <p className="text-green-800 font-mono break-all">{s.password}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Desktop table view */}
+                      <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-xs">
                           <thead>
                             <tr className="border-b border-green-200 text-left text-green-700">
@@ -666,7 +689,19 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
                   {batchPreview.length > 0 && (
                     <div>
                       <p className="text-xs text-gray-500 mb-2">預覽：將建立 {batchPreview.length} 位學生</p>
-                      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+
+                      {/* Mobile card view */}
+                      <div className="md:hidden space-y-1.5">
+                        {batchPreview.map((s, i) => (
+                          <div key={i} className="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-3 py-2 text-xs">
+                            <span className="text-gray-900 font-medium">{s.name}</span>
+                            <span className="text-gray-500">座號 {s.seat_number || '-'}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Desktop table view */}
+                      <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-lg">
                         <table className="w-full text-xs">
                           <thead>
                             <tr className="border-b border-gray-100 text-left text-gray-500 bg-gray-50">

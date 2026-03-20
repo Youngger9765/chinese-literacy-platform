@@ -30,6 +30,7 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
     errorMessage,
     elapsedSeconds,
     remainingSeconds,
+    volumeLevel,
     startRecording,
     stopRecording,
     clearRecording,
@@ -117,6 +118,18 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
             </span>
+            {/* Volume indicator — 5 bars */}
+            <div className="flex items-end gap-0.5 h-4" aria-label={`音量 ${Math.round(volumeLevel * 100)}%`}>
+              {[0.1, 0.25, 0.45, 0.65, 0.85].map((threshold, i) => (
+                <div
+                  key={i}
+                  className={`w-1 rounded-sm transition-all duration-75 ${
+                    volumeLevel >= threshold ? 'bg-green-500' : 'bg-gray-300'
+                  }`}
+                  style={{ height: `${8 + i * 2}px` }}
+                />
+              ))}
+            </div>
             <span
               aria-hidden="true"
               className={`text-sm font-mono font-semibold tabular-nums ${

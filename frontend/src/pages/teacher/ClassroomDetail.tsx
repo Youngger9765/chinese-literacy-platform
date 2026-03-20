@@ -12,28 +12,24 @@ import {
 } from '../../services/classroomApi';
 import StudentProgressTab from './StudentProgressTab';
 import TextManagementTab from './TextManagementTab';
-import MyTextsTab from './MyTextsTab';
 import StudentListTab from './StudentListTab';
-import AssignmentTab from './AssignmentTab';
 import ClassroomAnalytics from './ClassroomAnalytics';
 import CrossTextAnalytics from './CrossTextAnalytics';
 import AtRiskStudents from '../../components/teacher/AtRiskStudents';
 import ErrorHeatmapTab from './ErrorHeatmapTab';
 import CoTeachingTab from './CoTeachingTab';
 
-type TabKey = 'progress' | 'texts' | 'my-texts' | 'assignments' | 'students' | 'analytics' | 'cross-text' | 'at-risk' | 'error-heatmap' | 'teachers';
+type TabKey = 'progress' | 'texts' | 'students' | 'analytics' | 'cross-text' | 'at-risk' | 'error-heatmap' | 'teachers';
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'progress', label: '學生進度' },
-  { key: 'analytics', label: '學習分析' },
-  { key: 'cross-text', label: '跨課文分析' },
-  { key: 'at-risk', label: '早期介入' },
-  { key: 'error-heatmap', label: '錯字熱力圖' },
-  { key: 'texts', label: '課文管理' },
-  { key: 'my-texts', label: '我的課文' },
-  { key: 'assignments', label: '作業管理' },
-  { key: 'students', label: '學生名單' },
-  { key: 'teachers', label: '協同教師' },
+const TABS: { key: TabKey; label: string; group?: 'core' | 'analysis' | 'other' }[] = [
+  { key: 'progress', label: '學生進度', group: 'core' },
+  { key: 'students', label: '學生名單', group: 'core' },
+  { key: 'texts', label: '課文管理', group: 'core' },
+  { key: 'analytics', label: '學習分析', group: 'analysis' },
+  { key: 'cross-text', label: '跨課文分析', group: 'analysis' },
+  { key: 'at-risk', label: '早期介入', group: 'analysis' },
+  { key: 'error-heatmap', label: '錯字熱力圖', group: 'analysis' },
+  { key: 'teachers', label: '協同教師', group: 'other' },
 ];
 
 interface ClassroomDetailProps {
@@ -380,20 +376,31 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
           {/* Tab bar */}
           <div className="border-b border-gray-200 overflow-x-auto">
-            <nav className="flex -mb-px whitespace-nowrap" aria-label="Tabs">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer shrink-0 ${
-                    activeTab === tab.key
-                      ? 'border-accent text-accent'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            <nav className="flex -mb-px whitespace-nowrap items-center" aria-label="Tabs">
+              {TABS.map((tab, i) => {
+                const prevGroup = TABS[i - 1]?.group;
+                const showDivider = prevGroup && prevGroup !== tab.group;
+                return (
+                  <React.Fragment key={tab.key}>
+                    {showDivider && (
+                      <span
+                        className="shrink-0 w-px h-5 bg-gray-200 mx-1"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <button
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer shrink-0 ${
+                        activeTab === tab.key
+                          ? 'border-accent text-accent'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  </React.Fragment>
+                );
+              })}
             </nav>
           </div>
 
@@ -420,14 +427,6 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
           {activeTab === 'texts' && (
             <TextManagementTab classroomId={classroomId} />
-          )}
-
-          {activeTab === 'my-texts' && (
-            <MyTextsTab />
-          )}
-
-          {activeTab === 'assignments' && (
-            <AssignmentTab classroomId={classroomId} />
           )}
 
           {activeTab === 'students' && (

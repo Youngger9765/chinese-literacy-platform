@@ -1,3 +1,7 @@
+"""App config — env vars for CORS, DB, JWT, etc.
+
+ALLOWED_ORIGINS: comma-separated frontend origins (Production: lingoleap-frontend-*.run.app, lingoleap-dev.web.app)
+"""
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

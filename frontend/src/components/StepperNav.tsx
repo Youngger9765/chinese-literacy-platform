@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppView, Story, LearningSession } from '../types';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useAuth } from '../contexts/AuthContext';
@@ -129,6 +130,7 @@ const StepperNav: React.FC<StepperNavProps> = ({
 }) => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const avatarInitial = user?.name?.charAt(0) ?? '?';
 
@@ -217,11 +219,17 @@ const StepperNav: React.FC<StepperNavProps> = ({
           </>
         )}
 
-        {/* Avatar */}
+        {/* Avatar + Achievements link */}
         <div className="ml-2 flex items-center gap-1 pl-2 border-l border-gray-200">
-          <div className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-xs font-bold" aria-label={user?.name ?? '使用者'}>
-            {avatarInitial}
-          </div>
+          <button
+            onClick={() => navigate('/achievements')}
+            className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+            aria-label="成就頁面"
+          >
+            <div className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-xs font-bold" aria-label={user?.name ?? '使用者'}>
+              {avatarInitial}
+            </div>
+          </button>
         </div>
       </nav>
     );
@@ -286,12 +294,18 @@ const StepperNav: React.FC<StepperNavProps> = ({
         );
       })}
 
-      {/* User avatar */}
+      {/* User avatar + Achievements link */}
       <div className="ml-3 flex items-center gap-1 pl-3 border-l border-gray-200">
-        <div className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-xs font-bold" aria-label={user?.name ?? '使用者'}>
-          {avatarInitial}
-        </div>
-        <span className="text-[10px] text-gray-500 hidden sm:block">{user?.name}</span>
+        <button
+          onClick={() => navigate('/achievements')}
+          className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+          aria-label="成就頁面"
+        >
+          <div className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-xs font-bold" aria-label={user?.name ?? '使用者'}>
+            {avatarInitial}
+          </div>
+          <span className="text-[10px] text-gray-500 hidden sm:block">{user?.name}</span>
+        </button>
       </div>
     </nav>
   );

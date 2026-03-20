@@ -515,7 +515,31 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
             <div className="p-8 text-center text-sm text-gray-400">尚無使用紀錄</div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              {/* Mobile card view */}
+              <div className="md:hidden p-4 space-y-3">
+                {logs.map((log) => (
+                  <div key={log.id} className="bg-white rounded-lg border border-gray-200 p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900 text-sm">
+                        {log.user_name ?? <span className="text-gray-400">—</span>}
+                      </span>
+                      <span className="text-amber-700 font-medium text-sm">-{log.points_used}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs">
+                        {log.feature_type}
+                      </span>
+                      <span className="text-xs text-gray-400">{formatDateTime(log.created_at)}</span>
+                    </div>
+                    {log.description && (
+                      <p className="text-xs text-gray-500 line-clamp-2">{log.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop table view */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100 bg-gray-50/50">
@@ -551,6 +575,7 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
                   </tbody>
                 </table>
               </div>
+
               {/* Load more */}
               {logs.length < logsTotal && (
                 <div className="p-4 text-center border-t border-gray-100">

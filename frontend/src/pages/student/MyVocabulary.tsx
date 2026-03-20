@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ErrorPatternsCard from '../../components/student/ErrorPatternsCard';
 import RecommendedVocab from '../../components/student/RecommendedVocab';
-import { getStudentStorySlugs } from '../../services/api';
+import { getStudentStorySlugs, StorySlugItem } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 /**
@@ -19,7 +19,7 @@ const MyVocabulary: React.FC = () => {
   const { token, user } = useAuth();
   const navigate = useNavigate();
 
-  const [storySlugs, setStorySlugs] = useState<string[]>([]);
+  const [storyItems, setStoryItems] = useState<StorySlugItem[]>([]);
   const [selectedSlug, setSelectedSlug] = useState<string>('');
   const [slugsLoading, setSlugsLoading] = useState(true);
 
@@ -32,7 +32,7 @@ const MyVocabulary: React.FC = () => {
     try {
       setSlugsLoading(true);
       const data = await getStudentStorySlugs(token, user.id);
-      setStorySlugs(data.slugs);
+      setStoryItems(data.stories ?? data.slugs.map((s) => ({ slug: s, title: s })));
     } catch (err) {
       console.error('Failed to load story slugs:', err);
     } finally {
@@ -83,9 +83,9 @@ const MyVocabulary: React.FC = () => {
               className="block w-full max-w-xs rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-700 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             >
               <option value="">全部課文</option>
-              {storySlugs.map((slug) => (
+              {storyItems.map(({ slug, title }) => (
                 <option key={slug} value={slug}>
-                  {slug}
+                  {title}
                 </option>
               ))}
             </select>

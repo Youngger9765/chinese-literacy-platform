@@ -233,7 +233,37 @@ function StudentDetailPanel({ pattern }: { pattern: StudentCrossTextPattern }) {
       {pattern.text_performance.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">各課文學習成效</h4>
-          <div className="overflow-x-auto">
+          {/* Mobile card view */}
+          <div className="md:hidden space-y-3">
+            {pattern.text_performance.map((tp) => (
+              <div key={tp.story_slug} className="bg-white rounded-lg border border-gray-100 p-3 space-y-2">
+                <div className="font-medium text-gray-700 truncate text-sm">
+                  {tp.story_title || tp.story_slug}
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                  <div>
+                    <span className="text-xs text-gray-400">練習次數</span>
+                    <p className="text-gray-600">{tp.attempt_count}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400">平均分</span>
+                    <p><ScoreBadge score={tp.avg_score} /></p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400">朗讀準確率</span>
+                    <p className="text-gray-600">{tp.avg_accuracy !== null ? `${tp.avg_accuracy}%` : '--'}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-400">閱讀理解</span>
+                    <p><ScoreBadge score={tp.avg_comprehension_score} /></p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table view */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-xs text-gray-500 border-b border-gray-200">
