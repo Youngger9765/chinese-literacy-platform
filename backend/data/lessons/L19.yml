@@ -87,16 +87,16 @@ multiple_choice:
   - 睡前被3C內容吸引，停不下來。
   - 大腦有其他的睡眠障礙。
   - 大腦高速運轉不想入睡。
-  answer: null
-  explanation: null
+  answer: B
+  explanation: 課文在「改善失眠的方法」中提到要「遠離3C產品」，間接說明現代人可能因為被3C產品吸引而延後入睡，這與「睡前拖延症」的現象相符。
 - question: 根據本課課文，你覺得「懸樑刺股」的讀書效果好嗎？為什麼？
   options:
   - 效果好！這樣才能隨時警惕自己，才不會偷懶。
   - 效果好！這樣才可以增加讀書的時間。
   - 效果不好！它剝奪了睡眠，讓人很難吸收新知。
   - 效果不好！它違反了基本人權，帶來負向情緒。
-  answer: null
-  explanation: null
+  answer: C
+  explanation: 課文指出「熬夜打電動，導致白天上學時睡眼惺忪，無法吸收新知」，且強調充足的睡眠對於大腦修復、增強記憶的重要性，因此犧牲睡眠的讀書方式效果不好，因為會影響學習吸收。
 multiple_choice_count: 5
 reading_benchmark:
   levels:

@@ -92,8 +92,8 @@ multiple_choice:
   - 絕大多數的人會頻繁發生睡眠癱瘓。
   - 作噩夢時，身體可以自由移動。
   - 癱瘓現象是人體在睡眠中的保護機制。
-  answer: null
-  explanation: null
+  answer: D
+  explanation: 課文中雖未直接說明「睡眠癱瘓症」，但其定義的「癱瘓」與選項D提及的「癱瘓現象」概念相關，且選項D符合「靈異與科學」此課主題中科學解釋現象的精神。
 - question: 人們常常聽到「鬼火」與「鬼壓床」的經驗，請問兩者的共同之處為何？
   options:
   - 都是鬼魂想要向人世間傳達訊息的一種手段。
@@ -116,8 +116,8 @@ multiple_choice:
   - 乙丙甲
   - 甲乙丙。
   - 丙乙甲。
-  answer: null
-  explanation: null
+  answer: C
+  explanation: 題目中明確指出解決科學問題的步驟為(1)提出問題→(2)提出假設→(3)檢驗假設。若將這些步驟依序對應為甲、乙、丙，則正確的順序即為甲乙丙。
 multiple_choice_count: 5
 reading_benchmark:
   levels:
