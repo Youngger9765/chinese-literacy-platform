@@ -1,7 +1,7 @@
 """Teacher student management endpoints: sessions, dialogue, tags, learning curve, stuck overview."""
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
@@ -11,6 +11,7 @@ from ...models.school import Classroom, ClassroomStudent
 from ...models.session import DialogueTurn, LearningSession
 from ...models.student_tag import StudentTag
 from ...models.user import User
+from ...services.audit_logger import AuditAction, audit_log_endpoint
 from ...services.lesson_loader import get_lesson_by_id
 from ...services.stuck_detection_service import build_recommendations, detect_stuck_points
 from .teacher_schemas import (
@@ -55,6 +56,7 @@ def _require_teacher_owns_student(
 )
 def get_student_sessions(
     student_id: int,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -74,6 +76,13 @@ def get_student_sessions(
     )
     if not enrollment:
         raise HTTPException(status_code=403, detail="Not authorized to view this student's sessions")
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.VIEW_STUDENT,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
 
     sessions = (
         db.query(LearningSession)
@@ -114,6 +123,7 @@ def get_student_sessions(
 def get_teacher_student_dialogue(
     student_id: int,
     session_id: int,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -134,6 +144,13 @@ def get_teacher_student_dialogue(
     )
     if not enrollment:
         raise HTTPException(status_code=403, detail="Not authorized to view this student's sessions")
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.VIEW_SESSION,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
 
     # Verify the session belongs to the student
     session = (
@@ -261,6 +278,7 @@ def remove_student_tag(
 )
 def get_student_learning_curve(
     student_id: int,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -281,6 +299,13 @@ def get_student_learning_curve(
     )
     if not enrollment:
         raise HTTPException(status_code=403, detail="Not authorized to view this student's data")
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.VIEW_STUDENT,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
 
     # Sessions with scores, ordered oldest first
     sessions = (
