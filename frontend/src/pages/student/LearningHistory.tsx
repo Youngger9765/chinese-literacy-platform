@@ -95,9 +95,9 @@ const SessionCard: React.FC<{ s: LearningSummary; onNavigate: (path: string) => 
 
         {/* Actions */}
         <div className="flex flex-col gap-2 shrink-0">
-          {s.status === 'completed' && s.story_slug && (
+          {s.status === 'completed' && (
             <button
-              onClick={() => onNavigate(`/learn/${s.story_slug}/report`)}
+              onClick={() => onNavigate(`/sessions/${s.id}/report`)}
               className="px-3 py-1.5 rounded-lg border border-accent text-accent text-xs font-medium hover:bg-accent-bg transition-colors cursor-pointer"
             >
               查看報告
