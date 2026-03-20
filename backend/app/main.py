@@ -5,6 +5,8 @@ import uuid
 import traceback
 from contextlib import asynccontextmanager
 
+import sentry_sdk
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -35,6 +37,26 @@ from .auth.rate_limiter import general_rate_limiter
 setup_logging()
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Sentry error tracking
+# ---------------------------------------------------------------------------
+# To enable Sentry, set the SENTRY_DSN environment variable in Cloud Run:
+#   gcloud run services update lingoleap-backend \
+#     --set-env-vars SENTRY_DSN=https://<key>@<org>.ingest.sentry.io/<project-id>
+#
+# ENVIRONMENT env var controls the Sentry environment tag (default: "production").
+# Leave SENTRY_DSN unset (or empty) in local dev to skip initialisation.
+_sentry_dsn = os.environ.get("SENTRY_DSN", "").strip()
+if _sentry_dsn:
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        environment=os.environ.get("ENVIRONMENT", "production"),
+        traces_sample_rate=0.1,
+    )
+    logger.info("Sentry initialised (environment=%s)", os.environ.get("ENVIRONMENT", "production"))
+else:
+    logger.info("Sentry not initialised — SENTRY_DSN is not set")
 
 _env = os.environ.get("ENVIRONMENT", "development")
 _is_dev = _env in ("development", "preview")
