@@ -176,6 +176,67 @@ jobs:
           echo "**Backend:** ${BACKEND_URL}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
 
+  smoke-test:
+    name: Smoke test staging API
+    needs: [deploy-backend, deploy-frontend]
+    if: always() && !cancelled() && (needs.deploy-backend.result == 'success' || needs.deploy-frontend.result == 'success')
+    runs-on: ubuntu-latest
+    env:
+      STAGING_BACKEND: https://lingoleap-backend-staging-958347263320.asia-east1.run.app
+    steps:
+      - name: Wait for Cloud Run to be ready
+        run: sleep 15
+
+      - name: Smoke test /health (expect 200)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/health")
+          echo "/health -> $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "FAIL: /health returned $STATUS, expected 200"
+            exit 1
+          fi
+
+      - name: Smoke test /api/teacher/story-tags (expect 200 or 401, not 500)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/teacher/story-tags")
+          echo "/api/teacher/story-tags -> $STATUS"
+          if [ "$STATUS" = "500" ]; then
+            echo "FAIL: /api/teacher/story-tags returned 500"
+            exit 1
+          fi
+
+      - name: Smoke test /api/schools (expect 200 or 401, not 500)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/schools")
+          echo "/api/schools -> $STATUS"
+          if [ "$STATUS" = "500" ]; then
+            echo "FAIL: /api/schools returned 500"
+            exit 1
+          fi
+
+      - name: Smoke test /api/organizations (expect 200 or 401, not 500)
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_BACKEND}/api/organizations")
+          echo "/api/organizations -> $STATUS"
+          if [ "$STATUS" = "500" ]; then
+            echo "FAIL: /api/organizations returned 500"
+            exit 1
+          fi
+
+      - name: Smoke test summary
+        if: always()
+        run: |
+          echo "## Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Target**: ${STAGING_BACKEND}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Endpoint | Acceptable Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|------------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| GET /health | 200 only |" >> $GITHUB_STEP_SUMMARY
+          echo "| GET /api/teacher/story-tags | 200 or 401 (not 500) |" >> $GITHUB_STEP_SUMMARY
+          echo "| GET /api/schools | 200 or 401 (not 500) |" >> $GITHUB_STEP_SUMMARY
+          echo "| GET /api/organizations | 200 or 401 (not 500) |" >> $GITHUB_STEP_SUMMARY
+
   cleanup-images:
     name: Cleanup old AR images
     needs: [deploy-backend, deploy-frontend]
