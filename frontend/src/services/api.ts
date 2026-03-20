@@ -484,6 +484,39 @@ export interface LearningSummary {
   completed_at: string | null;
 }
 
+// --- Session Detail / Report (Issue #580) ---
+
+export interface SessionDetailResponse {
+  id: number;
+  story_slug: string | null;
+  status: string;
+  current_step: number;
+  accuracy: number | null;
+  overall_score: number | null;
+  started_at: string;
+  completed_at: string | null;
+  reading_result: Record<string, unknown> | null;
+  comprehension_result: Record<string, unknown> | null;
+  vocab_result: Record<string, unknown> | null;
+  full_reading_result: Record<string, unknown> | null;
+  comprehension_score: number | null;
+  literal_score: number | null;
+  inferential_score: number | null;
+  evaluative_score: number | null;
+  comprehension_feedback: string | null;
+}
+
+export async function fetchSessionReport(
+  token: string,
+  sessionId: number,
+): Promise<SessionDetailResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/report`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`fetchSessionReport failed: ${res.status}`);
+  return res.json();
+}
+
 // --- Error Correction API (Issue #248) ---
 
 export interface ErrorPatternItem {
