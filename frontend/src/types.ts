@@ -37,6 +37,20 @@ export interface VocabItem {
   note?: string;
 }
 
+// ④ 語詞應用 (#615)
+export interface FillInBlankItem {
+  sentence: string;
+  answer: string;  // letter code e.g. "A", "B"
+}
+
+// ⑦ 閱讀理解選擇題 (#615)
+export interface MultipleChoiceItem {
+  question: string;
+  options: string[];
+  answer: string | null;  // letter code e.g. "A", "B", or null if missing
+  explanation: string | null;
+}
+
 export interface Story {
   id: string;
   title: string;
@@ -56,6 +70,10 @@ export interface Story {
   difficultyLevel?: 'easy' | 'medium' | 'hard';
   /** Teacher-defined custom tags, e.g. ["重要考題", "期末複習"]. */
   customTags?: string[];
+  // 三民教材練習題 (#615)
+  fillInBlank?: FillInBlankItem[];           // ④ 語詞應用（PDF 現成資料）
+  multipleChoice?: MultipleChoiceItem[];     // ⑦ 閱讀理解選擇題（PDF 現成資料）
+  vocabBank?: Record<string, string>;        // { A: "疑難雜症", ... } for fillInBlank
 }
 
 export interface ReadingAttempt {

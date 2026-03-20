@@ -45,6 +45,7 @@ class StoryDetail(StoryListItem):
     vocabulary: Optional[list[VocabItemSchema]] = None
     fill_in_blank: Optional[list[dict]] = None
     multiple_choice: Optional[list[dict]] = None
+    vocab_bank: Optional[dict] = None  # letter → word mapping for fill_in_blank (#615)
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     text_type: str = "單"
     source_file: Optional[str] = None

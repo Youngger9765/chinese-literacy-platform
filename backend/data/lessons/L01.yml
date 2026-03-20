@@ -50,6 +50,14 @@ vocabulary:
   definition: 大聲叫好。
   note: 「鷹眼」常用的意思是銳利的眼光。
 vocabulary_count: 12
+vocab_bank:
+  A: 疑難雜症
+  B: 龍爭虎鬥
+  C: 目不轉睛
+  D: 摸不著頭緒
+  E: 讚嘆不已
+  F: 凝聚力
+  G: 喝采
 fill_in_blank:
 - sentence: 這個問題很複雜，一時之間讓人(　　)，無法解決。
   answer: D

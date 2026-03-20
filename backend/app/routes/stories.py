@@ -11,6 +11,7 @@ from ..models.user import User
 from ..models.school import ClassroomStudent, ClassroomText
 from ..auth.dependencies import get_optional_user
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
+from ..services.ai_service import generate_story_structure
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 router = APIRouter(tags=["stories"])
@@ -115,7 +116,35 @@ def get_story(story_id: str):
         vocabulary=story["vocabulary"],
         fill_in_blank=story["fill_in_blank"],
         multiple_choice=story["multiple_choice"],
+        vocab_bank=story.get("vocab_bank"),
         reading_benchmark=story["reading_benchmark"],
         text_type=story["text_type"],
         source_file=story["source_file"],
     )
+
+
+# ── ⑤ 文章重點表 AI endpoint (#615) ──────────────────────────────────────────
+
+@router.get("/stories/{story_id}/structure")
+async def get_story_structure(story_id: str):
+    """Generate AI story structure table (⑤ 文章重點表) for a lesson.
+
+    Returns a list of rows with label/value (and optional sub_rows).
+    Genre-aware: 記敘文 / 說明文 / 議論文 each get different templates.
+    """
+    normalized = story_id.lstrip("Ll")
+    try:
+        numeric_id = int(normalized)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=404, detail="Story not found")
+    story = get_lesson_by_id(numeric_id)
+    if not story:
+        raise HTTPException(status_code=404, detail="Story not found")
+
+    story_text = story.get("full_text") or "\n".join(story.get("paragraphs", []))
+    result = await generate_story_structure(
+        story_title=story["title"],
+        story_text=story_text,
+        genre=story.get("genre"),
+    )
+    return result
