@@ -18,6 +18,18 @@ from ...services.ai_service import generate_reading_analysis, GeminiContentFilte
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+# Session.ai_analysis cache: v2 wraps response + enrichment fingerprint so we can
+# invalidate when the client sends richer data (Fixes #540 — stale cache after
+# comprehension/vocab/dictation completes).
+AI_ANALYSIS_CACHE_V2 = "ai_analysis_v2"
+_LEGACY_ANALYSIS_KEYS = frozenset({
+    "analysis_summary",
+    "strengths",
+    "areas_for_improvement",
+    "practice_suggestions",
+    "encouragement_message",
+})
+
 
 class AIAnalysisRequest(BaseModel):
     story_title: str = Field(..., max_length=200)
@@ -41,6 +53,67 @@ class AIAnalysisResponse(BaseModel):
     encouragement_message: str
 
 
+def _enrichment_cache_signature(payload: AIAnalysisRequest) -> str:
+    """Stable string for comparing which optional metrics were included in the request."""
+    c = payload.comprehension_score
+    if c is not None:
+        c = round(float(c), 4)
+    parts = [
+        c,
+        payload.vocab_practiced_count,
+        payload.vocab_total_count,
+        payload.dictation_correct_count,
+        payload.dictation_total_count,
+    ]
+    return json.dumps(parts, separators=(",", ":"), ensure_ascii=False)
+
+
+def _try_return_cached_ai_analysis(
+    raw: str | None,
+    payload: AIAnalysisRequest,
+) -> AIAnalysisResponse | None:
+    """Return cached AIAnalysisResponse if still valid for this payload; else None."""
+    if not raw:
+        return None
+    try:
+        data = json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        return None
+    if not isinstance(data, dict):
+        return None
+
+    sig = _enrichment_cache_signature(payload)
+
+    if data.get("format") == AI_ANALYSIS_CACHE_V2:
+        if data.get("enrichment_sig") == sig:
+            resp = data.get("response")
+            if isinstance(resp, dict) and _LEGACY_ANALYSIS_KEYS.issubset(resp.keys()):
+                return AIAnalysisResponse(**{k: resp[k] for k in _LEGACY_ANALYSIS_KEYS})
+        return None
+
+    # Legacy: flat response JSON only (pre-#540). If the client now sends any
+    # enrichment, ignore cache — it was generated without cross-step context.
+    if _LEGACY_ANALYSIS_KEYS.issubset(data.keys()):
+        if sig != "[null,null,null,null,null]":
+            logger.info("Ignoring legacy AI analysis cache — request has enrichment data")
+            return None
+        try:
+            return AIAnalysisResponse(**{k: data[k] for k in _LEGACY_ANALYSIS_KEYS})
+        except Exception:
+            return None
+
+    return None
+
+
+def _wrap_ai_analysis_for_cache(analysis: dict, payload: AIAnalysisRequest) -> str:
+    wrapped = {
+        "format": AI_ANALYSIS_CACHE_V2,
+        "enrichment_sig": _enrichment_cache_signature(payload),
+        "response": analysis,
+    }
+    return json.dumps(wrapped, ensure_ascii=False)
+
+
 @router.post(
     "/learning/sessions/{session_id}/ai-analysis",
     response_model=AIAnalysisResponse,
@@ -54,9 +127,10 @@ async def get_ai_analysis(
 ):
     """Generate AI reading diagnosis and improvement suggestions.
 
-    If the session already has a cached analysis, returns it immediately
-    without calling Gemini again. Otherwise calls Gemini and caches the
-    result in the session's ai_analysis column.
+    Caches in ``session.ai_analysis`` with an enrichment fingerprint (#540).
+    Legacy flat JSON caches are ignored when the client sends comprehension /
+    vocab / dictation metrics so the report can regenerate after later steps
+    complete.
 
     Rate limited: 5 requests per minute per user/IP.
     """
@@ -66,13 +140,13 @@ async def get_ai_analysis(
     if session.student_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your session")
 
-    # Return cached result if available
+    cached_resp = _try_return_cached_ai_analysis(session.ai_analysis, payload)
+    if cached_resp is not None:
+        return cached_resp
     if session.ai_analysis:
         try:
-            cached = json.loads(session.ai_analysis)
-            return AIAnalysisResponse(**cached)
+            json.loads(session.ai_analysis)
         except (json.JSONDecodeError, TypeError):
-            # Corrupted cache — regenerate
             logger.warning("Corrupted ai_analysis cache for session %d, regenerating", session_id)
 
     # Call Gemini
@@ -105,8 +179,8 @@ async def get_ai_analysis(
         logger.error("AI analysis generation failed for session %d: %s", session_id, e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
 
-    # Cache the result
-    session.ai_analysis = json.dumps(analysis, ensure_ascii=False)
+    # Cache the result (versioned + enrichment fingerprint — #540)
+    session.ai_analysis = _wrap_ai_analysis_for_cache(analysis, payload)
     db.commit()
 
     logger.info("Generated AI analysis for session %d", session_id)
