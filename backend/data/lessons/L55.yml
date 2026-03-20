@@ -59,7 +59,7 @@ fill_in_blank:
 - sentence: 豚骨拉麵的湯底是由(　　)的豬骨湯調製而成。
   answer: E
 - sentence: 天氣一冷，血管彈性不佳的老人，很容易造成(  H  )，引發腦中風。
-  answer: null
+  answer: 血栓
 - sentence: 愛迪生眾多的發明，為人類帶來了新文明，真是(　　)。
   answer: G
 - sentence: 哥哥是體育健將，只要是他參加的比賽，幾乎(　　)所有金牌。

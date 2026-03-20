@@ -77,9 +77,9 @@ fill_in_blank:
 - sentence: 他 (　　)的表情和動作，惹得眾人哄堂大笑。
   answer: Ａ
 - sentence: 倒反法若使用不當，很容易造成人際衝突。但在文章中，皓翔並沒有不舒服的感覺。從此推論，文中詹老師與皓翔的關係如何？
-  answer: null
+  answer: 亦師亦友
 - sentence: 幽默也要看對象，何種關係才能使用倒反法呢?
-  answer: null
+  answer: 親近
 multiple_choice:
 - question: 請問下列句子內使用的詞語，哪一個使用正確?
   options:

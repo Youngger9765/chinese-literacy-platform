@@ -59,35 +59,35 @@ fill_in_blank:
 - sentence: 如果我們對社會上發生的壞事件 (　　)，可能會導致人們越來越冷漠。
   answer: A
 - sentence: 寫上折線圖的標題：臺北市113年1~7月平均氣溫變化折線圖
-  answer: null
+  answer: 1951~2024年臺灣婦女總生育率
 - sentence: 寫下橫軸表示的統計項目及單位：月份(月)
-  answer: null
+  answer: 年份(年)
 - sentence: 寫下縱軸表示的統計項目及單位：氣溫(℃)
-  answer: null
+  answer: 婦女總生育率(個子女)
 - sentence: 省略符號：省略不需要用到的刻度。
-  answer: null
+  answer: 斷裂符號
 - sentence: 用點來表示橫軸和縱軸上的兩組數字，依序用直線把這些點連起來。
-  answer: null
+  answer: 折線圖
 - sentence: 全天最高溫是（　22　）度，在（　13　）時，最低溫是（　12　）度，在（　17　）時。
-  answer: null
+  answer: '22'
 - sentence: 從（　15　）時開始溫度越來越低。
-  answer: null
+  answer: '15'
 - sentence: 相鄰的兩時刻中，溫度變化最大的是（　15　）時到（　16　）時，相差（　4　）度。
-  answer: null
+  answer: '15'
 - sentence: 2018年的市場占有率是（　12　）%。
-  answer: null
+  answer: '12'
 - sentence: 2020年的市場占有率是2015年的（　10　）倍。
-  answer: null
+  answer: '10'
 - sentence: 2019~2020年的市場占有率成長了（　6　）%。
-  answer: null
+  answer: 無法得知
 - sentence: 圖二告訴我們「Ａ牌奶粉在市場的佔有率」和「年份」有什麼關係？  Ａ牌奶粉在市場的佔有率呈現逐年成長的趨勢
-  answer: null
+  answer: 死亡人數
 - sentence: 根據資料完成折線圖和標題。
-  answer: null
+  answer: 臺灣出生死亡人數交叉
 - sentence: 請問幾歲到幾歲小倫的體重有下降（　7 ）歲～（　8　）歲，下降了幾公斤？ （　2 ）公斤。
-  answer: null
+  answer: 文章未提供此資訊
 - sentence: 小倫體重最重和最輕相差多少公斤？（　16 ）公斤。
-  answer: null
+  answer: '16'
 multiple_choice:
 - question: 依據本文的定義：「灰犀牛指的是正在發生、明明可見的負面事件，但因為沒有急迫性，大家卻視而不見。」請問何者狀況不是灰犀牛？
   options:

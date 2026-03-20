@@ -74,9 +74,9 @@ fill_in_blank:
 - sentence: 警察詢問竊案嫌犯時，嫌犯吞吞吐吐、眼神閃躲，(　　)。
   answer: C
 - sentence: 為什麼小明上課都很想睡覺？→因為□昨晚小明太晚睡 □小明是懶惰蟲。
-  answer: null
+  answer: 昨晚小明太晚睡
 - sentence: 如何解決問題/結論：設定玩電動的時間，早點休息　　　 　       　。
-  answer: null
+  answer: 確保充足睡眠，維持規律作息
 multiple_choice:
 - question: 下列語詞何者用法使用正確？
   options:

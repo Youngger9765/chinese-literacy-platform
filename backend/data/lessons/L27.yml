@@ -76,7 +76,7 @@ fill_in_blank:
 - sentence: 她總是認為自己受到了不公平的對待，因此內心充滿了 (　　)。
   answer: Ｆ
 - sentence: 集合時間快要到了，同組的同學們還(  Ｈ  )的收拾行李，讓我好著急。
-  answer: null
+  answer: 慢條斯理
 - sentence: 胖虎邀請大家去參加他的新歌發表會，舞台上，他臉上自信的表情，(　　)認為自己是大歌星。
   answer: Ｇ
 - sentence: 輸球後，他每天(　　)，後悔當天出現大失誤，才會與冠軍擦肩而過。
@@ -84,7 +84,7 @@ fill_in_blank:
 - sentence: 我們本來是無話不談的好朋友，為什麼她突然變得冷淡，這讓我(　　)。
   answer: Ａ
 - sentence: 我最近真是(  Ｉ  )了，居然有人跑去跟老師告我的狀，說我作弊，根本是造謠生事！
-  answer: null
+  answer: 精采了
 multiple_choice:
 - question: 下列選項「  」中的語詞，何者使用正確？
   options:
