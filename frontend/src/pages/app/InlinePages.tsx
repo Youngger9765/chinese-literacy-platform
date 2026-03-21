@@ -58,7 +58,7 @@ interface RecentPracticeItem {
 function mapSessionToRecentItem(session: LearningSummary): RecentPracticeItem {
   return {
     id: session.id,
-    title: session.story_slug ?? '未知課文',
+    title: session.story_title ?? session.story_slug ?? '未知課文',
     status: session.status,
     startedAt: session.started_at,
     completedAt: session.completed_at,
