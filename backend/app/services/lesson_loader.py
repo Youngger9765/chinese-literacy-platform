@@ -77,6 +77,8 @@ def _load_lessons() -> list[dict]:
             "vocabulary": data.get("vocabulary"),
             "fill_in_blank": data.get("fill_in_blank"),
             "multiple_choice": data.get("multiple_choice"),
+            "vocab_bank": data.get("vocab_bank"),
+            "knowledge_video_url": data.get("knowledge_video_url"),
             "reading_benchmark": data.get("reading_benchmark"),
             "source_file": data.get("source_file"),
             "intro": _build_intro(data),

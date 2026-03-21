@@ -34,6 +34,9 @@ class SessionState:
     cpm: float | None = None
     # Teacher special instructions for individualized learning (Issue #90)
     teacher_instructions: list[str] | None = None
+    # Genre-aware Socratic (#615)
+    genre: str | None = None
+    reading_strategy: str | None = None
 
 
 class SessionStore:
@@ -157,9 +160,44 @@ class SocraticAgent:
                 reading_info += f"- 讀錯的字：{', '.join(state.mispronounced_words)}\n"
             reading_info += "→ 提問時可以特別關注這些字相關的段落和內容\n"
 
+        # Build genre-aware guidance section (#615)
+        genre_section = ""
+        if state.genre and state.genre != "無":
+            genre_prompts = {
+                "記敘文": (
+                    "這是一篇【記敘文】。\n"
+                    "重點提問方向：\n"
+                    "- factual：人物（誰）、時地（何時/何地）、事件（發生什麼）\n"
+                    "- inferential：人物動機（為什麼）、心理情感、因果關係\n"
+                    "- evaluative：主題（這個故事告訴我們什麼）、連結自身經驗\n"
+                ),
+                "說明文": (
+                    "這是一篇【說明文】。\n"
+                    "重點提問方向：\n"
+                    "- factual：主要說明對象、重要事實、數字資料\n"
+                    "- inferential：說明結構（分類/比較/因果）、各段落關係\n"
+                    "- evaluative：這個知識對生活有何影響？還有哪些想知道的？\n"
+                ),
+                "議論文": (
+                    "這是一篇【議論文】。\n"
+                    "重點提問方向：\n"
+                    "- factual：作者的論點（主張）是什麼\n"
+                    "- inferential：作者用哪些論據支持論點？論據夠充分嗎？\n"
+                    "- evaluative：你同意作者的看法嗎？為什麼？\n"
+                ),
+            }
+            genre_section = genre_prompts.get(state.genre, f"文體：{state.genre}\n")
+
+        strategy_section = ""
+        if state.reading_strategy and state.reading_strategy not in ("無", ""):
+            strategy_section = (
+                f"本課閱讀策略：【{state.reading_strategy}】\n"
+                f"→ 請在 inferential/evaluative 階段，將問題引導至學生練習此策略\n"
+            )
+
         return f"""{TUTOR_PERSONA}
 你擅長用蘇格拉底式問答引導學生深入理解課文。
-
+{genre_section}{strategy_section}
 課文標題：{state.story_title}
 
 課文內容（每段前標有段落索引）：
@@ -222,6 +260,8 @@ class SocraticAgent:
         accuracy: float | None = None,
         cpm: float | None = None,
         teacher_instructions: list[str] | None = None,
+        genre: str | None = None,
+        reading_strategy: str | None = None,
     ) -> AgentResponse:
         """Start a new session — generate the first question."""
         state = SessionState(
@@ -232,6 +272,8 @@ class SocraticAgent:
             accuracy=accuracy,
             cpm=cpm,
             teacher_instructions=teacher_instructions,
+            genre=genre,
+            reading_strategy=reading_strategy,
         )
 
         system_prompt = self._build_system_prompt(state)

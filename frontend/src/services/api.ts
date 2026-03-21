@@ -48,8 +48,10 @@ interface ApiStoryListItem {
 interface ApiStoryDetail extends ApiStoryListItem {
   paragraphs: string[];
   vocabulary: ApiVocabItem[] | null;
-  fill_in_blank: unknown;
-  multiple_choice: unknown;
+  fill_in_blank: Array<{ sentence: string; answer: string }> | null;
+  multiple_choice: Array<{ question: string; options: string[]; answer: string | null; explanation: string | null }> | null;
+  vocab_bank: Record<string, string> | null;  // { A: "疑難雜症", B: "龍爭虎鬥", ... }
+  knowledge_video_url: string | null;          // ⑨ 知識補給站 YouTube URL
   reading_benchmark: { levels: { threshold: string; feedback: string }[] } | null;
   text_type: string;
   source_file: string;
@@ -94,6 +96,10 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     vocabulary: detail.vocabulary ?? undefined,
     charCount: detail.char_count,
     readingBenchmark: detail.reading_benchmark ?? undefined,
+    fillInBlank: detail.fill_in_blank ?? undefined,
+    multipleChoice: detail.multiple_choice ?? undefined,
+    vocabBank: detail.vocab_bank ?? undefined,
+    knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
   };
 }
 
@@ -398,6 +404,9 @@ export async function sendComprehensionChat(payload: {
   cpm?: number;
   /** DB LearningSession integer ID — when provided, dialogue turns are persisted (Issue #242) */
   dbSessionId?: number;
+  /** Genre-aware Socratic (#615) */
+  genre?: string;
+  readingStrategy?: string;
   token?: string;
 }): Promise<ChatResponse> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -414,6 +423,8 @@ export async function sendComprehensionChat(payload: {
       accuracy: payload.accuracy,
       cpm: payload.cpm,
       db_session_id: payload.dbSessionId ?? null,
+      genre: payload.genre ?? null,
+      reading_strategy: payload.readingStrategy ?? null,
     }),
   });
   if (res.status === 422) {

@@ -11,6 +11,7 @@ import ZhuyinToggle from '../ui/ZhuyinToggle';
 import RadicalDecomposition from './RadicalDecomposition';
 import { getDecomposition } from '../../data/radicals';
 import DictionaryPanel from '../dictionary/DictionaryPanel';
+import FillInBlankExercise from './FillInBlankExercise';
 
 interface VocabPracticeProps {
   story: Story;
@@ -21,7 +22,7 @@ interface VocabPracticeProps {
 
 type Phase = 'confirm' | 'grid' | 'practice' | 'pronunciation' | 'sentence' | 'zhuyin-game';
 
-type PracticeMode = 'stroke' | 'pronunciation' | 'zhuyin';
+type PracticeMode = 'stroke' | 'pronunciation' | 'zhuyin' | 'fillinblank';
 
 /* ================================================================ */
 /*  Progress bar                                                     */
@@ -339,6 +340,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const currentChars = activeTab === 'stroke' ? displayChars : activeTab === 'pronunciation' ? pronunciationChars : [];
   const currentPracticedSet = activeTab === 'stroke' ? practicedChars : activeTab === 'pronunciation' ? pronouncedChars : new Set<string>();
   const currentDone = activeTab === 'stroke' ? strokeDone : activeTab === 'pronunciation' ? pronounceDone : false;
+  // 'zhuyin' and 'fillinblank' tabs are handled separately above; these vars only matter for stroke/pronunciation
 
   // Characters for which we have radical decomposition data
   const charsWithRadical = displayChars.filter(ch => getDecomposition(ch) !== null);
@@ -363,7 +365,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             ? `筆順 ${practicedChars.size} / ${displayChars.length}`
             : activeTab === 'pronunciation'
               ? `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`
-              : '注音遊戲'}
+              : activeTab === 'fillinblank'
+                ? '語詞應用'
+                : '注音遊戲'}
         </span>
         <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
@@ -432,7 +436,30 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               <span className="text-base leading-none select-none">ㄅ</span>
               注音遊戲
             </button>
+            {story.fillInBlank && story.fillInBlank.length > 0 && story.vocabBank && (
+              <button
+                onClick={() => setActiveTab('fillinblank')}
+                className={[
+                  'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
+                  activeTab === 'fillinblank'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700',
+                ].join(' ')}
+              >
+                <span className="text-base leading-none select-none">④</span>
+                語詞應用
+              </button>
+            )}
           </div>
+
+          {/* ④ 語詞應用 fill-in-blank panel */}
+          {activeTab === 'fillinblank' && story.fillInBlank && story.vocabBank && (
+            <FillInBlankExercise
+              sentences={story.fillInBlank}
+              vocabBank={story.vocabBank}
+              onComplete={() => setActiveTab('stroke')}
+            />
+          )}
 
           {/* Zhuyin phonetic game entry card */}
           {activeTab === 'zhuyin' && (
@@ -463,8 +490,8 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </div>
           )}
 
-          {/* Character grid — hidden when zhuyin game tab is active */}
-          {activeTab !== 'zhuyin' && <>{/* Character grid */}
+          {/* Character grid — hidden when zhuyin or fillinblank tab is active */}
+          {activeTab !== 'zhuyin' && activeTab !== 'fillinblank' && <>{/* Character grid */}
           {currentChars.length === 0 ? (
             <div className="text-gray-400 text-sm py-8 text-center">
               {activeTab === 'stroke'

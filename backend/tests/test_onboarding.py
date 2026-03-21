@@ -116,7 +116,10 @@ def registered_student(client):
         "name": name,
     })
     assert resp.status_code == 201
-    token = resp.json()["access_token"]
+    verification_token = resp.json()["verification_token"]
+    client.get(f"/api/auth/verify-email?token={verification_token}")
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    token = login_resp.json()["access_token"]
     return {"email": email, "password": password, "name": name, "token": token}
 
 
@@ -180,12 +183,17 @@ class TestCompleteOnboardingEndpoint:
         """After calling complete-onboarding, GET /api/users/me should show onboarding_completed=True."""
         # Register a fresh user for isolation
         unique = uuid.uuid4().hex[:8]
+        persist_email = f"persist_{unique}@example.com"
+        persist_pass = "PersistPass123!"
         reg_resp = client.post("/api/auth/register", json={
-            "email": f"persist_{unique}@example.com",
-            "password": "PersistPass123!",
+            "email": persist_email,
+            "password": persist_pass,
             "name": f"Persist User {unique}",
         })
-        token = reg_resp.json()["access_token"]
+        assert reg_resp.status_code == 201
+        vt = reg_resp.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vt}")
+        token = client.post("/api/auth/login", json={"email": persist_email, "password": persist_pass}).json()["access_token"]
 
         # Initially False
         me_resp = client.get("/api/users/me", headers=auth_header(token))
@@ -218,12 +226,17 @@ class TestCompleteOnboardingEndpoint:
     def test_complete_onboarding_idempotent(self, client):
         """Calling complete-onboarding multiple times should be safe (idempotent)."""
         unique = uuid.uuid4().hex[:8]
+        idem_email = f"idempotent_{unique}@example.com"
+        idem_pass = "IdempotentPass123!"
         reg_resp = client.post("/api/auth/register", json={
-            "email": f"idempotent_{unique}@example.com",
-            "password": "IdempotentPass123!",
+            "email": idem_email,
+            "password": idem_pass,
             "name": f"Idempotent User {unique}",
         })
-        token = reg_resp.json()["access_token"]
+        assert reg_resp.status_code == 201
+        vt = reg_resp.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vt}")
+        token = client.post("/api/auth/login", json={"email": idem_email, "password": idem_pass}).json()["access_token"]
 
         # Call twice
         resp1 = client.post("/api/auth/complete-onboarding", headers=auth_header(token))
@@ -247,14 +260,18 @@ class TestOnboardingFlow:
         """Register -> check onboarding=False -> complete -> check onboarding=True."""
         unique = uuid.uuid4().hex[:8]
 
-        # Step 1: Register
+        # Step 1: Register then verify + login
+        flow_email = f"flow_{unique}@example.com"
+        flow_pass = "FlowPass123!"
         reg_resp = client.post("/api/auth/register", json={
-            "email": f"flow_{unique}@example.com",
-            "password": "FlowPass123!",
+            "email": flow_email,
+            "password": flow_pass,
             "name": f"Flow User {unique}",
         })
         assert reg_resp.status_code == 201
-        token = reg_resp.json()["access_token"]
+        vt = reg_resp.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vt}")
+        token = client.post("/api/auth/login", json={"email": flow_email, "password": flow_pass}).json()["access_token"]
 
         # Step 2: Verify onboarding_completed is False after registration
         me_resp = client.get("/api/users/me", headers=auth_header(token))

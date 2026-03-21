@@ -117,7 +117,10 @@ def _register_user(client, suffix=None):
         "copyright_confirmed": True,
     })
     assert resp.status_code == 201, resp.text
-    token = resp.json()["access_token"]
+    verification_token = resp.json()["verification_token"]
+    client.get(f"/api/auth/verify-email?token={verification_token}")
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    token = login_resp.json()["access_token"]
     me = client.get("/api/users/me", headers={"Authorization": f"Bearer {token}"})
     assert me.status_code == 200
     return {"token": token, "id": me.json()["id"], "email": email}

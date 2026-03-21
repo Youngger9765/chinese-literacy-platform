@@ -129,13 +129,17 @@ def _auth_header(token: str) -> dict:
 def _register_and_login(client) -> str:
     unique = uuid.uuid4().hex[:8]
     email = f"teacher_{unique}@example.com"
+    password = "SecurePass123!"
     resp = client.post("/api/auth/register", json={
         "email": email,
-        "password": "SecurePass123!",
+        "password": password,
         "name": f"Teacher {unique}",
     })
     assert resp.status_code == 201
-    return resp.json()["access_token"]
+    verification_token = resp.json()["verification_token"]
+    client.get(f"/api/auth/verify-email?token={verification_token}")
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    return login_resp.json()["access_token"]
 
 
 def _create_classroom(client, token: str, school_id: int) -> int:

@@ -102,9 +102,13 @@ def auth_header(token: str) -> dict:
 def _register(client, prefix: str) -> tuple[int, str]:
     """Register a user; return (id, token)."""
     email = f"{prefix}_{uuid.uuid4().hex[:6]}@test.com"
-    r = client.post("/api/auth/register", json={"email": email, "password": "Test1234!", "name": prefix})
+    password = "Test1234!"
+    r = client.post("/api/auth/register", json={"email": email, "password": password, "name": prefix})
     assert r.status_code == 201, r.text
-    token = r.json()["access_token"]
+    verification_token = r.json()["verification_token"]
+    client.get(f"/api/auth/verify-email?token={verification_token}")
+    login_r = client.post("/api/auth/login", json={"email": email, "password": password})
+    token = login_r.json()["access_token"]
     me = client.get("/api/users/me", headers=auth_header(token))
     return me.json()["id"], token
 
