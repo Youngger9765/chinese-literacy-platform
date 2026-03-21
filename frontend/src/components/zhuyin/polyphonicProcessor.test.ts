@@ -201,3 +201,106 @@ describe('PolyphonicProcessor — Issue #219: polyphonic character ss mapping', 
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// 一 tone sandhi regression tests (Issue #638)
+// ---------------------------------------------------------------------------
+//
+// Documents the CURRENT behavior of getNewToneForYiBu for 一.
+// Standard Mandarin tone sandhi rules for 一:
+//   Before 4th tone → 2nd tone (ss01)  e.g. 一個 yí gè
+//   Before 1st/2nd/3rd tone → 4th tone (ss02)  e.g. 一天 yì tiān
+//   In number context (第一, 十一, 一百...) → 1st tone (0000)
+//   Standalone → 1st tone (0000)
+//
+// Known limitations (tracked in Issue #611):
+//   - When 一 is the FIRST character in text (prevChar == null), the processor
+//     returns 0000 (1st tone) regardless of the following character tone.
+//     This means 一年/一天/一起 at the START of text incorrectly show 1st tone.
+//     This is a pedagogical simplification — correct for in-context reading
+//     where 一 is preceded by other characters.
+//   - 一個/一是 also use specialYiCases/nextCharSet1 → 0000 (1st tone).
+//     Standard pronunciation for 一個 is yí gè (2nd tone), but the app
+//     treats it as 1st for simplicity.
+//
+// These tests document CURRENT behavior so regressions are caught.
+// When fixing the linguistic accuracy (Issue #611), update tests accordingly.
+
+import { getToneForChar } from '../zhuyin/toneData';
+
+describe('一 tone sandhi regression tests (Issue #638)', () => {
+  let proc: import('../zhuyin/polyphonicProcessor').PolyphonicProcessor;
+
+  beforeAll(async () => {
+    const { PolyphonicProcessor } = await import('../zhuyin/polyphonicProcessor');
+    (PolyphonicProcessor as unknown as { _instance: unknown })._instance = undefined;
+    proc = PolyphonicProcessor.instance;
+    // Inject empty polyphonic data — 一/不 sandhi uses toneData.ts, not polyphonicData
+    (proc as unknown as { polyphonicData: unknown; _loaded: boolean }).polyphonicData = { data: {} };
+    (proc as unknown as { _loaded: boolean })._loaded = true;
+  });
+
+  const ssOf = (text: string) =>
+    proc.process(text).find(c => c.char === '一')?.styleSet;
+
+  describe('number / ordinal context → 1st tone (0000)', () => {
+    it('一百 → 0000 (一 is first char; 百 is in nextCharSet1)', () => {
+      expect(ssOf('一百')).toBe('0000');
+    });
+    it('一千 → 0000 (千 is in nextCharSet1)', () => {
+      expect(ssOf('一千')).toBe('0000');
+    });
+    it('一萬 → 0000 (萬 is in nextCharSet1)', () => {
+      expect(ssOf('一萬')).toBe('0000');
+    });
+    it('第一 → 0000 (第 is in prevCharSet1 → ordinal context)', () => {
+      expect(ssOf('第一')).toBe('0000');
+    });
+    it('十一 → 0000 (十 is in prevCharSet1 → number context)', () => {
+      expect(ssOf('十一')).toBe('0000');
+    });
+  });
+
+  describe('一 as first character in text → currently 0000 (known limitation)', () => {
+    // NOTE: Standard tone sandhi would give ss02 for 一天/一年/一起 and ss01 for 一個.
+    // The processor returns 0000 because prevChar==null triggers the early-return path.
+    // See Issue #611 for the planned fix.
+    it('一天 → 0000 (known limitation: should be ss02, yì tiān)', () => {
+      expect(getToneForChar('天')).toBe(1);
+      expect(ssOf('一天')).toBe('0000');
+    });
+    it('一年 → 0000 (known limitation: should be ss02, yì nián)', () => {
+      expect(getToneForChar('年')).toBe(2);
+      expect(ssOf('一年')).toBe('0000');
+    });
+    it('一起 → 0000 (known limitation: should be ss02, yì qǐ)', () => {
+      expect(getToneForChar('起')).toBe(3);
+      expect(ssOf('一起')).toBe('0000');
+    });
+    it('一個 → 0000 (specialYiCases override; standard yí gè would be ss01)', () => {
+      expect(getToneForChar('個')).toBe(4);
+      expect(ssOf('一個')).toBe('0000');
+    });
+  });
+
+  describe('tone sandhi DOES apply when 一 has a preceding char + nextChar not in nextCharSet1', () => {
+    // Use characters NOT in nextCharSet1 or specialYiCases to exercise the real sandhi path.
+    // 種 (zhǒng, 3rd tone) and 步 (bù, 4th tone) are not in any exception sets.
+    it('做一種 → 一 gets ss02 (4th tone; 種 = 3rd, prevChar 做 not in prevCharSet1)', () => {
+      expect(getToneForChar('種')).toBe(3);
+      const result = proc.process('做一種');
+      expect(result.find(c => c.char === '一')?.styleSet).toBe('ss02');
+    });
+    it('做一步 → 一 gets ss01 (2nd tone; 步 = 4th, before-4th-tone sandhi)', () => {
+      expect(getToneForChar('步')).toBe(4);
+      const result = proc.process('做一步');
+      expect(result.find(c => c.char === '一')?.styleSet).toBe('ss01');
+    });
+  });
+
+  describe('standalone → 1st tone (0000)', () => {
+    it('standalone 一 → 0000', () => {
+      expect(ssOf('一')).toBe('0000');
+    });
+  });
+});

@@ -49,8 +49,19 @@ const intToChinese = (num: number): string => {
 
 const normalizeNumbers = (text: string) => text.replace(/\d+/g, m => intToChinese(parseInt(m, 10)));
 
+/**
+ * Normalize spoken variants of Chinese numbers for comparison.
+ * In spoken Mandarin, 兩 (liǎng) is commonly used instead of 二 (èr) before
+ * 百/千/萬/億. Both forms are correct; we collapse them to 二 so STT output
+ * ("兩百一十四") matches the canonical written form ("二百一十四").
+ */
+const normalizeChineseNumberVariants = (text: string) =>
+  text.replace(/兩(?=[百千萬億])/g, '二');
+
 export const normalizeForComparison = (text: string) =>
-  normalizeNumbers(cleanChineseText(text)).replace(/[「」『』，。！？：；、\s]/g, '');
+  normalizeChineseNumberVariants(
+    normalizeNumbers(cleanChineseText(text))
+  ).replace(/[「」『』，。！？：；、\s]/g, '');
 
 /**
  * LCS-based diff: compare spoken text against target text, producing
