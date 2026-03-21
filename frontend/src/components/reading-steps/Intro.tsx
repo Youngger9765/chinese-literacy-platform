@@ -177,7 +177,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </svg>
                 <span className="text-xs font-bold text-accent-light uppercase tracking-widest">課文簡介</span>
               </div>
-              <p className={`text-gray-900 text-xl leading-[3rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+              <p className={`text-gray-900 text-2xl leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                 {processZhuyin(story.intro.background)}
               </p>
 

@@ -6,6 +6,7 @@ import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -29,6 +30,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   onFinish,
   onBack,
 }) => {
+  const { token } = useAuth();
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -195,6 +197,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         // Genre-aware Socratic (#615)
         genre: story.genre,
         readingStrategy: story.readingStrategy,
+        token: token ?? undefined,
       });
       setConversation([{ role: 'ai', text: result.question }]);
       applyServerState(result);
@@ -326,6 +329,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         storyTitle: story.title,
         storyText,
         studentAnswer: text,
+        token: token ?? undefined,
       });
 
       applyServerState(result);
@@ -787,7 +791,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                           : 'border-transparent hover:border-gray-200 hover:bg-white/40'
                       }`}
                     >
-                      <p className={`text-xl text-gray-900 leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                      <p className={`text-2xl text-gray-900 leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                         {zhuyinLines ? zhuyinLines[idx] : line}
                       </p>
                     </div>
