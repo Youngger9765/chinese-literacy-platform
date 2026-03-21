@@ -21,9 +21,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        "assignment_submissions",
-        sa.Column("teacher_feedback", sa.Text(), nullable=True),
+    op.execute(
+        "ALTER TABLE assignment_submissions ADD COLUMN IF NOT EXISTS teacher_feedback TEXT;"
     )
 
 
