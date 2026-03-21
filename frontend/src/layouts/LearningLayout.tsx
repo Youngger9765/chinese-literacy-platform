@@ -97,8 +97,16 @@ const LearningLayout: React.FC = () => {
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  /** DB LearningSession integer ID — created when the user starts the intro (Issue #242) */
-  const [dbSessionId, setDbSessionId] = useState<number | null>(null);
+  /** DB LearningSession integer ID — created when the user starts the intro (Issue #242).
+   * Persisted to sessionStorage so refresh within the same browser tab restores the session. */
+  const [dbSessionId, setDbSessionId] = useState<number | null>(() => {
+    try {
+      const raw = sessionStorage.getItem(`db-session-${storyId}`);
+      return raw ? parseInt(raw, 10) : null;
+    } catch {
+      return null;
+    }
+  });
   /** Progressive paragraph unlock tracking (Issue #85). */
   const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(new Set());
   /** Reading goals from the active assignment, loaded from sessionStorage (Issue #414). */
@@ -129,11 +137,13 @@ const LearningLayout: React.FC = () => {
     [user, storyId],
   );
 
-  /** Clear active session from localStorage (called on completion). */
+  /** Clear active session from localStorage and sessionStorage (called on completion).
+   * Removing the sessionStorage key means the next visit creates a fresh DB session. */
   const clearPersistedSession = useCallback(() => {
     if (!user) return;
     clearActiveSession(String(user.id));
-  }, [user]);
+    try { sessionStorage.removeItem(`db-session-${storyId}`); } catch { /* non-fatal */ }
+  }, [user, storyId]);
 
   // ── Idle-timeout warning (Issue #408) ────────────────────────────────────
 
@@ -264,7 +274,10 @@ const LearningLayout: React.FC = () => {
       })
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
-          if (data?.id) setDbSessionId(data.id);
+          if (data?.id) {
+            setDbSessionId(data.id);
+            try { sessionStorage.setItem(`db-session-${storyId}`, String(data.id)); } catch { /* non-fatal */ }
+          }
         })
         .catch(() => {
           // Non-fatal — dialogue won't be persisted but learning still works
