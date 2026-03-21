@@ -341,6 +341,12 @@ export async function getAIAnalysis(
 
 // --- New Comprehension Chat API (Issue #1: answer evaluation) ---
 
+export interface ConversationHistoryItem {
+  role: 'ai' | 'student' | 'feedback';
+  text: string;
+  understood: boolean | null;
+}
+
 export interface ChatResponse {
   question: string;
   feedback: string | null;
@@ -350,6 +356,9 @@ export interface ChatResponse {
   phase: string;
   is_complete: boolean;
   referenced_paragraph: number | null;
+  // Session persistence fields (Issue #632)
+  resumed?: boolean;
+  conversation_history?: ConversationHistoryItem[];
 }
 
 // --- Comprehension Scoring API (Issue #243) ---
@@ -437,6 +446,25 @@ export async function sendComprehensionChat(payload: {
   }
   if (!res.ok) throw new Error(`sendComprehensionChat failed: ${res.status}`);
   return res.json();
+}
+
+/** Clear the in-memory + DB session so the next fetchFirstQuestion starts fresh (Issue #632). */
+export async function restartComprehensionSession(payload: {
+  sessionId: string;
+  dbSessionId?: number;
+  token?: string;
+}): Promise<void> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (payload.token) headers['Authorization'] = `Bearer ${payload.token}`;
+  await fetch(`${API_BASE}/api/comprehension/restart`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      session_id: payload.sessionId,
+      db_session_id: payload.dbSessionId ?? null,
+    }),
+  });
+  // Fire-and-forget: non-fatal if this fails
 }
 
 // --- Dialogue history API (Issue #242) ---

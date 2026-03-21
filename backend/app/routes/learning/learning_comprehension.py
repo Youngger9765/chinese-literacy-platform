@@ -100,6 +100,12 @@ class ComprehensionChatRequest(BaseModel):
     reading_strategy: str | None = None
 
 
+class ConversationHistoryItem(BaseModel):
+    role: str  # "ai" | "student" | "feedback"
+    text: str
+    understood: bool | None = None  # only for feedback turns
+
+
 class ComprehensionChatResponse(BaseModel):
     question: str
     feedback: str | None = None
@@ -109,6 +115,9 @@ class ComprehensionChatResponse(BaseModel):
     phase: str
     is_complete: bool
     referenced_paragraph: int | None = None
+    # Session persistence fields (Issue #632)
+    resumed: bool = False  # True = restored from memory/DB, no Gemini call
+    conversation_history: list[ConversationHistoryItem] = []  # populated when resumed=True
 
 
 @router.post(
@@ -129,7 +138,14 @@ async def comprehension_chat(
     Send student_answer=null to start a new session and get the first question.
     Optionally pass db_session_id (integer DB LearningSession PK) to persist
     dialogue turns for later retrieval via GET /api/learning/sessions/{id}/dialogue.
+
+    When the session is restored from memory or DB (after refresh / Cloud Run restart),
+    the response includes resumed=true and conversation_history so the frontend can
+    display the prior conversation without a Gemini call.
     """
+    is_resumed = False
+    conversation_history: list[ConversationHistoryItem] = []
+
     try:
         if payload.student_answer is None:
             # Fetch active teacher instructions for this student (Issue #90)
@@ -147,7 +163,7 @@ async def comprehension_chat(
             except Exception as e:
                 logger.warning("Failed to fetch teacher instructions: %s", e)
 
-            result = await socratic_agent.start_session(
+            result, is_resumed = await socratic_agent.start_session(
                 session_id=payload.session_id,
                 story_title=payload.story_title,
                 story_text=payload.story_text,
@@ -157,7 +173,30 @@ async def comprehension_chat(
                 teacher_instructions=teacher_instructions_content or None,
                 genre=payload.genre,
                 reading_strategy=payload.reading_strategy,
+                db=db,
+                db_session_id=payload.db_session_id,
             )
+
+            # When resuming, build conversation_history from DB turns so the
+            # frontend can display prior Q&A without extra API calls.
+            if is_resumed and payload.db_session_id is not None:
+                try:
+                    turns = (
+                        db.query(DialogueTurn)
+                        .filter(DialogueTurn.learning_session_id == payload.db_session_id)
+                        .order_by(DialogueTurn.turn_order)
+                        .all()
+                    )
+                    for turn in turns:
+                        conversation_history.append(
+                            ConversationHistoryItem(
+                                role=turn.role,
+                                text=turn.text,
+                                understood=turn.is_correct,
+                            )
+                        )
+                except Exception as e:
+                    logger.warning("Failed to fetch conversation history for resume: %s", e)
         else:
             result = await socratic_agent.process_answer(
                 session_id=payload.session_id,
@@ -172,8 +211,9 @@ async def comprehension_chat(
         logger.error("Comprehension chat error: %s", e)
         raise HTTPException(status_code=500, detail="AI service error")
 
-    # Persist dialogue turns when a DB session ID is provided (Issue #242)
-    if payload.db_session_id is not None:
+    # Persist dialogue turns when a DB session ID is provided (Issue #242).
+    # Skip persistence when resuming — turns are already in DB.
+    if payload.db_session_id is not None and not is_resumed:
         try:
             _persist_dialogue_turns(
                 db=db,
@@ -195,6 +235,38 @@ async def comprehension_chat(
         phase=result.phase,
         is_complete=result.is_complete,
         referenced_paragraph=result.referenced_paragraph,
+        resumed=is_resumed,
+        conversation_history=conversation_history,
+    )
+
+
+# ── Step 3c: Restart session (Issue #632) ────────────────────────────────────
+
+class ComprehensionRestartRequest(BaseModel):
+    session_id: str
+    db_session_id: int | None = None  # when provided, also clears DB turns
+
+
+@router.post(
+    "/comprehension/restart",
+    status_code=204,
+    dependencies=[Depends(ai_limit_10_per_min)],
+)
+async def comprehension_restart(
+    payload: ComprehensionRestartRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Clear the in-memory session and (optionally) delete DB turns for a given
+    db_session_id so the next fetchFirstQuestion call starts a fresh Gemini session.
+
+    Called when the student clicks '重新開始'.
+    """
+    socratic_agent.clear_session(
+        session_id=payload.session_id,
+        db=db,
+        db_session_id=payload.db_session_id,
     )
 
 
