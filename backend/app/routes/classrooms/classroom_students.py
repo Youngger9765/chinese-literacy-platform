@@ -1,7 +1,7 @@
 """Student management endpoints: add, remove, list, search students in a classroom."""
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
@@ -14,6 +14,7 @@ from ...schemas.classroom import (
     StudentSearchRequest,
     StudentSearchResult,
 )
+from ...services.audit_logger import AuditAction, audit_log_endpoint
 from .helpers import (
     get_classroom_or_404,
     require_member_or_admin,
@@ -78,6 +79,7 @@ def add_student_to_classroom(
 def remove_student_from_classroom(
     classroom_id: int,
     student_id: int,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -96,6 +98,12 @@ def remove_student_from_classroom(
     if cs is None:
         raise HTTPException(status_code=404, detail="Student not in classroom")
 
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.DELETE_STUDENT,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
     db.delete(cs)
     db.commit()
     logger.info("Removed student %d from classroom %d", student_id, classroom_id)
@@ -108,12 +116,20 @@ def remove_student_from_classroom(
 )
 def list_classroom_students(
     classroom_id: int,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """List all students enrolled in a classroom. Owner, co-teachers, and admins can access."""
     classroom = get_classroom_or_404(classroom_id, db)
     require_member_or_admin(classroom, current_user, db)
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.LIST_STUDENTS,
+        user_id=current_user.id,
+        target_student_id=None,
+    )
 
     enrollments = (
         db.query(ClassroomStudent)
