@@ -7,9 +7,9 @@ const DEFAULT_LEVEL: FontSizeLevel = 'medium';
 export const FONT_SIZE_EVENT = 'lingoleap:font-size-change';
 
 export const FONT_SIZE_PX: Record<FontSizeLevel, number> = {
-  small: 14,
-  medium: 18,
-  large: 22,
+  small: 24,
+  medium: 28,
+  large: 32,
 };
 
 const LEVELS: FontSizeLevel[] = ['small', 'medium', 'large'];
