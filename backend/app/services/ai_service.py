@@ -968,3 +968,114 @@ async def validate_student_sentence(
         result["suggestion"] = ""
 
     return result
+
+
+# ── ⑤ 文章重點表 — AI-generated story structure (#615) ────────────────────────
+
+STORY_STRUCTURE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "rows": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "label": {"type": "string"},
+                    "value": {"type": "string"},
+                    "sub_rows": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "label": {"type": "string"},
+                                "value": {"type": "string"},
+                            },
+                            "required": ["label", "value"],
+                        },
+                        "nullable": True,
+                    },
+                },
+                "required": ["label", "value"],
+            },
+        }
+    },
+    "required": ["rows"],
+}
+
+_STRUCTURE_PROMPTS = {
+    "記敘文": """請根據課文，用繁體中文填寫文章重點表（記敘文格式）：
+rows 應包含：
+- 主角（課文的主要人物）
+- 主題（一句話說明課文的核心訊息）
+- 特色（主角的特質或行為模式）
+- 事例，sub_rows 包含：
+  - 背景（故事發生的情境/時間/地點）
+  - 經過（主角遇到的挑戰及如何因應）
+  - 結果（最終的結果或影響）
+每格 value 控制在 20 字以內，使用臺灣繁體中文。""",
+
+    "說明文": """請根據課文，用繁體中文填寫文章重點表（說明文格式）：
+rows 應包含：
+- 主題（被說明的對象是什麼）
+- 重要事實 1（最重要的說明內容）
+- 重要事實 2（第二重要的說明內容）
+- 重要事實 3（第三重要的說明內容）
+- 結論（課文想讓讀者知道或做的事）
+每格 value 控制在 25 字以內，使用臺灣繁體中文。""",
+
+    "議論文": """請根據課文，用繁體中文填寫文章重點表（議論文格式）：
+rows 應包含：
+- 論點（作者的主要主張是什麼）
+- 論據 1（支持論點的第一個理由或例子）
+- 論據 2（支持論點的第二個理由或例子）
+- 結論（作者希望讀者怎麼做或怎麼想）
+每格 value 控制在 25 字以內，使用臺灣繁體中文。""",
+}
+
+_DEFAULT_STRUCTURE_PROMPT = """請根據課文，用繁體中文填寫文章重點表：
+rows 應包含：主題、重要內容 1、重要內容 2、結論。
+每格 value 控制在 25 字以內，使用臺灣繁體中文。"""
+
+
+async def generate_story_structure(
+    story_title: str,
+    story_text: str,
+    genre: str | None = None,
+) -> dict:
+    """Generate a structured story summary table for ⑤ 文章重點表 (#615).
+
+    Returns a dict with 'rows', each row having 'label', 'value',
+    and optionally 'sub_rows' for nested entries (e.g. 事例).
+    """
+    prompt_instruction = _STRUCTURE_PROMPTS.get(genre or "", _DEFAULT_STRUCTURE_PROMPT)
+
+    system_prompt = (
+        "你是國語文教學助手，專門幫學生整理課文重點。"
+        "請務必使用臺灣繁體中文，禁止大陸用語。"
+        "每個 value 盡量簡潔，讓國小高年級學生容易理解。"
+    )
+    user_msg = (
+        f"課文標題：{story_title}\n\n"
+        f"課文內容：\n{story_text}\n\n"
+        f"{prompt_instruction}"
+    )
+
+    contents = [
+        genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text=user_msg)],
+        )
+    ]
+
+    try:
+        result = await generate_structured_response(
+            system_prompt=system_prompt,
+            contents=contents,
+            response_schema=STORY_STRUCTURE_SCHEMA,
+            max_tokens=1024,
+            temperature=0.3,
+        )
+        return result
+    except Exception as e:
+        logger.warning("generate_story_structure failed: %s", e)
+        return {"rows": [{"label": "錯誤", "value": "無法載入文章重點表，請稍後再試"}]}
