@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, ComprehensionResult } from '../../types';
-import { sendComprehensionChat, ChatResponse, SessionExpiredError } from '../../services/api';
+import { sendComprehensionChat, restartComprehensionSession, ChatResponse, SessionExpiredError } from '../../services/api';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -14,6 +15,7 @@ interface ComprehensionChatProps {
   onPanelWidthChange: (w: number) => void;
   onFinish: (result: ComprehensionResult) => void;
   onBack: () => void;
+  dbSessionId?: number;
 }
 
 type ChatMessage =
@@ -28,7 +30,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   onPanelWidthChange,
   onFinish,
   onBack,
+  dbSessionId,
 }) => {
+  const { token } = useAuth();
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +48,11 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [activeTab, setActiveTab] = useState<'story' | 'chat' | 'structure' | 'mcq'>('chat');
 
   // Server-driven session state
-  const [sessionId] = useState(() => crypto.randomUUID());
+  // Use a stable key derived from dbSessionId so refreshes don't generate a new UUID
+  // and waste a Gemini call. Anonymous users (no dbSessionId) fall back to a random UUID.
+  const [sessionId] = useState(() =>
+    dbSessionId ? `db-${dbSessionId}` : crypto.randomUUID()
+  );
   const [understoodCount, setUnderstoodCount] = useState(0);
   const [requiredCount, setRequiredCount] = useState(3);
   const [isSessionComplete, setIsSessionComplete] = useState(false);
@@ -176,7 +184,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     }
   }, [isMobile]);
 
-  // Fetch the first question from the server (no student answer)
+  // Fetch the first question from the server (no student answer).
+  // When the backend detects an existing session (resumed=true), it returns
+  // conversation_history so the frontend can restore the prior conversation
+  // without a Gemini call.
   const fetchFirstQuestion = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -192,11 +203,26 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         mispronouncedWords: attempt.mispronouncedWords?.length ? attempt.mispronouncedWords : undefined,
         accuracy: attempt.accuracy || undefined,
         cpm: attempt.cpm || undefined,
+        // Persist turns and enable session restore on refresh (Issue #632)
+        dbSessionId: dbSessionId,
         // Genre-aware Socratic (#615)
         genre: story.genre,
         readingStrategy: story.readingStrategy,
+        token: token ?? undefined,
       });
-      setConversation([{ role: 'ai', text: result.question }]);
+
+      if (result.resumed && result.conversation_history && result.conversation_history.length > 0) {
+        // Restore prior conversation — no loading animation shown
+        const restored: ChatMessage[] = result.conversation_history.map(h => {
+          if (h.role === 'feedback') {
+            return { role: 'feedback' as const, text: h.text, understood: h.understood ?? false };
+          }
+          return { role: h.role as 'ai' | 'student', text: h.text };
+        });
+        setConversation(restored);
+      } else {
+        setConversation([{ role: 'ai', text: result.question }]);
+      }
       applyServerState(result);
     } catch {
       switchToOfflineMode('無法連線到伺服器，已啟用離線測試模式。');
@@ -204,7 +230,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [story.content, story.title, sessionId, attempt, applyServerState, switchToOfflineMode]);
+  }, [story.content, story.title, sessionId, dbSessionId, attempt, applyServerState, switchToOfflineMode, token]);
 
   // Resizable right panel (mouse + touch)
   useEffect(() => {
@@ -380,6 +406,23 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       }
     }
   };
+
+  // Clear session and start over from scratch (Issue #632)
+  const handleRestart = useCallback(async () => {
+    setConversation([]);
+    setUnderstoodCount(0);
+    setIsSessionComplete(false);
+    setHighlightedParagraph(null);
+    setError(null);
+    initializedRef.current = false;
+    // Tell backend to clear memory + DB turns so next fetchFirstQuestion starts fresh
+    await restartComprehensionSession({
+      sessionId,
+      dbSessionId: dbSessionId,
+      token: token ?? undefined,
+    }).catch(() => { /* non-fatal */ });
+    fetchFirstQuestion();
+  }, [sessionId, dbSessionId, token, fetchFirstQuestion]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const nativeEvent = e.nativeEvent as KeyboardEvent;
@@ -619,6 +662,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             className="px-3 py-3 rounded-xl text-base text-gray-500 hover:text-gray-900 transition-colors"
           >
             ← 回到朗讀
+          </button>
+          <button
+            onClick={handleRestart}
+            className="px-3 py-3 rounded-xl text-sm text-gray-500 hover:text-gray-900 transition-colors"
+            title="重新開始對話"
+          >
+            重新開始
           </button>
           <button
             onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
