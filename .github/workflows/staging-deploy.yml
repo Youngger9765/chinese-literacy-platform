@@ -300,14 +300,7 @@ jobs:
           STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
           for ISSUE_NUM in $ISSUES; do
             echo "Commenting on issue #${ISSUE_NUM}"
-            BODY="## Deployed to Staging
-
-Smoke tests passed. E2E tests are now running in parallel.
-
-**Staging URL**: ${STAGING_URL}
-
-Next step: wait for E2E test results, then request case owner testing."
-            gh issue comment "$ISSUE_NUM" --repo "$REPO" --body "$BODY"
+            gh issue comment "$ISSUE_NUM" --repo "$REPO" --body "$(printf '## Deployed to Staging\n\nSmoke tests passed.\n\n**Staging URL**: %s\n\nNext step: request case owner testing.' "${STAGING_URL}")"
           done
 
   cleanup-branch:

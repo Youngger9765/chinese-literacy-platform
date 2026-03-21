@@ -72,19 +72,19 @@ jobs:
           echo "Deployment URL did not become healthy within 10 minutes."
           exit 1
 
-      - name: Run E2E tests (core flows only)
+      - name: Run E2E tests (m1-m6 core flows)
         working-directory: frontend
         env:
           PLAYWRIGHT_BASE_URL: ${{ steps.resolve-url.outputs.base_url }}
           CI: 'true'
         run: |
           npx playwright test \
-            e2e/auth-flow.spec.ts \
-            e2e/story-selection.spec.ts \
-            e2e/learning-flow.spec.ts \
-            e2e/student-flow.spec.ts \
-            e2e/teacher-flow.spec.ts \
-            e2e/teacher-dashboard.spec.ts \
+            e2e/m1-auth.spec.ts \
+            e2e/m2-teacher.spec.ts \
+            e2e/m3-student.spec.ts \
+            e2e/m4-admin.spec.ts \
+            e2e/m5-infra.spec.ts \
+            e2e/m6-learning.spec.ts \
             --reporter=github \
             --timeout=60000
 
