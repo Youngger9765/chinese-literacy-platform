@@ -146,6 +146,20 @@ async def comprehension_chat(
     is_resumed = False
     conversation_history: list[ConversationHistoryItem] = []
 
+    # Validate db_session_id ownership to prevent IDOR (Insecure Direct Object Reference).
+    # A malicious user cannot read or write another student's dialogue by guessing session IDs.
+    if payload.db_session_id is not None:
+        owned = (
+            db.query(LearningSession.id)
+            .filter(
+                LearningSession.id == payload.db_session_id,
+                LearningSession.student_id == current_user.id,
+            )
+            .first()
+        )
+        if not owned:
+            raise HTTPException(status_code=403, detail="Session not found")
+
     try:
         if payload.student_answer is None:
             # Fetch active teacher instructions for this student (Issue #90)
