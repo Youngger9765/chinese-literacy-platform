@@ -275,3 +275,62 @@ jobs:
                 --delete-tags --quiet 2>/dev/null || true
             done
           done
+
+  notify-staging:
+    name: Notify referenced issues
+    needs: smoke-test
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Comment on referenced issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          # Parse Fixes/Closes/Refs #N from commit message (passed via env var — safe)
+          ISSUES=$(echo "$COMMIT_MSG" | grep -oiE '(fixes|closes|refs) #[0-9]+' | grep -oE '[0-9]+' || true)
+          if [ -z "$ISSUES" ]; then
+            echo "No referenced issues found in commit message — skipping notify"
+            exit 0
+          fi
+          REPO="${{ github.repository }}"
+          STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
+          for ISSUE_NUM in $ISSUES; do
+            echo "Commenting on issue #${ISSUE_NUM}"
+            gh issue comment "$ISSUE_NUM" --repo "$REPO" --body "$(printf '## Deployed to Staging\n\nSmoke tests passed.\n\n**Staging URL**: %s\n\nNext step: request case owner testing.' "${STAGING_URL}")"
+          done
+
+  cleanup-branch:
+    name: Delete merged feature branch
+    needs: notify-staging
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete remote feature branch if applicable
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          # Squash merges: commit message format "fix: description (#N)"
+          # Merge commits: "Merge pull request #N from owner/branch-name"
+          # Extract branch name from merge commit format only
+          BRANCH=$(echo "$COMMIT_MSG" | grep -oP '(?<=from )[^/]+/\K\S+' || true)
+
+          if [ -z "$BRANCH" ]; then
+            echo "Could not extract branch name from commit message — skipping cleanup"
+            exit 0
+          fi
+
+          # Only delete feature/fix/feat branches (never staging, main, etc.)
+          if echo "$BRANCH" | grep -qE '^(fix/issue-|feat/issue-|feature/issue-)'; then
+            REPO="${{ github.repository }}"
+            echo "Deleting remote branch: $BRANCH"
+            gh api "repos/${REPO}/git/refs/heads/${BRANCH}" -X DELETE && \
+              echo "Deleted $BRANCH" || \
+              echo "Branch $BRANCH not found or already deleted — OK"
+          else
+            echo "Branch '$BRANCH' is not a feature branch — skipping cleanup"
+          fi
