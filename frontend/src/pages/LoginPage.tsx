@@ -175,8 +175,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
           </button>
         </p>
 
-        {/* Quick login buttons (dev/demo only) — hidden in production */}
-        {import.meta.env.VITE_ENVIRONMENT === 'development' && (
+        {/* Quick login buttons (demo) */}
+        {(
           <div className="mt-8 border-t border-gray-200 pt-6">
             <p className="text-xs text-gray-400 text-center mb-3">快速登入（測試用）</p>
             <div className="grid grid-cols-3 gap-2">
