@@ -6,11 +6,6 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/e2e-tests.yml'
-  push:
-    branches: [staging]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/e2e-tests.yml'
 
 # Only run one E2E job per branch — cancel in-progress runs on new push
 concurrency:
@@ -43,37 +38,24 @@ jobs:
         working-directory: frontend
         run: npx playwright install chromium --with-deps
 
-      # Determine target URL.
-      # On push to staging → always use the persistent staging URL.
-      # On PR → derive PR preview URL from branch name (issue-N pattern).
+      # Determine target URL from PR branch name (issue-N pattern).
       - name: Resolve base URL
         id: resolve-url
         env:
-          EVENT_NAME: ${{ github.event_name }}
           PR_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
-          if [ "$EVENT_NAME" = "push" ]; then
+          ISSUE_NUM=$(echo "$PR_BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
+          if [ -n "$ISSUE_NUM" ]; then
+            PREVIEW_URL="https://lingoleap-frontend-issue-${ISSUE_NUM}-958347263320.asia-east1.run.app"
+            echo "base_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
+            echo "Using PR Preview URL: ${PREVIEW_URL}"
+          else
             STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
             echo "base_url=${STAGING_URL}" >> $GITHUB_OUTPUT
-            echo "trigger=staging" >> $GITHUB_OUTPUT
-            echo "Using staging URL (push trigger): ${STAGING_URL}"
-          else
-            ISSUE_NUM=$(echo "$PR_BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+' || echo "")
-            if [ -n "$ISSUE_NUM" ]; then
-              PREVIEW_URL="https://lingoleap-frontend-issue-${ISSUE_NUM}-958347263320.asia-east1.run.app"
-              echo "base_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
-              echo "trigger=pr" >> $GITHUB_OUTPUT
-              echo "Using PR Preview URL: ${PREVIEW_URL}"
-            else
-              STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
-              echo "base_url=${STAGING_URL}" >> $GITHUB_OUTPUT
-              echo "trigger=pr-fallback" >> $GITHUB_OUTPUT
-              echo "Branch has no issue number — falling back to staging: ${STAGING_URL}"
-            fi
+            echo "Branch has no issue number — falling back to staging: ${STAGING_URL}"
           fi
 
-      # Wait for the target deployment to become healthy before running tests.
-      # On staging push, staging-deploy.yml runs in parallel — poll until ready.
+      # Wait for the PR preview deployment to become healthy before running tests.
       - name: Wait for deployment (max 10 min)
         run: |
           BASE_URL="${{ steps.resolve-url.outputs.base_url }}"
