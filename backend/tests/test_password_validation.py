@@ -74,7 +74,13 @@ def client():
 # ---------------------------------------------------------------------------
 
 def register_user(client: TestClient, email: str, password: str, name: str = "Test User"):
-    return client.post("/api/auth/register", json={"email": email, "password": password, "name": name})
+    resp = client.post("/api/auth/register", json={"email": email, "password": password, "name": name})
+    # If registration succeeded, auto-verify email using the dev-mode token (issue #460)
+    if resp.status_code == 201:
+        vt = resp.json().get("verification_token")
+        if vt:
+            client.get(f"/api/auth/verify-email?token={vt}")
+    return resp
 
 
 def register_and_verify(client: TestClient, email: str, password: str, name: str = "Test User"):
@@ -92,9 +98,7 @@ def get_auth_token(client: TestClient, email: str, password: str) -> str:
     return resp.json()["access_token"]
 
 
-# ===========================================================================
 # Unit tests: password_validator module
-# ===========================================================================
 
 class TestPasswordValidatorUnit:
 
@@ -154,9 +158,7 @@ class TestPasswordStrengthLevel:
         assert level == "strong"
 
 
-# ===========================================================================
 # Integration tests: register with password strength
-# ===========================================================================
 
 class TestRegisterPasswordStrength:
 
@@ -193,9 +195,7 @@ class TestRegisterPasswordStrength:
         assert resp.status_code == 422
 
 
-# ===========================================================================
 # Integration tests: change-password with password strength
-# ===========================================================================
 
 class TestChangePasswordStrength:
 
@@ -220,9 +220,7 @@ class TestChangePasswordStrength:
         assert resp.status_code == 200
 
 
-# ===========================================================================
 # Integration tests: forgot-password flow
-# ===========================================================================
 
 class TestForgotPasswordFlow:
 
@@ -311,9 +309,7 @@ class TestForgotPasswordFlow:
         assert resp.status_code == 422
 
 
-# ===========================================================================
 # Integration tests: verify-email endpoint
-# ===========================================================================
 
 class TestVerifyEmail:
 

@@ -131,19 +131,24 @@ def auth_header(token: str) -> dict:
 def _register_user(client, suffix: str) -> dict:
     unique = uuid.uuid4().hex[:8]
     email = f"{suffix}_{unique}@example.com"
+    password = "SecurePass123!"
+    name = f"{suffix.title()} {unique}"
     resp = client.post("/api/auth/register", json={
         "email": email,
-        "password": "SecurePass123!",
-        "name": f"{suffix.title()} {unique}",
+        "password": password,
+        "name": name,
     })
     assert resp.status_code == 201
-    token = resp.json()["access_token"]
+    verification_token = resp.json()["verification_token"]
+    client.get(f"/api/auth/verify-email?token={verification_token}")
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    token = login_resp.json()["access_token"]
     me_resp = client.get("/api/users/me", headers=auth_header(token))
     return {
         "token": token,
         "user_id": me_resp.json()["id"],
         "email": email,
-        "name": f"{suffix.title()} {unique}",
+        "name": name,
     }
 
 

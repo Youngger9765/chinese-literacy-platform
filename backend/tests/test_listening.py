@@ -103,12 +103,16 @@ def _register_and_login(client: TestClient) -> str:
     """Register a student and return their access token."""
     unique = uuid.uuid4().hex[:8]
     email = f"listen_{unique}@example.com"
+    password = "Test1234!"
     resp = client.post(
         "/api/auth/register",
-        json={"email": email, "password": "Test1234!", "name": "Listen Tester"},
+        json={"email": email, "password": password, "name": "Listen Tester"},
     )
     assert resp.status_code == 201, resp.text
-    return resp.json()["access_token"]
+    verification_token = resp.json()["verification_token"]
+    client.get(f"/api/auth/verify-email?token={verification_token}")
+    login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
+    return login_resp.json()["access_token"]
 
 
 # ---------------------------------------------------------------------------

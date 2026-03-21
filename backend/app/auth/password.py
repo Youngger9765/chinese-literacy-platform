@@ -1,6 +1,5 @@
 import bcrypt
 
-
 _BCRYPT_MAX = 72  # bcrypt hard limit
 
 
