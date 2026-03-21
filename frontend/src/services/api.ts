@@ -404,6 +404,9 @@ export async function sendComprehensionChat(payload: {
   cpm?: number;
   /** DB LearningSession integer ID — when provided, dialogue turns are persisted (Issue #242) */
   dbSessionId?: number;
+  /** Genre-aware Socratic (#615) */
+  genre?: string;
+  readingStrategy?: string;
   token?: string;
 }): Promise<ChatResponse> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -420,6 +423,8 @@ export async function sendComprehensionChat(payload: {
       accuracy: payload.accuracy,
       cpm: payload.cpm,
       db_session_id: payload.dbSessionId ?? null,
+      genre: payload.genre ?? null,
+      reading_strategy: payload.readingStrategy ?? null,
     }),
   });
   if (res.status === 422) {

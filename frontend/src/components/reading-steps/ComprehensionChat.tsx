@@ -192,6 +192,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         mispronouncedWords: attempt.mispronouncedWords?.length ? attempt.mispronouncedWords : undefined,
         accuracy: attempt.accuracy || undefined,
         cpm: attempt.cpm || undefined,
+        // Genre-aware Socratic (#615)
+        genre: story.genre,
+        readingStrategy: story.readingStrategy,
       });
       setConversation([{ role: 'ai', text: result.question }]);
       applyServerState(result);
