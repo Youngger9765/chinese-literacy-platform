@@ -334,6 +334,10 @@ async def evaluate_reading_with_ai(
         "請根據以上規則評分，輸出 JSON。"
     )
 
+    # Dynamic token budget for per-char diff output.
+    # 81 chars can already produce large JSON arrays; fixed 1024 is often too tight.
+    ai_max_tokens = max(1024, min(4096, t_len * 24 + 256))
+
     contents = [
         genai_types.Content(
             role="user",
@@ -346,7 +350,7 @@ async def evaluate_reading_with_ai(
             system_prompt=_SYSTEM_PROMPT,
             contents=contents,
             response_schema=_RESPONSE_SCHEMA,
-            max_tokens=1024,
+            max_tokens=ai_max_tokens,
             temperature=0.1,  # Low temp for deterministic evaluation
         )
 
