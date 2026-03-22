@@ -3,7 +3,6 @@
  * This avoids hitting rate limits by logging in only once per role.
  */
 import { test as setup, expect } from '@playwright/test';
-import { dismissAllModals } from './fixtures';
 
 const TEACHER_EMAIL = 'teacher@test.com';
 const TEACHER_PASSWORD = 'teacher1234';
@@ -12,64 +11,62 @@ const ADMIN_PASSWORD = 'admin1234';
 const STUDENT_EMAIL = 'student@test.com';
 const STUDENT_PASSWORD = 'student1234';
 
-setup('authenticate as teacher', async ({ page }) => {
+const FRONTEND_BASE_URL =
+  process.env.PLAYWRIGHT_BASE_URL ||
+  process.env.E2E_BASE_URL ||
+  'https://lingoleap-frontend-staging-958347263320.asia-east1.run.app';
+
+const BACKEND_BASE_URL = FRONTEND_BASE_URL.replace('frontend', 'backend');
+
+async function loginAndGetToken(
+  request: import('@playwright/test').APIRequestContext,
+  email: string,
+  password: string,
+): Promise<string> {
+  const loginRes = await request.post(`${BACKEND_BASE_URL}/api/auth/login`, {
+    headers: { 'Content-Type': 'application/json' },
+    data: { email, password },
+  });
+
+  expect(loginRes.ok()).toBeTruthy();
+  const loginJson = await loginRes.json();
+  const token = loginJson.access_token as string | undefined;
+  expect(token).toBeTruthy();
+
+  // Verify token is usable before storing it as auth state.
+  const meRes = await request.get(`${BACKEND_BASE_URL}/api/users/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  expect(meRes.ok()).toBeTruthy();
+
+  return token!;
+}
+
+async function saveStorageStateWithToken(
+  page: import('@playwright/test').Page,
+  token: string,
+  statePath: string,
+): Promise<void> {
   await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
+  await page.evaluate((tokenValue) => {
+    localStorage.setItem('lingoleap_token', tokenValue);
+  }, token);
+  await page.context().storageState({ path: statePath });
+}
 
-  await page.locator('#login-email').fill(TEACHER_EMAIL);
-  await page.locator('#login-password').fill(TEACHER_PASSWORD);
-  await page.locator('button[type="submit"]:has-text("登入")').click();
-
-  await Promise.race([
-    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
-    page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
-  ]);
-  await dismissAllModals(page);
-  await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
-
-  await page.context().storageState({ path: 'e2e/.auth/teacher.json' });
+setup('authenticate as teacher', async ({ page, request }) => {
+  const token = await loginAndGetToken(request, TEACHER_EMAIL, TEACHER_PASSWORD);
+  await saveStorageStateWithToken(page, token, 'e2e/.auth/teacher.json');
 });
 
-setup('authenticate as admin', async ({ page }) => {
-  await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
-
-  await page.locator('#login-email').fill(ADMIN_EMAIL);
-  await page.locator('#login-password').fill(ADMIN_PASSWORD);
-  await page.locator('button[type="submit"]:has-text("登入")').click();
-
-  await Promise.race([
-    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
-    page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
-  ]);
-  await dismissAllModals(page);
-  await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
-
-  await page.context().storageState({ path: 'e2e/.auth/admin.json' });
+setup('authenticate as admin', async ({ page, request }) => {
+  const token = await loginAndGetToken(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+  await saveStorageStateWithToken(page, token, 'e2e/.auth/admin.json');
 });
 
-setup('authenticate as student', async ({ page }) => {
+setup('authenticate as student', async ({ page, request }) => {
   // Use pre-seeded student account instead of self-registering.
   // Student self-registration was blocked in #457; seed accounts have email_verified=True (#475).
-  await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  await expect(page.locator('text=登入你的帳號')).toBeVisible({ timeout: 30_000 });
-
-  await page.locator('#login-email').fill(STUDENT_EMAIL);
-  await page.locator('#login-password').fill(STUDENT_PASSWORD);
-  await page.locator('button[type="submit"]:has-text("登入")').click();
-
-  await Promise.race([
-    page.waitForSelector('h2:has-text("使用條款同意書")', { timeout: 30_000 }).catch(() => null),
-    page.waitForSelector('button:has-text("登出")', { timeout: 30_000 }).catch(() => null),
-  ]);
-  await dismissAllModals(page);
-  await expect(page.locator('button:has-text("登出")')).toBeVisible({ timeout: 30_000 });
-
-  await page.context().storageState({ path: 'e2e/.auth/student.json' });
+  const token = await loginAndGetToken(request, STUDENT_EMAIL, STUDENT_PASSWORD);
+  await saveStorageStateWithToken(page, token, 'e2e/.auth/student.json');
 });
