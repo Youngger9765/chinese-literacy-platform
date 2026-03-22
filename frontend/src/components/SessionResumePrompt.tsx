@@ -5,8 +5,8 @@ import {
   loadActiveSession,
   clearActiveSession,
   ActiveSessionRecord,
+  fetchStory,
 } from '../services/api';
-import { fetchStory } from '../services/api';
 
 /**
  * Step index to URL path segment mapping.

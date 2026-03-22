@@ -19,7 +19,7 @@ import {
   Tooltip,
 } from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
-import { fetchStudentDashboard, StudentDashboardData } from '../../services/api';
+import { fetchStudentDashboard, StudentDashboardData } from '../../services/learningApi';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

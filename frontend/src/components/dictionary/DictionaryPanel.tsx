@@ -9,7 +9,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { lookupCharacter, type DictionaryEntry } from '../../services/api';
+import { lookupCharacter, type DictionaryEntry } from '../../services/learningApi';
 
 interface DictionaryPanelProps {
   /** The Chinese character to look up. Must be a single character. */

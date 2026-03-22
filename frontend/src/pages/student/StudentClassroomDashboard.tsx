@@ -17,7 +17,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   fetchMyEnrolledClassrooms,
   type StudentEnrolledClassroom,
-} from '../../services/api';
+} from '../../services/learningApi';
 import {
   getMyAssignments,
   type StudentAssignmentResponse,

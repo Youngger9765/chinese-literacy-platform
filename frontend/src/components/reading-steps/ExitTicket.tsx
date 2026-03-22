@@ -4,7 +4,7 @@ import {
   generateExitTicket,
   submitExitTicket,
   type ExitTicketQuestion as ApiQuestion,
-} from '../../services/api';
+} from '../../services/learningApi';
 
 interface WrongToken {
   char: string;

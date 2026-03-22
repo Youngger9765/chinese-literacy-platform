@@ -22,13 +22,13 @@ import {
   Tooltip,
 } from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
+import type { StudentDashboardData } from '../../services/learningApi';
 import {
   LinkedChild,
-  StudentDashboardData,
   fetchChildDashboard,
   listLinkedChildren,
   redeemParentInviteCode,
-} from '../../services/api';
+} from '../../services/parentApi';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

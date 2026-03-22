@@ -10,7 +10,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { fetchLearningSessions, LearningSummary } from '../../services/api';
+import { fetchLearningSessions, LearningSummary } from '../../services/learningApi';
 
 const STEP_LABELS: Record<number, string> = {
   1: '簡介',

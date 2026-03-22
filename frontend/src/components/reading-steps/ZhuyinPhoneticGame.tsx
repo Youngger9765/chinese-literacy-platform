@@ -12,7 +12,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { lookupCharactersBatch } from '../../services/api';
+import { lookupCharactersBatch } from '../../services/learningApi';
 import { INITIALS, PRENUCLEAR, FINALS } from '../zhuyin/bopomoConstants';
 import { Story } from '../../types';
 

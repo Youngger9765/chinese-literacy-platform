@@ -13,12 +13,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { fetchStory } from '../../services/api';
 import {
   fetchSessionReport,
-  fetchStory,
   type SessionDetailResponse,
   type ComprehensionScoreResult,
-} from '../../services/api';
+} from '../../services/learningApi';
 import type {
   LearningSession,
   ReadingAttempt,

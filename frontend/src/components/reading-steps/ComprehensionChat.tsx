@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, ComprehensionResult } from '../../types';
-import { sendComprehensionChat, restartComprehensionSession, ChatResponse, SessionExpiredError } from '../../services/api';
+import { sendComprehensionChat, restartComprehensionSession, ChatResponse, SessionExpiredError } from '../../services/learningApi';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';

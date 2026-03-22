@@ -18,7 +18,7 @@ import {
   StudentProgressResponse,
   TextProgressItem,
   StepStatusItem,
-} from '../../services/api';
+} from '../../services/progressApi';
 
 const STEP_ROUTE: Record<string, string> = {
   intro: 'intro',

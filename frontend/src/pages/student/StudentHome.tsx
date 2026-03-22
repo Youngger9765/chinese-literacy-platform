@@ -21,7 +21,7 @@ import SessionResumePrompt from '../../components/SessionResumePrompt';
 import {
   fetchMyEnrolledClassrooms,
   type StudentEnrolledClassroom,
-} from '../../services/api';
+} from '../../services/learningApi';
 
 // ---------------------------------------------------------------------------
 // Quick action card data

@@ -147,3 +147,81 @@ export async function fetchAchievements(
   if (!res.ok) throw new Error(`fetchAchievements failed: ${res.status}`);
   return res.json();
 }
+
+// ---------------------------------------------------------------------------
+// Aliases — formerly in api.ts, consolidated here (Issue #646)
+// ---------------------------------------------------------------------------
+
+/** @alias LevelInfo */
+export type GamificationLevelInfo = LevelInfo;
+/** @alias StreakInfo */
+export type GamificationStreak = StreakInfo;
+/** @alias BadgeInfo */
+export type GamificationBadge = BadgeInfo;
+
+/** Alias for fetchGamificationSummary — matches legacy api.ts signature (studentId first). */
+export async function getGamificationSummary(
+  studentId: number,
+  token: string,
+): Promise<GamificationSummary> {
+  return fetchGamificationSummary(studentId, token);
+}
+
+export async function getGamificationPoints(
+  studentId: number,
+  token: string,
+): Promise<{ student_id: number; total_xp: number; stories_completed: number; level_info: LevelInfo }> {
+  const res = await fetch(`${API_BASE}/api/gamification/points/${studentId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getGamificationPoints failed: ${res.status}`);
+  return res.json();
+}
+
+export async function getGamificationStreak(
+  studentId: number,
+  token: string,
+): Promise<StreakInfo & { student_id: number }> {
+  const res = await fetch(`${API_BASE}/api/gamification/streak/${studentId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getGamificationStreak failed: ${res.status}`);
+  return res.json();
+}
+
+export async function getClassroomLeaderboard(
+  classroomId: number,
+  token: string,
+  limit = 10,
+): Promise<LeaderboardResponse> {
+  return fetchLeaderboard(classroomId, token, limit);
+}
+
+export async function reportSessionComplete(
+  studentId: number,
+  sessionId: number,
+  token: string,
+  opts: { readingAccuracy?: number; comprehensionPassed?: boolean } = {},
+): Promise<{
+  xp_earned: number;
+  new_total_xp: number;
+  level_info: LevelInfo;
+  streak: StreakInfo;
+  badges_unlocked: string[];
+}> {
+  const res = await fetch(`${API_BASE}/api/gamification/session-complete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      student_id: studentId,
+      session_id: sessionId,
+      reading_accuracy: opts.readingAccuracy ?? null,
+      comprehension_passed: opts.comprehensionPassed ?? false,
+    }),
+  });
+  if (!res.ok) throw new Error(`reportSessionComplete failed: ${res.status}`);
+  return res.json();
+}

@@ -2,9 +2,9 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
-import type { ComprehensionScoreResult } from '../../services/api';
-import { getRepeatedErrorsAlert } from '../../services/api';
-import type { RepeatedErrorAlertItem } from '../../services/api';
+import type { ComprehensionScoreResult } from '../../services/learningApi';
+import { getRepeatedErrorsAlert } from '../../services/progressApi';
+import type { RepeatedErrorAlertItem } from '../../services/progressApi';
 import DiffDisplay from '../ui/DiffDisplay';
 import CelebrationOverlay from '../ui/CelebrationOverlay';
 import ComprehensionScoreCard from './ComprehensionScoreCard';

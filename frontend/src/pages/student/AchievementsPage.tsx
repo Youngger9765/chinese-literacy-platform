@@ -15,7 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import PointsBadge, { LevelInfo } from '../../components/gamification/PointsBadge';
 import StreakIndicator, { StreakData } from '../../components/gamification/StreakIndicator';
 import AchievementCard, { BadgeInfo } from '../../components/gamification/AchievementCard';
-import { getGamificationSummary, GamificationSummary } from '../../services/api';
+import { getGamificationSummary, GamificationSummary } from '../../services/gamificationApi';
 
 const AchievementsPage: React.FC = () => {
   const { user, token } = useAuth();

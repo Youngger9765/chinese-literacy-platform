@@ -9,7 +9,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Story } from '../../types';
-import { evaluateListeningRetelling, ListeningEvaluateResponse } from '../../services/api';
+import { evaluateListeningRetelling, ListeningEvaluateResponse } from '../../services/learningApi';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { useAuth } from '../../contexts/AuthContext';
 
