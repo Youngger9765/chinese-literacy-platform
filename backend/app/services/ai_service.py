@@ -223,6 +223,12 @@ async def generate_structured_response(
 
     Uses response_mime_type="application/json" and response_schema
     to get structured JSON output from Gemini.
+
+        Notes:
+        - Disable thinking for deterministic schema-bound JSON tasks so token
+            budget is preserved for visible output (avoids premature MAX_TOKENS).
+        - Disable automatic function calling because this helper never passes
+            tools and does not need AFC orchestration overhead.
     """
     client = _get_client()
     last_error = None
@@ -240,6 +246,10 @@ async def generate_structured_response(
                         response_schema=response_schema,
                         max_output_tokens=max_tokens,
                         temperature=temperature,
+                        thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
+                        automatic_function_calling=genai_types.AutomaticFunctionCallingConfig(
+                            disable=True
+                        ),
                     ),
                 ),
                 timeout=GEMINI_TIMEOUT,
