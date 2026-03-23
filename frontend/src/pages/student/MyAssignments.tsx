@@ -8,7 +8,6 @@ import {
   AssignmentApiError,
 } from '../../services/assignmentApi';
 import { fetchLearningSessions, LearningSummary, loadActiveSession } from '../../services/api';
-import ReadingGoalsBadge from '../../components/ui/ReadingGoalsBadge';
 
 const STEP_NUMBER_TO_PATH: Record<number, string> = {
   1: 'intro',
@@ -84,40 +83,6 @@ const MyAssignments: React.FC = () => {
       return clampStep(activeSession.currentStep);
     }
     return 1;
-  };
-
-  const getProgressInfo = (a: StudentAssignmentResponse): {
-    completionPct: number;
-    remainingSteps: number;
-    statusText: string;
-    barColor: string;
-  } => {
-    if (a.status === 'submitted' || a.status === 'graded') {
-      return {
-        completionPct: 100,
-        remainingSteps: 0,
-        statusText: '已完成',
-        barColor: 'bg-green-500',
-      };
-    }
-    if (a.status !== 'in_progress') {
-      return {
-        completionPct: 0,
-        remainingSteps: TOTAL_ASSIGNMENT_STEPS,
-        statusText: `剩 ${TOTAL_ASSIGNMENT_STEPS} 步`,
-        barColor: 'bg-gray-300',
-      };
-    }
-
-    const currentStep = getEstimatedCurrentStep(a);
-    const finishedSteps = Math.max(0, currentStep - 1);
-    const remainingSteps = Math.max(0, TOTAL_ASSIGNMENT_STEPS - finishedSteps);
-    return {
-      completionPct: Math.round((finishedSteps / TOTAL_ASSIGNMENT_STEPS) * 100),
-      remainingSteps,
-      statusText: remainingSteps === 0 ? '即將完成' : `剩 ${remainingSteps} 步`,
-      barColor: 'bg-blue-500',
-    };
   };
 
   const loadAssignments = useCallback(async () => {
@@ -402,7 +367,6 @@ const MyAssignments: React.FC = () => {
           /* Assignment cards */
           <div className="space-y-3">
             {filteredAssignments.map((a) => {
-              const progress = getProgressInfo(a);
               return (
                 <div
                   key={a.assignment_id}
@@ -454,35 +418,6 @@ const MyAssignments: React.FC = () => {
                             提交於 {formatDate(a.submitted_at)}
                           </span>
                         )}
-                      </div>
-
-                      {/* Reading goals badge (Issue #414) */}
-                      <div className="mt-2">
-                        <ReadingGoalsBadge
-                          goals={{
-                            effectiveCpm: a.effective_cpm,
-                            effectiveAccuracy: a.effective_accuracy,
-                            difficultyLabel: a.difficulty_label,
-                            isCustom: a.target_cpm != null || a.target_accuracy != null,
-                          }}
-                          variant="compact"
-                        />
-                      </div>
-
-                      {/* Assignment progress overview */}
-                      <div className="mt-2">
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-gray-600">學習進度</span>
-                          <span className="text-gray-500">
-                            {progress.completionPct}% ・ {progress.statusText}
-                          </span>
-                        </div>
-                        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${progress.barColor}`}
-                            style={{ width: `${progress.completionPct}%` }}
-                          />
-                        </div>
                       </div>
 
                       {/* Issue #424: per-student teacher feedback */}
