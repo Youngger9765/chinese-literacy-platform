@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { ClassroomDetailResponse, StudentInClassroomResponse } from '../../services/classroomApi';
 import CsvUploadModal from './CsvUploadModal';
-import { generateParentInviteCode } from '../../services/api';
+import { generateParentInviteCode } from '../../services/parentApi';
 
 // ── Per-student parent invite button ─────────────────────────────────────────
 

@@ -12,7 +12,7 @@ import {
   fetchDialogueHistory,
   DialogueTurnItem,
   DialogueHistoryResponse,
-} from '../../services/api';
+} from '../../services/learningApi';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 

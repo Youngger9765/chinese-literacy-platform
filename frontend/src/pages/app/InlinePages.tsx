@@ -19,7 +19,7 @@ import StoryLibrary from '../student/StoryLibrary';
 import WriteCharacter from '../../components/stroke-order/WriteCharacter';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
 import RecommendedStories from '../../components/student/RecommendedStories';
-import { fetchLearningSessions, type LearningSummary } from '../../services/api';
+import { fetchLearningSessions, type LearningSummary } from '../../services/learningApi';
 import { Story } from '../../types';
 
 // Lazy-loaded — only needed when route is active

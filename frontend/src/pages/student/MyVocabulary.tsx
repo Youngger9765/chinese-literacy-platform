@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ErrorPatternsCard from '../../components/student/ErrorPatternsCard';
 import RecommendedVocab from '../../components/student/RecommendedVocab';
-import { getStudentStorySlugs, StorySlugItem } from '../../services/api';
+import { getStudentStorySlugs, StorySlugItem } from '../../services/progressApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 /**

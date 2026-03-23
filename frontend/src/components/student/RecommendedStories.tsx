@@ -15,7 +15,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getStoryRecommendations, type StoryRecommendationItem } from '../../services/api';
+import { getStoryRecommendations, type StoryRecommendationItem } from '../../services/progressApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 // ── Grade display helper ─────────────────────────────────────────────────────

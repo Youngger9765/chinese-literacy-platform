@@ -11,7 +11,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
 import RecordingButton from '../recording/RecordingButton';
 import ParagraphProgress, { ParagraphStatus } from './ParagraphProgress';
-import { evaluateReading } from '../../services/api';
+import { evaluateReading } from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 /* ------------------------------------------------------------------ */

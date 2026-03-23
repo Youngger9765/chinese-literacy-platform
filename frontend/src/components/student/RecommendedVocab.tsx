@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getRecommendedVocab, type RecommendedVocabItem } from '../../services/api';
+import { getRecommendedVocab, type RecommendedVocabItem } from '../../services/progressApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 /**
