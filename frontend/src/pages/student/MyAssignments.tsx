@@ -7,7 +7,8 @@ import {
   StudentAssignmentResponse,
   AssignmentApiError,
 } from '../../services/assignmentApi';
-import { fetchLearningSessions, LearningSummary, loadActiveSession } from '../../services/api';
+import { fetchLearningSessions, type LearningSummary } from '../../services/learningApi';
+import { loadActiveSession } from '../../services/api';
 
 const STEP_NUMBER_TO_PATH: Record<number, string> = {
   1: 'intro',
