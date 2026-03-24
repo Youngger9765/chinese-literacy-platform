@@ -1172,9 +1172,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               let paragraphDiffTokens: DiffToken[] | null = null;
               if (idx === currentLineIndex && lastDiffTokens) {
                 paragraphDiffTokens = lastDiffTokens;
-              } else if (status === 'completed') {
+              }
+              // Fallback: use saved lineResults diff (works after refresh + for completed paragraphs)
+              if (!paragraphDiffTokens) {
                 for (let i = lineResults.length - 1; i >= 0; i--) {
-                  if (lineResults[i].lineIndex === idx) {
+                  if (lineResults[i].lineIndex === idx && lineResults[i].diffTokens?.length > 0) {
                     paragraphDiffTokens = lineResults[i].diffTokens;
                     break;
                   }
@@ -1440,19 +1442,25 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                             <span className="text-gray-400">漏字 {summary.missingCount} 字</span>
                           )}
                         </div>
-                        {/* Action buttons — only on current paragraph */}
-                        {idx === currentLineIndex && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                setParagraphSummaries(prev => { const next = { ...prev }; delete next[idx]; return next; });
-                                setRealtimeDiffTokens(null);
-                                startSession();
-                              }}
-                              className="flex-1 py-2 rounded-lg text-sm font-bold border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all"
-                            >
-                              重練這段
-                            </button>
+                        {/* Action buttons */}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              if (idx !== currentLineIndex) {
+                                stopSession(); setRetryCount(0); setCurrentLineIndex(idx);
+                              }
+                              setParagraphSummaries(prev => { const next = { ...prev }; delete next[idx]; return next; });
+                              setRealtimeDiffTokens(null);
+                              // startSession after state settles — use setTimeout for non-current paragraphs
+                              if (idx === currentLineIndex) { startSession(); }
+                              else { setTimeout(() => startSession(), 100); }
+                            }}
+                            className="flex-1 py-2 rounded-lg text-sm font-bold border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all"
+                          >
+                            重練這段
+                          </button>
+                          {/* 下一段 — only on current paragraph, not yet advanced */}
+                          {idx === currentLineIndex && !completedParagraphs.has(idx) && (
                             <button
                               onClick={() => advanceParagraph(idx, lineResults)}
                               className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
@@ -1463,8 +1471,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                             >
                               {idx >= story.content.length - 1 ? '完成朗讀' : '下一段'}
                             </button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     );
                   })()}
