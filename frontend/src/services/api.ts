@@ -142,6 +142,76 @@ export async function fetchStory(id: string): Promise<Story> {
   }
 }
 
+export async function createLearningSession(payload: {
+  studentId: string;
+  storyId: string;
+}) {
+  const res = await fetch(`${API_BASE}/api/learning-sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`createLearningSession failed: ${res.status}`);
+  return res.json();
+}
+
+// --- Reading Evaluation API (Issue #454, frontend integration) ---
+
+export async function evaluateReading(
+  spokenText: string,
+  targetText: string,
+  durationMs?: number,
+  token?: string,
+  signal?: AbortSignal,
+): Promise<ReadingEvaluateResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/api/reading/evaluate`, {
+    method: 'POST',
+    headers,
+    signal,
+    body: JSON.stringify({
+      spoken_text: spokenText,
+      target_text: targetText,
+      duration_ms: durationMs,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ?? `evaluateReading failed: ${res.status}`);
+  }
+
+  return res.json();
+}
+
+// --- Session Resume API ---
+
+export interface SessionStatusResponse {
+  id: number;
+  story_slug: string | null;
+  current_step: number;
+  status: string;
+  is_resumable: boolean;
+  is_completed: boolean;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export async function getSessionStatus(
+  sessionId: number,
+  token: string,
+): Promise<SessionStatusResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/status`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 404) throw new Error('Session not found');
+  if (res.status === 403) throw new Error('Not your session');
+  if (!res.ok) throw new Error(`getSessionStatus failed: ${res.status}`);
+  return res.json();
+}
+
 // --- Active Session localStorage helpers ---
 
 export interface ActiveSessionRecord {
