@@ -22,7 +22,6 @@ export function useAppView(): AppView {
   if (pathname === '/history') return AppView.MY_ASSIGNMENTS;
   if (pathname === '/progress') return AppView.MY_ASSIGNMENTS;
   if (pathname === '/parent') return AppView.PARENT_DASHBOARD;
-  if (pathname.startsWith('/sessions/') && pathname.endsWith('/dialogue')) return AppView.DIALOGUE_HISTORY;
   if (pathname === '/classroom-dashboard') return AppView.STUDENT_CLASSROOM_DASHBOARD;
   if (pathname === '/profile') return AppView.STUDENT_PROFILE;
 

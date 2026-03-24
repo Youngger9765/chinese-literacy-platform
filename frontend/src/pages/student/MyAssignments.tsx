@@ -67,11 +67,13 @@ const MyAssignments: React.FC = () => {
     [user],
   );
 
-  const getAssignmentStoryKey = (a: StudentAssignmentResponse): string => String(a.story_id ?? a.text_id);
+  const getAssignmentStorySlug = (a: StudentAssignmentResponse): string | null =>
+    a.story_slug ?? null;
 
   const getLinkedSession = (a: StudentAssignmentResponse): LearningSummary | null => {
-    const storyKey = getAssignmentStoryKey(a);
-    return sessionByStorySlug[storyKey] ?? null;
+    const storySlug = getAssignmentStorySlug(a);
+    if (!storySlug) return null;
+    return sessionByStorySlug[storySlug] ?? null;
   };
 
   const getEstimatedCurrentStep = (a: StudentAssignmentResponse): number => {
@@ -79,8 +81,8 @@ const MyAssignments: React.FC = () => {
     if (linkedSession) {
       return clampStep(linkedSession.current_step);
     }
-    const storyKey = getAssignmentStoryKey(a);
-    if (activeSession && activeSession.storyId === storyKey) {
+    const storySlug = getAssignmentStorySlug(a);
+    if (activeSession && storySlug && activeSession.storyId === storySlug) {
       return clampStep(activeSession.currentStep);
     }
     return 1;
@@ -91,16 +93,29 @@ const MyAssignments: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      const [assignmentData, sessionData] = await Promise.all([
-        getMyAssignments(token),
-        fetchLearningSessions(token, {
-          // backend enforces limit <= 100
-          limit: 100,
-          status: 'in_progress,completed,abandoned',
-        }),
-      ]);
+      const assignmentData = await getMyAssignments(token);
+      const storySlugs = Array.from(
+        new Set(
+          assignmentData
+            .map((a) => a.story_slug)
+            .filter((slug): slug is string => Boolean(slug)),
+        ),
+      );
+
+      const sessionResponses = await Promise.all(
+        storySlugs.map((storySlug) =>
+          fetchLearningSessions(token, {
+            // Fetch only latest session for this assignment story key.
+            limit: 1,
+            status: 'in_progress,completed,abandoned',
+            story_slug: storySlug,
+          }),
+        ),
+      );
+
+      const sessionItems = sessionResponses.flatMap((response) => response.items);
       setAssignments(assignmentData);
-      setSessionByStorySlug(buildLatestSessionMap(sessionData.items));
+      setSessionByStorySlug(buildLatestSessionMap(sessionItems));
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -214,82 +229,46 @@ const MyAssignments: React.FC = () => {
       );
     }
     if (a.status === 'in_progress') {
-      const linkedSession = getLinkedSession(a);
-      const canOpenDialogue = linkedSession != null && linkedSession.current_step >= 3;
       return (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              if (!linkedSession) {
-                navigate('/history');
-                return;
-              }
-              navigate(`/sessions/${linkedSession.id}/dialogue`);
-            }}
-            disabled={!canOpenDialogue}
-            className="px-3 py-1.5 rounded-lg border border-accent text-accent text-xs font-medium hover:bg-accent-bg transition-colors cursor-pointer shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-            title={canOpenDialogue ? '查看此作業的對話紀錄' : '完成課文理解步驟後即可查看對話'}
-          >
-            對話紀錄
-          </button>
-          <button
-            onClick={() => {
-              // Restore assignment ID so LearningLayout can auto-submit on completion.
-              sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
-              // Restore reading goals so AssessmentReport can show goal comparison (Issue #414).
-              sessionStorage.setItem(
-                'activeAssignmentGoals',
-                JSON.stringify({
-                  target_cpm: a.target_cpm,
-                  target_accuracy: a.target_accuracy,
-                  difficulty_label: a.difficulty_label,
-                  effective_cpm: a.effective_cpm,
-                  effective_accuracy: a.effective_accuracy,
-                }),
-              );
-              // story_id is set for YAML texts; text_id for DB texts
-              const textKey = a.story_id ?? a.text_id;
-              // Resume from last saved step if available, otherwise use latest server step.
-              const currentStep = getEstimatedCurrentStep(a);
-              const serverStepPath = STEP_NUMBER_TO_PATH[currentStep] ?? 'intro';
-              const savedStep = activeSession && activeSession.storyId === String(textKey)
-                ? STEP_NUMBER_TO_PATH[clampStep(activeSession.currentStep)]
-                : null;
-              navigate(`/learn/${textKey}/${savedStep || serverStepPath}`);
-            }}
-            className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
-          >
-            繼續
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            // Restore assignment ID so LearningLayout can auto-submit on completion.
+            sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
+            // Restore reading goals so AssessmentReport can show goal comparison (Issue #414).
+            sessionStorage.setItem(
+              'activeAssignmentGoals',
+              JSON.stringify({
+                target_cpm: a.target_cpm,
+                target_accuracy: a.target_accuracy,
+                difficulty_label: a.difficulty_label,
+                effective_cpm: a.effective_cpm,
+                effective_accuracy: a.effective_accuracy,
+              }),
+            );
+            // story_id is set for YAML texts; text_id for DB texts
+            const textKey = a.story_id ?? a.text_id;
+            // Resume from last saved step if available, otherwise use latest server step.
+            const currentStep = getEstimatedCurrentStep(a);
+            const serverStepPath = STEP_NUMBER_TO_PATH[currentStep] ?? 'intro';
+            const savedStep = activeSession && activeSession.storyId === String(textKey)
+              ? STEP_NUMBER_TO_PATH[clampStep(activeSession.currentStep)]
+              : null;
+            navigate(`/learn/${textKey}/${savedStep || serverStepPath}`);
+          }}
+          className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
+        >
+          繼續
+        </button>
       );
     }
     // submitted or graded
-    const linkedSession = getLinkedSession(a);
-    const canOpenDialogue = linkedSession != null && linkedSession.current_step >= 3;
     return (
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => {
-            if (!linkedSession) {
-              navigate('/history');
-              return;
-            }
-            navigate(`/sessions/${linkedSession.id}/dialogue`);
-          }}
-          disabled={!canOpenDialogue}
-          className="px-3 py-1.5 rounded-lg border border-accent text-accent text-xs font-medium hover:bg-accent-bg transition-colors cursor-pointer shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-          title={canOpenDialogue ? '查看此作業的對話紀錄' : '完成課文理解步驟後即可查看對話'}
-        >
-          對話紀錄
-        </button>
-        <button
-          onClick={() => navigate(`/learn/${a.story_id ?? a.text_id}/report`)}
-          className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
-        >
-          查看
-        </button>
-      </div>
+      <button
+        onClick={() => navigate(`/learn/${a.story_id ?? a.text_id}/report`)}
+        className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+      >
+        查看
+      </button>
     );
   };
 

@@ -53,7 +53,6 @@ const KnowledgeStationPage = lazy(() => import('../pages/learning/KnowledgeStati
 // Student pages — infrequently accessed, split to reduce initial load
 const JoinClassroomPage = lazy(() => import('../pages/JoinClassroomPage'));
 const MyAssignments = lazy(() => import('../pages/student/MyAssignments'));
-const DialogueHistory = lazy(() => import('../pages/student/DialogueHistory'));
 const MyVocabulary = lazy(() => import('../pages/student/MyVocabulary'));
 const AchievementsPage = lazy(() => import('../pages/student/AchievementsPage'));
 const StudentClassroomDashboard = lazy(() => import('../pages/student/StudentClassroomDashboard'));
@@ -278,16 +277,6 @@ const AppRoutes: React.FC = () => (
           <ProtectedRoute>
             <AppShell>
               <StudentProfile />
-            </AppShell>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/sessions/:sessionId/dialogue"
-        element={
-          <ProtectedRoute>
-            <AppShell>
-              <DialogueHistory />
             </AppShell>
           </ProtectedRoute>
         }
