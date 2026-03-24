@@ -1131,6 +1131,34 @@
 
 ---
 
+### 朗讀評分架構（Hybrid STT Eval，#653）
+
+**核心設計**：Local LCS 即時評分 + Gemini 非同步校正（僅 FAIL 路徑）
+
+```
+學生開口
+  → Web Speech API (interim) → 進度條更新 (throttle 150ms)
+  → isFinal event（每句結束）→ localEvaluateParagraph (<1ms) → 立即顯示彩色 diff
+  → STT onend（整段完畢）→ overallTier
+      ├── PASS → 立即前進（Gemini 不呼叫，0 API cost）
+      └── FAIL → 「精算中...」→ Gemini 呼叫一次（整段）→ 可升分 → 更新顯示
+```
+
+**同音字表（pinyin_groups）**：
+- 來源：方大哥 `learning-to-read-chinese` `all.sqlite` + 本地擴充（#655）
+- 覆蓋：**3,869 字**（2026-03-24，原 2,611 字）
+- 邏輯：toneless pinyin 分組，不同聲調視為同音（媽/馬/嗎/麻 → 全部 `ma`）
+- 維護：`frontend/src/utils/pinyin.ts` + `backend/app/services/stt_service.py` 必須同步
+
+**數字正規化**：阿拉伯→國語（23→二十三），口語變體（兩百→二百）
+前端 `normalizeForComparison()`，後端 `_normalize_for_comparison()`，邏輯一致
+
+**短文閾值補償**：≤5 字 -0.2、≤10 字 -0.1（`getReadingPassThreshold` / `_apply_short_text_compensation`，前後端必須同步）
+
+**關鍵不變量**：Gemini 只能升分。Local PASS → Gemini 一定也 PASS → 可安全跳過
+
+---
+
 ### 參考專案
 
 #### 學國語 App（Flutter）
