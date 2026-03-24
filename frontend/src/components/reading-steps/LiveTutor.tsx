@@ -306,14 +306,48 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const { token } = useAuth();
   const isMobile = useIsMobile();
   const { px: fontSizePx } = useFontSize();
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [currentLineIndex, setCurrentLineIndex] = useState(() => {
+    try {
+      const raw = localStorage.getItem(`liveTutor_progress_${story.id}`);
+      if (raw) { const p = JSON.parse(raw); return p.currentLineIndex ?? 0; }
+    } catch {}
+    return 0;
+  });
   const [isPreparing, setIsPreparing] = useState(false);          // STT initializing
   const [isSessionActive, setIsSessionActive] = useState(false);  // mic actively recording
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [messages, setMessages] = useState<LiveMessage[]>([]);
   const [micError, setMicError] = useState('');
   const [streamingUserInput, setStreamingUserInput] = useState('');
-  const [lineResults, setLineResults] = useState<LineResult[]>([]);
+  // Per-paragraph summary type (used by storage + state)
+  type ParagraphSummaryData = {
+    feedback: string;
+    matchRate: number;
+    wrongCount: number;
+    missingCount: number;
+    tier: number;
+    geminiPending: boolean;
+  };
+
+  // ── localStorage persistence for reading progress ──────────────────────────
+  const storageKey = `liveTutor_progress_${story.id}`;
+  const loadSavedProgress = () => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw) as {
+        lineResults: LineResult[];
+        paragraphSummaries: Record<number, ParagraphSummaryData>;
+        completedParagraphs: number[];
+        currentLineIndex: number;
+      };
+    } catch { return null; }
+  };
+  const savedProgress = useRef(loadSavedProgress());
+
+  const [lineResults, setLineResults] = useState<LineResult[]>(
+    savedProgress.current?.lineResults ?? []
+  );
   const [streak, setStreak] = useState(0);
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
   const [zhuyinReady, setZhuyinReady] = useState(false);
@@ -326,14 +360,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [retryCount, setRetryCount] = useState(0);
   const [speakingProgress, setSpeakingProgress] = useState(0); // char index cursor during recording
   const [realtimeDiffTokens, setRealtimeDiffTokens] = useState<DiffToken[] | null>(null); // real-time LCS overlay
-  const [paragraphSummary, setParagraphSummary] = useState<{
-    feedback: string;
-    matchRate: number;
-    wrongCount: number;
-    missingCount: number;
-    tier: number;
-    geminiPending: boolean;
-  } | null>(null);
+  // Per-paragraph summary: keyed by lineIndex
+  const [paragraphSummaries, setParagraphSummaries] = useState<Record<number, ParagraphSummaryData>>(
+    savedProgress.current?.paragraphSummaries ?? {}
+  );
+  // Convenience: current paragraph's summary
+  const paragraphSummary = paragraphSummaries[currentLineIndex] ?? null;
 
   // Hybrid eval: per-sentence (分期付款) tracking
   const geminiGenRef = useRef(0); // generation counter — replaces AbortController
@@ -346,7 +378,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   // Progressive unlock state — track which paragraphs have passed evaluation.
   const [completedParagraphs, setCompletedParagraphs] = useState<Set<number>>(
-    initialCompletedParagraphs ?? new Set<number>()
+    savedProgress.current?.completedParagraphs
+      ? new Set(savedProgress.current.completedParagraphs)
+      : initialCompletedParagraphs ?? new Set<number>()
   );
   // Celebration animation: shows briefly when a new paragraph is unlocked
   const [celebratingIndex, setCelebratingIndex] = useState<number | null>(null);
@@ -479,6 +513,20 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     };
   }, []);
 
+  // ── Save progress to localStorage whenever key state changes ──────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        lineResults,
+        paragraphSummaries: Object.fromEntries(
+          Object.entries(paragraphSummaries).map(([k, v]) => [k, { ...v, geminiPending: false }])
+        ),
+        completedParagraphs: Array.from(completedParagraphs),
+        currentLineIndex,
+      }));
+    } catch {}
+  }, [lineResults, paragraphSummaries, completedParagraphs, currentLineIndex, storageKey]);
+
   const onDividerMouseDown = (e: React.MouseEvent) => {
     isDraggingRef.current = true;
     dragStartXRef.current = e.clientX;
@@ -501,7 +549,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setLastDiffTokens(null);
     setSpeakingProgress(0);
     setRealtimeDiffTokens(null);
-    setParagraphSummary(null);
+    // Don't clear paragraphSummaries — they persist across paragraph navigation
   }, [currentLineIndex, story.content]);
 
   /* ---- cleanup on unmount ---- */
@@ -661,14 +709,15 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     stopSession();
 
     // Show local summary immediately (Gemini will update it)
-    setParagraphSummary({
+    const summaryData: ParagraphSummaryData = {
       feedback: localTier <= 2 ? (localFeedback || '唸得不錯！') : (localFeedback || '再試一次，加油！'),
       matchRate: localMatchRate,
       wrongCount,
       missingCount,
       tier: localTier,
       geminiPending: true,
-    });
+    };
+    setParagraphSummaries(prev => ({ ...prev, [lineIdx]: summaryData }));
 
     if (localTier <= 2) {
       setStreak(prev => prev + 1);
@@ -698,14 +747,14 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         // Update summary with Gemini feedback
         const geminiWrong = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'wrong').length;
         const geminiMissing = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'missing').length;
-        setParagraphSummary({
+        setParagraphSummaries(prev => ({ ...prev, [lineIdx]: {
           feedback: gemini.feedback || (gemini.tier <= 2 ? '唸得不錯！' : '再試一次，加油！'),
           matchRate: gemini.adjusted_match_rate,
           wrongCount: geminiWrong,
           missingCount: geminiMissing,
           tier: gemini.tier,
           geminiPending: false,
-        });
+        }}));
         setLastDiffTokens(gemini.diff_tokens);
 
         // If Gemini upgrades to PASS, update the result
@@ -725,7 +774,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         if (geminiTimeoutRef.current === localTimeout) geminiTimeoutRef.current = null;
         if (geminiGenRef.current !== gen) return;
         // Gemini failed — local summary stands, just mark as done
-        setParagraphSummary(prev => prev ? { ...prev, geminiPending: false } : null);
+        setParagraphSummaries(prev => {
+          const existing = prev[lineIdx];
+          return existing ? { ...prev, [lineIdx]: { ...existing, geminiPending: false } } : prev;
+        });
         const msg = err instanceof Error ? err.message : '';
         if (msg !== 'gemini_timeout') {
           console.warn('[LiveTutor] Gemini eval failed, local result stands:', err);
@@ -1050,6 +1102,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const handleFinish = () => {
     stopSession();
+    // Clear localStorage — progress is complete, will be sent to backend
+    try { localStorage.removeItem(storageKey); } catch {}
     const avgMatchRate =
       lineResults.length > 0
         ? lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length : 0;
@@ -1175,6 +1229,97 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     {idx === currentLineIndex && isAwaitingGemini && paragraphDiffTokens && (
                       <span className="ml-auto text-[10px] text-blue-400 font-bold animate-pulse">AI 精算中…</span>
                     )}
+                    {/* Inline action buttons — system read + start/submit/retry */}
+                    {status !== 'locked' && !isAdvancing && (
+                      <div className="ml-auto flex items-center gap-2">
+                        {/* System demo — available on all non-locked paragraphs */}
+                        <button
+                          onClick={() => {
+                            if (idx !== currentLineIndex) { stopSession(); setRetryCount(0); setCurrentLineIndex(idx); }
+                            if (isTtsSpeaking) {
+                              if (utteranceRef.current) { utteranceRef.current.onend = null; utteranceRef.current.onerror = null; utteranceRef.current.onboundary = null; utteranceRef.current = null; }
+                              if (ttsRafRef.current !== null) { cancelAnimationFrame(ttsRafRef.current); ttsRafRef.current = null; }
+                              window.speechSynthesis?.cancel();
+                              setIsTtsSpeaking(false); setIsTtsPaused(false);
+                            } else {
+                              // Speak this paragraph's text
+                              const text = story.content[idx];
+                              if (text && window.speechSynthesis) {
+                                window.speechSynthesis.cancel();
+                                const utterance = new SpeechSynthesisUtterance(text);
+                                utteranceRef.current = utterance;
+                                utterance.lang = 'zh-TW';
+                                utterance.rate = 1.0;
+                                const voices = window.speechSynthesis.getVoices();
+                                const preferred = voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) || voices.find(v => v.lang === 'zh-TW') || voices.find(v => v.lang.startsWith('zh'));
+                                if (preferred) utterance.voice = preferred;
+                                utterance.onend = () => { utteranceRef.current = null; setIsTtsSpeaking(false); setIsTtsPaused(false); };
+                                utterance.onerror = () => { utteranceRef.current = null; setIsTtsSpeaking(false); setIsTtsPaused(false); };
+                                setIsTtsSpeaking(true);
+                                window.speechSynthesis.speak(utterance);
+                              }
+                            }
+                          }}
+                          disabled={idx === currentLineIndex && (isSessionActive || isPreparing)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
+                            idx === currentLineIndex && (isSessionActive || isPreparing)
+                              ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                              : isTtsSpeaking && idx === currentLineIndex
+                                ? 'bg-red-100 hover:bg-red-200 text-red-600'
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          {isTtsSpeaking && idx === currentLineIndex ? (
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="4" height="12" rx="1" /><rect x="14" y="6" width="4" height="12" rx="1" /></svg>
+                          ) : (
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
+                          )}
+                          {isTtsSpeaking && idx === currentLineIndex ? '停止' : '系統朗讀'}
+                        </button>
+                        {/* Start / Submit / Retry — context-dependent */}
+                        {idx === currentLineIndex ? (
+                          // Current paragraph: show session controls
+                          isPreparing ? (
+                            <button disabled className="px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-200 text-gray-400 cursor-wait flex items-center gap-1">
+                              <div className="w-2.5 h-2.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                              準備中...
+                            </button>
+                          ) : isSessionActive ? (
+                            <button
+                              onClick={submitSentence}
+                              disabled={isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all shadow active:scale-95 ${
+                                isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
+                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                              }`}
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                              完成
+                            </button>
+                          ) : !paragraphSummaries[idx] ? (
+                            <button
+                              onClick={startSession}
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1 transition-all shadow active:scale-95"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                              {retryCount > 0 ? '再試一次' : '開始朗讀'}
+                            </button>
+                          ) : null
+                        ) : (
+                          // Non-current paragraph: show "開始朗讀" to switch + start
+                          <button
+                            onClick={() => {
+                              stopSession(); setRetryCount(0); setCurrentLineIndex(idx);
+                            }}
+                            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1 transition-all shadow active:scale-95"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                            開始朗讀
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Paragraph text — 3-mode: diff | cursor | plain */}
@@ -1247,229 +1392,106 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                       )}
                     </p>
                   )}
+
+                  {/* Bottom-of-paragraph controls — complete + stop (visible while recording this paragraph) */}
+                  {idx === currentLineIndex && isSessionActive && (
+                    <div className="mt-4 flex items-center justify-end gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
+                      <span className="text-xs text-green-600 font-medium mr-auto">聆聽中</span>
+                      <button
+                        onClick={stopSession}
+                        className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                      >
+                        停止朗讀
+                      </button>
+                      <button
+                        onClick={submitSentence}
+                        disabled={isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all shadow active:scale-95 ${
+                          isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                        }`}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                        完成
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Inline summary card — persists below each evaluated paragraph */}
+                  {(() => {
+                    const summary = paragraphSummaries[idx];
+                    if (!summary) return null;
+                    return (
+                      <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200 shadow-sm space-y-3">
+                        <p className="text-base font-bold text-gray-800">
+                          {summary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI 分析中...</span>}
+                          {summary.feedback}
+                        </p>
+                        <div className="flex gap-4 text-sm">
+                          <span className="text-green-600 font-medium">
+                            正確率 {Math.round(summary.matchRate * 100)}%
+                          </span>
+                          {summary.wrongCount > 0 && (
+                            <span className="text-red-500">念錯 {summary.wrongCount} 字</span>
+                          )}
+                          {summary.missingCount > 0 && (
+                            <span className="text-gray-400">漏字 {summary.missingCount} 字</span>
+                          )}
+                        </div>
+                        {/* Action buttons — only on current paragraph */}
+                        {idx === currentLineIndex && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setParagraphSummaries(prev => { const next = { ...prev }; delete next[idx]; return next; });
+                                setRealtimeDiffTokens(null);
+                                startSession();
+                              }}
+                              className="flex-1 py-2 rounded-lg text-sm font-bold border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all"
+                            >
+                              重練這段
+                            </button>
+                            <button
+                              onClick={() => advanceParagraph(idx, lineResults)}
+                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                                summary.tier <= 2
+                                  ? 'bg-accent hover:bg-accent-hover text-white'
+                                  : 'border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-600'
+                              }`}
+                            >
+                              {idx >= story.content.length - 1 ? '完成朗讀' : '下一段'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}
-          </div>
-        </div>
 
-        {/* Paragraph summary card — shown when evaluation completes */}
-        {paragraphSummary && (
-          <div className="flex-shrink-0 mx-4 mb-2 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200 shadow-sm space-y-3">
-            {/* Feedback line */}
-            <p className="text-base font-bold text-gray-800">
-              {paragraphSummary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI 分析中...</span>}
-              {paragraphSummary.feedback}
-            </p>
-            {/* Stats */}
-            <div className="flex gap-4 text-sm">
-              <span className="text-green-600 font-medium">
-                正確率 {Math.round(paragraphSummary.matchRate * 100)}%
-              </span>
-              {paragraphSummary.wrongCount > 0 && (
-                <span className="text-red-500">念錯 {paragraphSummary.wrongCount} 字</span>
-              )}
-              {paragraphSummary.missingCount > 0 && (
-                <span className="text-gray-400">漏字 {paragraphSummary.missingCount} 字</span>
-              )}
-            </div>
-            {/* Action buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setParagraphSummary(null);
-                  setRealtimeDiffTokens(null);
-                  startSession();
-                }}
-                className="flex-1 py-2 rounded-lg text-sm font-bold border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all"
-              >
-                重練這段
-              </button>
-              <button
-                onClick={() => {
-                  setParagraphSummary(null);
-                  // Use the latest lineResults to advance
-                  advanceParagraph(currentLineIndex, lineResults);
-                }}
-                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-                  paragraphSummary.tier <= 2
-                    ? 'bg-accent hover:bg-accent-hover text-white'
-                    : 'border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-600'
-                }`}
-              >
-                {currentLineIndex >= story.content.length - 1 ? '完成朗讀' : '下一段'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Bottom controls bar */}
-        <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 py-3 space-y-2">
-          {/* Status + primary action buttons */}
-          <div className="flex items-center gap-2">
-            {/* Status dot */}
-            <span className={`w-2 h-2 rounded-full shrink-0 ${
-              isAwaitingGemini ? 'bg-blue-400 animate-pulse' :
-              isSessionActive ? 'bg-green-400 animate-pulse' :
-              isPreparing ? 'bg-yellow-400 animate-pulse' :
-              'bg-gray-300'
-            }`} />
-            <span className={`text-xs font-medium mr-auto ${
-              isAwaitingGemini ? 'text-blue-500' :
-              isSessionActive ? 'text-green-600' :
-              isPreparing ? 'text-yellow-600' :
-              'text-gray-400'
-            }`}>
-              {isAwaitingGemini ? 'AI 精算中...' : isSessionActive ? '聆聽中' : isPreparing ? '準備中...' : '點擊「開始朗讀」'}
-            </span>
-
-            {/* System demo button — toggles play/stop */}
-            <button
-              onClick={isTtsSpeaking ? () => {
-                if (utteranceRef.current) {
-                  utteranceRef.current.onend = null;
-                  utteranceRef.current.onerror = null;
-                  utteranceRef.current.onboundary = null;
-                  utteranceRef.current = null;
-                }
-                if (ttsRafRef.current !== null) {
-                  cancelAnimationFrame(ttsRafRef.current);
-                  ttsRafRef.current = null;
-                }
-                window.speechSynthesis?.cancel();
-                setIsTtsSpeaking(false);
-                setIsTtsPaused(false);
-              } : speakCurrentParagraph}
-              disabled={isSessionActive || isPreparing || isAdvancing}
-              aria-label={isTtsSpeaking ? '停止系統朗讀' : '播放這段的系統示範朗讀'}
-              className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all ${
-                isSessionActive || isPreparing || isAdvancing
-                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                  : isTtsSpeaking
-                    ? 'bg-red-100 hover:bg-red-200 text-red-600'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-              }`}
-            >
-              {isTtsSpeaking ? (
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                  <rect x="6" y="6" width="4" height="12" rx="1" />
-                  <rect x="14" y="6" width="4" height="12" rx="1" />
-                </svg>
-              ) : (
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                </svg>
-              )}
-              {processZhuyin(isTtsSpeaking ? '停止' : '系統朗讀')}
-            </button>
-
-            {/* Primary: Start / Submit / Retry */}
-            {isPreparing ? (
-              <button disabled className="px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-400 cursor-wait flex items-center gap-1.5">
-                <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
-                {processZhuyin('準備中...')}
-              </button>
-            ) : isSessionActive ? (
-              <button
-                onClick={submitSentence}
-                disabled={isAdvancing || isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
-                aria-label="完成這段朗讀"
-                className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all shadow active:scale-95 ${
-                  isAdvancing || isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                {processZhuyin('完成')}
-              </button>
-            ) : retryCount > 0 ? (
-              <button
-                onClick={startSession}
-                aria-label="再試一次"
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-amber-500 hover:bg-amber-400 text-white flex items-center gap-1.5 transition-all shadow active:scale-95"
-              >
-                {processZhuyin('再試一次')}
-              </button>
-            ) : (
-              <button
-                onClick={startSession}
-                aria-label="開始朗讀這段，啟動語音辨識"
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1.5 transition-all shadow active:scale-95"
-              >
-                <span className="w-2 h-2 rounded-full bg-white" />
-                {processZhuyin('開始朗讀')}
-              </button>
+            {/* Final report button — shown after all paragraphs are completed */}
+            {completedParagraphs.size === story.content.length && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={handleFinish}
+                  className="px-8 py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95"
+                >
+                  觀看總結報告
+                </button>
+              </div>
             )}
           </div>
-
-          {micError && <div className="text-[10px] text-rose-400">{micError}</div>}
-
-          {/* Navigation */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                const prevIdx = currentLineIndex - 1;
-                if (prevIdx >= 0 && (lineStatuses[prevIdx] === 'completed' || lineStatuses[prevIdx] === 'current')) {
-                  stopSession();
-                  setRetryCount(0);
-                  setCurrentLineIndex(prevIdx);
-                }
-              }}
-              disabled={currentLineIndex === 0}
-              aria-label={currentLineIndex === 0 ? '已是第一段' : `返回第 ${currentLineIndex} 段`}
-              className={`flex-1 py-2 rounded-lg text-sm font-bold border border-gray-200 ${
-                currentLineIndex === 0 ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-              }`}
-            >
-              {processZhuyin('上一段')}
-            </button>
-
-            {(() => {
-              const isLastLine = currentLineIndex === story.content.length - 1;
-              const allDone = completedParagraphs.size === story.content.length;
-              const nextUnlocked = !isLastLine && maxUnlockedIndex > currentLineIndex;
-              if (isLastLine) {
-                return (
-                  <button
-                    onClick={handleFinish}
-                    disabled={!allDone}
-                    aria-label={!allDone ? '請完成所有段落後查看總結報告' : '查看朗讀總結報告'}
-                    className={`flex-1 py-2 rounded-lg text-sm font-bold border border-gray-200 ${
-                      allDone ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                    }`}
-                  >
-                    {processZhuyin('觀看總結報告')}
-                  </button>
-                );
-              }
-              return (
-                <button
-                  onClick={() => { if (nextUnlocked) { stopSession(); setRetryCount(0); setCurrentLineIndex(prev => prev + 1); } }}
-                  disabled={!nextUnlocked}
-                  aria-label={!nextUnlocked ? '請先完成此段朗讀才能繼續' : `前往第 ${currentLineIndex + 2} 段`}
-                  className={`flex-1 py-2 rounded-lg text-sm font-bold border border-gray-200 ${
-                    nextUnlocked ? 'bg-gray-100 hover:bg-gray-200 text-gray-600' : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                  }`}
-                >
-                  {processZhuyin('下一段')}
-                </button>
-              );
-            })()}
-          </div>
-
-          {isSessionActive && (
-            <button
-              onClick={stopSession}
-              aria-label="停止目前的朗讀練習"
-              className="w-full py-1 rounded-lg text-xs text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {processZhuyin('停止朗讀')}
-            </button>
-          )}
         </div>
+
+        {/* Mic error */}
+        {micError && (
+          <div className="flex-shrink-0 px-4 py-2 bg-rose-50">
+            <span className="text-xs text-rose-500">{micError}</span>
+          </div>
+        )}
       </div>
 
       <style>{`
