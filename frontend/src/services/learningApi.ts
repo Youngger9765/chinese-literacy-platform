@@ -36,6 +36,7 @@ export async function evaluateReading(
   targetText: string,
   durationMs?: number,
   token?: string,
+  signal?: AbortSignal,
 ): Promise<ReadingEvaluateResponse> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -43,6 +44,7 @@ export async function evaluateReading(
   const res = await fetch(`${API_BASE}/api/reading/evaluate`, {
     method: 'POST',
     headers,
+    signal,
     body: JSON.stringify({
       spoken_text: spokenText,
       target_text: targetText,

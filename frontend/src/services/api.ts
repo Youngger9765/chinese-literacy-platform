@@ -155,37 +155,6 @@ export async function createLearningSession(payload: {
   return res.json();
 }
 
-// --- Reading Evaluation API (Issue #454, frontend integration) ---
-
-export async function evaluateReading(
-  spokenText: string,
-  targetText: string,
-  durationMs?: number,
-  token?: string,
-  signal?: AbortSignal,
-): Promise<ReadingEvaluateResponse> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const res = await fetch(`${API_BASE}/api/reading/evaluate`, {
-    method: 'POST',
-    headers,
-    signal,
-    body: JSON.stringify({
-      spoken_text: spokenText,
-      target_text: targetText,
-      duration_ms: durationMs,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail ?? `evaluateReading failed: ${res.status}`);
-  }
-
-  return res.json();
-}
-
 // --- Session Resume API ---
 
 export interface SessionStatusResponse {
