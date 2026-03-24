@@ -102,7 +102,7 @@ const MyAssignments: React.FC = () => {
         ),
       );
 
-      const sessionResponses = await Promise.all(
+      const sessionResponses = await Promise.allSettled(
         storySlugs.map((storySlug) =>
           fetchLearningSessions(token, {
             // Fetch only latest session for this assignment story key.
@@ -113,7 +113,14 @@ const MyAssignments: React.FC = () => {
         ),
       );
 
-      const sessionItems = sessionResponses.flatMap((response) => response.items);
+      const sessionItems = sessionResponses
+        .filter(
+          (
+            r,
+          ): r is PromiseFulfilledResult<{ items: LearningSummary[]; total: number }> =>
+            r.status === 'fulfilled',
+        )
+        .flatMap((r) => r.value.items);
       setAssignments(assignmentData);
       setSessionByStorySlug(buildLatestSessionMap(sessionItems));
     } catch (err) {

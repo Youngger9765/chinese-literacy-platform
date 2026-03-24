@@ -292,6 +292,14 @@ const AppRoutes: React.FC = () => (
         }
       />
       <Route
+        path="/sessions/:sessionId/dialogue"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/assignments" replace />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/vocabulary"
         element={
           <ProtectedRoute>
