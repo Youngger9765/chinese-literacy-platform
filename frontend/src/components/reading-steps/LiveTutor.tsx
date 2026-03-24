@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Story, ReadingAttempt, LiveMessage, DiffToken } from '../../types';
-import { correctHomophones } from '../../utils/pinyin';
+import { correctHomophones, isHomophone } from '../../utils/pinyin';
 import { diffCharacters, normalizeForComparison, cleanChineseText } from '../../utils/textDiff';
 import DiffDisplay from '../ui/DiffDisplay';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
@@ -65,6 +65,110 @@ const STREAK_MESSAGES = [
 const LAST_LINE_MESSAGE = '全部唸完了！你好棒，辛苦了！';
 
 const pick = (pool: string[]) => pool[Math.floor(Math.random() * pool.length)];
+
+/* ------------------------------------------------------------------ */
+/*  Moving cursor helpers                                              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Greedy forward match: count how many normalized target chars have been
+ * covered by the interim transcript. Homophone-aware.
+ */
+function calcSpeakingProgress(interim: string, target: string): number {
+  const s = Array.from(normalizeForComparison(interim));
+  const t = Array.from(normalizeForComparison(target));
+  let j = 0;
+  for (let i = 0; i < s.length && j < t.length; i++) {
+    if (s[i] === t[j] || isHomophone(s[i], t[j])) j++;
+  }
+  return j;
+}
+
+/**
+ * Map a count of normalized (punctuation-stripped) matched chars back to
+ * the corresponding index in the original target string.
+ * Returns the index of the first character not yet covered (cursor position).
+ */
+function normalizedToOrigIdx(target: string, normalizedProgress: number): number {
+  let norm = 0;
+  for (let i = 0; i < target.length; i++) {
+    if (norm >= normalizedProgress) return i;
+    if (!/[「」『』，。！？：；、\s]/.test(target[i])) norm++;
+  }
+  return target.length;
+}
+
+const IS_PUNCT = /[「」『』，。！？：；、\s]/;
+
+/**
+ * Render the original paragraph with diff annotations below each character.
+ * Punctuation is kept as-is. For each content char, consume the next
+ * non-extra diff token and apply colored underline / sub-text.
+ *
+ * Rendering rules (below the original char):
+ *   correct  → no annotation
+ *   forgiven → blue dotted underline
+ *   missing  → gray dashed underline + reduced opacity (char was skipped)
+ *   wrong    → red solid underline + small red spoken char below
+ *   extra    → skipped (no target position)
+ */
+function renderLineWithDiff(
+  originalLine: string,
+  tokens: DiffToken[],
+  fontSizePx: string | number,
+  extraClass: string,
+): React.ReactNode {
+  let tokenIdx = 0;
+
+  const chars = Array.from(originalLine).map((ch, i) => {
+    if (IS_PUNCT.test(ch)) {
+      return <span key={i} className="text-gray-400">{ch}</span>;
+    }
+
+    // Skip extra tokens — they have no target position
+    while (tokenIdx < tokens.length && tokens[tokenIdx].type === 'extra') tokenIdx++;
+    const token = tokens[tokenIdx++];
+
+    if (!token || token.type === 'correct') {
+      return <span key={i}>{ch}</span>;
+    }
+    if (token.type === 'forgiven') {
+      return (
+        <span key={i} className="inline-flex flex-col items-center border-b-2 border-dotted border-sky-400">
+          {ch}
+        </span>
+      );
+    }
+    if (token.type === 'missing') {
+      return (
+        <span key={i} className="inline-flex flex-col items-center opacity-40 border-b-2 border-dashed border-gray-400">
+          {ch}
+        </span>
+      );
+    }
+    if (token.type === 'wrong') {
+      return (
+        <span
+          key={i}
+          className="inline-flex flex-col items-center border-b-2 border-red-500"
+          title={`讀成「${token.char}」，應是「${ch}」`}
+        >
+          <span>{ch}</span>
+          <span className="text-red-500 leading-none" style={{ fontSize: `calc(${fontSizePx} * 0.55)` }}>
+            {token.char}
+          </span>
+        </span>
+      );
+    }
+    return <span key={i}>{ch}</span>;
+  });
+
+  return (
+    <p className={`leading-[4rem] ${extraClass}`} style={{ fontSize: fontSizePx }}>
+      {chars}
+    </p>
+  );
+}
 
 /**
  * Extract Chinese characters the student actually missed on their LAST attempt
@@ -168,6 +272,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
   const [showRecorder, setShowRecorder] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [speakingProgress, setSpeakingProgress] = useState(0); // char index cursor during recording
 
   // Hybrid eval: per-sentence (分期付款) tracking
   const geminiAbortRef = useRef<AbortController | null>(null);
@@ -191,6 +296,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
+  // gets collected mid-playback, silencing onend/onboundary callbacks.
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  // rAF loop for TTS cursor animation — Chrome's onboundary doesn't fire per-char for Chinese.
+  const ttsRafRef = useRef<number | null>(null);
+  const ttsStartTimeRef = useRef<number>(0);
+  const ttsTotalCharsRef = useRef<number>(0);
   const isSessionActiveRef = useRef(false);   // true while recording
   const sentenceStartTimeRef = useRef(0);     // when current sentence reading began
   const currentTranscriptRef = useRef('');     // full transcript (accumulated + current session)
@@ -325,6 +437,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     nextSentenceIdxRef.current = 0;
     lastFinalResultIdxRef.current = -1;
     setLastDiffTokens(null);
+    setSpeakingProgress(0);
   }, [currentLineIndex, story.content]);
 
   /* ---- cleanup on unmount ---- */
@@ -333,6 +446,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       isSessionActiveRef.current = false;
       if (recognitionRef.current) {
         try { recognitionRef.current.abort(); } catch (_) {}
+      }
+      if (ttsRafRef.current !== null) {
+        cancelAnimationFrame(ttsRafRef.current);
+        ttsRafRef.current = null;
       }
       window.speechSynthesis?.cancel();
       geminiAbortRef.current?.abort();
@@ -557,6 +674,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const startSession = () => {
     if (isSessionActiveRef.current) return;
+    // Null out TTS callbacks before cancel() so any async onend/onerror from
+    // the previous utterance cannot stomp on the STT cursor position.
+    if (utteranceRef.current) {
+      utteranceRef.current.onstart = null;
+      utteranceRef.current.onboundary = null;
+      utteranceRef.current.onend = null;
+      utteranceRef.current.onerror = null;
+      utteranceRef.current = null;
+    }
+    if (ttsRafRef.current !== null) {
+      cancelAnimationFrame(ttsRafRef.current);
+      ttsRafRef.current = null;
+    }
     window.speechSynthesis?.cancel();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
@@ -608,6 +738,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       rawSttRef.current = fullTranscript;
       currentTranscriptRef.current = fullTranscript;
       setStreamingUserInput(cleanChineseText(fullTranscript));
+
+      // Update moving cursor: map interim transcript progress onto original target chars
+      const targetText = story.content[currentLineIndexRef.current] || '';
+      const normProgress = calcSpeakingProgress(fullTranscript, targetText);
+      setSpeakingProgress(normalizedToOrigIdx(targetText, normProgress));
 
       // ── 分期付款: per-sentence local eval on isFinal events ────────────────
       // Each isFinal chunk is mapped to the next un-evaluated sentence target.
@@ -671,6 +806,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     rawSttRef.current = '';
     accumulatedTranscriptRef.current = '';
     setStreamingUserInput('');
+    setSpeakingProgress(0);
 
     recognition.start();
     // Note: isSessionActive & sentenceStartTimeRef are set in onstart once STT is truly ready
@@ -715,6 +851,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     rawSttRef.current = '';
     accumulatedTranscriptRef.current = '';
     setStreamingUserInput('');
+    setSpeakingProgress(0);
   };
 
   /** Use browser TTS to read the current paragraph aloud. */
@@ -726,6 +863,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     const doSpeak = () => {
       const utterance = new SpeechSynthesisUtterance(text);
+      // Hold a strong ref — prevents Chrome GC bug where the utterance object
+      // is collected before onend/onboundary fire.
+      utteranceRef.current = utterance;
       utterance.lang = 'zh-TW';
       utterance.rate = 1.0;
 
@@ -738,9 +878,36 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         voices.find(v => v.lang.startsWith('zh'));
       if (preferred) utterance.voice = preferred;
 
-      utterance.onstart = () => setIsTtsSpeaking(true);
-      utterance.onend = () => { setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      utterance.onerror = () => { setIsTtsSpeaking(false); setIsTtsPaused(false); };
+      utterance.onstart = () => {
+        setIsTtsSpeaking(true);
+        setSpeakingProgress(0);
+        // Chrome's onboundary doesn't fire per-character for Chinese TTS.
+        // Drive the cursor with a time-based rAF loop instead (~4 chars/sec).
+        ttsStartTimeRef.current = performance.now();
+        ttsTotalCharsRef.current = Array.from(text).length;
+        const MS_PER_CHAR = 240; // ~4.2 chars/sec — tuned for zh-TW Google TTS at rate 1.0
+        const animate = () => {
+          const elapsed = performance.now() - ttsStartTimeRef.current;
+          const pos = Math.min(Math.floor(elapsed / MS_PER_CHAR), ttsTotalCharsRef.current);
+          setSpeakingProgress(pos);
+          if (pos < ttsTotalCharsRef.current) {
+            ttsRafRef.current = requestAnimationFrame(animate);
+          }
+        };
+        ttsRafRef.current = requestAnimationFrame(animate);
+      };
+      // onboundary still used if it fires — provides more accurate positions.
+      utterance.onboundary = (e) => { setSpeakingProgress(e.charIndex); };
+      const stopTtsAnimation = () => {
+        if (ttsRafRef.current !== null) {
+          cancelAnimationFrame(ttsRafRef.current);
+          ttsRafRef.current = null;
+        }
+      };
+      // Note: do NOT call setSpeakingProgress(0) here — if STT is active, that
+      // would reset the cursor position that the student has already advanced.
+      utterance.onend = () => { stopTtsAnimation(); utteranceRef.current = null; setIsTtsSpeaking(false); setIsTtsPaused(false); };
+      utterance.onerror = () => { stopTtsAnimation(); utteranceRef.current = null; setIsTtsSpeaking(false); setIsTtsPaused(false); };
       window.speechSynthesis.speak(utterance);
     };
 
@@ -764,6 +931,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setIsTtsPaused(false);
   };
   const stopTts = () => {
+    if (ttsRafRef.current !== null) {
+      cancelAnimationFrame(ttsRafRef.current);
+      ttsRafRef.current = null;
+    }
     window.speechSynthesis?.cancel();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
@@ -800,7 +971,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   return (
     <div
-      className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 h-full bg-amber-50 overflow-hidden`}
+      className="flex flex-col flex-1 h-full bg-amber-50 overflow-hidden"
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
@@ -808,7 +979,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       }}
     >
       {/* CENTER: Editor - story text panel */}
-      <div className={`flex flex-col bg-amber-50 ${isMobile ? 'h-[60vh]' : 'flex-1'}`}>
+      <div className="flex flex-col bg-amber-50 flex-1 min-h-0 overflow-hidden">
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2">
           <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
             {processZhuyin(story.filename)}
@@ -902,17 +1073,64 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     )}
                   </div>
 
-                  {/* Paragraph text — inline diff overlay when tokens available */}
-                  {paragraphDiffTokens ? (
-                    <div
+                  {/* Paragraph text — 3-mode: diff | cursor | plain */}
+                  {paragraphDiffTokens && !isSessionActive ? (
+                    /* Mode 3: diff annotations below each char (only after recording stops) */
+                    renderLineWithDiff(
+                      line,
+                      paragraphDiffTokens,
+                      fontSizePx,
+                      `${zhuyinActive ? 'tracking-[0.4em]' : ''} ${status === 'current' ? 'font-bold' : ''}`,
+                    )
+                  ) : idx === currentLineIndex && isTtsSpeaking ? (
+                    /* Mode 2b: TTS playing — highlight active sentence */
+                    (() => {
+                      const sentences = splitIntoSentences(line);
+                      // build cumulative char offsets so we can map speakingProgress → sentence index
+                      let offset = 0;
+                      const offsets = sentences.map(s => { const start = offset; offset += s.length; return start; });
+                      // active sentence = last one whose start offset <= speakingProgress
+                      let activeSentIdx = 0;
+                      for (let si = offsets.length - 1; si >= 0; si--) {
+                        if (offsets[si] <= speakingProgress) { activeSentIdx = si; break; }
+                      }
+                      return (
+                        <p
+                          className={`leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} font-bold`}
+                          style={{ fontSize: fontSizePx }}
+                        >
+                          {sentences.map((sent, si) => (
+                            <span
+                              key={si}
+                              className={si === activeSentIdx
+                                ? 'bg-sky-200/70 rounded-sm text-gray-900'
+                                : 'text-gray-400'}
+                            >{sent}</span>
+                          ))}
+                        </p>
+                      );
+                    })()
+                  ) : idx === currentLineIndex && isSessionActive ? (
+                    /* Mode 2a: moving cursor while recording (STT) */
+                    <p
+                      className={`leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} font-bold`}
                       style={{ fontSize: fontSizePx }}
-                      className={`leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
-                        status === 'current' ? 'font-bold' : ''
-                      }`}
                     >
-                      <DiffDisplay tokens={paragraphDiffTokens} showLegend={false} />
-                    </div>
+                      {Array.from(line).map((ch, charIdx) => (
+                        <span
+                          key={charIdx}
+                          className={
+                            charIdx < speakingProgress
+                              ? 'text-gray-400'
+                              : charIdx === speakingProgress
+                                ? 'text-gray-900 bg-yellow-200/80 rounded-sm px-px'
+                                : 'text-gray-800'
+                          }
+                        >{ch}</span>
+                      ))}
+                    </p>
                   ) : (
+                    /* Mode 1: idle / plain text */
                     <p
                       className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
                         status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
@@ -926,253 +1144,118 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                       )}
                     </p>
                   )}
-
-                  {/* Live streaming transcript shown under current paragraph */}
-                  {idx === currentLineIndex && streamingUserInput && (
-                    <div className="mt-3 pt-2 border-t border-gray-200/60 text-sm text-gray-400 italic flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
-                      {streamingUserInput}
-                    </div>
-                  )}
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 justify-between text-[10px] text-gray-500 uppercase">
-          <div className="flex gap-4">
-            <span>段 {currentLineIndex + 1} / {story.content.length}</span>
-            <span>UTF-8</span>
-          </div>
-          <div className="flex gap-3">
-            <span className={isSessionActive ? 'text-green-500 font-bold' : isPreparing ? 'text-yellow-500 font-bold' : 'text-gray-300'}>
-              {isAwaitingGemini ? '• GEMINI' : isSessionActive ? '• LISTENING' : isPreparing ? '• PREPARING' : '• IDLE'}
+        {/* Bottom controls bar */}
+        <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 py-3 space-y-2">
+          {/* Status + primary action buttons */}
+          <div className="flex items-center gap-2">
+            {/* Status dot */}
+            <span className={`w-2 h-2 rounded-full shrink-0 ${
+              isAwaitingGemini ? 'bg-blue-400 animate-pulse' :
+              isSessionActive ? 'bg-green-400 animate-pulse' :
+              isPreparing ? 'bg-yellow-400 animate-pulse' :
+              'bg-gray-300'
+            }`} />
+            <span className={`text-xs font-medium mr-auto ${
+              isAwaitingGemini ? 'text-blue-500' :
+              isSessionActive ? 'text-green-600' :
+              isPreparing ? 'text-yellow-600' :
+              'text-gray-400'
+            }`}>
+              {isAwaitingGemini ? 'AI 精算中...' : isSessionActive ? '聆聽中' : isPreparing ? '準備中...' : '點擊「開始朗讀」'}
             </span>
-          </div>
-        </div>
-      </div>
 
-      {/* Resizable divider - hidden on mobile */}
-      {!isMobile && (
-        <div
-          onMouseDown={onDividerMouseDown}
-          onTouchStart={(e) => {
-            isDraggingRef.current = true;
-            dragStartXRef.current = e.touches[0].clientX;
-            dragStartWidthRef.current = rightPanelWidth;
-            document.body.style.userSelect = 'none';
-          }}
-          className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
-        />
-      )}
+            {/* System demo button — toggles play/stop */}
+            <button
+              onClick={isTtsSpeaking ? () => {
+                if (utteranceRef.current) {
+                  utteranceRef.current.onend = null;
+                  utteranceRef.current.onerror = null;
+                  utteranceRef.current.onboundary = null;
+                  utteranceRef.current = null;
+                }
+                if (ttsRafRef.current !== null) {
+                  cancelAnimationFrame(ttsRafRef.current);
+                  ttsRafRef.current = null;
+                }
+                window.speechSynthesis?.cancel();
+                setIsTtsSpeaking(false);
+                setIsTtsPaused(false);
+              } : speakCurrentParagraph}
+              disabled={isSessionActive || isPreparing || isAdvancing}
+              aria-label={isTtsSpeaking ? '停止系統朗讀' : '播放這段的系統示範朗讀'}
+              className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all ${
+                isSessionActive || isPreparing || isAdvancing
+                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                  : isTtsSpeaking
+                    ? 'bg-red-100 hover:bg-red-200 text-red-600'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              }`}
+            >
+              {isTtsSpeaking ? (
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="6" y="6" width="4" height="12" rx="1" />
+                  <rect x="14" y="6" width="4" height="12" rx="1" />
+                </svg>
+              ) : (
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
+                </svg>
+              )}
+              {processZhuyin(isTtsSpeaking ? '停止' : '系統朗讀')}
+            </button>
 
-      {/* RIGHT: Interaction panel */}
-      <div
-        className={`bg-amber-50 flex flex-col min-h-0 ${isMobile ? 'flex-1' : 'flex-shrink-0 h-full'}`}
-        style={isMobile ? undefined : { width: rightPanelWidth }}
-      >
-        <div className="h-9 flex-shrink-0 bg-white border-b border-gray-200 flex items-center px-4">
-          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">
-            Live Feedback
-          </span>
-        </div>
-
-        {/* Chat area */}
-        <div
-          ref={scrollRef}
-          className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50"
-        >
-          {messages.filter(m => m.role !== 'user').map(m => (
-            <div key={m.id} className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-gray-300 mb-0.5 uppercase">
-                TUTOR
-              </span>
-              <div
-                className={`px-4 py-3 rounded-2xl text-lg max-w-[90%] shadow-lg leading-[2.6] bg-gray-100 text-gray-800 border border-gray-200 rounded-tl-none ${
-                  zhuyinActive ? 'tracking-[0.3em]' : ''
-                }`}
-              >
-                {processZhuyin(m.text)}
-              </div>
-            </div>
-          ))}
-
-          {isAdvancing && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-accent mb-0.5 uppercase animate-pulse">
-                NEXT...
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-gray-100 text-accent-light border border-accent-hover/30 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin('正在前往下一段...')}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Controls */}
-        <div className="flex-shrink-0 p-3 bg-white border-t border-gray-200 space-y-2">
-          {/* Minimal status indicator */}
-          <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500">
-            {isAwaitingGemini ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0" />
-                <span className="text-blue-500 font-medium">AI 精算中...</span>
-              </>
-            ) : isSessionActive ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
-                <span className="text-green-600 font-medium">聆聽中</span>
-              </>
-            ) : isPreparing ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse shrink-0" />
-                <span className="text-yellow-600 font-medium">準備中...</span>
-              </>
-            ) : (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
-                <span>點擊「開始朗讀」</span>
-              </>
-            )}
-          </div>
-
-          {micError && <div className="text-[10px] text-rose-400 px-1">{micError}</div>}
-
-          <div className="flex gap-2">
+            {/* Primary: Start / Submit / Retry */}
             {isPreparing ? (
-              <>
-                {/* 系統朗讀 disabled while mic is initializing */}
-                <button
-                  disabled
-                  aria-label="系統朗讀（準備中，暫不可用）"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                  </svg>
-                  {processZhuyin('系統朗讀')}
-                </button>
-                <button
-                  disabled
-                  aria-label="正在準備語音辨識"
-                  aria-busy="true"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-600 cursor-wait"
-                >
-                  <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                  {processZhuyin('準備中...')}
-                </button>
-              </>
+              <button disabled className="px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-400 cursor-wait flex items-center gap-1.5">
+                <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                {processZhuyin('準備中...')}
+              </button>
             ) : isSessionActive ? (
               <button
                 onClick={submitSentence}
                 disabled={isAdvancing || isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
-                aria-label={isAdvancing ? '請稍候，正在處理' : isAwaitingGemini ? '正在精算...' : '完成這段朗讀'}
-                className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
+                aria-label="完成這段朗讀"
+                className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all shadow active:scale-95 ${
                   isAdvancing || isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
-                    ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : 'bg-emerald-600 hover:bg-emerald-500 text-white'
                 }`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
-                {processZhuyin(isAnalyzing ? '分析中...' : isAdvancing ? '請稍候...' : '完成這段')}
+                {processZhuyin('完成')}
               </button>
-            ) : isTtsSpeaking ? (
-              <>
-                {/* 暫停 / 繼續 */}
-                <button
-                  onClick={isTtsPaused ? resumeTts : pauseTts}
-                  aria-label={isTtsPaused ? '繼續系統朗讀' : '暫停系統朗讀'}
-                  className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
-                    isTtsPaused
-                      ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
-                      : 'bg-amber-700 hover:bg-amber-600 text-white'
-                  }`}
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    {isTtsPaused
-                      ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 9v6m4-6v6" />
-                    }
-                  </svg>
-                  {processZhuyin(isTtsPaused ? '繼續' : '暫停')}
-                </button>
-                {/* 停止 */}
-                <button
-                  onClick={stopTts}
-                  aria-label="停止系統朗讀"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
-                  </svg>
-                  {processZhuyin('停止')}
-                </button>
-              </>
-            ) : (
-              <>
-                {/* 系統朗讀 */}
-                <button
-                  onClick={speakCurrentParagraph}
-                  aria-label="播放這段的系統示範朗讀"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                  </svg>
-                  {processZhuyin('系統朗讀')}
-                </button>
-                {/* 開始朗讀 */}
-                <button
-                  onClick={startSession}
-                  disabled={isAdvancing}
-                  aria-label={isAdvancing ? '請稍候，正在處理' : '開始朗讀這段，啟動語音辨識'}
-                  className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                    isAdvancing
-                      ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
-                      : 'bg-accent hover:bg-accent-hover text-white'
-                  }`}
-                >
-                  <div className="w-2.5 h-2.5 bg-white rounded-full" aria-hidden="true" />
-                  {processZhuyin(isAdvancing ? '請稍候...' : '開始朗讀')}
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Optional recording for student self-review */}
-          <div className="border-t border-gray-100 pt-2">
-            <button
-              onClick={() => setShowRecorder(prev => !prev)}
-              aria-label={showRecorder ? '收起錄音重聽功能' : '展開錄音重聽功能'}
-              aria-expanded={showRecorder}
-              aria-controls="recorder-panel"
-              className="w-full flex items-center justify-between px-2 py-1 text-xs text-gray-400 hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
-            >
-              <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.938V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-1.062A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z" />
-                </svg>
-                錄音重聽（選用）
-              </span>
-              <svg
-                className={`w-3.5 h-3.5 transition-transform ${showRecorder ? 'rotate-180' : ''}`}
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            ) : retryCount > 0 ? (
+              <button
+                onClick={startSession}
+                aria-label="再試一次"
+                className="px-4 py-2 rounded-lg text-sm font-bold bg-amber-500 hover:bg-amber-400 text-white flex items-center gap-1.5 transition-all shadow active:scale-95"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {showRecorder && (
-              <div id="recorder-panel" className="pt-2 pb-1">
-                <RecordingButton maxDurationSeconds={60} label="錄下這段朗讀，完成後可重聽" />
-              </div>
+                {processZhuyin('再試一次')}
+              </button>
+            ) : (
+              <button
+                onClick={startSession}
+                aria-label="開始朗讀這段，啟動語音辨識"
+                className="px-4 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1.5 transition-all shadow active:scale-95"
+              >
+                <span className="w-2 h-2 rounded-full bg-white" />
+                {processZhuyin('開始朗讀')}
+              </button>
             )}
           </div>
 
+          {micError && <div className="text-[10px] text-rose-400">{micError}</div>}
+
+          {/* Navigation */}
           <div className="flex gap-2">
-            {/* 上一段 — only navigate back to completed or current paragraphs */}
             <button
               onClick={() => {
                 const prevIdx = currentLineIndex - 1;
@@ -1184,57 +1267,38 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               }}
               disabled={currentLineIndex === 0}
               aria-label={currentLineIndex === 0 ? '已是第一段' : `返回第 ${currentLineIndex} 段`}
-              className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                zhuyinActive ? 'tracking-[0.2em]' : ''
-              } ${
-                currentLineIndex === 0
-                  ? 'bg-gray-300 text-gray-300 cursor-not-allowed'
-                  : 'bg-gray-300 hover:bg-gray-200 text-gray-600'
+              className={`flex-1 py-2 rounded-lg text-sm font-bold border border-gray-200 ${
+                currentLineIndex === 0 ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
               }`}
             >
               {processZhuyin('上一段')}
             </button>
 
-            {/* 下一段 / 觀看總結報告 — gated by paragraph completion */}
             {(() => {
               const isLastLine = currentLineIndex === story.content.length - 1;
               const allDone = completedParagraphs.size === story.content.length;
               const nextUnlocked = !isLastLine && maxUnlockedIndex > currentLineIndex;
-
               if (isLastLine) {
-                // Last paragraph: only show finish button when all paragraphs are done
                 return (
                   <button
                     onClick={handleFinish}
                     disabled={!allDone}
                     aria-label={!allDone ? '請完成所有段落後查看總結報告' : '查看朗讀總結報告'}
-                    className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
-                      allDone
-                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                        : 'bg-gray-300 text-gray-300 cursor-not-allowed'
+                    className={`flex-1 py-2 rounded-lg text-sm font-bold border border-gray-200 ${
+                      allDone ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-gray-100 text-gray-300 cursor-not-allowed'
                     }`}
                   >
                     {processZhuyin('觀看總結報告')}
                   </button>
                 );
               }
-
-              // Non-last paragraph: next paragraph is unlocked only if current is completed
               return (
                 <button
-                  onClick={() => {
-                    if (nextUnlocked) {
-                      stopSession();
-                      setRetryCount(0);
-                      setCurrentLineIndex(prev => prev + 1);
-                    }
-                  }}
+                  onClick={() => { if (nextUnlocked) { stopSession(); setRetryCount(0); setCurrentLineIndex(prev => prev + 1); } }}
                   disabled={!nextUnlocked}
-                  aria-label={!nextUnlocked ? '請先完成此段朗讀才能繼續（正確率需達 60%）' : `前往第 ${currentLineIndex + 2} 段`}
-                  className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
-                    nextUnlocked
-                      ? 'bg-gray-300 hover:bg-gray-200 text-gray-600'
-                      : 'bg-gray-300 text-gray-300 cursor-not-allowed'
+                  aria-label={!nextUnlocked ? '請先完成此段朗讀才能繼續' : `前往第 ${currentLineIndex + 2} 段`}
+                  className={`flex-1 py-2 rounded-lg text-sm font-bold border border-gray-200 ${
+                    nextUnlocked ? 'bg-gray-100 hover:bg-gray-200 text-gray-600' : 'bg-gray-100 text-gray-300 cursor-not-allowed'
                   }`}
                 >
                   {processZhuyin('下一段')}
@@ -1247,7 +1311,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             <button
               onClick={stopSession}
               aria-label="停止目前的朗讀練習"
-              className={`w-full py-1.5 rounded-lg text-base font-bold text-gray-400 hover:text-gray-600 transition-colors leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}
+              className="w-full py-1 rounded-lg text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
               {processZhuyin('停止朗讀')}
             </button>
