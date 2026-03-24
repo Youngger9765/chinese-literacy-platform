@@ -787,12 +787,24 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     recognition.onend = () => {
       if (isSessionActiveRef.current) {
-        // Browser/API timed out — seamlessly reconnect
-        if (import.meta.env.DEV) {
-          console.log('[SpeechRecognition] Auto-reconnecting…');
-        }
+        // Browser/API timed out — seamlessly reconnect.
+        // Chrome sometimes throws InvalidStateError if start() is called
+        // immediately inside onend (engine not fully cleaned up yet).
+        // A 150ms delay lets Chrome finish teardown before we restart.
         accumulatedTranscriptRef.current = currentTranscriptRef.current;
-        try { recognition.start(); } catch (_) {}
+        setTimeout(() => {
+          if (!isSessionActiveRef.current) return; // user stopped during the delay
+          if (import.meta.env.DEV) {
+            console.log('[SpeechRecognition] Auto-reconnecting…');
+          }
+          try {
+            recognition.start();
+          } catch (err) {
+            if (import.meta.env.DEV) {
+              console.warn('[SpeechRecognition] Reconnect failed:', err);
+            }
+          }
+        }, 150);
       } else {
         // Session fully ended
         setIsSessionActive(false);
