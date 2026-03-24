@@ -96,6 +96,12 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
                   {token.char}
                 </span>
               );
+            case 'unread':
+              return (
+                <span key={idx} className="text-gray-300">
+                  {token.char}
+                </span>
+              );
             default:
               return <span key={idx}>{token.char}</span>;
           }

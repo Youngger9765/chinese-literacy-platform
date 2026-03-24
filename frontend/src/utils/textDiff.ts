@@ -5,7 +5,7 @@
  */
 import { isHomophone } from './pinyin';
 
-export type DiffType = 'correct' | 'wrong' | 'missing' | 'extra';
+export type DiffType = 'correct' | 'wrong' | 'missing' | 'extra' | 'unread';
 
 export interface DiffToken {
   char: string;

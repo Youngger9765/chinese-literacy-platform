@@ -71,15 +71,33 @@ const pick = (pool: string[]) => pool[Math.floor(Math.random() * pool.length)];
 /* ------------------------------------------------------------------ */
 
 /**
- * Greedy forward match: count how many normalized target chars have been
- * covered by the interim transcript. Homophone-aware.
+ * Look-ahead cursor: for each spoken char, try matching the current target
+ * position first. On mismatch, look ahead up to LOOK_AHEAD target positions
+ * to handle substitutions (e.g. 而且 vs 並且) and rare chars (e.g. 賁).
+ * Spoken chars that don't match anything are treated as extra and skipped.
  */
+const LOOK_AHEAD = 3;
+
 function calcSpeakingProgress(interim: string, target: string): number {
   const s = Array.from(normalizeForComparison(interim));
   const t = Array.from(normalizeForComparison(target));
   let j = 0;
   for (let i = 0; i < s.length && j < t.length; i++) {
-    if (s[i] === t[j] || isHomophone(s[i], t[j])) j++;
+    if (s[i] === t[j] || isHomophone(s[i], t[j])) {
+      j++;
+    } else {
+      // Look ahead: can this spoken char match a nearby target position?
+      // Handles substitutions (而且→並且) and STT-impossible chars (賁→噴)
+      let found = false;
+      for (let k = 1; k <= LOOK_AHEAD && j + k < t.length; k++) {
+        if (s[i] === t[j + k] || isHomophone(s[i], t[j + k])) {
+          j = j + k + 1; // skip mismatched target chars + advance past match
+          found = true;
+          break;
+        }
+      }
+      // If not found, spoken char is extra — skip it (j stays)
+    }
   }
   return j;
 }
@@ -129,8 +147,11 @@ function renderLineWithDiff(
     while (tokenIdx < tokens.length && tokens[tokenIdx].type === 'extra') tokenIdx++;
     const token = tokens[tokenIdx++];
 
-    if (!token || token.type === 'correct') {
+    if (!token) {
       return <span key={i}>{ch}</span>;
+    }
+    if (token.type === 'correct') {
+      return <span key={i} className="text-green-600">{ch}</span>;
     }
     if (token.type === 'forgiven') {
       return (
@@ -138,6 +159,9 @@ function renderLineWithDiff(
           {ch}
         </span>
       );
+    }
+    if (token.type === 'unread') {
+      return <span key={i} className="text-gray-300">{ch}</span>;
     }
     if (token.type === 'missing') {
       return (
@@ -168,6 +192,34 @@ function renderLineWithDiff(
       {chars}
     </p>
   );
+}
+
+/**
+ * Build real-time overlay tokens from diffCharacters output.
+ * 1. Filter out "extra" tokens (spoken chars with no target position)
+ * 2. Find the cursor: index of last correct/wrong/forgiven token
+ * 3. Mark everything after the cursor as "unread"
+ */
+function buildRealtimeOverlay(diffTokens: DiffToken[]): DiffToken[] {
+  // Keep only target-side tokens (correct, wrong, missing, forgiven)
+  const targetTokens = diffTokens.filter(t => t.type !== 'extra');
+
+  // Find cursor: last position where student has spoken (correct, wrong, or forgiven)
+  let cursor = -1;
+  for (let i = targetTokens.length - 1; i >= 0; i--) {
+    if (targetTokens[i].type === 'correct' || targetTokens[i].type === 'wrong' || targetTokens[i].type === 'forgiven') {
+      cursor = i;
+      break;
+    }
+  }
+
+  // Mark tokens after cursor as "unread"
+  return targetTokens.map((t, i) => {
+    if (i > cursor && t.type === 'missing') {
+      return { ...t, type: 'unread' as const };
+    }
+    return t;
+  });
 }
 
 /**
@@ -273,9 +325,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [showRecorder, setShowRecorder] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [speakingProgress, setSpeakingProgress] = useState(0); // char index cursor during recording
+  const [realtimeDiffTokens, setRealtimeDiffTokens] = useState<DiffToken[] | null>(null); // real-time LCS overlay
+  const [paragraphSummary, setParagraphSummary] = useState<{
+    feedback: string;
+    matchRate: number;
+    wrongCount: number;
+    missingCount: number;
+    tier: number;
+    geminiPending: boolean;
+  } | null>(null);
 
   // Hybrid eval: per-sentence (分期付款) tracking
-  const geminiAbortRef = useRef<AbortController | null>(null);
+  const geminiGenRef = useRef(0); // generation counter — replaces AbortController
+  const geminiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sentenceTargetsRef = useRef<string[]>([]);
   const sentenceResultsRef = useRef<Array<LocalEvalResult | null>>([]);
   const nextSentenceIdxRef = useRef(0);
@@ -438,6 +500,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     lastFinalResultIdxRef.current = -1;
     setLastDiffTokens(null);
     setSpeakingProgress(0);
+    setRealtimeDiffTokens(null);
+    setParagraphSummary(null);
   }, [currentLineIndex, story.content]);
 
   /* ---- cleanup on unmount ---- */
@@ -452,7 +516,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         ttsRafRef.current = null;
       }
       window.speechSynthesis?.cancel();
-      geminiAbortRef.current?.abort();
+      if (geminiTimeoutRef.current !== null) {
+        clearTimeout(geminiTimeoutRef.current);
+        geminiTimeoutRef.current = null;
+      }
+      geminiGenRef.current++; // invalidate any in-flight Gemini eval
     };
   }, []);
 
@@ -524,8 +592,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     let localMatchRate: number;
     let localCpm: number;
 
-    if (sentResults.length > 0) {
-      // Compute overall from per-sentence results
+    const totalSentences = sentenceTargetsRef.current.length;
+    if (sentResults.length > 0 && sentResults.length >= Math.ceil(totalSentences / 2)) {
+      // Compute overall from per-sentence results (only if majority captured)
       const allDiff = sentResults.flatMap(r => r.diffTokens);
       const correctAndForgiven = allDiff.filter(t => t.type === 'correct' || t.type === 'forgiven').length;
       const totalTarget = normalizeForComparison(targetText).length || 1;
@@ -536,7 +605,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       localFeedback = sentResults[sentResults.length - 1].feedback;
       localCpm = Math.round(sentResults.reduce((s, r) => s + r.cpm, 0) / sentResults.length);
     } else {
-      // No isFinal events — whole-paragraph local eval
+      // Incomplete sentence results or no isFinal events — whole-paragraph local eval
       const localResult = localEvaluateParagraph(
         cleaned, targetText, durationMs,
         { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
@@ -563,6 +632,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     // ── Retry cap: auto-advance after 2 failed attempts ──────────────────────
     if (localTier === 3 && retryCount >= 2) {
+      stopSession();
       const capFeedback = '你已經很努力了！我們先繼續下一段，之後再回來練習。';
       setMessages(prev => [...prev,
         { id: Date.now().toString(), role: 'user', text: cleaned, type: 'transcription' },
@@ -577,87 +647,91 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       return;
     }
 
-    // ── Phase 2: local PASS → advance immediately, no Gemini ─────────────────
+    // ── Phase 2: Show paragraph summary, call Gemini for feedback ─────────────
+    const localResult: LineResult = { lineIndex: lineIdx, matchRate: localMatchRate, cpm: localCpm, durationMs, transcript: cleaned, diffTokens: localDiffTokens };
+    const allResults = [...lineResults, localResult];
+    setLineResults(allResults);
+    setStreamingUserInput('');
+
+    // Count errors from diff tokens
+    const wrongCount = localDiffTokens.filter(t => t.type === 'wrong').length;
+    const missingCount = localDiffTokens.filter(t => t.type === 'missing').length;
+
+    // Stop recognition so the summary card is visible and action buttons work
+    stopSession();
+
+    // Show local summary immediately (Gemini will update it)
+    setParagraphSummary({
+      feedback: localTier <= 2 ? (localFeedback || '唸得不錯！') : (localFeedback || '再試一次，加油！'),
+      matchRate: localMatchRate,
+      wrongCount,
+      missingCount,
+      tier: localTier,
+      geminiPending: true,
+    });
+
     if (localTier <= 2) {
-      const newStreak = streak + 1;
-      let effectiveFeedback = localFeedback;
-      if (newStreak >= 3 && newStreak < STREAK_MESSAGES.length && STREAK_MESSAGES[newStreak]) {
-        effectiveFeedback = STREAK_MESSAGES[newStreak];
-      } else if (!effectiveFeedback) {
-        effectiveFeedback = localTier === 1 ? pick(TIER1_POOL) : pick(TIER2_POOL);
-      }
-      setStreak(newStreak);
+      setStreak(prev => prev + 1);
       setRetryCount(0);
-      setMessages(prev => [...prev,
-        { id: Date.now().toString(), role: 'user', text: cleaned, type: 'transcription' },
-        { id: (Date.now() + 1).toString(), role: 'model', text: effectiveFeedback, type: 'feedback' },
-      ]);
-      setStreamingUserInput('');
-      const passResult: LineResult = { lineIndex: lineIdx, matchRate: localMatchRate, cpm: localCpm, durationMs, transcript: cleaned, diffTokens: localDiffTokens };
-      const allResults = [...lineResults, passResult];
-      setLineResults(allResults);
-      advanceParagraph(lineIdx, allResults);
-      return; // Gemini NOT called
+    } else {
+      setRetryCount(prev => prev + 1);
     }
 
-    // ── Phase 3: local FAIL → show local result, try Gemini upgrade ──────────
-    setRetryCount(prev => prev + 1);
-    const failFeedback = localFeedback || pick(TIER3_POOL);
-    setMessages(prev => [...prev,
-      { id: Date.now().toString(), role: 'user', text: cleaned, type: 'transcription' },
-      { id: (Date.now() + 1).toString(), role: 'model', text: failFeedback, type: 'feedback' },
-    ]);
-    setStreamingUserInput('');
-    const localResult: LineResult = { lineIndex: lineIdx, matchRate: localMatchRate, cpm: localCpm, durationMs, transcript: cleaned, diffTokens: localDiffTokens };
-    const allResultsWithLocal = [...lineResults, localResult];
-    setLineResults(allResultsWithLocal);
+    // Async Gemini: get AI feedback to update the summary
+    const gen = ++geminiGenRef.current;
+    if (geminiTimeoutRef.current !== null) { clearTimeout(geminiTimeoutRef.current); geminiTimeoutRef.current = null; }
 
-    // Async Gemini upgrade (homophone rescue)
-    setIsAwaitingGemini(true);
-    setIsAnalyzing(true); // keep status bar in sync
-    geminiAbortRef.current?.abort();
-    geminiAbortRef.current = new AbortController();
+    void (async () => {
+      let localTimeout: ReturnType<typeof setTimeout> | null = null;
+      try {
+        const gemini = await Promise.race([
+          evaluateReading(cleaned, targetText, durationMs, token ?? undefined),
+          new Promise<never>((_, reject) => {
+            localTimeout = setTimeout(() => reject(new Error('gemini_timeout')), 8000);
+            geminiTimeoutRef.current = localTimeout;
+          }),
+        ]);
+        if (localTimeout !== null) clearTimeout(localTimeout);
+        if (geminiTimeoutRef.current === localTimeout) geminiTimeoutRef.current = null;
+        if (geminiGenRef.current !== gen) return;
 
-    const timeoutId = setTimeout(() => geminiAbortRef.current?.abort(), 5000);
-
-    evaluateReading(cleaned, targetText, durationMs, token ?? undefined, geminiAbortRef.current.signal)
-      .then(gemini => {
-        clearTimeout(timeoutId);
-        setIsAwaitingGemini(false);
-        setIsAnalyzing(false);
+        // Update summary with Gemini feedback
+        const geminiWrong = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'wrong').length;
+        const geminiMissing = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'missing').length;
+        setParagraphSummary({
+          feedback: gemini.feedback || (gemini.tier <= 2 ? '唸得不錯！' : '再試一次，加油！'),
+          matchRate: gemini.adjusted_match_rate,
+          wrongCount: geminiWrong,
+          missingCount: geminiMissing,
+          tier: gemini.tier,
+          geminiPending: false,
+        });
         setLastDiffTokens(gemini.diff_tokens);
 
-        if (gemini.tier <= 2) {
-          // Gemini upgraded to PASS (homophone rescue)
-          const upgradeFeedback = gemini.feedback || '好消息，你過了！';
-          setMessages(prev => [...prev,
-            { id: Date.now().toString(), role: 'model', text: upgradeFeedback, type: 'feedback' },
-          ]);
+        // If Gemini upgrades to PASS, update the result
+        if (gemini.tier <= 2 && localTier > 2) {
           setStreak(prev => prev + 1);
           setRetryCount(0);
           const geminiResult: LineResult = {
             lineIndex: lineIdx,
             matchRate: gemini.adjusted_match_rate,
             cpm: Math.round(gemini.cpm ?? localCpm),
-            durationMs,
-            transcript: cleaned,
-            diffTokens: gemini.diff_tokens,
+            durationMs, transcript: cleaned, diffTokens: gemini.diff_tokens,
           };
-          // Replace the local result we just added with the Gemini result
           setLineResults(prev => [...prev.slice(0, -1), geminiResult]);
-          advanceParagraph(lineIdx, [...lineResults, geminiResult]);
         }
-        // Gemini confirms FAIL: diff colors updated (setLastDiffTokens above), retry stays
-      })
-      .catch(err => {
-        clearTimeout(timeoutId);
-        setIsAwaitingGemini(false);
-        setIsAnalyzing(false);
-        if (err.name !== 'AbortError') {
+      } catch (err: unknown) {
+        if (localTimeout !== null) clearTimeout(localTimeout);
+        if (geminiTimeoutRef.current === localTimeout) geminiTimeoutRef.current = null;
+        if (geminiGenRef.current !== gen) return;
+        // Gemini failed — local summary stands, just mark as done
+        setParagraphSummary(prev => prev ? { ...prev, geminiPending: false } : null);
+        const msg = err instanceof Error ? err.message : '';
+        if (msg !== 'gemini_timeout') {
           console.warn('[LiveTutor] Gemini eval failed, local result stands:', err);
         }
-        // Local result already displayed — no UX change
-      });
+      }
+    })();
   }, [story, streak, lineResults, onFinish, onParagraphComplete, retryCount, token, advanceParagraph]);
 
   // Sync refs so async callbacks (onend) always see latest values
@@ -739,12 +813,26 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       currentTranscriptRef.current = fullTranscript;
       setStreamingUserInput(cleanChineseText(fullTranscript));
 
-      // Update moving cursor: map interim transcript progress onto original target chars
+      // Real-time LCS diff overlay: compare full transcript against target
       const targetText = story.content[currentLineIndexRef.current] || '';
-      const normProgress = calcSpeakingProgress(fullTranscript, targetText);
-      const origIdx = normalizedToOrigIdx(targetText, normProgress);
-      console.log('[STT] onresult | transcript:', fullTranscript.slice(-20), '| normProg:', normProgress, '| origIdx:', origIdx, '| targetLen:', targetText.length);
-      setSpeakingProgress(origIdx);
+      const rawDiff = diffCharacters(fullTranscript, targetText, { useHomophone: true });
+      const overlayTokens = buildRealtimeOverlay(rawDiff.tokens);
+      // Highwater mark: once a char is correct/wrong/forgiven, never revert to unread.
+      // This prevents "jumping" when STT interim transcript fluctuates.
+      setRealtimeDiffTokens(prev => {
+        if (!prev) return overlayTokens;
+        return overlayTokens.map((t, i) => {
+          const old = prev[i];
+          if (!old) return t;
+          // If previously committed (correct/wrong/forgiven/missing), keep it
+          // unless new result is also committed (allows correction on re-read)
+          if (old.type !== 'unread' && t.type === 'unread') return old;
+          return t;
+        });
+      });
+      // Also update cursor for progress bar / other consumers
+      const readChars = overlayTokens.filter(t => t.type !== 'unread').length;
+      setSpeakingProgress(prev => Math.max(prev, readChars));
 
       // ── 分期付款: per-sentence local eval on isFinal events ────────────────
       // Each isFinal chunk is mapped to the next un-evaluated sentence target.
@@ -795,6 +883,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         // immediately inside onend (engine not fully cleaned up yet).
         // A 150ms delay lets Chrome finish teardown before we restart.
         accumulatedTranscriptRef.current = currentTranscriptRef.current;
+        lastFinalResultIdxRef.current = -1; // reset — reconnect resets event.results indices
         setTimeout(() => {
           if (!isSessionActiveRef.current) return; // user stopped during the delay
           console.log('[STT] reconnecting… accumulated now:', accumulatedTranscriptRef.current.slice(-20));
@@ -819,6 +908,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     accumulatedTranscriptRef.current = '';
     setStreamingUserInput('');
     setSpeakingProgress(0);
+    setRealtimeDiffTokens(null);
 
     recognition.start();
     // Note: isSessionActive & sentenceStartTimeRef are set in onstart once STT is truly ready
@@ -864,6 +954,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     accumulatedTranscriptRef.current = '';
     setStreamingUserInput('');
     setSpeakingProgress(0);
+    setRealtimeDiffTokens(null);
   };
 
   /** Use browser TTS to read the current paragraph aloud. */
@@ -893,6 +984,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       utterance.onstart = () => {
         setIsTtsSpeaking(true);
         setSpeakingProgress(0);
+    setRealtimeDiffTokens(null);
         // Chrome's onboundary doesn't fire per-character for Chinese TTS.
         // Drive the cursor with a time-based rAF loop instead (~4 chars/sec).
         ttsStartTimeRef.current = performance.now();
@@ -1122,23 +1214,22 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                         </p>
                       );
                     })()
+                  ) : idx === currentLineIndex && isSessionActive && realtimeDiffTokens ? (
+                    /* Mode 2a: real-time LCS diff overlay while recording */
+                    renderLineWithDiff(
+                      line,
+                      realtimeDiffTokens,
+                      fontSizePx,
+                      `${zhuyinActive ? 'tracking-[0.4em]' : ''} font-bold`,
+                    )
                   ) : idx === currentLineIndex && isSessionActive ? (
-                    /* Mode 2a: moving cursor while recording (STT) */
+                    /* Mode 2a fallback: plain bold before first STT result */
                     <p
                       className={`leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} font-bold`}
                       style={{ fontSize: fontSizePx }}
                     >
                       {Array.from(line).map((ch, charIdx) => (
-                        <span
-                          key={charIdx}
-                          className={
-                            charIdx < speakingProgress
-                              ? 'text-gray-400'
-                              : charIdx === speakingProgress
-                                ? 'text-gray-900 bg-yellow-200/80 rounded-sm px-px'
-                                : 'text-gray-800'
-                          }
-                        >{ch}</span>
+                        <span key={charIdx} className="text-gray-300">{ch}</span>
                       ))}
                     </p>
                   ) : (
@@ -1161,6 +1252,56 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             })}
           </div>
         </div>
+
+        {/* Paragraph summary card — shown when evaluation completes */}
+        {paragraphSummary && (
+          <div className="flex-shrink-0 mx-4 mb-2 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200 shadow-sm space-y-3">
+            {/* Feedback line */}
+            <p className="text-base font-bold text-gray-800">
+              {paragraphSummary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI 分析中...</span>}
+              {paragraphSummary.feedback}
+            </p>
+            {/* Stats */}
+            <div className="flex gap-4 text-sm">
+              <span className="text-green-600 font-medium">
+                正確率 {Math.round(paragraphSummary.matchRate * 100)}%
+              </span>
+              {paragraphSummary.wrongCount > 0 && (
+                <span className="text-red-500">念錯 {paragraphSummary.wrongCount} 字</span>
+              )}
+              {paragraphSummary.missingCount > 0 && (
+                <span className="text-gray-400">漏字 {paragraphSummary.missingCount} 字</span>
+              )}
+            </div>
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setParagraphSummary(null);
+                  setRealtimeDiffTokens(null);
+                  startSession();
+                }}
+                className="flex-1 py-2 rounded-lg text-sm font-bold border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all"
+              >
+                重練這段
+              </button>
+              <button
+                onClick={() => {
+                  setParagraphSummary(null);
+                  // Use the latest lineResults to advance
+                  advanceParagraph(currentLineIndex, lineResults);
+                }}
+                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                  paragraphSummary.tier <= 2
+                    ? 'bg-accent hover:bg-accent-hover text-white'
+                    : 'border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-600'
+                }`}
+              >
+                {currentLineIndex >= story.content.length - 1 ? '完成朗讀' : '下一段'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Bottom controls bar */}
         <div className="flex-shrink-0 bg-white border-t border-gray-200 px-4 py-3 space-y-2">

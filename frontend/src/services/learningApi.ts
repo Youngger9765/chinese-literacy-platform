@@ -57,7 +57,7 @@ export async function evaluateReading(
     throw new Error(body.detail ?? `evaluateReading failed: ${res.status}`);
   }
 
-  return res.json();
+  return await res.json();
 }
 
 // ---------------------------------------------------------------------------

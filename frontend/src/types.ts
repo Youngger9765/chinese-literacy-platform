@@ -88,7 +88,7 @@ export interface ReadingAttempt {
   lineBreakdown?: LineBreakdown[];
 }
 
-export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra';
+export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra' | 'unread';
 
 export interface DiffToken {
   char: string;
