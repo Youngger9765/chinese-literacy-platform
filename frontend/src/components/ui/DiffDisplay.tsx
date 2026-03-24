@@ -28,7 +28,7 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
   return (
     <div className={className}>
       <div
-        className="flex flex-wrap leading-relaxed text-lg"
+        className="flex flex-wrap leading-[inherit]"
         role="group"
         aria-label="朗讀差異對比結果"
       >

@@ -396,7 +396,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               {result.diffTokens && result.diffTokens.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
                   <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">逐字比對</p>
-                  <DiffDisplay tokens={result.diffTokens} showLegend />
+                  <DiffDisplay tokens={result.diffTokens} showLegend className="text-lg" />
                 </div>
               )}
 

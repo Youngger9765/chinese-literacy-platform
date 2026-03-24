@@ -534,7 +534,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                     </button>
                     {isExpanded && line.diffTokens && (
                       <div className="px-6 pb-4 pt-1">
-                        <DiffDisplay tokens={line.diffTokens} showLegend />
+                        <DiffDisplay tokens={line.diffTokens} showLegend className="text-lg" />
                         <div className="flex gap-4 mt-3 text-xs text-gray-400">
                           <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
                           <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>
@@ -552,7 +552,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             {fullReadingResult?.diffTokens && fullReadingResult.diffTokens.length > 0 && (
               <div className="border-t border-slate-200 px-6 py-4">
                 <p className="text-xs text-gray-500 font-bold mb-2">全文朗讀比對</p>
-                <DiffDisplay tokens={fullReadingResult.diffTokens} showLegend />
+                <DiffDisplay tokens={fullReadingResult.diffTokens} showLegend className="text-lg" />
                 {fullReadingResult.errorBreakdown && (
                   <div className="flex gap-4 mt-3 text-xs text-gray-400">
                     <span>正確: {fullReadingResult.errorBreakdown.correct} 字</span>
@@ -870,7 +870,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                   </button>
                   {isExpanded && line.diffTokens && (
                     <div className="px-6 pb-4 pt-1">
-                      <DiffDisplay tokens={line.diffTokens} showLegend />
+                      <DiffDisplay tokens={line.diffTokens} showLegend className="text-lg" />
                       <div className="flex gap-4 mt-3 text-xs text-gray-400">
                         <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
                         <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>

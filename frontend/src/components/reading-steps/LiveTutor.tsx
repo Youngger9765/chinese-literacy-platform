@@ -836,6 +836,22 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             {story.content.map((line, idx) => {
               const isCelebrating = celebratingIndex === idx;
               const status = lineStatuses[idx];
+
+              // Compute diff tokens for this paragraph:
+              // – current paragraph: use live lastDiffTokens
+              // – completed paragraphs: use last recorded result
+              let paragraphDiffTokens: DiffToken[] | null = null;
+              if (idx === currentLineIndex && lastDiffTokens) {
+                paragraphDiffTokens = lastDiffTokens;
+              } else if (status === 'completed') {
+                for (let i = lineResults.length - 1; i >= 0; i--) {
+                  if (lineResults[i].lineIndex === idx) {
+                    paragraphDiffTokens = lineResults[i].diffTokens;
+                    break;
+                  }
+                }
+              }
+
               return (
                 <div
                   key={idx}
@@ -865,7 +881,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                       </span>
                     )}
                     {status === 'locked' && (
-                      /* Lock icon for locked paragraphs */
                       <span className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0">
                         <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -873,30 +888,52 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                       </span>
                     )}
                     <span className="text-xs text-gray-400 font-bold">第 {idx + 1} 段</span>
-                    {/* Celebration label */}
                     {isCelebrating && (
                       <span className="ml-auto text-xs font-bold text-emerald-600 animate-bounce">
                         解鎖了！
                       </span>
                     )}
-                    {/* Locked hint */}
                     {status === 'locked' && (
                       <span className="ml-auto text-[10px] text-gray-400">完成前一段後解鎖</span>
                     )}
-                  </div>
-                  <p
-                    className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
-                      status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
-                    }`}
-                    style={{ fontSize: fontSizePx }}
-                  >
-                    {/* Show blurred text for locked paragraphs */}
-                    {status === 'locked' ? (
-                      <span className="blur-sm select-none">{zhuyinLines ? zhuyinLines[idx] : line}</span>
-                    ) : (
-                      zhuyinLines ? zhuyinLines[idx] : line
+                    {/* Gemini correction in progress indicator */}
+                    {idx === currentLineIndex && isAwaitingGemini && paragraphDiffTokens && (
+                      <span className="ml-auto text-[10px] text-blue-400 font-bold animate-pulse">AI 精算中…</span>
                     )}
-                  </p>
+                  </div>
+
+                  {/* Paragraph text — inline diff overlay when tokens available */}
+                  {paragraphDiffTokens ? (
+                    <div
+                      style={{ fontSize: fontSizePx }}
+                      className={`leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
+                        status === 'current' ? 'font-bold' : ''
+                      }`}
+                    >
+                      <DiffDisplay tokens={paragraphDiffTokens} showLegend={false} />
+                    </div>
+                  ) : (
+                    <p
+                      className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
+                        status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
+                      }`}
+                      style={{ fontSize: fontSizePx }}
+                    >
+                      {status === 'locked' ? (
+                        <span className="blur-sm select-none">{zhuyinLines ? zhuyinLines[idx] : line}</span>
+                      ) : (
+                        zhuyinLines ? zhuyinLines[idx] : line
+                      )}
+                    </p>
+                  )}
+
+                  {/* Live streaming transcript shown under current paragraph */}
+                  {idx === currentLineIndex && streamingUserInput && (
+                    <div className="mt-3 pt-2 border-t border-gray-200/60 text-sm text-gray-400 italic flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
+                      {streamingUserInput}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -946,71 +983,20 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           ref={scrollRef}
           className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50"
         >
-          {messages.map(m => (
-            <div key={m.id} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+          {messages.filter(m => m.role !== 'user').map(m => (
+            <div key={m.id} className="flex flex-col items-start">
               <span className="text-[9px] font-bold text-gray-300 mb-0.5 uppercase">
-                {m.role === 'user' ? 'STUDENT' : 'TUTOR'}
+                TUTOR
               </span>
               <div
-                className={`px-4 py-3 rounded-2xl text-lg max-w-[90%] shadow-lg leading-[2.6] ${
+                className={`px-4 py-3 rounded-2xl text-lg max-w-[90%] shadow-lg leading-[2.6] bg-gray-100 text-gray-800 border border-gray-200 rounded-tl-none ${
                   zhuyinActive ? 'tracking-[0.3em]' : ''
-                } ${
-                  m.role === 'user'
-                    ? 'bg-accent text-white rounded-tr-none'
-                    : 'bg-gray-100 text-gray-800 border border-gray-200 rounded-tl-none'
                 }`}
               >
                 {processZhuyin(m.text)}
               </div>
             </div>
           ))}
-
-          {isSessionActive && !streamingUserInput && !isAdvancing && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-green-500 mb-0.5 uppercase animate-pulse">
-                LISTENING
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-green-900/30 text-green-200 border border-green-700/30 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin(`請閱讀左側文章的第${currentLineIndex + 1}段：${story.content[currentLineIndex].slice(0, 5)}...`)}
-              </div>
-            </div>
-          )}
-
-          {streamingUserInput && (
-            <div className="flex flex-col items-end">
-              <span className="text-[9px] font-bold text-accent mb-0.5 uppercase animate-pulse">
-                LISTENING...
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-accent/60 text-gray-800 rounded-tr-none max-w-[90%] border border-accent/30 leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin(streamingUserInput)}
-              </div>
-            </div>
-          )}
-
-          {lastDiffTokens && !isAdvancing && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-gray-400 mb-0.5 uppercase">
-                DIFF
-              </span>
-              <div className="px-4 py-3 rounded-2xl bg-white border border-gray-200 rounded-tl-none max-w-[95%] relative">
-                <DiffDisplay tokens={lastDiffTokens} showLegend className="text-base" />
-                {isAwaitingGemini && (
-                  <span className="absolute top-1 right-2 text-[9px] text-blue-400 font-bold animate-pulse">精算中...</span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {isAwaitingGemini && !lastDiffTokens && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-blue-500 mb-0.5 uppercase animate-pulse">
-                精算中...
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-blue-50 text-blue-700 border border-blue-200 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin('正在用 AI 校正朗讀結果...')}
-              </div>
-            </div>
-          )}
 
           {isAdvancing && (
             <div className="flex flex-col items-start">
@@ -1026,11 +1012,28 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
         {/* Controls */}
         <div className="flex-shrink-0 p-3 bg-white border-t border-gray-200 space-y-2">
-          <div className={`min-h-[3rem] p-2 rounded-lg bg-black/40 border border-gray-200 text-base text-accent-light overflow-hidden leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-            {streamingUserInput ? processZhuyin(streamingUserInput) : (
-              <span className="text-gray-800 italic">
-                {processZhuyin(isAwaitingGemini ? '正在精算結果...' : isPreparing ? '正在準備語音辨識...' : isSessionActive ? '正在聆聽您的朗讀...' : '點擊「開始朗讀」開始')}
-              </span>
+          {/* Minimal status indicator */}
+          <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500">
+            {isAwaitingGemini ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0" />
+                <span className="text-blue-500 font-medium">AI 精算中...</span>
+              </>
+            ) : isSessionActive ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
+                <span className="text-green-600 font-medium">聆聽中</span>
+              </>
+            ) : isPreparing ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse shrink-0" />
+                <span className="text-yellow-600 font-medium">準備中...</span>
+              </>
+            ) : (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
+                <span>點擊「開始朗讀」</span>
+              </>
             )}
           </div>
 
