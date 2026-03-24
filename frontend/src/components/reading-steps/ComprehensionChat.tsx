@@ -98,6 +98,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [requiredCount, setRequiredCount] = useState(() => savedRef.current?.requiredCount ?? 3);
   const [isSessionComplete, setIsSessionComplete] = useState(() => savedRef.current?.isSessionComplete ?? false);
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
+  const [hintParagraph, setHintParagraph] = useState<number | null>(null);
   const [offlineMode, setOfflineMode] = useState(false);
   const [mockQuestionIndex, setMockQuestionIndex] = useState(0);
 
@@ -140,6 +141,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     setRequiredCount(mockQuestions.length);
     setIsSessionComplete(false);
     setHighlightedParagraph(null);
+    setHintParagraph(null);
     setConversation([{ role: 'ai', text: mockQuestions[0] }]);
     setError(message ?? '已切換為離線測試模式（不需連線 GCP）。');
   }, [mockQuestions]);
@@ -195,6 +197,32 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const paragraphRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  const progressPercent = requiredCount > 0
+    ? Math.min(100, Math.round((understoodCount / requiredCount) * 100))
+    : 0;
+  const remainingCount = Math.max(requiredCount - understoodCount, 0);
+
+  const jumpToParagraph = useCallback((paragraphIndex: number, switchToStoryTab = false) => {
+    if (paragraphIndex < 0) return;
+    if (switchToStoryTab && isMobile) {
+      setActiveTab('story');
+      setTimeout(() => {
+        paragraphRefs.current[paragraphIndex]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }, 180);
+      return;
+    }
+
+    setTimeout(() => {
+      paragraphRefs.current[paragraphIndex]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }, 90);
+  }, [isMobile]);
+
   // Helper to apply server response to local state
   const applyServerState = useCallback((result: ChatResponse) => {
     setUnderstoodCount(result.understood_count);
@@ -203,22 +231,19 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
     // Highlight referenced paragraph on wrong answer
     if (result.understood === false && result.referenced_paragraph != null) {
-      setHighlightedParagraph(result.referenced_paragraph - 1);
-      // On mobile, auto-switch to story tab when highlighting
-      if (isMobile) {
-        setActiveTab('story');
+      const paragraphIndex = result.referenced_paragraph - 1;
+      setHighlightedParagraph(paragraphIndex);
+      setHintParagraph(paragraphIndex);
+
+      // Keep current tab on mobile and guide explicitly instead of forced switching.
+      if (!isMobile || activeTab === 'story') {
+        jumpToParagraph(paragraphIndex, false);
       }
-      // Auto-scroll to highlighted paragraph
-      setTimeout(() => {
-        paragraphRefs.current[result.referenced_paragraph! - 1]?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-      }, 100);
     } else {
       setHighlightedParagraph(null);
+      setHintParagraph(null);
     }
-  }, [isMobile]);
+  }, [activeTab, isMobile, jumpToParagraph]);
 
   // Fetch the first question from the server (no student answer).
   // When the backend detects an existing session (resumed=true), it returns
@@ -384,6 +409,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     setIsLoading(true);
     setError(null);
     setHighlightedParagraph(null);
+    setHintParagraph(null);
 
     // Offline fallback mode for local testing without backend/GCP availability.
     if (offlineMode) {
@@ -493,6 +519,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     setUnderstoodCount(0);
     setIsSessionComplete(false);
     setHighlightedParagraph(null);
+    setHintParagraph(null);
     setError(null);
     initializedRef.current = false;
     // Tell backend to clear memory + DB turns so next fetchFirstQuestion starts fresh
@@ -634,16 +661,71 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     }
   }, [inputText, isLoading, isSessionComplete]);
 
+  const handleSkip = useCallback(() => {
+    onFinish({
+      understoodCount,
+      requiredCount,
+      isComplete: isSessionComplete,
+      conversationLength: conversation.length,
+    });
+  }, [conversation.length, isSessionComplete, onFinish, requiredCount, understoodCount]);
+
+  const renderProgressHeader = () => (
+    <div className="shrink-0 border-b border-gray-200 bg-white px-4 py-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-accent-light">AI Tutor</p>
+          <p className="mt-1 text-sm font-semibold text-gray-900">
+            已完成 <span className="text-accent">{understoodCount}</span> / {requiredCount} 題
+          </p>
+        </div>
+        <button
+          onClick={handleSkip}
+          className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-800"
+        >
+          跳過
+        </button>
+      </div>
+      <div className="mt-3">
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-amber-100">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 transition-all duration-500"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-xs">
+          <span className="font-semibold text-emerald-700">進度 {progressPercent}%</span>
+          <span className="text-gray-500">
+            {remainingCount === 0 ? '已達成目標' : `還有 ${remainingCount} 題`}
+          </span>
+        </div>
+      </div>
+      {hintParagraph != null && activeTab === 'chat' && (
+        <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+          <p className="font-semibold">小提示：可以回看第 {hintParagraph + 1} 段，再試一次。</p>
+          <button
+            type="button"
+            onClick={() => jumpToParagraph(hintParagraph, true)}
+            className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-amber-700 underline decoration-amber-400 underline-offset-2 hover:text-amber-900"
+          >
+            前往第 {hintParagraph + 1} 段
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   // Extract chat content to reuse in both mobile and desktop layouts
   const renderChatMessages = () => (
     <>
       {/* Intro message */}
-      <div className="flex gap-2.5 pt-1">
-        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
-          <span className="text-white text-[10px] font-bold">AI</span>
+      <div className="flex gap-3 pt-2">
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent flex items-center justify-center shadow-sm">
+          <span className="text-white text-[11px] font-bold">AI</span>
         </div>
         <div className="flex-1">
-          <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-4 py-3">
+          <p className="mb-1 text-[11px] font-bold tracking-wide text-accent">老師開場</p>
+          <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-4 py-3.5 shadow-sm">
             <p className={`text-lg text-accent-hover leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
               {processZhuyin(`你剛才讀完了《${story.title}》，做得很棒！讓我們來聊聊課文的內容吧。`)}
             </p>
@@ -664,38 +746,48 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         // Feedback message
         if (turn.role === 'feedback') {
           return (
-            <div key={i} className={`mx-10 rounded-xl px-3.5 py-2 text-sm border ${
+            <div key={i} className={`mx-1 rounded-2xl px-4 py-3 text-sm border ${
               turn.understood
-                ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                : 'bg-amber-50 border-amber-300 text-amber-800'
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                : 'bg-amber-50 border-amber-300 text-amber-900'
             }`}>
-              <span className="mr-1.5">{turn.understood ? '✓' : '💡'}</span>
-              {processZhuyin(turn.text)}
+              <div className="flex items-center gap-2">
+                <span className="text-base">{turn.understood ? '✓' : '💡'}</span>
+                <span className="text-xs font-bold uppercase tracking-wide">
+                  {turn.understood ? '理解到位' : '再想想看'}
+                </span>
+              </div>
+              <p className={`mt-1.5 leading-7 ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
+                {processZhuyin(turn.text)}
+              </p>
             </div>
           );
         }
 
         // AI or student message
         return (
-          <div key={i} className={`flex gap-2.5 ${turn.role === 'student' ? 'flex-row-reverse' : ''}`}>
+          <div key={i} className={`flex gap-3 ${turn.role === 'student' ? 'flex-row-reverse' : ''}`}>
             {turn.role === 'ai' ? (
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
-                <span className="text-white text-[10px] font-bold">AI</span>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent flex items-center justify-center shadow-sm">
+                <span className="text-white text-[11px] font-bold">AI</span>
               </div>
             ) : (
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shadow-sm">
                 <svg className="w-3.5 h-3.5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
             )}
-            <div className={`max-w-[85%] flex flex-col ${turn.role === 'student' ? 'items-end' : ''}`}>
+            <div className={`max-w-[88%] flex flex-col ${turn.role === 'student' ? 'items-end' : ''}`}>
+              <p className={`mb-1 text-[11px] font-bold tracking-wide ${turn.role === 'student' ? 'text-slate-500' : 'text-accent'}`}>
+                {turn.role === 'student' ? '我的回答' : '老師提問'}
+              </p>
               <div className={[
-                'rounded-2xl px-4 py-3',
+                'rounded-2xl px-4 py-3.5 shadow-sm',
                 turn.role === 'ai'
                   ? 'bg-accent-bg border border-accent-bg-subtle rounded-tl-sm text-accent-hover'
-                  : 'bg-accent rounded-tr-sm text-white',
+                  : 'bg-accent rounded-tr-sm text-white border border-accent-hover/20',
               ].join(' ')}>
                 <p className={`text-lg leading-[1.8] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>{processZhuyin(turn.text)}</p>
               </div>
@@ -703,7 +795,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 <button
                   type="button"
                   onClick={() => speakText(turn.text)}
-                  className="mt-1 inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 self-start"
+                  className={`mt-1 inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 ${turn.role === 'student' ? 'self-end' : 'self-start'}`}
                 >
                   <span>🔊</span>
                   <span>播放</span>
@@ -716,11 +808,11 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
       {/* Loading indicator */}
       {isLoading && (
-        <div className="flex gap-2.5">
-          <div className="flex-shrink-0 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
-            <span className="text-white text-[10px] font-bold">AI</span>
+        <div className="flex gap-3">
+          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent flex items-center justify-center shadow-sm">
+            <span className="text-white text-[11px] font-bold">AI</span>
           </div>
-          <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+          <div className="bg-accent-bg border border-accent-bg-subtle rounded-2xl rounded-tl-sm px-4 py-3.5 flex items-center gap-1.5 shadow-sm">
             <span className="w-1.5 h-1.5 bg-accent-light rounded-full animate-bounce [animation-delay:0ms]" />
             <span className="w-1.5 h-1.5 bg-accent-light rounded-full animate-bounce [animation-delay:150ms]" />
             <span className="w-1.5 h-1.5 bg-accent-light rounded-full animate-bounce [animation-delay:300ms]" />
@@ -730,7 +822,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
       {/* Error */}
       {error && (
-        <div className="bg-red-900/30 border border-red-700/40 rounded-xl px-3.5 py-2.5 text-sm text-red-600">
+        <div className="bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5 text-sm text-red-700">
           {error}
           <button
             onClick={handleRetry}
@@ -743,9 +835,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
       {/* Completion message */}
       {isSessionComplete && !isLoading && (
-        <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center">
-          <p className="text-emerald-800 font-bold text-sm">太棒了！你展現了很好的理解力！</p>
-          <p className="text-emerald-700 text-xs mt-1">你對課文的理解很好，繼續下一步吧！</p>
+        <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center shadow-sm">
+          <p className="text-emerald-900 font-bold text-base">太棒了！你展現了很好的理解力！</p>
+          <p className="text-emerald-700 text-sm mt-1">你對課文的理解很好，繼續下一步吧！</p>
         </div>
       )}
 
@@ -754,7 +846,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   );
 
   const renderInputArea = () => (
-    <div className="shrink-0 bg-white border-t border-gray-200 p-3">
+    <div className="shrink-0 bg-white border-t border-gray-200 p-3.5">
       {isSessionComplete ? (
         <div className="flex items-center justify-between gap-2">
           <button
@@ -782,7 +874,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         </div>
       ) : (
         <div className="space-y-2">
-          <div className="flex gap-2 items-end">
+          <div className="flex gap-2.5 items-end">
             <textarea
               ref={inputRef}
               value={inputText}
@@ -794,17 +886,19 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               onCompositionEnd={() => {
                 isComposingRef.current = false;
               }}
-              placeholder="輸入你的回答……（Enter 送出，Shift+Enter 換行）"
+              placeholder="分享你的想法吧（Enter 送出，Shift+Enter 換行）"
               rows={2}
               disabled={isLoading || isSessionComplete}
-              className="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none disabled:opacity-50"
+              className="flex-1 bg-white border border-gray-300 rounded-xl px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent resize-none disabled:opacity-50"
             />
             <button
               type="button"
               onClick={() => (isListening ? stopVoiceInput() : startVoiceInput())}
               disabled={isLoading || isSessionComplete || isVoicePreparing}
-              className={`flex-shrink-0 w-11 h-11 rounded-xl text-white flex items-center justify-center transition-all active:scale-95 disabled:bg-gray-300 disabled:text-gray-400 ${
-                isListening ? 'bg-rose-500 hover:bg-rose-400' : 'bg-emerald-600 hover:bg-emerald-500'
+              className={`flex-shrink-0 h-11 w-11 rounded-xl border flex items-center justify-center transition-all active:scale-95 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 ${
+                isListening
+                  ? 'bg-rose-500 border-rose-500 text-white hover:bg-rose-400'
+                  : 'bg-white border-gray-300 text-emerald-700 hover:bg-emerald-50'
               }`}
               title={isListening ? '停止語音輸入' : '啟動語音輸入'}
             >
@@ -816,16 +910,17 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             <button
               onClick={() => handleSubmit()}
               disabled={!inputText.trim() || isLoading || isSessionComplete}
-              className="flex-shrink-0 w-11 h-11 rounded-xl bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white flex items-center justify-center transition-all active:scale-95"
+              className="flex-shrink-0 h-11 min-w-[92px] rounded-xl bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white px-4 flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                   d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
+              <span className="text-sm font-bold">送出</span>
             </button>
           </div>
           <div className="flex gap-2 items-center justify-between text-xs">
-            <span className={isListening ? 'text-emerald-600' : 'text-gray-500'}>
+            <span className={isListening ? 'text-emerald-700 font-medium' : 'text-gray-500'}>
               {isVoicePreparing ? '麥克風啟動中…' : isListening ? '語音輸入中，完成後請按送出。' : '可直接鍵盤輸入，或按麥克風開始語音輸入。'}
             </span>
           </div>
@@ -928,8 +1023,81 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       {isMobile ? (
         /* MOBILE: Tab-based layout — prominent centered pill tabs */
         <>
-          {renderProminentTabBar(true)}
-
+          {/* Tab bar */}
+          <div className="flex bg-white border-b border-gray-200 shrink-0">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'story'}
+              onClick={() => {
+                setActiveTab('story');
+                requestAnimationFrame(() => {
+                  if (storyPanelRef.current) {
+                    storyPanelRef.current.scrollTop = storyScrollRef.current;
+                  }
+                });
+              }}
+              className={`flex-1 py-2.5 text-xs font-bold transition-colors ${
+                activeTab === 'story'
+                  ? 'text-accent border-b-2 border-accent'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              課文
+              {hintParagraph != null && activeTab === 'chat' && (
+                <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-amber-500 align-middle" />
+              )}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'chat'}
+              onClick={() => {
+                if (storyPanelRef.current) {
+                  storyScrollRef.current = storyPanelRef.current.scrollTop;
+                }
+                setActiveTab('chat');
+              }}
+              className={`flex-1 py-2.5 text-xs font-bold transition-colors ${
+                activeTab === 'chat'
+                  ? 'text-accent border-b-2 border-accent'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              AI 對話
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'structure'}
+              onClick={() => setActiveTab('structure')}
+              className={`flex-1 py-2.5 text-xs font-bold transition-colors ${
+                activeTab === 'structure'
+                  ? 'text-accent border-b-2 border-accent'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              重點表
+            </button>
+            {story.multipleChoice && story.multipleChoice.length > 0 && (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'mcq'}
+                onClick={() => setActiveTab('mcq')}
+                className={`flex-1 py-2.5 text-xs font-bold transition-colors ${
+                  activeTab === 'mcq'
+                    ? 'text-accent border-b-2 border-accent'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                選擇題
+              </button>
+            )}
+            <div className="flex items-center px-2">
+              <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+            </div>
+          </div>
           {activeTab === 'story' ? (
             /* Story panel - full height */
             <div className="flex-1 flex flex-col bg-amber-50 min-h-0">
@@ -1001,13 +1169,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 <span className="text-[10px] text-gray-600">
                   {understoodCount} / {requiredCount} 理解
                 </span>
-                <button onClick={handleFinish} className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
+                <button onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })} className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
                   跳過
                 </button>
               </div>
 
               {/* Chat messages */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50">
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-gray-50">
                 {renderChatMessages()}
               </div>
 
@@ -1017,74 +1185,18 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           )}
         </>
       ) : (
-        /* DESKTOP: dual-panel for AI chat; full-width for structure table / MCQ */
+        /* DESKTOP: Current dual-panel layout */
         <>
-          {/* Prominent centered tab bar — always visible on desktop for structure/mcq,
-              and as an overlay tab bar in right panel for chat view */}
-          {(activeTab === 'structure' || activeTab === 'mcq') && (
-            <div className="absolute top-0 left-0 right-0 z-10">
-              {renderProminentTabBar(false)}
-            </div>
-          )}
-
-          {activeTab === 'structure' ? (
-            /* FULL-WIDTH: 文章重點表 */
-            <div className="flex-1 flex flex-col min-h-0 pt-12">
-              <div className="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 custom-scrollbar">
-                <div className="max-w-5xl mx-auto">
-                  <StoryStructureTable storyId={story.id} />
-                  {tabCompletion.structureVisited && (
-                    <div className="mt-6 text-center">
-                      <button
-                        onClick={handleStructureRedo}
-                        className="text-xs text-gray-400 hover:text-gray-600 underline"
-                      >
-                        重新練習
-                      </button>
-                    </div>
-                  )}
-                </div>
+          {/* LEFT: Story text panel */}
+          <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
+            {/* Tab bar */}
+            <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
+              <div className="h-full px-4 flex items-center bg-amber-50 border-x border-gray-200 border-t-2 border-t-accent text-xs text-gray-800 gap-2">
+                {story.filename}
               </div>
+              <div className="flex-1" />
+              <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
             </div>
-          ) : activeTab === 'mcq' && hasMcq ? (
-            /* FULL-WIDTH: 選擇題 */
-            <div className="flex-1 flex flex-col min-h-0 pt-12">
-              <div className="flex-1 overflow-y-auto bg-gray-50 custom-scrollbar">
-                <div className="max-w-3xl mx-auto py-6 px-4 lg:px-0">
-                  {tabCompletion.mcqDone ? (
-                    <div className="flex flex-col items-center justify-center p-8 gap-4">
-                      <div className="text-4xl">✓</div>
-                      <p className="text-emerald-700 font-semibold text-sm">選擇題已完成</p>
-                      <button
-                        onClick={handleMcqRedo}
-                        className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm hover:bg-gray-200 transition-colors"
-                      >
-                        重新練習
-                      </button>
-                    </div>
-                  ) : (
-                    <MultipleChoiceExercise
-                      questions={story.multipleChoice!}
-                      onComplete={handleMcqComplete}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* DUAL-PANE: story left + AI chat right */
-            <>
-              {/* LEFT: Story text panel */}
-              <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
-                {/* Tab bar — story filename header */}
-                <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-                  <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-                    {story.filename}
-                  </div>
-                  <div className="flex-1" />
-                  <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
-                </div>
-
                 {/* Story content — all paragraphs visible for reference */}
                 <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
                   <div className="max-w-3xl mx-auto space-y-20">
@@ -1118,63 +1230,80 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 onTouchStart={onDividerTouchStart}
                 className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
               />
-
-              {/* RIGHT: Chat panel */}
-              <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
-                {/* Prominent pill tab bar inside right panel (#844) */}
-                <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-1 px-3 py-2">
-                  <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
-                    <button
-                      onClick={() => handleTabChange('chat')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold bg-white text-accent shadow-sm transition-all"
-                    >
-                      AI 對話
-                      {tabCompletion.chatDone && (
-                        <span className="text-emerald-500 text-xs leading-none">✓</span>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => handleTabChange('structure')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
-                    >
-                      重點表
-                      {tabCompletion.structureVisited && (
-                        <span className="text-emerald-500 text-xs leading-none">✓</span>
-                      )}
-                    </button>
-                    {hasMcq && (
-                      <button
-                        onClick={() => handleTabChange('mcq')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
-                      >
-                        選擇題
-                        {tabCompletion.mcqDone && (
-                          <span className="text-emerald-500 text-xs leading-none">✓</span>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                  <div className="ml-1 flex items-center gap-2">
-                    <span className="text-[10px] text-gray-500">{understoodCount}/{requiredCount}</span>
-                    <button
-                      onClick={handleFinish}
-                      className="text-[10px] text-gray-500 hover:text-gray-400 transition-colors"
-                    >
-                      跳過
-                    </button>
-                  </div>
-                </div>
-
+          {/* RIGHT: Chat / 文章重點表 / 選擇題 panel */}
+          <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
+            {/* Panel tab bar */}
+            <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center">
+              <button
+                onClick={() => setActiveTab('chat')}
+                className={`px-3 h-full text-[11px] font-bold border-b-2 transition-colors ${
+                  activeTab === 'chat'
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-gray-400 hover:text-gray-700'
+                }`}
+              >
+                AI 對話
+              </button>
+              <button
+                onClick={() => setActiveTab('structure')}
+                className={`px-3 h-full text-[11px] font-bold border-b-2 transition-colors ${
+                  activeTab === 'structure'
+                    ? 'border-accent text-accent'
+                    : 'border-transparent text-gray-400 hover:text-gray-700'
+                }`}
+              >
+                文章重點表
+              </button>
+              {story.multipleChoice && story.multipleChoice.length > 0 && (
+                <button
+                  onClick={() => setActiveTab('mcq')}
+                  className={`px-3 h-full text-[11px] font-bold border-b-2 transition-colors ${
+                    activeTab === 'mcq'
+                      ? 'border-accent text-accent'
+                      : 'border-transparent text-gray-400 hover:text-gray-700'
+                  }`}
+                >
+                  選擇題
+                </button>
+              )}
+              <div className="flex-1" />
+              {activeTab === 'chat' && (
+                <>
+                  <span className="text-[10px] text-gray-600 pr-2">
+                    {understoodCount} / {requiredCount} 理解
+                  </span>
+                  <button
+                    onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
+                    className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors pr-3"
+                  >
+                    跳過
+                  </button>
+                </>
+              )}
+            </div>
+            {activeTab === 'structure' ? (
+              <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                <StoryStructureTable storyId={story.id} />
+              </div>
+            ) : activeTab === 'mcq' && story.multipleChoice && story.multipleChoice.length > 0 ? (
+              <div className="flex-1 overflow-y-auto bg-gray-50">
+                <MultipleChoiceExercise
+                  questions={story.multipleChoice}
+                  onComplete={() => setActiveTab('chat')}
+                />
+              </div>
+            ) : (
+              <>
                 {/* Chat messages */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50">
+                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-gray-50">
                   {renderChatMessages()}
                 </div>
 
                 {/* Input area */}
                 {renderInputArea()}
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </>
       )}
 
