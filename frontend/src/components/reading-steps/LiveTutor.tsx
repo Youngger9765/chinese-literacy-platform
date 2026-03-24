@@ -742,7 +742,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       // Update moving cursor: map interim transcript progress onto original target chars
       const targetText = story.content[currentLineIndexRef.current] || '';
       const normProgress = calcSpeakingProgress(fullTranscript, targetText);
-      setSpeakingProgress(normalizedToOrigIdx(targetText, normProgress));
+      const origIdx = normalizedToOrigIdx(targetText, normProgress);
+      console.log('[STT] onresult | transcript:', fullTranscript.slice(-20), '| normProg:', normProgress, '| origIdx:', origIdx, '| targetLen:', targetText.length);
+      setSpeakingProgress(origIdx);
 
       // ── 分期付款: per-sentence local eval on isFinal events ────────────────
       // Each isFinal chunk is mapped to the next un-evaluated sentence target.
@@ -770,7 +772,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     };
 
     recognition.onerror = (event: any) => {
-      console.warn('SpeechRecognition error:', event.error);
+      console.warn('[STT] onerror:', event.error, '| sessionActive:', isSessionActiveRef.current);
       if (event.error === 'not-allowed') {
         setMicError('請允許麥克風權限後再試一次。');
         isSessionActiveRef.current = false;
@@ -786,6 +788,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     };
 
     recognition.onend = () => {
+      console.log('[STT] onend | sessionActive:', isSessionActiveRef.current, '| accumulated:', accumulatedTranscriptRef.current.slice(-20));
       if (isSessionActiveRef.current) {
         // Browser/API timed out — seamlessly reconnect.
         // Chrome sometimes throws InvalidStateError if start() is called
@@ -794,15 +797,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         accumulatedTranscriptRef.current = currentTranscriptRef.current;
         setTimeout(() => {
           if (!isSessionActiveRef.current) return; // user stopped during the delay
-          if (import.meta.env.DEV) {
-            console.log('[SpeechRecognition] Auto-reconnecting…');
-          }
+          console.log('[STT] reconnecting… accumulated now:', accumulatedTranscriptRef.current.slice(-20));
           try {
             recognition.start();
+            console.log('[STT] reconnect start() OK');
           } catch (err) {
-            if (import.meta.env.DEV) {
-              console.warn('[SpeechRecognition] Reconnect failed:', err);
-            }
+            console.error('[STT] reconnect start() FAILED — cursor will freeze!', err);
           }
         }, 150);
       } else {
