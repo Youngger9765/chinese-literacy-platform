@@ -35,6 +35,7 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
         {tokens.map((token, idx) => {
           switch (token.type) {
             case 'correct':
+            case 'forgiven':
               return (
                 <span key={idx} className="text-gray-900">
                   {token.char}
@@ -58,18 +59,6 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
                       {`應該是「${token.expected}」`}
                     </span>
                   )}
-                </span>
-              );
-            case 'forgiven':
-              return (
-                <span
-                  key={idx}
-                  className="bg-sky-100 text-sky-900 border-b-2 border-dashed border-sky-500 rounded-sm px-0.5 mx-px cursor-help"
-                  title={token.reason ? `通融：${token.reason}` : '通融判定'}
-                  aria-label={`通融：目標字「${token.char}」${token.spoken ? `，朗讀為「${token.spoken}」` : ''}${token.reason ? `，原因：${token.reason}` : ''}`}
-                  role="mark"
-                >
-                  {token.char}
                 </span>
               );
             case 'missing':

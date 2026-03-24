@@ -150,15 +150,8 @@ function renderLineWithDiff(
     if (!token) {
       return <span key={i}>{ch}</span>;
     }
-    if (token.type === 'correct') {
+    if (token.type === 'correct' || token.type === 'forgiven') {
       return <span key={i} className="text-green-600">{ch}</span>;
-    }
-    if (token.type === 'forgiven') {
-      return (
-        <span key={i} className="inline-flex flex-col items-center border-b-2 border-dotted border-sky-400">
-          {ch}
-        </span>
-      );
     }
     if (token.type === 'unread') {
       return <span key={i} className="text-gray-300">{ch}</span>;

@@ -477,6 +477,50 @@ export function isHomophone(a: string, b: string): boolean {
 }
 
 /**
+ * Near-sound pairs: initials that are commonly confused in STT.
+ * zh↔z, sh↔s, ch↔c, n↔l, r↔l, an↔ang, en↔eng, in↔ing
+ */
+const NEAR_SOUND_PAIRS: [string, string][] = [
+  ['zh', 'z'], ['sh', 's'], ['ch', 'c'],
+  ['n', 'l'], ['r', 'l'],
+  ['an', 'ang'], ['en', 'eng'], ['in', 'ing'],
+];
+
+/** Returns true if two pinyins are near-sound (e.g. zh↔z, n↔l). */
+function pinyinNearSound(pa: string, pb: string): boolean {
+  for (const [a, b] of NEAR_SOUND_PAIRS) {
+    // Check initial substitution: replace one initial with the other
+    if (pa.replace(a, b) === pb || pa.replace(b, a) === pb) return true;
+    if (pb.replace(a, b) === pa || pb.replace(b, a) === pa) return true;
+  }
+  return false;
+}
+
+/** Returns true if two characters have near-sound pinyins (forgiven, not wrong). */
+export function isNearSound(a: string, b: string): boolean {
+  if (a === b) return false; // exact match is not "near sound"
+  const pa = getPinyin(a);
+  const pb = getPinyin(b);
+  if (pa === null || pb === null) return false;
+  if (pa === pb) return false; // same pinyin = homophone, not near-sound
+  return pinyinNearSound(pa, pb);
+}
+
+/**
+ * STT-equivalent characters: substitutions that are NOT student errors.
+ * 的/得/地 are commonly confused by STT, not by the student.
+ */
+const STT_EQUIVALENT_GROUPS = [
+  new Set(['的', '得', '地']),
+];
+
+/** Returns true if two characters are STT-equivalent (should be treated as correct, not forgiven). */
+export function isSttEquivalent(a: string, b: string): boolean {
+  if (a === b) return true;
+  return STT_EQUIVALENT_GROUPS.some(group => group.has(a) && group.has(b));
+}
+
+/**
  * Given raw STT text and the known target text, correct homophone
  * substitutions on a character-by-character basis using Levenshtein
  * alignment (edit-distance with backtracking).

@@ -3,9 +3,12 @@
  * Used by LiveTutor and FullReading to show exactly which characters
  * the student read correctly, incorrectly, missed, or added.
  */
-import { isHomophone } from './pinyin';
+import { isHomophone, isNearSound, isSttEquivalent } from './pinyin';
 
-export type DiffType = 'correct' | 'wrong' | 'missing' | 'extra' | 'unread';
+export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra' | 'unread';
+
+/** Filler words commonly inserted by STT — not student errors. */
+const FILLER_CHARS = new Set(['嗯', '啊', '呃', '喔', '欸']);
 
 export interface DiffToken {
   char: string;
@@ -115,10 +118,23 @@ export function diffCharacters(
   // dp[i][j] = length of LCS of s[0..i-1] and t[0..j-1]
   const dp: number[][] = Array.from({ length: sLen + 1 }, () => Array(tLen + 1).fill(0));
 
+  /** Check if two chars match for LCS purposes (exact, STT-equivalent, homophone, or near-sound). */
   const isMatch = (a: string, b: string): boolean => {
     if (a === b) return true;
-    if (useHomophone) return isHomophone(a, b);
+    if (useHomophone) {
+      if (isSttEquivalent(a, b)) return true;
+      if (isHomophone(a, b)) return true;
+      if (isNearSound(a, b)) return true;
+    }
     return false;
+  };
+
+  /** Classify the match type between two matched characters. */
+  const classifyMatch = (a: string, b: string): 'correct' | 'forgiven' => {
+    if (a === b) return 'correct';
+    if (isSttEquivalent(a, b)) return 'correct'; // 的/得/地 = correct, not student error
+    // Homophone or near-sound = forgiven (STT chose wrong char, student pronounced correctly)
+    return 'forgiven';
   };
 
   for (let i = 1; i <= sLen; i++) {
@@ -138,8 +154,8 @@ export function diffCharacters(
 
   while (i > 0 || j > 0) {
     if (i > 0 && j > 0 && isMatch(s[i - 1], t[j - 1])) {
-      // Match — correct (use the target char for display consistency)
-      tokens.push({ char: t[j - 1], type: 'correct' });
+      // Match — correct or forgiven (use the target char for display consistency)
+      tokens.push({ char: t[j - 1], type: classifyMatch(s[i - 1], t[j - 1]) });
       i--;
       j--;
     } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
@@ -155,34 +171,42 @@ export function diffCharacters(
 
   tokens.reverse();
 
-  // Step 3: Post-process — merge adjacent missing+extra into wrong (substitution)
-  // This handles the case where a student said one char instead of another
+  // Step 3: Post-process — merge adjacent missing+extra into wrong/forgiven (substitution)
+  // Also filter out filler characters from 'extra' tokens
   const merged: DiffToken[] = [];
   let idx = 0;
   while (idx < tokens.length) {
+    // Filter filler chars (嗯啊呃喔欸) — these are STT noise, not student errors
+    if (tokens[idx].type === 'extra' && FILLER_CHARS.has(tokens[idx].char)) {
+      idx++;
+      continue;
+    }
     if (
       idx + 1 < tokens.length &&
       tokens[idx].type === 'extra' &&
       tokens[idx + 1].type === 'missing'
     ) {
-      // extra followed by missing = substitution (wrong)
-      merged.push({
-        char: tokens[idx].char,
-        type: 'wrong',
-        expected: tokens[idx + 1].char,
-      });
+      const spokenChar = tokens[idx].char;
+      const targetChar = tokens[idx + 1].char;
+      // Check if substitution is forgivable (homophone/near-sound/STT-equivalent)
+      if (useHomophone && isMatch(spokenChar, targetChar)) {
+        merged.push({ char: targetChar, type: classifyMatch(spokenChar, targetChar) });
+      } else {
+        merged.push({ char: spokenChar, type: 'wrong', expected: targetChar });
+      }
       idx += 2;
     } else if (
       idx + 1 < tokens.length &&
       tokens[idx].type === 'missing' &&
       tokens[idx + 1].type === 'extra'
     ) {
-      // missing followed by extra = substitution (wrong)
-      merged.push({
-        char: tokens[idx + 1].char,
-        type: 'wrong',
-        expected: tokens[idx].char,
-      });
+      const targetChar = tokens[idx].char;
+      const spokenChar = tokens[idx + 1].char;
+      if (useHomophone && isMatch(spokenChar, targetChar)) {
+        merged.push({ char: targetChar, type: classifyMatch(spokenChar, targetChar) });
+      } else {
+        merged.push({ char: spokenChar, type: 'wrong', expected: targetChar });
+      }
       idx += 2;
     } else {
       merged.push(tokens[idx]);
@@ -190,8 +214,9 @@ export function diffCharacters(
     }
   }
 
-  // Step 4: Compute stats
+  // Step 4: Compute stats (forgiven counts as correct for matchRate)
   let correctCount = 0;
+  let forgivenCount = 0;
   let wrongCount = 0;
   let missingCount = 0;
   let extraCount = 0;
@@ -199,13 +224,15 @@ export function diffCharacters(
   for (const token of merged) {
     switch (token.type) {
       case 'correct': correctCount++; break;
+      case 'forgiven': forgivenCount++; break;
       case 'wrong': wrongCount++; break;
       case 'missing': missingCount++; break;
       case 'extra': extraCount++; break;
     }
   }
 
-  const matchRate = tLen > 0 ? correctCount / tLen : 0;
+  // Forgiven chars count toward match rate (student pronounced correctly, STT picked wrong char)
+  const matchRate = tLen > 0 ? (correctCount + forgivenCount) / tLen : 0;
 
   return {
     tokens: merged,
