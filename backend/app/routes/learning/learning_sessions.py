@@ -11,7 +11,9 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.school import ClassroomStudent
 from ...models.session import CharacterError, LearningSession
+from ...models.text import Text
 from ...models.user import User
+from ...services.lesson_loader import get_lesson_by_id
 from ...schemas.session import (
     SessionCreateRequest,
     SessionDetailResponse,
@@ -40,9 +42,21 @@ def create_learning_session(
     )
     classroom_id = enrollment.classroom_id if enrollment else None
 
+    # Resolve text_id from story_slug (supports numeric "13" or L-prefixed "L06")
+    text_id = None
+    if payload.story_slug:
+        try:
+            ln = int(payload.story_slug.lstrip("Ll"))
+            text_record = db.query(Text).filter(Text.lesson_number == ln).first()
+            if text_record:
+                text_id = text_record.id
+        except (ValueError, TypeError):
+            pass
+
     session = LearningSession(
         student_id=current_user.id,
         story_slug=payload.story_slug,
+        text_id=text_id,
         status="in_progress",
         current_step=1,
         classroom_id=classroom_id,
@@ -87,9 +101,17 @@ def list_my_sessions(
     summaries = []
     for s in items:
         summary = SessionSummaryResponse.model_validate(s)
-        # Resolve human-readable title from the linked Text record (if available)
+        # Resolve human-readable title: prefer linked Text record, else look up YAML lesson
         if s.text is not None:
             summary.story_title = s.text.title
+        elif s.story_slug:
+            normalized = s.story_slug.lstrip("Ll")
+            try:
+                lesson = get_lesson_by_id(int(normalized))
+                if lesson:
+                    summary.story_title = lesson["title"]
+            except (ValueError, TypeError):
+                pass
         summaries.append(summary)
     return SessionListResponse(items=summaries, total=total)
 
