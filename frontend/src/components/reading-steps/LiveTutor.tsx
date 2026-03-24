@@ -13,6 +13,12 @@ import RecordingButton from '../recording/RecordingButton';
 import ParagraphProgress, { ParagraphStatus } from './ParagraphProgress';
 import { evaluateReading } from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
+import {
+  localEvaluateParagraph,
+  splitIntoSentences,
+  getReadingPassThreshold,
+  type LocalEvalResult,
+} from '../../utils/localEval';
 
 /* ------------------------------------------------------------------ */
 /*  Canned response pools — randomly selected to avoid repetition     */
@@ -157,10 +163,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [zhuyinReady, setZhuyinReady] = useState(false);
   const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
   const [isTtsPaused, setIsTtsPaused] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false); // legacy — kept for status bar compat
+  const [isAwaitingGemini, setIsAwaitingGemini] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
   const [showRecorder, setShowRecorder] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+
+  // Hybrid eval: per-sentence (分期付款) tracking
+  const geminiAbortRef = useRef<AbortController | null>(null);
+  const sentenceTargetsRef = useRef<string[]>([]);
+  const sentenceResultsRef = useRef<Array<LocalEvalResult | null>>([]);
+  const nextSentenceIdxRef = useRef(0);
+  const lastFinalResultIdxRef = useRef(-1);
+  const streakRef = useRef(0); // mirrors streak for use in STT callbacks
 
   // Progressive unlock state — track which paragraphs have passed evaluation.
   const [completedParagraphs, setCompletedParagraphs] = useState<Set<number>>(
@@ -299,6 +314,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     e.preventDefault();
   };
 
+  /* ---- keep streakRef in sync for use in STT callbacks ---- */
+  useEffect(() => { streakRef.current = streak; }, [streak]);
+
+  /* ---- init sentence targets when paragraph changes ---- */
+  useEffect(() => {
+    const targets = splitIntoSentences(story.content[currentLineIndex] || '');
+    sentenceTargetsRef.current = targets;
+    sentenceResultsRef.current = new Array(targets.length).fill(null);
+    nextSentenceIdxRef.current = 0;
+    lastFinalResultIdxRef.current = -1;
+    setLastDiffTokens(null);
+  }, [currentLineIndex, story.content]);
+
   /* ---- cleanup on unmount ---- */
   useEffect(() => {
     return () => {
@@ -307,6 +335,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         try { recognitionRef.current.abort(); } catch (_) {}
       }
       window.speechSynthesis?.cancel();
+      geminiAbortRef.current?.abort();
     };
   }, []);
 
@@ -314,140 +343,18 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /*  Core: evaluate the student's reading and respond                */
   /* ================================================================ */
 
-  const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
-    const targetText = story.content[lineIdx] || '';
-    const cleaned = cleanChineseText(rawTranscript);
-
-    if (!cleaned) return; // nothing to evaluate
-
-    setIsAnalyzing(true);
-
-    let displayInput = cleaned;
-    let tier: 1 | 2 | 3 = 3;
-    let feedback = '';
-    let matchRate = 0;
-    let rawMatchRate = 0;
-    let cpm = 0;
-    let diffTokens: DiffToken[] = [];
-    let evaluationMethod: 'ai' | 'fallback' = 'ai';
-    let usedFallback = false;
-
-    try {
-      const response = await evaluateReading(cleaned, targetText, durationMs, token ?? undefined);
-      tier = response.tier;
-      feedback = response.feedback;
-      rawMatchRate = response.match_rate;
-      matchRate = response.adjusted_match_rate;
-      cpm = Math.round(response.cpm ?? 0);
-      diffTokens = response.diff_tokens;
-      evaluationMethod = response.evaluation_method;
-    } catch (error) {
-      usedFallback = true;
-      evaluationMethod = 'fallback';
-
-      // Fallback path keeps the previous local algorithm for resiliency.
-      const targetForAlignment = normalizeForComparison(targetText);
-      const corrected = correctHomophones(cleaned, targetForAlignment);
-      const diffResult = diffCharacters(corrected, targetText, { useHomophone: true });
-      rawMatchRate = diffResult.matchRate;
-      matchRate = diffResult.matchRate;
-      diffTokens = diffResult.tokens;
-      displayInput = corrected;
-
-      if (matchRate >= READING_EXCELLENT) tier = 1;
-      else if (matchRate >= READING_PASS) tier = 2;
-      else tier = 3;
-
-      const fallbackStreak = tier <= 2 ? streak + 1 : 0;
-      if (tier <= 2 && fallbackStreak >= 3 && fallbackStreak < STREAK_MESSAGES.length && STREAK_MESSAGES[fallbackStreak]) {
-        feedback = STREAK_MESSAGES[fallbackStreak];
-      } else if (tier === 1) {
-        feedback = pick(TIER1_POOL);
-      } else if (tier === 2) {
-        feedback = pick(TIER2_POOL);
-      } else {
-        feedback = pick(TIER3_POOL);
-      }
-      setStreak(fallbackStreak);
-
-      const durationSec = Math.max(durationMs / 1000, 0.5);
-      cpm = Math.round((diffResult.correctCount / durationSec) * 60);
-
-      console.warn('[Evaluation] backend evaluateReading failed, fallback to local diff:', error);
-    } finally {
-      setIsAnalyzing(false);
-    }
-
+  /* ---- Helper: advance or finish after a successful paragraph ---- */
+  const advanceParagraph = useCallback((lineIdx: number, allLineResults: LineResult[]) => {
     const isLastLine = lineIdx >= story.content.length - 1;
-    let shouldAdvance = tier <= 2 && !isLastLine;
-    let shouldFinish = tier <= 2 && isLastLine;
-    let effectiveFeedback = feedback || (shouldFinish ? LAST_LINE_MESSAGE : '');
-
-    // Tier 3 retry cap: auto-pass after 2 retries (the 3rd failed attempt).
-    if (tier === 3 && retryCount >= 2) {
-      effectiveFeedback = '你已經很努力了！我們先繼續下一段，之後再回來練習。';
-      shouldAdvance = !isLastLine;
-      shouldFinish = isLastLine;
-      setRetryCount(0);
-    } else if (tier === 3) {
-      setRetryCount(prev => prev + 1);
-    } else {
-      setRetryCount(0);
-    }
-
-    if (!usedFallback) {
-      setStreak(prev => tier <= 2 ? prev + 1 : 0)
-      if (!effectiveFeedback) {
-        if (tier === 1) effectiveFeedback = pick(TIER1_POOL);
-        else if (tier === 2) effectiveFeedback = pick(TIER2_POOL);
-        else effectiveFeedback = pick(TIER3_POOL);
-      }
-    }
-
-    // Step 6: Record line result
-    const result: LineResult = { lineIndex: lineIdx, matchRate, cpm, durationMs, transcript: cleaned, diffTokens };
-    setLastDiffTokens(diffTokens);
-    setLineResults(prev => [...prev, result]);
-
-    // Step 7: Debug logging (dev only)
-    if (import.meta.env.DEV) {
-      console.group('%c[Evaluation]', 'color: cyan; font-weight: bold');
-      console.log('Line:', lineIdx, '/', story.content.length - 1);
-      console.log('Target:', targetText);
-      console.log('STT:', rawStt);
-      console.log('Method:', evaluationMethod);
-      console.log('Raw match rate:', (rawMatchRate * 100).toFixed(1) + '%');
-      console.log('Adjusted match rate:', (matchRate * 100).toFixed(1) + '%', '→ Tier', tier);
-      console.log('CPM:', cpm);
-      console.log('Duration:', (durationMs / 1000).toFixed(1) + 's');
-      console.log('Advance:', shouldAdvance, '| Finish:', shouldFinish);
-      console.log('Feedback:', effectiveFeedback);
-      console.groupEnd();
-    }
-
-    // Step 8: Commit messages
-    const newMsgs: LiveMessage[] = [];
-    newMsgs.push({ id: Date.now().toString(), role: 'user', text: displayInput, type: 'transcription' });
-    newMsgs.push({ id: (Date.now() + 1).toString(), role: 'model', text: effectiveFeedback, type: 'feedback' });
-    setMessages(prev => [...prev, ...newMsgs]);
-    setStreamingUserInput('');
-
-    // Step 9: Advance, finish, or stay
-    if (shouldAdvance && !isAdvancingRef.current) {
+    if (!isLastLine) {
+      if (isAdvancingRef.current) return;
       isAdvancingRef.current = true;
       setIsAdvancing(true);
-      stopSession(); // stop mic so student sees [系統朗讀][開始朗讀] for the next paragraph
+      stopSession();
 
-      // Mark this paragraph as completed and notify parent
       const nextIdx = lineIdx + 1;
-      setCompletedParagraphs(prev => {
-        const updated = new Set(prev);
-        updated.add(lineIdx);
-        return updated;
-      });
+      setCompletedParagraphs(prev => { const s = new Set(prev); s.add(lineIdx); return s; });
       onParagraphComplete?.(lineIdx);
-
-      // Celebration animation for unlocking next paragraph
       setCelebratingIndex(nextIdx);
       setTimeout(() => setCelebratingIndex(null), 2000);
 
@@ -457,37 +364,184 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         isAdvancingRef.current = false;
         setIsAdvancing(false);
       }, 1500);
-    } else if (shouldFinish) {
+    } else {
+      // Last paragraph — finish
       stopSession();
-      // Mark final paragraph as completed
-      setCompletedParagraphs(prev => {
-        const updated = new Set(prev);
-        updated.add(lineIdx);
-        return updated;
-      });
+      setCompletedParagraphs(prev => { const s = new Set(prev); s.add(lineIdx); return s; });
       onParagraphComplete?.(lineIdx);
 
       setTimeout(() => {
-        const allResults = [...lineResults, result];
-        const avgMatchRate = allResults.reduce((s, r) => s + r.matchRate, 0) / allResults.length;
-        const totalCorrectChars = allResults.reduce(
+        const avgMatchRate = allLineResults.reduce((s, r) => s + r.matchRate, 0) / allLineResults.length;
+        const totalCorrectChars = allLineResults.reduce(
           (s, r) => s + r.diffTokens.filter(t => t.type === 'correct' || t.type === 'forgiven').length, 0
         );
-        const totalDurationSec = allResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
+        const totalDurationSec = allLineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
         const overallCpm = totalDurationSec > 0 ? Math.round((totalCorrectChars / totalDurationSec) * 60) : 0;
         onFinish({
           storyId: story.id, accuracy: Math.round(avgMatchRate * 100), fluency: overallCpm,
-          cpm: overallCpm, mispronouncedWords: extractPracticeChars(allResults, story.content),
-          transcription: allResults.map(r => r.transcript).join(' '), timestamp: Date.now(),
-          lineBreakdown: allResults.map(r => ({
+          cpm: overallCpm, mispronouncedWords: extractPracticeChars(allLineResults, story.content),
+          transcription: allLineResults.map(r => r.transcript).join(' '), timestamp: Date.now(),
+          lineBreakdown: allLineResults.map(r => ({
             lineIndex: r.lineIndex, matchRate: r.matchRate, cpm: r.cpm,
             transcript: r.transcript, diffTokens: r.diffTokens,
           })),
         });
       }, 2000);
     }
-    // If tier 3 (retry), stay on same line — mic keeps listening
-  }, [story, streak, lineResults, onFinish, onParagraphComplete, retryCount, token]);
+  }, [story, onFinish, onParagraphComplete]);
+
+  /* ---- Hybrid evaluation: local first, Gemini only on FAIL ---- */
+  const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
+    const targetText = story.content[lineIdx] || '';
+    const cleaned = cleanChineseText(rawTranscript);
+    if (!cleaned) return;
+
+    // ── Phase 1: local eval (instant, <1ms) ─────────────────────────────────
+    // Prefer accumulated per-sentence results from isFinal events.
+    // Fall back to whole-paragraph local eval if no isFinal events captured.
+    const sentResults = sentenceResultsRef.current.filter(Boolean) as LocalEvalResult[];
+
+    let localTier: 1 | 2 | 3;
+    let localDiffTokens: DiffToken[];
+    let localFeedback: string;
+    let localMatchRate: number;
+    let localCpm: number;
+
+    if (sentResults.length > 0) {
+      // Compute overall from per-sentence results
+      const allDiff = sentResults.flatMap(r => r.diffTokens);
+      const correctAndForgiven = allDiff.filter(t => t.type === 'correct' || t.type === 'forgiven').length;
+      const totalTarget = normalizeForComparison(targetText).length || 1;
+      localMatchRate = correctAndForgiven / totalTarget;
+      const threshold = getReadingPassThreshold(totalTarget);
+      localTier = localMatchRate >= READING_EXCELLENT ? 1 : localMatchRate >= threshold ? 2 : 3;
+      localDiffTokens = allDiff;
+      localFeedback = sentResults[sentResults.length - 1].feedback;
+      localCpm = Math.round(sentResults.reduce((s, r) => s + r.cpm, 0) / sentResults.length);
+    } else {
+      // No isFinal events — whole-paragraph local eval
+      const localResult = localEvaluateParagraph(
+        cleaned, targetText, durationMs,
+        { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+        streak,
+      );
+      localTier = localResult.tier;
+      localDiffTokens = localResult.diffTokens;
+      localFeedback = localResult.feedback;
+      localMatchRate = localResult.matchRate;
+      localCpm = localResult.cpm;
+    }
+
+    // Show local diff immediately
+    setLastDiffTokens(localDiffTokens);
+
+    if (import.meta.env.DEV) {
+      console.group('%c[Evaluation] Hybrid', 'color: cyan; font-weight: bold');
+      console.log('Line:', lineIdx, '/', story.content.length - 1);
+      console.log('Target:', targetText, '| STT:', rawStt);
+      console.log('Local tier:', localTier, '| match:', (localMatchRate * 100).toFixed(1) + '%', '| cpm:', localCpm);
+      console.log('Sentence results:', sentResults.length, '/ total sentences:', sentenceTargetsRef.current.length);
+      console.groupEnd();
+    }
+
+    // ── Retry cap: auto-advance after 2 failed attempts ──────────────────────
+    if (localTier === 3 && retryCount >= 2) {
+      const capFeedback = '你已經很努力了！我們先繼續下一段，之後再回來練習。';
+      setMessages(prev => [...prev,
+        { id: Date.now().toString(), role: 'user', text: cleaned, type: 'transcription' },
+        { id: (Date.now() + 1).toString(), role: 'model', text: capFeedback, type: 'feedback' },
+      ]);
+      setStreamingUserInput('');
+      setRetryCount(0);
+      const capResult: LineResult = { lineIndex: lineIdx, matchRate: localMatchRate, cpm: localCpm, durationMs, transcript: cleaned, diffTokens: localDiffTokens };
+      const allResults = [...lineResults, capResult];
+      setLineResults(allResults);
+      advanceParagraph(lineIdx, allResults);
+      return;
+    }
+
+    // ── Phase 2: local PASS → advance immediately, no Gemini ─────────────────
+    if (localTier <= 2) {
+      const newStreak = streak + 1;
+      let effectiveFeedback = localFeedback;
+      if (newStreak >= 3 && newStreak < STREAK_MESSAGES.length && STREAK_MESSAGES[newStreak]) {
+        effectiveFeedback = STREAK_MESSAGES[newStreak];
+      } else if (!effectiveFeedback) {
+        effectiveFeedback = localTier === 1 ? pick(TIER1_POOL) : pick(TIER2_POOL);
+      }
+      setStreak(newStreak);
+      setRetryCount(0);
+      setMessages(prev => [...prev,
+        { id: Date.now().toString(), role: 'user', text: cleaned, type: 'transcription' },
+        { id: (Date.now() + 1).toString(), role: 'model', text: effectiveFeedback, type: 'feedback' },
+      ]);
+      setStreamingUserInput('');
+      const passResult: LineResult = { lineIndex: lineIdx, matchRate: localMatchRate, cpm: localCpm, durationMs, transcript: cleaned, diffTokens: localDiffTokens };
+      const allResults = [...lineResults, passResult];
+      setLineResults(allResults);
+      advanceParagraph(lineIdx, allResults);
+      return; // Gemini NOT called
+    }
+
+    // ── Phase 3: local FAIL → show local result, try Gemini upgrade ──────────
+    setRetryCount(prev => prev + 1);
+    const failFeedback = localFeedback || pick(TIER3_POOL);
+    setMessages(prev => [...prev,
+      { id: Date.now().toString(), role: 'user', text: cleaned, type: 'transcription' },
+      { id: (Date.now() + 1).toString(), role: 'model', text: failFeedback, type: 'feedback' },
+    ]);
+    setStreamingUserInput('');
+    const localResult: LineResult = { lineIndex: lineIdx, matchRate: localMatchRate, cpm: localCpm, durationMs, transcript: cleaned, diffTokens: localDiffTokens };
+    const allResultsWithLocal = [...lineResults, localResult];
+    setLineResults(allResultsWithLocal);
+
+    // Async Gemini upgrade (homophone rescue)
+    setIsAwaitingGemini(true);
+    setIsAnalyzing(true); // keep status bar in sync
+    geminiAbortRef.current?.abort();
+    geminiAbortRef.current = new AbortController();
+
+    const timeoutId = setTimeout(() => geminiAbortRef.current?.abort(), 5000);
+
+    evaluateReading(cleaned, targetText, durationMs, token ?? undefined, geminiAbortRef.current.signal)
+      .then(gemini => {
+        clearTimeout(timeoutId);
+        setIsAwaitingGemini(false);
+        setIsAnalyzing(false);
+        setLastDiffTokens(gemini.diff_tokens);
+
+        if (gemini.tier <= 2) {
+          // Gemini upgraded to PASS (homophone rescue)
+          const upgradeFeedback = gemini.feedback || '好消息，你過了！';
+          setMessages(prev => [...prev,
+            { id: Date.now().toString(), role: 'model', text: upgradeFeedback, type: 'feedback' },
+          ]);
+          setStreak(prev => prev + 1);
+          setRetryCount(0);
+          const geminiResult: LineResult = {
+            lineIndex: lineIdx,
+            matchRate: gemini.adjusted_match_rate,
+            cpm: Math.round(gemini.cpm ?? localCpm),
+            durationMs,
+            transcript: cleaned,
+            diffTokens: gemini.diff_tokens,
+          };
+          // Replace the local result we just added with the Gemini result
+          setLineResults(prev => [...prev.slice(0, -1), geminiResult]);
+          advanceParagraph(lineIdx, [...lineResults, geminiResult]);
+        }
+        // Gemini confirms FAIL: diff colors updated (setLastDiffTokens above), retry stays
+      })
+      .catch(err => {
+        clearTimeout(timeoutId);
+        setIsAwaitingGemini(false);
+        setIsAnalyzing(false);
+        if (err.name !== 'AbortError') {
+          console.warn('[LiveTutor] Gemini eval failed, local result stands:', err);
+        }
+        // Local result already displayed — no UX change
+      });
+  }, [story, streak, lineResults, onFinish, onParagraphComplete, retryCount, token, advanceParagraph]);
 
   // Sync refs so async callbacks (onend) always see latest values
   evaluateAndRespondRef.current = evaluateAndRespond;
@@ -554,6 +608,30 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       rawSttRef.current = fullTranscript;
       currentTranscriptRef.current = fullTranscript;
       setStreamingUserInput(cleanChineseText(fullTranscript));
+
+      // ── 分期付款: per-sentence local eval on isFinal events ────────────────
+      // Each isFinal chunk is mapped to the next un-evaluated sentence target.
+      // Result diffTokens are accumulated so the student sees progressive colors.
+      for (let i = lastFinalResultIdxRef.current + 1; i < event.results.length; i++) {
+        if (!event.results[i].isFinal) break; // non-final → stop (results are ordered)
+        lastFinalResultIdxRef.current = i;
+        const sentIdx = nextSentenceIdxRef.current;
+        const sentTargets = sentenceTargetsRef.current;
+        if (sentIdx >= sentTargets.length) continue; // extra speech after all sentences
+
+        const chunk = event.results[i][0].transcript;
+        const sentTarget = sentTargets[sentIdx];
+        const elapsed = Math.max(Date.now() - sentenceStartTimeRef.current, 500);
+        const localResult = localEvaluateParagraph(
+          chunk, sentTarget, elapsed,
+          { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+          streakRef.current,
+        );
+        sentenceResultsRef.current[sentIdx] = localResult;
+        nextSentenceIdxRef.current = sentIdx + 1;
+        // Accumulate tokens for progressive display in the right panel
+        setLastDiffTokens(prev => prev ? [...prev, ...localResult.diffTokens] : localResult.diffTokens);
+      }
     };
 
     recognition.onerror = (event: any) => {
@@ -832,7 +910,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           </div>
           <div className="flex gap-3">
             <span className={isSessionActive ? 'text-green-500 font-bold' : isPreparing ? 'text-yellow-500 font-bold' : 'text-gray-300'}>
-              {isAnalyzing ? '• ANALYZING' : isSessionActive ? '• LISTENING' : isPreparing ? '• PREPARING' : '• IDLE'}
+              {isAwaitingGemini ? '• GEMINI' : isSessionActive ? '• LISTENING' : isPreparing ? '• PREPARING' : '• IDLE'}
             </span>
           </div>
         </div>
@@ -909,24 +987,27 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             </div>
           )}
 
-          {lastDiffTokens && !isAdvancing && !streamingUserInput && (
+          {lastDiffTokens && !isAdvancing && (
             <div className="flex flex-col items-start">
               <span className="text-[9px] font-bold text-gray-400 mb-0.5 uppercase">
                 DIFF
               </span>
-              <div className="px-4 py-3 rounded-2xl bg-white border border-gray-200 rounded-tl-none max-w-[95%]">
+              <div className="px-4 py-3 rounded-2xl bg-white border border-gray-200 rounded-tl-none max-w-[95%] relative">
                 <DiffDisplay tokens={lastDiffTokens} showLegend className="text-base" />
+                {isAwaitingGemini && (
+                  <span className="absolute top-1 right-2 text-[9px] text-blue-400 font-bold animate-pulse">精算中...</span>
+                )}
               </div>
             </div>
           )}
 
-          {isAnalyzing && (
+          {isAwaitingGemini && !lastDiffTokens && (
             <div className="flex flex-col items-start">
               <span className="text-[9px] font-bold text-blue-500 mb-0.5 uppercase animate-pulse">
-                ANALYZING...
+                精算中...
               </span>
               <div className={`px-4 py-3 rounded-2xl text-lg bg-blue-50 text-blue-700 border border-blue-200 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin('正在分析朗讀內容，請稍候...')}
+                {processZhuyin('正在用 AI 校正朗讀結果...')}
               </div>
             </div>
           )}
@@ -948,7 +1029,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           <div className={`min-h-[3rem] p-2 rounded-lg bg-black/40 border border-gray-200 text-base text-accent-light overflow-hidden leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
             {streamingUserInput ? processZhuyin(streamingUserInput) : (
               <span className="text-gray-800 italic">
-                {processZhuyin(isAnalyzing ? '正在分析朗讀...' : isPreparing ? '正在準備語音辨識...' : isSessionActive ? '正在聆聽您的朗讀...' : '點擊「開始朗讀」開始')}
+                {processZhuyin(isAwaitingGemini ? '正在精算結果...' : isPreparing ? '正在準備語音辨識...' : isSessionActive ? '正在聆聽您的朗讀...' : '點擊「開始朗讀」開始')}
               </span>
             )}
           </div>
@@ -982,10 +1063,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             ) : isSessionActive ? (
               <button
                 onClick={submitSentence}
-                disabled={isAdvancing || isAnalyzing || !streamingUserInput}
-                aria-label={isAdvancing ? '請稍候，正在處理' : '完成這段朗讀'}
+                disabled={isAdvancing || isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
+                aria-label={isAdvancing ? '請稍候，正在處理' : isAwaitingGemini ? '正在精算...' : '完成這段朗讀'}
                 className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
-                  isAdvancing || isAnalyzing || !streamingUserInput
+                  isAdvancing || isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
                     ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
                     : 'bg-emerald-600 hover:bg-emerald-500 text-white'
                 }`}
