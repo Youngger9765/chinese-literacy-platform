@@ -167,6 +167,17 @@ jobs:
           echo "frontend_url=${FRONTEND_URL}" >> $GITHUB_OUTPUT
           echo "backend_url=${BACKEND_URL}" >> $GITHUB_OUTPUT
 
+      - name: Update backend CORS with actual frontend URL
+        run: |
+          FRONTEND_URL="${{ steps.preview-urls.outputs.frontend_url }}"
+          if [ -n "$FRONTEND_URL" ] && [ "$FRONTEND_URL" != "N/A" ]; then
+            gcloud run services update ${{ env.BACKEND_SERVICE }} \
+              --region ${{ env.REGION }} \
+              --project ${{ env.PROJECT_ID }} \
+              --update-env-vars="ALLOWED_ORIGINS=${FRONTEND_URL},https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-dev.web.app" \
+              --quiet
+          fi
+
       - name: Comment PR with preview URLs
         uses: actions/github-script@v7
         with:
