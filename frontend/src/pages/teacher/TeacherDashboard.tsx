@@ -8,6 +8,8 @@ import {
   ClassroomApiError,
 } from '../../services/classroomApi';
 import SchoolSwitcher from '../../components/teacher/SchoolSwitcher';
+import { Skeleton, SkeletonText } from '../../components/ui/Skeleton';
+import LoadingIndicator from '../../components/ui/LoadingIndicator';
 
 interface TeacherDashboardProps {
   onSelectClassroom: (classroomId: number) => void;
@@ -108,12 +110,10 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
     return d.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  // Skeleton cards for loading state
-  const SkeletonCard = () => (
+  const ClassroomCardSkeleton = () => (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      <div className="h-5 bg-gray-200 animate-pulse rounded w-2/3 mb-3" />
-      <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3 mb-2" />
-      <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2" />
+      <Skeleton className="h-5 w-2/3 rounded mb-3" />
+      <SkeletonText lines={3} lineClassName="h-4 rounded" />
     </div>
   );
 
@@ -129,9 +129,11 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">班級管理</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {isLoading ? '載入中...' : `共 ${schoolFilteredCount} 個班級`}
-            </p>
+            {isLoading ? (
+              <Skeleton className="mt-2 h-4 w-28 rounded" />
+            ) : (
+              <p className="text-sm text-gray-500 mt-1">共 {schoolFilteredCount} 個班級</p>
+            )}
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             {/* School switcher — only shown when teacher belongs to multiple schools */}
@@ -262,10 +264,13 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
 
         {/* Loading state */}
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
+          <div className="space-y-6">
+            <LoadingIndicator />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <ClassroomCardSkeleton key={i} />
+              ))}
+            </div>
           </div>
         )}
 
