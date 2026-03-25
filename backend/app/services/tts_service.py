@@ -6,9 +6,9 @@ Synthesises text to speech using Cloud TTS Wavenet voices for cmn-TW
 synthesised once per process lifetime (course content is mostly fixed text
 that repeats across students).
 
-Voice used: cmn-TW-Wavenet-A (female, high quality)
-  - Wavenet is significantly more natural than Standard voices
-  - Neural2 is not yet available for cmn-TW in asia-east1
+Voice used: cmn-CN-Chirp3-HD-Laomedeia (female, highest quality)
+  - Chirp3-HD is Google's latest and most natural voice
+  - Uses cmn-CN locale but pronunciation is standard Mandarin (same as cmn-TW)
 
 Override via TTS_VOICE env var, e.g. TTS_VOICE=cmn-TW-Wavenet-B
 
@@ -34,10 +34,10 @@ _TTS_CACHE: dict[str, bytes] = {}
 CACHE_MAX_ENTRIES = 2000
 
 # Voice to use — can be overridden via TTS_VOICE env var for A/B testing.
-# cmn-TW-Wavenet-A: female Wavenet voice (most natural available for cmn-TW).
-# Neural2 voices are not yet available for cmn-TW in asia-east1 as of 2026-03.
-TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-TW-Wavenet-A")
-TTS_LANGUAGE_CODE = "cmn-TW"
+# cmn-CN-Chirp3-HD-Laomedeia: female Chirp3-HD voice (most natural available).
+# Uses cmn-CN locale; pronunciation is standard Mandarin, same as cmn-TW.
+TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-CN-Chirp3-HD-Laomedeia")
+TTS_LANGUAGE_CODE = "cmn-CN"
 
 
 # ---------------------------------------------------------------------------
