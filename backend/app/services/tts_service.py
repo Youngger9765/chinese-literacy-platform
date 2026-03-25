@@ -1,16 +1,16 @@
 """
 Google Cloud TTS service (Issue #663).
 
-Synthesises text to speech using Cloud TTS Neural2 voices for zh-TW.
-Uses an in-memory cache so the same text is only synthesised once per
-process lifetime (course content is mostly fixed text that repeats across
-students).
+Synthesises text to speech using Cloud TTS Wavenet voices for cmn-TW
+(Traditional Chinese).  Uses an in-memory cache so the same text is only
+synthesised once per process lifetime (course content is mostly fixed text
+that repeats across students).
 
-Voice preference order:
-  cmn-TW-Neural2-A  (female, most natural)
-  cmn-TW-Neural2-B  (male)
-  cmn-TW-Wavenet-A  (fallback if Neural2 quota exceeded)
-  cmn-TW-Standard-A (last-resort)
+Voice used: cmn-TW-Wavenet-A (female, high quality)
+  - Wavenet is significantly more natural than Standard voices
+  - Neural2 is not yet available for cmn-TW in asia-east1
+
+Override via TTS_VOICE env var, e.g. TTS_VOICE=cmn-TW-Wavenet-B
 
 Auth: uses the service-account ADC already available on Cloud Run —
 no API key required.  For local dev, ensure GOOGLE_APPLICATION_CREDENTIALS
@@ -33,8 +33,10 @@ logger = logging.getLogger(__name__)
 _TTS_CACHE: dict[str, bytes] = {}
 CACHE_MAX_ENTRIES = 2000
 
-# Voice to use — can be overridden via TTS_VOICE env var for A/B testing
-TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-TW-Neural2-A")
+# Voice to use — can be overridden via TTS_VOICE env var for A/B testing.
+# cmn-TW-Wavenet-A: female Wavenet voice (most natural available for cmn-TW).
+# Neural2 voices are not yet available for cmn-TW in asia-east1 as of 2026-03.
+TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-TW-Wavenet-A")
 TTS_LANGUAGE_CODE = "cmn-TW"
 
 
