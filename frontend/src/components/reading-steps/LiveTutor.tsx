@@ -1388,17 +1388,32 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                           >
                             重練這段
                           </button>
-                          {/* 下一段 — only on current paragraph, not yet advanced */}
-                          {idx === currentLineIndex && !completedParagraphs.has(idx) && (
+                          {/* 下一段 — show when not yet advanced, OR when revisiting a completed paragraph */}
+                          {idx < story.content.length - 1 && (
                             <button
-                              onClick={() => advanceParagraph(idx, lineResults)}
+                              onClick={() => {
+                                if (!completedParagraphs.has(idx)) {
+                                  advanceParagraph(idx, lineResults);
+                                } else {
+                                  // Already completed — just move to next paragraph
+                                  setCurrentLineIndex(idx + 1);
+                                }
+                              }}
                               className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
                                 summary.tier <= 2
                                   ? 'bg-accent hover:bg-accent-hover text-white'
                                   : 'border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-600'
                               }`}
                             >
-                              {idx >= story.content.length - 1 ? '完成朗讀' : '下一段'}
+                              下一段
+                            </button>
+                          )}
+                          {idx >= story.content.length - 1 && !completedParagraphs.has(idx) && (
+                            <button
+                              onClick={() => advanceParagraph(idx, lineResults)}
+                              className="flex-1 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white transition-all"
+                            >
+                              完成朗讀
                             </button>
                           )}
                         </div>
