@@ -168,7 +168,7 @@ jobs:
           echo "backend_url=${BACKEND_URL}" >> $GITHUB_OUTPUT
 
       - name: Update backend CORS with actual frontend URL
-        if: needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened'
+        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A'
         env:
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
         run: |
