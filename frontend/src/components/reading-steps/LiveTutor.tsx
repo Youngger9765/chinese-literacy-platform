@@ -1256,7 +1256,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                             }
                           }}
                           disabled={idx === currentLineIndex && (isSessionActive || isPreparing)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
+                          className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all ${
                             idx === currentLineIndex && (isSessionActive || isPreparing)
                               ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                               : isTtsSpeaking && idx === currentLineIndex
@@ -1265,9 +1265,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                           }`}
                         >
                           {isTtsSpeaking && idx === currentLineIndex ? (
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="4" height="12" rx="1" /><rect x="14" y="6" width="4" height="12" rx="1" /></svg>
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="4" height="12" rx="1" /><rect x="14" y="6" width="4" height="12" rx="1" /></svg>
                           ) : (
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
                           )}
                           {isTtsSpeaking && idx === currentLineIndex ? '停止' : '系統朗讀'}
                         </button>
@@ -1275,7 +1275,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                         {idx === currentLineIndex ? (
                           // Current paragraph: show session controls
                           isPreparing ? (
-                            <button disabled className="px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-200 text-gray-400 cursor-wait flex items-center gap-1">
+                            <button disabled className="px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-400 cursor-wait flex items-center gap-1.5">
                               <div className="w-2.5 h-2.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
                               準備中...
                             </button>
@@ -1283,21 +1283,21 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                             <button
                               onClick={submitSentence}
                               disabled={isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
-                              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all shadow active:scale-95 ${
+                              className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all shadow active:scale-95 ${
                                 isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
                                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                   : 'bg-emerald-600 hover:bg-emerald-500 text-white'
                               }`}
                             >
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
                               完成
                             </button>
                           ) : !paragraphSummaries[idx] ? (
                             <button
                               onClick={startSession}
-                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1 transition-all shadow active:scale-95"
+                              className="px-4 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1.5 transition-all shadow active:scale-95"
                             >
-                              <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                              <span className="w-2 h-2 rounded-full bg-white" />
                               {retryCount > 0 ? '再試一次' : '開始朗讀'}
                             </button>
                           ) : null
@@ -1307,9 +1307,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                             onClick={() => {
                               stopSession(); setRetryCount(0); setCurrentLineIndex(idx);
                             }}
-                            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1 transition-all shadow active:scale-95"
+                            className="px-4 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1.5 transition-all shadow active:scale-95"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                            <span className="w-2 h-2 rounded-full bg-white" />
                             開始朗讀
                           </button>
                         )}
