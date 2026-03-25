@@ -1120,16 +1120,28 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /*  JSX                                                             */
   /* ================================================================ */
 
+  // Compute diff tokens for the right panel (current paragraph only, shown after eval)
+  const rightPanelDiffTokens: DiffToken[] | null = (() => {
+    if (lastDiffTokens && lastDiffTokens.length > 0) return lastDiffTokens;
+    // After refresh: fall back to last saved result for current paragraph
+    for (let i = lineResults.length - 1; i >= 0; i--) {
+      if (lineResults[i].lineIndex === currentLineIndex && lineResults[i].diffTokens?.length > 0) {
+        return lineResults[i].diffTokens;
+      }
+    }
+    return null;
+  })();
+
   return (
     <div
-      className="flex flex-col flex-1 h-full bg-amber-50 overflow-hidden"
+      className={`flex flex-1 h-full bg-amber-50 overflow-hidden ${isMobile ? 'flex-col' : 'flex-row'}`}
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
           : "'Iansui', 'Noto Sans TC', sans-serif",
       }}
     >
-      {/* CENTER: Editor - story text panel */}
+      {/* LEFT: Story text panel — completely static, no dynamic text changes */}
       <div className="flex flex-col bg-amber-50 flex-1 min-h-0 overflow-hidden">
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2">
           <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
@@ -1158,23 +1170,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             {story.content.map((line, idx) => {
               const isCelebrating = celebratingIndex === idx;
               const status = lineStatuses[idx];
-
-              // Compute diff tokens for this paragraph:
-              // – current paragraph: use live lastDiffTokens
-              // – completed paragraphs: use last recorded result
-              let paragraphDiffTokens: DiffToken[] | null = null;
-              if (idx === currentLineIndex && lastDiffTokens) {
-                paragraphDiffTokens = lastDiffTokens;
-              }
-              // Fallback: use saved lineResults diff (works after refresh + for completed paragraphs)
-              if (!paragraphDiffTokens) {
-                for (let i = lineResults.length - 1; i >= 0; i--) {
-                  if (lineResults[i].lineIndex === idx && lineResults[i].diffTokens?.length > 0) {
-                    paragraphDiffTokens = lineResults[i].diffTokens;
-                    break;
-                  }
-                }
-              }
 
               return (
                 <div
@@ -1219,10 +1214,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     )}
                     {status === 'locked' && (
                       <span className="ml-auto text-[10px] text-gray-400">完成前一段後解鎖</span>
-                    )}
-                    {/* Gemini correction in progress indicator */}
-                    {idx === currentLineIndex && isAwaitingGemini && paragraphDiffTokens && (
-                      <span className="ml-auto text-[10px] text-blue-400 font-bold animate-pulse">AI 精算中…</span>
                     )}
                     {/* Inline action buttons — system read + start/submit/retry */}
                     {status !== 'locked' && !isAdvancing && (
@@ -1317,76 +1308,20 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     )}
                   </div>
 
-                  {/* Paragraph text — 3-mode: diff | cursor | plain */}
-                  {paragraphDiffTokens && !isSessionActive ? (
-                    /* Mode 3: diff annotations below each char (only after recording stops) */
-                    renderLineWithDiff(
-                      line,
-                      paragraphDiffTokens,
-                      fontSizePx,
-                      `${zhuyinActive ? 'tracking-[0.4em]' : ''} ${status === 'current' ? 'font-bold' : ''}`,
-                    )
-                  ) : idx === currentLineIndex && isTtsSpeaking ? (
-                    /* Mode 2b: TTS playing — highlight active sentence */
-                    (() => {
-                      const sentences = splitIntoSentences(line);
-                      // build cumulative char offsets so we can map speakingProgress → sentence index
-                      let offset = 0;
-                      const offsets = sentences.map(s => { const start = offset; offset += s.length; return start; });
-                      // active sentence = last one whose start offset <= speakingProgress
-                      let activeSentIdx = 0;
-                      for (let si = offsets.length - 1; si >= 0; si--) {
-                        if (offsets[si] <= speakingProgress) { activeSentIdx = si; break; }
-                      }
-                      return (
-                        <p
-                          className={`leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} font-bold`}
-                          style={{ fontSize: fontSizePx }}
-                        >
-                          {sentences.map((sent, si) => (
-                            <span
-                              key={si}
-                              className={si === activeSentIdx
-                                ? 'bg-sky-200/70 rounded-sm text-gray-900'
-                                : 'text-gray-400'}
-                            >{sent}</span>
-                          ))}
-                        </p>
-                      );
-                    })()
-                  ) : idx === currentLineIndex && isSessionActive && realtimeDiffTokens ? (
-                    /* Mode 2a: real-time LCS diff overlay while recording */
-                    renderLineWithDiff(
-                      line,
-                      realtimeDiffTokens,
-                      fontSizePx,
-                      `${zhuyinActive ? 'tracking-[0.4em]' : ''} font-bold`,
-                    )
-                  ) : idx === currentLineIndex && isSessionActive ? (
-                    /* Mode 2a fallback: plain bold before first STT result */
-                    <p
-                      className={`leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} font-bold`}
-                      style={{ fontSize: fontSizePx }}
-                    >
-                      {Array.from(line).map((ch, charIdx) => (
-                        <span key={charIdx} className="text-gray-300">{ch}</span>
-                      ))}
-                    </p>
-                  ) : (
-                    /* Mode 1: idle / plain text */
-                    <p
-                      className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
-                        status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
-                      }`}
-                      style={{ fontSize: fontSizePx }}
-                    >
-                      {status === 'locked' ? (
-                        <span className="blur-sm select-none">{zhuyinLines ? zhuyinLines[idx] : line}</span>
-                      ) : (
-                        zhuyinLines ? zhuyinLines[idx] : line
-                      )}
-                    </p>
-                  )}
+                  {/* Paragraph text — STATIC: text and colors never change during reading.
+                      Only show plain text at all times. Background highlight is on the container above. */}
+                  <p
+                    className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
+                      status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
+                    }`}
+                    style={{ fontSize: fontSizePx }}
+                  >
+                    {status === 'locked' ? (
+                      <span className="blur-sm select-none">{zhuyinLines ? zhuyinLines[idx] : line}</span>
+                    ) : (
+                      zhuyinLines ? zhuyinLines[idx] : line
+                    )}
+                  </p>
 
                   {/* Bottom-of-paragraph controls — complete + stop (visible while recording this paragraph) */}
                   {idx === currentLineIndex && isSessionActive && (
@@ -1414,7 +1349,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     </div>
                   )}
 
-                  {/* Inline summary card — persists below each evaluated paragraph */}
+                  {/* Inline summary card — persists below each evaluated paragraph (actions only, no diff) */}
                   {(() => {
                     const summary = paragraphSummaries[idx];
                     if (!summary) return null;
@@ -1444,6 +1379,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                               }
                               setParagraphSummaries(prev => { const next = { ...prev }; delete next[idx]; return next; });
                               setRealtimeDiffTokens(null);
+                              setLastDiffTokens(null);
                               // startSession after state settles — use setTimeout for non-current paragraphs
                               if (idx === currentLineIndex) { startSession(); }
                               else { setTimeout(() => startSession(), 100); }
@@ -1490,6 +1426,93 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         {/* Mic error */}
         {micError && (
           <div className="flex-shrink-0 px-4 py-2 bg-rose-50">
+            <span className="text-xs text-rose-500">{micError}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Resizable divider - hidden on mobile */}
+      {!isMobile && (
+        <div
+          onMouseDown={onDividerMouseDown}
+          onTouchStart={(e) => {
+            isDraggingRef.current = true;
+            dragStartXRef.current = e.touches[0].clientX;
+            dragStartWidthRef.current = rightPanelWidth;
+            document.body.style.userSelect = 'none';
+          }}
+          className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
+        />
+      )}
+
+      {/* RIGHT: Feedback panel — progress, live transcript, diff results */}
+      <div
+        className={`bg-gray-50 flex flex-col min-h-0 border-l border-gray-200 ${isMobile ? 'flex-1' : 'flex-shrink-0 h-full'}`}
+        style={isMobile ? undefined : { width: rightPanelWidth }}
+      >
+        {/* Header */}
+        <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-2">
+          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">朗讀回饋</span>
+          <div className="flex-1" />
+          <span className={`text-[10px] font-bold ${isSessionActive ? 'text-green-500' : isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
+            {isSessionActive ? '● 聆聽中' : isPreparing ? '● 準備中' : '● 待機'}
+          </span>
+        </div>
+
+        {/* Content */}
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+
+          {/* Progress info */}
+          <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">朗讀進度</p>
+            <p className="text-sm font-bold text-gray-700">
+              第 {currentLineIndex + 1} 段 / 共 {story.content.length} 段
+            </p>
+            <p className="text-xs text-gray-500">
+              已完成 {completedParagraphs.size} 段
+              {retryCount > 0 && <span className="ml-2 text-amber-500">重試 {retryCount} 次</span>}
+            </p>
+          </div>
+
+          {/* Live transcript — shown while recording */}
+          {isSessionActive && (
+            <div className="space-y-1">
+              <p className="text-[9px] font-bold text-accent-light uppercase tracking-widest animate-pulse">即時辨識</p>
+              <div className="bg-accent/10 border border-accent/20 rounded-xl px-3 py-2.5 text-sm text-gray-800 leading-relaxed min-h-[2.5rem]">
+                {streamingUserInput || <span className="text-gray-400">請開始朗讀…</span>}
+              </div>
+            </div>
+          )}
+
+          {/* Diff result — shown after evaluation completes for current paragraph */}
+          {!isSessionActive && rightPanelDiffTokens && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">逐字比對</p>
+                {paragraphSummary?.geminiPending && (
+                  <span className="text-[9px] text-blue-400 font-bold animate-pulse">AI 精算中…</span>
+                )}
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl px-3 py-3">
+                <DiffDisplay tokens={rightPanelDiffTokens} showLegend className="text-base" />
+              </div>
+            </div>
+          )}
+
+          {/* Idle state — no recording yet */}
+          {!isSessionActive && !rightPanelDiffTokens && !paragraphSummary && (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
+              <p className="text-sm text-gray-500 leading-relaxed">
+                按左側「開始朗讀」後，回饋結果會顯示在這裡
+              </p>
+            </div>
+          )}
+
+        </div>
+
+        {/* Mic error */}
+        {micError && (
+          <div className="flex-shrink-0 px-4 py-2 bg-rose-50 border-t border-rose-100">
             <span className="text-xs text-rose-500">{micError}</span>
           </div>
         )}
