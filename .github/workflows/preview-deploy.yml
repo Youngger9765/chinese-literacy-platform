@@ -105,7 +105,7 @@ jobs:
             --max-instances=1 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-preview-db \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-issue-${{ env.ISSUE_NUM }}-958347263320.asia-east1.run.app,https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true"
 
       - name: Get backend preview URL
         id: backend-url
@@ -166,6 +166,18 @@ jobs:
             --format='value(status.url)' 2>/dev/null || echo "N/A")
           echo "frontend_url=${FRONTEND_URL}" >> $GITHUB_OUTPUT
           echo "backend_url=${BACKEND_URL}" >> $GITHUB_OUTPUT
+
+      - name: Update backend CORS with actual frontend URL
+        if: needs.detect-changes.outputs.backend == 'true' || github.event.action == 'opened'
+        env:
+          FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
+        run: |
+          STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
+          FIREBASE_URL="https://lingoleap-dev.web.app"
+          gcloud run services update ${{ env.BACKEND_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${STAGING_URL},${FIREBASE_URL}"
 
       - name: Comment PR with preview URLs
         uses: actions/github-script@v7
