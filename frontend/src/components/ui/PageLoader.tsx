@@ -1,18 +1,24 @@
 import React from 'react';
+import LoadingIndicator from './LoadingIndicator';
+import { Skeleton, SkeletonText } from './Skeleton';
 
-/** Route-level Suspense fallback — minimal spinner, matches app loading style. */
+/**
+ * Route-level Suspense fallback.
+ * Shows both loading indicator and layout skeletons to avoid a blank screen.
+ */
 const PageLoader: React.FC = () => (
-  <div className="flex-1 flex items-center justify-center bg-amber-50">
-    <div
-      className="flex flex-col items-center gap-3"
-      role="status"
-      aria-label="頁面載入中，請稍候"
-    >
-      <div
-        className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin"
-        aria-hidden="true"
-      />
-      <span className="text-sm text-gray-400">載入中...</span>
+  <div className="flex-1 overflow-y-auto bg-amber-50">
+    <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+      <LoadingIndicator textClassName="text-sm text-gray-500" />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <Skeleton className="h-5 w-2/3 rounded mb-3" />
+            <SkeletonText lines={3} lineClassName="h-3 rounded" />
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 );

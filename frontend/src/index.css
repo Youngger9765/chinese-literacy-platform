@@ -3,6 +3,24 @@
 @tailwind utilities;
 
 @layer base {
+  @keyframes sk-shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes loading-dot {
+    0%,
+    20% {
+      opacity: 0;
+    }
+
+    40%,
+    100% {
+      opacity: 1;
+    }
+  }
+
   :root {
     /* Brand / Accent */
     --color-accent: 99 102 241;       /* indigo-600 */
