@@ -1,20 +1,19 @@
 """
 Google Cloud TTS service (Issue #663).
 
-Synthesises text to speech using Cloud TTS Wavenet voices for cmn-TW
-(Traditional Chinese).  Uses an in-memory cache so the same text is only
-synthesised once per process lifetime (course content is mostly fixed text
-that repeats across students).
+Two-layer cache: GCS (persistent) → in-memory (fast).
+1. Check in-memory dict
+2. Check GCS bucket
+3. Call Cloud TTS API → save to GCS + in-memory
 
-Voice used: cmn-CN-Chirp3-HD-Laomedeia (female, highest quality)
+Voice: cmn-CN-Chirp3-HD-Laomedeia (female, highest quality)
   - Chirp3-HD is Google's latest and most natural voice
   - Uses cmn-CN locale but pronunciation is standard Mandarin (same as cmn-TW)
 
-Override via TTS_VOICE env var, e.g. TTS_VOICE=cmn-TW-Wavenet-B
+Override via TTS_VOICE env var, e.g. TTS_VOICE=cmn-CN-Chirp3-HD-Aoede
 
 Auth: uses the service-account ADC already available on Cloud Run —
-no API key required.  For local dev, ensure GOOGLE_APPLICATION_CREDENTIALS
-points to a service account JSON that has the Cloud TTS API enabled.
+no API key required.
 """
 
 from __future__ import annotations
@@ -27,15 +26,66 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# In-memory cache: {text_hash: audio_bytes}
-# Bounded at CACHE_MAX_ENTRIES to prevent unbounded memory growth.
+# In-memory cache (L1): {text_hash: audio_bytes}
 # ---------------------------------------------------------------------------
 _TTS_CACHE: dict[str, bytes] = {}
-CACHE_MAX_ENTRIES = 2000
+CACHE_MAX_ENTRIES = 500
 
-# Voice to use — can be overridden via TTS_VOICE env var for A/B testing.
-# cmn-CN-Chirp3-HD-Laomedeia: female Chirp3-HD voice (most natural available).
-# Uses cmn-CN locale; pronunciation is standard Mandarin, same as cmn-TW.
+# ---------------------------------------------------------------------------
+# GCS cache (L2): gs://{bucket}/tts-cache/{hash}.mp3
+# ---------------------------------------------------------------------------
+TTS_GCS_BUCKET = os.environ.get("TTS_GCS_BUCKET", "lingoleap-tts-cache")
+
+_gcs_client: Optional[object] = None
+
+
+def _get_gcs_bucket():
+    """Return a lazy-initialised GCS bucket object."""
+    global _gcs_client
+    if _gcs_client is None:
+        try:
+            from google.cloud import storage
+            client = storage.Client()
+            _gcs_client = client.bucket(TTS_GCS_BUCKET)
+            logger.info("GCS TTS cache bucket: %s", TTS_GCS_BUCKET)
+        except Exception as exc:
+            logger.warning("GCS cache unavailable, falling back to API-only: %s", exc)
+            return None
+    return _gcs_client
+
+
+def _gcs_get(key: str) -> Optional[bytes]:
+    """Try to read cached audio from GCS. Returns None on miss or error."""
+    bucket = _get_gcs_bucket()
+    if bucket is None:
+        return None
+    try:
+        blob = bucket.blob(f"tts-cache/{key}.mp3")
+        if blob.exists():
+            data = blob.download_as_bytes()
+            logger.debug("GCS cache hit (key=%s, bytes=%d)", key[:8], len(data))
+            return data
+    except Exception as exc:
+        logger.warning("GCS cache read error: %s", exc)
+    return None
+
+
+def _gcs_put(key: str, audio_bytes: bytes) -> None:
+    """Write audio to GCS cache. Failures are logged but not raised."""
+    bucket = _get_gcs_bucket()
+    if bucket is None:
+        return
+    try:
+        blob = bucket.blob(f"tts-cache/{key}.mp3")
+        blob.upload_from_string(audio_bytes, content_type="audio/mpeg")
+        logger.debug("GCS cache write (key=%s, bytes=%d)", key[:8], len(audio_bytes))
+    except Exception as exc:
+        logger.warning("GCS cache write error: %s", exc)
+
+
+# ---------------------------------------------------------------------------
+# Voice config
+# ---------------------------------------------------------------------------
 TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-CN-Chirp3-HD-Laomedeia")
 TTS_LANGUAGE_CODE = "cmn-CN"
 
@@ -49,7 +99,7 @@ class TTSError(RuntimeError):
 
 
 # ---------------------------------------------------------------------------
-# Lazy-initialise TTS client (avoids import cost on startup if TTS unused)
+# Lazy-initialise TTS client
 # ---------------------------------------------------------------------------
 
 _tts_client: Optional[object] = None
@@ -82,10 +132,10 @@ def _cache_key(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 def synthesize_speech(text: str) -> bytes:
-    """Synthesise *text* to MP3 audio bytes using Cloud TTS Neural2.
+    """Synthesise *text* to MP3 audio bytes using Cloud TTS Chirp3-HD.
 
-    Results are cached in-memory: same text returns the cached bytes without
-    making a second API call.
+    Two-layer cache: in-memory (L1) → GCS (L2) → API call.
+    Results are persisted to GCS so they survive deploys and cold starts.
 
     Args:
         text: Plain text to synthesise (max 5000 chars).
@@ -97,11 +147,20 @@ def synthesize_speech(text: str) -> bytes:
         TTSError: if synthesis fails or returns empty audio.
     """
     key = _cache_key(text)
+
+    # L1: in-memory
     if key in _TTS_CACHE:
-        logger.debug("TTS cache hit (key=%s, len=%d)", key[:8], len(text))
+        logger.debug("L1 cache hit (key=%s)", key[:8])
         return _TTS_CACHE[key]
 
-    logger.info("Synthesising speech (len=%d chars, voice=%s)", len(text), TTS_VOICE)
+    # L2: GCS
+    gcs_data = _gcs_get(key)
+    if gcs_data is not None:
+        _l1_put(key, gcs_data)
+        return gcs_data
+
+    # L3: API call
+    logger.info("TTS cache miss, calling API (len=%d chars, voice=%s)", len(text), TTS_VOICE)
 
     try:
         from google.cloud import texttospeech
@@ -114,7 +173,7 @@ def synthesize_speech(text: str) -> bytes:
         )
         audio_config = texttospeech.AudioConfig(
             audio_encoding=texttospeech.AudioEncoding.MP3,
-            speaking_rate=0.9,   # slightly slower for learner audience
+            speaking_rate=0.9,
             pitch=0.0,
         )
 
@@ -132,11 +191,17 @@ def synthesize_speech(text: str) -> bytes:
     if not audio_bytes:
         raise TTSError("Cloud TTS returned empty audio content")
 
-    # Store in cache (evict oldest entry if at capacity)
+    # Save to both caches
+    _l1_put(key, audio_bytes)
+    _gcs_put(key, audio_bytes)
+
+    logger.info("TTS synthesis complete (key=%s, bytes=%d)", key[:8], len(audio_bytes))
+    return audio_bytes
+
+
+def _l1_put(key: str, audio_bytes: bytes) -> None:
+    """Store in L1 in-memory cache with eviction."""
     if len(_TTS_CACHE) >= CACHE_MAX_ENTRIES:
         oldest_key = next(iter(_TTS_CACHE))
         del _TTS_CACHE[oldest_key]
     _TTS_CACHE[key] = audio_bytes
-
-    logger.info("TTS synthesis complete (key=%s, bytes=%d)", key[:8], len(audio_bytes))
-    return audio_bytes
