@@ -7,6 +7,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
 import { useAuth } from '../../contexts/AuthContext';
+import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -69,14 +70,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const currentTranscriptRef = useRef('');
   const accumulatedTranscriptRef = useRef('');
 
-  // Text-to-speech helper
+  // Text-to-speech helper — uses Cloud TTS Neural2 with Web Speech API fallback
   const speakText = useCallback((text: string) => {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-TW';
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    window.speechSynthesis.speak(utterance);
+    cloudSpeakText(text).catch(() => {/* silently ignore — fallback handled inside */});
   }, []);
   const initializedRef = useRef(false);
   const isDraggingRef = useRef(false);
@@ -126,7 +122,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         }
         recognitionRef.current = null;
       }
-      window.speechSynthesis?.cancel();
+      cancelTts();
     };
   }, []);
 

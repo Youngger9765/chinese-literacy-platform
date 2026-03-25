@@ -2,7 +2,7 @@
  * ListeningPractice — Issue #251
  *
  * Three-phase listening comprehension exercise:
- *   Phase 1: Play story text via Web Speech API SpeechSynthesis (zh-TW)
+ *   Phase 1: Play story text via Cloud TTS Neural2 (zh-TW), Web Speech API fallback
  *   Phase 2: Student retells what they heard (voice or text input)
  *   Phase 3: Show AI evaluation with score and feedback
  */
@@ -12,6 +12,7 @@ import { Story } from '../../types';
 import { evaluateListeningRetelling, ListeningEvaluateResponse } from '../../services/learningApi';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { useAuth } from '../../contexts/AuthContext';
+import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,51 +35,30 @@ type PlayState = 'idle' | 'playing' | 'paused' | 'done';
 // ── TTS helpers ───────────────────────────────────────────────────────────────
 
 /**
- * Speak text using Web Speech API SpeechSynthesis with zh-TW voice.
- * Returns a cleanup function that cancels speech.
+ * Speak text using Cloud TTS Neural2 (zh-TW) with Web Speech API fallback.
+ * Returns a speaker object with start/cancel interface matching prior API.
  */
 function createSpeaker(text: string, rate: number): {
   start: (onEnd: () => void, onError: (e: string) => void) => void;
   cancel: () => void;
 } {
-  let utteranceRef: SpeechSynthesisUtterance | null = null;
-
   const start = (onEnd: () => void, onError: (e: string) => void) => {
-    if (!window.speechSynthesis) {
-      onError('SpeechSynthesis not supported');
-      return;
-    }
-    window.speechSynthesis.cancel();
-
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = 'zh-TW';
-    utt.rate = rate;
-    utt.pitch = 1.0;
-
-    // Prefer zh-TW voice
-    const voices = window.speechSynthesis.getVoices();
-    const twVoice =
-      voices.find((v) => v.lang === 'zh-TW') ||
-      voices.find((v) => v.lang.startsWith('zh'));
-    if (twVoice) utt.voice = twVoice;
-
-    utt.onend = onEnd;
-    utt.onerror = (e) => onError(e.error ?? 'speech error');
-
-    utteranceRef = utt;
-    window.speechSynthesis.speak(utt);
+    cloudSpeakText(text, rate)
+      .then(onEnd)
+      .catch((err: Error) => onError(err?.message ?? 'speech error'));
   };
 
   const cancel = () => {
-    window.speechSynthesis?.cancel();
-    utteranceRef = null;
+    cancelTts();
   };
 
   return { start, cancel };
 }
 
 function isTTSSupported(): boolean {
-  return typeof window !== 'undefined' && 'speechSynthesis' in window;
+  // Cloud TTS is available when backend is reachable; always return true
+  // and let ttsApi handle fallback to Web Speech API gracefully.
+  return true;
 }
 
 // ── Score colour helper ───────────────────────────────────────────────────────
@@ -177,13 +157,18 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
   }, [fullText, playRate]);
 
   const handlePause = useCallback(() => {
+    // Cloud TTS uses <audio> element; pause via cancelTts and track state.
+    // Web Speech API fallback also honours this via window.speechSynthesis.pause().
+    cancelTts();
     if (window.speechSynthesis?.speaking) {
       window.speechSynthesis.pause();
-      setPlayState('paused');
     }
+    setPlayState('paused');
   }, []);
 
   const handleResume = useCallback(() => {
+    // Re-trigger playback from beginning when resuming after pause
+    // (HTML audio pause/resume position tracking is not exposed via ttsApi)
     if (window.speechSynthesis?.paused) {
       window.speechSynthesis.resume();
       setPlayState('playing');

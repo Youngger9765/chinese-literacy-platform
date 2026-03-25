@@ -19,6 +19,7 @@ import {
   getReadingPassThreshold,
   type LocalEvalResult,
 } from '../../utils/localEval';
+import { cancelTts } from '../../services/ttsApi';
 
 /* ------------------------------------------------------------------ */
 /*  Canned response pools — randomly selected to avoid repetition     */
@@ -387,7 +388,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const recognitionRef = useRef<any>(null);
   // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
   // gets collected mid-playback, silencing onend/onboundary callbacks.
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | HTMLAudioElement | null>(null);
   // rAF loop for TTS cursor animation — Chrome's onboundary doesn't fire per-char for Chinese.
   const ttsRafRef = useRef<number | null>(null);
   const ttsStartTimeRef = useRef<number>(0);
@@ -556,7 +557,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         cancelAnimationFrame(ttsRafRef.current);
         ttsRafRef.current = null;
       }
-      window.speechSynthesis?.cancel();
+      cancelTts();
       if (geminiTimeoutRef.current !== null) {
         clearTimeout(geminiTimeoutRef.current);
         geminiTimeoutRef.current = null;
@@ -796,17 +797,24 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     // Null out TTS callbacks before cancel() so any async onend/onerror from
     // the previous utterance cannot stomp on the STT cursor position.
     if (utteranceRef.current) {
-      utteranceRef.current.onstart = null;
-      utteranceRef.current.onboundary = null;
-      utteranceRef.current.onend = null;
-      utteranceRef.current.onerror = null;
+      const cur = utteranceRef.current;
+      if (cur instanceof HTMLAudioElement) {
+        cur.onended = null;
+        cur.onerror = null;
+        cur.pause();
+      } else {
+        (cur as SpeechSynthesisUtterance).onstart = null;
+        (cur as SpeechSynthesisUtterance).onboundary = null;
+        (cur as SpeechSynthesisUtterance).onend = null;
+        (cur as SpeechSynthesisUtterance).onerror = null;
+      }
       utteranceRef.current = null;
     }
     if (ttsRafRef.current !== null) {
       cancelAnimationFrame(ttsRafRef.current);
       ttsRafRef.current = null;
     }
-    window.speechSynthesis?.cancel();
+    cancelTts();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
     setIsPreparing(true);
@@ -1002,81 +1010,117 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setRealtimeDiffTokens(null);
   };
 
-  /** Use browser TTS to read the current paragraph aloud. */
+  /** Use Cloud TTS Neural2 to read the current paragraph aloud.
+   *  Falls back to Web Speech API inside ttsApi if backend is unavailable.
+   *  Drives the cursor animation using time-based rAF (~4.2 chars/sec).
+   */
   const speakCurrentParagraph = useCallback(() => {
     const text = story.content[currentLineIndex];
-    if (!text || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    if (!text) return;
+    cancelTts();
     setIsTtsPaused(false);
 
-    const doSpeak = () => {
-      const utterance = new SpeechSynthesisUtterance(text);
-      // Hold a strong ref — prevents Chrome GC bug where the utterance object
-      // is collected before onend/onboundary fire.
-      utteranceRef.current = utterance;
-      utterance.lang = 'zh-TW';
-      utterance.rate = 1.0;
+    const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
-      // Prefer Google Taiwan, fall back to any zh-TW, then any zh
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-        voices.find(v => v.name.includes('Google') && v.lang === 'zh-TW') ||
-        voices.find(v => v.lang === 'zh-TW') ||
-        voices.find(v => v.lang.startsWith('zh'));
-      if (preferred) utterance.voice = preferred;
-
-      utterance.onstart = () => {
-        setIsTtsSpeaking(true);
-        setSpeakingProgress(0);
-    setRealtimeDiffTokens(null);
-        // Chrome's onboundary doesn't fire per-character for Chinese TTS.
-        // Drive the cursor with a time-based rAF loop instead (~4 chars/sec).
-        ttsStartTimeRef.current = performance.now();
-        ttsTotalCharsRef.current = Array.from(text).length;
-        const MS_PER_CHAR = 240; // ~4.2 chars/sec — tuned for zh-TW Google TTS at rate 1.0
-        const animate = () => {
-          const elapsed = performance.now() - ttsStartTimeRef.current;
-          const pos = Math.min(Math.floor(elapsed / MS_PER_CHAR), ttsTotalCharsRef.current);
-          setSpeakingProgress(pos);
-          if (pos < ttsTotalCharsRef.current) {
-            ttsRafRef.current = requestAnimationFrame(animate);
-          }
-        };
-        ttsRafRef.current = requestAnimationFrame(animate);
-      };
-      // onboundary still used if it fires — provides more accurate positions.
-      utterance.onboundary = (e) => { setSpeakingProgress(e.charIndex); };
-      const stopTtsAnimation = () => {
-        if (ttsRafRef.current !== null) {
-          cancelAnimationFrame(ttsRafRef.current);
-          ttsRafRef.current = null;
-        }
-      };
-      // Note: do NOT call setSpeakingProgress(0) here — if STT is active, that
-      // would reset the cursor position that the student has already advanced.
-      utterance.onend = () => { stopTtsAnimation(); utteranceRef.current = null; setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      utterance.onerror = () => { stopTtsAnimation(); utteranceRef.current = null; setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      window.speechSynthesis.speak(utterance);
+    const stopTtsAnimation = () => {
+      if (ttsRafRef.current !== null) {
+        cancelAnimationFrame(ttsRafRef.current);
+        ttsRafRef.current = null;
+      }
     };
 
-    // If voices not yet loaded, wait for them then speak
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.onvoiceschanged = null;
-        doSpeak();
+    const startCursorAnimation = () => {
+      setIsTtsSpeaking(true);
+      setSpeakingProgress(0);
+      setRealtimeDiffTokens(null);
+      ttsStartTimeRef.current = performance.now();
+      ttsTotalCharsRef.current = Array.from(text).length;
+      const MS_PER_CHAR = 240; // ~4.2 chars/sec — tuned for Neural2 zh-TW at rate 0.9
+      const animate = () => {
+        const elapsed = performance.now() - ttsStartTimeRef.current;
+        const pos = Math.min(Math.floor(elapsed / MS_PER_CHAR), ttsTotalCharsRef.current);
+        setSpeakingProgress(pos);
+        if (pos < ttsTotalCharsRef.current) {
+          ttsRafRef.current = requestAnimationFrame(animate);
+        }
       };
-    } else {
-      doSpeak();
-    }
+      ttsRafRef.current = requestAnimationFrame(animate);
+    };
+
+    const onSpeechEnd = () => {
+      stopTtsAnimation();
+      setIsTtsSpeaking(false);
+      setIsTtsPaused(false);
+    };
+
+    // Try Cloud TTS first via <audio> element for better control
+    fetch(`${API_BASE}/api/tts/synthesize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`TTS ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        if (blob.size === 0) throw new Error('Empty TTS audio');
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
+        audio.onplay = startCursorAnimation;
+        audio.onended = onSpeechEnd;
+        audio.onerror = onSpeechEnd;
+        return audio.play();
+      })
+      .catch(() => {
+        // Fallback: Web Speech API
+        if (!window.speechSynthesis) { onSpeechEnd(); return; }
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utteranceRef.current = utterance;
+        utterance.lang = 'zh-TW';
+        utterance.rate = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const preferred =
+          voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
+          voices.find(v => v.lang === 'zh-TW') ||
+          voices.find(v => v.lang.startsWith('zh'));
+        if (preferred) utterance.voice = preferred;
+        utterance.onstart = startCursorAnimation;
+        utterance.onboundary = (e) => { setSpeakingProgress(e.charIndex); };
+        utterance.onend = onSpeechEnd;
+        utterance.onerror = onSpeechEnd;
+
+        const doSpeak = () => window.speechSynthesis.speak(utterance);
+        if (window.speechSynthesis.getVoices().length === 0) {
+          window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.onvoiceschanged = null;
+            doSpeak();
+          };
+        } else {
+          doSpeak();
+        }
+      });
   }, [story.content, currentLineIndex]);
 
   const pauseTts = () => {
-    window.speechSynthesis?.pause();
+    // Pause <audio> element if playing via Cloud TTS
+    const ua = utteranceRef.current;
+    if (ua && ua instanceof HTMLAudioElement) {
+      ua.pause();
+    } else {
+      window.speechSynthesis?.pause();
+    }
     setIsTtsPaused(true);
   };
   const resumeTts = () => {
-    window.speechSynthesis?.resume();
+    const ua = utteranceRef.current;
+    if (ua && ua instanceof HTMLAudioElement) {
+      ua.play().catch(() => {});
+    } else {
+      window.speechSynthesis?.resume();
+    }
     setIsTtsPaused(false);
   };
   const stopTts = () => {
@@ -1084,7 +1128,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       cancelAnimationFrame(ttsRafRef.current);
       ttsRafRef.current = null;
     }
-    window.speechSynthesis?.cancel();
+    const ua = utteranceRef.current;
+    if (ua && ua instanceof HTMLAudioElement) {
+      ua.pause();
+      ua.currentTime = 0;
+    }
+    cancelTts();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
   };
@@ -1232,26 +1281,25 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                           onClick={() => {
                             if (idx !== currentLineIndex) { stopSession(); setRetryCount(0); setCurrentLineIndex(idx); }
                             if (isTtsSpeaking) {
-                              if (utteranceRef.current) { utteranceRef.current.onend = null; utteranceRef.current.onerror = null; utteranceRef.current.onboundary = null; utteranceRef.current = null; }
+                              if (utteranceRef.current) { const _u = utteranceRef.current; if (_u instanceof HTMLAudioElement) { _u.onended = null; _u.onerror = null; _u.pause(); } else { (_u as SpeechSynthesisUtterance).onend = null; (_u as SpeechSynthesisUtterance).onerror = null; (_u as SpeechSynthesisUtterance).onboundary = null; } utteranceRef.current = null; }
                               if (ttsRafRef.current !== null) { cancelAnimationFrame(ttsRafRef.current); ttsRafRef.current = null; }
-                              window.speechSynthesis?.cancel();
+                              cancelTts();
                               setIsTtsSpeaking(false); setIsTtsPaused(false);
                             } else {
-                              // Speak this paragraph's text
-                              const text = story.content[idx];
-                              if (text && window.speechSynthesis) {
-                                window.speechSynthesis.cancel();
-                                const utterance = new SpeechSynthesisUtterance(text);
-                                utteranceRef.current = utterance;
-                                utterance.lang = 'zh-TW';
-                                utterance.rate = 1.0;
-                                const voices = window.speechSynthesis.getVoices();
-                                const preferred = voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) || voices.find(v => v.lang === 'zh-TW') || voices.find(v => v.lang.startsWith('zh'));
-                                if (preferred) utterance.voice = preferred;
-                                utterance.onend = () => { utteranceRef.current = null; setIsTtsSpeaking(false); setIsTtsPaused(false); };
-                                utterance.onerror = () => { utteranceRef.current = null; setIsTtsSpeaking(false); setIsTtsPaused(false); };
-                                setIsTtsSpeaking(true);
-                                window.speechSynthesis.speak(utterance);
+                              // Speak this paragraph's text via speakCurrentParagraph
+                              // (navigating to that line first if needed)
+                              if (idx === currentLineIndex) {
+                                speakCurrentParagraph();
+                              } else {
+                                // Brief inline fallback for non-current paragraphs (demo mode)
+                                const text = story.content[idx];
+                                if (text) {
+                                  cancelTts();
+                                  setIsTtsSpeaking(true);
+                                  import('../../services/ttsApi').then(({ speakText: sp }) => {
+                                    sp(text).finally(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
+                                  });
+                                }
                               }
                             }
                           }}
