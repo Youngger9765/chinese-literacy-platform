@@ -291,8 +291,8 @@ const LearningLayout: React.FC = () => {
     (attempt: ReadingAttempt) => {
       setLastAttempt(attempt);
       setSession((prev) => (prev ? { ...prev, readingAttempt: attempt } : null));
-      persistStep(STEP_PATH_TO_NUMBER['vocab']);
-      navigate(`/learn/${storyId}/vocab`);
+      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
+      navigate(`/learn/${storyId}/full-reading`);
     },
     [storyId, navigate, persistStep],
   );
@@ -327,8 +327,8 @@ const LearningLayout: React.FC = () => {
   const handleFinishFullReading = useCallback(
     (result: FullReadingResult) => {
       setSession((prev) => (prev ? { ...prev, fullReadingResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
-      navigate(`/learn/${storyId}/knowledge-station`);
+      persistStep(STEP_PATH_TO_NUMBER['vocab']);
+      navigate(`/learn/${storyId}/vocab`);
     },
     [storyId, navigate, persistStep],
   );
@@ -351,8 +351,8 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishVocabWordSearch = useCallback(
     (_elapsedSeconds: number) => {
-      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
-      navigate(`/learn/${storyId}/full-reading`);
+      persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
+      navigate(`/learn/${storyId}/knowledge-station`);
     },
     [storyId, navigate, persistStep],
   );
