@@ -38,17 +38,21 @@ export interface StepConfig {
 }
 
 /**
- * Default step order for the 7-step learning flow.
+ * Default step order for the 10-step learning flow (三民版).
  *
  * To customise order per lesson/teacher, override this array at runtime
  * (future: load from DB/API and pass to StepperNav as a prop).
+ *
+ * dbStepNumber is the value stored in the DB (learning_sessions.current_step).
+ * Existing steps keep their original dbStepNumbers (1–7) to avoid a DB migration.
+ * The three new 三民 steps use dbStepNumbers 8–10.
  */
 export const STEP_CONFIG: StepConfig[] = [
   {
-    id: 'intro',
-    label: '簡介',
-    view: AppView.INTRO,
-    dbStepNumber: 1,
+    id: 'reading-annotation',
+    label: '閱讀標記',
+    view: AppView.READING_ANNOTATION,
+    dbStepNumber: 8,
     needsStory: true,
     enabled: true,
   },
@@ -77,10 +81,26 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
   },
   {
+    id: 'vocab-application',
+    label: '語詞應用',
+    view: AppView.VOCAB_APPLICATION,
+    dbStepNumber: 9,
+    needsStory: true,
+    enabled: true,
+  },
+  {
     id: 'dictation',
     label: '聽寫練習',
     view: AppView.DICTATION,
     dbStepNumber: 5,
+    needsStory: true,
+    enabled: true,
+  },
+  {
+    id: 'vocab-word-search',
+    label: '語詞複習',
+    view: AppView.VOCAB_WORD_SEARCH,
+    dbStepNumber: 10,
     needsStory: true,
     enabled: true,
   },
