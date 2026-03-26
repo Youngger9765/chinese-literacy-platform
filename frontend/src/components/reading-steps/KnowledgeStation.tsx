@@ -2,7 +2,7 @@
  * 知識補給站 — 三民學習單第九步
  * 顯示課文相關的 YouTube 影片和延伸資料
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Story } from '../../types';
 
 interface KnowledgeStationProps {
@@ -12,6 +12,18 @@ interface KnowledgeStationProps {
 }
 
 const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) => {
+  const storageKey = `knowledge_viewed_${story.id}`;
+
+  // Mark as viewed on mount; clear on finish
+  useEffect(() => {
+    try { localStorage.setItem(storageKey, JSON.stringify({ viewed: true })); } catch {}
+  }, [storageKey]);
+
+  const handleFinish = () => {
+    try { localStorage.removeItem(storageKey); } catch {}
+    onFinish();
+  };
+
   const videoUrl = story.knowledgeVideoUrl;
 
   // Extract YouTube video ID from URL
@@ -78,7 +90,7 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
           {/* Finish button */}
           <div className="flex justify-center pt-4">
             <button
-              onClick={onFinish}
+              onClick={handleFinish}
               className="px-8 py-3 rounded-xl text-base font-bold bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95"
             >
               繼續前往報告

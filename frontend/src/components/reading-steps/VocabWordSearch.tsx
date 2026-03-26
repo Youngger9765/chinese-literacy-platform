@@ -243,6 +243,16 @@ function getCellsBetween(start: CellPos, end: CellPos): CellPos[] {
 // ---------------------------------------------------------------------------
 
 export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProps) {
+  const storageKey = `wordSearch_progress_${story.id}`;
+  const loadSaved = () => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw) as { foundWords: string[]; elapsedTime: number };
+    } catch { return null; }
+  };
+  const savedRef = useRef(loadSaved());
+
   const vocabWords = useMemo(
     () => (story.vocabulary ?? []).map((v) => v.word).filter((w) => [...w].length >= 2),
     [story.vocabulary]
@@ -261,24 +271,59 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     return map;
   }, [placedWords]);
 
-  const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
-  const [highlightedCells, setHighlightedCells] = useState<Set<string>>(new Set());
+  const [foundWords, setFoundWords] = useState<Set<string>>(() => new Set(savedRef.current?.foundWords ?? []));
+  const [highlightedCells, setHighlightedCells] = useState<Set<string>>(() => {
+    // Restore highlighted cells from saved found words
+    const saved = savedRef.current?.foundWords ?? [];
+    if (saved.length === 0) return new Set<string>();
+    const cells = new Set<string>();
+    // We can't restore exact cell positions here since grid is regenerated randomly
+    // Just restore found words state; cells will be re-highlighted as words are re-found
+    return cells;
+  });
   const [dragCells, setDragCells] = useState<Set<string>>(new Set());
   const [dragStart, setDragStart] = useState<CellPos | null>(null);
   const [flashCells, setFlashCells] = useState<Set<string>>(new Set());
   const [finished, setFinished] = useState(false);
   const [justFound, setJustFound] = useState<string | null>(null);
 
+  // Restore highlighted cells for already-found words on mount
+  useEffect(() => {
+    if (savedRef.current?.foundWords && savedRef.current.foundWords.length > 0) {
+      const restoredCells = new Set<string>();
+      for (const word of savedRef.current.foundWords) {
+        const keys = wordKeysMap.get(word);
+        if (keys) keys.forEach(k => restoredCells.add(k));
+      }
+      if (restoredCells.size > 0) {
+        setHighlightedCells(restoredCells);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const timerRunning = !finished && vocabWords.length > 0;
   const elapsed = useTimer(timerRunning);
   const allFound = foundWords.size === placedWords.length && placedWords.length > 0;
 
+  // ── localStorage persistence ────────────────────────────────────────
+  useEffect(() => {
+    if (foundWords.size === 0) return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        foundWords: Array.from(foundWords),
+        elapsedTime: elapsed,
+      }));
+    } catch {}
+  }, [foundWords, elapsed, storageKey]);
+
   useEffect(() => {
     if (allFound && !finished) {
       setFinished(true);
+      try { localStorage.removeItem(storageKey); } catch {}
       setTimeout(() => onFinish(elapsed), 800);
     }
-  }, [allFound, finished, onFinish, elapsed]);
+  }, [allFound, finished, onFinish, elapsed, storageKey]);
 
   // Resolve a touch/mouse event to a grid cell position
   const resolveCell = useCallback((e: React.MouseEvent | React.TouchEvent): CellPos | null => {

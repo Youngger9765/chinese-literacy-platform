@@ -8,7 +8,7 @@
  *
  * Props: { story, onFinish, zhuyinActive?, fontSizePx? }
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Story } from '../../types';
 import FillInBlankExercise from './FillInBlankExercise';
 
@@ -119,8 +119,25 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   onFinish,
   fontSizePx,
 }) => {
-  const [phase, setPhase] = useState<'exercise' | 'done'>('exercise');
-  const [result, setResult] = useState<{ score: number; total: number } | null>(null);
+  const storageKey = `vocabApp_progress_${story.id}`;
+  const loadSaved = () => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw) as { phase: 'exercise' | 'done'; result: { score: number; total: number } | null };
+    } catch { return null; }
+  };
+  const savedProgress = useRef(loadSaved());
+
+  const [phase, setPhase] = useState<'exercise' | 'done'>(() => savedProgress.current?.phase ?? 'exercise');
+  const [result, setResult] = useState<{ score: number; total: number } | null>(() => savedProgress.current?.result ?? null);
+
+  // ── localStorage persistence ────────────────────────────────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ phase, result }));
+    } catch {}
+  }, [phase, result, storageKey]);
 
   const sentences = story.fillInBlank ?? [];
   const vocabBank = story.vocabBank ?? {};
@@ -133,6 +150,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   }
 
   function handleFinish() {
+    try { localStorage.removeItem(storageKey); } catch {}
     const score = result?.score ?? 0;
     const total = result?.total ?? sentences.length;
     onFinish({

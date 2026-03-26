@@ -34,7 +34,25 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   dbSessionId,
 }) => {
   const { token } = useAuth();
-  const [conversation, setConversation] = useState<ChatMessage[]>([]);
+
+  // ── localStorage persistence ────────────────────────────────────────
+  const storageKey = `comprehension_progress_${story.id}`;
+  type SavedComprehension = {
+    conversation: ChatMessage[];
+    understoodCount: number;
+    requiredCount: number;
+    isSessionComplete: boolean;
+  };
+  const loadSaved = (): SavedComprehension | null => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch { return null; }
+  };
+  const savedRef = useRef(loadSaved());
+
+  const [conversation, setConversation] = useState<ChatMessage[]>(() => savedRef.current?.conversation ?? []);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,9 +72,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [sessionId] = useState(() =>
     dbSessionId ? `db-${dbSessionId}` : crypto.randomUUID()
   );
-  const [understoodCount, setUnderstoodCount] = useState(0);
-  const [requiredCount, setRequiredCount] = useState(3);
-  const [isSessionComplete, setIsSessionComplete] = useState(false);
+  const [understoodCount, setUnderstoodCount] = useState(() => savedRef.current?.understoodCount ?? 0);
+  const [requiredCount, setRequiredCount] = useState(() => savedRef.current?.requiredCount ?? 3);
+  const [isSessionComplete, setIsSessionComplete] = useState(() => savedRef.current?.isSessionComplete ?? false);
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
   const [offlineMode, setOfflineMode] = useState(false);
   const [mockQuestionIndex, setMockQuestionIndex] = useState(0);
@@ -282,6 +300,19 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     fetchFirstQuestion();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Save conversation progress to localStorage ──────────────────────
+  useEffect(() => {
+    if (conversation.length === 0) return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        conversation,
+        understoodCount,
+        requiredCount,
+        isSessionComplete,
+      }));
+    } catch {}
+  }, [conversation, understoodCount, requiredCount, isSessionComplete, storageKey]);
+
   const handleSubmit = useCallback(async (overrideText?: string) => {
     const text = (overrideText ?? inputText).trim();
     if (!text || isLoading || isSessionComplete || isSubmittingRef.current) return;
@@ -405,7 +436,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   };
 
   // Clear session and start over from scratch (Issue #632)
+  const handleFinish = useCallback(() => {
+    try { localStorage.removeItem(storageKey); } catch {}
+    onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length });
+  }, [storageKey, onFinish, understoodCount, requiredCount, isSessionComplete, conversation.length]);
+
   const handleRestart = useCallback(async () => {
+    try { localStorage.removeItem(storageKey); } catch {}
     setConversation([]);
     setUnderstoodCount(0);
     setIsSessionComplete(false);
@@ -668,7 +705,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             重新開始
           </button>
           <button
-            onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
+            onClick={handleFinish}
             className="flex-1 py-3 rounded-xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-2"
           >
             繼續，生字練習
@@ -867,7 +904,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 <span className="text-[10px] text-gray-600">
                   {understoodCount} / {requiredCount} 理解
                 </span>
-                <button onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })} className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
+                <button onClick={handleFinish} className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
                   跳過
                 </button>
               </div>
@@ -973,7 +1010,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     {understoodCount} / {requiredCount} 理解
                   </span>
                   <button
-                    onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
+                    onClick={handleFinish}
                     className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors pr-3"
                   >
                     跳過
