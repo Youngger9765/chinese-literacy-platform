@@ -47,6 +47,7 @@ const ReportPage = lazy(() => import('../pages/learning/ReportPage'));
 const ReadingAnnotationPage = lazy(() => import('../pages/learning/ReadingAnnotationPage'));
 const VocabApplicationPage = lazy(() => import('../pages/learning/VocabApplicationPage'));
 const VocabWordSearchPage = lazy(() => import('../pages/learning/VocabWordSearchPage'));
+const KnowledgeStationPage = lazy(() => import('../pages/learning/KnowledgeStationPage'));
 
 // Student pages — infrequently accessed, split to reduce initial load
 const JoinClassroomPage = lazy(() => import('../pages/JoinClassroomPage'));
@@ -344,6 +345,7 @@ const AppRoutes: React.FC = () => (
         <Route path="vocab-word-search" element={<VocabWordSearchPage />} />
         <Route path="listening" element={<ListeningPage />} />
         <Route path="full-reading" element={<FullReadingPage />} />
+        <Route path="knowledge-station" element={<KnowledgeStationPage />} />
         <Route path="report" element={<ReportPage />} />
         {/* Default: redirect to reading-annotation (new first step) */}
         <Route index element={<Navigate to="reading-annotation" replace />} />

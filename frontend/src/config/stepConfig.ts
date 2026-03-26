@@ -94,7 +94,7 @@ export const STEP_CONFIG: StepConfig[] = [
     view: AppView.DICTATION,
     dbStepNumber: 5,
     needsStory: true,
-    enabled: true,
+    enabled: false, // hidden per product decision 2026-03-27
   },
   {
     id: 'vocab-word-search',
@@ -109,6 +109,14 @@ export const STEP_CONFIG: StepConfig[] = [
     label: '全文朗讀',
     view: AppView.FULL_READING,
     dbStepNumber: 6,
+    needsStory: true,
+    enabled: true,
+  },
+  {
+    id: 'knowledge-station',
+    label: '知識補給站',
+    view: AppView.KNOWLEDGE_STATION,
+    dbStepNumber: 11,
     needsStory: true,
     enabled: true,
   },

@@ -58,6 +58,7 @@ export interface LearningContext {
   handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
   handleFinishVocabApplication: (result: VocabApplicationResult) => void;
   handleFinishVocabWordSearch: (elapsedSeconds: number) => void;
+  handleFinishKnowledgeStation: () => void;
   handleRetry: () => void;
   handleSessionComplete: () => void;
   emptyAttempt: ReadingAttempt;
@@ -326,8 +327,8 @@ const LearningLayout: React.FC = () => {
   const handleFinishFullReading = useCallback(
     (result: FullReadingResult) => {
       setSession((prev) => (prev ? { ...prev, fullReadingResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['report']);
-      navigate(`/learn/${storyId}/report`);
+      persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
+      navigate(`/learn/${storyId}/knowledge-station`);
     },
     [storyId, navigate, persistStep],
   );
@@ -352,6 +353,14 @@ const LearningLayout: React.FC = () => {
     (_elapsedSeconds: number) => {
       persistStep(STEP_PATH_TO_NUMBER['full-reading']);
       navigate(`/learn/${storyId}/full-reading`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishKnowledgeStation = useCallback(
+    () => {
+      persistStep(STEP_PATH_TO_NUMBER['report']);
+      navigate(`/learn/${storyId}/report`);
     },
     [storyId, navigate, persistStep],
   );
@@ -442,6 +451,7 @@ const LearningLayout: React.FC = () => {
     handleFinishReadingAnnotation,
     handleFinishVocabApplication,
     handleFinishVocabWordSearch,
+    handleFinishKnowledgeStation,
     handleRetry,
     handleSessionComplete,
     emptyAttempt: EMPTY_ATTEMPT,
