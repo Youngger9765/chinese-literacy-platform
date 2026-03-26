@@ -10,6 +10,49 @@ export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra' | 
 /** Filler words commonly inserted by STT — not student errors. */
 const FILLER_CHARS = new Set(['嗯', '啊', '呃', '喔', '欸']);
 
+/**
+ * Clean spoken text (STT output) before diff comparison.
+ * Handles natural speech patterns that aren't reading errors:
+ * 1. Consecutive repeated chars: 「你你你的」→「你的」(stuttering)
+ * 2. Backtrack re-reads: 「她就是台灣第她就是台灣第一人」→「她就是台灣第一人」
+ * 3. STT duplicate segments: same phrase sent twice by speech recognition
+ */
+export function cleanSpokenForDiff(spoken: string, target: string): string {
+  let cleaned = spoken;
+
+  // 1. Collapse consecutive repeated characters (stuttering/口吃)
+  // 「你你你的」→「你的」, 「累累累計」→「累計」
+  cleaned = cleaned.replace(/([\u4e00-\u9fff])\1{1,}/g, '$1');
+
+  // 2. Remove backtrack re-reads against the target
+  // If the student said "她就是台灣第她就是台灣第一人", detect the overlapping
+  // prefix and keep only the last occurrence.
+  const targetNorm = normalizeForComparison(target);
+  const spokenChars = Array.from(normalizeForComparison(cleaned));
+
+  // Look for a repeated prefix of the target within spoken text.
+  // Scan spoken for the longest target prefix that appears twice.
+  if (spokenChars.length > targetNorm.length) {
+    const tChars = Array.from(targetNorm);
+    // Try to find where the student restarted: look for target[0..k] appearing
+    // at position > 0 in spoken, meaning they went back and re-read.
+    for (let prefixLen = Math.min(5, Math.floor(tChars.length / 2)); prefixLen >= 3; prefixLen--) {
+      const prefix = tChars.slice(0, prefixLen).join('');
+      const firstIdx = cleaned.indexOf(prefix);
+      if (firstIdx >= 0) {
+        const secondIdx = cleaned.indexOf(prefix, firstIdx + 1);
+        if (secondIdx > firstIdx) {
+          // Found a re-read: keep everything from the second occurrence onwards
+          cleaned = cleaned.slice(secondIdx);
+          break;
+        }
+      }
+    }
+  }
+
+  return cleaned;
+}
+
 export interface DiffToken {
   char: string;
   type: DiffType;

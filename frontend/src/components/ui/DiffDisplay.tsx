@@ -74,17 +74,9 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
                 </span>
               );
             case 'extra':
-              return (
-                <span
-                  key={idx}
-                  className="bg-warning/30 text-warning line-through rounded-sm px-0.5 mx-px"
-                  title="多讀"
-                  aria-label={`多讀：多讀了「${token.char}」`}
-                  role="mark"
-                >
-                  {token.char}
-                </span>
-              );
+              // Extra chars (stutters, repeated words, etc.) are kept in tokens metadata
+              // for future coaching hints but not shown in the diff display.
+              return null;
             case 'unread':
               return (
                 <span key={idx} className="text-gray-300">
