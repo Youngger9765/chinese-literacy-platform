@@ -20,9 +20,13 @@ const _urlCache = new Map<string, string>();
 // Track the currently playing audio element so cancelTts() can stop it
 let _currentAudio: HTMLAudioElement | null = null;
 
-// Whether we already tried and failed the backend (to skip retries in the same
-// session if the TTS service is unavailable, e.g. in local dev).
-let _backendUnavailable = false;
+// Backend retry state: cooldown after failure, permanent fallback after 3 consecutive failures.
+const BACKEND_COOLDOWN_MS = 30_000; // 30 seconds before retrying after a failure
+const MAX_CONSECUTIVE_FAILURES = 3;
+
+let _consecutiveFailures = 0;
+let _permanentlyFallback = false;
+let _lastFailureTime = 0;
 
 /**
  * Stop any TTS currently in progress (backend or Web Speech API).
@@ -53,20 +57,53 @@ export async function speakText(text: string, rate = 0.9): Promise<void> {
   if (!text.trim()) return;
   cancelTts();
 
-  // Try backend TTS first (unless we already know it's down)
-  if (!_backendUnavailable) {
+  // Try backend TTS first (unless permanently fallen back or in cooldown)
+  if (!_permanentlyFallback && _isBackendAvailable()) {
     try {
       await _speakViaBackend(text);
+      // Reset failure count on success
+      _consecutiveFailures = 0;
       return;
     } catch (err) {
-      console.warn('[TTS] Backend TTS failed, falling back to Web Speech API:', err);
-      _backendUnavailable = true;
+      _consecutiveFailures++;
+      _lastFailureTime = Date.now();
+      if (_consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+        console.warn(`[TTS] ${MAX_CONSECUTIVE_FAILURES} consecutive failures — permanently falling back to Web Speech API`);
+        _permanentlyFallback = true;
+      } else {
+        console.warn(`[TTS] Backend TTS failed (${_consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES}), cooldown ${BACKEND_COOLDOWN_MS / 1000}s:`, err);
+      }
     }
   }
 
   // Fallback: browser Web Speech API
   await _speakViaBrowserApi(text, rate);
 }
+
+// ---------------------------------------------------------------------------
+// Private: backend availability check
+// ---------------------------------------------------------------------------
+
+function _isBackendAvailable(): boolean {
+  if (_permanentlyFallback) return false;
+  if (_consecutiveFailures === 0) return true;
+  // In cooldown: wait before retrying
+  return Date.now() - _lastFailureTime >= BACKEND_COOLDOWN_MS;
+}
+
+// Exported for testing only
+export const _testInternals = {
+  reset() {
+    _consecutiveFailures = 0;
+    _permanentlyFallback = false;
+    _lastFailureTime = 0;
+  },
+  getState() {
+    return { _consecutiveFailures, _permanentlyFallback, _lastFailureTime };
+  },
+  BACKEND_COOLDOWN_MS,
+  MAX_CONSECUTIVE_FAILURES,
+};
 
 // ---------------------------------------------------------------------------
 // Private: backend audio playback
