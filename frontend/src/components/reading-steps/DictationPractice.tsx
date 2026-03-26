@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Story } from '../../types';
+import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
 
 export interface DictationResult {
   totalWords: number;
@@ -51,32 +52,11 @@ function extractDictationWords(story: Story): string[] {
 }
 
 /**
- * Use Web Speech API SpeechSynthesis to speak text in zh-TW.
- * Returns a Promise that resolves when speech ends (or rejects on error).
+ * Speak text using Cloud TTS Neural2 (zh-TW) with Web Speech API fallback.
+ * Returns a Promise that resolves when speech ends (or rejects on fatal error).
  */
-function speakText(text: string, rate = 0.85): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (!window.speechSynthesis) {
-      reject(new Error('SpeechSynthesis not supported'));
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-TW';
-    utterance.rate = rate;
-    utterance.pitch = 1.0;
-
-    // Prefer a zh-TW voice if available
-    const voices = window.speechSynthesis.getVoices();
-    const twVoice =
-      voices.find((v) => v.lang === 'zh-TW') ||
-      voices.find((v) => v.lang.startsWith('zh'));
-    if (twVoice) utterance.voice = twVoice;
-
-    utterance.onend = () => resolve();
-    utterance.onerror = (e) => reject(new Error(e.error));
-    window.speechSynthesis.speak(utterance);
-  });
+function speakText(text: string, _rate = 0.85): Promise<void> {
+  return cloudSpeakText(text, _rate);
 }
 
 // ---- Sub-components ----
@@ -133,24 +113,10 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
   const [voicesLoaded, setVoicesLoaded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load voices asynchronously (Chrome loads voices after a slight delay)
+  // Cloud TTS is always ready immediately; mark voicesLoaded true on mount.
+  // Web Speech API voice loading is handled inside ttsApi fallback.
   useEffect(() => {
-    const loadVoices = () => {
-      window.speechSynthesis.getVoices();
-      setVoicesLoaded(true);
-    };
-    if (window.speechSynthesis) {
-      if (window.speechSynthesis.getVoices().length > 0) {
-        setVoicesLoaded(true);
-      } else {
-        window.speechSynthesis.addEventListener('voiceschanged', loadVoices, { once: true });
-      }
-    } else {
-      setTtsSupported(false);
-    }
-    return () => {
-      window.speechSynthesis?.removeEventListener('voiceschanged', loadVoices);
-    };
+    setVoicesLoaded(true);
   }, []);
 
   // Focus input when entering practice phase or moving to next word
@@ -207,7 +173,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
 
       if (currentIndex + 1 >= words.length) {
         // Done — show results
-        window.speechSynthesis?.cancel();
+        cancelTts();
         const correct = updatedResults.filter((r) => r.isCorrect).length;
         const skippedCount = updatedResults.filter((r) => r.skipped).length;
         const incorrect = updatedResults.length - correct - skippedCount;
