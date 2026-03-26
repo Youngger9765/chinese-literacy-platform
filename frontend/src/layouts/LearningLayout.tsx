@@ -9,6 +9,8 @@ import {
   DictationResult,
   FullReadingResult,
 } from '../types';
+import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnotation';
+import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
 import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
 import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,6 +55,9 @@ export interface LearningContext {
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishDictation: (result: DictationResult) => void;
   handleFinishFullReading: (result: FullReadingResult) => void;
+  handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
+  handleFinishVocabApplication: (result: VocabApplicationResult) => void;
+  handleFinishVocabWordSearch: (elapsedSeconds: number) => void;
   handleRetry: () => void;
   handleSessionComplete: () => void;
   emptyAttempt: ReadingAttempt;
@@ -219,12 +224,12 @@ const LearningLayout: React.FC = () => {
             fullReadingResult: null,
           };
         });
-        // Persist step 1 (intro) as the starting point
+        // Persist step 1 (reading-annotation) as the starting point
         if (user) {
           saveActiveSession(String(user.id), {
             sessionId: 0,
             storyId,
-            currentStep: STEP_PATH_TO_NUMBER['intro'],
+            currentStep: STEP_PATH_TO_NUMBER['reading-annotation'],
             timestamp: Date.now(),
           });
         }
@@ -254,7 +259,7 @@ const LearningLayout: React.FC = () => {
       }
       return null;
     });
-    persistStep(STEP_PATH_TO_NUMBER['tutor']);
+    persistStep(STEP_PATH_TO_NUMBER['reading-annotation']);
 
     // Create a DB learning session so dialogue can be persisted (Issue #242)
     if (token && storyId && dbSessionId === null) {
@@ -278,7 +283,7 @@ const LearningLayout: React.FC = () => {
         });
     }
 
-    navigate(`/learn/${storyId}/tutor`);
+    navigate(`/learn/${storyId}/reading-annotation`);
   }, [storyId, selectedStory, navigate, persistStep, token, dbSessionId]);
 
   const handleFinishReading = useCallback(
@@ -303,8 +308,8 @@ const LearningLayout: React.FC = () => {
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
       setSession((prev) => (prev ? { ...prev, vocabResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['dictation']);
-      navigate(`/learn/${storyId}/dictation`);
+      persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
+      navigate(`/learn/${storyId}/vocab-application`);
     },
     [storyId, navigate, persistStep],
   );
@@ -312,8 +317,8 @@ const LearningLayout: React.FC = () => {
   const handleFinishDictation = useCallback(
     (result: DictationResult) => {
       setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
-      navigate(`/learn/${storyId}/full-reading`);
+      persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
+      navigate(`/learn/${storyId}/vocab-word-search`);
     },
     [storyId, navigate, persistStep],
   );
@@ -323,6 +328,30 @@ const LearningLayout: React.FC = () => {
       setSession((prev) => (prev ? { ...prev, fullReadingResult: result } : null));
       persistStep(STEP_PATH_TO_NUMBER['report']);
       navigate(`/learn/${storyId}/report`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishReadingAnnotation = useCallback(
+    (_summary: AnnotationSummary) => {
+      persistStep(STEP_PATH_TO_NUMBER['tutor']);
+      navigate(`/learn/${storyId}/tutor`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishVocabApplication = useCallback(
+    (_result: VocabApplicationResult) => {
+      persistStep(STEP_PATH_TO_NUMBER['dictation']);
+      navigate(`/learn/${storyId}/dictation`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishVocabWordSearch = useCallback(
+    (_elapsedSeconds: number) => {
+      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
+      navigate(`/learn/${storyId}/full-reading`);
     },
     [storyId, navigate, persistStep],
   );
@@ -410,6 +439,9 @@ const LearningLayout: React.FC = () => {
     handleFinishVocab,
     handleFinishDictation,
     handleFinishFullReading,
+    handleFinishReadingAnnotation,
+    handleFinishVocabApplication,
+    handleFinishVocabWordSearch,
     handleRetry,
     handleSessionComplete,
     emptyAttempt: EMPTY_ATTEMPT,
