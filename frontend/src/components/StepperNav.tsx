@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppView, Story, LearningSession } from '../types';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useAuth } from '../contexts/AuthContext';
+import { ACTIVE_STEPS } from '../config/stepConfig';
 
 interface StepperNavProps {
   currentView: AppView;
@@ -20,15 +21,16 @@ interface StepDef {
   needsStory: boolean;
 }
 
-const steps: StepDef[] = [
-  { step: 1, label: '簡介',    view: AppView.INTRO,         needsStory: true  },
-  { step: 2, label: '逐段朗讀', view: AppView.TUTOR,         needsStory: true  },
-  { step: 3, label: '課文理解', view: AppView.COMPREHENSION, needsStory: true  },
-  { step: 4, label: '生字練習', view: AppView.VOCAB,         needsStory: true  },
-  { step: 5, label: '聽寫練習', view: AppView.DICTATION,     needsStory: true  },
-  { step: 6, label: '全文朗讀', view: AppView.FULL_READING,  needsStory: true  },
-  { step: 7, label: '報告',    view: AppView.REPORT,        needsStory: false },
-];
+/**
+ * Steps are derived from the central ACTIVE_STEPS config so that reordering
+ * or adding steps only requires editing stepConfig.ts.
+ */
+const steps: StepDef[] = ACTIVE_STEPS.map((s, i) => ({
+  step: i + 1,
+  label: s.label,
+  view: s.view,
+  needsStory: s.needsStory,
+}));
 
 function getStepStatus(
   stepDef: StepDef,
