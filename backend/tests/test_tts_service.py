@@ -248,7 +248,85 @@ class TestEmptyAudioResponse:
 
 
 # ---------------------------------------------------------------------------
-# 6. TTS route tests
+# 6. Cost protection — cache layers must prevent duplicate API calls
+# ---------------------------------------------------------------------------
+
+class TestCostProtection:
+    """Every cache layer must prevent redundant Cloud TTS API calls (= money)."""
+
+    def _make_fake_response(self, audio_content=b"FAKE_AUDIO"):
+        resp = MagicMock()
+        resp.audio_content = audio_content
+        return resp
+
+    @patch("app.services.tts_service._gcs_put")
+    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch("app.services.tts_service._get_tts_client")
+    def test_gcs_hit_skips_api_call(self, mock_get_client, mock_gcs_put):
+        """L2 GCS cache hit → Cloud TTS API must NOT be called (saves money)."""
+        from app.services.tts_service import synthesize_speech
+        mock_client = MagicMock()
+        mock_get_client.return_value = mock_client
+
+        with patch("app.services.tts_service._gcs_get", return_value=b"CACHED_AUDIO"):
+            result = synthesize_speech("已快取的句子")
+
+        assert result == b"CACHED_AUDIO"
+        mock_client.synthesize_speech.assert_not_called()  # NO API call = NO cost
+
+    @patch("app.services.tts_service._gcs_get", return_value=None)
+    @patch("app.services.tts_service._gcs_put")
+    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch("app.services.tts_service._get_tts_client")
+    def test_api_result_saved_to_gcs(self, mock_get_client, mock_gcs_put, mock_gcs_get):
+        """After API call, result MUST be saved to GCS (prevents paying again)."""
+        from app.services.tts_service import synthesize_speech, _cache_key
+        mock_client = MagicMock()
+        mock_client.synthesize_speech.return_value = self._make_fake_response(b"NEW_AUDIO")
+        mock_get_client.return_value = mock_client
+
+        synthesize_speech("新的句子")
+
+        expected_key = _cache_key("新的句子")
+        mock_gcs_put.assert_called_once_with(expected_key, b"NEW_AUDIO")
+
+    @patch("app.services.tts_service._gcs_put")
+    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch("app.services.tts_service._get_tts_client")
+    def test_gcs_hit_also_populates_l1(self, mock_get_client, mock_gcs_put):
+        """GCS hit should populate L1 so next call doesn't even hit GCS."""
+        from app.services.tts_service import synthesize_speech, _cache_key, _TTS_CACHE
+
+        with patch("app.services.tts_service._gcs_get", return_value=b"GCS_AUDIO"):
+            synthesize_speech("測試L1填充")
+
+        # L1 should now have it
+        key = _cache_key("測試L1填充")
+        assert key in _TTS_CACHE
+        assert _TTS_CACHE[key] == b"GCS_AUDIO"
+
+    @patch("app.services.tts_service._gcs_get", return_value=None)
+    @patch("app.services.tts_service._gcs_put")
+    @patch("app.services.tts_service._get_tts_client")
+    def test_three_calls_same_text_only_one_api_call(self, mock_get_client, mock_gcs_put, mock_gcs_get):
+        """3 calls with same text = exactly 1 API call. Cost = 1x not 3x."""
+        import app.services.tts_service as tts_mod
+        # Clear L1 cache
+        tts_mod._TTS_CACHE.clear()
+
+        mock_client = MagicMock()
+        mock_client.synthesize_speech.return_value = self._make_fake_response(b"AUDIO")
+        mock_get_client.return_value = mock_client
+
+        tts_mod.synthesize_speech("重複的句子")
+        tts_mod.synthesize_speech("重複的句子")
+        tts_mod.synthesize_speech("重複的句子")
+
+        assert mock_client.synthesize_speech.call_count == 1  # paid once only
+
+
+# ---------------------------------------------------------------------------
+# 7. TTS route tests
 # ---------------------------------------------------------------------------
 
 class TestTTSRoute:
