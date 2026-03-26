@@ -291,8 +291,8 @@ const LearningLayout: React.FC = () => {
     (attempt: ReadingAttempt) => {
       setLastAttempt(attempt);
       setSession((prev) => (prev ? { ...prev, readingAttempt: attempt } : null));
-      persistStep(STEP_PATH_TO_NUMBER['comprehension']);
-      navigate(`/learn/${storyId}/comprehension`);
+      persistStep(STEP_PATH_TO_NUMBER['vocab']);
+      navigate(`/learn/${storyId}/vocab`);
     },
     [storyId, navigate, persistStep],
   );
@@ -300,8 +300,8 @@ const LearningLayout: React.FC = () => {
   const handleFinishComprehension = useCallback(
     (result: ComprehensionResult) => {
       setSession((prev) => (prev ? { ...prev, comprehensionResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['vocab']);
-      navigate(`/learn/${storyId}/vocab`);
+      persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
+      navigate(`/learn/${storyId}/vocab-word-search`);
     },
     [storyId, navigate, persistStep],
   );
@@ -343,8 +343,8 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishVocabApplication = useCallback(
     (_result: VocabApplicationResult) => {
-      persistStep(STEP_PATH_TO_NUMBER['dictation']);
-      navigate(`/learn/${storyId}/dictation`);
+      persistStep(STEP_PATH_TO_NUMBER['comprehension']);
+      navigate(`/learn/${storyId}/comprehension`);
     },
     [storyId, navigate, persistStep],
   );
