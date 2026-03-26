@@ -111,12 +111,15 @@ const normalizeChineseNumberVariants = (text: string) =>
 const stripDecorativeSymbols = (text: string) =>
   text
     .replace(/[~～]+/g, '')                    // tildes (~~~)
-    .replace(/[──—–]{1,}/g, '')                // long dashes
+    .replace(/[──—–−]{1,}/g, '')              // long dashes, minus sign
     .replace(/-{2,}/g, '')                     // double hyphens
-    .replace(/\.{3,}|…+/g, '')                // ellipsis
+    .replace(/[.]{3,}|[…⋯]+/g, '')           // ellipsis (all variants)
     .replace(/#/g, '')                         // hashtag
     .replace(/[/\\|*[\]{}]+/g, '')             // markdown/code symbols
-    .replace(/（[^）]*）/g, '')                // parenthetical notes e.g. （ml，台灣常用C.C.）
+    .replace(/[·‧・°○]+/g, '')                // interpunct, degree, circle
+    .replace(/%/g, '')                         // percent sign
+    .replace(/[\uf410\u{E01E0}-\u{E01E4}]+/gu, '') // invisible/private-use chars
+    .replace(/（[^）]*）/g, '')                // parenthetical notes
     .replace(/\([^)]*\)/g, '');                // English parenthetical notes
 
 export const normalizeForComparison = (text: string) =>

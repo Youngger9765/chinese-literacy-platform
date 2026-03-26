@@ -133,13 +133,16 @@ def _clean_for_tts(text: str) -> str:
     """Strip symbols that TTS would read aloud (e.g. ~~~ → '波浪符波浪符波浪符')."""
     # Remove decorative symbols that aren't meant to be spoken
     text = re.sub(r'[~～]+', '', text)           # tildes (~~~)
-    text = re.sub(r'[──—–]{1,}', '，', text)     # long dashes → pause
+    text = re.sub(r'[──—–−]{1,}', '，', text)    # long dashes, minus → pause
     text = re.sub(r'-{2,}', '，', text)           # double hyphens → pause
-    text = re.sub(r'\.{3,}|…+', '，', text)      # ellipsis → pause
+    text = re.sub(r'[.]{3,}|[…⋯]+', '，', text)  # ellipsis (all variants) → pause
     text = re.sub(r'#', '', text)                 # hashtag symbols (#MeToo → MeToo)
     text = re.sub(r'(\d+)/(\d+)', r'\1 之 \2', text)  # blood pressure 210/120 → 210 之 120
     text = re.sub(r'[/\\|]+', '', text)           # remaining slashes
     text = re.sub(r'[\*\[\]\{\}]+', '', text)     # markdown symbols
+    text = re.sub(r'[·‧・°○]+', '', text)        # interpunct, degree, circle
+    text = re.sub(r'%', '百分之', text)           # percent → spoken form
+    text = re.sub(r'[\uf410\U000E01E0-\U000E01E4]+', '', text)  # invisible/private-use chars
     text = re.sub(r'，{2,}', '，', text)          # collapse multiple pauses
     text = re.sub(r'\s+', ' ', text).strip()      # collapse whitespace
     return text
