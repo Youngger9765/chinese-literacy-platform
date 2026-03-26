@@ -13,6 +13,7 @@ import { fetchStory, saveActiveSession, clearActiveSession } from '../services/a
 import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
+import { STEP_PATH_TO_NUMBER as STEP_CONFIG_PATH_TO_NUMBER } from '../config/stepConfig';
 import { useIdleTimer } from '../hooks/useIdleTimer';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
 
@@ -67,16 +68,9 @@ export interface LearningContext {
 
 /**
  * Map from step name in URL path to numeric step index (1-based, matching DB).
+ * Sourced from stepConfig.ts — the single source of truth for step definitions.
  */
-const STEP_PATH_TO_NUMBER: Record<string, number> = {
-  intro: 1,
-  tutor: 2,
-  comprehension: 3,
-  vocab: 4,
-  dictation: 5,
-  'full-reading': 6,
-  report: 7,
-};
+const STEP_PATH_TO_NUMBER = STEP_CONFIG_PATH_TO_NUMBER;
 
 /**
  * Wraps the learning flow routes (/learn/:storyId/*).

@@ -10,6 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
+import { VIEW_TO_PATH } from '../../config/stepConfig';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
@@ -50,32 +51,20 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
       case AppView.LIBRARY:
         navigate('/library');
         break;
-      // Learning step navigation: extract storyId from current URL
-      case AppView.INTRO:
-      case AppView.TUTOR:
-      case AppView.COMPREHENSION:
-      case AppView.VOCAB:
-      case AppView.DICTATION:
-      case AppView.FULL_READING:
-      case AppView.REPORT: {
-        const match = window.location.pathname.match(/\/learn\/([^/]+)/);
-        const storyId = match?.[1];
-        if (storyId) {
-          const stepPath: Record<string, string> = {
-            [AppView.INTRO]: 'intro',
-            [AppView.TUTOR]: 'tutor',
-            [AppView.COMPREHENSION]: 'comprehension',
-            [AppView.VOCAB]: 'vocab',
-            [AppView.DICTATION]: 'dictation',
-            [AppView.FULL_READING]: 'full-reading',
-            [AppView.REPORT]: 'report',
-          };
-          navigate(`/learn/${storyId}/${stepPath[view]}`);
+      default: {
+        // Learning step navigation: look up path from config-driven VIEW_TO_PATH map.
+        // ACTIVE_STEPS drives which views are valid learning steps, so any view
+        // that resolves in VIEW_TO_PATH is a learning step.
+        const pathId = VIEW_TO_PATH[view];
+        if (pathId) {
+          const match = window.location.pathname.match(/\/learn\/([^/]+)/);
+          const storyId = match?.[1];
+          if (storyId) {
+            navigate(`/learn/${storyId}/${pathId}`);
+          }
         }
         break;
       }
-      default:
-        break;
     }
   };
 
