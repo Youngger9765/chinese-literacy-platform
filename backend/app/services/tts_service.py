@@ -36,12 +36,17 @@ CACHE_MAX_ENTRIES = 500
 # ---------------------------------------------------------------------------
 TTS_GCS_BUCKET = os.environ.get("TTS_GCS_BUCKET", "lingoleap-tts-cache")
 
-_gcs_client: Optional[object] = None
+# Sentinel: once GCS init fails, stop retrying for this process lifetime.
+_GCS_UNAVAILABLE = object()
+
+_gcs_client: object = None  # None = not yet attempted, _GCS_UNAVAILABLE = failed
 
 
 def _get_gcs_bucket():
-    """Return a lazy-initialised GCS bucket object."""
+    """Return a lazy-initialised GCS bucket object, or None if unavailable."""
     global _gcs_client
+    if _gcs_client is _GCS_UNAVAILABLE:
+        return None
     if _gcs_client is None:
         try:
             from google.cloud import storage
@@ -50,6 +55,7 @@ def _get_gcs_bucket():
             logger.info("GCS TTS cache bucket: %s", TTS_GCS_BUCKET)
         except Exception as exc:
             logger.warning("GCS cache unavailable, falling back to API-only: %s", exc)
+            _gcs_client = _GCS_UNAVAILABLE
             return None
     return _gcs_client
 
