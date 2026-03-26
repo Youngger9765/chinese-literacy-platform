@@ -144,3 +144,4 @@ export const VIEW_TO_PATH: Record<string, string> = Object.fromEntries(
 export const PATH_TO_VIEW: Record<string, AppView> = Object.fromEntries(
   STEP_CONFIG.map((s) => [s.id, s.view]),
 );
+// trigger CI
