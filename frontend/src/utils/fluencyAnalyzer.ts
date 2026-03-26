@@ -3,7 +3,7 @@
  * Centralizes CPM calculation, pass/fail determination, and feedback messages.
  */
 import type { DiffToken } from '../types';
-import { diffCharacters, cleanSpokenForDiff } from './textDiff';
+import { diffCharacters } from './textDiff';
 import { correctHomophones } from './pinyin';
 import { normalizeForComparison, cleanChineseText } from './textDiff';
 import { FULLREADING_CPM_PASS, FULLREADING_ACCURACY_PASS } from './personaConfig';
@@ -63,7 +63,7 @@ export function analyzeFluency(input: {
 }): FluencyResult {
   const thresholds = input.thresholds ?? DEFAULT_THRESHOLDS;
   const targetNorm = normalizeForComparison(input.target);
-  const cleaned = cleanSpokenForDiff(cleanChineseText(input.spoken), input.target);
+  const cleaned = cleanChineseText(input.spoken);
   const corrected = correctHomophones(cleaned, targetNorm);
   const diffResult = diffCharacters(corrected, input.target, { useHomophone: true });
 
