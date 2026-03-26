@@ -248,7 +248,47 @@ class TestEmptyAudioResponse:
 
 
 # ---------------------------------------------------------------------------
-# 6. Sentence splitting — prevents 400 errors on long text
+# 6. Text cleaning — strip symbols TTS would read aloud
+# ---------------------------------------------------------------------------
+
+class TestTextCleaning:
+    """Symbols like ~~~ must be stripped before sending to TTS."""
+
+    def test_tildes_removed(self):
+        from app.services.tts_service import _clean_for_tts
+        assert "~~~" not in _clean_for_tts("我愛妳~~~這一句")
+        assert _clean_for_tts("我愛妳~~~這一句") == "我愛妳這一句"
+
+    def test_long_dashes_become_pause(self):
+        from app.services.tts_service import _clean_for_tts
+        assert _clean_for_tts("球后──戴資穎") == "球后，戴資穎"
+
+    def test_ellipsis_becomes_pause(self):
+        from app.services.tts_service import _clean_for_tts
+        assert _clean_for_tts("輕鬆……對手") == "輕鬆，對手"
+
+    def test_hashtag_removed_but_word_kept(self):
+        from app.services.tts_service import _clean_for_tts
+        assert _clean_for_tts("#MeToo運動") == "MeToo運動"
+
+    def test_blood_pressure_slash(self):
+        from app.services.tts_service import _clean_for_tts
+        assert "210 之 120" in _clean_for_tts("血壓210/120")
+
+    def test_normal_text_unchanged(self):
+        from app.services.tts_service import _clean_for_tts
+        assert _clean_for_tts("你好世界") == "你好世界"
+
+    def test_real_lesson_text(self):
+        from app.services.tts_service import _clean_for_tts
+        text = "「戴資穎戴資穎我愛妳~~~」這一句洗腦的廣告臺詞"
+        cleaned = _clean_for_tts(text)
+        assert "~~~" not in cleaned
+        assert "戴資穎" in cleaned
+
+
+# ---------------------------------------------------------------------------
+# 7. Sentence splitting — prevents 400 errors on long text
 # ---------------------------------------------------------------------------
 
 class TestSentenceSplitting:

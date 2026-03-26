@@ -129,6 +129,22 @@ def _get_tts_client():
 # Cache key helper
 # ---------------------------------------------------------------------------
 
+def _clean_for_tts(text: str) -> str:
+    """Strip symbols that TTS would read aloud (e.g. ~~~ → '波浪符波浪符波浪符')."""
+    # Remove decorative symbols that aren't meant to be spoken
+    text = re.sub(r'[~～]+', '', text)           # tildes (~~~)
+    text = re.sub(r'[──—–]{1,}', '，', text)     # long dashes → pause
+    text = re.sub(r'-{2,}', '，', text)           # double hyphens → pause
+    text = re.sub(r'\.{3,}|…+', '，', text)      # ellipsis → pause
+    text = re.sub(r'#', '', text)                 # hashtag symbols (#MeToo → MeToo)
+    text = re.sub(r'(\d+)/(\d+)', r'\1 之 \2', text)  # blood pressure 210/120 → 210 之 120
+    text = re.sub(r'[/\\|]+', '', text)           # remaining slashes
+    text = re.sub(r'[\*\[\]\{\}]+', '', text)     # markdown symbols
+    text = re.sub(r'，{2,}', '，', text)          # collapse multiple pauses
+    text = re.sub(r'\s+', ' ', text).strip()      # collapse whitespace
+    return text
+
+
 def _cache_key(text: str) -> str:
     """Return a stable hex SHA-256 digest for *text*."""
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -223,6 +239,7 @@ def synthesize_speech(text: str) -> bytes:
     Raises:
         TTSError: if synthesis fails or returns empty audio.
     """
+    # Cache key uses original text (before cleaning) for consistency
     key = _cache_key(text)
 
     # L1: in-memory
@@ -236,8 +253,13 @@ def synthesize_speech(text: str) -> bytes:
         _l1_put(key, gcs_data)
         return gcs_data
 
+    # Clean text before TTS: strip symbols that would be read aloud
+    cleaned = _clean_for_tts(text)
+    if not cleaned:
+        raise TTSError("Text is empty after cleaning")
+
     # L3: API call — split if text is too long for Chirp3-HD
-    sentences = _split_sentences(text)
+    sentences = _split_sentences(cleaned)
     logger.info(
         "TTS cache miss, calling API (len=%d chars, %d chunks, voice=%s)",
         len(text), len(sentences), TTS_VOICE,
