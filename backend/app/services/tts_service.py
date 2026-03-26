@@ -21,6 +21,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
+import re
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -134,6 +135,75 @@ def _cache_key(text: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Sentence splitting — Chirp3-HD rejects sentences >60 chars
+# ---------------------------------------------------------------------------
+
+MAX_SENTENCE_LEN = 40  # safe threshold (tested: 50 OK, 70 FAIL)
+
+
+def _split_sentences(text: str) -> list[str]:
+    """Split Chinese text into chunks ≤ MAX_SENTENCE_LEN chars.
+
+    Strategy: split by sentence-ending punctuation first, then by
+    comma/pause marks if still too long.
+    """
+    # Split by sentence-ending punctuation
+    parts = re.split(r'(?<=[。！？\n])', text)
+    sentences = [s.strip() for s in parts if s.strip()]
+
+    result: list[str] = []
+    for s in sentences:
+        if len(s) <= MAX_SENTENCE_LEN:
+            result.append(s)
+        else:
+            # Split by comma/pause marks
+            sub = re.split(r'(?<=[，、；：」）])', s)
+            chunk = ""
+            for part in sub:
+                if len(chunk) + len(part) > MAX_SENTENCE_LEN and chunk:
+                    result.append(chunk)
+                    chunk = part
+                else:
+                    chunk += part
+            if chunk:
+                result.append(chunk)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Single-chunk synthesis (internal, no splitting)
+# ---------------------------------------------------------------------------
+
+def _synthesize_chunk(text: str) -> bytes:
+    """Synthesise a single short text chunk via Cloud TTS API."""
+    try:
+        from google.cloud import texttospeech
+        client = _get_tts_client()
+
+        response = client.synthesize_speech(
+            input=texttospeech.SynthesisInput(text=text),
+            voice=texttospeech.VoiceSelectionParams(
+                language_code=TTS_LANGUAGE_CODE,
+                name=TTS_VOICE,
+            ),
+            audio_config=texttospeech.AudioConfig(
+                audio_encoding=texttospeech.AudioEncoding.MP3,
+                speaking_rate=0.9,
+                pitch=0.0,
+            ),
+        )
+    except TTSError:
+        raise
+    except Exception as exc:
+        raise TTSError(f"Cloud TTS API error: {exc}") from exc
+
+    audio_bytes = response.audio_content
+    if not audio_bytes:
+        raise TTSError("Cloud TTS returned empty audio content")
+    return audio_bytes
+
+
+# ---------------------------------------------------------------------------
 # Public synthesis function
 # ---------------------------------------------------------------------------
 
@@ -141,13 +211,14 @@ def synthesize_speech(text: str) -> bytes:
     """Synthesise *text* to MP3 audio bytes using Cloud TTS Chirp3-HD.
 
     Two-layer cache: in-memory (L1) → GCS (L2) → API call.
+    Long text is auto-split into sentences to avoid Chirp3-HD length limits.
     Results are persisted to GCS so they survive deploys and cold starts.
 
     Args:
         text: Plain text to synthesise (max 5000 chars).
 
     Returns:
-        MP3 audio bytes.
+        MP3 audio bytes (concatenated if split).
 
     Raises:
         TTSError: if synthesis fails or returns empty audio.
@@ -165,37 +236,18 @@ def synthesize_speech(text: str) -> bytes:
         _l1_put(key, gcs_data)
         return gcs_data
 
-    # L3: API call
-    logger.info("TTS cache miss, calling API (len=%d chars, voice=%s)", len(text), TTS_VOICE)
+    # L3: API call — split if text is too long for Chirp3-HD
+    sentences = _split_sentences(text)
+    logger.info(
+        "TTS cache miss, calling API (len=%d chars, %d chunks, voice=%s)",
+        len(text), len(sentences), TTS_VOICE,
+    )
 
-    try:
-        from google.cloud import texttospeech
-        client = _get_tts_client()
+    chunks: list[bytes] = []
+    for sentence in sentences:
+        chunks.append(_synthesize_chunk(sentence))
 
-        synthesis_input = texttospeech.SynthesisInput(text=text)
-        voice = texttospeech.VoiceSelectionParams(
-            language_code=TTS_LANGUAGE_CODE,
-            name=TTS_VOICE,
-        )
-        audio_config = texttospeech.AudioConfig(
-            audio_encoding=texttospeech.AudioEncoding.MP3,
-            speaking_rate=0.9,
-            pitch=0.0,
-        )
-
-        response = client.synthesize_speech(
-            input=synthesis_input,
-            voice=voice,
-            audio_config=audio_config,
-        )
-    except TTSError:
-        raise
-    except Exception as exc:
-        raise TTSError(f"Cloud TTS API error: {exc}") from exc
-
-    audio_bytes = response.audio_content
-    if not audio_bytes:
-        raise TTSError("Cloud TTS returned empty audio content")
+    audio_bytes = b"".join(chunks)
 
     # Save to both caches
     _l1_put(key, audio_bytes)

@@ -248,7 +248,52 @@ class TestEmptyAudioResponse:
 
 
 # ---------------------------------------------------------------------------
-# 6. Cost protection — cache layers must prevent duplicate API calls
+# 6. Sentence splitting — prevents 400 errors on long text
+# ---------------------------------------------------------------------------
+
+class TestSentenceSplitting:
+    """Long text must be split to avoid Chirp3-HD 400 errors."""
+
+    def test_short_text_not_split(self):
+        from app.services.tts_service import _split_sentences
+        result = _split_sentences("你好世界。")
+        assert len(result) == 1
+
+    def test_long_text_split_by_period(self):
+        from app.services.tts_service import _split_sentences
+        text = "第一句話很短。第二句話也很短。第三句話還是很短。"
+        result = _split_sentences(text)
+        assert len(result) == 3
+
+    def test_long_sentence_split_by_comma(self):
+        from app.services.tts_service import _split_sentences
+        # 73 chars, no period — must split by comma
+        text = "漫畫《一拳超人》中的埼玉老師堅持了三年，每天做一百次的伏地挺身、一百次的仰臥起坐、一百次的深蹲、十公里的長跑，終於擁有一拳就能打倒所有敵人的實力。"
+        result = _split_sentences(text)
+        assert all(len(s) <= 50 for s in result), f"Chunks too long: {[len(s) for s in result]}"
+        assert "".join(result) == text  # no text lost
+
+    def test_synthesize_speech_handles_long_text(self):
+        """Long text should be split and each chunk synthesized separately."""
+        from app.services.tts_service import synthesize_speech
+        long_text = "漫畫《一拳超人》中的埼玉老師堅持了三年，每天做一百次的伏地挺身、一百次的仰臥起坐、一百次的深蹲、十公里的長跑，終於擁有一拳就能打倒所有敵人的實力。"
+
+        mock_client = MagicMock()
+        mock_client.synthesize_speech.side_effect = lambda **kwargs: MagicMock(audio_content=b"CHUNK")
+
+        with patch("app.services.tts_service._gcs_get", return_value=None), \
+             patch("app.services.tts_service._gcs_put"), \
+             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch("app.services.tts_service._get_tts_client", return_value=mock_client):
+            result = synthesize_speech(long_text)
+
+        # Multiple chunks concatenated
+        assert mock_client.synthesize_speech.call_count > 1
+        assert result == b"CHUNK" * mock_client.synthesize_speech.call_count
+
+
+# ---------------------------------------------------------------------------
+# 7. Cost protection — cache layers must prevent duplicate API calls
 # ---------------------------------------------------------------------------
 
 class TestCostProtection:
