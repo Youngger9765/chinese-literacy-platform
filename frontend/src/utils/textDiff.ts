@@ -61,9 +61,24 @@ const normalizeNumbers = (text: string) => text.replace(/\d+/g, m => intToChines
 const normalizeChineseNumberVariants = (text: string) =>
   text.replace(/兩(?=[百千萬億])/g, '二');
 
+/**
+ * Strip decorative symbols that students cannot possibly speak.
+ * Must stay in sync with backend tts_service._clean_for_tts().
+ */
+const stripDecorativeSymbols = (text: string) =>
+  text
+    .replace(/[~～]+/g, '')                    // tildes (~~~)
+    .replace(/[──—–]{1,}/g, '')                // long dashes
+    .replace(/-{2,}/g, '')                     // double hyphens
+    .replace(/\.{3,}|…+/g, '')                // ellipsis
+    .replace(/#/g, '')                         // hashtag
+    .replace(/[/\\|*[\]{}]+/g, '')             // markdown/code symbols
+    .replace(/（[^）]*）/g, '')                // parenthetical notes e.g. （ml，台灣常用C.C.）
+    .replace(/\([^)]*\)/g, '');                // English parenthetical notes
+
 export const normalizeForComparison = (text: string) =>
   normalizeChineseNumberVariants(
-    normalizeNumbers(cleanChineseText(text))
+    normalizeNumbers(cleanChineseText(stripDecorativeSymbols(text)))
   ).replace(/[「」『』，。！？：；、\s]/g, '');
 
 /**
