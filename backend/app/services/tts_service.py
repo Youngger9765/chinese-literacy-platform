@@ -6,7 +6,7 @@ Two-layer cache: GCS (persistent) → in-memory (fast).
 2. Check GCS bucket
 3. Call Cloud TTS API → save to GCS + in-memory
 
-Voice: cmn-CN-Chirp3-HD-Laomedeia (female, highest quality)
+Voice: cmn-CN-Chirp3-HD-Sulafat (female, highest quality)
   - Chirp3-HD is Google's latest and most natural voice
   - Uses cmn-CN locale but pronunciation is standard Mandarin (same as cmn-TW)
 
@@ -92,7 +92,7 @@ def _gcs_put(key: str, audio_bytes: bytes) -> None:
 # ---------------------------------------------------------------------------
 # Voice config
 # ---------------------------------------------------------------------------
-TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-CN-Chirp3-HD-Laomedeia")
+TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-CN-Chirp3-HD-Sulafat")
 TTS_LANGUAGE_CODE = "cmn-CN"
 
 
