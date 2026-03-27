@@ -184,23 +184,18 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     const paragraphIndex = parseInt(paraIdxStr, 10);
     const paraEl = startEl; // same element
 
-    // Walk text nodes of the paragraph to compute char offsets
-    function charOffsetInPara(node: Node, offsetInNode: number): number {
-      let count = 0;
-      const walker = document.createTreeWalker(paraEl, NodeFilter.SHOW_TEXT);
-      let current = walker.nextNode();
-      while (current) {
-        if (current === node) {
-          return count + offsetInNode;
-        }
-        count += (current.textContent ?? '').length;
-        current = walker.nextNode();
-      }
-      return count + offsetInNode;
-    }
+    // Compute char offsets relative to the original paragraph text.
+    // Uses the selected text to find its position in the raw paragraph string,
+    // avoiding DOM text node offset issues caused by annotation spans.
+    const selectedText = range.toString();
+    if (!selectedText.trim()) return null;
 
-    const charStart = charOffsetInPara(range.startContainer, range.startOffset);
-    const charEnd = charOffsetInPara(range.endContainer, range.endOffset);
+    const rawParagraph = story.content[paragraphIndex];
+    const selStart = rawParagraph.indexOf(selectedText);
+    if (selStart < 0) return null; // selected text not found in paragraph
+
+    const charStart = selStart;
+    const charEnd = selStart + selectedText.length;
 
     if (charStart >= charEnd) return null;
 
