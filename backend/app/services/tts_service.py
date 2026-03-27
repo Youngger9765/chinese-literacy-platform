@@ -10,7 +10,7 @@ Two-layer cache: GCS (persistent) → in-memory (fast).
 Azure voice: zh-TW-HsiaoChenNeural (Taiwan accent, female)
 Google voice: cmn-CN-Chirp3-HD-Sulafat (fallback)
 
-Provider selection via TTS_PROVIDER env var: "azure" (default) | "google"
+Provider auto-detected: Azure if AZURE_SPEECH_KEY is set, otherwise Google
 
 Auth:
   Azure  — Ocp-Apim-Subscription-Key header (AZURE_SPEECH_KEY env var)
@@ -114,12 +114,10 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
 # ---------------------------------------------------------------------------
 # Provider config
 # ---------------------------------------------------------------------------
-TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "azure")  # "azure" | "google"
-
-# Azure Speech Service
+# Azure Speech Service (台灣腔，primary if key is set)
 AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY", "")
 AZURE_SPEECH_REGION = os.environ.get("AZURE_SPEECH_REGION", "eastus")
-AZURE_VOICE = "zh-TW-HsiaoChenNeural"
+AZURE_TTS_VOICE = os.environ.get("AZURE_TTS_VOICE", "zh-TW-HsiaoChenNeural")
 
 # Google Cloud TTS (fallback)
 TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-CN-Chirp3-HD-Sulafat")
@@ -165,7 +163,7 @@ def _synthesize_azure(text: str) -> bytes:
 
     ssml = (
         '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="zh-TW">'
-        f'<voice name="{AZURE_VOICE}">'
+        f'<voice name="{AZURE_TTS_VOICE}">'
         f'<prosody rate="0.95">{text_escaped}</prosody>'
         "</voice>"
         "</speak>"
@@ -334,7 +332,7 @@ def synthesize_speech(text: str) -> bytes:
     """Synthesise *text* to MP3 audio bytes.
 
     Provider priority: Azure (primary) → Google Cloud TTS (fallback).
-    Override with TTS_PROVIDER env var: "azure" | "google".
+    Provider auto-detected: Azure if AZURE_SPEECH_KEY is set, otherwise Google.
 
     Two-layer cache: in-memory (L1) → GCS (L2) → API call.
     GCS paths: azure/{hash}.mp3 (Azure) or tts-cache/{hash}.mp3 (Google).
@@ -355,8 +353,8 @@ def synthesize_speech(text: str) -> bytes:
         logger.debug("L1 cache hit (key=%s)", key[:8])
         return _TTS_CACHE[key]
 
-    # Determine active provider for GCS lookup
-    active_provider = TTS_PROVIDER if TTS_PROVIDER in ("azure", "google") else "azure"
+    # Auto-detect provider: Azure if key is set, otherwise Google
+    active_provider = "azure" if AZURE_SPEECH_KEY else "google"
 
     # L2: GCS — check active provider's path first
     gcs_data = _gcs_get(key, provider=active_provider)
@@ -385,7 +383,7 @@ def synthesize_speech(text: str) -> bytes:
         try:
             logger.info(
                 "Azure TTS API call (len=%d chars, voice=%s)",
-                len(cleaned), AZURE_VOICE,
+                len(cleaned), AZURE_TTS_VOICE,
             )
             audio_bytes = _synthesize_azure(cleaned)
             used_provider = "azure"

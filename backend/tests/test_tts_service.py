@@ -569,7 +569,7 @@ class TestAzureTTSSynthesis:
         fake_response.__exit__ = MagicMock(return_value=False)
         fake_response.read.return_value = b"AZURE_AUDIO"
 
-        with patch.object(tts_mod, "TTS_PROVIDER", "azure"), \
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
              patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
              patch("urllib.request.urlopen", return_value=fake_response), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
@@ -601,7 +601,7 @@ class TestAzureGoogleFallback:
         mock_resp.audio_content = b"GOOGLE_FALLBACK"
         mock_google_client.synthesize_speech.return_value = mock_resp
 
-        with patch.object(tts_mod, "TTS_PROVIDER", "azure"), \
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
              patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
@@ -617,7 +617,7 @@ class TestAzureGoogleFallback:
         import app.services.tts_service as tts_mod
         from app.services.tts_service import synthesize_speech, TTSError
 
-        with patch.object(tts_mod, "TTS_PROVIDER", "azure"), \
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
              patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
@@ -628,7 +628,7 @@ class TestAzureGoogleFallback:
                 synthesize_speech("你好世界")
 
     def test_google_provider_skips_azure_entirely(self):
-        """TTS_PROVIDER=google must call Google directly without trying Azure."""
+        """No AZURE_SPEECH_KEY must call Google directly without trying Azure."""
         import app.services.tts_service as tts_mod
         from app.services.tts_service import synthesize_speech
 
@@ -637,8 +637,7 @@ class TestAzureGoogleFallback:
         mock_resp.audio_content = b"GOOGLE_DIRECT"
         mock_google_client.synthesize_speech.return_value = mock_resp
 
-        with patch.object(tts_mod, "TTS_PROVIDER", "google"), \
-             patch.object(tts_mod, "AZURE_SPEECH_KEY", "should-not-be-used"), \
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put"), \
              patch("app.services.tts_service._TTS_CACHE", {}), \
@@ -660,7 +659,7 @@ class TestAzureGoogleFallback:
         mock_resp.audio_content = b"GOOGLE_FALLBACK"
         mock_google_client.synthesize_speech.return_value = mock_resp
 
-        with patch.object(tts_mod, "TTS_PROVIDER", "azure"), \
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
              patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
              patch("app.services.tts_service._gcs_get", return_value=None), \
              patch("app.services.tts_service._gcs_put") as mock_put, \
