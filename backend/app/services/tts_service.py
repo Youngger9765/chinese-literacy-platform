@@ -175,7 +175,7 @@ def _synthesize_azure(text: str) -> bytes:
         headers={
             "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
             "Content-Type": "application/ssml+xml",
-            "X-Microsoft-OutputFormat": "audio-16khz-128kbitrate-mono-mp3",
+            "X-Microsoft-OutputFormat": "audio-48khz-192kbitrate-mono-mp3",
         },
     )
 
