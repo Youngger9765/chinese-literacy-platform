@@ -169,6 +169,17 @@ const Section: React.FC<{
 const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals, dbSessionId, token }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
 
+  // Track report viewed in localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(`report_viewed_${story.id}`, JSON.stringify({
+        viewed: true,
+        viewedAt: new Date().toISOString(),
+        sessionId: dbSessionId,
+      }));
+    } catch {}
+  }, [story.id, dbSessionId]);
+
   // Repeated error alert modal state (Issue #248)
   const [repeatedAlerts, setRepeatedAlerts] = useState<RepeatedErrorAlertItem[]>([]);
   const [showRepeatedAlert, setShowRepeatedAlert] = useState(false);
