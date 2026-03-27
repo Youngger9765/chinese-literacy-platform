@@ -2,10 +2,12 @@
  * Header — slim global app bar.
  *
  * Layout (left → center → right):
- *   Logo | StepperNav (learning mode) or context title | User + Logout
+ *   Logo | context title (story name when in learning mode) | User + Logout
  *
- * The header intentionally contains only global chrome (identity, context,
- * logout).  Page-level navigation lives in Sidebar.
+ * The StepperNav has moved out of the header into a vertical left sidebar
+ * that sits alongside the learning content area (see LearningAppShell in
+ * AppShell.tsx). The header now only shows global chrome: identity, context
+ * title, notifications, and logout.
  */
 
 import React from 'react';
@@ -13,28 +15,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { hasRole } from '../../services/authApi';
-import { useAppView } from '../../hooks/useAppView';
 import { AppView } from '../../types';
-import StepperNav from '../StepperNav';
 import NotificationBell from '../teacher/NotificationBell';
 
-// ---------------------------------------------------------------------------
-// Data-driven nav items for the header right rail (legacy fallback items
-// that are NOT in the sidebar — e.g. teacher notification bell).
-// Most page-level links have been moved to Sidebar; only global-chrome items
-// live here.
-// ---------------------------------------------------------------------------
-
 export interface HeaderProps {
-  /** Called when StepperNav step button is clicked. */
+  /** Kept for API compatibility with AppShell — no longer used by Header itself. */
   onStepperNavigate: (view: AppView) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onStepperNavigate }) => {
+const Header: React.FC<HeaderProps> = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const currentView = useAppView();
-  const { session: navSession, selectedStory: navStory } = useLearningNav();
+  const { selectedStory: navStory } = useLearningNav();
 
   const isTeacher = hasRole(
     user,
@@ -47,23 +39,7 @@ const Header: React.FC<HeaderProps> = ({ onStepperNavigate }) => {
     'homeroom_teacher',
   );
 
-  // Learning step views — stepper is shown in header when a story is active
-  const learningViews: AppView[] = [
-    AppView.ADMIN_DASHBOARD,
-    AppView.TEACHER_DASHBOARD,
-    AppView.CLASSROOM_DETAIL,
-    AppView.MY_ASSIGNMENTS,
-    AppView.MY_VOCABULARY,
-    AppView.LEARNING_HISTORY,
-    AppView.DIALOGUE_HISTORY,
-    AppView.STUDENT_PROGRESS,
-    AppView.STUDENT_HOME,
-    AppView.TEACHER_HOME,
-    AppView.STUDENT_CLASSROOM_DASHBOARD,
-    AppView.STUDENT_PROFILE,
-  ];
-
-  const showStepper = navStory != null && !learningViews.includes(currentView);
+  // In learning mode show the story title as context; otherwise nothing in center.
   const contextTitle = navStory?.title ?? null;
 
   return (
@@ -90,30 +66,23 @@ const Header: React.FC<HeaderProps> = ({ onStepperNavigate }) => {
         </span>
       </button>
 
-      {/* Center — StepperNav in learning mode, or context title otherwise */}
-      <div className="flex-1 flex items-center justify-center px-4 min-w-0">
-        {showStepper ? (
-          <StepperNav
-            currentView={currentView}
-            session={navSession}
-            selectedStory={navStory}
-            onNavigate={onStepperNavigate}
-          />
-        ) : contextTitle ? (
+      {/* Center — story title when in learning mode */}
+      {contextTitle && (
+        <div className="flex-1 flex items-center justify-center px-4 min-w-0">
           <span
             className="text-sm font-medium text-gray-500 truncate"
             aria-live="polite"
           >
             {contextTitle}
           </span>
-        ) : null}
-      </div>
+        </div>
+      )}
 
       {/* Right rail — notifications (teacher) + user info + logout */}
       <div
         role="navigation"
         aria-label="全局操作列"
-        className="flex items-center gap-1 shrink-0"
+        className="flex items-center gap-1 shrink-0 ml-auto"
       >
         {/* Teacher notification bell */}
         {isTeacher && (
