@@ -472,6 +472,40 @@
     letter-spacing: 0.05em;
   }
 
+  /* --- Screenshots --- */
+  .step-screenshot {
+    width: 100%;
+    max-width: 260px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px var(--shadow);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .step-screenshot:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  /* Lightbox */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  }
+
   /* --- Print Styles --- */
   @media print {
     body { background: white; font-size: 12pt; }
@@ -533,8 +567,9 @@
       <thead>
         <tr>
           <th>#</th>
-          <th style="width:200px">LingoLeap 步驟</th>
+          <th style="width:180px">LingoLeap 步驟</th>
           <th>三民學習單對應</th>
+          <th style="width:280px">實際畫面</th>
         </tr>
       </thead>
       <tbody>
@@ -555,6 +590,10 @@
               <!-- 九. 知識補給站 moved to Step 8 as independent step -->
             </ul>
           </td>
+        
+          <td>
+            <img src="https://storage.googleapis.com/lingoleap-tts-cache/step-screenshots/s1.png" alt="步驟畫面" class="step-screenshot" onclick="openLightbox(this.src)" />
+          </td>
         </tr>
 
         <!-- Step 2 -->
@@ -572,6 +611,10 @@
               </li>
             </ul>
             <div class="sanmin-extra">LingoLeap 額外提供 AI 即時語音辨識 + 逐字差異比對回饋</div>
+          </td>
+        
+          <td>
+            <img src="https://storage.googleapis.com/lingoleap-tts-cache/step-screenshots/s2.png" alt="步驟畫面" class="step-screenshot" onclick="openLightbox(this.src)" />
           </td>
         </tr>
 
@@ -591,6 +634,10 @@
             </ul>
             <div class="sanmin-extra">LingoLeap 額外提供筆順動畫練習 + 注音標示</div>
           </td>
+        
+          <td>
+            <img src="https://storage.googleapis.com/lingoleap-tts-cache/step-screenshots/s3.png" alt="步驟畫面" class="step-screenshot" onclick="openLightbox(this.src)" />
+          </td>
         </tr>
 
         <!-- Step 4 -->
@@ -607,6 +654,10 @@
                 <span class="sanmin-text"><b>語詞應用</b> — 將語詞填入造句空格</span>
               </li>
             </ul>
+          </td>
+        
+          <td>
+            <img src="https://storage.googleapis.com/lingoleap-tts-cache/step-screenshots/s4.png" alt="步驟畫面" class="step-screenshot" onclick="openLightbox(this.src)" />
           </td>
         </tr>
 
@@ -634,6 +685,10 @@
             </ul>
             <div class="sanmin-extra">LingoLeap 額外提供 AI 蘇格拉底式對話，引導學生自行推論答案</div>
           </td>
+        
+          <td>
+            <img src="https://storage.googleapis.com/lingoleap-tts-cache/step-screenshots/s5.png" alt="步驟畫面" class="step-screenshot" onclick="openLightbox(this.src)" />
+          </td>
         </tr>
 
         <!-- Step 6 -->
@@ -650,6 +705,10 @@
                 <span class="sanmin-text"><b>語詞複習</b> — 文字方格找一找</span>
               </li>
             </ul>
+          </td>
+        
+          <td>
+            <img src="https://storage.googleapis.com/lingoleap-tts-cache/step-screenshots/s6.png" alt="步驟畫面" class="step-screenshot" onclick="openLightbox(this.src)" />
           </td>
         </tr>
 
@@ -669,6 +728,10 @@
             </ul>
             <div class="sanmin-extra">步驟 2 練逐段，步驟 7 挑戰全文完整朗讀</div>
           </td>
+        
+          <td>
+            <img src="https://storage.googleapis.com/lingoleap-tts-cache/step-screenshots/s7.png" alt="步驟畫面" class="step-screenshot" onclick="openLightbox(this.src)" />
+          </td>
         </tr>
 
         <!-- Step 8 -->
@@ -686,6 +749,10 @@
               </li>
             </ul>
           </td>
+        
+          <td>
+            <img src="https://storage.googleapis.com/lingoleap-tts-cache/step-screenshots/s8.png" alt="步驟畫面" class="step-screenshot" onclick="openLightbox(this.src)" />
+          </td>
         </tr>
 
         <!-- Step 9 -->
@@ -698,6 +765,10 @@
           <td>
             <div class="sanmin-none">三民學習單無此環節</div>
             <div class="sanmin-none-desc">LingoLeap 獨有 — 朗讀、理解、生字、全文等多環節自動診斷</div>
+          </td>
+        
+          <td>
+            <img src="https://storage.googleapis.com/lingoleap-tts-cache/step-screenshots/s9.png" alt="步驟畫面" class="step-screenshot" onclick="openLightbox(this.src)" />
           </td>
         </tr>
 
@@ -788,6 +859,17 @@
   </div>
 
 </div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
+  <img id="lightbox-img" src="" alt="放大檢視" />
+</div>
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+</script>
 
 </body>
 </html>
