@@ -2,18 +2,22 @@
  * AppShell — the authenticated app chrome (header + sidebar + main area).
  *
  * LearningAppShell — thin wrapper that puts LearningLayout inside AppShell,
- * used for all /learn/:storyId/* routes.
+ * used for all /learn/:storyId/* routes. It also renders the StepperNav as a
+ * vertical left sidebar alongside the learning content (moved out of the header).
  */
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
+import { useLearningNav } from '../../contexts/LearningNavContext';
 import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
 import { VIEW_TO_PATH } from '../../config/stepConfig';
+import { useAppView } from '../../hooks/useAppView';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
+import StepperNav from '../StepperNav';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 
 /** The authenticated app shell with header + sidebar. */
@@ -78,7 +82,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
         跳至主要內容
       </a>
 
-      {/* Header — extracted to components/layout/Header.tsx */}
+      {/* Header — global chrome only (logo, user info, logout). No stepper here. */}
       <Header onStepperNavigate={handleStepperNavigate} />
 
       {/* Body: sidebar + main content */}
@@ -106,13 +110,65 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 };
 
 /**
+ * Inner content for the learning flow: StepperNav sidebar + LearningLayout.
+ * Rendered inside AppShell's <main> element.
+ *
+ * Desktop: flex-row — [StepperNav 208px] + [LearningLayout fills rest]
+ * Mobile: flex-col — [StepperNav compact bar] stacked above [LearningLayout]
+ */
+const LearningContent: React.FC = () => {
+  const navigate = useNavigate();
+  const currentView = useAppView();
+  const { session: navSession, selectedStory: navStory } = useLearningNav();
+
+  const handleStepperNavigate = (view: AppView) => {
+    switch (view) {
+      case AppView.HOME:
+        navigate('/');
+        break;
+      case AppView.LIBRARY:
+        navigate('/library');
+        break;
+      default: {
+        const pathId = VIEW_TO_PATH[view];
+        if (pathId) {
+          const match = window.location.pathname.match(/\/learn\/([^/]+)/);
+          const storyId = match?.[1];
+          if (storyId) {
+            navigate(`/learn/${storyId}/${pathId}`);
+          }
+        }
+        break;
+      }
+    }
+  };
+
+  return (
+    <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+      {/* Vertical step sidebar (desktop) / compact bar (mobile) */}
+      <StepperNav
+        currentView={currentView}
+        session={navSession}
+        selectedStory={navStory}
+        onNavigate={handleStepperNavigate}
+      />
+
+      {/* Learning step content — scrollable, with bottom padding for mobile tab bar */}
+      <div className="flex-1 overflow-y-auto pb-14 md:pb-0">
+        <LearningLayout />
+      </div>
+    </div>
+  );
+};
+
+/**
  * AppShell wrapper specifically for the learning flow.
- * Passes session and selectedStory to StepperNav via LearningLayout context.
+ * Renders StepperNav as a sidebar alongside LearningLayout.
  */
 export const LearningAppShell: React.FC = () => {
   return (
     <AppShell>
-      <LearningLayout />
+      <LearningContent />
     </AppShell>
   );
 };
