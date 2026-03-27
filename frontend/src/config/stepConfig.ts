@@ -81,6 +81,14 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
   },
   {
+    id: 'vocab-definition',
+    label: '語詞定義',
+    view: AppView.VOCAB_DEFINITION_MATCH,
+    dbStepNumber: 12,
+    needsStory: true,
+    enabled: true,
+  },
+  {
     id: 'vocab-application',
     label: '語詞應用',
     view: AppView.VOCAB_APPLICATION,

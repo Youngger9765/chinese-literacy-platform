@@ -46,6 +46,7 @@ const ReportPage = lazy(() => import('../pages/learning/ReportPage'));
 // 三民 steps (Issue #676)
 const ReadingAnnotationPage = lazy(() => import('../pages/learning/ReadingAnnotationPage'));
 const VocabApplicationPage = lazy(() => import('../pages/learning/VocabApplicationPage'));
+const VocabDefinitionMatchPage = lazy(() => import('../pages/learning/VocabDefinitionMatchPage'));
 const VocabWordSearchPage = lazy(() => import('../pages/learning/VocabWordSearchPage'));
 const KnowledgeStationPage = lazy(() => import('../pages/learning/KnowledgeStationPage'));
 
@@ -340,6 +341,7 @@ const AppRoutes: React.FC = () => (
         <Route path="tutor" element={<TutorPage />} />
         <Route path="comprehension" element={<ComprehensionPage />} />
         <Route path="vocab" element={<VocabPage />} />
+        <Route path="vocab-definition" element={<VocabDefinitionMatchPage />} />
         <Route path="vocab-application" element={<VocabApplicationPage />} />
         <Route path="dictation" element={<DictationPage />} />
         <Route path="vocab-word-search" element={<VocabWordSearchPage />} />
