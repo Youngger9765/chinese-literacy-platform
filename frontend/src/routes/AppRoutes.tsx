@@ -335,7 +335,7 @@ const AppRoutes: React.FC = () => (
           </ProtectedRoute>
         }
       >
-        <Route path="intro" element={<IntroPage />} />
+        <Route path="intro" element={<Navigate to="../reading-annotation" replace />} />
         <Route path="reading-annotation" element={<ReadingAnnotationPage />} />
         <Route path="tutor" element={<TutorPage />} />
         <Route path="comprehension" element={<ComprehensionPage />} />
