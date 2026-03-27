@@ -1,5 +1,4 @@
-
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, VocabResult } from '../../types';
 import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
@@ -145,9 +144,25 @@ function CharCard({ label, isSuggested, isPracticed, animDelay, onClick }: CharC
 /* ================================================================ */
 
 const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish, onBack }) => {
-  const [phase, setPhase] = useState<Phase>('confirm');
-  const [practicingChar, setPracticingChar] = useState('');
-  const [practicedChars, setPracticedChars] = useState<Set<string>>(new Set());
+  const storageKey = `vocabPractice_progress_${story.id}`;
+  const loadSaved = () => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw) as { practicedChars: string[]; phase: Phase; practicingChar: string };
+    } catch { return null; }
+  };
+  const savedProgress = useRef(loadSaved());
+
+  const [phase, setPhase] = useState<Phase>(() => {
+    const p = savedProgress.current?.phase;
+    // Only restore grid phase (not mid-practice)
+    return (p === 'grid') ? 'grid' : 'confirm';
+  });
+  const [practicingChar, setPracticingChar] = useState(savedProgress.current?.practicingChar ?? '');
+  const [practicedChars, setPracticedChars] = useState<Set<string>>(
+    () => new Set(savedProgress.current?.practicedChars ?? [])
+  );
   const [pronouncedChars, setPronoucedChars] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<PracticeMode>('stroke');
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
@@ -164,6 +179,18 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       .then(() => setZhuyinReady(true))
       .catch((err) => console.error('Failed to load zhuyin data:', err));
   }, []);
+
+  // ── localStorage persistence ────────────────────────────────────────
+  useEffect(() => {
+    if (phase === 'confirm') return; // Nothing to save yet
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        practicedChars: Array.from(practicedChars),
+        phase,
+        practicingChar,
+      }));
+    } catch {}
+  }, [practicedChars, phase, practicingChar, storageKey]);
 
   const processZhuyin = useCallback((text: string): string => {
     if (!zhuyinActive) return text;
@@ -239,6 +266,11 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     setPhase('grid');
   };
 
+  const handleFinish = (result: VocabResult) => {
+    try { localStorage.removeItem(storageKey); } catch {}
+    onFinish(result);
+  };
+
   /** Toggle the radical panel for a character. Long-press / secondary action. */
   const handleRadicalToggle = (ch: string) => {
     setRadicalChar(prev => (prev === ch ? null : ch));
@@ -274,7 +306,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               好！開始練習
             </button>
             <button
-              onClick={() => onFinish({ practicedChars: [], totalChars: charCount })}
+              onClick={() => handleFinish({ practicedChars: [], totalChars: charCount })}
               className="w-full py-3 rounded-2xl font-semibold text-base text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all active:scale-95"
             >
               跳過
@@ -315,7 +347,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       <SentencePractice
         practicedChars={Array.from(practicedChars)}
         storyTitle={story.title}
-        onFinish={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+        onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
         onBack={() => setPhase('grid')}
       />
     );
@@ -612,7 +644,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {allDone && (
             <CompletionBanner
               count={practicedChars.size}
-              onFinish={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+              onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
             />
           )}
           </>}
@@ -637,7 +669,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </button>
           )}
           <button
-            onClick={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+            onClick={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
             className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
           >
             {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
