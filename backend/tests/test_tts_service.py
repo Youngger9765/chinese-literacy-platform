@@ -1,5 +1,5 @@
 """
-TDD tests for Google Cloud TTS service (Issue #663).
+TDD tests for TTS service — Azure (primary) + Google (fallback) (Issue #663).
 Run: pytest backend/tests/test_tts_service.py -v
 """
 import hashlib
@@ -373,7 +373,11 @@ class TestCostProtection:
         synthesize_speech("新的句子")
 
         expected_key = _cache_key("新的句子")
-        mock_gcs_put.assert_called_once_with(expected_key, b"NEW_AUDIO")
+        # _gcs_put is called with (key, audio_bytes, provider=<provider>)
+        mock_gcs_put.assert_called_once()
+        args, kwargs = mock_gcs_put.call_args
+        assert args[0] == expected_key
+        assert args[1] == b"NEW_AUDIO"
 
     @patch("app.services.tts_service._gcs_put")
     @patch("app.services.tts_service._TTS_CACHE", {})
@@ -461,3 +465,210 @@ class TestTTSRoute:
         long_text = "你" * 5001
         response = client.post("/api/tts/synthesize", json={"text": long_text})
         assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# 8. Azure TTS synthesis path
+# ---------------------------------------------------------------------------
+
+class TestAzureTTSSynthesis:
+    """_synthesize_azure must call Azure REST API and return audio bytes."""
+
+    def test_azure_synthesis_returns_bytes(self):
+        """Successful Azure call returns MP3 bytes."""
+        import urllib.request
+        from unittest.mock import patch, MagicMock
+        import app.services.tts_service as tts_mod
+
+        fake_response = MagicMock()
+        fake_response.__enter__ = lambda s: s
+        fake_response.__exit__ = MagicMock(return_value=False)
+        fake_response.read.return_value = b"AZURE_AUDIO"
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch.object(tts_mod, "AZURE_SPEECH_REGION", "eastus"), \
+             patch("urllib.request.urlopen", return_value=fake_response):
+            result = tts_mod._synthesize_azure("你好世界")
+
+        assert result == b"AZURE_AUDIO"
+
+    def test_azure_synthesis_raises_when_no_key(self):
+        """_synthesize_azure must raise TTSError when AZURE_SPEECH_KEY is empty."""
+        import app.services.tts_service as tts_mod
+        from app.services.tts_service import TTSError
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", ""):
+            with pytest.raises(TTSError, match="AZURE_SPEECH_KEY"):
+                tts_mod._synthesize_azure("你好")
+
+    def test_azure_synthesis_raises_on_http_error(self):
+        """HTTP 401 from Azure must raise TTSError."""
+        import urllib.error
+        import app.services.tts_service as tts_mod
+        from app.services.tts_service import TTSError
+
+        http_error = urllib.error.HTTPError(
+            url="https://eastus.tts.speech.microsoft.com/cognitiveservices/v1",
+            code=401,
+            msg="Unauthorized",
+            hdrs=None,
+            fp=None,
+        )
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "bad-key"), \
+             patch("urllib.request.urlopen", side_effect=http_error):
+            with pytest.raises(TTSError, match="401"):
+                tts_mod._synthesize_azure("你好")
+
+    def test_azure_synthesis_raises_on_empty_response(self):
+        """Azure returning empty bytes must raise TTSError."""
+        import app.services.tts_service as tts_mod
+        from app.services.tts_service import TTSError
+
+        fake_response = MagicMock()
+        fake_response.__enter__ = lambda s: s
+        fake_response.__exit__ = MagicMock(return_value=False)
+        fake_response.read.return_value = b""
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch("urllib.request.urlopen", return_value=fake_response):
+            with pytest.raises(TTSError, match="empty"):
+                tts_mod._synthesize_azure("你好")
+
+    def test_azure_ssml_escapes_xml_chars(self):
+        """Special XML chars in text must be escaped in SSML."""
+        import urllib.request
+        import app.services.tts_service as tts_mod
+
+        captured_request = {}
+
+        def fake_urlopen(req, timeout=None):
+            captured_request["data"] = req.data.decode("utf-8")
+            resp = MagicMock()
+            resp.__enter__ = lambda s: s
+            resp.__exit__ = MagicMock(return_value=False)
+            resp.read.return_value = b"AUDIO"
+            return resp
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            tts_mod._synthesize_azure("5 < 10 & 10 > 5")
+
+        ssml = captured_request["data"]
+        assert "&lt;" in ssml
+        assert "&gt;" in ssml
+        assert "&amp;" in ssml
+        assert "<" not in ssml.split("<speak")[1].split("</speak>")[0].replace("<voice", "").replace("</voice>", "").replace("<prosody", "").replace("</prosody>", "")
+
+    def test_azure_gcs_path_uses_azure_prefix(self):
+        """Audio from Azure must be saved under azure/ GCS prefix."""
+        import app.services.tts_service as tts_mod
+
+        fake_response = MagicMock()
+        fake_response.__enter__ = lambda s: s
+        fake_response.__exit__ = MagicMock(return_value=False)
+        fake_response.read.return_value = b"AZURE_AUDIO"
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+             patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch("urllib.request.urlopen", return_value=fake_response), \
+             patch("app.services.tts_service._gcs_get", return_value=None), \
+             patch("app.services.tts_service._gcs_put") as mock_put, \
+             patch("app.services.tts_service._TTS_CACHE", {}):
+            tts_mod.synthesize_speech("你好")
+
+        mock_put.assert_called_once()
+        args, kwargs = mock_put.call_args
+        # provider is passed as positional arg[2] or keyword arg
+        provider_used = args[2] if len(args) > 2 else kwargs.get("provider", "google")
+        assert provider_used == "azure"
+
+
+# ---------------------------------------------------------------------------
+# 9. Azure → Google fallback
+# ---------------------------------------------------------------------------
+
+class TestAzureGoogleFallback:
+    """When Azure fails, synthesize_speech must fall back to Google TTS."""
+
+    def test_azure_failure_falls_back_to_google(self):
+        """Azure TTSError → Google client is called and returns audio."""
+        import app.services.tts_service as tts_mod
+        from app.services.tts_service import synthesize_speech, TTSError
+
+        mock_google_client = MagicMock()
+        mock_resp = MagicMock()
+        mock_resp.audio_content = b"GOOGLE_FALLBACK"
+        mock_google_client.synthesize_speech.return_value = mock_resp
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+             patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
+             patch("app.services.tts_service._gcs_get", return_value=None), \
+             patch("app.services.tts_service._gcs_put"), \
+             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch("app.services.tts_service._get_tts_client", return_value=mock_google_client):
+            result = synthesize_speech("你好世界")
+
+        assert result == b"GOOGLE_FALLBACK"
+        mock_google_client.synthesize_speech.assert_called()
+
+    def test_both_providers_fail_raises_tts_error(self):
+        """If both Azure and Google fail, TTSError is raised."""
+        import app.services.tts_service as tts_mod
+        from app.services.tts_service import synthesize_speech, TTSError
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+             patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
+             patch("app.services.tts_service._gcs_get", return_value=None), \
+             patch("app.services.tts_service._gcs_put"), \
+             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch("app.services.tts_service._get_tts_client",
+                   side_effect=TTSError("Google also failed")):
+            with pytest.raises(TTSError):
+                synthesize_speech("你好世界")
+
+    def test_google_provider_skips_azure_entirely(self):
+        """No AZURE_SPEECH_KEY must call Google directly without trying Azure."""
+        import app.services.tts_service as tts_mod
+        from app.services.tts_service import synthesize_speech
+
+        mock_google_client = MagicMock()
+        mock_resp = MagicMock()
+        mock_resp.audio_content = b"GOOGLE_DIRECT"
+        mock_google_client.synthesize_speech.return_value = mock_resp
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
+             patch("app.services.tts_service._gcs_get", return_value=None), \
+             patch("app.services.tts_service._gcs_put"), \
+             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch("app.services.tts_service._get_tts_client", return_value=mock_google_client), \
+             patch("urllib.request.urlopen") as mock_urlopen:
+            result = synthesize_speech("你好")
+
+        assert result == b"GOOGLE_DIRECT"
+        # Azure HTTP call must NOT have been made
+        mock_urlopen.assert_not_called()
+
+    def test_fallback_saves_with_google_provider_key(self):
+        """Audio from Google fallback must be saved with provider='google' in GCS."""
+        import app.services.tts_service as tts_mod
+        from app.services.tts_service import synthesize_speech
+
+        mock_google_client = MagicMock()
+        mock_resp = MagicMock()
+        mock_resp.audio_content = b"GOOGLE_FALLBACK"
+        mock_google_client.synthesize_speech.return_value = mock_resp
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "test-key-123"), \
+             patch.object(tts_mod, "AZURE_SPEECH_KEY", ""), \
+             patch("app.services.tts_service._gcs_get", return_value=None), \
+             patch("app.services.tts_service._gcs_put") as mock_put, \
+             patch("app.services.tts_service._TTS_CACHE", {}), \
+             patch("app.services.tts_service._get_tts_client", return_value=mock_google_client):
+            synthesize_speech("你好")
+
+        mock_put.assert_called_once()
+        args, kwargs = mock_put.call_args
+        # provider is passed as positional arg[2] or keyword arg
+        provider_used = args[2] if len(args) > 2 else kwargs.get("provider", "google")
+        assert provider_used == "google"
