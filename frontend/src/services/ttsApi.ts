@@ -1,9 +1,11 @@
 /**
- * ttsApi.ts — Google Cloud TTS client (Issue #663)
+ * ttsApi.ts — TTS client with sentence-level sequential playback (Issue #667)
  *
- * Provides speakText() that first tries the backend /api/tts/synthesize endpoint
- * (Cloud TTS Neural2, zh-TW, natural voice) and falls back to browser Web Speech
- * API if the backend is unavailable or returns an error.
+ * Provides speakText() that:
+ * 1. Splits text into sentences (matching backend _split_sentences / _clean_for_tts)
+ * 2. Fetches each sentence from /api/tts/synthesize (stored per-sentence in GCS)
+ * 3. Plays audio blobs sequentially — one sentence finishes, next one starts
+ * 4. Falls back to browser Web Speech API if backend is unavailable
  *
  * Usage:
  *   import { speakText, cancelTts } from '../../services/ttsApi';
@@ -13,12 +15,16 @@
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
-// In-memory URL cache to avoid repeatedly fetching the same audio.
+// In-memory URL cache: sentence text → blob URL.
+// Avoids re-fetching the same sentence audio.
 // Blob URLs are released when the page unloads.
 const _urlCache = new Map<string, string>();
 
 // Track the currently playing audio element so cancelTts() can stop it
 let _currentAudio: HTMLAudioElement | null = null;
+
+// Flag to signal cancellation mid-sequence
+let _cancelRequested = false;
 
 // Backend retry state: cooldown after failure, permanent fallback after 3 consecutive failures.
 const BACKEND_COOLDOWN_MS = 30_000; // 30 seconds before retrying after a failure
@@ -32,6 +38,7 @@ let _lastFailureTime = 0;
  * Stop any TTS currently in progress (backend or Web Speech API).
  */
 export function cancelTts(): void {
+  _cancelRequested = true;
   if (_currentAudio) {
     _currentAudio.pause();
     _currentAudio.currentTime = 0;
@@ -45,17 +52,17 @@ export function cancelTts(): void {
 /**
  * Synthesise and play *text* in Traditional Chinese.
  *
- * Tries Cloud TTS backend first; if the backend returns an error or is
- * unavailable, falls back to browser Web Speech API so the app keeps
- * working in environments without GCP credentials.
+ * Splits text into sentences and plays each one sequentially via the backend.
+ * Falls back to browser Web Speech API if backend is unavailable.
  *
  * @param text - Text to synthesise (keep under 5000 chars per request).
  * @param rate - Playback speed multiplier (default 0.9, applied to Web Speech fallback).
- * @returns Promise that resolves when speech ends, or rejects on fatal error.
+ * @returns Promise that resolves when all sentences finish, or rejects on fatal error.
  */
 export async function speakText(text: string, rate = 0.9): Promise<void> {
   if (!text.trim()) return;
   cancelTts();
+  _cancelRequested = false;
 
   // Try backend TTS first (unless permanently fallen back or in cooldown)
   if (!_permanentlyFallback && _isBackendAvailable()) {
@@ -76,7 +83,7 @@ export async function speakText(text: string, rate = 0.9): Promise<void> {
     }
   }
 
-  // Fallback: browser Web Speech API
+  // Fallback: browser Web Speech API (whole text at once)
   await _speakViaBrowserApi(text, rate);
 }
 
@@ -97,43 +104,128 @@ export const _testInternals = {
     _consecutiveFailures = 0;
     _permanentlyFallback = false;
     _lastFailureTime = 0;
+    _cancelRequested = false;
+    _urlCache.clear();
   },
   getState() {
     return { _consecutiveFailures, _permanentlyFallback, _lastFailureTime };
   },
+  splitSentences: _splitSentences,
+  cleanForTts: _cleanForTts,
   BACKEND_COOLDOWN_MS,
   MAX_CONSECUTIVE_FAILURES,
 };
 
 // ---------------------------------------------------------------------------
-// Private: backend audio playback
+// Private: sentence splitting (mirrors backend _clean_for_tts + _split_sentences)
+// ---------------------------------------------------------------------------
+
+const MAX_SENTENCE_LEN = 40; // must match backend MAX_SENTENCE_LEN
+
+/**
+ * Clean text before TTS — remove symbols that would be read aloud verbatim.
+ * Mirrors backend _clean_for_tts() exactly.
+ */
+function _cleanForTts(text: string): string {
+  text = text.replace(/[~～]+/g, '');                          // tildes
+  text = text.replace(/[──—–−]+/g, '，');                      // long dashes → pause
+  text = text.replace(/-{2,}/g, '，');                         // double hyphens → pause
+  text = text.replace(/[.]{3,}|[…⋯]+/g, '，');                // ellipsis → pause
+  text = text.replace(/#/g, '');                               // hashtag
+  text = text.replace(/(\d+)\/(\d+)/g, '$1 之 $2');           // fractions
+  text = text.replace(/[/\\|]+/g, '');                         // slashes
+  text = text.replace(/[\*\[\]\{\}]+/g, '');                   // markdown
+  text = text.replace(/[·‧・°○]+/g, '');                      // interpunct
+  text = text.replace(/%/g, '百分之');                         // percent
+  text = text.replace(/，{2,}/g, '，');                        // collapse pauses
+  text = text.replace(/\s+/g, ' ').trim();
+  return text;
+}
+
+/**
+ * Split Chinese text into chunks <= MAX_SENTENCE_LEN chars.
+ * Mirrors backend _split_sentences() exactly.
+ */
+function _splitSentences(text: string): string[] {
+  // Split by sentence-ending punctuation
+  const parts = text.split(/(?<=[。！？\n])/u).map(s => s.trim()).filter(Boolean);
+
+  const result: string[] = [];
+  for (const s of parts) {
+    if (s.length <= MAX_SENTENCE_LEN) {
+      result.push(s);
+    } else {
+      // Split by comma/pause marks
+      const sub = s.split(/(?<=[，、；：」）])/u);
+      let chunk = '';
+      for (const part of sub) {
+        if (chunk.length + part.length > MAX_SENTENCE_LEN && chunk) {
+          result.push(chunk);
+          chunk = part;
+        } else {
+          chunk += part;
+        }
+      }
+      if (chunk) result.push(chunk);
+    }
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Private: backend sequential playback
 // ---------------------------------------------------------------------------
 
 async function _speakViaBackend(text: string): Promise<void> {
-  // Check URL cache first
-  let audioUrl = _urlCache.get(text);
+  const cleaned = _cleanForTts(text);
+  if (!cleaned) return;
 
-  if (!audioUrl) {
-    const response = await fetch(`${API_BASE}/api/tts/synthesize`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
+  const sentences = _splitSentences(cleaned);
+  if (sentences.length === 0) return;
 
-    if (!response.ok) {
-      throw new Error(`TTS backend responded ${response.status}`);
+  for (const sentence of sentences) {
+    if (_cancelRequested) break;
+    if (!sentence.trim()) continue;
+
+    // Check URL cache first
+    let audioUrl = _urlCache.get(sentence);
+
+    if (!audioUrl) {
+      const response = await fetch(`${API_BASE}/api/tts/synthesize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: sentence }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`TTS backend responded ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      if (blob.size === 0) {
+        throw new Error('TTS backend returned empty audio');
+      }
+
+      audioUrl = URL.createObjectURL(blob);
+      _urlCache.set(sentence, audioUrl);
     }
 
-    const blob = await response.blob();
-    if (blob.size === 0) {
-      throw new Error('TTS backend returned empty audio');
-    }
+    if (_cancelRequested) break;
 
-    audioUrl = URL.createObjectURL(blob);
-    _urlCache.set(text, audioUrl);
+    await _playSingleAudio(audioUrl);
   }
+}
 
+/**
+ * Play a single audio URL and wait for it to finish.
+ */
+function _playSingleAudio(audioUrl: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
+    if (_cancelRequested) {
+      resolve();
+      return;
+    }
+
     const audio = new Audio(audioUrl);
     _currentAudio = audio;
 
