@@ -11,6 +11,7 @@ import {
 } from '../types';
 import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnotation';
 import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
+import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
 import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
 import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
@@ -56,6 +57,7 @@ export interface LearningContext {
   handleFinishDictation: (result: DictationResult) => void;
   handleFinishFullReading: (result: FullReadingResult) => void;
   handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
+  handleFinishVocabDefinitionMatch: (result: VocabDefinitionMatchResult) => void;
   handleFinishVocabApplication: (result: VocabApplicationResult) => void;
   handleFinishVocabWordSearch: (elapsedSeconds: number) => void;
   handleFinishKnowledgeStation: () => void;
@@ -309,8 +311,8 @@ const LearningLayout: React.FC = () => {
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
       setSession((prev) => (prev ? { ...prev, vocabResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
-      navigate(`/learn/${storyId}/vocab-application`);
+      persistStep(STEP_PATH_TO_NUMBER['vocab-definition']);
+      navigate(`/learn/${storyId}/vocab-definition`);
     },
     [storyId, navigate, persistStep],
   );
@@ -337,6 +339,14 @@ const LearningLayout: React.FC = () => {
     (_summary: AnnotationSummary) => {
       persistStep(STEP_PATH_TO_NUMBER['tutor']);
       navigate(`/learn/${storyId}/tutor`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishVocabDefinitionMatch = useCallback(
+    (_result: VocabDefinitionMatchResult) => {
+      persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
+      navigate(`/learn/${storyId}/vocab-application`);
     },
     [storyId, navigate, persistStep],
   );
@@ -449,6 +459,7 @@ const LearningLayout: React.FC = () => {
     handleFinishDictation,
     handleFinishFullReading,
     handleFinishReadingAnnotation,
+    handleFinishVocabDefinitionMatch,
     handleFinishVocabApplication,
     handleFinishVocabWordSearch,
     handleFinishKnowledgeStation,
