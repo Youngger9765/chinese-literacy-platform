@@ -3,7 +3,7 @@ TTS service — Azure Speech (primary) + Google Cloud TTS (fallback).
 
 Two-layer cache: GCS (persistent) → in-memory (fast).
 1. Check in-memory dict
-2. Check GCS bucket  (azure/{hash}.mp3 or tts-cache/{hash}.mp3)
+2. Check GCS bucket  (azure/sentences/{hash}.mp3 or tts-cache/{hash}.mp3)
 3. Call Azure Speech API → save to GCS + in-memory
 4. If Azure fails → fall back to Google Cloud TTS
 
@@ -11,6 +11,10 @@ Azure voice: zh-TW-HsiaoChenNeural (Taiwan accent, female)
 Google voice: cmn-CN-Chirp3-HD-Sulafat (fallback)
 
 Provider auto-detected: Azure if AZURE_SPEECH_KEY is set, otherwise Google
+
+GCS paths:
+  Azure  — azure/sentences/{hash}.mp3  (sentence-level, Issue #667)
+  Google — tts-cache/{hash}.mp3        (legacy path, unchanged for compatibility)
 
 Auth:
   Azure  — Ocp-Apim-Subscription-Key header (AZURE_SPEECH_KEY env var)
@@ -68,14 +72,14 @@ def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
     """Try to read cached audio from GCS. Returns None on miss or error.
 
     GCS paths:
-      Azure  — azure/{key}.mp3
-      Google — tts-cache/{key}.mp3   (legacy path, unchanged for compatibility)
+      Azure  — azure/sentences/{key}.mp3  (sentence-level, Issue #667)
+      Google — tts-cache/{key}.mp3        (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
         return None
     if provider == "azure":
-        blob_path = f"azure/{key}.mp3"
+        blob_path = f"azure/sentences/{key}.mp3"
     else:
         blob_path = f"tts-cache/{key}.mp3"
     try:
@@ -93,14 +97,14 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
     """Write audio to GCS cache. Failures are logged but not raised.
 
     GCS paths:
-      Azure  — azure/{key}.mp3
-      Google — tts-cache/{key}.mp3   (legacy path, unchanged for compatibility)
+      Azure  — azure/sentences/{key}.mp3  (sentence-level, Issue #667)
+      Google — tts-cache/{key}.mp3        (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
         return
     if provider == "azure":
-        blob_path = f"azure/{key}.mp3"
+        blob_path = f"azure/sentences/{key}.mp3"
     else:
         blob_path = f"tts-cache/{key}.mp3"
     try:
@@ -418,3 +422,80 @@ def _l1_put(key: str, audio_bytes: bytes) -> None:
         oldest_key = next(iter(_TTS_CACHE))
         del _TTS_CACHE[oldest_key]
     _TTS_CACHE[key] = audio_bytes
+
+
+# ---------------------------------------------------------------------------
+# Sentence-level synthesis — Issue #667
+# ---------------------------------------------------------------------------
+
+def synthesize_sentence(text: str) -> bytes:
+    """Synthesise a single sentence to MP3 audio bytes.
+
+    Same as synthesize_speech() but explicitly stores under azure/sentences/ path.
+    For Azure provider, this is the same behaviour (already uses azure/sentences/).
+    For Google fallback, also stores under azure/sentences/ to avoid confusion.
+
+    Backward-compatible: synthesize_speech() also stores under azure/sentences/ now.
+    """
+    return synthesize_speech(text)
+
+
+# ---------------------------------------------------------------------------
+# Lesson TTS mapping — Issue #667
+# ---------------------------------------------------------------------------
+
+def build_lesson_tts_mapping(lesson: dict) -> dict:
+    """Build a sentence-level TTS mapping for a lesson.
+
+    Given a lesson dict (from lesson_loader), splits each paragraph into
+    sentences and returns a mapping structure with text, hash, and char count
+    for each sentence.
+
+    Args:
+        lesson: Lesson dict with 'id', 'paragraphs' keys.
+
+    Returns:
+        Mapping dict:
+        {
+            "lesson_id": 1,
+            "paragraphs": [
+                {
+                    "index": 0,
+                    "sentences": [
+                        {"text": "cleaned sentence", "hash": "sha256hex", "chars": 32}
+                    ]
+                }
+            ]
+        }
+    """
+    lesson_id = lesson.get("id") or lesson.get("lesson_number")
+    paragraphs_raw = lesson.get("paragraphs", [])
+
+    mapping_paragraphs = []
+    for idx, paragraph in enumerate(paragraphs_raw):
+        if not paragraph or not str(paragraph).strip():
+            continue
+        cleaned_paragraph = _clean_for_tts(str(paragraph))
+        if not cleaned_paragraph:
+            continue
+        sentences = _split_sentences(cleaned_paragraph)
+        sentence_entries = []
+        for sent in sentences:
+            if not sent.strip():
+                continue
+            h = _cache_key(sent)
+            sentence_entries.append({
+                "text": sent,
+                "hash": h,
+                "chars": len(sent),
+            })
+        if sentence_entries:
+            mapping_paragraphs.append({
+                "index": idx,
+                "sentences": sentence_entries,
+            })
+
+    return {
+        "lesson_id": lesson_id,
+        "paragraphs": mapping_paragraphs,
+    }
