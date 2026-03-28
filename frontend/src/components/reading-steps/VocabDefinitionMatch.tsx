@@ -132,14 +132,14 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   const hasData = vocab.length > 0;
 
   // Shuffle word options once on mount (or restore from saved)
-  const shuffledWords = useRef<number[]>(() => {
+  const shuffledWords = useRef<number[]>((() => {
     const indices = vocab.map((_, i) => i);
     for (let i = indices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [indices[i], indices[j]] = [indices[j], indices[i]];
     }
     return indices;
-  });
+  })());
 
   const [phase, setPhase] = useState<MatchPhase>(
     () => savedProgress.current?.phase ?? 'matching',
