@@ -422,9 +422,9 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             onClick={toggleCollapsed}
             aria-label={collapsed ? '展開側邊欄' : '收合側邊欄'}
             title={collapsed ? '展開側邊欄' : '收合側邊欄'}
-            className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+            className="p-2.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           >
-            <span className="text-sm font-mono" aria-hidden="true">
+            <span className="text-base font-mono" aria-hidden="true">
               {collapsed ? '»' : '«'}
             </span>
           </button>

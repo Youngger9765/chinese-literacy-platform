@@ -109,7 +109,7 @@ const Header: React.FC<HeaderProps> = () => {
         <button
           type="button"
           onClick={logout}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+          className="text-sm text-gray-400 hover:text-gray-600 transition-colors rounded px-2 py-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
         >
           登出
         </button>
