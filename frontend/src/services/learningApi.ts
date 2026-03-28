@@ -628,3 +628,54 @@ export async function submitExitTicket(
   }
   return res.json();
 }
+
+// ---------------------------------------------------------------------------
+// Step Progress persistence (Issue #660)
+// ---------------------------------------------------------------------------
+
+export interface StepProgressData {
+  current_step: string | null;
+  steps_completed: string[];
+  step_data: Record<string, unknown>;
+}
+
+export interface StepProgressResponse {
+  session_id: number;
+  step_progress: StepProgressData | null;
+}
+
+/**
+ * Persist step progress to DB for a given learning session.
+ * Non-blocking — caller should catch errors and not surface them to the user.
+ */
+export async function saveStepProgress(
+  token: string,
+  sessionId: number,
+  progress: StepProgressData,
+): Promise<StepProgressResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/progress`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(progress),
+  });
+  if (!res.ok) throw new Error(`saveStepProgress failed: ${res.status}`);
+  return res.json();
+}
+
+/**
+ * Load step progress from DB for a given learning session.
+ * Returns null step_progress when nothing has been saved yet.
+ */
+export async function loadStepProgress(
+  token: string,
+  sessionId: number,
+): Promise<StepProgressResponse> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}/progress`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`loadStepProgress failed: ${res.status}`);
+  return res.json();
+}

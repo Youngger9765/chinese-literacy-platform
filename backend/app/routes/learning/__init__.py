@@ -9,6 +9,7 @@ Splits the original monolithic learning.py (1,881 lines) into focused sub-module
 - learning_comprehension_score.py  — Dialogue history + comprehension scoring (Issues #242/#243)
 - learning_errors.py               — Error patterns, recommended vocab, corrections, alerts
 - learning_progress.py             — Stuck points + per-text progress tracking
+- learning_step_progress.py        — Step progress persistence (Issue #660)
 - learning_recommendations.py      — Rule-based + AI story recommendations
 - learning_dashboard.py            — Student progress dashboard (Issue #25)
 - learning_vocab.py                — Sentence practice + listening comprehension
@@ -25,6 +26,7 @@ from .learning_comprehension import router as comprehension_router
 from .learning_comprehension_score import router as comprehension_score_router
 from .learning_errors import router as errors_router
 from .learning_progress import router as progress_router
+from .learning_step_progress import router as step_progress_router
 from .learning_recommendations import router as recommendations_router
 from .learning_dashboard import router as dashboard_router
 # Re-export symbols that parents.py imports by name
@@ -40,6 +42,7 @@ router.include_router(comprehension_router)
 router.include_router(comprehension_score_router)
 router.include_router(errors_router)
 router.include_router(progress_router)
+router.include_router(step_progress_router)
 router.include_router(recommendations_router)
 router.include_router(dashboard_router)
 router.include_router(vocab_router)

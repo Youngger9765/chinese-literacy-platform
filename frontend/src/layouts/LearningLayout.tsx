@@ -18,6 +18,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
 import { STEP_PATH_TO_NUMBER as STEP_CONFIG_PATH_TO_NUMBER } from '../config/stepConfig';
 import { useIdleTimer } from '../hooks/useIdleTimer';
+import { useProgressSync } from '../hooks/useProgressSync';
+import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
 
 /** Idle time before showing warning modal (15 minutes). */
@@ -72,6 +74,16 @@ export interface LearningContext {
   handleParagraphComplete: (paragraphIndex: number) => void;
   /** Reading goals set by teacher for the active assignment (Issue #414). Null for free-play. */
   assignmentReadingGoals: AssignmentReadingGoals | null;
+  /**
+   * Sync step progress to DB (debounced 5 s) and to localStorage.
+   * Non-blocking — API failures do not break the learning flow (Issue #660).
+   */
+  syncProgress: (data: StepProgressData) => void;
+  /**
+   * Force an immediate DB save (e.g. on step completion or page unload).
+   * Non-blocking (Issue #660).
+   */
+  flushProgress: (data: StepProgressData) => void;
 }
 
 /**
@@ -124,6 +136,26 @@ const LearningLayout: React.FC = () => {
   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
   /** Ref to the idle-timer reset function so handleContinueLearning can call it. */
   const idleResetRef = useRef<(() => void) | null>(null);
+
+  // ── Step progress DB sync (Issue #660) ──────────────────────────────────
+  const { syncProgress, flushProgress } = useProgressSync({
+    token: token ?? null,
+    dbSessionId,
+    onProgressLoaded: (data) => {
+      // When DB returns saved progress, update the in-memory session with
+      // completed paragraphs from step_data so LiveTutor can restore unlock state.
+      // This is best-effort — localStorage is the primary L1 store.
+      if (data.step_data?.tutor) {
+        const tutorData = data.step_data.tutor as Record<string, unknown>;
+        const completedIdxs = tutorData.completedParagraphs;
+        if (Array.isArray(completedIdxs)) {
+          setCompletedParagraphsSet(new Set(completedIdxs as number[]));
+        }
+      }
+    },
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   /** Persist current step to localStorage for session resume. */
   const persistStep = useCallback(
@@ -470,6 +502,8 @@ const LearningLayout: React.FC = () => {
     completedParagraphsSet,
     handleParagraphComplete,
     assignmentReadingGoals,
+    syncProgress,
+    flushProgress,
   };
 
   return (
