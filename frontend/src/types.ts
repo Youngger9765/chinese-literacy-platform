@@ -24,6 +24,11 @@ export enum AppView {
   ACHIEVEMENTS = 'ACHIEVEMENTS',
   STUDENT_CLASSROOM_DASHBOARD = 'STUDENT_CLASSROOM_DASHBOARD',
   STUDENT_PROFILE = 'STUDENT_PROFILE',
+  READING_ANNOTATION = 'READING_ANNOTATION',
+  VOCAB_APPLICATION = 'VOCAB_APPLICATION',
+  VOCAB_DEFINITION_MATCH = 'VOCAB_DEFINITION_MATCH',
+  VOCAB_WORD_SEARCH = 'VOCAB_WORD_SEARCH',
+  KNOWLEDGE_STATION = 'KNOWLEDGE_STATION',
 }
 
 export interface StoryIntro {
@@ -88,7 +93,7 @@ export interface ReadingAttempt {
   lineBreakdown?: LineBreakdown[];
 }
 
-export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra';
+export type DiffType = 'correct' | 'forgiven' | 'wrong' | 'missing' | 'extra' | 'unread';
 
 export interface DiffToken {
   char: string;

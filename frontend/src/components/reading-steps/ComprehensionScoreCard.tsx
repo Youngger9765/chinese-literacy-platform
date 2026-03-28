@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ComprehensionScoreFeedback } from '../../services/api';
+import type { ComprehensionScoreFeedback } from '../../services/learningApi';
 
 interface ComprehensionScoreCardProps {
   comprehensionScore: number;

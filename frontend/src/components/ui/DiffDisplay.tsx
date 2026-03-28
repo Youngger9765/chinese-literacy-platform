@@ -28,13 +28,14 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
   return (
     <div className={className}>
       <div
-        className="flex flex-wrap leading-relaxed text-lg"
+        className="flex flex-wrap leading-[inherit]"
         role="group"
         aria-label="朗讀差異對比結果"
       >
         {tokens.map((token, idx) => {
           switch (token.type) {
             case 'correct':
+            case 'forgiven':
               return (
                 <span key={idx} className="text-gray-900">
                   {token.char}
@@ -60,18 +61,6 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
                   )}
                 </span>
               );
-            case 'forgiven':
-              return (
-                <span
-                  key={idx}
-                  className="bg-sky-100 text-sky-900 border-b-2 border-dashed border-sky-500 rounded-sm px-0.5 mx-px cursor-help"
-                  title={token.reason ? `通融：${token.reason}` : '通融判定'}
-                  aria-label={`通融：目標字「${token.char}」${token.spoken ? `，朗讀為「${token.spoken}」` : ''}${token.reason ? `，原因：${token.reason}` : ''}`}
-                  role="mark"
-                >
-                  {token.char}
-                </span>
-              );
             case 'missing':
               return (
                 <span
@@ -85,14 +74,12 @@ const DiffDisplay: React.FC<DiffDisplayProps> = ({ tokens, showLegend = false, c
                 </span>
               );
             case 'extra':
+              // Extra chars (stutters, repeated words, etc.) are kept in tokens metadata
+              // for future coaching hints but not shown in the diff display.
+              return null;
+            case 'unread':
               return (
-                <span
-                  key={idx}
-                  className="bg-warning/30 text-warning line-through rounded-sm px-0.5 mx-px"
-                  title="多讀"
-                  aria-label={`多讀：多讀了「${token.char}」`}
-                  role="mark"
-                >
+                <span key={idx} className="text-gray-300">
                   {token.char}
                 </span>
               );

@@ -18,11 +18,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   fetchMyEnrolledClassrooms,
   fetchStudentDashboard,
-  getGamificationSummary,
   type StudentEnrolledClassroom,
-  type GamificationSummary,
   type StudentDashboardData,
-} from '../../services/api';
+} from '../../services/learningApi';
+import {
+  getGamificationSummary,
+  type GamificationSummary,
+} from '../../services/gamificationApi';
 
 // ---------------------------------------------------------------------------
 // Stat card

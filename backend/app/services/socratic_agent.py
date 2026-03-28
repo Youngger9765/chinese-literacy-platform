@@ -9,6 +9,7 @@ import logging
 from dataclasses import dataclass, field
 
 from google.genai import types as genai_types
+from sqlalchemy.orm import Session
 
 from .ai_service import generate_structured_response
 from .input_sanitizer import sanitize_ai_input
@@ -262,8 +263,78 @@ class SocraticAgent:
         teacher_instructions: list[str] | None = None,
         genre: str | None = None,
         reading_strategy: str | None = None,
-    ) -> AgentResponse:
-        """Start a new session — generate the first question."""
+        db: Session | None = None,
+        db_session_id: int | None = None,
+    ) -> tuple["AgentResponse", bool]:
+        """Start or resume a session.
+
+        Returns (AgentResponse, is_resumed).
+        is_resumed=True means the session was restored from memory or DB (no Gemini call).
+        is_resumed=False means a fresh Gemini call was made.
+        """
+        # 1. Check in-memory first (fastest path — no DB or Gemini needed)
+        existing_state = _store.get(session_id)
+        if existing_state is not None:
+            last_ai_turn = next(
+                (t for t in reversed(existing_state.conversation) if t["role"] == "ai"),
+                None,
+            )
+            question = last_ai_turn["text"] if last_ai_turn else "請繼續回答上一個問題。"
+            return AgentResponse(
+                question=question,
+                feedback=None,
+                understood=None,
+                understood_count=existing_state.understood_count,
+                required_count=self.REQUIRED_UNDERSTOOD,
+                phase=existing_state.current_phase,
+                is_complete=existing_state.understood_count >= self.REQUIRED_UNDERSTOOD,
+            ), True
+
+        # 2. Try to restore from DB turns (survives Cloud Run restart)
+        if db is not None and db_session_id is not None:
+            try:
+                # Import here to avoid circular imports at module load time
+                from ..models.session import DialogueTurn  # noqa: PLC0415
+
+                turns = (
+                    db.query(DialogueTurn)
+                    .filter(DialogueTurn.learning_session_id == db_session_id)
+                    .order_by(DialogueTurn.turn_order)
+                    .all()
+                )
+
+                if turns:
+                    state = self._rebuild_state_from_turns(
+                        turns=turns,
+                        session_id=session_id,
+                        story_title=story_title,
+                        story_text=story_text,
+                        mispronounced_words=mispronounced_words,
+                        accuracy=accuracy,
+                        cpm=cpm,
+                        teacher_instructions=teacher_instructions,
+                        genre=genre,
+                        reading_strategy=reading_strategy,
+                    )
+                    _store.save(state)
+                    last_ai_turn = next(
+                        (t for t in reversed(state.conversation) if t["role"] == "ai"),
+                        None,
+                    )
+                    question = last_ai_turn["text"] if last_ai_turn else "請繼續回答上一個問題。"
+                    return AgentResponse(
+                        question=question,
+                        feedback=None,
+                        understood=None,
+                        understood_count=state.understood_count,
+                        required_count=self.REQUIRED_UNDERSTOOD,
+                        phase=state.current_phase,
+                        is_complete=state.understood_count >= self.REQUIRED_UNDERSTOOD,
+                    ), True
+            except Exception as e:
+                logger.warning("Failed to restore session from DB (will start fresh): %s", e)
+
+        # 3. Fresh start — only Gemini call that's actually needed
         state = SessionState(
             session_id=session_id,
             story_title=story_title,
@@ -309,7 +380,85 @@ class SocraticAgent:
             required_count=self.REQUIRED_UNDERSTOOD,
             phase=phase,
             is_complete=False,
+        ), False
+
+    def _rebuild_state_from_turns(
+        self,
+        turns: list,
+        session_id: str,
+        story_title: str,
+        story_text: str,
+        mispronounced_words: list[str] | None,
+        accuracy: float | None,
+        cpm: float | None,
+        teacher_instructions: list[str] | None,
+        genre: str | None,
+        reading_strategy: str | None,
+    ) -> "SessionState":
+        """Rebuild in-memory SessionState from persisted DialogueTurn rows."""
+        state = SessionState(
+            session_id=session_id,
+            story_title=story_title,
+            story_text=story_text,
+            mispronounced_words=mispronounced_words,
+            accuracy=accuracy,
+            cpm=cpm,
+            teacher_instructions=teacher_instructions,
+            genre=genre,
+            reading_strategy=reading_strategy,
         )
+
+        # Replay turns to reconstruct conversation and scores
+        for turn in turns:
+            state.conversation.append({"role": turn.role, "text": turn.text})
+            if turn.role == "student":
+                state.total_attempts += 1
+            elif turn.role == "feedback" and turn.is_correct:
+                state.understood_count += 1
+            if turn.phase:
+                state.current_phase = turn.phase
+
+        # Recalculate phase based on understood_count (mirrors process_answer logic)
+        if state.understood_count <= 1:
+            state.current_phase = "factual"
+        elif state.understood_count <= 3:
+            state.current_phase = "inferential"
+        else:
+            state.current_phase = "evaluative"
+
+        # Override with the phase of the latest turn if available
+        for turn in reversed(turns):
+            if turn.phase:
+                state.current_phase = turn.phase
+                break
+
+        return state
+
+    def clear_session(
+        self,
+        session_id: str,
+        db: Session | None = None,
+        db_session_id: int | None = None,
+    ) -> None:
+        """Remove a session from memory and optionally delete its DB turns.
+
+        Called when the student clicks '重新開始'.
+        """
+        # Remove from in-memory store
+        if session_id in _store._sessions:
+            del _store._sessions[session_id]
+
+        # Delete DB turns for this learning session so next mount starts fresh
+        if db is not None and db_session_id is not None:
+            try:
+                from ..models.session import DialogueTurn  # noqa: PLC0415
+
+                db.query(DialogueTurn).filter(
+                    DialogueTurn.learning_session_id == db_session_id
+                ).delete(synchronize_session=False)
+                db.commit()
+            except Exception as e:
+                logger.warning("Failed to delete DB dialogue turns on restart: %s", e)
 
     async def process_answer(
         self, session_id: str, student_answer: str

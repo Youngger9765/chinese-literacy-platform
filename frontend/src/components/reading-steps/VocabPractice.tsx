@@ -1,5 +1,4 @@
-
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, VocabResult } from '../../types';
 import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
@@ -145,9 +144,25 @@ function CharCard({ label, isSuggested, isPracticed, animDelay, onClick }: CharC
 /* ================================================================ */
 
 const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish, onBack }) => {
-  const [phase, setPhase] = useState<Phase>('confirm');
-  const [practicingChar, setPracticingChar] = useState('');
-  const [practicedChars, setPracticedChars] = useState<Set<string>>(new Set());
+  const storageKey = `vocabPractice_progress_${story.id}`;
+  const loadSaved = () => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw) as { practicedChars: string[]; phase: Phase; practicingChar: string };
+    } catch { return null; }
+  };
+  const savedProgress = useRef(loadSaved());
+
+  const [phase, setPhase] = useState<Phase>(() => {
+    const p = savedProgress.current?.phase;
+    // Only restore grid phase (not mid-practice)
+    return (p === 'grid') ? 'grid' : 'confirm';
+  });
+  const [practicingChar, setPracticingChar] = useState(savedProgress.current?.practicingChar ?? '');
+  const [practicedChars, setPracticedChars] = useState<Set<string>>(
+    () => new Set(savedProgress.current?.practicedChars ?? [])
+  );
   const [pronouncedChars, setPronoucedChars] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<PracticeMode>('stroke');
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
@@ -164,6 +179,18 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       .then(() => setZhuyinReady(true))
       .catch((err) => console.error('Failed to load zhuyin data:', err));
   }, []);
+
+  // ── localStorage persistence ────────────────────────────────────────
+  useEffect(() => {
+    if (phase === 'confirm') return; // Nothing to save yet
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        practicedChars: Array.from(practicedChars),
+        phase,
+        practicingChar,
+      }));
+    } catch {}
+  }, [practicedChars, phase, practicingChar, storageKey]);
 
   const processZhuyin = useCallback((text: string): string => {
     if (!zhuyinActive) return text;
@@ -239,6 +266,11 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     setPhase('grid');
   };
 
+  const handleFinish = (result: VocabResult) => {
+    try { localStorage.removeItem(storageKey); } catch {}
+    onFinish(result);
+  };
+
   /** Toggle the radical panel for a character. Long-press / secondary action. */
   const handleRadicalToggle = (ch: string) => {
     setRadicalChar(prev => (prev === ch ? null : ch));
@@ -274,7 +306,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               好！開始練習
             </button>
             <button
-              onClick={() => onFinish({ practicedChars: [], totalChars: charCount })}
+              onClick={() => handleFinish({ practicedChars: [], totalChars: charCount })}
               className="w-full py-3 rounded-2xl font-semibold text-base text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all active:scale-95"
             >
               跳過
@@ -315,7 +347,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       <SentencePractice
         practicedChars={Array.from(practicedChars)}
         storyTitle={story.title}
-        onFinish={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+        onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
         onBack={() => setPhase('grid')}
       />
     );
@@ -409,57 +441,11 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               筆順練習
               {strokeDone && <span className="w-2 h-2 bg-emerald-500 rounded-full" />}
             </button>
-            <button
-              onClick={() => setActiveTab('pronunciation')}
-              className={[
-                'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
-                activeTab === 'pronunciation'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700',
-              ].join(' ')}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z" />
-              </svg>
-              發音練習
-              {pronounceDone && <span className="w-2 h-2 bg-emerald-500 rounded-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab('zhuyin')}
-              className={[
-                'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
-                activeTab === 'zhuyin'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700',
-              ].join(' ')}
-            >
-              <span className="text-base leading-none select-none">ㄅ</span>
-              注音遊戲
-            </button>
-            {story.fillInBlank && story.fillInBlank.length > 0 && story.vocabBank && (
-              <button
-                onClick={() => setActiveTab('fillinblank')}
-                className={[
-                  'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
-                  activeTab === 'fillinblank'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700',
-                ].join(' ')}
-              >
-                <span className="text-base leading-none select-none">④</span>
-                語詞應用
-              </button>
-            )}
+            {/* 發音練習 and 注音遊戲 tabs hidden per product decision 2026-03-27 */}
+            {/* 語詞應用 tab removed — now a separate step (#668 VocabApplication) */}
           </div>
 
-          {/* ④ 語詞應用 fill-in-blank panel */}
-          {activeTab === 'fillinblank' && story.fillInBlank && story.vocabBank && (
-            <FillInBlankExercise
-              sentences={story.fillInBlank}
-              vocabBank={story.vocabBank}
-              onComplete={() => setActiveTab('stroke')}
-            />
-          )}
+          {/* 語詞應用 panel removed — now a separate step */}
 
           {/* Zhuyin phonetic game entry card */}
           {activeTab === 'zhuyin' && (
@@ -576,32 +562,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </div>
           )}
 
-          {/* Dictionary panel — shown when a character is selected */}
-          {selectedChar && (
-            <div className="bg-white border border-indigo-100 rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
-                  教育部國語辭典
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handlePractice(selectedChar)}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-accent text-white hover:bg-accent-hover font-semibold transition-colors"
-                  >
-                    練習筆順
-                  </button>
-                  <button
-                    onClick={() => setSelectedChar(null)}
-                    className="text-xs px-2 py-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
-                    aria-label="關閉字典"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-              <DictionaryPanel character={selectedChar} />
-            </div>
-          )}
+          {/* 教育部國語辭典 panel removed per product decision 2026-03-27 */}
 
           {/* Legend */}
           <div className="flex items-center gap-4 text-[10px] text-gray-400 flex-wrap">
@@ -683,7 +644,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {allDone && (
             <CompletionBanner
               count={practicedChars.size}
-              onFinish={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+              onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
             />
           )}
           </>}
@@ -708,7 +669,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </button>
           )}
           <button
-            onClick={() => onFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+            onClick={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
             className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
           >
             {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}

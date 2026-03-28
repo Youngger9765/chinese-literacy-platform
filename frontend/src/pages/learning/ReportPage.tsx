@@ -4,12 +4,12 @@ import AssessmentReport from '../../components/reading-steps/AssessmentReport';
 import XPAwardToast, { type XPAwardResult } from '../../components/gamification/XPAwardToast';
 import { useLearningContext } from '../../layouts/LearningLayout';
 import { useAuth } from '../../contexts/AuthContext';
+import { reportSessionComplete } from '../../services/gamificationApi';
 import {
-  reportSessionComplete,
   fetchDialogueHistory,
   getComprehensionScore,
   type ComprehensionScoreResult,
-} from '../../services/api';
+} from '../../services/learningApi';
 
 const ReportPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();

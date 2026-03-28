@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { getAIAnalysis, AIAnalysisResponse } from '../../services/api';
+import { getAIAnalysis, AIAnalysisResponse } from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface AIAnalysisSectionProps {

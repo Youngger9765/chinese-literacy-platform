@@ -19,7 +19,7 @@ import StoryLibrary from '../student/StoryLibrary';
 import WriteCharacter from '../../components/stroke-order/WriteCharacter';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
 import RecommendedStories from '../../components/student/RecommendedStories';
-import { fetchLearningSessions, type LearningSummary } from '../../services/api';
+import { fetchLearningSessions, type LearningSummary } from '../../services/learningApi';
 import { Story } from '../../types';
 
 // Lazy-loaded — only needed when route is active
@@ -58,7 +58,7 @@ interface RecentPracticeItem {
 function mapSessionToRecentItem(session: LearningSummary): RecentPracticeItem {
   return {
     id: session.id,
-    title: session.story_slug ?? '未知課文',
+    title: session.story_title ?? session.story_slug ?? '未知課文',
     status: session.status,
     startedAt: session.started_at,
     completedAt: session.completed_at,

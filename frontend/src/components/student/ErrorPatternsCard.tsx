@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { getErrorPatterns, markErrorCorrected, type ErrorPatternItem } from '../../services/api';
+import { getErrorPatterns, markErrorCorrected, type ErrorPatternItem } from '../../services/progressApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface Props {

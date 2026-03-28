@@ -1,0 +1,46 @@
+# .claude/cicd-config.yml
+# Read by git-issue-pr-flow agent at Phase 0.
+
+project:
+  name: "chinese-literacy-platform"
+  repo: "Youngger9765/chinese-literacy-platform"
+
+branches:
+  integration: staging
+  production: main
+  issue_prefix: "fix/issue-|feat/issue-"
+
+workflows:
+  staging_deploy: "staging-deploy.yml"
+  preview_deploy: "preview-deploy.yml"
+
+provider: gcp
+
+preview_url:
+  strategy: template
+  template: "https://lingoleap-frontend-issue-{issue_num}-958347263320.asia-east1.run.app"
+  gcp:
+    project_id: "lingoleap-dev"
+    region: "asia-east1"
+    project_number: "958347263320"
+
+topology: fullstack
+
+services:
+  frontend:
+    health_path: "/"
+    health_expect: 200
+  backend:
+    health_path: "/api/health"
+    health_expect: 200
+    smoke_tests:
+      - path: "/api/health"
+        accept: [200]
+      - path: "/api/teacher/story-tags"
+        accept: [200, 401]
+      - path: "/api/schools"
+        accept: [200, 401]
+
+screenshots:
+  storage: gcs
+  gcs_bucket: "lingoleap-screenshots"

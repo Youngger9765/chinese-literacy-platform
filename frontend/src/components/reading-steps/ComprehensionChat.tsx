@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, ComprehensionResult } from '../../types';
-import { sendComprehensionChat, ChatResponse, SessionExpiredError } from '../../services/api';
+import { sendComprehensionChat, restartComprehensionSession, ChatResponse, SessionExpiredError } from '../../services/learningApi';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
+import { useAuth } from '../../contexts/AuthContext';
+import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -14,6 +16,7 @@ interface ComprehensionChatProps {
   onPanelWidthChange: (w: number) => void;
   onFinish: (result: ComprehensionResult) => void;
   onBack: () => void;
+  dbSessionId?: number;
 }
 
 type ChatMessage =
@@ -28,8 +31,28 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   onPanelWidthChange,
   onFinish,
   onBack,
+  dbSessionId,
 }) => {
-  const [conversation, setConversation] = useState<ChatMessage[]>([]);
+  const { token } = useAuth();
+
+  // ── localStorage persistence ────────────────────────────────────────
+  const storageKey = `comprehension_progress_${story.id}`;
+  type SavedComprehension = {
+    conversation: ChatMessage[];
+    understoodCount: number;
+    requiredCount: number;
+    isSessionComplete: boolean;
+  };
+  const loadSaved = (): SavedComprehension | null => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch { return null; }
+  };
+  const savedRef = useRef(loadSaved());
+
+  const [conversation, setConversation] = useState<ChatMessage[]>(() => savedRef.current?.conversation ?? []);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,10 +67,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [activeTab, setActiveTab] = useState<'story' | 'chat' | 'structure' | 'mcq'>('chat');
 
   // Server-driven session state
-  const [sessionId] = useState(() => crypto.randomUUID());
-  const [understoodCount, setUnderstoodCount] = useState(0);
-  const [requiredCount, setRequiredCount] = useState(3);
-  const [isSessionComplete, setIsSessionComplete] = useState(false);
+  // Use a stable key derived from dbSessionId so refreshes don't generate a new UUID
+  // and waste a Gemini call. Anonymous users (no dbSessionId) fall back to a random UUID.
+  const [sessionId] = useState(() =>
+    dbSessionId ? `db-${dbSessionId}` : crypto.randomUUID()
+  );
+  const [understoodCount, setUnderstoodCount] = useState(() => savedRef.current?.understoodCount ?? 0);
+  const [requiredCount, setRequiredCount] = useState(() => savedRef.current?.requiredCount ?? 3);
+  const [isSessionComplete, setIsSessionComplete] = useState(() => savedRef.current?.isSessionComplete ?? false);
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
   const [offlineMode, setOfflineMode] = useState(false);
   const [mockQuestionIndex, setMockQuestionIndex] = useState(0);
@@ -61,14 +88,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const currentTranscriptRef = useRef('');
   const accumulatedTranscriptRef = useRef('');
 
-  // Text-to-speech helper
+  // Text-to-speech helper — uses Cloud TTS Neural2 with Web Speech API fallback
   const speakText = useCallback((text: string) => {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-TW';
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    window.speechSynthesis.speak(utterance);
+    cloudSpeakText(text).catch(() => {/* silently ignore — fallback handled inside */});
   }, []);
   const initializedRef = useRef(false);
   const isDraggingRef = useRef(false);
@@ -118,7 +140,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         }
         recognitionRef.current = null;
       }
-      window.speechSynthesis?.cancel();
+      cancelTts();
     };
   }, []);
 
@@ -176,7 +198,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     }
   }, [isMobile]);
 
-  // Fetch the first question from the server (no student answer)
+  // Fetch the first question from the server (no student answer).
+  // When the backend detects an existing session (resumed=true), it returns
+  // conversation_history so the frontend can restore the prior conversation
+  // without a Gemini call.
   const fetchFirstQuestion = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -192,11 +217,26 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         mispronouncedWords: attempt.mispronouncedWords?.length ? attempt.mispronouncedWords : undefined,
         accuracy: attempt.accuracy || undefined,
         cpm: attempt.cpm || undefined,
+        // Persist turns and enable session restore on refresh (Issue #632)
+        dbSessionId: dbSessionId,
         // Genre-aware Socratic (#615)
         genre: story.genre,
         readingStrategy: story.readingStrategy,
+        token: token ?? undefined,
       });
-      setConversation([{ role: 'ai', text: result.question }]);
+
+      if (result.resumed && result.conversation_history && result.conversation_history.length > 0) {
+        // Restore prior conversation — no loading animation shown
+        const restored: ChatMessage[] = result.conversation_history.map(h => {
+          if (h.role === 'feedback') {
+            return { role: 'feedback' as const, text: h.text, understood: h.understood ?? false };
+          }
+          return { role: h.role as 'ai' | 'student', text: h.text };
+        });
+        setConversation(restored);
+      } else {
+        setConversation([{ role: 'ai', text: result.question }]);
+      }
       applyServerState(result);
     } catch {
       switchToOfflineMode('無法連線到伺服器，已啟用離線測試模式。');
@@ -204,7 +244,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [story.content, story.title, sessionId, attempt, applyServerState, switchToOfflineMode]);
+  }, [story.content, story.title, sessionId, dbSessionId, attempt, applyServerState, switchToOfflineMode, token]);
 
   // Resizable right panel (mouse + touch)
   useEffect(() => {
@@ -259,6 +299,19 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     initializedRef.current = true;
     fetchFirstQuestion();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Save conversation progress to localStorage ──────────────────────
+  useEffect(() => {
+    if (conversation.length === 0) return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        conversation,
+        understoodCount,
+        requiredCount,
+        isSessionComplete,
+      }));
+    } catch {}
+  }, [conversation, understoodCount, requiredCount, isSessionComplete, storageKey]);
 
   const handleSubmit = useCallback(async (overrideText?: string) => {
     const text = (overrideText ?? inputText).trim();
@@ -326,6 +379,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         storyTitle: story.title,
         storyText,
         studentAnswer: text,
+        token: token ?? undefined,
       });
 
       applyServerState(result);
@@ -380,6 +434,29 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       }
     }
   };
+
+  // Clear session and start over from scratch (Issue #632)
+  const handleFinish = useCallback(() => {
+    try { localStorage.removeItem(storageKey); } catch {}
+    onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length });
+  }, [storageKey, onFinish, understoodCount, requiredCount, isSessionComplete, conversation.length]);
+
+  const handleRestart = useCallback(async () => {
+    try { localStorage.removeItem(storageKey); } catch {}
+    setConversation([]);
+    setUnderstoodCount(0);
+    setIsSessionComplete(false);
+    setHighlightedParagraph(null);
+    setError(null);
+    initializedRef.current = false;
+    // Tell backend to clear memory + DB turns so next fetchFirstQuestion starts fresh
+    await restartComprehensionSession({
+      sessionId,
+      dbSessionId: dbSessionId,
+      token: token ?? undefined,
+    }).catch(() => { /* non-fatal */ });
+    fetchFirstQuestion();
+  }, [sessionId, dbSessionId, token, fetchFirstQuestion]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const nativeEvent = e.nativeEvent as KeyboardEvent;
@@ -621,7 +698,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             ← 回到朗讀
           </button>
           <button
-            onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
+            onClick={handleRestart}
+            className="px-3 py-3 rounded-xl text-sm text-gray-500 hover:text-gray-900 transition-colors"
+            title="重新開始對話"
+          >
+            重新開始
+          </button>
+          <button
+            onClick={handleFinish}
             className="flex-1 py-3 rounded-xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-2"
           >
             繼續，生字練習
@@ -787,7 +871,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                           : 'border-transparent hover:border-gray-200 hover:bg-white/40'
                       }`}
                     >
-                      <p className={`text-xl text-gray-900 leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                      <p className={`text-2xl text-gray-900 leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                         {zhuyinLines ? zhuyinLines[idx] : line}
                       </p>
                     </div>
@@ -820,7 +904,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 <span className="text-[10px] text-gray-600">
                   {understoodCount} / {requiredCount} 理解
                 </span>
-                <button onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })} className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
+                <button onClick={handleFinish} className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
                   跳過
                 </button>
               </div>
@@ -926,7 +1010,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     {understoodCount} / {requiredCount} 理解
                   </span>
                   <button
-                    onClick={() => onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length })}
+                    onClick={handleFinish}
                     className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors pr-3"
                   >
                     跳過

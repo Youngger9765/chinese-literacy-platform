@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { RepeatedErrorAlertItem } from '../../services/api';
+import type { RepeatedErrorAlertItem } from '../../services/progressApi';
 
 interface Props {
   alerts: RepeatedErrorAlertItem[];

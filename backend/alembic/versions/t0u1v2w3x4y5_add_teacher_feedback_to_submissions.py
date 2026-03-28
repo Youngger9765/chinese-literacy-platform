@@ -21,10 +21,21 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        "assignment_submissions",
-        sa.Column("teacher_feedback", sa.Text(), nullable=True),
-    )
+    # Use a PL/pgSQL block so the migration is a no-op when the table doesn't
+    # exist yet (can happen on preview DBs with partial migration history) and
+    # also safe when the column was already added by a prior run.
+    op.execute(sa.text("""
+        DO $$ BEGIN
+            IF EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
+                  AND table_name = 'assignment_submissions'
+            ) THEN
+                ALTER TABLE assignment_submissions
+                ADD COLUMN IF NOT EXISTS teacher_feedback TEXT;
+            END IF;
+        END $$;
+    """))
 
 
 def downgrade() -> None:

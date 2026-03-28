@@ -2,9 +2,9 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
-import type { ComprehensionScoreResult } from '../../services/api';
-import { getRepeatedErrorsAlert } from '../../services/api';
-import type { RepeatedErrorAlertItem } from '../../services/api';
+import type { ComprehensionScoreResult } from '../../services/learningApi';
+import { getRepeatedErrorsAlert } from '../../services/progressApi';
+import type { RepeatedErrorAlertItem } from '../../services/progressApi';
 import DiffDisplay from '../ui/DiffDisplay';
 import CelebrationOverlay from '../ui/CelebrationOverlay';
 import ComprehensionScoreCard from './ComprehensionScoreCard';
@@ -169,6 +169,17 @@ const Section: React.FC<{
 const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals, dbSessionId, token }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
 
+  // Track report viewed in localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(`report_viewed_${story.id}`, JSON.stringify({
+        viewed: true,
+        viewedAt: new Date().toISOString(),
+        sessionId: dbSessionId,
+      }));
+    } catch {}
+  }, [story.id, dbSessionId]);
+
   // Repeated error alert modal state (Issue #248)
   const [repeatedAlerts, setRepeatedAlerts] = useState<RepeatedErrorAlertItem[]>([]);
   const [showRepeatedAlert, setShowRepeatedAlert] = useState(false);
@@ -295,7 +306,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   // Chart data for donut
   const accuracy = readingAttempt?.accuracy ?? 0;
   const scoreData = [
-    { name: '準確度', value: accuracy, color: '#4f46e5' },
+    { name: '準確度', value: accuracy, color: '#4A3FA3' },
     { name: '待改進', value: 100 - accuracy, color: '#f1f5f9' },
   ];
 
@@ -534,7 +545,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                     </button>
                     {isExpanded && line.diffTokens && (
                       <div className="px-6 pb-4 pt-1">
-                        <DiffDisplay tokens={line.diffTokens} showLegend />
+                        <DiffDisplay tokens={line.diffTokens} showLegend className="text-lg" />
                         <div className="flex gap-4 mt-3 text-xs text-gray-400">
                           <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
                           <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>
@@ -552,7 +563,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             {fullReadingResult?.diffTokens && fullReadingResult.diffTokens.length > 0 && (
               <div className="border-t border-slate-200 px-6 py-4">
                 <p className="text-xs text-gray-500 font-bold mb-2">全文朗讀比對</p>
-                <DiffDisplay tokens={fullReadingResult.diffTokens} showLegend />
+                <DiffDisplay tokens={fullReadingResult.diffTokens} showLegend className="text-lg" />
                 {fullReadingResult.errorBreakdown && (
                   <div className="flex gap-4 mt-3 text-xs text-gray-400">
                     <span>正確: {fullReadingResult.errorBreakdown.correct} 字</span>
@@ -870,7 +881,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                   </button>
                   {isExpanded && line.diffTokens && (
                     <div className="px-6 pb-4 pt-1">
-                      <DiffDisplay tokens={line.diffTokens} showLegend />
+                      <DiffDisplay tokens={line.diffTokens} showLegend className="text-lg" />
                       <div className="flex gap-4 mt-3 text-xs text-gray-400">
                         <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
                         <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>

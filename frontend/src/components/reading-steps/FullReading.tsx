@@ -20,13 +20,25 @@ interface FullReadingProps {
 
 const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPanelWidthChange, onFinish, onBack }) => {
   const isMobile = useIsMobile();
+  const storageKey = `fullReading_progress_${story.id}`;
+
+  type SavedResult = { matchRate: number; feedback: string; diffTokens: DiffToken[]; cpm: number; durationMs: number; errorBreakdown: { correct: number; wrong: number; missing: number; extra: number } };
+  const loadSaved = (): { result: SavedResult; transcript: string } | null => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch { return null; }
+  };
+  const savedProgress = useRef(loadSaved());
+
   const [isPreparing, setIsPreparing]           = useState(false);
   const [isSessionActive, setIsSessionActive]   = useState(false);
   const [isTtsSpeaking, setIsTtsSpeaking]       = useState(false);
   const [isTtsPaused, setIsTtsPaused]           = useState(false);
-  const [streamingTranscript, setStreamingTranscript] = useState('');
+  const [streamingTranscript, setStreamingTranscript] = useState(() => savedProgress.current?.transcript ?? '');
   const [micError, setMicError]                 = useState('');
-  const [result, setResult]                     = useState<{ matchRate: number; feedback: string; diffTokens: DiffToken[]; cpm: number; durationMs: number; errorBreakdown: { correct: number; wrong: number; missing: number; extra: number } } | null>(null);
+  const [result, setResult]                     = useState<SavedResult | null>(() => savedProgress.current?.result ?? null);
   const [zhuyinEnabled, setZhuyinEnabled]       = useState(true);
   const [zhuyinReady, setZhuyinReady]           = useState(false);
 
@@ -44,6 +56,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
   /* ---- Audio recorder (for student playback review) ---- */
   const audioRecorder = useAudioRecorder(120);
+
+  /* ---- localStorage persistence ---- */
+  useEffect(() => {
+    if (!result) return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ result, transcript: streamingTranscript }));
+    } catch {}
+  }, [result, streamingTranscript, storageKey]);
 
   /* ---- Zhuyin ---- */
   useEffect(() => {
@@ -287,7 +307,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                 key={idx}
                 className="rounded-2xl px-6 py-12 border-b border-gray-200 last:border-b-0 hover:bg-white/30 transition-all"
               >
-                <p className={`${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'} text-gray-800 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                <p className={`text-2xl lg:text-3xl text-gray-800 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                   {zhuyinLines ? zhuyinLines[idx] : line}
                 </p>
               </div>
@@ -396,7 +416,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               {result.diffTokens && result.diffTokens.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
                   <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">逐字比對</p>
-                  <DiffDisplay tokens={result.diffTokens} showLegend />
+                  <DiffDisplay tokens={result.diffTokens} showLegend className="text-lg" />
                 </div>
               )}
 
@@ -418,14 +438,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {result ? (
             <div className="space-y-2">
               <button
-                onClick={() => { setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
+                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
                 aria-label="重新開始全文朗讀"
                 className="w-full py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
                 再試一次
               </button>
               <button
-                onClick={() => onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown })}
+                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
                 aria-label="完成全文朗讀，查看學習報告"
                 className="w-full py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1"
               >

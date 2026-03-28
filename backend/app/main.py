@@ -30,6 +30,7 @@ from .routes.gamification import router as gamification_router
 from .routes.health import router as health_router
 from .routes.semesters import router as semesters_router
 from .routes.co_teaching import router as co_teaching_router
+from .routes.tts import router as tts_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter
 
@@ -81,6 +82,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src 'self' https://fonts.gstatic.com; "
         "img-src 'self' data: https:; "
+        "media-src 'self' blob:; "
         "connect-src 'self' "
         "https://*.run.app "
         "https://*.googleapis.com "
@@ -332,6 +334,7 @@ app.include_router(gamification_router, prefix="/api", tags=["gamification"])
 app.include_router(health_router)
 app.include_router(semesters_router, prefix="/api", tags=["semesters"])
 app.include_router(co_teaching_router, prefix="/api", tags=["co-teaching"])
+app.include_router(tts_router)
 
 
 def _patch_seed_assignments(db) -> None:
@@ -436,6 +439,52 @@ def _patch_seed_assignments(db) -> None:
     )
 
 
+def _sync_yaml_lessons_to_texts(db) -> None:
+    """Upsert all YAML lessons into the texts table (idempotent).
+
+    Uses lesson_number as the unique key. New lessons are inserted;
+    existing ones are skipped. Runs on every startup so newly added
+    YAML files are automatically available as Text records.
+    """
+    from .services.lesson_loader import get_all_lessons
+    from .models.text import Text, VisibilityLevel, TextStatus
+
+    lessons = get_all_lessons()
+    synced = 0
+    for lesson in lessons:
+        ln = lesson.get("lesson_number")
+        if ln is None:
+            continue
+        existing = db.query(Text).filter(Text.lesson_number == ln).first()
+        if existing:
+            continue
+        text = Text(
+            title=lesson["title"],
+            paragraphs=lesson.get("paragraphs", []),
+            full_text=lesson.get("full_text"),
+            char_count=lesson.get("char_count", 0),
+            grade=lesson.get("grade", 4),
+            grade_code=lesson.get("grade_code", ""),
+            genre=lesson.get("genre", "記敘文"),
+            text_type=lesson.get("text_type", "單"),
+            category=lesson.get("category", ""),
+            reading_strategy=lesson.get("reading_strategy"),
+            vocabulary=lesson.get("vocabulary"),
+            fill_in_blank=lesson.get("fill_in_blank"),
+            multiple_choice=lesson.get("multiple_choice"),
+            reading_benchmark=lesson.get("reading_benchmark"),
+            source_file=lesson.get("source_file"),
+            lesson_number=ln,
+            visibility=VisibilityLevel.platform,
+            status=TextStatus.published,
+        )
+        db.add(text)
+        synced += 1
+    if synced:
+        db.commit()
+        logger.info("_sync_yaml_lessons_to_texts: synced %d lessons → texts table", synced)
+
+
 def seed_default_data():
     """Seed complete demo data: org -> school -> teacher -> classroom -> students.
 
@@ -478,6 +527,10 @@ def seed_default_data():
             # Runs before the early-return so staging DBs get the fix even if
             # users were already seeded before assignments were added.
             _patch_seed_assignments(db)
+
+            # Sync YAML lessons → texts table (idempotent, uses lesson_number unique key).
+            # Runs on every startup so new lessons are picked up automatically.
+            _sync_yaml_lessons_to_texts(db)
 
             if db.query(User).count() > 0:
                 return  # Already seeded

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Story, ReadingAttempt, LiveMessage, DiffToken } from '../../types';
-import { correctHomophones } from '../../utils/pinyin';
+import { correctHomophones, isHomophone } from '../../utils/pinyin';
 import { diffCharacters, normalizeForComparison, cleanChineseText } from '../../utils/textDiff';
 import DiffDisplay from '../ui/DiffDisplay';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
@@ -11,8 +11,15 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
 import RecordingButton from '../recording/RecordingButton';
 import ParagraphProgress, { ParagraphStatus } from './ParagraphProgress';
-import { evaluateReading } from '../../services/api';
+import { evaluateReading } from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
+import {
+  localEvaluateParagraph,
+  splitIntoSentences,
+  getReadingPassThreshold,
+  type LocalEvalResult,
+} from '../../utils/localEval';
+import { cancelTts } from '../../services/ttsApi';
 
 /* ------------------------------------------------------------------ */
 /*  Canned response pools — randomly selected to avoid repetition     */
@@ -59,6 +66,155 @@ const STREAK_MESSAGES = [
 const LAST_LINE_MESSAGE = '全部唸完了！你好棒，辛苦了！';
 
 const pick = (pool: string[]) => pool[Math.floor(Math.random() * pool.length)];
+
+/* ------------------------------------------------------------------ */
+/*  Moving cursor helpers                                              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Look-ahead cursor: for each spoken char, try matching the current target
+ * position first. On mismatch, look ahead up to LOOK_AHEAD target positions
+ * to handle substitutions (e.g. 而且 vs 並且) and rare chars (e.g. 賁).
+ * Spoken chars that don't match anything are treated as extra and skipped.
+ */
+const LOOK_AHEAD = 3;
+
+function calcSpeakingProgress(interim: string, target: string): number {
+  const s = Array.from(normalizeForComparison(interim));
+  const t = Array.from(normalizeForComparison(target));
+  let j = 0;
+  for (let i = 0; i < s.length && j < t.length; i++) {
+    if (s[i] === t[j] || isHomophone(s[i], t[j])) {
+      j++;
+    } else {
+      // Look ahead: can this spoken char match a nearby target position?
+      // Handles substitutions (而且→並且) and STT-impossible chars (賁→噴)
+      let found = false;
+      for (let k = 1; k <= LOOK_AHEAD && j + k < t.length; k++) {
+        if (s[i] === t[j + k] || isHomophone(s[i], t[j + k])) {
+          j = j + k + 1; // skip mismatched target chars + advance past match
+          found = true;
+          break;
+        }
+      }
+      // If not found, spoken char is extra — skip it (j stays)
+    }
+  }
+  return j;
+}
+
+/**
+ * Map a count of normalized (punctuation-stripped) matched chars back to
+ * the corresponding index in the original target string.
+ * Returns the index of the first character not yet covered (cursor position).
+ */
+function normalizedToOrigIdx(target: string, normalizedProgress: number): number {
+  let norm = 0;
+  for (let i = 0; i < target.length; i++) {
+    if (norm >= normalizedProgress) return i;
+    if (!/[「」『』，。！？：；、\s]/.test(target[i])) norm++;
+  }
+  return target.length;
+}
+
+const IS_PUNCT = /[「」『』，。！？：；、\s]/;
+
+/**
+ * Render the original paragraph with diff annotations below each character.
+ * Punctuation is kept as-is. For each content char, consume the next
+ * non-extra diff token and apply colored underline / sub-text.
+ *
+ * Rendering rules (below the original char):
+ *   correct  → no annotation
+ *   forgiven → blue dotted underline
+ *   missing  → gray dashed underline + reduced opacity (char was skipped)
+ *   wrong    → red solid underline + small red spoken char below
+ *   extra    → skipped (no target position)
+ */
+function renderLineWithDiff(
+  originalLine: string,
+  tokens: DiffToken[],
+  fontSizePx: string | number,
+  extraClass: string,
+): React.ReactNode {
+  let tokenIdx = 0;
+
+  const chars = Array.from(originalLine).map((ch, i) => {
+    if (IS_PUNCT.test(ch)) {
+      return <span key={i} className="text-gray-400">{ch}</span>;
+    }
+
+    // Skip extra tokens — they have no target position
+    while (tokenIdx < tokens.length && tokens[tokenIdx].type === 'extra') tokenIdx++;
+    const token = tokens[tokenIdx++];
+
+    if (!token) {
+      return <span key={i}>{ch}</span>;
+    }
+    if (token.type === 'correct' || token.type === 'forgiven') {
+      return <span key={i} className="text-green-600">{ch}</span>;
+    }
+    if (token.type === 'unread') {
+      return <span key={i} className="text-gray-300">{ch}</span>;
+    }
+    if (token.type === 'missing') {
+      return (
+        <span key={i} className="inline-flex flex-col items-center opacity-40 border-b-2 border-dashed border-gray-400">
+          {ch}
+        </span>
+      );
+    }
+    if (token.type === 'wrong') {
+      return (
+        <span
+          key={i}
+          className="inline-flex flex-col items-center border-b-2 border-red-500"
+          title={`讀成「${token.char}」，應是「${ch}」`}
+        >
+          <span>{ch}</span>
+          <span className="text-red-500 leading-none" style={{ fontSize: `calc(${fontSizePx} * 0.55)` }}>
+            {token.char}
+          </span>
+        </span>
+      );
+    }
+    return <span key={i}>{ch}</span>;
+  });
+
+  return (
+    <p className={`leading-[4rem] ${extraClass}`} style={{ fontSize: fontSizePx }}>
+      {chars}
+    </p>
+  );
+}
+
+/**
+ * Build real-time overlay tokens from diffCharacters output.
+ * 1. Filter out "extra" tokens (spoken chars with no target position)
+ * 2. Find the cursor: index of last correct/wrong/forgiven token
+ * 3. Mark everything after the cursor as "unread"
+ */
+function buildRealtimeOverlay(diffTokens: DiffToken[]): DiffToken[] {
+  // Keep only target-side tokens (correct, wrong, missing, forgiven)
+  const targetTokens = diffTokens.filter(t => t.type !== 'extra');
+
+  // Find cursor: last position where student has spoken (correct, wrong, or forgiven)
+  let cursor = -1;
+  for (let i = targetTokens.length - 1; i >= 0; i--) {
+    if (targetTokens[i].type === 'correct' || targetTokens[i].type === 'wrong' || targetTokens[i].type === 'forgiven') {
+      cursor = i;
+      break;
+    }
+  }
+
+  // Mark tokens after cursor as "unread"
+  return targetTokens.map((t, i) => {
+    if (i > cursor && t.type === 'missing') {
+      return { ...t, type: 'unread' as const };
+    }
+    return t;
+  });
+}
 
 /**
  * Extract Chinese characters the student actually missed on their LAST attempt
@@ -144,27 +300,81 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const { token } = useAuth();
   const isMobile = useIsMobile();
   const { px: fontSizePx } = useFontSize();
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [currentLineIndex, setCurrentLineIndex] = useState(() => {
+    try {
+      const raw = localStorage.getItem(`liveTutor_progress_${story.id}`);
+      if (raw) { const p = JSON.parse(raw); return p.currentLineIndex ?? 0; }
+    } catch {}
+    return 0;
+  });
   const [isPreparing, setIsPreparing] = useState(false);          // STT initializing
   const [isSessionActive, setIsSessionActive] = useState(false);  // mic actively recording
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [messages, setMessages] = useState<LiveMessage[]>([]);
   const [micError, setMicError] = useState('');
   const [streamingUserInput, setStreamingUserInput] = useState('');
-  const [lineResults, setLineResults] = useState<LineResult[]>([]);
+  // Per-paragraph summary type (used by storage + state)
+  type ParagraphSummaryData = {
+    feedback: string;
+    matchRate: number;
+    wrongCount: number;
+    missingCount: number;
+    tier: number;
+    geminiPending: boolean;
+  };
+
+  // ── localStorage persistence for reading progress ──────────────────────────
+  const storageKey = `liveTutor_progress_${story.id}`;
+  const loadSavedProgress = () => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      return JSON.parse(raw) as {
+        lineResults: LineResult[];
+        paragraphSummaries: Record<number, ParagraphSummaryData>;
+        completedParagraphs: number[];
+        currentLineIndex: number;
+      };
+    } catch { return null; }
+  };
+  const savedProgress = useRef(loadSavedProgress());
+
+  const [lineResults, setLineResults] = useState<LineResult[]>(
+    savedProgress.current?.lineResults ?? []
+  );
   const [streak, setStreak] = useState(0);
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
   const [zhuyinReady, setZhuyinReady] = useState(false);
   const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
   const [isTtsPaused, setIsTtsPaused] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false); // legacy — kept for status bar compat
+  const [isAwaitingGemini, setIsAwaitingGemini] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
   const [showRecorder, setShowRecorder] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [speakingProgress, setSpeakingProgress] = useState(0); // char index cursor during recording
+  const [realtimeDiffTokens, setRealtimeDiffTokens] = useState<DiffToken[] | null>(null); // real-time LCS overlay
+  // Per-paragraph summary: keyed by lineIndex
+  const [paragraphSummaries, setParagraphSummaries] = useState<Record<number, ParagraphSummaryData>>(
+    savedProgress.current?.paragraphSummaries ?? {}
+  );
+  // Convenience: current paragraph's summary
+  const paragraphSummary = paragraphSummaries[currentLineIndex] ?? null;
+
+  // Hybrid eval: per-sentence (分期付款) tracking
+  const geminiGenRef = useRef(0); // generation counter — replaces AbortController
+  const geminiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sentenceTargetsRef = useRef<string[]>([]);
+  const sentenceResultsRef = useRef<Array<LocalEvalResult | null>>([]);
+  const nextSentenceIdxRef = useRef(0);
+  const lastFinalResultIdxRef = useRef(-1);
+  const streakRef = useRef(0); // mirrors streak for use in STT callbacks
 
   // Progressive unlock state — track which paragraphs have passed evaluation.
   const [completedParagraphs, setCompletedParagraphs] = useState<Set<number>>(
-    initialCompletedParagraphs ?? new Set<number>()
+    savedProgress.current?.completedParagraphs
+      ? new Set(savedProgress.current.completedParagraphs)
+      : initialCompletedParagraphs ?? new Set<number>()
   );
   // Celebration animation: shows briefly when a new paragraph is unlocked
   const [celebratingIndex, setCelebratingIndex] = useState<number | null>(null);
@@ -176,6 +386,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
+  // gets collected mid-playback, silencing onend/onboundary callbacks.
+  const utteranceRef = useRef<SpeechSynthesisUtterance | HTMLAudioElement | null>(null);
+  // rAF loop for TTS cursor animation — Chrome's onboundary doesn't fire per-char for Chinese.
+  const ttsRafRef = useRef<number | null>(null);
+  const ttsStartTimeRef = useRef<number>(0);
+  const ttsTotalCharsRef = useRef<number>(0);
   const isSessionActiveRef = useRef(false);   // true while recording
   const sentenceStartTimeRef = useRef(0);     // when current sentence reading began
   const currentTranscriptRef = useRef('');     // full transcript (accumulated + current session)
@@ -290,6 +507,20 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     };
   }, []);
 
+  // ── Save progress to localStorage whenever key state changes ──────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        lineResults,
+        paragraphSummaries: Object.fromEntries(
+          Object.entries(paragraphSummaries).map(([k, v]) => [k, { ...v, geminiPending: false }])
+        ),
+        completedParagraphs: Array.from(completedParagraphs),
+        currentLineIndex,
+      }));
+    } catch {}
+  }, [lineResults, paragraphSummaries, completedParagraphs, currentLineIndex, storageKey]);
+
   const onDividerMouseDown = (e: React.MouseEvent) => {
     isDraggingRef.current = true;
     dragStartXRef.current = e.clientX;
@@ -299,6 +530,22 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     e.preventDefault();
   };
 
+  /* ---- keep streakRef in sync for use in STT callbacks ---- */
+  useEffect(() => { streakRef.current = streak; }, [streak]);
+
+  /* ---- init sentence targets when paragraph changes ---- */
+  useEffect(() => {
+    const targets = splitIntoSentences(story.content[currentLineIndex] || '');
+    sentenceTargetsRef.current = targets;
+    sentenceResultsRef.current = new Array(targets.length).fill(null);
+    nextSentenceIdxRef.current = 0;
+    lastFinalResultIdxRef.current = -1;
+    setLastDiffTokens(null);
+    setSpeakingProgress(0);
+    setRealtimeDiffTokens(null);
+    // Don't clear paragraphSummaries — they persist across paragraph navigation
+  }, [currentLineIndex, story.content]);
+
   /* ---- cleanup on unmount ---- */
   useEffect(() => {
     return () => {
@@ -306,7 +553,16 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       if (recognitionRef.current) {
         try { recognitionRef.current.abort(); } catch (_) {}
       }
-      window.speechSynthesis?.cancel();
+      if (ttsRafRef.current !== null) {
+        cancelAnimationFrame(ttsRafRef.current);
+        ttsRafRef.current = null;
+      }
+      cancelTts();
+      if (geminiTimeoutRef.current !== null) {
+        clearTimeout(geminiTimeoutRef.current);
+        geminiTimeoutRef.current = null;
+      }
+      geminiGenRef.current++; // invalidate any in-flight Gemini eval
     };
   }, []);
 
@@ -314,140 +570,18 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /*  Core: evaluate the student's reading and respond                */
   /* ================================================================ */
 
-  const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
-    const targetText = story.content[lineIdx] || '';
-    const cleaned = cleanChineseText(rawTranscript);
-
-    if (!cleaned) return; // nothing to evaluate
-
-    setIsAnalyzing(true);
-
-    let displayInput = cleaned;
-    let tier: 1 | 2 | 3 = 3;
-    let feedback = '';
-    let matchRate = 0;
-    let rawMatchRate = 0;
-    let cpm = 0;
-    let diffTokens: DiffToken[] = [];
-    let evaluationMethod: 'ai' | 'fallback' = 'ai';
-    let usedFallback = false;
-
-    try {
-      const response = await evaluateReading(cleaned, targetText, durationMs, token ?? undefined);
-      tier = response.tier;
-      feedback = response.feedback;
-      rawMatchRate = response.match_rate;
-      matchRate = response.adjusted_match_rate;
-      cpm = Math.round(response.cpm ?? 0);
-      diffTokens = response.diff_tokens;
-      evaluationMethod = response.evaluation_method;
-    } catch (error) {
-      usedFallback = true;
-      evaluationMethod = 'fallback';
-
-      // Fallback path keeps the previous local algorithm for resiliency.
-      const targetForAlignment = normalizeForComparison(targetText);
-      const corrected = correctHomophones(cleaned, targetForAlignment);
-      const diffResult = diffCharacters(corrected, targetText, { useHomophone: true });
-      rawMatchRate = diffResult.matchRate;
-      matchRate = diffResult.matchRate;
-      diffTokens = diffResult.tokens;
-      displayInput = corrected;
-
-      if (matchRate >= READING_EXCELLENT) tier = 1;
-      else if (matchRate >= READING_PASS) tier = 2;
-      else tier = 3;
-
-      const fallbackStreak = tier <= 2 ? streak + 1 : 0;
-      if (tier <= 2 && fallbackStreak >= 3 && fallbackStreak < STREAK_MESSAGES.length && STREAK_MESSAGES[fallbackStreak]) {
-        feedback = STREAK_MESSAGES[fallbackStreak];
-      } else if (tier === 1) {
-        feedback = pick(TIER1_POOL);
-      } else if (tier === 2) {
-        feedback = pick(TIER2_POOL);
-      } else {
-        feedback = pick(TIER3_POOL);
-      }
-      setStreak(fallbackStreak);
-
-      const durationSec = Math.max(durationMs / 1000, 0.5);
-      cpm = Math.round((diffResult.correctCount / durationSec) * 60);
-
-      console.warn('[Evaluation] backend evaluateReading failed, fallback to local diff:', error);
-    } finally {
-      setIsAnalyzing(false);
-    }
-
+  /* ---- Helper: advance or finish after a successful paragraph ---- */
+  const advanceParagraph = useCallback((lineIdx: number, allLineResults: LineResult[]) => {
     const isLastLine = lineIdx >= story.content.length - 1;
-    let shouldAdvance = tier <= 2 && !isLastLine;
-    let shouldFinish = tier <= 2 && isLastLine;
-    let effectiveFeedback = feedback || (shouldFinish ? LAST_LINE_MESSAGE : '');
-
-    // Tier 3 retry cap: auto-pass after 2 retries (the 3rd failed attempt).
-    if (tier === 3 && retryCount >= 2) {
-      effectiveFeedback = '你已經很努力了！我們先繼續下一段，之後再回來練習。';
-      shouldAdvance = !isLastLine;
-      shouldFinish = isLastLine;
-      setRetryCount(0);
-    } else if (tier === 3) {
-      setRetryCount(prev => prev + 1);
-    } else {
-      setRetryCount(0);
-    }
-
-    if (!usedFallback) {
-      setStreak(prev => tier <= 2 ? prev + 1 : 0)
-      if (!effectiveFeedback) {
-        if (tier === 1) effectiveFeedback = pick(TIER1_POOL);
-        else if (tier === 2) effectiveFeedback = pick(TIER2_POOL);
-        else effectiveFeedback = pick(TIER3_POOL);
-      }
-    }
-
-    // Step 6: Record line result
-    const result: LineResult = { lineIndex: lineIdx, matchRate, cpm, durationMs, transcript: cleaned, diffTokens };
-    setLastDiffTokens(diffTokens);
-    setLineResults(prev => [...prev, result]);
-
-    // Step 7: Debug logging (dev only)
-    if (import.meta.env.DEV) {
-      console.group('%c[Evaluation]', 'color: cyan; font-weight: bold');
-      console.log('Line:', lineIdx, '/', story.content.length - 1);
-      console.log('Target:', targetText);
-      console.log('STT:', rawStt);
-      console.log('Method:', evaluationMethod);
-      console.log('Raw match rate:', (rawMatchRate * 100).toFixed(1) + '%');
-      console.log('Adjusted match rate:', (matchRate * 100).toFixed(1) + '%', '→ Tier', tier);
-      console.log('CPM:', cpm);
-      console.log('Duration:', (durationMs / 1000).toFixed(1) + 's');
-      console.log('Advance:', shouldAdvance, '| Finish:', shouldFinish);
-      console.log('Feedback:', effectiveFeedback);
-      console.groupEnd();
-    }
-
-    // Step 8: Commit messages
-    const newMsgs: LiveMessage[] = [];
-    newMsgs.push({ id: Date.now().toString(), role: 'user', text: displayInput, type: 'transcription' });
-    newMsgs.push({ id: (Date.now() + 1).toString(), role: 'model', text: effectiveFeedback, type: 'feedback' });
-    setMessages(prev => [...prev, ...newMsgs]);
-    setStreamingUserInput('');
-
-    // Step 9: Advance, finish, or stay
-    if (shouldAdvance && !isAdvancingRef.current) {
+    if (!isLastLine) {
+      if (isAdvancingRef.current) return;
       isAdvancingRef.current = true;
       setIsAdvancing(true);
-      stopSession(); // stop mic so student sees [系統朗讀][開始朗讀] for the next paragraph
+      stopSession();
 
-      // Mark this paragraph as completed and notify parent
       const nextIdx = lineIdx + 1;
-      setCompletedParagraphs(prev => {
-        const updated = new Set(prev);
-        updated.add(lineIdx);
-        return updated;
-      });
+      setCompletedParagraphs(prev => { const s = new Set(prev); s.add(lineIdx); return s; });
       onParagraphComplete?.(lineIdx);
-
-      // Celebration animation for unlocking next paragraph
       setCelebratingIndex(nextIdx);
       setTimeout(() => setCelebratingIndex(null), 2000);
 
@@ -457,37 +591,194 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         isAdvancingRef.current = false;
         setIsAdvancing(false);
       }, 1500);
-    } else if (shouldFinish) {
+    } else {
+      // Last paragraph — finish
       stopSession();
-      // Mark final paragraph as completed
-      setCompletedParagraphs(prev => {
-        const updated = new Set(prev);
-        updated.add(lineIdx);
-        return updated;
-      });
+      setCompletedParagraphs(prev => { const s = new Set(prev); s.add(lineIdx); return s; });
       onParagraphComplete?.(lineIdx);
 
       setTimeout(() => {
-        const allResults = [...lineResults, result];
-        const avgMatchRate = allResults.reduce((s, r) => s + r.matchRate, 0) / allResults.length;
-        const totalCorrectChars = allResults.reduce(
+        const avgMatchRate = allLineResults.reduce((s, r) => s + r.matchRate, 0) / allLineResults.length;
+        const totalCorrectChars = allLineResults.reduce(
           (s, r) => s + r.diffTokens.filter(t => t.type === 'correct' || t.type === 'forgiven').length, 0
         );
-        const totalDurationSec = allResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
+        const totalDurationSec = allLineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
         const overallCpm = totalDurationSec > 0 ? Math.round((totalCorrectChars / totalDurationSec) * 60) : 0;
         onFinish({
           storyId: story.id, accuracy: Math.round(avgMatchRate * 100), fluency: overallCpm,
-          cpm: overallCpm, mispronouncedWords: extractPracticeChars(allResults, story.content),
-          transcription: allResults.map(r => r.transcript).join(' '), timestamp: Date.now(),
-          lineBreakdown: allResults.map(r => ({
+          cpm: overallCpm, mispronouncedWords: extractPracticeChars(allLineResults, story.content),
+          transcription: allLineResults.map(r => r.transcript).join(' '), timestamp: Date.now(),
+          lineBreakdown: allLineResults.map(r => ({
             lineIndex: r.lineIndex, matchRate: r.matchRate, cpm: r.cpm,
             transcript: r.transcript, diffTokens: r.diffTokens,
           })),
         });
       }, 2000);
     }
-    // If tier 3 (retry), stay on same line — mic keeps listening
-  }, [story, streak, lineResults, onFinish, onParagraphComplete, retryCount, token]);
+  }, [story, onFinish, onParagraphComplete]);
+
+  /* ---- Hybrid evaluation: local first, Gemini only on FAIL ---- */
+  const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
+    const targetText = story.content[lineIdx] || '';
+    const cleaned = cleanChineseText(rawTranscript);
+    if (!cleaned) return;
+
+    // ── Phase 1: local eval (instant, <1ms) ─────────────────────────────────
+    // Prefer accumulated per-sentence results from isFinal events.
+    // Fall back to whole-paragraph local eval if no isFinal events captured.
+    const sentResults = sentenceResultsRef.current.filter(Boolean) as LocalEvalResult[];
+
+    let localTier: 1 | 2 | 3;
+    let localDiffTokens: DiffToken[];
+    let localFeedback: string;
+    let localMatchRate: number;
+    let localCpm: number;
+
+    const totalSentences = sentenceTargetsRef.current.length;
+    if (sentResults.length > 0 && sentResults.length >= Math.ceil(totalSentences / 2)) {
+      // Compute overall from per-sentence results (only if majority captured)
+      const allDiff = sentResults.flatMap(r => r.diffTokens);
+      const correctAndForgiven = allDiff.filter(t => t.type === 'correct' || t.type === 'forgiven').length;
+      const totalTarget = normalizeForComparison(targetText).length || 1;
+      localMatchRate = correctAndForgiven / totalTarget;
+      const threshold = getReadingPassThreshold(totalTarget);
+      localTier = localMatchRate >= READING_EXCELLENT ? 1 : localMatchRate >= threshold ? 2 : 3;
+      localDiffTokens = allDiff;
+      localFeedback = sentResults[sentResults.length - 1].feedback;
+      localCpm = Math.round(sentResults.reduce((s, r) => s + r.cpm, 0) / sentResults.length);
+    } else {
+      // Incomplete sentence results or no isFinal events — whole-paragraph local eval
+      const localResult = localEvaluateParagraph(
+        cleaned, targetText, durationMs,
+        { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+        streak,
+      );
+      localTier = localResult.tier;
+      localDiffTokens = localResult.diffTokens;
+      localFeedback = localResult.feedback;
+      localMatchRate = localResult.matchRate;
+      localCpm = localResult.cpm;
+    }
+
+    // Show local diff immediately
+    setLastDiffTokens(localDiffTokens);
+
+    if (import.meta.env.DEV) {
+      console.group('%c[Evaluation] Hybrid', 'color: cyan; font-weight: bold');
+      console.log('Line:', lineIdx, '/', story.content.length - 1);
+      console.log('Target:', targetText, '| STT:', rawStt);
+      console.log('Local tier:', localTier, '| match:', (localMatchRate * 100).toFixed(1) + '%', '| cpm:', localCpm);
+      console.log('Sentence results:', sentResults.length, '/ total sentences:', sentenceTargetsRef.current.length);
+      console.groupEnd();
+    }
+
+    // ── Retry cap: auto-advance after 2 failed attempts ──────────────────────
+    if (localTier === 3 && retryCount >= 2) {
+      stopSession();
+      const capFeedback = '你已經很努力了！我們先繼續下一段，之後再回來練習。';
+      setMessages(prev => [...prev,
+        { id: Date.now().toString(), role: 'user', text: cleaned, type: 'transcription' },
+        { id: (Date.now() + 1).toString(), role: 'model', text: capFeedback, type: 'feedback' },
+      ]);
+      setStreamingUserInput('');
+      setRetryCount(0);
+      const capResult: LineResult = { lineIndex: lineIdx, matchRate: localMatchRate, cpm: localCpm, durationMs, transcript: cleaned, diffTokens: localDiffTokens };
+      const allResults = [...lineResults, capResult];
+      setLineResults(allResults);
+      advanceParagraph(lineIdx, allResults);
+      return;
+    }
+
+    // ── Phase 2: Show paragraph summary, call Gemini for feedback ─────────────
+    const localResult: LineResult = { lineIndex: lineIdx, matchRate: localMatchRate, cpm: localCpm, durationMs, transcript: cleaned, diffTokens: localDiffTokens };
+    const allResults = [...lineResults, localResult];
+    setLineResults(allResults);
+    setStreamingUserInput('');
+
+    // Count errors from diff tokens
+    const wrongCount = localDiffTokens.filter(t => t.type === 'wrong').length;
+    const missingCount = localDiffTokens.filter(t => t.type === 'missing').length;
+
+    // Stop recognition so the summary card is visible and action buttons work
+    stopSession();
+
+    // Show local summary immediately (Gemini will update it)
+    const summaryData: ParagraphSummaryData = {
+      feedback: localTier <= 2 ? (localFeedback || '唸得不錯！') : (localFeedback || '再試一次，加油！'),
+      matchRate: localMatchRate,
+      wrongCount,
+      missingCount,
+      tier: localTier,
+      geminiPending: true,
+    };
+    setParagraphSummaries(prev => ({ ...prev, [lineIdx]: summaryData }));
+
+    if (localTier <= 2) {
+      setStreak(prev => prev + 1);
+      setRetryCount(0);
+    } else {
+      setRetryCount(prev => prev + 1);
+    }
+
+    // Async Gemini: get AI feedback to update the summary
+    const gen = ++geminiGenRef.current;
+    if (geminiTimeoutRef.current !== null) { clearTimeout(geminiTimeoutRef.current); geminiTimeoutRef.current = null; }
+
+    void (async () => {
+      let localTimeout: ReturnType<typeof setTimeout> | null = null;
+      try {
+        const gemini = await Promise.race([
+          evaluateReading(cleaned, targetText, durationMs, token ?? undefined),
+          new Promise<never>((_, reject) => {
+            localTimeout = setTimeout(() => reject(new Error('gemini_timeout')), 8000);
+            geminiTimeoutRef.current = localTimeout;
+          }),
+        ]);
+        if (localTimeout !== null) clearTimeout(localTimeout);
+        if (geminiTimeoutRef.current === localTimeout) geminiTimeoutRef.current = null;
+        if (geminiGenRef.current !== gen) return;
+
+        // Update summary with Gemini feedback
+        const geminiWrong = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'wrong').length;
+        const geminiMissing = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'missing').length;
+        setParagraphSummaries(prev => ({ ...prev, [lineIdx]: {
+          feedback: gemini.feedback || (gemini.tier <= 2 ? '唸得不錯！' : '再試一次，加油！'),
+          matchRate: gemini.adjusted_match_rate,
+          wrongCount: geminiWrong,
+          missingCount: geminiMissing,
+          tier: gemini.tier,
+          geminiPending: false,
+        }}));
+        setLastDiffTokens(gemini.diff_tokens);
+
+        // If Gemini upgrades to PASS, update the result
+        if (gemini.tier <= 2 && localTier > 2) {
+          setStreak(prev => prev + 1);
+          setRetryCount(0);
+          const geminiResult: LineResult = {
+            lineIndex: lineIdx,
+            matchRate: gemini.adjusted_match_rate,
+            cpm: Math.round(gemini.cpm ?? localCpm),
+            durationMs, transcript: cleaned, diffTokens: gemini.diff_tokens,
+          };
+          setLineResults(prev => [...prev.slice(0, -1), geminiResult]);
+        }
+      } catch (err: unknown) {
+        if (localTimeout !== null) clearTimeout(localTimeout);
+        if (geminiTimeoutRef.current === localTimeout) geminiTimeoutRef.current = null;
+        if (geminiGenRef.current !== gen) return;
+        // Gemini failed — local summary stands, just mark as done
+        setParagraphSummaries(prev => {
+          const existing = prev[lineIdx];
+          return existing ? { ...prev, [lineIdx]: { ...existing, geminiPending: false } } : prev;
+        });
+        const msg = err instanceof Error ? err.message : '';
+        if (msg !== 'gemini_timeout') {
+          console.warn('[LiveTutor] Gemini eval failed, local result stands:', err);
+        }
+      }
+    })();
+  }, [story, streak, lineResults, onFinish, onParagraphComplete, retryCount, token, advanceParagraph]);
 
   // Sync refs so async callbacks (onend) always see latest values
   evaluateAndRespondRef.current = evaluateAndRespond;
@@ -503,7 +794,27 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const startSession = () => {
     if (isSessionActiveRef.current) return;
-    window.speechSynthesis?.cancel();
+    // Null out TTS callbacks before cancel() so any async onend/onerror from
+    // the previous utterance cannot stomp on the STT cursor position.
+    if (utteranceRef.current) {
+      const cur = utteranceRef.current;
+      if (cur instanceof HTMLAudioElement) {
+        cur.onended = null;
+        cur.onerror = null;
+        cur.pause();
+      } else {
+        (cur as SpeechSynthesisUtterance).onstart = null;
+        (cur as SpeechSynthesisUtterance).onboundary = null;
+        (cur as SpeechSynthesisUtterance).onend = null;
+        (cur as SpeechSynthesisUtterance).onerror = null;
+      }
+      utteranceRef.current = null;
+    }
+    if (ttsRafRef.current !== null) {
+      cancelAnimationFrame(ttsRafRef.current);
+      ttsRafRef.current = null;
+    }
+    cancelTts();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
     setIsPreparing(true);
@@ -554,10 +865,55 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       rawSttRef.current = fullTranscript;
       currentTranscriptRef.current = fullTranscript;
       setStreamingUserInput(cleanChineseText(fullTranscript));
+
+      // Real-time LCS diff overlay: compare full transcript against target
+      const targetText = story.content[currentLineIndexRef.current] || '';
+      const rawDiff = diffCharacters(fullTranscript, targetText, { useHomophone: true });
+      const overlayTokens = buildRealtimeOverlay(rawDiff.tokens);
+      // Highwater mark: once a char is correct/wrong/forgiven, never revert to unread.
+      // This prevents "jumping" when STT interim transcript fluctuates.
+      setRealtimeDiffTokens(prev => {
+        if (!prev) return overlayTokens;
+        return overlayTokens.map((t, i) => {
+          const old = prev[i];
+          if (!old) return t;
+          // If previously committed (correct/wrong/forgiven/missing), keep it
+          // unless new result is also committed (allows correction on re-read)
+          if (old.type !== 'unread' && t.type === 'unread') return old;
+          return t;
+        });
+      });
+      // Also update cursor for progress bar / other consumers
+      const readChars = overlayTokens.filter(t => t.type !== 'unread').length;
+      setSpeakingProgress(prev => Math.max(prev, readChars));
+
+      // ── 分期付款: per-sentence local eval on isFinal events ────────────────
+      // Each isFinal chunk is mapped to the next un-evaluated sentence target.
+      // Result diffTokens are accumulated so the student sees progressive colors.
+      for (let i = lastFinalResultIdxRef.current + 1; i < event.results.length; i++) {
+        if (!event.results[i].isFinal) break; // non-final → stop (results are ordered)
+        lastFinalResultIdxRef.current = i;
+        const sentIdx = nextSentenceIdxRef.current;
+        const sentTargets = sentenceTargetsRef.current;
+        if (sentIdx >= sentTargets.length) continue; // extra speech after all sentences
+
+        const chunk = event.results[i][0].transcript;
+        const sentTarget = sentTargets[sentIdx];
+        const elapsed = Math.max(Date.now() - sentenceStartTimeRef.current, 500);
+        const localResult = localEvaluateParagraph(
+          chunk, sentTarget, elapsed,
+          { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+          streakRef.current,
+        );
+        sentenceResultsRef.current[sentIdx] = localResult;
+        nextSentenceIdxRef.current = sentIdx + 1;
+        // Accumulate tokens for progressive display in the right panel
+        setLastDiffTokens(prev => prev ? [...prev, ...localResult.diffTokens] : localResult.diffTokens);
+      }
     };
 
     recognition.onerror = (event: any) => {
-      console.warn('SpeechRecognition error:', event.error);
+      console.warn('[STT] onerror:', event.error, '| sessionActive:', isSessionActiveRef.current);
       if (event.error === 'not-allowed') {
         setMicError('請允許麥克風權限後再試一次。');
         isSessionActiveRef.current = false;
@@ -573,13 +929,24 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     };
 
     recognition.onend = () => {
+      console.log('[STT] onend | sessionActive:', isSessionActiveRef.current, '| accumulated:', accumulatedTranscriptRef.current.slice(-20));
       if (isSessionActiveRef.current) {
-        // Browser/API timed out — seamlessly reconnect
-        if (import.meta.env.DEV) {
-          console.log('[SpeechRecognition] Auto-reconnecting…');
-        }
+        // Browser/API timed out — seamlessly reconnect.
+        // Chrome sometimes throws InvalidStateError if start() is called
+        // immediately inside onend (engine not fully cleaned up yet).
+        // A 150ms delay lets Chrome finish teardown before we restart.
         accumulatedTranscriptRef.current = currentTranscriptRef.current;
-        try { recognition.start(); } catch (_) {}
+        lastFinalResultIdxRef.current = -1; // reset — reconnect resets event.results indices
+        setTimeout(() => {
+          if (!isSessionActiveRef.current) return; // user stopped during the delay
+          console.log('[STT] reconnecting… accumulated now:', accumulatedTranscriptRef.current.slice(-20));
+          try {
+            recognition.start();
+            console.log('[STT] reconnect start() OK');
+          } catch (err) {
+            console.error('[STT] reconnect start() FAILED — cursor will freeze!', err);
+          }
+        }, 150);
       } else {
         // Session fully ended
         setIsSessionActive(false);
@@ -593,6 +960,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     rawSttRef.current = '';
     accumulatedTranscriptRef.current = '';
     setStreamingUserInput('');
+    setSpeakingProgress(0);
+    setRealtimeDiffTokens(null);
 
     recognition.start();
     // Note: isSessionActive & sentenceStartTimeRef are set in onstart once STT is truly ready
@@ -637,56 +1006,134 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     rawSttRef.current = '';
     accumulatedTranscriptRef.current = '';
     setStreamingUserInput('');
+    setSpeakingProgress(0);
+    setRealtimeDiffTokens(null);
   };
 
-  /** Use browser TTS to read the current paragraph aloud. */
+  /** Use Cloud TTS Neural2 to read the current paragraph aloud.
+   *  Falls back to Web Speech API inside ttsApi if backend is unavailable.
+   *  Drives the cursor animation using time-based rAF (~4.2 chars/sec).
+   */
   const speakCurrentParagraph = useCallback(() => {
     const text = story.content[currentLineIndex];
-    if (!text || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    if (!text) return;
+    cancelTts();
     setIsTtsPaused(false);
 
-    const doSpeak = () => {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'zh-TW';
-      utterance.rate = 1.0;
+    const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
-      // Prefer Google Taiwan, fall back to any zh-TW, then any zh
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-        voices.find(v => v.name.includes('Google') && v.lang === 'zh-TW') ||
-        voices.find(v => v.lang === 'zh-TW') ||
-        voices.find(v => v.lang.startsWith('zh'));
-      if (preferred) utterance.voice = preferred;
-
-      utterance.onstart = () => setIsTtsSpeaking(true);
-      utterance.onend = () => { setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      utterance.onerror = () => { setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      window.speechSynthesis.speak(utterance);
+    const stopTtsAnimation = () => {
+      if (ttsRafRef.current !== null) {
+        cancelAnimationFrame(ttsRafRef.current);
+        ttsRafRef.current = null;
+      }
     };
 
-    // If voices not yet loaded, wait for them then speak
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.onvoiceschanged = null;
-        doSpeak();
+    const startCursorAnimation = () => {
+      setIsTtsSpeaking(true);
+      setSpeakingProgress(0);
+      setRealtimeDiffTokens(null);
+      ttsStartTimeRef.current = performance.now();
+      ttsTotalCharsRef.current = Array.from(text).length;
+      const MS_PER_CHAR = 240; // ~4.2 chars/sec — tuned for Neural2 zh-TW at rate 0.9
+      const animate = () => {
+        const elapsed = performance.now() - ttsStartTimeRef.current;
+        const pos = Math.min(Math.floor(elapsed / MS_PER_CHAR), ttsTotalCharsRef.current);
+        setSpeakingProgress(pos);
+        if (pos < ttsTotalCharsRef.current) {
+          ttsRafRef.current = requestAnimationFrame(animate);
+        }
       };
-    } else {
-      doSpeak();
-    }
+      ttsRafRef.current = requestAnimationFrame(animate);
+    };
+
+    const onSpeechEnd = () => {
+      stopTtsAnimation();
+      setIsTtsSpeaking(false);
+      setIsTtsPaused(false);
+    };
+
+    // Try Cloud TTS first via <audio> element for better control
+    fetch(`${API_BASE}/api/tts/synthesize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`TTS ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        if (blob.size === 0) throw new Error('Empty TTS audio');
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
+        audio.onplay = startCursorAnimation;
+        audio.onended = onSpeechEnd;
+        audio.onerror = onSpeechEnd;
+        return audio.play();
+      })
+      .catch(() => {
+        // Fallback: Web Speech API
+        if (!window.speechSynthesis) { onSpeechEnd(); return; }
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utteranceRef.current = utterance;
+        utterance.lang = 'zh-TW';
+        utterance.rate = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const preferred =
+          voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
+          voices.find(v => v.lang === 'zh-TW') ||
+          voices.find(v => v.lang.startsWith('zh'));
+        if (preferred) utterance.voice = preferred;
+        utterance.onstart = startCursorAnimation;
+        utterance.onboundary = (e) => { setSpeakingProgress(e.charIndex); };
+        utterance.onend = onSpeechEnd;
+        utterance.onerror = onSpeechEnd;
+
+        const doSpeak = () => window.speechSynthesis.speak(utterance);
+        if (window.speechSynthesis.getVoices().length === 0) {
+          window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.onvoiceschanged = null;
+            doSpeak();
+          };
+        } else {
+          doSpeak();
+        }
+      });
   }, [story.content, currentLineIndex]);
 
   const pauseTts = () => {
-    window.speechSynthesis?.pause();
+    // Pause <audio> element if playing via Cloud TTS
+    const ua = utteranceRef.current;
+    if (ua && ua instanceof HTMLAudioElement) {
+      ua.pause();
+    } else {
+      window.speechSynthesis?.pause();
+    }
     setIsTtsPaused(true);
   };
   const resumeTts = () => {
-    window.speechSynthesis?.resume();
+    const ua = utteranceRef.current;
+    if (ua && ua instanceof HTMLAudioElement) {
+      ua.play().catch(() => {});
+    } else {
+      window.speechSynthesis?.resume();
+    }
     setIsTtsPaused(false);
   };
   const stopTts = () => {
-    window.speechSynthesis?.cancel();
+    if (ttsRafRef.current !== null) {
+      cancelAnimationFrame(ttsRafRef.current);
+      ttsRafRef.current = null;
+    }
+    const ua = utteranceRef.current;
+    if (ua && ua instanceof HTMLAudioElement) {
+      ua.pause();
+      ua.currentTime = 0;
+    }
+    cancelTts();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
   };
@@ -697,6 +1144,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const handleFinish = () => {
     stopSession();
+    // Clear localStorage — progress is complete, will be sent to backend
+    try { localStorage.removeItem(storageKey); } catch {}
     const avgMatchRate =
       lineResults.length > 0
         ? lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length : 0;
@@ -720,17 +1169,29 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /*  JSX                                                             */
   /* ================================================================ */
 
+  // Compute diff tokens for the right panel (current paragraph only, shown after eval)
+  const rightPanelDiffTokens: DiffToken[] | null = (() => {
+    if (lastDiffTokens && lastDiffTokens.length > 0) return lastDiffTokens;
+    // After refresh: fall back to last saved result for current paragraph
+    for (let i = lineResults.length - 1; i >= 0; i--) {
+      if (lineResults[i].lineIndex === currentLineIndex && lineResults[i].diffTokens?.length > 0) {
+        return lineResults[i].diffTokens;
+      }
+    }
+    return null;
+  })();
+
   return (
     <div
-      className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 h-full bg-amber-50 overflow-hidden`}
+      className={`flex flex-1 h-full bg-amber-50 overflow-hidden ${isMobile ? 'flex-col' : 'flex-row'}`}
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
           : "'Iansui', 'Noto Sans TC', sans-serif",
       }}
     >
-      {/* CENTER: Editor - story text panel */}
-      <div className={`flex flex-col bg-amber-50 ${isMobile ? 'h-[60vh]' : 'flex-1'}`}>
+      {/* LEFT: Story text panel — completely static, no dynamic text changes */}
+      <div className="flex flex-col bg-amber-50 flex-1 min-h-0 overflow-hidden">
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2">
           <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
             {processZhuyin(story.filename)}
@@ -758,6 +1219,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             {story.content.map((line, idx) => {
               const isCelebrating = celebratingIndex === idx;
               const status = lineStatuses[idx];
+
               return (
                 <div
                   key={idx}
@@ -787,7 +1249,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                       </span>
                     )}
                     {status === 'locked' && (
-                      /* Lock icon for locked paragraphs */
                       <span className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center shrink-0">
                         <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -795,47 +1256,268 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                       </span>
                     )}
                     <span className="text-xs text-gray-400 font-bold">第 {idx + 1} 段</span>
-                    {/* Celebration label */}
                     {isCelebrating && (
                       <span className="ml-auto text-xs font-bold text-emerald-600 animate-bounce">
                         解鎖了！
                       </span>
                     )}
-                    {/* Locked hint */}
                     {status === 'locked' && (
                       <span className="ml-auto text-[10px] text-gray-400">完成前一段後解鎖</span>
                     )}
+                    {/* Inline action buttons — system read + start/submit/retry */}
+                    {status !== 'locked' && !isAdvancing && (
+                      <div className="ml-auto flex items-center gap-2">
+                        {/* System demo — available on all non-locked paragraphs */}
+                        <button
+                          onClick={() => {
+                            if (idx !== currentLineIndex) { stopSession(); setRetryCount(0); setCurrentLineIndex(idx); }
+                            if (isTtsSpeaking) {
+                              if (utteranceRef.current) { const _u = utteranceRef.current; if (_u instanceof HTMLAudioElement) { _u.onended = null; _u.onerror = null; _u.pause(); } else { (_u as SpeechSynthesisUtterance).onend = null; (_u as SpeechSynthesisUtterance).onerror = null; (_u as SpeechSynthesisUtterance).onboundary = null; } utteranceRef.current = null; }
+                              if (ttsRafRef.current !== null) { cancelAnimationFrame(ttsRafRef.current); ttsRafRef.current = null; }
+                              cancelTts();
+                              setIsTtsSpeaking(false); setIsTtsPaused(false);
+                            } else {
+                              // Speak this paragraph's text via speakCurrentParagraph
+                              // (navigating to that line first if needed)
+                              if (idx === currentLineIndex) {
+                                speakCurrentParagraph();
+                              } else {
+                                // Brief inline fallback for non-current paragraphs (demo mode)
+                                const text = story.content[idx];
+                                if (text) {
+                                  cancelTts();
+                                  setIsTtsSpeaking(true);
+                                  import('../../services/ttsApi').then(({ speakText: sp }) => {
+                                    sp(text).finally(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
+                                  });
+                                }
+                              }
+                            }
+                          }}
+                          disabled={idx === currentLineIndex && (isSessionActive || isPreparing)}
+                          className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all ${
+                            idx === currentLineIndex && (isSessionActive || isPreparing)
+                              ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                              : isTtsSpeaking && idx === currentLineIndex
+                                ? 'bg-red-100 hover:bg-red-200 text-red-600'
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          {isTtsSpeaking && idx === currentLineIndex ? (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="4" height="12" rx="1" /><rect x="14" y="6" width="4" height="12" rx="1" /></svg>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
+                          )}
+                          {isTtsSpeaking && idx === currentLineIndex ? '停止' : 'AI 朗讀'}
+                        </button>
+                        {/* A/B test: Web Speech API button for comparison */}
+                        <button
+                          onClick={() => {
+                            const text = story.content[idx];
+                            if (!text) return;
+                            if (window.speechSynthesis.speaking) {
+                              window.speechSynthesis.cancel();
+                              return;
+                            }
+                            const utt = new SpeechSynthesisUtterance(text);
+                            utt.lang = 'zh-TW';
+                            utt.rate = 0.9;
+                            const voices = window.speechSynthesis.getVoices();
+                            const best = voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan'))
+                              || voices.find(v => v.lang === 'zh-TW');
+                            if (best) utt.voice = best;
+                            window.speechSynthesis.speak(utt);
+                          }}
+                          disabled={idx === currentLineIndex && (isSessionActive || isPreparing)}
+                          className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 ${
+                            idx === currentLineIndex && (isSessionActive || isPreparing) ? 'opacity-40 cursor-not-allowed' : ''
+                          }`}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
+                          瀏覽器朗讀
+                        </button>
+                        {/* Start / Submit / Retry — context-dependent */}
+                        {idx === currentLineIndex ? (
+                          // Current paragraph: show session controls
+                          isPreparing ? (
+                            <button disabled className="px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-400 cursor-wait flex items-center gap-1.5">
+                              <div className="w-2.5 h-2.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                              準備中...
+                            </button>
+                          ) : isSessionActive ? (
+                            <button
+                              onClick={submitSentence}
+                              disabled={isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
+                              className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all shadow active:scale-95 ${
+                                isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
+                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                              }`}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                              完成
+                            </button>
+                          ) : !paragraphSummaries[idx] ? (
+                            <button
+                              onClick={startSession}
+                              className="px-4 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1.5 transition-all shadow active:scale-95"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-white" />
+                              {retryCount > 0 ? '再試一次' : '開始朗讀'}
+                            </button>
+                          ) : null
+                        ) : (
+                          // Non-current paragraph: show "開始朗讀" to switch + start
+                          <button
+                            onClick={() => {
+                              stopSession(); setRetryCount(0); setCurrentLineIndex(idx);
+                            }}
+                            className="px-4 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white flex items-center gap-1.5 transition-all shadow active:scale-95"
+                          >
+                            <span className="w-2 h-2 rounded-full bg-white" />
+                            開始朗讀
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
+
+                  {/* Paragraph text — STATIC: text and colors never change during reading.
+                      Only show plain text at all times. Background highlight is on the container above. */}
                   <p
                     className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
                       status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
                     }`}
                     style={{ fontSize: fontSizePx }}
                   >
-                    {/* Show blurred text for locked paragraphs */}
                     {status === 'locked' ? (
                       <span className="blur-sm select-none">{zhuyinLines ? zhuyinLines[idx] : line}</span>
                     ) : (
                       zhuyinLines ? zhuyinLines[idx] : line
                     )}
                   </p>
+
+                  {/* Bottom-of-paragraph controls — complete + stop (visible while recording this paragraph) */}
+                  {idx === currentLineIndex && isSessionActive && (
+                    <div className="mt-4 flex items-center justify-end gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
+                      <span className="text-xs text-green-600 font-medium mr-auto">聆聽中</span>
+                      <button
+                        onClick={stopSession}
+                        className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                      >
+                        停止朗讀
+                      </button>
+                      <button
+                        onClick={submitSentence}
+                        disabled={isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all shadow active:scale-95 ${
+                          isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                        }`}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                        完成
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Inline summary card — persists below each evaluated paragraph (actions only, no diff) */}
+                  {(() => {
+                    const summary = paragraphSummaries[idx];
+                    if (!summary) return null;
+                    return (
+                      <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200 shadow-sm space-y-3">
+                        <p className="text-base font-bold text-gray-800">
+                          {summary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI 分析中...</span>}
+                          {summary.feedback}
+                        </p>
+                        <div className="flex gap-4 text-sm">
+                          <span className="text-green-600 font-medium">
+                            正確率 {Math.round(summary.matchRate * 100)}%
+                          </span>
+                          {summary.wrongCount > 0 && (
+                            <span className="text-red-500">念錯 {summary.wrongCount} 字</span>
+                          )}
+                          {summary.missingCount > 0 && (
+                            <span className="text-gray-400">漏字 {summary.missingCount} 字</span>
+                          )}
+                        </div>
+                        {/* Action buttons */}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              if (idx !== currentLineIndex) {
+                                stopSession(); setRetryCount(0); setCurrentLineIndex(idx);
+                              }
+                              setParagraphSummaries(prev => { const next = { ...prev }; delete next[idx]; return next; });
+                              setRealtimeDiffTokens(null);
+                              setLastDiffTokens(null);
+                              // startSession after state settles — use setTimeout for non-current paragraphs
+                              if (idx === currentLineIndex) { startSession(); }
+                              else { setTimeout(() => startSession(), 100); }
+                            }}
+                            className="flex-1 py-2 rounded-lg text-sm font-bold border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all"
+                          >
+                            重練這段
+                          </button>
+                          {/* 下一段 — show when not yet advanced, OR when revisiting a completed paragraph */}
+                          {idx < story.content.length - 1 && (
+                            <button
+                              onClick={() => {
+                                if (!completedParagraphs.has(idx)) {
+                                  advanceParagraph(idx, lineResults);
+                                } else {
+                                  // Already completed — just move to next paragraph
+                                  setCurrentLineIndex(idx + 1);
+                                }
+                              }}
+                              className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                                summary.tier <= 2
+                                  ? 'bg-accent hover:bg-accent-hover text-white'
+                                  : 'border border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-600'
+                              }`}
+                            >
+                              下一段
+                            </button>
+                          )}
+                          {idx >= story.content.length - 1 && !completedParagraphs.has(idx) && (
+                            <button
+                              onClick={() => advanceParagraph(idx, lineResults)}
+                              className="flex-1 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white transition-all"
+                            >
+                              完成朗讀
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}
+
+            {/* Final report button — shown after all paragraphs are completed */}
+            {completedParagraphs.size === story.content.length && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={handleFinish}
+                  className="px-8 py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95"
+                >
+                  觀看總結報告
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 justify-between text-[10px] text-gray-500 uppercase">
-          <div className="flex gap-4">
-            <span>段 {currentLineIndex + 1} / {story.content.length}</span>
-            <span>UTF-8</span>
+        {/* Mic error */}
+        {micError && (
+          <div className="flex-shrink-0 px-4 py-2 bg-rose-50">
+            <span className="text-xs text-rose-500">{micError}</span>
           </div>
-          <div className="flex gap-3">
-            <span className={isSessionActive ? 'text-green-500 font-bold' : isPreparing ? 'text-yellow-500 font-bold' : 'text-gray-300'}>
-              {isAnalyzing ? '• ANALYZING' : isSessionActive ? '• LISTENING' : isPreparing ? '• PREPARING' : '• IDLE'}
-            </span>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Resizable divider - hidden on mobile */}
@@ -852,323 +1534,77 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         />
       )}
 
-      {/* RIGHT: Interaction panel */}
+      {/* RIGHT: Feedback panel — progress, live transcript, diff results */}
       <div
-        className={`bg-amber-50 flex flex-col min-h-0 ${isMobile ? 'flex-1' : 'flex-shrink-0 h-full'}`}
+        className={`bg-gray-50 flex flex-col min-h-0 border-l border-gray-200 ${isMobile ? 'flex-1' : 'flex-shrink-0 h-full'}`}
         style={isMobile ? undefined : { width: rightPanelWidth }}
       >
-        <div className="h-9 flex-shrink-0 bg-white border-b border-gray-200 flex items-center px-4">
-          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">
-            Live Feedback
+        {/* Header */}
+        <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-2">
+          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">朗讀回饋</span>
+          <div className="flex-1" />
+          <span className={`text-[10px] font-bold ${isSessionActive ? 'text-green-500' : isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
+            {isSessionActive ? '● 聆聽中' : isPreparing ? '● 準備中' : '● 待機'}
           </span>
         </div>
 
-        {/* Chat area */}
-        <div
-          ref={scrollRef}
-          className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50"
-        >
-          {messages.map(m => (
-            <div key={m.id} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
-              <span className="text-[9px] font-bold text-gray-300 mb-0.5 uppercase">
-                {m.role === 'user' ? 'STUDENT' : 'TUTOR'}
-              </span>
-              <div
-                className={`px-4 py-3 rounded-2xl text-lg max-w-[90%] shadow-lg leading-[2.6] ${
-                  zhuyinActive ? 'tracking-[0.3em]' : ''
-                } ${
-                  m.role === 'user'
-                    ? 'bg-accent text-white rounded-tr-none'
-                    : 'bg-gray-100 text-gray-800 border border-gray-200 rounded-tl-none'
-                }`}
-              >
-                {processZhuyin(m.text)}
-              </div>
-            </div>
-          ))}
+        {/* Content */}
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3 custom-scrollbar">
 
-          {isSessionActive && !streamingUserInput && !isAdvancing && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-green-500 mb-0.5 uppercase animate-pulse">
-                LISTENING
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-green-900/30 text-green-200 border border-green-700/30 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin(`請閱讀左側文章的第${currentLineIndex + 1}段：${story.content[currentLineIndex].slice(0, 5)}...`)}
-              </div>
-            </div>
-          )}
-
-          {streamingUserInput && (
-            <div className="flex flex-col items-end">
-              <span className="text-[9px] font-bold text-accent mb-0.5 uppercase animate-pulse">
-                LISTENING...
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-accent/60 text-gray-800 rounded-tr-none max-w-[90%] border border-accent/30 leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin(streamingUserInput)}
-              </div>
-            </div>
-          )}
-
-          {lastDiffTokens && !isAdvancing && !streamingUserInput && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-gray-400 mb-0.5 uppercase">
-                DIFF
-              </span>
-              <div className="px-4 py-3 rounded-2xl bg-white border border-gray-200 rounded-tl-none max-w-[95%]">
-                <DiffDisplay tokens={lastDiffTokens} showLegend className="text-base" />
-              </div>
-            </div>
-          )}
-
-          {isAnalyzing && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-blue-500 mb-0.5 uppercase animate-pulse">
-                ANALYZING...
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-blue-50 text-blue-700 border border-blue-200 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin('正在分析朗讀內容，請稍候...')}
-              </div>
-            </div>
-          )}
-
-          {isAdvancing && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-accent mb-0.5 uppercase animate-pulse">
-                NEXT...
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-gray-100 text-accent-light border border-accent-hover/30 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin('正在前往下一段...')}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Controls */}
-        <div className="flex-shrink-0 p-3 bg-white border-t border-gray-200 space-y-2">
-          <div className={`min-h-[3rem] p-2 rounded-lg bg-black/40 border border-gray-200 text-base text-accent-light overflow-hidden leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-            {streamingUserInput ? processZhuyin(streamingUserInput) : (
-              <span className="text-gray-800 italic">
-                {processZhuyin(isAnalyzing ? '正在分析朗讀...' : isPreparing ? '正在準備語音辨識...' : isSessionActive ? '正在聆聽您的朗讀...' : '點擊「開始朗讀」開始')}
-              </span>
-            )}
+          {/* Progress info */}
+          <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">朗讀進度</p>
+            <p className="text-sm font-bold text-gray-700">
+              第 {currentLineIndex + 1} 段 / 共 {story.content.length} 段
+            </p>
+            <p className="text-xs text-gray-500">
+              已完成 {completedParagraphs.size} 段
+              {retryCount > 0 && <span className="ml-2 text-amber-500">重試 {retryCount} 次</span>}
+            </p>
           </div>
 
-          {micError && <div className="text-[10px] text-rose-400 px-1">{micError}</div>}
-
-          <div className="flex gap-2">
-            {isPreparing ? (
-              <>
-                {/* 系統朗讀 disabled while mic is initializing */}
-                <button
-                  disabled
-                  aria-label="系統朗讀（準備中，暫不可用）"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                  </svg>
-                  {processZhuyin('系統朗讀')}
-                </button>
-                <button
-                  disabled
-                  aria-label="正在準備語音辨識"
-                  aria-busy="true"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-600 cursor-wait"
-                >
-                  <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                  {processZhuyin('準備中...')}
-                </button>
-              </>
-            ) : isSessionActive ? (
-              <button
-                onClick={submitSentence}
-                disabled={isAdvancing || isAnalyzing || !streamingUserInput}
-                aria-label={isAdvancing ? '請稍候，正在處理' : '完成這段朗讀'}
-                className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
-                  isAdvancing || isAnalyzing || !streamingUserInput
-                    ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                {processZhuyin(isAnalyzing ? '分析中...' : isAdvancing ? '請稍候...' : '完成這段')}
-              </button>
-            ) : isTtsSpeaking ? (
-              <>
-                {/* 暫停 / 繼續 */}
-                <button
-                  onClick={isTtsPaused ? resumeTts : pauseTts}
-                  aria-label={isTtsPaused ? '繼續系統朗讀' : '暫停系統朗讀'}
-                  className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
-                    isTtsPaused
-                      ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
-                      : 'bg-amber-700 hover:bg-amber-600 text-white'
-                  }`}
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    {isTtsPaused
-                      ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 9v6m4-6v6" />
-                    }
-                  </svg>
-                  {processZhuyin(isTtsPaused ? '繼續' : '暫停')}
-                </button>
-                {/* 停止 */}
-                <button
-                  onClick={stopTts}
-                  aria-label="停止系統朗讀"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
-                  </svg>
-                  {processZhuyin('停止')}
-                </button>
-              </>
-            ) : (
-              <>
-                {/* 系統朗讀 */}
-                <button
-                  onClick={speakCurrentParagraph}
-                  aria-label="播放這段的系統示範朗讀"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                  </svg>
-                  {processZhuyin('系統朗讀')}
-                </button>
-                {/* 開始朗讀 */}
-                <button
-                  onClick={startSession}
-                  disabled={isAdvancing}
-                  aria-label={isAdvancing ? '請稍候，正在處理' : '開始朗讀這段，啟動語音辨識'}
-                  className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                    isAdvancing
-                      ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
-                      : 'bg-accent hover:bg-accent-hover text-white'
-                  }`}
-                >
-                  <div className="w-2.5 h-2.5 bg-white rounded-full" aria-hidden="true" />
-                  {processZhuyin(isAdvancing ? '請稍候...' : '開始朗讀')}
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Optional recording for student self-review */}
-          <div className="border-t border-gray-100 pt-2">
-            <button
-              onClick={() => setShowRecorder(prev => !prev)}
-              aria-label={showRecorder ? '收起錄音重聽功能' : '展開錄音重聽功能'}
-              aria-expanded={showRecorder}
-              aria-controls="recorder-panel"
-              className="w-full flex items-center justify-between px-2 py-1 text-xs text-gray-400 hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
-            >
-              <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.938V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-1.062A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z" />
-                </svg>
-                錄音重聽（選用）
-              </span>
-              <svg
-                className={`w-3.5 h-3.5 transition-transform ${showRecorder ? 'rotate-180' : ''}`}
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {showRecorder && (
-              <div id="recorder-panel" className="pt-2 pb-1">
-                <RecordingButton maxDurationSeconds={60} label="錄下這段朗讀，完成後可重聽" />
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            {/* 上一段 — only navigate back to completed or current paragraphs */}
-            <button
-              onClick={() => {
-                const prevIdx = currentLineIndex - 1;
-                if (prevIdx >= 0 && (lineStatuses[prevIdx] === 'completed' || lineStatuses[prevIdx] === 'current')) {
-                  stopSession();
-                  setRetryCount(0);
-                  setCurrentLineIndex(prevIdx);
-                }
-              }}
-              disabled={currentLineIndex === 0}
-              aria-label={currentLineIndex === 0 ? '已是第一段' : `返回第 ${currentLineIndex} 段`}
-              className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                zhuyinActive ? 'tracking-[0.2em]' : ''
-              } ${
-                currentLineIndex === 0
-                  ? 'bg-gray-300 text-gray-300 cursor-not-allowed'
-                  : 'bg-gray-300 hover:bg-gray-200 text-gray-600'
-              }`}
-            >
-              {processZhuyin('上一段')}
-            </button>
-
-            {/* 下一段 / 觀看總結報告 — gated by paragraph completion */}
-            {(() => {
-              const isLastLine = currentLineIndex === story.content.length - 1;
-              const allDone = completedParagraphs.size === story.content.length;
-              const nextUnlocked = !isLastLine && maxUnlockedIndex > currentLineIndex;
-
-              if (isLastLine) {
-                // Last paragraph: only show finish button when all paragraphs are done
-                return (
-                  <button
-                    onClick={handleFinish}
-                    disabled={!allDone}
-                    aria-label={!allDone ? '請完成所有段落後查看總結報告' : '查看朗讀總結報告'}
-                    className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
-                      allDone
-                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                        : 'bg-gray-300 text-gray-300 cursor-not-allowed'
-                    }`}
-                  >
-                    {processZhuyin('觀看總結報告')}
-                  </button>
-                );
-              }
-
-              // Non-last paragraph: next paragraph is unlocked only if current is completed
-              return (
-                <button
-                  onClick={() => {
-                    if (nextUnlocked) {
-                      stopSession();
-                      setRetryCount(0);
-                      setCurrentLineIndex(prev => prev + 1);
-                    }
-                  }}
-                  disabled={!nextUnlocked}
-                  aria-label={!nextUnlocked ? '請先完成此段朗讀才能繼續（正確率需達 60%）' : `前往第 ${currentLineIndex + 2} 段`}
-                  className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
-                    nextUnlocked
-                      ? 'bg-gray-300 hover:bg-gray-200 text-gray-600'
-                      : 'bg-gray-300 text-gray-300 cursor-not-allowed'
-                  }`}
-                >
-                  {processZhuyin('下一段')}
-                </button>
-              );
-            })()}
-          </div>
-
+          {/* Live transcript — shown while recording */}
           {isSessionActive && (
-            <button
-              onClick={stopSession}
-              aria-label="停止目前的朗讀練習"
-              className={`w-full py-1.5 rounded-lg text-base font-bold text-gray-400 hover:text-gray-600 transition-colors leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}
-            >
-              {processZhuyin('停止朗讀')}
-            </button>
+            <div className="space-y-1">
+              <p className="text-[9px] font-bold text-accent-light uppercase tracking-widest animate-pulse">即時辨識</p>
+              <div className="bg-accent/10 border border-accent/20 rounded-xl px-3 py-2.5 text-sm text-gray-800 leading-relaxed min-h-[2.5rem]">
+                {streamingUserInput || <span className="text-gray-400">請開始朗讀…</span>}
+              </div>
+            </div>
           )}
+
+          {/* Diff result — shown after evaluation completes for current paragraph */}
+          {!isSessionActive && rightPanelDiffTokens && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">逐字比對</p>
+                {paragraphSummary?.geminiPending && (
+                  <span className="text-[9px] text-blue-400 font-bold animate-pulse">AI 精算中…</span>
+                )}
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl px-3 py-3">
+                <DiffDisplay tokens={rightPanelDiffTokens} showLegend className="text-base" />
+              </div>
+            </div>
+          )}
+
+          {/* Idle state — no recording yet */}
+          {!isSessionActive && !rightPanelDiffTokens && !paragraphSummary && (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
+              <p className="text-sm text-gray-500 leading-relaxed">
+                按左側「開始朗讀」後，回饋結果會顯示在這裡
+              </p>
+            </div>
+          )}
+
         </div>
+
+        {/* Mic error */}
+        {micError && (
+          <div className="flex-shrink-0 px-4 py-2 bg-rose-50 border-t border-rose-100">
+            <span className="text-xs text-rose-500">{micError}</span>
+          </div>
+        )}
       </div>
 
       <style>{`

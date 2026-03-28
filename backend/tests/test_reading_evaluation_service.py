@@ -288,6 +288,25 @@ async def test_ai_path_thresholds_in_response():
     assert "reading_excellent" in result["thresholds"]
 
 
+@pytest.mark.asyncio
+async def test_ai_path_uses_dynamic_max_tokens_for_long_text():
+    """Long targets should request a larger token budget than 1024."""
+    long_target = "天" * 120
+    with patch(
+        "app.services.reading_evaluation_service.generate_structured_response",
+        new=AsyncMock(return_value={"diff_tokens": [], "feedback": "加油"}),
+    ) as mocked_generate:
+        await evaluate_reading_with_ai(
+            spoken_text=long_target,
+            target_text=long_target,
+        )
+
+    kwargs = mocked_generate.await_args.kwargs
+    assert "max_tokens" in kwargs
+    assert kwargs["max_tokens"] > 1024
+    assert kwargs["max_tokens"] <= 4096
+
+
 # ---------------------------------------------------------------------------
 # evaluate_reading_with_ai — fallback on AI error
 # ---------------------------------------------------------------------------

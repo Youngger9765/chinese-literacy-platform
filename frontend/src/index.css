@@ -4,12 +4,12 @@
 
 @layer base {
   :root {
-    /* Brand / Accent */
-    --color-accent: 99 102 241;       /* indigo-600 */
-    --color-accent-hover: 79 70 229;  /* indigo-700 */
-    --color-accent-light: 129 140 248; /* indigo-400 */
-    --color-accent-bg: 238 242 255;   /* indigo-50 */
-    --color-accent-bg-subtle: 224 231 255; /* indigo-100 */
+    /* Brand / Accent — per DESIGN.md #5B4FC4 紫藍 */
+    --color-accent: 91 79 196;        /* primary #5B4FC4 */
+    --color-accent-hover: 124 111 217; /* primary-light #7C6FD9 */
+    --color-accent-light: 152 141 224; /* lighter tint */
+    --color-accent-bg: 237 235 249;   /* primary bg tint */
+    --color-accent-bg-subtle: 224 220 245; /* primary bg subtle */
 
     /* Status */
     --color-success: 16 185 129;      /* emerald-500 */
@@ -85,3 +85,39 @@
     }
   }
 }
+
+/* ── Custom animations for interactive learning components ── */
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-6px); }
+  30%       { transform: translateX(6px); }
+  45%       { transform: translateX(-5px); }
+  60%       { transform: translateX(5px); }
+  75%       { transform: translateX(-3px); }
+  90%       { transform: translateX(3px); }
+}
+
+@keyframes pop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  80%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce-in {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.05); opacity: 1; }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.animate-shake      { animation: shake 0.5s ease-in-out; }
+.animate-pop        { animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-fade-in    { animation: fade-in 0.3s ease-out; }
+.animate-bounce-in  { animation: bounce-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }

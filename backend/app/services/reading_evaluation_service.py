@@ -83,12 +83,13 @@ _SYSTEM_PROMPT = (
     "請比較學生朗讀的 STT 轉錄文字（spoken_text）與課文原文（target_text），\n"
     "判斷每個原文字元是否被正確朗讀，並分類為以下類型：\n\n"
     "【分類標準】\n"
-    "- correct：學生念對了（STT 轉錄與原文相同）\n"
+    "- correct：學生念對了，包含兩種情況：\n"
+    "    * STT 轉錄與原文完全相同\n"
+    "    * STT 常見選字誤差（的/得/地 混淆、一/壹/1）— 學生發音正確，是語音辨識選字問題，不算學生錯誤\n"
     "- forgiven：可通融的錯誤（算作通過），包含：\n"
     "    * 同音字（不同聲調也算，例如：門/們、公/工、完/玩）\n"
     "    * 近音字（zh↔z, sh↔s, ch↔c, n↔l 聲母混淆，例如：刷/耍、字/紙）\n"
     "    * 語氣詞/贅字（嗯、啊、那個、就是、然後）→ 直接忽略，不列入 diff_tokens\n"
-    "    * STT 常見誤差（的/得/地 混淆、一/壹/1）\n"
     "- wrong：真的念錯（完全不同的字、漏念整個詞）\n"
     "- missing：原文有但學生完全沒念到\n"
     "- extra：學生多念了不在原文中的字（已排除語氣詞）\n\n"
@@ -334,6 +335,10 @@ async def evaluate_reading_with_ai(
         "請根據以上規則評分，輸出 JSON。"
     )
 
+    # Dynamic token budget for per-char diff output.
+    # 81 chars can already produce large JSON arrays; fixed 1024 is often too tight.
+    ai_max_tokens = max(1024, min(4096, t_len * 24 + 256))
+
     contents = [
         genai_types.Content(
             role="user",
@@ -346,7 +351,7 @@ async def evaluate_reading_with_ai(
             system_prompt=_SYSTEM_PROMPT,
             contents=contents,
             response_schema=_RESPONSE_SCHEMA,
-            max_tokens=1024,
+            max_tokens=ai_max_tokens,
             temperature=0.1,  # Low temp for deterministic evaluation
         )
 

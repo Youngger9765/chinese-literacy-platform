@@ -43,6 +43,12 @@ const DictationPage = lazy(() => import('../pages/learning/DictationPage'));
 const ListeningPage = lazy(() => import('../pages/learning/ListeningPage'));
 const FullReadingPage = lazy(() => import('../pages/learning/FullReadingPage'));
 const ReportPage = lazy(() => import('../pages/learning/ReportPage'));
+// 三民 steps (Issue #676)
+const ReadingAnnotationPage = lazy(() => import('../pages/learning/ReadingAnnotationPage'));
+const VocabApplicationPage = lazy(() => import('../pages/learning/VocabApplicationPage'));
+const VocabDefinitionMatchPage = lazy(() => import('../pages/learning/VocabDefinitionMatchPage'));
+const VocabWordSearchPage = lazy(() => import('../pages/learning/VocabWordSearchPage'));
+const KnowledgeStationPage = lazy(() => import('../pages/learning/KnowledgeStationPage'));
 
 // Student pages — infrequently accessed, split to reduce initial load
 const JoinClassroomPage = lazy(() => import('../pages/JoinClassroomPage'));
@@ -330,16 +336,21 @@ const AppRoutes: React.FC = () => (
           </ProtectedRoute>
         }
       >
-        <Route path="intro" element={<IntroPage />} />
+        <Route path="intro" element={<Navigate to="../reading-annotation" replace />} />
+        <Route path="reading-annotation" element={<ReadingAnnotationPage />} />
         <Route path="tutor" element={<TutorPage />} />
         <Route path="comprehension" element={<ComprehensionPage />} />
         <Route path="vocab" element={<VocabPage />} />
+        <Route path="vocab-definition" element={<VocabDefinitionMatchPage />} />
+        <Route path="vocab-application" element={<VocabApplicationPage />} />
         <Route path="dictation" element={<DictationPage />} />
+        <Route path="vocab-word-search" element={<VocabWordSearchPage />} />
         <Route path="listening" element={<ListeningPage />} />
         <Route path="full-reading" element={<FullReadingPage />} />
+        <Route path="knowledge-station" element={<KnowledgeStationPage />} />
         <Route path="report" element={<ReportPage />} />
-        {/* Default: redirect to intro */}
-        <Route index element={<Navigate to="intro" replace />} />
+        {/* Default: redirect to reading-annotation (new first step) */}
+        <Route index element={<Navigate to="reading-annotation" replace />} />
       </Route>
 
       {/* Privacy policy — public, no auth required */}

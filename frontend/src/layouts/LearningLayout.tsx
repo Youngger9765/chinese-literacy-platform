@@ -9,11 +9,17 @@ import {
   DictationResult,
   FullReadingResult,
 } from '../types';
+import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnotation';
+import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
+import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
 import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
 import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
+import { STEP_PATH_TO_NUMBER as STEP_CONFIG_PATH_TO_NUMBER } from '../config/stepConfig';
 import { useIdleTimer } from '../hooks/useIdleTimer';
+import { useProgressSync } from '../hooks/useProgressSync';
+import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
 
 /** Idle time before showing warning modal (15 minutes). */
@@ -52,6 +58,11 @@ export interface LearningContext {
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishDictation: (result: DictationResult) => void;
   handleFinishFullReading: (result: FullReadingResult) => void;
+  handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
+  handleFinishVocabDefinitionMatch: (result: VocabDefinitionMatchResult) => void;
+  handleFinishVocabApplication: (result: VocabApplicationResult) => void;
+  handleFinishVocabWordSearch: (elapsedSeconds: number) => void;
+  handleFinishKnowledgeStation: () => void;
   handleRetry: () => void;
   handleSessionComplete: () => void;
   emptyAttempt: ReadingAttempt;
@@ -63,20 +74,23 @@ export interface LearningContext {
   handleParagraphComplete: (paragraphIndex: number) => void;
   /** Reading goals set by teacher for the active assignment (Issue #414). Null for free-play. */
   assignmentReadingGoals: AssignmentReadingGoals | null;
+  /**
+   * Sync step progress to DB (debounced 5 s) and to localStorage.
+   * Non-blocking — API failures do not break the learning flow (Issue #660).
+   */
+  syncProgress: (data: StepProgressData) => void;
+  /**
+   * Force an immediate DB save (e.g. on step completion or page unload).
+   * Non-blocking (Issue #660).
+   */
+  flushProgress: (data: StepProgressData) => void;
 }
 
 /**
  * Map from step name in URL path to numeric step index (1-based, matching DB).
+ * Sourced from stepConfig.ts — the single source of truth for step definitions.
  */
-const STEP_PATH_TO_NUMBER: Record<string, number> = {
-  intro: 1,
-  tutor: 2,
-  comprehension: 3,
-  vocab: 4,
-  dictation: 5,
-  'full-reading': 6,
-  report: 7,
-};
+const STEP_PATH_TO_NUMBER = STEP_CONFIG_PATH_TO_NUMBER;
 
 /**
  * Wraps the learning flow routes (/learn/:storyId/*).
@@ -97,8 +111,16 @@ const LearningLayout: React.FC = () => {
   const [rightPanelWidth, setRightPanelWidth] = useState(320);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  /** DB LearningSession integer ID — created when the user starts the intro (Issue #242) */
-  const [dbSessionId, setDbSessionId] = useState<number | null>(null);
+  /** DB LearningSession integer ID — created when the user starts the intro (Issue #242).
+   * Persisted to sessionStorage so refresh within the same browser tab restores the session. */
+  const [dbSessionId, setDbSessionId] = useState<number | null>(() => {
+    try {
+      const raw = sessionStorage.getItem(`db-session-${storyId}`);
+      return raw ? parseInt(raw, 10) : null;
+    } catch {
+      return null;
+    }
+  });
   /** Progressive paragraph unlock tracking (Issue #85). */
   const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(new Set());
   /** Reading goals from the active assignment, loaded from sessionStorage (Issue #414). */
@@ -115,6 +137,26 @@ const LearningLayout: React.FC = () => {
   /** Ref to the idle-timer reset function so handleContinueLearning can call it. */
   const idleResetRef = useRef<(() => void) | null>(null);
 
+  // ── Step progress DB sync (Issue #660) ──────────────────────────────────
+  const { syncProgress, flushProgress } = useProgressSync({
+    token: token ?? null,
+    dbSessionId,
+    onProgressLoaded: (data) => {
+      // When DB returns saved progress, update the in-memory session with
+      // completed paragraphs from step_data so LiveTutor can restore unlock state.
+      // This is best-effort — localStorage is the primary L1 store.
+      if (data.step_data?.tutor) {
+        const tutorData = data.step_data.tutor as Record<string, unknown>;
+        const completedIdxs = tutorData.completedParagraphs;
+        if (Array.isArray(completedIdxs)) {
+          setCompletedParagraphsSet(new Set(completedIdxs as number[]));
+        }
+      }
+    },
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+
   /** Persist current step to localStorage for session resume. */
   const persistStep = useCallback(
     (step: number) => {
@@ -129,11 +171,13 @@ const LearningLayout: React.FC = () => {
     [user, storyId],
   );
 
-  /** Clear active session from localStorage (called on completion). */
+  /** Clear active session from localStorage and sessionStorage (called on completion).
+   * Removing the sessionStorage key means the next visit creates a fresh DB session. */
   const clearPersistedSession = useCallback(() => {
     if (!user) return;
     clearActiveSession(String(user.id));
-  }, [user]);
+    try { sessionStorage.removeItem(`db-session-${storyId}`); } catch { /* non-fatal */ }
+  }, [user, storyId]);
 
   // ── Idle-timeout warning (Issue #408) ────────────────────────────────────
 
@@ -215,12 +259,12 @@ const LearningLayout: React.FC = () => {
             fullReadingResult: null,
           };
         });
-        // Persist step 1 (intro) as the starting point
+        // Persist step 1 (reading-annotation) as the starting point
         if (user) {
           saveActiveSession(String(user.id), {
             sessionId: 0,
             storyId,
-            currentStep: STEP_PATH_TO_NUMBER['intro'],
+            currentStep: STEP_PATH_TO_NUMBER['reading-annotation'],
             timestamp: Date.now(),
           });
         }
@@ -250,7 +294,7 @@ const LearningLayout: React.FC = () => {
       }
       return null;
     });
-    persistStep(STEP_PATH_TO_NUMBER['tutor']);
+    persistStep(STEP_PATH_TO_NUMBER['reading-annotation']);
 
     // Create a DB learning session so dialogue can be persisted (Issue #242)
     if (token && storyId && dbSessionId === null) {
@@ -264,22 +308,25 @@ const LearningLayout: React.FC = () => {
       })
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
-          if (data?.id) setDbSessionId(data.id);
+          if (data?.id) {
+            setDbSessionId(data.id);
+            try { sessionStorage.setItem(`db-session-${storyId}`, String(data.id)); } catch { /* non-fatal */ }
+          }
         })
         .catch(() => {
           // Non-fatal — dialogue won't be persisted but learning still works
         });
     }
 
-    navigate(`/learn/${storyId}/tutor`);
+    navigate(`/learn/${storyId}/reading-annotation`);
   }, [storyId, selectedStory, navigate, persistStep, token, dbSessionId]);
 
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
       setLastAttempt(attempt);
       setSession((prev) => (prev ? { ...prev, readingAttempt: attempt } : null));
-      persistStep(STEP_PATH_TO_NUMBER['comprehension']);
-      navigate(`/learn/${storyId}/comprehension`);
+      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
+      navigate(`/learn/${storyId}/full-reading`);
     },
     [storyId, navigate, persistStep],
   );
@@ -287,8 +334,8 @@ const LearningLayout: React.FC = () => {
   const handleFinishComprehension = useCallback(
     (result: ComprehensionResult) => {
       setSession((prev) => (prev ? { ...prev, comprehensionResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['vocab']);
-      navigate(`/learn/${storyId}/vocab`);
+      persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
+      navigate(`/learn/${storyId}/vocab-word-search`);
     },
     [storyId, navigate, persistStep],
   );
@@ -296,8 +343,8 @@ const LearningLayout: React.FC = () => {
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
       setSession((prev) => (prev ? { ...prev, vocabResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['dictation']);
-      navigate(`/learn/${storyId}/dictation`);
+      persistStep(STEP_PATH_TO_NUMBER['vocab-definition']);
+      navigate(`/learn/${storyId}/vocab-definition`);
     },
     [storyId, navigate, persistStep],
   );
@@ -305,8 +352,8 @@ const LearningLayout: React.FC = () => {
   const handleFinishDictation = useCallback(
     (result: DictationResult) => {
       setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
-      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
-      navigate(`/learn/${storyId}/full-reading`);
+      persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
+      navigate(`/learn/${storyId}/vocab-word-search`);
     },
     [storyId, navigate, persistStep],
   );
@@ -314,6 +361,46 @@ const LearningLayout: React.FC = () => {
   const handleFinishFullReading = useCallback(
     (result: FullReadingResult) => {
       setSession((prev) => (prev ? { ...prev, fullReadingResult: result } : null));
+      persistStep(STEP_PATH_TO_NUMBER['vocab']);
+      navigate(`/learn/${storyId}/vocab`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishReadingAnnotation = useCallback(
+    (_summary: AnnotationSummary) => {
+      persistStep(STEP_PATH_TO_NUMBER['tutor']);
+      navigate(`/learn/${storyId}/tutor`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishVocabDefinitionMatch = useCallback(
+    (_result: VocabDefinitionMatchResult) => {
+      persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
+      navigate(`/learn/${storyId}/vocab-application`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishVocabApplication = useCallback(
+    (_result: VocabApplicationResult) => {
+      persistStep(STEP_PATH_TO_NUMBER['comprehension']);
+      navigate(`/learn/${storyId}/comprehension`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishVocabWordSearch = useCallback(
+    (_elapsedSeconds: number) => {
+      persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
+      navigate(`/learn/${storyId}/knowledge-station`);
+    },
+    [storyId, navigate, persistStep],
+  );
+
+  const handleFinishKnowledgeStation = useCallback(
+    () => {
       persistStep(STEP_PATH_TO_NUMBER['report']);
       navigate(`/learn/${storyId}/report`);
     },
@@ -403,6 +490,11 @@ const LearningLayout: React.FC = () => {
     handleFinishVocab,
     handleFinishDictation,
     handleFinishFullReading,
+    handleFinishReadingAnnotation,
+    handleFinishVocabDefinitionMatch,
+    handleFinishVocabApplication,
+    handleFinishVocabWordSearch,
+    handleFinishKnowledgeStation,
     handleRetry,
     handleSessionComplete,
     emptyAttempt: EMPTY_ATTEMPT,
@@ -410,6 +502,8 @@ const LearningLayout: React.FC = () => {
     completedParagraphsSet,
     handleParagraphComplete,
     assignmentReadingGoals,
+    syncProgress,
+    flushProgress,
   };
 
   return (

@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Iansui', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
       colors: {
         accent: {
           DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
@@ -17,6 +20,20 @@ export default {
         success: 'rgb(var(--color-success) / <alpha-value>)',
         warning: 'rgb(var(--color-warning) / <alpha-value>)',
         error: 'rgb(var(--color-error) / <alpha-value>)',
+        // Override indigo palette to match DESIGN.md primary #5B4FC4
+        indigo: {
+          50:  '#EDEBF9',
+          100: '#E0DCF5',
+          200: '#C4BCEB',
+          300: '#A89DE1',
+          400: '#8C7DD7',
+          500: '#5B4FC4',
+          600: '#4A3FA3',
+          700: '#3A3282',
+          800: '#2A2461',
+          900: '#1A1740',
+          950: '#0D0B20',
+        },
       },
       keyframes: {
         shake: {
