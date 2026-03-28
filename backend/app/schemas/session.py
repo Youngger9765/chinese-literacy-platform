@@ -73,3 +73,24 @@ class ComprehensionScoreResponse(BaseModel):
     inferential_score: float = Field(..., ge=0, le=100)
     evaluative_score: float = Field(..., ge=0, le=100)
     feedback: dict[str, str] = Field(default_factory=dict)
+
+
+# ── Step Progress (Issue #660) ────────────────────────────────────────────────
+
+class StepProgressSaveRequest(BaseModel):
+    """Body for PUT /api/learning/sessions/{id}/progress.
+
+    Fields mirror the localStorage schema so the frontend can send
+    the same object it writes to localStorage.
+    """
+    current_step: str | None = Field(None, description="Active step path, e.g. 'vocab-definition'")
+    steps_completed: list[str] = Field(default_factory=list, description="List of completed step path keys")
+    step_data: dict[str, Any] = Field(default_factory=dict, description="Per-step serialised progress data")
+
+
+class StepProgressResponse(BaseModel):
+    """Response for GET /api/learning/sessions/{id}/progress."""
+    session_id: int
+    step_progress: dict[str, Any] | None
+
+    model_config = {"from_attributes": True}
