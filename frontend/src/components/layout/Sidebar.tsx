@@ -332,27 +332,24 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   // Build nav items based on active workspace view
   // ---------------------------------------------------------------------------
 
+  // Simplified sidebar — focus on core workflows (#686)
+  // Hidden items are NOT deleted, just removed from sidebar. Routes still work.
   const studentItems: NavItem[] = activeView === 'student'
     ? [
         { icon: '🏠', label: '主頁', path: '/student' },
         { icon: '📚', label: '圖書館', path: '/library' },
         { icon: '📋', label: '我的作業', path: '/assignments', badge: pendingAssignmentCount },
-        { icon: '📊', label: '學習進度', path: '/progress' },
-        { icon: '🏆', label: '成就', path: '/achievements' },
-        { icon: '📖', label: '生字本', path: '/vocabulary' },
-        { icon: '📝', label: '對話記錄', path: '/history' },
+        // Hidden: 學習進度, 成就, 生字本, 對話記錄 — 整合到「我的作業」(#643)
         { icon: '🏫', label: '我的班級', path: '/classroom-dashboard' },
         { icon: '🔗', label: '加入班級', path: '/join' },
-        { icon: '👤', label: '個人檔案', path: '/profile' },
       ]
     : [];
 
   const teacherItems: NavItem[] = activeView === 'teacher' || activeView === 'admin'
     ? [
-        { icon: '🏠', label: '主頁', path: '/teacher-home' },
         { icon: '🏫', label: '班級管理', path: '/teacher' },
-        { icon: '📖', label: '我的課文', path: '/teacher/my-texts' },
         { icon: '📋', label: '作業管理', path: '/teacher/assignments' },
+        // Hidden: 主頁 (直接進班級管理), 我的課文 (降低優先)
       ]
     : [];
 
