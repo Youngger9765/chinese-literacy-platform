@@ -12,7 +12,7 @@ const getStarInfo = (score: number | null): { stars: number; message: string } =
   return { stars: 2, message: '繼續加油！' };
 };
 
-const CONFETTI_COLORS = ['#f59e0b', '#10b981', '#6366f1', '#ec4899', '#3b82f6', '#f97316'];
+const CONFETTI_COLORS = ['#f59e0b', '#10b981', '#5B4FC4', '#ec4899', '#3b82f6', '#f97316'];
 const CONFETTI_COUNT = 30;
 
 const confettiPieces = Array.from({ length: CONFETTI_COUNT }, (_, i) => ({

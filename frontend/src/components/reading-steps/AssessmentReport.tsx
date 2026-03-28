@@ -306,7 +306,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   // Chart data for donut
   const accuracy = readingAttempt?.accuracy ?? 0;
   const scoreData = [
-    { name: '準確度', value: accuracy, color: '#4f46e5' },
+    { name: '準確度', value: accuracy, color: '#4A3FA3' },
     { name: '待改進', value: 100 - accuracy, color: '#f1f5f9' },
   ];
 

@@ -753,7 +753,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                             labelFormatter={(label) => `日期：${label}`}
                           />
                           <Legend formatter={(value) => value === 'score' ? '實際分數' : '5次均線'} />
-                          <Line type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                          <Line type="monotone" dataKey="score" stroke="#5B4FC4" strokeWidth={2} dot={{ r: 3 }} connectNulls />
                           <Line type="monotone" dataKey="rollingAvg" stroke="#10b981" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
                         </LineChart>
                       </ResponsiveContainer>
@@ -939,7 +939,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                                 <Line
                                   type="monotone"
                                   dataKey="score"
-                                  stroke="#6366f1"
+                                  stroke="#5B4FC4"
                                   strokeWidth={2}
                                   dot={{ r: 3 }}
                                   connectNulls

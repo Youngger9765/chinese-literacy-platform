@@ -26,7 +26,7 @@ interface CrossTextAnalyticsProps {
 type ViewMode = 'class' | 'student';
 
 function scoreColor(score: number | null): string {
-  if (score === null) return '#6366f1';
+  if (score === null) return '#5B4FC4';
   if (score >= 80) return '#10b981';
   if (score >= 60) return '#f59e0b';
   return '#ef4444';
@@ -86,7 +86,7 @@ function ClassOverviewPanel({ data }: { data: ClassroomCrossTextPattern }) {
               <Line
                 type="monotone"
                 dataKey="avg_score"
-                stroke="#6366f1"
+                stroke="#5B4FC4"
                 strokeWidth={2}
                 dot={{ r: 3 }}
                 name="班級平均"
@@ -220,7 +220,7 @@ function StudentDetailPanel({ pattern }: { pattern: StudentCrossTextPattern }) {
               <Line
                 type="monotone"
                 dataKey="score"
-                stroke="#6366f1"
+                stroke="#5B4FC4"
                 strokeWidth={2}
                 dot={{ r: 3 }}
               />
