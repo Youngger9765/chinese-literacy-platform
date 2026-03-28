@@ -31,6 +31,7 @@ interface PairState {
   defIndex: number;   // index in vocab array
   matched: boolean;
   flashWrong: boolean;
+  flashCorrect: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -43,7 +44,7 @@ function StepHeader({ title, subtitle }: { title: string; subtitle?: string }) {
       <div className="max-w-2xl mx-auto">
         <h2 className="text-xl font-bold text-amber-900">{title}</h2>
         {subtitle && (
-          <p className="mt-0.5 text-sm text-amber-700">{subtitle}</p>
+          <p className="mt-1 text-base text-amber-700">{subtitle}</p>
         )}
       </div>
     </div>
@@ -63,7 +64,7 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
       </div>
       <button
         onClick={onFinish}
-        className="rounded-lg bg-amber-500 px-8 py-3 text-white font-medium hover:bg-amber-600 transition-colors"
+        className="rounded-xl bg-amber-500 px-8 py-3 text-white font-semibold text-lg hover:bg-amber-600 transition-colors"
       >
         繼續下一步
       </button>
@@ -81,17 +82,19 @@ function CompletionScreen({
   onFinish: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-6 px-6 py-16 text-center max-w-lg mx-auto">
-      <div className="text-5xl select-none">🎉</div>
-      <div>
-        <h3 className="text-2xl font-black text-emerald-800 mb-1">配對完成！</h3>
-        <p className="text-emerald-700 text-base">
-          成功配對 <span className="font-bold">{matched}</span> / {total} 組語詞
+    <div className="flex flex-col items-center gap-8 px-6 py-16 text-center max-w-lg mx-auto animate-fade-in">
+      <div className="text-7xl select-none animate-bounce-in">🎉</div>
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-10 py-6 shadow-sm">
+        <h3 className="text-3xl font-black text-emerald-800 mb-2">配對完成！</h3>
+        <p className="text-emerald-700 text-lg">
+          成功配對
+          <span className="font-black text-2xl mx-2 text-emerald-600">{matched}</span>
+          / {total} 組語詞
         </p>
       </div>
       <button
         onClick={onFinish}
-        className="rounded-lg bg-emerald-500 px-10 py-3 text-white font-semibold hover:bg-emerald-600 transition-colors text-lg"
+        className="rounded-xl bg-emerald-500 px-12 py-4 text-white font-bold hover:bg-emerald-600 active:scale-95 transition-all text-xl shadow-lg"
       >
         繼續下一步 →
       </button>
@@ -154,6 +157,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
       defIndex: i,
       matched: saved ? saved.matchedIndices.includes(i) : false,
       flashWrong: false,
+      flashCorrect: false,
     }));
   });
 
@@ -181,7 +185,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   // Auto-advance to done when all matched
   useEffect(() => {
     if (hasData && matchedCount === vocab.length && phase === 'matching') {
-      setPhase('done');
+      setTimeout(() => setPhase('done'), 600);
     }
   }, [matchedCount, vocab.length, phase, hasData]);
 
@@ -191,7 +195,16 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
       setPairs((prev) =>
         prev.map((p) => (p.defIndex === defIndex ? { ...p, flashWrong: false } : p)),
       );
-    }, 600);
+    }, 550);
+  }, []);
+
+  // Flash-correct cleanup
+  const clearCorrect = useCallback((defIndex: number) => {
+    setTimeout(() => {
+      setPairs((prev) =>
+        prev.map((p) => (p.defIndex === defIndex ? { ...p, flashCorrect: false } : p)),
+      );
+    }, 400);
   }, []);
 
   // Attempt a match: selectedDef must match selectedWord's vocab index
@@ -199,14 +212,22 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     (defIdx: number, wordIdx: number) => {
       setAttempts((a) => a + 1);
       if (defIdx === wordIdx) {
-        // Correct
+        // Correct — flash green then set matched
         setPairs((prev) =>
           prev.map((p) =>
-            p.defIndex === defIdx ? { ...p, matched: true, flashWrong: false } : p,
+            p.defIndex === defIdx ? { ...p, flashCorrect: true } : p,
           ),
         );
+        clearCorrect(defIdx);
+        setTimeout(() => {
+          setPairs((prev) =>
+            prev.map((p) =>
+              p.defIndex === defIdx ? { ...p, matched: true, flashCorrect: false } : p,
+            ),
+          );
+        }, 300);
       } else {
-        // Wrong — flash both
+        // Wrong — shake animation
         setPairs((prev) =>
           prev.map((p) =>
             p.defIndex === defIdx ? { ...p, flashWrong: true } : p,
@@ -217,7 +238,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
       setSelectedDef(null);
       setSelectedWord(null);
     },
-    [clearFlash],
+    [clearFlash, clearCorrect],
   );
 
   const handleDefClick = useCallback(
@@ -264,7 +285,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   }, [onFinish, matchedCount, vocab.length, storageKey]);
 
   return (
-    <div className="flex flex-col min-h-full bg-white">
+    <div className="flex flex-col min-h-full bg-amber-50">
       <StepHeader
         title="語詞定義配對"
         subtitle="點選左邊的定義，再點選右邊對應的語詞，完成配對"
@@ -321,26 +342,32 @@ function MatchingExercise({
   onWordClick,
   matchedCount,
 }: MatchingExerciseProps) {
+  const pct = vocab.length > 0 ? (matchedCount / vocab.length) * 100 : 0;
+
   return (
     <div className="max-w-3xl mx-auto px-4">
-      {/* Progress bar */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between text-sm text-gray-500 mb-1">
-          <span>配對進度</span>
-          <span className="font-medium text-amber-700">
-            {matchedCount} / {vocab.length}
+      {/* Progress bar — enhanced */}
+      <div className="mb-6 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-base font-semibold text-gray-600">配對進度</span>
+          <span className="text-lg font-black text-amber-700">
+            {matchedCount} <span className="text-gray-400 font-normal text-sm">/ {vocab.length}</span>
           </span>
         </div>
-        <div className="h-2 bg-amber-100 rounded-full overflow-hidden">
+        <div className="h-4 bg-amber-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-amber-400 rounded-full transition-all duration-500"
-            style={{ width: `${(matchedCount / vocab.length) * 100}%` }}
+            className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${pct}%` }}
+            role="progressbar"
+            aria-valuenow={matchedCount}
+            aria-valuemin={0}
+            aria-valuemax={vocab.length}
           />
         </div>
       </div>
 
       {/* Hint text */}
-      <p className="text-center text-sm text-gray-400 mb-6 select-none">
+      <p className="text-center text-base text-amber-800 bg-amber-100 rounded-xl py-2.5 px-4 mb-6 select-none font-medium">
         先點選左邊的「定義」，再點選右邊對應的「語詞」
       </p>
 
@@ -348,26 +375,29 @@ function MatchingExercise({
       <div className="grid grid-cols-2 gap-4">
         {/* Left: definitions (in original vocab order) */}
         <div className="flex flex-col gap-3">
-          <h3 className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+          <h3 className="text-center text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">
             定義
           </h3>
           {vocab.map((item, defIdx) => {
             const pairState = pairs[defIdx];
             const isMatched = pairState?.matched ?? false;
             const isFlashWrong = pairState?.flashWrong ?? false;
+            const isFlashCorrect = pairState?.flashCorrect ?? false;
             const isSelected = selectedDef === defIdx;
 
             let cardClass =
-              'rounded-xl border-2 px-4 py-3 text-left cursor-pointer transition-all duration-200 text-sm leading-relaxed min-h-[72px] select-none ';
+              'rounded-2xl border-2 px-4 py-4 text-left cursor-pointer transition-all duration-200 text-base leading-relaxed min-h-[88px] select-none ';
 
             if (isMatched) {
-              cardClass += 'bg-emerald-50 border-emerald-400 text-emerald-800 cursor-default opacity-70';
+              cardClass += 'bg-emerald-50 border-emerald-400 text-emerald-800 cursor-default';
+            } else if (isFlashCorrect) {
+              cardClass += 'bg-emerald-100 border-emerald-500 text-emerald-800 scale-105 shadow-lg';
             } else if (isFlashWrong) {
-              cardClass += 'bg-red-50 border-red-400 text-red-700 animate-pulse';
+              cardClass += 'bg-red-50 border-red-400 text-red-700 animate-shake';
             } else if (isSelected) {
-              cardClass += 'bg-amber-100 border-amber-500 text-amber-900 shadow-md';
+              cardClass += 'bg-amber-100 border-amber-500 text-amber-900 shadow-md scale-[1.02]';
             } else {
-              cardClass += 'bg-white border-gray-200 text-gray-700 hover:border-amber-300 hover:bg-amber-50';
+              cardClass += 'bg-white border-gray-200 text-gray-700 hover:border-amber-300 hover:bg-amber-50 hover:shadow-sm';
             }
 
             return (
@@ -380,7 +410,7 @@ function MatchingExercise({
                 aria-label={`定義 ${defIdx + 1}: ${item.definition}`}
               >
                 {isMatched && (
-                  <span className="inline-block mr-1 text-emerald-500 font-bold">✓</span>
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white text-xs font-bold mr-2 flex-shrink-0">✓</span>
                 )}
                 {item.definition}
               </button>
@@ -390,23 +420,26 @@ function MatchingExercise({
 
         {/* Right: shuffled vocabulary words */}
         <div className="flex flex-col gap-3">
-          <h3 className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+          <h3 className="text-center text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">
             語詞
           </h3>
           {shuffledWords.map((vocabIdx) => {
             const pairState = pairs[vocabIdx];
             const isMatched = pairState?.matched ?? false;
+            const isFlashCorrect = pairState?.flashCorrect ?? false;
             const isSelected = selectedWord === vocabIdx;
 
             let cardClass =
-              'rounded-xl border-2 px-4 py-3 text-center cursor-pointer transition-all duration-200 font-bold text-lg min-h-[72px] flex items-center justify-center select-none ';
+              'rounded-2xl border-2 px-4 py-4 text-center cursor-pointer transition-all duration-200 font-bold text-xl min-h-[88px] flex items-center justify-center select-none gap-2 ';
 
             if (isMatched) {
-              cardClass += 'bg-emerald-50 border-emerald-400 text-emerald-700 cursor-default opacity-70';
+              cardClass += 'bg-emerald-50 border-emerald-400 text-emerald-700 cursor-default';
+            } else if (isFlashCorrect) {
+              cardClass += 'bg-emerald-100 border-emerald-500 text-emerald-700 scale-105 shadow-lg';
             } else if (isSelected) {
-              cardClass += 'bg-amber-100 border-amber-500 text-amber-900 shadow-md';
+              cardClass += 'bg-amber-100 border-amber-500 text-amber-900 shadow-md scale-[1.02]';
             } else {
-              cardClass += 'bg-white border-gray-200 text-gray-800 hover:border-amber-300 hover:bg-amber-50';
+              cardClass += 'bg-white border-gray-200 text-gray-800 hover:border-amber-300 hover:bg-amber-50 hover:shadow-sm';
             }
 
             return (
@@ -419,7 +452,7 @@ function MatchingExercise({
                 aria-label={`語詞：${vocab[vocabIdx].word}`}
               >
                 {isMatched && (
-                  <span className="mr-1 text-emerald-500">✓</span>
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white text-xs font-bold flex-shrink-0">✓</span>
                 )}
                 {vocab[vocabIdx].word}
               </button>
