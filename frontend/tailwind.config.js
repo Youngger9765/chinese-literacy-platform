@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Iansui', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
       colors: {
         accent: {
           DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
