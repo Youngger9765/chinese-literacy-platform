@@ -459,12 +459,15 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       </nav>
 
       {/* ── Instruction banner ─────────────────────────────────────────── */}
-      <div className="flex-shrink-0 bg-amber-100 border-b border-amber-200 px-6 py-2 flex items-center gap-2 text-sm text-amber-800">
-        <span className="text-base" aria-hidden="true">📖</span>
-        <span>
-          <strong>第一次閱讀</strong>：選取不太了解的字、詞或句，按 <strong>❓ 不懂</strong> 做記號。
-          <strong className="ml-3">第二次閱讀</strong>：選取重要的地方，按 <strong>💛 重要</strong> 標記。
-        </span>
+      <div className="flex-shrink-0 bg-amber-100 border-b border-amber-200 px-6 py-3 flex items-start gap-3 text-amber-900">
+        <span className="text-xl flex-shrink-0 mt-0.5" aria-hidden="true">📖</span>
+        <div className="text-sm leading-relaxed">
+          <span className="font-black text-base">選取課文中不太了解的字詞，標記起來</span>
+          <div className="mt-0.5 text-amber-800">
+            <strong>第一次閱讀</strong>：選取後按 <strong>❓ 不懂</strong> 做記號。
+            <strong className="ml-3">第二次閱讀</strong>：選取重要的地方，按 <strong>💛 重要</strong> 標記。
+          </div>
+        </div>
       </div>
 
       {/* ── Main text area ─────────────────────────────────────────────── */}
@@ -495,13 +498,13 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           })}
         </div>
 
-        {/* ── Floating toolbar ─────────────────────────────────────────── */}
+        {/* ── Floating toolbar — larger for touch ──────────────────────── */}
         {toolbar.visible && (
           <div
             ref={toolbarRef}
             role="toolbar"
             aria-label="標記選取文字"
-            className="absolute z-50 flex items-center gap-1 bg-white border border-gray-200 rounded-xl shadow-xl px-2 py-1.5 -translate-x-1/2 -translate-y-full"
+            className="absolute z-50 flex items-center gap-2 bg-white border-2 border-amber-300 rounded-2xl shadow-2xl px-3 py-2 -translate-x-1/2 -translate-y-full"
             style={{ left: toolbar.x, top: toolbar.y }}
           >
             {(Object.entries(TYPE_CONFIG) as Array<[AnnotationType, typeof TYPE_CONFIG[AnnotationType]]>).map(
@@ -514,7 +517,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                     e.preventDefault();
                     applyAnnotation(type);
                   }}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold border transition-all ${cfg.activeClass}`}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-base font-black border-2 transition-all min-h-[44px] active:scale-95 ${cfg.activeClass}`}
                 >
                   <span aria-hidden="true">{cfg.icon}</span>
                   {cfg.label}
@@ -528,7 +531,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 window.getSelection()?.removeAllRanges();
                 hideToolbar();
               }}
-              className="ml-1 px-2 py-1.5 rounded-lg text-sm text-gray-400 hover:text-gray-700 border border-gray-200 hover:bg-gray-50 transition-all"
+              className="ml-1 px-3 py-2 rounded-xl text-base text-gray-400 hover:text-gray-700 border-2 border-gray-200 hover:bg-gray-50 transition-all min-h-[44px]"
               aria-label="取消"
             >
               ✕
@@ -539,26 +542,30 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
       {/* ── Summary bar + finish button ────────────────────────────────── */}
       <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between gap-4">
-        {/* Mark count summary */}
-        <div className="flex items-center gap-4 text-sm text-gray-600">
-          <span>
-            已標記：
-            <strong className="ml-1 text-gray-900">{summary.totalMarks}</strong> 處
-          </span>
-          {summary.unknownCount > 0 && (
-            <span className="flex items-center gap-1">
-              <span aria-hidden="true">❓</span>
-              <span className="text-red-600 font-bold">{summary.unknownCount}</span>
-            </span>
-          )}
-          {summary.importantCount > 0 && (
-            <span className="flex items-center gap-1">
-              <span aria-hidden="true">💛</span>
-              <span className="text-yellow-700 font-bold">{summary.importantCount}</span>
-            </span>
-          )}
-          {summary.totalMarks === 0 && (
-            <span className="text-gray-400">（還沒有標記）</span>
+        {/* Mark count summary — more visual */}
+        <div className="flex items-center gap-3">
+          {summary.totalMarks === 0 ? (
+            <span className="text-sm text-gray-400">（還沒有標記）</span>
+          ) : (
+            <>
+              <span className="text-sm text-gray-600">
+                已標記
+                <strong className="mx-1 text-lg text-gray-900">{summary.totalMarks}</strong>
+                處
+              </span>
+              {summary.unknownCount > 0 && (
+                <span className="flex items-center gap-1 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full text-sm font-bold text-red-700">
+                  <span aria-hidden="true">❓</span>
+                  {summary.unknownCount}
+                </span>
+              )}
+              {summary.importantCount > 0 && (
+                <span className="flex items-center gap-1 bg-yellow-50 border border-yellow-200 px-2.5 py-1 rounded-full text-sm font-bold text-yellow-800">
+                  <span aria-hidden="true">💛</span>
+                  {summary.importantCount}
+                </span>
+              )}
+            </>
           )}
         </div>
 
