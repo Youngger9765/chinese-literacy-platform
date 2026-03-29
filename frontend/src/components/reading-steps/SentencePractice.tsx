@@ -4,7 +4,7 @@
  * After stroke order practice, students compose 2 sentences using each
  * practiced vocabulary character. AI validates grammar and word usage.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
@@ -136,6 +136,10 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   });
   const [completedChars, setCompletedChars] = useState<Set<string>>(new Set());
 
+  // Tracks characters that have been loaded or are currently loading,
+  // avoiding circular dependency on charStates inside the loadExamples callback.
+  const loadedCharsRef = useRef<Set<string>>(new Set());
+
   const currentChar = practicedChars[currentCharIndex] ?? '';
   const currentState = charStates[currentChar] ?? makeCharState();
 
@@ -143,7 +147,12 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
 
   const loadExamples = useCallback(async () => {
     if (!currentChar) return;
-    if (charStates[currentChar]?.exampleSentences) return; // already loaded
+    // Use ref instead of charStates to avoid adding charStates as a dependency
+    // (which would cause an infinite loop: error → setCharStates → new charStates
+    //  → new loadExamples → useEffect fires → loadExamples called again → 429)
+    if (loadedCharsRef.current.has(currentChar)) return;
+
+    loadedCharsRef.current.add(currentChar);
 
     setCharStates(prev => ({
       ...prev,
@@ -157,6 +166,8 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         [currentChar]: { ...prev[currentChar], examplesLoading: false, exampleSentences: examples },
       }));
     } catch {
+      // Remove from ref so the retry button can re-attempt
+      loadedCharsRef.current.delete(currentChar);
       setCharStates(prev => ({
         ...prev,
         [currentChar]: {
@@ -166,7 +177,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         },
       }));
     }
-  }, [currentChar, charStates, storyTitle]);
+  }, [currentChar, storyTitle, token]);
 
   // Auto-load examples when we navigate to a character
   React.useEffect(() => {
