@@ -66,7 +66,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   story,
   onFinish,
   zhuyinActive: zhuyinActiveProp,
-  fontSizePx = 22,
+  fontSizePx = 28,
 }) => {
   // Zhuyin state (internal if not controlled via prop)
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
@@ -744,10 +744,10 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 <p
                   key={paraIdx}
                   data-para-idx={paraIdx}
-                  className="text-gray-900 leading-loose"
+                  className="text-gray-900"
                   style={{
                     fontSize: `${fontSizePx}px`,
-                    lineHeight: zhuyinActive ? '3.8rem' : '2.8rem',
+                    lineHeight: zhuyinActive ? '3.8rem' : '3.5rem',
                     letterSpacing: zhuyinActive ? '0.35em' : '0.05em',
                   }}
                 >
