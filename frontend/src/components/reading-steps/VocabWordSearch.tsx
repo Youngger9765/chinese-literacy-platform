@@ -462,7 +462,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
 
   function getCellClass(row: number, col: number): string {
     const key = row + ',' + col;
-    if (highlightedCells.has(key)) return 'bg-[#5B4FC4] text-white font-black ring-2 ring-inset ring-white';
+    if (highlightedCells.has(key)) return 'bg-indigo-100 text-indigo-700 font-black';
     if (dragCells.has(key)) return 'bg-indigo-300 text-white font-bold';
     if (flashCells.has(key)) return 'bg-red-300 text-white';
     return 'bg-white text-gray-800 hover:bg-indigo-50';
