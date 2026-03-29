@@ -43,3 +43,4 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
 );
 
 export default LoadingIndicator;
+
