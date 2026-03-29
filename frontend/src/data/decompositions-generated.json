@@ -435,17 +435,17 @@
     ]
   },
   "乳": {
-    "formula": "乚 + 孚",
+    "formula": "孚 + 乚",
     "components": [
-      {
-        "radical": "乚",
-        "role": "形符",
-        "label": "乚"
-      },
       {
         "radical": "孚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "乚",
+        "role": "形符",
+        "label": "乚"
       }
     ]
   },
@@ -615,17 +615,17 @@
     ]
   },
   "些": {
-    "formula": "二 + 此",
+    "formula": "此 + 二",
     "components": [
-      {
-        "radical": "二",
-        "role": "形符",
-        "label": "二"
-      },
       {
         "radical": "此",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "二",
+        "role": "形符",
+        "label": "二"
       }
     ]
   },
@@ -805,17 +805,17 @@
     ]
   },
   "仍": {
-    "formula": "乃 + 亻",
+    "formula": "亻 + 乃",
     "components": [
-      {
-        "radical": "乃",
-        "role": "形符",
-        "label": "乃"
-      },
       {
         "radical": "亻",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "乃",
+        "role": "形符",
+        "label": "乃"
       }
     ]
   },
@@ -1685,17 +1685,17 @@
     ]
   },
   "修": {
-    "formula": "彡 + 攸",
+    "formula": "攸 + 彡",
     "components": [
-      {
-        "radical": "彡",
-        "role": "形符",
-        "label": "彡"
-      },
       {
         "radical": "攸",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "彡",
+        "role": "形符",
+        "label": "彡"
       }
     ]
   },
@@ -2619,8 +2619,8 @@
       },
       {
         "radical": "儿",
-        "role": "聲符",
-        "label": "讀音"
+        "role": "形符",
+        "label": "儿"
       }
     ]
   },
@@ -3195,32 +3195,32 @@
     ]
   },
   "切": {
-    "formula": "刀 + 七",
+    "formula": "七 + 刀",
     "components": [
-      {
-        "radical": "刀",
-        "role": "形符",
-        "label": "刀"
-      },
       {
         "radical": "七",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刀",
+        "role": "形符",
+        "label": "刀"
       }
     ]
   },
   "刈": {
-    "formula": "刂 + 乂",
+    "formula": "乂 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "乂",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
@@ -3270,17 +3270,17 @@
     ]
   },
   "判": {
-    "formula": "刂 + 半",
+    "formula": "半 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "半",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
@@ -3315,17 +3315,17 @@
     ]
   },
   "刮": {
-    "formula": "刂 + 舌",
+    "formula": "舌 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "舌",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
@@ -3345,17 +3345,17 @@
     ]
   },
   "制": {
-    "formula": "刂 + 巾",
+    "formula": "巾 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "巾",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
@@ -3380,32 +3380,32 @@
     ]
   },
   "刺": {
-    "formula": "刂 + 朿",
+    "formula": "朿 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "朿",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "刻": {
-    "formula": "刂 + 亥",
-    "components": [
+      },
       {
         "radical": "刂",
         "role": "形符",
         "label": "刀旁"
-      },
+      }
+    ]
+  },
+  "刻": {
+    "formula": "亥 + 刂",
+    "components": [
       {
         "radical": "亥",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
@@ -3425,32 +3425,32 @@
     ]
   },
   "削": {
-    "formula": "刂 + 肖",
+    "formula": "肖 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "肖",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "剌": {
-    "formula": "刂 + 束",
-    "components": [
+      },
       {
         "radical": "刂",
         "role": "形符",
         "label": "刀旁"
-      },
+      }
+    ]
+  },
+  "剌": {
+    "formula": "束 + 刂",
+    "components": [
       {
         "radical": "束",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
@@ -3480,227 +3480,227 @@
     ]
   },
   "剎": {
-    "formula": "刂 + 杀",
+    "formula": "杀 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "杀",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
   "剖": {
-    "formula": "刂 + 咅",
+    "formula": "咅 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "咅",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
   "剛": {
-    "formula": "刂 + 岡",
+    "formula": "岡 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "岡",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
   "剝": {
-    "formula": "刂 + 彔",
+    "formula": "彔 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "彔",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
   "剩": {
-    "formula": "刂 + 乘",
+    "formula": "乘 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "乘",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
   "剪": {
-    "formula": "刀 + 前",
+    "formula": "前 + 刀",
     "components": [
-      {
-        "radical": "刀",
-        "role": "形符",
-        "label": "刀"
-      },
       {
         "radical": "前",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "副": {
-    "formula": "刂 + 畐",
-    "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
       },
-      {
-        "radical": "畐",
-        "role": "聲符",
-        "label": "讀音"
-      }
-    ]
-  },
-  "割": {
-    "formula": "刂 + 害",
-    "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
-      {
-        "radical": "害",
-        "role": "聲符",
-        "label": "讀音"
-      }
-    ]
-  },
-  "創": {
-    "formula": "刂 + 倉",
-    "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
-      {
-        "radical": "倉",
-        "role": "聲符",
-        "label": "讀音"
-      }
-    ]
-  },
-  "劃": {
-    "formula": "刂 + 畫",
-    "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
-      {
-        "radical": "畫",
-        "role": "聲符",
-        "label": "讀音"
-      }
-    ]
-  },
-  "劇": {
-    "formula": "刂 + 豦",
-    "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
-      {
-        "radical": "豦",
-        "role": "聲符",
-        "label": "讀音"
-      }
-    ]
-  },
-  "劈": {
-    "formula": "刀 + 辟",
-    "components": [
       {
         "radical": "刀",
         "role": "形符",
         "label": "刀"
+      }
+    ]
+  },
+  "副": {
+    "formula": "畐 + 刂",
+    "components": [
+      {
+        "radical": "畐",
+        "role": "聲符",
+        "label": "讀音"
       },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
+      }
+    ]
+  },
+  "割": {
+    "formula": "害 + 刂",
+    "components": [
+      {
+        "radical": "害",
+        "role": "聲符",
+        "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
+      }
+    ]
+  },
+  "創": {
+    "formula": "倉 + 刂",
+    "components": [
+      {
+        "radical": "倉",
+        "role": "聲符",
+        "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
+      }
+    ]
+  },
+  "劃": {
+    "formula": "畫 + 刂",
+    "components": [
+      {
+        "radical": "畫",
+        "role": "聲符",
+        "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
+      }
+    ]
+  },
+  "劇": {
+    "formula": "豦 + 刂",
+    "components": [
+      {
+        "radical": "豦",
+        "role": "聲符",
+        "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
+      }
+    ]
+  },
+  "劈": {
+    "formula": "辟 + 刀",
+    "components": [
       {
         "radical": "辟",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刀",
+        "role": "形符",
+        "label": "刀"
       }
     ]
   },
   "劉": {
-    "formula": "刂 + 卯",
+    "formula": "卯 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "卯",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
   "劍": {
-    "formula": "刂 + 僉",
+    "formula": "僉 + 刂",
     "components": [
-      {
-        "radical": "刂",
-        "role": "形符",
-        "label": "刀旁"
-      },
       {
         "radical": "僉",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "劑": {
-    "formula": "刂 + 齊",
-    "components": [
+      },
       {
         "radical": "刂",
         "role": "形符",
         "label": "刀旁"
-      },
+      }
+    ]
+  },
+  "劑": {
+    "formula": "齊 + 刂",
+    "components": [
       {
         "radical": "齊",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "刂",
+        "role": "形符",
+        "label": "刀旁"
       }
     ]
   },
@@ -3760,122 +3760,122 @@
     ]
   },
   "助": {
-    "formula": "力 + 且",
+    "formula": "且 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "且",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
   "努": {
-    "formula": "力 + 奴",
+    "formula": "奴 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "奴",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
   "劫": {
-    "formula": "力 + 去",
+    "formula": "去 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "去",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
   "勃": {
-    "formula": "力 + 孛",
+    "formula": "孛 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "孛",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
   "勇": {
-    "formula": "力 + 甬",
+    "formula": "甬 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "甬",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
   "勉": {
-    "formula": "力 + 免",
+    "formula": "免 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "免",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
   "勒": {
-    "formula": "力 + 革",
+    "formula": "革 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "革",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "動": {
-    "formula": "力 + 重",
-    "components": [
+      },
       {
         "radical": "力",
         "role": "形符",
         "label": "力量"
-      },
+      }
+    ]
+  },
+  "動": {
+    "formula": "重 + 力",
+    "components": [
       {
         "radical": "重",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
@@ -3930,77 +3930,77 @@
     ]
   },
   "勢": {
-    "formula": "力 + 埶",
+    "formula": "埶 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "埶",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
   "勤": {
-    "formula": "力 + 堇",
+    "formula": "堇 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "堇",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
   "勳": {
-    "formula": "力 + 熏",
+    "formula": "熏 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "熏",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
   "勵": {
-    "formula": "力 + 厲",
+    "formula": "厲 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "厲",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "勸": {
-    "formula": "力 + 雚",
-    "components": [
+      },
       {
         "radical": "力",
         "role": "形符",
         "label": "力量"
-      },
+      }
+    ]
+  },
+  "勸": {
+    "formula": "雚 + 力",
+    "components": [
       {
         "radical": "雚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
@@ -4255,17 +4255,17 @@
     ]
   },
   "協": {
-    "formula": "劦 + 十",
+    "formula": "十 + 劦",
     "components": [
-      {
-        "radical": "劦",
-        "role": "形符",
-        "label": "劦"
-      },
       {
         "radical": "十",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "劦",
+        "role": "形符",
+        "label": "劦"
       }
     ]
   },
@@ -4325,17 +4325,17 @@
     ]
   },
   "卦": {
-    "formula": "卜 + 圭",
+    "formula": "圭 + 卜",
     "components": [
-      {
-        "radical": "卜",
-        "role": "形符",
-        "label": "卜"
-      },
       {
         "radical": "圭",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "卜",
+        "role": "形符",
+        "label": "卜"
       }
     ]
   },
@@ -4415,17 +4415,17 @@
     ]
   },
   "卻": {
-    "formula": "卩 + 谷",
+    "formula": "谷 + 卩",
     "components": [
-      {
-        "radical": "卩",
-        "role": "形符",
-        "label": "卩"
-      },
       {
         "radical": "谷",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "卩",
+        "role": "形符",
+        "label": "卩"
       }
     ]
   },
@@ -5040,17 +5040,17 @@
     ]
   },
   "吞": {
-    "formula": "口 + 天",
+    "formula": "天 + 口",
     "components": [
-      {
-        "radical": "口",
-        "role": "形符",
-        "label": "口"
-      },
       {
         "radical": "天",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "口",
+        "role": "形符",
+        "label": "口"
       }
     ]
   },
@@ -5100,17 +5100,17 @@
     ]
   },
   "含": {
-    "formula": "口 + 今",
+    "formula": "今 + 口",
     "components": [
-      {
-        "radical": "口",
-        "role": "形符",
-        "label": "口"
-      },
       {
         "radical": "今",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "口",
+        "role": "形符",
+        "label": "口"
       }
     ]
   },
@@ -5190,17 +5190,17 @@
     ]
   },
   "吾": {
-    "formula": "口 + 五",
+    "formula": "五 + 口",
     "components": [
-      {
-        "radical": "口",
-        "role": "形符",
-        "label": "口"
-      },
       {
         "radical": "五",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "口",
+        "role": "形符",
+        "label": "口"
       }
     ]
   },
@@ -5405,32 +5405,32 @@
     ]
   },
   "和": {
-    "formula": "口 + 禾",
+    "formula": "禾 + 口",
     "components": [
-      {
-        "radical": "口",
-        "role": "形符",
-        "label": "口"
-      },
       {
         "radical": "禾",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "咎": {
-    "formula": "口 + 处",
-    "components": [
+      },
       {
         "radical": "口",
         "role": "形符",
         "label": "口"
-      },
+      }
+    ]
+  },
+  "咎": {
+    "formula": "处 + 口",
+    "components": [
       {
         "radical": "处",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "口",
+        "role": "形符",
+        "label": "口"
       }
     ]
   },
@@ -5595,17 +5595,17 @@
     ]
   },
   "哀": {
-    "formula": "口 + 衣",
+    "formula": "衣 + 口",
     "components": [
-      {
-        "radical": "口",
-        "role": "形符",
-        "label": "口"
-      },
       {
         "radical": "衣",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "口",
+        "role": "形符",
+        "label": "口"
       }
     ]
   },
@@ -5785,17 +5785,17 @@
     ]
   },
   "哲": {
-    "formula": "口 + 折",
+    "formula": "折 + 口",
     "components": [
-      {
-        "radical": "口",
-        "role": "形符",
-        "label": "口"
-      },
       {
         "radical": "折",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "口",
+        "role": "形符",
+        "label": "口"
       }
     ]
   },
@@ -5830,17 +5830,17 @@
     ]
   },
   "唇": {
-    "formula": "口 + 辰",
+    "formula": "辰 + 口",
     "components": [
-      {
-        "radical": "口",
-        "role": "形符",
-        "label": "口"
-      },
       {
         "radical": "辰",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "口",
+        "role": "形符",
+        "label": "口"
       }
     ]
   },
@@ -6010,17 +6010,17 @@
     ]
   },
   "問": {
-    "formula": "口 + 門",
+    "formula": "門 + 口",
     "components": [
-      {
-        "radical": "口",
-        "role": "形符",
-        "label": "口"
-      },
       {
         "radical": "門",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "口",
+        "role": "形符",
+        "label": "口"
       }
     ]
   },
@@ -6300,17 +6300,17 @@
     ]
   },
   "喬": {
-    "formula": "高 + 夭",
+    "formula": "夭 + 高",
     "components": [
-      {
-        "radical": "高",
-        "role": "形符",
-        "label": "高"
-      },
       {
         "radical": "夭",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "高",
+        "role": "形符",
+        "label": "高"
       }
     ]
   },
@@ -6510,17 +6510,17 @@
     ]
   },
   "嘗": {
-    "formula": "旨 + 尚",
+    "formula": "尚 + 旨",
     "components": [
-      {
-        "radical": "旨",
-        "role": "形符",
-        "label": "旨"
-      },
       {
         "radical": "尚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "旨",
+        "role": "形符",
+        "label": "旨"
       }
     ]
   },
@@ -6639,8 +6639,8 @@
       },
       {
         "radical": "惡",
-        "role": "聲符",
-        "label": "讀音"
+        "role": "形符",
+        "label": "惡"
       }
     ]
   },
@@ -7090,17 +7090,17 @@
     ]
   },
   "在": {
-    "formula": "土 + 才",
+    "formula": "才 + 土",
     "components": [
-      {
-        "radical": "土",
-        "role": "形符",
-        "label": "土"
-      },
       {
         "radical": "才",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "土",
+        "role": "形符",
+        "label": "土"
       }
     ]
   },
@@ -7250,17 +7250,17 @@
     ]
   },
   "型": {
-    "formula": "土 + 刑",
+    "formula": "刑 + 土",
     "components": [
-      {
-        "radical": "土",
-        "role": "形符",
-        "label": "土"
-      },
       {
         "radical": "刑",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "土",
+        "role": "形符",
+        "label": "土"
       }
     ]
   },
@@ -7370,17 +7370,17 @@
     ]
   },
   "基": {
-    "formula": "土 + 其",
+    "formula": "其 + 土",
     "components": [
-      {
-        "radical": "土",
-        "role": "形符",
-        "label": "土"
-      },
       {
         "radical": "其",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "土",
+        "role": "形符",
+        "label": "土"
       }
     ]
   },
@@ -7400,17 +7400,17 @@
     ]
   },
   "堂": {
-    "formula": "土 + 尚",
+    "formula": "尚 + 土",
     "components": [
-      {
-        "radical": "土",
-        "role": "形符",
-        "label": "土"
-      },
       {
         "radical": "尚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "土",
+        "role": "形符",
+        "label": "土"
       }
     ]
   },
@@ -7545,17 +7545,17 @@
     ]
   },
   "塑": {
-    "formula": "土 + 朔",
+    "formula": "朔 + 土",
     "components": [
-      {
-        "radical": "土",
-        "role": "形符",
-        "label": "土"
-      },
       {
         "radical": "朔",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "土",
+        "role": "形符",
+        "label": "土"
       }
     ]
   },
@@ -7685,32 +7685,32 @@
     ]
   },
   "墓": {
-    "formula": "土 + 莫",
+    "formula": "莫 + 土",
     "components": [
-      {
-        "radical": "土",
-        "role": "形符",
-        "label": "土"
-      },
       {
         "radical": "莫",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "墜": {
-    "formula": "土 + 隊",
-    "components": [
+      },
       {
         "radical": "土",
         "role": "形符",
         "label": "土"
-      },
+      }
+    ]
+  },
+  "墜": {
+    "formula": "隊 + 土",
+    "components": [
       {
         "radical": "隊",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "土",
+        "role": "形符",
+        "label": "土"
       }
     ]
   },
@@ -7745,17 +7745,17 @@
     ]
   },
   "墮": {
-    "formula": "土 + 隋",
+    "formula": "隋 + 土",
     "components": [
-      {
-        "radical": "土",
-        "role": "形符",
-        "label": "土"
-      },
       {
         "radical": "隋",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "土",
+        "role": "形符",
+        "label": "土"
       }
     ]
   },
@@ -7775,32 +7775,32 @@
     ]
   },
   "墾": {
-    "formula": "土 + 貇",
+    "formula": "貇 + 土",
     "components": [
-      {
-        "radical": "土",
-        "role": "形符",
-        "label": "土"
-      },
       {
         "radical": "貇",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "壁": {
-    "formula": "土 + 辟",
-    "components": [
+      },
       {
         "radical": "土",
         "role": "形符",
         "label": "土"
-      },
+      }
+    ]
+  },
+  "壁": {
+    "formula": "辟 + 土",
+    "components": [
       {
         "radical": "辟",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "土",
+        "role": "形符",
+        "label": "土"
       }
     ]
   },
@@ -7835,17 +7835,17 @@
     ]
   },
   "壘": {
-    "formula": "土 + 畾",
+    "formula": "畾 + 土",
     "components": [
-      {
-        "radical": "土",
-        "role": "形符",
-        "label": "土"
-      },
       {
         "radical": "畾",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "土",
+        "role": "形符",
+        "label": "土"
       }
     ]
   },
@@ -7895,17 +7895,17 @@
     ]
   },
   "壯": {
-    "formula": "士 + 爿",
+    "formula": "爿 + 士",
     "components": [
-      {
-        "radical": "士",
-        "role": "形符",
-        "label": "士"
-      },
       {
         "radical": "爿",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "士",
+        "role": "形符",
+        "label": "士"
       }
     ]
   },
@@ -8020,17 +8020,17 @@
     ]
   },
   "夠": {
-    "formula": "句 + 多",
+    "formula": "多 + 句",
     "components": [
-      {
-        "radical": "句",
-        "role": "形符",
-        "label": "句"
-      },
       {
         "radical": "多",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "句",
+        "role": "形符",
+        "label": "句"
       }
     ]
   },
@@ -8060,17 +8060,17 @@
     ]
   },
   "夥": {
-    "formula": "多 + 果",
+    "formula": "果 + 多",
     "components": [
-      {
-        "radical": "多",
-        "role": "形符",
-        "label": "多"
-      },
       {
         "radical": "果",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "多",
+        "role": "形符",
+        "label": "多"
       }
     ]
   },
@@ -8465,17 +8465,17 @@
     ]
   },
   "妄": {
-    "formula": "女 + 亡",
+    "formula": "亡 + 女",
     "components": [
-      {
-        "radical": "女",
-        "role": "形符",
-        "label": "女旁"
-      },
       {
         "radical": "亡",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "女",
+        "role": "形符",
+        "label": "女旁"
       }
     ]
   },
@@ -8510,17 +8510,17 @@
     ]
   },
   "妝": {
-    "formula": "女 + 爿",
+    "formula": "爿 + 女",
     "components": [
-      {
-        "radical": "女",
-        "role": "形符",
-        "label": "女旁"
-      },
       {
         "radical": "爿",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "女",
+        "role": "形符",
+        "label": "女旁"
       }
     ]
   },
@@ -8725,17 +8725,17 @@
     ]
   },
   "姿": {
-    "formula": "女 + 次",
+    "formula": "次 + 女",
     "components": [
-      {
-        "radical": "女",
-        "role": "形符",
-        "label": "女旁"
-      },
       {
         "radical": "次",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "女",
+        "role": "形符",
+        "label": "女旁"
       }
     ]
   },
@@ -9030,17 +9030,17 @@
     ]
   },
   "存": {
-    "formula": "子 + 才",
+    "formula": "才 + 子",
     "components": [
-      {
-        "radical": "子",
-        "role": "形符",
-        "label": "孩子"
-      },
       {
         "radical": "才",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "子",
+        "role": "形符",
+        "label": "孩子"
       }
     ]
   },
@@ -9155,17 +9155,17 @@
     ]
   },
   "孳": {
-    "formula": "子 + 兹",
+    "formula": "兹 + 子",
     "components": [
-      {
-        "radical": "子",
-        "role": "形符",
-        "label": "孩子"
-      },
       {
         "radical": "兹",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "子",
+        "role": "形符",
+        "label": "孩子"
       }
     ]
   },
@@ -9200,17 +9200,17 @@
     ]
   },
   "孽": {
-    "formula": "子 + 薛",
+    "formula": "薛 + 子",
     "components": [
-      {
-        "radical": "子",
-        "role": "形符",
-        "label": "孩子"
-      },
       {
         "radical": "薛",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "子",
+        "role": "形符",
+        "label": "孩子"
       }
     ]
   },
@@ -9745,17 +9745,17 @@
     ]
   },
   "實": {
-    "formula": "貫 + 宀",
+    "formula": "宀 + 貫",
     "components": [
-      {
-        "radical": "貫",
-        "role": "形符",
-        "label": "貫"
-      },
       {
         "radical": "宀",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "貫",
+        "role": "形符",
+        "label": "貫"
       }
     ]
   },
@@ -9905,17 +9905,17 @@
     ]
   },
   "專": {
-    "formula": "寸 + 叀",
+    "formula": "叀 + 寸",
     "components": [
-      {
-        "radical": "寸",
-        "role": "形符",
-        "label": "寸"
-      },
       {
         "radical": "叀",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "寸",
+        "role": "形符",
+        "label": "寸"
       }
     ]
   },
@@ -10080,17 +10080,17 @@
     ]
   },
   "就": {
-    "formula": "尤 + 京",
+    "formula": "京 + 尤",
     "components": [
-      {
-        "radical": "尤",
-        "role": "形符",
-        "label": "尤"
-      },
       {
         "radical": "京",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "尤",
+        "role": "形符",
+        "label": "尤"
       }
     ]
   },
@@ -10985,17 +10985,17 @@
     ]
   },
   "常": {
-    "formula": "巾 + 尚",
+    "formula": "尚 + 巾",
     "components": [
-      {
-        "radical": "巾",
-        "role": "形符",
-        "label": "巾"
-      },
       {
         "radical": "尚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "巾",
+        "role": "形符",
+        "label": "巾"
       }
     ]
   },
@@ -11030,17 +11030,17 @@
     ]
   },
   "幕": {
-    "formula": "巾 + 莫",
+    "formula": "莫 + 巾",
     "components": [
-      {
-        "radical": "巾",
-        "role": "形符",
-        "label": "巾"
-      },
       {
         "radical": "莫",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "巾",
+        "role": "形符",
+        "label": "巾"
       }
     ]
   },
@@ -11060,17 +11060,17 @@
     ]
   },
   "幣": {
-    "formula": "巾 + 敝",
+    "formula": "敝 + 巾",
     "components": [
-      {
-        "radical": "巾",
-        "role": "形符",
-        "label": "巾"
-      },
       {
         "radical": "敝",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "巾",
+        "role": "形符",
+        "label": "巾"
       }
     ]
   },
@@ -11790,17 +11790,17 @@
     ]
   },
   "彎": {
-    "formula": "弓 + 䜌",
+    "formula": "䜌 + 弓",
     "components": [
-      {
-        "radical": "弓",
-        "role": "形符",
-        "label": "弓箭"
-      },
       {
         "radical": "䜌",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "弓",
+        "role": "形符",
+        "label": "弓箭"
       }
     ]
   },
@@ -11840,32 +11840,32 @@
     ]
   },
   "彥": {
-    "formula": "彡 + 文",
+    "formula": "文 + 彡",
     "components": [
-      {
-        "radical": "彡",
-        "role": "形符",
-        "label": "彡"
-      },
       {
         "radical": "文",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "彩": {
-    "formula": "彡 + 采",
-    "components": [
+      },
       {
         "radical": "彡",
         "role": "形符",
         "label": "彡"
-      },
+      }
+    ]
+  },
+  "彩": {
+    "formula": "采 + 彡",
+    "components": [
       {
         "radical": "采",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "彡",
+        "role": "形符",
+        "label": "彡"
       }
     ]
   },
@@ -11885,32 +11885,32 @@
     ]
   },
   "彰": {
-    "formula": "彡 + 章",
+    "formula": "章 + 彡",
     "components": [
-      {
-        "radical": "彡",
-        "role": "形符",
-        "label": "彡"
-      },
       {
         "radical": "章",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "影": {
-    "formula": "彡 + 景",
-    "components": [
+      },
       {
         "radical": "彡",
         "role": "形符",
         "label": "彡"
-      },
+      }
+    ]
+  },
+  "影": {
+    "formula": "景 + 彡",
+    "components": [
       {
         "radical": "景",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "彡",
+        "role": "形符",
+        "label": "彡"
       }
     ]
   },
@@ -12300,17 +12300,17 @@
     ]
   },
   "忌": {
-    "formula": "心 + 己",
+    "formula": "己 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "己",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12345,17 +12345,17 @@
     ]
   },
   "忘": {
-    "formula": "心 + 亡",
+    "formula": "亡 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "亡",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12375,17 +12375,17 @@
     ]
   },
   "忠": {
-    "formula": "心 + 中",
+    "formula": "中 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "中",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12465,47 +12465,47 @@
     ]
   },
   "忽": {
-    "formula": "心 + 勿",
+    "formula": "勿 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "勿",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
   "怎": {
-    "formula": "心 + 乍",
+    "formula": "乍 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "乍",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "怒": {
-    "formula": "心 + 奴",
-    "components": [
+      },
       {
         "radical": "心",
         "role": "形符",
         "label": "心"
-      },
+      }
+    ]
+  },
+  "怒": {
+    "formula": "奴 + 心",
+    "components": [
       {
         "radical": "奴",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12555,17 +12555,17 @@
     ]
   },
   "怠": {
-    "formula": "心 + 台",
+    "formula": "台 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "台",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12585,17 +12585,17 @@
     ]
   },
   "急": {
-    "formula": "心 + 刍",
+    "formula": "刍 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "刍",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12615,17 +12615,17 @@
     ]
   },
   "怨": {
-    "formula": "心 + 夗",
+    "formula": "夗 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "夗",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12660,47 +12660,47 @@
     ]
   },
   "恐": {
-    "formula": "心 + 巩",
+    "formula": "巩 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "巩",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
   "恕": {
-    "formula": "心 + 如",
+    "formula": "如 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "如",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "恙": {
-    "formula": "心 + 羊",
-    "components": [
+      },
       {
         "radical": "心",
         "role": "形符",
         "label": "心"
-      },
+      }
+    ]
+  },
+  "恙": {
+    "formula": "羊 + 心",
+    "components": [
       {
         "radical": "羊",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12750,32 +12750,32 @@
     ]
   },
   "恩": {
-    "formula": "心 + 因",
+    "formula": "因 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "因",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
   "恭": {
-    "formula": "⺗ + 共",
+    "formula": "共 + ⺗",
     "components": [
-      {
-        "radical": "⺗",
-        "role": "形符",
-        "label": "⺗"
-      },
       {
         "radical": "共",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "⺗",
+        "role": "形符",
+        "label": "⺗"
       }
     ]
   },
@@ -12840,17 +12840,17 @@
     ]
   },
   "悉": {
-    "formula": "心 + 釆",
+    "formula": "釆 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "釆",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12915,32 +12915,32 @@
     ]
   },
   "悠": {
-    "formula": "心 + 攸",
+    "formula": "攸 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "攸",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "患": {
-    "formula": "心 + 串",
-    "components": [
+      },
       {
         "radical": "心",
         "role": "形符",
         "label": "心"
-      },
+      }
+    ]
+  },
+  "患": {
+    "formula": "串 + 心",
+    "components": [
       {
         "radical": "串",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -12960,32 +12960,32 @@
     ]
   },
   "悲": {
-    "formula": "心 + 非",
+    "formula": "非 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "非",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "悶": {
-    "formula": "心 + 門",
-    "components": [
+      },
       {
         "radical": "心",
         "role": "形符",
         "label": "心"
-      },
+      }
+    ]
+  },
+  "悶": {
+    "formula": "門 + 心",
+    "components": [
       {
         "radical": "門",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13080,17 +13080,17 @@
     ]
   },
   "惡": {
-    "formula": "心 + 亞",
+    "formula": "亞 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "亞",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13125,32 +13125,32 @@
     ]
   },
   "想": {
-    "formula": "心 + 相",
+    "formula": "相 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "相",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "惹": {
-    "formula": "心 + 若",
-    "components": [
+      },
       {
         "radical": "心",
         "role": "形符",
         "label": "心"
-      },
+      }
+    ]
+  },
+  "惹": {
+    "formula": "若 + 心",
+    "components": [
       {
         "radical": "若",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13170,62 +13170,62 @@
     ]
   },
   "愁": {
-    "formula": "心 + 秋",
+    "formula": "秋 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "秋",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
   "愈": {
-    "formula": "心 + 俞",
+    "formula": "俞 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "俞",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
   "意": {
-    "formula": "心 + 音",
+    "formula": "音 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "音",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "愚": {
-    "formula": "心 + 禺",
-    "components": [
+      },
       {
         "radical": "心",
         "role": "形符",
         "label": "心"
-      },
+      }
+    ]
+  },
+  "愚": {
+    "formula": "禺 + 心",
+    "components": [
       {
         "radical": "禺",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13285,32 +13285,32 @@
     ]
   },
   "慈": {
-    "formula": "心 + 兹",
+    "formula": "兹 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "兹",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "態": {
-    "formula": "心 + 能",
-    "components": [
+      },
       {
         "radical": "心",
         "role": "形符",
         "label": "心"
-      },
+      }
+    ]
+  },
+  "態": {
+    "formula": "能 + 心",
+    "components": [
       {
         "radical": "能",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13345,17 +13345,17 @@
     ]
   },
   "慕": {
-    "formula": "⺗ + 莫",
+    "formula": "莫 + ⺗",
     "components": [
-      {
-        "radical": "⺗",
-        "role": "形符",
-        "label": "⺗"
-      },
       {
         "radical": "莫",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "⺗",
+        "role": "形符",
+        "label": "⺗"
       }
     ]
   },
@@ -13405,17 +13405,17 @@
     ]
   },
   "慧": {
-    "formula": "心 + 彗",
+    "formula": "彗 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "彗",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13450,17 +13450,17 @@
     ]
   },
   "慰": {
-    "formula": "心 + 尉",
+    "formula": "尉 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "尉",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13515,17 +13515,17 @@
     ]
   },
   "憊": {
-    "formula": "心 + 備",
+    "formula": "備 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "備",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13545,17 +13545,17 @@
     ]
   },
   "憑": {
-    "formula": "心 + 馮",
+    "formula": "馮 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "馮",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13635,17 +13635,17 @@
     ]
   },
   "懇": {
-    "formula": "心 + 貇",
+    "formula": "貇 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "貇",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13665,17 +13665,17 @@
     ]
   },
   "應": {
-    "formula": "心 + 倠",
+    "formula": "倠 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "倠",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13695,32 +13695,32 @@
     ]
   },
   "懟": {
-    "formula": "心 + 對",
+    "formula": "對 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "對",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "懲": {
-    "formula": "心 + 徴",
-    "components": [
+      },
       {
         "radical": "心",
         "role": "形符",
         "label": "心"
-      },
+      }
+    ]
+  },
+  "懲": {
+    "formula": "徴 + 心",
+    "components": [
       {
         "radical": "徴",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13800,17 +13800,17 @@
     ]
   },
   "戀": {
-    "formula": "心 + 䜌",
+    "formula": "䜌 + 心",
     "components": [
-      {
-        "radical": "心",
-        "role": "形符",
-        "label": "心"
-      },
       {
         "radical": "䜌",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "心",
+        "role": "形符",
+        "label": "心"
       }
     ]
   },
@@ -13915,17 +13915,17 @@
     ]
   },
   "战": {
-    "formula": "戈 + 占",
+    "formula": "占 + 戈",
     "components": [
-      {
-        "radical": "戈",
-        "role": "形符",
-        "label": "戈"
-      },
       {
         "radical": "占",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "戈",
+        "role": "形符",
+        "label": "戈"
       }
     ]
   },
@@ -13965,17 +13965,17 @@
     ]
   },
   "戰": {
-    "formula": "戈 + 單",
+    "formula": "單 + 戈",
     "components": [
-      {
-        "radical": "戈",
-        "role": "形符",
-        "label": "戈"
-      },
       {
         "radical": "單",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "戈",
+        "role": "形符",
+        "label": "戈"
       }
     ]
   },
@@ -14765,17 +14765,17 @@
     ]
   },
   "拳": {
-    "formula": "手 + 龹",
+    "formula": "龹 + 手",
     "components": [
-      {
-        "radical": "手",
-        "role": "形符",
-        "label": "手"
-      },
       {
         "radical": "龹",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "手",
+        "role": "形符",
+        "label": "手"
       }
     ]
   },
@@ -14810,17 +14810,17 @@
     ]
   },
   "拿": {
-    "formula": "手 + 合",
+    "formula": "合 + 手",
     "components": [
-      {
-        "radical": "手",
-        "role": "形符",
-        "label": "手"
-      },
       {
         "radical": "合",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "手",
+        "role": "形符",
+        "label": "手"
       }
     ]
   },
@@ -15050,17 +15050,17 @@
     ]
   },
   "捨": {
-    "formula": "舍 + 扌",
+    "formula": "扌 + 舍",
     "components": [
-      {
-        "radical": "舍",
-        "role": "形符",
-        "label": "舍"
-      },
       {
         "radical": "扌",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "舍",
+        "role": "形符",
+        "label": "舍"
       }
     ]
   },
@@ -15155,17 +15155,17 @@
     ]
   },
   "掌": {
-    "formula": "手 + 尚",
+    "formula": "尚 + 手",
     "components": [
-      {
-        "radical": "手",
-        "role": "形符",
-        "label": "手"
-      },
       {
         "radical": "尚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "手",
+        "role": "形符",
+        "label": "手"
       }
     ]
   },
@@ -15715,17 +15715,17 @@
     ]
   },
   "摩": {
-    "formula": "手 + 麻",
+    "formula": "麻 + 手",
     "components": [
-      {
-        "radical": "手",
-        "role": "形符",
-        "label": "手"
-      },
       {
         "radical": "麻",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "手",
+        "role": "形符",
+        "label": "手"
       }
     ]
   },
@@ -16120,17 +16120,17 @@
     ]
   },
   "擴": {
-    "formula": "廣 + 扌",
+    "formula": "扌 + 廣",
     "components": [
-      {
-        "radical": "廣",
-        "role": "形符",
-        "label": "廣"
-      },
       {
         "radical": "扌",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "廣",
+        "role": "形符",
+        "label": "廣"
       }
     ]
   },
@@ -16180,17 +16180,17 @@
     ]
   },
   "攀": {
-    "formula": "手 + 樊",
+    "formula": "樊 + 手",
     "components": [
-      {
-        "radical": "手",
-        "role": "形符",
-        "label": "手"
-      },
       {
         "radical": "樊",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "手",
+        "role": "形符",
+        "label": "手"
       }
     ]
   },
@@ -16255,17 +16255,17 @@
     ]
   },
   "攣": {
-    "formula": "手 + 䜌",
+    "formula": "䜌 + 手",
     "components": [
-      {
-        "radical": "手",
-        "role": "形符",
-        "label": "手"
-      },
       {
         "radical": "䜌",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "手",
+        "role": "形符",
+        "label": "手"
       }
     ]
   },
@@ -16315,17 +16315,17 @@
     ]
   },
   "收": {
-    "formula": "攵 + 丩",
+    "formula": "丩 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "丩",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
@@ -16345,152 +16345,152 @@
     ]
   },
   "攻": {
-    "formula": "攵 + 工",
+    "formula": "工 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "工",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
   "放": {
-    "formula": "攵 + 方",
+    "formula": "方 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "方",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
   "政": {
-    "formula": "攵 + 正",
+    "formula": "正 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "正",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
   "故": {
-    "formula": "攵 + 古",
+    "formula": "古 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "古",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
   "效": {
-    "formula": "攵 + 交",
+    "formula": "交 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "交",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
   "敏": {
-    "formula": "攵 + 每",
+    "formula": "每 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "每",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
   "救": {
-    "formula": "攵 + 求",
+    "formula": "求 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "求",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
   "敗": {
-    "formula": "攵 + 貝",
+    "formula": "貝 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "貝",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
   "敘": {
-    "formula": "攵 + 余",
+    "formula": "余 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "余",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "教": {
-    "formula": "攵 + 孝",
-    "components": [
+      },
       {
         "radical": "攵",
         "role": "形符",
         "label": "攵"
-      },
+      }
+    ]
+  },
+  "教": {
+    "formula": "孝 + 攵",
+    "components": [
       {
         "radical": "孝",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
@@ -16555,17 +16555,17 @@
     ]
   },
   "敲": {
-    "formula": "攴 + 高",
+    "formula": "高 + 攴",
     "components": [
-      {
-        "radical": "攴",
-        "role": "形符",
-        "label": "攴"
-      },
       {
         "radical": "高",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攴",
+        "role": "形符",
+        "label": "攴"
       }
     ]
   },
@@ -16585,47 +16585,47 @@
     ]
   },
   "敵": {
-    "formula": "攵 + 啇",
+    "formula": "啇 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "啇",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "數": {
-    "formula": "攵 + 婁",
-    "components": [
+      },
       {
         "radical": "攵",
         "role": "形符",
         "label": "攵"
-      },
+      }
+    ]
+  },
+  "數": {
+    "formula": "婁 + 攵",
+    "components": [
       {
         "radical": "婁",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
   "斃": {
-    "formula": "死 + 敝",
+    "formula": "敝 + 死",
     "components": [
-      {
-        "radical": "死",
-        "role": "形符",
-        "label": "死"
-      },
       {
         "radical": "敝",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "死",
+        "role": "形符",
+        "label": "死"
       }
     ]
   },
@@ -16640,17 +16640,17 @@
     ]
   },
   "斐": {
-    "formula": "文 + 非",
+    "formula": "非 + 文",
     "components": [
-      {
-        "radical": "文",
-        "role": "形符",
-        "label": "文"
-      },
       {
         "radical": "非",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "文",
+        "role": "形符",
+        "label": "文"
       }
     ]
   },
@@ -16680,17 +16680,17 @@
     ]
   },
   "斜": {
-    "formula": "斗 + 余",
+    "formula": "余 + 斗",
     "components": [
-      {
-        "radical": "斗",
-        "role": "形符",
-        "label": "斗"
-      },
       {
         "radical": "余",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "斗",
+        "role": "形符",
+        "label": "斗"
       }
     ]
   },
@@ -16725,32 +16725,32 @@
     ]
   },
   "斧": {
-    "formula": "斤 + 父",
+    "formula": "父 + 斤",
     "components": [
-      {
-        "radical": "斤",
-        "role": "形符",
-        "label": "斧頭"
-      },
       {
         "radical": "父",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "斬": {
-    "formula": "斤 + 車",
-    "components": [
+      },
       {
         "radical": "斤",
         "role": "形符",
         "label": "斧頭"
-      },
+      }
+    ]
+  },
+  "斬": {
+    "formula": "車 + 斤",
+    "components": [
       {
         "radical": "車",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "斤",
+        "role": "形符",
+        "label": "斧頭"
       }
     ]
   },
@@ -17470,32 +17470,32 @@
     ]
   },
   "暨": {
-    "formula": "旦 + 既",
+    "formula": "既 + 旦",
     "components": [
-      {
-        "radical": "旦",
-        "role": "形符",
-        "label": "旦"
-      },
       {
         "radical": "既",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "旦",
+        "role": "形符",
+        "label": "旦"
       }
     ]
   },
   "暫": {
-    "formula": "日 + 斬",
+    "formula": "斬 + 日",
     "components": [
-      {
-        "radical": "日",
-        "role": "形符",
-        "label": "太陽"
-      },
       {
         "radical": "斬",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "日",
+        "role": "形符",
+        "label": "太陽"
       }
     ]
   },
@@ -17815,17 +17815,17 @@
     ]
   },
   "朗": {
-    "formula": "月 + 良",
+    "formula": "良 + 月",
     "components": [
-      {
-        "radical": "月",
-        "role": "形符",
-        "label": "月亮"
-      },
       {
         "radical": "良",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "月",
+        "role": "形符",
+        "label": "月亮"
       }
     ]
   },
@@ -17850,32 +17850,32 @@
     ]
   },
   "朝": {
-    "formula": "月 + 龺",
+    "formula": "龺 + 月",
     "components": [
-      {
-        "radical": "月",
-        "role": "形符",
-        "label": "月亮"
-      },
       {
         "radical": "龺",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "期": {
-    "formula": "月 + 其",
-    "components": [
+      },
       {
         "radical": "月",
         "role": "形符",
         "label": "月亮"
-      },
+      }
+    ]
+  },
+  "期": {
+    "formula": "其 + 月",
+    "components": [
       {
         "radical": "其",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "月",
+        "role": "形符",
+        "label": "月亮"
       }
     ]
   },
@@ -18235,17 +18235,17 @@
     ]
   },
   "架": {
-    "formula": "木 + 加",
+    "formula": "加 + 木",
     "components": [
-      {
-        "radical": "木",
-        "role": "形符",
-        "label": "木"
-      },
       {
         "radical": "加",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "木",
+        "role": "形符",
+        "label": "木"
       }
     ]
   },
@@ -18400,17 +18400,17 @@
     ]
   },
   "柴": {
-    "formula": "木 + 此",
+    "formula": "此 + 木",
     "components": [
-      {
-        "radical": "木",
-        "role": "形符",
-        "label": "木"
-      },
       {
         "radical": "此",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "木",
+        "role": "形符",
+        "label": "木"
       }
     ]
   },
@@ -18520,17 +18520,17 @@
     ]
   },
   "栽": {
-    "formula": "木 + 戈",
+    "formula": "戈 + 木",
     "components": [
-      {
-        "radical": "木",
-        "role": "形符",
-        "label": "木"
-      },
       {
         "radical": "戈",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "木",
+        "role": "形符",
+        "label": "木"
       }
     ]
   },
@@ -18565,17 +18565,17 @@
     ]
   },
   "案": {
-    "formula": "木 + 安",
+    "formula": "安 + 木",
     "components": [
-      {
-        "radical": "木",
-        "role": "形符",
-        "label": "木"
-      },
       {
         "radical": "安",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "木",
+        "role": "形符",
+        "label": "木"
       }
     ]
   },
@@ -18799,8 +18799,8 @@
       },
       {
         "radical": "朿",
-        "role": "聲符",
-        "label": "讀音"
+        "role": "形符",
+        "label": "朿"
       }
     ]
   },
@@ -19530,32 +19530,32 @@
     ]
   },
   "欣": {
-    "formula": "欠 + 斤",
+    "formula": "斤 + 欠",
     "components": [
-      {
-        "radical": "欠",
-        "role": "形符",
-        "label": "欠"
-      },
       {
         "radical": "斤",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "欲": {
-    "formula": "欠 + 谷",
-    "components": [
+      },
       {
         "radical": "欠",
         "role": "形符",
         "label": "欠"
-      },
+      }
+    ]
+  },
+  "欲": {
+    "formula": "谷 + 欠",
+    "components": [
       {
         "radical": "谷",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "欠",
+        "role": "形符",
+        "label": "欠"
       }
     ]
   },
@@ -19595,17 +19595,17 @@
     ]
   },
   "欺": {
-    "formula": "欠 + 其",
+    "formula": "其 + 欠",
     "components": [
-      {
-        "radical": "欠",
-        "role": "形符",
-        "label": "欠"
-      },
       {
         "radical": "其",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "欠",
+        "role": "形符",
+        "label": "欠"
       }
     ]
   },
@@ -19630,47 +19630,47 @@
     ]
   },
   "歉": {
-    "formula": "欠 + 兼",
+    "formula": "兼 + 欠",
     "components": [
-      {
-        "radical": "欠",
-        "role": "形符",
-        "label": "欠"
-      },
       {
         "radical": "兼",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "欠",
+        "role": "形符",
+        "label": "欠"
       }
     ]
   },
   "歌": {
-    "formula": "欠 + 哥",
+    "formula": "哥 + 欠",
     "components": [
-      {
-        "radical": "欠",
-        "role": "形符",
-        "label": "欠"
-      },
       {
         "radical": "哥",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "歡": {
-    "formula": "欠 + 雚",
-    "components": [
+      },
       {
         "radical": "欠",
         "role": "形符",
         "label": "欠"
-      },
+      }
+    ]
+  },
+  "歡": {
+    "formula": "雚 + 欠",
+    "components": [
       {
         "radical": "雚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "欠",
+        "role": "形符",
+        "label": "欠"
       }
     ]
   },
@@ -19700,17 +19700,17 @@
     ]
   },
   "此": {
-    "formula": "匕 + 止",
+    "formula": "止 + 匕",
     "components": [
-      {
-        "radical": "匕",
-        "role": "形符",
-        "label": "湯匙"
-      },
       {
         "radical": "止",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "匕",
+        "role": "形符",
+        "label": "湯匙"
       }
     ]
   },
@@ -19775,17 +19775,17 @@
     ]
   },
   "歸": {
-    "formula": "止 + 㠯",
+    "formula": "㠯 + 止",
     "components": [
-      {
-        "radical": "止",
-        "role": "形符",
-        "label": "止"
-      },
       {
         "radical": "㠯",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "止",
+        "role": "形符",
+        "label": "止"
       }
     ]
   },
@@ -19930,17 +19930,17 @@
     ]
   },
   "殺": {
-    "formula": "殳 + 杀",
+    "formula": "杀 + 殳",
     "components": [
-      {
-        "radical": "殳",
-        "role": "形符",
-        "label": "殳"
-      },
       {
         "radical": "杀",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "殳",
+        "role": "形符",
+        "label": "殳"
       }
     ]
   },
@@ -19985,17 +19985,17 @@
     ]
   },
   "毅": {
-    "formula": "殳 + 豙",
+    "formula": "豙 + 殳",
     "components": [
-      {
-        "radical": "殳",
-        "role": "形符",
-        "label": "殳"
-      },
       {
         "radical": "豙",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "殳",
+        "role": "形符",
+        "label": "殳"
       }
     ]
   },
@@ -20120,17 +20120,17 @@
     ]
   },
   "氈": {
-    "formula": "毛 + 亶",
+    "formula": "亶 + 毛",
     "components": [
-      {
-        "radical": "毛",
-        "role": "形符",
-        "label": "毛"
-      },
       {
         "radical": "亶",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "毛",
+        "role": "形符",
+        "label": "毛"
       }
     ]
   },
@@ -20350,17 +20350,17 @@
     ]
   },
   "決": {
-    "formula": "夬 + 氵",
+    "formula": "氵 + 夬",
     "components": [
-      {
-        "radical": "夬",
-        "role": "形符",
-        "label": "夬"
-      },
       {
         "radical": "氵",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "夬",
+        "role": "形符",
+        "label": "夬"
       }
     ]
   },
@@ -22350,17 +22350,17 @@
     ]
   },
   "炙": {
-    "formula": "火 + 月",
+    "formula": "月 + 火",
     "components": [
-      {
-        "radical": "火",
-        "role": "形符",
-        "label": "火"
-      },
       {
         "radical": "月",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "火",
+        "role": "形符",
+        "label": "火"
       }
     ]
   },
@@ -22425,17 +22425,17 @@
     ]
   },
   "烈": {
-    "formula": "灬 + 列",
+    "formula": "列 + 灬",
     "components": [
-      {
-        "radical": "灬",
-        "role": "形符",
-        "label": "火底"
-      },
       {
         "radical": "列",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "灬",
+        "role": "形符",
+        "label": "火底"
       }
     ]
   },
@@ -22570,17 +22570,17 @@
     ]
   },
   "然": {
-    "formula": "灬 + 肰",
+    "formula": "肰 + 灬",
     "components": [
-      {
-        "radical": "灬",
-        "role": "形符",
-        "label": "火底"
-      },
       {
         "radical": "肰",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "灬",
+        "role": "形符",
+        "label": "火底"
       }
     ]
   },
@@ -22600,17 +22600,17 @@
     ]
   },
   "煎": {
-    "formula": "灬 + 前",
+    "formula": "前 + 灬",
     "components": [
-      {
-        "radical": "灬",
-        "role": "形符",
-        "label": "火底"
-      },
       {
         "radical": "前",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "灬",
+        "role": "形符",
+        "label": "火底"
       }
     ]
   },
@@ -22680,17 +22680,17 @@
     ]
   },
   "照": {
-    "formula": "灬 + 昭",
+    "formula": "昭 + 灬",
     "components": [
-      {
-        "radical": "灬",
-        "role": "形符",
-        "label": "火底"
-      },
       {
         "radical": "昭",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "灬",
+        "role": "形符",
+        "label": "火底"
       }
     ]
   },
@@ -22710,17 +22710,17 @@
     ]
   },
   "煮": {
-    "formula": "灬 + 者",
+    "formula": "者 + 灬",
     "components": [
-      {
-        "radical": "灬",
-        "role": "形符",
-        "label": "火底"
-      },
       {
         "radical": "者",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "灬",
+        "role": "形符",
+        "label": "火底"
       }
     ]
   },
@@ -22740,62 +22740,62 @@
     ]
   },
   "熙": {
-    "formula": "灬 + 巸",
+    "formula": "巸 + 灬",
     "components": [
-      {
-        "radical": "灬",
-        "role": "形符",
-        "label": "火底"
-      },
       {
         "radical": "巸",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "灬",
+        "role": "形符",
+        "label": "火底"
       }
     ]
   },
   "熟": {
-    "formula": "灬 + 孰",
+    "formula": "孰 + 灬",
     "components": [
-      {
-        "radical": "灬",
-        "role": "形符",
-        "label": "火底"
-      },
       {
         "radical": "孰",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "灬",
+        "role": "形符",
+        "label": "火底"
       }
     ]
   },
   "熬": {
-    "formula": "灬 + 敖",
+    "formula": "敖 + 灬",
     "components": [
-      {
-        "radical": "灬",
-        "role": "形符",
-        "label": "火底"
-      },
       {
         "radical": "敖",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "熱": {
-    "formula": "灬 + 埶",
-    "components": [
+      },
       {
         "radical": "灬",
         "role": "形符",
         "label": "火底"
-      },
+      }
+    ]
+  },
+  "熱": {
+    "formula": "埶 + 灬",
+    "components": [
       {
         "radical": "埶",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "灬",
+        "role": "形符",
+        "label": "火底"
       }
     ]
   },
@@ -23270,17 +23270,17 @@
     ]
   },
   "狀": {
-    "formula": "犬 + 爿",
+    "formula": "爿 + 犬",
     "components": [
-      {
-        "radical": "犬",
-        "role": "形符",
-        "label": "狗"
-      },
       {
         "radical": "爿",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "犬",
+        "role": "形符",
+        "label": "狗"
       }
     ]
   },
@@ -23495,17 +23495,17 @@
     ]
   },
   "獎": {
-    "formula": "犬 + 將",
+    "formula": "將 + 犬",
     "components": [
-      {
-        "radical": "犬",
-        "role": "形符",
-        "label": "狗"
-      },
       {
         "radical": "將",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "犬",
+        "role": "形符",
+        "label": "狗"
       }
     ]
   },
@@ -23555,32 +23555,32 @@
     ]
   },
   "獸": {
-    "formula": "犬 + 嘼",
+    "formula": "嘼 + 犬",
     "components": [
-      {
-        "radical": "犬",
-        "role": "形符",
-        "label": "狗"
-      },
       {
         "radical": "嘼",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "獻": {
-    "formula": "犬 + 鬳",
-    "components": [
+      },
       {
         "radical": "犬",
         "role": "形符",
         "label": "狗"
-      },
+      }
+    ]
+  },
+  "獻": {
+    "formula": "鬳 + 犬",
+    "components": [
       {
         "radical": "鬳",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "犬",
+        "role": "形符",
+        "label": "狗"
       }
     ]
   },
@@ -24035,17 +24035,17 @@
     ]
   },
   "瓶": {
-    "formula": "瓦 + 并",
+    "formula": "并 + 瓦",
     "components": [
-      {
-        "radical": "瓦",
-        "role": "形符",
-        "label": "瓦"
-      },
       {
         "radical": "并",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "瓦",
+        "role": "形符",
+        "label": "瓦"
       }
     ]
   },
@@ -24110,17 +24110,17 @@
     ]
   },
   "產": {
-    "formula": "生 + 厂",
+    "formula": "厂 + 生",
     "components": [
-      {
-        "radical": "生",
-        "role": "形符",
-        "label": "生"
-      },
       {
         "radical": "厂",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "生",
+        "role": "形符",
+        "label": "生"
       }
     ]
   },
@@ -24305,32 +24305,32 @@
     ]
   },
   "畜": {
-    "formula": "田 + 玄",
+    "formula": "玄 + 田",
     "components": [
-      {
-        "radical": "田",
-        "role": "形符",
-        "label": "田地"
-      },
       {
         "radical": "玄",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "田",
+        "role": "形符",
+        "label": "田地"
       }
     ]
   },
   "畢": {
-    "formula": "十 + 卄",
+    "formula": "卄 + 十",
     "components": [
-      {
-        "radical": "十",
-        "role": "形符",
-        "label": "十"
-      },
       {
         "radical": "卄",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "十",
+        "role": "形符",
+        "label": "十"
       }
     ]
   },
@@ -24395,17 +24395,17 @@
     ]
   },
   "當": {
-    "formula": "田 + 尚",
+    "formula": "尚 + 田",
     "components": [
-      {
-        "radical": "田",
-        "role": "形符",
-        "label": "田地"
-      },
       {
         "radical": "尚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "田",
+        "role": "形符",
+        "label": "田地"
       }
     ]
   },
@@ -24970,17 +24970,17 @@
     ]
   },
   "發": {
-    "formula": "弓 + 癶",
+    "formula": "癶 + 弓",
     "components": [
-      {
-        "radical": "弓",
-        "role": "形符",
-        "label": "弓箭"
-      },
       {
         "radical": "癶",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "弓",
+        "role": "形符",
+        "label": "弓箭"
       }
     ]
   },
@@ -25080,32 +25080,32 @@
     ]
   },
   "皺": {
-    "formula": "皮 + 芻",
+    "formula": "芻 + 皮",
     "components": [
-      {
-        "radical": "皮",
-        "role": "形符",
-        "label": "皮"
-      },
       {
         "radical": "芻",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "皮",
+        "role": "形符",
+        "label": "皮"
       }
     ]
   },
   "盃": {
-    "formula": "皿 + 不",
+    "formula": "不 + 皿",
     "components": [
-      {
-        "radical": "皿",
-        "role": "形符",
-        "label": "器皿"
-      },
       {
         "radical": "不",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "皿",
+        "role": "形符",
+        "label": "器皿"
       }
     ]
   },
@@ -25135,32 +25135,32 @@
     ]
   },
   "盛": {
-    "formula": "皿 + 成",
+    "formula": "成 + 皿",
     "components": [
-      {
-        "radical": "皿",
-        "role": "形符",
-        "label": "器皿"
-      },
       {
         "radical": "成",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "盟": {
-    "formula": "皿 + 明",
-    "components": [
+      },
       {
         "radical": "皿",
         "role": "形符",
         "label": "器皿"
-      },
+      }
+    ]
+  },
+  "盟": {
+    "formula": "明 + 皿",
+    "components": [
       {
         "radical": "明",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "皿",
+        "role": "形符",
+        "label": "器皿"
       }
     ]
   },
@@ -25200,17 +25200,17 @@
     ]
   },
   "盤": {
-    "formula": "皿 + 般",
+    "formula": "般 + 皿",
     "components": [
-      {
-        "radical": "皿",
-        "role": "形符",
-        "label": "器皿"
-      },
       {
         "radical": "般",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "皿",
+        "role": "形符",
+        "label": "器皿"
       }
     ]
   },
@@ -25350,17 +25350,17 @@
     ]
   },
   "省": {
-    "formula": "目 + 少",
+    "formula": "少 + 目",
     "components": [
-      {
-        "radical": "目",
-        "role": "形符",
-        "label": "眼睛"
-      },
       {
         "radical": "少",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "目",
+        "role": "形符",
+        "label": "眼睛"
       }
     ]
   },
@@ -25455,17 +25455,17 @@
     ]
   },
   "眾": {
-    "formula": "众 + 罒",
+    "formula": "罒 + 众",
     "components": [
-      {
-        "radical": "众",
-        "role": "形符",
-        "label": "众"
-      },
       {
         "radical": "罒",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "众",
+        "role": "形符",
+        "label": "众"
       }
     ]
   },
@@ -25650,17 +25650,17 @@
     ]
   },
   "瞥": {
-    "formula": "目 + 敝",
+    "formula": "敝 + 目",
     "components": [
-      {
-        "radical": "目",
-        "role": "形符",
-        "label": "眼睛"
-      },
       {
         "radical": "敝",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "目",
+        "role": "形符",
+        "label": "眼睛"
       }
     ]
   },
@@ -25795,17 +25795,17 @@
     ]
   },
   "知": {
-    "formula": "口 + 矢",
+    "formula": "矢 + 口",
     "components": [
-      {
-        "radical": "口",
-        "role": "形符",
-        "label": "口"
-      },
       {
         "radical": "矢",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "口",
+        "role": "形符",
+        "label": "口"
       }
     ]
   },
@@ -26155,17 +26155,17 @@
     ]
   },
   "磨": {
-    "formula": "石 + 麻",
+    "formula": "麻 + 石",
     "components": [
-      {
-        "radical": "石",
-        "role": "形符",
-        "label": "石頭"
-      },
       {
         "radical": "麻",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "石",
+        "role": "形符",
+        "label": "石頭"
       }
     ]
   },
@@ -26390,17 +26390,17 @@
     ]
   },
   "禁": {
-    "formula": "示 + 林",
+    "formula": "林 + 示",
     "components": [
-      {
-        "radical": "示",
-        "role": "形符",
-        "label": "祭祀"
-      },
       {
         "radical": "林",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "示",
+        "role": "形符",
+        "label": "祭祀"
       }
     ]
   },
@@ -26435,17 +26435,17 @@
     ]
   },
   "禦": {
-    "formula": "示 + 御",
+    "formula": "御 + 示",
     "components": [
-      {
-        "radical": "示",
-        "role": "形符",
-        "label": "祭祀"
-      },
       {
         "radical": "御",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "示",
+        "role": "形符",
+        "label": "祭祀"
       }
     ]
   },
@@ -26945,17 +26945,17 @@
     ]
   },
   "穿": {
-    "formula": "牙 + 穴",
+    "formula": "穴 + 牙",
     "components": [
-      {
-        "radical": "牙",
-        "role": "形符",
-        "label": "牙齒"
-      },
       {
         "radical": "穴",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "牙",
+        "role": "形符",
+        "label": "牙齒"
       }
     ]
   },
@@ -28145,32 +28145,32 @@
     ]
   },
   "紫": {
-    "formula": "糸 + 此",
+    "formula": "此 + 糸",
     "components": [
-      {
-        "radical": "糸",
-        "role": "形符",
-        "label": "絲線"
-      },
       {
         "radical": "此",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "紮": {
-    "formula": "糸 + 札",
-    "components": [
+      },
       {
         "radical": "糸",
         "role": "形符",
         "label": "絲線"
-      },
+      }
+    ]
+  },
+  "紮": {
+    "formula": "札 + 糸",
+    "components": [
       {
         "radical": "札",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "糸",
+        "role": "形符",
+        "label": "絲線"
       }
     ]
   },
@@ -28510,17 +28510,17 @@
     ]
   },
   "緊": {
-    "formula": "糸 + 臤",
+    "formula": "臤 + 糸",
     "components": [
-      {
-        "radical": "糸",
-        "role": "形符",
-        "label": "絲線"
-      },
       {
         "radical": "臤",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "糸",
+        "role": "形符",
+        "label": "絲線"
       }
     ]
   },
@@ -28765,17 +28765,17 @@
     ]
   },
   "繁": {
-    "formula": "糸 + 敏",
+    "formula": "敏 + 糸",
     "components": [
-      {
-        "radical": "糸",
-        "role": "形符",
-        "label": "絲線"
-      },
       {
         "radical": "敏",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "糸",
+        "role": "形符",
+        "label": "絲線"
       }
     ]
   },
@@ -28870,17 +28870,17 @@
     ]
   },
   "繫": {
-    "formula": "糸 + 毄",
+    "formula": "毄 + 糸",
     "components": [
-      {
-        "radical": "糸",
-        "role": "形符",
-        "label": "絲線"
-      },
       {
         "radical": "毄",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "糸",
+        "role": "形符",
+        "label": "絲線"
       }
     ]
   },
@@ -29190,17 +29190,17 @@
     ]
   },
   "群": {
-    "formula": "羊 + 君",
+    "formula": "君 + 羊",
     "components": [
-      {
-        "radical": "羊",
-        "role": "形符",
-        "label": "羊"
-      },
       {
         "radical": "君",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "羊",
+        "role": "形符",
+        "label": "羊"
       }
     ]
   },
@@ -29245,17 +29245,17 @@
     ]
   },
   "翅": {
-    "formula": "羽 + 支",
+    "formula": "支 + 羽",
     "components": [
-      {
-        "radical": "羽",
-        "role": "形符",
-        "label": "羽"
-      },
       {
         "radical": "支",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "羽",
+        "role": "形符",
+        "label": "羽"
       }
     ]
   },
@@ -29275,62 +29275,62 @@
     ]
   },
   "翔": {
-    "formula": "羽 + 羊",
+    "formula": "羊 + 羽",
     "components": [
-      {
-        "radical": "羽",
-        "role": "形符",
-        "label": "羽"
-      },
       {
         "radical": "羊",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "羽",
+        "role": "形符",
+        "label": "羽"
       }
     ]
   },
   "翩": {
-    "formula": "羽 + 扁",
+    "formula": "扁 + 羽",
     "components": [
-      {
-        "radical": "羽",
-        "role": "形符",
-        "label": "羽"
-      },
       {
         "radical": "扁",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "羽",
+        "role": "形符",
+        "label": "羽"
       }
     ]
   },
   "翰": {
-    "formula": "羽 + 倝",
+    "formula": "倝 + 羽",
     "components": [
-      {
-        "radical": "羽",
-        "role": "形符",
-        "label": "羽"
-      },
       {
         "radical": "倝",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "翻": {
-    "formula": "羽 + 番",
-    "components": [
+      },
       {
         "radical": "羽",
         "role": "形符",
         "label": "羽"
-      },
+      }
+    ]
+  },
+  "翻": {
+    "formula": "番 + 羽",
+    "components": [
       {
         "radical": "番",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "羽",
+        "role": "形符",
+        "label": "羽"
       }
     ]
   },
@@ -29590,17 +29590,17 @@
     ]
   },
   "聞": {
-    "formula": "耳 + 門",
+    "formula": "門 + 耳",
     "components": [
-      {
-        "radical": "耳",
-        "role": "形符",
-        "label": "耳朵"
-      },
       {
         "radical": "門",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "耳",
+        "role": "形符",
+        "label": "耳朵"
       }
     ]
   },
@@ -29630,32 +29630,32 @@
     ]
   },
   "聲": {
-    "formula": "耳 + 殸",
+    "formula": "殸 + 耳",
     "components": [
-      {
-        "radical": "耳",
-        "role": "形符",
-        "label": "耳朵"
-      },
       {
         "radical": "殸",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "聳": {
-    "formula": "耳 + 從",
-    "components": [
+      },
       {
         "radical": "耳",
         "role": "形符",
         "label": "耳朵"
-      },
+      }
+    ]
+  },
+  "聳": {
+    "formula": "從 + 耳",
+    "components": [
       {
         "radical": "從",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "耳",
+        "role": "形符",
+        "label": "耳朵"
       }
     ]
   },
@@ -29750,17 +29750,17 @@
     ]
   },
   "肖": {
-    "formula": "⺼ + ⺌",
+    "formula": "⺌ + ⺼",
     "components": [
-      {
-        "radical": "⺼",
-        "role": "形符",
-        "label": "⺼"
-      },
       {
         "radical": "⺌",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "⺼",
+        "role": "形符",
+        "label": "⺼"
       }
     ]
   },
@@ -29920,17 +29920,17 @@
     ]
   },
   "背": {
-    "formula": "⺼ + 北",
+    "formula": "北 + ⺼",
     "components": [
-      {
-        "radical": "⺼",
-        "role": "形符",
-        "label": "⺼"
-      },
       {
         "radical": "北",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "⺼",
+        "role": "形符",
+        "label": "⺼"
       }
     ]
   },
@@ -29980,17 +29980,17 @@
     ]
   },
   "胡": {
-    "formula": "⺼ + 古",
+    "formula": "古 + ⺼",
     "components": [
-      {
-        "radical": "⺼",
-        "role": "形符",
-        "label": "⺼"
-      },
       {
         "radical": "古",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "⺼",
+        "role": "形符",
+        "label": "⺼"
       }
     ]
   },
@@ -30170,32 +30170,32 @@
     ]
   },
   "腎": {
-    "formula": "⺼ + 臤",
+    "formula": "臤 + ⺼",
     "components": [
-      {
-        "radical": "⺼",
-        "role": "形符",
-        "label": "⺼"
-      },
       {
         "radical": "臤",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "⺼",
+        "role": "形符",
+        "label": "⺼"
       }
     ]
   },
   "腐": {
-    "formula": "肉 + 付",
+    "formula": "付 + 肉",
     "components": [
-      {
-        "radical": "肉",
-        "role": "形符",
-        "label": "肉"
-      },
       {
         "radical": "付",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "肉",
+        "role": "形符",
+        "label": "肉"
       }
     ]
   },
@@ -30340,17 +30340,17 @@
     ]
   },
   "膏": {
-    "formula": "⺼ + 高",
+    "formula": "高 + ⺼",
     "components": [
-      {
-        "radical": "⺼",
-        "role": "形符",
-        "label": "⺼"
-      },
       {
         "radical": "高",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "⺼",
+        "role": "形符",
+        "label": "⺼"
       }
     ]
   },
@@ -30445,32 +30445,32 @@
     ]
   },
   "臀": {
-    "formula": "⺼ + 殿",
+    "formula": "殿 + ⺼",
     "components": [
-      {
-        "radical": "⺼",
-        "role": "形符",
-        "label": "⺼"
-      },
       {
         "radical": "殿",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "臂": {
-    "formula": "⺼ + 辟",
-    "components": [
+      },
       {
         "radical": "⺼",
         "role": "形符",
         "label": "⺼"
-      },
+      }
+    ]
+  },
+  "臂": {
+    "formula": "辟 + ⺼",
+    "components": [
       {
         "radical": "辟",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "⺼",
+        "role": "形符",
+        "label": "⺼"
       }
     ]
   },
@@ -30565,17 +30565,17 @@
     ]
   },
   "致": {
-    "formula": "攵 + 至",
+    "formula": "至 + 攵",
     "components": [
-      {
-        "radical": "攵",
-        "role": "形符",
-        "label": "攵"
-      },
       {
         "radical": "至",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "攵",
+        "role": "形符",
+        "label": "攵"
       }
     ]
   },
@@ -30600,17 +30600,17 @@
     ]
   },
   "舅": {
-    "formula": "男 + 臼",
+    "formula": "臼 + 男",
     "components": [
-      {
-        "radical": "男",
-        "role": "形符",
-        "label": "男"
-      },
       {
         "radical": "臼",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "男",
+        "role": "形符",
+        "label": "男"
       }
     ]
   },
@@ -30750,17 +30750,17 @@
     ]
   },
   "艱": {
-    "formula": "艮 + 堇",
+    "formula": "堇 + 艮",
     "components": [
-      {
-        "radical": "艮",
-        "role": "形符",
-        "label": "艮"
-      },
       {
         "radical": "堇",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "艮",
+        "role": "形符",
+        "label": "艮"
       }
     ]
   },
@@ -31290,17 +31290,17 @@
     ]
   },
   "華": {
-    "formula": "十 + 艹",
+    "formula": "艹 + 十",
     "components": [
-      {
-        "radical": "十",
-        "role": "形符",
-        "label": "十"
-      },
       {
         "radical": "艹",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "十",
+        "role": "形符",
+        "label": "十"
       }
     ]
   },
@@ -31940,17 +31940,17 @@
     ]
   },
   "處": {
-    "formula": "処 + 虍",
+    "formula": "虍 + 処",
     "components": [
-      {
-        "radical": "処",
-        "role": "形符",
-        "label": "処"
-      },
       {
         "radical": "虍",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "処",
+        "role": "形符",
+        "label": "処"
       }
     ]
   },
@@ -31975,17 +31975,17 @@
     ]
   },
   "虜": {
-    "formula": "男 + 虍",
+    "formula": "虍 + 男",
     "components": [
-      {
-        "radical": "男",
-        "role": "形符",
-        "label": "男"
-      },
       {
         "radical": "虍",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "男",
+        "role": "形符",
+        "label": "男"
       }
     ]
   },
@@ -32245,17 +32245,17 @@
     ]
   },
   "蜜": {
-    "formula": "虫 + 宓",
+    "formula": "宓 + 虫",
     "components": [
-      {
-        "radical": "虫",
-        "role": "形符",
-        "label": "蟲"
-      },
       {
         "radical": "宓",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "虫",
+        "role": "形符",
+        "label": "蟲"
       }
     ]
   },
@@ -32390,17 +32390,17 @@
     ]
   },
   "螯": {
-    "formula": "虫 + 敖",
+    "formula": "敖 + 虫",
     "components": [
-      {
-        "radical": "虫",
-        "role": "形符",
-        "label": "蟲"
-      },
       {
         "radical": "敖",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "虫",
+        "role": "形符",
+        "label": "蟲"
       }
     ]
   },
@@ -32455,17 +32455,17 @@
     ]
   },
   "蟹": {
-    "formula": "虫 + 解",
+    "formula": "解 + 虫",
     "components": [
-      {
-        "radical": "虫",
-        "role": "形符",
-        "label": "蟲"
-      },
       {
         "radical": "解",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "虫",
+        "role": "形符",
+        "label": "蟲"
       }
     ]
   },
@@ -32485,32 +32485,32 @@
     ]
   },
   "蠢": {
-    "formula": "虫 + 春",
+    "formula": "春 + 虫",
     "components": [
-      {
-        "radical": "虫",
-        "role": "形符",
-        "label": "蟲"
-      },
       {
         "radical": "春",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "蠻": {
-    "formula": "虫 + 䜌",
-    "components": [
+      },
       {
         "radical": "虫",
         "role": "形符",
         "label": "蟲"
-      },
+      }
+    ]
+  },
+  "蠻": {
+    "formula": "䜌 + 虫",
+    "components": [
       {
         "radical": "䜌",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "虫",
+        "role": "形符",
+        "label": "蟲"
       }
     ]
   },
@@ -32715,17 +32715,17 @@
     ]
   },
   "袋": {
-    "formula": "衣 + 代",
+    "formula": "代 + 衣",
     "components": [
-      {
-        "radical": "衣",
-        "role": "形符",
-        "label": "衣服"
-      },
       {
         "radical": "代",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "衣",
+        "role": "形符",
+        "label": "衣服"
       }
     ]
   },
@@ -32780,32 +32780,32 @@
     ]
   },
   "裂": {
-    "formula": "衣 + 列",
+    "formula": "列 + 衣",
     "components": [
-      {
-        "radical": "衣",
-        "role": "形符",
-        "label": "衣服"
-      },
       {
         "radical": "列",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "衣",
+        "role": "形符",
+        "label": "衣服"
       }
     ]
   },
   "裔": {
-    "formula": "冏 + 衣",
+    "formula": "衣 + 冏",
     "components": [
-      {
-        "radical": "冏",
-        "role": "形符",
-        "label": "冏"
-      },
       {
         "radical": "衣",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "冏",
+        "role": "形符",
+        "label": "冏"
       }
     ]
   },
@@ -32855,17 +32855,17 @@
     ]
   },
   "裝": {
-    "formula": "衣 + 壯",
+    "formula": "壯 + 衣",
     "components": [
-      {
-        "radical": "衣",
-        "role": "形符",
-        "label": "衣服"
-      },
       {
         "radical": "壯",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "衣",
+        "role": "形符",
+        "label": "衣服"
       }
     ]
   },
@@ -32895,17 +32895,17 @@
     ]
   },
   "裳": {
-    "formula": "衣 + 尚",
+    "formula": "尚 + 衣",
     "components": [
-      {
-        "radical": "衣",
-        "role": "形符",
-        "label": "衣服"
-      },
       {
         "radical": "尚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "衣",
+        "role": "形符",
+        "label": "衣服"
       }
     ]
   },
@@ -33100,17 +33100,17 @@
     ]
   },
   "規": {
-    "formula": "見 + 夫",
+    "formula": "夫 + 見",
     "components": [
-      {
-        "radical": "見",
-        "role": "形符",
-        "label": "看見"
-      },
       {
         "radical": "夫",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "見",
+        "role": "形符",
+        "label": "看見"
       }
     ]
   },
@@ -33130,62 +33130,62 @@
     ]
   },
   "視": {
-    "formula": "見 + 礻",
+    "formula": "礻 + 見",
     "components": [
-      {
-        "radical": "見",
-        "role": "形符",
-        "label": "看見"
-      },
       {
         "radical": "礻",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "見",
+        "role": "形符",
+        "label": "看見"
       }
     ]
   },
   "親": {
-    "formula": "見 + 亲",
+    "formula": "亲 + 見",
     "components": [
-      {
-        "radical": "見",
-        "role": "形符",
-        "label": "看見"
-      },
       {
         "radical": "亲",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "見",
+        "role": "形符",
+        "label": "看見"
       }
     ]
   },
   "覽": {
-    "formula": "見 + 監",
+    "formula": "監 + 見",
     "components": [
-      {
-        "radical": "見",
-        "role": "形符",
-        "label": "看見"
-      },
       {
         "radical": "監",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "觀": {
-    "formula": "見 + 雚",
-    "components": [
+      },
       {
         "radical": "見",
         "role": "形符",
         "label": "看見"
-      },
+      }
+    ]
+  },
+  "觀": {
+    "formula": "雚 + 見",
+    "components": [
       {
         "radical": "雚",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "見",
+        "role": "形符",
+        "label": "看見"
       }
     ]
   },
@@ -33630,17 +33630,17 @@
     ]
   },
   "詹": {
-    "formula": "言 + 厂",
+    "formula": "厂 + 言",
     "components": [
-      {
-        "radical": "言",
-        "role": "形符",
-        "label": "說話"
-      },
       {
         "radical": "厂",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "言",
+        "role": "形符",
+        "label": "說話"
       }
     ]
   },
@@ -34080,17 +34080,17 @@
     ]
   },
   "謠": {
-    "formula": "䍃 + 言",
+    "formula": "言 + 䍃",
     "components": [
-      {
-        "radical": "䍃",
-        "role": "形符",
-        "label": "䍃"
-      },
       {
         "radical": "言",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "䍃",
+        "role": "形符",
+        "label": "䍃"
       }
     ]
   },
@@ -34155,32 +34155,32 @@
     ]
   },
   "警": {
-    "formula": "言 + 敬",
+    "formula": "敬 + 言",
     "components": [
-      {
-        "radical": "言",
-        "role": "形符",
-        "label": "說話"
-      },
       {
         "radical": "敬",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "譬": {
-    "formula": "言 + 辟",
-    "components": [
+      },
       {
         "radical": "言",
         "role": "形符",
         "label": "說話"
-      },
+      }
+    ]
+  },
+  "譬": {
+    "formula": "辟 + 言",
+    "components": [
       {
         "radical": "辟",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "言",
+        "role": "形符",
+        "label": "說話"
       }
     ]
   },
@@ -34230,17 +34230,17 @@
     ]
   },
   "譽": {
-    "formula": "言 + 與",
+    "formula": "與 + 言",
     "components": [
-      {
-        "radical": "言",
-        "role": "形符",
-        "label": "說話"
-      },
       {
         "radical": "與",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "言",
+        "role": "形符",
+        "label": "說話"
       }
     ]
   },
@@ -34325,32 +34325,32 @@
     ]
   },
   "谿": {
-    "formula": "谷 + 奚",
+    "formula": "奚 + 谷",
     "components": [
-      {
-        "radical": "谷",
-        "role": "形符",
-        "label": "谷"
-      },
       {
         "radical": "奚",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "豁": {
-    "formula": "谷 + 害",
-    "components": [
+      },
       {
         "radical": "谷",
         "role": "形符",
         "label": "谷"
-      },
+      }
+    ]
+  },
+  "豁": {
+    "formula": "害 + 谷",
+    "components": [
       {
         "radical": "害",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "谷",
+        "role": "形符",
+        "label": "谷"
       }
     ]
   },
@@ -34405,17 +34405,17 @@
     ]
   },
   "豔": {
-    "formula": "盍 + 豐",
+    "formula": "豐 + 盍",
     "components": [
-      {
-        "radical": "盍",
-        "role": "形符",
-        "label": "盍"
-      },
       {
         "radical": "豐",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "盍",
+        "role": "形符",
+        "label": "盍"
       }
     ]
   },
@@ -34440,32 +34440,32 @@
     ]
   },
   "豪": {
-    "formula": "豕 + 高",
+    "formula": "高 + 豕",
     "components": [
-      {
-        "radical": "豕",
-        "role": "形符",
-        "label": "豬"
-      },
       {
         "radical": "高",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "豕",
+        "role": "形符",
+        "label": "豬"
       }
     ]
   },
   "豫": {
-    "formula": "象 + 予",
+    "formula": "予 + 象",
     "components": [
-      {
-        "radical": "象",
-        "role": "形符",
-        "label": "象"
-      },
       {
         "radical": "予",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "象",
+        "role": "形符",
+        "label": "象"
       }
     ]
   },
@@ -34590,17 +34590,17 @@
     ]
   },
   "貢": {
-    "formula": "貝 + 工",
+    "formula": "工 + 貝",
     "components": [
-      {
-        "radical": "貝",
-        "role": "形符",
-        "label": "貝"
-      },
       {
         "radical": "工",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "貝",
+        "role": "形符",
+        "label": "貝"
       }
     ]
   },
@@ -34620,17 +34620,17 @@
     ]
   },
   "貨": {
-    "formula": "貝 + 化",
+    "formula": "化 + 貝",
     "components": [
-      {
-        "radical": "貝",
-        "role": "形符",
-        "label": "貝"
-      },
       {
         "radical": "化",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "貝",
+        "role": "形符",
+        "label": "貝"
       }
     ]
   },
@@ -34650,32 +34650,32 @@
     ]
   },
   "貪": {
-    "formula": "貝 + 今",
+    "formula": "今 + 貝",
     "components": [
-      {
-        "radical": "貝",
-        "role": "形符",
-        "label": "貝"
-      },
       {
         "radical": "今",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "貫": {
-    "formula": "貝 + 毌",
-    "components": [
+      },
       {
         "radical": "貝",
         "role": "形符",
         "label": "貝"
-      },
+      }
+    ]
+  },
+  "貫": {
+    "formula": "毌 + 貝",
+    "components": [
       {
         "radical": "毌",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "貝",
+        "role": "形符",
+        "label": "貝"
       }
     ]
   },
@@ -34715,32 +34715,32 @@
     ]
   },
   "貸": {
-    "formula": "貝 + 代",
+    "formula": "代 + 貝",
     "components": [
-      {
-        "radical": "貝",
-        "role": "形符",
-        "label": "貝"
-      },
       {
         "radical": "代",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "費": {
-    "formula": "貝 + 弗",
-    "components": [
+      },
       {
         "radical": "貝",
         "role": "形符",
         "label": "貝"
-      },
+      }
+    ]
+  },
+  "費": {
+    "formula": "弗 + 貝",
+    "components": [
       {
         "radical": "弗",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "貝",
+        "role": "形符",
+        "label": "貝"
       }
     ]
   },
@@ -34805,47 +34805,47 @@
     ]
   },
   "資": {
-    "formula": "貝 + 次",
+    "formula": "次 + 貝",
     "components": [
-      {
-        "radical": "貝",
-        "role": "形符",
-        "label": "貝"
-      },
       {
         "radical": "次",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "賈": {
-    "formula": "貝 + 覀",
-    "components": [
+      },
       {
         "radical": "貝",
         "role": "形符",
         "label": "貝"
-      },
+      }
+    ]
+  },
+  "賈": {
+    "formula": "覀 + 貝",
+    "components": [
       {
         "radical": "覀",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "貝",
+        "role": "形符",
+        "label": "貝"
       }
     ]
   },
   "賊": {
-    "formula": "戎 + 貝",
+    "formula": "貝 + 戎",
     "components": [
-      {
-        "radical": "戎",
-        "role": "形符",
-        "label": "戎"
-      },
       {
         "radical": "貝",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "戎",
+        "role": "形符",
+        "label": "戎"
       }
     ]
   },
@@ -34945,32 +34945,32 @@
     ]
   },
   "質": {
-    "formula": "貝 + 斦",
+    "formula": "斦 + 貝",
     "components": [
-      {
-        "radical": "貝",
-        "role": "形符",
-        "label": "貝"
-      },
       {
         "radical": "斦",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "貝",
+        "role": "形符",
+        "label": "貝"
       }
     ]
   },
   "賴": {
-    "formula": "負 + 束",
+    "formula": "束 + 負",
     "components": [
-      {
-        "radical": "負",
-        "role": "形符",
-        "label": "負"
-      },
       {
         "radical": "束",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "負",
+        "role": "形符",
+        "label": "負"
       }
     ]
   },
@@ -35005,17 +35005,17 @@
     ]
   },
   "賽": {
-    "formula": "貝 + 宀",
+    "formula": "宀 + 貝",
     "components": [
-      {
-        "radical": "貝",
-        "role": "形符",
-        "label": "貝"
-      },
       {
         "radical": "宀",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "貝",
+        "role": "形符",
+        "label": "貝"
       }
     ]
   },
@@ -35035,17 +35035,17 @@
     ]
   },
   "贊": {
-    "formula": "貝 + 兟",
+    "formula": "兟 + 貝",
     "components": [
-      {
-        "radical": "貝",
-        "role": "形符",
-        "label": "貝"
-      },
       {
         "radical": "兟",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "貝",
+        "role": "形符",
+        "label": "貝"
       }
     ]
   },
@@ -35815,17 +35815,17 @@
     ]
   },
   "載": {
-    "formula": "車 + 哉",
+    "formula": "哉 + 車",
     "components": [
-      {
-        "radical": "車",
-        "role": "形符",
-        "label": "車"
-      },
       {
         "radical": "哉",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "車",
+        "role": "形符",
+        "label": "車"
       }
     ]
   },
@@ -35860,17 +35860,17 @@
     ]
   },
   "輩": {
-    "formula": "車 + 非",
+    "formula": "非 + 車",
     "components": [
-      {
-        "radical": "車",
-        "role": "形符",
-        "label": "車"
-      },
       {
         "radical": "非",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "車",
+        "role": "形符",
+        "label": "車"
       }
     ]
   },
@@ -36040,17 +36040,17 @@
     ]
   },
   "辜": {
-    "formula": "辛 + 古",
+    "formula": "古 + 辛",
     "components": [
-      {
-        "radical": "辛",
-        "role": "形符",
-        "label": "辛"
-      },
       {
         "radical": "古",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "辛",
+        "role": "形符",
+        "label": "辛"
       }
     ]
   },
@@ -36070,17 +36070,17 @@
     ]
   },
   "辦": {
-    "formula": "力 + 辛",
+    "formula": "辛 + 力",
     "components": [
-      {
-        "radical": "力",
-        "role": "形符",
-        "label": "力量"
-      },
       {
         "radical": "辛",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "力",
+        "role": "形符",
+        "label": "力量"
       }
     ]
   },
@@ -36465,17 +36465,17 @@
     ]
   },
   "這": {
-    "formula": "言 + 辶",
+    "formula": "辶 + 言",
     "components": [
-      {
-        "radical": "言",
-        "role": "形符",
-        "label": "說話"
-      },
       {
         "radical": "辶",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "言",
+        "role": "形符",
+        "label": "說話"
       }
     ]
   },
@@ -37110,32 +37110,32 @@
     ]
   },
   "邸": {
-    "formula": "阝 + 氐",
+    "formula": "氐 + 阝",
     "components": [
-      {
-        "radical": "阝",
-        "role": "形符",
-        "label": "耳旁"
-      },
       {
         "radical": "氐",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "郁": {
-    "formula": "阝 + 有",
-    "components": [
+      },
       {
         "radical": "阝",
         "role": "形符",
         "label": "耳旁"
-      },
+      }
+    ]
+  },
+  "郁": {
+    "formula": "有 + 阝",
+    "components": [
       {
         "radical": "有",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "阝",
+        "role": "形符",
+        "label": "耳旁"
       }
     ]
   },
@@ -37155,32 +37155,32 @@
     ]
   },
   "郡": {
-    "formula": "阝 + 君",
+    "formula": "君 + 阝",
     "components": [
-      {
-        "radical": "阝",
-        "role": "形符",
-        "label": "耳旁"
-      },
       {
         "radical": "君",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "部": {
-    "formula": "阝 + 咅",
-    "components": [
+      },
       {
         "radical": "阝",
         "role": "形符",
         "label": "耳旁"
-      },
+      }
+    ]
+  },
+  "部": {
+    "formula": "咅 + 阝",
+    "components": [
       {
         "radical": "咅",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "阝",
+        "role": "形符",
+        "label": "耳旁"
       }
     ]
   },
@@ -37200,17 +37200,17 @@
     ]
   },
   "都": {
-    "formula": "阝 + 者",
+    "formula": "者 + 阝",
     "components": [
-      {
-        "radical": "阝",
-        "role": "形符",
-        "label": "耳旁"
-      },
       {
         "radical": "者",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "阝",
+        "role": "形符",
+        "label": "耳旁"
       }
     ]
   },
@@ -37230,32 +37230,32 @@
     ]
   },
   "鄧": {
-    "formula": "阝 + 登",
+    "formula": "登 + 阝",
     "components": [
-      {
-        "radical": "阝",
-        "role": "形符",
-        "label": "耳旁"
-      },
       {
         "radical": "登",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "鄰": {
-    "formula": "阝 + 粦",
-    "components": [
+      },
       {
         "radical": "阝",
         "role": "形符",
         "label": "耳旁"
-      },
+      }
+    ]
+  },
+  "鄰": {
+    "formula": "粦 + 阝",
+    "components": [
       {
         "radical": "粦",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "阝",
+        "role": "形符",
+        "label": "耳旁"
       }
     ]
   },
@@ -37440,47 +37440,47 @@
     ]
   },
   "醜": {
-    "formula": "鬼 + 酉",
+    "formula": "酉 + 鬼",
     "components": [
+      {
+        "radical": "酉",
+        "role": "聲符",
+        "label": "讀音"
+      },
       {
         "radical": "鬼",
         "role": "形符",
         "label": "鬼"
-      },
-      {
-        "radical": "酉",
-        "role": "聲符",
-        "label": "讀音"
       }
     ]
   },
   "醫": {
-    "formula": "酉 + 殹",
+    "formula": "殹 + 酉",
     "components": [
-      {
-        "radical": "酉",
-        "role": "形符",
-        "label": "酉"
-      },
       {
         "radical": "殹",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "醬": {
-    "formula": "酉 + 將",
-    "components": [
+      },
       {
         "radical": "酉",
         "role": "形符",
         "label": "酉"
-      },
+      }
+    ]
+  },
+  "醬": {
+    "formula": "將 + 酉",
+    "components": [
       {
         "radical": "將",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "酉",
+        "role": "形符",
+        "label": "酉"
       }
     ]
   },
@@ -37590,17 +37590,17 @@
     ]
   },
   "量": {
-    "formula": "里 + 旦",
+    "formula": "旦 + 里",
     "components": [
-      {
-        "radical": "里",
-        "role": "形符",
-        "label": "里"
-      },
       {
         "radical": "旦",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "里",
+        "role": "形符",
+        "label": "里"
       }
     ]
   },
@@ -38320,17 +38320,17 @@
     ]
   },
   "閩": {
-    "formula": "虫 + 門",
+    "formula": "門 + 虫",
     "components": [
-      {
-        "radical": "虫",
-        "role": "形符",
-        "label": "蟲"
-      },
       {
         "radical": "門",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "虫",
+        "role": "形符",
+        "label": "蟲"
       }
     ]
   },
@@ -38825,17 +38825,17 @@
     ]
   },
   "隻": {
-    "formula": "又 + 隹",
+    "formula": "隹 + 又",
     "components": [
-      {
-        "radical": "又",
-        "role": "形符",
-        "label": "又"
-      },
       {
         "radical": "隹",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "又",
+        "role": "形符",
+        "label": "又"
       }
     ]
   },
@@ -38855,32 +38855,32 @@
     ]
   },
   "雄": {
-    "formula": "隹 + 厷",
+    "formula": "厷 + 隹",
     "components": [
-      {
-        "radical": "隹",
-        "role": "形符",
-        "label": "隹"
-      },
       {
         "radical": "厷",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "雅": {
-    "formula": "隹 + 牙",
-    "components": [
+      },
       {
         "radical": "隹",
         "role": "形符",
         "label": "隹"
-      },
+      }
+    ]
+  },
+  "雅": {
+    "formula": "牙 + 隹",
+    "components": [
       {
         "radical": "牙",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "隹",
+        "role": "形符",
+        "label": "隹"
       }
     ]
   },
@@ -38900,47 +38900,47 @@
     ]
   },
   "雇": {
-    "formula": "隹 + 户",
+    "formula": "户 + 隹",
     "components": [
-      {
-        "radical": "隹",
-        "role": "形符",
-        "label": "隹"
-      },
       {
         "radical": "户",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "隹",
+        "role": "形符",
+        "label": "隹"
       }
     ]
   },
   "雌": {
-    "formula": "隹 + 此",
+    "formula": "此 + 隹",
     "components": [
-      {
-        "radical": "隹",
-        "role": "形符",
-        "label": "隹"
-      },
       {
         "radical": "此",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "雕": {
-    "formula": "隹 + 周",
-    "components": [
+      },
       {
         "radical": "隹",
         "role": "形符",
         "label": "隹"
-      },
+      }
+    ]
+  },
+  "雕": {
+    "formula": "周 + 隹",
+    "components": [
       {
         "radical": "周",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "隹",
+        "role": "形符",
+        "label": "隹"
       }
     ]
   },
@@ -38970,17 +38970,17 @@
     ]
   },
   "雛": {
-    "formula": "隹 + 芻",
+    "formula": "芻 + 隹",
     "components": [
-      {
-        "radical": "隹",
-        "role": "形符",
-        "label": "隹"
-      },
       {
         "radical": "芻",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "隹",
+        "role": "形符",
+        "label": "隹"
       }
     ]
   },
@@ -39020,32 +39020,32 @@
     ]
   },
   "離": {
-    "formula": "隹 + 离",
+    "formula": "离 + 隹",
     "components": [
-      {
-        "radical": "隹",
-        "role": "形符",
-        "label": "隹"
-      },
       {
         "radical": "离",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "難": {
-    "formula": "隹 + 堇",
-    "components": [
+      },
       {
         "radical": "隹",
         "role": "形符",
         "label": "隹"
-      },
+      }
+    ]
+  },
+  "難": {
+    "formula": "堇 + 隹",
+    "components": [
       {
         "radical": "堇",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "隹",
+        "role": "形符",
+        "label": "隹"
       }
     ]
   },
@@ -39345,17 +39345,17 @@
     ]
   },
   "靠": {
-    "formula": "非 + 告",
+    "formula": "告 + 非",
     "components": [
-      {
-        "radical": "非",
-        "role": "形符",
-        "label": "非"
-      },
       {
         "radical": "告",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "非",
+        "role": "形符",
+        "label": "非"
       }
     ]
   },
@@ -39485,62 +39485,62 @@
     ]
   },
   "響": {
-    "formula": "音 + 鄉",
+    "formula": "鄉 + 音",
     "components": [
-      {
-        "radical": "音",
-        "role": "形符",
-        "label": "音"
-      },
       {
         "radical": "鄉",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "音",
+        "role": "形符",
+        "label": "音"
       }
     ]
   },
   "頂": {
-    "formula": "頁 + 丁",
+    "formula": "丁 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "丁",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "項": {
-    "formula": "頁 + 工",
+    "formula": "工 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "工",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "順": {
-    "formula": "頁 + 川",
-    "components": [
+      },
       {
         "radical": "頁",
         "role": "形符",
         "label": "頭部"
-      },
+      }
+    ]
+  },
+  "順": {
+    "formula": "川 + 頁",
+    "components": [
       {
         "radical": "川",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
@@ -39560,122 +39560,122 @@
     ]
   },
   "預": {
-    "formula": "頁 + 予",
+    "formula": "予 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "予",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "頑": {
-    "formula": "頁 + 元",
+    "formula": "元 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "元",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "頓": {
-    "formula": "頁 + 屯",
+    "formula": "屯 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "屯",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "頗": {
-    "formula": "頁 + 皮",
+    "formula": "皮 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "皮",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "領": {
-    "formula": "頁 + 令",
+    "formula": "令 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "令",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "頡": {
-    "formula": "頁 + 吉",
+    "formula": "吉 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "吉",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "頭": {
-    "formula": "頁 + 豆",
+    "formula": "豆 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "豆",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "頸": {
-    "formula": "頁 + 巠",
-    "components": [
+      },
       {
         "radical": "頁",
         "role": "形符",
         "label": "頭部"
-      },
+      }
+    ]
+  },
+  "頸": {
+    "formula": "巠 + 頁",
+    "components": [
       {
         "radical": "巠",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
@@ -39695,107 +39695,107 @@
     ]
   },
   "題": {
-    "formula": "頁 + 是",
+    "formula": "是 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "是",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "額": {
-    "formula": "頁 + 客",
+    "formula": "客 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "客",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "顏": {
-    "formula": "頁 + 彥",
+    "formula": "彥 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "彥",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "願": {
-    "formula": "頁 + 原",
+    "formula": "原 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "原",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "顛": {
-    "formula": "頁 + 真",
+    "formula": "真 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "真",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
   "顧": {
-    "formula": "頁 + 雇",
+    "formula": "雇 + 頁",
     "components": [
-      {
-        "radical": "頁",
-        "role": "形符",
-        "label": "頭部"
-      },
       {
         "radical": "雇",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "顯": {
-    "formula": "頁 + 㬎",
-    "components": [
+      },
       {
         "radical": "頁",
         "role": "形符",
         "label": "頭部"
-      },
+      }
+    ]
+  },
+  "顯": {
+    "formula": "㬎 + 頁",
+    "components": [
       {
         "radical": "㬎",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "頁",
+        "role": "形符",
+        "label": "頭部"
       }
     ]
   },
@@ -39815,17 +39815,17 @@
     ]
   },
   "飄": {
-    "formula": "風 + 票",
+    "formula": "票 + 風",
     "components": [
-      {
-        "radical": "風",
-        "role": "形符",
-        "label": "風"
-      },
       {
         "radical": "票",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "風",
+        "role": "形符",
+        "label": "風"
       }
     ]
   },
@@ -39930,17 +39930,17 @@
     ]
   },
   "飾": {
-    "formula": "巾 + 飠",
+    "formula": "飠 + 巾",
     "components": [
-      {
-        "radical": "巾",
-        "role": "形符",
-        "label": "巾"
-      },
       {
         "radical": "飠",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "巾",
+        "role": "形符",
+        "label": "巾"
       }
     ]
   },
@@ -39960,17 +39960,17 @@
     ]
   },
   "養": {
-    "formula": "食 + 羊",
+    "formula": "羊 + 食",
     "components": [
-      {
-        "radical": "食",
-        "role": "形符",
-        "label": "食"
-      },
       {
         "radical": "羊",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "食",
+        "role": "形符",
+        "label": "食"
       }
     ]
   },
@@ -40190,17 +40190,17 @@
     ]
   },
   "駕": {
-    "formula": "馬 + 加",
+    "formula": "加 + 馬",
     "components": [
-      {
-        "radical": "馬",
-        "role": "形符",
-        "label": "馬"
-      },
       {
         "radical": "加",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "馬",
+        "role": "形符",
+        "label": "馬"
       }
     ]
   },
@@ -40340,17 +40340,17 @@
     ]
   },
   "驚": {
-    "formula": "馬 + 敬",
+    "formula": "敬 + 馬",
     "components": [
-      {
-        "radical": "馬",
-        "role": "形符",
-        "label": "馬"
-      },
       {
         "radical": "敬",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "馬",
+        "role": "形符",
+        "label": "馬"
       }
     ]
   },
@@ -40595,32 +40595,32 @@
     ]
   },
   "魂": {
-    "formula": "鬼 + 云",
+    "formula": "云 + 鬼",
     "components": [
-      {
-        "radical": "鬼",
-        "role": "形符",
-        "label": "鬼"
-      },
       {
         "radical": "云",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "魄": {
-    "formula": "鬼 + 白",
-    "components": [
+      },
       {
         "radical": "鬼",
         "role": "形符",
         "label": "鬼"
-      },
+      }
+    ]
+  },
+  "魄": {
+    "formula": "白 + 鬼",
+    "components": [
       {
         "radical": "白",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "鬼",
+        "role": "形符",
+        "label": "鬼"
       }
     ]
   },
@@ -40640,17 +40640,17 @@
     ]
   },
   "魔": {
-    "formula": "鬼 + 麻",
+    "formula": "麻 + 鬼",
     "components": [
-      {
-        "radical": "鬼",
-        "role": "形符",
-        "label": "鬼"
-      },
       {
         "radical": "麻",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "鬼",
+        "role": "形符",
+        "label": "鬼"
       }
     ]
   },
@@ -40725,17 +40725,17 @@
     ]
   },
   "鯊": {
-    "formula": "魚 + 沙",
+    "formula": "沙 + 魚",
     "components": [
-      {
-        "radical": "魚",
-        "role": "形符",
-        "label": "魚"
-      },
       {
         "radical": "沙",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "魚",
+        "role": "形符",
+        "label": "魚"
       }
     ]
   },
@@ -40810,17 +40810,17 @@
     ]
   },
   "鴉": {
-    "formula": "鳥 + 牙",
+    "formula": "牙 + 鳥",
     "components": [
-      {
-        "radical": "鳥",
-        "role": "形符",
-        "label": "鳥類"
-      },
       {
         "radical": "牙",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "鳥",
+        "role": "形符",
+        "label": "鳥類"
       }
     ]
   },
@@ -40840,77 +40840,77 @@
     ]
   },
   "鴨": {
-    "formula": "鳥 + 甲",
+    "formula": "甲 + 鳥",
     "components": [
-      {
-        "radical": "鳥",
-        "role": "形符",
-        "label": "鳥類"
-      },
       {
         "radical": "甲",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "鳥",
+        "role": "形符",
+        "label": "鳥類"
       }
     ]
   },
   "鴿": {
-    "formula": "鳥 + 合",
+    "formula": "合 + 鳥",
     "components": [
-      {
-        "radical": "鳥",
-        "role": "形符",
-        "label": "鳥類"
-      },
       {
         "radical": "合",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "鳥",
+        "role": "形符",
+        "label": "鳥類"
       }
     ]
   },
   "鵒": {
-    "formula": "鳥 + 谷",
+    "formula": "谷 + 鳥",
     "components": [
-      {
-        "radical": "鳥",
-        "role": "形符",
-        "label": "鳥類"
-      },
       {
         "radical": "谷",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "鳥",
+        "role": "形符",
+        "label": "鳥類"
       }
     ]
   },
   "鷲": {
-    "formula": "鳥 + 就",
+    "formula": "就 + 鳥",
     "components": [
-      {
-        "radical": "鳥",
-        "role": "形符",
-        "label": "鳥類"
-      },
       {
         "radical": "就",
         "role": "聲符",
         "label": "讀音"
-      }
-    ]
-  },
-  "鷹": {
-    "formula": "鳥 + 䧹",
-    "components": [
+      },
       {
         "radical": "鳥",
         "role": "形符",
         "label": "鳥類"
-      },
+      }
+    ]
+  },
+  "鷹": {
+    "formula": "䧹 + 鳥",
+    "components": [
       {
         "radical": "䧹",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "鳥",
+        "role": "形符",
+        "label": "鳥類"
       }
     ]
   },
@@ -40985,17 +40985,17 @@
     ]
   },
   "麵": {
-    "formula": "面 + 麥",
+    "formula": "麥 + 面",
     "components": [
-      {
-        "radical": "面",
-        "role": "形符",
-        "label": "面"
-      },
       {
         "radical": "麥",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "面",
+        "role": "形符",
+        "label": "面"
       }
     ]
   },
@@ -41015,17 +41015,17 @@
     ]
   },
   "麼": {
-    "formula": "幺 + 麻",
+    "formula": "麻 + 幺",
     "components": [
-      {
-        "radical": "幺",
-        "role": "形符",
-        "label": "幺"
-      },
       {
         "radical": "麻",
         "role": "聲符",
         "label": "讀音"
+      },
+      {
+        "radical": "幺",
+        "role": "形符",
+        "label": "幺"
       }
     ]
   },
