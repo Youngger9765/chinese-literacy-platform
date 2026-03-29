@@ -493,7 +493,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                 const isRadicalOpen = radicalChar === ch;
                 const isSelected = selectedChar === ch;
                 return (
-                  <div key={ch} className="relative">
+                  <div key={ch} className="flex flex-col gap-1">
                     <button
                       onClick={() => {
                         setSelectedChar(prev => prev === ch ? null : ch);
@@ -502,7 +502,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                       className={[
                         `relative flex flex-col items-center justify-center w-full ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95 animate-card-in`,
                         isSelected
-                          ? 'ring-2 ring-indigo-500 ring-offset-1'
+                          ? 'ring-2 ring-[#5B4FC4] ring-offset-1'
                           : '',
                         isPracticed
                           ? 'bg-emerald-50 border-emerald-700/50 text-emerald-800'
@@ -539,21 +539,23 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                       </span>
                     </button>
 
-                    {/* Radical decomposition toggle button */}
+                    {/* Radical decomposition button — placed below the card for discoverability */}
                     {hasRadical && (
                       <button
                         onClick={() => handleRadicalToggle(ch)}
-                        title="查看部件拆解"
                         className={[
-                          'absolute -bottom-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center border text-[9px] font-bold transition-all',
+                          'w-full py-1 rounded-lg border text-[10px] font-semibold transition-all active:scale-95 flex items-center justify-center gap-1',
                           isRadicalOpen
-                            ? 'bg-indigo-500 border-indigo-600 text-white'
-                            : 'bg-indigo-100 border-indigo-200 text-indigo-600 hover:bg-indigo-200',
+                            ? 'bg-[#5B4FC4] border-[#5B4FC4] text-white'
+                            : 'bg-[#5B4FC4]/10 border-[#5B4FC4]/30 text-[#5B4FC4] hover:bg-[#5B4FC4]/20',
                         ].join(' ')}
                         aria-label={`查看「${ch}」的部件拆解`}
                         aria-expanded={isRadicalOpen}
                       >
-                        部
+                        <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" />
+                        </svg>
+                        部件
                       </button>
                     )}
                   </div>
@@ -580,8 +582,8 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             )}
             {charsWithRadical.length > 0 && (
               <div className="flex items-center gap-1.5">
-                <span className="w-5 h-5 bg-indigo-100 border border-indigo-200 text-indigo-600 rounded-full flex items-center justify-center text-[9px] font-bold">部</span>
-                點我查看部件拆解
+                <span className="px-1.5 py-0.5 bg-[#5B4FC4]/10 border border-[#5B4FC4]/30 text-[#5B4FC4] rounded text-[9px] font-semibold">部件</span>
+                字卡下方可查看部件拆解
               </div>
             )}
           </div>
