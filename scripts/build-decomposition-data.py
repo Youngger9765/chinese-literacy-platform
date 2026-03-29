@@ -522,6 +522,42 @@ def get_label(radical: str, hint: str | None = None) -> str:
     return RADICAL_LABELS.get(radical, radical)
 
 
+def ids_component_order(ids_string: str, semantic: str, phonetic: str) -> tuple[str, str]:
+    """
+    Given an IDS string (e.g. '⿰屯頁') and two components (semantic, phonetic),
+    return them in the order they appear in the IDS string.
+
+    IDS operands appear left-to-right after the operator character, so we simply
+    find the first occurrence index of each component in the IDS string and sort.
+
+    Rules:
+    - ⿰ 左右：左先右後
+    - ⿱ 上下：上先下後
+    - ⿲ 左中右：左→中→右
+    - ⿳ 上中下：上→中→下
+    - ⿴⿵⿶⿷⿸⿹⿺：外先內後
+    - ⿻ 重疊：保持原序（原始 IDS 順序）
+
+    If either component is not found in the IDS string, fall back to original order.
+    """
+    if not ids_string or not semantic or not phonetic:
+        return semantic, phonetic
+
+    # Strip IDS operators to get only the operand positions
+    # Walk the IDS string character by character and record positions of semantic/phonetic
+    sem_pos = ids_string.find(semantic)
+    pho_pos = ids_string.find(phonetic)
+
+    if sem_pos == -1 or pho_pos == -1:
+        # One or both not found in IDS — keep semantic first (original behaviour)
+        return semantic, phonetic
+
+    if sem_pos <= pho_pos:
+        return semantic, phonetic
+    else:
+        return phonetic, semantic
+
+
 def build_from_makemeahanzi(
     entry: dict,
 ) -> dict | None:
@@ -546,10 +582,17 @@ def build_from_makemeahanzi(
         if not semantic and not phonetic:
             return None
         if semantic and phonetic:
-            formula = f"{semantic} + {phonetic}"
+            # Use IDS string to determine correct stroke-order position
+            ids_string = entry.get("decomposition", "")
+            first, second = ids_component_order(ids_string, semantic, phonetic)
+            first_role = "形符" if first == semantic else "聲符"
+            second_role = "形符" if second == semantic else "聲符"
+            first_label = get_label(first) if first_role == "形符" else "讀音"
+            second_label = get_label(second) if second_role == "形符" else "讀音"
+            formula = f"{first} + {second}"
             components = [
-                {"radical": semantic, "role": "形符", "label": get_label(semantic)},
-                {"radical": phonetic, "role": "聲符", "label": "讀音"},
+                {"radical": first, "role": first_role, "label": first_label},
+                {"radical": second, "role": second_role, "label": second_label},
             ]
         elif semantic:
             formula = semantic
