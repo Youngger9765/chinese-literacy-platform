@@ -1,18 +1,22 @@
 /**
  * VocabDefinitionMatch — Step Component for 語詞定義配對
  *
- * Click-to-match interaction (tap definition, then tap word).
+ * 支援兩種互動模式 (#697, restored #728):
+ *   - 選擇題 (Multiple Choice) — DEFAULT
+ *   - 拖拉配對 (Drag & Drop)
  *
  * Flow:
- * 1. matching — one attempt per pair; wrong = recorded silently, no reveal
- * 2. summary  — show score + per-question result; offer retry options
+ *   matching → summary (score + per-question) → retry wrong / retry all / finish
+ *
+ * No hints during answering (#710): wrong answer silently recorded, immediately advance.
  *
  * Props: { story, onFinish, zhuyinActive? }
  */
 import React, {
   useCallback,
-  useEffect,
+  useRef,
   useState,
+  useMemo,
 } from 'react';
 import { Story, VocabItem } from '../../types';
 
@@ -31,22 +35,23 @@ export interface VocabDefinitionMatchProps {
   zhuyinActive?: boolean;
 }
 
-type MatchPhase = 'matching' | 'summary';
+type InteractionMode = 'multiple-choice' | 'drag-drop';
+type Phase = 'matching' | 'summary';
 
 /**
- * Records the answer for one definition item.
+ * Records the answer for one vocabulary item.
  * answeredWordIdx === null  → not yet answered
  * answeredWordIdx === defIndex → correct
  * answeredWordIdx !== defIndex → wrong
  */
 interface AnswerRecord {
-  defIndex: number;         // which vocab item this is (position in vocab[])
+  defIndex: number;
   answeredWordIdx: number | null;
   correct: boolean | null;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Helpers                                                             */
+/*  Utility: shuffle                                                    */
 /* ------------------------------------------------------------------ */
 
 function shuffle<T>(arr: T[]): T[] {
@@ -119,7 +124,6 @@ function SummaryScreen({
   const total = answers.length;
   const allCorrect = correctCount === total;
   const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-
   const wrongAnswers = answers.filter((a) => !a.correct);
 
   return (
@@ -171,7 +175,6 @@ function SummaryScreen({
                   : 'bg-red-50 border-red-200'
               }`}
             >
-              {/* Status icon */}
               <span
                 className={`mt-0.5 flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
                   isCorrect ? 'bg-emerald-500' : 'bg-red-500'
@@ -179,8 +182,6 @@ function SummaryScreen({
               >
                 {isCorrect ? '✓' : '✗'}
               </span>
-
-              {/* Content */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-gray-500 leading-snug mb-1">
                   {item?.definition}
@@ -230,145 +231,369 @@ function SummaryScreen({
 }
 
 /* ------------------------------------------------------------------ */
-/*  MatchingExercise — the interactive matching UI                     */
+/*  Mode Switcher                                                       */
 /* ------------------------------------------------------------------ */
 
-interface MatchingExerciseProps {
-  vocab: VocabItem[];
-  /** Subset of defIndices to practice (all or wrong-only) */
-  activeDefIndices: number[];
-  shuffledWords: number[];
-  answers: AnswerRecord[];
-  selectedDef: number | null;
-  selectedWord: number | null;
-  onDefClick: (defIdx: number) => void;
-  onWordClick: (wordIdx: number) => void;
-  answeredCount: number;
+const MODE_LABELS: { id: InteractionMode; label: string; icon: string }[] = [
+  { id: 'multiple-choice', label: '選擇題', icon: '☑' },
+  { id: 'drag-drop', label: '拖拉配對', icon: '✥' },
+];
+
+function ModeSwitcher({
+  current,
+  onChange,
+}: {
+  current: InteractionMode;
+  onChange: (m: InteractionMode) => void;
+}) {
+  return (
+    <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 max-w-sm mx-auto">
+      {MODE_LABELS.map(({ id, label, icon }) => (
+        <button
+          key={id}
+          onClick={() => onChange(id)}
+          className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+            current === id
+              ? 'bg-white text-[#5B4FC4] shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <span>{icon}</span>
+          <span>{label}</span>
+        </button>
+      ))}
+    </div>
+  );
 }
 
-function MatchingExercise({
-  vocab,
-  activeDefIndices,
-  shuffledWords,
-  answers,
-  selectedDef,
-  selectedWord,
-  onDefClick,
-  onWordClick,
-  answeredCount,
-}: MatchingExerciseProps) {
-  const total = activeDefIndices.length;
-  const pct = total > 0 ? (answeredCount / total) * 100 : 0;
+/* ------------------------------------------------------------------ */
+/*  Mode 1: Multiple Choice (選擇題) — DEFAULT                          */
+/* ------------------------------------------------------------------ */
+
+interface MultipleChoiceProps {
+  vocab: VocabItem[];
+  activeDefIndices: number[];
+  onAllDone: (answers: AnswerRecord[]) => void;
+}
+
+function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoiceProps) {
+  const [queueIdx, setQueueIdx] = useState(0);
+  const answersRef = useRef<AnswerRecord[]>(
+    activeDefIndices.map((defIdx) => ({ defIndex: defIdx, answeredWordIdx: null, correct: null })),
+  );
+  const [pendingAdvance, setPendingAdvance] = useState(false);
+
+  const currentDefIdx = activeDefIndices[queueIdx];
+
+  // Shuffle 4 options for current question (1 correct + 3 distractors from all vocab)
+  const options = useMemo(() => {
+    const allIndices = vocab.map((_, i) => i);
+    const distractors = shuffle(allIndices.filter((i) => i !== currentDefIdx)).slice(0, 3);
+    return shuffle([currentDefIdx, ...distractors]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queueIdx, currentDefIdx, vocab]);
+
+  const handleChoice = (vocabIdx: number) => {
+    if (pendingAdvance) return;
+
+    const isCorrect = vocabIdx === currentDefIdx;
+
+    // Record answer silently — no shake, no reveal (#710)
+    answersRef.current = answersRef.current.map((a) =>
+      a.defIndex === currentDefIdx
+        ? { ...a, answeredWordIdx: vocabIdx, correct: isCorrect }
+        : a,
+    );
+
+    setPendingAdvance(true);
+    setTimeout(() => {
+      setPendingAdvance(false);
+      const nextIdx = queueIdx + 1;
+      if (nextIdx >= activeDefIndices.length) {
+        onAllDone(answersRef.current);
+      } else {
+        setQueueIdx(nextIdx);
+      }
+    }, 400);
+  };
+
+  const item = vocab[currentDefIdx];
 
   return (
-    <div className="max-w-3xl mx-auto px-4">
-      {/* Progress bar */}
-      <div className="mb-6 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-base font-semibold text-gray-600">作答進度</span>
-          <span className="text-lg font-black text-amber-700">
-            {answeredCount} <span className="text-gray-400 font-normal text-sm">/ {total}</span>
-          </span>
-        </div>
-        <div className="h-4 bg-amber-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${pct}%` }}
-            role="progressbar"
-            aria-valuenow={answeredCount}
-            aria-valuemin={0}
-            aria-valuemax={total}
-          />
-        </div>
+    <div className="max-w-xl mx-auto px-4">
+      {/* Progress */}
+      <div className="mb-5 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
+        <span className="text-sm font-semibold text-gray-500">題目進度</span>
+        <span className="text-base font-black text-amber-700">
+          {queueIdx + 1}{' '}
+          <span className="text-gray-400 font-normal text-sm">/ {activeDefIndices.length}</span>
+        </span>
       </div>
 
-      {/* Instruction */}
-      <p className="text-center text-base text-amber-800 bg-amber-100 rounded-xl py-2.5 px-4 mb-6 select-none font-medium">
-        先點選左邊的「定義」，再點選右邊對應的「語詞」
+      {/* Definition card */}
+      <div className="bg-white border-2 border-[#5B4FC4] rounded-2xl p-6 mb-6 shadow-sm">
+        <p className="text-xs font-semibold text-[#5B4FC4] uppercase tracking-wider mb-2">
+          定義
+        </p>
+        <p className="text-lg text-gray-800 leading-relaxed">{item?.definition}</p>
+      </div>
+
+      {/* Options */}
+      <p className="text-center text-sm text-gray-500 mb-3 select-none">
+        請選出對應的語詞
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        {options.map((vocabIdx) => (
+          <button
+            key={vocabIdx}
+            className="rounded-xl border-2 px-4 py-4 text-center font-bold text-xl transition-all duration-200 select-none bg-white border-gray-200 text-gray-800 hover:border-[#5B4FC4] hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+            onClick={() => handleChoice(vocabIdx)}
+            disabled={pendingAdvance}
+          >
+            {vocab[vocabIdx]?.word}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Mode 2: Drag & Drop (拖拉配對)                                      */
+/* ------------------------------------------------------------------ */
+
+interface DragDropProps {
+  vocab: VocabItem[];
+  activeDefIndices: number[];
+  shuffledWords: number[];
+  onAllDone: (answers: AnswerRecord[]) => void;
+}
+
+function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: DragDropProps) {
+  const [draggingVocabIdx, setDraggingVocabIdx] = useState<number | null>(null);
+  const [placements, setPlacements] = useState<Map<number, number>>(new Map());
+  const [confirmed, setConfirmed] = useState<Set<number>>(new Set());
+  const [wrongFlash, setWrongFlash] = useState<Set<number>>(new Set());
+  const [hoverTarget, setHoverTarget] = useState<number | null>(null);
+  const [touchSelected, setTouchSelected] = useState<number | null>(null);
+
+  // Track last answer per slot for summary (correct ones only, since wrong bounce back)
+  const answersRef = useRef<AnswerRecord[]>(
+    activeDefIndices.map((defIdx) => ({ defIndex: defIdx, answeredWordIdx: null, correct: null })),
+  );
+
+  const confirmedRef = useRef<Set<number>>(new Set());
+
+  const attemptPlace = useCallback(
+    (defIdx: number, vocabIdx: number) => {
+      if (confirmedRef.current.has(defIdx)) return;
+
+      setPlacements((prev) => {
+        const next = new Map(prev);
+        for (const [k, v] of next.entries()) {
+          if (v === vocabIdx) next.delete(k);
+        }
+        next.set(defIdx, vocabIdx);
+        return next;
+      });
+
+      if (vocabIdx === defIdx) {
+        // Correct
+        answersRef.current = answersRef.current.map((a) =>
+          a.defIndex === defIdx ? { ...a, answeredWordIdx: vocabIdx, correct: true } : a,
+        );
+        confirmedRef.current = new Set([...confirmedRef.current, defIdx]);
+
+        setConfirmed((prev) => {
+          const next = new Set(prev);
+          next.add(defIdx);
+          if (next.size === activeDefIndices.length) {
+            setTimeout(() => onAllDone(answersRef.current), 600);
+          }
+          return next;
+        });
+      } else {
+        // Wrong — record attempt, flash, bounce back
+        answersRef.current = answersRef.current.map((a) =>
+          a.defIndex === defIdx ? { ...a, answeredWordIdx: vocabIdx, correct: false } : a,
+        );
+        setWrongFlash((prev) => new Set([...prev, defIdx]));
+        setTimeout(() => {
+          setPlacements((prev) => {
+            const next = new Map(prev);
+            next.delete(defIdx);
+            return next;
+          });
+          setWrongFlash((prev) => {
+            const next = new Set(prev);
+            next.delete(defIdx);
+            return next;
+          });
+        }, 650);
+      }
+    },
+    [activeDefIndices.length, onAllDone],
+  );
+
+  const handleDragStart = (vocabIdx: number) => {
+    setDraggingVocabIdx(vocabIdx);
+    setTouchSelected(null);
+  };
+  const handleDragEnd = () => {
+    setDraggingVocabIdx(null);
+    setHoverTarget(null);
+  };
+  const handleDrop = (defIdx: number) => {
+    if (draggingVocabIdx === null) return;
+    setHoverTarget(null);
+    attemptPlace(defIdx, draggingVocabIdx);
+    setDraggingVocabIdx(null);
+  };
+
+  const handleTouchStart = (vocabIdx: number) => {
+    if (confirmed.has(vocabIdx)) return;
+    setTouchSelected((prev) => (prev === vocabIdx ? null : vocabIdx));
+  };
+  const handleSlotTap = (defIdx: number) => {
+    if (touchSelected !== null) {
+      attemptPlace(defIdx, touchSelected);
+      setTouchSelected(null);
+    }
+  };
+
+  const placedVocabIdxSet = useMemo(() => {
+    const s = new Set<number>();
+    placements.forEach((vocabIdx, defIdx) => {
+      if (!wrongFlash.has(defIdx)) s.add(vocabIdx);
+    });
+    return s;
+  }, [placements, wrongFlash]);
+
+  const activeShuffledWords = shuffledWords.filter((wi) => activeDefIndices.includes(wi));
+
+  return (
+    <div className="max-w-xl mx-auto px-4">
+      {/* Progress */}
+      <div className="mb-5 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
+        <span className="text-sm font-semibold text-gray-500">配對進度</span>
+        <span className="text-base font-black text-amber-700">
+          {confirmed.size}{' '}
+          <span className="text-gray-400 font-normal text-sm">/ {activeDefIndices.length}</span>
+        </span>
+      </div>
+
+      <p className="text-center text-sm text-amber-800 bg-amber-100 rounded-xl py-2 px-4 mb-4 select-none font-medium">
+        拖拉語詞卡片到對應的定義欄位，手機可先點選語詞再點選欄位
       </p>
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Left: definitions */}
-        <div className="flex flex-col gap-3">
-          <h3 className="text-center text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">
-            定義
-          </h3>
-          {activeDefIndices.map((defIdx) => {
-            const item = vocab[defIdx];
-            const ans = answers.find((a) => a.defIndex === defIdx);
-            const isAnswered = ans?.answeredWordIdx !== null && ans?.answeredWordIdx !== undefined;
-            const isSelected = selectedDef === defIdx;
+      {/* Word bank */}
+      <div className="mb-5">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center">
+          語詞庫
+        </p>
+        <div className="flex flex-wrap gap-2 justify-center min-h-[56px] bg-gray-50 rounded-xl p-3 border border-gray-200">
+          {activeShuffledWords.map((vocabIdx) => {
+            const isPlaced = placedVocabIdxSet.has(vocabIdx);
+            if (isPlaced) return null;
 
-            let cardClass =
-              'rounded-2xl border-2 px-4 py-4 text-left cursor-pointer transition-all duration-200 text-base leading-relaxed min-h-[88px] select-none ';
+            const isDragging = draggingVocabIdx === vocabIdx;
+            const isTouchSelected = touchSelected === vocabIdx;
 
-            if (isAnswered) {
-              cardClass += 'bg-gray-50 border-gray-200 text-gray-400 cursor-default';
-            } else if (isSelected) {
-              cardClass += 'bg-amber-100 border-amber-500 text-amber-900 shadow-md scale-[1.02]';
+            let cls =
+              'rounded-xl border-2 px-5 py-3 text-center font-bold text-xl select-none transition-all duration-200 ';
+            if (isDragging) {
+              cls += 'border-[#5B4FC4] bg-purple-100 text-purple-900 shadow-xl scale-105 opacity-80 cursor-grabbing';
+            } else if (isTouchSelected) {
+              cls += 'border-[#5B4FC4] bg-purple-100 text-purple-900 shadow-md scale-105 cursor-pointer';
             } else {
-              cardClass += 'bg-white border-gray-200 text-gray-700 hover:border-amber-300 hover:bg-amber-50 hover:shadow-sm';
+              cls += 'border-gray-200 bg-white text-gray-800 hover:border-[#5B4FC4] hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-grab';
             }
 
             return (
-              <button
-                key={defIdx}
-                className={cardClass}
-                onClick={() => !isAnswered && onDefClick(defIdx)}
-                disabled={isAnswered}
-                aria-pressed={isSelected}
-                aria-label={`定義 ${defIdx + 1}: ${item?.definition}`}
+              <div
+                key={vocabIdx}
+                draggable
+                onDragStart={() => handleDragStart(vocabIdx)}
+                onDragEnd={handleDragEnd}
+                onTouchStart={() => handleTouchStart(vocabIdx)}
+                onClick={() => handleTouchStart(vocabIdx)}
+                className={cls}
               >
-                {isAnswered && (
-                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs font-bold mr-2 flex-shrink-0">✓</span>
-                )}
-                {item?.definition}
-              </button>
+                {vocab[vocabIdx]?.word}
+              </div>
             );
           })}
         </div>
+        {touchSelected !== null && (
+          <p className="text-center text-xs text-[#5B4FC4] mt-2 font-medium">
+            已選「{vocab[touchSelected]?.word}」— 點選下方欄位放入
+          </p>
+        )}
+      </div>
 
-        {/* Right: shuffled vocabulary words — only show words for active defs */}
-        <div className="flex flex-col gap-3">
-          <h3 className="text-center text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">
-            語詞
-          </h3>
-          {shuffledWords
-            .filter((wi) => activeDefIndices.includes(wi))
-            .map((vocabIdx) => {
-              const ans = answers.find((a) => a.defIndex === vocabIdx);
-              const isAnswered = ans?.answeredWordIdx !== null && ans?.answeredWordIdx !== undefined;
-              const isSelected = selectedWord === vocabIdx;
+      {/* Definition slots */}
+      <div className="flex flex-col gap-3">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 text-center">
+          定義欄位
+        </p>
+        {activeDefIndices.map((defIdx) => {
+          const item = vocab[defIdx];
+          const placedVocabIdx = placements.get(defIdx) ?? null;
+          const isCorrect = confirmed.has(defIdx);
+          const isWrong = wrongFlash.has(defIdx);
+          const isOver = hoverTarget === defIdx && !isCorrect;
 
-              let cardClass =
-                'rounded-2xl border-2 px-4 py-4 text-center cursor-pointer transition-all duration-200 font-bold text-xl min-h-[88px] flex items-center justify-center select-none gap-2 ';
+          let cls =
+            'rounded-2xl border-2 px-4 py-4 min-h-[80px] flex flex-col gap-2 transition-all duration-200 cursor-pointer ';
+          if (isCorrect) {
+            cls += 'bg-emerald-50 border-emerald-400 cursor-default';
+          } else if (isWrong) {
+            cls += 'bg-red-50 border-red-400 animate-shake';
+          } else if (isOver) {
+            cls += 'bg-purple-50 border-[#5B4FC4] scale-[1.01] shadow-md';
+          } else if (placedVocabIdx !== null) {
+            cls += 'bg-amber-50 border-amber-400';
+          } else {
+            cls += 'bg-white border-dashed border-gray-300 hover:border-[#5B4FC4]';
+          }
 
-              if (isAnswered) {
-                cardClass += 'bg-gray-50 border-gray-200 text-gray-400 cursor-default';
-              } else if (isSelected) {
-                cardClass += 'bg-amber-100 border-amber-500 text-amber-900 shadow-md scale-[1.02]';
-              } else {
-                cardClass += 'bg-white border-gray-200 text-gray-800 hover:border-amber-300 hover:bg-amber-50 hover:shadow-sm';
-              }
-
-              return (
-                <button
-                  key={vocabIdx}
-                  className={cardClass}
-                  onClick={() => !isAnswered && onWordClick(vocabIdx)}
-                  disabled={isAnswered}
-                  aria-pressed={isSelected}
-                  aria-label={`語詞：${vocab[vocabIdx]?.word}`}
-                >
-                  {isAnswered && (
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-400 text-white text-xs font-bold flex-shrink-0">✓</span>
-                  )}
-                  {vocab[vocabIdx]?.word}
-                </button>
-              );
-            })}
-        </div>
+          return (
+            <div
+              key={defIdx}
+              className={cls}
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (!isCorrect) setHoverTarget(defIdx);
+              }}
+              onDragLeave={() => setHoverTarget(null)}
+              onDrop={(e) => {
+                e.preventDefault();
+                handleDrop(defIdx);
+              }}
+              onClick={() => handleSlotTap(defIdx)}
+            >
+              <p className="text-sm text-gray-700 leading-relaxed">{item?.definition}</p>
+              <div className="flex items-center justify-center h-8">
+                {isCorrect ? (
+                  <span className="font-bold text-base text-emerald-700 flex items-center gap-1">
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white text-xs font-bold">
+                      ✓
+                    </span>
+                    {placedVocabIdx !== null ? vocab[placedVocabIdx]?.word : ''}
+                  </span>
+                ) : placedVocabIdx !== null ? (
+                  <span className="font-bold text-base text-amber-800">
+                    {vocab[placedVocabIdx]?.word}
+                  </span>
+                ) : (
+                  <span className="text-xs text-gray-400 select-none">
+                    拖拉語詞到這裡
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -382,142 +607,88 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   story,
   onFinish,
 }) => {
+  const storageModeKey = `vocabDef_mode_${story.id}`;
   const vocab: VocabItem[] = story.vocabulary ?? [];
   const hasData = vocab.length > 0;
+
+  const [mode, setMode] = useState<InteractionMode>(() => {
+    try {
+      const saved = localStorage.getItem(storageModeKey) as InteractionMode | null;
+      if (saved && ['multiple-choice', 'drag-drop'].includes(saved)) {
+        return saved;
+      }
+    } catch {}
+    return 'multiple-choice';
+  });
+
+  const [phase, setPhase] = useState<Phase>('matching');
 
   // Which defIndices are active in the current round
   const [activeDefIndices, setActiveDefIndices] = useState<number[]>(() =>
     vocab.map((_, i) => i),
   );
 
-  // Shuffled word order (re-generated on retry-all)
-  const [shuffledWords, setShuffledWords] = useState<number[]>(() =>
-    shuffle(vocab.map((_, i) => i)),
-  );
+  // Stable shuffled word order for drag-drop (regenerated on retry)
+  const shuffledWords = useRef<number[]>(shuffle(vocab.map((_, i) => i)));
 
-  const [phase, setPhase] = useState<MatchPhase>('matching');
+  // Summary answers from the last completed round
+  const [summaryAnswers, setSummaryAnswers] = useState<AnswerRecord[]>([]);
 
-  // Per-question answer records for the current round
-  const [answers, setAnswers] = useState<AnswerRecord[]>(() =>
-    vocab.map((_, i) => ({ defIndex: i, answeredWordIdx: null, correct: null })),
-  );
+  // Increment to force-remount the active mode on mode change or retry
+  const [modeKey, setModeKey] = useState(0);
 
-  // Selected items
-  const [selectedDef, setSelectedDef] = useState<number | null>(null);
-  const [selectedWord, setSelectedWord] = useState<number | null>(null);
+  const handleModeChange = (m: InteractionMode) => {
+    setMode(m);
+    setPhase('matching');
+    setActiveDefIndices(vocab.map((_, i) => i));
+    shuffledWords.current = shuffle(vocab.map((_, i) => i));
+    setModeKey((k) => k + 1);
+    try {
+      localStorage.setItem(storageModeKey, m);
+    } catch {}
+  };
 
-  const answeredCount = answers.filter(
-    (a) => activeDefIndices.includes(a.defIndex) && a.answeredWordIdx !== null,
-  ).length;
-
-  // Auto-advance to summary when all active defs answered
-  useEffect(() => {
-    if (!hasData) return;
-    if (phase === 'matching' && activeDefIndices.length > 0 && answeredCount === activeDefIndices.length) {
-      setTimeout(() => setPhase('summary'), 400);
-    }
-  }, [answeredCount, activeDefIndices.length, phase, hasData]);
-
-  // Record an answer: one shot — no retries, no reveals
-  const tryMatch = useCallback(
-    (defIdx: number, wordIdx: number) => {
-      const isCorrect = defIdx === wordIdx;
-      setAnswers((prev) =>
-        prev.map((a) =>
-          a.defIndex === defIdx
-            ? { ...a, answeredWordIdx: wordIdx, correct: isCorrect }
-            : a,
-        ),
-      );
-      setSelectedDef(null);
-      setSelectedWord(null);
-    },
-    [],
-  );
-
-  const handleDefClick = useCallback(
-    (defIdx: number) => {
-      const ans = answers.find((a) => a.defIndex === defIdx);
-      if (ans?.answeredWordIdx !== null && ans?.answeredWordIdx !== undefined) return;
-
-      if (selectedWord !== null) {
-        tryMatch(defIdx, selectedWord);
-      } else if (selectedDef === defIdx) {
-        setSelectedDef(null);
-      } else {
-        setSelectedDef(defIdx);
-      }
-    },
-    [answers, selectedWord, selectedDef, tryMatch],
-  );
-
-  const handleWordClick = useCallback(
-    (wordIdx: number) => {
-      // Word is "answered" when its corresponding defIndex answer is filled
-      const ans = answers.find((a) => a.defIndex === wordIdx);
-      if (ans?.answeredWordIdx !== null && ans?.answeredWordIdx !== undefined) return;
-
-      if (selectedDef !== null) {
-        tryMatch(selectedDef, wordIdx);
-      } else if (selectedWord === wordIdx) {
-        setSelectedWord(null);
-      } else {
-        setSelectedWord(wordIdx);
-      }
-    },
-    [answers, selectedDef, selectedWord, tryMatch],
-  );
+  const handleAllDone = useCallback((answers: AnswerRecord[]) => {
+    setSummaryAnswers(answers);
+    setPhase('summary');
+  }, []);
 
   const handleRetryWrong = useCallback(() => {
-    const wrongIndices = answers
-      .filter((a) => activeDefIndices.includes(a.defIndex) && !a.correct)
+    const wrongIndices = summaryAnswers
+      .filter((a) => !a.correct)
       .map((a) => a.defIndex);
-
-    // Reset only the wrong answers
-    setAnswers((prev) =>
-      prev.map((a) =>
-        wrongIndices.includes(a.defIndex)
-          ? { ...a, answeredWordIdx: null, correct: null }
-          : a,
-      ),
-    );
     setActiveDefIndices(wrongIndices);
-    // Reshuffle only wrong words
-    setShuffledWords(shuffle(wrongIndices));
-    setSelectedDef(null);
-    setSelectedWord(null);
+    shuffledWords.current = shuffle(wrongIndices);
     setPhase('matching');
-  }, [answers, activeDefIndices]);
+    setModeKey((k) => k + 1);
+  }, [summaryAnswers]);
 
   const handleRetryAll = useCallback(() => {
     const allIndices = vocab.map((_, i) => i);
-    setAnswers(vocab.map((_, i) => ({ defIndex: i, answeredWordIdx: null, correct: null })));
     setActiveDefIndices(allIndices);
-    setShuffledWords(shuffle(allIndices));
-    setSelectedDef(null);
-    setSelectedWord(null);
+    shuffledWords.current = shuffle(allIndices);
     setPhase('matching');
+    setModeKey((k) => k + 1);
   }, [vocab]);
 
   const handleFinish = useCallback(() => {
-    const correctCount = answers.filter(
-      (a) => activeDefIndices.includes(a.defIndex) && a.correct,
-    ).length;
+    try {
+      localStorage.removeItem(storageModeKey);
+    } catch {}
+    const correctCount = summaryAnswers.filter((a) => a.correct).length;
     onFinish({ matchedCount: correctCount, totalCount: vocab.length });
-  }, [onFinish, answers, activeDefIndices, vocab.length]);
+  }, [onFinish, summaryAnswers, vocab.length, storageModeKey]);
 
-  // Build the summary answers only for the current active round
-  const summaryAnswers = answers.filter((a) => activeDefIndices.includes(a.defIndex));
+  const modeSubtitles: Record<InteractionMode, string> = {
+    'multiple-choice': '看定義，選出對應的語詞',
+    'drag-drop': '拖拉語詞卡片到對應的定義欄位',
+  };
 
   return (
     <div className="flex flex-col min-h-full bg-amber-50">
       <StepHeader
         title="語詞定義配對"
-        subtitle={
-          phase === 'matching'
-            ? '點選左邊的定義，再點選右邊對應的語詞，完成配對'
-            : '作答結果'
-        }
+        subtitle={phase === 'summary' ? '作答結果' : modeSubtitles[mode]}
       />
 
       <div className="flex-1 overflow-auto py-6">
@@ -532,17 +703,27 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
             onFinish={handleFinish}
           />
         ) : (
-          <MatchingExercise
-            vocab={vocab}
-            activeDefIndices={activeDefIndices}
-            shuffledWords={shuffledWords}
-            answers={answers}
-            selectedDef={selectedDef}
-            selectedWord={selectedWord}
-            onDefClick={handleDefClick}
-            onWordClick={handleWordClick}
-            answeredCount={answeredCount}
-          />
+          <>
+            <ModeSwitcher current={mode} onChange={handleModeChange} />
+
+            {mode === 'multiple-choice' && (
+              <MultipleChoiceMode
+                key={`mc-${modeKey}`}
+                vocab={vocab}
+                activeDefIndices={activeDefIndices}
+                onAllDone={handleAllDone}
+              />
+            )}
+            {mode === 'drag-drop' && (
+              <DragDropMode
+                key={`dd-${modeKey}`}
+                vocab={vocab}
+                activeDefIndices={activeDefIndices}
+                shuffledWords={shuffledWords.current}
+                onAllDone={handleAllDone}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
