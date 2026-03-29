@@ -54,6 +54,36 @@ export async function speakText(text: string): Promise<void> {
   await _speakViaBackend(text);
 }
 
+/**
+ * Progress info emitted during speakTextWithProgress playback.
+ */
+export interface TtsProgressInfo {
+  /** Sentence currently playing (0-based) */
+  sentenceIndex: number;
+  /** Total number of sentences */
+  totalSentences: number;
+  /** Overall progress 0–1 based on sentences completed + within-sentence position */
+  progress: number;
+}
+
+/**
+ * Like speakText, but fires `onProgress` on each sentence start and on
+ * `timeupdate` within each sentence so callers can render a progress bar.
+ *
+ * @param text - Text to synthesise.
+ * @param onProgress - Called with progress info as playback advances.
+ * @returns Promise that resolves when all sentences finish, or rejects on fatal error.
+ */
+export async function speakTextWithProgress(
+  text: string,
+  onProgress: (info: TtsProgressInfo) => void,
+): Promise<void> {
+  if (!text.trim()) return;
+  cancelTts();
+  _cancelRequested = false;
+  await _speakViaBackendWithProgress(text, onProgress);
+}
+
 // Exported for testing only
 export const _testInternals = {
   reset() {
@@ -124,6 +154,30 @@ function _splitSentences(text: string): string[] {
 // Private: backend sequential playback
 // ---------------------------------------------------------------------------
 
+async function _fetchAudioUrl(sentence: string): Promise<string> {
+  let audioUrl = _urlCache.get(sentence);
+  if (!audioUrl) {
+    const response = await fetch(`${API_BASE}/api/tts/synthesize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: sentence }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`TTS backend responded ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    if (blob.size === 0) {
+      throw new Error('TTS backend returned empty audio');
+    }
+
+    audioUrl = URL.createObjectURL(blob);
+    _urlCache.set(sentence, audioUrl);
+  }
+  return audioUrl;
+}
+
 async function _speakViaBackend(text: string): Promise<void> {
   const cleaned = _cleanForTts(text);
   if (!cleaned) return;
@@ -135,39 +189,56 @@ async function _speakViaBackend(text: string): Promise<void> {
     if (_cancelRequested) break;
     if (!sentence.trim()) continue;
 
-    // Check URL cache first
-    let audioUrl = _urlCache.get(sentence);
+    const audioUrl = await _fetchAudioUrl(sentence);
+    if (_cancelRequested) break;
+    await _playSingleAudio(audioUrl);
+  }
+}
 
-    if (!audioUrl) {
-      const response = await fetch(`${API_BASE}/api/tts/synthesize`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: sentence }),
-      });
+async function _speakViaBackendWithProgress(
+  text: string,
+  onProgress: (info: TtsProgressInfo) => void,
+): Promise<void> {
+  const cleaned = _cleanForTts(text);
+  if (!cleaned) return;
 
-      if (!response.ok) {
-        throw new Error(`TTS backend responded ${response.status}`);
-      }
+  const sentences = _splitSentences(cleaned);
+  if (sentences.length === 0) return;
 
-      const blob = await response.blob();
-      if (blob.size === 0) {
-        throw new Error('TTS backend returned empty audio');
-      }
+  const total = sentences.length;
 
-      audioUrl = URL.createObjectURL(blob);
-      _urlCache.set(sentence, audioUrl);
-    }
+  for (let i = 0; i < total; i++) {
+    if (_cancelRequested) break;
+    const sentence = sentences[i];
+    if (!sentence.trim()) continue;
 
+    // Emit start of this sentence
+    onProgress({ sentenceIndex: i, totalSentences: total, progress: i / total });
+
+    const audioUrl = await _fetchAudioUrl(sentence);
     if (_cancelRequested) break;
 
-    await _playSingleAudio(audioUrl);
+    await _playSingleAudio(audioUrl, (currentTime, duration) => {
+      const withinSentence = duration > 0 ? currentTime / duration : 0;
+      const progress = (i + withinSentence) / total;
+      onProgress({ sentenceIndex: i, totalSentences: total, progress });
+    });
+  }
+
+  if (!_cancelRequested) {
+    // Emit 100% when all sentences finished
+    onProgress({ sentenceIndex: total - 1, totalSentences: total, progress: 1 });
   }
 }
 
 /**
  * Play a single audio URL and wait for it to finish.
+ * Optional `onTimeUpdate` fires with (currentTime, duration) during playback.
  */
-function _playSingleAudio(audioUrl: string): Promise<void> {
+function _playSingleAudio(
+  audioUrl: string,
+  onTimeUpdate?: (currentTime: number, duration: number) => void,
+): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     if (_cancelRequested) {
       resolve();
@@ -176,6 +247,12 @@ function _playSingleAudio(audioUrl: string): Promise<void> {
 
     const audio = new Audio(audioUrl);
     _currentAudio = audio;
+
+    if (onTimeUpdate) {
+      audio.ontimeupdate = () => {
+        onTimeUpdate(audio.currentTime, audio.duration || 0);
+      };
+    }
 
     audio.onended = () => {
       _currentAudio = null;
