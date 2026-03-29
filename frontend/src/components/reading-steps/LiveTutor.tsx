@@ -1327,10 +1327,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   {/* Paragraph text — STATIC: text and colors never change during reading.
                       Only show plain text at all times. Background highlight is on the container above. */}
                   <p
-                    className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
+                    className={`text-2xl lg:text-3xl leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
                       status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
                     }`}
-                    style={{ fontSize: fontSizePx }}
                   >
                     {status === 'locked' ? (
                       <span className="blur-sm select-none">{zhuyinLines ? zhuyinLines[idx] : line}</span>
