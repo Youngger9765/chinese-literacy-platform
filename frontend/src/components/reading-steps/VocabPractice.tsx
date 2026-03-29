@@ -8,7 +8,7 @@ import ZhuyinPhoneticGame from './ZhuyinPhoneticGame';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import RadicalDecomposition from './RadicalDecomposition';
-import { getDecomposition } from '../../data/radicals';
+import { getDecomposition, initGeneratedDecompositions } from '../../data/radicals';
 import DictionaryPanel from '../dictionary/DictionaryPanel';
 import FillInBlankExercise from './FillInBlankExercise';
 
@@ -144,6 +144,11 @@ function CharCard({ label, isSuggested, isPracticed, animDelay, onClick }: CharC
 /* ================================================================ */
 
 const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish, onBack }) => {
+  // Load generated decomposition data so getDecomposition() covers 2700+ chars
+  const [decompReady, setDecompReady] = useState(false);
+  useEffect(() => {
+    initGeneratedDecompositions().then(() => setDecompReady(true));
+  }, []);
   const storageKey = `vocabPractice_progress_${story.id}`;
   const loadSaved = () => {
     try {
@@ -327,8 +332,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const currentDone = activeTab === 'stroke' ? strokeDone : activeTab === 'pronunciation' ? pronounceDone : false;
   // 'zhuyin' and 'fillinblank' tabs are handled separately above; these vars only matter for stroke/pronunciation
 
-  // Characters for which we have radical decomposition data
-  const charsWithRadical = displayChars.filter(ch => getDecomposition(ch) !== null);
+  // Characters for which we have radical decomposition data (re-filter after generated data loads)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const charsWithRadical = useMemo(() => displayChars.filter(ch => getDecomposition(ch) !== null), [displayChars, decompReady]);
 
   return (
     <div
