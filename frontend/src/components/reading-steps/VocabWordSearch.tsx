@@ -184,7 +184,7 @@ function cellKey(pos: CellPos): string {
 }
 
 // ---------------------------------------------------------------------------
-// Timer hook
+// Timer hook (kept for elapsed tracking; not displayed in UI)
 // ---------------------------------------------------------------------------
 
 function useTimer(running: boolean): number {
@@ -273,13 +273,9 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
 
   const [foundWords, setFoundWords] = useState<Set<string>>(() => new Set(savedRef.current?.foundWords ?? []));
   const [highlightedCells, setHighlightedCells] = useState<Set<string>>(() => {
-    // Restore highlighted cells from saved found words
     const saved = savedRef.current?.foundWords ?? [];
     if (saved.length === 0) return new Set<string>();
-    const cells = new Set<string>();
-    // We can't restore exact cell positions here since grid is regenerated randomly
-    // Just restore found words state; cells will be re-highlighted as words are re-found
-    return cells;
+    return new Set<string>();
   });
   const [dragCells, setDragCells] = useState<Set<string>>(new Set());
   const [dragStart, setDragStart] = useState<CellPos | null>(null);
@@ -515,29 +511,47 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
   const cellSizePx = Math.max(48, Math.min(64, Math.floor((Math.min(520, window.innerWidth - 32)) / size)));
   const fontSizePx = Math.max(20, Math.floor(cellSizePx * 0.62));
 
+  // Sort word list: unfound words first, found words at bottom
+  const sortedPlacedWords = [...placedWords].sort((a, b) => {
+    const aFound = foundWords.has(a.word) ? 1 : 0;
+    const bFound = foundWords.has(b.word) ? 1 : 0;
+    return aFound - bFound;
+  });
+
+  // Red border overlays for found words — absolutely positioned over the grid
+  const BORDER_INSET = 3; // px inset from cell edge for a tighter look
+  const foundWordOverlays = placedWords
+    .filter((pw) => foundWords.has(pw.word))
+    .map((pw) => {
+      const wordLen = [...pw.word].length;
+      const x = pw.col * cellSizePx + BORDER_INSET;
+      const y = pw.row * cellSizePx + BORDER_INSET;
+      const w = pw.direction === 'horizontal'
+        ? wordLen * cellSizePx - BORDER_INSET * 2
+        : cellSizePx - BORDER_INSET * 2;
+      const h = pw.direction === 'vertical'
+        ? wordLen * cellSizePx - BORDER_INSET * 2
+        : cellSizePx - BORDER_INSET * 2;
+      return { word: pw.word, x, y, w, h };
+    });
+
+  const gridTotalPx = size * cellSizePx;
+
   return (
     <div className="flex flex-col gap-4 px-2 py-4 select-none">
-      {/* Header — larger and more prominent */}
-      <div className="flex items-center justify-between px-2">
-        <div>
-          <h2 className="text-lg font-black text-gray-800">語詞複習</h2>
-          <p className="text-sm text-gray-500 mt-0.5 font-medium">
-            找出
-            <span className="font-black text-indigo-700 mx-1">{foundWords.size}</span>
-            /
-            <span className="mx-1">{placedWords.length}</span>
-            個語詞
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 text-indigo-700 font-mono font-black text-base bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          {formatTime(elapsed)}
-        </div>
+      {/* Header */}
+      <div className="px-2">
+        <h2 className="text-lg font-black text-gray-800">語詞複習</h2>
+        <p className="text-sm text-gray-500 mt-0.5 font-medium">
+          找出
+          <span className="font-black text-indigo-700 mx-1">{foundWords.size}</span>
+          /
+          <span className="mx-1">{placedWords.length}</span>
+          個語詞
+        </p>
       </div>
 
-      {/* Progress bar — thicker and more visible */}
+      {/* Progress bar */}
       <div className="px-2">
         <div className="h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
           <div
@@ -565,9 +579,10 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
       )}
 
       <div className="flex flex-col xl:flex-row gap-6 items-center xl:items-start justify-center">
-        {/* Grid */}
+        {/* Grid with red border overlays for found words */}
         <div
           className="flex-shrink-0 touch-none cursor-crosshair rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm"
+          style={{ position: 'relative', width: gridTotalPx, height: gridTotalPx }}
           role="grid"
           aria-label="語詞方格，拖選字元以找出語詞"
           onMouseDown={onMouseDown}
@@ -607,15 +622,35 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
               ))}
             </tbody>
           </table>
+
+          {/* Red rounded borders drawn over found word cells */}
+          {foundWordOverlays.map((ov) => (
+            <div
+              key={ov.word}
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                left: ov.x,
+                top: ov.y,
+                width: ov.w,
+                height: ov.h,
+                border: '2.5px solid #ef4444',
+                borderRadius: 10,
+                pointerEvents: 'none',
+                boxSizing: 'border-box',
+                zIndex: 10,
+              }}
+            />
+          ))}
         </div>
 
-        {/* Word list — more prominent */}
+        {/* Word list — unfound at top, found at bottom */}
         <div className="flex flex-col gap-3 w-full xl:w-52 max-w-sm mx-auto xl:mx-0">
           <h3 className="text-sm font-black text-gray-600 uppercase tracking-wide px-1">
             待找語詞
           </h3>
           <div className="flex flex-wrap xl:flex-col gap-2 justify-center xl:justify-start">
-            {placedWords.map((pw) => {
+            {sortedPlacedWords.map((pw) => {
               const found = foundWords.has(pw.word);
               const vocabItem = story.vocabulary?.find((v) => v.word === pw.word);
               return (
