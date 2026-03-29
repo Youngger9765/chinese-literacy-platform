@@ -390,6 +390,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const activeLineRef = useRef<HTMLDivElement>(null);
   // Per-paragraph refs for scroll-to behavior from side panel
   const paragraphRefsRef = useRef<Array<HTMLDivElement | null>>([]);
+  // Ref to the main diff section in the right panel (for "查看詳細" scroll-to)
+  const diffSectionRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   // Ref to the currently playing TTS audio element.
   const utteranceRef = useRef<HTMLAudioElement | null>(null);
@@ -1621,11 +1623,17 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                             <span className="text-gray-400">漏字 {summary.missingCount} 字</span>
                           )}
                         </div>
-                        {/* Diff display */}
-                        {paraResult && paraResult.diffTokens.length > 0 && (
-                          <div className="bg-white rounded-lg border border-gray-200 px-2 py-2">
-                            <DiffDisplay tokens={paraResult.diffTokens} showLegend={false} className="text-sm" />
-                          </div>
+                        {/* 查看詳細按鈕 — scroll to main diff section */}
+                        {paraResult && paraResult.diffTokens.length > 0 && idx === currentLineIndex && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              diffSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }}
+                            className="text-xs text-accent hover:text-accent-hover font-medium underline underline-offset-2"
+                          >
+                            查看詳細 ↓
+                          </button>
                         )}
                         {/* AI feedback */}
                         {summary.feedback && (
@@ -1654,7 +1662,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
           {/* Diff result for current paragraph — shown after evaluation */}
           {!isSessionActive && rightPanelDiffTokens && (
-            <div className="space-y-2">
+            <div ref={diffSectionRef} className="space-y-2">
               <div className="flex items-center gap-2">
                 <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">逐字比對（第 {currentLineIndex + 1} 段）</p>
                 {paragraphSummary?.geminiPending && (
