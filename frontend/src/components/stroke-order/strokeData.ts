@@ -18,7 +18,9 @@ const SPEED_REF_LENGTH = 520; // median length of first stroke of 你
 const NO_SVG_LIST = [
   '吔','姍','媼','嬤','履','搧','枴','椏','欓','汙',
   '溼','漥','痠','礫','粄','粿','綰','蓆','襬','譟',
-  '踖','踧','鎚','鏗','鏘','陳','颺','齒',
+  '踖','踧','鎚','鏗','鏘','颺','齒',
+  // 譁 (U+8B41) — not in makemeahanzi; appears in 譁眾取寵、一片譁然
+  '譁',
 ];
 
 export function hasStrokeData(char: string): boolean {
