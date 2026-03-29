@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -7,8 +7,8 @@ import {
   StudentAssignmentResponse,
   AssignmentApiError,
 } from '../../services/assignmentApi';
+import { fetchLearningSessions, type LearningSummary } from '../../services/learningApi';
 import { loadActiveSession } from '../../services/api';
-import ReadingGoalsBadge from '../../components/ui/ReadingGoalsBadge';
 
 const STEP_NUMBER_TO_PATH: Record<number, string> = {
   1: 'intro',
@@ -19,6 +19,29 @@ const STEP_NUMBER_TO_PATH: Record<number, string> = {
   6: 'full-reading',
   7: 'report',
 };
+
+const TOTAL_ASSIGNMENT_STEPS = 7;
+
+function clampStep(step: number): number {
+  if (!Number.isFinite(step)) return 1;
+  return Math.min(TOTAL_ASSIGNMENT_STEPS, Math.max(1, Math.floor(step)));
+}
+
+function buildLatestSessionMap(items: LearningSummary[]): Record<string, LearningSummary> {
+  const latestByStory: Record<string, LearningSummary> = {};
+  items.forEach((item) => {
+    if (!item.story_slug) return;
+    const existing = latestByStory[item.story_slug];
+    if (!existing) {
+      latestByStory[item.story_slug] = item;
+      return;
+    }
+    if (new Date(item.started_at).getTime() > new Date(existing.started_at).getTime()) {
+      latestByStory[item.story_slug] = item;
+    }
+  });
+  return latestByStory;
+}
 
 type FilterTab = 'pending' | 'completed' | 'all';
 
@@ -37,14 +60,69 @@ const MyAssignments: React.FC = () => {
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterTab>('pending');
   const [startingId, setStartingId] = useState<number | null>(null);
+  const [sessionByStorySlug, setSessionByStorySlug] = useState<Record<string, LearningSummary>>({});
+
+  const activeSession = useMemo(
+    () => (user ? loadActiveSession(String(user.id)) : null),
+    [user],
+  );
+
+  const getAssignmentStorySlug = (a: StudentAssignmentResponse): string | null =>
+    a.story_slug ?? null;
+
+  const getLinkedSession = (a: StudentAssignmentResponse): LearningSummary | null => {
+    const storySlug = getAssignmentStorySlug(a);
+    if (!storySlug) return null;
+    return sessionByStorySlug[storySlug] ?? null;
+  };
+
+  const getEstimatedCurrentStep = (a: StudentAssignmentResponse): number => {
+    const linkedSession = getLinkedSession(a);
+    if (linkedSession) {
+      return clampStep(linkedSession.current_step);
+    }
+    const storySlug = getAssignmentStorySlug(a);
+    if (activeSession && storySlug && activeSession.storyId === storySlug) {
+      return clampStep(activeSession.currentStep);
+    }
+    return 1;
+  };
 
   const loadAssignments = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
     setError('');
     try {
-      const data = await getMyAssignments(token);
-      setAssignments(data);
+      const assignmentData = await getMyAssignments(token);
+      const storySlugs = Array.from(
+        new Set(
+          assignmentData
+            .map((a) => a.story_slug)
+            .filter((slug): slug is string => Boolean(slug)),
+        ),
+      );
+
+      const sessionResponses = await Promise.allSettled(
+        storySlugs.map((storySlug) =>
+          fetchLearningSessions(token, {
+            // Fetch only latest session for this assignment story key.
+            limit: 1,
+            status: 'in_progress,completed,abandoned',
+            story_slug: storySlug,
+          }),
+        ),
+      );
+
+      const sessionItems = sessionResponses
+        .filter(
+          (
+            r,
+          ): r is PromiseFulfilledResult<{ items: LearningSummary[]; total: number }> =>
+            r.status === 'fulfilled',
+        )
+        .flatMap((r) => r.value.items);
+      setAssignments(assignmentData);
+      setSessionByStorySlug(buildLatestSessionMap(sessionItems));
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -153,7 +231,7 @@ const MyAssignments: React.FC = () => {
           disabled={startingId === a.assignment_id}
           className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
         >
-          {startingId === a.assignment_id ? '啟動中...' : '開始作業'}
+          {startingId === a.assignment_id ? '啟動中...' : '開始'}
         </button>
       );
     }
@@ -176,10 +254,13 @@ const MyAssignments: React.FC = () => {
             );
             // story_id is set for YAML texts; text_id for DB texts
             const textKey = a.story_id ?? a.text_id;
-            // Resume from last saved step if available
-            const saved = user ? loadActiveSession(String(user.id)) : null;
-            const savedStep = saved && saved.storyId === String(textKey) ? STEP_NUMBER_TO_PATH[saved.currentStep] : null;
-            navigate(`/learn/${textKey}/${savedStep || 'intro'}`);
+            // Resume from last saved step if available, otherwise use latest server step.
+            const currentStep = getEstimatedCurrentStep(a);
+            const serverStepPath = STEP_NUMBER_TO_PATH[currentStep] ?? 'intro';
+            const savedStep = activeSession && activeSession.storyId === String(textKey)
+              ? STEP_NUMBER_TO_PATH[clampStep(activeSession.currentStep)]
+              : null;
+            navigate(`/learn/${textKey}/${savedStep || serverStepPath}`);
           }}
           className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
         >
@@ -272,91 +353,80 @@ const MyAssignments: React.FC = () => {
         ) : (
           /* Assignment cards */
           <div className="space-y-3">
-            {filteredAssignments.map((a) => (
-              <div
-                key={a.assignment_id}
-                className="bg-white rounded-xl border border-gray-200 shadow-sm p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm font-medium text-gray-900 truncate">
-                        {a.title || a.story_title}
-                      </h3>
-                      {statusBadge(a.status)}
-                    </div>
-
-                    {a.title && a.title !== a.story_title && (
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        課文：{a.story_title}
-                      </p>
-                    )}
-
-                    <div className="flex items-center gap-3 mt-2 flex-wrap">
-                      <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-accent-bg text-accent">
-                        {a.classroom_name}
-                      </span>
-
-                      {a.due_date && (
-                        <span
-                          className={`text-xs ${
-                            isOverdue(a.due_date) ? 'text-red-600 font-medium' : 'text-gray-500'
-                          }`}
-                        >
-                          截止：{formatDate(a.due_date)}
-                          {isOverdue(a.due_date) && (
-                            <span className="ml-1 inline-block px-1 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
-                              已逾期
-                            </span>
-                          )}
-                        </span>
-                      )}
-
-                      {a.score != null && (
-                        <span className="text-xs text-gray-700 font-medium">
-                          分數：{Math.round(a.score)}%
-                        </span>
-                      )}
-
-                      {a.submitted_at && (
-                        <span className="text-xs text-gray-400">
-                          提交於 {formatDate(a.submitted_at)}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Reading goals badge (Issue #414) */}
-                    <div className="mt-2">
-                      <ReadingGoalsBadge
-                        goals={{
-                          effectiveCpm: a.effective_cpm,
-                          effectiveAccuracy: a.effective_accuracy,
-                          difficultyLabel: a.difficulty_label,
-                          isCustom: a.target_cpm != null || a.target_accuracy != null,
-                        }}
-                        variant="compact"
-                      />
-                    </div>
-
-                    {/* Issue #424: per-student teacher feedback */}
-                    {a.teacher_feedback && (
-                      <div className="mt-2 px-2.5 py-2 bg-purple-50 border border-purple-100 rounded-lg">
-                        <p className="text-xs font-medium text-purple-700 mb-0.5">老師評語</p>
-                        <p className="text-xs text-gray-700">{a.teacher_feedback}</p>
+            {filteredAssignments.map((a) => {
+              return (
+                <div
+                  key={a.assignment_id}
+                  className="bg-white rounded-xl border border-gray-200 shadow-sm p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                          {a.title || a.story_title}
+                        </h3>
+                        {statusBadge(a.status)}
                       </div>
-                    )}
 
-                    {a.description && (
-                      <p className="text-xs text-gray-500 mt-1.5 line-clamp-2">
-                        {a.description}
-                      </p>
-                    )}
+                      {a.title && a.title !== a.story_title && (
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          課文：{a.story_title}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-3 mt-2 flex-wrap">
+                        <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-accent-bg text-accent">
+                          {a.classroom_name}
+                        </span>
+
+                        {a.due_date && (
+                          <span
+                            className={`text-xs ${
+                              isOverdue(a.due_date) ? 'text-red-600 font-medium' : 'text-gray-500'
+                            }`}
+                          >
+                            截止：{formatDate(a.due_date)}
+                            {isOverdue(a.due_date) && (
+                              <span className="ml-1 inline-block px-1 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                                已逾期
+                              </span>
+                            )}
+                          </span>
+                        )}
+
+                        {a.score != null && (
+                          <span className="text-xs text-gray-700 font-medium">
+                            分數：{Math.round(a.score)}%
+                          </span>
+                        )}
+
+                        {a.submitted_at && (
+                          <span className="text-xs text-gray-400">
+                            提交於 {formatDate(a.submitted_at)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Issue #424: per-student teacher feedback */}
+                      {a.teacher_feedback && (
+                        <div className="mt-2 px-2.5 py-2 bg-purple-50 border border-purple-100 rounded-lg">
+                          <p className="text-xs font-medium text-purple-700 mb-0.5">老師評語</p>
+                          <p className="text-xs text-gray-700">{a.teacher_feedback}</p>
+                        </div>
+                      )}
+
+                      {a.description && (
+                        <p className="text-xs text-gray-500 mt-1.5 line-clamp-2">
+                          {a.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="shrink-0">{actionButton(a)}</div>
                   </div>
-
-                  <div className="shrink-0">{actionButton(a)}</div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

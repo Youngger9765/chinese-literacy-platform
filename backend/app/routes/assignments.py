@@ -73,6 +73,15 @@ def _resolve_title_for_assignment(assignment: Assignment, db: Session) -> str:
     return "(Unknown)"
 
 
+def _resolve_story_slug_for_assignment(assignment: Assignment) -> str | None:
+    """Return the LearningSession story_slug key used for this assignment."""
+    if assignment.story_id is not None:
+        return assignment.story_id
+    if assignment.text_id is not None:
+        return str(assignment.text_id)
+    return None
+
+
 def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentResponse:
     """Convert an Assignment ORM object to an AssignmentResponse."""
     story_title = _resolve_title_for_assignment(assignment, db)
@@ -214,6 +223,7 @@ def get_my_assignments(
                 assignment_id=assignment.id,
                 story_id=assignment.story_id,
                 text_id=assignment.text_id,
+                story_slug=_resolve_story_slug_for_assignment(assignment),
                 story_title=story_title,
                 title=assignment.title,
                 description=assignment.description,
@@ -269,6 +279,7 @@ def get_my_assignment_detail(
         assignment_id=assignment.id,
         story_id=assignment.story_id,
         text_id=assignment.text_id,
+        story_slug=_resolve_story_slug_for_assignment(assignment),
         story_title=story_title,
         title=assignment.title,
         description=assignment.description,
@@ -738,6 +749,7 @@ def submit_assignment(
             assignment_id=assignment.id,
             story_id=assignment.story_id,
             text_id=assignment.text_id,
+            story_slug=_resolve_story_slug_for_assignment(assignment),
             story_title=story_title,
             title=assignment.title,
             description=assignment.description,
@@ -798,6 +810,7 @@ def submit_assignment(
         assignment_id=assignment.id,
         story_id=assignment.story_id,
         text_id=assignment.text_id,
+        story_slug=_resolve_story_slug_for_assignment(assignment),
         story_title=story_title,
         title=assignment.title,
         description=assignment.description,

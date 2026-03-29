@@ -79,6 +79,10 @@ def list_my_sessions(
         None,
         description="Comma-separated statuses to filter by, e.g. 'in_progress' or 'completed,abandoned'",
     ),
+    story_slug: Optional[str] = Query(
+        None,
+        description="Filter by a specific story_slug",
+    ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -90,6 +94,8 @@ def list_my_sessions(
         statuses = [s.strip() for s in status.split(",") if s.strip()]
         if statuses:
             query = query.filter(LearningSession.status.in_(statuses))
+    if story_slug:
+        query = query.filter(LearningSession.story_slug == story_slug)
     total = query.count()
     items = (
         query

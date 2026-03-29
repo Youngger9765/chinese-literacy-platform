@@ -108,11 +108,11 @@ export function withScreenshotOnFailure(
   failureName: string,
   fn: (args: { page: Page; request: unknown; [key: string]: unknown }) => Promise<void>
 ): (args: { page: Page; request: unknown; [key: string]: unknown }) => Promise<void> {
-  return async (args) => {
+  return async ({ page, request }) => {
     try {
-      await fn(args);
+      await fn({ page, request });
     } catch (err) {
-      await takeScreenshotOnFailure(args.page, failureName);
+      await takeScreenshotOnFailure(page, failureName);
       throw err;
     }
   };
