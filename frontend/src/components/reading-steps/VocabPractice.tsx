@@ -495,8 +495,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               {currentChars.map((ch, idx) => {
                 const isSuggested = needPracticeSet.has(ch);
                 const isPracticed = currentPracticedSet.has(ch);
-                const hasRadical = activeTab === 'stroke' && getDecomposition(ch) !== null;
-                const isRadicalOpen = radicalChar === ch;
+                const isRadicalOpen = false; // radical button removed — now a separate tab
                 return (
                   <div key={ch} className="flex flex-col gap-1">
                     <button
@@ -534,25 +533,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                       </span>
                     </button>
 
-                    {/* Radical decomposition button — placed below the card for discoverability */}
-                    {hasRadical && (
-                      <button
-                        onClick={() => handleRadicalToggle(ch)}
-                        className={[
-                          'w-full py-1 rounded-lg border text-[10px] font-semibold transition-all active:scale-95 flex items-center justify-center gap-1',
-                          isRadicalOpen
-                            ? 'bg-[#5B4FC4] border-[#5B4FC4] text-white'
-                            : 'bg-[#5B4FC4]/10 border-[#5B4FC4]/30 text-[#5B4FC4] hover:bg-[#5B4FC4]/20',
-                        ].join(' ')}
-                        aria-label={`查看「${ch}」的部件拆解`}
-                        aria-expanded={isRadicalOpen}
-                      >
-                        <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" />
-                        </svg>
-                        部件
-                      </button>
-                    )}
+                    {/* Radical button removed — 部件學習 is now a separate tab */}
                   </div>
                 );
               })}
@@ -575,31 +556,10 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                 </div>
               </>
             )}
-            {charsWithRadical.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <span className="px-1.5 py-0.5 bg-[#5B4FC4]/10 border border-[#5B4FC4]/30 text-[#5B4FC4] rounded text-[9px] font-semibold">部件</span>
-                字卡下方可查看部件拆解
-              </div>
-            )}
+            {/* 部件 legend removed — now a separate tab */}
           </div>
 
-          {/* Radical decomposition panel */}
-          {radicalChar && (
-            <div className="animate-[fadeIn_0.2s_ease-in]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-gray-700">
-                  「{radicalChar}」的部件學習
-                </span>
-                <button
-                  onClick={() => setRadicalChar(null)}
-                  className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded"
-                >
-                  收起
-                </button>
-              </div>
-              <RadicalDecomposition char={radicalChar} />
-            </div>
-          )}
+          {/* Radical panel removed — now a separate tab */}
 
           {/* Usage hint */}
           {currentChars.length > 0 && (
