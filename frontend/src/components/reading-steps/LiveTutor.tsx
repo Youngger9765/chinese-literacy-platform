@@ -10,7 +10,7 @@ import FontSizeControl, { useFontSize } from '../ui/FontSizeControl';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
 import RecordingButton from '../recording/RecordingButton';
-import ParagraphProgress, { ParagraphStatus } from './ParagraphProgress';
+import { ParagraphStatus } from './ParagraphProgress';
 import { evaluateReading } from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -379,6 +379,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   );
   // Celebration animation: shows briefly when a new paragraph is unlocked
   const [celebratingIndex, setCelebratingIndex] = useState<number | null>(null);
+  // Side panel: which completed paragraph is expanded to show diff details
+  const [expandedParagraph, setExpandedParagraph] = useState<number | null>(null);
 
   const isAdvancingRef = useRef(false);
   const isDraggingRef = useRef(false);
@@ -386,6 +388,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const dragStartWidthRef = useRef(320);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
+  // Per-paragraph refs for scroll-to behavior from side panel
+  const paragraphRefsRef = useRef<Array<HTMLDivElement | null>>([]);
   const recognitionRef = useRef<any>(null);
   // Ref to the currently playing TTS audio element.
   const utteranceRef = useRef<HTMLAudioElement | null>(null);
@@ -1163,19 +1167,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
         </div>
 
-        {/* Paragraph progress bar */}
-        <ParagraphProgress
-          statuses={lineStatuses}
-          currentIndex={currentLineIndex}
-          onSelectParagraph={(idx) => {
-            // Only allow navigating to completed or current paragraphs (not locked)
-            if (lineStatuses[idx] === 'locked') return;
-            stopSession();
-            setRetryCount(0);
-            setCurrentLineIndex(idx);
-          }}
-        />
-
         <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8 lg:p-16'} overflow-y-auto custom-scrollbar`}>
           <div className="max-w-3xl mx-auto space-y-20">
             {story.content.map((line, idx) => {
@@ -1185,7 +1176,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               return (
                 <div
                   key={idx}
-                  ref={idx === currentLineIndex ? activeLineRef : null}
+                  ref={(el) => {
+                    paragraphRefsRef.current[idx] = el;
+                    if (idx === currentLineIndex && el) {
+                      (activeLineRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+                    }
+                  }}
                   className={`transition-all duration-700 rounded-2xl px-8 py-12 border ${
                     isCelebrating
                       ? 'bg-emerald-50 border-emerald-400 shadow-[0_0_40px_rgba(16,185,129,0.25)] scale-[1.04]'
@@ -1490,18 +1486,160 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         </div>
 
         {/* Content */}
-        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2 custom-scrollbar">
 
-          {/* Progress info */}
-          <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">朗讀進度</p>
-            <p className="text-sm font-bold text-gray-700">
-              第 {currentLineIndex + 1} 段 / 共 {story.content.length} 段
-            </p>
-            <p className="text-xs text-gray-500">
-              已完成 {completedParagraphs.size} 段
-              {retryCount > 0 && <span className="ml-2 text-amber-500">重試 {retryCount} 次</span>}
-            </p>
+          {/* Per-paragraph progress list — replaces the progress bar */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">朗讀進度</p>
+              <span className="text-[10px] text-gray-400 tabular-nums">
+                {completedParagraphs.size} / {story.content.length} 段
+              </span>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {story.content.map((_, idx) => {
+                const status = lineStatuses[idx];
+                const summary = paragraphSummaries[idx];
+                // Get the best diff tokens for this paragraph from lineResults
+                const paraResult = (() => {
+                  for (let i = lineResults.length - 1; i >= 0; i--) {
+                    if (lineResults[i].lineIndex === idx && lineResults[i].diffTokens?.length > 0) {
+                      return lineResults[i];
+                    }
+                  }
+                  return null;
+                })();
+                const isExpanded = expandedParagraph === idx;
+                const isCurrentlyActive = idx === currentLineIndex && (isSessionActive || isPreparing);
+
+                return (
+                  <div key={idx}>
+                    <button
+                      onClick={() => {
+                        // Scroll to the paragraph in the text area
+                        const el = paragraphRefsRef.current[idx];
+                        if (el) {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        // Toggle expand for completed paragraphs
+                        if (status === 'completed' && summary) {
+                          setExpandedParagraph(prev => prev === idx ? null : idx);
+                        }
+                        // Navigate to the paragraph if it's not locked
+                        if (status !== 'locked' && idx !== currentLineIndex) {
+                          stopSession();
+                          setRetryCount(0);
+                          setCurrentLineIndex(idx);
+                        }
+                      }}
+                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors ${
+                        status === 'locked'
+                          ? 'cursor-default'
+                          : 'hover:bg-gray-50 cursor-pointer'
+                      } ${idx === currentLineIndex ? 'bg-accent/5' : ''}`}
+                    >
+                      {/* Status icon */}
+                      <span className="shrink-0">
+                        {status === 'completed' ? (
+                          <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </span>
+                        ) : status === 'current' ? (
+                          isCurrentlyActive ? (
+                            <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                            </span>
+                          ) : (
+                            <span className="w-5 h-5 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center">
+                              <svg className="w-2.5 h-2.5 text-accent" fill="currentColor" viewBox="0 0 24 24">
+                                <polygon points="5,3 19,12 5,21" />
+                              </svg>
+                            </span>
+                          )
+                        ) : (
+                          <span className="w-5 h-5 rounded-full border-2 border-gray-200 flex items-center justify-center shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                          </span>
+                        )}
+                      </span>
+
+                      {/* Label */}
+                      <span className={`text-xs font-bold flex-1 ${
+                        status === 'completed' ? 'text-gray-700' :
+                        status === 'current' ? 'text-accent' :
+                        'text-gray-300'
+                      }`}>
+                        第 {idx + 1} 段
+                      </span>
+
+                      {/* Score badge for completed */}
+                      {status === 'completed' && summary && (
+                        <span className={`text-[10px] font-bold tabular-nums shrink-0 ${
+                          summary.tier === 1 ? 'text-emerald-600' :
+                          summary.tier === 2 ? 'text-blue-500' :
+                          'text-amber-500'
+                        }`}>
+                          {Math.round(summary.matchRate * 100)}%
+                          {summary.geminiPending && <span className="ml-0.5 text-blue-400 animate-pulse">…</span>}
+                        </span>
+                      )}
+
+                      {/* In-progress indicator */}
+                      {status === 'current' && isCurrentlyActive && (
+                        <span className="text-[10px] font-bold text-green-500 shrink-0">進行中</span>
+                      )}
+
+                      {/* Chevron for expandable completed paragraphs */}
+                      {status === 'completed' && summary && (
+                        <svg
+                          className={`w-3 h-3 text-gray-400 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      )}
+                    </button>
+
+                    {/* Expanded: score detail + diff */}
+                    {isExpanded && summary && (
+                      <div className="px-3 pb-3 bg-gray-50 border-t border-gray-100 space-y-2">
+                        {/* Score row */}
+                        <div className="flex gap-3 pt-2 text-xs">
+                          <span className={`font-bold ${
+                            summary.tier === 1 ? 'text-emerald-600' :
+                            summary.tier === 2 ? 'text-blue-500' :
+                            'text-amber-500'
+                          }`}>
+                            正確率 {Math.round(summary.matchRate * 100)}%
+                          </span>
+                          {summary.wrongCount > 0 && (
+                            <span className="text-red-500">念錯 {summary.wrongCount} 字</span>
+                          )}
+                          {summary.missingCount > 0 && (
+                            <span className="text-gray-400">漏字 {summary.missingCount} 字</span>
+                          )}
+                        </div>
+                        {/* Diff display */}
+                        {paraResult && paraResult.diffTokens.length > 0 && (
+                          <div className="bg-white rounded-lg border border-gray-200 px-2 py-2">
+                            <DiffDisplay tokens={paraResult.diffTokens} showLegend={false} className="text-sm" />
+                          </div>
+                        )}
+                        {/* AI feedback */}
+                        {summary.feedback && (
+                          <p className="text-xs text-gray-600 leading-relaxed">
+                            {summary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI…</span>}
+                            {summary.feedback}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Live transcript — shown while recording */}
@@ -1514,11 +1652,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             </div>
           )}
 
-          {/* Diff result — shown after evaluation completes for current paragraph */}
+          {/* Diff result for current paragraph — shown after evaluation */}
           {!isSessionActive && rightPanelDiffTokens && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">逐字比對</p>
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">逐字比對（第 {currentLineIndex + 1} 段）</p>
                 {paragraphSummary?.geminiPending && (
                   <span className="text-[9px] text-blue-400 font-bold animate-pulse">AI 精算中…</span>
                 )}
@@ -1529,12 +1667,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             </div>
           )}
 
-          {/* Idle state — no recording yet */}
-          {!isSessionActive && !rightPanelDiffTokens && !paragraphSummary && (
+          {/* Idle state — no recording yet and no results */}
+          {!isSessionActive && !rightPanelDiffTokens && completedParagraphs.size === 0 && (
             <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
               <p className="text-sm text-gray-500 leading-relaxed">
                 按左側「開始朗讀」後，回饋結果會顯示在這裡
               </p>
+            </div>
+          )}
+
+          {/* Retry hint */}
+          {retryCount > 0 && (
+            <div className="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+              <span className="text-xs text-amber-600">重試第 {retryCount} 次，加油！</span>
             </div>
           )}
 
