@@ -10,28 +10,97 @@
  *   - Wrong  → show hint, word stays in bank
  *   - No per-sentence option buttons; all selection happens via the top bank
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FillInBlankItem } from '../../types';
 
 interface Props {
   sentences: FillInBlankItem[];
   vocabBank: Record<string, string>;  // { A: "疑難雜症", B: "龍爭虎鬥", ... }
   onComplete: (score: number, total: number) => void;
+  /** Story ID used to namespace the localStorage key (Issue #709). */
+  storyId?: string | number;
 }
 
-const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete }) => {
+// ---------------------------------------------------------------------------
+// localStorage helpers
+// ---------------------------------------------------------------------------
+
+function storageKey(storyId: string | number | undefined): string | null {
+  return storyId != null ? `vocab_app_progress_${storyId}` : null;
+}
+
+interface SavedProgress {
+  currentIdx: number;
+  usedCodes: string[];
+  score: number;
+}
+
+function loadProgress(storyId: string | number | undefined): SavedProgress | null {
+  const key = storageKey(storyId);
+  if (!key) return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SavedProgress;
+    if (typeof parsed.currentIdx === 'number' && Array.isArray(parsed.usedCodes)) {
+      return parsed;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function saveProgress(storyId: string | number | undefined, data: SavedProgress): void {
+  const key = storageKey(storyId);
+  if (!key) return;
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {
+    // Quota exceeded or private mode — silently ignore
+  }
+}
+
+function clearAnswers(storyId: string | number | undefined): void {
+  const key = storageKey(storyId);
+  if (!key) return;
+  try {
+    localStorage.removeItem(key);
+  } catch {}
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete, storyId }) => {
   const bankEntries = Object.entries(vocabBank).sort(([a], [b]) => a.localeCompare(b));
 
+  // Restore progress from localStorage if available
+  const savedProgress = loadProgress(storyId);
+
   // Index of the current sentence being answered
-  const [currentIdx, setCurrentIdx] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(savedProgress?.currentIdx ?? 0);
   // Codes that have been correctly used and should disappear from bank
-  const [usedCodes, setUsedCodes] = useState<Set<string>>(new Set());
+  const [usedCodes, setUsedCodes] = useState<Set<string>>(
+    () => new Set(savedProgress?.usedCodes ?? []),
+  );
   // The code selected for the current question (pending confirmation)
   const [selected, setSelected] = useState<string | null>(null);
   // Feedback state for current question
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'wrong'>('idle');
   // Track score
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState(savedProgress?.score ?? 0);
+
+  // Persist progress to localStorage after every correct answer
+  useEffect(() => {
+    if (storyId == null) return;
+    saveProgress(storyId, {
+      currentIdx,
+      usedCodes: Array.from(usedCodes),
+      score,
+    });
+  }, [currentIdx, usedCodes, score, storyId]);
 
   const total = sentences.length;
   const done = currentIdx >= total;
@@ -117,7 +186,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
           </p>
         </div>
         <button
-          onClick={() => onComplete(score, total)}
+          onClick={() => { clearAnswers(storyId); onComplete(score, total); }}
           className="rounded-xl bg-[#5B4FC4] px-10 py-3 text-base font-bold text-white hover:bg-[#4a3fa8] active:scale-95 transition-all shadow-md min-h-[52px]"
         >
           繼續 →
