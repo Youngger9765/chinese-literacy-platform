@@ -21,7 +21,7 @@ interface VocabPracticeProps {
 
 type Phase = 'grid' | 'practice' | 'pronunciation' | 'sentence' | 'zhuyin-game';
 
-type PracticeMode = 'stroke' | 'pronunciation' | 'zhuyin' | 'fillinblank';
+type PracticeMode = 'stroke' | 'pronunciation' | 'zhuyin' | 'fillinblank' | 'radical';
 
 /* ================================================================ */
 /*  Progress bar                                                     */
@@ -168,8 +168,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const [activeTab, setActiveTab] = useState<PracticeMode>('stroke');
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
   const [zhuyinReady, setZhuyinReady] = useState(false);
-  /** Character whose radical panel is currently open */
-  const [radicalChar, setRadicalChar] = useState<string | null>(null);
   const [justCompleted, setJustCompleted] = useState('');
 
   const zhuyinActive = zhuyinReady && zhuyinEnabled;
@@ -270,11 +268,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     onFinish(result);
   };
 
-  /** Toggle the radical panel for a character. Long-press / secondary action. */
-  const handleRadicalToggle = (ch: string) => {
-    setRadicalChar(prev => (prev === ch ? null : ch));
-  };
-
   /* ── Pronunciation practice phase ── */
   if (phase === 'pronunciation') {
     const zhuyinStr = zhuyinActive ? processZhuyin(practicingChar) : undefined;
@@ -356,9 +349,11 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             ? `筆順 ${practicedChars.size} / ${displayChars.length}`
             : activeTab === 'pronunciation'
               ? `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`
-              : activeTab === 'fillinblank'
-                ? '語詞應用'
-                : '注音遊戲'}
+              : activeTab === 'radical'
+                ? `部件 ${charsWithRadical.length} 字`
+                : activeTab === 'fillinblank'
+                  ? '語詞應用'
+                  : '注音遊戲'}
         </span>
         <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
@@ -412,6 +407,20 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               </svg>
               造句練習
             </button>
+            <button
+              onClick={() => { setActiveTab('radical'); if (phase === 'sentence') setPhase('grid'); }}
+              className={[
+                'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
+                activeTab === 'radical' && phase !== 'sentence'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700',
+              ].join(' ')}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h8M4 18h8" />
+              </svg>
+              部件學習
+            </button>
             {/* 發音練習 and 注音遊戲 tabs hidden per product decision 2026-03-27 */}
             {/* 語詞應用 tab removed — now a separate step (#668 VocabApplication) */}
           </div>
@@ -447,8 +456,35 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </div>
           )}
 
-          {/* Character grid — hidden when zhuyin or fillinblank tab is active */}
-          {activeTab !== 'zhuyin' && activeTab !== 'fillinblank' && <>{/* Character grid */}
+          {/* Radical tab content */}
+          {activeTab === 'radical' && phase !== 'sentence' && (
+            <div className="space-y-6">
+              {charsWithRadical.length === 0 ? (
+                <div className="text-gray-400 text-sm py-8 text-center">
+                  此課文目前無部件資料
+                </div>
+              ) : (
+                displayChars.map(ch => {
+                  const hasData = getDecomposition(ch) !== null;
+                  return (
+                    <div key={ch}>
+                      {hasData ? (
+                        <RadicalDecomposition char={ch} />
+                      ) : (
+                        <div className="bg-white rounded-2xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+                          <span className="text-3xl font-black text-gray-700 leading-none">{ch}</span>
+                          <span className="text-sm text-gray-400">此字目前無部件資料</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* Character grid — hidden when zhuyin, fillinblank, or radical tab is active */}
+          {activeTab !== 'zhuyin' && activeTab !== 'fillinblank' && activeTab !== 'radical' && <>{/* Character grid */}
           {currentChars.length === 0 ? (
             <div className="text-gray-400 text-sm py-8 text-center">
               {activeTab === 'stroke'
@@ -460,8 +496,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               {currentChars.map((ch, idx) => {
                 const isSuggested = needPracticeSet.has(ch);
                 const isPracticed = currentPracticedSet.has(ch);
-                const hasRadical = activeTab === 'stroke' && getDecomposition(ch) !== null;
-                const isRadicalOpen = radicalChar === ch;
                 return (
                   <div key={ch} className="flex flex-col gap-1">
                     <button
@@ -499,25 +533,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                       </span>
                     </button>
 
-                    {/* Radical decomposition button — placed below the card for discoverability */}
-                    {hasRadical && (
-                      <button
-                        onClick={() => handleRadicalToggle(ch)}
-                        className={[
-                          'w-full py-1 rounded-lg border text-[10px] font-semibold transition-all active:scale-95 flex items-center justify-center gap-1',
-                          isRadicalOpen
-                            ? 'bg-[#5B4FC4] border-[#5B4FC4] text-white'
-                            : 'bg-[#5B4FC4]/10 border-[#5B4FC4]/30 text-[#5B4FC4] hover:bg-[#5B4FC4]/20',
-                        ].join(' ')}
-                        aria-label={`查看「${ch}」的部件拆解`}
-                        aria-expanded={isRadicalOpen}
-                      >
-                        <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" />
-                        </svg>
-                        部件
-                      </button>
-                    )}
+                    {/* Radical button removed — now a dedicated tab */}
                   </div>
                 );
               })}
@@ -540,31 +556,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                 </div>
               </>
             )}
-            {charsWithRadical.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <span className="px-1.5 py-0.5 bg-[#5B4FC4]/10 border border-[#5B4FC4]/30 text-[#5B4FC4] rounded text-[9px] font-semibold">部件</span>
-                字卡下方可查看部件拆解
-              </div>
-            )}
           </div>
-
-          {/* Radical decomposition panel */}
-          {radicalChar && (
-            <div className="animate-[fadeIn_0.2s_ease-in]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-gray-700">
-                  「{radicalChar}」的部件學習
-                </span>
-                <button
-                  onClick={() => setRadicalChar(null)}
-                  className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded"
-                >
-                  收起
-                </button>
-              </div>
-              <RadicalDecomposition char={radicalChar} />
-            </div>
-          )}
 
           {/* Usage hint */}
           {currentChars.length > 0 && (
