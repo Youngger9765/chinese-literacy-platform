@@ -369,6 +369,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishReadingAnnotation = useCallback(
     (_summary: AnnotationSummary) => {
+      setSession((prev) => (prev ? { ...prev, readingAnnotationCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['tutor']);
       navigate(`/learn/${storyId}/tutor`);
     },
@@ -377,6 +378,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishVocabDefinitionMatch = useCallback(
     (_result: VocabDefinitionMatchResult) => {
+      setSession((prev) => (prev ? { ...prev, vocabDefinitionMatchCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
       navigate(`/learn/${storyId}/vocab-application`);
     },
@@ -385,6 +387,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishVocabApplication = useCallback(
     (_result: VocabApplicationResult) => {
+      setSession((prev) => (prev ? { ...prev, vocabApplicationCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['comprehension']);
       navigate(`/learn/${storyId}/comprehension`);
     },
@@ -393,6 +396,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishVocabWordSearch = useCallback(
     (_elapsedSeconds: number) => {
+      setSession((prev) => (prev ? { ...prev, vocabWordSearchCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
       navigate(`/learn/${storyId}/knowledge-station`);
     },
@@ -401,6 +405,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishKnowledgeStation = useCallback(
     () => {
+      setSession((prev) => (prev ? { ...prev, knowledgeStationCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['report']);
       navigate(`/learn/${storyId}/report`);
     },

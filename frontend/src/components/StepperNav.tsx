@@ -43,14 +43,19 @@ function getStepStatus(
   const isCompleted = (() => {
     if (!session) return false;
     switch (stepDef.view) {
-      case AppView.INTRO:          return session.introCompleted;
-      case AppView.TUTOR:          return session.readingAttempt !== null;
-      case AppView.VOCAB:          return session.vocabResult !== null;
-      case AppView.DICTATION:      return session.dictationResult !== null;
-      case AppView.COMPREHENSION:  return session.comprehensionResult !== null;
-      case AppView.FULL_READING:   return session.fullReadingResult !== null;
-      case AppView.REPORT:         return false; // destination step, never "completed"
-      default:                     return false;
+      case AppView.INTRO:                    return session.introCompleted;
+      case AppView.TUTOR:                    return session.readingAttempt !== null;
+      case AppView.VOCAB:                    return session.vocabResult !== null;
+      case AppView.DICTATION:               return session.dictationResult !== null;
+      case AppView.COMPREHENSION:           return session.comprehensionResult !== null;
+      case AppView.FULL_READING:            return session.fullReadingResult !== null;
+      case AppView.READING_ANNOTATION:      return session.readingAnnotationCompleted === true;
+      case AppView.VOCAB_DEFINITION_MATCH:  return session.vocabDefinitionMatchCompleted === true;
+      case AppView.VOCAB_APPLICATION:       return session.vocabApplicationCompleted === true;
+      case AppView.VOCAB_WORD_SEARCH:       return session.vocabWordSearchCompleted === true;
+      case AppView.KNOWLEDGE_STATION:       return session.knowledgeStationCompleted === true;
+      case AppView.REPORT:                  return false; // destination step, never "completed"
+      default:                              return false;
     }
   })();
 
