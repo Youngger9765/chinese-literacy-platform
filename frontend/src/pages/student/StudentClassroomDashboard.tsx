@@ -46,6 +46,34 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   );
 };
 
+const ClassroomCardSkeleton: React.FC = () => (
+  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="bg-indigo-50 border-b border-indigo-100 px-5 py-4 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3 min-w-0 w-full">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <div className="min-w-0 flex-1">
+          <Skeleton className="h-5 w-2/5 rounded mb-2" />
+          <Skeleton className="h-3 w-1/3 rounded" />
+        </div>
+      </div>
+      <Skeleton className="h-8 w-16 rounded-lg" />
+    </div>
+    <div className="px-5 pt-4 pb-2 flex gap-4">
+      <Skeleton className="h-4 w-20 rounded" />
+      <Skeleton className="h-4 w-20 rounded" />
+    </div>
+    <div className="px-5 pb-4 space-y-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="flex items-center justify-between gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
+          <SkeletonText lines={2} className="flex-1" lineClassName="h-3 rounded" />
+          <Skeleton className="h-6 w-14 rounded-full" />
+          <Skeleton className="h-8 w-16 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 // ---------------------------------------------------------------------------
 // Assignment row inside a classroom card
 // ---------------------------------------------------------------------------
@@ -232,34 +260,6 @@ const StudentClassroomDashboard: React.FC = () => {
   // Group assignments by classroom_name
   const assignmentsByClassroom = (classroomName: string) =>
     assignments.filter((a) => a.classroom_name === classroomName);
-
-  const ClassroomCardSkeleton = () => (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="bg-indigo-50 border-b border-indigo-100 px-5 py-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0 w-full">
-          <Skeleton className="h-9 w-9 rounded-full" />
-          <div className="min-w-0 flex-1">
-            <Skeleton className="h-5 w-2/5 rounded mb-2" />
-            <Skeleton className="h-3 w-1/3 rounded" />
-          </div>
-        </div>
-        <Skeleton className="h-8 w-16 rounded-lg" />
-      </div>
-      <div className="px-5 pt-4 pb-2 flex gap-4">
-        <Skeleton className="h-4 w-20 rounded" />
-        <Skeleton className="h-4 w-20 rounded" />
-      </div>
-      <div className="px-5 pb-4 space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex items-center justify-between gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
-            <SkeletonText lines={2} className="flex-1" lineClassName="h-3 rounded" />
-            <Skeleton className="h-6 w-14 rounded-full" />
-            <Skeleton className="h-8 w-16 rounded-lg" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (
