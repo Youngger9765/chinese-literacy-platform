@@ -722,12 +722,40 @@ export const charDecomposition: Record<string, CharDecomposition> = {
 };
 
 // ---------------------------------------------------------------------------
+// Generated decomposition data (lazy-loaded to avoid bundle bloat)
+// Populated once by initGeneratedDecompositions(); null = not yet loaded.
+// ---------------------------------------------------------------------------
+
+let _generatedCache: Record<string, CharDecomposition> | null = null;
+
+/**
+ * Asynchronously loads the generated decomposition database (~700KB raw,
+ * ~48KB gzipped) and caches it in memory.  Call this once before rendering
+ * RadicalDecomposition to maximise coverage.
+ *
+ * Safe to call multiple times — only fetches once.
+ */
+export async function initGeneratedDecompositions(): Promise<void> {
+  if (_generatedCache !== null) return;
+  const mod = await import('./decompositions-generated.json');
+  _generatedCache = mod.default as Record<string, CharDecomposition>;
+}
+
+// ---------------------------------------------------------------------------
 // Helper: look up decomposition for a character
 // ---------------------------------------------------------------------------
 
-/** Returns decomposition for a character, or null if not in database */
+/**
+ * Returns decomposition for a character.
+ * Priority: hand-curated (charDecomposition) → generated (decompositions-generated.json).
+ * Returns null if not found in either source.
+ */
 export function getDecomposition(char: string): CharDecomposition | null {
-  return charDecomposition[char] ?? null;
+  // Hand-curated entries take highest priority
+  if (charDecomposition[char]) return charDecomposition[char];
+  // Fall back to generated data if loaded
+  if (_generatedCache && _generatedCache[char]) return _generatedCache[char];
+  return null;
 }
 
 /**

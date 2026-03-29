@@ -1,0 +1,34 @@
+{
+  "sources": [
+    {
+      "name": "手動編寫",
+      "count": 43,
+      "priority": 1,
+      "license": "internal"
+    },
+    {
+      "name": "makemeahanzi",
+      "count": 2600,
+      "priority": 2,
+      "license": "LGPL",
+      "url": "https://github.com/skishore/makemeahanzi"
+    },
+    {
+      "name": "kfcd/chaizi",
+      "count": 134,
+      "priority": 3,
+      "license": "CC BY 3.0",
+      "url": "https://github.com/kfcd/chaizi"
+    }
+  ],
+  "generatedAt": "2026-03-30",
+  "totalLessonChars": 2791,
+  "coverage": "98.0%",
+  "breakdown": {
+    "pictophonetic": 1751,
+    "ideographic": 729,
+    "pictographic": 120,
+    "chaizi_fallback": 134,
+    "no_data": 57
+  }
+}
