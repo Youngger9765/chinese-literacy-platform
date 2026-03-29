@@ -11,6 +11,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   getDecomposition,
+  getDecompositionSource,
   getRadicalInfo,
   getRelatedChars,
   initGeneratedDecompositions,
@@ -193,6 +194,13 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
           </div>
         )}
       </div>
+
+      {/* Data source label */}
+      <p className="text-[10px] text-gray-400 text-right mt-2 pr-1">
+        {getDecompositionSource(char) === 'hand-curated'
+          ? '資料來源：教學團隊手動編寫'
+          : '資料來源：makemeahanzi（開源漢字資料庫）'}
+      </p>
     </div>
   );
 };
