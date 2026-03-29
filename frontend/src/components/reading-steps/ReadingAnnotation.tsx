@@ -744,12 +744,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 <p
                   key={paraIdx}
                   data-para-idx={paraIdx}
-                  className="text-gray-900"
-                  style={{
-                    fontSize: `${fontSizePx}px`,
-                    lineHeight: zhuyinActive ? '3.8rem' : '3.5rem',
-                    letterSpacing: zhuyinActive ? '0.35em' : '0.05em',
-                  }}
+                  className={`text-2xl lg:text-3xl text-gray-900 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}
                 >
                   {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}
                 </p>
