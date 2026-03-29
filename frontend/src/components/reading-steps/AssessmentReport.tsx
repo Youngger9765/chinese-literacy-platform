@@ -1,5 +1,6 @@
 
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
+import { speakText as azureSpeakText } from '../../services/ttsApi';
 import { LearningSession } from '../../types';
 import type { Story } from '../../types';
 import type { ComprehensionScoreResult } from '../../services/learningApi';
@@ -93,12 +94,9 @@ const getCurrentSegment = (cpm: number) => {
   return 3;
 };
 
-/** Speak a Chinese character/word using Web Speech API */
+/** Speak a Chinese character/word using Azure TTS */
 const speakText = (text: string) => {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'zh-TW';
-  u.rate = 0.8;
-  window.speechSynthesis.speak(u);
+  azureSpeakText(text).catch(() => {});
 };
 
 /** Generate practice suggestions based on performance */

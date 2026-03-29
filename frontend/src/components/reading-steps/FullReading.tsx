@@ -7,6 +7,7 @@ import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProc
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
+import { speakText as azureSpeakText, cancelTts } from '../../services/ttsApi';
 
 /* ------------------------------------------------------------------ */
 
@@ -135,52 +136,34 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
     return () => {
       isSessionActiveRef.current = false;
       if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (_) {} }
-      window.speechSynthesis?.cancel();
+      cancelTts();
     };
   }, []);
 
-  /* ---- TTS: read full story ---- */
+  /* ---- TTS: read full story via Azure TTS ---- */
   const speakFullStory = useCallback(() => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    cancelTts();
     setIsTtsPaused(false);
-    setIsTtsLoading(true); // show loading until the first utterance begins
+    setIsTtsSpeaking(true);
+    azureSpeakText(fullText)
+      .then(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); })
+      .catch(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
+  }, [fullText]);
 
-    const doSpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-        voices.find(v => v.name.includes('Google') && v.lang === 'zh-TW') ||
-        voices.find(v => v.lang === 'zh-TW') ||
-        voices.find(v => v.lang.startsWith('zh'));
-
-      const utterances = story.content.map(paragraph => {
-        const u = new SpeechSynthesisUtterance(paragraph);
-        u.lang = 'zh-TW'; u.rate = 1.0;
-        if (preferred) u.voice = preferred;
-        return u;
-      });
-      utterances[0].onstart = () => { setIsTtsLoading(false); setIsTtsSpeaking(true); };
-      utterances[utterances.length - 1].onend = () => { setIsTtsLoading(false); setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      utterances[utterances.length - 1].onerror = () => { setIsTtsLoading(false); setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      utterances.forEach(u => window.speechSynthesis.speak(u));
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; doSpeak(); };
-    } else {
-      doSpeak();
-    }
-  }, [story.content]);
-
-  const pauseTts = () => { window.speechSynthesis?.pause(); setIsTtsPaused(true); };
-  const resumeTts = () => { window.speechSynthesis?.resume(); setIsTtsPaused(false); };
-  const stopTts = () => { window.speechSynthesis?.cancel(); setIsTtsLoading(false); setIsTtsSpeaking(false); setIsTtsPaused(false); };
+  const pauseTts = () => { cancelTts(); setIsTtsPaused(true); };
+  const resumeTts = () => {
+    setIsTtsPaused(false);
+    setIsTtsSpeaking(true);
+    azureSpeakText(fullText)
+      .then(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); })
+      .catch(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
+  };
+  const stopTts = () => { cancelTts(); setIsTtsSpeaking(false); setIsTtsPaused(false); };
 
   /* ---- STT ---- */
   const startSession = () => {
     if (isSessionActiveRef.current) return;
-    window.speechSynthesis?.cancel();
+    cancelTts();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
     setIsPreparing(true);

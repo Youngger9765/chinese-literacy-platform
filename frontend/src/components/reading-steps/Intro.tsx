@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Story } from '../../types';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
+import { speakText as azureSpeakText, cancelTts } from '../../services/ttsApi';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -41,41 +42,17 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   }, [zhuyinActive]);
 
   const speakIntro = useCallback(() => {
-    if (!window.speechSynthesis || !story.intro) return;
-    window.speechSynthesis.cancel();
-
+    if (!story.intro) return;
+    cancelTts();
     const text = `${story.title}。作者：${story.intro.author}。${story.intro.background}`;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-TW';
-    utterance.rate = 0.95;
-
-    const doSpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-        voices.find(v => v.name.includes('Google') && v.lang === 'zh-TW') ||
-        voices.find(v => v.lang === 'zh-TW') ||
-        voices.find(v => v.lang.startsWith('zh'));
-      if (preferred) utterance.voice = preferred;
-
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.onvoiceschanged = null;
-        doSpeak();
-      };
-    } else {
-      doSpeak();
-    }
+    setIsSpeaking(true);
+    azureSpeakText(text)
+      .then(() => setIsSpeaking(false))
+      .catch(() => setIsSpeaking(false));
   }, [story]);
 
   const stopSpeaking = () => {
-    window.speechSynthesis?.cancel();
+    cancelTts();
     setIsSpeaking(false);
   };
 

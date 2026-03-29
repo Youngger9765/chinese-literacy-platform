@@ -5,7 +5,8 @@
  * 1. Splits text into sentences (matching backend _split_sentences / _clean_for_tts)
  * 2. Fetches each sentence from /api/tts/synthesize (stored per-sentence in GCS)
  * 3. Plays audio blobs sequentially — one sentence finishes, next one starts
- * 4. Falls back to browser Web Speech API if backend is unavailable
+ *
+ * Azure TTS is the sole TTS source. Web Speech API has been removed (#737).
  *
  * Usage:
  *   import { speakText, cancelTts } from '../../services/ttsApi';
@@ -26,16 +27,8 @@ let _currentAudio: HTMLAudioElement | null = null;
 // Flag to signal cancellation mid-sequence
 let _cancelRequested = false;
 
-// Backend retry state: cooldown after failure, permanent fallback after 3 consecutive failures.
-const BACKEND_COOLDOWN_MS = 30_000; // 30 seconds before retrying after a failure
-const MAX_CONSECUTIVE_FAILURES = 3;
-
-let _consecutiveFailures = 0;
-let _permanentlyFallback = false;
-let _lastFailureTime = 0;
-
 /**
- * Stop any TTS currently in progress (backend or Web Speech API).
+ * Stop any TTS currently in progress.
  */
 export function cancelTts(): void {
   _cancelRequested = true;
@@ -44,76 +37,31 @@ export function cancelTts(): void {
     _currentAudio.currentTime = 0;
     _currentAudio = null;
   }
-  if (typeof window !== 'undefined' && window.speechSynthesis) {
-    window.speechSynthesis.cancel();
-  }
 }
 
 /**
- * Synthesise and play *text* in Traditional Chinese.
+ * Synthesise and play *text* in Traditional Chinese via Azure TTS.
  *
  * Splits text into sentences and plays each one sequentially via the backend.
- * Falls back to browser Web Speech API if backend is unavailable.
  *
  * @param text - Text to synthesise (keep under 5000 chars per request).
- * @param rate - Playback speed multiplier (default 0.9, applied to Web Speech fallback).
  * @returns Promise that resolves when all sentences finish, or rejects on fatal error.
  */
-export async function speakText(text: string, rate = 0.9): Promise<void> {
+export async function speakText(text: string): Promise<void> {
   if (!text.trim()) return;
   cancelTts();
   _cancelRequested = false;
-
-  // Try backend TTS first (unless permanently fallen back or in cooldown)
-  if (!_permanentlyFallback && _isBackendAvailable()) {
-    try {
-      await _speakViaBackend(text);
-      // Reset failure count on success
-      _consecutiveFailures = 0;
-      return;
-    } catch (err) {
-      _consecutiveFailures++;
-      _lastFailureTime = Date.now();
-      if (_consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-        console.warn(`[TTS] ${MAX_CONSECUTIVE_FAILURES} consecutive failures — permanently falling back to Web Speech API`);
-        _permanentlyFallback = true;
-      } else {
-        console.warn(`[TTS] Backend TTS failed (${_consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES}), cooldown ${BACKEND_COOLDOWN_MS / 1000}s:`, err);
-      }
-    }
-  }
-
-  // Fallback: browser Web Speech API (whole text at once)
-  await _speakViaBrowserApi(text, rate);
-}
-
-// ---------------------------------------------------------------------------
-// Private: backend availability check
-// ---------------------------------------------------------------------------
-
-function _isBackendAvailable(): boolean {
-  if (_permanentlyFallback) return false;
-  if (_consecutiveFailures === 0) return true;
-  // In cooldown: wait before retrying
-  return Date.now() - _lastFailureTime >= BACKEND_COOLDOWN_MS;
+  await _speakViaBackend(text);
 }
 
 // Exported for testing only
 export const _testInternals = {
   reset() {
-    _consecutiveFailures = 0;
-    _permanentlyFallback = false;
-    _lastFailureTime = 0;
     _cancelRequested = false;
     _urlCache.clear();
   },
-  getState() {
-    return { _consecutiveFailures, _permanentlyFallback, _lastFailureTime };
-  },
   splitSentences: _splitSentences,
   cleanForTts: _cleanForTts,
-  BACKEND_COOLDOWN_MS,
-  MAX_CONSECUTIVE_FAILURES,
 };
 
 // ---------------------------------------------------------------------------
@@ -241,49 +189,3 @@ function _playSingleAudio(audioUrl: string): Promise<void> {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Private: Web Speech API fallback
-// ---------------------------------------------------------------------------
-
-function _speakViaBrowserApi(text: string, rate: number): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) {
-      reject(new Error('Web Speech API not available'));
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-TW';
-    utterance.rate = rate;
-    utterance.pitch = 1.0;
-
-    // Prefer Google Taiwan voice when available
-    const voices = window.speechSynthesis.getVoices();
-    const preferred =
-      voices.find((v) => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-      voices.find((v) => v.lang === 'zh-TW') ||
-      voices.find((v) => v.lang.startsWith('zh'));
-    if (preferred) utterance.voice = preferred;
-
-    utterance.onend = () => resolve();
-    utterance.onerror = (e) => reject(new Error(e.error ?? 'speech error'));
-    window.speechSynthesis.speak(utterance);
-
-    // If voices not loaded yet, retry after voiceschanged fires
-    if (voices.length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.onvoiceschanged = null;
-        window.speechSynthesis.cancel();
-        const v2 = window.speechSynthesis.getVoices();
-        const best =
-          v2.find((v) => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-          v2.find((v) => v.lang === 'zh-TW') ||
-          v2.find((v) => v.lang.startsWith('zh'));
-        if (best) utterance.voice = best;
-        window.speechSynthesis.speak(utterance);
-      };
-    }
-  });
-}

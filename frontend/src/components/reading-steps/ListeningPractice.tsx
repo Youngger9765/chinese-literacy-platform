@@ -2,7 +2,7 @@
  * ListeningPractice — Issue #251
  *
  * Three-phase listening comprehension exercise:
- *   Phase 1: Play story text via Cloud TTS Neural2 (zh-TW), Web Speech API fallback
+ *   Phase 1: Play story text via Azure TTS (zh-TW)
  *   Phase 2: Student retells what they heard (voice or text input)
  *   Phase 3: Show AI evaluation with score and feedback
  */
@@ -35,7 +35,7 @@ type PlayState = 'idle' | 'playing' | 'paused' | 'done';
 // ── TTS helpers ───────────────────────────────────────────────────────────────
 
 /**
- * Speak text using Cloud TTS Neural2 (zh-TW) with Web Speech API fallback.
+ * Speak text using Azure TTS (zh-TW).
  * Returns a speaker object with start/cancel interface matching prior API.
  */
 function createSpeaker(text: string, rate: number): {
@@ -157,23 +157,15 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
   }, [fullText, playRate]);
 
   const handlePause = useCallback(() => {
-    // Cloud TTS uses <audio> element; pause via cancelTts and track state.
-    // Web Speech API fallback also honours this via window.speechSynthesis.pause().
     cancelTts();
-    if (window.speechSynthesis?.speaking) {
-      window.speechSynthesis.pause();
-    }
     setPlayState('paused');
   }, []);
 
   const handleResume = useCallback(() => {
     // Re-trigger playback from beginning when resuming after pause
     // (HTML audio pause/resume position tracking is not exposed via ttsApi)
-    if (window.speechSynthesis?.paused) {
-      window.speechSynthesis.resume();
-      setPlayState('playing');
-    }
-  }, []);
+    handlePlay();
+  }, [handlePlay]);
 
   const handleStop = useCallback(() => {
     speakerRef.current?.cancel();
@@ -182,7 +174,6 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
 
   const handleReplay = useCallback(() => {
     handleStop();
-    // Brief delay to let SpeechSynthesis fully reset
     setTimeout(handlePlay, 100);
   }, [handleStop, handlePlay]);
 
