@@ -1,10 +1,15 @@
 /**
- * ListeningPractice — Issue #251
+ * ListeningPractice — Issue #251 / #764
  *
  * Three-phase listening comprehension exercise:
- *   Phase 1: Play story text via Azure TTS (zh-TW)
+ *   Phase 1: Play story text via Azure TTS (zh-TW), paragraph by paragraph
  *   Phase 2: Student retells what they heard (voice or text input)
  *   Phase 3: Show AI evaluation with score and feedback
+ *
+ * #764: Changed from full-text playback to paragraph-by-paragraph playback.
+ *       After each paragraph, a "繼續下一段" button is shown.
+ *       Current paragraph is highlighted in the text display.
+ *       Within-paragraph sentence progress bar (from #763) is preserved.
  */
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
@@ -31,6 +36,8 @@ interface ListeningPracticeProps {
 
 type Phase = 'play' | 'retell' | 'results';
 type PlayState = 'idle' | 'playing' | 'paused' | 'done';
+/** 'between' = finished current paragraph, waiting for user to continue */
+type ParagraphPlayState = 'idle' | 'playing' | 'between' | 'done';
 
 // ── TTS helpers ───────────────────────────────────────────────────────────────
 
@@ -104,6 +111,11 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
   const [ttsProgress, setTtsProgress] = useState<TtsProgressInfo | null>(null);
   const speakerRef = useRef<ReturnType<typeof createSpeaker> | null>(null);
 
+  // Paragraph state — #764
+  const paragraphs = story.content; // string[], one entry per paragraph
+  const [paragraphIdx, setParagraphIdx] = useState(0);
+  const [paragraphPlayState, setParagraphPlayState] = useState<ParagraphPlayState>('idle');
+
   // Phase 2 — retelling
   const [retelling, setRetelling] = useState('');
   const [retellMode, setRetellMode] = useState<'text' | 'voice'>('text');
@@ -140,64 +152,105 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
     };
   }, []);
 
-  // Full text to read aloud — join all paragraphs
+  // Full text to read aloud — join all paragraphs (used for retell evaluation)
   const fullText = story.content.join('\n');
 
-  // ── Phase 1: Playback ──────────────────────────────────────────────────────
+  // ── Phase 1: Paragraph Playback ────────────────────────────────────────────
 
-  const handlePlay = useCallback(() => {
+  /** Play the paragraph at the given index */
+  const playParagraph = useCallback((idx: number) => {
     if (!isTTSSupported()) {
       setTtsError('你的瀏覽器不支援語音合成功能，請改用 Chrome。');
       return;
     }
+    const text = paragraphs[idx];
+    if (!text) return;
+
     setTtsError(null);
     setTtsProgress(null);
     setPlayState('playing');
+    setParagraphPlayState('playing');
 
-    const speaker = createSpeaker(fullText, playRate);
+    const speaker = createSpeaker(text, playRate);
     speakerRef.current = speaker;
 
     speaker.start(
       () => {
         setPlayState('done');
         setTtsProgress(null);
+        const isLast = idx >= paragraphs.length - 1;
+        if (isLast) {
+          setParagraphPlayState('done');
+        } else {
+          setParagraphPlayState('between');
+        }
       },
       (errMsg) => {
         setTtsError(`播放發生錯誤：${errMsg}`);
         setPlayState('idle');
         setTtsProgress(null);
+        setParagraphPlayState('idle');
       },
       (info) => setTtsProgress(info),
     );
-  }, [fullText, playRate]);
+  }, [paragraphs, playRate]);
+
+  const handlePlay = useCallback(() => {
+    playParagraph(paragraphIdx);
+  }, [playParagraph, paragraphIdx]);
+
+  const handleContinueNextParagraph = useCallback(() => {
+    const nextIdx = paragraphIdx + 1;
+    if (nextIdx >= paragraphs.length) {
+      setParagraphPlayState('done');
+      return;
+    }
+    setParagraphIdx(nextIdx);
+    // Small delay to let React re-render before starting playback
+    setTimeout(() => playParagraph(nextIdx), 50);
+  }, [paragraphIdx, paragraphs.length, playParagraph]);
 
   const handlePause = useCallback(() => {
     cancelTts();
     setPlayState('paused');
     setTtsProgress(null);
+    // Keep paragraphPlayState as-is so we know which paragraph we're on
   }, []);
 
   const handleResume = useCallback(() => {
-    // Re-trigger playback from beginning when resuming after pause
-    // (HTML audio pause/resume position tracking is not exposed via ttsApi)
-    handlePlay();
-  }, [handlePlay]);
+    // Re-trigger playback from the beginning of the current paragraph
+    playParagraph(paragraphIdx);
+  }, [playParagraph, paragraphIdx]);
 
   const handleStop = useCallback(() => {
     speakerRef.current?.cancel();
     setPlayState('idle');
     setTtsProgress(null);
+    setParagraphPlayState('idle');
+    setParagraphIdx(0);
   }, []);
 
   const handleReplay = useCallback(() => {
-    handleStop();
-    setTimeout(handlePlay, 100);
-  }, [handleStop, handlePlay]);
+    // Replay from beginning — reset to first paragraph
+    speakerRef.current?.cancel();
+    setParagraphIdx(0);
+    setParagraphPlayState('idle');
+    setPlayState('idle');
+    setTtsProgress(null);
+    setTimeout(() => playParagraph(0), 100);
+  }, [playParagraph]);
 
   const handleProceedToRetell = useCallback(() => {
     speakerRef.current?.cancel();
     setPhase('retell');
   }, []);
+
+  // Derived: overall play state for existing UI logic
+  const isPlaying = playState === 'playing';
+  const isPaused = playState === 'paused';
+  const isIdle = playState === 'idle' && paragraphPlayState === 'idle';
+  const isAllDone = paragraphPlayState === 'done';
+  const isBetweenParagraphs = paragraphPlayState === 'between';
 
   // ── Phase 2: Retelling ─────────────────────────────────────────────────────
 
@@ -301,9 +354,42 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
             <h2 className="font-semibold text-blue-800 text-base">步驟一：仔細聆聽課文</h2>
             <p className="text-blue-700 text-sm">
               點擊播放，認真聆聽「{story.title}」的內容。
+              課文分為 {paragraphs.length} 段，每段播完後可以暫停消化再繼續。
               聽完後你需要用自己的話說出課文的重點。
             </p>
           </div>
+
+          {/* Paragraph progress indicator */}
+          {paragraphs.length > 1 && (
+            <div
+              className="flex items-center gap-2"
+              role="group"
+              aria-label="段落進度"
+            >
+              <span className="text-xs text-gray-500 whitespace-nowrap">
+                第 {paragraphIdx + 1} / {paragraphs.length} 段
+              </span>
+              <div className="flex flex-1 gap-1">
+                {paragraphs.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`flex-1 h-2 rounded-full transition-colors ${
+                      i < paragraphIdx
+                        ? 'bg-accent/60'
+                        : i === paragraphIdx
+                          ? isPlaying || isPaused
+                            ? 'bg-accent'
+                            : isBetweenParagraphs
+                              ? 'bg-accent/60'
+                              : 'bg-accent'
+                          : 'bg-gray-200'
+                    }`}
+                    aria-label={`第 ${i + 1} 段${i < paragraphIdx ? '（已播完）' : i === paragraphIdx ? '（目前）' : ''}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Speed control */}
           <div className="space-y-2">
@@ -325,7 +411,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                     handleStop();
                   }
                 }}
-                disabled={playState === 'playing'}
+                disabled={isPlaying}
                 className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer disabled:opacity-50"
                 aria-label="調整播放速度"
               />
@@ -333,9 +419,28 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
             </div>
           </div>
 
+          {/* Paragraph text display — highlights current paragraph */}
+          <div className="space-y-2">
+            {paragraphs.map((para, i) => (
+              <p
+                key={i}
+                className={`text-sm leading-relaxed rounded-lg px-3 py-2 transition-colors ${
+                  i === paragraphIdx && (isPlaying || isBetweenParagraphs || isPaused)
+                    ? 'bg-blue-50 text-blue-900 font-medium border border-blue-200'
+                    : i < paragraphIdx
+                      ? 'text-gray-400'
+                      : 'text-gray-700'
+                }`}
+                aria-current={i === paragraphIdx ? 'true' : undefined}
+              >
+                {para}
+              </p>
+            ))}
+          </div>
+
           {/* Playback controls */}
           <div className="flex flex-wrap gap-3 justify-center">
-            {playState === 'idle' && (
+            {isIdle && (
               <button
                 type="button"
                 onClick={handlePlay}
@@ -346,7 +451,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
               </button>
             )}
 
-            {playState === 'playing' && (
+            {isPlaying && (
               <>
                 <button
                   type="button"
@@ -367,7 +472,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
               </>
             )}
 
-            {playState === 'paused' && (
+            {isPaused && (
               <>
                 <button
                   type="button"
@@ -388,7 +493,29 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
               </>
             )}
 
-            {playState === 'done' && (
+            {/* Between paragraphs — show continue button */}
+            {isBetweenParagraphs && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleContinueNextParagraph}
+                  className="flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold text-base shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                  aria-label={`繼續播放第 ${paragraphIdx + 2} 段`}
+                >
+                  <span aria-hidden="true">▶</span> 繼續下一段
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStop}
+                  className="flex items-center gap-2 px-5 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+                  aria-label="停止播放"
+                >
+                  <span aria-hidden="true">⏹</span> 停止
+                </button>
+              </>
+            )}
+
+            {isAllDone && (
               <button
                 type="button"
                 onClick={handleReplay}
@@ -400,8 +527,8 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
             )}
           </div>
 
-          {/* TTS Progress bar — shown while playing */}
-          {playState === 'playing' && (
+          {/* TTS Progress bar — shown while playing (within-paragraph sentence progress from #763) */}
+          {isPlaying && (
             <div className="space-y-2" aria-label="播放進度">
               <div className="flex items-center gap-3">
                 <div
@@ -410,7 +537,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={ttsProgress ? Math.round(ttsProgress.progress * 100) : 0}
-                  aria-label="音檔播放進度"
+                  aria-label="段落播放進度"
                 >
                   <div
                     className="h-full bg-accent rounded-full transition-all duration-300 ease-linear"
@@ -431,19 +558,24 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
 
           {/* Status text */}
           <div className="text-center">
-            {playState === 'playing' && (
+            {isPlaying && (
               <p className="text-sm text-accent animate-pulse" role="status" aria-live="polite">
-                正在播放中...
+                正在播放第 {paragraphIdx + 1} 段...
               </p>
             )}
-            {playState === 'paused' && (
+            {isPaused && (
               <p className="text-sm text-yellow-600" role="status">
                 已暫停
               </p>
             )}
-            {playState === 'done' && (
+            {isBetweenParagraphs && (
               <p className="text-sm text-green-600 font-medium" role="status">
-                播放完畢！可以重聽，或繼續下一步。
+                第 {paragraphIdx + 1} 段播放完畢，準備好後點擊「繼續下一段」
+              </p>
+            )}
+            {isAllDone && (
+              <p className="text-sm text-green-600 font-medium" role="status">
+                全部播放完畢！可以重聽，或繼續下一步。
               </p>
             )}
           </div>
@@ -457,8 +589,8 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
             </div>
           )}
 
-          {/* Proceed button — available once playback started at least once */}
-          {(playState === 'done' || playState === 'idle' && false) && (
+          {/* Proceed button — available once all paragraphs done */}
+          {isAllDone && (
             <button
               type="button"
               onClick={handleProceedToRetell}
@@ -469,7 +601,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
           )}
 
           {/* Allow skipping to retell even if not done playing */}
-          {playState !== 'idle' && playState !== 'done' && (
+          {(isPlaying || isPaused || isBetweenParagraphs) && (
             <button
               type="button"
               onClick={handleProceedToRetell}
@@ -480,7 +612,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
           )}
 
           {/* Allow skipping even before playing for accessibility */}
-          {playState === 'idle' && (
+          {isIdle && (
             <button
               type="button"
               onClick={handleProceedToRetell}
@@ -725,6 +857,8 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                 setRetelling('');
                 setEvalResult(null);
                 setPlayState('idle');
+                setParagraphIdx(0);
+                setParagraphPlayState('idle');
               }}
               className="px-4 py-3 border border-gray-200 text-gray-600 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
