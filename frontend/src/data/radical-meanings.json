@@ -1,24 +1,39 @@
 {
   "_metadata": {
+    "version": "2.0",
+    "generatedAt": "2026-03-30",
+    "totalRadicals": 226,
     "sources": [
       {
+        "name": "手動編寫 (radicals.ts)",
+        "priority": 1,
+        "license": "internal",
+        "description": "Hand-curated entries in radicals.ts override this file at runtime"
+      },
+      {
+        "name": "branneman/214-kangxi-radicals",
+        "priority": 2,
+        "url": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+        "downloadUrl": "https://gist.githubusercontent.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f/raw/radicals.json",
+        "downloadedAt": "2026-03-30",
+        "license": "none declared",
+        "description": "214 Kangxi radicals with English meanings, pinyin, stroke counts"
+      },
+      {
         "name": "moedict (教育部重編國語辭典)",
+        "priority": 3,
         "url": "https://github.com/g0v/moedict-data",
-        "license": "MOE open data"
+        "license": "MOE open data",
+        "description": "Ministry of Education Traditional Chinese dictionary — zh-TW definitions"
       },
       {
         "name": "makemeahanzi",
+        "priority": 4,
         "url": "https://github.com/skishore/makemeahanzi",
-        "license": "LGPL"
-      },
-      {
-        "name": "214 Kangxi radicals",
-        "url": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
-        "license": "none declared"
+        "license": "LGPL",
+        "description": "etymology.json — semantic radical → related characters mapping"
       }
-    ],
-    "generatedAt": "2026-03-30",
-    "totalRadicals": 226
+    ]
   },
   "一": {
     "meaning": "自然數的開始",
@@ -177,7 +192,7 @@
     "meaning": "無色無臭的液體（水的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "ice / water (side)",
+    "englishMeaning": "ice / water (side form)",
     "strokeCount": 2,
     "baseRadical": "水",
     "relatedChars": [
@@ -1433,7 +1448,7 @@
     "meaning": "動物名（犬的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "dog / animal (side)",
+    "englishMeaning": "dog / animal (side form)",
     "strokeCount": 3,
     "baseRadical": "犬",
     "relatedChars": [
@@ -2157,7 +2172,7 @@
   },
   "艹": {
     "meaning": "grass",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "grass",
     "strokeCount": 3,
@@ -2272,7 +2287,7 @@
   },
   "见": {
     "meaning": "see",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "see",
     "strokeCount": 4,
@@ -2316,7 +2331,7 @@
     "meaning": "說、講（言的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "speech / language (simplified)",
+    "englishMeaning": "speech / language (simplified side)",
     "strokeCount": 2,
     "baseRadical": "言",
     "relatedChars": [
@@ -2401,7 +2416,7 @@
   },
   "贝": {
     "meaning": "shell",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "shell",
     "strokeCount": 4,
@@ -2492,7 +2507,7 @@
   },
   "车": {
     "meaning": "cart",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "cart",
     "strokeCount": 4,
@@ -2535,7 +2550,7 @@
   },
   "辶": {
     "meaning": "walk",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "walk",
     "strokeCount": 3,
@@ -2638,7 +2653,7 @@
   },
   "长": {
     "meaning": "long",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "long",
     "strokeCount": 4,
@@ -2647,7 +2662,7 @@
   },
   "门": {
     "meaning": "gate",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "gate",
     "strokeCount": 3,
@@ -2790,7 +2805,7 @@
   },
   "韦": {
     "meaning": "soft leather",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "soft leather",
     "strokeCount": 4,
@@ -2828,7 +2843,7 @@
   },
   "页": {
     "meaning": "page",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "page",
     "strokeCount": 6,
@@ -2866,7 +2881,7 @@
   },
   "飞": {
     "meaning": "fly",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "fly",
     "strokeCount": 4,
@@ -2922,7 +2937,7 @@
   },
   "马": {
     "meaning": "horse",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "horse",
     "strokeCount": 3,
@@ -3052,7 +3067,7 @@
   },
   "鱼": {
     "meaning": "fish",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "fish",
     "strokeCount": 8,
@@ -3073,7 +3088,7 @@
   },
   "鸟": {
     "meaning": "bird",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "bird",
     "strokeCount": 5,
@@ -3094,7 +3109,7 @@
   },
   "卤": {
     "meaning": "salty",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "salty",
     "strokeCount": 7,
@@ -3272,7 +3287,7 @@
   },
   "齐": {
     "meaning": "even",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "even",
     "strokeCount": 6,
@@ -3281,7 +3296,7 @@
   },
   "齿": {
     "meaning": "tooth",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "tooth",
     "strokeCount": 8,
@@ -3302,7 +3317,7 @@
   },
   "龙": {
     "meaning": "dragon",
-    "meaningSource": "branneman-214",
+    "meaningSource": "branneman",
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "dragon",
     "strokeCount": 5,
@@ -3336,7 +3351,7 @@
     "meaning": "無色無臭的液體（水的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "water (flowing)",
+    "englishMeaning": "water (flowing form)",
     "strokeCount": 3,
     "baseRadical": "水",
     "relatedChars": [
@@ -3358,7 +3373,7 @@
     "meaning": "人體的上肢（手的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "hand (side)",
+    "englishMeaning": "hand (side form)",
     "strokeCount": 3,
     "baseRadical": "手",
     "relatedChars": [
@@ -3380,7 +3395,7 @@
     "meaning": "內臟之一（心的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "heart / mind (side)",
+    "englishMeaning": "heart / mind (side form)",
     "strokeCount": 3,
     "baseRadical": "心",
     "relatedChars": [
@@ -3402,7 +3417,7 @@
     "meaning": "具有高度智慧和靈性，且能製造並使用工具以進行勞動的高等動物（人的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "person (side)",
+    "englishMeaning": "person (side form)",
     "strokeCount": 2,
     "baseRadical": "人",
     "relatedChars": [
@@ -3512,7 +3527,7 @@
     "meaning": "地神（示的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "spirit / altar (side)",
+    "englishMeaning": "spirit / altar (side form)",
     "strokeCount": 4,
     "baseRadical": "示",
     "relatedChars": [
@@ -3534,7 +3549,7 @@
     "meaning": "用布帛、皮革或各種纖維材質等做成（衣的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "clothing (side)",
+    "englishMeaning": "clothing (side form)",
     "strokeCount": 5,
     "baseRadical": "衣",
     "relatedChars": [
@@ -3556,7 +3571,7 @@
     "meaning": "物體燃燒時產生的光和熱（火的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "fire (bottom)",
+    "englishMeaning": "fire (bottom form)",
     "strokeCount": 4,
     "baseRadical": "火",
     "relatedChars": [
@@ -3578,7 +3593,7 @@
     "meaning": "武器名（刀的變體）",
     "meaningSource": "moedict",
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
-    "englishMeaning": "knife (side)",
+    "englishMeaning": "knife (side form)",
     "strokeCount": 2,
     "baseRadical": "刀",
     "relatedChars": [
