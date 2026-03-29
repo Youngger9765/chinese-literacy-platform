@@ -12,7 +12,7 @@ import { Story } from '../../types';
 import { evaluateListeningRetelling, ListeningEvaluateResponse } from '../../services/learningApi';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { useAuth } from '../../contexts/AuthContext';
-import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
+import { speakTextWithProgress, cancelTts, TtsProgressInfo } from '../../services/ttsApi';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,14 +36,22 @@ type PlayState = 'idle' | 'playing' | 'paused' | 'done';
 
 /**
  * Speak text using Azure TTS (zh-TW).
- * Returns a speaker object with start/cancel interface matching prior API.
+ * Returns a speaker object with start/cancel interface.
  */
-function createSpeaker(text: string, rate: number): {
-  start: (onEnd: () => void, onError: (e: string) => void) => void;
+function createSpeaker(text: string, _rate: number): {
+  start: (
+    onEnd: () => void,
+    onError: (e: string) => void,
+    onProgress: (info: TtsProgressInfo) => void,
+  ) => void;
   cancel: () => void;
 } {
-  const start = (onEnd: () => void, onError: (e: string) => void) => {
-    cloudSpeakText(text, rate)
+  const start = (
+    onEnd: () => void,
+    onError: (e: string) => void,
+    onProgress: (info: TtsProgressInfo) => void,
+  ) => {
+    speakTextWithProgress(text, onProgress)
       .then(onEnd)
       .catch((err: Error) => onError(err?.message ?? 'speech error'));
   };
@@ -93,6 +101,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
   const [playState, setPlayState] = useState<PlayState>('idle');
   const [playRate, setPlayRate] = useState(0.85);
   const [ttsError, setTtsError] = useState<string | null>(null);
+  const [ttsProgress, setTtsProgress] = useState<TtsProgressInfo | null>(null);
   const speakerRef = useRef<ReturnType<typeof createSpeaker> | null>(null);
 
   // Phase 2 — retelling
@@ -142,23 +151,30 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
       return;
     }
     setTtsError(null);
+    setTtsProgress(null);
     setPlayState('playing');
 
     const speaker = createSpeaker(fullText, playRate);
     speakerRef.current = speaker;
 
     speaker.start(
-      () => setPlayState('done'),
+      () => {
+        setPlayState('done');
+        setTtsProgress(null);
+      },
       (errMsg) => {
         setTtsError(`播放發生錯誤：${errMsg}`);
         setPlayState('idle');
+        setTtsProgress(null);
       },
+      (info) => setTtsProgress(info),
     );
   }, [fullText, playRate]);
 
   const handlePause = useCallback(() => {
     cancelTts();
     setPlayState('paused');
+    setTtsProgress(null);
   }, []);
 
   const handleResume = useCallback(() => {
@@ -170,6 +186,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
   const handleStop = useCallback(() => {
     speakerRef.current?.cancel();
     setPlayState('idle');
+    setTtsProgress(null);
   }, []);
 
   const handleReplay = useCallback(() => {
@@ -382,6 +399,35 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
               </button>
             )}
           </div>
+
+          {/* TTS Progress bar — shown while playing */}
+          {playState === 'playing' && (
+            <div className="space-y-2" aria-label="播放進度">
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={ttsProgress ? Math.round(ttsProgress.progress * 100) : 0}
+                  aria-label="音檔播放進度"
+                >
+                  <div
+                    className="h-full bg-accent rounded-full transition-all duration-300 ease-linear"
+                    style={{ width: `${ttsProgress ? ttsProgress.progress * 100 : 0}%` }}
+                  />
+                </div>
+                <span className="text-xs text-gray-500 tabular-nums min-w-[3rem] text-right">
+                  {ttsProgress
+                    ? `${ttsProgress.sentenceIndex + 1} / ${ttsProgress.totalSentences}`
+                    : '— / —'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 text-center">
+                第 {ttsProgress ? ttsProgress.sentenceIndex + 1 : '—'} 句，共 {ttsProgress ? ttsProgress.totalSentences : '—'} 句
+              </p>
+            </div>
+          )}
 
           {/* Status text */}
           <div className="text-center">
