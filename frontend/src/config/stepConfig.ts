@@ -58,7 +58,7 @@ export const STEP_CONFIG: StepConfig[] = [
   },
   {
     id: 'tutor',
-    label: '念順順',
+    label: '逐段朗讀',
     view: AppView.TUTOR,
     dbStepNumber: 2,
     needsStory: true,
@@ -82,7 +82,7 @@ export const STEP_CONFIG: StepConfig[] = [
   },
   {
     id: 'vocab-definition',
-    label: '語詞我最棒',
+    label: '詞語定義',
     view: AppView.VOCAB_DEFINITION_MATCH,
     dbStepNumber: 12,
     needsStory: true,
