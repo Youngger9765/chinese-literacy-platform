@@ -25935,7 +25935,7 @@
       {
         "radical": "頁",
         "role": "部件",
-        "label": "頁"
+        "label": "頭部"
       }
     ]
   },
@@ -26695,7 +26695,7 @@
     ]
   },
   "穎": {
-    "formula": "禾 + 匕",
+    "formula": "禾 + 匕 + 頁",
     "components": [
       {
         "radical": "禾",
@@ -26704,8 +26704,13 @@
       },
       {
         "radical": "匕",
+        "role": "部件",
+        "label": "匕首"
+      },
+      {
+        "radical": "頁",
         "role": "聲符",
-        "label": "讀音"
+        "label": "頭部"
       }
     ]
   },
@@ -39310,7 +39315,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "丁",
@@ -39325,7 +39330,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "工",
@@ -39340,7 +39345,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "川",
@@ -39360,7 +39365,7 @@
       {
         "radical": "頁",
         "role": "部件",
-        "label": "頁"
+        "label": "頭部"
       }
     ]
   },
@@ -39370,7 +39375,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "予",
@@ -39385,7 +39390,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "元",
@@ -39400,7 +39405,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "屯",
@@ -39415,7 +39420,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "皮",
@@ -39430,7 +39435,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "令",
@@ -39445,7 +39450,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "吉",
@@ -39460,7 +39465,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "豆",
@@ -39475,7 +39480,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "巠",
@@ -39505,7 +39510,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "是",
@@ -39520,7 +39525,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "客",
@@ -39535,7 +39540,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "彥",
@@ -39550,7 +39555,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "原",
@@ -39565,7 +39570,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "真",
@@ -39580,7 +39585,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "雇",
@@ -39595,7 +39600,7 @@
       {
         "radical": "頁",
         "role": "形符",
-        "label": "頁"
+        "label": "頭部"
       },
       {
         "radical": "㬎",
