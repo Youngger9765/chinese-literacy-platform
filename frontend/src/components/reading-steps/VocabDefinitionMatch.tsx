@@ -471,10 +471,117 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
 
   const activeShuffledWords = shuffledWords.filter((wi) => activeDefIndices.includes(wi));
 
+  /* ---- Word bank chips (shared between mobile top strip and desktop right panel) ---- */
+  const wordBankContent = (
+    <>
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center">
+        語詞庫
+      </p>
+      <div className="flex flex-wrap gap-2 justify-center min-h-[56px] bg-gray-50 rounded-xl p-3 border border-gray-200">
+        {activeShuffledWords.map((vocabIdx) => {
+          const isPlaced = placedVocabIdxSet.has(vocabIdx);
+          if (isPlaced) return null;
+
+          const isDragging = draggingVocabIdx === vocabIdx;
+          const isTouchSelected = touchSelected === vocabIdx;
+
+          let cls =
+            'rounded-xl border-2 px-5 py-3 text-center font-bold text-xl select-none transition-all duration-200 ';
+          if (isDragging) {
+            cls += 'border-[#5B4FC4] bg-purple-100 text-purple-900 shadow-xl scale-105 opacity-80 cursor-grabbing';
+          } else if (isTouchSelected) {
+            cls += 'border-[#5B4FC4] bg-purple-100 text-purple-900 shadow-md scale-105 cursor-pointer';
+          } else {
+            cls += 'border-gray-200 bg-white text-gray-800 hover:border-[#5B4FC4] hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-grab';
+          }
+
+          return (
+            <div
+              key={vocabIdx}
+              draggable
+              onDragStart={() => handleDragStart(vocabIdx)}
+              onDragEnd={handleDragEnd}
+              onTouchStart={() => handleTouchStart(vocabIdx)}
+              onClick={() => handleTouchStart(vocabIdx)}
+              className={cls}
+            >
+              {vocab[vocabIdx]?.word}
+            </div>
+          );
+        })}
+      </div>
+      {touchSelected !== null && (
+        <p className="text-center text-xs text-[#5B4FC4] mt-2 font-medium">
+          已選「{vocab[touchSelected]?.word}」— 點選下方欄位放入
+        </p>
+      )}
+    </>
+  );
+
+  /* ---- Definition slots ---- */
+  const definitionSlots = activeDefIndices.map((defIdx) => {
+    const item = vocab[defIdx];
+    const placedVocabIdx = placements.get(defIdx) ?? null;
+    const isCorrect = confirmed.has(defIdx);
+    const isWrong = wrongFlash.has(defIdx);
+    const isOver = hoverTarget === defIdx && !isCorrect;
+
+    let cls =
+      'rounded-2xl border-2 px-4 py-4 min-h-[80px] flex flex-col gap-2 transition-all duration-200 cursor-pointer ';
+    if (isCorrect) {
+      cls += 'bg-emerald-50 border-emerald-400 cursor-default';
+    } else if (isWrong) {
+      cls += 'bg-red-50 border-red-400 animate-shake';
+    } else if (isOver) {
+      cls += 'bg-purple-50 border-[#5B4FC4] scale-[1.01] shadow-md';
+    } else if (placedVocabIdx !== null) {
+      cls += 'bg-amber-50 border-amber-400';
+    } else {
+      cls += 'bg-white border-dashed border-gray-300 hover:border-[#5B4FC4]';
+    }
+
+    return (
+      <div
+        key={defIdx}
+        className={cls}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!isCorrect) setHoverTarget(defIdx);
+        }}
+        onDragLeave={() => setHoverTarget(null)}
+        onDrop={(e) => {
+          e.preventDefault();
+          handleDrop(defIdx);
+        }}
+        onClick={() => handleSlotTap(defIdx)}
+      >
+        <p className="text-sm text-gray-700 leading-relaxed">{item?.definition}</p>
+        <div className="flex items-center justify-center h-8">
+          {isCorrect ? (
+            <span className="font-bold text-base text-emerald-700 flex items-center gap-1">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white text-xs font-bold">
+                ✓
+              </span>
+              {placedVocabIdx !== null ? vocab[placedVocabIdx]?.word : ''}
+            </span>
+          ) : placedVocabIdx !== null ? (
+            <span className="font-bold text-base text-amber-800">
+              {vocab[placedVocabIdx]?.word}
+            </span>
+          ) : (
+            <span className="text-xs text-gray-400 select-none">
+              拖拉語詞到這裡
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  });
+
   return (
-    <div className="max-w-xl mx-auto px-4">
+    <div className="px-4 md:px-6 max-w-5xl mx-auto">
       {/* Progress */}
-      <div className="mb-5 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
+      <div className="mb-4 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-gray-500">配對進度</span>
         <span className="text-base font-black text-amber-700">
           {confirmed.size}{' '}
@@ -486,114 +593,27 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
         拖拉語詞卡片到對應的定義欄位，手機可先點選語詞再點選欄位
       </p>
 
-      {/* Word bank */}
-      <div className="mb-5">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center">
-          語詞庫
-        </p>
-        <div className="flex flex-wrap gap-2 justify-center min-h-[56px] bg-gray-50 rounded-xl p-3 border border-gray-200">
-          {activeShuffledWords.map((vocabIdx) => {
-            const isPlaced = placedVocabIdxSet.has(vocabIdx);
-            if (isPlaced) return null;
-
-            const isDragging = draggingVocabIdx === vocabIdx;
-            const isTouchSelected = touchSelected === vocabIdx;
-
-            let cls =
-              'rounded-xl border-2 px-5 py-3 text-center font-bold text-xl select-none transition-all duration-200 ';
-            if (isDragging) {
-              cls += 'border-[#5B4FC4] bg-purple-100 text-purple-900 shadow-xl scale-105 opacity-80 cursor-grabbing';
-            } else if (isTouchSelected) {
-              cls += 'border-[#5B4FC4] bg-purple-100 text-purple-900 shadow-md scale-105 cursor-pointer';
-            } else {
-              cls += 'border-gray-200 bg-white text-gray-800 hover:border-[#5B4FC4] hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-grab';
-            }
-
-            return (
-              <div
-                key={vocabIdx}
-                draggable
-                onDragStart={() => handleDragStart(vocabIdx)}
-                onDragEnd={handleDragEnd}
-                onTouchStart={() => handleTouchStart(vocabIdx)}
-                onClick={() => handleTouchStart(vocabIdx)}
-                className={cls}
-              >
-                {vocab[vocabIdx]?.word}
-              </div>
-            );
-          })}
-        </div>
-        {touchSelected !== null && (
-          <p className="text-center text-xs text-[#5B4FC4] mt-2 font-medium">
-            已選「{vocab[touchSelected]?.word}」— 點選下方欄位放入
-          </p>
-        )}
+      {/* Mobile: word bank on top (sticky so it stays visible while scrolling definitions) */}
+      <div className="md:hidden sticky top-0 z-10 bg-amber-50 pb-3 pt-1">
+        {wordBankContent}
       </div>
 
-      {/* Definition slots */}
-      <div className="flex flex-col gap-3">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 text-center">
-          定義欄位
-        </p>
-        {activeDefIndices.map((defIdx) => {
-          const item = vocab[defIdx];
-          const placedVocabIdx = placements.get(defIdx) ?? null;
-          const isCorrect = confirmed.has(defIdx);
-          const isWrong = wrongFlash.has(defIdx);
-          const isOver = hoverTarget === defIdx && !isCorrect;
+      {/* Desktop: two-column layout — definitions left (scrollable), word bank right (sticky) */}
+      <div className="md:flex md:gap-6 md:items-start">
+        {/* Left column — definition slots */}
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center md:text-left">
+            定義欄位
+          </p>
+          <div className="flex flex-col gap-3">
+            {definitionSlots}
+          </div>
+        </div>
 
-          let cls =
-            'rounded-2xl border-2 px-4 py-4 min-h-[80px] flex flex-col gap-2 transition-all duration-200 cursor-pointer ';
-          if (isCorrect) {
-            cls += 'bg-emerald-50 border-emerald-400 cursor-default';
-          } else if (isWrong) {
-            cls += 'bg-red-50 border-red-400 animate-shake';
-          } else if (isOver) {
-            cls += 'bg-purple-50 border-[#5B4FC4] scale-[1.01] shadow-md';
-          } else if (placedVocabIdx !== null) {
-            cls += 'bg-amber-50 border-amber-400';
-          } else {
-            cls += 'bg-white border-dashed border-gray-300 hover:border-[#5B4FC4]';
-          }
-
-          return (
-            <div
-              key={defIdx}
-              className={cls}
-              onDragOver={(e) => {
-                e.preventDefault();
-                if (!isCorrect) setHoverTarget(defIdx);
-              }}
-              onDragLeave={() => setHoverTarget(null)}
-              onDrop={(e) => {
-                e.preventDefault();
-                handleDrop(defIdx);
-              }}
-              onClick={() => handleSlotTap(defIdx)}
-            >
-              <p className="text-sm text-gray-700 leading-relaxed">{item?.definition}</p>
-              <div className="flex items-center justify-center h-8">
-                {isCorrect ? (
-                  <span className="font-bold text-base text-emerald-700 flex items-center gap-1">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white text-xs font-bold">
-                      ✓
-                    </span>
-                    {placedVocabIdx !== null ? vocab[placedVocabIdx]?.word : ''}
-                  </span>
-                ) : placedVocabIdx !== null ? (
-                  <span className="font-bold text-base text-amber-800">
-                    {vocab[placedVocabIdx]?.word}
-                  </span>
-                ) : (
-                  <span className="text-xs text-gray-400 select-none">
-                    拖拉語詞到這裡
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        {/* Right column — word bank panel, sticky (desktop only) */}
+        <div className="hidden md:block w-52 flex-shrink-0 sticky top-4 self-start">
+          {wordBankContent}
+        </div>
       </div>
     </div>
   );
