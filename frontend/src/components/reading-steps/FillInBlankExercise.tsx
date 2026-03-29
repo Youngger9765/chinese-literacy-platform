@@ -19,7 +19,7 @@ import { FillInBlankItem } from '../../types';
 interface Props {
   sentences: FillInBlankItem[];
   vocabBank: Record<string, string>;  // { A: "疑難雜症", B: "龍爭虎鬥", ... }
-  onComplete: (score: number, total: number) => void;
+  onComplete: (score: number, total: number, firstTryResults?: QuestionResult[]) => void;
   /** Story ID used to namespace the localStorage key (Issue #709). */
   storyId?: string | number;
 }
@@ -28,7 +28,7 @@ interface Props {
 // Per-question result (for summary)
 // ---------------------------------------------------------------------------
 
-interface QuestionResult {
+export interface QuestionResult {
   sentenceIdx: number;        // index in the original sentences array
   firstTryCorrect: boolean;
   studentFirstAnswer: string | null;  // code of wrong first answer (null if first-try correct)
@@ -392,7 +392,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
             全部重做
           </button>
           <button
-            onClick={() => { clearAnswers(storyId); onComplete(firstTryScore, firstTryTotal); }}
+            onClick={() => { onComplete(firstTryScore, firstTryTotal, firstTryResults); }}
             className="rounded-xl bg-[#5B4FC4] px-10 py-3 text-base font-bold text-white hover:bg-[#4a3fa8] active:scale-95 transition-all shadow-md min-h-[52px]"
           >
             繼續 →
