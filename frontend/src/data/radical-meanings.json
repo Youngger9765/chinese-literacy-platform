@@ -1,0 +1,3599 @@
+{
+  "_metadata": {
+    "sources": [
+      {
+        "name": "moedict (教育部重編國語辭典)",
+        "url": "https://github.com/g0v/moedict-data",
+        "license": "MOE open data"
+      },
+      {
+        "name": "makemeahanzi",
+        "url": "https://github.com/skishore/makemeahanzi",
+        "license": "LGPL"
+      },
+      {
+        "name": "214 Kangxi radicals",
+        "url": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+        "license": "none declared"
+      }
+    ],
+    "generatedAt": "2026-03-30",
+    "totalRadicals": 226
+  },
+  "一": {
+    "meaning": "自然數的開始",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "one",
+    "strokeCount": 1,
+    "relatedChars": [
+      "丛",
+      "丞",
+      "百"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "丨": {
+    "meaning": "上下貫通的樣子",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "line",
+    "strokeCount": 1,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "丶": {
+    "meaning": "讀書時斷句的符號",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "dot",
+    "strokeCount": 1,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "丿": {
+    "meaning": "一左撇的筆畫",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "slash",
+    "strokeCount": 1,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "乙": {
+    "meaning": "天干的第二位",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "second",
+    "strokeCount": 1,
+    "relatedChars": [
+      "乶"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "亅": {
+    "meaning": "倒掛的鉤",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "hook",
+    "strokeCount": 1,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "二": {
+    "meaning": "介於一和三之間的自然數",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "two",
+    "strokeCount": 2,
+    "relatedChars": [
+      "些"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "亠": {
+    "meaning": "二一四部首之一",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "lid",
+    "strokeCount": 2,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "人": {
+    "meaning": "具有高度智慧和靈性，且能製造並使用工具以進行勞動的高等動物",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "person",
+    "strokeCount": 2,
+    "relatedChars": [
+      "仝",
+      "佘",
+      "舍"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "儿": {
+    "meaning": "同「人」",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "legs",
+    "strokeCount": 2,
+    "relatedChars": [
+      "兒",
+      "养"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "入": {
+    "meaning": "發生性關係",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "enter",
+    "strokeCount": 2,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "八": {
+    "meaning": "介於七與九之間的自然數",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "eight",
+    "strokeCount": 2,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "冂": {
+    "meaning": "離城市很遠的地方",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "down box",
+    "strokeCount": 2,
+    "relatedChars": [
+      "冕"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "冖": {
+    "meaning": "覆蓋",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "cover",
+    "strokeCount": 2,
+    "relatedChars": [
+      "冢",
+      "冣"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "冫": {
+    "meaning": "無色無臭的液體（水的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "ice / water (side)",
+    "strokeCount": 2,
+    "baseRadical": "水",
+    "relatedChars": [
+      "冱",
+      "冲",
+      "冷",
+      "冻",
+      "冽",
+      "净",
+      "凄",
+      "准",
+      "凇",
+      "凈"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "几": {
+    "meaning": "「幾」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "table",
+    "strokeCount": 2,
+    "relatedChars": [
+      "凰",
+      "凳"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "凵": {
+    "meaning": "同「坎」",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "open box",
+    "strokeCount": 2,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "刀": {
+    "meaning": "武器名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "knife",
+    "strokeCount": 2,
+    "relatedChars": [
+      "刅",
+      "切",
+      "券",
+      "剪",
+      "劈"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "力": {
+    "meaning": "改變物體運動狀態（靜止或運行速度）的效能稱為「力」，計算單位為「牛頓」",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "power",
+    "strokeCount": 2,
+    "relatedChars": [
+      "办",
+      "劢",
+      "动",
+      "助",
+      "努",
+      "劫",
+      "劬",
+      "劭",
+      "励",
+      "劲"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "勹": {
+    "meaning": "包裹",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "wrap",
+    "strokeCount": 2,
+    "relatedChars": [
+      "匈",
+      "匍",
+      "匐",
+      "甸"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "匕": {
+    "meaning": "古人舀取食物的器具，相當於現代的湯匙、勺子之類",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "ladle",
+    "strokeCount": 2,
+    "relatedChars": [
+      "匙",
+      "此"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "匚": {
+    "meaning": "古代一種盛物的器具",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "right open box",
+    "strokeCount": 2,
+    "relatedChars": [
+      "匛",
+      "匡",
+      "匣",
+      "匦",
+      "匧",
+      "匪",
+      "匭",
+      "匮",
+      "匯",
+      "匱"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "匸": {
+    "meaning": "隱藏",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "hiding enclosure",
+    "strokeCount": 2,
+    "relatedChars": [
+      "匽",
+      "匿"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "十": {
+    "meaning": "數目字，為九加一的總和",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "ten",
+    "strokeCount": 2,
+    "relatedChars": [
+      "华",
+      "博",
+      "毕",
+      "畢",
+      "華"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "卜": {
+    "meaning": "古人灼燒龜甲或牛骨，辨視其裂紋以推斷事情吉凶的行為",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "divination",
+    "strokeCount": 2,
+    "relatedChars": [
+      "卦"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "卩": {
+    "meaning": "古代一種代表身分與權力的信物",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "seal",
+    "strokeCount": 2,
+    "relatedChars": [
+      "却",
+      "卻",
+      "叩"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "厂": {
+    "meaning": "山邊可以居住人的崖洞",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "cliff",
+    "strokeCount": 2,
+    "relatedChars": [
+      "厌",
+      "厕",
+      "厘",
+      "原",
+      "厢",
+      "厦",
+      "厨",
+      "厩",
+      "厪",
+      "厭"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "厶": {
+    "meaning": "「私」的古字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "private",
+    "strokeCount": 2,
+    "relatedChars": [
+      "篡"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "又": {
+    "meaning": "表示重複或反覆",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "again",
+    "strokeCount": 2,
+    "relatedChars": [
+      "凤",
+      "叙",
+      "隻"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "口": {
+    "meaning": "人或動物飲食、發聲的器官",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "mouth",
+    "strokeCount": 3,
+    "relatedChars": [
+      "叨",
+      "叫",
+      "召",
+      "叭",
+      "叮",
+      "叱",
+      "号",
+      "叼",
+      "叽",
+      "吁"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "囗": {
+    "meaning": "圍繞",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "enclosure",
+    "strokeCount": 3,
+    "relatedChars": [
+      "囤",
+      "囫",
+      "园",
+      "围",
+      "囵",
+      "囹",
+      "固",
+      "囿",
+      "圃",
+      "圄"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "土": {
+    "meaning": "地面砂泥等的混合物",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "earth",
+    "strokeCount": 3,
+    "relatedChars": [
+      "在",
+      "圩",
+      "圪",
+      "圬",
+      "圮",
+      "圯",
+      "地",
+      "圹",
+      "场",
+      "圻"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "士": {
+    "meaning": "未婚的男子",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "scholar",
+    "strokeCount": 3,
+    "relatedChars": [
+      "壮",
+      "壯"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "夂": {
+    "meaning": "從後而來",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "go",
+    "strokeCount": 3,
+    "relatedChars": [
+      "処",
+      "夆",
+      "敻",
+      "贛",
+      "赣"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "夊": {
+    "meaning": "(一)之又音",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "go slowly",
+    "strokeCount": 3,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "夕": {
+    "meaning": "傍晚、日落時分",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "night",
+    "strokeCount": 3,
+    "relatedChars": [
+      "夤"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "大": {
+    "meaning": "在體積、面積、容量、數量、強度、深度、力量等方面超過一般，或超過比較的對象",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "big",
+    "strokeCount": 3,
+    "relatedChars": [
+      "头",
+      "夸",
+      "奎",
+      "奕",
+      "奖",
+      "奘",
+      "奢",
+      "樊"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "女": {
+    "meaning": "女子，與「男」相對",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "woman",
+    "strokeCount": 3,
+    "relatedChars": [
+      "奶",
+      "奸",
+      "奼",
+      "妁",
+      "妄",
+      "妆",
+      "妈",
+      "妊",
+      "妒",
+      "妖"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "子": {
+    "meaning": "詞尾：(1)接名詞",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "child",
+    "strokeCount": 3,
+    "relatedChars": [
+      "孓",
+      "存",
+      "孢",
+      "孤",
+      "孥",
+      "孩",
+      "孳",
+      "孺",
+      "孽",
+      "孿"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "宀": {
+    "meaning": "古代一種四面有牆，上有覆蓋，內有堂有室的深屋",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "roof",
+    "strokeCount": 3,
+    "relatedChars": [
+      "宁",
+      "宄",
+      "宅",
+      "宇",
+      "完",
+      "宏",
+      "宓",
+      "宙",
+      "宛",
+      "宠"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "寸": {
+    "meaning": "量詞",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "inch",
+    "strokeCount": 3,
+    "relatedChars": [
+      "專",
+      "尌"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "小": {
+    "meaning": "與「大」相對：(1)體積、數量、力量等方面不大的",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "small",
+    "strokeCount": 3,
+    "relatedChars": [
+      "尕"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "尢": {
+    "meaning": "腳跛",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "lame",
+    "strokeCount": 3,
+    "relatedChars": [
+      "尬",
+      "尴",
+      "尷"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "尸": {
+    "meaning": "死人的軀體",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "corpse",
+    "strokeCount": 3,
+    "relatedChars": [
+      "尻",
+      "屁",
+      "屈",
+      "屑",
+      "屙",
+      "属",
+      "屠",
+      "屡",
+      "屢",
+      "層"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "屮": {
+    "meaning": "初生的草木",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "sprout",
+    "strokeCount": 3,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "山": {
+    "meaning": "陸地上高起的部分",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "mountain",
+    "strokeCount": 3,
+    "relatedChars": [
+      "屹",
+      "屺",
+      "屿",
+      "岈",
+      "岌",
+      "岍",
+      "岐",
+      "岑",
+      "岖",
+      "岗"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "川": {
+    "meaning": "河流",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "river",
+    "strokeCount": 3,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "工": {
+    "meaning": "有專門技術或從事勞動生產的人",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "work",
+    "strokeCount": 3,
+    "relatedChars": [
+      "巧"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "己": {
+    "meaning": "天干的第六位",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "oneself",
+    "strokeCount": 3,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "巾": {
+    "meaning": "擦洗用的布",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "towel",
+    "strokeCount": 3,
+    "relatedChars": [
+      "冘",
+      "帆",
+      "帏",
+      "帐",
+      "帔",
+      "帙",
+      "帛",
+      "帜",
+      "帧",
+      "帱"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "干": {
+    "meaning": "武器名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "dry",
+    "strokeCount": 3,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "幺": {
+    "meaning": "「么」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "thread",
+    "strokeCount": 3,
+    "relatedChars": [
+      "麼"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "广": {
+    "meaning": "依山崖所建造的房屋",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "shelter",
+    "strokeCount": 3,
+    "relatedChars": [
+      "厅",
+      "庀",
+      "庄",
+      "庇",
+      "庋",
+      "序",
+      "庑",
+      "底",
+      "庖",
+      "店"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "廴": {
+    "meaning": "長行，連步行走",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "stride",
+    "strokeCount": 3,
+    "relatedChars": [
+      "廷",
+      "建"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "廾": {
+    "meaning": "「廿」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "hands joined",
+    "strokeCount": 3,
+    "relatedChars": [
+      "弈"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "弋": {
+    "meaning": "小木樁",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "shoot with a bow",
+    "strokeCount": 3,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "弓": {
+    "meaning": "武器名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "bow",
+    "strokeCount": 3,
+    "relatedChars": [
+      "弛",
+      "张",
+      "弥",
+      "弦",
+      "弧",
+      "弩",
+      "弪",
+      "弮",
+      "弳",
+      "張"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "彐": {
+    "meaning": "豬頭",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "snout",
+    "strokeCount": 3,
+    "relatedChars": [
+      "寻"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "彡": {
+    "meaning": "筆所畫的花紋",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "hair",
+    "strokeCount": 3,
+    "relatedChars": [
+      "修",
+      "彥",
+      "彦",
+      "彩",
+      "彬",
+      "彰",
+      "影"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "彳": {
+    "meaning": "左腳的步伐",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "step",
+    "strokeCount": 3,
+    "relatedChars": [
+      "屐",
+      "屦",
+      "屨",
+      "彷",
+      "彸",
+      "彼",
+      "彿",
+      "往",
+      "征",
+      "徂"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "心": {
+    "meaning": "內臟之一",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "heart",
+    "strokeCount": 4,
+    "relatedChars": [
+      "寧",
+      "德",
+      "忌",
+      "忒",
+      "忘",
+      "忞",
+      "忠",
+      "忽",
+      "忿",
+      "态"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "戈": {
+    "meaning": "武器名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "spear",
+    "strokeCount": 4,
+    "relatedChars": [
+      "戕",
+      "戗",
+      "战",
+      "戠",
+      "戡",
+      "戢",
+      "戥",
+      "戧",
+      "戬",
+      "戮"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "户": {
+    "meaning": "「戶」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "door",
+    "strokeCount": 4,
+    "relatedChars": [
+      "居",
+      "屏",
+      "房",
+      "扂",
+      "扃",
+      "扉",
+      "牖"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "手": {
+    "meaning": "人體的上肢",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "hand",
+    "strokeCount": 4,
+    "relatedChars": [
+      "拳",
+      "拿",
+      "挈",
+      "挛",
+      "挲",
+      "掌",
+      "掣",
+      "搴",
+      "摩",
+      "摹"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "支": {
+    "meaning": "草木的枝條",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "branch",
+    "strokeCount": 4,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "攴": {
+    "meaning": "輕擊",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "rap",
+    "strokeCount": 4,
+    "relatedChars": [
+      "敲"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "文": {
+    "meaning": "線條交錯的圖案、花紋",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "script",
+    "strokeCount": 4,
+    "relatedChars": [
+      "斋",
+      "斌",
+      "斐",
+      "斓",
+      "斕",
+      "閔",
+      "闵"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "斗": {
+    "meaning": "量詞",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "dipper",
+    "strokeCount": 4,
+    "relatedChars": [
+      "戽",
+      "斛",
+      "斜",
+      "斟"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "斤": {
+    "meaning": "一種砍樹用的器具",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "axe",
+    "strokeCount": 4,
+    "relatedChars": [
+      "斦",
+      "斧",
+      "斩",
+      "斫",
+      "斬"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "方": {
+    "meaning": "四個角都是九十度的四邊形",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "square",
+    "strokeCount": 4,
+    "relatedChars": [
+      "旃",
+      "旆",
+      "旉",
+      "旌",
+      "旎",
+      "旒",
+      "旖",
+      "旗"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "无": {
+    "meaning": "「無」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "not",
+    "strokeCount": 4,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "日": {
+    "meaning": "人名用字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "sun",
+    "strokeCount": 4,
+    "relatedChars": [
+      "旭",
+      "旰",
+      "旲",
+      "时",
+      "旺",
+      "昀",
+      "昂",
+      "昉",
+      "昕",
+      "星"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "曰": {
+    "meaning": "說",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "say",
+    "strokeCount": 4,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "月": {
+    "meaning": "月亮、月球",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "moon",
+    "strokeCount": 4,
+    "relatedChars": [
+      "勝",
+      "朐",
+      "朔",
+      "朗",
+      "朝",
+      "期",
+      "朦",
+      "朧",
+      "胧",
+      "臍"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "木": {
+    "meaning": "樹、木本植物的通稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "tree",
+    "strokeCount": 4,
+    "relatedChars": [
+      "朴",
+      "权",
+      "杆",
+      "杉",
+      "李",
+      "材",
+      "村",
+      "杖",
+      "杜",
+      "杞"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "欠": {
+    "meaning": "累的時候，張嘴呵氣",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "lack",
+    "strokeCount": 4,
+    "relatedChars": [
+      "欣",
+      "欤",
+      "欲",
+      "欶",
+      "欷",
+      "欹",
+      "欺",
+      "款",
+      "歃",
+      "歆"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "止": {
+    "meaning": "停住、不動",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "stop",
+    "strokeCount": 4,
+    "relatedChars": [
+      "卸",
+      "歧",
+      "歸",
+      "辵"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "歹": {
+    "meaning": "壞事、惡事",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "death",
+    "strokeCount": 4,
+    "relatedChars": [
+      "殁",
+      "殂",
+      "殃",
+      "殄",
+      "殆",
+      "殇",
+      "殉",
+      "殊",
+      "残",
+      "殍"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "殳": {
+    "meaning": "兵器名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "weapon",
+    "strokeCount": 4,
+    "relatedChars": [
+      "殴",
+      "殹",
+      "殺",
+      "毄",
+      "毅",
+      "毆"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "母": {
+    "meaning": "稱謂：(1)對媽媽的稱呼",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "mother",
+    "strokeCount": 4,
+    "relatedChars": [
+      "毓"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "比": {
+    "meaning": "較量",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "compare",
+    "strokeCount": 4,
+    "relatedChars": [
+      "毖"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "毛": {
+    "meaning": "動植物表皮或果實表皮所生的絲狀物",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "fur",
+    "strokeCount": 4,
+    "relatedChars": [
+      "毡",
+      "毪",
+      "毫",
+      "毯",
+      "毵",
+      "毹",
+      "毽",
+      "氂",
+      "氅",
+      "氆"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "氏": {
+    "meaning": "參見「月氏」條",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "clan",
+    "strokeCount": 4,
+    "relatedChars": [
+      "氐"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "气": {
+    "meaning": "雲氣",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "steam",
+    "strokeCount": 4,
+    "relatedChars": [
+      "氕",
+      "氖",
+      "氘",
+      "氙",
+      "氚",
+      "氛",
+      "氟",
+      "氡",
+      "氢",
+      "氤"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "水": {
+    "meaning": "無色無臭的液體",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "water",
+    "strokeCount": 4,
+    "relatedChars": [
+      "氶",
+      "氽",
+      "汆",
+      "汞",
+      "浆",
+      "滎",
+      "漿",
+      "荥",
+      "颍"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "火": {
+    "meaning": "物體燃燒時產生的光和熱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "fire",
+    "strokeCount": 4,
+    "relatedChars": [
+      "灯",
+      "灵",
+      "灸",
+      "灼",
+      "灿",
+      "炀",
+      "炆",
+      "炊",
+      "炒",
+      "炔"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "爪": {
+    "meaning": "人類手、腳的指甲",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "claw",
+    "strokeCount": 4,
+    "relatedChars": [
+      "爬"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "父": {
+    "meaning": "古代對男子的美稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "father",
+    "strokeCount": 4,
+    "relatedChars": [
+      "爷",
+      "爸",
+      "爹",
+      "爺"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "爻": {
+    "meaning": "(一)之讀音",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "lines on a trigram",
+    "strokeCount": 4,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "爿": {
+    "meaning": "江蘇方言",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "half of a tree trunk",
+    "strokeCount": 4,
+    "relatedChars": [
+      "牆"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "片": {
+    "meaning": "扁平的東西",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "slice",
+    "strokeCount": 4,
+    "relatedChars": [
+      "版",
+      "牌",
+      "牍",
+      "牘"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "牙": {
+    "meaning": "人或動物口腔中，用來研磨、咀嚼食物的器官",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "tooth",
+    "strokeCount": 4,
+    "relatedChars": [
+      "穿"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "牛": {
+    "meaning": "動物名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "cow",
+    "strokeCount": 4,
+    "relatedChars": [
+      "牝",
+      "牟",
+      "牡",
+      "物",
+      "牯",
+      "牲",
+      "牴",
+      "牸",
+      "特",
+      "牺"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "犭": {
+    "meaning": "動物名（犬的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "dog / animal (side)",
+    "strokeCount": 3,
+    "baseRadical": "犬",
+    "relatedChars": [
+      "犯",
+      "犰",
+      "犴",
+      "犷",
+      "犸",
+      "犹",
+      "狁",
+      "狂",
+      "狃",
+      "狄"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "玄": {
+    "meaning": "黑色的",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "profound",
+    "strokeCount": 5,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "玉": {
+    "meaning": "寶石的一種，一般指的是閃玉或輝玉",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "jade",
+    "strokeCount": 5,
+    "relatedChars": [
+      "玺",
+      "璧",
+      "璺",
+      "璽"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "瓜": {
+    "meaning": "葫蘆科植物的總稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "melon",
+    "strokeCount": 5,
+    "relatedChars": [
+      "瓞",
+      "瓠",
+      "瓢",
+      "瓣",
+      "瓤"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "瓦": {
+    "meaning": "用陶土燒成的器物的總稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "tile",
+    "strokeCount": 5,
+    "relatedChars": [
+      "瓮",
+      "瓯",
+      "瓴",
+      "瓶",
+      "瓷",
+      "瓿",
+      "甄",
+      "甌",
+      "甏",
+      "甑"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "甘": {
+    "meaning": "甜美的",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "sweet",
+    "strokeCount": 5,
+    "relatedChars": [
+      "甙"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "生": {
+    "meaning": "長出、生長",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "life",
+    "strokeCount": 5,
+    "relatedChars": [
+      "產",
+      "産",
+      "甤"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "用": {
+    "meaning": "功效",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "use",
+    "strokeCount": 5,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "田": {
+    "meaning": "土地",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "field",
+    "strokeCount": 5,
+    "relatedChars": [
+      "亩",
+      "毗",
+      "町",
+      "畀",
+      "畈",
+      "界",
+      "畎",
+      "畛",
+      "畜",
+      "略"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "疋": {
+    "meaning": "量詞",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "cloth",
+    "strokeCount": 5,
+    "relatedChars": [
+      "疌"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "疒": {
+    "meaning": "人有病痛而倚靠休養的樣子",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "ill",
+    "strokeCount": 5,
+    "relatedChars": [
+      "疔",
+      "疖",
+      "疙",
+      "疚",
+      "疝",
+      "疟",
+      "疡",
+      "疣",
+      "疤",
+      "疥"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "癶": {
+    "meaning": "足剌癶：兩個腳掌向外張開行走的樣子",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "foot steps",
+    "strokeCount": 5,
+    "relatedChars": [
+      "登"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "白": {
+    "meaning": "(一)之讀音",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "white",
+    "strokeCount": 5,
+    "relatedChars": [
+      "皅",
+      "皎",
+      "皑",
+      "皒",
+      "皓",
+      "皖",
+      "皙",
+      "皚",
+      "皤",
+      "皦"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "皮": {
+    "meaning": "動植物體表的一層組織",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "skin",
+    "strokeCount": 5,
+    "relatedChars": [
+      "皰",
+      "皱",
+      "皲",
+      "皴",
+      "皺"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "皿": {
+    "meaning": "裝盛東西的器具，多指碗碟杯盤",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "dish",
+    "strokeCount": 5,
+    "relatedChars": [
+      "盂",
+      "盃",
+      "盅",
+      "盆",
+      "盈",
+      "盎",
+      "盒",
+      "盔",
+      "盘",
+      "盛"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "目": {
+    "meaning": "眼睛",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "eye",
+    "strokeCount": 5,
+    "relatedChars": [
+      "冒",
+      "盯",
+      "盱",
+      "盹",
+      "盼",
+      "省",
+      "眄",
+      "眈",
+      "県",
+      "眍"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "矛": {
+    "meaning": "古代一種直刺兵器",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "spear",
+    "strokeCount": 5,
+    "relatedChars": [
+      "務",
+      "矜"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "矢": {
+    "meaning": "箭",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "arrow",
+    "strokeCount": 5,
+    "relatedChars": [
+      "医",
+      "矩",
+      "矫",
+      "矬",
+      "短",
+      "矮",
+      "矯"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "石": {
+    "meaning": "量詞：(1)計算容量的單位",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "stone",
+    "strokeCount": 5,
+    "relatedChars": [
+      "矶",
+      "矸",
+      "矻",
+      "矽",
+      "矾",
+      "矿",
+      "码",
+      "砍",
+      "砒",
+      "研"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "示": {
+    "meaning": "地神",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "spirit",
+    "strokeCount": 5,
+    "relatedChars": [
+      "祟",
+      "禁",
+      "禦"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "禸": {
+    "meaning": "獸類踐踏地面",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "track",
+    "strokeCount": 4,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "禾": {
+    "meaning": "穀類植物的總稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "grain",
+    "strokeCount": 5,
+    "relatedChars": [
+      "秀",
+      "种",
+      "秒",
+      "秕",
+      "秘",
+      "秣",
+      "秧",
+      "秩",
+      "秫",
+      "秭"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "穴": {
+    "meaning": "(一)之又音",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "cave",
+    "strokeCount": 5,
+    "relatedChars": [
+      "穵",
+      "究",
+      "空",
+      "窀",
+      "窃",
+      "窄",
+      "窆",
+      "窈",
+      "窍",
+      "窒"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "立": {
+    "meaning": "直身站著",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "stand",
+    "strokeCount": 5,
+    "relatedChars": [
+      "旁",
+      "竘",
+      "站",
+      "竣",
+      "竭",
+      "端"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "竹": {
+    "meaning": "植物名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "bamboo",
+    "strokeCount": 6,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "米": {
+    "meaning": "去殼的穀實，今專指稻實",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "rice",
+    "strokeCount": 6,
+    "relatedChars": [
+      "籼",
+      "粉",
+      "粑",
+      "粒",
+      "粕",
+      "粗",
+      "粘",
+      "粞",
+      "粢",
+      "粪"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "纟": {
+    "meaning": "「絲」的異體字（糸的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "silk / thread (simplified side)",
+    "strokeCount": 3,
+    "baseRadical": "糸",
+    "relatedChars": [
+      "纡",
+      "红",
+      "纣",
+      "纤",
+      "约",
+      "级",
+      "纨",
+      "纩",
+      "纪",
+      "纬"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "缶": {
+    "meaning": "盛酒漿的瓦器，腹大口小，有蓋",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "jar",
+    "strokeCount": 6,
+    "relatedChars": [
+      "匋",
+      "缸",
+      "缺",
+      "缽",
+      "罂",
+      "罄",
+      "罈",
+      "罌",
+      "罐"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "网": {
+    "meaning": "同「網」",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "net",
+    "strokeCount": 6,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "羊": {
+    "meaning": "吉利、吉祥",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "sheep",
+    "strokeCount": 6,
+    "relatedChars": [
+      "羍",
+      "羔",
+      "羚",
+      "羝",
+      "群",
+      "羨",
+      "義",
+      "羯"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "羽": {
+    "meaning": "鳥類的毛",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "feather",
+    "strokeCount": 6,
+    "relatedChars": [
+      "翁",
+      "翅",
+      "翊",
+      "翎",
+      "翔",
+      "翘",
+      "翠",
+      "翡",
+      "翥",
+      "翦"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "老": {
+    "meaning": "年長的人",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "old",
+    "strokeCount": 6,
+    "relatedChars": [
+      "耄",
+      "耆",
+      "耋"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "而": {
+    "meaning": "兩頰上的毛",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "and",
+    "strokeCount": 6,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "耒": {
+    "meaning": "古代木製耕具上的曲柄",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "plow",
+    "strokeCount": 6,
+    "relatedChars": [
+      "耔",
+      "耕",
+      "耖",
+      "耗",
+      "耘",
+      "耙",
+      "耜",
+      "耠",
+      "耢",
+      "耤"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "耳": {
+    "meaning": "人及動物的聽覺器官",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "ear",
+    "strokeCount": 6,
+    "relatedChars": [
+      "耵",
+      "耶",
+      "耷",
+      "耸",
+      "耻",
+      "耽",
+      "聃",
+      "聆",
+      "聊",
+      "聋"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "聿": {
+    "meaning": "筆",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "brush",
+    "strokeCount": 6,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "肉": {
+    "meaning": "動物體中包住骨骼的柔韌物質",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "meat",
+    "strokeCount": 6,
+    "relatedChars": [
+      "胬",
+      "脔",
+      "腐",
+      "臠"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "臣": {
+    "meaning": "俘虜、奴隸",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "minister",
+    "strokeCount": 6,
+    "relatedChars": [
+      "監",
+      "臧",
+      "赜"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "自": {
+    "meaning": "起源的地方",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "oneself",
+    "strokeCount": 6,
+    "relatedChars": [
+      "鼻"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "至": {
+    "meaning": "到達、來到",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "arrive",
+    "strokeCount": 6,
+    "relatedChars": [
+      "到",
+      "臻"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "臼": {
+    "meaning": "中間下凹的舂米器具",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "mortar",
+    "strokeCount": 6,
+    "relatedChars": [
+      "舂"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "舌": {
+    "meaning": "動物口腔中專司辨別味道，幫助咀嚼與發音的味覺器官",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "tongue",
+    "strokeCount": 6,
+    "relatedChars": [
+      "舐",
+      "舔"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "舛": {
+    "meaning": "乖違、違背",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "contrary",
+    "strokeCount": 6,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "舟": {
+    "meaning": "船",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "boat",
+    "strokeCount": 6,
+    "relatedChars": [
+      "舡",
+      "舢",
+      "舣",
+      "舨",
+      "航",
+      "舫",
+      "舭",
+      "舯",
+      "舰",
+      "舲"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "艮": {
+    "meaning": "食物堅韌不脆",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "mountain",
+    "strokeCount": 6,
+    "relatedChars": [
+      "艰",
+      "艱"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "色": {
+    "meaning": "俗稱性慾衝動",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "color",
+    "strokeCount": 6,
+    "relatedChars": [
+      "艴"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "艹": {
+    "meaning": "grass",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "grass",
+    "strokeCount": 3,
+    "relatedChars": [
+      "艺",
+      "艻",
+      "艽",
+      "艾",
+      "艿",
+      "芄",
+      "芋",
+      "芍",
+      "芎",
+      "芏"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "虍": {
+    "meaning": "老虎身上的花紋",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "tiger",
+    "strokeCount": 6,
+    "relatedChars": [
+      "虘",
+      "虞"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "虫": {
+    "meaning": "虺的古字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "insect",
+    "strokeCount": 6,
+    "relatedChars": [
+      "萤",
+      "虮",
+      "虱",
+      "虹",
+      "虺",
+      "虻",
+      "虼",
+      "虾",
+      "虿",
+      "蚁"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "血": {
+    "meaning": "動物循環系統的體液之一，可循流全身，輸送氧、養分及代謝物",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "blood",
+    "strokeCount": 6,
+    "relatedChars": [
+      "衅"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "行": {
+    "meaning": "行列",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "walk",
+    "strokeCount": 6,
+    "relatedChars": [
+      "衖",
+      "街",
+      "衙",
+      "衚",
+      "衛",
+      "衝",
+      "衢"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "衣": {
+    "meaning": "用布帛、皮革或各種纖維材質等做成",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "clothes",
+    "strokeCount": 6,
+    "relatedChars": [
+      "衾",
+      "袅",
+      "袈",
+      "袋",
+      "袤",
+      "裂",
+      "装",
+      "裊",
+      "裏",
+      "裒"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "西": {
+    "meaning": "方位名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "west",
+    "strokeCount": 6,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "见": {
+    "meaning": "see",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "see",
+    "strokeCount": 4,
+    "relatedChars": [
+      "规",
+      "视",
+      "览",
+      "觉",
+      "觊",
+      "觌",
+      "觎",
+      "觏",
+      "觐",
+      "觑"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "角": {
+    "meaning": "參見「角里」條",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "horn",
+    "strokeCount": 7,
+    "relatedChars": [
+      "觖",
+      "觚",
+      "觜",
+      "觞",
+      "觥",
+      "触",
+      "觫",
+      "觯",
+      "觱",
+      "觳"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "讠": {
+    "meaning": "說、講（言的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "speech / language (simplified)",
+    "strokeCount": 2,
+    "baseRadical": "言",
+    "relatedChars": [
+      "计",
+      "订",
+      "讣",
+      "认",
+      "讥",
+      "让",
+      "讪",
+      "讫",
+      "训",
+      "议"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "谷": {
+    "meaning": "兩山間的水道或低地",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "valley",
+    "strokeCount": 7,
+    "relatedChars": [
+      "谿",
+      "豁",
+      "郤"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "豆": {
+    "meaning": "古代盛食品的器皿",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "bean",
+    "strokeCount": 7,
+    "relatedChars": [
+      "豇",
+      "豉",
+      "豌"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "豕": {
+    "meaning": "豬，家畜之一",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "pig",
+    "strokeCount": 7,
+    "relatedChars": [
+      "象",
+      "豢",
+      "豪",
+      "豬",
+      "豱"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "豸": {
+    "meaning": "爬蟲類的總稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "badger",
+    "strokeCount": 7,
+    "relatedChars": [
+      "豹",
+      "豺",
+      "豻",
+      "貂",
+      "貅",
+      "貉",
+      "貍",
+      "貓",
+      "貔",
+      "貘"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "贝": {
+    "meaning": "shell",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "shell",
+    "strokeCount": 4,
+    "relatedChars": [
+      "员",
+      "貿",
+      "賞",
+      "贡",
+      "财",
+      "贤",
+      "账",
+      "货",
+      "质",
+      "贩"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "赤": {
+    "meaning": "紅色的",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "red",
+    "strokeCount": 7,
+    "relatedChars": [
+      "赧",
+      "赭"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "走": {
+    "meaning": "疾行、奔跑",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "walk",
+    "strokeCount": 7,
+    "relatedChars": [
+      "赳",
+      "赴",
+      "赶",
+      "起",
+      "赸",
+      "趁",
+      "趄",
+      "超",
+      "越",
+      "趋"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "足": {
+    "meaning": "過分",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "foot",
+    "strokeCount": 7,
+    "relatedChars": [
+      "趴",
+      "趵",
+      "趺",
+      "趼",
+      "趾",
+      "趿",
+      "跂",
+      "跃",
+      "跄",
+      "跆"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "身": {
+    "meaning": "參見「身毒」條",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "body",
+    "strokeCount": 7,
+    "relatedChars": [
+      "躯",
+      "躲",
+      "躺",
+      "軀"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "车": {
+    "meaning": "cart",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "cart",
+    "strokeCount": 4,
+    "relatedChars": [
+      "毂",
+      "轧",
+      "轨",
+      "轩",
+      "轫",
+      "转",
+      "轭",
+      "轮",
+      "软",
+      "轱"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "辛": {
+    "meaning": "辣的味道",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "bitter",
+    "strokeCount": 7,
+    "relatedChars": [
+      "辜",
+      "辣"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "辰": {
+    "meaning": "地支的第五位",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "morning",
+    "strokeCount": 7,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "辶": {
+    "meaning": "walk",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "walk",
+    "strokeCount": 3,
+    "relatedChars": [
+      "边",
+      "辽",
+      "达",
+      "迁",
+      "迂",
+      "迄",
+      "过",
+      "迎",
+      "运",
+      "近"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "邑": {
+    "meaning": "國家",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "city",
+    "strokeCount": 7,
+    "relatedChars": [
+      "扈"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "酉": {
+    "meaning": "地支的第十位",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "wine",
+    "strokeCount": 7,
+    "relatedChars": [
+      "酊",
+      "酌",
+      "配",
+      "酎",
+      "酏",
+      "酐",
+      "酕",
+      "酚",
+      "酝",
+      "酞"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "釆": {
+    "meaning": "分別、辨別",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "distinguish",
+    "strokeCount": 7,
+    "relatedChars": [
+      "釉",
+      "释",
+      "釋"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "里": {
+    "meaning": "居所、居處",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "village",
+    "strokeCount": 7,
+    "relatedChars": [
+      "野",
+      "量"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "钅": {
+    "meaning": "（gold，Au）化學元素（金的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "metal / gold (simplified side)",
+    "strokeCount": 5,
+    "baseRadical": "金",
+    "relatedChars": [
+      "衔",
+      "钆",
+      "钇",
+      "钋",
+      "钌",
+      "钍",
+      "钏",
+      "钐",
+      "钒",
+      "钔"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "长": {
+    "meaning": "long",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "long",
+    "strokeCount": 4,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "门": {
+    "meaning": "gate",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "gate",
+    "strokeCount": 3,
+    "relatedChars": [
+      "闫",
+      "闱",
+      "闳",
+      "闶",
+      "闸",
+      "闺",
+      "闼",
+      "闾",
+      "阀",
+      "阁"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "阜": {
+    "meaning": "土山",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "mound",
+    "strokeCount": 8,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "隶": {
+    "meaning": "及、到",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "slave",
+    "strokeCount": 8,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "隹": {
+    "meaning": "短尾鳥的總稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "short-tailed bird",
+    "strokeCount": 8,
+    "relatedChars": [
+      "隼",
+      "雁",
+      "雄",
+      "雅",
+      "雇",
+      "雈",
+      "雉",
+      "雌",
+      "雎",
+      "雏"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "雨": {
+    "meaning": "空氣中的水蒸氣遇冷凝結而降落的小水滴",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "rain",
+    "strokeCount": 8,
+    "relatedChars": [
+      "雪",
+      "雯",
+      "雳",
+      "零",
+      "雹",
+      "雾",
+      "霁",
+      "霂",
+      "霆",
+      "震"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "青": {
+    "meaning": "參見「青青」(二)條",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "blue",
+    "strokeCount": 8,
+    "relatedChars": [
+      "静",
+      "靛",
+      "靜"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "非": {
+    "meaning": "不對的、不善的",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "wrong",
+    "strokeCount": 8,
+    "relatedChars": [
+      "靠",
+      "靡"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "面": {
+    "meaning": "臉部",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "face",
+    "strokeCount": 9,
+    "relatedChars": [
+      "靥",
+      "靦",
+      "麵"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "革": {
+    "meaning": "去毛且經過加工處理的獸皮",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "leather",
+    "strokeCount": 9,
+    "relatedChars": [
+      "靳",
+      "靴",
+      "靶",
+      "靼",
+      "鞅",
+      "鞋",
+      "鞍",
+      "鞑",
+      "鞒",
+      "鞔"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "韦": {
+    "meaning": "soft leather",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "soft leather",
+    "strokeCount": 4,
+    "relatedChars": [
+      "韧",
+      "韫",
+      "韬"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "韭": {
+    "meaning": "植物名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "leek",
+    "strokeCount": 9,
+    "relatedChars": [
+      "齑"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "音": {
+    "meaning": "聲響、聲音",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "sound",
+    "strokeCount": 9,
+    "relatedChars": [
+      "響"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "页": {
+    "meaning": "page",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "page",
+    "strokeCount": 6,
+    "relatedChars": [
+      "顶",
+      "项",
+      "顺",
+      "顽",
+      "顾",
+      "顿",
+      "颀",
+      "颂",
+      "颃",
+      "预"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "风": {
+    "meaning": "「風」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "wind",
+    "strokeCount": 4,
+    "relatedChars": [
+      "飐",
+      "飒",
+      "飓",
+      "飕",
+      "飖",
+      "飘"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "飞": {
+    "meaning": "fly",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "fly",
+    "strokeCount": 4,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "饣": {
+    "meaning": "吃的東西（食的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "food (simplified side)",
+    "strokeCount": 3,
+    "baseRadical": "食",
+    "relatedChars": [
+      "饥",
+      "饧",
+      "饨",
+      "饩",
+      "饪",
+      "饫",
+      "饭",
+      "饮",
+      "饯",
+      "饱"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "首": {
+    "meaning": "頭、腦袋",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "head",
+    "strokeCount": 9,
+    "relatedChars": [
+      "馗"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "香": {
+    "meaning": "芬芳美好的氣味",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "fragrant",
+    "strokeCount": 9,
+    "relatedChars": [
+      "馥",
+      "馨"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "马": {
+    "meaning": "horse",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "horse",
+    "strokeCount": 3,
+    "relatedChars": [
+      "冯",
+      "腾",
+      "蓦",
+      "驭",
+      "驮",
+      "驯",
+      "驰",
+      "驱",
+      "驳",
+      "驴"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "骨": {
+    "meaning": "參見「骨朵兒」條",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "bone",
+    "strokeCount": 9,
+    "relatedChars": [
+      "骯",
+      "骶",
+      "骷",
+      "骸",
+      "骼",
+      "髁",
+      "髂",
+      "髅",
+      "髋",
+      "髌"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "高": {
+    "meaning": "上下距離遠的",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "high",
+    "strokeCount": 10,
+    "relatedChars": [
+      "喬"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "髟": {
+    "meaning": "形容毛髮垂披",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "long hair",
+    "strokeCount": 10,
+    "relatedChars": [
+      "髡",
+      "髦",
+      "髫",
+      "髭",
+      "髮",
+      "髯",
+      "髹",
+      "髻",
+      "鬃",
+      "鬍"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鬥": {
+    "meaning": "相爭",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "fight",
+    "strokeCount": 10,
+    "relatedChars": [
+      "鬨",
+      "鬩"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鬯": {
+    "meaning": "古代祭祀時所用的香酒，由鬱金香釀秬黍而成",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "sacrificial wine",
+    "strokeCount": 10,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "鬲": {
+    "meaning": "一種古代的炊具",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "cauldron",
+    "strokeCount": 10,
+    "relatedChars": [
+      "融"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鬼": {
+    "meaning": "人死後的靈魂",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "ghost",
+    "strokeCount": 9,
+    "relatedChars": [
+      "醜",
+      "魂",
+      "魃",
+      "魄",
+      "魆",
+      "魇",
+      "魈",
+      "魉",
+      "魍",
+      "魎"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鱼": {
+    "meaning": "fish",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "fish",
+    "strokeCount": 8,
+    "relatedChars": [
+      "鰂",
+      "鱿",
+      "鲂",
+      "鲃",
+      "鲅",
+      "鲆",
+      "鲇",
+      "鲈",
+      "鲋",
+      "鲍"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鸟": {
+    "meaning": "bird",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "bird",
+    "strokeCount": 5,
+    "relatedChars": [
+      "凫",
+      "鸠",
+      "鸢",
+      "鸥",
+      "鸦",
+      "鸧",
+      "鸨",
+      "鸩",
+      "鸪",
+      "鸫"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "卤": {
+    "meaning": "salty",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "salty",
+    "strokeCount": 7,
+    "relatedChars": [
+      "鹾"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鹿": {
+    "meaning": "動物名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "deer",
+    "strokeCount": 11,
+    "relatedChars": [
+      "廌",
+      "麂",
+      "麇",
+      "麈",
+      "麋",
+      "麒",
+      "麝",
+      "麟"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "麦": {
+    "meaning": "「麥」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "wheat",
+    "strokeCount": 7,
+    "relatedChars": [
+      "麸"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "麻": {
+    "meaning": "以韌皮纖維為主要用途之草本植物的統稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "hemp",
+    "strokeCount": 11,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "黄": {
+    "meaning": "「黃」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "yellow",
+    "strokeCount": 11,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "黍": {
+    "meaning": "植物名",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "millet",
+    "strokeCount": 12,
+    "relatedChars": [
+      "黏"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "黑": {
+    "meaning": "(一)之讀音",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "black",
+    "strokeCount": 12,
+    "relatedChars": [
+      "黔",
+      "黛",
+      "黜",
+      "黝",
+      "點",
+      "黟",
+      "黠",
+      "黢",
+      "黥",
+      "黧"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "黹": {
+    "meaning": "女紅的通稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "embroidery",
+    "strokeCount": 12,
+    "relatedChars": [
+      "黻",
+      "黼"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "黾": {
+    "meaning": "「黽」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "frog",
+    "strokeCount": 8,
+    "relatedChars": [
+      "鼋",
+      "鼍"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鼎": {
+    "meaning": "古代用來烹煮食物的金屬器具",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "tripod",
+    "strokeCount": 12,
+    "relatedChars": [
+      "鼐"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鼓": {
+    "meaning": "樂器名，打擊樂器",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "drum",
+    "strokeCount": 13,
+    "relatedChars": [
+      "鼕",
+      "鼗"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鼠": {
+    "meaning": "哺乳類齧齒目鼠科動物的總稱",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "rat",
+    "strokeCount": 13,
+    "relatedChars": [
+      "鼢",
+      "鼩",
+      "鼬",
+      "鼯",
+      "鼱",
+      "鼴",
+      "鼷",
+      "鼹"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "鼻": {
+    "meaning": "動物的呼吸器官之一，主司嗅覺",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "nose",
+    "strokeCount": 14,
+    "relatedChars": [
+      "鼽",
+      "鼾",
+      "齄"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "齐": {
+    "meaning": "even",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "even",
+    "strokeCount": 6,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "齿": {
+    "meaning": "tooth",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "tooth",
+    "strokeCount": 8,
+    "relatedChars": [
+      "龀",
+      "龃",
+      "龄",
+      "龅",
+      "龆",
+      "龇",
+      "龈",
+      "龉",
+      "龋",
+      "龌"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "龙": {
+    "meaning": "dragon",
+    "meaningSource": "branneman-214",
+    "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
+    "englishMeaning": "dragon",
+    "strokeCount": 5,
+    "relatedChars": [
+      "袭",
+      "龚",
+      "龛"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "龟": {
+    "meaning": "「龜」的異體字",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "turtle",
+    "strokeCount": 7,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "龠": {
+    "meaning": "樂器名，吹管樂器",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "flute",
+    "strokeCount": 17,
+    "relatedChars": [],
+    "relatedCharsSource": "none"
+  },
+  "氵": {
+    "meaning": "無色無臭的液體（水的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "water (flowing)",
+    "strokeCount": 3,
+    "baseRadical": "水",
+    "relatedChars": [
+      "塗",
+      "氾",
+      "氿",
+      "汀",
+      "汁",
+      "汒",
+      "汔",
+      "汕",
+      "汗",
+      "汛"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "扌": {
+    "meaning": "人體的上肢（手的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "hand (side)",
+    "strokeCount": 3,
+    "baseRadical": "手",
+    "relatedChars": [
+      "举",
+      "扑",
+      "扒",
+      "打",
+      "扔",
+      "払",
+      "扢",
+      "扣",
+      "扦",
+      "扪"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "忄": {
+    "meaning": "內臟之一（心的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "heart / mind (side)",
+    "strokeCount": 3,
+    "baseRadical": "心",
+    "relatedChars": [
+      "忆",
+      "忉",
+      "忏",
+      "忕",
+      "忖",
+      "忡",
+      "忤",
+      "忧",
+      "忪",
+      "忭"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "亻": {
+    "meaning": "具有高度智慧和靈性，且能製造並使用工具以進行勞動的高等動物（人的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "person (side)",
+    "strokeCount": 2,
+    "baseRadical": "人",
+    "relatedChars": [
+      "亿",
+      "仃",
+      "仅",
+      "仆",
+      "仇",
+      "仕",
+      "仗",
+      "仙",
+      "仟",
+      "仫"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "訁": {
+    "meaning": "說、講（言的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "speech / language (traditional side)",
+    "strokeCount": 2,
+    "baseRadical": "言",
+    "relatedChars": [
+      "訂",
+      "訃",
+      "訇",
+      "計",
+      "訊",
+      "訓",
+      "訕",
+      "訖",
+      "訚",
+      "訛"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "釒": {
+    "meaning": "（gold，Au）化學元素（金的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "metal / gold (traditional side)",
+    "strokeCount": 8,
+    "baseRadical": "金",
+    "relatedChars": [
+      "欽",
+      "釦",
+      "釧",
+      "釩",
+      "鈀",
+      "鈆",
+      "鈉",
+      "鈍",
+      "鈔",
+      "鈕"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "飠": {
+    "meaning": "吃的東西（食的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "food (traditional side)",
+    "strokeCount": 8,
+    "baseRadical": "食",
+    "relatedChars": [
+      "飢",
+      "飩",
+      "飪",
+      "飫",
+      "飯",
+      "飲",
+      "飴",
+      "飼",
+      "飽",
+      "餃"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "糹": {
+    "meaning": "「絲」的異體字（糸的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "silk / thread (traditional side)",
+    "strokeCount": 6,
+    "baseRadical": "糸",
+    "relatedChars": [
+      "紀",
+      "紂",
+      "約",
+      "紅",
+      "紆",
+      "紈",
+      "紋",
+      "納",
+      "紐",
+      "純"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "礻": {
+    "meaning": "地神（示的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "spirit / altar (side)",
+    "strokeCount": 4,
+    "baseRadical": "示",
+    "relatedChars": [
+      "礼",
+      "祀",
+      "祁",
+      "祇",
+      "祈",
+      "祉",
+      "祎",
+      "祓",
+      "祕",
+      "祖"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "衤": {
+    "meaning": "用布帛、皮革或各種纖維材質等做成（衣的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "clothing (side)",
+    "strokeCount": 5,
+    "baseRadical": "衣",
+    "relatedChars": [
+      "补",
+      "衩",
+      "衫",
+      "衬",
+      "衲",
+      "衹",
+      "衽",
+      "衿",
+      "袂",
+      "袄"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "灬": {
+    "meaning": "物體燃燒時產生的光和熱（火的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "fire (bottom)",
+    "strokeCount": 4,
+    "baseRadical": "火",
+    "relatedChars": [
+      "点",
+      "烈",
+      "热",
+      "烹",
+      "焘",
+      "然",
+      "煎",
+      "照",
+      "煮",
+      "熏"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  },
+  "刂": {
+    "meaning": "武器名（刀的變體）",
+    "meaningSource": "moedict",
+    "meaningSourceUrl": "https://github.com/g0v/moedict-data",
+    "englishMeaning": "knife (side)",
+    "strokeCount": 2,
+    "baseRadical": "刀",
+    "relatedChars": [
+      "刈",
+      "刊",
+      "刎",
+      "刖",
+      "列",
+      "刘",
+      "刚",
+      "创",
+      "判",
+      "刨"
+    ],
+    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
+  }
+}
