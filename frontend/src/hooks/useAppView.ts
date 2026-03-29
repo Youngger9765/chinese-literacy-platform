@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { AppView } from '../types';
+import { PATH_TO_VIEW } from '../config/stepConfig';
 
 /**
  * Derive the current AppView from the route path.
@@ -27,14 +28,12 @@ export function useAppView(): AppView {
   if (pathname === '/profile') return AppView.STUDENT_PROFILE;
 
   // Learning flow: /learn/:storyId/<step>
+  // Use PATH_TO_VIEW from stepConfig so any new step is automatically mapped
+  // without needing a manual update here.
   if (pathname.includes('/learn/')) {
-    if (pathname.endsWith('/intro')) return AppView.INTRO;
-    if (pathname.endsWith('/tutor')) return AppView.TUTOR;
-    if (pathname.endsWith('/comprehension')) return AppView.COMPREHENSION;
-    if (pathname.endsWith('/vocab')) return AppView.VOCAB;
-    if (pathname.endsWith('/dictation')) return AppView.DICTATION;
-    if (pathname.endsWith('/full-reading')) return AppView.FULL_READING;
-    if (pathname.endsWith('/report')) return AppView.REPORT;
+    const stepId = pathname.split('/').pop() ?? '';
+    const view = PATH_TO_VIEW[stepId];
+    if (view !== undefined) return view;
   }
 
   return AppView.HOME;
