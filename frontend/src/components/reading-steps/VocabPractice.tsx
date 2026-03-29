@@ -426,10 +426,10 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {/* Mode toggle tabs */}
           <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
             <button
-              onClick={() => setActiveTab('stroke')}
+              onClick={() => { setActiveTab('stroke'); if (phase === 'sentence') setPhase('grid'); }}
               className={[
                 'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
-                activeTab === 'stroke'
+                activeTab === 'stroke' && phase !== 'sentence'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700',
               ].join(' ')}
@@ -444,7 +444,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               onClick={() => setPhase('sentence')}
               className={[
                 'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
-                'text-gray-500 hover:text-gray-700',
+                phase === 'sentence'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700',
               ].join(' ')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
