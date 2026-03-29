@@ -58,6 +58,220 @@ MANUAL_CORRECTIONS: dict[str, dict] = {
             {"radical": "頁", "role": "聲符", "label": "頭部"},
         ],
     },
+    # --------------------------------------------------------------------------
+    # Characters where makemeahanzi pictophonetic only has semantic OR phonetic
+    # (missing the other half), so the auto-builder emits only 1 component.
+    # Fixed by listing all visible surface components in stroke order.
+    # --------------------------------------------------------------------------
+
+    # 雜: decomp ⿰⿳亠从木隹 — semantic missing; phonetic=隹; surface: 九+木+隹
+    "雜": {
+        "formula": "九 + 木 + 隹",
+        "components": [
+            {"radical": "九", "role": "部件", "label": "九"},
+            {"radical": "木", "role": "部件", "label": "木"},
+            {"radical": "隹", "role": "聲符", "label": "短尾鳥"},
+        ],
+    },
+    # 德: decomp ⿰彳⿱⿱十罒⿱一心 — phonetic missing; semantic=心; surface: 彳+十+罒+心
+    "德": {
+        "formula": "彳 + 十 + 罒 + 心",
+        "components": [
+            {"radical": "彳", "role": "形符", "label": "行旁"},
+            {"radical": "十", "role": "部件", "label": "十"},
+            {"radical": "罒", "role": "部件", "label": "網罟"},
+            {"radical": "心", "role": "部件", "label": "心"},
+        ],
+    },
+    # 惱: decomp ⿰忄⿱巛囟 — phonetic missing; semantic=忄; surface: 忄+囟
+    "惱": {
+        "formula": "忄 + 囟",
+        "components": [
+            {"radical": "忄", "role": "形符", "label": "心旁"},
+            {"radical": "囟", "role": "聲符", "label": "腦頂"},
+        ],
+    },
+    # 贏: decomp ⿵吂⿲⺼貝？ — phonetic missing; semantic=貝; surface: 亡+口+月+貝+凡
+    "贏": {
+        "formula": "亡 + 口 + 月 + 貝 + 凡",
+        "components": [
+            {"radical": "亡", "role": "部件", "label": "亡"},
+            {"radical": "口", "role": "部件", "label": "口"},
+            {"radical": "月", "role": "部件", "label": "月亮"},
+            {"radical": "貝", "role": "形符", "label": "貝"},
+            {"radical": "凡", "role": "部件", "label": "凡"},
+        ],
+    },
+    # 參: decomp ⿳厽人彡 — semantic missing; phonetic=彡; surface: ⺶+大+彡
+    "參": {
+        "formula": "⺶ + 大 + 彡",
+        "components": [
+            {"radical": "⺶", "role": "部件", "label": "羊頭"},
+            {"radical": "大", "role": "部件", "label": "大"},
+            {"radical": "彡", "role": "聲符", "label": "紋飾"},
+        ],
+    },
+    # 霸: decomp ⿱雨⿰革月 — phonetic missing; semantic=雨; surface: 雨+革+月
+    "霸": {
+        "formula": "雨 + 革 + 月",
+        "components": [
+            {"radical": "雨", "role": "形符", "label": "雨"},
+            {"radical": "革", "role": "部件", "label": "皮革"},
+            {"radical": "月", "role": "部件", "label": "月亮"},
+        ],
+    },
+    # 但: decomp ⿰亻旦 — semantic missing; phonetic=旦; surface: 亻+旦
+    "但": {
+        "formula": "亻 + 旦",
+        "components": [
+            {"radical": "亻", "role": "形符", "label": "人旁"},
+            {"radical": "旦", "role": "聲符", "label": "旦"},
+        ],
+    },
+    # 低: decomp ⿰亻氐 — semantic missing; phonetic=氐; surface: 亻+氐
+    "低": {
+        "formula": "亻 + 氐",
+        "components": [
+            {"radical": "亻", "role": "形符", "label": "人旁"},
+            {"radical": "氐", "role": "聲符", "label": "氐"},
+        ],
+    },
+    # 列: decomp ⿰歹刂 — phonetic missing; semantic=刂; surface: 歹+刂
+    "列": {
+        "formula": "歹 + 刂",
+        "components": [
+            {"radical": "歹", "role": "部件", "label": "歹"},
+            {"radical": "刂", "role": "形符", "label": "刀旁"},
+        ],
+    },
+    # 沒: decomp ⿰氵⿱？又 — phonetic missing; semantic=氵; surface: 氵+殳
+    "沒": {
+        "formula": "氵 + 殳",
+        "components": [
+            {"radical": "氵", "role": "形符", "label": "水旁"},
+            {"radical": "殳", "role": "聲符", "label": "殳"},
+        ],
+    },
+    # 沿: decomp ⿰氵⿱几口 — phonetic missing; semantic=氵; surface: 氵+几+口
+    "沿": {
+        "formula": "氵 + 几 + 口",
+        "components": [
+            {"radical": "氵", "role": "形符", "label": "水旁"},
+            {"radical": "几", "role": "部件", "label": "几"},
+            {"radical": "口", "role": "部件", "label": "口"},
+        ],
+    },
+    # 春: decomp ⿱？日 — phonetic missing; semantic=日; surface: 三+人+日 (屯+日)
+    "春": {
+        "formula": "三 + 人 + 日",
+        "components": [
+            {"radical": "三", "role": "部件", "label": "三"},
+            {"radical": "人", "role": "部件", "label": "人"},
+            {"radical": "日", "role": "形符", "label": "太陽"},
+        ],
+    },
+    # 黑: decomp ⿱？灬 — ideographic; surface: 口+土+灬
+    "黑": {
+        "formula": "口 + 土 + 灬",
+        "components": [
+            {"radical": "口", "role": "部件", "label": "口"},
+            {"radical": "土", "role": "部件", "label": "土"},
+            {"radical": "灬", "role": "部件", "label": "火底"},
+        ],
+    },
+    # 約: decomp ⿰糹勺 — phonetic missing; semantic=糹; surface: 糹+勺
+    "約": {
+        "formula": "糹 + 勺",
+        "components": [
+            {"radical": "糹", "role": "形符", "label": "絲線"},
+            {"radical": "勺", "role": "聲符", "label": "勺"},
+        ],
+    },
+    # 探: decomp ⿰扌⿱？木 — phonetic missing; semantic=扌; surface: 扌+穴+木
+    "探": {
+        "formula": "扌 + 穴 + 木",
+        "components": [
+            {"radical": "扌", "role": "形符", "label": "手旁"},
+            {"radical": "穴", "role": "部件", "label": "穴"},
+            {"radical": "木", "role": "部件", "label": "木"},
+        ],
+    },
+    # 拋: decomp ⿰扌⿺尢力 — phonetic missing; semantic=扌; surface: 扌+九+力
+    "拋": {
+        "formula": "扌 + 九 + 力",
+        "components": [
+            {"radical": "扌", "role": "形符", "label": "手旁"},
+            {"radical": "九", "role": "部件", "label": "九"},
+            {"radical": "力", "role": "部件", "label": "力量"},
+        ],
+    },
+    # 拖: decomp ⿰扌⿱亻也 — phonetic missing; semantic=扌; surface: 扌+它
+    "拖": {
+        "formula": "扌 + 它",
+        "components": [
+            {"radical": "扌", "role": "形符", "label": "手旁"},
+            {"radical": "它", "role": "聲符", "label": "它"},
+        ],
+    },
+    # 塌: decomp ⿰土⿱日羽 — phonetic missing; semantic=土; surface: 土+日+羽
+    "塌": {
+        "formula": "土 + 日 + 羽",
+        "components": [
+            {"radical": "土", "role": "形符", "label": "土"},
+            {"radical": "日", "role": "部件", "label": "太陽"},
+            {"radical": "羽", "role": "部件", "label": "羽毛"},
+        ],
+    },
+    # 塞: decomp ⿱宀⿱？土 — phonetic missing; semantic=土; surface: 宀+二+土
+    "塞": {
+        "formula": "宀 + 二 + 土",
+        "components": [
+            {"radical": "宀", "role": "部件", "label": "房頂"},
+            {"radical": "二", "role": "部件", "label": "二"},
+            {"radical": "土", "role": "形符", "label": "土"},
+        ],
+    },
+    # 員: decomp ⿱口貝 — phonetic missing; semantic=貝; surface: 口+貝
+    "員": {
+        "formula": "口 + 貝",
+        "components": [
+            {"radical": "口", "role": "部件", "label": "口"},
+            {"radical": "貝", "role": "形符", "label": "貝"},
+        ],
+    },
+    # 容: decomp ⿱宀谷 — phonetic missing; semantic=宀; surface: 宀+谷
+    "容": {
+        "formula": "宀 + 谷",
+        "components": [
+            {"radical": "宀", "role": "形符", "label": "房頂"},
+            {"radical": "谷", "role": "聲符", "label": "山谷"},
+        ],
+    },
+    # 疫: decomp ⿸疒殳 — phonetic missing; semantic=疒; surface: 疒+殳
+    "疫": {
+        "formula": "疒 + 殳",
+        "components": [
+            {"radical": "疒", "role": "形符", "label": "病旁"},
+            {"radical": "殳", "role": "聲符", "label": "殳"},
+        ],
+    },
+    # 秀: decomp ⿱禾乃 — phonetic missing; semantic=禾; surface: 禾+乃
+    "秀": {
+        "formula": "禾 + 乃",
+        "components": [
+            {"radical": "禾", "role": "形符", "label": "穀物"},
+            {"radical": "乃", "role": "部件", "label": "乃"},
+        ],
+    },
+    # 款: decomp ⿰⿱士示欠 — phonetic missing; semantic=欠; surface: 士+示+欠
+    "款": {
+        "formula": "士 + 示 + 欠",
+        "components": [
+            {"radical": "士", "role": "部件", "label": "士"},
+            {"radical": "示", "role": "部件", "label": "祭祀"},
+            {"radical": "欠", "role": "形符", "label": "欠"},
+        ],
+    },
 }
 
 
