@@ -758,6 +758,13 @@ export function getDecomposition(char: string): CharDecomposition | null {
   return null;
 }
 
+/** Returns the source of decomposition data for a character */
+export function getDecompositionSource(char: string): 'hand-curated' | 'generated' | null {
+  if (charDecomposition[char]) return 'hand-curated';
+  if (_generatedCache && _generatedCache[char]) return 'generated';
+  return null;
+}
+
 /**
  * Returns related characters for a given radical.
  * Excludes the source character itself from the list.
