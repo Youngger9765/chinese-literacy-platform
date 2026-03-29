@@ -466,7 +466,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
 
   function getCellClass(row: number, col: number): string {
     const key = row + ',' + col;
-    if (highlightedCells.has(key)) return 'bg-emerald-400 text-white font-bold';
+    if (highlightedCells.has(key)) return 'bg-[#5B4FC4] text-white font-black ring-2 ring-inset ring-white';
     if (dragCells.has(key)) return 'bg-indigo-300 text-white font-bold';
     if (flashCells.has(key)) return 'bg-red-300 text-white';
     return 'bg-white text-gray-800 hover:bg-indigo-50';
@@ -511,16 +511,16 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     );
   }
 
-  // Ensure minimum 44px touch targets per design guidelines
-  const cellSizePx = Math.max(44, Math.min(52, Math.floor((Math.min(440, window.innerWidth - 32)) / size)));
-  const fontSizePx = Math.max(14, Math.floor(cellSizePx * 0.55));
+  // Ensure minimum 44px touch targets per design guidelines; use larger cells for readability
+  const cellSizePx = Math.max(48, Math.min(64, Math.floor((Math.min(520, window.innerWidth - 32)) / size)));
+  const fontSizePx = Math.max(20, Math.floor(cellSizePx * 0.62));
 
   return (
     <div className="flex flex-col gap-4 px-2 py-4 select-none">
       {/* Header — larger and more prominent */}
       <div className="flex items-center justify-between px-2">
         <div>
-          <h2 className="text-lg font-black text-gray-800">找一找：語詞方格</h2>
+          <h2 className="text-lg font-black text-gray-800">語詞複習</h2>
           <p className="text-sm text-gray-500 mt-0.5 font-medium">
             找出
             <span className="font-black text-indigo-700 mx-1">{foundWords.size}</span>
@@ -564,10 +564,10 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <div className="flex flex-col xl:flex-row gap-6 items-center xl:items-start justify-center">
         {/* Grid */}
         <div
-          className="flex-shrink-0 mx-auto touch-none cursor-crosshair rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm"
+          className="flex-shrink-0 touch-none cursor-crosshair rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm"
           role="grid"
           aria-label="語詞方格，拖選字元以找出語詞"
           onMouseDown={onMouseDown}
@@ -610,11 +610,11 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
         </div>
 
         {/* Word list — more prominent */}
-        <div className="flex flex-col gap-3 w-full lg:w-56">
+        <div className="flex flex-col gap-3 w-full xl:w-52 max-w-sm mx-auto xl:mx-0">
           <h3 className="text-sm font-black text-gray-600 uppercase tracking-wide px-1">
             待找語詞
           </h3>
-          <div className="flex flex-wrap lg:flex-col gap-2">
+          <div className="flex flex-wrap xl:flex-col gap-2 justify-center xl:justify-start">
             {placedWords.map((pw) => {
               const found = foundWords.has(pw.word);
               const vocabItem = story.vocabulary?.find((v) => v.word === pw.word);
@@ -624,13 +624,13 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                   className={
                     'flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-300 min-h-[52px] ' +
                     (found
-                      ? 'bg-emerald-50 border-emerald-300'
+                      ? 'bg-[#5B4FC4]/10 border-[#5B4FC4]/40'
                       : 'bg-white border-gray-200')
                   }
                 >
                   {found ? (
                     <svg
-                      className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                      className="w-5 h-5 text-[#5B4FC4] flex-shrink-0"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                       aria-label="已找到"
@@ -646,15 +646,15 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                   )}
                   <span
                     className={
-                      'text-base font-black ' +
-                      (found ? 'text-emerald-600 line-through' : 'text-gray-800')
+                      'text-lg font-black ' +
+                      (found ? 'text-[#5B4FC4] line-through' : 'text-gray-800')
                     }
                   >
                     {pw.word}
                   </span>
                   {!found && vocabItem?.definition && (
                     <span
-                      className="hidden lg:block text-xs text-gray-400 truncate flex-1"
+                      className="hidden xl:block text-xs text-gray-400 truncate flex-1"
                       title={vocabItem.definition}
                     >
                       {vocabItem.definition.length > 16
