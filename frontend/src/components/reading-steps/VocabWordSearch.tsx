@@ -462,7 +462,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
 
   function getCellClass(row: number, col: number): string {
     const key = row + ',' + col;
-    if (highlightedCells.has(key)) return 'bg-indigo-100 text-indigo-700 font-black';
+    if (highlightedCells.has(key)) return 'bg-indigo-50 text-indigo-700 font-black';
     if (dragCells.has(key)) return 'bg-indigo-300 text-white font-bold';
     if (flashCells.has(key)) return 'bg-red-300 text-white';
     return 'bg-white text-gray-800 hover:bg-indigo-50';
@@ -634,7 +634,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                 top: ov.y,
                 width: ov.w,
                 height: ov.h,
-                border: '2.5px solid #ef4444',
+                border: '4px solid #ef4444',
                 borderRadius: 10,
                 pointerEvents: 'none',
                 boxSizing: 'border-box',
