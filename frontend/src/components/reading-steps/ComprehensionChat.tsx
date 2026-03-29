@@ -773,7 +773,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   return (
     <div
-      className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 h-full bg-amber-50 overflow-hidden`}
+      className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 h-full bg-amber-50 overflow-hidden relative`}
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
@@ -920,64 +920,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           )}
         </>
       ) : (
-        /* DESKTOP: Current dual-panel layout */
+        /* DESKTOP: dual-panel for AI chat; full-width for structure table / MCQ */
         <>
-          {/* LEFT: Story text panel */}
-          <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
-            {/* Tab bar */}
-            <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-              <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-                {story.filename}
-              </div>
-              <div className="flex-1" />
-              <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
-            </div>
-
-            {/* Story content — all paragraphs visible for reference */}
-            <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
-              <div className="max-w-3xl mx-auto space-y-20">
-                {story.content.map((line, idx) => (
-                  <div
-                    key={idx}
-                    ref={el => { paragraphRefs.current[idx] = el; }}
-                    className={`rounded-2xl px-6 py-12 border transition-all ${
-                      highlightedParagraph === idx
-                        ? 'border-amber-500/60 bg-amber-900/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
-                        : 'border-transparent hover:border-gray-200 hover:bg-white/40'
-                    }`}
-                  >
-                    <p className={`text-2xl lg:text-3xl text-gray-900 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
-                      {zhuyinLines ? zhuyinLines[idx] : line}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Status bar */}
-            <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 text-[10px] text-gray-500 uppercase shrink-0">
-              <span>共 {story.content.length} 段 · {story.title}</span>
-            </div>
-          </div>
-
-          {/* Resizable divider */}
-          <div
-            onMouseDown={onDividerMouseDown}
-            onTouchStart={onDividerTouchStart}
-            className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
-          />
-
-          {/* RIGHT: Chat / 文章重點表 / 選擇題 panel */}
-          <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
-            {/* Panel tab bar */}
-            <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center">
+          {/* Shared tab bar — always visible on desktop */}
+          {(activeTab === 'structure' || activeTab === 'mcq') && (
+            <div className="absolute top-0 left-0 right-0 h-9 z-10 bg-white border-b border-gray-200 flex items-center shrink-0">
               <button
                 onClick={() => setActiveTab('chat')}
-                className={`px-3 h-full text-[11px] font-bold border-b-2 transition-colors ${
-                  activeTab === 'chat'
-                    ? 'border-accent text-accent'
-                    : 'border-transparent text-gray-400 hover:text-gray-700'
-                }`}
+                className="px-3 h-full text-[11px] font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition-colors"
               >
                 AI 對話
               </button>
@@ -1004,8 +954,104 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 </button>
               )}
               <div className="flex-1" />
-              {activeTab === 'chat' && (
-                <>
+              <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+            </div>
+          )}
+
+          {activeTab === 'structure' ? (
+            /* FULL-WIDTH: 文章重點表 */
+            <div className="flex-1 flex flex-col min-h-0 pt-9">
+              <div className="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 custom-scrollbar">
+                <div className="max-w-5xl mx-auto">
+                  <StoryStructureTable storyId={story.id} />
+                </div>
+              </div>
+            </div>
+          ) : activeTab === 'mcq' && story.multipleChoice && story.multipleChoice.length > 0 ? (
+            /* FULL-WIDTH: 選擇題 */
+            <div className="flex-1 flex flex-col min-h-0 pt-9">
+              <div className="flex-1 overflow-y-auto bg-gray-50 custom-scrollbar">
+                <div className="max-w-3xl mx-auto py-6 px-4 lg:px-0">
+                  <MultipleChoiceExercise
+                    questions={story.multipleChoice}
+                    onComplete={() => setActiveTab('chat')}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* DUAL-PANE: story left + AI chat right */
+            <>
+              {/* LEFT: Story text panel */}
+              <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
+                {/* Tab bar */}
+                <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
+                  <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
+                    {story.filename}
+                  </div>
+                  <div className="flex-1" />
+                  <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+                </div>
+
+                {/* Story content — all paragraphs visible for reference */}
+                <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
+                  <div className="max-w-3xl mx-auto space-y-20">
+                    {story.content.map((line, idx) => (
+                      <div
+                        key={idx}
+                        ref={el => { paragraphRefs.current[idx] = el; }}
+                        className={`rounded-2xl px-6 py-12 border transition-all ${
+                          highlightedParagraph === idx
+                            ? 'border-amber-500/60 bg-amber-900/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
+                            : 'border-transparent hover:border-gray-200 hover:bg-white/40'
+                        }`}
+                      >
+                        <p className={`text-2xl lg:text-3xl text-gray-900 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                          {zhuyinLines ? zhuyinLines[idx] : line}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status bar */}
+                <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 text-[10px] text-gray-500 uppercase shrink-0">
+                  <span>共 {story.content.length} 段 · {story.title}</span>
+                </div>
+              </div>
+
+              {/* Resizable divider */}
+              <div
+                onMouseDown={onDividerMouseDown}
+                onTouchStart={onDividerTouchStart}
+                className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
+              />
+
+              {/* RIGHT: Chat panel */}
+              <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
+                {/* Panel tab bar */}
+                <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center">
+                  <button
+                    onClick={() => setActiveTab('chat')}
+                    className="px-3 h-full text-[11px] font-bold border-b-2 border-accent text-accent"
+                  >
+                    AI 對話
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('structure')}
+                    className="px-3 h-full text-[11px] font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition-colors"
+                  >
+                    文章重點表
+                  </button>
+                  {story.multipleChoice && story.multipleChoice.length > 0 && (
+                    <button
+                      onClick={() => setActiveTab('mcq')}
+                      className="px-3 h-full text-[11px] font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition-colors"
+                    >
+                      選擇題
+                    </button>
+                  )}
+                  <div className="flex-1" />
                   <span className="text-[10px] text-gray-600 pr-2">
                     {understoodCount} / {requiredCount} 理解
                   </span>
@@ -1015,23 +1061,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                   >
                     跳過
                   </button>
-                </>
-              )}
-            </div>
+                </div>
 
-            {activeTab === 'structure' ? (
-              <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-                <StoryStructureTable storyId={story.id} />
-              </div>
-            ) : activeTab === 'mcq' && story.multipleChoice && story.multipleChoice.length > 0 ? (
-              <div className="flex-1 overflow-y-auto bg-gray-50">
-                <MultipleChoiceExercise
-                  questions={story.multipleChoice}
-                  onComplete={() => setActiveTab('chat')}
-                />
-              </div>
-            ) : (
-              <>
                 {/* Chat messages */}
                 <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50">
                   {renderChatMessages()}
@@ -1039,9 +1070,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
                 {/* Input area */}
                 {renderInputArea()}
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
         </>
       )}
 
