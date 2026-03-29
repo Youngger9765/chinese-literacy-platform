@@ -50,7 +50,7 @@ export interface StepConfig {
 export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'reading-annotation',
-    label: '閱讀標記',
+    label: '讀全文-做記號',
     view: AppView.READING_ANNOTATION,
     dbStepNumber: 8,
     needsStory: true,
@@ -58,7 +58,7 @@ export const STEP_CONFIG: StepConfig[] = [
   },
   {
     id: 'tutor',
-    label: '逐段朗讀',
+    label: '念順順',
     view: AppView.TUTOR,
     dbStepNumber: 2,
     needsStory: true,
@@ -82,7 +82,7 @@ export const STEP_CONFIG: StepConfig[] = [
   },
   {
     id: 'vocab-definition',
-    label: '語詞定義',
+    label: '語詞我最棒',
     view: AppView.VOCAB_DEFINITION_MATCH,
     dbStepNumber: 12,
     needsStory: true,
