@@ -347,6 +347,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [zhuyinReady, setZhuyinReady] = useState(false);
   const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
   const [isTtsPaused, setIsTtsPaused] = useState(false);
+  const [isTtsLoading, setIsTtsLoading] = useState(false); // true while fetch is in-flight, before audio starts
   const [isAnalyzing, setIsAnalyzing] = useState(false); // legacy — kept for status bar compat
   const [isAwaitingGemini, setIsAwaitingGemini] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
@@ -1019,6 +1020,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     if (!text) return;
     cancelTts();
     setIsTtsPaused(false);
+    setIsTtsLoading(true); // show loading state while network fetch is in-flight
 
     const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -1030,6 +1032,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     };
 
     const startCursorAnimation = () => {
+      setIsTtsLoading(false); // audio started — no longer loading
       setIsTtsSpeaking(true);
       setSpeakingProgress(0);
       setRealtimeDiffTokens(null);
@@ -1049,6 +1052,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     const onSpeechEnd = () => {
       stopTtsAnimation();
+      setIsTtsLoading(false);
       setIsTtsSpeaking(false);
       setIsTtsPaused(false);
     };
@@ -1134,6 +1138,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       ua.currentTime = 0;
     }
     cancelTts();
+    setIsTtsLoading(false);
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
   };
@@ -1275,7 +1280,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                               if (utteranceRef.current) { const _u = utteranceRef.current; if (_u instanceof HTMLAudioElement) { _u.onended = null; _u.onerror = null; _u.pause(); } else { (_u as SpeechSynthesisUtterance).onend = null; (_u as SpeechSynthesisUtterance).onerror = null; (_u as SpeechSynthesisUtterance).onboundary = null; } utteranceRef.current = null; }
                               if (ttsRafRef.current !== null) { cancelAnimationFrame(ttsRafRef.current); ttsRafRef.current = null; }
                               cancelTts();
-                              setIsTtsSpeaking(false); setIsTtsPaused(false);
+                              setIsTtsLoading(false); setIsTtsSpeaking(false); setIsTtsPaused(false);
                             } else {
                               // Speak this paragraph's text via speakCurrentParagraph
                               // (navigating to that line first if needed)
@@ -1286,29 +1291,35 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                                 const text = story.content[idx];
                                 if (text) {
                                   cancelTts();
-                                  setIsTtsSpeaking(true);
+                                  setIsTtsLoading(true); // loading while ttsApi module + fetch in-flight
                                   import('../../services/ttsApi').then(({ speakText: sp }) => {
+                                    setIsTtsLoading(false);
+                                    setIsTtsSpeaking(true);
                                     sp(text).finally(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
-                                  });
+                                  }).catch(() => { setIsTtsLoading(false); });
                                 }
                               }
                             }
                           }}
-                          disabled={idx === currentLineIndex && (isSessionActive || isPreparing)}
+                          disabled={isTtsLoading || (idx === currentLineIndex && (isSessionActive || isPreparing))}
                           className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all ${
-                            idx === currentLineIndex && (isSessionActive || isPreparing)
+                            isTtsLoading || (idx === currentLineIndex && (isSessionActive || isPreparing))
                               ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                               : isTtsSpeaking && idx === currentLineIndex
                                 ? 'bg-red-100 hover:bg-red-200 text-red-600'
                                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                           }`}
+                          aria-label={isTtsLoading ? '載入中' : isTtsSpeaking && idx === currentLineIndex ? '停止朗讀' : 'AI 示範朗讀'}
+                          aria-busy={isTtsLoading}
                         >
-                          {isTtsSpeaking && idx === currentLineIndex ? (
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="4" height="12" rx="1" /><rect x="14" y="6" width="4" height="12" rx="1" /></svg>
+                          {isTtsLoading ? (
+                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                          ) : isTtsSpeaking && idx === currentLineIndex ? (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="4" height="12" rx="1" /><rect x="14" y="6" width="4" height="12" rx="1" /></svg>
                           ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
                           )}
-                          {isTtsSpeaking && idx === currentLineIndex ? '停止' : 'AI 朗讀'}
+                          {isTtsLoading ? '載入中...' : isTtsSpeaking && idx === currentLineIndex ? '停止' : 'AI 朗讀'}
                         </button>
                         {/* A/B test: Web Speech API button for comparison */}
                         <button
