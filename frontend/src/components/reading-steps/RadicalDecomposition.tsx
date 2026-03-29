@@ -8,11 +8,12 @@
  * Based on 部件教學法 by Prof. Tseng Shih-chieh (曾世杰教授).
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   getDecomposition,
   getRadicalInfo,
   getRelatedChars,
+  initGeneratedDecompositions,
   RadicalRole,
   RelatedChar,
 } from '../../data/radicals';
@@ -64,6 +65,14 @@ const RelatedCharCard: React.FC<RelatedCharCardProps> = ({ item, isSelected, onC
 const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => {
   const [selectedRelated, setSelectedRelated] = useState<RelatedChar | null>(null);
   const [activeRadical, setActiveRadical] = useState<string | null>(null);
+  const [, forceUpdate] = useState(0);
+
+  // Load generated decomposition database on first render (lazy chunk).
+  // forceUpdate triggers a re-render after the data is available so that
+  // characters not in the hand-curated set are shown immediately.
+  useEffect(() => {
+    initGeneratedDecompositions().then(() => forceUpdate(n => n + 1));
+  }, []);
 
   const decomp = getDecomposition(char);
 
