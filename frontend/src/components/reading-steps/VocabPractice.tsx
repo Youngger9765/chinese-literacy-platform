@@ -19,9 +19,9 @@ interface VocabPracticeProps {
   onBack: () => void;
 }
 
-type Phase = 'grid' | 'practice' | 'pronunciation' | 'sentence' | 'zhuyin-game';
+type Phase = 'grid' | 'practice' | 'pronunciation' | 'zhuyin-game';
 
-type PracticeMode = 'stroke' | 'pronunciation' | 'zhuyin' | 'fillinblank';
+type PracticeMode = 'stroke' | 'pronunciation' | 'zhuyin' | 'fillinblank' | 'sentence';
 
 /* ================================================================ */
 /*  Progress bar                                                     */
@@ -294,18 +294,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     );
   }
 
-  /* ── Sentence phase: compose sentences after stroke practice ── */
-  if (phase === 'sentence') {
-    return (
-      <SentencePractice
-        practicedChars={Array.from(practicedChars)}
-        storyTitle={story.title}
-        onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
-        onBack={() => setPhase('grid')}
-      />
-    );
-  }
-
   /* ── Zhuyin phonetic game phase ── */
   if (phase === 'zhuyin-game') {
     return (
@@ -325,7 +313,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const currentChars = activeTab === 'stroke' ? displayChars : activeTab === 'pronunciation' ? pronunciationChars : [];
   const currentPracticedSet = activeTab === 'stroke' ? practicedChars : activeTab === 'pronunciation' ? pronouncedChars : new Set<string>();
   const currentDone = activeTab === 'stroke' ? strokeDone : activeTab === 'pronunciation' ? pronounceDone : false;
-  // 'zhuyin' and 'fillinblank' tabs are handled separately above; these vars only matter for stroke/pronunciation
+  // 'zhuyin', 'fillinblank', and 'sentence' tabs are handled separately; these vars only matter for stroke/pronunciation
 
   // Characters for which we have radical decomposition data
   const charsWithRadical = displayChars.filter(ch => getDecomposition(ch) !== null);
@@ -352,7 +340,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               ? `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`
               : activeTab === 'fillinblank'
                 ? '語詞應用'
-                : '注音遊戲'}
+                : activeTab === 'sentence'
+                  ? '造句練習'
+                  : '注音遊戲'}
         </span>
         <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
@@ -378,10 +368,10 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {/* Mode toggle tabs */}
           <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
             <button
-              onClick={() => { setActiveTab('stroke'); if (phase === 'sentence') setPhase('grid'); }}
+              onClick={() => setActiveTab('stroke')}
               className={[
                 'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
-                activeTab === 'stroke' && phase !== 'sentence'
+                activeTab === 'stroke'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700',
               ].join(' ')}
@@ -393,10 +383,10 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               {strokeDone && <span className="w-2 h-2 bg-emerald-500 rounded-full" />}
             </button>
             <button
-              onClick={() => setPhase('sentence')}
+              onClick={() => setActiveTab('sentence')}
               className={[
                 'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
-                phase === 'sentence'
+                activeTab === 'sentence'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700',
               ].join(' ')}
@@ -441,8 +431,19 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </div>
           )}
 
-          {/* Character grid — hidden when zhuyin or fillinblank tab is active */}
-          {activeTab !== 'zhuyin' && activeTab !== 'fillinblank' && <>{/* Character grid */}
+          {/* Sentence practice — inline tab panel */}
+          {activeTab === 'sentence' && (
+            <SentencePractice
+              practicedChars={displayChars.length > 0 ? displayChars : Array.from(practicedChars)}
+              storyTitle={story.title}
+              onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+              onBack={() => setActiveTab('stroke')}
+              inline
+            />
+          )}
+
+          {/* Character grid — hidden when zhuyin, fillinblank, or sentence tab is active */}
+          {activeTab !== 'zhuyin' && activeTab !== 'fillinblank' && activeTab !== 'sentence' && <>{/* Character grid */}
           {currentChars.length === 0 ? (
             <div className="text-gray-400 text-sm py-8 text-center">
               {activeTab === 'stroke'
@@ -589,7 +590,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               <p className="text-emerald-800 font-bold mb-2">太棒了！所有生字都練習完了！</p>
               <p className="text-emerald-700 text-sm mb-3">接下來，試著用這些生字各造兩個句子吧！</p>
               <button
-                onClick={() => setPhase('sentence')}
+                onClick={() => setActiveTab('sentence')}
                 className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
               >
                 開始造句練習
