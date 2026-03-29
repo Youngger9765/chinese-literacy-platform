@@ -440,6 +440,18 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               筆順練習
               {strokeDone && <span className="w-2 h-2 bg-emerald-500 rounded-full" />}
             </button>
+            <button
+              onClick={() => setPhase('sentence')}
+              className={[
+                'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
+                'text-gray-500 hover:text-gray-700',
+              ].join(' ')}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z" />
+              </svg>
+              造句練習
+            </button>
             {/* 發音練習 and 注音遊戲 tabs hidden per product decision 2026-03-27 */}
             {/* 語詞應用 tab removed — now a separate step (#668 VocabApplication) */}
           </div>
@@ -642,32 +654,16 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       </div>
 
       {/* Bottom actions */}
-      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-end">
         <button
-          onClick={onBack}
-          className="px-4 py-3 rounded-xl text-base text-gray-500 hover:text-gray-800 transition-colors"
+          onClick={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
-          回到朗讀
+          {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </button>
-        <div className="flex items-center gap-3">
-          {practicedChars.size > 0 && !allDone && (
-            <button
-              onClick={() => setPhase('sentence')}
-              className="px-5 py-3 rounded-xl font-bold text-base border border-accent text-accent hover:bg-accent/10 transition-all active:scale-95"
-            >
-              造句練習
-            </button>
-          )}
-          <button
-            onClick={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
-            className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
-          >
-            {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
       </div>
     </div>
   );
