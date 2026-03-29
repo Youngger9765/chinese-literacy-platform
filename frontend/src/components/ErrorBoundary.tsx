@@ -1,5 +1,9 @@
 import React, { Component, ErrorInfo } from 'react';
 
+const RELOAD_COUNT_KEY = 'error_reload_count';
+const MAX_AUTO_RELOADS = 2;
+const STABLE_PAGE_TIMEOUT_MS = 10_000;
+
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   /** Optional fallback UI override. Receives error + reset callback. */
@@ -28,12 +32,40 @@ function generateErrorId(): string {
   return `ERR-${ts}-${rand}`;
 }
 
+function getReloadCount(): number {
+  try {
+    return parseInt(sessionStorage.getItem(RELOAD_COUNT_KEY) ?? '0', 10) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function setReloadCount(count: number): void {
+  try {
+    sessionStorage.setItem(RELOAD_COUNT_KEY, String(count));
+  } catch {
+    // sessionStorage unavailable — ignore
+  }
+}
+
+function clearReloadCount(): void {
+  try {
+    sessionStorage.removeItem(RELOAD_COUNT_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 /**
  * Top-level React error boundary.
  *
  * Catches render-phase errors anywhere in the component tree, logs them to
- * the browser console (picked up by Cloud Logging in production), and
- * displays a friendly recovery UI instead of a blank page.
+ * the browser console (picked up by Cloud Logging in production), and either:
+ * - Auto-reloads the page (up to MAX_AUTO_RELOADS times, tracked in sessionStorage), or
+ * - Displays a friendly recovery UI if the auto-reload limit is reached.
+ *
+ * On successful page load (no error within STABLE_PAGE_TIMEOUT_MS ms),
+ * the reload counter is cleared so future transient errors can auto-reload again.
  *
  * Usage:
  *   <ErrorBoundary>
@@ -41,10 +73,26 @@ function generateErrorId(): string {
  *   </ErrorBoundary>
  */
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  private stableTimer: ReturnType<typeof setTimeout> | null = null;
+
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null, errorId: null };
     this.handleReset = this.handleReset.bind(this);
+  }
+
+  componentDidMount(): void {
+    // Start stable-page timer. If no error fires within the window, clear
+    // the reload counter so future errors can auto-reload again.
+    this.stableTimer = setTimeout(() => {
+      clearReloadCount();
+    }, STABLE_PAGE_TIMEOUT_MS);
+  }
+
+  componentWillUnmount(): void {
+    if (this.stableTimer !== null) {
+      clearTimeout(this.stableTimer);
+    }
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
@@ -53,6 +101,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     const { errorId } = this.state;
+
+    // Cancel the stable-page timer — we just caught an error.
+    if (this.stableTimer !== null) {
+      clearTimeout(this.stableTimer);
+      this.stableTimer = null;
+    }
 
     // Log to console — Cloud Logging ingests stdout/stderr from Cloud Run.
     // Keep this structured so Cloud Logging can parse it as JSON when the
@@ -70,6 +124,14 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           .join(' | '),
       })
     );
+
+    // Auto-reload logic: reload up to MAX_AUTO_RELOADS times.
+    const count = getReloadCount();
+    if (count < MAX_AUTO_RELOADS) {
+      setReloadCount(count + 1);
+      window.location.reload();
+    }
+    // If count >= MAX_AUTO_RELOADS, fall through to render the error UI.
   }
 
   handleReset(): void {
@@ -119,6 +181,11 @@ const DefaultErrorUI: React.FC<{
     }
   };
 
+  const handleManualReload = () => {
+    clearReloadCount();
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-amber-50 p-6">
       <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center space-y-4">
@@ -129,7 +196,7 @@ const DefaultErrorUI: React.FC<{
         <h1 className="text-xl font-bold text-gray-900">頁面發生錯誤</h1>
 
         <p className="text-sm text-gray-600 leading-relaxed">
-          很抱歉，頁面遇到了一個問題。請嘗試重新載入，或聯絡系統管理員。
+          很抱歉，頁面自動重整後仍無法恢復。請嘗試手動重新載入，或聯絡系統管理員。
         </p>
 
         {/* Error ID — safe to show in all environments; contains no internals */}
@@ -164,7 +231,7 @@ const DefaultErrorUI: React.FC<{
             重新載入
           </button>
           <button
-            onClick={() => window.location.reload()}
+            onClick={handleManualReload}
             className="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
           >
             整頁重整
