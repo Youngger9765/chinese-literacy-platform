@@ -1,9 +1,8 @@
 /**
  * VocabDefinitionMatch — Step Component for 語詞定義配對
  *
- * 支援三種互動模式 (#697):
+ * 支援兩種互動模式:
  *   - 選擇題 (Multiple Choice) — DEFAULT
- *   - 連連看 (Line Matching)
  *   - 拖拉配對 (Drag & Drop)
  *
  * Props: { story, onFinish, zhuyinActive? }
@@ -32,7 +31,7 @@ export interface VocabDefinitionMatchProps {
   zhuyinActive?: boolean;
 }
 
-type InteractionMode = 'multiple-choice' | 'line-match' | 'drag-drop';
+type InteractionMode = 'multiple-choice' | 'drag-drop';
 
 /* ------------------------------------------------------------------ */
 /*  Utility: shuffle                                                    */
@@ -121,7 +120,6 @@ function CompletionScreen({
 
 const MODE_LABELS: { id: InteractionMode; label: string; icon: string }[] = [
   { id: 'multiple-choice', label: '選擇題', icon: '☑' },
-  { id: 'line-match', label: '連連看', icon: '↔' },
   { id: 'drag-drop', label: '拖拉配對', icon: '✥' },
 ];
 
@@ -261,251 +259,7 @@ function MultipleChoiceMode({ vocab, onAllDone }: MultipleChoiceProps) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mode 2: Line Match (連連看)                                         */
-/* ------------------------------------------------------------------ */
-
-interface LineMatchProps {
-  vocab: VocabItem[];
-  shuffledWords: number[];
-  onAllDone: (matched: number) => void;
-}
-
-interface LineData {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  defIdx: number;
-}
-
-function LineMatchMode({ vocab, shuffledWords, onAllDone }: LineMatchProps) {
-  const [selectedDef, setSelectedDef] = useState<number | null>(null);
-  const [selectedWord, setSelectedWord] = useState<number | null>(null);
-  // defIdx -> shufflePos of matched word
-  const [matchedMap, setMatchedMap] = useState<Map<number, number>>(new Map());
-  const [flashWrong, setFlashWrong] = useState<number | null>(null);
-  const [flashCorrectDef, setFlashCorrectDef] = useState<number | null>(null);
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const defRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const wordRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const [lines, setLines] = useState<LineData[]>([]);
-
-  const matchedCount = matchedMap.size;
-
-  const computeLines = useCallback(() => {
-    if (!containerRef.current) return;
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const newLines: LineData[] = [];
-    matchedMap.forEach((shufflePos, defIdx) => {
-      const defEl = defRefs.current[defIdx];
-      const wordEl = wordRefs.current[shufflePos];
-      if (!defEl || !wordEl) return;
-      const dr = defEl.getBoundingClientRect();
-      const wr = wordEl.getBoundingClientRect();
-      newLines.push({
-        x1: dr.right - containerRect.left,
-        y1: dr.top + dr.height / 2 - containerRect.top,
-        x2: wr.left - containerRect.left,
-        y2: wr.top + wr.height / 2 - containerRect.top,
-        defIdx,
-      });
-    });
-    setLines(newLines);
-  }, [matchedMap]);
-
-  useEffect(() => {
-    computeLines();
-  }, [computeLines]);
-
-  useEffect(() => {
-    const handleResize = () => computeLines();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [computeLines]);
-
-  const attemptMatch = useCallback(
-    (defIdx: number, shufflePos: number) => {
-      const vocabIdx = shuffledWords[shufflePos];
-      if (vocabIdx === defIdx) {
-        setFlashCorrectDef(defIdx);
-        setTimeout(() => setFlashCorrectDef(null), 500);
-        setMatchedMap((prev) => {
-          const next = new Map(prev);
-          next.set(defIdx, shufflePos);
-          if (next.size === vocab.length) {
-            setTimeout(() => onAllDone(next.size), 600);
-          }
-          return next;
-        });
-      } else {
-        setFlashWrong(defIdx);
-        setTimeout(() => setFlashWrong(null), 550);
-      }
-      setSelectedDef(null);
-      setSelectedWord(null);
-    },
-    [shuffledWords, vocab.length, onAllDone],
-  );
-
-  const handleDefClick = (defIdx: number) => {
-    if (matchedMap.has(defIdx)) return;
-    if (selectedWord !== null) {
-      attemptMatch(defIdx, selectedWord);
-    } else {
-      setSelectedDef(selectedDef === defIdx ? null : defIdx);
-    }
-  };
-
-  const handleWordClick = (shufflePos: number) => {
-    const vocabIdx = shuffledWords[shufflePos];
-    if (matchedMap.has(vocabIdx)) return;
-    if (selectedDef !== null) {
-      attemptMatch(selectedDef, shufflePos);
-    } else {
-      setSelectedWord(selectedWord === shufflePos ? null : shufflePos);
-    }
-  };
-
-  return (
-    <div className="max-w-3xl mx-auto px-4">
-      {/* Progress */}
-      <div className="mb-5 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
-        <span className="text-sm font-semibold text-gray-500">配對進度</span>
-        <span className="text-base font-black text-amber-700">
-          {matchedCount}{' '}
-          <span className="text-gray-400 font-normal text-sm">/ {vocab.length}</span>
-        </span>
-      </div>
-
-      <p className="text-center text-sm text-amber-800 bg-amber-100 rounded-xl py-2 px-4 mb-4 select-none font-medium">
-        點選左邊的定義，再點選右邊對應的語詞連線
-      </p>
-
-      {/* Relative container for SVG line overlay */}
-      <div className="relative" ref={containerRef}>
-        {/* SVG lines overlay */}
-        <svg
-          className="absolute inset-0 pointer-events-none"
-          style={{ width: '100%', height: '100%', overflow: 'visible' }}
-        >
-          {lines.map(({ x1, y1, x2, y2, defIdx }) => (
-            <line
-              key={defIdx}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#10b981"
-              strokeWidth={3}
-              strokeLinecap="round"
-              opacity={0.85}
-            />
-          ))}
-        </svg>
-
-        <div className="grid grid-cols-2 gap-8">
-          {/* Left: definitions */}
-          <div className="flex flex-col gap-3">
-            <h3 className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-              定義
-            </h3>
-            {vocab.map((item, defIdx) => {
-              const isMatched = matchedMap.has(defIdx);
-              const isSelected = selectedDef === defIdx;
-              const isWrong = flashWrong === defIdx;
-              const isCorrect = flashCorrectDef === defIdx;
-
-              let cls =
-                'rounded-2xl border-2 px-4 py-4 text-left text-sm leading-relaxed min-h-[72px] select-none transition-all duration-200 w-full ';
-              if (isMatched) {
-                cls +=
-                  'bg-emerald-50 border-emerald-400 text-emerald-800 cursor-default';
-              } else if (isCorrect) {
-                cls +=
-                  'bg-emerald-100 border-emerald-500 text-emerald-800 scale-[1.02] shadow-md cursor-pointer';
-              } else if (isWrong) {
-                cls +=
-                  'bg-red-50 border-red-400 text-red-700 animate-shake cursor-pointer';
-              } else if (isSelected) {
-                cls +=
-                  'bg-purple-100 border-[#5B4FC4] text-purple-900 shadow-md scale-[1.02] cursor-pointer';
-              } else {
-                cls +=
-                  'bg-white border-gray-200 text-gray-700 hover:border-[#5B4FC4] hover:bg-purple-50 cursor-pointer';
-              }
-
-              return (
-                <button
-                  key={defIdx}
-                  ref={(el) => {
-                    defRefs.current[defIdx] = el;
-                  }}
-                  className={cls}
-                  onClick={() => !isMatched && handleDefClick(defIdx)}
-                  disabled={isMatched}
-                >
-                  {isMatched && (
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-white text-xs font-bold mr-2 flex-shrink-0">
-                      ✓
-                    </span>
-                  )}
-                  {item.definition}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Right: shuffled words */}
-          <div className="flex flex-col gap-3">
-            <h3 className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-              語詞
-            </h3>
-            {shuffledWords.map((vocabIdx, shufflePos) => {
-              const isMatched = matchedMap.has(vocabIdx);
-              const isSelected = selectedWord === shufflePos;
-
-              let cls =
-                'rounded-2xl border-2 px-4 py-4 text-center font-bold text-xl min-h-[72px] flex items-center justify-center select-none transition-all duration-200 ';
-              if (isMatched) {
-                cls +=
-                  'bg-emerald-50 border-emerald-400 text-emerald-700 cursor-default';
-              } else if (isSelected) {
-                cls +=
-                  'bg-purple-100 border-[#5B4FC4] text-purple-900 shadow-md scale-[1.02] cursor-pointer';
-              } else {
-                cls +=
-                  'bg-white border-gray-200 text-gray-800 hover:border-[#5B4FC4] hover:bg-purple-50 cursor-pointer';
-              }
-
-              return (
-                <button
-                  key={shufflePos}
-                  ref={(el) => {
-                    wordRefs.current[shufflePos] = el;
-                  }}
-                  className={cls}
-                  onClick={() => !isMatched && handleWordClick(shufflePos)}
-                  disabled={isMatched}
-                >
-                  {isMatched && (
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-white text-xs font-bold mr-2 flex-shrink-0">
-                      ✓
-                    </span>
-                  )}
-                  {vocab[vocabIdx].word}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Mode 3: Drag & Drop (拖拉配對)                                      */
+/*  Mode 2: Drag & Drop (拖拉配對)                                      */
 /* ------------------------------------------------------------------ */
 
 interface DragDropProps {
@@ -755,7 +509,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
       const saved = localStorage.getItem(storageModeKey) as InteractionMode | null;
       if (
         saved &&
-        ['multiple-choice', 'line-match', 'drag-drop'].includes(saved)
+        ['multiple-choice', 'drag-drop'].includes(saved)
       ) {
         return saved;
       }
@@ -768,7 +522,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   // Increment to force-remount the active mode on mode change
   const [modeKey, setModeKey] = useState(0);
 
-  // Stable shuffled word order shared between line-match and drag-drop
+  // Stable shuffled word order for drag-drop
   const shuffledWords = useRef<number[]>(shuffle(vocab.map((_, i) => i)));
 
   const handleModeChange = (m: InteractionMode) => {
@@ -795,7 +549,6 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
 
   const modeSubtitles: Record<InteractionMode, string> = {
     'multiple-choice': '看定義，選出對應的語詞',
-    'line-match': '點選左邊定義，再點選右邊對應語詞連線',
     'drag-drop': '拖拉語詞卡片到對應的定義欄位',
   };
 
@@ -820,14 +573,6 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
               <MultipleChoiceMode
                 key={`mc-${modeKey}`}
                 vocab={vocab}
-                onAllDone={handleAllDone}
-              />
-            )}
-            {mode === 'line-match' && (
-              <LineMatchMode
-                key={`lm-${modeKey}`}
-                vocab={vocab}
-                shuffledWords={shuffledWords.current}
                 onAllDone={handleAllDone}
               />
             )}
