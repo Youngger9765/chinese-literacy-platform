@@ -169,7 +169,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const [zhuyinReady, setZhuyinReady] = useState(false);
   /** Character whose radical panel is currently open */
   const [radicalChar, setRadicalChar] = useState<string | null>(null);
-  const [selectedChar, setSelectedChar] = useState<string | null>(null);
   const [justCompleted, setJustCompleted] = useState('');
 
   const zhuyinActive = zhuyinReady && zhuyinEnabled;
@@ -491,19 +490,12 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                 const isPracticed = currentPracticedSet.has(ch);
                 const hasRadical = activeTab === 'stroke' && getDecomposition(ch) !== null;
                 const isRadicalOpen = radicalChar === ch;
-                const isSelected = selectedChar === ch;
                 return (
                   <div key={ch} className="flex flex-col gap-1">
                     <button
-                      onClick={() => {
-                        setSelectedChar(prev => prev === ch ? null : ch);
-                      }}
-                      onDoubleClick={() => handlePractice(ch, activeTab)}
+                      onClick={() => handlePractice(ch, activeTab)}
                       className={[
                         `relative flex flex-col items-center justify-center w-full ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95 animate-card-in`,
-                        isSelected
-                          ? 'ring-2 ring-[#5B4FC4] ring-offset-1'
-                          : '',
                         isPracticed
                           ? 'bg-emerald-50 border-emerald-700/50 text-emerald-800'
                           : isSuggested
@@ -531,11 +523,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                       )}
 
                       <span className="text-[9px] mt-1 opacity-60">
-                        {isPracticed
-                          ? '已練習'
-                          : isSelected
-                            ? '再點練習'
-                            : '點我查字'}
+                        {isPracticed ? '已練習' : '點我練習'}
                       </span>
                     </button>
 
@@ -607,9 +595,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           )}
 
           {/* Usage hint */}
-          {currentChars.length > 0 && !selectedChar && (
+          {currentChars.length > 0 && (
             <p className="text-[10px] text-gray-400 text-center">
-              點一下字卡查字典，連點兩下練習{activeTab === 'stroke' ? '筆順' : '發音'}
+              點一下字卡即可練習{activeTab === 'stroke' ? '筆順' : '發音'}
             </p>
           )}
 
