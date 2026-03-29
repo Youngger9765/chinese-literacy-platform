@@ -1,6 +1,12 @@
 {
   "sources": [
     {
+      "name": "手動修正 (MANUAL_CORRECTIONS)",
+      "count": 1,
+      "priority": 0,
+      "license": "internal"
+    },
+    {
       "name": "手動編寫",
       "count": 43,
       "priority": 1,
@@ -8,7 +14,7 @@
     },
     {
       "name": "makemeahanzi",
-      "count": 2600,
+      "count": 2599,
       "priority": 2,
       "license": "LGPL",
       "url": "https://github.com/skishore/makemeahanzi"
@@ -25,7 +31,7 @@
   "totalLessonChars": 2791,
   "coverage": "98.0%",
   "breakdown": {
-    "pictophonetic": 1751,
+    "pictophonetic": 1750,
     "ideographic": 729,
     "pictographic": 120,
     "chaizi_fallback": 134,

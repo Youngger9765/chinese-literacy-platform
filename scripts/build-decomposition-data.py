@@ -34,6 +34,32 @@ import yaml  # PyYAML
 # ---------------------------------------------------------------------------
 IDS_OPERATORS = set("⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻")
 
+# IDS operator → left-to-right / top-to-bottom ordering of operands
+# The values represent the natural stroke-order position of each operand slot
+# ⿰ left+right, ⿱ top+bottom, ⿲ left+mid+right, ⿳ top+mid+bottom
+# ⿴⿵⿶⿷ enclosure (outer first), ⿸⿹⿺ corner (outer first)
+IDS_ORDER_PRESERVED = set("⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻")  # All operators: keep IDS operand order
+
+
+# ---------------------------------------------------------------------------
+# MANUAL_CORRECTIONS — override known-bad decompositions
+# Add entries here for characters where makemeahanzi/chaizi give wrong results.
+# Priority: always applied before any automatic source.
+# ---------------------------------------------------------------------------
+MANUAL_CORRECTIONS: dict[str, dict] = {
+    # 穎: makemeahanzi gives only 禾+匕 (incomplete pictophonetic).
+    # Correct structure: 禾 (semantic, grain) + 頃 (phonetic), where 頃 = 匕+頁
+    # For teaching purposes, show all three surface components in stroke order.
+    "穎": {
+        "formula": "禾 + 匕 + 頁",
+        "components": [
+            {"radical": "禾", "role": "形符", "label": "穀物"},
+            {"radical": "匕", "role": "部件", "label": "匕首"},
+            {"radical": "頁", "role": "聲符", "label": "頭部"},
+        ],
+    },
+}
+
 
 # ---------------------------------------------------------------------------
 # Friendly labels for common radicals (used when etymology.hint is absent)
@@ -180,6 +206,8 @@ RADICAL_LABELS: dict[str, str] = {
     "邑": "城邑",
     # Jade/king
     "⺩": "玉旁",
+    # Head/page
+    "頁": "頭部",
     # Leather
     "革": "皮革",
     # Bone
@@ -404,7 +432,14 @@ def main() -> None:
         "no_data": 0,
     }
 
+    manual_count = 0
     for char in sorted(lesson_chars):
+        # Step 0: Apply manual corrections (highest priority)
+        if char in MANUAL_CORRECTIONS:
+            result[char] = MANUAL_CORRECTIONS[char]
+            manual_count += 1
+            continue
+
         # Try makemeahanzi first
         entry = mma.get(char)
         if entry:
@@ -437,6 +472,12 @@ def main() -> None:
     sources_meta = {
         "sources": [
             {
+                "name": "手動修正 (MANUAL_CORRECTIONS)",
+                "count": manual_count,
+                "priority": 0,
+                "license": "internal",
+            },
+            {
                 "name": "手動編寫",
                 "count": 43,
                 "priority": 1,
@@ -464,6 +505,7 @@ def main() -> None:
     }
 
     print(f"\nBuilt {total} decompositions out of {len(lesson_chars)} lesson chars ({coverage_pct}%)")
+    print(f"  manual corrections: {manual_count}")
     print(f"  pictophonetic : {stats['pictophonetic']}")
     print(f"  ideographic   : {stats['ideographic']}")
     print(f"  pictographic  : {stats['pictographic']}")
