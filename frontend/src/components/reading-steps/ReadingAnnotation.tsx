@@ -625,7 +625,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   return (
     <div
-      className="flex-1 flex flex-col bg-amber-50 overflow-hidden select-none"
+      className="flex-1 flex flex-col h-full bg-amber-50 overflow-hidden select-none"
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
