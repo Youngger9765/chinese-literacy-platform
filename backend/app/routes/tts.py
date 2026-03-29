@@ -1,5 +1,5 @@
 """
-TTS route — Issue #663 (synthesize) + Issue #667 (sentence mapping).
+TTS route — Issue #663 (synthesize) + Issue #667 (sentence mapping) + Issue #765 (regenerate).
 
 POST /api/tts/synthesize
   Body: { "text": "..." }
@@ -15,6 +15,12 @@ GET /api/tts/mapping/{lesson_id}
   Structure:
     { "lesson_id": 1, "paragraphs": [{"index": 0, "sentences": [{"text": ..., "hash": ..., "chars": ...}]}] }
 
+POST /api/tts/regenerate
+  Body: { "text": "..." }
+  Deletes cached audio for the given text (L1 + GCS) then re-synthesises from scratch.
+  Used to fix sentences with incorrect phoneme readings (Issue #765).
+  Response: { "status": "ok", "key": "...", "gcs_deleted": [...], "bytes": N }
+
 Falls back gracefully: if TTS fails (quota, auth, etc.) the frontend
 is expected to fall back to Web Speech API on its own.
 """
@@ -27,7 +33,13 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
-from ..services.tts_service import TTSError, build_lesson_tts_mapping, synthesize_sentence, synthesize_speech
+from ..services.tts_service import (
+    TTSError,
+    build_lesson_tts_mapping,
+    delete_tts_cache,
+    synthesize_sentence,
+    synthesize_speech,
+)
 from ..services.lesson_loader import get_lesson_by_id
 
 logger = logging.getLogger(__name__)
@@ -130,3 +142,42 @@ def get_tts_mapping(lesson_id: int) -> dict:
         raise HTTPException(status_code=404, detail=f"Lesson {lesson_id} not found")
 
     return build_lesson_tts_mapping(lesson)
+
+
+@router.post("/regenerate")
+def regenerate(req: TTSRequest) -> dict:
+    """Delete cached audio for *text* and re-synthesise from scratch (Issue #765).
+
+    Use this endpoint when a specific sentence has a known mispronunciation
+    in its cached audio (e.g. wrong tone for 喝采). The endpoint:
+      1. Deletes the GCS cached file (both azure/sentences/ and tts-cache/ paths).
+      2. Evicts the L1 in-memory cache entry.
+      3. Calls Azure TTS (with phoneme corrections applied) to produce fresh audio.
+      4. Stores the new audio in L1 + GCS.
+
+    Returns:
+        200  application/json — { "status": "ok", "key": "...", "gcs_deleted": [...], "bytes": N }
+        503  application/json — TTS unavailable.
+    """
+    # Step 1: delete existing caches
+    delete_result = delete_tts_cache(req.text)
+    logger.info(
+        "TTS regenerate: key=%s, l1=%s, gcs_deleted=%s",
+        delete_result["key"][:8],
+        delete_result["l1_deleted"],
+        delete_result["gcs_deleted"],
+    )
+
+    # Step 2: re-synthesise (phoneme corrections in _synthesize_azure will apply)
+    try:
+        audio_bytes = synthesize_speech(req.text)
+    except TTSError as exc:
+        logger.warning("TTS regenerate synthesis failed: %s", exc)
+        raise HTTPException(status_code=503, detail="TTS service unavailable during regenerate")
+
+    return {
+        "status": "ok",
+        "key": delete_result["key"],
+        "gcs_deleted": delete_result["gcs_deleted"],
+        "bytes": len(audio_bytes),
+    }

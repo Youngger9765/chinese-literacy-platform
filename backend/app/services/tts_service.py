@@ -137,6 +137,67 @@ class TTSError(RuntimeError):
 
 
 # ---------------------------------------------------------------------------
+# Phoneme correction — Issue #765
+# ---------------------------------------------------------------------------
+# Azure SSML phoneme tag format (zh-TW Zhuyin):
+#   <phoneme alphabet="x-microsoft-zhuyin" ph="ㄏㄜˋ">喝</phoneme>
+#
+# Each entry is (pattern, replacement_ssml).
+# Patterns are matched in order; first match wins for each occurrence.
+# The replacement is raw SSML (already XML-safe) that replaces the matched text.
+
+_PHONEME_CORRECTIONS: list[tuple[str, str]] = [
+    # 喝采 / 喝彩 — 喝 should be hè (ㄏㄜˋ), not hē (ㄏㄜ)
+    (
+        "喝采",
+        '<phoneme alphabet="x-microsoft-zhuyin" ph="ㄏㄜˋ">喝</phoneme>采',
+    ),
+    (
+        "喝彩",
+        '<phoneme alphabet="x-microsoft-zhuyin" ph="ㄏㄜˋ">喝</phoneme>彩',
+    ),
+    # 打得漂亮 / 打的漂亮 — 的/得 should be neutral tone "de", not dì/dí
+    # Cover both orthographies since the source text may use either
+    (
+        "打的漂亮",
+        '打<phoneme alphabet="x-microsoft-zhuyin" ph="˙ㄉㄜ">的</phoneme>漂亮',
+    ),
+    (
+        "打得漂亮",
+        '打<phoneme alphabet="x-microsoft-zhuyin" ph="˙ㄉㄜ">得</phoneme>漂亮',
+    ),
+]
+
+
+def _apply_phoneme_corrections(text_escaped: str) -> str:
+    """Apply known phoneme corrections to XML-escaped SSML content.
+
+    Scans *text_escaped* (already XML-escaped plain text) for known
+    mispronunciation patterns and wraps them with Azure SSML <phoneme> tags.
+
+    The replacements are inserted as raw SSML markup so they must NOT be
+    re-escaped after this step.
+
+    Args:
+        text_escaped: XML-escaped text (& → &amp; etc. already applied).
+
+    Returns:
+        SSML fragment with phoneme corrections applied.
+    """
+    result = text_escaped
+    for pattern, replacement in _PHONEME_CORRECTIONS:
+        if pattern in result:
+            result = result.replace(pattern, replacement)
+            logger.debug("Phoneme correction applied: %r → %r", pattern, replacement)
+    return result
+
+
+def _has_phoneme_corrections(text: str) -> bool:
+    """Return True if *text* contains any known mispronunciation patterns."""
+    return any(pattern in text for pattern, _ in _PHONEME_CORRECTIONS)
+
+
+# ---------------------------------------------------------------------------
 # Azure Speech — REST API synthesis
 # ---------------------------------------------------------------------------
 
@@ -144,8 +205,12 @@ def _synthesize_azure(text: str) -> bytes:
     """Synthesise text via Azure Speech Service REST API.
 
     Voice: zh-TW-HsiaoChenNeural (Taiwan accent, female)
-    Output: audio-16khz-128kbitrate-mono-mp3
+    Output: audio-48khz-192kbitrate-mono-mp3
     Rate: 0.95 (slightly slower than natural for reading practice)
+
+    When *text* contains known mispronunciation patterns (see
+    _PHONEME_CORRECTIONS), the SSML body is enriched with <phoneme> tags
+    so Azure reads the characters with the correct tones.
 
     Raises:
         TTSError: if Azure key is missing, HTTP error, or empty audio returned.
@@ -165,10 +230,13 @@ def _synthesize_azure(text: str) -> bytes:
         .replace("'", "&apos;")
     )
 
+    # Apply phoneme corrections (inserts raw SSML tags — must come after escaping)
+    ssml_body = _apply_phoneme_corrections(text_escaped)
+
     ssml = (
         '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="zh-TW">'
         f'<voice name="{AZURE_TTS_VOICE}">'
-        f'<prosody rate="0.95">{text_escaped}</prosody>'
+        f'<prosody rate="0.95">{ssml_body}</prosody>'
         "</voice>"
         "</speak>"
     )
@@ -422,6 +490,51 @@ def _l1_put(key: str, audio_bytes: bytes) -> None:
         oldest_key = next(iter(_TTS_CACHE))
         del _TTS_CACHE[oldest_key]
     _TTS_CACHE[key] = audio_bytes
+
+
+def delete_tts_cache(text: str) -> dict:
+    """Delete cached audio for *text* from L1 and GCS (both azure and google paths).
+
+    Used by the /api/tts/regenerate admin endpoint to force re-synthesis
+    after phoneme corrections are added.
+
+    Args:
+        text: The exact text whose cache should be invalidated.
+
+    Returns:
+        Dict with keys "key", "l1_deleted" (bool), "gcs_deleted" (list of paths deleted).
+    """
+    key = _cache_key(text)
+    deleted_paths: list[str] = []
+
+    # L1 eviction
+    l1_deleted = key in _TTS_CACHE
+    if l1_deleted:
+        del _TTS_CACHE[key]
+        logger.info("L1 cache evicted (key=%s)", key[:8])
+
+    # GCS deletion — try both provider paths
+    bucket = _get_gcs_bucket()
+    if bucket is not None:
+        for provider in ("azure", "google"):
+            if provider == "azure":
+                blob_path = f"azure/sentences/{key}.mp3"
+            else:
+                blob_path = f"tts-cache/{key}.mp3"
+            try:
+                blob = bucket.blob(blob_path)
+                if blob.exists():
+                    blob.delete()
+                    deleted_paths.append(blob_path)
+                    logger.info("GCS cache deleted: %s", blob_path)
+            except Exception as exc:
+                logger.warning("GCS cache delete error (%s): %s", blob_path, exc)
+
+    return {
+        "key": key,
+        "l1_deleted": l1_deleted,
+        "gcs_deleted": deleted_paths,
+    }
 
 
 # ---------------------------------------------------------------------------
