@@ -12,6 +12,7 @@ from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min
 from ...database import get_db
 from ...models.user import User
 from ...services.ai_service import generate_example_sentences, validate_student_sentence
+from ...services.example_sentence_cache import get_cached, set_cached
 from ...services.listening_service import evaluate_retelling
 
 router = APIRouter()
@@ -57,9 +58,23 @@ async def get_example_sentences(
 ):
     """Generate 2 AI example sentences for a vocabulary character.
 
-    Used in the sentence practice phase after stroke order practice (Issue #109).
+    Returns cached result if available (TTL 30 days) to avoid repeated Gemini
+    API calls for the same character + story (Issue #730).
     Rate limited: 10 requests per minute per user/IP.
     """
+    # 1. Cache hit — return immediately without calling AI
+    cached = get_cached(story_title=payload.story_title, character=payload.character)
+    if cached is not None:
+        logger.debug(
+            "Example sentence cache hit: char=%s story=%s",
+            payload.character,
+            payload.story_title,
+        )
+        return ExampleSentencesResponse(
+            sentences=[ExampleSentenceItem(**s) for s in cached.get("sentences", [])],
+        )
+
+    # 2. Cache miss — call AI
     try:
         result = await generate_example_sentences(
             character=payload.character,
@@ -70,6 +85,17 @@ async def get_example_sentences(
     except Exception as e:
         logger.error("Example sentence generation failed for char=%s: %s", payload.character, e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
+
+    # 3. Store in cache for next request
+    try:
+        set_cached(
+            story_title=payload.story_title,
+            character=payload.character,
+            result=result,
+        )
+    except Exception as exc:
+        # Cache write failure is non-fatal — log and continue
+        logger.warning("Failed to write example sentence cache: %s", exc)
 
     return ExampleSentencesResponse(
         sentences=[ExampleSentenceItem(**s) for s in result.get("sentences", [])],
