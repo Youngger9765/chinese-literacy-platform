@@ -387,9 +387,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
-  // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
-  // gets collected mid-playback, silencing onend/onboundary callbacks.
-  const utteranceRef = useRef<SpeechSynthesisUtterance | HTMLAudioElement | null>(null);
+  // Ref to the currently playing TTS audio element.
+  const utteranceRef = useRef<HTMLAudioElement | null>(null);
   // rAF loop for TTS cursor animation — Chrome's onboundary doesn't fire per-char for Chinese.
   const ttsRafRef = useRef<number | null>(null);
   const ttsStartTimeRef = useRef<number>(0);
@@ -799,16 +798,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     // the previous utterance cannot stomp on the STT cursor position.
     if (utteranceRef.current) {
       const cur = utteranceRef.current;
-      if (cur instanceof HTMLAudioElement) {
-        cur.onended = null;
-        cur.onerror = null;
-        cur.pause();
-      } else {
-        (cur as SpeechSynthesisUtterance).onstart = null;
-        (cur as SpeechSynthesisUtterance).onboundary = null;
-        (cur as SpeechSynthesisUtterance).onend = null;
-        (cur as SpeechSynthesisUtterance).onerror = null;
-      }
+      cur.onended = null;
+      cur.onerror = null;
+      cur.pause();
       utteranceRef.current = null;
     }
     if (ttsRafRef.current !== null) {
@@ -1071,60 +1063,25 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         if (blob.size === 0) throw new Error('Empty TTS audio');
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
-        utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
+        utteranceRef.current = audio;
         audio.onplay = startCursorAnimation;
         audio.onended = onSpeechEnd;
         audio.onerror = onSpeechEnd;
         return audio.play();
       })
       .catch(() => {
-        // Fallback: Web Speech API
-        if (!window.speechSynthesis) { onSpeechEnd(); return; }
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utteranceRef.current = utterance;
-        utterance.lang = 'zh-TW';
-        utterance.rate = 1.0;
-        const voices = window.speechSynthesis.getVoices();
-        const preferred =
-          voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-          voices.find(v => v.lang === 'zh-TW') ||
-          voices.find(v => v.lang.startsWith('zh'));
-        if (preferred) utterance.voice = preferred;
-        utterance.onstart = startCursorAnimation;
-        utterance.onboundary = (e) => { setSpeakingProgress(e.charIndex); };
-        utterance.onend = onSpeechEnd;
-        utterance.onerror = onSpeechEnd;
-
-        const doSpeak = () => window.speechSynthesis.speak(utterance);
-        if (window.speechSynthesis.getVoices().length === 0) {
-          window.speechSynthesis.onvoiceschanged = () => {
-            window.speechSynthesis.onvoiceschanged = null;
-            doSpeak();
-          };
-        } else {
-          doSpeak();
-        }
+        onSpeechEnd();
       });
   }, [story.content, currentLineIndex]);
 
   const pauseTts = () => {
-    // Pause <audio> element if playing via Cloud TTS
     const ua = utteranceRef.current;
-    if (ua && ua instanceof HTMLAudioElement) {
-      ua.pause();
-    } else {
-      window.speechSynthesis?.pause();
-    }
+    if (ua) ua.pause();
     setIsTtsPaused(true);
   };
   const resumeTts = () => {
     const ua = utteranceRef.current;
-    if (ua && ua instanceof HTMLAudioElement) {
-      ua.play().catch(() => {});
-    } else {
-      window.speechSynthesis?.resume();
-    }
+    if (ua) ua.play().catch(() => {});
     setIsTtsPaused(false);
   };
   const stopTts = () => {
@@ -1277,7 +1234,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                           onClick={() => {
                             if (idx !== currentLineIndex) { stopSession(); setRetryCount(0); setCurrentLineIndex(idx); }
                             if (isTtsSpeaking) {
-                              if (utteranceRef.current) { const _u = utteranceRef.current; if (_u instanceof HTMLAudioElement) { _u.onended = null; _u.onerror = null; _u.pause(); } else { (_u as SpeechSynthesisUtterance).onend = null; (_u as SpeechSynthesisUtterance).onerror = null; (_u as SpeechSynthesisUtterance).onboundary = null; } utteranceRef.current = null; }
+                              if (utteranceRef.current) { const _u = utteranceRef.current; _u.onended = null; _u.onerror = null; _u.pause(); utteranceRef.current = null; }
                               if (ttsRafRef.current !== null) { cancelAnimationFrame(ttsRafRef.current); ttsRafRef.current = null; }
                               cancelTts();
                               setIsTtsLoading(false); setIsTtsSpeaking(false); setIsTtsPaused(false);
@@ -1320,32 +1277,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
                           )}
                           {isTtsLoading ? '載入中...' : isTtsSpeaking && idx === currentLineIndex ? '停止' : 'AI 朗讀'}
-                        </button>
-                        {/* A/B test: Web Speech API button for comparison */}
-                        <button
-                          onClick={() => {
-                            const text = story.content[idx];
-                            if (!text) return;
-                            if (window.speechSynthesis.speaking) {
-                              window.speechSynthesis.cancel();
-                              return;
-                            }
-                            const utt = new SpeechSynthesisUtterance(text);
-                            utt.lang = 'zh-TW';
-                            utt.rate = 0.9;
-                            const voices = window.speechSynthesis.getVoices();
-                            const best = voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan'))
-                              || voices.find(v => v.lang === 'zh-TW');
-                            if (best) utt.voice = best;
-                            window.speechSynthesis.speak(utt);
-                          }}
-                          disabled={idx === currentLineIndex && (isSessionActive || isPreparing)}
-                          className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 ${
-                            idx === currentLineIndex && (isSessionActive || isPreparing) ? 'opacity-40 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
-                          瀏覽器朗讀
                         </button>
                         {/* Start / Submit / Retry — context-dependent */}
                         {idx === currentLineIndex ? (
