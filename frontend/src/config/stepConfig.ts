@@ -97,6 +97,14 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
   },
   {
+    id: 'vocab-word-search',
+    label: '語詞複習',
+    view: AppView.VOCAB_WORD_SEARCH,
+    dbStepNumber: 10,
+    needsStory: true,
+    enabled: true,
+  },
+  {
     id: 'comprehension',
     label: '課文理解',
     view: AppView.COMPREHENSION,
@@ -111,14 +119,6 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 5,
     needsStory: true,
     enabled: false, // hidden per product decision 2026-03-27
-  },
-  {
-    id: 'vocab-word-search',
-    label: '語詞複習',
-    view: AppView.VOCAB_WORD_SEARCH,
-    dbStepNumber: 10,
-    needsStory: true,
-    enabled: true,
   },
   {
     id: 'knowledge-station',
