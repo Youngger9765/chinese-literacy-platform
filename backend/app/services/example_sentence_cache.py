@@ -1,12 +1,13 @@
 """Example sentence cache service — JSON file-based.
 
 Caches AI-generated example sentences in a local JSON file to avoid
-repeated Gemini API calls for the same character (Issue #730).
+repeated Gemini API calls for the same character (Issue #730, #780).
 
 Cache strategy:
 - Key: "{story_title}:{character}" (includes story context for accuracy)
 - Storage: backend/data/example_sentence_cache.json
-- TTL: 30 days (checked at read time)
+- TTL: 30 days for runtime-generated entries (checked at read time)
+- Pre-generated entries (source="pregenerated") never expire
 - Thread-safe: file writes use a lock
 """
 
@@ -72,7 +73,14 @@ def _save() -> None:
 
 
 def _is_expired(entry: dict) -> bool:
-    """Return True if cache entry is older than CACHE_TTL_DAYS."""
+    """Return True if cache entry is older than CACHE_TTL_DAYS.
+
+    Pre-generated entries (source="pregenerated") never expire — they are
+    curated content produced by scripts/pre-generate-example-sentences.py
+    and should always be served (Issue #780).
+    """
+    if entry.get("source") == "pregenerated":
+        return False
     cached_at_str = entry.get("cached_at")
     if not cached_at_str:
         return True
@@ -91,7 +99,12 @@ def _make_key(story_title: str, character: str) -> str:
 
 
 def get_cached(story_title: str, character: str) -> Optional[dict]:
-    """Return cached sentences if present and not expired, else None.
+    """Return cached sentences if present, not expired, and non-empty, else None.
+
+    An entry with an empty sentences list (e.g. a placeholder written by
+    scripts/pre-generate-example-sentences.py --mode placeholder) is treated
+    as a cache miss so the live AI fallback is used until real sentences are
+    populated (Issue #780).
 
     Returns:
         {"sentences": [{"sentence": str, "explanation": str}, ...]} or None
@@ -104,8 +117,12 @@ def get_cached(story_title: str, character: str) -> Optional[dict]:
     if _is_expired(entry):
         logger.debug("Cache expired for key: %s", key)
         return None
+    sentences = entry.get("sentences") or []
+    if not sentences:
+        logger.debug("Cache entry has no sentences (placeholder?), treating as miss: %s", key)
+        return None
     logger.debug("Cache hit for key: %s", key)
-    return {"sentences": entry["sentences"]}
+    return {"sentences": sentences}
 
 
 def set_cached(story_title: str, character: str, result: dict) -> None:
@@ -126,6 +143,65 @@ def set_cached(story_title: str, character: str, result: dict) -> None:
         _cache[key] = entry
         _save()
     logger.info("Cached example sentences for key: %s", key)
+
+
+def set_pregenerated(story_title: str, character: str, sentences: list) -> None:
+    """Store a pre-generated sentence list that never expires (Issue #780).
+
+    Used by scripts/pre-generate-example-sentences.py to bulk-load curated
+    sentences into the cache.  Pre-generated entries are served indefinitely
+    without further AI calls.
+
+    Args:
+        story_title: Lesson title (must match story lookup key exactly).
+        character: Single Chinese character.
+        sentences: list of {"sentence": str, "explanation": str} dicts.
+    """
+    _ensure_loaded()
+    key = _make_key(story_title, character)
+    # Skip if pre-generated entry already exists — don't overwrite curated data
+    existing = _cache.get(key, {})
+    if existing.get("source") == "pregenerated" and existing.get("sentences"):
+        logger.debug("Pre-generated entry already exists, skipping: %s", key)
+        return
+    entry = {
+        "sentences": sentences,
+        "source": "pregenerated",
+        "cached_at": datetime.now(timezone.utc).isoformat(),
+    }
+    with _lock:
+        _cache[key] = entry
+        _save()
+    logger.info("Stored pre-generated example sentences for key: %s", key)
+
+
+def bulk_set_pregenerated(entries: dict) -> int:
+    """Bulk-load pre-generated sentences from a dict mapping cache_key -> sentences.
+
+    Args:
+        entries: {"{story_title}:{character}": [{"sentence": str, "explanation": str}]}
+
+    Returns:
+        Number of new entries written (skips already-present pre-generated keys).
+    """
+    _ensure_loaded()
+    written = 0
+    now_iso = datetime.now(timezone.utc).isoformat()
+    with _lock:
+        for key, sentences in entries.items():
+            existing = _cache.get(key, {})
+            if existing.get("source") == "pregenerated" and existing.get("sentences"):
+                continue
+            _cache[key] = {
+                "sentences": sentences,
+                "source": "pregenerated",
+                "cached_at": now_iso,
+            }
+            written += 1
+        if written:
+            _save()
+    logger.info("bulk_set_pregenerated: wrote %d new entries", written)
+    return written
 
 
 # Expose for testing
