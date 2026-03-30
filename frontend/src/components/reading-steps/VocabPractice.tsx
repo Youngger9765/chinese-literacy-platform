@@ -247,10 +247,20 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     setPracticingChar(ch);
     // Only 'stroke' launches WriteCharacter; all other modes (including
     // 'radical', 'sentence', etc.) are tab-based inline panels, not a
-    // full-screen phase. Guard here so an unexpected activeTab value can
-    // never send the user to PronunciationPractice by accident.
-    const targetPhase = mode === 'stroke' ? 'practice' : mode === 'pronunciation' ? 'pronunciation' : 'practice';
-    setPhase(targetPhase);
+    // full-screen phase. Guard: any mode that isn't 'stroke' or 'pronunciation'
+    // falls through to 'practice' (WriteCharacter) as the safe default.
+    // Also pin activeTab so returning from WriteCharacter always lands on the
+    // correct tab (fixes #854: clicking stroke-tab card returned to 部件 tab).
+    if (mode === 'stroke') {
+      setActiveTab('stroke');
+      setPhase('practice');
+    } else if (mode === 'pronunciation') {
+      setActiveTab('pronunciation');
+      setPhase('pronunciation');
+    } else {
+      setActiveTab('stroke');
+      setPhase('practice');
+    }
     setJustCompleted('');
   };
 
@@ -258,15 +268,20 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     const ch = practicingChar;
     setPracticedChars(prev => new Set(prev).add(ch));
     setJustCompleted(ch);
+    // Always return to the stroke tab after completing WriteCharacter (#854)
+    setActiveTab('stroke');
     setPhase('grid');
   };
 
   const handlePronunciationComplete = () => {
     setPronoucedChars(prev => new Set(prev).add(practicingChar));
+    setActiveTab('pronunciation');
     setPhase('grid');
   };
 
   const handlePracticeBack = () => {
+    // Return to the stroke tab after backing out of WriteCharacter (#854)
+    setActiveTab('stroke');
     setPhase('grid');
   };
 
