@@ -397,7 +397,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
 
   return (
     <div
-      className="flex flex-col min-h-full bg-white"
+      className="flex-1 flex flex-col bg-white"
       style={fontSizePx ? { fontSize: fontSizePx } : undefined}
     >
       <StepHeader

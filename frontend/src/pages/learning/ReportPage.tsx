@@ -110,7 +110,7 @@ const ReportPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-8 max-w-4xl mx-auto w-full">
+    <div className="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto w-full">
       <AssessmentReport
         session={session}
         story={selectedStory}
