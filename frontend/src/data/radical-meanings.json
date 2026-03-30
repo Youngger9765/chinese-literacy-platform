@@ -197,11 +197,11 @@
     "baseRadical": "水",
     "relatedChars": [
       "冱",
-      "冲",
+      "沖",
       "冷",
       "冻",
       "冽",
-      "净",
+      "淨",
       "凄",
       "准",
       "凇",
@@ -257,7 +257,7 @@
     "relatedChars": [
       "办",
       "劢",
-      "动",
+      "動",
       "助",
       "努",
       "劫",
@@ -338,9 +338,9 @@
     "englishMeaning": "ten",
     "strokeCount": 2,
     "relatedChars": [
-      "华",
+      "華",
       "博",
-      "毕",
+      "畢",
       "畢",
       "華"
     ],
@@ -413,7 +413,7 @@
     "englishMeaning": "again",
     "strokeCount": 2,
     "relatedChars": [
-      "凤",
+      "鳳",
       "叙",
       "隻"
     ],
@@ -477,7 +477,7 @@
       "圯",
       "地",
       "圹",
-      "场",
+      "場",
       "圻"
     ],
     "relatedCharsSource": "makemeahanzi",
@@ -540,11 +540,11 @@
     "englishMeaning": "big",
     "strokeCount": 3,
     "relatedChars": [
-      "头",
+      "頭",
       "夸",
       "奎",
       "奕",
-      "奖",
+      "獎",
       "奘",
       "奢",
       "樊"
@@ -784,7 +784,7 @@
     "englishMeaning": "shelter",
     "strokeCount": 3,
     "relatedChars": [
-      "厅",
+      "廳",
       "庀",
       "庄",
       "庇",
@@ -840,7 +840,7 @@
     "strokeCount": 3,
     "relatedChars": [
       "弛",
-      "张",
+      "張",
       "弥",
       "弦",
       "弧",
@@ -934,7 +934,7 @@
     "relatedChars": [
       "戕",
       "戗",
-      "战",
+      "戰",
       "戠",
       "戡",
       "戢",
@@ -1093,7 +1093,7 @@
       "旭",
       "旰",
       "旲",
-      "时",
+      "時",
       "旺",
       "昀",
       "昂",
@@ -1142,7 +1142,7 @@
     "strokeCount": 4,
     "relatedChars": [
       "朴",
-      "权",
+      "權",
       "杆",
       "杉",
       "李",
@@ -1206,7 +1206,7 @@
       "殇",
       "殉",
       "殊",
-      "残",
+      "殘",
       "殍"
     ],
     "relatedCharsSource": "makemeahanzi",
@@ -1727,7 +1727,7 @@
     "englishMeaning": "arrow",
     "strokeCount": 5,
     "relatedChars": [
-      "医",
+      "醫",
       "矩",
       "矫",
       "矬",
@@ -1790,7 +1790,7 @@
     "strokeCount": 5,
     "relatedChars": [
       "秀",
-      "种",
+      "種",
       "秒",
       "秕",
       "秘",
@@ -1887,7 +1887,7 @@
       "级",
       "纨",
       "纩",
-      "纪",
+      "紀",
       "纬"
     ],
     "relatedCharsSource": "makemeahanzi",
@@ -2292,7 +2292,7 @@
     "englishMeaning": "see",
     "strokeCount": 4,
     "relatedChars": [
-      "规",
+      "規",
       "视",
       "览",
       "觉",
@@ -2338,13 +2338,13 @@
       "计",
       "订",
       "讣",
-      "认",
+      "認",
       "讥",
-      "让",
+      "讓",
       "讪",
       "讫",
       "训",
-      "议"
+      "議"
     ],
     "relatedCharsSource": "makemeahanzi",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
