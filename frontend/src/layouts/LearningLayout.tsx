@@ -122,13 +122,39 @@ const LearningLayout: React.FC = () => {
     }
   });
   /** Progressive paragraph unlock tracking (Issue #85).
-   * Restored from localStorage on mount so progress survives page refresh (Issue #689). */
+   * Restored from localStorage on mount so progress survives page refresh (Issue #689).
+   *
+   * Fix #806: also fall back to LiveTutor's own localStorage key (`liveTutor_progress_*`)
+   * so that when `tutor_completed_*` was cleared at session end but the user returns to
+   * the same story before LiveTutor clears its own cache, FullReading still sees all
+   * paragraphs as done. */
   const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(() => {
     try {
       const raw = localStorage.getItem(`tutor_completed_${storyId}`);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return new Set<number>(parsed as number[]);
+        if (Array.isArray(parsed) && (parsed as number[]).length > 0) {
+          return new Set<number>(parsed as number[]);
+        }
+      }
+    } catch {
+      // Non-fatal — continue to fallback
+    }
+    // Fallback: LiveTutor persists its own progress under a different key.
+    // If the user refreshed the page or started a new session for the same story
+    // before LiveTutor cleared its own cache, read completed paragraphs from there.
+    try {
+      const liveTutorRaw = localStorage.getItem(`liveTutor_progress_${storyId}`);
+      if (liveTutorRaw) {
+        const liveTutorParsed = JSON.parse(liveTutorRaw) as {
+          completedParagraphs?: unknown;
+        };
+        if (
+          Array.isArray(liveTutorParsed.completedParagraphs) &&
+          (liveTutorParsed.completedParagraphs as number[]).length > 0
+        ) {
+          return new Set<number>(liveTutorParsed.completedParagraphs as number[]);
+        }
       }
     } catch {
       // Non-fatal — start fresh
@@ -185,12 +211,15 @@ const LearningLayout: React.FC = () => {
 
   /** Clear active session from localStorage and sessionStorage (called on completion).
    * Removing the sessionStorage key means the next visit creates a fresh DB session.
-   * Also clears the tutor paragraph progress so a fresh session starts at zero (Issue #689). */
+   * Also clears the tutor paragraph progress so a fresh session starts at zero (Issue #689).
+   * Fix #806: also clear LiveTutor's own cache key so stale paragraph data from a
+   * completed session never bleeds into a new session for the same story. */
   const clearPersistedSession = useCallback(() => {
     if (!user) return;
     clearActiveSession(String(user.id));
     try { sessionStorage.removeItem(`db-session-${storyId}`); } catch { /* non-fatal */ }
     try { localStorage.removeItem(`tutor_completed_${storyId}`); } catch { /* non-fatal */ }
+    try { localStorage.removeItem(`liveTutor_progress_${storyId}`); } catch { /* non-fatal */ }
   }, [user, storyId]);
 
   // ── Idle-timeout warning (Issue #408) ────────────────────────────────────
