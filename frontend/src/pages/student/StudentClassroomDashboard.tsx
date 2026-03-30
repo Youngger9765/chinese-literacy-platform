@@ -174,7 +174,7 @@ const ClassroomCard: React.FC<ClassroomCardProps> = ({
       </div>
 
       {/* Assignment summary stats */}
-      <div className="px-5 pt-4 pb-2 flex gap-4 text-sm">
+      <div className="px-5 pt-3 pb-2 flex gap-4 text-xs">
         <span className="text-amber-700 font-semibold">
           {pending.length} 待完成
         </span>
@@ -292,11 +292,11 @@ const StudentClassroomDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto p-6 space-y-6">
+        <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4">
           <LoadingIndicator />
           <div>
-            <Skeleton className="h-8 w-36 rounded" />
-            <Skeleton className="h-4 w-52 rounded mt-2" />
+            <Skeleton className="h-5 w-36 rounded" />
+            <Skeleton className="h-3 w-52 rounded mt-1.5" />
           </div>
           <div className="space-y-5">
             {Array.from({ length: 2 }).map((_, index) => (
@@ -310,11 +310,11 @@ const StudentClassroomDashboard: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4">
         {/* Page header */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">我的班級</h1>
-          <p className="text-sm text-gray-500 mt-1">查看你加入的班級、老師和作業</p>
+          <h1 className="text-base font-bold text-gray-900">我的班級</h1>
+          <p className="text-xs text-gray-500 mt-0.5">查看你加入的班級、老師和作業</p>
         </div>
 
         {error && (
