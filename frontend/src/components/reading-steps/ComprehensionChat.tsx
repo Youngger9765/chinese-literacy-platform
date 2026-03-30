@@ -24,6 +24,13 @@ type ChatMessage =
   | { role: 'student'; text: string }
   | { role: 'feedback'; text: string; understood: boolean };
 
+// ── Per-tab completion tracking (Issue #846) ────────────────────────────────
+interface TabCompletion {
+  chatDone: boolean;       // Completed 5-question Socratic dialogue
+  structureVisited: boolean; // Opened the key points table (visited = completed)
+  mcqDone: boolean;        // Answered all MCQ questions
+}
+
 const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   story,
   attempt,
@@ -37,6 +44,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   // ── localStorage persistence ────────────────────────────────────────
   const storageKey = `comprehension_progress_${story.id}`;
+  const completionKey = `comprehension_completion_${story.id}`;
+
   type SavedComprehension = {
     conversation: ChatMessage[];
     understoodCount: number;
@@ -50,6 +59,16 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       return JSON.parse(raw);
     } catch { return null; }
   };
+
+  // Load per-tab completion state from localStorage (#846)
+  const loadCompletion = (): TabCompletion => {
+    try {
+      const raw = localStorage.getItem(completionKey);
+      if (!raw) return { chatDone: false, structureVisited: false, mcqDone: false };
+      return { chatDone: false, structureVisited: false, mcqDone: false, ...JSON.parse(raw) };
+    } catch { return { chatDone: false, structureVisited: false, mcqDone: false }; }
+  };
+
   const savedRef = useRef(loadSaved());
 
   const [conversation, setConversation] = useState<ChatMessage[]>(() => savedRef.current?.conversation ?? []);
@@ -61,6 +80,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [zhuyinReady, setZhuyinReady] = useState(false);
   const [isVoicePreparing, setIsVoicePreparing] = useState(false);
   const [isListening, setIsListening] = useState(false);
+
+  // Per-tab completion state (#846)
+  const [tabCompletion, setTabCompletion] = useState<TabCompletion>(() => loadCompletion());
 
   // Mobile responsive
   const isMobile = useIsMobile();
@@ -313,6 +335,29 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     } catch {}
   }, [conversation, understoodCount, requiredCount, isSessionComplete, storageKey]);
 
+  // ── Save per-tab completion to localStorage (#846) ──────────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(completionKey, JSON.stringify(tabCompletion));
+    } catch {}
+  }, [tabCompletion, completionKey]);
+
+  // Mark chatDone when Socratic dialogue completes (#846)
+  useEffect(() => {
+    if (isSessionComplete && !tabCompletion.chatDone) {
+      setTabCompletion(prev => ({ ...prev, chatDone: true }));
+    }
+  }, [isSessionComplete, tabCompletion.chatDone]);
+
+  // Mark structureVisited when user switches to structure tab (#846)
+  // "有打開就算完成"
+  const handleTabChange = useCallback((tab: 'story' | 'chat' | 'structure' | 'mcq') => {
+    setActiveTab(tab);
+    if (tab === 'structure' && !tabCompletion.structureVisited) {
+      setTabCompletion(prev => ({ ...prev, structureVisited: true }));
+    }
+  }, [tabCompletion.structureVisited]);
+
   const handleSubmit = useCallback(async (overrideText?: string) => {
     const text = (overrideText ?? inputText).trim();
     if (!text || isLoading || isSessionComplete || isSubmittingRef.current) return;
@@ -442,6 +487,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const handleRestart = useCallback(async () => {
     try { localStorage.removeItem(storageKey); } catch {}
+    // Reset chatDone on restart so tab checkmark reflects current session (#846)
+    setTabCompletion(prev => ({ ...prev, chatDone: false }));
     setConversation([]);
     setUnderstoodCount(0);
     setIsSessionComplete(false);
@@ -455,7 +502,27 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       token: token ?? undefined,
     }).catch(() => { /* non-fatal */ });
     fetchFirstQuestion();
-  }, [sessionId, dbSessionId, token, fetchFirstQuestion]);
+  }, [sessionId, dbSessionId, token, fetchFirstQuestion, storageKey]);
+
+  // MCQ completion handler — marks mcqDone (#846)
+  const handleMcqComplete = useCallback((score: number, total: number) => {
+    setTabCompletion(prev => ({ ...prev, mcqDone: true }));
+    setActiveTab('chat');
+  }, []);
+
+  // "重新練習" for structure tab (#846)
+  const handleStructureRedo = useCallback(() => {
+    setTabCompletion(prev => ({ ...prev, structureVisited: false }));
+    // Re-mark as visited immediately since user is still on the tab
+    setTimeout(() => {
+      setTabCompletion(prev => ({ ...prev, structureVisited: true }));
+    }, 0);
+  }, []);
+
+  // "重新練習" for MCQ tab (#846)
+  const handleMcqRedo = useCallback(() => {
+    setTabCompletion(prev => ({ ...prev, mcqDone: false }));
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const nativeEvent = e.nativeEvent as KeyboardEvent;
@@ -701,7 +768,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             className="px-3 py-3 rounded-xl text-sm text-gray-500 hover:text-gray-900 transition-colors"
             title="重新開始對話"
           >
-            重新開始
+            重新練習
           </button>
           <button
             onClick={handleFinish}
@@ -770,6 +837,85 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     </div>
   );
 
+  // ── #844: Prominent centered tab bar component ───────────────────────
+  // Used both in mobile and desktop (as overlay / standalone)
+  const hasMcq = !!(story.multipleChoice && story.multipleChoice.length > 0);
+
+  const renderProminentTabBar = (includeStory = false) => (
+    <div className="flex items-center justify-center gap-1 px-3 py-2 bg-white border-b border-gray-200">
+      <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+        {includeStory && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'story'}
+            onClick={() => handleTabChange('story')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === 'story'
+                ? 'bg-white text-accent shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            課文
+          </button>
+        )}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'chat'}
+          onClick={() => handleTabChange('chat')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+            activeTab === 'chat'
+              ? 'bg-white text-accent shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          AI 對話
+          {tabCompletion.chatDone && (
+            <span className="text-emerald-500 text-xs leading-none">✓</span>
+          )}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'structure'}
+          onClick={() => handleTabChange('structure')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+            activeTab === 'structure'
+              ? 'bg-white text-accent shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          重點表
+          {tabCompletion.structureVisited && (
+            <span className="text-emerald-500 text-xs leading-none">✓</span>
+          )}
+        </button>
+        {hasMcq && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'mcq'}
+            onClick={() => handleTabChange('mcq')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === 'mcq'
+                ? 'bg-white text-accent shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            選擇題
+            {tabCompletion.mcqDone && (
+              <span className="text-emerald-500 text-xs leading-none">✓</span>
+            )}
+          </button>
+        )}
+      </div>
+      <div className="ml-2">
+        <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+      </div>
+    </div>
+  );
+
   return (
     <div
       className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 h-full bg-amber-50 overflow-hidden relative`}
@@ -780,80 +926,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       }}
     >
       {isMobile ? (
-        /* MOBILE: Tab-based layout */
+        /* MOBILE: Tab-based layout — prominent centered pill tabs */
         <>
-          {/* Tab bar */}
-          <div className="flex bg-white border-b border-gray-200 shrink-0">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'story'}
-              onClick={() => {
-                setActiveTab('story');
-                requestAnimationFrame(() => {
-                  if (storyPanelRef.current) {
-                    storyPanelRef.current.scrollTop = storyScrollRef.current;
-                  }
-                });
-              }}
-              className={`flex-1 py-2 text-xs font-bold transition-colors ${
-                activeTab === 'story'
-                  ? 'text-accent border-b-2 border-accent'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              課文
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'chat'}
-              onClick={() => {
-                if (storyPanelRef.current) {
-                  storyScrollRef.current = storyPanelRef.current.scrollTop;
-                }
-                setActiveTab('chat');
-              }}
-              className={`flex-1 py-2 text-xs font-bold transition-colors ${
-                activeTab === 'chat'
-                  ? 'text-accent border-b-2 border-accent'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              AI 對話
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === 'structure'}
-              onClick={() => setActiveTab('structure')}
-              className={`flex-1 py-2 text-xs font-bold transition-colors ${
-                activeTab === 'structure'
-                  ? 'text-accent border-b-2 border-accent'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              重點表
-            </button>
-            {story.multipleChoice && story.multipleChoice.length > 0 && (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === 'mcq'}
-                onClick={() => setActiveTab('mcq')}
-                className={`flex-1 py-2 text-xs font-bold transition-colors ${
-                  activeTab === 'mcq'
-                    ? 'text-accent border-b-2 border-accent'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                選擇題
-              </button>
-            )}
-            <div className="flex items-center px-2">
-              <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
-            </div>
-          </div>
+          {renderProminentTabBar(true)}
 
           {activeTab === 'story' ? (
             /* Story panel - full height */
@@ -879,17 +954,40 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               </div>
             </div>
           ) : activeTab === 'structure' ? (
-            /* ⑤ 文章重點表 panel */
+            /* 文章重點表 panel */
             <div className="flex-1 overflow-y-auto p-4 bg-amber-50">
               <StoryStructureTable storyId={story.id} />
+              {tabCompletion.structureVisited && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={handleStructureRedo}
+                    className="text-xs text-gray-400 hover:text-gray-600 underline"
+                  >
+                    重新練習
+                  </button>
+                </div>
+              )}
             </div>
-          ) : activeTab === 'mcq' && story.multipleChoice && story.multipleChoice.length > 0 ? (
-            /* ⑦ 閱讀理解選擇題 panel */
+          ) : activeTab === 'mcq' && hasMcq ? (
+            /* 閱讀理解選擇題 panel */
             <div className="flex-1 overflow-y-auto bg-amber-50">
-              <MultipleChoiceExercise
-                questions={story.multipleChoice}
-                onComplete={() => setActiveTab('chat')}
-              />
+              {tabCompletion.mcqDone ? (
+                <div className="flex flex-col items-center justify-center p-8 gap-4">
+                  <div className="text-4xl">✓</div>
+                  <p className="text-emerald-700 font-semibold text-sm">選擇題已完成</p>
+                  <button
+                    onClick={handleMcqRedo}
+                    className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm hover:bg-gray-200 transition-colors"
+                  >
+                    重新練習
+                  </button>
+                </div>
+              ) : (
+                <MultipleChoiceExercise
+                  questions={story.multipleChoice!}
+                  onComplete={handleMcqComplete}
+                />
+              )}
             </div>
           ) : (
             /* Chat panel - full height with input */
@@ -921,60 +1019,55 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       ) : (
         /* DESKTOP: dual-panel for AI chat; full-width for structure table / MCQ */
         <>
-          {/* Shared tab bar — always visible on desktop */}
+          {/* Prominent centered tab bar — always visible on desktop for structure/mcq,
+              and as an overlay tab bar in right panel for chat view */}
           {(activeTab === 'structure' || activeTab === 'mcq') && (
-            <div className="absolute top-0 left-0 right-0 h-9 z-10 bg-white border-b border-gray-200 flex items-center shrink-0">
-              <button
-                onClick={() => setActiveTab('chat')}
-                className="px-3 h-full text-[11px] font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition-colors"
-              >
-                AI 對話
-              </button>
-              <button
-                onClick={() => setActiveTab('structure')}
-                className={`px-3 h-full text-[11px] font-bold border-b-2 transition-colors ${
-                  activeTab === 'structure'
-                    ? 'border-accent text-accent'
-                    : 'border-transparent text-gray-400 hover:text-gray-700'
-                }`}
-              >
-                文章重點表
-              </button>
-              {story.multipleChoice && story.multipleChoice.length > 0 && (
-                <button
-                  onClick={() => setActiveTab('mcq')}
-                  className={`px-3 h-full text-[11px] font-bold border-b-2 transition-colors ${
-                    activeTab === 'mcq'
-                      ? 'border-accent text-accent'
-                      : 'border-transparent text-gray-400 hover:text-gray-700'
-                  }`}
-                >
-                  選擇題
-                </button>
-              )}
-              <div className="flex-1" />
-              <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+            <div className="absolute top-0 left-0 right-0 z-10">
+              {renderProminentTabBar(false)}
             </div>
           )}
 
           {activeTab === 'structure' ? (
             /* FULL-WIDTH: 文章重點表 */
-            <div className="flex-1 flex flex-col min-h-0 pt-9">
+            <div className="flex-1 flex flex-col min-h-0 pt-12">
               <div className="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 custom-scrollbar">
                 <div className="max-w-5xl mx-auto">
                   <StoryStructureTable storyId={story.id} />
+                  {tabCompletion.structureVisited && (
+                    <div className="mt-6 text-center">
+                      <button
+                        onClick={handleStructureRedo}
+                        className="text-xs text-gray-400 hover:text-gray-600 underline"
+                      >
+                        重新練習
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          ) : activeTab === 'mcq' && story.multipleChoice && story.multipleChoice.length > 0 ? (
+          ) : activeTab === 'mcq' && hasMcq ? (
             /* FULL-WIDTH: 選擇題 */
-            <div className="flex-1 flex flex-col min-h-0 pt-9">
+            <div className="flex-1 flex flex-col min-h-0 pt-12">
               <div className="flex-1 overflow-y-auto bg-gray-50 custom-scrollbar">
                 <div className="max-w-3xl mx-auto py-6 px-4 lg:px-0">
-                  <MultipleChoiceExercise
-                    questions={story.multipleChoice}
-                    onComplete={() => setActiveTab('chat')}
-                  />
+                  {tabCompletion.mcqDone ? (
+                    <div className="flex flex-col items-center justify-center p-8 gap-4">
+                      <div className="text-4xl">✓</div>
+                      <p className="text-emerald-700 font-semibold text-sm">選擇題已完成</p>
+                      <button
+                        onClick={handleMcqRedo}
+                        className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm hover:bg-gray-200 transition-colors"
+                      >
+                        重新練習
+                      </button>
+                    </div>
+                  ) : (
+                    <MultipleChoiceExercise
+                      questions={story.multipleChoice!}
+                      onComplete={handleMcqComplete}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -983,7 +1076,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             <>
               {/* LEFT: Story text panel */}
               <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
-                {/* Tab bar */}
+                {/* Tab bar — story filename header */}
                 <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
                   <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
                     {story.filename}
@@ -1028,38 +1121,48 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
               {/* RIGHT: Chat panel */}
               <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
-                {/* Panel tab bar */}
-                <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center">
-                  <button
-                    onClick={() => setActiveTab('chat')}
-                    className="px-3 h-full text-[11px] font-bold border-b-2 border-accent text-accent"
-                  >
-                    AI 對話
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('structure')}
-                    className="px-3 h-full text-[11px] font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition-colors"
-                  >
-                    文章重點表
-                  </button>
-                  {story.multipleChoice && story.multipleChoice.length > 0 && (
+                {/* Prominent pill tab bar inside right panel (#844) */}
+                <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-1 px-3 py-2">
+                  <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
                     <button
-                      onClick={() => setActiveTab('mcq')}
-                      className="px-3 h-full text-[11px] font-bold border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition-colors"
+                      onClick={() => handleTabChange('chat')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold bg-white text-accent shadow-sm transition-all"
                     >
-                      選擇題
+                      AI 對話
+                      {tabCompletion.chatDone && (
+                        <span className="text-emerald-500 text-xs leading-none">✓</span>
+                      )}
                     </button>
-                  )}
-                  <div className="flex-1" />
-                  <span className="text-[10px] text-gray-600 pr-2">
-                    {understoodCount} / {requiredCount} 理解
-                  </span>
-                  <button
-                    onClick={handleFinish}
-                    className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors pr-3"
-                  >
-                    跳過
-                  </button>
+                    <button
+                      onClick={() => handleTabChange('structure')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
+                    >
+                      重點表
+                      {tabCompletion.structureVisited && (
+                        <span className="text-emerald-500 text-xs leading-none">✓</span>
+                      )}
+                    </button>
+                    {hasMcq && (
+                      <button
+                        onClick={() => handleTabChange('mcq')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
+                      >
+                        選擇題
+                        {tabCompletion.mcqDone && (
+                          <span className="text-emerald-500 text-xs leading-none">✓</span>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <div className="ml-1 flex items-center gap-2">
+                    <span className="text-[10px] text-gray-500">{understoodCount}/{requiredCount}</span>
+                    <button
+                      onClick={handleFinish}
+                      className="text-[10px] text-gray-500 hover:text-gray-400 transition-colors"
+                    >
+                      跳過
+                    </button>
+                  </div>
                 </div>
 
                 {/* Chat messages */}
