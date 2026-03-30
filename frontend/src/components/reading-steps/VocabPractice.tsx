@@ -8,7 +8,7 @@ import ZhuyinPhoneticGame from './ZhuyinPhoneticGame';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import RadicalDecomposition from './RadicalDecomposition';
-import { getDecomposition, initGeneratedDecompositions } from '../../data/radicals';
+import { getDecomposition, initGeneratedDecompositions, initRadicalMeanings } from '../../data/radicals';
 import DictionaryPanel from '../dictionary/DictionaryPanel';
 import FillInBlankExercise from './FillInBlankExercise';
 
@@ -147,7 +147,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   // Load generated decomposition data so getDecomposition() covers 2700+ chars
   const [decompReady, setDecompReady] = useState(false);
   useEffect(() => {
-    initGeneratedDecompositions().then(() => setDecompReady(true));
+    Promise.all([initGeneratedDecompositions(), initRadicalMeanings()]).then(() => setDecompReady(true));
   }, []);
   const storageKey = `vocabPractice_progress_${story.id}`;
   const loadSaved = () => {

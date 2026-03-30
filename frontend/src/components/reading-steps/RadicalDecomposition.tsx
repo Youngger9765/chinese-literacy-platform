@@ -15,6 +15,7 @@ import {
   getRadicalInfo,
   getRelatedChars,
   initGeneratedDecompositions,
+  initRadicalMeanings,
   RadicalRole,
   RelatedChar,
 } from '../../data/radicals';
@@ -72,7 +73,8 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
   // forceUpdate triggers a re-render after the data is available so that
   // characters not in the hand-curated set are shown immediately.
   useEffect(() => {
-    initGeneratedDecompositions().then(() => forceUpdate(n => n + 1));
+    Promise.all([initGeneratedDecompositions(), initRadicalMeanings()])
+      .then(() => forceUpdate(n => n + 1));
   }, []);
 
   const decomp = getDecomposition(char);
