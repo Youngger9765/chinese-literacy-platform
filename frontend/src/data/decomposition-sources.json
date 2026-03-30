@@ -14,14 +14,14 @@
     },
     {
       "name": "makemeahanzi",
-      "count": 2575,
+      "count": 2382,
       "priority": 2,
       "license": "LGPL",
       "url": "https://github.com/skishore/makemeahanzi"
     },
     {
       "name": "kfcd/chaizi",
-      "count": 134,
+      "count": 121,
       "priority": 3,
       "license": "CC BY 3.0",
       "url": "https://github.com/kfcd/chaizi"
@@ -29,12 +29,13 @@
   ],
   "generatedAt": "2026-03-30",
   "totalLessonChars": 2791,
-  "coverage": "98.0%",
+  "coverage": "90.6%",
   "breakdown": {
-    "pictophonetic": 1727,
-    "ideographic": 728,
-    "pictographic": 120,
-    "chaizi_fallback": 134,
-    "no_data": 57
+    "pictophonetic": 1700,
+    "ideographic": 682,
+    "pictographic": 0,
+    "chaizi_fallback": 121,
+    "no_data": 55,
+    "independent": 208
   }
 }
