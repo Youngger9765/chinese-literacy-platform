@@ -1796,5 +1796,3 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 };
 
 export default LiveTutor;
-
-export default LiveTutor;
