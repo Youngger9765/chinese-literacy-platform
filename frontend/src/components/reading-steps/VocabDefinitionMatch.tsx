@@ -692,12 +692,10 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   }, [vocab]);
 
   const handleFinish = useCallback(() => {
-    try {
-      localStorage.removeItem(storageModeKey);
-    } catch {}
+    // Keep completion record — only clear on explicit redo
     const correctCount = summaryAnswers.filter((a) => a.correct).length;
     onFinish({ matchedCount: correctCount, totalCount: vocab.length });
-  }, [onFinish, summaryAnswers, vocab.length, storageModeKey]);
+  }, [onFinish, summaryAnswers, vocab.length]);
 
   const modeSubtitles: Record<InteractionMode, string> = {
     'multiple-choice': '看定義，選出對應的語詞',

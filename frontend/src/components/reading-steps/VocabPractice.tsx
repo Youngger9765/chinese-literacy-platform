@@ -266,7 +266,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   };
 
   const handleFinish = (result: VocabResult) => {
-    try { localStorage.removeItem(storageKey); } catch {}
+    // Keep completion record — only clear on explicit redo
     onFinish(result);
   };
 

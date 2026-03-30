@@ -1111,8 +1111,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const handleFinish = () => {
     stopSession();
-    // Clear localStorage — progress is complete, will be sent to backend
-    try { localStorage.removeItem(storageKey); } catch {}
+    // Keep completion record — only clear on explicit redo
     const avgMatchRate =
       lineResults.length > 0
         ? lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length : 0;
