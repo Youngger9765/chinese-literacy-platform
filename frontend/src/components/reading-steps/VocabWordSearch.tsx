@@ -9,6 +9,13 @@
  *   story       -- The lesson story (uses story.vocabulary)
  *   onFinish    -- Called when all words are found, with time elapsed (seconds)
  *   zhuyinActive -- (optional) reserved for future zhuyin overlay
+ *
+ * Issue #816 — fix: completion record not persisted
+ *   - On completion, save completed:true + elapsedTime to localStorage
+ *     (do NOT removeItem on finish — that was the bug)
+ *   - On mount, if saved state has completed:true, show completion screen
+ *     immediately without starting a new game
+ *   - Only clear localStorage when student clicks "重新練習"
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -248,7 +255,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     try {
       const raw = localStorage.getItem(storageKey);
       if (!raw) return null;
-      return JSON.parse(raw) as { foundWords: string[]; elapsedTime: number };
+      return JSON.parse(raw) as { foundWords: string[]; elapsedTime: number; completed?: boolean };
     } catch { return null; }
   };
   const savedRef = useRef(loadSaved());
@@ -280,8 +287,13 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
   const [dragCells, setDragCells] = useState<Set<string>>(new Set());
   const [dragStart, setDragStart] = useState<CellPos | null>(null);
   const [flashCells, setFlashCells] = useState<Set<string>>(new Set());
-  const [finished, setFinished] = useState(false);
+  // #816: start as finished=true if localStorage records a completed session
+  const [finished, setFinished] = useState(() => savedRef.current?.completed === true);
   const [justFound, setJustFound] = useState<string | null>(null);
+  // #816: time at completion (restored from localStorage for the completion screen)
+  const [finishedElapsed, setFinishedElapsed] = useState<number>(
+    savedRef.current?.completed ? (savedRef.current.elapsedTime ?? 0) : 0
+  );
 
   // Restore highlighted cells for already-found words on mount
   useEffect(() => {
@@ -316,10 +328,19 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
   useEffect(() => {
     if (allFound && !finished) {
       setFinished(true);
-      try { localStorage.removeItem(storageKey); } catch {}
+      setFinishedElapsed(elapsed);
+      // #816: persist completion — do NOT removeItem here
+      // Saving completed:true so returning to this step shows the completion screen
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({
+          foundWords: Array.from(foundWords),
+          elapsedTime: elapsed,
+          completed: true,
+        }));
+      } catch {}
       setTimeout(() => onFinish(elapsed), 800);
     }
-  }, [allFound, finished, onFinish, elapsed, storageKey]);
+  }, [allFound, finished, onFinish, elapsed, storageKey, foundWords]);
 
   // Resolve a touch/mouse event to a grid cell position
   const resolveCell = useCallback((e: React.MouseEvent | React.TouchEvent): CellPos | null => {
@@ -485,13 +506,23 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
   }
 
   // ---- Completion screen ----
+  // #816: show completion screen both when just-finished (allFound) and when
+  // returning with a previously-completed session (finished loaded from localStorage)
   if (finished) {
+    const displayTime = allFound ? elapsed : finishedElapsed;
+
+    const handleRedo = () => {
+      // #816: only clear localStorage when student explicitly requests restart
+      try { localStorage.removeItem(storageKey); } catch {}
+      window.location.reload();
+    };
+
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-8 animate-fade-in">
         <div className="text-8xl animate-bounce-in" role="img" aria-label="慶祝">🎉</div>
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-10 py-6 text-center shadow-sm">
           <h2 className="text-3xl font-black text-emerald-700 mb-2">全部找到了！</h2>
-          <p className="text-gray-500 text-base">共花了 <span className="font-bold text-gray-700">{formatTime(elapsed)}</span></p>
+          <p className="text-gray-500 text-base">共花了 <span className="font-bold text-gray-700">{formatTime(displayTime)}</span></p>
         </div>
         <div className="flex flex-wrap gap-3 justify-center max-w-sm">
           {placedWords.map((pw) => (
@@ -503,6 +534,12 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
             </span>
           ))}
         </div>
+        <button
+          onClick={handleRedo}
+          className="mt-2 px-8 py-3 bg-gray-100 text-gray-700 rounded-xl text-base font-bold hover:bg-gray-200 active:scale-95 transition-all shadow-sm min-h-[52px]"
+        >
+          重新練習
+        </button>
       </div>
     );
   }
