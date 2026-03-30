@@ -42,6 +42,55 @@ IDS_ORDER_PRESERVED = set("⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻")  # All operato
 
 
 # ---------------------------------------------------------------------------
+# INDEPENDENT_CHARS — 獨體字清單
+# Characters that CANNOT be further decomposed into meaningful sub-components.
+# These are 象形字 (pictographic) or structurally indivisible characters.
+# When a char is in this set, it is EXCLUDED from decompositions-generated.json
+# so the frontend RadicalDecomposition component can show a friendly message.
+#
+# Sources:
+#   - Traditional Kangxi radicals that are themselves indivisible
+#   - Common 象形字 used in elementary education
+#   - Characters where makemeahanzi/chaizi produce meaningless 1-component splits
+# ---------------------------------------------------------------------------
+INDEPENDENT_CHARS: set[str] = {
+    # Basic numerals / simple forms
+    "一", "二", "三", "四", "五", "六", "七", "八", "九", "十",
+    "百", "千", "萬",
+    # Common independent pictographs (象形字)
+    "人", "大", "小", "上", "下", "中",
+    "山", "水", "火", "日", "月", "木", "金", "土",
+    "口", "手", "目", "耳", "足", "身", "心",
+    "牛", "羊", "犬", "馬", "魚", "鳥", "鹿",
+    "田", "禾", "米", "竹",
+    # Common independent characters in lesson texts
+    "不", "龍", "也", "了", "又", "之",
+    "乃", "才", "己", "巳", "乙",
+    "丁", "丸", "丰", "九", "力", "女", "子", "寸",
+    "工", "干", "弓", "斤", "方", "毛", "片",
+    "立", "羊", "耳", "舌", "自", "至", "臣", "色",
+    "角", "言", "豆", "身", "車", "辛",
+    "長", "門", "雨", "非", "面", "革", "骨", "高",
+    "魚", "鳥", "鹿", "齒",
+    # Kangxi radicals that are themselves pictographic and indivisible
+    "刀", "力", "又", "土", "士", "夕", "大", "女", "子",
+    "山", "工", "己", "巾", "干", "弓", "心", "戈", "戶", "手",
+    "文", "斗", "月", "木", "止", "歹", "水", "火", "爪",
+    "片", "牛", "犬", "瓜", "瓦", "田", "目", "矛", "矢", "石",
+    "禾", "穴", "立", "竹", "米", "羊", "羽", "老", "耳", "肉",
+    "舌", "衣", "見", "角", "言", "豆", "豕", "身", "車",
+    "辛", "金", "長", "門", "雨", "面", "革", "骨", "高", "魚",
+    "鳥", "鹿", "鼠", "鼻", "齒", "龍",
+    # Additional pictographs commonly mis-decomposed
+    "丁", "丐", "且", "世", "丘", "丰", "丸", "主", "乙",
+    "云", "井", "亞", "京", "亮", "元", "兔", "再", "北",
+    "匹", "南", "卵", "喪", "垂", "宣", "射", "少",
+    "岡", "巫", "帝", "平", "幹", "幾", "西",
+    "烏", "申", "畏", "異", "皮", "示",
+    "能", "農", "食", "鬼", "黃", "默", "齊",
+}
+
+# ---------------------------------------------------------------------------
 # MANUAL_CORRECTIONS — override known-bad decompositions
 # Add entries here for characters where makemeahanzi/chaizi give wrong results.
 # Priority: always applied before any automatic source.
@@ -687,10 +736,16 @@ def main() -> None:
         "pictographic": 0,
         "chaizi_fallback": 0,
         "no_data": 0,
+        "independent": 0,
     }
 
     manual_count = 0
     for char in sorted(lesson_chars):
+        # Step -1: Skip 獨體字 (independent chars that cannot be decomposed)
+        if char in INDEPENDENT_CHARS:
+            stats["independent"] += 1
+            continue
+
         # Step 0: Apply manual corrections (highest priority)
         if char in MANUAL_CORRECTIONS:
             result[char] = MANUAL_CORRECTIONS[char]
@@ -702,6 +757,13 @@ def main() -> None:
         if entry:
             decomp = build_from_makemeahanzi(entry)
             if decomp:
+                # Skip trivial single-component decompositions that are meaningless:
+                # e.g. 不 -> [一], 乃 -> [丿] — these are stroke-level breakdowns,
+                # not teachable 部件 decompositions.
+                comps = decomp.get("components", [])
+                if len(comps) == 1:
+                    stats["independent"] += 1
+                    continue
                 etype = entry.get("etymology", {}).get("type", "ideographic")
                 if etype == "pictophonetic":
                     stats["pictophonetic"] += 1
@@ -717,6 +779,10 @@ def main() -> None:
         # Fallback to chaizi
         decomp = build_from_chaizi(char, chaizi)
         if decomp:
+            comps = decomp.get("components", [])
+            if len(comps) == 1:
+                stats["independent"] += 1
+                continue
             stats["chaizi_fallback"] += 1
             result[char] = decomp
             continue
@@ -767,6 +833,7 @@ def main() -> None:
     print(f"  ideographic   : {stats['ideographic']}")
     print(f"  pictographic  : {stats['pictographic']}")
     print(f"  chaizi fallback: {stats['chaizi_fallback']}")
+    print(f"  independent (skipped): {stats['independent']}")
     print(f"  no data        : {stats['no_data']}")
 
     # Write output JSON (just the decomposition map)
