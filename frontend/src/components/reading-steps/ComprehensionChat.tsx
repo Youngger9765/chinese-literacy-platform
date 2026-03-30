@@ -435,11 +435,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     }
   };
 
-  // Clear session and start over from scratch (Issue #632)
+  // Keep completion record — only clear on explicit redo (Issue #817)
   const handleFinish = useCallback(() => {
-    try { localStorage.removeItem(storageKey); } catch {}
     onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length });
-  }, [storageKey, onFinish, understoodCount, requiredCount, isSessionComplete, conversation.length]);
+  }, [onFinish, understoodCount, requiredCount, isSessionComplete, conversation.length]);
 
   const handleRestart = useCallback(async () => {
     try { localStorage.removeItem(storageKey); } catch {}

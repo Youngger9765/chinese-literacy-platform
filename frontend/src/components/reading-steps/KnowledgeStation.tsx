@@ -20,7 +20,7 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
   }, [storageKey]);
 
   const handleFinish = () => {
-    try { localStorage.removeItem(storageKey); } catch {}
+    // Keep completion record — only clear on explicit redo
     onFinish();
   };
 
