@@ -518,8 +518,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       localStorage.setItem(storageKey, JSON.stringify({
         lineResults,
         paragraphSummaries: Object.fromEntries(
-          Object.entries(paragraphSummaries).map(([k, v]) => [k, { ...v, geminiPending: false }])
-        ),
+            Object.entries(paragraphSummaries).map(([k, v]) => [
+              k,
+              { ...(v as ParagraphSummaryData), geminiPending: false },
+            ])
+          ) as Record<number, ParagraphSummaryData>,
         completedParagraphs: Array.from(completedParagraphs),
         currentLineIndex,
       }));
@@ -1499,7 +1502,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                 {processZhuyin(`請閱讀左側文章的第${currentLineIndex + 1}段：${story.content[currentLineIndex].slice(0, 5)}...`)}
               </div>
             </div>
-          )}
+            </div>
 
           {streamingUserInput && (
             <div className="flex flex-col items-end">
@@ -1791,7 +1794,5 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     </div>
   );
 };
-
-export default LiveTutor;
 
 export default LiveTutor;

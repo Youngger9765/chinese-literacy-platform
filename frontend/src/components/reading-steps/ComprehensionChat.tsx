@@ -1191,7 +1191,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
             {/* Tab bar */}
             <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-              <div className="h-full px-4 flex items-center bg-amber-50 border-x border-gray-200 border-t-2 border-t-accent text-xs text-gray-800 gap-2">
+              <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-t-accent border-x border-x-gray-200 text-xs text-gray-800 gap-2">
                 {story.filename}
               </div>
               <div className="flex-1" />
@@ -1301,9 +1301,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
                 {/* Input area */}
                 {renderInputArea()}
-              </>
-            )}
-          </div>
+                </>
+              )}
+            </div>
         </>
       )}
 
