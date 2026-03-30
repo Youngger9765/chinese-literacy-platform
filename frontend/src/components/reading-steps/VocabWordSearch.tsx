@@ -211,12 +211,6 @@ function useTimer(running: boolean): number {
   return elapsed;
 }
 
-function formatTime(secs: number): string {
-  const m = Math.floor(secs / 60).toString().padStart(2, '0');
-  const s = (secs % 60).toString().padStart(2, '0');
-  return m + ':' + s;
-}
-
 // ---------------------------------------------------------------------------
 // Drag selection: straight lines only
 // ---------------------------------------------------------------------------
@@ -338,9 +332,9 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
           completed: true,
         }));
       } catch {}
-      setTimeout(() => onFinish(elapsed), 800);
+      // #847: do NOT auto-advance — student clicks "繼續下一步" manually
     }
-  }, [allFound, finished, onFinish, elapsed, storageKey, foundWords]);
+  }, [allFound, finished, elapsed, storageKey, foundWords]);
 
   // Resolve a touch/mouse event to a grid cell position
   const resolveCell = useCallback((e: React.MouseEvent | React.TouchEvent): CellPos | null => {
@@ -505,44 +499,12 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     );
   }
 
-  // ---- Completion screen ----
-  // #816: show completion screen both when just-finished (allFound) and when
-  // returning with a previously-completed session (finished loaded from localStorage)
-  if (finished) {
-    const displayTime = allFound ? elapsed : finishedElapsed;
-
-    const handleRedo = () => {
-      // #816: only clear localStorage when student explicitly requests restart
-      try { localStorage.removeItem(storageKey); } catch {}
-      window.location.reload();
-    };
-
-    return (
-      <div className="flex flex-col items-center justify-center py-16 gap-8 animate-fade-in">
-        <div className="text-8xl animate-bounce-in" role="img" aria-label="慶祝">🎉</div>
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl px-10 py-6 text-center shadow-sm">
-          <h2 className="text-3xl font-black text-emerald-700 mb-2">全部找到了！</h2>
-          <p className="text-gray-500 text-base">共花了 <span className="font-bold text-gray-700">{formatTime(displayTime)}</span></p>
-        </div>
-        <div className="flex flex-wrap gap-3 justify-center max-w-sm">
-          {placedWords.map((pw) => (
-            <span
-              key={pw.word}
-              className="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-xl text-base font-bold border border-emerald-200"
-            >
-              ✓ {pw.word}
-            </span>
-          ))}
-        </div>
-        <button
-          onClick={handleRedo}
-          className="mt-2 px-8 py-3 bg-gray-100 text-gray-700 rounded-xl text-base font-bold hover:bg-gray-200 active:scale-95 transition-all shadow-sm min-h-[52px]"
-        >
-          重新練習
-        </button>
-      </div>
-    );
-  }
+  // #847: handleRedo available for both the completion banner and restart button
+  const handleRedo = () => {
+    // #816: only clear localStorage when student explicitly requests restart
+    try { localStorage.removeItem(storageKey); } catch {}
+    window.location.reload();
+  };
 
   // Ensure minimum 44px touch targets per design guidelines; use larger cells for readability
   const cellSizePx = Math.max(48, Math.min(64, Math.floor((Math.min(520, window.innerWidth - 32)) / size)));
@@ -747,10 +709,36 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
         </div>
       </div>
 
-      {/* Instructions */}
-      <p className="text-sm text-gray-400 text-center px-4 mt-2 bg-gray-50 rounded-xl py-2.5 mx-2">
-        拖曳選取字元，水平或垂直圈出語詞
-      </p>
+      {/* Instructions — hidden after completion */}
+      {!finished && (
+        <p className="text-sm text-gray-400 text-center px-4 mt-2 bg-gray-50 rounded-xl py-2.5 mx-2">
+          拖曳選取字元，水平或垂直圈出語詞
+        </p>
+      )}
+
+      {/* #847: Completion banner — shown in-place, grid stays visible above */}
+      {finished && (
+        <div className="flex flex-col items-center gap-4 px-4 pb-4 animate-fade-in">
+          <div className="w-full bg-emerald-50 border border-emerald-200 rounded-2xl px-6 py-5 text-center shadow-sm">
+            <div className="text-4xl mb-2" role="img" aria-label="慶祝">🎉</div>
+            <h2 className="text-2xl font-black text-emerald-700">全部找到了！</h2>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleRedo}
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl text-base font-bold hover:bg-gray-200 active:scale-95 transition-all shadow-sm min-h-[52px]"
+            >
+              重新練習
+            </button>
+            <button
+              onClick={() => onFinish(finishedElapsed)}
+              className="px-8 py-3 bg-indigo-600 text-white rounded-xl text-base font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-md min-h-[52px]"
+            >
+              繼續下一步
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
