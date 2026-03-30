@@ -183,19 +183,12 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   const jumpToAnnotation = useCallback((id: string) => {
     const el = annSpanRefs.current.get(id);
-    const container = containerRef.current;
-    if (!el || !container) return;
+    if (!el) return;
 
-    // Manually scroll only the inner text-area container so that outer
-    // overflow-y-auto ancestors (LearningContent wrapper, AppShell <main>)
-    // are not touched. Using scrollIntoView() would bubble up and scroll
-    // those outer containers as well, causing no visible movement inside
-    // the annotation text area.
-    const elRect = el.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-    const offset =
-      elRect.top - containerRect.top + container.scrollTop - containerRect.height / 2 + elRect.height / 2;
-    container.scrollTo({ top: offset, behavior: 'smooth' });
+    // Use scrollIntoView on the annotation span directly.
+    // PR #830 fixed the outer wrapper to overflow-hidden so
+    // scrollIntoView now correctly scrolls only the inner container.
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     // Flash highlight
     setHighlightedId(id);
