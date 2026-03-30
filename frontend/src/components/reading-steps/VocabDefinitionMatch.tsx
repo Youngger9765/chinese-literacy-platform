@@ -703,7 +703,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-amber-50">
+    <div className="flex-1 flex flex-col bg-amber-50">
       <StepHeader
         title="語詞定義配對"
         subtitle={phase === 'summary' ? '作答結果' : modeSubtitles[mode]}

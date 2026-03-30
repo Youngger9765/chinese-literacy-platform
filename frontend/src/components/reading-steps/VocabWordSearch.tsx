@@ -575,7 +575,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
   const gridTotalPx = size * cellSizePx;
 
   return (
-    <div className="flex flex-col gap-4 px-2 py-4 select-none">
+    <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-2 py-4 select-none">
       {/* Header */}
       <div className="px-2">
         <h2 className="text-lg font-black text-gray-800">語詞複習</h2>

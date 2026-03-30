@@ -153,11 +153,12 @@ const LearningContent: React.FC = () => {
         onNavigate={handleStepperNavigate}
       />
 
-      {/* Learning step content — overflow-hidden so each step manages its own scroll.
-          ReadingAnnotation, LiveTutor, and other steps use h-full + internal overflow-y-auto
-          and require a height-bounded parent; overflow-y-auto here would let them expand
-          unboundedly and make their internal containerRef never scroll (#815). */}
-      <div className="flex-1 overflow-hidden pb-14 md:pb-0">
+      {/* Learning step content — flex flex-col so child step components receive a flex
+          context and their flex-1 / h-full classes are bounded. overflow-hidden keeps the
+          height capped to the viewport so steps with internal scroll containers (e.g.
+          ReadingAnnotation's containerRef, VocabPractice's main-content div) scroll
+          correctly without the outer wrapper scrolling instead (#815, #824). */}
+      <div className="flex-1 flex flex-col overflow-hidden pb-14 md:pb-0">
         <LearningLayout />
       </div>
     </div>
