@@ -183,11 +183,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   const jumpToAnnotation = useCallback((id: string) => {
     const el = annSpanRefs.current.get(id);
-    if (!el) return;
-
-    // Use scrollIntoView on the annotation span directly.
-    // PR #830 fixed the outer wrapper to overflow-hidden so
-    // scrollIntoView now correctly scrolls only the inner container.
+    if (!el) {
+      console.warn('[jumpToAnnotation] element not found for id:', id);
+      return;
+    }
+    console.log('[jumpToAnnotation] scrolling to:', id, el.textContent);
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     // Flash highlight
