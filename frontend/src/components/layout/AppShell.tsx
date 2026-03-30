@@ -158,7 +158,7 @@ const LearningContent: React.FC = () => {
           height capped to the viewport so steps with internal scroll containers (e.g.
           ReadingAnnotation's containerRef, VocabPractice's main-content div) scroll
           correctly without the outer wrapper scrolling instead (#815, #824). */}
-      <div className="flex-1 flex flex-col overflow-hidden pb-14 md:pb-0">
+      <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
         <LearningLayout />
       </div>
     </div>
