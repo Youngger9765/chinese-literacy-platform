@@ -41,6 +41,33 @@ PASSWORD_RESET_EXPIRY_HOURS = 1
 EMAIL_VERIFICATION_TOKEN_BYTES = 32
 
 
+def _has_active_role(db: Session, user_id: int, role_name: str) -> bool:
+    """Return whether the user has an active role with the given name."""
+    return (
+        db.query(UserRole)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(
+            UserRole.user_id == user_id,
+            UserRole.is_active == True,
+            Role.name == role_name,
+        )
+        .first()
+        is not None
+    )
+
+
+def _ensure_parent_login_allowed(user: User, db: Session) -> None:
+    """Raise 403 when parent logins are temporarily disabled by feature flag."""
+    if settings.parent_portal_enabled:
+        return
+
+    if _has_active_role(db, user.id, "parent"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="家長功能目前暫時關閉，請聯繫老師或管理員。",
+        )
+
+
 def _enforce_password_strength(password: str) -> None:
     """Raise HTTP 422 with a Chinese error message if password is too weak."""
     result = validate_password_strength(password)
@@ -218,6 +245,8 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
+
+    _ensure_parent_login_allowed(user, db)
 
     # Require email verification before allowing login (issue #460).
     # Batch-created student accounts keep email_verified=True (they have no real email).
@@ -505,6 +534,7 @@ def google_login(req: GoogleLoginRequest, request: Request, db: Session = Depend
         # 2. Look up by email (link existing account)
         user = db.query(User).filter(User.email == email, User.is_active == True).first()
         if user is not None:
+            _ensure_parent_login_allowed(user, db)
             user.google_id = google_sub
             if picture and not user.avatar_url:
                 user.avatar_url = picture
@@ -521,6 +551,8 @@ def google_login(req: GoogleLoginRequest, request: Request, db: Session = Depend
             )
             db.add(user)
             is_new_user = True
+    else:
+        _ensure_parent_login_allowed(user, db)
 
     user.last_login_at = datetime.now(timezone.utc)
     db.commit()
