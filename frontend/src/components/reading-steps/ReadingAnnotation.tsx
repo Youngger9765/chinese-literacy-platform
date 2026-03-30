@@ -183,12 +183,17 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   const jumpToAnnotation = useCallback((id: string) => {
     const el = annSpanRefs.current.get(id);
-    if (!el) {
-      console.warn('[jumpToAnnotation] element not found for id:', id);
+    const container = containerRef.current;
+    if (!el || !container) {
+      console.warn('[jumpToAnnotation] missing:', { el: !!el, container: !!container, id });
       return;
     }
-    console.log('[jumpToAnnotation] scrolling to:', id, el.textContent);
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Scroll the inner text container directly (not scrollIntoView which
+    // bubbles up to outer overflow-hidden wrappers and resets to 0).
+    const elTop = el.offsetTop;
+    const targetScroll = Math.max(0, elTop - container.clientHeight / 2);
+    console.log('[jumpToAnnotation]', id, el.textContent, { elTop, targetScroll });
+    container.scrollTo({ top: targetScroll, behavior: 'smooth' });
 
     // Flash highlight
     setHighlightedId(id);
