@@ -245,7 +245,12 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
   const handlePractice = (ch: string, mode: PracticeMode = 'stroke') => {
     setPracticingChar(ch);
-    setPhase(mode === 'stroke' ? 'practice' : 'pronunciation');
+    // Only 'stroke' launches WriteCharacter; all other modes (including
+    // 'radical', 'sentence', etc.) are tab-based inline panels, not a
+    // full-screen phase. Guard here so an unexpected activeTab value can
+    // never send the user to PronunciationPractice by accident.
+    const targetPhase = mode === 'stroke' ? 'practice' : mode === 'pronunciation' ? 'pronunciation' : 'practice';
+    setPhase(targetPhase);
     setJustCompleted('');
   };
 
@@ -499,7 +504,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                 return (
                   <div key={ch} className="flex flex-col gap-1">
                     <button
-                      onClick={() => handlePractice(ch, activeTab)}
+                      onClick={() => handlePractice(ch, activeTab === 'stroke' ? 'stroke' : 'pronunciation')}
                       className={[
                         `relative flex flex-col items-center justify-center w-full ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95 animate-card-in`,
                         isPracticed

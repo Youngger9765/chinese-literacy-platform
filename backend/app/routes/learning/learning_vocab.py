@@ -70,8 +70,14 @@ async def get_example_sentences(
             payload.character,
             payload.story_title,
         )
+        def _to_item(s: object) -> ExampleSentenceItem:
+            # Pre-generated cache stores plain strings; AI-generated cache stores dicts.
+            if isinstance(s, str):
+                return ExampleSentenceItem(sentence=s, explanation="")
+            return ExampleSentenceItem(**s)
+
         return ExampleSentencesResponse(
-            sentences=[ExampleSentenceItem(**s) for s in cached.get("sentences", [])],
+            sentences=[_to_item(s) for s in cached.get("sentences", [])],
         )
 
     # 2. Cache miss — call AI
