@@ -209,7 +209,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
   // Pronunciation tab: all characters are candidates (no stroke-data filter needed)
   const pronunciationChars = useMemo(() => {
-    const suggested = attempt.mispronouncedWords.filter(ch => /[\u4e00-\u9fa5]/.test(ch));
+    const suggested = (attempt?.mispronouncedWords ?? []).filter(ch => /[\u4e00-\u9fa5]/.test(ch));
     if (suggested.length > 0) return suggested.slice(0, 12);
     const seen = new Set<string>();
     const optional: string[] = [];
@@ -222,7 +222,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       }
     }
     return optional.slice(0, 12);
-  }, [story.content, attempt.mispronouncedWords]);
+  }, [story.content, attempt?.mispronouncedWords]);
 
   const handlePractice = (ch: string, mode: PracticeMode = 'stroke') => {
     setPracticingChar(ch);
