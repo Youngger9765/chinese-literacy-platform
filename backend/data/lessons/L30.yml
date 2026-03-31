@@ -61,7 +61,37 @@ vocabulary:
 - word: 寫表格左欄
   definition: 將「項目」寫在表格左欄。
 vocabulary_count: 15
-fill_in_blank: []
+fill_in_blank:
+- sentence: 核能電廠的安全問題，常常讓人擔心是否有有害的（　　）洩漏。
+  answer: A
+- sentence: 老師說，雖然這次比賽失敗了，但我們可以從頭來過，為下次的挑戰（　　）新的計畫。
+  answer: B
+- sentence: 人類在過去的幾個（　　）裡，科技發展的速度真是令人驚嘆。
+  answer: C
+- sentence: 觀察天空中的月亮，可以發現它每天的形狀都在改變，這是因為（　　）的關係。
+  answer: D
+- sentence: 晚上抬頭看天空，我們會看到許多閃亮的星星，它們都是宇宙中的（　　）。
+  answer: E
+- sentence: 我們不應該因為一個人的外表或出身，就對他產生任何（　　）的看法。
+  answer: F
+- sentence: 為了讓太空人熟悉太空環境，科學家們建造了一個（　　）太空艙進行訓練。
+  answer: G
+- sentence: 老師講的故事雖然簡短，但其中包含的道理卻（　　），讓人久久不能忘懷。
+  answer: H
+- sentence: 台灣是個多元的社會，有許多不同的（　　）共同生活在這片土地上。
+  answer: I
+- sentence: 他不喜歡搭電梯，因為那種狹小又（　　）的空間讓他感到很不舒服。
+  answer: J
+- sentence: 這座老舊的橋樑已經（　　）了許多車輛和行人的重量，是時候進行維修了。
+  answer: K
+- sentence: 長時間玩電動遊戲會（　　）大量的體力和視力，所以要記得適度休息。
+  answer: L
+- sentence: 在寫報告之前，我們必須先清楚地（　　），才能讓數據分析更有意義。
+  answer: M
+- sentence: 閱讀課文時，老師教我們學習如何快速地（　　），這樣才能掌握文章的核心思想。
+  answer: N
+- sentence: 為了讓資料更清晰，請大家先在（　　）填入分類名稱。
+  answer: O
 multiple_choice:
 - question: 下列語詞何者用法使用正確？　　　　　　　　　　　(邏輯錯誤）
   options:
@@ -114,3 +144,14 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-2-L30女性太空人登月.docx
 flags: []
+story_structure:
+- label: 主題
+  value: 女性太空人登月
+- label: 重要事實 1
+  value: NASA重啟登月計畫「阿提米絲」，將有女性太空人登月。
+- label: 重要事實 2
+  value: 女性在太空任務中，可能比男性更具優勢。
+- label: 重要事實 3
+  value: 阿提米絲計畫強調性別與族群平等，目標是探索火星。
+- label: 結論
+  value: 女性太空人參與，有助人類探索更遠的宇宙。

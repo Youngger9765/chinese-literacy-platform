@@ -64,7 +64,25 @@ vocabulary:
 - word: 珍重
   definition: 珍惜。
 vocabulary_count: 9
-fill_in_blank: []
+fill_in_blank:
+- sentence: 那些童年時的美好回憶，總是（　　）地跟著他，讓他感到溫暖。
+  answer: A
+- sentence: 為了成為頂尖的科學家，他必須通過無數次的失敗與（　　）才能成功。
+  answer: B
+- sentence: 這條通往山頂的小路十分（　　），需要小心行走。
+  answer: C
+- sentence: 每年的清明節，我們都會去掃墓，（　　）已故的親人。
+  answer: D
+- sentence: 人生旅途有時就像一條（　　）的小徑，充滿了未知與挑戰。
+  answer: E
+- sentence: 在比賽的最後一刻，他們靠著一記關鍵得分，成功（　　）了戰局。
+  answer: F
+- sentence: 醫院提供（　　）服務，讓病人在生命最後階段能得到妥善的照顧，減輕痛苦。
+  answer: G
+- sentence: 他在葬禮上講了一個關於死亡的笑話，雖然有點冷，但那種（　　）讓大家苦笑不已。
+  answer: H
+- sentence: 老師在畢業典禮上叮嚀大家要（　　）彼此的友情，未來繼續保持聯繫。
+  answer: I
 multiple_choice:
 - question: 下底下哪一個情況，可以用「如影隨形」這個詞語來形容？
   options:

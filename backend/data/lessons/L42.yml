@@ -38,7 +38,13 @@ vocabulary:
     年少時就擁有超越一般人的資質'
   type: 多義字
 vocabulary_count: 3
-fill_in_blank: []
+fill_in_blank:
+- sentence: 經過長途跋涉，我們決定在路邊的咖啡館（　　）作停留，補充體力。
+  answer: A
+- sentence: 因為過度捕撈，這片海域的魚類數量已經非常（　　）了。
+  answer: B
+- sentence: 這位運動員在（　　）時就展現了驚人的天賦，被譽為明日之星。
+  answer: C
 multiple_choice:
 - question: 下列成語，何者最適合用來形容顧寧人先生的讀書態度？
   options:
@@ -98,3 +104,4 @@ story_structure:
   sub_rows:
   - label: 背景
     value: 家世
+knowledge_video_url: https://www.youtube.com/watch?v=p3SufRlafnA

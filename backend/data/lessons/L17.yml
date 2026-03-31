@@ -112,7 +112,31 @@ vocabulary:
 - word: 潸然淚下
   definition: 傷心落淚。潸然，流淚的樣子。
 vocabulary_count: 12
-fill_in_blank: []
+fill_in_blank:
+- sentence: 晚上睡覺時，他想著明天的考試，怎麼也睡不著，在床上（　　）。
+  answer: A
+- sentence: 這次比賽的失利讓他大受打擊，從此對任何事都提不起勁，整個人變得（　　）。
+  answer: B
+- sentence: 即使遇到困難，他也能保持樂觀的心情，用（　　）的態度去面對。
+  answer: C
+- sentence: 小明走在路上，突然被從天而降的花盆砸到，真是飛來橫禍，遭遇了（　　）。
+  answer: D
+- sentence: 老師要求我們對課文內容多加（　　），才能真正理解其中的深意。
+  answer: E
+- sentence: 爺爺因為中風，導致他右邊身體（　　），行動十分不便。
+  answer: F
+- sentence: 媽媽每天都要上班、做家事、照顧小孩，真希望自己有（　　），才能應付這麼多事情。
+  answer: G
+- sentence: 自從心愛的寵物走失後，小華就一直悶悶不樂，整天（　　），讓家人很擔心。
+  answer: H
+- sentence: 聽到考試不及格的消息，他感到心情跌落（　　），久久無法平復。
+  answer: I
+- sentence: 老師一走進教室，原本吵鬧的同學們立刻安靜下來，變得（　　）。
+  answer: J
+- sentence: 今天早上出門就遇到下雨，結果還遲到被老師罵，真是（　　）的一天。
+  answer: K
+- sentence: 看到電影中主角悲慘的遭遇，許多觀眾都忍不住（　　）。
+  answer: L
 multiple_choice:
 - question: 下列選項「  」中的語詞，何者使用正確？
   options:

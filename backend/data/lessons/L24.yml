@@ -65,7 +65,27 @@ vocabulary:
 - word: 迅雷不及掩耳
   definition: 雷聲突然響起，來不及掩住耳朵。比喻行動迅速，來不及防範準備。
 vocabulary_count: 10
-fill_in_blank: []
+fill_in_blank:
+- sentence: 小鳥在樹林裡四處（　　），希望能找到蟲子餵飽自己。
+  answer: A
+- sentence: 夕陽西下，天空被染成一片橘紅色，（　　）一幅美麗的油畫。
+  answer: B
+- sentence: 老師提醒我們，學習不能（　　），要主動思考和探索新知。
+  answer: C
+- sentence: 魔術師用他（　　）的手法，變出了一朵又一朵的鮮花，讓觀眾驚呼連連。
+  answer: D
+- sentence: 清晨的露珠掛在（　　）上，晶瑩剔透，十分可愛。
+  answer: E
+- sentence: 小雞從蛋殼裡鑽出來，完成了（　　）的過程，開始探索這個世界。
+  answer: F
+- sentence: 我們必須（　　）交通規則，才能確保行車安全，避免意外發生。
+  answer: G
+- sentence: 大自然的變化有著一定的（　　），例如日出日落、潮起潮落。
+  answer: H
+- sentence: 比賽中遇到突發狀況，選手必須（　　），才能找到獲勝的機會。
+  answer: I
+- sentence: 警方（　　）地展開突襲行動，讓歹徒措手不及，順利將其逮捕。
+  answer: J
 multiple_choice:
 - question: 根據這篇文章，請問下列哪個選項不是動物的本能?
   options:

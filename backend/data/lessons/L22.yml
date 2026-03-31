@@ -69,7 +69,39 @@ vocabulary:
 - word: 棲地
   definition: 居住停留的地方。
 vocabulary_count: 16
-fill_in_blank: []
+fill_in_blank:
+- sentence: 努力學習是為未來成功（　　）良好的基礎。
+  answer: A
+- sentence: 她在比賽中表現出色，獲得了所有人的（　　）。
+  answer: B
+- sentence: 為了地球的未來，我們應該推廣（　　）發展的理念。
+  answer: C
+- sentence: 這座老舊的房子因為年久失修，已經（　　）倒塌。
+  answer: D
+- sentence: 許多特有種動物因為環境破壞，都處於（　　）的狀態。
+  answer: E
+- sentence: 夏日午後，我們喜歡坐在大樹下，享受（　　）提供的陰涼。
+  answer: F
+- sentence: 當我（　　）那隻小貓時，牠卻突然跑開了。
+  answer: G
+- sentence: 這個詞語的發音很（　　），我總是念不好。
+  answer: H
+- sentence: 閱讀是從書本中（　　）知識的最佳方式。
+  answer: I
+- sentence: 老師對班長的能力非常（　　），許多班務都交給他處理。
+  answer: J
+- sentence: 隨著科技發展，我們的生活方式也產生了巨大的（　　）。
+  answer: K
+- sentence: 經過長途跋涉，我們來到了一片（　　）的森林深處。
+  answer: L
+- sentence: 他在班級裡成績總是名列前茅，是大家公認的（　　）。
+  answer: M
+- sentence: 這次考試我沒有準備充分，能及格真是（　　）。
+  answer: N
+- sentence: 貓咪（　　）地走進房間，沒有發出任何聲響。
+  answer: O
+- sentence: 保護濕地是為了維護許多水鳥的（　　）。
+  answer: P
 multiple_choice:
 - question: 請問哪一個句子使用語詞有誤?
   options:

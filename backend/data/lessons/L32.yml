@@ -79,7 +79,27 @@ vocabulary:
 - word: 遲滯
   definition: 緩慢、停止不動。
 vocabulary_count: 10
-fill_in_blank: []
+fill_in_blank:
+- sentence: 比賽結束後，他因為運動過度，小腿肌肉開始（　　）起來。
+  answer: A
+- sentence: 游泳游到一半，小明突然感覺小腿一陣（　　），痛得他差點無法划水。
+  answer: B
+- sentence: 在這個古老的國度裡，人們相信有許多（　　）守護著他們的家園。
+  answer: C
+- sentence: 他厭倦了城市的喧囂，決定到深山裡（　　），過著與世無爭的生活。
+  answer: D
+- sentence: 籃球隊的隊長身材（　　），站在場上特別顯眼。
+  answer: E
+- sentence: 聽到火警警報響起，大家驚慌失措地（　　），想要趕快逃生。
+  answer: F
+- sentence: 在這個部落裡，隨意觸摸他人的頭部是一種嚴重的（　　）。
+  answer: G
+- sentence: 受傷的小狗發出微弱的（　　），讓人聽了非常心疼。
+  answer: H
+- sentence: 那個貪污的官員以為自己可以（　　），沒想到真相最終還是被揭露了。
+  answer: I
+- sentence: 受到大雨影響，高速公路上的車流開始（　　），幾乎動彈不得。
+  answer: J
 multiple_choice:
 - question: 請問怪物的名字是什麼？
   options:

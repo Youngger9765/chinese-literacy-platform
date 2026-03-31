@@ -66,7 +66,33 @@ vocabulary:
 - word: 眼花撩亂
   definition: 形容看到的東西眾多而且雜亂。
 vocabulary_count: 13
-fill_in_blank: []
+fill_in_blank:
+- sentence: 為了在比賽中脫穎而出，他努力練習，希望能（　　）評審的青睞。
+  answer: A
+- sentence: 詐騙集團常用免費贈品作為（　　），吸引人們點擊不明連結。
+  answer: B
+- sentence: 新聞報導應該力求公正客觀，才能贏得廣大（　　）的信任。
+  answer: C
+- sentence: 他每次發言都喜歡用誇張的詞語，好像不（　　）就不罷休。
+  answer: D
+- sentence: 有些網紅會故意發布爭議性言論，試圖（　　），讓大家跟著他們的意見走。
+  answer: E
+- sentence: 為了提高點閱率，有些媒體會使用（　　）的標題來吸引讀者。
+  answer: F
+- sentence: 那位評論家的文章總是充滿（　　）的言詞，讓讀者對社會現象有更深的思考。
+  answer: G
+- sentence: 假新聞在網路上（　　），使得人們很難分辨訊息的真假。
+  answer: H
+- sentence: 這篇作文寫得天馬行空，內容和題目完全（　　），難怪老師給了低分。
+  answer: I
+- sentence: 小明看到有趣的短片，立刻（　　）給所有朋友，希望大家都能看到。
+  answer: J
+- sentence: 交作業前，老師提醒我們要仔細（　　）答案，避免粗心錯誤。
+  answer: K
+- sentence: 逛百貨公司週年慶時，各種特價商品琳瑯滿目，真是讓人（　　）。
+  answer: L
+- sentence: 第一次進入大型圖書館，書架上密密麻麻的書籍讓我感到（　　），不知從何找起。
+  answer: M
 multiple_choice:
 - question: 下列選項「  」中的語詞，何者使用正確？
   options:
@@ -119,3 +145,14 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-12-L40別上「誘餌式標題」的鉤.docx
 flags: []
+story_structure:
+- label: 主題
+  value: 誘餌式標題
+- label: 重要事實 1
+  value: 誘餌式標題指誇大、聳動的標題，吸引點擊。
+- label: 重要事實 2
+  value: 媒體用誘餌式標題，為增加點擊率和廣告收益。
+- label: 重要事實 3
+  value: 誘餌式標題會誤導大眾，傳播劣質新聞。
+- label: 結論
+  value: 對誇張標題保持警戒，培養獨立思考能力。

@@ -66,7 +66,33 @@ vocabulary:
 - word: 象徵
   definition: 用具體事物來表現抽象的觀念。例如，用綠色象徵環保；用玫瑰象徵愛情。
 vocabulary_count: 13
-fill_in_blank: []
+fill_in_blank:
+- sentence: 一個真正關心世界各地貧困與環境問題的人，才能稱得上是（　　）。
+  answer: A
+- sentence: 工廠製造產品時，會產生大量的（　　），對環境造成負擔。
+  answer: B
+- sentence: 我們應該多搭乘大眾運輸工具，減少開車，才能降低個人的（　　）。
+  answer: C
+- sentence: 為了改善班級秩序，小明向老師（　　）了一項新的管理辦法。
+  answer: D
+- sentence: 聽到鞭炮聲，小狗嚇得在院子裡（　　）。
+  answer: E
+- sentence: 發展綠色能源是為了實現（　　）的目標，讓後代子孫也能享有美好的地球。
+  answer: F
+- sentence: 冬天到了，媽媽提醒我出門前要多穿衣服，以（　　）。
+  answer: G
+- sentence: 在這次全國性的演講比賽中，小華的表現（　　），贏得了評審的高度讚賞。
+  answer: H
+- sentence: 隨著線上學習的需求增加，各種數位教學平台也（　　）。
+  answer: I
+- sentence: 那篇評論文章用（　　）的筆法，巧妙地批評了社會上某些不合理的現象。
+  answer: J
+- sentence: 近年來全球各地極端天氣事件頻傳，顯示（　　）的問題日益嚴重。
+  answer: K
+- sentence: 聽到奶奶生病的消息，全家人都（　　），不知道該怎麼辦。
+  answer: L
+- sentence: 紅色在許多文化中，通常（　　）著熱情與活力。
+  answer: M
 multiple_choice:
 - question: 下列語詞何者使用正確？
   options:

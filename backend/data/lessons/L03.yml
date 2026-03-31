@@ -111,3 +111,14 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G4-3-L3長高的祕密.docx
 flags: []
+story_structure:
+- label: 主題
+  value: 長高的祕密
+- label: 重要事實 1
+  value: 充足的睡眠能分泌生長激素，幫助身體發育。
+- label: 重要事實 2
+  value: 適當的運動能刺激成長，但過度激烈會受傷。
+- label: 重要事實 3
+  value: 均衡飲食，多攝取蛋白質和維生素，避免甜食。
+- label: 結論
+  value: 掌握睡眠、運動、飲食三關鍵，青春期才能長高。

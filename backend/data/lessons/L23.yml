@@ -48,7 +48,27 @@ vocabulary:
 - word: 流竄
   definition: 指惡劣的昆蟲、疾病或勢力四處流動或擴散。
 vocabulary_count: 10
-fill_in_blank: []
+fill_in_blank:
+- sentence: 科學家們小心翼翼地對那隻實驗動物進行了（　　），以了解其內臟構造。
+  answer: A
+- sentence: 博物館將許多珍貴的歷史文物（　　）起來，讓後人能夠欣賞與研究。
+  answer: B
+- sentence: 退潮時，一艘小漁船不小心在沙灘上（　　），動彈不得。
+  answer: C
+- sentence: 他從小時候那個害羞內向的孩子，經過不斷學習和努力，終於（　　）成一位自信的領導者。
+  answer: D
+- sentence: 爺爺生了一場大病後，整個人看起來明顯（　　）了不少，讓家人十分擔心。
+  answer: E
+- sentence: 這種在深山中才能找到的蘭花非常（　　），因此被列為重點保護植物。
+  answer: F
+- sentence: 我們不應該讓恐懼（　　）住我們的夢想，應該勇敢去追求。
+  answer: G
+- sentence: 由於棲息地遭到破壞，許多野生動物都成了（　　），需要人類的積極保育。
+  answer: H
+- sentence: 營火晚會結束時，所有的木柴都已經（　　），只剩下灰燼。
+  answer: I
+- sentence: 謠言像野火般在校園裡（　　），讓許多同學感到不安。
+  answer: J
 multiple_choice:
 - question: 下列語詞何者使用正確？
   options:
@@ -93,3 +113,14 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-10-L23小藍鯨之死.docx
 flags: []
+story_structure:
+- label: 主題
+  value: 小藍鯨擱淺死亡事件
+- label: 重要事實 1
+  value: 小藍鯨因漁具纏繞，無法進食而餓死。
+- label: 重要事實 2
+  value: 小藍鯨骨骼標本在海生館展出，提醒世人。
+- label: 重要事實 3
+  value: 藍鯨是瀕危物種，曾因捕獵數量銳減。
+- label: 結論
+  value: 人類應反省並行動，共同保育海洋環境。

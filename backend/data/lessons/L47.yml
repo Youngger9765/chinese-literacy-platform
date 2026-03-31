@@ -37,9 +37,41 @@ paragraphs:
 - 鴝鵒眼：一種硯石。這種硯石上有圓點形狀的花紋，就像是鴝鵒鳥的眼睛，所以叫「鴝鵒眼」。
 paragraph_count: 10
 char_count: 658
-vocabulary: []
-vocabulary_count: 0
-fill_in_blank: []
+vocabulary:
+- word: 京城
+  definition: 國家的首都。
+- word: 市集
+  definition: 買賣貨物的場所。
+- word: 議價
+  definition: 商議貨物的價格。
+- word: 官邸
+  definition: 官員的住宅。
+- word: 僕人
+  definition: 舊時供役於主人之家的人。
+- word: 硯臺
+  definition: 文具之一，磨墨用的器具。
+- word: 驚訝
+  definition: 感到非常意外和奇怪。
+- word: 可惜
+  definition: 值得惋惜。
+vocabulary_count: 8
+fill_in_blank:
+- sentence: 陸盧峰在（ 京城 ）等待朝廷的任用。
+  answer: A
+- sentence: 他曾在（ 市集 ）上見到一塊上好的硯臺。
+  answer: B
+- sentence: 可是（ 議價 ）沒有成功。
+  answer: C
+- sentence: 回到（ 官邸 ）之後，他還是派僕人前往。
+  answer: D
+- sentence: （ 僕人 ）拿著硯臺回來，陸公驚訝它不像自己想買的那個。
+  answer: E
+- sentence: 他想買的那個（ 硯臺 ）有個八哥眼。
+  answer: F
+- sentence: 陸公（ 驚訝 ）它不像自己想買的那個。
+  answer: G
+- sentence: 陸公感到十分（ 可惜 ）。
+  answer: H
 multiple_choice:
 - question: 關於本文，下列敘述何者正確？
   options:
@@ -121,8 +153,11 @@ story_structure:
 - label: 事例
   sub_rows:
   - label: 背景
-    value: 明朝人【 陸盧峰 】。 陸盧峰在市集看上一塊【 佳硯/硯臺 】，當下沒有買， 起因 後來後悔了。 1.派僕人用【 一金/一兩 】銀子買回來。 2.僕人買回來的硯臺，跟他想買的【 不類/不像 】？
+    value: 明朝人【 陸盧峰 】。 陸盧峰在市集看上一塊【 佳硯/硯臺 】，當下沒有買， 起因 後來後悔了。 1.派僕人用【 一金/一兩 】銀子買回來。
+      2.僕人買回來的硯臺，跟他想買的【 不類/不像 】？
   - label: 經過
     value: 3.陸盧峰問硯臺怎麼沒有【 鴝鵒眼/八哥眼 】，原來僕 人請【 石工/石匠 】把微凸的地方磨平了。
   - label: 結果
-    value: 陸盧峰感到十分可惜。 四、文言文聚光燈 斷句及判讀主語 II 在「不量田」一課，我們學習如何判讀主語、補主語。現在，我們要在 這基礎上再學一點小技巧——斷句。 想想：一大塊食物沒辦法一口吞下，我們會怎麼做呢？拿刀切一小塊 一小塊吃，是不是容
+    value: 陸盧峰感到十分可惜。 四、文言文聚光燈 斷句及判讀主語 II 在「不量田」一課，我們學習如何判讀主語、補主語。現在，我們要在 這基礎上再學一點小技巧——斷句。
+      想想：一大塊食物沒辦法一口吞下，我們會怎麼做呢？拿刀切一小塊 一小塊吃，是不是容
+knowledge_video_url: https://www.youtube.com/watch?v=ZaPoFNRRfww

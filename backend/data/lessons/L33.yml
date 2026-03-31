@@ -56,7 +56,29 @@ vocabulary:
 - word: 氣候難民
   definition: 因為居住環境氣候的劇烈改變，導致被迫離開家園的人。
 vocabulary_count: 11
-fill_in_blank: []
+fill_in_blank:
+- sentence: 從飛機上往下看，整座城市顯得如此渺小，彷彿能將一切（　　）。
+  answer: A
+- sentence: 經過多年的努力，我們的研究終於來到了（　　），只差最後一步就能成功。
+  answer: B
+- sentence: 地震過後，許多居民的家園被毀，不得不（　　），尋找新的安身之處。
+  answer: C
+- sentence: 海嘯來襲時，沿海的村莊（　　），遭受了最嚴重的破壞。
+  answer: D
+- sentence: 保護地球環境是每個人的責任，因為（　　），我們都生活在同一個地球上。
+  answer: E
+- sentence: 這座老舊的吊橋已經年久失修，看起來（　　），隨時都有可能斷裂。
+  answer: F
+- sentence: 工業發展排放過多的二氧化碳等（　　），是導致全球氣候變暖的主要原因。
+  answer: G
+- sentence: 兩個同學吵架，我只是路過卻被老師一起責罵，真是（　　）。
+  answer: H
+- sentence: 這次的比賽，雖然我們沒有任何（　　）可以參考，但大家還是努力爭取最好的成績。
+  answer: I
+- sentence: 老師教我們如何將作業儲存在（　　）空間，這樣就算電腦壞了也不怕資料遺失。
+  answer: J
+- sentence: 全球暖化造成海平面上升，許多低窪地區的居民被迫遷徙，成為（　　）。
+  answer: K
 multiple_choice:
 - question: 下列選項「  」中的語詞，何者使用正確？
   options:

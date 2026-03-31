@@ -88,7 +88,31 @@ vocabulary:
 - word: 由衷
   definition: 從內心深處。
 vocabulary_count: 12
-fill_in_blank: []
+fill_in_blank:
+- sentence: 這位老師教學認真，對學生很有耐心，是大家公認最（　　）的班導師。
+  answer: A
+- sentence: 病情複雜，主治醫生決定邀請多位專科醫師進行（　　），希望能找出最佳治療方案。
+  answer: B
+- sentence: 小明看著空蕩蕩的教室，（　　）為什麼今天都沒有同學來上學。
+  answer: C
+- sentence: 知道這是一個（　　），但我還是希望你能幫我多做一份報告。
+  answer: D
+- sentence: 法會結束後，乩童在眾人圍觀下逐漸恢復意識，表示神明已經（　　）了。
+  answer: E
+- sentence: 小華一時口快，說了一些不該說的話，結果（　　）了爸爸，讓他非常生氣。
+  answer: F
+- sentence: 為了不被敵人發現，特務人員（　　）成普通百姓，混入人群中。
+  answer: G
+- sentence: 老師提出問題，他（　　）地舉手回答，展現了對課文的熟悉。
+  answer: H
+- sentence: 醫生根據病人的檢查報告和病情發展，詳細說明了未來的（　　）情況。
+  answer: I
+- sentence: 奶奶年紀大了，上下樓梯時都需要家人小心（　　）著。
+  answer: J
+- sentence: 我們不應該對特定族群抱持（　　），應該學習欣賞每個人的獨特之處。
+  answer: K
+- sentence: 聽到老師的鼓勵，我感到（　　）的感謝，決定要更加努力。
+  answer: L
 multiple_choice:
 - question: 下列語詞何者使用不正確？
   options:

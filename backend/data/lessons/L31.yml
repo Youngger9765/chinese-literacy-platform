@@ -63,7 +63,33 @@ vocabulary:
 - word: 約莫
   definition: 大約、大概。
 vocabulary_count: 13
-fill_in_blank: []
+fill_in_blank:
+- sentence: 學習知識的過程，是（　　）的，掌握的越多，對未來越有幫助。
+  answer: A
+- sentence: 這次的畢業旅行，在每個同學心中都留下了深刻的（　　），是難忘的回憶。
+  answer: B
+- sentence: 為了讓校慶運動會順利舉行，老師和同學們正緊鑼密鼓地（　　）各項細節。
+  answer: C
+- sentence: 成功發射太空船，是國家太空科技發展史上一個重要的（　　），值得紀念。
+  answer: D
+- sentence: 這次的國際科學競賽，吸引了（　　）的目光，每個參賽隊伍都想爭奪冠軍。
+  answer: E
+- sentence: 我們不應該讓自己的想像力受到（　　），要勇敢地去探索和創造。
+  answer: F
+- sentence: 進入國中是學習生涯的一個全新（　　），代表著更多的挑戰和機會。
+  answer: G
+- sentence: 這位藝術家的作品，（　　）了他對大自然的熱愛和對生命的尊重。
+  answer: H
+- sentence: 成功的道路上往往充滿了（　　），需要我們有毅力去克服。
+  answer: I
+- sentence: 歷史的真相是無法被（　　）的，它會永遠存在於紀錄中。
+  answer: J
+- sentence: 哥倫布是地理大發現時代的（　　），他勇敢地航向未知的大海。
+  answer: K
+- sentence: 這次的才藝表演，小明終於有機會在大家面前（　　），展現他的鋼琴天賦。
+  answer: L
+- sentence: 從這裡走到學校，（　　）需要十五分鐘，所以我們要提早出門。
+  answer: M
 multiple_choice:
 - question: 請問哪一個句子使用語詞有誤?
   options:
@@ -116,3 +142,14 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-3-L31奧運性別平等這條路.docx
 flags: []
+story_structure:
+- label: 主題
+  value: 奧運性別平等的發展與現況
+- label: 重要事實 1
+  value: 女性參與奧運從被排除到逐漸增加，歷經百年。
+- label: 重要事實 2
+  value: 2024年巴黎奧運首次達成男女選手1:1的里程碑。
+- label: 重要事實 3
+  value: 巴黎奧運推出多項措施，提升女性在運動中的地位。
+- label: 結論
+  value: 奧運是檢視性別平等的舞臺，但仍有進步空間。

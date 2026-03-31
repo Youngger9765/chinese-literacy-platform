@@ -137,3 +137,15 @@ reading_benchmark: null
 source_file: G9-9.10-L56~57多文本-未解之謎-巨石陣+摩艾石像.docx
 flags:
 - MULTI_TEXT
+story_structure:
+- label: 主題
+  value: 巨石陣與摩艾石像的未解之謎
+- label: 重要事實 1
+  value: 巨石陣是英國史前遺跡，巨石重且遠，搬運方式成謎。
+- label: 重要事實 2
+  value: 巨石陣建造目的眾說紛紜，天文觀測說法最可能。
+- label: 重要事實 3
+  value: 摩艾石像位於復活節島，巨大沉重，移動方式仍是謎。
+- label: 結論
+  value: 人類祖先的智慧與技術，至今仍有許多未解之謎。
+knowledge_video_url: https://www.youtube.com/watch?v=EKJqvSPOXzg

@@ -81,7 +81,27 @@ vocabulary:
 - word: 兵貴神速
   definition: 做事時，速度非常重要。
 vocabulary_count: 10
-fill_in_blank: []
+fill_in_blank:
+- sentence: 走進教室，黑板上寫著的緊急通知（　　）映入眼簾。
+  answer: A
+- sentence: 弟弟揉了揉眼睛，一副睡眼（　　）的樣子，還沒完全清醒過來。
+  answer: B
+- sentence: 那個偷走獨居老人養老金的行為，簡直（　　），引起公眾的強烈譴責。
+  answer: C
+- sentence: 老師還沒下課，他就（　　）收拾書包，準備離開。
+  answer: D
+- sentence: 他從小父母雙亡，（　　）地跟著奶奶生活，日子過得很艱辛。
+  answer: E
+- sentence: 小明走進陌生的環境，（　　）了一下四周，感到有些緊張。
+  answer: F
+- sentence: 既然已經決定要參加全國比賽了，就（　　），一定要努力練習到最後一刻。
+  answer: G
+- sentence: 老師在課堂上提問後，（　　）教室一圈，尋找舉手的同學。
+  answer: H
+- sentence: 為了讓貴賓有更舒適的空間，工作人員客氣地請大家（　　）到旁邊的休息區。
+  answer: I
+- sentence: 在這場與時間賽跑的救援行動中，救援隊深知（　　）的道理，爭分奪秒地工作。
+  answer: J
 multiple_choice:
 - question: 下列選項「  」中的語詞，何者使用正確？
   options:

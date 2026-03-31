@@ -44,7 +44,29 @@ vocabulary:
 - word: 指鹿為馬
   definition: 用來比喻人故意顛倒是非、混淆視聽。
 vocabulary_count: 11
-fill_in_blank: []
+fill_in_blank:
+- sentence: 小明聽到網路上的謠言，沒有查證就（　　），結果鬧出了笑話。
+  answer: A
+- sentence: 老師說，雖然小華和小芳的成績都不錯，但兩人的學習方法截然不同，不能（　　）。
+  answer: B
+- sentence: 詐騙集團設計了一套巧妙的（　　），讓許多老人家把錢匯出去。
+  answer: C
+- sentence: 醫生不斷強調，香菸中的（　　）會嚴重危害人體健康，讓人容易上癮。
+  answer: D
+- sentence: 他故意說出許多似是而非的資訊，想要（　　）大家的視聽，讓真相變得模糊。
+  answer: E
+- sentence: 煮湯圓時，鍋中的糖水變得越來越（　　），散發出濃郁的香氣。
+  answer: F
+- sentence: 警方接獲線報後，立刻展開大規模的（　　）行動，希望能將毒販繩之以法。
+  answer: G
+- sentence: 這些網路遊戲業者開發出許多吸引人的道具，讓玩家不斷投入金錢，簡直把他們當成了（　　）。
+  answer: H
+- sentence: 這篇文章提出了許多（　　）的觀點，乍看之下很有道理，仔細思考卻站不住腳。
+  answer: I
+- sentence: 商家為了吸引顧客，不斷推陳出新各種創意的（　　），希望提高產品的曝光度。
+  answer: J
+- sentence: 在會議上，他為了自己的利益，不惜（　　），把錯誤的說成對的，讓大家無所適從。
+  answer: K
 multiple_choice:
 - question: 下列語詞何者用法使用正確？
   options:

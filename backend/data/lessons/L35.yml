@@ -68,7 +68,27 @@ vocabulary:
 - word: 嘆為觀止
   definition: 形容事物極好，讓人看了都不停讚嘆。
 vocabulary_count: 10
-fill_in_blank: []
+fill_in_blank:
+- sentence: 這次校外教學的趣事，讓同學們回家後一直（　　）。
+  answer: A
+- sentence: 隨著科技進步，無現金支付已成為消費的（　　）。
+  answer: B
+- sentence: 請你幫忙把這本書（　　）給坐在最裡面的同學。
+  answer: C
+- sentence: 爺爺說，他們那一輩有許多原本富裕的家庭，後來因為戰爭而（　　）。
+  answer: D
+- sentence: 為了在比賽中取得好成績，選手們每天都加緊練習，（　　）突破自我。
+  answer: E
+- sentence: 雖然他們不是雙胞胎，但長相卻非常（　　），常常讓人分不清楚。
+  answer: F
+- sentence: 秋天到了，果園裡的蘋果樹上掛滿了（　　）的紅蘋果。
+  answer: G
+- sentence: 小明雖然（　　），但他從不炫耀，反而很樂意幫助別人。
+  answer: H
+- sentence: 魔術師精采的表演，讓全場觀眾都（　　），掌聲不斷。
+  answer: I
+- sentence: 站在山頂俯瞰壯麗的景色，真是令人（　　）。
+  answer: J
 multiple_choice:
 - question: 下列選項「」中的語詞，何者使用正確？
   options:
@@ -120,3 +140,4 @@ story_structure:
   sub_rows:
   - label: 結果
     value: 推論
+knowledge_video_url: https://www.youtube.com/watch?v=uGBBCJmkeOM
