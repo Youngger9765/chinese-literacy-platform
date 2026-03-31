@@ -6,6 +6,7 @@
  * Genre-aware: 記敘文 shows 主角/主題/事例, 說明文 shows concept structure, etc.
  */
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface StructureRow {
   label: string;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
+  const { token } = useAuth();
   const [rows, setRows] = useState<StructureRow[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -26,7 +28,9 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     setLoading(true);
     setError(false);
     const API_BASE = import.meta.env.VITE_API_URL || '';
-    fetch(`${API_BASE}/api/stories/${storyId}/structure`)
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    fetch(`${API_BASE}/api/stories/${storyId}/structure`, { headers })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -34,7 +38,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
       .then((data) => setRows(data.rows ?? []))
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [storyId]);
+  }, [storyId, token]);
 
   if (loading) {
     return (
