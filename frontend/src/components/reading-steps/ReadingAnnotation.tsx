@@ -78,9 +78,6 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     }
   });
 
-  // Active mark tool
-  const [activeTool, setActiveTool] = useState<AnnotationType>('unknown');
-
   // Floating toolbar state
   const [toolbar, setToolbar] = useState<{
     visible: boolean;
@@ -372,28 +369,6 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         <span className="text-xs text-amber-700 font-bold">閱讀標記</span>
 
         <div className="flex-1" />
-
-        {/* Tool selector */}
-        <div className="flex items-center gap-2" role="group" aria-label="標記類型">
-          {(Object.entries(TYPE_CONFIG) as Array<[AnnotationType, typeof TYPE_CONFIG[AnnotationType]]>).map(
-            ([type, cfg]) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setActiveTool(type)}
-                aria-pressed={activeTool === type}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold border transition-all ${
-                  activeTool === type
-                    ? `${cfg.activeClass} border-current`
-                    : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <span aria-hidden="true">{cfg.icon}</span>
-                {cfg.label}
-              </button>
-            )
-          )}
-        </div>
 
         {/* Undo */}
         <button
