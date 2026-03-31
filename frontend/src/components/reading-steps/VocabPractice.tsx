@@ -295,6 +295,19 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     setRadicalChar(prev => (prev === ch ? null : ch));
   };
 
+  // ── Derived state (must stay BEFORE conditional returns to satisfy Rules of Hooks) ──
+  const strokeDone = displayChars.length > 0 && displayChars.every(ch => practicedChars.has(ch));
+  const pronounceDone = displayChars.length > 0 && displayChars.every(ch => pronouncedChars.has(ch));
+  const allDone = strokeDone && pronounceDone;
+
+  const currentChars = activeTab === 'stroke' ? displayChars : activeTab === 'pronunciation' ? pronunciationChars : [];
+  const currentPracticedSet = activeTab === 'stroke' ? practicedChars : activeTab === 'pronunciation' ? pronouncedChars : new Set<string>();
+  const currentDone = activeTab === 'stroke' ? strokeDone : activeTab === 'pronunciation' ? pronounceDone : false;
+
+  // Characters for which we have radical decomposition data (re-filter after generated data loads)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const charsWithRadical = useMemo(() => displayChars.filter(ch => getDecomposition(ch) !== null), [displayChars, decompReady]);
+
   /* ── Pronunciation practice phase ── */
   if (phase === 'pronunciation') {
     const zhuyinStr = zhuyinActive ? processZhuyin(practicingChar) : undefined;
@@ -331,18 +344,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   }
 
   /* ── Grid phase: character selection ── */
-  const strokeDone = displayChars.length > 0 && displayChars.every(ch => practicedChars.has(ch));
-  const pronounceDone = displayChars.length > 0 && displayChars.every(ch => pronouncedChars.has(ch));
-  const allDone = strokeDone && pronounceDone;
-
-  const currentChars = activeTab === 'stroke' ? displayChars : activeTab === 'pronunciation' ? pronunciationChars : [];
-  const currentPracticedSet = activeTab === 'stroke' ? practicedChars : activeTab === 'pronunciation' ? pronouncedChars : new Set<string>();
-  const currentDone = activeTab === 'stroke' ? strokeDone : activeTab === 'pronunciation' ? pronounceDone : false;
-  // 'zhuyin', 'fillinblank', and 'sentence' tabs are handled separately; these vars only matter for stroke/pronunciation
-
-  // Characters for which we have radical decomposition data (re-filter after generated data loads)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const charsWithRadical = useMemo(() => displayChars.filter(ch => getDecomposition(ch) !== null), [displayChars, decompReady]);
 
   return (
     <div
