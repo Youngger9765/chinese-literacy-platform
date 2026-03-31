@@ -3,6 +3,7 @@
 Handles AI-powered exit ticket question generation and answer submission.
 """
 import logging
+import time
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -12,6 +13,7 @@ from ...auth.rate_limiter import ai_limit_5_per_min
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
+from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.exit_ticket_service import generate_exit_ticket_questions, calculate_score  # noqa: F401
 
 router = APIRouter()
@@ -82,10 +84,32 @@ async def generate_session_exit_ticket(
     if session.student_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
 
+    start_time = time.monotonic()
     result = await generate_exit_ticket_questions(
         story_content=payload.story_content,
         wrong_chars=payload.wrong_chars or [],
     )
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+
+    # Track AI usage (Issue #874) — only track when AI source (not fallback)
+    if result.get("source") == "ai":
+        usage = last_usage.get()
+        log_ai_usage(
+            db,
+            endpoint=f"/learning/sessions/{session_id}/exit-ticket/generate",
+            step="exit_ticket",
+            student_id=current_user.id,
+            session_id=session_id,
+            input_tokens=usage.input_tokens if usage else 0,
+            output_tokens=usage.output_tokens if usage else 0,
+            model=usage.model if usage else "gemini-2.5-flash",
+            latency_ms=latency_ms,
+            success=True,
+            model_version=usage.model_version if usage else None,
+            prompt_char_count=usage.prompt_char_count if usage else None,
+            response_char_count=usage.response_char_count if usage else None,
+            content_filtered=usage.content_filtered if usage else False,
+        )
 
     logger.info(
         "exit_ticket generate: session=%d user=%d source=%s questions=%d",

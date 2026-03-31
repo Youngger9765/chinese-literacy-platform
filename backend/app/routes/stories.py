@@ -14,6 +14,7 @@ from ..auth.dependencies import get_optional_user, get_current_user
 from ..auth.rate_limiter import ai_limit_5_per_min
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
 from ..services.ai_service import generate_story_structure
+from ..services.ai_usage_tracker import last_usage, log_ai_usage
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
@@ -176,10 +177,33 @@ async def get_story_structure(
         return cached
 
     story_text = story.get("full_text") or "\n".join(story.get("paragraphs", []))
+    start_time = time.monotonic()
     result = await generate_story_structure(
         story_title=story["title"],
         story_text=story_text,
         genre=story.get("genre"),
     )
-    _set_cached_structure(story_id, result)
+    _set_cached_structure(normalized, result)
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+
+    # Track AI usage (Issue #874)
+    usage = last_usage.get()
+    log_ai_usage(
+        db,
+        endpoint=f"/stories/{normalized}/structure",
+        step="structure",
+        student_id=current_user.id,
+        story_id=normalized,
+        story_title=story["title"],
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=True,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+        cache_hit=False,
+    )
     return result

@@ -4,6 +4,7 @@ Handles AI-powered reading diagnosis and improvement suggestions.
 """
 import json
 import logging
+import time
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -14,6 +15,7 @@ from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
 from ...services.ai_service import generate_reading_analysis, GeminiContentFilterError, CONTENT_FILTER_FRIENDLY_MSG
+from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.reading_evaluation_service import evaluate_reading_with_ai
 
 router = APIRouter()
@@ -151,6 +153,9 @@ async def get_ai_analysis(
             logger.warning("Corrupted ai_analysis cache for session %d, regenerating", session_id)
 
     # Call Gemini
+    start_time = time.monotonic()
+    ai_success = True
+    ai_error_type = None
     try:
         analysis = await generate_reading_analysis({
             "story_title": payload.story_title,
@@ -166,6 +171,8 @@ async def get_ai_analysis(
             "dictation_total_count": payload.dictation_total_count,
         })
     except GeminiContentFilterError:
+        ai_success = False
+        ai_error_type = "ContentFilter"
         logger.warning("Content filter blocked AI analysis for session %d", session_id)
         return AIAnalysisResponse(
             analysis_summary=CONTENT_FILTER_FRIENDLY_MSG,
@@ -175,10 +182,37 @@ async def get_ai_analysis(
             encouragement_message="你很棒，繼續加油！",
         )
     except TimeoutError:
+        ai_success = False
+        ai_error_type = "Timeout"
         raise HTTPException(status_code=503, detail="AI service timeout")
     except Exception as e:
+        ai_success = False
+        ai_error_type = type(e).__name__
         logger.error("AI analysis generation failed for session %d: %s", session_id, e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
+
+    # Track AI usage AFTER try/except — not in finally (FAIL-2 review fix).
+    # In finally, the DB session may be in an inconsistent state after HTTPException.
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+    usage = last_usage.get()
+    log_ai_usage(
+        db,
+        endpoint=f"/learning/sessions/{session_id}/ai-analysis",
+        step="analysis",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        session_id=session_id,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=ai_success,
+        error_type=ai_error_type,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+    )
 
     # Cache the result (versioned + enrichment fingerprint — #540)
     session.ai_analysis = _wrap_ai_analysis_for_cache(analysis, payload)
@@ -204,6 +238,9 @@ async def get_ai_analysis_standalone(
 
     Rate limited: 5 requests per minute per user/IP.
     """
+    start_time = time.monotonic()
+    ai_success = True
+    ai_error_type = None
     try:
         analysis = await generate_reading_analysis({
             "story_title": payload.story_title,
@@ -219,6 +256,8 @@ async def get_ai_analysis_standalone(
             "dictation_total_count": payload.dictation_total_count,
         })
     except GeminiContentFilterError:
+        ai_success = False
+        ai_error_type = "ContentFilter"
         logger.warning("Content filter blocked standalone AI analysis for user %d", current_user.id)
         return AIAnalysisResponse(
             analysis_summary=CONTENT_FILTER_FRIENDLY_MSG,
@@ -228,10 +267,35 @@ async def get_ai_analysis_standalone(
             encouragement_message="你很棒，繼續加油！",
         )
     except TimeoutError:
+        ai_success = False
+        ai_error_type = "Timeout"
         raise HTTPException(status_code=503, detail="AI service timeout")
     except Exception as e:
+        ai_success = False
+        ai_error_type = type(e).__name__
         logger.error("Standalone AI analysis generation failed: %s", e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
+
+    # Track AI usage AFTER try/except — not in finally (FAIL-2 review fix).
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+    usage = last_usage.get()
+    log_ai_usage(
+        None,
+        endpoint="/learning/ai-analysis",
+        step="analysis",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=ai_success,
+        error_type=ai_error_type,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+    )
 
     logger.info("Generated standalone AI analysis for user %d", current_user.id)
     return AIAnalysisResponse(**analysis)
@@ -306,11 +370,32 @@ async def evaluate_reading_endpoint(
         },
     )
 
+    start_time = time.monotonic()
     result = await evaluate_reading_with_ai(
         spoken_text=payload.spoken_text,
         target_text=payload.target_text,
         duration_ms=payload.duration_ms,
     )
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+
+    # Track AI usage (Issue #874) — only when AI method was used
+    if result.get("evaluation_method") == "ai":
+        usage = last_usage.get()
+        log_ai_usage(
+            None,
+            endpoint="/reading/evaluate",
+            step="reading",
+            student_id=current_user.id,
+            input_tokens=usage.input_tokens if usage else 0,
+            output_tokens=usage.output_tokens if usage else 0,
+            model=usage.model if usage else "gemini-2.5-flash",
+            latency_ms=latency_ms,
+            success=True,
+            model_version=usage.model_version if usage else None,
+            prompt_char_count=usage.prompt_char_count if usage else None,
+            response_char_count=usage.response_char_count if usage else None,
+            content_filtered=usage.content_filtered if usage else False,
+        )
 
     return ReadingEvaluateResponse(
         match_rate=result["match_rate"],

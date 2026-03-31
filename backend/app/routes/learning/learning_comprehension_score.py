@@ -5,6 +5,7 @@ comprehension scoring across 3 levels (Issue #243).
 """
 import json
 import logging
+import time
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -17,6 +18,7 @@ from ...models.session import DialogueTurn, LearningSession
 from ...models.user import User
 from ...schemas.session import ComprehensionScoreResponse
 from ...services.ai_service import evaluate_comprehension
+from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ._helpers import ConversationTurn
 
 router = APIRouter()
@@ -136,6 +138,7 @@ async def score_comprehension(
     # Build dialogue turns list
     dialogue_turns = [t.model_dump() for t in payload.dialogue_turns]
 
+    start_time = time.monotonic()
     try:
         result = await evaluate_comprehension(
             dialogue_turns=dialogue_turns,
@@ -144,6 +147,27 @@ async def score_comprehension(
     except Exception as e:
         logger.error("Comprehension scoring error: %s", e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
+
+    # Track AI usage (Issue #874)
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+    usage = last_usage.get()
+    log_ai_usage(
+        db,
+        endpoint=f"/learning/sessions/{session_id}/comprehension-score",
+        step="comprehension",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        session_id=session_id,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=True,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+    )
 
     # Cache scores in DB
     session.comprehension_score = result["comprehension_score"]

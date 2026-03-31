@@ -4,6 +4,7 @@ Handles generating comprehension questions and the Socratic dialogue chat.
 Dialogue history and scoring are in learning_comprehension_score.py.
 """
 import logging
+import time
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -15,6 +16,7 @@ from ...models.session import DialogueTurn, LearningSession
 from ...models.teacher_instruction import TeacherInstruction
 from ...models.user import User
 from ...services.ai_service import generate_socratic_question
+from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.socratic_agent import socratic_agent
 from ._helpers import ConversationTurn
 
@@ -53,6 +55,9 @@ async def get_comprehension_question(
     the next AI question. Call this after each student answer (and on initial
     load with an empty conversation to get the first question).
     """
+    start_time = time.monotonic()
+    ai_success = True
+    ai_error_type = None
     try:
         conversation = [t.model_dump() for t in payload.conversation]
         question = await generate_socratic_question(
@@ -64,6 +69,30 @@ async def get_comprehension_question(
         # AI service unavailable (auth, network, etc.) — return a fallback question
         logger.warning("AI service error: %s", e)
         question = _fallback_question(payload.conversation)
+        ai_success = False
+        ai_error_type = type(e).__name__
+
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+
+    # Track AI usage (Issue #874)
+    usage = last_usage.get()
+    log_ai_usage(
+        None,  # no db session in this endpoint
+        endpoint="/comprehension/question",
+        step="comprehension_question",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=ai_success,
+        error_type=ai_error_type,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+    )
 
     # Count how many AI turns have been in the conversation (including this new one)
     ai_count = sum(1 for t in payload.conversation if t.role == "ai") + 1
@@ -145,6 +174,9 @@ async def comprehension_chat(
     """
     is_resumed = False
     conversation_history: list[ConversationHistoryItem] = []
+    start_time = time.monotonic()
+    ai_success = True
+    ai_error_type = None
 
     # Validate db_session_id ownership to prevent IDOR (Insecure Direct Object Reference).
     # A malicious user cannot read or write another student's dialogue by guessing session IDs.
@@ -217,11 +249,17 @@ async def comprehension_chat(
                 student_answer=payload.student_answer,
             )
     except ValueError as e:
+        ai_success = False
+        ai_error_type = "ValueError"
         status = 429 if "Rate limit" in str(e) else 422
         raise HTTPException(status_code=status, detail=str(e))
     except RuntimeError as e:
+        ai_success = False
+        ai_error_type = "RuntimeError"
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
+        ai_success = False
+        ai_error_type = type(e).__name__
         logger.error("Comprehension chat error: %s", e)
         raise HTTPException(status_code=500, detail="AI service error")
 
@@ -239,6 +277,29 @@ async def comprehension_chat(
         except Exception as e:
             # Non-fatal — log and continue so the chat still works
             logger.warning("Failed to persist dialogue turn: %s", e)
+
+    # Track AI usage (Issue #874) — skip tracking for resumed sessions (no Gemini call)
+    if not is_resumed:
+        latency_ms = int((time.monotonic() - start_time) * 1000)
+        usage = last_usage.get()
+        log_ai_usage(
+            db,
+            endpoint="/comprehension/chat",
+            step="comprehension",
+            student_id=current_user.id,
+            story_title=payload.story_title,
+            session_id=payload.db_session_id,
+            input_tokens=usage.input_tokens if usage else 0,
+            output_tokens=usage.output_tokens if usage else 0,
+            model=usage.model if usage else "gemini-2.5-flash",
+            latency_ms=latency_ms,
+            success=ai_success,
+            error_type=ai_error_type,
+            model_version=usage.model_version if usage else None,
+            prompt_char_count=usage.prompt_char_count if usage else None,
+            response_char_count=usage.response_char_count if usage else None,
+            content_filtered=usage.content_filtered if usage else False,
+        )
 
     return ComprehensionChatResponse(
         question=result.question,
