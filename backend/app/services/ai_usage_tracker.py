@@ -4,10 +4,12 @@ Provides:
 - `log_ai_usage()` — record a single AI call to DB + structured log
 - `estimate_cost()` — calculate estimated USD cost from token counts
 - `last_usage` context var — populated by ai_service after each Gemini call
+- `_resolve_context()` — best-effort denormalized dimension lookup
 """
 
 import contextvars
 import logging
+import uuid
 from dataclasses import dataclass, field
 
 from sqlalchemy.orm import Session
@@ -41,6 +43,11 @@ class UsageMetadata:
     output_tokens: int = 0
     total_tokens: int = 0
     model: str = "gemini-2.5-flash"
+    model_version: str | None = None
+    finish_reason: str | None = None
+    prompt_char_count: int | None = None
+    response_char_count: int | None = None
+    content_filtered: bool = False
 
 
 # Context variable to pass usage metadata from ai_service to route handlers
@@ -65,6 +72,36 @@ def capture_usage(response, model: str = "gemini-2.5-flash") -> UsageMetadata:
             meta.total_tokens = getattr(usage, "total_token_count", 0) or 0
     except Exception:
         pass
+
+    # Model version from API response (if available)
+    try:
+        meta.model_version = getattr(response, "model_version", None)
+    except Exception:
+        pass
+
+    # Finish reason from first candidate
+    try:
+        if response.candidates:
+            meta.finish_reason = str(response.candidates[0].finish_reason)
+    except Exception:
+        pass
+
+    # Response char count
+    try:
+        if response.text:
+            meta.response_char_count = len(response.text)
+    except Exception:
+        pass
+
+    # Content filter detection
+    try:
+        if response.candidates:
+            fr = str(response.candidates[0].finish_reason)
+            if "SAFETY" in fr:
+                meta.content_filtered = True
+    except Exception:
+        pass
+
     last_usage.set(meta)
     return meta
 
@@ -73,6 +110,51 @@ def estimate_cost(model: str, input_tokens: int, output_tokens: int) -> float:
     """Calculate estimated USD cost from token counts."""
     pricing = PRICING.get(model, PRICING["gemini-2.5-flash"])
     return (input_tokens * pricing["input"] + output_tokens * pricing["output"]) / 1_000_000
+
+
+def _resolve_context(
+    db: Session | None,
+    student_id: int | None = None,
+    story_id: str | None = None,
+) -> dict:
+    """Resolve denormalized dimension values from related tables.
+
+    Best-effort: if any lookup fails, the field is simply omitted (left NULL).
+    Never let this crash the main request.
+    """
+    result: dict = {}
+    if not db:
+        return result
+
+    try:
+        if student_id:
+            from ..models.user import User
+
+            user = db.query(User).filter(User.id == student_id).first()
+            if user:
+                result["student_name"] = getattr(user, "display_name", None) or getattr(user, "username", None)
+                result["grade_level"] = getattr(user, "grade_level", None)
+
+                # TODO: resolve teacher_id, teacher_name, org_id, school_name,
+                # classroom_name from ClassroomMembership -> Classroom -> teacher.
+                # For now these remain NULL — the column exists for future population.
+    except Exception as e:
+        logger.debug("_resolve_context student lookup failed: %s", e)
+
+    try:
+        if story_id:
+            # Try to get genre from story loader
+            from ..routes.stories import get_lesson_by_id
+
+            normalized = story_id.lstrip("Ll")
+            numeric_id = int(normalized)
+            story = get_lesson_by_id(numeric_id)
+            if story:
+                result["genre"] = story.get("genre")
+    except Exception as e:
+        logger.debug("_resolve_context story lookup failed: %s", e)
+
+    return result
 
 
 def log_ai_usage(
@@ -96,6 +178,18 @@ def log_ai_usage(
     error_type: str | None = None,
     action: str | None = None,
     metadata: dict | None = None,
+    # ── New analytics fields ──
+    model_version: str | None = None,
+    prompt_template_id: str | None = None,
+    prompt_char_count: int | None = None,
+    response_char_count: int | None = None,
+    retry_count: int = 0,
+    content_filtered: bool = False,
+    cache_hit: bool = False,
+    request_payload: dict | None = None,
+    response_payload: dict | None = None,
+    request_id: str | None = None,
+    parent_request_id: str | None = None,
 ) -> None:
     """Log an AI API call to both DB and structured logs.
 
@@ -107,6 +201,13 @@ def log_ai_usage(
     total = input_tokens + output_tokens
     cost = estimate_cost(model, input_tokens, output_tokens)
     step_label = STEP_LABELS.get(step) if step else None
+
+    # Auto-generate request_id for correlation if not provided
+    if not request_id:
+        request_id = str(uuid.uuid4())
+
+    # Best-effort denormalized context resolution
+    ctx = _resolve_context(db, student_id=student_id, story_id=story_id)
 
     # 1. DB write (non-blocking, don't fail the request if logging fails)
     if db is not None:
@@ -133,6 +234,31 @@ def log_ai_usage(
                 success=success,
                 error_type=error_type,
                 metadata_=metadata,
+                # Denormalized dimensions
+                student_name=ctx.get("student_name"),
+                grade_level=ctx.get("grade_level"),
+                teacher_id=ctx.get("teacher_id"),
+                teacher_name=ctx.get("teacher_name"),
+                org_id=ctx.get("org_id"),
+                school_name=ctx.get("school_name"),
+                classroom_name=ctx.get("classroom_name"),
+                genre=ctx.get("genre"),
+                # Model details
+                model_version=model_version,
+                prompt_template_id=prompt_template_id,
+                # Additional measures
+                prompt_char_count=prompt_char_count,
+                response_char_count=response_char_count,
+                retry_count=retry_count,
+                # Quality flags
+                content_filtered=content_filtered,
+                cache_hit=cache_hit,
+                # Raw payloads
+                request_payload=request_payload,
+                response_payload=response_payload,
+                # Correlation
+                request_id=request_id,
+                parent_request_id=parent_request_id,
             )
             db.add(record)
             db.commit()
@@ -158,8 +284,14 @@ def log_ai_usage(
             "total_tokens": total,
             "estimated_cost_usd": float(cost),
             "model": model,
+            "model_version": model_version,
             "latency_ms": latency_ms,
             "success": success,
             "error_type": error_type,
+            "request_id": request_id,
+            "cache_hit": cache_hit,
+            "content_filtered": content_filtered,
+            "prompt_char_count": prompt_char_count,
+            "response_char_count": response_char_count,
         },
     )

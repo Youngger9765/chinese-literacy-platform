@@ -105,6 +105,10 @@ async def generate_session_exit_ticket(
             model=usage.model if usage else "gemini-2.5-flash",
             latency_ms=latency_ms,
             success=True,
+            model_version=usage.model_version if usage else None,
+            prompt_char_count=usage.prompt_char_count if usage else None,
+            response_char_count=usage.response_char_count if usage else None,
+            content_filtered=usage.content_filtered if usage else False,
         )
 
     logger.info(

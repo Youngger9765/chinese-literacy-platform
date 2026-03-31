@@ -88,6 +88,10 @@ async def get_comprehension_question(
         latency_ms=latency_ms,
         success=ai_success,
         error_type=ai_error_type,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
     )
 
     # Count how many AI turns have been in the conversation (including this new one)
@@ -291,6 +295,10 @@ async def comprehension_chat(
             latency_ms=latency_ms,
             success=ai_success,
             error_type=ai_error_type,
+            model_version=usage.model_version if usage else None,
+            prompt_char_count=usage.prompt_char_count if usage else None,
+            response_char_count=usage.response_char_count if usage else None,
+            content_filtered=usage.content_filtered if usage else False,
         )
 
     return ComprehensionChatResponse(

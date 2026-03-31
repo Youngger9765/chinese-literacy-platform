@@ -262,7 +262,17 @@ async def generate_structured_response(
             _check_safety_filter(response)
 
             # Capture token usage metadata for tracking (Issue #874)
-            capture_usage(response, model="gemini-2.5-flash")
+            # Estimate prompt char count from system_prompt + contents text parts
+            _prompt_chars = len(system_prompt) if system_prompt else 0
+            try:
+                for c in contents:
+                    for p in (c.parts or []):
+                        if hasattr(p, "text") and p.text:
+                            _prompt_chars += len(p.text)
+            except Exception:
+                pass
+            usage_meta = capture_usage(response, model="gemini-2.5-flash")
+            usage_meta.prompt_char_count = _prompt_chars
 
             # Extract finish_reason for diagnostics (MAX_TOKENS = truncated output)
             finish_reason = None
@@ -478,7 +488,16 @@ async def generate_socratic_question(
     # Guard against safety filter before accessing response.text (#526)
     _check_safety_filter(response)
     # Capture token usage metadata for tracking (Issue #874)
-    capture_usage(response, model="gemini-2.5-flash")
+    _prompt_chars = len(system_prompt) if system_prompt else 0
+    try:
+        for c in contents:
+            for p in (c.parts or []):
+                if hasattr(p, "text") and p.text:
+                    _prompt_chars += len(p.text)
+    except Exception:
+        pass
+    usage_meta = capture_usage(response, model="gemini-2.5-flash")
+    usage_meta.prompt_char_count = _prompt_chars
     return response.text.strip()
 
 

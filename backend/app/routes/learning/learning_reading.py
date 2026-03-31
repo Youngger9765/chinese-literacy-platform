@@ -206,6 +206,10 @@ async def get_ai_analysis(
             latency_ms=latency_ms,
             success=ai_success,
             error_type=ai_error_type,
+            model_version=usage.model_version if usage else None,
+            prompt_char_count=usage.prompt_char_count if usage else None,
+            response_char_count=usage.response_char_count if usage else None,
+            content_filtered=usage.content_filtered if usage else False,
         )
 
     # Cache the result (versioned + enrichment fingerprint — #540)
@@ -284,6 +288,10 @@ async def get_ai_analysis_standalone(
             latency_ms=latency_ms,
             success=ai_success,
             error_type=ai_error_type,
+            model_version=usage.model_version if usage else None,
+            prompt_char_count=usage.prompt_char_count if usage else None,
+            response_char_count=usage.response_char_count if usage else None,
+            content_filtered=usage.content_filtered if usage else False,
         )
 
     logger.info("Generated standalone AI analysis for user %d", current_user.id)
@@ -380,6 +388,10 @@ async def evaluate_reading_endpoint(
             model=usage.model if usage else "gemini-2.5-flash",
             latency_ms=latency_ms,
             success=True,
+            model_version=usage.model_version if usage else None,
+            prompt_char_count=usage.prompt_char_count if usage else None,
+            response_char_count=usage.response_char_count if usage else None,
+            content_filtered=usage.content_filtered if usage else False,
         )
 
     return ReadingEvaluateResponse(

@@ -33,3 +33,34 @@ class AIUsageLog(Base):
     success = Column(Boolean, default=True)
     error_type = Column(String(50))
     metadata_ = Column("metadata", JSONB)
+
+    # ── Denormalized dimensions (snapshot at call time) ──
+    student_name = Column(String(100))
+    grade_level = Column(String(20))
+    teacher_id = Column(Integer)
+    teacher_name = Column(String(100))
+    org_id = Column(Integer)
+    school_name = Column(String(100))
+    classroom_name = Column(String(100))
+    genre = Column(String(30))
+
+    # ── Model details ──
+    model_version = Column(String(50))
+    prompt_template_id = Column(String(50))
+
+    # ── Additional measures ──
+    prompt_char_count = Column(Integer)
+    response_char_count = Column(Integer)
+    retry_count = Column(Integer, default=0)
+
+    # ── Quality flags ──
+    content_filtered = Column(Boolean, default=False)
+    cache_hit = Column(Boolean, default=False)
+
+    # ── Raw payloads (JSONB for future analysis) ──
+    request_payload = Column(JSONB)
+    response_payload = Column(JSONB)
+
+    # ── Correlation ──
+    request_id = Column(String(36))
+    parent_request_id = Column(String(36))

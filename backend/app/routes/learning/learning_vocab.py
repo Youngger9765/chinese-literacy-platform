@@ -109,6 +109,10 @@ async def get_example_sentences(
         model=usage.model if usage else "gemini-2.5-flash",
         latency_ms=latency_ms,
         success=True,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
     )
 
     # 3. Store in cache for next request
@@ -180,6 +184,10 @@ async def validate_sentence(
         model=usage.model if usage else "gemini-2.5-flash",
         latency_ms=latency_ms,
         success=True,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
     )
 
     return ValidateSentenceResponse(
@@ -249,6 +257,10 @@ async def evaluate_listening_retelling(
         model=usage.model if usage else "gemini-2.5-flash",
         latency_ms=latency_ms,
         success=True,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
     )
 
     logger.info(
