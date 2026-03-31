@@ -3,16 +3,36 @@ Stories API — serves platform lessons from in-memory YAML data.
 No database dependency for platform content.
 """
 
+import time
 from fastapi import APIRouter, Query, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models.user import User
 from ..models.school import ClassroomStudent, ClassroomText
-from ..auth.dependencies import get_optional_user
+from ..auth.dependencies import get_optional_user, get_current_user
+from ..auth.rate_limiter import ai_limit_5_per_min
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
 from ..services.ai_service import generate_story_structure
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
+
+# ---------------------------------------------------------------------------
+# Simple TTL cache for story structure results (avoids redundant Gemini calls)
+# ---------------------------------------------------------------------------
+
+_structure_cache: dict[str, tuple[float, object]] = {}
+_CACHE_TTL = 86400  # 24 hours
+
+
+def _get_cached_structure(story_id: str):
+    entry = _structure_cache.get(story_id)
+    if entry and time.time() - entry[0] < _CACHE_TTL:
+        return entry[1]
+    return None
+
+
+def _set_cached_structure(story_id: str, result):
+    _structure_cache[story_id] = (time.time(), result)
 
 router = APIRouter(tags=["stories"])
 
@@ -126,12 +146,21 @@ def get_story(story_id: str):
 
 # ── ⑤ 文章重點表 AI endpoint (#615) ──────────────────────────────────────────
 
-@router.get("/stories/{story_id}/structure")
-async def get_story_structure(story_id: str):
+@router.get(
+    "/stories/{story_id}/structure",
+    dependencies=[Depends(ai_limit_5_per_min)],
+)
+async def get_story_structure(
+    story_id: str,
+    current_user: User = Depends(get_current_user),
+):
     """Generate AI story structure table (⑤ 文章重點表) for a lesson.
 
     Returns a list of rows with label/value (and optional sub_rows).
     Genre-aware: 記敘文 / 說明文 / 議論文 each get different templates.
+
+    Requires authentication. Rate-limited to 5 req/min per user.
+    Responses are cached in-memory for 24 h to avoid redundant Gemini calls.
     """
     normalized = story_id.lstrip("Ll")
     try:
@@ -142,10 +171,15 @@ async def get_story_structure(story_id: str):
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
+    cached = _get_cached_structure(story_id)
+    if cached is not None:
+        return cached
+
     story_text = story.get("full_text") or "\n".join(story.get("paragraphs", []))
     result = await generate_story_structure(
         story_title=story["title"],
         story_text=story_text,
         genre=story.get("genre"),
     )
+    _set_cached_structure(story_id, result)
     return result
