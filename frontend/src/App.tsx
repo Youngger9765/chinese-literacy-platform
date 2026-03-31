@@ -13,6 +13,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { WorkspaceProvider } from './contexts/WorkspaceContext';
 import { LearningNavProvider } from './contexts/LearningNavContext';
+import { ZhuyinProvider } from './context/ZhuyinContext';
 import TermsGate from './components/auth/TermsGate';
 import AppRoutes from './routes/AppRoutes';
 
@@ -24,9 +25,11 @@ const App: React.FC = () => {
         <AuthProvider>
           <WorkspaceProvider>
             <LearningNavProvider>
-              <TermsGate>
-                <AppRoutes />
-              </TermsGate>
+              <ZhuyinProvider>
+                <TermsGate>
+                  <AppRoutes />
+                </TermsGate>
+              </ZhuyinProvider>
             </LearningNavProvider>
           </WorkspaceProvider>
         </AuthProvider>

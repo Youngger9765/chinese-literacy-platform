@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, ComprehensionResult } from '../../types';
 import { sendComprehensionChat, restartComprehensionSession, ChatResponse, SessionExpiredError } from '../../services/learningApi';
-import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
-import ZhuyinToggle from '../ui/ZhuyinToggle';
+import { useZhuyin } from '../../context/ZhuyinContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
@@ -76,8 +75,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [voiceError, setVoiceError] = useState<string | null>(null);
-  const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
-  const [zhuyinReady, setZhuyinReady] = useState(false);
   const [isVoicePreparing, setIsVoicePreparing] = useState(false);
   const [isListening, setIsListening] = useState(false);
 
@@ -121,7 +118,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const dragStartXRef = useRef(0);
   const dragStartWidthRef = useRef(384);
 
-  const zhuyinActive = zhuyinReady && zhuyinEnabled;
+  const { zhuyinActive, processZhuyin, processLines: zhuyinProcessLines } = useZhuyin();
 
   const mockQuestions = useMemo(() => {
     const source = story.content.filter((line) => line.trim().length > 0);
@@ -144,12 +141,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     setError(message ?? '已切換為離線測試模式（不需連線 GCP）。');
   }, [mockQuestions]);
 
-  useEffect(() => {
-    PolyphonicProcessor.instance.loadPolyphonicData()
-      .then(() => setZhuyinReady(true))
-      .catch((err) => console.error('Failed to load zhuyin data:', err));
-  }, []);
-
   // Cleanup speech resources when leaving this step
   useEffect(() => {
     return () => {
@@ -166,27 +157,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     };
   }, []);
 
-  const processZhuyin = useCallback((text: string): string => {
-    if (!zhuyinActive) return text;
-    try {
-      const processed = PolyphonicProcessor.instance.process(text);
-      return buildZhuyinString(processed);
-    } catch {
-      return text;
-    }
-  }, [zhuyinActive]);
-
   const zhuyinLines = useMemo(() => {
     if (!zhuyinActive) return null;
-    try {
-      return story.content.map((line) => {
-        const processed = PolyphonicProcessor.instance.process(line);
-        return buildZhuyinString(processed);
-      });
-    } catch {
-      return null;
-    }
-  }, [story.content, zhuyinActive]);
+    return zhuyinProcessLines(story.content);
+  }, [story.content, zhuyinActive, zhuyinProcessLines]);
 
   // Scroll to bottom whenever conversation updates
   useEffect(() => {
@@ -911,7 +885,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         )}
       </div>
       <div className="ml-2">
-        <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+        {/* ZhuyinToggle moved to global Header (#863) */}
       </div>
     </div>
   );
@@ -1079,7 +1053,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     {story.filename}
                   </div>
                   <div className="flex-1" />
-                  <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+                  {/* ZhuyinToggle moved to global Header (#863) */}
                 </div>
 
                 {/* Story content — all paragraphs visible for reference */}

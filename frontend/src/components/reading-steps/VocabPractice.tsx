@@ -5,8 +5,7 @@ import WriteCharacter from '../stroke-order/WriteCharacter';
 import PronunciationPractice from './PronunciationPractice';
 import SentencePractice from './SentencePractice';
 import ZhuyinPhoneticGame from './ZhuyinPhoneticGame';
-import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
-import ZhuyinToggle from '../ui/ZhuyinToggle';
+import { useZhuyin } from '../../context/ZhuyinContext';
 import RadicalDecomposition from './RadicalDecomposition';
 import { getDecomposition, initGeneratedDecompositions, initRadicalMeanings } from '../../data/radicals';
 import DictionaryPanel from '../dictionary/DictionaryPanel';
@@ -166,19 +165,11 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   );
   const [pronouncedChars, setPronoucedChars] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<PracticeMode>('radical');
-  const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
-  const [zhuyinReady, setZhuyinReady] = useState(false);
   /** Character whose radical panel is currently open */
   const [radicalChar, setRadicalChar] = useState<string | null>(null);
   const [justCompleted, setJustCompleted] = useState('');
 
-  const zhuyinActive = zhuyinReady && zhuyinEnabled;
-
-  useEffect(() => {
-    PolyphonicProcessor.instance.loadPolyphonicData()
-      .then(() => setZhuyinReady(true))
-      .catch((err) => console.error('Failed to load zhuyin data:', err));
-  }, []);
+  const { zhuyinActive, processZhuyin } = useZhuyin();
 
   // ── localStorage persistence ────────────────────────────────────────
   useEffect(() => {
@@ -190,16 +181,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       }));
     } catch {}
   }, [practicedChars, phase, practicingChar, storageKey]);
-
-  const processZhuyin = useCallback((text: string): string => {
-    if (!zhuyinActive) return text;
-    try {
-      const processed = PolyphonicProcessor.instance.process(text);
-      return buildZhuyinString(processed);
-    } catch {
-      return text;
-    }
-  }, [zhuyinActive]);
 
   const needPracticeSet = useMemo(
     () => new Set(attempt?.mispronouncedWords ?? []),
@@ -373,7 +354,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                     ? '造句練習'
                     : '注音遊戲'}
         </span>
-        <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+        {/* ZhuyinToggle moved to global Header (#863) */}
       </div>
 
       {/* Progress bar */}
