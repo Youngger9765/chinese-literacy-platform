@@ -196,7 +196,7 @@ function CompletionScreen({
         {wrongCount > 0 && (
           <button
             onClick={onRetryWrong}
-            className="rounded-xl border-2 border-[#5B4FC4] bg-white px-8 py-3 text-base font-bold text-[#5B4FC4] hover:bg-[#5B4FC4]/5 active:scale-95 transition-all shadow-sm min-h-[52px]"
+            className="rounded-xl border-2 border-accent bg-white px-8 py-3 text-base font-bold text-accent hover:bg-accent/5 active:scale-95 transition-all shadow-sm min-h-[52px]"
           >
             練習錯題（{wrongCount} 題）
           </button>
@@ -209,7 +209,7 @@ function CompletionScreen({
         </button>
         <button
           onClick={onFinish}
-          className="rounded-lg bg-emerald-500 px-10 py-3 text-white font-semibold hover:bg-emerald-600 transition-colors text-lg min-h-[52px]"
+          className="rounded-xl bg-accent px-10 py-3 text-white font-semibold hover:bg-accent-hover transition-colors text-lg min-h-[52px]"
         >
           繼續下一步 →
         </button>
@@ -397,7 +397,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
 
   return (
     <div
-      className="flex-1 flex flex-col bg-white"
+      className="flex-1 flex flex-col bg-amber-50"
       style={fontSizePx ? { fontSize: fontSizePx } : undefined}
     >
       <StepHeader

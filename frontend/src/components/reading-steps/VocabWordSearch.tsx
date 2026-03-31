@@ -671,13 +671,13 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                   className={
                     'flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-300 min-h-[52px] ' +
                     (found
-                      ? 'bg-[#5B4FC4]/10 border-[#5B4FC4]/40'
+                      ? 'bg-accent/10 border-accent/40'
                       : 'bg-white border-gray-200')
                   }
                 >
                   {found ? (
                     <svg
-                      className="w-5 h-5 text-[#5B4FC4] flex-shrink-0"
+                      className="w-5 h-5 text-accent flex-shrink-0"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                       aria-label="已找到"
@@ -694,7 +694,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                   <span
                     className={
                       'text-lg font-black ' +
-                      (found ? 'text-[#5B4FC4] line-through' : 'text-gray-800')
+                      (found ? 'text-accent line-through' : 'text-gray-800')
                     }
                   >
                     {pw.word}

@@ -38,8 +38,8 @@ function ProgressBar({ done, total }: ProgressBarProps) {
     <div className="w-full px-6 py-2 bg-white border-b border-gray-100">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] font-medium text-gray-500" aria-hidden="true">練習進度</span>
-          <span className="text-[10px] font-bold text-gray-700" aria-hidden="true">{done} / {total} 字</span>
+          <span className="text-xs font-medium text-gray-500" aria-hidden="true">練習進度</span>
+          <span className="text-xs font-bold text-gray-700" aria-hidden="true">{done} / {total} 字</span>
         </div>
         <div
           role="progressbar"
@@ -131,7 +131,7 @@ function CharCard({ label, isSuggested, isPracticed, animDelay, onClick }: CharC
         </span>
       )}
 
-      <span className="text-[9px] mt-1 opacity-50 font-medium">
+      <span className="text-xs mt-1 opacity-50 font-medium">
         {isPracticed ? '已完成' : '點我練習'}
       </span>
     </button>
@@ -341,7 +341,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {story.filename} — 生字練習
         </div>
         <div className="flex-1" />
-        <span className="text-[10px] text-gray-500">
+        <span className="text-xs text-gray-500">
           {activeTab === 'radical'
             ? `部件 ${charsWithRadical.length} 字`
             : activeTab === 'stroke'
@@ -530,7 +530,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                         </span>
                       )}
 
-                      <span className="text-[9px] mt-1 opacity-60">
+                      <span className="text-xs mt-1 opacity-60">
                         {isPracticed ? '已練習' : '點我練習'}
                       </span>
                     </button>
@@ -545,7 +545,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {/* 教育部國語辭典 panel removed per product decision 2026-03-27 */}
 
           {/* Legend */}
-          <div className="flex items-center gap-4 text-[10px] text-gray-400 flex-wrap">
+          <div className="flex items-center gap-4 text-xs text-gray-400 flex-wrap">
             {needPracticeSet.size > 0 && (
               <>
                 <div className="flex items-center gap-1.5">
@@ -565,7 +565,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
           {/* Usage hint */}
           {currentChars.length > 0 && (
-            <p className="text-[10px] text-gray-400 text-center">
+            <p className="text-xs text-gray-400 text-center">
               點一下字卡即可練習{activeTab === 'stroke' ? '筆順' : '發音'}
             </p>
           )}
