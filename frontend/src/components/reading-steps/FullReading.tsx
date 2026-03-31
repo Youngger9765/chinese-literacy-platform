@@ -7,6 +7,7 @@ import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProc
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
+import { speakText as azureSpeakText, cancelTts } from '../../services/ttsApi';
 
 /* ------------------------------------------------------------------ */
 
@@ -36,6 +37,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
   const [isSessionActive, setIsSessionActive]   = useState(false);
   const [isTtsSpeaking, setIsTtsSpeaking]       = useState(false);
   const [isTtsPaused, setIsTtsPaused]           = useState(false);
+  const [isTtsLoading, setIsTtsLoading]         = useState(false); // true while TTS is buffering before playback starts
   const [streamingTranscript, setStreamingTranscript] = useState(() => savedProgress.current?.transcript ?? '');
   const [micError, setMicError]                 = useState('');
   const [result, setResult]                     = useState<SavedResult | null>(() => savedProgress.current?.result ?? null);
@@ -134,51 +136,34 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
     return () => {
       isSessionActiveRef.current = false;
       if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (_) {} }
-      window.speechSynthesis?.cancel();
+      cancelTts();
     };
   }, []);
 
-  /* ---- TTS: read full story ---- */
+  /* ---- TTS: read full story via Azure TTS ---- */
   const speakFullStory = useCallback(() => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    cancelTts();
     setIsTtsPaused(false);
+    setIsTtsSpeaking(true);
+    azureSpeakText(fullText)
+      .then(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); })
+      .catch(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
+  }, [fullText]);
 
-    const doSpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-        voices.find(v => v.name.includes('Google') && v.lang === 'zh-TW') ||
-        voices.find(v => v.lang === 'zh-TW') ||
-        voices.find(v => v.lang.startsWith('zh'));
-
-      const utterances = story.content.map(paragraph => {
-        const u = new SpeechSynthesisUtterance(paragraph);
-        u.lang = 'zh-TW'; u.rate = 1.0;
-        if (preferred) u.voice = preferred;
-        return u;
-      });
-      utterances[0].onstart = () => setIsTtsSpeaking(true);
-      utterances[utterances.length - 1].onend = () => { setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      utterances[utterances.length - 1].onerror = () => { setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      utterances.forEach(u => window.speechSynthesis.speak(u));
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; doSpeak(); };
-    } else {
-      doSpeak();
-    }
-  }, [story.content]);
-
-  const pauseTts = () => { window.speechSynthesis?.pause(); setIsTtsPaused(true); };
-  const resumeTts = () => { window.speechSynthesis?.resume(); setIsTtsPaused(false); };
-  const stopTts = () => { window.speechSynthesis?.cancel(); setIsTtsSpeaking(false); setIsTtsPaused(false); };
+  const pauseTts = () => { cancelTts(); setIsTtsPaused(true); };
+  const resumeTts = () => {
+    setIsTtsPaused(false);
+    setIsTtsSpeaking(true);
+    azureSpeakText(fullText)
+      .then(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); })
+      .catch(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
+  };
+  const stopTts = () => { cancelTts(); setIsTtsSpeaking(false); setIsTtsPaused(false); };
 
   /* ---- STT ---- */
   const startSession = () => {
     if (isSessionActiveRef.current) return;
-    window.speechSynthesis?.cancel();
+    cancelTts();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
     setIsPreparing(true);
@@ -445,7 +430,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                 再試一次
               </button>
               <button
-                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
+                onClick={() => { /* Keep completion record — only clear on explicit redo */ onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
                 aria-label="完成全文朗讀，查看學習報告"
                 className="w-full py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1"
               >
@@ -512,13 +497,23 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             <div className="flex gap-2">
               <button
                 onClick={speakFullStory}
-                aria-label="播放全文系統示範朗讀"
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                disabled={isTtsLoading}
+                aria-label={isTtsLoading ? '載入中' : '播放全文系統示範朗讀'}
+                aria-busy={isTtsLoading}
+                className={`flex-1 py-3 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                  isTtsLoading
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-800 active:scale-95'
+                }`}
               >
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                </svg>
-                系統朗讀
+                {isTtsLoading ? (
+                  <div className="w-3.5 h-3.5 flex-shrink-0 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                ) : (
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
+                  </svg>
+                )}
+                {isTtsLoading ? '載入中...' : '系統朗讀'}
               </button>
               <button
                 onClick={startSession}

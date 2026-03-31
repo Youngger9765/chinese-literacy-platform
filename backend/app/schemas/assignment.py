@@ -113,6 +113,7 @@ class StudentAssignmentResponse(BaseModel):
     assignment_id: int
     story_id: str | None
     text_id: int | None
+    story_slug: str | None
     story_title: str
     title: str | None
     description: str | None

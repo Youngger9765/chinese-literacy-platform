@@ -4,7 +4,7 @@
  * After stroke order practice, students compose 2 sentences using each
  * practiced vocabulary character. AI validates grammar and word usage.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
@@ -115,6 +115,8 @@ interface SentencePracticeProps {
   storyTitle: string;
   onFinish: () => void;
   onBack: () => void;
+  /** When true, renders as an inline tab panel (no outer wrapper, no tab bar, no bottom actions bar) */
+  inline?: boolean;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -124,6 +126,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   storyTitle,
   onFinish,
   onBack,
+  inline = false,
 }) => {
   const { token } = useAuth();
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
@@ -136,6 +139,10 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   });
   const [completedChars, setCompletedChars] = useState<Set<string>>(new Set());
 
+  // Tracks characters that have been loaded or are currently loading,
+  // avoiding circular dependency on charStates inside the loadExamples callback.
+  const loadedCharsRef = useRef<Set<string>>(new Set());
+
   const currentChar = practicedChars[currentCharIndex] ?? '';
   const currentState = charStates[currentChar] ?? makeCharState();
 
@@ -143,7 +150,12 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
 
   const loadExamples = useCallback(async () => {
     if (!currentChar) return;
-    if (charStates[currentChar]?.exampleSentences) return; // already loaded
+    // Use ref instead of charStates to avoid adding charStates as a dependency
+    // (which would cause an infinite loop: error → setCharStates → new charStates
+    //  → new loadExamples → useEffect fires → loadExamples called again → 429)
+    if (loadedCharsRef.current.has(currentChar)) return;
+
+    loadedCharsRef.current.add(currentChar);
 
     setCharStates(prev => ({
       ...prev,
@@ -157,6 +169,8 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         [currentChar]: { ...prev[currentChar], examplesLoading: false, exampleSentences: examples },
       }));
     } catch {
+      // Remove from ref so the retry button can re-attempt
+      loadedCharsRef.current.delete(currentChar);
       setCharStates(prev => ({
         ...prev,
         [currentChar]: {
@@ -166,7 +180,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         },
       }));
     }
-  }, [currentChar, charStates, storyTitle]);
+  }, [currentChar, storyTitle, token]);
 
   // Auto-load examples when we navigate to a character
   React.useEffect(() => {
@@ -264,6 +278,13 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   // ── Early exit: no practiced chars ───────────────────────────────────
 
   if (practicedChars.length === 0) {
+    if (inline) {
+      return (
+        <div className="flex flex-col items-center justify-center text-center py-12">
+          <p className="text-gray-500 text-sm">沒有需要造句練習的生字。</p>
+        </div>
+      );
+    }
     return (
       <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden">
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-4 text-xs text-gray-600">
@@ -286,54 +307,8 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   const isCurrentDone = completedChars.has(currentChar);
   const currentAllCorrect = currentState.allCorrect;
 
-  return (
-    <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden" style={{ fontFamily: "'Iansui', 'Noto Sans TC', sans-serif" }}>
-
-      {/* Tab bar */}
-      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-          {storyTitle} — 造句練習
-        </div>
-        <div className="flex-1" />
-        <span className="text-[10px] text-gray-500">
-          {currentCharIndex + 1} / {practicedChars.length} 字
-        </span>
-      </div>
-
-      {/* Character tab nav */}
-      {practicedChars.length > 1 && (
-        <div className="bg-white border-b border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto shrink-0">
-          {practicedChars.map((ch, i) => {
-            const done = completedChars.has(ch);
-            const active = i === currentCharIndex;
-            return (
-              <button
-                key={ch}
-                onClick={() => setCurrentCharIndex(i)}
-                className={[
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
-                  active
-                    ? 'bg-accent text-white shadow'
-                    : done
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
-                ].join(' ')}
-              >
-                {ch}
-                {done && (
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Main content */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="max-w-2xl mx-auto space-y-6">
+  const innerContent = (
+    <div className="max-w-2xl mx-auto space-y-6">
 
           {/* Header */}
           <div>
@@ -480,7 +455,97 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
             </div>
           )}
 
+    </div>
+  );
+
+  // Inline mode: render content directly inside VocabPractice's scroll area (no outer wrapper, no tab bar, no bottom bar)
+  if (inline) {
+    return (
+      <>
+        {/* Character tab nav — shown inline above content */}
+        {practicedChars.length > 1 && (
+          <div className="bg-white border border-gray-100 rounded-xl px-3 py-2 flex gap-2 overflow-x-auto">
+            {practicedChars.map((ch, i) => {
+              const done = completedChars.has(ch);
+              const active = i === currentCharIndex;
+              return (
+                <button
+                  key={ch}
+                  onClick={() => setCurrentCharIndex(i)}
+                  className={[
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                    active
+                      ? 'bg-accent text-white shadow'
+                      : done
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+                  ].join(' ')}
+                >
+                  {ch}
+                  {done && (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {innerContent}
+      </>
+    );
+  }
+
+  // Standalone mode: full-page layout with tab bar and bottom actions
+  return (
+    <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden" style={{ fontFamily: "'Iansui', 'Noto Sans TC', sans-serif" }}>
+
+      {/* Tab bar */}
+      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
+        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
+          {storyTitle} — 造句練習
         </div>
+        <div className="flex-1" />
+        <span className="text-[10px] text-gray-500">
+          {currentCharIndex + 1} / {practicedChars.length} 字
+        </span>
+      </div>
+
+      {/* Character tab nav */}
+      {practicedChars.length > 1 && (
+        <div className="bg-white border-b border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto shrink-0">
+          {practicedChars.map((ch, i) => {
+            const done = completedChars.has(ch);
+            const active = i === currentCharIndex;
+            return (
+              <button
+                key={ch}
+                onClick={() => setCurrentCharIndex(i)}
+                className={[
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                  active
+                    ? 'bg-accent text-white shadow'
+                    : done
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+                ].join(' ')}
+              >
+                {ch}
+                {done && (
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Main content */}
+      <div className="flex-1 overflow-y-auto px-6 py-6">
+        {innerContent}
       </div>
 
       {/* Bottom actions */}

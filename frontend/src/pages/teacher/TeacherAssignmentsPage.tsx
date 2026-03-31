@@ -9,6 +9,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { listMyClassrooms, ClassroomResponse, ClassroomApiError } from '../../services/classroomApi';
 import AssignmentTab from './AssignmentTab';
+import { Skeleton, SkeletonText } from '../../components/ui/Skeleton';
+import LoadingIndicator from '../../components/ui/LoadingIndicator';
 
 const TeacherAssignmentsPage: React.FC = () => {
   const { token } = useAuth();
@@ -68,10 +70,22 @@ const TeacherAssignmentsPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex-1 overflow-y-auto p-6 sm:p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="h-6 bg-gray-200 animate-pulse rounded w-32 mb-6" />
+        <div className="max-w-4xl mx-auto space-y-6">
+          <LoadingIndicator />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <Skeleton className="h-7 w-28 rounded" />
+            <Skeleton className="h-10 w-52 rounded-lg" />
+          </div>
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <div className="h-48 bg-gray-100 animate-pulse rounded" />
+            <Skeleton className="h-10 w-full rounded-lg mb-4" />
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="border border-gray-100 rounded-lg p-4">
+                  <Skeleton className="h-4 w-1/3 rounded mb-3" />
+                  <SkeletonText lines={2} lineClassName="h-3 rounded" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

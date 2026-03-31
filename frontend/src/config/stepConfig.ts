@@ -50,7 +50,7 @@ export interface StepConfig {
 export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'reading-annotation',
-    label: '閱讀標記',
+    label: '讀全文-做記號',
     view: AppView.READING_ANNOTATION,
     dbStepNumber: 8,
     needsStory: true,
@@ -82,7 +82,7 @@ export const STEP_CONFIG: StepConfig[] = [
   },
   {
     id: 'vocab-definition',
-    label: '語詞定義',
+    label: '詞語定義',
     view: AppView.VOCAB_DEFINITION_MATCH,
     dbStepNumber: 12,
     needsStory: true,
@@ -105,20 +105,20 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
   },
   {
-    id: 'dictation',
-    label: '聽寫練習',
-    view: AppView.DICTATION,
-    dbStepNumber: 5,
-    needsStory: true,
-    enabled: false, // hidden per product decision 2026-03-27
-  },
-  {
     id: 'vocab-word-search',
     label: '語詞複習',
     view: AppView.VOCAB_WORD_SEARCH,
     dbStepNumber: 10,
     needsStory: true,
     enabled: true,
+  },
+  {
+    id: 'dictation',
+    label: '聽寫練習',
+    view: AppView.DICTATION,
+    dbStepNumber: 5,
+    needsStory: true,
+    enabled: false, // hidden per product decision 2026-03-27
   },
   {
     id: 'knowledge-station',

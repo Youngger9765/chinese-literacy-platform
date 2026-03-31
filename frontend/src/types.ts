@@ -184,6 +184,12 @@ export interface LearningSession {
   fullReadingResult: FullReadingResult | null;
   /** Paragraph indices (0-based) completed during LiveTutor (progressive unlock). */
   completedParagraphs?: number[];
+  /** Completion flags for the 5 new steps (issue #690). */
+  readingAnnotationCompleted?: boolean;
+  vocabDefinitionMatchCompleted?: boolean;
+  vocabApplicationCompleted?: boolean;
+  vocabWordSearchCompleted?: boolean;
+  knowledgeStationCompleted?: boolean;
 }
 
 export interface LiveMessage {

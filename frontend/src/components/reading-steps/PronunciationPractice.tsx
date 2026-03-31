@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
+import { speakText as azureSpeakText, cancelTts } from '../../services/ttsApi';
 
 interface PronunciationPracticeProps {
   character: string;
@@ -14,21 +15,7 @@ const MAX_ATTEMPTS = 3;
 const SHORT_RECORDING_SECONDS = 5;
 
 function speakCharacter(character: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (!('speechSynthesis' in window)) {
-      reject(new Error('不支援語音合成'));
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(character);
-    utterance.lang = 'zh-TW';
-    utterance.rate = 0.8;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    utterance.onend = () => resolve();
-    utterance.onerror = (e) => reject(new Error(e.error));
-    window.speechSynthesis.speak(utterance);
-  });
+  return azureSpeakText(character);
 }
 
 const PronunciationPractice: React.FC<PronunciationPracticeProps> = ({
@@ -139,7 +126,7 @@ const PronunciationPractice: React.FC<PronunciationPracticeProps> = ({
       if (studentAudioRef.current) {
         studentAudioRef.current.pause();
       }
-      window.speechSynthesis?.cancel();
+      cancelTts();
     };
   }, []);
 

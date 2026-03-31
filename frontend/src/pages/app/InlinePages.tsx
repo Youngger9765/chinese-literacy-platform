@@ -49,6 +49,7 @@ export const HomePage: React.FC = () => {
 
 interface RecentPracticeItem {
   id: number;
+  storySlug: string | null;
   title: string;
   status: string;
   startedAt: string;
@@ -58,6 +59,7 @@ interface RecentPracticeItem {
 function mapSessionToRecentItem(session: LearningSummary): RecentPracticeItem {
   return {
     id: session.id,
+    storySlug: session.story_slug,
     title: session.story_title ?? session.story_slug ?? '未知課文',
     status: session.status,
     startedAt: session.started_at,
@@ -144,7 +146,11 @@ export const LibraryPage: React.FC = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => navigate(`/history`)}
+                  onClick={() =>
+                    item.storySlug
+                      ? navigate(`/learn/${item.storySlug}/report`)
+                      : navigate(`/history`)
+                  }
                   className="text-xs font-medium text-accent hover:text-accent-hover"
                 >
                   查看記錄

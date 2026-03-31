@@ -672,3 +672,221 @@ class TestAzureGoogleFallback:
         # provider is passed as positional arg[2] or keyword arg
         provider_used = args[2] if len(args) > 2 else kwargs.get("provider", "google")
         assert provider_used == "google"
+
+
+# ---------------------------------------------------------------------------
+# 10. Phoneme corrections — Issue #765
+# ---------------------------------------------------------------------------
+
+class TestPhonemeCorrections:
+    """Phoneme corrections must inject SSML <phoneme> tags for known mispronunciations."""
+
+    def test_he_cai_detected(self):
+        """'喝采' in text should trigger a phoneme correction."""
+        from app.services.tts_service import _has_phoneme_corrections
+        assert _has_phoneme_corrections("贏得全國人民的尊敬及喝采") is True
+
+    def test_he_cai2_detected(self):
+        """'喝彩' variant also triggers a phoneme correction."""
+        from app.services.tts_service import _has_phoneme_corrections
+        assert _has_phoneme_corrections("觀眾喝彩叫好") is True
+
+    def test_da_de_piaoliang_detected(self):
+        """'打的漂亮' triggers a phoneme correction."""
+        from app.services.tts_service import _has_phoneme_corrections
+        assert _has_phoneme_corrections("她，打的漂亮，雖然輸了比賽") is True
+
+    def test_no_corrections_for_plain_text(self):
+        """Text without known mispronunciations should return False."""
+        from app.services.tts_service import _has_phoneme_corrections
+        assert _has_phoneme_corrections("她是一個好學生") is False
+
+    def test_apply_he_cai_correction(self):
+        """'喝采' must be wrapped with phoneme tag for hè (ㄏㄜˋ)."""
+        from app.services.tts_service import _apply_phoneme_corrections
+        result = _apply_phoneme_corrections("贏得喝采")
+        assert '<phoneme' in result
+        assert 'ㄏㄜˋ' in result
+        assert '喝</phoneme>采' in result
+
+    def test_apply_he_cai2_correction(self):
+        """'喝彩' must also get the phoneme correction."""
+        from app.services.tts_service import _apply_phoneme_corrections
+        result = _apply_phoneme_corrections("觀眾喝彩")
+        assert '<phoneme' in result
+        assert 'ㄏㄜˋ' in result
+
+    def test_apply_da_de_piaoliang_correction(self):
+        """'打的漂亮' — '的' must be corrected to neutral tone de (˙ㄉㄜ)."""
+        from app.services.tts_service import _apply_phoneme_corrections
+        result = _apply_phoneme_corrections("打的漂亮")
+        assert '<phoneme' in result
+        assert '˙ㄉㄜ' in result
+
+    def test_no_correction_applied_for_plain_text(self):
+        """Text without patterns should pass through unchanged."""
+        from app.services.tts_service import _apply_phoneme_corrections
+        text = "她是一個好學生"
+        result = _apply_phoneme_corrections(text)
+        assert result == text
+        assert '<phoneme' not in result
+
+    def test_azure_ssml_contains_phoneme_for_he_cai(self):
+        """Full Azure SSML output must contain phoneme tag when text has 喝采."""
+        import app.services.tts_service as tts_mod
+
+        captured_request = {}
+
+        def fake_urlopen(req, timeout=None):
+            captured_request["data"] = req.data.decode("utf-8")
+            resp = MagicMock()
+            resp.__enter__ = lambda s: s
+            resp.__exit__ = MagicMock(return_value=False)
+            resp.read.return_value = b"AUDIO"
+            return resp
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            tts_mod._synthesize_azure("贏得全國人民的尊敬及喝采")
+
+        ssml = captured_request["data"]
+        assert '<phoneme' in ssml
+        assert 'ㄏㄜˋ' in ssml
+
+    def test_azure_ssml_no_phoneme_for_plain_text(self):
+        """SSML for plain text must NOT contain phoneme tags."""
+        import app.services.tts_service as tts_mod
+
+        captured_request = {}
+
+        def fake_urlopen(req, timeout=None):
+            captured_request["data"] = req.data.decode("utf-8")
+            resp = MagicMock()
+            resp.__enter__ = lambda s: s
+            resp.__exit__ = MagicMock(return_value=False)
+            resp.read.return_value = b"AUDIO"
+            return resp
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            tts_mod._synthesize_azure("她是一個好學生")
+
+        ssml = captured_request["data"]
+        assert '<phoneme' not in ssml
+
+
+# ---------------------------------------------------------------------------
+# 11. Cache deletion — delete_tts_cache (Issue #765)
+# ---------------------------------------------------------------------------
+
+class TestDeleteTtsCache:
+    """delete_tts_cache must evict L1 and delete GCS blobs."""
+
+    def test_l1_eviction_when_present(self):
+        """Key present in L1 cache must be removed."""
+        import app.services.tts_service as tts_mod
+        from app.services.tts_service import delete_tts_cache, _cache_key
+
+        text = "測試刪除L1"
+        key = _cache_key(text)
+        tts_mod._TTS_CACHE[key] = b"CACHED"
+
+        with patch("app.services.tts_service._get_gcs_bucket", return_value=None):
+            result = delete_tts_cache(text)
+
+        assert result["l1_deleted"] is True
+        assert key not in tts_mod._TTS_CACHE
+
+    def test_l1_eviction_when_absent(self):
+        """Key absent from L1 must return l1_deleted=False without error."""
+        import app.services.tts_service as tts_mod
+        from app.services.tts_service import delete_tts_cache, _cache_key
+
+        text = "不在快取裡的句子"
+        key = _cache_key(text)
+        tts_mod._TTS_CACHE.pop(key, None)  # ensure not present
+
+        with patch("app.services.tts_service._get_gcs_bucket", return_value=None):
+            result = delete_tts_cache(text)
+
+        assert result["l1_deleted"] is False
+
+    def test_gcs_blobs_deleted(self):
+        """delete_tts_cache must call blob.delete() for existing GCS blobs."""
+        from app.services.tts_service import delete_tts_cache, _cache_key
+        import app.services.tts_service as tts_mod
+
+        text = "測試GCS刪除"
+        key = _cache_key(text)
+        tts_mod._TTS_CACHE.pop(key, None)
+
+        mock_blob = MagicMock()
+        mock_blob.exists.return_value = True
+
+        mock_bucket = MagicMock()
+        mock_bucket.blob.return_value = mock_blob
+
+        with patch("app.services.tts_service._get_gcs_bucket", return_value=mock_bucket):
+            result = delete_tts_cache(text)
+
+        assert mock_blob.delete.call_count >= 1
+        assert len(result["gcs_deleted"]) >= 1
+
+    def test_gcs_unavailable_does_not_raise(self):
+        """If GCS bucket is None, delete_tts_cache should succeed silently."""
+        from app.services.tts_service import delete_tts_cache
+
+        with patch("app.services.tts_service._get_gcs_bucket", return_value=None):
+            result = delete_tts_cache("任何文字")
+
+        assert "key" in result
+        assert result["gcs_deleted"] == []
+
+
+# ---------------------------------------------------------------------------
+# 12. Regenerate endpoint — POST /api/tts/regenerate (Issue #765)
+# ---------------------------------------------------------------------------
+
+class TestRegenerateEndpoint:
+    """POST /api/tts/regenerate must delete cache and re-synthesise."""
+
+    def _make_app(self):
+        from fastapi import FastAPI
+        from app.routes.tts import router
+        app = FastAPI()
+        app.include_router(router)
+        return app
+
+    @patch("app.services.tts_service._gcs_get", return_value=None)
+    @patch("app.services.tts_service._gcs_put")
+    @patch("app.services.tts_service._TTS_CACHE", {})
+    @patch("app.services.tts_service._get_gcs_bucket", return_value=None)
+    def test_regenerate_returns_ok(self, mock_bucket, mock_gcs_put, mock_gcs_get):
+        """POST /api/tts/regenerate must return 200 with status=ok (uses Azure path)."""
+        import app.services.tts_service as tts_mod
+        from fastapi.testclient import TestClient
+        import urllib.request
+
+        fake_response = MagicMock()
+        fake_response.__enter__ = lambda s: s
+        fake_response.__exit__ = MagicMock(return_value=False)
+        fake_response.read.return_value = b"REGENERATED_AUDIO"
+
+        with patch.object(tts_mod, "AZURE_SPEECH_KEY", "fake-key"), \
+             patch("urllib.request.urlopen", return_value=fake_response):
+            client = TestClient(self._make_app())
+            response = client.post("/api/tts/regenerate", json={"text": "她贏得了喝采"})
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "ok"
+        assert "key" in data
+        assert "bytes" in data
+
+    def test_regenerate_rejects_empty_text(self):
+        """POST /api/tts/regenerate must reject empty text with 422."""
+        from fastapi.testclient import TestClient
+
+        client = TestClient(self._make_app())
+        response = client.post("/api/tts/regenerate", json={"text": ""})
+        assert response.status_code == 422

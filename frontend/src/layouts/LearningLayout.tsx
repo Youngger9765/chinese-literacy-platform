@@ -121,8 +121,46 @@ const LearningLayout: React.FC = () => {
       return null;
     }
   });
-  /** Progressive paragraph unlock tracking (Issue #85). */
-  const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(new Set());
+  /** Progressive paragraph unlock tracking (Issue #85).
+   * Restored from localStorage on mount so progress survives page refresh (Issue #689).
+   *
+   * Fix #806: also fall back to LiveTutor's own localStorage key (`liveTutor_progress_*`)
+   * so that when `tutor_completed_*` was cleared at session end but the user returns to
+   * the same story before LiveTutor clears its own cache, FullReading still sees all
+   * paragraphs as done. */
+  const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(() => {
+    try {
+      const raw = localStorage.getItem(`tutor_completed_${storyId}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && (parsed as number[]).length > 0) {
+          return new Set<number>(parsed as number[]);
+        }
+      }
+    } catch {
+      // Non-fatal — continue to fallback
+    }
+    // Fallback: LiveTutor persists its own progress under a different key.
+    // If the user refreshed the page or started a new session for the same story
+    // before LiveTutor cleared its own cache, read completed paragraphs from there.
+    try {
+      const liveTutorRaw = localStorage.getItem(`liveTutor_progress_${storyId}`);
+      if (liveTutorRaw) {
+        const liveTutorParsed = JSON.parse(liveTutorRaw) as {
+          completedParagraphs?: unknown;
+        };
+        if (
+          Array.isArray(liveTutorParsed.completedParagraphs) &&
+          (liveTutorParsed.completedParagraphs as number[]).length > 0
+        ) {
+          return new Set<number>(liveTutorParsed.completedParagraphs as number[]);
+        }
+      }
+    } catch {
+      // Non-fatal — start fresh
+    }
+    return new Set<number>();
+  });
   /** Reading goals from the active assignment, loaded from sessionStorage (Issue #414). */
   const [assignmentReadingGoals, setAssignmentReadingGoals] = useState<AssignmentReadingGoals | null>(() => {
     try {
@@ -172,11 +210,16 @@ const LearningLayout: React.FC = () => {
   );
 
   /** Clear active session from localStorage and sessionStorage (called on completion).
-   * Removing the sessionStorage key means the next visit creates a fresh DB session. */
+   * Removing the sessionStorage key means the next visit creates a fresh DB session.
+   * Also clears the tutor paragraph progress so a fresh session starts at zero (Issue #689).
+   * Fix #806: also clear LiveTutor's own cache key so stale paragraph data from a
+   * completed session never bleeds into a new session for the same story. */
   const clearPersistedSession = useCallback(() => {
     if (!user) return;
     clearActiveSession(String(user.id));
     try { sessionStorage.removeItem(`db-session-${storyId}`); } catch { /* non-fatal */ }
+    try { localStorage.removeItem(`tutor_completed_${storyId}`); } catch { /* non-fatal */ }
+    try { localStorage.removeItem(`liveTutor_progress_${storyId}`); } catch { /* non-fatal */ }
   }, [user, storyId]);
 
   // ── Idle-timeout warning (Issue #408) ────────────────────────────────────
@@ -369,6 +412,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishReadingAnnotation = useCallback(
     (_summary: AnnotationSummary) => {
+      setSession((prev) => (prev ? { ...prev, readingAnnotationCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['tutor']);
       navigate(`/learn/${storyId}/tutor`);
     },
@@ -377,6 +421,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishVocabDefinitionMatch = useCallback(
     (_result: VocabDefinitionMatchResult) => {
+      setSession((prev) => (prev ? { ...prev, vocabDefinitionMatchCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
       navigate(`/learn/${storyId}/vocab-application`);
     },
@@ -385,6 +430,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishVocabApplication = useCallback(
     (_result: VocabApplicationResult) => {
+      setSession((prev) => (prev ? { ...prev, vocabApplicationCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['comprehension']);
       navigate(`/learn/${storyId}/comprehension`);
     },
@@ -393,6 +439,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishVocabWordSearch = useCallback(
     (_elapsedSeconds: number) => {
+      setSession((prev) => (prev ? { ...prev, vocabWordSearchCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
       navigate(`/learn/${storyId}/knowledge-station`);
     },
@@ -401,6 +448,7 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishKnowledgeStation = useCallback(
     () => {
+      setSession((prev) => (prev ? { ...prev, knowledgeStationCompleted: true } : null));
       persistStep(STEP_PATH_TO_NUMBER['report']);
       navigate(`/learn/${storyId}/report`);
     },
@@ -434,12 +482,19 @@ const LearningLayout: React.FC = () => {
     }
   }, [clearPersistedSession, token]);
 
-  /** Mark a paragraph as completed in both local state and session (Issue #85). */
+  /** Mark a paragraph as completed in both local state and session (Issue #85).
+   * Also persists to localStorage so progress survives page refresh (Issue #689). */
   const handleParagraphComplete = useCallback((paragraphIndex: number) => {
     setCompletedParagraphsSet((prev) => {
       if (prev.has(paragraphIndex)) return prev;
       const updated = new Set(prev);
       updated.add(paragraphIndex);
+      // Persist to localStorage (L1 cache) — key per story so different stories don't collide
+      try {
+        localStorage.setItem(`tutor_completed_${storyId}`, JSON.stringify(Array.from(updated)));
+      } catch {
+        // Non-fatal — in-memory state still updated
+      }
       return updated;
     });
     setSession((prev) => {
@@ -449,7 +504,7 @@ const LearningLayout: React.FC = () => {
       existing.add(paragraphIndex);
       return { ...prev, completedParagraphs: Array.from(existing) };
     });
-  }, []);
+  }, [storyId]);
 
   if (isLoading) {
     return (

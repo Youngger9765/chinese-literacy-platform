@@ -8,7 +8,7 @@ import ZhuyinPhoneticGame from './ZhuyinPhoneticGame';
 import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import RadicalDecomposition from './RadicalDecomposition';
-import { getDecomposition } from '../../data/radicals';
+import { getDecomposition, initGeneratedDecompositions, initRadicalMeanings } from '../../data/radicals';
 import DictionaryPanel from '../dictionary/DictionaryPanel';
 import FillInBlankExercise from './FillInBlankExercise';
 
@@ -19,9 +19,9 @@ interface VocabPracticeProps {
   onBack: () => void;
 }
 
-type Phase = 'confirm' | 'grid' | 'practice' | 'pronunciation' | 'sentence' | 'zhuyin-game';
+type Phase = 'grid' | 'practice' | 'pronunciation' | 'zhuyin-game';
 
-type PracticeMode = 'stroke' | 'pronunciation' | 'zhuyin' | 'fillinblank';
+type PracticeMode = 'radical' | 'stroke' | 'pronunciation' | 'zhuyin' | 'fillinblank' | 'sentence';
 
 /* ================================================================ */
 /*  Progress bar                                                     */
@@ -144,6 +144,11 @@ function CharCard({ label, isSuggested, isPracticed, animDelay, onClick }: CharC
 /* ================================================================ */
 
 const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish, onBack }) => {
+  // Load generated decomposition data so getDecomposition() covers 2700+ chars
+  const [decompReady, setDecompReady] = useState(false);
+  useEffect(() => {
+    Promise.all([initGeneratedDecompositions(), initRadicalMeanings()]).then(() => setDecompReady(true));
+  }, []);
   const storageKey = `vocabPractice_progress_${story.id}`;
   const loadSaved = () => {
     try {
@@ -154,22 +159,17 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   };
   const savedProgress = useRef(loadSaved());
 
-  const [phase, setPhase] = useState<Phase>(() => {
-    const p = savedProgress.current?.phase;
-    // Only restore grid phase (not mid-practice)
-    return (p === 'grid') ? 'grid' : 'confirm';
-  });
+  const [phase, setPhase] = useState<Phase>('grid');
   const [practicingChar, setPracticingChar] = useState(savedProgress.current?.practicingChar ?? '');
   const [practicedChars, setPracticedChars] = useState<Set<string>>(
     () => new Set(savedProgress.current?.practicedChars ?? [])
   );
   const [pronouncedChars, setPronoucedChars] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState<PracticeMode>('stroke');
+  const [activeTab, setActiveTab] = useState<PracticeMode>('radical');
   const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
   const [zhuyinReady, setZhuyinReady] = useState(false);
   /** Character whose radical panel is currently open */
   const [radicalChar, setRadicalChar] = useState<string | null>(null);
-  const [selectedChar, setSelectedChar] = useState<string | null>(null);
   const [justCompleted, setJustCompleted] = useState('');
 
   const zhuyinActive = zhuyinReady && zhuyinEnabled;
@@ -182,7 +182,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
   // ── localStorage persistence ────────────────────────────────────────
   useEffect(() => {
-    if (phase === 'confirm') return; // Nothing to save yet
     try {
       localStorage.setItem(storageKey, JSON.stringify({
         practicedChars: Array.from(practicedChars),
@@ -246,7 +245,22 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
   const handlePractice = (ch: string, mode: PracticeMode = 'stroke') => {
     setPracticingChar(ch);
-    setPhase(mode === 'stroke' ? 'practice' : 'pronunciation');
+    // Only 'stroke' launches WriteCharacter; all other modes (including
+    // 'radical', 'sentence', etc.) are tab-based inline panels, not a
+    // full-screen phase. Guard: any mode that isn't 'stroke' or 'pronunciation'
+    // falls through to 'practice' (WriteCharacter) as the safe default.
+    // Also pin activeTab so returning from WriteCharacter always lands on the
+    // correct tab (fixes #854: clicking stroke-tab card returned to 部件 tab).
+    if (mode === 'stroke') {
+      setActiveTab('stroke');
+      setPhase('practice');
+    } else if (mode === 'pronunciation') {
+      setActiveTab('pronunciation');
+      setPhase('pronunciation');
+    } else {
+      setActiveTab('stroke');
+      setPhase('practice');
+    }
     setJustCompleted('');
   };
 
@@ -254,20 +268,25 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     const ch = practicingChar;
     setPracticedChars(prev => new Set(prev).add(ch));
     setJustCompleted(ch);
+    // Always return to the stroke tab after completing WriteCharacter (#854)
+    setActiveTab('stroke');
     setPhase('grid');
   };
 
   const handlePronunciationComplete = () => {
     setPronoucedChars(prev => new Set(prev).add(practicingChar));
+    setActiveTab('pronunciation');
     setPhase('grid');
   };
 
   const handlePracticeBack = () => {
+    // Return to the stroke tab after backing out of WriteCharacter (#854)
+    setActiveTab('stroke');
     setPhase('grid');
   };
 
   const handleFinish = (result: VocabResult) => {
-    try { localStorage.removeItem(storageKey); } catch {}
+    // Keep completion record — only clear on explicit redo
     onFinish(result);
   };
 
@@ -276,46 +295,18 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     setRadicalChar(prev => (prev === ch ? null : ch));
   };
 
-  /* ── Confirm phase: ask student whether to start vocab practice ── */
-  if (phase === 'confirm') {
-    const suggestedCount = attempt.mispronouncedWords.filter(hasStrokeData).length;
-    const totalVocabCount = displayChars.length;
-    const charCount = suggestedCount > 0 ? suggestedCount : totalVocabCount;
+  // ── Derived state (must stay BEFORE conditional returns to satisfy Rules of Hooks) ──
+  const strokeDone = displayChars.length > 0 && displayChars.every(ch => practicedChars.has(ch));
+  const pronounceDone = displayChars.length > 0 && displayChars.every(ch => pronouncedChars.has(ch));
+  const allDone = strokeDone && pronounceDone;
 
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-amber-50 px-6 py-12">
-        <div className="max-w-sm w-full bg-white rounded-3xl shadow-lg border border-amber-100 p-8 flex flex-col items-center gap-6 text-center">
-          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-3xl select-none">
-            ✏️
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-gray-900 mb-2">
-              要練習這一課的生字嗎？
-            </h2>
-            <p className="text-sm text-gray-500">
-              {suggestedCount > 0
-                ? `剛才朗讀有 ${suggestedCount} 個字需要加強，要練習看看嗎？`
-                : `這一課有 ${charCount} 個生字，要練習嗎？`}
-            </p>
-          </div>
-          <div className="w-full flex flex-col gap-3">
-            <button
-              onClick={() => setPhase('grid')}
-              className="w-full py-3.5 rounded-2xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-md transition-all active:scale-95"
-            >
-              好！開始練習
-            </button>
-            <button
-              onClick={() => handleFinish({ practicedChars: [], totalChars: charCount })}
-              className="w-full py-3 rounded-2xl font-semibold text-base text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all active:scale-95"
-            >
-              跳過
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const currentChars = activeTab === 'stroke' ? displayChars : activeTab === 'pronunciation' ? pronunciationChars : [];
+  const currentPracticedSet = activeTab === 'stroke' ? practicedChars : activeTab === 'pronunciation' ? pronouncedChars : new Set<string>();
+  const currentDone = activeTab === 'stroke' ? strokeDone : activeTab === 'pronunciation' ? pronounceDone : false;
+
+  // Characters for which we have radical decomposition data (re-filter after generated data loads)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const charsWithRadical = useMemo(() => displayChars.filter(ch => getDecomposition(ch) !== null), [displayChars, decompReady]);
 
   /* ── Pronunciation practice phase ── */
   if (phase === 'pronunciation') {
@@ -341,18 +332,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     );
   }
 
-  /* ── Sentence phase: compose sentences after stroke practice ── */
-  if (phase === 'sentence') {
-    return (
-      <SentencePractice
-        practicedChars={Array.from(practicedChars)}
-        storyTitle={story.title}
-        onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
-        onBack={() => setPhase('grid')}
-      />
-    );
-  }
-
   /* ── Zhuyin phonetic game phase ── */
   if (phase === 'zhuyin-game') {
     return (
@@ -365,17 +344,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   }
 
   /* ── Grid phase: character selection ── */
-  const strokeDone = displayChars.length > 0 && displayChars.every(ch => practicedChars.has(ch));
-  const pronounceDone = displayChars.length > 0 && displayChars.every(ch => pronouncedChars.has(ch));
-  const allDone = strokeDone && pronounceDone;
-
-  const currentChars = activeTab === 'stroke' ? displayChars : activeTab === 'pronunciation' ? pronunciationChars : [];
-  const currentPracticedSet = activeTab === 'stroke' ? practicedChars : activeTab === 'pronunciation' ? pronouncedChars : new Set<string>();
-  const currentDone = activeTab === 'stroke' ? strokeDone : activeTab === 'pronunciation' ? pronounceDone : false;
-  // 'zhuyin' and 'fillinblank' tabs are handled separately above; these vars only matter for stroke/pronunciation
-
-  // Characters for which we have radical decomposition data
-  const charsWithRadical = displayChars.filter(ch => getDecomposition(ch) !== null);
 
   return (
     <div
@@ -393,13 +361,17 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         </div>
         <div className="flex-1" />
         <span className="text-[10px] text-gray-500">
-          {activeTab === 'stroke'
-            ? `筆順 ${practicedChars.size} / ${displayChars.length}`
-            : activeTab === 'pronunciation'
-              ? `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`
-              : activeTab === 'fillinblank'
-                ? '語詞應用'
-                : '注音遊戲'}
+          {activeTab === 'radical'
+            ? `部件 ${charsWithRadical.length} 字`
+            : activeTab === 'stroke'
+              ? `筆順 ${practicedChars.size} / ${displayChars.length}`
+              : activeTab === 'pronunciation'
+                ? `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`
+                : activeTab === 'fillinblank'
+                  ? '語詞應用'
+                  : activeTab === 'sentence'
+                    ? '造句練習'
+                    : '注音遊戲'}
         </span>
         <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </div>
@@ -416,16 +388,28 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             <h2 className="text-xl font-black text-gray-900 mb-1">生字練習</h2>
 
             <p className="text-sm text-gray-600">
-              {attempt === null
-                ? '還沒有朗讀紀錄，以下是這篇課文的生字，點一點來練習筆順吧！'
-                : needPracticeSet.size > 0
-                  ? `以下 ${Math.min(needPracticeSet.size, 12)} 個字可以再練習看看，選一個模式開始練習吧！`
-                  : '讀得很棒！沒有漏字。想再練習這篇的字嗎？'}
+              {attempt === null || needPracticeSet.size === 0
+                ? '以下是這篇課文的生字，點一點來練習筆順吧！'
+                : `以下 ${Math.min(needPracticeSet.size, 12)} 個字可以再練習看看，選一個模式開始練習吧！`}
             </p>
           </div>
 
           {/* Mode toggle tabs */}
           <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+            <button
+              onClick={() => setActiveTab('radical')}
+              className={[
+                'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
+                activeTab === 'radical'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700',
+              ].join(' ')}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+              部件學習
+            </button>
             <button
               onClick={() => setActiveTab('stroke')}
               className={[
@@ -440,6 +424,20 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               </svg>
               筆順練習
               {strokeDone && <span className="w-2 h-2 bg-emerald-500 rounded-full" />}
+            </button>
+            <button
+              onClick={() => setActiveTab('sentence')}
+              className={[
+                'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all',
+                activeTab === 'sentence'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700',
+              ].join(' ')}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z" />
+              </svg>
+              造句練習
             </button>
             {/* 發音練習 and 注音遊戲 tabs hidden per product decision 2026-03-27 */}
             {/* 語詞應用 tab removed — now a separate step (#668 VocabApplication) */}
@@ -476,8 +474,37 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             </div>
           )}
 
-          {/* Character grid — hidden when zhuyin or fillinblank tab is active */}
-          {activeTab !== 'zhuyin' && activeTab !== 'fillinblank' && <>{/* Character grid */}
+          {/* Radical/component learning tab */}
+          {activeTab === 'radical' && (
+            <div className="space-y-4">
+              {displayChars.map(ch => {
+                const hasDecomp = getDecomposition(ch) !== null;
+                if (!hasDecomp) {
+                  return (
+                    <div key={ch} className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
+                      <span className="text-2xl font-bold text-gray-400">{ch}</span>
+                      <span className="text-sm text-gray-400">此字目前無部件資料</span>
+                    </div>
+                  );
+                }
+                return <RadicalDecomposition key={ch} char={ch} />;
+              })}
+            </div>
+          )}
+
+          {/* Sentence practice — inline tab panel */}
+          {activeTab === 'sentence' && (
+            <SentencePractice
+              practicedChars={displayChars.length > 0 ? displayChars : Array.from(practicedChars)}
+              storyTitle={story.title}
+              onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+              onBack={() => setActiveTab('stroke')}
+              inline
+            />
+          )}
+
+          {/* Character grid — hidden when zhuyin, fillinblank, or sentence tab is active */}
+          {activeTab !== 'zhuyin' && activeTab !== 'fillinblank' && activeTab !== 'sentence' && activeTab !== 'radical' && <>{/* Character grid */}
           {currentChars.length === 0 ? (
             <div className="text-gray-400 text-sm py-8 text-center">
               {activeTab === 'stroke'
@@ -489,21 +516,13 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               {currentChars.map((ch, idx) => {
                 const isSuggested = needPracticeSet.has(ch);
                 const isPracticed = currentPracticedSet.has(ch);
-                const hasRadical = activeTab === 'stroke' && getDecomposition(ch) !== null;
-                const isRadicalOpen = radicalChar === ch;
-                const isSelected = selectedChar === ch;
+                const isRadicalOpen = false; // radical button removed — now a separate tab
                 return (
-                  <div key={ch} className="relative">
+                  <div key={ch} className="flex flex-col gap-1">
                     <button
-                      onClick={() => {
-                        setSelectedChar(prev => prev === ch ? null : ch);
-                      }}
-                      onDoubleClick={() => handlePractice(ch, activeTab)}
+                      onClick={() => handlePractice(ch, activeTab === 'stroke' ? 'stroke' : 'pronunciation')}
                       className={[
                         `relative flex flex-col items-center justify-center w-full ${zhuyinActive ? 'aspect-[3/6]' : 'aspect-square'} rounded-2xl border transition-all active:scale-95 animate-card-in`,
-                        isSelected
-                          ? 'ring-2 ring-indigo-500 ring-offset-1'
-                          : '',
                         isPracticed
                           ? 'bg-emerald-50 border-emerald-700/50 text-emerald-800'
                           : isSuggested
@@ -531,31 +550,11 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                       )}
 
                       <span className="text-[9px] mt-1 opacity-60">
-                        {isPracticed
-                          ? '已練習'
-                          : isSelected
-                            ? '再點練習'
-                            : '點我查字'}
+                        {isPracticed ? '已練習' : '點我練習'}
                       </span>
                     </button>
 
-                    {/* Radical decomposition toggle button */}
-                    {hasRadical && (
-                      <button
-                        onClick={() => handleRadicalToggle(ch)}
-                        title="查看部件拆解"
-                        className={[
-                          'absolute -bottom-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center border text-[9px] font-bold transition-all',
-                          isRadicalOpen
-                            ? 'bg-indigo-500 border-indigo-600 text-white'
-                            : 'bg-indigo-100 border-indigo-200 text-indigo-600 hover:bg-indigo-200',
-                        ].join(' ')}
-                        aria-label={`查看「${ch}」的部件拆解`}
-                        aria-expanded={isRadicalOpen}
-                      >
-                        部
-                      </button>
-                    )}
+                    {/* Radical button removed — 部件學習 is now a separate tab */}
                   </div>
                 );
               })}
@@ -578,36 +577,15 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                 </div>
               </>
             )}
-            {charsWithRadical.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <span className="w-5 h-5 bg-indigo-100 border border-indigo-200 text-indigo-600 rounded-full flex items-center justify-center text-[9px] font-bold">部</span>
-                點我查看部件拆解
-              </div>
-            )}
+            {/* 部件 legend removed — now a separate tab */}
           </div>
 
-          {/* Radical decomposition panel */}
-          {radicalChar && (
-            <div className="animate-[fadeIn_0.2s_ease-in]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-gray-700">
-                  「{radicalChar}」的部件學習
-                </span>
-                <button
-                  onClick={() => setRadicalChar(null)}
-                  className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded"
-                >
-                  收起
-                </button>
-              </div>
-              <RadicalDecomposition char={radicalChar} />
-            </div>
-          )}
+          {/* Radical panel removed — now a separate tab */}
 
           {/* Usage hint */}
-          {currentChars.length > 0 && !selectedChar && (
+          {currentChars.length > 0 && (
             <p className="text-[10px] text-gray-400 text-center">
-              點一下字卡查字典，連點兩下練習{activeTab === 'stroke' ? '筆順' : '發音'}
+              點一下字卡即可練習{activeTab === 'stroke' ? '筆順' : '發音'}
             </p>
           )}
 
@@ -633,7 +611,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               <p className="text-emerald-800 font-bold mb-2">太棒了！所有生字都練習完了！</p>
               <p className="text-emerald-700 text-sm mb-3">接下來，試著用這些生字各造兩個句子吧！</p>
               <button
-                onClick={() => setPhase('sentence')}
+                onClick={() => setActiveTab('sentence')}
                 className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
               >
                 開始造句練習
@@ -652,32 +630,16 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       </div>
 
       {/* Bottom actions */}
-      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-end">
         <button
-          onClick={onBack}
-          className="px-4 py-3 rounded-xl text-base text-gray-500 hover:text-gray-800 transition-colors"
+          onClick={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
-          回到朗讀
+          {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </button>
-        <div className="flex items-center gap-3">
-          {practicedChars.size > 0 && !allDone && (
-            <button
-              onClick={() => setPhase('sentence')}
-              className="px-5 py-3 rounded-xl font-bold text-base border border-accent text-accent hover:bg-accent/10 transition-all active:scale-95"
-            >
-              造句練習
-            </button>
-          )}
-          <button
-            onClick={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
-            className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
-          >
-            {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
       </div>
     </div>
   );

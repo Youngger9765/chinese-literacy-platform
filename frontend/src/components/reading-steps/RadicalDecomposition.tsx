@@ -8,11 +8,14 @@
  * Based on 部件教學法 by Prof. Tseng Shih-chieh (曾世杰教授).
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   getDecomposition,
+  getDecompositionSource,
   getRadicalInfo,
   getRelatedChars,
+  initGeneratedDecompositions,
+  initRadicalMeanings,
   RadicalRole,
   RelatedChar,
 } from '../../data/radicals';
@@ -64,11 +67,37 @@ const RelatedCharCard: React.FC<RelatedCharCardProps> = ({ item, isSelected, onC
 const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => {
   const [selectedRelated, setSelectedRelated] = useState<RelatedChar | null>(null);
   const [activeRadical, setActiveRadical] = useState<string | null>(null);
+  const [, forceUpdate] = useState(0);
+
+  // Load generated decomposition database on first render (lazy chunk).
+  // forceUpdate triggers a re-render after the data is available so that
+  // characters not in the hand-curated set are shown immediately.
+  useEffect(() => {
+    Promise.all([initGeneratedDecompositions(), initRadicalMeanings()])
+      .then(() => forceUpdate(n => n + 1));
+  }, []);
 
   const decomp = getDecomposition(char);
 
   if (!decomp) {
-    return null; // Silently skip characters not in the database
+    // Character is an independent form (獨體字) or not in the database.
+    // Show a friendly educational message instead of silently hiding the panel.
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+        <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
+          <span className="text-base font-bold text-gray-700">部件拆解</span>
+        </div>
+        <div className="p-4 flex flex-col items-center gap-3 text-center">
+          <span className="text-4xl font-black text-gray-900 leading-none">{char}</span>
+          <p className="text-sm text-gray-600">
+            此字為<span className="font-semibold text-indigo-700">獨體字</span>，無法再拆解
+          </p>
+          <p className="text-xs text-gray-400">
+            獨體字是最小的漢字單位，本身就是一個完整的象形或指事字
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Collect unique radicals from components
@@ -184,6 +213,13 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
           </div>
         )}
       </div>
+
+      {/* Data source label */}
+      <p className="text-[10px] text-gray-400 text-right mt-2 pr-1">
+        {getDecompositionSource(char) === 'hand-curated'
+          ? '資料來源：教學團隊手動編寫'
+          : '資料來源：makemeahanzi（開源漢字資料庫）'}
+      </p>
     </div>
   );
 };

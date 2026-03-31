@@ -71,6 +71,7 @@ export interface StudentAssignmentResponse extends ReadingGoals {
   assignment_id: number;
   story_id: string | null;
   text_id: number | null;
+  story_slug: string | null;
   story_title: string;
   title: string | null;
   description: string | null;

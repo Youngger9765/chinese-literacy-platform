@@ -53,9 +53,6 @@ const KnowledgeStationPage = lazy(() => import('../pages/learning/KnowledgeStati
 // Student pages — infrequently accessed, split to reduce initial load
 const JoinClassroomPage = lazy(() => import('../pages/JoinClassroomPage'));
 const MyAssignments = lazy(() => import('../pages/student/MyAssignments'));
-const LearningHistory = lazy(() => import('../pages/student/LearningHistory'));
-const StudentProgress = lazy(() => import('../pages/student/StudentProgress'));
-const DialogueHistory = lazy(() => import('../pages/student/DialogueHistory'));
 const MyVocabulary = lazy(() => import('../pages/student/MyVocabulary'));
 const AchievementsPage = lazy(() => import('../pages/student/AchievementsPage'));
 const StudentClassroomDashboard = lazy(() => import('../pages/student/StudentClassroomDashboard'));
@@ -242,9 +239,7 @@ const AppRoutes: React.FC = () => (
         path="/history"
         element={
           <ProtectedRoute>
-            <AppShell>
-              <LearningHistory />
-            </AppShell>
+            <Navigate to="/assignments" replace />
           </ProtectedRoute>
         }
       />
@@ -252,9 +247,7 @@ const AppRoutes: React.FC = () => (
         path="/progress"
         element={
           <ProtectedRoute>
-            <AppShell>
-              <StudentProgress />
-            </AppShell>
+            <Navigate to="/assignments" replace />
           </ProtectedRoute>
         }
       />
@@ -289,22 +282,20 @@ const AppRoutes: React.FC = () => (
         }
       />
       <Route
-        path="/sessions/:sessionId/dialogue"
-        element={
-          <ProtectedRoute>
-            <AppShell>
-              <DialogueHistory />
-            </AppShell>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/sessions/:sessionId/report"
         element={
           <ProtectedRoute>
             <AppShell>
               <SessionHistoryReportPage />
             </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/sessions/:sessionId/dialogue"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/assignments" replace />
           </ProtectedRoute>
         }
       />
