@@ -1291,32 +1291,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                           )}
                           {isTtsSpeaking && idx === currentLineIndex ? '停止' : 'AI 朗讀'}
                         </button>
-                        {/* A/B test: Web Speech API button for comparison */}
-                        <button
-                          onClick={() => {
-                            const text = story.content[idx];
-                            if (!text) return;
-                            if (window.speechSynthesis.speaking) {
-                              window.speechSynthesis.cancel();
-                              return;
-                            }
-                            const utt = new SpeechSynthesisUtterance(text);
-                            utt.lang = 'zh-TW';
-                            utt.rate = 0.9;
-                            const voices = window.speechSynthesis.getVoices();
-                            const best = voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan'))
-                              || voices.find(v => v.lang === 'zh-TW');
-                            if (best) utt.voice = best;
-                            window.speechSynthesis.speak(utt);
-                          }}
-                          disabled={idx === currentLineIndex && (isSessionActive || isPreparing)}
-                          className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 ${
-                            idx === currentLineIndex && (isSessionActive || isPreparing) ? 'opacity-40 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
-                          瀏覽器朗讀
-                        </button>
                         {/* Start / Submit / Retry — context-dependent */}
                         {idx === currentLineIndex ? (
                           // Current paragraph: show session controls
