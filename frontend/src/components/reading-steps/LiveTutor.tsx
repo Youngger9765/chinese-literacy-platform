@@ -1,14 +1,11 @@
-
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Story, ReadingAttempt, LiveMessage, DiffToken } from '../../types';
-import { correctHomophones, isHomophone } from '../../utils/pinyin';
-import { diffCharacters, normalizeForComparison, cleanChineseText } from '../../utils/textDiff';
+import { normalizeForComparison, cleanChineseText } from '../../utils/textDiff';
 import DiffDisplay from '../ui/DiffDisplay';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import FontSizeControl, { useFontSize } from '../ui/FontSizeControl';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
-import RecordingButton from '../recording/RecordingButton';
+import { READING_EXCELLENT } from '../../utils/personaConfig';
 import ParagraphProgress, { ParagraphStatus } from './ParagraphProgress';
 import { evaluateReading } from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
@@ -19,52 +16,19 @@ import {
   type LocalEvalResult,
 } from '../../utils/localEval';
 import { cancelTts } from '../../services/ttsApi';
-
-/* ------------------------------------------------------------------ */
-/*  Canned response pools — randomly selected to avoid repetition     */
-/* ------------------------------------------------------------------ */
-
-const TIER1_POOL = [
-  '唸得很棒！下一段。',
-  '真厲害！下一段。',
-  '讀得好清楚！下一段。',
-  '好棒喔！下一段。',
-  '很流利呢！下一段。',
-  '讀得很棒！下一段。',
-];
-
-const TIER2_POOL = [
-  '唸得不錯！下一段。',
-  '很好！下一段。',
-  '不錯不錯！下一段。',
-  '加油，繼續下一段！',
-  '很好！繼續加油！',
-  '讀得不錯喔！下一段。',
-];
-
-const TIER3_POOL = [
-  '還差一點點，再試一次！',
-  '沒關係，再念一遍看看。',
-  '加油！再念一次。',
-  '再試一次，你可以的！',
-  '慢慢來，再唸一遍。',
-  '不要急，再讀一次喔。',
-  '別灰心，再念一次！',
-  '仔細看一看，再念一遍。',
-];
-
-const STREAK_MESSAGES = [
-  '', // 0 streak — unused
-  '', // 1 streak — just use normal pool
-  '', // 2 streak — just use normal pool
-  '連續三段都唸對了，好厲害！',
-  '連續四段了！你好棒！',
-  '五段都對！你是朗讀小達人！',
-];
-
-const LAST_LINE_MESSAGE = '全部唸完了！你好棒，辛苦了！';
-
-const pick = (pool: string[]) => pool[Math.floor(Math.random() * pool.length)];
+import {
+  TIER1_POOL,
+  TIER2_POOL,
+  TIER3_POOL,
+  STREAK_MESSAGES,
+} from '../../utils/liveTutorPools';
+import {
+  IS_PUNCT,
+  extractPracticeChars,
+} from '../../utils/liveTutorHelpers';
+import { useResizablePanel } from '../../hooks/useResizablePanel';
+import { useLiveTutorSpeech } from '../../hooks/useLiveTutorSpeech';
+import { useTtsPlayback } from '../../hooks/useTtsPlayback';
 
 /* ------------------------------------------------------------------ */
 /*  Moving cursor helpers                                              */
@@ -83,20 +47,18 @@ function calcSpeakingProgress(interim: string, target: string): number {
   const t = Array.from(normalizeForComparison(target));
   let j = 0;
   for (let i = 0; i < s.length && j < t.length; i++) {
-    if (s[i] === t[j] || isHomophone(s[i], t[j])) {
+    if (s[i] === t[j]) {
       j++;
     } else {
-      // Look ahead: can this spoken char match a nearby target position?
-      // Handles substitutions (而且→並且) and STT-impossible chars (賁→噴)
       let found = false;
       for (let k = 1; k <= LOOK_AHEAD && j + k < t.length; k++) {
-        if (s[i] === t[j + k] || isHomophone(s[i], t[j + k])) {
-          j = j + k + 1; // skip mismatched target chars + advance past match
+        if (s[i] === t[j + k]) {
+          j = j + k + 1;
           found = true;
           break;
         }
       }
-      // If not found, spoken char is extra — skip it (j stays)
+      void found;
     }
   }
   return j;
@@ -111,24 +73,15 @@ function normalizedToOrigIdx(target: string, normalizedProgress: number): number
   let norm = 0;
   for (let i = 0; i < target.length; i++) {
     if (norm >= normalizedProgress) return i;
-    if (!/[「」『』，。！？：；、\s]/.test(target[i])) norm++;
+    if (!IS_PUNCT.test(target[i])) norm++;
   }
   return target.length;
 }
-
-const IS_PUNCT = /[「」『』，。！？：；、\s]/;
 
 /**
  * Render the original paragraph with diff annotations below each character.
  * Punctuation is kept as-is. For each content char, consume the next
  * non-extra diff token and apply colored underline / sub-text.
- *
- * Rendering rules (below the original char):
- *   correct  → no annotation
- *   forgiven → blue dotted underline
- *   missing  → gray dashed underline + reduced opacity (char was skipped)
- *   wrong    → red solid underline + small red spoken char below
- *   extra    → skipped (no target position)
  */
 function renderLineWithDiff(
   originalLine: string,
@@ -186,77 +139,6 @@ function renderLineWithDiff(
     </p>
   );
 }
-
-/**
- * Build real-time overlay tokens from diffCharacters output.
- * 1. Filter out "extra" tokens (spoken chars with no target position)
- * 2. Find the cursor: index of last correct/wrong/forgiven token
- * 3. Mark everything after the cursor as "unread"
- */
-function buildRealtimeOverlay(diffTokens: DiffToken[]): DiffToken[] {
-  // Keep only target-side tokens (correct, wrong, missing, forgiven)
-  const targetTokens = diffTokens.filter(t => t.type !== 'extra');
-
-  // Find cursor: last position where student has spoken (correct, wrong, or forgiven)
-  let cursor = -1;
-  for (let i = targetTokens.length - 1; i >= 0; i--) {
-    if (targetTokens[i].type === 'correct' || targetTokens[i].type === 'wrong' || targetTokens[i].type === 'forgiven') {
-      cursor = i;
-      break;
-    }
-  }
-
-  // Mark tokens after cursor as "unread"
-  return targetTokens.map((t, i) => {
-    if (i > cursor && t.type === 'missing') {
-      return { ...t, type: 'unread' as const };
-    }
-    return t;
-  });
-}
-
-/**
- * Extract Chinese characters the student actually missed on their LAST attempt
- * per paragraph. Characters present in the target but absent from the
- * (homophone-corrected) spoken transcript are collected.
- *
- * Using only the last attempt per line is fair: if the student retried and
- * eventually read the paragraph well, we don't penalise earlier stumbles.
- */
-const extractPracticeChars = (results: LineResult[], content: string[]): string[] => {
-  // Keep only the last result for each lineIndex
-  const lastByLine = new Map<number, LineResult>();
-  for (const r of results) {
-    lastByLine.set(r.lineIndex, r); // later entry overwrites earlier
-  }
-
-  const chars = new Set<string>();
-  for (const r of lastByLine.values()) {
-    const targetText = content[r.lineIndex] || '';
-    const targetNorm = normalizeForComparison(targetText);
-    const spokenNorm = normalizeForComparison(
-      correctHomophones(r.transcript, targetNorm),
-    );
-
-    // Build spoken character frequency map
-    const spokenFreq: Record<string, number> = {};
-    for (const ch of spokenNorm) {
-      if (/[\u4e00-\u9fa5]/.test(ch)) spokenFreq[ch] = (spokenFreq[ch] || 0) + 1;
-    }
-
-    // Collect target characters that were not (fully) spoken
-    for (const ch of targetNorm) {
-      if (/[\u4e00-\u9fa5]/.test(ch)) {
-        if (!spokenFreq[ch] || spokenFreq[ch] <= 0) {
-          chars.add(ch);
-        } else {
-          spokenFreq[ch]--;
-        }
-      }
-    }
-  }
-  return Array.from(chars).slice(0, 12);
-};
 
 /* ------------------------------------------------------------------ */
 /*  Per-line result tracking                                          */
@@ -343,8 +225,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   );
   const [streak, setStreak] = useState(0);
   const { zhuyinActive, processZhuyin } = useZhuyin();
-  const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
-  const [isTtsPaused, setIsTtsPaused] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false); // legacy — kept for status bar compat
   const [isAwaitingGemini, setIsAwaitingGemini] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
@@ -378,27 +258,77 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [celebratingIndex, setCelebratingIndex] = useState<number | null>(null);
 
   const isAdvancingRef = useRef(false);
-  const isDraggingRef = useRef(false);
-  const dragStartXRef = useRef(0);
-  const dragStartWidthRef = useRef(320);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
-  // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
-  // gets collected mid-playback, silencing onend/onboundary callbacks.
-  const utteranceRef = useRef<SpeechSynthesisUtterance | HTMLAudioElement | null>(null);
-  // rAF loop for TTS cursor animation — Chrome's onboundary doesn't fire per-char for Chinese.
-  const ttsRafRef = useRef<number | null>(null);
-  const ttsStartTimeRef = useRef<number>(0);
-  const ttsTotalCharsRef = useRef<number>(0);
-  const isSessionActiveRef = useRef(false);   // true while recording
-  const sentenceStartTimeRef = useRef(0);     // when current sentence reading began
-  const currentTranscriptRef = useRef('');     // full transcript (accumulated + current session)
-  const rawSttRef = useRef('');               // raw STT output for logging
-  const accumulatedTranscriptRef = useRef(''); // transcript preserved across auto-reconnects
-  const currentLineIndexRef = useRef(0);      // mirrors currentLineIndex for async callbacks
-  const lastDiffTimeRef = useRef(0);          // throttle STT diff computation to max 400ms
   const evaluateAndRespondRef = useRef<any>(null);
+
+  const sentenceStartTimeRef = useRef(0);
+  const lastDiffTimeRef = useRef(0);
+
+  /* ---- TTS playback hook ---- */
+  const {
+    isTtsSpeaking,
+    isTtsPaused,
+    setIsTtsSpeaking,
+    setIsTtsPaused,
+    utteranceRef,
+    ttsRafRef,
+    speakText,
+    pauseTts,
+    resumeTts,
+    stopTts,
+  } = useTtsPlayback(
+    (pos) => setSpeakingProgress(pos),
+    () => setRealtimeDiffTokens(null),
+  );
+
+  /** Use Cloud TTS Neural2 to read the current paragraph aloud. */
+  const speakCurrentParagraph = useCallback(() => {
+    const text = story.content[currentLineIndex];
+    if (!text) return;
+    speakText(text);
+  }, [story.content, currentLineIndex, speakText]);
+
+  /* ---- Resizable right panel ---- */
+  const { onDividerMouseDown, onDividerTouchStart } = useResizablePanel(
+    rightPanelWidth,
+    onPanelWidthChange,
+  );
+
+  /* ---- STT hook ---- */
+  const stt = useLiveTutorSpeech({
+    targetText: story.content[currentLineIndex] || '',
+    streakRef,
+    sentenceTargetsRef,
+    sentenceResultsRef,
+    lastFinalResultIdxRef,
+    nextSentenceIdxRef,
+    sentenceStartTimeRef,
+    lastDiffTimeRef,
+    utteranceRef,
+    ttsRafRef,
+    onStreamingTranscript: setStreamingUserInput,
+    onRealtimeDiffTokens: setRealtimeDiffTokens as any,
+    onSpeakingProgress: setSpeakingProgress as any,
+    onLastDiffTokens: setLastDiffTokens as any,
+    onMicError: setMicError,
+    onClearTts: () => { setIsTtsSpeaking(false); setIsTtsPaused(false); },
+    onSessionReady: () => {
+      setMessages(prev => [...prev, {
+        id: 'ready-' + Date.now(),
+        role: 'model' as const,
+        text: '準備好了，請開始朗讀！',
+        type: 'feedback' as const,
+      }]);
+    },
+  });
+
+  // Expose STT state/methods with the same names used by the original code
+  const startSession = stt.startSession;
+  const stopSession = stt.stopSession;
+
+  // Keep component-level state in sync with the hook's internal state
+  // (isPreparing, isSessionActive come from stt directly)
 
   /* ---- scroll helpers ---- */
   useEffect(() => {
@@ -424,9 +354,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     return story.content.map((line) => processZhuyin(line));
   }, [story.content, zhuyinActive, processZhuyin]);
 
-  /** Compute completed/current/locked status for each paragraph.
-   *  A paragraph is 'completed' only if it passed evaluation.
-   *  Paragraphs beyond the current unlocked index are 'locked'. */
+  /** Compute completed/current/locked status for each paragraph. */
   const lineStatuses = useMemo<ParagraphStatus[]>(() => {
     return story.content.map((_, idx) => {
       if (completedParagraphs.has(idx)) return 'completed';
@@ -437,46 +365,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   /** Highest paragraph index that is unlocked (either completed or currently active). */
   const maxUnlockedIndex = useMemo(() => {
-    // All completed paragraphs + current one
     let max = currentLineIndex;
     for (const idx of completedParagraphs) {
       if (idx > max) max = idx;
     }
     return max;
   }, [completedParagraphs, currentLineIndex]);
-
-  /* ---- resizable right panel ---- */
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current) return;
-      const delta = dragStartXRef.current - e.clientX;
-      onPanelWidthChange(Math.max(240, Math.min(600, dragStartWidthRef.current + delta)));
-    };
-    const onMouseUp = () => {
-      isDraggingRef.current = false;
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (!isDraggingRef.current) return;
-      const delta = dragStartXRef.current - e.touches[0].clientX;
-      onPanelWidthChange(Math.max(240, Math.min(600, dragStartWidthRef.current + delta)));
-    };
-    const onTouchEnd = () => {
-      isDraggingRef.current = false;
-      document.body.style.userSelect = '';
-    };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-    window.addEventListener('touchmove', onTouchMove);
-    window.addEventListener('touchend', onTouchEnd);
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
-    };
-  }, []);
 
   // ── Save progress to localStorage whenever key state changes ──────────────
   useEffect(() => {
@@ -491,15 +385,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       }));
     } catch {}
   }, [lineResults, paragraphSummaries, completedParagraphs, currentLineIndex, storageKey]);
-
-  const onDividerMouseDown = (e: React.MouseEvent) => {
-    isDraggingRef.current = true;
-    dragStartXRef.current = e.clientX;
-    dragStartWidthRef.current = rightPanelWidth;
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
-  };
 
   /* ---- keep streakRef in sync for use in STT callbacks ---- */
   useEffect(() => { streakRef.current = streak; }, [streak]);
@@ -520,9 +405,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /* ---- cleanup on unmount ---- */
   useEffect(() => {
     return () => {
-      isSessionActiveRef.current = false;
-      if (recognitionRef.current) {
-        try { recognitionRef.current.abort(); } catch (_) {}
+      stt.isSessionActiveRef.current = false;
+      if (stt.recognitionRef.current) {
+        try { stt.recognitionRef.current.abort(); } catch (_) {}
       }
       if (ttsRafRef.current !== null) {
         cancelAnimationFrame(ttsRafRef.current);
@@ -595,8 +480,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     if (!cleaned) return;
 
     // ── Phase 1: local eval (instant, <1ms) ─────────────────────────────────
-    // Prefer accumulated per-sentence results from isFinal events.
-    // Fall back to whole-paragraph local eval if no isFinal events captured.
     const sentResults = sentenceResultsRef.current.filter(Boolean) as LocalEvalResult[];
 
     let localTier: 1 | 2 | 3;
@@ -607,7 +490,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     const totalSentences = sentenceTargetsRef.current.length;
     if (sentResults.length > 0 && sentResults.length >= Math.ceil(totalSentences / 2)) {
-      // Compute overall from per-sentence results (only if majority captured)
       const allDiff = sentResults.flatMap(r => r.diffTokens);
       const correctAndForgiven = allDiff.filter(t => t.type === 'correct' || t.type === 'forgiven').length;
       const totalTarget = normalizeForComparison(targetText).length || 1;
@@ -618,7 +500,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       localFeedback = sentResults[sentResults.length - 1].feedback;
       localCpm = Math.round(sentResults.reduce((s, r) => s + r.cpm, 0) / sentResults.length);
     } else {
-      // Incomplete sentence results or no isFinal events — whole-paragraph local eval
       const localResult = localEvaluateParagraph(
         cleaned, targetText, durationMs,
         { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
@@ -666,14 +547,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setLineResults(allResults);
     setStreamingUserInput('');
 
-    // Count errors from diff tokens
     const wrongCount = localDiffTokens.filter(t => t.type === 'wrong').length;
     const missingCount = localDiffTokens.filter(t => t.type === 'missing').length;
 
-    // Stop recognition so the summary card is visible and action buttons work
     stopSession();
 
-    // Show local summary immediately (Gemini will update it)
     const summaryData: ParagraphSummaryData = {
       feedback: localTier <= 2 ? (localFeedback || '唸得不錯！') : (localFeedback || '再試一次，加油！'),
       matchRate: localMatchRate,
@@ -709,7 +587,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         if (geminiTimeoutRef.current === localTimeout) geminiTimeoutRef.current = null;
         if (geminiGenRef.current !== gen) return;
 
-        // Update summary with Gemini feedback
         const geminiWrong = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'wrong').length;
         const geminiMissing = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'missing').length;
         setParagraphSummaries(prev => ({ ...prev, [lineIdx]: {
@@ -722,7 +599,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         }}));
         setLastDiffTokens(gemini.diff_tokens);
 
-        // If Gemini upgrades to PASS, update the result
         if (gemini.tier <= 2 && localTier > 2) {
           setStreak(prev => prev + 1);
           setRetryCount(0);
@@ -738,7 +614,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         if (localTimeout !== null) clearTimeout(localTimeout);
         if (geminiTimeoutRef.current === localTimeout) geminiTimeoutRef.current = null;
         if (geminiGenRef.current !== gen) return;
-        // Gemini failed — local summary stands, just mark as done
         setParagraphSummaries(prev => {
           const existing = prev[lineIdx];
           return existing ? { ...prev, [lineIdx]: { ...existing, geminiPending: false } } : prev;
@@ -753,372 +628,14 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   // Sync refs so async callbacks (onend) always see latest values
   evaluateAndRespondRef.current = evaluateAndRespond;
-  currentLineIndexRef.current = currentLineIndex;
 
-  /* ================================================================ */
-  /*  Web Speech API — continuous session                              */
-  /*  – Recognition starts once and stays open across sentences        */
-  /*  – continuous = true  → never cuts off on pauses                  */
-  /*  – auto-reconnects on browser/API timeout                         */
-  /*  – user clicks 完成這段 to submit; recognition keeps running      */
-  /* ================================================================ */
-
-  const startSession = () => {
-    if (isSessionActiveRef.current) return;
-    // Null out TTS callbacks before cancel() so any async onend/onerror from
-    // the previous utterance cannot stomp on the STT cursor position.
-    if (utteranceRef.current) {
-      const cur = utteranceRef.current;
-      if (cur instanceof HTMLAudioElement) {
-        cur.onended = null;
-        cur.onerror = null;
-        cur.pause();
-      } else {
-        (cur as SpeechSynthesisUtterance).onstart = null;
-        (cur as SpeechSynthesisUtterance).onboundary = null;
-        (cur as SpeechSynthesisUtterance).onend = null;
-        (cur as SpeechSynthesisUtterance).onerror = null;
-      }
-      utteranceRef.current = null;
-    }
-    if (ttsRafRef.current !== null) {
-      cancelAnimationFrame(ttsRafRef.current);
-      ttsRafRef.current = null;
-    }
-    cancelTts();
-    setIsTtsSpeaking(false);
-    setIsTtsPaused(false);
-    setIsPreparing(true);
-    setMicError('');
-
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setMicError('您的瀏覽器不支援語音辨識，請使用 Chrome 瀏覽器。');
-      setIsPreparing(false);
-      return;
-    }
-
-    // Note: mic permission is pre-warmed on mount. If not yet granted,
-    // recognition.start() will trigger the browser permission dialog and
-    // onerror('not-allowed') handles denial.
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'cmn-Hant-TW';  // BCP 47: Mandarin, Traditional script, Taiwan
-    recognition.continuous = true;       // KEEP listening — never cut off on pauses
-    recognition.interimResults = true;
-
-    recognition.onstart = () => {
-      setIsPreparing(false);
-      if (!isSessionActiveRef.current) {
-        // First start — set accurate sentence timer & show "ready" signal
-        sentenceStartTimeRef.current = Date.now();
-        isSessionActiveRef.current = true;
-        setIsSessionActive(true);
-        setMessages(prev => [...prev, {
-          id: 'ready-' + Date.now(),
-          role: 'model' as const,
-          text: '準備好了，請開始朗讀！',
-          type: 'feedback' as const,
-        }]);
-      }
-      // On reconnects / submitSentence restarts, isSessionActiveRef is already true → no-op
-    };
-
-    recognition.onresult = (event: any) => {
-      // Build transcript from this recognition session's results
-      let sessionTranscript = '';
-      for (let i = 0; i < event.results.length; i++) {
-        sessionTranscript += event.results[i][0].transcript;
-      }
-      // Combine with transcript accumulated from previous sessions (auto-reconnects)
-      const fullTranscript = accumulatedTranscriptRef.current + sessionTranscript;
-      rawSttRef.current = fullTranscript;
-      currentTranscriptRef.current = fullTranscript;
-      setStreamingUserInput(cleanChineseText(fullTranscript));
-
-      // Real-time LCS diff overlay: compare full transcript against target
-      // Throttle: only recompute on isFinal events OR if 400ms has elapsed since last diff.
-      const isFinalEvent = event.results.length > 0 && event.results[event.results.length - 1].isFinal;
-      const now = Date.now();
-      const targetText = story.content[currentLineIndexRef.current] || '';
-      let overlayTokens: ReturnType<typeof buildRealtimeOverlay> | null = null;
-      if (isFinalEvent || now - lastDiffTimeRef.current >= 400) {
-        lastDiffTimeRef.current = now;
-        const rawDiff = diffCharacters(fullTranscript, targetText, { useHomophone: true });
-        overlayTokens = buildRealtimeOverlay(rawDiff.tokens);
-      }
-      // Highwater mark: once a char is correct/wrong/forgiven, never revert to unread.
-      // This prevents "jumping" when STT interim transcript fluctuates.
-      // Skip state updates when diff was throttled (overlayTokens === null).
-      if (overlayTokens !== null) {
-        const committedTokens = overlayTokens;
-        setRealtimeDiffTokens(prev => {
-          if (!prev) return committedTokens;
-          return committedTokens.map((t, i) => {
-            const old = prev[i];
-            if (!old) return t;
-            // If previously committed (correct/wrong/forgiven/missing), keep it
-            // unless new result is also committed (allows correction on re-read)
-            if (old.type !== 'unread' && t.type === 'unread') return old;
-            return t;
-          });
-        });
-        // Also update cursor for progress bar / other consumers
-        const readChars = committedTokens.filter(t => t.type !== 'unread').length;
-        setSpeakingProgress(prev => Math.max(prev, readChars));
-      }
-
-      // ── 分期付款: per-sentence local eval on isFinal events ────────────────
-      // Each isFinal chunk is mapped to the next un-evaluated sentence target.
-      // Result diffTokens are accumulated so the student sees progressive colors.
-      for (let i = lastFinalResultIdxRef.current + 1; i < event.results.length; i++) {
-        if (!event.results[i].isFinal) break; // non-final → stop (results are ordered)
-        lastFinalResultIdxRef.current = i;
-        const sentIdx = nextSentenceIdxRef.current;
-        const sentTargets = sentenceTargetsRef.current;
-        if (sentIdx >= sentTargets.length) continue; // extra speech after all sentences
-
-        const chunk = event.results[i][0].transcript;
-        const sentTarget = sentTargets[sentIdx];
-        const elapsed = Math.max(Date.now() - sentenceStartTimeRef.current, 500);
-        const localResult = localEvaluateParagraph(
-          chunk, sentTarget, elapsed,
-          { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
-          streakRef.current,
-        );
-        sentenceResultsRef.current[sentIdx] = localResult;
-        nextSentenceIdxRef.current = sentIdx + 1;
-        // Accumulate tokens for progressive display in the right panel
-        setLastDiffTokens(prev => prev ? [...prev, ...localResult.diffTokens] : localResult.diffTokens);
-      }
-    };
-
-    recognition.onerror = (event: any) => {
-      console.warn('[STT] onerror:', event.error, '| sessionActive:', isSessionActiveRef.current);
-      if (event.error === 'not-allowed') {
-        setMicError('請允許麥克風權限後再試一次。');
-        isSessionActiveRef.current = false;
-        setIsSessionActive(false);
-        setIsPreparing(false);
-      } else if (event.error === 'audio-capture') {
-        setMicError('找不到麥克風，請確認麥克風已連接後再試一次。');
-        isSessionActiveRef.current = false;
-        setIsSessionActive(false);
-        setIsPreparing(false);
-      }
-      // Other errors (no-speech, network, aborted) → onend will handle reconnect
-    };
-
-    recognition.onend = () => {
-      console.log('[STT] onend | sessionActive:', isSessionActiveRef.current, '| accumulated:', accumulatedTranscriptRef.current.slice(-20));
-      if (isSessionActiveRef.current) {
-        // Browser/API timed out — seamlessly reconnect.
-        // Chrome sometimes throws InvalidStateError if start() is called
-        // immediately inside onend (engine not fully cleaned up yet).
-        // A 150ms delay lets Chrome finish teardown before we restart.
-        accumulatedTranscriptRef.current = currentTranscriptRef.current;
-        lastFinalResultIdxRef.current = -1; // reset — reconnect resets event.results indices
-        setTimeout(() => {
-          if (!isSessionActiveRef.current) return; // user stopped during the delay
-          console.log('[STT] reconnecting… accumulated now:', accumulatedTranscriptRef.current.slice(-20));
-          try {
-            recognition.start();
-            console.log('[STT] reconnect start() OK');
-          } catch (err) {
-            console.error('[STT] reconnect start() FAILED — cursor will freeze!', err);
-          }
-        }, 150);
-      } else {
-        // Session fully ended
-        setIsSessionActive(false);
-        setIsPreparing(false);
-        recognitionRef.current = null;
-      }
-    };
-
-    recognitionRef.current = recognition;
-    currentTranscriptRef.current = '';
-    rawSttRef.current = '';
-    accumulatedTranscriptRef.current = '';
-    setStreamingUserInput('');
-    setSpeakingProgress(0);
-    setRealtimeDiffTokens(null);
-
-    recognition.start();
-    // Note: isSessionActive & sentenceStartTimeRef are set in onstart once STT is truly ready
-  };
-
-  /** Submit the current sentence for evaluation. Recognition keeps running. */
+  /* ---- submitSentence wrapper — calls stt.submitSentence then evaluates ---- */
   const submitSentence = useCallback(async () => {
-    const transcript = currentTranscriptRef.current;
-    const rawStt = rawSttRef.current;
-    const durationMs = Date.now() - sentenceStartTimeRef.current;
-
-    // Reset transcript for next sentence & restart recognition (near-instant)
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch (_) {}
-      currentTranscriptRef.current = '';
-      rawSttRef.current = '';
-      accumulatedTranscriptRef.current = '';
-      setStreamingUserInput('');
-      setLastDiffTokens(null);
-      sentenceStartTimeRef.current = Date.now();
-      // Immediately restart — onend will also try but catch silently
-      if (isSessionActiveRef.current) {
-        try { recognitionRef.current.start(); } catch (_) {}
-      }
-    }
-
+    const { transcript, rawStt, durationMs } = stt.submitSentence();
     if (transcript) {
-      await evaluateAndRespondRef.current(transcript, rawStt, durationMs, currentLineIndexRef.current);
+      await evaluateAndRespondRef.current(transcript, rawStt, durationMs, currentLineIndex);
     }
-  }, []);
-
-  /** Stop the entire session (for navigation / story switching / finishing). */
-  const stopSession = () => {
-    isSessionActiveRef.current = false;
-    setIsSessionActive(false);
-    setIsPreparing(false);
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch (_) {}
-      recognitionRef.current = null;
-    }
-    currentTranscriptRef.current = '';
-    rawSttRef.current = '';
-    accumulatedTranscriptRef.current = '';
-    setStreamingUserInput('');
-    setSpeakingProgress(0);
-    setRealtimeDiffTokens(null);
-  };
-
-  /** Use Cloud TTS Neural2 to read the current paragraph aloud.
-   *  Falls back to Web Speech API inside ttsApi if backend is unavailable.
-   *  Drives the cursor animation using time-based rAF (~4.2 chars/sec).
-   */
-  const speakCurrentParagraph = useCallback(() => {
-    const text = story.content[currentLineIndex];
-    if (!text) return;
-    cancelTts();
-    setIsTtsPaused(false);
-
-    const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
-
-    const stopTtsAnimation = () => {
-      if (ttsRafRef.current !== null) {
-        cancelAnimationFrame(ttsRafRef.current);
-        ttsRafRef.current = null;
-      }
-    };
-
-    const startCursorAnimation = () => {
-      setIsTtsSpeaking(true);
-      setSpeakingProgress(0);
-      setRealtimeDiffTokens(null);
-      ttsStartTimeRef.current = performance.now();
-      ttsTotalCharsRef.current = Array.from(text).length;
-      const MS_PER_CHAR = 240; // ~4.2 chars/sec — tuned for Neural2 zh-TW at rate 0.9
-      const animate = () => {
-        const elapsed = performance.now() - ttsStartTimeRef.current;
-        const pos = Math.min(Math.floor(elapsed / MS_PER_CHAR), ttsTotalCharsRef.current);
-        setSpeakingProgress(pos);
-        if (pos < ttsTotalCharsRef.current) {
-          ttsRafRef.current = requestAnimationFrame(animate);
-        }
-      };
-      ttsRafRef.current = requestAnimationFrame(animate);
-    };
-
-    const onSpeechEnd = () => {
-      stopTtsAnimation();
-      setIsTtsSpeaking(false);
-      setIsTtsPaused(false);
-    };
-
-    // Try Cloud TTS first via <audio> element for better control
-    fetch(`${API_BASE}/api/tts/synthesize`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`TTS ${res.status}`);
-        return res.blob();
-      })
-      .then((blob) => {
-        if (blob.size === 0) throw new Error('Empty TTS audio');
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
-        audio.onplay = startCursorAnimation;
-        audio.onended = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
-        audio.onerror = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
-        return audio.play();
-      })
-      .catch(() => {
-        // Fallback: Web Speech API
-        if (!window.speechSynthesis) { onSpeechEnd(); return; }
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utteranceRef.current = utterance;
-        utterance.lang = 'zh-TW';
-        utterance.rate = 1.0;
-        const voices = window.speechSynthesis.getVoices();
-        const preferred =
-          voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-          voices.find(v => v.lang === 'zh-TW') ||
-          voices.find(v => v.lang.startsWith('zh'));
-        if (preferred) utterance.voice = preferred;
-        utterance.onstart = startCursorAnimation;
-        utterance.onboundary = (e) => { setSpeakingProgress(e.charIndex); };
-        utterance.onend = onSpeechEnd;
-        utterance.onerror = onSpeechEnd;
-
-        const doSpeak = () => window.speechSynthesis.speak(utterance);
-        if (window.speechSynthesis.getVoices().length === 0) {
-          window.speechSynthesis.onvoiceschanged = () => {
-            window.speechSynthesis.onvoiceschanged = null;
-            doSpeak();
-          };
-        } else {
-          doSpeak();
-        }
-      });
-  }, [story.content, currentLineIndex]);
-
-  const pauseTts = () => {
-    // Pause <audio> element if playing via Cloud TTS
-    const ua = utteranceRef.current;
-    if (ua && ua instanceof HTMLAudioElement) {
-      ua.pause();
-    } else {
-      window.speechSynthesis?.pause();
-    }
-    setIsTtsPaused(true);
-  };
-  const resumeTts = () => {
-    const ua = utteranceRef.current;
-    if (ua && ua instanceof HTMLAudioElement) {
-      ua.play().catch(() => {});
-    } else {
-      window.speechSynthesis?.resume();
-    }
-    setIsTtsPaused(false);
-  };
-  const stopTts = () => {
-    if (ttsRafRef.current !== null) {
-      cancelAnimationFrame(ttsRafRef.current);
-      ttsRafRef.current = null;
-    }
-    const ua = utteranceRef.current;
-    if (ua && ua instanceof HTMLAudioElement) {
-      ua.pause();
-      ua.currentTime = 0;
-    }
-    cancelTts();
-    setIsTtsSpeaking(false);
-    setIsTtsPaused(false);
-  };
+  }, [currentLineIndex]);
 
   /* ================================================================ */
   /*  Finish / manual nav                                             */
@@ -1126,7 +643,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const handleFinish = () => {
     stopSession();
-    // Clear localStorage — progress is complete, will be sent to backend
     try { localStorage.removeItem(storageKey); } catch {}
     const avgMatchRate =
       lineResults.length > 0
@@ -1154,7 +670,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   // Compute diff tokens for the right panel (current paragraph only, shown after eval)
   const rightPanelDiffTokens: DiffToken[] | null = (() => {
     if (lastDiffTokens && lastDiffTokens.length > 0) return lastDiffTokens;
-    // After refresh: fall back to last saved result for current paragraph
     for (let i = lineResults.length - 1; i >= 0; i--) {
       if (lineResults[i].lineIndex === currentLineIndex && lineResults[i].diffTokens?.length > 0) {
         return lineResults[i].diffTokens;
@@ -1187,7 +702,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           statuses={lineStatuses}
           currentIndex={currentLineIndex}
           onSelectParagraph={(idx) => {
-            // Only allow navigating to completed or current paragraphs (not locked)
             if (lineStatuses[idx] === 'locked') return;
             stopSession();
             setRetryCount(0);
@@ -1258,12 +772,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                               cancelTts();
                               setIsTtsSpeaking(false); setIsTtsPaused(false);
                             } else {
-                              // Speak this paragraph's text via speakCurrentParagraph
-                              // (navigating to that line first if needed)
                               if (idx === currentLineIndex) {
                                 speakCurrentParagraph();
                               } else {
-                                // Brief inline fallback for non-current paragraphs (demo mode)
                                 const text = story.content[idx];
                                 if (text) {
                                   cancelTts();
@@ -1275,9 +786,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                               }
                             }
                           }}
-                          disabled={idx === currentLineIndex && (isSessionActive || isPreparing)}
+                          disabled={idx === currentLineIndex && (stt.isSessionActive || stt.isPreparing)}
                           className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all ${
-                            idx === currentLineIndex && (isSessionActive || isPreparing)
+                            idx === currentLineIndex && (stt.isSessionActive || stt.isPreparing)
                               ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                               : isTtsSpeaking && idx === currentLineIndex
                                 ? 'bg-red-100 hover:bg-red-200 text-red-600'
@@ -1293,13 +804,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                         </button>
                         {/* Start / Submit / Retry — context-dependent */}
                         {idx === currentLineIndex ? (
-                          // Current paragraph: show session controls
-                          isPreparing ? (
+                          stt.isPreparing ? (
                             <button disabled className="px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-400 cursor-wait flex items-center gap-1.5">
                               <div className="w-2.5 h-2.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
                               準備中...
                             </button>
-                          ) : isSessionActive ? (
+                          ) : stt.isSessionActive ? (
                             <button
                               onClick={submitSentence}
                               disabled={isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
@@ -1322,7 +832,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                             </button>
                           ) : null
                         ) : (
-                          // Non-current paragraph: show "開始朗讀" to switch + start
                           <button
                             onClick={() => {
                               stopSession(); setRetryCount(0); setCurrentLineIndex(idx);
@@ -1337,8 +846,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     )}
                   </div>
 
-                  {/* Paragraph text — STATIC: text and colors never change during reading.
-                      Only show plain text at all times. Background highlight is on the container above. */}
+                  {/* Paragraph text */}
                   <p
                     className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
                       status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
@@ -1353,7 +861,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   </p>
 
                   {/* Bottom-of-paragraph controls — complete + stop (visible while recording this paragraph) */}
-                  {idx === currentLineIndex && isSessionActive && (
+                  {idx === currentLineIndex && stt.isSessionActive && (
                     <div className="mt-4 flex items-center justify-end gap-2">
                       <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
                       <span className="text-xs text-green-600 font-medium mr-auto">聆聽中</span>
@@ -1378,7 +886,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     </div>
                   )}
 
-                  {/* Inline summary card — persists below each evaluated paragraph (actions only, no diff) */}
+                  {/* Inline summary card */}
                   {(() => {
                     const summary = paragraphSummaries[idx];
                     if (!summary) return null;
@@ -1409,7 +917,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                               setParagraphSummaries(prev => { const next = { ...prev }; delete next[idx]; return next; });
                               setRealtimeDiffTokens(null);
                               setLastDiffTokens(null);
-                              // startSession after state settles — use setTimeout for non-current paragraphs
                               if (idx === currentLineIndex) { startSession(); }
                               else { setTimeout(() => startSession(), 100); }
                             }}
@@ -1417,14 +924,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                           >
                             重練這段
                           </button>
-                          {/* 下一段 — show when not yet advanced, OR when revisiting a completed paragraph */}
                           {idx < story.content.length - 1 && (
                             <button
                               onClick={() => {
                                 if (!completedParagraphs.has(idx)) {
                                   advanceParagraph(idx, lineResults);
                                 } else {
-                                  // Already completed — just move to next paragraph
                                   setCurrentLineIndex(idx + 1);
                                 }
                               }}
@@ -1479,12 +984,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {!isMobile && (
         <div
           onMouseDown={onDividerMouseDown}
-          onTouchStart={(e) => {
-            isDraggingRef.current = true;
-            dragStartXRef.current = e.touches[0].clientX;
-            dragStartWidthRef.current = rightPanelWidth;
-            document.body.style.userSelect = 'none';
-          }}
+          onTouchStart={onDividerTouchStart}
           className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
         />
       )}
@@ -1498,8 +998,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-2">
           <span className="text-xs font-black text-accent-light uppercase tracking-widest">朗讀回饋</span>
           <div className="flex-1" />
-          <span className={`text-xs font-bold ${isSessionActive ? 'text-green-500' : isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
-            {isSessionActive ? '● 聆聽中' : isPreparing ? '● 準備中' : '● 待機'}
+          <span className={`text-xs font-bold ${stt.isSessionActive ? 'text-green-500' : stt.isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
+            {stt.isSessionActive ? '● 聆聽中' : stt.isPreparing ? '● 準備中' : '● 待機'}
           </span>
         </div>
 
@@ -1519,7 +1019,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           </div>
 
           {/* Live transcript — shown while recording */}
-          {isSessionActive && (
+          {stt.isSessionActive && (
             <div className="space-y-1">
               <p className="text-xs font-bold text-accent-light uppercase tracking-widest animate-pulse">即時辨識</p>
               <div className="bg-accent/10 border border-accent/20 rounded-xl px-3 py-2.5 text-sm text-gray-800 leading-relaxed min-h-[2.5rem]">
@@ -1529,7 +1029,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           )}
 
           {/* Diff result — shown after evaluation completes for current paragraph */}
-          {!isSessionActive && rightPanelDiffTokens && (
+          {!stt.isSessionActive && rightPanelDiffTokens && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">逐字比對</p>
@@ -1544,7 +1044,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           )}
 
           {/* Idle state — no recording yet */}
-          {!isSessionActive && !rightPanelDiffTokens && !paragraphSummary && (
+          {!stt.isSessionActive && !rightPanelDiffTokens && !paragraphSummary && (
             <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
               <p className="text-sm text-gray-500 leading-relaxed">
                 按左側「開始朗讀」後，回饋結果會顯示在這裡
