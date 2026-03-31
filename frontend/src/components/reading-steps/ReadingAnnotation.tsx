@@ -78,9 +78,6 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     }
   });
 
-  // Active mark tool
-  const [activeTool, setActiveTool] = useState<AnnotationType>('unknown');
-
   // Floating toolbar state
   const [toolbar, setToolbar] = useState<{
     visible: boolean;
@@ -154,17 +151,28 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     const paraEl = startEl; // same element
 
     // Compute char offsets relative to the original paragraph text.
-    // Uses the selected text to find its position in the raw paragraph string,
-    // avoiding DOM text node offset issues caused by annotation spans.
+    // Walk text nodes with a TreeWalker to get the actual character offset from
+    // the Range, so duplicate text in the same paragraph is handled correctly.
     const selectedText = range.toString();
     if (!selectedText.trim()) return null;
 
-    const rawParagraph = story.content[paragraphIndex];
-    const selStart = rawParagraph.indexOf(selectedText);
-    if (selStart < 0) return null; // selected text not found in paragraph
+    // Walk all text nodes inside the paragraph to find where range.startContainer
+    // sits and accumulate the character offset up to range.startOffset.
+    let charStart = 0;
+    let found = false;
+    const walker = document.createTreeWalker(paraEl, NodeFilter.SHOW_TEXT);
+    let node: Text | null;
+    while ((node = walker.nextNode() as Text | null)) {
+      if (node === range.startContainer) {
+        charStart += range.startOffset;
+        found = true;
+        break;
+      }
+      charStart += node.textContent?.length ?? 0;
+    }
+    if (!found) return null;
 
-    const charStart = selStart;
-    const charEnd = selStart + selectedText.length;
+    const charEnd = charStart + selectedText.length;
 
     if (charStart >= charEnd) return null;
 
@@ -372,28 +380,6 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         <span className="text-xs text-amber-700 font-bold">閱讀標記</span>
 
         <div className="flex-1" />
-
-        {/* Tool selector */}
-        <div className="flex items-center gap-2" role="group" aria-label="標記類型">
-          {(Object.entries(TYPE_CONFIG) as Array<[AnnotationType, typeof TYPE_CONFIG[AnnotationType]]>).map(
-            ([type, cfg]) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setActiveTool(type)}
-                aria-pressed={activeTool === type}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold border transition-all ${
-                  activeTool === type
-                    ? `${cfg.activeClass} border-current`
-                    : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <span aria-hidden="true">{cfg.icon}</span>
-                {cfg.label}
-              </button>
-            )
-          )}
-        </div>
 
         {/* Undo */}
         <button

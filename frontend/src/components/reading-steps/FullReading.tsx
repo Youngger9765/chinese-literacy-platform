@@ -305,7 +305,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           <span>共 {story.content.length} 段 · {story.title}</span>
           <div className="flex-1" />
           <span className={isSessionActive ? 'text-green-500 font-bold' : isPreparing ? 'text-yellow-500 font-bold' : 'text-gray-300'}>
-            {isSessionActive ? '• LISTENING' : isPreparing ? '• PREPARING' : '• IDLE'}
+            {isSessionActive ? '• 聆聽中' : isPreparing ? '• 準備中' : '• 待命'}
           </span>
         </div>
       </div>
@@ -355,7 +355,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {/* Live transcript */}
           {isSessionActive && streamingTranscript && (
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-accent-light uppercase animate-pulse">LISTENING...</span>
+              <span className="text-xs font-bold text-accent-light uppercase animate-pulse">聆聽中...</span>
               <div className="bg-accent/20 border border-accent/30 rounded-xl px-3 py-2.5 text-base text-gray-800 leading-relaxed">
                 {streamingTranscript}
               </div>
@@ -364,7 +364,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
           {isSessionActive && !streamingTranscript && (
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-green-500 uppercase animate-pulse">LISTENING</span>
+              <span className="text-xs font-bold text-green-500 uppercase animate-pulse">聆聽中</span>
               <div className="bg-green-900/20 border border-green-700/30 rounded-xl px-3 py-2.5 text-base text-gray-600 leading-relaxed">
                 請朗讀左側課文，從頭到尾…
               </div>

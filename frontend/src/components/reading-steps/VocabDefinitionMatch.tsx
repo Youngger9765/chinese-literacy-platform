@@ -14,6 +14,7 @@
  */
 import React, {
   useCallback,
+  useEffect,
   useRef,
   useState,
   useMemo,
@@ -231,6 +232,17 @@ function SummaryScreen({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Per-tab completion tracking (Issue #827)                            */
+/* ------------------------------------------------------------------ */
+
+interface TabCompletion {
+  mcDone: boolean;        // Completed multiple-choice mode
+  dragDropDone: boolean;  // Completed drag-drop mode
+}
+
+const DEFAULT_TAB_COMPLETION: TabCompletion = { mcDone: false, dragDropDone: false };
+
+/* ------------------------------------------------------------------ */
 /*  Mode Switcher                                                       */
 /* ------------------------------------------------------------------ */
 
@@ -242,10 +254,15 @@ const MODE_LABELS: { id: InteractionMode; label: string; icon: string }[] = [
 function ModeSwitcher({
   current,
   onChange,
+  tabCompletion,
 }: {
   current: InteractionMode;
   onChange: (m: InteractionMode) => void;
+  tabCompletion: TabCompletion;
 }) {
+  const isDone = (id: InteractionMode) =>
+    id === 'multiple-choice' ? tabCompletion.mcDone : tabCompletion.dragDropDone;
+
   return (
     <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 max-w-sm mx-auto">
       {MODE_LABELS.map(({ id, label, icon }) => (
@@ -260,6 +277,9 @@ function ModeSwitcher({
         >
           <span>{icon}</span>
           <span>{label}</span>
+          {isDone(id) && (
+            <span className="text-emerald-500 text-xs leading-none">✓</span>
+          )}
         </button>
       ))}
     </div>
@@ -628,6 +648,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   onFinish,
 }) => {
   const storageModeKey = `vocabDef_mode_${story.id}`;
+  const completionKey = `vocabDef_completion_${story.id}`;
   const vocab: VocabItem[] = story.vocabulary ?? [];
   const hasData = vocab.length > 0;
 
@@ -643,6 +664,15 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
 
   const [phase, setPhase] = useState<Phase>('matching');
 
+  // Per-tab completion state (#827)
+  const [tabCompletion, setTabCompletion] = useState<TabCompletion>(() => {
+    try {
+      const raw = localStorage.getItem(completionKey);
+      if (!raw) return DEFAULT_TAB_COMPLETION;
+      return { ...DEFAULT_TAB_COMPLETION, ...JSON.parse(raw) };
+    } catch { return DEFAULT_TAB_COMPLETION; }
+  });
+
   // Which defIndices are active in the current round
   const [activeDefIndices, setActiveDefIndices] = useState<number[]>(() =>
     vocab.map((_, i) => i),
@@ -656,6 +686,13 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
 
   // Increment to force-remount the active mode on mode change or retry
   const [modeKey, setModeKey] = useState(0);
+
+  // Persist per-tab completion to localStorage (#827)
+  useEffect(() => {
+    try {
+      localStorage.setItem(completionKey, JSON.stringify(tabCompletion));
+    } catch {}
+  }, [tabCompletion, completionKey]);
 
   const handleModeChange = (m: InteractionMode) => {
     setMode(m);
@@ -671,7 +708,12 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   const handleAllDone = useCallback((answers: AnswerRecord[]) => {
     setSummaryAnswers(answers);
     setPhase('summary');
-  }, []);
+    // Mark current mode as completed (#827)
+    setTabCompletion(prev => ({
+      ...prev,
+      ...(mode === 'multiple-choice' ? { mcDone: true } : { dragDropDone: true }),
+    }));
+  }, [mode]);
 
   const handleRetryWrong = useCallback(() => {
     const wrongIndices = summaryAnswers
@@ -681,7 +723,12 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     shuffledWords.current = shuffle(wrongIndices);
     setPhase('matching');
     setModeKey((k) => k + 1);
-  }, [summaryAnswers]);
+    // Clear completion for current mode on explicit redo (#827)
+    setTabCompletion(prev => ({
+      ...prev,
+      ...(mode === 'multiple-choice' ? { mcDone: false } : { dragDropDone: false }),
+    }));
+  }, [summaryAnswers, mode]);
 
   const handleRetryAll = useCallback(() => {
     const allIndices = vocab.map((_, i) => i);
@@ -689,7 +736,12 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     shuffledWords.current = shuffle(allIndices);
     setPhase('matching');
     setModeKey((k) => k + 1);
-  }, [vocab]);
+    // Clear completion for current mode on explicit redo (#827)
+    setTabCompletion(prev => ({
+      ...prev,
+      ...(mode === 'multiple-choice' ? { mcDone: false } : { dragDropDone: false }),
+    }));
+  }, [vocab, mode]);
 
   const handleFinish = useCallback(() => {
     // Keep completion record — only clear on explicit redo
@@ -722,7 +774,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
           />
         ) : (
           <>
-            <ModeSwitcher current={mode} onChange={handleModeChange} />
+            <ModeSwitcher current={mode} onChange={handleModeChange} tabCompletion={tabCompletion} />
 
             {mode === 'multiple-choice' && (
               <MultipleChoiceMode
