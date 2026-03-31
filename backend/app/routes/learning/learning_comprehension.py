@@ -45,6 +45,7 @@ class ComprehensionResponse(BaseModel):
 async def get_comprehension_question(
     payload: ComprehensionRequest,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """
     Generate the next Socratic question for a reading comprehension session.
@@ -77,7 +78,7 @@ async def get_comprehension_question(
     # Track AI usage (Issue #874)
     usage = last_usage.get()
     log_ai_usage(
-        None,  # no db session in this endpoint
+        db,
         endpoint="/comprehension/question",
         step="comprehension_question",
         student_id=current_user.id,
@@ -92,6 +93,7 @@ async def get_comprehension_question(
         prompt_char_count=usage.prompt_char_count if usage else None,
         response_char_count=usage.response_char_count if usage else None,
         content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="comprehension_question",
     )
 
     # Count how many AI turns have been in the conversation (including this new one)
@@ -299,6 +301,7 @@ async def comprehension_chat(
             prompt_char_count=usage.prompt_char_count if usage else None,
             response_char_count=usage.response_char_count if usage else None,
             content_filtered=usage.content_filtered if usage else False,
+            prompt_template_id="comprehension_chat",
         )
 
     return ComprehensionChatResponse(

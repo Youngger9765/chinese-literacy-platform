@@ -212,6 +212,7 @@ async def get_ai_analysis(
         prompt_char_count=usage.prompt_char_count if usage else None,
         response_char_count=usage.response_char_count if usage else None,
         content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="reading_ai_analysis",
     )
 
     # Cache the result (versioned + enrichment fingerprint — #540)
@@ -230,6 +231,7 @@ async def get_ai_analysis(
 async def get_ai_analysis_standalone(
     payload: AIAnalysisRequest,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Generate AI reading diagnosis without requiring a backend session.
 
@@ -280,7 +282,7 @@ async def get_ai_analysis_standalone(
     latency_ms = int((time.monotonic() - start_time) * 1000)
     usage = last_usage.get()
     log_ai_usage(
-        None,
+        db,
         endpoint="/learning/ai-analysis",
         step="analysis",
         student_id=current_user.id,
@@ -295,6 +297,7 @@ async def get_ai_analysis_standalone(
         prompt_char_count=usage.prompt_char_count if usage else None,
         response_char_count=usage.response_char_count if usage else None,
         content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="reading_ai_analysis",
     )
 
     logger.info("Generated standalone AI analysis for user %d", current_user.id)
@@ -356,6 +359,7 @@ class ReadingEvaluateResponse(BaseModel):
 async def evaluate_reading_endpoint(
     payload: ReadingEvaluateRequest,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Stateless AI reading evaluation. Rate limited: 10 requests per minute."""
     logger.info(
@@ -382,7 +386,7 @@ async def evaluate_reading_endpoint(
     if result.get("evaluation_method") == "ai":
         usage = last_usage.get()
         log_ai_usage(
-            None,
+            db,
             endpoint="/reading/evaluate",
             step="reading",
             student_id=current_user.id,
@@ -395,6 +399,7 @@ async def evaluate_reading_endpoint(
             prompt_char_count=usage.prompt_char_count if usage else None,
             response_char_count=usage.response_char_count if usage else None,
             content_filtered=usage.content_filtered if usage else False,
+            prompt_template_id="reading_evaluate",
         )
 
     return ReadingEvaluateResponse(

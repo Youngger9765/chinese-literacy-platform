@@ -154,6 +154,7 @@ def get_story(story_id: str):
 async def get_story_structure(
     story_id: str,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Generate AI story structure table (⑤ 文章重點表) for a lesson.
 
@@ -205,5 +206,6 @@ async def get_story_structure(
         response_char_count=usage.response_char_count if usage else None,
         content_filtered=usage.content_filtered if usage else False,
         cache_hit=False,
+        prompt_template_id="story_structure",
     )
     return result
