@@ -397,6 +397,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const rawSttRef = useRef('');               // raw STT output for logging
   const accumulatedTranscriptRef = useRef(''); // transcript preserved across auto-reconnects
   const currentLineIndexRef = useRef(0);      // mirrors currentLineIndex for async callbacks
+  const lastDiffTimeRef = useRef(0);          // throttle STT diff computation to max 400ms
   const evaluateAndRespondRef = useRef<any>(null);
 
   /* ---- scroll helpers ---- */
@@ -837,25 +838,36 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       setStreamingUserInput(cleanChineseText(fullTranscript));
 
       // Real-time LCS diff overlay: compare full transcript against target
+      // Throttle: only recompute on isFinal events OR if 400ms has elapsed since last diff.
+      const isFinalEvent = event.results.length > 0 && event.results[event.results.length - 1].isFinal;
+      const now = Date.now();
       const targetText = story.content[currentLineIndexRef.current] || '';
-      const rawDiff = diffCharacters(fullTranscript, targetText, { useHomophone: true });
-      const overlayTokens = buildRealtimeOverlay(rawDiff.tokens);
+      let overlayTokens: ReturnType<typeof buildRealtimeOverlay> | null = null;
+      if (isFinalEvent || now - lastDiffTimeRef.current >= 400) {
+        lastDiffTimeRef.current = now;
+        const rawDiff = diffCharacters(fullTranscript, targetText, { useHomophone: true });
+        overlayTokens = buildRealtimeOverlay(rawDiff.tokens);
+      }
       // Highwater mark: once a char is correct/wrong/forgiven, never revert to unread.
       // This prevents "jumping" when STT interim transcript fluctuates.
-      setRealtimeDiffTokens(prev => {
-        if (!prev) return overlayTokens;
-        return overlayTokens.map((t, i) => {
-          const old = prev[i];
-          if (!old) return t;
-          // If previously committed (correct/wrong/forgiven/missing), keep it
-          // unless new result is also committed (allows correction on re-read)
-          if (old.type !== 'unread' && t.type === 'unread') return old;
-          return t;
+      // Skip state updates when diff was throttled (overlayTokens === null).
+      if (overlayTokens !== null) {
+        const committedTokens = overlayTokens;
+        setRealtimeDiffTokens(prev => {
+          if (!prev) return committedTokens;
+          return committedTokens.map((t, i) => {
+            const old = prev[i];
+            if (!old) return t;
+            // If previously committed (correct/wrong/forgiven/missing), keep it
+            // unless new result is also committed (allows correction on re-read)
+            if (old.type !== 'unread' && t.type === 'unread') return old;
+            return t;
+          });
         });
-      });
-      // Also update cursor for progress bar / other consumers
-      const readChars = overlayTokens.filter(t => t.type !== 'unread').length;
-      setSpeakingProgress(prev => Math.max(prev, readChars));
+        // Also update cursor for progress bar / other consumers
+        const readChars = committedTokens.filter(t => t.type !== 'unread').length;
+        setSpeakingProgress(prev => Math.max(prev, readChars));
+      }
 
       // ── 分期付款: per-sentence local eval on isFinal events ────────────────
       // Each isFinal chunk is mapped to the next un-evaluated sentence target.
@@ -1039,8 +1051,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         const audio = new Audio(url);
         utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
         audio.onplay = startCursorAnimation;
-        audio.onended = onSpeechEnd;
-        audio.onerror = onSpeechEnd;
+        audio.onended = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
+        audio.onerror = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
         return audio.play();
       })
       .catch(() => {
