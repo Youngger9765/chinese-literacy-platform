@@ -1019,17 +1019,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       ) : (
         /* DESKTOP: dual-panel for AI chat; full-width for structure table / MCQ */
         <>
-          {/* Prominent centered tab bar — always visible on desktop for structure/mcq,
-              and as an overlay tab bar in right panel for chat view */}
-          {(activeTab === 'structure' || activeTab === 'mcq') && (
-            <div className="absolute top-0 left-0 right-0 z-10">
-              {renderProminentTabBar(false)}
-            </div>
-          )}
+          {/* Prominent centered tab bar — always visible on desktop, sticky at top */}
+          <div className="shrink-0 z-10">
+            {renderProminentTabBar(false)}
+          </div>
 
           {activeTab === 'structure' ? (
             /* FULL-WIDTH: 文章重點表 */
-            <div className="flex-1 flex flex-col min-h-0 pt-12">
+            <div className="flex-1 flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 custom-scrollbar">
                 <div className="max-w-5xl mx-auto">
                   <StoryStructureTable storyId={story.id} />
@@ -1048,7 +1045,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             </div>
           ) : activeTab === 'mcq' && hasMcq ? (
             /* FULL-WIDTH: 選擇題 */
-            <div className="flex-1 flex flex-col min-h-0 pt-12">
+            <div className="flex-1 flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto bg-gray-50 custom-scrollbar">
                 <div className="max-w-3xl mx-auto py-6 px-4 lg:px-0">
                   {tabCompletion.mcqDone ? (
@@ -1121,48 +1118,15 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
               {/* RIGHT: Chat panel */}
               <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
-                {/* Prominent pill tab bar inside right panel (#844) */}
-                <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-1 px-3 py-2">
-                  <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
-                    <button
-                      onClick={() => handleTabChange('chat')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold bg-white text-accent shadow-sm transition-all"
-                    >
-                      AI 對話
-                      {tabCompletion.chatDone && (
-                        <span className="text-emerald-500 text-xs leading-none">✓</span>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => handleTabChange('structure')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
-                    >
-                      重點表
-                      {tabCompletion.structureVisited && (
-                        <span className="text-emerald-500 text-xs leading-none">✓</span>
-                      )}
-                    </button>
-                    {hasMcq && (
-                      <button
-                        onClick={() => handleTabChange('mcq')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
-                      >
-                        選擇題
-                        {tabCompletion.mcqDone && (
-                          <span className="text-emerald-500 text-xs leading-none">✓</span>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                  <div className="ml-1 flex items-center gap-2">
-                    <span className="text-[10px] text-gray-500">{understoodCount}/{requiredCount}</span>
-                    <button
-                      onClick={handleFinish}
-                      className="text-[10px] text-gray-500 hover:text-gray-400 transition-colors"
-                    >
-                      跳過
-                    </button>
-                  </div>
+                {/* Progress + skip bar */}
+                <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-2 px-3 py-1.5">
+                  <span className="text-xs text-gray-500">AI 對話 {understoodCount}/{requiredCount}</span>
+                  <button
+                    onClick={handleFinish}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    跳過
+                  </button>
                 </div>
 
                 {/* Chat messages */}
