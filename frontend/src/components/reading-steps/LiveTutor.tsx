@@ -518,11 +518,18 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       localStorage.setItem(storageKey, JSON.stringify({
         lineResults,
         paragraphSummaries: Object.fromEntries(
-            Object.entries(paragraphSummaries).map(([k, v]) => [
-              k,
-              { ...(v as ParagraphSummaryData), geminiPending: false },
-            ])
-          ) as Record<number, ParagraphSummaryData>,
+          Object.entries(paragraphSummaries).map(([k, v]) => {
+            const summary = v as ParagraphSummaryData;
+            return [k, {
+              feedback: summary.feedback,
+              matchRate: summary.matchRate,
+              wrongCount: summary.wrongCount,
+              missingCount: summary.missingCount,
+              tier: summary.tier,
+              geminiPending: false,
+            }];
+          })
+        ),
         completedParagraphs: Array.from(completedParagraphs),
         currentLineIndex,
       }));
@@ -1162,7 +1169,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {/* LEFT: Story text panel — completely static, no dynamic text changes */}
       <div className="flex flex-col bg-amber-50 flex-1 min-h-0 overflow-hidden">
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2">
-          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-x border-t-accent border-x-gray-200 text-xs text-gray-800 gap-2">
+          <div className="h-full px-4 flex items-center bg-amber-50 border-x border-gray-200 border-t-2 border-t-accent text-xs text-gray-800 gap-2">
             {processZhuyin(story.filename)}
           </div>
           <div className="flex-1" />
@@ -1498,281 +1505,198 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <span className="text-[10px] text-gray-400 tabular-nums">
                 {completedParagraphs.size} / {story.content.length} 段
               </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-green-900/30 text-green-200 border border-green-700/30 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin(`請閱讀左側文章的第${currentLineIndex + 1}段：${story.content[currentLineIndex].slice(0, 5)}...`)}
-              </div>
             </div>
-            </div>
-
-          {streamingUserInput && (
-            <div className="flex flex-col items-end">
-              <span className="text-[9px] font-bold text-accent mb-0.5 uppercase animate-pulse">
-                LISTENING...
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-accent/60 text-gray-800 rounded-tr-none max-w-[90%] border border-accent/30 leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin(streamingUserInput)}
-              </div>
-            </div>
-          )}
-
-          {lastDiffTokens && !isAdvancing && !streamingUserInput && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-gray-400 mb-0.5 uppercase">
-                DIFF
-              </span>
-              <div className="px-4 py-3 rounded-2xl bg-white border border-gray-200 rounded-tl-none max-w-[95%]">
-                <DiffDisplay tokens={lastDiffTokens} showLegend className="text-base" />
-              </div>
-            </div>
-          )}
-
-          {isAnalyzing && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-blue-500 mb-0.5 uppercase animate-pulse">
-                ANALYZING...
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-blue-50 text-blue-700 border border-blue-200 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin('正在分析朗讀內容，請稍候...')}
-              </div>
-            </div>
-          )}
-
-          {isAdvancing && (
-            <div className="flex flex-col items-start">
-              <span className="text-[9px] font-bold text-accent mb-0.5 uppercase animate-pulse">
-                NEXT...
-              </span>
-              <div className={`px-4 py-3 rounded-2xl text-lg bg-gray-100 text-accent-light border border-accent-hover/30 rounded-tl-none leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-                {processZhuyin('正在前往下一段...')}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Controls */}
-        <div className="flex-shrink-0 p-3 bg-white border-t border-gray-200 space-y-2">
-          <div className={`min-h-[3rem] p-2 rounded-lg bg-black/40 border border-gray-200 text-base text-accent-light overflow-hidden leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
-            {streamingUserInput ? processZhuyin(streamingUserInput) : (
-              <span className="text-gray-800 italic">
-                {processZhuyin(isAnalyzing ? '正在分析朗讀...' : isPreparing ? '正在準備語音辨識...' : isSessionActive ? '正在聆聽您的朗讀...' : '點擊「開始朗讀」開始')}
-              </span>
-            )}
-          </div>
-
-          {micError && <div className="text-[10px] text-rose-400 px-1">{micError}</div>}
-
-          <div className="flex gap-2">
-            {isPreparing ? (
-              <>
-                {/* 系統朗讀 disabled while mic is initializing */}
-                <button
-                  disabled
-                  aria-label="系統朗讀（準備中，暫不可用）"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                  </svg>
-                  {processZhuyin('系統朗讀')}
-                </button>
-                <button
-                  disabled
-                  aria-label="正在準備語音辨識"
-                  aria-busy="true"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-300 text-gray-600 cursor-wait"
-                >
-                  <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                  {processZhuyin('準備中...')}
-                </button>
-              </>
-            ) : isSessionActive ? (
-              <button
-                onClick={submitSentence}
-                disabled={isAdvancing || isAnalyzing || !streamingUserInput}
-                aria-label={isAdvancing ? '請稍候，正在處理' : '完成這段朗讀'}
-                className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
-                  isAdvancing || isAnalyzing || !streamingUserInput
-                    ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                {processZhuyin(isAnalyzing ? '分析中...' : isAdvancing ? '請稍候...' : '完成這段')}
-              </button>
-            ) : isTtsSpeaking ? (
-              <>
-                {/* 暫停 / 繼續 */}
-                <button
-                  onClick={isTtsPaused ? resumeTts : pauseTts}
-                  aria-label={isTtsPaused ? '繼續系統朗讀' : '暫停系統朗讀'}
-                  className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 ${
-                    isTtsPaused
-                      ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
-                      : 'bg-amber-700 hover:bg-amber-600 text-white'
-                  }`}
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    {isTtsPaused
-                      ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 9v6m4-6v6" />
+            <div className="divide-y divide-gray-50">
+              {story.content.map((_, idx) => {
+                const status = lineStatuses[idx];
+                const summary = paragraphSummaries[idx];
+                // Get the best diff tokens for this paragraph from lineResults
+                const paraResult = (() => {
+                  for (let i = lineResults.length - 1; i >= 0; i--) {
+                    if (lineResults[i].lineIndex === idx && lineResults[i].diffTokens?.length > 0) {
+                      return lineResults[i];
                     }
-                  </svg>
-                  {processZhuyin(isTtsPaused ? '繼續' : '暫停')}
-                </button>
-                {/* 停止 */}
-                <button
-                  onClick={stopTts}
-                  aria-label="停止系統朗讀"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
-                  </svg>
-                  {processZhuyin('停止')}
-                </button>
-              </>
-            ) : (
-              <>
-                {/* 系統朗讀 */}
-                <button
-                  onClick={speakCurrentParagraph}
-                  aria-label="播放這段的系統示範朗讀"
-                  className="flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all shadow active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                  </svg>
-                  {processZhuyin('系統朗讀')}
-                </button>
-                {/* 開始朗讀 */}
-                <button
-                  onClick={startSession}
-                  disabled={isAdvancing}
-                  aria-label={isAdvancing ? '請稍候，正在處理' : '開始朗讀這段，啟動語音辨識'}
-                  className={`flex-1 py-3 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                    isAdvancing
-                      ? 'bg-gray-300 text-gray-400 cursor-not-allowed opacity-50'
-                      : 'bg-accent hover:bg-accent-hover text-white'
-                  }`}
-                >
-                  <div className="w-2.5 h-2.5 bg-white rounded-full" aria-hidden="true" />
-                  {processZhuyin(isAdvancing ? '請稍候...' : '開始朗讀')}
-                </button>
-              </>
-            )}
-          </div>
+                  }
+                  return null;
+                })();
+                const isExpanded = expandedParagraph === idx;
+                const isCurrentlyActive = idx === currentLineIndex && (isSessionActive || isPreparing);
 
-          {/* Optional recording for student self-review */}
-          <div className="border-t border-gray-100 pt-2">
-            <button
-              onClick={() => setShowRecorder(prev => !prev)}
-              aria-label={showRecorder ? '收起錄音重聽功能' : '展開錄音重聽功能'}
-              aria-expanded={showRecorder}
-              aria-controls="recorder-panel"
-              className="w-full flex items-center justify-between px-2 py-1 text-xs text-gray-400 hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 rounded"
-            >
-              <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.938V21h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-1.062A8 8 0 0 1 4 12a1 1 0 0 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z" />
-                </svg>
-                錄音重聽（選用）
-              </span>
-              <svg
-                className={`w-3.5 h-3.5 transition-transform ${showRecorder ? 'rotate-180' : ''}`}
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {showRecorder && (
-              <div id="recorder-panel" className="pt-2 pb-1">
-                <RecordingButton maxDurationSeconds={60} label="錄下這段朗讀，完成後可重聽" />
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            {/* 上一段 — only navigate back to completed or current paragraphs */}
-            <button
-              onClick={() => {
-                const prevIdx = currentLineIndex - 1;
-                if (prevIdx >= 0 && (lineStatuses[prevIdx] === 'completed' || lineStatuses[prevIdx] === 'current')) {
-                  stopSession();
-                  setRetryCount(0);
-                  setCurrentLineIndex(prevIdx);
-                }
-              }}
-              disabled={currentLineIndex === 0}
-              aria-label={currentLineIndex === 0 ? '已是第一段' : `返回第 ${currentLineIndex} 段`}
-              className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                zhuyinActive ? 'tracking-[0.2em]' : ''
-              } ${
-                currentLineIndex === 0
-                  ? 'bg-gray-300 text-gray-300 cursor-not-allowed'
-                  : 'bg-gray-300 hover:bg-gray-200 text-gray-600'
-              }`}
-            >
-              {processZhuyin('上一段')}
-            </button>
-
-            {/* 下一段 / 觀看總結報告 — gated by paragraph completion */}
-            {(() => {
-              const isLastLine = currentLineIndex === story.content.length - 1;
-              const allDone = completedParagraphs.size === story.content.length;
-              const nextUnlocked = !isLastLine && maxUnlockedIndex > currentLineIndex;
-
-              if (isLastLine) {
-                // Last paragraph: only show finish button when all paragraphs are done
                 return (
-                  <button
-                    onClick={handleFinish}
-                    disabled={!allDone}
-                    aria-label={!allDone ? '請完成所有段落後查看總結報告' : '查看朗讀總結報告'}
-                    className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
-                      allDone
-                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                        : 'bg-gray-300 text-gray-300 cursor-not-allowed'
-                    }`}
-                  >
-                    {processZhuyin('觀看總結報告')}
-                  </button>
-                );
-              }
+                  <div key={idx}>
+                    <button
+                      onClick={() => {
+                        // Scroll to the paragraph in the text area
+                        const el = paragraphRefsRef.current[idx];
+                        if (el) {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        // Toggle expand for completed paragraphs
+                        if (status === 'completed' && summary) {
+                          setExpandedParagraph(prev => prev === idx ? null : idx);
+                        }
+                        // Navigate to the paragraph if it's not locked
+                        if (status !== 'locked' && idx !== currentLineIndex) {
+                          stopSession();
+                          setRetryCount(0);
+                          setCurrentLineIndex(idx);
+                        }
+                      }}
+                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors ${
+                        status === 'locked'
+                          ? 'cursor-default'
+                          : 'hover:bg-gray-50 cursor-pointer'
+                      } ${idx === currentLineIndex ? 'bg-accent/5' : ''}`}
+                    >
+                      {/* Status icon */}
+                      <span className="shrink-0">
+                        {status === 'completed' ? (
+                          <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </span>
+                        ) : status === 'current' ? (
+                          isCurrentlyActive ? (
+                            <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                            </span>
+                          ) : (
+                            <span className="w-5 h-5 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center">
+                              <svg className="w-2.5 h-2.5 text-accent" fill="currentColor" viewBox="0 0 24 24">
+                                <polygon points="5,3 19,12 5,21" />
+                              </svg>
+                            </span>
+                          )
+                        ) : (
+                          <span className="w-5 h-5 rounded-full border-2 border-gray-200 flex items-center justify-center shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                          </span>
+                        )}
+                      </span>
 
-              // Non-last paragraph: next paragraph is unlocked only if current is completed
-              return (
-                <button
-                  onClick={() => {
-                    if (nextUnlocked) {
-                      stopSession();
-                      setRetryCount(0);
-                      setCurrentLineIndex(prev => prev + 1);
-                    }
-                  }}
-                  disabled={!nextUnlocked}
-                  aria-label={!nextUnlocked ? '請先完成此段朗讀才能繼續（正確率需達 60%）' : `前往第 ${currentLineIndex + 2} 段`}
-                  className={`flex-1 py-3 rounded-lg text-base font-bold border border-gray-200 leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''} ${
-                    nextUnlocked
-                      ? 'bg-gray-300 hover:bg-gray-200 text-gray-600'
-                      : 'bg-gray-300 text-gray-300 cursor-not-allowed'
-                  }`}
-                >
-                  {processZhuyin('下一段')}
-                </button>
-              );
-            })()}
+                      {/* Label */}
+                      <span className={`text-xs font-bold flex-1 ${
+                        status === 'completed' ? 'text-gray-700' :
+                        status === 'current' ? 'text-accent' :
+                        'text-gray-300'
+                      }`}>
+                        第 {idx + 1} 段
+                      </span>
+
+                      {/* Score badge for completed */}
+                      {status === 'completed' && summary && (
+                        <span className={`text-[10px] font-bold tabular-nums shrink-0 ${
+                          summary.tier === 1 ? 'text-emerald-600' :
+                          summary.tier === 2 ? 'text-blue-500' :
+                          'text-amber-500'
+                        }`}>
+                          {Math.round(summary.matchRate * 100)}%
+                          {summary.geminiPending && <span className="ml-0.5 text-blue-400 animate-pulse">…</span>}
+                        </span>
+                      )}
+
+                      {/* In-progress indicator */}
+                      {status === 'current' && isCurrentlyActive && (
+                        <span className="text-[10px] font-bold text-green-500 shrink-0">進行中</span>
+                      )}
+
+                      {/* Chevron for expandable completed paragraphs */}
+                      {status === 'completed' && summary && (
+                        <svg
+                          className={`w-3 h-3 text-gray-400 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      )}
+                    </button>
+
+                    {/* Expanded: score detail + diff */}
+                    {isExpanded && summary && (
+                      <div className="px-3 pb-3 bg-gray-50 border-t border-gray-100 space-y-2">
+                        {/* Score row */}
+                        <div className="flex gap-3 pt-2 text-xs">
+                          <span className={`font-bold ${
+                            summary.tier === 1 ? 'text-emerald-600' :
+                            summary.tier === 2 ? 'text-blue-500' :
+                            'text-amber-500'
+                          }`}>
+                            正確率 {Math.round(summary.matchRate * 100)}%
+                          </span>
+                          {summary.wrongCount > 0 && (
+                            <span className="text-red-500">念錯 {summary.wrongCount} 字</span>
+                          )}
+                          {summary.missingCount > 0 && (
+                            <span className="text-gray-400">漏字 {summary.missingCount} 字</span>
+                          )}
+                        </div>
+                        {/* 查看詳細按鈕 — scroll to main diff section */}
+                        {paraResult && paraResult.diffTokens.length > 0 && idx === currentLineIndex && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              diffSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }}
+                            className="text-xs text-accent hover:text-accent-hover font-medium underline underline-offset-2"
+                          >
+                            查看詳細 ↓
+                          </button>
+                        )}
+                        {/* AI feedback */}
+                        {summary.feedback && (
+                          <p className="text-xs text-gray-600 leading-relaxed">
+                            {summary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI…</span>}
+                            {summary.feedback}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
+          {/* Live transcript — shown while recording */}
           {isSessionActive && (
-            <button
-              onClick={stopSession}
-              aria-label="停止目前的朗讀練習"
-              className={`w-full py-1.5 rounded-lg text-base font-bold text-gray-400 hover:text-gray-600 transition-colors leading-[2.6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${zhuyinActive ? 'tracking-[0.2em]' : ''}`}
-            >
-              {processZhuyin('停止朗讀')}
-            </button>
+            <div className="space-y-1">
+              <p className="text-[9px] font-bold text-accent-light uppercase tracking-widest animate-pulse">即時辨識</p>
+              <div className="bg-accent/10 border border-accent/20 rounded-xl px-3 py-2.5 text-sm text-gray-800 leading-relaxed min-h-[2.5rem]">
+                {streamingUserInput || <span className="text-gray-400">請開始朗讀…</span>}
+              </div>
+            </div>
+          )}
+
+          {/* Diff result for current paragraph — shown after evaluation */}
+          {!isSessionActive && rightPanelDiffTokens && (
+            <div ref={diffSectionRef} className="space-y-2">
+              <div className="flex items-center gap-2">
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">逐字比對（第 {currentLineIndex + 1} 段）</p>
+                {paragraphSummary?.geminiPending && (
+                  <span className="text-[9px] text-blue-400 font-bold animate-pulse">AI 精算中…</span>
+                )}
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl px-3 py-3">
+                <DiffDisplay tokens={rightPanelDiffTokens} showLegend className="text-base" />
+              </div>
+            </div>
+          )}
+
+          {/* Idle state — no recording yet and no results */}
+          {!isSessionActive && !rightPanelDiffTokens && completedParagraphs.size === 0 && (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
+              <p className="text-sm text-gray-500 leading-relaxed">
+                按左側「開始朗讀」後，回饋結果會顯示在這裡
+              </p>
+            </div>
+          )}
+
+          {/* Retry hint */}
+          {retryCount > 0 && (
+            <div className="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+              <span className="text-xs text-amber-600">重試第 {retryCount} 次，加油！</span>
+            </div>
           )}
 
         </div>
