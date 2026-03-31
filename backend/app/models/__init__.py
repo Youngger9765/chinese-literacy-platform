@@ -15,3 +15,4 @@ from .parent_link import ParentInviteCode, ParentStudentLink  # noqa: F401
 from .gamification import StudentXPLog, StudentBadge, StudentStreak  # noqa: F401
 from .story_tag import StoryTag  # noqa: F401
 from .semester import Semester  # noqa: F401
+from .ai_usage import AIUsageLog  # noqa: F401

@@ -17,6 +17,7 @@ from google import genai
 from google.genai import types as genai_types
 
 from ..config import settings
+from .ai_usage_tracker import capture_usage
 from .input_sanitizer import sanitize_ai_input, sanitize_dialogue_turns
 from .persona import TUTOR_PERSONA
 
@@ -260,6 +261,9 @@ async def generate_structured_response(
             # ValueError. We intercept this with a clear, named exception.
             _check_safety_filter(response)
 
+            # Capture token usage metadata for tracking (Issue #874)
+            capture_usage(response, model="gemini-2.5-flash")
+
             # Extract finish_reason for diagnostics (MAX_TOKENS = truncated output)
             finish_reason = None
             if response.candidates:
@@ -473,6 +477,8 @@ async def generate_socratic_question(
     )
     # Guard against safety filter before accessing response.text (#526)
     _check_safety_filter(response)
+    # Capture token usage metadata for tracking (Issue #874)
+    capture_usage(response, model="gemini-2.5-flash")
     return response.text.strip()
 
 
