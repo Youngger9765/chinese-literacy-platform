@@ -57,6 +57,7 @@ class ValidateSentenceResponse(BaseModel):
 async def get_example_sentences(
     payload: ExampleSentencesRequest,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Generate 2 AI example sentences for a vocabulary character.
 
@@ -99,7 +100,7 @@ async def get_example_sentences(
     latency_ms = int((time.monotonic() - start_time) * 1000)
     usage = last_usage.get()
     log_ai_usage(
-        None,
+        db,
         endpoint="/learning/sentence-practice/example-sentences",
         step="vocab",
         student_id=current_user.id,
@@ -113,6 +114,7 @@ async def get_example_sentences(
         prompt_char_count=usage.prompt_char_count if usage else None,
         response_char_count=usage.response_char_count if usage else None,
         content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="vocab_example_sentences",
     )
 
     # 3. Store in cache for next request
@@ -139,6 +141,7 @@ async def get_example_sentences(
 async def validate_sentence(
     payload: ValidateSentenceRequest,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Validate a student's composed sentence for a vocabulary character.
 
@@ -174,7 +177,7 @@ async def validate_sentence(
     latency_ms = int((time.monotonic() - start_time) * 1000)
     usage = last_usage.get()
     log_ai_usage(
-        None,
+        db,
         endpoint="/learning/sentence-practice/validate",
         step="vocab_validate",
         student_id=current_user.id,
@@ -188,6 +191,7 @@ async def validate_sentence(
         prompt_char_count=usage.prompt_char_count if usage else None,
         response_char_count=usage.response_char_count if usage else None,
         content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="vocab_validate_sentence",
     )
 
     return ValidateSentenceResponse(
@@ -221,7 +225,7 @@ class ListeningEvaluateResponse(BaseModel):
 async def evaluate_listening_retelling(
     payload: ListeningEvaluateRequest,
     current_user: User = Depends(get_current_user),
-    _db: Session = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     """Evaluate a student's retelling of a story they listened to.
 
@@ -247,7 +251,7 @@ async def evaluate_listening_retelling(
     latency_ms = int((time.monotonic() - start_time) * 1000)
     usage = last_usage.get()
     log_ai_usage(
-        None,
+        db,
         endpoint="/learning/listening/evaluate",
         step="listening",
         student_id=current_user.id,
@@ -261,6 +265,7 @@ async def evaluate_listening_retelling(
         prompt_char_count=usage.prompt_char_count if usage else None,
         response_char_count=usage.response_char_count if usage else None,
         content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="vocab_listening_evaluate",
     )
 
     logger.info(

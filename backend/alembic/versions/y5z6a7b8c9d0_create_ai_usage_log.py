@@ -83,9 +83,14 @@ def upgrade() -> None:
     op.create_index("idx_ai_usage_org", "ai_usage_log", ["org_id"])
     op.create_index("idx_ai_usage_teacher", "ai_usage_log", ["teacher_id"])
     op.create_index("idx_ai_usage_request", "ai_usage_log", ["request_id"])
+    # Composite indexes for common dashboard queries
+    op.create_index("idx_ai_usage_created_endpoint", "ai_usage_log", ["created_at", "endpoint"])
+    op.create_index("idx_ai_usage_student_created", "ai_usage_log", ["student_id", "created_at"])
 
 
 def downgrade() -> None:
+    op.drop_index("idx_ai_usage_student_created", table_name="ai_usage_log")
+    op.drop_index("idx_ai_usage_created_endpoint", table_name="ai_usage_log")
     op.drop_index("idx_ai_usage_request", table_name="ai_usage_log")
     op.drop_index("idx_ai_usage_teacher", table_name="ai_usage_log")
     op.drop_index("idx_ai_usage_org", table_name="ai_usage_log")

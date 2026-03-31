@@ -167,6 +167,7 @@ async def score_comprehension(
         prompt_char_count=usage.prompt_char_count if usage else None,
         response_char_count=usage.response_char_count if usage else None,
         content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="comprehension_score",
     )
 
     # Cache scores in DB

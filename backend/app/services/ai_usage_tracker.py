@@ -57,12 +57,8 @@ last_usage: contextvars.ContextVar[UsageMetadata | None] = contextvars.ContextVa
 )
 
 
-def capture_usage(response, model: str = "gemini-2.5-flash") -> UsageMetadata:
-    """Extract token counts from a Gemini response and store in context var.
-
-    Call this inside ai_service right after a successful generate_content call.
-    Route handlers can then read `last_usage.get()` to log the data.
-    """
+def _extract_usage(response, model: str = "gemini-2.5-flash") -> UsageMetadata:
+    """Extract token counts from a single Gemini response into a UsageMetadata."""
     meta = UsageMetadata(model=model)
     try:
         usage = response.usage_metadata
@@ -102,8 +98,38 @@ def capture_usage(response, model: str = "gemini-2.5-flash") -> UsageMetadata:
     except Exception:
         pass
 
-    last_usage.set(meta)
     return meta
+
+
+def capture_usage(response, model: str = "gemini-2.5-flash") -> UsageMetadata:
+    """Capture and accumulate usage metadata from a Gemini response.
+
+    Call this inside ai_service right after a successful generate_content call.
+    Route handlers can then read `last_usage.get()` to log the data.
+
+    When multiple Gemini calls occur in a single request (e.g. socratic_agent
+    making evaluation + question calls), tokens are accumulated so the final
+    log_ai_usage call captures the total. The `last_usage.set(None)` reset at
+    the start of each generate_structured_response call ensures accumulation
+    is per-request, not cross-request.
+    """
+    new_usage = _extract_usage(response, model=model)
+    existing = last_usage.get()
+    if existing and new_usage:
+        # Accumulate tokens from multiple calls in the same request
+        new_usage = UsageMetadata(
+            input_tokens=existing.input_tokens + new_usage.input_tokens,
+            output_tokens=existing.output_tokens + new_usage.output_tokens,
+            total_tokens=existing.total_tokens + new_usage.total_tokens,
+            model=new_usage.model,
+            model_version=new_usage.model_version or existing.model_version,
+            finish_reason=new_usage.finish_reason,
+            prompt_char_count=(existing.prompt_char_count or 0) + (new_usage.prompt_char_count or 0),
+            response_char_count=(existing.response_char_count or 0) + (new_usage.response_char_count or 0),
+            content_filtered=existing.content_filtered or new_usage.content_filtered,
+        )
+    last_usage.set(new_usage)
+    return new_usage
 
 
 def estimate_cost(model: str, input_tokens: int, output_tokens: int) -> float:
