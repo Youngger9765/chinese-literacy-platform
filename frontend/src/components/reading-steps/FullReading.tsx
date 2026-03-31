@@ -143,7 +143,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       });
       utterances[0].onstart = () => setIsTtsSpeaking(true);
       utterances[utterances.length - 1].onend = () => { setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      utterances[utterances.length - 1].onerror = () => { setIsTtsSpeaking(false); setIsTtsPaused(false); };
+      // Add onerror to every utterance so isTtsSpeaking resets if any intermediate sentence fails
+      utterances.forEach(u => {
+        u.onerror = () => { window.speechSynthesis.cancel(); setIsTtsSpeaking(false); setIsTtsPaused(false); };
+      });
       utterances.forEach(u => window.speechSynthesis.speak(u));
     };
 
