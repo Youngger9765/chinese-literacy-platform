@@ -890,9 +890,127 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     </div>
   );
 
+  // Shared story panel for desktop — renders the same regardless of active tab
+  const renderDesktopStoryPanel = () => (
+    <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
+      {/* Tab bar — story filename header */}
+      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
+        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
+          {story.filename}
+        </div>
+        <div className="flex-1" />
+      </div>
+
+      {/* Story content — all paragraphs visible for reference */}
+      <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
+        <div className="max-w-3xl mx-auto space-y-20">
+          {story.content.map((line, idx) => (
+            <div
+              key={idx}
+              ref={el => { paragraphRefs.current[idx] = el; }}
+              className={`rounded-2xl px-6 py-12 border transition-all ${
+                highlightedParagraph === idx
+                  ? 'border-amber-500/60 bg-amber-900/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
+                  : 'border-transparent hover:border-gray-200 hover:bg-white/40'
+              }`}
+            >
+              <p className={`text-2xl lg:text-3xl text-gray-900 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                {zhuyinLines ? zhuyinLines[idx] : line}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Status bar */}
+      <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 text-[10px] text-gray-500 uppercase shrink-0">
+        <span>共 {story.content.length} 段 · {story.title}</span>
+      </div>
+    </div>
+  );
+
+  // Desktop right panel content — switches based on active tab
+  const renderDesktopRightPanel = () => {
+    if (activeTab === 'structure') {
+      return (
+        <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
+          <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-2 px-3 py-1.5">
+            <span className="text-xs text-gray-500">文章重點表</span>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar bg-gray-50">
+            <StoryStructureTable storyId={story.id} />
+            {tabCompletion.structureVisited && (
+              <div className="mt-6 text-center">
+                <button
+                  onClick={handleStructureRedo}
+                  className="text-xs text-gray-400 hover:text-gray-600 underline"
+                >
+                  重新練習
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === 'mcq' && hasMcq) {
+      return (
+        <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
+          <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-2 px-3 py-1.5">
+            <span className="text-xs text-gray-500">閱讀理解選擇題</span>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar bg-gray-50">
+            {tabCompletion.mcqDone ? (
+              <div className="flex flex-col items-center justify-center p-8 gap-4">
+                <div className="text-4xl">✓</div>
+                <p className="text-emerald-700 font-semibold text-sm">選擇題已完成</p>
+                <button
+                  onClick={handleMcqRedo}
+                  className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm hover:bg-gray-200 transition-colors"
+                >
+                  重新練習
+                </button>
+              </div>
+            ) : (
+              <MultipleChoiceExercise
+                questions={story.multipleChoice!}
+                onComplete={handleMcqComplete}
+              />
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Default: AI chat panel
+    return (
+      <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
+        {/* Progress + skip bar */}
+        <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-2 px-3 py-1.5">
+          <span className="text-xs text-gray-500">AI 對話 {understoodCount}/{requiredCount}</span>
+          <button
+            onClick={handleFinish}
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            跳過
+          </button>
+        </div>
+
+        {/* Chat messages */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50">
+          {renderChatMessages()}
+        </div>
+
+        {/* Input area */}
+        {renderInputArea()}
+      </div>
+    );
+  };
+
   return (
     <div
-      className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 h-full bg-amber-50 overflow-hidden relative`}
+      className="flex flex-col flex-1 h-full bg-amber-50 overflow-hidden relative"
       style={{
         fontFamily: zhuyinActive
           ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
@@ -929,7 +1047,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             </div>
           ) : activeTab === 'structure' ? (
             /* 文章重點表 panel */
-            <div className="flex-1 overflow-y-auto p-4 bg-amber-50">
+            <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
               <StoryStructureTable storyId={story.id} />
               {tabCompletion.structureVisited && (
                 <div className="mt-4 text-center">
@@ -944,7 +1062,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             </div>
           ) : activeTab === 'mcq' && hasMcq ? (
             /* 閱讀理解選擇題 panel */
-            <div className="flex-1 overflow-y-auto bg-amber-50">
+            <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
               {tabCompletion.mcqDone ? (
                 <div className="flex flex-col items-center justify-center p-8 gap-4">
                   <div className="text-4xl">✓</div>
@@ -991,128 +1109,28 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           )}
         </>
       ) : (
-        /* DESKTOP: dual-panel for AI chat; full-width for structure table / MCQ */
+        /* DESKTOP: consistent dual-pane layout — story left + tab content right (#808) */
         <>
-          {/* Prominent centered tab bar — always visible on desktop, sticky at top */}
+          {/* Prominent centered tab bar — always visible on desktop */}
           <div className="shrink-0 z-10">
             {renderProminentTabBar(false)}
           </div>
 
-          {activeTab === 'structure' ? (
-            /* FULL-WIDTH: 文章重點表 */
-            <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 custom-scrollbar">
-                <div className="max-w-5xl mx-auto">
-                  <StoryStructureTable storyId={story.id} />
-                  {tabCompletion.structureVisited && (
-                    <div className="mt-6 text-center">
-                      <button
-                        onClick={handleStructureRedo}
-                        className="text-xs text-gray-400 hover:text-gray-600 underline"
-                      >
-                        重新練習
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : activeTab === 'mcq' && hasMcq ? (
-            /* FULL-WIDTH: 選擇題 */
-            <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex-1 overflow-y-auto bg-gray-50 custom-scrollbar">
-                <div className="max-w-3xl mx-auto py-6 px-4 lg:px-0">
-                  {tabCompletion.mcqDone ? (
-                    <div className="flex flex-col items-center justify-center p-8 gap-4">
-                      <div className="text-4xl">✓</div>
-                      <p className="text-emerald-700 font-semibold text-sm">選擇題已完成</p>
-                      <button
-                        onClick={handleMcqRedo}
-                        className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 text-sm hover:bg-gray-200 transition-colors"
-                      >
-                        重新練習
-                      </button>
-                    </div>
-                  ) : (
-                    <MultipleChoiceExercise
-                      questions={story.multipleChoice!}
-                      onComplete={handleMcqComplete}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* DUAL-PANE: story left + AI chat right */
-            <>
-              {/* LEFT: Story text panel */}
-              <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
-                {/* Tab bar — story filename header */}
-                <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-                  <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-                    {story.filename}
-                  </div>
-                  <div className="flex-1" />
-                  {/* ZhuyinToggle moved to global Header (#863) */}
-                </div>
+          {/* Dual-pane area: story left + active tab content right */}
+          <div className="flex flex-row flex-1 min-h-0">
+            {/* LEFT: Story text panel — always visible for reference */}
+            {renderDesktopStoryPanel()}
 
-                {/* Story content — all paragraphs visible for reference */}
-                <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
-                  <div className="max-w-3xl mx-auto space-y-20">
-                    {story.content.map((line, idx) => (
-                      <div
-                        key={idx}
-                        ref={el => { paragraphRefs.current[idx] = el; }}
-                        className={`rounded-2xl px-6 py-12 border transition-all ${
-                          highlightedParagraph === idx
-                            ? 'border-amber-500/60 bg-amber-900/10 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
-                            : 'border-transparent hover:border-gray-200 hover:bg-white/40'
-                        }`}
-                      >
-                        <p className={`text-2xl lg:text-3xl text-gray-900 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
-                          {zhuyinLines ? zhuyinLines[idx] : line}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            {/* Resizable divider */}
+            <div
+              onMouseDown={onDividerMouseDown}
+              onTouchStart={onDividerTouchStart}
+              className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
+            />
 
-                {/* Status bar */}
-                <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 text-[10px] text-gray-500 uppercase shrink-0">
-                  <span>共 {story.content.length} 段 · {story.title}</span>
-                </div>
-              </div>
-
-              {/* Resizable divider */}
-              <div
-                onMouseDown={onDividerMouseDown}
-                onTouchStart={onDividerTouchStart}
-                className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
-              />
-
-              {/* RIGHT: Chat panel */}
-              <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
-                {/* Progress + skip bar */}
-                <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-2 px-3 py-1.5">
-                  <span className="text-xs text-gray-500">AI 對話 {understoodCount}/{requiredCount}</span>
-                  <button
-                    onClick={handleFinish}
-                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    跳過
-                  </button>
-                </div>
-
-                {/* Chat messages */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-gray-50">
-                  {renderChatMessages()}
-                </div>
-
-                {/* Input area */}
-                {renderInputArea()}
-              </div>
-            </>
-          )}
+            {/* RIGHT: Tab content panel — chat / structure / MCQ */}
+            {renderDesktopRightPanel()}
+          </div>
         </>
       )}
 
