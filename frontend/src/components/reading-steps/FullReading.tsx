@@ -298,7 +298,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
         </div>
 
         {/* Status bar */}
-        <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 text-[10px] text-gray-500 uppercase shrink-0">
+        <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 text-xs text-gray-500 uppercase shrink-0">
           <span>共 {story.content.length} 段 · {story.title}</span>
           <div className="flex-1" />
           <span className={isSessionActive ? 'text-green-500 font-bold' : isPreparing ? 'text-yellow-500 font-bold' : 'text-gray-300'}>
@@ -328,7 +328,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       >
         {/* Header */}
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4">
-          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">全文朗讀</span>
+          <span className="text-xs font-black text-accent-light uppercase tracking-widest">全文朗讀</span>
         </div>
 
         {/* Content */}
@@ -352,7 +352,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {/* Live transcript */}
           {isSessionActive && streamingTranscript && (
             <div className="flex flex-col gap-1">
-              <span className="text-[9px] font-bold text-accent-light uppercase animate-pulse">LISTENING...</span>
+              <span className="text-xs font-bold text-accent-light uppercase animate-pulse">LISTENING...</span>
               <div className="bg-accent/20 border border-accent/30 rounded-xl px-3 py-2.5 text-base text-gray-800 leading-relaxed">
                 {streamingTranscript}
               </div>
@@ -361,7 +361,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
           {isSessionActive && !streamingTranscript && (
             <div className="flex flex-col gap-1">
-              <span className="text-[9px] font-bold text-green-500 uppercase animate-pulse">LISTENING</span>
+              <span className="text-xs font-bold text-green-500 uppercase animate-pulse">LISTENING</span>
               <div className="bg-green-900/20 border border-green-700/30 rounded-xl px-3 py-2.5 text-base text-gray-600 leading-relaxed">
                 請朗讀左側課文，從頭到尾…
               </div>
@@ -390,14 +390,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
               {streamingTranscript && (
                 <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-                  <p className="text-[10px] text-gray-500 mb-1 uppercase tracking-widest">你說的</p>
+                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-widest">你說的</p>
                   <p className="text-xs text-gray-600 leading-relaxed line-clamp-6">{streamingTranscript}</p>
                 </div>
               )}
 
               {result.diffTokens && result.diffTokens.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-                  <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">逐字比對</p>
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">逐字比對</p>
                   <DiffDisplay tokens={result.diffTokens} showLegend className="text-lg" />
                 </div>
               )}
@@ -405,7 +405,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               {/* Audio playback — let student re-listen to their reading */}
               {audioRecorder.audioUrl && (
                 <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-                  <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest">重聽錄音</p>
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">重聽錄音</p>
                   <audio src={audioRecorder.audioUrl} controls className="w-full h-9" aria-label="播放您的朗讀錄音" />
                 </div>
               )}
@@ -415,7 +415,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
         {/* Controls */}
         <div className="shrink-0 p-3 bg-white border-t border-gray-200 space-y-2">
-          {micError && <div className="text-[10px] text-rose-400 px-1 pb-1">{micError}</div>}
+          {micError && <div className="text-xs text-rose-400 px-1 pb-1">{micError}</div>}
 
           {result ? (
             <div className="space-y-2">

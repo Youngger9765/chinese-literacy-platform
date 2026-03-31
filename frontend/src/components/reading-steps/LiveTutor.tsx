@@ -1243,7 +1243,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                       </span>
                     )}
                     {status === 'locked' && (
-                      <span className="ml-auto text-[10px] text-gray-400">完成前一段後解鎖</span>
+                      <span className="ml-auto text-xs text-gray-400">完成前一段後解鎖</span>
                     )}
                     {/* Inline action buttons — system read + start/submit/retry */}
                     {status !== 'locked' && !isAdvancing && (
@@ -1522,9 +1522,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       >
         {/* Header */}
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-2">
-          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">朗讀回饋</span>
+          <span className="text-xs font-black text-accent-light uppercase tracking-widest">朗讀回饋</span>
           <div className="flex-1" />
-          <span className={`text-[10px] font-bold ${isSessionActive ? 'text-green-500' : isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
+          <span className={`text-xs font-bold ${isSessionActive ? 'text-green-500' : isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
             {isSessionActive ? '● 聆聽中' : isPreparing ? '● 準備中' : '● 待機'}
           </span>
         </div>
@@ -1534,7 +1534,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
           {/* Progress info */}
           <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">朗讀進度</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">朗讀進度</p>
             <p className="text-sm font-bold text-gray-700">
               第 {currentLineIndex + 1} 段 / 共 {story.content.length} 段
             </p>
@@ -1547,7 +1547,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           {/* Live transcript — shown while recording */}
           {isSessionActive && (
             <div className="space-y-1">
-              <p className="text-[9px] font-bold text-accent-light uppercase tracking-widest animate-pulse">即時辨識</p>
+              <p className="text-xs font-bold text-accent-light uppercase tracking-widest animate-pulse">即時辨識</p>
               <div className="bg-accent/10 border border-accent/20 rounded-xl px-3 py-2.5 text-sm text-gray-800 leading-relaxed min-h-[2.5rem]">
                 {streamingUserInput || <span className="text-gray-400">請開始朗讀…</span>}
               </div>
@@ -1558,9 +1558,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           {!isSessionActive && rightPanelDiffTokens && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">逐字比對</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">逐字比對</p>
                 {paragraphSummary?.geminiPending && (
-                  <span className="text-[9px] text-blue-400 font-bold animate-pulse">AI 精算中…</span>
+                  <span className="text-xs text-blue-400 font-bold animate-pulse">AI 精算中…</span>
                 )}
               </div>
               <div className="bg-white border border-gray-200 rounded-xl px-3 py-3">

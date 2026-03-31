@@ -534,7 +534,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         <button
           type="button"
           onClick={() => onFinish(summary)}
-          className="px-8 py-3 rounded-xl font-bold text-base bg-amber-600 hover:bg-amber-700 text-white shadow-lg transition-all active:scale-95 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           完成標記
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
