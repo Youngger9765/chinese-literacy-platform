@@ -311,6 +311,7 @@ def log_ai_usage(
             # not the caller's outer transaction (FAIL-1 review fix).
             with db.begin_nested():
                 db.add(record)
+            db.commit()
         except Exception as e:
             logger.warning("Failed to write AI usage to DB: %s", e)
 
