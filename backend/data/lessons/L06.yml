@@ -49,7 +49,21 @@ vocabulary:
 - word: 當志明說
   definition: 「春嬌這麼美，這麼好，是不可能看上我的。」志明的(  E  )是他好希望春嬌可以喜歡他。
 vocabulary_count: 8
-fill_in_blank: []
+fill_in_blank:
+- sentence: 寒冷的冬天，媽媽端上桌的火鍋（　　），讓人感覺暖和許多。
+  answer: A
+- sentence: 寒流來襲，小明在公車站牌前不斷（　　），希望能讓身體暖和一點。
+  answer: B
+- sentence: 傍晚時分，夕陽的光線穿過窗戶，在房間裡灑下一片（　　）的暖色調。
+  answer: C
+- sentence: 運動會結束後，選手們（　　）地離開操場，準備回家休息。
+  answer: D
+- sentence: 媒體為了吸引讀者，常常會對某些事件進行過度的（　　），導致真相被扭曲。
+  answer: E
+- sentence: 隨著升上不同學校，我們和國小同學之間的聯繫也（　　），很少有機會再見面了。
+  answer: F
+- sentence: 老師雖然沒有直接批評小明的報告，但他委婉的語氣中，我卻聽出了（　　）。
+  answer: G
 multiple_choice:
 - question: 下列選項「  」中的語詞，何者使用正確？
   options:
@@ -111,3 +125,4 @@ story_structure:
     value: 3. 小男孩數到第【 99 】個客人時，把老人拉進店裡， 完成請阿公吃麵的心願。 4. 老闆娘想送一碗麵給小男孩，老闆卻說小男孩正在學習 「 【 不吃飯也會飽 】 」的道理。
   - label: 結果
     value: '吃完麵後，祖孫倆【 滿足/幸福 】的離去。 「換位思考」是指站在別人的角度看事情，了解對方的感受，進而聽 懂別人的言外之意。故事中的阿公、小男孩或是麵攤老闆，他們都能夠換 位思考，懂得替別人著想。 我們可以用三個步驟來學習「換位思考」喔： '
+knowledge_video_url: https://www.youtube.com/watch?v=6-O0bddu7VQ

@@ -80,7 +80,29 @@ vocabulary:
 - word: 中計
   definition: 落入圈套，遭人暗算。
 vocabulary_count: 11
-fill_in_blank: []
+fill_in_blank:
+- sentence: 當老師問誰想去郊遊時，全班同學都（　　）地舉手贊成。
+  answer: A
+- sentence: 弟弟非常害怕打針，每次看到醫生都會（　　）地掙扎。
+  answer: B
+- sentence: 小明一時緊張，不小心把心中的想法（　　），讓大家很驚訝。
+  answer: C
+- sentence: 夜晚的星空，繁星點點，（　　）灑落了無數鑽石。
+  answer: D
+- sentence: 聽到下課鐘響，同學們立刻（　　）衝出教室，準備去玩耍。
+  answer: E
+- sentence: 老師仔細地批改作業，並（　　）我們寫錯的字和句型。
+  answer: F
+- sentence: 班長候選人發表了許多關於如何改善班級秩序的（　　），希望獲得同學支持。
+  answer: G
+- sentence: 這次的才藝表演，小華終於有機會（　　），秀出他苦練已久的鋼琴絕技。
+  answer: H
+- sentence: 媽媽總是無微不至地（　　）著我們，讓我們感受到滿滿的愛。
+  answer: I
+- sentence: 小明因為個性（　　），常常不小心說出得罪人的話。
+  answer: J
+- sentence: 偵探小說裡，壞人常常會設計一個陷阱，讓主角不小心（　　）。
+  answer: K
 multiple_choice:
 - question: 下列哪個詞語使用正確?
   options:

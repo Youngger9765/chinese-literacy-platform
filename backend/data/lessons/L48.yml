@@ -58,7 +58,25 @@ vocabulary:
 - word: 視若無睹
   definition: 雖然看到，但因不關心，好像沒有看到一樣。等同「視而不見」。
 vocabulary_count: 9
-fill_in_blank: []
+fill_in_blank:
+- sentence: 偵探們經過多日的調查，終於將複雜的線索（　　），找出了案件的真相。
+  answer: A
+- sentence: 老師一進教室，就（　　）問：「是誰沒寫功課？」
+  answer: B
+- sentence: 小明（　　）看著自己的冰淇淋掉到地上，卻什麼也做不了。
+  answer: C
+- sentence: 當地震發生時，各國紛紛伸出援手，提供（　　）給受災地區。
+  answer: D
+- sentence: 這部電影利用悲傷的音樂和畫面，刻意（　　）觀眾的情緒，讓大家哭得稀里嘩啦。
+  answer: E
+- sentence: 小華為了逃避寫作業，常常（　　）一些稀奇古怪的理由。
+  answer: F
+- sentence: 那些破壞環境的行為真是（　　），我們應該站出來制止。
+  answer: G
+- sentence: 這間博物館收藏了許多珍貴的藝術品，是全球（　　）的文化地標之一。
+  answer: H
+- sentence: 看到路邊的流浪狗在雨中發抖，他卻（　　），頭也不回地走了過去。
+  answer: I
 multiple_choice:
 - question: 下列語詞何者使用正確？
   options:

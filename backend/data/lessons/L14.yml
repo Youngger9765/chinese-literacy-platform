@@ -132,3 +132,14 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-1-L14運動傷害，怎麼辦.docx
 flags: []
+story_structure:
+- label: 主題
+  value: 運動傷害的處理與預防
+- label: 重要事實 1
+  value: 運動前暖身很重要，可降低受傷風險。
+- label: 重要事實 2
+  value: 運動傷害發生時，可記住PEACE五步驟。
+- label: 重要事實 3
+  value: 抽筋原因：流汗多電解質失衡、肌肉疲勞。
+- label: 結論
+  value: 了解運動傷害處理，保護自己與他人。

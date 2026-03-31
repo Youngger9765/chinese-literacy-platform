@@ -83,3 +83,15 @@ reading_benchmark: null
 source_file: G8-4-L45文言文怎麼讀？以鞭虎救弟記為例.docx
 flags:
 - NO_VOCABULARY
+story_structure:
+- label: 主題
+  value: 文言文的閱讀方法與特色
+- label: 重要事實 1
+  value: 文言文因書寫不便而生，可大幅精簡文字。
+- label: 重要事實 2
+  value: 文言文主要透過三種方式節省用字。
+- label: 重要事實 3
+  value: 文言文因時代差異，有許多生字古字。
+- label: 結論
+  value: 讀文言文要「腦補」被省略處，並查注釋。
+knowledge_video_url: https://www.youtube.com/watch?v=JRZOowz9V7c

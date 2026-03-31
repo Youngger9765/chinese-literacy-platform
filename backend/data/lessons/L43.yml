@@ -45,7 +45,13 @@ vocabulary:
     不能符合先前的傳聞'
   type: 多義字
 vocabulary_count: 3
-fill_in_blank: []
+fill_in_blank:
+- sentence: 昨天老師說下週要考試，這個消息你（　　）了嗎？
+  answer: A
+- sentence: 這位科學家發明了許多東西，在國際上非常（　　）。
+  answer: B
+- sentence: 關於這次校外教學的地點，我已經從同學那裡得到了一些（　　）。
+  answer: C
 multiple_choice:
 - question: 下列選項「」中字，何者字音、字義完全正確？
   options:
@@ -104,4 +110,6 @@ story_structure:
 - label: 事例
   sub_rows:
   - label: 背景
-    value: 家 世：【 世隸耕／世代種田 】 【 五 】歲開始展現天才。 天 1 不曾見過【 書具／寫字的紙筆 】 ，沒有人教， 發 卻會寫詩，還能簽名。 才 展 2 指定任何事物叫他作詩，都能立刻做出來。 時 或 3 寫出來的詩有【 文（采） 】也有
+    value: 家 世：【 世隸耕／世代種田 】 【 五 】歲開始展現天才。 天 1 不曾見過【 書具／寫字的紙筆 】 ，沒有人教， 發 卻會寫詩，還能簽名。
+      才 展 2 指定任何事物叫他作詩，都能立刻做出來。 時 或 3 寫出來的詩有【 文（采） 】也有
+knowledge_video_url: https://www.youtube.com/watch?v=KTZSWPJKpBU

@@ -81,7 +81,33 @@ vocabulary:
 - word: 攫
   definition: 指鳥獸用爪抓取獵物。
 vocabulary_count: 13
-fill_in_blank: []
+fill_in_blank:
+- sentence: 醫生說雖然傷勢嚴重，但他（　　），我們絕不能放棄希望。
+  answer: A
+- sentence: 看到自己支持的隊伍得分，球迷們忍不住（　　）起來。
+  answer: B
+- sentence: 這座深山裡，連一戶人家都沒有，真是（　　）的絕境。
+  answer: C
+- sentence: 面對兇惡的歹徒，他（　　），只能奮力抵抗。
+  answer: D
+- sentence: 烏雲密布，天空變得十分（　　），看來快要下雨了。
+  answer: E
+- sentence: 地震過後，許多人都失去了生命，只有少數人（　　）下來。
+  answer: F
+- sentence: 這條山路十分（　　），開車經過時一定要小心謹慎。
+  answer: G
+- sentence: 這場電影的動作場面太過（　　），讓觀眾都屏住了呼吸。
+  answer: H
+- sentence: 我們在（　　）裡找到了一塊平地，決定在那裡紮營。
+  answer: I
+- sentence: 他為了得到大家的選票，不斷說些（　　）的話，讓人覺得很不真實。
+  answer: J
+- sentence: 即使醫生們用盡了所有方法，面對如此嚴重的病情，最終還是（　　）。
+  answer: K
+- sentence: 經過搶救無效，受傷的鳥兒最終還是（　　）了。
+  answer: L
+- sentence: 老鷹從空中俯衝而下，用銳利的爪子（　　）住了地上的兔子。
+  answer: M
 multiple_choice:
 - question: 下列文句，何者語詞使用最恰當？
   options:

@@ -48,7 +48,21 @@ vocabulary:
 - word: 精湛
   definition: 技術或技能非常高超。
 vocabulary_count: 7
-fill_in_blank: []
+fill_in_blank:
+- sentence: 小明每次考試成績不理想的原因，（　　）是上課不專心或回家沒複習。
+  answer: A
+- sentence: 經過一番激烈的籃球賽後，每個隊員都累得（　　），氣喘吁吁。
+  answer: B
+- sentence: 這次熱門社團報名人數爆滿，名額卻有限，真是（　　），許多同學都沒能選上。
+  answer: C
+- sentence: 為了在馬拉松比賽中（　　），小華每天努力練習長跑，從不間斷。
+  answer: D
+- sentence: 這次的團體報告，由於組員們（　　），最終才能順利完成並獲得好成績。
+  answer: E
+- sentence: 為了讓班級園遊會的攤位更受歡迎，同學們（　　），設計出許多有趣的遊戲。
+  answer: F
+- sentence: 魔術師憑藉著（　　）的技藝，將觀眾們逗得目不轉睛，掌聲連連。
+  answer: G
 multiple_choice:
 - question: 依據本文，下列哪一個成語最能形容職棒選手面臨的「職業競爭」？
   options:

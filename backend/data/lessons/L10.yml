@@ -56,7 +56,29 @@ vocabulary:
 - word: 食指浩繁
   definition: 家裡要餵養的人數很多。
 vocabulary_count: 11
-fill_in_blank: []
+fill_in_blank:
+- sentence: 教室裡（　　）著一股淡淡的咖啡香，讓人感到放鬆。
+  answer: A
+- sentence: 爸爸為了養家，日夜辛勞，最後因過度疲憊而（　　）。
+  answer: B
+- sentence: 那些失去父母的孤兒，每天都（　　），盼望有人能伸出援手。
+  answer: C
+- sentence: 她的動作很（　　），三兩下就把桌面整理好了，一點也不拖泥帶水。
+  answer: D
+- sentence: 這筆捐款的用途還沒有（　　），大家都在等慈善機構的規劃。
+  answer: E
+- sentence: 小明在爺爺的（　　）下，生活過得無憂無慮，很少遇到困難。
+  answer: F
+- sentence: 媽媽打零工賺錢，希望能（　　）家用，減輕爸爸的負擔。
+  answer: G
+- sentence: 這份客服工作是（　　），處理的案件越多，薪水就越高。
+  answer: H
+- sentence: 雖然那場車禍已經過去很久了，但想到當時的驚險場面，我還是（　　）。
+  answer: I
+- sentence: 爺爺因為家境貧困，小時候沒機會上學，所以直到現在還是（　　）。
+  answer: J
+- sentence: 叔叔家裡（　　），光靠他一個人的薪水很難維持，生活壓力很大。
+  answer: K
 multiple_choice:
 - question: 下列語詞何者使用正確？
   options:

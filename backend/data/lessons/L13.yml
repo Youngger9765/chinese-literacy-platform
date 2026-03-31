@@ -45,7 +45,27 @@ vocabulary:
 - word: 舒適區
   definition: 舒服安適的狀態。
 vocabulary_count: 10
-fill_in_blank: []
+fill_in_blank:
+- sentence: （　　）明天是個大晴天，我們就能去海邊玩了。
+  answer: A
+- sentence: 爸爸親手做的木桌非常（　　），即使放上許多重物也不會搖晃。
+  answer: B
+- sentence: 水是生命中（　　）的要素，沒有它我們就無法生存。
+  answer: C
+- sentence: 這次班級辯論比賽，正反兩方的立場（　　），各持己見，互不相讓。
+  answer: D
+- sentence: 成功往往需要長時間的努力與累積，很少有人能（　　），一下子就達到頂峰。
+  answer: E
+- sentence: 這項任務在整個專案中佔有極重的（　　），必須謹慎處理。
+  answer: F
+- sentence: 學習新知識時，我們應該（　　），打好基礎再往上學習，這樣才不容易感到挫折。
+  answer: G
+- sentence: 寫作文時，如果只求快而忽略了內容和文法，往往會（　　），反而寫不好。
+  answer: H
+- sentence: 大雪將整個山頭（　　），放眼望去一片銀白世界，非常美麗。
+  answer: I
+- sentence: 為了挑戰自我，他決定離開原有的（　　），嘗試學習一項全新的技能。
+  answer: J
 multiple_choice:
 - question: 請問文中第四段所提到的：「練肌肉沒有一步登天的方法，循序漸進的飲食控制和規律練習才會慢慢看見成效。」，「循序漸進」可以用哪個詞語替換?
   options:

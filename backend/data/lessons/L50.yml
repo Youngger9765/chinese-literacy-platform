@@ -82,7 +82,27 @@ vocabulary:
 - word: 一片譁然
   definition: 發生一件事情，令大家很驚訝，引起討論。一般用於形容消息（多指不好的消息）傳開，引起轟動。
 vocabulary_count: 10
-fill_in_blank: []
+fill_in_blank:
+- sentence: 法官要求律師必須（　　）自己的論點，才能讓陪審團信服。
+  answer: A
+- sentence: 由於擔心會惹父親生氣，他對自己的言行總是（　　），不敢輕易做出決定。
+  answer: B
+- sentence: 道路旁的各種（　　）能幫助駕駛員辨別方向，確保行車安全。
+  answer: C
+- sentence: 點擊這個（　　）就能直接進入學校的官網，查詢最新的活動資訊。
+  answer: D
+- sentence: 青少年都希望自己能擁有做決定的（　　），而不是事事被父母安排。
+  answer: E
+- sentence: 小貓（　　）著窗外飛過的小鳥，眼神一動也不動，彷彿被完全吸引了。
+  answer: F
+- sentence: 鄰居們喜歡在（　　）聚在一起，聊聊生活中的趣事，增進彼此的感情。
+  answer: G
+- sentence: 說話時要小心，別不經意地（　　）了別人，造成不必要的誤會。
+  answer: H
+- sentence: 經歷了長期低潮後，他終於從心情的（　　）中走了出來，重新找回了笑容。
+  answer: I
+- sentence: 學校突然宣布取消期末考的消息，讓全校師生都（　　），議論紛紛。
+  answer: J
 multiple_choice:
 - question: 下列語詞何者使用錯誤？
   options:
@@ -135,3 +155,14 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G9-3-L50#MeToo運動與我們的權利.docx
 flags: []
+story_structure:
+- label: 主題
+  value: '#MeToo運動的意義與影響'
+- label: 重要事實 1
+  value: '#MeToo運動鼓勵性騷擾受害者發聲'
+- label: 重要事實 2
+  value: 受害者常因權力不對等難以說出
+- label: 重要事實 3
+  value: 身體自主權是尊重個人身體界線
+- label: 結論
+  value: 共同創造安全、尊重的社會環境

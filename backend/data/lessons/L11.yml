@@ -47,7 +47,29 @@ vocabulary:
 - word: 橫逆
   definition: 生命出出現負面事件，例如生了重病。
 vocabulary_count: 11
-fill_in_blank: []
+fill_in_blank:
+- sentence: 面對突發狀況，他總能保持（　　），找出最佳解決方案。
+  answer: A
+- sentence: 科學家們透過儀器，對環境變化進行長期的（　　），以預測未來的趨勢。
+  answer: B
+- sentence: 經過多年的訓練，他已經有能力（　　），負責整個專案的執行。
+  answer: C
+- sentence: 心情低落時，找個信任的朋友（　　），會讓心裡舒服許多。
+  answer: D
+- sentence: 自從轉到這個部門後，他覺得自己的才能終於能被看見，工作起來真是（　　）。
+  answer: E
+- sentence: 對於課本上某個觀點，小明鼓起勇氣向老師提出（　　），希望能有更深入的了解。
+  answer: F
+- sentence: 為了抵擋外敵入侵，這座古老的城堡建造了堅固的城牆作為（　　）工事。
+  answer: G
+- sentence: 老師就像一位園丁，不斷地（　　）著每個學生的潛力，希望他們都能發光發熱。
+  answer: H
+- sentence: 雖然比賽一開始落後許多，但靠著隊友們的努力，我們終於（　　），讓比分差距縮小了。
+  answer: I
+- sentence: 連續加班好幾個星期，他感到身心俱疲，整個人幾乎是（　　）了。
+  answer: J
+- sentence: 儘管人生路上會遇到許多（　　），我們仍應保持樂觀，勇敢面對。
+  answer: K
 multiple_choice:
 - question: 請問文中提到「她是塊璞玉，更需要雕琢」，「璞玉」代表什麼意思?
   options:

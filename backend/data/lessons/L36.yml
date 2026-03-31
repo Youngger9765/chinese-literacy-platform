@@ -64,7 +64,27 @@ vocabulary:
 - word: 坐困愁城
   definition: 形容情況艱難，沒有出路，而且無力擺脫。
 vocabulary_count: 10
-fill_in_blank: []
+fill_in_blank:
+- sentence: 這次校外教學的活動，老師希望能找到一個（　　）的方案，讓學生玩得開心，又能學到知識。
+  answer: A
+- sentence: 在眾多參賽者中，小明憑藉著出色的表現，最終（　　），贏得了冠軍。
+  answer: B
+- sentence: 為了幫助偏鄉學校的孩子有書可讀，我們正在努力（　　）資金來購買圖書。
+  answer: C
+- sentence: 看到魔術師精采的表演，觀眾們都（　　），掌聲久久不歇。
+  answer: D
+- sentence: 他以真誠的態度和幽默的談吐，很快就（　　）了班上同學的友誼。
+  answer: E
+- sentence: 當大家對這個難題束手無策時，小華突然（　　），想出了一個巧妙的解決辦法。
+  answer: F
+- sentence: 經過多年的努力，他終於在國際數學競賽中脫穎而出，成功摘下最高榮譽的（　　）。
+  answer: G
+- sentence: 為了參加這場國際機器人設計大賽，來自世界各地的頂尖好手都（　　）在這座城市。
+  answer: H
+- sentence: 這家新開的麵包店，因為用料實在、口味獨特，很快就在附近居民之間傳開了（　　）。
+  answer: I
+- sentence: 期末考將近，小明因為平時沒有好好複習，現在感覺自己（　　），不知該從何準備起。
+  answer: J
 multiple_choice:
 - question: 「如果自己能像阿嬤那樣將它們熬煮成果醬，豈不是『兩全其美』嗎？」這裡的『兩全其美』指的是哪兩件事呢？
   options:

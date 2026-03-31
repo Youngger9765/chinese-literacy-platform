@@ -56,7 +56,29 @@ vocabulary:
 - word: 籌措
   definition: 想辦法弄到（資金或物資）。
 vocabulary_count: 11
-fill_in_blank: []
+fill_in_blank:
+- sentence: 夏天喝一口冰鎮的汽水，感覺全身（　　）舒暢。
+  answer: A
+- sentence: 小明躺在草地上，（　　）著夜空中閃爍的星星，心中充滿了好奇。
+  answer: B
+- sentence: 經過幾天的野外求生，他們帶來的食物已經（　　），必須盡快尋找新的補給。
+  answer: C
+- sentence: 在選擇未來志願時，小華決定向老師（　　），聽取專業的建議。
+  answer: D
+- sentence: 經過一夜好眠，他今天早上看起來（　　），準備好迎接新的挑戰。
+  answer: E
+- sentence: 獅子的巨大吼聲讓森林裡的動物們都感到（　　），紛紛逃竄。
+  answer: F
+- sentence: 即使面對困難，我們也不應該（　　），要勇敢地去面對。
+  answer: G
+- sentence: 老師常常提醒我們，要謹慎選擇朋友，不要（　　）那些品行不佳的人。
+  answer: H
+- sentence: 爺爺說，他最大的願望就是在（　　）看到孫子們都健康快樂地成長。
+  answer: I
+- sentence: 雖然他選擇了遠赴他鄉發展事業，但絕不會（　　），他會努力讓家人過上好日子。
+  answer: J
+- sentence: 為了舉辦班級活動，班長正在積極（　　）經費和所需的物品。
+  answer: K
 multiple_choice:
 - question: 請問哪一個句子使用語詞有誤?
   options:

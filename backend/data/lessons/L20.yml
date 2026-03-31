@@ -60,7 +60,29 @@ vocabulary:
 - word: 出資
   definition: 提供資金，用在某個計劃或項目。
 vocabulary_count: 11
-fill_in_blank: []
+fill_in_blank:
+- sentence: 這個國家擁有豐富的自然資源，從熱帶雨林到高山冰川，展現了地理環境的（　　）。
+  answer: A
+- sentence: 爸爸總是提醒我們，平時要節省用水，以防乾旱來臨時能（　　）。
+  answer: B
+- sentence: 總統府周圍的警衛部署（　　），閒雜人等難以靠近。
+  answer: C
+- sentence: 昨天那場車禍非常嚴重，幸好他反應快，才得以（　　）於難。
+  answer: D
+- sentence: 颱風來臨前，沿海地區的居民都加強了（　　），以防海水倒灌。
+  answer: E
+- sentence: 電影中描繪的古戰場，到處是殘破的城牆和燃燒的村莊，呈現一片（　　）的淒涼。
+  answer: F
+- sentence: 這種酵素在低溫下能保持較高的（　　），有助於食物保鮮。
+  answer: G
+- sentence: 經過醫護人員的努力，昏迷多日的病人終於（　　）過來，讓家人鬆了一口氣。
+  answer: H
+- sentence: 這次的氣候變化非常（　　），一下子酷熱難耐，一下子又寒流來襲。
+  answer: I
+- sentence: 兩大國家的貿易戰，讓許多小企業也跟著受到影響，真是（　　）。
+  answer: J
+- sentence: 為了幫助偏鄉學校蓋圖書館，許多熱心人士紛紛（　　）贊助。
+  answer: K
 multiple_choice:
 - question: 請問哪一個句子使用語詞正確?
   options:

@@ -70,3 +70,15 @@ reading_benchmark: null
 source_file: G9-6-L53臺灣學生的閱讀力：美麗與哀愁.docx
 flags:
 - NO_VOCABULARY
+story_structure:
+- label: 主題
+  value: 臺灣學生的閱讀力現況
+- label: 重要事實 1
+  value: 臺灣學生閱讀力持續進步，2022年世界排名第五。
+- label: 重要事實 2
+  value: 疫情期間臺灣停課短，遠距教學有效，助閱讀力提升。
+- label: 重要事實 3
+  value: 城鄉差距大，偏鄉學生閱讀力與識字能力落後。
+- label: 結論
+  value: 臺灣閱讀力雖佳，但需加強偏鄉學生的閱讀能力。
+knowledge_video_url: https://www.youtube.com/watch?v=Ov2FE4TN270

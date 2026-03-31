@@ -55,7 +55,25 @@ vocabulary:
 - word: 沮喪
   definition: 心情低落到極點。
 vocabulary_count: 9
-fill_in_blank: []
+fill_in_blank:
+- sentence: 這兩款手機雖然外觀設計（　　），但內部的功能和操作系統還是有些許不同。
+  answer: A
+- sentence: 老師在我們上台前給了我們一個微笑，感覺好像獲得了無形的力量（　　），讓我們更有信心。
+  answer: B
+- sentence: 媽媽每天辛苦工作，還要照顧我們，家裡的經濟重擔都由她一個人（　　）著。
+  answer: C
+- sentence: 雖然這次考試考差了，但我決定努力準備下次，希望用優異的表現來（　　）這次的失落感。
+  answer: D
+- sentence: 為了保持身材，哥哥每天早上都會在家裡做一些伏地挺身和仰臥起坐，這種（　　）對場地和器材都沒有限制。
+  answer: E
+- sentence: 經過同學們幾個月的努力，這次為社區募款的活動（　　），遠超過預期的目標。
+  answer: F
+- sentence: 科學家們透過不斷的實驗和觀察，收集了大量的（　　），以便分析和歸納出新的發現。
+  answer: G
+- sentence: 射箭選手經過不斷練習，每次都能將箭射到靶心，他的技術可說是十分（　　）。
+  answer: H
+- sentence: 運動會比賽輸了之後，小明感到非常（　　），好幾天都提不起精神。
+  answer: I
 multiple_choice:
 - question: 請問第二段提到：「每一項獨立出來都是很不錯的徒手訓練運動」，句中『徒手』下列那一句使用不當?
   options:

@@ -137,3 +137,19 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-14-L27把手上的餅吃香一點.docx
 flags: []
+story_structure:
+- label: 主角
+  value: 作者（小時候的自己）
+- label: 主題
+  value: 換個角度看事情，讓生活更美好。
+- label: 特色
+  value: 小時候愛計較，長大後樂觀積極。
+- label: 事例
+  value: 分餅的困惑與馬克吐溫的啟示
+  sub_rows:
+  - label: 背景
+    value: 小時候在花蓮鄉下，常和姊姊分餅吃。
+  - label: 經過
+    value: 總覺得姊姊的餅比較大，後來讀《湯姆歷險記》。
+  - label: 結果
+    value: 領悟到問題不在餅大小，而在心態。

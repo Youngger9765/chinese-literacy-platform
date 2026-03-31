@@ -50,7 +50,23 @@ vocabulary:
 - word: 代謝
   definition: 生物體內物質轉換成能量的過程。
 vocabulary_count: 8
-fill_in_blank: []
+fill_in_blank:
+- sentence: 只要掌握正確的學習方法，就能讓你的努力（　　）。
+  answer: A
+- sentence: 即使是微小的力量，只要堅持不放棄，也能像（　　）一樣，最終達成目標。
+  answer: B
+- sentence: 這個城市擁有美麗的自然風光和豐富的文化遺產，真是（　　）。
+  answer: C
+- sentence: 小明做事總是很快又好，所以老師稱讚他學習（　　）很高。
+  answer: D
+- sentence: 老師鼓勵我們從小多方嘗試，為未來的（　　）發展打下基礎。
+  answer: E
+- sentence: 這次校慶運動會，參加籃球比賽的六年級學生人數，比其他年級多出許多，形成一種（　　）的狀況。
+  answer: F
+- sentence: 老師會觀察每位同學的學習狀況，並用不同的方式引導，真正做到（　　）。
+  answer: G
+- sentence: 運動能幫助身體加快（　　），讓體內的廢物更容易排出。
+  answer: H
 multiple_choice:
 - question: 下列選項的描述，何者出現「過度表徵」的現象？
   options:

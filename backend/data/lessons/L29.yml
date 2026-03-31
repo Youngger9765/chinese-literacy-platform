@@ -55,7 +55,31 @@ vocabulary:
 - word: 總結
   definition: 根據這個表格進行分析，提出結論。
 vocabulary_count: 12
-fill_in_blank: []
+fill_in_blank:
+- sentence: 那位曾經叱吒風雲的籃球選手，在球隊奪冠後選擇了（　　）。
+  answer: A
+- sentence: 為了讓這棟大樓更穩固，建築師們特別加強了地基的（　　）工程。
+  answer: B
+- sentence: 中國是一個（　　）的國家，從南到北有著截然不同的氣候和風景。
+  answer: C
+- sentence: 隨著城市發展，各種新穎的文創商店在老街區如雨後春筍般（　　），為城市增添了活力。
+  answer: D
+- sentence: 老師鼓勵我們多參加社團活動，希望能（　　）出每個同學的潛能。
+  answer: E
+- sentence: 父母親把家裡打理得很好，讓哥哥可以沒有（　　）地專心準備大學考試。
+  answer: F
+- sentence: 經過暑假的努力學習，小明的數學成績和之前簡直是（　　）。
+  answer: G
+- sentence: 他對科學實驗非常（　　），常常一待在實驗室就是好幾個小時。
+  answer: H
+- sentence: 雖然他的書桌上總是堆滿了書，但他總能把所有資料整理得（　　），一眼就能找到需要的文件。
+  answer: I
+- sentence: 為了提升生產效率，這家科技公司決定（　　）興建一座全新的智慧化廠房。
+  answer: J
+- sentence: 為了讓閱讀的資訊更清晰，我們可以依照特定的（　　），將文章內容歸納成圖表。
+  answer: K
+- sentence: 報告的最後，我們會根據前面提供的數據和分析，提出一個（　　）性的看法。
+  answer: L
 multiple_choice:
 - question: 下列語詞何者使用正確？
   options:
@@ -108,3 +132,14 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-1-L29澳洲奧運金牌的X機密.docx
 flags: []
+story_structure:
+- label: 主題
+  value: 澳洲奧運金牌的祕密
+- label: 重要事實 1
+  value: 澳洲體育系統完善，政府全力支持
+- label: 重要事實 2
+  value: 學校重視體育，家長鼓勵孩子運動
+- label: 重要事實 3
+  value: 社區俱樂部健全，運動員生涯無憂
+- label: 結論
+  value: 臺灣應學習澳洲，發展全民體育

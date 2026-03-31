@@ -132,3 +132,14 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-10-L38你看見時代的灰犀牛了嗎談人口負成長.docx
 flags: []
+story_structure:
+- label: 主題
+  value: 人口負成長這個「灰犀牛」現象
+- label: 重要事實 1
+  value: 臺灣總生育率逐年下降，是全球少子化最嚴重的國家。
+- label: 重要事實 2
+  value: 臺灣出生人數已少於死亡人數，人口開始負成長。
+- label: 重要事實 3
+  value: 人口負成長會加重年輕人的扶養負擔，但也可能帶來經濟變革。
+- label: 結論
+  value: 認識人口負成長的影響，才能更清楚規劃未來。

@@ -55,7 +55,25 @@ vocabulary:
 - word: 生理時鐘
   definition: 人體內的週期性節律功能。會讓人到了固定時間點，自動化地產生特定的生理反應。例如，時間到了，就會想睡；時間到了，就會肚子餓。
 vocabulary_count: 9
-fill_in_blank: []
+fill_in_blank:
+- sentence: 當我們學習時，應該學會從眾多資訊中（　　），只吸收真正有用的知識。
+  answer: A
+- sentence: 博物館的展覽實在太精彩了，我們在裡面欣賞了很久，幾乎（　　）。
+  answer: B
+- sentence: 為了省一點點錢，卻花費更多時間和精力，這樣的做法真是（　　）。
+  answer: C
+- sentence: 如果不改掉熬夜的習慣，就會陷入精神不濟、學習效率低落的（　　）中。
+  answer: D
+- sentence: 爸爸偶爾會和朋友在週末（　　）幾杯，但從不貪杯。
+  answer: E
+- sentence: 為了考上理想的學校，哥哥每天晚上都努力讀書，那股（　　）的精神令人佩服。
+  answer: F
+- sentence: 早上被鬧鐘吵醒時，我總是（　　），好一會兒才能清醒過來。
+  answer: G
+- sentence: 運動可以促進身體的（　　），讓我們的身體保持健康與活力。
+  answer: H
+- sentence: 每天固定時間吃飯睡覺，有助於調整我們的（　　），讓身體保持規律。
+  answer: I
 multiple_choice:
 - question: 下列語詞何者使用不正確？
   options:
