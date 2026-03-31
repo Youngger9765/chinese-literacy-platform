@@ -37,9 +37,41 @@ paragraphs:
 - 鴝鵒眼：一種硯石。這種硯石上有圓點形狀的花紋，就像是鴝鵒鳥的眼睛，所以叫「鴝鵒眼」。
 paragraph_count: 10
 char_count: 658
-vocabulary: []
-vocabulary_count: 0
-fill_in_blank: []
+vocabulary:
+- word: 京城
+  definition: 國家的首都。
+- word: 市集
+  definition: 買賣貨物的場所。
+- word: 議價
+  definition: 商議貨物的價格。
+- word: 官邸
+  definition: 官員的住宅。
+- word: 僕人
+  definition: 舊時供役於主人之家的人。
+- word: 硯臺
+  definition: 文具之一，磨墨用的器具。
+- word: 驚訝
+  definition: 感到非常意外和奇怪。
+- word: 可惜
+  definition: 值得惋惜。
+vocabulary_count: 8
+fill_in_blank:
+- sentence: 陸盧峰在（ 京城 ）等待朝廷的任用。
+  answer: A
+- sentence: 他曾在（ 市集 ）上見到一塊上好的硯臺。
+  answer: B
+- sentence: 可是（ 議價 ）沒有成功。
+  answer: C
+- sentence: 回到（ 官邸 ）之後，他還是派僕人前往。
+  answer: D
+- sentence: （ 僕人 ）拿著硯臺回來，陸公驚訝它不像自己想買的那個。
+  answer: E
+- sentence: 他想買的那個（ 硯臺 ）有個八哥眼。
+  answer: F
+- sentence: 陸公（ 驚訝 ）它不像自己想買的那個。
+  answer: G
+- sentence: 陸公感到十分（ 可惜 ）。
+  answer: H
 multiple_choice:
 - question: 關於本文，下列敘述何者正確？
   options:

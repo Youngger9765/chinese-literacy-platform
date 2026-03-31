@@ -29,9 +29,41 @@ paragraphs:
 - 如果你是偏鄉國中的校長，讀了這篇文章之後，你覺得該怎麼做才能提升偏鄉國中生的閱讀力呢？
 paragraph_count: 6
 char_count: 1049
-vocabulary: []
-vocabulary_count: 0
-fill_in_blank: []
+vocabulary:
+- word: 閱讀力
+  definition: 指一個人理解、分析、評估和運用書面資訊的能力。
+- word: 如魚得水
+  definition: 比喻得到和自己很投合的人或很適合的環境。
+- word: 挫敗
+  definition: 失敗、受挫。
+- word: 終身學習
+  definition: 指個人在生命全程中，為提升知識、技能、態度與價值觀而持續進行的學習活動。
+- word: 關鍵
+  definition: 事物最主要的部分，或指對事物起決定性作用的因素。
+- word: 評估
+  definition: 對事物的價值、狀況等進行判斷或估計。
+- word: 趨勢
+  definition: 事物發展的方向。
+- word: 逆勢推升
+  definition: 在不利或普遍下降的環境中，反而向上提升。
+vocabulary_count: 8
+fill_in_blank:
+- sentence: 閱讀能力越強，越有能力處理複雜的資訊，各領域的學習都會（　　）。
+  answer: B
+- sentence: 但只要不會讀、讀不懂，甚至讀得慢，都會造成學習的全面（　　）。
+  answer: C
+- sentence: 閱讀也是確保一個人具備（　　）能力的根本。
+  answer: D
+- sentence: 閱讀也是適應現在生活及面對未來挑戰的（　　）。
+  answer: E
+- sentence: PISA這個計畫（　　）各國15歲學生數學、閱讀、科學三大領域的學習表現。
+  answer: F
+- sentence: 從圖1可知，臺灣學生的閱讀分數呈現上升的（　　）。
+  answer: G
+- sentence: 2022年為何全球閱讀力表現下滑，臺灣卻（　　）呢？
+  answer: H
+- sentence: 臺灣學生的（　　）在近10年有明顯的進步。
+  answer: A
 multiple_choice:
 - question: 根據本文，請問下列關於閱讀的敘述何者正確？
   options:
