@@ -108,14 +108,9 @@ jobs:
       - name: Resolve staging backend URL
         id: backend-url
         run: |
-          URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
-            --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }} \
-            --format='value(status.url)' 2>/dev/null || echo "")
-          if [ -z "$URL" ]; then
-            # Fallback to production backend if staging backend doesn't exist yet
-            URL="https://lingoleap-backend-958347263320.asia-east1.run.app"
-          fi
+          # Use stable Cloud Run service URL (not gcloud describe which returns
+          # new-format URLs like oja2sffiya-de.a.run.app that break CORS)
+          URL="https://lingoleap-backend-staging-958347263320.asia-east1.run.app"
           echo "url=${URL}" >> $GITHUB_OUTPUT
           echo "Staging frontend will use backend: ${URL}"
 

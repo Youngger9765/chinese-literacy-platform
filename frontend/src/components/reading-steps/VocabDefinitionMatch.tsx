@@ -208,7 +208,7 @@ function SummaryScreen({
         {!allCorrect && (
           <button
             onClick={onRetryWrong}
-            className="rounded-xl border-2 border-[#5B4FC4] text-[#5B4FC4] px-6 py-3 font-bold hover:bg-[#5B4FC4] hover:text-white transition-all active:scale-95"
+            className="rounded-xl border-2 border-accent text-accent px-6 py-3 font-bold hover:bg-accent hover:text-white transition-all active:scale-95"
           >
             只重做錯題（{wrongAnswers.length} 題）
           </button>
@@ -221,7 +221,7 @@ function SummaryScreen({
         </button>
         <button
           onClick={onFinish}
-          className="rounded-xl bg-[#5B4FC4] px-8 py-3 text-white font-bold hover:bg-[#4a3fb0] transition-all active:scale-95 shadow-md"
+          className="rounded-xl bg-accent px-8 py-3 text-white font-bold hover:bg-accent-hover transition-all active:scale-95 shadow-md"
         >
           繼續下一步 →
         </button>
@@ -254,7 +254,7 @@ function ModeSwitcher({
           onClick={() => onChange(id)}
           className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
             current === id
-              ? 'bg-white text-[#5B4FC4] shadow-sm'
+              ? 'bg-white text-accent shadow-sm'
               : 'text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -331,8 +331,8 @@ function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoi
       </div>
 
       {/* Definition card */}
-      <div className="bg-white border-2 border-[#5B4FC4] rounded-2xl p-6 mb-6 shadow-sm">
-        <p className="text-xs font-semibold text-[#5B4FC4] uppercase tracking-wider mb-2">
+      <div className="bg-white border-2 border-accent rounded-2xl p-6 mb-6 shadow-sm">
+        <p className="text-xs font-semibold text-accent uppercase tracking-wider mb-2">
           定義
         </p>
         <p className="text-lg text-gray-800 leading-relaxed">{item?.definition}</p>
@@ -346,7 +346,7 @@ function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoi
         {options.map((vocabIdx) => (
           <button
             key={vocabIdx}
-            className="rounded-xl border-2 px-4 py-4 text-center font-bold text-xl transition-all duration-200 select-none bg-white border-gray-200 text-gray-800 hover:border-[#5B4FC4] hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+            className="rounded-xl border-2 px-4 py-4 text-center font-bold text-xl transition-all duration-200 select-none bg-white border-gray-200 text-gray-800 hover:border-accent hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
             onClick={() => handleChoice(vocabIdx)}
             disabled={pendingAdvance}
           >
@@ -488,11 +488,11 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
           let cls =
             'rounded-xl border-2 px-5 py-3 text-center font-bold text-xl select-none transition-all duration-200 ';
           if (isDragging) {
-            cls += 'border-[#5B4FC4] bg-purple-100 text-purple-900 shadow-xl scale-105 opacity-80 cursor-grabbing';
+            cls += 'border-accent bg-purple-100 text-purple-900 shadow-xl scale-105 opacity-80 cursor-grabbing';
           } else if (isTouchSelected) {
-            cls += 'border-[#5B4FC4] bg-purple-100 text-purple-900 shadow-md scale-105 cursor-pointer';
+            cls += 'border-accent bg-purple-100 text-purple-900 shadow-md scale-105 cursor-pointer';
           } else {
-            cls += 'border-gray-200 bg-white text-gray-800 hover:border-[#5B4FC4] hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-grab';
+            cls += 'border-gray-200 bg-white text-gray-800 hover:border-accent hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-grab';
           }
 
           return (
@@ -511,7 +511,7 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
         })}
       </div>
       {touchSelected !== null && (
-        <p className="text-center text-xs text-[#5B4FC4] mt-2 font-medium">
+        <p className="text-center text-xs text-accent mt-2 font-medium">
           已選「{vocab[touchSelected]?.word}」— 點選下方欄位放入
         </p>
       )}
@@ -533,11 +533,11 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
     } else if (isWrong) {
       cls += 'bg-red-50 border-red-400 animate-shake';
     } else if (isOver) {
-      cls += 'bg-purple-50 border-[#5B4FC4] scale-[1.01] shadow-md';
+      cls += 'bg-purple-50 border-accent scale-[1.01] shadow-md';
     } else if (placedVocabIdx !== null) {
       cls += 'bg-amber-50 border-amber-400';
     } else {
-      cls += 'bg-white border-dashed border-gray-300 hover:border-[#5B4FC4]';
+      cls += 'bg-white border-dashed border-gray-300 hover:border-accent';
     }
 
     return (

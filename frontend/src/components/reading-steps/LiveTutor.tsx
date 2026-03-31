@@ -4,13 +4,12 @@ import { Story, ReadingAttempt, LiveMessage, DiffToken } from '../../types';
 import { correctHomophones, isHomophone } from '../../utils/pinyin';
 import { diffCharacters, normalizeForComparison, cleanChineseText } from '../../utils/textDiff';
 import DiffDisplay from '../ui/DiffDisplay';
-import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
-import ZhuyinToggle from '../ui/ZhuyinToggle';
+import { useZhuyin } from '../../context/ZhuyinContext';
 import FontSizeControl, { useFontSize } from '../ui/FontSizeControl';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { READING_EXCELLENT, READING_PASS } from '../../utils/personaConfig';
 import RecordingButton from '../recording/RecordingButton';
-import { ParagraphStatus } from './ParagraphProgress';
+import ParagraphProgress, { ParagraphStatus } from './ParagraphProgress';
 import { evaluateReading } from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -31,6 +30,7 @@ const TIER1_POOL = [
   '讀得好清楚！下一段。',
   '好棒喔！下一段。',
   '很流利呢！下一段。',
+  '讀得很棒！下一段。',
 ];
 
 const TIER2_POOL = [
@@ -342,11 +342,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     savedProgress.current?.lineResults ?? []
   );
   const [streak, setStreak] = useState(0);
-  const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
-  const [zhuyinReady, setZhuyinReady] = useState(false);
+  const { zhuyinActive, processZhuyin } = useZhuyin();
   const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
   const [isTtsPaused, setIsTtsPaused] = useState(false);
-  const [isTtsLoading, setIsTtsLoading] = useState(false); // true while fetch is in-flight, before audio starts
   const [isAnalyzing, setIsAnalyzing] = useState(false); // legacy — kept for status bar compat
   const [isAwaitingGemini, setIsAwaitingGemini] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
@@ -378,8 +376,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   );
   // Celebration animation: shows briefly when a new paragraph is unlocked
   const [celebratingIndex, setCelebratingIndex] = useState<number | null>(null);
-  // Side panel: which completed paragraph is expanded to show diff details
-  const [expandedParagraph, setExpandedParagraph] = useState<number | null>(null);
 
   const isAdvancingRef = useRef(false);
   const isDraggingRef = useRef(false);
@@ -387,13 +383,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const dragStartWidthRef = useRef(320);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
-  // Per-paragraph refs for scroll-to behavior from side panel
-  const paragraphRefsRef = useRef<Array<HTMLDivElement | null>>([]);
-  // Ref to the main diff section in the right panel (for "查看詳細" scroll-to)
-  const diffSectionRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
-  // Ref to the currently playing TTS audio element.
-  const utteranceRef = useRef<HTMLAudioElement | null>(null);
+  // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
+  // gets collected mid-playback, silencing onend/onboundary callbacks.
+  const utteranceRef = useRef<SpeechSynthesisUtterance | HTMLAudioElement | null>(null);
   // rAF loop for TTS cursor animation — Chrome's onboundary doesn't fire per-char for Chinese.
   const ttsRafRef = useRef<number | null>(null);
   const ttsStartTimeRef = useRef<number>(0);
@@ -404,6 +397,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const rawSttRef = useRef('');               // raw STT output for logging
   const accumulatedTranscriptRef = useRef(''); // transcript preserved across auto-reconnects
   const currentLineIndexRef = useRef(0);      // mirrors currentLineIndex for async callbacks
+  const lastDiffTimeRef = useRef(0);          // throttle STT diff computation to max 400ms
   const evaluateAndRespondRef = useRef<any>(null);
 
   /* ---- scroll helpers ---- */
@@ -424,39 +418,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       .catch(() => {});
   }, []);
 
-  /* ---- initialize polyphonic processor for zhuyin ---- */
-  useEffect(() => {
-    PolyphonicProcessor.instance.loadPolyphonicData()
-      .then(() => setZhuyinReady(true))
-      .catch((err) => console.error('Failed to load zhuyin data:', err));
-  }, []);
-
-  /** Whether zhuyin rendering is active */
-  const zhuyinActive = zhuyinReady && zhuyinEnabled;
-
-  /** Process a Chinese text string through the polyphonic processor for zhuyin rendering */
-  const processZhuyin = useCallback((text: string): string => {
-    if (!zhuyinActive) return text;
-    try {
-      const processed = PolyphonicProcessor.instance.process(text);
-      return buildZhuyinString(processed);
-    } catch {
-      return text;
-    }
-  }, [zhuyinActive]);
-
   /** Pre-process each story line through the polyphonic processor for zhuyin rendering */
   const zhuyinLines = useMemo(() => {
     if (!zhuyinActive) return null;
-    try {
-      return story.content.map((line) => {
-        const processed = PolyphonicProcessor.instance.process(line);
-        return buildZhuyinString(processed);
-      });
-    } catch {
-      return null;
-    }
-  }, [story.content, zhuyinActive]);
+    return story.content.map((line) => processZhuyin(line));
+  }, [story.content, zhuyinActive, processZhuyin]);
 
   /** Compute completed/current/locked status for each paragraph.
    *  A paragraph is 'completed' only if it passed evaluation.
@@ -803,9 +769,16 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     // the previous utterance cannot stomp on the STT cursor position.
     if (utteranceRef.current) {
       const cur = utteranceRef.current;
-      cur.onended = null;
-      cur.onerror = null;
-      cur.pause();
+      if (cur instanceof HTMLAudioElement) {
+        cur.onended = null;
+        cur.onerror = null;
+        cur.pause();
+      } else {
+        (cur as SpeechSynthesisUtterance).onstart = null;
+        (cur as SpeechSynthesisUtterance).onboundary = null;
+        (cur as SpeechSynthesisUtterance).onend = null;
+        (cur as SpeechSynthesisUtterance).onerror = null;
+      }
       utteranceRef.current = null;
     }
     if (ttsRafRef.current !== null) {
@@ -865,25 +838,36 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       setStreamingUserInput(cleanChineseText(fullTranscript));
 
       // Real-time LCS diff overlay: compare full transcript against target
+      // Throttle: only recompute on isFinal events OR if 400ms has elapsed since last diff.
+      const isFinalEvent = event.results.length > 0 && event.results[event.results.length - 1].isFinal;
+      const now = Date.now();
       const targetText = story.content[currentLineIndexRef.current] || '';
-      const rawDiff = diffCharacters(fullTranscript, targetText, { useHomophone: true });
-      const overlayTokens = buildRealtimeOverlay(rawDiff.tokens);
+      let overlayTokens: ReturnType<typeof buildRealtimeOverlay> | null = null;
+      if (isFinalEvent || now - lastDiffTimeRef.current >= 400) {
+        lastDiffTimeRef.current = now;
+        const rawDiff = diffCharacters(fullTranscript, targetText, { useHomophone: true });
+        overlayTokens = buildRealtimeOverlay(rawDiff.tokens);
+      }
       // Highwater mark: once a char is correct/wrong/forgiven, never revert to unread.
       // This prevents "jumping" when STT interim transcript fluctuates.
-      setRealtimeDiffTokens(prev => {
-        if (!prev) return overlayTokens;
-        return overlayTokens.map((t, i) => {
-          const old = prev[i];
-          if (!old) return t;
-          // If previously committed (correct/wrong/forgiven/missing), keep it
-          // unless new result is also committed (allows correction on re-read)
-          if (old.type !== 'unread' && t.type === 'unread') return old;
-          return t;
+      // Skip state updates when diff was throttled (overlayTokens === null).
+      if (overlayTokens !== null) {
+        const committedTokens = overlayTokens;
+        setRealtimeDiffTokens(prev => {
+          if (!prev) return committedTokens;
+          return committedTokens.map((t, i) => {
+            const old = prev[i];
+            if (!old) return t;
+            // If previously committed (correct/wrong/forgiven/missing), keep it
+            // unless new result is also committed (allows correction on re-read)
+            if (old.type !== 'unread' && t.type === 'unread') return old;
+            return t;
+          });
         });
-      });
-      // Also update cursor for progress bar / other consumers
-      const readChars = overlayTokens.filter(t => t.type !== 'unread').length;
-      setSpeakingProgress(prev => Math.max(prev, readChars));
+        // Also update cursor for progress bar / other consumers
+        const readChars = committedTokens.filter(t => t.type !== 'unread').length;
+        setSpeakingProgress(prev => Math.max(prev, readChars));
+      }
 
       // ── 分期付款: per-sentence local eval on isFinal events ────────────────
       // Each isFinal chunk is mapped to the next un-evaluated sentence target.
@@ -1017,7 +1001,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     if (!text) return;
     cancelTts();
     setIsTtsPaused(false);
-    setIsTtsLoading(true); // show loading state while network fetch is in-flight
 
     const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -1029,7 +1012,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     };
 
     const startCursorAnimation = () => {
-      setIsTtsLoading(false); // audio started — no longer loading
       setIsTtsSpeaking(true);
       setSpeakingProgress(0);
       setRealtimeDiffTokens(null);
@@ -1049,7 +1031,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     const onSpeechEnd = () => {
       stopTtsAnimation();
-      setIsTtsLoading(false);
       setIsTtsSpeaking(false);
       setIsTtsPaused(false);
     };
@@ -1068,25 +1049,60 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         if (blob.size === 0) throw new Error('Empty TTS audio');
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
-        utteranceRef.current = audio;
+        utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
         audio.onplay = startCursorAnimation;
-        audio.onended = onSpeechEnd;
-        audio.onerror = onSpeechEnd;
+        audio.onended = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
+        audio.onerror = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
         return audio.play();
       })
       .catch(() => {
-        onSpeechEnd();
+        // Fallback: Web Speech API
+        if (!window.speechSynthesis) { onSpeechEnd(); return; }
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utteranceRef.current = utterance;
+        utterance.lang = 'zh-TW';
+        utterance.rate = 1.0;
+        const voices = window.speechSynthesis.getVoices();
+        const preferred =
+          voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
+          voices.find(v => v.lang === 'zh-TW') ||
+          voices.find(v => v.lang.startsWith('zh'));
+        if (preferred) utterance.voice = preferred;
+        utterance.onstart = startCursorAnimation;
+        utterance.onboundary = (e) => { setSpeakingProgress(e.charIndex); };
+        utterance.onend = onSpeechEnd;
+        utterance.onerror = onSpeechEnd;
+
+        const doSpeak = () => window.speechSynthesis.speak(utterance);
+        if (window.speechSynthesis.getVoices().length === 0) {
+          window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.onvoiceschanged = null;
+            doSpeak();
+          };
+        } else {
+          doSpeak();
+        }
       });
   }, [story.content, currentLineIndex]);
 
   const pauseTts = () => {
+    // Pause <audio> element if playing via Cloud TTS
     const ua = utteranceRef.current;
-    if (ua) ua.pause();
+    if (ua && ua instanceof HTMLAudioElement) {
+      ua.pause();
+    } else {
+      window.speechSynthesis?.pause();
+    }
     setIsTtsPaused(true);
   };
   const resumeTts = () => {
     const ua = utteranceRef.current;
-    if (ua) ua.play().catch(() => {});
+    if (ua && ua instanceof HTMLAudioElement) {
+      ua.play().catch(() => {});
+    } else {
+      window.speechSynthesis?.resume();
+    }
     setIsTtsPaused(false);
   };
   const stopTts = () => {
@@ -1100,7 +1116,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       ua.currentTime = 0;
     }
     cancelTts();
-    setIsTtsLoading(false);
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
   };
@@ -1111,7 +1126,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const handleFinish = () => {
     stopSession();
-    // Keep completion record — only clear on explicit redo
+    // Clear localStorage — progress is complete, will be sent to backend
+    try { localStorage.removeItem(storageKey); } catch {}
     const avgMatchRate =
       lineResults.length > 0
         ? lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length : 0;
@@ -1164,8 +1180,20 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           </div>
           <div className="flex-1" />
           <FontSizeControl />
-          <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
         </div>
+
+        {/* Paragraph progress bar */}
+        <ParagraphProgress
+          statuses={lineStatuses}
+          currentIndex={currentLineIndex}
+          onSelectParagraph={(idx) => {
+            // Only allow navigating to completed or current paragraphs (not locked)
+            if (lineStatuses[idx] === 'locked') return;
+            stopSession();
+            setRetryCount(0);
+            setCurrentLineIndex(idx);
+          }}
+        />
 
         <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8 lg:p-16'} overflow-y-auto custom-scrollbar`}>
           <div className="max-w-3xl mx-auto space-y-20">
@@ -1176,12 +1204,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               return (
                 <div
                   key={idx}
-                  ref={(el) => {
-                    paragraphRefsRef.current[idx] = el;
-                    if (idx === currentLineIndex && el) {
-                      (activeLineRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
-                    }
-                  }}
+                  ref={idx === currentLineIndex ? activeLineRef : null}
                   className={`transition-all duration-700 rounded-2xl px-8 py-12 border ${
                     isCelebrating
                       ? 'bg-emerald-50 border-emerald-400 shadow-[0_0_40px_rgba(16,185,129,0.25)] scale-[1.04]'
@@ -1220,7 +1243,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                       </span>
                     )}
                     {status === 'locked' && (
-                      <span className="ml-auto text-[10px] text-gray-400">完成前一段後解鎖</span>
+                      <span className="ml-auto text-xs text-gray-400">完成前一段後解鎖</span>
                     )}
                     {/* Inline action buttons — system read + start/submit/retry */}
                     {status !== 'locked' && !isAdvancing && (
@@ -1230,10 +1253,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                           onClick={() => {
                             if (idx !== currentLineIndex) { stopSession(); setRetryCount(0); setCurrentLineIndex(idx); }
                             if (isTtsSpeaking) {
-                              if (utteranceRef.current) { const _u = utteranceRef.current; _u.onended = null; _u.onerror = null; _u.pause(); utteranceRef.current = null; }
+                              if (utteranceRef.current) { const _u = utteranceRef.current; if (_u instanceof HTMLAudioElement) { _u.onended = null; _u.onerror = null; _u.pause(); } else { (_u as SpeechSynthesisUtterance).onend = null; (_u as SpeechSynthesisUtterance).onerror = null; (_u as SpeechSynthesisUtterance).onboundary = null; } utteranceRef.current = null; }
                               if (ttsRafRef.current !== null) { cancelAnimationFrame(ttsRafRef.current); ttsRafRef.current = null; }
                               cancelTts();
-                              setIsTtsLoading(false); setIsTtsSpeaking(false); setIsTtsPaused(false);
+                              setIsTtsSpeaking(false); setIsTtsPaused(false);
                             } else {
                               // Speak this paragraph's text via speakCurrentParagraph
                               // (navigating to that line first if needed)
@@ -1244,35 +1267,29 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                                 const text = story.content[idx];
                                 if (text) {
                                   cancelTts();
-                                  setIsTtsLoading(true); // loading while ttsApi module + fetch in-flight
+                                  setIsTtsSpeaking(true);
                                   import('../../services/ttsApi').then(({ speakText: sp }) => {
-                                    setIsTtsLoading(false);
-                                    setIsTtsSpeaking(true);
                                     sp(text).finally(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
-                                  }).catch(() => { setIsTtsLoading(false); });
+                                  });
                                 }
                               }
                             }
                           }}
-                          disabled={isTtsLoading || (idx === currentLineIndex && (isSessionActive || isPreparing))}
+                          disabled={idx === currentLineIndex && (isSessionActive || isPreparing)}
                           className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all ${
-                            isTtsLoading || (idx === currentLineIndex && (isSessionActive || isPreparing))
+                            idx === currentLineIndex && (isSessionActive || isPreparing)
                               ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                               : isTtsSpeaking && idx === currentLineIndex
                                 ? 'bg-red-100 hover:bg-red-200 text-red-600'
                                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                           }`}
-                          aria-label={isTtsLoading ? '載入中' : isTtsSpeaking && idx === currentLineIndex ? '停止朗讀' : 'AI 示範朗讀'}
-                          aria-busy={isTtsLoading}
                         >
-                          {isTtsLoading ? (
-                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                          ) : isTtsSpeaking && idx === currentLineIndex ? (
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="4" height="12" rx="1" /><rect x="14" y="6" width="4" height="12" rx="1" /></svg>
+                          {isTtsSpeaking && idx === currentLineIndex ? (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="4" height="12" rx="1" /><rect x="14" y="6" width="4" height="12" rx="1" /></svg>
                           ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" /></svg>
                           )}
-                          {isTtsLoading ? '載入中...' : isTtsSpeaking && idx === currentLineIndex ? '停止' : 'AI 朗讀'}
+                          {isTtsSpeaking && idx === currentLineIndex ? '停止' : 'AI 朗讀'}
                         </button>
                         {/* Start / Submit / Retry — context-dependent */}
                         {idx === currentLineIndex ? (
@@ -1323,9 +1340,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   {/* Paragraph text — STATIC: text and colors never change during reading.
                       Only show plain text at all times. Background highlight is on the container above. */}
                   <p
-                    className={`text-2xl lg:text-3xl leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
+                    className={`leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''} ${
                       status === 'current' ? 'text-gray-900 font-bold' : 'text-gray-600'
                     }`}
+                    style={{ fontSize: fontSizePx }}
                   >
                     {status === 'locked' ? (
                       <span className="blur-sm select-none">{zhuyinLines ? zhuyinLines[idx] : line}</span>
@@ -1478,193 +1496,45 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       >
         {/* Header */}
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-2">
-          <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">朗讀回饋</span>
+          <span className="text-xs font-black text-accent-light uppercase tracking-widest">朗讀回饋</span>
           <div className="flex-1" />
-          <span className={`text-[10px] font-bold ${isSessionActive ? 'text-green-500' : isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
+          <span className={`text-xs font-bold ${isSessionActive ? 'text-green-500' : isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
             {isSessionActive ? '● 聆聽中' : isPreparing ? '● 準備中' : '● 待機'}
           </span>
         </div>
 
         {/* Content */}
-        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2 custom-scrollbar">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3 custom-scrollbar">
 
-          {/* Per-paragraph progress list — replaces the progress bar */}
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">朗讀進度</p>
-              <span className="text-[10px] text-gray-400 tabular-nums">
-                {completedParagraphs.size} / {story.content.length} 段
-              </span>
-            </div>
-            <div className="divide-y divide-gray-50">
-              {story.content.map((_, idx) => {
-                const status = lineStatuses[idx];
-                const summary = paragraphSummaries[idx];
-                // Get the best diff tokens for this paragraph from lineResults
-                const paraResult = (() => {
-                  for (let i = lineResults.length - 1; i >= 0; i--) {
-                    if (lineResults[i].lineIndex === idx && lineResults[i].diffTokens?.length > 0) {
-                      return lineResults[i];
-                    }
-                  }
-                  return null;
-                })();
-                const isExpanded = expandedParagraph === idx;
-                const isCurrentlyActive = idx === currentLineIndex && (isSessionActive || isPreparing);
-
-                return (
-                  <div key={idx}>
-                    <button
-                      onClick={() => {
-                        // Scroll to the paragraph in the text area
-                        const el = paragraphRefsRef.current[idx];
-                        if (el) {
-                          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                        // Toggle expand for completed paragraphs
-                        if (status === 'completed' && summary) {
-                          setExpandedParagraph(prev => prev === idx ? null : idx);
-                        }
-                        // Navigate to the paragraph if it's not locked
-                        if (status !== 'locked' && idx !== currentLineIndex) {
-                          stopSession();
-                          setRetryCount(0);
-                          setCurrentLineIndex(idx);
-                        }
-                      }}
-                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors ${
-                        status === 'locked'
-                          ? 'cursor-default'
-                          : 'hover:bg-gray-50 cursor-pointer'
-                      } ${idx === currentLineIndex ? 'bg-accent/5' : ''}`}
-                    >
-                      {/* Status icon */}
-                      <span className="shrink-0">
-                        {status === 'completed' ? (
-                          <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </span>
-                        ) : status === 'current' ? (
-                          isCurrentlyActive ? (
-                            <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center">
-                              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                            </span>
-                          ) : (
-                            <span className="w-5 h-5 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center">
-                              <svg className="w-2.5 h-2.5 text-accent" fill="currentColor" viewBox="0 0 24 24">
-                                <polygon points="5,3 19,12 5,21" />
-                              </svg>
-                            </span>
-                          )
-                        ) : (
-                          <span className="w-5 h-5 rounded-full border-2 border-gray-200 flex items-center justify-center shrink-0">
-                            <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                          </span>
-                        )}
-                      </span>
-
-                      {/* Label */}
-                      <span className={`text-xs font-bold flex-1 ${
-                        status === 'completed' ? 'text-gray-700' :
-                        status === 'current' ? 'text-accent' :
-                        'text-gray-300'
-                      }`}>
-                        第 {idx + 1} 段
-                      </span>
-
-                      {/* Score badge for completed */}
-                      {status === 'completed' && summary && (
-                        <span className={`text-[10px] font-bold tabular-nums shrink-0 ${
-                          summary.tier === 1 ? 'text-emerald-600' :
-                          summary.tier === 2 ? 'text-blue-500' :
-                          'text-amber-500'
-                        }`}>
-                          {Math.round(summary.matchRate * 100)}%
-                          {summary.geminiPending && <span className="ml-0.5 text-blue-400 animate-pulse">…</span>}
-                        </span>
-                      )}
-
-                      {/* In-progress indicator */}
-                      {status === 'current' && isCurrentlyActive && (
-                        <span className="text-[10px] font-bold text-green-500 shrink-0">進行中</span>
-                      )}
-
-                      {/* Chevron for expandable completed paragraphs */}
-                      {status === 'completed' && summary && (
-                        <svg
-                          className={`w-3 h-3 text-gray-400 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-                          fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      )}
-                    </button>
-
-                    {/* Expanded: score detail + diff */}
-                    {isExpanded && summary && (
-                      <div className="px-3 pb-3 bg-gray-50 border-t border-gray-100 space-y-2">
-                        {/* Score row */}
-                        <div className="flex gap-3 pt-2 text-xs">
-                          <span className={`font-bold ${
-                            summary.tier === 1 ? 'text-emerald-600' :
-                            summary.tier === 2 ? 'text-blue-500' :
-                            'text-amber-500'
-                          }`}>
-                            正確率 {Math.round(summary.matchRate * 100)}%
-                          </span>
-                          {summary.wrongCount > 0 && (
-                            <span className="text-red-500">念錯 {summary.wrongCount} 字</span>
-                          )}
-                          {summary.missingCount > 0 && (
-                            <span className="text-gray-400">漏字 {summary.missingCount} 字</span>
-                          )}
-                        </div>
-                        {/* 查看詳細按鈕 — scroll to main diff section */}
-                        {paraResult && paraResult.diffTokens.length > 0 && idx === currentLineIndex && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              diffSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }}
-                            className="text-xs text-accent hover:text-accent-hover font-medium underline underline-offset-2"
-                          >
-                            查看詳細 ↓
-                          </button>
-                        )}
-                        {/* AI feedback */}
-                        {summary.feedback && (
-                          <p className="text-xs text-gray-600 leading-relaxed">
-                            {summary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI…</span>}
-                            {summary.feedback}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+          {/* Progress info */}
+          <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">朗讀進度</p>
+            <p className="text-sm font-bold text-gray-700">
+              第 {currentLineIndex + 1} 段 / 共 {story.content.length} 段
+            </p>
+            <p className="text-xs text-gray-500">
+              已完成 {completedParagraphs.size} 段
+              {retryCount > 0 && <span className="ml-2 text-amber-500">重試 {retryCount} 次</span>}
+            </p>
           </div>
 
           {/* Live transcript — shown while recording */}
           {isSessionActive && (
             <div className="space-y-1">
-              <p className="text-[9px] font-bold text-accent-light uppercase tracking-widest animate-pulse">即時辨識</p>
+              <p className="text-xs font-bold text-accent-light uppercase tracking-widest animate-pulse">即時辨識</p>
               <div className="bg-accent/10 border border-accent/20 rounded-xl px-3 py-2.5 text-sm text-gray-800 leading-relaxed min-h-[2.5rem]">
                 {streamingUserInput || <span className="text-gray-400">請開始朗讀…</span>}
               </div>
             </div>
           )}
 
-          {/* Diff result for current paragraph — shown after evaluation */}
+          {/* Diff result — shown after evaluation completes for current paragraph */}
           {!isSessionActive && rightPanelDiffTokens && (
-            <div ref={diffSectionRef} className="space-y-2">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">逐字比對（第 {currentLineIndex + 1} 段）</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">逐字比對</p>
                 {paragraphSummary?.geminiPending && (
-                  <span className="text-[9px] text-blue-400 font-bold animate-pulse">AI 精算中…</span>
+                  <span className="text-xs text-blue-400 font-bold animate-pulse">AI 精算中…</span>
                 )}
               </div>
               <div className="bg-white border border-gray-200 rounded-xl px-3 py-3">
@@ -1673,19 +1543,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             </div>
           )}
 
-          {/* Idle state — no recording yet and no results */}
-          {!isSessionActive && !rightPanelDiffTokens && completedParagraphs.size === 0 && (
+          {/* Idle state — no recording yet */}
+          {!isSessionActive && !rightPanelDiffTokens && !paragraphSummary && (
             <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
               <p className="text-sm text-gray-500 leading-relaxed">
                 按左側「開始朗讀」後，回饋結果會顯示在這裡
               </p>
-            </div>
-          )}
-
-          {/* Retry hint */}
-          {retryCount > 0 && (
-            <div className="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
-              <span className="text-xs text-amber-600">重試第 {retryCount} 次，加油！</span>
             </div>
           )}
 

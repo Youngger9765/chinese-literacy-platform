@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, ComprehensionResult } from '../../types';
 import { sendComprehensionChat, restartComprehensionSession, ChatResponse, SessionExpiredError } from '../../services/learningApi';
-import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
-import ZhuyinToggle from '../ui/ZhuyinToggle';
+import { useZhuyin } from '../../context/ZhuyinContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
@@ -76,8 +75,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [voiceError, setVoiceError] = useState<string | null>(null);
-  const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
-  const [zhuyinReady, setZhuyinReady] = useState(false);
   const [isVoicePreparing, setIsVoicePreparing] = useState(false);
   const [isListening, setIsListening] = useState(false);
 
@@ -121,7 +118,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const dragStartXRef = useRef(0);
   const dragStartWidthRef = useRef(384);
 
-  const zhuyinActive = zhuyinReady && zhuyinEnabled;
+  const { zhuyinActive, processZhuyin, processLines: zhuyinProcessLines } = useZhuyin();
 
   const mockQuestions = useMemo(() => {
     const source = story.content.filter((line) => line.trim().length > 0);
@@ -144,12 +141,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     setError(message ?? '已切換為離線測試模式（不需連線 GCP）。');
   }, [mockQuestions]);
 
-  useEffect(() => {
-    PolyphonicProcessor.instance.loadPolyphonicData()
-      .then(() => setZhuyinReady(true))
-      .catch((err) => console.error('Failed to load zhuyin data:', err));
-  }, []);
-
   // Cleanup speech resources when leaving this step
   useEffect(() => {
     return () => {
@@ -166,27 +157,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     };
   }, []);
 
-  const processZhuyin = useCallback((text: string): string => {
-    if (!zhuyinActive) return text;
-    try {
-      const processed = PolyphonicProcessor.instance.process(text);
-      return buildZhuyinString(processed);
-    } catch {
-      return text;
-    }
-  }, [zhuyinActive]);
-
   const zhuyinLines = useMemo(() => {
     if (!zhuyinActive) return null;
-    try {
-      return story.content.map((line) => {
-        const processed = PolyphonicProcessor.instance.process(line);
-        return buildZhuyinString(processed);
-      });
-    } catch {
-      return null;
-    }
-  }, [story.content, zhuyinActive]);
+    return zhuyinProcessLines(story.content);
+  }, [story.content, zhuyinActive, zhuyinProcessLines]);
 
   // Scroll to bottom whenever conversation updates
   useEffect(() => {
@@ -911,7 +885,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         )}
       </div>
       <div className="ml-2">
-        <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+        {/* ZhuyinToggle moved to global Header (#863) */}
       </div>
     </div>
   );
@@ -1019,17 +993,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       ) : (
         /* DESKTOP: dual-panel for AI chat; full-width for structure table / MCQ */
         <>
-          {/* Prominent centered tab bar — always visible on desktop for structure/mcq,
-              and as an overlay tab bar in right panel for chat view */}
-          {(activeTab === 'structure' || activeTab === 'mcq') && (
-            <div className="absolute top-0 left-0 right-0 z-10">
-              {renderProminentTabBar(false)}
-            </div>
-          )}
+          {/* Prominent centered tab bar — always visible on desktop, sticky at top */}
+          <div className="shrink-0 z-10">
+            {renderProminentTabBar(false)}
+          </div>
 
           {activeTab === 'structure' ? (
             /* FULL-WIDTH: 文章重點表 */
-            <div className="flex-1 flex flex-col min-h-0 pt-12">
+            <div className="flex-1 flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 custom-scrollbar">
                 <div className="max-w-5xl mx-auto">
                   <StoryStructureTable storyId={story.id} />
@@ -1048,7 +1019,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             </div>
           ) : activeTab === 'mcq' && hasMcq ? (
             /* FULL-WIDTH: 選擇題 */
-            <div className="flex-1 flex flex-col min-h-0 pt-12">
+            <div className="flex-1 flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto bg-gray-50 custom-scrollbar">
                 <div className="max-w-3xl mx-auto py-6 px-4 lg:px-0">
                   {tabCompletion.mcqDone ? (
@@ -1082,7 +1053,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     {story.filename}
                   </div>
                   <div className="flex-1" />
-                  <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+                  {/* ZhuyinToggle moved to global Header (#863) */}
                 </div>
 
                 {/* Story content — all paragraphs visible for reference */}
@@ -1121,48 +1092,15 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
               {/* RIGHT: Chat panel */}
               <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
-                {/* Prominent pill tab bar inside right panel (#844) */}
-                <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-1 px-3 py-2">
-                  <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
-                    <button
-                      onClick={() => handleTabChange('chat')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold bg-white text-accent shadow-sm transition-all"
-                    >
-                      AI 對話
-                      {tabCompletion.chatDone && (
-                        <span className="text-emerald-500 text-xs leading-none">✓</span>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => handleTabChange('structure')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
-                    >
-                      重點表
-                      {tabCompletion.structureVisited && (
-                        <span className="text-emerald-500 text-xs leading-none">✓</span>
-                      )}
-                    </button>
-                    {hasMcq && (
-                      <button
-                        onClick={() => handleTabChange('mcq')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all"
-                      >
-                        選擇題
-                        {tabCompletion.mcqDone && (
-                          <span className="text-emerald-500 text-xs leading-none">✓</span>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                  <div className="ml-1 flex items-center gap-2">
-                    <span className="text-[10px] text-gray-500">{understoodCount}/{requiredCount}</span>
-                    <button
-                      onClick={handleFinish}
-                      className="text-[10px] text-gray-500 hover:text-gray-400 transition-colors"
-                    >
-                      跳過
-                    </button>
-                  </div>
+                {/* Progress + skip bar */}
+                <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-2 px-3 py-1.5">
+                  <span className="text-xs text-gray-500">AI 對話 {understoodCount}/{requiredCount}</span>
+                  <button
+                    onClick={handleFinish}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    跳過
+                  </button>
                 </div>
 
                 {/* Chat messages */}

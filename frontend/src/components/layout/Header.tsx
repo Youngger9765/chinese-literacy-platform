@@ -14,9 +14,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLearningNav } from '../../contexts/LearningNavContext';
+import { useZhuyin } from '../../context/ZhuyinContext';
 import { hasRole } from '../../services/authApi';
 import { AppView } from '../../types';
 import NotificationBell from '../teacher/NotificationBell';
+import ZhuyinToggle from '../ui/ZhuyinToggle';
 
 export interface HeaderProps {
   /** Kept for API compatibility with AppShell — no longer used by Header itself. */
@@ -27,6 +29,7 @@ const Header: React.FC<HeaderProps> = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { selectedStory: navStory } = useLearningNav();
+  const { zhuyinEnabled, zhuyinReady, toggleZhuyin } = useZhuyin();
 
   const isTeacher = hasRole(
     user,
@@ -90,6 +93,15 @@ const Header: React.FC<HeaderProps> = () => {
             onNavigateToStudent={(classroomId) =>
               navigate(`/teacher/classroom/${classroomId}`)
             }
+          />
+        )}
+
+        {/* Zhuyin toggle — only in learning mode */}
+        {navStory && (
+          <ZhuyinToggle
+            enabled={zhuyinEnabled}
+            ready={zhuyinReady}
+            onToggle={toggleZhuyin}
           />
         )}
 

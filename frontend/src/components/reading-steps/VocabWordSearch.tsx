@@ -259,10 +259,14 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     [story.vocabulary]
   );
 
+  const [redoKey, setRedoKey] = useState(0);
+
   const { grid, placedWords, size } = useMemo(() => {
     if (vocabWords.length === 0) return { grid: [], placedWords: [], size: 0 };
     return generateGrid(vocabWords);
-  }, [vocabWords]);
+  // redoKey forces grid regeneration when student clicks 重新練習
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vocabWords, redoKey]);
 
   const wordKeysMap = useMemo(() => {
     const map = new Map<string, Set<string>>();
@@ -499,11 +503,20 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     );
   }
 
-  // #847: handleRedo available for both the completion banner and restart button
+  // #847: handleRedo — reset all game state without reloading the page (#865)
   const handleRedo = () => {
-    // #816: only clear localStorage when student explicitly requests restart
+    // Clear localStorage so completion state is gone
     try { localStorage.removeItem(storageKey); } catch {}
-    window.location.reload();
+    // Reset all game state in-place; incrementing redoKey regenerates the grid via useMemo
+    setFoundWords(new Set());
+    setHighlightedCells(new Set());
+    setDragCells(new Set());
+    setDragStart(null);
+    setFlashCells(new Set());
+    setFinished(false);
+    setFinishedElapsed(0);
+    setJustFound(null);
+    setRedoKey((k) => k + 1);
   };
 
   // Ensure minimum 44px touch targets per design guidelines; use larger cells for readability
@@ -658,13 +671,13 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                   className={
                     'flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-300 min-h-[52px] ' +
                     (found
-                      ? 'bg-[#5B4FC4]/10 border-[#5B4FC4]/40'
+                      ? 'bg-accent/10 border-accent/40'
                       : 'bg-white border-gray-200')
                   }
                 >
                   {found ? (
                     <svg
-                      className="w-5 h-5 text-[#5B4FC4] flex-shrink-0"
+                      className="w-5 h-5 text-accent flex-shrink-0"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                       aria-label="已找到"
@@ -681,7 +694,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                   <span
                     className={
                       'text-lg font-black ' +
-                      (found ? 'text-[#5B4FC4] line-through' : 'text-gray-800')
+                      (found ? 'text-accent line-through' : 'text-gray-800')
                     }
                   >
                     {pw.word}

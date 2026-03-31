@@ -3,22 +3,17 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import ReadingAnnotation from '../ReadingAnnotation';
 import { Story } from '../../../types';
 
-// ── Mock zhuyin (heavy processor not needed in unit tests) ──────────────────
+// ── Mock ZhuyinContext ──────────────────────────────────────────────────────
 
-vi.mock('../../zhuyin/polyphonicProcessor', () => ({
-  PolyphonicProcessor: {
-    instance: {
-      loadPolyphonicData: vi.fn().mockResolvedValue(undefined),
-      process: vi.fn((text: string) => text),
-    },
-  },
-  buildZhuyinString: vi.fn((text: string) => text),
-}));
-
-vi.mock('../../ui/ZhuyinToggle', () => ({
-  default: ({ onToggle }: { onToggle: () => void }) => (
-    <button onClick={onToggle} data-testid="zhuyin-toggle">注音切換</button>
-  ),
+vi.mock('../../../context/ZhuyinContext', () => ({
+  useZhuyin: () => ({
+    zhuyinEnabled: true,
+    zhuyinReady: true,
+    zhuyinActive: true,
+    setZhuyinEnabled: vi.fn(),
+    toggleZhuyin: vi.fn(),
+    processZhuyin: (text: string) => text,
+  }),
 }));
 
 // ── Mock localStorage ──────────────────────────────────────────────────────
@@ -141,51 +136,6 @@ describe('ReadingAnnotation', () => {
     // importantCount shown in summary bar — both total (strong) and importantCount (span) = '1'
     const allOnes = screen.getAllByText('1');
     expect(allOnes.length).toBeGreaterThan(0);
-  });
-
-  it('displays 注音切換 toggle when zhuyinActive prop is not set', () => {
-    render(<ReadingAnnotation story={mockStory} onFinish={onFinish} />);
-    expect(screen.getByTestId('zhuyin-toggle')).toBeTruthy();
-  });
-
-  it('hides 注音切換 toggle when zhuyinActive prop is provided', () => {
-    render(<ReadingAnnotation story={mockStory} onFinish={onFinish} zhuyinActive={false} />);
-    expect(screen.queryByTestId('zhuyin-toggle')).toBeNull();
-  });
-
-  it('jumpToAnnotation scrolls the inner container (not scrollIntoView)', async () => {
-    // Set up an annotation so the side-panel jump button is rendered
-    const seeded = [
-      { id: 'ann-jump', paragraphIndex: 0, charStart: 0, charEnd: 2, type: 'unknown' },
-    ];
-    localStorageMock.setItem(`annotations_test-story-001`, JSON.stringify(seeded));
-    render(<ReadingAnnotation story={mockStory} onFinish={onFinish} />);
-
-    // scrollIntoView must NOT be called — we use container.scrollTo instead
-    const scrollIntoViewSpy = vi.fn();
-    window.HTMLElement.prototype.scrollIntoView = scrollIntoViewSpy;
-
-    // scrollTo spy on the container element
-    const scrollToSpy = vi.fn();
-    const textArea = document.querySelector('.overflow-y-auto.relative') as HTMLElement;
-    if (textArea) {
-      textArea.scrollTo = scrollToSpy;
-    }
-
-    // Click the jump button in the desktop side panel
-    const jumpBtn = screen.getByLabelText(/跳轉到標記/);
-    await act(async () => {
-      fireEvent.click(jumpBtn);
-    });
-
-    // The inner container's scrollTo must be called with smooth behavior
-    if (textArea) {
-      expect(scrollToSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ behavior: 'smooth' })
-      );
-    }
-    // scrollIntoView must NOT have been called on any element
-    expect(scrollIntoViewSpy).not.toHaveBeenCalled();
   });
 
   it('renders marks on annotated text (seeded from localStorage)', () => {

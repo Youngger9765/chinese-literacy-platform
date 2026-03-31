@@ -3,6 +3,7 @@
 Handles sentence practice (Issue #109) and listening comprehension evaluation (Issue #251).
 """
 import logging
+import time
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -12,6 +13,7 @@ from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min
 from ...database import get_db
 from ...models.user import User
 from ...services.ai_service import generate_example_sentences, validate_student_sentence
+from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.example_sentence_cache import get_cached, set_cached
 from ...services.listening_service import evaluate_retelling
 
@@ -55,6 +57,7 @@ class ValidateSentenceResponse(BaseModel):
 async def get_example_sentences(
     payload: ExampleSentencesRequest,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Generate 2 AI example sentences for a vocabulary character.
 
@@ -81,6 +84,7 @@ async def get_example_sentences(
         )
 
     # 2. Cache miss — call AI
+    start_time = time.monotonic()
     try:
         result = await generate_example_sentences(
             character=payload.character,
@@ -91,6 +95,27 @@ async def get_example_sentences(
     except Exception as e:
         logger.error("Example sentence generation failed for char=%s: %s", payload.character, e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
+
+    # Track AI usage (Issue #874)
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+    usage = last_usage.get()
+    log_ai_usage(
+        db,
+        endpoint="/learning/sentence-practice/example-sentences",
+        step="vocab",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=True,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="vocab_example_sentences",
+    )
 
     # 3. Store in cache for next request
     try:
@@ -116,6 +141,7 @@ async def get_example_sentences(
 async def validate_sentence(
     payload: ValidateSentenceRequest,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """Validate a student's composed sentence for a vocabulary character.
 
@@ -131,6 +157,7 @@ async def validate_sentence(
             suggestion=f"請記得在句子中使用「{payload.character}」這個字。",
         )
 
+    start_time = time.monotonic()
     try:
         result = await validate_student_sentence(
             character=payload.character,
@@ -145,6 +172,27 @@ async def validate_sentence(
             payload.character, payload.student_sentence[:50], e,
         )
         raise HTTPException(status_code=503, detail="AI service unavailable")
+
+    # Track AI usage (Issue #874)
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+    usage = last_usage.get()
+    log_ai_usage(
+        db,
+        endpoint="/learning/sentence-practice/validate",
+        step="vocab_validate",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=True,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="vocab_validate_sentence",
+    )
 
     return ValidateSentenceResponse(
         is_correct=result.get("is_correct", True),
@@ -177,7 +225,7 @@ class ListeningEvaluateResponse(BaseModel):
 async def evaluate_listening_retelling(
     payload: ListeningEvaluateRequest,
     current_user: User = Depends(get_current_user),
-    _db: Session = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     """Evaluate a student's retelling of a story they listened to.
 
@@ -186,6 +234,7 @@ async def evaluate_listening_retelling(
 
     Returns a score (0-100), covered/missed key points, and feedback.
     """
+    start_time = time.monotonic()
     try:
         result = await evaluate_retelling(
             original_text=payload.original_text,
@@ -197,6 +246,27 @@ async def evaluate_listening_retelling(
     except Exception as e:
         logger.error("Listening evaluation failed: %s", e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
+
+    # Track AI usage (Issue #874)
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+    usage = last_usage.get()
+    log_ai_usage(
+        db,
+        endpoint="/learning/listening/evaluate",
+        step="listening",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=True,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+        prompt_template_id="vocab_listening_evaluate",
+    )
 
     logger.info(
         "Listening eval for user %d, story=%s: score=%.1f",

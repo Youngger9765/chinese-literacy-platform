@@ -110,16 +110,13 @@ jobs:
       - name: Get backend preview URL
         id: backend-url
         run: |
-          # Try to get the PR-specific backend, fall back to staging, then production
+          # Try to get the PR-specific backend, fall back to staging (hardcoded stable URL), then production
           URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --format='value(status.url)' 2>/dev/null || echo "")
           if [ -z "$URL" ]; then
-            URL=$(gcloud run services describe lingoleap-backend-staging \
-              --region ${{ env.REGION }} \
-              --project ${{ env.PROJECT_ID }} \
-              --format='value(status.url)' 2>/dev/null || echo "")
+            URL="https://lingoleap-backend-staging-958347263320.asia-east1.run.app"
           fi
           if [ -z "$URL" ]; then
             URL="https://lingoleap-backend-958347263320.asia-east1.run.app"

@@ -5,8 +5,7 @@ import WriteCharacter from '../stroke-order/WriteCharacter';
 import PronunciationPractice from './PronunciationPractice';
 import SentencePractice from './SentencePractice';
 import ZhuyinPhoneticGame from './ZhuyinPhoneticGame';
-import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
-import ZhuyinToggle from '../ui/ZhuyinToggle';
+import { useZhuyin } from '../../context/ZhuyinContext';
 import RadicalDecomposition from './RadicalDecomposition';
 import { getDecomposition, initGeneratedDecompositions, initRadicalMeanings } from '../../data/radicals';
 import DictionaryPanel from '../dictionary/DictionaryPanel';
@@ -39,8 +38,8 @@ function ProgressBar({ done, total }: ProgressBarProps) {
     <div className="w-full px-6 py-2 bg-white border-b border-gray-100">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-[10px] font-medium text-gray-500" aria-hidden="true">練習進度</span>
-          <span className="text-[10px] font-bold text-gray-700" aria-hidden="true">{done} / {total} 字</span>
+          <span className="text-xs font-medium text-gray-500" aria-hidden="true">練習進度</span>
+          <span className="text-xs font-bold text-gray-700" aria-hidden="true">{done} / {total} 字</span>
         </div>
         <div
           role="progressbar"
@@ -132,7 +131,7 @@ function CharCard({ label, isSuggested, isPracticed, animDelay, onClick }: CharC
         </span>
       )}
 
-      <span className="text-[9px] mt-1 opacity-50 font-medium">
+      <span className="text-xs mt-1 opacity-50 font-medium">
         {isPracticed ? '已完成' : '點我練習'}
       </span>
     </button>
@@ -166,19 +165,11 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   );
   const [pronouncedChars, setPronoucedChars] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<PracticeMode>('radical');
-  const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
-  const [zhuyinReady, setZhuyinReady] = useState(false);
   /** Character whose radical panel is currently open */
   const [radicalChar, setRadicalChar] = useState<string | null>(null);
   const [justCompleted, setJustCompleted] = useState('');
 
-  const zhuyinActive = zhuyinReady && zhuyinEnabled;
-
-  useEffect(() => {
-    PolyphonicProcessor.instance.loadPolyphonicData()
-      .then(() => setZhuyinReady(true))
-      .catch((err) => console.error('Failed to load zhuyin data:', err));
-  }, []);
+  const { zhuyinActive, processZhuyin } = useZhuyin();
 
   // ── localStorage persistence ────────────────────────────────────────
   useEffect(() => {
@@ -190,16 +181,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       }));
     } catch {}
   }, [practicedChars, phase, practicingChar, storageKey]);
-
-  const processZhuyin = useCallback((text: string): string => {
-    if (!zhuyinActive) return text;
-    try {
-      const processed = PolyphonicProcessor.instance.process(text);
-      return buildZhuyinString(processed);
-    } catch {
-      return text;
-    }
-  }, [zhuyinActive]);
 
   const needPracticeSet = useMemo(
     () => new Set(attempt?.mispronouncedWords ?? []),
@@ -228,7 +209,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
   // Pronunciation tab: all characters are candidates (no stroke-data filter needed)
   const pronunciationChars = useMemo(() => {
-    const suggested = attempt.mispronouncedWords.filter(ch => /[\u4e00-\u9fa5]/.test(ch));
+    const suggested = (attempt?.mispronouncedWords ?? []).filter(ch => /[\u4e00-\u9fa5]/.test(ch));
     if (suggested.length > 0) return suggested.slice(0, 12);
     const seen = new Set<string>();
     const optional: string[] = [];
@@ -241,7 +222,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       }
     }
     return optional.slice(0, 12);
-  }, [story.content, attempt.mispronouncedWords]);
+  }, [story.content, attempt?.mispronouncedWords]);
 
   const handlePractice = (ch: string, mode: PracticeMode = 'stroke') => {
     setPracticingChar(ch);
@@ -360,7 +341,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {story.filename} — 生字練習
         </div>
         <div className="flex-1" />
-        <span className="text-[10px] text-gray-500">
+        <span className="text-xs text-gray-500">
           {activeTab === 'radical'
             ? `部件 ${charsWithRadical.length} 字`
             : activeTab === 'stroke'
@@ -373,7 +354,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                     ? '造句練習'
                     : '注音遊戲'}
         </span>
-        <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
+        {/* ZhuyinToggle moved to global Header (#863) */}
       </div>
 
       {/* Progress bar */}
@@ -549,7 +530,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                         </span>
                       )}
 
-                      <span className="text-[9px] mt-1 opacity-60">
+                      <span className="text-xs mt-1 opacity-60">
                         {isPracticed ? '已練習' : '點我練習'}
                       </span>
                     </button>
@@ -564,7 +545,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {/* 教育部國語辭典 panel removed per product decision 2026-03-27 */}
 
           {/* Legend */}
-          <div className="flex items-center gap-4 text-[10px] text-gray-400 flex-wrap">
+          <div className="flex items-center gap-4 text-xs text-gray-400 flex-wrap">
             {needPracticeSet.size > 0 && (
               <>
                 <div className="flex items-center gap-1.5">
@@ -584,7 +565,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
           {/* Usage hint */}
           {currentChars.length > 0 && (
-            <p className="text-[10px] text-gray-400 text-center">
+            <p className="text-xs text-gray-400 text-center">
               點一下字卡即可練習{activeTab === 'stroke' ? '筆順' : '發音'}
             </p>
           )}

@@ -1,9 +1,7 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Story } from '../../types';
-import { PolyphonicProcessor, buildZhuyinString } from '../zhuyin/polyphonicProcessor';
-import ZhuyinToggle from '../ui/ZhuyinToggle';
-import { speakText as azureSpeakText, cancelTts } from '../../services/ttsApi';
+import { useZhuyin } from '../../context/ZhuyinContext';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -20,39 +18,44 @@ interface IntroProps {
 
 const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [zhuyinEnabled, setZhuyinEnabled] = useState(true);
-  const [zhuyinReady, setZhuyinReady] = useState(false);
-
-  const zhuyinActive = zhuyinReady && zhuyinEnabled;
-
-  useEffect(() => {
-    PolyphonicProcessor.instance.loadPolyphonicData()
-      .then(() => setZhuyinReady(true))
-      .catch((err) => console.error('Failed to load zhuyin data:', err));
-  }, []);
-
-  const processZhuyin = useCallback((text: string): string => {
-    if (!zhuyinActive) return text;
-    try {
-      const processed = PolyphonicProcessor.instance.process(text);
-      return buildZhuyinString(processed);
-    } catch {
-      return text;
-    }
-  }, [zhuyinActive]);
+  const { zhuyinActive, processZhuyin } = useZhuyin();
 
   const speakIntro = useCallback(() => {
-    if (!story.intro) return;
-    cancelTts();
+    if (!window.speechSynthesis || !story.intro) return;
+    window.speechSynthesis.cancel();
+
     const text = `${story.title}。作者：${story.intro.author}。${story.intro.background}`;
-    setIsSpeaking(true);
-    azureSpeakText(text)
-      .then(() => setIsSpeaking(false))
-      .catch(() => setIsSpeaking(false));
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'zh-TW';
+    utterance.rate = 0.95;
+
+    const doSpeak = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const preferred =
+        voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
+        voices.find(v => v.name.includes('Google') && v.lang === 'zh-TW') ||
+        voices.find(v => v.lang === 'zh-TW') ||
+        voices.find(v => v.lang.startsWith('zh'));
+      if (preferred) utterance.voice = preferred;
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+    };
+
+    if (window.speechSynthesis.getVoices().length === 0) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.onvoiceschanged = null;
+        doSpeak();
+      };
+    } else {
+      doSpeak();
+    }
   }, [story]);
 
   const stopSpeaking = () => {
-    cancelTts();
+    window.speechSynthesis?.cancel();
     setIsSpeaking(false);
   };
 
@@ -83,7 +86,6 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         <span className="text-gray-300 text-xs" aria-hidden="true">›</span>
         <span className="text-xs text-accent-light font-bold" aria-current="page">簡介</span>
         <div className="flex-1" />
-        <ZhuyinToggle enabled={zhuyinEnabled} ready={zhuyinReady} onToggle={() => setZhuyinEnabled(!zhuyinEnabled)} />
       </nav>
 
       {/* Main content */}
