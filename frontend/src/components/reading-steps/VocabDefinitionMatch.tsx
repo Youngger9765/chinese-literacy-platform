@@ -703,13 +703,13 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-amber-50">
+    <div className="flex-1 flex flex-col min-h-0 bg-amber-50">
       <StepHeader
         title="語詞定義配對"
         subtitle={phase === 'summary' ? '作答結果' : modeSubtitles[mode]}
       />
 
-      <div className="flex-1 overflow-auto py-6">
+      <div className="flex-1 overflow-y-auto min-h-0 py-6">
         {!hasData ? (
           <NoDataFallback onFinish={handleFinish} />
         ) : phase === 'summary' ? (
