@@ -190,27 +190,29 @@ async def get_ai_analysis(
         ai_error_type = type(e).__name__
         logger.error("AI analysis generation failed for session %d: %s", session_id, e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
-    finally:
-        latency_ms = int((time.monotonic() - start_time) * 1000)
-        usage = last_usage.get()
-        log_ai_usage(
-            db,
-            endpoint=f"/learning/sessions/{session_id}/ai-analysis",
-            step="analysis",
-            student_id=current_user.id,
-            story_title=payload.story_title,
-            session_id=session_id,
-            input_tokens=usage.input_tokens if usage else 0,
-            output_tokens=usage.output_tokens if usage else 0,
-            model=usage.model if usage else "gemini-2.5-flash",
-            latency_ms=latency_ms,
-            success=ai_success,
-            error_type=ai_error_type,
-            model_version=usage.model_version if usage else None,
-            prompt_char_count=usage.prompt_char_count if usage else None,
-            response_char_count=usage.response_char_count if usage else None,
-            content_filtered=usage.content_filtered if usage else False,
-        )
+
+    # Track AI usage AFTER try/except — not in finally (FAIL-2 review fix).
+    # In finally, the DB session may be in an inconsistent state after HTTPException.
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+    usage = last_usage.get()
+    log_ai_usage(
+        db,
+        endpoint=f"/learning/sessions/{session_id}/ai-analysis",
+        step="analysis",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        session_id=session_id,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=ai_success,
+        error_type=ai_error_type,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+    )
 
     # Cache the result (versioned + enrichment fingerprint — #540)
     session.ai_analysis = _wrap_ai_analysis_for_cache(analysis, payload)
@@ -273,26 +275,27 @@ async def get_ai_analysis_standalone(
         ai_error_type = type(e).__name__
         logger.error("Standalone AI analysis generation failed: %s", e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
-    finally:
-        latency_ms = int((time.monotonic() - start_time) * 1000)
-        usage = last_usage.get()
-        log_ai_usage(
-            None,
-            endpoint="/learning/ai-analysis",
-            step="analysis",
-            student_id=current_user.id,
-            story_title=payload.story_title,
-            input_tokens=usage.input_tokens if usage else 0,
-            output_tokens=usage.output_tokens if usage else 0,
-            model=usage.model if usage else "gemini-2.5-flash",
-            latency_ms=latency_ms,
-            success=ai_success,
-            error_type=ai_error_type,
-            model_version=usage.model_version if usage else None,
-            prompt_char_count=usage.prompt_char_count if usage else None,
-            response_char_count=usage.response_char_count if usage else None,
-            content_filtered=usage.content_filtered if usage else False,
-        )
+
+    # Track AI usage AFTER try/except — not in finally (FAIL-2 review fix).
+    latency_ms = int((time.monotonic() - start_time) * 1000)
+    usage = last_usage.get()
+    log_ai_usage(
+        None,
+        endpoint="/learning/ai-analysis",
+        step="analysis",
+        student_id=current_user.id,
+        story_title=payload.story_title,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        model=usage.model if usage else "gemini-2.5-flash",
+        latency_ms=latency_ms,
+        success=ai_success,
+        error_type=ai_error_type,
+        model_version=usage.model_version if usage else None,
+        prompt_char_count=usage.prompt_char_count if usage else None,
+        response_char_count=usage.response_char_count if usage else None,
+        content_filtered=usage.content_filtered if usage else False,
+    )
 
     logger.info("Generated standalone AI analysis for user %d", current_user.id)
     return AIAnalysisResponse(**analysis)

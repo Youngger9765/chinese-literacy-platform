@@ -116,24 +116,40 @@ def _resolve_context(
     db: Session | None,
     student_id: int | None = None,
     story_id: str | None = None,
+    # Caller-provided values to avoid re-querying the User table (review concern fix).
+    user_display_name: str | None = None,
+    user_role: str | None = None,
 ) -> dict:
     """Resolve denormalized dimension values from related tables.
 
     Best-effort: if any lookup fails, the field is simply omitted (left NULL).
     Never let this crash the main request.
+
+    When ``user_display_name`` is provided (from ``current_user`` in the route
+    handler), the User table query is skipped entirely.
     """
     result: dict = {}
     if not db:
+        # Even without a DB session, accept caller-provided values.
+        if user_display_name:
+            result["student_name"] = user_display_name
         return result
 
     try:
         if student_id:
-            from ..models.user import User
+            if user_display_name:
+                # Route handler already resolved the user — skip DB query.
+                result["student_name"] = user_display_name
+                # grade_level still needs a DB lookup if we don't have it.
+                # Acceptable trade-off: skip for now, populate when we add
+                # grade_level to the current_user dependency.
+            else:
+                from ..models.user import User
 
-            user = db.query(User).filter(User.id == student_id).first()
-            if user:
-                result["student_name"] = getattr(user, "display_name", None) or getattr(user, "username", None)
-                result["grade_level"] = getattr(user, "grade_level", None)
+                user = db.query(User).filter(User.id == student_id).first()
+                if user:
+                    result["student_name"] = getattr(user, "display_name", None) or getattr(user, "username", None)
+                    result["grade_level"] = getattr(user, "grade_level", None)
 
                 # TODO: resolve teacher_id, teacher_name, org_id, school_name,
                 # classroom_name from ClassroomMembership -> Classroom -> teacher.
@@ -190,6 +206,8 @@ def log_ai_usage(
     response_payload: dict | None = None,
     request_id: str | None = None,
     parent_request_id: str | None = None,
+    # Caller-provided user info to avoid re-querying (review concern fix)
+    user_display_name: str | None = None,
 ) -> None:
     """Log an AI API call to both DB and structured logs.
 
@@ -207,7 +225,10 @@ def log_ai_usage(
         request_id = str(uuid.uuid4())
 
     # Best-effort denormalized context resolution
-    ctx = _resolve_context(db, student_id=student_id, story_id=story_id)
+    ctx = _resolve_context(
+        db, student_id=student_id, story_id=story_id,
+        user_display_name=user_display_name, user_role=user_role,
+    )
 
     # 1. DB write (non-blocking, don't fail the request if logging fails)
     if db is not None:
@@ -260,14 +281,12 @@ def log_ai_usage(
                 request_id=request_id,
                 parent_request_id=parent_request_id,
             )
-            db.add(record)
-            db.commit()
+            # Use SAVEPOINT so a failure here only rolls back the usage insert,
+            # not the caller's outer transaction (FAIL-1 review fix).
+            with db.begin_nested():
+                db.add(record)
         except Exception as e:
             logger.warning("Failed to write AI usage to DB: %s", e)
-            try:
-                db.rollback()
-            except Exception:
-                pass
 
     # 2. Structured logging (always, even if DB fails or db is None)
     logger.info(

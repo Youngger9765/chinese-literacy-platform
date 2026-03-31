@@ -17,7 +17,7 @@ from google import genai
 from google.genai import types as genai_types
 
 from ..config import settings
-from .ai_usage_tracker import capture_usage
+from .ai_usage_tracker import capture_usage, last_usage
 from .input_sanitizer import sanitize_ai_input, sanitize_dialogue_turns
 from .persona import TUTOR_PERSONA
 
@@ -231,6 +231,10 @@ async def generate_structured_response(
         - Disable automatic function calling because this helper never passes
             tools and does not need AFC orchestration overhead.
     """
+    # Reset usage context var so error paths don't log stale data from
+    # a previous request (FAIL-3 review fix).
+    last_usage.set(None)
+
     client = _get_client()
     last_error = None
 
@@ -423,6 +427,9 @@ async def generate_socratic_question(
     Returns:
         A single Socratic question as a string.
     """
+    # Reset usage context var so error paths don't log stale data (FAIL-3 review fix).
+    last_usage.set(None)
+
     system_prompt = f"""{TUTOR_PERSONA}
 你擅長用蘇格拉底式問答引導學生思考課文。
 
