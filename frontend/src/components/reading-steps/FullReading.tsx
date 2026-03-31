@@ -6,6 +6,7 @@ import DiffDisplay from '../ui/DiffDisplay';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
+import { useResizablePanel } from '../../hooks/useResizablePanel';
 
 /* ------------------------------------------------------------------ */
 
@@ -44,9 +45,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
   const recognitionRef            = useRef<any>(null);
   const currentTranscriptRef      = useRef('');
   const accumulatedTranscriptRef  = useRef('');
-  const isDraggingRef             = useRef(false);
-  const dragStartXRef             = useRef(0);
-  const dragStartWidthRef         = useRef(0);
   const startTimeRef              = useRef<number>(0);
 
   const fullText = useMemo(() => story.content.join(''), [story.content]);
@@ -68,46 +66,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
   }, [story.content, zhuyinActive, processZhuyin]);
 
   /* ---- Resizable panel ---- */
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current) return;
-      const delta = dragStartXRef.current - e.clientX;
-      onPanelWidthChange(Math.max(240, Math.min(600, dragStartWidthRef.current + delta)));
-    };
-    const onMouseUp = () => {
-      isDraggingRef.current = false;
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (!isDraggingRef.current) return;
-      const delta = dragStartXRef.current - e.touches[0].clientX;
-      onPanelWidthChange(Math.max(240, Math.min(600, dragStartWidthRef.current + delta)));
-    };
-    const onTouchEnd = () => {
-      isDraggingRef.current = false;
-      document.body.style.userSelect = '';
-    };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-    window.addEventListener('touchmove', onTouchMove);
-    window.addEventListener('touchend', onTouchEnd);
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
-    };
-  }, []);
-
-  const onDividerMouseDown = (e: React.MouseEvent) => {
-    isDraggingRef.current = true;
-    dragStartXRef.current = e.clientX;
-    dragStartWidthRef.current = rightPanelWidth;
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
-  };
+  const { onDividerMouseDown, onDividerTouchStart } = useResizablePanel(rightPanelWidth, onPanelWidthChange);
 
   /* ---- Cleanup ---- */
   useEffect(() => {
@@ -314,12 +273,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       {!isMobile && (
         <div
           onMouseDown={onDividerMouseDown}
-          onTouchStart={(e) => {
-            isDraggingRef.current = true;
-            dragStartXRef.current = e.touches[0].clientX;
-            dragStartWidthRef.current = rightPanelWidth;
-            document.body.style.userSelect = 'none';
-          }}
+          onTouchStart={onDividerTouchStart}
           className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
         />
       )}
