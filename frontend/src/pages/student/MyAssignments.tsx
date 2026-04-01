@@ -35,6 +35,8 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: 'all', label: '全部' },
 ];
 
+const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
+
 interface ProgressStep {
   id: string;
   label: string;
@@ -287,6 +289,19 @@ const MyAssignments: React.FC = () => {
       // story_id is set for YAML texts; text_id for DB texts
       const textKey = result.story_id ?? String(result.text_id);
       try {
+        sessionStorage.setItem(
+          ACTIVE_ASSIGNMENT_CONTEXT_KEY,
+          JSON.stringify({
+            assignmentId,
+            userId: user ? String(user.id) : null,
+            storyKey: String(textKey),
+            startedAt: Date.now(),
+          }),
+        );
+      } catch {
+        // non-fatal
+      }
+      try {
         sessionStorage.setItem(`db-session-${textKey}`, String(result.session_id));
       } catch {
         // non-fatal
@@ -387,6 +402,19 @@ const MyAssignments: React.FC = () => {
             }
             // story_id is set for YAML texts; text_id for DB texts
             const textKey = a.story_id ?? a.text_id;
+            try {
+              sessionStorage.setItem(
+                ACTIVE_ASSIGNMENT_CONTEXT_KEY,
+                JSON.stringify({
+                  assignmentId: a.assignment_id,
+                  userId: user ? String(user.id) : null,
+                  storyKey: String(textKey),
+                  startedAt: Date.now(),
+                }),
+              );
+            } catch {
+              // non-fatal
+            }
             if (sessionId != null) {
               try {
                 sessionStorage.setItem(`db-session-${textKey}`, String(sessionId));

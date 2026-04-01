@@ -13,7 +13,18 @@ import {
 
 const ReportPage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
-  const { selectedStory, session, handleRetry, handleSessionComplete, dbSessionId, assignmentReadingGoals } = useLearningContext();
+  const {
+    selectedStory,
+    session,
+    handleRetry,
+    handleSessionComplete,
+    dbSessionId,
+    assignmentReadingGoals,
+    isAssignmentReadyForSubmit,
+    missingAssignmentSteps,
+    firstIncompleteStepPath,
+    hasActiveAssignment,
+  } = useLearningContext();
   const { user, token } = useAuth();
   const navigate = useNavigate();
 
@@ -26,11 +37,13 @@ const ReportPage: React.FC = () => {
 
   // Clear active session from localStorage when report is reached
   useEffect(() => {
+    if (hasActiveAssignment && !isAssignmentReadyForSubmit) return;
     handleSessionComplete();
-  }, [handleSessionComplete]);
+  }, [handleSessionComplete, hasActiveAssignment, isAssignmentReadyForSubmit]);
 
   // Award XP once we have a confirmed backend session ID
   useEffect(() => {
+    if (hasActiveAssignment && !isAssignmentReadyForSubmit) return;
     if (!dbSessionId || !token || !user?.id) return;
 
     const readingAccuracy = session?.readingAttempt?.accuracy;
@@ -65,10 +78,11 @@ const ReportPage: React.FC = () => {
       });
     // Run once per report page load — dbSessionId is the stable identifier
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dbSessionId]);
+  }, [dbSessionId, hasActiveAssignment, isAssignmentReadyForSubmit]);
 
   // Fetch 3-level comprehension scores when dialogue data is available (Issue #243)
   useEffect(() => {
+    if (hasActiveAssignment && !isAssignmentReadyForSubmit) return;
     if (!dbSessionId || !token || !selectedStory || !session?.comprehensionResult) return;
 
     setComprehensionScoresLoading(true);
@@ -102,7 +116,46 @@ const ReportPage: React.FC = () => {
       .finally(() => setComprehensionScoresLoading(false));
   // Run once per report page load — dbSessionId is the stable identifier
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dbSessionId]);
+  }, [dbSessionId, hasActiveAssignment, isAssignmentReadyForSubmit]);
+
+  if (hasActiveAssignment && !isAssignmentReadyForSubmit) {
+    return (
+      <div className="flex-1 overflow-y-auto p-8 max-w-3xl mx-auto w-full">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
+          <h2 className="text-xl font-bold text-amber-900 mb-2">作業尚未完成</h2>
+          <p className="text-sm text-amber-800 mb-4">
+            完成所有必做關卡後，才可查看報告並標記為已繳交。
+          </p>
+          <div className="bg-white border border-amber-100 rounded-xl p-4 mb-5">
+            <p className="text-xs font-semibold text-amber-700 mb-2">尚未完成關卡</p>
+            <div className="flex flex-wrap gap-2">
+              {missingAssignmentSteps.map((s) => (
+                <span key={s.id} className="inline-flex px-2.5 py-1 rounded-full text-xs bg-amber-100 text-amber-800">
+                  {s.label}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => navigate(`/learn/${storyId}/${firstIncompleteStepPath}`)}
+              className="px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-semibold"
+            >
+              繼續未完成關卡
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/assignments')}
+              className="px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50"
+            >
+              返回我的作業
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleDismissToast = useCallback(() => {
     setShowXpToast(false);

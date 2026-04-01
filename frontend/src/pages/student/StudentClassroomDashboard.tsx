@@ -26,6 +26,8 @@ import {
 import { Skeleton, SkeletonText } from '../../components/ui/Skeleton';
 import LoadingIndicator from '../../components/ui/LoadingIndicator';
 
+const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
+
 // ---------------------------------------------------------------------------
 // Assignment status badge
 // ---------------------------------------------------------------------------
@@ -207,7 +209,7 @@ const ClassroomCard: React.FC<ClassroomCardProps> = ({
 // ---------------------------------------------------------------------------
 
 const StudentClassroomDashboard: React.FC = () => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
 
   const [classrooms, setClassrooms] = useState<StudentEnrolledClassroom[]>([]);
@@ -244,9 +246,27 @@ const StudentClassroomDashboard: React.FC = () => {
       const result = await startAssignment(token, assignmentId);
       sessionStorage.setItem('activeAssignmentId', String(assignmentId));
       if (result.story_id) {
-        navigate(`/learn/${result.story_id}/intro`);
+        sessionStorage.setItem(
+          ACTIVE_ASSIGNMENT_CONTEXT_KEY,
+          JSON.stringify({
+            assignmentId,
+            userId: user ? String(user.id) : null,
+            storyKey: String(result.story_id),
+            startedAt: Date.now(),
+          }),
+        );
+        navigate(`/learn/${result.story_id}/reading-annotation`);
       } else if (result.text_id) {
-        navigate(`/learn/${result.text_id}/intro`);
+        sessionStorage.setItem(
+          ACTIVE_ASSIGNMENT_CONTEXT_KEY,
+          JSON.stringify({
+            assignmentId,
+            userId: user ? String(user.id) : null,
+            storyKey: String(result.text_id),
+            startedAt: Date.now(),
+          }),
+        );
+        navigate(`/learn/${result.text_id}/reading-annotation`);
       } else {
         navigate('/assignments');
       }

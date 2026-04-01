@@ -3,6 +3,7 @@ import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAc
 import { SESSION_UNAUTHORIZED_EVENT } from '../services/sessionGuard';
 
 const TOKEN_KEY = 'lingoleap_token';
+const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -109,6 +110,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
+    try {
+      sessionStorage.removeItem('activeAssignmentId');
+      sessionStorage.removeItem('activeAssignmentGoals');
+      sessionStorage.removeItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
+
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < sessionStorage.length; i += 1) {
+        const key = sessionStorage.key(i);
+        if (!key) continue;
+        if (key.startsWith('db-session-')) keysToRemove.push(key);
+      }
+      keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+    } catch {
+      // non-fatal
+    }
     setToken(null);
     setUser(null);
     setMustChangePassword(false);

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Outlet, useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import {
   Story,
@@ -17,6 +17,7 @@ import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
 import { STEP_PATH_TO_NUMBER as STEP_CONFIG_PATH_TO_NUMBER } from '../config/stepConfig';
+import { ACTIVE_STEPS } from '../config/stepConfig';
 import { useIdleTimer } from '../hooks/useIdleTimer';
 import { useProgressSync } from '../hooks/useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
@@ -97,6 +98,14 @@ export interface LearningContext {
     markCompleted?: boolean;
     immediate?: boolean;
   }) => void;
+  /** Whether current assignment has completed all required steps (except report). */
+  isAssignmentReadyForSubmit: boolean;
+  /** Missing required assignment steps used by report blocking UI. */
+  missingAssignmentSteps: Array<{ id: string; label: string }>;
+  /** First incomplete step path to resume from. */
+  firstIncompleteStepPath: string;
+  /** Whether this learning flow is currently tied to an active assignment. */
+  hasActiveAssignment: boolean;
 }
 
 /**
@@ -114,6 +123,7 @@ const STEP_NUMBER_TO_PATH: Record<number, string> = Object.fromEntries(
  * Children access this state via useOutletContext<LearningContext>().
  */
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 
 const LearningLayout: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -195,6 +205,28 @@ const LearningLayout: React.FC = () => {
     steps_completed: [],
     step_data: {},
   });
+
+  const requiredAssignmentSteps = useMemo(
+    () => ACTIVE_STEPS.filter((s) => s.id !== 'report').map((s) => ({ id: s.id, label: s.label })),
+    [],
+  );
+  const completedStepsSet = useMemo(
+    () => new Set(stepProgressState.steps_completed ?? []),
+    [stepProgressState.steps_completed],
+  );
+  const missingAssignmentSteps = useMemo(
+    () => requiredAssignmentSteps.filter((s) => !completedStepsSet.has(s.id)),
+    [requiredAssignmentSteps, completedStepsSet],
+  );
+  const isAssignmentReadyForSubmit = missingAssignmentSteps.length === 0;
+  const firstIncompleteStepPath = missingAssignmentSteps[0]?.id ?? 'reading-annotation';
+  const hasActiveAssignment = useMemo(() => {
+    try {
+      return Boolean(sessionStorage.getItem('activeAssignmentId'));
+    } catch {
+      return false;
+    }
+  }, [storyId]);
 
   // ── Step progress DB sync (Issue #660) ──────────────────────────────────
   const { syncProgress, flushProgress } = useProgressSync({
@@ -719,22 +751,59 @@ const LearningLayout: React.FC = () => {
 
   /** Called when a session is fully completed (report viewed). Auto-submits if assignment active. */
   const handleSessionComplete = useCallback(() => {
-    clearPersistedSession();
-
     // Auto-submit assignment if this session was started from an assignment.
     const assignmentIdStr = sessionStorage.getItem('activeAssignmentId');
-    if (assignmentIdStr && token) {
-      const assignmentId = parseInt(assignmentIdStr, 10);
-      if (!isNaN(assignmentId)) {
-        sessionStorage.removeItem('activeAssignmentId');
-        sessionStorage.removeItem('activeAssignmentGoals');
-        // Fire-and-forget: best-effort auto-submit; errors are silent to avoid disrupting the report view.
-        submitAssignment(token, assignmentId).catch((err) => {
-          console.warn('[LearningLayout] Auto-submit assignment failed:', err);
-        });
+    const contextRaw = sessionStorage.getItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
+
+    let shouldSubmit = false;
+    let assignmentId: number | null = null;
+    if (assignmentIdStr) {
+      const parsed = parseInt(assignmentIdStr, 10);
+      if (!isNaN(parsed)) assignmentId = parsed;
+    }
+
+    if (assignmentId != null && contextRaw && token && user && storyId) {
+      try {
+        const context = JSON.parse(contextRaw) as {
+          assignmentId?: number;
+          userId?: string | null;
+          storyKey?: string | null;
+        };
+        shouldSubmit = (
+          context.assignmentId === assignmentId
+          && String(context.userId ?? '') === String(user.id)
+          && String(context.storyKey ?? '') === String(storyId)
+          && isAssignmentReadyForSubmit
+        );
+      } catch {
+        shouldSubmit = false;
       }
     }
-  }, [clearPersistedSession, token]);
+
+    // Assignment not complete yet: keep progress/context; do not auto-submit.
+    if (assignmentId != null && !shouldSubmit) {
+      return;
+    }
+
+    clearPersistedSession();
+
+    sessionStorage.removeItem('activeAssignmentId');
+    sessionStorage.removeItem('activeAssignmentGoals');
+    sessionStorage.removeItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
+
+    if (shouldSubmit && token && assignmentId != null) {
+      // Fire-and-forget: best-effort auto-submit; errors are silent to avoid disrupting the report view.
+      submitAssignment(token, assignmentId).catch((err) => {
+        console.warn('[LearningLayout] Auto-submit assignment failed:', err);
+      });
+    }
+  }, [
+    clearPersistedSession,
+    token,
+    user,
+    storyId,
+    isAssignmentReadyForSubmit,
+  ]);
 
   /** Mark a paragraph as completed in both local state and session (Issue #85).
    * Also persists to localStorage so progress survives page refresh (Issue #689). */
@@ -815,6 +884,10 @@ const LearningLayout: React.FC = () => {
     flushProgress,
     stepProgressData: stepProgressState,
     saveStepProgressPatch,
+    isAssignmentReadyForSubmit,
+    missingAssignmentSteps,
+    firstIncompleteStepPath,
+    hasActiveAssignment,
   };
 
   return (
