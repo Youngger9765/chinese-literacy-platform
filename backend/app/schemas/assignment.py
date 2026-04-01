@@ -121,6 +121,10 @@ class StudentAssignmentResponse(BaseModel):
     due_date: datetime | None
     classroom_name: str
     status: str
+    session_id: int | None = None
+    # Step progress persistence (Issue #660)
+    current_step: str | None = None
+    steps_completed: list[str] = Field(default_factory=list)
     submitted_at: datetime | None
     score: float | None
     teacher_feedback: str | None  # per-student teacher feedback (Issue #424)

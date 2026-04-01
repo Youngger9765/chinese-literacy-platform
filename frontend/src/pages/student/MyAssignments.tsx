@@ -9,23 +9,7 @@ import {
 } from '../../services/assignmentApi';
 import { fetchLearningSessions, type LearningSummary } from '../../services/learningApi';
 import { loadActiveSession } from '../../services/api';
-
-const STEP_NUMBER_TO_PATH: Record<number, string> = {
-  1: 'intro',
-  2: 'tutor',
-  3: 'comprehension',
-  4: 'vocab',
-  5: 'dictation',
-  6: 'full-reading',
-  7: 'report',
-};
-
-const TOTAL_ASSIGNMENT_STEPS = 7;
-
-function clampStep(step: number): number {
-  if (!Number.isFinite(step)) return 1;
-  return Math.min(TOTAL_ASSIGNMENT_STEPS, Math.max(1, Math.floor(step)));
-}
+import { ACTIVE_STEPS } from '../../config/stepConfig';
 
 function buildLatestSessionMap(items: LearningSummary[]): Record<string, LearningSummary> {
   const latestByStory: Record<string, LearningSummary> = {};
@@ -62,6 +46,17 @@ const MyAssignments: React.FC = () => {
   const [startingId, setStartingId] = useState<number | null>(null);
   const [sessionByStorySlug, setSessionByStorySlug] = useState<Record<string, LearningSummary>>({});
 
+  const assignmentSteps = useMemo(
+    () => ACTIVE_STEPS,
+    [],
+  );
+  const defaultStepPath = assignmentSteps[0]?.id ?? 'reading-annotation';
+  const stepIdSet = useMemo(() => new Set(assignmentSteps.map((s) => s.id)), [assignmentSteps]);
+  const stepNumberToPath = useMemo(
+    () => Object.fromEntries(assignmentSteps.map((s) => [s.dbStepNumber, s.id])),
+    [assignmentSteps],
+  );
+
   const activeSession = useMemo(
     () => (user ? loadActiveSession(String(user.id)) : null),
     [user],
@@ -70,22 +65,42 @@ const MyAssignments: React.FC = () => {
   const getAssignmentStorySlug = (a: StudentAssignmentResponse): string | null =>
     a.story_slug ?? null;
 
+  const getAssignmentTextKey = (a: StudentAssignmentResponse): string =>
+    String(a.story_id ?? a.text_id ?? '');
+
   const getLinkedSession = (a: StudentAssignmentResponse): LearningSummary | null => {
     const storySlug = getAssignmentStorySlug(a);
     if (!storySlug) return null;
     return sessionByStorySlug[storySlug] ?? null;
   };
 
-  const getEstimatedCurrentStep = (a: StudentAssignmentResponse): number => {
+  const getCompletedSteps = (a: StudentAssignmentResponse): Set<string> => {
+    if (a.status === 'submitted' || a.status === 'graded') {
+      return new Set(assignmentSteps.map((step) => step.id));
+    }
+    return new Set(
+      (a.steps_completed ?? []).filter((stepKey) => stepIdSet.has(stepKey)),
+    );
+  };
+
+  const getResumeStepPath = (a: StudentAssignmentResponse): string => {
+    const textKey = getAssignmentTextKey(a);
+    if (activeSession && activeSession.storyId === textKey) {
+      const activeSessionPath = stepNumberToPath[activeSession.currentStep];
+      if (activeSessionPath) return activeSessionPath;
+    }
+
+    if (a.current_step && stepIdSet.has(a.current_step)) {
+      return a.current_step;
+    }
+
     const linkedSession = getLinkedSession(a);
     if (linkedSession) {
-      return clampStep(linkedSession.current_step);
+      const linkedPath = stepNumberToPath[linkedSession.current_step];
+      if (linkedPath) return linkedPath;
     }
-    const storySlug = getAssignmentStorySlug(a);
-    if (activeSession && storySlug && activeSession.storyId === storySlug) {
-      return clampStep(activeSession.currentStep);
-    }
-    return 1;
+
+    return defaultStepPath;
   };
 
   const loadAssignments = useCallback(async () => {
@@ -168,7 +183,12 @@ const MyAssignments: React.FC = () => {
       );
       // story_id is set for YAML texts; text_id for DB texts
       const textKey = result.story_id ?? String(result.text_id);
-      navigate(`/learn/${textKey}/intro`);
+      try {
+        sessionStorage.setItem(`db-session-${textKey}`, String(result.session_id));
+      } catch {
+        // non-fatal
+      }
+      navigate(`/learn/${textKey}/${defaultStepPath}`);
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -238,7 +258,7 @@ const MyAssignments: React.FC = () => {
     if (a.status === 'in_progress') {
       return (
         <button
-          onClick={() => {
+          onClick={async () => {
             // Restore assignment ID so LearningLayout can auto-submit on completion.
             sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
             // Restore reading goals so AssessmentReport can show goal comparison (Issue #414).
@@ -252,15 +272,27 @@ const MyAssignments: React.FC = () => {
                 effective_accuracy: a.effective_accuracy,
               }),
             );
+            let sessionId = a.session_id;
+            // Backfill missing linkage for legacy in_progress rows without session_id.
+            if (sessionId == null && token) {
+              try {
+                const started = await startAssignment(token, a.assignment_id);
+                sessionId = started.session_id;
+              } catch {
+                // non-fatal: proceed with existing data paths
+              }
+            }
             // story_id is set for YAML texts; text_id for DB texts
             const textKey = a.story_id ?? a.text_id;
-            // Resume from last saved step if available, otherwise use latest server step.
-            const currentStep = getEstimatedCurrentStep(a);
-            const serverStepPath = STEP_NUMBER_TO_PATH[currentStep] ?? 'intro';
-            const savedStep = activeSession && activeSession.storyId === String(textKey)
-              ? STEP_NUMBER_TO_PATH[clampStep(activeSession.currentStep)]
-              : null;
-            navigate(`/learn/${textKey}/${savedStep || serverStepPath}`);
+            if (sessionId != null) {
+              try {
+                sessionStorage.setItem(`db-session-${textKey}`, String(sessionId));
+              } catch {
+                // non-fatal
+              }
+            }
+            const resumeStepPath = getResumeStepPath(a);
+            navigate(`/learn/${textKey}/${resumeStepPath}`);
           }}
           className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
         >
@@ -354,6 +386,8 @@ const MyAssignments: React.FC = () => {
           /* Assignment cards */
           <div className="space-y-3">
             {filteredAssignments.map((a) => {
+              const completedSteps = getCompletedSteps(a);
+              const currentStepPath = a.status === 'in_progress' ? getResumeStepPath(a) : null;
               return (
                 <div
                   key={a.assignment_id}
@@ -412,6 +446,41 @@ const MyAssignments: React.FC = () => {
                         <div className="mt-2 px-2.5 py-2 bg-purple-50 border border-purple-100 rounded-lg">
                           <p className="text-xs font-medium text-purple-700 mb-0.5">老師評語</p>
                           <p className="text-xs text-gray-700">{a.teacher_feedback}</p>
+                        </div>
+                      )}
+
+                      {assignmentSteps.length > 0 && (
+                        <div className="mt-2.5">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-[11px] text-gray-500">學習關卡進度</p>
+                            <p className="text-[11px] text-gray-400">
+                              {completedSteps.size}/{assignmentSteps.length}
+                            </p>
+                          </div>
+                          <div
+                            className="grid gap-1.5"
+                            style={{ gridTemplateColumns: `repeat(${assignmentSteps.length}, minmax(0, 1fr))` }}
+                          >
+                            {assignmentSteps.map((step) => {
+                              const isDone = completedSteps.has(step.id);
+                              const isCurrent = !isDone && currentStepPath === step.id;
+                              return (
+                                <div
+                                  key={step.id}
+                                  title={step.label}
+                                  className={`h-7 rounded-md border px-1.5 flex items-center justify-center transition-colors ${
+                                    isDone
+                                      ? 'bg-amber-100 border-amber-200 text-amber-800'
+                                      : isCurrent
+                                        ? 'bg-blue-50 border-blue-200 text-blue-700'
+                                        : 'bg-gray-50 border-gray-200 text-gray-500'
+                                  }`}
+                                >
+                                  <span className="text-[10px] leading-tight font-medium truncate">{step.label}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
 
