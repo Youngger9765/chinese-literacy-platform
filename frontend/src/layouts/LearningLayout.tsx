@@ -84,6 +84,19 @@ export interface LearningContext {
    * Non-blocking (Issue #660).
    */
   flushProgress: (data: StepProgressData) => void;
+  /** Current persisted step progress snapshot loaded from DB/local state. */
+  stepProgressData: StepProgressData;
+  /**
+   * Merge a per-step progress payload into step_progress and persist it.
+   * Use this for in-step process/history persistence (e.g. dialogue turns).
+   */
+  saveStepProgressPatch: (opts: {
+    stepId: string;
+    stepData: Record<string, unknown>;
+    currentStep?: string | null;
+    markCompleted?: boolean;
+    immediate?: boolean;
+  }) => void;
 }
 
 /**
@@ -265,6 +278,13 @@ const LearningLayout: React.FC = () => {
           },
         };
 
+        // Prevent no-op writes that can trigger parent-child update loops.
+        const prevSig = JSON.stringify(prev);
+        const nextSig = JSON.stringify(next);
+        if (prevSig === nextSig) {
+          return prev;
+        }
+
         if (immediate) {
           flushProgress(next);
         } else {
@@ -282,6 +302,30 @@ const LearningLayout: React.FC = () => {
       });
     },
     [flushProgress, syncProgress],
+  );
+
+  const saveStepProgressPatch = useCallback(
+    (opts: {
+      stepId: string;
+      stepData: Record<string, unknown>;
+      currentStep?: string | null;
+      markCompleted?: boolean;
+      immediate?: boolean;
+    }) => {
+      persistStepProgressState(
+        {
+          currentStep: opts.currentStep,
+          completeStep: opts.markCompleted ? opts.stepId : undefined,
+          stepDataPatch: {
+            [opts.stepId]: {
+              ...opts.stepData,
+            },
+          },
+        },
+        opts.immediate ?? false,
+      );
+    },
+    [persistStepProgressState],
   );
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -590,14 +634,14 @@ const LearningLayout: React.FC = () => {
   );
 
   const handleFinishVocabDefinitionMatch = useCallback(
-    (_result: VocabDefinitionMatchResult) => {
+    (result: VocabDefinitionMatchResult) => {
       setSession((prev) => (prev ? { ...prev, vocabDefinitionMatchCompleted: true } : null));
       persistStepProgressState(
         {
           completeStep: 'vocab-definition',
           currentStep: 'vocab-application',
           stepDataPatch: {
-            'vocab-definition': { completed: true },
+            'vocab-definition': { completed: true, result },
           },
         },
         true,
@@ -769,6 +813,8 @@ const LearningLayout: React.FC = () => {
     assignmentReadingGoals,
     syncProgress,
     flushProgress,
+    stepProgressData: stepProgressState,
+    saveStepProgressPatch,
   };
 
   return (

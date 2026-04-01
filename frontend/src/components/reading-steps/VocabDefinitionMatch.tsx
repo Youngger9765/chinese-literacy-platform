@@ -34,6 +34,8 @@ export interface VocabDefinitionMatchProps {
   story: Story;
   onFinish: (result: VocabDefinitionMatchResult) => void;
   zhuyinActive?: boolean;
+  initialProgress?: Record<string, unknown>;
+  onProgressChange?: (stepData: Record<string, unknown>, immediate?: boolean) => void;
 }
 
 type InteractionMode = 'multiple-choice' | 'drag-drop';
@@ -646,6 +648,8 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
 const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   story,
   onFinish,
+  initialProgress,
+  onProgressChange,
 }) => {
   const storageModeKey = `vocabDef_mode_${story.id}`;
   const completionKey = `vocabDef_completion_${story.id}`;
@@ -653,6 +657,10 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   const hasData = vocab.length > 0;
 
   const [mode, setMode] = useState<InteractionMode>(() => {
+    const persistedMode = initialProgress?.mode;
+    if (persistedMode === 'multiple-choice' || persistedMode === 'drag-drop') {
+      return persistedMode;
+    }
     try {
       const saved = localStorage.getItem(storageModeKey) as InteractionMode | null;
       if (saved && ['multiple-choice', 'drag-drop'].includes(saved)) {
@@ -662,10 +670,17 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
     return 'multiple-choice';
   });
 
-  const [phase, setPhase] = useState<Phase>('matching');
+  const [phase, setPhase] = useState<Phase>(() => {
+    const p = initialProgress?.phase;
+    return p === 'matching' || p === 'summary' ? p : 'matching';
+  });
 
   // Per-tab completion state (#827)
   const [tabCompletion, setTabCompletion] = useState<TabCompletion>(() => {
+    const persisted = initialProgress?.tabCompletion;
+    if (persisted && typeof persisted === 'object') {
+      return { ...DEFAULT_TAB_COMPLETION, ...(persisted as Partial<TabCompletion>) };
+    }
     try {
       const raw = localStorage.getItem(completionKey);
       if (!raw) return DEFAULT_TAB_COMPLETION;
@@ -675,14 +690,20 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
 
   // Which defIndices are active in the current round
   const [activeDefIndices, setActiveDefIndices] = useState<number[]>(() =>
-    vocab.map((_, i) => i),
+    Array.isArray(initialProgress?.activeDefIndices)
+      ? (initialProgress.activeDefIndices as number[])
+      : vocab.map((_, i) => i),
   );
 
   // Stable shuffled word order for drag-drop (regenerated on retry)
   const shuffledWords = useRef<number[]>(shuffle(vocab.map((_, i) => i)));
 
   // Summary answers from the last completed round
-  const [summaryAnswers, setSummaryAnswers] = useState<AnswerRecord[]>([]);
+  const [summaryAnswers, setSummaryAnswers] = useState<AnswerRecord[]>(() =>
+    Array.isArray(initialProgress?.summaryAnswers)
+      ? (initialProgress.summaryAnswers as AnswerRecord[])
+      : [],
+  );
 
   // Increment to force-remount the active mode on mode change or retry
   const [modeKey, setModeKey] = useState(0);
@@ -693,6 +714,21 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
       localStorage.setItem(completionKey, JSON.stringify(tabCompletion));
     } catch {}
   }, [tabCompletion, completionKey]);
+
+  // Persist process data so reopen can restore previous learning status.
+  useEffect(() => {
+    if (!onProgressChange) return;
+    onProgressChange(
+      {
+        mode,
+        phase,
+        tabCompletion,
+        activeDefIndices,
+        summaryAnswers,
+      },
+      false,
+    );
+  }, [onProgressChange, mode, phase, tabCompletion, activeDefIndices, summaryAnswers]);
 
   const handleModeChange = (m: InteractionMode) => {
     setMode(m);
@@ -746,8 +782,27 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   const handleFinish = useCallback(() => {
     // Keep completion record — only clear on explicit redo
     const correctCount = summaryAnswers.filter((a) => a.correct).length;
+    onProgressChange?.(
+      {
+        mode,
+        phase,
+        tabCompletion,
+        activeDefIndices,
+        summaryAnswers,
+      },
+      true,
+    );
     onFinish({ matchedCount: correctCount, totalCount: vocab.length });
-  }, [onFinish, summaryAnswers, vocab.length]);
+  }, [
+    onProgressChange,
+    mode,
+    phase,
+    tabCompletion,
+    activeDefIndices,
+    summaryAnswers,
+    onFinish,
+    vocab.length,
+  ]);
 
   const modeSubtitles: Record<InteractionMode, string> = {
     'multiple-choice': '看定義，選出對應的語詞',
