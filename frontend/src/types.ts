@@ -190,6 +190,8 @@ export interface LearningSession {
   vocabApplicationCompleted?: boolean;
   vocabWordSearchCompleted?: boolean;
   knowledgeStationCompleted?: boolean;
+  /** Persisted completed step path keys (from step_progress.steps_completed). */
+  completedSteps?: string[];
 }
 
 export interface LiveMessage {

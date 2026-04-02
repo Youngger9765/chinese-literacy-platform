@@ -16,6 +16,8 @@ interface ComprehensionChatProps {
   onFinish: (result: ComprehensionResult) => void;
   onBack: () => void;
   dbSessionId?: number;
+  initialProgress?: Record<string, unknown>;
+  onProgressChange?: (stepData: Record<string, unknown>, immediate?: boolean) => void;
 }
 
 type ChatMessage =
@@ -38,6 +40,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   onFinish,
   onBack,
   dbSessionId,
+  initialProgress,
+  onProgressChange,
 }) => {
   const { token } = useAuth();
 
@@ -70,7 +74,37 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const savedRef = useRef(loadSaved());
 
-  const [conversation, setConversation] = useState<ChatMessage[]>(() => savedRef.current?.conversation ?? []);
+  const persistedConversation = useMemo(() => {
+    const raw = initialProgress?.conversation;
+    return Array.isArray(raw) ? (raw as ChatMessage[]) : null;
+  }, [initialProgress]);
+  const persistedUnderstoodCount = useMemo(() => {
+    const raw = initialProgress?.understoodCount;
+    return typeof raw === 'number' ? raw : null;
+  }, [initialProgress]);
+  const persistedRequiredCount = useMemo(() => {
+    const raw = initialProgress?.requiredCount;
+    return typeof raw === 'number' ? raw : null;
+  }, [initialProgress]);
+  const persistedSessionComplete = useMemo(() => {
+    const raw = initialProgress?.isSessionComplete;
+    return typeof raw === 'boolean' ? raw : null;
+  }, [initialProgress]);
+  const persistedActiveTab = useMemo(() => {
+    const raw = initialProgress?.activeTab;
+    return raw === 'story' || raw === 'chat' || raw === 'structure' || raw === 'mcq'
+      ? raw
+      : null;
+  }, [initialProgress]);
+  const persistedTabCompletion = useMemo(() => {
+    const raw = initialProgress?.tabCompletion;
+    if (!raw || typeof raw !== 'object') return null;
+    return raw as TabCompletion;
+  }, [initialProgress]);
+
+  const [conversation, setConversation] = useState<ChatMessage[]>(
+    () => persistedConversation ?? savedRef.current?.conversation ?? [],
+  );
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,11 +113,15 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [isListening, setIsListening] = useState(false);
 
   // Per-tab completion state (#846)
-  const [tabCompletion, setTabCompletion] = useState<TabCompletion>(() => loadCompletion());
+  const [tabCompletion, setTabCompletion] = useState<TabCompletion>(
+    () => persistedTabCompletion ?? loadCompletion(),
+  );
 
   // Mobile responsive
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState<'story' | 'chat' | 'structure' | 'mcq'>('chat');
+  const [activeTab, setActiveTab] = useState<'story' | 'chat' | 'structure' | 'mcq'>(
+    persistedActiveTab ?? 'chat',
+  );
 
   // Server-driven session state
   // Use a stable key derived from dbSessionId so refreshes don't generate a new UUID
@@ -91,9 +129,15 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const [sessionId] = useState(() =>
     dbSessionId ? `db-${dbSessionId}` : crypto.randomUUID()
   );
-  const [understoodCount, setUnderstoodCount] = useState(() => savedRef.current?.understoodCount ?? 0);
-  const [requiredCount, setRequiredCount] = useState(() => savedRef.current?.requiredCount ?? 3);
-  const [isSessionComplete, setIsSessionComplete] = useState(() => savedRef.current?.isSessionComplete ?? false);
+  const [understoodCount, setUnderstoodCount] = useState(
+    () => persistedUnderstoodCount ?? savedRef.current?.understoodCount ?? 0,
+  );
+  const [requiredCount, setRequiredCount] = useState(
+    () => persistedRequiredCount ?? savedRef.current?.requiredCount ?? 3,
+  );
+  const [isSessionComplete, setIsSessionComplete] = useState(
+    () => persistedSessionComplete ?? savedRef.current?.isSessionComplete ?? false,
+  );
   const [highlightedParagraph, setHighlightedParagraph] = useState<number | null>(null);
   const [offlineMode, setOfflineMode] = useState(false);
   const [mockQuestionIndex, setMockQuestionIndex] = useState(0);
@@ -309,6 +353,31 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     } catch {}
   }, [conversation, understoodCount, requiredCount, isSessionComplete, storageKey]);
 
+  // Persist comprehension process to DB step_progress so students can resume
+  // with prior dialogue and tab state after leaving the assignment.
+  useEffect(() => {
+    if (!onProgressChange) return;
+    onProgressChange(
+      {
+        conversation,
+        understoodCount,
+        requiredCount,
+        isSessionComplete,
+        tabCompletion,
+        activeTab,
+      },
+      false,
+    );
+  }, [
+    onProgressChange,
+    conversation,
+    understoodCount,
+    requiredCount,
+    isSessionComplete,
+    tabCompletion,
+    activeTab,
+  ]);
+
   // ── Save per-tab completion to localStorage (#846) ──────────────────
   useEffect(() => {
     try {
@@ -398,6 +467,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         storyTitle: story.title,
         storyText,
         studentAnswer: text,
+        dbSessionId: dbSessionId,
+        genre: story.genre,
+        readingStrategy: story.readingStrategy,
         token: token ?? undefined,
       });
 
@@ -456,8 +528,28 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   // Keep completion record — only clear on explicit redo (Issue #817)
   const handleFinish = useCallback(() => {
+    onProgressChange?.(
+      {
+        conversation,
+        understoodCount,
+        requiredCount,
+        isSessionComplete,
+        tabCompletion,
+        activeTab,
+      },
+      true,
+    );
     onFinish({ understoodCount, requiredCount, isComplete: isSessionComplete, conversationLength: conversation.length });
-  }, [onFinish, understoodCount, requiredCount, isSessionComplete, conversation.length]);
+  }, [
+    onProgressChange,
+    conversation,
+    understoodCount,
+    requiredCount,
+    isSessionComplete,
+    tabCompletion,
+    activeTab,
+    onFinish,
+  ]);
 
   const handleRestart = useCallback(async () => {
     try { localStorage.removeItem(storageKey); } catch {}

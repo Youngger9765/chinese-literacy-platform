@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -9,23 +9,7 @@ import {
 } from '../../services/assignmentApi';
 import { fetchLearningSessions, type LearningSummary } from '../../services/learningApi';
 import { loadActiveSession } from '../../services/api';
-
-const STEP_NUMBER_TO_PATH: Record<number, string> = {
-  1: 'intro',
-  2: 'tutor',
-  3: 'comprehension',
-  4: 'vocab',
-  5: 'dictation',
-  6: 'full-reading',
-  7: 'report',
-};
-
-const TOTAL_ASSIGNMENT_STEPS = 7;
-
-function clampStep(step: number): number {
-  if (!Number.isFinite(step)) return 1;
-  return Math.min(TOTAL_ASSIGNMENT_STEPS, Math.max(1, Math.floor(step)));
-}
+import { ACTIVE_STEPS } from '../../config/stepConfig';
 
 function buildLatestSessionMap(items: LearningSummary[]): Record<string, LearningSummary> {
   const latestByStory: Record<string, LearningSummary> = {};
@@ -51,6 +35,111 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: 'all', label: '全部' },
 ];
 
+const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
+
+interface ProgressStep {
+  id: string;
+  label: string;
+}
+
+const AssignmentProgressStrip: React.FC<{
+  steps: ProgressStep[];
+  completedSteps: Set<string>;
+  currentStepPath: string | null;
+}> = ({ steps, completedSteps, currentStepPath }) => {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollControls = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const maxLeft = el.scrollWidth - el.clientWidth;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(maxLeft - el.scrollLeft > 4);
+  }, []);
+
+  useEffect(() => {
+    updateScrollControls();
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', updateScrollControls, { passive: true });
+    window.addEventListener('resize', updateScrollControls);
+    return () => {
+      el.removeEventListener('scroll', updateScrollControls);
+      window.removeEventListener('resize', updateScrollControls);
+    };
+  }, [steps.length, updateScrollControls]);
+
+  const scrollByDirection = (dir: 'left' | 'right') => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const amount = Math.max(180, Math.floor(el.clientWidth * 0.65));
+    el.scrollBy({
+      left: dir === 'left' ? -amount : amount,
+      behavior: 'smooth',
+    });
+    window.setTimeout(updateScrollControls, 180);
+  };
+
+  return (
+    <div className="relative">
+      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-white to-transparent z-[1]" />
+      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white to-transparent z-[1]" />
+
+      <button
+        type="button"
+        onClick={() => scrollByDirection('left')}
+        aria-label="向左查看關卡"
+        disabled={!canScrollLeft}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full border border-gray-300 bg-white/95 shadow-sm hover:bg-white hover:shadow transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        <svg className="w-4 h-4 text-gray-700" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fillRule="evenodd" d="M11.78 15.53a.75.75 0 0 1-1.06 0l-5-5a.75.75 0 0 1 0-1.06l5-5a.75.75 0 1 1 1.06 1.06L7.31 10l4.47 4.47a.75.75 0 0 1 0 1.06Z" clipRule="evenodd" />
+        </svg>
+      </button>
+
+      <div ref={scrollerRef} className="overflow-x-auto pb-1 px-8">
+        <div className="flex gap-1.5 min-w-max">
+          {steps.map((step) => {
+            const isDone = completedSteps.has(step.id);
+            const isCurrent = !isDone && currentStepPath === step.id;
+            return (
+              <div
+                key={step.id}
+                title={step.label}
+                className={`min-w-[84px] min-h-[40px] rounded-md border px-2 py-1 flex items-center justify-center transition-colors ${
+                  isDone
+                    ? 'bg-amber-100 border-amber-200 text-amber-800'
+                    : isCurrent
+                      ? 'bg-blue-50 border-blue-200 text-blue-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-500'
+                }`}
+              >
+                <span className="text-[11px] leading-tight font-medium text-center whitespace-normal break-words">
+                  {step.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => scrollByDirection('right')}
+        aria-label="向右查看關卡"
+        disabled={!canScrollRight}
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full border border-gray-300 bg-white/95 shadow-sm hover:bg-white hover:shadow transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        <svg className="w-4 h-4 text-gray-700" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fillRule="evenodd" d="M8.22 4.47a.75.75 0 0 1 1.06 0l5 5a.75.75 0 0 1 0 1.06l-5 5a.75.75 0 1 1-1.06-1.06L12.69 10 8.22 5.53a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+        </svg>
+      </button>
+    </div>
+  );
+};
+
 const MyAssignments: React.FC = () => {
   const navigate = useNavigate();
   const { token, user } = useAuth();
@@ -62,6 +151,17 @@ const MyAssignments: React.FC = () => {
   const [startingId, setStartingId] = useState<number | null>(null);
   const [sessionByStorySlug, setSessionByStorySlug] = useState<Record<string, LearningSummary>>({});
 
+  const assignmentSteps = useMemo(
+    () => ACTIVE_STEPS,
+    [],
+  );
+  const defaultStepPath = assignmentSteps[0]?.id ?? 'reading-annotation';
+  const stepIdSet = useMemo(() => new Set(assignmentSteps.map((s) => s.id)), [assignmentSteps]);
+  const stepNumberToPath = useMemo(
+    () => Object.fromEntries(assignmentSteps.map((s) => [s.dbStepNumber, s.id])),
+    [assignmentSteps],
+  );
+
   const activeSession = useMemo(
     () => (user ? loadActiveSession(String(user.id)) : null),
     [user],
@@ -70,22 +170,42 @@ const MyAssignments: React.FC = () => {
   const getAssignmentStorySlug = (a: StudentAssignmentResponse): string | null =>
     a.story_slug ?? null;
 
+  const getAssignmentTextKey = (a: StudentAssignmentResponse): string =>
+    String(a.story_id ?? a.text_id ?? '');
+
   const getLinkedSession = (a: StudentAssignmentResponse): LearningSummary | null => {
     const storySlug = getAssignmentStorySlug(a);
     if (!storySlug) return null;
     return sessionByStorySlug[storySlug] ?? null;
   };
 
-  const getEstimatedCurrentStep = (a: StudentAssignmentResponse): number => {
+  const getCompletedSteps = (a: StudentAssignmentResponse): Set<string> => {
+    if (a.status === 'submitted' || a.status === 'graded') {
+      return new Set(assignmentSteps.map((step) => step.id));
+    }
+    return new Set(
+      (a.steps_completed ?? []).filter((stepKey) => stepIdSet.has(stepKey)),
+    );
+  };
+
+  const getResumeStepPath = (a: StudentAssignmentResponse): string => {
+    const textKey = getAssignmentTextKey(a);
+    if (activeSession && activeSession.storyId === textKey) {
+      const activeSessionPath = stepNumberToPath[activeSession.currentStep];
+      if (activeSessionPath) return activeSessionPath;
+    }
+
+    if (a.current_step && stepIdSet.has(a.current_step)) {
+      return a.current_step;
+    }
+
     const linkedSession = getLinkedSession(a);
     if (linkedSession) {
-      return clampStep(linkedSession.current_step);
+      const linkedPath = stepNumberToPath[linkedSession.current_step];
+      if (linkedPath) return linkedPath;
     }
-    const storySlug = getAssignmentStorySlug(a);
-    if (activeSession && storySlug && activeSession.storyId === storySlug) {
-      return clampStep(activeSession.currentStep);
-    }
-    return 1;
+
+    return defaultStepPath;
   };
 
   const loadAssignments = useCallback(async () => {
@@ -168,7 +288,25 @@ const MyAssignments: React.FC = () => {
       );
       // story_id is set for YAML texts; text_id for DB texts
       const textKey = result.story_id ?? String(result.text_id);
-      navigate(`/learn/${textKey}/intro`);
+      try {
+        sessionStorage.setItem(
+          ACTIVE_ASSIGNMENT_CONTEXT_KEY,
+          JSON.stringify({
+            assignmentId,
+            userId: user ? String(user.id) : null,
+            storyKey: String(textKey),
+            startedAt: Date.now(),
+          }),
+        );
+      } catch {
+        // non-fatal
+      }
+      try {
+        sessionStorage.setItem(`db-session-${textKey}`, String(result.session_id));
+      } catch {
+        // non-fatal
+      }
+      navigate(`/learn/${textKey}/${defaultStepPath}`);
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -238,7 +376,7 @@ const MyAssignments: React.FC = () => {
     if (a.status === 'in_progress') {
       return (
         <button
-          onClick={() => {
+          onClick={async () => {
             // Restore assignment ID so LearningLayout can auto-submit on completion.
             sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
             // Restore reading goals so AssessmentReport can show goal comparison (Issue #414).
@@ -252,15 +390,40 @@ const MyAssignments: React.FC = () => {
                 effective_accuracy: a.effective_accuracy,
               }),
             );
+            let sessionId = a.session_id;
+            // Backfill missing linkage for legacy in_progress rows without session_id.
+            if (sessionId == null && token) {
+              try {
+                const started = await startAssignment(token, a.assignment_id);
+                sessionId = started.session_id;
+              } catch {
+                // non-fatal: proceed with existing data paths
+              }
+            }
             // story_id is set for YAML texts; text_id for DB texts
             const textKey = a.story_id ?? a.text_id;
-            // Resume from last saved step if available, otherwise use latest server step.
-            const currentStep = getEstimatedCurrentStep(a);
-            const serverStepPath = STEP_NUMBER_TO_PATH[currentStep] ?? 'intro';
-            const savedStep = activeSession && activeSession.storyId === String(textKey)
-              ? STEP_NUMBER_TO_PATH[clampStep(activeSession.currentStep)]
-              : null;
-            navigate(`/learn/${textKey}/${savedStep || serverStepPath}`);
+            try {
+              sessionStorage.setItem(
+                ACTIVE_ASSIGNMENT_CONTEXT_KEY,
+                JSON.stringify({
+                  assignmentId: a.assignment_id,
+                  userId: user ? String(user.id) : null,
+                  storyKey: String(textKey),
+                  startedAt: Date.now(),
+                }),
+              );
+            } catch {
+              // non-fatal
+            }
+            if (sessionId != null) {
+              try {
+                sessionStorage.setItem(`db-session-${textKey}`, String(sessionId));
+              } catch {
+                // non-fatal
+              }
+            }
+            const resumeStepPath = getResumeStepPath(a);
+            navigate(`/learn/${textKey}/${resumeStepPath}`);
           }}
           className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
         >
@@ -354,6 +517,8 @@ const MyAssignments: React.FC = () => {
           /* Assignment cards */
           <div className="space-y-3">
             {filteredAssignments.map((a) => {
+              const completedSteps = getCompletedSteps(a);
+              const currentStepPath = a.status === 'in_progress' ? getResumeStepPath(a) : null;
               return (
                 <div
                   key={a.assignment_id}
@@ -412,6 +577,22 @@ const MyAssignments: React.FC = () => {
                         <div className="mt-2 px-2.5 py-2 bg-purple-50 border border-purple-100 rounded-lg">
                           <p className="text-xs font-medium text-purple-700 mb-0.5">老師評語</p>
                           <p className="text-xs text-gray-700">{a.teacher_feedback}</p>
+                        </div>
+                      )}
+
+                      {assignmentSteps.length > 0 && (
+                        <div className="mt-2.5">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-[11px] text-gray-500">學習關卡進度</p>
+                            <p className="text-[11px] text-gray-400">
+                              {completedSteps.size}/{assignmentSteps.length}
+                            </p>
+                          </div>
+                          <AssignmentProgressStrip
+                            steps={assignmentSteps}
+                            completedSteps={completedSteps}
+                            currentStepPath={currentStepPath}
+                          />
                         </div>
                       )}
 

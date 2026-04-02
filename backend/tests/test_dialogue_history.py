@@ -432,9 +432,9 @@ class TestDialoguePersistence:
         db_before.close()
 
         with patch(
-            "app.routes.learning.socratic_agent.start_session",
+            "app.routes.learning.learning_comprehension.socratic_agent.start_session",
             new_callable=AsyncMock,
-            return_value=mock_result,
+            return_value=(mock_result, False),
         ):
             resp = client.post(
                 "/api/comprehension/chat",
@@ -465,9 +465,9 @@ class TestDialoguePersistence:
         mock_result = self._mock_agent_start()
 
         with patch(
-            "app.routes.learning.socratic_agent.start_session",
+            "app.routes.learning.learning_comprehension.socratic_agent.start_session",
             new_callable=AsyncMock,
-            return_value=mock_result,
+            return_value=(mock_result, False),
         ):
             resp = client.post(
                 "/api/comprehension/chat",
@@ -505,9 +505,9 @@ class TestDialoguePersistence:
         # First: start session (opening question)
         start_result = self._mock_agent_start()
         with patch(
-            "app.routes.learning.socratic_agent.start_session",
+            "app.routes.learning.learning_comprehension.socratic_agent.start_session",
             new_callable=AsyncMock,
-            return_value=start_result,
+            return_value=(start_result, False),
         ):
             client.post(
                 "/api/comprehension/chat",
@@ -524,7 +524,7 @@ class TestDialoguePersistence:
         # Second: student answers
         answer_result = self._mock_agent_answer(understood=True)
         with patch(
-            "app.routes.learning.socratic_agent.process_answer",
+            "app.routes.learning.learning_comprehension.socratic_agent.process_answer",
             new_callable=AsyncMock,
             return_value=answer_result,
         ):
@@ -566,9 +566,9 @@ class TestDialoguePersistence:
 
         start_result = self._mock_agent_start()
         with patch(
-            "app.routes.learning.socratic_agent.start_session",
+            "app.routes.learning.learning_comprehension.socratic_agent.start_session",
             new_callable=AsyncMock,
-            return_value=start_result,
+            return_value=(start_result, False),
         ):
             client.post(
                 "/api/comprehension/chat",

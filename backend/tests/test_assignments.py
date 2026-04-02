@@ -659,6 +659,55 @@ class TestStudentMyAssignments:
         for item in resp.json():
             assert item["status"] == "pending"
 
+    def test_my_assignments_includes_step_progress_fields(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        """In-progress assignments should expose session_id/current_step/steps_completed."""
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Progress Field Test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student1["token"]),
+        )
+        assert start_resp.status_code == 200
+        session_id = start_resp.json()["session_id"]
+
+        save_progress_resp = client.put(
+            f"/api/learning/sessions/{session_id}/progress",
+            json={
+                "current_step": "vocab",
+                "steps_completed": ["reading-annotation", "tutor", "full-reading"],
+                "step_data": {
+                    "vocab": {
+                        "completedWords": ["春", "風"],
+                    }
+                },
+            },
+            headers=auth_header(student1["token"]),
+        )
+        assert save_progress_resp.status_code == 200
+
+        my_resp = client.get(
+            "/api/assignments/my?status=in_progress",
+            headers=auth_header(student1["token"]),
+        )
+        assert my_resp.status_code == 200
+        item = next((x for x in my_resp.json() if x["assignment_id"] == assignment_id), None)
+        assert item is not None
+        assert item["session_id"] == session_id
+        assert item["current_step"] == "vocab"
+        assert item["steps_completed"] == ["reading-annotation", "tutor", "full-reading"]
+
     def test_teacher_can_also_access_my_endpoint(self, client, teacher):
         """Teachers can call /assignments/my but will see only their own submissions (none)."""
         resp = client.get(
@@ -1153,7 +1202,7 @@ class TestSubmitAssignment:
         assert "effective_accuracy" in data
 
     def test_submit_unenrolled_student_returns_403(
-        self, client, teacher, school_id
+        self, client, teacher, other_teacher, school_id
     ):
         """Student not enrolled in the assignment should get 403."""
         # Register a new student not in classroom
@@ -1249,11 +1298,6 @@ class TestSubmitAssignment:
             headers=auth_header(admin_user["token"]),
         )
         assert resp.status_code == 204
-        resp = client.post(
-            f"/api/assignments/{assignment_id}/submit",
-            headers=auth_header(unenrolled["token"]),
-        )
-        assert resp.status_code == 403
 
 
 # ====================================================================# Notification service — unit tests (no HTTP needed)

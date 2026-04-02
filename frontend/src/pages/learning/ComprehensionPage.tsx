@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ComprehensionChat from '../../components/reading-steps/ComprehensionChat';
 import { useLearningContext } from '../../layouts/LearningLayout';
@@ -13,8 +13,22 @@ const ComprehensionPage: React.FC = () => {
     handleFinishComprehension,
     emptyAttempt,
     dbSessionId,
+    stepProgressData,
+    saveStepProgressPatch,
   } = useLearningContext();
   const navigate = useNavigate();
+
+  const handleProgressChange = useCallback(
+    (stepData: Record<string, unknown>, immediate = false) => {
+      saveStepProgressPatch({
+        stepId: 'comprehension',
+        stepData,
+        currentStep: 'comprehension',
+        immediate,
+      });
+    },
+    [saveStepProgressPatch],
+  );
 
   if (!selectedStory) return null;
 
@@ -27,6 +41,8 @@ const ComprehensionPage: React.FC = () => {
       onFinish={handleFinishComprehension}
       onBack={() => navigate(`/learn/${storyId}/tutor`)}
       dbSessionId={dbSessionId ?? undefined}
+      initialProgress={(stepProgressData.step_data?.comprehension as Record<string, unknown> | undefined) ?? undefined}
+      onProgressChange={handleProgressChange}
     />
   );
 };

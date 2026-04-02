@@ -34,6 +34,8 @@ export interface VocabDefinitionMatchProps {
   story: Story;
   onFinish: (result: VocabDefinitionMatchResult) => void;
   zhuyinActive?: boolean;
+  initialProgress?: Record<string, unknown>;
+  onProgressChange?: (stepData: Record<string, unknown>, immediate?: boolean) => void;
 }
 
 type InteractionMode = 'multiple-choice' | 'drag-drop';
@@ -49,6 +51,44 @@ interface AnswerRecord {
   defIndex: number;
   answeredWordIdx: number | null;
   correct: boolean | null;
+  wrongAttempts?: number;
+}
+
+interface PersistedProgress {
+  mode?: InteractionMode;
+  phase?: Phase;
+  activeDefIndices?: number[];
+  mcAnswers?: AnswerRecord[];
+  dragDropAnswers?: AnswerRecord[];
+}
+
+function getDragDropAttemptFeedback(wrongAttempts: number): string | null {
+  if (wrongAttempts === 1) return null;
+  if (wrongAttempts === 2) return '下次小心喔～';
+  if (wrongAttempts >= 3) return `要不要再複習一遍`;
+  return null;
+}
+
+function getDragDropAttemptTone(wrongAttempts: number): {
+  cardClass: string;
+  badgeClass: string;
+} {
+  if (wrongAttempts >= 3) {
+    return {
+      cardClass: 'bg-red-50 border-red-200',
+      badgeClass: 'bg-red-500',
+    };
+  }
+  if (wrongAttempts === 2) {
+    return {
+      cardClass: 'bg-amber-50 border-amber-200',
+      badgeClass: 'bg-amber-500',
+    };
+  }
+  return {
+    cardClass: 'bg-emerald-50 border-emerald-200',
+    badgeClass: 'bg-emerald-500',
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -108,24 +148,88 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
 
 interface SummaryScreenProps {
   vocab: VocabItem[];
-  answers: AnswerRecord[];
-  onRetryWrong: () => void;
+  mcAnswers: AnswerRecord[];
+  dragDropAnswers: AnswerRecord[];
+  onRetryModeWrong: (mode: InteractionMode) => void;
   onRetryAll: () => void;
   onFinish: () => void;
 }
 
 function SummaryScreen({
   vocab,
-  answers,
-  onRetryWrong,
+  mcAnswers,
+  dragDropAnswers,
+  onRetryModeWrong,
   onRetryAll,
   onFinish,
 }: SummaryScreenProps) {
-  const correctCount = answers.filter((a) => a.correct).length;
-  const total = answers.length;
+  const mcCorrect = mcAnswers.filter((a) => a.correct).length;
+  const mcTotal = mcAnswers.length;
+  const dragDropCorrect = dragDropAnswers.filter((a) => a.correct).length;
+  const dragDropTotal = dragDropAnswers.length;
+  const correctCount = mcCorrect + dragDropCorrect;
+  const total = mcTotal + dragDropTotal;
   const allCorrect = correctCount === total;
   const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-  const wrongAnswers = answers.filter((a) => !a.correct);
+  const mcWrongAnswers = mcAnswers.filter((a) => !a.correct);
+  const dragDropWrongAnswers = dragDropAnswers.filter((a) => !a.correct);
+
+  const renderResultSection = (title: string, answers: AnswerRecord[], mode: InteractionMode) => (
+    <div className="flex flex-col gap-3 mb-6">
+      <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">
+        {title}
+      </h4>
+      {answers.map((ans, idx) => {
+        const item = vocab[ans.defIndex];
+        const isCorrect = ans.correct;
+        const studentWord =
+          ans.answeredWordIdx !== null ? vocab[ans.answeredWordIdx]?.word : '—';
+        const wrongAttempts = ans.wrongAttempts ?? 0;
+        const feedback = mode === 'drag-drop'
+          ? getDragDropAttemptFeedback(wrongAttempts)
+          : null;
+        const dragDropTone = getDragDropAttemptTone(wrongAttempts);
+        const cardClass = mode === 'drag-drop'
+          ? dragDropTone.cardClass
+          : (isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200');
+        const badgeClass = mode === 'drag-drop'
+          ? dragDropTone.badgeClass
+          : (isCorrect ? 'bg-emerald-500' : 'bg-red-500');
+
+        return (
+          <div
+            key={`${title}-${idx}`}
+            className={`rounded-xl border-2 px-4 py-3 flex items-start gap-3 ${cardClass}`}
+          >
+            <span
+              className={`mt-0.5 flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${badgeClass}`}
+            >
+              {isCorrect ? '✓' : '✗'}
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-gray-500 leading-snug mb-1">
+                {item?.definition}
+              </p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <span className="text-gray-500">正確答案：</span>
+                <span className="font-bold text-gray-800">{item?.word}</span>
+                {!isCorrect && (
+                  <>
+                    <span className="text-gray-400">|</span>
+                    <span className="text-gray-500">你的答案：</span>
+                    <span className="font-bold text-red-600">{studentWord}</span>
+                  </>
+                )}
+              </div>
+              {feedback && (
+                <p className="mt-1 text-xs font-semibold text-amber-700">{feedback}</p>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 animate-fade-in">
@@ -156,62 +260,25 @@ function SummaryScreen({
         </p>
       </div>
 
-      {/* Per-question results */}
-      <div className="flex flex-col gap-3 mb-8">
-        <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">
-          每題結果
-        </h4>
-        {answers.map((ans, idx) => {
-          const item = vocab[ans.defIndex];
-          const isCorrect = ans.correct;
-          const studentWord =
-            ans.answeredWordIdx !== null ? vocab[ans.answeredWordIdx]?.word : '—';
-
-          return (
-            <div
-              key={idx}
-              className={`rounded-xl border-2 px-4 py-3 flex items-start gap-3 ${
-                isCorrect
-                  ? 'bg-emerald-50 border-emerald-200'
-                  : 'bg-red-50 border-red-200'
-              }`}
-            >
-              <span
-                className={`mt-0.5 flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white ${
-                  isCorrect ? 'bg-emerald-500' : 'bg-red-500'
-                }`}
-              >
-                {isCorrect ? '✓' : '✗'}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-500 leading-snug mb-1">
-                  {item?.definition}
-                </p>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                  <span className="text-gray-500">正確答案：</span>
-                  <span className="font-bold text-gray-800">{item?.word}</span>
-                  {!isCorrect && (
-                    <>
-                      <span className="text-gray-400">|</span>
-                      <span className="text-gray-500">你的答案：</span>
-                      <span className="font-bold text-red-600">{studentWord}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {renderResultSection('第一關：選擇題', mcAnswers, 'multiple-choice')}
+      {renderResultSection('第二關：拖拉配對', dragDropAnswers, 'drag-drop')}
 
       {/* Action buttons */}
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        {!allCorrect && (
+        {mcWrongAnswers.length > 0 && (
           <button
-            onClick={onRetryWrong}
+            onClick={() => onRetryModeWrong('multiple-choice')}
             className="rounded-xl border-2 border-accent text-accent px-6 py-3 font-bold hover:bg-accent hover:text-white transition-all active:scale-95"
           >
-            只重做錯題（{wrongAnswers.length} 題）
+            重做選擇題錯題（{mcWrongAnswers.length} 題）
+          </button>
+        )}
+        {dragDropWrongAnswers.length > 0 && (
+          <button
+            onClick={() => onRetryModeWrong('drag-drop')}
+            className="rounded-xl border-2 border-accent text-accent px-6 py-3 font-bold hover:bg-accent hover:text-white transition-all active:scale-95"
+          >
+            重做拖拉配對錯題（{dragDropWrongAnswers.length} 題）
           </button>
         )}
         <button
@@ -232,56 +299,42 @@ function SummaryScreen({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Per-tab completion tracking (Issue #827)                            */
+/*  Stage Status                                                        */
 /* ------------------------------------------------------------------ */
 
-interface TabCompletion {
-  mcDone: boolean;        // Completed multiple-choice mode
-  dragDropDone: boolean;  // Completed drag-drop mode
-}
-
-const DEFAULT_TAB_COMPLETION: TabCompletion = { mcDone: false, dragDropDone: false };
-
-/* ------------------------------------------------------------------ */
-/*  Mode Switcher                                                       */
-/* ------------------------------------------------------------------ */
-
-const MODE_LABELS: { id: InteractionMode; label: string; icon: string }[] = [
-  { id: 'multiple-choice', label: '選擇題', icon: '☑' },
-  { id: 'drag-drop', label: '拖拉配對', icon: '✥' },
-];
-
-function ModeSwitcher({
+function StageStatus({
   current,
-  onChange,
-  tabCompletion,
+  mcDone,
+  dragDropDone,
 }: {
   current: InteractionMode;
-  onChange: (m: InteractionMode) => void;
-  tabCompletion: TabCompletion;
+  mcDone: boolean;
+  dragDropDone: boolean;
 }) {
-  const isDone = (id: InteractionMode) =>
-    id === 'multiple-choice' ? tabCompletion.mcDone : tabCompletion.dragDropDone;
-
   return (
     <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 max-w-sm mx-auto">
-      {MODE_LABELS.map(({ id, label, icon }) => (
-        <button
-          key={id}
-          onClick={() => onChange(id)}
-          className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-            current === id
-              ? 'bg-white text-accent shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <span>{icon}</span>
-          <span>{label}</span>
-          {isDone(id) && (
-            <span className="text-emerald-500 text-xs leading-none">✓</span>
-          )}
-        </button>
-      ))}
+      <div
+        className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-sm font-semibold ${
+          current === 'multiple-choice'
+            ? 'bg-white text-accent shadow-sm'
+            : 'text-gray-500'
+        }`}
+      >
+        <span>☑</span>
+        <span>選擇題</span>
+        {mcDone && <span className="text-emerald-500 text-xs leading-none">✓</span>}
+      </div>
+      <div
+        className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-sm font-semibold ${
+          current === 'drag-drop'
+            ? 'bg-white text-accent shadow-sm'
+            : 'text-gray-500'
+        }`}
+      >
+        <span>✥</span>
+        <span>拖拉配對</span>
+        {dragDropDone && <span className="text-emerald-500 text-xs leading-none">✓</span>}
+      </div>
     </div>
   );
 }
@@ -302,6 +355,16 @@ function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoi
     activeDefIndices.map((defIdx) => ({ defIndex: defIdx, answeredWordIdx: null, correct: null })),
   );
   const [pendingAdvance, setPendingAdvance] = useState(false);
+
+  useEffect(() => {
+    setQueueIdx(0);
+    setPendingAdvance(false);
+    answersRef.current = activeDefIndices.map((defIdx) => ({
+      defIndex: defIdx,
+      answeredWordIdx: null,
+      correct: null,
+    }));
+  }, [activeDefIndices]);
 
   const currentDefIdx = activeDefIndices[queueIdx];
 
@@ -403,6 +466,24 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
   );
 
   const confirmedRef = useRef<Set<number>>(new Set());
+  const wrongAttemptCountRef = useRef<Map<number, number>>(new Map());
+
+  useEffect(() => {
+    setDraggingVocabIdx(null);
+    setPlacements(new Map());
+    setConfirmed(new Set());
+    setWrongFlash(new Set());
+    setHoverTarget(null);
+    setTouchSelected(null);
+    answersRef.current = activeDefIndices.map((defIdx) => ({
+      defIndex: defIdx,
+      answeredWordIdx: null,
+      correct: null,
+      wrongAttempts: 0,
+    }));
+    confirmedRef.current = new Set();
+    wrongAttemptCountRef.current = new Map();
+  }, [activeDefIndices, shuffledWords]);
 
   const attemptPlace = useCallback(
     (defIdx: number, vocabIdx: number) => {
@@ -419,8 +500,14 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
 
       if (vocabIdx === defIdx) {
         // Correct
+        const wrongAttempts = wrongAttemptCountRef.current.get(defIdx) ?? 0;
         answersRef.current = answersRef.current.map((a) =>
-          a.defIndex === defIdx ? { ...a, answeredWordIdx: vocabIdx, correct: true } : a,
+          a.defIndex === defIdx ? {
+            ...a,
+            answeredWordIdx: vocabIdx,
+            correct: true,
+            wrongAttempts,
+          } : a,
         );
         confirmedRef.current = new Set([...confirmedRef.current, defIdx]);
 
@@ -434,8 +521,15 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
         });
       } else {
         // Wrong — record attempt, flash, bounce back
+        const wrongAttempts = (wrongAttemptCountRef.current.get(defIdx) ?? 0) + 1;
+        wrongAttemptCountRef.current.set(defIdx, wrongAttempts);
         answersRef.current = answersRef.current.map((a) =>
-          a.defIndex === defIdx ? { ...a, answeredWordIdx: vocabIdx, correct: false } : a,
+          a.defIndex === defIdx ? {
+            ...a,
+            answeredWordIdx: vocabIdx,
+            correct: false,
+            wrongAttempts,
+          } : a,
         );
         setWrongFlash((prev) => new Set([...prev, defIdx]));
         setTimeout(() => {
@@ -646,108 +740,159 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
 const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   story,
   onFinish,
+  initialProgress,
+  onProgressChange,
 }) => {
-  const storageModeKey = `vocabDef_mode_${story.id}`;
-  const completionKey = `vocabDef_completion_${story.id}`;
+  const progressStorageKey = `vocabDef_progress_${story.id}`;
   const vocab: VocabItem[] = story.vocabulary ?? [];
   const hasData = vocab.length > 0;
+  const allIndices = useMemo(() => vocab.map((_, i) => i), [vocab]);
+
+  const persistedProgress = useMemo<PersistedProgress>(() => {
+    try {
+      const raw = localStorage.getItem(progressStorageKey);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return {};
+      return parsed as PersistedProgress;
+    } catch {
+      return {};
+    }
+  }, [progressStorageKey]);
+
+  const mergedInitialProgress = useMemo<PersistedProgress>(() => {
+    const source = initialProgress && typeof initialProgress === 'object'
+      ? (initialProgress as PersistedProgress)
+      : {};
+
+    return {
+      mode: source.mode ?? persistedProgress.mode,
+      phase: source.phase ?? persistedProgress.phase,
+      activeDefIndices: source.activeDefIndices ?? persistedProgress.activeDefIndices,
+      mcAnswers: source.mcAnswers ?? persistedProgress.mcAnswers,
+      dragDropAnswers: source.dragDropAnswers ?? persistedProgress.dragDropAnswers,
+    };
+  }, [initialProgress, persistedProgress]);
 
   const [mode, setMode] = useState<InteractionMode>(() => {
-    try {
-      const saved = localStorage.getItem(storageModeKey) as InteractionMode | null;
-      if (saved && ['multiple-choice', 'drag-drop'].includes(saved)) {
-        return saved;
-      }
-    } catch {}
+    const persistedMode = mergedInitialProgress.mode;
+    if (persistedMode === 'multiple-choice' || persistedMode === 'drag-drop') {
+      return persistedMode;
+    }
     return 'multiple-choice';
   });
 
-  const [phase, setPhase] = useState<Phase>('matching');
-
-  // Per-tab completion state (#827)
-  const [tabCompletion, setTabCompletion] = useState<TabCompletion>(() => {
-    try {
-      const raw = localStorage.getItem(completionKey);
-      if (!raw) return DEFAULT_TAB_COMPLETION;
-      return { ...DEFAULT_TAB_COMPLETION, ...JSON.parse(raw) };
-    } catch { return DEFAULT_TAB_COMPLETION; }
+  const [phase, setPhase] = useState<Phase>(() => {
+    const p = mergedInitialProgress.phase;
+    return p === 'matching' || p === 'summary' ? p : 'matching';
   });
 
-  // Which defIndices are active in the current round
+  // Which defIndices are active in the current stage
   const [activeDefIndices, setActiveDefIndices] = useState<number[]>(() =>
-    vocab.map((_, i) => i),
+    Array.isArray(mergedInitialProgress.activeDefIndices)
+      ? mergedInitialProgress.activeDefIndices
+      : vocab.map((_, i) => i),
   );
 
   // Stable shuffled word order for drag-drop (regenerated on retry)
   const shuffledWords = useRef<number[]>(shuffle(vocab.map((_, i) => i)));
 
-  // Summary answers from the last completed round
-  const [summaryAnswers, setSummaryAnswers] = useState<AnswerRecord[]>([]);
+  const [mcAnswers, setMcAnswers] = useState<AnswerRecord[]>(() =>
+    Array.isArray(mergedInitialProgress.mcAnswers)
+      ? mergedInitialProgress.mcAnswers
+      : [],
+  );
 
-  // Increment to force-remount the active mode on mode change or retry
-  const [modeKey, setModeKey] = useState(0);
+  const [dragDropAnswers, setDragDropAnswers] = useState<AnswerRecord[]>(() =>
+    Array.isArray(mergedInitialProgress.dragDropAnswers)
+      ? mergedInitialProgress.dragDropAnswers
+      : [],
+  );
 
-  // Persist per-tab completion to localStorage (#827)
+  const isStepCompleted =
+    phase === 'summary' && mcAnswers.length > 0 && dragDropAnswers.length > 0;
+
+  const buildProgressPayload = useCallback(() => ({
+    mode,
+    phase,
+    activeDefIndices,
+    mcAnswers,
+    dragDropAnswers,
+    completed: isStepCompleted,
+  }), [mode, phase, activeDefIndices, mcAnswers, dragDropAnswers, isStepCompleted]);
+
+  // Persist to localStorage so page close / logout / cross-step navigation can restore.
   useEffect(() => {
     try {
-      localStorage.setItem(completionKey, JSON.stringify(tabCompletion));
+      const payload: PersistedProgress = buildProgressPayload();
+      localStorage.setItem(progressStorageKey, JSON.stringify(payload));
     } catch {}
-  }, [tabCompletion, completionKey]);
+  }, [progressStorageKey, buildProgressPayload]);
 
-  const handleModeChange = (m: InteractionMode) => {
-    setMode(m);
+  // Persist process data so reopen can restore previous learning status.
+  useEffect(() => {
+    if (!onProgressChange) return;
+    onProgressChange(buildProgressPayload(), false);
+  }, [onProgressChange, buildProgressPayload]);
+
+  const completionFlushedRef = useRef(false);
+  useEffect(() => {
+    if (!onProgressChange) return;
+    if (!isStepCompleted) {
+      completionFlushedRef.current = false;
+      return;
+    }
+    if (completionFlushedRef.current) return;
+
+    onProgressChange(buildProgressPayload(), true);
+    completionFlushedRef.current = true;
+  }, [onProgressChange, isStepCompleted, buildProgressPayload]);
+
+  const startStage = useCallback((nextMode: InteractionMode, indices: number[]) => {
+    setMode(nextMode);
     setPhase('matching');
-    setActiveDefIndices(vocab.map((_, i) => i));
-    shuffledWords.current = shuffle(vocab.map((_, i) => i));
-    setModeKey((k) => k + 1);
-    try {
-      localStorage.setItem(storageModeKey, m);
-    } catch {}
-  };
+    setActiveDefIndices(indices);
+    shuffledWords.current = shuffle(indices);
+  }, []);
 
   const handleAllDone = useCallback((answers: AnswerRecord[]) => {
-    setSummaryAnswers(answers);
+    if (mode === 'multiple-choice') {
+      setMcAnswers(answers);
+      startStage('drag-drop', allIndices);
+      return;
+    }
+    setDragDropAnswers(answers);
     setPhase('summary');
-    // Mark current mode as completed (#827)
-    setTabCompletion(prev => ({
-      ...prev,
-      ...(mode === 'multiple-choice' ? { mcDone: true } : { dragDropDone: true }),
-    }));
-  }, [mode]);
+  }, [mode, startStage, allIndices]);
 
-  const handleRetryWrong = useCallback(() => {
-    const wrongIndices = summaryAnswers
-      .filter((a) => !a.correct)
-      .map((a) => a.defIndex);
-    setActiveDefIndices(wrongIndices);
-    shuffledWords.current = shuffle(wrongIndices);
-    setPhase('matching');
-    setModeKey((k) => k + 1);
-    // Clear completion for current mode on explicit redo (#827)
-    setTabCompletion(prev => ({
-      ...prev,
-      ...(mode === 'multiple-choice' ? { mcDone: false } : { dragDropDone: false }),
-    }));
-  }, [summaryAnswers, mode]);
+  const handleRetryModeWrong = useCallback((targetMode: InteractionMode) => {
+    const sourceAnswers = targetMode === 'multiple-choice' ? mcAnswers : dragDropAnswers;
+    const wrongIndices = sourceAnswers.filter((a) => !a.correct).map((a) => a.defIndex);
+    if (wrongIndices.length === 0) return;
+    startStage(targetMode, wrongIndices);
+  }, [mcAnswers, dragDropAnswers, startStage]);
 
   const handleRetryAll = useCallback(() => {
-    const allIndices = vocab.map((_, i) => i);
-    setActiveDefIndices(allIndices);
-    shuffledWords.current = shuffle(allIndices);
-    setPhase('matching');
-    setModeKey((k) => k + 1);
-    // Clear completion for current mode on explicit redo (#827)
-    setTabCompletion(prev => ({
-      ...prev,
-      ...(mode === 'multiple-choice' ? { mcDone: false } : { dragDropDone: false }),
-    }));
-  }, [vocab, mode]);
+    setMcAnswers([]);
+    setDragDropAnswers([]);
+    startStage('multiple-choice', allIndices);
+  }, [startStage, allIndices]);
 
   const handleFinish = useCallback(() => {
-    // Keep completion record — only clear on explicit redo
-    const correctCount = summaryAnswers.filter((a) => a.correct).length;
-    onFinish({ matchedCount: correctCount, totalCount: vocab.length });
-  }, [onFinish, summaryAnswers, vocab.length]);
+    const correctCount =
+      mcAnswers.filter((a) => a.correct).length +
+      dragDropAnswers.filter((a) => a.correct).length;
+    onProgressChange?.(
+      buildProgressPayload(),
+      true,
+    );
+    onFinish({ matchedCount: correctCount, totalCount: vocab.length * 2 });
+  }, [
+    onProgressChange,
+    buildProgressPayload,
+    onFinish,
+    vocab.length,
+  ]);
 
   const modeSubtitles: Record<InteractionMode, string> = {
     'multiple-choice': '看定義，選出對應的語詞',
@@ -767,18 +912,22 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
         ) : phase === 'summary' ? (
           <SummaryScreen
             vocab={vocab}
-            answers={summaryAnswers}
-            onRetryWrong={handleRetryWrong}
+            mcAnswers={mcAnswers}
+            dragDropAnswers={dragDropAnswers}
+            onRetryModeWrong={handleRetryModeWrong}
             onRetryAll={handleRetryAll}
             onFinish={handleFinish}
           />
         ) : (
           <>
-            <ModeSwitcher current={mode} onChange={handleModeChange} tabCompletion={tabCompletion} />
+            <StageStatus
+              current={mode}
+              mcDone={mcAnswers.length > 0}
+              dragDropDone={dragDropAnswers.length > 0}
+            />
 
             {mode === 'multiple-choice' && (
               <MultipleChoiceMode
-                key={`mc-${modeKey}`}
                 vocab={vocab}
                 activeDefIndices={activeDefIndices}
                 onAllDone={handleAllDone}
@@ -786,7 +935,6 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
             )}
             {mode === 'drag-drop' && (
               <DragDropMode
-                key={`dd-${modeKey}`}
                 vocab={vocab}
                 activeDefIndices={activeDefIndices}
                 shuffledWords={shuffledWords.current}
