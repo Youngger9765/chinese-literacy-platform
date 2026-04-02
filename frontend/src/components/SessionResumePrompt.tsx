@@ -143,7 +143,7 @@ const SessionResumePrompt: React.FC<SessionResumePromptProps> = ({ onDismiss }) 
         <div className="flex flex-col gap-2">
           <button
             onClick={handleResume}
-            className="w-full bg-accent hover:bg-accent-hover text-white font-bold py-2.5 rounded-xl transition-colors text-sm"
+            className="w-full bg-accent hover:bg-accent-hover text-white font-bold py-2.5 rounded-full transition-colors text-sm"
           >
             繼續
           </button>

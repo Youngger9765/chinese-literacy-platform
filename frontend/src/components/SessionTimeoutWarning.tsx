@@ -168,7 +168,7 @@ const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
             ref={continueButtonRef}
             type="button"
             onClick={onContinue}
-            className="w-full bg-accent hover:bg-accent-hover text-white font-bold py-2.5 rounded-xl transition-colors text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            className="w-full bg-accent hover:bg-accent-hover text-white font-bold py-2.5 rounded-full transition-colors text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           >
             繼續學習
           </button>

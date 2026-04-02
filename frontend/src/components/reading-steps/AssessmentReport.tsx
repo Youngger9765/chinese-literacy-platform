@@ -645,7 +645,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             {onGoToVocab && (
               <button
                 onClick={onGoToVocab}
-                className="w-full mt-2 flex items-center justify-center gap-2 py-3 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-sm rounded-xl transition-colors"
+                className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-sm rounded-full transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />

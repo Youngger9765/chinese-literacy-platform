@@ -495,7 +495,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
         <p className="text-base font-medium">本課無語詞資料，無法產生方格遊戲</p>
         <button
           onClick={() => onFinish(0)}
-          className="mt-2 px-8 py-3 bg-indigo-600 text-white rounded-xl text-base font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-md min-h-[52px]"
+          className="mt-2 px-6 py-2.5 bg-indigo-600 text-white rounded-full text-sm font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-sm min-h-[44px]"
         >
           繼續下一步
         </button>
@@ -745,7 +745,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
             </button>
             <button
               onClick={() => onFinish(finishedElapsed)}
-              className="px-8 py-3 bg-indigo-600 text-white rounded-xl text-base font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-md min-h-[52px]"
+              className="px-6 py-2.5 bg-indigo-600 text-white rounded-full text-sm font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-sm min-h-[44px]"
             >
               繼續下一步
             </button>

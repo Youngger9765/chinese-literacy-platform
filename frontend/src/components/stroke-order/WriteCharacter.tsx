@@ -656,7 +656,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
               {onComplete && (
                 <button
                   onClick={onComplete}
-                  className="w-full px-8 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl shadow-lg transition-all active:scale-95 text-base"
+                  className="w-full px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-full shadow-sm transition-all active:scale-95 text-sm"
                 >
                   完成，回到練習清單
                 </button>
