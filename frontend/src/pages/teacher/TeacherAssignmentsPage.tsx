@@ -76,7 +76,7 @@ const TeacherAssignmentsPage: React.FC = () => {
             <Skeleton className="h-7 w-28 rounded" />
             <Skeleton className="h-10 w-52 rounded-lg" />
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <div className="bg-white rounded-2xl shadow-card p-6">
             <Skeleton className="h-10 w-full rounded-lg mb-4" />
             <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -116,7 +116,7 @@ const TeacherAssignmentsPage: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-6 sm:p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-xl font-bold text-gray-900 mb-6">作業管理</h1>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center text-gray-500">
+          <div className="bg-white rounded-2xl shadow-card p-8 text-center text-gray-500">
             <p>尚無班級，請先建立班級。</p>
             <button
               type="button"

@@ -104,6 +104,17 @@
   }
 }
 
+/* ── Button utility classes ── */
+
+@layer components {
+  .btn-primary {
+    @apply rounded-full px-6 py-2.5 text-sm font-bold bg-accent hover:bg-accent-hover text-white shadow-sm transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1;
+  }
+  .btn-secondary {
+    @apply rounded-full px-6 py-2.5 text-sm font-bold border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1;
+  }
+}
+
 /* ── Custom animations for interactive learning components ── */
 
 @keyframes shake {

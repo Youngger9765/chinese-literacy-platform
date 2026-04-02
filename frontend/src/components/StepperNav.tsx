@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AppView, Story, LearningSession } from '../types';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { ACTIVE_STEPS } from '../config/stepConfig';
+import { ACTIVE_STEPS, STEP_CATEGORY_COLORS } from '../config/stepConfig';
 
 interface StepperNavProps {
   currentView: AppView;
@@ -17,6 +17,7 @@ interface StepDef {
   label: string;
   view: AppView;
   needsStory: boolean;
+  category: 'reading' | 'comprehension' | 'practice' | 'report';
 }
 
 /**
@@ -28,6 +29,7 @@ const steps: StepDef[] = ACTIVE_STEPS.map((s, i) => ({
   label: s.label,
   view: s.view,
   needsStory: s.needsStory,
+  category: s.category,
 }));
 
 const VIEW_TO_STEP_ID: Record<string, string> = Object.fromEntries(
@@ -101,14 +103,17 @@ function getMiniSummary(stepDef: StepDef, session: LearningSession | null): stri
 const StepBadge: React.FC<{
   step: number;
   status: StepStatus;
+  category?: 'reading' | 'comprehension' | 'practice' | 'report';
   size?: 'sm' | 'md';
-}> = ({ step, status, size = 'md' }) => {
-  const sizeClasses = size === 'sm' ? 'w-6 h-6 text-xs' : 'w-7 h-7 text-sm';
+}> = ({ step, status, category, size = 'md' }) => {
+  const sizeClasses = size === 'sm' ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm';
+
+  const categoryColors = category ? STEP_CATEGORY_COLORS[category] : null;
 
   const styleMap: Record<StepStatus, string> = {
     disabled:  'bg-gray-200 text-gray-400',
-    idle:      'bg-gray-200 text-gray-700',
-    active:    'bg-accent text-white',
+    idle:      categoryColors ? `${categoryColors.badge}/20 ${categoryColors.text}` : 'bg-gray-200 text-gray-700',
+    active:    categoryColors ? `${categoryColors.badge} text-white` : 'bg-accent text-white',
     completed: 'bg-emerald-500 text-white',
   };
 
@@ -138,7 +143,7 @@ const DesktopSidebar: React.FC<StepperNavProps> = ({
   return (
     <nav
       aria-label="學習步驟導覽"
-      className="hidden md:flex flex-col w-52 shrink-0 bg-white border-r border-gray-200 overflow-y-auto py-4 gap-1"
+      className="hidden md:flex flex-col font-ui w-52 shrink-0 bg-white border-r border-gray-200 overflow-y-auto py-4 gap-1.5"
     >
       {/* Story title */}
       {selectedStory && (
@@ -166,13 +171,13 @@ const DesktopSidebar: React.FC<StepperNavProps> = ({
             aria-label={`步驟 ${stepDef.step}：${stepDef.label}（${isActive ? '目前' : isDisabled ? '未解鎖' : status === 'completed' ? '已完成' : '未完成'}）`}
             className={`mx-2 flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
               isActive
-                ? 'bg-accent/10 text-accent'
+                ? `${STEP_CATEGORY_COLORS[stepDef.category].activeBg} ${STEP_CATEGORY_COLORS[stepDef.category].text}`
                 : isDisabled
                 ? 'text-gray-300 cursor-not-allowed'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
             }`}
           >
-            <StepBadge step={stepDef.step} status={status} size="md" />
+            <StepBadge step={stepDef.step} status={status} category={stepDef.category} size="md" />
             <span className="flex flex-col min-w-0">
               <span className={`text-sm leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
                 {stepDef.label}
@@ -211,11 +216,11 @@ const MobileStepBar: React.FC<StepperNavProps> = ({
   return (
     <>
       {/* Compact top bar — mobile only */}
-      <div className="flex items-center gap-3 px-4 py-2 bg-white border-b border-gray-200 shrink-0">
+      <div className="flex items-center gap-3 px-4 py-2 font-ui bg-white border-b border-gray-200 shrink-0">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {currentStepDef ? (
             <>
-              <StepBadge step={currentStepDef.step} status={currentStatus} size="sm" />
+              <StepBadge step={currentStepDef.step} status={currentStatus} category={currentStepDef.category} size="sm" />
               <span className="text-sm font-semibold text-gray-800 truncate">
                 {currentStepDef.label}
               </span>
@@ -282,7 +287,7 @@ const MobileStepBar: React.FC<StepperNavProps> = ({
             {/* Step list */}
             <nav
               aria-label="學習步驟導覽"
-              className="overflow-y-auto py-3 px-3 flex flex-col gap-1"
+              className="overflow-y-auto py-3 px-3 flex flex-col gap-1.5 font-ui"
             >
               {steps.map((stepDef) => {
                 const status = getStepStatus(stepDef, currentView, session, selectedStory);
@@ -298,13 +303,13 @@ const MobileStepBar: React.FC<StepperNavProps> = ({
                     aria-current={isActive ? 'step' : undefined}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                       isActive
-                        ? 'bg-accent/10 text-accent'
+                        ? `${STEP_CATEGORY_COLORS[stepDef.category].activeBg} ${STEP_CATEGORY_COLORS[stepDef.category].text}`
                         : isDisabled
                         ? 'text-gray-300 cursor-not-allowed'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    <StepBadge step={stepDef.step} status={status} size="sm" />
+                    <StepBadge step={stepDef.step} status={status} category={stepDef.category} size="sm" />
                     <span className="flex flex-col">
                       <span className={`text-base leading-snug ${isActive ? 'font-semibold' : 'font-medium'}`}>
                         {stepDef.label}

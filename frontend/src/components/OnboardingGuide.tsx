@@ -119,7 +119,7 @@ const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ userName, token, onCo
           </div>
 
           {/* Step title */}
-          <h2 className="text-2xl font-black text-gray-800 mb-4 leading-tight">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 leading-tight">
             {currentStep === 0 ? (
               <>
                 {step.title}
@@ -157,7 +157,7 @@ const OnboardingGuide: React.FC<OnboardingGuideProps> = ({ userName, token, onCo
           {/* Next / Finish button */}
           <button
             onClick={handleNext}
-            className="w-full py-4 rounded-2xl font-black text-xl text-white bg-accent hover:bg-accent-hover active:scale-95 transition-all duration-150 shadow-lg"
+            className="w-full py-4 rounded-2xl font-bold text-lg text-white bg-accent hover:bg-accent-hover active:scale-95 transition-all duration-150 shadow-lg"
           >
             {isLastStep ? '開始學習！' : '下一步'}
           </button>

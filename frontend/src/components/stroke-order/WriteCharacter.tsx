@@ -688,7 +688,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       {step === Step.ANIMATION && (
         <button
           onClick={handleBeginPractice}
-          className="px-10 py-4 bg-accent hover:bg-accent-hover text-white font-black text-lg rounded-2xl shadow-xl transition-all active:scale-95 animate-pulse"
+          className="px-10 py-4 bg-accent hover:bg-accent-hover text-white font-bold text-lg rounded-2xl shadow-xl transition-all active:scale-95 animate-pulse"
         >
           ✏️ 開始練習
         </button>

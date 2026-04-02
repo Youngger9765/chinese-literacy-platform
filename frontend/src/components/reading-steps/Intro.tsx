@@ -106,7 +106,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </span>
                 <span className="text-[10px] text-gray-400">難度 {story.level}</span>
               </div>
-              <h1 className={`text-2xl font-black text-gray-900 leading-[3rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+              <h1 className={`text-2xl font-bold text-gray-900 leading-[3rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
                 {processZhuyin(story.title)}
               </h1>
               {story.intro && (
@@ -168,7 +168,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     onClick={stopSpeaking}
                     aria-label="停止朗讀課文簡介"
                     aria-pressed={true}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
                   >
                     <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -182,7 +182,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                     onClick={speakIntro}
                     aria-label="朗讀課文簡介"
                     aria-pressed={false}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 border border-gray-200 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
@@ -206,7 +206,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
         <button
           type="button"
           onClick={onBack}
-          className="px-4 py-3 rounded-xl text-base text-gray-500 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+          className="px-4 py-2.5 rounded-full text-sm text-gray-500 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
         >
           返回圖書館
         </button>
@@ -216,7 +216,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             stopSpeaking();
             onStartReading();
           }}
-          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           開始逐段朗讀
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

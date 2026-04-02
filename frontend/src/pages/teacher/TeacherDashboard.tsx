@@ -111,7 +111,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
   };
 
   const ClassroomCardSkeleton = () => (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+    <div className="bg-white rounded-2xl shadow-card p-5">
       <Skeleton className="h-5 w-2/3 rounded mb-3" />
       <SkeletonText lines={3} lineClassName="h-4 rounded" />
     </div>
@@ -176,7 +176,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
 
         {/* Create form */}
         {showCreateForm && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <div className="bg-white rounded-2xl shadow-card p-5">
             <h2 className="text-base font-bold text-gray-900 mb-4">建立新班級</h2>
             <form onSubmit={handleCreate} className="space-y-4">
               {createError && (
@@ -297,7 +297,7 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
                 <button
                   key={cr.id}
                   onClick={() => onSelectClassroom(cr.id)}
-                  className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 text-left hover:border-accent hover:shadow-md transition-all group cursor-pointer"
+                  className="bg-white rounded-2xl shadow-card p-5 text-left hover:shadow-md transition-all group cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <h3 className="font-bold text-gray-900 group-hover:text-accent transition-colors">

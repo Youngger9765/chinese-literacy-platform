@@ -177,7 +177,7 @@ const AIAnalysisSection: React.FC<AIAnalysisSectionProps> = ({
           <div className="space-y-2">
             {analysis.practice_suggestions.map((suggestion, idx) => (
               <div key={idx} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
-                <span className="w-6 h-6 rounded-full bg-accent/10 text-accent text-xs font-black flex items-center justify-center shrink-0">
+                <span className="w-6 h-6 rounded-full bg-accent/10 text-accent text-xs font-semibold flex items-center justify-center shrink-0">
                   {idx + 1}
                 </span>
                 <p className="text-sm text-gray-700">{suggestion}</p>

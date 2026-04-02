@@ -894,7 +894,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     const summary = paragraphSummaries[idx];
                     if (!summary) return null;
                     return (
-                      <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200 shadow-sm space-y-3">
+                      <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white shadow-card space-y-3">
                         <p className="text-base font-bold text-gray-800">
                           {summary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI 分析中...</span>}
                           {summary.feedback}
@@ -966,7 +966,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={handleFinish}
-                  className="px-8 py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95"
+                  className="px-6 py-2.5 rounded-full text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95"
                 >
                   觀看總結報告
                 </button>
@@ -999,7 +999,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       >
         {/* Header */}
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-2">
-          <span className="text-xs font-black text-accent-light uppercase tracking-widest">朗讀回饋</span>
+          <span className="text-xs font-bold text-accent-light uppercase tracking-widest">朗讀回饋</span>
           <div className="flex-1" />
           <span className={`text-xs font-bold ${stt.isSessionActive ? 'text-green-500' : stt.isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
             {stt.isSessionActive ? '● 聆聽中' : stt.isPreparing ? '● 準備中' : '● 待機'}

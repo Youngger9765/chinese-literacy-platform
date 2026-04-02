@@ -407,7 +407,7 @@ function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoi
       {/* Progress */}
       <div className="mb-5 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-gray-500">題目進度</span>
-        <span className="text-base font-black text-amber-700">
+        <span className="text-base font-bold text-amber-700">
           {queueIdx + 1}{' '}
           <span className="text-gray-400 font-normal text-sm">/ {activeDefIndices.length}</span>
         </span>
@@ -697,7 +697,7 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
       {/* Progress */}
       <div className="mb-4 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-gray-500">配對進度</span>
-        <span className="text-base font-black text-amber-700">
+        <span className="text-base font-bold text-amber-700">
           {confirmed.size}{' '}
           <span className="text-gray-400 font-normal text-sm">/ {activeDefIndices.length}</span>
         </span>

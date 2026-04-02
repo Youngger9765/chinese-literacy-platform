@@ -112,7 +112,7 @@ const ForgotPassword: React.FC = () => {
           <div className="inline-flex items-center justify-center w-14 h-14 bg-accent rounded-2xl mb-4">
             <span className="text-white font-black text-2xl">L</span>
           </div>
-          <h1 className="text-2xl font-black text-gray-900">AI 朗讀助教</h1>
+          <h1 className="text-2xl font-bold text-gray-900">AI 朗讀助教</h1>
           <p className="text-gray-500 text-sm mt-1">
             {step === 'request' && '重設密碼'}
             {step === 'reset' && '設定新密碼'}

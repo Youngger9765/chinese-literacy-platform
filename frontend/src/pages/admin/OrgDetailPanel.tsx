@@ -219,7 +219,7 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
     return (
       <div className="p-6 sm:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
+          <div className="bg-white rounded-2xl shadow-card p-6 space-y-4">
             <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3" />
             <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
           </div>
@@ -262,7 +262,7 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
         )}
 
         {/* Org info card */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white rounded-2xl shadow-card p-6">
           {isEditing ? (
             <form onSubmit={handleSaveEdit} className="space-y-4">
               <h2 className="text-base font-bold text-gray-900">編輯機構</h2>
@@ -427,7 +427,7 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
 
         {/* Business info card */}
         {!isEditing && (org.description || org.tax_id || org.contact_email || org.contact_phone || org.address) && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <div className="bg-white rounded-2xl shadow-card p-6">
             <h3 className="font-bold text-gray-900 mb-4">商業資訊</h3>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
               {org.tax_id && (
@@ -467,7 +467,7 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
 
         {/* Points section — only show if total_points is set */}
         {org.total_points != null && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <div className="bg-white rounded-2xl shadow-card p-6">
             <h3 className="font-bold text-gray-900 mb-4">點數使用狀況</h3>
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div className="text-center">
@@ -506,7 +506,7 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
         )}
 
         {/* Points log section */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card">
           <div className="p-5 border-b border-gray-100">
             <h3 className="font-bold text-gray-900">點數使用紀錄</h3>
             <p className="text-xs text-gray-500 mt-0.5">共 {logsTotal} 筆</p>
@@ -594,7 +594,7 @@ const OrgDetailPanel: React.FC<OrgDetailPanelProps> = ({ organizationId, onSchoo
 
 
         {/* Schools in this org */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card">
           <div className="p-5 border-b border-gray-100 flex items-center justify-between">
             <h3 className="font-bold text-gray-900">所屬學校</h3>
             <div className="flex items-center gap-3">

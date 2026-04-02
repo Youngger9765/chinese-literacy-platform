@@ -553,7 +553,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-2 py-4 select-none">
       {/* Header */}
       <div className="px-2">
-        <h2 className="text-lg font-black text-gray-800">語詞複習</h2>
+        <h2 className="text-lg font-bold text-gray-800">語詞複習</h2>
         <p className="text-sm text-gray-500 mt-0.5 font-medium">
           找出
           <span className="font-black text-indigo-700 mx-1">{foundWords.size}</span>
@@ -582,7 +582,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
       {/* Found toast */}
       {justFound && (
         <div
-          className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-base shadow-xl pointer-events-none animate-bounce-in"
+          className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-emerald-500 text-white px-6 py-3 rounded-2xl font-bold text-base shadow-xl pointer-events-none animate-bounce-in"
           role="status"
           aria-live="polite"
         >
@@ -658,7 +658,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
 
         {/* Word list — unfound at top, found at bottom */}
         <div className="flex flex-col gap-3 w-full xl:w-52 max-w-sm mx-auto xl:mx-0">
-          <h3 className="text-sm font-black text-gray-600 uppercase tracking-wide px-1">
+          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide px-1">
             待找語詞
           </h3>
           <div className="flex flex-wrap xl:flex-col gap-2 justify-center xl:justify-start">
@@ -734,7 +734,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
         <div className="flex flex-col items-center gap-4 px-4 pb-4 animate-fade-in">
           <div className="w-full bg-emerald-50 border border-emerald-200 rounded-2xl px-6 py-5 text-center shadow-sm">
             <div className="text-4xl mb-2" role="img" aria-label="慶祝">🎉</div>
-            <h2 className="text-2xl font-black text-emerald-700">全部找到了！</h2>
+            <h2 className="text-2xl font-bold text-emerald-700">全部找到了！</h2>
           </div>
           <div className="flex gap-3">
             <button

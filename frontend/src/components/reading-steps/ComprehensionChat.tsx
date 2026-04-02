@@ -838,7 +838,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           </button>
           <button
             onClick={handleFinish}
-            className="flex-1 py-3 rounded-xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 rounded-full font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow transition-all active:scale-95 flex items-center justify-center gap-2"
           >
             繼續，生字練習
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1178,7 +1178,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             <div className="flex-1 flex flex-col min-h-0">
               {/* Panel header with progress */}
               <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
-                <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-accent-light uppercase tracking-widest">
                   AI Tutor
                 </span>
                 <div className="flex-1" />

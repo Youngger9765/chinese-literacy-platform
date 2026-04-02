@@ -74,13 +74,13 @@ function CompletionBanner({ count, onFinish }: CompletionBannerProps) {
       <div className="flex justify-center gap-2 text-3xl select-none animate-pop">
         <span>🌟</span><span>🎉</span><span>🌟</span>
       </div>
-      <h3 className="text-2xl font-black text-emerald-800">全部完成！</h3>
+      <h3 className="text-2xl font-bold text-emerald-800">全部完成！</h3>
       <p className="text-emerald-700 text-sm">
         你練習了 <span className="font-bold text-emerald-900">{count}</span> 個生字，太厲害了！
       </p>
       <button
         onClick={onFinish}
-        className="w-full max-w-xs mx-auto mt-2 px-8 py-3.5 rounded-2xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+        className="w-full max-w-xs mx-auto mt-2 px-6 py-2.5 rounded-full font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
       >
         查看學習報告
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -366,7 +366,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
           {/* Header */}
           <div>
-            <h2 className="text-xl font-black text-gray-900 mb-1">生字練習</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">生字練習</h2>
 
             <p className="text-sm text-gray-600">
               {attempt === null || needPracticeSet.size === 0
@@ -431,14 +431,14 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
             <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 flex flex-col items-center gap-4 text-center">
               <div className="text-4xl select-none">🎮</div>
               <div>
-                <h3 className="font-black text-gray-900 text-base mb-1">注音聲韻覺識遊戲</h3>
+                <h3 className="font-semibold text-gray-900 text-base mb-1">注音聲韻覺識遊戲</h3>
                 <p className="text-xs text-gray-500 leading-relaxed">
                   練習聲母、韻母配對與拼音合成，<br />鞏固本課生字的注音能力
                 </p>
               </div>
               <button
                 onClick={() => setPhase('zhuyin-game')}
-                className="w-full max-w-xs py-3 rounded-2xl font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-all active:scale-95"
+                className="w-full max-w-xs py-2.5 rounded-full font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-all active:scale-95"
               >
                 開始注音遊戲
               </button>
@@ -593,7 +593,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               <p className="text-emerald-700 text-sm mb-3">接下來，試著用這些生字各造兩個句子吧！</p>
               <button
                 onClick={() => setActiveTab('sentence')}
-                className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
+                className="px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
               >
                 開始造句練習
               </button>
@@ -614,7 +614,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-end">
         <button
           onClick={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
-          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
+          className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
           {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -328,7 +328,7 @@ const ExitTicket: React.FC<ExitTicketProps> = ({
     return (
       <div className="rounded-3xl border border-amber-200 bg-amber-50/50 overflow-hidden">
         <div className="px-6 py-4 flex items-center gap-3">
-          <span className="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-sm font-black shrink-0">
+          <span className="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-sm font-bold shrink-0">
             ✎
           </span>
           <h3 className="text-lg font-bold text-gray-900">學習出場卷</h3>
@@ -385,7 +385,7 @@ const ExitTicket: React.FC<ExitTicketProps> = ({
         className="w-full px-6 py-4 flex items-center justify-between hover:bg-amber-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-sm font-black shrink-0">
+          <span className="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-sm font-bold shrink-0">
             ✎
           </span>
           <h3 className="text-lg font-bold text-gray-900">學習出場卷</h3>

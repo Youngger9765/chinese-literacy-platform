@@ -48,7 +48,7 @@ const CreateOrgPanel: React.FC<CreateOrgPanelProps> = ({ onCreated, onCancel }) 
           <p className="text-sm text-gray-500 mt-1">建立新的機構，之後可在機構下新增學校</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white rounded-2xl shadow-card p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">

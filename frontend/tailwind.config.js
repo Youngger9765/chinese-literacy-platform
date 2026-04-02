@@ -8,6 +8,10 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Iansui', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        ui: ['cwTeXYen', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        card: '0 0 32px rgba(136, 152, 170, 0.12)',
       },
       colors: {
         accent: {

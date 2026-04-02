@@ -38,7 +38,7 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
     <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden">
       {/* Header */}
       <div className="h-9 bg-white border-b border-gray-200 flex items-center px-4 gap-2 shrink-0">
-        <span className="text-[10px] font-black text-accent-light uppercase tracking-widest">
+        <span className="text-[10px] font-bold text-accent-light uppercase tracking-widest">
           知識補給站
         </span>
         <div className="flex-1" />
@@ -49,7 +49,7 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-3xl mx-auto space-y-6">
           <div>
-            <h2 className="text-xl font-black text-gray-900 mb-2">知識補給站</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">知識補給站</h2>
             <p className="text-sm text-gray-600">
               看看和這篇課文相關的影片，幫助你更深入了解主題
             </p>
@@ -91,7 +91,7 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
           <div className="flex justify-center pt-4">
             <button
               onClick={handleFinish}
-              className="px-8 py-3 rounded-xl text-base font-bold bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95"
+              className="px-6 py-2.5 rounded-full text-sm font-bold bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95"
             >
               繼續前往報告
             </button>

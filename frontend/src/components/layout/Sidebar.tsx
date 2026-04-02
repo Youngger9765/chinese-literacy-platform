@@ -142,7 +142,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
       <nav
         role="navigation"
         aria-label="底部導覽列"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 h-14 flex items-stretch md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 font-ui bg-white border-t border-gray-200 h-14 flex items-stretch md:hidden"
       >
         {topItems.map((item) => (
           <button
@@ -376,7 +376,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         role="navigation"
         aria-label="側邊導覽列"
         className={`
-          hidden md:flex flex-col bg-white border-r border-gray-200 shrink-0 transition-all duration-200
+          hidden md:flex flex-col font-ui bg-white border-r border-gray-200 shrink-0 transition-all duration-200
           ${collapsed ? 'w-14' : 'w-56'}
         `}
       >
@@ -432,7 +432,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         </div>
 
         {/* Primary nav */}
-        <nav aria-label="主要頁面" className="flex-1 flex flex-col gap-1 px-2 overflow-y-auto">
+        <nav aria-label="主要頁面" className="flex-1 flex flex-col gap-1.5 px-2 overflow-y-auto">
           {primaryItems.map((item) => (
             <NavButton
               key={item.path}

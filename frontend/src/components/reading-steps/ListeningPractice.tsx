@@ -444,7 +444,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
               <button
                 type="button"
                 onClick={handlePlay}
-                className="flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold text-base shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                className="flex items-center gap-2 px-6 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-full font-semibold text-sm shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                 aria-label="播放課文"
               >
                 <span aria-hidden="true">▶</span> 播放課文
@@ -456,7 +456,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                 <button
                   type="button"
                   onClick={handlePause}
-                  className="flex items-center gap-2 px-5 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:ring-offset-2"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:ring-offset-2"
                   aria-label="暫停播放"
                 >
                   <span aria-hidden="true">⏸</span> 暫停
@@ -464,7 +464,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                 <button
                   type="button"
                   onClick={handleStop}
-                  className="flex items-center gap-2 px-5 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+                  className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-700 rounded-full font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
                   aria-label="停止播放"
                 >
                   <span aria-hidden="true">⏹</span> 停止
@@ -477,7 +477,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                 <button
                   type="button"
                   onClick={handleResume}
-                  className="flex items-center gap-2 px-5 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-full font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                   aria-label="繼續播放"
                 >
                   <span aria-hidden="true">▶</span> 繼續
@@ -485,7 +485,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                 <button
                   type="button"
                   onClick={handleStop}
-                  className="flex items-center gap-2 px-5 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+                  className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-700 rounded-full font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
                   aria-label="停止播放"
                 >
                   <span aria-hidden="true">⏹</span> 停止
@@ -499,7 +499,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                 <button
                   type="button"
                   onClick={handleContinueNextParagraph}
-                  className="flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold text-base shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-full font-semibold text-sm shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                   aria-label={`繼續播放第 ${paragraphIdx + 2} 段`}
                 >
                   <span aria-hidden="true">▶</span> 繼續下一段
@@ -507,7 +507,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                 <button
                   type="button"
                   onClick={handleStop}
-                  className="flex items-center gap-2 px-5 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+                  className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-700 rounded-full font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
                   aria-label="停止播放"
                 >
                   <span aria-hidden="true">⏹</span> 停止
@@ -519,7 +519,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
               <button
                 type="button"
                 onClick={handleReplay}
-                className="flex items-center gap-2 px-5 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+                className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-700 rounded-full font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
                 aria-label="重新播放"
               >
                 <span aria-hidden="true">↺</span> 重聽
@@ -594,7 +594,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
             <button
               type="button"
               onClick={handleProceedToRetell}
-              className="w-full py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold text-base shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+              className="w-full py-2.5 bg-accent hover:bg-accent-hover text-white rounded-full font-semibold text-sm shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               我聽完了，開始覆述 →
             </button>
@@ -761,7 +761,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
             <button
               type="button"
               onClick={() => setPhase('play')}
-              className="px-4 py-3 border border-gray-200 text-gray-600 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="px-4 py-2.5 border border-gray-300 bg-transparent text-gray-600 rounded-full font-medium text-sm hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               ← 重聽
             </button>
@@ -769,7 +769,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
               type="button"
               onClick={handleSubmitRetelling}
               disabled={isEvaluating || !retelling.trim()}
-              className="flex-1 py-3 bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-xl font-semibold text-base shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+              className="flex-1 py-2.5 bg-accent hover:bg-accent-hover disabled:bg-gray-300 disabled:text-gray-400 text-white rounded-full font-semibold text-sm shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
               aria-busy={isEvaluating}
             >
               {isEvaluating ? '評估中...' : '提交覆述'}
@@ -860,14 +860,14 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({
                 setParagraphIdx(0);
                 setParagraphPlayState('idle');
               }}
-              className="px-4 py-3 border border-gray-200 text-gray-600 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="px-4 py-2.5 border border-gray-300 bg-transparent text-gray-600 rounded-full font-medium text-sm hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               再練習一次
             </button>
             <button
               type="button"
               onClick={handleFinish}
-              className="flex-1 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold text-base shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+              className="flex-1 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-full font-semibold text-sm shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               完成練習 →
             </button>
