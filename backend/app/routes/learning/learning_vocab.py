@@ -4,12 +4,12 @@ Handles sentence practice (Issue #109) and listening comprehension evaluation (I
 """
 import logging
 import time
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
-from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min
+from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min, ai_rate_limiter
 from ...database import get_db
 from ...models.user import User
 from ...services.ai_service import generate_example_sentences, validate_student_sentence
@@ -53,9 +53,9 @@ class ValidateSentenceResponse(BaseModel):
 @router.post(
     "/learning/sentence-practice/example-sentences",
     response_model=ExampleSentencesResponse,
-    dependencies=[Depends(ai_limit_10_per_min)],
 )
 async def get_example_sentences(
+    request: Request,
     payload: ExampleSentencesRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -64,9 +64,9 @@ async def get_example_sentences(
 
     Returns cached result if available (TTL 30 days) to avoid repeated Gemini
     API calls for the same character + story (Issue #730).
-    Rate limited: 10 requests per minute per user/IP.
+    Rate limited: 10 requests per minute per user/IP (cache miss only, Issue #911).
     """
-    # 1. Cache hit — return immediately without calling AI
+    # 1. Cache hit — return immediately without calling AI (no rate limit)
     cached = get_cached(story_title=payload.story_title, character=payload.character)
     if cached is not None:
         logger.debug(
@@ -90,7 +90,11 @@ async def get_example_sentences(
             source=cache_source,
         )
 
-    # 2. Cache miss — call AI
+    # 2. Cache miss — enforce rate limit before calling AI (Issue #911)
+    user_id = getattr(request.state, "user_id", None)
+    rl_key = f"ai:user:{user_id}" if user_id else f"ai:ip:{request.client.host if request.client else 'unknown'}"
+    if not ai_rate_limiter.check(rl_key, max_requests=10, window_seconds=60):
+        raise HTTPException(status_code=429, detail="AI endpoint rate limit exceeded. Please wait before retrying.")
     start_time = time.monotonic()
     try:
         result = await generate_example_sentences(
