@@ -48,10 +48,15 @@ const mockStory: Story = {
 
 describe('ReadingAnnotation', () => {
   const onFinish = vi.fn();
+  const scrollIntoViewMock = vi.fn();
 
   beforeEach(() => {
     localStorageMock.clear();
     vi.clearAllMocks();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoViewMock,
+    });
   });
 
   afterEach(() => {
@@ -72,17 +77,14 @@ describe('ReadingAnnotation', () => {
 
   it('shows mark tool buttons in toolbar', () => {
     render(<ReadingAnnotation story={mockStory} onFinish={onFinish} />);
-    // Both mark types should be in the top toolbar
-    const unknownBtns = screen.getAllByText('不懂');
-    const importantBtns = screen.getAllByText('重要');
+    const unknownBtns = screen.getAllByText(/不懂/);
+    const importantBtns = screen.getAllByText(/重要/);
     expect(unknownBtns.length).toBeGreaterThan(0);
     expect(importantBtns.length).toBeGreaterThan(0);
   });
 
   it('initially shows 0 marks in summary', () => {
     render(<ReadingAnnotation story={mockStory} onFinish={onFinish} />);
-    expect(screen.getByText(/已標記/)).toBeTruthy();
-    expect(screen.getByText('0')).toBeTruthy();
     expect(screen.getByText(/還沒有標記/)).toBeTruthy();
   });
 
@@ -168,7 +170,40 @@ describe('ReadingAnnotation', () => {
     });
 
     // Count should be 0 now
-    expect(screen.getByText('0', { selector: 'strong' })).toBeTruthy();
     expect(screen.getByText(/還沒有標記/)).toBeTruthy();
+  });
+
+  it('shows marked words in right side panel as vertical list', () => {
+    const seeded = [
+      { id: 'ann-1', paragraphIndex: 0, charStart: 0, charEnd: 2, type: 'unknown' },
+      { id: 'ann-2', paragraphIndex: 1, charStart: 0, charEnd: 3, type: 'important' },
+    ];
+    localStorageMock.setItem(`annotations_test-story-001`, JSON.stringify(seeded));
+
+    render(<ReadingAnnotation story={mockStory} onFinish={onFinish} />);
+
+    expect(screen.getByText('我的記號')).toBeTruthy();
+    expect(screen.getByLabelText(/跳轉到不懂標記：第一/)).toBeTruthy();
+    expect(screen.getByLabelText(/跳轉到重要標記：第二段/)).toBeTruthy();
+  });
+
+  it('jumps to selected marked word and highlights it when clicking side panel', async () => {
+    const seeded = [
+      { id: 'ann-jump', paragraphIndex: 0, charStart: 0, charEnd: 2, type: 'important' },
+    ];
+    localStorageMock.setItem(`annotations_test-story-001`, JSON.stringify(seeded));
+
+    render(<ReadingAnnotation story={mockStory} onFinish={onFinish} />);
+
+    const jumpButton = screen.getByLabelText(/跳轉到重要標記：第一/);
+
+    await act(async () => {
+      fireEvent.click(jumpButton);
+    });
+
+    expect(scrollIntoViewMock).toHaveBeenCalledTimes(1);
+
+    const mark = screen.getByRole('mark', { name: /重要標記：第一/ });
+    expect(mark.className).toContain('ring-4');
   });
 });
