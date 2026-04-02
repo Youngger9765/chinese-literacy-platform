@@ -35,6 +35,7 @@ class ExampleSentenceItem(BaseModel):
 
 class ExampleSentencesResponse(BaseModel):
     sentences: list[ExampleSentenceItem]
+    source: str = Field(default="ai", description="'pregenerated' if from cache/JSON, 'ai' if generated in real-time")
 
 
 class ValidateSentenceRequest(BaseModel):
@@ -69,9 +70,10 @@ async def get_example_sentences(
     cached = get_cached(story_title=payload.story_title, character=payload.character)
     if cached is not None:
         logger.debug(
-            "Example sentence cache hit: char=%s story=%s",
+            "Example sentence cache hit: char=%s story=%s source=%s",
             payload.character,
             payload.story_title,
+            cached.get("source", "ai"),
         )
         def _to_item(s: object) -> ExampleSentenceItem:
             # Pre-generated cache stores plain strings; AI-generated cache stores dicts.
@@ -79,8 +81,13 @@ async def get_example_sentences(
                 return ExampleSentenceItem(sentence=s, explanation="")
             return ExampleSentenceItem(**s)
 
+        # Determine source: explicitly-tagged pregenerated entries keep "pregenerated";
+        # all other cache hits (AI results stored after first call) are treated as "pregenerated"
+        # because they return instantly without an AI call.
+        cache_source = cached.get("source", "pregenerated")
         return ExampleSentencesResponse(
             sentences=[_to_item(s) for s in cached.get("sentences", [])],
+            source=cache_source,
         )
 
     # 2. Cache miss — call AI
@@ -130,6 +137,7 @@ async def get_example_sentences(
 
     return ExampleSentencesResponse(
         sentences=[ExampleSentenceItem(**s) for s in result.get("sentences", [])],
+        source="ai",
     )
 
 
