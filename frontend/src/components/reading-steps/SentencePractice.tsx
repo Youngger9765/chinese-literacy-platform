@@ -491,7 +491,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       <>
         {/* Character tab nav — shown inline above content */}
         {practicedChars.length > 1 && (
-          <div className="bg-white border border-gray-100 rounded-xl px-3 py-2 flex gap-2 overflow-x-auto">
+          <div className="bg-white border border-gray-100 rounded-xl px-3 py-2 flex flex-wrap gap-2">
             {practicedChars.map((ch, i) => {
               const done = completedChars.has(ch);
               const active = i === currentCharIndex;

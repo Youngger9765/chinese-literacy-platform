@@ -207,6 +207,22 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     return optional.slice(0, 12);
   }, [story.content, attempt?.mispronouncedWords]);
 
+  // Vocabulary chars for sentence practice — extracted from story.vocabulary words
+  // These match the cache keys in example_sentence_cache.json (Issue #910)
+  const vocabChars = useMemo(() => {
+    const seen = new Set<string>();
+    const chars: string[] = [];
+    for (const item of story.vocabulary ?? []) {
+      for (const ch of item.word) {
+        if (/[\u4e00-\u9fa5]/.test(ch) && !seen.has(ch)) {
+          chars.push(ch);
+          seen.add(ch);
+        }
+      }
+    }
+    return chars;
+  }, [story.vocabulary]);
+
   // Pronunciation tab: all characters are candidates (no stroke-data filter needed)
   const pronunciationChars = useMemo(() => {
     const suggested = (attempt?.mispronouncedWords ?? []).filter(ch => /[\u4e00-\u9fa5]/.test(ch));
@@ -476,7 +492,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {/* Sentence practice — inline tab panel */}
           {activeTab === 'sentence' && (
             <SentencePractice
-              practicedChars={displayChars.length > 0 ? displayChars : Array.from(practicedChars)}
+              practicedChars={vocabChars.length > 0 ? vocabChars : displayChars}
               storyTitle={story.title}
               onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
               onBack={() => setActiveTab('stroke')}
