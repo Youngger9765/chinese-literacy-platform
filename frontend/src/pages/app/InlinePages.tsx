@@ -15,6 +15,7 @@ import { lazy } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasRole } from '../../services/authApi';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
+import { PARENT_PORTAL_ENABLED } from '../../config/featureFlags';
 import StoryLibrary from '../student/StoryLibrary';
 import WriteCharacter from '../../components/stroke-order/WriteCharacter';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
@@ -42,7 +43,7 @@ export const HomePage: React.FC = () => {
     admin: '/admin',
     teacher: '/teacher-home',
     student: '/student',
-    parent: '/parent',
+    parent: PARENT_PORTAL_ENABLED ? '/parent' : '/student',
   };
   return <Navigate to={homeMap[activeView] ?? '/student'} replace />;
 };

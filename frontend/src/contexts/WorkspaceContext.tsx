@@ -10,6 +10,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import type { AuthUser, UserRole } from '../services/authApi';
+import { PARENT_PORTAL_ENABLED } from '../config/featureFlags';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -61,7 +62,7 @@ function deriveAvailableViews(user: AuthUser | null): WorkspaceView[] {
     if (ADMIN_ROLES.has(r.role_name)) views.add('admin');
     if (TEACHER_ROLES.has(r.role_name)) views.add('teacher');
     if (r.role_name === 'student') views.add('student');
-    if (r.role_name === 'parent') views.add('parent');
+    if (PARENT_PORTAL_ENABLED && r.role_name === 'parent') views.add('parent');
   }
   // Admin users also get teacher view (they manage classrooms)
   if (views.has('admin') && !views.has('teacher')) views.add('teacher');

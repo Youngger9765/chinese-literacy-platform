@@ -34,7 +34,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
-from app.models.user import Role
+from app.models.user import Role, User, UserRole
 from app.auth.password import hash_password, verify_password
 from app.auth.jwt import create_access_token, decode_token
 from app.config import settings
@@ -156,6 +156,30 @@ def registered_user(client):
 def auth_header(token: str) -> dict:
     """Build an Authorization header dict."""
     return {"Authorization": f"Bearer {token}"}
+
+
+def _assign_role_to_user(email: str, role_name: str) -> None:
+    """Assign an active role to a user in the test database."""
+    db = TestingSessionLocal()
+    try:
+        user = db.query(User).filter(User.email == email).first()
+        assert user is not None
+        role = db.query(Role).filter(Role.name == role_name).first()
+        assert role is not None
+        existing = (
+            db.query(UserRole)
+            .filter(
+                UserRole.user_id == user.id,
+                UserRole.role_id == role.id,
+                UserRole.is_active == True,
+            )
+            .first()
+        )
+        if existing is None:
+            db.add(UserRole(user_id=user.id, role_id=role.id, scope_type="platform"))
+            db.commit()
+    finally:
+        db.close()
 
 
 # ===========================================================================
@@ -818,6 +842,29 @@ class TestLoginEndpoint:
         })
         assert resp_wrong_email.json()["detail"] == resp_wrong_pass.json()["detail"]
         assert resp_wrong_email.status_code == resp_wrong_pass.status_code
+
+    def test_login_blocks_parent_role_when_parent_portal_disabled(self, client, registered_user, monkeypatch):
+        _assign_role_to_user(registered_user["email"], "parent")
+        monkeypatch.setattr("app.config.settings.parent_portal_enabled", False)
+
+        resp = client.post("/api/auth/login", json={
+            "email": registered_user["email"],
+            "password": registered_user["password"],
+        })
+
+        assert resp.status_code == 403
+        assert resp.json()["detail"] == "家長功能目前暫時關閉，請聯繫老師或管理員。"
+
+    def test_login_allows_parent_role_when_parent_portal_enabled(self, client, registered_user, monkeypatch):
+        _assign_role_to_user(registered_user["email"], "parent")
+        monkeypatch.setattr("app.config.settings.parent_portal_enabled", True)
+
+        resp = client.post("/api/auth/login", json={
+            "email": registered_user["email"],
+            "password": registered_user["password"],
+        })
+
+        assert resp.status_code == 200
 
 
 # ===========================================================================

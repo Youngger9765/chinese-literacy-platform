@@ -18,6 +18,7 @@ import {
   TeacherDashboardPage,
 } from '../pages/app/InlinePages';
 import PageLoader from '../components/ui/PageLoader';
+import { PARENT_PORTAL_ENABLED } from '../config/featureFlags';
 
 // Auth pages — eager-loaded (small, needed immediately on first visit)
 import LoginPage from '../pages/LoginPage';
@@ -215,16 +216,18 @@ const AppRoutes: React.FC = () => (
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/parent"
-        element={
-          <ProtectedRoute>
-            <AppShell>
-              <ParentDashboard />
-            </AppShell>
-          </ProtectedRoute>
-        }
-      />
+      {PARENT_PORTAL_ENABLED && (
+        <Route
+          path="/parent"
+          element={
+            <ProtectedRoute>
+              <AppShell>
+                <ParentDashboard />
+              </AppShell>
+            </ProtectedRoute>
+          }
+        />
+      )}
       <Route
         path="/assignments"
         element={
