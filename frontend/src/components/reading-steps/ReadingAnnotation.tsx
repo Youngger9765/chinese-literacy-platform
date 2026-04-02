@@ -32,6 +32,11 @@ interface ReadingAnnotationProps {
   fontSizePx?: number;
 }
 
+interface AnnotationWithText {
+  annotation: Annotation;
+  text: string;
+}
+
 // ── Config ─────────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = (storyId: string) => `annotations_${storyId}`;
@@ -93,6 +98,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const annotationElementRefs = useRef(new Map<string, HTMLSpanElement>());
+  const [focusedAnnotationId, setFocusedAnnotationId] = useState<string | null>(null);
 
   // ── Zhuyin ─────────────────────────────────────────────────────────────
 
@@ -118,6 +125,23 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     unknownCount: annotations.filter((a) => a.type === 'unknown').length,
     importantCount: annotations.filter((a) => a.type === 'important').length,
   }), [annotations]);
+
+  const annotationsForPanel = useMemo<AnnotationWithText[]>(() => {
+    return [...annotations]
+      .sort((a, b) => {
+        if (a.paragraphIndex !== b.paragraphIndex) {
+          return a.paragraphIndex - b.paragraphIndex;
+        }
+        return a.charStart - b.charStart;
+      })
+      .map((annotation) => {
+        const paragraph = story.content[annotation.paragraphIndex] ?? '';
+        return {
+          annotation,
+          text: paragraph.slice(annotation.charStart, annotation.charEnd),
+        };
+      });
+  }, [annotations, story.content]);
 
   // ── Selection helpers ──────────────────────────────────────────────────
 
@@ -271,7 +295,12 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       setUndoStack((stack) => [...stack.slice(-19), prev]);
       return prev.filter((a) => a.id !== id);
     });
-  }, []);
+
+    if (focusedAnnotationId === id) {
+      setFocusedAnnotationId(null);
+    }
+    annotationElementRefs.current.delete(id);
+  }, [focusedAnnotationId]);
 
   // ── Undo ──────────────────────────────────────────────────────────────
 
@@ -289,7 +318,27 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   const clearAll = useCallback(() => {
     setUndoStack((stack) => [...stack.slice(-19), annotations]);
     setAnnotations([]);
+    setFocusedAnnotationId(null);
+    annotationElementRefs.current.clear();
   }, [annotations]);
+
+  const jumpToAnnotation = useCallback((annotationId: string) => {
+    const targetElement = annotationElementRefs.current.get(annotationId);
+    if (!targetElement) return;
+
+    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setFocusedAnnotationId(annotationId);
+  }, []);
+
+  useEffect(() => {
+    if (!focusedAnnotationId) return;
+
+    const timer = window.setTimeout(() => {
+      setFocusedAnnotationId((current) => (current === focusedAnnotationId ? null : current));
+    }, 2200);
+
+    return () => window.clearTimeout(timer);
+  }, [focusedAnnotationId]);
 
   // ── Render paragraph with annotation spans ─────────────────────────────
 
@@ -346,11 +395,19 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       return (
         <span
           key={seg.annotation.id}
-          className={`cursor-pointer ${cfg.className}`}
+          ref={(element) => {
+            if (element) {
+              annotationElementRefs.current.set(seg.annotation.id, element);
+            } else {
+              annotationElementRefs.current.delete(seg.annotation.id);
+            }
+          }}
+          className={`cursor-pointer transition-all duration-300 ${cfg.className} ${focusedAnnotationId === seg.annotation.id ? 'ring-4 ring-lime-300 ring-offset-2 shadow-[0_0_0_4px_rgba(190,242,100,0.35)]' : ''}`}
           title={`${cfg.icon} ${cfg.label} (點擊移除)`}
           onClick={() => removeAnnotation(seg.annotation!.id)}
           role="mark"
           aria-label={`${cfg.label}標記：${chars}`}
+          data-annotation-id={seg.annotation.id}
         >
           {chars}
         </span>
@@ -418,73 +475,112 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       </div>
 
       {/* ── Main text area ─────────────────────────────────────────────── */}
-      <div
-        ref={containerRef}
-        className="flex-1 overflow-y-auto relative"
-        onMouseUp={handleMouseUp}
-        onTouchEnd={handleTouchEnd}
-        style={{ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties}
-      >
-        <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-          {story.content.map((rawPara, paraIdx) => {
-            const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
-            return (
-              <p
-                key={paraIdx}
-                data-para-idx={paraIdx}
-                className="text-gray-900 leading-loose"
-                style={{
-                  fontSize: `${fontSizePx}px`,
-                  lineHeight: zhuyinActive ? '3.8rem' : '2.8rem',
-                  letterSpacing: zhuyinActive ? '0.35em' : '0.05em',
+      <div className="flex-1 min-h-0 flex overflow-hidden">
+        <div
+          ref={containerRef}
+          className="flex-1 overflow-y-auto relative"
+          onMouseUp={handleMouseUp}
+          onTouchEnd={handleTouchEnd}
+          style={{ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties}
+        >
+          <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+            {story.content.map((rawPara, paraIdx) => {
+              const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
+              return (
+                <p
+                  key={paraIdx}
+                  data-para-idx={paraIdx}
+                  className="text-gray-900 leading-loose"
+                  style={{
+                    fontSize: `${fontSizePx}px`,
+                    lineHeight: zhuyinActive ? '3.8rem' : '2.8rem',
+                    letterSpacing: zhuyinActive ? '0.35em' : '0.05em',
+                  }}
+                >
+                  {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}
+                </p>
+              );
+            })}
+          </div>
+
+          {/* ── Floating toolbar — larger for touch ──────────────────────── */}
+          {toolbar.visible && (
+            <div
+              ref={toolbarRef}
+              role="toolbar"
+              aria-label="標記選取文字"
+              className="absolute z-50 flex items-center gap-2 bg-white border-2 border-amber-300 rounded-2xl shadow-2xl px-3 py-2 -translate-x-1/2 -translate-y-full"
+              style={{ left: toolbar.x, top: toolbar.y }}
+            >
+              {(Object.entries(TYPE_CONFIG) as Array<[AnnotationType, typeof TYPE_CONFIG[AnnotationType]]>).map(
+                ([type, cfg]) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onPointerDown={(e) => {
+                      // Use pointerdown so we act before selection is cleared
+                      e.preventDefault();
+                      applyAnnotation(type);
+                    }}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-base font-black border-2 transition-all min-h-[44px] active:scale-95 ${cfg.activeClass}`}
+                  >
+                    <span aria-hidden="true">{cfg.icon}</span>
+                    {cfg.label}
+                  </button>
+                )
+              )}
+              <button
+                type="button"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  window.getSelection()?.removeAllRanges();
+                  hideToolbar();
                 }}
+                className="ml-1 px-3 py-2 rounded-xl text-base text-gray-400 hover:text-gray-700 border-2 border-gray-200 hover:bg-gray-50 transition-all min-h-[44px]"
+                aria-label="取消"
               >
-                {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}
-              </p>
-            );
-          })}
+                ✕
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* ── Floating toolbar — larger for touch ──────────────────────── */}
-        {toolbar.visible && (
-          <div
-            ref={toolbarRef}
-            role="toolbar"
-            aria-label="標記選取文字"
-            className="absolute z-50 flex items-center gap-2 bg-white border-2 border-amber-300 rounded-2xl shadow-2xl px-3 py-2 -translate-x-1/2 -translate-y-full"
-            style={{ left: toolbar.x, top: toolbar.y }}
-          >
-            {(Object.entries(TYPE_CONFIG) as Array<[AnnotationType, typeof TYPE_CONFIG[AnnotationType]]>).map(
-              ([type, cfg]) => (
-                <button
-                  key={type}
-                  type="button"
-                  onPointerDown={(e) => {
-                    // Use pointerdown so we act before selection is cleared
-                    e.preventDefault();
-                    applyAnnotation(type);
-                  }}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-base font-black border-2 transition-all min-h-[44px] active:scale-95 ${cfg.activeClass}`}
-                >
-                  <span aria-hidden="true">{cfg.icon}</span>
-                  {cfg.label}
-                </button>
-              )
-            )}
-            <button
-              type="button"
-              onPointerDown={(e) => {
-                e.preventDefault();
-                window.getSelection()?.removeAllRanges();
-                hideToolbar();
-              }}
-              className="ml-1 px-3 py-2 rounded-xl text-base text-gray-400 hover:text-gray-700 border-2 border-gray-200 hover:bg-gray-50 transition-all min-h-[44px]"
-              aria-label="取消"
-            >
-              ✕
-            </button>
+        <aside className="w-52 sm:w-60 md:w-72 border-l border-amber-200 bg-white overflow-y-auto">
+          <div className="sticky top-0 bg-amber-50 border-b border-amber-200 px-4 py-3">
+            <h3 className="text-sm font-black text-amber-900">我的記號</h3>
+            <p className="text-xs text-amber-700 mt-1">點擊詞語可跳到課文對應位置</p>
           </div>
-        )}
+          <div className="px-3 py-3 space-y-2">
+            {annotationsForPanel.length === 0 ? (
+              <p className="text-xs text-gray-400 px-1 py-2">尚未標記詞語</p>
+            ) : (
+              annotationsForPanel.map(({ annotation, text }, index) => {
+                const cfg = TYPE_CONFIG[annotation.type];
+                const displayText = text.trim() || '（空白選取）';
+                return (
+                  <button
+                    key={annotation.id}
+                    type="button"
+                    onClick={() => jumpToAnnotation(annotation.id)}
+                    className={`w-full text-left px-3 py-2 rounded-xl border transition-all hover:shadow-sm ${focusedAnnotationId === annotation.id
+                      ? 'border-lime-300 bg-lime-50 shadow-[0_0_0_3px_rgba(163,230,53,0.25)]'
+                      : 'border-gray-200 bg-white hover:bg-amber-50'}
+                    `}
+                    aria-label={`跳轉到${cfg.label}標記：${displayText}`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-gray-500">#{index + 1}</span>
+                      <span className={`text-[11px] px-1.5 py-0.5 rounded-full border ${annotation.type === 'unknown' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-yellow-50 text-yellow-900 border-yellow-200'}`}>
+                        {cfg.icon} {cfg.label}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm font-bold text-gray-800 break-all">{displayText}</p>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </aside>
       </div>
 
       {/* ── Summary bar + finish button ────────────────────────────────── */}
