@@ -98,19 +98,33 @@ def client(db_session):
 # ---------------------------------------------------------------------------
 
 def _create_student_and_login(client: TestClient) -> str:
-    """Register a student and return JWT token."""
+    """Create a user directly in the DB (bypasses self-reg restriction and email verification).
+
+    Students cannot self-register since issue #457 — they're created by teachers.
+    We insert the user directly into the test DB with email_verified=True.
+    The sentence practice endpoint only requires a valid authenticated user, not a specific role.
+    """
     import uuid
-    email = f"student_{uuid.uuid4().hex[:8]}@test.com"
+    from app.auth.password import hash_password
+    from app.models.user import User as UserModel
+
+    unique = uuid.uuid4().hex[:8]
+    email = f"testuser_{unique}@example.com"
     password = "TestPass123!"
 
-    res = client.post("/api/auth/register", json={
-        "email": email,
-        "password": password,
-        "name": "Test Student",
-        "role": "student",
-        "copyright_confirmed": True,
-    })
-    assert res.status_code in (200, 201), f"Register failed: {res.text}"
+    db = TestingSessionLocal()
+    try:
+        user = UserModel(
+            email=email,
+            password_hash=hash_password(password),
+            name=f"Test User {unique}",
+            email_verified=True,
+            is_active=True,
+        )
+        db.add(user)
+        db.commit()
+    finally:
+        db.close()
 
     login_res = client.post("/api/auth/login", json={"email": email, "password": password})
     assert login_res.status_code == 200, f"Login failed: {login_res.text}"
@@ -132,7 +146,7 @@ class TestExampleSentences:
             ]
         }
         with patch(
-            "app.routes.learning.generate_example_sentences",
+            "app.routes.learning.learning_vocab.generate_example_sentences",
             new=AsyncMock(return_value=mock_result),
         ):
             res = client.post(
@@ -151,7 +165,7 @@ class TestExampleSentences:
     def test_example_sentences_requires_auth(self, client: TestClient):
         """Without auth token, endpoint returns 401 or 403."""
         with patch(
-            "app.routes.learning.generate_example_sentences",
+            "app.routes.learning.learning_vocab.generate_example_sentences",
             new=AsyncMock(return_value={"sentences": []}),
         ):
             res = client.post(
@@ -174,7 +188,7 @@ class TestExampleSentences:
         """Returns 503 when AI service times out."""
         token = _create_student_and_login(client)
         with patch(
-            "app.routes.learning.generate_example_sentences",
+            "app.routes.learning.learning_vocab.generate_example_sentences",
             new=AsyncMock(side_effect=TimeoutError("AI timeout")),
         ):
             res = client.post(
@@ -183,6 +197,93 @@ class TestExampleSentences:
                 headers={"Authorization": f"Bearer {token}"},
             )
         assert res.status_code == 503
+
+    def test_example_sentences_ai_path_returns_source_ai(self, client: TestClient):
+        """When AI generates sentences in real-time, response includes source='ai'. (Issue #836)"""
+        import app.services.example_sentence_cache as cache_module
+        from app.services.example_sentence_cache import _reset
+
+        token = _create_student_and_login(client)
+        mock_result = {
+            "sentences": [
+                {"sentence": "河流源源不絕地流著。", "explanation": "源：水流的起點"},
+                {"sentence": "這個想法來源於大自然。", "explanation": "源：事物的根本"},
+            ]
+        }
+        # Use a unique story title to guarantee cache miss
+        unique_story = "測試課文_issue836_ai"
+        with patch(
+            "app.routes.learning.learning_vocab.get_cached",
+            return_value=None,
+        ), patch(
+            "app.routes.learning.learning_vocab.generate_example_sentences",
+            new=AsyncMock(return_value=mock_result),
+        ), patch(
+            "app.routes.learning.learning_vocab.set_cached",
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/example-sentences",
+                json={"character": "源", "story_title": unique_story},
+                headers={"Authorization": f"Bearer {token}"},
+            )
+        assert res.status_code == 200
+        data = res.json()
+        assert "source" in data, "Response must include 'source' field (Issue #836)"
+        assert data["source"] == "ai", f"Expected source='ai' for real-time generation, got '{data['source']}'"
+
+    def test_example_sentences_pregenerated_cache_returns_source_pregenerated(self, client: TestClient):
+        """When served from pregenerated cache, response includes source='pregenerated'. (Issue #836)"""
+        token = _create_student_and_login(client)
+        cached_data = {
+            "sentences": [
+                {"sentence": "這條河的來源是高山。", "explanation": "來源：事物的起點"},
+                {"sentence": "她的靈感來源於童年記憶。", "explanation": "來源：根本"},
+            ],
+            "source": "pregenerated",
+        }
+        with patch(
+            "app.routes.learning.learning_vocab.get_cached",
+            return_value=cached_data,
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/example-sentences",
+                json={"character": "源", "story_title": "測試課文_pregenerated"},
+                headers={"Authorization": f"Bearer {token}"},
+            )
+        assert res.status_code == 200
+        data = res.json()
+        assert "source" in data, "Response must include 'source' field (Issue #836)"
+        assert data["source"] == "pregenerated", (
+            f"Expected source='pregenerated' for cached entry, got '{data['source']}'"
+        )
+
+    def test_example_sentences_ai_cached_returns_source_pregenerated(self, client: TestClient):
+        """When served from AI-result cache (no source tag), response includes source='pregenerated'.
+        AI-cached results also return instantly, so they use 'pregenerated' semantics. (Issue #836)"""
+        token = _create_student_and_login(client)
+        # AI cache entries don't have a 'source' key — they're stored by set_cached
+        cached_data = {
+            "sentences": [
+                {"sentence": "泉水是山裡清澈的水源。", "explanation": "水源：水的來源"},
+                {"sentence": "她努力工作是收入的主要來源。", "explanation": "來源：事物根本"},
+            ],
+            # No 'source' key — simulates a cached AI result stored by set_cached
+        }
+        with patch(
+            "app.routes.learning.learning_vocab.get_cached",
+            return_value=cached_data,
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/example-sentences",
+                json={"character": "源", "story_title": "測試課文_ai_cached"},
+                headers={"Authorization": f"Bearer {token}"},
+            )
+        assert res.status_code == 200
+        data = res.json()
+        assert "source" in data, "Response must include 'source' field (Issue #836)"
+        assert data["source"] == "pregenerated", (
+            f"Expected source='pregenerated' for cached AI result (returns instantly), got '{data['source']}'"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -199,7 +300,7 @@ class TestValidateSentence:
             "suggestion": "",
         }
         with patch(
-            "app.routes.learning.validate_student_sentence",
+            "app.routes.learning.learning_vocab.validate_student_sentence",
             new=AsyncMock(return_value=mock_result),
         ):
             res = client.post(
@@ -221,7 +322,7 @@ class TestValidateSentence:
         """Returns is_correct=False without calling AI when char not in sentence."""
         token = _create_student_and_login(client)
         with patch(
-            "app.routes.learning.validate_student_sentence",
+            "app.routes.learning.learning_vocab.validate_student_sentence",
             new=AsyncMock(return_value={"is_correct": True, "feedback": "", "suggestion": ""}),
         ) as mock_ai:
             res = client.post(
@@ -250,7 +351,7 @@ class TestValidateSentence:
             "suggestion": "試試：「這杯水很清涼。」",
         }
         with patch(
-            "app.routes.learning.validate_student_sentence",
+            "app.routes.learning.learning_vocab.validate_student_sentence",
             new=AsyncMock(return_value=mock_result),
         ):
             res = client.post(
@@ -298,7 +399,7 @@ class TestValidateSentence:
         """Returns 503 when AI service encounters an error."""
         token = _create_student_and_login(client)
         with patch(
-            "app.routes.learning.validate_student_sentence",
+            "app.routes.learning.learning_vocab.validate_student_sentence",
             new=AsyncMock(side_effect=Exception("AI error")),
         ):
             res = client.post(

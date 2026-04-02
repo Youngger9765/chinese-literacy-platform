@@ -16,6 +16,8 @@ interface ExampleSentence {
   explanation: string;
 }
 
+type ExampleSentenceSource = 'pregenerated' | 'ai';
+
 type SentenceStatus = 'idle' | 'loading' | 'correct' | 'incorrect';
 
 interface SentenceEntry {
@@ -29,6 +31,7 @@ interface CharacterPracticeState {
   exampleSentences: ExampleSentence[] | null;
   examplesLoading: boolean;
   examplesError: string;
+  examplesSource: ExampleSentenceSource | null;
   sentences: [SentenceEntry, SentenceEntry];
   allCorrect: boolean;
 }
@@ -42,6 +45,7 @@ function makeCharState(): CharacterPracticeState {
     exampleSentences: null,
     examplesLoading: false,
     examplesError: '',
+    examplesSource: null,
     sentences: [makeSentenceEntry(), makeSentenceEntry()],
     allCorrect: false,
   };
@@ -49,11 +53,16 @@ function makeCharState(): CharacterPracticeState {
 
 // ── API helpers ───────────────────────────────────────────────────────────
 
+interface ExampleSentencesApiResponse {
+  sentences: ExampleSentence[];
+  source: ExampleSentenceSource;
+}
+
 async function fetchExampleSentences(
   character: string,
   storyTitle: string,
   token: string | null,
-): Promise<ExampleSentence[]> {
+): Promise<ExampleSentencesApiResponse> {
   const res = await fetch(`${API_BASE}/api/learning/sentence-practice/example-sentences`, {
     method: 'POST',
     headers: {
@@ -64,7 +73,10 @@ async function fetchExampleSentences(
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
-  return data.sentences as ExampleSentence[];
+  return {
+    sentences: data.sentences as ExampleSentence[],
+    source: (data.source ?? 'ai') as ExampleSentenceSource,
+  };
 }
 
 async function validateSentence(
@@ -163,10 +175,15 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
     }));
 
     try {
-      const examples = await fetchExampleSentences(currentChar, storyTitle, token);
+      const { sentences: examples, source } = await fetchExampleSentences(currentChar, storyTitle, token);
       setCharStates(prev => ({
         ...prev,
-        [currentChar]: { ...prev[currentChar], examplesLoading: false, exampleSentences: examples },
+        [currentChar]: {
+          ...prev[currentChar],
+          examplesLoading: false,
+          exampleSentences: examples,
+          examplesSource: source,
+        },
       }));
     } catch {
       // Remove from ref so the retry button can re-attempt
@@ -325,6 +342,16 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
           <div className="bg-white rounded-2xl border border-gray-200 p-4">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">AI 例句示範</span>
+              {!currentState.examplesLoading && currentState.examplesSource && (
+                <span className={[
+                  'text-[10px] font-medium px-1.5 py-0.5 rounded',
+                  currentState.examplesSource === 'pregenerated'
+                    ? 'bg-blue-50 text-blue-500'
+                    : 'bg-purple-50 text-purple-500',
+                ].join(' ')}>
+                  {currentState.examplesSource === 'pregenerated' ? '預先生成' : 'AI 即時生成'}
+                </span>
+              )}
             </div>
 
             {currentState.examplesLoading && (
