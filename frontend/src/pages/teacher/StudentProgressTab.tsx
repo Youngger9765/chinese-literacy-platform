@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -392,7 +392,8 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   // Learning curve state
   const [learningCurve, setLearningCurve] = useState<LearningCurvePoint[]>([]);
   const [isLoadingCurve, setIsLoadingCurve] = useState(false);
-  const curveCache = useRef<Record<number, LearningCurvePoint[]>>({});
+  const curveCache = useRef<Record<string, LearningCurvePoint[]>>({});
+  const [curveStoryFilter, setCurveStoryFilter] = useState<string>(''); // empty = all stories
 
   const loadProgress = useCallback(async () => {
     if (!token) return;
@@ -469,6 +470,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     }
 
     setExpandedStudentId(studentId);
+    setCurveStoryFilter(''); // reset story filter when switching students
     if (!token) return;
 
     // Load session history (with cache)
@@ -489,14 +491,15 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     }
 
     // Load learning curve (with cache)
-    if (curveCache.current[studentId]) {
-      setLearningCurve(curveCache.current[studentId]);
+    const cacheKey = `${studentId}:${curveStoryFilter}`;
+    if (curveCache.current[cacheKey]) {
+      setLearningCurve(curveCache.current[cacheKey]);
     } else {
       setIsLoadingCurve(true);
       setLearningCurve([]);
       try {
-        const curveData = await getStudentLearningCurve(token, studentId);
-        curveCache.current[studentId] = curveData.data;
+        const curveData = await getStudentLearningCurve(token, studentId, curveStoryFilter || undefined);
+        curveCache.current[cacheKey] = curveData.data;
         setLearningCurve(curveData.data);
       } catch {
         setLearningCurve([]);
@@ -504,7 +507,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
         setIsLoadingCurve(false);
       }
     }
-  }, [expandedStudentId, token]);
+  }, [expandedStudentId, token, curveStoryFilter]);
 
   // Load and show dialogue history for a session (Issue #418)
   const handleViewDialogue = useCallback(async (
@@ -547,9 +550,25 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
         score: pt.score,
         rollingAvg: Math.round(rollingAvg * 10) / 10,
         story_title: pt.story_title,
+        cpm: pt.cpm,
+        accuracy: pt.accuracy,
       };
     });
   };
+
+  /** Get unique story slugs from learning curve for the filter dropdown. */
+  const availableStories = useMemo(() => {
+    // Use the "all stories" cache for the current student
+    const allKey = `${expandedStudentId}:`;
+    const allPoints = curveCache.current[allKey] || learningCurve;
+    const seen = new Map<string, string>();
+    for (const pt of allPoints) {
+      if (pt.story_slug && !seen.has(pt.story_slug)) {
+        seen.set(pt.story_slug, pt.story_title || pt.story_slug);
+      }
+    }
+    return Array.from(seen.entries()).map(([slug, title]) => ({ slug, title }));
+  }, [expandedStudentId, learningCurve]);
 
   const formatDate = (dateStr: string | null): string => {
     if (!dateStr) return '-';
@@ -738,7 +757,21 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                     <div className="h-40 bg-gray-200 animate-pulse rounded" />
                   ) : learningCurve.length >= 2 ? (
                     <div>
-                      <p className="text-xs font-medium text-gray-500 mb-2">學習曲線</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium text-gray-500">學習曲線</p>
+                        {availableStories.length > 1 && (
+                          <select
+                            value={curveStoryFilter}
+                            onChange={(e) => setCurveStoryFilter(e.target.value)}
+                            className="text-xs border border-gray-200 rounded px-2 py-1 bg-white text-gray-600"
+                          >
+                            <option value="">全部課文</option>
+                            {availableStories.map((s) => (
+                              <option key={s.slug} value={s.slug}>{s.title}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
                       <ResponsiveContainer width="100%" height={180}>
                         <LineChart data={buildCurveChartData(learningCurve)}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -748,13 +781,27 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                             formatter={(value: number, name: string) => {
                               if (name === 'score') return [value, '實際分數'];
                               if (name === 'rollingAvg') return [value, '5次均線'];
+                              if (name === 'cpm') return [`${value} 字/分`, '語速'];
+                              if (name === 'accuracy') return [`${value}%`, '準確度'];
                               return [value, name];
                             }}
                             labelFormatter={(label) => `日期：${label}`}
                           />
-                          <Legend formatter={(value) => value === 'score' ? '實際分數' : '5次均線'} />
+                          <Legend formatter={(value) => {
+                            if (value === 'score') return '實際分數';
+                            if (value === 'rollingAvg') return '5次均線';
+                            if (value === 'cpm') return '語速';
+                            if (value === 'accuracy') return '準確度';
+                            return value;
+                          }} />
                           <Line type="monotone" dataKey="score" stroke="#5B4FC4" strokeWidth={2} dot={{ r: 3 }} connectNulls />
                           <Line type="monotone" dataKey="rollingAvg" stroke="#10b981" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
+                          {curveStoryFilter && (
+                            <>
+                              <Line type="monotone" dataKey="cpm" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                              <Line type="monotone" dataKey="accuracy" stroke="#ef4444" strokeWidth={1} dot={{ r: 2 }} strokeDasharray="4 2" connectNulls />
+                            </>
+                          )}
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -917,7 +964,21 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                           <div className="h-40 bg-gray-200 animate-pulse rounded" />
                         ) : learningCurve.length >= 2 ? (
                           <div>
-                            <p className="text-xs font-medium text-gray-500 mb-2">學習曲線</p>
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-xs font-medium text-gray-500">學習曲線</p>
+                              {availableStories.length > 1 && (
+                                <select
+                                  value={curveStoryFilter}
+                                  onChange={(e) => setCurveStoryFilter(e.target.value)}
+                                  className="text-xs border border-gray-200 rounded px-2 py-1 bg-white text-gray-600"
+                                >
+                                  <option value="">全部課文</option>
+                                  {availableStories.map((st) => (
+                                    <option key={st.slug} value={st.slug}>{st.title}</option>
+                                  ))}
+                                </select>
+                              )}
+                            </div>
                             <ResponsiveContainer width="100%" height={180}>
                               <LineChart data={buildCurveChartData(learningCurve)}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -927,32 +988,29 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                                   formatter={(value: number, name: string) => {
                                     if (name === 'score') return [value, '實際分數'];
                                     if (name === 'rollingAvg') return [value, '5次均線'];
+                                    if (name === 'cpm') return [`${value} 字/分`, '語速'];
+                                    if (name === 'accuracy') return [`${value}%`, '準確度'];
                                     return [value, name];
                                   }}
                                   labelFormatter={(label) => `日期：${label}`}
                                 />
                                 <Legend
-                                  formatter={(value) =>
-                                    value === 'score' ? '實際分數' : '5次均線'
-                                  }
+                                  formatter={(value) => {
+                                    if (value === 'score') return '實際分數';
+                                    if (value === 'rollingAvg') return '5次均線';
+                                    if (value === 'cpm') return '語速';
+                                    if (value === 'accuracy') return '準確度';
+                                    return value;
+                                  }}
                                 />
-                                <Line
-                                  type="monotone"
-                                  dataKey="score"
-                                  stroke="#5B4FC4"
-                                  strokeWidth={2}
-                                  dot={{ r: 3 }}
-                                  connectNulls
-                                />
-                                <Line
-                                  type="monotone"
-                                  dataKey="rollingAvg"
-                                  stroke="#10b981"
-                                  strokeWidth={2}
-                                  dot={false}
-                                  strokeDasharray="5 3"
-                                  connectNulls
-                                />
+                                <Line type="monotone" dataKey="score" stroke="#5B4FC4" strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                                <Line type="monotone" dataKey="rollingAvg" stroke="#10b981" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
+                                {curveStoryFilter && (
+                                  <>
+                                    <Line type="monotone" dataKey="cpm" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                                    <Line type="monotone" dataKey="accuracy" stroke="#ef4444" strokeWidth={1} dot={{ r: 2 }} strokeDasharray="4 2" connectNulls />
+                                  </>
+                                )}
                               </LineChart>
                             </ResponsiveContainer>
                           </div>

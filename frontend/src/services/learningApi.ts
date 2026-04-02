@@ -680,3 +680,28 @@ export async function loadStepProgress(
   if (!res.ok) throw new Error(`loadStepProgress failed: ${res.status}`);
   return res.json();
 }
+
+// ---------------------------------------------------------------------------
+// Reading history (for progress curve)
+// ---------------------------------------------------------------------------
+
+export interface ReadingHistoryPoint {
+  session_id: number;
+  started_at: string;
+  cpm: number | null;
+  accuracy: number | null;
+  match_rate: number | null;
+  overall_score: number | null;
+}
+
+export async function getReadingHistory(
+  token: string,
+  storySlug: string,
+): Promise<ReadingHistoryPoint[]> {
+  const res = await fetch(
+    `${API_BASE}/api/learning/sessions/reading-history?story_slug=${encodeURIComponent(storySlug)}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`getReadingHistory failed: ${res.status}`);
+  return res.json();
+}
