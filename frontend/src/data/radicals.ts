@@ -39,6 +39,8 @@ export interface CharDecomposition {
   components: CharComponent[];
   /** Plain-text decomposition formula, e.g. "氵 + 青" */
   formula: string;
+  /** Data source: 'manual' | 'manual-override' | 'makemeahanzi' | 'chaizi' */
+  source?: 'manual' | 'manual-override' | 'makemeahanzi' | 'chaizi';
 }
 
 // ---------------------------------------------------------------------------
