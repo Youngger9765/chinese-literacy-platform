@@ -214,7 +214,7 @@ def _create_session(client, token: str, slug: str = "comp-test") -> int:
 
 
 class TestComprehensionScore:
-    @patch("app.routes.learning.evaluate_comprehension", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_score_returns_200_with_valid_data(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
         session_id = _create_session(client, user_a["token"], "score-200")
@@ -234,7 +234,7 @@ class TestComprehensionScore:
         assert data["feedback"]["literal"] is not None
         assert data["feedback"]["overall"] is not None
 
-    @patch("app.routes.learning.evaluate_comprehension", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_all_three_subscores_present(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
         session_id = _create_session(client, user_a["token"], "subscores")
@@ -249,7 +249,7 @@ class TestComprehensionScore:
         assert "inferential_score" in data
         assert "evaluative_score" in data
 
-    @patch("app.routes.learning.evaluate_comprehension", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_scores_in_valid_range(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
         session_id = _create_session(client, user_a["token"], "range")
@@ -263,7 +263,7 @@ class TestComprehensionScore:
         for key in ("comprehension_score", "literal_score", "inferential_score", "evaluative_score"):
             assert 0 <= data[key] <= 100, f"{key}={data[key]} out of range"
 
-    @patch("app.routes.learning.evaluate_comprehension", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_cached_scores_returned_without_recalling_gemini(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
         session_id = _create_session(client, user_a["token"], "cache-test")
@@ -324,7 +324,7 @@ class TestComprehensionScore:
         )
         assert resp.status_code == 401
 
-    @patch("app.routes.learning.evaluate_comprehension", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_gemini_failure_returns_503(self, mock_eval, client, user_a):
         mock_eval.side_effect = RuntimeError("AI service error")
         session_id = _create_session(client, user_a["token"], "gemini-fail")
@@ -364,7 +364,7 @@ class TestComprehensionScore:
         )
         assert resp.status_code == 422
 
-    @patch("app.routes.learning.evaluate_comprehension", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_scores_persisted_in_session_detail(self, mock_eval, client, user_a):
         """Verify that comprehension scores appear in the session detail response."""
         mock_eval.return_value = MOCK_GEMINI_SCORE
@@ -388,7 +388,7 @@ class TestComprehensionScore:
         assert data["inferential_score"] == 70.0
         assert data["evaluative_score"] == 65.0
 
-    @patch("app.routes.learning.evaluate_comprehension", new_callable=AsyncMock)
+    @patch("app.routes.learning.learning_comprehension_score.evaluate_comprehension", new_callable=AsyncMock)
     def test_feedback_structure(self, mock_eval, client, user_a):
         mock_eval.return_value = MOCK_GEMINI_SCORE
         session_id = _create_session(client, user_a["token"], "feedback-struct")
