@@ -12,11 +12,13 @@ const VocabDefinitionMatchPage: React.FC = () => {
 
   const handleProgressChange = useCallback(
     (stepData: Record<string, unknown>, immediate = false) => {
+      const isCompleted = stepData.completed === true;
       saveStepProgressPatch({
         stepId: 'vocab-definition',
         stepData,
         currentStep: 'vocab-definition',
-        immediate,
+        markCompleted: isCompleted,
+        immediate: immediate || isCompleted,
       });
     },
     [saveStepProgressPatch],
