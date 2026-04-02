@@ -182,6 +182,41 @@ def _extract_reading_metrics(
     return accuracy, cpm, error_chars
 
 
+def _extract_assignment_progress(
+    sub: AssignmentSubmission, db: Session
+) -> tuple[int | None, str | None, list[str]]:
+    """Extract durable step progress for assignment list/resume UI.
+
+    Returns (session_id, current_step_path, steps_completed).
+    """
+    if sub.session_id is None:
+        return None, None, []
+
+    session = (
+        db.query(LearningSession)
+        .filter(LearningSession.id == sub.session_id)
+        .first()
+    )
+    if session is None:
+        return sub.session_id, None, []
+
+    current_step: str | None = None
+    steps_completed: list[str] = []
+    if isinstance(session.step_progress, dict):
+        raw_current = session.step_progress.get("current_step")
+        if isinstance(raw_current, str) and raw_current.strip():
+            current_step = raw_current.strip()
+        raw_completed = session.step_progress.get("steps_completed", [])
+        if isinstance(raw_completed, list):
+            steps_completed = [
+                step.strip()
+                for step in raw_completed
+                if isinstance(step, str) and step.strip()
+            ]
+
+    return session.id, current_step, steps_completed
+
+
 # ── Student Endpoints (registered first to avoid path parameter conflicts) ───
 # /assignments/my must be registered before /assignments/{assignment_id}
 # so FastAPI doesn't try to parse "my" as an integer assignment_id.
@@ -213,6 +248,7 @@ def get_my_assignments(
     results = []
     for sub in submissions:
         assignment = sub.assignment
+        session_id, current_step, steps_completed = _extract_assignment_progress(sub, db)
         classroom = (
             db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
         )
@@ -231,6 +267,9 @@ def get_my_assignments(
                 due_date=assignment.due_date,
                 classroom_name=classroom.name if classroom else "Unknown",
                 status=sub.status,
+                session_id=session_id,
+                current_step=current_step,
+                steps_completed=steps_completed,
                 submitted_at=sub.submitted_at,
                 score=sub.score,
                 teacher_feedback=sub.teacher_feedback,  # Issue #424
@@ -270,6 +309,7 @@ def get_my_assignment_detail(
         )
 
     assignment = submission.assignment
+    session_id, current_step, steps_completed = _extract_assignment_progress(submission, db)
     classroom = (
         db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
     )
@@ -287,6 +327,9 @@ def get_my_assignment_detail(
         due_date=assignment.due_date,
         classroom_name=classroom.name if classroom else "Unknown",
         status=submission.status,
+        session_id=session_id,
+        current_step=current_step,
+        steps_completed=steps_completed,
         submitted_at=submission.submitted_at,
         score=submission.score,
         teacher_feedback=submission.teacher_feedback,  # Issue #424
@@ -745,6 +788,7 @@ def submit_assignment(
             db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
         )
         story_title = _resolve_title_for_assignment(assignment, db)
+        session_id, current_step, steps_completed = _extract_assignment_progress(submission, db)
         return StudentAssignmentResponse(
             assignment_id=assignment.id,
             story_id=assignment.story_id,
@@ -757,6 +801,9 @@ def submit_assignment(
             due_date=assignment.due_date,
             classroom_name=classroom.name if classroom else "Unknown",
             status=submission.status,
+            session_id=session_id,
+            current_step=current_step,
+            steps_completed=steps_completed,
             submitted_at=submission.submitted_at,
             score=submission.score,
             teacher_feedback=submission.teacher_feedback,  # Issue #424
@@ -790,6 +837,7 @@ def submit_assignment(
         db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
     )
     story_title = _resolve_title_for_assignment(assignment, db)
+    session_id, current_step, steps_completed = _extract_assignment_progress(submission, db)
 
     logger.info(
         "Student %d submitted assignment %d (score=%s)",
@@ -818,6 +866,9 @@ def submit_assignment(
         due_date=assignment.due_date,
         classroom_name=classroom.name if classroom else "Unknown",
         status=submission.status,
+        session_id=session_id,
+        current_step=current_step,
+        steps_completed=steps_completed,
         submitted_at=submission.submitted_at,
         score=submission.score,
         teacher_feedback=submission.teacher_feedback,  # Issue #424

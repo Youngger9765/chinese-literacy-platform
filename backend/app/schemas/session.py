@@ -10,7 +10,7 @@ class SessionCreateRequest(BaseModel):
 
 
 class SessionUpdateRequest(BaseModel):
-    current_step: int | None = Field(None, ge=1, le=6)
+    current_step: int | None = Field(None, ge=1, le=50)
     status: str | None = Field(None, pattern=r"^(in_progress|completed|abandoned)$")
     accuracy: float | None = Field(None, ge=0, le=100)
     overall_score: float | None = Field(None, ge=0, le=100)

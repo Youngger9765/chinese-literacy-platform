@@ -30,6 +30,10 @@ const steps: StepDef[] = ACTIVE_STEPS.map((s, i) => ({
   needsStory: s.needsStory,
 }));
 
+const VIEW_TO_STEP_ID: Record<string, string> = Object.fromEntries(
+  ACTIVE_STEPS.map((s) => [s.view, s.id]),
+);
+
 function getStepStatus(
   stepDef: StepDef,
   currentView: AppView,
@@ -42,6 +46,9 @@ function getStepStatus(
   // Check completion based on session data
   const isCompleted = (() => {
     if (!session) return false;
+    const completedSet = new Set(session.completedSteps ?? []);
+    const stepId = VIEW_TO_STEP_ID[stepDef.view];
+    if (stepId && completedSet.has(stepId)) return true;
     switch (stepDef.view) {
       case AppView.INTRO:                    return session.introCompleted;
       case AppView.TUTOR:                    return session.readingAttempt !== null;

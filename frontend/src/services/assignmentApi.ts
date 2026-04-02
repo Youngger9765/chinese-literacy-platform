@@ -79,6 +79,9 @@ export interface StudentAssignmentResponse extends ReadingGoals {
   due_date: string | null;
   classroom_name: string;
   status: string;
+  session_id: number | null;
+  current_step: string | null;
+  steps_completed: string[];
   submitted_at: string | null;
   score: number | null;
   /** Per-student teacher feedback visible to the student (Issue #424). */
