@@ -298,7 +298,7 @@ const LearningLayout: React.FC = () => {
       immediate: boolean,
     ) => {
       setStepProgressState((prev) => {
-        const completed = new Set(prev.steps_completed);
+        const completed = new Set<string>(prev.steps_completed);
         if (opts.completeStep) completed.add(opts.completeStep);
 
         const next: StepProgressData = {

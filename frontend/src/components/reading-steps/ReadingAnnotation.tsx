@@ -220,9 +220,14 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     const containerRect = containerRef.current?.getBoundingClientRect();
     if (!containerRect) return;
 
-    // Position toolbar above the selection
-    const x = info.rect.left + info.rect.width / 2 - containerRect.left;
-    const y = info.rect.top - containerRect.top - 8; // 8px gap above
+    const scrollContainer = containerRef.current;
+    const scrollLeft = scrollContainer?.scrollLeft ?? 0;
+    const scrollTop = scrollContainer?.scrollTop ?? 0;
+
+    // Convert viewport coordinates to scroll-content coordinates so the toolbar
+    // stays anchored to selected text even after the user has scrolled.
+    const x = info.rect.left + info.rect.width / 2 - containerRect.left + scrollLeft;
+    const y = info.rect.top - containerRect.top - 8 + scrollTop; // 8px gap above
 
     setToolbar({
       visible: true,

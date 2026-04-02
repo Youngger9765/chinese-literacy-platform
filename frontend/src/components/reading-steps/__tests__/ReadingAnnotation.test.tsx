@@ -206,4 +206,61 @@ describe('ReadingAnnotation', () => {
     const mark = screen.getByRole('mark', { name: /重要標記：第一/ });
     expect(mark.className).toContain('ring-4');
   });
+
+  it('positions floating toolbar correctly after scrolling', async () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(<ReadingAnnotation story={mockStory} onFinish={onFinish} />);
+
+      const paragraph = container.querySelector('[data-para-idx="0"]') as HTMLElement;
+      expect(paragraph).toBeTruthy();
+      const textNode = paragraph.firstChild as Text;
+      expect(textNode).toBeTruthy();
+
+      const scrollContainer = paragraph.closest('.max-w-3xl')?.parentElement as HTMLDivElement;
+      expect(scrollContainer).toBeTruthy();
+
+      Object.defineProperty(scrollContainer, 'scrollTop', {
+        configurable: true,
+        value: 240,
+      });
+      Object.defineProperty(scrollContainer, 'scrollLeft', {
+        configurable: true,
+        value: 12,
+      });
+
+      vi.spyOn(scrollContainer, 'getBoundingClientRect').mockReturnValue(
+        new DOMRect(100, 80, 700, 500)
+      );
+
+      const selectionRect = new DOMRect(220, 300, 40, 20);
+      const mockRange = {
+        collapsed: false,
+        startContainer: textNode,
+        endContainer: textNode,
+        startOffset: 2,
+        toString: () => '一段',
+        getBoundingClientRect: () => selectionRect,
+      } as unknown as Range;
+
+      const mockSelection = {
+        isCollapsed: false,
+        rangeCount: 1,
+        getRangeAt: () => mockRange,
+      } as unknown as Selection;
+
+      vi.spyOn(window, 'getSelection').mockReturnValue(mockSelection);
+
+      await act(async () => {
+        fireEvent.mouseUp(scrollContainer);
+        vi.advanceTimersByTime(60);
+      });
+
+      const toolbar = screen.getByRole('toolbar', { name: '標記選取文字' }) as HTMLDivElement;
+      expect(toolbar.style.left).toBe('152px');
+      expect(toolbar.style.top).toBe('452px');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
