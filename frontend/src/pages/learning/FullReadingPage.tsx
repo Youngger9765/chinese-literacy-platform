@@ -34,7 +34,7 @@ const FullReadingPage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate(`/learn/${storyId}/listening`)}
-            className="w-full py-4 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold text-base shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            className="w-full py-2.5 bg-accent hover:bg-accent-hover text-white rounded-full font-bold text-sm shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           >
             進行聽力理解練習
           </button>
