@@ -6,10 +6,11 @@
  * only the active route's JS chunk is loaded on demand.
  */
 import React, { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 import { PublicOnlyRoute, ProtectedRoute } from '../components/auth/RouteGuards';
 import { AppShell, LearningAppShell } from '../components/layout/AppShell';
+import StepErrorBoundary from '../components/StepErrorBoundary';
 import {
   HomePage,
   LibraryPage,
@@ -73,6 +74,28 @@ const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 // Utility pages — rarely visited after first load
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
 const HelpPage = lazy(() => import('../pages/HelpPage'));
+
+// ---------------------------------------------------------------------------
+// StepRoute — wraps a learning step page in StepErrorBoundary.
+// The `nextPath` prop wires the "跳過此步驟" button to navigate to the next step.
+// ---------------------------------------------------------------------------
+
+interface StepRouteProps {
+  stepLabel: string;
+  nextPath?: string;
+  children: React.ReactNode;
+}
+
+const StepRoute: React.FC<StepRouteProps> = ({ stepLabel, nextPath, children }) => {
+  const navigate = useNavigate();
+  const handleSkip = nextPath ? () => navigate(nextPath, { replace: true }) : undefined;
+
+  return (
+    <StepErrorBoundary stepLabel={stepLabel} onSkip={handleSkip}>
+      {children}
+    </StepErrorBoundary>
+  );
+};
 
 // ---------------------------------------------------------------------------
 
@@ -331,18 +354,102 @@ const AppRoutes: React.FC = () => (
         }
       >
         <Route path="intro" element={<Navigate to="../reading-annotation" replace />} />
-        <Route path="reading-annotation" element={<ReadingAnnotationPage />} />
-        <Route path="tutor" element={<TutorPage />} />
-        <Route path="comprehension" element={<ComprehensionPage />} />
-        <Route path="vocab" element={<VocabPage />} />
-        <Route path="vocab-definition" element={<VocabDefinitionMatchPage />} />
-        <Route path="vocab-application" element={<VocabApplicationPage />} />
-        <Route path="dictation" element={<DictationPage />} />
-        <Route path="vocab-word-search" element={<VocabWordSearchPage />} />
-        <Route path="listening" element={<ListeningPage />} />
-        <Route path="full-reading" element={<FullReadingPage />} />
-        <Route path="knowledge-station" element={<KnowledgeStationPage />} />
-        <Route path="report" element={<ReportPage />} />
+        <Route
+          path="reading-annotation"
+          element={
+            <StepRoute stepLabel="讀全文-做記號" nextPath="tutor">
+              <ReadingAnnotationPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="tutor"
+          element={
+            <StepRoute stepLabel="逐段朗讀" nextPath="full-reading">
+              <TutorPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="full-reading"
+          element={
+            <StepRoute stepLabel="全文朗讀" nextPath="vocab">
+              <FullReadingPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="vocab"
+          element={
+            <StepRoute stepLabel="生字練習" nextPath="vocab-definition">
+              <VocabPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="vocab-definition"
+          element={
+            <StepRoute stepLabel="詞語定義" nextPath="vocab-application">
+              <VocabDefinitionMatchPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="vocab-application"
+          element={
+            <StepRoute stepLabel="語詞應用" nextPath="comprehension">
+              <VocabApplicationPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="comprehension"
+          element={
+            <StepRoute stepLabel="課文理解" nextPath="vocab-word-search">
+              <ComprehensionPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="dictation"
+          element={
+            <StepRoute stepLabel="聽寫練習" nextPath="vocab-word-search">
+              <DictationPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="vocab-word-search"
+          element={
+            <StepRoute stepLabel="語詞複習" nextPath="knowledge-station">
+              <VocabWordSearchPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="listening"
+          element={
+            <StepRoute stepLabel="聽力練習" nextPath="report">
+              <ListeningPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="knowledge-station"
+          element={
+            <StepRoute stepLabel="知識站" nextPath="report">
+              <KnowledgeStationPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="report"
+          element={
+            <StepRoute stepLabel="學習報告">
+              <ReportPage />
+            </StepRoute>
+          }
+        />
         {/* Default: redirect to reading-annotation (new first step) */}
         <Route index element={<Navigate to="reading-annotation" replace />} />
       </Route>
