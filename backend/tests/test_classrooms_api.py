@@ -796,3 +796,186 @@ class TestFullClassroomFlow:
         )
         assert classroom_in_list is not None
         assert classroom_in_list["is_active"] is False
+
+
+# ===========================================================================
+# GET /api/classrooms/my-enrollments — Student enrolled classrooms (Issue #462)
+# ===========================================================================
+
+
+class TestMyEnrollments:
+    """Tests for GET /api/classrooms/my-enrollments.
+
+    Covers the auto-navigation flow: student logs in → system fetches their
+    classrooms → frontend auto-navigates if exactly 1 active classroom.
+    """
+
+    def test_unauthenticated_returns_401(self, client):
+        resp = client.get("/api/classrooms/my-enrollments")
+        assert resp.status_code == 401
+
+    def test_student_with_no_classrooms_returns_empty_list(self, client, school_id):
+        """A brand-new student not enrolled in any classroom gets an empty list."""
+        lonely = _register_user(client, "lonely_student")
+        resp = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(lonely["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 0
+        assert data["classrooms"] == []
+
+    def test_student_enrolled_in_one_classroom(self, client, school_id):
+        """Student enrolled in exactly 1 classroom: list returns that classroom with teacher info."""
+        teacher = _register_user(client, "enroll_teacher_single")
+        student = _register_user(client, "enroll_student_single")
+
+        # Teacher creates classroom
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "My Enrollment Class", "school_id": school_id, "grade": 4},
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        classroom_id = create_resp.json()["id"]
+
+        # Teacher adds student
+        add_resp = client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert add_resp.status_code == 201
+
+        # Student fetches their enrollments
+        resp = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 1
+        assert len(data["classrooms"]) == 1
+
+        classroom = data["classrooms"][0]
+        assert classroom["id"] == classroom_id
+        assert classroom["name"] == "My Enrollment Class"
+        assert classroom["grade"] == 4
+        assert classroom["teacher_id"] == teacher["user_id"]
+        assert classroom["teacher_name"] == teacher["name"]
+        assert classroom["is_active"] is True
+        assert "enrolled_at" in classroom
+
+    def test_student_enrolled_in_multiple_classrooms(self, client, school_id):
+        """Student enrolled in 2 classrooms: list returns both."""
+        teacher_a = _register_user(client, "multi_teacher_a")
+        teacher_b = _register_user(client, "multi_teacher_b")
+        student = _register_user(client, "multi_student")
+
+        # Create two classrooms
+        class_a_id = client.post(
+            "/api/classrooms",
+            json={"name": "Multi Class A", "school_id": school_id},
+            headers=auth_header(teacher_a["token"]),
+        ).json()["id"]
+
+        class_b_id = client.post(
+            "/api/classrooms",
+            json={"name": "Multi Class B", "school_id": school_id},
+            headers=auth_header(teacher_b["token"]),
+        ).json()["id"]
+
+        # Enroll student in both
+        client.post(
+            f"/api/classrooms/{class_a_id}/students",
+            json={"student_id": student["user_id"]},
+            headers=auth_header(teacher_a["token"]),
+        )
+        client.post(
+            f"/api/classrooms/{class_b_id}/students",
+            json={"student_id": student["user_id"]},
+            headers=auth_header(teacher_b["token"]),
+        )
+
+        resp = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 2
+        assert len(data["classrooms"]) == 2
+
+        names = {c["name"] for c in data["classrooms"]}
+        assert "Multi Class A" in names
+        assert "Multi Class B" in names
+
+    def test_enrollments_scoped_to_current_student(self, client, school_id):
+        """A student does NOT see classrooms belonging to other students."""
+        teacher = _register_user(client, "scope_teacher")
+        student_a = _register_user(client, "scope_student_a")
+        student_b = _register_user(client, "scope_student_b")
+
+        # Create classroom, enroll only student_a
+        classroom_id = client.post(
+            "/api/classrooms",
+            json={"name": "Scoped Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        ).json()["id"]
+
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student_a["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        # student_b has no enrollments — should see empty list
+        resp_b = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(student_b["token"]),
+        )
+        assert resp_b.status_code == 200
+        assert resp_b.json()["total"] == 0
+
+        # student_a sees exactly 1 classroom
+        resp_a = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(student_a["token"]),
+        )
+        assert resp_a.status_code == 200
+        assert resp_a.json()["total"] == 1
+        assert resp_a.json()["classrooms"][0]["id"] == classroom_id
+
+    def test_inactive_classroom_still_returned(self, client, school_id):
+        """Inactive classrooms are still included — frontend handles is_active filtering."""
+        teacher = _register_user(client, "inactive_teacher")
+        student = _register_user(client, "inactive_student")
+
+        classroom_id = client.post(
+            "/api/classrooms",
+            json={"name": "Inactive Class", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        ).json()["id"]
+
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        # Deactivate the classroom
+        client.patch(
+            f"/api/classrooms/{classroom_id}",
+            json={"is_active": False},
+            headers=auth_header(teacher["token"]),
+        )
+
+        resp = client.get(
+            "/api/classrooms/my-enrollments",
+            headers=auth_header(student["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 1
+        assert data["classrooms"][0]["is_active"] is False
