@@ -47,6 +47,18 @@ vocabulary:
 - word: 橫逆
   definition: 生命出出現負面事件，例如生了重病。
 vocabulary_count: 11
+vocab_bank:
+  A: 沉著
+  B: 監測
+  C: 獨當一面
+  D: 傾訴
+  E: 如魚得水
+  F: 質疑
+  G: 防禦
+  H: 雕琢
+  I: 扳回一城
+  J: 心力交瘁
+  K: 橫逆
 fill_in_blank:
 - sentence: 面對突發狀況，他總能保持（　　），找出最佳解決方案。
   answer: A

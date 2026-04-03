@@ -60,6 +60,14 @@ vocabulary:
 - word: 省略
   definition: 在語句中，將某些可根據上下文推斷出的成分（如主詞、受詞）不寫出來。
 vocabulary_count: 8
+vocab_bank:
+  B: 白話文
+  C: 竹簡
+  D: 印刷
+  E: 精簡
+  F: 推廣
+  G: 用詞精簡
+  H: 省略
 fill_in_blank:
 - sentence: 對古人來說，（　　）是日常的口語，也是比較容易懂的。
   answer: B

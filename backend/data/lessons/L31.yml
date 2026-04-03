@@ -63,6 +63,20 @@ vocabulary:
 - word: 約莫
   definition: 大約、大概。
 vocabulary_count: 13
+vocab_bank:
+  A: 多多益善
+  B: 印記
+  C: 籌備
+  D: 里程碑
+  E: 眾所矚目
+  F: 侷限
+  G: 開端
+  H: 彰顯
+  I: 荊棘
+  J: 抹滅
+  K: 開路先鋒
+  L: 大顯身手
+  M: 約莫
 fill_in_blank:
 - sentence: 學習知識的過程，是（　　）的，掌握的越多，對未來越有幫助。
   answer: A

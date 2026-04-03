@@ -48,6 +48,12 @@ vocabulary:
 - word: 大幅度
   definition: 改變或變動的程度很大。
 vocabulary_count: 10
+vocab_bank:
+  C: 均衡
+  D: 促進
+  E: 嘰嘰喳喳
+  F: 分泌
+  G: 前提
 fill_in_blank:
 - sentence: 飯前的開胃菜可以(　　)食慾。
   answer: D

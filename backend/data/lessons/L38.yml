@@ -47,6 +47,12 @@ vocabulary:
 - word: 每況愈下
   definition: 情況變得越來越糟糕。
 vocabulary_count: 5
+vocab_bank:
+  A: 視而不見
+  B: 每況愈下
+  C: 蹂躪
+  D: 不可逆
+  F: 負成長
 fill_in_blank:
 - sentence: 他因為沉迷遊戲，荒廢課業，導致成績(　　)。
   answer: B

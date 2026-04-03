@@ -65,6 +65,17 @@ vocabulary:
 - word: 迅雷不及掩耳
   definition: 雷聲突然響起，來不及掩住耳朵。比喻行動迅速，來不及防範準備。
 vocabulary_count: 10
+vocab_bank:
+  A: 覓食
+  B: 彷彿
+  C: 守株待兔
+  D: 巧妙
+  E: 葉苞
+  F: 孵化
+  G: 依循
+  H: 規律
+  I: 臨機應變
+  J: 迅雷不及掩耳
 fill_in_blank:
 - sentence: 小鳥在樹林裡四處（　　），希望能找到蟲子餵飽自己。
   answer: A

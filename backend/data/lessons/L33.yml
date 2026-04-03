@@ -56,6 +56,18 @@ vocabulary:
 - word: 氣候難民
   definition: 因為居住環境氣候的劇烈改變，導致被迫離開家園的人。
 vocabulary_count: 11
+vocab_bank:
+  A: 鳥瞰
+  B: 臨界點
+  C: 流離失所
+  D: 首當其衝
+  E: 沒有人是局外人
+  F: 岌岌可危
+  G: 溫室氣體
+  H: 池魚之殃
+  I: 先例
+  J: 雲端
+  K: 氣候難民
 fill_in_blank:
 - sentence: 從飛機上往下看，整座城市顯得如此渺小，彷彿能將一切（　　）。
   answer: A

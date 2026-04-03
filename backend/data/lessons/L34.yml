@@ -66,6 +66,19 @@ vocabulary:
 - word: 象徵
   definition: 用具體事物來表現抽象的觀念。例如，用綠色象徵環保；用玫瑰象徵愛情。
 vocabulary_count: 13
+vocab_bank:
+  A: 地球公民
+  B: 碳排放
+  C: 碳足跡
+  E: 亂竄
+  F: 環境永續
+  G: 禦寒
+  H: 大放異彩
+  I: 因應而生
+  J: 諷刺
+  K: 氣候變遷
+  L: 憂心忡忡
+  M: 象徵
 fill_in_blank:
 - sentence: 一個真正關心世界各地貧困與環境問題的人，才能稱得上是（　　）。
   answer: A

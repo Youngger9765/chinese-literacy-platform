@@ -67,6 +67,14 @@ vocabulary:
 - word: 迅疾如風
   definition: 行動迅速像風一樣快速。
 vocabulary_count: 11
+vocab_bank:
+  A: 夢寐以求
+  B: 深不可測
+  C: 崎嶇
+  D: 馬不停蹄
+  E: 卸下心防
+  F: 舉世聞名
+  G: 拒人於千里之外
 fill_in_blank:
 - sentence: 科學家們仍不斷研究宇宙的奧秘，因為它實在是(　　)。
   answer: Ｂ

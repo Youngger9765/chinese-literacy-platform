@@ -53,6 +53,12 @@ vocabulary:
 - word: 濃稠
   definition: 濃厚黏稠。
 vocabulary_count: 8
+vocab_bank:
+  A: 囊括
+  D: 因人而異
+  E: 濃稠
+  G: 功不可沒
+  H: 血栓
 fill_in_blank:
 - sentence: 每個人的體質不同，對藥物的反應也(　　)。
   answer: D

@@ -61,6 +61,22 @@ vocabulary:
 - word: 寫表格左欄
   definition: 將「項目」寫在表格左欄。
 vocabulary_count: 15
+vocab_bank:
+  A: 輻射
+  B: 重啟
+  C: 世紀
+  D: 月相變化
+  E: 天體
+  F: 偏見
+  G: 模擬
+  H: 意味深長
+  I: 族裔
+  J: 幽閉
+  K: 承載
+  L: 消耗
+  M: 確認比較的對象
+  N: 找重點
+  O: 寫表格左欄
 fill_in_blank:
 - sentence: 核能電廠的安全問題，常常讓人擔心是否有有害的（　　）洩漏。
   answer: A

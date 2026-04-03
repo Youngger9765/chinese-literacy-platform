@@ -58,6 +58,16 @@ vocabulary:
 - word: 視若無睹
   definition: 雖然看到，但因不關心，好像沒有看到一樣。等同「視而不見」。
 vocabulary_count: 9
+vocab_bank:
+  A: 抽絲剝繭
+  B: 劈頭
+  C: 眼睜睜
+  D: 援助
+  E: 煽情
+  F: 杜撰
+  G: 令人髮指
+  H: 最負盛名
+  I: 視若無睹
 fill_in_blank:
 - sentence: 偵探們經過多日的調查，終於將複雜的線索（　　），找出了案件的真相。
   answer: A

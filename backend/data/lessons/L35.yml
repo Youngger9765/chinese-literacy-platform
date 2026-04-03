@@ -68,6 +68,17 @@ vocabulary:
 - word: 嘆為觀止
   definition: 形容事物極好，讓人看了都不停讚嘆。
 vocabulary_count: 10
+vocab_bank:
+  A: 津津樂道
+  B: 趨勢
+  C: 傳遞
+  D: 家道中落
+  E: 力圖
+  F: 相仿
+  G: 結實纍纍
+  H: 家境殷實
+  I: 拍案叫絕
+  J: 嘆為觀止
 fill_in_blank:
 - sentence: 這次校外教學的趣事，讓同學們回家後一直（　　）。
   answer: A

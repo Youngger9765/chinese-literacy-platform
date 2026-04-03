@@ -49,6 +49,13 @@ vocabulary:
 - word: 贊助
   definition: 給予物質或金錢上的幫助。
 vocabulary_count: 9
+vocab_bank:
+  A: 鍛鍊
+  C: 贊助
+  D: 口腹之欲
+  E: 輕盈
+  F: 頻繁
+  G: 窺視
 fill_in_blank:
 - sentence: 他躲在湖濱草綠色的帳蓬裡，（ G ）著野鳥養育幼雛的行為。
   answer: 窺視

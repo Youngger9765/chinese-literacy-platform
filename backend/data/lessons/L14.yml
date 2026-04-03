@@ -65,6 +65,12 @@ vocabulary:
 - word: 全神貫注
   definition: 將心思和精神完全集中在一件事物上。
 vocabulary_count: 10
+vocab_bank:
+  A: 滑稽
+  B: 充斥
+  C: 處置
+  F: 此起彼落
+  G: 抑制
 fill_in_blank:
 - sentence: 他終究(　　)不住心中的悲傷，流下了眼淚。
   answer: Ｇ

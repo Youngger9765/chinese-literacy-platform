@@ -55,6 +55,15 @@ vocabulary:
 - word: 可惜
   definition: 值得惋惜。
 vocabulary_count: 8
+vocab_bank:
+  A: 京城
+  B: 市集
+  C: 議價
+  D: 官邸
+  E: 僕人
+  F: 硯臺
+  G: 驚訝
+  H: 可惜
 fill_in_blank:
 - sentence: 陸盧峰在（ 京城 ）等待朝廷的任用。
   answer: A

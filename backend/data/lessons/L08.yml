@@ -51,6 +51,12 @@ vocabulary:
 - word: 壓制
   definition: 一種柔道動作。以身軀伏壓對手，使之無法反抗。
 vocabulary_count: 10
+vocab_bank:
+  A: 心理素質
+  B: 自律
+  C: 注重
+  D: 干擾
+  E: 劣勢
 fill_in_blank:
 - sentence: 夜深了，請把電視機的音量轉小，以免(　　)他人的睡眠。
   answer: D

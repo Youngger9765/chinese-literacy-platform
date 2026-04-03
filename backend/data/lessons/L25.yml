@@ -88,6 +88,19 @@ vocabulary:
 - word: 由衷
   definition: 從內心深處。
 vocabulary_count: 12
+vocab_bank:
+  A: 稱職
+  B: 會診
+  C: 納悶
+  D: 不情之請
+  E: 退駕
+  F: 觸怒
+  G: 喬裝
+  H: 不假思索
+  I: 預後
+  J: 攙扶
+  K: 刻板印象
+  L: 由衷
 fill_in_blank:
 - sentence: 這位老師教學認真，對學生很有耐心，是大家公認最（　　）的班導師。
   answer: A

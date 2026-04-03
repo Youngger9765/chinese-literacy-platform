@@ -82,6 +82,12 @@ vocabulary:
 - word: 傾家蕩產
   definition: 為了做某件事，用光了家中全部的財產。
 vocabulary_count: 9
+vocab_bank:
+  A: 廝殺
+  B: 衝鋒陷陣
+  E: 益發
+  F: 自圓其說
+  G: 匪夷所思
 fill_in_blank:
 - sentence: 如果騙人的話說太多，就無法(　　)。
   answer: F

@@ -81,6 +81,12 @@ vocabulary:
 - word: 肅然起敬
   definition: 對偉大的事物產生尊敬崇拜的感情。
 vocabulary_count: 11
+vocab_bank:
+  A: 肅然起敬
+  D: 崎嶇
+  E: 人煙稀少
+  F: 矗立
+  G: 千里迢迢
 fill_in_blank:
 - sentence: 太魯閣峽谷的鬼斧神工名聞遐邇，許多遊客(　　)而來只為了一睹這裡的美景。
   answer: G

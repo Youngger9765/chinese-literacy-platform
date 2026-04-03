@@ -64,6 +64,17 @@ vocabulary:
 - word: 坐困愁城
   definition: 形容情況艱難，沒有出路，而且無力擺脫。
 vocabulary_count: 10
+vocab_bank:
+  A: 兩全其美
+  B: 脫穎而出
+  C: 籌措
+  D: 大為嘆服
+  E: 虜獲
+  F: 靈機一動
+  G: 桂冠
+  H: 雲集
+  I: 口碑
+  J: 坐困愁城
 fill_in_blank:
 - sentence: 這次校外教學的活動，老師希望能找到一個（　　）的方案，讓學生玩得開心，又能學到知識。
   answer: A

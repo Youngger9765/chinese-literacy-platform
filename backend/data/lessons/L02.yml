@@ -48,6 +48,12 @@ vocabulary:
 - word: 睽違
   definition: 分離、分開。
 vocabulary_count: 10
+vocab_bank:
+  A: 經年累月
+  B: 事與願違
+  C: 轉瞬即逝
+  D: 血脈賁張
+  E: 天壤之別
 fill_in_blank:
 - sentence: 這精采的比賽看得大家(　　)，緊張萬分。
   answer: D

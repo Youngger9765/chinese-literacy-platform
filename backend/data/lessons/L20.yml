@@ -60,6 +60,18 @@ vocabulary:
 - word: 出資
   definition: 提供資金，用在某個計劃或項目。
 vocabulary_count: 11
+vocab_bank:
+  A: 多樣性
+  B: 未雨綢繆
+  C: 森嚴
+  D: 倖免
+  E: 戒備
+  F: 烽火漫天
+  G: 活性
+  H: 甦醒
+  I: 極端
+  J: 殃及池魚
+  K: 出資
 fill_in_blank:
 - sentence: 這個國家擁有豐富的自然資源，從熱帶雨林到高山冰川，展現了地理環境的（　　）。
   answer: A

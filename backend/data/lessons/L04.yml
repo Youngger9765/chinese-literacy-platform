@@ -55,6 +55,16 @@ vocabulary:
 - word: 沮喪
   definition: 心情低落到極點。
 vocabulary_count: 9
+vocab_bank:
+  A: 大同小異
+  B: 加持
+  C: 負擔
+  D: 抵消
+  E: 徒手訓練
+  F: 成效斐然
+  G: 數據
+  H: 精準
+  I: 沮喪
 fill_in_blank:
 - sentence: 這兩款手機雖然外觀設計（　　），但內部的功能和操作系統還是有些許不同。
   answer: A

@@ -45,6 +45,16 @@ vocabulary:
 - word: 名符其實
   definition: 名聲與實際相符合。
 vocabulary_count: 10
+vocab_bank:
+  A: 直率
+  B: 普及
+  C: 遲疑
+  D: 富可敵國
+  E: 謙和
+  F: 果斷
+  G: 學問淵博
+  I: 朽木不可雕也
+  J: 名符其實
 fill_in_blank:
 - sentence: 小明總是（　　）地說出自己的想法，從不拐彎抹角。
   answer: A

@@ -50,6 +50,15 @@ vocabulary:
 - word: 代謝
   definition: 生物體內物質轉換成能量的過程。
 vocabulary_count: 8
+vocab_bank:
+  A: 事半功倍
+  B: 水滴石穿
+  C: 得天獨厚
+  D: 效率
+  E: 職涯
+  F: 過度表徵
+  G: 因材施教
+  H: 代謝
 fill_in_blank:
 - sentence: 只要掌握正確的學習方法，就能讓你的努力（　　）。
   answer: A
