@@ -181,11 +181,15 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   }, [story?.id, dbSessionId]);
 
   // Reading history for progress curve (#909)
+  // Only fetch when there is actual reading data — avoids 422 when student hasn't started yet
   const [readingHistory, setReadingHistory] = useState<ReadingHistoryPoint[]>([]);
   useEffect(() => {
     if (!token || !story?.id) return;
+    // Determine if any reading result exists before making the network call
+    const hasReadingData = !!(session?.readingAttempt || session?.fullReadingResult);
+    if (!hasReadingData) return;
     getReadingHistory(token, String(story.id)).then(setReadingHistory).catch(() => {});
-  }, [token, story?.id]);
+  }, [token, story?.id, session?.readingAttempt, session?.fullReadingResult]);
 
   // Repeated error alert modal state (Issue #248)
   const [repeatedAlerts, setRepeatedAlerts] = useState<RepeatedErrorAlertItem[]>([]);
@@ -193,7 +197,9 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   const alertFetchedRef = useRef(false);
 
   const fetchRepeatedAlerts = useCallback(async () => {
-    if (!token || !dbSessionId || alertFetchedRef.current) return;
+    // Only check for repeated errors when the student has actual session data
+    const hasReadingData = !!(session?.readingAttempt || session?.fullReadingResult);
+    if (!token || !dbSessionId || alertFetchedRef.current || !hasReadingData) return;
     alertFetchedRef.current = true;
     try {
       // We need the studentId — derive it by calling the alert endpoint via
@@ -244,23 +250,16 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
   const { readingAttempt, comprehensionResult, vocabResult, dictationResult, fullReadingResult } = session;
 
-  // Empty state: session exists but no learning data completed yet
+  // Determine how many of the 6 key sections the student has completed
   const hasNoData = !readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult;
-  if (hasNoData) {
-    return (
-      <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 py-24 text-center">
-        <span className="text-6xl">📖</span>
-        <h2 className="text-2xl font-bold text-gray-900">還沒有完成朗讀練習喔！</h2>
-        <p className="text-gray-500">請先完成「逐段朗讀」或「全文朗讀」，才能查看學習報告。</p>
-        <button
-          onClick={onRetry}
-          className="bg-accent hover:bg-accent-hover text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all"
-        >
-          回到課文
-        </button>
-      </div>
-    );
-  }
+  const completedSections = [
+    !!(readingAttempt || fullReadingResult),  // 環節一 朗讀結果
+    !!(readingAttempt || fullReadingResult),  // 環節二 錄音分析
+    !!(readingAttempt?.lineBreakdown?.length), // 環節三 逐句對比
+    !!(readingAttempt || fullReadingResult),  // 環節四 錯字詞
+    !!readingAttempt,                         // 環節五 練習建議
+    !!(comprehensionScores || comprehensionResult), // 環節六 課文理解
+  ].filter(Boolean).length;
 
   // Compute overall score
   const scores: number[] = [];
@@ -358,26 +357,68 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
       <CelebrationOverlay score={overallScore} />
 
       {/* ============ 星星評級 Star Rating (Issue #222) ============ */}
-      <StarCelebration
-        stars={starCount}
-        readingAccuracy={bestReadingAccuracy}
-        comprehensionScore={comprehensionPct}
-      />
+      {!hasNoData && (
+        <StarCelebration
+          stars={starCount}
+          readingAccuracy={bestReadingAccuracy}
+          comprehensionScore={comprehensionPct}
+        />
+      )}
+
+      {/* Progress indicator — shown when not all sections are complete */}
+      {hasNoData ? (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
+          <p className="text-2xl mb-2">📖</p>
+          <h2 className="text-lg font-bold text-amber-900 mb-1">還沒有完成朗讀練習喔！</h2>
+          <p className="text-sm text-amber-700 mb-3">完成「逐段朗讀」或「全文朗讀」後，這裡會顯示你的完整學習報告。</p>
+          <button
+            onClick={onRetry}
+            className="bg-accent hover:bg-accent-hover text-white px-6 py-2 rounded-full text-sm font-bold transition-all"
+          >
+            回到課文
+          </button>
+        </div>
+      ) : completedSections < 6 ? (
+        <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
+          <div className="flex gap-1">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className={`h-2 rounded-full transition-all ${i < completedSections ? 'w-6 bg-accent' : 'w-4 bg-gray-200'}`}
+              />
+            ))}
+          </div>
+          <p className="text-sm text-blue-700 font-medium">
+            已完成 <span className="font-black">{completedSections}</span> / 6 環節
+          </p>
+        </div>
+      ) : null}
 
       {/* Header */}
       <div className="text-center">
-        <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
-          恭喜完成練習！
-        </div>
-        <h2 className="text-4xl font-bold mb-2">好棒！你今天又進步了。</h2>
-        <p className="text-gray-500">讓我們看看這次學習的完整成果吧。</p>
+        {hasNoData ? null : (
+          <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
+            恭喜完成練習！
+          </div>
+        )}
+        <h2 className="text-4xl font-bold mb-2">
+          {hasNoData ? '學習報告預覽' : '好棒！你今天又進步了。'}
+        </h2>
+        <p className="text-gray-500">
+          {hasNoData ? '完成各環節後，這裡會顯示你的詳細成果。' : '讓我們看看這次學習的完整成果吧。'}
+        </p>
         {story && (
           <p className="text-sm text-gray-400 mt-1">{story.title}</p>
         )}
-        {overallScore !== null && (
+        {overallScore !== null ? (
           <div className="mt-4 inline-flex items-center gap-2 bg-accent/10 text-accent px-5 py-2 rounded-full">
             <span className="text-sm font-bold">綜合成績</span>
             <span className="text-2xl font-black">{overallScore}%</span>
+          </div>
+        ) : (
+          <div className="mt-4 inline-flex items-center gap-2 bg-gray-100 text-gray-400 px-5 py-2 rounded-full">
+            <span className="text-sm font-bold">綜合成績</span>
+            <span className="text-2xl font-black">--</span>
           </div>
         )}
       </div>

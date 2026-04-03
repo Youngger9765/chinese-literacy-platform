@@ -45,6 +45,14 @@ const ReportPage: React.FC = () => {
   useEffect(() => {
     if (hasActiveAssignment && !isAssignmentReadyForSubmit) return;
     if (!dbSessionId || !token || !user?.id) return;
+    // Skip XP award when student hasn't completed any learning steps yet
+    const hasLearningData = !!(
+      session?.readingAttempt ||
+      session?.fullReadingResult ||
+      session?.comprehensionResult ||
+      session?.vocabResult
+    );
+    if (!hasLearningData) return;
 
     const readingAccuracy = session?.readingAttempt?.accuracy;
     const comprehensionPct = session?.comprehensionResult
