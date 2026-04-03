@@ -2,8 +2,8 @@
  * AppShell — the authenticated app chrome (header + sidebar + main area).
  *
  * LearningAppShell — thin wrapper that puts LearningLayout inside AppShell,
- * used for all /learn/:storyId/* routes. It also renders the StepperNav as a
- * vertical left sidebar alongside the learning content (moved out of the header).
+ * used for all /learn/:storyId/* routes. It renders the StepperNav as a
+ * horizontal top navigation bar above the learning content.
  */
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -110,11 +110,10 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 };
 
 /**
- * Inner content for the learning flow: StepperNav sidebar + LearningLayout.
+ * Inner content for the learning flow: StepperNav top bar + LearningLayout.
  * Rendered inside AppShell's <main> element.
  *
- * Desktop: flex-row — [StepperNav 208px] + [LearningLayout fills rest]
- * Mobile: flex-col — [StepperNav compact bar] stacked above [LearningLayout]
+ * Layout: flex-col — [StepperNav horizontal bar] stacked above [LearningLayout full-width]
  */
 const LearningContent: React.FC = () => {
   const navigate = useNavigate();
@@ -144,8 +143,8 @@ const LearningContent: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-      {/* Vertical step sidebar (desktop) / compact bar (mobile) */}
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Horizontal step nav bar at the top */}
       <StepperNav
         currentView={currentView}
         session={navSession}
@@ -153,11 +152,9 @@ const LearningContent: React.FC = () => {
         onNavigate={handleStepperNavigate}
       />
 
-      {/* Learning step content — flex flex-col so child step components receive a flex
-          context and their flex-1 / h-full classes are bounded. overflow-hidden keeps the
-          height capped to the viewport so steps with internal scroll containers (e.g.
-          ReadingAnnotation's containerRef, VocabPractice's main-content div) scroll
-          correctly without the outer wrapper scrolling instead (#815, #824). */}
+      {/* Learning step content — full width below the top nav.
+          overflow-y-auto keeps the height capped to the viewport so steps with
+          internal scroll containers scroll correctly (#815, #824). */}
       <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
         <LearningLayout />
       </div>
