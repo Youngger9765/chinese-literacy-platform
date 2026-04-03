@@ -15,6 +15,7 @@ from ...models.user import User
 from ...services.ai_service import generate_example_sentences, validate_student_sentence
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.example_sentence_cache import get_cached, set_cached
+from ...services.input_sanitizer import sanitize_ai_input
 from ...services.listening_service import evaluate_retelling
 
 router = APIRouter()
@@ -157,8 +158,12 @@ async def validate_sentence(
     and uses the target character appropriately (Issue #109).
     Rate limited: 10 requests per minute per user/IP.
     """
+    # Sanitize student input before sending to AI
+    safe_sentence, _ = sanitize_ai_input(payload.student_sentence, user_id=str(current_user.id))
+    safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
+
     # Basic check: target character must appear in the sentence
-    if payload.character not in payload.student_sentence:
+    if payload.character not in safe_sentence:
         return ValidateSentenceResponse(
             is_correct=False,
             feedback="你的句子裡沒有包含目標生字喔！",
@@ -169,8 +174,8 @@ async def validate_sentence(
     try:
         result = await validate_student_sentence(
             character=payload.character,
-            student_sentence=payload.student_sentence,
-            story_title=payload.story_title,
+            student_sentence=safe_sentence,
+            story_title=safe_story_title,
         )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
@@ -242,12 +247,16 @@ async def evaluate_listening_retelling(
 
     Returns a score (0-100), covered/missed key points, and feedback.
     """
+    # Sanitize student retelling before sending to AI
+    safe_retelling, _ = sanitize_ai_input(payload.student_retelling, user_id=str(current_user.id))
+    safe_story_title_listen, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
+
     start_time = time.monotonic()
     try:
         result = await evaluate_retelling(
             original_text=payload.original_text,
-            student_retelling=payload.student_retelling,
-            story_title=payload.story_title,
+            student_retelling=safe_retelling,
+            story_title=safe_story_title_listen,
         )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")

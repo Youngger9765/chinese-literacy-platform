@@ -9,6 +9,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.text import Text, TextStatus, VisibilityLevel
 from ...models.user import User
+from ...services.input_sanitizer import sanitize_ai_input
 from .teacher_schemas import (
     TeacherTextCreateRequest,
     TeacherTextDetail,
@@ -129,20 +130,27 @@ def create_my_text(
     db: Session = Depends(get_db),
 ):
     """Create a new custom text owned by the authenticated teacher."""
-    full_text = "\n".join(body.paragraphs)
+    # Sanitize teacher-provided text — these are used in AI prompts
+    safe_title, _ = sanitize_ai_input(body.title, user_id=str(current_user.id))
+    safe_paragraphs = []
+    for p in body.paragraphs:
+        safe_p, _ = sanitize_ai_input(p, user_id=str(current_user.id))
+        safe_paragraphs.append(safe_p)
+
+    full_text = "\n".join(safe_paragraphs)
     char_count = len(full_text.replace("\n", "").replace(" ", ""))
     grade_code = _GRADE_CODE_MAP.get(body.grade, f"G{body.grade}")
     category = _GENRE_TO_CATEGORY.get(body.genre, "Daily")
 
     text = Text(
-        title=body.title,
+        title=safe_title,
         grade=body.grade,
         grade_code=grade_code,
         genre=body.genre,
         text_type=body.text_type,
         category=category,
         reading_strategy=body.reading_strategy,
-        paragraphs=body.paragraphs,
+        paragraphs=safe_paragraphs,
         full_text=full_text,
         char_count=char_count,
         vocabulary=body.vocabulary,
@@ -171,7 +179,7 @@ def update_my_text(
     text = _get_text_or_404(text_id, current_user.id, db)
 
     if body.title is not None:
-        text.title = body.title
+        text.title, _ = sanitize_ai_input(body.title, user_id=str(current_user.id))
     if body.grade is not None:
         text.grade = body.grade
         text.grade_code = _GRADE_CODE_MAP.get(body.grade, f"G{body.grade}")
@@ -183,8 +191,12 @@ def update_my_text(
     if body.reading_strategy is not None:
         text.reading_strategy = body.reading_strategy
     if body.paragraphs is not None:
-        text.paragraphs = body.paragraphs
-        full_text = "\n".join(body.paragraphs)
+        safe_paragraphs = []
+        for p in body.paragraphs:
+            safe_p, _ = sanitize_ai_input(p, user_id=str(current_user.id))
+            safe_paragraphs.append(safe_p)
+        text.paragraphs = safe_paragraphs
+        full_text = "\n".join(safe_paragraphs)
         text.full_text = full_text
         text.char_count = len(full_text.replace("\n", "").replace(" ", ""))
     if body.vocabulary is not None:

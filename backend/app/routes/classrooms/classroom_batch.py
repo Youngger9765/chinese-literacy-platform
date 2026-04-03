@@ -17,6 +17,7 @@ from ...schemas.classroom import (
     BatchStudentError,
     CreatedStudentInfo,
 )
+from ...services.input_sanitizer import sanitize_ai_input
 from .helpers import (
     check_email_domain,
     get_classroom_or_404,
@@ -66,6 +67,8 @@ def batch_create_students(
     for item in payload.students:
         try:
             savepoint = db.begin_nested()
+            # Sanitize student name — displayed in reports and potentially used in AI contexts
+            safe_name, _ = sanitize_ai_input(item.name, user_id=str(current_user.id))
             username = f"{classroom.join_code}{item.seat_number}"
             email = f"{username.lower()}@student.lingoleap.local"
 
@@ -90,7 +93,7 @@ def batch_create_students(
                 email=email,
                 username=username.upper(),
                 password_hash=hash_password(password),
-                name=item.name,
+                name=safe_name,
                 is_active=True,
             )
             db.add(user)

@@ -37,6 +37,7 @@ from ..schemas.assignment import (
     DEFAULT_TARGET_ACCURACY,
 )
 from ..services.assignment_copy_strategy import resolve_text_for_assignment
+from ..services.input_sanitizer import sanitize_ai_input
 from ..services.lesson_loader import get_lesson_by_id
 from ..services.notification_service import send_assignment_submitted_notification
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
@@ -370,6 +371,12 @@ def create_assignment(
             detail="classroom_id in request body must match classroom_id in path",
         )
 
+    # Sanitize teacher-provided text fields
+    safe_title, _ = sanitize_ai_input(payload.title, user_id=str(current_user.id)) if payload.title else (payload.title, False)
+    safe_description = payload.description
+    if safe_description:
+        safe_description, _ = sanitize_ai_input(safe_description, user_id=str(current_user.id))
+
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_owner_or_admin(classroom, current_user, db)
 
@@ -403,8 +410,8 @@ def create_assignment(
         teacher_id=current_user.id,
         story_id=resolved_story_id,
         text_id=resolved_text_id,
-        title=payload.title,
-        description=payload.description,
+        title=safe_title,
+        description=safe_description,
         assignment_type=payload.assignment_type,
         due_date=payload.due_date,
         # Reading goals (Issue #84)
@@ -548,6 +555,12 @@ def update_assignment(
     _require_assignment_owner_or_admin(assignment, current_user, db)
 
     update_data = payload.model_dump(exclude_unset=True)
+    # Sanitize text fields in update payload
+    for text_field in ("title", "description"):
+        if text_field in update_data and update_data[text_field]:
+            update_data[text_field], _ = sanitize_ai_input(
+                update_data[text_field], user_id=str(current_user.id)
+            )
     for field, value in update_data.items():
         setattr(assignment, field, value)
 
@@ -594,7 +607,8 @@ def grade_submission(
         submission.score = payload.score
     # Persist per-student feedback (Issue #424); None keeps existing value unchanged
     if payload.teacher_feedback is not None:
-        submission.teacher_feedback = payload.teacher_feedback
+        safe_feedback, _ = sanitize_ai_input(payload.teacher_feedback, user_id=str(current_user.id))
+        submission.teacher_feedback = safe_feedback
     submission.status = "graded"
 
     db.commit()

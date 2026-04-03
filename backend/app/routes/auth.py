@@ -28,6 +28,7 @@ from ..schemas.auth import (
     VerifyEmailRequest,
     VerifyEmailResponse,
 )
+from ..services.input_sanitizer import sanitize_ai_input
 from ..utils.password_validator import validate_password_strength
 from ..schemas.user import UserResponse
 
@@ -116,6 +117,9 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     if not rate_limiter.check(f"register:{client_ip}", max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
+    # Sanitize user-provided name to prevent injection in downstream AI contexts
+    safe_name, _ = sanitize_ai_input(req.name, user_id=req.email) if req.name else (req.name, False)
+
     # Block student self-registration. Students are created by teachers only.
     if req.role is not None and req.role.lower() == "student":
         raise HTTPException(
@@ -148,7 +152,7 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     user = User(
         email=req.email,
         password_hash=hash_password(req.password),
-        name=req.name,
+        name=safe_name,
         email_verified=auto_verified,
         email_verification_token=verification_token,
     )

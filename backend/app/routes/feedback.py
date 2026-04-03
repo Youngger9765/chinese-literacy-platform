@@ -21,6 +21,7 @@ from ..schemas.feedback import (
     FeedbackResponse,
     FeedbackStatusUpdateRequest,
 )
+from ..services.input_sanitizer import sanitize_ai_input
 
 router = APIRouter(tags=["feedback"])
 logger = logging.getLogger(__name__)
@@ -47,11 +48,17 @@ def submit_feedback(
     db: Session = Depends(get_db),
 ) -> FeedbackResponse:
     """Submit feedback from any authenticated user."""
+    # Sanitize user-provided text fields
+    safe_title, _ = sanitize_ai_input(body.title, user_id=str(current_user.id))
+    safe_description = body.description
+    if safe_description:
+        safe_description, _ = sanitize_ai_input(safe_description, user_id=str(current_user.id))
+
     feedback = Feedback(
         user_id=current_user.id,
         category=body.category,
-        title=body.title,
-        description=body.description,
+        title=safe_title,
+        description=safe_description,
         page_url=body.page_url,
         status="open",
     )
