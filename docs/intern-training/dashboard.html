@@ -399,6 +399,9 @@
     --gold: #f59e0b;
     --gold-light: #fffbeb;
     --gold-glow: #f59e0b30;
+    --cyan: #06b6d4;
+    --cyan-light: #ecfeff;
+    --cyan-glow: #06b6d430;
     --locked-bg: #f1f5f9;
     --locked-border: #cbd5e1;
     --locked-text: #6b7280;
@@ -624,6 +627,19 @@
   .skilltree-panel .node.tier-4 .check { background: var(--gold); }
   .skilltree-panel .node.tier-4.completed .check { background: #fff; color: var(--gold); }
 
+  .skilltree-panel .node.tier-5 {
+    background: linear-gradient(135deg, #ecfeff, #cffafe);
+    border-color: var(--cyan);
+    box-shadow: 0 2px 8px var(--cyan-glow), inset 0 1px 0 rgba(255,255,255,0.8);
+    color: #155e75;
+  }
+  .skilltree-panel .node.tier-5.completed {
+    background: linear-gradient(135deg, var(--cyan), #0891b2);
+    color: #fff;
+  }
+  .skilltree-panel .node.tier-5 .check { background: var(--cyan); }
+  .skilltree-panel .node.tier-5.completed .check { background: #fff; color: var(--cyan); }
+
   /* Locked */
   .skilltree-panel .node.locked {
     background: var(--locked-bg);
@@ -653,6 +669,7 @@
   .skilltree-panel .node.tier-2.available:not(.completed) { --glow-color: var(--blue-glow); }
   .skilltree-panel .node.tier-3.available:not(.completed) { --glow-color: var(--purple-glow); }
   .skilltree-panel .node.tier-4.available:not(.completed) { --glow-color: var(--gold-glow); }
+  .skilltree-panel .node.tier-5.available:not(.completed) { --glow-color: var(--cyan-glow); }
 
   /* Section cards */
   .skilltree-panel .section-card {
@@ -1042,9 +1059,8 @@
 <!-- Left sidebar panel -->
 <div style="position:fixed;left:0;top:0;width:220px;height:100vh;background:#1e293b;color:#f1f5f9;display:flex;flex-direction:column;padding:20px 16px;z-index:100;overflow-y:auto;">
   <h2 style="font-size:15px;margin-bottom:20px;color:#fff;">🗺️ 導覽</h2>
-  <a href="skill-tree.html" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:6px;border-radius:8px;color:#a5b4fc;text-decoration:none;font-size:14px;transition:background 0.2s;" onmouseover="this.style.background='rgba(99,102,241,0.15)'" onmouseout="this.style.background='transparent'">🌳 技能樹</a>
+  <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:6px;border-radius:8px;background:rgba(59,130,246,0.15);color:#93c5fd;text-decoration:none;font-size:14px;font-weight:600;">🌳 技能樹 + 儀表板</a>
   <a href="journey.html" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:6px;border-radius:8px;color:#c4b5fd;text-decoration:none;font-size:14px;transition:background 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.15)'" onmouseout="this.style.background='transparent'">⚔️ 英雄旅程</a>
-  <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:6px;border-radius:8px;background:rgba(59,130,246,0.15);color:#93c5fd;text-decoration:none;font-size:14px;font-weight:600;">📊 儀表板</a>
   <a href="courses/viewer.html" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:6px;border-radius:8px;color:#86efac;text-decoration:none;font-size:14px;transition:background 0.2s;" onmouseover="this.style.background='rgba(34,197,94,0.15)'" onmouseout="this.style.background='transparent'">📚 教材</a>
   <div style="flex:1;"></div>
   <div style="border-top:1px solid #334155;padding-top:12px;margin-top:12px;">
@@ -1118,14 +1134,18 @@ const SKILL_NAMES = {
   1:"Git 基礎", 2:"HTML/CSS", 3:"JavaScript", 4:"開發環境", 5:"讀懂程式碼",
   6:"React 元件", 7:"TypeScript", 8:"Tailwind", 9:"Git 工作流", 10:"Bug 修復",
   11:"React 進階", 12:"API 串接", 13:"設計模式", 14:"測試", 15:"Code Review",
-  16:"獨立開發", 17:"效能優化", 18:"架構理解", 19:"技術文件", 20:"指導他人"
+  16:"獨立開發", 17:"效能優化", 18:"架構理解", 19:"技術文件", 20:"指導他人",
+  21:"Claude Code 基礎", 22:"CLAUDE.md 撰寫", 23:"Skill 撰寫", 24:"Hook 撰寫",
+  25:"Worktree 平行開發", 26:"Agent 撰寫", 27:"MCP 整合", 28:"Plugin 開發", 29:"Workflow 自動化"
 };
 
 const SKILL_ICONS = {
   1:"\u{1F500}", 2:"\u{1F3A8}", 3:"\u26A1", 4:"\u{1F6E0}\uFE0F", 5:"\u{1F4D6}",
   6:"\u269B\uFE0F", 7:"\u{1F4DD}", 8:"\u{1F3AF}", 9:"\u{1F33F}", 10:"\u{1F41B}",
   11:"\u{1F9EA}", 12:"\u{1F310}", 13:"\u{1F9F1}", 14:"\u2705", 15:"\u{1F50D}",
-  16:"\u{1F680}", 17:"\u{1F3CE}\uFE0F", 18:"\u{1F3D7}\uFE0F", 19:"\u{1F4DA}", 20:"\u{1F91D}"
+  16:"\u{1F680}", 17:"\u{1F3CE}\uFE0F", 18:"\u{1F3D7}\uFE0F", 19:"\u{1F4DA}", 20:"\u{1F91D}",
+  21:"\u{1F916}", 22:"\u{1F4DC}", 23:"\u{1F4CB}", 24:"\u{1F6E1}\uFE0F",
+  25:"\u{1F333}", 26:"\u{1F47E}", 27:"\u{1F50C}", 28:"\u{1F4E6}", 29:"\u{1F504}"
 };
 
 const SKILLS = [
@@ -1228,14 +1248,61 @@ const SKILLS = [
     project:"帶領一位新成員完成第一個 PR，或組織一次技術分享",
     criteria:"成功帶領一位新成員完成他們的首個貢獻、或完成一次團隊技術分享",
     courseFile:"tier4-mentoring.md",
-    courseOutline:["Pair Programming 技巧","如何引導而非直接給答案","Onboarding 流程設計","技術分享準備","建立學習文化"] }
+    courseOutline:["Pair Programming 技巧","如何引導而非直接給答案","Onboarding 流程設計","技術分享準備","建立學習文化"] },
+  // Tier 5 — Claude Code (VCA 課程)
+  { id:21, tier:5, icon:"\u{1F916}", name:"Claude Code 基礎", desc:"用 Claude Code 完成一個 issue", xp:15, prereqs:[9],
+    project:"用 Claude Code 做一個 issue，PR 是 Claude 幫寫的",
+    criteria:"至少一個 PR 的主要程式碼由 Claude Code 產生，並通過 review",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["安裝 Claude Code","基本對話與檔案讀取","讓 Claude 改 code","Plan Mode"] },
+  { id:22, tier:5, icon:"\u{1F4DC}", name:"CLAUDE.md 撰寫", desc:"寫出 AI 看得懂的專案規則", xp:20, prereqs:[21],
+    project:"在個人專案或 LingoLeap 寫一份 CLAUDE.md",
+    criteria:"CLAUDE.md 包含專案背景、技術架構、開發規則，Claude Code 實際遵守這些規則",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["CLAUDE.md 結構","Rules 目錄","覆寫規則","讓 AI 遵守你的規則"] },
+  { id:25, tier:5, icon:"\u{1F333}", name:"Worktree 平行開發", desc:"同時做多個 issue 不打架", xp:20, prereqs:[21],
+    project:"用 git worktree 同時做兩個 issue",
+    criteria:"兩個 worktree 各自有 PR，互不干擾",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["什麼是 worktree","為什麼要用","Claude Code + worktree","多 agent 平行"] },
+  { id:23, tier:5, icon:"\u{1F4CB}", name:"Skill 撰寫", desc:"把重複的工作流程自動化", xp:25, prereqs:[22],
+    project:"寫一個 global skill 並在實際工作中使用",
+    criteria:"skill 能用 /my-skill 觸發，實際省下重複操作",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["Skill vs Agent 差別","SKILL.md 格式","觸發條件設計","Progressive disclosure"] },
+  { id:24, tier:5, icon:"\u{1F6E1}\uFE0F", name:"Hook 撰寫", desc:"用物理限制防止 AI 犯錯", xp:25, prereqs:[22],
+    project:"寫一個防護 hook，實際擋住一次錯誤操作",
+    criteria:"hook 在真實場景中擋住一次錯誤（如：禁止在 main 直接編輯）",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["PreToolUse vs PostToolUse","Bash hook vs Prompt hook","從踩坑中長出 hook","Postmortem 驅動"] },
+  { id:26, tier:5, icon:"\u{1F47E}", name:"Agent 撰寫", desc:"讓 AI 獨立完成任務", xp:30, prereqs:[23,24],
+    project:"寫一個自訂 agent 能獨立完成一個任務",
+    criteria:"agent 從 issue 到 PR 完整自動化，產出品質通過 review",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["Agent frontmatter","System prompt 設計","工具選擇","Context 隔離"] },
+  { id:27, tier:5, icon:"\u{1F50C}", name:"MCP 整合", desc:"讓 Claude 連接外部工具（DB、瀏覽器、API）", xp:25, prereqs:[21],
+    project:"在專案設定一個 MCP server 並實際使用",
+    criteria:".mcp.json 有設定，Claude Code 能透過 MCP 操作外部服務",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["MCP 是什麼","stdio vs SSE","設定 .mcp.json","Chrome MCP / DB MCP"] },
+  { id:28, tier:5, icon:"\u{1F4E6}", name:"Plugin 開發", desc:"打包 command + skill + hook 成可分享套件", xp:35, prereqs:[23,24,26],
+    project:"建一個完整的 plugin（含 plugin.json + 至少 1 個 command/skill/hook）",
+    criteria:"~/.claude/plugins/你的plugin/plugin.json 存在且能正常載入",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["plugin.json 結構","Commands vs Skills vs Hooks","auto-discovery","分享給團隊"] },
+  { id:29, tier:5, icon:"\u{1F504}", name:"Workflow 自動化", desc:"設計多步驟自動化流程", xp:30, prereqs:[23,25],
+    project:"設計一個 issue→branch→code→test→PR 一鍵流程",
+    criteria:"git log 裡有完整自動化流程產出的 commit chain",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["CI/CD 整合","GitHub Actions + Claude","多 agent 協作","自動 QA"] }
 ];
 
 const TIER_META = {
   1: { name:"基礎入門", color:"var(--green)", hex:"#22c55e" },
   2: { name:"實戰技能", color:"var(--blue)", hex:"#3b82f6" },
   3: { name:"進階能力", color:"var(--purple)", hex:"#a855f7" },
-  4: { name:"獨立開發者", color:"var(--gold)", hex:"#f59e0b" }
+  4: { name:"獨立開發者", color:"var(--gold)", hex:"#f59e0b" },
+  5: { name:"Claude Code (VCA)", color:"var(--cyan)", hex:"#06b6d4" }
 };
 
 const TOTAL_XP = SKILLS.reduce((s, sk) => s + sk.xp, 0);
@@ -1634,7 +1701,7 @@ function renderTree() {
   const tree = document.getElementById('tree');
   tree.innerHTML = '';
 
-  for (let tier = 1; tier <= 4; tier++) {
+  for (let tier = 1; tier <= 5; tier++) {
     if (tier > 1) {
       const conn = document.createElement('div');
       conn.className = 'tier-connector';
