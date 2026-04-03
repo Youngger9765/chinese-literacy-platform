@@ -97,6 +97,20 @@ open docs/intern-training/skill-tree.html
 | 9 | Git 工作流 | 20 | 1 | feature branch + PR + conventional commits |
 | 10 | Bug 修復 | 25 | 4,5 | 重現 → 定位 → 修復 → 驗證 |
 
+### Tier 2.5 — Claude Code 技能 (NEW — 對應 VCA 課程)
+
+> 教材：`courses/claude-code-foundations.md`
+> VCA 課程：https://young-tsai.vercel.app/zh-TW/private/vca-curriculum
+
+| # | 技能 | XP | 前置 | 怎麼算通過 |
+|---|------|-----|------|-----------|
+| 21 | Claude Code 基礎 | 15 | 9 | 用 Claude Code 完成一個 issue（PR 是 Claude 幫寫的） |
+| 22 | CLAUDE.md 撰寫 | 20 | 21 | 在個人專案寫一份 CLAUDE.md |
+| 23 | Skill 撰寫 | 25 | 22 | 寫一個 global skill 並實際使用 |
+| 24 | Hook 撰寫 | 25 | 22 | 寫一個防護 hook，實際擋住一次錯誤 |
+| 25 | Agent 使用 | 20 | 21 | 用 worktree 平行做兩個 issue |
+| 26 | Agent 撰寫 | 30 | 23,24 | 寫一個自訂 agent 能獨立完成任務 |
+
 ### Tier 3 — 進階能力 (155 XP)
 
 | # | 技能 | XP | 前置 | 怎麼算通過 |
