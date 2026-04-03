@@ -26,6 +26,9 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     must_change_password: bool = False
+    # Issue #457: True for teachers/admins and students enrolled in at least one classroom.
+    # False only for students with no classroom enrollment — shows a waiting screen on frontend.
+    has_classroom: bool = True
 
 
 class RegisterResponse(BaseModel):
