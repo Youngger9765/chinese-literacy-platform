@@ -122,6 +122,59 @@ def list_my_sessions(
     return SessionListResponse(items=summaries, total=total)
 
 
+@router.get("/learning/sessions/reading-history")
+def get_reading_history(
+    story_slug: str = Query(..., description="Story slug to get reading history for"),
+    limit: int = Query(50, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get the student's own reading history for a specific story.
+
+    Returns CPM, accuracy, and match_rate from each completed session,
+    enabling progress curve visualisation on the student side.
+    """
+    sessions = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id == current_user.id,
+            LearningSession.story_slug == story_slug,
+            LearningSession.status == "completed",
+        )
+        .order_by(LearningSession.started_at.asc())
+        .limit(limit)
+        .all()
+    )
+
+    results = []
+    for s in sessions:
+        fr = s.full_reading_result or {}
+        rr = s.reading_result or {}
+        # Extract CPM — prefer full_reading_result
+        cpm = fr.get("cpm") or rr.get("cpm")
+        # Extract accuracy
+        accuracy = None
+        if fr.get("match_rate") is not None:
+            accuracy = round(float(fr["match_rate"]) * 100, 1)
+        elif fr.get("accuracy") is not None:
+            accuracy = round(float(fr["accuracy"]), 1)
+        elif rr.get("accuracy") is not None:
+            accuracy = round(float(rr["accuracy"]), 1)
+        # Extract match_rate raw
+        match_rate = fr.get("match_rate") or rr.get("match_rate")
+
+        results.append({
+            "session_id": s.id,
+            "started_at": s.started_at.isoformat(),
+            "cpm": float(cpm) if cpm is not None else None,
+            "accuracy": accuracy,
+            "match_rate": float(match_rate) if match_rate is not None else None,
+            "overall_score": round(s.overall_score, 1) if s.overall_score is not None else None,
+        })
+
+    return results
+
+
 @router.get("/learning/sessions/{session_id}", response_model=SessionDetailResponse)
 def get_session_detail(
     session_id: int,

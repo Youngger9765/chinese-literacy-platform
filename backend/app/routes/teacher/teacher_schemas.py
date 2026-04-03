@@ -156,6 +156,9 @@ class LearningCurvePoint(BaseModel):
     score: float
     story_title: str | None
     session_id: int
+    story_slug: str | None = None
+    cpm: float | None = None
+    accuracy: float | None = None
 
     model_config = {"from_attributes": True}
 

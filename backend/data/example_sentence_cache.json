@@ -13408,5 +13408,18 @@
     ],
     "source": "pregenerated",
     "cached_at": "2026-03-30T00:00:00Z"
+  },
+  "測試課文:源": {
+    "sentences": [
+      {
+        "sentence": "老師講述這個故事的來源。",
+        "explanation": "來源：事物的起點或出處"
+      },
+      {
+        "sentence": "這首歌的靈感來源於童年。",
+        "explanation": "來源：靈感的起點"
+      }
+    ],
+    "cached_at": "2026-04-02T07:15:01.108390+00:00"
   }
 }
