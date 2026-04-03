@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { AppView, Story, LearningSession } from '../types';
-import { useIsMobile } from '../hooks/useIsMobile';
 import { ACTIVE_STEPS, STEP_CATEGORY_COLORS } from '../config/stepConfig';
 
 interface StepperNavProps {
@@ -71,43 +70,12 @@ function getStepStatus(
   return isCompleted ? 'completed' : 'idle';
 }
 
-function getMiniSummary(stepDef: StepDef, session: LearningSession | null): string | null {
-  if (!session) return null;
-  switch (stepDef.view) {
-    case AppView.TUTOR: {
-      const a = session.readingAttempt;
-      return a ? `${a.accuracy}% \u00B7 ${a.cpm} CPM` : null;
-    }
-    case AppView.VOCAB: {
-      const v = session.vocabResult;
-      return v ? `${v.practicedChars.length}/${v.totalChars} \u5B57` : null;
-    }
-    case AppView.COMPREHENSION: {
-      const c = session.comprehensionResult;
-      return c ? `${c.understoodCount}/${c.requiredCount} \u984C` : null;
-    }
-    case AppView.DICTATION: {
-      const d = session.dictationResult;
-      return d ? `${d.correctCount}/${d.totalWords} \u5C0D` : null;
-    }
-    case AppView.FULL_READING: {
-      const f = session.fullReadingResult;
-      return f ? `${Math.round(f.matchRate * 100)}%` : null;
-    }
-    default:
-      return null;
-  }
-}
-
 // -- Step badge sub-component --
 const StepBadge: React.FC<{
   step: number;
   status: StepStatus;
   category?: 'reading' | 'comprehension' | 'practice' | 'report';
-  size?: 'sm' | 'md';
-}> = ({ step, status, category, size = 'md' }) => {
-  const sizeClasses = size === 'sm' ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm';
-
+}> = ({ step, status, category }) => {
   const categoryColors = category ? STEP_CATEGORY_COLORS[category] : null;
 
   const styleMap: Record<StepStatus, string> = {
@@ -119,10 +87,10 @@ const StepBadge: React.FC<{
 
   return (
     <span
-      className={`${sizeClasses} rounded-full flex items-center justify-center font-bold shrink-0 ${styleMap[status]}`}
+      className={`w-6 h-6 text-xs rounded-full flex items-center justify-center font-bold shrink-0 ${styleMap[status]}`}
     >
       {status === 'completed' ? (
-        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       ) : (
@@ -132,228 +100,83 @@ const StepBadge: React.FC<{
   );
 };
 
-// ── Desktop vertical sidebar ──────────────────────────────────────────────
-
-const DesktopSidebar: React.FC<StepperNavProps> = ({
-  currentView,
-  session,
-  selectedStory,
-  onNavigate,
-}) => {
-  return (
-    <nav
-      aria-label="學習步驟導覽"
-      className="hidden md:flex flex-col font-ui w-52 shrink-0 bg-white border-r border-gray-200 overflow-y-auto py-4 gap-1.5"
-    >
-      {/* Story title */}
-      {selectedStory && (
-        <div className="px-4 pb-3 border-b border-gray-100 mb-1">
-          <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-0.5">目前課文</p>
-          <p className="text-xs font-semibold text-gray-700 line-clamp-2 leading-snug">
-            {selectedStory.title}
-          </p>
-        </div>
-      )}
-
-      {/* Step list */}
-      {steps.map((stepDef) => {
-        const status = getStepStatus(stepDef, currentView, session, selectedStory);
-        const summary = status === 'completed' ? getMiniSummary(stepDef, session) : null;
-        const isActive = status === 'active';
-        const isDisabled = status === 'disabled';
-
-        return (
-          <button
-            key={stepDef.view}
-            onClick={() => !isDisabled && onNavigate(stepDef.view)}
-            disabled={isDisabled}
-            aria-current={isActive ? 'step' : undefined}
-            aria-label={`步驟 ${stepDef.step}：${stepDef.label}（${isActive ? '目前' : isDisabled ? '未解鎖' : status === 'completed' ? '已完成' : '未完成'}）`}
-            className={`mx-2 flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-              isActive
-                ? `${STEP_CATEGORY_COLORS[stepDef.category].activeBg} ${STEP_CATEGORY_COLORS[stepDef.category].text}`
-                : isDisabled
-                ? 'text-gray-300 cursor-not-allowed'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            }`}
-          >
-            <StepBadge step={stepDef.step} status={status} category={stepDef.category} size="md" />
-            <span className="flex flex-col min-w-0">
-              <span className={`text-sm leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
-                {stepDef.label}
-              </span>
-              {summary && (
-                <span className="text-[11px] text-emerald-600 font-normal mt-0.5">{summary}</span>
-              )}
-            </span>
-          </button>
-        );
-      })}
-    </nav>
-  );
-};
-
-// ── Mobile compact bar + bottom sheet overlay ─────────────────────────────
-
-const MobileStepBar: React.FC<StepperNavProps> = ({
-  currentView,
-  session,
-  selectedStory,
-  onNavigate,
-}) => {
-  const [open, setOpen] = useState(false);
-
-  const currentStepDef = steps.find((s) => s.view === currentView);
-  const currentStatus = currentStepDef
-    ? getStepStatus(currentStepDef, currentView, session, selectedStory)
-    : 'idle';
-
-  const handleNavigate = (view: AppView) => {
-    onNavigate(view);
-    setOpen(false);
-  };
-
-  return (
-    <>
-      {/* Compact top bar — mobile only */}
-      <div className="flex items-center gap-3 px-4 py-2 font-ui bg-white border-b border-gray-200 shrink-0">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          {currentStepDef ? (
-            <>
-              <StepBadge step={currentStepDef.step} status={currentStatus} category={currentStepDef.category} size="sm" />
-              <span className="text-sm font-semibold text-gray-800 truncate">
-                {currentStepDef.label}
-              </span>
-              <span className="text-xs text-gray-400 shrink-0">
-                {currentStepDef.step} / {steps.length}
-              </span>
-            </>
-          ) : (
-            <span className="text-sm text-gray-500">選擇步驟</span>
-          )}
-        </div>
-
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="展開所有步驟"
-          aria-expanded={open}
-          aria-haspopup="dialog"
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Bottom sheet overlay */}
-      {open && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/40"
-            onClick={() => setOpen(false)}
-            aria-hidden="true"
-          />
-          <div
-            role="dialog"
-            aria-label="學習步驟清單"
-            aria-modal="true"
-            className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-2xl max-h-[80vh] flex flex-col"
-          >
-            {/* Sheet handle */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-gray-300" />
-            </div>
-
-            {/* Sheet header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-              <div>
-                <h2 className="text-base font-semibold text-gray-900">學習步驟</h2>
-                {selectedStory && (
-                  <p className="text-xs text-gray-500 mt-0.5 truncate max-w-xs">{selectedStory.title}</p>
-                )}
-              </div>
-              <button
-                onClick={() => setOpen(false)}
-                aria-label="關閉"
-                className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Step list */}
-            <nav
-              aria-label="學習步驟導覽"
-              className="overflow-y-auto py-3 px-3 flex flex-col gap-1.5 font-ui"
-            >
-              {steps.map((stepDef) => {
-                const status = getStepStatus(stepDef, currentView, session, selectedStory);
-                const summary = status === 'completed' ? getMiniSummary(stepDef, session) : null;
-                const isActive = status === 'active';
-                const isDisabled = status === 'disabled';
-
-                return (
-                  <button
-                    key={stepDef.view}
-                    onClick={() => !isDisabled && handleNavigate(stepDef.view)}
-                    disabled={isDisabled}
-                    aria-current={isActive ? 'step' : undefined}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                      isActive
-                        ? `${STEP_CATEGORY_COLORS[stepDef.category].activeBg} ${STEP_CATEGORY_COLORS[stepDef.category].text}`
-                        : isDisabled
-                        ? 'text-gray-300 cursor-not-allowed'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <StepBadge step={stepDef.step} status={status} category={stepDef.category} size="sm" />
-                    <span className="flex flex-col">
-                      <span className={`text-base leading-snug ${isActive ? 'font-semibold' : 'font-medium'}`}>
-                        {stepDef.label}
-                      </span>
-                      {summary && (
-                        <span className="text-xs text-emerald-600 font-normal mt-0.5">{summary}</span>
-                      )}
-                    </span>
-                    {isActive && (
-                      <span className="ml-auto text-xs font-medium bg-accent/10 text-accent px-2 py-0.5 rounded-full shrink-0">
-                        目前
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-        </>
-      )}
-    </>
-  );
-};
-
-// ── Main export ───────────────────────────────────────────────────────────
+// ── Horizontal top nav (shared for desktop & mobile) ─────────────────────
 
 /**
- * StepperNav — vertical sidebar on desktop, compact bar + bottom sheet on mobile.
+ * StepperNav — horizontal top navigation bar.
  *
- * Desktop (md+): fixed-width left column (208px / w-52) with numbered step rows.
- * Mobile (<md): slim top bar showing current step + hamburger; tapping opens a
- * bottom sheet with the full step list.
+ * Desktop (md+): horizontal row of step pills with labels.
+ * Mobile (<md): horizontally scrollable compact step indicators.
  *
- * This component is rendered OUTSIDE the header. It lives as a sibling to the
- * main learning content area (see LearningAppShell in AppShell.tsx).
+ * Auto-scrolls the active step into view on mount and when the step changes.
  */
-const StepperNav: React.FC<StepperNavProps> = (props) => {
-  const isMobile = useIsMobile();
+const StepperNav: React.FC<StepperNavProps> = ({
+  currentView,
+  session,
+  selectedStory,
+  onNavigate,
+}) => {
+  const scrollRef = useRef<HTMLElement>(null);
 
-  if (isMobile) {
-    return <MobileStepBar {...props} />;
-  }
+  // Auto-scroll the active step into view
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const activeEl = container.querySelector('[aria-current="step"]');
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [currentView]);
 
-  return <DesktopSidebar {...props} />;
+  return (
+    <nav
+      ref={scrollRef}
+      aria-label="學習步驟導覽"
+      className="font-ui bg-white border-b border-gray-200 shrink-0 overflow-x-auto scrollbar-hide"
+    >
+      <div className="flex items-center gap-1 px-3 py-2 min-w-max">
+        {/* Story title pill — desktop only */}
+        {selectedStory && (
+          <div className="hidden md:flex items-center mr-2 pr-3 border-r border-gray-200">
+            <p className="text-xs font-semibold text-gray-500 truncate max-w-[120px]" title={selectedStory.title}>
+              {selectedStory.title}
+            </p>
+          </div>
+        )}
+
+        {/* Step pills */}
+        {steps.map((stepDef) => {
+          const status = getStepStatus(stepDef, currentView, session, selectedStory);
+          const isActive = status === 'active';
+          const isDisabled = status === 'disabled';
+          const categoryColors = STEP_CATEGORY_COLORS[stepDef.category];
+
+          return (
+            <button
+              key={stepDef.view}
+              onClick={() => !isDisabled && onNavigate(stepDef.view)}
+              disabled={isDisabled}
+              aria-current={isActive ? 'step' : undefined}
+              aria-label={`步驟 ${stepDef.step}：${stepDef.label}（${isActive ? '目前' : isDisabled ? '未解鎖' : status === 'completed' ? '已完成' : '未完成'}）`}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                isActive
+                  ? `${categoryColors.activeBg} ${categoryColors.text}`
+                  : isDisabled
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <StepBadge step={stepDef.step} status={status} category={stepDef.category} />
+              {/* Show label on desktop, hide on mobile to save space */}
+              <span className={`hidden md:inline text-xs leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                {stepDef.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
 };
 
 export default StepperNav;
