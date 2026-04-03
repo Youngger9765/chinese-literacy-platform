@@ -1157,6 +1157,14 @@ const SKILLS = [
     courseFile:"claude-code-foundations.md",
     courseOutline:["CLAUDE.md 結構","Rules 目錄","覆寫規則","讓 AI 遵守你的規則"]
   },
+  { id:25, tier:5, icon:"\u{1F333}", name:"Worktree 平行開發",
+    desc:"同時做多個 issue 不打架",
+    xp:20, prereqs:[21],
+    project:"用 git worktree 同時做兩個 issue",
+    criteria:"兩個 worktree 各自有 PR，互不干擾",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["什麼是 worktree","為什麼要用","Claude Code + worktree","多 agent 平行"]
+  },
   { id:23, tier:5, icon:"\u{1F4CB}", name:"Skill 撰寫",
     desc:"把重複的工作流程自動化",
     xp:25, prereqs:[22],
@@ -1172,14 +1180,6 @@ const SKILLS = [
     criteria:"hook 在真實場景中擋住一次錯誤（如：禁止在 main 直接編輯）",
     courseFile:"claude-code-foundations.md",
     courseOutline:["PreToolUse vs PostToolUse","Bash hook vs Prompt hook","從踩坑中長出 hook","Postmortem 驅動"]
-  },
-  { id:25, tier:5, icon:"\u{1F333}", name:"Worktree 平行開發",
-    desc:"同時做多個 issue 不打架",
-    xp:20, prereqs:[21],
-    project:"用 git worktree 同時做兩個 issue",
-    criteria:"兩個 worktree 各自有 PR，互不干擾",
-    courseFile:"claude-code-foundations.md",
-    courseOutline:["什麼是 worktree","為什麼要用","Claude Code + worktree","多 agent 平行"]
   },
   { id:26, tier:5, icon:"\u{1F47E}", name:"Agent 撰寫",
     desc:"讓 AI 獨立完成任務",
