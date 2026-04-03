@@ -118,8 +118,9 @@ def _register_user(client: TestClient, suffix: str | None = None) -> dict:
         "name": name,
     })
     assert resp.status_code == 201, resp.text
-    verification_token = resp.json()["verification_token"]
-    client.get(f"/api/auth/verify-email?token={verification_token}")
+    verification_token = resp.json().get("verification_token")
+    if verification_token:
+        client.get(f"/api/auth/verify-email?token={verification_token}")
     login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     assert login_resp.status_code == 200, login_resp.text
     token = login_resp.json()["access_token"]

@@ -145,12 +145,13 @@ def _register_user(client, suffix: str | None = None) -> dict:
         "name": name,
     })
     assert resp.status_code == 201, resp.text
-    verification_token = resp.json()["verification_token"]
+    verification_token = resp.json().get("verification_token")
 
-    resp = client.post("/api/auth/verify-email", json={
-        "token": verification_token,
-    })
-    assert resp.status_code == 200, resp.text
+    if verification_token:
+        resp = client.post("/api/auth/verify-email", json={
+            "token": verification_token,
+        })
+        assert resp.status_code == 200, resp.text
 
     resp = client.post("/api/auth/login", json={
         "email": email,

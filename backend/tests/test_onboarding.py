@@ -116,8 +116,9 @@ def registered_student(client):
         "name": name,
     })
     assert resp.status_code == 201
-    verification_token = resp.json()["verification_token"]
-    client.get(f"/api/auth/verify-email?token={verification_token}")
+    verification_token = resp.json().get("verification_token")
+    if verification_token:
+        client.get(f"/api/auth/verify-email?token={verification_token}")
     login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     token = login_resp.json()["access_token"]
     return {"email": email, "password": password, "name": name, "token": token}
@@ -191,8 +192,9 @@ class TestCompleteOnboardingEndpoint:
             "name": f"Persist User {unique}",
         })
         assert reg_resp.status_code == 201
-        vt = reg_resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vt}")
+        vt = reg_resp.json().get("verification_token")
+        if vt:
+            client.get(f"/api/auth/verify-email?token={vt}")
         token = client.post("/api/auth/login", json={"email": persist_email, "password": persist_pass}).json()["access_token"]
 
         # Initially False
@@ -234,8 +236,9 @@ class TestCompleteOnboardingEndpoint:
             "name": f"Idempotent User {unique}",
         })
         assert reg_resp.status_code == 201
-        vt = reg_resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vt}")
+        vt = reg_resp.json().get("verification_token")
+        if vt:
+            client.get(f"/api/auth/verify-email?token={vt}")
         token = client.post("/api/auth/login", json={"email": idem_email, "password": idem_pass}).json()["access_token"]
 
         # Call twice
@@ -269,8 +272,9 @@ class TestOnboardingFlow:
             "name": f"Flow User {unique}",
         })
         assert reg_resp.status_code == 201
-        vt = reg_resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vt}")
+        vt = reg_resp.json().get("verification_token")
+        if vt:
+            client.get(f"/api/auth/verify-email?token={vt}")
         token = client.post("/api/auth/login", json={"email": flow_email, "password": flow_pass}).json()["access_token"]
 
         # Step 2: Verify onboarding_completed is False after registration

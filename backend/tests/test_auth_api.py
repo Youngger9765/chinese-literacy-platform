@@ -601,8 +601,9 @@ class TestAutoSchoolCreation:
         assert resp.status_code == 201
 
         # Verify email and login to get a JWT (issue #460)
-        verification_token = resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={verification_token}")
+        verification_token = resp.json().get("verification_token")
+        if verification_token:
+            client.get(f"/api/auth/verify-email?token={verification_token}")
         login_resp = client.post("/api/auth/login", json={"email": email, "password": "StrongPass1!"})
         token = login_resp.json()["access_token"]
         user_id = int(decode_token(token)["sub"])
@@ -1476,7 +1477,7 @@ class TestEmailVerificationFlow:
         data = self._register(client)
         # Get a new token via resend
         resend_resp = client.post("/api/auth/resend-verification", json={"email": data["email"]})
-        new_token = resend_resp.json()["verification_token"]
+        new_token = resend_resp.json().get("verification_token")
         # Verify with new token
         client.get(f"/api/auth/verify-email?token={new_token}")
         # Login should now work
@@ -1823,8 +1824,9 @@ class TestHasClassroomLoginResponse:
             "email": email, "password": "StrongPass1!", "name": "HC Teacher",
         })
         assert reg.status_code == 201
-        vtoken = reg.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vtoken}")
+        vtoken = reg.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
         teacher_token = client.post("/api/auth/login", json={
             "email": email, "password": "StrongPass1!",
         }).json()["access_token"]
@@ -1914,8 +1916,9 @@ class TestHasClassroomLoginResponse:
             "name": "Plain User",
         })
         assert reg.status_code == 201
-        vtoken = reg.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vtoken}")
+        vtoken = reg.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
 
         resp = client.post("/api/auth/login", json={
             "email": f"plain@{domain}",

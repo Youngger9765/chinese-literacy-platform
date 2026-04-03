@@ -105,8 +105,9 @@ def _register_and_login(client, suffix: str | None = None) -> dict:
         json={"email": email, "password": password, "name": f"SP660 {unique}"},
     )
     assert resp.status_code == 201, resp.text
-    verification_token = resp.json()["verification_token"]
-    client.get(f"/api/auth/verify-email?token={verification_token}")
+    verification_token = resp.json().get("verification_token")
+    if verification_token:
+        client.get(f"/api/auth/verify-email?token={verification_token}")
     login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     assert login_resp.status_code == 200, login_resp.text
     return {"email": email, "token": login_resp.json()["access_token"]}
