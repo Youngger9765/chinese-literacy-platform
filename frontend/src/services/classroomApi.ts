@@ -265,6 +265,7 @@ export interface CsvUploadResult {
     password: string;
     user_id: number;
   }[];
+  warnings: string[];
 }
 
 export async function uploadCsvStudents(

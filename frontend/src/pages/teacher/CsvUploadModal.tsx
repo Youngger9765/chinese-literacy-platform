@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   downloadCsvTemplate,
   uploadCsvStudents,
@@ -39,6 +39,36 @@ function parseCsvPreview(text: string): ParsedRow[] {
   });
 }
 
+function countCsvDataRows(text: string): number {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  const firstLower = lines[0]?.toLowerCase() ?? '';
+  const hasHeader = firstLower.includes('name') || firstLower.includes('姓名') || firstLower.includes('seat');
+  return hasHeader ? lines.length - 1 : lines.length;
+}
+
+/**
+ * Download the created students' credentials as a CSV file.
+ * This gives teachers a portable record of the one-time passwords.
+ */
+function downloadCredentialsCsv(students: CsvUploadResult['created']): void {
+  const BOM = '\uFEFF';
+  const header = '姓名,座號,帳號,初始密碼\n';
+  const rows = students
+    .map((s) => `${s.name},${s.seat_number},${s.username},${s.password}`)
+    .join('\n');
+  const csvContent = BOM + header + rows;
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'student-credentials.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
   token,
   classroomId,
@@ -53,28 +83,54 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<CsvUploadResult | null>(null);
   const [error, setError] = useState('');
+  const [isDragOver, setIsDragOver] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processFile = useCallback((file: File) => {
     setError('');
     setSelectedFile(file);
 
-    // Parse preview
     const reader = new FileReader();
     reader.onload = (evt) => {
       const text = evt.target?.result as string;
       const preview = parseCsvPreview(text);
-      // Count total data rows
-      const lines = text.split(/\r?\n/).filter((l) => l.trim());
-      const firstLower = lines[0]?.toLowerCase() ?? '';
-      const hasHeader = firstLower.includes('name') || firstLower.includes('姓名') || firstLower.includes('seat');
-      setTotalRows(hasHeader ? lines.length - 1 : lines.length);
+      setTotalRows(countCsvDataRows(text));
       setPreviewRows(preview);
       setPhase('preview');
     };
     reader.readAsText(file, 'utf-8');
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processFile(file);
   };
+
+  // ── Drag-and-drop handlers ────────────────────────────────────────────────
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    processFile(file);
+  };
+
+  // ── Upload ────────────────────────────────────────────────────────────────
 
   const handleUpload = async () => {
     if (!selectedFile) return;
@@ -99,6 +155,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
     setTotalRows(0);
     setUploadResult(null);
     setError('');
+    setIsDragOver(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -151,16 +208,34 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 下載範本 CSV
               </button>
 
-              {/* File input */}
-              <div>
+              {/* Drag-and-drop zone */}
+              <div
+                role="region"
+                aria-label="拖曳 CSV 檔案至此或點擊選擇"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`rounded-xl transition-colors ${
+                  isDragOver
+                    ? 'border-2 border-accent ring-2 ring-accent/30 bg-accent/5'
+                    : 'border-2 border-dashed border-gray-300 hover:border-accent'
+                }`}
+              >
                 <label
                   htmlFor="csv-file-input"
-                  className="block w-full cursor-pointer border-2 border-dashed border-gray-300 hover:border-accent rounded-xl p-6 text-center transition-colors"
+                  className="block w-full cursor-pointer p-6 text-center"
                 >
-                  <svg className="mx-auto w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className={`mx-auto w-8 h-8 mb-2 ${isDragOver ? 'text-accent' : 'text-gray-400'}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
-                  <p className="text-sm font-medium text-gray-700">點擊或拖曳 CSV 檔案至此</p>
+                  <p className="text-sm font-medium text-gray-700">
+                    {isDragOver ? '放開以上傳' : '點擊或拖曳 CSV 檔案至此'}
+                  </p>
                   <p className="text-xs text-gray-400 mt-1">支援 .csv 格式，UTF-8 或 UTF-8 BOM 編碼</p>
                 </label>
                 <input
@@ -241,6 +316,18 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                   <p className={`text-xs mt-0.5 ${uploadResult.skipped_count > 0 ? 'text-amber-600' : 'text-gray-400'}`}>跳過</p>
                 </div>
               </div>
+
+              {/* Warnings */}
+              {uploadResult.warnings && uploadResult.warnings.length > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+                  <p className="text-xs font-medium text-blue-700 mb-1">注意事項：</p>
+                  <ul className="space-y-0.5">
+                    {uploadResult.warnings.map((w, i) => (
+                      <li key={i} className="text-xs text-blue-700">{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* Credentials table */}
               {uploadResult.created.length > 0 && (
@@ -325,6 +412,14 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                   className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   重試
+                </button>
+              )}
+              {uploadResult && uploadResult.created.length > 0 && (
+                <button
+                  onClick={() => downloadCredentialsCsv(uploadResult.created)}
+                  className="px-4 py-2 rounded-lg border border-blue-300 text-blue-700 text-sm font-medium hover:bg-blue-50 transition-colors cursor-pointer"
+                >
+                  下載帳號 CSV
                 </button>
               )}
               <button
