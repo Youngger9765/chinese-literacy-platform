@@ -1,0 +1,365 @@
+{
+  "name": "xiung (Steven)",
+  "github": "stgst",
+  "email": "steven19790906@gmail.com",
+  "startDate": "2026-03-06",
+  "lastReview": "2026-04-03",
+  "skills": {
+    "1": {
+      "level": 3,
+      "history": [
+        {
+          "date": "2026-03-06",
+          "level": 1,
+          "reason": "完成 fork 和初次 push"
+        },
+        {
+          "date": "2026-03-08",
+          "level": 2,
+          "reason": "多次 commit/push 流暢，開始使用 feature branch"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "多個 PR 完整走完 branch → commit → push 流程，操作熟練穩定"
+        }
+      ]
+    },
+    "2": {
+      "level": 2,
+      "history": [
+        {
+          "date": "2026-03-08",
+          "level": 1,
+          "reason": "能讀懂基本 HTML 結構"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "修改 WriteCharacter.tsx 樣式，理解 CSS 結構與 class 組合方式"
+        }
+      ]
+    },
+    "3": {
+      "level": 4,
+      "history": [
+        {
+          "date": "2026-03-06",
+          "level": 1,
+          "reason": "能讀懂基本 JS 語法"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "使用 setTimeout、state 管理等進階概念"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "PR #229 使用 StorageEvent、setTimeout、複雜 state 管理，JS 進階能力已具備"
+        },
+        {
+          "date": "2026-03-20",
+          "level": 4,
+          "reason": "PR #450 精準診斷 StorageEvent 跨 tab 限制（同頁面寫入不觸發）並手動 dispatch synthetic StorageEvent，展示深度瀏覽器事件 API 知識"
+        }
+      ]
+    },
+    "4": {
+      "level": 2,
+      "history": [
+        {
+          "date": "2026-03-06",
+          "level": 1,
+          "reason": "環境建置完成"
+        },
+        {
+          "date": "2026-03-08",
+          "level": 2,
+          "reason": "本地開發環境正常運作，能獨立啟動 frontend/backend"
+        }
+      ]
+    },
+    "5": {
+      "level": 5,
+      "history": [
+        {
+          "date": "2026-03-08",
+          "level": 1,
+          "reason": "能讀懂基本元件結構"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "能讀懂 VocabPractice 的 state 流和條件渲染"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "深度讀懂 VocabPractice、WriteCharacter 等複雜元件，並能提出改進方向"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "多次修改程式碼，能理解程式邏輯。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "能快速定位問題並提出解決方案。"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "6": {
+      "level": 5,
+      "history": [
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "能修改現有元件，理解 props 和 state 互動"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "PR #229 獨立重構 WriteCharacter（+99/-120 行），正確使用 state、event handling，元件設計清晰"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "獨立開發生字練習 UX，完成度高。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "多次獨立完成元件開發，並改善 UX。"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "8": {
+      "level": 2,
+      "history": [
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "PR #229 修改含 Tailwind 樣式的元件，理解 utility-first 概念與 class 組合方式"
+        }
+      ]
+    },
+    "9": {
+      "level": 3,
+      "history": [
+        {
+          "date": "2026-03-08",
+          "level": 1,
+          "reason": "開始使用 feature branch"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "PR 流程完整：feature branch → 多次 commit → PR"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "commit message 品質佳（feat/fix/refactor 正確分類），PR #448 完整走完 branch → PR → merge 流程"
+        }
+      ]
+    },
+    "10": {
+      "level": 5,
+      "history": [
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "能找到 bug 並修復"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "PR #448 精準定位 React hooks 順序 bug（useMemo before conditional return），從重現到修復到驗證流程完整"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "多次修復 bug，能獨立 debug。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "能獨立 debug 並修復多種 bug。"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "11": {
+      "level": 4,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "PR #448 正確使用 useMemo 優化效能、理解 hooks 執行順序規則，但應用範圍仍局限於單一 bug 修復"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "能使用 useMemo 優化效能。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能熟練運用 useMemo, useCallback。"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "12": {
+      "level": 2,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-03",
+          "level": 2,
+          "reason": "PR #912/#913 首次修改後端 Python code：理解 FastAPI route + cache 機制 + rate limiter middleware，獨立定位 cache key mismatch 問題"
+        }
+      ]
+    },
+    "18": {
+      "level": 2,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-03",
+          "level": 2,
+          "reason": "PR #912 追蹤從前端 SentencePractice → API → cache → AI 的完整資料流，理解 cache key format 與前端資料不匹配的根因"
+        }
+      ]
+    },
+    "15": {
+      "level": 4,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能給出有建設性的 code review 意見。"
+        }
+      ]
+    },
+    "16": {
+      "level": 4,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "能獨立完成功能開發。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "獨立完成多個 feature 開發。"
+        }
+      ]
+    },
+    "17": {
+      "level": 4,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "開始有優化程式碼的意識。"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能進行效能優化，例如使用 useMemo。"
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    "PR #912/#913 已展現後端理解力，下一步嘗試獨立新增 API endpoint（不只修改現有）",
+    "PR #913 被 request changes 要求重用 _get_client_key()，養成 DRY 意識（技能 #17 提升）",
+    "嘗試為造句 cache 邏輯撰寫 pytest 測試，驗證 cache hit/miss 路徑（技能 #14）",
+    "TypeScript 型別（技能 #7）仍待入門，嘗試在前端 PR 中加入 interface 標注"
+  ],
+  "summary": "3/28~4/3：首次挑戰後端修改！PR #912 修正造句練習 cache key 對齊 vocabulary（已 merge），PR #913 調整 rate limiter scope（待修改 DRY 問題）。從純前端拓展到後端 cache/rate-limit 邏輯，展現全端發展潛力",
+  "issues": [
+    {
+      "id": "環境建置",
+      "title": "Fork repo + 開發環境設定",
+      "date": "2026-03-06",
+      "type": "setup",
+      "contribution": "完成專案 fork、本地環境建置，獨立啟動 frontend/backend",
+      "skillsLearned": [1, 4],
+      "highlights": ["環境建置順利完成"]
+    },
+    {
+      "id": "#229",
+      "title": "生字練習寫字功能重構",
+      "date": "2026-03-10",
+      "type": "refactor",
+      "contribution": "重構 WriteCharacter 元件（+99/-120 行），改善生字練習的寫字 UX 體驗",
+      "skillsLearned": [2, 3, 6, 8, 9],
+      "highlights": ["大規模重構（+99/-120 行）", "正確使用 state、event handling", "元件設計清晰", "PR 流程完整"],
+      "linesChanged": "+99/-120"
+    },
+    {
+      "id": "#229 續",
+      "title": "生字練習 UX 持續優化",
+      "date": "2026-03-13",
+      "type": "feature",
+      "contribution": "使用 StorageEvent、setTimeout 等進階技巧持續優化生字練習體驗",
+      "skillsLearned": [3, 6, 16],
+      "highlights": ["使用 StorageEvent 跨 tab 同步", "複雜 state 管理", "JS 進階能力已具備"]
+    },
+    {
+      "id": "#448",
+      "title": "修復 React Hooks 順序 bug",
+      "date": "2026-03-13",
+      "type": "bugfix",
+      "contribution": "精準定位並修復 useMemo 在 conditional return 之前的 React Hooks 順序 bug",
+      "skillsLearned": [10, 11, 17],
+      "highlights": ["精準定位 hooks 順序問題", "正確使用 useMemo 優化效能", "理解 hooks 執行規則", "從重現到修復到驗證流程完整"],
+      "linesChanged": "+25/-15"
+    },
+    {
+      "id": "#450",
+      "title": "修復字體大小設定需重新整理頁面才生效的 bug（Fixes #262）",
+      "date": "2026-03-20",
+      "type": "bugfix",
+      "contribution": "診斷 useFontSize() hook 監聽 window.storage 事件的跨 tab 限制，透過手動 dispatch synthetic StorageEvent 解決同頁面即時更新問題",
+      "skillsLearned": [3, 10],
+      "highlights": [
+        "精準指出 StorageEvent 只在其他 tab 寫入時才觸發的瀏覽器限制",
+        "使用 new StorageEvent() + window.dispatchEvent() 手動觸發同頁面監聽",
+        "只修改 FontSizeControl.tsx 一個檔案，精準不亂改",
+        "根本原因分析清晰完整"
+      ],
+      "linesChanged": "+5/-1"
+    },
+    {
+      "id": "#912",
+      "title": "造句練習改用 vocabulary 生字，修正 cache 命中率（PR #912）",
+      "date": "2026-04-02",
+      "type": "bugfix",
+      "contribution": "發現前端傳的 chars 與後端 cache key 不匹配導致 1490 筆 cache 從未命中，改用 story.vocabulary 對齊 cache key format",
+      "skillsLearned": [10, 12],
+      "highlights": ["首次後端相關修改", "理解 cache key 設計", "效能優化意識（減少 AI token 消耗）"],
+      "linesChanged": "+20/-5"
+    },
+    {
+      "id": "#913",
+      "title": "造句例句 rate limit 改為僅限 cache miss（PR #913）",
+      "date": "2026-04-02",
+      "type": "bugfix",
+      "contribution": "調整 rate limiter 只在 cache miss（實際呼叫 AI）時套用，避免讀取 cache 時被不必要的 rate limit 擋住",
+      "skillsLearned": [10],
+      "highlights": ["理解 rate limiter 設計", "後端 middleware 修改", "收到 DRY 建議待改善"],
+      "linesChanged": "+15/-5"
+    }
+  ]
+}

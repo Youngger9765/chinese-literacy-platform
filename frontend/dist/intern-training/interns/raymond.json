@@ -1,0 +1,399 @@
+{
+  "name": "Raymond",
+  "github": "if-else-master",
+  "email": "78069313+if-else-master@users.noreply.github.com",
+  "startDate": "2026-03-02",
+  "lastReview": "2026-04-03",
+  "skills": {
+    "1": {
+      "level": 3,
+      "history": [
+        {
+          "date": "2026-03-02",
+          "level": 1,
+          "reason": "fork 完成、會 push，但 commit message 中英混用、格式不一致"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "多次 commit/push 順暢，workflow 已建立，commit 品質仍需改善"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "多次 commit，熟悉 Git 操作"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "2": {
+      "level": 2,
+      "history": [
+        {
+          "date": "2026-03-05",
+          "level": 1,
+          "reason": "PR #224 修改 UI/UX 相關，理解基本 HTML 結構，但改動範圍小"
+        },
+        {
+          "date": "2026-03-20",
+          "level": 2,
+          "reason": "PR #575 改善教師留言按鈕 UI，將 emoji 改為文字按鈕，理解可讀性與使用者體驗，對 HTML 元素的語意使用更有意識"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "3": {
+      "level": 3,
+      "history": [
+        {
+          "date": "2026-03-05",
+          "level": 1,
+          "reason": "能讀懂基本 JS，了解事件處理概念"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "能處理 isComposing event 和 async 語音功能，JS 基礎已過關"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "新增語音輸入功能"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "4": {
+      "level": 2,
+      "history": [
+        {
+          "date": "2026-03-02",
+          "level": 1,
+          "reason": "環境建置完成但遇到本地 DB 連線問題"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "PR #314 處理本地 DB 連線問題，本地開發環境已跑通"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "5": {
+      "level": 5,
+      "history": [
+        {
+          "date": "2026-03-05",
+          "level": 1,
+          "reason": "能讀懂簡單元件結構"
+        },
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "能讀懂 ComprehensionChat.tsx 並精準定位 bug #216 的問題所在"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "能讀懂並修改程式碼"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "多次修改程式碼，熟悉專案"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "多次修改程式碼，且能理解程式碼"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "6": {
+      "level": 5,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "ComprehensionChat.tsx 修改"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "獨立開發語音輸入元件"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能獨立開發 React 元件，品質合格"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "獨立完成語音輸入/輸出功能"
+        }
+      ]
+    },
+    "7": {
+      "level": 5,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "ComprehensionChat.tsx 使用"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "修改程式碼時有使用 TypeScript"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能獨立使用 TypeScript 開發"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "獨立完成語音輸入/輸出功能"
+        }
+      ]
+    },
+    "8": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "ComprehensionChat.tsx 使用"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "在元件中使用 Tailwind CSS"
+        }
+      ]
+    },
+    "9": {
+      "level": 2,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-20",
+          "level": 1,
+          "reason": "PR #573 和 PR #575 皆使用 feature branch + PR 流程，commit message 格式遵循 conventional commits（fix: 前綴），工作流程完整"
+        },
+        {
+          "date": "2026-04-03",
+          "level": 2,
+          "reason": "6 個 PR merged，獨立處理 rebase 衝突（PR #900），PR #905 在 rebase 誤刪後獨立重建修復"
+        }
+      ]
+    },
+    "10": {
+      "level": 5,
+      "history": [
+        {
+          "date": "2026-03-10",
+          "level": 2,
+          "reason": "修復 IME composition bug（#216），完整執行重現 → 定位 → 修復 → 驗證流程"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "多次修復 bug"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "多次修復 Bug，能獨立 Debug"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "多次修復 Bug，且有重構意識"
+        }
+      ],
+      "maxLevel": 5
+    },
+    "12": {
+      "level": 5,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 2,
+          "reason": "新增語音輸入功能"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 3,
+          "reason": "成功串接語音輸入 API"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能獨立完成 API 串接功能"
+        },
+        {
+          "date": "2026-03-13",
+          "level": 5,
+          "reason": "獨立完成語音輸入/輸出功能"
+        }
+      ]
+    },
+    "14": {
+      "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-20",
+          "level": 1,
+          "reason": "PR #573 新增 backend/tests/test_assignments.py，第一次主動撰寫測試，覆蓋作業發派的 API 行為驗證"
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    "PR 數量和品質都在提升，下一步挑戰 rebase conflict resolution 的獨立處理能力（PR #900 有練到）",
+    "測試（#14）仍在 level 1，建議為下一個 bug fix 加上 regression test",
+    "嘗試挑戰後端 API 修改（不只前端），像啟翔的 PR #912/#913 那樣處理 cache/rate-limit 邏輯",
+    "元件設計模式（#13）— PR #644 合併三個頁面已展現整合能力，下一步抽出共用 hook"
+  ],
+  "summary": "3/28~4/3 高產出期：6 個 PR merged，涵蓋 UI 整合（#644 合併三頁）、Loading skeleton（#662）、作業進度條（#898）、標記欄位（#899）、按鈕修正（#905）、家長頁隱藏（#805）。部件拆解（#900）也已 approved 等 merge。展現獨立處理 rebase 衝突的能力",
+  "issues": [
+    {
+      "id": "環境建置",
+      "title": "Fork repo + 開發環境設定",
+      "date": "2026-03-02",
+      "type": "setup",
+      "contribution": "完成專案 fork、本地環境建置",
+      "skillsLearned": [1, 4],
+      "highlights": ["順利完成 fork 和 push"]
+    },
+    {
+      "id": "#224",
+      "title": "閱讀理解頁面 UI 修改",
+      "date": "2026-03-05",
+      "type": "feature",
+      "contribution": "修改閱讀理解頁面 UI/UX，改善互動體驗",
+      "skillsLearned": [2, 3, 5],
+      "highlights": ["第一個 PR", "能讀懂基本 HTML/JS"]
+    },
+    {
+      "id": "#216",
+      "title": "修復 IME 輸入法 composition bug",
+      "date": "2026-03-10",
+      "type": "bugfix",
+      "contribution": "修復中文輸入法在聊天介面的 composition 事件處理問題，影響所有中文使用者",
+      "skillsLearned": [3, 5, 10],
+      "highlights": ["完整執行 重現→定位→修復→驗證 流程", "處理 isComposing event 和 async 語音功能", "Bug 修復流程扎實"],
+      "linesChanged": "+32/-8"
+    },
+    {
+      "id": "#314",
+      "title": "本地 DB 連線問題修復",
+      "date": "2026-03-10",
+      "type": "bugfix",
+      "contribution": "修復本地開發環境的資料庫連線問題，讓開發流程更順暢",
+      "skillsLearned": [4],
+      "highlights": ["本地開發環境完全跑通"]
+    },
+    {
+      "id": "語音功能",
+      "title": "語音輸入/輸出功能開發",
+      "date": "2026-03-13",
+      "type": "feature",
+      "contribution": "為閱讀理解聊天介面新增語音輸入和語音輸出功能，大幅提升無障礙使用體驗",
+      "skillsLearned": [6, 7, 8, 12],
+      "highlights": ["獨立完成完整功能", "成功串接語音 API", "React 元件設計清晰", "TypeScript 使用正確"],
+      "linesChanged": "+180/-20"
+    },
+    {
+      "id": "#568",
+      "title": "修復教師發派作業功能（PR #573）",
+      "date": "2026-03-20",
+      "type": "bugfix",
+      "contribution": "定位並修復作業 API 的 422 錯誤：後端 schema 仍要求 classroom_id 在 body，但 API 已改為 path parameter 傳遞，導致教師無法發派作業。修改 assignments.py、assignment.py schema，並補寫 test_assignments.py 驗證修正",
+      "skillsLearned": [9, 10, 12, 14],
+      "highlights": ["跨越 frontend + backend + 測試三個層面", "第一次主動撰寫後端測試", "理解 API schema 設計與 path parameter 差異", "conventional commit 格式正確"],
+      "linesChanged": "+多行/-多行"
+    },
+    {
+      "id": "#644",
+      "title": "合併「我的作業」「學習進度」「對話紀錄」（PR #644）",
+      "date": "2026-03-28",
+      "type": "feature",
+      "contribution": "將三個獨立頁面整合為單一作業頁面，簡化學生端導覽",
+      "skillsLearned": [5, 6],
+      "highlights": ["大規模 UI 整合", "獨立完成頁面重構"]
+    },
+    {
+      "id": "#662",
+      "title": "Loading skeleton（PR #662）",
+      "date": "2026-03-28",
+      "type": "feature",
+      "contribution": "為載入狀態新增 skeleton 骨架畫面，提升 perceived performance",
+      "skillsLearned": [6, 8],
+      "highlights": ["UX 改善", "Tailwind 動畫運用"]
+    },
+    {
+      "id": "#898",
+      "title": "作業進度條與學習進度顯示（PR #898）",
+      "date": "2026-04-01",
+      "type": "feature",
+      "contribution": "修復作業進度條和對話紀錄的學習進度顯示",
+      "skillsLearned": [6, 12],
+      "highlights": ["跨元件資料流理解"]
+    },
+    {
+      "id": "#899",
+      "title": "標記課文紀錄欄位（PR #899）",
+      "date": "2026-04-01",
+      "type": "feature",
+      "contribution": "新增課文標記紀錄欄位，支援學生標記重點",
+      "skillsLearned": [6],
+      "highlights": ["功能擴充"]
+    },
+    {
+      "id": "#905",
+      "title": "閱讀標記按鈕修正（PR #905）",
+      "date": "2026-04-02",
+      "type": "bugfix",
+      "contribution": "修復浮動工具列座標計算，解決閱讀標記按鈕位置偏移問題",
+      "skillsLearned": [3, 10],
+      "highlights": ["CSS 座標計算", "獨立排查 rebase 誤刪後重建修復"]
+    },
+    {
+      "id": "#805",
+      "title": "隱藏家長頁面（PR #805）",
+      "date": "2026-03-28",
+      "type": "feature",
+      "contribution": "依產品決策暫時隱藏家長功能頁面",
+      "skillsLearned": [5],
+      "highlights": ["產品需求理解"]
+    },
+    {
+      "id": "#900",
+      "title": "生字練習部件拆解修正（PR #900）",
+      "date": "2026-04-03",
+      "type": "bugfix",
+      "contribution": "修正部件拆解顯示：meaning fallback + TypeScript 型別修正，獨立處理 rebase 衝突",
+      "skillsLearned": [7, 10],
+      "highlights": ["TypeScript 使用", "獨立 rebase 解衝突", "意義 fallback 邏輯設計"]
+    },
+    {
+      "id": "#574",
+      "title": "提升留言按鈕 UI 可讀性（PR #575）",
+      "date": "2026-03-20",
+      "type": "bugfix",
+      "contribution": "主動發現教師留言功能只有 emoji，使用者不容易識別，改為文字按鈕提升可讀性",
+      "skillsLearned": [2, 8],
+      "highlights": ["主動發現 UX 問題並提 issue 修復", "改善按鈕語意與可讀性"]
+    }
+  ]
+}

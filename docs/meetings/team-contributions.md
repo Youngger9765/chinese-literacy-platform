@@ -24,7 +24,7 @@
 | 靖杭 | ✅ | PR #805 家長頁 | 隱藏家長頁面 |
 | 靖杭 | 🔧 | PR #900 部件拆解 | 生字練習部件拆解修正，已 rebase 解衝突 |
 | 靖杭 | 🔧 | PR #652 UI 優化 | 課文理解 UI 優化（WIP） |
-| 啟翔 | 🔧 | PR #912 造句 cache | 造句練習改用 vocabulary 生字，修正 cache 命中率 |
+| 啟翔 | ✅ | PR #912 造句 cache | 造句練習改用 vocabulary 生字，修正 cache 命中率（已 merge） |
 | 啟翔 | 🔧 | PR #913 rate limit | 造句例句 rate limit 改為僅限 cache miss |
 
 ---
