@@ -56,11 +56,6 @@ const RelatedCharCard: React.FC<RelatedCharCardProps> = ({ item, isSelected, onC
     aria-pressed={isSelected}
   >
     <span className="text-2xl font-bold text-gray-800 leading-none">{item.char}</span>
-    {isSelected && (
-      <span className="text-[10px] text-indigo-600 text-center leading-tight max-w-[5rem]">
-        {item.meaning}
-      </span>
-    )}
   </button>
 );
 
@@ -110,6 +105,12 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
     ? getRelatedChars(displayRadical, char)
     : [];
   const displayRadicalInfo = displayRadical ? getRadicalInfo(displayRadical) : null;
+
+  const getRelatedDisplayMeaning = (item: RelatedChar): string => {
+    if (item.meaning.trim().length > 0) return item.meaning;
+    if (!displayRadicalInfo) return '此字含有相同部件';
+    return `此字含「${displayRadical}」，與「${char}」同屬${displayRadicalInfo.role}`;
+  };
 
   const handleRelatedClick = (item: RelatedChar) => {
     setSelectedRelated(prev => (prev?.char === item.char ? null : item));
@@ -207,7 +208,7 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
               <div className="mt-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 text-sm text-gray-700">
                 <span className="font-bold text-gray-900">{selectedRelated.char}</span>
                 {' — '}
-                {selectedRelated.meaning}
+                {getRelatedDisplayMeaning(selectedRelated)}
               </div>
             )}
           </div>
