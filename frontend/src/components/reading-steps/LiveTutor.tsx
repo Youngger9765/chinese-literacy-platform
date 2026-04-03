@@ -16,6 +16,7 @@ import {
   type LocalEvalResult,
 } from '../../utils/localEval';
 import { cancelTts } from '../../services/ttsApi';
+import { saveReadingHistory } from '../../services/readingHistoryApi';
 import {
   TIER1_POOL,
   TIER2_POOL,
@@ -429,8 +430,30 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /*  Core: evaluate the student's reading and respond                */
   /* ================================================================ */
 
+  /* ---- Helper: save paragraph reading to history (#909) ---- */
+  const saveParagraphReading = useCallback((lineIdx: number, result: LineResult) => {
+    if (!token) return;
+    const durationSec = result.durationMs / 1000;
+    if (durationSec <= 0) return;
+    saveReadingHistory(
+      {
+        lesson_id: String(story.id),
+        paragraph_index: lineIdx,
+        reading_type: 'paragraph',
+        cpm: result.cpm,
+        accuracy: Math.round(result.matchRate * 100),
+        duration_seconds: durationSec,
+      },
+      token,
+    ).catch((err) => console.error('Failed to save paragraph reading history:', err));
+  }, [token, story.id]);
+
   /* ---- Helper: advance or finish after a successful paragraph ---- */
   const advanceParagraph = useCallback((lineIdx: number, allLineResults: LineResult[]) => {
+    // Save per-paragraph reading to history (#909)
+    const currentResult = allLineResults.find(r => r.lineIndex === lineIdx);
+    if (currentResult) saveParagraphReading(lineIdx, currentResult);
+
     const isLastLine = lineIdx >= story.content.length - 1;
     if (!isLastLine) {
       if (isAdvancingRef.current) return;
@@ -474,7 +497,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         });
       }, 2000);
     }
-  }, [story, onFinish, onParagraphComplete]);
+  }, [story, onFinish, onParagraphComplete, saveParagraphReading]);
 
   /* ---- Hybrid evaluation: local first, Gemini only on FAIL ---- */
   const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {

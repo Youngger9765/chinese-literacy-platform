@@ -16,3 +16,4 @@ from .gamification import StudentXPLog, StudentBadge, StudentStreak  # noqa: F40
 from .story_tag import StoryTag  # noqa: F401
 from .semester import Semester  # noqa: F401
 from .ai_usage import AIUsageLog  # noqa: F401
+from .reading_history import ReadingHistory, ReadingTarget  # noqa: F401
