@@ -8,6 +8,27 @@
 
 ---
 
+## 3/28 ~ 4/3
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | UI 改善 6 項 | 字體分層/font-weight/按鈕/卡片/留白/模組色彩（52+ files，staging 已部署） |
+| Young | ✅ | 數位讀寫網分析 | `docs/research/eliteracy-uiux-design-analysis.md` 完整設計分析 |
+| Young | ✅ | API tests | 38 cases covering all 10 AI routes（`db8e046`） |
+| Young | ✅ | API source field | #836 sentence example API 加 source 欄位（PR #902） |
+| 靖杭 | ✅ | PR #905 按鈕修正 | 閱讀標記浮動工具列座標計算修復 |
+| 靖杭 | ✅ | PR #899 標記欄位 | 標記課文紀錄欄位 |
+| 靖杭 | ✅ | PR #898 進度條 | 作業進度條與對話紀錄學習進度顯示 |
+| 靖杭 | ✅ | PR #662 skeleton | Loading skeleton |
+| 靖杭 | ✅ | PR #644 整合 | 合併「我的作業」「學習進度」「對話紀錄」 |
+| 靖杭 | ✅ | PR #805 家長頁 | 隱藏家長頁面 |
+| 靖杭 | 🔧 | PR #900 部件拆解 | 生字練習部件拆解修正，已 rebase 解衝突 |
+| 靖杭 | 🔧 | PR #652 UI 優化 | 課文理解 UI 優化（WIP） |
+| 啟翔 | 🔧 | PR #912 造句 cache | 造句練習改用 vocabulary 生字，修正 cache 命中率 |
+| 啟翔 | 🔧 | PR #913 rate limit | 造句例句 rate limit 改為僅限 cache miss |
+
+---
+
 ## 3/14 ~ 3/20
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
