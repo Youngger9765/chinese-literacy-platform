@@ -38,6 +38,10 @@ vocabulary:
     年少時就擁有超越一般人的資質'
   type: 多義字
 vocabulary_count: 3
+vocab_bank:
+  A: 少
+  B: 少
+  C: 少
 fill_in_blank:
 - sentence: 經過長途跋涉，我們決定在路邊的咖啡館（　　）作停留，補充體力。
   answer: A

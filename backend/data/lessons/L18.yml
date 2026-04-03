@@ -73,6 +73,14 @@ vocabulary:
 - word: 真摯
   definition: 真實且誠懇。
 vocabulary_count: 10
+vocab_bank:
+  A: 爭強鬥勝
+  B: 招親
+  C: 耳目一新
+  D: 粉墨登場
+  E: 尾隨而至
+  F: 青睞
+  G: 雄赳赳，氣昂昂
 fill_in_blank:
 - sentence: 今年校慶我們班要表演舞臺劇，到時全班都會(　　)。
   answer: D

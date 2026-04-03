@@ -45,6 +45,9 @@ vocabulary:
   definition: 滿
   type: inline
 vocabulary_count: 2
+vocab_bank:
+  A: 盈
+  B: 盈
 fill_in_blank:
 - sentence: 運動會結束後，選手們的臉上都（　　）著勝利的喜悅。
   answer: A

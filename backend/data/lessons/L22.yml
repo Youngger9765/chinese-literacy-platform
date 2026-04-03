@@ -69,6 +69,23 @@ vocabulary:
 - word: 棲地
   definition: 居住停留的地方。
 vocabulary_count: 16
+vocab_bank:
+  A: 奠定
+  B: 注目
+  C: 永續
+  D: 瀕臨
+  E: 瀕危
+  F: 樹冠
+  G: 趨近
+  H: 拗口
+  I: 汲取
+  J: 倚重
+  K: 變遷
+  L: 杳無人煙
+  M: 佼佼者
+  N: 僥倖
+  O: 悄然無息
+  P: 棲地
 fill_in_blank:
 - sentence: 努力學習是為未來成功（　　）良好的基礎。
   answer: A

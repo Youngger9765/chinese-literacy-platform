@@ -48,6 +48,13 @@ vocabulary:
 - word: 精湛
   definition: 技術或技能非常高超。
 vocabulary_count: 7
+vocab_bank:
+  A: 不外乎
+  B: 汗流浹背
+  C: 僧多粥少
+  D: 達標
+  F: 想方設法
+  G: 精湛
 fill_in_blank:
 - sentence: 小明每次考試成績不理想的原因，（　　）是上課不專心或回家沒複習。
   answer: A

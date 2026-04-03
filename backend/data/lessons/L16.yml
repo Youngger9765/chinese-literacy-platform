@@ -80,6 +80,18 @@ vocabulary:
 - word: 中計
   definition: 落入圈套，遭人暗算。
 vocabulary_count: 11
+vocab_bank:
+  A: 異口同聲
+  B: 抗拒
+  C: 脫口而出
+  D: 宛如
+  E: 箭步
+  F: 糾正
+  G: 政見
+  H: 大展身手
+  I: 呵護
+  J: 莽撞
+  K: 中計
 fill_in_blank:
 - sentence: 當老師問誰想去郊遊時，全班同學都（　　）地舉手贊成。
   answer: A

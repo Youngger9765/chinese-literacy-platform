@@ -44,6 +44,18 @@ vocabulary:
 - word: 指鹿為馬
   definition: 用來比喻人故意顛倒是非、混淆視聽。
 vocabulary_count: 11
+vocab_bank:
+  A: 信以為真
+  B: 相提並論
+  C: 迷魂陣
+  D: 尼古丁
+  E: 混淆
+  F: 黏稠
+  G: 查緝
+  H: 長期提款機
+  I: 似是而非
+  J: 行銷手法
+  K: 指鹿為馬
 fill_in_blank:
 - sentence: 小明聽到網路上的謠言，沒有查證就（　　），結果鬧出了笑話。
   answer: A

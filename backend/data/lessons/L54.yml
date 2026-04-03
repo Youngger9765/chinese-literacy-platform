@@ -75,6 +75,13 @@ vocabulary:
 - word: 動作組群
   definition: 競技體操D分評分標準之一，根據不同類型的動作組合給予額外加分。
 vocabulary_count: 8
+vocab_bank:
+  D分: D分
+  E分: E分
+  下法: 下法
+  動作組群: 動作組群
+  競技體操: 競技體操
+  鞍馬: 鞍馬
 fill_in_blank:
 - sentence: 兼具力與美表現的（　　），是奧運最吸睛的運動項目之一。
   answer: 競技體操

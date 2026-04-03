@@ -65,6 +65,17 @@ vocabulary:
 - word: 植被
   definition: 覆蓋地面的植物。
 vocabulary_count: 10
+vocab_bank:
+  A: 殘骸
+  B: 危機四伏
+  C: 蚊蚋
+  D: 襁褓
+  E: 骨瘦如柴
+  F: 渺茫
+  G: 倖存
+  H: 罹難
+  I: 充飢
+  J: 植被
 fill_in_blank:
 - sentence: 地震過後，街道上只剩下許多房屋的（　　），景象十分淒慘。
   answer: A

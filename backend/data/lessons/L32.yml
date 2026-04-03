@@ -79,6 +79,17 @@ vocabulary:
 - word: 遲滯
   definition: 緩慢、停止不動。
 vocabulary_count: 10
+vocab_bank:
+  A: 抽搐
+  B: 痙攣
+  C: 神祇
+  D: 離群索居
+  E: 魁梧
+  F: 奪門而出
+  G: 禁忌
+  H: 哀鳴
+  I: 隻手遮天
+  J: 遲滯
 fill_in_blank:
 - sentence: 比賽結束後，他因為運動過度，小腿肌肉開始（　　）起來。
   answer: A

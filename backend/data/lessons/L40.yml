@@ -66,6 +66,20 @@ vocabulary:
 - word: 眼花撩亂
   definition: 形容看到的東西眾多而且雜亂。
 vocabulary_count: 13
+vocab_bank:
+  A: 博取
+  B: 誘餌
+  C: 閱聽大眾
+  D: 語不驚人死不休
+  E: 帶風向
+  F: 聳動
+  G: 辛辣
+  H: 氾濫
+  I: 文不對題
+  J: 推播
+  K: 核對
+  L: 目不暇給
+  M: 眼花撩亂
 fill_in_blank:
 - sentence: 為了在比賽中脫穎而出，他努力練習，希望能（　　）評審的青睞。
   answer: A

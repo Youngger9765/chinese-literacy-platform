@@ -74,6 +74,22 @@ vocabulary:
   definition: 本文是指吸收或消耗的意思。
   note: 讀者可以透過文章中人物所說的話和所做的事形成「讀者觀點」，但要注意觀點和支持的理由的連結是否合適，不能太過主觀、強辯。
 vocabulary_count: 15
+vocab_bank:
+  A: 魔障
+  B: 奠定
+  C: 增廣見聞
+  D: 聞名於世
+  E: 審視
+  F: 輪替
+  G: 海拔
+  H: 綿延
+  I: 佼佼者
+  J: 屢屢
+  K: 備受爭議
+  L: 瞠目結舌
+  M: 壓線
+  N: 迥異
+  O: 吞噬
 fill_in_blank:
 - sentence: 學習數學的挫折感，一度成為他前進的（　　），讓他想放棄。
   answer: A

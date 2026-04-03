@@ -45,6 +45,10 @@ vocabulary:
     不能符合先前的傳聞'
   type: 多義字
 vocabulary_count: 3
+vocab_bank:
+  A: 聞
+  B: 聞
+  C: 聞
 fill_in_blank:
 - sentence: 昨天老師說下週要考試，這個消息你（　　）了嗎？
   answer: A

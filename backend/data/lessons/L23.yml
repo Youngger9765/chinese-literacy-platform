@@ -48,6 +48,17 @@ vocabulary:
 - word: 流竄
   definition: 指惡劣的昆蟲、疾病或勢力四處流動或擴散。
 vocabulary_count: 10
+vocab_bank:
+  A: 解剖
+  B: 典藏
+  C: 擱淺
+  D: 蛻變
+  E: 削瘦
+  F: 珍稀
+  G: 束縛
+  H: 瀕危物種
+  I: 燃燒殆盡
+  J: 流竄
 fill_in_blank:
 - sentence: 科學家們小心翼翼地對那隻實驗動物進行了（　　），以了解其內臟構造。
   answer: A

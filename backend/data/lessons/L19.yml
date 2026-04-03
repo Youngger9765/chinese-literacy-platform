@@ -55,6 +55,16 @@ vocabulary:
 - word: 生理時鐘
   definition: 人體內的週期性節律功能。會讓人到了固定時間點，自動化地產生特定的生理反應。例如，時間到了，就會想睡；時間到了，就會肚子餓。
 vocabulary_count: 9
+vocab_bank:
+  A: 去蕪存菁
+  B: 流連忘返
+  C: 得不償失
+  D: 惡性循環
+  E: 小酌
+  F: 懸梁刺股
+  G: 睡眼惺忪
+  H: 新陳代謝
+  I: 生理時鐘
 fill_in_blank:
 - sentence: 當我們學習時，應該學會從眾多資訊中（　　），只吸收真正有用的知識。
   answer: A

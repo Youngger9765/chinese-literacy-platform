@@ -47,6 +47,15 @@ vocabulary:
 - word: 逆勢推升
   definition: 在不利或普遍下降的環境中，反而向上提升。
 vocabulary_count: 8
+vocab_bank:
+  A: 閱讀力
+  B: 如魚得水
+  C: 挫敗
+  D: 終身學習
+  E: 關鍵
+  F: 評估
+  G: 趨勢
+  H: 逆勢推升
 fill_in_blank:
 - sentence: 閱讀能力越強，越有能力處理複雜的資訊，各領域的學習都會（　　）。
   answer: B

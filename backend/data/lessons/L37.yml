@@ -81,6 +81,17 @@ vocabulary:
 - word: 兵貴神速
   definition: 做事時，速度非常重要。
 vocabulary_count: 10
+vocab_bank:
+  A: 赫然
+  B: 惺忪
+  C: 令人髮指
+  D: 逕自
+  E: 孤苦伶仃
+  F: 環顧
+  G: 一不做二不休
+  H: 環顧
+  I: 移駕
+  J: 兵貴神速
 fill_in_blank:
 - sentence: 走進教室，黑板上寫著的緊急通知（　　）映入眼簾。
   answer: A

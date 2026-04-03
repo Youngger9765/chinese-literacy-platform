@@ -82,6 +82,17 @@ vocabulary:
 - word: 一片譁然
   definition: 發生一件事情，令大家很驚訝，引起討論。一般用於形容消息（多指不好的消息）傳開，引起轟動。
 vocabulary_count: 10
+vocab_bank:
+  A: 舉證
+  B: 有所忌憚
+  C: 標識
+  D: 鏈結
+  E: 自主權
+  F: 凝視
+  G: 茶餘飯後
+  H: 冒犯
+  I: 陰霾
+  J: 一片譁然
 fill_in_blank:
 - sentence: 法官要求律師必須（　　）自己的論點，才能讓陪審團信服。
   answer: A
