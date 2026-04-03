@@ -17,6 +17,7 @@ from ...schemas.teacher_instruction import (
     InstructionResponse,
     InstructionUpdate,
 )
+from ...services.input_sanitizer import sanitize_ai_input
 from ..classrooms import _get_classroom_or_404, _require_owner_or_admin
 
 router = APIRouter(tags=["teacher"])
@@ -61,12 +62,15 @@ def create_student_instruction(
             detail="Student not found in this classroom",
         )
 
+    # Sanitize instruction content — this text is injected into AI prompts
+    safe_content, _ = sanitize_ai_input(payload.content, user_id=str(current_user.id))
+
     instruction = TeacherInstruction(
         teacher_id=current_user.id,
         student_id=student_id,
         classroom_id=payload.classroom_id,
         instruction_type=payload.instruction_type,
-        content=payload.content,
+        content=safe_content,
     )
     db.add(instruction)
     db.commit()
@@ -195,6 +199,11 @@ def update_instruction(
         )
 
     update_data = payload.model_dump(exclude_unset=True)
+    # Sanitize content field — injected into AI prompts
+    if "content" in update_data and update_data["content"]:
+        update_data["content"], _ = sanitize_ai_input(
+            update_data["content"], user_id=str(current_user.id)
+        )
     for field, value in update_data.items():
         setattr(instruction, field, value)
 

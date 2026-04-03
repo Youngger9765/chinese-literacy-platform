@@ -29,6 +29,7 @@ from ..schemas.organization import (
     SchoolStatItem,
 )
 from ..schemas.school import SchoolResponse
+from ..services.input_sanitizer import sanitize_ai_input
 
 router = APIRouter(tags=["organizations"])
 logger = logging.getLogger(__name__)
@@ -87,6 +88,15 @@ def create_organization(
     db: Session = Depends(get_db),
 ):
     """Create a new organization."""
+    # Sanitize admin-provided text fields
+    safe_name, _ = sanitize_ai_input(payload.name, user_id=str(current_user.id))
+    safe_display_name = payload.display_name
+    if safe_display_name:
+        safe_display_name, _ = sanitize_ai_input(safe_display_name, user_id=str(current_user.id))
+    safe_description = payload.description
+    if safe_description:
+        safe_description, _ = sanitize_ai_input(safe_description, user_id=str(current_user.id))
+
     if payload.tax_id:
         existing = db.query(Organization).filter(
             Organization.tax_id == payload.tax_id,
@@ -95,10 +105,10 @@ def create_organization(
         if existing:
             raise HTTPException(status_code=409, detail="統一編號已被其他機構使用")
     org = Organization(
-        name=payload.name,
-        display_name=payload.display_name,
+        name=safe_name,
+        display_name=safe_display_name,
         teacher_limit=payload.teacher_limit,
-        description=payload.description,
+        description=safe_description,
         tax_id=payload.tax_id,
         contact_email=payload.contact_email,
         contact_phone=payload.contact_phone,
@@ -211,6 +221,12 @@ def update_organization(
             raise HTTPException(status_code=409, detail="統一編號已被其他機構使用")
 
     update_data = payload.model_dump(exclude_unset=True)
+    # Sanitize text fields in update payload
+    for text_field in ("name", "display_name", "description", "address"):
+        if text_field in update_data and update_data[text_field]:
+            update_data[text_field], _ = sanitize_ai_input(
+                update_data[text_field], user_id=str(current_user.id)
+            )
     for field, value in update_data.items():
         setattr(org, field, value)
 

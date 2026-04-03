@@ -18,6 +18,7 @@ from ..schemas.school import (
     SchoolUpdateRequest,
 )
 from ..schemas.user_admin import SchoolMemberResponse
+from ..services.input_sanitizer import sanitize_ai_input
 
 router = APIRouter(tags=["schools"])
 logger = logging.getLogger(__name__)
@@ -87,9 +88,12 @@ def create_school(
         if org is None:
             raise HTTPException(status_code=404, detail="Organization not found")
 
+    # Sanitize admin-provided text fields
+    safe_name, _ = sanitize_ai_input(payload.name, user_id=str(current_user.id))
+
     join_code = _generate_school_join_code(db)
     school = School(
-        name=payload.name,
+        name=safe_name,
         organization_id=payload.organization_id,
         address=payload.address,
         phone=payload.phone,
@@ -153,6 +157,12 @@ def update_school(
         raise HTTPException(status_code=403, detail="Not authorized for this school")
 
     update_data = payload.model_dump(exclude_unset=True)
+    # Sanitize text fields in update payload
+    for text_field in ("name", "address"):
+        if text_field in update_data and update_data[text_field]:
+            update_data[text_field], _ = sanitize_ai_input(
+                update_data[text_field], user_id=str(current_user.id)
+            )
     for field, value in update_data.items():
         setattr(school, field, value)
 

@@ -19,6 +19,7 @@ from ...schemas.classroom import (
     StudentEnrolledClassroom,
     StudentEnrolledClassroomsResponse,
 )
+from ...services.input_sanitizer import sanitize_ai_input
 from .helpers import (
     classroom_to_detail_response,
     classroom_to_response,
@@ -62,9 +63,12 @@ def create_classroom(
             raise HTTPException(status_code=404, detail="Teacher user not found")
         effective_teacher_id = payload.teacher_id
 
+    # Sanitize teacher-provided name
+    safe_name, _ = sanitize_ai_input(payload.name, user_id=str(current_user.id))
+
     join_code = generate_join_code(db)
     classroom = Classroom(
-        name=payload.name,
+        name=safe_name,
         school_id=payload.school_id,
         teacher_id=effective_teacher_id,
         grade=payload.grade,
@@ -244,6 +248,11 @@ def update_classroom(
     require_owner_or_admin(classroom, current_user, db)
 
     update_data = payload.model_dump(exclude_unset=True)
+    # Sanitize text fields in update payload
+    if "name" in update_data and update_data["name"]:
+        update_data["name"], _ = sanitize_ai_input(
+            update_data["name"], user_id=str(current_user.id)
+        )
     for field, value in update_data.items():
         setattr(classroom, field, value)
 

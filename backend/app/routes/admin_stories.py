@@ -20,6 +20,7 @@ from ..schemas.story import (
     VocabItemSchema,
 )
 from ..services import lesson_loader
+from ..services.input_sanitizer import sanitize_ai_input
 
 router = APIRouter(tags=["admin-stories"])
 
@@ -39,22 +40,25 @@ def _lesson_path(lesson_number: int) -> Path:
     return _LESSONS_DIR / f"L{lesson_number}.yml"
 
 
-def _build_yaml_dict(data: StoryCreateRequest) -> dict:
+def _build_yaml_dict(data: StoryCreateRequest, user_id: str | None = None) -> dict:
     """Convert a StoryCreateRequest to the YAML dict format used on disk."""
-    full_text = "\n".join(data.paragraphs)
+    # Sanitize text fields — story content is used in AI prompts
+    safe_title, _ = sanitize_ai_input(data.title, user_id=user_id)
+    safe_paragraphs = [sanitize_ai_input(p, user_id=user_id)[0] for p in data.paragraphs]
+    full_text = "\n".join(safe_paragraphs)
     char_count = len(full_text.replace("\n", "").replace(" ", ""))
 
     doc: dict = {
         "lesson_number": data.lesson_number,
         "grade": data.grade,
         "grade_code": data.grade_code,
-        "title": data.title,
+        "title": safe_title,
         "genre": data.genre,
         "text_type": data.text_type,
         "reading_strategy": data.reading_strategy or "無",
         "story_text": full_text,
-        "paragraphs": data.paragraphs,
-        "paragraph_count": len(data.paragraphs),
+        "paragraphs": safe_paragraphs,
+        "paragraph_count": len(safe_paragraphs),
         "char_count": char_count,
     }
     if data.vocabulary:
@@ -192,7 +196,7 @@ def create_story(body: StoryCreateRequest):
             detail=f"Story with lesson_number {body.lesson_number} already exists",
         )
 
-    doc = _build_yaml_dict(body)
+    doc = _build_yaml_dict(body, user_id=None)
     with open(yaml_path, "w", encoding="utf-8") as f:
         yaml.dump(doc, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
 
@@ -218,9 +222,10 @@ def update_story(lesson_number: int, body: StoryUpdateRequest):
     with open(yaml_path, "r", encoding="utf-8") as f:
         doc = yaml.safe_load(f)
 
-    # Apply partial updates
+    # Apply partial updates (sanitize text fields that feed into AI prompts)
     if body.title is not None:
-        doc["title"] = body.title
+        safe_title, _ = sanitize_ai_input(body.title)
+        doc["title"] = safe_title
     if body.grade is not None:
         doc["grade"] = body.grade
     if body.grade_code is not None:
@@ -234,9 +239,10 @@ def update_story(lesson_number: int, body: StoryUpdateRequest):
     if body.source_file is not None:
         doc["source_file"] = body.source_file
     if body.paragraphs is not None:
-        doc["paragraphs"] = body.paragraphs
-        doc["paragraph_count"] = len(body.paragraphs)
-        full_text = "\n".join(body.paragraphs)
+        safe_paragraphs = [sanitize_ai_input(p)[0] for p in body.paragraphs]
+        doc["paragraphs"] = safe_paragraphs
+        doc["paragraph_count"] = len(safe_paragraphs)
+        full_text = "\n".join(safe_paragraphs)
         doc["story_text"] = full_text
         doc["char_count"] = len(full_text.replace("\n", "").replace(" ", ""))
     if body.vocabulary is not None:

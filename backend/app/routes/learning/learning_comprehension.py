@@ -17,6 +17,7 @@ from ...models.teacher_instruction import TeacherInstruction
 from ...models.user import User
 from ...services.ai_service import generate_socratic_question
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
+from ...services.input_sanitizer import sanitize_ai_input
 from ...services.socratic_agent import socratic_agent
 from ._helpers import ConversationTurn
 
@@ -56,14 +57,18 @@ async def get_comprehension_question(
     the next AI question. Call this after each student answer (and on initial
     load with an empty conversation to get the first question).
     """
+    # Sanitize user-provided text before sending to AI
+    safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
+    safe_story_text, _ = sanitize_ai_input(payload.story_text, user_id=str(current_user.id))
+
     start_time = time.monotonic()
     ai_success = True
     ai_error_type = None
     try:
         conversation = [t.model_dump() for t in payload.conversation]
         question = await generate_socratic_question(
-            story_title=payload.story_title,
-            story_text=payload.story_text,
+            story_title=safe_story_title,
+            story_text=safe_story_text,
             conversation=conversation,
         )
     except Exception as e:
@@ -174,6 +179,13 @@ async def comprehension_chat(
     the response includes resumed=true and conversation_history so the frontend can
     display the prior conversation without a Gemini call.
     """
+    # Sanitize user-provided text before sending to AI
+    safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
+    safe_story_text, _ = sanitize_ai_input(payload.story_text, user_id=str(current_user.id))
+    safe_student_answer = payload.student_answer
+    if safe_student_answer is not None:
+        safe_student_answer, _ = sanitize_ai_input(safe_student_answer, user_id=str(current_user.id))
+
     is_resumed = False
     conversation_history: list[ConversationHistoryItem] = []
     start_time = time.monotonic()
@@ -195,7 +207,7 @@ async def comprehension_chat(
             raise HTTPException(status_code=403, detail="Session not found")
 
     try:
-        if payload.student_answer is None:
+        if safe_student_answer is None:
             # Fetch active teacher instructions for this student (Issue #90)
             teacher_instructions_content: list[str] = []
             try:
@@ -213,8 +225,8 @@ async def comprehension_chat(
 
             result, is_resumed = await socratic_agent.start_session(
                 session_id=payload.session_id,
-                story_title=payload.story_title,
-                story_text=payload.story_text,
+                story_title=safe_story_title,
+                story_text=safe_story_text,
                 mispronounced_words=payload.mispronounced_words,
                 accuracy=payload.accuracy,
                 cpm=payload.cpm,
@@ -248,7 +260,7 @@ async def comprehension_chat(
         else:
             result = await socratic_agent.process_answer(
                 session_id=payload.session_id,
-                student_answer=payload.student_answer,
+                student_answer=safe_student_answer,
             )
     except ValueError as e:
         ai_success = False
@@ -273,7 +285,7 @@ async def comprehension_chat(
                 db=db,
                 socratic_session_id=payload.session_id,
                 learning_session_id=payload.db_session_id,
-                student_answer=payload.student_answer,
+                student_answer=safe_student_answer,
                 result=result,
             )
         except Exception as e:
