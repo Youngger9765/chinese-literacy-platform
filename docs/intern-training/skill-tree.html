@@ -1188,6 +1188,30 @@ const SKILLS = [
     criteria:"agent 從 issue 到 PR 完整自動化，產出品質通過 review",
     courseFile:"claude-code-foundations.md",
     courseOutline:["Agent frontmatter","System prompt 設計","工具選擇","Context 隔離"]
+  },
+  { id:27, tier:5, icon:"\u{1F50C}", name:"MCP 整合",
+    desc:"讓 Claude 連接外部工具（DB、瀏覽器、API）",
+    xp:25, prereqs:[21],
+    project:"在專案設定一個 MCP server 並實際使用",
+    criteria:".mcp.json 有設定，Claude Code 能透過 MCP 操作外部服務",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["MCP 是什麼","stdio vs SSE","設定 .mcp.json","Chrome MCP / DB MCP"]
+  },
+  { id:28, tier:5, icon:"\u{1F4E6}", name:"Plugin 開發",
+    desc:"打包 command + skill + hook 成可分享套件",
+    xp:35, prereqs:[23,24,26],
+    project:"建一個完整的 plugin（含 plugin.json + 至少 1 個 command/skill/hook）",
+    criteria:"~/.claude/plugins/你的plugin/plugin.json 存在且能正常載入",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["plugin.json 結構","Commands vs Skills vs Hooks","auto-discovery","分享給團隊"]
+  },
+  { id:29, tier:5, icon:"\u{1F504}", name:"Workflow 自動化",
+    desc:"設計多步驟自動化流程",
+    xp:30, prereqs:[23,25],
+    project:"設計一個 issue→branch→code→test→PR 一鍵流程",
+    criteria:"git log 裡有完整自動化流程產出的 commit chain",
+    courseFile:"claude-code-foundations.md",
+    courseOutline:["CI/CD 整合","GitHub Actions + Claude","多 agent 協作","自動 QA"]
   }
 ];
 
