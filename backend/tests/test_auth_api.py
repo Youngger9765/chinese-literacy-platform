@@ -1704,3 +1704,176 @@ class TestEmailDomainValidation:
             "name": "Pioneer Teacher",
         })
         assert resp.status_code == 201
+
+
+# ===========================================================================
+# Integration tests — has_classroom field in login response (issue #457)
+# ===========================================================================
+
+
+class TestHasClassroomLoginResponse:
+    """Tests for issue #457: login response includes has_classroom flag.
+
+    Students not yet enrolled in any classroom should get has_classroom=False.
+    Teachers and other non-student roles always get has_classroom=True.
+    """
+
+    def _create_student_directly(self, name: str) -> dict:
+        """Create a student directly in DB (simulates teacher-created account).
+
+        Returns dict with email, password.
+        """
+        from app.models.user import User as UserModel, UserRole as UserRoleModel, Role as RoleModel
+        from app.auth.password import hash_password as _hash
+        import uuid as _uuid
+
+        email = f"student_{_uuid.uuid4().hex[:8]}@school.edu.tw"
+        password = "StudentPass1!"
+
+        db = TestingSessionLocal()
+        try:
+            student = UserModel(
+                email=email,
+                password_hash=_hash(password),
+                name=name,
+                email_verified=True,  # batch-created students skip email verification
+            )
+            db.add(student)
+            db.flush()
+
+            # Assign student role
+            role = db.query(RoleModel).filter(RoleModel.name == "student").first()
+            assert role is not None, "student role must be seeded"
+            db.add(UserRoleModel(user_id=student.id, role_id=role.id, scope_type="school"))
+            db.commit()
+            return {"email": email, "password": password, "user_id": student.id}
+        finally:
+            db.close()
+
+    def _enroll_student_in_classroom(self, student_id: int, classroom_id: int) -> None:
+        """Directly enroll a student in a classroom via DB."""
+        from app.models.school import ClassroomStudent
+
+        db = TestingSessionLocal()
+        try:
+            cs = ClassroomStudent(classroom_id=classroom_id, student_id=student_id)
+            db.add(cs)
+            db.commit()
+        finally:
+            db.close()
+
+    def _create_teacher_and_classroom(self, client) -> dict:
+        """Register a teacher (with email verification), then create a classroom.
+
+        Returns dict with teacher_token, classroom_id.
+        """
+        import uuid as _uuid
+
+        unique = _uuid.uuid4().hex[:6]
+        domain = f"hctest-{unique}.edu.tw"
+        email = f"teacher@{domain}"
+
+        reg = client.post("/api/auth/register", json={
+            "email": email, "password": "StrongPass1!", "name": "HC Teacher",
+        })
+        assert reg.status_code == 201
+        vtoken = reg.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vtoken}")
+        teacher_token = client.post("/api/auth/login", json={
+            "email": email, "password": "StrongPass1!",
+        }).json()["access_token"]
+
+        # Create a classroom
+        from app.models.school import School, Classroom
+        db = TestingSessionLocal()
+        try:
+            school = db.query(School).filter(School.domain == domain).first()
+            assert school is not None
+            # Get teacher user_id from token
+            from app.auth.jwt import decode_token
+            teacher_id = int(decode_token(teacher_token)["sub"])
+            classroom = Classroom(
+                school_id=school.id,
+                teacher_id=teacher_id,
+                name="Test Class",
+                grade=3,
+            )
+            db.add(classroom)
+            db.commit()
+            db.refresh(classroom)
+            return {"teacher_token": teacher_token, "classroom_id": classroom.id}
+        finally:
+            db.close()
+
+    # -----------------------------------------------------------------------
+    # Test: login response contains has_classroom field
+    # -----------------------------------------------------------------------
+
+    def test_login_response_has_has_classroom_field(self, client, registered_user):
+        """Login response must include has_classroom field (issue #457)."""
+        resp = client.post("/api/auth/login", json={
+            "email": registered_user["email"],
+            "password": registered_user["password"],
+        })
+        assert resp.status_code == 200
+        assert "has_classroom" in resp.json(), (
+            "Login response must include has_classroom field for student classroom gate"
+        )
+
+    def test_teacher_login_has_classroom_true(self, client, registered_user):
+        """Teachers always get has_classroom=True (they are not subject to the gate)."""
+        resp = client.post("/api/auth/login", json={
+            "email": registered_user["email"],
+            "password": registered_user["password"],
+        })
+        assert resp.status_code == 200
+        assert resp.json()["has_classroom"] is True
+
+    def test_student_with_no_classroom_gets_has_classroom_false(self, client):
+        """Student with no classroom enrollment should get has_classroom=False."""
+        student = self._create_student_directly("No Classroom Student")
+        resp = client.post("/api/auth/login", json={
+            "email": student["email"],
+            "password": student["password"],
+        })
+        assert resp.status_code == 200
+        assert resp.json()["has_classroom"] is False, (
+            "Student not enrolled in any classroom should get has_classroom=False"
+        )
+
+    def test_student_enrolled_in_classroom_gets_has_classroom_true(self, client):
+        """Student who IS enrolled in a classroom should get has_classroom=True."""
+        student = self._create_student_directly("Enrolled Student")
+        tc = self._create_teacher_and_classroom(client)
+        self._enroll_student_in_classroom(student["user_id"], tc["classroom_id"])
+
+        resp = client.post("/api/auth/login", json={
+            "email": student["email"],
+            "password": student["password"],
+        })
+        assert resp.status_code == 200
+        assert resp.json()["has_classroom"] is True, (
+            "Student enrolled in a classroom should get has_classroom=True"
+        )
+
+    def test_student_without_student_role_gets_has_classroom_true(self, client):
+        """A user with no student role (regular teacher account) gets has_classroom=True."""
+        # registered_user is a teacher — no student role assigned
+        import uuid as _uuid
+        unique = _uuid.uuid4().hex[:6]
+        domain = f"norole-{unique}.edu.tw"
+        reg = client.post("/api/auth/register", json={
+            "email": f"plain@{domain}",
+            "password": "StrongPass1!",
+            "name": "Plain User",
+        })
+        assert reg.status_code == 201
+        vtoken = reg.json()["verification_token"]
+        client.get(f"/api/auth/verify-email?token={vtoken}")
+
+        resp = client.post("/api/auth/login", json={
+            "email": f"plain@{domain}",
+            "password": "StrongPass1!",
+        })
+        assert resp.status_code == 200
+        assert resp.json()["has_classroom"] is True

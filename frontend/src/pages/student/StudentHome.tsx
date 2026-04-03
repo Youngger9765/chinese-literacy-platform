@@ -9,6 +9,10 @@
  * - RecommendedStories
  * - SessionResumePrompt (resume incomplete session)
  *
+ * Issue #457: Students not yet added to any classroom see a friendly waiting
+ * screen instead of the full dashboard. All dashboard content is blocked until
+ * a teacher enrolls the student.
+ *
  * Route: /student
  */
 
@@ -133,6 +137,51 @@ const ClassroomContextCard: React.FC<ClassroomContextCardProps> = ({
 };
 
 // ---------------------------------------------------------------------------
+// NoClassroomWaitingScreen — shown to students not yet added to any classroom
+// Issue #457
+// ---------------------------------------------------------------------------
+
+interface NoClassroomWaitingScreenProps {
+  firstName: string;
+}
+
+const NoClassroomWaitingScreen: React.FC<NoClassroomWaitingScreenProps> = ({ firstName }) => (
+  <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+    <div className="max-w-md w-full mx-auto p-6 text-center space-y-6">
+      {/* Avatar */}
+      <div
+        className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mx-auto"
+        aria-hidden="true"
+      >
+        <span className="text-4xl">🏫</span>
+      </div>
+
+      {/* Greeting */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">你好，{firstName}！</h1>
+        <p className="text-base text-gray-600 mt-2">
+          你的老師還沒有把你加入班級
+        </p>
+      </div>
+
+      {/* Instruction card */}
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-left space-y-3">
+        <p className="text-sm font-semibold text-amber-900">下一步怎麼做？</p>
+        <ol className="space-y-2 text-sm text-amber-800 list-decimal list-inside">
+          <li>請聯繫你的老師</li>
+          <li>請老師把你加入班級</li>
+          <li>加入後重新登入，即可開始學習</li>
+        </ol>
+      </div>
+
+      <p className="text-xs text-gray-400">
+        加入班級後重新整理頁面即可繼續
+      </p>
+    </div>
+  </div>
+);
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -166,6 +215,13 @@ const StudentHome: React.FC = () => {
   const handleSelectClassroom = (classroomId: number) => {
     navigate(`/library?classroom=${classroomId}`);
   };
+
+  // Issue #457: block the full dashboard for students not yet added to any classroom.
+  // Only gate after classrooms have been fetched so we don't flash the waiting screen
+  // for students who ARE enrolled (while the API call is in-flight).
+  if (classroomsLoaded && classrooms.length === 0) {
+    return <NoClassroomWaitingScreen firstName={firstName} />;
+  }
 
   return (
     <div className="flex-1 overflow-y-auto">

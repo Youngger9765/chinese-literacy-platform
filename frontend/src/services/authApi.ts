@@ -52,6 +52,8 @@ export interface AuthTokenResponse {
   access_token: string;
   token_type: string;
   must_change_password?: boolean;
+  /** Issue #457: false for students not yet enrolled in any classroom. */
+  has_classroom?: boolean;
 }
 
 export class AuthError extends Error {
