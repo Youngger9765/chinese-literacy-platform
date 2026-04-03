@@ -8,8 +8,9 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
+import { saveReadingHistory } from '../../services/readingHistoryApi';
 import { useAuth } from '../../contexts/AuthContext';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts';
 
 /* ------------------------------------------------------------------ */
 
@@ -55,10 +56,33 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
   /* ---- Reading history for progress curve ---- */
   const [readingHistory, setReadingHistory] = useState<ReadingHistoryPoint[]>([]);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   useEffect(() => {
     if (!token || !story.id) return;
     getReadingHistory(token, String(story.id)).then(setReadingHistory).catch(() => {});
-  }, [token, story.id]);
+  }, [token, story.id, historyRefreshKey]);
+
+  /* ---- Save reading attempt to dedicated reading_history table (#909) ---- */
+  const savedResultRef = useRef(false);
+  useEffect(() => {
+    if (!result || savedResultRef.current || !token) return;
+    savedResultRef.current = true;
+    const durationSec = (result.durationMs || 0) / 1000;
+    if (durationSec > 0) {
+      saveReadingHistory(
+        {
+          lesson_id: String(story.id),
+          reading_type: 'full',
+          cpm: result.cpm || 0,
+          accuracy: Math.round((result.matchRate || 0) * 100),
+          duration_seconds: durationSec,
+        },
+        token,
+      )
+        .then(() => setHistoryRefreshKey(k => k + 1))
+        .catch((err) => console.error('Failed to save reading history:', err));
+    }
+  }, [result, token, story.id]);
 
   /* ---- Audio recorder (for student playback review) ---- */
   const audioRecorder = useAudioRecorder(120);
@@ -379,10 +403,23 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               )}
 
               {/* Reading progress curve (#909) */}
-              {readingHistory.length >= 2 && (
+              {readingHistory.length >= 1 && (
                 <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">朗讀進步曲線</p>
-                  <ResponsiveContainer width="100%" height={120}>
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">
+                    朗讀進步曲線
+                    {readingHistory.length >= 2 && (() => {
+                      const first = readingHistory[0]?.cpm;
+                      const last = readingHistory[readingHistory.length - 1]?.cpm;
+                      if (first && last && first > 0) {
+                        const pct = Math.round(((last - first) / first) * 100);
+                        return pct > 0
+                          ? <span className="ml-1 text-green-600">▲{pct}%</span>
+                          : pct < 0 ? <span className="ml-1 text-red-500">▼{Math.abs(pct)}%</span> : null;
+                      }
+                      return null;
+                    })()}
+                  </p>
+                  <ResponsiveContainer width="100%" height={140}>
                     <LineChart data={readingHistory.map((h, i) => ({
                       attempt: `第${i + 1}次`,
                       cpm: h.cpm,
@@ -396,8 +433,9 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                           name === 'cpm' ? '語速' : '準確度',
                         ]}
                       />
-                      <Line yAxisId="cpm" type="monotone" dataKey="cpm" stroke="#4A3FA3" strokeWidth={2} dot={{ r: 3 }} name="cpm" />
-                      <Line yAxisId="cpm" type="monotone" dataKey="accuracy" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} name="accuracy" />
+                      <ReferenceLine yAxisId="cpm" y={90} stroke="#ef4444" strokeDasharray="6 3" label={{ value: '目標 90', position: 'right', fill: '#ef4444', fontSize: 9 }} />
+                      <Line yAxisId="cpm" type="monotone" dataKey="cpm" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3, fill: '#3b82f6' }} name="cpm" />
+                      <Line yAxisId="cpm" type="monotone" dataKey="accuracy" stroke="#22c55e" strokeWidth={2} dot={{ r: 3, fill: '#22c55e' }} strokeDasharray="4 2" name="accuracy" />
                     </LineChart>
                   </ResponsiveContainer>
                   <p className="text-[10px] text-gray-400 text-center mt-1">
@@ -416,11 +454,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {result ? (
             <div className="space-y-2">
               <button
-                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
-                aria-label="重新開始全文朗讀"
-                className="w-full py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
+                aria-label="再讀一次全文朗讀"
+                className="w-full py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-md transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
-                再試一次
+                🔄 再讀一次
               </button>
               <button
                 onClick={() => { try { localStorage.removeItem(storageKey); } catch {} onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
