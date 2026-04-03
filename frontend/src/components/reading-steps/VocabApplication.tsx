@@ -86,7 +86,7 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
       </div>
       <button
         onClick={onFinish}
-        className="rounded-lg bg-amber-500 px-8 py-3 text-white font-medium hover:bg-amber-600 transition-colors"
+        className="rounded-full bg-amber-500 px-6 py-2.5 text-white text-sm font-medium hover:bg-amber-600 transition-colors"
       >
         繼續下一步
       </button>
@@ -196,20 +196,20 @@ function CompletionScreen({
         {wrongCount > 0 && (
           <button
             onClick={onRetryWrong}
-            className="rounded-xl border-2 border-accent bg-white px-8 py-3 text-base font-bold text-accent hover:bg-accent/5 active:scale-95 transition-all shadow-sm min-h-[52px]"
+            className="rounded-full border border-gray-300 bg-transparent px-6 py-2.5 text-sm font-bold text-accent hover:bg-gray-50 active:scale-95 transition-all min-h-[44px]"
           >
             練習錯題（{wrongCount} 題）
           </button>
         )}
         <button
           onClick={onRetryAll}
-          className="rounded-xl border border-gray-300 bg-white px-8 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 active:scale-95 transition-all min-h-[52px]"
+          className="rounded-full border border-gray-300 bg-transparent px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 active:scale-95 transition-all min-h-[44px]"
         >
           重新練習
         </button>
         <button
           onClick={onFinish}
-          className="rounded-xl bg-accent px-10 py-3 text-white font-semibold hover:bg-accent-hover transition-colors text-lg min-h-[52px]"
+          className="rounded-full bg-accent px-6 py-2.5 text-white font-semibold hover:bg-accent-hover transition-colors text-sm min-h-[44px]"
         >
           繼續下一步 →
         </button>

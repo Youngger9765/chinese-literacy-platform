@@ -484,7 +484,7 @@ const MyAssignments: React.FC = () => {
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 p-4">
+              <div key={i} className="bg-white rounded-2xl shadow-card p-4">
                 <div className="h-5 bg-gray-200 animate-pulse rounded w-2/3 mb-3" />
                 <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3 mb-2" />
                 <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
@@ -522,7 +522,7 @@ const MyAssignments: React.FC = () => {
               return (
                 <div
                   key={a.assignment_id}
-                  className="bg-white rounded-xl border border-gray-200 shadow-sm p-4"
+                  className="bg-white rounded-2xl shadow-card p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">

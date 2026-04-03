@@ -62,6 +62,12 @@ vocabulary:
 - word: 閃爍
   definition: 光線快速閃動的樣子。
 vocabulary_count: 10
+vocab_bank:
+  A: 引人入勝
+  B: 毛骨悚然
+  C: 啟人疑竇
+  D: 睡眼惺忪
+  G: 閃爍
 fill_in_blank:
 - sentence: 夜晚的星星(　　)著，為夜空增添神祕的美感。
   answer: Ｇ

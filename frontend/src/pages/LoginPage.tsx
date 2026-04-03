@@ -79,7 +79,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
           <div className="inline-flex items-center justify-center w-14 h-14 bg-accent rounded-2xl mb-4">
             <span className="text-white font-black text-2xl">L</span>
           </div>
-          <h1 className="text-2xl font-black text-gray-900">AI 朗讀助教</h1>
+          <h1 className="text-2xl font-bold text-gray-900">AI 朗讀助教</h1>
           <p className="text-gray-500 text-sm mt-1">登入你的帳號</p>
         </div>
 
@@ -175,15 +175,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
           </button>
         </p>
 
-        {/* Quick login buttons (demo) */}
-        {(
+        {/* Quick login buttons — only shown in non-production environments */}
+        {import.meta.env.VITE_SHOW_DEMO_LOGIN !== 'false' && (
           <div className="mt-8 border-t border-gray-200 pt-6">
             <p className="text-xs text-gray-400 text-center mb-3">快速登入（測試用）</p>
             <div className="grid grid-cols-3 gap-2">
               {([
-                { label: '管理員', desc: '王管理員', email: 'admin@test.com', pw: 'admin1234', color: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' },
-                { label: '教師', desc: '李老師', email: 'teacher@test.com', pw: 'teacher1234', color: 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100' },
-                { label: '學生', desc: '小明', email: 'student@test.com', pw: 'student1234', color: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100' },
+                { label: '管理員', desc: '王管理員', email: import.meta.env.VITE_DEMO_ADMIN_EMAIL ?? '', pw: import.meta.env.VITE_DEMO_ADMIN_PW ?? '', color: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' },
+                { label: '教師', desc: '李老師', email: import.meta.env.VITE_DEMO_TEACHER_EMAIL ?? '', pw: import.meta.env.VITE_DEMO_TEACHER_PW ?? '', color: 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100' },
+                { label: '學生', desc: '小明', email: import.meta.env.VITE_DEMO_STUDENT_EMAIL ?? '', pw: import.meta.env.VITE_DEMO_STUDENT_PW ?? '', color: 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100' },
               ] as const).map((acc) => (
                 <button
                   key={acc.email}

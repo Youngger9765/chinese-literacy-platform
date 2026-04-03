@@ -214,6 +214,17 @@
       ],
       "maxLevel": 5
     },
+    "15": {
+      "level": 4,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-03-13",
+          "level": 4,
+          "reason": "能給出有建設性的 code review 意見。"
+        }
+      ]
+    },
     "16": {
       "level": 4,
       "maxLevel": 5,
@@ -243,17 +254,6 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "能進行效能優化，例如使用 useMemo。"
-        }
-      ]
-    },
-    "15": {
-      "level": 4,
-      "maxLevel": 5,
-      "history": [
-        {
-          "date": "2026-03-13",
-          "level": 4,
-          "reason": "能給出有建設性的 code review 意見。"
         }
       ]
     }

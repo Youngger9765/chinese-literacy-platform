@@ -216,7 +216,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
       <div className="flex-1 overflow-y-auto p-6 sm:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="h-5 bg-gray-200 animate-pulse rounded w-24 mb-6" />
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
+          <div className="bg-white rounded-2xl shadow-card p-6 space-y-4">
             <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3" />
             <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
           </div>
@@ -257,7 +257,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
         )}
 
         {/* Classroom info card */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white rounded-2xl shadow-card p-6">
           {isEditing ? (
             <form onSubmit={handleSaveEdit} className="space-y-4">
               <h2 className="text-base font-bold text-gray-900">編輯班級</h2>
@@ -373,7 +373,7 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
         </div>
 
         {/* Tabbed content card */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card">
           {/* Tab bar */}
           <div className="border-b border-gray-200 overflow-x-auto">
             <nav className="flex -mb-px whitespace-nowrap items-center" aria-label="Tabs">

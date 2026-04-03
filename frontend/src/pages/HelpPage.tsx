@@ -234,7 +234,7 @@ const HelpPage: React.FC = () => {
           {manual.sections.map((section, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+              className="bg-white rounded-2xl shadow-card overflow-hidden"
             >
               <button
                 className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
@@ -270,7 +270,7 @@ const HelpPage: React.FC = () => {
         </div>
 
         {/* Footer links to full docs */}
-        <div className="mt-8 bg-white rounded-xl border border-gray-200 p-5">
+        <div className="mt-8 bg-white rounded-2xl shadow-card p-5">
           <h3 className="font-semibold text-gray-800 mb-3 text-sm">完整文件</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[

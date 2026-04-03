@@ -176,7 +176,7 @@ const UsersPanel: React.FC = () => {
 
         {/* Loading skeleton */}
         {isLoading && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-card overflow-hidden">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-gray-100 last:border-b-0">
                 <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
@@ -190,7 +190,7 @@ const UsersPanel: React.FC = () => {
 
         {/* User table */}
         {!isLoading && !error && users.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-card overflow-hidden">
             {/* Table header */}
             <div className="hidden sm:grid sm:grid-cols-[1fr_1.5fr_1fr_80px_100px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
               <span>姓名</span>

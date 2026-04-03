@@ -311,7 +311,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
           <p className="text-gray-500 text-sm mb-6">沒有需要造句練習的生字。</p>
           <button
             onClick={onFinish}
-            className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95"
+            className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95"
           >
             繼續
           </button>
@@ -329,7 +329,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
 
           {/* Header */}
           <div>
-            <h2 className="text-xl font-black text-gray-900 mb-1">
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
               造句練習
               <span className="ml-3 text-4xl text-accent">{currentChar}</span>
             </h2>
@@ -461,14 +461,14 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
               {currentCharIndex < practicedChars.length - 1 ? (
                 <button
                   onClick={handleCompleteCurrentChar}
-                  className="mt-3 px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all active:scale-95"
+                  className="mt-3 px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
                 >
                   繼續下一個字
                 </button>
               ) : (
                 <button
                   onClick={() => { handleCompleteCurrentChar(); }}
-                  className="mt-3 px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all active:scale-95"
+                  className="mt-3 px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
                 >
                   完成所有造句
                 </button>
@@ -491,7 +491,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       <>
         {/* Character tab nav — shown inline above content */}
         {practicedChars.length > 1 && (
-          <div className="bg-white border border-gray-100 rounded-xl px-3 py-2 flex gap-2 overflow-x-auto">
+          <div className="bg-white border border-gray-100 rounded-xl px-3 py-2 flex flex-wrap gap-2">
             {practicedChars.map((ch, i) => {
               const done = completedChars.has(ch);
               const active = i === currentCharIndex;
@@ -579,13 +579,13 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
         <button
           onClick={onBack}
-          className="px-4 py-3 rounded-xl text-base text-gray-600 hover:text-gray-800 transition-colors"
+          className="px-4 py-2.5 rounded-full text-sm text-gray-600 hover:text-gray-800 transition-colors"
         >
           回到生字練習
         </button>
         <button
           onClick={handleFinish}
-          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
+          className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
           {allCharsDone ? '完成，查看報告' : '跳過，查看報告'}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

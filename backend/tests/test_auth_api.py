@@ -125,10 +125,13 @@ def client():
 
 @pytest.fixture()
 def registered_user(client):
-    """Register a fresh user, verify their email, and return (email, password, token).
+    """Register a fresh user and return (email, password, token).
 
-    Updated for issue #460: register no longer auto-verifies or returns a token.
-    We use the verification_token returned in dev mode to verify, then login.
+    Updated for issue #460 config flag:
+    - When REQUIRE_EMAIL_VERIFICATION=False (default): registration auto-verifies,
+      no token in response, login works immediately.
+    - When REQUIRE_EMAIL_VERIFICATION=True: uses the dev-mode verification_token
+      to verify before login.
     """
     import uuid
     unique = uuid.uuid4().hex[:8]
@@ -141,11 +144,12 @@ def registered_user(client):
         "name": name,
     })
     assert resp.status_code == 201
-    # Verify email using the dev-mode token returned in the response
-    verification_token = resp.json()["verification_token"]
-    assert verification_token is not None
-    verify_resp = client.get(f"/api/auth/verify-email?token={verification_token}")
-    assert verify_resp.status_code == 200
+    # Only verify via token when REQUIRE_EMAIL_VERIFICATION=True (token will be non-None).
+    # When the flag is off, email is auto-verified and token is None.
+    verification_token = resp.json().get("verification_token")
+    if verification_token is not None:
+        verify_resp = client.get(f"/api/auth/verify-email?token={verification_token}")
+        assert verify_resp.status_code == 200
     # Now login to get a JWT token
     login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     assert login_resp.status_code == 200
@@ -322,8 +326,26 @@ class TestRegisterEndpoint:
         assert isinstance(data["message"], str)
         assert len(data["message"]) > 0
 
-    def test_register_returns_verification_token_in_dev_mode(self, client):
-        """Issue #460: dev mode returns verification_token in response body."""
+    def test_register_returns_verification_token_when_flag_on(self, client):
+        """Issue #460: verification_token is returned in the response only when
+        REQUIRE_EMAIL_VERIFICATION=True (dev/staging mode for testability)."""
+        from unittest.mock import patch
+        from app.config import settings
+
+        with patch.object(settings, "require_email_verification", True):
+            resp = client.post("/api/auth/register", json={
+                "email": "beareruser_flagtest@example.com",
+                "password": "StrongPass1!",
+                "name": "Bearer Flag User",
+            })
+        data = resp.json()
+        assert "verification_token" in data
+        assert data["verification_token"] is not None
+        assert len(data["verification_token"]) > 0
+
+    def test_register_returns_no_verification_token_when_flag_off(self, client):
+        """Issue #460: when REQUIRE_EMAIL_VERIFICATION=False (default),
+        registration auto-verifies and returns no verification_token."""
         resp = client.post("/api/auth/register", json={
             "email": "beareruser@example.com",
             "password": "StrongPass1!",
@@ -331,8 +353,7 @@ class TestRegisterEndpoint:
         })
         data = resp.json()
         assert "verification_token" in data
-        assert data["verification_token"] is not None
-        assert len(data["verification_token"]) > 0
+        assert data["verification_token"] is None
 
     def test_register_does_not_return_access_token(self, client):
         """Issue #460: register no longer auto-logs in — no access_token in response."""
@@ -465,17 +486,18 @@ class TestRegisterEndpoint:
 
     def test_register_email_is_stored_normalized(self, client):
         """Pydantic EmailStr normalizes the email (e.g. lowercases domain).
-        Verify the user can log in with the normalized form after email verification."""
+        Verify the user can log in with the normalized form."""
         resp = client.post("/api/auth/register", json={
             "email": "CaseSense@Example.com",
             "password": "StrongPass1!",
             "name": "Case Test",
         })
         assert resp.status_code == 201
-        # Verify email first (issue #460 — required before login)
-        token = resp.json()["verification_token"]
-        verify_resp = client.get(f"/api/auth/verify-email?token={token}")
-        assert verify_resp.status_code == 200
+        # When REQUIRE_EMAIL_VERIFICATION=True a token is returned; verify if so.
+        token = resp.json().get("verification_token")
+        if token is not None:
+            verify_resp = client.get(f"/api/auth/verify-email?token={token}")
+            assert verify_resp.status_code == 200
         # Login with the normalized form should work
         login_resp = client.post("/api/auth/login", json={
             "email": "CaseSense@example.com",
@@ -579,8 +601,9 @@ class TestAutoSchoolCreation:
         assert resp.status_code == 201
 
         # Verify email and login to get a JWT (issue #460)
-        verification_token = resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={verification_token}")
+        verification_token = resp.json().get("verification_token")
+        if verification_token:
+            client.get(f"/api/auth/verify-email?token={verification_token}")
         login_resp = client.post("/api/auth/login", json={"email": email, "password": "StrongPass1!"})
         token = login_resp.json()["access_token"]
         user_id = int(decode_token(token)["sub"])
@@ -642,9 +665,10 @@ class TestAutoSchoolCreation:
             teacher_role = db.query(Role).filter(Role.name == "teacher").first()
             assert teacher_role is not None
 
-            # Verify email and login to get user2_id (issue #460)
-            vtoken2 = resp2.json()["verification_token"]
-            client.get(f"/api/auth/verify-email?token={vtoken2}")
+            # Verify email if required, then login to get user2_id (issue #460)
+            vtoken2 = resp2.json().get("verification_token")
+            if vtoken2:
+                client.get(f"/api/auth/verify-email?token={vtoken2}")
             login2 = client.post("/api/auth/login", json={"email": f"second@{domain}", "password": "StrongPass1!"})
             token2 = login2.json()["access_token"]
             user2_id = int(decode_token(token2)["sub"])
@@ -709,9 +733,10 @@ class TestAutoSchoolCreation:
         })
         assert resp.status_code == 201
 
-        # Verify email and login to get user_id (issue #460)
-        vtoken = resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vtoken}")
+        # Verify email if required, then login to get user_id (issue #460)
+        vtoken = resp.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
         login_resp = client.post("/api/auth/login", json={"email": email, "password": "StrongPass1!"})
         token = login_resp.json()["access_token"]
         user_id = int(decode_token(token)["sub"])
@@ -903,8 +928,9 @@ class TestChangePasswordEndpoint:
             "password": "OldPassword1!",
             "name": "Change Me",
         })
-        vtoken = reg_resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vtoken}")
+        vtoken = reg_resp.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
         token = client.post("/api/auth/login", json={"email": "changeme@example.com", "password": "OldPassword1!"}).json()["access_token"]
 
         # Change password
@@ -933,8 +959,9 @@ class TestChangePasswordEndpoint:
             "password": "OldPassword1!",
             "name": "Old No Work",
         })
-        vtoken = reg_resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vtoken}")
+        vtoken = reg_resp.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
         token = client.post("/api/auth/login", json={"email": "oldnowork@example.com", "password": "OldPassword1!"}).json()["access_token"]
 
         client.post(
@@ -1173,9 +1200,10 @@ class TestAuthFlow:
             "name": "Flow User",
         })
         assert reg_resp.status_code == 201
-        # Verify email before login (issue #460)
-        vtoken = reg_resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vtoken}")
+        # Verify email before login if flag is on (issue #460)
+        vtoken = reg_resp.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
 
         # Login
         login_resp = client.post("/api/auth/login", json={
@@ -1197,9 +1225,10 @@ class TestAuthFlow:
             "password": "OriginalPass1!",
             "name": "PW Flow",
         })
-        # Verify email and login to get token (issue #460)
-        vtoken = reg_resp.json()["verification_token"]
-        client.get(f"/api/auth/verify-email?token={vtoken}")
+        # Verify email if required, then login to get token (issue #460)
+        vtoken = reg_resp.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
         token = client.post("/api/auth/login", json={"email": "pwflow@example.com", "password": "OriginalPass1!"}).json()["access_token"]
 
         # Change password
@@ -1299,17 +1328,31 @@ class TestRateLimiting:
 
 
 class TestEmailVerificationFlow:
-    """Tests for issue #460: token-based email verification."""
+    """Tests for issue #460: token-based email verification.
+
+    All tests in this class run with REQUIRE_EMAIL_VERIFICATION=True so that
+    the verification flow (token generation, 403 on unverified login, etc.)
+    is exercised end-to-end.
+    """
 
     def _register(self, client, suffix: str = "") -> dict:
-        """Helper: register a fresh user and return response data."""
+        """Helper: register a fresh user with REQUIRE_EMAIL_VERIFICATION=True.
+
+        Returns the response body with email and password added for convenience.
+        The verification_token in the returned dict is always non-None because
+        the flag is forced on.
+        """
+        from unittest.mock import patch
+        from app.config import settings
+
         unique = uuid.uuid4().hex[:8]
         email = f"evtest_{unique}{suffix}@verify.com"
-        resp = client.post("/api/auth/register", json={
-            "email": email,
-            "password": "StrongPass1!",
-            "name": f"Verify User {unique}",
-        })
+        with patch.object(settings, "require_email_verification", True):
+            resp = client.post("/api/auth/register", json={
+                "email": email,
+                "password": "StrongPass1!",
+                "name": f"Verify User {unique}",
+            })
         assert resp.status_code == 201
         data = resp.json()
         data["email"] = email
@@ -1317,7 +1360,7 @@ class TestEmailVerificationFlow:
         return data
 
     def test_register_sets_email_verified_false(self, client):
-        """Newly registered users should have email_verified=False in DB."""
+        """With flag on, newly registered users should have email_verified=False in DB."""
         from app.models.user import User as UserModel
 
         data = self._register(client)
@@ -1330,7 +1373,7 @@ class TestEmailVerificationFlow:
             db.close()
 
     def test_register_stores_verification_token_in_db(self, client):
-        """Newly registered users should have a non-null email_verification_token."""
+        """With flag on, newly registered users should have a non-null email_verification_token."""
         from app.models.user import User as UserModel
 
         data = self._register(client)
@@ -1344,18 +1387,22 @@ class TestEmailVerificationFlow:
             db.close()
 
     def test_register_returns_verification_token(self, client):
-        """Register response should include verification_token in dev mode."""
+        """With flag on, register response should include verification_token in dev mode."""
         data = self._register(client)
         assert "verification_token" in data
         assert data["verification_token"] is not None
 
     def test_login_without_verification_returns_403(self, client):
-        """Unverified users should get 403 with Chinese message on login."""
+        """With flag on, unverified users should get 403 with Chinese message on login."""
+        from unittest.mock import patch
+        from app.config import settings
+
         data = self._register(client)
-        resp = client.post("/api/auth/login", json={
-            "email": data["email"],
-            "password": data["password"],
-        })
+        with patch.object(settings, "require_email_verification", True):
+            resp = client.post("/api/auth/login", json={
+                "email": data["email"],
+                "password": data["password"],
+            })
         assert resp.status_code == 403
         assert "驗證" in resp.json()["detail"]
 
@@ -1430,7 +1477,7 @@ class TestEmailVerificationFlow:
         data = self._register(client)
         # Get a new token via resend
         resend_resp = client.post("/api/auth/resend-verification", json={"email": data["email"]})
-        new_token = resend_resp.json()["verification_token"]
+        new_token = resend_resp.json().get("verification_token")
         # Verify with new token
         client.get(f"/api/auth/verify-email?token={new_token}")
         # Login should now work
@@ -1704,3 +1751,178 @@ class TestEmailDomainValidation:
             "name": "Pioneer Teacher",
         })
         assert resp.status_code == 201
+
+
+# ===========================================================================
+# Integration tests — has_classroom field in login response (issue #457)
+# ===========================================================================
+
+
+class TestHasClassroomLoginResponse:
+    """Tests for issue #457: login response includes has_classroom flag.
+
+    Students not yet enrolled in any classroom should get has_classroom=False.
+    Teachers and other non-student roles always get has_classroom=True.
+    """
+
+    def _create_student_directly(self, name: str) -> dict:
+        """Create a student directly in DB (simulates teacher-created account).
+
+        Returns dict with email, password.
+        """
+        from app.models.user import User as UserModel, UserRole as UserRoleModel, Role as RoleModel
+        from app.auth.password import hash_password as _hash
+        import uuid as _uuid
+
+        email = f"student_{_uuid.uuid4().hex[:8]}@school.edu.tw"
+        password = "StudentPass1!"
+
+        db = TestingSessionLocal()
+        try:
+            student = UserModel(
+                email=email,
+                password_hash=_hash(password),
+                name=name,
+                email_verified=True,  # batch-created students skip email verification
+            )
+            db.add(student)
+            db.flush()
+
+            # Assign student role
+            role = db.query(RoleModel).filter(RoleModel.name == "student").first()
+            assert role is not None, "student role must be seeded"
+            db.add(UserRoleModel(user_id=student.id, role_id=role.id, scope_type="school"))
+            db.commit()
+            return {"email": email, "password": password, "user_id": student.id}
+        finally:
+            db.close()
+
+    def _enroll_student_in_classroom(self, student_id: int, classroom_id: int) -> None:
+        """Directly enroll a student in a classroom via DB."""
+        from app.models.school import ClassroomStudent
+
+        db = TestingSessionLocal()
+        try:
+            cs = ClassroomStudent(classroom_id=classroom_id, student_id=student_id)
+            db.add(cs)
+            db.commit()
+        finally:
+            db.close()
+
+    def _create_teacher_and_classroom(self, client) -> dict:
+        """Register a teacher (with email verification), then create a classroom.
+
+        Returns dict with teacher_token, classroom_id.
+        """
+        import uuid as _uuid
+
+        unique = _uuid.uuid4().hex[:6]
+        domain = f"hctest-{unique}.edu.tw"
+        email = f"teacher@{domain}"
+
+        reg = client.post("/api/auth/register", json={
+            "email": email, "password": "StrongPass1!", "name": "HC Teacher",
+        })
+        assert reg.status_code == 201
+        vtoken = reg.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
+        teacher_token = client.post("/api/auth/login", json={
+            "email": email, "password": "StrongPass1!",
+        }).json()["access_token"]
+
+        # Create a classroom
+        from app.models.school import School, Classroom
+        db = TestingSessionLocal()
+        try:
+            school = db.query(School).filter(School.domain == domain).first()
+            assert school is not None
+            # Get teacher user_id from token
+            from app.auth.jwt import decode_token
+            teacher_id = int(decode_token(teacher_token)["sub"])
+            classroom = Classroom(
+                school_id=school.id,
+                teacher_id=teacher_id,
+                name="Test Class",
+                grade=3,
+            )
+            db.add(classroom)
+            db.commit()
+            db.refresh(classroom)
+            return {"teacher_token": teacher_token, "classroom_id": classroom.id}
+        finally:
+            db.close()
+
+    # -----------------------------------------------------------------------
+    # Test: login response contains has_classroom field
+    # -----------------------------------------------------------------------
+
+    def test_login_response_has_has_classroom_field(self, client, registered_user):
+        """Login response must include has_classroom field (issue #457)."""
+        resp = client.post("/api/auth/login", json={
+            "email": registered_user["email"],
+            "password": registered_user["password"],
+        })
+        assert resp.status_code == 200
+        assert "has_classroom" in resp.json(), (
+            "Login response must include has_classroom field for student classroom gate"
+        )
+
+    def test_teacher_login_has_classroom_true(self, client, registered_user):
+        """Teachers always get has_classroom=True (they are not subject to the gate)."""
+        resp = client.post("/api/auth/login", json={
+            "email": registered_user["email"],
+            "password": registered_user["password"],
+        })
+        assert resp.status_code == 200
+        assert resp.json()["has_classroom"] is True
+
+    def test_student_with_no_classroom_gets_has_classroom_false(self, client):
+        """Student with no classroom enrollment should get has_classroom=False."""
+        student = self._create_student_directly("No Classroom Student")
+        resp = client.post("/api/auth/login", json={
+            "email": student["email"],
+            "password": student["password"],
+        })
+        assert resp.status_code == 200
+        assert resp.json()["has_classroom"] is False, (
+            "Student not enrolled in any classroom should get has_classroom=False"
+        )
+
+    def test_student_enrolled_in_classroom_gets_has_classroom_true(self, client):
+        """Student who IS enrolled in a classroom should get has_classroom=True."""
+        student = self._create_student_directly("Enrolled Student")
+        tc = self._create_teacher_and_classroom(client)
+        self._enroll_student_in_classroom(student["user_id"], tc["classroom_id"])
+
+        resp = client.post("/api/auth/login", json={
+            "email": student["email"],
+            "password": student["password"],
+        })
+        assert resp.status_code == 200
+        assert resp.json()["has_classroom"] is True, (
+            "Student enrolled in a classroom should get has_classroom=True"
+        )
+
+    def test_student_without_student_role_gets_has_classroom_true(self, client):
+        """A user with no student role (regular teacher account) gets has_classroom=True."""
+        # registered_user is a teacher — no student role assigned
+        import uuid as _uuid
+        unique = _uuid.uuid4().hex[:6]
+        domain = f"norole-{unique}.edu.tw"
+        reg = client.post("/api/auth/register", json={
+            "email": f"plain@{domain}",
+            "password": "StrongPass1!",
+            "name": "Plain User",
+        })
+        assert reg.status_code == 201
+        vtoken = reg.json().get("verification_token")
+        if vtoken:
+            client.get(f"/api/auth/verify-email?token={vtoken}")
+
+        resp = client.post("/api/auth/login", json={
+            "email": f"plain@{domain}",
+            "password": "StrongPass1!",
+        })
+        assert resp.status_code == 200
+        assert resp.json()["has_classroom"] is True

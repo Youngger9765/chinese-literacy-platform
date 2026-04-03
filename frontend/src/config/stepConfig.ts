@@ -15,6 +15,17 @@
 
 import { AppView } from '../types';
 
+/** Step category for color-coding in StepperNav */
+export type StepCategory = 'reading' | 'comprehension' | 'practice' | 'report';
+
+/** Color theme per step category */
+export const STEP_CATEGORY_COLORS: Record<StepCategory, { badge: string; activeBg: string; text: string; headerBar: string }> = {
+  reading:       { badge: 'bg-orange-500',  activeBg: 'bg-orange-50',  text: 'text-orange-600',  headerBar: 'bg-orange-500' },
+  comprehension: { badge: 'bg-emerald-500', activeBg: 'bg-emerald-50', text: 'text-emerald-600', headerBar: 'bg-emerald-500' },
+  practice:      { badge: 'bg-blue-500',    activeBg: 'bg-blue-50',    text: 'text-blue-600',    headerBar: 'bg-blue-500' },
+  report:        { badge: 'bg-accent',      activeBg: 'bg-accent/10',  text: 'text-accent',      headerBar: 'bg-accent' },
+};
+
 export interface StepConfig {
   /** Unique identifier — must match the URL path segment under /learn/:storyId/ */
   id: string;
@@ -35,6 +46,8 @@ export interface StepConfig {
   needsStory: boolean;
   /** When false the step is excluded from StepperNav entirely (not yet implemented steps). */
   enabled: boolean;
+  /** Step category for color-coding */
+  category: StepCategory;
 }
 
 /**
@@ -55,6 +68,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 8,
     needsStory: true,
     enabled: true,
+    category: 'reading',
   },
   {
     id: 'tutor',
@@ -63,6 +77,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 2,
     needsStory: true,
     enabled: true,
+    category: 'reading',
   },
   {
     id: 'full-reading',
@@ -71,6 +86,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 6,
     needsStory: true,
     enabled: true,
+    category: 'reading',
   },
   {
     id: 'vocab',
@@ -79,6 +95,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 4,
     needsStory: true,
     enabled: true,
+    category: 'practice',
   },
   {
     id: 'vocab-definition',
@@ -87,6 +104,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 12,
     needsStory: true,
     enabled: true,
+    category: 'practice',
   },
   {
     id: 'vocab-application',
@@ -95,6 +113,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 9,
     needsStory: true,
     enabled: true,
+    category: 'practice',
   },
   {
     id: 'comprehension',
@@ -103,6 +122,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 3,
     needsStory: true,
     enabled: true,
+    category: 'comprehension',
   },
   {
     id: 'vocab-word-search',
@@ -111,6 +131,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 10,
     needsStory: true,
     enabled: true,
+    category: 'practice',
   },
   {
     id: 'dictation',
@@ -119,6 +140,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 5,
     needsStory: true,
     enabled: false, // hidden per product decision 2026-03-27
+    category: 'practice',
   },
   {
     id: 'knowledge-station',
@@ -127,6 +149,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 11,
     needsStory: true,
     enabled: true,
+    category: 'comprehension',
   },
   {
     id: 'report',
@@ -135,6 +158,7 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 7,
     needsStory: false,
     enabled: true,
+    category: 'report',
   },
 ];
 

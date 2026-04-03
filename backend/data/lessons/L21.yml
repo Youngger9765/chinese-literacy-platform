@@ -56,6 +56,18 @@ vocabulary:
 - word: 籌措
   definition: 想辦法弄到（資金或物資）。
 vocabulary_count: 11
+vocab_bank:
+  A: 沁涼
+  B: 仰望
+  C: 殆盡
+  D: 諮詢
+  E: 精神抖擻
+  F: 震懾
+  G: 畏懼
+  H: 與…為伍
+  I: 有生之年
+  J: 拋家棄子
+  K: 籌措
 fill_in_blank:
 - sentence: 夏天喝一口冰鎮的汽水，感覺全身（　　）舒暢。
   answer: A

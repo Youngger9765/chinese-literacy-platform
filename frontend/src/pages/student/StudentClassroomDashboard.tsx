@@ -353,7 +353,7 @@ const StudentClassroomDashboard: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate('/join')}
-              className="mt-4 text-sm font-medium text-white bg-accent hover:bg-accent/90 px-5 py-2 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="mt-4 text-sm font-bold text-white bg-accent hover:bg-accent/90 px-6 py-2.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               加入班級
             </button>

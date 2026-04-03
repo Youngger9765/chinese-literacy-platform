@@ -7,6 +7,10 @@ import { useZhuyin } from '../../context/ZhuyinContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
+import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
+import { saveReadingHistory } from '../../services/readingHistoryApi';
+import { useAuth } from '../../contexts/AuthContext';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts';
 
 /* ------------------------------------------------------------------ */
 
@@ -20,6 +24,7 @@ interface FullReadingProps {
 
 const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPanelWidthChange, onFinish, onBack }) => {
   const isMobile = useIsMobile();
+  const { token } = useAuth();
   const storageKey = `fullReading_progress_${story.id}`;
 
   type SavedResult = { matchRate: number; feedback: string; diffTokens: DiffToken[]; cpm: number; durationMs: number; errorBreakdown: { correct: number; wrong: number; missing: number; extra: number } };
@@ -48,6 +53,36 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
   const startTimeRef              = useRef<number>(0);
 
   const fullText = useMemo(() => story.content.join(''), [story.content]);
+
+  /* ---- Reading history for progress curve ---- */
+  const [readingHistory, setReadingHistory] = useState<ReadingHistoryPoint[]>([]);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  useEffect(() => {
+    if (!token || !story.id) return;
+    getReadingHistory(token, String(story.id)).then(setReadingHistory).catch(() => {});
+  }, [token, story.id, historyRefreshKey]);
+
+  /* ---- Save reading attempt to dedicated reading_history table (#909) ---- */
+  const savedResultRef = useRef(false);
+  useEffect(() => {
+    if (!result || savedResultRef.current || !token) return;
+    savedResultRef.current = true;
+    const durationSec = (result.durationMs || 0) / 1000;
+    if (durationSec > 0) {
+      saveReadingHistory(
+        {
+          lesson_id: String(story.id),
+          reading_type: 'full',
+          cpm: result.cpm || 0,
+          accuracy: Math.round((result.matchRate || 0) * 100),
+          duration_seconds: durationSec,
+        },
+        token,
+      )
+        .then(() => setHistoryRefreshKey(k => k + 1))
+        .catch((err) => console.error('Failed to save reading history:', err));
+    }
+  }, [result, token, story.id]);
 
   /* ---- Audio recorder (for student playback review) ---- */
   const audioRecorder = useAudioRecorder(120);
@@ -285,7 +320,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
       >
         {/* Header */}
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4">
-          <span className="text-xs font-black text-accent-light uppercase tracking-widest">全文朗讀</span>
+          <span className="text-xs font-bold text-accent-light uppercase tracking-widest">全文朗讀</span>
         </div>
 
         {/* Content */}
@@ -366,6 +401,48 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                   <audio src={audioRecorder.audioUrl} controls className="w-full h-9" aria-label="播放您的朗讀錄音" />
                 </div>
               )}
+
+              {/* Reading progress curve (#909) */}
+              {readingHistory.length >= 1 && (
+                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
+                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">
+                    朗讀進步曲線
+                    {readingHistory.length >= 2 && (() => {
+                      const first = readingHistory[0]?.cpm;
+                      const last = readingHistory[readingHistory.length - 1]?.cpm;
+                      if (first && last && first > 0) {
+                        const pct = Math.round(((last - first) / first) * 100);
+                        return pct > 0
+                          ? <span className="ml-1 text-green-600">▲{pct}%</span>
+                          : pct < 0 ? <span className="ml-1 text-red-500">▼{Math.abs(pct)}%</span> : null;
+                      }
+                      return null;
+                    })()}
+                  </p>
+                  <ResponsiveContainer width="100%" height={140}>
+                    <LineChart data={readingHistory.map((h, i) => ({
+                      attempt: `第${i + 1}次`,
+                      cpm: h.cpm,
+                      accuracy: h.accuracy,
+                    }))}>
+                      <XAxis dataKey="attempt" tick={{ fontSize: 10 }} />
+                      <YAxis yAxisId="cpm" tick={{ fontSize: 10 }} width={30} />
+                      <Tooltip
+                        formatter={(value: number, name: string) => [
+                          name === 'cpm' ? `${value} 字/分` : `${value}%`,
+                          name === 'cpm' ? '語速' : '準確度',
+                        ]}
+                      />
+                      <ReferenceLine yAxisId="cpm" y={90} stroke="#ef4444" strokeDasharray="6 3" label={{ value: '目標 90', position: 'right', fill: '#ef4444', fontSize: 9 }} />
+                      <Line yAxisId="cpm" type="monotone" dataKey="cpm" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3, fill: '#3b82f6' }} name="cpm" />
+                      <Line yAxisId="cpm" type="monotone" dataKey="accuracy" stroke="#22c55e" strokeWidth={2} dot={{ r: 3, fill: '#22c55e' }} strokeDasharray="4 2" name="accuracy" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  <p className="text-[10px] text-gray-400 text-center mt-1">
+                    本篇已練習 {readingHistory.length} 次
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -377,16 +454,16 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
           {result ? (
             <div className="space-y-2">
               <button
-                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
-                aria-label="重新開始全文朗讀"
-                className="w-full py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
+                aria-label="再讀一次全文朗讀"
+                className="w-full py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-md transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
-                再試一次
+                🔄 再讀一次
               </button>
               <button
                 onClick={() => { try { localStorage.removeItem(storageKey); } catch {} onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
                 aria-label="完成全文朗讀，查看學習報告"
-                className="w-full py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1"
+                className="w-full py-2.5 rounded-full text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1"
               >
                 查看報告
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -395,7 +472,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               </button>
             </div>
           ) : isPreparing ? (
-            <button disabled aria-label="正在準備語音辨識" aria-busy="true" className="w-full py-3 rounded-xl text-base font-bold bg-gray-300 text-gray-500 cursor-wait flex items-center justify-center gap-2">
+            <button disabled aria-label="正在準備語音辨識" aria-busy="true" className="w-full py-2.5 rounded-full text-sm font-bold bg-gray-300 text-gray-500 cursor-wait flex items-center justify-center gap-2">
               <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
               準備中...
             </button>
@@ -404,7 +481,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               onClick={submitReading}
               disabled={!streamingTranscript}
               aria-label={!streamingTranscript ? '請先開始朗讀' : '完成朗讀並送出'}
-              className={`w-full py-3 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+              className={`w-full py-2.5 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                 streamingTranscript
                   ? 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95'
                   : 'bg-gray-300 text-gray-400 cursor-not-allowed'
@@ -421,7 +498,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               <button
                 onClick={isTtsPaused ? resumeTts : pauseTts}
                 aria-label={isTtsPaused ? '繼續系統朗讀' : '暫停系統朗讀'}
-                className={`flex-1 py-3 rounded-xl text-base font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                   isTtsPaused
                     ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
                     : 'bg-amber-700 hover:bg-amber-600 text-white'
@@ -439,7 +516,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               <button
                 onClick={stopTts}
                 aria-label="停止系統朗讀"
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                className="flex-1 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
@@ -452,7 +529,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               <button
                 onClick={speakFullStory}
                 aria-label="播放全文系統示範朗讀"
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-gray-200 hover:bg-gray-300 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                className="flex-1 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
                 <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
@@ -462,7 +539,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
               <button
                 onClick={startSession}
                 aria-label="開始全文朗讀，啟動語音辨識"
-                className="flex-1 py-3 rounded-xl text-base font-bold bg-accent hover:bg-accent-hover text-white transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                className="flex-1 py-2.5 rounded-full text-sm font-bold bg-accent hover:bg-accent-hover text-white transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
               >
                 <div className="w-2.5 h-2.5 bg-white rounded-full" aria-hidden="true" />
                 開始朗讀

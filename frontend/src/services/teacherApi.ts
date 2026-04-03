@@ -376,6 +376,9 @@ export interface LearningCurvePoint {
   score: number;
   story_title: string | null;
   session_id: number;
+  story_slug: string | null;
+  cpm: number | null;
+  accuracy: number | null;
 }
 
 export interface LearningCurveData {
@@ -398,11 +401,11 @@ export async function getClassroomAlerts(
 export async function getStudentLearningCurve(
   token: string,
   studentId: number,
+  storySlug?: string,
 ): Promise<LearningCurveData> {
-  const res = await fetch(
-    `${API_BASE}/api/teacher/students/${studentId}/learning-curve`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
+  let url = `${API_BASE}/api/teacher/students/${studentId}/learning-curve`;
+  if (storySlug) url += `?story_slug=${encodeURIComponent(storySlug)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   return handleResponse<LearningCurveData>(res);
 }
 

@@ -26,7 +26,7 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ label, value, icon, colorClass }) => (
-  <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
+  <div className="bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
     <div className={`inline-flex items-center justify-center w-11 h-11 rounded-xl ${colorClass} shrink-0`}>
       {icon}
     </div>
@@ -71,7 +71,7 @@ const OrgDashboardPanel: React.FC<OrgDashboardPanelProps> = ({ organizationId })
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="grid grid-cols-2 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
+              <div key={i} className="bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
                 <div className="w-11 h-11 bg-gray-200 animate-pulse rounded-xl shrink-0" />
                 <div className="space-y-2 flex-1">
                   <div className="h-6 bg-gray-200 animate-pulse rounded w-1/3" />
@@ -80,7 +80,7 @@ const OrgDashboardPanel: React.FC<OrgDashboardPanelProps> = ({ organizationId })
               </div>
             ))}
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <div className="bg-white rounded-2xl shadow-card p-6">
             <div className="h-5 bg-gray-200 animate-pulse rounded w-1/4 mb-4" />
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -146,7 +146,7 @@ const OrgDashboardPanel: React.FC<OrgDashboardPanelProps> = ({ organizationId })
 
         {/* Completed sessions sub-stat */}
         {data.total_sessions > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4 flex items-center justify-between">
+          <div className="bg-white rounded-2xl shadow-card px-5 py-4 flex items-center justify-between">
             <span className="text-sm text-gray-600">已完成學習次數</span>
             <span className="text-sm font-bold text-emerald-700">
               {data.completed_sessions.toLocaleString()}
@@ -158,7 +158,7 @@ const OrgDashboardPanel: React.FC<OrgDashboardPanelProps> = ({ organizationId })
         )}
 
         {/* Per-school table */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card">
           <div className="p-5 border-b border-gray-100">
             <h3 className="font-bold text-gray-900">各校概覽</h3>
           </div>

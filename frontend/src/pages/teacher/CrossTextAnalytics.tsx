@@ -61,7 +61,7 @@ function ClassOverviewPanel({ data }: { data: ClassroomCrossTextPattern }) {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm"
+            className="bg-white rounded-2xl p-4 text-center shadow-card"
           >
             <div className="text-2xl font-bold text-indigo-600">{stat.value}</div>
             <div className="text-sm text-gray-500 mt-1">{stat.label}</div>
@@ -71,7 +71,7 @@ function ClassOverviewPanel({ data }: { data: ClassroomCrossTextPattern }) {
 
       {/* Class score trend */}
       {data.class_score_trend.length > 1 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card p-5">
           <h3 className="text-base font-semibold text-gray-700 mb-4">班級整體分數趨勢</h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={data.class_score_trend}>
@@ -98,7 +98,7 @@ function ClassOverviewPanel({ data }: { data: ClassroomCrossTextPattern }) {
 
       {/* Text difficulty ranking */}
       {data.text_difficulty_ranking.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card p-5">
           <h3 className="text-base font-semibold text-gray-700 mb-1">課文難易排行</h3>
           <p className="text-xs text-gray-400 mb-4">依班級平均分由低到高排列</p>
           <ResponsiveContainer
@@ -151,7 +151,7 @@ function ClassOverviewPanel({ data }: { data: ClassroomCrossTextPattern }) {
 
       {/* Common class-level error chars */}
       {data.common_error_chars.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card p-5">
           <h3 className="text-base font-semibold text-gray-700 mb-4">
             班級常見錯字（多人共同出錯）
           </h3>
@@ -189,7 +189,7 @@ function StudentDetailPanel({ pattern }: { pattern: StudentCrossTextPattern }) {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="bg-white rounded-lg border border-gray-200 p-3 text-center shadow-sm"
+            className="bg-white rounded-2xl p-3 text-center shadow-card"
           >
             <div className="text-xl font-bold text-indigo-600">{stat.value}</div>
             <div className="text-xs text-gray-500 mt-1">{stat.label}</div>
@@ -199,7 +199,7 @@ function StudentDetailPanel({ pattern }: { pattern: StudentCrossTextPattern }) {
 
       {/* Score trend */}
       {pattern.score_trend.length > 1 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card p-4">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">分數學習曲線</h4>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={pattern.score_trend}>
@@ -231,7 +231,7 @@ function StudentDetailPanel({ pattern }: { pattern: StudentCrossTextPattern }) {
 
       {/* Text performance table */}
       {pattern.text_performance.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card p-4">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">各課文學習成效</h4>
           {/* Mobile card view */}
           <div className="md:hidden space-y-3">
@@ -302,7 +302,7 @@ function StudentDetailPanel({ pattern }: { pattern: StudentCrossTextPattern }) {
 
       {/* Cross-text recurring errors */}
       {pattern.repeated_error_chars.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+        <div className="bg-white rounded-2xl shadow-card p-4">
           <h4 className="text-sm font-semibold text-gray-700 mb-3">
             跨課文反覆錯誤字（出現於 2 篇以上）
           </h4>
@@ -373,7 +373,7 @@ function StudentSelector({
 }) {
   return (
     <div className="w-full md:w-56 flex-shrink-0">
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
         <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
             學生列表

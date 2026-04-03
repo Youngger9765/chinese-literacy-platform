@@ -380,20 +380,20 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
           {wrongCount > 0 && (
             <button
               onClick={handleRetryWrong}
-              className="rounded-xl border-2 border-[#5B4FC4] bg-white px-8 py-3 text-base font-bold text-[#5B4FC4] hover:bg-[#5B4FC4]/5 active:scale-95 transition-all shadow-sm min-h-[52px]"
+              className="rounded-full border border-gray-300 bg-transparent px-6 py-2.5 text-sm font-bold text-[#5B4FC4] hover:bg-gray-50 active:scale-95 transition-all min-h-[44px]"
             >
               重做錯題（{wrongCount} 題）
             </button>
           )}
           <button
             onClick={handleRetryAll}
-            className="rounded-xl border border-gray-300 bg-white px-8 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 active:scale-95 transition-all min-h-[52px]"
+            className="rounded-full border border-gray-300 bg-transparent px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 active:scale-95 transition-all min-h-[44px]"
           >
             全部重做
           </button>
           <button
             onClick={() => { onComplete(firstTryScore, firstTryTotal, firstTryResults); }}
-            className="rounded-xl bg-[#5B4FC4] px-10 py-3 text-base font-bold text-white hover:bg-[#4a3fa8] active:scale-95 transition-all shadow-md min-h-[52px]"
+            className="rounded-full bg-[#5B4FC4] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#4a3fa8] active:scale-95 transition-all shadow-md min-h-[44px]"
           >
             繼續 →
           </button>
@@ -504,7 +504,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
               <button
                 onClick={handleConfirm}
                 disabled={!selected}
-                className="rounded-xl bg-[#5B4FC4] px-8 py-2.5 text-white text-base font-bold
+                className="rounded-full bg-[#5B4FC4] px-6 py-2.5 text-white text-sm font-bold
                   disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#4a3fa8] active:scale-95 transition-all shadow min-h-[44px]"
               >
                 {selected ? '確認填入' : '請先選擇詞語'}

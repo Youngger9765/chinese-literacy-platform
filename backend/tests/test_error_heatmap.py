@@ -141,9 +141,9 @@ def _register_user(client, suffix: str) -> dict:
     assert resp.status_code == 201, resp.text
 
     verification_token = resp.json().get("verification_token")
-    assert verification_token is not None, "Expected dev-mode verification_token"
-    verify_resp = client.get(f"/api/auth/verify-email?token={verification_token}")
-    assert verify_resp.status_code == 200, verify_resp.text
+    if verification_token:
+        verify_resp = client.get(f"/api/auth/verify-email?token={verification_token}")
+        assert verify_resp.status_code == 200, verify_resp.text
 
     login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     assert login_resp.status_code == 200, login_resp.text

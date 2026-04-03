@@ -18,7 +18,7 @@ interface StoryLibraryProps {
 // ── Skeleton card ─────────────────────────────────────────────────────────────
 
 const SkeletonCard = () => (
-  <div className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+  <div className="bg-white rounded-2xl overflow-hidden shadow-card">
     <div className="h-40 bg-gray-200 animate-pulse" />
     <div className="p-4 space-y-2">
       <div className="h-5 bg-gray-200 animate-pulse rounded w-3/4" />

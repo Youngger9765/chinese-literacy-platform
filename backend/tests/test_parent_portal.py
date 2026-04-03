@@ -105,8 +105,9 @@ def _register(client, prefix: str) -> tuple[int, str]:
     password = "Test1234!"
     r = client.post("/api/auth/register", json={"email": email, "password": password, "name": prefix})
     assert r.status_code == 201, r.text
-    verification_token = r.json()["verification_token"]
-    client.get(f"/api/auth/verify-email?token={verification_token}")
+    verification_token = r.json().get("verification_token")
+    if verification_token:
+        client.get(f"/api/auth/verify-email?token={verification_token}")
     login_r = client.post("/api/auth/login", json={"email": email, "password": password})
     token = login_r.json()["access_token"]
     me = client.get("/api/users/me", headers=auth_header(token))

@@ -64,6 +64,16 @@ vocabulary:
 - word: 珍重
   definition: 珍惜。
 vocabulary_count: 9
+vocab_bank:
+  A: 如影隨形
+  B: 百般試煉
+  C: 崎嶇
+  D: 追思
+  E: 蜿蜒凶險
+  F: 逆轉
+  G: 安寧照護
+  H: 黑色幽默
+  I: 珍重
 fill_in_blank:
 - sentence: 那些童年時的美好回憶，總是（　　）地跟著他，讓他感到溫暖。
   answer: A

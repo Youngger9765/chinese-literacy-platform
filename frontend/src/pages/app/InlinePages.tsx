@@ -3,13 +3,13 @@
  * file but too domain-specific to live in App.tsx.
  *
  * - HomePage       — role-based redirect to teacher/student/library
- * - LibraryPage    — student library with recent practice + recommendations + full list
+ * - LibraryPage    — student library with story browsing
  * - WritePage      — standalone character writing practice
  * - ClassroomDetailPage  — resolves :id param and renders ClassroomDetail
  * - TeacherDashboardPage — thin wrapper around TeacherDashboard
  * - OnboardingWrapper    — first-time student onboarding overlay
  */
-import React, { Suspense, useState, useEffect, useCallback } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { lazy } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -19,8 +19,6 @@ import { PARENT_PORTAL_ENABLED } from '../../config/featureFlags';
 import StoryLibrary from '../student/StoryLibrary';
 import WriteCharacter from '../../components/stroke-order/WriteCharacter';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
-import RecommendedStories from '../../components/student/RecommendedStories';
-import { fetchLearningSessions, type LearningSummary } from '../../services/learningApi';
 import { Story } from '../../types';
 
 // Lazy-loaded — only needed when route is active
@@ -48,66 +46,16 @@ export const HomePage: React.FC = () => {
   return <Navigate to={homeMap[activeView] ?? '/student'} replace />;
 };
 
-interface RecentPracticeItem {
-  id: number;
-  storySlug: string | null;
-  title: string;
-  status: string;
-  startedAt: string;
-  completedAt: string | null;
-}
-
-function mapSessionToRecentItem(session: LearningSummary): RecentPracticeItem {
-  return {
-    id: session.id,
-    storySlug: session.story_slug,
-    title: session.story_title ?? session.story_slug ?? '未知課文',
-    status: session.status,
-    startedAt: session.started_at,
-    completedAt: session.completed_at,
-  };
-}
-
-/** Library page — wraps StoryLibrary with resume prompt, recommendations, and recent practice list. */
+/** Library page — clean story browsing with session resume prompt. */
 export const LibraryPage: React.FC = () => {
-  const { token } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const classroomId = searchParams.get('classroom');
   const classroomIdNum = classroomId ? parseInt(classroomId, 10) : null;
   const [showResumePrompt, setShowResumePrompt] = useState(true);
-  const [recentPractice, setRecentPractice] = useState<RecentPracticeItem[]>([]);
-  const [isLoadingRecent, setIsLoadingRecent] = useState(true);
-  const [recentError, setRecentError] = useState<string | null>(null);
 
   const handleSelectStory = (story: Story) => {
     navigate(`/learn/${story.id}/intro`);
-  };
-
-  const loadRecentPractice = useCallback(async () => {
-    if (!token) return;
-    try {
-      setIsLoadingRecent(true);
-      setRecentError(null);
-      const { items } = await fetchLearningSessions(token, { limit: 5 });
-      setRecentPractice(items.map(mapSessionToRecentItem));
-    } catch (err) {
-      setRecentError(err instanceof Error ? err.message : '載入最近練習失敗');
-    } finally {
-      setIsLoadingRecent(false);
-    }
-  }, [token]);
-
-  useEffect(() => {
-    void loadRecentPractice();
-  }, [loadRecentPractice]);
-
-  const formatDate = (iso: string | null): string => {
-    if (!iso) return '';
-    return new Date(iso).toLocaleDateString('zh-TW', {
-      month: 'short',
-      day: 'numeric',
-    });
   };
 
   return (
@@ -115,53 +63,7 @@ export const LibraryPage: React.FC = () => {
       {showResumePrompt && (
         <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
       )}
-      <div className="mt-4 min-h-[200px]">
-        <RecommendedStories />
-      </div>
-      <section className="mt-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-2">最近練習</h2>
-        {isLoadingRecent && (
-          <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <div key={idx} className="h-10 rounded-lg bg-gray-100 animate-pulse" />
-            ))}
-          </div>
-        )}
-        {!isLoadingRecent && recentError && (
-          <p className="text-sm text-red-500">{recentError}</p>
-        )}
-        {!isLoadingRecent && !recentError && recentPractice.length === 0 && (
-          <p className="text-sm text-gray-500">還沒有練習紀錄，先從下方課文開始吧！</p>
-        )}
-        {!isLoadingRecent && !recentError && recentPractice.length > 0 && (
-          <ul className="divide-y divide-gray-100 rounded-xl border border-gray-100 bg-white">
-            {recentPractice.map((item) => (
-              <li key={item.id} className="flex items-center justify-between px-4 py-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
-                  <p className="text-xs text-gray-500">
-                    {item.completedAt
-                      ? `完成：${formatDate(item.completedAt)}`
-                      : `開始：${formatDate(item.startedAt)}`}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    item.storySlug
-                      ? navigate(`/learn/${item.storySlug}/report`)
-                      : navigate(`/history`)
-                  }
-                  className="text-xs font-medium text-accent hover:text-accent-hover"
-                >
-                  查看記錄
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-      <div className="mt-8">
+      <div className="mt-4">
         <StoryLibrary onStartReading={handleSelectStory} classroomId={classroomIdNum} />
       </div>
     </div>

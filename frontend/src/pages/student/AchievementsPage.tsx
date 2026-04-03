@@ -57,7 +57,7 @@ const AchievementsPage: React.FC = () => {
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-2xl font-black text-gray-800">我的成就</h1>
+        <h1 className="text-2xl font-bold text-gray-800">我的成就</h1>
         <p className="text-gray-500 text-sm mt-1">學習積分、連續紀錄與成就徽章</p>
       </div>
 
@@ -77,7 +77,7 @@ const AchievementsPage: React.FC = () => {
       {/* Unlocked badges */}
       {unlockedBadges.length > 0 && (
         <section>
-          <h2 className="text-base font-black text-gray-700 mb-3">
+          <h2 className="text-base font-semibold text-gray-700 mb-3">
             已解鎖成就 ({unlockedBadges.length})
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -91,7 +91,7 @@ const AchievementsPage: React.FC = () => {
       {/* Locked badges */}
       {lockedBadges.length > 0 && (
         <section>
-          <h2 className="text-base font-black text-gray-700 mb-3">
+          <h2 className="text-base font-semibold text-gray-700 mb-3">
             待解鎖成就 ({lockedBadges.length})
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

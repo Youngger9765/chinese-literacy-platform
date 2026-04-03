@@ -127,9 +127,23 @@ jobs:
       # --- Frontend ---
       - name: Build & push frontend preview image
         if: needs.detect-changes.outputs.frontend == 'true' || github.event.action == 'opened'
+        env:
+          DEMO_ADMIN_EMAIL: ${{ secrets.DEMO_ADMIN_EMAIL }}
+          DEMO_ADMIN_PW: ${{ secrets.DEMO_ADMIN_PW }}
+          DEMO_TEACHER_EMAIL: ${{ secrets.DEMO_TEACHER_EMAIL }}
+          DEMO_TEACHER_PW: ${{ secrets.DEMO_TEACHER_PW }}
+          DEMO_STUDENT_EMAIL: ${{ secrets.DEMO_STUDENT_EMAIL }}
+          DEMO_STUDENT_PW: ${{ secrets.DEMO_STUDENT_PW }}
         run: |
           docker build \
             --build-arg VITE_API_URL=${{ steps.backend-url.outputs.url }} \
+            --build-arg VITE_SHOW_DEMO_LOGIN=true \
+            --build-arg "VITE_DEMO_ADMIN_EMAIL=${DEMO_ADMIN_EMAIL}" \
+            --build-arg "VITE_DEMO_ADMIN_PW=${DEMO_ADMIN_PW}" \
+            --build-arg "VITE_DEMO_TEACHER_EMAIL=${DEMO_TEACHER_EMAIL}" \
+            --build-arg "VITE_DEMO_TEACHER_PW=${DEMO_TEACHER_PW}" \
+            --build-arg "VITE_DEMO_STUDENT_EMAIL=${DEMO_STUDENT_EMAIL}" \
+            --build-arg "VITE_DEMO_STUDENT_PW=${DEMO_STUDENT_PW}" \
             -t "${{ env.REGISTRY }}/frontend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}" \
             ./frontend
           docker push "${{ env.REGISTRY }}/frontend:issue-${{ env.ISSUE_NUM }}-${{ github.sha }}"

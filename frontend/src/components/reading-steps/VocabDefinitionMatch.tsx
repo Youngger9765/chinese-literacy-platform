@@ -134,7 +134,7 @@ function NoDataFallback({ onFinish }: { onFinish: () => void }) {
       </div>
       <button
         onClick={onFinish}
-        className="rounded-xl bg-amber-500 px-8 py-3 text-white font-semibold text-lg hover:bg-amber-600 transition-colors"
+        className="rounded-full bg-amber-500 px-6 py-2.5 text-white font-bold text-sm hover:bg-amber-600 transition-colors"
       >
         繼續下一步
       </button>
@@ -268,7 +268,7 @@ function SummaryScreen({
         {mcWrongAnswers.length > 0 && (
           <button
             onClick={() => onRetryModeWrong('multiple-choice')}
-            className="rounded-xl border-2 border-accent text-accent px-6 py-3 font-bold hover:bg-accent hover:text-white transition-all active:scale-95"
+            className="rounded-full border border-gray-300 bg-transparent text-gray-700 px-6 py-2.5 text-sm font-bold hover:bg-gray-50 transition-all active:scale-95"
           >
             重做選擇題錯題（{mcWrongAnswers.length} 題）
           </button>
@@ -276,20 +276,20 @@ function SummaryScreen({
         {dragDropWrongAnswers.length > 0 && (
           <button
             onClick={() => onRetryModeWrong('drag-drop')}
-            className="rounded-xl border-2 border-accent text-accent px-6 py-3 font-bold hover:bg-accent hover:text-white transition-all active:scale-95"
+            className="rounded-full border border-gray-300 bg-transparent text-gray-700 px-6 py-2.5 text-sm font-bold hover:bg-gray-50 transition-all active:scale-95"
           >
             重做拖拉配對錯題（{dragDropWrongAnswers.length} 題）
           </button>
         )}
         <button
           onClick={onRetryAll}
-          className="rounded-xl border-2 border-gray-300 text-gray-700 px-6 py-3 font-bold hover:bg-gray-100 transition-all active:scale-95"
+          className="rounded-full border border-gray-300 text-gray-700 px-6 py-2.5 text-sm font-bold hover:bg-gray-50 transition-all active:scale-95"
         >
           全部重做
         </button>
         <button
           onClick={onFinish}
-          className="rounded-xl bg-accent px-8 py-3 text-white font-bold hover:bg-accent-hover transition-all active:scale-95 shadow-md"
+          className="rounded-full bg-accent px-6 py-2.5 text-white text-sm font-bold hover:bg-accent-hover transition-all active:scale-95 shadow-sm"
         >
           繼續下一步 →
         </button>
@@ -407,7 +407,7 @@ function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoi
       {/* Progress */}
       <div className="mb-5 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-gray-500">題目進度</span>
-        <span className="text-base font-black text-amber-700">
+        <span className="text-base font-bold text-amber-700">
           {queueIdx + 1}{' '}
           <span className="text-gray-400 font-normal text-sm">/ {activeDefIndices.length}</span>
         </span>
@@ -697,7 +697,7 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
       {/* Progress */}
       <div className="mb-4 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-gray-500">配對進度</span>
-        <span className="text-base font-black text-amber-700">
+        <span className="text-base font-bold text-amber-700">
           {confirmed.size}{' '}
           <span className="text-gray-400 font-normal text-sm">/ {activeDefIndices.length}</span>
         </span>

@@ -66,6 +66,16 @@ vocabulary:
 - word: 犯小人
   definition: 身旁出現了故意要害你的人。
 vocabulary_count: 13
+vocab_bank:
+  A: 百思不解
+  B: 嘀咕
+  C: 層出不窮
+  D: 難如登天
+  E: 自怨自艾
+  F: 怨懟
+  G: 儼然
+  慢條斯理: 慢條斯理
+  精采了: 犯小人
 fill_in_blank:
 - sentence: 教練要小夫每天多練習半小時，小夫不滿的(　　)幾句，讓教練大發雷霆。
   answer: Ｂ

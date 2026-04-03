@@ -11,7 +11,7 @@ from ..auth.rate_limiter import InMemoryRateLimiter
 from ..config import settings
 from ..database import get_db
 from ..models.user import User, UserRole, Role
-from ..models.school import School
+from ..models.school import School, ClassroomStudent
 from ..schemas.auth import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
@@ -54,6 +54,27 @@ def _has_active_role(db: Session, user_id: int, role_name: str) -> bool:
         .first()
         is not None
     )
+
+
+def _compute_has_classroom(db: Session, user_id: int) -> bool:
+    """Return True if user is not a student OR if they belong to at least one classroom.
+
+    Issue #457: students who are not yet enrolled in any classroom should see a
+    friendly waiting screen on the frontend instead of the full dashboard.
+    Teachers, admins, and all other roles always return True (not gated).
+    """
+    is_student = _has_active_role(db, user_id, "student")
+    if not is_student:
+        # Non-students (teachers, admins, parents, etc.) are never gated
+        return True
+
+    # Student — check if enrolled in at least one classroom
+    enrolled = (
+        db.query(ClassroomStudent)
+        .filter(ClassroomStudent.student_id == user_id)
+        .first()
+    )
+    return enrolled is not None
 
 
 def _ensure_parent_login_allowed(user: User, db: Session) -> None:
@@ -112,14 +133,23 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
             detail="Email already registered",
         )
 
-    verification_token = secrets.token_hex(EMAIL_VERIFICATION_TOKEN_BYTES)
+    # Issue #460: honour REQUIRE_EMAIL_VERIFICATION flag.
+    # When the flag is off (default), auto-verify so existing flows are unaffected.
+    # When the flag is on, generate a token and leave email_verified=False.
+    require_verification = settings.require_email_verification
+
+    if require_verification:
+        verification_token: str | None = secrets.token_hex(EMAIL_VERIFICATION_TOKEN_BYTES)
+        auto_verified = False
+    else:
+        verification_token = None
+        auto_verified = True
 
     user = User(
         email=req.email,
         password_hash=hash_password(req.password),
         name=req.name,
-        # Email verification is required before login (issue #460)
-        email_verified=False,
+        email_verified=auto_verified,
         email_verification_token=verification_token,
     )
     db.add(user)
@@ -131,11 +161,17 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     db.commit()
     db.refresh(user)
 
-    # TODO(production): send verification email here instead of returning token in response.
-    # Example: send_email(to=user.email, subject="驗證您的 Email", body=f"請點擊連結驗證：/auth/verify-email?token={verification_token}")
+    # TODO(production): when require_verification=True, send verification email here.
+    # Example: send_email(to=user.email, subject="驗證您的 Email",
+    #                     body=f"請點擊連結驗證：/auth/verify-email?token={verification_token}")
+    if require_verification:
+        return RegisterResponse(
+            message="註冊成功！請檢查 Email 並點擊驗證連結完成驗證。（測試模式下 token 直接回傳）",
+            verification_token=verification_token,  # Dev/staging only — remove in production
+        )
     return RegisterResponse(
-        message="註冊成功！請檢查 Email 並點擊驗證連結完成驗證。（測試模式下 token 直接回傳）",
-        verification_token=verification_token,  # Dev/staging only — remove in production
+        message="註冊成功！",
+        verification_token=None,
     )
 
 
@@ -249,8 +285,9 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     _ensure_parent_login_allowed(user, db)
 
     # Require email verification before allowing login (issue #460).
-    # Batch-created student accounts keep email_verified=True (they have no real email).
-    if not user.email_verified:
+    # Only enforced when REQUIRE_EMAIL_VERIFICATION=True.
+    # Batch-created student accounts always have email_verified=True (no real email).
+    if settings.require_email_verification and not user.email_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="請先驗證 Email。請檢查您的信箱並點擊驗證連結。",
@@ -264,8 +301,16 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     if user.student_profile and not user.student_profile.password_changed:
         must_change = True
 
+    # Issue #457: determine whether this user has at least one classroom.
+    # Only applies to students — teachers and admins always get True.
+    has_classroom = _compute_has_classroom(db, user.id)
+
     token = create_access_token(user.id)
-    return TokenResponse(access_token=token, must_change_password=must_change)
+    return TokenResponse(
+        access_token=token,
+        must_change_password=must_change,
+        has_classroom=has_classroom,
+    )
 
 
 @router.post("/complete-onboarding")

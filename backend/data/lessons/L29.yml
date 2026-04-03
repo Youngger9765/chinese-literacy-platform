@@ -55,6 +55,19 @@ vocabulary:
 - word: 總結
   definition: 根據這個表格進行分析，提出結論。
 vocabulary_count: 12
+vocab_bank:
+  A: 退役
+  B: 鞏固
+  C: 幅員遼闊
+  D: 遍地開花
+  E: 發掘
+  F: 後顧之憂
+  G: 天壤之別
+  H: 熱衷
+  I: 井井有條
+  J: 斥資
+  K: 整理表格步驟
+  L: 總結
 fill_in_blank:
 - sentence: 那位曾經叱吒風雲的籃球選手，在球隊奪冠後選擇了（　　）。
   answer: A

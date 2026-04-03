@@ -468,7 +468,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       <div className="flex-shrink-0 bg-amber-100 border-b border-amber-200 px-6 py-3 flex items-start gap-3 text-amber-900">
         <span className="text-xl flex-shrink-0 mt-0.5" aria-hidden="true">📖</span>
         <div className="text-sm leading-relaxed">
-          <span className="font-black text-base">選取課文中不太了解的字詞，標記起來</span>
+          <span className="font-semibold text-sm">選取課文中不太了解的字詞，標記起來</span>
           <div className="mt-0.5 text-amber-800">
             <strong>第一次閱讀</strong>：選取後按 <strong>❓ 不懂</strong> 做記號。
             <strong className="ml-3">第二次閱讀</strong>：選取重要的地方，按 <strong>💛 重要</strong> 標記。
@@ -524,7 +524,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                       e.preventDefault();
                       applyAnnotation(type);
                     }}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-base font-black border-2 transition-all min-h-[44px] active:scale-95 ${cfg.activeClass}`}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all min-h-[44px] active:scale-95 ${cfg.activeClass}`}
                   >
                     <span aria-hidden="true">{cfg.icon}</span>
                     {cfg.label}
@@ -549,7 +549,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
         <aside className="w-52 sm:w-60 md:w-72 border-l border-amber-200 bg-white overflow-y-auto">
           <div className="sticky top-0 bg-amber-50 border-b border-amber-200 px-4 py-3">
-            <h3 className="text-sm font-black text-amber-900">我的記號</h3>
+            <h3 className="text-sm font-semibold text-amber-900">我的記號</h3>
             <p className="text-xs text-amber-700 mt-1">點擊詞語可跳到課文對應位置</p>
           </div>
           <div className="px-3 py-3 space-y-2">
@@ -618,7 +618,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
         <button
           type="button"
           onClick={() => onFinish(summary)}
-          className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           完成標記
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

@@ -202,7 +202,7 @@ const RolesPanel: React.FC = () => {
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+              <div key={i} className="bg-white rounded-2xl shadow-card p-5">
                 <div className="h-5 bg-gray-200 animate-pulse rounded w-2/3 mb-3" />
                 <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3" />
               </div>
@@ -216,7 +216,7 @@ const RolesPanel: React.FC = () => {
             {roles.map((role) => (
               <div
                 key={role.id}
-                className="bg-white rounded-xl border border-gray-200 shadow-sm p-5"
+                className="bg-white rounded-2xl shadow-card p-5"
               >
                 <h3 className="font-bold text-gray-900 mb-2">{role.display_name}</h3>
                 <div className="space-y-1.5 text-sm text-gray-500">

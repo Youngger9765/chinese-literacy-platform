@@ -1,7 +1,9 @@
 """Teacher student management endpoints: sessions, dialogue, tags, learning curve, stuck overview."""
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
@@ -279,12 +281,14 @@ def remove_student_tag(
 def get_student_learning_curve(
     student_id: int,
     request: Request,
+    story_slug: Optional[str] = Query(None, description="Filter by a specific story_slug"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Return time-series learning data for a student.
 
-    Includes actual scores and rolling average over last 5 sessions.
+    Includes actual scores, CPM, accuracy, and rolling average over last 5 sessions.
+    Optionally filter by story_slug to see reading progress for a specific text.
     Teacher must own a classroom containing this student.
     """
     # Verify teacher access
@@ -308,16 +312,15 @@ def get_student_learning_curve(
     )
 
     # Sessions with scores, ordered oldest first
-    sessions = (
-        db.query(LearningSession)
-        .filter(
-            LearningSession.student_id == student_id,
-            LearningSession.overall_score.isnot(None),
-            LearningSession.status == "completed",
-        )
-        .order_by(LearningSession.started_at.asc())
-        .all()
+    query = db.query(LearningSession).filter(
+        LearningSession.student_id == student_id,
+        LearningSession.overall_score.isnot(None),
+        LearningSession.status == "completed",
     )
+    if story_slug:
+        query = query.filter(LearningSession.story_slug == story_slug)
+
+    sessions = query.order_by(LearningSession.started_at.asc()).all()
 
     if not sessions:
         return LearningCurveResponse(data=[])
@@ -333,12 +336,32 @@ def get_student_learning_curve(
             except (ValueError, TypeError):
                 story_title = session.story_slug
 
+        # Extract CPM and accuracy from JSONB reading results
+        cpm = None
+        accuracy = None
+        fr = session.full_reading_result or {}
+        rr = session.reading_result or {}
+        # Prefer full_reading_result, fall back to reading_result
+        if fr.get("cpm") is not None:
+            cpm = float(fr["cpm"])
+        elif rr.get("cpm") is not None:
+            cpm = float(rr["cpm"])
+        if fr.get("match_rate") is not None:
+            accuracy = round(float(fr["match_rate"]) * 100, 1)
+        elif fr.get("accuracy") is not None:
+            accuracy = round(float(fr["accuracy"]), 1)
+        elif rr.get("accuracy") is not None:
+            accuracy = round(float(rr["accuracy"]), 1)
+
         points.append(
             LearningCurvePoint(
                 date=session.started_at.isoformat(),
                 score=round(session.overall_score, 1),
                 story_title=story_title,
                 session_id=session.id,
+                story_slug=session.story_slug,
+                cpm=cpm,
+                accuracy=accuracy,
             )
         )
 

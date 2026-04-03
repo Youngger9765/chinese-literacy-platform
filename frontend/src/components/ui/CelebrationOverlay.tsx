@@ -118,7 +118,7 @@ const CelebrationOverlay: React.FC<CelebrationOverlayProps> = ({ score }) => {
           </div>
 
           {/* Message */}
-          <p className="message-bounce text-3xl font-black text-gray-900 tracking-wide">
+          <p className="message-bounce text-3xl font-bold text-gray-900 tracking-wide">
             {message}
           </p>
 

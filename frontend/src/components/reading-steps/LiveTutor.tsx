@@ -16,6 +16,7 @@ import {
   type LocalEvalResult,
 } from '../../utils/localEval';
 import { cancelTts } from '../../services/ttsApi';
+import { saveReadingHistory } from '../../services/readingHistoryApi';
 import {
   TIER1_POOL,
   TIER2_POOL,
@@ -429,8 +430,30 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /*  Core: evaluate the student's reading and respond                */
   /* ================================================================ */
 
+  /* ---- Helper: save paragraph reading to history (#909) ---- */
+  const saveParagraphReading = useCallback((lineIdx: number, result: LineResult) => {
+    if (!token) return;
+    const durationSec = result.durationMs / 1000;
+    if (durationSec <= 0) return;
+    saveReadingHistory(
+      {
+        lesson_id: String(story.id),
+        paragraph_index: lineIdx,
+        reading_type: 'paragraph',
+        cpm: result.cpm,
+        accuracy: Math.round(result.matchRate * 100),
+        duration_seconds: durationSec,
+      },
+      token,
+    ).catch((err) => console.error('Failed to save paragraph reading history:', err));
+  }, [token, story.id]);
+
   /* ---- Helper: advance or finish after a successful paragraph ---- */
   const advanceParagraph = useCallback((lineIdx: number, allLineResults: LineResult[]) => {
+    // Save per-paragraph reading to history (#909)
+    const currentResult = allLineResults.find(r => r.lineIndex === lineIdx);
+    if (currentResult) saveParagraphReading(lineIdx, currentResult);
+
     const isLastLine = lineIdx >= story.content.length - 1;
     if (!isLastLine) {
       if (isAdvancingRef.current) return;
@@ -474,7 +497,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         });
       }, 2000);
     }
-  }, [story, onFinish, onParagraphComplete]);
+  }, [story, onFinish, onParagraphComplete, saveParagraphReading]);
 
   /* ---- Hybrid evaluation: local first, Gemini only on FAIL ---- */
   const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
@@ -894,7 +917,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                     const summary = paragraphSummaries[idx];
                     if (!summary) return null;
                     return (
-                      <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-200 shadow-sm space-y-3">
+                      <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white shadow-card space-y-3">
                         <p className="text-base font-bold text-gray-800">
                           {summary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI 分析中...</span>}
                           {summary.feedback}
@@ -966,7 +989,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={handleFinish}
-                  className="px-8 py-3 rounded-xl text-base font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95"
+                  className="px-6 py-2.5 rounded-full text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95"
                 >
                   觀看總結報告
                 </button>
@@ -999,7 +1022,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       >
         {/* Header */}
         <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4 gap-2">
-          <span className="text-xs font-black text-accent-light uppercase tracking-widest">朗讀回饋</span>
+          <span className="text-xs font-bold text-accent-light uppercase tracking-widest">朗讀回饋</span>
           <div className="flex-1" />
           <span className={`text-xs font-bold ${stt.isSessionActive ? 'text-green-500' : stt.isPreparing ? 'text-yellow-500' : 'text-gray-300'}`}>
             {stt.isSessionActive ? '● 聆聽中' : stt.isPreparing ? '● 準備中' : '● 待機'}

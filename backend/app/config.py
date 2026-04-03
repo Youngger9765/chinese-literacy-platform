@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 480  # 8 hours
     google_client_id: str = ""  # set GOOGLE_CLIENT_ID env var in Cloud Run
     parent_portal_enabled: bool = False
+    # Email verification gate (issue #460).
+    # False (default): auto-verify on registration — existing flow unchanged.
+    # True: new registrations get email_verified=False and must click a link before login.
+    require_email_verification: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

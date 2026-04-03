@@ -45,6 +45,14 @@ const ReportPage: React.FC = () => {
   useEffect(() => {
     if (hasActiveAssignment && !isAssignmentReadyForSubmit) return;
     if (!dbSessionId || !token || !user?.id) return;
+    // Skip XP award when student hasn't completed any learning steps yet
+    const hasLearningData = !!(
+      session?.readingAttempt ||
+      session?.fullReadingResult ||
+      session?.comprehensionResult ||
+      session?.vocabResult
+    );
+    if (!hasLearningData) return;
 
     const readingAccuracy = session?.readingAttempt?.accuracy;
     const comprehensionPct = session?.comprehensionResult
@@ -140,7 +148,7 @@ const ReportPage: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate(`/learn/${storyId}/${firstIncompleteStepPath}`)}
-              className="px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-semibold"
+              className="px-6 py-2.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-bold"
             >
               繼續未完成關卡
             </button>

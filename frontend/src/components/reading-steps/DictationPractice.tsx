@@ -217,7 +217,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
                   d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 016 0v6a3 3 0 01-3 3z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-black text-gray-900">聽寫練習</h2>
+            <h2 className="text-2xl font-bold text-gray-900">聽寫練習</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
               系統會播放詞語的讀音，請聽完後在輸入框中寫出正確的字詞。
               <br />
@@ -258,13 +258,13 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
         <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
           <button
             onClick={onBack}
-            className="px-4 py-3 rounded-xl text-base text-gray-600 hover:text-gray-800 transition-colors"
+            className="px-4 py-2.5 rounded-full text-sm text-gray-600 hover:text-gray-800 transition-colors"
           >
             返回
           </button>
           <button
             onClick={handleStartPractice}
-            className="px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
+            className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
           >
             開始聽寫
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +301,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
           </div>
 
           {/* Speaker card */}
-          <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-8 w-full flex flex-col items-center gap-6">
+          <div className="bg-white rounded-3xl shadow-card p-8 w-full flex flex-col items-center gap-6">
             <p className="text-sm text-gray-500 font-medium">請聆聽並寫出詞語</p>
 
             {/* Speaker button */}
@@ -356,14 +356,14 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
         <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between gap-3">
           <button
             onClick={() => submitAnswer(true)}
-            className="px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-gray-700 border border-gray-200 hover:border-gray-300 transition-colors"
+            className="px-4 py-2.5 rounded-full text-sm text-gray-500 hover:text-gray-700 border border-gray-300 bg-transparent hover:bg-gray-50 transition-colors"
           >
             跳過
           </button>
           <button
             onClick={() => submitAnswer(false)}
             disabled={!answer.trim()}
-            className="flex-1 px-8 py-3 rounded-xl font-bold text-base bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white shadow-lg transition-all active:scale-95"
+            className="flex-1 px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 text-white shadow-lg transition-all active:scale-95"
           >
             {currentIndex + 1 >= words.length ? '完成' : '下一題'}
           </button>

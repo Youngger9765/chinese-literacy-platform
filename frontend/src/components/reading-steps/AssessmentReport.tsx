@@ -10,7 +10,7 @@ import DiffDisplay from '../ui/DiffDisplay';
 import CelebrationOverlay from '../ui/CelebrationOverlay';
 import ComprehensionScoreCard from './ComprehensionScoreCard';
 import { CPM_VERY_FAST, CPM_FAST, CPM_MEDIUM, CPM_SLOW } from '../../utils/personaConfig';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
 import ExitTicket from './ExitTicket';
 import { trackLearningEvent } from '../../utils/analytics';
@@ -19,6 +19,7 @@ import StarCelebration from '../gamification/StarCelebration';
 import { calcStarRating } from '../../utils/starRatingCalc';
 import GoalAchievementCard from '../ui/GoalAchievementCard';
 import RepeatedErrorAlertModal from '../student/RepeatedErrorAlertModal';
+import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -142,7 +143,7 @@ const Section: React.FC<{
         role={canToggle ? 'button' : undefined}
         aria-expanded={canToggle ? open : undefined}
       >
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${disabled ? 'bg-gray-200 text-gray-400' : 'bg-accent text-white'}`}>
+        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${disabled ? 'bg-gray-200 text-gray-400' : 'bg-accent text-white'}`}>
           {number}
         </span>
         <h3 className={`text-lg font-bold flex-1 ${disabled ? 'text-gray-400' : 'text-gray-900'}`}>{title}</h3>
@@ -179,13 +180,26 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
     } catch {}
   }, [story?.id, dbSessionId]);
 
+  // Reading history for progress curve (#909)
+  // Only fetch when there is actual reading data — avoids 422 when student hasn't started yet
+  const [readingHistory, setReadingHistory] = useState<ReadingHistoryPoint[]>([]);
+  useEffect(() => {
+    if (!token || !story?.id) return;
+    // Determine if any reading result exists before making the network call
+    const hasReadingData = !!(session?.readingAttempt || session?.fullReadingResult);
+    if (!hasReadingData) return;
+    getReadingHistory(token, String(story.id)).then(setReadingHistory).catch(() => {});
+  }, [token, story?.id, session?.readingAttempt, session?.fullReadingResult]);
+
   // Repeated error alert modal state (Issue #248)
   const [repeatedAlerts, setRepeatedAlerts] = useState<RepeatedErrorAlertItem[]>([]);
   const [showRepeatedAlert, setShowRepeatedAlert] = useState(false);
   const alertFetchedRef = useRef(false);
 
   const fetchRepeatedAlerts = useCallback(async () => {
-    if (!token || !dbSessionId || alertFetchedRef.current) return;
+    // Only check for repeated errors when the student has actual session data
+    const hasReadingData = !!(session?.readingAttempt || session?.fullReadingResult);
+    if (!token || !dbSessionId || alertFetchedRef.current || !hasReadingData) return;
     alertFetchedRef.current = true;
     try {
       // We need the studentId — derive it by calling the alert endpoint via
@@ -227,7 +241,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
     return (
       <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 py-24 text-center">
         <p className="text-gray-500 text-lg">請先選擇課文開始學習</p>
-        <button onClick={onRetry} className="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded-xl font-bold transition-all">
+        <button onClick={onRetry} className="bg-accent hover:bg-accent-hover text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all">
           回圖書館
         </button>
       </div>
@@ -236,23 +250,16 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
   const { readingAttempt, comprehensionResult, vocabResult, dictationResult, fullReadingResult } = session;
 
-  // Empty state: session exists but no learning data completed yet
+  // Determine how many of the 6 key sections the student has completed
   const hasNoData = !readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult;
-  if (hasNoData) {
-    return (
-      <div className="max-w-4xl mx-auto flex flex-col items-center justify-center gap-6 py-24 text-center">
-        <span className="text-6xl">📖</span>
-        <h2 className="text-2xl font-bold text-gray-900">還沒有完成朗讀練習喔！</h2>
-        <p className="text-gray-500">請先完成「逐段朗讀」或「全文朗讀」，才能查看學習報告。</p>
-        <button
-          onClick={onRetry}
-          className="bg-accent hover:bg-accent-hover text-white px-8 py-3 rounded-xl font-bold transition-all"
-        >
-          回到課文
-        </button>
-      </div>
-    );
-  }
+  const completedSections = [
+    !!(readingAttempt || fullReadingResult),  // 環節一 朗讀結果
+    !!(readingAttempt || fullReadingResult),  // 環節二 錄音分析
+    !!(readingAttempt?.lineBreakdown?.length), // 環節三 逐句對比
+    !!(readingAttempt || fullReadingResult),  // 環節四 錯字詞
+    !!readingAttempt,                         // 環節五 練習建議
+    !!(comprehensionScores || comprehensionResult), // 環節六 課文理解
+  ].filter(Boolean).length;
 
   // Compute overall score
   const scores: number[] = [];
@@ -350,26 +357,68 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
       <CelebrationOverlay score={overallScore} />
 
       {/* ============ 星星評級 Star Rating (Issue #222) ============ */}
-      <StarCelebration
-        stars={starCount}
-        readingAccuracy={bestReadingAccuracy}
-        comprehensionScore={comprehensionPct}
-      />
+      {!hasNoData && (
+        <StarCelebration
+          stars={starCount}
+          readingAccuracy={bestReadingAccuracy}
+          comprehensionScore={comprehensionPct}
+        />
+      )}
+
+      {/* Progress indicator — shown when not all sections are complete */}
+      {hasNoData ? (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
+          <p className="text-2xl mb-2">📖</p>
+          <h2 className="text-lg font-bold text-amber-900 mb-1">還沒有完成朗讀練習喔！</h2>
+          <p className="text-sm text-amber-700 mb-3">完成「逐段朗讀」或「全文朗讀」後，這裡會顯示你的完整學習報告。</p>
+          <button
+            onClick={onRetry}
+            className="bg-accent hover:bg-accent-hover text-white px-6 py-2 rounded-full text-sm font-bold transition-all"
+          >
+            回到課文
+          </button>
+        </div>
+      ) : completedSections < 6 ? (
+        <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
+          <div className="flex gap-1">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className={`h-2 rounded-full transition-all ${i < completedSections ? 'w-6 bg-accent' : 'w-4 bg-gray-200'}`}
+              />
+            ))}
+          </div>
+          <p className="text-sm text-blue-700 font-medium">
+            已完成 <span className="font-black">{completedSections}</span> / 6 環節
+          </p>
+        </div>
+      ) : null}
 
       {/* Header */}
       <div className="text-center">
-        <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
-          恭喜完成練習！
-        </div>
-        <h2 className="text-4xl font-bold mb-2">好棒！你今天又進步了。</h2>
-        <p className="text-gray-500">讓我們看看這次學習的完整成果吧。</p>
+        {hasNoData ? null : (
+          <div className="inline-block bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-bold mb-4">
+            恭喜完成練習！
+          </div>
+        )}
+        <h2 className="text-4xl font-bold mb-2">
+          {hasNoData ? '學習報告預覽' : '好棒！你今天又進步了。'}
+        </h2>
+        <p className="text-gray-500">
+          {hasNoData ? '完成各環節後，這裡會顯示你的詳細成果。' : '讓我們看看這次學習的完整成果吧。'}
+        </p>
         {story && (
           <p className="text-sm text-gray-400 mt-1">{story.title}</p>
         )}
-        {overallScore !== null && (
+        {overallScore !== null ? (
           <div className="mt-4 inline-flex items-center gap-2 bg-accent/10 text-accent px-5 py-2 rounded-full">
             <span className="text-sm font-bold">綜合成績</span>
             <span className="text-2xl font-black">{overallScore}%</span>
+          </div>
+        ) : (
+          <div className="mt-4 inline-flex items-center gap-2 bg-gray-100 text-gray-400 px-5 py-2 rounded-full">
+            <span className="text-sm font-bold">綜合成績</span>
+            <span className="text-2xl font-black">--</span>
           </div>
         )}
       </div>
@@ -637,7 +686,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             {onGoToVocab && (
               <button
                 onClick={onGoToVocab}
-                className="w-full mt-2 flex items-center justify-center gap-2 py-3 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-sm rounded-xl transition-colors"
+                className="w-full mt-2 flex items-center justify-center gap-2 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-sm rounded-full transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -733,7 +782,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             {/* 生字練習 */}
             <div className={`rounded-2xl border p-5 ${vocabResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
               <div className="flex items-center gap-2 mb-3">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${vocabResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>3</span>
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${vocabResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>3</span>
                 <h4 className={`text-sm font-bold ${vocabResult ? 'text-gray-900' : 'text-gray-400'}`}>生字練習</h4>
               </div>
               {vocabResult ? (
@@ -763,7 +812,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             {dictationResult && (
               <div className="rounded-2xl border p-5 bg-white border-slate-200 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black bg-accent text-white">5</span>
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-accent text-white">5</span>
                   <h4 className="text-sm font-bold text-gray-900">聽寫練習</h4>
                 </div>
                 <div className="space-y-2">
@@ -807,7 +856,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             {/* 課文理解 */}
             <div className={`rounded-2xl border p-5 ${comprehensionResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
               <div className="flex items-center gap-2 mb-3">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>3</span>
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${comprehensionResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>3</span>
                 <h4 className={`text-sm font-bold ${comprehensionResult ? 'text-gray-900' : 'text-gray-400'}`}>課文理解</h4>
                 {comprehensionResult?.isComplete && (
                   <span className="ml-auto bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">已完成</span>
@@ -845,13 +894,70 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         />
       )}
 
+      {/* ============ 朗讀進步曲線 (#909) ============ */}
+      {readingHistory.length >= 2 && (
+        <Section number={8} title="朗讀進步曲線" defaultOpen={true}>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              本篇課文已練習 {readingHistory.length} 次，持續練習可以看到明顯進步
+            </p>
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={readingHistory.map((h, i) => ({
+                attempt: `第${i + 1}次`,
+                cpm: h.cpm,
+                accuracy: h.accuracy,
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="attempt" tick={{ fontSize: 11 }} />
+                <YAxis
+                  yAxisId="cpm"
+                  tick={{ fontSize: 11 }}
+                  width={36}
+                  label={{ value: '字/分', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#9ca3af' } }}
+                />
+                <YAxis
+                  yAxisId="accuracy"
+                  orientation="right"
+                  domain={[0, 100]}
+                  tick={{ fontSize: 11 }}
+                  width={36}
+                  label={{ value: '%', angle: 90, position: 'insideRight', style: { fontSize: 10, fill: '#9ca3af' } }}
+                />
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    name === 'cpm' ? `${value} 字/分` : `${value}%`,
+                    name === 'cpm' ? '語速 (CPM)' : '準確度',
+                  ]}
+                />
+                <Legend
+                  formatter={(value: string) => value === 'cpm' ? '語速 (CPM)' : '準確度'}
+                />
+                <Line yAxisId="cpm" type="monotone" dataKey="cpm" stroke="#4A3FA3" strokeWidth={2} dot={{ r: 4 }} name="cpm" />
+                <Line yAxisId="accuracy" type="monotone" dataKey="accuracy" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} name="accuracy" />
+                {readingGoals && (
+                  <>
+                    <Line yAxisId="cpm" type="monotone" dataKey={() => readingGoals.effectiveCpm} stroke="#4A3FA3" strokeWidth={1} strokeDasharray="5 5" dot={false} name="cpm-goal" legendType="none" />
+                    <Line yAxisId="accuracy" type="monotone" dataKey={() => readingGoals.effectiveAccuracy} stroke="#10b981" strokeWidth={1} strokeDasharray="5 5" dot={false} name="accuracy-goal" legendType="none" />
+                  </>
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+            {readingGoals && (
+              <p className="text-xs text-gray-400 text-center">
+                虛線 = 目標值（CPM {readingGoals.effectiveCpm}，準確度 {readingGoals.effectiveAccuracy}%）
+              </p>
+            )}
+          </div>
+        </Section>
+      )}
+
       {/* CTA */}
       <div className="bg-gradient-to-r from-accent to-violet-600 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
         <div>
           <h3 className="text-2xl font-bold">準備好讀下一個故事了嗎？</h3>
           <p className="text-white/80">每天進步一點點，你就會變成閱讀小達人！</p>
         </div>
-        <button onClick={onRetry} className="bg-white text-accent px-8 py-3 rounded-xl font-bold hover:shadow-lg transition-all">
+        <button onClick={onRetry} className="bg-white text-accent px-6 py-2.5 rounded-full text-sm font-bold hover:shadow-lg transition-all">
           回圖書館
         </button>
       </div>

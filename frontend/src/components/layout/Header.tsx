@@ -49,7 +49,7 @@ const Header: React.FC<HeaderProps> = () => {
     <header
       role="banner"
       aria-label="應用程式標頭"
-      className="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-4 shrink-0 z-30"
+      className="font-ui bg-white border-b border-gray-200 h-14 flex items-center justify-between px-5 shrink-0 z-30"
     >
       {/* Logo — keyboard-accessible home link */}
       <button
@@ -59,10 +59,10 @@ const Header: React.FC<HeaderProps> = () => {
         aria-label="LingoLeap 首頁"
       >
         <div
-          className="bg-accent w-6 h-6 rounded flex items-center justify-center"
+          className="bg-accent w-8 h-8 rounded-lg flex items-center justify-center"
           aria-hidden="true"
         >
-          <span className="text-white font-bold text-xs">L</span>
+          <span className="text-white font-bold text-sm">L</span>
         </div>
         <span className="text-sm font-bold text-gray-800 hidden sm:block">
           AI Reading Tutor

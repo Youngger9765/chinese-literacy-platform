@@ -114,7 +114,7 @@ const StarRating: React.FC<StarRatingProps> = ({
         {/* Label */}
         {labelVisible && (
           <div className="label-rise text-center">
-            <p className="text-xl font-black text-gray-800 tracking-wide">
+            <p className="text-xl font-bold text-gray-800 tracking-wide">
               {label}
             </p>
             {subLabel && (

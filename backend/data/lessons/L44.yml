@@ -81,6 +81,19 @@ vocabulary:
 - word: 攫
   definition: 指鳥獸用爪抓取獵物。
 vocabulary_count: 13
+vocab_bank:
+  A: 一息尚存
+  C: 杳無人煙
+  D: 手無寸鐵
+  E: 陰黯
+  F: 倖存
+  G: 險峻
+  H: 驚心動魄
+  I: 山坳
+  J: 譁眾取寵
+  K: 回天乏術
+  L: 一命嗚呼
+  M: 攫
 fill_in_blank:
 - sentence: 醫生說雖然傷勢嚴重，但他（　　），我們絕不能放棄希望。
   answer: A

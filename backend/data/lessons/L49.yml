@@ -47,6 +47,15 @@ vocabulary:
 - word: 多巴胺
   definition: 一種神經傳遞物質，對大腦的情感和動機起著重要作用。
 vocabulary_count: 8
+vocab_bank:
+  A: 流行疫病
+  B: 刻板印象
+  C: 望塵莫及
+  D: 咎責
+  E: 罹患
+  F: 鳳毛麟角
+  G: 不言而喻
+  H: 多巴胺
 fill_in_blank:
 - sentence: 為了避免大規模的（　　）爆發，政府呼籲民眾勤洗手、戴口罩。
   answer: A

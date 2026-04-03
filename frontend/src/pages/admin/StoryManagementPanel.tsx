@@ -329,7 +329,7 @@ const StoryManagementPanel: React.FC = () => {
         {!isLoading && !loadError && (
           <>
             {stories.length === 0 ? (
-              <div className="rounded-xl border border-gray-200 shadow-sm px-4 py-12 text-center text-gray-400 text-sm bg-white">
+              <div className="rounded-2xl shadow-card px-4 py-12 text-center text-gray-400 text-sm bg-white">
                 {searchQuery || gradeFilter ? '找不到符合條件的課文' : '尚無課文'}
               </div>
             ) : (
@@ -337,7 +337,7 @@ const StoryManagementPanel: React.FC = () => {
                 {/* Mobile card view */}
                 <div className="md:hidden space-y-3">
                   {stories.map((story) => (
-                    <div key={story.lesson_number} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-2.5">
+                    <div key={story.lesson_number} className="bg-white rounded-2xl shadow-card p-4 space-y-2.5">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="font-medium text-gray-900 text-sm">{story.title}</p>
@@ -381,7 +381,7 @@ const StoryManagementPanel: React.FC = () => {
                 </div>
 
                 {/* Desktop table view */}
-                <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                <div className="hidden md:block overflow-x-auto rounded-2xl shadow-card">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">

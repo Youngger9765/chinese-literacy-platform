@@ -112,6 +112,19 @@ vocabulary:
 - word: 潸然淚下
   definition: 傷心落淚。潸然，流淚的樣子。
 vocabulary_count: 12
+vocab_bank:
+  A: 輾轉反側
+  B: 一蹶不振
+  C: 豁達
+  D: 無妄之災
+  E: 反芻
+  F: 半身不遂
+  G: 三頭六臂
+  H: 茶飯不思
+  I: 萬丈深淵
+  J: 鴉雀無聲
+  K: 倒楣
+  L: 潸然淚下
 fill_in_blank:
 - sentence: 晚上睡覺時，他想著明天的考試，怎麼也睡不著，在床上（　　）。
   answer: A

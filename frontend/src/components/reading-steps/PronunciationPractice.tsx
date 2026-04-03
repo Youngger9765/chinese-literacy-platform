@@ -378,7 +378,7 @@ const PronunciationPractice: React.FC<PronunciationPracticeProps> = ({
                 </button>
                 <button
                   onClick={onComplete}
-                  className="flex-1 py-3 bg-accent hover:bg-accent-hover text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
+                  className="flex-1 py-2.5 bg-accent hover:bg-accent-hover text-white font-bold text-sm rounded-full shadow-sm transition-all active:scale-95"
                 >
                   完成
                 </button>

@@ -45,6 +45,17 @@ vocabulary:
 - word: 舒適區
   definition: 舒服安適的狀態。
 vocabulary_count: 10
+vocab_bank:
+  A: 倘若
+  B: 結實
+  C: 不可或缺
+  D: 壁壘分明
+  E: 一󠇡步登天
+  F: 分量
+  G: 循序漸進
+  H: 欲速則不達
+  I: 覆蓋
+  J: 舒適區
 fill_in_blank:
 - sentence: （　　）明天是個大晴天，我們就能去海邊玩了。
   answer: A

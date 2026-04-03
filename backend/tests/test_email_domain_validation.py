@@ -173,8 +173,9 @@ def _register_teacher(client, email_prefix: str) -> dict:
         "name": name,
     })
     assert resp.status_code == 201, resp.text
-    verification_token = resp.json()["verification_token"]
-    client.get(f"/api/auth/verify-email?token={verification_token}")
+    verification_token = resp.json().get("verification_token")
+    if verification_token:
+        client.get(f"/api/auth/verify-email?token={verification_token}")
     login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     token = login_resp.json()["access_token"]
     me_resp = client.get("/api/users/me", headers=auth_header(token))

@@ -141,7 +141,7 @@ function ModeSelect({ charCount, onSelect, onBack }: ModeSelectProps) {
           🎮
         </div>
         <div className="text-center">
-          <h2 className="text-xl font-black text-gray-900 mb-1">注音拼讀練習</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-1">注音拼讀練習</h2>
           <p className="text-sm text-gray-500">本課有 {charCount} 個字可以練習，請選擇模式</p>
         </div>
         <div className="w-full flex flex-col gap-3">
@@ -190,7 +190,7 @@ function ScoreBanner({ score, total, onFinish, onRetry }: ScoreBannerProps) {
       <div className="max-w-sm w-full bg-white rounded-3xl shadow-lg border border-indigo-100 p-8 flex flex-col items-center gap-5 text-center">
         <div className="text-5xl select-none">{isGreat ? '🌟' : '💪'}</div>
         <div>
-          <h3 className="text-2xl font-black text-gray-900">
+          <h3 className="text-2xl font-bold text-gray-900">
             {isGreat ? '太厲害了！' : '繼續加油！'}
           </h3>
           <p className="text-gray-500 text-sm mt-1">
@@ -207,13 +207,13 @@ function ScoreBanner({ score, total, onFinish, onRetry }: ScoreBannerProps) {
         <div className="w-full flex flex-col gap-3 mt-2">
           <button
             onClick={onRetry}
-            className="w-full py-3 rounded-2xl font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-all active:scale-95"
+            className="w-full py-2.5 rounded-full font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-all active:scale-95"
           >
             再玩一次
           </button>
           <button
             onClick={onFinish}
-            className="w-full py-3 rounded-2xl font-semibold text-sm text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all active:scale-95"
+            className="w-full py-2.5 rounded-full font-semibold text-sm text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all active:scale-95"
           >
             返回生字練習
           </button>
