@@ -1099,7 +1099,7 @@
       <div class="progress-bar">
         <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
       </div>
-      <div class="skill-count">已完成 <span id="completed-count">0</span> / <span id="total-count">20</span> 技能</div>
+      <div class="skill-count">已完成 <span id="completed-count">0</span> / <span id="total-count">29</span> 技能</div>
     </div>
 
     <div class="tree" id="tree"></div>
@@ -1760,6 +1760,7 @@ function updateProgress() {
   document.getElementById('xp-display').textContent = `${earned} / ${TOTAL_XP} XP`;
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('completed-count').textContent = skillCount;
+  document.getElementById('total-count').textContent = SKILLS.length;
 }
 
 // =============================================
