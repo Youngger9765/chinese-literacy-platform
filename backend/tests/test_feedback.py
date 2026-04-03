@@ -112,8 +112,9 @@ def _register_and_login(client, suffix: str, role_name: str | None = None) -> tu
         "name": f"{suffix} user",
     })
     assert resp.status_code == 201, resp.text
-    verification_token = resp.json()["verification_token"]
-    client.get(f"/api/auth/verify-email?token={verification_token}")
+    verification_token = resp.json().get("verification_token")
+    if verification_token:
+        client.get(f"/api/auth/verify-email?token={verification_token}")
     login_r = client.post("/api/auth/login", json={"email": email, "password": "Test1234!"})
     token = login_r.json()["access_token"]
 

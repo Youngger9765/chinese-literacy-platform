@@ -257,7 +257,7 @@ class TestEmailVerificationFlagOn:
 
         # Resend and get new token
         resend_resp = client.post("/api/auth/resend-verification", json={"email": data["email"]})
-        new_token = resend_resp.json()["verification_token"]
+        new_token = resend_resp.json().get("verification_token")
 
         # Verify with new token
         client.get(f"/api/auth/verify-email?token={new_token}")

@@ -136,8 +136,9 @@ def _register_and_login(client) -> str:
         "name": f"Teacher {unique}",
     })
     assert resp.status_code == 201
-    verification_token = resp.json()["verification_token"]
-    client.get(f"/api/auth/verify-email?token={verification_token}")
+    verification_token = resp.json().get("verification_token")
+    if verification_token:
+        client.get(f"/api/auth/verify-email?token={verification_token}")
     login_resp = client.post("/api/auth/login", json={"email": email, "password": password})
     return login_resp.json()["access_token"]
 

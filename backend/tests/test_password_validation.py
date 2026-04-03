@@ -87,8 +87,9 @@ def register_and_verify(client: TestClient, email: str, password: str, name: str
     """Register a user and verify their email so they can log in."""
     resp = client.post("/api/auth/register", json={"email": email, "password": password, "name": name})
     assert resp.status_code == 201
-    token = resp.json()["verification_token"]
-    client.post("/api/auth/verify-email", json={"token": token})
+    token = resp.json().get("verification_token")
+    if token:
+        client.post("/api/auth/verify-email", json={"token": token})
     return resp
 
 
