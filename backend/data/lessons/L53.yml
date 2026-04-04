@@ -111,6 +111,38 @@ reading_benchmark: null
 source_file: G9-6-L53臺灣學生的閱讀力：美麗與哀愁.docx
 flags:
 - NO_VOCABULARY
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 判讀統計圖
+  instruction: 判讀統計圖時，要先看圖表類型、標題、橫軸和縱軸的名稱，再理解圖例，最後讀出圖表要表達什麼。請跟著步驟練習
+  steps:
+    - prompt: 根據課文，臺灣學生的PISA閱讀力世界排名，從2015年到2022年的變化是什麼？
+      type: select
+      options:
+        - 從第23名退步到第30名
+        - 從第23名進步到第5名
+        - 一直維持在第17名
+      answer: 1
+    - prompt: 2022年全球閱讀力表現下滑，但臺灣卻逆勢推升，課文提到的可能原因有哪些？
+      type: checkbox
+      options:
+        - 臺灣學校停課時間比其他國家短
+        - 臺灣老師能有效實施遠距教學
+        - 108課綱重視核心素養及自主學習
+        - 臺灣學生考試能力比較強
+      answer:
+        - 0
+        - 1
+        - 2
+    - prompt: 臺灣閱讀力雖然進步，但有一個明顯的弱項是什麼？
+      type: select
+      options:
+        - 男生的閱讀力比女生差很多
+        - 城鄉差距明顯，偏鄉學生閱讀力落後都會區超過兩個年級
+        - 科學領域的表現下滑
+      answer: 1
+    - prompt: 如果你是偏鄉國中的校長，你會怎麼提升學生的閱讀力？請提出一個具體的做法
+      type: free_text
 story_structure:
 - label: 主題
   value: 臺灣學生的閱讀力現況

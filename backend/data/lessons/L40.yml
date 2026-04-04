@@ -159,6 +159,36 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-12-L40別上「誘餌式標題」的鉤.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 辨識誘餌式標題
+  instruction: 誘餌式標題有四種常見手法：引發好奇、誇張句子、誇大的情緒字眼、利用熱門話題或公眾人物。請根據課文練習辨識
+  steps:
+    - prompt: 課文中「下週雷雨炸全臺！氣象署急發快訊」這個標題，實際內容是什麼？
+      type: select
+      options:
+        - 全臺灣真的會被雷雨轟炸
+        - 只是局部地區有雷擊和瞬間大雨的機率，氣象署只是例行發布預報
+        - 氣象署發出了緊急警報要大家躲在家裡
+      answer: 1
+    - prompt: 媒體為什麼要使用誘餌式標題？
+      type: select
+      options:
+        - 因為記者寫作能力不好
+        - 為了增加點擊率和廣告收益，或帶風向影響大眾認知
+        - 因為法律規定標題要寫得吸引人
+      answer: 1
+    - prompt: 以下哪一個標題最可能是誘餌式標題？
+      type: select
+      options:
+        - 教育部公布112年國中教育會考成績統計
+        - 震驚！國中生吃了這個東西，竟然變成天才！
+        - 颱風預計明天登陸，各縣市停班停課資訊整理
+      answer: 1
+    - prompt: 課文提到面對誘餌式標題的三個方法，請用自己的話寫出其中兩個
+      type: free_text
+    - prompt: 請你自己舉一個在生活中看過的誘餌式標題例子，並說明它用了哪種手法（引發好奇、誇張句子、誇大情緒字眼、或利用熱門話題）
+      type: free_text
 story_structure:
 - label: 主題
   value: 誘餌式標題

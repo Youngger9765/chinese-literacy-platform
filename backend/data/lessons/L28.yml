@@ -145,6 +145,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-15-L28紅領帶.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 品格力－用「至少、還好、很好啊」轉念
+  instruction: 媽媽面對生病的痛苦，總是能用「轉念」的方式找到值得感恩的地方。我們可以學習用「至少……」「還好……」「很好啊……」這些句型，把困難的事情換個角度來看。一起來練習吧！
+  steps:
+    - prompt: 媽媽全胃切除後，無法躺著睡覺。她怎麼轉念？
+      type: select
+      options:
+        - 「沒有胃真好，這樣就不會胃痛了」
+        - 「沒有胃真慘，以後什麼都不能吃」
+        - 「至少還可以站著睡」
+      answer: 0
+    - prompt: 媽媽化療後很虛弱，只能坐在沙發看電視。她怎麼轉念？
+      type: select
+      options:
+        - 「生病最大的好處就是可以整天躺在沙發看林書豪打球，一點罪惡感都沒有」
+        - 「生病真的太痛苦了」
+        - 「至少不用去上班」
+      answer: 0
+    - prompt: 作者說「很多事不是我們能掌控的，但我們還是可以決定如何面對它」。請選出最符合這句話的例子
+      type: select
+      options:
+        - 考試考不好，一直哭，覺得自己很笨
+        - 考試考不好，告訴自己「至少我知道哪裡不會了，下次可以加強」
+        - 考試考不好，假裝什麼事都沒發生
+      answer: 1
+    - prompt: 請你想一件最近遇到的不開心的事，試著用「至少……」「還好……」或「很好啊……」的句型來轉念，寫下來
+      type: free_text
 story_structure:
 - label: 事例
   sub_rows:

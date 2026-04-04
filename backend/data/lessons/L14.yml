@@ -138,6 +138,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-1-L14運動傷害，怎麼辦.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 倒反法
+  instruction: 倒反法是說反話的修辭技巧，表面上說的和心裡想的相反，常用來表達幽默或諷刺。使用倒反法時，要注意對象和場合
+  steps:
+    - prompt: 詹老師說皓祥的腳「雙喜臨門」，這句話是什麼意思？
+      type: select
+      options:
+        - 皓祥有兩件好事發生
+        - 皓祥同時腳踝扭傷又小腿抽筋，用反話來幽默化解緊張
+        - 皓祥贏了比賽又進了球
+      answer: 1
+    - prompt: 詹老師說皓祥「這樣的好運，很少見啊」，這裡的「好運」真正的意思是什麼？
+      type: select
+      options:
+        - 皓祥真的很幸運
+        - 皓祥很倒楣，同時扭傷又抽筋
+        - 皓祥的運氣一直都很好
+      answer: 1
+    - prompt: 為什麼詹老師可以對皓祥使用倒反法，卻不會讓皓祥不開心？
+      type: select
+      options:
+        - 因為皓祥聽不懂反話
+        - 因為他們關係親近，像亦師亦友
+        - 因為倒反法對任何人都可以使用
+      answer: 1
+    - prompt: 請你也用倒反法寫一句話，描述一個同學在體育課跌倒的情境（要有趣但不傷人）
+      type: free_text
 story_structure:
 - label: 主題
   value: 運動傷害的處理與預防

@@ -149,6 +149,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-11-L24昆蟲會思考嗎？.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 解決問題－用觀察證據回答科學問題
+  instruction: 科學家回答問題時，必須有足夠的觀察證據才能下結論。讓我們跟著李淳陽的觀察，用證據來回答「昆蟲會不會思考」這個科學問題！
+  steps:
+    - prompt: 捲葉象鼻蟲母蟲捲葉子做育嬰室，這個行為屬於什麼？
+      type: select
+      options:
+        - 本能行為（每隻母蟲都會做的固定程序）
+        - 思考行為（遇到問題後才想出來的）
+        - 學習行為（跟其他蟲學的）
+      answer: 0
+    - prompt: 有一隻捲葉象鼻蟲折彎葉片角度不對，轉不動了。牠怎麼解決這個問題？
+      type: select
+      options:
+        - 放棄這片葉子，去找另一片
+        - 轉頭跑到葉片基部，把葉緣拉過來包住葉苞
+        - 請其他象鼻蟲來幫忙
+      answer: 1
+    - prompt: 黃面蜂抓捲葉蛾幼蟲時，最關鍵的行為是什麼？
+      type: select
+      options:
+        - 用觸鬚碰碰葉苞嚇幼蟲
+        - 以迅雷不及掩耳的速度追趕
+        - 觀察到幼蟲來回奔跑的規律後，打破追逐模式，在開口處守株待兔
+      answer: 2
+    - prompt: 根據以上觀察證據，你覺得李淳陽會得到什麼結論？請用自己的話寫下來
+      type: free_text
 story_structure:
 - label: 結論
   value: 2. 黃面蜂打破規律，抓住獵物。

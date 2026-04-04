@@ -147,6 +147,42 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-7-L20-末日種子庫.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 說明文結構－找小主題和細節
+  instruction: 說明文除了有小主題，每個小主題底下還有重要的「細節」來補充說明。我們可以一邊讀一邊把重要細節勾選出來，幫助理解文章。一起來練習吧！
+  steps:
+    - prompt: 第三段說明了興建種子庫的目的，請選出正確的小主題
+      type: select
+      options:
+        - 種子庫的地理位置
+        - 為什麼要建末日種子庫
+        - 臺灣的小米種子
+      answer: 1
+    - prompt: 關於種子庫的保存環境，下列哪些是課文提到的重要細節？
+      type: checkbox
+      options:
+        - 溫度維持在攝氏零下18度
+        - 種子經過真空包裝，用三層鋁箔密封
+        - 種子庫建在永久凍土區的山脈內部
+        - 種子庫有窗戶可以照到陽光
+      answer:
+        - 0
+        - 1
+        - 2
+    - prompt: 關於種子庫的安全設計，下列哪些是課文提到的重要細節？
+      type: checkbox
+      options:
+        - 需要通過5扇有密碼裝置的門
+        - 外牆混凝土厚達1公尺
+        - 位在海拔130公尺高的地方
+        - 有機器人巡邏守衛
+      answer:
+        - 0
+        - 1
+        - 2
+    - prompt: 課文提到2015年敘利亞內戰時，研究人員提取了130箱種子。這個例子說明了什麼？用自己的話寫下來
+      type: free_text
 story_structure:
 - label: 主題
   value: 重要細節

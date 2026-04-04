@@ -138,6 +138,36 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-10-L38你看見時代的灰犀牛了嗎談人口負成長.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 認識折線圖
+  instruction: 折線圖可以幫助我們看出數據的變化趨勢。請根據課文中提到的數據，回答以下問題
+  steps:
+    - prompt: 根據課文，民國40年（1951年）臺灣每位婦女一生平均生育幾個子女？
+      type: select
+      options:
+        - 2.1個
+        - 5個
+        - 7個
+      answer: 2
+    - prompt: 根據課文，臺灣的出生人數和死亡人數大約在哪一年出現「死亡交叉」（死亡人數開始超過出生人數）？
+      type: select
+      options:
+        - 2015年
+        - 2019年
+        - 2024年
+      answer: 1
+    - prompt: 根據課文，2025年臺灣大約幾名生產者扶養1名被扶養者？到2065年預估會變成多少？
+      type: select
+      options:
+        - 2025年3人扶養1人，2065年2人扶養1人
+        - 2025年2人扶養1人，2065年1人扶養1人
+        - 2025年5人扶養1人，2065年3人扶養1人
+      answer: 1
+    - prompt: 如果要畫一張「臺灣婦女總生育率」的折線圖，橫軸（X軸）和縱軸（Y軸）分別應該放什麼？
+      type: free_text
+    - prompt: 文章提到人口負成長也可能有「樂觀」的一面，請舉出一個課文中提到的例子
+      type: free_text
 story_structure:
 - label: 主題
   value: 人口負成長這個「灰犀牛」現象

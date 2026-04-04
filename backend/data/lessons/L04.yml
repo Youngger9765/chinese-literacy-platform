@@ -126,6 +126,29 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G4-4-L4運動科學.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 條件複句
+  instruction: 條件複句是用「如果……就……」「只要……就……」「除非……否則……」等連接詞，表示在某個條件下會有某個結果。請從課文中找出條件關係
+  steps:
+    - prompt: 課文第二段提到有氧運動和肌肉訓練的關係，哪一句話包含條件關係？
+      type: select
+      options:
+        - 這四種運動方式是相互衝突的
+        - 把肌肉鍛鍊跟有氧運動的時間分開，才會達到較好的訓練效果
+        - 仰臥起坐對腰部容易造成很大的壓力
+      answer: 1
+    - prompt: 「把肌肉鍛鍊跟有氧運動的時間分開，才會達到較好的訓練效果」，這句話的「條件」是什麼？
+      type: select
+      options:
+        - 達到較好的訓練效果
+        - 把肌肉鍛鍊跟有氧運動的時間分開
+        - 這四種運動方式相互衝突
+      answer: 1
+    - prompt: 課文最後一段說運動科學的目標是讓每個人都有機會參與，請用「只要……就……」寫一個和運動科學有關的條件複句
+      type: free_text
+    - prompt: 請用「如果……就……」寫一個和運動訓練有關的條件複句
+      type: free_text
 story_structure:
 - label: 事例
   sub_rows:

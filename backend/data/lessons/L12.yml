@@ -122,6 +122,38 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G5-6-L12我有一個棒球夢.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 時間管理
+  instruction: 時間管理有四個步驟：1.計畫 2.設定優先順序 3.合理安排 4.保持彈性。請根據課文內容練習這四個步驟
+  steps:
+    - prompt: 根據課文，學生棒球員面臨的最大困難是什麼？
+      type: select
+      options:
+        - 訓練太辛苦，身體受不了
+        - 學業與棒球訓練難以兼顧
+        - 教練太嚴格，壓力很大
+      answer: 1
+    - prompt: 花蓮三民國中用了哪些方法幫助球員擠出讀書時間？（可複選）
+      type: checkbox
+      options:
+        - 增加宿舍淋浴間及洗衣機
+        - 取消棒球訓練
+        - 要求學業成績達標才能出賽
+        - 減少上課時間
+      answer:
+        - 0
+        - 2
+    - prompt: 如果你是一位學生棒球員，每天放學後有4小時的自由時間，你會怎麼安排「練球」和「讀書」的優先順序？請說明理由
+      type: free_text
+    - prompt: 課文提到「愛接棒計畫」提供夜間課輔，這屬於時間管理四步驟中的哪一步？
+      type: select
+      options:
+        - 計畫
+        - 設定優先順序
+        - 合理安排
+        - 保持彈性
+      answer: 2
 story_structure:
 - label: 結論
   value: 力

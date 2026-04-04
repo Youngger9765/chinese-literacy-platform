@@ -160,6 +160,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-2-L30女性太空人登月.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 用表格整理訊息－比較後推論上位概念
+  instruction: 這篇文章比較了「阿波羅計畫」和「阿提米絲計畫」。我們不只要整理兩者的細節，還要進一步推論出每個比較項目的「上位概念」（也就是幫這個項目取一個總稱）。一起來練習吧！
+  steps:
+    - prompt: 阿波羅計畫在1969年啟動，阿提米絲計畫在2022年重啟。這兩個細節可以歸納成什麼比較項目？
+      type: select
+      options:
+        - 計畫花費
+        - 啟動時間
+        - 太空人人數
+      answer: 1
+    - prompt: 阿波羅計畫的12位太空人都是男性，阿提米絲計畫要送女性和有色族裔登月。這兩個細節可以歸納成什麼比較項目？
+      type: select
+      options:
+        - 太空人的背景與多元性
+        - 太空人的體重
+        - 太空人的訓練方式
+      answer: 0
+    - prompt: 阿波羅計畫的目標是登月，阿提米絲計畫的目標除了登月，還要建立月球基地、為登陸火星做準備。這兩個細節可以歸納成什麼比較項目？
+      type: select
+      options:
+        - 火箭大小
+        - 計畫的長期目標
+        - 太空人的薪水
+      answer: 1
+    - prompt: 比較完這兩個計畫後，你覺得從阿波羅到阿提米絲，人類的太空探索有什麼重要的改變？請寫下你的想法
+      type: free_text
 story_structure:
 - label: 主題
   value: 女性太空人登月

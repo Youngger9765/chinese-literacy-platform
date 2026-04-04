@@ -122,6 +122,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-11-L39網紅的電子煙實驗：偽科學的陷阱.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 辨別網路訊息真偽
+  instruction: 網路上有很多看起來像真的假訊息。我們可以從「來源」「傳播途徑」「查證方式」三個方向來辨別真偽。請根據課文練習
+  steps:
+    - prompt: 課文開頭的「芬蘭廢除中小學課程教育」新聞，你覺得它可能是假新聞的線索是什麼？
+      type: select
+      options:
+        - 新聞來源是「每日頭條」，不是官方媒體
+        - 文章中有許多簡體字混用，不像正式報導
+        - 以上兩個都是可疑的線索
+      answer: 2
+    - prompt: 課文提到電子煙廠商會把年輕人當成「長期提款機」，這是什麼意思？
+      type: select
+      options:
+        - 年輕人很有錢，可以一直買電子煙
+        - 讓年輕人上癮後，就會長期消費，為廠商帶來穩定收入
+        - 年輕人會幫廠商推銷電子煙給朋友
+      answer: 1
+    - prompt: 網紅的電子煙實驗看起來像科學實驗，但其實是「偽科學」。判斷偽科學最重要的方法是什麼？
+      type: select
+      options:
+        - 看影片的觀看次數多不多
+        - 看實驗是否經過專業機構或科學家的驗證
+        - 看網紅是不是很有名
+      answer: 1
+    - prompt: 如果你在網路上看到一則很吸引人的健康資訊，你可以用什麼方法來查證它的真假？請寫出至少兩種方法
+      type: free_text
 story_structure:
 - label: 結論
   value: 電子煙對人體【     無害

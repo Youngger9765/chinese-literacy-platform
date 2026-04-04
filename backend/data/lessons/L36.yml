@@ -148,6 +148,37 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-8-L36果醬男孩.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 問題解決流程
+  instruction: 問題解決流程有四個步驟：認清問題、拆解問題、思考解決方案、選擇方案並執行。請根據課文中林韡勳的故事來練習
+  steps:
+    - prompt: 林韡勳一開始面臨的主要問題是什麼？
+      type: select
+      options:
+        - 因為過敏無法繼續做動物相關工作，在鄉間又找不到工作機會
+        - 他不喜歡讀書，大學畢業後不想工作
+        - 他的家人反對他做果醬
+      answer: 0
+    - prompt: 林韡勳開始做果醬後，遇到了很多小問題，以下哪些是他遇到的困難？
+      type: checkbox
+      options:
+        - 果醬又糊又黑、太甜或燒焦
+        - 做失敗的果醬不知道怎麼處理
+        - 成本太高、單價無法壓低
+        - 沒有人願意品嚐他的果醬
+      answer: [0, 1, 2]
+    - prompt: 面對果醬賣不出去的問題，林韡勳用了什麼解決方案？
+      type: select
+      options:
+        - 降低品質來壓低價格
+        - 分送親友試吃、到市集擺攤，慢慢建立口碑
+        - 放棄做果醬，改做其他食品
+      answer: 1
+    - prompt: 林韡勳的「茶金」果醬本來茶味不足，他想出了什麼創新的解決方法？
+      type: free_text
+    - prompt: 如果你遇到一個困難，請用「問題解決流程」的四個步驟來分析：認清問題是什麼、拆解成小問題、想出解決方案、選擇最好的方案
+      type: free_text
 story_structure:
 - label: 事例
   sub_rows:

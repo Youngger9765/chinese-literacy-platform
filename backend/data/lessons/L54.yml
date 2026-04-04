@@ -106,6 +106,34 @@ source_file: G9-7-L54力與美表現的競技體操.docx
 flags:
 - NO_VOCABULARY
 - NO_MC_QUESTIONS
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 摘要與組織圖表
+  instruction: 這篇文章介紹了競技體操的計分方式，資訊很多。我們可以用摘要的方法，把重要資訊整理成簡單的架構。請跟著步驟練習
+  steps:
+    - prompt: 競技體操的總分由哪兩種分數組成？
+      type: select
+      options:
+        - A分（藝術分）和B分（表現分）
+        - D分（難度分）和E分（實施分）
+        - 技術分和風格分
+      answer: 1
+    - prompt: D分的計算包含哪兩個部分？
+      type: select
+      options:
+        - 動作難度和動作組群
+        - 起跳分和落地分
+        - 速度分和力量分
+      answer: 0
+    - prompt: E分的評審方式是什麼？
+      type: select
+      options:
+        - 從0分開始，做得好就加分
+        - 從10分開始，有錯誤就扣分
+        - 7位裁判的平均分數
+      answer: 1
+    - prompt: 李智凱在東京奧運鞍馬拿下15.40分，請根據課文的計分規則，說明這個分數大概是怎麼來的（D分加E分）
+      type: free_text
 story_structure:
 - label: 主題
   value: 競技體操的計分方式

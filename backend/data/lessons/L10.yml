@@ -143,6 +143,26 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G5-4-L10從童工到大學教授之路.docx
 flags: []
+strategy_exercise:
+  type: trait_inference
+  strategy_name: 推論人物特質
+  instruction: 推論人物特質，我們可以從一個人說的話、做的事、態度來推論他是什麼樣的人
+  character: 小花
+  clues:
+    - text: 大學聯考落榜後，跟媽媽爭取再給自己一次機會，靠著教育翻身
+      source: 做的事
+    - text: 為了要活下去，我必須要有策略
+      source: 說的話
+    - text: 在很短的時間就成了業績第一名的工讀生
+      source: 做的事
+    - text: 格外珍惜得來不易的大學教育機會，畢業後繼續念碩士和博士
+      source: 態度
+  trait_options:
+    - 堅毅不屈
+    - 膽小害怕
+    - 隨遇而安
+    - 好高騖遠
+  correct_trait: 堅毅不屈
 story_structure:
 - label: 主角
   value: 世界充滿愛

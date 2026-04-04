@@ -142,6 +142,21 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G5-1-L7黑猩猩的守護者.docx
 flags: []
+strategy_exercise:
+  type: ordering
+  strategy_name: 記敘文結構－故事體
+  instruction: 故事體的記敘文會按照時間順序描述事件的發展。請把珍古德的故事依照發生的先後順序排列
+  items:
+    - text: 珍古德小時候閱讀《杜立德醫生非洲歷險記》，夢想去非洲探險
+      correct_order: 1
+    - text: 二十三歲時從英國前往非洲，在博物館找到工作
+      correct_order: 2
+    - text: 前往岡貝研究黑猩猩，初期被黑猩猩拒於千里之外
+      correct_order: 3
+    - text: 經過長時間的耐心等待，黑猩猩終於卸下心防接受她
+      correct_order: 4
+    - text: 成立國際珍古德協會，推動環境教育和野生動物保育
+      correct_order: 5
 story_structure:
 - label: 事例
   sub_rows:

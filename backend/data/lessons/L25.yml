@@ -186,6 +186,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-12-L25給神明發會診單.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 品格力－跨文化接納理解
+  instruction: 這篇課文讓我們看到，面對不同的文化和信仰，我們可以選擇理解和包容，而不是排斥和批判。讓我們一起來練習「跨文化接納理解」的思考方式！
+  steps:
+    - prompt: 一般醫師面對家屬想請乩童來醫院，通常會怎麼反應？
+      type: select
+      options:
+        - 覺得迷信、無知，拒絕讓乩童進來
+        - 主動邀請乩童來合作
+        - 完全不在意，隨便家屬怎麼做
+      answer: 0
+    - prompt: 陳醫師為什麼願意讓乩童來？他是怎麼想的？
+      type: select
+      options:
+        - 他相信乩童有神力可以治病
+        - 他認為這是家屬的祝福和心意，不是對醫療的不信任
+        - 他覺得反正病人快不行了，隨便吧
+      answer: 1
+    - prompt: 陳醫師說乩童「也是我們的伙伴，就像前來協助會診的醫師一樣」，這句話展現了什麼態度？
+      type: select
+      options:
+        - 放棄自己的專業判斷
+        - 用尊重和平等的態度看待不同文化的做法
+        - 認為乩童比醫生厲害
+      answer: 1
+    - prompt: 在你的生活中，有沒有遇過不同文化或信仰的人做了你不理解的事？你覺得可以怎麼做？請寫下你的想法
+      type: free_text
 story_structure:
 - label: 事例
   sub_rows:

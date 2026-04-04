@@ -156,6 +156,36 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-3-L31奧運性別平等這條路.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 用表格整理訊息
+  instruction: 用表格整理文章中的數據資料，可以幫助我們看出趨勢和變化。請根據課文內容，回答以下問題
+  steps:
+    - prompt: 根據課文，1900年巴黎奧運的女性選手人數和比例分別是多少？
+      type: select
+      options:
+        - 22名，占2.2%
+        - 100名，占10%
+        - 50名，占5%
+      answer: 0
+    - prompt: 根據課文，到了2004年雅典奧運，女性選手參與率達到多少？
+      type: select
+      options:
+        - 25.3%
+        - 40.7%
+        - 50%
+      answer: 1
+    - prompt: 2024年巴黎奧運達成了什麼重要的里程碑？
+      type: select
+      options:
+        - 女性選手人數首次超過男性
+        - 男女參賽選手達到1:1
+        - 所有比賽項目都設有女子組
+      answer: 1
+    - prompt: 從1900年到2024年，女性參與奧運的比例呈現什麼趨勢？請用一句話說明
+      type: free_text
+    - prompt: 除了「人數平等」，文章提到奧運在性別平等上還有哪些仍需努力的地方？請舉一個例子
+      type: free_text
 story_structure:
 - label: 主題
   value: 奧運性別平等的發展與現況

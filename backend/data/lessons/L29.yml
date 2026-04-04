@@ -145,6 +145,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-1-L29澳洲奧運金牌的X機密.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 用表格整理訊息－比較兩組對象
+  instruction: 這篇文章比較了澳洲和臺灣的體育發展。我們可以用表格來整理兩組對象的細節，進行比較。先想好「比較的對象」（澳洲 vs 臺灣），再列出「比較的項目」，最後填入細節。一起來練習吧！
+  steps:
+    - prompt: 在「政府支持」這個項目上，澳洲的做法是什麼？
+      type: select
+      options:
+        - 政府斥資設置體育設施、體育學校，成立國家運動中心
+        - 政府只負責舉辦奧運比賽
+        - 政府讓民間自己發展體育
+      answer: 0
+    - prompt: 在「家長態度」這個項目上，澳洲和臺灣最大的差別是什麼？
+      type: select
+      options:
+        - 澳洲家長不讓孩子運動，臺灣家長鼓勵運動
+        - 澳洲家長認為體育能培養品格，熱衷讓孩子參加運動俱樂部；臺灣家長重視課業，放學後多送孩子去補習
+        - 兩邊家長態度差不多
+      answer: 1
+    - prompt: 在「運動員退役後的發展」這個項目上，澳洲和臺灣有什麼不同？
+      type: select
+      options:
+        - 澳洲運動員退役後有其他職業，沒有後顧之憂；臺灣運動員因犧牲課業，退役後就業困難
+        - 澳洲和臺灣的運動員退役後都能順利找到工作
+        - 澳洲運動員退役後都當教練，臺灣運動員退役後都當老師
+      answer: 0
+    - prompt: 根據表格的比較，你覺得臺灣可以學習澳洲的哪一點來改善體育環境？請寫下你的想法
+      type: free_text
 story_structure:
 - label: 主題
   value: 澳洲奧運金牌的祕密

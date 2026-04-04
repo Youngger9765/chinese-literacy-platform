@@ -173,6 +173,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G8-3-L44假新聞？鞭虎救弟記.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 數位閱讀與論證
+  instruction: 閱讀文章時，我們可以用「提問→合理質疑→找證據→下結論」的方法來判斷內容是不是真的。請跟著步驟練習
+  steps:
+    - prompt: 讀完「鞭虎救弟記」的故事後，你覺得哪一個部分最讓人懷疑？
+      type: select
+      options:
+        - 含光在山上遇到老虎
+        - 含光追上老虎並打退牠
+        - 含光吸血數升救活弟弟
+      answer: 2
+    - prompt: 作者用什麼方式來檢驗「人類追得上老虎嗎」這個質疑？
+      type: select
+      options:
+        - 訪問動物園管理員
+        - 用老虎的體重和咬著獵物的速度來推算
+        - 找古書的其他記載
+      answer: 1
+    - prompt: 作者根據康熙年間的度量衡計算，發現「吸血數升」有什麼問題？
+      type: select
+      options:
+        - 數量太少，不足以排毒
+        - 失血量超過人體血液的一半，人會死亡
+        - 古代的「升」比現在的大很多
+      answer: 1
+    - prompt: 綜合所有證據，作者得出什麼結論？請用自己的話寫出來
+      type: free_text
 story_structure:
 - label: 事例
   sub_rows:

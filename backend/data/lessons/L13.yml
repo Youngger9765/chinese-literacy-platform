@@ -129,6 +129,33 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G5-7-L13六塊肌六塊雞.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 說明文文章結構
+  instruction: 說明文常用「主題＋描述」的結構，先提出主題，再用事實、例子、數據來說明。請找出本課的主題和描述
+  steps:
+    - prompt: 本課的主題是什麼？
+      type: select
+      options:
+        - 雷神索爾的健身方法
+        - 減脂增肌的基本原則
+        - 各種肌肉的名稱
+      answer: 1
+    - prompt: 課文用了哪三個重點來描述（說明）減脂增肌的方法？
+      type: checkbox
+      options:
+        - 均衡的飲食控制
+        - 保持良好的睡眠
+        - 專業且規律的訓練
+        - 吃營養補充品
+      answer:
+        - 0
+        - 1
+        - 2
+    - prompt: 第三段用了哪些「例子」來說明不同訓練方式會增強不同肌肉？請舉出兩組
+      type: free_text
+    - prompt: 第四段提到新手容易犯的錯誤是什麼？作者用這個例子想說明什麼道理？
+      type: free_text
 story_structure:
 - label: 主題
   value: 小主題
