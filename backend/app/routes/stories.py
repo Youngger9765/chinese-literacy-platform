@@ -4,14 +4,14 @@ No database dependency for platform content.
 """
 
 import time
-from fastapi import APIRouter, Query, HTTPException, Depends
+from fastapi import APIRouter, Query, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models.user import User
 from ..models.school import ClassroomStudent, ClassroomText
 from ..auth.dependencies import get_optional_user, get_current_user
-from ..auth.rate_limiter import ai_limit_5_per_min
+from ..auth.rate_limiter import ai_rate_limiter, get_client_key
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
 from ..services.ai_service import generate_story_structure
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
@@ -142,16 +142,15 @@ def get_story(story_id: str):
         reading_benchmark=story["reading_benchmark"],
         text_type=story["text_type"],
         source_file=story["source_file"],
+        strategy_exercise=story.get("strategy_exercise"),
     )
 
 
 # ── ⑤ 文章重點表 AI endpoint (#615) ──────────────────────────────────────────
 
-@router.get(
-    "/stories/{story_id}/structure",
-    dependencies=[Depends(ai_limit_5_per_min)],
-)
+@router.get("/stories/{story_id}/structure")
 async def get_story_structure(
+    request: Request,
     story_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -161,7 +160,7 @@ async def get_story_structure(
     Returns a list of rows with label/value (and optional sub_rows).
     Genre-aware: 記敘文 / 說明文 / 議論文 each get different templates.
 
-    Requires authentication. Rate-limited to 5 req/min per user.
+    Requires authentication. Rate-limited to 5 req/min per user (cache miss only).
     Responses are cached in-memory for 24 h to avoid redundant Gemini calls.
     """
     normalized = story_id.lstrip("Ll")
@@ -173,9 +172,15 @@ async def get_story_structure(
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
+    # Cache hit — return immediately without consuming rate limit quota
     cached = _get_cached_structure(story_id)
     if cached is not None:
         return cached
+
+    # Cache miss — enforce rate limit before calling AI
+    rl_key = f"ai:{get_client_key(request)}"
+    if not ai_rate_limiter.check(rl_key, max_requests=5, window_seconds=60):
+        raise HTTPException(status_code=429, detail="AI endpoint rate limit exceeded. Please wait before retrying.")
 
     story_text = story.get("full_text") or "\n".join(story.get("paragraphs", []))
     start_time = time.monotonic()

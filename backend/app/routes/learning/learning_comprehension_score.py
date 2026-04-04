@@ -19,6 +19,7 @@ from ...models.user import User
 from ...schemas.session import ComprehensionScoreResponse
 from ...services.ai_service import evaluate_comprehension
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
+from ...services.input_sanitizer import sanitize_ai_input
 from ._helpers import ConversationTurn
 
 router = APIRouter()
@@ -129,14 +130,23 @@ async def score_comprehension(
             feedback=feedback,
         )
 
+    # Sanitize user-provided text before sending to AI
+    safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
+    safe_story_text, _ = sanitize_ai_input(payload.story_text, user_id=str(current_user.id))
+
     # Build story context
     story_context = {
-        "title": payload.story_title,
-        "summary": payload.story_text[:500],  # Use first 500 chars as summary
+        "title": safe_story_title,
+        "summary": safe_story_text[:500],  # Use first 500 chars as summary
     }
 
-    # Build dialogue turns list
-    dialogue_turns = [t.model_dump() for t in payload.dialogue_turns]
+    # Build dialogue turns list — sanitize student turns
+    dialogue_turns = []
+    for t in payload.dialogue_turns:
+        turn = t.model_dump()
+        if turn.get("role") == "student" and turn.get("text"):
+            turn["text"], _ = sanitize_ai_input(turn["text"], user_id=str(current_user.id))
+        dialogue_turns.append(turn)
 
     start_time = time.monotonic()
     try:

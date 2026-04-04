@@ -50,6 +50,7 @@ class StoryDetail(StoryListItem):
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     text_type: str = "單"
     source_file: Optional[str] = None
+    strategy_exercise: Optional[dict] = None  # 閱讀策略練習 (#943)
 
 
 class StoryListResponse(BaseModel):

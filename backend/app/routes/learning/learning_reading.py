@@ -16,6 +16,7 @@ from ...models.session import LearningSession
 from ...models.user import User
 from ...services.ai_service import generate_reading_analysis, GeminiContentFilterError, CONTENT_FILTER_FRIENDLY_MSG
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
+from ...services.input_sanitizer import sanitize_ai_input
 from ...services.reading_evaluation_service import evaluate_reading_with_ai
 
 router = APIRouter()
@@ -143,6 +144,9 @@ async def get_ai_analysis(
     if session.student_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your session")
 
+    # Sanitize user-provided text before sending to AI
+    safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
+
     cached_resp = _try_return_cached_ai_analysis(session.ai_analysis, payload)
     if cached_resp is not None:
         return cached_resp
@@ -158,7 +162,7 @@ async def get_ai_analysis(
     ai_error_type = None
     try:
         analysis = await generate_reading_analysis({
-            "story_title": payload.story_title,
+            "story_title": safe_story_title,
             "accuracy": payload.accuracy,
             "cpm": payload.cpm,
             "error_chars": payload.error_chars,
@@ -200,7 +204,7 @@ async def get_ai_analysis(
         endpoint=f"/learning/sessions/{session_id}/ai-analysis",
         step="analysis",
         student_id=current_user.id,
-        story_title=payload.story_title,
+        story_title=safe_story_title,
         session_id=session_id,
         input_tokens=usage.input_tokens if usage else 0,
         output_tokens=usage.output_tokens if usage else 0,
@@ -240,12 +244,15 @@ async def get_ai_analysis_standalone(
 
     Rate limited: 5 requests per minute per user/IP.
     """
+    # Sanitize user-provided text before sending to AI
+    safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
+
     start_time = time.monotonic()
     ai_success = True
     ai_error_type = None
     try:
         analysis = await generate_reading_analysis({
-            "story_title": payload.story_title,
+            "story_title": safe_story_title,
             "accuracy": payload.accuracy,
             "cpm": payload.cpm,
             "error_chars": payload.error_chars,
@@ -286,7 +293,7 @@ async def get_ai_analysis_standalone(
         endpoint="/learning/ai-analysis",
         step="analysis",
         student_id=current_user.id,
-        story_title=payload.story_title,
+        story_title=safe_story_title,
         input_tokens=usage.input_tokens if usage else 0,
         output_tokens=usage.output_tokens if usage else 0,
         model=usage.model if usage else "gemini-2.5-flash",
@@ -362,11 +369,14 @@ async def evaluate_reading_endpoint(
     db: Session = Depends(get_db),
 ):
     """Stateless AI reading evaluation. Rate limited: 10 requests per minute."""
+    # Sanitize user-provided spoken text before sending to AI
+    safe_spoken_text, _ = sanitize_ai_input(payload.spoken_text, user_id=str(current_user.id))
+
     logger.info(
         "Reading eval request: user=%d target_len=%d spoken_len=%d",
         current_user.id,
         len(payload.target_text),
-        len(payload.spoken_text),
+        len(safe_spoken_text),
         extra={
             "event": "reading_eval_request",
             "user_id": current_user.id,
@@ -376,7 +386,7 @@ async def evaluate_reading_endpoint(
 
     start_time = time.monotonic()
     result = await evaluate_reading_with_ai(
-        spoken_text=payload.spoken_text,
+        spoken_text=safe_spoken_text,
         target_text=payload.target_text,
         duration_ms=payload.duration_ms,
     )

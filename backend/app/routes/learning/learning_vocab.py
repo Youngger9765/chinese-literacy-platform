@@ -4,17 +4,18 @@ Handles sentence practice (Issue #109) and listening comprehension evaluation (I
 """
 import logging
 import time
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
-from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min
+from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min, ai_rate_limiter, get_client_key
 from ...database import get_db
 from ...models.user import User
 from ...services.ai_service import generate_example_sentences, validate_student_sentence
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.example_sentence_cache import get_cached, set_cached
+from ...services.input_sanitizer import sanitize_ai_input
 from ...services.listening_service import evaluate_retelling
 
 router = APIRouter()
@@ -53,9 +54,9 @@ class ValidateSentenceResponse(BaseModel):
 @router.post(
     "/learning/sentence-practice/example-sentences",
     response_model=ExampleSentencesResponse,
-    dependencies=[Depends(ai_limit_10_per_min)],
 )
 async def get_example_sentences(
+    request: Request,
     payload: ExampleSentencesRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -64,9 +65,9 @@ async def get_example_sentences(
 
     Returns cached result if available (TTL 30 days) to avoid repeated Gemini
     API calls for the same character + story (Issue #730).
-    Rate limited: 10 requests per minute per user/IP.
+    Rate limited: 10 requests per minute per user/IP (cache miss only, Issue #911).
     """
-    # 1. Cache hit — return immediately without calling AI
+    # 1. Cache hit — return immediately without calling AI (no rate limit)
     cached = get_cached(story_title=payload.story_title, character=payload.character)
     if cached is not None:
         logger.debug(
@@ -90,7 +91,10 @@ async def get_example_sentences(
             source=cache_source,
         )
 
-    # 2. Cache miss — call AI
+    # 2. Cache miss — enforce rate limit before calling AI (Issue #911)
+    rl_key = f"ai:{get_client_key(request)}"
+    if not ai_rate_limiter.check(rl_key, max_requests=10, window_seconds=60):
+        raise HTTPException(status_code=429, detail="AI endpoint rate limit exceeded. Please wait before retrying.")
     start_time = time.monotonic()
     try:
         result = await generate_example_sentences(
@@ -157,8 +161,12 @@ async def validate_sentence(
     and uses the target character appropriately (Issue #109).
     Rate limited: 10 requests per minute per user/IP.
     """
+    # Sanitize student input before sending to AI
+    safe_sentence, _ = sanitize_ai_input(payload.student_sentence, user_id=str(current_user.id))
+    safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
+
     # Basic check: target character must appear in the sentence
-    if payload.character not in payload.student_sentence:
+    if payload.character not in safe_sentence:
         return ValidateSentenceResponse(
             is_correct=False,
             feedback="你的句子裡沒有包含目標生字喔！",
@@ -169,8 +177,8 @@ async def validate_sentence(
     try:
         result = await validate_student_sentence(
             character=payload.character,
-            student_sentence=payload.student_sentence,
-            story_title=payload.story_title,
+            student_sentence=safe_sentence,
+            story_title=safe_story_title,
         )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
@@ -242,12 +250,16 @@ async def evaluate_listening_retelling(
 
     Returns a score (0-100), covered/missed key points, and feedback.
     """
+    # Sanitize student retelling before sending to AI
+    safe_retelling, _ = sanitize_ai_input(payload.student_retelling, user_id=str(current_user.id))
+    safe_story_title_listen, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
+
     start_time = time.monotonic()
     try:
         result = await evaluate_retelling(
             original_text=payload.original_text,
-            student_retelling=payload.student_retelling,
-            story_title=payload.story_title,
+            student_retelling=safe_retelling,
+            story_title=safe_story_title_listen,
         )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")

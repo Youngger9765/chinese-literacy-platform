@@ -14,6 +14,7 @@ from ...models.session import DialogueTurn, LearningSession
 from ...models.student_tag import StudentTag
 from ...models.user import User
 from ...services.audit_logger import AuditAction, audit_log_endpoint
+from ...services.input_sanitizer import sanitize_ai_input
 from ...services.lesson_loader import get_lesson_by_id
 from ...services.stuck_detection_service import build_recommendations, detect_stuck_points
 from .teacher_schemas import (
@@ -219,6 +220,8 @@ def add_student_tag(
     tag_name = payload.tag_name.strip()
     if not tag_name:
         raise HTTPException(status_code=422, detail="tag_name must not be blank")
+    # Sanitize tag name to prevent injection
+    tag_name, _ = sanitize_ai_input(tag_name, user_id=str(current_user.id))
     if len(tag_name) > 50:
         raise HTTPException(status_code=422, detail="tag_name must be 50 characters or fewer")
 

@@ -81,6 +81,7 @@ def _load_lessons() -> list[dict]:
             "knowledge_video_url": data.get("knowledge_video_url"),
             "reading_benchmark": data.get("reading_benchmark"),
             "source_file": data.get("source_file"),
+            "strategy_exercise": data.get("strategy_exercise"),
             "intro": _build_intro(data),
         }
         lessons.append(lesson)

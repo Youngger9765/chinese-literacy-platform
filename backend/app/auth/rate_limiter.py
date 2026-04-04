@@ -98,7 +98,7 @@ general_rate_limiter = InMemoryRateLimiter()
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _get_client_key(request: Request) -> str:
+def get_client_key(request: Request) -> str:
     """Return a stable key for the current request client.
 
     Uses the authenticated user ID when available (from a previously decoded
@@ -133,7 +133,7 @@ def make_ai_rate_limit_dependency(max_requests: int = 10, window_seconds: int = 
             ...
     """
     def _dependency(request: Request) -> None:
-        key = f"ai:{_get_client_key(request)}"
+        key = f"ai:{get_client_key(request)}"
         if not ai_rate_limiter.check(key, max_requests, window_seconds):
             raise HTTPException(
                 status_code=429,

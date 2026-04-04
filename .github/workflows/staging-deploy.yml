@@ -256,13 +256,13 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       - uses: google-github-actions/setup-gcloud@v2
-      - name: Delete old staging images (keep latest 3)
+      - name: Delete old staging images (keep latest 5)
         run: |
-          KEEP=3
+          KEEP=5
           for PACKAGE in backend frontend; do
             echo "=== Cleaning ${PACKAGE} staging images ==="
             DIGESTS=$(gcloud artifacts docker images list \
-              "${{ env.REGISTRY }}/${PACKAGE}" \
+              "$REGISTRY/${PACKAGE}" \
               --include-tags \
               --filter="tags:staging-" \
               --sort-by="~CREATE_TIME" \
@@ -280,7 +280,7 @@ jobs:
               [ -z "$DIGEST" ] && continue
               echo "DELETE: ${DIGEST:0:20}..."
               gcloud artifacts docker images delete \
-                "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
+                "$REGISTRY/${PACKAGE}@${DIGEST}" \
                 --delete-tags --quiet 2>/dev/null || true
             done
           done

@@ -38,18 +38,21 @@ jobs:
             const projectId = process.env.PROJECT_ID;
             const registry = `${region}-docker.pkg.dev/${projectId}/${process.env.AR_REPO}`;
 
-            // Get open issues/PRs
-            const { data: openIssues } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              per_page: 100,
-            });
+            // Get ALL open issues (paginate to handle >100)
+            const openIssues = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 100,
+              }
+            );
             const activeNums = new Set(openIssues.map(i => String(i.number)));
-            console.log(`Active issues: ${[...activeNums].join(', ') || 'none'}`);
+            console.log(`Active issues (${activeNums.size}): ${[...activeNums].slice(0, 20).join(', ')}${activeNums.size > 20 ? '...' : ''}`);
 
-            // === Part 1: Cloud Run Services ===
-            console.log('\n=== Cloud Run Services ===');
+            // === Part 1: Cloud Run Preview Services ===
+            console.log('\n=== Cloud Run Preview Services ===');
             let svcOutput;
             try {
               svcOutput = execSync(
@@ -73,18 +76,16 @@ jobs:
               try {
                 execSync(
                   `gcloud run services delete ${svc} --region=${region} --project=${projectId} --quiet`,
-                  { timeout: 60000 }
+                  { timeout: 120000 }
                 );
                 svcDeleted++;
               } catch(e) {
                 console.log(`  Failed: ${e.message}`);
               }
             }
-            console.log(`Cloud Run: ${svcDeleted} deleted, ${services.length - svcDeleted} kept`);
+            console.log(`Cloud Run services: ${svcDeleted} deleted, ${services.length - svcDeleted} kept`);
 
-            // === Part 2: AR Preview Tags ===
-            // lingoleap uses Strategy B: tags in shared packages (backend/frontend)
-            // Tags like: issue-{N}-{sha}, pr-{N}-{sha}
+            // === Part 2: AR Preview Tags + Images ===
             console.log('\n=== AR Preview Tags ===');
             let tagDeleted = 0;
 
@@ -114,6 +115,8 @@ jobs:
                 }
               }
             }
-            console.log(`\nAR Tags: ${tagDeleted} untagged`);
+
+            console.log(`\n=== Summary ===`);
+            console.log(`Services: ${svcDeleted} deleted`);
+            console.log(`AR Tags: ${tagDeleted} untagged`);
             console.log('L1 AR Policy will auto-clean untagged images within 7 days');
-            console.log(`\nTotal cleanup: ${svcDeleted} services + ${tagDeleted} tags`);

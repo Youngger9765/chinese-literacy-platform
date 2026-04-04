@@ -8,6 +8,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.story_tag import StoryTag
 from ...models.user import User
+from ...services.input_sanitizer import sanitize_ai_input
 from .teacher_schemas import StoryTagResponse, StoryTagUpsertRequest
 
 router = APIRouter(tags=["teacher"])
@@ -106,7 +107,13 @@ def upsert_story_tag(
     ):
         tag.difficulty_level = body.difficulty_level
     if body.custom_tags is not None:
-        tag.custom_tags = [t.strip() for t in body.custom_tags if t.strip()]
+        sanitized_tags = []
+        for t in body.custom_tags:
+            stripped = t.strip()
+            if stripped:
+                safe_tag, _ = sanitize_ai_input(stripped, user_id=str(current_user.id))
+                sanitized_tags.append(safe_tag)
+        tag.custom_tags = sanitized_tags
 
     db.commit()
     db.refresh(tag)

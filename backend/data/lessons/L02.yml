@@ -117,6 +117,19 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G4-2-L2十秒的背後.docx
 flags: []
+strategy_exercise:
+  type: ordering
+  strategy_name: 順敘法
+  instruction: 順敘法是按照事情的發生順序來講故事。先找到描述時間的詞，再依發生的先後順序排列。
+  items:
+    - text: 楊俊瀚從小學開始練短跑
+      correct_order: 1
+    - text: 在全大運跑出十秒二二破大會紀錄
+      correct_order: 2
+    - text: 二〇一八年亞運一百公尺與金牌擦身而過
+      correct_order: 3
+    - text: 期許自己代表台灣站上奧運舞台
+      correct_order: 4
 story_structure:
 - label: 主角
   value: 楊俊瀚
