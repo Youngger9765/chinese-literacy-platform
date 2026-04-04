@@ -1,4 +1,4 @@
-name: L3 Cleanup Orphan Previews (Cloud Run + AR + Revisions)
+name: L3 Cleanup Orphan Previews (Cloud Run + AR)
 
 on:
   schedule:
@@ -17,7 +17,7 @@ env:
 
 jobs:
   cleanup:
-    name: Delete orphan preview services, images & revisions
+    name: Delete orphan preview services & images
     runs-on: ubuntu-latest
 
     steps:
@@ -85,46 +85,7 @@ jobs:
             }
             console.log(`Cloud Run services: ${svcDeleted} deleted, ${services.length - svcDeleted} kept`);
 
-            // === Part 2: Cloud Run Revisions (all environments) ===
-            console.log('\n=== Cloud Run Revisions ===');
-            const KEEP_REVISIONS = 5;
-            let revDeleted = 0;
-
-            // Main services to clean revisions for
-            const mainServices = [
-              'lingoleap-backend', 'lingoleap-frontend',
-              'lingoleap-backend-staging', 'lingoleap-frontend-staging',
-            ];
-
-            for (const svc of mainServices) {
-              let revisions;
-              try {
-                revisions = execSync(
-                  `gcloud run revisions list --service=${svc} --region=${region} --project=${projectId} --format="value(name)" --sort-by="~createTime"`
-                ).toString().trim().split('\n').filter(Boolean);
-              } catch(e) {
-                console.log(`${svc}: could not list revisions`);
-                continue;
-              }
-
-              const toDelete = revisions.slice(KEEP_REVISIONS);
-              console.log(`${svc}: ${revisions.length} total, deleting ${toDelete.length} (keeping ${KEEP_REVISIONS})`);
-
-              for (const rev of toDelete) {
-                try {
-                  execSync(
-                    `gcloud run revisions delete ${rev} --region=${region} --project=${projectId} --quiet`,
-                    { timeout: 60000 }
-                  );
-                  revDeleted++;
-                } catch(e) {
-                  // Skip errors (active revision can't be deleted)
-                }
-              }
-            }
-            console.log(`Revisions: ${revDeleted} deleted`);
-
-            // === Part 3: AR Preview Tags + Images ===
+            // === Part 2: AR Preview Tags + Images ===
             console.log('\n=== AR Preview Tags ===');
             let tagDeleted = 0;
 
@@ -157,6 +118,5 @@ jobs:
 
             console.log(`\n=== Summary ===`);
             console.log(`Services: ${svcDeleted} deleted`);
-            console.log(`Revisions: ${revDeleted} deleted`);
             console.log(`AR Tags: ${tagDeleted} untagged`);
             console.log('L1 AR Policy will auto-clean untagged images within 7 days');

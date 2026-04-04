@@ -285,46 +285,6 @@ jobs:
             done
           done
 
-  cleanup-revisions:
-    name: Cleanup old Cloud Run revisions
-    needs: [deploy-backend, deploy-frontend]
-    if: always() && !cancelled()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-      - uses: google-github-actions/setup-gcloud@v2
-      - name: Delete old staging revisions (keep latest 5)
-        run: |
-          KEEP=5
-          for SERVICE in "$BACKEND_SERVICE" "$FRONTEND_SERVICE"; do
-            echo "=== Cleaning ${SERVICE} revisions ==="
-            REVISIONS=$(gcloud run revisions list \
-              --service="${SERVICE}" \
-              --region="$REGION" \
-              --project="$PROJECT_ID" \
-              --format="value(name)" \
-              --sort-by="~createTime" 2>/dev/null || true)
-
-            if [ -z "$REVISIONS" ]; then
-              echo "No revisions found, skipping"
-              continue
-            fi
-
-            TOTAL=$(echo "$REVISIONS" | wc -l | tr -d ' ')
-            echo "Found $TOTAL revisions, keeping latest $KEEP"
-
-            echo "$REVISIONS" | tail -n +$((KEEP + 1)) | while read -r REV; do
-              [ -z "$REV" ] && continue
-              echo "DELETE: $REV"
-              gcloud run revisions delete "$REV" \
-                --region="$REGION" \
-                --project="$PROJECT_ID" \
-                --quiet 2>/dev/null || true
-            done
-          done
-
   notify-staging:
     name: Notify referenced issues
     needs: smoke-test
