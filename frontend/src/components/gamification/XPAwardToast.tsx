@@ -3,7 +3,7 @@
  * Shows XP earned, level up (if any), and new badges.
  * Auto-dismisses after 4 seconds or on button click.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 /** Minimal shape needed for the toast — compatible with both gamificationApi and api.ts results. */
 export interface XPAwardResult {
@@ -64,31 +64,72 @@ const BADGE_NAMES: Record<string, string> = {
   xp_1000:     '千分英雄',
 };
 
+/** XP thresholds for each level. Index = level number (level 0 starts at 0 XP). */
+const LEVEL_THRESHOLDS = [0, 100, 250, 500, 800, 1200, 1700, 2300, 3000, 4000] as const;
+
+/** Given a total XP value, return the corresponding level. */
+function getLevelForXP(totalXP: number): number {
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (totalXP >= LEVEL_THRESHOLDS[i]) return i;
+  }
+  return 0;
+}
+
+const AUTO_DISMISS_MS = 4000;
+
 const XPAwardToast: React.FC<XPAwardToastProps> = ({ result, onDismiss }) => {
   const [visible, setVisible] = useState(false);
+
+  // --- Pause-on-hover timer (WCAG 2.2.1) ---
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const remainingRef = useRef(AUTO_DISMISS_MS);
+  const startedAtRef = useRef(Date.now());
+
+  const startDismissTimer = useCallback(() => {
+    startedAtRef.current = Date.now();
+    dismissTimerRef.current = setTimeout(() => {
+      setVisible(false);
+      setTimeout(onDismiss, 300);
+    }, remainingRef.current);
+  }, [onDismiss]);
+
+  const pauseDismissTimer = useCallback(() => {
+    if (dismissTimerRef.current != null) {
+      clearTimeout(dismissTimerRef.current);
+      dismissTimerRef.current = null;
+      const elapsed = Date.now() - startedAtRef.current;
+      remainingRef.current = Math.max(remainingRef.current - elapsed, 500);
+    }
+  }, []);
 
   useEffect(() => {
     // Trigger animation in
     const showTimer = setTimeout(() => setVisible(true), 50);
-    // Auto-dismiss after 4 seconds
-    const hideTimer = setTimeout(() => {
-      setVisible(false);
-      setTimeout(onDismiss, 300);
-    }, 4000);
+    // Start auto-dismiss countdown
+    startDismissTimer();
     return () => {
       clearTimeout(showTimer);
-      clearTimeout(hideTimer);
+      if (dismissTimerRef.current != null) clearTimeout(dismissTimerRef.current);
     };
-  }, [onDismiss]);
+  }, [startDismissTimer]);
+
+  const handleMouseEnter = () => pauseDismissTimer();
+  const handleMouseLeave = () => startDismissTimer();
 
   const { xp_earned, new_total_xp, level_info, badges_unlocked } = result;
-  const levelUp = result.level_info.level > (new_total_xp - xp_earned >= 100 ? 2 : 1);
+
+  // Level-up detection: compare level before this XP award vs current level
+  const previousTotalXP = level_info.total_xp - xp_earned;
+  const previousLevel = getLevelForXP(previousTotalXP);
+  const levelUp = previousLevel < level_info.level;
 
   return (
     <div
       className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
       }`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="bg-white rounded-3xl shadow-2xl border-2 border-blue-100 px-6 py-5 min-w-[280px] max-w-sm">
         {/* XP gained */}

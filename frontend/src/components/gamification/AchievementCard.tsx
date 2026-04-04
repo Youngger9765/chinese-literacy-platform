@@ -77,22 +77,36 @@ const AchievementCard: React.FC<AchievementCardProps> = ({ badge, size = 'md' })
       `}
       title={badge.description}
     >
-      <div
-        className={`
-          ${sizeClasses.icon} leading-none
-          ${unlocked ? '' : 'grayscale'}
-        `}
-      >
-        {unlocked ? emoji : '🔒'}
+      <div className="relative">
+        <div
+          className={`
+            ${sizeClasses.icon} leading-none
+            ${unlocked ? '' : 'grayscale'}
+          `}
+          style={unlocked ? undefined : { filter: 'blur(4px)', opacity: 0.5 }}
+        >
+          {emoji}
+        </div>
+        {!unlocked && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-lg">🔒</span>
+          </div>
+        )}
       </div>
 
       <div>
         <div className={`font-black ${sizeClasses.name} ${unlocked ? colors.text : 'text-gray-400'}`}>
           {badge.name}
         </div>
-        <div className={`${sizeClasses.desc} text-gray-500 mt-0.5 leading-snug`}>
-          {badge.description}
-        </div>
+        {unlocked ? (
+          <div className={`${sizeClasses.desc} text-gray-500 mt-0.5 leading-snug`}>
+            {badge.description}
+          </div>
+        ) : (
+          <div className={`${sizeClasses.desc} text-gray-400 mt-0.5 leading-snug italic`}>
+            {badge.description}
+          </div>
+        )}
       </div>
 
       {unlocked && badge.unlocked_at && (

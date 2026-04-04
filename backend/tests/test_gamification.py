@@ -11,6 +11,7 @@ from app.models.gamification import (
     BADGE_CATALOGUE,
     LEVEL_THRESHOLDS,
     LEVEL_NAMES,
+    XP_REWARDS,
     StudentBadge,
     StudentStreak,
     StudentXPLog,
@@ -333,3 +334,110 @@ class TestUpdateStreak:
         streak = update_streak(db_session, student_id=1, activity_date=date(2026, 3, 9))
         assert streak.current_streak == 1
         assert streak.longest_streak == 3
+
+
+# ── B1: first_session badge triggers on first story completion ───────────────
+
+
+class TestFirstSessionBadge:
+    def test_first_session_badge_triggers_on_first_completion(self, db_session):
+        """B1 fix: first_session badge should unlock when stories_completed >= 1."""
+        from app.services.gamification_service import process_session_completion
+        _make_user(db_session, 1)
+        _make_session(db_session, 1, 1)
+
+        result = process_session_completion(db_session, student_id=1, session_id=1)
+        assert "first_session" in result["badges_unlocked"]
+
+    def test_first_session_badge_not_awarded_twice(self, db_session):
+        from app.services.gamification_service import process_session_completion
+        _make_user(db_session, 1)
+        _make_session(db_session, 1, 1)
+        _make_session(db_session, 2, 1)
+
+        r1 = process_session_completion(db_session, student_id=1, session_id=1)
+        assert "first_session" in r1["badges_unlocked"]
+
+        r2 = process_session_completion(db_session, student_id=1, session_id=2)
+        assert "first_session" not in r2["badges_unlocked"]
+
+
+# ── B2: Idempotency — duplicate session_id returns cached, no double XP ──────
+
+
+class TestIdempotency:
+    def test_duplicate_session_id_does_not_double_xp(self, db_session):
+        """B2 fix: calling process_session_completion twice with same session_id
+        should only award XP once."""
+        from app.services.gamification_service import process_session_completion
+        _make_user(db_session, 1)
+        _make_session(db_session, 1, 1)
+
+        r1 = process_session_completion(db_session, student_id=1, session_id=1)
+        r2 = process_session_completion(db_session, student_id=1, session_id=1)
+
+        # Same total XP — no double award
+        assert r2["new_total_xp"] == r1["new_total_xp"]
+        # Second call returns same XP breakdown amount
+        assert r2["xp_earned"] == r1["xp_earned"]
+        # Second call should NOT unlock any new badges
+        assert r2["badges_unlocked"] == []
+
+    def test_different_session_ids_award_separately(self, db_session):
+        """Different session_ids should each award XP normally."""
+        from app.services.gamification_service import process_session_completion
+        _make_user(db_session, 1)
+        _make_session(db_session, 1, 1)
+        _make_session(db_session, 2, 1)
+
+        r1 = process_session_completion(db_session, student_id=1, session_id=1)
+        r2 = process_session_completion(db_session, student_id=1, session_id=2)
+
+        assert r2["new_total_xp"] > r1["new_total_xp"]
+
+
+# ── New XP events and badges exist ───────────────────────────────────────────
+
+
+class TestNewXpEvents:
+    @pytest.mark.parametrize("event_type", [
+        "step_complete",
+        "strategy_exercise_complete",
+        "all_steps_complete",
+        "daily_first_login",
+    ])
+    def test_new_xp_event_exists(self, event_type):
+        assert event_type in XP_REWARDS
+        assert XP_REWARDS[event_type] > 0
+
+    def test_step_complete_value(self):
+        assert XP_REWARDS["step_complete"] == 3
+
+    def test_strategy_exercise_complete_value(self):
+        assert XP_REWARDS["strategy_exercise_complete"] == 10
+
+    def test_all_steps_complete_value(self):
+        assert XP_REWARDS["all_steps_complete"] == 25
+
+    def test_daily_first_login_value(self):
+        assert XP_REWARDS["daily_first_login"] == 3
+
+
+class TestNewBadges:
+    def test_perfect_week_badge_exists(self):
+        assert "perfect_week" in BADGE_CATALOGUE
+        badge = BADGE_CATALOGUE["perfect_week"]
+        assert badge["name"] == "完美一週"
+        assert badge.get("hidden") is True
+
+    def test_explorer_badge_exists(self):
+        assert "explorer" in BADGE_CATALOGUE
+        badge = BADGE_CATALOGUE["explorer"]
+        assert badge["name"] == "步步探索"
+        assert badge.get("hidden") is True
+
+    def test_new_badges_have_required_fields(self):
+        for key in ("perfect_week", "explorer"):
+            badge = BADGE_CATALOGUE[key]
+            for field in ("name", "description", "icon", "color"):
+                assert field in badge, f"Badge {key!r} missing field {field!r}"

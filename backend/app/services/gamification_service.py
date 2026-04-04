@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 from datetime import date, datetime, timezone
 
+from sqlalchemy import func as sqlfunc
 from sqlalchemy.orm import Session
 
 from ..models.gamification import (
@@ -31,19 +32,27 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-def _get_or_create_xp_log_entry(db: Session, student_id: int) -> tuple[int, list[StudentXPLog]]:
-    """Return the student's cumulative XP and all XP log rows.
-
-    We compute cumulative XP from the log to avoid a separate summary table,
-    keeping the schema simple while still allowing full auditability.
-    """
-    logs = (
-        db.query(StudentXPLog)
+def _get_total_xp(db: Session, student_id: int) -> int:
+    """Return the student's cumulative XP using a DB-side aggregate."""
+    result = (
+        db.query(sqlfunc.coalesce(sqlfunc.sum(StudentXPLog.xp_earned), 0))
         .filter(StudentXPLog.student_id == student_id)
-        .all()
+        .scalar()
     )
-    total = sum(log.xp_earned for log in logs)
-    return total, logs
+    return int(result)
+
+
+def _get_stories_completed(db: Session, student_id: int) -> int:
+    """Return count of 'session_complete' XP log entries for a student."""
+    result = (
+        db.query(sqlfunc.count(StudentXPLog.id))
+        .filter(
+            StudentXPLog.student_id == student_id,
+            StudentXPLog.event_type == "session_complete",
+        )
+        .scalar()
+    )
+    return int(result)
 
 
 def _get_or_create_streak(db: Session, student_id: int) -> StudentStreak:
@@ -152,8 +161,8 @@ def check_and_award_badges(
 
     Returns list of newly unlocked badge keys.
     """
-    total_xp, logs = _get_or_create_xp_log_entry(db, student_id)
-    stories_completed = sum(1 for log in logs if log.event_type == "session_complete")
+    total_xp = _get_total_xp(db, student_id)
+    stories_completed = _get_stories_completed(db, student_id)
     level = xp_to_level(total_xp)
     streak = _get_or_create_streak(db, student_id)
     unlocked = _get_unlocked_badge_keys(db, student_id)
@@ -165,6 +174,9 @@ def check_and_award_badges(
             if row:
                 newly_unlocked.append(badge_key)
 
+    # First session badge (B1 fix: triggers on first story completion)
+    _try("first_session", stories_completed >= 1)
+
     # Story completion badges
     _try("first_story", stories_completed >= 1)
     _try("story_5", stories_completed >= 5)
@@ -175,6 +187,9 @@ def check_and_award_badges(
     _try("streak_3", streak.current_streak >= 3)
     _try("streak_7", streak.current_streak >= 7)
     _try("streak_30", streak.current_streak >= 30)
+
+    # Hidden: perfect_week — longest streak >= 7 days
+    _try("perfect_week", streak.longest_streak >= 7)
 
     # Accuracy badges
     if reading_accuracy is not None:
@@ -188,6 +203,14 @@ def check_and_award_badges(
     # XP milestone badges
     _try("xp_500", total_xp >= 500)
     _try("xp_1000", total_xp >= 1000)
+
+    # Hidden: explorer — 10+ distinct event types in XP log
+    distinct_event_count = (
+        db.query(sqlfunc.count(sqlfunc.distinct(StudentXPLog.event_type)))
+        .filter(StudentXPLog.student_id == student_id)
+        .scalar()
+    )
+    _try("explorer", (distinct_event_count or 0) >= 10)
 
     return newly_unlocked
 
@@ -205,11 +228,48 @@ def process_session_completion(
     Awards XP, updates streak, checks badges, commits all changes.
     Returns a summary dict with XP earned, badges unlocked, and level info.
     """
+    # --- Idempotency check (B2): skip if this session already awarded XP ---
+    existing_logs = (
+        db.query(StudentXPLog)
+        .filter(StudentXPLog.session_id == session_id)
+        .first()
+    )
+    if existing_logs is not None:
+        # Already processed — return existing summary without awarding again
+        total_xp = _get_total_xp(db, student_id)
+        lv_info = level_progress(total_xp)
+        streak = _get_or_create_streak(db, student_id)
+        all_session_logs = (
+            db.query(StudentXPLog)
+            .filter(StudentXPLog.session_id == session_id)
+            .all()
+        )
+        logger.info(
+            "Session %d already processed for student %d — returning cached summary",
+            session_id,
+            student_id,
+        )
+        return {
+            "xp_earned": sum(l.xp_earned for l in all_session_logs),
+            "xp_breakdown": [
+                {"event_type": l.event_type, "xp": l.xp_earned, "note": l.note}
+                for l in all_session_logs
+            ],
+            "new_total_xp": total_xp,
+            "level_info": lv_info,
+            "streak": {
+                "current": streak.current_streak,
+                "longest": streak.longest_streak,
+            },
+            "badges_unlocked": [],
+            "notes": ["（已處理，不重複計算）"],
+        }
+
     xp_earned: list[StudentXPLog] = []
     notes: list[str] = []
 
     # --- Base session XP ---
-    total_xp_before, _ = _get_or_create_xp_log_entry(db, student_id)
+    total_xp_before = _get_total_xp(db, student_id)
     is_first_story = total_xp_before == 0
 
     log = award_xp(db, student_id, "session_complete", session_id=session_id, note="完成課文學習")
@@ -288,8 +348,8 @@ def process_session_completion(
 
 def get_student_summary(db: Session, student_id: int) -> dict:
     """Return full gamification summary for a student."""
-    total_xp, logs = _get_or_create_xp_log_entry(db, student_id)
-    stories_completed = sum(1 for l in logs if l.event_type == "session_complete")
+    total_xp = _get_total_xp(db, student_id)
+    stories_completed = _get_stories_completed(db, student_id)
     lv_info = level_progress(total_xp)
 
     streak = _get_or_create_streak(db, student_id)
@@ -346,7 +406,6 @@ def get_student_summary(db: Session, student_id: int) -> dict:
 
 def get_classroom_leaderboard(db: Session, classroom_id: int, limit: int = 10) -> list[dict]:
     """Return top N students in a classroom ranked by total XP."""
-    from sqlalchemy import func as sqlfunc
     from ..models.user import User
 
     # Get all student IDs in classroom
