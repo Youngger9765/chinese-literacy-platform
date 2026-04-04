@@ -35,6 +35,8 @@ const ICON_EMOJI: Record<string, string> = {
   brain: '🧠',
   crown: '👑',
   zap: '⚡',
+  'calendar-check': '📅',
+  compass: '🧭',
 };
 
 // Map color keys to Tailwind classes
@@ -48,6 +50,8 @@ const COLOR_MAP: Record<string, { bg: string; ring: string; text: string }> = {
   green: { bg: 'bg-green-50', ring: 'ring-green-300', text: 'text-green-700' },
   indigo: { bg: 'bg-indigo-50', ring: 'ring-indigo-300', text: 'text-indigo-700' },
   gray: { bg: 'bg-gray-50', ring: 'ring-gray-300', text: 'text-gray-600' },
+  emerald: { bg: 'bg-emerald-50', ring: 'ring-emerald-300', text: 'text-emerald-700' },
+  teal: { bg: 'bg-teal-50', ring: 'ring-teal-300', text: 'text-teal-700' },
 };
 
 function getColors(color: string, unlocked: boolean) {

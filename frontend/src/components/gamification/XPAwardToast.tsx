@@ -46,6 +46,9 @@ const BADGE_ICONS: Record<string, string> = {
   level_10:    '👑',
   xp_500:      '⚡',
   xp_1000:     '⚡',
+  first_session:'⭐',
+  perfect_week: '📅',
+  explorer:     '🧭',
 };
 
 const BADGE_NAMES: Record<string, string> = {
@@ -62,17 +65,20 @@ const BADGE_NAMES: Record<string, string> = {
   level_10:    '國文之星',
   xp_500:      '積分達人',
   xp_1000:     '千分英雄',
+  first_session:'初次學習',
+  perfect_week: '完美一週',
+  explorer:     '步步探索',
 };
 
 /** XP thresholds for each level. Index = level number (level 0 starts at 0 XP). */
 const LEVEL_THRESHOLDS = [0, 100, 250, 500, 800, 1200, 1700, 2300, 3000, 4000] as const;
 
-/** Given a total XP value, return the corresponding level. */
+/** Given a total XP value, return the corresponding 1-based level (matches backend xp_to_level). */
 function getLevelForXP(totalXP: number): number {
   for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
-    if (totalXP >= LEVEL_THRESHOLDS[i]) return i;
+    if (totalXP >= LEVEL_THRESHOLDS[i]) return i + 1;
   }
-  return 0;
+  return 1;
 }
 
 const AUTO_DISMISS_MS = 4000;

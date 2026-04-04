@@ -400,6 +400,7 @@ def get_student_summary(db: Session, student_id: int) -> dict:
                 "unlocked": key in {b["key"] for b in badge_list},
             }
             for key, info in BADGE_CATALOGUE.items()
+            if not info.get("hidden") or key in {b["key"] for b in badge_list}
         ],
     }
 
