@@ -30,9 +30,13 @@ interface StoryCardProps {
   isLoading: boolean;
   isCompleted: boolean;
   onClick: () => void;
+  /** Estimated XP for completing this story (e.g. 60). Shown as a small badge. */
+  estimatedXP?: number;
+  /** When true, shows a "level up soon" hint instead of the XP estimate. */
+  closeToLevelUp?: boolean;
 }
 
-const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, onClick }) => {
+const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, onClick, estimatedXP, closeToLevelUp }) => {
   const diff = getDifficulty(story);
   const diffConfig = DIFFICULTY_CONFIG[diff];
 
@@ -97,6 +101,20 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
                 {tag}
               </span>
             ))}
+          </div>
+        )}
+        {/* XP callout */}
+        {!isCompleted && (closeToLevelUp || (estimatedXP != null && estimatedXP > 0)) && (
+          <div className="mt-2">
+            {closeToLevelUp ? (
+              <span className="text-xs font-semibold text-[#5B4FC4] bg-[#5B4FC4]/10 px-2 py-0.5 rounded-full">
+                ⚡ 再 1 篇就升級！
+              </span>
+            ) : (
+              <span className="text-xs text-gray-500">
+                ⚡ 完成可得 ~{estimatedXP} XP
+              </span>
+            )}
           </div>
         )}
       </div>

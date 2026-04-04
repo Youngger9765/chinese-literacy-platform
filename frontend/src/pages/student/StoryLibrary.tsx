@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Story } from '../../types';
 import { fetchStories, fetchStory } from '../../services/api';
 import { getClassroomTexts } from '../../services/teacherApi';
+import { getGamificationPoints } from '../../services/gamificationApi';
 import { useAuth } from '../../contexts/AuthContext';
 import StoryCard, { Difficulty, DIFFICULTY_CONFIG, getDifficulty } from '../../components/student/StoryCard';
 
@@ -35,7 +36,8 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   completedSlugs = [],
   classroomId = null,
 }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const [xpToNext, setXpToNext] = useState<number | null>(null);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -48,6 +50,14 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   const [classroomFilterLabel, setClassroomFilterLabel] = useState<string | null>(null);
 
   const completedSet = new Set(completedSlugs);
+
+  // Fetch XP info for callout badges (lightweight, non-blocking)
+  useEffect(() => {
+    if (!token || !user) return;
+    getGamificationPoints(user.id, token)
+      .then((data) => setXpToNext(data.level_info.xp_to_next))
+      .catch(() => {/* silently ignore — XP callout is cosmetic */});
+  }, [token, user]);
 
   useEffect(() => {
     if (!token) return;
@@ -268,15 +278,21 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
       {/* Story grid */}
       {!isLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stories.map((story) => (
-            <StoryCard
-              key={story.id}
-              story={story}
-              isLoading={loadingStoryId === story.id}
-              isCompleted={completedSet.has(story.id)}
-              onClick={() => handleStoryClick(story)}
-            />
-          ))}
+          {stories.map((story) => {
+            const ESTIMATED_XP = 60;
+            const isCloseToLevelUp = xpToNext != null && xpToNext > 0 && xpToNext <= ESTIMATED_XP;
+            return (
+              <StoryCard
+                key={story.id}
+                story={story}
+                isLoading={loadingStoryId === story.id}
+                isCompleted={completedSet.has(story.id)}
+                onClick={() => handleStoryClick(story)}
+                estimatedXP={ESTIMATED_XP}
+                closeToLevelUp={isCloseToLevelUp}
+              />
+            );
+          })}
         </div>
       )}
 
