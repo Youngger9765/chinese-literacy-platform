@@ -139,7 +139,14 @@ multiple_choice:
   answer: A
   explanation: 兩篇文章的寫作順序都先介紹巨石陣或摩艾石像的發現經過，接著提出關於它們建造方式或目的的疑問，再針對這些疑問提出三種假設，最後指出這些謎團至今仍未有定論，因此是「發現由來→令人好奇的問題→三個假設→未解
 multiple_choice_count: 5
-reading_benchmark: null
+reading_benchmark:
+  levels:
+  - threshold: □＜220字
+    feedback: 還要多加練習。
+  - threshold: □ 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: □＞251字
+    feedback: 哇嗚，超級厲害！
 source_file: G9-9.10-L56~57多文本-未解之謎-巨石陣+摩艾石像.docx
 flags:
 - MULTI_TEXT

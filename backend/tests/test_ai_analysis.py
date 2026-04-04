@@ -457,11 +457,11 @@ class TestStandaloneAIAnalysis:
 class TestGenerateReadingAnalysisEnrichedPrompt:
     """Tests that the AI service includes comprehension/vocab data in the prompt."""
 
-    @patch("app.services.ai_service.generate_structured_response", new_callable=AsyncMock)
+    @patch("app.services.ai_reading.generate_structured_response", new_callable=AsyncMock)
     def test_prompt_includes_comprehension_score_when_provided(self, mock_structured):
         """Issue #415: comprehension_score should appear in the AI prompt."""
         import asyncio
-        from app.services.ai_service import generate_reading_analysis
+        from app.services.ai_reading import generate_reading_analysis
 
         mock_structured.return_value = {
             "analysis_summary": "Test",
@@ -488,11 +488,11 @@ class TestGenerateReadingAnalysisEnrichedPrompt:
         user_content = str(call_args)
         assert "75" in user_content  # comprehension score appears somewhere in the call
 
-    @patch("app.services.ai_service.generate_structured_response", new_callable=AsyncMock)
+    @patch("app.services.ai_reading.generate_structured_response", new_callable=AsyncMock)
     def test_prompt_works_without_optional_fields(self, mock_structured):
         """Issue #415: analysis should still work with only reading data."""
         import asyncio
-        from app.services.ai_service import generate_reading_analysis
+        from app.services.ai_reading import generate_reading_analysis
 
         mock_structured.return_value = {
             "analysis_summary": "Test",

@@ -117,7 +117,14 @@ multiple_choice:
   answer: C
   explanation: 課文開頭解釋了文言文是古人因書寫成本高而用於書寫的語言（由來），並在標題「文言文怎麼讀？」後，透過五個步驟（用故事情節推測、讀懂代名詞、推測生詞、全句翻譯、讀出作者意圖）詳細教授了閱讀文言文的具體策略
 multiple_choice_count: 4
-reading_benchmark: null
+reading_benchmark:
+  levels:
+  - threshold: □＜220字
+    feedback: 還要多加練習。
+  - threshold: □ 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: □＞251字
+    feedback: 哇嗚，超級厲害！
 source_file: G8-4-L45文言文怎麼讀？以鞭虎救弟記為例.docx
 flags:
 - NO_VOCABULARY
