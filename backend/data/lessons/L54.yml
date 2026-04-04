@@ -99,13 +99,59 @@ fill_in_blank:
   answer: 動作組群
 - sentence: （　　）是臺灣首度有體操選手在奧運奪牌。
   answer: 李智凱
-multiple_choice: []
-multiple_choice_count: 0
-reading_benchmark: null
+multiple_choice:
+- question: 根據課文，李智凱在東京奧運鞍馬項目中使用的招牌動作是什麼？
+  options:
+  - 後空翻
+  - 湯瑪士迴旋
+  - 十字支撐
+  - 鞍馬旋轉
+  answer: B
+  explanation: 課文明確提到李智凱以自創的招牌動作「湯瑪士迴旋」拿下15.40的高分，奪下銀牌
+- question: 競技體操的最終得分是由哪兩種分數組成的？
+  options:
+  - A分（藝術分）和B分（表現分）
+  - D分（難度分）和E分（實施分）
+  - 技術分和創意分
+  - 基礎分和加分
+  answer: B
+  explanation: 課文指出奧運會鞍馬比賽得分由「D分（難度分）」和「E分（實施分）」兩種分數組成
+- question: D分的計算中，共取幾個動作來計算難度分數？
+  options:
+  - 8個動作
+  - 9個動作
+  - 10個動作
+  - 12個動作
+  answer: C
+  explanation: 課文說明計分取成套動作中「最好的9個動作」加上「下法」，共10個動作來計算難度分數
+- question: E分評審的方式是什麼？
+  options:
+  - 從0分開始，做得好就加分
+  - 從10分開始，有錯誤就扣分
+  - 由觀眾投票決定
+  - 7位裁判分數的總和
+  answer: B
+  explanation: 課文說明E分裁判從10分開始，以0.1分為單位進行扣分，小錯扣0.1分，中錯扣0.3分，大錯扣0.5分，失敗扣1.0分
+- question: 關於E分裁判的評分方式，下列敘述何者正確？
+  options:
+  - E組裁判共有2人
+  - 7位裁判的分數全部採計
+  - 最高分和最低分均不予採計
+  - 只取最高分和最低分的平均
+  answer: C
+  explanation: 課文明確指出E組裁判有7人，最高分和最低分均不予採計
+multiple_choice_count: 5
+reading_benchmark:
+  levels:
+  - threshold: □＜220字
+    feedback: 還要多加練習。
+  - threshold: □ 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: □＞251字
+    feedback: 哇嗚，超級厲害！
 source_file: G9-7-L54力與美表現的競技體操.docx
 flags:
 - NO_VOCABULARY
-- NO_MC_QUESTIONS
 strategy_exercise:
   type: guided_steps
   strategy_name: 摘要與組織圖表

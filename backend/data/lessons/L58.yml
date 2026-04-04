@@ -195,7 +195,14 @@ multiple_choice:
   answer: A
   explanation: 作者在開頭明確提示讀者要「注意三篇文章觀點的差異」，這表示作者認為單一的觀點或解釋無法全面呈現事物的面貌，鼓勵讀者從多元角度理解主題。
 multiple_choice_count: 9
-reading_benchmark: null
+reading_benchmark:
+  levels:
+  - threshold: □＜220字
+    feedback: 還要多加練習。
+  - threshold: □ 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: □＞251字
+    feedback: 哇嗚，超級厲害！
 source_file: G9-11.12.13-L58~60多文本-馬拉松王者+靠跑鞋破紀錄合理嗎+促成更高更快更遠的因素.docx
 flags:
 - MULTI_TEXT
