@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
-from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min, ai_rate_limiter
+from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min, ai_rate_limiter, get_client_key
 from ...database import get_db
 from ...models.user import User
 from ...services.ai_service import generate_example_sentences, validate_student_sentence
@@ -91,8 +91,7 @@ async def get_example_sentences(
         )
 
     # 2. Cache miss — enforce rate limit before calling AI (Issue #911)
-    user_id = getattr(request.state, "user_id", None)
-    rl_key = f"ai:user:{user_id}" if user_id else f"ai:ip:{request.client.host if request.client else 'unknown'}"
+    rl_key = f"ai:{get_client_key(request)}"
     if not ai_rate_limiter.check(rl_key, max_requests=10, window_seconds=60):
         raise HTTPException(status_code=429, detail="AI endpoint rate limit exceeded. Please wait before retrying.")
     start_time = time.monotonic()
