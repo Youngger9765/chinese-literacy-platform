@@ -59,8 +59,7 @@ class ReadingHistoryItem(BaseModel):
     duration_seconds: float
     created_at: str
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class ReadingHistoryResponse(BaseModel):
