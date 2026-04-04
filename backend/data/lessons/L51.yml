@@ -135,6 +135,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G9-4-L51靈異與科學.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 科學方法解決問題
+  instruction: 遇到無法解釋的現象時，可以用「提問→假設→檢驗」的科學方法來找答案。請跟著步驟，用科學方法分析課文中的靈異現象
+  steps:
+    - prompt: 對於「鬼火」現象，科學家提出的解釋是什麼？
+      type: select
+      options:
+        - 鬼魂在夜晚出來活動發出的光
+        - 屍體腐化產生的磷化氫和沼氣混合，在低溫就能燃燒的「冷焰」
+        - 地底下的火山氣體噴出來
+      answer: 1
+    - prompt: 為什麼鬼火最常出現在夏天的墳場？
+      type: select
+      options:
+        - 夏天氣溫高，容易達到冷焰的燃點（攝氏30度），墳場有腐化的遺骸產生磷化氫
+        - 夏天鬼魂比較活躍
+        - 夏天的月亮比較亮
+      answer: 0
+    - prompt: 「鬼壓床」在醫學上叫什麼？它發生在睡眠週期的哪個階段？
+      type: select
+      options:
+        - 睡眠障礙症，發生在深睡期
+        - 睡眠癱瘓症，發生在快速眼動期
+        - 夢遊症，發生在淺睡期
+      answer: 1
+    - prompt: 課文說睡覺時動彈不得其實是身體的「保護機制」，為什麼？請用自己的話回答
+      type: free_text
 story_structure:
 - label: 結論
   value: 理性的科學方法，讓我們不再害怕，對現象有更客觀的認識。

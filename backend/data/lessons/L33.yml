@@ -143,6 +143,36 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-5-L33吐瓦魯：逐漸被淹沒的島國.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 4F反思法
+  instruction: 4F反思法幫助我們深入思考一個議題，包含四個步驟：事實（Fact）發生了什麼事、感受（Feeling）你有什麼感覺、反思（Finding）你發現了什麼道理、行動（Future）你可以怎麼做。請根據課文練習
+  steps:
+    - prompt: "【事實】根據課文，吐瓦魯面臨什麼危機？"
+      type: select
+      options:
+        - 因為戰爭，人民被迫離開家園
+        - 因為全球暖化、海平面上升，國土即將被淹沒
+        - 因為經濟衰退，人民生活困難
+      answer: 1
+    - prompt: "【事實】吐瓦魯部長柯飛提出了什麼計畫來因應危機？"
+      type: select
+      options:
+        - 搬遷到其他國家
+        - 建造巨大海堤保護島嶼
+        - 建立「元宇宙國家」，把國家轉移到雲端
+      answer: 2
+    - prompt: "【感受】讀到吐瓦魯的溫室氣體排放僅占全球0.03%，卻要承受國土被淹沒的後果，你有什麼感受？"
+      type: free_text
+    - prompt: "【反思】文章提到臺灣海平面也在上升，你覺得這跟吐瓦魯的處境有什麼關聯？"
+      type: select
+      options:
+        - 臺灣也可能面臨類似的問題，全球暖化影響每個人
+        - 臺灣面積比較大，所以完全不用擔心
+        - 臺灣應該幫吐瓦魯搬家
+      answer: 0
+    - prompt: "【行動】為了減緩全球暖化，你在日常生活中可以做什麼？請舉出一個具體行動"
+      type: free_text
 story_structure:
 - label: 結論
   value: 類的避難󠇡所嗎？

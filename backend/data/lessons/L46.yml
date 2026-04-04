@@ -105,6 +105,34 @@ reading_benchmark:
     feedback: 速度有點快，要讀清楚哦!
 source_file: G8-5-L46不量田.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 文言文判讀主語
+  instruction: 文言文經常省略主語，讀的時候要自己「腦補」出誰在做這件事。請跟著步驟練習判讀主語
+  steps:
+    - prompt: 「賈人某，至直隸界，忽大雨雹，伏禾中」，這裡「伏禾中」的主語是誰？
+      type: select
+      options:
+        - 張不量
+        - 商人（賈人）
+        - 上天
+      answer: 1
+    - prompt: 「聞空中云：此張不量田，勿傷其稼」，說這句話的主語是誰？
+      type: select
+      options:
+        - 商人自言自語
+        - 空中的聲音（上天）
+        - 村裡的人
+      answer: 1
+    - prompt: 「雹止，入村，訪問其人」，這裡連續三個動作「雹止、入村、訪問」的主語分別是誰？
+      type: select
+      options:
+        - 全部都是商人
+        - 「雹止」主語是冰雹，「入村、訪問」主語是商人
+        - 全部都是冰雹
+      answer: 1
+    - prompt: 張氏被稱為「不量」而非「不良」，真正的原因是什麼？請用自己的話回答
+      type: free_text
 story_structure:
 - label: 事例
   sub_rows:

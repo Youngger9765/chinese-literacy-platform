@@ -149,6 +149,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-13-L26奇蹟行動.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 野外求生技能
+  instruction: 萊絲莉帶著弟弟妹妹在亞馬遜雨林求生了40天，靠的是從族人那裡學到的野外求生技巧。讓我們一起來整理她用了哪些求生方法吧！
+  steps:
+    - prompt: 萊絲莉怎麼解決「吃」的問題？
+      type: select
+      options:
+        - 獵捕野生動物來吃
+        - 先吃飛機上帶下來的木薯粉，之後採集種子、野果和根莖類植物充飢
+        - 等搜救隊空投食物箱
+      answer: 1
+    - prompt: 萊絲莉怎麼解決「喝水」的問題？
+      type: select
+      options:
+        - 直接喝叢林裡的溪水
+        - 只喝雨水，先承接雨水等沉澱淨化後再喝
+        - 從樹幹裡擠出水分來喝
+      answer: 1
+    - prompt: 萊絲莉怎麼解決「住」的問題，保護大家的安全？
+      type: select
+      options:
+        - 住在飛機殘骸裡
+        - 挖地洞躲起來
+        - 和弟弟在樹上搭建小屋，避免地面野獸攻擊
+      answer: 2
+    - prompt: 萊絲莉能在雨林中求生，最主要是因為什麼？這對你有什麼啟發？請寫下你的想法
+      type: free_text
 story_structure:
 - label: 主角
   value: 萊絲莉和她的三個弟妹

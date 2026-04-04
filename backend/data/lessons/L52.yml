@@ -127,6 +127,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G9-5-L52從基因來的特別禮物.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 認識統計圖表
+  instruction: 統計圖表可以幫助我們快速看出數據的重點。這篇文章用數據和圖表來說明阿美族人的特殊血型。請跟著步驟練習讀懂數據
+  steps:
+    - prompt: 課文提到阿美族約占全臺灣人口的1%，但在2021年東京奧運國手中占了10.3%，這叫做什麼現象？
+      type: select
+      options:
+        - 正常分布
+        - 過度表徵
+        - 隨機巧合
+      answer: 1
+    - prompt: 根據課文，哪個族群帶有米田堡血型的比率最高？
+      type: select
+      options:
+        - 白種人（0.002%）
+        - 臺灣人整體（5%）
+        - 阿美族（88%）
+      answer: 2
+    - prompt: 馬偕醫院的踏階運動實驗發現，有米田堡血型的人和沒有的人有什麼差異？
+      type: select
+      options:
+        - 有米田堡血型的人跑得比較快
+        - 有米田堡血型的人運動後排出二氧化碳只需1到2分鐘，比一般人的2到3分鐘更快
+        - 兩組人沒有差異
+      answer: 1
+    - prompt: 課文結尾說除了努力練習之外，基因決定的身體素質也會影響運動表現。你覺得「因材施教」這個概念可以怎麼應用？請用自己的話回答
+      type: free_text
 story_structure:
 - label: 結論
   value: (1)除了努力練習，

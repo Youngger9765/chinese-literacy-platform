@@ -148,6 +148,37 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-5-L18動物談情說愛的方式.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 說明文結構－找出舉例與細節
+  instruction: 說明文常常會用「主題＋舉例」的方式來說明，每個小主題底下會有動物的例子和細節來支持。讓我們一起來找出課文中的舉例和細節吧！
+  steps:
+    - prompt: 課文介紹了哪些動物求偶的方式？請選出正確的分類
+      type: select
+      options:
+        - 用歌聲、用舞姿、用氣味、用武力展示
+        - 用歌聲、用顏色、用氣味、用速度
+        - 用歌聲、用舞姿、用築巢、用武力展示
+      answer: 0
+    - prompt: 在「用歌聲求偶」這個小主題下，課文舉了哪些動物的例子？
+      type: checkbox
+      options:
+        - 雄蛙
+        - 五色鳥
+        - 海馬
+        - 鴕鳥
+      answer:
+        - 0
+        - 1
+    - prompt: 海馬的求偶細節是什麼？
+      type: select
+      options:
+        - 用歌聲吸引仰慕者
+        - 以忽明忽暗的體色和曼妙的舞姿吸引仰慕者
+        - 快速揮動大螯，展示武力
+      answer: 1
+    - prompt: 課文最後一段總結了什麼？用自己的話寫下來
+      type: free_text
 story_structure:
 - label: 主題
   value: 本段的小標題也是：用歌聲求偶。

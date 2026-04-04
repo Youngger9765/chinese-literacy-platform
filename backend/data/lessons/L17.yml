@@ -202,6 +202,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-4-L17心理出狀況，是壞事導致的嗎?.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 推論段落主旨
+  instruction: 推論段落主旨的方法：先找出每個段落的大意，再找出關鍵語句，歸納出段落想表達的重點
+  steps:
+    - prompt: 故事一中，阿堅和小芸來自同一個家庭，但結果不同。這個段落的主旨是什麼？
+      type: select
+      options:
+        - 失能的家庭一定會害了孩子
+        - 同樣的環境，不同的想法會帶來不同的結果
+        - 姊姊比較聰明所以比較成功
+      answer: 1
+    - prompt: 故事二中，鄧小姐聽了名醫的話之後就不憂鬱了。她的「事實」改變了嗎？
+      type: select
+      options:
+        - 改變了，她不用再吃藥
+        - 沒有改變，但她改變了對這件事的看法
+        - 改變了，她的血壓恢復正常
+      answer: 1
+    - prompt: 故事三中，黃美廉在黑板上寫了很多她擁有的東西。她想表達的是什麼？
+      type: select
+      options:
+        - 她的生活比別人好
+        - 她擁有很多，不應該只看她沒有的
+        - 她最喜歡的是她的貓
+      answer: 1
+    - prompt: 最後一段的關鍵語句是「改變自己對壞事的看法」，請用自己的話解釋這三個故事的共同主旨
+      type: free_text
 story_structure:
 - label: 主角
   value: 心理

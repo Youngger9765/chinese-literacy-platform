@@ -171,6 +171,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-9-L22-植物獵人.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 自我提問－問重要的問題
+  instruction: 閱讀「記人」類文章時，我們可以從文章重點表（主角是誰、做了什麼事、為什麼這樣做、結果如何）來轉化成重要的問題，幫助我們更深入理解人物。一起來練習吧！
+  steps:
+    - prompt: 從「主角是誰」的角度，以下哪個是最重要的問題？
+      type: select
+      options:
+        - 阿介喜歡吃什麼？
+        - 阿介是誰？他有什麼特別的地方？
+        - 阿介住在哪裡？
+      answer: 1
+    - prompt: 從「為什麼需要植物獵人」的角度提問，以下哪個是最重要的問題？
+      type: select
+      options:
+        - 植物獵人的薪水有多少？
+        - 地球上有多少種植物？
+        - 為什麼科學家自己不去採集，需要像阿介這樣的人幫忙？
+      answer: 2
+    - prompt: 阿介被保種中心拒絕後，他做了什麼來克服困難？請用自己的話回答
+      type: free_text
+    - prompt: 從「結果如何」的角度，以下哪個問題最能幫助我們理解文章的核心意義？
+      type: select
+      options:
+        - 阿介最後賺了多少錢？
+        - 阿介從植物獵人的工作中得到了什麼？
+        - 阿介爬過幾座山？
+      answer: 1
 story_structure:
 - label: 主角
   value: 學 習

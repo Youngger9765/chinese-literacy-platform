@@ -125,6 +125,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G9-2-L49預防近視？多點戶外活動就對了！.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 科學方法說服他人
+  instruction: 要說服別人，需要用「事實→論點→找證據支持→結論」的步驟。這篇文章用科學研究來說服我們「戶外活動可以預防近視」。請跟著步驟分析
+  steps:
+    - prompt: 過去大家認為造成近視的原因是什麼？
+      type: select
+      options:
+        - 遺傳和近距離工作（看書、看手機）
+        - 眼球缺乏陽光
+        - 睡眠不足
+      answer: 0
+    - prompt: 文章提出的新論點是什麼？
+      type: select
+      options:
+        - 看電視是造成近視的主因
+        - 眼球缺乏陽光才是近視的重要原因
+        - 遺傳決定一切，無法預防
+      answer: 1
+    - prompt: 澳洲和新加坡華裔兒童的比較研究發現了什麼？
+      type: select
+      options:
+        - 新加坡兒童讀書時間多，所以近視率高
+        - 澳洲兒童戶外活動時間多（每週13小時），近視率只有3%；新加坡只有3小時，近視率29%
+        - 兩國兒童的近視率差不多
+      answer: 1
+    - prompt: 室內開燈能不能取代戶外陽光來預防近視？為什麼？請用課文中的數據回答
+      type: free_text
 story_structure:
 - label: 結論
   value: 孩子應該【多出去玩，別關在家／多去戶外晒太陽

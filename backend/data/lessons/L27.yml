@@ -147,6 +147,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-14-L27把手上的餅吃香一點.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 品格力－正向思考轉換
+  instruction: 我們常常覺得「別人的比較好」，但其實問題不在東西本身，而在我們怎麼看待它。讓我們一起練習辨識「負向思考」和「正向思考」，並學習把負向思考轉換成正向思考吧！
+  steps:
+    - prompt: 以下哪一個是課文中作者小時候的「負向思考」？
+      type: select
+      options:
+        - 姊姊把餅分得很公平，我很滿意
+        - 不管怎麼選，我總覺得姊姊的餅比我的大
+        - 和姊姊分享餅是一件開心的事
+      answer: 1
+    - prompt: 湯姆被姨媽叫去刷籬笆油漆，他怎麼把這件苦差事變成正向的？
+      type: select
+      options:
+        - 他偷偷跑去玩，不刷了
+        - 他把自己當成正在創作偉大壁畫的藝術家，全神投入享受
+        - 他請姨媽幫他一起刷
+      answer: 1
+    - prompt: 作者長大後，回程飛機延誤，他怎麼用正向思考看待這件事？
+      type: select
+      options:
+        - 太倒楣了，浪費時間
+        - 太棒了，還可以在國外多玩一天
+        - 都是航空公司的錯
+      answer: 1
+    - prompt: 請你想一個生活中不順心的事情（例如下雨不能出去玩），試著用正向思考的方式重新看待它，寫下來
+      type: free_text
 story_structure:
 - label: 主角
   value: 作者（小時候的自己）
