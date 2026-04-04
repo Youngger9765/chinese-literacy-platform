@@ -1,7 +1,7 @@
 """Shared Pydantic schemas for teacher route sub-modules."""
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 # ── Student Tags ──────────────────────────────────────────────────────────────
@@ -217,11 +217,13 @@ class ErrorHeatmapResponse(BaseModel):
 class TeacherDialogueTurnResponse(BaseModel):
     id: int
     role: str
-    content: str
+    content: str = Field(validation_alias="text")
     turn_order: int
+    is_correct: bool | None = None
+    phase: str | None = None
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True, "populate_by_name": True}
 
 
 class TeacherDialogueHistoryResponse(BaseModel):
