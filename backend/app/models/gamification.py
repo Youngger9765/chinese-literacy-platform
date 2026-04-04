@@ -26,6 +26,10 @@ XP_REWARDS = {
     "streak_bonus": 5,            # daily login streak bonus (per day)
     "first_story": 30,            # bonus for completing very first story
     "vocab_practice": 5,          # completed vocabulary practice step
+    "step_complete": 3,            # completed any learning step
+    "strategy_exercise_complete": 10,  # completed strategy exercise
+    "all_steps_complete": 25,      # completed all 10 steps for one lesson
+    "daily_first_login": 3,        # first activity of the day
 }
 
 # Cumulative XP thresholds per level (index = level-1, value = XP needed to reach it)
@@ -180,6 +184,20 @@ BADGE_CATALOGUE = {
         "description": "累計獲得 1000 XP",
         "icon": "zap",
         "color": "orange",
+    },
+    "perfect_week": {
+        "name": "完美一週",
+        "description": "一週內每天都學習",
+        "icon": "calendar-check",
+        "color": "emerald",
+        "hidden": True,
+    },
+    "explorer": {
+        "name": "步步探索",
+        "description": "嘗試過所有 10 種步驟類型",
+        "icon": "compass",
+        "color": "teal",
+        "hidden": True,
     },
 }
 
