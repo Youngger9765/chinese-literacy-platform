@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-03-20",
+  "lastReview": "2026-04-04",
   "skills": {
     "1": {
       "level": 3,
@@ -179,13 +179,18 @@
       ]
     },
     "9": {
-      "level": 1,
+      "level": 2,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-03-20",
           "level": 1,
           "reason": "PR #573 和 PR #575 皆使用 feature branch + PR 流程，commit message 格式遵循 conventional commits（fix: 前綴），工作流程完整"
+        },
+        {
+          "date": "2026-04-04",
+          "level": 2,
+          "reason": "8 個 commit 全部使用 feat:/fix: 前綴，涵蓋多個不同 issue 的獨立 PR，工作流程持續穩定。部分 commit message 夾雜中英文（如 WIP-fix: 逐段朗讀不準確的BUG），conventional commit 格式尚未完全一致，保守升至 level 2"
         }
       ]
     },
@@ -241,25 +246,52 @@
         }
       ]
     },
-    "14": {
+    "13": {
       "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-04",
+          "level": 1,
+          "reason": "feat: hide-parent-page (#805) 新建 featureFlags.ts 集中管理前端功能開關，並在 auth.py / AppRoutes.tsx 各層正確引用，展現將設定邏輯抽離元件的意識。18ffa845 也顯示能理解跨元件的 props/context 資料流。首次展現元件設計模式的雛形，解鎖 level 1"
+        }
+      ]
+    },
+    "14": {
+      "level": 2,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-03-20",
           "level": 1,
           "reason": "PR #573 新增 backend/tests/test_assignments.py，第一次主動撰寫測試，覆蓋作業發派的 API 行為驗證"
+        },
+        {
+          "date": "2026-04-04",
+          "level": 2,
+          "reason": "a08b2b40（標記課文紀錄欄位 #899）擴充 ReadingAnnotation.test.tsx：新增 scrollIntoView mock、修正 aria-label 斷言、加入 act() + fireEvent.click 的非同步測試，還新增側邊面板顯示和跳轉功能的兩個完整 test case。9d97a3c1 也補了 test_reading_evaluation_service.py。測試不只是 happy path，有測互動行為，升至 level 2"
+        }
+      ]
+    },
+    "18": {
+      "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-04",
+          "level": 1,
+          "reason": "18ffa845（作業進度條 #645/#898）同時修改 backend routes/assignments.py、schemas/assignment.py，以及 frontend LearningLayout、ComprehensionChat、MyAssignments、ReportPage 等多個層，顯示理解資料從 API → context → 元件顯示的完整路徑。d4e11a98 類似，從 backend config → auth route → frontend featureFlags → AppRoutes 全端串通。首次展現全端資料流理解，解鎖 level 1"
         }
       ]
     }
   },
   "recommendations": [
-    "Git 工作流（#9）已解鎖，下一步試著在 PR 留言中說明測試方式或截圖，讓 reviewer 更容易理解你的修改",
-    "測試（#14）剛起步，可以為下一個 bug fix 加上 happy path 和 edge case 的測試，練習 TDD 流程",
-    "Tailwind CSS（#8）目前 level 3，挑戰用 Tailwind 做響應式設計（sm:/md:/lg: 前綴），完成後可升級",
-    "考慮挑戰技能 #13（元件設計模式）— PR #573 已經展現跨層理解能力，下一步可以嘗試抽出共用元件或 custom hook"
+    "Git 工作流（#9）升至 level 2，下一步練習讓每個 PR 只包含單一 issue 的改動，commit message 全部統一用英文描述（例如 fix: reading annotation scroll behavior），避免 WIP- 前綴混入 main branch",
+    "測試（#14）升至 level 2，下一步挑戰 TDD 流程：先寫一個會 fail 的測試，再實作功能讓它通過。下一個 bug fix 可以從測試先寫起",
+    "元件設計模式（#13）剛解鎖，下一步可以嘗試把 18ffa845 裡的學習進度邏輯抽出成 custom hook（例如 useAssignmentProgress），讓元件本身更乾淨",
+    "架構理解（#18）剛解鎖，試著畫出一個功能的完整資料流圖（從 DB schema → API endpoint → frontend hook → UI），用文字或圖解說明，這會幫助你更快定位未來的 bug"
   ],
-  "summary": "PR #573 展現全端能力：理解 API schema 設計、定位 422 錯誤根因、修改前後端並補寫測試，是迄今最完整的一次 bug fix。PR #575 展現對 UI 可讀性的主動意識。新解鎖技能 9（Git 工作流）和技能 14（測試），目前已確認解鎖 12 項技能",
+  "summary": "本期 8 個 commit 涵蓋全端：後端 AI 服務修正、feature flag 架構、作業進度全端串接、loading skeleton、閱讀標記測試擴充。新解鎖技能 13（元件設計模式）、18（架構理解），測試技能升至 level 2，Git 工作流升至 level 2。目前已確認解鎖 14 項技能",
   "issues": [
     {
       "id": "環境建置",
@@ -326,6 +358,81 @@
       "contribution": "主動發現教師留言功能只有 emoji，使用者不容易識別，改為文字按鈕提升可讀性",
       "skillsLearned": [2, 8],
       "highlights": ["主動發現 UX 問題並提 issue 修復", "改善按鈕語意與可讀性"]
+    },
+    {
+      "id": "#642",
+      "title": "逐段朗讀評分 bug 修正（WIP）",
+      "date": "2026-03-22",
+      "type": "bugfix",
+      "contribution": "修改 ai_service.py 和 reading_evaluation_service.py 改善逐段朗讀評分準確度，同時補寫 test_reading_evaluation_service.py 測試案例",
+      "skillsLearned": [10, 14],
+      "highlights": ["觸及後端 AI 服務層", "主動補測試"]
+    },
+    {
+      "id": "#643/#644",
+      "title": "合併學生三大頁面（我的作業＋學習進度＋對話紀錄）",
+      "date": "2026-03-29",
+      "type": "feature",
+      "contribution": "整合學生端三個分散頁面為統一的「我的作業」頁，刪除 DialogueHistory.tsx，修改後端 assignments/learning_sessions 路由，更新 E2E fixtures",
+      "skillsLearned": [6, 9, 13, 18],
+      "highlights": ["跨 frontend + backend 的大型整合", "刪除冗餘元件展現架構判斷", "E2E fixture 更新"],
+      "linesChanged": "+多行/-217 (DialogueHistory.tsx)"
+    },
+    {
+      "id": "#411/#662",
+      "title": "新增 Loading Skeleton",
+      "date": "2026-03-29",
+      "type": "feature",
+      "contribution": "為頁面載入新增 skeleton 佔位元件，改善用戶等待體驗",
+      "skillsLearned": [6, 8],
+      "highlights": ["主動改善 UX 細節"]
+    },
+    {
+      "id": "#805",
+      "title": "隱藏家長頁面（feature flag 架構）",
+      "date": "2026-04-02",
+      "type": "feature",
+      "contribution": "新建 featureFlags.ts 集中管理前端功能開關，透過 VITE_PARENT_PORTAL_ENABLED 環境變數控制家長頁面顯示，同時在 backend auth.py 新增對應路由保護並補寫 test_auth_api.py",
+      "skillsLearned": [13, 18],
+      "highlights": ["首次建立專案級 feature flag 系統", "從 backend config 到 frontend routing 全端串通", "有寫 JSDoc 說明用法"]
+    },
+    {
+      "id": "#645/#898",
+      "title": "作業進度條與對話紀錄顯示學習進度",
+      "date": "2026-04-02",
+      "type": "feature",
+      "contribution": "修改 backend assignments 路由新增進度欄位，更新 assignment schema，擴充 frontend LearningLayout、ComprehensionChat、VocabDefinitionMatch、MyAssignments、ReportPage 等多個元件顯示進度資料",
+      "skillsLearned": [6, 12, 18],
+      "highlights": ["最大規模的全端整合 commit", "理解 DB schema → API → context → UI 完整資料流", "同時補寫後端測試"],
+      "linesChanged": "+多行（16 個檔案）"
+    },
+    {
+      "id": "#899",
+      "title": "標記課文紀錄欄位（ReadingAnnotation 側邊面板）",
+      "date": "2026-04-02",
+      "type": "feature",
+      "contribution": "大幅擴充 ReadingAnnotation.tsx 新增標記紀錄側邊面板，同步擴充測試案例：新增 scrollIntoView mock、aria-label 斷言、act()+fireEvent 的互動測試",
+      "skillsLearned": [6, 14],
+      "highlights": ["+200/-69 行的大型元件開發", "測試涵蓋非同步互動和 DOM 行為", "aria-label 設計顯示無障礙意識"],
+      "linesChanged": "+200/-69"
+    },
+    {
+      "id": "#905",
+      "title": "閱讀標記按鈕修正",
+      "date": "2026-04-02",
+      "type": "bugfix",
+      "contribution": "修正 ReadingAnnotation.tsx 按鈕邏輯，精準小改動",
+      "skillsLearned": [10],
+      "highlights": ["精準定位問題，不亂改"]
+    },
+    {
+      "id": "#88/#900",
+      "title": "生字練習「部件拆解」修正",
+      "date": "2026-04-03",
+      "type": "bugfix",
+      "contribution": "修正 RadicalDecomposition.tsx 功能 bug 並同步修正 TypeScript 錯誤，調整 LearningLayout.tsx 對應位置",
+      "skillsLearned": [7, 10],
+      "highlights": ["主動修正 TypeScript 型別錯誤", "跨兩個檔案的精準修改"]
     }
   ]
 }
