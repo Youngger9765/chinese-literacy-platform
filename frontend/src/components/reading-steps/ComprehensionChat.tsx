@@ -3,10 +3,11 @@
  *
  * 2026-04-03 會議決議：移除 AI 對話 tab，改為左邊課文 + 右邊選擇題的學習單模式
  * AI 功能改為獨立浮動小助手（FloatingAIHelper）
+ * 2026-04-04 (#943): 新增「閱讀策略」第三 tab
  *
  * Layout:
- *   Desktop: left=scrollable lesson text, right=MCQ/structure tabs
- *   Mobile:  tab switcher between story / MCQ / structure
+ *   Desktop: left=scrollable lesson text, right=MCQ/structure/strategy tabs
+ *   Mobile:  tab switcher between story / MCQ / structure / strategy
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, ComprehensionResult } from '../../types';
@@ -15,6 +16,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
 import FloatingAIHelper from './FloatingAIHelper';
+import StrategyExercise from './StrategyExercise';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -32,6 +34,7 @@ interface ComprehensionChatProps {
 interface TabCompletion {
   structureVisited: boolean;
   mcqDone: boolean;
+  strategyDone: boolean;
 }
 
 const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
@@ -50,9 +53,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const loadCompletion = (): TabCompletion => {
     try {
       const raw = localStorage.getItem(completionKey);
-      if (!raw) return { structureVisited: false, mcqDone: false };
-      return { structureVisited: false, mcqDone: false, ...JSON.parse(raw) };
-    } catch { return { structureVisited: false, mcqDone: false }; }
+      if (!raw) return { structureVisited: false, mcqDone: false, strategyDone: false };
+      return { structureVisited: false, mcqDone: false, strategyDone: false, ...JSON.parse(raw) };
+    } catch { return { structureVisited: false, mcqDone: false, strategyDone: false }; }
   };
 
   const persistedTabCompletion = useMemo(() => {
@@ -63,7 +66,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const persistedActiveTab = useMemo(() => {
     const raw = initialProgress?.activeTab;
-    return raw === 'story' || raw === 'mcq' || raw === 'structure' ? raw : null;
+    return raw === 'story' || raw === 'mcq' || raw === 'structure' || raw === 'strategy' ? raw : null;
   }, [initialProgress]);
 
   const persistedMcqScore = useMemo(() => {
@@ -84,9 +87,10 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const isMobile = useIsMobile();
   const hasMcq = !!(story.multipleChoice && story.multipleChoice.length > 0);
+  const hasStrategy = !!story.strategyExercise;
 
   // Default to MCQ tab if available, otherwise structure
-  const [activeTab, setActiveTab] = useState<'story' | 'mcq' | 'structure'>(
+  const [activeTab, setActiveTab] = useState<'story' | 'mcq' | 'structure' | 'strategy'>(
     persistedActiveTab ?? (hasMcq ? 'mcq' : 'structure'),
   );
 
@@ -149,7 +153,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   }, [story.content, zhuyinActive, zhuyinProcessLines]);
 
   // Tab change handler
-  const handleTabChange = useCallback((tab: 'story' | 'mcq' | 'structure') => {
+  const handleTabChange = useCallback((tab: 'story' | 'mcq' | 'structure' | 'strategy') => {
     setActiveTab(tab);
     if (tab === 'structure' && !tabCompletion.structureVisited) {
       setTabCompletion(prev => ({ ...prev, structureVisited: true }));
@@ -177,7 +181,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     setMcqTotal(0);
   }, []);
 
+  const handleStrategyComplete = useCallback(() => {
+    setTabCompletion(prev => ({ ...prev, strategyDone: true }));
+  }, []);
+
   // Check if worksheet is complete (MCQ done or no MCQ available)
+  // Strategy tab completion is bonus — doesn't gate the "continue" button
   const isWorksheetComplete = hasMcq ? tabCompletion.mcqDone : tabCompletion.structureVisited;
 
   // Persist progress to DB
@@ -277,6 +286,24 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             <span className="text-emerald-500 text-xs leading-none">✓</span>
           )}
         </button>
+        {hasStrategy && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'strategy'}
+            onClick={() => handleTabChange('strategy')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === 'strategy'
+                ? 'bg-white text-accent shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            閱讀策略
+            {tabCompletion.strategyDone && (
+              <span className="text-emerald-500 text-xs leading-none">✓</span>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -335,6 +362,22 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === 'strategy' && hasStrategy && story.strategyExercise) {
+      return (
+        <div className="flex-shrink-0 bg-white flex flex-col h-full min-h-0" style={{ width: rightPanelWidth }}>
+          <div className="shrink-0 bg-white border-b border-gray-200 flex items-center justify-center gap-2 px-3 py-1.5">
+            <span className="text-xs text-gray-500">閱讀策略練習</span>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar bg-gray-50">
+            <StrategyExercise
+              exercise={story.strategyExercise}
+              onComplete={handleStrategyComplete}
+            />
           </div>
         </div>
       );
@@ -479,6 +522,16 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                   </div>
                 </div>
               )}
+            </div>
+          ) : activeTab === 'strategy' && hasStrategy && story.strategyExercise ? (
+            /* Strategy exercise panel (mobile) */
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                <StrategyExercise
+                  exercise={story.strategyExercise}
+                  onComplete={handleStrategyComplete}
+                />
+              </div>
             </div>
           ) : (
             /* MCQ panel */

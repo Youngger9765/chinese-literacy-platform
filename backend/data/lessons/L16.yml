@@ -167,6 +167,28 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-3-L16卡通人氣王票選政見發表會.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 推論文章主旨
+  instruction: 推論文章主旨的方法：摘取文章的大意＋找出關鍵語句。
+  steps:
+    - prompt: 寫出本課大意（用一到兩句話說明課文在講什麼）
+      type: free_text
+    - prompt: 以下文章結尾的句子，哪一句最可能成為關鍵語句？
+      type: select
+      options:
+        - 票選活動進入最後階段，主持人為發表會做總結
+        - 謝謝大家發表了自己的觀點，謝謝大家專心聆聽彼此的意見
+        - 誰會成為第一名的卡通人氣王？我們就投票來決定囉
+      answer: 1
+    - prompt: 下列哪一個選項敘述符合本課主旨？
+      type: select
+      options:
+        - 少數服從多數，最優秀的人就是你自己
+        - 每個人都可以有不同的觀點，我們應該彼此尊重
+        - 只要我喜歡，有什麼不可以
+        - 人可以犯錯，但是不可犯同一個錯
+      answer: 1
 story_structure:
 - label: 主旨
   value: 第一次閱讀課文時，請在不太了解的字、詞或句做記號，如： ？

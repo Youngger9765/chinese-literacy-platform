@@ -60,6 +60,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   reading_benchmark: { levels: { threshold: string; feedback: string }[] } | null;
   text_type: string;
   source_file: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  strategy_exercise: Record<string, any> | null;
 }
 
 interface ApiStoryListResponse {
@@ -105,6 +107,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     multipleChoice: detail.multiple_choice ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
+    strategyExercise: detail.strategy_exercise ?? undefined,
   };
 }
 

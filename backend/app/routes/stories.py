@@ -142,6 +142,7 @@ def get_story(story_id: str):
         reading_benchmark=story["reading_benchmark"],
         text_type=story["text_type"],
         source_file=story["source_file"],
+        strategy_exercise=story.get("strategy_exercise"),
     )
 
 

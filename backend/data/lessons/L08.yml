@@ -120,6 +120,24 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G5-2-L8奧運銀牌的自我鍛鍊.docx
 flags: []
+strategy_exercise:
+  type: trait_inference
+  strategy_name: 推論人物特質
+  instruction: 推論人物特質，我們可以從一個人說的話、做的事來推論。
+  character: 楊勇緯
+  clues:
+    - text: 每天清晨提早三、四十分鐘到校練習
+      source: 做的事
+    - text: 我的目標是金牌！
+      source: 說的話
+    - text: 面對失敗不氣餒，把失敗當成成長養分
+      source: 態度
+  trait_options:
+    - 自律
+    - 勇敢
+    - 固執
+    - 懶散
+  correct_trait: 自律
 story_structure:
 - label: 主角
   value: 楊勇緯

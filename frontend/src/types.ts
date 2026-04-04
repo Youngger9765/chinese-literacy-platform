@@ -56,6 +56,39 @@ export interface MultipleChoiceItem {
   explanation: string | null;
 }
 
+// 閱讀策略練習 (#943)
+export interface StrategyExerciseOrderingItem {
+  text: string;
+  correct_order: number;
+}
+
+export interface StrategyExerciseClue {
+  text: string;
+  source: string;
+}
+
+export interface StrategyExerciseStep {
+  prompt: string;
+  type: 'free_text' | 'select';
+  options?: string[];
+  answer?: number; // 0-indexed
+}
+
+export interface StrategyExercise {
+  type: 'ordering' | 'trait_inference' | 'guided_steps';
+  strategy_name: string;
+  instruction: string;
+  // ordering
+  items?: StrategyExerciseOrderingItem[];
+  // trait_inference
+  character?: string;
+  clues?: StrategyExerciseClue[];
+  trait_options?: string[];
+  correct_trait?: string;
+  // guided_steps
+  steps?: StrategyExerciseStep[];
+}
+
 export interface Story {
   id: string;
   title: string;
@@ -80,6 +113,7 @@ export interface Story {
   multipleChoice?: MultipleChoiceItem[];     // ⑦ 閱讀理解選擇題（PDF 現成資料）
   vocabBank?: Record<string, string>;        // { A: "疑難雜症", ... } for fillInBlank
   knowledgeVideoUrl?: string;               // ⑨ 知識補給站 YouTube URL
+  strategyExercise?: StrategyExercise;      // 閱讀策略練習 (#943)
 }
 
 export interface ReadingAttempt {
