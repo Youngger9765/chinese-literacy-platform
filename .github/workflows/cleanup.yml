@@ -1,0 +1,150 @@
+name: Scheduled Cleanup (AR Images + Cloud Run Revisions)
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Every Sunday midnight UTC
+  workflow_dispatch:  # Manual trigger
+
+env:
+  PROJECT_ID: lingoleap-dev
+  REGION: asia-east1
+  REGISTRY: asia-east1-docker.pkg.dev/lingoleap-dev/lingoleap
+
+jobs:
+  cleanup-ar-images:
+    name: Delete old AR images (keep latest 3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Delete old images per tag prefix
+        run: |
+          KEEP=3
+
+          for PACKAGE in backend frontend; do
+            for PREFIX in prod staging; do
+              echo "=== Cleaning ${PACKAGE} ${PREFIX}-* images (keep ${KEEP}) ==="
+
+              DIGESTS=$(gcloud artifacts docker images list \
+                "${{ env.REGISTRY }}/${PACKAGE}" \
+                --include-tags \
+                --filter="tags:${PREFIX}-" \
+                --sort-by="~CREATE_TIME" \
+                --format="value(version)" 2>/dev/null || true)
+
+              if [ -z "$DIGESTS" ]; then
+                echo "No ${PREFIX} images found for ${PACKAGE}, skipping"
+                continue
+              fi
+
+              TOTAL=$(echo "$DIGESTS" | wc -l | tr -d ' ')
+              echo "Found $TOTAL images, keeping latest $KEEP"
+
+              DELETED=0
+              echo "$DIGESTS" | tail -n +$((KEEP + 1)) | while read -r DIGEST; do
+                [ -z "$DIGEST" ] && continue
+                echo "DELETE: ${PACKAGE}@${DIGEST:0:20}..."
+                gcloud artifacts docker images delete \
+                  "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
+                  --delete-tags --quiet 2>/dev/null || true
+                DELETED=$((DELETED + 1))
+              done
+
+              echo "Done: ${PACKAGE}/${PREFIX} — deleted $((TOTAL - KEEP > 0 ? TOTAL - KEEP : 0)) of $TOTAL"
+              echo ""
+            done
+          done
+
+      - name: Delete untagged images
+        run: |
+          for PACKAGE in backend frontend; do
+            echo "=== Cleaning ${PACKAGE} untagged images ==="
+
+            DIGESTS=$(gcloud artifacts docker images list \
+              "${{ env.REGISTRY }}/${PACKAGE}" \
+              --include-tags \
+              --filter="NOT tags:*" \
+              --format="value(version)" 2>/dev/null || true)
+
+            if [ -z "$DIGESTS" ]; then
+              echo "No untagged images found for ${PACKAGE}"
+              continue
+            fi
+
+            TOTAL=$(echo "$DIGESTS" | wc -l | tr -d ' ')
+            echo "Found $TOTAL untagged images"
+
+            echo "$DIGESTS" | while read -r DIGEST; do
+              [ -z "$DIGEST" ] && continue
+              echo "DELETE: ${PACKAGE}@${DIGEST:0:20}..."
+              gcloud artifacts docker images delete \
+                "${{ env.REGISTRY }}/${PACKAGE}@${DIGEST}" \
+                --delete-tags --quiet 2>/dev/null || true
+            done
+          done
+
+  cleanup-revisions:
+    name: Delete old Cloud Run revisions (keep latest 5)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Delete old revisions
+        run: |
+          KEEP=5
+          SERVICES=(
+            lingoleap-backend
+            lingoleap-frontend
+            lingoleap-backend-staging
+            lingoleap-frontend-staging
+          )
+
+          for SERVICE in "${SERVICES[@]}"; do
+            echo "=== Cleaning revisions for ${SERVICE} (keep ${KEEP}) ==="
+
+            REVISIONS=$(gcloud run revisions list \
+              --service="${SERVICE}" \
+              --region="${{ env.REGION }}" \
+              --project="${{ env.PROJECT_ID }}" \
+              --sort-by="~creationTimestamp" \
+              --format="value(metadata.name)" 2>/dev/null || true)
+
+            if [ -z "$REVISIONS" ]; then
+              echo "No revisions found for ${SERVICE}, skipping"
+              continue
+            fi
+
+            TOTAL=$(echo "$REVISIONS" | wc -l | tr -d ' ')
+            echo "Found $TOTAL revisions, keeping latest $KEEP"
+
+            DELETED=0
+            echo "$REVISIONS" | tail -n +$((KEEP + 1)) | while read -r REV; do
+              [ -z "$REV" ] && continue
+              echo "DELETE: ${REV}"
+              gcloud run revisions delete "${REV}" \
+                --region="${{ env.REGION }}" \
+                --project="${{ env.PROJECT_ID }}" \
+                --quiet 2>/dev/null || true
+              DELETED=$((DELETED + 1))
+            done
+
+            echo "Done: ${SERVICE} — cleaned $((TOTAL - KEEP > 0 ? TOTAL - KEEP : 0)) of $TOTAL revisions"
+            echo ""
+          done
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Weekly Cleanup Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **AR Images**: kept latest 3 per package per environment, deleted untagged" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cloud Run Revisions**: kept latest 5 per service" >> $GITHUB_STEP_SUMMARY
+          echo "- **Services**: lingoleap-backend, lingoleap-frontend, lingoleap-backend-staging, lingoleap-frontend-staging" >> $GITHUB_STEP_SUMMARY
