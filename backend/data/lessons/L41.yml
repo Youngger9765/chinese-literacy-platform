@@ -151,6 +151,36 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-13-L41信眾與教主.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 建立思辨超能力
+  instruction: 思辨能力就是不盲目相信，學會用證據來判斷。請根據課文中的心理學研究來練習思辨
+  steps:
+    - prompt: 課文中的末日預言教主說1954年12月21日是世界末日，結果那天發生了什麼事？
+      type: select
+      options:
+        - 真的發生了大洪水
+        - 什麼都沒有發生，外星人沒有來，也沒有洪水
+        - 只有小規模的水災
+      answer: 1
+    - prompt: 預言失敗後，教主告訴信眾什麼？
+      type: select
+      options:
+        - 承認自己的預言是錯的
+        - 說信眾的虔誠感動了外星人，所以外星人決定不毀滅地球了
+        - 說下一次世界末日改在明年
+      answer: 1
+    - prompt: 根據課文，哪一種信眾在預言失敗後，反而更加崇拜教主？
+      type: select
+      options:
+        - 平常就會「聽其言、觀其行」的信眾
+        - 曾經為教主犧牲奉獻、付出很大代價的信眾
+        - 剛加入不久的新信眾
+      answer: 1
+    - prompt: 哈佛大學校長福斯特說「教育的目標在確保學生能夠辨別有人在胡說八道」，你覺得這句話的意思是什麼？
+      type: free_text
+    - prompt: 在日常生活中，你有沒有遇過類似的情況——有人說了不合理的話，但很多人卻相信？請舉一個例子，並說明你會怎麼判斷真假
+      type: free_text
 story_structure:
 - label: 結論
   value: □可能會不看證據，做出匪夷所思的判斷

@@ -117,6 +117,29 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G4-3-L3長高的祕密.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 遞進複句
+  instruction: 遞進複句是後面的意思比前面更進一步，常用「不但……而且……」「不只……更……」「不僅……還……」等連接詞。請找出課文中的遞進關係
+  steps:
+    - prompt: 課文第四段提到運動太過激烈的後果，使用了哪一組遞進連接詞？
+      type: select
+      options:
+        - 因為……所以……
+        - 不只……更……
+        - 雖然……但是……
+      answer: 1
+    - prompt: 「運動若是太過激烈，不只容易造成運動傷害，更無法達到促進生長的效果」這句話中，哪個部分是「更進一步」的意思？
+      type: select
+      options:
+        - 容易造成運動傷害
+        - 無法達到促進生長的效果
+        - 運動若是太過激烈
+      answer: 1
+    - prompt: 課文第五段提到亂吃的後果：「不但會讓體重過重，反而不會長高」，請用「不只……更……」改寫這句話
+      type: free_text
+    - prompt: 請用「不但……而且……」造一個和長高有關的遞進複句
+      type: free_text
 story_structure:
 - label: 主題
   value: 長高的祕密

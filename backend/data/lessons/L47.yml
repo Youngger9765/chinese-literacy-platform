@@ -158,6 +158,34 @@ reading_benchmark:
 source_file: G8-6-L47陸公買硯.docx
 flags:
 - NO_VOCABULARY
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 文言文斷句與判讀主語
+  instruction: 文言文沒有標點符號，要先「斷句」切成小段再讀。斷句後再判讀每段的主語是誰。請跟著步驟練習
+  steps:
+    - prompt: 「門人持硯歸，公訝其不類」，這裡「公」指的是誰？
+      type: select
+      options:
+        - 僕人（門人）
+        - 陸盧峰（陸公）
+        - 石工
+      answer: 1
+    - prompt: 「吾嫌其微凸，路值石工，幸有餘銀，令磨而平之」，這段話的主語「吾」是誰？
+      type: select
+      options:
+        - 陸盧峰
+        - 僕人（門人）
+        - 賣硯的商人
+      answer: 1
+    - prompt: 僕人把硯臺的「鴝鵒眼」磨平了，陸公為什麼感到「大惋惜」？
+      type: select
+      options:
+        - 因為磨平後硯臺裂開了
+        - 因為鴝鵒眼正是硯臺最珍貴的特徵，被僕人破壞了
+        - 因為花了太多銀子請石工
+      answer: 1
+    - prompt: 這個故事告訴我們什麼道理？請用自己的話回答
+      type: free_text
 story_structure:
 - label: 事例
   sub_rows:

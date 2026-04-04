@@ -127,6 +127,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-2-L15兩千五百歲的酷老師.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 推論文章主旨
+  instruction: 推論文章主旨的方法：先摘取文章大意，再從標題和首末段找出關鍵語句，最後歸納主旨
+  steps:
+    - prompt: 從標題「兩千五百歲的酷老師」，你覺得文章要介紹的主角是誰？
+      type: select
+      options:
+        - 一位很老的老師
+        - 孔子
+        - 阿里山神木
+      answer: 1
+    - prompt: 文章最後一段提到哪一本書記錄了孔子的言行？
+      type: select
+      options:
+        - 杜立德醫生非洲歷險記
+        - 論語
+        - 經書
+      answer: 1
+    - prompt: 以下哪一句話最能代表本課的主旨？
+      type: select
+      options:
+        - 孔子很會唱歌、射箭和駕車
+        - 孔子是博學有智慧、有教無類、因材施教，為理想奉獻一生的老師
+        - 宰予上課睡覺被孔子罵了
+      answer: 1
+    - prompt: 課文用了哪些事例來說明孔子是「酷老師」？請舉出兩個例子
+      type: free_text
 story_structure:
 - label: 主角
   value: 孔子

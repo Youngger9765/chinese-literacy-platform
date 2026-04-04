@@ -117,6 +117,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G4-5-L5穿越極限的跑者.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 推論指稱詞
+  instruction: 指稱詞（代名詞）是用來代替前面提過的人或事物的詞，例如「他」「她」「它」「這」「那」。讀文章時要找出指稱詞代替的是誰或什麼事
+  steps:
+    - prompt: 第一段「他跑過沙漠、高山和冰原」，這裡的「他」指的是誰？
+      type: select
+      options:
+        - 林義傑
+        - 陳彥博
+        - 劉柏園
+      answer: 1
+    - prompt: 第二段「這場比賽帶給他的感動無可言喻，也是他跨入極地賽的夢想起點」，「這場比賽」指的是哪場比賽？
+      type: select
+      options:
+        - 四大極地超級馬拉松巡迴賽
+        - 磁北極六百五十公里極限馬拉松
+        - 世界七大洲超級馬拉松
+      answer: 1
+    - prompt: 第五段「如果上天給了他再活一次的機會，怎麼能夠不痛快淋漓的享受它？」這裡的「它」指的是什麼？
+      type: select
+      options:
+        - 上天給的機會
+        - 跑步這件事
+        - 極地馬拉松比賽
+      answer: 1
+    - prompt: 第三段提到「遇到一段意外的插曲」，這個「插曲」指的是什麼事？請用自己的話說明
+      type: free_text
 story_structure:
 - label: 主角
   value: 陳彥博

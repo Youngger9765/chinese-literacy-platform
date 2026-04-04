@@ -136,6 +136,46 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-6-L19祝你好眠.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 說明文結構－找小主題
+  instruction: 說明文的每一段通常都有一個「小主題」，也就是那段最重要的重點。我們可以直接從段落中找到核心概念，當作小主題的名稱。一起來練習找出每段的小主題吧！
+  steps:
+    - prompt: 第三段提到「睡眠與健康的關係密切」，這段的小主題最適合叫什麼？
+      type: select
+      options:
+        - 阿勝的煩惱
+        - 睡眠時間的建議
+        - 睡眠不足的原因
+      answer: 1
+    - prompt: 第四段提到大腦在睡眠時會修補肌肉、清除代謝物，這段的小主題最適合叫什麼？
+      type: select
+      options:
+        - 睡眠對健康的好處
+        - 大腦的構造
+        - 疾病的種類
+      answer: 0
+    - prompt: 第五段提到大腦在睡眠中會進行記憶的重整，這段的小主題最適合叫什麼？
+      type: select
+      options:
+        - 古人讀書的方法
+        - 睡眠幫助學習與記憶
+        - 懸樑刺股的故事
+      answer: 1
+    - prompt: 第六段提到「平日熬夜沒關係，假日補眠」和「睡前喝酒能幫助入眠」，這段的小主題最適合叫什麼？
+      type: select
+      options:
+        - 關於睡眠的錯誤觀念
+        - 生理時鐘的發明
+        - 喝酒的壞處
+      answer: 0
+    - prompt: 第七段提到3C產品讓人捨不得睡覺，這段的小主題最適合叫什麼？
+      type: select
+      options:
+        - 社群媒體的種類
+        - 睡前拖延症與3C產品
+        - 工作壓力太大
+      answer: 1
 story_structure:
 - label: 主題
   value: (1)小主題可以直接從段落中找到：找出該段的核心概念，當小主題名

@@ -158,6 +158,36 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-6-L34綠色賽事.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 環保3R
+  instruction: 環保3R是指 Reduce（減少使用）、Reuse（物盡其用）、Recycle（循環回收）。請根據課文內容，判斷以下做法分別屬於哪一個R
+  steps:
+    - prompt: 課文中提到「許多賽事採用網路報名，不再印製秩序冊，完賽證書也能線上下載」，這屬於環保3R的哪一個？
+      type: select
+      options:
+        - Reduce（減少使用）
+        - Reuse（物盡其用）
+        - Recycle（循環回收）
+      answer: 0
+    - prompt: 課文中提到「比賽過程提供可重複使用的環保杯，一杯用到底」，這屬於環保3R的哪一個？
+      type: select
+      options:
+        - Reduce（減少使用）
+        - Reuse（物盡其用）
+        - Recycle（循環回收）
+      answer: 1
+    - prompt: 課文中提到「臺灣利用寶特瓶回收製成的環保球衣，在世界盃足球賽中大放異彩」，這屬於環保3R的哪一個？
+      type: select
+      options:
+        - Reduce（減少使用）
+        - Reuse（物盡其用）
+        - Recycle（循環回收）
+      answer: 2
+    - prompt: 阿國在路跑賽後看到了哪些汙染環境的現象？請舉出兩個例子
+      type: free_text
+    - prompt: 如果你們學校要舉辦運動會，請想一個落實環保3R的做法，並說明它屬於哪一個R
+      type: free_text
 story_structure:
 - label: 結論
   value: 中。不要把【 快樂

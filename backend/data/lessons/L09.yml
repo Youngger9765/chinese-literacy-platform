@@ -121,6 +121,26 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G5-3-L9周天成的一天-頂尖選手的養成.docx
 flags: []
+strategy_exercise:
+  type: trait_inference
+  strategy_name: 推論人物特質
+  instruction: 推論人物特質，我們可以從一個人說的話、做的事、態度來推論他是什麼樣的人
+  character: 周天成
+  clues:
+    - text: 日復一日進行基本訓練，完成羽球訓練後直奔健身房繼續重量訓練
+      source: 做的事
+    - text: 連吃飯都是有設計、有紀律的，每口慢慢咀嚼
+      source: 做的事
+    - text: 每當我驕傲起來，就無法在場上打出好表現
+      source: 說的話
+    - text: 哪怕只有百分之一的進步機會，他都會去嘗試
+      source: 態度
+  trait_options:
+    - 自律
+    - 聰明
+    - 隨性
+    - 驕傲
+  correct_trait: 自律
 story_structure:
 - label: 主角
   value: 周天成

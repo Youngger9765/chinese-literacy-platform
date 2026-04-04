@@ -143,6 +143,34 @@ reading_benchmark: null
 source_file: G9-9.10-L56~57多文本-未解之謎-巨石陣+摩艾石像.docx
 flags:
 - MULTI_TEXT
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 比較異同與科學方法
+  instruction: 這兩篇文章分別介紹了巨石陣和摩艾石像。我們可以比較它們的相同和不同之處，並學習用「假設→考驗→結論」的方法來思考。請跟著步驟練習
+  steps:
+    - prompt: 巨石陣和摩艾石像有一個共同的未解之謎，是什麼？
+      type: select
+      options:
+        - 它們是誰建造的
+        - 古代人在沒有大型機械的情況下，如何搬運巨大的石頭
+        - 石頭是從哪裡來的
+      answer: 1
+    - prompt: 關於巨石陣設立的目的，哪個假設目前最可能成立？
+      type: select
+      options:
+        - 外星人的基地
+        - 古代的醫院
+        - 古代人為了觀測天文而建造
+      answer: 2
+    - prompt: 關於摩艾石像的移動方式，課文提到的三個假設中，哪一個有實驗支持？
+      type: select
+      options:
+        - 超自然力量移動石像
+        - 用滾輪把石像移到海邊
+        - 把石像立起來，用繩索拉扯移動
+      answer: 2
+    - prompt: 比較巨石陣和摩艾石像，寫出一個相同點和一個不同點
+      type: free_text
 story_structure:
 - label: 主題
   value: 巨石陣與摩艾石像的未解之謎

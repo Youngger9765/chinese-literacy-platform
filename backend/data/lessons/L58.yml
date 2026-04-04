@@ -199,6 +199,38 @@ reading_benchmark: null
 source_file: G9-11.12.13-L58~60多文本-馬拉松王者+靠跑鞋破紀錄合理嗎+促成更高更快更遠的因素.docx
 flags:
 - MULTI_TEXT
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 比較不同作者觀點
+  instruction: 這三篇文章從不同角度討論運動表現。閱讀時要找出每位作者的主要觀點，比較異同，再形成自己的看法。請跟著步驟練習
+  steps:
+    - prompt: 第一篇文章認為基普喬吉成功的原因有哪些？
+      type: checkbox
+      options:
+        - 天生的身體優勢（高海拔、小腿細長）
+        - 團隊合作（陪跑員、教練團）
+        - 自律、內省與閱讀
+        - 只靠高科技跑鞋
+      answer:
+        - 0
+        - 1
+        - 2
+    - prompt: 第二篇文章提出了什麼質疑？
+      type: select
+      options:
+        - 基普喬吉的訓練方式不科學
+        - 高科技跑鞋可能造成比賽不公平
+        - 馬拉松的距離應該縮短
+      answer: 1
+    - prompt: 第三篇文章認為，運動成績進步的兩大因素是什麼？
+      type: select
+      options:
+        - 營養和休息
+        - 科技進步和專項選才
+        - 獎金和國家支持
+      answer: 1
+    - prompt: 綜合三篇文章，你認為基普喬吉破紀錄主要靠自己的實力，還是靠外在因素（跑鞋、團隊、科技）？請說明你的理由
+      type: free_text
 story_structure:
 - label: 主角
   value: 基普喬吉、歐文斯、博爾特

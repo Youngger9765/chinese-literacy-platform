@@ -121,6 +121,39 @@ reading_benchmark: null
 source_file: G8-4-L45文言文怎麼讀？以鞭虎救弟記為例.docx
 flags:
 - NO_VOCABULARY
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 文言文閱讀方法
+  instruction: 文言文比白話文精簡很多，我們可以用「找代名詞→猜詞意→全句翻譯→讀出作者意圖」的步驟來讀懂。請跟著練習
+  steps:
+    - prompt: 文言文主要用哪三種方式來節省用字？
+      type: checkbox
+      options:
+        - 用詞精簡
+        - 加入插圖
+        - 省略主詞或受詞
+        - 省略連接詞
+        - 使用注音符號
+      answer:
+        - 0
+        - 2
+        - 3
+    - prompt: 「虎牙有毒，深入，惡血不盡出，不可救」這句話中，「深入」省略了什麼？
+      type: select
+      options:
+        - 省略了主詞「虎牙的毒」和受詞「傷者的身體」
+        - 省略了時間「很久以後」
+        - 省略了地點「山裡面」
+      answer: 0
+    - prompt: 「惡血不盡出，不可救」省略了哪些連接詞？
+      type: select
+      options:
+        - 「因為」和「所以」
+        - 「如果」和「就」
+        - 「雖然」和「但是」
+      answer: 1
+    - prompt: 讀文言文時遇到不認識的字詞，課文建議我們怎麼做？請用自己的話回答
+      type: free_text
 story_structure:
 - label: 主題
   value: 文言文的閱讀方法與特色

@@ -144,6 +144,36 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G7-7-L35看到了嗎，然後呢.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 推理三要素
+  instruction: 推理三要素是：細心觀察、具備背景知識、慣於推論。請根據課文中的兩個故事來練習推理
+  steps:
+    - prompt: 福爾摩斯從帽子上觀察到哪些細節？請選出正確的組合
+      type: select
+      options:
+        - 高級用料、灰白髮絲、補丁以墨水染黑
+        - 帽子的顏色、帽子的價錢、帽主的姓名
+        - 帽子的品牌、帽子的產地、帽主的職業
+      answer: 0
+    - prompt: 福爾摩斯推論帽主「家道中落」的依據是什麼？
+      type: select
+      options:
+        - 帽子是便宜貨
+        - 鬆緊帶壞了沒換，補丁用墨水染黑
+        - 帽子裡有灰白髮絲
+      answer: 1
+    - prompt: 王戎的故事中，他觀察到什麼現象？
+      type: select
+      options:
+        - 李子樹長在路邊，結了很多果實卻沒人採
+        - 李子樹的葉子枯黃，看起來快枯死了
+        - 李子樹上有蟲，果實都爛掉了
+      answer: 0
+    - prompt: 王戎用了什麼「背景知識」來推論李子是苦的？
+      type: free_text
+    - prompt: 請你試著用推理三要素來分析一個生活中的現象。例如：你看到教室地上有水漬，你能推論出什麼？
+      type: free_text
 story_structure:
 - label: 主角
   value: 家境殷實

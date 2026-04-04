@@ -124,6 +124,29 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G4-6-L6第一百碗麵.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 換位思考
+  instruction: 換位思考是站在別人的角度看事情，了解對方的感受。我們可以用三個步驟來學習：1. 觀察對方的處境 2. 想想對方的感受 3. 思考怎麼做對對方最好
+  steps:
+    - prompt: 老闆說老人是「第一百個客人」，他真正的用意是什麼？
+      type: select
+      options:
+        - 店裡真的有這個促銷活動
+        - 想免費請老人吃麵，又不傷害老人的自尊心
+        - 想吸引更多客人來吃麵
+      answer: 1
+    - prompt: 寒流那天，老闆打電話請朋友來吃麵，他站在誰的角度在思考？
+      type: select
+      options:
+        - 站在自己賺錢的角度
+        - 站在小男孩想請阿公吃麵的角度
+        - 站在朋友想吃免費麵的角度
+      answer: 1
+    - prompt: 小男孩最後說「我很飽，飽的像蜘蛛一樣」，他是學誰的做法？這代表他學會了什麼？
+      type: free_text
+    - prompt: 如果你是故事中的老闆娘，你會怎麼幫助這對祖孫？請站在他們的角度想一想
+      type: free_text
 story_structure:
 - label: 事例
   sub_rows:

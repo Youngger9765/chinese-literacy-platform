@@ -143,6 +143,34 @@ reading_benchmark:
     feedback: 哇嗚，超級厲害！
 source_file: G6-8-L21森林大軍的守護者.docx
 flags: []
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 自我提問－問好奇的問題
+  instruction: 閱讀時，如果你能持續問自己問題，例如「他為什麼會這樣？」「這是真的嗎？」就能更深入理解文章。讓我們一起來對課文提出好奇的問題吧！
+  steps:
+    - prompt: 讀到「賴桑花了三千萬買下第一座山，卻發現整座山佈滿垃圾」，你會想問什麼問題？
+      type: select
+      options:
+        - 賴桑為什麼明知是垃圾山還要買？
+        - 垃圾山有多少公斤？
+        - 賴桑的爸爸是做什麼的？
+      answer: 0
+    - prompt: 賴桑說「我的信仰就是種樹，人類過去砍了太多樹，我要把它們種回來！」讀到這裡，你心中會浮現什麼好奇的問題？
+      type: free_text
+    - prompt: 讀到「親友們都認為賴桑若不是瘋了，就是很笨」，你覺得最好的提問是哪一個？
+      type: select
+      options:
+        - 賴桑的親友有幾個人？
+        - 為什麼親友會覺得賴桑瘋了？他做了什麼讓人不理解的事？
+        - 賴桑的妻子叫什麼名字？
+      answer: 1
+    - prompt: 讀到「兒子們也開始種咖啡樹，將販售所得投入父親的種樹志業」，你會想問什麼疑惑的問題？
+      type: select
+      options:
+        - 咖啡樹可以長多高？
+        - 兒子從不理解到支持，中間發生了什麼轉變？
+        - 咖啡一杯賣多少錢？
+      answer: 1
 story_structure:
 - label: 主角
   value: 賴桑為什麼要買一座垃圾山？
