@@ -1,6 +1,6 @@
 """add missing fk indexes
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: fk01idx02add03
 Revises: z6a7b8c9d0e1
 Create Date: 2026-04-04 00:00:00.000000
 
@@ -12,7 +12,7 @@ CREATE INDEX (no CONCURRENTLY needed for Alembic — migrations run offline).
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "a1b2c3d4e5f6"
+revision = "fk01idx02add03"
 down_revision = "z6a7b8c9d0e1"
 branch_labels = None
 depends_on = None
