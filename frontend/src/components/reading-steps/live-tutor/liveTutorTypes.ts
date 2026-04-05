@@ -1,0 +1,23 @@
+import { DiffToken } from '../../../types';
+
+/* ------------------------------------------------------------------ */
+/*  Shared types used across LiveTutor sub-components                  */
+/* ------------------------------------------------------------------ */
+
+export interface LineResult {
+  lineIndex: number;
+  matchRate: number;
+  cpm: number;
+  durationMs: number;
+  transcript: string;
+  diffTokens: DiffToken[];
+}
+
+export type ParagraphSummaryData = {
+  feedback: string;
+  matchRate: number;
+  wrongCount: number;
+  missingCount: number;
+  tier: number;
+  geminiPending: boolean;
+};
