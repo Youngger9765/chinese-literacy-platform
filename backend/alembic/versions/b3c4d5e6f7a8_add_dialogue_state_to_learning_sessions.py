@@ -1,6 +1,6 @@
 """add dialogue_state to learning_sessions
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: b3c4d5e6f7a8
 Revises: z6a7b8c9d0e1
 Create Date: 2026-04-05 00:00:00.000000
 
@@ -13,7 +13,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 
 # revision identifiers, used by Alembic.
-revision: str = "a1b2c3d4e5f6"
+revision: str = "b3c4d5e6f7a8"
 down_revision: Union[str, None] = "z6a7b8c9d0e1"
 branch_labels = None
 depends_on = None
