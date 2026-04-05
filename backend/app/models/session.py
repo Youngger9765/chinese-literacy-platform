@@ -39,6 +39,8 @@ class LearningSession(Base):
     # General step progress store for all learning steps (Issue #660)
     # Stores current_step, steps_completed[], and per-step step_data
     step_progress: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Serialized Socratic SessionState snapshot for fast Cloud Run restart recovery (Issue #961)
+    dialogue_state: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     ai_analysis: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
     # 3-level comprehension scoring (Issue #243)
     comprehension_score: Mapped[float | None] = mapped_column(Float, nullable=True)

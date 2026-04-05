@@ -261,6 +261,8 @@ async def comprehension_chat(
             result = await socratic_agent.process_answer(
                 session_id=payload.session_id,
                 student_answer=safe_student_answer,
+                db=db,
+                db_session_id=payload.db_session_id,
             )
     except ValueError as e:
         ai_success = False
