@@ -9,6 +9,7 @@ import logging
 from dataclasses import dataclass, field
 
 from google.genai import types as genai_types
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from .ai_service import generate_structured_response
@@ -132,7 +133,7 @@ class SessionStore:
             if ls is not None:
                 ls.dialogue_state = self._serialize(state)
                 db.commit()
-        except Exception:
+        except SQLAlchemyError:
             logger.warning(
                 "Failed to persist dialogue_state to DB for db_session_id=%s",
                 db_session_id,
@@ -140,7 +141,7 @@ class SessionStore:
             )
             try:
                 db.rollback()
-            except Exception:
+            except SQLAlchemyError:
                 pass
 
     def _restore_from_db(
@@ -171,7 +172,7 @@ class SessionStore:
             # Warm the in-memory cache so subsequent calls don't hit DB
             self._sessions[session_id] = state
             return state
-        except Exception:
+        except (SQLAlchemyError, AttributeError, KeyError):
             logger.warning(
                 "Failed to restore dialogue_state from DB for db_session_id=%s",
                 db_session_id,
@@ -452,7 +453,7 @@ class SocraticAgent:
                         phase=state.current_phase,
                         is_complete=state.understood_count >= self.REQUIRED_UNDERSTOOD,
                     ), True
-            except Exception as e:
+            except (SQLAlchemyError, AttributeError, KeyError) as e:
                 logger.warning("Failed to restore session from DB turns (will start fresh): %s", e)
 
         # 3. Fresh start — only Gemini call that's actually needed
@@ -583,7 +584,7 @@ class SocraticAgent:
                     ls.dialogue_state = None
 
                 db.commit()
-            except Exception as e:
+            except SQLAlchemyError as e:
                 logger.warning("Failed to delete DB dialogue turns on restart: %s", e)
 
     async def process_answer(
