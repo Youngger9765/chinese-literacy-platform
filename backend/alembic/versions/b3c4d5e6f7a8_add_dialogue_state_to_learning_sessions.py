@@ -14,7 +14,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 # revision identifiers, used by Alembic.
 revision: str = "b3c4d5e6f7a8"
-down_revision: Union[str, None] = "z6a7b8c9d0e1"
+down_revision: Union[str, None] = "fk01idx02add03"
 branch_labels = None
 depends_on = None
 
