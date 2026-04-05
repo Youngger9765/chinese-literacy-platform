@@ -150,6 +150,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
     return init;
   });
   const [completedChars, setCompletedChars] = useState<Set<string>>(new Set());
+  const [pasteWarning, setPasteWarning] = useState(false);
 
   // Tracks characters that have been loaded or are currently loading,
   // avoiding circular dependency on charStates inside the loadExamples callback.
@@ -404,6 +405,11 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                           handleValidate(idx);
                         }
                       }}
+                      onPaste={e => {
+                        e.preventDefault();
+                        setPasteWarning(true);
+                        setTimeout(() => setPasteWarning(false), 3000);
+                      }}
                       disabled={entry.status === 'loading' || isCurrentDone}
                       placeholder={`用「${currentChar}」造一個句子…`}
                       className={[
@@ -453,6 +459,13 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
               );
             })}
           </div>
+
+          {/* Paste warning (#928) */}
+          {pasteWarning && (
+            <p className="text-sm text-amber-600 text-center animate-pulse">
+              請用自己的話造句，不要複製貼上喔！
+            </p>
+          )}
 
           {/* Completion message for current char */}
           {currentAllCorrect && !isCurrentDone && (
