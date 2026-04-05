@@ -57,10 +57,12 @@ def get_classroom_time_stats(
             sessions_last_week=0,
         )
 
-    # All sessions for classroom students
+    # All sessions for classroom students (safety cap: 5000 rows)
     sessions = (
         db.query(LearningSession)
         .filter(LearningSession.student_id.in_(student_ids))
+        .order_by(LearningSession.started_at.desc())
+        .limit(5000)
         .all()
     )
 
@@ -141,12 +143,15 @@ def get_classroom_heatmap(
     students_map = {e.student_id: e.student for e in enrollments}
 
     # Query all sessions for classroom students with a story_slug and score
+    # Safety cap: 5000 rows (classroom-scoped, ~30-50 students x 57 lessons)
     sessions = (
         db.query(LearningSession)
         .filter(
             LearningSession.student_id.in_(student_ids),
             LearningSession.story_slug.isnot(None),
         )
+        .order_by(LearningSession.started_at.desc())
+        .limit(5000)
         .all()
     )
 

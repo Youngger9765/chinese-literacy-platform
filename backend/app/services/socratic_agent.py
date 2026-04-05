@@ -9,6 +9,7 @@ import logging
 from dataclasses import dataclass, field
 
 from google.genai import types as genai_types
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from .ai_service import generate_structured_response
@@ -331,7 +332,7 @@ class SocraticAgent:
                         phase=state.current_phase,
                         is_complete=state.understood_count >= self.REQUIRED_UNDERSTOOD,
                     ), True
-            except Exception as e:
+            except (SQLAlchemyError, AttributeError, KeyError) as e:
                 logger.warning("Failed to restore session from DB (will start fresh): %s", e)
 
         # 3. Fresh start — only Gemini call that's actually needed
@@ -457,7 +458,7 @@ class SocraticAgent:
                     DialogueTurn.learning_session_id == db_session_id
                 ).delete(synchronize_session=False)
                 db.commit()
-            except Exception as e:
+            except SQLAlchemyError as e:
                 logger.warning("Failed to delete DB dialogue turns on restart: %s", e)
 
     async def process_answer(

@@ -202,7 +202,7 @@ def _repair_json(raw: str) -> str | None:
     try:
         json.loads(candidate)
         return candidate
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         pass
 
     return None
