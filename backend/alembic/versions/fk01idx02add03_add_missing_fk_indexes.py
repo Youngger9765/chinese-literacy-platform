@@ -20,86 +20,86 @@ depends_on = None
 
 def upgrade() -> None:
     # ── user_roles ────────────────────────────────────────────────────────────
-    op.create_index("ix_user_roles_user_id", "user_roles", ["user_id"])
-    op.create_index("ix_user_roles_role_id", "user_roles", ["role_id"])
-    op.create_index("ix_user_roles_granted_by", "user_roles", ["granted_by"])
+    op.create_index("ix_user_roles_user_id", "user_roles", ["user_id"], if_not_exists=True)
+    op.create_index("ix_user_roles_role_id", "user_roles", ["role_id"], if_not_exists=True)
+    op.create_index("ix_user_roles_granted_by", "user_roles", ["granted_by"], if_not_exists=True)
 
     # ── student_profiles ──────────────────────────────────────────────────────
-    op.create_index("ix_student_profiles_school_id", "student_profiles", ["school_id"])
+    op.create_index("ix_student_profiles_school_id", "student_profiles", ["school_id"], if_not_exists=True)
 
     # ── schools ───────────────────────────────────────────────────────────────
-    op.create_index("ix_schools_organization_id", "schools", ["organization_id"])
-    op.create_index("ix_schools_admin_user_id", "schools", ["admin_user_id"])
+    op.create_index("ix_schools_organization_id", "schools", ["organization_id"], if_not_exists=True)
+    op.create_index("ix_schools_admin_user_id", "schools", ["admin_user_id"], if_not_exists=True)
 
     # ── classrooms ────────────────────────────────────────────────────────────
-    op.create_index("ix_classrooms_school_id", "classrooms", ["school_id"])
-    op.create_index("ix_classrooms_teacher_id", "classrooms", ["teacher_id"])
+    op.create_index("ix_classrooms_school_id", "classrooms", ["school_id"], if_not_exists=True)
+    op.create_index("ix_classrooms_teacher_id", "classrooms", ["teacher_id"], if_not_exists=True)
 
     # ── classroom_students ────────────────────────────────────────────────────
-    op.create_index("ix_classroom_students_classroom_id", "classroom_students", ["classroom_id"])
-    op.create_index("ix_classroom_students_student_id", "classroom_students", ["student_id"])
+    op.create_index("ix_classroom_students_classroom_id", "classroom_students", ["classroom_id"], if_not_exists=True)
+    op.create_index("ix_classroom_students_student_id", "classroom_students", ["student_id"], if_not_exists=True)
 
     # ── classroom_teachers ────────────────────────────────────────────────────
-    op.create_index("ix_classroom_teachers_classroom_id", "classroom_teachers", ["classroom_id"])
-    op.create_index("ix_classroom_teachers_teacher_id", "classroom_teachers", ["teacher_id"])
-    op.create_index("ix_classroom_teachers_invited_by", "classroom_teachers", ["invited_by"])
+    op.create_index("ix_classroom_teachers_classroom_id", "classroom_teachers", ["classroom_id"], if_not_exists=True)
+    op.create_index("ix_classroom_teachers_teacher_id", "classroom_teachers", ["teacher_id"], if_not_exists=True)
+    op.create_index("ix_classroom_teachers_invited_by", "classroom_teachers", ["invited_by"], if_not_exists=True)
 
     # ── classroom_texts ───────────────────────────────────────────────────────
-    op.create_index("ix_classroom_texts_classroom_id", "classroom_texts", ["classroom_id"])
-    op.create_index("ix_classroom_texts_assigned_by", "classroom_texts", ["assigned_by"])
+    op.create_index("ix_classroom_texts_classroom_id", "classroom_texts", ["classroom_id"], if_not_exists=True)
+    op.create_index("ix_classroom_texts_assigned_by", "classroom_texts", ["assigned_by"], if_not_exists=True)
 
     # ── assignments ───────────────────────────────────────────────────────────
-    op.create_index("ix_assignments_teacher_id", "assignments", ["teacher_id"])
+    op.create_index("ix_assignments_teacher_id", "assignments", ["teacher_id"], if_not_exists=True)
 
     # ── assignment_submissions ────────────────────────────────────────────────
-    op.create_index("ix_assignment_submissions_student_id", "assignment_submissions", ["student_id"])
-    op.create_index("ix_assignment_submissions_session_id", "assignment_submissions", ["session_id"])
+    op.create_index("ix_assignment_submissions_student_id", "assignment_submissions", ["student_id"], if_not_exists=True)
+    op.create_index("ix_assignment_submissions_session_id", "assignment_submissions", ["session_id"], if_not_exists=True)
 
     # ── learning_sessions ─────────────────────────────────────────────────────
-    op.create_index("ix_learning_sessions_text_id", "learning_sessions", ["text_id"])
-    op.create_index("ix_learning_sessions_classroom_id", "learning_sessions", ["classroom_id"])
+    op.create_index("ix_learning_sessions_text_id", "learning_sessions", ["text_id"], if_not_exists=True)
+    op.create_index("ix_learning_sessions_classroom_id", "learning_sessions", ["classroom_id"], if_not_exists=True)
 
     # ── character_errors ──────────────────────────────────────────────────────
-    op.create_index("ix_character_errors_session_id", "character_errors", ["session_id"])
+    op.create_index("ix_character_errors_session_id", "character_errors", ["session_id"], if_not_exists=True)
 
     # ── student_xp_log ────────────────────────────────────────────────────────
-    op.create_index("ix_student_xp_log_session_id", "student_xp_log", ["session_id"])
+    op.create_index("ix_student_xp_log_session_id", "student_xp_log", ["session_id"], if_not_exists=True)
 
     # ── feedbacks ─────────────────────────────────────────────────────────────
-    op.create_index("ix_feedbacks_user_id", "feedbacks", ["user_id"])
+    op.create_index("ix_feedbacks_user_id", "feedbacks", ["user_id"], if_not_exists=True)
 
     # ── parent_invite_codes ───────────────────────────────────────────────────
-    op.create_index("ix_parent_invite_codes_student_id", "parent_invite_codes", ["student_id"])
-    op.create_index("ix_parent_invite_codes_created_by", "parent_invite_codes", ["created_by"])
-    op.create_index("ix_parent_invite_codes_used_by", "parent_invite_codes", ["used_by"])
+    op.create_index("ix_parent_invite_codes_student_id", "parent_invite_codes", ["student_id"], if_not_exists=True)
+    op.create_index("ix_parent_invite_codes_created_by", "parent_invite_codes", ["created_by"], if_not_exists=True)
+    op.create_index("ix_parent_invite_codes_used_by", "parent_invite_codes", ["used_by"], if_not_exists=True)
 
     # ── parent_student_links ──────────────────────────────────────────────────
-    op.create_index("ix_parent_student_links_parent_id", "parent_student_links", ["parent_id"])
-    op.create_index("ix_parent_student_links_student_id", "parent_student_links", ["student_id"])
+    op.create_index("ix_parent_student_links_parent_id", "parent_student_links", ["parent_id"], if_not_exists=True)
+    op.create_index("ix_parent_student_links_student_id", "parent_student_links", ["student_id"], if_not_exists=True)
 
     # ── organization_points_log ───────────────────────────────────────────────
-    op.create_index("ix_organization_points_log_user_id", "organization_points_log", ["user_id"])
+    op.create_index("ix_organization_points_log_user_id", "organization_points_log", ["user_id"], if_not_exists=True)
 
     # ── texts ─────────────────────────────────────────────────────────────────
-    op.create_index("ix_texts_school_id", "texts", ["school_id"])
-    op.create_index("ix_texts_class_id", "texts", ["class_id"])
-    op.create_index("ix_texts_teacher_id", "texts", ["teacher_id"])
-    op.create_index("ix_texts_created_by_id", "texts", ["created_by_id"])
-    op.create_index("ix_texts_forked_from_id", "texts", ["forked_from_id"])
+    op.create_index("ix_texts_school_id", "texts", ["school_id"], if_not_exists=True)
+    op.create_index("ix_texts_class_id", "texts", ["class_id"], if_not_exists=True)
+    op.create_index("ix_texts_teacher_id", "texts", ["teacher_id"], if_not_exists=True)
+    op.create_index("ix_texts_created_by_id", "texts", ["created_by_id"], if_not_exists=True)
+    op.create_index("ix_texts_forked_from_id", "texts", ["forked_from_id"], if_not_exists=True)
 
     # ── teacher_notification_reads ────────────────────────────────────────────
-    op.create_index("ix_teacher_notification_reads_teacher_id", "teacher_notification_reads", ["teacher_id"])
+    op.create_index("ix_teacher_notification_reads_teacher_id", "teacher_notification_reads", ["teacher_id"], if_not_exists=True)
 
     # ── teacher_instructions ──────────────────────────────────────────────────
-    op.create_index("ix_teacher_instructions_teacher_id", "teacher_instructions", ["teacher_id"])
-    op.create_index("ix_teacher_instructions_student_id", "teacher_instructions", ["student_id"])
-    op.create_index("ix_teacher_instructions_classroom_id", "teacher_instructions", ["classroom_id"])
+    op.create_index("ix_teacher_instructions_teacher_id", "teacher_instructions", ["teacher_id"], if_not_exists=True)
+    op.create_index("ix_teacher_instructions_student_id", "teacher_instructions", ["student_id"], if_not_exists=True)
+    op.create_index("ix_teacher_instructions_classroom_id", "teacher_instructions", ["classroom_id"], if_not_exists=True)
 
     # ── semesters ─────────────────────────────────────────────────────────────
-    op.create_index("ix_semesters_created_by_id", "semesters", ["created_by_id"])
+    op.create_index("ix_semesters_created_by_id", "semesters", ["created_by_id"], if_not_exists=True)
 
     # ── ai_usage_log ──────────────────────────────────────────────────────────
-    op.create_index("ix_ai_usage_log_student_id", "ai_usage_log", ["student_id"])
+    op.create_index("ix_ai_usage_log_student_id", "ai_usage_log", ["student_id"], if_not_exists=True)
 
 
 def downgrade() -> None:
