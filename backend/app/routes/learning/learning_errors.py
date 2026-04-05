@@ -100,6 +100,7 @@ def get_student_story_slugs(
         )
         .distinct()
         .order_by(LearningSession.story_slug)
+        .limit(5000)
         .all()
     )
     slugs = []
@@ -155,6 +156,7 @@ def get_error_patterns(
         .group_by(CharacterError.character)
         .having(sa_func.count(CharacterError.id) >= min_errors)
         .order_by(sa_func.count(CharacterError.id).desc())
+        .limit(5000)
         .all()
     )
 
@@ -165,6 +167,7 @@ def get_error_patterns(
             ErrorCorrection.student_id == student_id,
             ErrorCorrection.correction_type == "mastered",
         )
+        .limit(5000)
         .all()
     )
     for row in mastered_rows:
@@ -207,6 +210,7 @@ def get_recommended_vocab(
             ErrorCorrection.student_id == student_id,
             ErrorCorrection.correction_type == "mastered",
         )
+        .limit(5000)
         .all()
     )
     for row in mastered_rows:
@@ -224,6 +228,7 @@ def get_recommended_vocab(
         )
         .group_by(CharacterError.character)
         .order_by(sa_func.count(CharacterError.id).desc())
+        .limit(5000)
         .all()
     )
 
@@ -302,6 +307,7 @@ def get_repeated_errors_alert(
             ErrorCorrection.student_id == student_id,
             ErrorCorrection.correction_type == "mastered",
         )
+        .limit(5000)
         .all()
     ):
         mastered_chars.add(row.character)
@@ -316,6 +322,7 @@ def get_repeated_errors_alert(
         .group_by(CharacterError.character)
         .having(sa_func.count(CharacterError.id) >= REPEATED_ERROR_THRESHOLD)
         .order_by(sa_func.count(CharacterError.id).desc())
+        .limit(5000)
         .all()
     )
 

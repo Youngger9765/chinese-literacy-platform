@@ -57,10 +57,11 @@ def get_classroom_time_stats(
             sessions_last_week=0,
         )
 
-    # All sessions for classroom students
+    # All sessions for classroom students (safety cap to prevent unbounded memory usage)
     sessions = (
         db.query(LearningSession)
         .filter(LearningSession.student_id.in_(student_ids))
+        .limit(5000)
         .all()
     )
 
@@ -127,10 +128,11 @@ def get_classroom_heatmap(
     """
     _check_classroom_access(current_user, classroom_id, db)
 
-    # Get all student IDs in this classroom
+    # Get all student IDs in this classroom (safety cap)
     enrollments = (
         db.query(ClassroomStudent)
         .filter(ClassroomStudent.classroom_id == classroom_id)
+        .limit(5000)
         .all()
     )
 
@@ -140,13 +142,14 @@ def get_classroom_heatmap(
     student_ids = [e.student_id for e in enrollments]
     students_map = {e.student_id: e.student for e in enrollments}
 
-    # Query all sessions for classroom students with a story_slug and score
+    # Query all sessions for classroom students with a story_slug and score (safety cap)
     sessions = (
         db.query(LearningSession)
         .filter(
             LearningSession.student_id.in_(student_ids),
             LearningSession.story_slug.isnot(None),
         )
+        .limit(5000)
         .all()
     )
 
@@ -225,10 +228,11 @@ def get_classroom_error_heatmap(
     """
     _check_classroom_access(current_user, classroom_id, db)
 
-    # Get enrolled students in enrollment order
+    # Get enrolled students in enrollment order (safety cap)
     enrollments = (
         db.query(ClassroomStudent)
         .filter(ClassroomStudent.classroom_id == classroom_id)
+        .limit(5000)
         .all()
     )
     if not enrollments:
@@ -237,7 +241,7 @@ def get_classroom_error_heatmap(
     student_ids = [e.student_id for e in enrollments]
     students_map = {e.student_id: e.student for e in enrollments}
 
-    # Query aggregated error counts: (student_id, character) -> count
+    # Query aggregated error counts: (student_id, character) -> count (safety cap)
     rows = (
         db.query(
             LearningSession.student_id,
@@ -247,6 +251,7 @@ def get_classroom_error_heatmap(
         .join(CharacterError, CharacterError.session_id == LearningSession.id)
         .filter(LearningSession.student_id.in_(student_ids))
         .group_by(LearningSession.student_id, CharacterError.character)
+        .limit(5000)
         .all()
     )
 
