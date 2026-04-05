@@ -8,23 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:e2e": "npx playwright test",
-    "test:e2e:ui": "npx playwright test --ui",
-    "test:e2e:headed": "npx playwright test --headed",
-    "test:e2e:auth": "npx playwright test --project=setup",
-    "test:e2e:teacher": "npx playwright test --project=teacher",
-    "test:e2e:student": "npx playwright test --project=student",
-    "test:e2e:admin": "npx playwright test --project=admin",
-    "test:e2e:infra": "npx playwright test --project=infra",
-    "test:e2e:report": "npx playwright test && npx tsx e2e/scripts/generate-report.ts",
-    "test:e2e:m1": "npx playwright test --project=m1-auth",
-    "test:e2e:m2": "npx playwright test --project=m2-teacher",
-    "test:e2e:m3": "npx playwright test --project=m3-student",
-    "test:e2e:m4": "npx playwright test --project=m4-admin",
-    "test:e2e:m5": "npx playwright test --project=m5-infra",
-    "test:e2e:m6": "npx playwright test --project=m6-learning",
-    "test:e2e:show-report": "npx playwright show-report playwright-report"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "react": "^19.2.4",
@@ -33,7 +17,6 @@
     "recharts": "^3.7.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
