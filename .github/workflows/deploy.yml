@@ -149,6 +149,31 @@ jobs:
           echo "**Backend:** https://lingoleap-backend-958347263320.asia-east1.run.app" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
 
+  post-deploy-healthcheck:
+    name: Post-deploy health check
+    needs: [deploy-backend, deploy-frontend]
+    if: always() && !cancelled() && !contains(needs.*.result, 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Cloud Run rollout
+        run: sleep 15
+      - name: Check backend health
+        run: |
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' https://lingoleap-backend-958347263320.asia-east1.run.app/api/health || echo "000")
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Backend health check failed (HTTP $STATUS)"
+            exit 1
+          fi
+          echo "Backend: HTTP $STATUS ✅"
+      - name: Check frontend
+        run: |
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' https://lingoleap-frontend-958347263320.asia-east1.run.app/ || echo "000")
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Frontend health check failed (HTTP $STATUS)"
+            exit 1
+          fi
+          echo "Frontend: HTTP $STATUS ✅"
+
   cleanup-images:
     name: Cleanup old AR images
     needs: [deploy-backend, deploy-frontend]
