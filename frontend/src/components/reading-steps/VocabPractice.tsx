@@ -207,20 +207,19 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     return optional.slice(0, 12);
   }, [story.content, attempt?.mispronouncedWords]);
 
-  // Vocabulary chars for sentence practice — extracted from story.vocabulary words
-  // These match the cache keys in example_sentence_cache.json (Issue #910)
-  const vocabChars = useMemo(() => {
+  // Vocabulary words for sentence practice — use whole words as units (Issue #927)
+  // These match the cache keys in example_sentence_cache.json
+  const vocabWords = useMemo(() => {
     const seen = new Set<string>();
-    const chars: string[] = [];
+    const words: string[] = [];
     for (const item of story.vocabulary ?? []) {
-      for (const ch of item.word) {
-        if (/[\u4e00-\u9fa5]/.test(ch) && !seen.has(ch)) {
-          chars.push(ch);
-          seen.add(ch);
-        }
+      const w = item.word.trim();
+      if (w && !seen.has(w)) {
+        words.push(w);
+        seen.add(w);
       }
     }
-    return chars;
+    return words;
   }, [story.vocabulary]);
 
   // Pronunciation tab: all characters are candidates (no stroke-data filter needed)
@@ -492,9 +491,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {/* Sentence practice — inline tab panel */}
           {activeTab === 'sentence' && (
             <SentencePractice
-              practicedChars={vocabChars.length > 0 ? vocabChars : displayChars}
+              practicedWords={vocabWords.length > 0 ? vocabWords : displayChars}
               storyTitle={story.title}
-              onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+              onFinish={() => handleFinish({ practicedWords: vocabWords, totalWords: vocabWords.length })}
               onBack={() => setActiveTab('stroke')}
               inline
             />
@@ -619,7 +618,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           {allDone && (
             <CompletionBanner
               count={practicedChars.size}
-              onFinish={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+              onFinish={() => handleFinish({ practicedWords: vocabWords, totalWords: vocabWords.length })}
             />
           )}
           </>}
@@ -629,7 +628,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       {/* Bottom actions */}
       <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-end">
         <button
-          onClick={() => handleFinish({ practicedChars: Array.from(practicedChars), totalChars: displayChars.length })}
+          onClick={() => handleFinish({ practicedWords: vocabWords, totalWords: vocabWords.length })}
           className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
           {practicedChars.size > 0 || pronouncedChars.size > 0 ? '完成，查看報告' : '跳過，查看報告'}

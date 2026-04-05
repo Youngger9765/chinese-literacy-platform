@@ -72,8 +72,8 @@ test('Inject session and verify collapsible sections', async ({ page }) => {
         questions: [],
       },
       vocabResult: {
-        totalChars: 5,
-        practicedChars: ['戴', '資', '穎'],
+        totalWords: 5,
+        practicedWords: ['戴', '資', '穎'],
       },
       fullReadingResult: {
         matchRate: 0.82,

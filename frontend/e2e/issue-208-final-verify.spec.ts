@@ -359,8 +359,8 @@ test('E: Mock session injection attempt via React internals (production build)',
           questions: [],
         },
         vocabResult: {
-          totalChars: 10,
-          practicedChars: ['戴', '資', '穎', '累', '計'],
+          totalWords: 10,
+          practicedWords: ['戴', '資', '穎', '累', '計'],
         },
         fullReadingResult: {
           matchRate: 0.82,
@@ -492,8 +492,8 @@ test('F: Final verification - Section chevrons and collapse behavior', async ({ 
         questions: [],
       },
       vocabResult: {
-        totalChars: 5,
-        practicedChars: ['戴', '資', '穎'],
+        totalWords: 5,
+        practicedWords: ['戴', '資', '穎'],
       },
       fullReadingResult: {
         matchRate: 0.82,

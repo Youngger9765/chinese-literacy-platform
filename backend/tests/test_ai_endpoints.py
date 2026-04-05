@@ -400,12 +400,12 @@ class TestExampleSentences:
     def test_happy_path_cache_miss(self, mock_log, mock_set, mock_get, mock_gen, client):
         mock_gen.return_value = {
             "sentences": [
-                {"sentence": "明天我要去學校", "explanation": "用「明」表示明天"},
-                {"sentence": "他很聰明", "explanation": "用「明」表示聰明"},
+                {"sentence": "明天我要去學校", "explanation": "用「明天」表示隔天"},
+                {"sentence": "他很聰明", "explanation": "用「聰明」表示聰明"},
             ]
         }
         resp = client.post("/api/learning/sentence-practice/example-sentences", json={
-            "character": "明",
+            "word": "明天",
             "story_title": "小王子",
         })
         assert resp.status_code == 200
@@ -423,16 +423,16 @@ class TestExampleSentences:
             ]
         }
         resp = client.post("/api/learning/sentence-practice/example-sentences", json={
-            "character": "來",
+            "word": "過來",
             "story_title": "Test",
         })
         assert resp.status_code == 200
         assert len(resp.json()["sentences"]) == 1
 
-    def test_character_field_validation(self, client):
-        # Too long — max_length=1
+    def test_word_field_validation(self, client):
+        # Too long — max_length=10
         resp = client.post("/api/learning/sentence-practice/example-sentences", json={
-            "character": "明天",
+            "word": "這個詞語超過十個字了吧",
             "story_title": "Test",
         })
         assert resp.status_code == 422
@@ -443,7 +443,7 @@ class TestExampleSentences:
     def test_ai_timeout_returns_503(self, mock_log, mock_get, mock_gen, client):
         mock_gen.side_effect = TimeoutError("Gemini timeout")
         resp = client.post("/api/learning/sentence-practice/example-sentences", json={
-            "character": "明",
+            "word": "明天",
             "story_title": "Test",
         })
         assert resp.status_code == 503
@@ -465,7 +465,7 @@ class TestValidateSentence:
             "suggestion": "",
         }
         resp = client.post("/api/learning/sentence-practice/validate", json={
-            "character": "明",
+            "word": "明天",
             "student_sentence": "明天我要去學校上課",
             "story_title": "Test",
         })
@@ -473,24 +473,24 @@ class TestValidateSentence:
         data = resp.json()
         assert data["is_correct"] is True
 
-    def test_missing_character_in_sentence(self, client):
-        """If the target character doesn't appear in the sentence, reject without calling AI."""
+    def test_missing_word_in_sentence(self, client):
+        """If the target word doesn't appear in the sentence, reject without calling AI."""
         resp = client.post("/api/learning/sentence-practice/validate", json={
-            "character": "明",
+            "word": "明天",
             "student_sentence": "我喜歡吃飯",
             "story_title": "Test",
         })
         assert resp.status_code == 200
         data = resp.json()
         assert data["is_correct"] is False
-        assert "沒有包含目標生字" in data["feedback"]
+        assert "沒有包含目標詞語" in data["feedback"]
 
     @patch("app.routes.learning.learning_vocab.validate_student_sentence", new_callable=AsyncMock)
     @patch("app.routes.learning.learning_vocab.log_ai_usage", side_effect=_mock_log_ai_usage)
     def test_ai_failure_returns_503(self, mock_log, mock_validate, client):
         mock_validate.side_effect = Exception("Gemini error")
         resp = client.post("/api/learning/sentence-practice/validate", json={
-            "character": "明",
+            "word": "明天",
             "student_sentence": "明天很好",
             "story_title": "Test",
         })

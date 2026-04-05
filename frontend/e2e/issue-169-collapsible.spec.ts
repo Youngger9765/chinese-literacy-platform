@@ -77,7 +77,7 @@ async function navigateToReport(page: import('@playwright/test').Page) {
         ],
       },
       comprehensionResult: { understoodCount: 4, requiredCount: 5, questions: [] },
-      vocabResult: { totalChars: 5, practicedChars: ['戴', '資', '穎'] },
+      vocabResult: { totalWords: 5, practicedWords: ['戴', '資', '穎'] },
       fullReadingResult: {
         matchRate: 0.88,
         transcript: '代資穎是台灣羽球選手',

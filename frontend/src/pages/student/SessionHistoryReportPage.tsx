@@ -67,12 +67,18 @@ function toComprehensionResult(raw: Record<string, unknown> | null): Comprehensi
 
 function toVocabResult(raw: Record<string, unknown> | null): VocabResult | null {
   if (!raw) return null;
-  return {
-    practicedChars: Array.isArray(raw.practiced_chars)
+  // Support both new (practiced_words) and legacy (practiced_chars) formats
+  const words = Array.isArray(raw.practiced_words)
+    ? (raw.practiced_words as string[])
+    : Array.isArray(raw.practiced_chars)
       ? (raw.practiced_chars as string[])
-      : [],
-    totalChars: typeof raw.total_chars === 'number' ? raw.total_chars : 0,
-  };
+      : [];
+  const total = typeof raw.total_words === 'number'
+    ? raw.total_words
+    : typeof raw.total_chars === 'number'
+      ? raw.total_chars
+      : 0;
+  return { practicedWords: words, totalWords: total };
 }
 
 function toFullReadingResult(raw: Record<string, unknown> | null): FullReadingResult | null {

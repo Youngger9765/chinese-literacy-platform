@@ -1,5 +1,5 @@
 """
-Tests for sentence practice API endpoints (Issue #109).
+Tests for sentence practice API endpoints (Issue #109, #927).
 
 Covers:
 - POST /api/learning/sentence-practice/example-sentences
@@ -8,7 +8,7 @@ Covers:
 Uses SQLite in-memory DB. AI calls are mocked via unittest.mock.
 
 Run with:
-    cd /Users/young/project/chinese-literacy-platform-issue-109/backend
+    cd backend
     python -m pytest tests/test_sentence_practice.py -v
 """
 
@@ -137,7 +137,7 @@ def _create_student_and_login(client: TestClient) -> str:
 
 class TestExampleSentences:
     def test_example_sentences_returns_two_sentences(self, client: TestClient):
-        """Endpoint returns exactly 2 example sentences for a valid character."""
+        """Endpoint returns exactly 2 example sentences for a valid word."""
         token = _create_student_and_login(client)
         mock_result = {
             "sentences": [
@@ -151,7 +151,7 @@ class TestExampleSentences:
         ):
             res = client.post(
                 "/api/learning/sentence-practice/example-sentences",
-                json={"character": "源", "story_title": "測試課文"},
+                json={"word": "來源", "story_title": "測試課文"},
                 headers={"Authorization": f"Bearer {token}"},
             )
         assert res.status_code == 200
@@ -170,19 +170,40 @@ class TestExampleSentences:
         ):
             res = client.post(
                 "/api/learning/sentence-practice/example-sentences",
-                json={"character": "水", "story_title": "課文"},
+                json={"word": "來源", "story_title": "課文"},
             )
         assert res.status_code in (401, 403)
 
-    def test_example_sentences_rejects_multi_char(self, client: TestClient):
-        """Endpoint rejects character field with more than 1 character."""
+    def test_example_sentences_rejects_too_long_word(self, client: TestClient):
+        """Endpoint rejects word field exceeding max_length=10."""
         token = _create_student_and_login(client)
         res = client.post(
             "/api/learning/sentence-practice/example-sentences",
-            json={"character": "多字", "story_title": "課文"},
+            json={"word": "這個詞語超過十個字了吧", "story_title": "課文"},
             headers={"Authorization": f"Bearer {token}"},
         )
         assert res.status_code == 422
+
+    def test_example_sentences_accepts_multi_char_word(self, client: TestClient):
+        """Endpoint accepts multi-character vocabulary words (Issue #927)."""
+        token = _create_student_and_login(client)
+        mock_result = {
+            "sentences": [
+                {"sentence": "他面對危險時非常沉著。", "explanation": "沉著：冷靜穩重"},
+                {"sentence": "考試時要保持沉著的態度。", "explanation": "沉著：不慌張"},
+            ]
+        }
+        with patch(
+            "app.routes.learning.learning_vocab.generate_example_sentences",
+            new=AsyncMock(return_value=mock_result),
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/example-sentences",
+                json={"word": "沉著", "story_title": "測試課文"},
+                headers={"Authorization": f"Bearer {token}"},
+            )
+        assert res.status_code == 200
+        assert len(res.json()["sentences"]) == 2
 
     def test_example_sentences_handles_ai_timeout(self, client: TestClient):
         """Returns 503 when AI service times out."""
@@ -193,16 +214,13 @@ class TestExampleSentences:
         ):
             res = client.post(
                 "/api/learning/sentence-practice/example-sentences",
-                json={"character": "水", "story_title": "課文"},
+                json={"word": "來源", "story_title": "課文"},
                 headers={"Authorization": f"Bearer {token}"},
             )
         assert res.status_code == 503
 
     def test_example_sentences_ai_path_returns_source_ai(self, client: TestClient):
         """When AI generates sentences in real-time, response includes source='ai'. (Issue #836)"""
-        import app.services.example_sentence_cache as cache_module
-        from app.services.example_sentence_cache import _reset
-
         token = _create_student_and_login(client)
         mock_result = {
             "sentences": [
@@ -223,7 +241,7 @@ class TestExampleSentences:
         ):
             res = client.post(
                 "/api/learning/sentence-practice/example-sentences",
-                json={"character": "源", "story_title": unique_story},
+                json={"word": "來源", "story_title": unique_story},
                 headers={"Authorization": f"Bearer {token}"},
             )
         assert res.status_code == 200
@@ -247,7 +265,7 @@ class TestExampleSentences:
         ):
             res = client.post(
                 "/api/learning/sentence-practice/example-sentences",
-                json={"character": "源", "story_title": "測試課文_pregenerated"},
+                json={"word": "來源", "story_title": "測試課文_pregenerated"},
                 headers={"Authorization": f"Bearer {token}"},
             )
         assert res.status_code == 200
@@ -275,7 +293,7 @@ class TestExampleSentences:
         ):
             res = client.post(
                 "/api/learning/sentence-practice/example-sentences",
-                json={"character": "源", "story_title": "測試課文_ai_cached"},
+                json={"word": "來源", "story_title": "測試課文_ai_cached"},
                 headers={"Authorization": f"Bearer {token}"},
             )
         assert res.status_code == 200
@@ -306,8 +324,8 @@ class TestValidateSentence:
             res = client.post(
                 "/api/learning/sentence-practice/validate",
                 json={
-                    "character": "水",
-                    "student_sentence": "我每天喝很多水保持健康。",
+                    "word": "來源",
+                    "student_sentence": "老師講述這個故事的來源。",
                     "story_title": "課文",
                 },
                 headers={"Authorization": f"Bearer {token}"},
@@ -318,8 +336,8 @@ class TestValidateSentence:
         assert data["feedback"] != ""
         assert data["suggestion"] == ""
 
-    def test_validate_sentence_missing_target_char(self, client: TestClient):
-        """Returns is_correct=False without calling AI when char not in sentence."""
+    def test_validate_sentence_missing_target_word(self, client: TestClient):
+        """Returns is_correct=False without calling AI when word not in sentence."""
         token = _create_student_and_login(client)
         with patch(
             "app.routes.learning.learning_vocab.validate_student_sentence",
@@ -328,8 +346,8 @@ class TestValidateSentence:
             res = client.post(
                 "/api/learning/sentence-practice/validate",
                 json={
-                    "character": "水",
-                    "student_sentence": "我每天都很快樂。",  # 沒有包含「水」
+                    "word": "來源",
+                    "student_sentence": "我每天都很快樂。",  # 沒有包含「來源」
                     "story_title": "課文",
                 },
                 headers={"Authorization": f"Bearer {token}"},
@@ -340,7 +358,7 @@ class TestValidateSentence:
         assert res.status_code == 200
         data = res.json()
         assert data["is_correct"] is False
-        assert "水" in data["suggestion"]
+        assert "來源" in data["suggestion"]
 
     def test_validate_incorrect_sentence(self, client: TestClient):
         """Returns is_correct=False with feedback for an incorrect sentence."""
@@ -348,7 +366,7 @@ class TestValidateSentence:
         mock_result = {
             "is_correct": False,
             "feedback": "句子語法有點問題，請再修改看看。",
-            "suggestion": "試試：「這杯水很清涼。」",
+            "suggestion": "試試：「這本書的來源是圖書館。」",
         }
         with patch(
             "app.routes.learning.learning_vocab.validate_student_sentence",
@@ -357,8 +375,8 @@ class TestValidateSentence:
             res = client.post(
                 "/api/learning/sentence-practice/validate",
                 json={
-                    "character": "水",
-                    "student_sentence": "水 是 好",
+                    "word": "來源",
+                    "student_sentence": "來源 是 好",
                     "story_title": "課文",
                 },
                 headers={"Authorization": f"Bearer {token}"},
@@ -374,8 +392,8 @@ class TestValidateSentence:
         res = client.post(
             "/api/learning/sentence-practice/validate",
             json={
-                "character": "水",
-                "student_sentence": "我喝水。",
+                "word": "來源",
+                "student_sentence": "這個故事的來源很有趣。",
                 "story_title": "課文",
             },
         )
@@ -387,7 +405,7 @@ class TestValidateSentence:
         res = client.post(
             "/api/learning/sentence-practice/validate",
             json={
-                "character": "水",
+                "word": "來源",
                 "student_sentence": "",
                 "story_title": "課文",
             },
@@ -405,8 +423,8 @@ class TestValidateSentence:
             res = client.post(
                 "/api/learning/sentence-practice/validate",
                 json={
-                    "character": "水",
-                    "student_sentence": "我每天喝水保持健康。",
+                    "word": "來源",
+                    "student_sentence": "老師講述這個故事的來源。",
                     "story_title": "課文",
                 },
                 headers={"Authorization": f"Bearer {token}"},

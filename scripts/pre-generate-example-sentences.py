@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Pre-generate example sentences for all lesson vocabulary characters (Issue #780).
+"""Pre-generate example sentences for all lesson vocabulary words (Issue #780, #927).
 
-This script extracts every unique (story_title, character) pair from the 57
+This script extracts every unique (story_title, word) pair from the 57
 lesson YAML files, then either:
 
   --mode api   : calls the local/staging backend API to generate and cache
@@ -28,7 +28,7 @@ Usage examples:
 
 Exit codes:
   0  success
-  1  partial failure (some chars failed, see --output-failures)
+  1  partial failure (some words failed, see --output-failures)
   2  fatal error (bad args, can't read lessons, etc.)
 """
 
@@ -76,12 +76,11 @@ def _is_cjk(ch: str) -> bool:
     return bool(re.match(r"[\u4e00-\u9fa5]", ch))
 
 
-def extract_vocab_chars(lessons_dir: Path) -> list[tuple[str, str]]:
-    """Return sorted list of (story_title, char) pairs from all YAML lessons.
+def extract_vocab_words(lessons_dir: Path) -> list[tuple[str, str]]:
+    """Return sorted list of (story_title, word) pairs from all YAML lessons.
 
-    For each lesson we iterate over the vocabulary words and decompose each
-    word into its constituent CJK characters.  Duplicate (title, char) pairs
-    are deduplicated.
+    Each vocabulary entry's word is used as-is (Issue #927: word-based units).
+    Duplicate (title, word) pairs are deduplicated.
     """
     pairs: set[tuple[str, str]] = set()
     lesson_files = sorted(glob.glob(str(lessons_dir / "*.yml")))
@@ -99,9 +98,8 @@ def extract_vocab_chars(lessons_dir: Path) -> list[tuple[str, str]]:
         vocab = data.get("vocabulary") or []
         for item in vocab:
             word = (item.get("word") or "").strip()
-            for ch in word:
-                if _is_cjk(ch):
-                    pairs.add((title, ch))
+            if word:
+                pairs.add((title, word))
 
     return sorted(pairs)
 
@@ -132,8 +130,8 @@ def run_placeholder(pairs: list[tuple[str, str]], cache_path: Path) -> None:
     cache = load_cache(cache_path)
     written = 0
     skipped = 0
-    for title, ch in pairs:
-        key = f"{title}:{ch}"
+    for title, word in pairs:
+        key = f"{title}:{word}"
         if cache.get(key, {}).get("source") == "pregenerated" and cache[key].get("sentences"):
             skipped += 1
             continue
@@ -161,7 +159,7 @@ def call_api(
     api_url: str,
     token: str,
     title: str,
-    character: str,
+    word: str,
     timeout: int = 30,
 ) -> Optional[list]:
     """Call the example-sentences endpoint and return the sentences list or None."""
@@ -171,7 +169,7 @@ def call_api(
 
     url = f"{api_url.rstrip('/')}/api/learning/sentence-practice/example-sentences"
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    payload = {"character": character, "story_title": title}
+    payload = {"word": word, "story_title": title}
 
     try:
         resp = requests.post(url, json=payload, headers=headers, timeout=timeout)
@@ -179,15 +177,15 @@ def call_api(
             data = resp.json()
             return data.get("sentences", [])
         logger.warning(
-            "API returned %d for char=%s title=%s: %s",
+            "API returned %d for word=%s title=%s: %s",
             resp.status_code,
-            character,
+            word,
             title,
             resp.text[:200],
         )
         return None
     except requests.RequestException as exc:
-        logger.warning("Request failed for char=%s title=%s: %s", character, title, exc)
+        logger.warning("Request failed for word=%s title=%s: %s", word, title, exc)
         return None
 
 
@@ -207,17 +205,17 @@ def run_api(
     skipped = 0
 
     total = len(pairs)
-    for idx, (title, ch) in enumerate(pairs, 1):
-        key = f"{title}:{ch}"
+    for idx, (title, word) in enumerate(pairs, 1):
+        key = f"{title}:{word}"
         existing = cache.get(key, {})
         if skip_existing and existing.get("source") == "pregenerated" and existing.get("sentences"):
             skipped += 1
             continue
 
-        logger.info("[%d/%d] Generating: %s | %s", idx, total, title, ch)
-        sentences = call_api(api_url, token, title, ch)
+        logger.info("[%d/%d] Generating: %s | %s", idx, total, title, word)
+        sentences = call_api(api_url, token, title, word)
         if sentences is None:
-            failed.append((title, ch))
+            failed.append((title, word))
         else:
             cache[key] = {
                 "sentences": sentences,
@@ -245,11 +243,11 @@ def run_api(
     if failed:
         if output_failures:
             with open(output_failures, "w", encoding="utf-8") as fh:
-                json.dump([{"title": t, "char": c} for t, c in failed], fh, ensure_ascii=False, indent=2)
+                json.dump([{"title": t, "word": w} for t, w in failed], fh, ensure_ascii=False, indent=2)
             logger.info("Failures written to %s", output_failures)
         else:
-            for title, ch in failed:
-                logger.warning("FAILED: %s | %s", title, ch)
+            for title, word in failed:
+                logger.warning("FAILED: %s | %s", title, word)
         return 1
 
     return 0
@@ -305,12 +303,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-failures",
         type=Path,
         default=None,
-        help="Write failed (title, char) pairs as JSON to this file",
+        help="Write failed (title, word) pairs as JSON to this file",
     )
     p.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print the list of (title, char) pairs without writing anything",
+        help="Print the list of (title, word) pairs without writing anything",
     )
     return p
 
@@ -326,12 +324,12 @@ def main() -> int:
         logger.error("Lessons directory not found: %s", lessons_dir)
         return 2
 
-    pairs = extract_vocab_chars(lessons_dir)
-    logger.info("Found %d unique (story_title, char) pairs across all lessons", len(pairs))
+    pairs = extract_vocab_words(lessons_dir)
+    logger.info("Found %d unique (story_title, word) pairs across all lessons", len(pairs))
 
     if args.dry_run:
-        for title, ch in pairs:
-            print(f"{title}\t{ch}")
+        for title, word in pairs:
+            print(f"{title}\t{word}")
         return 0
 
     if args.mode == "placeholder":

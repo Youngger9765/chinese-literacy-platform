@@ -60,7 +60,7 @@ test('Find K7 (App) fiber and inject session', async ({ page }) => {
         ],
       },
       comprehensionResult: { understoodCount: 3, requiredCount: 5, questions: [] },
-      vocabResult: { totalChars: 5, practicedChars: ['戴', '資', '穎'] },
+      vocabResult: { totalWords: 5, practicedWords: ['戴', '資', '穎'] },
       fullReadingResult: {
         matchRate: 0.82,
         transcript: '代資穎第一名台灣第一人',
