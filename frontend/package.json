@@ -22,8 +22,6 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/dom-speech-recognition": "^0.0.7",
     "@types/node": "^22.14.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.0",
     "jsdom": "^29.0.0",
