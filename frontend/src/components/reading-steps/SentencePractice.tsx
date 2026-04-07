@@ -410,6 +410,12 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                         setPasteWarning(true);
                         setTimeout(() => setPasteWarning(false), 3000);
                       }}
+                      onDrop={e => {
+                        e.preventDefault();
+                        setPasteWarning(true);
+                        setTimeout(() => setPasteWarning(false), 3000);
+                      }}
+                      onDragOver={e => e.preventDefault()}
                       disabled={entry.status === 'loading' || isCurrentDone}
                       placeholder={`用「${currentChar}」造一個句子…`}
                       className={[

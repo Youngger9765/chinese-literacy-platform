@@ -179,6 +179,8 @@ async def validate_sentence(
 
     passage_sentences: list[str] = []
     lesson = get_lesson_by_title(payload.story_title)
+    if lesson is None:
+        logger.warning("copy_detect: lesson not found for title=%r, skipping", payload.story_title)
     if lesson:
         full_text = lesson.get("full_text") or ""
         paragraphs = lesson.get("paragraphs") or []
