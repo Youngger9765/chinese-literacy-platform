@@ -1,8 +1,8 @@
 /**
- * SentencePractice — Issue #109
+ * SentencePractice — Issue #109, #927
  *
  * After stroke order practice, students compose 2 sentences using each
- * practiced vocabulary character. AI validates grammar and word usage.
+ * practiced vocabulary word. AI validates grammar and word usage.
  */
 import React, { useState, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -27,7 +27,7 @@ interface SentenceEntry {
   suggestion: string;
 }
 
-interface CharacterPracticeState {
+interface WordPracticeState {
   exampleSentences: ExampleSentence[] | null;
   examplesLoading: boolean;
   examplesError: string;
@@ -40,7 +40,7 @@ function makeSentenceEntry(): SentenceEntry {
   return { text: '', status: 'idle', feedback: '', suggestion: '' };
 }
 
-function makeCharState(): CharacterPracticeState {
+function makeWordState(): WordPracticeState {
   return {
     exampleSentences: null,
     examplesLoading: false,
@@ -59,7 +59,7 @@ interface ExampleSentencesApiResponse {
 }
 
 async function fetchExampleSentences(
-  character: string,
+  word: string,
   storyTitle: string,
   token: string | null,
 ): Promise<ExampleSentencesApiResponse> {
@@ -69,7 +69,7 @@ async function fetchExampleSentences(
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ character, story_title: storyTitle }),
+    body: JSON.stringify({ word, story_title: storyTitle }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
@@ -80,7 +80,7 @@ async function fetchExampleSentences(
 }
 
 async function validateSentence(
-  character: string,
+  word: string,
   studentSentence: string,
   storyTitle: string,
   token: string | null,
@@ -92,7 +92,7 @@ async function validateSentence(
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({
-      character,
+      word,
       student_sentence: studentSentence,
       story_title: storyTitle,
     }),
@@ -101,7 +101,7 @@ async function validateSentence(
   return res.json();
 }
 
-// ── Highlight target character in a sentence ──────────────────────────────
+// ── Highlight target word in a sentence ──────────────────────────────────
 
 function HighlightedSentence({ sentence, target }: { sentence: string; target: string }) {
   const parts = sentence.split(target);
@@ -122,8 +122,8 @@ function HighlightedSentence({ sentence, target }: { sentence: string; target: s
 // ── Props ─────────────────────────────────────────────────────────────────
 
 interface SentencePracticeProps {
-  /** Characters the student completed stroke order practice for */
-  practicedChars: string[];
+  /** Vocabulary words the student will practice sentence composition for */
+  practicedWords: string[];
   storyTitle: string;
   onFinish: () => void;
   onBack: () => void;
@@ -134,53 +134,53 @@ interface SentencePracticeProps {
 // ── Component ─────────────────────────────────────────────────────────────
 
 const SentencePractice: React.FC<SentencePracticeProps> = ({
-  practicedChars,
+  practicedWords,
   storyTitle,
   onFinish,
   onBack,
   inline = false,
 }) => {
   const { token } = useAuth();
-  const [currentCharIndex, setCurrentCharIndex] = useState(0);
-  const [charStates, setCharStates] = useState<Record<string, CharacterPracticeState>>(() => {
-    const init: Record<string, CharacterPracticeState> = {};
-    for (const ch of practicedChars) {
-      init[ch] = makeCharState();
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [wordStates, setWordStates] = useState<Record<string, WordPracticeState>>(() => {
+    const init: Record<string, WordPracticeState> = {};
+    for (const w of practicedWords) {
+      init[w] = makeWordState();
     }
     return init;
   });
-  const [completedChars, setCompletedChars] = useState<Set<string>>(new Set());
+  const [completedWords, setCompletedWords] = useState<Set<string>>(new Set());
   const [pasteWarning, setPasteWarning] = useState(false);
 
-  // Tracks characters that have been loaded or are currently loading,
-  // avoiding circular dependency on charStates inside the loadExamples callback.
-  const loadedCharsRef = useRef<Set<string>>(new Set());
+  // Tracks words that have been loaded or are currently loading,
+  // avoiding circular dependency on wordStates inside the loadExamples callback.
+  const loadedWordsRef = useRef<Set<string>>(new Set());
 
-  const currentChar = practicedChars[currentCharIndex] ?? '';
-  const currentState = charStates[currentChar] ?? makeCharState();
+  const currentWord = practicedWords[currentWordIndex] ?? '';
+  const currentState = wordStates[currentWord] ?? makeWordState();
 
-  // ── Load example sentences for current character ──────────────────────
+  // ── Load example sentences for current word ─────────────────────────
 
   const loadExamples = useCallback(async () => {
-    if (!currentChar) return;
-    // Use ref instead of charStates to avoid adding charStates as a dependency
-    // (which would cause an infinite loop: error → setCharStates → new charStates
+    if (!currentWord) return;
+    // Use ref instead of wordStates to avoid adding wordStates as a dependency
+    // (which would cause an infinite loop: error → setWordStates → new wordStates
     //  → new loadExamples → useEffect fires → loadExamples called again → 429)
-    if (loadedCharsRef.current.has(currentChar)) return;
+    if (loadedWordsRef.current.has(currentWord)) return;
 
-    loadedCharsRef.current.add(currentChar);
+    loadedWordsRef.current.add(currentWord);
 
-    setCharStates(prev => ({
+    setWordStates(prev => ({
       ...prev,
-      [currentChar]: { ...prev[currentChar], examplesLoading: true, examplesError: '' },
+      [currentWord]: { ...prev[currentWord], examplesLoading: true, examplesError: '' },
     }));
 
     try {
-      const { sentences: examples, source } = await fetchExampleSentences(currentChar, storyTitle, token);
-      setCharStates(prev => ({
+      const { sentences: examples, source } = await fetchExampleSentences(currentWord, storyTitle, token);
+      setWordStates(prev => ({
         ...prev,
-        [currentChar]: {
-          ...prev[currentChar],
+        [currentWord]: {
+          ...prev[currentWord],
           examplesLoading: false,
           exampleSentences: examples,
           examplesSource: source,
@@ -188,19 +188,19 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       }));
     } catch {
       // Remove from ref so the retry button can re-attempt
-      loadedCharsRef.current.delete(currentChar);
-      setCharStates(prev => ({
+      loadedWordsRef.current.delete(currentWord);
+      setWordStates(prev => ({
         ...prev,
-        [currentChar]: {
-          ...prev[currentChar],
+        [currentWord]: {
+          ...prev[currentWord],
           examplesLoading: false,
           examplesError: '例句載入失敗，請稍後再試。',
         },
       }));
     }
-  }, [currentChar, storyTitle, token]);
+  }, [currentWord, storyTitle, token]);
 
-  // Auto-load examples when we navigate to a character
+  // Auto-load examples when we navigate to a word
   React.useEffect(() => {
     loadExamples();
   }, [loadExamples]);
@@ -209,17 +209,17 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
 
   const updateSentenceText = useCallback(
     (sentenceIndex: 0 | 1, text: string) => {
-      setCharStates(prev => {
-        const state = prev[currentChar];
+      setWordStates(prev => {
+        const state = prev[currentWord];
         const updated: [SentenceEntry, SentenceEntry] = [
           { ...state.sentences[0] },
           { ...state.sentences[1] },
         ];
         updated[sentenceIndex] = { ...updated[sentenceIndex], text, status: 'idle', feedback: '', suggestion: '' };
-        return { ...prev, [currentChar]: { ...state, sentences: updated } };
+        return { ...prev, [currentWord]: { ...state, sentences: updated } };
       });
     },
-    [currentChar],
+    [currentWord],
   );
 
   // ── Validate a sentence ──────────────────────────────────────────────
@@ -230,20 +230,20 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       if (!sentence.text.trim()) return;
 
       // Set loading state
-      setCharStates(prev => {
-        const state = prev[currentChar];
+      setWordStates(prev => {
+        const state = prev[currentWord];
         const updated: [SentenceEntry, SentenceEntry] = [
           { ...state.sentences[0] },
           { ...state.sentences[1] },
         ];
         updated[sentenceIndex] = { ...updated[sentenceIndex], status: 'loading' };
-        return { ...prev, [currentChar]: { ...state, sentences: updated } };
+        return { ...prev, [currentWord]: { ...state, sentences: updated } };
       });
 
       try {
-        const result = await validateSentence(currentChar, sentence.text.trim(), storyTitle, token);
-        setCharStates(prev => {
-          const state = prev[currentChar];
+        const result = await validateSentence(currentWord, sentence.text.trim(), storyTitle, token);
+        setWordStates(prev => {
+          const state = prev[currentWord];
           const updated: [SentenceEntry, SentenceEntry] = [
             { ...state.sentences[0] },
             { ...state.sentences[1] },
@@ -257,12 +257,12 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
           const bothCorrect = updated[0].status === 'correct' && updated[1].status === 'correct';
           return {
             ...prev,
-            [currentChar]: { ...state, sentences: updated, allCorrect: bothCorrect },
+            [currentWord]: { ...state, sentences: updated, allCorrect: bothCorrect },
           };
         });
       } catch {
-        setCharStates(prev => {
-          const state = prev[currentChar];
+        setWordStates(prev => {
+          const state = prev[currentWord];
           const updated: [SentenceEntry, SentenceEntry] = [
             { ...state.sentences[0] },
             { ...state.sentences[1] },
@@ -273,19 +273,19 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
             feedback: '評估失敗，請再試一次。',
             suggestion: '',
           };
-          return { ...prev, [currentChar]: { ...state, sentences: updated } };
+          return { ...prev, [currentWord]: { ...state, sentences: updated } };
         });
       }
     },
-    [currentChar, currentState, storyTitle],
+    [currentWord, currentState, storyTitle],
   );
 
   // ── Navigation ────────────────────────────────────────────────────────
 
-  const handleCompleteCurrentChar = () => {
-    setCompletedChars(prev => new Set(prev).add(currentChar));
-    if (currentCharIndex < practicedChars.length - 1) {
-      setCurrentCharIndex(i => i + 1);
+  const handleCompleteCurrentWord = () => {
+    setCompletedWords(prev => new Set(prev).add(currentWord));
+    if (currentWordIndex < practicedWords.length - 1) {
+      setCurrentWordIndex(i => i + 1);
     }
   };
 
@@ -293,13 +293,13 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
     onFinish();
   };
 
-  // ── Early exit: no practiced chars ───────────────────────────────────
+  // ── Early exit: no practiced words ──────────────────────────────────
 
-  if (practicedChars.length === 0) {
+  if (practicedWords.length === 0) {
     if (inline) {
       return (
         <div className="flex flex-col items-center justify-center text-center py-12">
-          <p className="text-gray-500 text-sm">沒有需要造句練習的生字。</p>
+          <p className="text-gray-500 text-sm">沒有需要造句練習的詞語。</p>
         </div>
       );
     }
@@ -309,7 +309,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
           {storyTitle} — 造句練習
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-12">
-          <p className="text-gray-500 text-sm mb-6">沒有需要造句練習的生字。</p>
+          <p className="text-gray-500 text-sm mb-6">沒有需要造句練習的詞語。</p>
           <button
             onClick={onFinish}
             className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95"
@@ -321,8 +321,8 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
     );
   }
 
-  const allCharsDone = practicedChars.every(ch => completedChars.has(ch));
-  const isCurrentDone = completedChars.has(currentChar);
+  const allWordsDone = practicedWords.every(w => completedWords.has(w));
+  const isCurrentDone = completedWords.has(currentWord);
   const currentAllCorrect = currentState.allCorrect;
 
   const innerContent = (
@@ -332,10 +332,10 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-1">
               造句練習
-              <span className="ml-3 text-4xl text-accent">{currentChar}</span>
+              <span className={`ml-3 ${currentWord.length > 2 ? 'text-2xl' : 'text-4xl'} text-accent`}>{currentWord}</span>
             </h2>
             <p className="text-sm text-gray-600">
-              用「{currentChar}」造兩個句子，讓 AI 幫你批改。
+              用「{currentWord}」造兩個句子，讓 AI 幫你批改。
             </p>
           </div>
 
@@ -376,7 +376,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                 {currentState.exampleSentences.map((ex, i) => (
                   <div key={i} className="bg-amber-50 rounded-xl p-3">
                     <p className="text-base text-gray-800 leading-relaxed">
-                      <HighlightedSentence sentence={ex.sentence} target={currentChar} />
+                      <HighlightedSentence sentence={ex.sentence} target={currentWord} />
                     </p>
                     <p className="text-xs text-gray-500 mt-1">{ex.explanation}</p>
                   </div>
@@ -417,7 +417,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                       }}
                       onDragOver={e => e.preventDefault()}
                       disabled={entry.status === 'loading' || isCurrentDone}
-                      placeholder={`用「${currentChar}」造一個句子…`}
+                      placeholder={`用「${currentWord}」造一個句子…`}
                       className={[
                         'flex-1 rounded-xl border px-3 py-2 text-base outline-none transition-all',
                         entry.status === 'correct'
@@ -473,20 +473,20 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
             </p>
           )}
 
-          {/* Completion message for current char */}
+          {/* Completion message for current word */}
           {currentAllCorrect && !isCurrentDone && (
             <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center">
-              <p className="text-emerald-800 font-bold text-lg">「{currentChar}」造句全部正確！</p>
-              {currentCharIndex < practicedChars.length - 1 ? (
+              <p className="text-emerald-800 font-bold text-lg">「{currentWord}」造句全部正確！</p>
+              {currentWordIndex < practicedWords.length - 1 ? (
                 <button
-                  onClick={handleCompleteCurrentChar}
+                  onClick={handleCompleteCurrentWord}
                   className="mt-3 px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
                 >
-                  繼續下一個字
+                  繼續下一個詞
                 </button>
               ) : (
                 <button
-                  onClick={() => { handleCompleteCurrentChar(); }}
+                  onClick={() => { handleCompleteCurrentWord(); }}
                   className="mt-3 px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
                 >
                   完成所有造句
@@ -497,7 +497,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
 
           {isCurrentDone && (
             <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3 text-center">
-              <p className="text-emerald-700 text-sm font-medium">「{currentChar}」已完成</p>
+              <p className="text-emerald-700 text-sm font-medium">「{currentWord}」已完成</p>
             </div>
           )}
 
@@ -508,18 +508,18 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   if (inline) {
     return (
       <>
-        {/* Character tab nav — shown inline above content */}
-        {practicedChars.length > 1 && (
+        {/* Word tab nav — shown inline above content */}
+        {practicedWords.length > 1 && (
           <div className="bg-white border border-gray-100 rounded-xl px-3 py-2 flex flex-wrap gap-2">
-            {practicedChars.map((ch, i) => {
-              const done = completedChars.has(ch);
-              const active = i === currentCharIndex;
+            {practicedWords.map((w, i) => {
+              const done = completedWords.has(w);
+              const active = i === currentWordIndex;
               return (
                 <button
-                  key={ch}
-                  onClick={() => setCurrentCharIndex(i)}
+                  key={w}
+                  onClick={() => setCurrentWordIndex(i)}
                   className={[
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all',
                     active
                       ? 'bg-accent text-white shadow'
                       : done
@@ -527,7 +527,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
                   ].join(' ')}
                 >
-                  {ch}
+                  {w}
                   {done && (
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
@@ -554,22 +554,22 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         </div>
         <div className="flex-1" />
         <span className="text-[10px] text-gray-500">
-          {currentCharIndex + 1} / {practicedChars.length} 字
+          {currentWordIndex + 1} / {practicedWords.length} 詞
         </span>
       </div>
 
-      {/* Character tab nav */}
-      {practicedChars.length > 1 && (
+      {/* Word tab nav */}
+      {practicedWords.length > 1 && (
         <div className="bg-white border-b border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto shrink-0">
-          {practicedChars.map((ch, i) => {
-            const done = completedChars.has(ch);
-            const active = i === currentCharIndex;
+          {practicedWords.map((w, i) => {
+            const done = completedWords.has(w);
+            const active = i === currentWordIndex;
             return (
               <button
-                key={ch}
-                onClick={() => setCurrentCharIndex(i)}
+                key={w}
+                onClick={() => setCurrentWordIndex(i)}
                 className={[
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all',
                   active
                     ? 'bg-accent text-white shadow'
                     : done
@@ -577,7 +577,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
                 ].join(' ')}
               >
-                {ch}
+                {w}
                 {done && (
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
@@ -606,7 +606,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
           onClick={handleFinish}
           className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
         >
-          {allCharsDone ? '完成，查看報告' : '跳過，查看報告'}
+          {allWordsDone ? '完成，查看報告' : '跳過，查看報告'}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
           </svg>

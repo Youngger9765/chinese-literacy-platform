@@ -265,7 +265,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   const scores: number[] = [];
   if (readingAttempt) scores.push(readingAttempt.accuracy);
   if (comprehensionResult) scores.push(Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100));
-  if (vocabResult) scores.push(vocabResult.totalChars > 0 ? Math.round((vocabResult.practicedChars.length / vocabResult.totalChars) * 100) : 100);
+  if (vocabResult) scores.push(vocabResult.totalWords > 0 ? Math.round((vocabResult.practicedWords.length / vocabResult.totalWords) * 100) : 100);
   if (dictationResult) scores.push(dictationResult.totalWords > 0 ? Math.round((dictationResult.correctCount / dictationResult.totalWords) * 100) : 0);
   if (fullReadingResult) scores.push(Math.round(fullReadingResult.matchRate * 100));
   const overallScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
@@ -763,8 +763,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                 ? Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)
                 : null
             }
-            vocabPracticedCount={vocabResult?.practicedChars.length ?? null}
-            vocabTotalCount={vocabResult?.totalChars ?? null}
+            vocabPracticedCount={vocabResult?.practicedWords.length ?? null}
+            vocabTotalCount={vocabResult?.totalWords ?? null}
             dictationCorrectCount={dictationResult?.correctCount ?? null}
             dictationTotalCount={dictationResult?.totalWords ?? null}
           />
@@ -789,15 +789,15 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div className="bg-accent h-2 rounded-full transition-all" style={{ width: vocabResult.totalChars > 0 ? `${Math.round((vocabResult.practicedChars.length / vocabResult.totalChars) * 100)}%` : '0%' }} />
+                      <div className="bg-accent h-2 rounded-full transition-all" style={{ width: vocabResult.totalWords > 0 ? `${Math.round((vocabResult.practicedWords.length / vocabResult.totalWords) * 100)}%` : '0%' }} />
                     </div>
-                    <span className="text-xs font-bold text-gray-600">{vocabResult.practicedChars.length}/{vocabResult.totalChars}</span>
+                    <span className="text-xs font-bold text-gray-600">{vocabResult.practicedWords.length}/{vocabResult.totalWords}</span>
                   </div>
-                  {vocabResult.practicedChars.length > 0 && (
+                  {vocabResult.practicedWords.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {vocabResult.practicedChars.map(ch => (
-                        <span key={ch} className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-1.5 py-0.5 rounded">
-                          {ch}
+                      {vocabResult.practicedWords.map(w => (
+                        <span key={w} className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-1.5 py-0.5 rounded">
+                          {w}
                         </span>
                       ))}
                     </div>

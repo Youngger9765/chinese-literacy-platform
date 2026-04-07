@@ -1,10 +1,10 @@
 """Example sentence cache service — JSON file-based.
 
 Caches AI-generated example sentences in a local JSON file to avoid
-repeated Gemini API calls for the same character (Issue #730, #780).
+repeated Gemini API calls for the same vocabulary word (Issue #730, #780, #927).
 
 Cache strategy:
-- Key: "{story_title}:{character}" (includes story context for accuracy)
+- Key: "{story_title}:{word}" (includes story context for accuracy)
 - Storage: backend/data/example_sentence_cache.json
 - TTL: 30 days for runtime-generated entries (checked at read time)
 - Pre-generated entries (source="pregenerated") never expire
@@ -94,11 +94,11 @@ def _is_expired(entry: dict) -> bool:
         return True
 
 
-def _make_key(story_title: str, character: str) -> str:
-    return f"{story_title}:{character}"
+def _make_key(story_title: str, word: str) -> str:
+    return f"{story_title}:{word}"
 
 
-def get_cached(story_title: str, character: str) -> Optional[dict]:
+def get_cached(story_title: str, word: str) -> Optional[dict]:
     """Return cached sentences if present, not expired, and non-empty, else None.
 
     An entry with an empty sentences list (e.g. a placeholder written by
@@ -110,7 +110,7 @@ def get_cached(story_title: str, character: str) -> Optional[dict]:
         {"sentences": [{"sentence": str, "explanation": str}, ...]} or None
     """
     _ensure_loaded()
-    key = _make_key(story_title, character)
+    key = _make_key(story_title, word)
     entry = _cache.get(key)
     if entry is None:
         return None
@@ -125,16 +125,16 @@ def get_cached(story_title: str, character: str) -> Optional[dict]:
     return {"sentences": sentences}
 
 
-def set_cached(story_title: str, character: str, result: dict) -> None:
+def set_cached(story_title: str, word: str, result: dict) -> None:
     """Store AI result in cache and persist to disk.
 
     Args:
         story_title: Lesson title.
-        character: Single Chinese character.
+        word: Chinese vocabulary word.
         result: {"sentences": [{"sentence": str, "explanation": str}, ...]}
     """
     _ensure_loaded()
-    key = _make_key(story_title, character)
+    key = _make_key(story_title, word)
     entry = {
         "sentences": result.get("sentences", []),
         "cached_at": datetime.now(timezone.utc).isoformat(),
@@ -145,7 +145,7 @@ def set_cached(story_title: str, character: str, result: dict) -> None:
     logger.info("Cached example sentences for key: %s", key)
 
 
-def set_pregenerated(story_title: str, character: str, sentences: list) -> None:
+def set_pregenerated(story_title: str, word: str, sentences: list) -> None:
     """Store a pre-generated sentence list that never expires (Issue #780).
 
     Used by scripts/pre-generate-example-sentences.py to bulk-load curated
@@ -154,11 +154,11 @@ def set_pregenerated(story_title: str, character: str, sentences: list) -> None:
 
     Args:
         story_title: Lesson title (must match story lookup key exactly).
-        character: Single Chinese character.
+        word: Chinese vocabulary word.
         sentences: list of {"sentence": str, "explanation": str} dicts.
     """
     _ensure_loaded()
-    key = _make_key(story_title, character)
+    key = _make_key(story_title, word)
     # Skip if pre-generated entry already exists — don't overwrite curated data
     existing = _cache.get(key, {})
     if existing.get("source") == "pregenerated" and existing.get("sentences"):
