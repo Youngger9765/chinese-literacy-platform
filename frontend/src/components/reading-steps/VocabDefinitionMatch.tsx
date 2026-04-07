@@ -311,29 +311,61 @@ function StageStatus({
   mcDone: boolean;
   dragDropDone: boolean;
 }) {
+  const step1Active = current === 'multiple-choice';
+  const step2Active = current === 'drag-drop';
+  const step2Locked = !mcDone && !step2Active;
+
   return (
-    <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 max-w-sm mx-auto">
-      <div
-        className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-sm font-semibold ${
-          current === 'multiple-choice'
-            ? 'bg-white text-accent shadow-sm'
-            : 'text-gray-500'
-        }`}
-      >
-        <span>☑</span>
-        <span>選擇題</span>
-        {mcDone && <span className="text-emerald-500 text-xs leading-none">✓</span>}
+    <div className="flex items-center justify-center gap-0 mb-6 max-w-sm mx-auto select-none">
+      {/* Step 1 */}
+      <div className="flex flex-col items-center gap-1">
+        <div
+          className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors ${
+            mcDone
+              ? 'bg-emerald-500 border-emerald-500 text-white'
+              : step1Active
+                ? 'bg-accent border-accent text-white'
+                : 'bg-white border-gray-300 text-gray-400'
+          }`}
+        >
+          {mcDone ? '✓' : '1'}
+        </div>
+        <span
+          className={`text-xs font-semibold whitespace-nowrap ${
+            step1Active ? 'text-accent' : mcDone ? 'text-emerald-600' : 'text-gray-400'
+          }`}
+        >
+          選擇題
+        </span>
       </div>
+
+      {/* Connector line */}
       <div
-        className={`flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-sm font-semibold ${
-          current === 'drag-drop'
-            ? 'bg-white text-accent shadow-sm'
-            : 'text-gray-500'
+        className={`h-0.5 w-12 mb-4 transition-colors ${
+          mcDone ? 'bg-emerald-400' : 'bg-gray-200'
         }`}
-      >
-        <span>✥</span>
-        <span>拖拉配對</span>
-        {dragDropDone && <span className="text-emerald-500 text-xs leading-none">✓</span>}
+      />
+
+      {/* Step 2 */}
+      <div className="flex flex-col items-center gap-1">
+        <div
+          className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors ${
+            dragDropDone
+              ? 'bg-emerald-500 border-emerald-500 text-white'
+              : step2Active
+                ? 'bg-accent border-accent text-white'
+                : 'bg-gray-100 border-gray-200 text-gray-300'
+          }`}
+        >
+          {dragDropDone ? '✓' : step2Locked ? '🔒' : '2'}
+        </div>
+        <span
+          className={`text-xs font-semibold whitespace-nowrap ${
+            step2Active ? 'text-accent' : dragDropDone ? 'text-emerald-600' : 'text-gray-300'
+          }`}
+        >
+          拖拉配對
+        </span>
       </div>
     </div>
   );
