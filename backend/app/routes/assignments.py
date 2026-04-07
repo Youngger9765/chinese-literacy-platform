@@ -20,7 +20,7 @@ from ..auth.dependencies import get_current_user
 from ..database import get_db
 from ..models.assignment import Assignment, AssignmentSubmission
 from ..models.school import Classroom, ClassroomStudent
-from ..models.session import LearningSession
+from ..models.session import LearningSession, CharacterError, DialogueTurn
 from ..models.text import Text
 from ..models.user import User, UserRole, Role
 from ..schemas.assignment import (
@@ -660,12 +660,82 @@ def delete_assignment(
 
     _require_assignment_owner_or_admin(assignment, current_user, db)
 
+    linked_session_ids = [
+        sid
+        for (sid,) in (
+            db.query(AssignmentSubmission.session_id)
+            .filter(
+                AssignmentSubmission.assignment_id == assignment_id,
+                AssignmentSubmission.session_id.is_not(None),
+            )
+            .all()
+        )
+        if sid is not None
+    ]
+
+    if linked_session_ids:
+        (
+            db.query(CharacterError)
+            .filter(CharacterError.session_id.in_(linked_session_ids))
+            .delete(synchronize_session=False)
+        )
+        (
+            db.query(DialogueTurn)
+            .filter(DialogueTurn.learning_session_id.in_(linked_session_ids))
+            .delete(synchronize_session=False)
+        )
+
+        linked_sessions = (
+            db.query(LearningSession)
+            .filter(LearningSession.id.in_(linked_session_ids))
+            .all()
+        )
+        for linked_session in linked_sessions:
+            raw_meta = None
+            if isinstance(linked_session.step_progress, dict):
+                raw_meta = linked_session.step_progress.get("__meta")
+            meta = raw_meta if isinstance(raw_meta, dict) else {}
+            meta.update(
+                {
+                    "source": "assignment",
+                    "assignment_id": assignment_id,
+                    "assignment_deleted": True,
+                    "records_cleared": True,
+                    "cleared_at": datetime.now(tz=timezone.utc).isoformat(),
+                }
+            )
+
+            # Clear all learning artifacts for this assignment session.
+            linked_session.current_step = 1
+            linked_session.accuracy = None
+            linked_session.overall_score = None
+            linked_session.reading_result = None
+            linked_session.comprehension_result = None
+            linked_session.vocab_result = None
+            linked_session.full_reading_result = None
+            linked_session.dialogue_state = None
+            linked_session.ai_analysis = None
+            linked_session.comprehension_score = None
+            linked_session.literal_score = None
+            linked_session.inferential_score = None
+            linked_session.evaluative_score = None
+            linked_session.comprehension_feedback = None
+            linked_session.completed_at = None
+
+            linked_session.step_progress = {
+                "current_step": None,
+                "steps_completed": [],
+                "step_data": {},
+                "__meta": meta,
+            }
+            linked_session.status = "abandoned"
+
     db.delete(assignment)
     db.commit()
 
     logger.info(
-        "Teacher %d deleted assignment %d (classroom=%d)",
-        current_user.id, assignment_id, assignment.classroom_id,
+        "Teacher %d deleted assignment %d (classroom=%d, linked_sessions_marked=%d)",
+        current_user.id, assignment_id, assignment.classroom_id, len(linked_session_ids),
     )
     # FastAPI returns empty 204 response automatically when status_code=204
 
@@ -736,6 +806,12 @@ def start_assignment(
         classroom_id=assignment.classroom_id,
         status="in_progress",
         current_step=1,
+        step_progress={
+            "__meta": {
+                "source": "assignment",
+                "assignment_id": assignment.id,
+            }
+        },
     )
     db.add(learning_session)
     db.flush()  # get learning_session.id

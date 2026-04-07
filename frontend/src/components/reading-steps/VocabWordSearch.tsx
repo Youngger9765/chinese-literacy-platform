@@ -20,6 +20,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story } from '../../types';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -244,7 +245,7 @@ function getCellsBetween(start: CellPos, end: CellPos): CellPos[] {
 // ---------------------------------------------------------------------------
 
 export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProps) {
-  const storageKey = `wordSearch_progress_${story.id}`;
+  const storageKey = scopedStepStorageKey('wordSearch_progress_', story.id);
   const loadSaved = () => {
     try {
       const raw = localStorage.getItem(storageKey);

@@ -25,6 +25,7 @@ class SessionSummaryResponse(BaseModel):
     id: int
     story_slug: str | None
     story_title: str | None = None  # human-readable title, e.g. "第六課 牛頓的故事"
+    learning_source: str | None = None  # "self" | "assignment"
     status: str
     current_step: int
     accuracy: float | None

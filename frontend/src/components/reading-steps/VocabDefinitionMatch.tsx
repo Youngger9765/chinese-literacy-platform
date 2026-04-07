@@ -20,6 +20,7 @@ import React, {
   useMemo,
 } from 'react';
 import { Story, VocabItem } from '../../types';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -743,7 +744,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   initialProgress,
   onProgressChange,
 }) => {
-  const progressStorageKey = `vocabDef_progress_${story.id}`;
+  const progressStorageKey = scopedStepStorageKey('vocabDef_progress_', story.id);
   const vocab: VocabItem[] = story.vocabulary ?? [];
   const hasData = vocab.length > 0;
   const allIndices = useMemo(() => vocab.map((_, i) => i), [vocab]);

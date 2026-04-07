@@ -22,6 +22,7 @@ import { useIdleTimer } from '../hooks/useIdleTimer';
 import { useProgressSync } from '../hooks/useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
+import { scopedStepStorageKey } from '../services/learningStorageScope';
 
 /** Idle time before showing warning modal (15 minutes). */
 const IDLE_WARNING_TIMEOUT_MS = 15 * 60 * 1000;
@@ -124,12 +125,59 @@ const STEP_NUMBER_TO_PATH: Record<number, string> = Object.fromEntries(
  */
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
+const LEGACY_DB_SESSION_KEY_PREFIX = 'db-session-';
+const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
+const SELF_DB_SESSION_KEY_PREFIX = 'self-db-session-';
+const SELF_PRACTICE_COMPLETED_KEY_PREFIX = 'self-practice-completed-';
 
 const LearningLayout: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
   const navigate = useNavigate();
   const learningNav = useLearningNav();
   const { user, token } = useAuth();
+
+  const isAssignmentFlow = useMemo(() => {
+    if (!storyId) return false;
+    try {
+      const assignmentId = sessionStorage.getItem('activeAssignmentId');
+      if (!assignmentId) return false;
+      const contextRaw = sessionStorage.getItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
+      if (!contextRaw) return true;
+      const context = JSON.parse(contextRaw) as { storyKey?: string | null; userId?: string | null };
+      const storyMatch = String(context.storyKey ?? '') === String(storyId);
+      const userMatch = !context.userId || !user || String(context.userId) === String(user.id);
+      return storyMatch && userMatch;
+    } catch {
+      return false;
+    }
+  }, [storyId, user]);
+
+  const activeDbSessionStorageKey = useMemo(() => {
+    if (!storyId) return null;
+    if (isAssignmentFlow) {
+      const assignmentId = sessionStorage.getItem('activeAssignmentId');
+      if (assignmentId) {
+        return `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${assignmentId}-${storyId}`;
+      }
+      return `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${storyId}`;
+    }
+    return `${SELF_DB_SESSION_KEY_PREFIX}${storyId}`;
+  }, [isAssignmentFlow, storyId]);
+
+  const tutorCompletedStorageKey = useMemo(() => {
+    if (!storyId) return null;
+    return scopedStepStorageKey('tutor_completed_', storyId);
+  }, [storyId, isAssignmentFlow]);
+
+  const liveTutorProgressStorageKey = useMemo(() => {
+    if (!storyId) return null;
+    return scopedStepStorageKey('liveTutor_progress_', storyId);
+  }, [storyId, isAssignmentFlow]);
+
+  const legacyDbSessionStorageKey = useMemo(() => {
+    if (!storyId) return null;
+    return `${LEGACY_DB_SESSION_KEY_PREFIX}${storyId}`;
+  }, [storyId]);
 
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [session, setSession] = useState<LearningSession | null>(null);
@@ -139,14 +187,7 @@ const LearningLayout: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   /** DB LearningSession integer ID — created when the user starts the intro (Issue #242).
    * Persisted to sessionStorage so refresh within the same browser tab restores the session. */
-  const [dbSessionId, setDbSessionId] = useState<number | null>(() => {
-    try {
-      const raw = sessionStorage.getItem(`db-session-${storyId}`);
-      return raw ? parseInt(raw, 10) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [dbSessionId, setDbSessionId] = useState<number | null>(null);
   /** Progressive paragraph unlock tracking (Issue #85).
    * Restored from localStorage on mount so progress survives page refresh (Issue #689).
    *
@@ -155,8 +196,10 @@ const LearningLayout: React.FC = () => {
    * the same story before LiveTutor clears its own cache, FullReading still sees all
    * paragraphs as done. */
   const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(() => {
+    const scopedTutorKey = storyId ? scopedStepStorageKey('tutor_completed_', storyId) : null;
+    const scopedLiveTutorKey = storyId ? scopedStepStorageKey('liveTutor_progress_', storyId) : null;
     try {
-      const raw = localStorage.getItem(`tutor_completed_${storyId}`);
+      const raw = scopedTutorKey ? localStorage.getItem(scopedTutorKey) : null;
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && (parsed as number[]).length > 0) {
@@ -170,7 +213,7 @@ const LearningLayout: React.FC = () => {
     // If the user refreshed the page or started a new session for the same story
     // before LiveTutor cleared its own cache, read completed paragraphs from there.
     try {
-      const liveTutorRaw = localStorage.getItem(`liveTutor_progress_${storyId}`);
+      const liveTutorRaw = scopedLiveTutorKey ? localStorage.getItem(scopedLiveTutorKey) : null;
       if (liveTutorRaw) {
         const liveTutorParsed = JSON.parse(liveTutorRaw) as {
           completedParagraphs?: unknown;
@@ -222,11 +265,42 @@ const LearningLayout: React.FC = () => {
   const firstIncompleteStepPath = missingAssignmentSteps[0]?.id ?? 'reading-annotation';
   const hasActiveAssignment = useMemo(() => {
     try {
-      return Boolean(sessionStorage.getItem('activeAssignmentId'));
+      return isAssignmentFlow;
     } catch {
       return false;
     }
-  }, [storyId]);
+  }, [isAssignmentFlow]);
+
+  useEffect(() => {
+    if (!storyId || !activeDbSessionStorageKey) {
+      setDbSessionId(null);
+      return;
+    }
+
+    try {
+      const directRaw = sessionStorage.getItem(activeDbSessionStorageKey);
+      const legacyRaw = legacyDbSessionStorageKey
+        ? sessionStorage.getItem(legacyDbSessionStorageKey)
+        : null;
+      const chosenRaw = directRaw ?? legacyRaw;
+      if (!chosenRaw) {
+        setDbSessionId(null);
+        return;
+      }
+      const parsed = parseInt(chosenRaw, 10);
+      if (Number.isNaN(parsed)) {
+        setDbSessionId(null);
+        return;
+      }
+      setDbSessionId(parsed);
+      // Migrate legacy key value to split key for future reads.
+      if (!directRaw && legacyRaw) {
+        sessionStorage.setItem(activeDbSessionStorageKey, String(parsed));
+      }
+    } catch {
+      setDbSessionId(null);
+    }
+  }, [storyId, activeDbSessionStorageKey, legacyDbSessionStorageKey]);
 
   // ── Step progress DB sync (Issue #660) ──────────────────────────────────
   const { syncProgress, flushProgress } = useProgressSync({
@@ -388,10 +462,26 @@ const LearningLayout: React.FC = () => {
   const clearPersistedSession = useCallback(() => {
     if (!user) return;
     clearActiveSession(String(user.id));
-    try { sessionStorage.removeItem(`db-session-${storyId}`); } catch { /* non-fatal */ }
-    try { localStorage.removeItem(`tutor_completed_${storyId}`); } catch { /* non-fatal */ }
-    try { localStorage.removeItem(`liveTutor_progress_${storyId}`); } catch { /* non-fatal */ }
-  }, [user, storyId]);
+    if (activeDbSessionStorageKey) {
+      try { sessionStorage.removeItem(activeDbSessionStorageKey); } catch { /* non-fatal */ }
+    }
+    if (legacyDbSessionStorageKey) {
+      try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
+    }
+    if (tutorCompletedStorageKey) {
+      try { localStorage.removeItem(tutorCompletedStorageKey); } catch { /* non-fatal */ }
+    }
+    if (liveTutorProgressStorageKey) {
+      try { localStorage.removeItem(liveTutorProgressStorageKey); } catch { /* non-fatal */ }
+    }
+  }, [
+    user,
+    storyId,
+    activeDbSessionStorageKey,
+    legacyDbSessionStorageKey,
+    tutorCompletedStorageKey,
+    liveTutorProgressStorageKey,
+  ]);
 
   // ── Idle-timeout warning (Issue #408) ────────────────────────────────────
 
@@ -508,13 +598,18 @@ const LearningLayout: React.FC = () => {
       .then((data) => {
         if (data?.id) {
           setDbSessionId(data.id);
-          try { sessionStorage.setItem(`db-session-${storyId}`, String(data.id)); } catch { /* non-fatal */ }
+          if (activeDbSessionStorageKey) {
+            try { sessionStorage.setItem(activeDbSessionStorageKey, String(data.id)); } catch { /* non-fatal */ }
+          }
+          if (legacyDbSessionStorageKey) {
+            try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
+          }
         }
       })
       .catch(() => {
         // Non-fatal: local progress still works without DB.
       });
-  }, [token, storyId, dbSessionId, isLoading]);
+  }, [token, storyId, dbSessionId, isLoading, activeDbSessionStorageKey, legacyDbSessionStorageKey]);
 
   const handleStartReading = useCallback(() => {
     setSession((prev) => {
@@ -549,7 +644,12 @@ const LearningLayout: React.FC = () => {
         .then((data) => {
           if (data?.id) {
             setDbSessionId(data.id);
-            try { sessionStorage.setItem(`db-session-${storyId}`, String(data.id)); } catch { /* non-fatal */ }
+            if (activeDbSessionStorageKey) {
+              try { sessionStorage.setItem(activeDbSessionStorageKey, String(data.id)); } catch { /* non-fatal */ }
+            }
+            if (legacyDbSessionStorageKey) {
+              try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
+            }
           }
         })
         .catch(() => {
@@ -558,7 +658,16 @@ const LearningLayout: React.FC = () => {
     }
 
     navigate(`/learn/${storyId}/reading-annotation`);
-  }, [storyId, selectedStory, navigate, persistStep, token, dbSessionId]);
+  }, [
+    storyId,
+    selectedStory,
+    navigate,
+    persistStep,
+    token,
+    dbSessionId,
+    activeDbSessionStorageKey,
+    legacyDbSessionStorageKey,
+  ]);
 
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
@@ -785,6 +894,14 @@ const LearningLayout: React.FC = () => {
       return;
     }
 
+    if (!hasActiveAssignment && storyId) {
+      try {
+        localStorage.setItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${storyId}`, '1');
+      } catch {
+        // non-fatal
+      }
+    }
+
     clearPersistedSession();
 
     sessionStorage.removeItem('activeAssignmentId');
@@ -803,6 +920,7 @@ const LearningLayout: React.FC = () => {
     user,
     storyId,
     isAssignmentReadyForSubmit,
+    hasActiveAssignment,
   ]);
 
   /** Mark a paragraph as completed in both local state and session (Issue #85).
@@ -813,10 +931,12 @@ const LearningLayout: React.FC = () => {
       const updated = new Set(prev);
       updated.add(paragraphIndex);
       // Persist to localStorage (L1 cache) — key per story so different stories don't collide
-      try {
-        localStorage.setItem(`tutor_completed_${storyId}`, JSON.stringify(Array.from(updated)));
-      } catch {
-        // Non-fatal — in-memory state still updated
+      if (tutorCompletedStorageKey) {
+        try {
+          localStorage.setItem(tutorCompletedStorageKey, JSON.stringify(Array.from(updated)));
+        } catch {
+          // Non-fatal — in-memory state still updated
+        }
       }
       return updated;
     });
@@ -827,7 +947,7 @@ const LearningLayout: React.FC = () => {
       existing.add(paragraphIndex);
       return { ...prev, completedParagraphs: Array.from(existing) };
     });
-  }, [storyId]);
+  }, [storyId, tutorCompletedStorageKey]);
 
   if (isLoading) {
     return (

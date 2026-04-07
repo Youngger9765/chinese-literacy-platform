@@ -14,12 +14,18 @@ import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-
 import { lazy } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasRole } from '../../services/authApi';
+import { clearActiveSession } from '../../services/api';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { PARENT_PORTAL_ENABLED } from '../../config/featureFlags';
 import StoryLibrary from '../student/StoryLibrary';
 import WriteCharacter from '../../components/stroke-order/WriteCharacter';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
 import { Story } from '../../types';
+
+const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
+const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
+const SELF_DB_SESSION_KEY_PREFIX = 'self-db-session-';
+const SELF_PRACTICE_COMPLETED_KEY_PREFIX = 'self-practice-completed-';
 
 // Lazy-loaded — only needed when route is active
 const ClassroomDetail = lazy(() => import('../teacher/ClassroomDetail'));
@@ -49,12 +55,69 @@ export const HomePage: React.FC = () => {
 /** Library page — clean story browsing with session resume prompt. */
 export const LibraryPage: React.FC = () => {
   const navigate = useNavigate();
+  const { token, user } = useAuth();
   const [searchParams] = useSearchParams();
   const classroomId = searchParams.get('classroom');
   const classroomIdNum = classroomId ? parseInt(classroomId, 10) : null;
   const [showResumePrompt, setShowResumePrompt] = useState(true);
 
-  const handleSelectStory = (story: Story) => {
+  const clearAssignmentContext = (storyId: string) => {
+    try {
+      const raw = sessionStorage.getItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { storyKey?: string | null };
+        if (String(parsed.storyKey ?? '') === String(storyId)) {
+          const keysToRemove: string[] = [];
+          for (let i = 0; i < sessionStorage.length; i += 1) {
+            const key = sessionStorage.key(i);
+            if (!key) continue;
+            if (!key.startsWith(ASSIGNMENT_DB_SESSION_KEY_PREFIX)) continue;
+            if (key === `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${storyId}` || key.endsWith(`-${storyId}`)) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+          sessionStorage.removeItem(`db-session-${storyId}`);
+        }
+      }
+    } catch {
+      // non-fatal
+    }
+
+    try { sessionStorage.removeItem('activeAssignmentId'); } catch { /* non-fatal */ }
+    try { sessionStorage.removeItem('activeAssignmentGoals'); } catch { /* non-fatal */ }
+    try { sessionStorage.removeItem(ACTIVE_ASSIGNMENT_CONTEXT_KEY); } catch { /* non-fatal */ }
+  };
+
+  const clearSelfPracticeProgress = (storyId: string) => {
+    try { sessionStorage.removeItem(`${SELF_DB_SESSION_KEY_PREFIX}${storyId}`); } catch { /* non-fatal */ }
+    try { sessionStorage.removeItem(`db-session-${storyId}`); } catch { /* non-fatal */ }
+    try { localStorage.removeItem(`tutor_completed_${storyId}`); } catch { /* non-fatal */ }
+    try { localStorage.removeItem(`liveTutor_progress_${storyId}`); } catch { /* non-fatal */ }
+    try { localStorage.removeItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${storyId}`); } catch { /* non-fatal */ }
+    if (user) {
+      clearActiveSession(String(user.id));
+    }
+  };
+
+  const handleSelectStory = async (story: Story) => {
+    clearAssignmentContext(story.id);
+
+    let isCompletedBefore = false;
+    try {
+      isCompletedBefore = localStorage.getItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${story.id}`) === '1';
+    } catch {
+      isCompletedBefore = false;
+    }
+
+    if (isCompletedBefore) {
+      const shouldRestart = window.confirm('你已完成過這篇課文，要重新練習嗎？');
+      if (!shouldRestart) {
+        return;
+      }
+      clearSelfPracticeProgress(story.id);
+    }
+
     navigate(`/learn/${story.id}/intro`);
   };
 

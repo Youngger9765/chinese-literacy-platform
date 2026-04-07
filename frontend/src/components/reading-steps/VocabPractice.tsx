@@ -10,6 +10,7 @@ import RadicalDecomposition from './RadicalDecomposition';
 import { getDecomposition, initGeneratedDecompositions, initRadicalMeanings } from '../../data/radicals';
 import DictionaryPanel from '../dictionary/DictionaryPanel';
 import FillInBlankExercise from './FillInBlankExercise';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
 interface VocabPracticeProps {
   story: Story;
@@ -148,7 +149,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   useEffect(() => {
     Promise.all([initGeneratedDecompositions(), initRadicalMeanings()]).then(() => setDecompReady(true));
   }, []);
-  const storageKey = `vocabPractice_progress_${story.id}`;
+  const storageKey = scopedStepStorageKey('vocabPractice_progress_', story.id);
   const loadSaved = () => {
     try {
       const raw = localStorage.getItem(storageKey);

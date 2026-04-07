@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models.user import User
-from ..models.school import ClassroomStudent, ClassroomText
 from ..auth.dependencies import get_optional_user, get_current_user
 from ..auth.rate_limiter import ai_rate_limiter, get_client_key
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
@@ -51,31 +50,14 @@ def list_stories(
 ):
     """List published platform stories with optional filters.
 
-    If the authenticated user is enrolled in classroom(s), only stories
-    assigned to those classrooms are returned. Anonymous users and users
-    without classroom enrollment see all stories (backward compatible).
-    """
-    all_results = search_lessons(grade=grade, genre=genre, category=category, search=search)
+    Returns all published platform stories with optional filters.
 
-    # Filter to classroom-assigned stories when the user is enrolled
-    results = all_results
-    if user is not None:
-        enrollments = (
-            db.query(ClassroomStudent.classroom_id)
-            .filter(ClassroomStudent.student_id == user.id)
-            .all()
-        )
-        if enrollments:
-            classroom_ids = [e.classroom_id for e in enrollments]
-            assigned_text_ids = (
-                db.query(ClassroomText.text_id)
-                .filter(ClassroomText.classroom_id.in_(classroom_ids))
-                .distinct()
-                .all()
-            )
-            # text_id is stored as String; compare against integer lesson_number
-            assigned_ids = {int(t.text_id) for t in assigned_text_ids}
-            results = [s for s in all_results if s["lesson_number"] in assigned_ids]
+    Note: classroom-specific filtering is handled by
+    GET /api/classrooms/{id}/texts and the frontend classroom library mode.
+    """
+    _ = user  # optional auth retained for future personalization hooks
+    _ = db
+    results = search_lessons(grade=grade, genre=genre, category=category, search=search)
 
     total = len(results)
     start = (page - 1) * page_size
