@@ -13,6 +13,7 @@ from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min, ai_rat
 from ...database import get_db
 from ...models.user import User
 from ...services.ai_service import generate_example_sentences, validate_student_sentence
+from ...services.lesson_loader import get_lesson_by_title
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.example_sentence_cache import get_cached, set_cached
 from ...services.input_sanitizer import sanitize_ai_input
@@ -173,12 +174,51 @@ async def validate_sentence(
             suggestion=f"請記得在句子中使用「{payload.character}」這個字。",
         )
 
+    # Copy-paste detection: reject sentences lifted from the passage (#928)
+    import re
+
+    passage_sentences: list[str] = []
+    lesson = get_lesson_by_title(payload.story_title)
+    if lesson is None:
+        logger.warning("copy_detect: lesson not found for title=%r, skipping", payload.story_title)
+    if lesson:
+        full_text = lesson.get("full_text") or ""
+        paragraphs = lesson.get("paragraphs") or []
+
+        # Normalize: strip trailing punctuation for comparison
+        normalized = safe_sentence.strip().rstrip("。！？，、；：「」『』")
+
+        # Check: sentence is a substring of the passage (exact copy)
+        if normalized and len(normalized) >= 4 and normalized in full_text:
+            return ValidateSentenceResponse(
+                is_correct=False,
+                feedback="這個句子好像是從課文或例句中複製的喔！請試著用自己的話造一個新句子。",
+                suggestion=f"試著用「{payload.character}」描述你自己的生活經驗或想像一個新的情境。",
+            )
+
+        # Check: sentence matches a paragraph substring
+        for para in paragraphs:
+            if normalized and len(normalized) >= 4 and normalized in para:
+                return ValidateSentenceResponse(
+                    is_correct=False,
+                    feedback="這個句子和課文或例句內容太相似了，請用自己的話重新造句。",
+                    suggestion=f"嘗試用「{payload.character}」造一個和課文、例句不同情境的句子。",
+                )
+
+        # Extract passage sentences containing the target char for AI cross-reference
+        raw_sentences = re.split(r"[。！？]", full_text)
+        passage_sentences = [
+            s.strip() for s in raw_sentences
+            if payload.character in s and s.strip()
+        ][:5]
+
     start_time = time.monotonic()
     try:
         result = await validate_student_sentence(
             character=payload.character,
             student_sentence=safe_sentence,
             story_title=safe_story_title,
+            passage_sentences=passage_sentences,
         )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
