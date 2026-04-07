@@ -100,6 +100,7 @@ def get_student_story_slugs(
         )
         .distinct()
         .order_by(LearningSession.story_slug)
+        .limit(5000)
         .all()
     )
     slugs = []
@@ -122,6 +123,8 @@ def get_student_story_slugs(
 def get_error_patterns(
     student_id: int,
     story_slug: str | None = Query(None, description="Filter errors by story slug"),
+    limit: int = Query(50, ge=1, le=200, description="Max patterns to return"),
+    offset: int = Query(0, ge=0, description="Number of patterns to skip"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -155,6 +158,7 @@ def get_error_patterns(
         .group_by(CharacterError.character)
         .having(sa_func.count(CharacterError.id) >= min_errors)
         .order_by(sa_func.count(CharacterError.id).desc())
+        .limit(5000)
         .all()
     )
 
@@ -165,15 +169,16 @@ def get_error_patterns(
             ErrorCorrection.student_id == student_id,
             ErrorCorrection.correction_type == "mastered",
         )
+        .limit(5000)
         .all()
     )
     for row in mastered_rows:
         mastered_chars.add(row.character)
 
-    patterns = []
+    all_patterns = []
     for row in error_groups:
         is_corrected = row.character in mastered_chars
-        patterns.append(ErrorPatternItem(
+        all_patterns.append(ErrorPatternItem(
             character=row.character,
             total_error_count=row.total_error_count,
             sessions_with_error=row.sessions_with_error,
@@ -182,12 +187,15 @@ def get_error_patterns(
             is_corrected=is_corrected,
         ))
 
-    return ErrorPatternsResponse(patterns=patterns, total=len(patterns))
+    total = len(all_patterns)
+    patterns = all_patterns[offset:offset + limit]
+    return ErrorPatternsResponse(patterns=patterns, total=total)
 
 
 @router.get("/learning/students/{student_id}/recommended-vocab", response_model=RecommendedVocabResponse)
 def get_recommended_vocab(
     student_id: int,
+    limit: int = Query(10, ge=1, le=50, description="Max vocab items to return"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -207,6 +215,7 @@ def get_recommended_vocab(
             ErrorCorrection.student_id == student_id,
             ErrorCorrection.correction_type == "mastered",
         )
+        .limit(5000)
         .all()
     )
     for row in mastered_rows:
@@ -224,6 +233,7 @@ def get_recommended_vocab(
         )
         .group_by(CharacterError.character)
         .order_by(sa_func.count(CharacterError.id).desc())
+        .limit(5000)
         .all()
     )
 
@@ -231,7 +241,7 @@ def get_recommended_vocab(
     for row in error_groups:
         if row.character in mastered_chars:
             continue
-        if len(items) >= 10:
+        if len(items) >= limit:
             break
         items.append(RecommendedVocabItem(
             character=row.character,
@@ -302,6 +312,7 @@ def get_repeated_errors_alert(
             ErrorCorrection.student_id == student_id,
             ErrorCorrection.correction_type == "mastered",
         )
+        .limit(5000)
         .all()
     ):
         mastered_chars.add(row.character)
@@ -316,6 +327,7 @@ def get_repeated_errors_alert(
         .group_by(CharacterError.character)
         .having(sa_func.count(CharacterError.id) >= REPEATED_ERROR_THRESHOLD)
         .order_by(sa_func.count(CharacterError.id).desc())
+        .limit(5000)
         .all()
     )
 

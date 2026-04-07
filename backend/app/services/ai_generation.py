@@ -227,6 +227,7 @@ async def validate_student_sentence(
     word: str,
     student_sentence: str,
     story_title: str,
+    passage_sentences: list[str] | None = None,
 ) -> dict:
     """Validate a student's sentence for a given vocabulary word.
 
@@ -251,6 +252,7 @@ async def validate_student_sentence(
 2. 句子是否語法正確、語意通順
 3. 目標詞語的用法是否恰當
 4. 適合國小高年級～國中程度
+5. 句子必須是學生自己創作的，不能是從課文或例句中抄寫或稍微改寫的
 
 請給予鼓勵性的評語，用繁體中文（zh-TW）回覆。
 - 若造句正確：is_correct=true，給予鼓勵
@@ -258,6 +260,17 @@ async def validate_student_sentence(
 
 注意：只要學生的句子基本語法正確、有使用目標詞語，就算通過。
 不要過度嚴格，給予適度的鼓勵。"""
+
+    if passage_sentences:
+        passage_ref = "\n".join(f"- {s}" for s in passage_sentences[:5])
+        system_prompt += f"""
+
+以下是課文或例句中包含「{safe_char}」的句子片段（供參考比對）：
+{passage_ref}
+
+如果學生的句子與上述片段高度相似（只改了幾個字但意思和結構幾乎一樣），判定 is_correct=false，
+並在 feedback 中提示學生「不要照抄課文或例句」，請用自己的話造句。
+注意：feedback 中不要具體指出是「跟課文裡的某某詞像」，因為來源也可能是例句，請統一說「和課文或例句太相似」。"""
 
     contents = [
         genai_types.Content(

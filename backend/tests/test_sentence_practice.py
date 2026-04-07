@@ -28,6 +28,7 @@ from app.main import app
 from app.database import get_db
 from app.models import Base
 from app.models.user import Role
+from app.auth.rate_limiter import ai_limit_10_per_min, ai_limit_5_per_min
 
 # ---------------------------------------------------------------------------
 # Test database setup
@@ -87,7 +88,12 @@ def client(db_session):
     def override_get_db():
         yield db_session
 
+    async def _no_rate_limit():
+        pass
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[ai_limit_10_per_min] = _no_rate_limit
+    app.dependency_overrides[ai_limit_5_per_min] = _no_rate_limit
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
@@ -430,3 +436,138 @@ class TestValidateSentence:
                 headers={"Authorization": f"Bearer {token}"},
             )
         assert res.status_code == 503
+
+
+# ---------------------------------------------------------------------------
+# Tests: copy-paste detection (#928)
+# ---------------------------------------------------------------------------
+
+_FAKE_LESSON = {
+    "title": "小水滴的旅行",
+    "full_text": "小水滴從天上掉下來，落在一片綠色的葉子上。它順著葉子滑到地面，流進了小溪。小溪帶著它穿過森林，來到了大海。",
+    "paragraphs": [
+        "小水滴從天上掉下來，落在一片綠色的葉子上。",
+        "它順著葉子滑到地面，流進了小溪。",
+        "小溪帶著它穿過森林，來到了大海。",
+    ],
+}
+
+
+class TestCopyPasteDetection:
+    """Tests for Issue #928: reject sentences copied from the passage."""
+
+    def test_validate_rejects_copied_sentence(self, client: TestClient):
+        """Sentence that is a substring of full_text is rejected without calling AI."""
+        token = _create_student_and_login(client)
+        ai_mock = AsyncMock(return_value={"is_correct": True, "feedback": "", "suggestion": ""})
+        with (
+            patch("app.routes.learning.learning_vocab.get_lesson_by_title", return_value=_FAKE_LESSON),
+            patch("app.routes.learning.learning_vocab.validate_student_sentence", new=ai_mock),
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/validate",
+                json={
+                    "character": "水",
+                    "student_sentence": "小水滴從天上掉下來",
+                    "story_title": "小水滴的旅行",
+                },
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            ai_mock.assert_not_called()
+
+        assert res.status_code == 200
+        data = res.json()
+        assert data["is_correct"] is False
+        assert "複製" in data["feedback"] or "相似" in data["feedback"] or "例句" in data["feedback"]
+
+    def test_validate_rejects_paragraph_copy(self, client: TestClient):
+        """Sentence matching a paragraph substring is rejected."""
+        token = _create_student_and_login(client)
+        ai_mock = AsyncMock(return_value={"is_correct": True, "feedback": "", "suggestion": ""})
+        with (
+            patch("app.routes.learning.learning_vocab.get_lesson_by_title", return_value=_FAKE_LESSON),
+            patch("app.routes.learning.learning_vocab.validate_student_sentence", new=ai_mock),
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/validate",
+                json={
+                    "character": "溪",
+                    "student_sentence": "流進了小溪",
+                    "story_title": "小水滴的旅行",
+                },
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            ai_mock.assert_not_called()
+
+        assert res.status_code == 200
+        data = res.json()
+        assert data["is_correct"] is False
+
+    def test_validate_allows_original_sentence(self, client: TestClient):
+        """Original sentence passes the copy check and reaches AI validation."""
+        token = _create_student_and_login(client)
+        ai_mock = AsyncMock(return_value={"is_correct": True, "feedback": "很棒！", "suggestion": ""})
+        with (
+            patch("app.routes.learning.learning_vocab.get_lesson_by_title", return_value=_FAKE_LESSON),
+            patch("app.routes.learning.learning_vocab.validate_student_sentence", new=ai_mock),
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/validate",
+                json={
+                    "character": "水",
+                    "student_sentence": "我每天都會喝水來保持健康。",
+                    "story_title": "小水滴的旅行",
+                },
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            ai_mock.assert_called_once()
+
+        assert res.status_code == 200
+        assert res.json()["is_correct"] is True
+
+    def test_validate_no_lesson_skips_copy_check(self, client: TestClient):
+        """When lesson is not found, copy check is skipped and AI is called normally."""
+        token = _create_student_and_login(client)
+        ai_mock = AsyncMock(return_value={"is_correct": True, "feedback": "好！", "suggestion": ""})
+        with (
+            patch("app.routes.learning.learning_vocab.get_lesson_by_title", return_value=None),
+            patch("app.routes.learning.learning_vocab.validate_student_sentence", new=ai_mock),
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/validate",
+                json={
+                    "character": "水",
+                    "student_sentence": "小水滴從天上掉下來",
+                    "story_title": "不存在的課文",
+                },
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            ai_mock.assert_called_once()
+
+        assert res.status_code == 200
+        assert res.json()["is_correct"] is True
+
+    def test_validate_passage_sentences_passed_to_ai(self, client: TestClient):
+        """passage_sentences kwarg is passed to validate_student_sentence when lesson exists."""
+        token = _create_student_and_login(client)
+        ai_mock = AsyncMock(return_value={"is_correct": True, "feedback": "好！", "suggestion": ""})
+        with (
+            patch("app.routes.learning.learning_vocab.get_lesson_by_title", return_value=_FAKE_LESSON),
+            patch("app.routes.learning.learning_vocab.validate_student_sentence", new=ai_mock),
+        ):
+            res = client.post(
+                "/api/learning/sentence-practice/validate",
+                json={
+                    "character": "水",
+                    "student_sentence": "我喜歡在夏天喝冰水。",
+                    "story_title": "小水滴的旅行",
+                },
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            ai_mock.assert_called_once()
+            call_kwargs = ai_mock.call_args
+            assert "passage_sentences" in call_kwargs.kwargs
+            assert isinstance(call_kwargs.kwargs["passage_sentences"], list)
+            assert len(call_kwargs.kwargs["passage_sentences"]) > 0
+
+        assert res.status_code == 200

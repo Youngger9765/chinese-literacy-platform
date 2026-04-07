@@ -9,6 +9,7 @@ import logging
 from dataclasses import dataclass, field
 
 from google.genai import types as genai_types
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from .ai_service import generate_structured_response
@@ -41,7 +42,16 @@ class SessionState:
 
 
 class SessionStore:
-    """In-memory session store with 30-minute TTL cleanup."""
+    """DB-backed session store with in-memory hot cache and 30-minute TTL cleanup.
+
+    Persistence strategy (Issue #961):
+    - save(state, db, db_session_id): writes serialized SessionState to
+      LearningSession.dialogue_state JSONB column AND the in-memory cache.
+    - get(session_id, db, db_session_id): reads from in-memory cache first
+      (fast path); falls back to DB on cache miss (survives Cloud Run restarts).
+    - save(state) without db: writes to in-memory cache only (backwards compatible).
+    - get(session_id) without db: returns None on cache miss (backwards compatible).
+    """
 
     TTL_SECONDS = 30 * 60
     RATE_LIMIT = 30  # max requests per minute per session
@@ -51,12 +61,124 @@ class SessionStore:
         self._sessions: dict[str, SessionState] = {}
         self._rate_counts: dict[str, list[float]] = {}  # session_id -> [timestamps]
 
-    def get(self, session_id: str) -> SessionState | None:
+    def get(
+        self,
+        session_id: str,
+        db: "Session | None" = None,
+        db_session_id: int | None = None,
+    ) -> SessionState | None:
+        """Return SessionState from in-memory cache, or restore from DB on miss."""
         self._cleanup()
-        return self._sessions.get(session_id)
+        if session_id in self._sessions:
+            return self._sessions[session_id]
 
-    def save(self, state: SessionState) -> None:
+        # Cache miss — attempt DB restore if context provided
+        if db is not None and db_session_id is not None:
+            return self._restore_from_db(session_id, db, db_session_id)
+
+        return None
+
+    def save(
+        self,
+        state: SessionState,
+        db: "Session | None" = None,
+        db_session_id: int | None = None,
+    ) -> None:
+        """Persist SessionState to in-memory cache, and optionally to DB."""
         self._sessions[state.session_id] = state
+
+        if db is not None and db_session_id is not None:
+            self._persist_to_db(state, db, db_session_id)
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _serialize(self, state: SessionState) -> dict:
+        """Convert SessionState dataclass to a JSON-serializable dict."""
+        import dataclasses
+        return dataclasses.asdict(state)
+
+    def _deserialize(self, data: dict) -> SessionState:
+        """Reconstruct SessionState from a dict (e.g., loaded from JSONB)."""
+        return SessionState(
+            session_id=data["session_id"],
+            story_title=data.get("story_title", ""),
+            story_text=data.get("story_text", ""),
+            conversation=data.get("conversation", []),
+            understood_count=data.get("understood_count", 0),
+            total_attempts=data.get("total_attempts", 0),
+            current_phase=data.get("current_phase", "factual"),
+            created_at=data.get("created_at", time.time()),
+            consecutive_errors=data.get("consecutive_errors", 0),
+            mispronounced_words=data.get("mispronounced_words"),
+            accuracy=data.get("accuracy"),
+            cpm=data.get("cpm"),
+            teacher_instructions=data.get("teacher_instructions"),
+            genre=data.get("genre"),
+            reading_strategy=data.get("reading_strategy"),
+        )
+
+    def _persist_to_db(
+        self,
+        state: SessionState,
+        db: "Session",
+        db_session_id: int,
+    ) -> None:
+        """Write serialized state to LearningSession.dialogue_state column."""
+        try:
+            from ..models.session import LearningSession  # noqa: PLC0415
+
+            ls = db.query(LearningSession).filter_by(id=db_session_id).first()
+            if ls is not None:
+                ls.dialogue_state = self._serialize(state)
+                db.commit()
+        except SQLAlchemyError:
+            logger.warning(
+                "Failed to persist dialogue_state to DB for db_session_id=%s",
+                db_session_id,
+                exc_info=True,
+            )
+            try:
+                db.rollback()
+            except SQLAlchemyError:
+                pass
+
+    def _restore_from_db(
+        self,
+        session_id: str,
+        db: "Session",
+        db_session_id: int,
+    ) -> SessionState | None:
+        """Load SessionState from LearningSession.dialogue_state column."""
+        try:
+            from ..models.session import LearningSession  # noqa: PLC0415
+
+            ls = db.query(LearningSession).filter_by(id=db_session_id).first()
+            if ls is None or ls.dialogue_state is None:
+                return None
+
+            data = ls.dialogue_state
+            # Validate that the stored snapshot belongs to this session
+            if data.get("session_id") != session_id:
+                logger.warning(
+                    "dialogue_state session_id mismatch: stored=%s requested=%s",
+                    data.get("session_id"),
+                    session_id,
+                )
+                return None
+
+            state = self._deserialize(data)
+            # Warm the in-memory cache so subsequent calls don't hit DB
+            self._sessions[session_id] = state
+            return state
+        except (SQLAlchemyError, AttributeError, KeyError):
+            logger.warning(
+                "Failed to restore dialogue_state from DB for db_session_id=%s",
+                db_session_id,
+                exc_info=True,
+            )
+            return None
 
     def _cleanup(self) -> None:
         now = time.time()
@@ -272,8 +394,8 @@ class SocraticAgent:
         is_resumed=True means the session was restored from memory or DB (no Gemini call).
         is_resumed=False means a fresh Gemini call was made.
         """
-        # 1. Check in-memory first (fastest path — no DB or Gemini needed)
-        existing_state = _store.get(session_id)
+        # 1. Check in-memory cache first; fall back to dialogue_state DB snapshot (Issue #961)
+        existing_state = _store.get(session_id, db=db, db_session_id=db_session_id)
         if existing_state is not None:
             last_ai_turn = next(
                 (t for t in reversed(existing_state.conversation) if t["role"] == "ai"),
@@ -316,7 +438,7 @@ class SocraticAgent:
                         genre=genre,
                         reading_strategy=reading_strategy,
                     )
-                    _store.save(state)
+                    _store.save(state, db=db, db_session_id=db_session_id)
                     last_ai_turn = next(
                         (t for t in reversed(state.conversation) if t["role"] == "ai"),
                         None,
@@ -331,8 +453,8 @@ class SocraticAgent:
                         phase=state.current_phase,
                         is_complete=state.understood_count >= self.REQUIRED_UNDERSTOOD,
                     ), True
-            except Exception as e:
-                logger.warning("Failed to restore session from DB (will start fresh): %s", e)
+            except (SQLAlchemyError, AttributeError, KeyError) as e:
+                logger.warning("Failed to restore session from DB turns (will start fresh): %s", e)
 
         # 3. Fresh start — only Gemini call that's actually needed
         state = SessionState(
@@ -370,7 +492,7 @@ class SocraticAgent:
 
         state.current_phase = phase
         state.conversation.append({"role": "ai", "text": question})
-        _store.save(state)
+        _store.save(state, db=db, db_session_id=db_session_id)
 
         return AgentResponse(
             question=question,
@@ -448,20 +570,29 @@ class SocraticAgent:
         if session_id in _store._sessions:
             del _store._sessions[session_id]
 
-        # Delete DB turns for this learning session so next mount starts fresh
+        # Delete DB turns and dialogue_state snapshot so next mount starts fresh
         if db is not None and db_session_id is not None:
             try:
-                from ..models.session import DialogueTurn  # noqa: PLC0415
+                from ..models.session import DialogueTurn, LearningSession  # noqa: PLC0415
 
                 db.query(DialogueTurn).filter(
                     DialogueTurn.learning_session_id == db_session_id
                 ).delete(synchronize_session=False)
+
+                ls = db.query(LearningSession).filter_by(id=db_session_id).first()
+                if ls is not None:
+                    ls.dialogue_state = None
+
                 db.commit()
-            except Exception as e:
+            except SQLAlchemyError as e:
                 logger.warning("Failed to delete DB dialogue turns on restart: %s", e)
 
     async def process_answer(
-        self, session_id: str, student_answer: str
+        self,
+        session_id: str,
+        student_answer: str,
+        db: Session | None = None,
+        db_session_id: int | None = None,
     ) -> AgentResponse:
         """Process a student's answer, evaluate understanding, return next question."""
         # Rate limiting check
@@ -480,7 +611,7 @@ class SocraticAgent:
             student_answer, user_id=session_id
         )
 
-        state = _store.get(session_id)
+        state = _store.get(session_id, db=db, db_session_id=db_session_id)
         if state is None:
             raise ValueError(f"Session {session_id} not found or expired")
 
@@ -575,7 +706,7 @@ class SocraticAgent:
                         "session_id": session_id,
                     },
                 )
-                _store.save(state)
+                _store.save(state, db=db, db_session_id=db_session_id)
                 raise RuntimeError("AI 服務暫時無法使用，請稍後再試。") from e
 
             understood = False  # Don't auto-pass on error; re-ask instead
@@ -603,7 +734,7 @@ class SocraticAgent:
         if not is_complete:
             state.conversation.append({"role": "ai", "text": question})
 
-        _store.save(state)
+        _store.save(state, db=db, db_session_id=db_session_id)
 
         return AgentResponse(
             question=question,

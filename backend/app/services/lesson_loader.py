@@ -93,6 +93,7 @@ def _load_lessons() -> list[dict]:
 # Load once at import time
 _ALL_LESSONS: list[dict] = _load_lessons()
 _LESSONS_BY_ID: dict[int, dict] = {l["id"]: l for l in _ALL_LESSONS}
+_LESSONS_BY_TITLE: dict[str, dict] = {l["title"]: l for l in _ALL_LESSONS}
 _AVAILABLE_GRADES: list[int] = sorted({l["grade"] for l in _ALL_LESSONS})
 
 
@@ -106,6 +107,11 @@ def get_lessons_by_grade(grade: int) -> list[dict]:
 
 def get_lesson_by_id(lesson_id: int) -> dict | None:
     return _LESSONS_BY_ID.get(lesson_id)
+
+
+def get_lesson_by_title(title: str) -> dict | None:
+    """Exact match lookup by lesson title. O(1) from pre-built index."""
+    return _LESSONS_BY_TITLE.get(title)
 
 
 def get_available_grades() -> list[int]:
