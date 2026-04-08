@@ -20,6 +20,7 @@ import { calcStarRating } from '../../utils/starRatingCalc';
 import GoalAchievementCard from '../ui/GoalAchievementCard';
 import RepeatedErrorAlertModal from '../student/RepeatedErrorAlertModal';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -172,7 +173,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   useEffect(() => {
     if (!story?.id) return;
     try {
-      localStorage.setItem(`report_viewed_${story.id}`, JSON.stringify({
+      localStorage.setItem(scopedStepStorageKey('report_viewed_', story.id), JSON.stringify({
         viewed: true,
         viewedAt: new Date().toISOString(),
         sessionId: dbSessionId,

@@ -53,11 +53,19 @@ def save_step_progress(
     """
     session = _get_owned_session(session_id, current_user, db)
 
+    existing_meta: dict = {}
+    if isinstance(session.step_progress, dict):
+        raw_meta = session.step_progress.get("__meta")
+        if isinstance(raw_meta, dict):
+            existing_meta = raw_meta
+
     session.step_progress = {
         "current_step": payload.current_step,
         "steps_completed": payload.steps_completed,
         "step_data": payload.step_data,
     }
+    if existing_meta:
+        session.step_progress["__meta"] = existing_meta
     db.commit()
     db.refresh(session)
     logger.info(

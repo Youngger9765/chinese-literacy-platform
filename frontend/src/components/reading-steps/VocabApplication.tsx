@@ -25,6 +25,7 @@ import { Story } from '../../types';
 import FillInBlankExercise from './FillInBlankExercise';
 import type { QuestionResult } from './FillInBlankExercise';
 import type { StepProgressData } from '../../services/learningApi';
+import { getLearningStorageScope, scopedStepStorageKey } from '../../services/learningStorageScope';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -226,11 +227,11 @@ const PHASE_STORAGE_PREFIX = 'vocabApp_progress_';
 const ANSWER_STORAGE_PREFIX = 'vocab_app_progress_';
 
 function phaseStorageKey(storyId: string | number) {
-  return `${PHASE_STORAGE_PREFIX}${storyId}`;
+  return scopedStepStorageKey(PHASE_STORAGE_PREFIX, storyId);
 }
 
 function answerStorageKey(storyId: string | number) {
-  return `${ANSWER_STORAGE_PREFIX}${storyId}`;
+  return scopedStepStorageKey(ANSWER_STORAGE_PREFIX, storyId);
 }
 
 function clearAllStorageForStory(storyId: string | number) {
@@ -413,7 +414,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
             sentences={sentences}
             vocabBank={vocabBank}
             onComplete={handleComplete}
-            storyId={story.id}
+            storyId={getLearningStorageScope(story.id)}
           />
         ) : (
           <CompletionScreen

@@ -27,6 +27,7 @@ import { Skeleton, SkeletonText } from '../../components/ui/Skeleton';
 import LoadingIndicator from '../../components/ui/LoadingIndicator';
 
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
+const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
 
 // ---------------------------------------------------------------------------
 // Assignment status badge
@@ -247,6 +248,12 @@ const StudentClassroomDashboard: React.FC = () => {
       sessionStorage.setItem('activeAssignmentId', String(assignmentId));
       if (result.story_id) {
         sessionStorage.setItem(
+          `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${assignmentId}-${result.story_id}`,
+          String(result.session_id),
+        );
+        sessionStorage.removeItem(`${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${result.story_id}`);
+        sessionStorage.removeItem(`db-session-${result.story_id}`);
+        sessionStorage.setItem(
           ACTIVE_ASSIGNMENT_CONTEXT_KEY,
           JSON.stringify({
             assignmentId,
@@ -257,6 +264,12 @@ const StudentClassroomDashboard: React.FC = () => {
         );
         navigate(`/learn/${result.story_id}/reading-annotation`);
       } else if (result.text_id) {
+        sessionStorage.setItem(
+          `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${assignmentId}-${result.text_id}`,
+          String(result.session_id),
+        );
+        sessionStorage.removeItem(`${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${result.text_id}`);
+        sessionStorage.removeItem(`db-session-${result.text_id}`);
         sessionStorage.setItem(
           ACTIVE_ASSIGNMENT_CONTEXT_KEY,
           JSON.stringify({

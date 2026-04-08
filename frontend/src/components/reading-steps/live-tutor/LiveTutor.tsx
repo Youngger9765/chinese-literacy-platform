@@ -23,6 +23,7 @@ import {
   STREAK_MESSAGES,
 } from '../../../utils/liveTutorPools';
 import { extractPracticeChars } from '../../../utils/liveTutorHelpers';
+import { scopedStepStorageKey } from '../../../services/learningStorageScope';
 import { useResizablePanel } from '../../../hooks/useResizablePanel';
 import { useLiveTutorSpeech } from '../../../hooks/useLiveTutorSpeech';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
@@ -55,12 +56,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   onParagraphComplete,
   initialCompletedParagraphs,
 }) => {
+  const storageKey = scopedStepStorageKey('liveTutor_progress_', story.id);
   const { token } = useAuth();
   const isMobile = useIsMobile();
   const { px: fontSizePx } = useFontSize();
   const [currentLineIndex, setCurrentLineIndex] = useState(() => {
     try {
-      const raw = localStorage.getItem(`liveTutor_progress_${story.id}`);
+      const raw = localStorage.getItem(storageKey);
       if (raw) { const p = JSON.parse(raw); return p.currentLineIndex ?? 0; }
     } catch {}
     return 0;
@@ -72,7 +74,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [streamingUserInput, setStreamingUserInput] = useState('');
 
   // ── localStorage persistence for reading progress ──────────────────────────
-  const storageKey = `liveTutor_progress_${story.id}`;
   const loadSavedProgress = () => {
     try {
       const raw = localStorage.getItem(storageKey);

@@ -119,7 +119,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       for (let i = 0; i < sessionStorage.length; i += 1) {
         const key = sessionStorage.key(i);
         if (!key) continue;
-        if (key.startsWith('db-session-')) keysToRemove.push(key);
+        if (
+          key.startsWith('db-session-')
+          || key.startsWith('assignment-db-session-')
+          || key.startsWith('self-db-session-')
+        ) {
+          keysToRemove.push(key);
+        }
       }
       keysToRemove.forEach((key) => sessionStorage.removeItem(key));
     } catch {

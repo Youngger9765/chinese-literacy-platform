@@ -7,35 +7,18 @@ import {
   StudentAssignmentResponse,
   AssignmentApiError,
 } from '../../services/assignmentApi';
-import { fetchLearningSessions, type LearningSummary } from '../../services/learningApi';
-import { loadActiveSession } from '../../services/api';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
 
-function buildLatestSessionMap(items: LearningSummary[]): Record<string, LearningSummary> {
-  const latestByStory: Record<string, LearningSummary> = {};
-  items.forEach((item) => {
-    if (!item.story_slug) return;
-    const existing = latestByStory[item.story_slug];
-    if (!existing) {
-      latestByStory[item.story_slug] = item;
-      return;
-    }
-    if (new Date(item.started_at).getTime() > new Date(existing.started_at).getTime()) {
-      latestByStory[item.story_slug] = item;
-    }
-  });
-  return latestByStory;
-}
-
-type FilterTab = 'pending' | 'completed' | 'all';
+type FilterTab = 'pending' | 'completed' | 'graded';
 
 const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: 'pending', label: '待完成' },
   { key: 'completed', label: '已完成' },
-  { key: 'all', label: '全部' },
+  { key: 'graded', label: '已批改' },
 ];
 
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
+const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
 
 interface ProgressStep {
   id: string;
@@ -149,7 +132,6 @@ const MyAssignments: React.FC = () => {
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterTab>('pending');
   const [startingId, setStartingId] = useState<number | null>(null);
-  const [sessionByStorySlug, setSessionByStorySlug] = useState<Record<string, LearningSummary>>({});
 
   const assignmentSteps = useMemo(
     () => ACTIVE_STEPS,
@@ -157,27 +139,6 @@ const MyAssignments: React.FC = () => {
   );
   const defaultStepPath = assignmentSteps[0]?.id ?? 'reading-annotation';
   const stepIdSet = useMemo(() => new Set(assignmentSteps.map((s) => s.id)), [assignmentSteps]);
-  const stepNumberToPath = useMemo(
-    () => Object.fromEntries(assignmentSteps.map((s) => [s.dbStepNumber, s.id])),
-    [assignmentSteps],
-  );
-
-  const activeSession = useMemo(
-    () => (user ? loadActiveSession(String(user.id)) : null),
-    [user],
-  );
-
-  const getAssignmentStorySlug = (a: StudentAssignmentResponse): string | null =>
-    a.story_slug ?? null;
-
-  const getAssignmentTextKey = (a: StudentAssignmentResponse): string =>
-    String(a.story_id ?? a.text_id ?? '');
-
-  const getLinkedSession = (a: StudentAssignmentResponse): LearningSummary | null => {
-    const storySlug = getAssignmentStorySlug(a);
-    if (!storySlug) return null;
-    return sessionByStorySlug[storySlug] ?? null;
-  };
 
   const getCompletedSteps = (a: StudentAssignmentResponse): Set<string> => {
     if (a.status === 'submitted' || a.status === 'graded') {
@@ -189,20 +150,8 @@ const MyAssignments: React.FC = () => {
   };
 
   const getResumeStepPath = (a: StudentAssignmentResponse): string => {
-    const textKey = getAssignmentTextKey(a);
-    if (activeSession && activeSession.storyId === textKey) {
-      const activeSessionPath = stepNumberToPath[activeSession.currentStep];
-      if (activeSessionPath) return activeSessionPath;
-    }
-
     if (a.current_step && stepIdSet.has(a.current_step)) {
       return a.current_step;
-    }
-
-    const linkedSession = getLinkedSession(a);
-    if (linkedSession) {
-      const linkedPath = stepNumberToPath[linkedSession.current_step];
-      if (linkedPath) return linkedPath;
     }
 
     return defaultStepPath;
@@ -214,35 +163,7 @@ const MyAssignments: React.FC = () => {
     setError('');
     try {
       const assignmentData = await getMyAssignments(token);
-      const storySlugs = Array.from(
-        new Set(
-          assignmentData
-            .map((a) => a.story_slug)
-            .filter((slug): slug is string => Boolean(slug)),
-        ),
-      );
-
-      const sessionResponses = await Promise.allSettled(
-        storySlugs.map((storySlug) =>
-          fetchLearningSessions(token, {
-            // Fetch only latest session for this assignment story key.
-            limit: 1,
-            status: 'in_progress,completed,abandoned',
-            story_slug: storySlug,
-          }),
-        ),
-      );
-
-      const sessionItems = sessionResponses
-        .filter(
-          (
-            r,
-          ): r is PromiseFulfilledResult<{ items: LearningSummary[]; total: number }> =>
-            r.status === 'fulfilled',
-        )
-        .flatMap((r) => r.value.items);
       setAssignments(assignmentData);
-      setSessionByStorySlug(buildLatestSessionMap(sessionItems));
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -263,9 +184,9 @@ const MyAssignments: React.FC = () => {
       return a.status === 'pending' || a.status === 'in_progress';
     }
     if (activeFilter === 'completed') {
-      return a.status === 'submitted' || a.status === 'graded';
+      return a.status === 'submitted';
     }
-    return true;
+    return a.status === 'graded';
   });
 
   const handleStart = async (assignmentId: number) => {
@@ -302,7 +223,12 @@ const MyAssignments: React.FC = () => {
         // non-fatal
       }
       try {
-        sessionStorage.setItem(`db-session-${textKey}`, String(result.session_id));
+        sessionStorage.setItem(
+          `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${assignmentId}-${textKey}`,
+          String(result.session_id),
+        );
+        sessionStorage.removeItem(`${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${textKey}`);
+        sessionStorage.removeItem(`db-session-${textKey}`);
       } catch {
         // non-fatal
       }
@@ -343,7 +269,7 @@ const MyAssignments: React.FC = () => {
       case 'submitted':
         return (
           <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
-            已提交
+            已完成
           </span>
         );
       case 'graded':
@@ -417,7 +343,12 @@ const MyAssignments: React.FC = () => {
             }
             if (sessionId != null) {
               try {
-                sessionStorage.setItem(`db-session-${textKey}`, String(sessionId));
+                sessionStorage.setItem(
+                  `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${a.assignment_id}-${textKey}`,
+                  String(sessionId),
+                );
+                sessionStorage.removeItem(`${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${textKey}`);
+                sessionStorage.removeItem(`db-session-${textKey}`);
               } catch {
                 // non-fatal
               }
@@ -434,7 +365,53 @@ const MyAssignments: React.FC = () => {
     // submitted or graded
     return (
       <button
-        onClick={() => navigate(`/learn/${a.story_id ?? a.text_id}/report`)}
+        onClick={() => {
+          const textKey = a.story_id ?? a.text_id;
+          if (textKey == null) {
+            return;
+          }
+
+          sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
+          sessionStorage.setItem(
+            'activeAssignmentGoals',
+            JSON.stringify({
+              target_cpm: a.target_cpm,
+              target_accuracy: a.target_accuracy,
+              difficulty_label: a.difficulty_label,
+              effective_cpm: a.effective_cpm,
+              effective_accuracy: a.effective_accuracy,
+            }),
+          );
+
+          try {
+            sessionStorage.setItem(
+              ACTIVE_ASSIGNMENT_CONTEXT_KEY,
+              JSON.stringify({
+                assignmentId: a.assignment_id,
+                userId: user ? String(user.id) : null,
+                storyKey: String(textKey),
+                startedAt: Date.now(),
+              }),
+            );
+          } catch {
+            // non-fatal
+          }
+
+          if (a.session_id != null) {
+            try {
+              sessionStorage.setItem(
+                `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${a.assignment_id}-${textKey}`,
+                String(a.session_id),
+              );
+              sessionStorage.removeItem(`${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${textKey}`);
+              sessionStorage.removeItem(`db-session-${textKey}`);
+            } catch {
+              // non-fatal
+            }
+          }
+
+          navigate(`/learn/${textKey}/report`);
+        }}
         className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
       >
         查看
@@ -509,7 +486,7 @@ const MyAssignments: React.FC = () => {
                 ? '目前沒有待完成的作業'
                 : activeFilter === 'completed'
                   ? '還沒有已完成的作業'
-                  : '目前沒有作業'}
+                  : '還沒有已批改的作業'}
             </p>
             <p className="text-xs text-gray-500">老師指派的作業會顯示在這裡</p>
           </div>
