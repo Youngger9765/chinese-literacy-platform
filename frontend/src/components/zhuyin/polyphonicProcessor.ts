@@ -40,25 +40,50 @@ export class PolyphonicProcessor {
 
   /**
    * Load polyphonic data from the JSON file.
+   * Retries up to MAX_RETRIES times with exponential backoff on network errors.
    * Call this once at app startup.
    */
   async loadPolyphonicData(): Promise<void> {
     if (this._loaded) return;
-    try {
-      const response = await fetch('/data/poyin_db.json');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const raw: Record<string, unknown> = await response.json();
 
-      if (!('data' in raw)) {
-        throw new Error('Polyphonic data is improperly formatted or missing key "data"');
+    const MAX_RETRIES = 3;
+    const BASE_DELAY_MS = 500;
+
+    let lastError: unknown;
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const response = await fetch('/data/poyin_db.json');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const raw: Record<string, unknown> = await response.json();
+
+        if (!('data' in raw)) {
+          throw new Error('Polyphonic data is improperly formatted or missing key "data"');
+        }
+
+        this.polyphonicData = this.removeComments(raw) as unknown as PolyphonicData;
+        this._loaded = true;
+        return;
+      } catch (e) {
+        lastError = e;
+        const isNetworkError = e instanceof TypeError && (e.message === 'Failed to fetch');
+        const isLastAttempt = attempt === MAX_RETRIES - 1;
+
+        if (!isNetworkError || isLastAttempt) {
+          // Non-retryable error (e.g. malformed JSON, HTTP 4xx) or exhausted retries
+          break;
+        }
+
+        const delayMs = BASE_DELAY_MS * 2 ** attempt;
+        console.warn(
+          `Failed to load polyphonic data (attempt ${attempt + 1}/${MAX_RETRIES}), retrying in ${delayMs}ms...`,
+          e,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
-
-      this.polyphonicData = this.removeComments(raw) as unknown as PolyphonicData;
-      this._loaded = true;
-    } catch (e) {
-      console.error('Failed to load polyphonic data:', e);
-      throw e;
     }
+
+    console.error('Failed to load polyphonic data after all retries:', lastError);
+    throw lastError;
   }
 
   /** Recursively strip _comment keys from the data */
