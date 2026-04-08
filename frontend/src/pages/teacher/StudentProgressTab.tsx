@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import {
   LineChart,
   Line,
@@ -824,6 +825,23 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                             <span className="font-medium text-gray-700 text-sm truncate">{sess.story_title ?? '-'}</span>
                             <div className="flex items-center gap-2 shrink-0">
                               {statusLabel(sess.status)}
+                              {sess.teacher_reviewed_at && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-200" title="已查看">
+                                  ✓ 已查看
+                                </span>
+                              )}
+                              <Link
+                                to={`/teacher/students/${s.student_id}/sessions/${sess.id}/report`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors"
+                                title="查看學習報告"
+                              >
+                                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                報告
+                              </Link>
                               <button
                                 type="button"
                                 disabled={loadingDialogueSessionId === sess.id}
@@ -1039,6 +1057,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                                 <th className="pb-1.5 font-medium">日期</th>
                                 <th className="pb-1.5 font-medium text-center">分數</th>
                                 <th className="pb-1.5 font-medium text-center">狀態</th>
+                                <th className="pb-1.5 font-medium text-center">報告</th>
                                 <th className="pb-1.5 font-medium text-center">對話</th>
                               </tr>
                             </thead>
@@ -1049,6 +1068,15 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                                   <td className="py-1.5 text-gray-500">{formatDate(sess.started_at)}</td>
                                   <td className="py-1.5 text-gray-700 text-center font-medium">{formatScore(sess.overall_score)}</td>
                                   <td className="py-1.5 text-center">{statusLabel(sess.status)}</td>
+                                  <td className="py-1.5 text-center">
+                                    <Link
+                                      to={`/teacher/students/${s.student_id}/sessions/${sess.id}/report`}
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-accent border border-accent/30 hover:bg-accent-bg transition-colors"
+                                      title="查看學習報告"
+                                    >
+                                      {sess.teacher_reviewed_at ? '✓ 報告' : '報告'}
+                                    </Link>
+                                  </td>
                                   <td className="py-1.5 text-center">
                                     <button
                                       type="button"

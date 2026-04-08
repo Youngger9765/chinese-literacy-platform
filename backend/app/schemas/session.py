@@ -47,6 +47,9 @@ class SessionDetailResponse(SessionSummaryResponse):
     inferential_score: float | None = None
     evaluative_score: float | None = None
     comprehension_feedback: str | None = None
+    # Teacher review (Issue #993)
+    teacher_reviewed_at: datetime | None = None
+    teacher_comment: str | None = None
 
 
 class SessionListResponse(BaseModel):

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
+from ...models.assignment import Assignment, AssignmentSubmission
 from ...models.school import ClassroomStudent
 from ...models.user import User
 from ...schemas.classroom import (
@@ -60,9 +61,40 @@ def add_student_to_classroom(
         student_id=payload.student_id,
     )
     db.add(cs)
+    db.flush()  # get cs.id without committing yet
+
+    # Backfill submissions for all active assignments in this classroom (#996)
+    active_assignments = (
+        db.query(Assignment)
+        .filter(
+            Assignment.classroom_id == classroom_id,
+            Assignment.is_active == True,
+        )
+        .all()
+    )
+    for assignment in active_assignments:
+        # Skip if submission already exists (defensive guard against double-add)
+        existing_sub = (
+            db.query(AssignmentSubmission)
+            .filter(
+                AssignmentSubmission.assignment_id == assignment.id,
+                AssignmentSubmission.student_id == payload.student_id,
+            )
+            .first()
+        )
+        if existing_sub is None:
+            db.add(AssignmentSubmission(
+                assignment_id=assignment.id,
+                student_id=payload.student_id,
+                status="pending",
+            ))
+
     db.commit()
     db.refresh(cs)
-    logger.info("Added student %d to classroom %d", payload.student_id, classroom_id)
+    logger.info(
+        "Added student %d to classroom %d; backfilled %d submission(s)",
+        payload.student_id, classroom_id, len(active_assignments),
+    )
     return StudentInClassroomResponse(
         id=student.id,
         name=student.name,

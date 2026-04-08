@@ -19,14 +19,18 @@ from ...services.lesson_loader import get_lesson_by_id
 from ...services.stuck_detection_service import build_recommendations, detect_stuck_points
 from .teacher_schemas import (
     AddTagRequest,
+    AICommentResponse,
     ClassroomStuckResponse,
     LearningCurvePoint,
     LearningCurveResponse,
     StudentSessionResponse,
     StudentStuckSummary,
     TagResponse,
+    TeacherCommentRequest,
+    TeacherCommentResponse,
     TeacherDialogueHistoryResponse,
     TeacherDialogueTurnResponse,
+    TeacherSessionReportResponse,
 )
 
 router = APIRouter(tags=["teacher"])
@@ -113,6 +117,7 @@ def get_student_sessions(
                 completed_at=s.completed_at,
                 overall_score=round(s.overall_score, 1) if s.overall_score is not None else None,
                 status=s.status,
+                teacher_reviewed_at=s.teacher_reviewed_at,
             )
         )
 
@@ -432,3 +437,168 @@ def get_classroom_stuck_overview(
         students=summaries,
         total_stuck=len(summaries),
     )
+
+
+# ── Teacher Session Report + Comment (Issue #993) ────────────────────────────
+
+
+def _get_session_for_teacher(
+    teacher_id: int, student_id: int, session_id: int, db: Session
+) -> LearningSession:
+    """Fetch a session after verifying teacher authorization."""
+    _require_teacher_owns_student(teacher_id, student_id, db)
+    session = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.id == session_id,
+            LearningSession.student_id == student_id,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return session
+
+
+@router.get(
+    "/teacher/students/{student_id}/sessions/{session_id}/report",
+    response_model=TeacherSessionReportResponse,
+)
+def get_teacher_session_report(
+    student_id: int,
+    session_id: int,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return full session report data for teacher review. Auto-marks as reviewed."""
+    from datetime import datetime, timezone
+
+    session = _get_session_for_teacher(current_user.id, student_id, session_id, db)
+
+    # Auto-mark as reviewed on first view
+    if session.teacher_reviewed_at is None:
+        session.teacher_reviewed_at = datetime.now(timezone.utc)
+        db.commit()
+        db.refresh(session)
+
+    audit_log_endpoint(
+        request=request,
+        action=AuditAction.VIEW_STUDENT,
+        user_id=current_user.id,
+        target_student_id=student_id,
+    )
+
+    # Resolve story title
+    story_title = None
+    if session.story_slug:
+        try:
+            story = get_lesson_by_id(int(session.story_slug))
+            if story:
+                story_title = story["title"]
+        except (ValueError, TypeError):
+            story_title = session.story_slug
+
+    # Resolve student name
+    student = db.query(User).filter(User.id == student_id).first()
+    student_name = student.name if student else "未知"
+
+    return TeacherSessionReportResponse(
+        id=session.id,
+        student_id=session.student_id,
+        student_name=student_name,
+        story_slug=session.story_slug,
+        story_title=story_title,
+        status=session.status,
+        accuracy=session.accuracy,
+        overall_score=session.overall_score,
+        reading_result=session.reading_result,
+        comprehension_result=session.comprehension_result,
+        vocab_result=session.vocab_result,
+        full_reading_result=session.full_reading_result,
+        comprehension_score=session.comprehension_score,
+        literal_score=session.literal_score,
+        inferential_score=session.inferential_score,
+        evaluative_score=session.evaluative_score,
+        comprehension_feedback=session.comprehension_feedback,
+        ai_comment=session.ai_comment,
+        teacher_comment=session.teacher_comment,
+        teacher_reviewed_at=session.teacher_reviewed_at,
+        started_at=session.started_at,
+        completed_at=session.completed_at,
+    )
+
+
+@router.post(
+    "/teacher/students/{student_id}/sessions/{session_id}/comment",
+    response_model=TeacherCommentResponse,
+)
+def save_teacher_comment(
+    student_id: int,
+    session_id: int,
+    body: TeacherCommentRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Save or update teacher comment on a learning session."""
+    from datetime import datetime, timezone
+
+    session = _get_session_for_teacher(current_user.id, student_id, session_id, db)
+    session.teacher_comment = body.comment
+    if session.teacher_reviewed_at is None:
+        session.teacher_reviewed_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(session)
+    return TeacherCommentResponse(
+        teacher_comment=session.teacher_comment,
+        teacher_reviewed_at=session.teacher_reviewed_at,
+    )
+
+
+@router.post(
+    "/teacher/students/{student_id}/sessions/{session_id}/generate-ai-comment",
+    response_model=AICommentResponse,
+)
+async def generate_session_ai_comment(
+    student_id: int,
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Generate AI comment for a session. Returns cached version if already generated."""
+    from ...services.ai_generation import generate_teacher_comment
+
+    session = _get_session_for_teacher(current_user.id, student_id, session_id, db)
+
+    # Return cached if exists
+    if session.ai_comment:
+        return AICommentResponse(ai_comment=session.ai_comment)
+
+    # Gather data for AI
+    story_title = ""
+    if session.story_slug:
+        try:
+            story = get_lesson_by_id(int(session.story_slug))
+            if story:
+                story_title = story["title"]
+        except (ValueError, TypeError):
+            story_title = session.story_slug or ""
+
+    error_chars = []
+    for ce in session.character_errors:
+        error_chars.append(ce.character)
+
+    comment = await generate_teacher_comment(
+        story_title=story_title,
+        accuracy=session.accuracy,
+        cpm=session.reading_result.get("cpm") if session.reading_result else None,
+        error_chars=error_chars or None,
+        comprehension_score=session.comprehension_score,
+    )
+
+    if comment:
+        session.ai_comment = comment
+        db.commit()
+        db.refresh(session)
+
+    return AICommentResponse(ai_comment=session.ai_comment or "")

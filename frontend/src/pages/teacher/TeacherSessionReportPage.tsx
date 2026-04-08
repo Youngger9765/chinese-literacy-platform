@@ -1,13 +1,11 @@
 /**
- * SessionHistoryReportPage — shows AssessmentReport for a historical session.
+ * TeacherSessionReportPage — teacher view of a student's learning session report.
  *
- * Unlike ReportPage (which reads live session data from LearningContext),
- * this page fetches the persisted session data from
- * GET /api/learning/sessions/:sessionId/report and reconstructs a
- * LearningSession-shaped object so that AssessmentReport can render it.
+ * Reuses AssessmentReport (read-only) and adds TeacherCommentSection for
+ * AI-generated + teacher-editable feedback.
  *
- * Route: /sessions/:sessionId/report
- * Issue #580
+ * Route: /teacher/students/:studentId/sessions/:sessionId/report
+ * Issue #993
  */
 
 import React, { useEffect, useState } from 'react';
@@ -15,10 +13,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchStory } from '../../services/api';
 import {
-  fetchSessionReport,
-  type SessionDetailResponse,
-  type ComprehensionScoreResult,
-} from '../../services/learningApi';
+  fetchTeacherSessionReport,
+  type TeacherSessionReport,
+} from '../../services/teacherApi';
 import type {
   LearningSession,
   ReadingAttempt,
@@ -28,11 +25,14 @@ import type {
   DiffToken,
   Story,
 } from '../../types';
+import type { ComprehensionScoreResult } from '../../services/learningApi';
 import AssessmentReport from '../../components/reading-steps/AssessmentReport';
+import TeacherCommentSection from '../../components/teacher/TeacherCommentSection';
 import PageLoader from '../../components/ui/PageLoader';
 
 // ---------------------------------------------------------------------------
 // Helpers — map raw backend dicts to frontend types
+// (Same as SessionHistoryReportPage — shared mapping logic)
 // ---------------------------------------------------------------------------
 
 function toReadingAttempt(raw: Record<string, unknown> | null, storyId: string): ReadingAttempt | null {
@@ -47,7 +47,6 @@ function toReadingAttempt(raw: Record<string, unknown> | null, storyId: string):
       : [],
     transcription: typeof raw.transcription === 'string' ? raw.transcription : '',
     timestamp: typeof raw.timestamp === 'number' ? raw.timestamp : Date.now(),
-    // diff_tokens stored as-is — AssessmentReport uses DiffDisplay internally
     lineBreakdown: undefined,
   };
 }
@@ -55,19 +54,15 @@ function toReadingAttempt(raw: Record<string, unknown> | null, storyId: string):
 function toComprehensionResult(raw: Record<string, unknown> | null): ComprehensionResult | null {
   if (!raw) return null;
   return {
-    understoodCount:
-      typeof raw.understood_count === 'number' ? raw.understood_count : 0,
-    requiredCount:
-      typeof raw.required_count === 'number' ? raw.required_count : 0,
+    understoodCount: typeof raw.understood_count === 'number' ? raw.understood_count : 0,
+    requiredCount: typeof raw.required_count === 'number' ? raw.required_count : 0,
     isComplete: raw.is_complete === true,
-    conversationLength:
-      typeof raw.conversation_length === 'number' ? raw.conversation_length : 0,
+    conversationLength: typeof raw.conversation_length === 'number' ? raw.conversation_length : 0,
   };
 }
 
 function toVocabResult(raw: Record<string, unknown> | null): VocabResult | null {
   if (!raw) return null;
-  // Support both new (practiced_words) and legacy (practiced_chars) formats
   const words = Array.isArray(raw.practiced_words)
     ? (raw.practiced_words as string[])
     : Array.isArray(raw.practiced_chars)
@@ -99,12 +94,12 @@ function toFullReadingResult(raw: Record<string, unknown> | null): FullReadingRe
   };
 }
 
-function buildLearningSession(detail: SessionDetailResponse): LearningSession {
+function buildSession(detail: TeacherSessionReport): LearningSession {
   const storyId = detail.story_slug ?? '';
   return {
     storyId,
     startedAt: new Date(detail.started_at).getTime(),
-    introCompleted: detail.current_step > 1,
+    introCompleted: true,
     readingAttempt: toReadingAttempt(detail.reading_result, storyId),
     comprehensionResult: toComprehensionResult(detail.comprehension_result),
     vocabResult: toVocabResult(detail.vocab_result),
@@ -113,7 +108,7 @@ function buildLearningSession(detail: SessionDetailResponse): LearningSession {
   };
 }
 
-function buildComprehensionScores(detail: SessionDetailResponse): ComprehensionScoreResult | null {
+function buildScores(detail: TeacherSessionReport): ComprehensionScoreResult | null {
   if (detail.comprehension_score == null) return null;
   return {
     comprehension_score: detail.comprehension_score,
@@ -130,27 +125,27 @@ function buildComprehensionScores(detail: SessionDetailResponse): ComprehensionS
 }
 
 // ---------------------------------------------------------------------------
-// Page component
+// Page
 // ---------------------------------------------------------------------------
 
-const SessionHistoryReportPage: React.FC = () => {
-  const { sessionId } = useParams<{ sessionId: string }>();
+const TeacherSessionReportPage: React.FC = () => {
+  const { studentId, sessionId } = useParams<{ studentId: string; sessionId: string }>();
   const { token } = useAuth();
   const navigate = useNavigate();
 
+  const [report, setReport] = useState<TeacherSessionReport | null>(null);
   const [session, setSession] = useState<LearningSession | null>(null);
   const [story, setStory] = useState<Story | null>(null);
-  const [comprehensionScores, setComprehensionScores] = useState<ComprehensionScoreResult | null>(null);
-  const [teacherReviewedAt, setTeacherReviewedAt] = useState<string | null>(null);
-  const [teacherComment, setTeacherComment] = useState<string | null>(null);
+  const [scores, setScores] = useState<ComprehensionScoreResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!token || !sessionId) return;
-    const id = Number(sessionId);
-    if (isNaN(id)) {
-      setError('無效的記錄 ID');
+    if (!token || !studentId || !sessionId) return;
+    const sid = Number(studentId);
+    const sessId = Number(sessionId);
+    if (isNaN(sid) || isNaN(sessId)) {
+      setError('無效的 ID');
       setIsLoading(false);
       return;
     }
@@ -158,20 +153,18 @@ const SessionHistoryReportPage: React.FC = () => {
     setIsLoading(true);
     setError('');
 
-    fetchSessionReport(token, id)
+    fetchTeacherSessionReport(token, sid, sessId)
       .then(async (detail) => {
-        setSession(buildLearningSession(detail));
-        setComprehensionScores(buildComprehensionScores(detail));
-        setTeacherReviewedAt(detail.teacher_reviewed_at ?? null);
-        setTeacherComment(detail.teacher_comment ?? null);
+        setReport(detail);
+        setSession(buildSession(detail));
+        setScores(buildScores(detail));
 
-        // Try to load the Story for AssessmentReport (best-effort — non-blocking)
         if (detail.story_slug) {
           try {
             const s = await fetchStory(detail.story_slug);
             setStory(s);
           } catch {
-            // Non-critical — AssessmentReport gracefully handles story=null
+            // Non-critical
           }
         }
       })
@@ -179,7 +172,7 @@ const SessionHistoryReportPage: React.FC = () => {
         setError(err.message || '無法載入學習報告');
       })
       .finally(() => setIsLoading(false));
-  }, [token, sessionId]);
+  }, [token, studentId, sessionId]);
 
   if (isLoading) return <PageLoader />;
 
@@ -189,10 +182,10 @@ const SessionHistoryReportPage: React.FC = () => {
         <div className="text-center space-y-4">
           <p className="text-red-600 text-sm">{error}</p>
           <button
-            onClick={() => navigate('/history')}
+            onClick={() => navigate(-1)}
             className="px-4 py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer"
           >
-            返回學習記錄
+            返回
           </button>
         </div>
       </div>
@@ -201,32 +194,50 @@ const SessionHistoryReportPage: React.FC = () => {
 
   return (
     <div className="p-8 max-w-4xl mx-auto w-full">
-      {teacherReviewedAt && (
-        <div className="mb-4 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            老師已查看（{new Date(teacherReviewedAt).toLocaleDateString('zh-TW')}）
+      {/* Header with student name and story */}
+      {report && (
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">
+              {report.student_name} 的學習報告
+            </h1>
+            {report.story_title && (
+              <p className="text-sm text-gray-500 mt-1">{report.story_title}</p>
+            )}
           </div>
-          {teacherComment && (
-            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
-              <p className="text-xs font-semibold text-purple-700 mb-1">老師評語</p>
-              <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{teacherComment}</p>
-            </div>
-          )}
+          <button
+            onClick={() => navigate(-1)}
+            className="btn-secondary text-sm"
+          >
+            返回
+          </button>
         </div>
       )}
+
+      {/* Reuse student AssessmentReport (read-only) */}
       <AssessmentReport
         session={session}
         story={story}
-        onRetry={() => navigate('/history')}
+        onRetry={() => navigate(-1)}
         dbSessionId={sessionId ? Number(sessionId) : null}
         token={token}
-        comprehensionScores={comprehensionScores}
+        comprehensionScores={scores}
       />
+
+      {/* Teacher comment section */}
+      {report && token && (
+        <TeacherCommentSection
+          studentId={Number(studentId)}
+          sessionId={Number(sessionId)}
+          token={token}
+          aiComment={report.ai_comment}
+          teacherComment={report.teacher_comment}
+          teacherReviewedAt={report.teacher_reviewed_at}
+          studentName={report.student_name}
+        />
+      )}
     </div>
   );
 };
 
-export default SessionHistoryReportPage;
+export default TeacherSessionReportPage;
