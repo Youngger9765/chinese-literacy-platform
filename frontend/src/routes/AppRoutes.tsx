@@ -69,6 +69,7 @@ const StudentHome = lazy(() => import('../pages/student/StudentHome'));
 const TeacherHome = lazy(() => import('../pages/teacher/TeacherHome'));
 const TeacherMyTextsPage = lazy(() => import('../pages/teacher/TeacherMyTextsPage'));
 const TeacherAssignmentsPage = lazy(() => import('../pages/teacher/TeacherAssignmentsPage'));
+const TeacherSessionReportPage = lazy(() => import('../pages/teacher/TeacherSessionReportPage'));
 const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 
 // Utility pages — rarely visited after first load
@@ -225,6 +226,16 @@ const AppRoutes: React.FC = () => (
           <ProtectedRoute>
             <AppShell>
               <TeacherAssignmentsPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/teacher/students/:studentId/sessions/:sessionId/report"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <TeacherSessionReportPage />
             </AppShell>
           </ProtectedRoute>
         }

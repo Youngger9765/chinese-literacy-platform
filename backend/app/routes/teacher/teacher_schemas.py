@@ -72,6 +72,7 @@ class StudentSessionResponse(BaseModel):
     completed_at: datetime | None
     overall_score: float | None
     status: str
+    teacher_reviewed_at: datetime | None = None
 
     model_config = {"from_attributes": True}
 
@@ -369,6 +370,50 @@ class TeacherTextListResponse(BaseModel):
 
 
 # ── Story Tags ────────────────────────────────────────────────────────────────
+
+
+# ── Teacher Session Report (Issue #993) ──────────────────────────────────────
+
+
+class TeacherSessionReportResponse(BaseModel):
+    """Full session data for teacher report view."""
+    id: int
+    student_id: int
+    student_name: str
+    story_slug: str | None
+    story_title: str | None
+    status: str
+    accuracy: float | None
+    overall_score: float | None
+    reading_result: dict | None
+    comprehension_result: dict | None
+    vocab_result: dict | None
+    full_reading_result: dict | None
+    comprehension_score: float | None
+    literal_score: float | None
+    inferential_score: float | None
+    evaluative_score: float | None
+    comprehension_feedback: str | None
+    ai_comment: str | None
+    teacher_comment: str | None
+    teacher_reviewed_at: datetime | None
+    started_at: datetime
+    completed_at: datetime | None
+
+    model_config = {"from_attributes": True}
+
+
+class TeacherCommentRequest(BaseModel):
+    comment: str = Field(..., max_length=2000)
+
+
+class TeacherCommentResponse(BaseModel):
+    teacher_comment: str
+    teacher_reviewed_at: datetime
+
+
+class AICommentResponse(BaseModel):
+    ai_comment: str
 
 
 class StoryTagUpsertRequest(BaseModel):
