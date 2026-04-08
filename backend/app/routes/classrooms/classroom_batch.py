@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from ...auth.dependencies import get_current_user
 from ...auth.password import hash_password
 from ...database import get_db
+from ...models.assignment import Assignment, AssignmentSubmission
 from ...models.school import ClassroomStudent
 from ...models.user import Role, StudentProfile, User, UserRole
 from ...schemas.classroom import (
@@ -123,6 +124,22 @@ def batch_create_students(
             )
             db.add(cs)
             db.flush()
+
+            # Backfill submissions for all active assignments in this classroom (#996)
+            active_assignments = (
+                db.query(Assignment)
+                .filter(
+                    Assignment.classroom_id == classroom_id,
+                    Assignment.is_active == True,
+                )
+                .all()
+            )
+            for assignment in active_assignments:
+                db.add(AssignmentSubmission(
+                    assignment_id=assignment.id,
+                    student_id=user.id,
+                    status="pending",
+                ))
 
             created.append(CreatedStudentInfo(
                 name=item.name,
