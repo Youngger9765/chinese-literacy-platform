@@ -8,6 +8,32 @@
 
 ---
 
+## 4/4 ~ 4/10
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | PR #992 UI 清理 | 報告頁移除 AI 分析 + 字體統一 Noto Sans TC（#990, #991） |
+| Young | ✅ | PR #970 Socratic 持久化 | SessionStore 從 in-memory 改存 DB（Fixes #961） |
+| Young | ✅ | PR #971 查詢安全 | unbounded queries 加 .limit(5000) 上限（Fixes #964） |
+| Young | ✅ | PR #975 例外處理 | narrow except catches + pagination params |
+| Young | ✅ | PR #968 LiveTutor 拆分 | LiveTutor.tsx 拆成子元件（Fixes #962） |
+| Young | ✅ | PR #960 dead code | 抽取 seed data + 移除 dead TenantMiddleware |
+| Young | ✅ | PR #978 CI/CD | post-deploy health check |
+| Young | ✅ | PR #976 清理 | 移除 E2E Playwright tests（-12,202 行） |
+| Young | ✅ | PR #957 遊戲化 | Gamification Phase 1 bug fixes + XP events |
+| Young | ✅ | PR #951 閱讀策略 | 52 篇課文策略資料（Phase 2） |
+| Young | ✅ | 孤兒清理 | 清掉 4 個已 closed/merged 的 preview Cloud Run services |
+| Young | ✅ | 10 步驟 QA | headless browser 逐步測試，全部正常 |
+| 靖杭 | ✅ | PR #987 tab 鎖定 | 詞語定義 tab 前置鎖定提示（feat #925） |
+| 靖杭 | ✅ | PR #986 記錄分離 | 自學和作業記錄分離（feat #926） |
+| 靖杭 | 🔧 | PR #979 進度條 | 作業進度條顏色改綠色 + 排版每5格換行（fix #924） |
+| 靖杭 | 🔧 | PR #988 學習歷史 | 排序功能 + 對話記錄判斷邏輯（feat #435） |
+| 啟翔 | ✅ | PR #959 造句單位 | 造句練習改以詞為最小單位（feat #927） |
+| 啟翔 | ✅ | PR #969 防複製貼上 | 造句批改驗證真實性 + 防複製貼上（fix #928） |
+| 啟翔 | ✅ | PR #913 rate limit | rate limiter 改為僅限 cache miss（fix #911） |
+
+---
+
 ## 3/28 ~ 4/3
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
@@ -119,4 +145,4 @@
 
 ---
 
-*最後更新：2026-03-20*
+*最後更新：2026-04-08*

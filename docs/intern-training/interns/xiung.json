@@ -3,7 +3,7 @@
   "github": "stgst",
   "email": "steven19790906@gmail.com",
   "startDate": "2026-03-06",
-  "lastReview": "2026-04-05",
+  "lastReview": "2026-04-08",
   "skills": {
     "1": {
       "level": 3,
@@ -215,13 +215,18 @@
       "maxLevel": 5
     },
     "12": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-05",
           "level": 2,
           "reason": "PR #913 修改 backend rate_limiter.py 和 learning_vocab.py/stories.py，理解 FastAPI route decorator 的執行順序與 rate limiting 機制，知道如何在特定程式碼路徑內套用 rate limit 而非全局套用。展現後端 API 結構的理解，但主要是修改既有邏輯，非獨立設計 API"
+        },
+        {
+          "date": "2026-04-08",
+          "level": 3,
+          "reason": "PR #959（造句以詞為單位）涉及前後端 API 串接修改：後端 vocabulary 資料結構的理解（字 vs 詞的區分）+ 前端 API call 參數調整 + 預生成快取 key 對齊。PR #969（防複製貼上）在後端加入 AI 批改驗證邏輯，理解 Gemini API 回應結構並加入真實性檢查。兩個 PR 都跨前後端完整修改"
         }
       ]
     },
@@ -292,12 +297,12 @@
     }
   },
   "recommendations": [
-    "測試（#14）尚未解鎖：PR #912 修復了 cache 命中率，建議補寫一個 Vitest 測試確認 vocabChars 產生正確結果，把這個 bug fix 變成有保護的程式碼",
-    "架構理解（#18）剛解鎖 level 1，建議主動追蹤一個完整 API 路徑：從前端呼叫 example_sentences API → backend learning_vocab.py → cache lookup → AI call，用文字記錄下來，挑戰 level 2",
-    "元件設計模式（#13）在 level 2，下一步可嘗試把 VocabPractice 裡的 vocabChars 邏輯抽成 custom hook（例如 useVocabChars），讓邏輯更可重用、更容易測試",
-    "TypeScript 型別（#7）目前尚未有明確紀錄：PR #913 修改 rate_limiter.py 是純 Python，建議在下一個前端 PR 中主動加上 interface 或明確型別標注，開始累積 TS 的技能證據"
+    "造句 UI 改側邊欄排版是 4/3 會議的 action item，建議盡快建 issue 並開始實作",
+    "API 串接（#12）升到 level 3，下一步可以嘗試獨立設計一個新 API endpoint（例如造句歷史記錄），從 schema 設計到 route 實作",
+    "架構理解（#18）在 level 1，PR #959 和 #969 都涉及前後端完整修改，建議用文字記錄造句練習的完整資料流（前端 → API → cache → AI → 回應），挑戰 level 2",
+    "測試（#14）尚未解鎖：下一個 PR 建議補寫測試驗證防複製貼上的邏輯"
   ],
-  "summary": "3/20 至 4/5 間共 2 個 PR merge：PR #912（造句練習 cache 修正）透過新增 vocabChars memo 修正 cache key 不匹配，展現元件資料流設計意識。PR #913（rate limit fix）精準診斷 FastAPI decorator 執行時機問題，將 rate limiting 移到 cache miss 路徑，展現後端 API 結構理解。新解鎖技能：#12（API 串接 level 2）、#13（元件設計模式 level 2）、#18（架構理解 level 1）",
+  "summary": "4/3 至 4/8 間共 3 個 PR merge：PR #959（造句以詞為單位）是 4/3 會議的核心決議，涉及前後端 vocabulary 資料結構修改 + 預生成快取 key 對齊。PR #969（防複製貼上）在後端加入 AI 批改真實性驗證。PR #913（rate limit fix）精準將 rate limiting 移到 cache miss 路徑。技能升級：#12（API 串接 level 3）",
   "issues": [
     {
       "id": "環境建置",
@@ -381,6 +386,32 @@
         "既有 13 個 test_sentence_practice 測試全部通過"
       ],
       "linesChanged": "+22/-15"
+    },
+    {
+      "id": "#927",
+      "title": "造句練習改以詞為最小單位（PR #959）",
+      "date": "2026-04-07",
+      "type": "feature",
+      "contribution": "實作 4/3 會議核心決議：造句練習從「字」改為「詞」為最小單位。前端修改 SentencePractice 元件接收 vocabulary 詞組、後端修改預生成快取 key 對齊、確保預生成例句也以詞為單位",
+      "skillsLearned": [12, 13],
+      "highlights": [
+        "跨前後端完整修改（vocabulary 資料結構 + 快取 key）",
+        "理解字 vs 詞的語言學差異並正確反映在程式碼中",
+        "確保預生成快取與即時 API 的 key 一致"
+      ]
+    },
+    {
+      "id": "#928",
+      "title": "造句批改驗證真實性 + 防複製貼上（PR #969）",
+      "date": "2026-04-07",
+      "type": "feature",
+      "contribution": "實作 4/3 會議決議：防止學生複製貼上範例句獲得正面回饋。後端加入 AI 批改真實性檢查邏輯，前端加入複製貼上偵測，作業模式下禁用",
+      "skillsLearned": [12],
+      "highlights": [
+        "後端 AI 批改加入真實性驗證",
+        "理解 Gemini API 回應結構並做二次檢查",
+        "前後端協同防弊設計"
+      ]
     }
   ]
 }

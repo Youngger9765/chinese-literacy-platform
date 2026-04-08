@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-04-05",
+  "lastReview": "2026-04-08",
   "skills": {
     "1": {
       "level": 3,
@@ -191,6 +191,11 @@
           "date": "2026-04-05",
           "level": 2,
           "reason": "PR #898/#899/#900/#905 持續穩定使用 feature branch + conventional commits（fix:/feat: 前綴正確分類），每個 PR 都有清楚的問題描述與修改說明，工作流已成習慣"
+        },
+        {
+          "date": "2026-04-08",
+          "level": 3,
+          "reason": "PR #986（自學/作業分離）和 PR #987（tab 鎖定）都是從 4/3 會議決議出發，獨立拆 issue → 開發 → PR → merge 的完整自主流程。PR 說明清楚標注對應 issue 編號，commit message 格式正確"
         }
       ]
     },
@@ -247,13 +252,18 @@
       ]
     },
     "13": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-05",
           "level": 2,
           "reason": "PR #805 設計前後端 feature flag 系統：後端 config.py 新增 PARENT_PORTAL_ENABLED 旗標、auth.py 加入 guard、前端建立 featureFlags.ts 集中管理，前後端職責分離清晰。PR #898 跨越 backend schemas/routes + 多個 frontend 元件（LearningLayout/MyAssignments/StepperNav 等），元件間資料流設計合理，但尚未見到 custom hook 抽取或共用元件重構"
+        },
+        {
+          "date": "2026-04-08",
+          "level": 3,
+          "reason": "PR #986 自學/作業分離涉及前端狀態管理重新設計（assignment ID vs self-study session），需理解 LearningSession 與 Assignment 的資料模型關係。PR #987 tab 鎖定提示需設計元件間的狀態傳遞（選擇題完成狀態 → 控制拖拉配對 tab 的 disabled 狀態），展現跨元件資料流設計能力"
         }
       ]
     },
@@ -274,13 +284,18 @@
       ]
     },
     "16": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-05",
           "level": 2,
           "reason": "PR #805（隱藏家長功能）和 PR #898（作業進度條）都是從 Issue 出發、跨越前後端完整實作並 merge 的功能。PR #898 規模特別大（+1248/-256，涉及 16 個檔案），顯示能獨立推進複雜任務。但目前兩個 PR 都沒有明確看到從 issue 開立到最終驗收的完整自主流程紀錄，保守給 level 2"
+        },
+        {
+          "date": "2026-04-08",
+          "level": 3,
+          "reason": "PR #986（自學/作業分離）和 PR #987（tab 鎖定）皆從 4/3 會議決議獨立建立 issue（#925, #926）→ 開發 → merge，展現完整的自主開發流程。兩個功能都在一週內完成，速度穩定"
         }
       ]
     },
@@ -297,12 +312,12 @@
     }
   },
   "recommendations": [
-    "Git 工作流（#9）已升到 level 2，下一步可以練習在 PR 中加入截圖或 staging 測試連結，讓 reviewer 更容易驗收，往 level 3 邁進",
-    "測試（#14）升到 level 2 很棒，下一步挑戰在寫程式前先寫測試（TDD 流程）：先定義預期行為，再實作功能，會讓 debug 更有效率",
-    "元件設計模式（#13）已解鎖 level 2，下一步可以嘗試把 PR #898 裡 LearningLayout 重複出現的進度計算邏輯抽成 custom hook（例如 useAssignmentProgress），讓程式碼更容易重用",
-    "架構理解（#18）剛解鎖，建議主動追蹤一個完整的 API 呼叫路徑：從前端 assignmentApi.ts → backend routes/assignments.py → schemas → DB model，用文字或圖記錄下來，加深對全端資料流的掌握"
+    "Git 工作流（#9）升到 level 3，下一步練習在 PR 中加入 staging 截圖或測試連結，讓方大哥也能直接驗收",
+    "元件設計模式（#13）升到 level 3，下一步挑戰把重複邏輯抽成 custom hook（例如 useAssignmentProgress），往 level 4 邁進",
+    "教師端報告（#930）是下一個大功能，涉及跨角色資料存取（學生報告 → 教師 dashboard），完成後架構理解（#18）可望升級",
+    "PR #979（進度條）已提交，merge 後可以挑戰更大的 UI 元件重構"
   ],
-  "summary": "3/20 至 4/5 間共 4 個 PR merge：PR #898（作業進度條，+1248/-256，16 個檔案）是迄今最大規模的獨立功能開發，展現跨前後端架構理解能力。PR #805（隱藏家長功能）設計 feature flag 系統，職責分離清晰。PR #899（標記詞語 bug）同步維護測試。PR #905 精準定位 scrollTop 座標計算問題。新解鎖技能：#13（元件設計模式 level 2）、#16（獨立開發功能 level 2）、#18（架構理解 level 1）；#9（Git 工作流）升至 level 2、#14（測試）升至 level 2",
+  "summary": "4/3 至 4/8 間共 3 個 PR merge：PR #986（自學/作業分離）和 PR #987（詞語定義 tab 鎖定）都是從 4/3 會議決議獨立建立 issue → 開發 → merge 的完整自主流程，一週內完成。PR #900（部件拆解修正）修正 JSON fallback 資料問題。技能升級：#9（Git 工作流 level 3）、#13（元件設計模式 level 3）、#16（獨立開發功能 level 3）",
   "issues": [
     {
       "id": "環境建置",
@@ -419,6 +434,24 @@
       "skillsLearned": [10],
       "highlights": ["精準定位座標計算問題（scrollTop/scrollLeft 補償）", "修改範圍小（+8/-6）但影響精準"],
       "linesChanged": "+8/-6"
+    },
+    {
+      "id": "#925",
+      "title": "詞語定義 tab 前置鎖定提示（PR #987）",
+      "date": "2026-04-08",
+      "type": "feature",
+      "contribution": "實作 4/3 會議決議：選擇題完成才能做拖拉配對，加入 tab 鎖定提示 UI，引導學生按順序完成",
+      "skillsLearned": [9, 13, 16],
+      "highlights": ["從會議決議獨立建 issue → 開發 → merge", "跨元件狀態傳遞設計（完成狀態控制 tab disabled）"]
+    },
+    {
+      "id": "#926",
+      "title": "自學和作業記錄分離（PR #986）",
+      "date": "2026-04-08",
+      "type": "feature",
+      "contribution": "實作 4/3 會議決議：自學 session 與作業 session 分離，作業跟 assignment ID 走，刪除作業也刪記錄",
+      "skillsLearned": [9, 13, 16],
+      "highlights": ["涉及前端狀態管理重設計", "理解 LearningSession 與 Assignment 資料模型關係", "一週內完成"]
     }
   ]
 }
