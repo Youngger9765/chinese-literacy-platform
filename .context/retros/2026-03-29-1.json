@@ -1,0 +1,36 @@
+{
+  "date": "2026-03-29",
+  "window": "7d",
+  "metrics": {
+    "commits": 64,
+    "contributors": 2,
+    "prs_merged": 34,
+    "insertions": 11200,
+    "deletions": 3700,
+    "net_loc": 7500,
+    "test_loc": 416,
+    "test_ratio": 0.05,
+    "active_days": 7,
+    "sessions": 16,
+    "deep_sessions": 8,
+    "avg_session_minutes": 55,
+    "loc_per_session_hour": 500,
+    "feat_pct": 0.38,
+    "fix_pct": 0.34,
+    "peak_hour": 2,
+    "ai_assisted_commits": 63
+  },
+  "authors": {
+    "Youngger9765": {"commits": 43, "insertions": 4500, "deletions": 1200, "test_ratio": 0.04, "top_area": "frontend/src/components/reading-steps/"},
+    "young_tsai": {"commits": 20, "insertions": 6400, "deletions": 2300, "test_ratio": 0.06, "top_area": "backend/app/services/"},
+    "Raymond": {"commits": 1, "insertions": 34, "deletions": 1, "test_ratio": 0, "top_area": "frontend/src/components/reading-steps/"}
+  },
+  "streak_days": 28,
+  "tweetable": "Week of Mar 22: 64 commits (2 contributors), 10.5k LOC, 34 PRs, peak: 2am | Streak: 28d",
+  "test_health": {
+    "total_test_files": 61,
+    "tests_added_this_period": 2,
+    "regression_test_commits": 0,
+    "test_files_changed": 3
+  }
+}

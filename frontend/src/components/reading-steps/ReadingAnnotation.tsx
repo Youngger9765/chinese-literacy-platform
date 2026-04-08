@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ interface AnnotationWithText {
 
 // ── Config ─────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = (storyId: string) => `annotations_${storyId}`;
+const STORAGE_KEY = (storyId: string) => scopedStepStorageKey('annotations_', storyId);
 
 const TYPE_CONFIG: Record<AnnotationType, { label: string; icon: string; className: string; activeClass: string }> = {
   unknown: {

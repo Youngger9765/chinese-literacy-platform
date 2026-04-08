@@ -3,7 +3,7 @@
   "github": "stgst",
   "email": "steven19790906@gmail.com",
   "startDate": "2026-03-06",
-  "lastReview": "2026-03-20",
+  "lastReview": "2026-04-08",
   "skills": {
     "1": {
       "level": 3,
@@ -214,6 +214,33 @@
       ],
       "maxLevel": 5
     },
+    "12": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-05",
+          "level": 2,
+          "reason": "PR #913 修改 backend rate_limiter.py 和 learning_vocab.py/stories.py，理解 FastAPI route decorator 的執行順序與 rate limiting 機制，知道如何在特定程式碼路徑內套用 rate limit 而非全局套用。展現後端 API 結構的理解，但主要是修改既有邏輯，非獨立設計 API"
+        },
+        {
+          "date": "2026-04-08",
+          "level": 3,
+          "reason": "PR #959（造句以詞為單位）涉及前後端 API 串接修改：後端 vocabulary 資料結構的理解（字 vs 詞的區分）+ 前端 API call 參數調整 + 預生成快取 key 對齊。PR #969（防複製貼上）在後端加入 AI 批改驗證邏輯，理解 Gemini API 回應結構並加入真實性檢查。兩個 PR 都跨前後端完整修改"
+        }
+      ]
+    },
+    "13": {
+      "level": 2,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-05",
+          "level": 2,
+          "reason": "PR #912 新增 vocabChars memo，從 story.vocabulary 拆出去重的 CJK 字並向下傳給 SentencePractice，修正 cache key 不匹配問題。正確識別資料來源問題（story.content 前 12 字 vs vocabulary 生字），並透過新增 memo 而非修改既有邏輯來解決，顯示對元件資料流的設計意識。尚未見到 custom hook 的抽取"
+        }
+      ]
+    },
     "15": {
       "level": 4,
       "maxLevel": 5,
@@ -256,15 +283,26 @@
           "reason": "能進行效能優化，例如使用 useMemo。"
         }
       ]
+    },
+    "18": {
+      "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-05",
+          "level": 1,
+          "reason": "PR #913 的問題分析顯示能理解 request → rate limiter → cache check → AI call 的後端執行流程，並知道 rate limit 應套在 AI 呼叫而非 request 入口。PR #912 能追蹤 story.vocabulary → vocabChars → SentencePractice → cache key 的完整資料流。但目前對全端架構（前端 API call → backend route → DB）的整體視野尚未完整，保守給 level 1"
+        }
+      ]
     }
   },
   "recommendations": [
-    "嘗試為 FontSizeControl 或 useFontSize hook 撰寫單元測試（Vitest），驗證 synthetic event 觸發後 font size 確實更新，把 bug 修復變成有測試保護的穩固程式碼（技能 #14）",
-    "研究 LingoLeap 的整體資料流：從 API call（api.ts）到 backend route 到 DB 的完整路徑，嘗試獨立追蹤一個功能的全端流向（技能 #18）",
-    "在 PR review 時留下具體的技術建議（不只是「看起來不錯」），例如指出潛在的 edge case 或更好的寫法（技能 #15 提升方向）",
-    "嘗試在現有 hook（如 useFontSize）加入 TypeScript interface 或明確型別標注，從實際程式碼開始熟悉 TS（技能 #7 入門）"
+    "造句 UI 改側邊欄排版是 4/3 會議的 action item，建議盡快建 issue 並開始實作",
+    "API 串接（#12）升到 level 3，下一步可以嘗試獨立設計一個新 API endpoint（例如造句歷史記錄），從 schema 設計到 route 實作",
+    "架構理解（#18）在 level 1，PR #959 和 #969 都涉及前後端完整修改，建議用文字記錄造句練習的完整資料流（前端 → API → cache → AI → 回應），挑戰 level 2",
+    "測試（#14）尚未解鎖：下一個 PR 建議補寫測試驗證防複製貼上的邏輯"
   ],
-  "summary": "PR #450 展示進階瀏覽器 API 知識：獨立診斷 StorageEvent 跨 tab 限制並用 synthetic event 解決，JS 技能升至 level 4。目前已掌握 Git/React/Hooks/Bug 修復完整工作流，下一步方向為 TypeScript 型別、測試撰寫與全端架構理解",
+  "summary": "4/3 至 4/8 間共 3 個 PR merge：PR #959（造句以詞為單位）是 4/3 會議的核心決議，涉及前後端 vocabulary 資料結構修改 + 預生成快取 key 對齊。PR #969（防複製貼上）在後端加入 AI 批改真實性驗證。PR #913（rate limit fix）精準將 rate limiting 移到 cache miss 路徑。技能升級：#12（API 串接 level 3）",
   "issues": [
     {
       "id": "環境建置",
@@ -318,6 +356,62 @@
         "根本原因分析清晰完整"
       ],
       "linesChanged": "+5/-1"
+    },
+    {
+      "id": "#910",
+      "title": "造句練習改用 vocabulary 生字修正 cache 命中率（PR #912）",
+      "date": "2026-04-03",
+      "type": "bugfix",
+      "contribution": "發現 SentencePractice 從 story.content 取前 12 個字作為造句字，與 example_sentence_cache.json 的 vocabulary 生字 key 完全不匹配，導致 1490 筆預生成快取從未被使用。新增 vocabChars memo 從 story.vocabulary 拆出去重 CJK 字傳給 SentencePractice，同步修正 tab 容器 flex-wrap 防止溢出",
+      "skillsLearned": [11, 13],
+      "highlights": [
+        "清楚識別 cache key 不匹配的根本原因",
+        "用 memo 而非修改既有邏輯解決問題，影響最小",
+        "PR 附上截圖驗證修正結果",
+        "PR 說明包含完整 test plan 清單"
+      ],
+      "linesChanged": "+18/-2"
+    },
+    {
+      "id": "#911",
+      "title": "造句例句、課文重點表 rate limit 改為僅限 cache miss（PR #913）",
+      "date": "2026-04-04",
+      "type": "bugfix",
+      "contribution": "診斷 rate limiter 設在 route decorator 導致 cache hit 請求也消耗額度，快速切換生字時觸發 429。將 rate limit 從 decorator 移到 cache miss 的 AI 呼叫路徑內，同時修正 rate_limiter.py 的 DRY 問題。修改 backend 三個檔案：rate_limiter.py、learning_vocab.py、stories.py",
+      "skillsLearned": [12, 18],
+      "highlights": [
+        "精準理解 FastAPI decorator 執行時機與 rate limiting 的關係",
+        "修正範圍最小化（只移動 rate limit 的位置）",
+        "PR 說明包含完整 test plan 含邊界情境（cache hit/miss/validate endpoint）",
+        "既有 13 個 test_sentence_practice 測試全部通過"
+      ],
+      "linesChanged": "+22/-15"
+    },
+    {
+      "id": "#927",
+      "title": "造句練習改以詞為最小單位（PR #959）",
+      "date": "2026-04-07",
+      "type": "feature",
+      "contribution": "實作 4/3 會議核心決議：造句練習從「字」改為「詞」為最小單位。前端修改 SentencePractice 元件接收 vocabulary 詞組、後端修改預生成快取 key 對齊、確保預生成例句也以詞為單位",
+      "skillsLearned": [12, 13],
+      "highlights": [
+        "跨前後端完整修改（vocabulary 資料結構 + 快取 key）",
+        "理解字 vs 詞的語言學差異並正確反映在程式碼中",
+        "確保預生成快取與即時 API 的 key 一致"
+      ]
+    },
+    {
+      "id": "#928",
+      "title": "造句批改驗證真實性 + 防複製貼上（PR #969）",
+      "date": "2026-04-07",
+      "type": "feature",
+      "contribution": "實作 4/3 會議決議：防止學生複製貼上範例句獲得正面回饋。後端加入 AI 批改真實性檢查邏輯，前端加入複製貼上偵測，作業模式下禁用",
+      "skillsLearned": [12],
+      "highlights": [
+        "後端 AI 批改加入真實性驗證",
+        "理解 Gemini API 回應結構並做二次檢查",
+        "前後端協同防弊設計"
+      ]
     }
   ]
 }

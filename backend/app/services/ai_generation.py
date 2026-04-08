@@ -179,37 +179,37 @@ SENTENCE_VALIDATION_SCHEMA = {
 }
 
 
-async def generate_example_sentences(character: str, story_title: str) -> dict:
-    """Generate 2 example sentences for a Chinese character.
+async def generate_example_sentences(word: str, story_title: str) -> dict:
+    """Generate 2 example sentences for a Chinese vocabulary word.
 
     Returns {"sentences": [{"sentence": str, "explanation": str}, ...]}
-    Each sentence uses the target character in a contextually appropriate way
+    Each sentence uses the target word in a contextually appropriate way
     suited for elementary/middle school students.
     """
-    safe_char, _ = sanitize_ai_input(character)
+    safe_word, _ = sanitize_ai_input(word)
     safe_title, _ = sanitize_ai_input(story_title)
 
     system_prompt = f"""{TUTOR_PERSONA}
 
-你是一位專業的國語文教師，請為學生示範如何使用生字造句。
+你是一位專業的國語文教師，請為學生示範如何使用詞語造句。
 
-目標生字：「{safe_char}」
+目標詞語：「{safe_word}」
 課文名稱：《{safe_title}》
 
-請造 2 個包含目標生字的例句，要求：
+請造 2 個包含目標詞語的例句，要求：
 1. 符合國小高年級～國中的語文程度
 2. 句子自然流暢，生動有趣
-3. 幫助學生理解這個字的用法
+3. 幫助學生理解這個詞語的用法
 4. 用繁體中文（zh-TW）
 
 請以 JSON 格式輸出，包含 sentences 陣列，每個元素有：
 - sentence（例句）
-- explanation（簡短說明這個字在句中的意思）"""
+- explanation（簡短說明這個詞語在句中的意思）"""
 
     contents = [
         genai_types.Content(
             role="user",
-            parts=[genai_types.Part(text=f"請為生字「{safe_char}」造兩個例句。")],
+            parts=[genai_types.Part(text=f"請為詞語「{safe_word}」造兩個例句。")],
         )
     ]
 
@@ -224,18 +224,19 @@ async def generate_example_sentences(character: str, story_title: str) -> dict:
 
 
 async def validate_student_sentence(
-    character: str,
+    word: str,
     student_sentence: str,
     story_title: str,
+    passage_sentences: list[str] | None = None,
 ) -> dict:
-    """Validate a student's sentence for a given character.
+    """Validate a student's sentence for a given vocabulary word.
 
     Returns {"is_correct": bool, "feedback": str, "suggestion": str}
-    - is_correct: True if grammatically correct and uses the character appropriately
+    - is_correct: True if grammatically correct and uses the word appropriately
     - feedback: encouraging feedback message (in Chinese)
     - suggestion: improvement hint if not correct (empty string if correct)
     """
-    safe_char, _ = sanitize_ai_input(character)
+    safe_word, _ = sanitize_ai_input(word)
     safe_sentence, _ = sanitize_ai_input(student_sentence)
     safe_title, _ = sanitize_ai_input(story_title)
 
@@ -243,21 +244,33 @@ async def validate_student_sentence(
 
 你是一位親切的國語文老師，正在批改學生的造句練習。
 
-目標生字：「{safe_char}」
+目標詞語：「{safe_word}」
 課文：《{safe_title}》
 
 評估標準：
-1. 句子是否包含目標生字「{safe_char}」
+1. 句子是否包含目標詞語「{safe_word}」
 2. 句子是否語法正確、語意通順
-3. 目標生字的用法是否恰當
+3. 目標詞語的用法是否恰當
 4. 適合國小高年級～國中程度
+5. 句子必須是學生自己創作的，不能是從課文或例句中抄寫或稍微改寫的
 
 請給予鼓勵性的評語，用繁體中文（zh-TW）回覆。
 - 若造句正確：is_correct=true，給予鼓勵
 - 若有問題：is_correct=false，指出問題並提供改進建議
 
-注意：只要學生的句子基本語法正確、有使用目標生字，就算通過。
+注意：只要學生的句子基本語法正確、有使用目標詞語，就算通過。
 不要過度嚴格，給予適度的鼓勵。"""
+
+    if passage_sentences:
+        passage_ref = "\n".join(f"- {s}" for s in passage_sentences[:5])
+        system_prompt += f"""
+
+以下是課文或例句中包含「{safe_char}」的句子片段（供參考比對）：
+{passage_ref}
+
+如果學生的句子與上述片段高度相似（只改了幾個字但意思和結構幾乎一樣），判定 is_correct=false，
+並在 feedback 中提示學生「不要照抄課文或例句」，請用自己的話造句。
+注意：feedback 中不要具體指出是「跟課文裡的某某詞像」，因為來源也可能是例句，請統一說「和課文或例句太相似」。"""
 
     contents = [
         genai_types.Content(

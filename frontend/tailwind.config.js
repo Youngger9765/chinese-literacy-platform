@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Iansui', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         ui: ['cwTeXYen', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {

@@ -178,8 +178,8 @@ export interface ComprehensionResult {
 }
 
 export interface VocabResult {
-  practicedChars: string[];
-  totalChars: number;
+  practicedWords: string[];
+  totalWords: number;
 }
 
 export interface DictationWordResult {

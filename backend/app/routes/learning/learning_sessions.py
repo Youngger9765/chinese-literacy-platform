@@ -3,12 +3,13 @@
 Handles creating, listing, getting, and updating learning sessions.
 """
 import logging
-from typing import Optional
+from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
+from ...models.assignment import AssignmentSubmission
 from ...models.school import ClassroomStudent
 from ...models.session import CharacterError, LearningSession
 from ...models.text import Text
@@ -25,6 +26,20 @@ from ...schemas.session import (
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+def _is_assignment_session(
+    session: LearningSession,
+    assignment_session_ids: set[int],
+) -> bool:
+    """Return True when a session originates from assignment flow."""
+    if session.id in assignment_session_ids:
+        return True
+    if isinstance(session.step_progress, dict):
+        raw_meta = session.step_progress.get("__meta")
+        if isinstance(raw_meta, dict) and raw_meta.get("source") == "assignment":
+            return True
+    return False
 
 
 @router.post("/learning/sessions", status_code=201, response_model=SessionDetailResponse)
@@ -83,30 +98,58 @@ def list_my_sessions(
         None,
         description="Filter by a specific story_slug",
     ),
+    learning_source: Optional[Literal["self", "assignment"]] = Query(
+        None,
+        description="Filter by session source: self practice or assignment",
+    ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """List learning sessions for the authenticated student, newest first."""
+    assignment_session_ids_query = (
+        db.query(AssignmentSubmission.session_id)
+        .filter(
+            AssignmentSubmission.student_id == current_user.id,
+            AssignmentSubmission.session_id.is_not(None),
+        )
+    )
+
     query = db.query(LearningSession).filter(
         LearningSession.student_id == current_user.id,
     )
+
     if status:
         statuses = [s.strip() for s in status.split(",") if s.strip()]
         if statuses:
             query = query.filter(LearningSession.status.in_(statuses))
     if story_slug:
         query = query.filter(LearningSession.story_slug == story_slug)
-    total = query.count()
-    items = (
+
+    all_items = (
         query
         .order_by(LearningSession.started_at.desc())
-        .offset(offset)
-        .limit(limit)
         .all()
     )
+    assignment_session_ids = {
+        sid for (sid,) in assignment_session_ids_query.all() if sid is not None
+    }
+
+    filtered_items: list[LearningSession] = []
+    for s in all_items:
+        is_assignment = _is_assignment_session(s, assignment_session_ids)
+        if learning_source == "assignment" and not is_assignment:
+            continue
+        if learning_source == "self" and is_assignment:
+            continue
+        filtered_items.append(s)
+
+    total = len(filtered_items)
+    items = filtered_items[offset: offset + limit]
+
     summaries = []
     for s in items:
         summary = SessionSummaryResponse.model_validate(s)
+        summary.learning_source = "assignment" if _is_assignment_session(s, assignment_session_ids) else "self"
         # Resolve human-readable title: prefer linked Text record, else look up YAML lesson
         if s.text is not None:
             summary.story_title = s.text.title
@@ -126,6 +169,10 @@ def list_my_sessions(
 def get_reading_history(
     story_slug: str = Query(..., description="Story slug to get reading history for"),
     limit: int = Query(50, ge=1, le=100),
+    learning_source: Literal["self", "assignment", "all"] = Query(
+        "all",
+        description="History source filter. Default all for backward compatibility.",
+    ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -134,17 +181,42 @@ def get_reading_history(
     Returns CPM, accuracy, and match_rate from each completed session,
     enabling progress curve visualisation on the student side.
     """
-    sessions = (
+    assignment_session_ids_query = (
+        db.query(AssignmentSubmission.session_id)
+        .filter(
+            AssignmentSubmission.student_id == current_user.id,
+            AssignmentSubmission.session_id.is_not(None),
+        )
+    )
+
+    sessions_query = (
         db.query(LearningSession)
         .filter(
             LearningSession.student_id == current_user.id,
             LearningSession.story_slug == story_slug,
             LearningSession.status == "completed",
         )
+    )
+
+    all_sessions = (
+        sessions_query
         .order_by(LearningSession.started_at.asc())
-        .limit(limit)
         .all()
     )
+    assignment_session_ids = {
+        sid for (sid,) in assignment_session_ids_query.all() if sid is not None
+    }
+
+    sessions: list[LearningSession] = []
+    for s in all_sessions:
+        is_assignment = _is_assignment_session(s, assignment_session_ids)
+        if learning_source == "assignment" and not is_assignment:
+            continue
+        if learning_source == "self" and is_assignment:
+            continue
+        sessions.append(s)
+
+    sessions = sessions[:limit]
 
     results = []
     for s in sessions:

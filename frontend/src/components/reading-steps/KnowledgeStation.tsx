@@ -4,6 +4,7 @@
  */
 import React, { useEffect } from 'react';
 import type { Story } from '../../types';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
 interface KnowledgeStationProps {
   story: Story;
@@ -12,7 +13,7 @@ interface KnowledgeStationProps {
 }
 
 const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) => {
-  const storageKey = `knowledge_viewed_${story.id}`;
+  const storageKey = scopedStepStorageKey('knowledge_viewed_', story.id);
 
   // Mark as viewed on mount; clear on finish
   useEffect(() => {

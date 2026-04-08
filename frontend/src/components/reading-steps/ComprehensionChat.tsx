@@ -17,6 +17,7 @@ import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
 import FloatingAIHelper from './FloatingAIHelper';
 import StrategyExercise from './StrategyExercise';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -48,7 +49,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   initialProgress,
   onProgressChange,
 }) => {
-  const completionKey = `comprehension_completion_${story.id}`;
+  const completionKey = scopedStepStorageKey('comprehension_completion_', story.id);
 
   const loadCompletion = (): TabCompletion => {
     try {

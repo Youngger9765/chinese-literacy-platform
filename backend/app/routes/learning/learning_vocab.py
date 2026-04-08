@@ -13,6 +13,7 @@ from ...auth.rate_limiter import ai_limit_5_per_min, ai_limit_10_per_min, ai_rat
 from ...database import get_db
 from ...models.user import User
 from ...services.ai_service import generate_example_sentences, validate_student_sentence
+from ...services.lesson_loader import get_lesson_by_title
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.example_sentence_cache import get_cached, set_cached
 from ...services.input_sanitizer import sanitize_ai_input
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 # ── Sentence Practice (Issue #109) ──────────────────────────────────────────
 
 class ExampleSentencesRequest(BaseModel):
-    character: str = Field(..., min_length=1, max_length=1, description="The Chinese character to generate sentences for")
+    word: str = Field(..., min_length=1, max_length=10, description="The Chinese vocabulary word to generate sentences for")
     story_title: str = Field(..., min_length=1, max_length=100)
 
 
@@ -40,7 +41,7 @@ class ExampleSentencesResponse(BaseModel):
 
 
 class ValidateSentenceRequest(BaseModel):
-    character: str = Field(..., min_length=1, max_length=1, description="The target character that must appear in the sentence")
+    word: str = Field(..., min_length=1, max_length=10, description="The target vocabulary word that must appear in the sentence")
     student_sentence: str = Field(..., min_length=1, max_length=200, description="The student's composed sentence")
     story_title: str = Field(..., min_length=1, max_length=100)
 
@@ -61,18 +62,18 @@ async def get_example_sentences(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Generate 2 AI example sentences for a vocabulary character.
+    """Generate 2 AI example sentences for a vocabulary word.
 
     Returns cached result if available (TTL 30 days) to avoid repeated Gemini
-    API calls for the same character + story (Issue #730).
+    API calls for the same word + story (Issue #730).
     Rate limited: 10 requests per minute per user/IP (cache miss only, Issue #911).
     """
     # 1. Cache hit — return immediately without calling AI (no rate limit)
-    cached = get_cached(story_title=payload.story_title, character=payload.character)
+    cached = get_cached(story_title=payload.story_title, word=payload.word)
     if cached is not None:
         logger.debug(
-            "Example sentence cache hit: char=%s story=%s source=%s",
-            payload.character,
+            "Example sentence cache hit: word=%s story=%s source=%s",
+            payload.word,
             payload.story_title,
             cached.get("source", "ai"),
         )
@@ -98,13 +99,13 @@ async def get_example_sentences(
     start_time = time.monotonic()
     try:
         result = await generate_example_sentences(
-            character=payload.character,
+            word=payload.word,
             story_title=payload.story_title,
         )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
     except Exception as e:
-        logger.error("Example sentence generation failed for char=%s: %s", payload.character, e)
+        logger.error("Example sentence generation failed for word=%s: %s", payload.word, e)
         raise HTTPException(status_code=503, detail="AI service unavailable")
 
     # Track AI usage (Issue #874)
@@ -132,7 +133,7 @@ async def get_example_sentences(
     try:
         set_cached(
             story_title=payload.story_title,
-            character=payload.character,
+            word=payload.word,
             result=result,
         )
     except Exception as exc:
@@ -155,37 +156,76 @@ async def validate_sentence(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Validate a student's composed sentence for a vocabulary character.
+    """Validate a student's composed sentence for a vocabulary word.
 
     Returns AI feedback on whether the sentence is grammatically correct
-    and uses the target character appropriately (Issue #109).
+    and uses the target word appropriately (Issue #109, #927).
     Rate limited: 10 requests per minute per user/IP.
     """
     # Sanitize student input before sending to AI
     safe_sentence, _ = sanitize_ai_input(payload.student_sentence, user_id=str(current_user.id))
     safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
 
-    # Basic check: target character must appear in the sentence
-    if payload.character not in safe_sentence:
+    # Basic check: target word must appear in the sentence
+    if payload.word not in safe_sentence:
         return ValidateSentenceResponse(
             is_correct=False,
-            feedback="你的句子裡沒有包含目標生字喔！",
-            suggestion=f"請記得在句子中使用「{payload.character}」這個字。",
+            feedback="你的句子裡沒有包含目標詞語喔！",
+            suggestion=f"請記得在句子中使用「{payload.word}」這個詞。",
         )
+
+    # Copy-paste detection: reject sentences lifted from the passage (#928)
+    import re
+
+    passage_sentences: list[str] = []
+    lesson = get_lesson_by_title(payload.story_title)
+    if lesson is None:
+        logger.warning("copy_detect: lesson not found for title=%r, skipping", payload.story_title)
+    if lesson:
+        full_text = lesson.get("full_text") or ""
+        paragraphs = lesson.get("paragraphs") or []
+
+        # Normalize: strip trailing punctuation for comparison
+        normalized = safe_sentence.strip().rstrip("。！？，、；：「」『』")
+
+        # Check: sentence is a substring of the passage (exact copy)
+        if normalized and len(normalized) >= 4 and normalized in full_text:
+            return ValidateSentenceResponse(
+                is_correct=False,
+                feedback="這個句子好像是從課文或例句中複製的喔！請試著用自己的話造一個新句子。",
+                suggestion=f"試著用「{payload.character}」描述你自己的生活經驗或想像一個新的情境。",
+            )
+
+        # Check: sentence matches a paragraph substring
+        for para in paragraphs:
+            if normalized and len(normalized) >= 4 and normalized in para:
+                return ValidateSentenceResponse(
+                    is_correct=False,
+                    feedback="這個句子和課文或例句內容太相似了，請用自己的話重新造句。",
+                    suggestion=f"嘗試用「{payload.character}」造一個和課文、例句不同情境的句子。",
+                )
+
+        # Extract passage sentences containing the target char for AI cross-reference
+        raw_sentences = re.split(r"[。！？]", full_text)
+        passage_sentences = [
+            s.strip() for s in raw_sentences
+            if payload.character in s and s.strip()
+        ][:5]
 
     start_time = time.monotonic()
     try:
         result = await validate_student_sentence(
-            character=payload.character,
+            word=payload.word,
             student_sentence=safe_sentence,
             story_title=safe_story_title,
+            passage_sentences=passage_sentences,
         )
     except TimeoutError:
         raise HTTPException(status_code=503, detail="AI service timeout")
     except Exception as e:
         logger.error(
-            "Sentence validation failed for char=%s sentence=%s: %s",
-            payload.character, payload.student_sentence[:50], e,
+            "Sentence validation failed for word=%s sentence=%s: %s",
+            payload.word, payload.student_sentence[:50], e,
         )
         raise HTTPException(status_code=503, detail="AI service unavailable")
 

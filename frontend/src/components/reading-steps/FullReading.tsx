@@ -9,6 +9,7 @@ import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { useResizablePanel } from '../../hooks/useResizablePanel';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
 import { saveReadingHistory } from '../../services/readingHistoryApi';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { useAuth } from '../../contexts/AuthContext';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts';
 
@@ -25,7 +26,7 @@ interface FullReadingProps {
 const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPanelWidthChange, onFinish, onBack }) => {
   const isMobile = useIsMobile();
   const { token } = useAuth();
-  const storageKey = `fullReading_progress_${story.id}`;
+  const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
 
   type SavedResult = { matchRate: number; feedback: string; diffTokens: DiffToken[]; cpm: number; durationMs: number; errorBreakdown: { correct: number; wrong: number; missing: number; extra: number } };
   const loadSaved = (): { result: SavedResult; transcript: string } | null => {

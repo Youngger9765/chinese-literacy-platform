@@ -14,12 +14,12 @@ import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
 import ExitTicket from './ExitTicket';
 import { trackLearningEvent } from '../../utils/analytics';
-import AIAnalysisSection from './AIAnalysisSection';
 import StarCelebration from '../gamification/StarCelebration';
 import { calcStarRating } from '../../utils/starRatingCalc';
 import GoalAchievementCard from '../ui/GoalAchievementCard';
 import RepeatedErrorAlertModal from '../student/RepeatedErrorAlertModal';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -172,7 +172,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   useEffect(() => {
     if (!story?.id) return;
     try {
-      localStorage.setItem(`report_viewed_${story.id}`, JSON.stringify({
+      localStorage.setItem(scopedStepStorageKey('report_viewed_', story.id), JSON.stringify({
         viewed: true,
         viewedAt: new Date().toISOString(),
         sessionId: dbSessionId,
@@ -265,7 +265,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   const scores: number[] = [];
   if (readingAttempt) scores.push(readingAttempt.accuracy);
   if (comprehensionResult) scores.push(Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100));
-  if (vocabResult) scores.push(vocabResult.totalChars > 0 ? Math.round((vocabResult.practicedChars.length / vocabResult.totalChars) * 100) : 100);
+  if (vocabResult) scores.push(vocabResult.totalWords > 0 ? Math.round((vocabResult.practicedWords.length / vocabResult.totalWords) * 100) : 100);
   if (dictationResult) scores.push(dictationResult.totalWords > 0 ? Math.round((dictationResult.correctCount / dictationResult.totalWords) * 100) : 0);
   if (fullReadingResult) scores.push(Math.round(fullReadingResult.matchRate * 100));
   const overallScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
@@ -742,37 +742,6 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         )}
       </Section>
 
-      {/* ============ 環節七：AI 詳細分析 (Issue #241, #415) ============ */}
-      <Section number={7} title="AI 詳細分析" defaultOpen={false} disabled={!readingAttempt && !fullReadingResult}>
-        {(readingAttempt || fullReadingResult) ? (
-          <AIAnalysisSection
-            storyTitle={story?.title ?? ''}
-            accuracy={accuracy}
-            cpm={fullReadingResult?.cpm ?? cpm}
-            errorChars={wrongTokens.map(t => t.expected)}
-            totalCharacters={
-              fullReadingResult?.errorBreakdown
-                ? (fullReadingResult.errorBreakdown.correct + fullReadingResult.errorBreakdown.wrong + fullReadingResult.errorBreakdown.missing + fullReadingResult.errorBreakdown.extra)
-                : (readingAttempt?.lineBreakdown?.reduce((sum, l) => sum + (l.diffTokens?.length ?? 0), 0) ?? 0)
-            }
-            dbSessionId={dbSessionId}
-            comprehensionScore={
-              comprehensionScores
-                ? comprehensionScores.comprehension_score
-                : comprehensionResult
-                ? Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)
-                : null
-            }
-            vocabPracticedCount={vocabResult?.practicedChars.length ?? null}
-            vocabTotalCount={vocabResult?.totalChars ?? null}
-            dictationCorrectCount={dictationResult?.correctCount ?? null}
-            dictationTotalCount={dictationResult?.totalWords ?? null}
-          />
-        ) : (
-          <p className="text-sm text-gray-400 text-center py-4">完成朗讀練習後可使用 AI 分析</p>
-        )}
-      </Section>
-
       {/* ============ 補充資訊：生字練習 + 聽寫練習 + 課文理解 ============ */}
       {(vocabResult || dictationResult || comprehensionResult) && (
         <div className="space-y-4">
@@ -789,15 +758,15 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div className="bg-accent h-2 rounded-full transition-all" style={{ width: vocabResult.totalChars > 0 ? `${Math.round((vocabResult.practicedChars.length / vocabResult.totalChars) * 100)}%` : '0%' }} />
+                      <div className="bg-accent h-2 rounded-full transition-all" style={{ width: vocabResult.totalWords > 0 ? `${Math.round((vocabResult.practicedWords.length / vocabResult.totalWords) * 100)}%` : '0%' }} />
                     </div>
-                    <span className="text-xs font-bold text-gray-600">{vocabResult.practicedChars.length}/{vocabResult.totalChars}</span>
+                    <span className="text-xs font-bold text-gray-600">{vocabResult.practicedWords.length}/{vocabResult.totalWords}</span>
                   </div>
-                  {vocabResult.practicedChars.length > 0 && (
+                  {vocabResult.practicedWords.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {vocabResult.practicedChars.map(ch => (
-                        <span key={ch} className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-1.5 py-0.5 rounded">
-                          {ch}
+                      {vocabResult.practicedWords.map(w => (
+                        <span key={w} className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-1.5 py-0.5 rounded">
+                          {w}
                         </span>
                       ))}
                     </div>
