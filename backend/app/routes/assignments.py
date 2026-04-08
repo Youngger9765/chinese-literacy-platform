@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 from ..auth.dependencies import get_current_user
 from ..database import get_db
 from ..models.assignment import Assignment, AssignmentSubmission
-from ..models.school import Classroom, ClassroomStudent
+from ..models.school import Classroom, ClassroomStudent, ClassroomText
 from ..models.session import LearningSession, CharacterError, DialogueTurn
 from ..models.text import Text
 from ..models.user import User, UserRole, Role
@@ -421,6 +421,25 @@ def create_assignment(
     )
     db.add(assignment)
     db.flush()  # get assignment.id
+
+    # Sync story_id to classroom_texts so the library page shows it (#997)
+    if resolved_story_id is not None:
+        existing_ct = (
+            db.query(ClassroomText)
+            .filter(
+                ClassroomText.classroom_id == classroom_id,
+                ClassroomText.text_id == resolved_story_id,
+                ClassroomText.deleted_at.is_(None),
+            )
+            .first()
+        )
+        if existing_ct is None:
+            db.add(ClassroomText(
+                classroom_id=classroom_id,
+                text_id=resolved_story_id,
+                assigned_by=current_user.id,
+                expires_at=payload.due_date,
+            ))
 
     # Bulk-create submissions for all enrolled students
     enrollments = (
