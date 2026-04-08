@@ -1,14 +1,14 @@
 """Add teacher review fields to learning_sessions (Issue #993)
 
 Revision ID: a1b2c3d4e5f6
-Revises: z6a7b8c9d0e1
+Revises: fk01idx02add03
 Create Date: 2026-04-08 12:00:00.000000
 """
 from alembic import op
 import sqlalchemy as sa
 
 revision = "a1b2c3d4e5f6"
-down_revision = "z6a7b8c9d0e1"
+down_revision = "fk01idx02add03"
 branch_labels = None
 depends_on = None
 
