@@ -14,7 +14,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis
 import { parseReadingBenchmark, getBenchmarkFeedback } from '../../utils/fluencyAnalyzer';
 import ExitTicket from './ExitTicket';
 import { trackLearningEvent } from '../../utils/analytics';
-import AIAnalysisSection from './AIAnalysisSection';
 import StarCelebration from '../gamification/StarCelebration';
 import { calcStarRating } from '../../utils/starRatingCalc';
 import GoalAchievementCard from '../ui/GoalAchievementCard';
@@ -739,37 +738,6 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             <p className="text-sm text-gray-400 font-bold">尚未完成課文理解對話</p>
             <p className="text-xs text-gray-300 mt-1">完成蘇格拉底式對話後，系統將評估你的三層次理解力</p>
           </div>
-        )}
-      </Section>
-
-      {/* ============ 環節七：AI 詳細分析 (Issue #241, #415) ============ */}
-      <Section number={7} title="AI 詳細分析" defaultOpen={false} disabled={!readingAttempt && !fullReadingResult}>
-        {(readingAttempt || fullReadingResult) ? (
-          <AIAnalysisSection
-            storyTitle={story?.title ?? ''}
-            accuracy={accuracy}
-            cpm={fullReadingResult?.cpm ?? cpm}
-            errorChars={wrongTokens.map(t => t.expected)}
-            totalCharacters={
-              fullReadingResult?.errorBreakdown
-                ? (fullReadingResult.errorBreakdown.correct + fullReadingResult.errorBreakdown.wrong + fullReadingResult.errorBreakdown.missing + fullReadingResult.errorBreakdown.extra)
-                : (readingAttempt?.lineBreakdown?.reduce((sum, l) => sum + (l.diffTokens?.length ?? 0), 0) ?? 0)
-            }
-            dbSessionId={dbSessionId}
-            comprehensionScore={
-              comprehensionScores
-                ? comprehensionScores.comprehension_score
-                : comprehensionResult
-                ? Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)
-                : null
-            }
-            vocabPracticedCount={vocabResult?.practicedWords.length ?? null}
-            vocabTotalCount={vocabResult?.totalWords ?? null}
-            dictationCorrectCount={dictationResult?.correctCount ?? null}
-            dictationTotalCount={dictationResult?.totalWords ?? null}
-          />
-        ) : (
-          <p className="text-sm text-gray-400 text-center py-4">完成朗讀練習後可使用 AI 分析</p>
         )}
       </Section>
 
