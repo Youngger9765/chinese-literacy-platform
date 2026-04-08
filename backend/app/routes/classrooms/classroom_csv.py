@@ -16,6 +16,7 @@ from ...schemas.classroom import BatchStudentError, CreatedStudentInfo, CsvUploa
 from ...auth.password import hash_password
 from .helpers import (
     check_email_domain,
+    create_submissions_for_new_student,
     get_classroom_or_404,
     require_owner_or_admin,
 )
@@ -222,6 +223,9 @@ async def upload_csv_students(
             )
             db.add(cs)
             db.flush()
+
+            # Back-fill submissions for active assignments (#996)
+            create_submissions_for_new_student(classroom_id, user.id, db)
 
             created.append(CreatedStudentInfo(
                 name=name,

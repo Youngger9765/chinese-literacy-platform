@@ -1,4 +1,5 @@
 """Shared helpers, constants, and permission checks for the classrooms module."""
+import logging
 import secrets
 import string
 
@@ -7,9 +8,12 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user  # noqa: F401 — re-exported for convenience
+from ...models.assignment import Assignment, AssignmentSubmission
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
 from ...models.user import Role, User, UserRole
 from ...schemas.classroom import ClassroomDetailResponse, ClassroomResponse, StudentInClassroomResponse
+
+logger = logging.getLogger(__name__)
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -151,6 +155,66 @@ def check_email_domain(email: str, school_domain: str | None) -> str | None:
     if email_domain != school_domain.lower().lstrip("@"):
         return f"學生 {email} 的 email 不屬於學校 domain ({school_domain})"
     return None
+
+
+# ── Late-join Assignment Submissions ─────────────────────────────────────────
+
+
+def create_submissions_for_new_student(
+    classroom_id: int, student_id: int, db: Session
+) -> int:
+    """Create AssignmentSubmission records for active assignments the student missed.
+
+    When a student joins a classroom after assignments have already been created,
+    they won't have submission records. This helper back-fills them so the student
+    can see and complete those assignments.
+
+    Returns the number of submissions created.
+    """
+    active_assignments = (
+        db.query(Assignment)
+        .filter(
+            Assignment.classroom_id == classroom_id,
+            Assignment.is_active == True,
+        )
+        .all()
+    )
+    if not active_assignments:
+        return 0
+
+    # Fetch any existing submissions for this student in this classroom
+    # (defensive: should be empty for a brand-new enrollment, but guard anyway)
+    existing_assignment_ids = set(
+        row[0]
+        for row in db.query(AssignmentSubmission.assignment_id)
+        .filter(
+            AssignmentSubmission.student_id == student_id,
+            AssignmentSubmission.assignment_id.in_(
+                [a.id for a in active_assignments]
+            ),
+        )
+        .all()
+    )
+
+    created = 0
+    for assignment in active_assignments:
+        if assignment.id in existing_assignment_ids:
+            continue
+        db.add(
+            AssignmentSubmission(
+                assignment_id=assignment.id,
+                student_id=student_id,
+                status="pending",
+            )
+        )
+        created += 1
+
+    if created:
+        logger.info(
+            "Created %d assignment submissions for late-joining student %d in classroom %d",
+            created, student_id, classroom_id,
+        )
+    return created
 
 
 # ── Response Converters ───────────────────────────────────────────────────────

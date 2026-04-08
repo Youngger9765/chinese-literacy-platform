@@ -11,6 +11,7 @@ from ...models.user import User
 from ...schemas.classroom import ClassroomJoinRequest, ClassroomResponse
 from .helpers import (
     classroom_to_response,
+    create_submissions_for_new_student,
     generate_join_code,
     get_classroom_or_404,
     require_owner_or_admin,
@@ -61,6 +62,11 @@ def join_classroom_by_code(
         student_id=current_user.id,
     )
     db.add(cs)
+    db.flush()
+
+    # Back-fill submissions for active assignments the student missed (#996)
+    create_submissions_for_new_student(classroom.id, current_user.id, db)
+
     db.commit()
     db.refresh(classroom)
     logger.info(
