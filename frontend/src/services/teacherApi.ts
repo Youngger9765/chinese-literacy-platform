@@ -749,3 +749,74 @@ export async function getClassroomErrorHeatmap(
   );
   return handleResponse<ClassroomErrorHeatmap>(res);
 }
+
+// --- Teacher Session Report + Comment (Issue #993) ---
+
+export interface TeacherSessionReport {
+  id: number;
+  student_id: number;
+  student_name: string;
+  story_slug: string | null;
+  story_title: string | null;
+  status: string;
+  accuracy: number | null;
+  overall_score: number | null;
+  reading_result: Record<string, unknown> | null;
+  comprehension_result: Record<string, unknown> | null;
+  vocab_result: Record<string, unknown> | null;
+  full_reading_result: Record<string, unknown> | null;
+  comprehension_score: number | null;
+  literal_score: number | null;
+  inferential_score: number | null;
+  evaluative_score: number | null;
+  comprehension_feedback: string | null;
+  ai_comment: string | null;
+  teacher_comment: string | null;
+  teacher_reviewed_at: string | null;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export async function fetchTeacherSessionReport(
+  token: string,
+  studentId: number,
+  sessionId: number,
+): Promise<TeacherSessionReport> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/sessions/${sessionId}/report`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return handleResponse<TeacherSessionReport>(res);
+}
+
+export async function saveTeacherComment(
+  token: string,
+  studentId: number,
+  sessionId: number,
+  comment: string,
+): Promise<{ teacher_comment: string; teacher_reviewed_at: string }> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/sessions/${sessionId}/comment`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify({ comment }),
+    },
+  );
+  return handleResponse(res);
+}
+
+export async function generateAIComment(
+  token: string,
+  studentId: number,
+  sessionId: number,
+): Promise<{ ai_comment: string }> {
+  const res = await fetch(
+    `${API_BASE}/api/teacher/students/${studentId}/sessions/${sessionId}/generate-ai-comment`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+    },
+  );
+  return handleResponse(res);
+}
