@@ -41,23 +41,40 @@ export class PolyphonicProcessor {
   /**
    * Load polyphonic data from the JSON file.
    * Call this once at app startup.
+   * Retries up to 3 times with exponential backoff (1s, 2s, 4s) on failure.
    */
   async loadPolyphonicData(): Promise<void> {
     if (this._loaded) return;
-    try {
-      const response = await fetch('/data/poyin_db.json');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const raw: Record<string, unknown> = await response.json();
 
-      if (!('data' in raw)) {
-        throw new Error('Polyphonic data is improperly formatted or missing key "data"');
+    const MAX_RETRIES = 3;
+    const BASE_DELAY_MS = 1000;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await fetch('/data/poyin_db.json');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const raw: Record<string, unknown> = await response.json();
+
+        if (!('data' in raw)) {
+          throw new Error('Polyphonic data is improperly formatted or missing key "data"');
+        }
+
+        this.polyphonicData = this.removeComments(raw) as unknown as PolyphonicData;
+        this._loaded = true;
+        return;
+      } catch (e) {
+        if (attempt < MAX_RETRIES) {
+          const delay = BASE_DELAY_MS * Math.pow(2, attempt);
+          console.warn(
+            `Failed to load polyphonic data (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying in ${delay}ms:`,
+            e,
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        } else {
+          console.error(`Failed to load polyphonic data after ${MAX_RETRIES + 1} attempts:`, e);
+          throw e;
+        }
       }
-
-      this.polyphonicData = this.removeComments(raw) as unknown as PolyphonicData;
-      this._loaded = true;
-    } catch (e) {
-      console.error('Failed to load polyphonic data:', e);
-      throw e;
     }
   }
 
