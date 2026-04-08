@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from ..auth.dependencies import get_current_user, require_role
 from ..database import get_db
 from ..models.user import User, UserRole, Role
-from ..schemas.user import UserResponse, UserRoleResponse
+from ..schemas.user import UserProfileUpdateRequest, UserResponse, UserRoleResponse
 from ..schemas.user_admin import (
     UserDetailResponse,
     UserListItem,
@@ -50,6 +50,61 @@ def get_me(
         .all()
     )
 
+    roles = [
+        UserRoleResponse(
+            role_name=role.name,
+            role_display_name=role.display_name,
+            scope_type=ur.scope_type,
+            scope_id=ur.scope_id,
+        )
+        for ur, role in user_roles
+    ]
+
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        name=current_user.name,
+        phone=current_user.phone,
+        avatar_url=current_user.avatar_url,
+        is_active=current_user.is_active,
+        email_verified=current_user.email_verified,
+        onboarding_completed=current_user.onboarding_completed,
+        last_login_at=current_user.last_login_at,
+        terms_accepted_at=current_user.terms_accepted_at,
+        terms_version=current_user.terms_version,
+        created_at=current_user.created_at,
+        roles=roles,
+    )
+
+
+@router.patch("/users/me", response_model=UserResponse)
+def update_me(
+    body: UserProfileUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update the current user's profile. Only provided fields are updated."""
+    updated = False
+    if body.name is not None:
+        current_user.name = body.name
+        updated = True
+    if body.avatar_url is not None:
+        current_user.avatar_url = body.avatar_url
+        updated = True
+
+    if not updated:
+        raise HTTPException(status_code=422, detail="No fields to update.")
+
+    db.commit()
+    db.refresh(current_user)
+
+    # Build roles for response
+    user_roles = (
+        db.query(UserRole, Role)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(UserRole.user_id == current_user.id, UserRole.is_active == True)
+        .all()
+    )
     roles = [
         UserRoleResponse(
             role_name=role.name,

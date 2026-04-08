@@ -36,6 +36,16 @@ class UserResponse(BaseModel):
         return self
 
 
+class UserProfileUpdateRequest(BaseModel):
+    """Request body for PATCH /users/me. All fields are optional;
+    only provided (non-None) fields will be updated."""
+
+    name: str | None = None
+    avatar_url: str | None = None
+
+    model_config = {"json_schema_extra": {"example": {"name": "新名字"}}}
+
+
 class StudentProfileResponse(BaseModel):
     school_id: int
     student_number: str | None = None
