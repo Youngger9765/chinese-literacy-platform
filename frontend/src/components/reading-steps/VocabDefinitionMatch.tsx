@@ -19,6 +19,7 @@ import React, {
   useState,
   useMemo,
 } from 'react';
+import { Lock } from 'lucide-react';
 import { Story, VocabItem } from '../../types';
 
 /* ------------------------------------------------------------------ */
@@ -313,7 +314,7 @@ function StageStatus({
 }) {
   const step1Active = current === 'multiple-choice';
   const step2Active = current === 'drag-drop';
-  const step2Locked = !mcDone && !step2Active;
+  const step2Locked = !mcDone;
 
   return (
     <div className="flex items-center justify-center gap-0 mb-6 max-w-sm mx-auto select-none">
@@ -357,7 +358,7 @@ function StageStatus({
                 : 'bg-gray-100 border-gray-200 text-gray-300'
           }`}
         >
-          {dragDropDone ? '✓' : step2Locked ? '🔒' : '2'}
+          {dragDropDone ? '✓' : step2Locked ? <Lock size={14} /> : '2'}
         </div>
         <span
           className={`text-xs font-semibold whitespace-nowrap ${
