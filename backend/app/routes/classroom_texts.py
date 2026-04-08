@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
+from ..models.assignment import Assignment
 from ..models.school import Classroom, ClassroomStudent, ClassroomText
 from ..models.user import User
 from ..services.lesson_loader import get_lesson_by_id
@@ -135,7 +136,7 @@ def list_classroom_texts(
         if not enrolled:
             raise
 
-    assignments = (
+    text_rows = (
         db.query(ClassroomText)
         .filter(
             ClassroomText.classroom_id == classroom_id,
@@ -145,8 +146,11 @@ def list_classroom_texts(
         .all()
     )
 
+    # Collect text_ids already present from classroom_texts
+    seen_text_ids: set[str] = set()
     results = []
-    for ct in assignments:
+    for ct in text_rows:
+        seen_text_ids.add(ct.text_id)
         story = get_lesson_by_id(int(ct.text_id))
         title = story["title"] if story else f"Unknown ({ct.text_id})"
         results.append(
@@ -158,6 +162,35 @@ def list_classroom_texts(
                 expires_at=ct.expires_at,
             )
         )
+
+    # Also include YAML stories referenced by active assignments but NOT
+    # already present in classroom_texts (fixes #997: library shows 0 when
+    # assignments exist but classroom_texts is empty).
+    assignment_stories = (
+        db.query(Assignment)
+        .filter(
+            Assignment.classroom_id == classroom_id,
+            Assignment.story_id.isnot(None),
+            Assignment.is_active.is_(True),
+        )
+        .all()
+    )
+    for asn in assignment_stories:
+        if asn.story_id in seen_text_ids:
+            continue
+        seen_text_ids.add(asn.story_id)
+        story = get_lesson_by_id(int(asn.story_id))
+        title = story["title"] if story else f"Unknown ({asn.story_id})"
+        results.append(
+            ClassroomTextResponse(
+                id=asn.id,
+                text_id=asn.story_id,
+                title=title,
+                assigned_at=asn.created_at,
+                expires_at=asn.due_date,
+            )
+        )
+
     return results
 
 
