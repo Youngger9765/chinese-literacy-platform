@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -25,7 +25,7 @@ class SessionSummaryResponse(BaseModel):
     id: int
     story_slug: str | None
     story_title: str | None = None  # human-readable title, e.g. "第六課 牛頓的故事"
-    learning_source: str | None = None  # "self" | "assignment"
+    learning_source: Literal["self", "assignment"] | None = None
     status: str
     current_step: int
     accuracy: float | None

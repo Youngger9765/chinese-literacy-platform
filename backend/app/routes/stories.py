@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models.user import User
-from ..auth.dependencies import get_optional_user, get_current_user
+from ..auth.dependencies import get_current_user
 from ..auth.rate_limiter import ai_rate_limiter, get_client_key
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
 from ..services.ai_service import generate_story_structure
@@ -45,8 +45,6 @@ def list_stories(
     search: str | None = Query(None, max_length=100),
     page: int = Query(1, ge=1),
     page_size: int = Query(60, ge=1, le=100),
-    user: User | None = Depends(get_optional_user),
-    db: Session = Depends(get_db),
 ):
     """List published platform stories with optional filters.
 
@@ -55,8 +53,6 @@ def list_stories(
     Note: classroom-specific filtering is handled by
     GET /api/classrooms/{id}/texts and the frontend classroom library mode.
     """
-    _ = user  # optional auth retained for future personalization hooks
-    _ = db
     results = search_lessons(grade=grade, genre=genre, category=category, search=search)
 
     total = len(results)

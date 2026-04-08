@@ -3,7 +3,7 @@
 Handles creating, listing, getting, and updating learning sessions.
 """
 import logging
-from typing import Optional
+from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -98,9 +98,8 @@ def list_my_sessions(
         None,
         description="Filter by a specific story_slug",
     ),
-    learning_source: Optional[str] = Query(
+    learning_source: Optional[Literal["self", "assignment"]] = Query(
         None,
-        pattern=r"^(self|assignment)$",
         description="Filter by session source: self practice or assignment",
     ),
     current_user: User = Depends(get_current_user),
@@ -170,10 +169,9 @@ def list_my_sessions(
 def get_reading_history(
     story_slug: str = Query(..., description="Story slug to get reading history for"),
     limit: int = Query(50, ge=1, le=100),
-    learning_source: str = Query(
-        "self",
-        pattern=r"^(self|assignment|all)$",
-        description="History source filter. Default self to keep assignment sessions separated.",
+    learning_source: Literal["self", "assignment", "all"] = Query(
+        "all",
+        description="History source filter. Default all for backward compatibility.",
     ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),

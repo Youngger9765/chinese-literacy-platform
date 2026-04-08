@@ -17,6 +17,7 @@ import { hasRole } from '../../services/authApi';
 import { clearActiveSession } from '../../services/api';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { PARENT_PORTAL_ENABLED } from '../../config/featureFlags';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import StoryLibrary from '../student/StoryLibrary';
 import WriteCharacter from '../../components/stroke-order/WriteCharacter';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
@@ -26,6 +27,18 @@ const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
 const SELF_DB_SESSION_KEY_PREFIX = 'self-db-session-';
 const SELF_PRACTICE_COMPLETED_KEY_PREFIX = 'self-practice-completed-';
+const SELF_PRACTICE_SCOPED_KEY_PREFIXES = [
+  'tutor_completed_',
+  'liveTutor_progress_',
+  'annotations_',
+  'comprehension_completion_',
+  'vocabPractice_progress_',
+  'vocabDef_progress_',
+  'wordSearch_progress_',
+  'knowledge_viewed_',
+  'fullReading_progress_',
+  'report_viewed_',
+];
 
 // Lazy-loaded — only needed when route is active
 const ClassroomDetail = lazy(() => import('../teacher/ClassroomDetail'));
@@ -60,6 +73,7 @@ export const LibraryPage: React.FC = () => {
   const classroomId = searchParams.get('classroom');
   const classroomIdNum = classroomId ? parseInt(classroomId, 10) : null;
   const [showResumePrompt, setShowResumePrompt] = useState(true);
+  const [restartConfirmStory, setRestartConfirmStory] = useState<Story | null>(null);
 
   const clearAssignmentContext = (storyId: string) => {
     try {
@@ -92,6 +106,10 @@ export const LibraryPage: React.FC = () => {
   const clearSelfPracticeProgress = (storyId: string) => {
     try { sessionStorage.removeItem(`${SELF_DB_SESSION_KEY_PREFIX}${storyId}`); } catch { /* non-fatal */ }
     try { sessionStorage.removeItem(`db-session-${storyId}`); } catch { /* non-fatal */ }
+    for (const prefix of SELF_PRACTICE_SCOPED_KEY_PREFIXES) {
+      try { localStorage.removeItem(scopedStepStorageKey(prefix, storyId)); } catch { /* non-fatal */ }
+    }
+    // Legacy keys cleanup to avoid carrying pre-scope progress forward.
     try { localStorage.removeItem(`tutor_completed_${storyId}`); } catch { /* non-fatal */ }
     try { localStorage.removeItem(`liveTutor_progress_${storyId}`); } catch { /* non-fatal */ }
     try { localStorage.removeItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${storyId}`); } catch { /* non-fatal */ }
@@ -100,8 +118,26 @@ export const LibraryPage: React.FC = () => {
     }
   };
 
+  const cleanupAssignmentScopedProgressKeys = (storyId: string) => {
+    const assignmentScopedFragment = `${storyId}__a_`;
+    const keysToRemove: string[] = [];
+
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (!key.includes(assignmentScopedFragment)) continue;
+      if (!SELF_PRACTICE_SCOPED_KEY_PREFIXES.some((prefix) => key.startsWith(prefix))) continue;
+      keysToRemove.push(key);
+    }
+
+    keysToRemove.forEach((key) => {
+      try { localStorage.removeItem(key); } catch { /* non-fatal */ }
+    });
+  };
+
   const handleSelectStory = async (story: Story) => {
     clearAssignmentContext(story.id);
+    cleanupAssignmentScopedProgressKeys(story.id);
 
     let isCompletedBefore = false;
     try {
@@ -111,14 +147,22 @@ export const LibraryPage: React.FC = () => {
     }
 
     if (isCompletedBefore) {
-      const shouldRestart = window.confirm('你已完成過這篇課文，要重新練習嗎？');
-      if (!shouldRestart) {
-        return;
-      }
-      clearSelfPracticeProgress(story.id);
+      setRestartConfirmStory(story);
+      return;
     }
 
     navigate(`/learn/${story.id}/intro`);
+  };
+
+  const handleConfirmRestart = () => {
+    if (!restartConfirmStory) return;
+    clearSelfPracticeProgress(restartConfirmStory.id);
+    navigate(`/learn/${restartConfirmStory.id}/intro`);
+    setRestartConfirmStory(null);
+  };
+
+  const handleCancelRestart = () => {
+    setRestartConfirmStory(null);
   };
 
   return (
@@ -126,12 +170,56 @@ export const LibraryPage: React.FC = () => {
       {showResumePrompt && (
         <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
       )}
+      {restartConfirmStory && (
+        <RestartPracticeConfirmModal
+          storyTitle={restartConfirmStory.title}
+          onConfirm={handleConfirmRestart}
+          onCancel={handleCancelRestart}
+        />
+      )}
       <div className="mt-4">
         <StoryLibrary onStartReading={handleSelectStory} classroomId={classroomIdNum} />
       </div>
     </div>
   );
 };
+
+interface RestartPracticeConfirmModalProps {
+  storyTitle: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+const RestartPracticeConfirmModal: React.FC<RestartPracticeConfirmModalProps> = ({
+  storyTitle,
+  onConfirm,
+  onCancel,
+}) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" role="dialog" aria-modal="true" aria-label="確認重新練習">
+    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 space-y-4">
+      <h3 className="text-lg font-bold text-gray-900">重新練習確認</h3>
+      <p className="text-sm text-gray-600">
+        你已完成過「<strong>{storyTitle}</strong>」，要清除目前自學進度並重新開始嗎？
+      </p>
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
+        >
+          取消
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          className="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent-hover rounded-lg"
+        >
+          重新練習
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 /** Write character page. */
 export const WritePage: React.FC = () => {
