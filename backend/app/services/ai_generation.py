@@ -437,6 +437,10 @@ async def generate_teacher_comment(
     comprehension_score: float | None = None,
 ) -> str:
     """Generate an AI comment for a learning session to assist teacher review (Issue #993)."""
+    # Don't generate if there's no meaningful data
+    if accuracy is None and cpm is None and comprehension_score is None:
+        return ""
+
     parts = [f"課文：{sanitize_ai_input(story_title[:100])[0]}"]
     if accuracy is not None:
         parts.append(f"朗讀正確率：{accuracy:.0f}%")

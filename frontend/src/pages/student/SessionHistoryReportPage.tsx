@@ -142,6 +142,7 @@ const SessionHistoryReportPage: React.FC = () => {
   const [story, setStory] = useState<Story | null>(null);
   const [comprehensionScores, setComprehensionScores] = useState<ComprehensionScoreResult | null>(null);
   const [teacherReviewedAt, setTeacherReviewedAt] = useState<string | null>(null);
+  const [teacherComment, setTeacherComment] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -162,6 +163,7 @@ const SessionHistoryReportPage: React.FC = () => {
         setSession(buildLearningSession(detail));
         setComprehensionScores(buildComprehensionScores(detail));
         setTeacherReviewedAt(detail.teacher_reviewed_at ?? null);
+        setTeacherComment(detail.teacher_comment ?? null);
 
         // Try to load the Story for AssessmentReport (best-effort — non-blocking)
         if (detail.story_slug) {
@@ -200,11 +202,19 @@ const SessionHistoryReportPage: React.FC = () => {
   return (
     <div className="p-8 max-w-4xl mx-auto w-full">
       {teacherReviewedAt && (
-        <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          老師已查看（{new Date(teacherReviewedAt).toLocaleDateString('zh-TW')}）
+        <div className="mb-4 space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            老師已查看（{new Date(teacherReviewedAt).toLocaleDateString('zh-TW')}）
+          </div>
+          {teacherComment && (
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+              <p className="text-xs font-semibold text-purple-700 mb-1">老師評語</p>
+              <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">{teacherComment}</p>
+            </div>
+          )}
         </div>
       )}
       <AssessmentReport

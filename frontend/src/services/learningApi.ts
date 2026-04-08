@@ -398,6 +398,7 @@ export interface SessionDetailResponse {
   evaluative_score: number | null;
   comprehension_feedback: string | null;
   teacher_reviewed_at: string | null;
+  teacher_comment: string | null;
 }
 
 export async function fetchSessionReport(
