@@ -18,6 +18,42 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: 'graded', label: '已批改' },
 ];
 
+type SortKey = 'newest' | 'due_asc' | 'score_desc';
+
+interface SortOption {
+  key: SortKey;
+  label: string;
+  compareFn: (a: StudentAssignmentResponse, b: StudentAssignmentResponse) => number;
+}
+
+const SORT_OPTIONS: SortOption[] = [
+  {
+    key: 'newest',
+    label: '最新指派',
+    compareFn: (a, b) => b.assignment_id - a.assignment_id,
+  },
+  {
+    key: 'due_asc',
+    label: '截止日期（由近到遠）',
+    compareFn: (a, b) => {
+      if (!a.due_date && !b.due_date) return 0;
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+    },
+  },
+  {
+    key: 'score_desc',
+    label: '分數（高到低）',
+    compareFn: (a, b) => {
+      if (a.score == null && b.score == null) return 0;
+      if (a.score == null) return 1;
+      if (b.score == null) return -1;
+      return b.score - a.score;
+    },
+  },
+];
+
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
 
@@ -29,6 +65,7 @@ const MyAssignments: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterTab>('pending');
+  const [sortKey, setSortKey] = useState<SortKey>('newest');
   const [startingId, setStartingId] = useState<number | null>(null);
 
   const assignmentSteps = useMemo(
@@ -77,15 +114,19 @@ const MyAssignments: React.FC = () => {
     loadAssignments();
   }, [loadAssignments]);
 
-  const filteredAssignments = assignments.filter((a) => {
-    if (activeFilter === 'pending') {
-      return a.status === 'pending' || a.status === 'in_progress';
-    }
-    if (activeFilter === 'completed') {
-      return a.status === 'submitted';
-    }
-    return a.status === 'graded';
-  });
+  const filteredAssignments = useMemo(() => {
+    const filtered = assignments.filter((a) => {
+      if (activeFilter === 'pending') {
+        return a.status === 'pending' || a.status === 'in_progress';
+      }
+      if (activeFilter === 'completed') {
+        return a.status === 'submitted' || a.status === 'graded';
+      }
+      return true;
+    });
+    const sortOption = SORT_OPTIONS.find((o) => o.key === sortKey);
+    return sortOption ? [...filtered].sort(sortOption.compareFn) : filtered;
+  }, [assignments, activeFilter, sortKey]);
 
   const handleStart = async (assignmentId: number) => {
     if (!token) return;
@@ -326,8 +367,8 @@ const MyAssignments: React.FC = () => {
           <p className="text-xs text-gray-500 mt-0.5">完成老師指派的學習任務</p>
         </div>
 
-        {/* Filter tabs */}
-        <div className="border-b border-gray-200">
+        {/* Filter tabs + sort */}
+        <div className="flex items-center justify-between gap-2 border-b border-gray-200">
           <nav className="flex -mb-px" aria-label="Filter tabs">
             {FILTER_TABS.map((tab) => (
               <button
@@ -343,6 +384,18 @@ const MyAssignments: React.FC = () => {
               </button>
             ))}
           </nav>
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            className="mb-px text-xs text-gray-600 border border-gray-200 rounded-md px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
+            aria-label="排序方式"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.key} value={opt.key}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Error */}
