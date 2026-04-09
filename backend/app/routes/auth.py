@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from ..auth.classroom_check import compute_has_classroom
 from ..auth.dependencies import get_current_user
 from ..auth.jwt import create_access_token
 from ..auth.password import hash_password, verify_password
@@ -11,7 +12,7 @@ from ..auth.rate_limiter import InMemoryRateLimiter
 from ..config import settings
 from ..database import get_db
 from ..models.user import User, UserRole, Role
-from ..models.school import School, ClassroomStudent
+from ..models.school import School
 from ..schemas.auth import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
@@ -41,41 +42,6 @@ PASSWORD_RESET_TOKEN_BYTES = 32
 PASSWORD_RESET_EXPIRY_HOURS = 1
 EMAIL_VERIFICATION_TOKEN_BYTES = 32
 
-
-def _has_active_role(db: Session, user_id: int, role_name: str) -> bool:
-    """Return whether the user has an active role with the given name."""
-    return (
-        db.query(UserRole)
-        .join(Role, UserRole.role_id == Role.id)
-        .filter(
-            UserRole.user_id == user_id,
-            UserRole.is_active == True,
-            Role.name == role_name,
-        )
-        .first()
-        is not None
-    )
-
-
-def _compute_has_classroom(db: Session, user_id: int) -> bool:
-    """Return True if user is not a student OR if they belong to at least one classroom.
-
-    Issue #457: students who are not yet enrolled in any classroom should see a
-    friendly waiting screen on the frontend instead of the full dashboard.
-    Teachers, admins, and all other roles always return True (not gated).
-    """
-    is_student = _has_active_role(db, user_id, "student")
-    if not is_student:
-        # Non-students (teachers, admins, parents, etc.) are never gated
-        return True
-
-    # Student — check if enrolled in at least one classroom
-    enrolled = (
-        db.query(ClassroomStudent)
-        .filter(ClassroomStudent.student_id == user_id)
-        .first()
-    )
-    return enrolled is not None
 
 
 def _ensure_parent_login_allowed(user: User, db: Session) -> None:
@@ -307,7 +273,7 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
 
     # Issue #457: determine whether this user has at least one classroom.
     # Only applies to students — teachers and admins always get True.
-    has_classroom = _compute_has_classroom(db, user.id)
+    has_classroom = compute_has_classroom(db, user.id)
 
     token = create_access_token(user.id)
     return TokenResponse(

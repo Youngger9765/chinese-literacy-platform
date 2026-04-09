@@ -31,3 +31,33 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
 
   return <>{children}</>;
 };
+
+/**
+ * Issue #457: redirect student users without a classroom to /no-teacher.
+ *
+ * Only active when teacherGatingEnforced is true (ENFORCE_TEACHER_GATING env var).
+ * Teachers, admins, and other non-student roles are never gated.
+ * The /no-teacher, /join, /profile, and /change-password pages are exempt
+ * so the user can still join a classroom or manage their account.
+ */
+export const StudentClassroomGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading, hasClassroom, teacherGatingEnforced } = useAuth();
+  const location = useLocation();
+
+  // Exempt paths — always accessible even without a classroom
+  const exemptPaths = ['/no-teacher', '/join', '/profile', '/change-password', '/privacy', '/help'];
+  const isExempt = exemptPaths.some((p) => location.pathname.startsWith(p));
+
+  if (isLoading) return <AuthLoadingSpinner />;
+
+  if (
+    isAuthenticated &&
+    teacherGatingEnforced &&
+    !hasClassroom &&
+    !isExempt
+  ) {
+    return <Navigate to="/no-teacher" replace />;
+  }
+
+  return <>{children}</>;
+};
