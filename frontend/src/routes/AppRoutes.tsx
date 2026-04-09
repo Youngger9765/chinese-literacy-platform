@@ -76,6 +76,9 @@ const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
 const HelpPage = lazy(() => import('../pages/HelpPage'));
 
+// ToS consent page (issue #1013)
+const TermsOfService = lazy(() => import('../pages/app/TermsOfService'));
+
 // ---------------------------------------------------------------------------
 // StepRoute — wraps a learning step page in StepErrorBoundary.
 // The `nextPath` prop wires the "跳過此步驟" button to navigate to the next step.
@@ -135,6 +138,16 @@ const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <ChangePasswordPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Terms of Service consent — shown to all new users before accessing the app (issue #1013) */}
+      <Route
+        path="/terms"
+        element={
+          <ProtectedRoute>
+            <TermsOfService />
           </ProtectedRoute>
         }
       />

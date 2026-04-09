@@ -21,13 +21,18 @@ export const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ child
   return <>{children}</>;
 };
 
-/** Redirect unauthenticated users to /login. */
+/** Redirect unauthenticated users to /login. Redirect ToS-pending users to /terms. */
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, needsTermsAcceptance } = useAuth();
   const location = useLocation();
 
   if (isLoading) return <AuthLoadingSpinner />;
   if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />;
+
+  // ToS gate: redirect to /terms if user hasn't accepted yet (except when already on /terms)
+  if (needsTermsAcceptance && location.pathname !== '/terms') {
+    return <Navigate to="/terms" replace />;
+  }
 
   return <>{children}</>;
 };
