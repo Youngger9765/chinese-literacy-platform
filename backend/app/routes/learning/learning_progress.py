@@ -13,7 +13,9 @@ from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
 from ...services.learning_stats_service import get_completed_story_count
+from ...services.lesson_loader import get_lesson_by_id
 from ...services.stuck_detection_service import detect_stuck_points
+from ...utils.slug import normalize_story_slug
 from ._helpers import verify_student_access
 
 router = APIRouter()
@@ -227,11 +229,13 @@ def get_student_progress(
         .all()
     )
 
-    # Keep only the most recent session per story_slug
+    # Keep only the most recent session per story_slug (normalized to deduplicate
+    # legacy formats like "L06" vs "6" vs Chinese title — Issue #985)
     seen: set[str] = set()
     latest_per_text: list[LearningSession] = []
     for s in sessions:
-        slug = s.story_slug or f"session-{s.id}"
+        raw_slug = s.story_slug or f"session-{s.id}"
+        slug = normalize_story_slug(raw_slug) if s.story_slug else raw_slug
         if slug not in seen:
             seen.add(slug)
             latest_per_text.append(s)
@@ -240,7 +244,8 @@ def get_student_progress(
     scores: list[float] = []
 
     for s in latest_per_text:
-        slug = s.story_slug or f"session-{s.id}"
+        raw_slug = s.story_slug or f"session-{s.id}"
+        slug = normalize_story_slug(raw_slug) if s.story_slug else raw_slug
         step_statuses = _compute_step_completion(s)
         completed_count = sum(1 for v in step_statuses.values() if v == "completed")
         completion_pct = round(completed_count / 6 * 100)
@@ -259,10 +264,17 @@ def get_student_progress(
         if s.overall_score is not None:
             scores.append(s.overall_score)
 
-        # Resolve human-readable title from the related Text record if available
+        # Resolve human-readable title from the related Text record or YAML lessons
         story_title: str | None = None
         if s.text is not None:
             story_title = s.text.title
+        elif s.story_slug:
+            try:
+                lesson = get_lesson_by_id(int(slug))
+                if lesson:
+                    story_title = lesson["title"]
+            except (ValueError, TypeError):
+                pass
 
         texts.append(TextProgressItem(
             story_slug=slug,

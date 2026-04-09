@@ -5,46 +5,46 @@ endpoints always return consistent numbers.
 """
 from __future__ import annotations
 
-from sqlalchemy import func as sqlfunc
 from sqlalchemy.orm import Session
 
 from ..models.session import LearningSession
+from ..utils.slug import normalize_story_slug
+
+
+def _completed_slugs_raw(db: Session, student_id: int) -> list[str]:
+    """Fetch raw story_slug values for all completed sessions of a student."""
+    rows = (
+        db.query(LearningSession.story_slug)
+        .filter(
+            LearningSession.student_id == student_id,
+            LearningSession.status == "completed",
+            LearningSession.story_slug.isnot(None),
+        )
+        .distinct()
+        .all()
+    )
+    return [r[0] for r in rows if r[0]]
 
 
 def get_completed_story_count(db: Session, student_id: int) -> int:
     """Return the number of distinct stories a student has completed.
 
-    Canonical definition: COUNT(DISTINCT story_slug) FROM learning_sessions
-    WHERE student_id = ? AND status = 'completed' AND story_slug IS NOT NULL.
-
-    This is the single source of truth used by the dashboard, progress, and
-    gamification endpoints to ensure they all report the same value.
+    Normalizes slugs so that legacy formats (e.g. "L06", Chinese titles)
+    are not double-counted with the canonical numeric format ("6").
+    Issue #985.
     """
-    result = (
-        db.query(sqlfunc.count(sqlfunc.distinct(LearningSession.story_slug)))
-        .filter(
-            LearningSession.student_id == student_id,
-            LearningSession.status == "completed",
-            LearningSession.story_slug.isnot(None),
-        )
-        .scalar()
-    )
-    return int(result or 0)
+    raw_slugs = _completed_slugs_raw(db, student_id)
+    normalized = {normalize_story_slug(s) for s in raw_slugs}
+    return len(normalized)
 
 
 def get_completed_story_slugs(db: Session, student_id: int) -> list[str]:
-    """Return the distinct story slugs the student has completed.
+    """Return the distinct normalized story slugs the student has completed.
 
     Same canonical filter as :func:`get_completed_story_count`; the dashboard
     uses the slug list while other endpoints use just the count.
+    Issue #985: normalizes slugs to avoid duplicates from legacy formats.
     """
-    rows = (
-        db.query(sqlfunc.distinct(LearningSession.story_slug))
-        .filter(
-            LearningSession.student_id == student_id,
-            LearningSession.status == "completed",
-            LearningSession.story_slug.isnot(None),
-        )
-        .all()
-    )
-    return [r[0] for r in rows]
+    raw_slugs = _completed_slugs_raw(db, student_id)
+    normalized = sorted({normalize_story_slug(s) for s in raw_slugs})
+    return normalized
