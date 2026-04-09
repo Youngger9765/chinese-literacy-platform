@@ -18,6 +18,7 @@ import StarCelebration from '../gamification/StarCelebration';
 import { calcStarRating } from '../../utils/starRatingCalc';
 import GoalAchievementCard from '../ui/GoalAchievementCard';
 import RepeatedErrorAlertModal from '../student/RepeatedErrorAlertModal';
+import RecommendedStories from '../student/RecommendedStories';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
@@ -920,6 +921,18 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             )}
           </div>
         </Section>
+      )}
+
+      {/* ============ AI 推薦下一篇 (#1015) ============ */}
+      {!readOnly && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-200" />
+            <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">接下來讀什麼？</span>
+            <div className="h-px flex-1 bg-gray-200" />
+          </div>
+          <RecommendedStories />
+        </div>
       )}
 
       {/* CTA */}
