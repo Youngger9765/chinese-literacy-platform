@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     # False (default): auto-verify on registration — existing flow unchanged.
     # True: new registrations get email_verified=False and must click a link before login.
     require_email_verification: bool = False
+    # Teacher-gating (issue #457).
+    # False (default): students without a classroom can still access the platform.
+    # True: students without a classroom are redirected to the "no teacher" waiting screen.
+    # Flip via Cloud Run env var ENFORCE_TEACHER_GATING=true when ready to enforce.
+    enforce_teacher_gating: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

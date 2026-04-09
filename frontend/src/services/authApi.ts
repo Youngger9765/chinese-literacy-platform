@@ -22,6 +22,10 @@ export interface AuthUser {
   terms_accepted: boolean;
   terms_accepted_at: string | null;
   terms_version: string | null;
+  /** Issue #457: false only for students with no classroom enrollment. */
+  has_classroom: boolean;
+  /** Issue #457: mirrors ENFORCE_TEACHER_GATING env var on the backend. */
+  teacher_gating_enforced: boolean;
 }
 
 /** Check if user has a specific role (ignores scope). */

@@ -27,6 +27,13 @@ class UserResponse(BaseModel):
     terms_accepted: bool = False
     created_at: datetime
     roles: list[UserRoleResponse] = []
+    # Issue #457: classroom membership flag.
+    # True for non-students and for students enrolled in at least one classroom.
+    # False only for students with no classroom enrollment.
+    has_classroom: bool = True
+    # Issue #457: whether the teacher-gating feature is active (reads ENFORCE_TEACHER_GATING).
+    # Frontend uses this to decide whether to redirect to the waiting screen.
+    teacher_gating_enforced: bool = False
 
     model_config = {"from_attributes": True}
 

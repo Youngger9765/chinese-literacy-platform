@@ -5,7 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, joinedload, selectinload
 
+from ..auth.classroom_check import compute_has_classroom
 from ..auth.dependencies import get_current_user, require_role
+from ..config import settings
 from ..database import get_db
 from ..models.user import User, UserRole, Role
 from ..schemas.user import UserResponse, UserRoleResponse
@@ -56,7 +58,13 @@ def get_me(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get current authenticated user with their roles."""
+    """Get current authenticated user with their roles.
+
+    Also includes issue #457 fields:
+    - has_classroom: True unless user is a student with no classroom enrollment.
+    - teacher_gating_enforced: mirrors the ENFORCE_TEACHER_GATING env var so the
+      frontend knows whether to enforce the classroom gate.
+    """
     user_roles = (
         db.query(UserRole, Role)
         .join(Role, UserRole.role_id == Role.id)
@@ -74,6 +82,8 @@ def get_me(
         for ur, role in user_roles
     ]
 
+    has_classroom = compute_has_classroom(db, current_user.id)
+
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
@@ -88,6 +98,8 @@ def get_me(
         terms_version=current_user.terms_version,
         created_at=current_user.created_at,
         roles=roles,
+        has_classroom=has_classroom,
+        teacher_gating_enforced=settings.enforce_teacher_gating,
     )
 
 
