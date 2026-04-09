@@ -193,7 +193,7 @@ async def validate_sentence(
             return ValidateSentenceResponse(
                 is_correct=False,
                 feedback="這個句子好像是從課文或例句中複製的喔！請試著用自己的話造一個新句子。",
-                suggestion=f"試著用「{payload.character}」描述你自己的生活經驗或想像一個新的情境。",
+                suggestion=f"試著用「{payload.word}」描述你自己的生活經驗或想像一個新的情境。",
             )
 
         # Check: sentence matches a paragraph substring
@@ -202,14 +202,14 @@ async def validate_sentence(
                 return ValidateSentenceResponse(
                     is_correct=False,
                     feedback="這個句子和課文或例句內容太相似了，請用自己的話重新造句。",
-                    suggestion=f"嘗試用「{payload.character}」造一個和課文、例句不同情境的句子。",
+                    suggestion=f"嘗試用「{payload.word}」造一個和課文、例句不同情境的句子。",
                 )
 
-        # Extract passage sentences containing the target char for AI cross-reference
+        # Extract passage sentences containing the target word for AI cross-reference
         raw_sentences = re.split(r"[。！？]", full_text)
         passage_sentences = [
             s.strip() for s in raw_sentences
-            if payload.character in s and s.strip()
+            if payload.word in s and s.strip()
         ][:5]
 
     start_time = time.monotonic()
