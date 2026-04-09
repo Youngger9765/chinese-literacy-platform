@@ -188,8 +188,8 @@ def _resolve_context(
             # Try to get genre from story loader
             from ..routes.stories import get_lesson_by_id
 
-            normalized = story_id.lstrip("Ll")
-            numeric_id = int(normalized)
+            from ..utils.slug import normalize_story_slug
+            numeric_id = int(normalize_story_slug(story_id))
             story = get_lesson_by_id(numeric_id)
             if story:
                 result["genre"] = story.get("genre")
