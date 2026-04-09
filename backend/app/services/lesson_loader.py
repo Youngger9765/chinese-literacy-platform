@@ -13,6 +13,18 @@ import yaml
 
 _LESSONS_DIR = Path(__file__).parent.parent.parent / "data" / "lessons"
 
+def _halfwidth(code: str) -> str:
+    """Convert fullwidth ASCII letters (Ａ-Ｚ, ａ-ｚ) to halfwidth (A-Z, a-z).
+
+    YAML fill_in_blank answers are sometimes typed as fullwidth (Ａ, Ｂ…)
+    while vocab_bank keys are always halfwidth (A, B…), causing mismatches.
+    """
+    return "".join(
+        chr(ord(c) - 0xFEE0) if 0xFF01 <= ord(c) <= 0xFF5E else c
+        for c in (code or "")
+    )
+
+
 _GENRE_TO_CATEGORY = {
     "記敘文": "Fable",
     "說明文": "Science",
@@ -75,7 +87,10 @@ def _load_lessons() -> list[dict]:
             "char_count": data.get("char_count", 0),
             "thumbnail_url": f"https://storage.googleapis.com/lingoleap-assets/stories/thumbnails/lesson-{data['lesson_number']}.webp",
             "vocabulary": data.get("vocabulary"),
-            "fill_in_blank": data.get("fill_in_blank"),
+            "fill_in_blank": [
+                {**item, "answer": _halfwidth(item.get("answer", ""))}
+                for item in (data.get("fill_in_blank") or [])
+            ] or None,
             "multiple_choice": data.get("multiple_choice"),
             "vocab_bank": data.get("vocab_bank"),
             "knowledge_video_url": data.get("knowledge_video_url"),

@@ -266,7 +266,7 @@ async def validate_student_sentence(
         passage_ref = "\n".join(f"- {s}" for s in passage_sentences[:5])
         system_prompt += f"""
 
-以下是課文或例句中包含「{safe_char}」的句子片段（供參考比對）：
+以下是課文或例句中包含「{safe_word}」的句子片段（供參考比對）：
 {passage_ref}
 
 如果學生的句子與上述片段高度相似（只改了幾個字但意思和結構幾乎一樣），判定 is_correct=false，
