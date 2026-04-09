@@ -8,7 +8,8 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
-import { PublicOnlyRoute, ProtectedRoute } from '../components/auth/RouteGuards';
+import { PublicOnlyRoute, ProtectedRoute, StudentClassroomGuard } from '../components/auth/RouteGuards';
+import NoTeacherPage from '../pages/app/NoTeacherPage';
 import { AppShell, LearningAppShell } from '../components/layout/AppShell';
 import StepErrorBoundary from '../components/StepErrorBoundary';
 import {
@@ -105,7 +106,18 @@ const StepRoute: React.FC<StepRouteProps> = ({ stepLabel, nextPath, children }) 
 
 const AppRoutes: React.FC = () => (
   <Suspense fallback={<PageLoader />}>
+    <StudentClassroomGuard>
     <Routes>
+      {/* Issue #457: students without classroom see this page when gating is enabled */}
+      <Route
+        path="/no-teacher"
+        element={
+          <ProtectedRoute>
+            <NoTeacherPage />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Public-only routes (redirect to / if already logged in) */}
       <Route
         path="/login"
@@ -489,6 +501,7 @@ const AppRoutes: React.FC = () => (
       {/* Catch-all: redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </StudentClassroomGuard>
   </Suspense>
 );
 

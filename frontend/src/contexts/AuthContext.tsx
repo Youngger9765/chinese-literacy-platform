@@ -13,6 +13,16 @@ interface AuthContextValue {
   mustChangePassword: boolean;
   loginPassword: string | null;
   needsTermsAcceptance: boolean;
+  /**
+   * Issue #457: false only for students with no classroom enrollment.
+   * Derived from user.has_classroom; defaults to true while loading.
+   */
+  hasClassroom: boolean;
+  /**
+   * Issue #457: mirrors ENFORCE_TEACHER_GATING env var.
+   * When false the classroom gate is dormant even if hasClassroom is false.
+   */
+  teacherGatingEnforced: boolean;
   login: (email: string, password: string) => Promise<{ mustChangePassword: boolean }>;
   register: (email: string, password: string, name: string) => Promise<RegisterResponse>;
   logout: () => void;
@@ -172,6 +182,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Derived: user is authenticated but hasn't accepted terms
   const needsTermsAcceptance = !!user && !user.terms_accepted;
 
+  // Issue #457: classroom gate state — default to true (safe) while loading
+  const hasClassroom = user ? (user.has_classroom ?? true) : true;
+  const teacherGatingEnforced = user ? (user.teacher_gating_enforced ?? false) : false;
+
   const value: AuthContextValue = {
     user,
     token,
@@ -180,6 +194,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     mustChangePassword,
     loginPassword,
     needsTermsAcceptance,
+    hasClassroom,
+    teacherGatingEnforced,
     login,
     register,
     logout,
