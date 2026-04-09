@@ -12,6 +12,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
+from ...services.learning_stats_service import get_completed_story_count
 from ...services.stuck_detection_service import detect_stuck_points
 from ._helpers import verify_student_access
 
@@ -277,7 +278,8 @@ def get_student_progress(
             next_step=next_step,
         ))
 
-    texts_completed = sum(1 for t in texts if t.status == "completed")
+    # Use canonical query for the aggregate count (Issue #981)
+    texts_completed = get_completed_story_count(db, student_id)
     average_score = round(sum(scores) / len(scores), 1) if scores else None
 
     logger.info(
