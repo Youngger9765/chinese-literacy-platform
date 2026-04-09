@@ -3,7 +3,7 @@
   "github": "stgst",
   "email": "steven19790906@gmail.com",
   "startDate": "2026-03-06",
-  "lastReview": "2026-04-08",
+  "lastReview": "2026-04-09",
   "skills": {
     "1": {
       "level": 3,
@@ -148,7 +148,7 @@
       ]
     },
     "9": {
-      "level": 3,
+      "level": 4,
       "history": [
         {
           "date": "2026-03-08",
@@ -164,6 +164,11 @@
           "date": "2026-03-13",
           "level": 3,
           "reason": "commit message 品質佳（feat/fix/refactor 正確分類），PR #448 完整走完 branch → PR → merge 流程"
+        },
+        {
+          "date": "2026-04-09",
+          "level": 4,
+          "reason": "4/3~4/10 一週 4 個 PR 全部高品質：每個 PR 都有結構化問題分析、修改說明、完整 test plan 含邊界情境。PR #913 的 test plan 列出 cache hit/miss/validate 三種路徑。PR #959 和 #969 都從 4/3 會議決議獨立建 issue → 開發 → merge，自主開發流程成熟"
         }
       ]
     },
@@ -231,13 +236,18 @@
       ]
     },
     "13": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-05",
           "level": 2,
           "reason": "PR #912 新增 vocabChars memo，從 story.vocabulary 拆出去重的 CJK 字並向下傳給 SentencePractice，修正 cache key 不匹配問題。正確識別資料來源問題（story.content 前 12 字 vs vocabulary 生字），並透過新增 memo 而非修改既有邏輯來解決，顯示對元件資料流的設計意識。尚未見到 custom hook 的抽取"
+        },
+        {
+          "date": "2026-04-09",
+          "level": 3,
+          "reason": "PR #959 重新設計 SentencePractice 的 props 資料流：從接收 chars（字）改為接收 words（詞），上游 App.tsx 需傳遞 vocabulary 詞組，下游需同步修改 cache key 和 API 呼叫參數。PR #969 進一步在元件中加入 paste 偵測邏輯和 UI 提示，展現在既有元件上疊加功能而不破壞原有架構的設計能力"
         }
       ]
     },
@@ -285,24 +295,29 @@
       ]
     },
     "18": {
-      "level": 1,
+      "level": 2,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-05",
           "level": 1,
           "reason": "PR #913 的問題分析顯示能理解 request → rate limiter → cache check → AI call 的後端執行流程，並知道 rate limit 應套在 AI 呼叫而非 request 入口。PR #912 能追蹤 story.vocabulary → vocabChars → SentencePractice → cache key 的完整資料流。但目前對全端架構（前端 API call → backend route → DB）的整體視野尚未完整，保守給 level 1"
+        },
+        {
+          "date": "2026-04-09",
+          "level": 2,
+          "reason": "PR #959 和 #969 都完整跨越前後端：前端元件 props 修改 → API 呼叫參數對齊 → 後端 route 邏輯 → AI service 整合 → 預生成快取 key 一致性。特別是 #969 的 AI 真實性驗證需要理解 Gemini API 的 prompt → response → 二次檢查的完整鏈路。兩個 PR 都在正確的層級做修改，沒有 frontend patch 的壞習慣"
         }
       ]
     }
   },
   "recommendations": [
-    "造句 UI 改側邊欄排版是 4/3 會議的 action item，建議盡快建 issue 並開始實作",
-    "API 串接（#12）升到 level 3，下一步可以嘗試獨立設計一個新 API endpoint（例如造句歷史記錄），從 schema 設計到 route 實作",
-    "架構理解（#18）在 level 1，PR #959 和 #969 都涉及前後端完整修改，建議用文字記錄造句練習的完整資料流（前端 → API → cache → AI → 回應），挑戰 level 2",
-    "測試（#14）尚未解鎖：下一個 PR 建議補寫測試驗證防複製貼上的邏輯"
+    "造句 UI 改側邊欄排版是 4/3 會議的 action item，確認是否已建 issue 或需要討論",
+    "元件設計（#13）升到 level 3，下一步挑戰抽取 custom hook（例如 useSentencePractice），管理造句的 state + cache + API 呼叫",
+    "測試（#14）尚未解鎖：下一個 PR 建議補寫一個 backend test case，例如驗證防複製貼上的 AI 真實性檢查邏輯",
+    "這週 4 個 PR 都是高品質的跨前後端工作，速度和品質都很好，可以開始挑戰更大 scope 的功能（例如完整的新頁面開發）"
   ],
-  "summary": "4/3 至 4/8 間共 3 個 PR merge：PR #959（造句以詞為單位）是 4/3 會議的核心決議，涉及前後端 vocabulary 資料結構修改 + 預生成快取 key 對齊。PR #969（防複製貼上）在後端加入 AI 批改真實性驗證。PR #913（rate limit fix）精準將 rate limiting 移到 cache miss 路徑。技能升級：#12（API 串接 level 3）",
+  "summary": "4/3 至 4/9 間共 4 個 PR merge，全部跨前後端。PR #959（造句以詞為單位）和 #969（防複製貼上）是 4/3 會議核心決議的獨立實作。PR #913 精準將 rate limit 移到 cache miss 路徑。PR #912 修正 cache key 命中率。技能升級：#9（Git 工作流 level 4，PR 品質穩定高）、#13（元件設計 level 3）、#18（架構理解 level 2，跨前後端完整資料流追蹤）",
   "issues": [
     {
       "id": "環境建置",
