@@ -43,6 +43,20 @@ PASSWORD_RESET_EXPIRY_HOURS = 1
 EMAIL_VERIFICATION_TOKEN_BYTES = 32
 
 
+def _has_active_role(db: Session, user_id: int, role_name: str) -> bool:
+    """Return whether the user has an active role with the given name."""
+    return (
+        db.query(UserRole)
+        .join(Role, UserRole.role_id == Role.id)
+        .filter(
+            UserRole.user_id == user_id,
+            UserRole.is_active == True,
+            Role.name == role_name,
+        )
+        .first()
+        is not None
+    )
+
 
 def _ensure_parent_login_allowed(user: User, db: Session) -> None:
     """Raise 403 when parent logins are temporarily disabled by feature flag."""
