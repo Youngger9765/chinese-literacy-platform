@@ -4,7 +4,7 @@
  *   2. 作答紀錄 — per-step answer records (reading errors, dialogue Q&A, vocab, full-reading diff)
  *
  * Route: /sessions/:sessionId/report
- * Issue #580 + feattodo new requirement
+ * Issue #580 + #416
  */
 
 import React, { useEffect, useState } from 'react';
