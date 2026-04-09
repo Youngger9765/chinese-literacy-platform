@@ -49,7 +49,36 @@ def create_learning_session(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Create a new learning session for the authenticated student."""
+    """Create a new learning session for the authenticated student.
+
+    Uses a get-or-create pattern: if an in_progress session already exists for
+    the same student + story_slug, return that session instead of creating a
+    duplicate.  This prevents the race condition described in Issue #984 where
+    the frontend fires two concurrent POST requests before the first response
+    arrives.
+    """
+    # Normalize slug using the centralized normalizer (#985 + #984)
+    normalized_slug = normalize_story_slug(payload.story_slug) if payload.story_slug else None
+
+    # --- get-or-create: return existing in_progress session if one exists (#984) ---
+    if normalized_slug:
+        existing = (
+            db.query(LearningSession)
+            .filter(
+                LearningSession.student_id == current_user.id,
+                LearningSession.story_slug == normalized_slug,
+                LearningSession.status == "in_progress",
+            )
+            .order_by(LearningSession.started_at.desc())
+            .first()
+        )
+        if existing:
+            logger.info(
+                "Returning existing in_progress session %d for user %d, story=%s (dedup #984)",
+                existing.id, current_user.id, normalized_slug,
+            )
+            return existing
+
     # Auto-fill classroom_id from the student's first active enrollment (if any)
     enrollment = (
         db.query(ClassroomStudent)
@@ -58,8 +87,7 @@ def create_learning_session(
     )
     classroom_id = enrollment.classroom_id if enrollment else None
 
-    # Normalize and resolve text_id from story_slug (supports "13", "L06", "06", etc.)
-    normalized_slug = normalize_story_slug(payload.story_slug) if payload.story_slug else None
+    # Resolve text_id from normalized story_slug
     text_id = None
     if normalized_slug:
         try:
@@ -83,7 +111,7 @@ def create_learning_session(
     db.refresh(session)
     logger.info(
         "Created learning session %d for user %d, story=%s",
-        session.id, current_user.id, payload.story_slug,
+        session.id, current_user.id, normalized_slug,
     )
     return session
 
