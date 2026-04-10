@@ -110,14 +110,12 @@ function shuffle<T>(arr: T[]): T[] {
 /*  Shared sub-components                                               */
 /* ------------------------------------------------------------------ */
 
-function StepHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+function StepHeader({ subtitle }: { title?: string; subtitle?: string }) {
+  if (!subtitle) return null;
   return (
-    <div className="bg-amber-50 border-b border-amber-200 px-6 py-4">
+    <div className="bg-amber-50 border-b border-amber-200 px-4 py-2">
       <div className="max-w-2xl mx-auto">
-        <h2 className="text-xl font-bold text-amber-900">{title}</h2>
-        {subtitle && (
-          <p className="mt-1 text-base text-amber-700">{subtitle}</p>
-        )}
+        <p className="text-xs text-amber-700">{subtitle}</p>
       </div>
     </div>
   );
@@ -747,9 +745,9 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
       </div>
 
       {/* Desktop: two-column layout — definitions left (scrollable), word bank right (sticky) */}
-      <div className="md:flex md:gap-6 md:items-start">
-        {/* Left column — definition slots */}
-        <div className="flex-1 min-w-0">
+      <div className="md:flex md:gap-6 md:items-start md:max-h-[calc(100vh-16rem)]">
+        {/* Left column — definition slots, independently scrollable on desktop */}
+        <div className="flex-1 min-w-0 md:overflow-y-auto md:max-h-[calc(100vh-16rem)]">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center md:text-left">
             定義欄位
           </p>
@@ -758,8 +756,8 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
           </div>
         </div>
 
-        {/* Right column — word bank panel, sticky (desktop only) */}
-        <div className="hidden md:block w-52 flex-shrink-0 sticky top-4 self-start">
+        {/* Right column — word bank panel, independently scrollable on desktop */}
+        <div className="hidden md:flex md:flex-col w-52 flex-shrink-0 overflow-y-auto max-h-[calc(100vh-16rem)]">
           {wordBankContent}
         </div>
       </div>

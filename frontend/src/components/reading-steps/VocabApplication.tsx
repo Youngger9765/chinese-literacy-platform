@@ -60,14 +60,12 @@ export interface VocabApplicationProps {
 /* ------------------------------------------------------------------ */
 
 /** Header banner matching other step components' amber-50 style */
-function StepHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+function StepHeader({ subtitle }: { title?: string; subtitle?: string }) {
+  if (!subtitle) return null;
   return (
-    <div className="bg-amber-50 border-b border-amber-200 px-6 py-4">
+    <div className="bg-amber-50 border-b border-amber-200 px-4 py-2">
       <div className="max-w-2xl mx-auto">
-        <h2 className="text-xl font-bold text-amber-900">{title}</h2>
-        {subtitle && (
-          <p className="mt-0.5 text-sm text-amber-700">{subtitle}</p>
-        )}
+        <p className="text-xs text-amber-700">{subtitle}</p>
       </div>
     </div>
   );
