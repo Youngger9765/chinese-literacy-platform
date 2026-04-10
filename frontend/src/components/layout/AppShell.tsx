@@ -5,19 +5,21 @@
  * used for all /learn/:storyId/* routes. It renders the StepperNav as a
  * horizontal top navigation bar above the learning content.
  */
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
-import { VIEW_TO_PATH } from '../../config/stepConfig';
+import { VIEW_TO_PATH, ACTIVE_STEPS } from '../../config/stepConfig';
 import { useAppView } from '../../hooks/useAppView';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
 import StepperNav from '../StepperNav';
+import LearningPathMap from '../ui/LearningPathMap';
+import type { PathStep } from '../ui/LearningPathMap';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 
 /** The authenticated app shell with header + sidebar. */
@@ -109,17 +111,60 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   );
 };
 
+/** localStorage key for the nav style preference */
+const NAV_STYLE_KEY = 'learning-nav-style';
+
+type NavStyle = 'classic' | 'map';
+
 /**
  * Inner content for the learning flow: StepperNav top bar + LearningLayout.
  * Rendered inside AppShell's <main> element.
  *
- * Layout: flex-col — [StepperNav horizontal bar] stacked above [LearningLayout full-width]
+ * Supports two nav styles toggled by the user:
+ *   - "classic": horizontal StepperNav bar at the top (default)
+ *   - "map": Duolingo-style winding path sidebar on desktop, stacked on mobile
  */
 const LearningContent: React.FC = () => {
   const navigate = useNavigate();
   const currentView = useAppView();
   const { session: navSession, selectedStory: navStory } = useLearningNav();
 
+  // ── Nav style toggle (persisted to localStorage) ───────────────────────
+  const [navStyle, setNavStyle] = useState<NavStyle>(() => {
+    try {
+      const saved = localStorage.getItem(NAV_STYLE_KEY);
+      if (saved === 'map') return 'map';
+    } catch { /* non-fatal */ }
+    return 'classic';
+  });
+
+  const toggleNavStyle = useCallback(() => {
+    setNavStyle((prev) => {
+      const next: NavStyle = prev === 'classic' ? 'map' : 'classic';
+      try { localStorage.setItem(NAV_STYLE_KEY, next); } catch { /* non-fatal */ }
+      return next;
+    });
+  }, []);
+
+  // ── Path map data derived from ACTIVE_STEPS (never hardcoded) ──────────
+  const currentStepId = useMemo(() => {
+    const stepId = window.location.pathname.split('/').pop() ?? '';
+    const found = ACTIVE_STEPS.find((s) => s.id === stepId);
+    return found ? found.id : ACTIVE_STEPS[0]?.id ?? '';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentView]); // re-derive when the view changes
+
+  const pathMapSteps: PathStep[] = useMemo(
+    () => ACTIVE_STEPS.map((s) => ({ id: s.id, label: s.label, category: s.category })),
+    [],
+  );
+
+  const completedSteps = useMemo(
+    () => new Set<string>(navSession?.completedSteps ?? []),
+    [navSession?.completedSteps],
+  );
+
+  // ── Navigation handlers ────────────────────────────────────────────────
   const handleStepperNavigate = (view: AppView) => {
     switch (view) {
       case AppView.HOME:
@@ -142,22 +187,75 @@ const LearningContent: React.FC = () => {
     }
   };
 
+  const handlePathMapClick = useCallback((stepId: string) => {
+    const match = window.location.pathname.match(/\/learn\/([^/]+)/);
+    const storyId = match?.[1];
+    if (storyId) {
+      navigate(`/learn/${storyId}/${stepId}`);
+    }
+  }, [navigate]);
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Horizontal step nav bar at the top */}
-      <StepperNav
-        currentView={currentView}
-        session={navSession}
-        selectedStory={navStory}
-        onNavigate={handleStepperNavigate}
-      />
-
-      {/* Learning step content — full width below the top nav.
-          overflow-y-auto keeps the height capped to the viewport so steps with
-          internal scroll containers scroll correctly (#815, #824). */}
-      <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
-        <LearningLayout />
+      {/* Nav style toggle */}
+      <div className="flex items-center justify-end px-3 py-1 bg-white/60 border-b border-gray-100">
+        <button
+          type="button"
+          onClick={toggleNavStyle}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-accent hover:bg-accent-bg transition-colors"
+          aria-label={navStyle === 'classic' ? '切換到地圖模式' : '切換到經典模式'}
+        >
+          {navStyle === 'classic' ? (
+            <>
+              {/* Map icon */}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
+              地圖
+            </>
+          ) : (
+            <>
+              {/* List icon */}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+              經典
+            </>
+          )}
+        </button>
       </div>
+
+      {navStyle === 'classic' ? (
+        <>
+          {/* Classic mode: horizontal StepperNav bar at top */}
+          <StepperNav
+            currentView={currentView}
+            session={navSession}
+            selectedStory={navStory}
+            onNavigate={handleStepperNavigate}
+          />
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </>
+      ) : (
+        /* Map mode: sidebar path map on desktop, stacked on mobile */
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <aside
+            className="w-full md:w-[280px] lg:w-[320px] shrink-0 border-b md:border-b-0 md:border-r border-gray-200 bg-white/80 overflow-y-auto"
+            aria-label="學習路徑地圖"
+          >
+            <div className="py-4 px-2">
+              <LearningPathMap
+                steps={pathMapSteps}
+                completedSteps={completedSteps}
+                currentStepId={currentStepId}
+                onStepClick={handlePathMapClick}
+              />
+            </div>
+          </aside>
+
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
