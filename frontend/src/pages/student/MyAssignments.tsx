@@ -120,9 +120,9 @@ const MyAssignments: React.FC = () => {
         return a.status === 'pending' || a.status === 'in_progress';
       }
       if (activeFilter === 'completed') {
-        return a.status === 'submitted' || a.status === 'graded';
+        return a.status === 'submitted';
       }
-      return true;
+      return a.status === 'graded';
     });
     const sortOption = SORT_OPTIONS.find((o) => o.key === sortKey);
     return sortOption ? [...filtered].sort(sortOption.compareFn) : filtered;
