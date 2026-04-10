@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* LearningPhases (#1048) — star burst celebration animation */
+@keyframes phase-star-burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--star-dx, 0px)) translateY(var(--star-dy, 0px)) scale(0);
+    opacity: 0;
+  }
+}
+
+.animate-phase-star {
+  animation: phase-star-burst var(--star-duration, 600ms) ease-out forwards;
+}
+
 @layer base {
   @keyframes sk-shimmer {
     100% {
