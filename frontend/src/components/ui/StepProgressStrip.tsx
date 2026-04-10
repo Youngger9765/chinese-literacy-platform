@@ -32,11 +32,11 @@ const StepProgressStrip: React.FC<StepProgressStripProps> = ({
           <div
             key={step.id}
             title={step.label}
-            className={`w-[calc(20%-6px)] min-h-[40px] rounded-md border px-2 py-1 flex items-center justify-center transition-colors ${
+            className={`w-[calc((100%-1.5rem)/5)] min-h-[40px] rounded-md border px-2 py-1 flex items-center justify-center transition-colors ${
               isDone
                 ? 'bg-green-100 border-green-200 text-green-800'
                 : isCurrent
-                  ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
+                  ? 'bg-yellow-100 border-yellow-200 text-yellow-800'
                   : 'bg-gray-50 border-gray-200 text-gray-500'
             }`}
           >
