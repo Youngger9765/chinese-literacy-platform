@@ -15,6 +15,9 @@ export interface SpeechRecognitionActions {
   clearTranscript: () => void;
 }
 
+/** Maximum recording duration in milliseconds (60 seconds) */
+const MAX_RECORDING_DURATION_MS = 60_000;
+
 function getSpeechRecognitionConstructor(): typeof SpeechRecognition | null {
   if (typeof window === 'undefined') return null;
   return window.SpeechRecognition ?? window.webkitSpeechRecognition ?? null;
@@ -35,6 +38,9 @@ export function useSpeechRecognition(
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const onTranscriptRef = useRef(onTranscript);
+  const maxDurationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Accumulated final results across multiple onresult events (continuous mode) */
+  const accumulatedFinalRef = useRef('');
 
   // Keep callback ref up to date without re-running effects
   useEffect(() => {
@@ -42,6 +48,10 @@ export function useSpeechRecognition(
   }, [onTranscript]);
 
   const stopListening = useCallback(() => {
+    if (maxDurationTimerRef.current) {
+      clearTimeout(maxDurationTimerRef.current);
+      maxDurationTimerRef.current = null;
+    }
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
@@ -60,14 +70,19 @@ export function useSpeechRecognition(
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
+    if (maxDurationTimerRef.current) {
+      clearTimeout(maxDurationTimerRef.current);
+      maxDurationTimerRef.current = null;
+    }
 
     setErrorMessage('');
     setTranscript('');
+    accumulatedFinalRef.current = '';
 
     const recognition = new SpeechRecognitionCtor();
     recognition.lang = lang;
     recognition.interimResults = true;
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.maxAlternatives = 1;
 
     recognitionRef.current = recognition;
@@ -78,23 +93,34 @@ export function useSpeechRecognition(
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interim = '';
-      let final = '';
+      let newFinal = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         if (result.isFinal) {
-          final += result[0].transcript;
+          newFinal += result[0].transcript;
         } else {
           interim += result[0].transcript;
         }
       }
-      const combined = final || interim;
-      setTranscript(combined);
-      if (final && onTranscriptRef.current) {
-        onTranscriptRef.current(final);
+
+      if (newFinal) {
+        accumulatedFinalRef.current += newFinal;
+      }
+
+      // Show accumulated finals + current interim for live feedback
+      const display = accumulatedFinalRef.current + interim;
+      setTranscript(display);
+
+      if (newFinal && onTranscriptRef.current) {
+        onTranscriptRef.current(accumulatedFinalRef.current);
       }
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (maxDurationTimerRef.current) {
+        clearTimeout(maxDurationTimerRef.current);
+        maxDurationTimerRef.current = null;
+      }
       recognitionRef.current = null;
       switch (event.error) {
         case 'not-allowed':
@@ -116,12 +142,22 @@ export function useSpeechRecognition(
     };
 
     recognition.onend = () => {
+      if (maxDurationTimerRef.current) {
+        clearTimeout(maxDurationTimerRef.current);
+        maxDurationTimerRef.current = null;
+      }
       recognitionRef.current = null;
       setStatus(prev => (prev === 'listening' ? 'idle' : prev));
     };
 
     try {
       recognition.start();
+      // Auto-stop after max duration to prevent infinite recording
+      maxDurationTimerRef.current = setTimeout(() => {
+        if (recognitionRef.current) {
+          recognitionRef.current.stop();
+        }
+      }, MAX_RECORDING_DURATION_MS);
     } catch {
       recognitionRef.current = null;
       setErrorMessage('無法啟動語音識別，請重試。');
@@ -132,6 +168,7 @@ export function useSpeechRecognition(
   const clearTranscript = useCallback(() => {
     setTranscript('');
     setErrorMessage('');
+    accumulatedFinalRef.current = '';
     if (status === 'error') {
       setStatus('idle');
     }
@@ -140,6 +177,10 @@ export function useSpeechRecognition(
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      if (maxDurationTimerRef.current) {
+        clearTimeout(maxDurationTimerRef.current);
+        maxDurationTimerRef.current = null;
+      }
       if (recognitionRef.current) {
         recognitionRef.current.stop();
         recognitionRef.current = null;
