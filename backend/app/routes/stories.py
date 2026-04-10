@@ -166,17 +166,17 @@ async def get_story_structure(
         story_text=story_text,
         genre=story.get("genre"),
     )
-    _set_cached_structure(normalized, result)
+    _set_cached_structure(story_id, result)
     latency_ms = int((time.monotonic() - start_time) * 1000)
 
     # Track AI usage (Issue #874)
     usage = last_usage.get()
     log_ai_usage(
         db,
-        endpoint=f"/stories/{normalized}/structure",
+        endpoint=f"/stories/{story_id}/structure",
         step="structure",
         student_id=current_user.id,
-        story_id=normalized,
+        story_id=story_id,
         story_title=story["title"],
         input_tokens=usage.input_tokens if usage else 0,
         output_tokens=usage.output_tokens if usage else 0,
