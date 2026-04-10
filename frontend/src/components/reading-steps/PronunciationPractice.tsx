@@ -134,25 +134,6 @@ const PronunciationPractice: React.FC<PronunciationPracticeProps> = ({
 
   return (
     <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden">
-      {/* Tab bar */}
-      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-        <button
-          onClick={onBack}
-          className="h-full px-3 flex items-center text-gray-500 hover:text-gray-800 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-          發音練習 — {character}
-        </div>
-        <div className="flex-1" />
-        <span className="text-[10px] text-gray-500 pr-2">
-          已練習 {attempts} / {MAX_ATTEMPTS} 次
-        </span>
-      </div>
-
       {/* Main content */}
       <div className="flex-1 overflow-y-auto px-6 py-8">
         <div className="max-w-md mx-auto space-y-8">

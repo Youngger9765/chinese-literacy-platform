@@ -201,13 +201,6 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
   if (phase === 'intro') {
     return (
       <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden">
-        {/* Tab bar */}
-        <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-            {story.filename} — 聽寫練習
-          </div>
-        </div>
-
         {/* Content */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 gap-8 max-w-lg mx-auto w-full">
           <div className="text-center space-y-4">
@@ -283,15 +276,6 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
 
     return (
       <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden">
-        {/* Tab bar */}
-        <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-            {story.filename} — 聽寫練習
-          </div>
-          <div className="flex-1" />
-          <span className="text-[10px] text-gray-500 pr-2">{progressText}</span>
-        </div>
-
         {/* Content */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 gap-6 max-w-lg mx-auto w-full">
           {/* Progress */}
