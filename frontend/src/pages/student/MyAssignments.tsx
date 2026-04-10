@@ -8,6 +8,7 @@ import {
   AssignmentApiError,
 } from '../../services/assignmentApi';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
+import StepProgressStrip from '../../components/ui/StepProgressStrip';
 
 type FilterTab = 'pending' | 'completed' | 'graded';
 
@@ -19,41 +20,6 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
 
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
-
-interface ProgressStep {
-  id: string;
-  label: string;
-}
-
-const AssignmentProgressStrip: React.FC<{
-  steps: ProgressStep[];
-  completedSteps: Set<string>;
-  currentStepPath: string | null;
-}> = ({ steps, completedSteps, currentStepPath }) => (
-  <div className="flex flex-wrap gap-1.5">
-    {steps.map((step) => {
-      const isDone = completedSteps.has(step.id);
-      const isCurrent = !isDone && currentStepPath === step.id;
-      return (
-        <div
-          key={step.id}
-          title={step.label}
-          className={`w-[calc((100%-1.5rem)/5)] min-h-[40px] rounded-md border px-2 py-1 flex items-center justify-center transition-colors ${
-            isDone
-              ? 'bg-green-100 border-green-200 text-green-800'
-              : isCurrent
-                ? 'bg-yellow-100 border-yellow-200 text-yellow-800'
-                : 'bg-gray-50 border-gray-200 text-gray-500'
-          }`}
-        >
-          <span className="text-[11px] leading-tight font-medium text-center whitespace-normal break-words">
-            {step.label}
-          </span>
-        </div>
-      );
-    })}
-  </div>
-);
 
 const MyAssignments: React.FC = () => {
   const navigate = useNavigate();
@@ -497,7 +463,7 @@ const MyAssignments: React.FC = () => {
                               {completedSteps.size}/{assignmentSteps.length}
                             </p>
                           </div>
-                          <AssignmentProgressStrip
+                          <StepProgressStrip
                             steps={assignmentSteps}
                             completedSteps={completedSteps}
                             currentStepPath={currentStepPath}
