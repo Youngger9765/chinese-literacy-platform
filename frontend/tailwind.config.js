@@ -91,6 +91,28 @@ export default {
           '50%':  { transform: 'scale(1.4) rotate(180deg)', opacity: '1' },
           '100%': { transform: 'scale(1) rotate(360deg)', opacity: '1' },
         },
+        'duo-bounce': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        'duo-pulse': {
+          '0%':   { boxShadow: '0 0 0 0 rgba(74, 222, 128, 0.5)' },
+          '70%':  { boxShadow: '0 0 0 12px rgba(74, 222, 128, 0)' },
+          '100%': { boxShadow: '0 0 0 0 rgba(74, 222, 128, 0)' },
+        },
+        'map-bounce': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%':      { transform: 'translateY(-6px)' },
+        },
+        'map-glow': {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(var(--tw-glow-color, 99 102 241), 0.4)' },
+          '50%':      { boxShadow: '0 0 0 8px rgba(var(--tw-glow-color, 99 102 241), 0)' },
+        },
+        sparkle: {
+          '0%':   { transform: 'scale(0) rotate(0deg)',   opacity: '0' },
+          '50%':  { transform: 'scale(1) rotate(180deg)', opacity: '1' },
+          '100%': { transform: 'scale(0) rotate(360deg)', opacity: '0' },
+        },
       },
       animation: {
         shake: 'shake 0.45s ease-in-out',
@@ -104,6 +126,11 @@ export default {
         'confetti-drop-2': 'confetti-drop-2 1.1s ease-in 0.2s forwards',
         'confetti-drop-3': 'confetti-drop-3 0.9s ease-in 0s forwards',
         'star-burst': 'star-burst 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'duo-bounce': 'duo-bounce 1.2s ease-in-out infinite',
+        'duo-pulse': 'duo-pulse 2s ease-in-out infinite',
+        'map-bounce': 'map-bounce 1.2s ease-in-out infinite',
+        'map-glow': 'map-glow 2s ease-in-out infinite',
+        sparkle: 'sparkle 1.5s ease-in-out infinite',
       },
     },
   },

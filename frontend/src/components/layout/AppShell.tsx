@@ -2,22 +2,29 @@
  * AppShell — the authenticated app chrome (header + sidebar + main area).
  *
  * LearningAppShell — thin wrapper that puts LearningLayout inside AppShell,
- * used for all /learn/:storyId/* routes. It renders the StepperNav as a
- * horizontal top navigation bar above the learning content.
+ * used for all /learn/:storyId/* routes. Supports four nav styles:
+ *   classic  — horizontal StepperNav top bar (default)
+ *   phases   — vertical 3-phase accordion sidebar (#1048)
+ *   duolingo — Duolingo-style winding snake path (#1047)
+ *   worldmap — gamified world map sidebar (#1049)
  */
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
-import { VIEW_TO_PATH } from '../../config/stepConfig';
+import { VIEW_TO_PATH, ACTIVE_STEPS } from '../../config/stepConfig';
 import { useAppView } from '../../hooks/useAppView';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
 import StepperNav from '../StepperNav';
+import LearningPhases from '../ui/LearningPhases';
+import WorldMap from '../ui/WorldMap';
+import LearningPathDuolingo from '../ui/LearningPathDuolingo';
+import type { LearningPathStep } from '../ui/LearningPathDuolingo';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 
 /** The authenticated app shell with header + sidebar. */
@@ -26,7 +33,6 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   const { activeView } = useWorkspace();
   const navigate = useNavigate();
 
-  // Pending assignment count for the student nav badge
   const [pendingAssignmentCount, setPendingAssignmentCount] = useState(0);
 
   const refreshPendingCount = useCallback(async () => {
@@ -47,7 +53,6 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   }, [refreshPendingCount]);
 
   const handleStepperNavigate = (view: AppView) => {
-    // Map AppView back to route paths for StepperNav clicks
     switch (view) {
       case AppView.HOME:
         navigate('/');
@@ -56,9 +61,6 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
         navigate('/library');
         break;
       default: {
-        // Learning step navigation: look up path from config-driven VIEW_TO_PATH map.
-        // ACTIVE_STEPS drives which views are valid learning steps, so any view
-        // that resolves in VIEW_TO_PATH is a learning step.
         const pathId = VIEW_TO_PATH[view];
         if (pathId) {
           const match = window.location.pathname.match(/\/learn\/([^/]+)/);
@@ -74,7 +76,6 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   return (
     <div className="h-screen flex flex-col bg-amber-50 text-gray-900 font-sans overflow-hidden">
-      {/* Skip-to-content link — visually hidden until focused (WCAG 2.4.1) */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-white focus:rounded focus:font-medium focus:text-sm focus:shadow-lg"
@@ -82,10 +83,8 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
         跳至主要內容
       </a>
 
-      {/* Header — global chrome only (logo, user info, logout). No stepper here. */}
       <Header onStepperNavigate={handleStepperNavigate} />
 
-      {/* Body: sidebar + main content */}
       <div className="flex-1 flex overflow-hidden">
         <Sidebar pendingAssignmentCount={pendingAssignmentCount} />
 
@@ -100,27 +99,121 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
         </main>
       </div>
 
-      {/* Onboarding overlay for first-time students */}
       <Suspense fallback={null}>
         <OnboardingWrapper />
       </Suspense>
-
     </div>
   );
 };
 
-/**
- * Inner content for the learning flow: StepperNav top bar + LearningLayout.
- * Rendered inside AppShell's <main> element.
- *
- * Layout: flex-col — [StepperNav horizontal bar] stacked above [LearningLayout full-width]
- */
+// ── Nav style config ──────────────────────────────────────────────────────
+
+const NAV_STYLE_KEY = 'learning-nav-style';
+
+type NavStyle = 'classic' | 'phases' | 'duolingo' | 'worldmap';
+
+const NAV_STYLES: { key: NavStyle; label: string; icon: React.ReactNode }[] = [
+  {
+    key: 'classic',
+    label: '經典',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'phases',
+    label: '階段',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M3 9h18M3 15h18"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'duolingo',
+    label: '闖關',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="5" r="2.5"/>
+        <circle cx="6" cy="12" r="2.5"/>
+        <circle cx="18" cy="12" r="2.5"/>
+        <circle cx="12" cy="19" r="2.5"/>
+        <path d="M12 7.5v9M8.5 13l1.5 4M15.5 13l-1.5 4"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'worldmap',
+    label: '地圖',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/>
+        <path d="M9 3v15M15 6v15"/>
+      </svg>
+    ),
+  },
+];
+
+const VALID_NAV_STYLES = new Set<string>(NAV_STYLES.map((s) => s.key));
+
+// ── LearningContent ───────────────────────────────────────────────────────
+
 const LearningContent: React.FC = () => {
   const navigate = useNavigate();
   const currentView = useAppView();
   const { session: navSession, selectedStory: navStory } = useLearningNav();
 
-  const handleStepperNavigate = (view: AppView) => {
+  const [navStyle, setNavStyle] = useState<NavStyle>(() => {
+    try {
+      const saved = localStorage.getItem(NAV_STYLE_KEY);
+      if (saved && VALID_NAV_STYLES.has(saved)) return saved as NavStyle;
+    } catch { /* non-fatal */ }
+    return 'classic';
+  });
+
+  const cycleNavStyle = useCallback(() => {
+    setNavStyle((prev) => {
+      const idx = NAV_STYLES.findIndex((s) => s.key === prev);
+      const next = NAV_STYLES[(idx + 1) % NAV_STYLES.length].key;
+      try { localStorage.setItem(NAV_STYLE_KEY, next); } catch { /* non-fatal */ }
+      return next;
+    });
+  }, []);
+
+  const currentStepId = useMemo(() => {
+    const stepId = window.location.pathname.split('/').pop() ?? '';
+    const found = ACTIVE_STEPS.find((s) => s.id === stepId);
+    return found ? found.id : ACTIVE_STEPS[0]?.id ?? '';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentView]);
+
+  const mapSteps = useMemo(
+    () => ACTIVE_STEPS.map((s) => ({ id: s.id, label: s.label })),
+    [],
+  );
+
+  const completedSteps = useMemo(() => {
+    return new Set<string>(navSession?.completedSteps ?? []);
+  }, [navSession?.completedSteps]);
+
+  const duolingoSteps = useMemo((): LearningPathStep[] => {
+    let reachedCurrent = false;
+    return ACTIVE_STEPS.map((s) => {
+      if (completedSteps.has(s.id)) {
+        return { ...s, status: 'complete' as const };
+      }
+      if (s.id === currentStepId && !reachedCurrent) {
+        reachedCurrent = true;
+        return { ...s, status: 'active' as const };
+      }
+      return { ...s, status: 'locked' as const };
+    });
+  }, [completedSteps, currentStepId]);
+
+  const handleStepperNavigate = useCallback((view: AppView) => {
     switch (view) {
       case AppView.HOME:
         navigate('/');
@@ -140,31 +233,118 @@ const LearningContent: React.FC = () => {
         break;
       }
     }
-  };
+  }, [navigate]);
+
+  const handleStepClick = useCallback((stepId: string) => {
+    const match = window.location.pathname.match(/\/learn\/([^/]+)/);
+    const storyId = match?.[1];
+    if (storyId) {
+      navigate(`/learn/${storyId}/${stepId}`);
+    }
+  }, [navigate]);
+
+  const handleDuolingoStart = useCallback((step: LearningPathStep) => {
+    handleStepClick(step.id);
+  }, [handleStepClick]);
+
+  const currentNavConfig = NAV_STYLES.find((s) => s.key === navStyle)!;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Horizontal step nav bar at the top */}
-      <StepperNav
-        currentView={currentView}
-        session={navSession}
-        selectedStory={navStory}
-        onNavigate={handleStepperNavigate}
-      />
-
-      {/* Learning step content — full width below the top nav.
-          overflow-y-auto keeps the height capped to the viewport so steps with
-          internal scroll containers scroll correctly (#815, #824). */}
-      <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
-        <LearningLayout />
+      {/* Nav style toggle bar */}
+      <div className="flex items-center justify-end px-3 py-1 bg-white/60 border-b border-gray-100">
+        <button
+          type="button"
+          onClick={cycleNavStyle}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-accent hover:bg-accent-bg transition-colors"
+          aria-label={`目前：${currentNavConfig.label}模式，點擊切換`}
+          title={`切換導航模式（目前：${currentNavConfig.label}）`}
+        >
+          {currentNavConfig.icon}
+          {currentNavConfig.label}
+        </button>
       </div>
+
+      {/* Classic: horizontal StepperNav top bar */}
+      {navStyle === 'classic' && (
+        <>
+          <StepperNav
+            currentView={currentView}
+            session={navSession}
+            selectedStory={navStory}
+            onNavigate={handleStepperNavigate}
+          />
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </>
+      )}
+
+      {/* Phases: 3-phase accordion sidebar */}
+      {navStyle === 'phases' && (
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <aside
+            className="w-full md:w-[280px] lg:w-[320px] shrink-0 border-b md:border-b-0 md:border-r border-gray-200 bg-white/80 overflow-y-auto"
+            aria-label="學習階段導航"
+          >
+            <div className="py-4 px-3">
+              <LearningPhases
+                steps={mapSteps}
+                completedSteps={completedSteps}
+                currentStepId={currentStepId}
+                onStepClick={handleStepClick}
+              />
+            </div>
+          </aside>
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </div>
+      )}
+
+      {/* Duolingo: winding snake path sidebar */}
+      {navStyle === 'duolingo' && (
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <aside
+            className="w-full md:w-[320px] lg:w-[360px] shrink-0 border-b md:border-b-0 md:border-r border-gray-200 bg-gradient-to-b from-green-50/50 to-white overflow-y-auto"
+            aria-label="學習闖關路徑"
+          >
+            <LearningPathDuolingo
+              steps={duolingoSteps}
+              onStartStep={handleDuolingoStart}
+            />
+          </aside>
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </div>
+      )}
+
+      {/* World Map: gamified RPG-style map sidebar */}
+      {navStyle === 'worldmap' && (
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <aside
+            className="w-full md:w-[320px] lg:w-[360px] shrink-0 border-b md:border-b-0 md:border-r border-gray-200 bg-gradient-to-b from-sky-50/50 to-white overflow-y-auto"
+            aria-label="學習世界地圖"
+          >
+            <WorldMap
+              steps={mapSteps}
+              completedSteps={completedSteps}
+              currentStepId={currentStepId}
+              onStepClick={handleStepClick}
+            />
+          </aside>
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 /**
  * AppShell wrapper specifically for the learning flow.
- * Renders StepperNav as a sidebar alongside LearningLayout.
  */
 export const LearningAppShell: React.FC = () => {
   return (
