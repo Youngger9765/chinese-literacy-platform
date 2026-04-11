@@ -535,6 +535,41 @@
     border-top: 1px solid var(--border-light);
   }
 
+  /* ── Screenshots ── */
+  .screenshot-section {
+    margin: 24px 0;
+    text-align: center;
+  }
+  .screenshot-section img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    border: 1px solid #ece5d8;
+  }
+  .screenshot-section .caption {
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .screenshot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .screenshot-grid img {
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #ece5d8;
+  }
+  .screenshot-grid .caption {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
   /* ── Mobile ── */
   .toc-toggle {
     display: none;
@@ -605,7 +640,7 @@
     <li><a href="#spiral"><span class="toc-num">6.</span>閱讀策略遞進</a></li>
     <li><a href="#gamification"><span class="toc-num">7.</span>遊戲化系統</a></li>
     <li><a href="#teacher"><span class="toc-num">8.</span>教師端功能</a></li>
-    <li><a href="#tech"><span class="toc-num">9.</span>技術架構</a></li>
+    <li><a href="#tech"><span class="toc-num">9.</span>AI 技術</a></li>
     <li><a href="#compare"><span class="toc-num">10.</span>與其他平台比較</a></li>
     <li><a href="#roadmap"><span class="toc-num">11.</span>下一步規劃</a></li>
   </ol>
@@ -775,6 +810,12 @@
       <li><strong>教師</strong>：國小國語文教師，特別是偏鄉、學習扶助計畫的教師</li>
       <li><strong>家長</strong>：可透過家長連結查看孩子的學習狀況</li>
     </ul>
+
+    <!-- Screenshot: 朗讀練習進度 -->
+    <div class="screenshot-section">
+      <img src="../images/langlangshangkou-exercise-detail.png" alt="朗讀練習進度">
+      <div class="caption">朗讀練習：AI 即時追蹤語速與正確率，老師可設定個人目標</div>
+    </div>
   </div>
 </section>
 
@@ -1013,6 +1054,18 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Screenshots: AI 朗讀分析 + 逐句對比 -->
+    <div class="screenshot-grid" style="margin-top: 24px;">
+      <div>
+        <img src="../images/feedback-3-recording-analysis.png" alt="AI 智能朗讀分析">
+        <div class="caption">AI 智能朗讀分析：自動統計正確、讀錯、遺漏片段</div>
+      </div>
+      <div>
+        <img src="../images/feedback-4-sentence-comparison.png" alt="逐句分析對比">
+        <div class="caption">逐句對比：原文與學生朗讀的差異一目瞭然</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1223,6 +1276,12 @@
         <p>每篇課文可配不同主題（森林、太空、城堡、運動、古典、生活），只改背景色、圖示、進度條，學生覺得「完全不同」</p>
       </div>
     </div>
+
+    <!-- Screenshot: AI 個別化回饋 -->
+    <div class="screenshot-section">
+      <img src="../images/feedback-6-ai-suggestions.png" alt="AI 練習建議">
+      <div class="caption">AI 個別化回饋：針對每位學生的弱點給出具體練習建議</div>
+    </div>
   </div>
 </section>
 
@@ -1275,43 +1334,43 @@
     <div class="callout callout-amber">
       <strong>教師為核心的設計理念：</strong>AI 代勞重複性工作（逐一聽讀、比對錯字、追蹤進度），教師專注在最有價值的事 — 教學決策、情感支持、個別輔導。一位教師 + AI 系統 = 可同時服務 30 位學生
     </div>
+
+    <!-- Screenshots: 教師端管理 + 班級表現 -->
+    <div class="screenshot-grid">
+      <div>
+        <img src="../images/teacher-class-management.png" alt="教師端班級管理">
+        <div class="caption">教師端：班級管理、學生匯入、課程指派</div>
+      </div>
+      <div>
+        <img src="../images/teacher-class-performance.png" alt="班級表現總覽">
+        <div class="caption">班級表現總覽：每位學生的朗讀數據一覽無遺</div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ════════════ 9. 技術架構 ════════════ -->
+<!-- ════════════ 9. AI 技術 ════════════ -->
 <section id="tech">
   <div class="container">
     <div class="section-title">
       <span class="section-number">9</span>
-      技術架構
+      AI 技術
     </div>
 
-    <p>簡述平台的技術選型，重點在可靠性和規模化能力：</p>
+    <p>LingoLeap 的核心價值來自三項 AI 技術的深度整合：</p>
 
     <div class="tech-stack">
       <div class="tech-item">
-        <h4>前端</h4>
-        <p>React 19 + Vite + Tailwind CSS，響應式設計支援平板和 Chromebook</p>
+        <h4>Gemini 2.5 Flash</h4>
+        <p>Google 最新大型語言模型，負責蘇格拉底式對話引導、閱讀理解評估、學習診斷報告生成，以及個別化學習路徑推薦</p>
       </div>
       <div class="tech-item">
-        <h4>後端</h4>
-        <p>Python FastAPI + PostgreSQL + SQLAlchemy，140+ API endpoints</p>
+        <h4>Azure TTS 語音合成</h4>
+        <p>採用 zh-TW HsiaoChen Neural 語音，48kHz 高品質中文自然語音，提供課文朗讀示範與聽力練習</p>
       </div>
       <div class="tech-item">
-        <h4>AI 引擎</h4>
-        <p>Google Vertex AI Gemini 2.5 Flash — 蘇格拉底對話、學習路徑推薦、策略練習</p>
-      </div>
-      <div class="tech-item">
-        <h4>語音合成（TTS）</h4>
-        <p>Azure zh-TW HsiaoChenNeural 48kHz，自然的中文朗讀示範</p>
-      </div>
-      <div class="tech-item">
-        <h4>語音辨識（STT）</h4>
-        <p>瀏覽器 Web Speech API + 同音自動修正算法</p>
-      </div>
-      <div class="tech-item">
-        <h4>部署</h4>
-        <p>GCP Cloud Run（自動擴縮），Cloud SQL PostgreSQL</p>
+        <h4>語音辨識</h4>
+        <p>即時朗讀評估引擎，自動計算 CPM（每分鐘字數）與正確率，搭配同音自動修正算法降低辨識誤差</p>
       </div>
     </div>
   </div>
