@@ -7,6 +7,7 @@
  *   phases   — vertical 3-phase accordion sidebar (#1048)
  *   duolingo — Duolingo-style winding snake path (#1047)
  *   worldmap — gamified world map sidebar (#1049)
+ *   rpg      — RPG adventure map with emoji pixel art (#1055)
  */
 import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +26,7 @@ import LearningPhases from '../ui/LearningPhases';
 import WorldMap from '../ui/WorldMap';
 import LearningPathDuolingo from '../ui/LearningPathDuolingo';
 import type { LearningPathStep } from '../ui/LearningPathDuolingo';
+import RPGAdventureMap from '../ui/RPGAdventureMap';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 
 /** The authenticated app shell with header + sidebar. */
@@ -110,7 +112,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
 const NAV_STYLE_KEY = 'learning-nav-style';
 
-type NavStyle = 'classic' | 'phases' | 'duolingo' | 'worldmap';
+type NavStyle = 'classic' | 'phases' | 'duolingo' | 'worldmap' | 'rpg';
 
 const NAV_STYLES: { key: NavStyle; label: string; icon: React.ReactNode }[] = [
   {
@@ -152,6 +154,16 @@ const NAV_STYLES: { key: NavStyle; label: string; icon: React.ReactNode }[] = [
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/>
         <path d="M9 3v15M15 6v15"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'rpg',
+    label: '冒險',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/>
+        <path d="M14 2v6h6M12 18v-6M9 15h6"/>
       </svg>
     ),
   },
@@ -328,6 +340,26 @@ const LearningContent: React.FC = () => {
             aria-label="學習世界地圖"
           >
             <WorldMap
+              steps={mapSteps}
+              completedSteps={completedSteps}
+              currentStepId={currentStepId}
+              onStepClick={handleStepClick}
+            />
+          </aside>
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </div>
+      )}
+
+      {/* RPG Adventure: emoji pixel art adventure map */}
+      {navStyle === 'rpg' && (
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <aside
+            className="w-full md:w-[320px] lg:w-[360px] shrink-0 border-b md:border-b-0 md:border-r border-gray-200 bg-gradient-to-b from-amber-50/50 to-white overflow-y-auto"
+            aria-label="RPG 冒險地圖"
+          >
+            <RPGAdventureMap
               steps={mapSteps}
               completedSteps={completedSteps}
               currentStepId={currentStepId}
