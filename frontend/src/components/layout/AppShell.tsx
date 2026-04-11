@@ -29,6 +29,7 @@ import WorldMap from '../ui/WorldMap';
 import LearningPathDuolingo from '../ui/LearningPathDuolingo';
 import type { LearningPathStep } from '../ui/LearningPathDuolingo';
 import RPGAdventureMap from '../ui/RPGAdventureMap';
+import PhaserGameMap from '../ui/PhaserGameMap';
 import XPBar from '../gamification/XPBar';
 import StreakIndicator from '../gamification/StreakIndicator';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
@@ -141,7 +142,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
 const NAV_STYLE_KEY = 'learning-nav-style';
 
-type NavStyle = 'classic' | 'phases' | 'duolingo' | 'worldmap' | 'rpg';
+type NavStyle = 'classic' | 'phases' | 'duolingo' | 'worldmap' | 'rpg' | 'phaser';
 
 const NAV_STYLES: { key: NavStyle; label: string; icon: React.ReactNode }[] = [
   {
@@ -193,6 +194,16 @@ const NAV_STYLES: { key: NavStyle; label: string; icon: React.ReactNode }[] = [
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/>
         <path d="M14 2v6h6M12 18v-6M9 15h6"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'phaser',
+    label: '探索',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="6" width="20" height="12" rx="2"/>
+        <path d="M6 12h4M8 10v4M14 10h.01M18 10h.01M16 14h.01"/>
       </svg>
     ),
   },
@@ -392,6 +403,27 @@ const LearningContent: React.FC = () => {
             aria-label="RPG 冒險地圖"
           >
             <RPGAdventureMap
+              steps={mapSteps}
+              completedSteps={completedSteps}
+              currentStepId={currentStepId}
+              onStepClick={handleStepClick}
+            />
+            <SidebarGamification />
+          </aside>
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </div>
+      )}
+
+      {/* Phaser: Phaser 3 RPG tile map with walkable character */}
+      {navStyle === 'phaser' && (
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <aside
+            className="w-full md:w-[380px] lg:w-[420px] shrink-0 border-b md:border-b-0 md:border-r border-gray-200 bg-gradient-to-b from-green-50/50 to-white overflow-hidden flex flex-col"
+            aria-label="探索地圖"
+          >
+            <PhaserGameMap
               steps={mapSteps}
               completedSteps={completedSteps}
               currentStepId={currentStepId}
