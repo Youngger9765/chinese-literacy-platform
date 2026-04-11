@@ -7,8 +7,10 @@
  * crash the entire learning session.
  *
  * Features:
- * - Shows a friendly Chinese error message with the step name
- * - "重試" button resets the boundary and re-mounts the step
+ * - Auto-retries up to 3 times (500ms delay) before showing error UI
+ * - Shows a spinner while auto-retrying so students don't see error flashes
+ * - Shows a friendly Chinese error message with the step name after 3 failures
+ * - "重試" button resets retryCount to 0 for a fresh round of auto-retries
  * - Logs a structured error record to the console (Cloud Logging picks it up)
  * - Accepts an optional `onSkip` callback so callers can wire in
  *   a "跳過此步驟" action without coupling the boundary to router logic
@@ -31,6 +33,13 @@ function generateErrorId(): string {
 }
 
 // ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const MAX_AUTO_RETRIES = 3;
+const AUTO_RETRY_DELAY_MS = 500;
+
+// ---------------------------------------------------------------------------
 // Props / State
 // ---------------------------------------------------------------------------
 
@@ -47,6 +56,8 @@ export interface StepErrorBoundaryProps {
 
 interface StepErrorBoundaryState {
   hasError: boolean;
+  isRetrying: boolean;
+  retryCount: number;
   error: Error | null;
   errorId: string | null;
 }
@@ -56,18 +67,26 @@ interface StepErrorBoundaryState {
 // ---------------------------------------------------------------------------
 
 class StepErrorBoundary extends Component<StepErrorBoundaryProps, StepErrorBoundaryState> {
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+
   constructor(props: StepErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null, errorId: null };
+    this.state = {
+      hasError: false,
+      isRetrying: false,
+      retryCount: 0,
+      error: null,
+      errorId: null,
+    };
     this.handleReset = this.handleReset.bind(this);
   }
 
-  static getDerivedStateFromError(error: Error): StepErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): Partial<StepErrorBoundaryState> {
     return { hasError: true, error, errorId: generateErrorId() };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    const { errorId } = this.state;
+    const { errorId, retryCount } = this.state;
     const { stepLabel } = this.props;
 
     // Structured log — Cloud Logging ingests stdout/stderr from Cloud Run.
@@ -77,6 +96,7 @@ class StepErrorBoundary extends Component<StepErrorBoundaryProps, StepErrorBound
         event: 'learning_step_render_error',
         errorId,
         stepLabel,
+        retryCount,
         message: error.message,
         componentStack: info.componentStack
           ?.split('\n')
@@ -84,15 +104,54 @@ class StepErrorBoundary extends Component<StepErrorBoundaryProps, StepErrorBound
           .join(' | '),
       }),
     );
+
+    if (retryCount < MAX_AUTO_RETRIES) {
+      // Auto-retry: show spinner, then reset error state after delay
+      this.setState({ isRetrying: true });
+      this.retryTimer = setTimeout(() => {
+        this.setState((prev) => ({
+          hasError: false,
+          isRetrying: false,
+          retryCount: prev.retryCount + 1,
+          error: null,
+          errorId: null,
+        }));
+      }, AUTO_RETRY_DELAY_MS);
+    } else {
+      // All auto-retries exhausted — show the error UI
+      this.setState({ isRetrying: false });
+    }
+  }
+
+  componentWillUnmount(): void {
+    if (this.retryTimer !== null) {
+      clearTimeout(this.retryTimer);
+    }
   }
 
   handleReset(): void {
-    this.setState({ hasError: false, error: null, errorId: null });
+    if (this.retryTimer !== null) {
+      clearTimeout(this.retryTimer);
+      this.retryTimer = null;
+    }
+    // Reset retryCount to 0 so a fresh round of auto-retries is available
+    this.setState({
+      hasError: false,
+      isRetrying: false,
+      retryCount: 0,
+      error: null,
+      errorId: null,
+    });
   }
 
   render(): React.ReactNode {
-    const { hasError, error, errorId } = this.state;
+    const { hasError, isRetrying, error, errorId } = this.state;
     const { children, stepLabel, onSkip } = this.props;
+
+    // While auto-retrying, show a spinner instead of the error UI
+    if (isRetrying) {
+      return <StepRetryingUI stepLabel={stepLabel} />;
+    }
 
     if (!hasError || !error) {
       return children;
@@ -109,6 +168,21 @@ class StepErrorBoundary extends Component<StepErrorBoundaryProps, StepErrorBound
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Retrying spinner UI
+// ---------------------------------------------------------------------------
+
+const StepRetryingUI: React.FC<{ stepLabel: string }> = ({ stepLabel }) => (
+  <div className="flex-1 flex items-center justify-center p-6">
+    <div className="bg-white rounded-2xl shadow-md p-8 max-w-sm w-full text-center space-y-4">
+      <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
+      <p className="text-sm text-gray-600">
+        「{stepLabel}」重新載入中…
+      </p>
+    </div>
+  </div>
+);
 
 // ---------------------------------------------------------------------------
 // Fallback UI

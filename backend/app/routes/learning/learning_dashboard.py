@@ -14,6 +14,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
+from ...services.learning_stats_service import get_completed_story_slugs
 from ._helpers import verify_student_access
 
 router = APIRouter()
@@ -149,10 +150,8 @@ def get_student_dashboard(
                 streak_check = 1
         longest_streak = max(longest_streak, streak_check)
 
-    # Completed story slugs
-    completed_story_slugs = list({
-        s.story_slug for s in completed if s.story_slug
-    })
+    # Completed story slugs — use canonical query (Issue #981)
+    completed_story_slugs = get_completed_story_slugs(db, student_id)
 
     return DashboardResponse(
         total_sessions=total_sessions,

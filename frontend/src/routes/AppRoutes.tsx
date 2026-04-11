@@ -8,7 +8,8 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
-import { PublicOnlyRoute, ProtectedRoute } from '../components/auth/RouteGuards';
+import { PublicOnlyRoute, ProtectedRoute, StudentClassroomGuard } from '../components/auth/RouteGuards';
+import NoTeacherPage from '../pages/app/NoTeacherPage';
 import { AppShell, LearningAppShell } from '../components/layout/AppShell';
 import StepErrorBoundary from '../components/StepErrorBoundary';
 import {
@@ -60,6 +61,7 @@ const AchievementsPage = lazy(() => import('../pages/student/AchievementsPage'))
 const StudentClassroomDashboard = lazy(() => import('../pages/student/StudentClassroomDashboard'));
 const StudentProfile = lazy(() => import('../pages/student/StudentProfile'));
 const SessionHistoryReportPage = lazy(() => import('../pages/student/SessionHistoryReportPage'));
+const LearningHistoryPage = lazy(() => import('../pages/student/LearningHistoryPage'));
 
 // Parent dashboard — role-specific, split separately
 const ParentDashboard = lazy(() => import('../pages/parent/ParentDashboard'));
@@ -75,6 +77,9 @@ const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 // Utility pages — rarely visited after first load
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
 const HelpPage = lazy(() => import('../pages/HelpPage'));
+
+// ToS consent page (issue #1013)
+const TermsOfService = lazy(() => import('../pages/app/TermsOfService'));
 
 // ---------------------------------------------------------------------------
 // StepRoute — wraps a learning step page in StepErrorBoundary.
@@ -102,7 +107,18 @@ const StepRoute: React.FC<StepRouteProps> = ({ stepLabel, nextPath, children }) 
 
 const AppRoutes: React.FC = () => (
   <Suspense fallback={<PageLoader />}>
+    <StudentClassroomGuard>
     <Routes>
+      {/* Issue #457: students without classroom see this page when gating is enabled */}
+      <Route
+        path="/no-teacher"
+        element={
+          <ProtectedRoute>
+            <NoTeacherPage />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Public-only routes (redirect to / if already logged in) */}
       <Route
         path="/login"
@@ -135,6 +151,16 @@ const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <ChangePasswordPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Terms of Service consent — shown to all new users before accessing the app (issue #1013) */}
+      <Route
+        path="/terms"
+        element={
+          <ProtectedRoute>
+            <TermsOfService />
           </ProtectedRoute>
         }
       />
@@ -273,10 +299,20 @@ const AppRoutes: React.FC = () => (
         }
       />
       <Route
+        path="/learning-history"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <LearningHistoryPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/history"
         element={
           <ProtectedRoute>
-            <Navigate to="/assignments" replace />
+            <Navigate to="/learning-history" replace />
           </ProtectedRoute>
         }
       />
@@ -476,6 +512,7 @@ const AppRoutes: React.FC = () => (
       {/* Catch-all: redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </StudentClassroomGuard>
   </Suspense>
 );
 

@@ -40,6 +40,7 @@ from ..services.assignment_copy_strategy import resolve_text_for_assignment
 from ..services.input_sanitizer import sanitize_ai_input
 from ..services.lesson_loader import get_lesson_by_id
 from ..services.notification_service import send_assignment_submitted_notification
+from ..utils.slug import normalize_story_slug
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
 
 router = APIRouter(tags=["assignments"])
@@ -55,7 +56,7 @@ def _resolve_story_title_from_yaml(story_id: str) -> str | None:
     Accepts both numeric strings ("6") and L-prefixed format ("L06").
     """
     try:
-        story = get_lesson_by_id(int(story_id.lstrip("Ll")))
+        story = get_lesson_by_id(int(normalize_story_slug(story_id)))
         if story:
             return story["title"]
     except (ValueError, TypeError):
@@ -385,14 +386,14 @@ def create_assignment(
 
     if payload.story_id is not None:
         # --- Platform YAML text path ---
-        # Normalize L-prefix format ("L06" → "6") before int() conversion
+        # Normalize slug ("L06" / "06" → "6") before lookup and storage
         try:
-            story = get_lesson_by_id(int(payload.story_id.lstrip("Ll")))
+            story = get_lesson_by_id(int(normalize_story_slug(payload.story_id)))
         except (ValueError, TypeError):
             story = None
         if not story:
             raise HTTPException(status_code=422, detail="Invalid story_id: story not found")
-        resolved_story_id = payload.story_id
+        resolved_story_id = normalize_story_slug(payload.story_id)
 
     else:
         # --- DB text path (with copy strategy) ---
@@ -823,8 +824,9 @@ def start_assignment(
             effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
         )
 
-    # story_slug for LearningSession: use story_id (YAML) or text_id as string
-    story_slug = assignment.story_id or str(assignment.text_id)
+    # story_slug for LearningSession: use normalized story_id (YAML) or text_id as string
+    raw_slug = assignment.story_id or str(assignment.text_id)
+    story_slug = normalize_story_slug(raw_slug)
 
     # Create a new LearningSession
     learning_session = LearningSession(

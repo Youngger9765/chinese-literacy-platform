@@ -312,14 +312,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   // ── Story panel (desktop left side) ────────────────────────────────
   const renderDesktopStoryPanel = () => (
     <div className="flex-1 flex flex-col bg-amber-50 min-w-0">
-      {/* Tab header */}
-      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-          {story.filename}
-        </div>
-        <div className="flex-1" />
-      </div>
-
       {/* Story content */}
       <div className="flex-1 p-8 lg:p-16 overflow-y-auto custom-scrollbar">
         <div className="max-w-3xl mx-auto space-y-20">

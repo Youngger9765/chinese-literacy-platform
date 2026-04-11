@@ -543,20 +543,9 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
     );
   }
 
-  // Standalone mode: full-page layout with tab bar and bottom actions
+  // Standalone mode: full-page layout with bottom actions
   return (
     <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden" style={{ fontFamily: "'Iansui', 'Noto Sans TC', sans-serif" }}>
-
-      {/* Tab bar */}
-      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-          {storyTitle} — 造句練習
-        </div>
-        <div className="flex-1" />
-        <span className="text-[10px] text-gray-500">
-          {currentWordIndex + 1} / {practicedWords.length} 詞
-        </span>
-      </div>
 
       {/* Word tab nav */}
       {practicedWords.length > 1 && (

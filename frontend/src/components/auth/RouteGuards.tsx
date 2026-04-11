@@ -21,13 +21,48 @@ export const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ child
   return <>{children}</>;
 };
 
-/** Redirect unauthenticated users to /login. */
+/** Redirect unauthenticated users to /login. Redirect ToS-pending users to /terms. */
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, needsTermsAcceptance } = useAuth();
   const location = useLocation();
 
   if (isLoading) return <AuthLoadingSpinner />;
   if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />;
+
+  // ToS gate: redirect to /terms if user hasn't accepted yet (except when already on /terms)
+  if (needsTermsAcceptance && location.pathname !== '/terms') {
+    return <Navigate to="/terms" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+/**
+ * Issue #457: redirect student users without a classroom to /no-teacher.
+ *
+ * Only active when teacherGatingEnforced is true (ENFORCE_TEACHER_GATING env var).
+ * Teachers, admins, and other non-student roles are never gated.
+ * The /no-teacher, /join, /profile, and /change-password pages are exempt
+ * so the user can still join a classroom or manage their account.
+ */
+export const StudentClassroomGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading, hasClassroom, teacherGatingEnforced } = useAuth();
+  const location = useLocation();
+
+  // Exempt paths — always accessible even without a classroom
+  const exemptPaths = ['/no-teacher', '/join', '/profile', '/change-password', '/privacy', '/help'];
+  const isExempt = exemptPaths.some((p) => location.pathname.startsWith(p));
+
+  if (isLoading) return <AuthLoadingSpinner />;
+
+  if (
+    isAuthenticated &&
+    teacherGatingEnforced &&
+    !hasClassroom &&
+    !isExempt
+  ) {
+    return <Navigate to="/no-teacher" replace />;
+  }
 
   return <>{children}</>;
 };

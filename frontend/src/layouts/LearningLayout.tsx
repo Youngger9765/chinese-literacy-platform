@@ -243,6 +243,8 @@ const LearningLayout: React.FC = () => {
   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false);
   /** Ref to the idle-timer reset function so handleContinueLearning can call it. */
   const idleResetRef = useRef<(() => void) | null>(null);
+  /** Guard ref that prevents concurrent POST /api/learning/sessions calls (Issue #984). */
+  const isCreatingSession = useRef(false);
   const [stepProgressState, setStepProgressState] = useState<StepProgressData>({
     current_step: null,
     steps_completed: [],
@@ -583,9 +585,12 @@ const LearningLayout: React.FC = () => {
 
   // Ensure a DB session exists for step_progress persistence even when the flow
   // starts from assignment entry points that skip the legacy intro action.
+  // Guard with isCreatingSession ref to prevent concurrent POSTs (Issue #984).
   useEffect(() => {
     if (!token || !storyId || dbSessionId !== null || isLoading) return;
+    if (isCreatingSession.current) return;
 
+    isCreatingSession.current = true;
     fetch(`${API_BASE}/api/learning/sessions`, {
       method: 'POST',
       headers: {
@@ -608,6 +613,9 @@ const LearningLayout: React.FC = () => {
       })
       .catch(() => {
         // Non-fatal: local progress still works without DB.
+      })
+      .finally(() => {
+        isCreatingSession.current = false;
       });
   }, [token, storyId, dbSessionId, isLoading, activeDbSessionStorageKey, legacyDbSessionStorageKey]);
 
@@ -630,8 +638,10 @@ const LearningLayout: React.FC = () => {
     });
     persistStep(STEP_PATH_TO_NUMBER['reading-annotation']);
 
-    // Create a DB learning session so dialogue can be persisted (Issue #242)
-    if (token && storyId && dbSessionId === null) {
+    // Create a DB learning session so dialogue can be persisted (Issue #242).
+    // Skip if a session already exists or another creation is in flight (Issue #984).
+    if (token && storyId && dbSessionId === null && !isCreatingSession.current) {
+      isCreatingSession.current = true;
       fetch(`${API_BASE}/api/learning/sessions`, {
         method: 'POST',
         headers: {
@@ -654,6 +664,9 @@ const LearningLayout: React.FC = () => {
         })
         .catch(() => {
           // Non-fatal — dialogue won't be persisted but learning still works
+        })
+        .finally(() => {
+          isCreatingSession.current = false;
         });
     }
 

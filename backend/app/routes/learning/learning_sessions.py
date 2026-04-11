@@ -15,6 +15,7 @@ from ...models.session import CharacterError, LearningSession
 from ...models.text import Text
 from ...models.user import User
 from ...services.lesson_loader import get_lesson_by_id
+from ...utils.slug import normalize_story_slug
 from ...schemas.session import (
     SessionCreateRequest,
     SessionDetailResponse,
@@ -48,7 +49,36 @@ def create_learning_session(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Create a new learning session for the authenticated student."""
+    """Create a new learning session for the authenticated student.
+
+    Uses a get-or-create pattern: if an in_progress session already exists for
+    the same student + story_slug, return that session instead of creating a
+    duplicate.  This prevents the race condition described in Issue #984 where
+    the frontend fires two concurrent POST requests before the first response
+    arrives.
+    """
+    # Normalize slug using the centralized normalizer (#985 + #984)
+    normalized_slug = normalize_story_slug(payload.story_slug) if payload.story_slug else None
+
+    # --- get-or-create: return existing in_progress session if one exists (#984) ---
+    if normalized_slug:
+        existing = (
+            db.query(LearningSession)
+            .filter(
+                LearningSession.student_id == current_user.id,
+                LearningSession.story_slug == normalized_slug,
+                LearningSession.status == "in_progress",
+            )
+            .order_by(LearningSession.started_at.desc())
+            .first()
+        )
+        if existing:
+            logger.info(
+                "Returning existing in_progress session %d for user %d, story=%s (dedup #984)",
+                existing.id, current_user.id, normalized_slug,
+            )
+            return existing
+
     # Auto-fill classroom_id from the student's first active enrollment (if any)
     enrollment = (
         db.query(ClassroomStudent)
@@ -57,11 +87,11 @@ def create_learning_session(
     )
     classroom_id = enrollment.classroom_id if enrollment else None
 
-    # Resolve text_id from story_slug (supports numeric "13" or L-prefixed "L06")
+    # Resolve text_id from normalized story_slug
     text_id = None
-    if payload.story_slug:
+    if normalized_slug:
         try:
-            ln = int(payload.story_slug.lstrip("Ll"))
+            ln = int(normalized_slug)
             text_record = db.query(Text).filter(Text.lesson_number == ln).first()
             if text_record:
                 text_id = text_record.id
@@ -70,7 +100,7 @@ def create_learning_session(
 
     session = LearningSession(
         student_id=current_user.id,
-        story_slug=payload.story_slug,
+        story_slug=normalized_slug,
         text_id=text_id,
         status="in_progress",
         current_step=1,
@@ -81,7 +111,7 @@ def create_learning_session(
     db.refresh(session)
     logger.info(
         "Created learning session %d for user %d, story=%s",
-        session.id, current_user.id, payload.story_slug,
+        session.id, current_user.id, normalized_slug,
     )
     return session
 
@@ -123,7 +153,7 @@ def list_my_sessions(
         if statuses:
             query = query.filter(LearningSession.status.in_(statuses))
     if story_slug:
-        query = query.filter(LearningSession.story_slug == story_slug)
+        query = query.filter(LearningSession.story_slug == normalize_story_slug(story_slug))
 
     all_items = (
         query
@@ -154,9 +184,8 @@ def list_my_sessions(
         if s.text is not None:
             summary.story_title = s.text.title
         elif s.story_slug:
-            normalized = s.story_slug.lstrip("Ll")
             try:
-                lesson = get_lesson_by_id(int(normalized))
+                lesson = get_lesson_by_id(int(normalize_story_slug(s.story_slug)))
                 if lesson:
                     summary.story_title = lesson["title"]
             except (ValueError, TypeError):
@@ -193,7 +222,7 @@ def get_reading_history(
         db.query(LearningSession)
         .filter(
             LearningSession.student_id == current_user.id,
-            LearningSession.story_slug == story_slug,
+            LearningSession.story_slug == normalize_story_slug(story_slug),
             LearningSession.status == "completed",
         )
     )

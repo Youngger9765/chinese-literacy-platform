@@ -601,9 +601,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {/* LEFT: Story text panel */}
       <div className="flex flex-col bg-amber-50 flex-1 min-h-0 overflow-hidden">
         <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2">
-          <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-t-accent border-x border-x-gray-200 text-xs text-gray-800 gap-2">
-            {processZhuyin(story.filename)}
-          </div>
           <div className="flex-1" />
           <FontSizeControl />
         </div>

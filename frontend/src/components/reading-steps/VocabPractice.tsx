@@ -351,28 +351,6 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           : "'Iansui', 'Noto Sans TC', sans-serif",
       }}
     >
-      {/* Tab bar */}
-      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2 shrink-0">
-        <div className="h-full px-4 flex items-center bg-amber-50 border-t-2 border-accent border-x border-gray-200 text-xs text-gray-800 gap-2">
-          {story.filename} — 生字練習
-        </div>
-        <div className="flex-1" />
-        <span className="text-xs text-gray-500">
-          {activeTab === 'radical'
-            ? `部件 ${charsWithRadical.length} 字`
-            : activeTab === 'stroke'
-              ? `筆順 ${practicedChars.size} / ${displayChars.length}`
-              : activeTab === 'pronunciation'
-                ? `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`
-                : activeTab === 'fillinblank'
-                  ? '語詞應用'
-                  : activeTab === 'sentence'
-                    ? '造句練習'
-                    : '注音遊戲'}
-        </span>
-        {/* ZhuyinToggle moved to global Header (#863) */}
-      </div>
-
       {/* Progress bar */}
       <ProgressBar done={practicedChars.size} total={displayChars.length} />
 
@@ -382,7 +360,22 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
 
           {/* Header */}
           <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">生字練習</h2>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-xl font-bold text-gray-900">生字練習</h2>
+              <span className="text-xs text-gray-500">
+                {activeTab === 'radical'
+                  ? `部件 ${charsWithRadical.length} 字`
+                  : activeTab === 'stroke'
+                    ? `筆順 ${practicedChars.size} / ${displayChars.length}`
+                    : activeTab === 'pronunciation'
+                      ? `發音 ${pronouncedChars.size} / ${pronunciationChars.length}`
+                      : activeTab === 'fillinblank'
+                        ? '語詞應用'
+                        : activeTab === 'sentence'
+                          ? '造句練習'
+                          : '注音遊戲'}
+              </span>
+            </div>
 
             <p className="text-sm text-gray-600">
               {attempt === null || needPracticeSet.size === 0

@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-04-08",
+  "lastReview": "2026-04-09",
   "skills": {
     "1": {
       "level": 3,
@@ -163,7 +163,7 @@
       ]
     },
     "8": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -175,6 +175,11 @@
           "date": "2026-03-13",
           "level": 3,
           "reason": "在元件中使用 Tailwind CSS"
+        },
+        {
+          "date": "2026-04-09",
+          "level": 4,
+          "reason": "PR #979 使用進階 Tailwind：w-[calc((100%-1.5rem)/5)] 自訂寬度計算實現 5 格換行佈局，flex-wrap 響應式設計取代複雜的 scrollable 元件"
         }
       ]
     },
@@ -300,24 +305,29 @@
       ]
     },
     "18": {
-      "level": 1,
+      "level": 2,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-05",
           "level": 1,
           "reason": "PR #898 的問題說明中清楚描述了 LearningSession.current_step → assignment API → 前端進度條的完整資料流，顯示已開始理解全端架構。但目前是「能描述問題」的程度，尚未看到主動追蹤或重構整體資料流的行動，保守給 level 1"
+        },
+        {
+          "date": "2026-04-09",
+          "level": 2,
+          "reason": "PR #1031 是靖杭第一個 backend PR！診斷全形/半形 bug 時追蹤了完整資料流（YAML 原始資料 → lesson_loader.py 載入 → API 回傳 → 前端比對），在正確的層級（lesson_loader）加入 _halfwidth() 正規化，而不是在前端 patch。同時修正 learning_vocab.py 和 ai_generation.py 的變數名稱殘留，展現跨檔案根因修復能力"
         }
       ]
     }
   },
   "recommendations": [
-    "Git 工作流（#9）升到 level 3，下一步練習在 PR 中加入 staging 截圖或測試連結，讓方大哥也能直接驗收",
-    "元件設計模式（#13）升到 level 3，下一步挑戰把重複邏輯抽成 custom hook（例如 useAssignmentProgress），往 level 4 邁進",
-    "教師端報告（#930）是下一個大功能，涉及跨角色資料存取（學生報告 → 教師 dashboard），完成後架構理解（#18）可望升級",
-    "PR #979（進度條）已提交，merge 後可以挑戰更大的 UI 元件重構"
+    "架構理解（#18）升到 level 2，PR #1031 展現跨層資料流追蹤能力。下一步：PR #1030 學習紀錄頁面涉及前端 API 串接 + 後端資料查詢，完成後可望再升",
+    "Tailwind（#8）升到 level 4，下一步挑戰響應式斷點設計（sm/md/lg 不同佈局）",
+    "PR #1030 學習紀錄頁面是目前最大的進行中功能（825 行），完成後元件設計（#13）和獨立開發（#16）可望升到 level 4",
+    "開始接觸 backend 了！可以嘗試更多 backend 任務，例如新增 API endpoint 或修改資料模型"
   ],
-  "summary": "4/3 至 4/8 間共 3 個 PR merge：PR #986（自學/作業分離）和 PR #987（詞語定義 tab 鎖定）都是從 4/3 會議決議獨立建立 issue → 開發 → merge 的完整自主流程，一週內完成。PR #900（部件拆解修正）修正 JSON fallback 資料問題。技能升級：#9（Git 工作流 level 3）、#13（元件設計模式 level 3）、#16（獨立開發功能 level 3）",
+  "summary": "4/3 至 4/9 間共 5 個 PR merge。亮點：PR #1031 是靖杭第一個 backend PR，在 lesson_loader.py 加入全形→半形正規化，展現跨層根因修復能力。PR #979 大幅簡化進度條元件（-94 行），用 flex-wrap 取代過度工程的 scrollable 元件。技能升級：#8（Tailwind level 4）、#18（架構理解 level 2）。還有 PR #988（排序）和 #1030（學習紀錄，825行大功能）進行中",
   "issues": [
     {
       "id": "環境建置",
@@ -452,6 +462,26 @@
       "contribution": "實作 4/3 會議決議：自學 session 與作業 session 分離，作業跟 assignment ID 走，刪除作業也刪記錄",
       "skillsLearned": [9, 13, 16],
       "highlights": ["涉及前端狀態管理重設計", "理解 LearningSession 與 Assignment 資料模型關係", "一週內完成"]
+    },
+    {
+      "id": "#924",
+      "title": "作業進度條顏色改綠色 + 排版每5格換行（PR #979）",
+      "date": "2026-04-09",
+      "type": "feature",
+      "contribution": "移除複雜的 horizontal scroll 進度條（左右箭頭 + gradient mask），改用 flex-wrap 每5格換行的簡潔佈局。完成→綠色、進行中→黃色、未完成→灰色",
+      "skillsLearned": [8],
+      "highlights": ["大幅簡化元件（-94/+26 行）", "w-[calc((100%-1.5rem)/5)] 自訂寬度計算", "用簡單方案取代過度工程"],
+      "linesChanged": "+26/-94"
+    },
+    {
+      "id": "#1029",
+      "title": "詞語應用全形/半形答案修正（PR #1031）",
+      "date": "2026-04-09",
+      "type": "bugfix",
+      "contribution": "第一個 backend PR！診斷詞語應用選項中無正確答案的 bug，根因是 YAML 中全形字母（Ａ）與 vocab_bank 半形 key（A）不匹配。在 lesson_loader.py 加入 _halfwidth() 正規化函數，同時修正 learning_vocab.py 的 payload.character→payload.word 殘留",
+      "skillsLearned": [10, 18],
+      "highlights": ["靖杭第一個 backend Python PR", "追蹤完整資料流找到根因（YAML→loader→API→frontend）", "在正確的層級修復（data loading 而非前端 patch）", "跨 3 個檔案的根因修復"],
+      "linesChanged": "+21/-6"
     }
   ]
 }

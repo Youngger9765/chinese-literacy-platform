@@ -23,6 +23,7 @@ from ..models.gamification import (
     xp_to_level,
 )
 from ..models.school import Classroom, ClassroomStudent
+from .learning_stats_service import get_completed_story_count
 
 logger = logging.getLogger(__name__)
 
@@ -43,16 +44,12 @@ def _get_total_xp(db: Session, student_id: int) -> int:
 
 
 def _get_stories_completed(db: Session, student_id: int) -> int:
-    """Return count of 'session_complete' XP log entries for a student."""
-    result = (
-        db.query(sqlfunc.count(StudentXPLog.id))
-        .filter(
-            StudentXPLog.student_id == student_id,
-            StudentXPLog.event_type == "session_complete",
-        )
-        .scalar()
-    )
-    return int(result)
+    """Return the number of distinct completed stories for a student.
+
+    Delegates to the canonical shared helper so that gamification, dashboard,
+    and progress endpoints all report the same value (Issue #981).
+    """
+    return get_completed_story_count(db, student_id)
 
 
 def _get_or_create_streak(db: Session, student_id: int) -> StudentStreak:

@@ -21,6 +21,7 @@ from ...schemas.classroom import (
 from ...services.input_sanitizer import sanitize_ai_input
 from .helpers import (
     check_email_domain,
+    create_submissions_for_new_student,
     get_classroom_or_404,
     require_owner_or_admin,
 )
@@ -125,21 +126,8 @@ def batch_create_students(
             db.add(cs)
             db.flush()
 
-            # Backfill submissions for all active assignments in this classroom (#996)
-            active_assignments = (
-                db.query(Assignment)
-                .filter(
-                    Assignment.classroom_id == classroom_id,
-                    Assignment.is_active == True,
-                )
-                .all()
-            )
-            for assignment in active_assignments:
-                db.add(AssignmentSubmission(
-                    assignment_id=assignment.id,
-                    student_id=user.id,
-                    status="pending",
-                ))
+            # Back-fill submissions for active assignments (#996)
+            create_submissions_for_new_student(classroom_id, user.id, db)
 
             created.append(CreatedStudentInfo(
                 name=item.name,

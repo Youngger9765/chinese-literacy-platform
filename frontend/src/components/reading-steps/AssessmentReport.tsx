@@ -70,6 +70,8 @@ interface AssessmentReportProps {
   dbSessionId?: number | null;
   /** Auth token — passed to ExitTicket for API calls (Issue #463) */
   token?: string | null;
+  /** When true, suppresses celebration overlays and interactive elements (teacher view) */
+  readOnly?: boolean;
 }
 
 // CPM thresholds aligned with backend persona.py (Issue #54)
@@ -165,7 +167,7 @@ const Section: React.FC<{
   );
 };
 
-const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals, dbSessionId, token }) => {
+const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals, dbSessionId, token, readOnly }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
 
   // Track report viewed in localStorage
@@ -354,10 +356,10 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         />
       )}
 
-      <CelebrationOverlay score={overallScore} />
+      {!readOnly && <CelebrationOverlay score={overallScore} />}
 
       {/* ============ 星星評級 Star Rating (Issue #222) ============ */}
-      {!hasNoData && (
+      {!hasNoData && !readOnly && (
         <StarCelebration
           stars={starCount}
           readingAccuracy={bestReadingAccuracy}
