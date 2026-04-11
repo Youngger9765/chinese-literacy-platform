@@ -13,6 +13,7 @@ from datetime import date, datetime, timezone
 from sqlalchemy import func as sqlfunc
 from sqlalchemy.orm import Session
 
+from ..models.session import LearningSession
 from ..models.gamification import (
     BADGE_CATALOGUE,
     XP_REWARDS,
@@ -303,6 +304,44 @@ def process_session_completion(
     # --- Compute new totals ---
     new_total_xp = total_xp_before + sum(l.xp_earned for l in xp_earned)
     lv_info = level_progress(new_total_xp)
+
+    # --- Compute and persist overall_score (#1063) ---
+    learning_session = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+    if learning_session is not None:
+        scores: list[float] = []
+        weights: list[float] = []
+        # Accuracy from reading (weight: 40%)
+        if learning_session.accuracy is not None:
+            scores.append(learning_session.accuracy * 100)
+            weights.append(0.4)
+        elif reading_accuracy is not None:
+            scores.append(reading_accuracy)
+            weights.append(0.4)
+        # Comprehension score (weight: 40%)
+        if learning_session.comprehension_score is not None:
+            scores.append(learning_session.comprehension_score)
+            weights.append(0.4)
+        elif comprehension_passed:
+            scores.append(80.0)  # default pass score
+            weights.append(0.4)
+        # Vocab result (weight: 20%) — extract from vocab_result JSONB if available
+        if isinstance(learning_session.vocab_result, dict):
+            vocab_accuracy = learning_session.vocab_result.get("accuracy")
+            if isinstance(vocab_accuracy, (int, float)):
+                scores.append(float(vocab_accuracy) * 100 if vocab_accuracy <= 1 else float(vocab_accuracy))
+                weights.append(0.2)
+
+        if scores and weights:
+            total_weight = sum(weights)
+            overall = sum(s * w for s, w in zip(scores, weights)) / total_weight
+            learning_session.overall_score = round(overall, 1)
+            if learning_session.status != "completed":
+                learning_session.status = "completed"
+                learning_session.completed_at = datetime.now(timezone.utc)
+            logger.info(
+                "Set overall_score=%.1f for session %d (sources=%d)",
+                learning_session.overall_score, session_id, len(scores),
+            )
 
     # --- Check badges ---
     newly_unlocked = check_and_award_badges(
