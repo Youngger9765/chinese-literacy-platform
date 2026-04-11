@@ -176,6 +176,14 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 | `backend/app/routes/` | API 路由（140+ endpoints：auth, classrooms, assignments, learning, teacher, gamification, parents, dictionary, feedback, jobs, privacy） |
 | `backend/data/lessons/` | 課文 YAML 來源檔（57 篇） |
 
+## 簡報資料（公開，不需登入）
+
+| 文件 | URL |
+|------|-----|
+| 教授簡介（3 分鐘版） | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/short.html |
+| 完整平台說明書 | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/full.html |
+| 閱讀理解技能樹研究 | https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/presentation/research.html |
+
 ## 參考專案
 
 方大哥的原始實作：`github.com/Shinjou/lingoleap-ai-reading-tutor`（唯讀參考，不修改）
