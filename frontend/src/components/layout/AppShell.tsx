@@ -30,6 +30,8 @@ import LearningPathDuolingo from '../ui/LearningPathDuolingo';
 import type { LearningPathStep } from '../ui/LearningPathDuolingo';
 import RPGAdventureMap from '../ui/RPGAdventureMap';
 import PhaserGameMap from '../ui/PhaserGameMap';
+import PixiLearningPath from '../ui/PixiLearningPath';
+import IsometricTown from '../ui/IsometricTown';
 import XPBar from '../gamification/XPBar';
 import StreakIndicator from '../gamification/StreakIndicator';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
@@ -142,7 +144,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
 const NAV_STYLE_KEY = 'learning-nav-style';
 
-type NavStyle = 'classic' | 'phases' | 'duolingo' | 'worldmap' | 'rpg' | 'phaser';
+type NavStyle = 'classic' | 'phases' | 'duolingo' | 'worldmap' | 'rpg' | 'phaser' | 'pixi' | 'isometric';
 
 const NAV_STYLES: { key: NavStyle; label: string; icon: React.ReactNode }[] = [
   {
@@ -207,6 +209,24 @@ const NAV_STYLES: { key: NavStyle; label: string; icon: React.ReactNode }[] = [
       </svg>
     ),
   },
+  {
+    key: 'pixi',
+    label: '粒子',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'isometric',
+    label: '小鎮',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>
+      </svg>
+    ),
+  },
 ];
 
 const VALID_NAV_STYLES = new Set<string>(NAV_STYLES.map((s) => s.key));
@@ -226,13 +246,9 @@ const LearningContent: React.FC = () => {
     return 'classic';
   });
 
-  const cycleNavStyle = useCallback(() => {
-    setNavStyle((prev) => {
-      const idx = NAV_STYLES.findIndex((s) => s.key === prev);
-      const next = NAV_STYLES[(idx + 1) % NAV_STYLES.length].key;
-      try { localStorage.setItem(NAV_STYLE_KEY, next); } catch { /* non-fatal */ }
-      return next;
-    });
+  const selectNavStyle = useCallback((key: NavStyle) => {
+    setNavStyle(key);
+    try { localStorage.setItem(NAV_STYLE_KEY, key); } catch { /* non-fatal */ }
   }, []);
 
   const currentStepId = useMemo(() => {
@@ -303,18 +319,18 @@ const LearningContent: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Nav style toggle bar */}
+      {/* Nav style selector */}
       <div className="flex items-center justify-end px-3 py-1 bg-white/60 border-b border-gray-100">
-        <button
-          type="button"
-          onClick={cycleNavStyle}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-accent hover:bg-accent-bg transition-colors"
-          aria-label={`目前：${currentNavConfig.label}模式，點擊切換`}
-          title={`切換導航模式（目前：${currentNavConfig.label}）`}
+        <select
+          value={navStyle}
+          onChange={(e) => selectNavStyle(e.target.value as NavStyle)}
+          className="px-2.5 py-1 rounded-md text-xs font-medium text-gray-600 bg-transparent border border-gray-200 hover:border-accent focus:border-accent focus:outline-none cursor-pointer"
+          aria-label="選擇導航模式"
         >
-          {currentNavConfig.icon}
-          {currentNavConfig.label}
-        </button>
+          {NAV_STYLES.map((s) => (
+            <option key={s.key} value={s.key}>{s.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Classic: horizontal StepperNav top bar */}
@@ -424,6 +440,48 @@ const LearningContent: React.FC = () => {
             aria-label="探索地圖"
           >
             <PhaserGameMap
+              steps={mapSteps}
+              completedSteps={completedSteps}
+              currentStepId={currentStepId}
+              onStepClick={handleStepClick}
+            />
+            <SidebarGamification />
+          </aside>
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </div>
+      )}
+
+      {/* PixiJS: particle effects interactive path */}
+      {navStyle === 'pixi' && (
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <aside
+            className="w-full md:w-[380px] lg:w-[420px] shrink-0 border-b md:border-b-0 md:border-r border-gray-200 bg-gradient-to-b from-indigo-50/50 to-white overflow-hidden flex flex-col"
+            aria-label="互動學習路徑"
+          >
+            <PixiLearningPath
+              steps={mapSteps}
+              completedSteps={completedSteps}
+              currentStepId={currentStepId}
+              onStepClick={handleStepClick}
+            />
+            <SidebarGamification />
+          </aside>
+          <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
+            <LearningLayout />
+          </div>
+        </div>
+      )}
+
+      {/* CSS Isometric 3D town */}
+      {navStyle === 'isometric' && (
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <aside
+            className="w-full md:w-[420px] lg:w-[480px] shrink-0 border-b md:border-b-0 md:border-r border-gray-200 bg-gradient-to-b from-amber-50/50 to-white overflow-y-auto"
+            aria-label="等距小鎮"
+          >
+            <IsometricTown
               steps={mapSteps}
               completedSteps={completedSteps}
               currentStepId={currentStepId}
