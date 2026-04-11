@@ -15,6 +15,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { getMyAssignments } from '../../services/assignmentApi';
+import { fetchGamificationSummary } from '../../services/gamificationApi';
+import type { GamificationSummary } from '../../services/gamificationApi';
 import { AppView } from '../../types';
 import { VIEW_TO_PATH, ACTIVE_STEPS } from '../../config/stepConfig';
 import { useAppView } from '../../hooks/useAppView';
@@ -27,7 +29,34 @@ import WorldMap from '../ui/WorldMap';
 import LearningPathDuolingo from '../ui/LearningPathDuolingo';
 import type { LearningPathStep } from '../ui/LearningPathDuolingo';
 import RPGAdventureMap from '../ui/RPGAdventureMap';
+import XPBar from '../gamification/XPBar';
+import StreakIndicator from '../gamification/StreakIndicator';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
+
+/** Compact gamification display for learning path sidebars. */
+const SidebarGamification: React.FC = () => {
+  const { token, user } = useAuth();
+  const { activeView } = useWorkspace();
+  const [summary, setSummary] = useState<GamificationSummary | null>(null);
+
+  useEffect(() => {
+    if (!token || !user?.id || activeView !== 'student') return;
+    let cancelled = false;
+    fetchGamificationSummary(user.id, token)
+      .then((data) => { if (!cancelled) setSummary(data); })
+      .catch(() => { /* non-critical — hide section on error */ });
+    return () => { cancelled = true; };
+  }, [token, user?.id, activeView]);
+
+  if (!summary) return null;
+
+  return (
+    <div className="border-t border-gray-200 px-3 py-3 space-y-2">
+      <XPBar levelInfo={summary.level_info} compact />
+      <StreakIndicator streak={summary.streak} variant="compact" />
+    </div>
+  );
+};
 
 /** The authenticated app shell with header + sidebar. */
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -307,6 +336,7 @@ const LearningContent: React.FC = () => {
                 onStepClick={handleStepClick}
               />
             </div>
+            <SidebarGamification />
           </aside>
           <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
             <LearningLayout />
@@ -325,6 +355,7 @@ const LearningContent: React.FC = () => {
               steps={duolingoSteps}
               onStartStep={handleDuolingoStart}
             />
+            <SidebarGamification />
           </aside>
           <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
             <LearningLayout />
@@ -345,6 +376,7 @@ const LearningContent: React.FC = () => {
               currentStepId={currentStepId}
               onStepClick={handleStepClick}
             />
+            <SidebarGamification />
           </aside>
           <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
             <LearningLayout />
@@ -365,6 +397,7 @@ const LearningContent: React.FC = () => {
               currentStepId={currentStepId}
               onStepClick={handleStepClick}
             />
+            <SidebarGamification />
           </aside>
           <div className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0">
             <LearningLayout />
