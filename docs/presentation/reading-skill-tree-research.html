@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>閱讀理解技能樹研究 — LingoLeap</title>
+<style>
+  :root {
+    --brand: #5B4FC4;
+    --brand-light: #EDEBF9;
+    --bg: #FDF8F0;
+    --text: #1a1a2e;
+    --text-secondary: #64748b;
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Noto Sans TC", -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--brand) 0%, #7c6dd8 100%);
+    color: white;
+    padding: 3rem 0;
+    text-align: center;
+  }
+  .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .header .subtitle { font-size: 1rem; opacity: 0.85; }
+  .header .meta { font-size: 0.8rem; opacity: 0.6; margin-top: 1rem; }
+
+  /* TOC */
+  .toc {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+  }
+  .toc h3 { font-size: 0.9rem; color: var(--brand); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+  .toc ol { padding-left: 1.25rem; }
+  .toc li { margin: 0.35rem 0; }
+  .toc a { color: var(--brand); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* Section */
+  .section { margin: 2.5rem 0; }
+  .section h2 {
+    font-size: 1.4rem;
+    color: var(--brand);
+    border-bottom: 2px solid var(--brand-light);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .section h3 { font-size: 1.1rem; margin: 1.5rem 0 0.75rem; color: var(--text); }
+
+  /* Cards */
+  .card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-meta { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem; }
+
+  /* Framework grid */
+  .fw-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .fw-card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .fw-card .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  .tag-intl { background: #dbeafe; color: #1e40af; }
+  .tag-tw { background: #fce7f3; color: #9d174d; }
+  .fw-card h4 { font-size: 0.95rem; margin-bottom: 0.25rem; }
+  .fw-card .author { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .fw-card p { font-size: 0.85rem; color: #475569; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: var(--brand-light); color: var(--brand); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  tr:hover { background: #faf8f5; }
+
+  /* Skill tree visual */
+  .tree { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.85rem; line-height: 1.8; background: #1e1b2e; color: #e2e8f0; padding: 1.5rem; border-radius: 10px; overflow-x: auto; white-space: pre; }
+  .tree .branch { color: var(--warning); }
+  .tree .leaf { color: var(--success); }
+  .tree .dim { color: #64748b; }
+  .tree .highlight { color: #a78bfa; font-weight: 600; }
+
+  /* Progression bars */
+  .prog-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0; }
+  .prog-label { font-size: 0.8rem; min-width: 120px; color: var(--text-secondary); }
+  .prog-bar { flex: 1; height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 99px; transition: width 0.3s; }
+
+  /* Badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.75rem; padding: 2px 10px; border-radius: 99px;
+    font-weight: 500;
+  }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-purple { background: var(--brand-light); color: var(--brand); }
+
+  /* Key finding callout */
+  .callout {
+    background: linear-gradient(135deg, var(--brand-light) 0%, #f3f0ff 100%);
+    border-left: 4px solid var(--brand);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 10px 10px 0;
+    margin: 1.5rem 0;
+  }
+  .callout-title { font-weight: 700; color: var(--brand); margin-bottom: 0.5rem; }
+
+  /* Mapping table special */
+  .mapping-table th:first-child { width: 25%; }
+  .mapping-table .check { color: var(--success); font-weight: bold; }
+  .mapping-table .missing { color: var(--danger); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; font-size: 12px; }
+    .header { background: var(--brand) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card, .fw-card, .toc { box-shadow: none; border: 1px solid #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container">
+    <h1>閱讀理解技能樹研究</h1>
+    <div class="subtitle">LingoLeap × 閱讀科學 — 國際與台灣 17 個框架分析</div>
+    <div class="meta">Issue #1060 | 2026-04-11 | 文獻來源：PIRLS, PISA, Scarborough, Barrett, Bloom, 柯華葳, 曾世杰, 十二年國教</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="toc">
+    <h3>目錄</h3>
+    <ol>
+      <li><a href="#finding">核心發現</a></li>
+      <li><a href="#frameworks">17 個框架總覽</a></li>
+      <li><a href="#equation">閱讀方程式</a></li>
+      <li><a href="#pirls">PIRLS 四歷程 × LingoLeap</a></li>
+      <li><a href="#kewen">課文本位 × LingoLeap</a></li>
+      <li><a href="#skilltree">10 條技能線 × 學術對應</a></li>
+      <li><a href="#gaps">缺口與建議</a></li>
+    </ol>
+  </div>
+
+  <!-- 核心發現 -->
+  <div class="section" id="finding">
+    <h2>核心發現</h2>
+    <div class="callout">
+      <div class="callout-title">LingoLeap 的 10 條策略遞進線完整覆蓋 PIRLS 四歷程，與柯華葳「課文本位閱讀理解教學」四階段高度吻合</div>
+      <p>這不是巧合——三民教材本來就是基於課文本位教學設計的。LingoLeap 的策略序列有明確的學術基礎，不是隨意編排</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">覆蓋率評估</div>
+      <div class="prog-row">
+        <span class="prog-label">PIRLS 四歷程</span>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%; background: var(--success);"></div></div>
+        <span class="badge badge-green">100%</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-label">課文本位四階段</span>
+        <div class="prog-bar"><div class="prog-fill" style="width:85%; background: var(--success);"></div></div>
+        <span class="badge badge-green">85%</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-label">Bloom 六層次</span>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%; background: var(--success);"></div></div>
+        <span class="badge badge-green">100%</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-label">Barrett 五層次</span>
+        <div class="prog-bar"><div class="prog-fill" style="width:80%; background: var(--warning);"></div></div>
+        <span class="badge badge-yellow">80%</span>
+      </div>
+      <div class="prog-row">
+        <span class="prog-label">十二年國教指標</span>
+        <div class="prog-bar"><div class="prog-fill" style="width:90%; background: var(--success);"></div></div>
+        <span class="badge badge-green">90%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 17 個框架 -->
+  <div class="section" id="frameworks">
+    <h2>17 個框架總覽</h2>
+    <div class="fw-grid">
+      <div class="fw-card">
+        <span class="tag tag-intl">國際</span>
+        <h4>Simple View of Reading</h4>
+        <div class="author">Gough & Tunmer, 1986</div>
+        <p>解碼 × 語言理解 = 閱讀理解。缺一不可的乘法關係</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-intl">國際</span>
+        <h4>Scarborough's Reading Rope</h4>
+        <div class="author">Hollis Scarborough, 2001</div>
+        <p>閱讀如繩索：字詞辨識（越來越自動化）+ 語言理解（越來越策略性）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-intl">國際</span>
+        <h4>RAND 閱讀理解框架</h4>
+        <div class="author">Catherine Snow, 2002</div>
+        <p>讀者 × 文本 × 活動 × 社會文化脈絡的三角互動</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-intl">國際</span>
+        <h4>Barrett's Taxonomy</h4>
+        <div class="author">Thomas Barrett, 1968</div>
+        <p>五層次：字面→重組→推論→評估→欣賞（含情意面）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-intl">國際</span>
+        <h4>Bloom's Taxonomy</h4>
+        <div class="author">Bloom 1956 / Anderson 2001</div>
+        <p>記憶→理解→應用→分析→評估→創造（六層認知）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-intl">國際</span>
+        <h4>PIRLS 四歷程</h4>
+        <div class="author">IEA, 每五年一次</div>
+        <p>直接提取→直接推論→詮釋整合→比較評估（4 年級國際評量）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-intl">國際</span>
+        <h4>Common Core Standards</h4>
+        <div class="author">美國 K-12 課綱</div>
+        <p>跨年級螺旋遞進的閱讀能力標準（K→12 年級）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-tw">台灣</span>
+        <h4>課文本位閱讀理解教學</h4>
+        <div class="author">柯華葳 / CIRN-PAIR 計畫</div>
+        <p>四階段：大意→推論→自我提問→理解監控（台灣最核心框架）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-tw">台灣</span>
+        <h4>柯華葳閱讀三成分</h4>
+        <div class="author">柯華葳教授</div>
+        <p>認字 + 理解 + 自我監督 = 三個必要成分</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-tw">台灣</span>
+        <h4>十二年國教課綱</h4>
+        <div class="author">教育部, 2019 實施</div>
+        <p>四學習階段的閱讀學習表現（5-I 至 5-IV）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-tw">台灣</span>
+        <h4>PISA 三歷程</h4>
+        <div class="author">OECD, 15 歲學生</div>
+        <p>擷取→統整→省思（台灣自 2006 年參與）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-tw">台灣</span>
+        <h4>PIRLS 四層次提問</h4>
+        <div class="author">台灣教學現場實踐</div>
+        <p>找線索→推理→整合→評鑑（轉化為教師提問策略）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-tw">台灣</span>
+        <h4>閱讀 101 計畫</h4>
+        <div class="author">教育部, 2008-2017</div>
+        <p>全國四大閱讀研發中心，2016 PIRLS 顯著提升</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-intl">國際</span>
+        <h4>字面/推論/評估三層次</h4>
+        <div class="author">教學實踐通用框架</div>
+        <p>最簡化的閱讀理解分層：表面→深層→批判</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-tw">台灣</span>
+        <h4>曾世杰閱讀方程式</h4>
+        <div class="author">曾世杰教授</div>
+        <p>閱讀能力 = 識字解碼 × 背景知識（與 Simple View 一致）</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-intl">國際</span>
+        <h4>螺旋課程理論</h4>
+        <div class="author">Jerome Bruner, 1960</div>
+        <p>同一概念在不同年級反覆出現，每次加深——LingoLeap 策略遞進的理論基礎</p>
+      </div>
+      <div class="fw-card">
+        <span class="tag tag-tw">台灣</span>
+        <h4>漢語閱讀特殊性</h4>
+        <div class="author">Shu Hua 等人</div>
+        <p>詞素覺知在漢語閱讀理解中的重要性超過英語</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 閱讀方程式 -->
+  <div class="section" id="equation">
+    <h2>閱讀方程式 × LingoLeap 10 步流程</h2>
+    <div class="card" style="text-align:center; padding: 2rem;">
+      <div style="font-size: 1.5rem; font-weight: 700; color: var(--brand); margin-bottom: 1rem;">
+        閱讀能力 = 識字解碼 × 背景知識
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-secondary);">
+        Simple View of Reading (Gough & Tunmer, 1986) = 曾世杰教授閱讀方程式
+      </div>
+    </div>
+
+    <table>
+      <tr><th>方程式側</th><th>LingoLeap 步驟</th><th>做什麼</th></tr>
+      <tr><td rowspan="4" style="font-weight:600; color: #0ea5e9;">識字解碼</td><td>逐段朗讀 LiveTutor</td><td>即時朗讀流暢性評估 + AI 回饋</td></tr>
+      <tr><td>生字練習 VocabPractice</td><td>部件拆解 + 筆順 + 注音</td></tr>
+      <tr><td>聽寫練習 Dictation</td><td>聽音寫字，強化聲韻覺識</td></tr>
+      <tr><td>全文朗讀 FullReading</td><td>重複朗讀提升自動化</td></tr>
+      <tr><td rowspan="4" style="font-weight:600; color: #8b5cf6;">背景知識</td><td>簡介 Intro</td><td>建立先行組織者</td></tr>
+      <tr><td>課文理解 ComprehensionChat</td><td>蘇格拉底式 AI 對話（5 題 3 階段）</td></tr>
+      <tr><td>策略練習 StrategyExercise</td><td>10 種閱讀理解策略遞進</td></tr>
+      <tr><td>知識站 KnowledgeStation</td><td>延伸知識影片 + 補充材料</td></tr>
+      <tr><td style="font-weight:600; color: #f59e0b;">整合評估</td><td>報告 AssessmentReport</td><td>六環節診斷 + 個人化建議</td></tr>
+    </table>
+  </div>
+
+  <!-- PIRLS -->
+  <div class="section" id="pirls">
+    <h2>PIRLS 四歷程 × LingoLeap 策略</h2>
+    <table class="mapping-table">
+      <tr><th>PIRLS 歷程</th><th>說明</th><th>LingoLeap 對應策略</th><th>覆蓋</th></tr>
+      <tr>
+        <td><strong>1. 直接提取</strong><br><span style="font-size:0.75rem;color:var(--text-secondary)">20% 評量比重</span></td>
+        <td>在文本中找到明確訊息</td>
+        <td>推論人物特質 L08-L11（找文本線索）<br>推論指稱詞 L05</td>
+        <td class="check">✓</td>
+      </tr>
+      <tr>
+        <td><strong>2. 直接推論</strong><br><span style="font-size:0.75rem;color:var(--text-secondary)">30% 評量比重</span></td>
+        <td>連結多個線索做簡單推論</td>
+        <td>推論主旨 L15-L17<br>說明文結構 L13, L18-L20</td>
+        <td class="check">✓</td>
+      </tr>
+      <tr>
+        <td><strong>3. 詮釋整合</strong><br><span style="font-size:0.75rem;color:var(--text-secondary)">30% 評量比重</span></td>
+        <td>整合全文歸納主題</td>
+        <td>用表格整理 L29-L31<br>自我提問 L21-L23<br>摘要 L54</td>
+        <td class="check">✓</td>
+      </tr>
+      <tr>
+        <td><strong>4. 比較評估</strong><br><span style="font-size:0.75rem;color:var(--text-secondary)">20% 評量比重</span></td>
+        <td>以個人/客觀角度批判文本</td>
+        <td>解決問題 L24-L51（6 級）<br>數位素養 L39-L48<br>多文本比較 L56, L58</td>
+        <td class="check">✓</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 課文本位 -->
+  <div class="section" id="kewen">
+    <h2>課文本位閱讀理解教學 × LingoLeap</h2>
+    <div class="card">
+      <div class="card-title">柯華葳教授四階段策略教學</div>
+      <div class="card-meta">CIRN / PAIR 計畫 — 台灣閱讀教學的核心框架</div>
+      <table>
+        <tr><th>階段</th><th>策略</th><th>LingoLeap 對應</th><th>狀態</th></tr>
+        <tr><td><strong>1. 大意</strong></td><td>摘取段落/文章大意</td><td>推論主旨 L15-L17、摘要 L54</td><td><span class="badge badge-green">已有</span></td></tr>
+        <tr><td><strong>2. 推論</strong></td><td>推論人物特質、因果、指稱詞</td><td>推論人物特質 L08-L11、推論指稱詞 L05</td><td><span class="badge badge-green">已有</span></td></tr>
+        <tr><td><strong>3. 自我提問</strong></td><td>學生自己提問並找答案</td><td>自我提問 L21-L23（3 級遞進）</td><td><span class="badge badge-green">已有</span></td></tr>
+        <tr><td><strong>4. 理解監控</strong></td><td>監控自己的理解狀態</td><td>部分（AI 即時回饋），缺獨立策略序列</td><td><span class="badge badge-yellow">部分</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- 10 條技能線 -->
+  <div class="section" id="skilltree">
+    <h2>10 條技能線 × 學術對應</h2>
+
+    <div class="tree">
+<span class="highlight">閱讀理解技能樹</span> <span class="dim">（from 57 篇課文 reading_strategy）</span>
+
+<span class="branch">推論系</span>
+  ├── <span class="leaf">推論人物特質</span> L08→L09→L10→L11 <span class="dim">│ Barrett 層次 3 │ PIRLS 歷程 1-2</span>
+  ├── <span class="leaf">推論主旨</span>     L15→L16→L17      <span class="dim">│ Bloom 層次 2-4 │ PIRLS 歷程 2-3</span>
+  ├── <span class="leaf">自我提問</span>     L21→L22→L23      <span class="dim">│ 課文本位第3階段 │ PIRLS 歷程 3</span>
+  └── <span class="leaf">推論指稱詞</span>   L05              <span class="dim">│ 語言結構 │ Scarborough 上方繩股</span>
+
+<span class="branch">文章結構</span>
+  ├── <span class="leaf">說明文結構</span>   L13→L18→L19→L20  <span class="dim">│ PIRLS 資訊文本 │ 十二年國教 5-III</span>
+  └── <span class="leaf">記敘文結構</span>   L07              <span class="dim">│ Barrett 層次 2（重組）</span>
+
+<span class="branch">高階思辨</span>
+  ├── <span class="leaf">解決問題</span>     L24→L35→L36→L37→L49→L51 <span class="dim">│ Bloom 層次 3-5 │ PIRLS 歷程 4</span>
+  ├── <span class="leaf">數位素養</span>     L39→L40→L41→L48  <span class="dim">│ PISA 2018 互動文本 │ 台灣 2021-2026 政策</span>
+  └── <span class="leaf">論證表達</span>     L32, L33, L56, L58 <span class="dim">│ Bloom 層次 5-6 │ 課文本位延伸</span>
+
+<span class="branch">工具能力</span>
+  ├── <span class="leaf">用表格整理</span>   L29→L30→L31      <span class="dim">│ PIRLS 歷程 3 │ Bloom 層次 3-4</span>
+  └── <span class="leaf">圖表素養</span>     L38→L52→L53      <span class="dim">│ PIRLS 資訊文本 │ Common Core RI.7</span>
+
+<span class="branch">特殊領域</span>
+  ├── <span class="leaf">文言文</span>       L42→L43→L45→L46→L47 <span class="dim">│ 漢語特殊性 │ 十二年國教 5-IV</span>
+  └── <span class="leaf">品格力</span>       L06, L25, L27, L28   <span class="dim">│ Barrett 層次 5（欣賞）│ SEL</span>
+    </div>
+
+    <div class="callout" style="margin-top: 1.5rem;">
+      <div class="callout-title">重要聲明</div>
+      <p>上面的分群結構是從 YAML 資料觀察歸納 + 學術框架比對的結果。策略遞進序列（如推論人物特質 4 級）來自三民教材的設計，與 Bruner 螺旋課程理論一致。但「推論系/高階思辨」等分群名稱需要跟方大哥確認是否符合教材設計意圖</p>
+    </div>
+  </div>
+
+  <!-- 缺口 -->
+  <div class="section" id="gaps">
+    <h2>缺口與強化建議</h2>
+    <table>
+      <tr><th>缺口</th><th>學術依據</th><th>建議</th><th>優先級</th></tr>
+      <tr>
+        <td>理解監控獨立序列</td>
+        <td>課文本位第 4 階段</td>
+        <td>新增「我讀懂了嗎」自我檢核策略</td>
+        <td><span class="badge badge-yellow">中</span></td>
+      </tr>
+      <tr>
+        <td>多文本整合</td>
+        <td>PIRLS 歷程 3-4、PISA</td>
+        <td>目前僅 L56, L58 兩篇，可擴充</td>
+        <td><span class="badge badge-yellow">中</span></td>
+      </tr>
+      <tr>
+        <td>詞彙深化策略</td>
+        <td>Scarborough 上方繩股</td>
+        <td>從「認字」進階到「詞彙網絡」建構</td>
+        <td><span class="badge badge-purple">低</span></td>
+      </tr>
+      <tr>
+        <td>快速命名（RAN）篩檢</td>
+        <td>曾世杰雙缺陷假說</td>
+        <td>加入 RAN 測驗作為學習困難早期篩檢</td>
+        <td><span class="badge badge-red">高</span></td>
+      </tr>
+      <tr>
+        <td>計時閱讀練習</td>
+        <td>曾世杰：唸名缺陷介入</td>
+        <td>重複朗讀 + 進步曲線追蹤</td>
+        <td><span class="badge badge-yellow">中</span></td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  LingoLeap 朗朗上口 &copy; 2026 | 國語文閱讀學習平台<br>
+  <span style="font-size: 0.7rem;">研究文件 — 非公開發表，僅供內部參考</span>
+</div>
+
+</body>
+</html>

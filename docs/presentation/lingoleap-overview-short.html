@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LingoLeap 朗朗上口 — 平台簡介</title>
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: "Noto Sans TC", -apple-system, system-ui, sans-serif;
+    background: #FDF8F0;
+    color: #1a1a2e;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Brand Colors ── */
+  :root {
+    --purple: #5B4FC4;
+    --purple-light: #7B6FD4;
+    --purple-bg: #F0EEFA;
+    --amber-bg: #FDF8F0;
+    --amber-warm: #FFF7ED;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --text-muted: #6b6b8a;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --card-shadow-hover: 0 4px 12px rgba(91,79,196,0.12);
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--purple) 0%, #7B6FD4 100%);
+    color: white;
+    padding: 48px 0 40px;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+  }
+  header .subtitle {
+    font-size: 1.05rem;
+    opacity: 0.9;
+    font-weight: 400;
+  }
+  header .badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 4px 16px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ── Sections ── */
+  section {
+    padding: 48px 0;
+    border-bottom: 1px solid #ece5d8;
+  }
+  section:last-of-type { border-bottom: none; }
+
+  .section-number {
+    display: inline-block;
+    width: 28px; height: 28px;
+    background: var(--purple);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 28px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 16px;
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: var(--card-shadow-hover); }
+  .card h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--purple);
+    margin-bottom: 8px;
+  }
+  .card p, .card li {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  /* ── Equation ── */
+  .equation-box {
+    background: linear-gradient(135deg, var(--purple-bg), #E8E4F8);
+    border-left: 4px solid var(--purple);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    text-align: center;
+  }
+  .equation-box .formula {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--purple);
+    letter-spacing: 0.03em;
+  }
+  .equation-box .source {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* ── Pain points ── */
+  .pain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .pain-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    border-top: 3px solid #e74c3c;
+  }
+  .pain-card h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #c0392b;
+    margin-bottom: 6px;
+  }
+  .pain-card p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+
+  /* ── Teaching Method Table ── */
+  .method-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    margin-top: 16px;
+  }
+  .method-table thead th {
+    background: var(--purple);
+    color: white;
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: left;
+  }
+  .method-table tbody td {
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid #f0ebe0;
+    vertical-align: top;
+  }
+  .method-table tbody tr:last-child td { border-bottom: none; }
+  .method-table tbody tr:hover { background: #FEFCF8; }
+  .method-table .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    background: var(--purple-bg);
+    color: var(--purple);
+    white-space: nowrap;
+  }
+
+  /* ── Comparison Table ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    margin-top: 16px;
+    font-size: 0.88rem;
+  }
+  .compare-table thead th {
+    background: var(--purple);
+    color: white;
+    padding: 12px 14px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .compare-table thead th:first-child { text-align: left; }
+  .compare-table tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f0ebe0;
+    text-align: center;
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+  .compare-table tbody td:first-child {
+    text-align: left;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .compare-table tbody tr:last-child td { border-bottom: none; }
+  .compare-table tbody tr:hover { background: #FEFCF8; }
+  .check { color: #27ae60; font-weight: 700; }
+  .cross { color: #ccc; }
+  .partial { color: #e67e22; font-weight: 600; }
+
+  /* ── Steps flow ── */
+  .steps-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+    align-items: center;
+  }
+  .step-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: white;
+    border: 1px solid #e8e2d6;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .step-chip .num {
+    width: 20px; height: 20px;
+    background: var(--purple);
+    color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .step-arrow {
+    color: #ccc;
+    font-size: 0.9rem;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    border-top: 1px solid #ece5d8;
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: white; font-size: 11pt; }
+    header { background: var(--purple) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card, .pain-card { box-shadow: none; border: 1px solid #ddd; }
+    .method-table thead th, .compare-table thead th {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    section { break-inside: avoid; }
+    footer { border-top: 1px solid #ccc; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    header h1 { font-size: 1.5rem; }
+    .container { padding: 0 16px; }
+    section { padding: 32px 0; }
+    .section-title { font-size: 1.2rem; }
+    .method-table, .compare-table { font-size: 0.82rem; }
+    .method-table thead th, .compare-table thead th { padding: 10px 10px; }
+    .method-table tbody td, .compare-table tbody td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ HEADER ════════════ -->
+<header>
+  <div class="container">
+    <h1>LingoLeap 朗朗上口</h1>
+    <p class="subtitle">AI 驅動的國語文閱讀學習平台</p>
+    <span class="badge">教授簡介 — 3 分鐘版</span>
+  </div>
+</header>
+
+<!-- ════════════ SECTION 1: 問題 ════════════ -->
+<section>
+  <div class="container">
+    <div class="section-title">
+      <span class="section-number">1</span>
+      問題：閱讀教育的三重困境
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <h4>馬太效應</h4>
+        <p>早期識字困難未解決，三年級後學習落差像滾雪球般擴大。偏鄉城鄉差距達 <strong>6 年</strong>學習進度</p>
+      </div>
+      <div class="pain-card">
+        <h4>教師人力不足</h4>
+        <p>一班 25-30 人，逐一聽讀需 60 分鐘。教師沒有時間逐句分析、給予個別化回饋</p>
+      </div>
+      <div class="pain-card">
+        <h4>現有工具缺乏 AI</h4>
+        <p>市面工具以「測驗」為主，缺乏即時朗讀回饋、蘇格拉底對話、個別化學習路徑</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ SECTION 2: 解法 ════════════ -->
+<section>
+  <div class="container">
+    <div class="section-title">
+      <span class="section-number">2</span>
+      解法：閱讀科學 + AI 即時回饋
+    </div>
+
+    <div class="equation-box">
+      <div class="formula">閱讀能力 = 識字解碼 &times; 背景知識</div>
+      <div class="source">曾世杰教授閱讀方程式 — 兩者缺一不可</div>
+    </div>
+
+    <p style="color: var(--text-secondary); margin: 16px 0 20px; font-size: 0.95rem;">
+      LingoLeap 將這個方程式轉化為 <strong>10 步學習流程</strong>，涵蓋朗讀、理解、識字三大面向，每一步都有 AI 即時回饋：
+    </p>
+
+    <div class="steps-flow">
+      <span class="step-chip"><span class="num">1</span>讀全文做記號</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-chip"><span class="num">2</span>逐段朗讀</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-chip"><span class="num">3</span>全文朗讀</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-chip"><span class="num">4</span>生字練習</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-chip"><span class="num">5</span>詞語定義</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-chip"><span class="num">6</span>語詞應用</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-chip"><span class="num">7</span>課文理解</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-chip"><span class="num">8</span>語詞複習</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-chip"><span class="num">9</span>知識補給站</span>
+      <span class="step-arrow">&rarr;</span>
+      <span class="step-chip"><span class="num">10</span>診斷報告</span>
+    </div>
+
+    <div class="card-grid" style="margin-top: 20px;">
+      <div class="card">
+        <h3>識字解碼面</h3>
+        <ul style="padding-left: 18px;">
+          <li>部件教學法拆解國字結構</li>
+          <li>筆順動畫 + 手寫練習</li>
+          <li>朗讀流暢度 = 語速 &times; 正確率</li>
+          <li>聲韻覺識：注音拼讀</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>背景知識面</h3>
+        <ul style="padding-left: 18px;">
+          <li>先行組織者：課文背景導讀</li>
+          <li>蘇格拉底式 AI 對話（5 題 3 階段）</li>
+          <li>閱讀策略遞進教學（10 條技能線）</li>
+          <li>六環節診斷報告</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ SECTION 3: 教學法 × 功能對應 ════════════ -->
+<section>
+  <div class="container">
+    <div class="section-title">
+      <span class="section-number">3</span>
+      教學法 &times; 功能對應表
+    </div>
+    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.92rem;">
+      以曾世杰教授的閱讀教學方法為核心，LingoLeap 的每項功能都有科學根據：
+    </p>
+
+    <table class="method-table">
+      <thead>
+        <tr>
+          <th style="width: 26%;">教學法 / 原則</th>
+          <th style="width: 38%;">LingoLeap 功能</th>
+          <th style="width: 36%;">學習流程步驟</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>閱讀方程式</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">識字解碼 &times; 背景知識</span></td>
+          <td>整個 10 步流程的架構設計，前半段強化解碼，後半段建構理解</td>
+          <td><span class="tag">全流程</span></td>
+        </tr>
+        <tr>
+          <td><strong>部件教學法</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">拆解國字結構</span></td>
+          <td>生字模組顯示部首、部件拆解，建立字感與預測能力</td>
+          <td><span class="tag">生字練習</span></td>
+        </tr>
+        <tr>
+          <td><strong>聲韻覺識</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">語音內部結構覺知</span></td>
+          <td>注音符號隨時開關、拼讀練習、聽寫練習強化聲音敏感度</td>
+          <td><span class="tag">生字練習</span> <span class="tag">聽寫</span></td>
+        </tr>
+        <tr>
+          <td><strong>流暢朗讀</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">識字自動化追蹤</span></td>
+          <td>AI 語音辨識即時比對，計算 CPM（每分鐘字數）+ 正確率</td>
+          <td><span class="tag">逐段朗讀</span> <span class="tag">全文朗讀</span></td>
+        </tr>
+        <tr>
+          <td><strong>先行組織者</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">建立閱讀前的「地圖」</span></td>
+          <td>課文背景介紹、作者生平、TTS 口語導讀</td>
+          <td><span class="tag">讀全文做記號</span></td>
+        </tr>
+        <tr>
+          <td><strong>蘇格拉底對話</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">引導式提問</span></td>
+          <td>AI 用 5 題 3 階段提問，鷹架逐步移除，引導學生自主思考</td>
+          <td><span class="tag">課文理解</span></td>
+        </tr>
+        <tr>
+          <td><strong>針對性練習</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">只練錯的字，避免無效罰抄</span></td>
+          <td>系統自動彙整學生讀錯的字詞，只針對錯誤進行練習</td>
+          <td><span class="tag">生字練習</span> <span class="tag">語詞複習</span></td>
+        </tr>
+        <tr>
+          <td><strong>早期介入</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">不等鑑定報告</span></td>
+          <td>學習預警系統：超過 7 天沒進展 → 自動通知教師</td>
+          <td><span class="tag">教師端</span></td>
+        </tr>
+        <tr>
+          <td><strong>重複朗讀</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">提升自動化程度</span></td>
+          <td>逐段練習後再全文朗讀，追蹤前後進步幅度</td>
+          <td><span class="tag">逐段朗讀</span> <span class="tag">全文朗讀</span></td>
+        </tr>
+        <tr>
+          <td><strong>溫暖但堅定</strong><br><span style="font-size:0.82rem;color:var(--text-muted);">AI 助教的語氣設計</span></td>
+          <td>分級鼓勵（80% 以上大力稱讚、60-80% 鼓勵再試），保護學習自尊</td>
+          <td><span class="tag">全流程</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════ SECTION 4: 技術差異化 ════════════ -->
+<section>
+  <div class="container">
+    <div class="section-title">
+      <span class="section-number">4</span>
+      技術差異化：與現有平台比較
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th style="text-align:left;">功能</th>
+          <th>LingoLeap</th>
+          <th>數位讀寫網</th>
+          <th>PaGamO</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>AI 朗讀即時回饋</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10005;</td>
+          <td class="cross">&#10005;</td>
+        </tr>
+        <tr>
+          <td>蘇格拉底式 AI 對話</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10005;</td>
+          <td class="cross">&#10005;</td>
+        </tr>
+        <tr>
+          <td>部件教學 + 筆順</td>
+          <td class="check">&#10003;</td>
+          <td class="partial">&Delta;</td>
+          <td class="cross">&#10005;</td>
+        </tr>
+        <tr>
+          <td>個別化學習路徑</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10005;</td>
+          <td class="cross">&#10005;</td>
+        </tr>
+        <tr>
+          <td>閱讀流暢度數據（CPM）</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10005;</td>
+          <td class="cross">&#10005;</td>
+        </tr>
+        <tr>
+          <td>閱讀策略遞進教學</td>
+          <td class="check">&#10003;</td>
+          <td class="partial">&Delta;</td>
+          <td class="cross">&#10005;</td>
+        </tr>
+        <tr>
+          <td>遊戲化激勵（XP/徽章）</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10005;</td>
+          <td class="check">&#10003;</td>
+        </tr>
+        <tr>
+          <td>教師端學習預警</td>
+          <td class="check">&#10003;</td>
+          <td class="cross">&#10005;</td>
+          <td class="partial">&Delta;</td>
+        </tr>
+        <tr>
+          <td>教學法科學根據</td>
+          <td><span style="font-size:0.82rem;">曾世杰教授<br>閱讀科學</span></td>
+          <td><span style="font-size:0.82rem;">識字教學<br>為主</span></td>
+          <td><span style="font-size:0.82rem;">遊戲化<br>為主</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 12px; font-size: 0.82rem; color: var(--text-muted);">
+      &#10003; 已實作 &nbsp;&nbsp; &Delta; 部分支援 &nbsp;&nbsp; &#10005; 無此功能
+    </p>
+  </div>
+</section>
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer>
+  <div class="container">
+    LingoLeap &copy; 2026 | 國語文閱讀學習平台
+  </div>
+</footer>
+
+</body>
+</html>
