@@ -89,6 +89,37 @@ export async function getSessionStatus(
 }
 
 // ---------------------------------------------------------------------------
+// Self-practice session completion (Issue #1070)
+// ---------------------------------------------------------------------------
+
+/**
+ * Mark a self-practice session as completed in the DB.
+ *
+ * Calls PATCH /api/learning/sessions/{sessionId} with status="completed" and
+ * completed_at set to the current timestamp.  Fire-and-forget — errors are
+ * non-fatal and logged to console only.
+ */
+export async function completeSelfPracticeSession(
+  sessionId: number,
+  token: string,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      status: 'completed',
+      completed_at: new Date().toISOString(),
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`completeSelfPracticeSession failed: ${res.status}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Comprehension chat
 // ---------------------------------------------------------------------------
 

@@ -13,6 +13,7 @@ import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnot
 import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
 import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
 import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
+import { completeSelfPracticeSession } from '../services/learningApi';
 import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
@@ -908,6 +909,13 @@ const LearningLayout: React.FC = () => {
     }
 
     if (!hasActiveAssignment && storyId) {
+      // Persist completion to DB so teachers can see self-practice records (Issue #1070).
+      if (dbSessionId !== null && token) {
+        completeSelfPracticeSession(dbSessionId, token).catch((err) => {
+          console.warn('[LearningLayout] completeSelfPracticeSession failed:', err);
+        });
+      }
+      // Keep localStorage as a local fallback for the "already completed" UI check.
       try {
         localStorage.setItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${storyId}`, '1');
       } catch {
@@ -934,6 +942,7 @@ const LearningLayout: React.FC = () => {
     storyId,
     isAssignmentReadyForSubmit,
     hasActiveAssignment,
+    dbSessionId,
   ]);
 
   /** Mark a paragraph as completed in both local state and session (Issue #85).
