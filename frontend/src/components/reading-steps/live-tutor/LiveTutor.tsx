@@ -130,6 +130,18 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const sentenceStartTimeRef = useRef(0);
   const lastDiffTimeRef = useRef(0);
 
+  // Sentence-level retry state
+  const [retrySentenceInfo, setRetrySentenceInfo] = useState<{
+    paragraphIdx: number;
+    sentenceIdx: number;
+    target: string;
+    originalTargets: string[];
+    originalResults: Array<LocalEvalResult | null>;
+  } | null>(null);
+  const retrySentenceInfoRef = useRef(retrySentenceInfo);
+  retrySentenceInfoRef.current = retrySentenceInfo;
+  const handleSentenceRetryEvalRef = useRef<(transcript: string, durationMs: number) => Promise<void>>(async () => {});
+
   /* ---- TTS playback hook ---- */
   const {
     isTtsSpeaking,
@@ -161,8 +173,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   );
 
   /* ---- STT hook ---- */
+  // During sentence retry, narrow the realtime diff overlay to just the one sentence
+  const sttTargetText = retrySentenceInfo
+    ? retrySentenceInfo.target
+    : (story.content[currentLineIndex] || '');
+
   const stt = useLiveTutorSpeech({
-    targetText: story.content[currentLineIndex] || '',
+    targetText: sttTargetText,
     streakRef,
     sentenceTargetsRef,
     sentenceResultsRef,
@@ -433,6 +450,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       missingCount,
       tier: localTier,
       geminiPending: true,
+      sentenceResults: [...sentenceResultsRef.current],
+      sentenceTargets: [...sentenceTargetsRef.current],
     };
     setParagraphSummaries(prev => ({ ...prev, [lineIdx]: summaryData }));
 
@@ -464,6 +483,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         const geminiWrong = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'wrong').length;
         const geminiMissing = (gemini.diff_tokens || []).filter((t: DiffToken) => t.type === 'missing').length;
         setParagraphSummaries(prev => ({ ...prev, [lineIdx]: {
+          // Preserve sentence-level data from local eval
+          sentenceResults: prev[lineIdx]?.sentenceResults,
+          sentenceTargets: prev[lineIdx]?.sentenceTargets,
           feedback: gemini.feedback || (gemini.tier <= 2 ? '唸得不錯！' : '再試一次，加油！'),
           matchRate: gemini.adjusted_match_rate,
           wrongCount: geminiWrong,
@@ -506,7 +528,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /* ---- submitSentence wrapper ---- */
   const submitSentence = useCallback(async () => {
     const { transcript, rawStt, durationMs } = stt.submitSentence();
-    if (transcript) {
+    if (retrySentenceInfoRef.current) {
+      // Sentence retry mode: evaluate only this sentence
+      await handleSentenceRetryEvalRef.current(transcript, durationMs);
+    } else if (transcript) {
       await evaluateAndRespondRef.current(transcript, rawStt, durationMs, currentLineIndex);
     }
   }, [currentLineIndex]);
@@ -570,9 +595,139 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setParagraphSummaries(prev => { const next = { ...prev }; delete next[idx]; return next; });
     setRealtimeDiffTokens(null);
     setLastDiffTokens(null);
+    // Reset sentence tracking for fresh attempt
+    const targets = splitIntoSentences(story.content[idx] || '');
+    sentenceTargetsRef.current = targets;
+    sentenceResultsRef.current = new Array(targets.length).fill(null);
+    nextSentenceIdxRef.current = 0;
+    lastFinalResultIdxRef.current = -1;
+    // Clear any active sentence retry
+    retrySentenceInfoRef.current = null;
+    setRetrySentenceInfo(null);
     if (idx === currentLineIndex) { startSession(); }
     else { setTimeout(() => startSession(), 100); }
-  }, [currentLineIndex, stopSession, startSession]);
+  }, [currentLineIndex, story.content, stopSession, startSession]);
+
+  /* ---- handleRetrySentence: enter single-sentence retry mode ---- */
+  const handleRetrySentence = useCallback((paragraphIdx: number, sentenceIdx: number) => {
+    if (paragraphIdx !== currentLineIndex) return;
+    stopSession();
+
+    const sentences = splitIntoSentences(story.content[paragraphIdx] || '');
+    const target = sentences[sentenceIdx];
+    // Don't retry single-char sentences (issue 661: 單獨一個字不用重練)
+    if (!target || target.replace(/[，。！？；]/g, '').length <= 1) return;
+
+    const info = {
+      paragraphIdx,
+      sentenceIdx,
+      target,
+      originalTargets: [...sentenceTargetsRef.current],
+      originalResults: [...sentenceResultsRef.current],
+    };
+    retrySentenceInfoRef.current = info;
+    setRetrySentenceInfo(info);
+
+    // Override sentence refs to just this one sentence
+    sentenceTargetsRef.current = [target];
+    sentenceResultsRef.current = [null];
+    nextSentenceIdxRef.current = 0;
+    lastFinalResultIdxRef.current = -1;
+    setLastDiffTokens(null);
+    setRealtimeDiffTokens(null);
+
+    setTimeout(() => startSession(), 100);
+  }, [currentLineIndex, story.content, stopSession, startSession]);
+
+  /* ---- handleSentenceRetryEval: evaluate single-sentence retry result ---- */
+  const handleSentenceRetryEval = useCallback(async (transcript: string, durationMs: number) => {
+    const info = retrySentenceInfoRef.current;
+    if (!info) return;
+
+    stopSession();
+    const cleaned = cleanChineseText(transcript);
+
+    // Restore original sentence refs
+    sentenceTargetsRef.current = info.originalTargets;
+    const newResults = [...info.originalResults];
+
+    let localResult: LocalEvalResult | null = null;
+    if (cleaned) {
+      localResult = localEvaluateParagraph(
+        cleaned, info.target, durationMs,
+        { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+        streak,
+      );
+      newResults[info.sentenceIdx] = localResult;
+      // Show the retried sentence's diff in the right panel
+      setLastDiffTokens(localResult.diffTokens);
+    }
+
+    sentenceResultsRef.current = newResults;
+    nextSentenceIdxRef.current = info.originalTargets.length;
+    retrySentenceInfoRef.current = null;
+    setRetrySentenceInfo(null);
+
+    // ── Weighted delta: only adjust the retried sentence's contribution ──────
+    // This preserves accuracy for sentences not individually tracked by STT,
+    // fixing the "28% after 100% retry" bug caused by dividing partial
+    // sentence diffTokens by the full paragraph length.
+    const paragraphTarget = story.content[info.paragraphIdx] || '';
+    const paragraphLen = normalizeForComparison(paragraphTarget).length || 1;
+    const sentenceLen = normalizeForComparison(info.target).length;
+    const sentenceWeight = sentenceLen / paragraphLen;
+
+    const oldSentenceMatchRate = info.originalResults[info.sentenceIdx]?.matchRate ?? 0;
+    const newSentenceMatchRate = localResult?.matchRate ?? oldSentenceMatchRate;
+
+    const oldWrong = info.originalResults[info.sentenceIdx]?.diffTokens.filter(t => t.type === 'wrong').length ?? 0;
+    const oldMissing = info.originalResults[info.sentenceIdx]?.diffTokens.filter(t => t.type === 'missing').length ?? 0;
+    const newWrong = localResult?.diffTokens.filter(t => t.type === 'wrong').length ?? oldWrong;
+    const newMissing = localResult?.diffTokens.filter(t => t.type === 'missing').length ?? oldMissing;
+
+    setParagraphSummaries(prev => {
+      const existing = prev[info.paragraphIdx];
+      if (!existing) return prev;
+      const newMatchRate = Math.max(0, Math.min(1,
+        existing.matchRate
+        - (oldSentenceMatchRate * sentenceWeight)
+        + (newSentenceMatchRate * sentenceWeight),
+      ));
+      const threshold = getReadingPassThreshold(paragraphLen);
+      const newTier = (newMatchRate >= READING_EXCELLENT ? 1 : newMatchRate >= threshold ? 2 : 3) as 1 | 2 | 3;
+      return {
+        ...prev,
+        [info.paragraphIdx]: {
+          ...existing,
+          matchRate: newMatchRate,
+          wrongCount: Math.max(0, existing.wrongCount - oldWrong + newWrong),
+          missingCount: Math.max(0, existing.missingCount - oldMissing + newMissing),
+          tier: newTier,
+          sentenceResults: newResults,
+          geminiPending: false,
+        },
+      };
+    });
+
+    // Update the most recent lineResult matchRate with the same delta
+    setLineResults(prev => {
+      let idx = -1;
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (prev[i].lineIndex === info.paragraphIdx) { idx = i; break; }
+      }
+      if (idx === -1) return prev;
+      const updated = [...prev];
+      const newMatchRate = Math.max(0, Math.min(1,
+        updated[idx].matchRate
+        - (oldSentenceMatchRate * sentenceWeight)
+        + (newSentenceMatchRate * sentenceWeight),
+      ));
+      updated[idx] = { ...updated[idx], matchRate: newMatchRate };
+      return updated;
+    });
+  }, [streak, story.content, stopSession]);
+  // Keep ref in sync so submitSentence (memoized) always calls the latest version
+  handleSentenceRetryEvalRef.current = handleSentenceRetryEval;
 
   /* ================================================================ */
   /*  JSX                                                             */
@@ -651,6 +806,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
                   onStopSession={stopSession}
                   onSubmitSentence={submitSentence}
                   onRetryParagraph={handleRetryParagraph}
+                  onRetrySentence={handleRetrySentence}
+                  retrySentenceIdx={retrySentenceInfo?.paragraphIdx === idx ? retrySentenceInfo.sentenceIdx : undefined}
                   onAdvanceParagraph={advanceParagraph}
                   setIsTtsSpeaking={setIsTtsSpeaking}
                   setIsTtsPaused={setIsTtsPaused}
