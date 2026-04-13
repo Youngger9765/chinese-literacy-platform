@@ -667,6 +667,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       newResults[info.sentenceIdx] = localResult;
       // Show the retried sentence's diff in the right panel
       setLastDiffTokens(localResult.diffTokens);
+      setRealtimeDiffTokens(null);
     }
 
     sentenceResultsRef.current = newResults;
