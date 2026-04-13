@@ -3,6 +3,7 @@
 Handles creating, listing, getting, and updating learning sessions.
 """
 import logging
+from datetime import datetime, timezone
 from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -357,6 +358,10 @@ def update_session(
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(session, field, value)
+
+    # Auto-set completed_at when status changes to completed (Issue #1070)
+    if update_data.get("status") == "completed" and session.completed_at is None:
+        session.completed_at = datetime.now(timezone.utc)
 
     # Auto-persist CharacterError records from reading_result.error_chars (Issue #248)
     if "reading_result" in update_data:

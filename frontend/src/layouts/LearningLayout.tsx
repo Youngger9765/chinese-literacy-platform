@@ -248,6 +248,9 @@ const LearningLayout: React.FC = () => {
   const isCreatingSession = useRef(false);
   /** Guard ref that prevents handleSessionComplete from executing more than once per session. */
   const sessionCompletedRef = useRef(false);
+  /** Tracks whether the completeSelfPracticeSession API call has fired (Issue #1070).
+   *  Separate from sessionCompletedRef so a late-arriving dbSessionId can still trigger it. */
+  const completionApiCalledRef = useRef(false);
   const [stepProgressState, setStepProgressState] = useState<StepProgressData>({
     current_step: null,
     steps_completed: [],
@@ -535,9 +538,10 @@ const LearningLayout: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, selectedStory]);
 
-  // Reset completion guard when the story changes so a new session can complete normally.
+  // Reset completion guards when the story changes so a new session can complete normally.
   useEffect(() => {
     sessionCompletedRef.current = false;
+    completionApiCalledRef.current = false;
   }, [storyId]);
 
   // Load story data when storyId changes
@@ -916,22 +920,26 @@ const LearningLayout: React.FC = () => {
       return;
     }
 
+    // Self-practice DB completion (Issue #1070).
+    // Placed before the one-time guard so a late-arriving dbSessionId can still trigger it
+    // on a subsequent useEffect re-fire without being blocked by sessionCompletedRef.
+    if (!hasActiveAssignment && storyId && dbSessionId !== null && token && !completionApiCalledRef.current) {
+      completionApiCalledRef.current = true;
+      completeSelfPracticeSession(dbSessionId, token).catch((err) => {
+        if (err instanceof SessionExpiredError) {
+          console.warn('[LearningLayout] completeSelfPracticeSession: token expired, session not marked complete in DB');
+        } else {
+          console.warn('[LearningLayout] completeSelfPracticeSession failed:', err);
+        }
+      });
+    }
+
     // Guard: prevent double-execution for the actual completion path.
     // Placed after the early-return above so a later "ready" call is not blocked.
     if (sessionCompletedRef.current) return;
     sessionCompletedRef.current = true;
 
     if (!hasActiveAssignment && storyId) {
-      // Persist completion to DB so teachers can see self-practice records (Issue #1070).
-      if (dbSessionId !== null && token) {
-        completeSelfPracticeSession(dbSessionId, token).catch((err) => {
-          if (err instanceof SessionExpiredError) {
-            console.warn('[LearningLayout] completeSelfPracticeSession: token expired, session not marked complete in DB');
-          } else {
-            console.warn('[LearningLayout] completeSelfPracticeSession failed:', err);
-          }
-        });
-      }
       // Keep localStorage as a local fallback for the "already completed" UI check.
       try {
         localStorage.setItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${storyId}`, '1');
