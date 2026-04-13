@@ -1,17 +1,21 @@
 name: Claude PR Review
 
 on:
-  pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
+  issue_comment:
+    types: [created]
 
 jobs:
   review:
-    # Only review PRs from team members (not random forks)
+    # Only trigger when someone comments @claude on a PR
     if: >-
-      github.event.pull_request.user.login == 'Youngger9765' ||
-      github.event.pull_request.user.login == 'if-else-master' ||
-      github.event.pull_request.user.login == 'stgst' ||
-      github.event.pull_request.user.login == 'Shinjou'
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude') &&
+      (
+        github.event.comment.user.login == 'Youngger9765' ||
+        github.event.comment.user.login == 'if-else-master' ||
+        github.event.comment.user.login == 'stgst' ||
+        github.event.comment.user.login == 'Shinjou'
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
