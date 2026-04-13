@@ -657,18 +657,15 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     sentenceTargetsRef.current = info.originalTargets;
     const newResults = [...info.originalResults];
 
-    let localResult: LocalEvalResult | null = null;
-    if (cleaned) {
-      localResult = localEvaluateParagraph(
-        cleaned, info.target, durationMs,
-        { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
-        streak,
-      );
-      newResults[info.sentenceIdx] = localResult;
-      // Show the retried sentence's diff in the right panel
-      setLastDiffTokens(localResult.diffTokens);
-      setRealtimeDiffTokens(null);
-    }
+    const localResult = localEvaluateParagraph(
+      cleaned, info.target, durationMs,
+      { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+      streak,
+    );
+    newResults[info.sentenceIdx] = localResult;
+    // Show the retried sentence's diff in the right panel
+    setLastDiffTokens(localResult.diffTokens);
+    setRealtimeDiffTokens(null);
 
     sentenceResultsRef.current = newResults;
     nextSentenceIdxRef.current = info.originalTargets.length;
