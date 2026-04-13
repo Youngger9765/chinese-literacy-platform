@@ -22,7 +22,7 @@ import {
   TIER3_POOL,
   STREAK_MESSAGES,
 } from '../../../utils/liveTutorPools';
-import { extractPracticeChars } from '../../../utils/liveTutorHelpers';
+import { extractPracticeChars, CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 import { scopedStepStorageKey } from '../../../services/learningStorageScope';
 import { useResizablePanel } from '../../../hooks/useResizablePanel';
 import { useLiveTutorSpeech } from '../../../hooks/useLiveTutorSpeech';
@@ -616,7 +616,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     const sentences = splitIntoSentences(story.content[paragraphIdx] || '');
     const target = sentences[sentenceIdx];
     // Don't retry single-char sentences (issue 661: 單獨一個字不用重練)
-    if (!target || target.replace(/[，。！？；]/g, '').length <= 1) return;
+    if (!target || target.replace(CHINESE_PUNCTUATION_REGEX, '').length <= 1) return;
 
     const info = {
       paragraphIdx,
@@ -646,6 +646,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     stopSession();
     const cleaned = cleanChineseText(transcript);
+
+    // No speech detected — stay in retry mode instead of silently exiting
+    if (!cleaned) {
+      setTimeout(() => startSession(), 100);
+      return;
+    }
 
     // Restore original sentence refs
     sentenceTargetsRef.current = info.originalTargets;
@@ -677,8 +683,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     const sentenceLen = normalizeForComparison(info.target).length;
     const sentenceWeight = sentenceLen / paragraphLen;
 
-    const oldSentenceMatchRate = info.originalResults[info.sentenceIdx]?.matchRate ?? 0;
-    const newSentenceMatchRate = localResult?.matchRate ?? oldSentenceMatchRate;
+    // The sentence's previous individual match rate (null if STT didn't capture it separately).
+    // When null, we fall back to the paragraph's current matchRate inside each state updater —
+    // this avoids the double-counting that occurs when defaulting to 0 (the paragraph's existing
+    // matchRate already includes this sentence's contribution from the full-paragraph eval).
+    const sentenceMatchRateFromResult = info.originalResults[info.sentenceIdx]?.matchRate;
+    const newSentenceMatchRate = localResult?.matchRate;
 
     const oldWrong = info.originalResults[info.sentenceIdx]?.diffTokens.filter(t => t.type === 'wrong').length ?? 0;
     const oldMissing = info.originalResults[info.sentenceIdx]?.diffTokens.filter(t => t.type === 'missing').length ?? 0;
@@ -688,10 +698,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setParagraphSummaries(prev => {
       const existing = prev[info.paragraphIdx];
       if (!existing) return prev;
+      // If sentence wasn't individually tracked, assume it matched at the paragraph average rate
+      const oldSentenceMatchRate = sentenceMatchRateFromResult ?? existing.matchRate;
+      const effectiveNewRate = newSentenceMatchRate ?? oldSentenceMatchRate;
       const newMatchRate = Math.max(0, Math.min(1,
         existing.matchRate
         - (oldSentenceMatchRate * sentenceWeight)
-        + (newSentenceMatchRate * sentenceWeight),
+        + (effectiveNewRate * sentenceWeight),
       ));
       const threshold = getReadingPassThreshold(paragraphLen);
       const newTier = (newMatchRate >= READING_EXCELLENT ? 1 : newMatchRate >= threshold ? 2 : 3) as 1 | 2 | 3;
@@ -717,15 +730,18 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       }
       if (idx === -1) return prev;
       const updated = [...prev];
+      // If sentence wasn't individually tracked, assume it matched at the paragraph average rate
+      const oldSentenceMatchRate = sentenceMatchRateFromResult ?? updated[idx].matchRate;
+      const effectiveNewRate = newSentenceMatchRate ?? oldSentenceMatchRate;
       const newMatchRate = Math.max(0, Math.min(1,
         updated[idx].matchRate
         - (oldSentenceMatchRate * sentenceWeight)
-        + (newSentenceMatchRate * sentenceWeight),
+        + (effectiveNewRate * sentenceWeight),
       ));
       updated[idx] = { ...updated[idx], matchRate: newMatchRate };
       return updated;
     });
-  }, [streak, story.content, stopSession]);
+  }, [streak, story.content, stopSession, startSession]);
   // Keep ref in sync so submitSentence (memoized) always calls the latest version
   handleSentenceRetryEvalRef.current = handleSentenceRetryEval;
 

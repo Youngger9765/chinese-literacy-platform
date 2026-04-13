@@ -1,7 +1,9 @@
 import React from 'react';
 import { ParagraphStatus } from '../ParagraphProgress';
 import { ParagraphSummaryData, LineResult } from './liveTutorTypes';
+import type { LocalEvalResult } from '../../../utils/localEval';
 import { cancelTts } from '../../../services/ttsApi';
+import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 
 // ── Encouraging phrase by accuracy range ─────────────────────────────────────
 const ENCOURAGE: Array<{ min: number; phrases: string[]; color: string }> = [
@@ -37,6 +39,86 @@ function getEncouragement(matchRate: number): { phrase: string; color: string } 
   const phrase = tier.phrases[Math.floor(matchRate * 1000) % tier.phrases.length];
   return { phrase, color: tier.color };
 }
+
+// ── FailedSentenceList ────────────────────────────────────────────────────────
+interface FailedSentenceListProps {
+  sentenceTargets: string[];
+  sentenceResults: Array<LocalEvalResult | null>;
+  retrySentenceIdx?: number;
+  isPreparing: boolean;
+  isSessionActive: boolean;
+  paragraphIdx: number;
+  onRetrySentence: (paragraphIdx: number, sentenceIdx: number) => void;
+  onSubmitSentence: () => void;
+}
+
+const FailedSentenceList: React.FC<FailedSentenceListProps> = ({
+  sentenceTargets,
+  sentenceResults,
+  retrySentenceIdx,
+  isPreparing,
+  isSessionActive,
+  paragraphIdx,
+  onRetrySentence,
+  onSubmitSentence,
+}) => {
+  const failedRows = sentenceTargets
+    .map((target, si) => ({ target, si, result: sentenceResults[si] }))
+    .filter(({ result }) => result != null && result.matchRate < 0.6);
+
+  if (failedRows.length === 0) return null;
+
+  return (
+    <div className="space-y-1.5 border-t border-gray-100 pt-2">
+      {failedRows.map(({ target, si, result: _result }) => {
+        const isRetrying = retrySentenceIdx === si;
+        const canRetry = target.replace(CHINESE_PUNCTUATION_REGEX, '').length > 1;
+        return (
+          <div
+            key={si}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+              isRetrying ? 'bg-amber-50 border border-amber-200' : 'bg-white/60'
+            }`}
+          >
+            <span className="shrink-0 text-base leading-none">❌</span>
+            <span className="flex-1 text-xs text-gray-700 leading-relaxed">{target}</span>
+            {canRetry && !isRetrying && (
+              <button
+                onClick={() => onRetrySentence(paragraphIdx, si)}
+                className="shrink-0 px-2 py-1 text-xs rounded border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all active:scale-95"
+              >
+                重練這句
+              </button>
+            )}
+            {isRetrying && (
+              <>
+                {isPreparing ? (
+                  <span className="shrink-0 flex items-center gap-1 text-xs text-gray-400">
+                    <span className="w-2 h-2 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                    準備中
+                  </span>
+                ) : isSessionActive ? (
+                  <>
+                    <span className="shrink-0 flex items-center gap-1 text-xs text-amber-600">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      錄音中
+                    </span>
+                    <button
+                      onClick={onSubmitSentence}
+                      className="shrink-0 px-3 py-1 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all active:scale-95 shadow"
+                    >
+                      完成
+                    </button>
+                  </>
+                ) : null}
+              </>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 interface ParagraphCardProps {
   idx: number;
@@ -310,67 +392,18 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           {/* Per-sentence breakdown — only failed sentences, only when there are 2+ total sentences */}
           {paragraphSummary.sentenceTargets &&
             paragraphSummary.sentenceResults &&
-            paragraphSummary.sentenceTargets.length >= 2 && (() => {
-              // Only show sentences where error > 40% (matchRate < 0.6)
-              // Ignore null results (sentence not individually captured by STT)
-              const failedRows = paragraphSummary.sentenceTargets!
-                .map((target, si) => ({ target, si, result: paragraphSummary.sentenceResults![si] }))
-                .filter(({ result }) => result != null && result.matchRate < 0.6);
-              if (failedRows.length === 0) return null;
-              return (
-                <div className="space-y-1.5 border-t border-gray-100 pt-2">
-                  {failedRows.map(({ target, si, result }) => {
-                    const isRetrying = retrySentenceIdx === si;
-                    // Allow retry only for multi-char sentences (issue 661: 單獨一個字不用重練)
-                    const canRetry = target.replace(/[，。！？；]/g, '').length > 1;
-                    return (
-                      <div
-                        key={si}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                          isRetrying ? 'bg-amber-50 border border-amber-200' : 'bg-white/60'
-                        }`}
-                      >
-                        <span className="shrink-0 text-base leading-none">❌</span>
-                        <span className="flex-1 text-xs text-gray-700 leading-relaxed">{target}</span>
-                        {/* 重練這句 button — only when not retrying */}
-                        {canRetry && !isRetrying && (
-                          <button
-                            onClick={() => onRetrySentence(idx, si)}
-                            className="shrink-0 px-2 py-1 text-xs rounded border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all active:scale-95"
-                          >
-                            重練這句
-                          </button>
-                        )}
-                        {/* Inline 完成 button — replaces the global 完成 during sentence retry */}
-                        {isRetrying && (
-                          <>
-                            {isPreparing ? (
-                              <span className="shrink-0 flex items-center gap-1 text-xs text-gray-400">
-                                <span className="w-2 h-2 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
-                                準備中
-                              </span>
-                            ) : isSessionActive ? (
-                              <>
-                                <span className="shrink-0 flex items-center gap-1 text-xs text-amber-600">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                  錄音中
-                                </span>
-                                <button
-                                  onClick={onSubmitSentence}
-                                  className="shrink-0 px-3 py-1 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all active:scale-95 shadow"
-                                >
-                                  完成
-                                </button>
-                              </>
-                            ) : null}
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
+            paragraphSummary.sentenceTargets.length >= 2 && (
+              <FailedSentenceList
+                sentenceTargets={paragraphSummary.sentenceTargets}
+                sentenceResults={paragraphSummary.sentenceResults}
+                retrySentenceIdx={retrySentenceIdx}
+                isPreparing={isPreparing}
+                isSessionActive={isSessionActive}
+                paragraphIdx={idx}
+                onRetrySentence={onRetrySentence}
+                onSubmitSentence={onSubmitSentence}
+              />
+            )}
 
           {/* Action buttons */}
           <div className="flex gap-2">

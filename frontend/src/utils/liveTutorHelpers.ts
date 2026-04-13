@@ -2,6 +2,9 @@ import { DiffToken } from '../types';
 import { normalizeForComparison } from './textDiff';
 import { isHomophone } from './pinyin';
 
+/** Punctuation characters used to determine retryable sentence length. */
+export const CHINESE_PUNCTUATION_REGEX = /[，。！？；]/g;
+
 /**
  * Look-ahead cursor: for each spoken char, try matching the current target
  * position first. On mismatch, look ahead up to LOOK_AHEAD target positions
