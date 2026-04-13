@@ -125,7 +125,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const isAdvancingRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
-  const evaluateAndRespondRef = useRef<any>(null);
+  const evaluateAndRespondRef = useRef<(
+    rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number
+  ) => Promise<void>>(async () => {});
 
   const sentenceStartTimeRef = useRef(0);
   const lastDiffTimeRef = useRef(0);
@@ -140,7 +142,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   } | null>(null);
   const retrySentenceInfoRef = useRef(retrySentenceInfo);
   retrySentenceInfoRef.current = retrySentenceInfo;
-  const handleSentenceRetryEvalRef = useRef<(transcript: string, durationMs: number) => Promise<void>>(async () => {});
+  const handleSentenceRetryEvalRef = useRef<(transcript: string, durationMs: number) => Promise<void>>(
+    async () => { throw new Error('handleSentenceRetryEval called before initialization'); }
+  );
 
   /* ---- TTS playback hook ---- */
   const {
@@ -173,6 +177,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   );
 
   /* ---- STT hook ---- */
+  const handleClearTts = useCallback(() => {
+    setIsTtsSpeaking(false);
+    setIsTtsPaused(false);
+  }, [setIsTtsSpeaking, setIsTtsPaused]);
+
   // During sentence retry, narrow the realtime diff overlay to just the one sentence
   const sttTargetText = retrySentenceInfo
     ? retrySentenceInfo.target
@@ -194,11 +203,15 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     onSpeakingProgress: setSpeakingProgress as any,
     onLastDiffTokens: setLastDiffTokens as any,
     onMicError: setMicError,
-    onClearTts: () => { setIsTtsSpeaking(false); setIsTtsPaused(false); },
+    onClearTts: handleClearTts,
     onSessionReady: () => {
       // session ready callback (kept for compat with hook)
     },
   });
+
+  // Ref to always access the latest stt.submitSentence (avoids stale closure in memoized submitSentence)
+  const sttSubmitSentenceRef = useRef(stt.submitSentence);
+  sttSubmitSentenceRef.current = stt.submitSentence;
 
   const startSession = stt.startSession;
   const stopSession = stt.stopSession;
@@ -527,12 +540,15 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   /* ---- submitSentence wrapper ---- */
   const submitSentence = useCallback(async () => {
-    const { transcript, rawStt, durationMs } = stt.submitSentence();
+    const { transcript, rawStt, durationMs } = sttSubmitSentenceRef.current();
     if (retrySentenceInfoRef.current) {
       // Sentence retry mode: evaluate only this sentence
       await handleSentenceRetryEvalRef.current(transcript, durationMs);
     } else if (transcript) {
       await evaluateAndRespondRef.current(transcript, rawStt, durationMs, currentLineIndex);
+    } else {
+      // No speech detected in normal mode — restart session so student can try again
+      console.warn('[LiveTutor] submitSentence: empty transcript in normal mode, ignoring');
     }
   }, [currentLineIndex]);
 
@@ -578,9 +594,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       if (text) {
         cancelTts();
         setIsTtsSpeaking(true);
-        import('../../../services/ttsApi').then(({ speakText: sp }) => {
-          sp(text).finally(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
-        });
+        import('../../../services/ttsApi')
+          .then(({ speakText: sp }) => sp(text))
+          .catch(err => console.error('[LiveTutor] TTS failed:', err))
+          .finally(() => { setIsTtsSpeaking(false); setIsTtsPaused(false); });
       }
     }
   }, [currentLineIndex, speakCurrentParagraph, story.content, setIsTtsSpeaking, setIsTtsPaused]);
@@ -610,13 +627,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   /* ---- handleRetrySentence: enter single-sentence retry mode ---- */
   const handleRetrySentence = useCallback((paragraphIdx: number, sentenceIdx: number) => {
-    if (paragraphIdx !== currentLineIndex) return;
+    if (paragraphIdx !== currentLineIndex) {
+      console.warn('[LiveTutor] handleRetrySentence: paragraphIdx mismatch', { paragraphIdx, currentLineIndex });
+      return;
+    }
     stopSession();
 
     const sentences = splitIntoSentences(story.content[paragraphIdx] || '');
     const target = sentences[sentenceIdx];
     // Don't retry single-char sentences (issue 661: 單獨一個字不用重練)
-    if (!target || target.replace(CHINESE_PUNCTUATION_REGEX, '').length <= 1) return;
+    if (!target || target.replace(CHINESE_PUNCTUATION_REGEX, '').length <= 1) {
+      console.warn('[LiveTutor] handleRetrySentence: skipping invalid/single-char sentence', { sentenceIdx, target });
+      return;
+    }
 
     const info = {
       paragraphIdx,

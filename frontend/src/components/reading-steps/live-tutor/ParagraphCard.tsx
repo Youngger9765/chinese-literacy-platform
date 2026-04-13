@@ -120,6 +120,91 @@ const FailedSentenceList: React.FC<FailedSentenceListProps> = ({
   );
 };
 
+// ── SummaryCard (extracted from IIFE) ────────────────────────────────────────
+interface SummaryCardProps {
+  paragraphSummary: ParagraphSummaryData;
+  retrySentenceIdx?: number;
+  isPreparing: boolean;
+  isSessionActive: boolean;
+  idx: number;
+  storyLength: number;
+  completedParagraphs: Set<number>;
+  lineResults: LineResult[];
+  onRetrySentence: (paragraphIdx: number, sentenceIdx: number) => void;
+  onSubmitSentence: () => void;
+  onRetryParagraph: (idx: number) => void;
+  onAdvanceParagraph: (idx: number, lineResults: LineResult[]) => void;
+  onSelectParagraph: (idx: number) => void;
+}
+
+const SummaryCard: React.FC<SummaryCardProps> = ({
+  paragraphSummary, retrySentenceIdx, isPreparing, isSessionActive,
+  idx, storyLength, completedParagraphs, lineResults,
+  onRetrySentence, onSubmitSentence, onRetryParagraph, onAdvanceParagraph, onSelectParagraph,
+}) => {
+  const { phrase, color } = getEncouragement(paragraphSummary.matchRate);
+  return (
+    <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white shadow-card space-y-3">
+      <p className="text-base font-bold text-gray-800">
+        {paragraphSummary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI 分析中...</span>}
+        {paragraphSummary.feedback}
+      </p>
+      <p className={`text-sm font-semibold ${color}`}>{phrase}</p>
+
+      {/* Per-sentence breakdown — only failed sentences, only when there are 2+ total sentences */}
+      {paragraphSummary.sentenceTargets &&
+        paragraphSummary.sentenceResults &&
+        paragraphSummary.sentenceTargets.length >= 2 && (
+          <FailedSentenceList
+            sentenceTargets={paragraphSummary.sentenceTargets}
+            sentenceResults={paragraphSummary.sentenceResults}
+            retrySentenceIdx={retrySentenceIdx}
+            isPreparing={isPreparing}
+            isSessionActive={isSessionActive}
+            paragraphIdx={idx}
+            onRetrySentence={onRetrySentence}
+            onSubmitSentence={onSubmitSentence}
+          />
+        )}
+
+      {/* Action buttons */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => onRetryParagraph(idx)}
+          className="flex-1 py-2 rounded-lg text-sm font-bold border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all"
+        >
+          重練這段
+        </button>
+        {/* 下一段：tier 3（念太差）時隱藏，避免學生亂念後直接跳過 */}
+        {/* 例外：已完成過的段落（completedParagraphs）允許自由導航 */}
+        {idx < storyLength - 1 && (paragraphSummary.tier <= 2 || completedParagraphs.has(idx)) && (
+          <button
+            onClick={() => {
+              if (!completedParagraphs.has(idx)) {
+                onAdvanceParagraph(idx, lineResults);
+              } else {
+                onSelectParagraph(idx + 1);
+              }
+            }}
+            className="flex-1 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white transition-all"
+          >
+            下一段
+          </button>
+        )}
+        {/* 完成朗讀：同樣只在通過時才顯示 */}
+        {idx >= storyLength - 1 && !completedParagraphs.has(idx) && paragraphSummary.tier <= 2 && (
+          <button
+            onClick={() => onAdvanceParagraph(idx, lineResults)}
+            className="flex-1 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white transition-all"
+          >
+            完成朗讀
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 interface ParagraphCardProps {
   idx: number;
   line: string;
@@ -379,69 +464,23 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
       )}
 
       {/* Inline summary card */}
-      {paragraphSummary && (() => {
-        const { phrase, color } = getEncouragement(paragraphSummary.matchRate);
-        return (
-        <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white shadow-card space-y-3">
-          <p className="text-base font-bold text-gray-800">
-            {paragraphSummary.geminiPending && <span className="text-blue-400 animate-pulse mr-1">AI 分析中...</span>}
-            {paragraphSummary.feedback}
-          </p>
-          <p className={`text-sm font-semibold ${color}`}>{phrase}</p>
-
-          {/* Per-sentence breakdown — only failed sentences, only when there are 2+ total sentences */}
-          {paragraphSummary.sentenceTargets &&
-            paragraphSummary.sentenceResults &&
-            paragraphSummary.sentenceTargets.length >= 2 && (
-              <FailedSentenceList
-                sentenceTargets={paragraphSummary.sentenceTargets}
-                sentenceResults={paragraphSummary.sentenceResults}
-                retrySentenceIdx={retrySentenceIdx}
-                isPreparing={isPreparing}
-                isSessionActive={isSessionActive}
-                paragraphIdx={idx}
-                onRetrySentence={onRetrySentence}
-                onSubmitSentence={onSubmitSentence}
-              />
-            )}
-
-          {/* Action buttons */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => onRetryParagraph(idx)}
-              className="flex-1 py-2 rounded-lg text-sm font-bold border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 transition-all"
-            >
-              重練這段
-            </button>
-            {/* 下一段：tier 3（念太差）時隱藏，避免學生亂念後直接跳過 */}
-            {/* 例外：已完成過的段落（completedParagraphs）允許自由導航 */}
-            {idx < storyLength - 1 && (paragraphSummary.tier <= 2 || completedParagraphs.has(idx)) && (
-              <button
-                onClick={() => {
-                  if (!completedParagraphs.has(idx)) {
-                    onAdvanceParagraph(idx, lineResults);
-                  } else {
-                    onSelectParagraph(idx + 1);
-                  }
-                }}
-                className="flex-1 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white transition-all"
-              >
-                下一段
-              </button>
-            )}
-            {/* 完成朗讀：同樣只在通過時才顯示 */}
-            {idx >= storyLength - 1 && !completedParagraphs.has(idx) && paragraphSummary.tier <= 2 && (
-              <button
-                onClick={() => onAdvanceParagraph(idx, lineResults)}
-                className="flex-1 py-2 rounded-lg text-sm font-bold bg-accent hover:bg-accent-hover text-white transition-all"
-              >
-                完成朗讀
-              </button>
-            )}
-          </div>
-        </div>
-        );
-      })()}
+      {paragraphSummary && (
+        <SummaryCard
+          paragraphSummary={paragraphSummary}
+          retrySentenceIdx={retrySentenceIdx}
+          isPreparing={isPreparing}
+          isSessionActive={isSessionActive}
+          idx={idx}
+          storyLength={storyLength}
+          completedParagraphs={completedParagraphs}
+          lineResults={lineResults}
+          onRetrySentence={onRetrySentence}
+          onSubmitSentence={onSubmitSentence}
+          onRetryParagraph={onRetryParagraph}
+          onAdvanceParagraph={onAdvanceParagraph}
+          onSelectParagraph={onSelectParagraph}
+        />
+      )}
     </div>
   );
 };
