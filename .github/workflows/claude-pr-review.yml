@@ -32,15 +32,19 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           track_progress: true
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.issue.number }}
+
             你是 LingoLeap 專案的 code reviewer。用中文留言。
+            讀 REVIEW.md 了解專案 review 規則。
 
-            Review 重點：
-            1. Bug risks — 邏輯錯誤、edge cases、null/undefined
-            2. React best practices — hooks 用法、state management、re-render
-            3. Security — XSS、injection、未消毒的 user input
-            4. 專案慣例 — Tailwind CSS、TypeScript types、API 呼叫走 api.ts
+            流程：
+            1. 用 gh pr diff 讀完整 diff
+            2. 讀改動的檔案原始碼理解 context
+            3. 用 inline comment 標註具體行數的問題
+            4. 最後用 gh pr comment 給總結
 
-            規則：
-            - 針對具體行數給 inline comment
-            - 嚴重問題標 🔴，建議標 🟡，讚賞標 🟢
-            - 最後給一個總結：可以 merge / 需要修改
+            嚴重問題標 🔴，建議標 🟡，讚賞標 🟢
+            總結：可以 merge / 需要修改
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Grep,Glob"
