@@ -1,0 +1,42 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  review:
+    # Only review PRs from team members (not random forks)
+    if: >-
+      github.event.pull_request.user.login == 'Youngger9765' ||
+      github.event.pull_request.user.login == 'if-else-master' ||
+      github.event.pull_request.user.login == 'stgst' ||
+      github.event.pull_request.user.login == 'Shinjou'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Claude Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          track_progress: true
+          prompt: |
+            你是 LingoLeap 專案的 code reviewer。用中文留言。
+
+            Review 重點：
+            1. Bug risks — 邏輯錯誤、edge cases、null/undefined
+            2. React best practices — hooks 用法、state management、re-render
+            3. Security — XSS、injection、未消毒的 user input
+            4. 專案慣例 — Tailwind CSS、TypeScript types、API 呼叫走 api.ts
+
+            規則：
+            - 針對具體行數給 inline comment
+            - 嚴重問題標 🔴，建議標 🟡，讚賞標 🟢
+            - 最後給一個總結：可以 merge / 需要修改
