@@ -182,6 +182,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setIsTtsPaused(false);
   }, [setIsTtsSpeaking, setIsTtsPaused]);
 
+  const handleSessionReady = useCallback(() => {
+    // session ready callback (kept for compat with hook)
+  }, []);
+
   // During sentence retry, narrow the realtime diff overlay to just the one sentence
   const sttTargetText = retrySentenceInfo
     ? retrySentenceInfo.target
@@ -204,9 +208,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     onLastDiffTokens: setLastDiffTokens as any,
     onMicError: setMicError,
     onClearTts: handleClearTts,
-    onSessionReady: () => {
-      // session ready callback (kept for compat with hook)
-    },
+    onSessionReady: handleSessionReady,
   });
 
   // Ref to always access the latest stt.submitSentence (avoids stale closure in memoized submitSentence)
@@ -547,7 +549,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     } else if (transcript) {
       await evaluateAndRespondRef.current(transcript, rawStt, durationMs, currentLineIndex);
     } else {
-      // No speech detected in normal mode — restart session so student can try again
+      // No speech detected — session already stopped, UI will show "開始朗讀" for manual retry
       console.warn('[LiveTutor] submitSentence: empty transcript in normal mode, ignoring');
     }
   }, [currentLineIndex]);
