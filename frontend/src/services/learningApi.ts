@@ -125,6 +125,36 @@ export async function completeSelfPracticeSession(
   }
 }
 
+/**
+ * Check whether the current user has any completed self-practice session for a
+ * given story by querying the DB via GET /api/learning/sessions.
+ *
+ * Returns `true` when at least one completed self-practice session exists,
+ * `false` otherwise (including on network/auth errors — the caller falls back
+ * to localStorage in that case).
+ */
+export async function checkSelfPracticeCompleted(
+  storySlug: string,
+  token: string,
+): Promise<boolean> {
+  try {
+    const params = new URLSearchParams({
+      story_slug: storySlug,
+      status: 'completed',
+      learning_source: 'self',
+      limit: '1',
+    });
+    const res = await fetch(`${API_BASE}/api/learning/sessions?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return false;
+    const data = (await res.json()) as { total: number };
+    return data.total > 0;
+  } catch {
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Comprehension chat
 // ---------------------------------------------------------------------------
