@@ -81,6 +81,10 @@ export function useProgressSync({
     [token, dbSessionId],
   );
 
+  // Keep a ref to the latest doSave so unmount cleanup always uses the current version
+  const doSaveRef = useRef(doSave);
+  useEffect(() => { doSaveRef.current = doSave; }, [doSave]);
+
   // ── Debounced sync ────────────────────────────────────────────────────────
   const syncProgress = useCallback(
     (data: StepProgressData) => {
@@ -137,12 +141,13 @@ export function useProgressSync({
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
-      }
-      if (latestDataRef.current) {
-        doSave(latestDataRef.current);
+        if (latestDataRef.current) {
+          doSaveRef.current(latestDataRef.current);
+        }
       }
     };
-  }, [doSave]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return { syncProgress, flushProgress };
 }
