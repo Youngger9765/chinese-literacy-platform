@@ -13,6 +13,7 @@ import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnot
 import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
 import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
 import { fetchStory, saveActiveSession, clearActiveSession } from '../services/api';
+import { completeSelfPracticeSession, SessionExpiredError } from '../services/learningApi';
 import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
@@ -245,6 +246,11 @@ const LearningLayout: React.FC = () => {
   const idleResetRef = useRef<(() => void) | null>(null);
   /** Guard ref that prevents concurrent POST /api/learning/sessions calls (Issue #984). */
   const isCreatingSession = useRef(false);
+  /** Guard ref that prevents handleSessionComplete from executing more than once per session. */
+  const sessionCompletedRef = useRef(false);
+  /** Tracks whether the completeSelfPracticeSession API call has fired (Issue #1070).
+   *  Separate from sessionCompletedRef so a late-arriving dbSessionId can still trigger it. */
+  const completionApiCalledRef = useRef(false);
   const [stepProgressState, setStepProgressState] = useState<StepProgressData>({
     current_step: null,
     steps_completed: [],
@@ -531,6 +537,12 @@ const LearningLayout: React.FC = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, selectedStory]);
+
+  // Reset completion guards when the story changes so a new session can complete normally.
+  useEffect(() => {
+    sessionCompletedRef.current = false;
+    completionApiCalledRef.current = false;
+  }, [storyId]);
 
   // Load story data when storyId changes
   useEffect(() => {
@@ -903,11 +915,32 @@ const LearningLayout: React.FC = () => {
     }
 
     // Assignment not complete yet: keep progress/context; do not auto-submit.
+    // Guard does NOT fire here — the function may be called again once ready.
     if (assignmentId != null && !shouldSubmit) {
       return;
     }
 
+    // Self-practice DB completion (Issue #1070).
+    // Placed before the one-time guard so a late-arriving dbSessionId can still trigger it
+    // on a subsequent useEffect re-fire without being blocked by sessionCompletedRef.
+    if (!hasActiveAssignment && storyId && dbSessionId !== null && token && !completionApiCalledRef.current) {
+      completionApiCalledRef.current = true;
+      completeSelfPracticeSession(dbSessionId, token).catch((err) => {
+        if (err instanceof SessionExpiredError) {
+          console.warn('[LearningLayout] completeSelfPracticeSession: token expired, session not marked complete in DB');
+        } else {
+          console.warn('[LearningLayout] completeSelfPracticeSession failed:', err);
+        }
+      });
+    }
+
+    // Guard: prevent double-execution for the actual completion path.
+    // Placed after the early-return above so a later "ready" call is not blocked.
+    if (sessionCompletedRef.current) return;
+    sessionCompletedRef.current = true;
+
     if (!hasActiveAssignment && storyId) {
+      // Keep localStorage as a local fallback for the "already completed" UI check.
       try {
         localStorage.setItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${storyId}`, '1');
       } catch {
@@ -934,6 +967,7 @@ const LearningLayout: React.FC = () => {
     storyId,
     isAssignmentReadyForSubmit,
     hasActiveAssignment,
+    dbSessionId,
   ]);
 
   /** Mark a paragraph as completed in both local state and session (Issue #85).
