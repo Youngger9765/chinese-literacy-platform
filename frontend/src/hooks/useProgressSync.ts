@@ -19,7 +19,7 @@
  * API failures are fully non-blocking — localStorage still functions.
  */
 import { useCallback, useEffect, useRef } from 'react';
-import { saveStepProgress, loadStepProgress, StepProgressData } from '../services/learningApi';
+import { saveStepProgress, saveStepProgressBeacon, loadStepProgress, StepProgressData } from '../services/learningApi';
 
 const DEBOUNCE_MS = 5_000;
 
@@ -93,6 +93,7 @@ export function useProgressSync({
         if (latestDataRef.current) {
           doSave(latestDataRef.current);
         }
+        debounceTimerRef.current = null;
       }, DEBOUNCE_MS);
     },
     [doSave],
@@ -120,19 +121,7 @@ export function useProgressSync({
       debounceTimerRef.current = null;
 
       if (token && dbSessionId !== null) {
-        const API_BASE = import.meta.env.VITE_API_URL ?? '';
-        const url = `${API_BASE}/api/learning/sessions/${dbSessionId}/progress`;
-        // Use fetch + keepalive to survive page unload while keeping auth headers.
-        // (sendBeacon cannot set Authorization headers.)
-        fetch(url, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(latestDataRef.current),
-          keepalive: true,
-        }).catch(() => { /* non-fatal */ });
+        saveStepProgressBeacon(token, dbSessionId, latestDataRef.current);
       }
     };
 
@@ -153,8 +142,7 @@ export function useProgressSync({
         doSave(latestDataRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [doSave]);
 
   return { syncProgress, flushProgress };
 }

@@ -714,6 +714,27 @@ export async function saveStepProgress(
 }
 
 /**
+ * Fire-and-forget step progress save using fetch + keepalive.
+ * Designed for beforeunload / page teardown where normal fetch may be cancelled.
+ */
+export function saveStepProgressBeacon(
+  token: string,
+  sessionId: number,
+  progress: StepProgressData,
+): void {
+  const url = `${API_BASE}/api/learning/sessions/${sessionId}/progress`;
+  fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(progress),
+    keepalive: true,
+  }).catch(() => { /* non-fatal */ });
+}
+
+/**
  * Load step progress from DB for a given learning session.
  * Returns null step_progress when nothing has been saved yet.
  */
