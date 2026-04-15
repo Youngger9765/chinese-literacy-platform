@@ -5,40 +5,40 @@
 
 | 大類 | # | 功能機制 | 學習單 | 平台 | 差距 |
 |---|---|---|---|---|---|
-| **閱讀輸入** | A1 | 標記閱讀（?/❤/— 做記號） | 57/57 | ReadingAnnotation | ✅ |
+| **閱讀輸入** | A1 | 標記閱讀（?/❤/— 做記號） | 57/57 | ReadingAnnotation：學生點選文字標記「不懂」或「重要」 | ✅ |
 | | A3 | 文白對照閱讀（左文言右白話） | 4/57 | 無 | ⚠️ 文言文特有 |
 | | A4 | 多文本閱讀（同主題 2~3 篇） | 2組 | 無 | ⚠️ 進階功能 |
-| **朗讀流暢度** | B1 | 計時朗讀（字/分鐘） | 53/57 | LiveTutor + FullReading | ✅ AI 更好 |
+| **朗讀流暢度** | B1 | 計時朗讀（字/分鐘） | 53/57 | LiveTutor + FullReading：AI 語音辨識即時計算 CPM | ✅ |
 | | B2 | 計時朗讀（秒，文言文） | 4/57 | 無 | ⚠️ 文言文特有 |
-| | B3 | 4 次練習記錄表 | 57/57 | readingHistory（不限次） | ✅ 更好 |
-| | B4 | 同學互評/裁判簽名 | 57/57 | AI 即時回饋 | ✅ AI 取代 |
-| | B5 | 三級自我檢核（勾選） | 57/57 | 後端有資料，前端無 UI | ⚠️ 缺自評 UI |
-| **語詞學習** | C1 | 語詞定義配對（看定義填詞） | 53/57 | VocabDefinitionMatch | ✅ |
-| | C2 | 語詞代號填空（選代號填句子） | 53/57 | VocabApplication | ✅ |
-| | C3 | 字海找詞（word search grid） | 53/57 | VocabWordSearch | ✅ |
+| | B3 | 4 次練習記錄表 | 57/57 | readingHistory：每次朗讀自動存入 DB，不限次數，LineChart 顯示進步曲線 | ✅ |
+| | B4 | 同學互評/裁判簽名 | 57/57 | AI 即時逐句回饋：語音辨識比對原文，即時顯示正確/錯誤/漏字 | ✅ |
+| | B5 | 三級自我檢核（勾選） | 57/57 | 後端有 reading_benchmark YAML 資料 + fluencyAnalyzer.ts 解析，前端無自評 UI | ⚠️ 缺自評 UI |
+| **語詞學習** | C1 | 語詞定義配對（看定義填詞） | 53/57 | VocabDefinitionMatch：顯示定義，學生從選項中配對正確語詞 | ✅ |
+| | C2 | 語詞代號填空（選代號填句子） | 53/57 | VocabApplication：從詞彙庫選代號填入句子，AI 批改 | ✅ |
+| | C3 | 字海找詞（word search grid） | 53/57 | VocabWordSearch：互動式字海 grid，學生拖曳圈選語詞 | ✅ |
 | | C4 | 古今詞彙對照（勾選白話意思） | 4/57 | 無 | ⚠️ 文言文特有 |
 | | C5 | 一字多義辨析 | 2/57 | 無 | ⚠️ 文言文特有 |
-| **文章理解** | D1 | 記敘文重點表（填空+勾選） | ~20/57 | StoryStructureTable（僅顯示） | 🔴 有但被動 |
+| **文章理解** | D1 | 記敘文重點表（填空+勾選） | ~20/57 | StoryStructureTable：AI 生成 genre-aware 結構化表格，目前僅顯示 | 🔴 有但被動 |
 | | D2 | 說明文重點表（填空） | ~26/57 | 同上 | 🔴 有但被動 |
 | | D3 | 應用文重點表（書評格式） | 1/57 | 同上 | 🔴 有但被動 |
 | | D4 | 文言文重點表（文白比對） | 4/57 | 無 | ⚠️ 文言文特有 |
 | | D5 | 多文本比較表（跨文章比較） | 2組 | 無 | ⚠️ 進階功能 |
-| **閱讀策略** | E1 | 句型/修辭（圈關聯詞、寫句子） | ~3/57 | StrategyExercise | ✅ |
-| | E2 | 推論（人物特質、指稱詞、主旨） | ~10/57 | StrategyExercise | ✅ |
-| | E3 | 文章結構（故事體、主題描述） | ~8/57 | StrategyExercise | ✅ |
-| | E4 | 表達/論證（PREP、4F、自我提問） | ~6/57 | StrategyExercise | ✅ |
-| | E5 | 科學方法（假設→驗證→結論） | ~5/57 | StrategyExercise | ✅ |
-| | E6 | 圖表判讀（折線/長條/圓形/統計） | ~4/57 | StrategyExercise | ⚠️ 含會考真題 |
-| | E7 | 思辨/媒體素養（假新聞、誘餌標題） | ~5/57 | StrategyExercise | ✅ |
-| | E8 | 品格/生活（正向思考、環保、時間管理） | ~6/57 | StrategyExercise | ✅ |
+| **閱讀策略** | E1 | 句型/修辭（圈關聯詞、寫句子） | ~3/57 | StrategyExercise：guided_steps 類型，多步驟引導填寫 | ✅ |
+| | E2 | 推論（人物特質、指稱詞、主旨） | ~10/57 | StrategyExercise：trait_inference 類型，從線索選正確特質 | ✅ |
+| | E3 | 文章結構（故事體、主題描述） | ~8/57 | StrategyExercise：guided_steps 類型，逐步拆解結構 | ✅ |
+| | E4 | 表達/論證（PREP、4F、自我提問） | ~6/57 | StrategyExercise：guided_steps 類型，PREP 四欄填寫 | ✅ |
+| | E5 | 科學方法（假設→驗證→結論） | ~5/57 | StrategyExercise：guided_steps 類型，科學方法流程表 | ✅ |
+| | E6 | 圖表判讀（折線/長條/圓形/統計） | ~4/57 | StrategyExercise：guided_steps 類型 | ⚠️ 學習單含會考真題 |
+| | E7 | 思辨/媒體素養（假新聞、誘餌標題） | ~5/57 | StrategyExercise：guided_steps 類型，判斷真偽練習 | ✅ |
+| | E8 | 品格/生活（正向思考、環保、時間管理） | ~6/57 | StrategyExercise：guided_steps 類型，情境練習 | ✅ |
 | **文言文特有** | F1 | 用故事情節推測文意 | 4/57 | 無 | ⚠️ |
 | | F2 | 讀懂代名詞（畫螢光筆配對） | 4/57 | 無 | ⚠️ |
 | | F3 | 猜詞意（上下文推測） | 4/57 | 無 | ⚠️ |
 | | F4 | 全句翻譯（選正確白話翻譯） | 4/57 | 無 | ⚠️ |
 | | F5 | 讀出作者意圖 | 4/57 | 無 | ⚠️ |
 | | F6 | 小試身手（另一篇短文練習） | 4/57 | 無 | ⚠️ |
-| **評量** | G1 | 四選一選擇題（5題） | 57/57 | ComprehensionChat（AI 對話） | ✅ 升級版 |
-| | G2 | YouTube 影片延伸 | 57/57 | KnowledgeStation | ✅ |
+| **評量** | G1 | 四選一選擇題（5題） | 57/57 | ComprehensionChat：AI 蘇格拉底式對話，5 題 3 階段引導，答錯有 Bridge 三步驟修正 | ✅ |
+| | G2 | YouTube 影片延伸 | 57/57 | KnowledgeStation：嵌入 YouTube 影片播放 | ✅ |
 
 ## 統計
 
