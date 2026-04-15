@@ -95,7 +95,7 @@ export function useProgressSync({
       }
       debounceTimerRef.current = setTimeout(() => {
         if (latestDataRef.current) {
-          doSave(latestDataRef.current);
+          doSaveRef.current(latestDataRef.current);
         }
         debounceTimerRef.current = null;
       }, DEBOUNCE_MS);
