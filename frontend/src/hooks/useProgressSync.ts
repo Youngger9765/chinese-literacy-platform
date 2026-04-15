@@ -111,13 +111,49 @@ export function useProgressSync({
     [doSave],
   );
 
-  // Cleanup debounce timer on unmount
+  // Flush pending data on page unload (refresh / close / navigate away)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (!latestDataRef.current || !debounceTimerRef.current) return;
+
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+
+      if (token && dbSessionId !== null) {
+        const API_BASE = import.meta.env.VITE_API_URL ?? '';
+        const url = `${API_BASE}/api/learning/sessions/${dbSessionId}/progress`;
+        // Use fetch + keepalive to survive page unload while keeping auth headers.
+        // (sendBeacon cannot set Authorization headers.)
+        fetch(url, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(latestDataRef.current),
+          keepalive: true,
+        }).catch(() => { /* non-fatal */ });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [token, dbSessionId]);
+
+  // Flush pending data on unmount (SPA navigation away from learning flow)
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      if (latestDataRef.current) {
+        doSave(latestDataRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { syncProgress, flushProgress };
