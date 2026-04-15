@@ -142,15 +142,23 @@ export async function checkSelfPracticeCompleted(
       story_slug: storySlug,
       status: 'completed',
       learning_source: 'self',
+      // Note: limit only caps the returned `items` array; `total` still reflects
+      // the full count because learning_source filtering happens in Python after
+      // the SQL query.  We keep limit=1 to minimise payload size.
       limit: '1',
     });
     const res = await fetch(`${API_BASE}/api/learning/sessions?${params}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (res.status === 401) {
+      throw new SessionExpiredError('checkSelfPracticeCompleted: token expired');
+    }
     if (!res.ok) return false;
     const data = (await res.json()) as { total: number };
     return data.total > 0;
-  } catch {
+  } catch (err) {
+    if (err instanceof SessionExpiredError) throw err;
+    console.error('[checkSelfPracticeCompleted] failed, falling back to localStorage:', err);
     return false;
   }
 }

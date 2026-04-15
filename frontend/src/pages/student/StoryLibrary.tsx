@@ -8,7 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import StoryCard, { Difficulty, DIFFICULTY_CONFIG, getDifficulty } from '../../components/student/StoryCard';
 
 interface StoryLibraryProps {
-  onStartReading: (story: Story) => void;
+  onStartReading: (story: Story) => void | Promise<void>;
   limit?: number;
   /** Slugs of already-completed stories — shows completion badge on card. */
   completedSlugs?: string[];
@@ -114,7 +114,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
     setLoadingStoryId(story.id);
     try {
       const fullStory = await fetchStory(story.id);
-      onStartReading(fullStory);
+      await onStartReading(fullStory);
     } catch (err) {
       setError(err instanceof Error ? err.message : '無法載入課文');
     } finally {
