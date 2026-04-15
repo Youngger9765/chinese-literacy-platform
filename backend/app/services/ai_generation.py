@@ -496,11 +496,14 @@ async def generate_story_structure(
         return {"rows": [{"label": "錯誤", "value": "無法載入文章重點表，請稍後再試", "interactive_type": "display"}]}
 
 
-def _fuzzy_match_chinese(student: str, reference: str) -> bool:
-    """Check if student answer contains key terms from the reference answer.
+def _fuzzy_match_chinese(student: str, reference: str, story_text: str = "") -> bool:
+    """Check if student answer is semantically close to the reference answer.
 
-    A student answer is considered correct if it contains at least half of the
-    key characters from the reference (excluding common particles/punctuation).
+    Matching strategies (any one passing = correct):
+    1. Exact match or containment (either direction)
+    2. Nickname/abbreviation: student answer appears in story_text AND shares
+       at least one key character with reference (handles 小戴 vs 戴資穎)
+    3. Character overlap >= 50% of reference key characters
     """
     if not student or not reference:
         return False
@@ -509,16 +512,25 @@ def _fuzzy_match_chinese(student: str, reference: str) -> bool:
     student = student.strip()
     reference = reference.strip()
 
-    # Exact match or containment
+    # Strategy 1: Exact match or containment
     if student == reference or reference in student or student in reference:
         return True
 
-    # Character-level overlap — exclude common single-character particles
     _PARTICLES = set("的了在是有和與也都就把被讓給從到著過嗎呢吧啊、，。！？")
     ref_chars = [c for c in reference if c not in _PARTICLES and '\u4e00' <= c <= '\u9fff']
+    stu_chars = [c for c in student if c not in _PARTICLES and '\u4e00' <= c <= '\u9fff']
+
     if not ref_chars:
         return len(student) > 0
 
+    # Strategy 2: Nickname/abbreviation — student answer appears in story text
+    # and shares at least one key character with reference
+    if story_text and student in story_text:
+        shared = sum(1 for c in stu_chars if c in reference)
+        if shared >= 1:
+            return True
+
+    # Strategy 3: Character-level overlap >= 50%
     matched = sum(1 for c in ref_chars if c in student)
     return matched / len(ref_chars) >= 0.5
 
@@ -526,12 +538,14 @@ def _fuzzy_match_chinese(student: str, reference: str) -> bool:
 async def grade_story_structure(
     structure: dict,
     answers: list[dict],
+    story_text: str = "",
 ) -> dict:
     """Grade student answers against the AI-generated structure reference.
 
     Args:
         structure: The cached structure dict (with 'rows' containing reference answers)
         answers: List of answer objects:
+        story_text: Original story text for nickname/abbreviation matching
             - For top-level rows: {"row_index": int, "value": str}
             - For sub-rows: {"row_index": int, "sub_row_index": int, "selected_options": [int, ...]}
             - For checkbox rows: {"row_index": int, "selected_options": [int, ...]}
@@ -593,7 +607,7 @@ async def grade_story_structure(
         else:
             # fill_blank: fuzzy text match
             student_value = str(answer.get("value") or "").strip()
-            is_correct = _fuzzy_match_chinese(student_value, correct_answer)
+            is_correct = _fuzzy_match_chinese(student_value, correct_answer, story_text)
             result_entry["correct"] = is_correct
             result_entry["correct_answer"] = correct_answer
             if is_correct:

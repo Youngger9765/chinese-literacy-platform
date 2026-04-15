@@ -246,9 +246,11 @@ async def grade_story_structure_endpoint(
             detail="Structure not yet generated. Call GET /api/stories/{story_id}/structure first.",
         )
 
+    story_text = story.get("full_text") or "\n".join(story.get("paragraphs", []))
     answers_payload = [a.model_dump() for a in body.answers]
     result = await grade_story_structure(
         structure=cached,
         answers=answers_payload,
+        story_text=story_text,
     )
     return result
