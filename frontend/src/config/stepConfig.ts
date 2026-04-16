@@ -31,6 +31,8 @@ export interface StepConfig {
   id: string;
   /** Display label shown in StepperNav */
   label: string;
+  /** Brief one-line instruction shown at the top of the immersive learning page */
+  hint: string;
   /** AppView enum value used by the legacy view routing system */
   view: AppView;
   /**
@@ -64,6 +66,7 @@ export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'reading-annotation',
     label: '讀全文-做記號',
+    hint: '閱讀全文，選取不懂或重要的詞語做記號',
     view: AppView.READING_ANNOTATION,
     dbStepNumber: 8,
     needsStory: true,
@@ -73,6 +76,7 @@ export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'tutor',
     label: '逐段朗讀',
+    hint: '跟著 AI 一段一段大聲朗讀',
     view: AppView.TUTOR,
     dbStepNumber: 2,
     needsStory: true,
@@ -82,6 +86,7 @@ export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'full-reading',
     label: '全文朗讀',
+    hint: '挑戰一次唸完全篇課文',
     view: AppView.FULL_READING,
     dbStepNumber: 6,
     needsStory: true,
@@ -89,8 +94,19 @@ export const STEP_CONFIG: StepConfig[] = [
     category: 'reading',
   },
   {
+    id: 'listening',
+    label: '聽力理解',
+    hint: '聽完課文後，用自己的話說出重點',
+    view: AppView.LISTENING,
+    dbStepNumber: 13,
+    needsStory: true,
+    enabled: true,
+    category: 'comprehension',
+  },
+  {
     id: 'vocab',
     label: '生字練習',
+    hint: '練習課文中的生字筆順與讀音',
     view: AppView.VOCAB,
     dbStepNumber: 4,
     needsStory: true,
@@ -98,8 +114,19 @@ export const STEP_CONFIG: StepConfig[] = [
     category: 'practice',
   },
   {
+    id: 'sentence-practice',
+    label: '造句練習',
+    hint: '用學到的詞語寫出自己的句子',
+    view: AppView.SENTENCE_PRACTICE,
+    dbStepNumber: 14,
+    needsStory: true,
+    enabled: true,
+    category: 'practice',
+  },
+  {
     id: 'vocab-definition',
     label: '詞語定義',
+    hint: '為每個詞語找到正確的解釋',
     view: AppView.VOCAB_DEFINITION_MATCH,
     dbStepNumber: 12,
     needsStory: true,
@@ -109,6 +136,7 @@ export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'vocab-application',
     label: '語詞應用',
+    hint: '把學到的詞語用在句子裡',
     view: AppView.VOCAB_APPLICATION,
     dbStepNumber: 9,
     needsStory: true,
@@ -118,6 +146,7 @@ export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'comprehension',
     label: '課文理解',
+    hint: '回答 AI 提出的課文問題',
     view: AppView.COMPREHENSION,
     dbStepNumber: 3,
     needsStory: true,
@@ -127,6 +156,7 @@ export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'vocab-word-search',
     label: '語詞複習',
+    hint: '在字母格中找出學過的詞語',
     view: AppView.VOCAB_WORD_SEARCH,
     dbStepNumber: 10,
     needsStory: true,
@@ -136,6 +166,7 @@ export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'dictation',
     label: '聽寫練習',
+    hint: '聽 AI 唸字，把聽到的打出來',
     view: AppView.DICTATION,
     dbStepNumber: 5,
     needsStory: true,
@@ -145,6 +176,7 @@ export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'knowledge-station',
     label: '知識補給站',
+    hint: '探索課文相關的延伸知識',
     view: AppView.KNOWLEDGE_STATION,
     dbStepNumber: 11,
     needsStory: true,
@@ -154,6 +186,7 @@ export const STEP_CONFIG: StepConfig[] = [
   {
     id: 'report',
     label: '報告',
+    hint: '查看這篇課文的學習成果',
     view: AppView.REPORT,
     dbStepNumber: 7,
     needsStory: false,
@@ -175,13 +208,7 @@ export const STEP_PATH_TO_NUMBER: Record<string, number> = Object.fromEntries(
   STEP_CONFIG.map((s) => [s.id, s.dbStepNumber]),
 );
 
-/** Map from AppView to URL path id (e.g. AppView.INTRO → "intro"). */
-export const VIEW_TO_PATH: Record<string, string> = Object.fromEntries(
-  STEP_CONFIG.map((s) => [s.view, s.id]),
-);
-
 /** Map from URL path id to AppView (e.g. "intro" → AppView.INTRO). */
 export const PATH_TO_VIEW: Record<string, AppView> = Object.fromEntries(
   STEP_CONFIG.map((s) => [s.id, s.view]),
 );
-// trigger CI

@@ -80,7 +80,7 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
     return (
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
-          <span className="text-base font-bold text-gray-700">部件拆解</span>
+          <span className="text-base font-bold text-gray-700 whitespace-nowrap">部件拆解</span>
         </div>
         <div className="p-4 flex flex-col items-center gap-3 text-center">
           <span className="text-4xl font-black text-gray-900 leading-none">{char}</span>
@@ -125,49 +125,51 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
       {/* Header */}
       <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
-        <span className="text-base font-bold text-gray-700">部件拆解</span>
-        <span className="text-xs text-gray-400">點擊部件查看相關字</span>
+        <span className="text-base font-bold text-gray-700 whitespace-nowrap">部件拆解</span>
+        <span className="text-xs text-gray-400 whitespace-nowrap">點擊部件查看相關字</span>
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Decomposition formula */}
-        <div className="flex items-center justify-center gap-2 flex-wrap">
+        {/* Decomposition: character → components grid */}
+        <div className="flex items-center justify-center gap-3">
           {/* The character itself */}
-          <div className="flex flex-col items-center">
-            <span className="text-4xl font-black text-gray-900 leading-none">{char}</span>
-            <span className="text-[10px] text-gray-400 mt-1">目標字</span>
+          <div className="flex flex-col items-center shrink-0">
+            <span className="text-3xl font-black text-gray-900 leading-none">{char}</span>
+            <span className="text-[10px] text-gray-400 mt-1 whitespace-nowrap">目標字</span>
           </div>
 
-          <span className="text-gray-400 text-xl font-light">=</span>
+          <span className="text-gray-400 text-lg font-light shrink-0">=</span>
 
-          {/* Components */}
-          {decomp.components.map((comp, idx) => {
-            const info = getRadicalInfo(comp.radical);
-            const isActive = activeRadical === comp.radical || (!activeRadical && comp.radical === primaryFormRadical);
-            return (
-              <React.Fragment key={`${comp.radical}-${idx}`}>
-                {idx > 0 && <span className="text-gray-400 text-lg">+</span>}
-                <button
-                  onClick={() => handleRadicalClick(comp.radical)}
-                  className={[
-                    'flex flex-col items-center gap-1 px-3 py-2 rounded-xl border transition-all active:scale-95',
-                    isActive
-                      ? 'bg-indigo-50 border-indigo-300 ring-1 ring-indigo-200'
-                      : 'bg-gray-50 border-gray-200 hover:bg-indigo-50 hover:border-indigo-200',
-                  ].join(' ')}
-                  title={info?.meaning ?? comp.label}
-                >
-                  <span className="text-3xl font-bold text-gray-800 leading-none">{comp.radical}</span>
-                  <span
-                    className={`text-[9px] px-1.5 py-0.5 rounded-full border font-medium ${ROLE_STYLES[comp.role]}`}
+          {/* Components — wrap into a grid */}
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+            {decomp.components.map((comp, idx) => {
+              const info = getRadicalInfo(comp.radical);
+              const isActive = activeRadical === comp.radical || (!activeRadical && comp.radical === primaryFormRadical);
+              return (
+                <React.Fragment key={`${comp.radical}-${idx}`}>
+                  {idx > 0 && <span className="text-gray-400 text-sm shrink-0">+</span>}
+                  <button
+                    onClick={() => handleRadicalClick(comp.radical)}
+                    className={[
+                      'flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-xl border transition-all active:scale-95',
+                      isActive
+                        ? 'bg-indigo-50 border-indigo-300 ring-1 ring-indigo-200'
+                        : 'bg-gray-50 border-gray-200 hover:bg-indigo-50 hover:border-indigo-200',
+                    ].join(' ')}
+                    title={info?.meaning ?? comp.label}
                   >
-                    {comp.role}
-                  </span>
-                  <span className="text-[10px] text-gray-500">{comp.label}</span>
-                </button>
-              </React.Fragment>
-            );
-          })}
+                    <span className="text-2xl font-bold text-gray-800 leading-none">{comp.radical}</span>
+                    <span
+                      className={`text-[8px] px-1 py-0.5 rounded-full border font-medium whitespace-nowrap ${ROLE_STYLES[comp.role]}`}
+                    >
+                      {comp.role}
+                    </span>
+                    <span className="text-[9px] text-gray-500 whitespace-nowrap">{comp.label}</span>
+                  </button>
+                </React.Fragment>
+              );
+            })}
+          </div>
         </div>
 
         {/* Active radical detail */}
@@ -216,7 +218,7 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
       </div>
 
       {/* Data source label */}
-      <p className="text-[10px] text-gray-400 text-right mt-2 pr-1">
+      <p className="text-[10px] text-gray-400 text-right mt-2 mb-3 pr-1">
         {getDecompositionSource(char) === 'hand-curated'
           ? '資料來源：教學團隊手動編寫'
           : '資料來源：makemeahanzi（開源漢字資料庫）'}

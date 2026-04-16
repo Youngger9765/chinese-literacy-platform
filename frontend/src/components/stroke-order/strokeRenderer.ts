@@ -13,13 +13,13 @@ export interface RenderState {
 }
 
 const COLORS = {
-  bg:      '#0d1117',
-  border:  '#4b5563',
-  grid:    '#1f2937',
-  stroke:  '#e2e8f0',
-  outline: 'rgba(255,255,255,0.18)',
-  hint:    '#818cf8',
-  brush:   '#818cf8',
+  bg:      '#FFFFFF',
+  border:  '#E7E2D8',
+  grid:    '#E1DCD2',
+  stroke:  '#302F2A',
+  outline: 'rgba(48,47,42,0.12)',
+  hint:    '#564ABF',
+  brush:   '#564ABF',
 };
 
 export function renderStrokes(

@@ -21,10 +21,9 @@ const ListeningPage: React.FC = () => {
     <ListeningPractice
       story={selectedStory}
       onFinish={(_result) => {
-        // Listening is an optional step — navigate forward to full-reading
-        navigate(`/learn/${storyId}/full-reading`);
+        navigate(`/learn/${storyId}/vocab`);
       }}
-      onBack={() => navigate(`/learn/${storyId}/dictation`)}
+      onBack={() => navigate(`/learn/${storyId}/full-reading`)}
     />
   );
 };

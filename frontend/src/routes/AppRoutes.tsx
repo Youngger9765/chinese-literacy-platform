@@ -52,6 +52,7 @@ const VocabApplicationPage = lazy(() => import('../pages/learning/VocabApplicati
 const VocabDefinitionMatchPage = lazy(() => import('../pages/learning/VocabDefinitionMatchPage'));
 const VocabWordSearchPage = lazy(() => import('../pages/learning/VocabWordSearchPage'));
 const KnowledgeStationPage = lazy(() => import('../pages/learning/KnowledgeStationPage'));
+const SentencePracticePage = lazy(() => import('../pages/learning/SentencePracticePage'));
 
 // Student pages — infrequently accessed, split to reduce initial load
 const JoinClassroomPage = lazy(() => import('../pages/JoinClassroomPage'));
@@ -420,7 +421,7 @@ const AppRoutes: React.FC = () => (
         <Route
           path="full-reading"
           element={
-            <StepRoute stepLabel="全文朗讀" nextPath="vocab">
+            <StepRoute stepLabel="全文朗讀" nextPath="listening">
               <FullReadingPage />
             </StepRoute>
           }
@@ -428,8 +429,16 @@ const AppRoutes: React.FC = () => (
         <Route
           path="vocab"
           element={
-            <StepRoute stepLabel="生字練習" nextPath="vocab-definition">
+            <StepRoute stepLabel="生字練習" nextPath="sentence-practice">
               <VocabPage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="sentence-practice"
+          element={
+            <StepRoute stepLabel="造句練習" nextPath="vocab-definition">
+              <SentencePracticePage />
             </StepRoute>
           }
         />
@@ -476,7 +485,7 @@ const AppRoutes: React.FC = () => (
         <Route
           path="listening"
           element={
-            <StepRoute stepLabel="聽力練習" nextPath="report">
+            <StepRoute stepLabel="聽力理解" nextPath="vocab">
               <ListeningPage />
             </StepRoute>
           }

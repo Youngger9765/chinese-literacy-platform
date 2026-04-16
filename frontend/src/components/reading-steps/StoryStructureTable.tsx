@@ -7,6 +7,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useZhuyin } from '../../context/ZhuyinContext';
 
 interface StructureRow {
   label: string;
@@ -20,6 +21,9 @@ interface Props {
 
 const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   const { token } = useAuth();
+  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
+  const zhuyinFont = zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined;
   const [rows, setRows] = useState<StructureRow[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -57,7 +61,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm max-w-2xl mx-auto">
+    <div className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm max-w-2xl mx-auto" style={{ fontFamily: zhuyinFont }}>
       {/* Header */}
       <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3">
         <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>
@@ -84,7 +88,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
                   >
                     {sub.label}
                   </td>
-                  <td className="px-5 py-3 text-gray-800 leading-relaxed">{sub.value}</td>
+                  <td className="px-5 py-3 text-gray-800 leading-relaxed">{zh(sub.value)}</td>
                 </tr>
               ))
             ) : (
@@ -96,7 +100,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
                   {row.label}
                 </td>
                 <td colSpan={2} className="px-5 py-3 text-gray-800 leading-relaxed">
-                  {row.value}
+                  {zh(row.value)}
                 </td>
               </tr>
             )

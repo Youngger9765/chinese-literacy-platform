@@ -21,6 +21,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story } from '../../types';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { useZhuyin } from '../../context/ZhuyinContext';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -245,6 +246,9 @@ function getCellsBetween(start: CellPos, end: CellPos): CellPos[] {
 // ---------------------------------------------------------------------------
 
 export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProps) {
+  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
+  const zhuyinFont = zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined;
   const storageKey = scopedStepStorageKey('wordSearch_progress_', story.id);
   const loadSaved = () => {
     try {
@@ -531,53 +535,33 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
     return aFound - bFound;
   });
 
-  // Red border overlays for found words — absolutely positioned over the grid
-  const BORDER_INSET = 3; // px inset from cell edge for a tighter look
+  // Red border overlays for found words — use inset outline to avoid offset issues
+  const OVERLAY_BORDER = 4;
   const foundWordOverlays = placedWords
     .filter((pw) => foundWords.has(pw.word))
     .map((pw) => {
       const wordLen = [...pw.word].length;
-      const x = pw.col * cellSizePx + BORDER_INSET;
-      const y = pw.row * cellSizePx + BORDER_INSET;
-      const w = pw.direction === 'horizontal'
-        ? wordLen * cellSizePx - BORDER_INSET * 2
-        : cellSizePx - BORDER_INSET * 2;
-      const h = pw.direction === 'vertical'
-        ? wordLen * cellSizePx - BORDER_INSET * 2
-        : cellSizePx - BORDER_INSET * 2;
+      const x = pw.col * cellSizePx;
+      const y = pw.row * cellSizePx;
+      const w = pw.direction === 'horizontal' ? wordLen * cellSizePx : cellSizePx;
+      const h = pw.direction === 'vertical' ? wordLen * cellSizePx : cellSizePx;
       return { word: pw.word, x, y, w, h };
     });
 
   const gridTotalPx = size * cellSizePx;
 
   return (
-    <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-2 py-4 select-none">
+    <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-4 md:px-8 py-6 select-none" style={{ fontFamily: zhuyinFont }}>
       {/* Header */}
-      <div className="px-2">
-        <h2 className="text-lg font-bold text-gray-800">語詞複習</h2>
-        <p className="text-sm text-gray-500 mt-0.5 font-medium">
-          找出
-          <span className="font-black text-indigo-700 mx-1">{foundWords.size}</span>
+      <div className="text-center">
+        <h2 className="text-lg font-bold text-on-surface">語詞複習</h2>
+        <p className="text-sm text-on-surface-variant mt-0.5">
+          拖曳選取字元，水平或垂直圈出語詞 · 找出
+          <span className="font-black text-accent mx-1">{foundWords.size}</span>
           /
           <span className="mx-1">{placedWords.length}</span>
           個語詞
         </p>
-      </div>
-
-      {/* Progress bar */}
-      <div className="px-2">
-        <div className="h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-          <div
-            className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-500 ease-out"
-            role="progressbar"
-            aria-valuenow={foundWords.size}
-            aria-valuemin={0}
-            aria-valuemax={placedWords.length}
-            style={{
-              width: placedWords.length === 0 ? '0%' : (foundWords.size / placedWords.length) * 100 + '%',
-            }}
-          />
-        </div>
       </div>
 
       {/* Found toast */}
@@ -591,11 +575,27 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
         </div>
       )}
 
+      {/* Progress bar */}
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="h-2.5 bg-surface-container-high rounded-full overflow-hidden">
+          <div
+            className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
+            role="progressbar"
+            aria-valuenow={foundWords.size}
+            aria-valuemin={0}
+            aria-valuemax={placedWords.length}
+            style={{
+              width: placedWords.length === 0 ? '0%' : (foundWords.size / placedWords.length) * 100 + '%',
+            }}
+          />
+        </div>
+      </div>
+
       <div className="flex flex-col xl:flex-row gap-6 items-center xl:items-start justify-center">
         {/* Grid with red border overlays for found words */}
         <div
-          className="flex-shrink-0 touch-none cursor-crosshair rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm"
-          style={{ position: 'relative', width: gridTotalPx, height: gridTotalPx }}
+          className="flex-shrink-0 touch-none cursor-crosshair border-2 border-gray-200 shadow-sm"
+          style={{ position: 'relative' }}
           role="grid"
           aria-label="語詞方格，拖選字元以找出語詞"
           onMouseDown={onMouseDown}
@@ -606,7 +606,7 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <table className="border-collapse" style={{ tableLayout: 'fixed' }}>
+          <table className="border-collapse no-zhuyin" style={{ tableLayout: 'fixed' }}>
             <tbody>
               {grid.map((row, r) => (
                 <tr key={r}>
@@ -647,108 +647,69 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
                 top: ov.y,
                 width: ov.w,
                 height: ov.h,
-                border: '4px solid #ef4444',
-                borderRadius: 10,
+                outline: `${OVERLAY_BORDER}px solid #ef4444`,
+                outlineOffset: `-${OVERLAY_BORDER}px`,
+                borderRadius: 8,
                 pointerEvents: 'none',
-                boxSizing: 'border-box',
                 zIndex: 10,
               }}
             />
           ))}
         </div>
 
-        {/* Word list — unfound at top, found at bottom */}
-        <div className="flex flex-col gap-3 w-full xl:w-52 max-w-sm mx-auto xl:mx-0">
-          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide px-1">
-            待找語詞
-          </h3>
-          <div className="flex flex-wrap xl:flex-col gap-2 justify-center xl:justify-start">
+        {/* Word list — compact wrapped pills */}
+        <div className="w-full xl:w-56 shrink-0">
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <span className="material-symbols-outlined text-on-surface-variant text-lg">search</span>
+            <span className="text-sm font-headline font-bold text-on-surface-variant uppercase tracking-wider">尋找語詞</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {sortedPlacedWords.map((pw) => {
               const found = foundWords.has(pw.word);
-              const vocabItem = story.vocabulary?.find((v) => v.word === pw.word);
               return (
-                <div
+                <span
                   key={pw.word}
-                  className={
-                    'flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-300 min-h-[52px] ' +
-                    (found
-                      ? 'bg-accent/10 border-accent/40'
-                      : 'bg-white border-gray-200')
-                  }
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+                    found
+                      ? 'bg-accent/10 text-accent line-through'
+                      : 'bg-surface-container-lowest border border-surface-container-high text-on-surface shadow-sm'
+                  }`}
                 >
-                  {found ? (
-                    <svg
-                      className="w-5 h-5 text-accent flex-shrink-0"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      aria-label="已找到"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  ) : (
-                    <span className="w-5 h-5 flex-shrink-0 rounded-full border-2 border-dashed border-gray-300" />
+                  {found && (
+                    <span className="material-symbols-outlined text-sm">check_circle</span>
                   )}
-                  <span
-                    className={
-                      'text-lg font-black ' +
-                      (found ? 'text-accent line-through' : 'text-gray-800')
-                    }
-                  >
-                    {pw.word}
-                  </span>
-                  {!found && vocabItem?.definition && (
-                    <span
-                      className="hidden xl:block text-xs text-gray-400 truncate flex-1"
-                      title={vocabItem.definition}
-                    >
-                      {vocabItem.definition.length > 16
-                        ? vocabItem.definition.slice(0, 16) + '...'
-                        : vocabItem.definition}
-                    </span>
-                  )}
-                </div>
+                  {zh(pw.word)}
+                </span>
               );
             })}
           </div>
 
           {placedWords.length < vocabWords.length && (
-            <p className="text-xs text-amber-600 px-1 mt-1">
-              注意：部分語詞因方格空間不足未能放入
+            <p className="text-xs text-on-surface-variant px-1 mt-2">
+              部分語詞因空間不足未能放入
             </p>
           )}
         </div>
       </div>
 
-      {/* Instructions — hidden after completion */}
-      {!finished && (
-        <p className="text-sm text-gray-400 text-center px-4 mt-2 bg-gray-50 rounded-xl py-2.5 mx-2">
-          拖曳選取字元，水平或垂直圈出語詞
-        </p>
-      )}
-
-      {/* #847: Completion banner — shown in-place, grid stays visible above */}
+      {/* Completion — fixed bottom CTA */}
       {finished && (
-        <div className="flex flex-col items-center gap-4 px-4 pb-4 animate-fade-in">
-          <div className="w-full bg-emerald-50 border border-emerald-200 rounded-2xl px-6 py-5 text-center shadow-sm">
-            <div className="text-4xl mb-2" role="img" aria-label="慶祝">🎉</div>
-            <h2 className="text-2xl font-bold text-emerald-700">全部找到了！</h2>
-          </div>
-          <div className="flex gap-3">
+        <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
+          <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
             <button
               onClick={handleRedo}
-              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl text-base font-bold hover:bg-gray-200 active:scale-95 transition-all shadow-sm min-h-[52px]"
+              className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all"
             >
               重新練習
             </button>
             <button
               onClick={() => onFinish(finishedElapsed)}
-              className="px-6 py-2.5 bg-indigo-600 text-white rounded-full text-sm font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-sm min-h-[44px]"
+              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
             >
               繼續下一步
+              <span className="material-symbols-outlined text-xl">arrow_forward</span>
             </button>
           </div>
         </div>

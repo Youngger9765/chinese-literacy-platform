@@ -64,8 +64,8 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
       className="flex-1 flex flex-col bg-amber-50 overflow-hidden"
       style={{
         fontFamily: zhuyinActive
-          ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
-          : "'Iansui', 'Noto Sans TC', sans-serif",
+          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
+          : undefined,
       }}
     >
       {/* Top bar */}

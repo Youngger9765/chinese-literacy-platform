@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Story } from '../../types';
 import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
+import { useZhuyin } from '../../context/ZhuyinContext';
 
 export interface DictationResult {
   totalWords: number;
@@ -102,6 +103,8 @@ const SpeakerIcon: React.FC<{ animate: boolean }> = ({ animate }) => (
 // ---- Main component ----
 
 const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, onBack }) => {
+  const { zhuyinActive } = useZhuyin();
+  const zhuyinFont = zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined;
   const words = React.useMemo(() => extractDictationWords(story), [story]);
 
   const [phase, setPhase] = useState<Phase>('intro');

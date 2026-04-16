@@ -4,9 +4,9 @@ import { cleanChineseText } from '../../utils/textDiff';
 import { analyzeFluency } from '../../utils/fluencyAnalyzer';
 import DiffDisplay from '../ui/DiffDisplay';
 import { useZhuyin } from '../../context/ZhuyinContext';
-import { useIsMobile } from '../../hooks/useIsMobile';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
-import { useResizablePanel } from '../../hooks/useResizablePanel';
+import { useTtsPlayback } from '../../hooks/useTtsPlayback';
+import { cancelTts } from '../../services/ttsApi';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
 import { saveReadingHistory } from '../../services/readingHistoryApi';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
@@ -15,16 +15,17 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContai
 
 /* ------------------------------------------------------------------ */
 
+import { splitZhuyinChars } from '../../utils/zhuyinUtils';
+
+/* ------------------------------------------------------------------ */
+
 interface FullReadingProps {
   story: Story;
-  rightPanelWidth: number;
-  onPanelWidthChange: (w: number) => void;
   onFinish: (result: FullReadingResult) => void;
   onBack: () => void;
 }
 
-const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPanelWidthChange, onFinish, onBack }) => {
-  const isMobile = useIsMobile();
+const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) => {
   const { token } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
 
@@ -40,8 +41,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
   const [isPreparing, setIsPreparing]           = useState(false);
   const [isSessionActive, setIsSessionActive]   = useState(false);
-  const [isTtsSpeaking, setIsTtsSpeaking]       = useState(false);
-  const [isTtsPaused, setIsTtsPaused]           = useState(false);
   const [streamingTranscript, setStreamingTranscript] = useState(() => savedProgress.current?.transcript ?? '');
   const [micError, setMicError]                 = useState('');
   const [result, setResult]                     = useState<SavedResult | null>(() => savedProgress.current?.result ?? null);
@@ -54,6 +53,54 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
   const startTimeRef              = useRef<number>(0);
 
   const fullText = useMemo(() => story.content.join(''), [story.content]);
+
+  /* ---- TTS playback (Cloud TTS + cursor animation, same as LiveTutor) ---- */
+  const [speakingProgress, setSpeakingProgress] = useState(0);
+  const [currentTtsParagraph, setCurrentTtsParagraph] = useState(-1);
+  const tts = useTtsPlayback(setSpeakingProgress, () => {});
+
+  /* Speak paragraph by paragraph to track which paragraph is highlighted */
+  const ttsQueueRef = useRef<string[]>([]);
+  const ttsQueueIdxRef = useRef(0);
+
+  const speakNextInQueue = useCallback(() => {
+    const idx = ttsQueueIdxRef.current;
+    const queue = ttsQueueRef.current;
+    if (idx >= queue.length) {
+      setCurrentTtsParagraph(-1);
+      setSpeakingProgress(0);
+      return;
+    }
+    setCurrentTtsParagraph(idx);
+    setSpeakingProgress(0);
+    tts.speakText(queue[idx]);
+  }, [tts]);
+
+  const speakFullStory = useCallback(() => {
+    ttsQueueRef.current = [...story.content];
+    ttsQueueIdxRef.current = 0;
+    speakNextInQueue();
+  }, [story.content, speakNextInQueue]);
+
+  // When TTS finishes a paragraph, advance to next
+  const prevTtsSpeaking = useRef(false);
+  useEffect(() => {
+    if (prevTtsSpeaking.current && !tts.isTtsSpeaking && currentTtsParagraph >= 0) {
+      ttsQueueIdxRef.current += 1;
+      speakNextInQueue();
+    }
+    prevTtsSpeaking.current = tts.isTtsSpeaking;
+  }, [tts.isTtsSpeaking, currentTtsParagraph, speakNextInQueue]);
+
+  const stopTtsAll = useCallback(() => {
+    tts.stopTts();
+    ttsQueueRef.current = [];
+    ttsQueueIdxRef.current = 0;
+    setCurrentTtsParagraph(-1);
+    setSpeakingProgress(0);
+  }, [tts]);
+
+  const isTtsPlaying = tts.isTtsSpeaking || currentTtsParagraph >= 0;
 
   /* ---- Reading history for progress curve ---- */
   const [readingHistory, setReadingHistory] = useState<ReadingHistoryPoint[]>([]);
@@ -101,9 +148,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
     return story.content.map((line) => processZhuyin(line));
   }, [story.content, zhuyinActive, processZhuyin]);
 
-  /* ---- Resizable panel ---- */
-  const { onDividerMouseDown, onDividerTouchStart } = useResizablePanel(rightPanelWidth, onPanelWidthChange);
-
   /* ---- Cleanup ---- */
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ audio: true })
@@ -112,56 +156,15 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
     return () => {
       isSessionActiveRef.current = false;
       if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch (_) {} }
-      window.speechSynthesis?.cancel();
+      cancelTts();
+      tts.stopTts();
     };
   }, []);
-
-  /* ---- TTS: read full story ---- */
-  const speakFullStory = useCallback(() => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    setIsTtsPaused(false);
-
-    const doSpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find(v => v.name.includes('Google') && v.name.includes('Taiwan')) ||
-        voices.find(v => v.name.includes('Google') && v.lang === 'zh-TW') ||
-        voices.find(v => v.lang === 'zh-TW') ||
-        voices.find(v => v.lang.startsWith('zh'));
-
-      const utterances = story.content.map(paragraph => {
-        const u = new SpeechSynthesisUtterance(paragraph);
-        u.lang = 'zh-TW'; u.rate = 1.0;
-        if (preferred) u.voice = preferred;
-        return u;
-      });
-      utterances[0].onstart = () => setIsTtsSpeaking(true);
-      utterances[utterances.length - 1].onend = () => { setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      // Add onerror to every utterance so isTtsSpeaking resets if any intermediate sentence fails
-      utterances.forEach(u => {
-        u.onerror = () => { window.speechSynthesis.cancel(); setIsTtsSpeaking(false); setIsTtsPaused(false); };
-      });
-      utterances.forEach(u => window.speechSynthesis.speak(u));
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.onvoiceschanged = null; doSpeak(); };
-    } else {
-      doSpeak();
-    }
-  }, [story.content]);
-
-  const pauseTts = () => { window.speechSynthesis?.pause(); setIsTtsPaused(true); };
-  const resumeTts = () => { window.speechSynthesis?.resume(); setIsTtsPaused(false); };
-  const stopTts = () => { window.speechSynthesis?.cancel(); setIsTtsSpeaking(false); setIsTtsPaused(false); };
 
   /* ---- STT ---- */
   const startSession = () => {
     if (isSessionActiveRef.current) return;
-    window.speechSynthesis?.cancel();
-    setIsTtsSpeaking(false);
-    setIsTtsPaused(false);
+    stopTtsAll();
     setIsPreparing(true);
     setMicError('');
     setResult(null);
@@ -218,10 +221,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
     accumulatedTranscriptRef.current = '';
     setStreamingTranscript('');
     recognition.start();
-    // Also start audio recording so student can replay
-    audioRecorder.startRecording().catch(() => {
-      // Recording is best-effort; STT continues even if recorder fails
-    });
+    audioRecorder.startRecording().catch(() => {});
   };
 
   const stopSession = useCallback(() => {
@@ -260,145 +260,188 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
 
   const percent = result ? Math.round(result.matchRate * 100) : 0;
 
+  /* ---- Render paragraph text with optional TTS highlighting ---- */
+  const renderParagraph = (line: string, idx: number) => {
+    const zhuyinLine = zhuyinLines ? zhuyinLines[idx] : null;
+    const isTtsHighlighting = isTtsPlaying && idx === currentTtsParagraph;
+
+    if (isTtsHighlighting) {
+      const displayText = (zhuyinActive && typeof zhuyinLine === 'string') ? zhuyinLine : line;
+      const chars = splitZhuyinChars(displayText);
+      return (
+        <>
+          {speakingProgress > 0 && (
+            <span className="text-accent font-bold">{chars.slice(0, speakingProgress).join('')}</span>
+          )}
+          <span className={speakingProgress > 0 ? 'opacity-30' : 'opacity-90'}>
+            {chars.slice(speakingProgress).join('')}
+          </span>
+        </>
+      );
+    }
+
+    // Finished TTS paragraphs stay fully colored
+    if (isTtsPlaying && currentTtsParagraph > idx) {
+      return <span className="text-accent font-bold">{zhuyinLine ?? line}</span>;
+    }
+
+    return <>{zhuyinLine ?? line}</>;
+  };
+
+  /* ================================================================ */
+  /*  JSX                                                             */
+  /* ================================================================ */
+
   return (
     <div
-      className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 h-full bg-amber-50 overflow-hidden`}
+      className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
       style={{
         fontFamily: zhuyinActive
-          ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
-          : "'Iansui', 'Noto Sans TC', sans-serif",
+          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
+          : undefined,
       }}
     >
-      {/* LEFT: Full story text */}
-      <div className={`flex flex-col bg-amber-50 min-w-0 ${isMobile ? 'h-[60vh]' : 'flex-1'}`}>
-        {/* All paragraphs */}
-        <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8 lg:p-16'} overflow-y-auto custom-scrollbar`}>
-          <div className="max-w-3xl mx-auto space-y-20">
-            {story.content.map((line, idx) => (
-              <div
-                key={idx}
-                className="rounded-2xl px-6 py-12 border-b border-gray-200 last:border-b-0 hover:bg-white/30 transition-all"
-              >
-                <p className={`text-2xl lg:text-3xl text-gray-800 leading-[3.5rem] lg:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
-                  {zhuyinLines ? zhuyinLines[idx] : line}
+      {/* ── Single-column centered layout ─────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto pb-48 custom-scrollbar">
+        <div className="max-w-4xl mx-auto px-6 md:px-16 pt-4">
+
+          {/* Full text card */}
+          <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-10 mt-4">
+            {/* Instructions */}
+            {!result && !isSessionActive && !isPreparing && !isTtsPlaying && (
+              <div className="mb-8 pb-6 border-b border-surface-container-high">
+                <p className="text-lg font-headline font-bold text-on-surface leading-relaxed">
+                  從頭到尾讀完整篇文章，不要中斷！
+                </p>
+                <p className="text-sm text-on-surface-variant mt-1">
+                  標準比逐段朗讀寬鬆，放輕鬆自然地讀吧
                 </p>
               </div>
-            ))}
-          </div>
-        </div>
+            )}
 
-        {/* Status bar */}
-        <div className="h-7 bg-white border-t border-gray-200 flex items-center px-4 text-xs text-gray-500 uppercase shrink-0">
-          <span>共 {story.content.length} 段 · {story.title}</span>
-          <div className="flex-1" />
-          <span className={isSessionActive ? 'text-green-500 font-bold' : isPreparing ? 'text-yellow-500 font-bold' : 'text-gray-300'}>
-            {isSessionActive ? '• 聆聽中' : isPreparing ? '• 準備中' : '• 待命'}
-          </span>
-        </div>
-      </div>
-
-      {/* Resizable divider - hidden on mobile */}
-      {!isMobile && (
-        <div
-          onMouseDown={onDividerMouseDown}
-          onTouchStart={onDividerTouchStart}
-          className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
-        />
-      )}
-
-      {/* RIGHT: Recording panel */}
-      <div
-        className={`bg-amber-50 flex flex-col min-h-0 ${isMobile ? 'flex-1' : 'flex-shrink-0 h-full'}`}
-        style={isMobile ? undefined : { width: rightPanelWidth }}
-      >
-        {/* Header */}
-        <div className="h-9 shrink-0 bg-white border-b border-gray-200 flex items-center px-4">
-          <span className="text-xs font-bold text-accent-light uppercase tracking-widest">全文朗讀</span>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-gray-50">
-
-          {/* Instructions */}
-          {!result && !isSessionActive && !isPreparing && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-4">
-              <p className="text-base font-bold text-gray-800 leading-relaxed mb-2">
-                你剛才一段一段練習過了，現在試著從頭到尾讀完整篇文章，不要中斷！
-              </p>
-              <p className="text-base text-gray-600 leading-relaxed">
-                請從頭到尾朗讀整篇課文。讀完後按「完成朗讀」送出。
-              </p>
-              <p className="text-sm text-gray-400 mt-2">
-                標準比逐段朗讀寬鬆，放輕鬆自然地讀吧！
-              </p>
-            </div>
-          )}
-
-          {/* Live transcript */}
-          {isSessionActive && streamingTranscript && (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-accent-light uppercase animate-pulse">聆聽中...</span>
-              <div className="bg-accent/20 border border-accent/30 rounded-xl px-3 py-2.5 text-base text-gray-800 leading-relaxed">
-                {streamingTranscript}
+            {/* Recording indicator */}
+            {isSessionActive && (
+              <div className="mb-6 flex items-center gap-2">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <span className="text-sm font-headline font-bold text-emerald-700 uppercase tracking-wider">聆聽中</span>
               </div>
+            )}
+
+            {/* TTS playing indicator */}
+            {isTtsPlaying && !isSessionActive && (
+              <div className="mb-6 flex items-center gap-2">
+                <span className="material-symbols-outlined text-accent text-lg animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
+                <span className="text-sm font-headline font-bold text-accent uppercase tracking-wider">AI 朗讀中</span>
+              </div>
+            )}
+
+            {/* Paragraphs */}
+            <div className="space-y-10">
+              {story.content.map((line, idx) => (
+                <div key={idx} className="flex gap-4 items-start">
+                  <span className="text-xs font-headline font-bold text-on-surface-variant/40 pt-2 select-none shrink-0 w-6 text-right">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <p className={`text-xl md:text-2xl text-on-surface leading-[3rem] md:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                    {renderParagraph(line, idx)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Live transcript card */}
+          {isSessionActive && streamingTranscript && (
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
+              <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">即時辨識</p>
+              <p className="text-lg text-on-surface leading-relaxed">{streamingTranscript}</p>
             </div>
           )}
 
           {isSessionActive && !streamingTranscript && (
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-green-500 uppercase animate-pulse">聆聽中</span>
-              <div className="bg-green-900/20 border border-green-700/30 rounded-xl px-3 py-2.5 text-base text-gray-600 leading-relaxed">
-                請朗讀左側課文，從頭到尾…
-              </div>
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 mt-6">
+              <p className="text-base text-on-surface-variant leading-relaxed">請開始朗讀上方課文…</p>
             </div>
           )}
 
-          {/* Result */}
+          {/* ── Result section ──────────────────────────────────────── */}
           {result && (
-            <div className="space-y-4">
-              <div className="flex flex-col items-center gap-3 py-4">
-                <div className={`w-24 h-24 rounded-full flex items-center justify-center border-4 ${
-                  percent >= 80 ? 'border-emerald-500 text-emerald-800'
-                  : percent >= 60 ? 'border-amber-500 text-amber-800'
-                  : 'border-red-500/60 text-red-300'
+            <div className="mt-6 space-y-6">
+              {/* Score */}
+              <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 flex flex-col items-center gap-4">
+                <div className={`w-28 h-28 rounded-full flex items-center justify-center border-4 ${
+                  percent >= 80 ? 'border-emerald-500'
+                  : percent >= 60 ? 'border-amber-500'
+                  : 'border-tertiary'
                 }`}>
-                  <span className="text-2xl font-black">{percent}%</span>
+                  <span className={`text-3xl font-headline font-black ${
+                    percent >= 80 ? 'text-emerald-700'
+                    : percent >= 60 ? 'text-amber-700'
+                    : 'text-tertiary'
+                  }`}>{percent}%</span>
                 </div>
-                <p className={`text-sm font-bold text-center ${
-                  percent >= 80 ? 'text-emerald-800'
-                  : percent >= 60 ? 'text-amber-800'
-                  : 'text-gray-600'
+                <p className={`text-base font-headline font-bold text-center ${
+                  percent >= 80 ? 'text-emerald-700'
+                  : percent >= 60 ? 'text-amber-700'
+                  : 'text-on-surface-variant'
                 }`}>
                   {result.feedback}
                 </p>
               </div>
 
+              {/* Stats grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-surface-container-low p-5 rounded-3xl flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-xl text-emerald-700">speed</span>
+                  </div>
+                  <div>
+                    <div className="font-headline text-on-surface-variant font-bold text-xs uppercase tracking-wider">語速</div>
+                    <div className="text-lg font-headline font-bold text-on-surface mt-0.5">{result.cpm} 字/分</div>
+                  </div>
+                </div>
+                <div className="bg-surface-container-low p-5 rounded-3xl flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-xl text-accent">verified</span>
+                  </div>
+                  <div>
+                    <div className="font-headline text-on-surface-variant font-bold text-xs uppercase tracking-wider">準確度</div>
+                    <div className="text-lg font-headline font-bold text-on-surface mt-0.5">{percent}%</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Transcript */}
               {streamingTranscript && (
-                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-                  <p className="text-xs text-gray-500 mb-1 uppercase tracking-widest">你說的</p>
-                  <p className="text-xs text-gray-600 leading-relaxed line-clamp-6">{streamingTranscript}</p>
+                <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
+                  <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">你說的</p>
+                  <p className="text-base text-on-surface leading-relaxed line-clamp-6">{streamingTranscript}</p>
                 </div>
               )}
 
+              {/* Diff display */}
               {result.diffTokens && result.diffTokens.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">逐字比對</p>
+                <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
+                  <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">逐字比對</p>
                   <DiffDisplay tokens={result.diffTokens} showLegend className="text-lg" />
                 </div>
               )}
 
-              {/* Audio playback — let student re-listen to their reading */}
+              {/* Audio playback */}
               {audioRecorder.audioUrl && (
-                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">重聽錄音</p>
-                  <audio src={audioRecorder.audioUrl} controls className="w-full h-9" aria-label="播放您的朗讀錄音" />
+                <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
+                  <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">重聽錄音</p>
+                  <audio src={audioRecorder.audioUrl} controls className="w-full h-10" aria-label="播放您的朗讀錄音" />
                 </div>
               )}
 
               {/* Reading progress curve (#909) */}
               {readingHistory.length >= 1 && (
-                <div className="bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-                  <p className="text-xs text-gray-500 mb-2 uppercase tracking-widest">
+                <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
+                  <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">
                     朗讀進步曲線
                     {readingHistory.length >= 2 && (() => {
                       const first = readingHistory[0]?.cpm;
@@ -406,32 +449,32 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
                       if (first && last && first > 0) {
                         const pct = Math.round(((last - first) / first) * 100);
                         return pct > 0
-                          ? <span className="ml-1 text-green-600">▲{pct}%</span>
-                          : pct < 0 ? <span className="ml-1 text-red-500">▼{Math.abs(pct)}%</span> : null;
+                          ? <span className="ml-1 text-emerald-600">▲{pct}%</span>
+                          : pct < 0 ? <span className="ml-1 text-tertiary">▼{Math.abs(pct)}%</span> : null;
                       }
                       return null;
                     })()}
                   </p>
-                  <ResponsiveContainer width="100%" height={140}>
+                  <ResponsiveContainer width="100%" height={160}>
                     <LineChart data={readingHistory.map((h, i) => ({
                       attempt: `第${i + 1}次`,
                       cpm: h.cpm,
                       accuracy: h.accuracy,
                     }))}>
-                      <XAxis dataKey="attempt" tick={{ fontSize: 10 }} />
-                      <YAxis yAxisId="cpm" tick={{ fontSize: 10 }} width={30} />
+                      <XAxis dataKey="attempt" tick={{ fontSize: 11 }} />
+                      <YAxis yAxisId="cpm" tick={{ fontSize: 11 }} width={32} />
                       <Tooltip
                         formatter={(value: number, name: string) => [
                           name === 'cpm' ? `${value} 字/分` : `${value}%`,
                           name === 'cpm' ? '語速' : '準確度',
                         ]}
                       />
-                      <ReferenceLine yAxisId="cpm" y={90} stroke="#ef4444" strokeDasharray="6 3" label={{ value: '目標 90', position: 'right', fill: '#ef4444', fontSize: 9 }} />
-                      <Line yAxisId="cpm" type="monotone" dataKey="cpm" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3, fill: '#3b82f6' }} name="cpm" />
-                      <Line yAxisId="cpm" type="monotone" dataKey="accuracy" stroke="#22c55e" strokeWidth={2} dot={{ r: 3, fill: '#22c55e' }} strokeDasharray="4 2" name="accuracy" />
+                      <ReferenceLine yAxisId="cpm" y={90} stroke="#ef4444" strokeDasharray="6 3" label={{ value: '目標 90', position: 'right', fill: '#ef4444', fontSize: 10 }} />
+                      <Line yAxisId="cpm" type="monotone" dataKey="cpm" stroke="#564ABF" strokeWidth={2.5} dot={{ r: 3, fill: '#564ABF' }} name="cpm" />
+                      <Line yAxisId="cpm" type="monotone" dataKey="accuracy" stroke="#006947" strokeWidth={2} dot={{ r: 3, fill: '#006947' }} strokeDasharray="4 2" name="accuracy" />
                     </LineChart>
                   </ResponsiveContainer>
-                  <p className="text-[10px] text-gray-400 text-center mt-1">
+                  <p className="text-xs text-on-surface-variant text-center mt-2">
                     本篇已練習 {readingHistory.length} 次
                   </p>
                 </div>
@@ -439,122 +482,109 @@ const FullReading: React.FC<FullReadingProps> = ({ story, rightPanelWidth, onPan
             </div>
           )}
         </div>
+      </div>
 
-        {/* Controls */}
-        <div className="shrink-0 p-3 bg-white border-t border-gray-200 space-y-2">
-          {micError && <div className="text-xs text-rose-400 px-1 pb-1">{micError}</div>}
+      {/* Mic error */}
+      {micError && (
+        <div className="absolute bottom-52 left-1/2 -translate-x-1/2 px-5 py-2 bg-tertiary-container/20 rounded-full z-20">
+          <span className="text-sm text-tertiary">{micError}</span>
+        </div>
+      )}
+
+      {/* ── Fixed bottom CTA ──────────────────────────────────────────── */}
+      <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+           style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
+        <div className="max-w-md mx-auto pointer-events-auto flex flex-col items-center gap-3">
 
           {result ? (
-            <div className="space-y-2">
+            <>
               <button
                 onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
-                aria-label="再讀一次全文朗讀"
-                className="w-full py-2.5 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-md transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                🔄 再讀一次
+                <span className="material-symbols-outlined text-lg">refresh</span>
+                再讀一次
               </button>
               <button
                 onClick={() => { try { localStorage.removeItem(storageKey); } catch {} onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
-                aria-label="完成全文朗讀，查看學習報告"
-                className="w-full py-2.5 rounded-full text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center gap-2 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1"
+                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
               >
-                查看報告
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                </svg>
+                <span>查看報告</span>
+                <span className="material-symbols-outlined text-xl">arrow_forward</span>
               </button>
-            </div>
+            </>
           ) : isPreparing ? (
-            <button disabled aria-label="正在準備語音辨識" aria-busy="true" className="w-full py-2.5 rounded-full text-sm font-bold bg-gray-300 text-gray-500 cursor-wait flex items-center justify-center gap-2">
-              <div className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+            <button disabled className="w-full h-14 rounded-full font-headline font-bold text-lg bg-surface-container-high text-on-surface-variant cursor-wait flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin" />
               準備中...
             </button>
           ) : isSessionActive ? (
             <button
               onClick={submitReading}
               disabled={!streamingTranscript}
-              aria-label={!streamingTranscript ? '請先開始朗讀' : '完成朗讀並送出'}
-              className={`w-full py-2.5 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+              className={`w-full h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] ${
                 streamingTranscript
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95'
-                  : 'bg-gray-300 text-gray-400 cursor-not-allowed'
+                  ? 'text-white shadow-[0_12px_48px_rgba(0,105,71,0.3)]'
+                  : 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'
               }`}
+              style={streamingTranscript ? { background: 'linear-gradient(135deg, #006947, #34d399)' } : undefined}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
+              <span className="material-symbols-outlined text-xl">check</span>
               完成朗讀
             </button>
-          ) : isTtsSpeaking ? (
-            <div className="flex gap-2">
-              {/* 暫停 / 繼續 */}
+          ) : isTtsPlaying ? (
+            /* TTS playing — show pause/stop controls */
+            <div className="w-full flex gap-3">
               <button
-                onClick={isTtsPaused ? resumeTts : pauseTts}
-                aria-label={isTtsPaused ? '繼續系統朗讀' : '暫停系統朗讀'}
-                className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                  isTtsPaused
-                    ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
-                    : 'bg-amber-700 hover:bg-amber-600 text-white'
-                }`}
+                onClick={tts.isTtsPaused ? tts.resumeTts : tts.pauseTts}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-accent/10 text-accent hover:bg-accent/15 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  {isTtsPaused
-                    ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 9v6m4-6v6" />
-                  }
-                </svg>
-                {isTtsPaused ? '繼續' : '暫停'}
+                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  {tts.isTtsPaused ? 'play_arrow' : 'pause'}
+                </span>
+                {tts.isTtsPaused ? '繼續' : '暫停'}
               </button>
-              {/* 停止 */}
               <button
-                onClick={stopTts}
-                aria-label="停止系統朗讀"
-                className="flex-1 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                onClick={stopTtsAll}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
-                </svg>
+                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>stop</span>
                 停止
               </button>
             </div>
           ) : (
-            <div className="flex gap-2">
+            /* Idle — AI朗讀 + 開始朗讀 side by side */
+            <div className="w-full flex gap-3">
               <button
                 onClick={speakFullStory}
-                aria-label="播放全文系統示範朗讀"
-                className="flex-1 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                </svg>
-                系統朗讀
+                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
+                AI 朗讀
               </button>
               <button
                 onClick={startSession}
-                aria-label="開始全文朗讀，啟動語音辨識"
-                className="flex-1 py-2.5 rounded-full text-sm font-bold bg-accent hover:bg-accent-hover text-white transition-all flex items-center justify-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-pulse"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
               >
-                <div className="w-2.5 h-2.5 bg-white rounded-full" aria-hidden="true" />
+                <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
                 開始朗讀
               </button>
             </div>
           )}
-
-          <button
-            onClick={onBack}
-            aria-label="返回生字練習"
-            className="w-full py-1.5 rounded-lg text-xs text-gray-400 hover:text-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-          >
-            ← 返回生字練習
-          </button>
         </div>
       </div>
+
+      {/* Background decoration */}
+      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #b0ada6; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #797770; }
       `}</style>
     </div>
   );

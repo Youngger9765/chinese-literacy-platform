@@ -28,6 +28,8 @@ export function useTtsPlayback(
   const ttsRafRef = useRef<number | null>(null);
   const ttsStartTimeRef = useRef<number>(0);
   const ttsTotalCharsRef = useRef<number>(0);
+  const msPerCharRef = useRef<number>(240); // default fallback, overridden by actual audio duration
+  const pausedElapsedRef = useRef<number>(0); // elapsed ms at pause time
 
   /**
    * Speak the given text via Cloud TTS (with Web Speech API fallback).
@@ -37,6 +39,15 @@ export function useTtsPlayback(
     if (!text) return;
     cancelTts();
     setIsTtsPaused(false);
+
+    // Chrome requires speechSynthesis.speak() to be called within user-gesture context.
+    // Since the Cloud TTS fetch is async, the gesture expires before .catch() runs.
+    // Warm up speechSynthesis now (synchronously, in gesture) so the fallback works.
+    if (window.speechSynthesis) {
+      const warmup = new SpeechSynthesisUtterance('');
+      window.speechSynthesis.speak(warmup);
+      window.speechSynthesis.cancel();
+    }
 
     const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -53,10 +64,9 @@ export function useTtsPlayback(
       onRealtimeDiffTokensClear();
       ttsStartTimeRef.current = performance.now();
       ttsTotalCharsRef.current = Array.from(text).length;
-      const MS_PER_CHAR = 240; // ~4.2 chars/sec — tuned for Neural2 zh-TW at rate 0.9
       const animate = () => {
         const elapsed = performance.now() - ttsStartTimeRef.current;
-        const pos = Math.min(Math.floor(elapsed / MS_PER_CHAR), ttsTotalCharsRef.current);
+        const pos = Math.min(Math.floor(elapsed / msPerCharRef.current), ttsTotalCharsRef.current);
         onSpeakingProgress(pos);
         if (pos < ttsTotalCharsRef.current) {
           ttsRafRef.current = requestAnimationFrame(animate);
@@ -86,6 +96,13 @@ export function useTtsPlayback(
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
+        audio.onloadedmetadata = () => {
+          // Calculate per-char timing from actual audio duration
+          const charCount = Array.from(text).length;
+          if (audio.duration > 0 && charCount > 0) {
+            msPerCharRef.current = (audio.duration * 1000) / charCount;
+          }
+        };
         audio.onplay = startCursorAnimation;
         audio.onended = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
         audio.onerror = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
@@ -93,6 +110,7 @@ export function useTtsPlayback(
       })
       .catch(() => {
         // Fallback: Web Speech API
+        msPerCharRef.current = 240; // reset to default estimate for Web Speech
         if (!window.speechSynthesis) { onSpeechEnd(); return; }
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
@@ -123,11 +141,18 @@ export function useTtsPlayback(
   }, [onSpeakingProgress, onRealtimeDiffTokensClear]);
 
   const pauseTts = () => {
+    // Pause audio
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
       ua.pause();
     } else {
       window.speechSynthesis?.pause();
+    }
+    // Pause cursor animation — record elapsed and cancel rAF
+    pausedElapsedRef.current = performance.now() - ttsStartTimeRef.current;
+    if (ttsRafRef.current !== null) {
+      cancelAnimationFrame(ttsRafRef.current);
+      ttsRafRef.current = null;
     }
     setIsTtsPaused(true);
   };
@@ -135,10 +160,25 @@ export function useTtsPlayback(
   const resumeTts = () => {
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
+      // Detach onplay so it doesn't re-trigger startCursorAnimation (which resets progress to 0)
+      ua.onplay = null;
+      const audioElapsed = ua.currentTime * 1000;
+      ttsStartTimeRef.current = performance.now() - audioElapsed;
       ua.play().catch(() => {});
     } else {
+      ttsStartTimeRef.current = performance.now() - pausedElapsedRef.current;
       window.speechSynthesis?.resume();
     }
+    // Restart cursor animation from current position
+    const animate = () => {
+      const elapsed = performance.now() - ttsStartTimeRef.current;
+      const pos = Math.min(Math.floor(elapsed / msPerCharRef.current), ttsTotalCharsRef.current);
+      onSpeakingProgress(pos);
+      if (pos < ttsTotalCharsRef.current) {
+        ttsRafRef.current = requestAnimationFrame(animate);
+      }
+    };
+    ttsRafRef.current = requestAnimationFrame(animate);
     setIsTtsPaused(false);
   };
 
@@ -150,8 +190,11 @@ export function useTtsPlayback(
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
       ua.pause();
-      (ua as HTMLAudioElement).currentTime = 0;
+      ua.currentTime = 0;
     }
+    // Stop Web Speech API (fallback path)
+    window.speechSynthesis?.cancel();
+    utteranceRef.current = null;
     cancelTts();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);

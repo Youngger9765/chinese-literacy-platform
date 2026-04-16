@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import { MultipleChoiceItem } from '../../types';
+import { useZhuyin } from '../../context/ZhuyinContext';
 
 interface Props {
   questions: MultipleChoiceItem[];
@@ -15,6 +16,8 @@ interface Props {
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 
 const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
+  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
@@ -33,7 +36,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
 
   function handleNext() {
     if (isLast) {
-      onComplete(isCorrect ? score : score, questions.length);
+      onComplete(score, questions.length);
       return;
     }
     setCurrent((c) => c + 1);
@@ -42,7 +45,8 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4 p-4 max-w-2xl mx-auto"
+      style={{ fontFamily: zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined }}>
       {/* Progress */}
       <div className="flex items-center justify-between text-sm text-gray-500">
         <span>第 {current + 1} 題／共 {questions.length} 題</span>
@@ -58,7 +62,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
       {/* Question */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
         <p className="text-base font-medium text-gray-800 leading-relaxed mb-4">
-          {current + 1}. {q.question}
+          {current + 1}. {zh(q.question)}
         </p>
 
         {/* Options */}
@@ -75,7 +79,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
             } else if (isAnswerLabel) {
               btnClass += 'border-green-500 bg-green-50 font-semibold text-green-800';
             } else if (isChosen && !isAnswerLabel) {
-              btnClass += 'border-red-400 bg-red-50 text-red-700 line-through';
+              btnClass += 'border-tertiary-container bg-tertiary-container/20 text-tertiary line-through';
             } else {
               btnClass += 'border-gray-200 text-gray-400';
             }
@@ -90,12 +94,12 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
                 <span className="shrink-0 w-6 h-6 rounded-full border border-current flex items-center justify-center text-xs font-bold">
                   {label}
                 </span>
-                <span>{opt}</span>
+                <span>{zh(opt)}</span>
                 {revealed && isAnswerLabel && (
                   <span className="ml-auto text-green-600 text-lg">✓</span>
                 )}
                 {revealed && isChosen && !isAnswerLabel && (
-                  <span className="ml-auto text-red-500 text-lg">✗</span>
+                  <span className="ml-auto text-tertiary text-lg">✗</span>
                 )}
               </button>
             );
@@ -105,7 +109,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
         {/* Explanation */}
         {revealed && q.explanation && (
           <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2 text-sm text-amber-800">
-            💡 {q.explanation}
+            💡 {zh(q.explanation)}
           </div>
         )}
       </div>
