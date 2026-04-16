@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import ParagraphProgress, { ParagraphStatus } from '../ParagraphProgress';
 import { ParagraphSummaryData, LineResult } from './liveTutorTypes';
 import { cancelTts } from '../../../services/ttsApi';
+import { splitIntoSentences } from '../../../utils/localEval';
+import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 
 import { splitZhuyinChars } from '../../../utils/zhuyinUtils';
 
@@ -42,6 +44,8 @@ interface ParagraphCardProps {
   onStopSession: () => void;
   onSubmitSentence: () => void;
   onRetryParagraph: (idx: number) => void;
+  onRetrySentence: (paragraphIdx: number, sentenceIdx: number) => void;
+  retrySentenceIdx?: number;
   onAdvanceParagraph: (idx: number, lineResults: LineResult[]) => void;
   setIsTtsSpeaking: (v: boolean) => void;
   setIsTtsPaused: (v: boolean) => void;
@@ -79,6 +83,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   onStopSession,
   onSubmitSentence,
   onRetryParagraph,
+  onRetrySentence,
+  retrySentenceIdx,
   onAdvanceParagraph,
   setIsTtsSpeaking,
   setIsTtsPaused,
@@ -253,8 +259,16 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         </div>
       )}
 
+      {/* ── Sentence retry in progress banner (#1076) ──────────────── */}
+      {isCurrentIdx && retrySentenceIdx !== undefined && (
+        <div className="mt-6 p-4 rounded-2xl bg-accent/10 border border-accent/30 text-sm text-accent flex items-center gap-3">
+          <span className="material-symbols-outlined text-base">volume_up</span>
+          重念第 {retrySentenceIdx + 1} 句中…念完按「完成」送出
+        </div>
+      )}
+
       {/* ── Inline summary card (after evaluation) ─────────────────── */}
-      {paragraphSummary && (
+      {paragraphSummary && retrySentenceIdx === undefined && (
         <div className="mt-8 p-6 rounded-2xl bg-surface-container-low space-y-4">
           <p className="text-base font-bold text-on-surface">
             {paragraphSummary.geminiPending && <span className="text-accent animate-pulse mr-1">AI 分析中...</span>}
@@ -271,6 +285,33 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               <span className="text-on-surface-variant">漏字 {paragraphSummary.missingCount} 字</span>
             )}
           </div>
+
+          {/* Sentence-level retry (#1076) — show when there are errors */}
+          {isCurrentIdx && (paragraphSummary.wrongCount > 0 || paragraphSummary.missingCount > 0) && (() => {
+            const sentences = splitIntoSentences(line || '');
+            const retryable = sentences
+              .map((text, i) => ({ text, i }))
+              .filter(({ text }) => text.replace(CHINESE_PUNCTUATION_REGEX, '').length > 1);
+            if (retryable.length === 0) return null;
+            return (
+              <div className="pt-2 border-t border-on-surface/10">
+                <p className="text-xs font-bold text-on-surface-variant mb-2">重念某一句</p>
+                <div className="flex flex-wrap gap-2">
+                  {retryable.map(({ text, i }) => (
+                    <button
+                      key={i}
+                      onClick={() => onRetrySentence(idx, i)}
+                      className="px-3 py-1.5 rounded-full text-xs bg-surface-container-highest hover:bg-accent/20 text-on-surface transition-all"
+                      title={text}
+                    >
+                      第 {i + 1} 句
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Action buttons */}
           <div className="flex gap-3 justify-center pt-2">
             <button
