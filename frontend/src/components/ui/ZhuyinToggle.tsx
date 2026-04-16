@@ -15,13 +15,21 @@ export default function ZhuyinToggle({ enabled, ready, onToggle }: ZhuyinToggleP
       aria-pressed={isOn}
       aria-label={label}
       title={label}
-      className={`px-2.5 py-1 rounded text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+      className={`relative inline-flex items-center gap-2 h-10 pl-3 pr-4 rounded-full font-headline font-bold text-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 active:scale-[0.95] ${
         isOn
-          ? 'bg-accent/80 text-white hover:bg-accent-hover'
-          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+          ? 'bg-accent text-white shadow-[0_4px_16px_rgba(86,74,191,0.3)]'
+          : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
       }`}
     >
-      注音 {isOn ? 'ON' : 'OFF'}
+      {/* Toggle track */}
+      <span className={`relative w-8 h-5 rounded-full transition-colors duration-300 ${
+        isOn ? 'bg-white/30' : 'bg-on-surface-variant/20'
+      }`}>
+        <span className={`absolute top-0.5 w-4 h-4 rounded-full transition-all duration-300 shadow-sm ${
+          isOn ? 'left-3.5 bg-white' : 'left-0.5 bg-on-surface-variant/60'
+        }`} />
+      </span>
+      <span className="whitespace-nowrap">注音</span>
     </button>
   );
 }

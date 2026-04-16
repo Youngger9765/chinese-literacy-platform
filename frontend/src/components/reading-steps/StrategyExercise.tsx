@@ -10,6 +10,7 @@
  */
 import React, { useCallback, useRef, useState } from 'react';
 import { StrategyExercise as StrategyExerciseType, StrategyExerciseOrderingItem } from '../../types';
+import { useZhuyin } from '../../context/ZhuyinContext';
 
 interface Props {
   exercise: StrategyExerciseType;
@@ -500,25 +501,21 @@ function GuidedStepsExercise({
 // ── Main Component ──────────────────────────────────────────────────────────
 
 const StrategyExercise: React.FC<Props> = ({ exercise, onComplete }) => {
+  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const zhuyinFont = zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined;
+
   const handleComplete = useCallback(() => {
     onComplete?.();
   }, [onComplete]);
 
-  if (exercise.type === 'ordering') {
-    return <OrderingExercise exercise={exercise} onComplete={handleComplete} />;
-  }
-  if (exercise.type === 'trait_inference') {
-    return <TraitInferenceExercise exercise={exercise} onComplete={handleComplete} />;
-  }
-  if (exercise.type === 'guided_steps') {
-    return <GuidedStepsExercise exercise={exercise} onComplete={handleComplete} />;
-  }
+  const content = (() => {
+    if (exercise.type === 'ordering') return <OrderingExercise exercise={exercise} onComplete={handleComplete} />;
+    if (exercise.type === 'trait_inference') return <TraitInferenceExercise exercise={exercise} onComplete={handleComplete} />;
+    if (exercise.type === 'guided_steps') return <GuidedStepsExercise exercise={exercise} onComplete={handleComplete} />;
+    return <div className="p-4 text-on-surface-variant text-sm text-center">不支援的練習類型：{exercise.type}</div>;
+  })();
 
-  return (
-    <div className="p-4 text-gray-400 text-sm text-center">
-      不支援的練習類型：{exercise.type}
-    </div>
-  );
+  return <div style={{ fontFamily: zhuyinFont }}>{content}</div>;
 };
 
 export default StrategyExercise;

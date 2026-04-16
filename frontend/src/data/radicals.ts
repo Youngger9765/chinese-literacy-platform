@@ -812,16 +812,20 @@ export function getRelatedChars(radical: string, excludeChar?: string): RelatedC
   // Hand-curated first
   const info = radicalMap[radical];
   if (info) {
-    return excludeChar
+    const filtered = excludeChar
       ? info.relatedChars.filter(r => r.char !== excludeChar)
       : info.relatedChars;
+    // Deduplicate by char
+    const seen = new Set<string>();
+    return filtered.filter(r => { if (seen.has(r.char)) return false; seen.add(r.char); return true; });
   }
   // Fall back to open-data JSON (characters without individual meanings)
   if (_radicalMeaningsCache) {
     const entry = _radicalMeaningsCache[radical];
     if (entry && entry.relatedChars.length > 0) {
+      const seen = new Set<string>();
       const chars: RelatedChar[] = entry.relatedChars
-        .filter(c => c !== excludeChar)
+        .filter(c => c !== excludeChar && !seen.has(c) && (seen.add(c), true))
         .map(c => ({ char: c, meaning: '' }));
       return chars;
     }

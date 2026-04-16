@@ -9,9 +9,12 @@ export default {
       fontFamily: {
         sans: ['"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         ui: ['cwTeXYen', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        headline: ['"Plus Jakarta Sans"', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        body: ['"Be Vietnam Pro"', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         card: '0 0 32px rgba(136, 152, 170, 0.12)',
+        editorial: '0 12px 48px rgba(48, 47, 42, 0.06)',
       },
       colors: {
         accent: {
@@ -24,6 +27,29 @@ export default {
         success: 'rgb(var(--color-success) / <alpha-value>)',
         warning: 'rgb(var(--color-warning) / <alpha-value>)',
         error: 'rgb(var(--color-error) / <alpha-value>)',
+        // Stitch "Tactile Scholar" surface system
+        surface: {
+          DEFAULT: '#FBF6EE',
+          bright: '#FBF6EE',
+          dim: '#D9D4CA',
+          'container-lowest': '#FFFFFF',
+          'container-low': '#F5F0E8',
+          'container': '#ECE8DF',
+          'container-high': '#E7E2D8',
+          'container-highest': '#E1DCD2',
+        },
+        'on-surface': {
+          DEFAULT: '#302F2A',
+          variant: '#5E5B55',
+        },
+        // Encouragement orange — for corrective feedback (not red)
+        tertiary: {
+          DEFAULT: '#994100',
+          dim: '#863800',
+          container: '#FF955A',
+          fixed: '#FF955A',
+          'fixed-dim': '#FF7F2F',
+        },
         // Override indigo palette to match DESIGN.md primary #5B4FC4
         indigo: {
           50:  '#EDEBF9',

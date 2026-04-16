@@ -16,16 +16,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { hasRole } from '../../services/authApi';
-import { AppView } from '../../types';
 import NotificationBell from '../teacher/NotificationBell';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 
-export interface HeaderProps {
-  /** Kept for API compatibility with AppShell — no longer used by Header itself. */
-  onStepperNavigate: (view: AppView) => void;
-}
-
-const Header: React.FC<HeaderProps> = () => {
+const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { selectedStory: navStory } = useLearningNav();
@@ -49,7 +43,7 @@ const Header: React.FC<HeaderProps> = () => {
     <header
       role="banner"
       aria-label="應用程式標頭"
-      className="font-ui bg-white border-b border-gray-200 h-14 flex items-center justify-between px-5 shrink-0 z-30"
+      className="font-ui glass h-14 flex items-center justify-between px-5 shrink-0 z-30"
     >
       {/* Logo — keyboard-accessible home link */}
       <button

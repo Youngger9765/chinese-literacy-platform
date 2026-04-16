@@ -8,8 +8,6 @@ const ComprehensionPage: React.FC = () => {
   const {
     selectedStory,
     lastAttempt,
-    rightPanelWidth,
-    setRightPanelWidth,
     handleFinishComprehension,
     emptyAttempt,
     dbSessionId,
@@ -36,8 +34,6 @@ const ComprehensionPage: React.FC = () => {
     <ComprehensionChat
       story={selectedStory}
       attempt={lastAttempt ?? emptyAttempt}
-      rightPanelWidth={rightPanelWidth}
-      onPanelWidthChange={setRightPanelWidth}
       onFinish={handleFinishComprehension}
       onBack={() => navigate(`/learn/${storyId}/tutor`)}
       dbSessionId={dbSessionId ?? undefined}

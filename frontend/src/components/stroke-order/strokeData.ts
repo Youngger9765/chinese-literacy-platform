@@ -75,20 +75,45 @@ export function isStrokeCorrect(user: Point[], median: Point[]): boolean {
   if (mLen === 0) return false;
 
   const short = mLen < 150;
-  const minLen = (short ? 0.2 : 0.5) * mLen;
-  const maxLen = (short ? 3.0 : 1.5) * mLen;
+  const long = mLen > 500;
+  const minLen = (short ? 0.2 : long ? 0.3 : 0.5) * mLen;
+  const maxLen = (short ? 3.0 : long ? 2.0 : 1.5) * mLen;
+
   if (uLen <= minLen || uLen >= maxLen) return false;
 
-  const margin = short ? 200 : 150;
+  const margin = short ? 200 : long ? 250 : 150;
   const us = user[0];
   const ue = user[user.length - 1];
-  const ms = median[0];
-  const me = median[median.length - 1];
+  let ms = median[0];
+  let me = median[median.length - 1];
 
-  if (Math.abs(us.x - ms.x) > margin || Math.abs(us.y - ms.y) > margin) return false;
-  if (Math.abs(ue.x - me.x) > margin || Math.abs(ue.y - me.y) > margin) return false;
+  // Some stroke data (e.g. 「一」) has median as a closed outline path where
+  // start≈end. In that case, find the two points on the median path that are
+  // farthest apart and use those as effective start/end.
+  if (dist(ms, me) < 50 && median.length > 2) {
+    let maxD = 0;
+    let pi = 0, pj = median.length - 1;
+    // Sample pairs to find the diameter (O(n) approximation)
+    for (let i = 0; i < median.length; i++) {
+      for (let j = i + 1; j < median.length; j += Math.max(1, Math.floor(median.length / 30))) {
+        const d2 = dist(median[i], median[j]);
+        if (d2 > maxD) { maxD = d2; pi = i; pj = j; }
+      }
+    }
+    ms = median[pi];
+    me = median[pj];
+  }
 
-  const rightDir =
-    dist(us, ms) < dist(ue, ms) || dist(ue, me) < dist(us, me);
-  return rightDir;
+  // Try normal direction: user start→median start, user end→median end
+  const normalStart = Math.abs(us.x - ms.x) <= margin && Math.abs(us.y - ms.y) <= margin;
+  const normalEnd = Math.abs(ue.x - me.x) <= margin && Math.abs(ue.y - me.y) <= margin;
+
+  // Try reversed direction
+  const revStart = Math.abs(us.x - me.x) <= margin && Math.abs(us.y - me.y) <= margin;
+  const revEnd = Math.abs(ue.x - ms.x) <= margin && Math.abs(ue.y - ms.y) <= margin;
+
+  if (normalStart && normalEnd) return true;
+  if (revStart && revEnd) return true;
+
+  return false;
 }

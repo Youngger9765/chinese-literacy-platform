@@ -6,17 +6,15 @@
  */
 import React, { useState, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-
-const API_BASE = import.meta.env.VITE_API_URL ?? '';
+import { useZhuyin } from '../../context/ZhuyinContext';
+import {
+  fetchExampleSentences,
+  validateSentence,
+  type ExampleSentence,
+  type ExampleSentenceSource,
+} from '../../services/learningApi';
 
 // ── Types ─────────────────────────────────────────────────────────────────
-
-interface ExampleSentence {
-  sentence: string;
-  explanation: string;
-}
-
-type ExampleSentenceSource = 'pregenerated' | 'ai';
 
 type SentenceStatus = 'idle' | 'loading' | 'correct' | 'incorrect';
 
@@ -42,66 +40,10 @@ function makeSentenceEntry(): SentenceEntry {
 
 function makeWordState(): WordPracticeState {
   return {
-    exampleSentences: null,
-    examplesLoading: false,
-    examplesError: '',
-    examplesSource: null,
-    sentences: [makeSentenceEntry(), makeSentenceEntry()],
-    allCorrect: false,
+    exampleSentences: null, examplesLoading: false, examplesError: '', examplesSource: null,
+    sentences: [makeSentenceEntry(), makeSentenceEntry()], allCorrect: false,
   };
 }
-
-// ── API helpers ───────────────────────────────────────────────────────────
-
-interface ExampleSentencesApiResponse {
-  sentences: ExampleSentence[];
-  source: ExampleSentenceSource;
-}
-
-async function fetchExampleSentences(
-  word: string,
-  storyTitle: string,
-  token: string | null,
-): Promise<ExampleSentencesApiResponse> {
-  const res = await fetch(`${API_BASE}/api/learning/sentence-practice/example-sentences`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({ word, story_title: storyTitle }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  return {
-    sentences: data.sentences as ExampleSentence[],
-    source: (data.source ?? 'ai') as ExampleSentenceSource,
-  };
-}
-
-async function validateSentence(
-  word: string,
-  studentSentence: string,
-  storyTitle: string,
-  token: string | null,
-): Promise<{ is_correct: boolean; feedback: string; suggestion: string }> {
-  const res = await fetch(`${API_BASE}/api/learning/sentence-practice/validate`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({
-      word,
-      student_sentence: studentSentence,
-      story_title: storyTitle,
-    }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
-
-// ── Highlight target word in a sentence ──────────────────────────────────
 
 function HighlightedSentence({ sentence, target }: { sentence: string; target: string }) {
   const parts = sentence.split(target);
@@ -110,9 +52,7 @@ function HighlightedSentence({ sentence, target }: { sentence: string; target: s
       {parts.map((part, i) => (
         <React.Fragment key={i}>
           {part}
-          {i < parts.length - 1 && (
-            <span className="text-accent font-bold underline underline-offset-2">{target}</span>
-          )}
+          {i < parts.length - 1 && <span className="text-accent font-bold">{target}</span>}
         </React.Fragment>
       ))}
     </span>
@@ -122,199 +62,100 @@ function HighlightedSentence({ sentence, target }: { sentence: string; target: s
 // ── Props ─────────────────────────────────────────────────────────────────
 
 interface SentencePracticeProps {
-  /** Vocabulary words the student will practice sentence composition for */
   practicedWords: string[];
   storyTitle: string;
   onFinish: () => void;
   onBack: () => void;
-  /** When true, renders as an inline tab panel (no outer wrapper, no tab bar, no bottom actions bar) */
   inline?: boolean;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
 
 const SentencePractice: React.FC<SentencePracticeProps> = ({
-  practicedWords,
-  storyTitle,
-  onFinish,
-  onBack,
-  inline = false,
+  practicedWords, storyTitle, onFinish, onBack, inline = false,
 }) => {
   const { token } = useAuth();
+  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [wordStates, setWordStates] = useState<Record<string, WordPracticeState>>(() => {
     const init: Record<string, WordPracticeState> = {};
-    for (const w of practicedWords) {
-      init[w] = makeWordState();
-    }
+    for (const w of practicedWords) init[w] = makeWordState();
     return init;
   });
   const [completedWords, setCompletedWords] = useState<Set<string>>(new Set());
   const [pasteWarning, setPasteWarning] = useState(false);
-
-  // Tracks words that have been loaded or are currently loading,
-  // avoiding circular dependency on wordStates inside the loadExamples callback.
   const loadedWordsRef = useRef<Set<string>>(new Set());
 
   const currentWord = practicedWords[currentWordIndex] ?? '';
   const currentState = wordStates[currentWord] ?? makeWordState();
 
-  // ── Load example sentences for current word ─────────────────────────
-
   const loadExamples = useCallback(async () => {
-    if (!currentWord) return;
-    // Use ref instead of wordStates to avoid adding wordStates as a dependency
-    // (which would cause an infinite loop: error → setWordStates → new wordStates
-    //  → new loadExamples → useEffect fires → loadExamples called again → 429)
-    if (loadedWordsRef.current.has(currentWord)) return;
-
+    if (!currentWord || loadedWordsRef.current.has(currentWord)) return;
     loadedWordsRef.current.add(currentWord);
-
-    setWordStates(prev => ({
-      ...prev,
-      [currentWord]: { ...prev[currentWord], examplesLoading: true, examplesError: '' },
-    }));
-
+    setWordStates(prev => ({ ...prev, [currentWord]: { ...prev[currentWord], examplesLoading: true, examplesError: '' } }));
     try {
-      const { sentences: examples, source } = await fetchExampleSentences(currentWord, storyTitle, token);
-      setWordStates(prev => ({
-        ...prev,
-        [currentWord]: {
-          ...prev[currentWord],
-          examplesLoading: false,
-          exampleSentences: examples,
-          examplesSource: source,
-        },
-      }));
+      const { sentences: examples, source } = await fetchExampleSentences(token ?? '', currentWord, storyTitle);
+      setWordStates(prev => ({ ...prev, [currentWord]: { ...prev[currentWord], examplesLoading: false, exampleSentences: examples, examplesSource: source } }));
     } catch {
-      // Remove from ref so the retry button can re-attempt
       loadedWordsRef.current.delete(currentWord);
-      setWordStates(prev => ({
-        ...prev,
-        [currentWord]: {
-          ...prev[currentWord],
-          examplesLoading: false,
-          examplesError: '例句載入失敗，請稍後再試。',
-        },
-      }));
+      setWordStates(prev => ({ ...prev, [currentWord]: { ...prev[currentWord], examplesLoading: false, examplesError: '例句載入失敗，請稍後再試。' } }));
     }
   }, [currentWord, storyTitle, token]);
 
-  // Auto-load examples when we navigate to a word
-  React.useEffect(() => {
-    loadExamples();
-  }, [loadExamples]);
+  React.useEffect(() => { loadExamples(); }, [loadExamples]);
 
-  // ── Update sentence text ──────────────────────────────────────────────
+  const updateSentenceText = useCallback((sentenceIndex: 0 | 1, text: string) => {
+    setWordStates(prev => {
+      const state = prev[currentWord];
+      const updated: [SentenceEntry, SentenceEntry] = [{ ...state.sentences[0] }, { ...state.sentences[1] }];
+      updated[sentenceIndex] = { ...updated[sentenceIndex], text, status: 'idle', feedback: '', suggestion: '' };
+      return { ...prev, [currentWord]: { ...state, sentences: updated } };
+    });
+  }, [currentWord]);
 
-  const updateSentenceText = useCallback(
-    (sentenceIndex: 0 | 1, text: string) => {
+  const handleValidate = useCallback(async (sentenceIndex: 0 | 1) => {
+    const sentence = currentState.sentences[sentenceIndex];
+    if (!sentence.text.trim()) return;
+    setWordStates(prev => {
+      const state = prev[currentWord];
+      const updated: [SentenceEntry, SentenceEntry] = [{ ...state.sentences[0] }, { ...state.sentences[1] }];
+      updated[sentenceIndex] = { ...updated[sentenceIndex], status: 'loading' };
+      return { ...prev, [currentWord]: { ...state, sentences: updated } };
+    });
+    try {
+      const result = await validateSentence(token ?? '', currentWord, sentence.text.trim(), storyTitle);
       setWordStates(prev => {
         const state = prev[currentWord];
-        const updated: [SentenceEntry, SentenceEntry] = [
-          { ...state.sentences[0] },
-          { ...state.sentences[1] },
-        ];
-        updated[sentenceIndex] = { ...updated[sentenceIndex], text, status: 'idle', feedback: '', suggestion: '' };
-        return { ...prev, [currentWord]: { ...state, sentences: updated } };
+        const updated: [SentenceEntry, SentenceEntry] = [{ ...state.sentences[0] }, { ...state.sentences[1] }];
+        updated[sentenceIndex] = { ...updated[sentenceIndex], status: result.is_correct ? 'correct' : 'incorrect', feedback: result.feedback, suggestion: result.suggestion };
+        const bothCorrect = updated[0].status === 'correct' && updated[1].status === 'correct';
+        return { ...prev, [currentWord]: { ...state, sentences: updated, allCorrect: bothCorrect } };
       });
-    },
-    [currentWord],
-  );
-
-  // ── Validate a sentence ──────────────────────────────────────────────
-
-  const handleValidate = useCallback(
-    async (sentenceIndex: 0 | 1) => {
-      const sentence = currentState.sentences[sentenceIndex];
-      if (!sentence.text.trim()) return;
-
-      // Set loading state
+    } catch {
       setWordStates(prev => {
         const state = prev[currentWord];
-        const updated: [SentenceEntry, SentenceEntry] = [
-          { ...state.sentences[0] },
-          { ...state.sentences[1] },
-        ];
-        updated[sentenceIndex] = { ...updated[sentenceIndex], status: 'loading' };
+        const updated: [SentenceEntry, SentenceEntry] = [{ ...state.sentences[0] }, { ...state.sentences[1] }];
+        updated[sentenceIndex] = { ...updated[sentenceIndex], status: 'incorrect', feedback: '評估失敗，請再試一次。', suggestion: '' };
         return { ...prev, [currentWord]: { ...state, sentences: updated } };
       });
-
-      try {
-        const result = await validateSentence(currentWord, sentence.text.trim(), storyTitle, token);
-        setWordStates(prev => {
-          const state = prev[currentWord];
-          const updated: [SentenceEntry, SentenceEntry] = [
-            { ...state.sentences[0] },
-            { ...state.sentences[1] },
-          ];
-          updated[sentenceIndex] = {
-            ...updated[sentenceIndex],
-            status: result.is_correct ? 'correct' : 'incorrect',
-            feedback: result.feedback,
-            suggestion: result.suggestion,
-          };
-          const bothCorrect = updated[0].status === 'correct' && updated[1].status === 'correct';
-          return {
-            ...prev,
-            [currentWord]: { ...state, sentences: updated, allCorrect: bothCorrect },
-          };
-        });
-      } catch {
-        setWordStates(prev => {
-          const state = prev[currentWord];
-          const updated: [SentenceEntry, SentenceEntry] = [
-            { ...state.sentences[0] },
-            { ...state.sentences[1] },
-          ];
-          updated[sentenceIndex] = {
-            ...updated[sentenceIndex],
-            status: 'incorrect',
-            feedback: '評估失敗，請再試一次。',
-            suggestion: '',
-          };
-          return { ...prev, [currentWord]: { ...state, sentences: updated } };
-        });
-      }
-    },
-    [currentWord, currentState, storyTitle],
-  );
-
-  // ── Navigation ────────────────────────────────────────────────────────
+    }
+  }, [currentWord, currentState, storyTitle, token]);
 
   const handleCompleteCurrentWord = () => {
     setCompletedWords(prev => new Set(prev).add(currentWord));
-    if (currentWordIndex < practicedWords.length - 1) {
-      setCurrentWordIndex(i => i + 1);
-    }
+    if (currentWordIndex < practicedWords.length - 1) setCurrentWordIndex(i => i + 1);
   };
 
-  const handleFinish = () => {
-    onFinish();
-  };
-
-  // ── Early exit: no practiced words ──────────────────────────────────
-
+  // ── No words ──────────────────────────────────────────────────────
   if (practicedWords.length === 0) {
-    if (inline) {
-      return (
-        <div className="flex flex-col items-center justify-center text-center py-12">
-          <p className="text-gray-500 text-sm">沒有需要造句練習的詞語。</p>
-        </div>
-      );
-    }
     return (
-      <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden">
-        <div className="h-9 bg-white border-b border-gray-200 flex items-center px-4 text-xs text-gray-600">
-          {storyTitle} — 造句練習
-        </div>
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-12">
-          <p className="text-gray-500 text-sm mb-6">沒有需要造句練習的詞語。</p>
-          <button
-            onClick={onFinish}
-            className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95"
-          >
-            繼續
+      <div className="flex-1 flex items-center justify-center bg-surface">
+        <div className="text-center space-y-4 p-8">
+          <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">edit_note</span>
+          <p className="text-on-surface-variant">沒有需要造句練習的詞語</p>
+          <button onClick={onFinish} className="btn-immersive">
+            繼續下一步 <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
           </button>
         </div>
       </div>
@@ -324,284 +165,299 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   const allWordsDone = practicedWords.every(w => completedWords.has(w));
   const isCurrentDone = completedWords.has(currentWord);
   const currentAllCorrect = currentState.allCorrect;
+  const progressPercent = practicedWords.length > 0 ? (completedWords.size / practicedWords.length) * 100 : 0;
 
-  const innerContent = (
-    <div className="max-w-2xl mx-auto space-y-6">
-
-          {/* Header */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              造句練習
-              <span className={`ml-3 ${currentWord.length > 2 ? 'text-2xl' : 'text-4xl'} text-accent`}>{currentWord}</span>
-            </h2>
-            <p className="text-sm text-gray-600">
-              用「{currentWord}」造兩個句子，讓 AI 幫你批改。
-            </p>
-          </div>
-
-          {/* Example sentences panel */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">AI 例句示範</span>
-              {!currentState.examplesLoading && currentState.examplesSource && (
-                <span className={[
-                  'text-[10px] font-medium px-1.5 py-0.5 rounded',
-                  currentState.examplesSource === 'pregenerated'
-                    ? 'bg-blue-50 text-blue-500'
-                    : 'bg-purple-50 text-purple-500',
-                ].join(' ')}>
-                  {currentState.examplesSource === 'pregenerated' ? '預先生成' : 'AI 即時生成'}
-                </span>
-              )}
-            </div>
-
-            {currentState.examplesLoading && (
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                AI 正在生成例句...
-              </div>
-            )}
-
-            {currentState.examplesError && (
-              <div className="text-sm text-red-600">
-                {currentState.examplesError}
-                <button onClick={loadExamples} className="ml-2 text-accent underline">重試</button>
-              </div>
-            )}
-
-            {currentState.exampleSentences && (
-              <div className="space-y-3">
-                {currentState.exampleSentences.map((ex, i) => (
-                  <div key={i} className="bg-amber-50 rounded-xl p-3">
-                    <p className="text-base text-gray-800 leading-relaxed">
-                      <HighlightedSentence sentence={ex.sentence} target={currentWord} />
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">{ex.explanation}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Student sentence inputs */}
-          <div className="space-y-4">
-            {([0, 1] as const).map(idx => {
-              const entry = currentState.sentences[idx];
-              return (
-                <div key={idx} className="bg-white rounded-2xl border border-gray-200 p-4">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">
-                    第 {idx + 1} 句
-                  </label>
-
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={entry.text}
-                      onChange={e => updateSentenceText(idx, e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' && entry.text.trim()) {
-                          handleValidate(idx);
-                        }
-                      }}
-                      onPaste={e => {
-                        e.preventDefault();
-                        setPasteWarning(true);
-                        setTimeout(() => setPasteWarning(false), 3000);
-                      }}
-                      onDrop={e => {
-                        e.preventDefault();
-                        setPasteWarning(true);
-                        setTimeout(() => setPasteWarning(false), 3000);
-                      }}
-                      onDragOver={e => e.preventDefault()}
-                      disabled={entry.status === 'loading' || isCurrentDone}
-                      placeholder={`用「${currentWord}」造一個句子…`}
-                      className={[
-                        'flex-1 rounded-xl border px-3 py-2 text-base outline-none transition-all',
-                        entry.status === 'correct'
-                          ? 'border-emerald-400 bg-emerald-50 text-emerald-900'
-                          : entry.status === 'incorrect'
-                            ? 'border-red-300 bg-red-50 text-red-900'
-                            : 'border-gray-200 bg-gray-50 focus:border-accent focus:bg-white text-gray-800',
-                      ].join(' ')}
-                    />
-                    <button
-                      onClick={() => handleValidate(idx)}
-                      disabled={!entry.text.trim() || entry.status === 'loading' || isCurrentDone}
-                      className={[
-                        'px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95',
-                        entry.status === 'loading'
-                          ? 'bg-gray-200 text-gray-500 cursor-wait'
-                          : entry.status === 'correct'
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-accent hover:bg-accent-hover text-white disabled:opacity-40 disabled:cursor-not-allowed',
-                      ].join(' ')}
-                    >
-                      {entry.status === 'loading' ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                      ) : entry.status === 'correct' ? '通過' : '批改'}
-                    </button>
-                  </div>
-
-                  {/* Feedback */}
-                  {(entry.status === 'correct' || entry.status === 'incorrect') && (
-                    <div className={[
-                      'mt-3 rounded-xl px-3 py-2 text-sm',
-                      entry.status === 'correct'
-                        ? 'bg-emerald-50 text-emerald-800'
-                        : 'bg-red-50 text-red-800',
-                    ].join(' ')}>
-                      <p className="font-medium">{entry.feedback}</p>
-                      {entry.suggestion && (
-                        <p className="mt-1 text-xs opacity-80">{entry.suggestion}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Paste warning (#928) */}
-          {pasteWarning && (
-            <p className="text-sm text-amber-600 text-center animate-pulse">
-              請用自己的話造句，不要複製貼上喔！
-            </p>
-          )}
-
-          {/* Completion message for current word */}
-          {currentAllCorrect && !isCurrentDone && (
-            <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-center">
-              <p className="text-emerald-800 font-bold text-lg">「{currentWord}」造句全部正確！</p>
-              {currentWordIndex < practicedWords.length - 1 ? (
-                <button
-                  onClick={handleCompleteCurrentWord}
-                  className="mt-3 px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
-                >
-                  繼續下一個詞
-                </button>
-              ) : (
-                <button
-                  onClick={() => { handleCompleteCurrentWord(); }}
-                  className="mt-3 px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all active:scale-95"
-                >
-                  完成所有造句
-                </button>
-              )}
-            </div>
-          )}
-
-          {isCurrentDone && (
-            <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3 text-center">
-              <p className="text-emerald-700 text-sm font-medium">「{currentWord}」已完成</p>
-            </div>
-          )}
-
+  // ── Vertical word tab sidebar ──────────────────────────────────────
+  const wordSidebar = (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 mb-2 px-1">
+        <span className="material-symbols-outlined text-on-surface-variant text-lg">list_alt</span>
+        <span className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">詞語列表</span>
+      </div>
+      {practicedWords.map((w, i) => {
+        const done = completedWords.has(w);
+        const active = i === currentWordIndex;
+        return (
+          <button
+            key={w}
+            onClick={() => setCurrentWordIndex(i)}
+            className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-left transition-all ${
+              active
+                ? 'bg-accent text-white shadow-sm'
+                : done
+                  ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container-low'
+            }`}
+          >
+            <span className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-headline font-black ${
+              active ? 'bg-white/20 text-white'
+              : done ? 'bg-emerald-500 text-white'
+              : 'bg-surface-container-high text-on-surface-variant'
+            }`}>
+              {done ? <span className="material-symbols-outlined text-sm">check</span> : i + 1}
+            </span>
+            <span className="font-bold text-base">{zh(w)}</span>
+          </button>
+        );
+      })}
+      {/* Progress */}
+      <div className="mt-3 px-1">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs text-on-surface-variant">完成進度</span>
+          <span className="text-xs font-headline font-bold text-on-surface-variant">{completedWords.size}/{practicedWords.length}</span>
+        </div>
+        <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
+          <div className="h-full bg-accent rounded-full transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }} />
+        </div>
+      </div>
     </div>
   );
 
-  // Inline mode: render content directly inside VocabPractice's scroll area (no outer wrapper, no tab bar, no bottom bar)
-  if (inline) {
+  // ── Word selector pills (for inline/mobile) ──────────────────────
+  const wordPills = practicedWords.length > 1 && (
+    <div className="flex flex-wrap gap-2 mb-4">
+      {practicedWords.map((w, i) => {
+        const done = completedWords.has(w);
+        const active = i === currentWordIndex;
+        return (
+          <button
+            key={w}
+            onClick={() => setCurrentWordIndex(i)}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-headline font-bold transition-all ${
+              active
+                ? 'bg-accent text-white shadow-sm'
+                : done
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+            }`}
+          >
+            {zh(w)}
+            {done && <span className="material-symbols-outlined text-sm">check</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  // ── Shared content renderer ───────────────────────────────────────
+  function renderContent() {
     return (
-      <>
-        {/* Word tab nav — shown inline above content */}
-        {practicedWords.length > 1 && (
-          <div className="bg-white border border-gray-100 rounded-xl px-3 py-2 flex flex-wrap gap-2">
-            {practicedWords.map((w, i) => {
-              const done = completedWords.has(w);
-              const active = i === currentWordIndex;
-              return (
+      <div className="space-y-6">
+
+        {/* Current word card */}
+        <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 text-center">
+          <p className="text-5xl font-bold text-accent leading-none mb-3">{zh(currentWord)}</p>
+          <p className="text-sm text-on-surface-variant">
+            用「{zh(currentWord)}」造兩個句子，讓 AI 幫你批改
+          </p>
+        </div>
+
+        {/* Example sentences */}
+        <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="material-symbols-outlined text-accent text-xl">auto_stories</span>
+            <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">AI 例句示範</span>
+            {!currentState.examplesLoading && currentState.examplesSource && (
+              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                currentState.examplesSource === 'pregenerated' ? 'bg-accent/10 text-accent' : 'bg-tertiary-container/20 text-tertiary'
+              }`}>
+                {currentState.examplesSource === 'pregenerated' ? '預先生成' : 'AI 即時'}
+              </span>
+            )}
+          </div>
+
+          {currentState.examplesLoading && (
+            <div className="flex items-center gap-2 text-sm text-on-surface-variant py-4">
+              <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              AI 正在生成例句...
+            </div>
+          )}
+
+          {currentState.examplesError && (
+            <div className="text-sm text-tertiary py-2">
+              {currentState.examplesError}
+              <button onClick={loadExamples} className="ml-2 text-accent underline font-bold">重試</button>
+            </div>
+          )}
+
+          {currentState.exampleSentences && (
+            <div className="space-y-3">
+              {currentState.exampleSentences.map((ex, i) => (
+                <div key={i} className="bg-surface-container-low rounded-2xl p-4">
+                  <p className="text-base text-on-surface leading-relaxed">
+                    <HighlightedSentence sentence={ex.sentence} target={currentWord} />
+                  </p>
+                  <p className="text-xs text-on-surface-variant mt-1.5">{ex.explanation}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Student sentence inputs */}
+        {([0, 1] as const).map(idx => {
+          const entry = currentState.sentences[idx];
+          return (
+            <div key={idx} className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-headline font-black ${
+                  entry.status === 'correct' ? 'bg-emerald-500 text-white'
+                  : entry.status === 'incorrect' ? 'bg-tertiary text-white'
+                  : 'bg-surface-container-high text-on-surface-variant'
+                }`}>
+                  {entry.status === 'correct' ? <span className="material-symbols-outlined text-sm">check</span>
+                  : entry.status === 'incorrect' ? <span className="material-symbols-outlined text-sm">close</span>
+                  : idx + 1}
+                </span>
+                <span className="text-sm font-headline font-bold text-on-surface-variant">第 {idx + 1} 句</span>
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={entry.text}
+                  onChange={e => updateSentenceText(idx, e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && entry.text.trim()) handleValidate(idx); }}
+                  onPaste={e => { e.preventDefault(); setPasteWarning(true); setTimeout(() => setPasteWarning(false), 3000); }}
+                  onDrop={e => { e.preventDefault(); setPasteWarning(true); setTimeout(() => setPasteWarning(false), 3000); }}
+                  onDragOver={e => e.preventDefault()}
+                  disabled={entry.status === 'loading' || isCurrentDone}
+                  placeholder={`用「${zh(currentWord)}」造一個句子…`}
+                  className={`flex-1 rounded-2xl border-2 px-4 py-3 text-base outline-none transition-all ${
+                    entry.status === 'correct' ? 'border-emerald-400 bg-emerald-50 text-emerald-900'
+                    : entry.status === 'incorrect' ? 'border-tertiary/40 bg-tertiary-container/10 text-on-surface'
+                    : 'border-surface-container-high bg-transparent focus:border-accent text-on-surface'
+                  }`}
+                />
                 <button
-                  key={w}
-                  onClick={() => setCurrentWordIndex(i)}
-                  className={[
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all',
-                    active
-                      ? 'bg-accent text-white shadow'
-                      : done
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
-                  ].join(' ')}
+                  onClick={() => handleValidate(idx)}
+                  disabled={!entry.text.trim() || entry.status === 'loading' || isCurrentDone}
+                  className={`px-5 py-3 rounded-2xl text-sm font-headline font-bold transition-all active:scale-[0.97] shrink-0 ${
+                    entry.status === 'loading' ? 'bg-surface-container-high text-on-surface-variant cursor-wait'
+                    : entry.status === 'correct' ? 'bg-emerald-500 text-white'
+                    : 'bg-accent hover:brightness-110 text-white disabled:opacity-40 disabled:cursor-not-allowed'
+                  }`}
                 >
-                  {w}
-                  {done && (
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
+                  {entry.status === 'loading' ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : entry.status === 'correct' ? (
+                    <span className="material-symbols-outlined text-lg">check</span>
+                  ) : '批改'}
                 </button>
-              );
-            })}
+              </div>
+
+              {/* Feedback */}
+              {(entry.status === 'correct' || entry.status === 'incorrect') && (
+                <div className={`mt-3 rounded-2xl px-4 py-3 ${
+                  entry.status === 'correct' ? 'bg-emerald-50' : 'bg-tertiary-container/10'
+                }`}>
+                  <div className="flex items-start gap-2">
+                    <span className={`material-symbols-outlined text-lg mt-0.5 ${entry.status === 'correct' ? 'text-emerald-600' : 'text-tertiary'}`}>
+                      {entry.status === 'correct' ? 'check_circle' : 'lightbulb'}
+                    </span>
+                    <div>
+                      <p className={`text-sm font-medium ${entry.status === 'correct' ? 'text-emerald-800' : 'text-on-surface'}`}>{entry.feedback}</p>
+                      {entry.suggestion && <p className="mt-1 text-xs text-on-surface-variant">{entry.suggestion}</p>}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Paste warning */}
+        {pasteWarning && (
+          <div className="rounded-2xl bg-tertiary-container/15 border border-tertiary/20 px-5 py-3 text-center animate-fade-in">
+            <span className="text-sm text-tertiary font-medium">請用自己的話造句，不要複製貼上喔！</span>
           </div>
         )}
-        {innerContent}
-      </>
+
+        {/* Word complete — advance */}
+        {currentAllCorrect && !isCurrentDone && (
+          <div className="bg-emerald-50 rounded-3xl p-6 text-center animate-fade-in">
+            <span className="material-symbols-outlined text-3xl text-emerald-600 mb-2">celebration</span>
+            <p className="text-lg font-headline font-bold text-emerald-700 mb-4">「{zh(currentWord)}」造句全部正確！</p>
+            <button
+              onClick={handleCompleteCurrentWord}
+              className="h-12 px-8 rounded-full font-headline font-bold text-base text-white active:scale-[0.98] transition-all"
+              style={{ background: 'linear-gradient(135deg, #006947, #34d399)' }}
+            >
+              {currentWordIndex < practicedWords.length - 1 ? '繼續下一個詞' : '完成所有造句'}
+              <span className="material-symbols-outlined text-lg ml-1 align-middle">arrow_forward</span>
+            </button>
+          </div>
+        )}
+
+        {isCurrentDone && (
+          <div className="bg-emerald-50 rounded-2xl px-5 py-3 text-center">
+            <span className="text-sm font-medium text-emerald-700">
+              <span className="material-symbols-outlined text-sm align-middle mr-1">check_circle</span>
+              「{zh(currentWord)}」已完成
+            </span>
+          </div>
+        )}
+      </div>
     );
   }
 
-  // Standalone mode: full-page layout with bottom actions
-  return (
-    <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden" style={{ fontFamily: "'Iansui', 'Noto Sans TC', sans-serif" }}>
+  // ── Inline mode ───────────────────────────────────────────────────
+  if (inline) {
+    return <>{wordPills}{renderContent()}</>;
+  }
 
-      {/* Word tab nav */}
-      {practicedWords.length > 1 && (
-        <div className="bg-white border-b border-gray-100 px-4 py-2 flex gap-2 overflow-x-auto shrink-0">
-          {practicedWords.map((w, i) => {
-            const done = completedWords.has(w);
-            const active = i === currentWordIndex;
-            return (
-              <button
-                key={w}
-                onClick={() => setCurrentWordIndex(i)}
-                className={[
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all',
-                  active
-                    ? 'bg-accent text-white shadow'
-                    : done
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
-                ].join(' ')}
-              >
-                {w}
-                {done && (
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-            );
-          })}
+  // ── Standalone mode — two-column: content left + word tabs right ──
+  return (
+    <div className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative">
+      <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8">
+        <div className="w-full h-full flex gap-6">
+
+          {/* Left: main content (scrollable) */}
+          <div className="flex-1 min-w-0 overflow-y-auto pb-32 custom-scrollbar">
+            {renderContent()}
+          </div>
+
+          {/* Right: vertical word tab sidebar */}
+          {practicedWords.length > 1 && (
+            <div className="hidden md:block w-48 lg:w-56 shrink-0 overflow-y-auto custom-scrollbar">
+              {wordSidebar}
+            </div>
+          )}
+        </div>
+
+        {/* Mobile: horizontal pills (shown below top bar, above content) */}
+        {practicedWords.length > 1 && (
+          <div className="md:hidden absolute top-0 left-0 right-0 px-4 pt-4 pb-2 bg-surface z-10">
+            {wordPills}
+          </div>
+        )}
+      </div>
+
+      {/* Fixed bottom CTA — only when all words done */}
+      {allWordsDone && (
+        <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
+          <div className="max-w-md mx-auto pointer-events-auto">
+            <button onClick={onFinish}
+              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
+              繼續下一步
+              <span className="material-symbols-outlined text-xl">arrow_forward</span>
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Main content */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        {innerContent}
-      </div>
+      {/* Background decoration */}
+      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Bottom actions */}
-      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
-        <button
-          onClick={onBack}
-          className="px-4 py-2.5 rounded-full text-sm text-gray-600 hover:text-gray-800 transition-colors"
-        >
-          回到生字練習
-        </button>
-        <button
-          onClick={handleFinish}
-          className="px-6 py-2.5 rounded-full font-bold text-sm bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95 flex items-center gap-2"
-        >
-          {allWordsDone ? '完成，查看報告' : '跳過，查看報告'}
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #b0ada6; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #797770; }
+      `}</style>
     </div>
   );
 };
