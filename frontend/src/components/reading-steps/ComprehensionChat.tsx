@@ -264,11 +264,6 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   return (
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
-      style={{
-        fontFamily: zhuyinActive
-          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-          : undefined,
-      }}
     >
       {/* ── Main content area — fills viewport, no page scroll ──── */}
       <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8">

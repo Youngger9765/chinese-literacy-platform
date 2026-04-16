@@ -239,66 +239,6 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
     </div>
   );
 
-  // ── Inline mode ───────────────────────────────────────────────────
-  if (inline) {
-    return <>{wordPills}{renderContent()}</>;
-  }
-
-  // ── Standalone mode — two-column: content left + word tabs right ──
-  return (
-    <div className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative">
-      <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8">
-        <div className="w-full h-full flex gap-6">
-
-          {/* Left: main content (scrollable) */}
-          <div className="flex-1 min-w-0 overflow-y-auto pb-32 custom-scrollbar">
-            {renderContent()}
-          </div>
-
-          {/* Right: vertical word tab sidebar */}
-          {practicedWords.length > 1 && (
-            <div className="hidden md:block w-48 lg:w-56 shrink-0 overflow-y-auto custom-scrollbar">
-              {wordSidebar}
-            </div>
-          )}
-        </div>
-
-        {/* Mobile: horizontal pills (shown below top bar, above content) */}
-        {practicedWords.length > 1 && (
-          <div className="md:hidden absolute top-0 left-0 right-0 px-4 pt-4 pb-2 bg-surface z-10">
-            {wordPills}
-          </div>
-        )}
-      </div>
-
-      {/* Fixed bottom CTA — only when all words done */}
-      {allWordsDone && (
-        <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
-             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-          <div className="max-w-md mx-auto pointer-events-auto">
-            <button onClick={onFinish}
-              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
-              繼續下一步
-              <span className="material-symbols-outlined text-xl">arrow_forward</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Background decoration */}
-      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
-
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #b0ada6; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #797770; }
-      `}</style>
-    </div>
-  );
-
   // ── Shared content renderer ───────────────────────────────────────
   function renderContent() {
     return (
@@ -460,6 +400,66 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       </div>
     );
   }
+
+  // ── Inline mode ───────────────────────────────────────────────────
+  if (inline) {
+    return <>{wordPills}{renderContent()}</>;
+  }
+
+  // ── Standalone mode — two-column: content left + word tabs right ──
+  return (
+    <div className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative">
+      <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8">
+        <div className="w-full h-full flex gap-6">
+
+          {/* Left: main content (scrollable) */}
+          <div className="flex-1 min-w-0 overflow-y-auto pb-32 custom-scrollbar">
+            {renderContent()}
+          </div>
+
+          {/* Right: vertical word tab sidebar */}
+          {practicedWords.length > 1 && (
+            <div className="hidden md:block w-48 lg:w-56 shrink-0 overflow-y-auto custom-scrollbar">
+              {wordSidebar}
+            </div>
+          )}
+        </div>
+
+        {/* Mobile: horizontal pills (shown below top bar, above content) */}
+        {practicedWords.length > 1 && (
+          <div className="md:hidden absolute top-0 left-0 right-0 px-4 pt-4 pb-2 bg-surface z-10">
+            {wordPills}
+          </div>
+        )}
+      </div>
+
+      {/* Fixed bottom CTA — only when all words done */}
+      {allWordsDone && (
+        <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+             style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
+          <div className="max-w-md mx-auto pointer-events-auto">
+            <button onClick={onFinish}
+              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
+              繼續下一步
+              <span className="material-symbols-outlined text-xl">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Background decoration */}
+      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
+
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #b0ada6; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #797770; }
+      `}</style>
+    </div>
+  );
 };
 
 export default SentencePractice;
