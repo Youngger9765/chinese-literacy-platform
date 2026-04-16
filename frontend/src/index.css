@@ -25,9 +25,11 @@
   line-height: 1.9;
 }
 
-/* Prevent top bar from wrapping when zhuyin adds width */
-[data-zhuyin-active="true"] header * {
-  white-space: nowrap;
+/* Prevent top bar step label from wrapping when zhuyin adds width.
+   Only target the step name row; hint text is allowed to truncate naturally. */
+[data-zhuyin-active="true"] header .whitespace-nowrap {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @layer base {

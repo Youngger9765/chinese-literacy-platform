@@ -91,8 +91,6 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
 
   const fullText = story.content.join('\n');
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
-  const zhuyinFont = zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined;
-
   // ── Phase 1: Playback ──────────────────────────────────────────────
   const playParagraph = useCallback((idx: number) => {
     const text = paragraphs[idx];
@@ -117,6 +115,8 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
     const next = paragraphIdx + 1;
     if (next >= paragraphs.length) { setParagraphPlayState('done'); return; }
     setParagraphIdx(next);
+    // Brief delay lets React commit the new paragraphIdx before TTS starts,
+    // ensuring highlight state stays in sync with the playing paragraph.
     setTimeout(() => playParagraph(next), 50);
   }, [paragraphIdx, paragraphs.length, playParagraph]);
   const handlePause = useCallback(() => { cancelTts(); setPlayState('paused'); setTtsProgress(null); }, []);
@@ -157,7 +157,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
 
   // ── Render ─────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative" style={{ fontFamily: zhuyinFont }}>
+    <div className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative">
       <div className="flex-1 overflow-y-auto pb-48 custom-scrollbar">
         <div className="max-w-4xl mx-auto px-6 md:px-16 pt-4">
 

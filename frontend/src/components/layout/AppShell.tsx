@@ -100,7 +100,6 @@ const ImmersiveTopBar: React.FC = () => {
   const currentStepIndex = ACTIVE_STEPS.findIndex((s) => s.view === currentView);
   const currentStep = currentStepIndex >= 0 ? ACTIVE_STEPS[currentStepIndex] : null;
   const totalSteps = ACTIVE_STEPS.length;
-  const reportStep = ACTIVE_STEPS.find((s) => s.id === 'report');
 
   // Determine completed steps
   const completedSet = new Set(session?.completedSteps ?? []);
@@ -124,8 +123,7 @@ const ImmersiveTopBar: React.FC = () => {
   return (
     <header
       aria-label="學習進度列"
-      className="shrink-0 z-30 h-24 flex items-center justify-between px-6 md:px-10"
-      style={{ background: 'rgba(251,246,238,0.6)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+      className="shrink-0 z-30 h-24 flex items-center justify-between px-6 md:px-10 glass"
     >
       {/* Left: back button */}
       <button

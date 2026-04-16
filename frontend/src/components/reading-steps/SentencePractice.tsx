@@ -7,17 +7,15 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
-
-const API_BASE = import.meta.env.VITE_API_URL ?? '';
+import {
+  fetchExampleSentences,
+  validateSentence,
+  type ExampleSentence,
+  type ExampleSentenceSource,
+} from '../../services/learningApi';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
-interface ExampleSentence {
-  sentence: string;
-  explanation: string;
-}
-
-type ExampleSentenceSource = 'pregenerated' | 'ai';
 type SentenceStatus = 'idle' | 'loading' | 'correct' | 'incorrect';
 
 interface SentenceEntry {
@@ -45,29 +43,6 @@ function makeWordState(): WordPracticeState {
     exampleSentences: null, examplesLoading: false, examplesError: '', examplesSource: null,
     sentences: [makeSentenceEntry(), makeSentenceEntry()], allCorrect: false,
   };
-}
-
-// ── API helpers ───────────────────────────────────────────────────────────
-
-async function fetchExampleSentences(word: string, storyTitle: string, token: string | null) {
-  const res = await fetch(`${API_BASE}/api/learning/sentence-practice/example-sentences`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: JSON.stringify({ word, story_title: storyTitle }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  return { sentences: data.sentences as ExampleSentence[], source: (data.source ?? 'ai') as ExampleSentenceSource };
-}
-
-async function validateSentence(word: string, studentSentence: string, storyTitle: string, token: string | null) {
-  const res = await fetch(`${API_BASE}/api/learning/sentence-practice/validate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: JSON.stringify({ word, student_sentence: studentSentence, story_title: storyTitle }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json() as Promise<{ is_correct: boolean; feedback: string; suggestion: string }>;
 }
 
 function HighlightedSentence({ sentence, target }: { sentence: string; target: string }) {
@@ -102,7 +77,6 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   const { token } = useAuth();
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
-  const zhuyinFont = zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined;
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [wordStates, setWordStates] = useState<Record<string, WordPracticeState>>(() => {
     const init: Record<string, WordPracticeState> = {};
@@ -121,7 +95,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
     loadedWordsRef.current.add(currentWord);
     setWordStates(prev => ({ ...prev, [currentWord]: { ...prev[currentWord], examplesLoading: true, examplesError: '' } }));
     try {
-      const { sentences: examples, source } = await fetchExampleSentences(currentWord, storyTitle, token);
+      const { sentences: examples, source } = await fetchExampleSentences(token ?? '', currentWord, storyTitle);
       setWordStates(prev => ({ ...prev, [currentWord]: { ...prev[currentWord], examplesLoading: false, exampleSentences: examples, examplesSource: source } }));
     } catch {
       loadedWordsRef.current.delete(currentWord);
@@ -150,7 +124,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       return { ...prev, [currentWord]: { ...state, sentences: updated } };
     });
     try {
-      const result = await validateSentence(currentWord, sentence.text.trim(), storyTitle, token);
+      const result = await validateSentence(token ?? '', currentWord, sentence.text.trim(), storyTitle);
       setWordStates(prev => {
         const state = prev[currentWord];
         const updated: [SentenceEntry, SentenceEntry] = [{ ...state.sentences[0] }, { ...state.sentences[1] }];
@@ -272,7 +246,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
 
   // ── Standalone mode — two-column: content left + word tabs right ──
   return (
-    <div className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative" style={{ fontFamily: zhuyinFont }}>
+    <div className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative">
       <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8">
         <div className="w-full h-full flex gap-6">
 
