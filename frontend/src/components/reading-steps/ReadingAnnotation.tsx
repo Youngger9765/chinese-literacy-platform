@@ -147,6 +147,46 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   // ── Selection helpers ──────────────────────────────────────────────────
 
   /**
+   * Count raw (non-selector) characters in a string, stopping after `upTo`
+   * UTF-16 code units have been consumed.  When `upTo` is omitted the entire
+   * string is scanned.
+   *
+   * BpmfIansui uses Unicode Variation Selectors Supplement (U+E0100–U+E01EF)
+   * to select polyphonic-character pronunciation variants.  buildZhuyinString()
+   * appends one of U+E01E1–U+E01E5 after each non-default character.  These
+   * code points are above U+FFFF so each occupies 2 UTF-16 code units (a
+   * surrogate pair).  The browser's Selection API reports offsets in UTF-16
+   * code units, so without correction the reported charStart is inflated by
+   * 2 × (number of PUA selectors before the selection point).
+   *
+   * This helper strips those selectors so we always get an index into the
+   * original raw paragraph text.
+   */
+  function countRawChars(text: string, upTo?: number): number {
+    // PUA range used by BpmfIansui variant selectors: U+E0100–U+E01EF.
+    // In UTF-16 these are the surrogate pair: high D83C + low DC00..DCEF.
+    const limit = upTo ?? text.length;
+    let rawCount = 0;
+    let i = 0;
+    while (i < limit) {
+      const code = text.charCodeAt(i);
+      // High surrogate of the PUA Variation Selectors Supplement block
+      // U+E0100–U+E01EF encodes as high surrogate 0xDB40 + low 0xDD00–0xDDEF.
+      if (code === 0xDB40 && i + 1 < text.length) {
+        const low = text.charCodeAt(i + 1);
+        if (low >= 0xDD00 && low <= 0xDDEF) {
+          // This is a PUA selector — skip both code units, don't count
+          i += 2;
+          continue;
+        }
+      }
+      rawCount++;
+      i++;
+    }
+    return rawCount;
+  }
+
+  /**
    * Given a Selection that spans inside a paragraph <p data-para-idx="N">,
    * compute character offsets into the raw paragraph text.
    * Returns null if selection is empty or crosses paragraph boundaries.
@@ -183,21 +223,33 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
     // Walk all text nodes inside the paragraph to find where range.startContainer
     // sits and accumulate the character offset up to range.startOffset.
+    //
+    // When zhuyin is active, each text node may contain BpmfIansui PUA variant
+    // selectors (U+E01E1–U+E01E5, stored as surrogate pairs = 2 UTF-16 units
+    // each).  These inflate node.textContent.length and range.startOffset
+    // compared to the raw paragraph text.  countRawChars() strips them so the
+    // stored annotation indices always refer to raw-text positions.
     let charStart = 0;
     let found = false;
     const walker = document.createTreeWalker(paraEl, NodeFilter.SHOW_TEXT);
     let node: Text | null;
     while ((node = walker.nextNode() as Text | null)) {
       if (node === range.startContainer) {
-        charStart += range.startOffset;
+        // range.startOffset is a UTF-16 offset into this text node; convert to
+        // raw-character count by stripping PUA selectors up to that point.
+        charStart += countRawChars(node.textContent ?? '', range.startOffset);
         found = true;
         break;
       }
-      charStart += node.textContent?.length ?? 0;
+      // Accumulate raw (non-selector) character count for completed nodes.
+      charStart += countRawChars(node.textContent ?? '');
     }
     if (!found) return null;
 
-    const charEnd = charStart + selectedText.length;
+    // selectedText from range.toString() also includes PUA selector code points;
+    // strip them to get the raw character count of the selection.
+    const rawSelectedLength = countRawChars(selectedText);
+    const charEnd = charStart + rawSelectedLength;
 
     if (charStart >= charEnd) return null;
 

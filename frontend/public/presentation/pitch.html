@@ -477,6 +477,106 @@
   .team-card-full .name { margin-bottom: 2px; }
   .team-card-full .bio { margin-top: 6px; }
 
+  /* ── Slide 5: Appendix ── */
+  .slide-appendix {
+    background: white;
+    padding: 24px 40px;
+  }
+  .appendix-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--purple);
+    text-align: center;
+    margin-bottom: 0;
+  }
+  .appendix-subtitle {
+    display: none;
+  }
+  .done-summary {
+    background: #f0fdf4;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 1.05rem;
+    color: var(--text-sub);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-right: 8px;
+  }
+  .badge-done { background: #d1fae5; color: #065f46; }
+
+  .roadmap-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--purple);
+    margin: 12px 0 10px;
+  }
+  .roadmap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .roadmap-card {
+    border-radius: 8px;
+    padding: 12px 16px;
+    border-left: 4px solid;
+  }
+  .roadmap-p0 { background: #fef2f2; border-left-color: #dc2626; } /* unused after P0 done */
+  .roadmap-p1 { background: #fffbeb; border-left-color: #d97706; }
+  .roadmap-p2 { background: #f0f9ff; border-left-color: #0284c7; }
+  .roadmap-p3 { background: #f5f3ff; border-left-color: #7c3aed; }
+  .roadmap-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 1rem;
+  }
+  .roadmap-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+  }
+  .tag-p0 { background: #dc2626; }
+  .tag-p1 { background: #d97706; }
+  .tag-p2 { background: #0284c7; }
+  .tag-p3 { background: #7c3aed; }
+  .roadmap-body {
+    font-size: 0.9rem;
+    color: var(--text-sub);
+    line-height: 1.5;
+  }
+  .roadmap-now { opacity: 0.7; }
+  .roadmap-next { font-weight: 600; color: var(--text); margin: 2px 0; }
+  .roadmap-impact {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .appendix-footer {
+    text-align: center;
+    margin-top: 10px;
+  }
+  .appendix-footer a {
+    color: var(--purple);
+    font-size: 0.9rem;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px dashed var(--purple-light);
+  }
+  .appendix-footer a:hover { border-bottom-style: solid; }
+
   /* ── Navigation dots ── */
   .nav-dots {
     position: fixed;
@@ -572,6 +672,7 @@
   <button class="nav-dot" data-slide="1"><span class="nav-dot-label">產品</span></button>
   <button class="nav-dot" data-slide="2"><span class="nav-dot-label">邀請</span></button>
   <button class="nav-dot" data-slide="3"><span class="nav-dot-label">團隊</span></button>
+  <button class="nav-dot" data-slide="4"><span class="nav-dot-label">附錄</span></button>
 </nav>
 <div class="key-hint">← → 或滾動切換</div>
 
@@ -599,7 +700,7 @@
     </div>
 
   </div>
-  <div class="slide-num">1 / 4</div>
+  <div class="slide-num">1 / 5</div>
 </section>
 
 <!-- ════════════════════════════════════════════════ -->
@@ -669,7 +770,7 @@
 
     </div>
   </div>
-  <div class="slide-num">2 / 4</div>
+  <div class="slide-num">2 / 5</div>
 </section>
 
 <!-- ════════════════════════════════════════════════ -->
@@ -707,7 +808,7 @@
       <p>懇請各位老師給予指導<br>讓這個工具真正幫到孩子</p>
     </div>
   </div>
-  <div class="slide-num">3 / 4</div>
+  <div class="slide-num">3 / 5</div>
 </section>
 
 <!-- ════════════════════════════════════════════════ -->
@@ -738,7 +839,73 @@
       </div>
     </div>
   </div>
-  <div class="slide-num">4 / 4</div>
+  <div class="slide-num">4 / 5</div>
+</section>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — 附錄：學習單 vs 平台對照                      -->
+<!-- ════════════════════════════════════════════════ -->
+<section class="slide slide-appendix" id="slide-4">
+  <div class="slide-inner">
+    <h2 class="appendix-title">附錄：學習單 vs 平台功能對照</h2>
+    <p class="appendix-subtitle">57 篇學習單功能機制，逐一比對平台覆蓋狀態</p>
+
+    <div class="done-summary">
+      <span class="badge badge-done">✅ 19 項已覆蓋</span>
+      標記閱讀、計時朗讀、練習記錄表、同學互評、語詞定義配對、語詞代號填空、字海找詞、記敘文重點表、說明文重點表、應用文重點表、句型修辭、推論、文章結構、表達論證、科學方法、思辨媒體素養、品格生活、四選一選擇題、YouTube 影片延伸
+    </div>
+
+    <h3 class="roadmap-title">升級方向</h3>
+    <div class="roadmap-grid">
+      <div class="roadmap-card roadmap-p1">
+        <div class="roadmap-header">
+          <span class="roadmap-tag tag-p1">最優先</span>
+          <strong>三級自我檢核（朗讀自評勾選）</strong>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-now">朗讀完只有系統評分，缺學習單上的自我檢核</div>
+          <div class="roadmap-next">加入三級自評，系統比對實際表現與自評，培養後設認知</div>
+        </div>
+      </div>
+      <div class="roadmap-card roadmap-p1">
+        <div class="roadmap-header">
+          <span class="roadmap-tag tag-p1">其次</span>
+          <strong>圖表判讀含會考真題</strong>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-now">平台有圖表判讀策略練習，但學習單另含會考真題</div>
+          <div class="roadmap-next">需補入歷屆會考圖表題作為延伸練習</div>
+        </div>
+      </div>
+      <div class="roadmap-card roadmap-p2">
+        <div class="roadmap-header">
+          <span class="roadmap-tag tag-p2">待討論</span>
+          <strong>文言文：文白對照、古今詞彙、猜詞意、全句翻譯…</strong>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-now">4 篇文言文課文需要完全不同的學習流程</div>
+          <div class="roadmap-next">僅佔 7%，想請教授指導優先順序</div>
+        </div>
+      </div>
+      <div class="roadmap-card roadmap-p3">
+        <div class="roadmap-header">
+          <span class="roadmap-tag tag-p3">未來</span>
+          <strong>多文本閱讀與比較表</strong>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-now">2 組多文本課文可做跨文章比較</div>
+          <div class="roadmap-next">僅佔 3.5%，屬進階功能，視需求規劃</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="appendix-footer">
+      <a href="https://github.com/Youngger9765/chinese-literacy-platform/blob/staging/docs/worksheet-vs-platform-matrix.md" target="_blank" rel="noopener">
+        完整 33 項逐一比對 →
+      </a>
+    </div>
+  </div>
+  <div class="slide-num">5 / 5</div>
 </section>
 
 <!-- ══ JavaScript: Keyboard + dot navigation ══ -->

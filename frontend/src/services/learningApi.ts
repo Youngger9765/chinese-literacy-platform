@@ -89,6 +89,43 @@ export async function getSessionStatus(
 }
 
 // ---------------------------------------------------------------------------
+// Self-practice session completion (Issue #1070)
+// ---------------------------------------------------------------------------
+
+/**
+ * Mark a self-practice session as completed in the DB.
+ *
+ * Calls PATCH /api/learning/sessions/{sessionId} with status="completed".
+ * completed_at is intentionally omitted — the backend sets it via server time
+ * to avoid client clock skew.  Fire-and-forget — errors are non-fatal and
+ * logged to console only.
+ *
+ * Throws SessionExpiredError on 401 so callers can distinguish token expiry
+ * from other failures.
+ */
+export async function completeSelfPracticeSession(
+  sessionId: number,
+  token: string,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      status: 'completed',
+    }),
+  });
+  if (res.status === 401) {
+    throw new SessionExpiredError('completeSelfPracticeSession: token expired');
+  }
+  if (!res.ok) {
+    throw new Error(`completeSelfPracticeSession failed: ${res.status}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Comprehension chat
 // ---------------------------------------------------------------------------
 
