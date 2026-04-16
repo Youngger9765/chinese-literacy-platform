@@ -192,6 +192,21 @@ jobs:
             --project ${{ env.PROJECT_ID }} \
             --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}"
 
+      - name: Warm backend to avoid cold-start CORS errors
+        if: always() && steps.preview-urls.outputs.backend_url != 'N/A'
+        env:
+          BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
+        run: |
+          # CORS env update creates a new Cloud Run revision which is cold.
+          # Browsers hitting a cold revision see 5xx without CORS headers,
+          # surfacing as spurious "blocked by CORS policy" console errors.
+          # Pre-warm so the first real user request lands on a warm instance.
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$BACKEND_URL/" || echo timeout)
+            echo "Warmup attempt $i: HTTP $code"
+            case "$code" in timeout|000) sleep 2 ;; *) break ;; esac
+          done
+
       - name: Comment PR with preview URLs
         uses: actions/github-script@v8
         with:
