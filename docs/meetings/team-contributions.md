@@ -22,10 +22,13 @@
 | Young | ✅ | Staging QA | #1082 重點表、#909 進步曲線、#1076 句子重練全驗證 |
 | 靖杭 | ✅ | PR #1075 Self-practice | 完成狀態持久化到後端（fix #1070） |
 | 靖杭 | ✅ | PR #1076 句子重練 | 逐段朗讀支援句子級重練（feat #661，方大哥長期項） |
-| 靖杭 | 🔧 | PR #1085 跨裝置 | Self-practice 跨裝置紀錄修復（fix #1071，待 review） |
-| 靖杭 | 🔧 | PR #1086 Debounce | Step 進度 debounce 5 秒修復（fix #1072，待 review） |
-| 靖杭 | 🔧 | 5 個 bug issue | 建 #1070~#1074 進度同步系列問題 |
-| 啟翔 | 🔧 | PR #1087 沈浸式學習 | 前端 50 files 大改 + 字體改黑體（feat #1081，CONFLICTING） |
+| Young | ✅ | PR #1088~#1091 follow-up | CORS warmup、mobile top bar 截斷、admin redirect race、LiveTutor scroll |
+| Young | ✅ | PR #1092/#1093 AR cleanup | AR cleanup 卡 1h+ 根因修復（soft deadline） |
+| Young | ✅ | 4/17 Staging QA | desktop + mobile 全掃，9 PR 驗證，health 90/100 |
+| 靖杭 | ✅ | PR #1085 跨裝置 | Self-practice 跨裝置紀錄修復（fix #1071，4/17 merged） |
+| 靖杭 | ✅ | PR #1086 Debounce | Step 進度 debounce 5 秒修復（fix #1072，4 輪 review，4/17 merged） |
+| 靖杭 | 🔧 | 5 個 bug issue | 建 #1070~#1074 進度同步系列（#1070/#1071/#1072 已解，#1073/#1074 進行中） |
+| 啟翔 | ✅ | PR #1087 沈浸式學習 | 前端 50 files 大改 + 字體改黑體（feat #1081，4/17 Young 解 conflict 後 merged） |
 | 啟翔 | ⛔ | P1 data integrity 停滯 | #984/#985/#982 連續 8+ 天未更新（beta blocker） |
 
 ---
