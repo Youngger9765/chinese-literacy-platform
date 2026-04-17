@@ -15,6 +15,7 @@ import { lazy } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { hasRole } from '../../services/authApi';
 import { clearActiveSession } from '../../services/api';
+import { checkSelfPracticeCompleted, SessionExpiredError } from '../../services/learningApi';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { PARENT_PORTAL_ENABLED } from '../../config/featureFlags';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
@@ -148,11 +149,28 @@ export const LibraryPage: React.FC = () => {
     clearAssignmentContext(story.id);
     cleanupAssignmentScopedProgressKeys(story.id);
 
+    // Check completion: DB first (cross-device), localStorage as fallback.
     let isCompletedBefore = false;
-    try {
-      isCompletedBefore = localStorage.getItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${story.id}`) === '1';
-    } catch {
-      isCompletedBefore = false;
+    if (token) {
+      try {
+        isCompletedBefore = await checkSelfPracticeCompleted(story.id, token);
+      } catch (err) {
+        if (err instanceof SessionExpiredError) {
+          console.warn('[LibraryPage] checkSelfPracticeCompleted: token expired, falling back to localStorage');
+        }
+        // Fall through to localStorage check below.
+      }
+      // Sync DB truth back to localStorage so subsequent checks are instant.
+      if (isCompletedBefore) {
+        try { localStorage.setItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${story.id}`, '1'); } catch { /* non-fatal */ }
+      }
+    }
+    if (!isCompletedBefore) {
+      try {
+        isCompletedBefore = localStorage.getItem(`${SELF_PRACTICE_COMPLETED_KEY_PREFIX}${story.id}`) === '1';
+      } catch {
+        isCompletedBefore = false;
+      }
     }
 
     if (isCompletedBefore) {
