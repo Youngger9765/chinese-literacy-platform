@@ -51,10 +51,14 @@ const OnboardingGuide = lazy(() => import('../../components/OnboardingGuide'));
  * Returns null while auth is loading to prevent flash redirects.
  */
 export const HomePage: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const { activeView } = useWorkspace();
 
   if (isLoading || !isAuthenticated) return null;
+  // Wait for roles to load before redirecting — otherwise activeView
+  // falls back to 'student' during the brief window between user being
+  // set and WorkspaceContext's useEffect running, leaving admins stranded.
+  if (!user?.roles || user.roles.length === 0) return null;
 
   const homeMap: Record<string, string> = {
     admin: '/admin',
