@@ -251,7 +251,6 @@ jobs:
     needs: [deploy-backend, deploy-frontend]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: google-github-actions/auth@v2
         with:
@@ -259,8 +258,17 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
       - name: Delete old staging images (keep latest 5)
         run: |
+          # Cleanup is best-effort. Historical registry has 1000+ images;
+          # serial deletes at ~4s each would run ~1.7h. Cap via an internal
+          # deadline that exits 0 so the job reports success. GCP's
+          # keep-recent-tagged=3 async policy handles the rest.
           KEEP=5
+          DEADLINE=$(( $(date +%s) + 540 ))  # 9 min hard stop
           for PACKAGE in backend frontend; do
+            if [ $(date +%s) -ge $DEADLINE ]; then
+              echo "Deadline reached before ${PACKAGE}; leaving rest to GCP async policy"
+              break
+            fi
             echo "=== Cleaning ${PACKAGE} staging images ==="
             DIGESTS=$(gcloud artifacts docker images list \
               "$REGISTRY/${PACKAGE}" \
@@ -279,12 +287,17 @@ jobs:
 
             echo "$DIGESTS" | tail -n +$((KEEP + 1)) | while read -r DIGEST; do
               [ -z "$DIGEST" ] && continue
+              if [ $(date +%s) -ge $DEADLINE ]; then
+                echo "Deadline reached; $(date +%s) >= $DEADLINE. Stopping."
+                break
+              fi
               echo "DELETE: ${DIGEST:0:20}..."
               gcloud artifacts docker images delete \
                 "$REGISTRY/${PACKAGE}@${DIGEST}" \
                 --delete-tags --quiet 2>/dev/null || true
             done
           done
+          echo "Cleanup step finished (may be partial; GCP async policy handles remainder)"
 
   notify-staging:
     name: Notify referenced issues
