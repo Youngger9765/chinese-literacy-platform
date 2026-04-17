@@ -251,6 +251,7 @@ jobs:
     needs: [deploy-backend, deploy-frontend]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: google-github-actions/auth@v2
         with:
