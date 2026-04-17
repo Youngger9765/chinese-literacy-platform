@@ -209,9 +209,17 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [streamingUserInput]);
 
+  // Skip the first auto-scroll on mount — on mobile the centered block
+  // position pushes the card header (第 N/M 段 + sub-progress) above
+  // the fold. Only scroll when the user actually navigates paragraphs.
+  const didInitialScrollRef = useRef(false);
   useEffect(() => {
+    if (!didInitialScrollRef.current) {
+      didInitialScrollRef.current = true;
+      return;
+    }
     if (activeLineRef.current) {
-      activeLineRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      activeLineRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [currentLineIndex]);
 

@@ -51,18 +51,27 @@ const OnboardingGuide = lazy(() => import('../../components/OnboardingGuide'));
  * Returns null while auth is loading to prevent flash redirects.
  */
 export const HomePage: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
-  const { activeView } = useWorkspace();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading || !isAuthenticated) return null;
+  // Wait for roles to hydrate before redirecting.
+  if (!user?.roles || user.roles.length === 0) return null;
 
-  const homeMap: Record<string, string> = {
-    admin: '/admin',
-    teacher: '/teacher-home',
-    student: '/student',
-    parent: PARENT_PORTAL_ENABLED ? '/parent' : '/student',
-  };
-  return <Navigate to={homeMap[activeView] ?? '/student'} replace />;
+  // Derive redirect target directly from user.roles instead of reading
+  // WorkspaceContext.activeView — that state re-syncs via useEffect, which
+  // runs AFTER HomePage's first render, causing admins to briefly see
+  // activeView='student' (the empty-set fallback) and land on the wrong
+  // route. Reading user.roles directly sidesteps the race entirely.
+  const ADMIN_ROLES = new Set(['system_admin', 'org_owner', 'org_admin']);
+  const TEACHER_ROLES = new Set(['teacher', 'homeroom_teacher', 'principal', 'director']);
+
+  let target = '/student';
+  if (user.roles.some((r) => ADMIN_ROLES.has(r.role_name))) target = '/admin';
+  else if (user.roles.some((r) => TEACHER_ROLES.has(r.role_name))) target = '/teacher-home';
+  else if (user.roles.some((r) => r.role_name === 'student')) target = '/student';
+  else if (PARENT_PORTAL_ENABLED && user.roles.some((r) => r.role_name === 'parent')) target = '/parent';
+
+  return <Navigate to={target} replace />;
 };
 
 /** Library page — clean story browsing with session resume prompt. */
