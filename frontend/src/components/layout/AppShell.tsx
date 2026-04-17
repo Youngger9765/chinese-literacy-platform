@@ -123,33 +123,33 @@ const ImmersiveTopBar: React.FC = () => {
   return (
     <header
       aria-label="學習進度列"
-      className="shrink-0 z-30 h-24 flex items-center justify-between px-6 md:px-10 glass"
+      className="shrink-0 z-30 h-20 md:h-24 flex items-center justify-between px-2 md:px-10 gap-2 glass"
     >
       {/* Left: back button */}
       <button
         type="button"
         onClick={handleBack}
-        className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-90 duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="shrink-0 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-90 duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         aria-label="返回圖書館"
       >
-        <span className="material-symbols-outlined text-on-surface text-2xl">arrow_back</span>
+        <span className="material-symbols-outlined text-on-surface text-xl md:text-2xl">arrow_back</span>
       </button>
 
       {/* Center: step label + hint + progress dots */}
-      <div className="flex flex-col items-center gap-1.5 min-w-0">
+      <div className="flex-1 min-w-0 flex flex-col items-center gap-1 md:gap-1.5">
         {currentStep && (
           <>
-            <span className="font-headline font-bold text-base text-accent tracking-wide whitespace-nowrap">
+            <span className="font-headline font-bold text-sm md:text-base text-accent tracking-wide truncate max-w-full">
               {currentStep.label} · {currentStepIndex + 1}/{totalSteps}
             </span>
-            <span className="text-sm text-on-surface-variant whitespace-nowrap">
+            <span className="hidden md:inline text-sm text-on-surface-variant truncate max-w-full">
               {currentStep.hint}
             </span>
           </>
         )}
 
         {/* Progress dots — clickable to navigate between steps */}
-        <div className="flex items-center gap-1.5" role="navigation" aria-label="學習步驟導航">
+        <div className="flex items-center gap-1 md:gap-1.5 max-w-full flex-wrap justify-center" role="navigation" aria-label="學習步驟導航">
           {ACTIVE_STEPS.map((step, i) => {
             const isCompleted = completedSet.has(step.id);
             const isActive = i === currentStepIndex;
@@ -166,7 +166,7 @@ const ImmersiveTopBar: React.FC = () => {
                 type="button"
                 onClick={() => handleStepClick(step)}
                 disabled={isLocked}
-                className={`w-2.5 h-2.5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 ${dotClass}`}
+                className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 ${dotClass}`}
                 title={`${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
                 aria-label={step.label}
                 aria-current={isActive ? 'step' : undefined}
@@ -177,7 +177,7 @@ const ImmersiveTopBar: React.FC = () => {
       </div>
 
       {/* Right: zhuyin toggle + settings */}
-      <div className="flex items-center">
+      <div className="shrink-0 flex items-center">
         {selectedStory && (
           <ZhuyinToggle
             enabled={zhuyinEnabled}
