@@ -2,6 +2,10 @@
 
 Handles the student progress dashboard with session stats, streaks,
 daily activity, and completed story slugs.
+
+Issue #982: streak_days / longest_streak now delegate to the StudentStreak
+table via gamification_service so that this endpoint and
+GET /api/gamification/streak/{id} always return the same values.
 """
 import logging
 from collections import defaultdict
@@ -14,6 +18,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
+from ...services.gamification_service import _get_or_create_streak  # noqa: WPS450
 from ...services.learning_stats_service import get_completed_story_slugs
 from ._helpers import verify_student_access
 
@@ -115,40 +120,12 @@ def get_student_dashboard(
             avg_score=round(sum(scores_for_day) / len(scores_for_day), 1) if scores_for_day else None,
         ))
 
-    # Streak calculation (consecutive days with at least 1 completed session up to today)
-    all_completed_days = set()
-    for s in completed:
-        if s.completed_at:
-            all_completed_days.add(s.completed_at.strftime("%Y-%m-%d"))
-
-    streak_days = 0
-    check_day = today_start
-    for _ in range(365):
-        day_str = check_day.strftime("%Y-%m-%d")
-        if day_str in all_completed_days:
-            if streak_days == 0 and check_day.date() < now.date():
-                # Allow a gap of one day (yesterday still counts)
-                pass
-            streak_days += 1
-        else:
-            break
-        check_day -= timedelta(days=1)
-
-    # Longest streak calculation
-    streak_check = 0
-    longest_streak = 0
-    sorted_days = sorted(all_completed_days)
-    for idx, day_str in enumerate(sorted_days):
-        if idx == 0:
-            streak_check = 1
-        else:
-            prev = datetime.strptime(sorted_days[idx - 1], "%Y-%m-%d")
-            curr = datetime.strptime(day_str, "%Y-%m-%d")
-            if (curr - prev).days == 1:
-                streak_check += 1
-            else:
-                streak_check = 1
-        longest_streak = max(longest_streak, streak_check)
+    # Streak data — delegate to StudentStreak table (Issue #982: single source of truth).
+    # Both GET /api/learning/students/{id}/dashboard and
+    # GET /api/gamification/streak/{id} now read from the same row.
+    streak_record = _get_or_create_streak(db, student_id)
+    streak_days = streak_record.current_streak
+    longest_streak = streak_record.longest_streak
 
     # Completed story slugs — use canonical query (Issue #981)
     completed_story_slugs = get_completed_story_slugs(db, student_id)
