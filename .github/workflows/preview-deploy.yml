@@ -196,15 +196,30 @@ jobs:
         if: always() && steps.preview-urls.outputs.backend_url != 'N/A'
         env:
           BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
+          FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
         run: |
           # CORS env update creates a new Cloud Run revision which is cold.
           # Browsers hitting a cold revision see 5xx without CORS headers,
           # surfacing as spurious "blocked by CORS policy" console errors.
-          # Pre-warm so the first real user request lands on a warm instance.
+          #
+          # Two warmups:
+          # 1. Root GET — warms one instance through Cloud Run routing.
+          # 2. OPTIONS preflight with Origin — mimics what the browser will do
+          #    for the first fetch(), ensuring the API route + CORS middleware
+          #    are both JIT-loaded before the real user request arrives.
           for i in 1 2 3; do
             code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$BACKEND_URL/" || echo timeout)
-            echo "Warmup attempt $i: HTTP $code"
+            echo "Warmup root attempt $i: HTTP $code"
             case "$code" in timeout|000) sleep 2 ;; *) break ;; esac
+          done
+          for path in /api/assignments/my /api/gamification/streak /api/stories; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 \
+              -X OPTIONS \
+              -H "Origin: $FRONTEND_URL" \
+              -H "Access-Control-Request-Method: GET" \
+              -H "Access-Control-Request-Headers: authorization,content-type" \
+              "${BACKEND_URL}${path}" || echo timeout)
+            echo "Preflight $path: HTTP $code"
           done
 
       - name: Comment PR with preview URLs
