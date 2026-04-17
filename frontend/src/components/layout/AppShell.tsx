@@ -149,7 +149,7 @@ const ImmersiveTopBar: React.FC = () => {
         )}
 
         {/* Progress dots — clickable to navigate between steps */}
-        <div className="flex items-center gap-1.5" role="navigation" aria-label="學習步驟導航">
+        <div className="flex items-center gap-1 md:gap-1.5 max-w-full flex-wrap justify-center" role="navigation" aria-label="學習步驟導航">
           {ACTIVE_STEPS.map((step, i) => {
             const isCompleted = completedSet.has(step.id);
             const isActive = i === currentStepIndex;
@@ -166,7 +166,7 @@ const ImmersiveTopBar: React.FC = () => {
                 type="button"
                 onClick={() => handleStepClick(step)}
                 disabled={isLocked}
-                className={`w-2.5 h-2.5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 ${dotClass}`}
+                className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 ${dotClass}`}
                 title={`${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
                 aria-label={step.label}
                 aria-current={isActive ? 'step' : undefined}

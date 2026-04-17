@@ -134,7 +134,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
   return (
     <div
-      className={`transition-all duration-500 rounded-3xl p-10 md:p-14 ${
+      className={`transition-all duration-500 rounded-3xl p-5 md:p-14 ${
         isCelebrating
           ? 'bg-emerald-50 shadow-[0_12px_48px_rgba(16,185,129,0.15)]'
           : status === 'current'
