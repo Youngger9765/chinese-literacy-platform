@@ -319,6 +319,88 @@ def _get_tts_client():
 # Cache key helper
 # ---------------------------------------------------------------------------
 
+def _num_to_chinese_tw(n: int) -> str:
+    """Convert integer to spoken Traditional Chinese (Taiwan conventions).
+
+    Taiwan style: 兩百 (not 二百), 兩千 (not 二千).
+    Used for Gemini TTS which doesn't handle Taiwan number pronunciation natively.
+    """
+    if n == 0:
+        return "零"
+    if n < 0:
+        return "負" + _num_to_chinese_tw(-n)
+
+    digits = "零一二三四五六七八九"
+    result = ""
+
+    # 萬位
+    if n >= 10000:
+        wan = n // 10000
+        result += (_num_to_chinese_tw(wan) if wan > 1 else "一") + "萬"
+        n %= 10000
+        if 0 < n < 1000:
+            result += "零"
+
+    # 千位 (台灣用「兩千」不用「二千」)
+    if n >= 1000:
+        qian = n // 1000
+        result += ("兩" if qian == 2 else digits[qian]) + "千"
+        n %= 1000
+        if 0 < n < 100:
+            result += "零"
+
+    # 百位 (台灣用「兩百」不用「二百」)
+    if n >= 100:
+        bai = n // 100
+        result += ("兩" if bai == 2 else digits[bai]) + "百"
+        n %= 100
+        if 0 < n < 10:
+            result += "零"
+
+    # 十位
+    if n >= 10:
+        shi = n // 10
+        if shi == 1 and not result:
+            result += "十"  # 「十二」不是「一十二」
+        else:
+            result += digits[shi] + "十"
+        n %= 10
+
+    # 個位
+    if n > 0:
+        result += digits[n]
+
+    return result
+
+
+def _numbers_to_chinese_tw(text: str) -> str:
+    """Replace Arabic numbers with spoken Chinese (Taiwan) in text.
+
+    Handles: integers, decimals (點), ranges (- ~ ～ 到).
+    Only used for Gemini TTS — Azure handles Taiwan numbers natively.
+    """
+    # Ranges first: 129-132, 80~90, 80～90
+    def _replace_range(m: re.Match) -> str:
+        a, sep, b = m.group(1), m.group(2), m.group(3)
+        return _num_to_chinese_tw(int(a)) + "到" + _num_to_chinese_tw(int(b))
+    text = re.sub(r'(\d+)([~～\-])(\d+)', _replace_range, text)
+
+    # Decimals: 10.22 → 十點二二 (each digit after dot read individually)
+    def _replace_decimal(m: re.Match) -> str:
+        integer_part = _num_to_chinese_tw(int(m.group(1)))
+        digits = "零一二三四五六七八九"
+        decimal_part = "".join(digits[int(d)] for d in m.group(2))
+        return integer_part + "點" + decimal_part
+    text = re.sub(r'(\d+)\.(\d+)', _replace_decimal, text)
+
+    # Remaining integers (not already converted)
+    def _replace_int(m: re.Match) -> str:
+        return _num_to_chinese_tw(int(m.group()))
+    text = re.sub(r'\d+', _replace_int, text)
+
+    return text
+
+
 def _clean_for_tts(text: str) -> str:
     """Strip symbols that TTS would read aloud (e.g. ~~~ → '波浪符波浪符波浪符')."""
     # Remove decorative symbols that aren't meant to be spoken
@@ -336,6 +418,15 @@ def _clean_for_tts(text: str) -> str:
     text = re.sub(r'，{2,}', '，', text)          # collapse multiple pauses
     text = re.sub(r'\s+', ' ', text).strip()      # collapse whitespace
     return text
+
+
+def _clean_for_gemini(text: str) -> str:
+    """Additional cleaning for Gemini TTS: convert numbers to spoken Chinese (Taiwan).
+
+    Azure handles Taiwan numbers natively, Gemini doesn't.
+    Applied AFTER _clean_for_tts, only when TTS_PROVIDER == 'gemini31'.
+    """
+    return _numbers_to_chinese_tw(text)
 
 
 def _cache_key(text: str) -> str:
@@ -518,6 +609,9 @@ def _synthesize_gemini(text: str) -> bytes:
         raise TTSError(f"google-genai SDK not installed: {exc}") from exc
 
     client = _get_gemini_client()
+
+    # Convert numbers to spoken Chinese (Taiwan) — Gemini doesn't do this natively
+    text = _clean_for_gemini(text)
 
     logger.info(
         "Gemini TTS API call (model=%s, voice=%s, len=%d chars)",

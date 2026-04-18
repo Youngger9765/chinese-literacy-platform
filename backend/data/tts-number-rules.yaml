@@ -1,0 +1,98 @@
+# TTS 數字轉中文規則表（台灣國語）
+# 用途：Gemini TTS 不支援台灣數字念法，需要前處理將阿拉伯數字轉成中文
+# 維護：新增規則後，需重新生成 Gemini TTS cache
+# 參考：_numbers_to_chinese_tw() in backend/app/services/tts_service.py
+
+rules:
+  - type: 整數
+    example: "214"
+    output: "兩百一十四"
+    notes: "基本轉換"
+
+  - type: 年份
+    example: "2021年"
+    output: "兩千零二十一年"
+    notes: "年份照數字念"
+
+  - type: 小數
+    example: "10.22秒"
+    output: "十點二二秒"
+    notes: "小數點後逐位念（二二，不是二十二）"
+
+  - type: 分數
+    example: "3/4"
+    output: "四分之三"
+    notes: "分母在前，分子在後"
+
+  - type: 百分比
+    example: "85%"
+    output: "百分之八十五"
+    notes: "_clean_for_tts 已處理 % → 百分之"
+
+  - type: 溫度
+    example: "31°C"
+    output: "攝氏三十一度"
+    notes: "_clean_for_tts 已移除 °，需要額外處理 C → 攝氏"
+
+  - type: 負數
+    example: "-5"
+    output: "負五"
+    notes: "前綴「負」"
+
+  - type: 範圍
+    example: "129~132"
+    output: "一百二十九到一百三十二"
+    notes: "支援 ~ ～ - 三種分隔符"
+
+  - type: 台灣百位
+    example: "200"
+    output: "兩百"
+    notes: "台灣用「兩百」不是「二百」"
+
+  - type: 台灣千位
+    example: "2000"
+    output: "兩千"
+    notes: "台灣用「兩千」不是「二千」"
+
+  - type: 逐位念
+    example: "0800"
+    output: "零八零零"
+    notes: "電話號碼、編號逐位念（目前未實作，課文中未出現）"
+
+  - type: 十位開頭
+    example: "12歲"
+    output: "十二歲"
+    notes: "十幾不念「一十幾」"
+
+  - type: 零的處理
+    example: "1003"
+    output: "一千零三"
+    notes: "中間有零要念出來"
+
+  - type: 萬位
+    example: "10000"
+    output: "一萬"
+    notes: "一萬不省略「一」"
+
+# 台灣 vs 中國差異（影響 TTS）
+taiwan_differences:
+  - pattern: "二百"
+    taiwan: "兩百"
+    china: "二百"
+  - pattern: "二千"
+    taiwan: "兩千"
+    china: "二千"
+  - pattern: "二萬"
+    taiwan: "兩萬"
+    china: "二萬"
+  - pattern: "十二月"
+    taiwan: "十二月"
+    china: "十二月"
+    notes: "月份相同"
+
+# 目前未實作（課文中未出現）
+not_implemented:
+  - "科學記號（1.5×10³）"
+  - "電話號碼逐位念（0800-123-456）"
+  - "羅馬數字（III → 三）"
+  - "序數（第1名 → 第一名）— _clean_for_tts 未處理，Gemini 可能自己處理"
