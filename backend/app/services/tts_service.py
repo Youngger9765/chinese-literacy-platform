@@ -593,14 +593,21 @@ def synthesize_speech(text: str) -> bytes:
         try:
             audio_bytes = _synthesize_gemini(cleaned)
             used_provider = "gemini31"
-        except TTSError as exc:
-            logger.warning("Gemini TTS failed, falling back to Azure→Google: %s", exc)
+        except TTSError as gemini_exc:
+            logger.warning("Gemini TTS failed, falling back to Azure→Google: %s", gemini_exc)
             try:
                 audio_bytes = _synthesize_azure(cleaned)
                 used_provider = "azure"
-            except TTSError:
-                audio_bytes = _synthesize_google(cleaned)
-                used_provider = "google"
+            except TTSError as azure_exc:
+                logger.warning("Azure TTS also failed: %s", azure_exc)
+                try:
+                    audio_bytes = _synthesize_google(cleaned)
+                    used_provider = "google"
+                except TTSError as google_exc:
+                    raise TTSError(
+                        f"All TTS providers failed — Gemini ({gemini_exc}), "
+                        f"Azure ({azure_exc}), Google ({google_exc})"
+                    ) from google_exc
     elif active_provider == "azure":
         # Try Azure first; fall back to Google on any error
         try:
