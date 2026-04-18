@@ -460,7 +460,12 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         {user && (
           <div className={`shrink-0 border-b border-gray-100 py-3 ${collapsed ? 'px-2 flex justify-center' : 'px-3'}`}>
             <div className={`flex items-center gap-2 ${collapsed ? 'flex-col' : ''}`}>
-              <span className="text-lg shrink-0" aria-hidden="true">👤</span>
+              <div
+                className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center shrink-0 text-sm font-semibold"
+                aria-hidden="true"
+              >
+                {user.name?.charAt(0) ?? '?'}
+              </div>
               {!collapsed && (
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
@@ -535,9 +540,9 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           ))}
         </nav>
 
-        {/* Bottom section — notification bell, zhuyin toggle, privacy, logout */}
+        {/* Bottom section — notification bell, zhuyin toggle, logout, footer */}
         <div className={`shrink-0 border-t border-gray-100 py-2 px-2 flex flex-col gap-1 ${collapsed ? 'items-center' : ''}`}>
-          {/* Notification bell — teacher only */}
+          {/* Actions: notification bell + zhuyin toggle + logout — grouped together */}
           {isTeacher && (
             <div className={collapsed ? '' : 'w-full'}>
               <NotificationBell
@@ -548,7 +553,6 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             </div>
           )}
 
-          {/* Zhuyin toggle — learning mode only */}
           {navStory && (
             <div className={collapsed ? '' : 'w-full px-1'}>
               <ZhuyinToggle
@@ -559,32 +563,6 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             </div>
           )}
 
-          {/* Privacy policy */}
-          {!collapsed ? (
-            <button
-              type="button"
-              onClick={() => navigate('/privacy')}
-              className="w-full text-left text-xs text-gray-400 hover:text-gray-600 transition-colors px-3 py-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-            >
-              隱私政策
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => navigate('/privacy')}
-              title="隱私政策"
-              aria-label="隱私政策"
-              className="p-1.5 text-gray-300 hover:text-gray-500 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-            >
-              <span className="text-sm" aria-hidden="true">🔒</span>
-            </button>
-          )}
-
-          {!collapsed && (
-            <p className="text-[10px] text-gray-300 px-3 select-none">LingoLeap v2.0</p>
-          )}
-
-          {/* Logout */}
           <button
             type="button"
             onClick={logout}
@@ -600,6 +578,33 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
             <span className="text-lg shrink-0" aria-hidden="true">🚪</span>
             {!collapsed && <span>登出</span>}
           </button>
+
+          {/* Footer — privacy + version, visually separated from actions */}
+          <div className={`${collapsed ? 'mt-1' : 'mt-2 pt-2 border-t border-gray-100'}`}>
+            {!collapsed ? (
+              <button
+                type="button"
+                onClick={() => navigate('/privacy')}
+                className="w-full text-left text-xs text-gray-400 hover:text-gray-600 transition-colors px-3 py-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+              >
+                隱私政策
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate('/privacy')}
+                title="隱私政策"
+                aria-label="隱私政策"
+                className="p-1.5 text-gray-300 hover:text-gray-500 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+              >
+                <span className="text-sm" aria-hidden="true">🔒</span>
+              </button>
+            )}
+
+            {!collapsed && (
+              <p className="text-[10px] text-gray-300 px-3 select-none">LingoLeap v2.0</p>
+            )}
+          </div>
         </div>
       </aside>
 
