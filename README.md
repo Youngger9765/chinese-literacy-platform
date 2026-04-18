@@ -42,6 +42,7 @@
 | 前端 | React 19 + Vite 6 + Tailwind CSS 3 + TypeScript |
 | 後端 | FastAPI + SQLAlchemy 2.0 + PostgreSQL 15 |
 | AI | Google Vertex AI Gemini 2.5 Flash |
+| TTS | **Gemini 3.1 Flash TTS**（Variant A，prompt-only 台灣腔）— [實驗紀錄](docs/research/tts-variant-ab-study-2026-04-18.md) |
 | 部署 | GCP Cloud Run + Cloud SQL + Artifact Registry |
 | CI/CD | GitHub Actions（push/PR 自動部署） |
 | 測試 | pytest + Playwright E2E + Locust 壓測 |

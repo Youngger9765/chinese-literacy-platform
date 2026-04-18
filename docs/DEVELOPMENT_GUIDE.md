@@ -308,7 +308,7 @@ Node.js + Express / Python FastAPI
 | 功能 | 技術選項 |
 |------|----------|
 | 語音識別 (STT) | Google Speech-to-Text / Azure Speech |
-| 文字轉語音 (TTS) | Google TTS / Azure TTS |
+| 文字轉語音 (TTS) | **Gemini 3.1 Flash TTS + Variant A prompt prefix（primary，台灣腔）** / Azure zh-TW HsiaoChen（fallback）／ Google Chirp3-HD（alternative）<br/>決策與實驗紀錄：`docs/research/tts-variant-ab-study-2026-04-18.md` |
 | 蘇格拉底對話 | OpenAI GPT-4 / Claude / Gemini |
 | 手寫辨識 | Google ML Kit / Azure Computer Vision |
 
