@@ -24,7 +24,7 @@ from pathlib import Path
 
 LESSON_DIR = Path(__file__).resolve().parent.parent / "backend" / "data" / "lessons"
 
-CJK = r"[\u4e00-\u9fff]"
+CJK = r"[\u3400-\u9fff\uf900-\ufaff]"
 INTER_CJK_SPACE = re.compile(rf"({CJK})[ \u3000]+({CJK})")
 TRAILING_WS = re.compile(r"[ \u3000]+$")
 
