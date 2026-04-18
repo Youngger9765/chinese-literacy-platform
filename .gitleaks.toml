@@ -16,6 +16,9 @@ useDefault = true
     '''(^|\/)docs\/''',
     '''\.md$''',
     '''\.example$''',
+    # TTS audit trail: contains SHA256 hashes of audio files, not credentials
+    # Fields like audio_sha256, cache_key, lesson_yaml_sha are content hashes
+    '''backend/data/tts-provenance\.jsonl$''',
   ]
 
   regexes = [

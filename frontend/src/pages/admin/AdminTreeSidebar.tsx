@@ -22,6 +22,7 @@ export type TreeNodeSelection =
   | { type: 'roles'; id: 'roles' }
   | { type: 'users'; id: 'users' }
   | { type: 'stories'; id: 'stories' }
+  | { type: 'tts_audit'; id: 'tts_audit' }
   | { type: 'create_org'; id: 'create_org' };
 
 type TreeNodeType = TreeNodeSelection['type'];
@@ -250,6 +251,21 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </button>
+
+        {/* TTS Audit icon */}
+        <button
+          onClick={() => onSelectNode({ type: 'tts_audit', id: 'tts_audit' })}
+          className={`p-1.5 rounded-md transition-colors cursor-pointer mb-1 ${
+            isSelected('tts_audit', 'tts_audit')
+              ? 'bg-violet-50 text-violet-600'
+              : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'
+          }`}
+          title="TTS 句子稽核"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
           </svg>
         </button>
 
@@ -547,6 +563,26 @@ const AdminTreeSidebar: React.FC<AdminTreeSidebarProps> = ({ selectedNode, onSel
           </svg>
           <span className={`text-sm ${isSelected('stories', 'stories') ? 'font-semibold' : ''}`}>
             課文管理
+          </span>
+        </button>
+        <button
+          onClick={() => onSelectNode({ type: 'tts_audit', id: 'tts_audit' })}
+          className={`flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${
+            isSelected('tts_audit', 'tts_audit')
+              ? 'bg-violet-50 text-violet-700'
+              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+          }`}
+        >
+          <svg
+            className={`w-4 h-4 shrink-0 ${isSelected('tts_audit', 'tts_audit') ? 'text-violet-500' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          </svg>
+          <span className={`text-sm ${isSelected('tts_audit', 'tts_audit') ? 'font-semibold' : ''}`}>
+            TTS 句子稽核
           </span>
         </button>
         <button
