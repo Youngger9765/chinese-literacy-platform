@@ -1,10 +1,13 @@
 /**
- * AppShell — the authenticated app chrome (header + sidebar + main area).
+ * AppShell — the authenticated app chrome (sidebar + main area).
  *
  * LearningAppShell — standalone immersive shell for /learn/:storyId/* routes.
- * Hides all navigation chrome (Header, Sidebar) to maximise focus.
+ * Hides all navigation chrome (Sidebar) to maximise focus.
  * Shows only a minimal glassmorphic top bar with back button, step name,
  * progress dots, and a settings gear.
+ *
+ * Header removed (2026-04-18): all header functionality (logo, story title,
+ * notification bell, zhuyin toggle, logout) is now integrated into Sidebar.
  */
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,18 +19,16 @@ import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
 import { useAppView } from '../../hooks/useAppView';
-import Header from './Header';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import DevSkipButton from '../ui/DevSkipButton';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
 
-/** The authenticated app shell with header + sidebar. */
+/** The authenticated app shell with sidebar only (header removed 2026-04-18). */
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token } = useAuth();
   const { activeView } = useWorkspace();
-  const navigate = useNavigate();
 
   // Pending assignment count for the student nav badge
   const [pendingAssignmentCount, setPendingAssignmentCount] = useState(0);
@@ -50,7 +51,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   }, [refreshPendingCount]);
 
   return (
-    <div className="h-screen flex flex-col bg-surface text-on-surface font-sans overflow-hidden">
+    <div className="h-screen flex bg-surface text-on-surface font-sans overflow-hidden">
       {/* Skip-to-content link — visually hidden until focused (WCAG 2.4.1) */}
       <a
         href="#main-content"
@@ -59,28 +60,22 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
         跳至主要內容
       </a>
 
-      <Header />
+      <Sidebar pendingAssignmentCount={pendingAssignmentCount} />
 
-      {/* Body: sidebar + main content */}
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar pendingAssignmentCount={pendingAssignmentCount} />
-
-        <main
-          id="main-content"
-          role="main"
-          aria-label="主要內容"
-          className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0"
-          tabIndex={-1}
-        >
-          {children}
-        </main>
-      </div>
+      <main
+        id="main-content"
+        role="main"
+        aria-label="主要內容"
+        className="flex-1 flex flex-col overflow-y-auto pb-14 md:pb-0"
+        tabIndex={-1}
+      >
+        {children}
+      </main>
 
       {/* Onboarding overlay for first-time students */}
       <Suspense fallback={null}>
         <OnboardingWrapper />
       </Suspense>
-
     </div>
   );
 };
