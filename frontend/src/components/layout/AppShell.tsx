@@ -130,8 +130,16 @@ const ImmersiveTopBar: React.FC = () => {
         <span className="material-symbols-outlined text-on-surface text-xl md:text-2xl">arrow_back</span>
       </button>
 
-      {/* Center: step label + hint + progress dots */}
-      <div className="flex-1 min-w-0 flex flex-col items-center gap-1 md:gap-1.5">
+      {/* Center: story title (context) + step label + hint + progress dots */}
+      <div className="flex-1 min-w-0 flex flex-col items-center gap-0.5 md:gap-1">
+        {selectedStory && (
+          <span
+            className="text-xs md:text-sm text-on-surface-variant truncate max-w-full"
+            title={selectedStory.title}
+          >
+            《{selectedStory.title}》
+          </span>
+        )}
         {currentStep && (
           <>
             <span className="font-headline font-bold text-sm md:text-base text-accent tracking-wide truncate max-w-full">
