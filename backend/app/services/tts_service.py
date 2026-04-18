@@ -3,7 +3,7 @@ TTS service — three providers: Azure Speech, Google Cloud TTS, Gemini 3.1 Flas
 
 Two-layer cache: GCS (persistent) → in-memory (fast).
 1. Check in-memory dict
-2. Check GCS bucket  (azure/sentences/{hash}.mp3, gemini31/sentences/{hash}.mp3,
+2. Check GCS bucket  (azure/sentences/{hash}.mp3, gemini31-prompt-only/sentences/{hash}.mp3,
    or tts-cache/{hash}.mp3)
 3. Call active provider API → save to GCS + in-memory
 4. If Azure fails → fall back to Google Cloud TTS
@@ -20,7 +20,7 @@ Gemini voice: Aoede (prebuilt voice, PCM→MP3 via ffmpeg subprocess)
 
 GCS paths:
   Azure    — azure/sentences/{hash}.mp3    (sentence-level, Issue #667)
-  Gemini31 — gemini31/sentences/{hash}.mp3 (new, Issue #1107)
+  Gemini31 — gemini31-prompt-only/sentences/{hash}.mp3 (Variant A, 2026-04-18)
   Google   — tts-cache/{hash}.mp3          (legacy path, unchanged for compatibility)
 
 Auth:
@@ -82,7 +82,7 @@ def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
 
     GCS paths:
       Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
-      Gemini31 — gemini31/sentences/{key}.mp3 (Issue #1107)
+      Gemini31 — gemini31-prompt-only/sentences/{key}.mp3 (Variant A, 2026-04-18)
       Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
@@ -91,7 +91,7 @@ def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
     if provider == "azure":
         blob_path = f"azure/sentences/{key}.mp3"
     elif provider == "gemini31":
-        blob_path = f"gemini31/sentences/{key}.mp3"
+        blob_path = f"gemini31-prompt-only/sentences/{key}.mp3"
     else:
         blob_path = f"tts-cache/{key}.mp3"
     try:
@@ -110,7 +110,7 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
 
     GCS paths:
       Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
-      Gemini31 — gemini31/sentences/{key}.mp3 (Issue #1107)
+      Gemini31 — gemini31-prompt-only/sentences/{key}.mp3 (Variant A, 2026-04-18)
       Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
@@ -119,7 +119,7 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
     if provider == "azure":
         blob_path = f"azure/sentences/{key}.mp3"
     elif provider == "gemini31":
-        blob_path = f"gemini31/sentences/{key}.mp3"
+        blob_path = f"gemini31-prompt-only/sentences/{key}.mp3"
     else:
         blob_path = f"tts-cache/{key}.mp3"
     try:
@@ -146,8 +146,16 @@ TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-CN-Chirp3-HD-Sulafat")
 TTS_LANGUAGE_CODE = "cmn-CN"
 
 # Gemini 3.1 Flash TTS (Issue #1107)
+# VARIANT A STRATEGY (decided 2026-04-18 after A/B listening test):
+#   - No homophone substitution (_clean_for_gemini is NOT called).
+#   - Raw sentence sent directly to Gemini, prepended with a prompt prefix
+#     that tells the model to use Taiwan-style pronunciation.
+#   - This produced more natural audio than variant C (rule-based replacement).
+#   - GCS path: gemini31-prompt-only/sentences/{key}.mp3 (2408 pre-generated).
+#   - If you ever want to regenerate: run batch script with --variant A.
 GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview"
 GEMINI_TTS_VOICE = "Aoede"
+GEMINI_TTS_PROMPT_PREFIX = "請使用台灣用語的繁體中文，以親切且自然的語氣朗讀以下內容："
 GCP_PROJECT = os.environ.get("GCP_PROJECT", "lingoleap-dev")
 
 
@@ -684,13 +692,15 @@ def _synthesize_gemini(text: str) -> bytes:
             project=GCP_PROJECT,
             location="us-central1",
         )
+        # Variant A: prepend Taiwan-style prompt prefix (no homophone rules).
+        tts_contents = GEMINI_TTS_PROMPT_PREFIX + text
         logger.info(
-            "Gemini TTS API call (model=%s, voice=%s, len=%d chars)",
-            GEMINI_TTS_MODEL, GEMINI_TTS_VOICE, len(text),
+            "Gemini TTS API call (model=%s, voice=%s, len=%d chars incl. prompt)",
+            GEMINI_TTS_MODEL, GEMINI_TTS_VOICE, len(tts_contents),
         )
         response = client.models.generate_content(
             model=GEMINI_TTS_MODEL,
-            contents=text,
+            contents=tts_contents,
             config=genai_types.GenerateContentConfig(
                 response_modalities=["AUDIO"],
                 speech_config=genai_types.SpeechConfig(
@@ -742,7 +752,7 @@ def synthesize_speech(text: str) -> bytes:
     Two-layer cache: in-memory (L1) → GCS (L2) → API call.
     GCS paths:
       azure    — azure/sentences/{hash}.mp3
-      gemini31 — gemini31/sentences/{hash}.mp3
+      gemini31 — gemini31-prompt-only/sentences/{hash}.mp3 (Variant A)
       google   — tts-cache/{hash}.mp3 (legacy)
 
     Args:
@@ -786,7 +796,9 @@ def synthesize_speech(text: str) -> bytes:
     used_provider: str
 
     if active_provider == "gemini31":
-        cleaned = _clean_for_gemini(cleaned)
+        # Variant A: prompt-only baseline — no homophone substitution.
+        # 2026-04-18 A/B comparison showed A sounds more natural than C.
+        # Previous: `cleaned = _clean_for_gemini(cleaned)` (removed)
         audio_bytes = _synthesize_gemini(cleaned)
         used_provider = "gemini31"
     elif active_provider == "azure":
@@ -852,14 +864,18 @@ def delete_tts_cache(text: str) -> dict:
         del _TTS_CACHE[key]
         logger.info("L1 cache evicted (key=%s)", key[:8])
 
-    # GCS deletion — try all provider paths
+    # GCS deletion — try all provider paths.
+    # Note: gemini31 now uses `gemini31-prompt-only/sentences/` (Variant A).
+    # Old `gemini31/sentences/` files (Variant C, pre-2026-04-18) are not
+    # cleaned by this function. They remain in GCS as rollback-safety and
+    # are intentionally abandoned after the A/B switch.
     bucket = _get_gcs_bucket()
     if bucket is not None:
         for provider in ("azure", "gemini31", "google"):
             if provider == "azure":
                 blob_path = f"azure/sentences/{key}.mp3"
             elif provider == "gemini31":
-                blob_path = f"gemini31/sentences/{key}.mp3"
+                blob_path = f"gemini31-prompt-only/sentences/{key}.mp3"
             else:
                 blob_path = f"tts-cache/{key}.mp3"
             try:
