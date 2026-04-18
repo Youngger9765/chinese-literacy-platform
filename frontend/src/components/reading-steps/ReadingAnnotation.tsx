@@ -46,7 +46,10 @@ const TYPE_CONFIG: Record<AnnotationType, { label: string; icon: string; classNa
   unknown: {
     label: '不懂',
     icon: '❓',
-    className: 'underline decoration-red-500 decoration-2 underline-offset-2',
+    // Bottom red line drawn via inset box-shadow so it tracks the inline-box edge
+    // (always straight), unaffected by letter-spacing, ruby baselines, or PUA
+    // variation selectors that can make text-decoration: underline look tilted.
+    className: 'shadow-[inset_0_-3px_0_0_#ef4444]',
     activeClass: 'bg-red-100 border-red-400 text-red-800',
   },
   important: {
@@ -541,12 +544,17 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           {story.content.map((rawPara, paraIdx) => {
             const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
             return (
-              <section key={paraIdx} className="relative group" data-para-idx={paraIdx}>
-                {/* Paragraph number */}
-                <span className="absolute -left-8 md:-left-12 top-2 text-sm font-headline font-bold text-on-surface-variant/30 select-none">
+              <section key={paraIdx} className="relative group">
+                {/* Paragraph number — lives outside the [data-para-idx] subtree
+                    so its text doesn't inflate selection offsets. */}
+                <span
+                  aria-hidden="true"
+                  className="absolute -left-8 md:-left-12 top-2 text-sm font-headline font-bold text-on-surface-variant/30 select-none pointer-events-none"
+                >
                   {String(paraIdx + 1).padStart(2, '0')}
                 </span>
                 <p
+                  data-para-idx={paraIdx}
                   className="text-on-surface/90"
                   style={{
                     fontSize: `${fontSizePx}px`,
