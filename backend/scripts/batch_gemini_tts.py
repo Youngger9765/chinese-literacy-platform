@@ -85,7 +85,25 @@ def _synthesize_and_upload(client, bucket, text: str, key: str) -> dict:
                 ),
             ),
         )
-        pcm_data = response.candidates[0].content.parts[0].inline_data.data
+
+        # Guard against safety-blocked / empty responses before indexing
+        if not response.candidates:
+            return {
+                "key": key,
+                "status": "error",
+                "error": "empty candidates (safety block?)",
+                "raw_text": text[:80],
+            }
+        cand = response.candidates[0]
+        if not cand.content or not cand.content.parts:
+            finish_reason = getattr(cand, "finish_reason", "unknown")
+            return {
+                "key": key,
+                "status": "error",
+                "error": f"empty content (finish_reason={finish_reason})",
+                "raw_text": text[:80],
+            }
+        pcm_data = cand.content.parts[0].inline_data.data
         if not pcm_data:
             return {"key": key, "status": "error", "error": "empty PCM"}
 

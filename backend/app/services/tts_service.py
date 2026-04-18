@@ -705,9 +705,19 @@ def _synthesize_gemini(text: str) -> bytes:
     except Exception as exc:
         raise TTSError(f"Gemini TTS API error: {exc}") from exc
 
+    # Guard against safety-blocked / empty responses before indexing
+    if not response.candidates:
+        raise TTSError("Gemini TTS returned empty candidates (safety block?)")
+    cand = response.candidates[0]
+    if not cand.content or not cand.content.parts:
+        finish_reason = getattr(cand, "finish_reason", "unknown")
+        raise TTSError(
+            f"Gemini TTS returned empty content (finish_reason={finish_reason})"
+        )
+
     # Extract raw PCM from the response
     try:
-        pcm_data = response.candidates[0].content.parts[0].inline_data.data
+        pcm_data = cand.content.parts[0].inline_data.data
     except (AttributeError, IndexError, TypeError) as exc:
         raise TTSError(f"Gemini TTS unexpected response structure: {exc}") from exc
 
