@@ -6,7 +6,7 @@ Two-layer cache: GCS (persistent) → in-memory (fast).
 2. Check GCS bucket  (azure/sentences/{hash}.mp3, gemini31/sentences/{hash}.mp3,
    or tts-cache/{hash}.mp3)
 3. Call active provider API → save to GCS + in-memory
-4. Fallback chains: azure→google; gemini31→azure→google; google has no fallback
+4. If Azure fails → fall back to Google Cloud TTS
 
 Provider selection:
   TTS_PROVIDER env var (default: "azure")
@@ -80,7 +80,10 @@ def _get_gcs_bucket():
 def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
     """Try to read cached audio from GCS. Returns None on miss or error.
 
-    See module docstring for GCS path layout.
+    GCS paths:
+      Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
+      Gemini31 — gemini31/sentences/{key}.mp3 (Issue #1107)
+      Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
@@ -105,7 +108,10 @@ def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
 def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
     """Write audio to GCS cache. Failures are logged but not raised.
 
-    See module docstring for GCS path layout.
+    GCS paths:
+      Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
+      Gemini31 — gemini31/sentences/{key}.mp3 (Issue #1107)
+      Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
@@ -130,15 +136,7 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
 # Active provider: "azure" | "google" | "gemini31"  (default: "azure")
 TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "azure")
 
-_VALID_PROVIDERS = {"azure", "google", "gemini31"}
-if TTS_PROVIDER not in _VALID_PROVIDERS:
-    logger.error(
-        "Invalid TTS_PROVIDER=%r, must be one of %s. Defaulting to 'azure'.",
-        TTS_PROVIDER, _VALID_PROVIDERS,
-    )
-    TTS_PROVIDER = "azure"
-
-# Azure Speech Service (used when TTS_PROVIDER="azure")
+# Azure Speech Service (台灣腔，primary if key is set)
 AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY", "")
 AZURE_SPEECH_REGION = os.environ.get("AZURE_SPEECH_REGION", "eastus")
 AZURE_TTS_VOICE = os.environ.get("AZURE_TTS_VOICE", "zh-TW-HsiaoChenNeural")
@@ -151,11 +149,6 @@ TTS_LANGUAGE_CODE = "cmn-CN"
 GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview"
 GEMINI_TTS_VOICE = "Aoede"
 GCP_PROJECT = os.environ.get("GCP_PROJECT", "lingoleap-dev")
-
-# Singleton Gemini client (lazy init to avoid import error if SDK not installed)
-# None = not yet attempted; _GEMINI_UNAVAILABLE = permanent failure
-_GEMINI_UNAVAILABLE = object()
-_gemini_client = None  # None = not tried, _GEMINI_UNAVAILABLE = permanent failure
 
 
 # ---------------------------------------------------------------------------
@@ -319,88 +312,6 @@ def _get_tts_client():
 # Cache key helper
 # ---------------------------------------------------------------------------
 
-def _num_to_chinese_tw(n: int) -> str:
-    """Convert integer to spoken Traditional Chinese (Taiwan conventions).
-
-    Taiwan style: 兩百 (not 二百), 兩千 (not 二千).
-    Used for Gemini TTS which doesn't handle Taiwan number pronunciation natively.
-    """
-    if n == 0:
-        return "零"
-    if n < 0:
-        return "負" + _num_to_chinese_tw(-n)
-
-    digits = "零一二三四五六七八九"
-    result = ""
-
-    # 萬位
-    if n >= 10000:
-        wan = n // 10000
-        result += (_num_to_chinese_tw(wan) if wan > 1 else "一") + "萬"
-        n %= 10000
-        if 0 < n < 1000:
-            result += "零"
-
-    # 千位 (台灣用「兩千」不用「二千」)
-    if n >= 1000:
-        qian = n // 1000
-        result += ("兩" if qian == 2 else digits[qian]) + "千"
-        n %= 1000
-        if 0 < n < 100:
-            result += "零"
-
-    # 百位 (台灣用「兩百」不用「二百」)
-    if n >= 100:
-        bai = n // 100
-        result += ("兩" if bai == 2 else digits[bai]) + "百"
-        n %= 100
-        if 0 < n < 10:
-            result += "零"
-
-    # 十位
-    if n >= 10:
-        shi = n // 10
-        if shi == 1 and not result:
-            result += "十"  # 「十二」不是「一十二」
-        else:
-            result += digits[shi] + "十"
-        n %= 10
-
-    # 個位
-    if n > 0:
-        result += digits[n]
-
-    return result
-
-
-def _numbers_to_chinese_tw(text: str) -> str:
-    """Replace Arabic numbers with spoken Chinese (Taiwan) in text.
-
-    Handles: integers, decimals (點), ranges (- ~ ～ 到).
-    Only used for Gemini TTS — Azure handles Taiwan numbers natively.
-    """
-    # Ranges first: 129-132, 80~90, 80～90
-    def _replace_range(m: re.Match) -> str:
-        a, sep, b = m.group(1), m.group(2), m.group(3)
-        return _num_to_chinese_tw(int(a)) + "到" + _num_to_chinese_tw(int(b))
-    text = re.sub(r'(\d+)([~～\-])(\d+)', _replace_range, text)
-
-    # Decimals: 10.22 → 十點二二 (each digit after dot read individually)
-    def _replace_decimal(m: re.Match) -> str:
-        integer_part = _num_to_chinese_tw(int(m.group(1)))
-        digits = "零一二三四五六七八九"
-        decimal_part = "".join(digits[int(d)] for d in m.group(2))
-        return integer_part + "點" + decimal_part
-    text = re.sub(r'(\d+)\.(\d+)', _replace_decimal, text)
-
-    # Remaining integers (not already converted)
-    def _replace_int(m: re.Match) -> str:
-        return _num_to_chinese_tw(int(m.group()))
-    text = re.sub(r'\d+', _replace_int, text)
-
-    return text
-
-
 def _clean_for_tts(text: str) -> str:
     """Strip symbols that TTS would read aloud (e.g. ~~~ → '波浪符波浪符波浪符')."""
     # Remove decorative symbols that aren't meant to be spoken
@@ -420,18 +331,176 @@ def _clean_for_tts(text: str) -> str:
     return text
 
 
-def _clean_for_gemini(text: str) -> str:
-    """Additional cleaning for Gemini TTS: convert numbers to spoken Chinese (Taiwan).
-
-    Azure handles Taiwan numbers natively, Gemini doesn't.
-    Applied AFTER _clean_for_tts, only when TTS_PROVIDER == 'gemini31'.
-    """
-    return _numbers_to_chinese_tw(text)
-
-
 def _cache_key(text: str) -> str:
     """Return a stable hex SHA-256 digest for *text*."""
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+# ---------------------------------------------------------------------------
+# Gemini TTS — Taiwan pronunciation corrections
+# ---------------------------------------------------------------------------
+# Gemini uses China Mandarin pronunciation by default.
+# We replace specific words with homophones that sound correct in Taiwan Mandarin.
+# TTS only cares about SOUND, not meaning, so homophones are safe substitutions.
+# Reference: backend/data/tts-taiwan-pronunciation.yaml
+
+_TAIWAN_TTS_REPLACEMENTS: list[tuple[str, str]] = [
+    # --- Cat 1: 聲調不同 (high frequency) ---
+    # 垃圾: TW lè sè, CN lā jī — completely different
+    ("垃圾", "樂色"),
+    # 研究: 究 TW jiù (4th), CN jiū (1st)
+    ("研究", "研舊"),
+    # 危險: 危 TW wéi (2nd), CN wēi (1st)
+    ("危險", "圍險"),
+    # 企業: 企 TW qì (4th), CN qǐ (3rd)
+    ("企業", "氣業"),
+    # 成績: 績 TW jī (1st), CN jì (4th)
+    ("成績", "成基"),
+    # 星期: 期 TW qí (2nd), CN qī (1st)
+    ("星期", "星其"),
+    ("日期", "日其"),
+    ("期待", "其待"),
+    ("期限", "其限"),
+    ("期間", "其間"),
+    ("期末", "其末"),
+    # 法: TW fà (4th), CN fǎ (3rd) — only replace in compounds
+    ("法律", "罰律"),
+    ("法國", "罰國"),
+    ("法院", "罰院"),
+    ("法規", "罰規"),
+    ("司法", "司罰"),
+    ("方法", "方罰"),
+    ("辦法", "辦罰"),
+    # 微: TW wéi (2nd), CN wēi (1st)
+    ("微笑", "圍笑"),
+    ("微小", "圍小"),
+    # 盡: TW jìn (4th), CN jǐn (3rd)
+    ("盡量", "近量"),
+    ("盡力", "近力"),
+    # 休息: 息 TW xí (2nd), CN xī (1st)
+    ("休息", "休席"),
+    # 暫時: TW zhàn (4th), CN zàn (4th) — initial zh vs z
+    ("暫時", "站時"),
+    # 包括: TW bāo guā, CN bāo kuò — completely different
+    ("包括", "包刮"),
+    # 綜合: 綜 TW zòng (4th), CN zōng (1st)
+    ("綜合", "粽合"),
+    # 友誼: 誼 TW yí (2nd), CN yì (4th)
+    ("友誼", "友宜"),
+    # 品質: 質 TW zhí (2nd), CN zhì (4th)
+    ("品質", "品直"),
+    ("質量", "直量"),
+    # 攻擊: 擊 TW jí (2nd), CN jī (1st)
+    ("攻擊", "攻急"),
+    # 阿姨: 阿 TW ǎ (3rd), CN ā (1st)
+    ("阿姨", "啞姨"),
+
+    # --- Cat 2: 聲母/韻母不同 ---
+    # 蝸牛: TW guā niú, CN wō niú — completely different
+    ("蝸牛", "瓜牛"),
+    # 液體: 液 TW yì, CN yè
+    ("液體", "意體"),
+    # 堤防: 堤 TW tí, CN dī
+    ("堤防", "提防"),
+
+    # --- Cat 3: 多音字偏好 ---
+    # 知識: 識 TW shì (4th), CN shí (2nd)
+    ("知識", "知是"),
+    ("認識", "認是"),
+    ("常識", "常是"),
+    # 地殼: 殼 TW ké, CN qiào
+    ("地殼", "地咳"),
+
+    # --- 多音字 phoneme corrections ---
+    # 喝采/喝彩: 喝 should be hè (4th), not hē (1st)
+    ("喝采", "賀采"),
+    ("喝彩", "賀彩"),
+]
+
+
+def _apply_taiwan_pronunciation(text: str) -> str:
+    """Replace words with homophones that force Taiwan pronunciation in Gemini TTS.
+
+    Gemini TTS defaults to China Mandarin pronunciation. This function replaces
+    specific words with homophones that a Chinese TTS will naturally pronounce
+    with the correct Taiwan tone/initial/final.
+
+    Only used when TTS_PROVIDER == 'gemini31'.
+    Reference: backend/data/tts-taiwan-pronunciation.yaml
+    """
+    for original, replacement in _TAIWAN_TTS_REPLACEMENTS:
+        if original in text:
+            text = text.replace(original, replacement)
+    return text
+
+
+def _numbers_to_chinese_tw(text: str) -> str:
+    """Convert Arabic numerals in *text* to spoken Traditional Chinese (Taiwan conventions).
+
+    Taiwan style: 兩百 (not 二百), 兩千 (not 二千).
+    Handles integers, decimals, and ranges (e.g. 10-20 → 十到二十).
+    Used for Gemini TTS which doesn't handle Taiwan number pronunciation natively.
+    Reference: backend/data/tts-number-rules.yaml
+    """
+
+    def _int_to_tw(n: int) -> str:
+        if n == 0:
+            return "零"
+        if n < 0:
+            return "負" + _int_to_tw(-n)
+        digits = "零一二三四五六七八九"
+        result = ""
+        if n >= 10000:
+            wan = n // 10000
+            result += (_int_to_tw(wan) if wan > 1 else "一") + "萬"
+            n %= 10000
+            if 0 < n < 1000:
+                result += "零"
+        if n >= 1000:
+            qian = n // 1000
+            result += ("兩" if qian == 2 else digits[qian]) + "千"
+            n %= 1000
+            if 0 < n < 100:
+                result += "零"
+        if n >= 100:
+            bai = n // 100
+            result += ("兩" if bai == 2 else digits[bai]) + "百"
+            n %= 100
+            if 0 < n < 10:
+                result += "零"
+        if n >= 10:
+            shi = n // 10
+            result += ("十" if shi == 1 and not result else digits[shi] + "十")
+            n %= 10
+        if n > 0:
+            result += digits[n]
+        return result
+
+    def _replace_number(m: re.Match) -> str:
+        raw = m.group(0)
+        # Range pattern: 10-20 → 十到二十
+        range_m = re.fullmatch(r"(\d+)-(\d+)", raw)
+        if range_m:
+            a, b = int(range_m.group(1)), int(range_m.group(2))
+            return _int_to_tw(a) + "到" + _int_to_tw(b)
+        # Decimal pattern: 3.14 → 三點一四
+        decimal_m = re.fullmatch(r"(\d+)\.(\d+)", raw)
+        if decimal_m:
+            int_part = _int_to_tw(int(decimal_m.group(1)))
+            frac_part = "".join("零一二三四五六七八九"[int(d)] for d in decimal_m.group(2))
+            return int_part + "點" + frac_part
+        # Plain integer
+        return _int_to_tw(int(raw))
+
+    # Match ranges (1-10), decimals (3.14), and plain integers, but not years in parentheses
+    return re.sub(r"\d+(?:[.\-]\d+)?", _replace_number, text)
+
+
+def _clean_for_gemini(text: str) -> str:
+    """Additional cleaning for Gemini TTS: Taiwan numbers + pronunciation fixes."""
+    text = _numbers_to_chinese_tw(text)
+    text = _apply_taiwan_pronunciation(text)
+    return text
 
 
 # ---------------------------------------------------------------------------
@@ -521,37 +590,21 @@ def _synthesize_google(text: str) -> bytes:
 # Gemini 3.1 Flash TTS — Issue #1107
 # ---------------------------------------------------------------------------
 
-def _get_gemini_client():
-    """Return a lazy-initialised Gemini TTS client, or raise TTSError on permanent failure."""
-    global _gemini_client
-    if _gemini_client is _GEMINI_UNAVAILABLE:
-        raise TTSError("Gemini TTS client permanently unavailable")
-    if _gemini_client is None:
-        try:
-            import google.genai as genai
-            _gemini_client = genai.Client(vertexai=True, project=GCP_PROJECT, location="us-central1")
-            logger.info("Gemini TTS client initialised (project=%s)", GCP_PROJECT)
-        except Exception as exc:
-            logger.error("Gemini TTS client init failed: %s", exc)
-            _gemini_client = _GEMINI_UNAVAILABLE
-            raise TTSError(f"Gemini TTS client init failed: {exc}") from exc
-    return _gemini_client
-
-
 def _pcm_to_mp3(pcm_data: bytes, sample_rate: int = 24000) -> bytes:
     """Convert raw L16 PCM bytes to MP3 using ffmpeg subprocess.
 
-    Requires ffmpeg installed in the Docker image (Dockerfile: apt-get install ffmpeg).
+    Falls back to WAV (with proper header) if ffmpeg is unavailable, but
+    logs a warning since the frontend expects audio/mpeg.
 
     Args:
         pcm_data: Raw signed 16-bit little-endian PCM samples.
         sample_rate: Sample rate in Hz (Gemini outputs 24000 Hz mono).
 
     Returns:
-        MP3 bytes.
+        MP3 bytes, or WAV bytes as fallback.
 
     Raises:
-        TTSError: if ffmpeg fails or is not installed.
+        TTSError: if both ffmpeg and WAV fallback fail.
     """
     try:
         result = subprocess.run(
@@ -569,17 +622,33 @@ def _pcm_to_mp3(pcm_data: bytes, sample_rate: int = 24000) -> bytes:
             capture_output=True,
             timeout=30,
         )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.decode("utf-8", errors="replace"))
+        mp3_bytes = result.stdout
+        if not mp3_bytes:
+            raise RuntimeError("ffmpeg produced empty output")
+        return mp3_bytes
     except FileNotFoundError:
-        raise TTSError("ffmpeg is not installed or not on PATH")
-    except subprocess.TimeoutExpired:
-        raise TTSError("ffmpeg PCM→MP3 conversion timed out after 30s")
-    except OSError as exc:
-        raise TTSError(f"ffmpeg subprocess failed: {exc}")
-    if result.returncode != 0:
-        raise TTSError(f"ffmpeg PCM→MP3 failed: {result.stderr.decode('utf-8', errors='replace')}")
-    if not result.stdout:
-        raise TTSError("ffmpeg produced empty MP3 output")
-    return result.stdout
+        logger.warning("ffmpeg not found — falling back to WAV for Gemini TTS output")
+    except Exception as exc:
+        logger.warning("ffmpeg PCM→MP3 failed (%s) — falling back to WAV", exc)
+
+    # WAV fallback: build minimal WAV header for L16 PCM mono
+    import struct
+    num_channels = 1
+    bits_per_sample = 16
+    byte_rate = sample_rate * num_channels * bits_per_sample // 8
+    block_align = num_channels * bits_per_sample // 8
+    data_size = len(pcm_data)
+    chunk_size = 36 + data_size
+    wav_header = struct.pack(
+        "<4sI4s4sIHHIIHH4sI",
+        b"RIFF", chunk_size, b"WAVE",
+        b"fmt ", 16, 1, num_channels, sample_rate,
+        byte_rate, block_align, bits_per_sample,
+        b"data", data_size,
+    )
+    return wav_header + pcm_data
 
 
 def _synthesize_gemini(text: str) -> bytes:
@@ -588,9 +657,9 @@ def _synthesize_gemini(text: str) -> bytes:
     Uses the google-genai SDK in Vertex AI mode. The API returns raw L16 PCM
     at 24 kHz mono, which is converted to MP3 via ffmpeg subprocess.
 
-    No sentence splitting needed — tested up to ~700 chars. Preview model, limits may change.
+    No sentence splitting is needed — Gemini TTS has no strict length limit.
 
-    Voice: Aoede (prebuilt voice, Mandarin quality under evaluation)
+    Voice: Aoede (prebuilt English/Mandarin voice)
     Model: gemini-3.1-flash-tts-preview
     Location: us-central1
 
@@ -598,28 +667,27 @@ def _synthesize_gemini(text: str) -> bytes:
         text: Plain text to synthesise (already cleaned by _clean_for_tts).
 
     Returns:
-        MP3 bytes.
+        MP3 bytes (or WAV fallback if ffmpeg is unavailable).
 
     Raises:
-        TTSError: if the API call fails, returns empty audio, or ffmpeg conversion fails.
+        TTSError: if the API call fails or returns empty audio.
     """
     try:
+        import google.genai as genai
         from google.genai import types as genai_types
     except ImportError as exc:
         raise TTSError(f"google-genai SDK not installed: {exc}") from exc
 
-    client = _get_gemini_client()
-
-    # Convert numbers to spoken Chinese (Taiwan) — Gemini doesn't do this natively
-    text = _clean_for_gemini(text)
-
-    logger.info(
-        "Gemini TTS API call (model=%s, voice=%s, len=%d chars)",
-        GEMINI_TTS_MODEL, GEMINI_TTS_VOICE, len(text),
-    )
-
-    # Separate try for API call only
     try:
+        client = genai.Client(
+            vertexai=True,
+            project=GCP_PROJECT,
+            location="us-central1",
+        )
+        logger.info(
+            "Gemini TTS API call (model=%s, voice=%s, len=%d chars)",
+            GEMINI_TTS_MODEL, GEMINI_TTS_VOICE, len(text),
+        )
         response = client.models.generate_content(
             model=GEMINI_TTS_MODEL,
             contents=text,
@@ -635,35 +703,13 @@ def _synthesize_gemini(text: str) -> bytes:
             ),
         )
     except Exception as exc:
-        raise TTSError(f"Gemini TTS API call failed: {exc}") from exc
-
-    # Log response metadata before parsing (aids debugging on parse failure)
-    try:
-        candidates_count = len(response.candidates) if response.candidates else 0
-        finish_reason = (
-            getattr(response.candidates[0], "finish_reason", "unknown")
-            if candidates_count > 0
-            else "no_candidate"
-        )
-        logger.debug(
-            "Gemini TTS response: candidates=%d, finish_reason=%s",
-            candidates_count, finish_reason,
-        )
-    except Exception:
-        pass
+        raise TTSError(f"Gemini TTS API error: {exc}") from exc
 
     # Extract raw PCM from the response
     try:
         pcm_data = response.candidates[0].content.parts[0].inline_data.data
     except (AttributeError, IndexError, TypeError) as exc:
-        candidates_count = 0
-        try:
-            candidates_count = len(response.candidates) if response.candidates else 0
-        except Exception:
-            pass
-        raise TTSError(
-            f"Gemini TTS unexpected response structure (candidates={candidates_count}): {exc}"
-        ) from exc
+        raise TTSError(f"Gemini TTS unexpected response structure: {exc}") from exc
 
     if not pcm_data:
         raise TTSError("Gemini TTS returned empty audio content")
@@ -720,14 +766,6 @@ def synthesize_speech(text: str) -> bytes:
             _l1_put(key, gcs_data)
             return gcs_data
 
-    # Cross-provider fallback: check other providers' caches to avoid re-synthesis
-    if active_provider == "gemini31":
-        for fallback_provider in ("azure", "google"):
-            gcs_data = _gcs_get(key, provider=fallback_provider)
-            if gcs_data is not None:
-                _l1_put(key, gcs_data)
-                return gcs_data
-
     # Clean text before synthesis
     cleaned = _clean_for_tts(text)
     if not cleaned:
@@ -738,28 +776,9 @@ def synthesize_speech(text: str) -> bytes:
     used_provider: str
 
     if active_provider == "gemini31":
-        try:
-            audio_bytes = _synthesize_gemini(cleaned)
-            used_provider = "gemini31"
-        except TTSError as gemini_exc:
-            logger.warning("Gemini TTS failed, falling back to Azure→Google: %s", gemini_exc)
-            azure_exc: Optional[TTSError] = None
-            if AZURE_SPEECH_KEY:
-                try:
-                    audio_bytes = _synthesize_azure(cleaned)
-                    used_provider = "azure"
-                except TTSError as _azure_exc:
-                    azure_exc = _azure_exc
-                    logger.warning("Azure TTS also failed: %s", azure_exc)
-            if audio_bytes is None:
-                try:
-                    audio_bytes = _synthesize_google(cleaned)
-                    used_provider = "google"
-                except TTSError as google_exc:
-                    raise TTSError(
-                        f"All TTS providers failed — Gemini ({gemini_exc}), "
-                        f"Azure ({azure_exc}), Google ({google_exc})"
-                    ) from google_exc
+        cleaned = _clean_for_gemini(cleaned)
+        audio_bytes = _synthesize_gemini(cleaned)
+        used_provider = "gemini31"
     elif active_provider == "azure":
         # Try Azure first; fall back to Google on any error
         try:
@@ -778,12 +797,10 @@ def synthesize_speech(text: str) -> bytes:
                 raise TTSError(
                     f"Both Azure ({exc}) and Google ({google_exc}) TTS failed"
                 ) from google_exc
-    elif active_provider == "google":
+    else:
         # Provider explicitly set to "google" — skip Azure entirely
         audio_bytes = _synthesize_google(cleaned)
         used_provider = "google"
-    else:
-        raise TTSError(f"Unknown TTS_PROVIDER={active_provider!r}")
 
     # Save to both caches (use the provider that actually succeeded)
     _l1_put(key, audio_bytes)
@@ -805,7 +822,7 @@ def _l1_put(key: str, audio_bytes: bytes) -> None:
 
 
 def delete_tts_cache(text: str) -> dict:
-    """Delete cached audio for *text* from L1 and GCS (all provider paths: azure, gemini31, google).
+    """Delete cached audio for *text* from L1 and GCS (both azure and google paths).
 
     Used by the /api/tts/regenerate admin endpoint to force re-synthesis
     after phoneme corrections are added.
