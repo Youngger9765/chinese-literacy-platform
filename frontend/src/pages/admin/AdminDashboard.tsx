@@ -7,6 +7,7 @@ import CreateOrgPanel from './CreateOrgPanel';
 import ClassroomDetailPanel from './ClassroomDetailPanel';
 import UsersPanel from './UsersPanel';
 import StoryManagementPanel from './StoryManagementPanel';
+import TtsSentenceTable from './tts-audit/TtsSentenceTable';
 import { BuildingIcon, ShieldIcon } from '../../components/icons';
 import {
   listRoles,
@@ -119,6 +120,7 @@ const AdminDashboard: React.FC = () => {
         {selectedNode?.type === 'roles' && <RolesPanel />}
         {selectedNode?.type === 'users' && <UsersPanel />}
         {selectedNode?.type === 'stories' && <StoryManagementPanel />}
+        {selectedNode?.type === 'tts_audit' && <TtsSentenceTable />}
       </div>
     </div>
   );
