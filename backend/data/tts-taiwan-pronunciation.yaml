@@ -1,0 +1,346 @@
+# =============================================================================
+# 台灣國語 vs 中國普通話 發音差異對照表
+# For: LingoLeap TTS (Gemini 3.1 Flash) 發音校正
+# Sources:
+#   - Wikipedia: 臺灣海峽兩岸現代標準漢語發音差異列表
+#   - ToneOZ (toneoz.com): 兩岸語音差異搜尋引擎（170,000+ 詞分析，差異約 3-4%）
+#   - 陳樂融: 兩岸不同讀音一覽表
+#   - 教育部《國語一字多音審訂表》
+# Version: 1.0 (2026-04-18)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Cat 1: 聲調不同（同字不同聲調，最容易被學生察覺）
+# Priority: P0 — 每個都會讓台灣學生覺得「念錯了」
+# -----------------------------------------------------------------------------
+tone_differences:
+  # --- 高頻（課文大量出現）---
+  - word: 垃圾
+    taiwan: "ㄌㄜˋ ㄙㄜˋ (lè sè)"
+    china: "lā jī"
+    frequency: high
+    notes: 完全不同音。14 次出現。台灣學生一聽就知道不對
+
+  - word: 研究
+    taiwan: "ㄧㄢˊ ㄐㄧㄡˋ (yán jiù)"
+    china: "yán jiū"
+    frequency: high
+    notes: 64 次出現，遍布所有課文。「究」台灣四聲，大陸一聲
+
+  - word: 危險
+    taiwan: "ㄨㄟˊ ㄒㄧㄢˇ (wéi xiǎn)"
+    china: "wēi xiǎn"
+    frequency: high
+    notes: 7 次。「危」台灣二聲，大陸一聲
+
+  - word: 企業
+    taiwan: "ㄑㄧˋ ㄧㄝˋ (qì yè)"
+    china: "qǐ yè"
+    frequency: high
+    notes: 「企」台灣四聲，大陸三聲
+
+  - word: 成績
+    taiwan: "ㄔㄥˊ ㄐㄧ (chéng jī)"
+    china: "chéng jì"
+    frequency: high
+    notes: 「績」台灣一聲，大陸四聲。學校最常用詞
+
+  - word: 星期
+    taiwan: "ㄒㄧㄥ ㄑㄧˊ (xīng qí)"
+    china: "xīng qī"
+    frequency: high
+    notes: 「期」台灣二聲，大陸一聲
+
+  - word: 法律
+    taiwan: "ㄈㄚˋ ㄌㄩˋ (fà lǜ)"
+    china: "fǎ lǜ"
+    frequency: high
+    notes: 「法」台灣四聲，大陸三聲
+
+  - word: 微笑
+    taiwan: "ㄨㄟˊ ㄒㄧㄠˋ (wéi xiào)"
+    china: "wēi xiào"
+    frequency: high
+    notes: 「微」台灣二聲，大陸一聲
+
+  - word: 盡量
+    taiwan: "ㄐㄧㄣˋ ㄌㄧㄤˋ (jìn liàng)"
+    china: "jǐn liàng"
+    frequency: high
+    notes: 「盡」台灣四聲，大陸三聲
+
+  - word: 休息
+    taiwan: "ㄒㄧㄡ ㄒㄧˊ (xiū xí)"
+    china: "xiū xī"
+    frequency: high
+    notes: 「息」台灣二聲，大陸一聲
+
+  # --- 中頻 ---
+  - word: 暫時
+    taiwan: "ㄓㄢˋ ㄕˊ (zhàn shí)"
+    china: "zàn shí"
+    frequency: medium
+    notes: 聲母也不同（zh vs z）
+
+  - word: 包括
+    taiwan: "ㄅㄠ ㄍㄨㄚ (bāo guā)"
+    china: "bāo kuò"
+    frequency: medium
+    notes: 6 次出現。韻母完全不同
+
+  - word: 綜合
+    taiwan: "ㄗㄨㄥˋ (zòng)"
+    china: "zōng"
+    frequency: medium
+    notes: 「綜合活動」課名常用
+
+  - word: 友誼
+    taiwan: "ㄧㄡˇ ㄧˊ (yǒu yí)"
+    china: "yǒu yì"
+    frequency: medium
+
+  - word: 亞洲
+    taiwan: "ㄧㄚˇ ㄓㄡ (yǎ zhōu)"
+    china: "yà zhōu"
+    frequency: medium
+
+  - word: 品質
+    taiwan: "ㄆㄧㄣˇ ㄓˊ (pǐn zhí)"
+    china: "pǐn zhì"
+    frequency: medium
+
+  - word: 褐色
+    taiwan: "ㄏㄜˊ ㄙㄜˋ (hé sè)"
+    china: "hè sè"
+    frequency: medium
+
+  - word: 攻擊
+    taiwan: "ㄍㄨㄥ ㄐㄧˊ (gōng jí)"
+    china: "gōng jī"
+    frequency: medium
+
+  - word: 寂寞
+    taiwan: "ㄐㄧˊ ㄇㄛˋ (jí mò)"
+    china: "jì mò"
+    frequency: medium
+
+  - word: 阿姨
+    taiwan: "ㄚˇ ㄧˊ (ǎ yí)"
+    china: "ā yí"
+    frequency: high
+
+  - word: 炸雞
+    taiwan: "ㄓㄚˋ ㄐㄧ (zhà jī)"
+    china: "zhá jī"
+    frequency: high
+    notes: 烹飪「炸」大陸二聲，台灣統一四聲
+
+# -----------------------------------------------------------------------------
+# Cat 2: 聲母/韻母不同（發音完全不一樣）
+# -----------------------------------------------------------------------------
+initial_final_differences:
+  - word: 蝸牛
+    taiwan: "ㄍㄨㄚ ㄋㄧㄡˊ (guā niú)"
+    china: "wō niú"
+    frequency: medium
+    notes: 完全不同音。自然課常見
+
+  - word: 液體
+    taiwan: "ㄧˋ ㄊㄧˇ (yì tǐ)"
+    china: "yè tǐ"
+    frequency: medium
+
+  - word: 攜帶
+    taiwan: "ㄒㄧ ㄉㄞˋ (xī dài)"
+    china: "xié dài"
+    frequency: medium
+
+  - word: 堤防
+    taiwan: "ㄊㄧˊ ㄈㄤˊ (tí fáng)"
+    china: "dī fáng"
+    frequency: medium
+    notes: 聲母不同。台灣送氣 t，大陸不送氣 d
+
+  - word: 角色
+    taiwan: "ㄐㄩㄝˊ ㄙㄜˋ (jué sè)"
+    china: "jué sè"
+    frequency: high
+    notes: 3 次出現。此詞兩岸一致，但「角」其他語境台灣偏 jiǎo
+
+  - word: 混淆
+    taiwan: "ㄏㄨㄣˋ ㄧㄠˊ (hùn yáo)"
+    china: "hùn xiáo"
+    frequency: low
+    notes: 「淆」聲母完全不同
+
+# -----------------------------------------------------------------------------
+# Cat 3: 多音字偏好不同
+# -----------------------------------------------------------------------------
+polyphonic_preferences:
+  - word: 知識
+    taiwan: "ㄓ ㄕˋ (zhī shì)"
+    china: "zhī shí"
+    frequency: high
+    notes: 「識」台灣四聲 shì，大陸二聲 shí。高頻詞
+
+  - word: 說服
+    taiwan: "ㄕㄨㄛ ㄈㄨˊ (shuō fú)"
+    china: "shuì fú (傳統) / shuō fú (新)"
+    frequency: medium
+    notes: 台灣統一 shuō，大陸傳統 shuì
+
+  - word: 地殼
+    taiwan: "ㄉㄧˋ ㄎㄜˊ (dì ké)"
+    china: "dì qiào"
+    frequency: medium
+    notes: 自然課常見。完全不同音
+
+  - word: 血
+    taiwan: "ㄒㄧㄝˇ (xiě) 口語常用"
+    china: "xuè 標準"
+    frequency: medium
+    notes: 台灣口語偏 xiě（流血），大陸標準偏 xuè
+
+  - word: 曝光
+    taiwan: "ㄆㄨˋ ㄍㄨㄤ (pù guāng)"
+    china: "bào guāng"
+    frequency: low
+
+  - word: 骰子
+    taiwan: "ㄊㄡˊ ㄗˇ (tóu zi)"
+    china: "shǎi zi (口語)"
+    frequency: medium
+
+# -----------------------------------------------------------------------------
+# Cat 4: 輕聲差異（台灣幾乎不用輕聲，大陸大量使用）
+# 這是最系統性的差異，影響數百個詞
+# -----------------------------------------------------------------------------
+neutral_tone_differences:
+  # 所有疊字親屬稱呼：台灣保留原調，大陸第二字輕聲
+  - word: 爸爸
+    taiwan: "ㄅㄚˋ ㄅㄚˋ (bà bà)"
+    china: "bà ba"
+    frequency: high
+
+  - word: 媽媽
+    taiwan: "ㄇㄚ ㄇㄚ (mā mā)"
+    china: "mā ma"
+    frequency: high
+
+  - word: 哥哥
+    taiwan: "ㄍㄜ ㄍㄜ (gē gē)"
+    china: "gē ge"
+    frequency: high
+
+  - word: 姐姐
+    taiwan: "ㄐㄧㄝˇ ㄐㄧㄝˇ (jiě jiě)"
+    china: "jiě jie"
+    frequency: high
+
+  # 常用雙字詞：台灣保留聲調，大陸第二字輕聲
+  - word: 學生
+    taiwan: "ㄒㄩㄝˊ ㄕㄥ (xué shēng)"
+    china: "xué sheng"
+    frequency: high
+
+  - word: 先生
+    taiwan: "ㄒㄧㄢ ㄕㄥ (xiān shēng)"
+    china: "xiān sheng"
+    frequency: high
+
+  - word: 漂亮
+    taiwan: "ㄆㄧㄠˋ ㄌㄧㄤˋ (piào liàng)"
+    china: "piào liang"
+    frequency: high
+
+  - word: 東西
+    taiwan: "ㄉㄨㄥ ㄒㄧ (dōng xī)"
+    china: "dōng xi"
+    frequency: high
+
+  - word: 意思
+    taiwan: "ㄧˋ ㄙ (yì sī)"
+    china: "yì si"
+    frequency: high
+
+  - word: 故事
+    taiwan: "ㄍㄨˋ ㄕˋ (gù shì)"
+    china: "gù shi"
+    frequency: high
+
+  - word: 時候
+    taiwan: "ㄕˊ ㄏㄡˋ (shí hòu)"
+    china: "shí hou"
+    frequency: high
+
+  - word: 喜歡
+    taiwan: "ㄒㄧˇ ㄏㄨㄢ (xǐ huān)"
+    china: "xǐ huan"
+    frequency: high
+
+  - word: 告訴
+    taiwan: "ㄍㄠˋ ㄙㄨˋ (gào sù)"
+    china: "gào su"
+    frequency: high
+
+  - word: 認識
+    taiwan: "ㄖㄣˋ ㄕˋ (rèn shì)"
+    china: "rèn shi"
+    frequency: high
+
+  - word: 朋友
+    taiwan: "ㄆㄥˊ ㄧㄡˇ (péng yǒu)"
+    china: "péng you"
+    frequency: high
+
+  - word: 舒服
+    taiwan: "ㄕㄨ ㄈㄨˊ (shū fú)"
+    china: "shū fu"
+    frequency: high
+
+  - word: 客氣
+    taiwan: "ㄎㄜˋ ㄑㄧˋ (kè qì)"
+    china: "kè qi"
+    frequency: high
+
+  - word: 便宜
+    taiwan: "ㄆㄧㄢˊ ㄧˊ (pián yí)"
+    china: "pián yi"
+    frequency: high
+
+# -----------------------------------------------------------------------------
+# Cat 5: 系統性差異（不是個別詞，是整體口音特徵）
+# -----------------------------------------------------------------------------
+systematic_differences:
+  - pattern: 兒化音
+    taiwan: 幾乎不用。「一會兒」讀三個字 yī huì ér
+    china: 大量使用。「一會兒」讀 yī huìr
+    impact: Gemini 可能加兒化，台灣學生不習慣
+    fix: TTS prompt 指定不加兒化音
+
+  - pattern: 捲舌音強度
+    taiwan: zh/ch/sh 捲舌較輕
+    china: zh/ch/sh 捲舌明顯
+    impact: 捲舌太重會顯得「很大陸腔」
+    fix: 無法用文字前處理解決，需選對 voice
+
+  - pattern: 前後鼻音
+    taiwan: -n/-ng 區分較模糊
+    china: 嚴格區分
+    impact: TTS 嚴格區分對教學反而正面
+    fix: 不需處理
+
+# -----------------------------------------------------------------------------
+# 課文掃描結果摘要（57 篇）
+# -----------------------------------------------------------------------------
+lesson_scan_summary:
+  total_sentences: 2483
+  affected_by_tone: "研究(64次) + 垃圾(14次) + 危險(7次) + 包括(6次) + 角色(3次) = 94+ 高風險句"
+  affected_by_neutral_tone: "學生/故事/時候/喜歡 等高頻詞遍布所有課文"
+  english_words: "84 個英文詞，集中在 L50(MeToo) 和 L58(Nike/NBA)"
+  polyphonic_risky: "~50-80 個真正有歧義的多音字（長/數/倒/樂）"
+  top_risk_lessons:
+    - "L58 馬拉松/跑鞋：51 個多音字 + 大量英文"
+    - "L49 預防近視：研究 x19"
+    - "L50 MeToo：大量英文混讀"
+    - "L37 環保：垃圾 x6"
