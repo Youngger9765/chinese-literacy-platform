@@ -1,24 +1,32 @@
 """
-TTS service — Azure Speech (primary) + Google Cloud TTS (fallback).
+TTS service — three providers: Azure Speech, Google Cloud TTS, Gemini 3.1 Flash TTS.
 
 Two-layer cache: GCS (persistent) → in-memory (fast).
 1. Check in-memory dict
-2. Check GCS bucket  (azure/sentences/{hash}.mp3 or tts-cache/{hash}.mp3)
-3. Call Azure Speech API → save to GCS + in-memory
+2. Check GCS bucket  (azure/sentences/{hash}.mp3, gemini31/sentences/{hash}.mp3,
+   or tts-cache/{hash}.mp3)
+3. Call active provider API → save to GCS + in-memory
 4. If Azure fails → fall back to Google Cloud TTS
+
+Provider selection:
+  TTS_PROVIDER env var (default: "azure")
+    "azure"    — Azure Speech primary, Google fallback
+    "google"   — Google Cloud TTS only
+    "gemini31" — Gemini 3.1 Flash TTS (no sentence splitting needed)
 
 Azure voice: zh-TW-HsiaoChenNeural (Taiwan accent, female)
 Google voice: cmn-CN-Chirp3-HD-Sulafat (fallback)
-
-Provider auto-detected: Azure if AZURE_SPEECH_KEY is set, otherwise Google
+Gemini voice: Aoede (prebuilt voice, PCM→MP3 via ffmpeg subprocess)
 
 GCS paths:
-  Azure  — azure/sentences/{hash}.mp3  (sentence-level, Issue #667)
-  Google — tts-cache/{hash}.mp3        (legacy path, unchanged for compatibility)
+  Azure    — azure/sentences/{hash}.mp3    (sentence-level, Issue #667)
+  Gemini31 — gemini31/sentences/{hash}.mp3 (new, Issue #1107)
+  Google   — tts-cache/{hash}.mp3          (legacy path, unchanged for compatibility)
 
 Auth:
-  Azure  — Ocp-Apim-Subscription-Key header (AZURE_SPEECH_KEY env var)
-  Google — service-account ADC already available on Cloud Run, no API key needed
+  Azure    — Ocp-Apim-Subscription-Key header (AZURE_SPEECH_KEY env var)
+  Google   — service-account ADC already available on Cloud Run, no API key needed
+  Gemini31 — Vertex AI ADC (google-genai SDK, vertexai=True, us-central1)
 """
 
 from __future__ import annotations
@@ -27,6 +35,7 @@ import hashlib
 import logging
 import os
 import re
+import subprocess
 import urllib.error
 import urllib.request
 from typing import Optional
@@ -72,14 +81,17 @@ def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
     """Try to read cached audio from GCS. Returns None on miss or error.
 
     GCS paths:
-      Azure  — azure/sentences/{key}.mp3  (sentence-level, Issue #667)
-      Google — tts-cache/{key}.mp3        (legacy path, unchanged for compatibility)
+      Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
+      Gemini31 — gemini31/sentences/{key}.mp3 (Issue #1107)
+      Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
         return None
     if provider == "azure":
         blob_path = f"azure/sentences/{key}.mp3"
+    elif provider == "gemini31":
+        blob_path = f"gemini31/sentences/{key}.mp3"
     else:
         blob_path = f"tts-cache/{key}.mp3"
     try:
@@ -97,14 +109,17 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
     """Write audio to GCS cache. Failures are logged but not raised.
 
     GCS paths:
-      Azure  — azure/sentences/{key}.mp3  (sentence-level, Issue #667)
-      Google — tts-cache/{key}.mp3        (legacy path, unchanged for compatibility)
+      Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
+      Gemini31 — gemini31/sentences/{key}.mp3 (Issue #1107)
+      Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
         return
     if provider == "azure":
         blob_path = f"azure/sentences/{key}.mp3"
+    elif provider == "gemini31":
+        blob_path = f"gemini31/sentences/{key}.mp3"
     else:
         blob_path = f"tts-cache/{key}.mp3"
     try:
@@ -118,6 +133,9 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
 # ---------------------------------------------------------------------------
 # Provider config
 # ---------------------------------------------------------------------------
+# Active provider: "azure" | "google" | "gemini31"  (default: "azure")
+TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "azure")
+
 # Azure Speech Service (台灣腔，primary if key is set)
 AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY", "")
 AZURE_SPEECH_REGION = os.environ.get("AZURE_SPEECH_REGION", "eastus")
@@ -126,6 +144,11 @@ AZURE_TTS_VOICE = os.environ.get("AZURE_TTS_VOICE", "zh-TW-HsiaoChenNeural")
 # Google Cloud TTS (fallback)
 TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-CN-Chirp3-HD-Sulafat")
 TTS_LANGUAGE_CODE = "cmn-CN"
+
+# Gemini 3.1 Flash TTS (Issue #1107)
+GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview"
+GEMINI_TTS_VOICE = "Aoede"
+GCP_PROJECT = os.environ.get("GCP_PROJECT", "lingoleap-dev")
 
 
 # ---------------------------------------------------------------------------
@@ -397,17 +420,153 @@ def _synthesize_google(text: str) -> bytes:
 
 
 # ---------------------------------------------------------------------------
+# Gemini 3.1 Flash TTS — Issue #1107
+# ---------------------------------------------------------------------------
+
+def _pcm_to_mp3(pcm_data: bytes, sample_rate: int = 24000) -> bytes:
+    """Convert raw L16 PCM bytes to MP3 using ffmpeg subprocess.
+
+    Falls back to WAV (with proper header) if ffmpeg is unavailable, but
+    logs a warning since the frontend expects audio/mpeg.
+
+    Args:
+        pcm_data: Raw signed 16-bit little-endian PCM samples.
+        sample_rate: Sample rate in Hz (Gemini outputs 24000 Hz mono).
+
+    Returns:
+        MP3 bytes, or WAV bytes as fallback.
+
+    Raises:
+        TTSError: if both ffmpeg and WAV fallback fail.
+    """
+    try:
+        result = subprocess.run(
+            [
+                "ffmpeg",
+                "-f", "s16le",
+                "-ar", str(sample_rate),
+                "-ac", "1",
+                "-i", "pipe:0",
+                "-f", "mp3",
+                "-q:a", "2",
+                "pipe:1",
+            ],
+            input=pcm_data,
+            capture_output=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.decode("utf-8", errors="replace"))
+        mp3_bytes = result.stdout
+        if not mp3_bytes:
+            raise RuntimeError("ffmpeg produced empty output")
+        return mp3_bytes
+    except FileNotFoundError:
+        logger.warning("ffmpeg not found — falling back to WAV for Gemini TTS output")
+    except Exception as exc:
+        logger.warning("ffmpeg PCM→MP3 failed (%s) — falling back to WAV", exc)
+
+    # WAV fallback: build minimal WAV header for L16 PCM mono
+    import struct
+    num_channels = 1
+    bits_per_sample = 16
+    byte_rate = sample_rate * num_channels * bits_per_sample // 8
+    block_align = num_channels * bits_per_sample // 8
+    data_size = len(pcm_data)
+    chunk_size = 36 + data_size
+    wav_header = struct.pack(
+        "<4sI4s4sIHHIIHH4sI",
+        b"RIFF", chunk_size, b"WAVE",
+        b"fmt ", 16, 1, num_channels, sample_rate,
+        byte_rate, block_align, bits_per_sample,
+        b"data", data_size,
+    )
+    return wav_header + pcm_data
+
+
+def _synthesize_gemini(text: str) -> bytes:
+    """Synthesise text via Gemini 3.1 Flash TTS (Vertex AI).
+
+    Uses the google-genai SDK in Vertex AI mode. The API returns raw L16 PCM
+    at 24 kHz mono, which is converted to MP3 via ffmpeg subprocess.
+
+    No sentence splitting is needed — Gemini TTS has no strict length limit.
+
+    Voice: Aoede (prebuilt English/Mandarin voice)
+    Model: gemini-3.1-flash-tts-preview
+    Location: us-central1
+
+    Args:
+        text: Plain text to synthesise (already cleaned by _clean_for_tts).
+
+    Returns:
+        MP3 bytes (or WAV fallback if ffmpeg is unavailable).
+
+    Raises:
+        TTSError: if the API call fails or returns empty audio.
+    """
+    try:
+        import google.genai as genai
+        from google.genai import types as genai_types
+    except ImportError as exc:
+        raise TTSError(f"google-genai SDK not installed: {exc}") from exc
+
+    try:
+        client = genai.Client(
+            vertexai=True,
+            project=GCP_PROJECT,
+            location="us-central1",
+        )
+        logger.info(
+            "Gemini TTS API call (model=%s, voice=%s, len=%d chars)",
+            GEMINI_TTS_MODEL, GEMINI_TTS_VOICE, len(text),
+        )
+        response = client.models.generate_content(
+            model=GEMINI_TTS_MODEL,
+            contents=text,
+            config=genai_types.GenerateContentConfig(
+                response_modalities=["AUDIO"],
+                speech_config=genai_types.SpeechConfig(
+                    voice_config=genai_types.VoiceConfig(
+                        prebuilt_voice_config=genai_types.PrebuiltVoiceConfig(
+                            voice_name=GEMINI_TTS_VOICE,
+                        ),
+                    ),
+                ),
+            ),
+        )
+    except Exception as exc:
+        raise TTSError(f"Gemini TTS API error: {exc}") from exc
+
+    # Extract raw PCM from the response
+    try:
+        pcm_data = response.candidates[0].content.parts[0].inline_data.data
+    except (AttributeError, IndexError, TypeError) as exc:
+        raise TTSError(f"Gemini TTS unexpected response structure: {exc}") from exc
+
+    if not pcm_data:
+        raise TTSError("Gemini TTS returned empty audio content")
+
+    return _pcm_to_mp3(pcm_data)
+
+
+# ---------------------------------------------------------------------------
 # Public synthesis function
 # ---------------------------------------------------------------------------
 
 def synthesize_speech(text: str) -> bytes:
     """Synthesise *text* to MP3 audio bytes.
 
-    Provider priority: Azure (primary) → Google Cloud TTS (fallback).
-    Provider auto-detected: Azure if AZURE_SPEECH_KEY is set, otherwise Google.
+    Provider selection via TTS_PROVIDER env var (default: "azure"):
+      "azure"    — Azure Speech primary, Google Cloud TTS fallback
+      "google"   — Google Cloud TTS only (with sentence splitting)
+      "gemini31" — Gemini 3.1 Flash TTS (no sentence splitting, Vertex AI)
 
     Two-layer cache: in-memory (L1) → GCS (L2) → API call.
-    GCS paths: azure/{hash}.mp3 (Azure) or tts-cache/{hash}.mp3 (Google).
+    GCS paths:
+      azure    — azure/sentences/{hash}.mp3
+      gemini31 — gemini31/sentences/{hash}.mp3
+      google   — tts-cache/{hash}.mp3 (legacy)
 
     Args:
         text: Plain text to synthesise (max 5000 chars).
@@ -425,8 +584,7 @@ def synthesize_speech(text: str) -> bytes:
         logger.debug("L1 cache hit (key=%s)", key[:8])
         return _TTS_CACHE[key]
 
-    # Auto-detect provider: Azure if key is set, otherwise Google
-    active_provider = "azure" if AZURE_SPEECH_KEY else "google"
+    active_provider = TTS_PROVIDER  # "azure" | "google" | "gemini31"
 
     # L2: GCS — check active provider's path first
     gcs_data = _gcs_get(key, provider=active_provider)
@@ -450,7 +608,10 @@ def synthesize_speech(text: str) -> bytes:
     audio_bytes: Optional[bytes] = None
     used_provider: str
 
-    if active_provider == "azure":
+    if active_provider == "gemini31":
+        audio_bytes = _synthesize_gemini(cleaned)
+        used_provider = "gemini31"
+    elif active_provider == "azure":
         # Try Azure first; fall back to Google on any error
         try:
             logger.info(
@@ -513,12 +674,14 @@ def delete_tts_cache(text: str) -> dict:
         del _TTS_CACHE[key]
         logger.info("L1 cache evicted (key=%s)", key[:8])
 
-    # GCS deletion — try both provider paths
+    # GCS deletion — try all provider paths
     bucket = _get_gcs_bucket()
     if bucket is not None:
-        for provider in ("azure", "google"):
+        for provider in ("azure", "gemini31", "google"):
             if provider == "azure":
                 blob_path = f"azure/sentences/{key}.mp3"
+            elif provider == "gemini31":
+                blob_path = f"gemini31/sentences/{key}.mp3"
             else:
                 blob_path = f"tts-cache/{key}.mp3"
             try:
