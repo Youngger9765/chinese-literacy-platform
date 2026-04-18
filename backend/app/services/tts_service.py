@@ -6,7 +6,7 @@ Two-layer cache: GCS (persistent) → in-memory (fast).
 2. Check GCS bucket  (azure/sentences/{hash}.mp3, gemini31/sentences/{hash}.mp3,
    or tts-cache/{hash}.mp3)
 3. Call active provider API → save to GCS + in-memory
-4. If Azure fails → fall back to Google Cloud TTS
+4. Fallback chains: azure→google; gemini31→azure→google; google has no fallback
 
 Provider selection:
   TTS_PROVIDER env var (default: "azure")
@@ -80,10 +80,7 @@ def _get_gcs_bucket():
 def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
     """Try to read cached audio from GCS. Returns None on miss or error.
 
-    GCS paths:
-      Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
-      Gemini31 — gemini31/sentences/{key}.mp3 (Issue #1107)
-      Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
+    See module docstring for GCS path layout.
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
@@ -108,10 +105,7 @@ def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
 def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
     """Write audio to GCS cache. Failures are logged but not raised.
 
-    GCS paths:
-      Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
-      Gemini31 — gemini31/sentences/{key}.mp3 (Issue #1107)
-      Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
+    See module docstring for GCS path layout.
     """
     bucket = _get_gcs_bucket()
     if bucket is None:
@@ -136,7 +130,15 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
 # Active provider: "azure" | "google" | "gemini31"  (default: "azure")
 TTS_PROVIDER = os.environ.get("TTS_PROVIDER", "azure")
 
-# Azure Speech Service (台灣腔，primary if key is set)
+_VALID_PROVIDERS = {"azure", "google", "gemini31"}
+if TTS_PROVIDER not in _VALID_PROVIDERS:
+    logger.error(
+        "Invalid TTS_PROVIDER=%r, must be one of %s. Defaulting to 'azure'.",
+        TTS_PROVIDER, _VALID_PROVIDERS,
+    )
+    TTS_PROVIDER = "azure"
+
+# Azure Speech Service (used when TTS_PROVIDER="azure")
 AZURE_SPEECH_KEY = os.environ.get("AZURE_SPEECH_KEY", "")
 AZURE_SPEECH_REGION = os.environ.get("AZURE_SPEECH_REGION", "eastus")
 AZURE_TTS_VOICE = os.environ.get("AZURE_TTS_VOICE", "zh-TW-HsiaoChenNeural")
@@ -151,7 +153,9 @@ GEMINI_TTS_VOICE = "Aoede"
 GCP_PROJECT = os.environ.get("GCP_PROJECT", "lingoleap-dev")
 
 # Singleton Gemini client (lazy init to avoid import error if SDK not installed)
-_gemini_client = None
+# None = not yet attempted; _GEMINI_UNAVAILABLE = permanent failure
+_GEMINI_UNAVAILABLE = object()
+_gemini_client = None  # None = not tried, _GEMINI_UNAVAILABLE = permanent failure
 
 
 # ---------------------------------------------------------------------------
@@ -426,6 +430,23 @@ def _synthesize_google(text: str) -> bytes:
 # Gemini 3.1 Flash TTS — Issue #1107
 # ---------------------------------------------------------------------------
 
+def _get_gemini_client():
+    """Return a lazy-initialised Gemini TTS client, or raise TTSError on permanent failure."""
+    global _gemini_client
+    if _gemini_client is _GEMINI_UNAVAILABLE:
+        raise TTSError("Gemini TTS client permanently unavailable")
+    if _gemini_client is None:
+        try:
+            import google.genai as genai
+            _gemini_client = genai.Client(vertexai=True, project=GCP_PROJECT, location="us-central1")
+            logger.info("Gemini TTS client initialised (project=%s)", GCP_PROJECT)
+        except Exception as exc:
+            logger.error("Gemini TTS client init failed: %s", exc)
+            _gemini_client = _GEMINI_UNAVAILABLE
+            raise TTSError(f"Gemini TTS client init failed: {exc}") from exc
+    return _gemini_client
+
+
 def _pcm_to_mp3(pcm_data: bytes, sample_rate: int = 24000) -> bytes:
     """Convert raw L16 PCM bytes to MP3 using ffmpeg subprocess.
 
@@ -441,21 +462,28 @@ def _pcm_to_mp3(pcm_data: bytes, sample_rate: int = 24000) -> bytes:
     Raises:
         TTSError: if ffmpeg fails or is not installed.
     """
-    result = subprocess.run(
-        [
-            "ffmpeg",
-            "-f", "s16le",
-            "-ar", str(sample_rate),
-            "-ac", "1",
-            "-i", "pipe:0",
-            "-f", "mp3",
-            "-q:a", "2",
-            "pipe:1",
-        ],
-        input=pcm_data,
-        capture_output=True,
-        timeout=30,
-    )
+    try:
+        result = subprocess.run(
+            [
+                "ffmpeg",
+                "-f", "s16le",
+                "-ar", str(sample_rate),
+                "-ac", "1",
+                "-i", "pipe:0",
+                "-f", "mp3",
+                "-q:a", "2",
+                "pipe:1",
+            ],
+            input=pcm_data,
+            capture_output=True,
+            timeout=30,
+        )
+    except FileNotFoundError:
+        raise TTSError("ffmpeg is not installed or not on PATH")
+    except subprocess.TimeoutExpired:
+        raise TTSError("ffmpeg PCM→MP3 conversion timed out after 30s")
+    except OSError as exc:
+        raise TTSError(f"ffmpeg subprocess failed: {exc}")
     if result.returncode != 0:
         raise TTSError(f"ffmpeg PCM→MP3 failed: {result.stderr.decode('utf-8', errors='replace')}")
     if not result.stdout:
@@ -469,9 +497,9 @@ def _synthesize_gemini(text: str) -> bytes:
     Uses the google-genai SDK in Vertex AI mode. The API returns raw L16 PCM
     at 24 kHz mono, which is converted to MP3 via ffmpeg subprocess.
 
-    No sentence splitting is needed — Gemini TTS has no strict length limit.
+    No sentence splitting needed — tested up to ~700 chars. Preview model, limits may change.
 
-    Voice: Aoede (prebuilt English/Mandarin voice)
+    Voice: Aoede (prebuilt voice, Mandarin quality under evaluation)
     Model: gemini-3.1-flash-tts-preview
     Location: us-central1
 
@@ -485,24 +513,20 @@ def _synthesize_gemini(text: str) -> bytes:
         TTSError: if the API call fails, returns empty audio, or ffmpeg conversion fails.
     """
     try:
-        import google.genai as genai
         from google.genai import types as genai_types
     except ImportError as exc:
         raise TTSError(f"google-genai SDK not installed: {exc}") from exc
 
-    global _gemini_client
+    client = _get_gemini_client()
+
+    logger.info(
+        "Gemini TTS API call (model=%s, voice=%s, len=%d chars)",
+        GEMINI_TTS_MODEL, GEMINI_TTS_VOICE, len(text),
+    )
+
+    # Separate try for API call only
     try:
-        if _gemini_client is None:
-            _gemini_client = genai.Client(
-                vertexai=True,
-                project=GCP_PROJECT,
-                location="us-central1",
-            )
-        logger.info(
-            "Gemini TTS API call (model=%s, voice=%s, len=%d chars)",
-            GEMINI_TTS_MODEL, GEMINI_TTS_VOICE, len(text),
-        )
-        response = _gemini_client.models.generate_content(
+        response = client.models.generate_content(
             model=GEMINI_TTS_MODEL,
             contents=text,
             config=genai_types.GenerateContentConfig(
@@ -517,13 +541,35 @@ def _synthesize_gemini(text: str) -> bytes:
             ),
         )
     except Exception as exc:
-        raise TTSError(f"Gemini TTS API error: {exc}") from exc
+        raise TTSError(f"Gemini TTS API call failed: {exc}") from exc
+
+    # Log response metadata before parsing (aids debugging on parse failure)
+    try:
+        candidates_count = len(response.candidates) if response.candidates else 0
+        finish_reason = (
+            getattr(response.candidates[0], "finish_reason", "unknown")
+            if candidates_count > 0
+            else "no_candidate"
+        )
+        logger.debug(
+            "Gemini TTS response: candidates=%d, finish_reason=%s",
+            candidates_count, finish_reason,
+        )
+    except Exception:
+        pass
 
     # Extract raw PCM from the response
     try:
         pcm_data = response.candidates[0].content.parts[0].inline_data.data
     except (AttributeError, IndexError, TypeError) as exc:
-        raise TTSError(f"Gemini TTS unexpected response structure: {exc}") from exc
+        candidates_count = 0
+        try:
+            candidates_count = len(response.candidates) if response.candidates else 0
+        except Exception:
+            pass
+        raise TTSError(
+            f"Gemini TTS unexpected response structure (candidates={candidates_count}): {exc}"
+        ) from exc
 
     if not pcm_data:
         raise TTSError("Gemini TTS returned empty audio content")
@@ -580,6 +626,14 @@ def synthesize_speech(text: str) -> bytes:
             _l1_put(key, gcs_data)
             return gcs_data
 
+    # Cross-provider fallback: check other providers' caches to avoid re-synthesis
+    if active_provider == "gemini31":
+        for fallback_provider in ("azure", "google"):
+            gcs_data = _gcs_get(key, provider=fallback_provider)
+            if gcs_data is not None:
+                _l1_put(key, gcs_data)
+                return gcs_data
+
     # Clean text before synthesis
     cleaned = _clean_for_tts(text)
     if not cleaned:
@@ -595,11 +649,15 @@ def synthesize_speech(text: str) -> bytes:
             used_provider = "gemini31"
         except TTSError as gemini_exc:
             logger.warning("Gemini TTS failed, falling back to Azure→Google: %s", gemini_exc)
-            try:
-                audio_bytes = _synthesize_azure(cleaned)
-                used_provider = "azure"
-            except TTSError as azure_exc:
-                logger.warning("Azure TTS also failed: %s", azure_exc)
+            azure_exc: Optional[TTSError] = None
+            if AZURE_SPEECH_KEY:
+                try:
+                    audio_bytes = _synthesize_azure(cleaned)
+                    used_provider = "azure"
+                except TTSError as _azure_exc:
+                    azure_exc = _azure_exc
+                    logger.warning("Azure TTS also failed: %s", azure_exc)
+            if audio_bytes is None:
                 try:
                     audio_bytes = _synthesize_google(cleaned)
                     used_provider = "google"
@@ -626,10 +684,12 @@ def synthesize_speech(text: str) -> bytes:
                 raise TTSError(
                     f"Both Azure ({exc}) and Google ({google_exc}) TTS failed"
                 ) from google_exc
-    else:
+    elif active_provider == "google":
         # Provider explicitly set to "google" — skip Azure entirely
         audio_bytes = _synthesize_google(cleaned)
         used_provider = "google"
+    else:
+        raise TTSError(f"Unknown TTS_PROVIDER={active_provider!r}")
 
     # Save to both caches (use the provider that actually succeeded)
     _l1_put(key, audio_bytes)
@@ -651,7 +711,7 @@ def _l1_put(key: str, audio_bytes: bytes) -> None:
 
 
 def delete_tts_cache(text: str) -> dict:
-    """Delete cached audio for *text* from L1 and GCS (both azure and google paths).
+    """Delete cached audio for *text* from L1 and GCS (all provider paths: azure, gemini31, google).
 
     Used by the /api/tts/regenerate admin endpoint to force re-synthesis
     after phoneme corrections are added.
