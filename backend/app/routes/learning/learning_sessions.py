@@ -61,6 +61,24 @@ def create_learning_session(
     # Normalize slug using the centralized normalizer (#985 + #984)
     normalized_slug = normalize_story_slug(payload.story_slug) if payload.story_slug else None
 
+    # --- Validate story_slug against texts table (#1135) ---
+    # Reject requests whose slug does not resolve to a known Text record so that
+    # orphan sessions (sessions with no matching lesson content) cannot be created
+    # via the public API.  The normalizer maps "L6" / "06" → "6"; we then look up
+    # texts.lesson_number.  Non-numeric slugs that are not resolvable are also
+    # rejected because they would never have a backing Text row.
+    if normalized_slug:
+        try:
+            ln = int(normalized_slug)
+            text_exists = db.query(Text).filter(Text.lesson_number == ln).first() is not None
+        except (ValueError, TypeError):
+            text_exists = False
+        if not text_exists:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unknown story_slug: {payload.story_slug!r}",
+            )
+
     # --- get-or-create: return existing in_progress session if one exists (#984) ---
     if normalized_slug:
         existing = (
@@ -88,7 +106,7 @@ def create_learning_session(
     )
     classroom_id = enrollment.classroom_id if enrollment else None
 
-    # Resolve text_id from normalized story_slug
+    # Resolve text_id from normalized story_slug (slug already validated above)
     text_id = None
     if normalized_slug:
         try:
@@ -97,7 +115,7 @@ def create_learning_session(
             if text_record:
                 text_id = text_record.id
         except (ValueError, TypeError):
-            pass
+            pass  # non-numeric slugs have no text_id (blocked above unless normalized_slug is None)
 
     session = LearningSession(
         student_id=current_user.id,
