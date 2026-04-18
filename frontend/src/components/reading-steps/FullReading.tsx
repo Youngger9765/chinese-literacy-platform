@@ -16,6 +16,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContai
 /* ------------------------------------------------------------------ */
 
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
+import { displayIdxForProgress } from '../../utils/ttsHighlight';
 
 /* ------------------------------------------------------------------ */
 
@@ -268,13 +269,16 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
     if (isTtsHighlighting) {
       const displayText = (zhuyinActive && typeof zhuyinLine === 'string') ? zhuyinLine : line;
       const chars = splitZhuyinChars(displayText);
+      // Use displayIdxForProgress so symbols stripped by _cleanForTts (~~~, ──, …)
+      // don't consume TTS progress budget — fixes highlight lag (Issue #1110).
+      const splitIdx = displayIdxForProgress(displayText, speakingProgress);
       return (
         <>
           {speakingProgress > 0 && (
-            <span className="text-accent font-bold">{chars.slice(0, speakingProgress).join('')}</span>
+            <span className="text-accent font-bold">{chars.slice(0, splitIdx).join('')}</span>
           )}
           <span className={speakingProgress > 0 ? 'opacity-30' : 'opacity-90'}>
-            {chars.slice(speakingProgress).join('')}
+            {chars.slice(splitIdx).join('')}
           </span>
         </>
       );

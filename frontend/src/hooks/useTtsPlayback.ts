@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { cancelTts } from '../services/ttsApi';
+import { cancelTts, cleanForTts } from '../services/ttsApi';
 
 /**
  * Manages TTS (Text-to-Speech) audio playback for LiveTutor.
@@ -63,7 +63,9 @@ export function useTtsPlayback(
       onSpeakingProgress(0);
       onRealtimeDiffTokensClear();
       ttsStartTimeRef.current = performance.now();
-      ttsTotalCharsRef.current = Array.from(text).length;
+      // Use cleaned char count so the animation ceiling matches the audio's
+      // actual char count (cleaned chars only, same as msPerChar basis).
+      ttsTotalCharsRef.current = Array.from(cleanForTts(text)).length;
       const animate = () => {
         const elapsed = performance.now() - ttsStartTimeRef.current;
         const pos = Math.min(Math.floor(elapsed / msPerCharRef.current), ttsTotalCharsRef.current);
@@ -97,8 +99,11 @@ export function useTtsPlayback(
         const audio = new Audio(url);
         utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
         audio.onloadedmetadata = () => {
-          // Calculate per-char timing from actual audio duration
-          const charCount = Array.from(text).length;
+          // TTS audio duration corresponds to _cleanForTts(text), not raw text.
+          // Using raw length makes msPerChar too small → cursor outruns speech.
+          // Fix: compute charCount from the cleaned string (Issue #1110).
+          const cleanedText = cleanForTts(text);
+          const charCount = Array.from(cleanedText).length;
           if (audio.duration > 0 && charCount > 0) {
             msPerCharRef.current = (audio.duration * 1000) / charCount;
           }

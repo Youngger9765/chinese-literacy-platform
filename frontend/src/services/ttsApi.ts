@@ -84,6 +84,13 @@ export async function speakTextWithProgress(
   await _speakViaBackendWithProgress(text, onProgress);
 }
 
+/**
+ * Public alias for _cleanForTts — allows other modules to compute the cleaned
+ * character count without duplicating the regex logic.
+ * Used by useTtsPlayback to calculate msPerChar from the TTS-actual char count.
+ */
+export const cleanForTts = _cleanForTts;
+
 // Exported for testing only
 export const _testInternals = {
   reset() {
