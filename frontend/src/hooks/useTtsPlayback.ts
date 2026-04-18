@@ -7,12 +7,19 @@ import { cancelTts, cleanForTts } from '../services/ttsApi';
  * Responsibilities:
  *  - Cloud TTS fetch → <audio> element playback (primary)
  *  - Web Speech API fallback (when backend unavailable)
- *  - rAF-based cursor animation (~4.2 chars/sec for Neural2 zh-TW)
+ *  - Cloud TTS: ontimeupdate-based cursor sync (audio.currentTime / audio.duration ratio)
+ *  - Web Speech API fallback: rAF-based cursor animation (~4.2 chars/sec for Neural2 zh-TW)
  *  - isTtsSpeaking / isTtsPaused state
  *  - pause / resume / stop controls
  *
  * The utteranceRef and ttsRafRef are returned so the STT hook can null them
  * out before starting a new recording session.
+ *
+ * Fix (#1112, #1110): Cloud TTS path replaced rAF + wall-clock timing with
+ * audio.ontimeupdate + currentTime/duration ratio, eliminating:
+ *  1. onloadedmetadata vs onplay race (msPerChar stale at rAF start)
+ *  2. wall-clock drift from buffering/mobile stalls
+ * Web Speech API fallback path is unchanged.
  */
 export function useTtsPlayback(
   onSpeakingProgress: (pos: number) => void,
@@ -24,16 +31,19 @@ export function useTtsPlayback(
   // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
   // gets collected mid-playback, silencing onend/onboundary callbacks.
   const utteranceRef = useRef<SpeechSynthesisUtterance | HTMLAudioElement | null>(null);
-  // rAF loop for TTS cursor animation
+  // rAF loop for Web Speech API fallback cursor animation (not used for Cloud TTS path)
   const ttsRafRef = useRef<number | null>(null);
+  // Used only by Web Speech API fallback path
   const ttsStartTimeRef = useRef<number>(0);
   const ttsTotalCharsRef = useRef<number>(0);
-  const msPerCharRef = useRef<number>(240); // default fallback, overridden by actual audio duration
-  const pausedElapsedRef = useRef<number>(0); // elapsed ms at pause time
+  const msPerCharRef = useRef<number>(240); // default fallback for Web Speech path only
+  const pausedElapsedRef = useRef<number>(0); // elapsed ms at pause time (Web Speech only)
 
   /**
    * Speak the given text via Cloud TTS (with Web Speech API fallback).
-   * Drives the cursor animation using time-based rAF (~4.2 chars/sec).
+   *
+   * Cloud TTS path: drives cursor via audio.ontimeupdate + currentTime/duration ratio.
+   * Web Speech fallback: drives cursor via rAF + wall-clock timing (unchanged).
    */
   const speakText = useCallback((text: string) => {
     if (!text) return;
@@ -58,25 +68,6 @@ export function useTtsPlayback(
       }
     };
 
-    const startCursorAnimation = () => {
-      setIsTtsSpeaking(true);
-      onSpeakingProgress(0);
-      onRealtimeDiffTokensClear();
-      ttsStartTimeRef.current = performance.now();
-      // Use cleaned char count so the animation ceiling matches the audio's
-      // actual char count (cleaned chars only, same as msPerChar basis).
-      ttsTotalCharsRef.current = Array.from(cleanForTts(text)).length;
-      const animate = () => {
-        const elapsed = performance.now() - ttsStartTimeRef.current;
-        const pos = Math.min(Math.floor(elapsed / msPerCharRef.current), ttsTotalCharsRef.current);
-        onSpeakingProgress(pos);
-        if (pos < ttsTotalCharsRef.current) {
-          ttsRafRef.current = requestAnimationFrame(animate);
-        }
-      };
-      ttsRafRef.current = requestAnimationFrame(animate);
-    };
-
     const onSpeechEnd = () => {
       stopTtsAnimation();
       setIsTtsSpeaking(false);
@@ -98,23 +89,33 @@ export function useTtsPlayback(
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
-        audio.onloadedmetadata = () => {
-          // TTS audio duration corresponds to _cleanForTts(text), not raw text.
-          // Using raw length makes msPerChar too small → cursor outruns speech.
-          // Fix: compute charCount from the cleaned string (Issue #1110).
-          const cleanedText = cleanForTts(text);
-          const charCount = Array.from(cleanedText).length;
-          if (audio.duration > 0 && charCount > 0) {
-            msPerCharRef.current = (audio.duration * 1000) / charCount;
-          }
+
+        // Use cleaned char count so cursor ceiling matches what TTS actually speaks.
+        const charCount = Array.from(cleanForTts(text)).length;
+
+        // ontimeupdate: sync highlight to actual audio position (ratio-based).
+        // This eliminates both the onloadedmetadata vs onplay race and wall-clock drift.
+        // NaN/Infinity guard: skip if duration not yet known or is zero.
+        audio.ontimeupdate = () => {
+          if (!isFinite(audio.duration) || audio.duration === 0) return;
+          const ratio = audio.currentTime / audio.duration;
+          const pos = Math.min(Math.floor(ratio * charCount), charCount);
+          onSpeakingProgress(pos);
         };
-        audio.onplay = startCursorAnimation;
+
+        // onplay: only sets speaking state + resets progress to 0. No rAF started here.
+        audio.onplay = () => {
+          setIsTtsSpeaking(true);
+          onRealtimeDiffTokensClear();
+          onSpeakingProgress(0);
+        };
+
         audio.onended = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
         audio.onerror = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
         return audio.play();
       })
       .catch(() => {
-        // Fallback: Web Speech API
+        // Fallback: Web Speech API — rAF + wall-clock timing path (unchanged)
         msPerCharRef.current = 240; // reset to default estimate for Web Speech
         if (!window.speechSynthesis) { onSpeechEnd(); return; }
         window.speechSynthesis.cancel();
@@ -128,6 +129,24 @@ export function useTtsPlayback(
           voices.find(v => v.lang === 'zh-TW') ||
           voices.find(v => v.lang.startsWith('zh'));
         if (preferred) utterance.voice = preferred;
+
+        const startCursorAnimation = () => {
+          setIsTtsSpeaking(true);
+          onSpeakingProgress(0);
+          onRealtimeDiffTokensClear();
+          ttsStartTimeRef.current = performance.now();
+          ttsTotalCharsRef.current = Array.from(text).length;
+          const animate = () => {
+            const elapsed = performance.now() - ttsStartTimeRef.current;
+            const pos = Math.min(Math.floor(elapsed / msPerCharRef.current), ttsTotalCharsRef.current);
+            onSpeakingProgress(pos);
+            if (pos < ttsTotalCharsRef.current) {
+              ttsRafRef.current = requestAnimationFrame(animate);
+            }
+          };
+          ttsRafRef.current = requestAnimationFrame(animate);
+        };
+
         utterance.onstart = startCursorAnimation;
         utterance.onboundary = (e) => { onSpeakingProgress(e.charIndex); };
         utterance.onend = onSpeechEnd;
@@ -146,18 +165,18 @@ export function useTtsPlayback(
   }, [onSpeakingProgress, onRealtimeDiffTokensClear]);
 
   const pauseTts = () => {
-    // Pause audio
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
+      // Cloud TTS path: just pause. ontimeupdate stops firing automatically when paused.
       ua.pause();
     } else {
+      // Web Speech API fallback path: pause synthesis + record elapsed for resume
       window.speechSynthesis?.pause();
-    }
-    // Pause cursor animation — record elapsed and cancel rAF
-    pausedElapsedRef.current = performance.now() - ttsStartTimeRef.current;
-    if (ttsRafRef.current !== null) {
-      cancelAnimationFrame(ttsRafRef.current);
-      ttsRafRef.current = null;
+      pausedElapsedRef.current = performance.now() - ttsStartTimeRef.current;
+      if (ttsRafRef.current !== null) {
+        cancelAnimationFrame(ttsRafRef.current);
+        ttsRafRef.current = null;
+      }
     }
     setIsTtsPaused(true);
   };
@@ -165,25 +184,23 @@ export function useTtsPlayback(
   const resumeTts = () => {
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
-      // Detach onplay so it doesn't re-trigger startCursorAnimation (which resets progress to 0)
-      ua.onplay = null;
-      const audioElapsed = ua.currentTime * 1000;
-      ttsStartTimeRef.current = performance.now() - audioElapsed;
+      // Cloud TTS path: just resume. ontimeupdate was attached in speakText and
+      // remains valid — it resumes naturally as audio.currentTime advances again.
       ua.play().catch(() => {});
     } else {
+      // Web Speech API fallback path: reconstruct wall-clock start and restart rAF
       ttsStartTimeRef.current = performance.now() - pausedElapsedRef.current;
       window.speechSynthesis?.resume();
+      const animate = () => {
+        const elapsed = performance.now() - ttsStartTimeRef.current;
+        const pos = Math.min(Math.floor(elapsed / msPerCharRef.current), ttsTotalCharsRef.current);
+        onSpeakingProgress(pos);
+        if (pos < ttsTotalCharsRef.current) {
+          ttsRafRef.current = requestAnimationFrame(animate);
+        }
+      };
+      ttsRafRef.current = requestAnimationFrame(animate);
     }
-    // Restart cursor animation from current position
-    const animate = () => {
-      const elapsed = performance.now() - ttsStartTimeRef.current;
-      const pos = Math.min(Math.floor(elapsed / msPerCharRef.current), ttsTotalCharsRef.current);
-      onSpeakingProgress(pos);
-      if (pos < ttsTotalCharsRef.current) {
-        ttsRafRef.current = requestAnimationFrame(animate);
-      }
-    };
-    ttsRafRef.current = requestAnimationFrame(animate);
     setIsTtsPaused(false);
   };
 
