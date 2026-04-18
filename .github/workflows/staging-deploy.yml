@@ -5,6 +5,13 @@ on:
     branches: [staging]
   workflow_dispatch:
 
+# Serialize concurrent deploys. Back-to-back merges to staging would
+# race each other on Cloud Run revision/traffic. With this group,
+# new runs queue behind the in-flight one.
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
+
 env:
   PROJECT_ID: lingoleap-dev
   REGION: asia-east1
