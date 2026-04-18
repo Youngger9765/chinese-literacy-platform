@@ -98,16 +98,39 @@ export function useTtsPlayback(
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         utteranceRef.current = audio as unknown as SpeechSynthesisUtterance;
+
+        // Issue #1112: Use timeupdate-based highlight sync instead of rAF timer.
+        // This locks highlight position to the browser's actual playback cursor
+        // regardless of provider speed (Azure 0.95x vs Gemini default).
+        //
+        // Strategy:
+        //   1. onloadedmetadata — calibrate msPerChar from real audio.duration
+        //      so the rAF fallback (pause/resume) still works correctly.
+        //   2. ontimeupdate — primary sync: advance highlight based on
+        //      currentTime / duration progress, which is provider-agnostic.
+        //   3. startCursorAnimation — still called on onplay to set speaking state;
+        //      the rAF loop runs but its position is overridden by ontimeupdate.
+        const cleanedText = cleanForTts(text);
+        const charCount = Array.from(cleanedText).length;
+
         audio.onloadedmetadata = () => {
-          // TTS audio duration corresponds to _cleanForTts(text), not raw text.
-          // Using raw length makes msPerChar too small → cursor outruns speech.
-          // Fix: compute charCount from the cleaned string (Issue #1110).
-          const cleanedText = cleanForTts(text);
-          const charCount = Array.from(cleanedText).length;
           if (audio.duration > 0 && charCount > 0) {
             msPerCharRef.current = (audio.duration * 1000) / charCount;
+            // Store total chars so rAF ceiling is correct for pause/resume path.
+            ttsTotalCharsRef.current = charCount;
           }
         };
+
+        // Primary sync: advance highlight proportionally to actual playback time.
+        // Fires ~4× per second (browser-controlled), works for any audio speed.
+        audio.ontimeupdate = () => {
+          if (audio.duration > 0 && charCount > 0) {
+            const progress = audio.currentTime / audio.duration;
+            const pos = Math.min(Math.floor(progress * charCount), charCount);
+            onSpeakingProgress(pos);
+          }
+        };
+
         audio.onplay = startCursorAnimation;
         audio.onended = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
         audio.onerror = () => { URL.revokeObjectURL(url); onSpeechEnd(); };

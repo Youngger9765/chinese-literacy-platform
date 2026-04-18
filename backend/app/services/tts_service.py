@@ -155,7 +155,10 @@ TTS_LANGUAGE_CODE = "cmn-CN"
 #   - If you ever want to regenerate: run batch script with --variant A.
 GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview"
 GEMINI_TTS_VOICE = "Aoede"
-GEMINI_TTS_PROMPT_PREFIX = "請使用台灣用語的繁體中文，以親切且自然的語氣朗讀以下內容："
+# Issue #1112: Added "語速放慢、一字一句清楚朗讀" to slow Gemini to near-Azure pace.
+# Azure uses SSML prosody rate=0.95; Gemini defaults are faster.
+# Prompt-only approach per scope constraint (no ffmpeg post-processing in this PR).
+GEMINI_TTS_PROMPT_PREFIX = "請使用台灣用語的繁體中文，語速放慢、一字一句清楚朗讀，以親切且自然的語氣朗讀以下內容："
 GCP_PROJECT = os.environ.get("GCP_PROJECT", "lingoleap-dev")
 
 
