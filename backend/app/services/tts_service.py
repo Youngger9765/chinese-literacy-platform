@@ -150,6 +150,9 @@ GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview"
 GEMINI_TTS_VOICE = "Aoede"
 GCP_PROJECT = os.environ.get("GCP_PROJECT", "lingoleap-dev")
 
+# Singleton Gemini client (lazy init to avoid import error if SDK not installed)
+_gemini_client = None
+
 
 # ---------------------------------------------------------------------------
 # Custom exception
@@ -426,62 +429,38 @@ def _synthesize_google(text: str) -> bytes:
 def _pcm_to_mp3(pcm_data: bytes, sample_rate: int = 24000) -> bytes:
     """Convert raw L16 PCM bytes to MP3 using ffmpeg subprocess.
 
-    Falls back to WAV (with proper header) if ffmpeg is unavailable, but
-    logs a warning since the frontend expects audio/mpeg.
+    Requires ffmpeg installed in the Docker image (Dockerfile: apt-get install ffmpeg).
 
     Args:
         pcm_data: Raw signed 16-bit little-endian PCM samples.
         sample_rate: Sample rate in Hz (Gemini outputs 24000 Hz mono).
 
     Returns:
-        MP3 bytes, or WAV bytes as fallback.
+        MP3 bytes.
 
     Raises:
-        TTSError: if both ffmpeg and WAV fallback fail.
+        TTSError: if ffmpeg fails or is not installed.
     """
-    try:
-        result = subprocess.run(
-            [
-                "ffmpeg",
-                "-f", "s16le",
-                "-ar", str(sample_rate),
-                "-ac", "1",
-                "-i", "pipe:0",
-                "-f", "mp3",
-                "-q:a", "2",
-                "pipe:1",
-            ],
-            input=pcm_data,
-            capture_output=True,
-            timeout=30,
-        )
-        if result.returncode != 0:
-            raise RuntimeError(result.stderr.decode("utf-8", errors="replace"))
-        mp3_bytes = result.stdout
-        if not mp3_bytes:
-            raise RuntimeError("ffmpeg produced empty output")
-        return mp3_bytes
-    except FileNotFoundError:
-        logger.warning("ffmpeg not found — falling back to WAV for Gemini TTS output")
-    except Exception as exc:
-        logger.warning("ffmpeg PCM→MP3 failed (%s) — falling back to WAV", exc)
-
-    # WAV fallback: build minimal WAV header for L16 PCM mono
-    import struct
-    num_channels = 1
-    bits_per_sample = 16
-    byte_rate = sample_rate * num_channels * bits_per_sample // 8
-    block_align = num_channels * bits_per_sample // 8
-    data_size = len(pcm_data)
-    chunk_size = 36 + data_size
-    wav_header = struct.pack(
-        "<4sI4s4sIHHIIHH4sI",
-        b"RIFF", chunk_size, b"WAVE",
-        b"fmt ", 16, 1, num_channels, sample_rate,
-        byte_rate, block_align, bits_per_sample,
-        b"data", data_size,
+    result = subprocess.run(
+        [
+            "ffmpeg",
+            "-f", "s16le",
+            "-ar", str(sample_rate),
+            "-ac", "1",
+            "-i", "pipe:0",
+            "-f", "mp3",
+            "-q:a", "2",
+            "pipe:1",
+        ],
+        input=pcm_data,
+        capture_output=True,
+        timeout=30,
     )
-    return wav_header + pcm_data
+    if result.returncode != 0:
+        raise TTSError(f"ffmpeg PCM→MP3 failed: {result.stderr.decode('utf-8', errors='replace')}")
+    if not result.stdout:
+        raise TTSError("ffmpeg produced empty MP3 output")
+    return result.stdout
 
 
 def _synthesize_gemini(text: str) -> bytes:
@@ -500,10 +479,10 @@ def _synthesize_gemini(text: str) -> bytes:
         text: Plain text to synthesise (already cleaned by _clean_for_tts).
 
     Returns:
-        MP3 bytes (or WAV fallback if ffmpeg is unavailable).
+        MP3 bytes.
 
     Raises:
-        TTSError: if the API call fails or returns empty audio.
+        TTSError: if the API call fails, returns empty audio, or ffmpeg conversion fails.
     """
     try:
         import google.genai as genai
@@ -511,17 +490,19 @@ def _synthesize_gemini(text: str) -> bytes:
     except ImportError as exc:
         raise TTSError(f"google-genai SDK not installed: {exc}") from exc
 
+    global _gemini_client
     try:
-        client = genai.Client(
-            vertexai=True,
-            project=GCP_PROJECT,
-            location="us-central1",
-        )
+        if _gemini_client is None:
+            _gemini_client = genai.Client(
+                vertexai=True,
+                project=GCP_PROJECT,
+                location="us-central1",
+            )
         logger.info(
             "Gemini TTS API call (model=%s, voice=%s, len=%d chars)",
             GEMINI_TTS_MODEL, GEMINI_TTS_VOICE, len(text),
         )
-        response = client.models.generate_content(
+        response = _gemini_client.models.generate_content(
             model=GEMINI_TTS_MODEL,
             contents=text,
             config=genai_types.GenerateContentConfig(
@@ -609,8 +590,17 @@ def synthesize_speech(text: str) -> bytes:
     used_provider: str
 
     if active_provider == "gemini31":
-        audio_bytes = _synthesize_gemini(cleaned)
-        used_provider = "gemini31"
+        try:
+            audio_bytes = _synthesize_gemini(cleaned)
+            used_provider = "gemini31"
+        except TTSError as exc:
+            logger.warning("Gemini TTS failed, falling back to Azure→Google: %s", exc)
+            try:
+                audio_bytes = _synthesize_azure(cleaned)
+                used_provider = "azure"
+            except TTSError:
+                audio_bytes = _synthesize_google(cleaned)
+                used_provider = "google"
     elif active_provider == "azure":
         # Try Azure first; fall back to Google on any error
         try:
