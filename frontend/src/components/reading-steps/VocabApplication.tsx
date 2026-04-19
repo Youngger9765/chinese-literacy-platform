@@ -40,15 +40,8 @@ export interface VocabApplicationResult {
 export interface VocabApplicationProps {
   story: Story;
   onFinish: (result: VocabApplicationResult) => void;
-  /** Enable zhuyin ruby annotation (future-use, passed through) */
-  zhuyinActive?: boolean;
   /** Base font size in px for accessibility scaling */
   fontSizePx?: number;
-  // ── DB persistence props (Issue #709) ──────────────────────────────
-  /** Auth token for step_progress API calls. Null when unauthenticated. */
-  token?: string | null;
-  /** DB LearningSession integer ID. Null until session is created. */
-  dbSessionId?: number | null;
   /** Debounced DB sync from useProgressSync (Issue #660). */
   syncProgress?: (data: StepProgressData) => void;
   /** Immediate DB flush — use on completion or page unload (Issue #660). */
@@ -59,163 +52,22 @@ export interface VocabApplicationProps {
 /*  Sub-components                                                      */
 /* ------------------------------------------------------------------ */
 
-/** Header banner matching other step components' amber-50 style */
-function StepHeader({ subtitle }: { title?: string; subtitle?: string }) {
-  if (!subtitle) return null;
-  return (
-    <div className="bg-amber-50 border-b border-amber-200 px-4 py-2">
-      <div className="max-w-2xl mx-auto">
-        <p className="text-xs text-amber-700">{subtitle}</p>
-      </div>
-    </div>
-  );
-}
-
 /** Shown when the story has no fill-in-blank data */
 function NoDataFallback({ onFinish }: { onFinish: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-6 px-6 py-16 text-center max-w-lg mx-auto">
-      <div className="text-5xl select-none">📝</div>
-      <div>
-        <h3 className="text-lg font-bold text-gray-700 mb-2">本課尚無語詞應用題目</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">
-          這篇課文目前沒有填空練習資料。<br />
-          教師可透過後台上傳題目，或聯絡管理員更新課文資料。
-        </p>
-      </div>
-      <button
-        onClick={onFinish}
-        className="rounded-full bg-amber-500 px-6 py-2.5 text-white text-sm font-medium hover:bg-amber-600 transition-colors"
-      >
-        繼續下一步
-      </button>
-    </div>
-  );
-}
-
-/** Completion screen shown after FillInBlankExercise reports done.
- * Shows score summary, per-question breakdown, and action buttons.
- * Issue #758: expanded from simple score display to full result view. */
-function CompletionScreen({
-  score,
-  total,
-  firstTryResults,
-  vocabBank,
-  sentences,
-  onRetryAll,
-  onRetryWrong,
-  onFinish,
-}: {
-  score: number;
-  total: number;
-  firstTryResults: QuestionResult[];
-  vocabBank: Record<string, string>;
-  sentences: { sentence: string; answer: string }[];
-  onRetryAll: () => void;
-  onRetryWrong: () => void;
-  onFinish: () => void;
-}) {
-  const perfect = score === total;
-  const wrongCount = firstTryResults.filter((r) => !r.firstTryCorrect).length;
-
-  return (
-    <div className="flex flex-col gap-5 p-4 max-w-2xl mx-auto animate-fade-in">
-      {/* Score header */}
-      <div
-        className={`rounded-2xl px-6 py-5 text-center border ${
-          perfect
-            ? 'bg-emerald-50 border-emerald-200'
-            : 'bg-amber-50 border-amber-200'
-        }`}
-      >
-        <div className="text-4xl select-none mb-2">
-          {perfect ? '🌟' : '📚'}
-        </div>
-        <p className="text-2xl font-black text-gray-800 mb-1">
-          {perfect ? '全部答對！太棒了！' : `一次答對 ${score}／${total} 題`}
-        </p>
-        <p className="text-sm text-gray-500">
-          {perfect
-            ? '每一題都一次答對，表現優異！'
-            : '以下是各題的一次作答結果'}
-        </p>
-      </div>
-
-      {/* Per-question breakdown */}
-      {firstTryResults.length > 0 && (
-        <div className="flex flex-col gap-3">
-          {sentences.map((s, idx) => {
-            const qResult = firstTryResults.find((r) => r.sentenceIdx === idx);
-            const correct = qResult?.firstTryCorrect ?? false;
-            const correctCode = qResult?.correctAnswer ?? '';
-            const wrongCode = qResult?.studentFirstAnswer ?? null;
-
-            return (
-              <div
-                key={idx}
-                className={`rounded-xl border p-4 ${
-                  correct
-                    ? 'bg-emerald-50 border-emerald-200'
-                    : 'bg-red-50 border-red-200'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-xl flex-shrink-0 mt-0.5">
-                    {correct ? '✅' : '❌'}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base text-gray-700 leading-relaxed mb-1">
-                      {s.sentence.replace(
-                        '(　　)',
-                        `【${vocabBank[correctCode] ?? correctCode}】`,
-                      )}
-                    </p>
-                    {!correct && wrongCode && (
-                      <p className="text-sm text-red-600">
-                        你選了：
-                        <span className="font-semibold mx-1">
-                          {wrongCode}·{vocabBank[wrongCode] ?? wrongCode}
-                        </span>
-                        <span className="text-gray-500 mx-1">→ 正確答案：</span>
-                        <span className="font-semibold text-emerald-700">
-                          {correctCode}·{vocabBank[correctCode] ?? correctCode}
-                        </span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Action buttons */}
-      <div className="flex flex-col gap-3">
-        {wrongCount > 0 && (
-          <button
-            onClick={onRetryWrong}
-            className="rounded-full border border-gray-300 bg-transparent px-6 py-2.5 text-sm font-bold text-accent hover:bg-gray-50 active:scale-95 transition-all min-h-[44px]"
-          >
-            練習錯題（{wrongCount} 題）
-          </button>
-        )}
-        <button
-          onClick={onRetryAll}
-          className="rounded-full border border-gray-300 bg-transparent px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 active:scale-95 transition-all min-h-[44px]"
-        >
-          重新練習
-        </button>
-        <button
-          onClick={onFinish}
-          className="rounded-full bg-accent px-6 py-2.5 text-white font-semibold hover:bg-accent-hover transition-colors text-sm min-h-[44px]"
-        >
-          繼續下一步 →
+    <div className="flex-1 flex items-center justify-center bg-surface">
+      <div className="text-center space-y-4 p-8">
+        <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">edit_note</span>
+        <p className="text-on-surface-variant">本課尚無語詞應用題目</p>
+        <button onClick={onFinish} className="btn-immersive">
+          繼續下一步 <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
         </button>
       </div>
     </div>
   );
 }
+
+/* CompletionScreen removed — FillInBlankExercise now has its own summary screen */
 
 /* ------------------------------------------------------------------ */
 /*  localStorage helpers (phase + result persistence)                  */
@@ -359,6 +211,10 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
       setSavedFirstTryResults(firstTryResults);
     }
     setPhase('done');
+    // Navigate to next step — FillInBlankExercise already shows its own summary,
+    // so when it calls onComplete from "繼續下一步", we proceed immediately.
+    const completionRate = total > 0 ? score / total : 1;
+    onFinish({ score, total, completionRate });
   }
 
   function handleFinish() {
@@ -396,37 +252,19 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
 
   return (
     <div
-      className="flex-1 flex flex-col bg-amber-50"
+      className="flex-1 flex flex-col bg-surface overflow-hidden"
       style={fontSizePx ? { fontSize: fontSizePx } : undefined}
     >
-      <StepHeader
-        title="語詞應用"
-        subtitle="將正確的詞語代號填入空格中"
-      />
-
-      <div className="flex-1 overflow-auto py-6">
-        {!hasData ? (
-          <NoDataFallback onFinish={handleFinish} />
-        ) : phase === 'exercise' ? (
-          <FillInBlankExercise
-            sentences={sentences}
-            vocabBank={vocabBank}
-            onComplete={handleComplete}
-            storyId={getLearningStorageScope(story.id)}
-          />
-        ) : (
-          <CompletionScreen
-            score={result!.score}
-            total={result!.total}
-            firstTryResults={savedFirstTryResults}
-            vocabBank={vocabBank}
-            sentences={sentences}
-            onRetryAll={handleRedoFromDone}
-            onRetryWrong={handleRetryWrongFromDone}
-            onFinish={handleFinish}
-          />
-        )}
-      </div>
+      {!hasData ? (
+        <NoDataFallback onFinish={handleFinish} />
+      ) : (
+        <FillInBlankExercise
+          sentences={sentences}
+          vocabBank={vocabBank}
+          onComplete={handleComplete}
+          storyId={getLearningStorageScope(story.id)}
+        />
+      )}
     </div>
   );
 };

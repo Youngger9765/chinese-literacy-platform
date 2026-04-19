@@ -14,6 +14,8 @@ interface WriteCharacterProps {
   character: string;
   onComplete?: () => void;
   onBack?: () => void;
+  /** When true, only renders the canvas + minimal controls (no header/back/progress dots). */
+  embedded?: boolean;
 }
 
 enum Step {
@@ -76,7 +78,7 @@ function ProgressDots({ step, practiceLeft }: ProgressDotsProps) {
       {dots.map((dot, i) => (
         <React.Fragment key={i}>
           {i === 3 && (
-            <div className="w-4 h-px bg-slate-600" />
+            <div className="w-4 h-px bg-surface-container-highest" />
           )}
           <div className="flex flex-col items-center gap-0.5">
             <div
@@ -85,9 +87,9 @@ function ProgressDots({ step, practiceLeft }: ProgressDotsProps) {
               } ${
                 dot.filled
                   ? dot.isNoOutline
-                    ? 'border-violet-500 bg-violet-500'
-                    : 'border-orange-500 bg-orange-500'
-                  : 'border-slate-600 bg-transparent'
+                    ? 'border-accent bg-accent'
+                    : 'border-emerald-500 bg-emerald-500'
+                  : 'border-surface-container-highest bg-transparent'
               }`}
             >
               {dot.filled && (
@@ -96,7 +98,7 @@ function ProgressDots({ step, practiceLeft }: ProgressDotsProps) {
                 </svg>
               )}
             </div>
-            <span className={`text-[9px] ${dot.filled ? 'text-orange-400' : 'text-slate-600'}`}>
+            <span className={`text-[9px] ${dot.filled ? 'text-emerald-600' : 'text-on-surface-variant'}`}>
               {dot.label}
             </span>
           </div>
@@ -123,13 +125,13 @@ function StepGuidance({ step, mode, nStrokes, completedStrokes }: StepGuidancePr
   let icon = '';
   let text = '';
   let subtext = '';
-  let colorClass = 'text-slate-400 border-slate-700';
+  let colorClass = 'text-on-surface-variant bg-surface-container-low';
 
   if (step === Step.ANIMATION) {
     icon = '👀';
     text = '觀看筆順動畫';
     subtext = '準備好了就按「開始練習」';
-    colorClass = 'text-sky-300 border-sky-900 bg-sky-950/40';
+    colorClass = 'text-accent bg-accent/10';
   } else if (mode === 'quizzing') {
     const remaining = nStrokes - completedStrokes;
     const isNoOutline = step === Step.PRACTICE_NO_OUTLINE;
@@ -137,18 +139,18 @@ function StepGuidance({ step, mode, nStrokes, completedStrokes }: StepGuidancePr
     text = isNoOutline ? '不看框線，憑記憶寫' : '跟著筆順，一筆一筆寫';
     subtext = remaining > 0 ? `還有 ${remaining} 筆` : '最後一筆了！';
     colorClass = isNoOutline
-      ? 'text-violet-300 border-violet-900 bg-violet-950/40'
-      : 'text-emerald-300 border-emerald-900 bg-emerald-950/40';
+      ? 'text-accent bg-accent/10'
+      : 'text-emerald-700 bg-emerald-50';
   } else if (mode === 'idle' && step !== Step.ANIMATION) {
     icon = '✅';
     text = '這一輪寫完了！';
-    colorClass = 'text-emerald-300 border-emerald-900 bg-emerald-950/40';
+    colorClass = 'text-emerald-700 bg-emerald-50';
   }
 
   if (!text) return null;
 
   return (
-    <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm animate-slide-up-fast ${colorClass}`}>
+    <div className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm animate-slide-up-fast ${colorClass}`}>
       <span>{icon}</span>
       <span className="font-medium">{text}</span>
       {subtext && <span className="opacity-60 text-xs">{subtext}</span>}
@@ -163,8 +165,8 @@ function StepGuidance({ step, mode, nStrokes, completedStrokes }: StepGuidancePr
 function Toast({ message, type }: { message: string; type: 'success' | 'error' | 'info' }) {
   const colors = {
     success: 'bg-emerald-600 text-white',
-    error: 'bg-red-600 text-white',
-    info: 'bg-slate-700 text-white',
+    error: 'bg-tertiary text-white',
+    info: 'bg-surface-container-highest text-on-surface',
   };
   return (
     <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl shadow-2xl text-sm font-bold z-50 animate-toast-in whitespace-nowrap ${colors[type]}`}>
@@ -177,7 +179,7 @@ function Toast({ message, type }: { message: string; type: 'success' | 'error' |
 /*  Main component                                                   */
 /* ================================================================ */
 
-const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, onBack }) => {
+const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, onBack, embedded = false }) => {
   /* ---- React state (drives UI controls) ---- */
   const [data, setData] = useState<CharacterStrokeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -593,43 +595,42 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center bg-[#0d1117] p-4 gap-4 overflow-auto">
-      {/* Header */}
-      <div className="flex items-center gap-4 w-full max-w-lg">
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="text-slate-400 hover:text-white transition-colors p-1"
-            aria-label="返回"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-        )}
-        <div className="flex-1 text-center">
-          <h2 className="text-2xl font-bold text-white">
-            寫一寫：<span className="text-accent-light">{character}</span>
-          </h2>
-          {nStrokes > 0 && (
-            <p className="text-xs text-slate-500 mt-0.5">共 {nStrokes} 筆</p>
+    <div className={`flex-1 flex flex-col items-center ${embedded ? 'gap-3' : 'p-4 gap-4 overflow-auto'}`}>
+      {/* Header — hidden in embedded mode */}
+      {!embedded && (
+        <div className="flex items-center gap-4 w-full max-w-lg">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="text-on-surface-variant hover:text-on-surface transition-colors p-1"
+              aria-label="返回"
+            >
+              <span className="material-symbols-outlined text-2xl">arrow_back</span>
+            </button>
           )}
+          <div className="flex-1 text-center">
+            <h2 className="text-2xl font-bold font-headline text-on-surface">
+              寫一寫：<span className="text-accent">{character}</span>
+            </h2>
+            {nStrokes > 0 && (
+              <p className="text-xs text-on-surface-variant mt-0.5">共 {nStrokes} 筆</p>
+            )}
+          </div>
+          {onBack && <div className="w-8" />}
         </div>
-        {/* Spacer to balance back button */}
-        {onBack && <div className="w-8" />}
-      </div>
+      )}
 
-      {/* Progress dots */}
-      <ProgressDots step={step} practiceLeft={practiceLeft} />
+      {/* Progress dots — hidden in embedded mode */}
+      {!embedded && <ProgressDots step={step} practiceLeft={practiceLeft} />}
 
       {/* Stroke progress bar (during quiz) */}
       {mode === 'quizzing' && nStrokes > 0 && (
-        <div className="w-full max-w-lg">
-          <div className="flex justify-between text-[10px] text-slate-500 mb-1">
+        <div className={`w-full ${embedded ? '' : 'max-w-lg'}`}>
+          <div className="flex justify-between text-[10px] text-on-surface-variant mb-1">
             <span>筆畫進度</span>
             <span>{completedStrokesUI} / {nStrokes}</span>
           </div>
-          <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-surface-container-high rounded-full overflow-hidden">
             <div
               className="h-full bg-emerald-500 rounded-full transition-all duration-300"
               style={{ width: `${(completedStrokesUI / nStrokes) * 100}%` }}
@@ -644,26 +645,28 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       >
         {/* Completion overlay */}
         {isComplete && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0d1117]/95 rounded-xl z-10 gap-4 p-6 animate-fade-in">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/95 rounded-xl z-10 gap-4 p-6 animate-fade-in" style={{ backdropFilter: 'blur(8px)' }}>
             <ConfettiParticles />
             <div className="animate-star-burst text-6xl select-none">🎉</div>
-            <p className="text-6xl font-black text-white animate-pop">{character}</p>
+            <p className="text-6xl font-black text-on-surface animate-pop">{character}</p>
             <div className="flex flex-col items-center gap-1">
-              <p className="text-xl font-bold text-emerald-400">練習完成！</p>
-              <p className="text-xs text-slate-400">很棒，{nStrokes} 筆全部正確</p>
+              <p className="text-xl font-bold text-emerald-600">練習完成！</p>
+              <p className="text-xs text-on-surface-variant">很棒，{nStrokes} 筆全部正確</p>
             </div>
             <div className="flex flex-col gap-2 w-full max-w-xs mt-2">
               {onComplete && (
                 <button
                   onClick={onComplete}
-                  className="w-full px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-full shadow-sm transition-all active:scale-95 text-sm"
+                  className="w-full h-12 rounded-full font-bold text-base text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
                 >
-                  完成，回到練習清單
+                  下一個字
+                  <span className="material-symbols-outlined text-lg">arrow_forward</span>
                 </button>
               )}
               <button
                 onClick={handleRetry}
-                className="w-full px-6 py-2.5 text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 rounded-2xl transition-all text-sm"
+                className="w-full px-6 py-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-all text-sm"
               >
                 再練一次
               </button>
@@ -688,19 +691,23 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       {step === Step.ANIMATION && (
         <button
           onClick={handleBeginPractice}
-          className="px-10 py-4 bg-accent hover:bg-accent-hover text-white font-bold text-lg rounded-2xl shadow-xl transition-all active:scale-95 animate-pulse"
+          className="px-10 py-4 rounded-full font-headline font-bold text-lg text-white shadow-[0_8px_32px_rgba(86,74,191,0.3)] transition-all active:scale-95 animate-pulse flex items-center gap-2"
+          style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
         >
-          ✏️ 開始練習
+          <span className="material-symbols-outlined text-xl">edit</span>
+          開始練習
         </button>
       )}
 
-      {/* Step guidance */}
-      <StepGuidance
-        step={step}
-        mode={mode}
-        nStrokes={nStrokes}
-        completedStrokes={completedStrokesUI}
-      />
+      {/* Step guidance — hidden in embedded mode */}
+      {!embedded && (
+        <StepGuidance
+          step={step}
+          mode={mode}
+          nStrokes={nStrokes}
+          completedStrokes={completedStrokesUI}
+        />
+      )}
 
       {/* Toast */}
       {toast && <Toast message={toast} type={toastType} />}

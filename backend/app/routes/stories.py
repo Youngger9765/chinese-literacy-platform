@@ -5,6 +5,7 @@ No database dependency for platform content.
 
 import time
 from fastapi import APIRouter, Query, HTTPException, Depends, Request
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -13,27 +14,48 @@ from ..auth.dependencies import get_current_user
 from ..auth.rate_limiter import ai_rate_limiter, get_client_key
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
 from ..utils.slug import normalize_story_slug
-from ..services.ai_service import generate_story_structure
+from ..services.ai_service import generate_story_structure, grade_story_structure
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
 from ..schemas.story import StoryListItem, StoryDetail, StoryListResponse, StoryIntroSchema
 
 # ---------------------------------------------------------------------------
 # Simple TTL cache for story structure results (avoids redundant Gemini calls)
+# v2 cache key prefix — invalidates old non-interactive cache entries (#1082)
 # ---------------------------------------------------------------------------
 
 _structure_cache: dict[str, tuple[float, object]] = {}
 _CACHE_TTL = 86400  # 24 hours
+_CACHE_VERSION = "v2"  # bump when schema changes to auto-invalidate
+
+
+def _cache_key(story_id: str) -> str:
+    return f"{_CACHE_VERSION}:{story_id}"
 
 
 def _get_cached_structure(story_id: str):
-    entry = _structure_cache.get(story_id)
+    entry = _structure_cache.get(_cache_key(story_id))
     if entry and time.time() - entry[0] < _CACHE_TTL:
         return entry[1]
     return None
 
 
 def _set_cached_structure(story_id: str, result):
-    _structure_cache[story_id] = (time.time(), result)
+    _structure_cache[_cache_key(story_id)] = (time.time(), result)
+
+
+# ---------------------------------------------------------------------------
+# Request / Response schemas for grading
+# ---------------------------------------------------------------------------
+
+class StructureAnswerItem(BaseModel):
+    row_index: int
+    sub_row_index: int | None = None
+    value: str | None = None          # for fill_blank
+    selected_options: list[int] | None = None  # for checkbox
+
+
+class GradeStructureRequest(BaseModel):
+    answers: list[StructureAnswerItem]
 
 router = APIRouter(tags=["stories"])
 
@@ -189,5 +211,46 @@ async def get_story_structure(
         content_filtered=usage.content_filtered if usage else False,
         cache_hit=False,
         prompt_template_id="story_structure",
+    )
+    return result
+
+
+# ── ⑤ 文章重點表 批改 endpoint (#1082) ────────────────────────────────────────
+
+@router.post("/stories/{story_id}/structure/grade")
+async def grade_story_structure_endpoint(
+    story_id: str,
+    body: GradeStructureRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Grade student answers for the interactive story structure table (#1082).
+
+    Requires authentication. Uses the cached structure (must have called GET first).
+    For fill_blank rows: fuzzy Chinese text match.
+    For checkbox rows: exact index match against correct_options.
+
+    Returns {results: [...], score: 0-100}.
+    """
+    try:
+        numeric_id = int(normalize_story_slug(story_id))
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=404, detail="Story not found")
+    story = get_lesson_by_id(numeric_id)
+    if not story:
+        raise HTTPException(status_code=404, detail="Story not found")
+
+    cached = _get_cached_structure(story_id)
+    if cached is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Structure not yet generated. Call GET /api/stories/{story_id}/structure first.",
+        )
+
+    story_text = story.get("full_text") or "\n".join(story.get("paragraphs", []))
+    answers_payload = [a.model_dump() for a in body.answers]
+    result = await grade_story_structure(
+        structure=cached,
+        answers=answers_payload,
+        story_text=story_text,
     )
     return result

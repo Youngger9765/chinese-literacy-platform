@@ -89,6 +89,81 @@ export async function getSessionStatus(
 }
 
 // ---------------------------------------------------------------------------
+// Self-practice session completion (Issue #1070)
+// ---------------------------------------------------------------------------
+
+/**
+ * Mark a self-practice session as completed in the DB.
+ *
+ * Calls PATCH /api/learning/sessions/{sessionId} with status="completed".
+ * completed_at is intentionally omitted — the backend sets it via server time
+ * to avoid client clock skew.  Fire-and-forget — errors are non-fatal and
+ * logged to console only.
+ *
+ * Throws SessionExpiredError on 401 so callers can distinguish token expiry
+ * from other failures.
+ */
+export async function completeSelfPracticeSession(
+  sessionId: number,
+  token: string,
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/learning/sessions/${sessionId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      status: 'completed',
+    }),
+  });
+  if (res.status === 401) {
+    throw new SessionExpiredError('completeSelfPracticeSession: token expired');
+  }
+  if (!res.ok) {
+    throw new Error(`completeSelfPracticeSession failed: ${res.status}`);
+  }
+}
+
+/**
+ * Check whether the current user has any completed self-practice session for a
+ * given story by querying the DB via GET /api/learning/sessions.
+ *
+ * Returns `true` when at least one completed self-practice session exists,
+ * `false` otherwise (including on network/auth errors — the caller falls back
+ * to localStorage in that case).
+ */
+export async function checkSelfPracticeCompleted(
+  storySlug: string,
+  token: string,
+): Promise<boolean> {
+  try {
+    const params = new URLSearchParams({
+      story_slug: storySlug,
+      status: 'completed',
+      learning_source: 'self',
+      // Note: limit only caps the returned `items` array; `total` still reflects
+      // the full count because learning_source filtering happens in Python after
+      // the SQL query.  We keep limit=1 to minimise payload size.
+      limit: '1',
+    });
+    const res = await fetch(`${API_BASE}/api/learning/sessions?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 401) {
+      throw new SessionExpiredError('checkSelfPracticeCompleted: token expired');
+    }
+    if (!res.ok) return false;
+    const data = (await res.json()) as { total: number };
+    return data.total > 0;
+  } catch (err) {
+    if (err instanceof SessionExpiredError) throw err;
+    console.error('[checkSelfPracticeCompleted] failed, falling back to localStorage:', err);
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Comprehension chat
 // ---------------------------------------------------------------------------
 
@@ -677,6 +752,27 @@ export async function saveStepProgress(
 }
 
 /**
+ * Fire-and-forget step progress save using fetch + keepalive.
+ * Designed for beforeunload / page teardown where normal fetch may be cancelled.
+ */
+export function saveStepProgressBeacon(
+  token: string,
+  sessionId: number,
+  progress: StepProgressData,
+): void {
+  const url = `${API_BASE}/api/learning/sessions/${sessionId}/progress`;
+  fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(progress),
+    keepalive: true,
+  }).catch(() => { /* non-fatal */ });
+}
+
+/**
  * Load step progress from DB for a given learning session.
  * Returns null step_progress when nothing has been saved yet.
  */
@@ -713,5 +809,52 @@ export async function getReadingHistory(
     { headers: { Authorization: `Bearer ${token}` } },
   );
   if (!res.ok) throw new Error(`getReadingHistory failed: ${res.status}`);
+  return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Sentence practice (Issue #109, #927)
+// ---------------------------------------------------------------------------
+
+export interface ExampleSentence {
+  sentence: string;
+  explanation: string;
+}
+
+export type ExampleSentenceSource = 'pregenerated' | 'ai';
+
+export async function fetchExampleSentences(
+  token: string,
+  word: string,
+  storyTitle: string,
+): Promise<{ sentences: ExampleSentence[]; source: ExampleSentenceSource }> {
+  const res = await fetch(`${API_BASE}/api/learning/sentence-practice/example-sentences`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ word, story_title: storyTitle }),
+  });
+  if (!res.ok) throw new Error(`fetchExampleSentences failed: ${res.status}`);
+  const data = await res.json();
+  return { sentences: data.sentences as ExampleSentence[], source: (data.source ?? 'ai') as ExampleSentenceSource };
+}
+
+export async function validateSentence(
+  token: string,
+  word: string,
+  studentSentence: string,
+  storyTitle: string,
+): Promise<{ is_correct: boolean; feedback: string; suggestion: string }> {
+  const res = await fetch(`${API_BASE}/api/learning/sentence-practice/validate`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ word, student_sentence: studentSentence, story_title: storyTitle }),
+  });
+  if (!res.ok) throw new Error(`validateSentence failed: ${res.status}`);
   return res.json();
 }

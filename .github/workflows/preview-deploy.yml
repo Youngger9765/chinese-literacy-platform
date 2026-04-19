@@ -105,7 +105,7 @@ jobs:
             --max-instances=1 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-preview-db \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://placeholder.run.app::DATABASE_URL=${{ secrets.PREVIEW_DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=gemini31"
 
       - name: Get backend preview URL
         id: backend-url
@@ -191,6 +191,36 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}"
+
+      - name: Warm backend to avoid cold-start CORS errors
+        if: always() && steps.preview-urls.outputs.backend_url != 'N/A'
+        env:
+          BACKEND_URL: ${{ steps.preview-urls.outputs.backend_url }}
+          FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
+        run: |
+          # CORS env update creates a new Cloud Run revision which is cold.
+          # Browsers hitting a cold revision see 5xx without CORS headers,
+          # surfacing as spurious "blocked by CORS policy" console errors.
+          #
+          # Two warmups:
+          # 1. Root GET — warms one instance through Cloud Run routing.
+          # 2. OPTIONS preflight with Origin — mimics what the browser will do
+          #    for the first fetch(), ensuring the API route + CORS middleware
+          #    are both JIT-loaded before the real user request arrives.
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$BACKEND_URL/" || echo timeout)
+            echo "Warmup root attempt $i: HTTP $code"
+            case "$code" in timeout|000) sleep 2 ;; *) break ;; esac
+          done
+          for path in /api/assignments/my /api/gamification/streak /api/stories; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 \
+              -X OPTIONS \
+              -H "Origin: $FRONTEND_URL" \
+              -H "Access-Control-Request-Method: GET" \
+              -H "Access-Control-Request-Headers: authorization,content-type" \
+              "${BACKEND_URL}${path}" || echo timeout)
+            echo "Preflight $path: HTTP $code"
+          done
 
       - name: Comment PR with preview URLs
         uses: actions/github-script@v8

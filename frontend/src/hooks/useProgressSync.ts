@@ -19,7 +19,7 @@
  * API failures are fully non-blocking — localStorage still functions.
  */
 import { useCallback, useEffect, useRef } from 'react';
-import { saveStepProgress, loadStepProgress, StepProgressData } from '../services/learningApi';
+import { saveStepProgress, saveStepProgressBeacon, loadStepProgress, StepProgressData } from '../services/learningApi';
 
 const DEBOUNCE_MS = 5_000;
 
@@ -81,6 +81,10 @@ export function useProgressSync({
     [token, dbSessionId],
   );
 
+  // Keep a ref to the latest doSave so unmount cleanup always uses the current version
+  const doSaveRef = useRef(doSave);
+  useEffect(() => { doSaveRef.current = doSave; }, [doSave]);
+
   // ── Debounced sync ────────────────────────────────────────────────────────
   const syncProgress = useCallback(
     (data: StepProgressData) => {
@@ -91,8 +95,9 @@ export function useProgressSync({
       }
       debounceTimerRef.current = setTimeout(() => {
         if (latestDataRef.current) {
-          doSave(latestDataRef.current);
+          doSaveRef.current(latestDataRef.current);
         }
+        debounceTimerRef.current = null;
       }, DEBOUNCE_MS);
     },
     [doSave],
@@ -111,13 +116,37 @@ export function useProgressSync({
     [doSave],
   );
 
-  // Cleanup debounce timer on unmount
+  // Flush pending data on page unload (refresh / close / navigate away)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (!latestDataRef.current || !debounceTimerRef.current) return;
+
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+
+      if (token && dbSessionId !== null) {
+        saveStepProgressBeacon(token, dbSessionId, latestDataRef.current);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [token, dbSessionId]);
+
+  // Flush pending data on unmount (SPA navigation away from learning flow)
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+        if (latestDataRef.current) {
+          doSaveRef.current(latestDataRef.current);
+        }
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { syncProgress, flushProgress };

@@ -38,3 +38,4 @@ tests/load-testing/.venv/
 # macOS
 .DS_Store
 .gstack/
+.worktrees/

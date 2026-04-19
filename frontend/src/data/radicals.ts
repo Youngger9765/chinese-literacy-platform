@@ -413,6 +413,714 @@ export const radicalMap: Record<string, RadicalInfo> = {
       { char: '視', meaning: '視覺，觀察' },
     ],
   },
+
+  // ---------------------------------------------------------------------------
+  // Issue #1099 — 熱門部件資料補齊（Top 50，relatedChars 以 57 課課文字頻排序）
+  // ---------------------------------------------------------------------------
+
+  // ⺼ flesh / body-radical variant of 肉
+  '⺼': {
+    meaning: '與身體、器官有關（肉字旁）',
+    role: '形符',
+    relatedChars: [
+      { char: '育', meaning: '養育、教育' },
+      { char: '肌', meaning: '肌肉' },
+      { char: '背', meaning: '背部' },
+      { char: '肯', meaning: '願意' },
+      { char: '腦', meaning: '頭腦' },
+      { char: '腳', meaning: '腳部' },
+      { char: '腿', meaning: '腿部' },
+      { char: '肩', meaning: '肩膀' },
+    ],
+  },
+
+  // 阝 city (right) / mound (left)
+  '阝': {
+    meaning: '城邑或山丘（在字右為「邑」、在左為「阜」）',
+    role: '形符',
+    relatedChars: [
+      { char: '都', meaning: '首都、都市' },
+      { char: '部', meaning: '部分、部門' },
+      { char: '阿', meaning: '稱謂字首' },
+      { char: '隊', meaning: '隊伍' },
+      { char: '除', meaning: '除去' },
+      { char: '防', meaning: '防備' },
+      { char: '陳', meaning: '陳列、姓氏' },
+      { char: '陽', meaning: '太陽' },
+    ],
+  },
+
+  // 貝 shell / money
+  '貝': {
+    meaning: '貝殼、古代錢幣；與財貨有關',
+    role: '形符',
+    relatedChars: [
+      { char: '賽', meaning: '比賽' },
+      { char: '員', meaning: '人員' },
+      { char: '質', meaning: '品質' },
+      { char: '資', meaning: '資源' },
+      { char: '負', meaning: '背負、失敗' },
+      { char: '則', meaning: '規則' },
+      { char: '費', meaning: '費用' },
+      { char: '敗', meaning: '失敗' },
+    ],
+  },
+
+  // 王 king / jade
+  '王': {
+    meaning: '君王；也為「玉」的偏旁，與玉石有關',
+    role: '形符',
+    relatedChars: [
+      { char: '現', meaning: '出現' },
+      { char: '球', meaning: '球體' },
+      { char: '理', meaning: '道理' },
+      { char: '環', meaning: '環繞' },
+      { char: '望', meaning: '希望、盼望' },
+      { char: '珍', meaning: '珍貴' },
+      { char: '玩', meaning: '玩耍' },
+      { char: '玉', meaning: '美玉' },
+    ],
+  },
+
+  // ⺮ bamboo top
+  '⺮': {
+    meaning: '竹子；多用於竹製品（竹字頭）',
+    role: '形符',
+    relatedChars: [
+      { char: '第', meaning: '次序' },
+      { char: '等', meaning: '等候' },
+      { char: '節', meaning: '節日、節制' },
+      { char: '篇', meaning: '篇章' },
+      { char: '符', meaning: '符號' },
+      { char: '管', meaning: '管理' },
+      { char: '簡', meaning: '簡單' },
+      { char: '筆', meaning: '筆記' },
+    ],
+  },
+
+  // 車 vehicle
+  '車': {
+    meaning: '車輛、交通工具',
+    role: '形符',
+    relatedChars: [
+      { char: '較', meaning: '比較' },
+      { char: '轉', meaning: '轉動' },
+      { char: '連', meaning: '相連' },
+      { char: '輕', meaning: '輕盈' },
+      { char: '庫', meaning: '倉庫' },
+      { char: '輸', meaning: '輸送' },
+      { char: '軍', meaning: '軍隊' },
+      { char: '載', meaning: '裝載' },
+    ],
+  },
+
+  // 頁 head / page
+  '頁': {
+    meaning: '頭部、面容（古寫象人頭形）',
+    role: '形符',
+    relatedChars: [
+      { char: '題', meaning: '題目' },
+      { char: '項', meaning: '頸項、項目' },
+      { char: '頭', meaning: '頭部' },
+      { char: '預', meaning: '預先' },
+      { char: '須', meaning: '必須' },
+      { char: '顧', meaning: '照顧' },
+      { char: '顯', meaning: '顯示' },
+      { char: '順', meaning: '順從' },
+    ],
+  },
+
+  // 攵 strike / action (變體 of 攴)
+  '攵': {
+    meaning: '手持器具敲打；多表動作（反文旁）',
+    role: '形符',
+    relatedChars: [
+      { char: '數', meaning: '數量' },
+      { char: '教', meaning: '教導' },
+      { char: '變', meaning: '改變' },
+      { char: '故', meaning: '緣故' },
+      { char: '效', meaning: '效果' },
+      { char: '放', meaning: '放開' },
+      { char: '改', meaning: '改變' },
+      { char: '救', meaning: '救助' },
+    ],
+  },
+
+  // 馬 horse
+  '馬': {
+    meaning: '馬；與騎乘、奔跑有關',
+    role: '形符',
+    relatedChars: [
+      { char: '媽', meaning: '媽媽' },
+      { char: '驗', meaning: '檢驗' },
+      { char: '嗎', meaning: '疑問助詞' },
+      { char: '驚', meaning: '驚訝' },
+      { char: '騙', meaning: '欺騙' },
+      { char: '駕', meaning: '駕駛' },
+      { char: '騎', meaning: '騎乘' },
+      { char: '罵', meaning: '責罵' },
+    ],
+  },
+
+  // 門 gate
+  '門': {
+    meaning: '門戶、建築出入口',
+    role: '形符',
+    relatedChars: [
+      { char: '們', meaning: '複數詞尾' },
+      { char: '問', meaning: '詢問' },
+      { char: '開', meaning: '打開' },
+      { char: '間', meaning: '空間' },
+      { char: '關', meaning: '關閉' },
+      { char: '聞', meaning: '聽見' },
+      { char: '閃', meaning: '閃爍' },
+      { char: '閒', meaning: '閒暇' },
+    ],
+  },
+
+  // 罒 net
+  '罒': {
+    meaning: '網狀物（网字變體）',
+    role: '形符',
+    relatedChars: [
+      { char: '眾', meaning: '眾人' },
+      { char: '夢', meaning: '夢境' },
+      { char: '德', meaning: '道德' },
+      { char: '羅', meaning: '羅列' },
+      { char: '置', meaning: '放置' },
+      { char: '罪', meaning: '罪行' },
+      { char: '罰', meaning: '處罰' },
+      { char: '罵', meaning: '責罵' },
+    ],
+  },
+
+  // 肖 resemble (phonetic)
+  '肖': {
+    meaning: '相似、像（常作聲符）',
+    role: '聲符',
+    relatedChars: [
+      { char: '消', meaning: '消失' },
+      { char: '稍', meaning: '稍微' },
+      { char: '銷', meaning: '銷售' },
+      { char: '悄', meaning: '悄悄' },
+      { char: '哨', meaning: '哨子' },
+      { char: '削', meaning: '削減' },
+    ],
+  },
+
+  // 丷 diverging strokes
+  '丷': {
+    meaning: '分開的兩點（常見於字首裝飾）',
+    role: '部件',
+    relatedChars: [
+      { char: '前', meaning: '前面' },
+      { char: '並', meaning: '並且' },
+      { char: '弟', meaning: '弟弟' },
+      { char: '曾', meaning: '曾經' },
+      { char: '半', meaning: '一半' },
+      { char: '善', meaning: '良善' },
+      { char: '乎', meaning: '語氣助詞' },
+      { char: '幸', meaning: '幸福' },
+    ],
+  },
+
+  // 尚 still / esteem (phonetic)
+  '尚': {
+    meaning: '崇尚、還（常作聲符）',
+    role: '聲符',
+    relatedChars: [
+      { char: '常', meaning: '經常' },
+      { char: '當', meaning: '擔當' },
+      { char: '掌', meaning: '手掌' },
+      { char: '嘗', meaning: '品嘗' },
+      { char: '賞', meaning: '欣賞' },
+      { char: '堂', meaning: '廳堂' },
+      { char: '躺', meaning: '躺下' },
+    ],
+  },
+
+  // 包 wrap
+  '包': {
+    meaning: '包裹、包覆',
+    role: '聲符',
+    relatedChars: [
+      { char: '跑', meaning: '奔跑' },
+      { char: '抱', meaning: '懷抱' },
+      { char: '飽', meaning: '吃飽' },
+      { char: '胞', meaning: '細胞' },
+      { char: '泡', meaning: '泡沫' },
+      { char: '苞', meaning: '花苞' },
+    ],
+  },
+
+  // 者 one who / helper particle
+  '者': {
+    meaning: '「⋯的人」的助詞；常作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '都', meaning: '首都、都市' },
+      { char: '著', meaning: '著作、顯著' },
+      { char: '緒', meaning: '頭緒' },
+      { char: '署', meaning: '署名' },
+      { char: '煮', meaning: '烹煮' },
+      { char: '暑', meaning: '暑熱' },
+      { char: '諸', meaning: '各個' },
+    ],
+  },
+
+  // 圭 jade tablet
+  '圭': {
+    meaning: '古代玉器（圭璋）；作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '鞋', meaning: '鞋子' },
+      { char: '哇', meaning: '驚嘆語氣' },
+      { char: '佳', meaning: '美好' },
+      { char: '街', meaning: '街道' },
+      { char: '蛙', meaning: '青蛙' },
+      { char: '封', meaning: '封閉' },
+      { char: '桂', meaning: '桂花' },
+    ],
+  },
+
+  // 且 moreover
+  '且': {
+    meaning: '並列、況且；常作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '助', meaning: '幫助' },
+      { char: '組', meaning: '組成' },
+      { char: '姐', meaning: '姐姐' },
+      { char: '祖', meaning: '祖先' },
+      { char: '宜', meaning: '適宜' },
+      { char: '阻', meaning: '阻擋' },
+    ],
+  },
+
+  // 各 each
+  '各': {
+    meaning: '各自；常作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '路', meaning: '道路' },
+      { char: '格', meaning: '格式' },
+      { char: '客', meaning: '客人' },
+      { char: '略', meaning: '省略' },
+      { char: '落', meaning: '落下' },
+    ],
+  },
+
+  // 糸 silk thread
+  '糸': {
+    meaning: '絲線、繩索',
+    role: '形符',
+    relatedChars: [
+      { char: '素', meaning: '素色、平素' },
+      { char: '絲', meaning: '絲線' },
+      { char: '緊', meaning: '緊密' },
+      { char: '索', meaning: '繩索、探索' },
+      { char: '繁', meaning: '繁多' },
+      { char: '累', meaning: '累積' },
+    ],
+  },
+
+  // 丁 nail / male adult
+  '丁': {
+    meaning: '鐵釘、壯丁；常作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '打', meaning: '敲打' },
+      { char: '頂', meaning: '頂端' },
+      { char: '寧', meaning: '安寧' },
+      { char: '盯', meaning: '盯住' },
+      { char: '釘', meaning: '釘子' },
+      { char: '叮', meaning: '叮咬' },
+      { char: '訂', meaning: '訂立' },
+    ],
+  },
+
+  // 也 also
+  '也': {
+    meaning: '助詞「也」；常作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '他', meaning: '第三人稱' },
+      { char: '地', meaning: '土地' },
+      { char: '她', meaning: '女性第三人稱' },
+      { char: '施', meaning: '施行' },
+      { char: '牠', meaning: '動物第三人稱' },
+      { char: '池', meaning: '池塘' },
+    ],
+  },
+
+  // 分 divide
+  '分': {
+    meaning: '分開、分配',
+    role: '聲符',
+    relatedChars: [
+      { char: '份', meaning: '份量' },
+      { char: '紛', meaning: '紛亂' },
+      { char: '貧', meaning: '貧窮' },
+      { char: '粉', meaning: '粉末' },
+      { char: '扮', meaning: '扮演' },
+      { char: '芬', meaning: '芬芳' },
+    ],
+  },
+
+  // 犬 dog
+  '犬': {
+    meaning: '狗；與動物、追獵有關',
+    role: '形符',
+    relatedChars: [
+      { char: '狀', meaning: '狀態' },
+      { char: '突', meaning: '突然' },
+      { char: '器', meaning: '器具' },
+      { char: '獎', meaning: '獎賞' },
+      { char: '伏', meaning: '伏臥' },
+      { char: '哭', meaning: '哭泣' },
+      { char: '獻', meaning: '奉獻' },
+    ],
+  },
+
+  // 古 ancient
+  '古': {
+    meaning: '古老、古代；常作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '故', meaning: '緣故' },
+      { char: '苦', meaning: '痛苦' },
+      { char: '居', meaning: '居住' },
+      { char: '固', meaning: '堅固' },
+      { char: '估', meaning: '估計' },
+      { char: '胡', meaning: '胡亂' },
+      { char: '枯', meaning: '枯萎' },
+    ],
+  },
+
+  // 令 command
+  '令': {
+    meaning: '命令；常作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '命', meaning: '命令、生命' },
+      { char: '冷', meaning: '寒冷' },
+      { char: '領', meaning: '領導' },
+      { char: '零', meaning: '零星' },
+      { char: '齡', meaning: '年齡' },
+      { char: '鈴', meaning: '鈴鐺' },
+    ],
+  },
+
+  // 直 straight
+  '直': {
+    meaning: '筆直、正直',
+    role: '聲符',
+    relatedChars: [
+      { char: '真', meaning: '真實' },
+      { char: '植', meaning: '種植' },
+      { char: '值', meaning: '價值' },
+      { char: '置', meaning: '放置' },
+      { char: '殖', meaning: '繁殖' },
+    ],
+  },
+
+  // 巴 cling
+  '巴': {
+    meaning: '緊貼、盼望',
+    role: '聲符',
+    relatedChars: [
+      { char: '把', meaning: '把握' },
+      { char: '爸', meaning: '爸爸' },
+      { char: '吧', meaning: '語氣助詞' },
+      { char: '爬', meaning: '攀爬' },
+    ],
+  },
+
+  // 果 fruit
+  '果': {
+    meaning: '果實、結果',
+    role: '聲符',
+    relatedChars: [
+      { char: '課', meaning: '課程' },
+      { char: '棵', meaning: '量詞（一棵樹）' },
+      { char: '顆', meaning: '量詞（一顆球）' },
+    ],
+  },
+
+  // 乂 cut grass / govern
+  '乂': {
+    meaning: '割草、治理（古「艾」字）',
+    role: '部件',
+    relatedChars: [
+      { char: '希', meaning: '希望' },
+      { char: '父', meaning: '父親' },
+      { char: '凶', meaning: '凶險' },
+      { char: '交', meaning: '交會' },
+      { char: '史', meaning: '歷史' },
+      { char: '艾', meaning: '艾草' },
+    ],
+  },
+
+  // 占 divine
+  '占': {
+    meaning: '占卜、佔有',
+    role: '聲符',
+    relatedChars: [
+      { char: '點', meaning: '點滴' },
+      { char: '站', meaning: '站立' },
+      { char: '店', meaning: '店舖' },
+      { char: '貼', meaning: '貼近' },
+      { char: '佔', meaning: '佔據' },
+      { char: '黏', meaning: '黏貼' },
+    ],
+  },
+
+  // 乚 hidden / hook stroke
+  '乚': {
+    meaning: '隱藏；乙的變體（常為末筆）',
+    role: '部件',
+    relatedChars: [
+      { char: '已', meaning: '已經' },
+      { char: '孔', meaning: '孔洞' },
+      { char: '尺', meaning: '尺寸' },
+      { char: '亂', meaning: '混亂' },
+      { char: '乳', meaning: '乳汁' },
+    ],
+  },
+
+  // 爫 claw / grab
+  '爫': {
+    meaning: '手抓取（爪字變體）',
+    role: '形符',
+    relatedChars: [
+      { char: '為', meaning: '作為' },
+      { char: '受', meaning: '接受' },
+      { char: '愛', meaning: '愛護' },
+      { char: '爭', meaning: '爭取' },
+      { char: '亂', meaning: '混亂' },
+      { char: '采', meaning: '採集' },
+    ],
+  },
+
+  // 可 can
+  '可': {
+    meaning: '可以、贊同',
+    role: '聲符',
+    relatedChars: [
+      { char: '何', meaning: '何時' },
+      { char: '阿', meaning: '稱謂字首' },
+      { char: '哥', meaning: '哥哥' },
+      { char: '奇', meaning: '奇特' },
+      { char: '河', meaning: '河流' },
+    ],
+  },
+
+  // 共 together
+  '共': {
+    meaning: '共同、一起',
+    role: '聲符',
+    relatedChars: [
+      { char: '供', meaning: '供給' },
+      { char: '洪', meaning: '洪水' },
+      { char: '恭', meaning: '恭敬' },
+      { char: '哄', meaning: '哄騙' },
+    ],
+  },
+
+  // 莫 do not / dusk
+  '莫': {
+    meaning: '不要；原為黃昏（暮）',
+    role: '聲符',
+    relatedChars: [
+      { char: '模', meaning: '模型、模仿' },
+      { char: '慕', meaning: '羨慕' },
+      { char: '漠', meaning: '沙漠' },
+      { char: '摸', meaning: '撫摸' },
+      { char: '膜', meaning: '薄膜' },
+      { char: '墓', meaning: '墳墓' },
+      { char: '寞', meaning: '寂寞' },
+      { char: '幕', meaning: '帷幕' },
+    ],
+  },
+
+  // 台 platform
+  '台': {
+    meaning: '平台；台語中亦表敬稱',
+    role: '聲符',
+    relatedChars: [
+      { char: '始', meaning: '開始' },
+      { char: '治', meaning: '治理' },
+      { char: '抬', meaning: '抬起' },
+      { char: '胎', meaning: '胎兒' },
+      { char: '颱', meaning: '颱風' },
+    ],
+  },
+
+  // 巠 underground stream
+  '巠': {
+    meaning: '地下水流（常作聲符）',
+    role: '聲符',
+    relatedChars: [
+      { char: '經', meaning: '經過、經書' },
+      { char: '輕', meaning: '輕盈' },
+      { char: '徑', meaning: '小徑' },
+    ],
+  },
+
+  // 魚 fish
+  '魚': {
+    meaning: '魚類；與水產有關',
+    role: '形符',
+    relatedChars: [
+      { char: '鯨', meaning: '鯨魚' },
+      { char: '鮮', meaning: '新鮮' },
+      { char: '漁', meaning: '捕魚' },
+      { char: '魯', meaning: '粗魯' },
+    ],
+  },
+
+  // 堇 yellow clay
+  '堇': {
+    meaning: '黃黏土；常作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '難', meaning: '困難' },
+      { char: '僅', meaning: '僅僅' },
+      { char: '嘆', meaning: '嘆息' },
+      { char: '艱', meaning: '艱難' },
+      { char: '勤', meaning: '勤勞' },
+      { char: '謹', meaning: '謹慎' },
+      { char: '漢', meaning: '漢朝、漢字' },
+    ],
+  },
+
+  // 僉 all
+  '僉': {
+    meaning: '眾人、全部；常作聲符',
+    role: '聲符',
+    relatedChars: [
+      { char: '驗', meaning: '檢驗' },
+      { char: '險', meaning: '危險' },
+      { char: '檢', meaning: '檢查' },
+      { char: '臉', meaning: '臉龐' },
+    ],
+  },
+
+  // 少 few
+  '少': {
+    meaning: '少量、稀少',
+    role: '聲符',
+    relatedChars: [
+      { char: '省', meaning: '省略' },
+      { char: '秒', meaning: '秒數' },
+      { char: '沙', meaning: '沙子' },
+      { char: '妙', meaning: '奇妙' },
+      { char: '吵', meaning: '吵鬧' },
+      { char: '炒', meaning: '炒菜' },
+    ],
+  },
+
+  // 合 combine
+  '合': {
+    meaning: '合起、聚集',
+    role: '聲符',
+    relatedChars: [
+      { char: '給', meaning: '給予' },
+      { char: '答', meaning: '回答' },
+      { char: '拿', meaning: '拿取' },
+      { char: '哈', meaning: '大笑' },
+      { char: '恰', meaning: '恰好' },
+      { char: '鴿', meaning: '鴿子' },
+    ],
+  },
+
+  // 余 surplus / I (archaic)
+  '余': {
+    meaning: '多餘；古時第一人稱',
+    role: '聲符',
+    relatedChars: [
+      { char: '除', meaning: '除去' },
+      { char: '敘', meaning: '敘述' },
+      { char: '餘', meaning: '剩餘' },
+      { char: '途', meaning: '路途' },
+      { char: '徐', meaning: '緩慢' },
+    ],
+  },
+
+  // 亡 flee / lose
+  '亡': {
+    meaning: '逃亡、失去',
+    role: '聲符',
+    relatedChars: [
+      { char: '望', meaning: '希望' },
+      { char: '忙', meaning: '忙碌' },
+      { char: '贏', meaning: '勝利' },
+      { char: '忘', meaning: '遺忘' },
+      { char: '妄', meaning: '虛妄' },
+    ],
+  },
+
+  // 予 give / I
+  '予': {
+    meaning: '給予；亦為第一人稱',
+    role: '聲符',
+    relatedChars: [
+      { char: '預', meaning: '預備' },
+      { char: '野', meaning: '原野' },
+      { char: '序', meaning: '次序' },
+      { char: '舒', meaning: '舒展' },
+    ],
+  },
+
+  // 林 woods
+  '林': {
+    meaning: '樹林；雙木成林',
+    role: '部件',
+    relatedChars: [
+      { char: '楚', meaning: '清楚' },
+      { char: '麻', meaning: '麻布' },
+      { char: '淋', meaning: '淋浴' },
+      { char: '禁', meaning: '禁止' },
+      { char: '鬱', meaning: '憂鬱' },
+    ],
+  },
+
+  // 乃 thereupon
+  '乃': {
+    meaning: '於是、就；古代連詞',
+    role: '部件',
+    relatedChars: [
+      { char: '及', meaning: '及時' },
+      { char: '仍', meaning: '仍然' },
+      { char: '奶', meaning: '奶水' },
+      { char: '秀', meaning: '秀美' },
+      { char: '孕', meaning: '懷孕' },
+    ],
+  },
+
+  // 旦 dawn
+  '旦': {
+    meaning: '清晨、日出地平線',
+    role: '部件',
+    relatedChars: [
+      { char: '但', meaning: '但是' },
+      { char: '量', meaning: '數量' },
+      { char: '查', meaning: '查詢' },
+      { char: '坦', meaning: '坦白' },
+    ],
+  },
+
+  // 乍 suddenly
+  '乍': {
+    meaning: '忽然、初始',
+    role: '聲符',
+    relatedChars: [
+      { char: '作', meaning: '作為' },
+      { char: '怎', meaning: '怎麼' },
+      { char: '炸', meaning: '爆炸' },
+      { char: '昨', meaning: '昨日' },
+    ],
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -812,16 +1520,20 @@ export function getRelatedChars(radical: string, excludeChar?: string): RelatedC
   // Hand-curated first
   const info = radicalMap[radical];
   if (info) {
-    return excludeChar
+    const filtered = excludeChar
       ? info.relatedChars.filter(r => r.char !== excludeChar)
       : info.relatedChars;
+    // Deduplicate by char
+    const seen = new Set<string>();
+    return filtered.filter(r => { if (seen.has(r.char)) return false; seen.add(r.char); return true; });
   }
   // Fall back to open-data JSON (characters without individual meanings)
   if (_radicalMeaningsCache) {
     const entry = _radicalMeaningsCache[radical];
     if (entry && entry.relatedChars.length > 0) {
+      const seen = new Set<string>();
       const chars: RelatedChar[] = entry.relatedChars
-        .filter(c => c !== excludeChar)
+        .filter(c => c !== excludeChar && !seen.has(c) && (seen.add(c), true))
         .map(c => ({ char: c, meaning: '' }));
       return chars;
     }

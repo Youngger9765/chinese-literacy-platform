@@ -30,6 +30,8 @@ from .routes.health import router as health_router
 from .routes.semesters import router as semesters_router
 from .routes.co_teaching import router as co_teaching_router
 from .routes.tts import router as tts_router
+from .routes.tts_audit import router as tts_audit_router
+from .routes.admin_sessions import router as admin_sessions_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter
 from .services.seed import seed_default_data
@@ -333,6 +335,8 @@ app.include_router(health_router)
 app.include_router(semesters_router, prefix="/api", tags=["semesters"])
 app.include_router(co_teaching_router, prefix="/api", tags=["co-teaching"])
 app.include_router(tts_router)
+app.include_router(tts_audit_router)
+app.include_router(admin_sessions_router, prefix="/api", tags=["admin-sessions"])
 
 
 @app.get("/")

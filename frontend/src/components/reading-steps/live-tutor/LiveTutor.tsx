@@ -22,7 +22,7 @@ import {
   TIER3_POOL,
   STREAK_MESSAGES,
 } from '../../../utils/liveTutorPools';
-import { extractPracticeChars } from '../../../utils/liveTutorHelpers';
+import { extractPracticeChars, CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 import { scopedStepStorageKey } from '../../../services/learningStorageScope';
 import { useResizablePanel } from '../../../hooks/useResizablePanel';
 import { useLiveTutorSpeech } from '../../../hooks/useLiveTutorSpeech';
@@ -93,7 +93,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   );
   const [streak, setStreak] = useState(0);
   const { zhuyinActive, processZhuyin } = useZhuyin();
-  const [isAnalyzing, setIsAnalyzing] = useState(false); // legacy — kept for status bar compat
   const [isAwaitingGemini, setIsAwaitingGemini] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
   const [showRecorder, setShowRecorder] = useState(false);
@@ -130,6 +129,20 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const sentenceStartTimeRef = useRef(0);
   const lastDiffTimeRef = useRef(0);
 
+  // Sentence-level retry state (#1076)
+  const [retrySentenceInfo, setRetrySentenceInfo] = useState<{
+    paragraphIdx: number;
+    sentenceIdx: number;
+    target: string;
+    originalTargets: string[];
+    originalResults: Array<LocalEvalResult | null>;
+  } | null>(null);
+  const retrySentenceInfoRef = useRef(retrySentenceInfo);
+  retrySentenceInfoRef.current = retrySentenceInfo;
+  const handleSentenceRetryEvalRef = useRef<(transcript: string, durationMs: number) => Promise<void>>(
+    async () => { throw new Error('handleSentenceRetryEval called before initialization'); }
+  );
+
   /* ---- TTS playback hook ---- */
   const {
     isTtsSpeaking,
@@ -160,9 +173,14 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     onPanelWidthChange,
   );
 
+  // During sentence retry, narrow STT target to just the one sentence (#1076)
+  const sttTargetText = retrySentenceInfo
+    ? retrySentenceInfo.target
+    : (story.content[currentLineIndex] || '');
+
   /* ---- STT hook ---- */
   const stt = useLiveTutorSpeech({
-    targetText: story.content[currentLineIndex] || '',
+    targetText: sttTargetText,
     streakRef,
     sentenceTargetsRef,
     sentenceResultsRef,
@@ -191,9 +209,17 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [streamingUserInput]);
 
+  // Skip the first auto-scroll on mount — on mobile the centered block
+  // position pushes the card header (第 N/M 段 + sub-progress) above
+  // the fold. Only scroll when the user actually navigates paragraphs.
+  const didInitialScrollRef = useRef(false);
   useEffect(() => {
+    if (!didInitialScrollRef.current) {
+      didInitialScrollRef.current = true;
+      return;
+    }
     if (activeLineRef.current) {
-      activeLineRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      activeLineRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [currentLineIndex]);
 
@@ -506,7 +532,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /* ---- submitSentence wrapper ---- */
   const submitSentence = useCallback(async () => {
     const { transcript, rawStt, durationMs } = stt.submitSentence();
-    if (transcript) {
+    if (retrySentenceInfoRef.current) {
+      // Sentence retry mode: evaluate only this sentence (#1076)
+      await handleSentenceRetryEvalRef.current(transcript, durationMs);
+    } else if (transcript) {
       await evaluateAndRespondRef.current(transcript, rawStt, durationMs, currentLineIndex);
     }
   }, [currentLineIndex]);
@@ -570,9 +599,147 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setParagraphSummaries(prev => { const next = { ...prev }; delete next[idx]; return next; });
     setRealtimeDiffTokens(null);
     setLastDiffTokens(null);
+    // Reset sentence tracking for fresh attempt (#1076)
+    const targets = splitIntoSentences(story.content[idx] || '');
+    sentenceTargetsRef.current = targets;
+    sentenceResultsRef.current = new Array(targets.length).fill(null);
+    nextSentenceIdxRef.current = 0;
+    lastFinalResultIdxRef.current = -1;
+    // Clear any active sentence retry (#1076)
+    retrySentenceInfoRef.current = null;
+    setRetrySentenceInfo(null);
     if (idx === currentLineIndex) { startSession(); }
     else { setTimeout(() => startSession(), 100); }
-  }, [currentLineIndex, stopSession, startSession]);
+  }, [currentLineIndex, story.content, stopSession, startSession]);
+
+  /* ---- handleRetrySentence: enter single-sentence retry mode (#1076) ---- */
+  const handleRetrySentence = useCallback((paragraphIdx: number, sentenceIdx: number) => {
+    if (paragraphIdx !== currentLineIndex) {
+      console.warn('[LiveTutor] handleRetrySentence: paragraphIdx mismatch', { paragraphIdx, currentLineIndex });
+      return;
+    }
+    stopSession();
+
+    const sentences = splitIntoSentences(story.content[paragraphIdx] || '');
+    const target = sentences[sentenceIdx];
+    // Don't retry single-char sentences (issue 661: 單獨一個字不用重練)
+    if (!target || target.replace(CHINESE_PUNCTUATION_REGEX, '').length <= 1) {
+      console.warn('[LiveTutor] handleRetrySentence: skipping invalid/single-char sentence', { sentenceIdx, target });
+      return;
+    }
+
+    const info = {
+      paragraphIdx,
+      sentenceIdx,
+      target,
+      originalTargets: [...sentenceTargetsRef.current],
+      originalResults: [...sentenceResultsRef.current],
+    };
+    retrySentenceInfoRef.current = info;
+    setRetrySentenceInfo(info);
+
+    // Override sentence refs to just this one sentence
+    sentenceTargetsRef.current = [target];
+    sentenceResultsRef.current = [null];
+    nextSentenceIdxRef.current = 0;
+    lastFinalResultIdxRef.current = -1;
+    setLastDiffTokens(null);
+    setRealtimeDiffTokens(null);
+
+    setTimeout(() => startSession(), 100);
+  }, [currentLineIndex, story.content, stopSession, startSession]);
+
+  /* ---- handleSentenceRetryEval: evaluate single-sentence retry result (#1076) ---- */
+  const handleSentenceRetryEval = useCallback(async (transcript: string, durationMs: number) => {
+    const info = retrySentenceInfoRef.current;
+    if (!info) return;
+
+    stopSession();
+    const cleaned = cleanChineseText(transcript);
+
+    // No speech detected — stay in retry mode instead of silently exiting
+    if (!cleaned) {
+      setTimeout(() => startSession(), 100);
+      return;
+    }
+
+    // Restore original sentence refs
+    sentenceTargetsRef.current = info.originalTargets;
+    const newResults = [...info.originalResults];
+
+    const localResult = localEvaluateParagraph(
+      cleaned, info.target, durationMs,
+      { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+      streakRef.current,
+    );
+    newResults[info.sentenceIdx] = localResult;
+    setLastDiffTokens(localResult.diffTokens);
+    setRealtimeDiffTokens(null);
+
+    sentenceResultsRef.current = newResults;
+    nextSentenceIdxRef.current = info.originalTargets.length;
+    retrySentenceInfoRef.current = null;
+    setRetrySentenceInfo(null);
+
+    // Weighted delta: only adjust the retried sentence's contribution
+    const paragraphTarget = story.content[info.paragraphIdx] || '';
+    const paragraphLen = normalizeForComparison(paragraphTarget).length || 1;
+    const sentenceLen = normalizeForComparison(info.target).length;
+    const sentenceWeight = sentenceLen / paragraphLen;
+
+    const sentenceMatchRateFromResult = info.originalResults[info.sentenceIdx]?.matchRate;
+    const newSentenceMatchRate = localResult?.matchRate;
+
+    const oldWrong = info.originalResults[info.sentenceIdx]?.diffTokens.filter(t => t.type === 'wrong').length ?? 0;
+    const oldMissing = info.originalResults[info.sentenceIdx]?.diffTokens.filter(t => t.type === 'missing').length ?? 0;
+    const newWrong = localResult?.diffTokens.filter(t => t.type === 'wrong').length ?? oldWrong;
+    const newMissing = localResult?.diffTokens.filter(t => t.type === 'missing').length ?? oldMissing;
+
+    setParagraphSummaries(prev => {
+      const existing = prev[info.paragraphIdx];
+      if (!existing) return prev;
+      const oldSentenceMatchRate = sentenceMatchRateFromResult ?? existing.matchRate;
+      const effectiveNewRate = newSentenceMatchRate ?? oldSentenceMatchRate;
+      const newMatchRate = Math.max(0, Math.min(1,
+        existing.matchRate
+        - (oldSentenceMatchRate * sentenceWeight)
+        + (effectiveNewRate * sentenceWeight),
+      ));
+      const threshold = getReadingPassThreshold(paragraphLen);
+      const newTier = (newMatchRate >= READING_EXCELLENT ? 1 : newMatchRate >= threshold ? 2 : 3) as 1 | 2 | 3;
+      return {
+        ...prev,
+        [info.paragraphIdx]: {
+          ...existing,
+          matchRate: newMatchRate,
+          wrongCount: Math.max(0, existing.wrongCount - oldWrong + newWrong),
+          missingCount: Math.max(0, existing.missingCount - oldMissing + newMissing),
+          tier: newTier,
+          sentenceResults: newResults,
+          geminiPending: false,
+        },
+      };
+    });
+
+    setLineResults(prev => {
+      let idx = -1;
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (prev[i].lineIndex === info.paragraphIdx) { idx = i; break; }
+      }
+      if (idx === -1) return prev;
+      const updated = [...prev];
+      const oldSentenceMatchRate = sentenceMatchRateFromResult ?? updated[idx].matchRate;
+      const effectiveNewRate = newSentenceMatchRate ?? oldSentenceMatchRate;
+      const newMatchRate = Math.max(0, Math.min(1,
+        updated[idx].matchRate
+        - (oldSentenceMatchRate * sentenceWeight)
+        + (effectiveNewRate * sentenceWeight),
+      ));
+      updated[idx] = { ...updated[idx], matchRate: newMatchRate };
+      return updated;
+    });
+  }, [story.content, stopSession, startSession]);
+  handleSentenceRetryEvalRef.current = handleSentenceRetryEval;
 
   /* ================================================================ */
   /*  JSX                                                             */
@@ -589,129 +756,224 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     return null;
   })();
 
+  // Feedback panel visibility toggle
+  const [showFeedback, setShowFeedback] = React.useState(false);
+
   return (
     <div
-      className={`flex flex-1 h-full bg-amber-50 overflow-hidden ${isMobile ? 'flex-col' : 'flex-row'}`}
+      className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
       style={{
         fontFamily: zhuyinActive
-          ? "'BpmfIansui', 'Iansui', 'Noto Sans TC', sans-serif"
-          : "'Iansui', 'Noto Sans TC', sans-serif",
+          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
+          : undefined,
       }}
     >
-      {/* LEFT: Story text panel */}
-      <div className="flex flex-col bg-amber-50 flex-1 min-h-0 overflow-hidden">
-        <div className="h-9 bg-white border-b border-gray-200 flex items-center px-2 gap-2">
-          <div className="flex-1" />
-          <FontSizeControl />
-        </div>
+      {/* ── Single-column centered layout ─────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto pb-48 custom-scrollbar">
+        <div className="max-w-4xl mx-auto px-6 md:px-16 pt-4">
+          {/* Single paragraph card — only show the current paragraph */}
+          <div className="mt-4" ref={activeLineRef}>
+            <ParagraphCard
+              idx={currentLineIndex}
+              line={story.content[currentLineIndex]}
+              status={lineStatuses[currentLineIndex]}
+              isCelebrating={celebratingIndex === currentLineIndex}
+              currentLineIndex={currentLineIndex}
+              isAdvancing={isAdvancing}
+              fontSizePx={fontSizePx}
+              zhuyinLine={zhuyinLines ? zhuyinLines[currentLineIndex] : null}
+              zhuyinActive={zhuyinActive}
+              isSessionActive={stt.isSessionActive}
+              isPreparing={stt.isPreparing}
+              isTtsSpeaking={isTtsSpeaking}
+              speakingProgress={speakingProgress}
+              utteranceRef={utteranceRef}
+              ttsRafRef={ttsRafRef}
+              streamingUserInput={streamingUserInput}
+              lastDiffTokens={lastDiffTokens}
+              isAwaitingGemini={isAwaitingGemini}
+              retryCount={retryCount}
+              paragraphSummary={paragraphSummaries[currentLineIndex] ?? null}
+              completedParagraphs={completedParagraphs}
+              storyLength={story.content.length}
+              lineResults={lineResults}
+              allStatuses={lineStatuses}
+              onSelectParagraph={handleSelectParagraph}
+              onTtsToggle={handleTtsToggle}
+              onStartSession={startSession}
+              onStopSession={stopSession}
+              onSubmitSentence={submitSentence}
+              onRetryParagraph={handleRetryParagraph}
+              onRetrySentence={handleRetrySentence}
+              retrySentenceIdx={retrySentenceInfo?.paragraphIdx === currentLineIndex ? retrySentenceInfo.sentenceIdx : undefined}
+              onAdvanceParagraph={advanceParagraph}
+              setIsTtsSpeaking={setIsTtsSpeaking}
+              setIsTtsPaused={setIsTtsPaused}
+              storyContent={story.content}
+            />
+          </div>
 
-        {/* Paragraph progress bar */}
-        <ParagraphProgress
-          statuses={lineStatuses}
-          currentIndex={currentLineIndex}
-          onSelectParagraph={(idx) => {
-            if (lineStatuses[idx] === 'locked') return;
-            handleSelectParagraph(idx);
-          }}
-        />
-
-        <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8 lg:p-16'} overflow-y-auto custom-scrollbar`}>
-          <div className="max-w-3xl mx-auto space-y-20">
-            {story.content.map((line, idx) => (
-              <div
-                key={idx}
-                ref={idx === currentLineIndex ? activeLineRef : null}
-              >
-                <ParagraphCard
-                  idx={idx}
-                  line={line}
-                  status={lineStatuses[idx]}
-                  isCelebrating={celebratingIndex === idx}
-                  currentLineIndex={currentLineIndex}
-                  isAdvancing={isAdvancing}
-                  fontSizePx={fontSizePx}
-                  zhuyinLine={zhuyinLines ? zhuyinLines[idx] : null}
-                  zhuyinActive={zhuyinActive}
-                  isSessionActive={stt.isSessionActive}
-                  isPreparing={stt.isPreparing}
-                  isTtsSpeaking={isTtsSpeaking}
-                  utteranceRef={utteranceRef}
-                  ttsRafRef={ttsRafRef}
-                  streamingUserInput={streamingUserInput}
-                  lastDiffTokens={lastDiffTokens}
-                  isAwaitingGemini={isAwaitingGemini}
-                  retryCount={retryCount}
-                  paragraphSummary={paragraphSummaries[idx] ?? null}
-                  completedParagraphs={completedParagraphs}
-                  storyLength={story.content.length}
-                  lineResults={lineResults}
-                  onSelectParagraph={handleSelectParagraph}
-                  onTtsToggle={handleTtsToggle}
-                  onStartSession={startSession}
-                  onStopSession={stopSession}
-                  onSubmitSentence={submitSentence}
-                  onRetryParagraph={handleRetryParagraph}
-                  onAdvanceParagraph={advanceParagraph}
-                  setIsTtsSpeaking={setIsTtsSpeaking}
-                  setIsTtsPaused={setIsTtsPaused}
-                  storyContent={story.content}
-                />
+          {/* Stats grid — CPM + Accuracy placeholders */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+            <div className="bg-surface-container-low p-6 rounded-3xl flex items-center gap-5">
+              <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-2xl text-emerald-700">speed</span>
               </div>
-            ))}
-
-            {/* Final report button — shown after all paragraphs are completed */}
-            {completedParagraphs.size === story.content.length && (
-              <div className="mt-8 flex justify-center">
-                <button
-                  onClick={handleFinish}
-                  className="px-6 py-2.5 rounded-full text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition-all active:scale-95"
-                >
-                  觀看總結報告
-                </button>
+              <div>
+                <div className="font-headline text-on-surface-variant font-bold text-xs uppercase tracking-wider">語速 Reading Speed</div>
+                <div className="text-lg font-headline font-bold text-on-surface-variant mt-0.5">開發中</div>
               </div>
-            )}
+            </div>
+            <div className="bg-surface-container-low p-6 rounded-3xl flex items-center gap-5">
+              <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-2xl text-accent">verified</span>
+              </div>
+              <div>
+                <div className="font-headline text-on-surface-variant font-bold text-xs uppercase tracking-wider">準確度 Accuracy</div>
+                <div className="text-lg font-headline font-bold text-on-surface-variant mt-0.5">開發中</div>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Mic error */}
-        {micError && (
-          <div className="flex-shrink-0 px-4 py-2 bg-rose-50">
-            <span className="text-xs text-rose-500">{micError}</span>
-          </div>
-        )}
       </div>
 
-      {/* Resizable divider - hidden on mobile */}
-      {!isMobile && (
-        <div
-          onMouseDown={onDividerMouseDown}
-          onTouchStart={onDividerTouchStart}
-          className="w-1 flex-shrink-0 bg-gray-200 hover:bg-accent cursor-col-resize transition-colors"
-        />
+      {/* Mic error */}
+      {micError && (
+        <div className="absolute bottom-52 left-1/2 -translate-x-1/2 px-5 py-2 bg-tertiary-container/20 rounded-full z-20">
+          <span className="text-sm text-tertiary">{micError}</span>
+        </div>
       )}
 
-      {/* RIGHT: Feedback panel */}
-      <TutorFeedbackPanel
-        width={rightPanelWidth}
-        isMobile={isMobile}
-        scrollRef={scrollRef as React.RefObject<HTMLDivElement>}
-        isSessionActive={stt.isSessionActive}
-        isPreparing={stt.isPreparing}
-        streamingUserInput={streamingUserInput}
-        rightPanelDiffTokens={rightPanelDiffTokens}
-        paragraphSummary={paragraphSummary}
-        currentLineIndex={currentLineIndex}
-        totalLines={story.content.length}
-        completedCount={completedParagraphs.size}
-        retryCount={retryCount}
-        micError={micError}
-      />
+      {/* ── Fixed bottom CTA ──────────────────────────────────────────── */}
+      <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+           style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
+        <div className="max-w-md mx-auto pointer-events-auto flex flex-col items-center gap-3">
+
+          {/* Final report — all paragraphs done */}
+          {completedParagraphs.size === story.content.length ? (
+            <button
+              onClick={handleFinish}
+              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+            >
+              <span>觀看總結報告</span>
+              <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
+          ) : stt.isSessionActive ? (
+            /* Recording active — submit button */
+            <button
+              onClick={submitSentence}
+              disabled={isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)}
+              className={`w-full h-14 rounded-full font-headline font-bold text-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] ${
+                isAwaitingGemini || (!streamingUserInput && !lastDiffTokens)
+                  ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed'
+                  : 'text-white shadow-[0_12px_48px_rgba(0,105,71,0.3)]'
+              }`}
+              style={(!isAwaitingGemini && (streamingUserInput || lastDiffTokens)) ? { background: 'linear-gradient(135deg, #006947, #34d399)' } : undefined}
+            >
+              <span className="material-symbols-outlined text-xl">check</span>
+              完成
+            </button>
+          ) : stt.isPreparing ? (
+            <button disabled className="w-full h-14 rounded-full font-headline font-bold text-lg bg-surface-container-high text-on-surface-variant cursor-wait flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin" />
+              準備中...
+            </button>
+          ) : isTtsSpeaking ? (
+            /* TTS playing — pause/stop */
+            <div className="w-full flex gap-3">
+              <button
+                onClick={isTtsPaused ? resumeTts : pauseTts}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-accent/10 text-accent hover:bg-accent/15 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  {isTtsPaused ? 'play_arrow' : 'pause'}
+                </span>
+                {isTtsPaused ? '繼續' : '暫停'}
+              </button>
+              <button
+                onClick={stopTts}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>stop</span>
+                停止
+              </button>
+            </div>
+          ) : paragraphSummary && !isAdvancing ? (
+            /* After evaluation — feedback toggle + retry/next */
+            <>
+              <button
+                type="button"
+                onClick={() => setShowFeedback(!showFeedback)}
+                className="px-4 py-2 rounded-full bg-surface-container-lowest shadow-sm text-sm font-medium text-on-surface-variant hover:bg-surface-container-low transition-all"
+              >
+                {showFeedback ? '隱藏回饋' : '查看朗讀回饋'}
+              </button>
+            </>
+          ) : !isAdvancing ? (
+            /* Idle — AI朗讀 + 開始朗讀 side by side */
+            <div className="w-full flex gap-3">
+              <button
+                onClick={() => speakCurrentParagraph()}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
+                AI 朗讀
+              </button>
+              <button
+                onClick={startSession}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-pulse"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+              >
+                <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
+                {retryCount > 0 ? '再試一次' : '開始朗讀'}
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      {/* ── Feedback panel as slide-up drawer ──────────────────────── */}
+      {showFeedback && (
+        <>
+          <div className="fixed inset-0 bg-black/20 z-30" onClick={() => setShowFeedback(false)} />
+          <div className="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest rounded-t-3xl shadow-editorial max-h-[60vh] overflow-y-auto animate-slide-up">
+            <div className="sticky top-0 bg-surface-container-lowest px-6 py-4 flex items-center justify-between rounded-t-3xl">
+              <span className="font-headline font-bold text-on-surface">朗讀回饋</span>
+              <button onClick={() => setShowFeedback(false)} className="w-10 h-10 rounded-full hover:bg-surface-container-high flex items-center justify-center transition-colors">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="px-6 pb-8">
+              <TutorFeedbackPanel
+                width={9999}
+                isMobile={true}
+                scrollRef={scrollRef as React.RefObject<HTMLDivElement>}
+                isSessionActive={stt.isSessionActive}
+                isPreparing={stt.isPreparing}
+                streamingUserInput={streamingUserInput}
+                rightPanelDiffTokens={rightPanelDiffTokens}
+                paragraphSummary={paragraphSummary}
+                currentLineIndex={currentLineIndex}
+                totalLines={story.content.length}
+                completedCount={completedParagraphs.size}
+                retryCount={retryCount}
+                micError={micError}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Background decoration */}
+      <div className="fixed -bottom-16 -right-16 w-64 h-64 bg-tertiary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+      <div className="fixed top-1/4 -left-32 w-80 h-80 bg-accent/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #b0ada6; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #797770; }
       `}</style>
     </div>
   );

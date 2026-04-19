@@ -1,4 +1,5 @@
 import { DiffToken } from '../../../types';
+import type { LocalEvalResult } from '../../../utils/localEval';
 
 /* ------------------------------------------------------------------ */
 /*  Shared types used across LiveTutor sub-components                  */
@@ -20,4 +21,8 @@ export type ParagraphSummaryData = {
   missingCount: number;
   tier: number;
   geminiPending: boolean;
+  /** Per-sentence evaluation results (populated after paragraph completes) */
+  sentenceResults?: Array<LocalEvalResult | null>;
+  /** Per-sentence target texts (populated after paragraph completes) */
+  sentenceTargets?: string[];
 };

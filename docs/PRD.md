@@ -1159,6 +1159,48 @@
 
 ---
 
+### TTS 朗讀架構（Variant A — Prompt-Only Taiwan Style）
+
+**2026-04-18 決策**：全面改用 Gemini 3.1 Flash TTS 的 **Variant A** 策略。未來新增 TTS 功能都按此方式實作。
+
+**核心邏輯**：
+1. **不做同音字替換**（曾經有 37 條 `_TAIWAN_TTS_REPLACEMENTS` 表，如「垃圾→樂色」「研究→研舊」，現在**不呼叫** `_clean_for_gemini`）
+2. **Prompt prefix 指示台灣腔調** — 每次 API call 前綴：
+   ```
+   請使用台灣用語的繁體中文，以親切且自然的語氣朗讀以下內容：
+   ```
+3. 原文直接送 Gemini。例：「垃圾」就送「垃圾」，由模型自己用台灣發音念 `lè sè`
+
+**為什麼選 A 不選 C**（2026-04-18 A/B 盲聽測試）：
+- **C（替換表 + prompt）**：念得出來但**音調略僵硬**，因為同音字替換擾動語意
+- **A（prompt-only）**：更自然，Gemini 自己判斷台灣腔 — 人名、地名、數字、多音字表現更自然
+- 樣本比對：`/tmp/tts-ab-compare.html`（44 樣本 6 類）
+
+**GCS 快取路徑**：
+- 現行：`gs://lingoleap-tts-cache/gemini31-prompt-only/sentences/{sha256(raw)}.mp3`（A 版，2408 檔已預生成）
+- 舊版：`gs://lingoleap-tts-cache/gemini31/sentences/{hash}.mp3`（C 版，2417 檔，保留但不再使用）
+
+**Audit trail**：`backend/data/tts-provenance.jsonl` append-only 記錄每次生成的 raw_text / tts_input / audio_sha256 / variant / batch_run_id 等 29 欄位。方大哥 / admin 可在 `/admin/tts-audit` 頁抽聽 + 比對。
+
+**Batch 預生成**：`python backend/scripts/batch_gemini_tts.py --variant A --force`（預設 variant=A 即可）。2483 句 / 約 20 分鐘 / ~$0.30。
+
+**未來新增 TTS 時的 checklist**：
+- [ ] Raw text 送 Gemini 前**只加 prompt prefix**，不呼叫 `_clean_for_gemini`
+- [ ] GCS 寫入路徑用 `gemini31-prompt-only/sentences/`
+- [ ] 新增音檔要寫 provenance entry（variant: "A"）
+- [ ] 若 Gemini 安全審查 block（HTTP 200 + empty candidates），log raw_text 給方大哥 review，不要自動 retry
+
+**不要再做的事**：
+- ❌ 擴充 `_TAIWAN_TTS_REPLACEMENTS` 表（dead code，保留檔案供 rollback 但不要加新規則）
+- ❌ 做 SSML phoneme override（Gemini 尚未支援，且 prompt 已夠用）
+- ❌ 用 Azure / Chirp3-HD 作為 primary（現行 Azure 是 fallback，Chirp3-HD 保留作 alternative voice 實驗）
+
+**Rollback 方式**（若 A 有問題回到 C）：
+- Revert `tts_service.py`：恢復 `_clean_for_gemini(cleaned)` 呼叫 + GCS path 改回 `gemini31/sentences/`
+- GCS 舊 C 音檔（2417 檔）仍保留於 `gemini31/sentences/`
+
+---
+
 ### 參考專案
 
 #### 學國語 App（Flutter）

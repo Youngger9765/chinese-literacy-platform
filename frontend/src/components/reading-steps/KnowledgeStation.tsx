@@ -9,25 +9,17 @@ import { scopedStepStorageKey } from '../../services/learningStorageScope';
 interface KnowledgeStationProps {
   story: Story;
   onFinish: () => void;
-  zhuyinActive?: boolean;
 }
 
 const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) => {
   const storageKey = scopedStepStorageKey('knowledge_viewed_', story.id);
 
-  // Mark as viewed on mount; clear on finish
   useEffect(() => {
     try { localStorage.setItem(storageKey, JSON.stringify({ viewed: true })); } catch {}
   }, [storageKey]);
 
-  const handleFinish = () => {
-    // Keep completion record — only clear on explicit redo
-    onFinish();
-  };
-
   const videoUrl = story.knowledgeVideoUrl;
 
-  // Extract YouTube video ID from URL
   const getYouTubeEmbedUrl = (url: string): string | null => {
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
     return match ? `https://www.youtube-nocookie.com/embed/${match[1]}` : null;
@@ -36,29 +28,20 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
   const embedUrl = videoUrl ? getYouTubeEmbedUrl(videoUrl) : null;
 
   return (
-    <div className="flex-1 flex flex-col bg-amber-50 overflow-hidden">
-      {/* Header */}
-      <div className="h-9 bg-white border-b border-gray-200 flex items-center px-4 gap-2 shrink-0">
-        <span className="text-[10px] font-bold text-accent-light uppercase tracking-widest">
-          知識補給站
-        </span>
-        <div className="flex-1" />
-        <span className="text-[10px] text-gray-500">{story.title}</span>
-      </div>
-
+    <div className="flex-1 flex flex-col bg-surface overflow-hidden">
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">知識補給站</h2>
-            <p className="text-sm text-gray-600">
+      <div className="flex-1 overflow-y-auto pb-48 flex items-center">
+        <div className="max-w-3xl mx-auto px-6 md:px-16 space-y-6 w-full">
+          <div className="text-center">
+            <h2 className="text-xl font-headline font-bold text-on-surface mb-2">知識補給站</h2>
+            <p className="text-sm text-on-surface-variant">
               看看和這篇課文相關的影片，幫助你更深入了解主題
             </p>
           </div>
 
           {embedUrl ? (
             <div className="space-y-4">
-              <div className="aspect-video rounded-2xl overflow-hidden bg-black shadow-lg">
+              <div className="aspect-video rounded-3xl overflow-hidden bg-black shadow-editorial">
                 <iframe
                   src={embedUrl}
                   title={`${story.title} — 知識補給站`}
@@ -72,33 +55,41 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
                   href={videoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors"
+                  className="inline-flex items-center gap-2 text-sm text-accent hover:brightness-110 transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M10 6V8H5V19H16V14H18V20C18 20.5523 17.5523 21 17 21H4C3.44772 21 3 20.5523 3 20V7C3 6.44772 3.44772 6 4 6H10ZM21 3V11H19V6.413L11.2071 14.2071L9.79289 12.7929L17.585 5H13V3H21Z" />
-                  </svg>
+                  <span className="material-symbols-outlined text-lg">open_in_new</span>
                   在 YouTube 開啟
                 </a>
               )}
             </div>
           ) : (
-            <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
-              <p className="text-gray-500 text-lg mb-2">這篇課文目前沒有知識補給站影片</p>
-              <p className="text-gray-400 text-sm">未來會持續新增相關影片</p>
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 text-center">
+              <span className="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-2">videocam_off</span>
+              <p className="text-on-surface-variant text-lg mb-1">這篇課文目前沒有知識補給站影片</p>
+              <p className="text-on-surface-variant/60 text-sm">未來會持續新增相關影片</p>
             </div>
           )}
-
-          {/* Finish button */}
-          <div className="flex justify-center pt-4">
-            <button
-              onClick={handleFinish}
-              className="px-6 py-2.5 rounded-full text-sm font-bold bg-accent hover:bg-accent-hover text-white shadow-lg transition-all active:scale-95"
-            >
-              繼續前往報告
-            </button>
-          </div>
         </div>
       </div>
+
+      {/* Fixed bottom CTA */}
+      <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+           style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
+        <div className="max-w-md mx-auto pointer-events-auto">
+          <button
+            onClick={onFinish}
+            className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+          >
+            繼續前往報告
+            <span className="material-symbols-outlined text-xl">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Background decoration */}
+      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
     </div>
   );
 };

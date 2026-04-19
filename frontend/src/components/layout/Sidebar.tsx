@@ -6,12 +6,20 @@
  *
  * Collapse state persisted to localStorage key `sidebar-collapsed`.
  * Auto-collapses when in learning mode (/learn/ routes).
+ *
+ * Header removed (2026-04-18): Logo, story title, notification bell,
+ * zhuyin toggle, and logout are now integrated here.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace, type WorkspaceView } from '../../contexts/WorkspaceContext';
+import { useLearningNav } from '../../contexts/LearningNavContext';
+import { useZhuyin } from '../../context/ZhuyinContext';
+import { hasRole } from '../../services/authApi';
+import NotificationBell from '../teacher/NotificationBell';
+import ZhuyinToggle from '../ui/ZhuyinToggle';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -113,6 +121,7 @@ interface MobileTabBarProps {
   availableViews: WorkspaceView[];
   viewLabels: Record<WorkspaceView, { icon: string; label: string }>;
   onSwitchView: (view: WorkspaceView) => void;
+  onLogout: () => void;
 }
 
 const MobileTabBar: React.FC<MobileTabBarProps> = ({
@@ -126,6 +135,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
   availableViews,
   viewLabels,
   onSwitchView,
+  onLogout,
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const allItems = [...studentItems, ...teacherItems];
@@ -261,6 +271,22 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
                 ))}
               </div>
             )}
+
+            {/* Logout — always shown at bottom of drawer */}
+            <div className="mt-4 border-t border-gray-100 pt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  onLogout();
+                }}
+                aria-label="登出"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+              >
+                <span aria-hidden="true">🚪</span>
+                <span>登出</span>
+              </button>
+            </div>
           </div>
         </>
       )}
@@ -273,9 +299,11 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({
 // ---------------------------------------------------------------------------
 
 const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { selectedStory: navStory } = useLearningNav();
+  const { zhuyinEnabled, zhuyinReady, toggleZhuyin } = useZhuyin();
 
   // Determine initial collapsed state from localStorage
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -327,6 +355,18 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   };
 
   const roleLabel = VIEW_LABELS[activeView].label;
+
+  // Teacher role check for notification bell
+  const isTeacher = hasRole(
+    user,
+    'teacher',
+    'system_admin',
+    'principal',
+    'director',
+    'org_owner',
+    'org_admin',
+    'homeroom_teacher',
+  );
 
   // ---------------------------------------------------------------------------
   // Build nav items based on active workspace view
@@ -382,11 +422,50 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           ${collapsed ? 'w-14' : 'w-56'}
         `}
       >
+        {/* Logo — home link */}
+        <div className={`shrink-0 border-b border-gray-100 py-3 ${collapsed ? 'px-2 flex justify-center' : 'px-3'}`}>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            aria-label="LingoLeap 首頁"
+            title={collapsed ? 'LingoLeap 首頁' : undefined}
+            className="flex items-center gap-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+          >
+            <div
+              className="bg-accent w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              aria-hidden="true"
+            >
+              <span className="text-white font-bold text-sm">L</span>
+            </div>
+            {!collapsed && (
+              <span className="text-sm font-bold text-gray-800 truncate">AI Reading Tutor</span>
+            )}
+          </button>
+        </div>
+
+        {/* Story title — learning mode only, hidden when collapsed */}
+        {navStory && !collapsed && (
+          <div className="shrink-0 px-3 py-2 border-b border-gray-100">
+            <p
+              className="text-xs font-medium text-gray-500 truncate"
+              aria-live="polite"
+              title={navStory.title}
+            >
+              {navStory.title}
+            </p>
+          </div>
+        )}
+
         {/* User + role switcher (Issue #556, #557) */}
         {user && (
           <div className={`shrink-0 border-b border-gray-100 py-3 ${collapsed ? 'px-2 flex justify-center' : 'px-3'}`}>
             <div className={`flex items-center gap-2 ${collapsed ? 'flex-col' : ''}`}>
-              <span className="text-lg shrink-0" aria-hidden="true">👤</span>
+              <div
+                className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center shrink-0 text-sm font-semibold"
+                aria-hidden="true"
+              >
+                {user.name?.charAt(0) ?? '?'}
+              </div>
               {!collapsed && (
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
@@ -461,10 +540,48 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           ))}
         </nav>
 
-        {/* Footer — privacy + version */}
-        <div className={`shrink-0 border-t border-gray-100 py-3 px-2 ${collapsed ? 'flex flex-col items-center gap-1' : ''}`}>
-          {!collapsed ? (
-            <>
+        {/* Bottom section — notification bell, zhuyin toggle, logout, footer */}
+        <div className={`shrink-0 border-t border-gray-100 py-2 px-2 flex flex-col gap-1 ${collapsed ? 'items-center' : ''}`}>
+          {/* Actions: notification bell + zhuyin toggle + logout — grouped together */}
+          {isTeacher && (
+            <div className={collapsed ? '' : 'w-full'}>
+              <NotificationBell
+                onNavigateToStudent={(classroomId) =>
+                  navigate(`/teacher/classroom/${classroomId}`)
+                }
+              />
+            </div>
+          )}
+
+          {navStory && (
+            <div className={collapsed ? '' : 'w-full px-1'}>
+              <ZhuyinToggle
+                enabled={zhuyinEnabled}
+                ready={zhuyinReady}
+                onToggle={toggleZhuyin}
+              />
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={logout}
+            aria-label="登出"
+            title={collapsed ? '登出' : undefined}
+            className={`
+              flex items-center gap-2 rounded-lg transition-colors text-gray-500 hover:text-red-600 hover:bg-red-50
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+              min-h-[44px]
+              ${collapsed ? 'justify-center px-2 py-2.5 w-full' : 'px-3 py-2 w-full text-sm'}
+            `}
+          >
+            <span className="text-lg shrink-0" aria-hidden="true">🚪</span>
+            {!collapsed && <span>登出</span>}
+          </button>
+
+          {/* Footer — privacy + version, visually separated from actions */}
+          <div className={`${collapsed ? 'mt-1' : 'mt-2 pt-2 border-t border-gray-100'}`}>
+            {!collapsed ? (
               <button
                 type="button"
                 onClick={() => navigate('/privacy')}
@@ -472,19 +589,22 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
               >
                 隱私政策
               </button>
-              <p className="text-[10px] text-gray-300 px-3 mt-0.5 select-none">LingoLeap v2.0</p>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={() => navigate('/privacy')}
-              title="隱私政策"
-              aria-label="隱私政策"
-              className="p-1.5 text-gray-300 hover:text-gray-500 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-            >
-              <span className="text-sm" aria-hidden="true">🔒</span>
-            </button>
-          )}
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate('/privacy')}
+                title="隱私政策"
+                aria-label="隱私政策"
+                className="p-1.5 text-gray-300 hover:text-gray-500 transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+              >
+                <span className="text-sm" aria-hidden="true">🔒</span>
+              </button>
+            )}
+
+            {!collapsed && (
+              <p className="text-[10px] text-gray-300 px-3 select-none">LingoLeap v2.0</p>
+            )}
+          </div>
         </div>
       </aside>
 
@@ -507,6 +627,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           };
           navigate(home[view]);
         }}
+        onLogout={logout}
       />
     </>
   );

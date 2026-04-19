@@ -8,6 +8,31 @@
 
 ---
 
+## 4/11 ~ 4/17
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | PR #1068 Bridge 三步驟 | 錯誤處理蘇格拉底 prompt 升級（#1064） |
+| Young | ✅ | PR #1069 overall_score | session completion 計算 overall_score（#1063，修永遠 null bug） |
+| Young | ✅ | PR #1082/#1083 重點表互動化 | 填空 + 勾選 + AI 批改（beta roadmap 額外完成） |
+| Young | ✅ | PR #1084 選字偏移 | ReadingAnnotation 注音 PUA selector 位移修復 |
+| Young | ✅ | PR #1077~#1080 Claude 審查 | PR auto-review + @claude trigger + REVIEW.md + inline comments |
+| Young | ✅ | Pitch 簡報 | 5/1 會議用 3+1 頁 pitch |
+| Young | ✅ | 學習單 matrix | 57 篇課文 vs 平台功能對照表 + 文言文欄位整併 |
+| Young | ✅ | Staging QA | #1082 重點表、#909 進步曲線、#1076 句子重練全驗證 |
+| 靖杭 | ✅ | PR #1075 Self-practice | 完成狀態持久化到後端（fix #1070） |
+| 靖杭 | ✅ | PR #1076 句子重練 | 逐段朗讀支援句子級重練（feat #661，方大哥長期項） |
+| Young | ✅ | PR #1088~#1091 follow-up | CORS warmup、mobile top bar 截斷、admin redirect race、LiveTutor scroll |
+| Young | ✅ | PR #1092/#1093 AR cleanup | AR cleanup 卡 1h+ 根因修復（soft deadline） |
+| Young | ✅ | 4/17 Staging QA | desktop + mobile 全掃，9 PR 驗證，health 90/100 |
+| 靖杭 | ✅ | PR #1085 跨裝置 | Self-practice 跨裝置紀錄修復（fix #1071，4/17 merged） |
+| 靖杭 | ✅ | PR #1086 Debounce | Step 進度 debounce 5 秒修復（fix #1072，4 輪 review，4/17 merged） |
+| 靖杭 | 🔧 | 5 個 bug issue | 建 #1070~#1074 進度同步系列（#1070/#1071/#1072 已解，#1073/#1074 進行中） |
+| 啟翔 | ✅ | PR #1087 沈浸式學習 | 前端 50 files 大改 + 字體改黑體（feat #1081，4/17 Young 解 conflict 後 merged） |
+| 啟翔 | ⛔ | P1 data integrity 停滯 | #984/#985/#982 連續 8+ 天未更新（beta blocker） |
+
+---
+
 ## 4/4 ~ 4/10
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |

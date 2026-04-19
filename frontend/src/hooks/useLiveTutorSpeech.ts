@@ -83,6 +83,9 @@ export function useLiveTutorSpeech({
   const currentTranscriptRef = useRef('');
   const rawSttRef = useRef('');
   const accumulatedTranscriptRef = useRef('');
+  // Reconnect error tracking — stop after repeated failures
+  const consecutiveErrorsRef = useRef(0);
+  const MAX_CONSECUTIVE_ERRORS = 3;
   // Mirror of targetText for use inside async recognition callbacks
   const targetTextRef = useRef(targetText);
   targetTextRef.current = targetText;
@@ -138,10 +141,12 @@ export function useLiveTutorSpeech({
         setIsSessionActive(true);
         onSessionReady();
       }
-      // On reconnects / submitSentence restarts, isSessionActiveRef is already true → no-op
+      // Successful start doesn't reset error counter — only actual speech results do
     };
 
     recognition.onresult = (event: any) => {
+      // Got actual speech — reset error counter
+      consecutiveErrorsRef.current = 0;
       // Build transcript from this recognition session's results
       let sessionTranscript = '';
       for (let i = 0; i < event.results.length; i++) {
@@ -217,8 +222,17 @@ export function useLiveTutorSpeech({
         isSessionActiveRef.current = false;
         setIsSessionActive(false);
         setIsPreparing(false);
+      } else if (event.error === 'network') {
+        consecutiveErrorsRef.current += 1;
+        if (consecutiveErrorsRef.current >= MAX_CONSECUTIVE_ERRORS) {
+          console.error('[STT] Too many network errors, stopping session');
+          onMicError('語音辨識連線失敗，請檢查網路後再試一次。');
+          isSessionActiveRef.current = false;
+          setIsSessionActive(false);
+          setIsPreparing(false);
+        }
       }
-      // Other errors (no-speech, network, aborted) → onend will handle reconnect
+      // Other errors (no-speech, aborted) → onend will handle reconnect
     };
 
     recognition.onend = () => {
@@ -249,6 +263,7 @@ export function useLiveTutorSpeech({
     currentTranscriptRef.current = '';
     rawSttRef.current = '';
     accumulatedTranscriptRef.current = '';
+    consecutiveErrorsRef.current = 0;
     onStreamingTranscript('');
     onSpeakingProgress(() => 0);
     onRealtimeDiffTokens(() => null);

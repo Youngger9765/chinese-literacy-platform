@@ -22,6 +22,7 @@ import React, {
 import { Lock } from 'lucide-react';
 import { Story, VocabItem } from '../../types';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { useZhuyin } from '../../context/ZhuyinContext';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -110,34 +111,16 @@ function shuffle<T>(arr: T[]): T[] {
 /*  Shared sub-components                                               */
 /* ------------------------------------------------------------------ */
 
-function StepHeader({ subtitle }: { title?: string; subtitle?: string }) {
-  if (!subtitle) return null;
-  return (
-    <div className="bg-amber-50 border-b border-amber-200 px-4 py-2">
-      <div className="max-w-2xl mx-auto">
-        <p className="text-xs text-amber-700">{subtitle}</p>
-      </div>
-    </div>
-  );
-}
-
 function NoDataFallback({ onFinish }: { onFinish: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-6 px-6 py-16 text-center max-w-lg mx-auto">
-      <div className="text-5xl select-none">📖</div>
-      <div>
-        <h3 className="text-lg font-bold text-gray-700 mb-2">本課尚無語詞定義資料</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">
-          這篇課文目前沒有語詞定義配對資料。<br />
-          教師可透過後台上傳詞彙資料，或聯絡管理員更新課文。
-        </p>
+    <div className="flex-1 flex items-center justify-center bg-surface">
+      <div className="text-center space-y-4 p-8">
+        <span className="material-symbols-outlined text-5xl text-on-surface-variant/30">dictionary</span>
+        <p className="text-on-surface-variant">本課尚無語詞定義資料</p>
+        <button onClick={onFinish} className="btn-immersive">
+          繼續下一步 <span className="material-symbols-outlined text-lg ml-1">arrow_forward</span>
+        </button>
       </div>
-      <button
-        onClick={onFinish}
-        className="rounded-full bg-amber-500 px-6 py-2.5 text-white font-bold text-sm hover:bg-amber-600 transition-colors"
-      >
-        繼續下一步
-      </button>
     </div>
   );
 }
@@ -232,67 +215,45 @@ function SummaryScreen({
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 animate-fade-in">
+    <div className="max-w-2xl mx-auto px-4 py-8 pb-48 animate-fade-in">
       {/* Score card */}
-      <div
-        className={`rounded-2xl border-2 px-8 py-6 mb-8 text-center shadow-sm ${
-          allCorrect
-            ? 'bg-emerald-50 border-emerald-300'
-            : 'bg-amber-50 border-amber-300'
-        }`}
-      >
-        <div className="text-5xl select-none mb-3">
-          {allCorrect ? '🎉' : pct >= 60 ? '👍' : '💪'}
+      <div className={`rounded-3xl p-8 mb-8 text-center ${allCorrect ? 'bg-emerald-50' : 'bg-surface-container-lowest shadow-editorial'}`}>
+        <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${allCorrect ? 'bg-emerald-100' : 'bg-tertiary-container/20'}`}>
+          <span className={`material-symbols-outlined text-4xl ${allCorrect ? 'text-emerald-600' : 'text-tertiary'}`}>
+            {allCorrect ? 'emoji_events' : 'school'}
+          </span>
         </div>
-        <h3
-          className={`text-2xl font-black mb-1 ${
-            allCorrect ? 'text-emerald-800' : 'text-amber-800'
-          }`}
-        >
+        <p className="text-2xl font-headline font-black text-on-surface mb-1">
           {allCorrect ? '全部答對！' : `答對 ${correctCount} / ${total} 題`}
-        </h3>
-        <p
-          className={`text-lg font-semibold ${
-            allCorrect ? 'text-emerald-600' : 'text-amber-600'
-          }`}
-        >
-          正確率 {pct}%
         </p>
+        <p className="text-sm text-on-surface-variant">正確率 {pct}%</p>
       </div>
 
       {renderResultSection('第一關：選擇題', mcAnswers, 'multiple-choice')}
       {renderResultSection('第二關：拖拉配對', dragDropAnswers, 'drag-drop')}
 
-      {/* Action buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        {mcWrongAnswers.length > 0 && (
-          <button
-            onClick={() => onRetryModeWrong('multiple-choice')}
-            className="rounded-full border border-gray-300 bg-transparent text-gray-700 px-6 py-2.5 text-sm font-bold hover:bg-gray-50 transition-all active:scale-95"
-          >
-            重做選擇題錯題（{mcWrongAnswers.length} 題）
+      {/* Fixed bottom CTA */}
+      <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
+           style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
+        <div className="max-w-md mx-auto pointer-events-auto flex flex-col gap-2">
+          {(mcWrongAnswers.length > 0 || dragDropWrongAnswers.length > 0) && (
+            <button
+              onClick={() => mcWrongAnswers.length > 0 ? onRetryModeWrong('multiple-choice') : onRetryModeWrong('drag-drop')}
+              className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all">
+              重做錯題
+            </button>
+          )}
+          <button onClick={onRetryAll}
+            className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest active:scale-[0.98] transition-all">
+            全部重做
           </button>
-        )}
-        {dragDropWrongAnswers.length > 0 && (
-          <button
-            onClick={() => onRetryModeWrong('drag-drop')}
-            className="rounded-full border border-gray-300 bg-transparent text-gray-700 px-6 py-2.5 text-sm font-bold hover:bg-gray-50 transition-all active:scale-95"
-          >
-            重做拖拉配對錯題（{dragDropWrongAnswers.length} 題）
+          <button onClick={onFinish}
+            className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
+            繼續下一步
+            <span className="material-symbols-outlined text-xl">arrow_forward</span>
           </button>
-        )}
-        <button
-          onClick={onRetryAll}
-          className="rounded-full border border-gray-300 text-gray-700 px-6 py-2.5 text-sm font-bold hover:bg-gray-50 transition-all active:scale-95"
-        >
-          全部重做
-        </button>
-        <button
-          onClick={onFinish}
-          className="rounded-full bg-accent px-6 py-2.5 text-white text-sm font-bold hover:bg-accent-hover transition-all active:scale-95 shadow-sm"
-        >
-          繼續下一步 →
-        </button>
+        </div>
       </div>
     </div>
   );
@@ -435,33 +396,29 @@ function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoi
   const item = vocab[currentDefIdx];
 
   return (
-    <div className="max-w-xl mx-auto px-4">
-      {/* Progress */}
-      <div className="mb-5 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
-        <span className="text-sm font-semibold text-gray-500">題目進度</span>
-        <span className="text-base font-bold text-amber-700">
-          {queueIdx + 1}{' '}
-          <span className="text-gray-400 font-normal text-sm">/ {activeDefIndices.length}</span>
+    <div className="max-w-2xl mx-auto px-4">
+      {/* Progress bar */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex-1 h-2.5 bg-surface-container-high rounded-full overflow-hidden">
+          <div className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${activeDefIndices.length > 0 ? (queueIdx / activeDefIndices.length) * 100 : 0}%` }} />
+        </div>
+        <span className="text-sm font-headline font-bold text-on-surface-variant shrink-0">
+          {queueIdx + 1} / {activeDefIndices.length}
         </span>
       </div>
 
       {/* Definition card */}
-      <div className="bg-white border-2 border-accent rounded-2xl p-6 mb-6 shadow-sm">
-        <p className="text-xs font-semibold text-accent uppercase tracking-wider mb-2">
-          定義
-        </p>
-        <p className="text-lg text-gray-800 leading-relaxed">{item?.definition}</p>
+      <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 mb-6">
+        <p className="text-xl md:text-2xl text-on-surface leading-[2.5rem] md:leading-[3rem]">{item?.definition}</p>
       </div>
 
-      {/* Options */}
-      <p className="text-center text-sm text-gray-500 mb-3 select-none">
-        請選出對應的語詞
-      </p>
+      {/* Options — 2-column grid */}
       <div className="grid grid-cols-2 gap-3">
         {options.map((vocabIdx) => (
           <button
             key={vocabIdx}
-            className="rounded-xl border-2 px-4 py-4 text-center font-bold text-xl transition-all duration-200 select-none bg-white border-gray-200 text-gray-800 hover:border-accent hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+            className="rounded-2xl border-2 p-4 text-center font-bold text-xl transition-all duration-200 select-none active:scale-[0.97] min-h-[56px] border-surface-container-high bg-surface-container-lowest text-on-surface hover:border-accent hover:bg-accent/5 disabled:opacity-50"
             onClick={() => handleChoice(vocabIdx)}
             disabled={pendingAdvance}
           >
@@ -620,10 +577,11 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
   /* ---- Word bank chips (shared between mobile top strip and desktop right panel) ---- */
   const wordBankContent = (
     <>
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-center">
-        語詞庫
-      </p>
-      <div className="flex flex-wrap gap-2 justify-center min-h-[56px] bg-gray-50 rounded-xl p-3 border border-gray-200">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="material-symbols-outlined text-on-surface-variant text-lg">dictionary</span>
+        <span className="text-sm font-headline font-bold text-on-surface-variant uppercase tracking-wider">語詞庫</span>
+      </div>
+      <div className="flex flex-wrap gap-2 min-h-[56px]">
         {activeShuffledWords.map((vocabIdx) => {
           const isPlaced = placedVocabIdxSet.has(vocabIdx);
           if (isPlaced) return null;
@@ -632,13 +590,13 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
           const isTouchSelected = touchSelected === vocabIdx;
 
           let cls =
-            'rounded-xl border-2 px-5 py-3 text-center font-bold text-xl select-none transition-all duration-200 ';
+            'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-base select-none transition-all duration-200 ';
           if (isDragging) {
-            cls += 'border-accent bg-purple-100 text-purple-900 shadow-xl scale-105 opacity-80 cursor-grabbing';
+            cls += 'border-accent bg-accent/10 text-accent shadow-xl scale-105 opacity-80 cursor-grabbing';
           } else if (isTouchSelected) {
-            cls += 'border-accent bg-purple-100 text-purple-900 shadow-md scale-105 cursor-pointer';
+            cls += 'border-accent bg-accent/10 text-accent shadow-md scale-105 cursor-pointer';
           } else {
-            cls += 'border-gray-200 bg-white text-gray-800 hover:border-accent hover:bg-purple-50 hover:shadow-sm active:scale-95 cursor-grab';
+            cls += 'border-surface-container-high bg-surface-container-lowest text-on-surface hover:border-accent hover:bg-accent/5 active:scale-95 cursor-grab';
           }
 
           return (
@@ -673,17 +631,17 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
     const isOver = hoverTarget === defIdx && !isCorrect;
 
     let cls =
-      'rounded-2xl border-2 px-4 py-4 min-h-[80px] flex flex-col gap-2 transition-all duration-200 cursor-pointer ';
+      'rounded-3xl border-2 px-5 py-5 min-h-[80px] flex flex-col gap-2 transition-all duration-200 cursor-pointer ';
     if (isCorrect) {
       cls += 'bg-emerald-50 border-emerald-400 cursor-default';
     } else if (isWrong) {
-      cls += 'bg-red-50 border-red-400 animate-shake';
+      cls += 'bg-tertiary-container/10 border-tertiary animate-shake';
     } else if (isOver) {
-      cls += 'bg-purple-50 border-accent scale-[1.01] shadow-md';
+      cls += 'bg-accent/5 border-accent scale-[1.01] shadow-md';
     } else if (placedVocabIdx !== null) {
-      cls += 'bg-amber-50 border-amber-400';
+      cls += 'bg-accent/5 border-accent/40';
     } else {
-      cls += 'bg-white border-dashed border-gray-300 hover:border-accent';
+      cls += 'bg-surface-container-lowest border-dashed border-on-surface-variant/20 hover:border-accent shadow-editorial';
     }
 
     return (
@@ -701,7 +659,7 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
         }}
         onClick={() => handleSlotTap(defIdx)}
       >
-        <p className="text-sm text-gray-700 leading-relaxed">{item?.definition}</p>
+        <p className="text-base text-on-surface leading-relaxed">{item?.definition}</p>
         <div className="flex items-center justify-center h-8">
           {isCorrect ? (
             <span className="font-bold text-base text-emerald-700 flex items-center gap-1">
@@ -715,7 +673,7 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
               {vocab[placedVocabIdx]?.word}
             </span>
           ) : (
-            <span className="text-xs text-gray-400 select-none">
+            <span className="text-xs text-on-surface-variant/40 select-none">
               拖拉語詞到這裡
             </span>
           )}
@@ -726,21 +684,19 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
 
   return (
     <div className="px-4 md:px-6 max-w-5xl mx-auto">
-      {/* Progress */}
-      <div className="mb-4 bg-white rounded-2xl shadow-sm border border-amber-100 px-5 py-3 flex items-center justify-between">
-        <span className="text-sm font-semibold text-gray-500">配對進度</span>
-        <span className="text-base font-bold text-amber-700">
-          {confirmed.size}{' '}
-          <span className="text-gray-400 font-normal text-sm">/ {activeDefIndices.length}</span>
+      {/* Progress bar */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex-1 h-2.5 bg-surface-container-high rounded-full overflow-hidden">
+          <div className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${activeDefIndices.length > 0 ? (confirmed.size / activeDefIndices.length) * 100 : 0}%` }} />
+        </div>
+        <span className="text-sm font-headline font-bold text-on-surface-variant shrink-0">
+          {confirmed.size} / {activeDefIndices.length}
         </span>
       </div>
 
-      <p className="text-center text-sm text-amber-800 bg-amber-100 rounded-xl py-2 px-4 mb-4 select-none font-medium">
-        拖拉語詞卡片到對應的定義欄位，手機可先點選語詞再點選欄位
-      </p>
-
       {/* Mobile: word bank on top (sticky so it stays visible while scrolling definitions) */}
-      <div className="md:hidden sticky top-0 z-10 bg-amber-50 pb-3 pt-1">
+      <div className="md:hidden sticky top-0 z-10 bg-surface pb-3 pt-1">
         {wordBankContent}
       </div>
 
@@ -775,6 +731,12 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   initialProgress,
   onProgressChange,
 }) => {
+  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
+  const zhuyinFont = zhuyinActive
+    ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
+    : undefined;
+
   const progressStorageKey = scopedStepStorageKey('vocabDef_progress_', story.id);
   const vocab: VocabItem[] = story.vocabulary ?? [];
   const hasData = vocab.length > 0;
@@ -932,12 +894,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-amber-50">
-      <StepHeader
-        title="語詞定義配對"
-        subtitle={phase === 'summary' ? '作答結果' : modeSubtitles[mode]}
-      />
-
+    <div className="flex-1 flex flex-col min-h-0 bg-surface overflow-hidden" style={{ fontFamily: zhuyinFont }}>
       <div className="flex-1 overflow-y-auto min-h-0 py-6">
         {!hasData ? (
           <NoDataFallback onFinish={handleFinish} />
