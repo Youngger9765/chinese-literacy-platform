@@ -26,6 +26,10 @@ import { lookupCharactersBatch } from '../../services/learningApi';
 // network error); undefined = never queried yet.
 const moedictMeaningCache = new Map<string, string | null>();
 
+// Max relatedChars chips shown in the grid (keep in sync with both the
+// effect that batch-fetches meanings and the JSX that renders chips).
+const MAX_CHIPS = 8;
+
 /** Shorten a full moedict definition to a display-friendly snippet. */
 const shortenMoedictDef = (full: string): string => {
   const cleaned = full.trim();
@@ -95,7 +99,7 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
   const [selectedRelated, setSelectedRelated] = useState<RelatedChar | null>(null);
   const [activeRadical, setActiveRadical] = useState<string | null>(null);
   const [, forceUpdate] = useState(0);
-  const [moedictRev, setMoedictRev] = useState(0);
+  const [, setMoedictRev] = useState(0);
 
   // Load generated decomposition database on first render (lazy chunk).
   // forceUpdate triggers a re-render after the data is available so that
@@ -144,7 +148,7 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
   // shared Map. Referenced via moedictRev so a state bump re-renders
   // popups once data arrives.
   const fallbackChips = relatedChars
-    .slice(0, 8)
+    .slice(0, MAX_CHIPS)
     .filter(c => !c.meaning.trim())
     .map(c => c.char);
   const fallbackChipsKey = fallbackChips.join('');
@@ -279,7 +283,7 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
               <span className="text-[10px] text-gray-400">（點擊查看意思）</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {relatedChars.slice(0, 8).map(item => (
+              {relatedChars.slice(0, MAX_CHIPS).map(item => (
                 <RelatedCharCard
                   key={item.char}
                   item={item}
