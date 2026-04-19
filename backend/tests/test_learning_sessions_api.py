@@ -32,7 +32,13 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
+from app.models.text import Text
 from app.models.user import Role
+
+# Canonical slug used for all happy-path session creation tests (#1135).
+# Must match a seeded Text row (lesson_number=VALID_LESSON_NUM).
+VALID_LESSON_NUM = 1
+VALID_SLUG = str(VALID_LESSON_NUM)  # "1"
 
 # ---------------------------------------------------------------------------
 # Test database setup (SQLite in-memory with StaticPool)
@@ -90,12 +96,30 @@ def _override_get_db():
 # ---------------------------------------------------------------------------
 
 
+def _seed_text(session):
+    """Seed a single Text row so story_slug validation (#1135) passes in tests."""
+    text = Text(
+        title="Test Lesson",
+        paragraphs=["Test paragraph."],
+        char_count=14,
+        grade=4,
+        grade_code="G4-1",
+        genre="記敘文",
+        text_type="單",
+        category="Fable",
+        lesson_number=VALID_LESSON_NUM,
+    )
+    session.add(text)
+    session.commit()
+
+
 @pytest.fixture(scope="module", autouse=True)
 def setup_db():
-    """Create all tables once, seed roles, override get_db, and clean up at end."""
+    """Create all tables once, seed roles + text, override get_db, and clean up at end."""
     Base.metadata.create_all(bind=engine)
     session = TestingSessionLocal()
     _seed_roles(session)
+    _seed_text(session)
     session.close()
 
     app.dependency_overrides[get_db] = _override_get_db
@@ -159,20 +183,22 @@ class TestCreateSession:
     def test_create_returns_201(self, client, user_a):
         resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "test-story-01"},
+            json={"story_slug": VALID_SLUG},
             headers=auth_header(user_a["token"]),
         )
         assert resp.status_code == 201
 
     def test_create_returns_session_fields(self, client, user_a):
+        # Use a new user so there's no existing in_progress session for this slug
+        new_user = _register_user(client, "fields_test")
         resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "fields-test"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(new_user["token"]),
         )
         data = resp.json()
         assert "id" in data
-        assert data["story_slug"] == "fields-test"
+        assert data["story_slug"] == VALID_SLUG
         assert data["status"] == "in_progress"
         assert data["current_step"] == 1
         assert data["started_at"] is not None
@@ -187,9 +213,10 @@ class TestCreateSession:
     def test_create_with_story_title(self, client, user_a):
         resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "title-test", "story_title": "Test Title"},
+            json={"story_slug": VALID_SLUG, "story_title": "Test Title"},
             headers=auth_header(user_a["token"]),
         )
+        # get-or-create: returns existing in_progress session — 201 either way
         assert resp.status_code == 201
 
     def test_create_missing_story_slug_returns_422(self, client, user_a):
@@ -211,17 +238,61 @@ class TestCreateSession:
     def test_create_requires_auth(self, client):
         resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "no-auth"},
+            json={"story_slug": VALID_SLUG},
         )
         assert resp.status_code == 401
 
     def test_create_invalid_token_returns_401(self, client):
         resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "bad-token"},
+            json={"story_slug": VALID_SLUG},
             headers=auth_header("invalid.jwt.token"),
         )
         assert resp.status_code == 401
+
+    # ------------------------------------------------------------------
+    # slug validation tests (#1135)
+    # ------------------------------------------------------------------
+
+    def test_create_unknown_numeric_slug_returns_422(self, client, user_a):
+        """A numeric slug with no matching lesson_number must be rejected."""
+        resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "9999"},
+            headers=auth_header(user_a["token"]),
+        )
+        assert resp.status_code == 422
+        assert "unknown story_slug" in resp.json()["detail"]
+
+    def test_create_bogus_nonnumeric_slug_returns_422(self, client, user_a):
+        """Typo slug like 'esson-1' (non-numeric, non-existent) must be rejected."""
+        resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "esson-1"},
+            headers=auth_header(user_a["token"]),
+        )
+        assert resp.status_code == 422
+        assert "unknown story_slug" in resp.json()["detail"]
+
+    def test_create_l_prefix_valid_slug_returns_201(self, client):
+        """L01 normalizes to '1', which exists in texts — must be accepted."""
+        new_user = _register_user(client, "l01_test")
+        resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "L01"},
+            headers=auth_header(new_user["token"]),
+        )
+        assert resp.status_code == 201
+
+    def test_create_zero_padded_valid_slug_returns_201(self, client):
+        """'01' normalizes to '1', which exists — must be accepted."""
+        new_user = _register_user(client, "pad01_test")
+        resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": "01"},
+            headers=auth_header(new_user["token"]),
+        )
+        assert resp.status_code == 201
 
 
 # ===========================================================================
@@ -258,20 +329,25 @@ class TestListSessions:
         assert data["total"] >= 1  # at least the ones created in TestCreateSession
 
     def test_list_does_not_show_other_users_sessions(self, client, user_a, user_b):
-        # Create a session for user_b
+        # Create a session for user_b (uses valid slug)
         client.post(
             "/api/learning/sessions",
-            json={"story_slug": "user-b-story"},
+            json={"story_slug": VALID_SLUG},
             headers=auth_header(user_b["token"]),
         )
 
-        # user_a should not see user_b's sessions
-        resp = client.get(
+        # user_a should only see their own sessions, not user_b's
+        resp_a = client.get(
             "/api/learning/sessions",
             headers=auth_header(user_a["token"]),
         )
-        slugs = [item["story_slug"] for item in resp.json()["items"]]
-        assert "user-b-story" not in slugs
+        resp_b = client.get(
+            "/api/learning/sessions",
+            headers=auth_header(user_b["token"]),
+        )
+        ids_a = {item["id"] for item in resp_a.json()["items"]}
+        ids_b = {item["id"] for item in resp_b.json()["items"]}
+        assert not ids_a.intersection(ids_b), "Users must not share session IDs"
 
     def test_list_pagination_limit(self, client, user_a):
         resp = client.get(
@@ -322,10 +398,10 @@ class TestListSessions:
 
 class TestGetSessionDetail:
     def test_get_detail_returns_200(self, client, user_a):
-        # Create a session first
+        # Create a session first (get-or-create returns existing one — that's fine)
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "detail-test"},
+            json={"story_slug": VALID_SLUG},
             headers=auth_header(user_a["token"]),
         )
         session_id = create_resp.json()["id"]
@@ -339,7 +415,7 @@ class TestGetSessionDetail:
     def test_get_detail_returns_full_fields(self, client, user_a):
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "detail-fields"},
+            json={"story_slug": VALID_SLUG},
             headers=auth_header(user_a["token"]),
         )
         session_id = create_resp.json()["id"]
@@ -367,10 +443,10 @@ class TestGetSessionDetail:
         assert resp.json()["detail"] == "Session not found"
 
     def test_get_detail_other_users_session_returns_403(self, client, user_a, user_b):
-        # Create session as user_b
+        # Create session as user_b (get-or-create returns existing or new)
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "owned-by-b"},
+            json={"story_slug": VALID_SLUG},
             headers=auth_header(user_b["token"]),
         )
         session_id = create_resp.json()["id"]
@@ -394,60 +470,64 @@ class TestGetSessionDetail:
 
 
 class TestUpdateSession:
-    def test_update_step(self, client, user_a):
+    def test_update_step(self, client):
+        u = _register_user(client, "upd_step")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "update-step"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"current_step": 3},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["current_step"] == 3
 
-    def test_update_status(self, client, user_a):
+    def test_update_status(self, client):
+        u = _register_user(client, "upd_status")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "update-status"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"status": "completed"},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["status"] == "completed"
 
-    def test_update_accuracy_and_score(self, client, user_a):
+    def test_update_accuracy_and_score(self, client):
+        u = _register_user(client, "upd_score")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "update-score"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"accuracy": 85.5, "overall_score": 90.0},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["accuracy"] == 85.5
         assert resp.json()["overall_score"] == 90.0
 
-    def test_update_reading_result(self, client, user_a):
+    def test_update_reading_result(self, client):
+        u = _register_user(client, "upd_reading")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "update-reading"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
@@ -455,16 +535,17 @@ class TestUpdateSession:
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"reading_result": reading_data},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["reading_result"] == reading_data
 
-    def test_update_comprehension_result(self, client, user_a):
+    def test_update_comprehension_result(self, client):
+        u = _register_user(client, "upd_comp")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "update-comp"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
@@ -472,16 +553,17 @@ class TestUpdateSession:
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"comprehension_result": comp_data},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["comprehension_result"] == comp_data
 
-    def test_update_vocab_result(self, client, user_a):
+    def test_update_vocab_result(self, client):
+        u = _register_user(client, "upd_vocab")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "update-vocab"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
@@ -489,16 +571,17 @@ class TestUpdateSession:
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"vocab_result": vocab_data},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["vocab_result"] == vocab_data
 
-    def test_update_full_reading_result(self, client, user_a):
+    def test_update_full_reading_result(self, client):
+        u = _register_user(client, "upd_fullrd")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "update-full-read"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
@@ -506,16 +589,17 @@ class TestUpdateSession:
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"full_reading_result": full_data},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["full_reading_result"] == full_data
 
-    def test_update_mark_completed(self, client, user_a):
+    def test_update_mark_completed(self, client):
+        u = _register_user(client, "upd_mkcomp")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "mark-complete"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
@@ -527,7 +611,7 @@ class TestUpdateSession:
                 "overall_score": 95.0,
                 "completed_at": "2026-03-05T12:00:00Z",
             },
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -545,10 +629,11 @@ class TestUpdateSession:
         assert resp.status_code == 404
 
     def test_update_other_users_session_returns_403(self, client, user_a, user_b):
+        u_c = _register_user(client, "upd403_c")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "b-session-update"},
-            headers=auth_header(user_b["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u_c["token"]),
         )
         session_id = create_resp.json()["id"]
 
@@ -566,74 +651,79 @@ class TestUpdateSession:
         )
         assert resp.status_code == 401
 
-    def test_update_invalid_step_too_high_returns_422(self, client, user_a):
+    def test_update_invalid_step_too_high_returns_422(self, client):
+        u = _register_user(client, "upd_hi_step")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "invalid-step"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"current_step": 99},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 422
 
-    def test_update_invalid_step_zero_returns_422(self, client, user_a):
+    def test_update_invalid_step_zero_returns_422(self, client):
+        u = _register_user(client, "upd_zero_step")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "step-zero"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"current_step": 0},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 422
 
-    def test_update_invalid_status_returns_422(self, client, user_a):
+    def test_update_invalid_status_returns_422(self, client):
+        u = _register_user(client, "upd_bad_stat")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "bad-status"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={"status": "invalid_status"},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 422
 
-    def test_update_empty_body_is_noop(self, client, user_a):
+    def test_update_empty_body_is_noop(self, client):
         """PATCH with empty body should succeed without changing anything."""
+        u = _register_user(client, "upd_noop")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "noop-update"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
         resp = client.patch(
             f"/api/learning/sessions/{session_id}",
             json={},
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         assert resp.json()["current_step"] == 1
         assert resp.json()["status"] == "in_progress"
 
-    def test_update_multiple_fields_at_once(self, client, user_a):
+    def test_update_multiple_fields_at_once(self, client):
+        u = _register_user(client, "upd_multi")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "multi-update"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
@@ -644,7 +734,7 @@ class TestUpdateSession:
                 "accuracy": 78.3,
                 "comprehension_result": {"q1": True, "q2": False},
             },
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -659,35 +749,37 @@ class TestUpdateSession:
 
 
 class TestGetSessionReport:
-    def test_report_returns_200(self, client, user_a):
+    def test_report_returns_200(self, client):
+        u = _register_user(client, "rpt_200")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "report-test"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
         resp = client.get(
             f"/api/learning/sessions/{session_id}/report",
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert resp.status_code == 200
 
-    def test_report_matches_detail(self, client, user_a):
+    def test_report_matches_detail(self, client):
+        u = _register_user(client, "rpt_match")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "report-match"},
-            headers=auth_header(user_a["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u["token"]),
         )
         session_id = create_resp.json()["id"]
 
         detail_resp = client.get(
             f"/api/learning/sessions/{session_id}",
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         report_resp = client.get(
             f"/api/learning/sessions/{session_id}/report",
-            headers=auth_header(user_a["token"]),
+            headers=auth_header(u["token"]),
         )
         assert detail_resp.json() == report_resp.json()
 
@@ -698,11 +790,12 @@ class TestGetSessionReport:
         )
         assert resp.status_code == 404
 
-    def test_report_other_users_session_returns_403(self, client, user_a, user_b):
+    def test_report_other_users_session_returns_403(self, client, user_a):
+        u_d = _register_user(client, "rpt403_d")
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "b-report"},
-            headers=auth_header(user_b["token"]),
+            json={"story_slug": VALID_SLUG},
+            headers=auth_header(u_d["token"]),
         )
         session_id = create_resp.json()["id"]
 
@@ -731,7 +824,7 @@ class TestSessionFlow:
         # 1. Create session
         create_resp = client.post(
             "/api/learning/sessions",
-            json={"story_slug": "lifecycle-story"},
+            json={"story_slug": VALID_SLUG},
             headers=headers,
         )
         assert create_resp.status_code == 201
