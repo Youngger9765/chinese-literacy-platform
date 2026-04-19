@@ -6,7 +6,7 @@ import { splitIntoSentences } from '../../../utils/localEval';
 import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 
 import { splitZhuyinChars } from '../../../utils/zhuyinUtils';
-import { displayIdxForProgress } from '../../../utils/ttsHighlight';
+import { groupIdxForProgress } from '../../../utils/ttsHighlight';
 
 interface ParagraphCardProps {
   idx: number;
@@ -187,12 +187,13 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           <span className="blur-sm select-none">{zhuyinLine ?? line}</span>
         ) : isTtsSpeaking && isCurrentIdx ? (
           // Highlight chars up to speakingProgress during TTS playback.
-          // Use displayIdxForProgress so symbols stripped by _cleanForTts
-          // (~~~, ──, …) don't consume TTS progress budget (Issue #1110).
+          // groupIdxForProgress walks char groups so zhuyin PUA selectors
+          // (#1112) and symbols stripped by _cleanForTts (#1110) don't push
+          // the split past the real char boundary.
           (() => {
             const displayText = (zhuyinActive && typeof zhuyinLine === 'string') ? zhuyinLine : line;
             const chars = splitZhuyinChars(displayText);
-            const splitIdx = displayIdxForProgress(displayText, speakingProgress);
+            const splitIdx = groupIdxForProgress(chars, speakingProgress);
             return (
               <>
                 {speakingProgress > 0 && (
