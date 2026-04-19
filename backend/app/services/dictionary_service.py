@@ -41,6 +41,22 @@ def _strip_markup(text: str) -> str:
     return cleaned.strip()
 
 
+# Pronunciation-disambiguation markers that appear as pseudo-definitions in
+# moedict (e.g. "(一)之讀音。" on the first heteronym of 我). These are not
+# real definitions and should not cause us to pick that heteronym.
+_PRON_NOTE_RE = re.compile(r'^[（(][一二三四五六七八九十][）)]之(讀音|又音|俗音|讀)')
+
+
+def _has_real_definition(heteronym: dict) -> bool:
+    """True if this heteronym has at least one definition that is not just a
+    pronunciation-disambiguation note."""
+    for entry in heteronym.get("d", []):
+        text = _strip_markup(entry.get("f", ""))
+        if text and not _PRON_NOTE_RE.match(text):
+            return True
+    return False
+
+
 def _parse_moe_response(raw: dict) -> dict:
     """Parse the raw moedict API response into a structured dict.
 
@@ -58,8 +74,14 @@ def _parse_moe_response(raw: dict) -> dict:
     if not heteronyms:
         return {"zhuyin": None, "stroke_count": None, "definitions": []}
 
-    # Use the first heteronym (most common reading)
-    first = heteronyms[0]
+    # Pick the first heteronym with a real definition. Some chars (e.g. 我)
+    # have leading heteronyms whose only entry is a pronunciation-disambiguation
+    # note like "(一)之讀音。"; picking h[0] blindly loses the actual meaning
+    # stored in a later heteronym.
+    first = next(
+        (h for h in heteronyms if _has_real_definition(h)),
+        heteronyms[0],
+    )
     zhuyin = first.get("b", None)
 
     # Stroke count is stored under "c" at the top level
