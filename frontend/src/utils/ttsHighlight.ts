@@ -27,7 +27,10 @@
 /** Truly removed by _cleanForTts — contribute 0 TTS chars. */
 const STRIP_RE = /[~～#/\\|*[\]{}·‧・°○]/;
 
-/** Replaced by '，' (1 TTS char) — contribute 1 TTS char. */
+/**
+ * Collapsed to a single '，' by _cleanForTts — any consecutive run contributes
+ * 1 TTS char. Mirrors `/[──—–−]+/` and `/[…⋯]+/` in ttsApi.ts._cleanForTts.
+ */
 const PAUSE_ONE_RE = /[──—–−…⋯]/;
 
 /**
@@ -63,8 +66,16 @@ export function groupIdxForProgress(chars: string[], progress: number): number {
       continue;
     }
 
-    // Pause chars (em-dash, ellipsis) → '，' (1 TTS char)
+    // Pause chars (em-dash, ellipsis) → '，' (1 TTS char).
+    // Consecutive runs are collapsed by _cleanForTts (`/[──—–−]+/`), so skip
+    // adjacent pause groups too.
     if (PAUSE_ONE_RE.test(base)) {
+      while (chars[i + 1]) {
+        const nextCp = chars[i + 1].codePointAt(0);
+        if (nextCp === undefined) break;
+        if (!PAUSE_ONE_RE.test(String.fromCodePoint(nextCp))) break;
+        i++;
+      }
       effective++;
       continue;
     }
