@@ -459,6 +459,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       missingCount,
       tier: localTier,
       geminiPending: true,
+      sentenceResults: [...sentenceResultsRef.current],
+      sentenceTargets: [...sentenceTargetsRef.current],
     };
     setParagraphSummaries(prev => ({ ...prev, [lineIdx]: summaryData }));
 
@@ -496,6 +498,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           missingCount: geminiMissing,
           tier: gemini.tier,
           geminiPending: false,
+          sentenceResults: prev[lineIdx]?.sentenceResults,
+          sentenceTargets: prev[lineIdx]?.sentenceTargets,
         }}));
         setLastDiffTokens(gemini.diff_tokens);
 

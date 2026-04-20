@@ -8,6 +8,24 @@ import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 import { splitZhuyinChars } from '../../../utils/zhuyinUtils';
 import { groupIdxForProgress } from '../../../utils/ttsHighlight';
 
+/* ── Encouragement messages (PR #1076 / #1096) ──────────────────────────── */
+
+const ENCOURAGE_TIERS: Array<{ min: number; color: string; msgs: string[] }> = [
+  { min: 0.95, color: 'text-emerald-600', msgs: ['完美！太流暢了！', '讀得超棒！', '太厲害了！'] },
+  { min: 0.80, color: 'text-green-600', msgs: ['讀得很好！', '棒棒！繼續加油！', '很不錯喔！'] },
+  { min: 0.65, color: 'text-amber-600', msgs: ['快到了！再仔細一點！', '加把勁！', '差一點點！'] },
+  { min: 0.50, color: 'text-orange-500', msgs: ['沒關係，再試一次！', '繼續練習！', '加油！'] },
+  { min: 0, color: 'text-rose-500', msgs: ['別氣餒，多練習就會進步！', '慢慢來，不急！', '再來一次！'] },
+];
+
+function getEncouragement(matchRate: number): { text: string; color: string } {
+  const tier = ENCOURAGE_TIERS.find(t => matchRate >= t.min) ?? ENCOURAGE_TIERS[ENCOURAGE_TIERS.length - 1];
+  const idx = Math.floor(matchRate * 1000) % tier.msgs.length;
+  return { text: tier.msgs[idx], color: tier.color };
+}
+
+/* ── Component ──────────────────────────────────────────────────────────── */
+
 interface ParagraphCardProps {
   idx: number;
   line: string;
@@ -133,6 +151,12 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
     if (isTtsSpeaking) setTtsLoading(false);
   }, [isTtsSpeaking]);
 
+  // Encouragement for summary display
+  const encouragement = useMemo(() => {
+    if (!paragraphSummary) return null;
+    return getEncouragement(paragraphSummary.matchRate);
+  }, [paragraphSummary?.matchRate]);
+
   return (
     <div
       className={`transition-all duration-500 rounded-3xl p-5 md:p-14 ${
@@ -187,9 +211,6 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           <span className="blur-sm select-none">{zhuyinLine ?? line}</span>
         ) : isTtsSpeaking && isCurrentIdx ? (
           // Highlight chars up to speakingProgress during TTS playback.
-          // groupIdxForProgress walks char groups so zhuyin PUA selectors
-          // (#1112) and symbols stripped by _cleanForTts (#1110) don't push
-          // the split past the real char boundary.
           (() => {
             const displayText = (zhuyinActive && typeof zhuyinLine === 'string') ? zhuyinLine : line;
             const chars = splitZhuyinChars(displayText);
@@ -275,44 +296,75 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
       {/* ── Inline summary card (after evaluation) ─────────────────── */}
       {paragraphSummary && retrySentenceIdx === undefined && (
         <div className="mt-8 p-6 rounded-2xl bg-surface-container-low space-y-4">
-          <p className="text-base font-bold text-on-surface">
-            {paragraphSummary.geminiPending && <span className="text-accent animate-pulse mr-1">AI 分析中...</span>}
-            {paragraphSummary.feedback}
-          </p>
-          <div className="flex gap-4 text-sm">
-            <span className="text-emerald-600 font-medium">
-              正確率 {Math.round(paragraphSummary.matchRate * 100)}%
-            </span>
-            {paragraphSummary.wrongCount > 0 && (
-              <span className="text-tertiary">念錯 {paragraphSummary.wrongCount} 字</span>
+          {/* Encouragement message instead of raw numbers (#1076) */}
+          <div className="flex items-center gap-3">
+            {paragraphSummary.geminiPending && (
+              <span className="text-accent animate-pulse text-sm">AI 分析中...</span>
             )}
-            {paragraphSummary.missingCount > 0 && (
-              <span className="text-on-surface-variant">漏字 {paragraphSummary.missingCount} 字</span>
+            {encouragement && (
+              <p className={`text-lg font-bold ${encouragement.color}`}>
+                {encouragement.text}
+              </p>
             )}
           </div>
 
-          {/* Sentence-level retry (#1076) — show when there are errors */}
-          {isCurrentIdx && (paragraphSummary.wrongCount > 0 || paragraphSummary.missingCount > 0) && (() => {
-            const sentences = splitIntoSentences(line || '');
-            const retryable = sentences
-              .map((text, i) => ({ text, i }))
-              .filter(({ text }) => text.replace(CHINESE_PUNCTUATION_REGEX, '').length > 1);
-            if (retryable.length === 0) return null;
+          {/* Per-sentence results with ✅/❌ (#1076) */}
+          {isCurrentIdx && paragraphSummary.sentenceTargets && paragraphSummary.sentenceTargets.length >= 2 && (() => {
+            const targets = paragraphSummary.sentenceTargets!;
+            const results = paragraphSummary.sentenceResults ?? [];
+            const failedSentences = targets
+              .map((text, si) => ({ text, si, result: results[si] ?? null }))
+              .filter(({ text, result }) => {
+                const cleanLen = text.replace(CHINESE_PUNCTUATION_REGEX, '').length;
+                if (cleanLen <= 1) return false; // skip single-char sentences
+                return result === null || result.matchRate < 0.6;
+              });
+
+            if (failedSentences.length === 0) return null;
             return (
-              <div className="pt-2 border-t border-on-surface/10">
-                <p className="text-xs font-bold text-on-surface-variant mb-2">重念某一句</p>
-                <div className="flex flex-wrap gap-2">
-                  {retryable.map(({ text, i }) => (
-                    <button
-                      key={i}
-                      onClick={() => onRetrySentence(idx, i)}
-                      className="px-3 py-1.5 rounded-full text-xs bg-surface-container-highest hover:bg-accent/20 text-on-surface transition-all"
-                      title={text}
+              <div className="pt-3 border-t border-on-surface/10 space-y-2">
+                <p className="text-xs font-bold text-on-surface-variant mb-1">需要加強的句子</p>
+                {failedSentences.map(({ text, si }) => {
+                  const isRetrying = retrySentenceIdx === si;
+                  return (
+                    <div
+                      key={si}
+                      className={`flex items-center gap-2 p-2.5 rounded-xl text-sm transition-all ${
+                        isRetrying
+                          ? 'bg-amber-50 border border-amber-200'
+                          : 'bg-surface-container-lowest'
+                      }`}
                     >
-                      第 {i + 1} 句
-                    </button>
-                  ))}
-                </div>
+                      <span className="text-base">❌</span>
+                      <span className="flex-1 text-on-surface/80 truncate">{text}</span>
+                      {!isRetrying && (
+                        <button
+                          onClick={() => onRetrySentence(idx, si)}
+                          className="px-3 py-1 rounded-full text-xs font-bold bg-accent/10 text-accent hover:bg-accent/20 transition-all shrink-0"
+                        >
+                          重練這句
+                        </button>
+                      )}
+                      {isRetrying && isSessionActive && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="flex items-center gap-1 text-xs text-amber-600">
+                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                            錄音中
+                          </span>
+                          <button
+                            onClick={onSubmitSentence}
+                            className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition-all"
+                          >
+                            完成
+                          </button>
+                        </div>
+                      )}
+                      {isRetrying && isPreparing && (
+                        <span className="text-xs text-on-surface-variant shrink-0">準備中...</span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             );
           })()}
@@ -325,7 +377,9 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             >
               重練這段
             </button>
-            {idx < storyLength - 1 && (
+            {/* 下一段：tier 3 時隱藏，避免學生亂念後直接跳過 (#1076)
+                例外：已完成過的段落允許自由導航 */}
+            {idx < storyLength - 1 && (paragraphSummary.tier <= 2 || completedParagraphs.has(idx)) && (
               <button
                 onClick={() => {
                   if (!completedParagraphs.has(idx)) {
@@ -341,7 +395,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                 <span className="material-symbols-outlined text-lg">arrow_forward</span>
               </button>
             )}
-            {idx >= storyLength - 1 && !completedParagraphs.has(idx) && (
+            {/* 完成朗讀：同樣 tier 3 時隱藏 */}
+            {idx >= storyLength - 1 && !completedParagraphs.has(idx) && paragraphSummary.tier <= 2 && (
               <button
                 onClick={() => onAdvanceParagraph(idx, lineResults)}
                 className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
