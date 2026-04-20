@@ -303,8 +303,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             )}
           </div>
 
-          {/* Sentence-level retry (#1076) — hybrid: use sentenceResults when available, fallback to paragraph errors */}
-          {isCurrentIdx && (paragraphSummary.wrongCount > 0 || paragraphSummary.missingCount > 0) && (() => {
+          {/* Sentence-level retry (#1076) — only show when tier 3 (failed) */}
+          {isCurrentIdx && paragraphSummary.tier > 2 && (paragraphSummary.wrongCount > 0 || paragraphSummary.missingCount > 0) && (() => {
             const targets = paragraphSummary.sentenceTargets ?? splitIntoSentences(line || '');
             const results = paragraphSummary.sentenceResults ?? [];
             const hasEvalResults = results.some(r => r !== null);
@@ -388,9 +388,10 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             >
               重練這段
             </button>
-            {/* 下一段：tier 3 時隱藏，避免學生亂念後直接跳過 (#1076)
+            {/* 下一段：matchRate < 0.5 時隱藏（真正唸很差才擋），
+                tier <= 2 或重練後 matchRate >= 0.5 都可下一段。
                 例外：已完成過的段落允許自由導航 */}
-            {idx < storyLength - 1 && (paragraphSummary.tier <= 2 || completedParagraphs.has(idx)) && (
+            {idx < storyLength - 1 && (paragraphSummary.tier <= 2 || paragraphSummary.matchRate >= 0.5 || completedParagraphs.has(idx)) && (
               <button
                 onClick={() => {
                   if (!completedParagraphs.has(idx)) {
@@ -406,8 +407,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                 <span className="material-symbols-outlined text-lg">arrow_forward</span>
               </button>
             )}
-            {/* 完成朗讀：同樣 tier 3 時隱藏 */}
-            {idx >= storyLength - 1 && !completedParagraphs.has(idx) && paragraphSummary.tier <= 2 && (
+            {/* 完成朗讀：同樣邏輯，matchRate >= 0.5 或 tier <= 2 才顯示 */}
+            {idx >= storyLength - 1 && !completedParagraphs.has(idx) && (paragraphSummary.tier <= 2 || paragraphSummary.matchRate >= 0.5) && (
               <button
                 onClick={() => onAdvanceParagraph(idx, lineResults)}
                 className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
