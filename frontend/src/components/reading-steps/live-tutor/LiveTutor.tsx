@@ -452,6 +452,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     stopSession();
 
+    // Fill in null sentence results: evaluate each unevaluated sentence against
+    // the full transcript so skipped sentences are properly detected (#1096).
+    const filledSentenceResults = sentenceResultsRef.current.map((result, si) => {
+      if (result !== null) return result;
+      const sentTarget = sentenceTargetsRef.current[si];
+      if (!sentTarget) return null;
+      return localEvaluateParagraph(
+        cleaned, sentTarget, durationMs,
+        { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+        streak,
+      );
+    });
+
     const summaryData: ParagraphSummaryData = {
       feedback: localTier <= 2 ? (localFeedback || '唸得不錯！') : (localFeedback || '再試一次，加油！'),
       matchRate: localMatchRate,
@@ -459,7 +472,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       missingCount,
       tier: localTier,
       geminiPending: true,
-      sentenceResults: [...sentenceResultsRef.current],
+      sentenceResults: [...filledSentenceResults],
       sentenceTargets: [...sentenceTargetsRef.current],
     };
     setParagraphSummaries(prev => ({ ...prev, [lineIdx]: summaryData }));
