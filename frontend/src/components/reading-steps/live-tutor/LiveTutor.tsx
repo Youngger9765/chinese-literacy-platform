@@ -381,7 +381,30 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
     const targetText = story.content[lineIdx] || '';
     const cleaned = cleanChineseText(rawTranscript);
-    if (!cleaned) return;
+
+    // 整段漏讀：no speech detected → show summary with retry prompt instead of silently returning
+    if (!cleaned) {
+      stopSession();
+      const normalizedTarget = normalizeForComparison(targetText);
+      const targetLen = normalizedTarget.length;
+      const emptyDiffTokens: DiffToken[] = Array.from(normalizedTarget).map(ch => ({
+        char: ch, type: 'missing' as const,
+      }));
+      setParagraphSummaries(prev => ({
+        ...prev,
+        [lineIdx]: {
+          feedback: '好像沒有偵測到聲音，請再試一次吧！',
+          matchRate: 0,
+          wrongCount: 0,
+          missingCount: targetLen,
+          tier: 3 as const,
+          geminiPending: false,
+        },
+      }));
+      setLastDiffTokens(emptyDiffTokens);
+      setStreamingUserInput('');
+      return;
+    }
 
     // ── Phase 1: local eval (instant, <1ms) ─────────────────────────────────
     const sentResults = sentenceResultsRef.current.filter(Boolean) as LocalEvalResult[];
@@ -452,6 +475,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     stopSession();
 
+    // Fill in null sentence results: evaluate each unevaluated sentence against
+    // the full transcript so skipped sentences are properly detected (#1096).
+    const filledSentenceResults = sentenceResultsRef.current.map((result, si) => {
+      if (result !== null) return result;
+      const sentTarget = sentenceTargetsRef.current[si];
+      if (!sentTarget) return null;
+      return localEvaluateParagraph(
+        cleaned, sentTarget, durationMs,
+        { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+        streak,
+      );
+    });
+
     const summaryData: ParagraphSummaryData = {
       feedback: localTier <= 2 ? (localFeedback || '唸得不錯！') : (localFeedback || '再試一次，加油！'),
       matchRate: localMatchRate,
@@ -459,6 +495,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       missingCount,
       tier: localTier,
       geminiPending: true,
+      sentenceResults: [...filledSentenceResults],
+      sentenceTargets: [...sentenceTargetsRef.current],
     };
     setParagraphSummaries(prev => ({ ...prev, [lineIdx]: summaryData }));
 
@@ -496,6 +534,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           missingCount: geminiMissing,
           tier: gemini.tier,
           geminiPending: false,
+          sentenceResults: prev[lineIdx]?.sentenceResults,
+          sentenceTargets: prev[lineIdx]?.sentenceTargets,
         }}));
         setLastDiffTokens(gemini.diff_tokens);
 
