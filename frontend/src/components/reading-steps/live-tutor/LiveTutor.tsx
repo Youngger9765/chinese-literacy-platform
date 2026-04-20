@@ -385,8 +385,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     // 整段漏讀：no speech detected → show summary with retry prompt instead of silently returning
     if (!cleaned) {
       stopSession();
-      const targetLen = normalizeForComparison(targetText).length || 1;
-      const emptyDiffTokens: DiffToken[] = Array.from(normalizeForComparison(targetText)).map(ch => ({
+      const normalizedTarget = normalizeForComparison(targetText);
+      const targetLen = normalizedTarget.length || 1;
+      const emptyDiffTokens: DiffToken[] = Array.from(normalizedTarget).map(ch => ({
         char: ch, type: 'missing' as const,
       }));
       setParagraphSummaries(prev => ({
