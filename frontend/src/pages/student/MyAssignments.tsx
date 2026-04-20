@@ -380,7 +380,16 @@ const MyAssignments: React.FC = () => {
 
   // Summary bar: unique classroom names from enrolled classrooms
   const classroomNames = useMemo(() => classrooms.map((c) => c.name), [classrooms]);
-  const showClassroomFilter = classrooms.length >= 3;
+  // Show pill filter when student is in 2+ classrooms (#1158)
+  const showClassroomFilter = classrooms.length >= 2;
+
+  // Reset classroom filter if the selected classroom is no longer in the list
+  // (e.g. after classroom API failure returns empty or student left a classroom)
+  useEffect(() => {
+    if (classroomFilter !== 'all' && !classroomNames.includes(classroomFilter)) {
+      setClassroomFilter('all');
+    }
+  }, [classroomNames, classroomFilter]);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6">
@@ -402,8 +411,37 @@ const MyAssignments: React.FC = () => {
           </div>
         )}
 
-        {/* Filter tabs + sort + classroom filter */}
-        <div className="flex items-center justify-between gap-2 border-b border-gray-200 flex-wrap">
+        {/* Classroom pill filter — visible when student is in 2+ classrooms (#1158) */}
+        {showClassroomFilter && !isLoading && (
+          <div className="flex items-center gap-2 flex-wrap" role="group" aria-label="依班級篩選">
+            <button
+              onClick={() => setClassroomFilter('all')}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                classroomFilter === 'all'
+                  ? 'bg-accent text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              全部
+            </button>
+            {classroomNames.map((name) => (
+              <button
+                key={name}
+                onClick={() => setClassroomFilter(name)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                  classroomFilter === name
+                    ? 'bg-accent text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Filter tabs + sort */}
+        <div className="flex items-center justify-between gap-2 border-b border-gray-200">
           <nav className="flex -mb-px" aria-label="Filter tabs">
             {FILTER_TABS.map((tab) => (
               <button
@@ -419,35 +457,18 @@ const MyAssignments: React.FC = () => {
               </button>
             ))}
           </nav>
-          <div className="flex items-center gap-2 mb-px">
-            {showClassroomFilter && (
-              <select
-                value={classroomFilter}
-                onChange={(e) => setClassroomFilter(e.target.value)}
-                className="text-xs text-gray-600 border border-gray-200 rounded-md px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
-                aria-label="班級篩選"
-              >
-                <option value="all">全部班級</option>
-                {classroomNames.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            )}
-            <select
-              value={sortKey}
-              onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className="text-xs text-gray-600 border border-gray-200 rounded-md px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
-              aria-label="排序方式"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.key} value={opt.key}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            className="mb-px text-xs text-gray-600 border border-gray-200 rounded-md px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
+            aria-label="排序方式"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.key} value={opt.key}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Error */}
