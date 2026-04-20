@@ -312,7 +312,9 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               .filter(({ text, result }) => {
                 const cleanLen = text.replace(CHINESE_PUNCTUATION_REGEX, '').length;
                 if (cleanLen <= 1) return false; // skip single-char sentences
-                return result === null || result.matchRate < 0.6;
+                // null = not individually evaluated → treat as passed (not failed)
+                if (!result) return false;
+                return result.matchRate < 0.6;
               });
 
             if (failedSentences.length === 0) return null;

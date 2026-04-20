@@ -51,16 +51,15 @@ export function getReadingPassThreshold(targetLength: number): number {
 // ── Sentence segmentation ─────────────────────────────────────────────────────
 
 /**
- * Split Chinese text into sentences at ，。！？；
+ * Split Chinese text into sentences at 句號（。）.
  * Each segment keeps its trailing delimiter so targets stay faithful to the original.
  *
- * Example: '媽媽說，你好。' → ['媽媽說，', '你好。']
- * Example: '一二三。'       → ['一二三。']
- * Returns the full text as a single element when there are no delimiters.
+ * Example: '媽媽說，你好。再見。' → ['媽媽說，你好。', '再見。']
+ * Example: '一二三。'             → ['一二三。']
+ * Returns the full text as a single element when there are no 句號.
  */
 export function splitIntoSentences(text: string): string[] {
-  // Split after each sentence-final punctuation character
-  const segments = text.split(/(?<=[，。！？；])/u);
+  const segments = text.split(/(?<=[。])/u);
   return segments.filter(s => s.length > 0);
 }
 
