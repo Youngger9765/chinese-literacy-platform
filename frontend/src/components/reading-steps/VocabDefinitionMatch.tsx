@@ -224,9 +224,11 @@ function SummaryScreen({
           </span>
         </div>
         <p className="text-2xl font-headline font-black text-on-surface mb-1">
-          {allCorrect ? '全部答對！' : `答對 ${correctCount} / ${total} 題`}
+          {allCorrect ? '全部答對！' : '你完成了！'}
         </p>
-        <p className="text-sm text-on-surface-variant">正確率 {pct}%</p>
+        <p className="text-sm text-on-surface-variant">
+          {allCorrect ? '太厲害了，繼續保持！' : '有答對一些，再試一次會更好'}
+        </p>
       </div>
 
       {renderResultSection('第一關：選擇題', mcAnswers, 'multiple-choice')}

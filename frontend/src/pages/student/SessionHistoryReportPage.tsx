@@ -151,27 +151,12 @@ const StepSection: React.FC<{ title: string; children: React.ReactNode }> = ({ t
 // ---------------------------------------------------------------------------
 
 const ReadingRecord: React.FC<{ raw: Record<string, unknown> }> = ({ raw }) => {
-  const accuracy = typeof raw.accuracy === 'number' ? Math.round(raw.accuracy * 100) : null;
-  const cpm = typeof raw.cpm === 'number' ? raw.cpm : null;
   const mispronounced = Array.isArray(raw.mispronounced_words) ? (raw.mispronounced_words as string[]) : [];
   const transcription = typeof raw.transcription === 'string' ? raw.transcription : null;
 
   return (
     <StepSection title="逐段朗讀">
-      <div className="flex gap-4 flex-wrap text-sm">
-        {accuracy != null && (
-          <div>
-            <span className="text-xs text-gray-500">準確率</span>
-            <p className="font-semibold text-gray-800">{accuracy}%</p>
-          </div>
-        )}
-        {cpm != null && (
-          <div>
-            <span className="text-xs text-gray-500">語速 (CPM)</span>
-            <p className="font-semibold text-gray-800">{cpm}</p>
-          </div>
-        )}
-      </div>
+      {/* Issue #1094: 學生端不顯示準確率 / CPM 數字，只保留錯字詞與辨識文字 */}
       {mispronounced.length > 0 ? (
         <div>
           <p className="text-xs text-gray-500 mb-1.5">念錯的字詞</p>
@@ -203,38 +188,12 @@ const ReadingRecord: React.FC<{ raw: Record<string, unknown> }> = ({ raw }) => {
 // ---------------------------------------------------------------------------
 
 const FullReadingRecord: React.FC<{ raw: Record<string, unknown> }> = ({ raw }) => {
-  const matchRate = typeof raw.match_rate === 'number' ? Math.round(raw.match_rate * 100) : null;
-  const cpm = typeof raw.cpm === 'number' ? raw.cpm : null;
   const feedback = typeof raw.feedback === 'string' ? raw.feedback : null;
   const diffTokens = Array.isArray(raw.diff_tokens) ? (raw.diff_tokens as DiffToken[]) : [];
-  const errorBreakdown = raw.error_breakdown && typeof raw.error_breakdown === 'object'
-    ? (raw.error_breakdown as { correct: number; wrong: number; missing: number; extra: number })
-    : null;
 
   return (
     <StepSection title="全文朗讀">
-      <div className="flex gap-4 flex-wrap text-sm">
-        {matchRate != null && (
-          <div>
-            <span className="text-xs text-gray-500">符合率</span>
-            <p className="font-semibold text-gray-800">{matchRate}%</p>
-          </div>
-        )}
-        {cpm != null && (
-          <div>
-            <span className="text-xs text-gray-500">語速 (CPM)</span>
-            <p className="font-semibold text-gray-800">{cpm}</p>
-          </div>
-        )}
-      </div>
-      {errorBreakdown && (
-        <div className="flex gap-3 flex-wrap text-xs">
-          <span className="px-2 py-0.5 rounded bg-green-100 text-green-700">正確 {errorBreakdown.correct}</span>
-          <span className="px-2 py-0.5 rounded bg-red-100 text-red-700">錯誤 {errorBreakdown.wrong}</span>
-          <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-600">漏讀 {errorBreakdown.missing}</span>
-          <span className="px-2 py-0.5 rounded bg-orange-100 text-orange-700">多讀 {errorBreakdown.extra}</span>
-        </div>
-      )}
+      {/* Issue #1094: 學生端不顯示符合率 / CPM / 正確漏讀數字 */}
       {diffTokens.length > 0 && (
         <div>
           <p className="text-xs text-gray-500 mb-1.5">朗讀差異對照</p>
@@ -262,44 +221,12 @@ const ComprehensionRecord: React.FC<{
   turns: DialogueTurnItem[];
   scores: ComprehensionScoreResult | null;
 }> = ({ raw, turns, scores }) => {
-  const understood = raw && typeof raw.understood_count === 'number' ? raw.understood_count : null;
-  const required = raw && typeof raw.required_count === 'number' ? raw.required_count : null;
-
   // Only show ai + student turns (skip feedback role for readability)
   const conversationTurns = turns.filter((t) => t.role === 'ai' || t.role === 'student');
 
   return (
     <StepSection title="課文理解">
-      {(understood != null || scores) && (
-        <div className="flex gap-4 flex-wrap text-sm">
-          {understood != null && required != null && (
-            <div>
-              <span className="text-xs text-gray-500">答對題數</span>
-              <p className="font-semibold text-gray-800">{understood} / {required}</p>
-            </div>
-          )}
-          {scores && (
-            <>
-              <div>
-                <span className="text-xs text-gray-500">理解總分</span>
-                <p className="font-semibold text-gray-800">{Math.round(scores.comprehension_score * 100)}%</p>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500">字面</span>
-                <p className="font-semibold text-gray-800">{Math.round(scores.literal_score * 100)}%</p>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500">推論</span>
-                <p className="font-semibold text-gray-800">{Math.round(scores.inferential_score * 100)}%</p>
-              </div>
-              <div>
-                <span className="text-xs text-gray-500">評鑑</span>
-                <p className="font-semibold text-gray-800">{Math.round(scores.evaluative_score * 100)}%</p>
-              </div>
-            </>
-          )}
-        </div>
-      )}
+      {/* Issue #1094: 學生端不顯示答對題數 / 理解率 / 三層次分數，改以對話紀錄為主 */}
 
       {conversationTurns.length > 0 ? (
         <div className="space-y-2 max-h-96 overflow-y-auto pr-1">

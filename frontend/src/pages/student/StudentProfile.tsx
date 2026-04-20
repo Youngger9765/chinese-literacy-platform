@@ -156,16 +156,7 @@ const StudentProfile: React.FC = () => {
                 value={gamification?.total_xp ?? 0}
                 sub={gamification ? `Lv.${gamification.level_info.level} ${gamification.level_info.level_name}` : undefined}
               />
-              <StatCard
-                icon="📊"
-                label="平均分數"
-                value={
-                  dashboard?.avg_score != null
-                    ? `${Math.round(dashboard.avg_score)}%`
-                    : '—'
-                }
-                sub="所有課文"
-              />
+              {/* Issue #1094: 學生端不顯示平均分數 */}
             </div>
           </section>
         )}

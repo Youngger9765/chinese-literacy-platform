@@ -47,10 +47,10 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
   return (
     <div className="flex flex-col gap-4 p-4 max-w-2xl mx-auto"
       style={{ fontFamily: zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined }}>
-      {/* Progress */}
+      {/* Progress — Issue #1094: 學生端不顯示「答對 N 題」數字 */}
       <div className="flex items-center justify-between text-sm text-gray-500">
         <span>第 {current + 1} 題／共 {questions.length} 題</span>
-        <span>答對：{score} 題</span>
+        <span>繼續加油！</span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-1.5">
         <div

@@ -333,12 +333,14 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
           {/* ── Phase 3: Results ──────────────────────────────────── */}
           {phase === 'results' && evalResult && (
             <>
-              {/* Score card */}
+              {/* Feedback card — Issue #1094: 學生端不顯示分數，只保留鼓勵文字 + AI 回饋 */}
               <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 mt-4 flex flex-col items-center gap-4">
-                <div className={`w-28 h-28 rounded-full flex items-center justify-center border-4 ${
-                  evalResult.score >= 80 ? 'border-emerald-500' : evalResult.score >= 60 ? 'border-amber-500' : 'border-tertiary'
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center ${
+                  evalResult.score >= 80 ? 'bg-emerald-100' : evalResult.score >= 60 ? 'bg-amber-100' : 'bg-tertiary-container/30'
                 }`}>
-                  <span className={`text-3xl font-headline font-black ${scoreColour(evalResult.score)}`}>{evalResult.score}</span>
+                  <span className="material-symbols-outlined text-4xl" aria-hidden="true">
+                    {evalResult.score >= 80 ? 'celebration' : evalResult.score >= 60 ? 'thumb_up' : 'favorite'}
+                  </span>
                 </div>
                 <p className={`text-lg font-headline font-bold ${scoreColour(evalResult.score)}`}>{scoreLabel(evalResult.score)}</p>
                 <p className="text-sm text-on-surface-variant text-center leading-relaxed">{evalResult.feedback}</p>
