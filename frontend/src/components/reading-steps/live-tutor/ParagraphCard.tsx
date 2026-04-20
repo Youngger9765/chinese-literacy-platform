@@ -342,7 +342,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                       }`}
                     >
                       {hasEvalResults && <span className="text-base">{isFailed ? '❌' : '✅'}</span>}
-                      <span className="flex-1 text-on-surface/80 line-clamp-2" title={text}>
+                      <span className="flex-1 text-on-surface/80 leading-relaxed">
                         {text}
                       </span>
                       {!isRetrying && (
