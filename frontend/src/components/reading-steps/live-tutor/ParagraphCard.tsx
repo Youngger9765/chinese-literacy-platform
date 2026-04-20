@@ -316,8 +316,10 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                 const cleanLen = text.replace(CHINESE_PUNCTUATION_REGEX, '').length;
                 if (cleanLen <= 1) return false; // skip single-char sentences
                 if (hasEvalResults) {
-                  // Has per-sentence results → only show actually failed sentences
-                  return result !== null && result.matchRate < 0.6;
+                  // Has per-sentence results → only show badly failed sentences.
+                  // Use lenient threshold (0.4) because STT has higher noise on
+                  // short segments, and homophones/near-sounds are already forgiven.
+                  return result !== null && result.matchRate < 0.4;
                 }
                 // No per-sentence results → show all retryable sentences (paragraph had errors)
                 return true;
