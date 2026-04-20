@@ -86,11 +86,11 @@ const XPProgressBar: React.FC<XPProgressBarProps> = ({
 }) => (
   <div className="flex-1 min-w-0">
     <div className="flex items-center justify-between text-xs mb-1">
-      <span className="text-white/70 font-medium">{currentXp} XP</span>
+      <span className="text-white font-medium">{currentXp} XP</span>
       {nextLevelXp !== null ? (
-        <span className="text-white/70">還差 {xpToNext} XP</span>
+        <span className="text-white font-medium">還差 {xpToNext} XP</span>
       ) : (
-        <span className="text-white/80 font-bold">已達最高等級</span>
+        <span className="text-white font-bold">已達最高等級</span>
       )}
     </div>
     <div className="h-2 rounded-full bg-white/20 overflow-hidden">
@@ -128,7 +128,7 @@ const GamificationHero: React.FC<GamificationHeroProps> = ({ summary, className 
             <span className="text-white font-black text-lg leading-none tabular-nums">
               {streak.current}
             </span>
-            <span className="text-white/70 text-xs">天</span>
+            <span className="text-white text-xs">天</span>
           </div>
 
           {/* Level pill */}
@@ -150,7 +150,7 @@ const GamificationHero: React.FC<GamificationHeroProps> = ({ summary, className 
 
         {/* ── Row 2: next badge hint + link (hidden on mobile xs, shown sm+) ── */}
         <div className="hidden sm:flex items-center justify-between">
-          <p className="text-white/80 text-xs leading-snug">
+          <p className="text-white text-xs leading-snug">
             {nextBadge ? (
               <>
                 距離
@@ -164,7 +164,7 @@ const GamificationHero: React.FC<GamificationHeroProps> = ({ summary, className 
           <button
             type="button"
             onClick={() => navigate('/achievements')}
-            className="text-white/90 hover:text-white text-xs font-bold shrink-0 ml-3 transition-colors underline-offset-2 hover:underline"
+            className="text-white text-xs font-bold shrink-0 ml-3 transition-colors underline-offset-2 hover:underline"
             aria-label="前往成就頁"
           >
             看全部 →
@@ -173,13 +173,13 @@ const GamificationHero: React.FC<GamificationHeroProps> = ({ summary, className 
 
         {/* Mobile-only: compact "看全部" link */}
         <div className="flex sm:hidden items-center justify-between">
-          <p className="text-white/70 text-xs">
+          <p className="text-white text-xs">
             {li.level_name}
           </p>
           <button
             type="button"
             onClick={() => navigate('/achievements')}
-            className="text-white/90 text-xs font-bold underline-offset-2 hover:underline"
+            className="text-white text-xs font-bold underline-offset-2 hover:underline"
             aria-label="前往成就頁"
           >
             看全部 →
