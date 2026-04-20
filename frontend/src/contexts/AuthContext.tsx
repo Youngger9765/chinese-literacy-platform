@@ -50,9 +50,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [mustChangePassword, setMustChangePassword] = useState(false);
   const [loginPassword, setLoginPassword] = useState<string | null>(null);
 
-  // Load user from stored token on mount
+  // Load user from stored token on mount (page reload / direct token hydration).
+  // This effect watches [token] so it fires when the token first becomes available
+  // from localStorage on mount.  During a fresh login, login() already fetches user
+  // data and calls setUser() BEFORE calling setToken(), so by the time this effect
+  // runs `user` is already set — we skip the redundant /me call in that case.
+  // This eliminates the duplicate /api/users/me that was previously fired on every
+  // login (Issue #1156).
   useEffect(() => {
     if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
+    // User already set by login() / loginWithGoogle() — no need to re-fetch /me.
+    if (user) {
       setIsLoading(false);
       return;
     }
@@ -82,22 +94,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]); // intentionally omit `user` — re-run only when token changes
 
   const login = useCallback(async (email: string, password: string): Promise<{ mustChangePassword: boolean }> => {
     const response = await apiLogin(email, password);
     const newToken = response.access_token;
-    localStorage.setItem(TOKEN_KEY, newToken);
-    setToken(newToken);
 
     const needsPasswordChange = !!response.must_change_password;
+
+    // Fetch user data ONCE here, then set user BEFORE setting token so that the
+    // token-change useEffect above sees user !== null and skips its own /me call.
+    // Previously getMe() was called here AND triggered again by the useEffect,
+    // causing a duplicate /api/users/me on every login (Issue #1156).
+    const userData = await getMe(newToken);
+
+    localStorage.setItem(TOKEN_KEY, newToken);
+    setUser(userData);
+    setToken(newToken);
+
     if (needsPasswordChange) {
       setMustChangePassword(true);
       setLoginPassword(password);
     }
-
-    const userData = await getMe(newToken);
-    setUser(userData);
 
     return { mustChangePassword: needsPasswordChange };
   }, []);
@@ -111,10 +130,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithGoogle = useCallback(async (credential: string): Promise<{ isNewUser: boolean }> => {
     const response = await apiGoogleLogin(credential);
     const newToken = response.access_token;
-    localStorage.setItem(TOKEN_KEY, newToken);
-    setToken(newToken);
+    // Same ordering as login(): fetch user first, then set user before token so
+    // the token-change useEffect skips its redundant /me call (Issue #1156).
     const userData = await getMe(newToken);
+    localStorage.setItem(TOKEN_KEY, newToken);
     setUser(userData);
+    setToken(newToken);
     return { isNewUser: response.is_new_user };
   }, []);
 

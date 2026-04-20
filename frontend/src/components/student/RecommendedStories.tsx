@@ -118,12 +118,17 @@ const RecommendedStories: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Use user.id (primitive) rather than the full user object reference so that
+  // AuthContext re-renders (e.g. isLoading → false) that produce a new user
+  // object but the same identity do NOT retrigger the fetch (Issue #1156).
+  const userId = user?.id;
+
   const fetchRecs = useCallback(async () => {
-    if (!token || !user) return;
+    if (!token || !userId) return;
     try {
       setLoading(true);
       setError(null);
-      const data = await getStoryRecommendations(token, user.id, 5);
+      const data = await getStoryRecommendations(token, userId, 5);
       setRecs(data.recommendations);
     } catch (err) {
       setError('載入推薦課文失敗');
@@ -131,7 +136,7 @@ const RecommendedStories: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [token, user]);
+  }, [token, userId]);
 
   useEffect(() => {
     fetchRecs();
