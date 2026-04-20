@@ -46,7 +46,10 @@ const TYPE_CONFIG: Record<AnnotationType, { label: string; icon: string; classNa
   unknown: {
     label: '不懂',
     icon: '❓',
-    className: 'underline decoration-red-500 decoration-2 underline-offset-2',
+    // Bottom red line drawn via inset box-shadow so it tracks the inline-box edge
+    // (always straight), unaffected by letter-spacing, ruby baselines, or PUA
+    // variation selectors that can make text-decoration: underline look tilted.
+    className: 'shadow-[inset_0_-3px_0_0_#ef4444]',
     activeClass: 'bg-red-100 border-red-400 text-red-800',
   },
   important: {
@@ -452,9 +455,9 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           key={seg.annotation.id}
           ref={(element) => {
             if (element) {
-              annotationElementRefs.current.set(seg.annotation.id, element);
+              annotationElementRefs.current.set(seg.annotation!.id, element);
             } else {
-              annotationElementRefs.current.delete(seg.annotation.id);
+              annotationElementRefs.current.delete(seg.annotation!.id);
             }
           }}
           className={`cursor-pointer transition-all duration-300 ${cfg.className} ${focusedAnnotationId === seg.annotation.id ? 'ring-4 ring-lime-300 ring-offset-2 shadow-[0_0_0_4px_rgba(190,242,100,0.35)]' : ''}`}
@@ -481,125 +484,175 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
           : undefined,
       }}
     >
-      {/* ── Scrollable content area ───────────────────────────────────── */}
-      <div
-        ref={containerRef}
-        className="flex-1 overflow-y-auto relative pb-44"
-        onMouseUp={handleMouseUp}
-        onTouchEnd={handleTouchEnd}
-        style={{ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties}
-      >
-        {/* Legend pills + counts + undo/clear — floating centered */}
-        <div className="flex flex-wrap justify-center items-center gap-3 pt-6 pb-10 px-4">
-          <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
-            <span className="w-3 h-3 rounded-full bg-red-400" />
-            <span className="text-sm font-medium">❓ 不懂</span>
-            {summary.unknownCount > 0 && (
-              <span className="text-sm font-bold text-tertiary">{summary.unknownCount}</span>
-            )}
+      {/* ── Two-column layout: article left, panel right ──────────────── */}
+      <div className="flex-1 flex overflow-hidden">
+
+        {/* ── Scrollable article area ───────────────────────────────────── */}
+        <div
+          ref={containerRef}
+          className="flex-1 overflow-y-auto relative pb-44"
+          onMouseUp={handleMouseUp}
+          onTouchEnd={handleTouchEnd}
+          style={{ WebkitUserSelect: 'text', userSelect: 'text' } as React.CSSProperties}
+        >
+          {/* Instruction banner */}
+          <div className="mx-auto max-w-4xl px-6 md:px-16 pt-6 pb-4">
+            <div className="rounded-2xl bg-surface-container-low px-5 py-4 text-sm text-on-surface-variant space-y-1">
+              <p><span className="font-bold text-on-surface">第一次閱讀</span>：找出不懂的詞語，用 ❓ 標記</p>
+              <p><span className="font-bold text-on-surface">第二次閱讀</span>：找出重要的詞語，用 💛 標記</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
-            <span className="w-3 h-3 rounded-full bg-tertiary-container" />
-            <span className="text-sm font-medium">💛 重要</span>
-            {summary.importantCount > 0 && (
-              <span className="text-sm font-bold text-yellow-800">{summary.importantCount}</span>
-            )}
+
+          {/* Legend pills + counts + undo/clear — floating centered */}
+          <div className="flex flex-wrap justify-center items-center gap-3 pt-4 pb-10 px-4">
+            <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
+              <span className="w-3 h-3 rounded-full bg-red-400" />
+              <span className="text-sm font-medium">❓ 不懂</span>
+              {summary.unknownCount > 0 && (
+                <span className="text-sm font-bold text-tertiary">{summary.unknownCount}</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full shadow-sm">
+              <span className="w-3 h-3 rounded-full bg-tertiary-container" />
+              <span className="text-sm font-medium">💛 重要</span>
+              {summary.importantCount > 0 && (
+                <span className="text-sm font-bold text-yellow-800">{summary.importantCount}</span>
+              )}
+            </div>
+            {/* Undo / Clear — always rendered, disabled when no history/annotations */}
+            <button
+              type="button"
+              onClick={undo}
+              disabled={undoStack.length === 0}
+              aria-label="復原上一步"
+              className="px-3 py-2 rounded-full text-sm text-on-surface-variant hover:bg-surface-container-high disabled:opacity-30 transition-all"
+            >
+              ↩ 復原
+            </button>
+            <button
+              type="button"
+              onClick={clearAll}
+              disabled={annotations.length === 0}
+              aria-label="清除所有標記"
+              className="px-3 py-2 rounded-full text-sm text-tertiary hover:bg-tertiary-container/20 disabled:opacity-30 transition-all"
+            >
+              清除全部
+            </button>
           </div>
-          {/* Undo / Clear — compact */}
-          {annotations.length > 0 && (
-            <>
+
+          {/* Title */}
+          <div className="text-center mb-8 px-6">
+            <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-on-surface tracking-tight leading-tight">
+              {story.title}
+            </h1>
+          </div>
+
+          {/* Article paragraphs */}
+          <article className="max-w-4xl mx-auto px-6 md:px-16 space-y-10">
+            {story.content.map((rawPara, paraIdx) => {
+              const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
+              return (
+                <section key={paraIdx} className="relative group">
+                  {/* Paragraph number — lives outside the [data-para-idx] subtree
+                      so its text doesn't inflate selection offsets. */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute -left-8 md:-left-12 top-2 text-sm font-headline font-bold text-on-surface-variant/30 select-none pointer-events-none"
+                  >
+                    {String(paraIdx + 1).padStart(2, '0')}
+                  </span>
+                  <p
+                    data-para-idx={paraIdx}
+                    className="text-on-surface/90"
+                    style={{
+                      fontSize: `${fontSizePx}px`,
+                      lineHeight: zhuyinActive ? '3.8rem' : '2.0',
+                      letterSpacing: zhuyinActive ? '0.35em' : '0.02em',
+                    }}
+                  >
+                    {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}
+                  </p>
+                </section>
+              );
+            })}
+          </article>
+
+          {/* ── Floating selection toolbar ─────────────────────────────── */}
+          {toolbar.visible && (
+            <div
+              ref={toolbarRef}
+              role="toolbar"
+              aria-label="標記選取文字"
+              className="absolute z-50 flex items-center gap-2 bg-surface-container-lowest rounded-2xl shadow-editorial px-3 py-2.5 -translate-x-1/2 -translate-y-full"
+              style={{ left: toolbar.x, top: toolbar.y }}
+            >
+              {(Object.entries(TYPE_CONFIG) as Array<[AnnotationType, typeof TYPE_CONFIG[AnnotationType]]>).map(
+                ([type, cfg]) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      applyAnnotation(type);
+                    }}
+                    className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-[48px] active:scale-95 ${cfg.activeClass}`}
+                  >
+                    <span aria-hidden="true">{cfg.icon}</span>
+                    {cfg.label}
+                  </button>
+                )
+              )}
               <button
                 type="button"
-                onClick={undo}
-                disabled={undoStack.length === 0}
-                aria-label="復原上一步"
-                className="px-3 py-2 rounded-full text-sm text-on-surface-variant hover:bg-surface-container-high disabled:opacity-30 transition-all"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  window.getSelection()?.removeAllRanges();
+                  hideToolbar();
+                }}
+                className="ml-1 px-3 py-2.5 rounded-xl text-base text-on-surface-variant hover:bg-surface-container-high transition-all min-h-[48px]"
+                aria-label="取消"
               >
-                ↩ 復原
+                ✕
               </button>
-              <button
-                type="button"
-                onClick={clearAll}
-                aria-label="清除所有標記"
-                className="px-3 py-2 rounded-full text-sm text-tertiary hover:bg-tertiary-container/20 transition-all"
-              >
-                清除全部
-              </button>
-            </>
+            </div>
           )}
         </div>
 
-        {/* Title */}
-        <div className="text-center mb-8 px-6">
-          <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-on-surface tracking-tight leading-tight">
-            {story.title}
-          </h1>
-        </div>
-
-        {/* Article paragraphs */}
-        <article className="max-w-4xl mx-auto px-6 md:px-16 space-y-10">
-          {story.content.map((rawPara, paraIdx) => {
-            const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
-            return (
-              <section key={paraIdx} className="relative group" data-para-idx={paraIdx}>
-                {/* Paragraph number */}
-                <span className="absolute -left-8 md:-left-12 top-2 text-sm font-headline font-bold text-on-surface-variant/30 select-none">
-                  {String(paraIdx + 1).padStart(2, '0')}
-                </span>
-                <p
-                  className="text-on-surface/90"
-                  style={{
-                    fontSize: `${fontSizePx}px`,
-                    lineHeight: zhuyinActive ? '3.8rem' : '2.0',
-                    letterSpacing: zhuyinActive ? '0.35em' : '0.02em',
-                  }}
-                >
-                  {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}
-                </p>
-              </section>
-            );
-          })}
-        </article>
-
-        {/* ── Floating selection toolbar ─────────────────────────────── */}
-        {toolbar.visible && (
-          <div
-            ref={toolbarRef}
-            role="toolbar"
-            aria-label="標記選取文字"
-            className="absolute z-50 flex items-center gap-2 bg-surface-container-lowest rounded-2xl shadow-editorial px-3 py-2.5 -translate-x-1/2 -translate-y-full"
-            style={{ left: toolbar.x, top: toolbar.y }}
-          >
-            {(Object.entries(TYPE_CONFIG) as Array<[AnnotationType, typeof TYPE_CONFIG[AnnotationType]]>).map(
-              ([type, cfg]) => (
-                <button
-                  key={type}
-                  type="button"
-                  onPointerDown={(e) => {
-                    e.preventDefault();
-                    applyAnnotation(type);
-                  }}
-                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-[48px] active:scale-95 ${cfg.activeClass}`}
-                >
-                  <span aria-hidden="true">{cfg.icon}</span>
-                  {cfg.label}
-                </button>
-              )
-            )}
-            <button
-              type="button"
-              onPointerDown={(e) => {
-                e.preventDefault();
-                window.getSelection()?.removeAllRanges();
-                hideToolbar();
-              }}
-              className="ml-1 px-3 py-2.5 rounded-xl text-base text-on-surface-variant hover:bg-surface-container-high transition-all min-h-[48px]"
-              aria-label="取消"
-            >
-              ✕
-            </button>
+        {/* ── Right panel: 我的記號 ──────────────────────────────────────── */}
+        <aside
+          className="hidden md:flex flex-col w-56 shrink-0 border-l border-outline-variant bg-surface-container-low overflow-y-auto"
+          aria-label="我的記號清單"
+        >
+          {/* Panel header */}
+          <div className="px-4 pt-5 pb-3">
+            <h2 className="font-headline font-bold text-base text-on-surface">我的記號</h2>
+            <p className="text-xs text-on-surface-variant mt-0.5">
+              共 <strong>{summary.totalMarks}</strong> 個標記
+            </p>
           </div>
-        )}
+
+          <div className="flex-1 px-3 pb-4 space-y-2">
+            {annotationsForPanel.length === 0 ? (
+              <p className="text-sm text-on-surface-variant/70 px-1 py-2">還沒有標記</p>
+            ) : (
+              annotationsForPanel.map(({ annotation, text }) => {
+                const cfg = TYPE_CONFIG[annotation.type];
+                return (
+                  <button
+                    key={annotation.id}
+                    type="button"
+                    onClick={() => jumpToAnnotation(annotation.id)}
+                    aria-label={`跳轉到${cfg.label}標記：${text}`}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-all hover:brightness-95 active:scale-[0.98] ${cfg.activeClass}`}
+                  >
+                    <span aria-hidden="true" className="mr-1">{cfg.icon}</span>
+                    {text}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </aside>
       </div>
 
       {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
