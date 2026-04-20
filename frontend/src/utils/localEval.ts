@@ -57,9 +57,12 @@ const MAX_SENTENCE_CHARS = 20;
  * Split Chinese text into sentences at common punctuation marks.
  * Each segment keeps its trailing delimiter so targets stay faithful to the original.
  *
- * Punctuation recognized: ，。！？；：、─—…「」『』（）
+ * Punctuation recognized: ，。！？；：、─—…」』）
  * Primary split: sentence-ending marks (，。！？；：)
- * If any resulting segment exceeds MAX_SENTENCE_CHARS, further split at secondary marks (、─—…「」)
+ * If any resulting segment exceeds MAX_SENTENCE_CHARS, further split at secondary
+ * marks (、─—…」』）). Only closing quotes/brackets are split points.
+ * If a segment still exceeds MAX_SENTENCE_CHARS after secondary split
+ * (no secondary punctuation present), it is returned as-is.
  *
  * Example: '媽媽說，你好。' → ['媽媽說，', '你好。']
  * Example: '一二三。'       → ['一二三。']
