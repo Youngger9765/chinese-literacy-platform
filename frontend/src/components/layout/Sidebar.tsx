@@ -379,14 +379,17 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         { icon: '🏠', label: '主頁', path: '/student' },
         { icon: '📚', label: '圖書館', path: '/library' },
         { icon: '🏫', label: '班級作業', path: '/assignments', badge: pendingAssignmentCount },
-        { icon: '🧰', label: '練習工具箱', path: '/tools' },
         { icon: '📖', label: '學習紀錄', path: '/learning-history' },
         // Hidden: 成就 — merged into student home page (recent achievements strip + Lv banner) (#1163)
         // Hidden: 學習進度, 生字本, 對話記錄 — 整合到「班級作業」(#643)
         // Hidden: 我的班級 — merged into /assignments (#1146)
         // Hidden: 加入班級 — students join via invite code, not sidebar (#838)
-
       ]
+    : [];
+
+  // Targeted practice tools — shown at the BOTTOM of the student sidebar, separated by a divider (#1165)
+  const toolsItems: NavItem[] = activeView === 'student'
+    ? [{ icon: '🧰', label: '練習工具箱', path: '/tools' }]
     : [];
 
   const teacherItems: NavItem[] = activeView === 'teacher' || activeView === 'admin'
@@ -539,6 +542,21 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
               onClick={() => handleNavigate(item.path)}
             />
           ))}
+
+          {/* Divider before targeted practice tools (#1165) */}
+          {toolsItems.length > 0 && (
+            <div className="my-1 border-t border-gray-100" aria-hidden="true" />
+          )}
+
+          {toolsItems.map((item) => (
+            <NavButton
+              key={item.path}
+              item={item}
+              collapsed={collapsed}
+              active={isActive(pathname, item.path)}
+              onClick={() => handleNavigate(item.path)}
+            />
+          ))}
         </nav>
 
         {/* Bottom section — notification bell, zhuyin toggle, logout, footer */}
@@ -613,7 +631,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
       <MobileTabBar
         studentItems={studentItems}
         teacherItems={teacherItems}
-        extraItems={extraItems}
+        extraItems={[...extraItems, ...toolsItems]}
         pathname={pathname}
         onNavigate={handleNavigate}
         hasMultipleViews={hasMultipleViews}
