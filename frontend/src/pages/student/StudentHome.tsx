@@ -126,118 +126,128 @@ const StudentHome: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-5 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5">
         {/* Session resume prompt */}
         {showResumePrompt && (
           <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
         )}
 
-        {/* ── 1. Greeting strip ──────────────────────────────────────── */}
-        <div className="flex items-center gap-4">
-          <div
-            className="w-16 h-16 rounded-full bg-accent shadow-editorial flex items-center justify-center shrink-0"
-            aria-hidden="true"
-          >
-            <span className="text-white text-2xl font-bold font-headline">
-              {firstName.charAt(0)}
-            </span>
+        {/* ── Desktop 2-col: left = greeting+actions, right = gamification+progress ── */}
+        <div className="lg:grid lg:grid-cols-[2fr_3fr] lg:gap-6 space-y-5 lg:space-y-0">
+
+          {/* ── Left column: greeting + hero card + action cards ──────────── */}
+          <div className="space-y-4">
+            {/* 1. Greeting strip */}
+            <div className="flex items-center gap-4">
+              <div
+                className="w-14 h-14 rounded-full bg-accent shadow-editorial flex items-center justify-center shrink-0"
+                aria-hidden="true"
+              >
+                <span className="text-white text-2xl font-bold font-headline">
+                  {firstName.charAt(0)}
+                </span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold font-headline text-on-surface">
+                  你好，{firstName}！
+                </h1>
+                <p className="text-sm text-on-surface-variant mt-1">
+                  今天想探索什麼故事呢？
+                </p>
+              </div>
+            </div>
+
+            {/* 3. Hero card: Continue Learning / Classroom */}
+            {classroomsLoaded && classrooms.length > 0 && (
+              <button
+                type="button"
+                onClick={() => handleSelectClassroom(classrooms[0].id)}
+                className="w-full text-left bg-surface-container-lowest rounded-3xl shadow-editorial p-5 flex items-center gap-4 transition-all hover:scale-[0.99] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                aria-label="繼續學習"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center shrink-0">
+                  <span className="text-2xl" aria-hidden="true">📖</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-accent uppercase tracking-wide">繼續學習</p>
+                  <p className="text-lg font-bold text-on-surface mt-0.5 truncate">
+                    {classrooms[0].name}
+                  </p>
+                  <p className="text-sm text-on-surface-variant mt-0.5">
+                    老師：{classrooms[0].teacher_name}
+                  </p>
+                </div>
+                <span className="text-on-surface-variant shrink-0 text-xl" aria-hidden="true">→</span>
+              </button>
+            )}
+
+            {/* 4. Two action cards: Assignments + Library — always 2-col */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => navigate('/assignments')}
+                className="text-left bg-surface-container-lowest rounded-2xl shadow-editorial p-4 flex items-center gap-3 transition-all hover:scale-[0.99] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                aria-label="查看班級作業"
+              >
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                  <span className="text-xl" aria-hidden="true">📋</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-on-surface">班級作業</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">查看待完成的作業</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/library')}
+                className="text-left bg-surface-container-lowest rounded-2xl shadow-editorial p-4 flex items-center gap-3 transition-all hover:scale-[0.99] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                aria-label="前往圖書館"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                  <span className="text-xl" aria-hidden="true">📚</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-on-surface">圖書館</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">探索更多課文</p>
+                </div>
+              </button>
+            </div>
+
+            {/* 6. Quick practice strip (left column, below action cards) */}
+            <QuickPracticeStrip />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold font-headline text-on-surface">
-              你好，{firstName}！
-            </h1>
-            <p className="text-sm text-on-surface-variant mt-1">
-              今天想探索什麼故事呢？
-            </p>
+
+          {/* ── Right column: gamification + progress stats ───────────────── */}
+          <div className="space-y-4">
+            {/* 2. Gamification Hero */}
+            {gamification && (
+              <GamificationHero summary={gamification} />
+            )}
+
+            {/* 5. Recent badges strip */}
+            {gamification && (
+              <RecentBadgesStrip badges={gamification.badges} />
+            )}
+
+            {/* 8. Progress dashboard */}
+            <section aria-labelledby="progress-title">
+              <h2
+                id="progress-title"
+                className="text-sm font-bold font-headline text-on-surface mb-3"
+              >
+                學習進度
+              </h2>
+              <StudentProgressDashboard onDashboardLoaded={noop} />
+            </section>
           </div>
         </div>
 
-        {/* ── 2. Gamification Hero ───────────────────────────────────── */}
-        {gamification && (
-          <GamificationHero summary={gamification} />
-        )}
-
-        {/* ── 3. Hero card: Continue Learning / Classroom ────────────── */}
-        {classroomsLoaded && classrooms.length > 0 && (
-          <button
-            type="button"
-            onClick={() => handleSelectClassroom(classrooms[0].id)}
-            className="w-full text-left bg-surface-container-lowest rounded-3xl shadow-editorial p-6 flex items-center gap-5 transition-all hover:scale-[0.99] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-            aria-label="繼續學習"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center shrink-0">
-              <span className="text-3xl" aria-hidden="true">📖</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-accent uppercase tracking-wide">繼續學習</p>
-              <p className="text-lg font-bold text-on-surface mt-0.5 truncate">
-                {classrooms[0].name}
-              </p>
-              <p className="text-sm text-on-surface-variant mt-0.5">
-                老師：{classrooms[0].teacher_name}
-              </p>
-            </div>
-            <span className="text-on-surface-variant shrink-0 text-xl" aria-hidden="true">→</span>
-          </button>
-        )}
-
-        {/* ── 4. Two action cards: Assignments + Library ─────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button
-            type="button"
-            onClick={() => navigate('/assignments')}
-            className="text-left bg-surface-container-lowest rounded-3xl shadow-editorial p-5 flex items-center gap-4 transition-all hover:scale-[0.99] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-            aria-label="查看班級作業"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0">
-              <span className="text-2xl" aria-hidden="true">📋</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-base font-bold text-on-surface">班級作業</p>
-              <p className="text-sm text-on-surface-variant mt-0.5">查看待完成的作業</p>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigate('/library')}
-            className="text-left bg-surface-container-lowest rounded-3xl shadow-editorial p-5 flex items-center gap-4 transition-all hover:scale-[0.99] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-            aria-label="前往圖書館"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center shrink-0">
-              <span className="text-2xl" aria-hidden="true">📚</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-base font-bold text-on-surface">圖書館</p>
-              <p className="text-sm text-on-surface-variant mt-0.5">探索更多課文</p>
-            </div>
-          </button>
-        </div>
-
-        {/* ── 5. Recent badges strip ─────────────────────────────────── */}
-        {gamification && (
-          <RecentBadgesStrip badges={gamification.badges} />
-        )}
-
-        {/* ── 6. Quick practice strip: "想練點什麼？" ─────────────────── */}
-        <QuickPracticeStrip />
-
-        {/* ── 8. Progress dashboard — streak, chart, stats ───────────── */}
-        <section aria-labelledby="progress-title">
-          <h2
-            id="progress-title"
-            className="text-base font-bold font-headline text-on-surface mb-3"
-          >
-            學習進度
-          </h2>
-          <StudentProgressDashboard onDashboardLoaded={noop} />
-        </section>
-
-        {/* ── 9. Recommended stories ─────────────────────────────────── */}
+        {/* ── Recommended stories — full width below both columns ─────────── */}
         <section aria-labelledby="recommended-title">
           <h2
             id="recommended-title"
-            className="text-base font-bold font-headline text-on-surface mb-3"
+            className="text-sm font-bold font-headline text-on-surface mb-3"
           >
             推薦課文
           </h2>
