@@ -309,16 +309,21 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             const results = paragraphSummary.sentenceResults ?? [];
             const hasEvalResults = results.some(r => r !== null);
 
-            // Build failed sentence list (matchRate < 0.4 = truly bad)
+            // Build failed sentence list — per-sentence 判斷（以句號分段）
+            // matchRate < 0.5 = 該句超過半數字唸錯/漏念，需要重練
+            // null result（未個別評估）→ 用段落整體 matchRate 推斷
+            const SENTENCE_FAIL_THRESHOLD = 0.5;
             const failedSentences = targets
               .map((text, si) => ({ text, si, result: results[si] ?? null }))
               .filter(({ text, result }) => {
                 const cleanLen = text.replace(CHINESE_PUNCTUATION_REGEX, '').length;
                 if (cleanLen <= 1) return false;
-                if (hasEvalResults) {
-                  return result !== null && result.matchRate < 0.4;
+                if (result !== null) {
+                  // 有逐句結果 → 直接判斷
+                  return result.matchRate < SENTENCE_FAIL_THRESHOLD;
                 }
-                return true; // no eval results → show all
+                // 無逐句結果 → 用段落 matchRate 推斷（段落差就全部列出）
+                return paragraphSummary.matchRate < SENTENCE_FAIL_THRESHOLD;
               });
 
             const totalRetryable = targets.filter(t => t.replace(CHINESE_PUNCTUATION_REGEX, '').length > 1).length;
@@ -392,16 +397,14 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
           {/* Action buttons — hidden during sentence retry */}
           {retrySentenceIdx === undefined && (() => {
-            // Rule 1: if there are still failed sentences, must retry all before advancing
+            // Check if there are still failed sentences (same threshold as retry list)
             const results = paragraphSummary.sentenceResults ?? [];
-            const hasEvalResults = results.some(r => r !== null);
-            const remainingFailed = hasEvalResults
-              ? results.filter(r => r !== null && r.matchRate < 0.4).length
-              : 0;
+            const SENTENCE_FAIL = 0.5;
+            const remainingFailed = results.filter(r => r !== null && r.matchRate < SENTENCE_FAIL).length;
             const canAdvance = paragraphSummary.tier <= 2
               || paragraphSummary.matchRate >= 0.5
               || completedParagraphs.has(idx);
-            // Rule 1: block if still have failed sentences AND tier > 2
+            // Block if still have failed sentences AND tier > 2
             const blockedByRetry = paragraphSummary.tier > 2 && remainingFailed > 0;
 
             return (
