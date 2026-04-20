@@ -11,11 +11,11 @@ import { groupIdxForProgress } from '../../../utils/ttsHighlight';
 /* ── Encouragement messages (PR #1076 / #1096) ──────────────────────────── */
 
 const ENCOURAGE_TIERS: Array<{ min: number; color: string; msgs: string[] }> = [
-  { min: 0.95, color: 'text-emerald-600', msgs: ['完美！太流暢了！', '讀得超棒！', '太厲害了！'] },
-  { min: 0.80, color: 'text-green-600', msgs: ['讀得很好！', '棒棒！繼續加油！', '很不錯喔！'] },
-  { min: 0.65, color: 'text-amber-600', msgs: ['快到了！再仔細一點！', '加把勁！', '差一點點！'] },
-  { min: 0.50, color: 'text-orange-500', msgs: ['沒關係，再試一次！', '繼續練習！', '加油！'] },
-  { min: 0, color: 'text-rose-500', msgs: ['別氣餒，多練習就會進步！', '慢慢來，不急！', '再來一次！'] },
+  { min: 0.95, color: 'text-emerald-600', msgs: ['完美！太流暢了！', '讀得超棒！', '太厲害了！', '好厲害，一字不差！'] },
+  { min: 0.80, color: 'text-green-600', msgs: ['讀得很好！', '棒棒！繼續加油！', '很不錯喔！', '表現很棒！'] },
+  { min: 0.65, color: 'text-green-600', msgs: ['讀得不錯！', '很好喔，再練一下更好！', '進步很多了！'] },
+  { min: 0.50, color: 'text-amber-600', msgs: ['有進步喔！再試一次會更好！', '很努力！繼續加油！', '你做得到的！'] },
+  { min: 0, color: 'text-amber-600', msgs: ['沒關係，我們再試一次！', '慢慢來，不著急！', '多練幾次就會了！'] },
 ];
 
 function getEncouragement(matchRate: number): { text: string; color: string } {
@@ -303,50 +303,61 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             )}
           </div>
 
-          {/* Sentence-level retry (#1076) — only show when tier 3 (failed) */}
-          {isCurrentIdx && paragraphSummary.tier > 2 && (paragraphSummary.wrongCount > 0 || paragraphSummary.missingCount > 0) && (() => {
+          {/* Sentence-level retry — only when failed (tier > 2) */}
+          {isCurrentIdx && paragraphSummary.tier > 2 && (() => {
             const targets = paragraphSummary.sentenceTargets ?? splitIntoSentences(line || '');
             const results = paragraphSummary.sentenceResults ?? [];
             const hasEvalResults = results.some(r => r !== null);
 
-            // Build retryable sentence list
-            const retryableSentences = targets
+            // Build failed sentence list (matchRate < 0.4 = truly bad)
+            const failedSentences = targets
               .map((text, si) => ({ text, si, result: results[si] ?? null }))
               .filter(({ text, result }) => {
                 const cleanLen = text.replace(CHINESE_PUNCTUATION_REGEX, '').length;
-                if (cleanLen <= 1) return false; // skip single-char sentences
+                if (cleanLen <= 1) return false;
                 if (hasEvalResults) {
-                  // Has per-sentence results → only show badly failed sentences.
-                  // Use lenient threshold (0.4) because STT has higher noise on
-                  // short segments, and homophones/near-sounds are already forgiven.
                   return result !== null && result.matchRate < 0.4;
                 }
-                // No per-sentence results → show all retryable sentences (paragraph had errors)
-                return true;
+                return true; // no eval results → show all
               });
 
-            if (retryableSentences.length === 0) return null;
+            const totalRetryable = targets.filter(t => t.replace(CHINESE_PUNCTUATION_REGEX, '').length > 1).length;
+
+            // Rule 2: if > half the sentences failed → suggest redo entire paragraph
+            if (failedSentences.length > totalRetryable / 2) {
+              return (
+                <div className="pt-3 border-t border-on-surface/10">
+                  <p className="text-sm text-on-surface-variant text-center">
+                    這段有比較多地方需要加強，我們重新唸一次吧！
+                  </p>
+                  <div className="flex justify-center pt-3">
+                    <button
+                      onClick={() => onRetryParagraph(idx)}
+                      className="btn-encourage !text-sm !py-2.5 !px-6 !min-h-0"
+                    >
+                      重練這段
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            if (failedSentences.length === 0) return null;
+
+            // Rule 1: show individual failed sentences for retry
             return (
               <div className="pt-3 border-t border-on-surface/10 space-y-2">
-                <p className="text-xs font-bold text-on-surface-variant mb-1">
-                  {hasEvalResults ? '需要加強的句子' : '重念某一句'}
-                </p>
-                {retryableSentences.map(({ text, si, result }) => {
+                <p className="text-xs font-bold text-on-surface-variant mb-1">加強練習這幾句</p>
+                {failedSentences.map(({ text, si }) => {
                   const isRetrying = retrySentenceIdx === si;
-                  const isFailed = hasEvalResults && result !== null && result.matchRate < 0.6;
                   return (
                     <div
                       key={si}
                       className={`flex items-center gap-2 p-2.5 rounded-xl text-sm transition-all ${
-                        isRetrying
-                          ? 'bg-amber-50 border border-amber-200'
-                          : 'bg-surface-container-lowest'
+                        isRetrying ? 'bg-amber-50 border border-amber-200' : 'bg-surface-container-lowest'
                       }`}
                     >
-                      {hasEvalResults && <span className="text-base">{isFailed ? '❌' : '✅'}</span>}
-                      <span className="flex-1 text-on-surface/80 leading-relaxed">
-                        {text}
-                      </span>
+                      <span className="flex-1 text-on-surface/80 leading-relaxed">{text}</span>
                       {!isRetrying && (
                         <button
                           onClick={() => onRetrySentence(idx, si)}
@@ -380,38 +391,48 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           })()}
 
           {/* Action buttons — hidden during sentence retry */}
-          {retrySentenceIdx === undefined && (
-          <div className="flex gap-3 justify-center pt-2">
-            <button
-              onClick={() => onRetryParagraph(idx)}
-              className="btn-encourage !text-sm !py-2.5 !px-6 !min-h-0"
-            >
-              重練這段
-            </button>
-            {/* 下一段：matchRate < 0.5 時隱藏（真正唸很差才擋），
-                tier <= 2 或重練後 matchRate >= 0.5 都可下一段。
-                例外：已完成過的段落允許自由導航 */}
-            {idx < storyLength - 1 && (paragraphSummary.tier <= 2 || paragraphSummary.matchRate >= 0.5 || completedParagraphs.has(idx)) && (
+          {retrySentenceIdx === undefined && (() => {
+            // Rule 1: if there are still failed sentences, must retry all before advancing
+            const results = paragraphSummary.sentenceResults ?? [];
+            const hasEvalResults = results.some(r => r !== null);
+            const remainingFailed = hasEvalResults
+              ? results.filter(r => r !== null && r.matchRate < 0.4).length
+              : 0;
+            const canAdvance = paragraphSummary.tier <= 2
+              || paragraphSummary.matchRate >= 0.5
+              || completedParagraphs.has(idx);
+            // Rule 1: block if still have failed sentences AND tier > 2
+            const blockedByRetry = paragraphSummary.tier > 2 && remainingFailed > 0;
+
+            return (
+            <div className="flex gap-3 justify-center pt-2">
               <button
-                onClick={() => {
-                  if (!completedParagraphs.has(idx)) {
-                    onAdvanceParagraph(idx, lineResults);
-                  } else {
-                    onSelectParagraph(idx + 1);
-                  }
-                }}
-                className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+                onClick={() => onRetryParagraph(idx)}
+                className="btn-encourage !text-sm !py-2.5 !px-6 !min-h-0"
               >
-                下一段
-                <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                重練這段
               </button>
-            )}
-            {/* 完成朗讀：同樣邏輯，matchRate >= 0.5 或 tier <= 2 才顯示 */}
-            {idx >= storyLength - 1 && !completedParagraphs.has(idx) && (paragraphSummary.tier <= 2 || paragraphSummary.matchRate >= 0.5) && (
-              <button
-                onClick={() => onAdvanceParagraph(idx, lineResults)}
-                className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
+              {/* Rule 3: 重讀後大多數對了（matchRate >= 0.5）就放行 */}
+              {idx < storyLength - 1 && canAdvance && !blockedByRetry && (
+                <button
+                  onClick={() => {
+                    if (!completedParagraphs.has(idx)) {
+                      onAdvanceParagraph(idx, lineResults);
+                    } else {
+                      onSelectParagraph(idx + 1);
+                    }
+                  }}
+                  className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+                >
+                  下一段
+                  <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                </button>
+              )}
+              {idx >= storyLength - 1 && !completedParagraphs.has(idx) && canAdvance && !blockedByRetry && (
+                <button
+                  onClick={() => onAdvanceParagraph(idx, lineResults)}
+                  className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
                 style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
               >
                 完成朗讀
@@ -419,7 +440,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               </button>
             )}
           </div>
-          )}
+            );
+          })()}
         </div>
       )}
     </div>
