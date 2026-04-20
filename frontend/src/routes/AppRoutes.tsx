@@ -62,6 +62,7 @@ const AchievementsPage = lazy(() => import('../pages/student/AchievementsPage'))
 const StudentProfile = lazy(() => import('../pages/student/StudentProfile'));
 const SessionHistoryReportPage = lazy(() => import('../pages/student/SessionHistoryReportPage'));
 const LearningHistoryPage = lazy(() => import('../pages/student/LearningHistoryPage'));
+const PracticeToolbox = lazy(() => import('../pages/student/PracticeToolbox'));
 
 // Parent dashboard — role-specific, split separately
 const ParentDashboard = lazy(() => import('../pages/parent/ParentDashboard'));
@@ -330,6 +331,16 @@ const AppRoutes: React.FC = () => (
           <ProtectedRoute>
             <AppShell>
               <AchievementsPage />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tools"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <PracticeToolbox />
             </AppShell>
           </ProtectedRoute>
         }

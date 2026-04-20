@@ -379,6 +379,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         { icon: '🏠', label: '主頁', path: '/student' },
         { icon: '📚', label: '圖書館', path: '/library' },
         { icon: '🏫', label: '班級作業', path: '/assignments', badge: pendingAssignmentCount },
+        { icon: '🧰', label: '練習工具箱', path: '/tools' },
         { icon: '📖', label: '學習紀錄', path: '/learning-history' },
         { icon: '⭐', label: '成就', path: '/achievements' },
         // Hidden: 學習進度, 生字本, 對話記錄 — 整合到「班級作業」(#643)
