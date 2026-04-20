@@ -597,30 +597,58 @@ const LearningLayout: React.FC = () => {
 
   // Ensure a DB session exists for step_progress persistence even when the flow
   // starts from assignment entry points that skip the legacy intro action.
-  // Guard with isCreatingSession ref to prevent concurrent POSTs (Issue #984).
+  // Guard with isCreatingSession ref to prevent concurrent requests (Issue #984).
+  //
+  // Cross-device fix (#1074): when sessionStorage is empty (new device/browser),
+  // first try GET to find an existing in_progress session before creating a new
+  // one.  The backend POST already has get-or-create semantics, but an explicit
+  // GET avoids creating sessions when one already exists with a different source
+  // (assignment vs self-practice).
   useEffect(() => {
     if (!token || !storyId || dbSessionId !== null || isLoading) return;
     if (isCreatingSession.current) return;
 
     isCreatingSession.current = true;
-    fetch(`${API_BASE}/api/learning/sessions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ story_slug: storyId }),
+
+    const storeSessionId = (id: number) => {
+      setDbSessionId(id);
+      if (activeDbSessionStorageKey) {
+        try { sessionStorage.setItem(activeDbSessionStorageKey, String(id)); } catch { /* non-fatal */ }
+      }
+      if (legacyDbSessionStorageKey) {
+        try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
+      }
+    };
+
+    // Step 1: Try to find an existing in_progress session for this story (#1074)
+    fetch(`${API_BASE}/api/learning/sessions?story_slug=${encodeURIComponent(storyId)}&status=in_progress&limit=1`, {
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
+        const existing = data?.items?.[0];
+        if (existing?.id) {
+          // Recovered existing session from server — no need to create
+          storeSessionId(existing.id);
+          return null; // signal: skip POST
+        }
+        // Step 2: No existing session found — create via POST (get-or-create)
+        return fetch(`${API_BASE}/api/learning/sessions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ story_slug: storyId }),
+        });
+      })
+      .then((res) => {
+        if (!res) return null; // skipped POST (existing session found)
+        return res.ok ? res.json() : null;
+      })
+      .then((data) => {
         if (data?.id) {
-          setDbSessionId(data.id);
-          if (activeDbSessionStorageKey) {
-            try { sessionStorage.setItem(activeDbSessionStorageKey, String(data.id)); } catch { /* non-fatal */ }
-          }
-          if (legacyDbSessionStorageKey) {
-            try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
-          }
+          storeSessionId(data.id);
         }
       })
       .catch(() => {
