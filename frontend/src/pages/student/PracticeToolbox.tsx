@@ -1,227 +1,112 @@
 /**
- * PracticeToolbox — student self-directed practice landing page.
+ * PracticeToolbox — /tools 練習工具箱
  *
- * Route: /tools
- * Issue #1153
+ * 2-column layout: left = lesson picker (radio), right = tool picker (radio).
+ * Bottom sticky action bar shows selection + 開始練習 button.
  *
- * Shows 6-8 practice tools grouped by category. Tools that require a
- * story (LiveTutor, ComprehensionChat) route to the library first so
- * students can pick a text before starting.
+ * Flow: 開始練習 → /learn/:storyId/:toolPath
+ * The step page's onFinish / onCancel should navigate back to /tools.
  *
- * "不用等作業，自己選想練的"
+ * Issue #1165 (replaces #1153 card-grid design)
  */
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-interface Tool {
-  icon: string;
-  title: string;
-  description: string;
-  /** Route to navigate to. '#needs-story' = go to library first. */
-  route: string;
-  /** If true, button label changes to "選課文開始". */
-  needsStory?: boolean;
-}
-
-interface ToolGroup {
-  icon: string;
-  label: string;
-  tools: Tool[];
-}
-
-// ---------------------------------------------------------------------------
-// Tool catalogue (curated, no smart recommendation)
-// ---------------------------------------------------------------------------
-
-const TOOL_GROUPS: ToolGroup[] = [
-  {
-    icon: '🗣️',
-    label: '朗讀',
-    tools: [
-      {
-        icon: '🎙️',
-        title: '逐段朗讀',
-        description: 'AI 即時指導，一段一段練好再往下',
-        route: '/library',
-        needsStory: true,
-      },
-      {
-        icon: '📢',
-        title: '全文朗讀',
-        description: '完整朗讀一篇課文，聽自己的聲音',
-        route: '/library',
-        needsStory: true,
-      },
-    ],
-  },
-  {
-    icon: '✍️',
-    label: '寫字',
-    tools: [
-      {
-        icon: '🖊️',
-        title: '筆順字帖',
-        description: '跟著動畫練正確筆順，不怕寫錯',
-        route: '/write',
-      },
-      {
-        icon: '🔤',
-        title: '生字練習',
-        description: '學習本課生字，注音+筆順一起來',
-        route: '/library',
-        needsStory: true,
-      },
-    ],
-  },
-  {
-    icon: '👂',
-    label: '聽寫',
-    tools: [
-      {
-        icon: '🎧',
-        title: '聽寫挑戰',
-        description: 'AI 唸字，你來打字，邊聽邊學',
-        route: '/library',
-        needsStory: true,
-      },
-    ],
-  },
-  {
-    icon: '📝',
-    label: '字詞',
-    tools: [
-      {
-        icon: '✏️',
-        title: '造句練習',
-        description: 'AI 出題，練習用學過的詞造好句子',
-        route: '/library',
-        needsStory: true,
-      },
-      {
-        icon: '🔍',
-        title: '詞語定義配對',
-        description: '把詞語和它的意思配對，加深記憶',
-        route: '/library',
-        needsStory: true,
-      },
-      {
-        icon: '📖',
-        title: '字典查詢',
-        description: '查字義、注音、例句，隨時查隨時懂',
-        route: '/vocabulary',
-      },
-    ],
-  },
-  {
-    icon: '🧠',
-    label: '理解',
-    tools: [
-      {
-        icon: '💬',
-        title: '課文理解對話',
-        description: '蘇格拉底式 AI 對話，深入理解課文',
-        route: '/library',
-        needsStory: true,
-      },
-    ],
-  },
-];
-
-// ---------------------------------------------------------------------------
-// ToolCard — single practice tool card
-// ---------------------------------------------------------------------------
-
-interface ToolCardProps {
-  tool: Tool;
-}
-
-const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
-  const navigate = useNavigate();
-
-  return (
-    <div className="bg-surface-container-lowest rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3 hover:shadow-md transition-all duration-200">
-      <div className="flex items-start gap-3">
-        <div
-          className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0"
-          aria-hidden="true"
-        >
-          <span className="text-xl">{tool.icon}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-on-surface leading-tight">{tool.title}</p>
-          <p className="text-xs text-on-surface-variant mt-0.5 leading-snug">{tool.description}</p>
-        </div>
-      </div>
-      <button
-        type="button"
-        onClick={() => navigate(tool.route)}
-        className="w-full py-2 rounded-xl bg-accent text-white text-xs font-bold hover:bg-accent/90 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-      >
-        {tool.needsStory ? '選課文開始' : '開始練習'}
-      </button>
-    </div>
-  );
-};
-
-// ---------------------------------------------------------------------------
-// ToolGroup section
-// ---------------------------------------------------------------------------
-
-interface ToolGroupSectionProps {
-  group: ToolGroup;
-}
-
-const ToolGroupSection: React.FC<ToolGroupSectionProps> = ({ group }) => (
-  <section aria-labelledby={`group-${group.label}`}>
-    <h2
-      id={`group-${group.label}`}
-      className="flex items-center gap-2 text-sm font-bold text-on-surface-variant uppercase tracking-wide mb-3"
-    >
-      <span aria-hidden="true">{group.icon}</span>
-      {group.label}
-    </h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {group.tools.map((tool) => (
-        <ToolCard key={tool.title} tool={tool} />
-      ))}
-    </div>
-  </section>
-);
-
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
+import { Story } from '../../types';
+import LessonPicker from '../../components/tools/LessonPicker';
+import ToolPicker, { ToolOption } from '../../components/tools/ToolPicker';
 
 const PracticeToolbox: React.FC = () => {
+  const navigate = useNavigate();
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [selectedTool, setSelectedTool] = useState<ToolOption | null>(null);
+
+  const canStart = selectedStory != null && selectedTool != null;
+
+  const handleStart = () => {
+    if (!canStart) return;
+    navigate(`/learn/${selectedStory.id}/${selectedTool.stepPath}`, {
+      state: { returnTo: '/tools' },
+    });
+  };
+
   return (
-    <div className="flex-1 overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-5 py-8 space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold font-headline text-on-surface">
-            練習工具箱
-          </h1>
-          <p className="text-sm text-on-surface-variant mt-1">
-            不用等作業，自己選想練的
-          </p>
+    <div className="flex flex-col h-full bg-bg">
+      {/* Page header */}
+      <div className="px-6 py-5 border-b border-gray-100 bg-white shrink-0">
+        <h1 className="text-2xl font-bold text-gray-900">練習工具箱</h1>
+        <p className="text-sm text-gray-500 mt-1">選一篇課文，搭配一種練習方式，專注深練</p>
+      </div>
+
+      {/* 2-column body */}
+      <div className="flex-1 overflow-hidden flex min-h-0">
+        {/* Left column — lesson picker */}
+        <div className="flex-1 min-w-0 overflow-hidden border-r border-gray-100 bg-white">
+          <div className="h-full p-5 overflow-y-auto">
+            <LessonPicker
+              selectedId={selectedStory?.id ?? null}
+              onChange={setSelectedStory}
+            />
+          </div>
         </div>
 
-        {/* Tool groups */}
-        {TOOL_GROUPS.map((group) => (
-          <ToolGroupSection key={group.label} group={group} />
-        ))}
+        {/* Right column — tool picker */}
+        <div className="w-72 shrink-0 bg-white overflow-hidden">
+          <div className="h-full p-5 overflow-y-auto">
+            <ToolPicker
+              selectedId={selectedTool?.id ?? null}
+              onChange={setSelectedTool}
+            />
+          </div>
+        </div>
+      </div>
 
-        {/* Footer note for story-required tools */}
-        <div className="rounded-2xl bg-amber-50 border border-amber-100 p-4">
-          <p className="text-xs text-amber-700 leading-snug">
-            <span className="font-bold">「選課文開始」</span> 的工具需要先選一篇課文才能練習。
-            點選後會帶你到圖書館選課文，選完就直接進入練習。
-          </p>
+      {/* Sticky action bar */}
+      <div className="shrink-0 border-t border-gray-200 bg-white px-6 py-4">
+        <div className="flex items-center justify-between gap-4 max-w-4xl mx-auto">
+          {/* Selection summary */}
+          <div className="flex-1 min-w-0">
+            {!selectedStory && !selectedTool && (
+              <p className="text-sm text-gray-400">請先選擇課文和練習工具</p>
+            )}
+            {selectedStory && !selectedTool && (
+              <p className="text-sm text-gray-600">
+                已選課文：
+                <span className="font-semibold text-gray-900">{selectedStory.title}</span>
+                <span className="text-gray-400"> · 請選擇工具</span>
+              </p>
+            )}
+            {!selectedStory && selectedTool && (
+              <p className="text-sm text-gray-600">
+                已選工具：
+                <span className="font-semibold text-gray-900">{selectedTool.label}</span>
+                <span className="text-gray-400"> · 請選擇課文</span>
+              </p>
+            )}
+            {selectedStory && selectedTool && (
+              <p className="text-sm text-gray-600">
+                <span className="font-semibold text-gray-900">{selectedStory.title}</span>
+                <span className="text-gray-400 mx-2">×</span>
+                <span className="font-semibold text-accent">{selectedTool.label}</span>
+              </p>
+            )}
+          </div>
+
+          {/* Start button */}
+          <button
+            type="button"
+            onClick={handleStart}
+            disabled={!canStart}
+            className={`
+              px-6 py-2.5 rounded-xl text-sm font-semibold transition-all shrink-0
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2
+              ${canStart
+                ? 'bg-accent text-white hover:bg-primary-light shadow-sm active:scale-95'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }
+            `}
+          >
+            開始練習
+          </button>
         </div>
       </div>
     </div>
