@@ -381,7 +381,29 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
     const targetText = story.content[lineIdx] || '';
     const cleaned = cleanChineseText(rawTranscript);
-    if (!cleaned) return;
+
+    // 整段漏讀：no speech detected → show summary with retry prompt instead of silently returning
+    if (!cleaned) {
+      stopSession();
+      const targetLen = normalizeForComparison(targetText).length || 1;
+      const emptyDiffTokens: DiffToken[] = Array.from(normalizeForComparison(targetText)).map(ch => ({
+        char: ch, type: 'missing' as const,
+      }));
+      setParagraphSummaries(prev => ({
+        ...prev,
+        [lineIdx]: {
+          feedback: '好像沒有偵測到聲音，請再試一次吧！',
+          matchRate: 0,
+          wrongCount: 0,
+          missingCount: targetLen,
+          tier: 3 as const,
+          geminiPending: false,
+        },
+      }));
+      setLastDiffTokens(emptyDiffTokens);
+      setStreamingUserInput('');
+      return;
+    }
 
     // ── Phase 1: local eval (instant, <1ms) ─────────────────────────────────
     const sentResults = sentenceResultsRef.current.filter(Boolean) as LocalEvalResult[];
