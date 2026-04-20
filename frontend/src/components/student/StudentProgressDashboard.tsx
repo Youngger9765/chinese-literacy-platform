@@ -8,7 +8,7 @@
  * Issue #25
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -111,16 +111,28 @@ const StudentProgressDashboard: React.FC<StudentProgressDashboardProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Keep a stable ref so the callback never causes the effect to re-run.
+  // The effect only needs to fire when user/token become available, not when the
+  // callback reference changes (Issue #1156 — dashboard was fetched 3x on login).
+  const onDashboardLoadedRef = useRef(onDashboardLoaded);
+  useEffect(() => { onDashboardLoadedRef.current = onDashboardLoaded; });
+
+  // Use user.id (primitive) rather than the full user object so that a new
+  // object reference (e.g. after isLoading toggles) does NOT re-trigger the
+  // fetch.  The dashboard only needs to reload when the logged-in user changes
+  // or the token is rotated (Issue #1156 — was fetching 3x on login).
+  const userId = user?.id;
+
   useEffect(() => {
-    if (!user || !token) return;
-    fetchStudentDashboard(token, user.id)
+    if (!userId || !token) return;
+    fetchStudentDashboard(token, userId)
       .then((d) => {
         setData(d);
-        onDashboardLoaded?.(d.completed_story_slugs);
+        onDashboardLoadedRef.current?.(d.completed_story_slugs);
       })
       .catch((err) => setError(err.message))
       .finally(() => setIsLoading(false));
-  }, [user, token, onDashboardLoaded]);
+  }, [userId, token]); // onDashboardLoaded intentionally excluded — use ref above
 
   if (isLoading) {
     return (

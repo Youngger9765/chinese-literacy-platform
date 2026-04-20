@@ -18,7 +18,7 @@
  * Route: /student
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import StudentProgressDashboard from '../../components/student/StudentProgressDashboard';
@@ -110,9 +110,14 @@ const StudentHome: React.FC = () => {
       });
   }, [token, user, navigate]);
 
-  const handleSelectClassroom = (classroomId: number) => {
+  const handleSelectClassroom = useCallback((classroomId: number) => {
     navigate(`/library?classroom=${classroomId}`);
-  };
+  }, [navigate]);
+
+  // Stable no-op passed to StudentProgressDashboard to avoid recreating an
+  // arrow function on every render (inline `() => {}` would cause needless
+  // re-renders even though the child guards with useRef, Issue #1156).
+  const noop = useCallback(() => {}, []);
 
   // Issue #457: block full dashboard for students not yet in any classroom
   if (classroomsLoaded && classrooms.length === 0) {
@@ -225,7 +230,7 @@ const StudentHome: React.FC = () => {
           >
             學習進度
           </h2>
-          <StudentProgressDashboard onDashboardLoaded={() => {}} />
+          <StudentProgressDashboard onDashboardLoaded={noop} />
         </section>
 
         {/* ── 9. Recommended stories ─────────────────────────────────── */}
