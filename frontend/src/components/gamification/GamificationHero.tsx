@@ -115,7 +115,6 @@ const GamificationHero: React.FC<GamificationHeroProps> = ({ summary, className 
   return (
     <div
       className={`rounded-3xl bg-gradient-to-br from-accent to-accent/80 shadow-editorial overflow-hidden ${className}`}
-      style={{ background: 'linear-gradient(135deg, var(--color-accent, #5b7fff) 0%, #7c5cbf 100%)' }}
     >
       <div className="px-5 py-4 space-y-3">
         {/* ── Row 1: streak + level pill + XP bar ── */}
