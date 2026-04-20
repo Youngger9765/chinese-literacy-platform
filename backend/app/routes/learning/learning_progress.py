@@ -47,16 +47,44 @@ def _compute_step_completion(session: LearningSession) -> dict[str, str]:
     """Derive per-step status from a LearningSession record.
 
     Returns a dict mapping step key -> 'completed' | 'in_progress' | 'not_started'.
+
+    Priority: use step_progress.steps_completed[] (string array) as the source
+    of truth when available, since the frontend writes this field directly.
+    Falls back to current_step (integer) for older sessions without step_progress.
+    (#1073)
     """
-    completed_step = session.current_step if session.status == "completed" else session.current_step - 1
+    # Try to read steps_completed from step_progress JSONB first
+    sp = session.step_progress
+    sp_completed: list[str] | None = None
+    if isinstance(sp, dict):
+        raw = sp.get("steps_completed")
+        if isinstance(raw, list):
+            sp_completed = [s for s in raw if isinstance(s, str)]
+
     statuses: dict[str, str] = {}
-    for step_num, key in STEP_NAMES.items():
-        if step_num <= completed_step:
-            statuses[key] = "completed"
-        elif step_num == session.current_step and session.status == "in_progress":
-            statuses[key] = "in_progress"
-        else:
-            statuses[key] = "not_started"
+
+    if sp_completed is not None:
+        # Source of truth: step_progress.steps_completed[] (#1073)
+        completed_set = set(sp_completed)
+        sp_current = sp.get("current_step") if isinstance(sp, dict) else None
+        for _step_num, key in STEP_NAMES.items():
+            if key in completed_set:
+                statuses[key] = "completed"
+            elif key == sp_current and session.status == "in_progress":
+                statuses[key] = "in_progress"
+            else:
+                statuses[key] = "not_started"
+    else:
+        # Fallback: derive from integer current_step (legacy sessions)
+        completed_step = session.current_step if session.status == "completed" else session.current_step - 1
+        for step_num, key in STEP_NAMES.items():
+            if step_num <= completed_step:
+                statuses[key] = "completed"
+            elif step_num == session.current_step and session.status == "in_progress":
+                statuses[key] = "in_progress"
+            else:
+                statuses[key] = "not_started"
+
     return statuses
 
 
