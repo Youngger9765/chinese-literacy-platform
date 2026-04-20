@@ -303,26 +303,35 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             )}
           </div>
 
-          {/* Per-sentence results with ✅/❌ (#1076) */}
-          {isCurrentIdx && paragraphSummary.sentenceTargets && paragraphSummary.sentenceTargets.length >= 2 && (() => {
-            const targets = paragraphSummary.sentenceTargets!;
+          {/* Sentence-level retry (#1076) — hybrid: use sentenceResults when available, fallback to paragraph errors */}
+          {isCurrentIdx && (paragraphSummary.wrongCount > 0 || paragraphSummary.missingCount > 0) && (() => {
+            const targets = paragraphSummary.sentenceTargets ?? splitIntoSentences(line || '');
             const results = paragraphSummary.sentenceResults ?? [];
-            const failedSentences = targets
+            const hasEvalResults = results.some(r => r !== null);
+
+            // Build retryable sentence list
+            const retryableSentences = targets
               .map((text, si) => ({ text, si, result: results[si] ?? null }))
               .filter(({ text, result }) => {
                 const cleanLen = text.replace(CHINESE_PUNCTUATION_REGEX, '').length;
                 if (cleanLen <= 1) return false; // skip single-char sentences
-                // null = not individually evaluated → treat as passed (not failed)
-                if (!result) return false;
-                return result.matchRate < 0.6;
+                if (hasEvalResults) {
+                  // Has per-sentence results → only show actually failed sentences
+                  return result !== null && result.matchRate < 0.6;
+                }
+                // No per-sentence results → show all retryable sentences (paragraph had errors)
+                return true;
               });
 
-            if (failedSentences.length === 0) return null;
+            if (retryableSentences.length === 0) return null;
             return (
               <div className="pt-3 border-t border-on-surface/10 space-y-2">
-                <p className="text-xs font-bold text-on-surface-variant mb-1">需要加強的句子</p>
-                {failedSentences.map(({ text, si }) => {
+                <p className="text-xs font-bold text-on-surface-variant mb-1">
+                  {hasEvalResults ? '需要加強的句子' : '重念某一句'}
+                </p>
+                {retryableSentences.map(({ text, si, result }) => {
                   const isRetrying = retrySentenceIdx === si;
+                  const isFailed = hasEvalResults && result !== null && result.matchRate < 0.6;
                   return (
                     <div
                       key={si}
@@ -332,8 +341,10 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                           : 'bg-surface-container-lowest'
                       }`}
                     >
-                      <span className="text-base">❌</span>
-                      <span className="flex-1 text-on-surface/80 line-clamp-2" title={text}>{text}</span>
+                      {hasEvalResults && <span className="text-base">{isFailed ? '❌' : '✅'}</span>}
+                      <span className="flex-1 text-on-surface/80 line-clamp-2" title={text}>
+                        {hasEvalResults ? text : `第 ${si + 1} 句`}
+                      </span>
                       {!isRetrying && (
                         <button
                           onClick={() => onRetrySentence(idx, si)}
