@@ -50,18 +50,39 @@ export function getReadingPassThreshold(targetLength: number): number {
 
 // ── Sentence segmentation ─────────────────────────────────────────────────────
 
+/** Maximum characters per sentence segment before force-splitting. */
+const MAX_SENTENCE_CHARS = 20;
+
 /**
- * Split Chinese text into sentences at ，。！？；
+ * Split Chinese text into sentences at common punctuation marks.
  * Each segment keeps its trailing delimiter so targets stay faithful to the original.
+ *
+ * Punctuation recognized: ，。！？；：、─—…」』）
+ * Primary split: sentence-ending marks (，。！？；：)
+ * If any resulting segment exceeds MAX_SENTENCE_CHARS, further split at secondary
+ * marks (、─—…」』）). Only closing quotes/brackets are split points.
+ * If a segment still exceeds MAX_SENTENCE_CHARS after secondary split
+ * (no secondary punctuation present), it is returned as-is.
  *
  * Example: '媽媽說，你好。' → ['媽媽說，', '你好。']
  * Example: '一二三。'       → ['一二三。']
- * Returns the full text as a single element when there are no delimiters.
+ * Returns the full text as a single element when there are no delimiters and text ≤ MAX_SENTENCE_CHARS.
  */
 export function splitIntoSentences(text: string): string[] {
-  // Split after each sentence-final punctuation character
-  const segments = text.split(/(?<=[，。！？；])/u);
-  return segments.filter(s => s.length > 0);
+  // Primary split: sentence-level punctuation
+  const primarySegments = text.split(/(?<=[，。！？；：])/u).filter(s => s.length > 0);
+
+  const result: string[] = [];
+  for (const seg of primarySegments) {
+    if (Array.from(seg).length <= MAX_SENTENCE_CHARS) {
+      result.push(seg);
+    } else {
+      // Secondary split on enumeration / parenthetical marks
+      const subSegments = seg.split(/(?<=[、─—…」』）])/u).filter(s => s.length > 0);
+      result.push(...subSegments);
+    }
+  }
+  return result;
 }
 
 // ── Core local evaluation ─────────────────────────────────────────────────────
