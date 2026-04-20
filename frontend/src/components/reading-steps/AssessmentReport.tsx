@@ -20,7 +20,7 @@ import GoalAchievementCard from '../ui/GoalAchievementCard';
 import RepeatedErrorAlertModal from '../student/RepeatedErrorAlertModal';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
-import { encourageOverall, encourageAccuracy, encourageReadingSpeed, encourageQuiz } from '../../utils/encouragement';
+import { encourageOverall, encourageAccuracy, encourageReadingDone, encourageQuiz } from '../../utils/encouragement';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -448,7 +448,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
               <div className="bg-accent/5 rounded-2xl p-6 text-center space-y-2">
                 <p className="text-lg font-bold text-accent">{encourageAccuracy(accuracy)}</p>
                 {readingAttempt && (
-                  <p className="text-sm text-gray-600">{encourageReadingSpeed()}</p>
+                  <p className="text-sm text-gray-600">{encourageReadingDone()}</p>
                 )}
               </div>
             ) : (

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 interface VoiceInputButtonProps {
@@ -29,13 +29,8 @@ const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
   className = '',
   size = 'md',
 }) => {
-  const onTranscriptRef = useRef(onTranscript);
-  useEffect(() => {
-    onTranscriptRef.current = onTranscript;
-  }, [onTranscript]);
-
   const { status, errorMessage, isSupported, startListening, stopListening } =
-    useSpeechRecognition(lang, (text) => onTranscriptRef.current(text));
+    useSpeechRecognition(lang, onTranscript);
 
   const isListening = status === 'listening';
   const unsupported = !isSupported || status === 'unsupported';
@@ -50,7 +45,6 @@ const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
     : errorMessage || '點擊開始語音輸入';
 
   const handleClick = () => {
-    if (unsupported || disabled) return;
     if (isListening) stopListening();
     else startListening();
   };

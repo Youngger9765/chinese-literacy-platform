@@ -42,7 +42,7 @@ export function encourageAccuracy(percent: number): string {
   return '慢慢來，多練幾次就會更順';
 }
 
-export function encourageReadingSpeed(): string {
+export function encourageReadingDone(): string {
   return '唸完囉！';
 }
 

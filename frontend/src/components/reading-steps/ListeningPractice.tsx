@@ -14,6 +14,7 @@ import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { useAuth } from '../../contexts/AuthContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { speakTextWithProgress, cancelTts, TtsProgressInfo } from '../../services/ttsApi';
+import { encourageAccuracy } from '../../utils/encouragement';
 
 export interface ListeningResult {
   score: number;
@@ -49,14 +50,6 @@ function scoreColour(score: number): string {
   if (score >= 80) return 'text-emerald-700';
   if (score >= 60) return 'text-amber-700';
   return 'text-tertiary';
-}
-
-function scoreLabel(score: number): string {
-  if (score >= 90) return '非常優秀！';
-  if (score >= 75) return '表現良好';
-  if (score >= 60) return '尚可，繼續加油';
-  if (score >= 45) return '需要多練習';
-  return '請再聽一次試試看';
 }
 
 const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, onBack }) => {
@@ -342,7 +335,7 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
                     {evalResult.score >= 80 ? 'celebration' : evalResult.score >= 60 ? 'thumb_up' : 'favorite'}
                   </span>
                 </div>
-                <p className={`text-lg font-headline font-bold ${scoreColour(evalResult.score)}`}>{scoreLabel(evalResult.score)}</p>
+                <p className={`text-lg font-headline font-bold ${scoreColour(evalResult.score)}`}>{encourageAccuracy(evalResult.score)}</p>
                 <p className="text-sm text-on-surface-variant text-center leading-relaxed">{evalResult.feedback}</p>
               </div>
 

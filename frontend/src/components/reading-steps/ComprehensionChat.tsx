@@ -295,7 +295,11 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-headline font-bold text-on-surface-variant">閱讀理解度</span>
                   <span className="text-xs font-headline font-bold text-accent">
-                    {completedCount === totalTabs ? '全部完成！' : '繼續加油'}
+                    {completedCount === totalTabs
+                      ? '全部完成！'
+                      : totalTabs > 0 && completedCount / totalTabs >= 0.5
+                        ? '過半了，快到了！'
+                        : '繼續加油'}
                   </span>
                 </div>
                 <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">

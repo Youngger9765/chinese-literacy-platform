@@ -9,7 +9,7 @@
  * Header removed (2026-04-18): all header functionality (logo, story title,
  * notification bell, zhuyin toggle, logout) is now integrated into Sidebar.
  */
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -115,6 +115,23 @@ const ImmersiveTopBar: React.FC = () => {
     navigate(`/learn/${selectedStory.id}/${step.id}`);
   };
 
+  // Issue #1094: prev/next step arrows skip the locked report step
+  const prevStep = useMemo(() => {
+    for (let i = currentStepIndex - 1; i >= 0; i--) {
+      const s = ACTIVE_STEPS[i];
+      if (!(s.id === 'report' && !allNonReportDone)) return s;
+    }
+    return null;
+  }, [currentStepIndex, allNonReportDone]);
+
+  const nextStep = useMemo(() => {
+    for (let i = currentStepIndex + 1; i < ACTIVE_STEPS.length; i++) {
+      const s = ACTIVE_STEPS[i];
+      if (!(s.id === 'report' && !allNonReportDone)) return s;
+    }
+    return null;
+  }, [currentStepIndex, allNonReportDone]);
+
   return (
     <header
       aria-label="學習進度列"
@@ -159,75 +176,55 @@ const ImmersiveTopBar: React.FC = () => {
         )}
 
         {/* Progress dots + left/right arrows (Issue #1094) — tooltip shows step name; arrows fixed-size, dots wrap */}
-        {(() => {
-          const prevStep = (() => {
-            for (let i = currentStepIndex - 1; i >= 0; i--) {
-              const s = ACTIVE_STEPS[i];
-              const locked = s.id === 'report' && !allNonReportDone;
-              if (!locked) return s;
-            }
-            return null;
-          })();
-          const nextStep = (() => {
-            for (let i = currentStepIndex + 1; i < ACTIVE_STEPS.length; i++) {
-              const s = ACTIVE_STEPS[i];
-              const locked = s.id === 'report' && !allNonReportDone;
-              if (!locked) return s;
-            }
-            return null;
-          })();
-          return (
-            <div className="flex items-center gap-1 max-w-full min-w-0 h-4 md:h-5" role="navigation" aria-label="學習步驟導航">
-              <button
-                type="button"
-                onClick={() => prevStep && handleStepClick(prevStep)}
-                disabled={!prevStep || !selectedStory}
-                className="shrink-0 w-4 h-4 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                aria-label={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
-                title={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
-              >
-                <span className="material-symbols-outlined text-sm leading-none" style={{ fontSize: '14px' }}>chevron_left</span>
-              </button>
+        <div className="flex items-center gap-1 max-w-full min-w-0 h-4 md:h-5" role="navigation" aria-label="學習步驟導航">
+          <button
+            type="button"
+            onClick={() => prevStep && handleStepClick(prevStep)}
+            disabled={!prevStep || !selectedStory}
+            className="shrink-0 w-4 h-4 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
+            title={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
+          >
+            <span className="material-symbols-outlined text-sm leading-none" style={{ fontSize: '14px' }}>chevron_left</span>
+          </button>
 
-              <div className="flex items-center gap-1 md:gap-1.5 flex-wrap justify-center min-w-0">
-                {ACTIVE_STEPS.map((step, i) => {
-                  const isCompleted = completedSet.has(step.id);
-                  const isActive = i === currentStepIndex;
-                  const isReport = step.id === 'report';
-                  const isLocked = isReport && !allNonReportDone;
+          <div className="flex items-center gap-1 md:gap-1.5 flex-wrap justify-center min-w-0">
+            {ACTIVE_STEPS.map((step, i) => {
+              const isCompleted = completedSet.has(step.id);
+              const isActive = i === currentStepIndex;
+              const isReport = step.id === 'report';
+              const isLocked = isReport && !allNonReportDone;
 
-                  let dotClass = 'bg-on-surface-variant/20';
-                  if (isCompleted) dotClass = 'bg-emerald-500';
-                  if (isActive) dotClass = 'bg-accent scale-125';
+              let dotClass = 'bg-on-surface-variant/20';
+              if (isCompleted) dotClass = 'bg-emerald-500';
+              if (isActive) dotClass = 'bg-accent scale-125';
 
-                  return (
-                    <button
-                      key={step.id}
-                      type="button"
-                      onClick={() => handleStepClick(step)}
-                      disabled={isLocked}
-                      className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
-                      title={`${i + 1}. ${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
-                      aria-label={`${i + 1}. ${step.label}`}
-                      aria-current={isActive ? 'step' : undefined}
-                    />
-                  );
-                })}
-              </div>
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => handleStepClick(step)}
+                  disabled={isLocked}
+                  className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+                  title={`${i + 1}. ${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
+                  aria-label={`${i + 1}. ${step.label}`}
+                  aria-current={isActive ? 'step' : undefined}
+                />
+              );
+            })}
+          </div>
 
-              <button
-                type="button"
-                onClick={() => nextStep && handleStepClick(nextStep)}
-                disabled={!nextStep || !selectedStory}
-                className="shrink-0 w-4 h-4 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                aria-label={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
-                title={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
-              >
-                <span className="material-symbols-outlined text-sm leading-none" style={{ fontSize: '14px' }}>chevron_right</span>
-              </button>
-            </div>
-          );
-        })()}
+          <button
+            type="button"
+            onClick={() => nextStep && handleStepClick(nextStep)}
+            disabled={!nextStep || !selectedStory}
+            className="shrink-0 w-4 h-4 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
+            title={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
+          >
+            <span className="material-symbols-outlined text-sm leading-none" style={{ fontSize: '14px' }}>chevron_right</span>
+          </button>
+        </div>
       </div>
 
       {/* Right: zhuyin toggle + settings */}
