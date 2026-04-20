@@ -3,8 +3,9 @@ import { normalizeForComparison } from './textDiff';
 import { isHomophone } from './pinyin';
 
 /** Punctuation characters used to determine retryable sentence length.
+ *  Keep in sync with splitIntoSentences() in localEval.ts.
  *  ⚠️ Has /g flag → stateful lastIndex. Safe with .replace() but do NOT use .test() or .exec() directly. */
-export const CHINESE_PUNCTUATION_REGEX = /[，。！？；]/g;
+export const CHINESE_PUNCTUATION_REGEX = /[，。！？；：、─—…「」『』（）]/g;
 
 /**
  * Look-ahead cursor: for each spoken char, try matching the current target

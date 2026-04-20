@@ -211,8 +211,24 @@ export function useTtsPlayback(
     }
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
+      // Remove event listeners to prevent stale callbacks after stop
+      ua.ontimeupdate = null;
+      ua.onplay = null;
+      ua.onended = null;
+      ua.onerror = null;
       ua.pause();
       ua.currentTime = 0;
+      // Revoke blob URL to prevent memory leak
+      if (ua.src && ua.src.startsWith('blob:')) {
+        URL.revokeObjectURL(ua.src);
+      }
+    } else if (ua) {
+      // Web Speech API path: remove handlers before cancel
+      const utt = ua as SpeechSynthesisUtterance;
+      utt.onstart = null;
+      utt.onend = null;
+      utt.onerror = null;
+      utt.onboundary = null;
     }
     // Stop Web Speech API (fallback path)
     window.speechSynthesis?.cancel();

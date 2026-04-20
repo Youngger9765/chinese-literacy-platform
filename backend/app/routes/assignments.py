@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
@@ -828,22 +829,49 @@ def start_assignment(
     raw_slug = assignment.story_id or str(assignment.text_id)
     story_slug = normalize_story_slug(raw_slug)
 
-    # Create a new LearningSession
-    learning_session = LearningSession(
-        student_id=current_user.id,
-        story_slug=story_slug,
-        classroom_id=assignment.classroom_id,
-        status="in_progress",
-        current_step=1,
-        step_progress={
-            "__meta": {
-                "source": "assignment",
-                "assignment_id": assignment.id,
-            }
-        },
+    # Reuse existing in_progress session for same student + story to avoid
+    # duplicates when switching devices (#1074).  Attach assignment metadata
+    # so the session is associated with this assignment.
+    learning_session = (
+        db.query(LearningSession)
+        .filter(
+            LearningSession.student_id == current_user.id,
+            LearningSession.story_slug == story_slug,
+            LearningSession.status == "in_progress",
+        )
+        .order_by(LearningSession.started_at.desc())
+        .first()
     )
-    db.add(learning_session)
-    db.flush()  # get learning_session.id
+    if learning_session:
+        # Ensure assignment metadata and classroom_id are present on the reused session
+        progress = learning_session.step_progress or {}
+        if not isinstance(progress.get("__meta"), dict) or progress["__meta"].get("assignment_id") != assignment.id:
+            progress["__meta"] = {"source": "assignment", "assignment_id": assignment.id}
+            learning_session.step_progress = progress
+            flag_modified(learning_session, "step_progress")
+        # Sync classroom_id if the reused session was from self-practice (#1074 review)
+        if learning_session.classroom_id is None and assignment.classroom_id is not None:
+            learning_session.classroom_id = assignment.classroom_id
+        logger.info(
+            "Reusing existing session %d for assignment %d (student %d, story=%s) #1074",
+            learning_session.id, assignment.id, current_user.id, story_slug,
+        )
+    else:
+        learning_session = LearningSession(
+            student_id=current_user.id,
+            story_slug=story_slug,
+            classroom_id=assignment.classroom_id,
+            status="in_progress",
+            current_step=1,
+            step_progress={
+                "__meta": {
+                    "source": "assignment",
+                    "assignment_id": assignment.id,
+                }
+            },
+        )
+        db.add(learning_session)
+        db.flush()  # get learning_session.id
 
     # Update submission
     submission.status = "in_progress"

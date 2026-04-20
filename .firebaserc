@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "lingoleap-dev"
+  },
+  "targets": {
+    "lingoleap-dev": {
+      "hosting": {
+        "prod": ["lingoleap-prod"],
+        "staging": ["lingoleap-staging"],
+        "dev": ["lingoleap-dev"]
+      }
+    }
   }
 }
