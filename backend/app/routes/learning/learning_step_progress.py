@@ -15,7 +15,7 @@ from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
 from ...schemas.session import StepProgressResponse, StepProgressSaveRequest
-from .learning_progress import STEP_NAMES
+from .learning_progress import STEP_NAMES, _MAX_STEP_NUM, _normalize_step_key
 
 # Reverse mapping: step key (string) → step number (int)
 _STEP_KEY_TO_NUM = {v: k for k, v in STEP_NAMES.items()}
@@ -72,14 +72,14 @@ def save_step_progress(
         session.step_progress["__meta"] = existing_meta
 
     # Sync integer current_step from steps_completed to prevent desync (#1073).
-    # Derive the highest completed step number, then set current_step = next step.
+    # Normalize frontend step IDs → backend keys before lookup.
     if payload.steps_completed:
         max_completed_num = max(
-            (_STEP_KEY_TO_NUM.get(s, 0) for s in payload.steps_completed),
+            (_STEP_KEY_TO_NUM.get(_normalize_step_key(s), 0) for s in payload.steps_completed),
             default=0,
         )
         if max_completed_num > 0:
-            new_current = min(max_completed_num + 1, max(STEP_NAMES.keys()))
+            new_current = min(max_completed_num + 1, _MAX_STEP_NUM)
             if new_current != session.current_step:
                 session.current_step = new_current
 

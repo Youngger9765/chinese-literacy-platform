@@ -31,6 +31,8 @@ STEP_NAMES = {
     6: "report",
 }
 
+_MAX_STEP_NUM = max(STEP_NAMES.keys())
+
 STEP_LABELS = {
     1: "簡介",
     2: "逐段朗讀",
@@ -39,6 +41,19 @@ STEP_LABELS = {
     5: "全文朗讀",
     6: "學習報告",
 }
+
+# Frontend step IDs may differ from backend STEP_NAMES values.
+# This mapping normalizes frontend keys → backend keys (#1073).
+_FRONTEND_STEP_ALIAS: dict[str, str] = {
+    "tutor": "live_tutor",
+    "full-reading": "full_reading",
+    "reading-annotation": "intro",
+}
+
+
+def _normalize_step_key(key: str) -> str:
+    """Map a frontend step ID to the canonical backend STEP_NAMES key."""
+    return _FRONTEND_STEP_ALIAS.get(key, key)
 
 
 # ── Helper functions ──────────────────────────────────────────────────────────
@@ -65,13 +80,19 @@ def _compute_step_completion(session: LearningSession) -> dict[str, str]:
 
     if sp_completed is not None:
         # Source of truth: step_progress.steps_completed[] (#1073)
-        completed_set = set(sp_completed)
+        # Normalize frontend step IDs to backend keys for comparison
+        completed_set = {_normalize_step_key(s) for s in sp_completed}
         sp_current = sp.get("current_step") if isinstance(sp, dict) else None
+        normalized_current = _normalize_step_key(sp_current) if sp_current else None
         for _step_num, key in STEP_NAMES.items():
             if key in completed_set:
                 statuses[key] = "completed"
-            elif key == sp_current and session.status == "in_progress":
+            elif key == normalized_current and session.status == "in_progress":
                 statuses[key] = "in_progress"
+            elif session.status == "completed":
+                # Completed session: treat all steps as completed even if
+                # steps_completed[] is incomplete (#1073 review)
+                statuses[key] = "completed"
             else:
                 statuses[key] = "not_started"
     else:
