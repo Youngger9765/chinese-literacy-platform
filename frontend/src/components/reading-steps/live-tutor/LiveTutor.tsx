@@ -386,7 +386,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     if (!cleaned) {
       stopSession();
       const normalizedTarget = normalizeForComparison(targetText);
-      const targetLen = normalizedTarget.length || 1;
+      const targetLen = normalizedTarget.length;
       const emptyDiffTokens: DiffToken[] = Array.from(normalizedTarget).map(ch => ({
         char: ch, type: 'missing' as const,
       }));
