@@ -303,8 +303,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             )}
           </div>
 
-          {/* Sentence-level retry — only when failed (tier > 2) */}
-          {isCurrentIdx && paragraphSummary.tier > 2 && (() => {
+          {/* Sentence-level retry — show whenever there are failed sentences */}
+          {isCurrentIdx && (() => {
             const targets = paragraphSummary.sentenceTargets ?? splitIntoSentences(line || '');
             const results = paragraphSummary.sentenceResults ?? [];
             const hasEvalResults = results.some(r => r !== null);
@@ -401,11 +401,10 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             const results = paragraphSummary.sentenceResults ?? [];
             const SENTENCE_FAIL = 0.5;
             const remainingFailed = results.filter(r => r !== null && r.matchRate < SENTENCE_FAIL).length;
-            const canAdvance = paragraphSummary.tier <= 2
-              || paragraphSummary.matchRate >= 0.5
+            const canAdvance = (paragraphSummary.matchRate >= 0.5 && remainingFailed === 0)
               || completedParagraphs.has(idx);
-            // Block if still have failed sentences AND tier > 2
-            const blockedByRetry = paragraphSummary.tier > 2 && remainingFailed > 0;
+            // Block if still have any failed sentences
+            const blockedByRetry = remainingFailed > 0;
 
             return (
             <div className="flex gap-3 justify-center pt-2">
