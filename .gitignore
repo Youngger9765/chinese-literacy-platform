@@ -39,3 +39,6 @@ tests/load-testing/.venv/
 .DS_Store
 .gstack/
 .worktrees/
+
+# Firebase deploy cache
+.firebase/
