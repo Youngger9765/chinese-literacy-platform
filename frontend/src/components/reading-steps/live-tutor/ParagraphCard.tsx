@@ -211,6 +211,9 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
           <span className="blur-sm select-none">{zhuyinLine ?? line}</span>
         ) : isTtsSpeaking && isCurrentIdx ? (
           // Highlight chars up to speakingProgress during TTS playback.
+          // groupIdxForProgress walks char groups so zhuyin PUA selectors
+          // (#1112) and symbols stripped by _cleanForTts (#1110) don't push
+          // the split past the real char boundary.
           (() => {
             const displayText = (zhuyinActive && typeof zhuyinLine === 'string') ? zhuyinLine : line;
             const chars = splitZhuyinChars(displayText);
@@ -285,16 +288,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         </div>
       )}
 
-      {/* ── Sentence retry in progress banner (#1076) ──────────────── */}
-      {isCurrentIdx && retrySentenceIdx !== undefined && (
-        <div className="mt-6 p-4 rounded-2xl bg-accent/10 border border-accent/30 text-sm text-accent flex items-center gap-3">
-          <span className="material-symbols-outlined text-base">volume_up</span>
-          重念第 {retrySentenceIdx + 1} 句中…念完按「完成」送出
-        </div>
-      )}
-
       {/* ── Inline summary card (after evaluation) ─────────────────── */}
-      {paragraphSummary && retrySentenceIdx === undefined && (
+      {paragraphSummary && (
         <div className="mt-8 p-6 rounded-2xl bg-surface-container-low space-y-4">
           {/* Encouragement message instead of raw numbers (#1076) */}
           <div className="flex items-center gap-3">
@@ -336,7 +331,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                       }`}
                     >
                       <span className="text-base">❌</span>
-                      <span className="flex-1 text-on-surface/80 truncate">{text}</span>
+                      <span className="flex-1 text-on-surface/80 line-clamp-2" title={text}>{text}</span>
                       {!isRetrying && (
                         <button
                           onClick={() => onRetrySentence(idx, si)}
@@ -369,7 +364,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             );
           })()}
 
-          {/* Action buttons */}
+          {/* Action buttons — hidden during sentence retry */}
+          {retrySentenceIdx === undefined && (
           <div className="flex gap-3 justify-center pt-2">
             <button
               onClick={() => onRetryParagraph(idx)}
@@ -407,6 +403,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               </button>
             )}
           </div>
+          )}
         </div>
       )}
     </div>
