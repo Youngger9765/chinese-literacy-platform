@@ -7,10 +7,6 @@ import {
   StudentAssignmentResponse,
   AssignmentApiError,
 } from '../../services/assignmentApi';
-import {
-  fetchMyEnrolledClassrooms,
-  type StudentEnrolledClassroom,
-} from '../../services/learningApi';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
 import StepProgressStrip from '../../components/ui/StepProgressStrip';
 
@@ -66,13 +62,11 @@ const MyAssignments: React.FC = () => {
   const { token, user } = useAuth();
 
   const [assignments, setAssignments] = useState<StudentAssignmentResponse[]>([]);
-  const [classrooms, setClassrooms] = useState<StudentEnrolledClassroom[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterTab>('pending');
   const [sortKey, setSortKey] = useState<SortKey>('newest');
   const [startingId, setStartingId] = useState<number | null>(null);
-  const [classroomFilter, setClassroomFilter] = useState<string>('all');
 
   const assignmentSteps = useMemo(
     () => ACTIVE_STEPS,
@@ -80,15 +74,6 @@ const MyAssignments: React.FC = () => {
   );
   const defaultStepPath = assignmentSteps[0]?.id ?? 'reading-annotation';
   const stepIdSet = useMemo(() => new Set(assignmentSteps.map((s) => s.id)), [assignmentSteps]);
-
-  // Build classroom name -> teacher name lookup
-  const classroomTeacherMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const c of classrooms) {
-      map.set(c.name, c.teacher_name);
-    }
-    return map;
-  }, [classrooms]);
 
   const getCompletedSteps = (a: StudentAssignmentResponse): Set<string> => {
     if (a.status === 'submitted' || a.status === 'graded') {
@@ -107,17 +92,13 @@ const MyAssignments: React.FC = () => {
     return defaultStepPath;
   };
 
-  const loadData = useCallback(async () => {
+  const loadAssignments = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
     setError('');
     try {
-      const [assignmentData, classroomData] = await Promise.all([
-        getMyAssignments(token),
-        fetchMyEnrolledClassrooms(token).catch(() => ({ classrooms: [], total: 0 })),
-      ]);
+      const assignmentData = await getMyAssignments(token);
       setAssignments(assignmentData);
-      setClassrooms(classroomData.classrooms);
     } catch (err) {
       if (err instanceof AssignmentApiError) {
         setError(err.message);
@@ -130,12 +111,11 @@ const MyAssignments: React.FC = () => {
   }, [token]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadAssignments();
+  }, [loadAssignments]);
 
   const filteredAssignments = useMemo(() => {
     const filtered = assignments.filter((a) => {
-      if (classroomFilter !== 'all' && a.classroom_name !== classroomFilter) return false;
       if (activeFilter === 'pending') {
         return a.status === 'pending' || a.status === 'in_progress';
       }
@@ -146,7 +126,7 @@ const MyAssignments: React.FC = () => {
     });
     const sortOption = SORT_OPTIONS.find((o) => o.key === sortKey);
     return sortOption ? [...filtered].sort(sortOption.compareFn) : filtered;
-  }, [assignments, activeFilter, sortKey, classroomFilter]);
+  }, [assignments, activeFilter, sortKey]);
 
   const handleStart = async (assignmentId: number) => {
     if (!token) return;
@@ -378,32 +358,17 @@ const MyAssignments: React.FC = () => {
     );
   };
 
-  // Summary bar: unique classroom names from enrolled classrooms
-  const classroomNames = useMemo(() => classrooms.map((c) => c.name), [classrooms]);
-  const showClassroomFilter = classrooms.length >= 3;
-
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6">
       <div className="max-w-4xl mx-auto space-y-4">
         {/* Page title */}
         <div>
-          <h1 className="text-base font-bold text-gray-900">班級作業</h1>
+          <h1 className="text-base font-bold text-gray-900">我的作業</h1>
           <p className="text-xs text-gray-500 mt-0.5">完成老師指派的學習任務</p>
         </div>
 
-        {/* Classroom summary bar */}
-        {!isLoading && classrooms.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-xl text-xs text-indigo-700">
-            <span aria-hidden="true">🏫</span>
-            <span>
-              你在 <strong>{classrooms.length}</strong> 個班級：
-              {classroomNames.join('・')}
-            </span>
-          </div>
-        )}
-
-        {/* Filter tabs + sort + classroom filter */}
-        <div className="flex items-center justify-between gap-2 border-b border-gray-200 flex-wrap">
+        {/* Filter tabs + sort */}
+        <div className="flex items-center justify-between gap-2 border-b border-gray-200">
           <nav className="flex -mb-px" aria-label="Filter tabs">
             {FILTER_TABS.map((tab) => (
               <button
@@ -419,35 +384,18 @@ const MyAssignments: React.FC = () => {
               </button>
             ))}
           </nav>
-          <div className="flex items-center gap-2 mb-px">
-            {showClassroomFilter && (
-              <select
-                value={classroomFilter}
-                onChange={(e) => setClassroomFilter(e.target.value)}
-                className="text-xs text-gray-600 border border-gray-200 rounded-md px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
-                aria-label="班級篩選"
-              >
-                <option value="all">全部班級</option>
-                {classroomNames.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            )}
-            <select
-              value={sortKey}
-              onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className="text-xs text-gray-600 border border-gray-200 rounded-md px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
-              aria-label="排序方式"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.key} value={opt.key}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            className="mb-px text-xs text-gray-600 border border-gray-200 rounded-md px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
+            aria-label="排序方式"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.key} value={opt.key}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Error */}
@@ -499,7 +447,6 @@ const MyAssignments: React.FC = () => {
             {filteredAssignments.map((a) => {
               const completedSteps = getCompletedSteps(a);
               const currentStepPath = a.status === 'in_progress' ? getResumeStepPath(a) : null;
-              const teacherName = classroomTeacherMap.get(a.classroom_name);
               return (
                 <div
                   key={a.assignment_id}
@@ -520,17 +467,11 @@ const MyAssignments: React.FC = () => {
                         </p>
                       )}
 
-                      {/* Classroom + teacher badge */}
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <span className="text-xs text-indigo-600 font-medium">
-                          📍 {a.classroom_name}
-                          {teacherName && (
-                            <span className="text-indigo-400 font-normal">｜{teacherName}指派</span>
-                          )}
+                      <div className="flex items-center gap-3 mt-2 flex-wrap">
+                        <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-accent-bg text-accent">
+                          {a.classroom_name}
                         </span>
-                      </div>
 
-                      <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                         {a.due_date && (
                           <span
                             className={`text-xs ${
