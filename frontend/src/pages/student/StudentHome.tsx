@@ -1,17 +1,19 @@
 /**
  * StudentHome — student landing page / dashboard.
  *
- * Combines:
- * - Welcome message with user's name
- * - Classroom context card (班級 + 老師) if enrolled — Issue #462
- * - Quick action cards (start reading, continue assignment, practice vocabulary)
- * - StudentProgressDashboard (streak, chart, stats)
- * - RecommendedStories
- * - SessionResumePrompt (resume incomplete session)
+ * Issue #1153: merged gamification signals into the home page.
+ *
+ * Layout (top to bottom):
+ * 1. Greeting strip — name + avatar
+ * 2. GamificationHero — streak + level + XP bar + next badge hint
+ * 3. Hero classroom card — "繼續學習" → library
+ * 4. Two action cards: Assignments + Library
+ * 5. RecentBadgesStrip — last 3 unlocked badges
+ * 6. StudentProgressDashboard — learning stats chart
+ * 7. RecommendedStories
  *
  * Issue #457: Students not yet added to any classroom see a friendly waiting
- * screen instead of the full dashboard. All dashboard content is blocked until
- * a teacher enrolls the student.
+ * screen instead of the full dashboard.
  *
  * Route: /student
  */
@@ -22,14 +24,17 @@ import { useAuth } from '../../contexts/AuthContext';
 import StudentProgressDashboard from '../../components/student/StudentProgressDashboard';
 import RecommendedStories from '../../components/student/RecommendedStories';
 import SessionResumePrompt from '../../components/SessionResumePrompt';
+import GamificationHero from '../../components/gamification/GamificationHero';
+import RecentBadgesStrip from '../../components/gamification/RecentBadgesStrip';
+import QuickPracticeStrip from '../../components/student/QuickPracticeStrip';
 import {
   fetchMyEnrolledClassrooms,
   type StudentEnrolledClassroom,
 } from '../../services/learningApi';
-
-// ---------------------------------------------------------------------------
-// (Quick action cards removed — simplified to hero card + 2 actions, Issue #1081)
-// ---------------------------------------------------------------------------
+import {
+  fetchGamificationSummary,
+  type GamificationSummary,
+} from '../../services/gamificationApi';
 
 // ---------------------------------------------------------------------------
 // NoClassroomWaitingScreen — shown to students not yet added to any classroom
@@ -43,23 +48,16 @@ interface NoClassroomWaitingScreenProps {
 const NoClassroomWaitingScreen: React.FC<NoClassroomWaitingScreenProps> = ({ firstName }) => (
   <div className="flex-1 flex items-center justify-center min-h-[60vh]">
     <div className="max-w-md w-full mx-auto p-6 text-center space-y-6">
-      {/* Avatar */}
       <div
         className="w-20 h-20 rounded-full bg-amber-100 flex items-center justify-center mx-auto"
         aria-hidden="true"
       >
         <span className="text-4xl">🏫</span>
       </div>
-
-      {/* Greeting */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">你好，{firstName}！</h1>
-        <p className="text-base text-gray-600 mt-2">
-          你的老師還沒有把你加入班級
-        </p>
+        <p className="text-base text-gray-600 mt-2">你的老師還沒有把你加入班級</p>
       </div>
-
-      {/* Instruction card */}
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-left space-y-3">
         <p className="text-sm font-semibold text-amber-900">下一步怎麼做？</p>
         <ol className="space-y-2 text-sm text-amber-800 list-decimal list-inside">
@@ -68,16 +66,13 @@ const NoClassroomWaitingScreen: React.FC<NoClassroomWaitingScreenProps> = ({ fir
           <li>加入後重新登入，即可開始學習</li>
         </ol>
       </div>
-
-      <p className="text-xs text-gray-400">
-        加入班級後重新整理頁面即可繼續
-      </p>
+      <p className="text-xs text-gray-400">加入班級後重新整理頁面即可繼續</p>
     </div>
   </div>
 );
 
 // ---------------------------------------------------------------------------
-// Component
+// Main component
 // ---------------------------------------------------------------------------
 
 const StudentHome: React.FC = () => {
@@ -86,45 +81,53 @@ const StudentHome: React.FC = () => {
   const [showResumePrompt, setShowResumePrompt] = useState(true);
   const [classrooms, setClassrooms] = useState<StudentEnrolledClassroom[]>([]);
   const [classroomsLoaded, setClassroomsLoaded] = useState(false);
+  const [gamification, setGamification] = useState<GamificationSummary | null>(null);
 
-  // Get first name for greeting
   const firstName = user?.name ?? '同學';
 
-  // Fetch enrolled classrooms on mount
+  // Fetch classrooms and gamification summary in parallel
   useEffect(() => {
-    if (!token) return;
+    if (!token || !user) return;
+
+    // Classrooms
     fetchMyEnrolledClassrooms(token)
       .then((res) => {
         setClassrooms(res.classrooms);
-        // Auto-navigate if exactly one classroom
         if (res.classrooms.length === 1 && res.classrooms[0].is_active) {
           navigate(`/library?classroom=${res.classrooms[0].id}`, { replace: true });
         }
       })
       .catch(() => {
-        // Non-fatal: student may not be enrolled yet
+        // Non-fatal
       })
       .finally(() => setClassroomsLoaded(true));
-  }, [token, navigate]);
+
+    // Gamification — non-blocking, hero appears once loaded
+    fetchGamificationSummary(user.id, token)
+      .then(setGamification)
+      .catch(() => {
+        // Non-fatal: hero simply doesn't render on error
+      });
+  }, [token, user, navigate]);
 
   const handleSelectClassroom = (classroomId: number) => {
     navigate(`/library?classroom=${classroomId}`);
   };
 
-  // Issue #457: block the full dashboard for students not yet added to any classroom.
+  // Issue #457: block full dashboard for students not yet in any classroom
   if (classroomsLoaded && classrooms.length === 0) {
     return <NoClassroomWaitingScreen firstName={firstName} />;
   }
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="max-w-2xl mx-auto px-5 py-8 space-y-8">
+      <div className="max-w-2xl mx-auto px-5 py-8 space-y-6">
         {/* Session resume prompt */}
         {showResumePrompt && (
           <SessionResumePrompt onDismiss={() => setShowResumePrompt(false)} />
         )}
 
-        {/* ── Welcome + avatar ─────────────────────────────────────────── */}
+        {/* ── 1. Greeting strip ──────────────────────────────────────── */}
         <div className="flex items-center gap-4">
           <div
             className="w-16 h-16 rounded-full bg-accent shadow-editorial flex items-center justify-center shrink-0"
@@ -144,7 +147,12 @@ const StudentHome: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Hero card: Continue Learning / Classroom ────────────────── */}
+        {/* ── 2. Gamification Hero ───────────────────────────────────── */}
+        {gamification && (
+          <GamificationHero summary={gamification} />
+        )}
+
+        {/* ── 3. Hero card: Continue Learning / Classroom ────────────── */}
         {classroomsLoaded && classrooms.length > 0 && (
           <button
             type="button"
@@ -168,7 +176,7 @@ const StudentHome: React.FC = () => {
           </button>
         )}
 
-        {/* ── Two action cards: Assignments + Library ──────────────────── */}
+        {/* ── 4. Two action cards: Assignments + Library ─────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
             type="button"
@@ -201,7 +209,15 @@ const StudentHome: React.FC = () => {
           </button>
         </div>
 
-        {/* ── Progress dashboard — streak, chart, stats ───────────────── */}
+        {/* ── 5. Recent badges strip ─────────────────────────────────── */}
+        {gamification && (
+          <RecentBadgesStrip badges={gamification.badges} />
+        )}
+
+        {/* ── 6. Quick practice strip: "想練點什麼？" ─────────────────── */}
+        <QuickPracticeStrip />
+
+        {/* ── 8. Progress dashboard — streak, chart, stats ───────────── */}
         <section aria-labelledby="progress-title">
           <h2
             id="progress-title"
@@ -212,7 +228,7 @@ const StudentHome: React.FC = () => {
           <StudentProgressDashboard onDashboardLoaded={() => {}} />
         </section>
 
-        {/* ── Recommended stories ─────────────────────────────────────── */}
+        {/* ── 9. Recommended stories ─────────────────────────────────── */}
         <section aria-labelledby="recommended-title">
           <h2
             id="recommended-title"
