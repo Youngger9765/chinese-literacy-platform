@@ -157,7 +157,7 @@ const ReportPage: React.FC = () => {
               onClick={() => navigate('/assignments')}
               className="px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50"
             >
-              返回我的作業
+              返回班級作業
             </button>
           </div>
         </div>

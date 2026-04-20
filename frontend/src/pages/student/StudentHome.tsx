@@ -174,13 +174,13 @@ const StudentHome: React.FC = () => {
             type="button"
             onClick={() => navigate('/assignments')}
             className="text-left bg-surface-container-lowest rounded-3xl shadow-editorial p-5 flex items-center gap-4 transition-all hover:scale-[0.99] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-            aria-label="查看我的作業"
+            aria-label="查看班級作業"
           >
             <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0">
               <span className="text-2xl" aria-hidden="true">📋</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-base font-bold text-on-surface">我的作業</p>
+              <p className="text-base font-bold text-on-surface">班級作業</p>
               <p className="text-sm text-on-surface-variant mt-0.5">查看待完成的作業</p>
             </div>
           </button>
