@@ -18,6 +18,7 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      firebase: ${{ steps.filter.outputs.firebase }}
     steps:
       - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v4
@@ -27,6 +28,10 @@ jobs:
             backend:
               - 'backend/**'
             frontend:
+              - 'frontend/**'
+            firebase:
+              - 'firebase.json'
+              - '.firebaserc'
               - 'frontend/**'
 
   deploy-backend:
@@ -152,11 +157,10 @@ jobs:
 
   deploy-frontend-firebase:
     name: Deploy frontend to Firebase Hosting (prod)
-    needs: [detect-changes, deploy-frontend]
+    needs: [detect-changes]
     if: |
-      always() && !cancelled() &&
-      (needs.detect-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch') &&
-      needs.deploy-frontend.result == 'success'
+      needs.detect-changes.outputs.firebase == 'true' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
       COMMIT_SHA: ${{ github.sha }}
@@ -173,10 +177,11 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Build frontend for Firebase (relative API paths)
+      - name: Build frontend for Firebase (relative API paths, no demo login)
         working-directory: frontend
         env:
           VITE_API_URL: ""
+          VITE_SHOW_DEMO_LOGIN: "false"
         run: npm run build
 
       - id: auth
