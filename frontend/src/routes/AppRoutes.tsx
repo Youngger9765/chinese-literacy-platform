@@ -59,7 +59,6 @@ const JoinClassroomPage = lazy(() => import('../pages/JoinClassroomPage'));
 const MyAssignments = lazy(() => import('../pages/student/MyAssignments'));
 const MyVocabulary = lazy(() => import('../pages/student/MyVocabulary'));
 const AchievementsPage = lazy(() => import('../pages/student/AchievementsPage'));
-const StudentClassroomDashboard = lazy(() => import('../pages/student/StudentClassroomDashboard'));
 const StudentProfile = lazy(() => import('../pages/student/StudentProfile'));
 const SessionHistoryReportPage = lazy(() => import('../pages/student/SessionHistoryReportPage'));
 const LearningHistoryPage = lazy(() => import('../pages/student/LearningHistoryPage'));
@@ -339,9 +338,7 @@ const AppRoutes: React.FC = () => (
         path="/classroom-dashboard"
         element={
           <ProtectedRoute>
-            <AppShell>
-              <StudentClassroomDashboard />
-            </AppShell>
+            <Navigate to="/assignments" replace />
           </ProtectedRoute>
         }
       />
