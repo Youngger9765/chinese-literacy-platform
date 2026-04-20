@@ -381,7 +381,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
         { icon: '🏫', label: '班級作業', path: '/assignments', badge: pendingAssignmentCount },
         { icon: '🧰', label: '練習工具箱', path: '/tools' },
         { icon: '📖', label: '學習紀錄', path: '/learning-history' },
-        { icon: '⭐', label: '成就', path: '/achievements' },
+        // Hidden: 成就 — merged into student home page (recent achievements strip + Lv banner) (#1163)
         // Hidden: 學習進度, 生字本, 對話記錄 — 整合到「班級作業」(#643)
         // Hidden: 我的班級 — merged into /assignments (#1146)
         // Hidden: 加入班級 — students join via invite code, not sidebar (#838)
