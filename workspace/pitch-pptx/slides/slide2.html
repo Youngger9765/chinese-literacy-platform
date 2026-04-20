@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #FDF8F0; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  background: #FDF8F0; color: #1a1a2e;
+}
+.layout {
+  display: flex; margin: 14pt 16pt; width: 688pt; height: 377pt;
+}
+.sidebar {
+  width: 210pt; margin-right: 14pt;
+  display: flex; flex-direction: column;
+}
+.sidebar-title {
+  font-size: 14pt; font-weight: 700; color: #5B4FC4;
+  line-height: 1.4; margin: 0 0 8pt 0;
+}
+.lib-img {
+  border-radius: 6pt; border: 1px solid #ece5d8;
+}
+.lib-caption {
+  font-size: 7.5pt; color: #8888a8; margin: 3pt 0 0 0;
+}
+.stats-area {
+  margin-top: 10pt;
+}
+.stat-line {
+  font-size: 9pt; color: #1a1a2e; margin: 3pt 0;
+  line-height: 1.4;
+}
+.main {
+  flex: 1; display: flex; flex-wrap: wrap;
+  gap: 7pt; align-content: flex-start;
+}
+.card {
+  width: 222pt; height: 115pt;
+  background: white; border-radius: 6pt;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(91,79,196,0.08);
+}
+.card-tall {
+  height: 130pt;
+}
+.card img {
+  display: block;
+}
+.card-label {
+  padding: 5pt 8pt 6pt;
+}
+.card-label h3 {
+  font-size: 8.5pt; font-weight: 600; color: #5B4FC4;
+  margin: 0 0 2pt 0;
+}
+.tag-box {
+  background: #F0EEFA; border-radius: 6pt;
+  padding: 1pt 6pt;
+  display: inline-block;
+}
+.tag-box p {
+  font-size: 6.5pt; font-weight: 600; color: #5B4FC4;
+  margin: 0;
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div class="sidebar">
+    <h2 class="sidebar-title">閱讀科學 + AI<br>= 數位中文閱讀家教</h2>
+    <img class="lib-img" src="/Users/young/project/chinese-literacy-platform/frontend/public/presentation/screenshots/ll-14-library-grid.png" style="width: 210pt; height: 150pt; object-fit: cover;">
+    <p class="lib-caption">57 篇課文，依年級與難度分類</p>
+    <div class="stats-area">
+      <p class="stat-line"><b style="font-size: 12pt; color: #5B4FC4;">10</b> 步學習流程</p>
+      <p class="stat-line"><b style="font-size: 12pt; color: #5B4FC4;">6</b> 大教學理論整合</p>
+      <p class="stat-line">涵蓋<b style="color: #5B4FC4;">聽、說、讀、寫</b>四大能力</p>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Card 1: Annotation -->
+    <div class="card">
+      <img src="/Users/young/project/chinese-literacy-platform/frontend/public/presentation/screenshots/ll-11-annotation.png" style="width: 222pt; height: 78pt; object-fit: cover;">
+      <div class="card-label">
+        <h3>閱讀標記與筆記</h3>
+        <div class="tag-box"><p>先行組織者</p></div>
+      </div>
+    </div>
+
+    <!-- Card 2: Tutor -->
+    <div class="card">
+      <img src="/Users/young/project/chinese-literacy-platform/frontend/public/presentation/screenshots/ll-04-tutor.png" style="width: 222pt; height: 78pt; object-fit: cover;">
+      <div class="card-label">
+        <h3>AI 即時朗讀指導</h3>
+        <div class="tag-box"><p>流暢朗讀 · 識字自動化</p></div>
+      </div>
+    </div>
+
+    <!-- Card 3: Comprehension -->
+    <div class="card">
+      <img src="/Users/young/project/chinese-literacy-platform/frontend/public/presentation/screenshots/ll-06-comprehension.png" style="width: 222pt; height: 78pt; object-fit: cover;">
+      <div class="card-label">
+        <h3>蘇格拉底式 AI 對話</h3>
+        <div class="tag-box"><p>鷹架理論 · 背景知識</p></div>
+      </div>
+    </div>
+
+    <!-- Card 4: Word Search -->
+    <div class="card">
+      <img src="/Users/young/project/chinese-literacy-platform/frontend/public/presentation/screenshots/ll-10-wordsearch.png" style="width: 222pt; height: 78pt; object-fit: cover;">
+      <div class="card-label">
+        <h3>語詞搜尋遊戲</h3>
+        <div class="tag-box"><p>針對性練習</p></div>
+      </div>
+    </div>
+
+    <!-- Card 5: Stroke Order (VERTICAL image - taller card) -->
+    <div class="card card-tall">
+      <img src="/Users/young/project/chinese-literacy-platform/frontend/public/presentation/screenshots/ll-13-stroke-order.png" style="width: 222pt; height: 93pt; object-fit: contain; background: #1a1a2e;">
+      <div class="card-label">
+        <h3>筆順手寫練習</h3>
+        <div class="tag-box"><p>部件教學法</p></div>
+      </div>
+    </div>
+
+    <!-- Card 6: Knowledge Station -->
+    <div class="card card-tall">
+      <img src="/Users/young/project/chinese-literacy-platform/frontend/public/presentation/screenshots/ll-12-knowledge-station.png" style="width: 222pt; height: 93pt; object-fit: cover;">
+      <div class="card-label">
+        <h3>知識補給站</h3>
+        <div class="tag-box"><p>背景知識建構</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
