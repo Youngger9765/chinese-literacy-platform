@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
@@ -842,13 +843,15 @@ def start_assignment(
         .first()
     )
     if learning_session:
-        # Ensure assignment metadata is present on the reused session
+        # Ensure assignment metadata and classroom_id are present on the reused session
         progress = learning_session.step_progress or {}
         if not isinstance(progress.get("__meta"), dict) or progress["__meta"].get("assignment_id") != assignment.id:
             progress["__meta"] = {"source": "assignment", "assignment_id": assignment.id}
             learning_session.step_progress = progress
-            from sqlalchemy.orm.attributes import flag_modified
             flag_modified(learning_session, "step_progress")
+        # Sync classroom_id if the reused session was from self-practice (#1074 review)
+        if learning_session.classroom_id is None and assignment.classroom_id is not None:
+            learning_session.classroom_id = assignment.classroom_id
         logger.info(
             "Reusing existing session %d for assignment %d (student %d, story=%s) #1074",
             learning_session.id, assignment.id, current_user.id, story_slug,
