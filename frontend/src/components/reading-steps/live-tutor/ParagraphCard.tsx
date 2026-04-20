@@ -403,8 +403,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
             const remainingFailed = results.filter(r => r !== null && r.matchRate < SENTENCE_FAIL).length;
             const canAdvance = (paragraphSummary.matchRate >= 0.5 && remainingFailed === 0)
               || completedParagraphs.has(idx);
-            // Block if still have any failed sentences
-            const blockedByRetry = remainingFailed > 0;
+            // Block if still have any failed sentences (except already-completed paragraphs)
+            const blockedByRetry = remainingFailed > 0 && !completedParagraphs.has(idx);
 
             return (
             <div className="flex gap-3 justify-center pt-2">
