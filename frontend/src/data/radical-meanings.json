@@ -42,11 +42,20 @@
     "englishMeaning": "one",
     "strokeCount": 1,
     "relatedChars": [
-      "丛",
-      "丞",
-      "百"
+      "生",
+      "事",
+      "天",
+      "而",
+      "或",
+      "前",
+      "其",
+      "更",
+      "本",
+      "正",
+      "兩",
+      "合"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "丨": {
@@ -55,8 +64,21 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "line",
     "strokeCount": 1,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "用",
+      "而",
+      "引",
+      "升",
+      "姊",
+      "條",
+      "免",
+      "巴",
+      "母",
+      "弗",
+      "鬥",
+      "串"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "丶": {
     "meaning": "讀書時斷句的符號",
@@ -64,8 +86,21 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "dot",
     "strokeCount": 1,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "以",
+      "而",
+      "太",
+      "求",
+      "向",
+      "永",
+      "母",
+      "良",
+      "玉",
+      "斥",
+      "凡",
+      "叉"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "丿": {
     "meaning": "一左撇的筆畫",
@@ -73,8 +108,21 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "slash",
     "strokeCount": 1,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "者",
+      "血",
+      "入",
+      "師",
+      "失",
+      "弟",
+      "必",
+      "姊",
+      "久",
+      "施",
+      "乎",
+      "牙"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "乙": {
     "meaning": "天干的第二位",
@@ -83,9 +131,9 @@
     "englishMeaning": "second",
     "strokeCount": 1,
     "relatedChars": [
-      "乶"
+      "乞"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "亅": {
@@ -94,8 +142,16 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "hook",
     "strokeCount": 1,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "爭",
+      "乎",
+      "母",
+      "予",
+      "牙",
+      "鬥",
+      "于"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "二": {
     "meaning": "介於一和三之間的自然數",
@@ -104,9 +160,15 @@
     "englishMeaning": "two",
     "strokeCount": 2,
     "relatedChars": [
-      "些"
+      "些",
+      "母",
+      "仁",
+      "甘",
+      "乍",
+      "于",
+      "塞"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "亠": {
@@ -115,8 +177,17 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "lid",
     "strokeCount": 2,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "育",
+      "率",
+      "充",
+      "市",
+      "夜",
+      "享",
+      "稟",
+      "玄"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "人": {
     "meaning": "具有高度智慧和靈性，且能製造並使用工具以進行勞動的高等動物",
@@ -125,11 +196,20 @@
     "englishMeaning": "person",
     "strokeCount": 2,
     "relatedChars": [
-      "仝",
-      "佘",
-      "舍"
+      "以",
+      "何",
+      "更",
+      "化",
+      "信",
+      "合",
+      "便",
+      "丙",
+      "春",
+      "閃",
+      "侵",
+      "倍"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "儿": {
@@ -139,10 +219,15 @@
     "englishMeaning": "legs",
     "strokeCount": 2,
     "relatedChars": [
+      "先",
+      "免",
       "兒",
-      "养"
+      "竟",
+      "兄",
+      "兇",
+      "禿"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "入": {
@@ -151,8 +236,13 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "enter",
     "strokeCount": 2,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "全",
+      "內",
+      "兩",
+      "久"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "八": {
     "meaning": "介於七與九之間的自然數",
@@ -160,8 +250,20 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "eight",
     "strokeCount": 2,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "分",
+      "公",
+      "只",
+      "其",
+      "具",
+      "父",
+      "共",
+      "典",
+      "谷",
+      "貝",
+      "兵"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "冂": {
     "meaning": "離城市很遠的地方",
@@ -170,9 +272,20 @@
     "englishMeaning": "down box",
     "strokeCount": 2,
     "relatedChars": [
+      "而",
+      "內",
+      "向",
+      "周",
+      "丙",
+      "亂",
+      "冊",
+      "尚",
+      "冉",
+      "繭",
+      "央",
       "冕"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "冖": {
@@ -182,10 +295,20 @@
     "englishMeaning": "cover",
     "strokeCount": 2,
     "relatedChars": [
-      "冢",
-      "冣"
+      "學",
+      "受",
+      "臺",
+      "帶",
+      "夢",
+      "愛",
+      "索",
+      "勞",
+      "冠",
+      "軍",
+      "侵",
+      "榮"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "冫": {
@@ -196,18 +319,19 @@
     "strokeCount": 2,
     "baseRadical": "水",
     "relatedChars": [
-      "冱",
-      "沖",
+      "次",
       "冷",
-      "冻",
-      "冽",
+      "冰",
+      "弱",
+      "凝",
+      "凍",
       "淨",
-      "凄",
       "准",
-      "凇",
-      "凈"
+      "凌",
+      "沖",
+      "冽"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "几": {
@@ -217,10 +341,19 @@
     "englishMeaning": "table",
     "strokeCount": 2,
     "relatedChars": [
+      "真",
+      "肌",
+      "虎",
+      "凡",
+      "飢",
+      "沿",
+      "鉛",
+      "朵",
+      "咒",
       "凰",
       "凳"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "凵": {
@@ -229,8 +362,11 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "open box",
     "strokeCount": 2,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "出",
+      "凶"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "刀": {
     "meaning": "武器名",
@@ -239,13 +375,20 @@
     "englishMeaning": "knife",
     "strokeCount": 2,
     "relatedChars": [
-      "刅",
+      "分",
+      "前",
+      "解",
+      "免",
+      "絕",
       "切",
-      "券",
+      "初",
       "剪",
-      "劈"
+      "劈",
+      "尔",
+      "刃",
+      "叨"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "力": {
@@ -255,18 +398,20 @@
     "englishMeaning": "power",
     "strokeCount": 2,
     "relatedChars": [
-      "办",
-      "劢",
       "動",
+      "加",
       "助",
+      "功",
+      "男",
+      "辦",
       "努",
-      "劫",
-      "劬",
-      "劭",
-      "励",
-      "劲"
+      "勢",
+      "勇",
+      "勵",
+      "幼",
+      "勞"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "勹": {
@@ -276,12 +421,18 @@
     "englishMeaning": "wrap",
     "strokeCount": 2,
     "relatedChars": [
+      "句",
+      "包",
+      "黎",
+      "勾",
+      "勿",
+      "芻",
       "匈",
       "匍",
       "匐",
       "甸"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "匕": {
@@ -291,10 +442,19 @@
     "englishMeaning": "ladle",
     "strokeCount": 2,
     "relatedChars": [
-      "匙",
-      "此"
+      "比",
+      "此",
+      "化",
+      "它",
+      "死",
+      "疑",
+      "旨",
+      "穎",
+      "尼",
+      "欵",
+      "匙"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "匚": {
@@ -304,18 +464,14 @@
     "englishMeaning": "right open box",
     "strokeCount": 2,
     "relatedChars": [
-      "匛",
+      "匪",
+      "匠",
+      "匯",
       "匡",
       "匣",
-      "匦",
-      "匧",
-      "匪",
-      "匭",
-      "匮",
-      "匯",
       "匱"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "匸": {
@@ -325,10 +481,10 @@
     "englishMeaning": "hiding enclosure",
     "strokeCount": 2,
     "relatedChars": [
-      "匽",
+      "區",
       "匿"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "十": {
@@ -338,13 +494,20 @@
     "englishMeaning": "ten",
     "strokeCount": 2,
     "relatedChars": [
-      "華",
+      "什",
+      "計",
+      "直",
+      "古",
+      "聽",
+      "章",
+      "率",
       "博",
-      "畢",
-      "畢",
-      "華"
+      "德",
+      "戴",
+      "支",
+      "準"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "卜": {
@@ -354,9 +517,13 @@
     "englishMeaning": "divination",
     "strokeCount": 2,
     "relatedChars": [
-      "卦"
+      "外",
+      "卡",
+      "桌",
+      "卦",
+      "仆"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "卩": {
@@ -366,11 +533,13 @@
     "englishMeaning": "seal",
     "strokeCount": 2,
     "relatedChars": [
-      "却",
       "卻",
+      "報",
+      "服",
+      "卸",
       "叩"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "厂": {
@@ -380,18 +549,20 @@
     "englishMeaning": "cliff",
     "strokeCount": 2,
     "relatedChars": [
-      "厌",
-      "厕",
-      "厘",
       "原",
-      "厢",
-      "厦",
-      "厨",
-      "厩",
-      "厪",
-      "厭"
+      "反",
+      "產",
+      "厚",
+      "詹",
+      "盾",
+      "廚",
+      "派",
+      "后",
+      "厭",
+      "岸",
+      "厄"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "厶": {
@@ -401,9 +572,18 @@
     "englishMeaning": "private",
     "strokeCount": 2,
     "relatedChars": [
+      "公",
+      "去",
+      "育",
+      "台",
+      "亂",
+      "私",
+      "勾",
+      "矣",
+      "晉",
       "篡"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "又": {
@@ -413,11 +593,20 @@
     "englishMeaning": "again",
     "strokeCount": 2,
     "relatedChars": [
-      "鳳",
-      "叙",
-      "隻"
+      "度",
+      "受",
+      "反",
+      "取",
+      "報",
+      "服",
+      "隻",
+      "支",
+      "雙",
+      "亂",
+      "侵",
+      "叉"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "口": {
@@ -427,18 +616,20 @@
     "englishMeaning": "mouth",
     "strokeCount": 3,
     "relatedChars": [
-      "叨",
-      "叫",
-      "召",
-      "叭",
-      "叮",
-      "叱",
-      "号",
-      "叼",
-      "叽",
-      "吁"
+      "可",
+      "事",
+      "和",
+      "問",
+      "如",
+      "同",
+      "或",
+      "只",
+      "名",
+      "加",
+      "員",
+      "回"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "囗": {
@@ -448,18 +639,20 @@
     "englishMeaning": "enclosure",
     "strokeCount": 3,
     "relatedChars": [
-      "囤",
-      "囫",
-      "园",
-      "围",
-      "囵",
-      "囹",
+      "因",
+      "國",
+      "回",
+      "困",
+      "圖",
+      "團",
+      "園",
+      "甲",
       "固",
-      "囿",
-      "圃",
-      "圄"
+      "圓",
+      "圍",
+      "圈"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "土": {
@@ -470,17 +663,19 @@
     "strokeCount": 3,
     "relatedChars": [
       "在",
-      "圩",
-      "圪",
-      "圬",
-      "圮",
-      "圯",
+      "生",
+      "者",
       "地",
-      "圹",
+      "去",
       "場",
-      "圻"
+      "先",
+      "境",
+      "基",
+      "型",
+      "黑",
+      "走"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "士": {
@@ -490,10 +685,13 @@
     "englishMeaning": "scholar",
     "strokeCount": 3,
     "relatedChars": [
-      "壮",
-      "壯"
+      "吉",
+      "志",
+      "壯",
+      "款",
+      "壽"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "夂": {
@@ -503,13 +701,15 @@
     "englishMeaning": "go",
     "strokeCount": 3,
     "relatedChars": [
-      "処",
-      "夆",
-      "敻",
-      "贛",
-      "赣"
+      "後",
+      "各",
+      "愛",
+      "慶",
+      "冬",
+      "麥",
+      "贛"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "夊": {
@@ -528,9 +728,16 @@
     "englishMeaning": "night",
     "strokeCount": 3,
     "relatedChars": [
+      "多",
+      "外",
+      "名",
+      "將",
+      "夢",
+      "夜",
+      "夏",
       "夤"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "大": {
@@ -540,16 +747,20 @@
     "englishMeaning": "big",
     "strokeCount": 3,
     "relatedChars": [
+      "因",
+      "天",
+      "太",
       "頭",
-      "夸",
-      "奎",
-      "奕",
+      "奧",
+      "參",
+      "美",
+      "奇",
+      "衡",
+      "奪",
       "獎",
-      "奘",
-      "奢",
-      "樊"
+      "尖"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "女": {
@@ -559,18 +770,20 @@
     "englishMeaning": "woman",
     "strokeCount": 3,
     "relatedChars": [
-      "奶",
-      "奸",
-      "奼",
-      "妁",
-      "妄",
-      "妆",
-      "妈",
-      "妊",
-      "妒",
-      "妖"
+      "要",
+      "好",
+      "她",
+      "如",
+      "媽",
+      "始",
+      "姊",
+      "安",
+      "妹",
+      "威",
+      "媒",
+      "姆"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "子": {
@@ -580,18 +793,20 @@
     "englishMeaning": "child",
     "strokeCount": 3,
     "relatedChars": [
-      "孓",
-      "存",
-      "孢",
-      "孤",
-      "孥",
+      "學",
+      "好",
+      "字",
       "孩",
-      "孳",
-      "孺",
-      "孽",
-      "孿"
+      "存",
+      "李",
+      "孔",
+      "享",
+      "孫",
+      "厚",
+      "孤",
+      "仔"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "宀": {
@@ -601,18 +816,20 @@
     "englishMeaning": "roof",
     "strokeCount": 3,
     "relatedChars": [
-      "宁",
-      "宄",
-      "宅",
-      "宇",
+      "家",
+      "字",
+      "實",
+      "賽",
+      "定",
+      "害",
+      "容",
       "完",
-      "宏",
-      "宓",
-      "宙",
-      "宛",
-      "宠"
+      "它",
+      "安",
+      "察",
+      "客"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "寸": {
@@ -622,10 +839,20 @@
     "englishMeaning": "inch",
     "strokeCount": 3,
     "relatedChars": [
+      "對",
+      "得",
+      "將",
       "專",
-      "尌"
+      "導",
+      "尋",
+      "守",
+      "奪",
+      "尊",
+      "討",
+      "村",
+      "冠"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "小": {
@@ -635,9 +862,13 @@
     "englishMeaning": "small",
     "strokeCount": 3,
     "relatedChars": [
-      "尕"
+      "尖",
+      "尚",
+      "賓",
+      "雀",
+      "尔"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "尢": {
@@ -648,10 +879,9 @@
     "strokeCount": 3,
     "relatedChars": [
       "尬",
-      "尴",
       "尷"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "尸": {
@@ -661,18 +891,20 @@
     "englishMeaning": "corpse",
     "strokeCount": 3,
     "relatedChars": [
-      "尻",
-      "屁",
-      "屈",
-      "屑",
-      "屙",
-      "属",
-      "屠",
-      "屡",
+      "展",
+      "尺",
+      "屬",
+      "刷",
+      "層",
+      "尾",
+      "屍",
+      "屋",
       "屢",
-      "層"
+      "眉",
+      "尼",
+      "屈"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "屮": {
@@ -681,8 +913,11 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "sprout",
     "strokeCount": 3,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "出",
+      "芻"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "山": {
     "meaning": "陸地上高起的部分",
@@ -691,18 +926,20 @@
     "englishMeaning": "mountain",
     "strokeCount": 3,
     "relatedChars": [
-      "屹",
-      "屺",
-      "屿",
-      "岈",
+      "密",
+      "島",
+      "微",
+      "幽",
+      "豐",
+      "峰",
+      "崎",
+      "嶇",
+      "崇",
       "岌",
-      "岍",
-      "岐",
-      "岑",
-      "岖",
-      "岗"
+      "嶼",
+      "峻"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "川": {
@@ -711,8 +948,12 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "river",
     "strokeCount": 3,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "訓",
+      "順",
+      "荒"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "工": {
     "meaning": "有專門技術或從事勞動生產的人",
@@ -721,9 +962,20 @@
     "englishMeaning": "work",
     "strokeCount": 3,
     "relatedChars": [
-      "巧"
+      "項",
+      "空",
+      "式",
+      "功",
+      "差",
+      "紅",
+      "尋",
+      "巧",
+      "攻",
+      "壽",
+      "貢",
+      "虹"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "己": {
@@ -732,8 +984,16 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "oneself",
     "strokeCount": 3,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "起",
+      "記",
+      "紀",
+      "改",
+      "忌",
+      "配",
+      "巷"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "巾": {
     "meaning": "擦洗用的布",
@@ -742,18 +1002,20 @@
     "englishMeaning": "towel",
     "strokeCount": 3,
     "relatedChars": [
-      "冘",
+      "常",
+      "兩",
+      "帶",
+      "制",
+      "市",
+      "帽",
+      "刷",
+      "幅",
+      "飾",
+      "佩",
       "帆",
-      "帏",
-      "帐",
-      "帔",
-      "帙",
-      "帛",
-      "帜",
-      "帧",
-      "帱"
+      "幕"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "干": {
@@ -762,8 +1024,16 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "dry",
     "strokeCount": 3,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "幸",
+      "午",
+      "汗",
+      "岸",
+      "旱",
+      "竿",
+      "鼾"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "幺": {
     "meaning": "「么」的異體字",
@@ -772,9 +1042,16 @@
     "englishMeaning": "thread",
     "strokeCount": 3,
     "relatedChars": [
-      "麼"
+      "後",
+      "麼",
+      "斷",
+      "率",
+      "樂",
+      "幼",
+      "幽",
+      "玄"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "广": {
@@ -784,18 +1061,20 @@
     "englishMeaning": "shelter",
     "strokeCount": 3,
     "relatedChars": [
-      "廳",
-      "庀",
-      "庄",
-      "庇",
-      "庋",
-      "序",
-      "庑",
+      "度",
       "底",
-      "庖",
-      "店"
+      "序",
+      "庫",
+      "廣",
+      "座",
+      "床",
+      "府",
+      "店",
+      "庭",
+      "康",
+      "麻"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "廴": {
@@ -805,10 +1084,10 @@
     "englishMeaning": "stride",
     "strokeCount": 3,
     "relatedChars": [
-      "廷",
-      "建"
+      "建",
+      "廷"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "廾": {
@@ -818,9 +1097,15 @@
     "englishMeaning": "hands joined",
     "strokeCount": 3,
     "relatedChars": [
+      "共",
+      "戒",
+      "莽",
+      "弄",
+      "葬",
+      "弊",
       "弈"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "弋": {
@@ -829,8 +1114,12 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "shoot with a bow",
     "strokeCount": 3,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "代",
+      "式",
+      "武"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "弓": {
     "meaning": "武器名",
@@ -839,18 +1128,20 @@
     "englishMeaning": "bow",
     "strokeCount": 3,
     "relatedChars": [
-      "弛",
+      "發",
+      "強",
+      "引",
       "張",
-      "弥",
-      "弦",
-      "弧",
-      "弩",
-      "弪",
-      "弮",
-      "弳",
-      "張"
+      "弗",
+      "弱",
+      "彈",
+      "夷",
+      "彎",
+      "粥",
+      "彌",
+      "弛"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "彐": {
@@ -860,9 +1151,17 @@
     "englishMeaning": "snout",
     "strokeCount": 3,
     "relatedChars": [
-      "寻"
+      "爭",
+      "尋",
+      "兼",
+      "雪",
+      "侵",
+      "妻",
+      "寢",
+      "庚",
+      "唚"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "彡": {
@@ -872,15 +1171,20 @@
     "englishMeaning": "hair",
     "strokeCount": 3,
     "relatedChars": [
+      "形",
+      "參",
+      "影",
+      "須",
+      "珍",
       "修",
       "彥",
-      "彦",
       "彩",
-      "彬",
       "彰",
-      "影"
+      "衫",
+      "彪",
+      "杉"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "彳": {
@@ -890,18 +1194,20 @@
     "englishMeaning": "step",
     "strokeCount": 3,
     "relatedChars": [
-      "屐",
-      "屦",
-      "屨",
-      "彷",
-      "彸",
-      "彼",
-      "彿",
+      "後",
+      "得",
+      "行",
+      "從",
+      "很",
+      "待",
+      "律",
       "往",
-      "征",
-      "徂"
+      "復",
+      "德",
+      "微",
+      "循"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "心": {
@@ -911,18 +1217,20 @@
     "englishMeaning": "heart",
     "strokeCount": 4,
     "relatedChars": [
-      "寧",
-      "德",
-      "忌",
-      "忒",
-      "忘",
-      "忞",
-      "忠",
-      "忽",
-      "忿",
-      "态"
+      "意",
+      "想",
+      "思",
+      "應",
+      "感",
+      "聽",
+      "怎",
+      "念",
+      "必",
+      "息",
+      "愛",
+      "態"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "戈": {
@@ -932,18 +1240,20 @@
     "englishMeaning": "spear",
     "strokeCount": 4,
     "relatedChars": [
-      "戕",
-      "戗",
+      "我",
+      "或",
+      "找",
+      "民",
       "戰",
-      "戠",
-      "戡",
-      "戢",
-      "戥",
-      "戧",
-      "戬",
-      "戮"
+      "戴",
+      "裁",
+      "戒",
+      "戊",
+      "伐",
+      "截",
+      "战"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "户": {
@@ -953,15 +1263,19 @@
     "englishMeaning": "door",
     "strokeCount": 4,
     "relatedChars": [
+      "所",
       "居",
-      "屏",
       "房",
-      "扂",
-      "扃",
+      "肩",
+      "扇",
+      "妒",
+      "屏",
+      "倉",
+      "雇",
       "扉",
       "牖"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "手": {
@@ -971,18 +1285,20 @@
     "englishMeaning": "hand",
     "strokeCount": 4,
     "relatedChars": [
-      "拳",
+      "看",
+      "擊",
       "拿",
-      "挈",
-      "挛",
-      "挲",
-      "掌",
-      "掣",
-      "搴",
       "摩",
-      "摹"
+      "拳",
+      "掌",
+      "拜",
+      "奉",
+      "攣",
+      "攀",
+      "摯",
+      "挈"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "支": {
@@ -991,8 +1307,15 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "branch",
     "strokeCount": 4,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "技",
+      "鼓",
+      "枝",
+      "肢",
+      "翅",
+      "岐"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "攴": {
     "meaning": "輕擊",
@@ -1001,9 +1324,12 @@
     "englishMeaning": "rap",
     "strokeCount": 4,
     "relatedChars": [
-      "敲"
+      "微",
+      "敬",
+      "敲",
+      "煞"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "文": {
@@ -1013,15 +1339,15 @@
     "englishMeaning": "script",
     "strokeCount": 4,
     "relatedChars": [
-      "斋",
-      "斌",
+      "彥",
       "斐",
-      "斓",
-      "斕",
-      "閔",
-      "闵"
+      "蚊",
+      "吝",
+      "虔",
+      "紋",
+      "閔"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "斗": {
@@ -1031,12 +1357,14 @@
     "englishMeaning": "dipper",
     "strokeCount": 4,
     "relatedChars": [
-      "戽",
-      "斛",
+      "科",
+      "料",
+      "抖",
+      "魁",
       "斜",
       "斟"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "斤": {
@@ -1046,13 +1374,20 @@
     "englishMeaning": "axe",
     "strokeCount": 4,
     "relatedChars": [
-      "斦",
-      "斧",
-      "斩",
-      "斫",
+      "所",
+      "新",
+      "近",
+      "斯",
+      "斷",
+      "折",
+      "析",
+      "斥",
+      "欣",
+      "匠",
+      "祈",
       "斬"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "方": {
@@ -1062,16 +1397,20 @@
     "englishMeaning": "square",
     "strokeCount": 4,
     "relatedChars": [
-      "旃",
-      "旆",
-      "旉",
-      "旌",
-      "旎",
-      "旒",
-      "旖",
-      "旗"
+      "放",
+      "防",
+      "族",
+      "施",
+      "旁",
+      "房",
+      "旅",
+      "訪",
+      "旋",
+      "肪",
+      "仿",
+      "彷"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "无": {
@@ -1090,18 +1429,20 @@
     "englishMeaning": "sun",
     "strokeCount": 4,
     "relatedChars": [
-      "旭",
-      "旰",
-      "旲",
+      "是",
       "時",
-      "旺",
-      "昀",
-      "昂",
-      "昉",
-      "昕",
-      "星"
+      "會",
+      "者",
+      "最",
+      "明",
+      "間",
+      "更",
+      "普",
+      "易",
+      "東",
+      "景"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "曰": {
@@ -1110,8 +1451,12 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "say",
     "strokeCount": 4,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "書",
+      "昌",
+      "曳"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "月": {
     "meaning": "月亮、月球",
@@ -1120,18 +1465,20 @@
     "englishMeaning": "moon",
     "strokeCount": 4,
     "relatedChars": [
-      "勝",
-      "朐",
-      "朔",
-      "朗",
-      "朝",
+      "用",
+      "明",
+      "那",
       "期",
-      "朦",
-      "朧",
-      "胧",
-      "臍"
+      "望",
+      "服",
+      "朋",
+      "勝",
+      "贏",
+      "青",
+      "朝",
+      "閒"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "木": {
@@ -1141,18 +1488,20 @@
     "englishMeaning": "tree",
     "strokeCount": 4,
     "relatedChars": [
-      "朴",
-      "權",
-      "杆",
-      "杉",
-      "李",
-      "材",
-      "村",
-      "杖",
-      "杜",
-      "杞"
+      "來",
+      "果",
+      "樣",
+      "本",
+      "機",
+      "相",
+      "標",
+      "根",
+      "林",
+      "未",
+      "案",
+      "樹"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "欠": {
@@ -1162,18 +1511,20 @@
     "englishMeaning": "lack",
     "strokeCount": 4,
     "relatedChars": [
+      "次",
+      "歡",
+      "飲",
+      "歌",
       "欣",
-      "欤",
       "欲",
-      "欶",
-      "欷",
-      "欹",
-      "欺",
+      "軟",
       "款",
-      "歃",
-      "歆"
+      "歉",
+      "砍",
+      "欺",
+      "欵"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "止": {
@@ -1183,12 +1534,20 @@
     "englishMeaning": "stop",
     "strokeCount": 4,
     "relatedChars": [
-      "卸",
-      "歧",
+      "此",
+      "正",
+      "走",
+      "歷",
+      "肯",
       "歸",
-      "辵"
+      "武",
+      "企",
+      "卸",
+      "扯",
+      "址",
+      "趾"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "歹": {
@@ -1198,18 +1557,17 @@
     "englishMeaning": "death",
     "strokeCount": 4,
     "relatedChars": [
-      "殁",
-      "殂",
-      "殃",
-      "殄",
-      "殆",
-      "殇",
-      "殉",
+      "列",
+      "死",
       "殊",
       "殘",
-      "殍"
+      "殃",
+      "殆",
+      "殖",
+      "殲",
+      "殉"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "殳": {
@@ -1219,14 +1577,20 @@
     "englishMeaning": "weapon",
     "strokeCount": 4,
     "relatedChars": [
-      "殴",
-      "殹",
+      "沒",
+      "設",
       "殺",
-      "毄",
+      "投",
+      "般",
+      "役",
+      "疫",
+      "股",
+      "毀",
       "毅",
-      "毆"
+      "殷",
+      "殿"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "母": {
@@ -1236,9 +1600,12 @@
     "englishMeaning": "mother",
     "strokeCount": 4,
     "relatedChars": [
+      "毒",
+      "姆",
+      "拇",
       "毓"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "比": {
@@ -1248,9 +1615,12 @@
     "englishMeaning": "compare",
     "strokeCount": 4,
     "relatedChars": [
-      "毖"
+      "批",
+      "昆",
+      "皆",
+      "庇"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "毛": {
@@ -1260,18 +1630,15 @@
     "englishMeaning": "fur",
     "strokeCount": 4,
     "relatedChars": [
-      "毡",
-      "毪",
+      "表",
+      "耗",
+      "尾",
       "毫",
       "毯",
-      "毵",
-      "毹",
-      "毽",
-      "氂",
-      "氅",
-      "氆"
+      "氈",
+      "毽"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "氏": {
@@ -1281,9 +1648,14 @@
     "englishMeaning": "clan",
     "strokeCount": 4,
     "relatedChars": [
+      "旅",
+      "紙",
+      "派",
+      "昏",
+      "祇",
       "氐"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "气": {
@@ -1293,18 +1665,15 @@
     "englishMeaning": "steam",
     "strokeCount": 4,
     "relatedChars": [
-      "氕",
-      "氖",
-      "氘",
-      "氙",
-      "氚",
+      "氣",
+      "氧",
+      "氫",
       "氛",
+      "氖",
       "氟",
-      "氡",
-      "氢",
       "氤"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "水": {
@@ -1314,17 +1683,17 @@
     "englishMeaning": "water",
     "strokeCount": 4,
     "relatedChars": [
-      "氶",
-      "氽",
-      "汆",
+      "求",
+      "永",
+      "冰",
+      "益",
+      "派",
+      "暴",
+      "尿",
       "汞",
-      "浆",
-      "滎",
-      "漿",
-      "荥",
-      "颍"
+      "漿"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "火": {
@@ -1334,18 +1703,20 @@
     "englishMeaning": "fire",
     "strokeCount": 4,
     "relatedChars": [
-      "灯",
-      "灵",
-      "灸",
-      "灼",
-      "灿",
-      "炀",
-      "炆",
-      "炊",
-      "炒",
-      "炔"
+      "災",
+      "煙",
+      "燒",
+      "燃",
+      "炸",
+      "燈",
+      "爆",
+      "煉",
+      "煩",
+      "焰",
+      "伙",
+      "炎"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "爪": {
@@ -1355,9 +1726,10 @@
     "englishMeaning": "claw",
     "strokeCount": 4,
     "relatedChars": [
-      "爬"
+      "爬",
+      "抓"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "父": {
@@ -1367,12 +1739,12 @@
     "englishMeaning": "father",
     "strokeCount": 4,
     "relatedChars": [
-      "爷",
       "爸",
-      "爹",
-      "爺"
+      "爺",
+      "斧",
+      "爹"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "爻": {
@@ -1381,8 +1753,10 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "lines on a trigram",
     "strokeCount": 4,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "爽"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "爿": {
     "meaning": "江蘇方言",
@@ -1391,9 +1765,15 @@
     "englishMeaning": "half of a tree trunk",
     "strokeCount": 4,
     "relatedChars": [
-      "牆"
+      "將",
+      "狀",
+      "壯",
+      "牆",
+      "寐",
+      "妝",
+      "寢"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "片": {
@@ -1403,12 +1783,12 @@
     "englishMeaning": "slice",
     "strokeCount": 4,
     "relatedChars": [
-      "版",
       "牌",
-      "牍",
+      "淵",
+      "版",
       "牘"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "牙": {
@@ -1418,9 +1798,15 @@
     "englishMeaning": "tooth",
     "strokeCount": 4,
     "relatedChars": [
-      "穿"
+      "穿",
+      "訝",
+      "雅",
+      "鴉",
+      "芽",
+      "邪",
+      "呀"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "牛": {
@@ -1430,18 +1816,20 @@
     "englishMeaning": "cow",
     "strokeCount": 4,
     "relatedChars": [
-      "牝",
-      "牟",
-      "牡",
       "物",
-      "牯",
-      "牲",
-      "牴",
-      "牸",
+      "解",
       "特",
-      "牺"
+      "件",
+      "告",
+      "半",
+      "牠",
+      "牲",
+      "犧",
+      "犀",
+      "牽",
+      "牢"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "犭": {
@@ -1452,18 +1840,20 @@
     "strokeCount": 3,
     "baseRadical": "犬",
     "relatedChars": [
+      "猩",
+      "獲",
+      "獨",
       "犯",
-      "犰",
-      "犴",
-      "犷",
-      "犸",
-      "犹",
-      "狁",
+      "獵",
       "狂",
-      "狃",
-      "狄"
+      "猛",
+      "猜",
+      "猶",
+      "狠",
+      "狗",
+      "狹"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "玄": {
@@ -1472,8 +1862,12 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "profound",
     "strokeCount": 5,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "炫",
+      "牽",
+      "畜"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "玉": {
     "meaning": "寶石的一種，一般指的是閃玉或輝玉",
@@ -1482,12 +1876,13 @@
     "englishMeaning": "jade",
     "strokeCount": 5,
     "relatedChars": [
-      "玺",
+      "全",
+      "鈺",
+      "弄",
       "璧",
-      "璺",
       "璽"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "瓜": {
@@ -1497,13 +1892,13 @@
     "englishMeaning": "melon",
     "strokeCount": 5,
     "relatedChars": [
-      "瓞",
+      "孤",
+      "狐",
       "瓠",
       "瓢",
-      "瓣",
-      "瓤"
+      "瓣"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "瓦": {
@@ -1513,18 +1908,12 @@
     "englishMeaning": "tile",
     "strokeCount": 5,
     "relatedChars": [
-      "瓮",
-      "瓯",
-      "瓴",
       "瓶",
       "瓷",
-      "瓿",
       "甄",
-      "甌",
-      "甏",
-      "甑"
+      "甌"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "甘": {
@@ -1534,9 +1923,13 @@
     "englishMeaning": "sweet",
     "strokeCount": 5,
     "relatedChars": [
-      "甙"
+      "其",
+      "甚",
+      "某",
+      "甜",
+      "柑"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "生": {
@@ -1546,11 +1939,14 @@
     "englishMeaning": "life",
     "strokeCount": 5,
     "relatedChars": [
+      "性",
       "產",
-      "産",
-      "甤"
+      "星",
+      "牲",
+      "甦",
+      "姓"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "用": {
@@ -1559,8 +1955,10 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "use",
     "strokeCount": 5,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "甫"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "田": {
     "meaning": "土地",
@@ -1569,18 +1967,20 @@
     "englishMeaning": "field",
     "strokeCount": 5,
     "relatedChars": [
-      "亩",
-      "毗",
-      "町",
-      "畀",
-      "畈",
+      "果",
+      "當",
       "界",
-      "畎",
-      "畛",
-      "畜",
-      "略"
+      "思",
+      "男",
+      "畫",
+      "細",
+      "里",
+      "略",
+      "留",
+      "累",
+      "雷"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "疋": {
@@ -1590,9 +1990,14 @@
     "englishMeaning": "cloth",
     "strokeCount": 5,
     "relatedChars": [
-      "疌"
+      "是",
+      "定",
+      "疑",
+      "楚",
+      "旋",
+      "疏"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "疒": {
@@ -1602,18 +2007,20 @@
     "englishMeaning": "ill",
     "strokeCount": 5,
     "relatedChars": [
-      "疔",
-      "疖",
-      "疙",
-      "疚",
-      "疝",
-      "疟",
-      "疡",
-      "疣",
-      "疤",
-      "疥"
+      "病",
+      "症",
+      "痛",
+      "疾",
+      "療",
+      "癌",
+      "疲",
+      "疫",
+      "癱",
+      "瘦",
+      "瘓",
+      "瘋"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "癶": {
@@ -1623,9 +2030,10 @@
     "englishMeaning": "foot steps",
     "strokeCount": 5,
     "relatedChars": [
+      "發",
       "登"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "白": {
@@ -1635,18 +2043,20 @@
     "englishMeaning": "white",
     "strokeCount": 5,
     "relatedChars": [
-      "皅",
-      "皎",
-      "皑",
-      "皒",
+      "的",
+      "習",
+      "樂",
+      "怕",
       "皓",
-      "皖",
-      "皙",
-      "皚",
-      "皤",
-      "皦"
+      "迫",
+      "柏",
+      "皆",
+      "拍",
+      "卑",
+      "皇",
+      "伯"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "皮": {
@@ -1656,13 +2066,20 @@
     "englishMeaning": "skin",
     "strokeCount": 5,
     "relatedChars": [
+      "被",
+      "破",
+      "波",
+      "疲",
+      "彼",
+      "坡",
+      "披",
+      "皺",
+      "玻",
+      "頗",
       "皰",
-      "皱",
-      "皲",
-      "皴",
-      "皺"
+      "皴"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "皿": {
@@ -1672,18 +2089,20 @@
     "englishMeaning": "dish",
     "strokeCount": 5,
     "relatedChars": [
-      "盂",
-      "盃",
-      "盅",
-      "盆",
+      "血",
+      "盡",
+      "溫",
+      "益",
       "盈",
-      "盎",
-      "盒",
-      "盔",
-      "盘",
-      "盛"
+      "盤",
+      "盛",
+      "盃",
+      "監",
+      "盪",
+      "盟",
+      "孟"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "目": {
@@ -1693,18 +2112,20 @@
     "englishMeaning": "eye",
     "strokeCount": 5,
     "relatedChars": [
-      "冒",
-      "盯",
-      "盱",
-      "盹",
-      "盼",
+      "看",
+      "相",
+      "睡",
+      "眼",
+      "直",
+      "眠",
+      "具",
       "省",
-      "眄",
-      "眈",
-      "県",
-      "眍"
+      "睛",
+      "冒",
+      "睜",
+      "瞬"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "矛": {
@@ -1715,9 +2136,11 @@
     "strokeCount": 5,
     "relatedChars": [
       "務",
+      "柔",
+      "茅",
       "矜"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "矢": {
@@ -1727,15 +2150,19 @@
     "englishMeaning": "arrow",
     "strokeCount": 5,
     "relatedChars": [
+      "知",
       "醫",
-      "矩",
-      "矫",
-      "矬",
       "短",
+      "疑",
+      "族",
+      "疾",
+      "矣",
       "矮",
-      "矯"
+      "欵",
+      "矯",
+      "矩"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "石": {
@@ -1745,18 +2172,20 @@
     "englishMeaning": "stone",
     "strokeCount": 5,
     "relatedChars": [
-      "矶",
-      "矸",
-      "矻",
-      "矽",
-      "矾",
-      "矿",
-      "码",
-      "砍",
-      "砒",
-      "研"
+      "研",
+      "確",
+      "破",
+      "硯",
+      "碳",
+      "碗",
+      "碑",
+      "磨",
+      "礎",
+      "碰",
+      "礙",
+      "硬"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "示": {
@@ -1766,11 +2195,17 @@
     "englishMeaning": "spirit",
     "strokeCount": 5,
     "relatedChars": [
-      "祟",
       "禁",
-      "禦"
+      "票",
+      "宗",
+      "款",
+      "禦",
+      "祂",
+      "奈",
+      "际",
+      "祟"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "禸": {
@@ -1789,18 +2224,20 @@
     "englishMeaning": "grain",
     "strokeCount": 5,
     "relatedChars": [
-      "秀",
+      "和",
       "種",
+      "科",
+      "程",
+      "利",
+      "稱",
+      "移",
+      "積",
       "秒",
-      "秕",
-      "秘",
-      "秣",
-      "秧",
-      "秩",
-      "秫",
-      "秭"
+      "稀",
+      "穩",
+      "香"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "穴": {
@@ -1810,18 +2247,20 @@
     "englishMeaning": "cave",
     "strokeCount": 5,
     "relatedChars": [
-      "穵",
       "究",
       "空",
-      "窀",
-      "窃",
-      "窄",
-      "窆",
-      "窈",
-      "窍",
-      "窒"
+      "突",
+      "穿",
+      "探",
+      "窮",
+      "竄",
+      "窗",
+      "窺",
+      "竊",
+      "竇",
+      "窩"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "立": {
@@ -1831,14 +2270,20 @@
     "englishMeaning": "stand",
     "strokeCount": 5,
     "relatedChars": [
+      "位",
+      "拉",
+      "童",
       "旁",
-      "竘",
+      "音",
       "站",
-      "竣",
-      "竭",
-      "端"
+      "垃",
+      "端",
+      "泣",
+      "粒",
+      "昱",
+      "竣"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "竹": {
@@ -1847,8 +2292,10 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "bamboo",
     "strokeCount": 6,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "答"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "米": {
     "meaning": "去殼的穀實，今專指稻實",
@@ -1857,18 +2304,20 @@
     "englishMeaning": "rice",
     "strokeCount": 6,
     "relatedChars": [
-      "籼",
+      "氣",
+      "精",
+      "料",
+      "迷",
       "粉",
-      "粑",
-      "粒",
-      "粕",
-      "粗",
-      "粘",
-      "粞",
-      "粢",
-      "粪"
+      "糖",
+      "糊",
+      "糟",
+      "糧",
+      "粥",
+      "番",
+      "咪"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "纟": {
@@ -1879,18 +2328,9 @@
     "strokeCount": 3,
     "baseRadical": "糸",
     "relatedChars": [
-      "纡",
-      "红",
-      "纣",
-      "纤",
-      "约",
-      "级",
-      "纨",
-      "纩",
-      "紀",
-      "纬"
+      "紀"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "缶": {
@@ -1900,17 +2340,15 @@
     "englishMeaning": "jar",
     "strokeCount": 6,
     "relatedChars": [
-      "匋",
-      "缸",
       "缺",
+      "鬱",
+      "罐",
+      "缸",
       "缽",
-      "罂",
       "罄",
-      "罈",
-      "罌",
-      "罐"
+      "罈"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "网": {
@@ -1929,16 +2367,20 @@
     "englishMeaning": "sheep",
     "strokeCount": 6,
     "relatedChars": [
-      "羍",
-      "羔",
-      "羚",
-      "羝",
+      "對",
+      "美",
+      "差",
+      "養",
       "群",
-      "羨",
       "義",
-      "羯"
+      "善",
+      "洋",
+      "氧",
+      "祥",
+      "詳",
+      "鮮"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "羽": {
@@ -1948,18 +2390,20 @@
     "englishMeaning": "feather",
     "strokeCount": 6,
     "relatedChars": [
-      "翁",
-      "翅",
-      "翊",
-      "翎",
+      "習",
+      "翻",
       "翔",
-      "翘",
-      "翠",
-      "翡",
-      "翥",
-      "翦"
+      "扇",
+      "翼",
+      "翩",
+      "塌",
+      "翅",
+      "翰",
+      "翁",
+      "翎",
+      "翠"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "老": {
@@ -1969,11 +2413,9 @@
     "englishMeaning": "old",
     "strokeCount": 6,
     "relatedChars": [
-      "耄",
-      "耆",
-      "耋"
+      "耆"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "而": {
@@ -1982,8 +2424,12 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "and",
     "strokeCount": 6,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "需",
+      "耐",
+      "耍"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "耒": {
     "meaning": "古代木製耕具上的曲柄",
@@ -1992,18 +2438,13 @@
     "englishMeaning": "plow",
     "strokeCount": 6,
     "relatedChars": [
-      "耔",
-      "耕",
-      "耖",
       "耗",
+      "耕",
       "耘",
       "耙",
-      "耜",
-      "耠",
-      "耢",
-      "耤"
+      "耜"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "耳": {
@@ -2013,18 +2454,20 @@
     "englishMeaning": "ear",
     "strokeCount": 6,
     "relatedChars": [
-      "耵",
-      "耶",
-      "耷",
-      "耸",
-      "耻",
-      "耽",
-      "聃",
+      "聽",
+      "取",
+      "聲",
+      "聞",
+      "職",
+      "餌",
+      "敢",
+      "聳",
+      "聰",
+      "聖",
       "聆",
-      "聊",
-      "聋"
+      "耶"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "聿": {
@@ -2033,8 +2476,18 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "brush",
     "strokeCount": 6,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "事",
+      "書",
+      "建",
+      "畫",
+      "盡",
+      "律",
+      "筆",
+      "肆",
+      "津"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "肉": {
     "meaning": "動物體中包住骨骼的柔韌物質",
@@ -2043,12 +2496,10 @@
     "englishMeaning": "meat",
     "strokeCount": 6,
     "relatedChars": [
-      "胬",
-      "脔",
-      "腐",
-      "臠"
+      "前",
+      "腐"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "臣": {
@@ -2058,11 +2509,11 @@
     "englishMeaning": "minister",
     "strokeCount": 6,
     "relatedChars": [
+      "臥",
       "監",
-      "臧",
-      "赜"
+      "臧"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "自": {
@@ -2072,9 +2523,12 @@
     "englishMeaning": "oneself",
     "strokeCount": 6,
     "relatedChars": [
+      "息",
+      "首",
+      "夏",
       "鼻"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "至": {
@@ -2085,9 +2539,14 @@
     "strokeCount": 6,
     "relatedChars": [
       "到",
+      "臺",
+      "致",
+      "室",
+      "屋",
+      "蛭",
       "臻"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "臼": {
@@ -2097,9 +2556,11 @@
     "englishMeaning": "mortar",
     "strokeCount": 6,
     "relatedChars": [
+      "舅",
+      "毀",
       "舂"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "舌": {
@@ -2109,10 +2570,16 @@
     "englishMeaning": "tongue",
     "strokeCount": 6,
     "relatedChars": [
+      "話",
+      "活",
+      "甜",
+      "括",
+      "舍",
+      "刮",
       "舐",
       "舔"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "舛": {
@@ -2121,8 +2588,10 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "contrary",
     "strokeCount": 6,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "舞"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "舟": {
     "meaning": "船",
@@ -2131,18 +2600,13 @@
     "englishMeaning": "boat",
     "strokeCount": 6,
     "relatedChars": [
-      "舡",
-      "舢",
-      "舣",
-      "舨",
+      "般",
       "航",
-      "舫",
-      "舭",
-      "舯",
-      "舰",
-      "舲"
+      "舢",
+      "舨",
+      "舫"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "艮": {
@@ -2152,10 +2616,20 @@
     "englishMeaning": "mountain",
     "strokeCount": 6,
     "relatedChars": [
-      "艰",
-      "艱"
+      "很",
+      "眼",
+      "根",
+      "跟",
+      "退",
+      "限",
+      "銀",
+      "良",
+      "艱",
+      "狠",
+      "痕",
+      "恨"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "色": {
@@ -2165,9 +2639,9 @@
     "englishMeaning": "color",
     "strokeCount": 6,
     "relatedChars": [
-      "艴"
+      "艷"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "艹": {
@@ -2177,18 +2651,20 @@
     "englishMeaning": "grass",
     "strokeCount": 3,
     "relatedChars": [
-      "艺",
-      "艻",
-      "艽",
-      "艾",
-      "艿",
-      "芄",
-      "芋",
-      "芍",
-      "芎",
-      "芏"
+      "著",
+      "花",
+      "葉",
+      "苦",
+      "落",
+      "夢",
+      "藍",
+      "英",
+      "藥",
+      "蘭",
+      "菜",
+      "苞"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "虍": {
@@ -2198,10 +2674,15 @@
     "englishMeaning": "tiger",
     "strokeCount": 6,
     "relatedChars": [
-      "虘",
+      "處",
+      "虎",
+      "虛",
+      "慮",
+      "虜",
+      "膚",
       "虞"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "虫": {
@@ -2211,18 +2692,20 @@
     "englishMeaning": "insect",
     "strokeCount": 6,
     "relatedChars": [
-      "萤",
-      "虮",
-      "虱",
-      "虹",
-      "虺",
-      "虻",
-      "虼",
-      "虾",
-      "虿",
-      "蚁"
+      "強",
+      "蟲",
+      "蜂",
+      "蛾",
+      "蛇",
+      "蛋",
+      "蛙",
+      "蜜",
+      "蜘",
+      "蛛",
+      "融",
+      "蟹"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "血": {
@@ -2232,9 +2715,9 @@
     "englishMeaning": "blood",
     "strokeCount": 6,
     "relatedChars": [
-      "衅"
+      "恤"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "行": {
@@ -2244,15 +2727,16 @@
     "englishMeaning": "walk",
     "strokeCount": 6,
     "relatedChars": [
-      "衖",
-      "街",
-      "衙",
-      "衚",
-      "衛",
+      "術",
       "衝",
+      "衡",
+      "街",
+      "衛",
+      "衍",
+      "衙",
       "衢"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "衣": {
@@ -2262,18 +2746,20 @@
     "englishMeaning": "clothes",
     "strokeCount": 6,
     "relatedChars": [
-      "衾",
-      "袅",
-      "袈",
+      "表",
+      "展",
+      "製",
+      "依",
+      "裝",
       "袋",
-      "袤",
-      "裂",
-      "装",
-      "裊",
-      "裏",
-      "裒"
+      "襲",
+      "裁",
+      "裔",
+      "哀",
+      "衷",
+      "裂"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "西": {
@@ -2282,8 +2768,10 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "west",
     "strokeCount": 6,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "晒"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "见": {
     "meaning": "see",
@@ -2292,18 +2780,9 @@
     "englishMeaning": "see",
     "strokeCount": 4,
     "relatedChars": [
-      "規",
-      "视",
-      "览",
-      "觉",
-      "觊",
-      "觌",
-      "觎",
-      "觏",
-      "觐",
-      "觑"
+      "規"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "角": {
@@ -2313,18 +2792,11 @@
     "englishMeaning": "horn",
     "strokeCount": 7,
     "relatedChars": [
-      "觖",
-      "觚",
-      "觜",
-      "觞",
-      "觥",
-      "触",
-      "觫",
-      "觯",
-      "觱",
-      "觳"
+      "解",
+      "衡",
+      "觸"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "讠": {
@@ -2335,18 +2807,11 @@
     "strokeCount": 2,
     "baseRadical": "言",
     "relatedChars": [
-      "计",
-      "订",
-      "讣",
-      "認",
-      "讥",
       "讓",
-      "讪",
-      "讫",
-      "训",
+      "認",
       "議"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "谷": {
@@ -2356,11 +2821,17 @@
     "englishMeaning": "valley",
     "strokeCount": 7,
     "relatedChars": [
+      "容",
+      "卻",
+      "欲",
+      "鵒",
+      "俗",
       "谿",
       "豁",
-      "郤"
+      "浴",
+      "裕"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "豆": {
@@ -2370,11 +2841,17 @@
     "englishMeaning": "bean",
     "strokeCount": 7,
     "relatedChars": [
-      "豇",
+      "頭",
+      "短",
+      "登",
+      "豐",
+      "廚",
+      "豎",
+      "逗",
       "豉",
       "豌"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "豕": {
@@ -2384,13 +2861,15 @@
     "englishMeaning": "pig",
     "strokeCount": 7,
     "relatedChars": [
+      "家",
       "象",
-      "豢",
+      "逐",
       "豪",
+      "遂",
       "豬",
-      "豱"
+      "豢"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "豸": {
@@ -2400,18 +2879,15 @@
     "englishMeaning": "badger",
     "strokeCount": 7,
     "relatedChars": [
-      "豹",
-      "豺",
-      "豻",
-      "貂",
-      "貅",
-      "貉",
-      "貍",
+      "貌",
       "貓",
-      "貔",
-      "貘"
+      "豹",
+      "貂",
+      "豺",
+      "貉",
+      "貍"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "贝": {
@@ -2421,18 +2897,10 @@
     "englishMeaning": "shell",
     "strokeCount": 4,
     "relatedChars": [
-      "员",
-      "貿",
       "賞",
-      "贡",
-      "财",
-      "贤",
-      "账",
-      "货",
-      "质",
-      "贩"
+      "貿"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "赤": {
@@ -2442,10 +2910,11 @@
     "englishMeaning": "red",
     "strokeCount": 7,
     "relatedChars": [
+      "赫",
       "赧",
       "赭"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "走": {
@@ -2455,18 +2924,20 @@
     "englishMeaning": "walk",
     "strokeCount": 7,
     "relatedChars": [
-      "赳",
-      "赴",
-      "赶",
       "起",
-      "赸",
-      "趁",
-      "趄",
-      "超",
       "越",
-      "趋"
+      "超",
+      "趕",
+      "趨",
+      "徒",
+      "趣",
+      "赳",
+      "趟",
+      "陡",
+      "赴",
+      "趁"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "足": {
@@ -2476,18 +2947,20 @@
     "englishMeaning": "foot",
     "strokeCount": 7,
     "relatedChars": [
-      "趴",
-      "趵",
-      "趺",
-      "趼",
-      "趾",
-      "趿",
-      "跂",
-      "跃",
-      "跄",
-      "跆"
+      "跑",
+      "路",
+      "跟",
+      "距",
+      "跳",
+      "跡",
+      "促",
+      "跌",
+      "跨",
+      "踏",
+      "蹟",
+      "蹲"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "身": {
@@ -2497,12 +2970,11 @@
     "englishMeaning": "body",
     "strokeCount": 7,
     "relatedChars": [
-      "躯",
       "躲",
       "躺",
       "軀"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "车": {
@@ -2511,19 +2983,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "cart",
     "strokeCount": 4,
-    "relatedChars": [
-      "毂",
-      "轧",
-      "轨",
-      "轩",
-      "轫",
-      "转",
-      "轭",
-      "轮",
-      "软",
-      "轱"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "辛": {
@@ -2533,10 +2994,14 @@
     "englishMeaning": "bitter",
     "strokeCount": 7,
     "relatedChars": [
+      "辦",
+      "辨",
+      "宰",
+      "辯",
       "辜",
       "辣"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "辰": {
@@ -2545,8 +3010,13 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "morning",
     "strokeCount": 7,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "震",
+      "振",
+      "晨",
+      "唇"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "辶": {
     "meaning": "walk",
@@ -2555,18 +3025,20 @@
     "englishMeaning": "walk",
     "strokeCount": 3,
     "relatedChars": [
-      "边",
-      "辽",
-      "达",
-      "迁",
-      "迂",
-      "迄",
-      "过",
-      "迎",
-      "运",
-      "近"
+      "這",
+      "運",
+      "過",
+      "選",
+      "進",
+      "道",
+      "近",
+      "造",
+      "達",
+      "速",
+      "連",
+      "述"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "邑": {
@@ -2576,9 +3048,11 @@
     "englishMeaning": "city",
     "strokeCount": 7,
     "relatedChars": [
+      "那",
+      "邪",
       "扈"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "酉": {
@@ -2588,18 +3062,20 @@
     "englishMeaning": "wine",
     "strokeCount": 7,
     "relatedChars": [
-      "酊",
-      "酌",
+      "醫",
+      "醒",
+      "醬",
+      "酒",
+      "酷",
       "配",
-      "酎",
-      "酏",
-      "酐",
-      "酕",
-      "酚",
-      "酝",
-      "酞"
+      "醜",
+      "酬",
+      "醉",
+      "酸",
+      "醍",
+      "醐"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "釆": {
@@ -2609,11 +3085,12 @@
     "englishMeaning": "distinguish",
     "strokeCount": 7,
     "relatedChars": [
-      "釉",
-      "释",
-      "釋"
+      "奧",
+      "釋",
+      "悉",
+      "釉"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "里": {
@@ -2623,10 +3100,15 @@
     "englishMeaning": "village",
     "strokeCount": 7,
     "relatedChars": [
+      "重",
+      "裡",
+      "理",
+      "量",
+      "童",
       "野",
-      "量"
+      "埋"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "钅": {
@@ -2636,19 +3118,8 @@
     "englishMeaning": "metal / gold (simplified side)",
     "strokeCount": 5,
     "baseRadical": "金",
-    "relatedChars": [
-      "衔",
-      "钆",
-      "钇",
-      "钋",
-      "钌",
-      "钍",
-      "钏",
-      "钐",
-      "钒",
-      "钔"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "长": {
@@ -2666,19 +3137,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "gate",
     "strokeCount": 3,
-    "relatedChars": [
-      "闫",
-      "闱",
-      "闳",
-      "闶",
-      "闸",
-      "闺",
-      "闼",
-      "闾",
-      "阀",
-      "阁"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "阜": {
@@ -2696,8 +3156,11 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "slave",
     "strokeCount": 8,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "康",
+      "隸"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "隹": {
     "meaning": "短尾鳥的總稱",
@@ -2706,18 +3169,20 @@
     "englishMeaning": "short-tailed bird",
     "strokeCount": 8,
     "relatedChars": [
-      "隼",
-      "雁",
+      "進",
+      "難",
+      "推",
+      "離",
+      "集",
       "雄",
-      "雅",
-      "雇",
-      "雈",
-      "雉",
-      "雌",
-      "雎",
-      "雏"
+      "隻",
+      "維",
+      "誰",
+      "奪",
+      "雞",
+      "焦"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "雨": {
@@ -2727,18 +3192,20 @@
     "englishMeaning": "rain",
     "strokeCount": 8,
     "relatedChars": [
-      "雪",
-      "雯",
-      "雳",
-      "零",
+      "需",
+      "電",
+      "震",
+      "雷",
       "雹",
-      "雾",
-      "霁",
-      "霂",
-      "霆",
-      "震"
+      "零",
+      "雲",
+      "雪",
+      "露",
+      "霾",
+      "霄",
+      "霧"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "青": {
@@ -2748,11 +3215,19 @@
     "englishMeaning": "blue",
     "strokeCount": 8,
     "relatedChars": [
-      "静",
-      "靛",
-      "靜"
+      "請",
+      "情",
+      "精",
+      "清",
+      "睛",
+      "靜",
+      "猜",
+      "菁",
+      "晴",
+      "蜻",
+      "靛"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "非": {
@@ -2762,10 +3237,18 @@
     "englishMeaning": "wrong",
     "strokeCount": 8,
     "relatedChars": [
+      "排",
       "靠",
+      "輩",
+      "悲",
+      "罪",
+      "匪",
+      "啡",
+      "斐",
+      "菲",
       "靡"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "面": {
@@ -2775,11 +3258,10 @@
     "englishMeaning": "face",
     "strokeCount": 9,
     "relatedChars": [
-      "靥",
-      "靦",
-      "麵"
+      "麵",
+      "靦"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "革": {
@@ -2789,18 +3271,18 @@
     "englishMeaning": "leather",
     "strokeCount": 9,
     "relatedChars": [
-      "靳",
-      "靴",
-      "靶",
-      "靼",
-      "鞅",
       "鞋",
+      "鞭",
       "鞍",
-      "鞑",
-      "鞒",
-      "鞔"
+      "勒",
+      "鞏",
+      "霸",
+      "靶",
+      "靴",
+      "靼",
+      "鞅"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "韦": {
@@ -2809,12 +3291,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "soft leather",
     "strokeCount": 4,
-    "relatedChars": [
-      "韧",
-      "韫",
-      "韬"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "韭": {
@@ -2823,10 +3301,8 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "leek",
     "strokeCount": 9,
-    "relatedChars": [
-      "齑"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "音": {
@@ -2836,9 +3312,17 @@
     "englishMeaning": "sound",
     "strokeCount": 9,
     "relatedChars": [
-      "響"
+      "意",
+      "章",
+      "響",
+      "竟",
+      "暗",
+      "黯",
+      "喑",
+      "韻",
+      "瘖"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "页": {
@@ -2847,19 +3331,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "page",
     "strokeCount": 6,
-    "relatedChars": [
-      "顶",
-      "项",
-      "顺",
-      "顽",
-      "顾",
-      "顿",
-      "颀",
-      "颂",
-      "颃",
-      "预"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "风": {
@@ -2868,15 +3341,8 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "wind",
     "strokeCount": 4,
-    "relatedChars": [
-      "飐",
-      "飒",
-      "飓",
-      "飕",
-      "飖",
-      "飘"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "飞": {
@@ -2885,8 +3351,10 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "fly",
     "strokeCount": 4,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "飛"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "饣": {
     "meaning": "吃的東西（食的變體）",
@@ -2895,19 +3363,8 @@
     "englishMeaning": "food (simplified side)",
     "strokeCount": 3,
     "baseRadical": "食",
-    "relatedChars": [
-      "饥",
-      "饧",
-      "饨",
-      "饩",
-      "饪",
-      "饫",
-      "饭",
-      "饮",
-      "饯",
-      "饱"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "首": {
@@ -2917,9 +3374,9 @@
     "englishMeaning": "head",
     "strokeCount": 9,
     "relatedChars": [
-      "馗"
+      "道"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "香": {
@@ -2941,19 +3398,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "horse",
     "strokeCount": 3,
-    "relatedChars": [
-      "冯",
-      "腾",
-      "蓦",
-      "驭",
-      "驮",
-      "驯",
-      "驰",
-      "驱",
-      "驳",
-      "驴"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "骨": {
@@ -2963,18 +3409,15 @@
     "englishMeaning": "bone",
     "strokeCount": 9,
     "relatedChars": [
-      "骯",
-      "骶",
-      "骷",
-      "骸",
+      "體",
       "骼",
-      "髁",
-      "髂",
-      "髅",
-      "髋",
-      "髌"
+      "滑",
+      "骸",
+      "髒",
+      "骯",
+      "骷"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "高": {
@@ -2984,9 +3427,14 @@
     "englishMeaning": "high",
     "strokeCount": 10,
     "relatedChars": [
-      "喬"
+      "喬",
+      "敲",
+      "搞",
+      "稿",
+      "膏",
+      "豪"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "髟": {
@@ -2996,18 +3444,16 @@
     "englishMeaning": "long hair",
     "strokeCount": 10,
     "relatedChars": [
-      "髡",
-      "髦",
-      "髫",
-      "髭",
       "髮",
+      "鬚",
+      "髦",
+      "髭",
       "髯",
-      "髹",
       "髻",
       "鬃",
       "鬍"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鬥": {
@@ -3017,10 +3463,10 @@
     "englishMeaning": "fight",
     "strokeCount": 10,
     "relatedChars": [
-      "鬨",
-      "鬩"
+      "鬧",
+      "鬨"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鬯": {
@@ -3039,9 +3485,10 @@
     "englishMeaning": "cauldron",
     "strokeCount": 10,
     "relatedChars": [
+      "隔",
       "融"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鬼": {
@@ -3051,18 +3498,18 @@
     "englishMeaning": "ghost",
     "strokeCount": 9,
     "relatedChars": [
-      "醜",
+      "塊",
       "魂",
-      "魃",
+      "魔",
+      "醜",
+      "蒐",
+      "魅",
       "魄",
-      "魆",
-      "魇",
-      "魈",
-      "魉",
-      "魍",
-      "魎"
+      "魁",
+      "愧",
+      "瑰"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鱼": {
@@ -3071,19 +3518,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "fish",
     "strokeCount": 8,
-    "relatedChars": [
-      "鰂",
-      "鱿",
-      "鲂",
-      "鲃",
-      "鲅",
-      "鲆",
-      "鲇",
-      "鲈",
-      "鲋",
-      "鲍"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鸟": {
@@ -3092,19 +3528,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "bird",
     "strokeCount": 5,
-    "relatedChars": [
-      "凫",
-      "鸠",
-      "鸢",
-      "鸥",
-      "鸦",
-      "鸧",
-      "鸨",
-      "鸩",
-      "鸪",
-      "鸫"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "卤": {
@@ -3113,10 +3538,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "salty",
     "strokeCount": 7,
-    "relatedChars": [
-      "鹾"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鹿": {
@@ -3126,16 +3549,17 @@
     "englishMeaning": "deer",
     "strokeCount": 11,
     "relatedChars": [
-      "廌",
+      "麗",
+      "塵",
+      "慶",
+      "麟",
+      "簏",
       "麂",
-      "麇",
-      "麈",
       "麋",
       "麒",
-      "麝",
-      "麟"
+      "麝"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "麦": {
@@ -3144,10 +3568,8 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "wheat",
     "strokeCount": 7,
-    "relatedChars": [
-      "麸"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "麻": {
@@ -3156,8 +3578,14 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "hemp",
     "strokeCount": 11,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "麼",
+      "摩",
+      "磨",
+      "魔",
+      "嘛"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "黄": {
     "meaning": "「黃」的異體字",
@@ -3165,8 +3593,10 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "yellow",
     "strokeCount": 11,
-    "relatedChars": [],
-    "relatedCharsSource": "none"
+    "relatedChars": [
+      "廣"
+    ],
+    "relatedCharsSource": "decomposition+moe4808 (from none)"
   },
   "黍": {
     "meaning": "植物名",
@@ -3175,9 +3605,10 @@
     "englishMeaning": "millet",
     "strokeCount": 12,
     "relatedChars": [
+      "黎",
       "黏"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "黑": {
@@ -3187,18 +3618,17 @@
     "englishMeaning": "black",
     "strokeCount": 12,
     "relatedChars": [
+      "點",
+      "墨",
+      "黯",
+      "嘿",
       "黔",
       "黛",
       "黜",
       "黝",
-      "點",
-      "黟",
-      "黠",
-      "黢",
-      "黥",
-      "黧"
+      "黠"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "黹": {
@@ -3207,11 +3637,8 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "embroidery",
     "strokeCount": 12,
-    "relatedChars": [
-      "黻",
-      "黼"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "黾": {
@@ -3220,11 +3647,8 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "frog",
     "strokeCount": 8,
-    "relatedChars": [
-      "鼋",
-      "鼍"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鼎": {
@@ -3233,10 +3657,8 @@
     "meaningSourceUrl": "https://github.com/g0v/moedict-data",
     "englishMeaning": "tripod",
     "strokeCount": 12,
-    "relatedChars": [
-      "鼐"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鼓": {
@@ -3246,10 +3668,9 @@
     "englishMeaning": "drum",
     "strokeCount": 13,
     "relatedChars": [
-      "鼕",
-      "鼗"
+      "鼕"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鼠": {
@@ -3259,16 +3680,12 @@
     "englishMeaning": "rat",
     "strokeCount": 13,
     "relatedChars": [
-      "鼢",
+      "竄",
       "鼩",
       "鼬",
-      "鼯",
-      "鼱",
-      "鼴",
-      "鼷",
-      "鼹"
+      "鼴"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "鼻": {
@@ -3278,11 +3695,9 @@
     "englishMeaning": "nose",
     "strokeCount": 14,
     "relatedChars": [
-      "鼽",
-      "鼾",
-      "齄"
+      "鼾"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "齐": {
@@ -3300,19 +3715,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "tooth",
     "strokeCount": 8,
-    "relatedChars": [
-      "龀",
-      "龃",
-      "龄",
-      "龅",
-      "龆",
-      "龇",
-      "龈",
-      "龉",
-      "龋",
-      "龌"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "龙": {
@@ -3321,12 +3725,8 @@
     "meaningSourceUrl": "https://gist.github.com/branneman/f93d596ac236f0dbd9fb5b1a5099122f",
     "englishMeaning": "dragon",
     "strokeCount": 5,
-    "relatedChars": [
-      "袭",
-      "龚",
-      "龛"
-    ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedChars": [],
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "龟": {
@@ -3355,18 +3755,20 @@
     "strokeCount": 3,
     "baseRadical": "水",
     "relatedChars": [
-      "塗",
-      "氾",
-      "氿",
-      "汀",
-      "汁",
-      "汒",
-      "汔",
-      "汕",
-      "汗",
-      "汛"
+      "沒",
+      "法",
+      "灣",
+      "活",
+      "決",
+      "海",
+      "深",
+      "流",
+      "滿",
+      "洲",
+      "清",
+      "注"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "扌": {
@@ -3377,18 +3779,20 @@
     "strokeCount": 3,
     "baseRadical": "手",
     "relatedChars": [
-      "举",
-      "扑",
-      "扒",
+      "我",
+      "提",
+      "指",
+      "把",
+      "據",
+      "持",
+      "接",
+      "推",
+      "找",
       "打",
-      "扔",
-      "払",
-      "扢",
-      "扣",
-      "扦",
-      "扪"
+      "技",
+      "拉"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "忄": {
@@ -3399,18 +3803,20 @@
     "strokeCount": 3,
     "baseRadical": "心",
     "relatedChars": [
-      "忆",
-      "忉",
-      "忏",
-      "忕",
-      "忖",
-      "忡",
-      "忤",
-      "忧",
-      "忪",
-      "忭"
+      "性",
+      "情",
+      "快",
+      "慢",
+      "怕",
+      "懂",
+      "忙",
+      "憂",
+      "慣",
+      "惜",
+      "懷",
+      "懼"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "亻": {
@@ -3421,18 +3827,20 @@
     "strokeCount": 2,
     "baseRadical": "人",
     "relatedChars": [
-      "亿",
-      "仃",
-      "仅",
-      "仆",
-      "仇",
-      "仕",
-      "仗",
-      "仙",
-      "仟",
-      "仫"
+      "他",
+      "個",
+      "們",
+      "作",
+      "但",
+      "你",
+      "什",
+      "位",
+      "做",
+      "保",
+      "代",
+      "像"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "訁": {
@@ -3443,18 +3851,16 @@
     "strokeCount": 2,
     "baseRadical": "言",
     "relatedChars": [
-      "訂",
-      "訃",
-      "訇",
+      "訓",
       "計",
       "訊",
-      "訓",
+      "訂",
+      "訃",
       "訕",
       "訖",
-      "訚",
       "訛"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "釒": {
@@ -3465,18 +3871,20 @@
     "strokeCount": 8,
     "baseRadical": "金",
     "relatedChars": [
-      "欽",
-      "釦",
-      "釧",
-      "釩",
-      "鈀",
-      "鈆",
-      "鈉",
-      "鈍",
-      "鈔",
-      "鈕"
+      "錯",
+      "錢",
+      "錄",
+      "鐘",
+      "鍵",
+      "銀",
+      "鈺",
+      "鍊",
+      "鍛",
+      "針",
+      "鏡",
+      "銅"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "飠": {
@@ -3487,18 +3895,20 @@
     "strokeCount": 8,
     "baseRadical": "食",
     "relatedChars": [
-      "飢",
-      "飩",
-      "飪",
-      "飫",
       "飯",
+      "餅",
+      "餌",
       "飲",
-      "飴",
-      "飼",
+      "館",
+      "餘",
       "飽",
-      "餃"
+      "餓",
+      "飾",
+      "飢",
+      "餵",
+      "餒"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "糹": {
@@ -3509,18 +3919,20 @@
     "strokeCount": 6,
     "baseRadical": "糸",
     "relatedChars": [
+      "練",
+      "經",
+      "結",
+      "級",
+      "給",
+      "組",
+      "終",
+      "總",
+      "續",
       "紀",
-      "紂",
-      "約",
-      "紅",
-      "紆",
-      "紈",
-      "紋",
-      "納",
-      "紐",
-      "純"
+      "細",
+      "線"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "礻": {
@@ -3531,18 +3943,20 @@
     "strokeCount": 4,
     "baseRadical": "示",
     "relatedChars": [
-      "礼",
-      "祀",
-      "祁",
-      "祇",
-      "祈",
-      "祉",
-      "祎",
-      "祓",
+      "視",
+      "神",
+      "社",
+      "福",
+      "祥",
+      "祖",
+      "禮",
       "祕",
-      "祖"
+      "祝",
+      "禍",
+      "祇",
+      "祈"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "衤": {
@@ -3553,18 +3967,20 @@
     "strokeCount": 5,
     "baseRadical": "衣",
     "relatedChars": [
-      "补",
-      "衩",
+      "裡",
+      "被",
+      "補",
+      "複",
+      "初",
+      "襯",
+      "褲",
       "衫",
-      "衬",
-      "衲",
-      "衹",
-      "衽",
-      "衿",
-      "袂",
-      "袄"
+      "袖",
+      "褓",
+      "襁",
+      "裕"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "灬": {
@@ -3575,18 +3991,20 @@
     "strokeCount": 4,
     "baseRadical": "火",
     "relatedChars": [
-      "点",
-      "烈",
-      "热",
-      "烹",
-      "焘",
+      "為",
       "然",
-      "煎",
+      "黑",
+      "盡",
+      "熱",
       "照",
+      "烈",
+      "焦",
+      "熬",
+      "熟",
       "煮",
-      "熏"
+      "熙"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   },
   "刂": {
@@ -3597,18 +4015,20 @@
     "strokeCount": 2,
     "baseRadical": "刀",
     "relatedChars": [
-      "刈",
-      "刊",
-      "刎",
-      "刖",
+      "到",
+      "別",
       "列",
-      "刘",
-      "刚",
-      "创",
+      "利",
       "判",
-      "刨"
+      "則",
+      "刻",
+      "制",
+      "創",
+      "班",
+      "刺",
+      "辨"
     ],
-    "relatedCharsSource": "makemeahanzi",
+    "relatedCharsSource": "decomposition+moe4808 (from makemeahanzi)",
     "relatedCharsSourceUrl": "https://github.com/skishore/makemeahanzi"
   }
 }

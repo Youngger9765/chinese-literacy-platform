@@ -2,34 +2,24 @@
  * ttsHighlight.ts
  *
  * Helper for syncing TTS highlight progress with display text that contains
- * symbols stripped by _cleanForTts().
+ * symbols stripped by _cleanForTts() and zhuyin PUA variant selectors.
  *
- * Problem: displayText may contain ~~~, ──, …, etc. that are removed before
- * TTS audio is generated. The audio's character-count progress doesn't match
- * the display character index, causing highlights to lag behind.
+ * Problem 1 — stripped symbols (#1110):
+ * displayText may contain ~~~, ──, …, etc. that are removed before TTS audio
+ * is generated. Audio char-count progress doesn't match display char index,
+ * causing highlights to lag.
  *
- * Solution: Walk display chars; skip chars that _cleanForTts would strip so
- * they don't consume TTS progress budget.
- */
-
-/**
- * _cleanForTts has two distinct transformation types — we must treat them
- * differently when walking display chars:
+ * Problem 2 — zhuyin PUA variant selectors (#1112):
+ * Polyphonic chars carry U+E01E1–U+E01E5 selectors (BpmfZihiSans font). These
+ * are surrogate pairs (2 UTF-16 code units each) invisible to TTS. Walking
+ * displayText by UTF-16 index inflates `effective` by 2 per polyphonic char,
+ * pushing the highlight split past the real char boundary onto adjacent
+ * symbols (~~~, ──).
  *
- * 1. TRULY STRIPPED (→ ''): these chars vanish from TTS audio entirely.
- *    They must NOT advance `effective` (no audio time consumed).
- *    Examples: [~～], #, [/\|], [*\[\]{}], [·‧・°○]
- *
- * 2. REPLACED WITH ONE CHAR (→ '，'): these chars become a single pause char.
- *    They MUST advance `effective` by 1 (one char worth of audio time).
- *    Examples: [──—–−] and […⋯] and -{2,}  (all → '，')
- *
- * 3. REPLACED WITH THREE CHARS (→ '百分之'): % becomes 3 TTS chars.
- *    Advances `effective` by 3.
- *
- * Treating category 2/3 as "stripped" (category 1) makes the highlight split
- * arrive ahead of the speech whenever those chars appear in displayText.
- * E.g. L01.yml contains '球后──戴資穎' — the '──' must count as 1 TTS char.
+ * Solution: walk the array of display char GROUPS (from splitZhuyinChars).
+ * Each group = base char + optional PUA selector, contributing exactly what
+ * _cleanForTts would contribute for the base: 0 (stripped), 1 (normal /
+ * pause), or 3 (%). Returns an array index that matches chars.length.
  *
  * Keep in sync with _cleanForTts in frontend/src/services/ttsApi.ts.
  */
@@ -37,53 +27,66 @@
 /** Truly removed by _cleanForTts — contribute 0 TTS chars. */
 const STRIP_RE = /[~～#/\\|*[\]{}·‧・°○]/;
 
-/** Replaced by '，' (1 TTS char) — contribute 1 TTS char. */
+/**
+ * Collapsed to a single '，' by _cleanForTts — any consecutive run contributes
+ * 1 TTS char. Mirrors `/[──—–−]+/` and `/[…⋯]+/` in ttsApi.ts._cleanForTts.
+ */
 const PAUSE_ONE_RE = /[──—–−…⋯]/;
 
 /**
- * Given a display string (which may contain TTS-stripped/replaced symbols) and
- * a TTS progress count (number of cleaned chars already spoken), return the
- * index in displayText where highlighting should split.
+ * Given a char-group array (from splitZhuyinChars) and a TTS progress count
+ * (cleaned codepoints already spoken), return the array index where
+ * highlighting should split.
  *
- * Walk display chars, mapping each to its TTS char contribution:
+ * Each group's TTS contribution is derived from its base codepoint:
  *   - truly stripped chars → 0
  *   - pause chars (──, …)  → 1
  *   - % → 3 (百分之)
- *   - double-hyphen run    → 1
+ *   - consecutive '-' groups → collapsed into 1 (double-hyphen run)
  *   - all other chars      → 1
  */
-export function displayIdxForProgress(displayText: string, progress: number): number {
+export function groupIdxForProgress(chars: string[], progress: number): number {
   let effective = 0;
-  for (let i = 0; i < displayText.length; i++) {
+  for (let i = 0; i < chars.length; i++) {
     if (effective >= progress) return i;
-    const ch = displayText[i];
+    const baseCp = chars[i].codePointAt(0);
+    if (baseCp === undefined) continue;
+    const base = String.fromCodePoint(baseCp);
 
-    // Double-hyphen run "-{2,}" → '，' (1 TTS char)
-    if (ch === '-' && displayText[i + 1] === '-') {
-      while (i + 1 < displayText.length && displayText[i + 1] === '-') i++;
+    // Double-hyphen run "-{2,}" → '，' (1 TTS char). Collapse adjacent '-' groups.
+    if (base === '-' && chars[i + 1]?.codePointAt(0) === 0x2D) {
+      while (chars[i + 1]?.codePointAt(0) === 0x2D) i++;
       effective++;
       continue;
     }
 
     // % → '百分之' (3 TTS chars)
-    if (ch === '%') {
+    if (base === '%') {
       effective += 3;
       continue;
     }
 
-    // Pause chars (em-dash, ellipsis) → '，' (1 TTS char)
-    if (PAUSE_ONE_RE.test(ch)) {
+    // Pause chars (em-dash, ellipsis) → '，' (1 TTS char).
+    // Consecutive runs are collapsed by _cleanForTts (`/[──—–−]+/`), so skip
+    // adjacent pause groups too.
+    if (PAUSE_ONE_RE.test(base)) {
+      while (chars[i + 1]) {
+        const nextCp = chars[i + 1].codePointAt(0);
+        if (nextCp === undefined) break;
+        if (!PAUSE_ONE_RE.test(String.fromCodePoint(nextCp))) break;
+        i++;
+      }
       effective++;
       continue;
     }
 
     // Truly stripped chars → 0 TTS chars
-    if (STRIP_RE.test(ch)) {
+    if (STRIP_RE.test(base)) {
       continue;
     }
 
     // All other chars (CJK, punctuation, letters) → 1 TTS char
     effective++;
   }
-  return displayText.length;
+  return chars.length;
 }
