@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, googleLogin as apiGoogleLogin, AuthUser, AuthError, RegisterResponse } from '../services/authApi';
+import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, googleLogin as apiGoogleLogin, junyiLogin as apiJunyiLogin, AuthUser, AuthError, RegisterResponse } from '../services/authApi';
 import { SESSION_UNAUTHORIZED_EVENT } from '../services/sessionGuard';
 
 const TOKEN_KEY = 'lingoleap_token';
@@ -31,6 +31,8 @@ interface AuthContextValue {
   refreshUser: () => Promise<void>;
   acceptTerms: () => Promise<void>;
   loginWithGoogle: (credential: string) => Promise<{ isNewUser: boolean }>;
+  /** Exchange a Junyi SSO one-time code for a LingoLeap session (issue #1198). */
+  loginWithJunyi: (code: string) => Promise<{ isNewUser: boolean }>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -139,6 +141,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { isNewUser: response.is_new_user };
   }, []);
 
+  const loginWithJunyi = useCallback(async (code: string): Promise<{ isNewUser: boolean }> => {
+    const response = await apiJunyiLogin(code);
+    const newToken = response.access_token;
+    // Same ordering as loginWithGoogle: pre-fetch user so token-change useEffect
+    // sees user !== null and skips the redundant /me call (Issue #1156).
+    const userData = await getMe(newToken);
+    localStorage.setItem(TOKEN_KEY, newToken);
+    setUser(userData);
+    setToken(newToken);
+    return { isNewUser: response.is_new_user };
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     try {
@@ -224,6 +238,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshUser,
     acceptTerms,
     loginWithGoogle,
+    loginWithJunyi,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
