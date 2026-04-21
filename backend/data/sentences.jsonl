@@ -995,7 +995,6 @@
 {"lesson_id": 25, "paragraph_idx": 11, "sentence_idx": 3, "text": "她手腳比劃、口中唸唸有詞之後，轉頭向媽媽和太太講了幾句話。", "length": 26, "reasoning": "[長度33字] 原句過長（53字），在語意轉折處拆分並將逗號升級為句號，語意完整，符合朗讀長度偏好。", "segmenter_source": "gemini+validated"}
 {"lesson_id": 25, "paragraph_idx": 11, "sentence_idx": 4, "text": "就突然給媽媽一個深深的擁抱、也給太太一個擁抱！", "length": 21, "reasoning": "[長度22字] 原句過長拆分後，語意完整，符合朗讀長度偏好。", "segmenter_source": "gemini+validated"}
 {"lesson_id": 25, "paragraph_idx": 12, "sentence_idx": 0, "text": "護理師後來轉述說，她向太太說：「我上有老下有小，是放心不下，但是，也不想回來了，回來也是這樣躺著，很辛苦！也會讓你和媽媽辛苦！你要想清楚，我們夫妻同心！」", "length": 64, "reasoning": "[長度74字] 語意完整，且根據硬規則A和B，對話引號內的內容及冒號後的引述內容必須與說話者在同一句，因此無法拆分。", "segmenter_source": "gemini+validated", "review_note": "over-40 (64字), no safe split (brackets/short-halves)"}
-{"lesson_id": 25, "paragraph_idx": 12, "sentence_idx": 1, "text": "（就是先生對太太的口吻在說話）。", "length": 13, "reasoning": "[長度15字] 語意完整，為獨立的補充說明，且以括號結尾符合句末標點規則。", "segmenter_source": "gemini+validated"}
 {"lesson_id": 25, "paragraph_idx": 13, "sentence_idx": 0, "text": "原來，這兩個大大的擁抱，是乩童代替病人執行的。", "length": 20, "reasoning": "[長度25字] 語意完整，符合朗讀長度偏好。", "segmenter_source": "gemini+validated"}
 {"lesson_id": 25, "paragraph_idx": 14, "sentence_idx": 0, "text": "接著，她就很虛弱的倒下（應該是退駕了？），需要旁人攙扶她出去。", "length": 25, "reasoning": "[長度36字] 語意完整，描述了人物倒下並被攙扶的連貫動作。", "segmenter_source": "gemini+validated"}
 {"lesson_id": 25, "paragraph_idx": 14, "sentence_idx": 1, "text": "她剛剛應該是消耗了很大的元氣，還滿頭汗水，真的辛苦她了。", "length": 25, "reasoning": "[長度30字] 語意完整，描述了人物的狀態和表達了關懷。", "segmenter_source": "gemini+validated"}

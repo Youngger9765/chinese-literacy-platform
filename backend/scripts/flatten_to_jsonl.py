@@ -7,6 +7,7 @@ Output: backend/data/sentences.jsonl, one line per sentence.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -15,10 +16,17 @@ VAL_DIR = ROOT / "backend" / "data" / "segmentation-v2-fixed"
 OUT = ROOT / "backend" / "data" / "sentences.jsonl"
 
 PUNCT = set("，。！？；：、「」『』（）【】《》〈〉—…·~—─")
+STAGE_DIRECTION = re.compile(r"^（[^（）]*）。?$")
 
 
 def canonical_length(text: str) -> int:
     return sum(1 for c in text if c not in PUNCT)
+
+
+def is_stage_direction(text: str) -> bool:
+    """Pure parenthetical notes (author asides, e.g. 『（就是先生對太太的口吻）。』)
+    aren't meant to be read aloud. TTS models refuse them anyway. Skip."""
+    return bool(STAGE_DIRECTION.match(text.strip()))
 
 
 def load_paragraphs(lid: int):
@@ -50,8 +58,12 @@ def main():
             summary.append((lid, "MISSING", 0))
             continue
         count = 0
+        skipped = 0
         for pidx, sents in paras:
             for s in sents:
+                if is_stage_direction(s["text"]):
+                    skipped += 1
+                    continue
                 rec = {
                     "lesson_id": lid,
                     "paragraph_idx": pidx,
