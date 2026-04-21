@@ -829,6 +829,20 @@ def start_assignment(
     raw_slug = assignment.story_id or str(assignment.text_id)
     story_slug = normalize_story_slug(raw_slug)
 
+    def _sync_assignment_metadata(session: LearningSession) -> None:
+        """Attach assignment metadata + classroom_id to a reused session.
+
+        Ensures both the session's step_progress.__meta points to this assignment
+        and classroom_id is backfilled when the session was originally self-practice.
+        """
+        progress = session.step_progress or {}
+        if not isinstance(progress.get("__meta"), dict) or progress["__meta"].get("assignment_id") != assignment.id:
+            progress["__meta"] = {"source": "assignment", "assignment_id": assignment.id}
+            session.step_progress = progress
+            flag_modified(session, "step_progress")
+        if session.classroom_id is None and assignment.classroom_id is not None:
+            session.classroom_id = assignment.classroom_id
+
     # Reuse existing in_progress session for same student + story to avoid
     # duplicates when switching devices (#1074).  Attach assignment metadata
     # so the session is associated with this assignment.
@@ -843,15 +857,7 @@ def start_assignment(
         .first()
     )
     if learning_session:
-        # Ensure assignment metadata and classroom_id are present on the reused session
-        progress = learning_session.step_progress or {}
-        if not isinstance(progress.get("__meta"), dict) or progress["__meta"].get("assignment_id") != assignment.id:
-            progress["__meta"] = {"source": "assignment", "assignment_id": assignment.id}
-            learning_session.step_progress = progress
-            flag_modified(learning_session, "step_progress")
-        # Sync classroom_id if the reused session was from self-practice (#1074 review)
-        if learning_session.classroom_id is None and assignment.classroom_id is not None:
-            learning_session.classroom_id = assignment.classroom_id
+        _sync_assignment_metadata(learning_session)
         logger.info(
             "Reusing existing session %d for assignment %d (student %d, story=%s) #1074",
             learning_session.id, assignment.id, current_user.id, story_slug,
@@ -871,7 +877,29 @@ def start_assignment(
             },
         )
         db.add(learning_session)
-        db.flush()  # get learning_session.id
+        try:
+            db.flush()  # get learning_session.id
+        except IntegrityError:
+            # Partial unique index (#1179) caught concurrent insert; reuse existing
+            # and sync assignment metadata onto it so it shows up under this assignment.
+            db.rollback()
+            learning_session = (
+                db.query(LearningSession)
+                .filter(
+                    LearningSession.student_id == current_user.id,
+                    LearningSession.story_slug == story_slug,
+                    LearningSession.status == "in_progress",
+                )
+                .order_by(LearningSession.started_at.desc())
+                .first()
+            )
+            if learning_session is None:
+                raise
+            _sync_assignment_metadata(learning_session)
+            logger.info(
+                "Race resolved in start_assignment: reusing session %d for assignment %d (#1179)",
+                learning_session.id, assignment_id,
+            )
 
     # Update submission
     submission.status = "in_progress"
