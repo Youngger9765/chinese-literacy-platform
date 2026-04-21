@@ -90,4 +90,8 @@ class AssignmentSubmission(Base):
     # Relationships
     assignment: Mapped["Assignment"] = relationship("Assignment", back_populates="submissions")
     student: Mapped["User"] = relationship("User", foreign_keys=[student_id])  # type: ignore[name-defined]
-    session: Mapped["LearningSession"] = relationship("LearningSession", foreign_keys=[session_id])  # type: ignore[name-defined]
+    # passive_deletes=True defers to DB-level ON DELETE SET NULL so SQLAlchemy
+    # skips the redundant UPDATE when the parent session is removed.
+    session: Mapped["LearningSession"] = relationship(  # type: ignore[name-defined]
+        "LearningSession", foreign_keys=[session_id], passive_deletes=True,
+    )
