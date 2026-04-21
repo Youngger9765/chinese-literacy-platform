@@ -72,7 +72,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [micError, setMicError] = useState('');
   const [streamingUserInput, setStreamingUserInput] = useState('');
-  // No-audio-detected banner (#1174): shown when user started recording but
+  // No-audio-detected banner: shown when user started recording but
   // no audio detected within 5 seconds.
   const [noAudioDetected, setNoAudioDetected] = useState(false);
 
@@ -205,10 +205,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     onNoAudioDetected: () => setNoAudioDetected(true),
   });
 
-  const startSession = useCallback(() => {
+  const startSession = () => {
     setNoAudioDetected(false);
     stt.startSession();
-  }, [stt]);
+  };
   const stopSession = stt.stopSession;
 
   /* ---- scroll helpers ---- */
@@ -891,7 +891,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         </div>
       )}
 
-      {/* No-audio-detected banner (#1174) */}
+      {/* No-audio-detected banner */}
       {noAudioDetected && stt.isSessionActive && (
         <div className="absolute bottom-44 left-1/2 -translate-x-1/2 z-20 w-[min(92%,520px)]">
           <div className="flex items-start gap-3 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 shadow-md">
@@ -906,7 +906,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               onClick={() => {
                 stopSession();
                 setNoAudioDetected(false);
-                setTimeout(() => startSession(), 100);
+                startSession();
               }}
               className="px-3 py-1 rounded-full text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 transition-all shrink-0"
             >
