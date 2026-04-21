@@ -723,6 +723,8 @@ export interface StepProgressData {
   current_step: string | null;
   steps_completed: string[];
   step_data: Record<string, unknown>;
+  /** Optimistic concurrency version (#1187). Increments with each successful save. */
+  version?: number;
 }
 
 export interface StepProgressResponse {
@@ -731,8 +733,24 @@ export interface StepProgressResponse {
 }
 
 /**
+ * Raised when DB rejects a save because the incoming version is older than stored.
+ * Caller should refresh state from the server and discard the stale client snapshot.
+ */
+export class StaleVersionError extends Error {
+  storedVersion: number;
+  incomingVersion: number;
+  constructor(storedVersion: number, incomingVersion: number) {
+    super(`Stale step_progress version: stored=${storedVersion} incoming=${incomingVersion}`);
+    this.name = 'StaleVersionError';
+    this.storedVersion = storedVersion;
+    this.incomingVersion = incomingVersion;
+  }
+}
+
+/**
  * Persist step progress to DB for a given learning session.
  * Non-blocking — caller should catch errors and not surface them to the user.
+ * Throws StaleVersionError (409) when the incoming version is older than stored.
  */
 export async function saveStepProgress(
   token: string,
@@ -747,6 +765,13 @@ export async function saveStepProgress(
     },
     body: JSON.stringify(progress),
   });
+  if (res.status === 409) {
+    const body = await res.json().catch(() => ({}));
+    const d = body?.detail ?? {};
+    if (d?.error === 'stale_version') {
+      throw new StaleVersionError(d.stored_version ?? 0, d.incoming_version ?? 0);
+    }
+  }
   if (!res.ok) throw new Error(`saveStepProgress failed: ${res.status}`);
   return res.json();
 }

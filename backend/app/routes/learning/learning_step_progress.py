@@ -7,6 +7,7 @@ from the `step_progress` JSONB column on LearningSession.
     GET  /api/learning/sessions/{session_id}/progress  — load
 """
 import logging
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -61,15 +62,38 @@ def save_step_progress(
     if isinstance(session.step_progress, dict):
         raw_meta = session.step_progress.get("__meta")
         if isinstance(raw_meta, dict):
-            existing_meta = raw_meta
+            existing_meta = dict(raw_meta)
+
+    # Optimistic concurrency check (#1187): reject stale writes.
+    # Prevents overwriting newer progress when a previous save failed and the
+    # client retries with an older snapshot.
+    stored_version = existing_meta.get("version")
+    if payload.version is not None and isinstance(stored_version, int):
+        if payload.version < stored_version:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error": "stale_version",
+                    "stored_version": stored_version,
+                    "incoming_version": payload.version,
+                    "message": "Incoming progress is older than stored version; refresh and retry.",
+                },
+            )
+
+    # Bump version: max(stored, incoming) + 1, or start at 1 if none.
+    next_version = max(
+        stored_version if isinstance(stored_version, int) else 0,
+        payload.version if payload.version is not None else 0,
+    ) + 1
+    existing_meta["version"] = next_version
+    existing_meta["last_synced_at"] = datetime.now(tz=timezone.utc).isoformat()
 
     session.step_progress = {
         "current_step": payload.current_step,
         "steps_completed": payload.steps_completed,
         "step_data": payload.step_data,
+        "__meta": existing_meta,
     }
-    if existing_meta:
-        session.step_progress["__meta"] = existing_meta
 
     # Sync integer current_step from steps_completed to prevent desync (#1073).
     # Normalize frontend step IDs → backend keys before lookup.

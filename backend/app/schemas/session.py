@@ -90,6 +90,10 @@ class StepProgressSaveRequest(BaseModel):
     current_step: str | None = Field(None, description="Active step path, e.g. 'vocab-definition'")
     steps_completed: list[str] = Field(default_factory=list, description="List of completed step path keys")
     step_data: dict[str, Any] = Field(default_factory=dict, description="Per-step serialised progress data")
+    # Optimistic concurrency version (#1187): monotonically increasing counter from client.
+    # Backend rejects writes where incoming version < stored version to prevent stale
+    # overwrites after a previous save failure.
+    version: int | None = Field(None, ge=0, description="Client-side version counter")
 
 
 class StepProgressResponse(BaseModel):
