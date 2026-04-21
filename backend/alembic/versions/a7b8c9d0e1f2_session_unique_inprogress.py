@@ -1,7 +1,7 @@
 """add partial unique index on learning_sessions (student, story, in_progress)
 
 Revision ID: a7b8c9d0e1f2
-Revises: z6a7b8c9d0e1
+Revises: m1e2r3g4h5i6
 Create Date: 2026-04-21 00:00:00.000000
 
 Prevents duplicate in_progress sessions for the same student + story_slug (#1179).
@@ -16,7 +16,7 @@ import sqlalchemy as sa
 
 
 revision: str = "a7b8c9d0e1f2"
-down_revision: Union[str, None] = "z6a7b8c9d0e1"
+down_revision: Union[str, None] = "m1e2r3g4h5i6"
 branch_labels = None
 depends_on = None
 
