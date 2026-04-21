@@ -905,7 +905,6 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             <button
               onClick={() => {
                 stopSession();
-                setNoAudioDetected(false);
                 startSession();
               }}
               className="px-3 py-1 rounded-full text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 transition-all shrink-0"
