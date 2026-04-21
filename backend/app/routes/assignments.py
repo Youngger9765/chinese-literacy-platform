@@ -871,7 +871,27 @@ def start_assignment(
             },
         )
         db.add(learning_session)
-        db.flush()  # get learning_session.id
+        try:
+            db.flush()  # get learning_session.id
+        except IntegrityError:
+            # Partial unique index (#1179) caught concurrent insert; reuse existing.
+            db.rollback()
+            learning_session = (
+                db.query(LearningSession)
+                .filter(
+                    LearningSession.student_id == current_user.id,
+                    LearningSession.story_slug == story_slug,
+                    LearningSession.status == "in_progress",
+                )
+                .order_by(LearningSession.started_at.desc())
+                .first()
+            )
+            if learning_session is None:
+                raise
+            logger.info(
+                "Race resolved in start_assignment: reusing session %d for assignment %d (#1179)",
+                learning_session.id, assignment_id,
+            )
 
     # Update submission
     submission.status = "in_progress"
