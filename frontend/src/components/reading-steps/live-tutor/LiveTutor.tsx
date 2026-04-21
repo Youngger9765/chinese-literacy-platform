@@ -72,6 +72,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [micError, setMicError] = useState('');
   const [streamingUserInput, setStreamingUserInput] = useState('');
+  // No-audio-detected banner: shown when user started recording but
+  // no audio detected within 5 seconds.
+  const [noAudioDetected, setNoAudioDetected] = useState(false);
 
   // ── localStorage persistence for reading progress ──────────────────────────
   const loadSavedProgress = () => {
@@ -199,9 +202,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     onSessionReady: () => {
       // session ready callback (kept for compat with hook)
     },
+    onNoAudioDetected: () => setNoAudioDetected(true),
   });
 
-  const startSession = stt.startSession;
+  const startSession = () => {
+    setNoAudioDetected(false);
+    stt.startSession();
+  };
   const stopSession = stt.stopSession;
 
   /* ---- scroll helpers ---- */
@@ -881,6 +888,30 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {micError && (
         <div className="absolute bottom-52 left-1/2 -translate-x-1/2 px-5 py-2 bg-tertiary-container/20 rounded-full z-20">
           <span className="text-sm text-tertiary">{micError}</span>
+        </div>
+      )}
+
+      {/* No-audio-detected banner */}
+      {noAudioDetected && stt.isSessionActive && (
+        <div className="absolute bottom-44 left-1/2 -translate-x-1/2 z-20 w-[min(92%,520px)]">
+          <div className="flex items-start gap-3 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 shadow-md">
+            <span className="material-symbols-outlined text-amber-600 shrink-0">mic_off</span>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-amber-800">好像沒有偵測到聲音</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                請確認麥克風權限已開啟、音量足夠，或點擊下方「重新開始」再試一次。
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                stopSession();
+                startSession();
+              }}
+              className="px-3 py-1 rounded-full text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 transition-all shrink-0"
+            >
+              重新開始
+            </button>
+          </div>
         </div>
       )}
 
