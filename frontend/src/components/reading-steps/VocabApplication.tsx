@@ -24,7 +24,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Story } from '../../types';
 import FillInBlankExercise from './FillInBlankExercise';
 import type { QuestionResult } from './FillInBlankExercise';
-import type { StepProgressData } from '../../services/learningApi';
 import { getLearningStorageScope, scopedStepStorageKey } from '../../services/learningStorageScope';
 
 /* ------------------------------------------------------------------ */
@@ -42,10 +41,19 @@ export interface VocabApplicationProps {
   onFinish: (result: VocabApplicationResult) => void;
   /** Base font size in px for accessibility scaling */
   fontSizePx?: number;
-  /** Debounced DB sync from useProgressSync (Issue #660). */
-  syncProgress?: (data: StepProgressData) => void;
-  /** Immediate DB flush — use on completion or page unload (Issue #660). */
-  flushProgress?: (data: StepProgressData) => void;
+  /**
+   * Merge-based progress patch from LearningLayout (preserves other steps' data
+   * and completed list). Only touches step_data[stepId] and optionally appends
+   * stepId to steps_completed. Replaces the old syncProgress/flushProgress pair
+   * that overwrote the entire snapshot.
+   */
+  saveStepProgressPatch?: (opts: {
+    stepId: string;
+    stepData: Record<string, unknown>;
+    currentStep?: string | null;
+    markCompleted?: boolean;
+    immediate?: boolean;
+  }) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -107,8 +115,7 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   story,
   onFinish,
   fontSizePx,
-  flushProgress,
-  syncProgress,
+  saveStepProgressPatch,
 }) => {
   const storageKey = phaseStorageKey(story.id);
   const loadSaved = () => {
@@ -138,63 +145,61 @@ const VocabApplication: React.FC<VocabApplicationProps> = ({
   }, [phase, result, savedFirstTryResults, storageKey]);
 
   // ── DB persistence on completion ─────────────────────────────────────────
-  // When phase transitions to 'done', flush progress to DB immediately
+  // When phase transitions to 'done', flush progress to DB immediately via patch
+  // (merges with other steps' data instead of overwriting the snapshot).
   useEffect(() => {
-    if (phase === 'done' && result && flushProgress) {
-      flushProgress({
-        current_step: 'vocab-application',
-        steps_completed: ['vocab-application'],
-        step_data: {
-          vocab_application: {
-            score: result.score,
-            total: result.total,
-            completionRate: result.total > 0 ? result.score / result.total : 1,
-            completedAt: new Date().toISOString(),
-          },
+    if (phase === 'done' && result && saveStepProgressPatch) {
+      saveStepProgressPatch({
+        stepId: 'vocab-application',
+        currentStep: 'vocab-application',
+        markCompleted: true,
+        immediate: true,
+        stepData: {
+          score: result.score,
+          total: result.total,
+          completionRate: result.total > 0 ? result.score / result.total : 1,
+          completedAt: new Date().toISOString(),
         },
       });
     }
-  }, [phase, result, flushProgress]);
+  }, [phase, result, saveStepProgressPatch]);
 
   // ── DB persistence on page unload (beforeunload) ─────────────────────────
-  // Sync whatever progress exists when user navigates away mid-exercise
-  const flushRef = useRef(flushProgress);
-  const syncRef = useRef(syncProgress);
+  // Uses patch semantics so we never overwrite other steps' progress.
+  const patchRef = useRef(saveStepProgressPatch);
   const phaseRef = useRef(phase);
   const resultRef = useRef(result);
-  useEffect(() => { flushRef.current = flushProgress; }, [flushProgress]);
-  useEffect(() => { syncRef.current = syncProgress; }, [syncProgress]);
+  useEffect(() => { patchRef.current = saveStepProgressPatch; }, [saveStepProgressPatch]);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { resultRef.current = result; }, [result]);
 
   useEffect(() => {
     function handleBeforeUnload() {
-      const flush = flushRef.current;
-      if (!flush) return;
+      const patch = patchRef.current;
+      if (!patch) return;
       const currentPhase = phaseRef.current;
       const currentResult = resultRef.current;
 
       if (currentPhase === 'exercise') {
-        // Mid-exercise: sync partial progress
-        const sync = syncRef.current;
-        if (sync) {
-          sync({
-            current_step: 'vocab-application',
-            steps_completed: [],
-            step_data: { vocab_application: { phase: 'exercise', partialAt: new Date().toISOString() } },
-          });
-        }
+        // Mid-exercise: record that the student is working on vocab-application
+        // WITHOUT touching steps_completed (#1196).  markCompleted stays false.
+        patch({
+          stepId: 'vocab-application',
+          currentStep: 'vocab-application',
+          immediate: true,
+          stepData: { phase: 'exercise', partialAt: new Date().toISOString() },
+        });
       } else if (currentPhase === 'done' && currentResult) {
         // Completed but user is leaving — make sure it's flushed
-        flush({
-          current_step: 'vocab-application',
-          steps_completed: ['vocab-application'],
-          step_data: {
-            vocab_application: {
-              score: currentResult.score,
-              total: currentResult.total,
-              completionRate: currentResult.total > 0 ? currentResult.score / currentResult.total : 1,
-            },
+        patch({
+          stepId: 'vocab-application',
+          currentStep: 'vocab-application',
+          markCompleted: true,
+          immediate: true,
+          stepData: {
+            score: currentResult.score,
+            total: currentResult.total,
+            completionRate: currentResult.total > 0 ? currentResult.score / currentResult.total : 1,
           },
         });
       }
