@@ -59,16 +59,19 @@ def save_step_progress(
     session = _get_owned_session(session_id, current_user, db)
 
     existing_meta: dict = {}
+    stored_version: int | None = None
     if isinstance(session.step_progress, dict):
         raw_meta = session.step_progress.get("__meta")
         if isinstance(raw_meta, dict):
             existing_meta = dict(raw_meta)
+        raw_version = session.step_progress.get("version")
+        if isinstance(raw_version, int):
+            stored_version = raw_version
 
     # Optimistic concurrency check (#1187): reject stale writes.
     # Prevents overwriting newer progress when a previous save failed and the
     # client retries with an older snapshot.
-    stored_version = existing_meta.get("version")
-    if payload.version is not None and isinstance(stored_version, int):
+    if payload.version is not None and stored_version is not None:
         if payload.version < stored_version:
             raise HTTPException(
                 status_code=409,
@@ -82,16 +85,18 @@ def save_step_progress(
 
     # Bump version: max(stored, incoming) + 1, or start at 1 if none.
     next_version = max(
-        stored_version if isinstance(stored_version, int) else 0,
-        payload.version if payload.version is not None else 0,
+        stored_version or 0,
+        payload.version or 0,
     ) + 1
-    existing_meta["version"] = next_version
     existing_meta["last_synced_at"] = datetime.now(tz=timezone.utc).isoformat()
 
+    # Version is stored at the top level so the frontend can read it directly
+    # from StepProgressData.version. __meta keeps other metadata (source, etc.).
     session.step_progress = {
         "current_step": payload.current_step,
         "steps_completed": payload.steps_completed,
         "step_data": payload.step_data,
+        "version": next_version,
         "__meta": existing_meta,
     }
 
