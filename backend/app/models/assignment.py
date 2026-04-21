@@ -77,7 +77,9 @@ class AssignmentSubmission(Base):
     )
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="pending")  # "pending" | "in_progress" | "submitted" | "graded"
-    session_id: Mapped[int | None] = mapped_column(ForeignKey("learning_sessions.id"), nullable=True)
+    session_id: Mapped[int | None] = mapped_column(
+        ForeignKey("learning_sessions.id", ondelete="SET NULL"), nullable=True
+    )
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     score: Mapped[float | None] = mapped_column(Float, nullable=True)  # from LearningSession accuracy
     teacher_feedback: Mapped[str | None] = mapped_column(Text, nullable=True)  # per-student teacher comment (Issue #424)
@@ -88,4 +90,8 @@ class AssignmentSubmission(Base):
     # Relationships
     assignment: Mapped["Assignment"] = relationship("Assignment", back_populates="submissions")
     student: Mapped["User"] = relationship("User", foreign_keys=[student_id])  # type: ignore[name-defined]
-    session: Mapped["LearningSession"] = relationship("LearningSession", foreign_keys=[session_id])  # type: ignore[name-defined]
+    # passive_deletes=True defers to DB-level ON DELETE SET NULL so SQLAlchemy
+    # skips the redundant UPDATE when the parent session is removed.
+    session: Mapped["LearningSession"] = relationship(  # type: ignore[name-defined]
+        "LearningSession", foreign_keys=[session_id], passive_deletes=True,
+    )
