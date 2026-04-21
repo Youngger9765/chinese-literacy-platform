@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { AuthError } from '../services/authApi';
 import { trackEvent } from '../utils/analytics';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { buildJunyiLoginUrl } from './JunyiCallbackPage';
 
 interface LoginPageProps {
   onSwitchToRegister?: () => void;
@@ -14,6 +15,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
   const location = useLocation();
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
   const { login, loginWithGoogle } = useAuth();
+
+  const handleJunyiLogin = () => {
+    trackEvent('auth', 'junyi_login_initiated');
+    window.location.href = buildJunyiLoginUrl(from);
+  };
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -148,8 +154,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
           </div>
         </form>
 
-        {/* Google Sign-In */}
-        <div className="mt-4">
+        {/* Third-party sign-in options */}
+        <div className="mt-4 space-y-3">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200" />
@@ -158,9 +164,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
               <span className="px-2 bg-amber-50 text-gray-400">或</span>
             </div>
           </div>
-          <div className="mt-4">
+
+          {/* Google Sign-In */}
+          <div>
             <GoogleSignInButton onCredential={handleGoogleCredential} width={352} />
           </div>
+
+          {/* Junyi SSO (issue #1198) */}
+          <button
+            type="button"
+            onClick={handleJunyiLogin}
+            className="w-full h-11 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#FF6B35] text-white text-[10px] font-black leading-none">均</span>
+            使用均一帳號登入
+          </button>
         </div>
 
         {/* Switch to Register */}

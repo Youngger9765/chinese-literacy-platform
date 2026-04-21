@@ -1,8 +1,12 @@
+import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from ..auth.classroom_check import compute_has_classroom
 from ..auth.dependencies import get_current_user
@@ -19,6 +23,8 @@ from ..schemas.auth import (
     ForgotPasswordResponse,
     GoogleLoginRequest,
     GoogleLoginResponse,
+    JunyiLoginRequest,
+    JunyiLoginResponse,
     LoginRequest,
     RegisterRequest,
     RegisterResponse,
@@ -635,3 +641,119 @@ def accept_terms(
         created_at=current_user.created_at,
         roles=roles,
     )
+
+
+@router.post("/junyi", response_model=JunyiLoginResponse)
+def junyi_login(req: JunyiLoginRequest, request: Request, db: Session = Depends(get_db)):
+    """Authenticate (or register) a user via Junyi SSO auth code (issue #1198).
+
+    Flow (mirrors jutor.ai reference implementation):
+    1. Exchange the one-time code with Junyi's /api/v2/auth/code endpoint.
+    2. If a user with matching junyi_identity_id exists -> login.
+    3. Else if a user with matching email exists -> link junyi_identity_id + login.
+    4. Else -> create a new user account (student role, email_verified=True).
+
+    The code is single-use with a 600s TTL (enforced by Junyi's backend).
+    Junyi returns: {"data": {"userId": "...", "userEmail": "...", "userDisplayName": "..."}}
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    if not rate_limiter.check(f"junyi-login:{client_ip}", max_requests=20, window_seconds=60):
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+
+    # Exchange auth code with Junyi backend
+    junyi_base = settings.junyi_sso_base_url.rstrip("/")
+    exchange_url = f"{junyi_base}/api/v2/auth/code"
+    try:
+        resp = httpx.post(
+            exchange_url,
+            json={"code": req.code},
+            timeout=10.0,
+        )
+    except httpx.RequestError as exc:
+        logger.error("junyi_login: network error contacting Junyi SSO: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="無法連線到均一登入服務，請稍後再試。",
+        )
+
+    if resp.status_code == 404:
+        # Code expired, already used, or forged — guide user to retry
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="均一登入連結已過期或已使用，請重新點擊「使用均一帳號登入」。",
+        )
+    if resp.status_code != 200:
+        logger.error(
+            "junyi_login: unexpected status %s from Junyi SSO (url=%s)",
+            resp.status_code,
+            exchange_url,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="均一登入服務回應異常，請稍後再試。",
+        )
+
+    try:
+        payload = resp.json()
+        data = payload["data"]
+        junyi_user_id: str = data["userId"]
+        junyi_email: str = data.get("userEmail", "")
+        junyi_display_name: str = data.get("userDisplayName", "") or junyi_email.split("@")[0]
+    except (KeyError, ValueError) as exc:
+        logger.error("junyi_login: malformed Junyi payload: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="均一登入回傳資料格式異常。",
+        )
+
+    is_new_user = False
+
+    # 1. Look up by junyi_identity_id (returning user)
+    user = db.query(User).filter(
+        User.junyi_identity_id == junyi_user_id,
+        User.is_active == True,
+    ).first()
+
+    if user is None and junyi_email:
+        # 2. Look up by email (link existing account)
+        user = db.query(User).filter(
+            User.email == junyi_email,
+            User.is_active == True,
+        ).first()
+        if user is not None:
+            _ensure_parent_login_allowed(user, db)
+            user.junyi_identity_id = junyi_user_id
+
+    if user is None:
+        # 3. Create new account — unusable password hash (SSO-only account)
+        if not junyi_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="均一帳號未提供 Email，無法建立 LingoLeap 帳號。",
+            )
+        unusable_hash = hash_password(secrets.token_hex(32))
+        user = User(
+            email=junyi_email,
+            password_hash=unusable_hash,
+            name=junyi_display_name,
+            junyi_identity_id=junyi_user_id,
+            email_verified=True,  # Junyi already verified
+        )
+        db.add(user)
+        is_new_user = True
+    elif user.junyi_identity_id is None:
+        # Covers the email-match path above (already set) and any edge case
+        user.junyi_identity_id = junyi_user_id
+
+    user.last_login_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(user)
+
+    token = create_access_token(user.id)
+    logger.info(
+        "junyi_login: user_id=%s junyi_identity_id=%s is_new=%s",
+        user.id,
+        junyi_user_id,
+        is_new_user,
+    )
+    return JunyiLoginResponse(access_token=token, is_new_user=is_new_user)

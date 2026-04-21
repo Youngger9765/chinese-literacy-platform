@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 480  # 8 hours
     google_client_id: str = ""  # set GOOGLE_CLIENT_ID env var in Cloud Run
+    # Junyi SSO base URL (issue #1198).
+    # Production: https://www.junyiacademy.org
+    # Testing ci-live server: override with JUNYI_SSO_BASE_URL env var
+    junyi_sso_base_url: str = "https://www.junyiacademy.org"
     parent_portal_enabled: bool = False
     # Email verification gate (issue #460).
     # False (default): auto-verify on registration — existing flow unchanged.
