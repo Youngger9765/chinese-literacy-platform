@@ -1,7 +1,7 @@
 """add ondelete SET NULL to assignment_submissions.session_id
 
 Revision ID: b8c9d0e1f2g3
-Revises: m1e2r3g4h5i6
+Revises: a7b8c9d0e1f2
 Create Date: 2026-04-21 00:10:00.000000
 
 Fixes #1178: when a LearningSession is deleted (by cleanup/maintenance),
@@ -21,7 +21,7 @@ from alembic import op
 
 
 revision: str = "b8c9d0e1f2g3"
-down_revision: Union[str, None] = "m1e2r3g4h5i6"
+down_revision: Union[str, None] = "a7b8c9d0e1f2"
 branch_labels = None
 depends_on = None
 
