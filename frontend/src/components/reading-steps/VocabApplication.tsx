@@ -8,15 +8,17 @@
  * Standalone step component. Receives `story` prop and calls `onFinish`
  * with a score result when the student completes all fill-in-blank exercises.
  *
- * Props: { story, onFinish, zhuyinActive?, fontSizePx?, token?, dbSessionId?,
- *          syncProgress?, flushProgress? }
+ * Props: { story, onFinish, fontSizePx?, saveStepProgressPatch? }
  *
  * Persistence strategy:
  * - FillInBlankExercise saves in-progress answers to localStorage on every
  *   selection (key: `vocab_app_progress_${story.id}`, Issue #709).
  * - VocabApplication saves phase/result to `vocabApp_progress_${story.id}`.
- * - On completion, DB is updated via flushProgress (if token + dbSessionId available).
- * - On page unload (beforeunload), DB is flushed with whatever progress exists.
+ * - On completion, DB is updated via `saveStepProgressPatch` which merges into
+ *   LearningLayout's authoritative step_progress — does NOT overwrite other
+ *   steps' completion state (#1196).
+ * - On page unload (beforeunload), mid-exercise state is patched without
+ *   touching `steps_completed`; the done-phase flushes with `markCompleted`.
  * - On manual redo, both localStorage keys are cleared.
  * - Fix #758: handleFinish no longer removes phase storage — completion persists.
  */
