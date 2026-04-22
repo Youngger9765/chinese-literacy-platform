@@ -1,12 +1,19 @@
 /**
- * SentencePractice — Issue #109, #927
+ * SentencePractice — Issue #109, #927, #1203
  *
  * After stroke order practice, students compose 2 sentences using each
  * practiced vocabulary word. AI validates grammar and word usage.
+ *
+ * Persistence (#1203):
+ * - localStorage key `sentencePractice_progress_${scope}` stores wordStates,
+ *   completedWords, currentWordIndex so refreshing preserves progress.
+ * - When caller passes `saveStepProgressPatch`, DB is synced with step_data
+ *   (mid-exercise) and markCompleted (when every word is finished).
  */
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import {
   fetchExampleSentences,
   validateSentence,
@@ -67,25 +74,143 @@ interface SentencePracticeProps {
   onFinish: () => void;
   onBack: () => void;
   inline?: boolean;
+  /** Story id — used to scope localStorage key (#1203). */
+  storyId?: string | number;
+  /** Merge-based DB sync from LearningLayout (#1203). Optional — when absent,
+   *  only localStorage persistence is active (good for /tools standalone). */
+  saveStepProgressPatch?: (opts: {
+    stepId: string;
+    stepData: Record<string, unknown>;
+    currentStep?: string | null;
+    markCompleted?: boolean;
+    immediate?: boolean;
+  }) => void;
+}
+
+/* ------------------------------------------------------------------ */
+/*  localStorage helpers (#1203)                                        */
+/* ------------------------------------------------------------------ */
+
+const STATE_STORAGE_PREFIX = 'sentencePractice_progress_';
+
+interface SavedProgress {
+  wordStates: Record<string, WordPracticeState>;
+  completedWords: string[];
+  currentWordIndex: number;
+}
+
+function storageKeyFor(storyId: string | number | undefined): string | null {
+  if (storyId === undefined || storyId === null || storyId === '') return null;
+  return scopedStepStorageKey(STATE_STORAGE_PREFIX, storyId);
+}
+
+function loadSaved(storyId: string | number | undefined): SavedProgress | null {
+  const key = storageKeyFor(storyId);
+  if (!key) return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<SavedProgress>;
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      parsed.wordStates &&
+      Array.isArray(parsed.completedWords) &&
+      typeof parsed.currentWordIndex === 'number'
+    ) {
+      return parsed as SavedProgress;
+    }
+  } catch { /* non-fatal */ }
+  return null;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
 
 const SentencePractice: React.FC<SentencePracticeProps> = ({
   practicedWords, storyTitle, onFinish, onBack, inline = false,
+  storyId, saveStepProgressPatch,
 }) => {
   const { token } = useAuth();
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+
+  // Restore from localStorage (#1203) — run once on mount.
+  const savedRef = useRef<SavedProgress | null>(null);
+  if (savedRef.current === null) {
+    savedRef.current = loadSaved(storyId);
+  }
+  const saved = savedRef.current;
+
+  const [currentWordIndex, setCurrentWordIndex] = useState<number>(() => {
+    if (saved && saved.currentWordIndex < practicedWords.length) {
+      return saved.currentWordIndex;
+    }
+    return 0;
+  });
+
   const [wordStates, setWordStates] = useState<Record<string, WordPracticeState>>(() => {
     const init: Record<string, WordPracticeState> = {};
-    for (const w of practicedWords) init[w] = makeWordState();
+    for (const w of practicedWords) {
+      const restored = saved?.wordStates?.[w];
+      init[w] = restored ?? makeWordState();
+    }
     return init;
   });
-  const [completedWords, setCompletedWords] = useState<Set<string>>(new Set());
+
+  const [completedWords, setCompletedWords] = useState<Set<string>>(() => {
+    if (!saved) return new Set();
+    const restored = new Set<string>();
+    for (const w of saved.completedWords) {
+      if (practicedWords.includes(w)) restored.add(w);
+    }
+    return restored;
+  });
   const [pasteWarning, setPasteWarning] = useState(false);
   const loadedWordsRef = useRef<Set<string>>(new Set());
+
+  // Persist progress to localStorage whenever it changes (#1203).
+  const storageKey = useMemo(() => storageKeyFor(storyId), [storyId]);
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const payload: SavedProgress = {
+        wordStates,
+        completedWords: Array.from(completedWords),
+        currentWordIndex,
+      };
+      localStorage.setItem(storageKey, JSON.stringify(payload));
+    } catch { /* non-fatal */ }
+  }, [storageKey, wordStates, completedWords, currentWordIndex]);
+
+  // DB sync (#1203): mid-exercise patch on progress change; markCompleted when every word done.
+  useEffect(() => {
+    if (!saveStepProgressPatch) return;
+    const allDone =
+      practicedWords.length > 0 && practicedWords.every((w) => completedWords.has(w));
+    if (allDone) {
+      saveStepProgressPatch({
+        stepId: 'sentence-practice',
+        currentStep: 'sentence-practice',
+        markCompleted: true,
+        immediate: true,
+        stepData: {
+          completed: true,
+          completedAt: new Date().toISOString(),
+          wordCount: practicedWords.length,
+        },
+      });
+    } else if (completedWords.size > 0) {
+      saveStepProgressPatch({
+        stepId: 'sentence-practice',
+        currentStep: 'sentence-practice',
+        stepData: {
+          completedWords: Array.from(completedWords),
+          currentWordIndex,
+          partialAt: new Date().toISOString(),
+        },
+      });
+    }
+  }, [completedWords, currentWordIndex, practicedWords, saveStepProgressPatch]);
 
   const currentWord = practicedWords[currentWordIndex] ?? '';
   const currentState = wordStates[currentWord] ?? makeWordState();

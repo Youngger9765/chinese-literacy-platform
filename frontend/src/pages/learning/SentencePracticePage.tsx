@@ -5,7 +5,11 @@ import { useLearningContext } from '../../layouts/LearningLayout';
 
 const SentencePracticePage: React.FC = () => {
   const { storyId } = useParams<{ storyId: string }>();
-  const { selectedStory } = useLearningContext();
+  const {
+    selectedStory,
+    handleFinishSentencePractice,
+    saveStepProgressPatch,
+  } = useLearningContext();
   const navigate = useNavigate();
 
   const practicedWords = useMemo(() => {
@@ -25,7 +29,9 @@ const SentencePracticePage: React.FC = () => {
     <SentencePractice
       practicedWords={practicedWords}
       storyTitle={selectedStory.title}
-      onFinish={() => navigate(`/learn/${storyId}/vocab-definition`)}
+      storyId={selectedStory.id}
+      saveStepProgressPatch={saveStepProgressPatch}
+      onFinish={handleFinishSentencePractice}
       onBack={() => navigate(`/learn/${storyId}/vocab`)}
     />
   );

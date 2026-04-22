@@ -64,6 +64,7 @@ export interface LearningContext {
   handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
   handleFinishVocabDefinitionMatch: (result: VocabDefinitionMatchResult) => void;
   handleFinishVocabApplication: (result: VocabApplicationResult) => void;
+  handleFinishSentencePractice: () => void;
   handleFinishVocabWordSearch: (elapsedSeconds: number) => void;
   handleFinishKnowledgeStation: () => void;
   handleRetry: () => void;
@@ -865,6 +866,24 @@ const LearningLayout: React.FC = () => {
     [storyId, navigate, persistStep, persistStepProgressState],
   );
 
+  const handleFinishSentencePractice = useCallback(
+    () => {
+      persistStepProgressState(
+        {
+          completeStep: 'sentence-practice',
+          currentStep: 'vocab-definition',
+          stepDataPatch: {
+            'sentence-practice': { completed: true },
+          },
+        },
+        true,
+      );
+      persistStep(STEP_PATH_TO_NUMBER['sentence-practice']);
+      navigate(`/learn/${storyId}/vocab-definition`);
+    },
+    [storyId, navigate, persistStep, persistStepProgressState],
+  );
+
   const handleFinishVocabWordSearch = useCallback(
     (_elapsedSeconds: number) => {
       setSession((prev) => (prev ? { ...prev, vocabWordSearchCompleted: true } : null));
@@ -1066,6 +1085,7 @@ const LearningLayout: React.FC = () => {
     handleFinishReadingAnnotation,
     handleFinishVocabDefinitionMatch,
     handleFinishVocabApplication,
+    handleFinishSentencePractice,
     handleFinishVocabWordSearch,
     handleFinishKnowledgeStation,
     handleRetry,
