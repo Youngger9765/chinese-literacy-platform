@@ -100,9 +100,10 @@ def merge_sentences(sentences: list[dict]) -> tuple[list[dict], list[str]]:
             out.append(item)
         return out
 
+    SAFETY_CAP = 20
     changed = True
     safety = 0
-    while changed and safety < 20:
+    while changed and safety < SAFETY_CAP:
         changed = False
         safety += 1
 
@@ -147,10 +148,16 @@ def merge_sentences(sentences: list[dict]) -> tuple[list[dict], list[str]]:
         if changed:
             result = sanitize(result)
 
+    if changed and safety >= SAFETY_CAP:
+        raise RuntimeError(
+            f"validator did not converge on bracket/terminator pass after {SAFETY_CAP} iterations; "
+            f"remaining sentences: {[s['text'] for s in result]}"
+        )
+
     para_len = sum(len(s["text"]) for s in result)
     changed = True
     safety = 0
-    while changed and safety < 20:
+    while changed and safety < SAFETY_CAP:
         changed = False
         safety += 1
         for i, s in enumerate(result):
@@ -172,6 +179,12 @@ def merge_sentences(sentences: list[dict]) -> tuple[list[dict], list[str]]:
 
         if changed:
             result = sanitize(result)
+
+    if changed and safety >= SAFETY_CAP:
+        raise RuntimeError(
+            f"validator did not converge on short-sentence pass after {SAFETY_CAP} iterations; "
+            f"remaining sentences: {[s['text'] for s in result]}"
+        )
 
     return result, log
 

@@ -5,7 +5,7 @@ set -euo pipefail
 
 LID=${1:?lesson_id required}
 STEM=$(printf "L%02d" "$LID")
-ROOT="/Users/young/project/chinese-literacy-platform-issue-1176"
+ROOT="$(git rev-parse --show-toplevel)"
 PROMPT="$ROOT/backend/scripts/claude_segment/prompt.md"
 YML="$ROOT/backend/data/lessons/$STEM.yml"
 OUTDIR="$ROOT/backend/data/segmentation-v2"
@@ -23,7 +23,7 @@ echo "[$STEM] calling claude -p --bare ..." >&2
   printf "\n\nlesson_id: %d\n\n" "$LID"
   cat "$YML"
   printf "\n\n請只輸出 JSON。\n"
-} | claude -p --bare > "$RAW" 2>"$LOG"
+} | claude -p --bare --model claude-opus-4-7 > "$RAW" 2>"$LOG"
 
 # Extract JSON from raw output (strip any fences / preamble)
 python3 - "$RAW" "$OUT" <<'PYEOF'

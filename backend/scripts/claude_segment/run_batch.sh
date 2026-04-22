@@ -6,7 +6,7 @@ set -uo pipefail
 
 START=${1:?start_id required}
 END=${2:?end_id required}
-ROOT="/Users/young/project/chinese-literacy-platform-issue-1176"
+ROOT="$(git rev-parse --show-toplevel)"
 SEG="$ROOT/backend/scripts/claude_segment/segment_lesson.sh"
 AUDIT="$ROOT/backend/scripts/claude_segment/audit_lesson.py"
 VALIDATE="$ROOT/backend/scripts/validate_segmentation.py"
