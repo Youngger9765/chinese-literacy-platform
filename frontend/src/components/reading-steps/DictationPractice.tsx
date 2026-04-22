@@ -203,7 +203,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
     const nativeEvent = e.nativeEvent as KeyboardEvent;
     const isImeComposing =
       isComposingRef.current ||
-      e.nativeEvent.isComposing ||
+      nativeEvent.isComposing ||
       nativeEvent.keyCode === 229;
     if (e.key === 'Enter' && !isImeComposing) submitAnswer();
   };

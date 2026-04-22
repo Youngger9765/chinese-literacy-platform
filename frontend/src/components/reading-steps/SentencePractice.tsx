@@ -291,6 +291,19 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
     }
   }, [currentWord, currentState, storyTitle, token]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>, idx: 0 | 1) => {
+    // Skip Enter while IME is composing (e.g. 注音選字) — #1206.
+    const nativeEvent = e.nativeEvent as KeyboardEvent;
+    const isImeComposing =
+      isComposingRef.current ||
+      nativeEvent.isComposing ||
+      nativeEvent.keyCode === 229;
+    const text = currentState.sentences[idx].text;
+    if (e.key === 'Enter' && !isImeComposing && text.trim()) {
+      handleValidate(idx);
+    }
+  }, [currentState, handleValidate]);
+
   const handleCompleteCurrentWord = () => {
     setCompletedWords(prev => new Set(prev).add(currentWord));
     if (currentWordIndex < practicedWords.length - 1) setCurrentWordIndex(i => i + 1);
@@ -468,17 +481,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                   onChange={e => updateSentenceText(idx, e.target.value)}
                   onCompositionStart={() => { isComposingRef.current = true; }}
                   onCompositionEnd={() => { isComposingRef.current = false; }}
-                  onKeyDown={e => {
-                    // Skip Enter while IME is composing (e.g. 注音選字) — #1206.
-                    const nativeEvent = e.nativeEvent as KeyboardEvent;
-                    const isImeComposing =
-                      isComposingRef.current ||
-                      e.nativeEvent.isComposing ||
-                      nativeEvent.keyCode === 229;
-                    if (e.key === 'Enter' && !isImeComposing && entry.text.trim()) {
-                      handleValidate(idx);
-                    }
-                  }}
+                  onKeyDown={e => handleKeyDown(e, idx)}
                   onPaste={e => { e.preventDefault(); setPasteWarning(true); setTimeout(() => setPasteWarning(false), 3000); }}
                   onDrop={e => { e.preventDefault(); setPasteWarning(true); setTimeout(() => setPasteWarning(false), 3000); }}
                   onDragOver={e => e.preventDefault()}
