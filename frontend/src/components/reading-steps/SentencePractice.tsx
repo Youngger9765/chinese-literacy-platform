@@ -168,6 +168,12 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   // effect from firing with restored-only state and e.g. rolling `current_step`
   // back to 'sentence-practice' when the student has already moved on.
   const isRestoringRef = useRef(true);
+  // Ref mirror of saveStepProgressPatch so the DB sync effect does NOT depend
+  // on its identity. The prop is recreated on every LearningLayout render
+  // (onProgressLoaded is inline), so including it in deps would make the
+  // effect fire every render and PUT until the rate limiter kicks in (429).
+  const savePatchRef = useRef(saveStepProgressPatch);
+  useEffect(() => { savePatchRef.current = saveStepProgressPatch; }, [saveStepProgressPatch]);
 
   // Persist progress to localStorage whenever it changes (#1203).
   const storageKey = useMemo(() => storageKeyFor(storyId), [storyId]);
@@ -186,16 +192,19 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   // DB sync (#1203): mid-exercise patch on progress change; markCompleted when every word done.
   // Skip first fire so restored localStorage state doesn't clobber LearningLayout's
   // current_step (e.g. student already moved to vocab-definition and just revisits).
+  // Uses savePatchRef (not the prop directly) to avoid re-running on every parent
+  // render caused by unstable `saveStepProgressPatch` identity.
   useEffect(() => {
     if (isRestoringRef.current) {
       isRestoringRef.current = false;
       return;
     }
-    if (!saveStepProgressPatch) return;
+    const patch = savePatchRef.current;
+    if (!patch) return;
     const allDone =
       practicedWords.length > 0 && practicedWords.every((w) => completedWords.has(w));
     if (allDone) {
-      saveStepProgressPatch({
+      patch({
         stepId: 'sentence-practice',
         currentStep: 'sentence-practice',
         markCompleted: true,
@@ -207,7 +216,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         },
       });
     } else if (completedWords.size > 0) {
-      saveStepProgressPatch({
+      patch({
         stepId: 'sentence-practice',
         currentStep: 'sentence-practice',
         stepData: {
@@ -217,7 +226,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         },
       });
     }
-  }, [completedWords, currentWordIndex, practicedWords, saveStepProgressPatch]);
+  }, [completedWords, currentWordIndex, practicedWords]);
 
   const currentWord = practicedWords[currentWordIndex] ?? '';
   const currentState = wordStates[currentWord] ?? makeWordState();
