@@ -79,25 +79,28 @@ const QuickPracticeStrip: React.FC = () => {
         </button>
       </div>
 
-      {/* 4-card grid: 2 cols on xs, 4 cols on sm+ */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* 4-card grid: 2 cols always (student-friendly touch targets) */}
+      <div className="grid grid-cols-2 gap-3">
         {QUICK_CARDS.map((card) => (
           <button
             key={card.title}
             type="button"
             onClick={() => navigate(card.route)}
             className="
-              text-left bg-surface-container-lowest rounded-2xl border border-gray-100
-              shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95
-              p-4 flex flex-col gap-2 transition-all duration-150
+              text-left bg-surface-container-lowest rounded-2xl border border-[#E5E0D5]
+              hover:shadow-md hover:scale-[0.995] active:scale-[0.98]
+              p-4 flex items-center gap-3 transition-all duration-150
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
+              min-h-[72px]
             "
             aria-label={`${card.title}${card.needsStory ? '（先選課文）' : ''}`}
           >
-            <span className="text-2xl leading-none" aria-hidden="true">
-              {card.icon}
-            </span>
-            <div className="space-y-0.5">
+            <div className="w-11 h-11 rounded-xl bg-accent-bg flex items-center justify-center shrink-0">
+              <span className="text-2xl leading-none" aria-hidden="true">
+                {card.icon}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0 space-y-0.5">
               <p className="text-sm font-bold text-on-surface leading-tight">
                 {card.title}
               </p>
