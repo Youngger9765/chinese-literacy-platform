@@ -609,7 +609,11 @@ class TestGamificationAssertCanViewN1:
         assert "level_info" in data
 
     def test_assert_can_view_query_count_bounded(self, client, admin_token):
-        """_assert_can_view: admin has 2 roles. Without fix = 2 lazy queries. With fix = 1."""
+        """_assert_can_view: admin has 2 roles. Without fix = 2 lazy queries. With fix = 1.
+
+        Tightened bound (was < 20): route cost is dominated by auth + gamification queries.
+        If role-lookup N+1 regresses, even 2 roles will push us over 12.
+        """
         student_id = _state["student_id"]
 
         def call():
@@ -618,10 +622,130 @@ class TestGamificationAssertCanViewN1:
                 headers=auth_header(admin_token),
             )
 
+        # Warm up: first call may trigger lazy import / one-time caching
+        call()
         q = count_queries(call)
-        # Original: auth + UserRole query + 2 lazy role.name fetches + gamification queries
-        # Fixed: UserRole + roles in 1 joinedload
-        # Generous bound: must be significantly less than 2*role_count extra queries
-        assert q < 20, (
-            f"summary/{student_id} issued {q} queries. Expected < 20 after role joinedload fix."
+        # Observed after fix: ~6-8 queries. Regression to role N+1 would add >= n_roles extra.
+        assert q < 12, (
+            f"summary/{student_id} issued {q} queries. Expected < 12 after role joinedload fix "
+            f"(observed ~6-8 baseline)."
+        )
+
+    def test_assert_can_view_constant_in_role_count(self, client, admin_token):
+        """Regression test: query count must NOT grow with number of admin UserRole rows.
+
+        Seeds a second admin with MORE roles (4 vs existing 2) and verifies the delta is
+        bounded by a constant, not role_count. This is the sharpest N+1 regression signal.
+        """
+        # Seed a fat admin with 4 active roles (reuses TestingSessionLocal)
+        db = TestingSessionLocal()
+        try:
+            role_by_name = {r.name: r for r in db.query(Role).all()}
+            fat_admin = User(
+                email="n1fix_fat_admin@example.com",
+                username="n1fix_fat_admin",
+                password_hash=hash_password("Password1!"),
+                name="Fat Admin",
+                is_active=True,
+                email_verified=True,
+            )
+            db.add(fat_admin)
+            db.commit()
+            db.refresh(fat_admin)
+            for role_name in ["system_admin", "org_admin", "teacher", "student"]:
+                db.add(UserRole(
+                    user_id=fat_admin.id,
+                    role_id=role_by_name[role_name].id,
+                    scope_type="platform",
+                    scope_id=None,
+                    is_active=True,
+                ))
+            db.commit()
+        finally:
+            db.close()
+
+        fat_token = _login(client, "n1fix_fat_admin@example.com")
+        student_id = _state["student_id"]
+
+        def call_fat():
+            client.get(
+                f"/api/gamification/summary/{student_id}",
+                headers=auth_header(fat_token),
+            )
+
+        def call_thin():
+            client.get(
+                f"/api/gamification/summary/{student_id}",
+                headers=auth_header(admin_token),
+            )
+
+        # Warm up both paths
+        call_fat()
+        call_thin()
+
+        q_fat = count_queries(call_fat)
+        q_thin = count_queries(call_thin)
+
+        # Delta of added roles (4-2=2). If role.name is lazy-loaded, delta >= 2.
+        # With joinedload, delta should be 0 (or at most 1 for extra row iteration overhead).
+        delta = q_fat - q_thin
+        assert delta <= 1, (
+            f"Query count grew with UserRole count: thin_admin(2 roles)={q_thin}, "
+            f"fat_admin(4 roles)={q_fat} (delta={delta}). Regression to role lazy-load suspected."
+        )
+
+
+# ===========================================================================
+# 7. GET /admin/reports/export — CSV export (3-layer lazy load fix)
+# ===========================================================================
+
+
+class TestAdminReportExportN1:
+    """GET /admin/reports/export — joinedload student + classroom + classroom.school."""
+
+    def test_returns_200_csv(self, client, admin_token):
+        resp = client.get("/api/admin/reports/export", headers=auth_header(admin_token))
+        assert resp.status_code == 200, f"expected 200, got {resp.status_code}: {resp.text[:200]}"
+        body = resp.content.decode("utf-8-sig")
+        first_line = body.split("\n")[0]
+        assert "學校名稱" in first_line
+        assert "學生姓名" in first_line
+
+    def test_csv_contains_student_rows(self, client, admin_token):
+        """Each enrolled student appears as a row with non-empty school/classroom/name."""
+        resp = client.get("/api/admin/reports/export", headers=auth_header(admin_token))
+        body = resp.content.decode("utf-8-sig")
+        rows = [r for r in body.split("\r\n") if r.strip()]
+        if len(rows) <= 1:
+            # Some writers use \n only
+            rows = [r for r in body.split("\n") if r.strip()]
+        # Seed: 1 main student + (NUM_ASSIGNMENTS - 1) others = NUM_ASSIGNMENTS rows
+        assert len(rows) >= 1 + NUM_ASSIGNMENTS, (
+            f"Expected header + >= {NUM_ASSIGNMENTS} student rows, got {len(rows)} total"
+        )
+        # Each data row must have school name filled (first CSV column)
+        for data_row in rows[1:]:
+            cells = data_row.split(",")
+            assert cells[0].strip() != "", f"empty school in row: {data_row!r}"
+            assert cells[1].strip() != "", f"empty classroom in row: {data_row!r}"
+
+    def test_query_count_is_bounded(self, client, admin_token):
+        """3-layer lazy chain (student + classroom + school) must be eager-loaded.
+
+        Without fix: ~1 + 3N queries (per enrollment: lazy student, classroom, school).
+        With fix: enrollments (1 joinedload) + sessions (1 batch) + auth + admin checks.
+        """
+
+        def call():
+            client.get("/api/admin/reports/export", headers=auth_header(admin_token))
+
+        # Warm up one-time caching
+        call()
+        q = count_queries(call)
+        n = NUM_ASSIGNMENTS  # 6 enrollments
+        # 3N lazy regression would produce >= 18 queries from the lazy chain alone.
+        # Post-fix baseline: enrollments + sessions + auth ≈ 6-10 queries.
+        assert q < n + 8, (
+            f"/admin/reports/export issued {q} queries for {n} enrollments. "
+            f"Expected < {n + 8} after 3-layer joinedload fix."
         )
