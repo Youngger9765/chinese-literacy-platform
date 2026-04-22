@@ -50,8 +50,8 @@ const QUICK_CARDS: PracticeCard[] = [
   },
   {
     icon: '📖',
-    title: '字典查詢',
-    description: '查字義、注音、例句',
+    title: '我的生字',
+    description: '看看哪些字需要加強',
     route: '/vocabulary',
   },
 ];
