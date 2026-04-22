@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { cancelTts, cleanForTts } from '../services/ttsApi';
+import { cancelTts, cleanForTts, pauseCurrentTts, resumeCurrentTts, speakTextWithProgress, TtsProgressInfo } from '../services/ttsApi';
 
 /**
  * Manages TTS (Text-to-Speech) audio playback for LiveTutor.
@@ -31,6 +31,10 @@ export function useTtsPlayback(
   // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
   // gets collected mid-playback, silencing onend/onboundary callbacks.
   const utteranceRef = useRef<SpeechSynthesisUtterance | HTMLAudioElement | null>(null);
+  // True while the v2 sentence-level playback path is active — pause/resume
+  // must talk to ttsApi._currentAudio via pauseCurrentTts/resumeCurrentTts,
+  // because the internal Audio element is not exposed on utteranceRef.
+  const v2PathActiveRef = useRef<boolean>(false);
   // rAF loop for Web Speech API fallback cursor animation (not used for Cloud TTS path)
   const ttsRafRef = useRef<number | null>(null);
   // Used only by Web Speech API fallback path
@@ -42,14 +46,52 @@ export function useTtsPlayback(
   /**
    * Speak the given text via Cloud TTS (with Web Speech API fallback).
    *
+   * When lessonId + paragraphIdx are provided, uses sentence-level sequential
+   * playback via canonical v2 sentences (Issue #1208 fix: eliminates cache miss).
+   * Otherwise falls back to single-shot full-paragraph synthesis.
+   *
    * Cloud TTS path: drives cursor via audio.ontimeupdate + currentTime/duration ratio.
    * Web Speech fallback: drives cursor via rAF + wall-clock timing (unchanged).
+   *
+   * @param text - Text to synthesise.
+   * @param lessonId - Optional lesson ID for canonical v2 sentence lookup.
+   * @param paragraphIdx - Optional paragraph index (0-based) within the lesson.
    */
-  const speakText = useCallback((text: string) => {
+  const speakText = useCallback((text: string, lessonId?: number, paragraphIdx?: number) => {
     if (!text) return;
     cancelTts();
     setIsTtsPaused(false);
+    setIsTtsSpeaking(true);
+    onRealtimeDiffTokensClear();
+    onSpeakingProgress(0);
 
+    // When lesson context is available, use sentence-level sequential playback
+    // so SHA-256 keys match pre-generated GCS blobs (Issue #1208 fix).
+    // Use speakTextWithProgress so onSpeakingProgress fires during playback
+    // (fixes regression: highlight stopped updating when v2 path was introduced).
+    if (lessonId !== undefined && paragraphIdx !== undefined) {
+      const charCount = Array.from(cleanForTts(text)).length;
+      v2PathActiveRef.current = true;
+      utteranceRef.current = null;
+      speakTextWithProgress(
+        text,
+        (info: TtsProgressInfo) => {
+          const pos = Math.min(Math.floor(info.progress * charCount), charCount);
+          onSpeakingProgress(pos);
+        },
+        lessonId,
+        paragraphIdx,
+      ).finally(() => {
+        v2PathActiveRef.current = false;
+        setIsTtsSpeaking(false);
+        setIsTtsPaused(false);
+      });
+      return;
+    }
+
+    v2PathActiveRef.current = false;
+
+    // Lesson context not available — use original single-shot full-paragraph path.
     // Chrome requires speechSynthesis.speak() to be called within user-gesture context.
     // Since the Cloud TTS fetch is async, the gesture expires before .catch() runs.
     // Warm up speechSynthesis now (synchronously, in gesture) so the fallback works.
@@ -165,6 +207,12 @@ export function useTtsPlayback(
   }, [onSpeakingProgress, onRealtimeDiffTokensClear]);
 
   const pauseTts = () => {
+    if (v2PathActiveRef.current) {
+      // v2 sentence-level path: Audio element lives inside ttsApi, pause via helper.
+      pauseCurrentTts();
+      setIsTtsPaused(true);
+      return;
+    }
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
       // Cloud TTS path: just pause. ontimeupdate stops firing automatically when paused.
@@ -182,6 +230,11 @@ export function useTtsPlayback(
   };
 
   const resumeTts = () => {
+    if (v2PathActiveRef.current) {
+      resumeCurrentTts();
+      setIsTtsPaused(false);
+      return;
+    }
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
       // Cloud TTS path: just resume. ontimeupdate was attached in speakText and

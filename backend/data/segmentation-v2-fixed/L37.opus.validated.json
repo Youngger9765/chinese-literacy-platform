@@ -1,0 +1,780 @@
+{
+  "lesson_id": 37,
+  "title": "用科學方法伸張正義的神探",
+  "paragraphs": [
+    {
+      "paragraph_idx": 0,
+      "paragraph_text": "科學，是一種系統性解決問題的方法。科學家對自然界的現象好奇，有了「研究問題」後，對問題提出暫時性的答案，稱為「研究假設」，再來是蒐集證據「檢驗假設」是否為真，一直到問題得到合理的解答。其實，警察辦案也是循「問題、假設、檢驗假設、解答」這個程序哦！底下是世界聞名的刑事鑑識專家李昌鈺博士親身經歷的故事。",
+      "paragraph_length": 107,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "科學，是一種系統性解決問題的方法。",
+          "length": 15,
+          "reasoning": "Rule D: ends with 。。完整獨立句，長度14≥10符合Rule E。"
+        },
+        {
+          "idx": 1,
+          "text": "科學家對自然界的現象好奇，有了「研究問題」後，對問題提出暫時性的答案。",
+          "length": 30,
+          "reasoning": "Rule D: ends with 。。>40字嘗試拆分：句中含三組「」引號（研究問題/研究假設/檢驗假設），Rule A要求每組引號同句；任一逗號處拆分都會使某組引號橫跨兩句，且「一直到問題得到合理的解答」是時間狀語結果子句，語義緊依前文，無可行拆分點。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 2,
+          "text": "稱為「研究假設」，再來是蒐集證據「檢驗假設」是否為真，一直到問題得到合理的解答。",
+          "length": 33,
+          "reasoning": "Rule D: ends with 。。>40字嘗試拆分：句中含三組「」引號（研究問題/研究假設/檢驗假設），Rule A要求每組引號同句；任一逗號處拆分都會使某組引號橫跨兩句，且「一直到問題得到合理的解答」是時間狀語結果子句，語義緊依前文，無可行拆分點。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 3,
+          "text": "其實，警察辦案也是循「問題、假設、檢驗假設、解答」這個程序哦！",
+          "length": 24,
+          "reasoning": "Rule D: ends with ！。Rule A: 「」引號配對完整。長度25適中。"
+        },
+        {
+          "idx": 4,
+          "text": "底下是世界聞名的刑事鑑識專家李昌鈺博士親身經歷的故事。",
+          "length": 26,
+          "reasoning": "Rule D: ends with 。。獨立引入句，長度24適中。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "科學，是一種系統性解決問題的方法。",
+          "length": 15,
+          "reasoning": "Rule D: ends with 。。完整獨立句，長度14≥10符合Rule E。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "科學家對自然界的現象好奇，有了「研究問題」後，對問題提出暫時性的答案。",
+          "length": 30,
+          "reasoning": "Rule D: ends with 。。>40字嘗試拆分：句中含三組「」引號（研究問題/研究假設/檢驗假設），Rule A要求每組引號同句；任一逗號處拆分都會使某組引號橫跨兩句，且「一直到問題得到合理的解答」是時間狀語結果子句，語義緊依前文，無可行拆分點。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "稱為「研究假設」，再來是蒐集證據「檢驗假設」是否為真，一直到問題得到合理的解答。",
+          "length": 33,
+          "reasoning": "Rule D: ends with 。。>40字嘗試拆分：句中含三組「」引號（研究問題/研究假設/檢驗假設），Rule A要求每組引號同句；任一逗號處拆分都會使某組引號橫跨兩句，且「一直到問題得到合理的解答」是時間狀語結果子句，語義緊依前文，無可行拆分點。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 3,
+          "text": "其實，警察辦案也是循「問題、假設、檢驗假設、解答」這個程序哦！",
+          "length": 24,
+          "reasoning": "Rule D: ends with ！。Rule A: 「」引號配對完整。長度25適中。",
+          "fixes": []
+        },
+        {
+          "idx": 4,
+          "text": "底下是世界聞名的刑事鑑識專家李昌鈺博士親身經歷的故事。",
+          "length": 26,
+          "reasoning": "Rule D: ends with 。。獨立引入句，長度24適中。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 1,
+      "paragraph_text": "有位72歲的老太太獨居在美國康乃狄克州的一個城市裡。這天是感恩節，外面大雪紛飛。中午，鄰居的媽媽烘了一個餅，請小孩送到老太太家，希望她在團圓的節日裡，不致於太孤苦伶仃。",
+      "paragraph_length": 80,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "有位72歲的老太太獨居在美國康乃狄克州的一個城市裡。",
+          "length": 25,
+          "reasoning": "Rule D: ends with 。。完整句，22字適中。"
+        },
+        {
+          "idx": 1,
+          "text": "這天是感恩節，外面大雪紛飛。",
+          "length": 12,
+          "reasoning": "Rule D: ends with 。。長度11≥10符合Rule E。"
+        },
+        {
+          "idx": 2,
+          "text": "中午，鄰居的媽媽烘了一個餅，請小孩送到老太太家，希望她在團圓的節日裡，不致於太孤苦伶仃。",
+          "length": 39,
+          "reasoning": "Rule D: ends with 。。34字在理想範圍，語義完整。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "有位72歲的老太太獨居在美國康乃狄克州的一個城市裡。",
+          "length": 25,
+          "reasoning": "Rule D: ends with 。。完整句，22字適中。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "這天是感恩節，外面大雪紛飛。",
+          "length": 12,
+          "reasoning": "Rule D: ends with 。。長度11≥10符合Rule E。",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "中午，鄰居的媽媽烘了一個餅，請小孩送到老太太家，希望她在團圓的節日裡，不致於太孤苦伶仃。",
+          "length": 39,
+          "reasoning": "Rule D: ends with 。。34字在理想範圍，語義完整。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 2,
+      "paragraph_text": "孩子拿著餅，按鈴、敲門都沒人應，只好逕自開門走進，一進房，小朋友尖叫一聲，血液都冰凍了。她看見老太太倒在廚房裡，一動也不動，已經死去。",
+      "paragraph_length": 66,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "孩子拿著餅，按鈴、敲門都沒人應，只好逕自開門走進，一進房，小朋友尖叫一聲，血液都冰凍了。",
+          "length": 37,
+          "reasoning": "Rule D: ends with 。。完整敘事句，33字適中。"
+        },
+        {
+          "idx": 1,
+          "text": "她看見老太太倒在廚房裡，一動也不動，已經死去。",
+          "length": 20,
+          "reasoning": "Rule D: ends with 。。長度18≥10符合Rule E。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "孩子拿著餅，按鈴、敲門都沒人應，只好逕自開門走進，一進房，小朋友尖叫一聲，血液都冰凍了。",
+          "length": 37,
+          "reasoning": "Rule D: ends with 。。完整敘事句，33字適中。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "她看見老太太倒在廚房裡，一動也不動，已經死去。",
+          "length": 20,
+          "reasoning": "Rule D: ends with 。。長度18≥10符合Rule E。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 3,
+      "paragraph_text": "當天晚上十二點，世界聞名的刑事鑑識專家李昌鈺博士從床上爬起來接電話，電話那頭說：「李博士，我們是警局的重案小組，這裡發生了一樁令人髮指的命案，要請您移駕過來看看。」李昌鈺立刻著衣，冒著大雪趕到現場。",
+      "paragraph_length": 88,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "當天晚上十二點，世界聞名的刑事鑑識專家李昌鈺博士從床上爬起來接電話，電話那頭說：「李博士，我們是警局的重案小組，這裡發生了一樁令人髮指的命案，要請您移駕過來看看。」",
+          "length": 73,
+          "reasoning": "[73字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（73字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (73): complete quote cannot split"
+        },
+        {
+          "idx": 1,
+          "text": "李昌鈺立刻著衣，冒著大雪趕到現場。",
+          "length": 15,
+          "reasoning": "Rule D: ends with 。。獨立敘事句，14字≥10符合Rule E。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "當天晚上十二點，世界聞名的刑事鑑識專家李昌鈺博士從床上爬起來接電話，電話那頭說：「李博士，我們是警局的重案小組，這裡發生了一樁令人髮指的命案，要請您移駕過來看看。」",
+          "length": 73,
+          "reasoning": "[73字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（73字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (73): complete quote cannot split",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "李昌鈺立刻著衣，冒著大雪趕到現場。",
+          "length": 15,
+          "reasoning": "Rule D: ends with 。。獨立敘事句，14字≥10符合Rule E。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 4,
+      "paragraph_text": "李昌鈺到了現場，先問在場辦案的警方人員：「你們來多久了？」",
+      "paragraph_length": 30,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "李昌鈺到了現場，先問在場辦案的警方人員：「你們來多久了？」",
+          "length": 24,
+          "reasoning": "Rule B: 說話者+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。22字適中。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "李昌鈺到了現場，先問在場辦案的警方人員：「你們來多久了？」",
+          "length": 24,
+          "reasoning": "Rule B: 說話者+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。22字適中。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 5,
+      "paragraph_text": "「十小時了。」法醫同時報告：「老太太被刺了18刀，凶刀就是廚房的刀，被丟在洗碗槽裡。」",
+      "paragraph_length": 42,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "「十小時了。」法醫同時報告：「老太太被刺了18刀，凶刀就是廚房的刀，被丟在洗碗槽裡。」",
+          "length": 34,
+          "reasoning": "Rule A: 兩組「」引號各自配對完整。Rule B: 法醫同時報告：「…」speaker+quote同句。Rule D: ends with 」。前方「十小時了」是上句問話的回答，同屬此對話段落，28字適中。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "「十小時了。」法醫同時報告：「老太太被刺了18刀，凶刀就是廚房的刀，被丟在洗碗槽裡。」",
+          "length": 34,
+          "reasoning": "Rule A: 兩組「」引號各自配對完整。Rule B: 法醫同時報告：「…」speaker+quote同句。Rule D: ends with 」。前方「十小時了」是上句問話的回答，同屬此對話段落，28字適中。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 6,
+      "paragraph_text": "李昌鈺環顧四周，問：「十八刀？血呢？」地上沒有血。他馬上推論出兩個假設：血跡已經清理過了，或者，這裡不是第一現場。",
+      "paragraph_length": 55,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "李昌鈺環顧四周，問：「十八刀？血呢？」",
+          "length": 13,
+          "reasoning": "Rule B: 說話者「問：」+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。"
+        },
+        {
+          "idx": 1,
+          "text": "地上沒有血。他馬上推論出兩個假設：血跡已經清理過了，或者，這裡不是第一現場。",
+          "length": 33,
+          "reasoning": "Rule D: ends with 。。「地上沒有血」單獨僅5字不足Rule E的10字，故與後句合併。合併後28字≥10。冒號後接列舉項，以。結尾合規。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "李昌鈺環顧四周，問：「十八刀？血呢？」",
+          "length": 13,
+          "reasoning": "Rule B: 說話者「問：」+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "地上沒有血。他馬上推論出兩個假設：血跡已經清理過了，或者，這裡不是第一現場。",
+          "length": 33,
+          "reasoning": "Rule D: ends with 。。「地上沒有血」單獨僅5字不足Rule E的10字，故與後句合併。合併後28字≥10。冒號後接列舉項，以。結尾合規。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 7,
+      "paragraph_text": "李昌鈺請同仁在廚房地板上噴化學藥品，這種藥品和血液裡的鐵離子反應後，會放出藍色螢光。一噴完藥，看起來乾淨的地板，在關燈後，赫然出現大片藍色螢光的血跡反應。李昌鈺判斷，清理現場需要一段時間，凶手一定是老太太的熟人，清楚知道她的作息與交往關係，這才敢留在現場清理血跡。此外，凶手踩過血跡之後留下的幾個鞋印，也因為藥品的緣故清楚顯現，經過比對，這是彪馬牌球鞋，從球鞋的大小，可以推斷出凶手的身高。",
+      "paragraph_length": 162,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "李昌鈺請同仁在廚房地板上噴化學藥品，這種藥品和血液裡的鐵離子反應後，會放出藍色螢光。",
+          "length": 39,
+          "reasoning": "Rule D: ends with 。。完整句，32字適中。"
+        },
+        {
+          "idx": 1,
+          "text": "一噴完藥，看起來乾淨的地板，在關燈後，赫然出現大片藍色螢光的血跡反應。",
+          "length": 31,
+          "reasoning": "Rule D: ends with 。。完整句，26字適中。"
+        },
+        {
+          "idx": 2,
+          "text": "李昌鈺判斷，清理現場需要一段時間，凶手一定是老太太的熟人。",
+          "length": 26,
+          "reasoning": "Rule D: ends with 。。38字略接近上限但<40，語義連貫（判斷+推論鏈），無需拆分。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 3,
+          "text": "清楚知道她的作息與交往關係，這才敢留在現場清理血跡。",
+          "length": 24,
+          "reasoning": "Rule D: ends with 。。38字略接近上限但<40，語義連貫（判斷+推論鏈），無需拆分。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 4,
+          "text": "此外，凶手踩過血跡之後留下的幾個鞋印，也因為藥品的緣故清楚顯現。",
+          "length": 29,
+          "reasoning": "Rule D: 原句>40字（42字），在「清楚顯現」後逗號升級為句號拆分。前半26字語義完整（鞋印因藥品顯現）。"
+        },
+        {
+          "idx": 5,
+          "text": "經過比對，這是彪馬牌球鞋，從球鞋的大小，可以推斷出凶手的身高。",
+          "length": 27,
+          "reasoning": "Rule D: ends with 。。後半22字語義完整（比對→推斷身高）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "李昌鈺請同仁在廚房地板上噴化學藥品，這種藥品和血液裡的鐵離子反應後，會放出藍色螢光。",
+          "length": 39,
+          "reasoning": "Rule D: ends with 。。完整句，32字適中。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "一噴完藥，看起來乾淨的地板，在關燈後，赫然出現大片藍色螢光的血跡反應。",
+          "length": 31,
+          "reasoning": "Rule D: ends with 。。完整句，26字適中。",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "李昌鈺判斷，清理現場需要一段時間，凶手一定是老太太的熟人。",
+          "length": 26,
+          "reasoning": "Rule D: ends with 。。38字略接近上限但<40，語義連貫（判斷+推論鏈），無需拆分。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 3,
+          "text": "清楚知道她的作息與交往關係，這才敢留在現場清理血跡。",
+          "length": 24,
+          "reasoning": "Rule D: ends with 。。38字略接近上限但<40，語義連貫（判斷+推論鏈），無需拆分。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 4,
+          "text": "此外，凶手踩過血跡之後留下的幾個鞋印，也因為藥品的緣故清楚顯現。",
+          "length": 29,
+          "reasoning": "Rule D: 原句>40字（42字），在「清楚顯現」後逗號升級為句號拆分。前半26字語義完整（鞋印因藥品顯現）。",
+          "fixes": []
+        },
+        {
+          "idx": 5,
+          "text": "經過比對，這是彪馬牌球鞋，從球鞋的大小，可以推斷出凶手的身高。",
+          "length": 27,
+          "reasoning": "Rule D: ends with 。。後半22字語義完整（比對→推斷身高）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 8,
+      "paragraph_text": "他立刻下了一個指令，派出200名刑警去翻找附近所有的定置垃圾箱，目標是找到凶手的球鞋。同仁問：「今天是感恩節團聚的日子，不能隔兩天再去找嗎？」李昌鈺回答：「不行，兵貴神速，現在就要動員，今晚不搜，明天垃圾會去哪裡？垃圾場。垃圾場太大、垃圾太多，很難找，即使找到了，也早被汙染了。」",
+      "paragraph_length": 118,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "他立刻下了一個指令，派出200名刑警去翻找附近所有的定置垃圾箱，目標是找到凶手的球鞋。",
+          "length": 40,
+          "reasoning": "Rule D: ends with 。。完整句，32字適中。"
+        },
+        {
+          "idx": 1,
+          "text": "同仁問：「今天是感恩節團聚的日子，不能隔兩天再去找嗎？」",
+          "length": 23,
+          "reasoning": "Rule B: 說話者「同仁問：」+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。"
+        },
+        {
+          "idx": 2,
+          "text": "李昌鈺回答：「不行，兵貴神速，現在就要動員，今晚不搜，明天垃圾會去哪裡？垃圾場。垃圾場太大、垃圾太多，很難找，即使找到了，也早被汙染了。」",
+          "length": 55,
+          "reasoning": "[55字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（55字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (55): complete quote cannot split"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "他立刻下了一個指令，派出200名刑警去翻找附近所有的定置垃圾箱，目標是找到凶手的球鞋。",
+          "length": 40,
+          "reasoning": "Rule D: ends with 。。完整句，32字適中。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "同仁問：「今天是感恩節團聚的日子，不能隔兩天再去找嗎？」",
+          "length": 23,
+          "reasoning": "Rule B: 說話者「同仁問：」+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "李昌鈺回答：「不行，兵貴神速，現在就要動員，今晚不搜，明天垃圾會去哪裡？垃圾場。垃圾場太大、垃圾太多，很難找，即使找到了，也早被汙染了。」",
+          "length": 55,
+          "reasoning": "[55字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（55字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (55): complete quote cannot split",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 9,
+      "paragraph_text": "動員令下達25分鐘之後，指揮中心收到回報：找到球鞋了。鑑識人員立刻檢驗這雙鞋，鞋上有血點，而且從鞋子裡的毛髮，可以知道主人是白人，但，到底這個人是誰呢？",
+      "paragraph_length": 72,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "動員令下達25分鐘之後，指揮中心收到回報：找到球鞋了。",
+          "length": 24,
+          "reasoning": "Rule D: ends with 。。冒號後接回報內容（單一項），整句以。結尾合規，22字適中。"
+        },
+        {
+          "idx": 1,
+          "text": "鑑識人員立刻檢驗這雙鞋，鞋上有血點，而且從鞋子裡的毛髮。",
+          "length": 25,
+          "reasoning": "Rule D: ends with ？。35字在理想範圍，語義完整。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 2,
+          "text": "可以知道主人是白人，但，到底這個人是誰呢？",
+          "length": 18,
+          "reasoning": "Rule D: ends with ？。35字在理想範圍，語義完整。 [auto-split at comma by audit]"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "動員令下達25分鐘之後，指揮中心收到回報：找到球鞋了。",
+          "length": 24,
+          "reasoning": "Rule D: ends with 。。冒號後接回報內容（單一項），整句以。結尾合規，22字適中。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "鑑識人員立刻檢驗這雙鞋，鞋上有血點，而且從鞋子裡的毛髮。",
+          "length": 25,
+          "reasoning": "Rule D: ends with ？。35字在理想範圍，語義完整。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "可以知道主人是白人，但，到底這個人是誰呢？",
+          "length": 18,
+          "reasoning": "Rule D: ends with ？。35字在理想範圍，語義完整。 [auto-split at comma by audit]",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 10,
+      "paragraph_text": "李昌鈺說：「鞋子是不是在購物中心旁邊的垃圾箱找到的？」",
+      "paragraph_length": 29,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "李昌鈺說：「鞋子是不是在購物中心旁邊的垃圾箱找到的？」",
+          "length": 23,
+          "reasoning": "Rule B: 說話者+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。20字適中。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "李昌鈺說：「鞋子是不是在購物中心旁邊的垃圾箱找到的？」",
+          "length": 23,
+          "reasoning": "Rule B: 說話者+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。20字適中。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 11,
+      "paragraph_text": "同仁答：「是的，你怎麼知道？」",
+      "paragraph_length": 16,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "同仁答：「是的，你怎麼知道？」",
+          "length": 10,
+          "reasoning": "Rule B: 說話者+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。長度10≥10符合Rule E。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "同仁答：「是的，你怎麼知道？」",
+          "length": 10,
+          "reasoning": "Rule B: 說話者+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。長度10≥10符合Rule E。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 12,
+      "paragraph_text": "李昌鈺說：「別管我怎麼知道的，快去找那個購物中心的運動用品店或鞋店的老闆。」",
+      "paragraph_length": 38,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "李昌鈺說：「別管我怎麼知道的，快去找那個購物中心的運動用品店或鞋店的老闆。」",
+          "length": 33,
+          "reasoning": "Rule B: 說話者+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。28字適中。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "李昌鈺說：「別管我怎麼知道的，快去找那個購物中心的運動用品店或鞋店的老闆。」",
+          "length": 33,
+          "reasoning": "Rule B: 說話者+引言同句。Rule A: 「」配對完整。Rule D: ends with 」。28字適中。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 13,
+      "paragraph_text": "老闆三更半夜被電話吵醒，刑警請他回憶，前一天有沒有一個白人來買鞋子？老闆查了店裡的記錄，找到前一天下午，有一個男人用信用卡買了一雙鞋子，警方立刻查出信用卡的主人和地址。",
+      "paragraph_length": 81,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "老闆三更半夜被電話吵醒，刑警請他回憶，前一天有沒有一個白人來買鞋子？",
+          "length": 31,
+          "reasoning": "Rule D: ends with ？。疑問句完整，26字適中。"
+        },
+        {
+          "idx": 1,
+          "text": "老闆查了店裡的記錄，找到前一天下午。",
+          "length": 16,
+          "reasoning": "Rule D: ends with 。。語義完整（查記錄→找到→查出地址），36字在理想範圍。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 2,
+          "text": "有一個男人用信用卡買了一雙鞋子，警方立刻查出信用卡的主人和地址。",
+          "length": 30,
+          "reasoning": "Rule D: ends with 。。語義完整（查記錄→找到→查出地址），36字在理想範圍。 [auto-split at comma by audit]"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "老闆三更半夜被電話吵醒，刑警請他回憶，前一天有沒有一個白人來買鞋子？",
+          "length": 31,
+          "reasoning": "Rule D: ends with ？。疑問句完整，26字適中。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "老闆查了店裡的記錄，找到前一天下午。",
+          "length": 16,
+          "reasoning": "Rule D: ends with 。。語義完整（查記錄→找到→查出地址），36字在理想範圍。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "有一個男人用信用卡買了一雙鞋子，警方立刻查出信用卡的主人和地址。",
+          "length": 30,
+          "reasoning": "Rule D: ends with 。。語義完整（查記錄→找到→查出地址），36字在理想範圍。 [auto-split at comma by audit]",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 14,
+      "paragraph_text": "清晨六點。「叮咚！叮咚！」男人睡眼惺忪地開門，門外滿是警察，在詢問後，這位年輕的白人承認昨天殺了老太太。",
+      "paragraph_length": 52,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "清晨六點。「叮咚！叮咚！」男人睡眼惺忪地開門，門外滿是警察。",
+          "length": 23,
+          "reasoning": "Rule E: 「清晨六點」僅4字不足10，合併至整段為一句。Rule A: 「叮咚！叮咚！」引號完整在同句。Rule D: ends with 。。合併後33字適中。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 1,
+          "text": "在詢問後，這位年輕的白人承認昨天殺了老太太。",
+          "length": 20,
+          "reasoning": "Rule E: 「清晨六點」僅4字不足10，合併至整段為一句。Rule A: 「叮咚！叮咚！」引號完整在同句。Rule D: ends with 。。合併後33字適中。 [auto-split at comma by audit]"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "清晨六點。「叮咚！叮咚！」男人睡眼惺忪地開門，門外滿是警察。",
+          "length": 23,
+          "reasoning": "Rule E: 「清晨六點」僅4字不足10，合併至整段為一句。Rule A: 「叮咚！叮咚！」引號完整在同句。Rule D: ends with 。。合併後33字適中。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "在詢問後，這位年輕的白人承認昨天殺了老太太。",
+          "length": 20,
+          "reasoning": "Rule E: 「清晨六點」僅4字不足10，合併至整段為一句。Rule A: 「叮咚！叮咚！」引號完整在同句。Rule D: ends with 。。合併後33字適中。 [auto-split at comma by audit]",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 15,
+      "paragraph_text": "凶手是老太太的遠親，有吸毒的惡習，老太太偶爾請他到家裡幫忙，工作之後會給他一點錢。昨天感恩節，凶手去找老太太要錢，老太太不給，兩人起了爭執。凶手情緒失控出手打昏了老太太，他害怕老太太醒來會報警，便一不作二不休，拿了廚房的刀殺死了老太太。",
+      "paragraph_length": 107,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "凶手是老太太的遠親，有吸毒的惡習，老太太偶爾請他到家裡幫忙，工作之後會給他一點錢。",
+          "length": 37,
+          "reasoning": "Rule D: ends with 。。背景介紹句，31字適中。"
+        },
+        {
+          "idx": 1,
+          "text": "昨天感恩節，凶手去找老太太要錢，老太太不給，兩人起了爭執。",
+          "length": 25,
+          "reasoning": "Rule D: 原段末句>40字（51字），在逗號「兩人起了爭執」後升級為句號拆分。前半22字語義完整（起因：要錢→拒絕→爭執）。"
+        },
+        {
+          "idx": 2,
+          "text": "凶手情緒失控出手打昏了老太太，他害怕老太太醒來會報警。",
+          "length": 25,
+          "reasoning": "Rule D: ends with 。。後半33字語義完整（升級：失控→打昏→殺人）。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 3,
+          "text": "便一不作二不休，拿了廚房的刀殺死了老太太。",
+          "length": 19,
+          "reasoning": "Rule D: ends with 。。後半33字語義完整（升級：失控→打昏→殺人）。 [auto-split at comma by audit]"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "凶手是老太太的遠親，有吸毒的惡習，老太太偶爾請他到家裡幫忙，工作之後會給他一點錢。",
+          "length": 37,
+          "reasoning": "Rule D: ends with 。。背景介紹句，31字適中。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "昨天感恩節，凶手去找老太太要錢，老太太不給，兩人起了爭執。",
+          "length": 25,
+          "reasoning": "Rule D: 原段末句>40字（51字），在逗號「兩人起了爭執」後升級為句號拆分。前半22字語義完整（起因：要錢→拒絕→爭執）。",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "凶手情緒失控出手打昏了老太太，他害怕老太太醒來會報警。",
+          "length": 25,
+          "reasoning": "Rule D: ends with 。。後半33字語義完整（升級：失控→打昏→殺人）。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 3,
+          "text": "便一不作二不休，拿了廚房的刀殺死了老太太。",
+          "length": 19,
+          "reasoning": "Rule D: ends with 。。後半33字語義完整（升級：失控→打昏→殺人）。 [auto-split at comma by audit]",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 16,
+      "paragraph_text": "案子破了。你能看到李博士「問題、假設、檢驗假設」的辦案過程嗎？一個沒有人看見、沒有人知道、線索有限的凶案，李博士和他的團隊用鑑識科學，替無聲的死者說話，終於讓正義得到伸張。",
+      "paragraph_length": 79,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "案子破了。你能看到李博士「問題、假設、檢驗假設」的辦案過程嗎？",
+          "length": 25,
+          "reasoning": "Rule E: 「案子破了」僅4字不足10，合併至下句。Rule A: 「」引號配對完整。Rule D: ends with ？。合併後22字≥10。"
+        },
+        {
+          "idx": 1,
+          "text": "一個沒有人看見、沒有人知道、線索有限的凶案。",
+          "length": 19,
+          "reasoning": "Rule D: ends with 。。結尾總結句，38字在理想範圍，語義完整。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 2,
+          "text": "李博士和他的團隊用鑑識科學，替無聲的死者說話，終於讓正義得到伸張。",
+          "length": 30,
+          "reasoning": "Rule D: ends with 。。結尾總結句，38字在理想範圍，語義完整。 [auto-split at comma by audit]"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "案子破了。你能看到李博士「問題、假設、檢驗假設」的辦案過程嗎？",
+          "length": 25,
+          "reasoning": "Rule E: 「案子破了」僅4字不足10，合併至下句。Rule A: 「」引號配對完整。Rule D: ends with ？。合併後22字≥10。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "一個沒有人看見、沒有人知道、線索有限的凶案。",
+          "length": 19,
+          "reasoning": "Rule D: ends with 。。結尾總結句，38字在理想範圍，語義完整。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "李博士和他的團隊用鑑識科學，替無聲的死者說話，終於讓正義得到伸張。",
+          "length": 30,
+          "reasoning": "Rule D: ends with 。。結尾總結句，38字在理想範圍，語義完整。 [auto-split at comma by audit]",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    }
+  ],
+  "summary": {
+    "total_sentences_before": 43,
+    "total_sentences_after": 43,
+    "violations_before": 0,
+    "violations_after": 0,
+    "auto_fixes_applied": 0
+  }
+}

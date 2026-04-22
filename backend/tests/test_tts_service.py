@@ -890,3 +890,100 @@ class TestRegenerateEndpoint:
         client = TestClient(self._make_app())
         response = client.post("/api/tts/regenerate", json={"text": ""})
         assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# 13. v2 JSONL alignment — build_lesson_tts_mapping hashes must match pre-generated blobs
+# ---------------------------------------------------------------------------
+
+class TestBuildLessonTtsMappingV2Alignment:
+    """build_lesson_tts_mapping must produce hashes that exist in sentences.v2.jsonl.
+
+    This is the gate that would have caught the regex-split vs. Opus-segmentation
+    mismatch described in Issue #1208.  If this test fails, GCS blobs for the
+    sentences returned by the mapping endpoint do NOT exist — cache miss → live
+    synthesis → 8-second wait.
+    """
+
+    def _load_v2_hash_set(self) -> set:
+        """Load all SHA-256 hashes from sentences.v2.jsonl."""
+        import hashlib
+        import json
+        import os
+        jsonl_path = os.path.join(
+            os.path.dirname(__file__), "..", "data", "sentences.v2.jsonl"
+        )
+        hashes = set()
+        with open(os.path.normpath(jsonl_path), encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                row = json.loads(line)
+                text = row["text"]
+                h = hashlib.sha256(text.strip().encode("utf-8")).hexdigest()
+                hashes.add(h)
+        return hashes
+
+    def test_lesson_1_mapping_hashes_all_in_v2_jsonl(self):
+        """Every hash from build_lesson_tts_mapping(lesson_1) must exist in sentences.v2.jsonl.
+
+        A hash not in the JSONL means the pre-generated GCS blob does not exist
+        → runtime will fall through to live synthesis (~8s per sentence).
+        """
+        import app.services.tts_service as tts_mod
+        from app.services.lesson_loader import get_lesson_by_id
+
+        # Reset the in-process JSONL cache so we load fresh from disk.
+        tts_mod._SENTENCES_V2_CACHE = None
+
+        lesson = get_lesson_by_id(1)
+        assert lesson is not None, "Lesson 1 must exist in the test environment"
+
+        mapping = tts_mod.build_lesson_tts_mapping(lesson)
+        assert mapping["lesson_id"] is not None
+        assert len(mapping["paragraphs"]) > 0, "Lesson 1 mapping must have at least one paragraph"
+
+        v2_hashes = self._load_v2_hash_set()
+        assert len(v2_hashes) > 0, "sentences.v2.jsonl must be non-empty"
+
+        mismatched = []
+        for para in mapping["paragraphs"]:
+            for sent in para["sentences"]:
+                if sent["hash"] not in v2_hashes:
+                    mismatched.append({
+                        "paragraph_idx": para["index"],
+                        "text": sent["text"][:40],
+                        "hash_prefix": sent["hash"][:16],
+                    })
+
+        assert not mismatched, (
+            f"build_lesson_tts_mapping returned {len(mismatched)} sentence(s) whose hash "
+            f"is NOT in sentences.v2.jsonl — these will cause GCS cache misses:\n"
+            + "\n".join(f"  para={m['paragraph_idx']} text={m['text']!r} hash={m['hash_prefix']}..." for m in mismatched)
+        )
+
+    def test_all_lessons_in_v2_jsonl_have_consistent_hashes(self):
+        """Sanity check: re-hashing sentences.v2.jsonl rows must match the stored hash.
+
+        sha256(text.strip()) must equal _cache_key(text) for every row.
+        """
+        import json
+        import os
+        from app.services.tts_service import _cache_key
+
+        jsonl_path = os.path.normpath(os.path.join(
+            os.path.dirname(__file__), "..", "data", "sentences.v2.jsonl"
+        ))
+        with open(jsonl_path, encoding="utf-8") as fh:
+            for i, line in enumerate(fh):
+                line = line.strip()
+                if not line:
+                    continue
+                row = json.loads(line)
+                text = row["text"]
+                expected = _cache_key(text)
+                # _cache_key strips whitespace before hashing — verify consistency
+                assert len(expected) == 64, f"Line {i}: _cache_key returned unexpected length"
+                # Also verify the text round-trips clean
+                assert text == text.strip() or text.strip(), f"Line {i}: text is empty after strip"

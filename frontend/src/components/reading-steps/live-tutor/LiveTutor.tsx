@@ -163,12 +163,15 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     () => setRealtimeDiffTokens(null),
   );
 
-  /** Use Cloud TTS Neural2 to read the current paragraph aloud. */
+  /** Use Cloud TTS to read the current paragraph aloud.
+   *  Passes lessonId + paragraphIdx so the TTS hook fetches canonical v2 sentences
+   *  (Issue #1208 fix: cache hit instead of 8s live synthesis).
+   */
   const speakCurrentParagraph = useCallback(() => {
     const text = story.content[currentLineIndex];
     if (!text) return;
-    speakText(text);
-  }, [story.content, currentLineIndex, speakText]);
+    speakText(text, Number(story.id), currentLineIndex);
+  }, [story.content, story.id, currentLineIndex, speakText]);
 
   /* ---- Resizable right panel ---- */
   const { onDividerMouseDown, onDividerTouchStart } = useResizablePanel(

@@ -21,6 +21,10 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 // Blob URLs are released when the page unloads.
 const _urlCache = new Map<string, string>();
 
+// In-process lesson mapping cache: "lessonId-paragraphIdx" → canonical sentence texts.
+// Populated on first access from GET /api/tts/mapping/{lessonId}. (Issue #1208 fix)
+const _mappingCache = new Map<string, string[]>();
+
 // Track the currently playing audio element so cancelTts() can stop it
 let _currentAudio: HTMLAudioElement | null = null;
 
@@ -40,18 +44,45 @@ export function cancelTts(): void {
 }
 
 /**
- * Synthesise and play *text* in Traditional Chinese via Azure TTS.
+ * Pause the currently playing sentence without aborting the queue.
+ * Next sentence will still be fetched+played when resumed.
+ * Used by the v2 sentence-level playback path where useTtsPlayback has
+ * no direct handle to the internal Audio element.
+ */
+export function pauseCurrentTts(): void {
+  _currentAudio?.pause();
+}
+
+/**
+ * Resume a previously paused sentence.
+ */
+export function resumeCurrentTts(): void {
+  _currentAudio?.play().catch(() => {});
+}
+
+/**
+ * Synthesise and play *text* in Traditional Chinese via Azure/Gemini TTS.
  *
- * Splits text into sentences and plays each one sequentially via the backend.
+ * When lessonId + paragraphIdx are provided, fetches canonical sentence list from
+ * GET /api/tts/mapping/{lessonId} so SHA-256 keys match pre-generated GCS blobs
+ * (Issue #1208 fix: eliminates regex-split cache miss → 8s live synthesis).
+ *
+ * Falls back to regex _splitSentences() when lessonId is not provided.
  *
  * @param text - Text to synthesise (keep under 5000 chars per request).
+ * @param lessonId - Optional lesson ID for canonical v2 sentence lookup.
+ * @param paragraphIdx - Optional paragraph index (0-based) within the lesson.
  * @returns Promise that resolves when all sentences finish, or rejects on fatal error.
  */
-export async function speakText(text: string): Promise<void> {
+export async function speakText(
+  text: string,
+  lessonId?: number,
+  paragraphIdx?: number,
+): Promise<void> {
   if (!text.trim()) return;
   cancelTts();
   _cancelRequested = false;
-  await _speakViaBackend(text);
+  await _speakViaBackend(text, lessonId, paragraphIdx);
 }
 
 /**
@@ -72,16 +103,20 @@ export interface TtsProgressInfo {
  *
  * @param text - Text to synthesise.
  * @param onProgress - Called with progress info as playback advances.
+ * @param lessonId - Optional lesson ID for canonical v2 sentence lookup.
+ * @param paragraphIdx - Optional paragraph index (0-based) within the lesson.
  * @returns Promise that resolves when all sentences finish, or rejects on fatal error.
  */
 export async function speakTextWithProgress(
   text: string,
   onProgress: (info: TtsProgressInfo) => void,
+  lessonId?: number,
+  paragraphIdx?: number,
 ): Promise<void> {
   if (!text.trim()) return;
   cancelTts();
   _cancelRequested = false;
-  await _speakViaBackendWithProgress(text, onProgress);
+  await _speakViaBackendWithProgress(text, onProgress, lessonId, paragraphIdx);
 }
 
 /**
@@ -96,6 +131,7 @@ export const _testInternals = {
   reset() {
     _cancelRequested = false;
     _urlCache.clear();
+    _mappingCache.clear();
   },
   splitSentences: _splitSentences,
   cleanForTts: _cleanForTts,
@@ -158,6 +194,45 @@ function _splitSentences(text: string): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// Private: canonical sentence list from backend mapping (Issue #1208 fix)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch canonical sentences for a lesson paragraph from the backend mapping.
+ *
+ * Uses GET /api/tts/mapping/{lessonId} which now returns sentences from
+ * sentences.v2.jsonl (Opus 4.7 segmentation).  The SHA-256 of each sentence
+ * text matches pre-generated GCS blobs → cache hit, no live synthesis.
+ *
+ * Returns null on any fetch/parse error so the caller can fall back to regex.
+ */
+async function _fetchLessonSentences(
+  lessonId: number,
+  paragraphIdx: number,
+): Promise<string[] | null> {
+  const cacheKey = `${lessonId}-${paragraphIdx}`;
+  if (_mappingCache.has(cacheKey)) {
+    return _mappingCache.get(cacheKey)!;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/api/tts/mapping/${lessonId}`);
+    if (!response.ok) return null;
+    const data = await response.json() as {
+      paragraphs: Array<{ index: number; sentences: Array<{ text: string }> }>;
+    };
+    // Populate all paragraphs from this lesson into the cache at once.
+    for (const para of data.paragraphs) {
+      const key = `${lessonId}-${para.index}`;
+      _mappingCache.set(key, para.sentences.map((s) => s.text));
+    }
+    return _mappingCache.get(cacheKey) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Private: backend sequential playback
 // ---------------------------------------------------------------------------
 
@@ -185,11 +260,23 @@ async function _fetchAudioUrl(sentence: string): Promise<string> {
   return audioUrl;
 }
 
-async function _speakViaBackend(text: string): Promise<void> {
-  const cleaned = _cleanForTts(text);
-  if (!cleaned) return;
+async function _speakViaBackend(
+  text: string,
+  lessonId?: number,
+  paragraphIdx?: number,
+): Promise<void> {
+  let sentences: string[];
 
-  const sentences = _splitSentences(cleaned);
+  // Prefer canonical v2 sentences to guarantee GCS cache hits (Issue #1208).
+  if (lessonId !== undefined && paragraphIdx !== undefined) {
+    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx);
+    sentences = canonical ?? _splitSentences(_cleanForTts(text));
+  } else {
+    const cleaned = _cleanForTts(text);
+    if (!cleaned) return;
+    sentences = _splitSentences(cleaned);
+  }
+
   if (sentences.length === 0) return;
 
   for (const sentence of sentences) {
@@ -205,11 +292,21 @@ async function _speakViaBackend(text: string): Promise<void> {
 async function _speakViaBackendWithProgress(
   text: string,
   onProgress: (info: TtsProgressInfo) => void,
+  lessonId?: number,
+  paragraphIdx?: number,
 ): Promise<void> {
-  const cleaned = _cleanForTts(text);
-  if (!cleaned) return;
+  let sentences: string[];
 
-  const sentences = _splitSentences(cleaned);
+  // Prefer canonical v2 sentences to guarantee GCS cache hits (Issue #1208).
+  if (lessonId !== undefined && paragraphIdx !== undefined) {
+    const canonical = await _fetchLessonSentences(lessonId, paragraphIdx);
+    sentences = canonical ?? _splitSentences(_cleanForTts(text));
+  } else {
+    const cleaned = _cleanForTts(text);
+    if (!cleaned) return;
+    sentences = _splitSentences(cleaned);
+  }
+
   if (sentences.length === 0) return;
 
   const total = sentences.length;

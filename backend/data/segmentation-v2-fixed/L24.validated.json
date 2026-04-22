@@ -62,14 +62,12 @@
         },
         {
           "idx": 3,
-          "text": "台灣著名的昆蟲學者李淳陽，長年在田野觀察昆蟲行為，我們來看他對捲葉象鼻蟲和黃面蜂的觀察研究：解決困難的捲葉象鼻蟲。",
+          "text": "台灣著名的昆蟲學者李淳陽，長年在田野觀察昆蟲行為，我們來看他對捲葉象鼻蟲和黃面蜂的觀察研究：解決困難的捲葉象鼻蟲",
           "length": 53,
           "reasoning": "[長度46字] 語意完整，介紹即將引用的學者及其研究對象。",
           "fixes": [
-            "merged_next_idx_4_rule_D",
-            "manual: append ''->'。'"
-          ],
-          "review_note": "over-40 (53字), splittable at pos 24 if desired"
+            "merged_next_idx_4_rule_D"
+          ]
         }
       ],
       "violations_before": [
@@ -88,7 +86,15 @@
           ]
         }
       ],
-      "violations_after": [],
+      "violations_after": [
+        {
+          "idx": 3,
+          "text": "台灣著名的昆蟲學者李淳陽，長年在田野觀察昆蟲行為，我們來看他對捲葉象鼻蟲和黃面蜂的觀察研究：解決困難的捲葉象鼻蟲",
+          "violations": [
+            "D:weird_end_蟲"
+          ]
+        }
+      ],
       "fix_log": [
         "merge-forward: sentence 3 ends with ："
       ]
@@ -558,8 +564,7 @@
           "text": "牠走到一方的盡頭，就回頭走到另一方的盡頭，可是這時正好遇上在葉苞開口處守株待兔等待著的黃面蜂。",
           "length": 54,
           "reasoning": "[長度54字] 語意完整，描述幼蟲的移動與遭遇，包含轉折詞「可是」；將原文逗號升級為句號，因為前後語意可獨立。",
-          "fixes": [],
-          "review_note": "over-40 (44字), splittable at pos 20 if desired"
+          "fixes": []
         },
         {
           "idx": 4,

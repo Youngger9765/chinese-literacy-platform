@@ -208,8 +208,7 @@
           "text": "她天生的爆發力與沉著冷靜的臨場表現，讓愛惜人才的柯教練覺得她是拳擊界一塊未經雕琢的璞玉。",
           "length": 40,
           "reasoning": "[長度40字] 語意完整，描述教練對陳念琴的評價，與前句共同構成原文的第一個長句。",
-          "fixes": [],
-          "review_note": "over-40 (42字), splittable at pos 17 if desired"
+          "fixes": []
         },
         {
           "idx": 2,
@@ -293,8 +292,7 @@
           "text": "16歲，她「越級打怪」挑戰臺北城市邀請賽，擊敗了年紀更大、身材更好的蒙古亞運銅牌選手，她開始找回了自信。",
           "length": 57,
           "reasoning": "[長度57字] 語意完整，描述她16歲時的挑戰與成果，將原文逗號升級為句號以拆分長句。",
-          "fixes": [],
-          "review_note": "over-40 (45字), splittable at pos 20 if desired"
+          "fixes": []
         }
       ],
       "violations_before": [],
@@ -473,8 +471,7 @@
           "text": "她堅持飛舞在拳擊的擂台上，因為她的信念是：「為了夢想我願意忍耐，在追求成功的過程中，再苦再累我都要咬牙撐過。」",
           "length": 64,
           "reasoning": "[長度64字] 語意完整，包含引號內容，依規則A、B不可拆分。",
-          "fixes": [],
-          "review_note": "over-40 (48字), splittable at pos 12 if desired"
+          "fixes": []
         },
         {
           "idx": 7,

@@ -341,8 +341,7 @@
           "reasoning": "[長度43字] 語意完整，符合朗讀長度。",
           "fixes": [
             "absorbed_short_idx_3_rule_E"
-          ],
-          "review_note": "over-40 (48字), splittable at pos 24 if desired"
+          ]
         }
       ],
       "violations_before": [
@@ -506,8 +505,7 @@
           "text": "似乎也向心上人宣示：「我的螯是保衛家園的最佳利器，我有能力保護妳及我們的下一代，請妳放心的嫁給我吧！」",
           "length": 53,
           "reasoning": "[長度53字] 語意完整，包含冒號後的完整引述內容，符合對話引號和冒號規則，不可拆分。",
-          "fixes": [],
-          "review_note": "over-40 (45字), no safe split (brackets/short-halves)"
+          "fixes": []
         }
       ],
       "violations_before": [],

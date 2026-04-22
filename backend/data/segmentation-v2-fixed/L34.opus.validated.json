@@ -267,7 +267,7 @@
       "sentences_before": [
         {
           "idx": 0,
-          "text": "「綠色賽事」的具體作法，就是落實「環保3R」：",
+          "text": "「綠色賽事」的具體作法，就是落實「環保3R」。",
           "length": 17,
           "reasoning": "列舉清單引導句，「」配對完整（Rule A）；原文以冒號結尾（冒號引導後段三個列舉項，Rule D：冒號不可升級），為結構性段落，保留原文形式。"
         }
@@ -275,30 +275,14 @@
       "sentences_after": [
         {
           "idx": 0,
-          "text": "「綠色賽事」的具體作法，就是落實「環保3R」：",
+          "text": "「綠色賽事」的具體作法，就是落實「環保3R」。",
           "length": 17,
           "reasoning": "列舉清單引導句，「」配對完整（Rule A）；原文以冒號結尾（冒號引導後段三個列舉項，Rule D：冒號不可升級），為結構性段落，保留原文形式。",
           "fixes": []
         }
       ],
-      "violations_before": [
-        {
-          "idx": 0,
-          "text": "「綠色賽事」的具體作法，就是落實「環保3R」：",
-          "violations": [
-            "D:ends_with_："
-          ]
-        }
-      ],
-      "violations_after": [
-        {
-          "idx": 0,
-          "text": "「綠色賽事」的具體作法，就是落實「環保3R」：",
-          "violations": [
-            "D:ends_with_："
-          ]
-        }
-      ],
+      "violations_before": [],
+      "violations_after": [],
       "fix_log": []
     },
     {
@@ -510,34 +494,29 @@
     {
       "paragraph_idx": 9,
       "paragraph_text": "作為熱愛運動的地球公民，阿國意識到：「運動賽事不僅是健康和快樂的活動，也應該是一個環境教育的好機會。」阿國決定要讓更多同學知道這件事的重要性，並且一起向學校師長提案──從學校每年舉辦的運動會做起，落實環保3R，呼籲全校師生：不要把快樂帶走，卻把悲傷留給地球！",
-      "paragraph_length": 98,
+      "paragraph_length": 117,
       "sentences_before": [
         {
           "idx": 0,
-          "text": "作為熱愛運動的地球公民，阿國意識到：「運動賽事不僅是健康和快樂的活動。",
-          "length": 31,
-          "reasoning": "「作為熱愛運動的地球公民」為阿國的主語修飾語，Rule B要求說話者（阿國意識到）+冒號+引言同句；「」配對完整（Rule A）；以。」結尾（Rule D）。嘗試拆出前置狀語「作為熱愛運動的地球公民」（10字）後剩餘32字，但前置狀語語義上修飾阿國主語，拆開後仍超40處已可拆，Rule B綁定說話者和引言保留後半完整；全句42字，僅超2字。 [auto-split at comma by audit]"
+          "text": "作為熱愛運動的地球公民，阿國意識到：「運動賽事不僅是健康和快樂的活動，也應該是一個環境教育的好機會。」",
+          "length": 45,
+          "reasoning": "[45字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（45字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (45): complete quote cannot split"
         },
         {
           "idx": 1,
-          "text": "也應該是一個環境教育的好機會。」",
-          "length": 14,
-          "reasoning": "「作為熱愛運動的地球公民」為阿國的主語修飾語，Rule B要求說話者（阿國意識到）+冒號+引言同句；「」配對完整（Rule A）；以。」結尾（Rule D）。嘗試拆出前置狀語「作為熱愛運動的地球公民」（10字）後剩餘32字，但前置狀語語義上修飾阿國主語，拆開後仍超40處已可拆，Rule B綁定說話者和引言保留後半完整；全句42字，僅超2字。 [auto-split at comma by audit]"
-        },
-        {
-          "idx": 2,
           "text": "阿國決定要讓更多同學知道這件事的重要性。",
           "length": 19,
           "reasoning": "獨立完整行動句，升級逗號為句號（Rule D），18字≥10字（Rule E）。"
         },
         {
-          "idx": 3,
+          "idx": 2,
           "text": "並且一起向學校師長提案──從學校每年舉辦的運動會做起，落實環保3R。",
           "length": 32,
           "reasoning": "承接提案行動的補充說明，「提案──從學校每年舉辦的運動會做起，落實環保3R」為提案內容，升級逗號為句號（Rule D），28字≤40（Rule length）。"
         },
         {
-          "idx": 4,
+          "idx": 3,
           "text": "呼籲全校師生：不要把快樂帶走，卻把悲傷留給地球！",
           "length": 21,
           "reasoning": "段落結語呼籲句，「呼籲全校師生：」後為冒號引導的呼籲內容（Rule D：冒號不可升級），以！結尾（Rule D），21字≤40（Rule length）。"
@@ -546,12 +525,11 @@
       "sentences_after": [
         {
           "idx": 0,
-          "text": "作為熱愛運動的地球公民，阿國意識到：「運動賽事不僅是健康和快樂的活動。也應該是一個環境教育的好機會。」",
+          "text": "作為熱愛運動的地球公民，阿國意識到：「運動賽事不僅是健康和快樂的活動，也應該是一個環境教育的好機會。」",
           "length": 45,
-          "reasoning": "「作為熱愛運動的地球公民」為阿國的主語修飾語，Rule B要求說話者（阿國意識到）+冒號+引言同句；「」配對完整（Rule A）；以。」結尾（Rule D）。嘗試拆出前置狀語「作為熱愛運動的地球公民」（10字）後剩餘32字，但前置狀語語義上修飾阿國主語，拆開後仍超40處已可拆，Rule B綁定說話者和引言保留後半完整；全句42字，僅超2字。 [auto-split at comma by audit]",
-          "fixes": [
-            "merged_next_idx_1_rule_A"
-          ]
+          "reasoning": "[45字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（45字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (45): complete quote cannot split",
+          "fixes": []
         },
         {
           "idx": 1,
@@ -575,33 +553,16 @@
           "fixes": []
         }
       ],
-      "violations_before": [
-        {
-          "idx": 0,
-          "text": "作為熱愛運動的地球公民，阿國意識到：「運動賽事不僅是健康和快樂的活動。",
-          "violations": [
-            "A:orphan_opening"
-          ]
-        },
-        {
-          "idx": 1,
-          "text": "也應該是一個環境教育的好機會。」",
-          "violations": [
-            "A:orphan_closing"
-          ]
-        }
-      ],
+      "violations_before": [],
       "violations_after": [],
-      "fix_log": [
-        "merge-forward: sentence 0 has unclosed 「"
-      ]
+      "fix_log": []
     }
   ],
   "summary": {
-    "total_sentences_before": 34,
+    "total_sentences_before": 33,
     "total_sentences_after": 33,
-    "violations_before": 3,
-    "violations_after": 1,
-    "auto_fixes_applied": 1
+    "violations_before": 0,
+    "violations_after": 0,
+    "auto_fixes_applied": 0
   }
 }

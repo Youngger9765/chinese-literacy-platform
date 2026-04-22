@@ -32,8 +32,7 @@
           "text": "飾演雷神索爾的克里斯·漢斯沃（C. Hemsworth）結實的胸肌、壁壘分明的腹肌，令許多粉絲羨慕不已。",
           "length": 46,
           "reasoning": "[長度46字] 語意完整，描述演員的體格及其引發的羨慕之情，雖略長但語意連貫，無合適拆分點。",
-          "fixes": [],
-          "review_note": "over-40 (46字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 1,

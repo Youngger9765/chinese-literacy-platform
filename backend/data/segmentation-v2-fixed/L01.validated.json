@@ -348,8 +348,7 @@
           "reasoning": "[長度19字] 語意完整，描述球評的讚賞，將逗號升級為句號。",
           "fixes": [
             "merged_next_idx_6_rule_D"
-          ],
-          "review_note": "over-40 (41字), splittable at pos 15 if desired"
+          ]
         },
         {
           "idx": 6,

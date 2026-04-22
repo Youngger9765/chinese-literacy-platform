@@ -283,8 +283,7 @@
           "text": "但父親才剛過世，二姊一心想幫助家庭：「我只希望早一點開始賺錢貼補家用，不然家裡怎麼撐得下去？」",
           "length": 54,
           "reasoning": "[長度54字] 語意完整，包含轉折連詞「但」與前句銜接，並將說話者與引述內容合併，符合對話引號與冒號規則。",
-          "fixes": [],
-          "review_note": "over-40 (41字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 4,
@@ -305,16 +304,14 @@
           "text": "「小二就換到一個食品加工廠做包裝工作，工資是按件計酬，為了多賺點錢，我練就了一身俐落的身手，但不管包裝的速度多快，一天的所得還是很有限。」",
           "length": 76,
           "reasoning": "[長度76字] 語意完整，為前句引述內容的延續，因引號必須完整，故將此段引述內容合併為一句，儘管較長，但語意連貫且無法拆分。",
-          "fixes": [],
-          "review_note": "over-40 (61字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 7,
           "text": "小花還曾在鞋廠，坐在彌漫著有機溶劑味道的生產線旁，用強力膠把一直送到眼前來的涼鞋黏上鞋底，惡劣的工作環境讓小花至今餘悸猶存。",
           "length": 69,
           "reasoning": "[長度69字] 語意完整，描述小花在鞋廠的工作經歷及感受，儘管較長，但語意連貫且無法拆分。",
-          "fixes": [],
-          "review_note": "over-40 (58字), splittable at pos 24 if desired"
+          "fixes": []
         },
         {
           "idx": 8,
@@ -483,8 +480,7 @@
           "reasoning": "[長度20字] 語意完整，包含對話引號與說話者，符合規則A、B，在語意轉折處拆分。",
           "fixes": [
             "merged_next_idx_10_rule_A"
-          ],
-          "review_note": "over-40 (59字), no safe split (brackets/short-halves)"
+          ]
         },
         {
           "idx": 10,

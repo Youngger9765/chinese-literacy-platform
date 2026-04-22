@@ -32,17 +32,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.services.tts_service import _clean_for_gemini, _clean_for_tts
+from app.services.tts_service import _clean_for_tts, GEMINI_TTS_PROMPT_PREFIX
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
 GCS_BUCKET = "lingoleap-tts-cache"
-GCS_PREFIX = "gemini31/sentences"
+GCS_PREFIX = "gemini31-prompt-only-v2/sentences"
 MODEL = "gemini-3.1-flash-tts-preview"
 GCP_PROJECT = "lingoleap-dev"
 LOCATION = "us-central1"
-JSONL = ROOT / "backend" / "data" / "sentences.jsonl"
+JSONL = ROOT / "backend" / "data" / "sentences.v2.jsonl"
 PROVENANCE = ROOT / "backend" / "data" / "tts-provenance.jsonl"
 
 
@@ -51,31 +51,45 @@ def _cache_key(text: str) -> str:
 
 
 def _pcm_to_mp3(pcm_data: bytes) -> bytes:
+    """Convert PCM to MP3 with loudnorm applied inline.
+
+    Gemini 3.1 Flash TTS produces inconsistent volume across independent sentence
+    calls (2-6 dB mean/peak variance observed on L01). loudnorm=I=-16:TP=-1.5:LRA=11
+    targets EBU R128 broadcast loudness so adjacent sentences sound balanced.
+    Existing blobs can be retroactively normalized via normalize_tts_loudnorm.py.
+    """
     result = subprocess.run(
-        ["ffmpeg", "-f", "s16le", "-ar", "24000", "-ac", "1", "-i", "pipe:0", "-f", "mp3", "-q:a", "2", "pipe:1"],
-        input=pcm_data, capture_output=True, timeout=30,
+        [
+            "ffmpeg", "-f", "s16le", "-ar", "24000", "-ac", "1", "-i", "pipe:0",
+            "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
+            "-f", "mp3", "-q:a", "2", "pipe:1",
+        ],
+        input=pcm_data, capture_output=True, timeout=60,
     )
     if result.returncode != 0:
         raise RuntimeError(f"ffmpeg failed: {result.stderr.decode()[:200]}")
     return result.stdout
 
 
-def _prep_tts_input(raw: str) -> tuple[str, list[dict]]:
-    """Clean + Taiwan pronunciation. Returns (tts_input, replacements_applied)."""
-    cleaned = _clean_for_tts(raw)
-    tts_input = _clean_for_gemini(cleaned)
-    replacements = []
-    if tts_input != cleaned:
-        replacements.append({"note": "taiwan_fixes_applied"})
-    return tts_input, replacements
+def _prep_tts_input(raw: str) -> tuple[str, str]:
+    """Variant A canonical (PR #1133): cache key uses raw text, Gemini input uses _clean_for_tts only.
+    NEVER call _clean_for_gemini — prompt-only Taiwan style relies on the system prompt, not text replacement.
+    Returns (key_source, synthesize_input).
+    """
+    key_source = raw
+    synthesize_input = _clean_for_tts(raw)
+    return key_source, synthesize_input
 
 
 def _synthesize(client, bucket, tts_input: str, key: str, voice: str) -> dict:
     import google.genai.types as t
     try:
+        # Variant A: prepend Taiwan-style prompt prefix — MUST match
+        # tts_service._synthesize_gemini so runtime cache hits and
+        # pre-generated blobs produce identical audio.
         resp = client.models.generate_content(
             model=MODEL,
-            contents=tts_input,
+            contents=GEMINI_TTS_PROMPT_PREFIX + tts_input,
             config=t.GenerateContentConfig(
                 response_modalities=["AUDIO"],
                 speech_config=t.SpeechConfig(
@@ -106,11 +120,11 @@ def load_sentences():
                 continue
             rec = json.loads(line)
             raw = rec["text"]
-            tts_input, _ = _prep_tts_input(raw)
-            key = _cache_key(tts_input)
+            key_source, synthesize_input = _prep_tts_input(raw)
+            key = _cache_key(key_source)
             items.append({
                 "raw_text": raw,
-                "tts_input": tts_input,
+                "tts_input": synthesize_input,
                 "cache_key": key,
                 "lesson_id": rec["lesson_id"],
                 "paragraph_idx": rec["paragraph_idx"],

@@ -56,12 +56,10 @@
         },
         {
           "idx": 3,
-          "text": "結果晚上睡不著、白天又起不來。",
-          "length": 13,
+          "text": "結果晚上睡不著、白天又起不來……",
+          "length": 17,
           "reasoning": "[長度17字] 語意完整，描述小琪行為的後果，以省略號結尾符合原文。",
-          "fixes": [
-            "manual: suffix_fix '……'->'。'"
-          ]
+          "fixes": []
         }
       ],
       "violations_before": [
@@ -73,7 +71,15 @@
           ]
         }
       ],
-      "violations_after": [],
+      "violations_after": [
+        {
+          "idx": 3,
+          "text": "結果晚上睡不著、白天又起不來……",
+          "violations": [
+            "D:weird_end_…"
+          ]
+        }
+      ],
       "fix_log": []
     },
     {

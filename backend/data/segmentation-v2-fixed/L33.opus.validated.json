@@ -133,7 +133,7 @@
     {
       "paragraph_idx": 2,
       "paragraph_text": "2021年吐瓦魯部長柯飛（S. Kofe）錄製了一段影片，對聯合國全球氣候高峰會發表演說。影片中，他穿著西裝、打著領帶、褲腳捲起，站在水深及膝的海水中演講，他強調吐瓦魯在氣候變遷下首當其衝，「對我們而言，島嶼是神聖的，它是我們祖先的家，是我們人民的家園。」柯飛說：「（但）我們正在下沉，每個人都在下沉。」",
-      "paragraph_length": 152,
+      "paragraph_length": 129,
       "sentences_before": [
         {
           "idx": 0,
@@ -155,18 +155,13 @@
         },
         {
           "idx": 3,
-          "text": "他強調吐瓦魯在氣候變遷下首當其衝，「對我們而言。",
-          "length": 21,
-          "reasoning": "Rule B：說話者描述「他強調...首當其衝」與引言「對我們而言...家園」必須同句。引號「」配對完整。 [auto-split at comma by audit]"
+          "text": "他強調吐瓦魯在氣候變遷下首當其衝，「對我們而言，島嶼是神聖的，它是我們祖先的家，是我們人民的家園。」",
+          "length": 43,
+          "reasoning": "[43字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（43字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (43): complete quote cannot split"
         },
         {
           "idx": 4,
-          "text": "島嶼是神聖的，它是我們祖先的家，是我們人民的家園。」",
-          "length": 22,
-          "reasoning": "Rule B：說話者描述「他強調...首當其衝」與引言「對我們而言...家園」必須同句。引號「」配對完整。 [auto-split at comma by audit]"
-        },
-        {
-          "idx": 5,
           "text": "柯飛說：「（但）我們正在下沉，每個人都在下沉。」",
           "length": 17,
           "reasoning": "Rule B：柯飛說：+冒號+引言必須同句。「」配對完整，（）配對完整，長度17符合Rule E。"
@@ -196,12 +191,11 @@
         },
         {
           "idx": 3,
-          "text": "他強調吐瓦魯在氣候變遷下首當其衝，「對我們而言。島嶼是神聖的，它是我們祖先的家，是我們人民的家園。」",
+          "text": "他強調吐瓦魯在氣候變遷下首當其衝，「對我們而言，島嶼是神聖的，它是我們祖先的家，是我們人民的家園。」",
           "length": 43,
-          "reasoning": "Rule B：說話者描述「他強調...首當其衝」與引言「對我們而言...家園」必須同句。引號「」配對完整。 [auto-split at comma by audit]",
-          "fixes": [
-            "merged_next_idx_4_rule_A"
-          ]
+          "reasoning": "[43字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（43字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (43): complete quote cannot split",
+          "fixes": []
         },
         {
           "idx": 4,
@@ -211,26 +205,9 @@
           "fixes": []
         }
       ],
-      "violations_before": [
-        {
-          "idx": 3,
-          "text": "他強調吐瓦魯在氣候變遷下首當其衝，「對我們而言。",
-          "violations": [
-            "A:orphan_opening"
-          ]
-        },
-        {
-          "idx": 4,
-          "text": "島嶼是神聖的，它是我們祖先的家，是我們人民的家園。」",
-          "violations": [
-            "A:orphan_closing"
-          ]
-        }
-      ],
+      "violations_before": [],
       "violations_after": [],
-      "fix_log": [
-        "merge-forward: sentence 3 has unclosed 「"
-      ]
+      "fix_log": []
     },
     {
       "paragraph_idx": 3,
@@ -671,10 +648,10 @@
     }
   ],
   "summary": {
-    "total_sentences_before": 43,
+    "total_sentences_before": 42,
     "total_sentences_after": 42,
-    "violations_before": 2,
+    "violations_before": 0,
     "violations_after": 0,
-    "auto_fixes_applied": 1
+    "auto_fixes_applied": 0
   }
 }
