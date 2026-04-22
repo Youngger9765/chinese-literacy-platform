@@ -1105,12 +1105,19 @@
 
 #### 4. 系統效能
 
-| 測試項目 | 驗收標準 | 測試方法 |
-|---------|---------|---------|
-| 並發使用者支援 | 30 人同時使用 | 壓力測試（30 人同時錄音） |
-| 系統穩定度 | > 99% Uptime | 監控工具追蹤 30 天 |
-| 資料庫查詢速度 | < 500ms | 查詢學生練習紀錄的平均時間 |
-| 頁面載入時間 | < 2 秒 | 首次載入教師儀表板的時間 |
+| 測試項目 | 驗收標準 | 測試方法 | 現況（2026-04-23）|
+|---------|---------|---------|------|
+| 並發使用者支援 | 30 人同時使用 | 壓力測試（30 人同時錄音） | TTS 改 async 後 5 concurrent 實測 2.5s → 0.51s（~5x）|
+| 系統穩定度 | > 99% Uptime | 監控工具追蹤 30 天 | — |
+| 資料庫查詢速度 | < 500ms | 查詢學生練習紀錄的平均時間 | 熱路徑 N+1 全消（PR #1218/#1227），hot columns 補 index（#1226）|
+| 頁面載入時間 | < 2 秒 | 首次載入教師儀表板的時間 | dashboard cumulative stats 改 SQL aggregate（#1227），Python 雙 loop 移除 |
+
+**效能優化紀錄（2026-04-22 ~ 2026-04-23）**：詳見 `CHANGELOG.md`
+- 6 個 N+1 query 全消除（routes + services 雙層）
+- 3 個 hot column index 補齊（含 compound `(student_id, status)`）
+- 3 處 Python 端聚合推到 SQL（`func.count/avg/sum/group_by`）
+- TTS 三個路由改 async（`asyncio.to_thread` 包同步 SDK）
+- Unbounded queries 加邊界（heatmap 5k 上限、CSV export 10k 上限）
 
 ---
 
