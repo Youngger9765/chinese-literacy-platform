@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { cancelTts, cleanForTts } from '../services/ttsApi';
+import { cancelTts, cleanForTts, speakText as speakTextSentences } from '../services/ttsApi';
 
 /**
  * Manages TTS (Text-to-Speech) audio playback for LiveTutor.
@@ -42,14 +42,37 @@ export function useTtsPlayback(
   /**
    * Speak the given text via Cloud TTS (with Web Speech API fallback).
    *
+   * When lessonId + paragraphIdx are provided, uses sentence-level sequential
+   * playback via canonical v2 sentences (Issue #1208 fix: eliminates cache miss).
+   * Otherwise falls back to single-shot full-paragraph synthesis.
+   *
    * Cloud TTS path: drives cursor via audio.ontimeupdate + currentTime/duration ratio.
    * Web Speech fallback: drives cursor via rAF + wall-clock timing (unchanged).
+   *
+   * @param text - Text to synthesise.
+   * @param lessonId - Optional lesson ID for canonical v2 sentence lookup.
+   * @param paragraphIdx - Optional paragraph index (0-based) within the lesson.
    */
-  const speakText = useCallback((text: string) => {
+  const speakText = useCallback((text: string, lessonId?: number, paragraphIdx?: number) => {
     if (!text) return;
     cancelTts();
     setIsTtsPaused(false);
+    setIsTtsSpeaking(true);
+    onRealtimeDiffTokensClear();
+    onSpeakingProgress(0);
 
+    // When lesson context is available, use sentence-level sequential playback
+    // so SHA-256 keys match pre-generated GCS blobs (Issue #1208 fix).
+    if (lessonId !== undefined && paragraphIdx !== undefined) {
+      speakTextSentences(text, lessonId, paragraphIdx)
+        .finally(() => {
+          setIsTtsSpeaking(false);
+          setIsTtsPaused(false);
+        });
+      return;
+    }
+
+    // Lesson context not available — use original single-shot full-paragraph path.
     // Chrome requires speechSynthesis.speak() to be called within user-gesture context.
     // Since the Cloud TTS fetch is async, the gesture expires before .catch() runs.
     // Warm up speechSynthesis now (synchronously, in gesture) so the fallback works.

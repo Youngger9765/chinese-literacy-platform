@@ -32,6 +32,7 @@ Auth:
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import os
 import re
@@ -818,15 +819,64 @@ def synthesize_sentence(text: str) -> bytes:
 
 
 # ---------------------------------------------------------------------------
-# Lesson TTS mapping — Issue #667
+# Lesson TTS mapping — Issue #667 / #1208
 # ---------------------------------------------------------------------------
+
+# Path to the pre-generated sentence JSONL (Opus 4.7 semantic segmentation).
+# Lock file: 2301 sentences, 1:1 aligned with GCS gemini31-prompt-only-v2/.
+_SENTENCES_V2_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "..", "data", "sentences.v2.jsonl"
+)
+
+# Cached in-process: { lesson_id (int): { paragraph_idx (int): [{"text", "hash", "chars"}, ...] } }
+_SENTENCES_V2_CACHE: dict | None = None
+
+
+def _load_sentences_v2() -> dict:
+    """Load sentences.v2.jsonl into memory (once per process).
+
+    Returns dict keyed by (lesson_id, paragraph_idx) → list of sentence dicts.
+    Sentences preserve the Opus 4.7 segmentation order so hashes match GCS blobs.
+    """
+    global _SENTENCES_V2_CACHE
+    if _SENTENCES_V2_CACHE is not None:
+        return _SENTENCES_V2_CACHE
+
+    mapping: dict = {}  # { lesson_id: { para_idx: [{"text", "hash", "chars"}] } }
+    path = os.path.normpath(_SENTENCES_V2_PATH)
+    try:
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                row = json.loads(line)
+                lid = int(row["lesson_id"])
+                pidx = int(row["paragraph_idx"])
+                text = row["text"]
+                h = _cache_key(text)
+                mapping.setdefault(lid, {}).setdefault(pidx, []).append(
+                    {"text": text, "hash": h, "chars": len(text)}
+                )
+        logger.info("Loaded sentences.v2.jsonl: %d lessons", len(mapping))
+    except FileNotFoundError:
+        logger.warning("sentences.v2.jsonl not found at %s — falling back to regex split", path)
+    except Exception as exc:
+        logger.warning("Failed to load sentences.v2.jsonl: %s — falling back to regex split", exc)
+
+    _SENTENCES_V2_CACHE = mapping
+    return mapping
+
 
 def build_lesson_tts_mapping(lesson: dict) -> dict:
     """Build a sentence-level TTS mapping for a lesson.
 
-    Given a lesson dict (from lesson_loader), splits each paragraph into
-    sentences and returns a mapping structure with text, hash, and char count
-    for each sentence.
+    Loads segmentation from sentences.v2.jsonl (Opus 4.7 semantic segmentation,
+    Issue #1208) so the SHA-256 hashes match pre-generated GCS blobs at
+    gemini31-prompt-only-v2/sentences/{hash}.mp3.
+
+    Falls back to regex _split_sentences() for lessons not present in the JSONL
+    (e.g. newly added lessons not yet in the pre-generation batch).
 
     Args:
         lesson: Lesson dict with 'id', 'paragraphs' keys.
@@ -839,7 +889,7 @@ def build_lesson_tts_mapping(lesson: dict) -> dict:
                 {
                     "index": 0,
                     "sentences": [
-                        {"text": "cleaned sentence", "hash": "sha256hex", "chars": 32}
+                        {"text": "canonical sentence", "hash": "sha256hex", "chars": 32}
                     ]
                 }
             ]
@@ -848,29 +898,42 @@ def build_lesson_tts_mapping(lesson: dict) -> dict:
     lesson_id = lesson.get("id") or lesson.get("lesson_number")
     paragraphs_raw = lesson.get("paragraphs", [])
 
+    v2_index = _load_sentences_v2()
+    lesson_data = v2_index.get(int(lesson_id)) if lesson_id is not None else None
+
     mapping_paragraphs = []
-    for idx, paragraph in enumerate(paragraphs_raw):
-        if not paragraph or not str(paragraph).strip():
-            continue
-        cleaned_paragraph = _clean_for_tts(str(paragraph))
-        if not cleaned_paragraph:
-            continue
-        sentences = _split_sentences(cleaned_paragraph)
-        sentence_entries = []
-        for sent in sentences:
-            if not sent.strip():
+
+    if lesson_data:
+        # Use canonical v2 segmentation — hashes match pre-generated GCS blobs.
+        for para_idx, para_sentences in sorted(lesson_data.items()):
+            entries = [s for s in para_sentences if s["text"].strip()]
+            if entries:
+                mapping_paragraphs.append({"index": para_idx, "sentences": entries})
+    else:
+        # Fallback: regex split for lessons not in sentences.v2.jsonl.
+        logger.debug(
+            "build_lesson_tts_mapping: lesson %s not in v2 JSONL, using regex fallback",
+            lesson_id,
+        )
+        for idx, paragraph in enumerate(paragraphs_raw):
+            if not paragraph or not str(paragraph).strip():
                 continue
-            h = _cache_key(sent)
-            sentence_entries.append({
-                "text": sent,
-                "hash": h,
-                "chars": len(sent),
-            })
-        if sentence_entries:
-            mapping_paragraphs.append({
-                "index": idx,
-                "sentences": sentence_entries,
-            })
+            cleaned_paragraph = _clean_for_tts(str(paragraph))
+            if not cleaned_paragraph:
+                continue
+            sentences = _split_sentences(cleaned_paragraph)
+            sentence_entries = []
+            for sent in sentences:
+                if not sent.strip():
+                    continue
+                h = _cache_key(sent)
+                sentence_entries.append({
+                    "text": sent,
+                    "hash": h,
+                    "chars": len(sent),
+                })
+            if sentence_entries:
+                mapping_paragraphs.append({"index": idx, "sentences": sentence_entries})
 
     return {
         "lesson_id": lesson_id,
