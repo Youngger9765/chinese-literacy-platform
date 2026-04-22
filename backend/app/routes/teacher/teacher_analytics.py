@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
@@ -129,8 +129,10 @@ def get_classroom_heatmap(
     _check_classroom_access(current_user, classroom_id, db)
 
     # Get all student IDs in this classroom (safety cap)
+    # joinedload(ClassroomStudent.student) avoids N+1 lazy loads when accessing e.student
     enrollments = (
         db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .limit(5000)
         .all()
@@ -229,8 +231,10 @@ def get_classroom_error_heatmap(
     _check_classroom_access(current_user, classroom_id, db)
 
     # Get enrolled students in enrollment order (safety cap)
+    # joinedload(ClassroomStudent.student) avoids N+1 lazy loads when accessing e.student
     enrollments = (
         db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .limit(5000)
         .all()
