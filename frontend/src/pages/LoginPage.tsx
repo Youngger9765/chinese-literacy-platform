@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { AuthError } from '../services/authApi';
 import { trackEvent } from '../utils/analytics';
 import GoogleSignInButton from '../components/GoogleSignInButton';
-import { buildJunyiLoginUrl } from './JunyiCallbackPage';
+import { buildJunyiLoginUrl, isSsoSupported } from './JunyiCallbackPage';
 
 interface LoginPageProps {
   onSwitchToRegister?: () => void;
@@ -170,15 +170,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
             <GoogleSignInButton onCredential={handleGoogleCredential} width={352} />
           </div>
 
-          {/* Junyi SSO (issue #1198) */}
-          <button
-            type="button"
-            onClick={handleJunyiLogin}
-            className="w-full h-11 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#FF6B35] text-white text-[10px] font-black leading-none">均</span>
-            使用均一帳號登入
-          </button>
+          {/* Junyi SSO (issue #1198) — only shown on whitelisted hosts where callback works */}
+          {isSsoSupported() && (
+            <button
+              type="button"
+              onClick={handleJunyiLogin}
+              className="w-full h-11 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#FF6B35] text-white text-[10px] font-black leading-none">均</span>
+              使用均一帳號登入
+            </button>
+          )}
         </div>
 
         {/* Switch to Register */}

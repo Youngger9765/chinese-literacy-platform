@@ -19,12 +19,30 @@ import { trackEvent } from '../utils/analytics';
 
 const JUNYI_STATE_KEY = 'junyi_sso_state';
 
-/** Build the Junyi login URL pointing at the current environment's callback. */
-export function buildJunyiLoginUrl(returnTo: string = '/'): string {
-  // Encode the return path inside the callback URL so we can restore it after the round-trip.
-  const callbackUrl = `${window.location.origin}/junyi-callback?returnTo=${encodeURIComponent(returnTo)}`;
+// Hosts registered in Junyi SSO whitelist. Callback origin MUST be one of these
+// or Junyi silently refuses to redirect the ?code= back.
+const WHITELISTED_CALLBACK_ORIGINS = [
+  'https://lingoleap-prod.web.app',
+  'https://lingoleap-staging.web.app',
+  'https://lingoleap-dev.web.app',
+];
 
-  // Generate and persist a CSRF state token.
+/** True when the current origin is a Junyi-whitelisted host (SSO can round-trip). */
+export function isSsoSupported(): boolean {
+  return WHITELISTED_CALLBACK_ORIGINS.includes(window.location.origin);
+}
+
+/** Build the Junyi login URL pointing at a whitelisted callback origin. */
+export function buildJunyiLoginUrl(returnTo: string = '/'): string {
+  // Use current origin only if it is whitelisted; otherwise fall back to staging
+  // (covers PR previews / Cloud Run direct URLs / localhost — SSO won't actually
+  // complete there due to cross-origin sessionStorage, but at least the redirect
+  // reaches a real host Junyi accepts instead of hanging).
+  const callbackOrigin = isSsoSupported()
+    ? window.location.origin
+    : WHITELISTED_CALLBACK_ORIGINS[1]; // staging
+  const callbackUrl = `${callbackOrigin}/junyi-callback?returnTo=${encodeURIComponent(returnTo)}`;
+
   const state = Array.from(crypto.getRandomValues(new Uint8Array(16)))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
