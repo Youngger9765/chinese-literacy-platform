@@ -134,12 +134,9 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
 
-  // Restore from localStorage (#1203) — run once on mount.
-  const savedRef = useRef<SavedProgress | null>(null);
-  if (savedRef.current === null) {
-    savedRef.current = loadSaved(storyId);
-  }
-  const saved = savedRef.current;
+  // Restore from localStorage (#1203) — lazy init so the disk read happens
+  // exactly once even when loadSaved returns null (no re-reads on re-render).
+  const [saved] = useState<SavedProgress | null>(() => loadSaved(storyId));
 
   const [currentWordIndex, setCurrentWordIndex] = useState<number>(() => {
     if (saved && saved.currentWordIndex < practicedWords.length) {
@@ -167,6 +164,10 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   });
   const [pasteWarning, setPasteWarning] = useState(false);
   const loadedWordsRef = useRef<Set<string>>(new Set());
+  // True until the user actually interacts after mount. Prevents the DB sync
+  // effect from firing with restored-only state and e.g. rolling `current_step`
+  // back to 'sentence-practice' when the student has already moved on.
+  const isRestoringRef = useRef(true);
 
   // Persist progress to localStorage whenever it changes (#1203).
   const storageKey = useMemo(() => storageKeyFor(storyId), [storyId]);
@@ -183,7 +184,13 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   }, [storageKey, wordStates, completedWords, currentWordIndex]);
 
   // DB sync (#1203): mid-exercise patch on progress change; markCompleted when every word done.
+  // Skip first fire so restored localStorage state doesn't clobber LearningLayout's
+  // current_step (e.g. student already moved to vocab-definition and just revisits).
   useEffect(() => {
+    if (isRestoringRef.current) {
+      isRestoringRef.current = false;
+      return;
+    }
     if (!saveStepProgressPatch) return;
     const allDone =
       practicedWords.length > 0 && practicedWords.every((w) => completedWords.has(w));
@@ -217,6 +224,11 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
 
   const loadExamples = useCallback(async () => {
     if (!currentWord || loadedWordsRef.current.has(currentWord)) return;
+    // Skip API call if examples were restored from localStorage (#1203).
+    if (currentState.exampleSentences !== null) {
+      loadedWordsRef.current.add(currentWord);
+      return;
+    }
     loadedWordsRef.current.add(currentWord);
     setWordStates(prev => ({ ...prev, [currentWord]: { ...prev[currentWord], examplesLoading: true, examplesError: '' } }));
     try {
@@ -226,7 +238,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       loadedWordsRef.current.delete(currentWord);
       setWordStates(prev => ({ ...prev, [currentWord]: { ...prev[currentWord], examplesLoading: false, examplesError: '例句載入失敗，請稍後再試。' } }));
     }
-  }, [currentWord, storyTitle, token]);
+  }, [currentWord, currentState.exampleSentences, storyTitle, token]);
 
   React.useEffect(() => { loadExamples(); }, [loadExamples]);
 
