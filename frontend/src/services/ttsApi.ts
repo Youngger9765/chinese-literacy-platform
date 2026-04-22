@@ -311,21 +311,62 @@ async function _speakViaBackendWithProgress(
 
   const total = sentences.length;
 
+  // Bug 1 (#1211): progress must be char-weighted, not sentence-weighted.
+  // Consumer computes `pos = Math.floor(progress * charCount)` against the
+  // whole paragraph's cleaned char count. Sentence-weighted progress drifts
+  // 2-12 chars when sentence lengths are highly variable (Opus v2 segmenter).
+  //
+  // _cleanForTts is idempotent for all transforms we use on already-clean
+  // canonical sentences; the only edge is adjacent 「，」 which collapses only
+  // at paragraph-level cleaning (1-3 char delta across a whole paragraph),
+  // well under the 2-12 char drift this PR targets.
+  const sentChars = sentences.map((s) => Array.from(_cleanForTts(s || '')).length);
+  const cumChars: number[] = [0];
+  for (const n of sentChars) cumChars.push(cumChars[cumChars.length - 1] + n);
+  const totalChars = Math.max(cumChars[cumChars.length - 1], 1);
+
+  // Bug 2 (#1211): prefetch next sentence's audio URL while current plays
+  // so 100-500ms inter-sentence fetch doesn't freeze the highlight.
+  const firstIdx = sentences.findIndex((s) => s?.trim());
+  let pending: { idx: number; promise: Promise<string> } | null =
+    firstIdx >= 0
+      ? { idx: firstIdx, promise: _fetchAudioUrl(sentences[firstIdx]) }
+      : null;
+
   for (let i = 0; i < total; i++) {
     if (_cancelRequested) break;
     const sentence = sentences[i];
-    if (!sentence.trim()) continue;
+    if (!sentence?.trim()) continue;
 
-    // Emit start of this sentence
-    onProgress({ sentenceIndex: i, totalSentences: total, progress: i / total });
+    onProgress({
+      sentenceIndex: i,
+      totalSentences: total,
+      progress: cumChars[i] / totalChars,
+    });
 
-    const audioUrl = await _fetchAudioUrl(sentence);
+    const audioUrl = pending && pending.idx === i
+      ? await pending.promise
+      : await _fetchAudioUrl(sentence);
     if (_cancelRequested) break;
 
+    // Start prefetch for next non-empty sentence BEFORE awaiting playback.
+    let j = i + 1;
+    while (j < total && !sentences[j]?.trim()) j++;
+    pending = j < total
+      ? { idx: j, promise: _fetchAudioUrl(sentences[j]) }
+      : null;
+
+    const startChar = cumChars[i];
+    const nChars = sentChars[i];
+
     await _playSingleAudio(audioUrl, (currentTime, duration) => {
-      const withinSentence = duration > 0 ? currentTime / duration : 0;
-      const progress = (i + withinSentence) / total;
-      onProgress({ sentenceIndex: i, totalSentences: total, progress });
+      const within = duration > 0 ? Math.min(currentTime / duration, 1) : 0;
+      const charPos = startChar + within * nChars;
+      onProgress({
+        sentenceIndex: i,
+        totalSentences: total,
+        progress: charPos / totalChars,
+      });
     });
   }
 
