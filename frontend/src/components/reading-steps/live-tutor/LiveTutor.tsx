@@ -150,6 +150,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const {
     isTtsSpeaking,
     isTtsPaused,
+    isTtsLoading,
+    ttsError,
     setIsTtsSpeaking,
     setIsTtsPaused,
     utteranceRef,
@@ -836,6 +838,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               isSessionActive={stt.isSessionActive}
               isPreparing={stt.isPreparing}
               isTtsSpeaking={isTtsSpeaking}
+              isTtsLoading={isTtsLoading}
               speakingProgress={speakingProgress}
               utteranceRef={utteranceRef}
               ttsRafRef={ttsRafRef}
@@ -953,6 +956,26 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <div className="w-4 h-4 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin" />
               準備中...
             </button>
+          ) : isTtsLoading ? (
+            /* TTS loading — fetching audio, show spinner + disabled AI朗讀 */
+            <div className="w-full flex gap-3">
+              <button
+                disabled
+                title="載入中..."
+                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-high text-on-surface-variant cursor-wait flex items-center justify-center gap-2"
+              >
+                <div className="w-4 h-4 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin" />
+                載入中...
+              </button>
+              <button
+                onClick={startSession}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-pulse"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+              >
+                <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
+                {retryCount > 0 ? '再試一次' : '開始朗讀'}
+              </button>
+            </div>
           ) : isTtsSpeaking ? (
             /* TTS playing — pause/stop */
             <div className="w-full flex gap-3">
@@ -985,15 +1008,28 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               </button>
             </>
           ) : !isAdvancing ? (
-            /* Idle — AI朗讀 + 開始朗讀 side by side */
+            /* Idle (or error) — AI朗讀 + 開始朗讀 side by side */
             <div className="w-full flex gap-3">
-              <button
-                onClick={() => speakCurrentParagraph()}
-                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
-                AI 朗讀
-              </button>
+              {ttsError ? (
+                /* Error state — retry button */
+                <button
+                  onClick={() => speakCurrentParagraph()}
+                  title={ttsError}
+                  className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-tertiary-container/30 text-tertiary border border-tertiary/30 hover:bg-tertiary-container/50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-xl">refresh</span>
+                  重試朗讀
+                </button>
+              ) : (
+                /* Idle state — normal AI朗讀 button */
+                <button
+                  onClick={() => speakCurrentParagraph()}
+                  className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
+                  AI 朗讀
+                </button>
+              )}
               <button
                 onClick={startSession}
                 className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-pulse"

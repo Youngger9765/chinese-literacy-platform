@@ -41,6 +41,8 @@ interface ParagraphCardProps {
   isPreparing: boolean;
   // TTS state
   isTtsSpeaking: boolean;
+  /** True while audio is being fetched (before first byte plays). */
+  isTtsLoading: boolean;
   /** Current character position during TTS playback (0-based) */
   speakingProgress: number;
   utteranceRef: React.MutableRefObject<HTMLAudioElement | SpeechSynthesisUtterance | null>;
@@ -84,6 +86,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   isSessionActive,
   isPreparing,
   isTtsSpeaking,
+  isTtsLoading,
   speakingProgress,
   utteranceRef,
   ttsRafRef,
@@ -110,10 +113,11 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   storyContent,
 }) => {
   const isCurrentIdx = idx === currentLineIndex;
-  const [ttsLoading, setTtsLoading] = React.useState(false);
+  // isTtsLoading comes from useTtsPlayback hook (via LiveTutor) — no local state needed.
+  // This removes the old setTimeout-based debounce that was an approximation.
 
   const handleTtsClick = () => {
-    if (ttsLoading) return; // debounce
+    if (isTtsLoading) return; // debounce: ignore if still fetching
     if (idx !== currentLineIndex) {
       onSelectParagraph(idx);
     }
@@ -139,17 +143,9 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
       setIsTtsSpeaking(false);
       setIsTtsPaused(false);
     } else {
-      setTtsLoading(true);
       onTtsToggle(idx);
-      // Clear loading after TTS starts or after timeout
-      setTimeout(() => setTtsLoading(false), 5000);
     }
   };
-
-  // Clear loading when TTS actually starts playing
-  React.useEffect(() => {
-    if (isTtsSpeaking) setTtsLoading(false);
-  }, [isTtsSpeaking]);
 
   // Encouragement for summary display
   const encouragement = useMemo(() => {
