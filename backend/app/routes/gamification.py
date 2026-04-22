@@ -12,7 +12,7 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user
 from ..database import get_db
@@ -74,12 +74,13 @@ def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
     if is_teacher:
         return
 
-    # Check admin roles
+    # Check admin roles — joinedload(UserRole.role) avoids N lazy fetches per role row
     from ..models.user import UserRole
     admin_roles = {"system_admin", "org_admin", "org_owner"}
     user_role_names = {
         ur.role.name
         for ur in db.query(UserRole)
+        .options(joinedload(UserRole.role))
         .filter(UserRole.user_id == current_user.id, UserRole.is_active == True)
         .all()
         if ur.role
@@ -179,12 +180,13 @@ def get_leaderboard(
         is not None
     )
     if not is_teacher and not is_student:
-        # Check admin roles
+        # Check admin roles — joinedload(UserRole.role) avoids N lazy fetches per role row
         from ..models.user import UserRole
         admin_roles = {"system_admin", "org_admin", "org_owner"}
         user_role_names = {
             ur.role.name
             for ur in db.query(UserRole)
+            .options(joinedload(UserRole.role))
             .filter(UserRole.user_id == current_user.id, UserRole.is_active == True)
             .all()
             if ur.role

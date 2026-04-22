@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.orm.attributes import flag_modified
 
 from ..auth.dependencies import get_current_user
@@ -234,10 +234,19 @@ def get_my_assignments(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get all assignments for the current student."""
+    """Get all assignments for the current student.
+
+    Batch-loads Assignment (with Text), LearningSession, and Classroom in one pass
+    to avoid 2N+1 queries that would otherwise occur when looping through submissions.
+    """
+    # Eager-load Assignment → Text relationship so _resolve_title_for_assignment
+    # never hits DB when assignment.text_id is set.
     query = (
         db.query(AssignmentSubmission)
         .join(Assignment, AssignmentSubmission.assignment_id == Assignment.id)
+        .options(
+            joinedload(AssignmentSubmission.assignment).joinedload(Assignment.text),
+        )
         .filter(
             AssignmentSubmission.student_id == current_user.id,
             Assignment.is_active == True,  # noqa: E712
@@ -248,14 +257,52 @@ def get_my_assignments(
 
     submissions = query.all()
 
+    if not submissions:
+        return []
+
+    # Batch-load all linked LearningSession objects in one query
+    session_ids = [sub.session_id for sub in submissions if sub.session_id is not None]
+    sessions_map: dict[int, LearningSession] = {}
+    if session_ids:
+        for sess in db.query(LearningSession).filter(LearningSession.id.in_(session_ids)).all():
+            sessions_map[sess.id] = sess
+
+    # Batch-load all Classroom objects in one query (de-duplicated)
+    classroom_ids = list({sub.assignment.classroom_id for sub in submissions})
+    classrooms_map: dict[int, Classroom] = {}
+    for cls in db.query(Classroom).filter(Classroom.id.in_(classroom_ids)).all():
+        classrooms_map[cls.id] = cls
+
     results = []
     for sub in submissions:
         assignment = sub.assignment
-        session_id, current_step, steps_completed = _extract_assignment_progress(sub, db)
-        classroom = (
-            db.query(Classroom).filter(Classroom.id == assignment.classroom_id).first()
-        )
+
+        # Resolve session fields from pre-loaded map (no DB hit)
+        session_id: int | None = None
+        current_step: str | None = None
+        steps_completed: list[str] = []
+        if sub.session_id is not None:
+            sess = sessions_map.get(sub.session_id)
+            if sess is not None:
+                session_id = sess.id
+                if isinstance(sess.step_progress, dict):
+                    raw_current = sess.step_progress.get("current_step")
+                    if isinstance(raw_current, str) and raw_current.strip():
+                        current_step = raw_current.strip()
+                    raw_completed = sess.step_progress.get("steps_completed", [])
+                    if isinstance(raw_completed, list):
+                        steps_completed = [
+                            step.strip()
+                            for step in raw_completed
+                            if isinstance(step, str) and step.strip()
+                        ]
+            else:
+                session_id = sub.session_id
+
+        # Title resolution: assignment.text already eager-loaded → no extra query
         story_title = _resolve_title_for_assignment(assignment, db)
+
+        classroom = classrooms_map.get(assignment.classroom_id)
 
         results.append(
             StudentAssignmentResponse(
@@ -490,11 +537,19 @@ def list_classroom_assignments(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List assignments for a classroom with submission and completion counts."""
+    """List assignments for a classroom with submission and completion counts.
+
+    joinedload(Assignment.text) avoids N+1 queries when _resolve_title_for_assignment
+    accesses assignment.text for text_id-based assignments.
+    """
     classroom = _get_classroom_or_404(classroom_id, db)
     _require_owner_or_admin(classroom, current_user, db)
 
-    query = db.query(Assignment).filter(Assignment.classroom_id == classroom_id)
+    query = (
+        db.query(Assignment)
+        .options(joinedload(Assignment.text))
+        .filter(Assignment.classroom_id == classroom_id)
+    )
     if is_active is not None:
         query = query.filter(Assignment.is_active == is_active)
 
