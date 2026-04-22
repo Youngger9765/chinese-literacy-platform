@@ -7,7 +7,7 @@ import logging
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import case, func
 from sqlalchemy.orm import Session, joinedload
 
@@ -31,6 +31,12 @@ from .teacher_schemas import (
 
 router = APIRouter(tags=["teacher"])
 logger = logging.getLogger(__name__)
+
+# Maximum sessions the heatmap endpoint will process in one request.
+# Exceeding this limit raises 400 so the caller knows to apply additional filters
+# (e.g. date range or story filter) rather than silently receiving truncated data.
+# Mirrors _ADMIN_EXPORT_ROW_LIMIT in organizations.py.
+_HEATMAP_SESSION_LIMIT = 5_000
 
 
 @router.get(
@@ -181,16 +187,27 @@ def get_classroom_heatmap(
     student_ids = [e.student_id for e in enrollments]
     students_map = {e.student_id: e.student for e in enrollments}
 
-    # Query all sessions for classroom students with a story_slug and score (safety cap)
-    sessions = (
+    # Query sessions for classroom students that have a story_slug.
+    # Fetch one extra row to detect overflow — if we get more than the limit,
+    # raise 400 so the caller knows data would be silently truncated.
+    sessions_raw = (
         db.query(LearningSession)
         .filter(
             LearningSession.student_id.in_(student_ids),
             LearningSession.story_slug.isnot(None),
         )
-        .limit(5000)
+        .limit(_HEATMAP_SESSION_LIMIT + 1)
         .all()
     )
+    if len(sessions_raw) > _HEATMAP_SESSION_LIMIT:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"此班級的 session 數量超過上限 {_HEATMAP_SESSION_LIMIT:,} 筆，"
+                "請聯絡管理員或加上日期篩選條件後再試。"
+            ),
+        )
+    sessions = sessions_raw
 
     # Build best-score map: (student_id, story_slug) -> best session
     best_score_map: dict[tuple[int, str], LearningSession] = {}
