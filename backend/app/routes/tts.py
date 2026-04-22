@@ -27,6 +27,7 @@ is expected to fall back to Web Speech API on its own.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 
 from fastapi import APIRouter, HTTPException
@@ -52,8 +53,11 @@ class TTSRequest(BaseModel):
 
 
 @router.post("/synthesize")
-def synthesize(req: TTSRequest) -> Response:
+async def synthesize(req: TTSRequest) -> Response:
     """Synthesise *text* to MP3 audio using Azure TTS (primary) or Cloud TTS (fallback).
+
+    Runs in a thread pool via asyncio.to_thread() so the FastAPI event loop is
+    not blocked during the 8–15 s remote TTS call (Azure / Google / Gemini).
 
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
@@ -61,7 +65,7 @@ def synthesize(req: TTSRequest) -> Response:
              to Web Speech API.
     """
     try:
-        audio_bytes = synthesize_speech(req.text)
+        audio_bytes = await asyncio.to_thread(synthesize_speech, req.text)
     except TTSError as exc:
         logger.warning("TTS synthesis failed: %s", exc)
         return Response(
@@ -81,18 +85,19 @@ def synthesize(req: TTSRequest) -> Response:
 
 
 @router.post("/synthesize-sentence")
-def synthesize_sentence_endpoint(req: TTSRequest) -> Response:
+async def synthesize_sentence_endpoint(req: TTSRequest) -> Response:
     """Synthesise a single sentence to MP3 audio (Issue #667).
 
     Stores audio under azure/sentences/ GCS path for sentence-level caching.
     Functionally identical to /synthesize but semantically scoped to sentences.
+    Runs in a thread pool via asyncio.to_thread() to avoid blocking the event loop.
 
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
         503  application/json — TTS unavailable.
     """
     try:
-        audio_bytes = synthesize_sentence(req.text)
+        audio_bytes = await asyncio.to_thread(synthesize_sentence, req.text)
     except TTSError as exc:
         logger.warning("TTS sentence synthesis failed: %s", exc)
         return Response(
@@ -145,7 +150,7 @@ def get_tts_mapping(lesson_id: int) -> dict:
 
 
 @router.post("/regenerate")
-def regenerate(req: TTSRequest) -> dict:
+async def regenerate(req: TTSRequest) -> dict:
     """Delete cached audio for *text* and re-synthesise from scratch (Issue #765).
 
     Use this endpoint when a specific sentence has a known mispronunciation
@@ -154,13 +159,14 @@ def regenerate(req: TTSRequest) -> dict:
       2. Evicts the L1 in-memory cache entry.
       3. Calls Azure TTS (with phoneme corrections applied) to produce fresh audio.
       4. Stores the new audio in L1 + GCS.
+    Runs cache deletion + synthesis in thread pool to avoid blocking the event loop.
 
     Returns:
         200  application/json — { "status": "ok", "key": "...", "gcs_deleted": [...], "bytes": N }
         503  application/json — TTS unavailable.
     """
-    # Step 1: delete existing caches
-    delete_result = delete_tts_cache(req.text)
+    # Step 1: delete existing caches (GCS I/O — run in thread pool)
+    delete_result = await asyncio.to_thread(delete_tts_cache, req.text)
     logger.info(
         "TTS regenerate: key=%s, l1=%s, gcs_deleted=%s",
         delete_result["key"][:8],
@@ -170,7 +176,7 @@ def regenerate(req: TTSRequest) -> dict:
 
     # Step 2: re-synthesise (phoneme corrections in _synthesize_azure will apply)
     try:
-        audio_bytes = synthesize_speech(req.text)
+        audio_bytes = await asyncio.to_thread(synthesize_speech, req.text)
     except TTSError as exc:
         logger.warning("TTS regenerate synthesis failed: %s", exc)
         raise HTTPException(status_code=503, detail="TTS service unavailable during regenerate")

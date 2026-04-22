@@ -31,6 +31,8 @@ class LearningSession(Base):
             unique=True,
             postgresql_where=text("status = 'in_progress' AND story_slug IS NOT NULL"),
         ),
+        # Compound index for student dashboard session filter (#1223)
+        Index("ix_learning_sessions_student_id_status", "student_id", "status"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -38,7 +40,7 @@ class LearningSession(Base):
     text_id: Mapped[int | None] = mapped_column(ForeignKey("texts.id"), nullable=True)
     classroom_id: Mapped[int | None] = mapped_column(ForeignKey("classrooms.id"), nullable=True)
     story_slug: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="in_progress")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="in_progress", index=True)
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
     overall_score: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -82,7 +84,7 @@ class CharacterError(Base):
     __tablename__ = "character_errors"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    session_id: Mapped[int] = mapped_column(ForeignKey("learning_sessions.id"), nullable=False)
+    session_id: Mapped[int] = mapped_column(ForeignKey("learning_sessions.id"), nullable=False, index=True)
     character: Mapped[str] = mapped_column(String(4), nullable=False)
     error_type: Mapped[str] = mapped_column(String(50), nullable=False)
 

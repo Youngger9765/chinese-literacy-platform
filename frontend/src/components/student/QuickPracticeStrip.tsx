@@ -50,8 +50,8 @@ const QUICK_CARDS: PracticeCard[] = [
   },
   {
     icon: '📖',
-    title: '字典查詢',
-    description: '查字義、注音、例句',
+    title: '我的生字',
+    description: '看看哪些字需要加強',
     route: '/vocabulary',
   },
 ];
@@ -79,35 +79,38 @@ const QuickPracticeStrip: React.FC = () => {
         </button>
       </div>
 
-      {/* 4-card grid: 2 cols on xs, 4 cols on sm+ */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Horizontal shelf: scrollable tool cards (Variant B — no icon circles) */}
+      <div
+        className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide"
+        role="list"
+      >
         {QUICK_CARDS.map((card) => (
           <button
             key={card.title}
             type="button"
+            role="listitem"
             onClick={() => navigate(card.route)}
             className="
-              text-left bg-surface-container-lowest rounded-2xl border border-gray-100
-              shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95
-              p-4 flex flex-col gap-2 transition-all duration-150
+              snap-start shrink-0 w-[140px] text-left
+              bg-surface-container-lowest rounded-xl border border-[#E5E0D5]
+              hover:border-accent hover:shadow-sm active:scale-[0.98]
+              p-3 flex flex-col gap-1.5 transition-all duration-150
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1
             "
             aria-label={`${card.title}${card.needsStory ? '（先選課文）' : ''}`}
           >
-            <span className="text-2xl leading-none" aria-hidden="true">
+            <span className="text-lg leading-none" aria-hidden="true">
               {card.icon}
             </span>
-            <div className="space-y-0.5">
-              <p className="text-sm font-bold text-on-surface leading-tight">
-                {card.title}
-              </p>
-              <p className="text-xs text-on-surface-variant leading-snug">
-                {card.description}
-              </p>
-              {card.needsStory && (
-                <p className="text-xs text-accent/70 font-medium">先選課文</p>
-              )}
-            </div>
+            <p className="text-sm font-bold text-on-surface leading-tight">
+              {card.title}
+            </p>
+            <p className="text-xs text-on-surface-variant leading-snug line-clamp-2">
+              {card.description}
+            </p>
+            {card.needsStory && (
+              <p className="text-[11px] text-accent/70 font-medium mt-auto">先選課文</p>
+            )}
           </button>
         ))}
       </div>

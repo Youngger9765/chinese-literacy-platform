@@ -70,21 +70,24 @@ def recommend_next_stories(
     cutoff = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
 
     # ── 1. Fetch student history ────────────────────────────────────────────
+    # Filter story_slug IS NOT NULL in SQL to avoid fetching sessions that
+    # can never contribute to slug_sessions (e.g. sessions without a story).
     sessions = (
         db.query(LearningSession)
         .filter(
             LearningSession.student_id == student_id,
             LearningSession.started_at >= cutoff,
+            LearningSession.story_slug.isnot(None),
         )
         .order_by(LearningSession.started_at.asc())
         .all()
     )
 
     # Map slug → list of sessions (for this student)
+    # All sessions here are guaranteed to have story_slug (filtered in SQL above).
     slug_sessions: dict[str, list[LearningSession]] = defaultdict(list)
     for s in sessions:
-        if s.story_slug:
-            slug_sessions[s.story_slug].append(s)
+        slug_sessions[s.story_slug].append(s)
 
     # Slugs where the student achieved >=80% accuracy (well done, skip)
     well_done_slugs: set[str] = set()

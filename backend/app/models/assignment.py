@@ -75,7 +75,7 @@ class AssignmentSubmission(Base):
     assignment_id: Mapped[int] = mapped_column(
         ForeignKey("assignments.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(20), default="pending")  # "pending" | "in_progress" | "submitted" | "graded"
     session_id: Mapped[int | None] = mapped_column(
         ForeignKey("learning_sessions.id", ondelete="SET NULL"), nullable=True

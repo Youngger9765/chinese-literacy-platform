@@ -6,7 +6,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
 from ..dependencies.tenant import _check_org_member
@@ -406,9 +406,16 @@ def export_platform_report(
     Columns: 學校名稱, 班級名稱, 學生姓名, 已完成課文數, 平均正確率, 總學習次數, 最近學習日期
     Raises 400 if result set exceeds the row limit (use filters to narrow).
     """
-    query = db.query(ClassroomStudent).join(
-        Classroom, ClassroomStudent.classroom_id == Classroom.id
-    ).join(School, Classroom.school_id == School.id)
+    # joinedload student + classroom + classroom.school to avoid 3-layer lazy load N+1
+    query = (
+        db.query(ClassroomStudent)
+        .options(
+            joinedload(ClassroomStudent.student),
+            joinedload(ClassroomStudent.classroom).joinedload(Classroom.school),
+        )
+        .join(Classroom, ClassroomStudent.classroom_id == Classroom.id)
+        .join(School, Classroom.school_id == School.id)
+    )
 
     if classroom_id is not None:
         query = query.filter(ClassroomStudent.classroom_id == classroom_id)

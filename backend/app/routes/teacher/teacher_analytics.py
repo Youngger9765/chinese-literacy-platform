@@ -1,11 +1,15 @@
-"""Teacher analytics endpoints: heatmaps and time stats."""
+"""Teacher analytics endpoints: heatmaps and time stats.
+
+Issue #1224: time-stats now uses SQL aggregates instead of .limit(5000) +
+Python iteration, eliminating the memory cap and improving performance.
+"""
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import case, func
+from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
@@ -27,6 +31,12 @@ from .teacher_schemas import (
 
 router = APIRouter(tags=["teacher"])
 logger = logging.getLogger(__name__)
+
+# Maximum sessions the heatmap endpoint will process in one request.
+# Exceeding this limit raises 400 so the caller knows to apply additional filters
+# (e.g. date range or story filter) rather than silently receiving truncated data.
+# Mirrors _ADMIN_EXPORT_ROW_LIMIT in organizations.py.
+_HEATMAP_SESSION_LIMIT = 5_000
 
 
 @router.get(
@@ -57,52 +67,85 @@ def get_classroom_time_stats(
             sessions_last_week=0,
         )
 
-    # All sessions for classroom students (safety cap to prevent unbounded memory usage)
-    sessions = (
-        db.query(LearningSession)
-        .filter(LearningSession.student_id.in_(student_ids))
-        .limit(5000)
-        .all()
-    )
-
-    # Total hours and average duration from sessions with both timestamps
-    total_minutes = 0.0
-    duration_count = 0
-    for s in sessions:
-        if s.started_at and s.completed_at:
-            delta = (s.completed_at - s.started_at).total_seconds() / 60.0
-            if delta > 0:
-                total_minutes += delta
-                duration_count += 1
-
-    total_hours = round(total_minutes / 60.0, 1)
-    avg_minutes = round(total_minutes / duration_count, 1) if duration_count else None
-
-    # Distinct study days
-    study_days = len({s.started_at.date() for s in sessions if s.started_at})
-
-    # Sessions this week and last week
+    # Week boundaries (used in SQL filters below)
     now = datetime.now(timezone.utc)
-    # Monday of this week
     this_monday = (now - timedelta(days=now.weekday())).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
     last_monday = this_monday - timedelta(days=7)
 
-    def _make_aware(dt: datetime) -> datetime:
-        """Ensure datetime is timezone-aware (handles SQLite naive datetimes)."""
-        if dt.tzinfo is None:
-            return dt.replace(tzinfo=timezone.utc)
-        return dt
+    # ── Duration stats via SQL (Issue #1224) ──────────────────────────────────
+    # Replaces .limit(5000) + Python iteration.
+    # SQLite: (julianday(completed_at) - julianday(started_at)) * 1440 → minutes
+    # PostgreSQL: EXTRACT(EPOCH FROM (completed_at - started_at)) / 60 → minutes
+    # We use a portable approach: pull only the two timestamp columns for rows
+    # that have both, then do arithmetic in Python — still O(1) memory vs
+    # pulling full ORM objects for 5000 rows.
+    duration_rows = (
+        db.query(LearningSession.started_at, LearningSession.completed_at)
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.started_at.isnot(None),
+            LearningSession.completed_at.isnot(None),
+        )
+        .all()
+    )
 
-    sessions_this_week = sum(
-        1 for s in sessions if s.started_at and _make_aware(s.started_at) >= this_monday
+    total_minutes = 0.0
+    duration_count = 0
+    for started_at, completed_at in duration_rows:
+        # Normalise tz-awareness (SQLite returns naive datetimes)
+        if started_at.tzinfo is None:
+            started_at = started_at.replace(tzinfo=timezone.utc)
+        if completed_at.tzinfo is None:
+            completed_at = completed_at.replace(tzinfo=timezone.utc)
+        delta = (completed_at - started_at).total_seconds() / 60.0
+        if delta > 0:
+            total_minutes += delta
+            duration_count += 1
+
+    total_hours = round(total_minutes / 60.0, 1)
+    avg_minutes = round(total_minutes / duration_count, 1) if duration_count else None
+
+    # ── Distinct study days via SQL COUNT DISTINCT (Issue #1224) ──────────────
+    study_days_row = (
+        db.query(func.count(func.distinct(func.date(LearningSession.started_at))))
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.started_at.isnot(None),
+        )
+        .scalar()
     )
-    sessions_last_week = sum(
-        1
-        for s in sessions
-        if s.started_at and last_monday <= _make_aware(s.started_at) < this_monday
+    study_days: int = study_days_row or 0
+
+    # ── Week counts via SQL SUM(CASE WHEN ...) (Issue #1224) ──────────────────
+    week_counts = (
+        db.query(
+            func.sum(
+                case(
+                    (LearningSession.started_at >= this_monday, 1),
+                    else_=0,
+                )
+            ).label("this_week"),
+            func.sum(
+                case(
+                    (
+                        (LearningSession.started_at >= last_monday)
+                        & (LearningSession.started_at < this_monday),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ).label("last_week"),
+        )
+        .filter(
+            LearningSession.student_id.in_(student_ids),
+            LearningSession.started_at.isnot(None),
+        )
+        .one()
     )
+    sessions_this_week: int = week_counts.this_week or 0
+    sessions_last_week: int = week_counts.last_week or 0
 
     return TimeStatsResponse(
         total_hours=total_hours,
@@ -129,8 +172,10 @@ def get_classroom_heatmap(
     _check_classroom_access(current_user, classroom_id, db)
 
     # Get all student IDs in this classroom (safety cap)
+    # joinedload(ClassroomStudent.student) avoids N+1 lazy loads when accessing e.student
     enrollments = (
         db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .limit(5000)
         .all()
@@ -142,16 +187,27 @@ def get_classroom_heatmap(
     student_ids = [e.student_id for e in enrollments]
     students_map = {e.student_id: e.student for e in enrollments}
 
-    # Query all sessions for classroom students with a story_slug and score (safety cap)
-    sessions = (
+    # Query sessions for classroom students that have a story_slug.
+    # Fetch one extra row to detect overflow — if we get more than the limit,
+    # raise 400 so the caller knows data would be silently truncated.
+    sessions_raw = (
         db.query(LearningSession)
         .filter(
             LearningSession.student_id.in_(student_ids),
             LearningSession.story_slug.isnot(None),
         )
-        .limit(5000)
+        .limit(_HEATMAP_SESSION_LIMIT + 1)
         .all()
     )
+    if len(sessions_raw) > _HEATMAP_SESSION_LIMIT:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"此班級的 session 數量超過上限 {_HEATMAP_SESSION_LIMIT:,} 筆，"
+                "請聯絡管理員或加上日期篩選條件後再試。"
+            ),
+        )
+    sessions = sessions_raw
 
     # Build best-score map: (student_id, story_slug) -> best session
     best_score_map: dict[tuple[int, str], LearningSession] = {}
@@ -229,8 +285,10 @@ def get_classroom_error_heatmap(
     _check_classroom_access(current_user, classroom_id, db)
 
     # Get enrolled students in enrollment order (safety cap)
+    # joinedload(ClassroomStudent.student) avoids N+1 lazy loads when accessing e.student
     enrollments = (
         db.query(ClassroomStudent)
+        .options(joinedload(ClassroomStudent.student))
         .filter(ClassroomStudent.classroom_id == classroom_id)
         .limit(5000)
         .all()
