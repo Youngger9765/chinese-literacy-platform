@@ -380,3 +380,129 @@ class TestHeatmapEndpoint:
             headers=auth_header(other_teacher["token"]),
         )
         assert resp.status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# Session-limit guard tests (Issue #1225)
+# ---------------------------------------------------------------------------
+
+class TestHeatmapSessionLimit:
+    """Verify that the heatmap endpoint raises 400 when session count exceeds
+    _HEATMAP_SESSION_LIMIT (5,000) so teachers are not silently shown
+    incomplete data."""
+
+    @pytest.fixture(scope="class")
+    def limit_teacher(self, client):
+        return _register_user(client, "limit_teacher")
+
+    @pytest.fixture(scope="class")
+    def limit_student(self, client):
+        return _register_user(client, "limit_student")
+
+    @pytest.fixture(scope="class")
+    def small_classroom(self, limit_teacher, school_id):
+        """Classroom with a small number of sessions — must return 200."""
+        db = TestingSessionLocal()
+        c = Classroom(
+            name="Small Limit Class",
+            teacher_id=limit_teacher["user_id"],
+            school_id=school_id,
+        )
+        db.add(c)
+        db.commit()
+        db.refresh(c)
+        cid = c.id
+        db.close()
+        return cid
+
+    @pytest.fixture(scope="class")
+    def over_limit_classroom(self, limit_teacher, school_id):
+        """Classroom that will be seeded with 5,001 sessions."""
+        db = TestingSessionLocal()
+        c = Classroom(
+            name="Over Limit Class",
+            teacher_id=limit_teacher["user_id"],
+            school_id=school_id,
+        )
+        db.add(c)
+        db.commit()
+        db.refresh(c)
+        cid = c.id
+        db.close()
+        return cid
+
+    @pytest.fixture(scope="class")
+    def seeded_over_limit(self, over_limit_classroom, limit_student, school_id):
+        """Enroll the student and seed 5,001 sessions with distinct story slugs."""
+        db = TestingSessionLocal()
+        enrollment = ClassroomStudent(
+            classroom_id=over_limit_classroom,
+            student_id=limit_student["user_id"],
+        )
+        db.add(enrollment)
+        db.commit()
+
+        # Each session gets a unique story_slug to avoid UNIQUE constraint issues.
+        # We need 5,001 sessions to exceed _HEATMAP_SESSION_LIMIT.
+        sessions = [
+            LearningSession(
+                student_id=limit_student["user_id"],
+                classroom_id=over_limit_classroom,
+                story_slug=f"limit-story-{i}",
+                overall_score=80.0,
+                status="completed",
+            )
+            for i in range(5001)
+        ]
+        db.bulk_save_objects(sessions)
+        db.commit()
+        db.close()
+        return over_limit_classroom
+
+    @pytest.fixture(scope="class")
+    def seeded_small(self, small_classroom, limit_student, school_id):
+        """Enroll the student and seed a few sessions under the limit."""
+        db = TestingSessionLocal()
+        enrollment = ClassroomStudent(
+            classroom_id=small_classroom,
+            student_id=limit_student["user_id"],
+        )
+        db.add(enrollment)
+        db.commit()
+
+        sessions = [
+            LearningSession(
+                student_id=limit_student["user_id"],
+                classroom_id=small_classroom,
+                story_slug=f"small-story-{i}",
+                overall_score=80.0,
+                status="completed",
+            )
+            for i in range(10)
+        ]
+        db.bulk_save_objects(sessions)
+        db.commit()
+        db.close()
+        return small_classroom
+
+    def test_under_limit_returns_200(self, client, limit_teacher, seeded_small):
+        """Small classroom (10 sessions) must succeed with 200."""
+        resp = client.get(
+            f"/api/teacher/classrooms/{seeded_small}/heatmap",
+            headers=auth_header(limit_teacher["token"]),
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "students" in data
+        assert len(data["scores"]) == 10
+
+    def test_over_limit_returns_400(self, client, limit_teacher, seeded_over_limit):
+        """Classroom with 5,001 sessions must return 400 (not silently truncate)."""
+        resp = client.get(
+            f"/api/teacher/classrooms/{seeded_over_limit}/heatmap",
+            headers=auth_header(limit_teacher["token"]),
+        )
+        assert resp.status_code == 400
+        detail = resp.json().get("detail", "")
+        # Should mention the limit so the teacher knows what to do
+        assert "5,000" in detail or "5000" in detail
