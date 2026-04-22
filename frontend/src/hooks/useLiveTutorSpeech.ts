@@ -53,6 +53,10 @@ export interface UseLiveTutorSpeechOptions {
   onClearTts: () => void;
   /** Called by recognition.onstart (first time only) to add "準備好了" message */
   onSessionReady: () => void;
+  /** Called when no STT audio detected within noAudioTimeoutMs after session starts. */
+  onNoAudioDetected?: () => void;
+  /** Timeout (ms) before onNoAudioDetected fires. Default 5000. */
+  noAudioTimeoutMs?: number;
 }
 
 export function useLiveTutorSpeech({
@@ -74,6 +78,8 @@ export function useLiveTutorSpeech({
   onMicError,
   onClearTts,
   onSessionReady,
+  onNoAudioDetected,
+  noAudioTimeoutMs = 5000,
 }: UseLiveTutorSpeechOptions) {
   const [isPreparing, setIsPreparing] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -89,6 +95,16 @@ export function useLiveTutorSpeech({
   // Mirror of targetText for use inside async recognition callbacks
   const targetTextRef = useRef(targetText);
   targetTextRef.current = targetText;
+
+  // No-audio-detected timer: fires onNoAudioDetected if no STT result
+  // arrives within noAudioTimeoutMs after session starts.
+  const noAudioTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearNoAudioTimer = () => {
+    if (noAudioTimerRef.current !== null) {
+      clearTimeout(noAudioTimerRef.current);
+      noAudioTimerRef.current = null;
+    }
+  };
 
   const startSession = () => {
     if (isSessionActiveRef.current) return;
@@ -142,11 +158,22 @@ export function useLiveTutorSpeech({
         onSessionReady();
       }
       // Successful start doesn't reset error counter — only actual speech results do
+
+      // Start no-audio-detected timer
+      if (onNoAudioDetected) {
+        clearNoAudioTimer();
+        noAudioTimerRef.current = setTimeout(() => {
+          if (isSessionActiveRef.current && !currentTranscriptRef.current) {
+            onNoAudioDetected();
+          }
+        }, noAudioTimeoutMs);
+      }
     };
 
     recognition.onresult = (event: any) => {
-      // Got actual speech — reset error counter
+      // Got actual speech — reset error counter and clear no-audio timer
       consecutiveErrorsRef.current = 0;
+      clearNoAudioTimer();
       // Build transcript from this recognition session's results
       let sessionTranscript = '';
       for (let i = 0; i < event.results.length; i++) {
@@ -288,6 +315,7 @@ export function useLiveTutorSpeech({
       onStreamingTranscript('');
       onLastDiffTokens(() => null);
       sentenceStartTimeRef.current = Date.now();
+      clearNoAudioTimer();
       if (isSessionActiveRef.current) {
         try { recognitionRef.current.start(); } catch (_) {}
       }
@@ -301,6 +329,7 @@ export function useLiveTutorSpeech({
     isSessionActiveRef.current = false;
     setIsSessionActive(false);
     setIsPreparing(false);
+    clearNoAudioTimer();
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch (_) {}
       recognitionRef.current = null;

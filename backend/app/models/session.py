@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import String, Integer, Float, Boolean, Text, ForeignKey, DateTime, func
+from sqlalchemy import String, Integer, Float, Boolean, Text, ForeignKey, DateTime, Index, func, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
@@ -22,6 +22,16 @@ class ErrorCorrection(Base):
 
 class LearningSession(Base):
     __tablename__ = "learning_sessions"
+    __table_args__ = (
+        # Prevent duplicate in_progress sessions for same student + story (#1179)
+        Index(
+            "uq_session_student_story_inprogress",
+            "student_id",
+            "story_slug",
+            unique=True,
+            postgresql_where=text("status = 'in_progress' AND story_slug IS NOT NULL"),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)

@@ -3,7 +3,7 @@ import VocabApplication from '../../components/reading-steps/VocabApplication';
 import { useLearningContext } from '../../layouts/LearningLayout';
 
 const VocabApplicationPage: React.FC = () => {
-  const { selectedStory, handleFinishVocabApplication, syncProgress, flushProgress } = useLearningContext();
+  const { selectedStory, handleFinishVocabApplication, saveStepProgressPatch } = useLearningContext();
 
   if (!selectedStory) return null;
 
@@ -11,8 +11,7 @@ const VocabApplicationPage: React.FC = () => {
     <VocabApplication
       story={selectedStory}
       onFinish={handleFinishVocabApplication}
-      syncProgress={syncProgress}
-      flushProgress={flushProgress}
+      saveStepProgressPatch={saveStepProgressPatch}
     />
   );
 };

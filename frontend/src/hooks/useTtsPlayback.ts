@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { cancelTts, cleanForTts } from '../services/ttsApi';
+import { cancelTts, cleanForTts, pauseCurrentTts, resumeCurrentTts, speakTextWithProgress, TtsProgressInfo } from '../services/ttsApi';
 
 /**
  * Manages TTS (Text-to-Speech) audio playback for LiveTutor.
@@ -27,10 +27,26 @@ export function useTtsPlayback(
 ) {
   const [isTtsSpeaking, setIsTtsSpeaking] = useState(false);
   const [isTtsPaused, setIsTtsPaused] = useState(false);
+  /**
+   * isTtsLoading — true from the moment speakText() is called until the first
+   * audio byte starts playing (or until an error occurs).  UI should show a
+   * spinner and disable the button during this window.
+   */
+  const [isTtsLoading, setIsTtsLoading] = useState(false);
+  /**
+   * ttsError — non-null when the last TTS request failed and no fallback was
+   * available.  UI should show a retry affordance.  Cleared automatically the
+   * next time speakText() is called.
+   */
+  const [ttsError, setTtsError] = useState<string | null>(null);
 
   // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
   // gets collected mid-playback, silencing onend/onboundary callbacks.
   const utteranceRef = useRef<SpeechSynthesisUtterance | HTMLAudioElement | null>(null);
+  // True while the v2 sentence-level playback path is active — pause/resume
+  // must talk to ttsApi._currentAudio via pauseCurrentTts/resumeCurrentTts,
+  // because the internal Audio element is not exposed on utteranceRef.
+  const v2PathActiveRef = useRef<boolean>(false);
   // rAF loop for Web Speech API fallback cursor animation (not used for Cloud TTS path)
   const ttsRafRef = useRef<number | null>(null);
   // Used only by Web Speech API fallback path
@@ -42,14 +58,66 @@ export function useTtsPlayback(
   /**
    * Speak the given text via Cloud TTS (with Web Speech API fallback).
    *
+   * When lessonId + paragraphIdx are provided, uses sentence-level sequential
+   * playback via canonical v2 sentences (Issue #1208 fix: eliminates cache miss).
+   * Otherwise falls back to single-shot full-paragraph synthesis.
+   *
    * Cloud TTS path: drives cursor via audio.ontimeupdate + currentTime/duration ratio.
    * Web Speech fallback: drives cursor via rAF + wall-clock timing (unchanged).
+   *
+   * @param text - Text to synthesise.
+   * @param lessonId - Optional lesson ID for canonical v2 sentence lookup.
+   * @param paragraphIdx - Optional paragraph index (0-based) within the lesson.
    */
-  const speakText = useCallback((text: string) => {
+  const speakText = useCallback((text: string, lessonId?: number, paragraphIdx?: number) => {
     if (!text) return;
     cancelTts();
     setIsTtsPaused(false);
+    setIsTtsLoading(true);
+    setTtsError(null);
+    // isTtsSpeaking stays false until audio actually starts playing —
+    // during the loading window only isTtsLoading is true.
 
+    // When lesson context is available, use sentence-level sequential playback
+    // so SHA-256 keys match pre-generated GCS blobs (Issue #1208 fix).
+    // Use speakTextWithProgress so onSpeakingProgress fires during playback
+    // (fixes regression: highlight stopped updating when v2 path was introduced).
+    if (lessonId !== undefined && paragraphIdx !== undefined) {
+      const charCount = Array.from(cleanForTts(text)).length;
+      v2PathActiveRef.current = true;
+      utteranceRef.current = null;
+      // v2 path: the first sentence starts playing very quickly; treat first
+      // progress callback as the "playing" signal to flip loading → speaking.
+      let v2PlaybackStarted = false;
+      speakTextWithProgress(
+        text,
+        (info: TtsProgressInfo) => {
+          if (!v2PlaybackStarted) {
+            v2PlaybackStarted = true;
+            setIsTtsLoading(false);
+            setIsTtsSpeaking(true);
+            onRealtimeDiffTokensClear();
+            onSpeakingProgress(0);
+          }
+          const pos = Math.min(Math.floor(info.progress * charCount), charCount);
+          onSpeakingProgress(pos);
+        },
+        lessonId,
+        paragraphIdx,
+      ).catch(() => {
+        setTtsError('音檔載入失敗，請重試');
+      }).finally(() => {
+        v2PathActiveRef.current = false;
+        setIsTtsLoading(false);
+        setIsTtsSpeaking(false);
+        setIsTtsPaused(false);
+      });
+      return;
+    }
+
+    v2PathActiveRef.current = false;
+
+    // Lesson context not available — use original single-shot full-paragraph path.
     // Chrome requires speechSynthesis.speak() to be called within user-gesture context.
     // Since the Cloud TTS fetch is async, the gesture expires before .catch() runs.
     // Warm up speechSynthesis now (synchronously, in gesture) so the fallback works.
@@ -72,6 +140,15 @@ export function useTtsPlayback(
       stopTtsAnimation();
       setIsTtsSpeaking(false);
       setIsTtsPaused(false);
+      setIsTtsLoading(false);
+    };
+
+    const onSpeechError = () => {
+      stopTtsAnimation();
+      setIsTtsSpeaking(false);
+      setIsTtsPaused(false);
+      setIsTtsLoading(false);
+      setTtsError('音檔載入失敗，請重試');
     };
 
     // Try Cloud TTS first via <audio> element for better control
@@ -103,21 +180,22 @@ export function useTtsPlayback(
           onSpeakingProgress(pos);
         };
 
-        // onplay: only sets speaking state + resets progress to 0. No rAF started here.
+        // onplay: flip loading → speaking as soon as first bytes play.
         audio.onplay = () => {
+          setIsTtsLoading(false);
           setIsTtsSpeaking(true);
           onRealtimeDiffTokensClear();
           onSpeakingProgress(0);
         };
 
         audio.onended = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
-        audio.onerror = () => { URL.revokeObjectURL(url); onSpeechEnd(); };
+        audio.onerror = () => { URL.revokeObjectURL(url); onSpeechError(); };
         return audio.play();
       })
       .catch(() => {
         // Fallback: Web Speech API — rAF + wall-clock timing path (unchanged)
         msPerCharRef.current = 240; // reset to default estimate for Web Speech
-        if (!window.speechSynthesis) { onSpeechEnd(); return; }
+        if (!window.speechSynthesis) { onSpeechError(); return; }
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utteranceRef.current = utterance;
@@ -131,6 +209,8 @@ export function useTtsPlayback(
         if (preferred) utterance.voice = preferred;
 
         const startCursorAnimation = () => {
+          // Web Speech API started: flip loading → speaking
+          setIsTtsLoading(false);
           setIsTtsSpeaking(true);
           onSpeakingProgress(0);
           onRealtimeDiffTokensClear();
@@ -150,7 +230,7 @@ export function useTtsPlayback(
         utterance.onstart = startCursorAnimation;
         utterance.onboundary = (e) => { onSpeakingProgress(e.charIndex); };
         utterance.onend = onSpeechEnd;
-        utterance.onerror = onSpeechEnd;
+        utterance.onerror = onSpeechError;
 
         const doSpeak = () => window.speechSynthesis.speak(utterance);
         if (window.speechSynthesis.getVoices().length === 0) {
@@ -165,6 +245,12 @@ export function useTtsPlayback(
   }, [onSpeakingProgress, onRealtimeDiffTokensClear]);
 
   const pauseTts = () => {
+    if (v2PathActiveRef.current) {
+      // v2 sentence-level path: Audio element lives inside ttsApi, pause via helper.
+      pauseCurrentTts();
+      setIsTtsPaused(true);
+      return;
+    }
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
       // Cloud TTS path: just pause. ontimeupdate stops firing automatically when paused.
@@ -182,6 +268,11 @@ export function useTtsPlayback(
   };
 
   const resumeTts = () => {
+    if (v2PathActiveRef.current) {
+      resumeCurrentTts();
+      setIsTtsPaused(false);
+      return;
+    }
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
       // Cloud TTS path: just resume. ontimeupdate was attached in speakText and
@@ -211,8 +302,24 @@ export function useTtsPlayback(
     }
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
+      // Remove event listeners to prevent stale callbacks after stop
+      ua.ontimeupdate = null;
+      ua.onplay = null;
+      ua.onended = null;
+      ua.onerror = null;
       ua.pause();
       ua.currentTime = 0;
+      // Revoke blob URL to prevent memory leak
+      if (ua.src && ua.src.startsWith('blob:')) {
+        URL.revokeObjectURL(ua.src);
+      }
+    } else if (ua) {
+      // Web Speech API path: remove handlers before cancel
+      const utt = ua as SpeechSynthesisUtterance;
+      utt.onstart = null;
+      utt.onend = null;
+      utt.onerror = null;
+      utt.onboundary = null;
     }
     // Stop Web Speech API (fallback path)
     window.speechSynthesis?.cancel();
@@ -220,11 +327,15 @@ export function useTtsPlayback(
     cancelTts();
     setIsTtsSpeaking(false);
     setIsTtsPaused(false);
+    setIsTtsLoading(false);
+    setTtsError(null);
   };
 
   return {
     isTtsSpeaking,
     isTtsPaused,
+    isTtsLoading,
+    ttsError,
     setIsTtsSpeaking,
     setIsTtsPaused,
     utteranceRef,

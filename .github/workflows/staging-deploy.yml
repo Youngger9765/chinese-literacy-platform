@@ -25,6 +25,7 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      firebase: ${{ steps.filter.outputs.firebase }}
     steps:
       - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v4
@@ -34,6 +35,10 @@ jobs:
             backend:
               - 'backend/**'
             frontend:
+              - 'frontend/**'
+            firebase:
+              - 'firebase.json'
+              - '.firebaserc'
               - 'frontend/**'
 
   deploy-backend:
@@ -76,7 +81,7 @@ jobs:
             --max-instances=1 \
             --timeout=300s \
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-db \
-            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=gemini31"
+            --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=gemini31::JUNYI_SSO_BASE_URL=https://ci-live-worktree-sso-multi-rp---rev-proxy-dg4bspkswq-de.a.run.app"
 
       - name: Verify backend health
         run: |
@@ -196,11 +201,10 @@ jobs:
 
   deploy-frontend-firebase:
     name: Deploy frontend to Firebase Hosting (staging + dev)
-    needs: [detect-changes, deploy-frontend]
+    needs: [detect-changes]
     if: |
-      always() && !cancelled() &&
-      (needs.detect-changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch') &&
-      needs.deploy-frontend.result == 'success'
+      needs.detect-changes.outputs.firebase == 'true' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
       COMMIT_SHA: ${{ github.sha }}

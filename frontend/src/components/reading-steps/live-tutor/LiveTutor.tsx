@@ -72,6 +72,9 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [micError, setMicError] = useState('');
   const [streamingUserInput, setStreamingUserInput] = useState('');
+  // No-audio-detected banner: shown when user started recording but
+  // no audio detected within 5 seconds.
+  const [noAudioDetected, setNoAudioDetected] = useState(false);
 
   // ── localStorage persistence for reading progress ──────────────────────────
   const loadSavedProgress = () => {
@@ -147,6 +150,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const {
     isTtsSpeaking,
     isTtsPaused,
+    isTtsLoading,
+    ttsError,
     setIsTtsSpeaking,
     setIsTtsPaused,
     utteranceRef,
@@ -160,12 +165,15 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     () => setRealtimeDiffTokens(null),
   );
 
-  /** Use Cloud TTS Neural2 to read the current paragraph aloud. */
+  /** Use Cloud TTS to read the current paragraph aloud.
+   *  Passes lessonId + paragraphIdx so the TTS hook fetches canonical v2 sentences
+   *  (Issue #1208 fix: cache hit instead of 8s live synthesis).
+   */
   const speakCurrentParagraph = useCallback(() => {
     const text = story.content[currentLineIndex];
     if (!text) return;
-    speakText(text);
-  }, [story.content, currentLineIndex, speakText]);
+    speakText(text, Number(story.id), currentLineIndex);
+  }, [story.content, story.id, currentLineIndex, speakText]);
 
   /* ---- Resizable right panel ---- */
   const { onDividerMouseDown, onDividerTouchStart } = useResizablePanel(
@@ -199,9 +207,13 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     onSessionReady: () => {
       // session ready callback (kept for compat with hook)
     },
+    onNoAudioDetected: () => setNoAudioDetected(true),
   });
 
-  const startSession = stt.startSession;
+  const startSession = () => {
+    setNoAudioDetected(false);
+    stt.startSession();
+  };
   const stopSession = stt.stopSession;
 
   /* ---- scroll helpers ---- */
@@ -381,7 +393,30 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
     const targetText = story.content[lineIdx] || '';
     const cleaned = cleanChineseText(rawTranscript);
-    if (!cleaned) return;
+
+    // 整段漏讀：no speech detected → show summary with retry prompt instead of silently returning
+    if (!cleaned) {
+      stopSession();
+      const normalizedTarget = normalizeForComparison(targetText);
+      const targetLen = normalizedTarget.length;
+      const emptyDiffTokens: DiffToken[] = Array.from(normalizedTarget).map(ch => ({
+        char: ch, type: 'missing' as const,
+      }));
+      setParagraphSummaries(prev => ({
+        ...prev,
+        [lineIdx]: {
+          feedback: '好像沒有偵測到聲音，請再試一次吧！',
+          matchRate: 0,
+          wrongCount: 0,
+          missingCount: targetLen,
+          tier: 3 as const,
+          geminiPending: false,
+        },
+      }));
+      setLastDiffTokens(emptyDiffTokens);
+      setStreamingUserInput('');
+      return;
+    }
 
     // ── Phase 1: local eval (instant, <1ms) ─────────────────────────────────
     const sentResults = sentenceResultsRef.current.filter(Boolean) as LocalEvalResult[];
@@ -452,6 +487,19 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
     stopSession();
 
+    // Fill in null sentence results: evaluate each unevaluated sentence against
+    // the full transcript so skipped sentences are properly detected (#1096).
+    const filledSentenceResults = sentenceResultsRef.current.map((result, si) => {
+      if (result !== null) return result;
+      const sentTarget = sentenceTargetsRef.current[si];
+      if (!sentTarget) return null;
+      return localEvaluateParagraph(
+        cleaned, sentTarget, durationMs,
+        { tier1: TIER1_POOL, tier2: TIER2_POOL, tier3: TIER3_POOL, streakMsgs: STREAK_MESSAGES },
+        streak,
+      );
+    });
+
     const summaryData: ParagraphSummaryData = {
       feedback: localTier <= 2 ? (localFeedback || '唸得不錯！') : (localFeedback || '再試一次，加油！'),
       matchRate: localMatchRate,
@@ -459,6 +507,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       missingCount,
       tier: localTier,
       geminiPending: true,
+      sentenceResults: [...filledSentenceResults],
+      sentenceTargets: [...sentenceTargetsRef.current],
     };
     setParagraphSummaries(prev => ({ ...prev, [lineIdx]: summaryData }));
 
@@ -496,6 +546,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
           missingCount: geminiMissing,
           tier: gemini.tier,
           geminiPending: false,
+          sentenceResults: prev[lineIdx]?.sentenceResults,
+          sentenceTargets: prev[lineIdx]?.sentenceTargets,
         }}));
         setLastDiffTokens(gemini.diff_tokens);
 
@@ -786,6 +838,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               isSessionActive={stt.isSessionActive}
               isPreparing={stt.isPreparing}
               isTtsSpeaking={isTtsSpeaking}
+              isTtsLoading={isTtsLoading}
               speakingProgress={speakingProgress}
               utteranceRef={utteranceRef}
               ttsRafRef={ttsRafRef}
@@ -844,6 +897,30 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         </div>
       )}
 
+      {/* No-audio-detected banner */}
+      {noAudioDetected && stt.isSessionActive && (
+        <div className="absolute bottom-44 left-1/2 -translate-x-1/2 z-20 w-[min(92%,520px)]">
+          <div className="flex items-start gap-3 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 shadow-md">
+            <span className="material-symbols-outlined text-amber-600 shrink-0">mic_off</span>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-amber-800">好像沒有偵測到聲音</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                請確認麥克風權限已開啟、音量足夠，或點擊下方「重新開始」再試一次。
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                stopSession();
+                startSession();
+              }}
+              className="px-3 py-1 rounded-full text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 transition-all shrink-0"
+            >
+              重新開始
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Fixed bottom CTA ──────────────────────────────────────────── */}
       <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
            style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
@@ -879,6 +956,26 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               <div className="w-4 h-4 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin" />
               準備中...
             </button>
+          ) : isTtsLoading ? (
+            /* TTS loading — fetching audio, show spinner + disabled AI朗讀 */
+            <div className="w-full flex gap-3">
+              <button
+                disabled
+                title="載入中..."
+                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-high text-on-surface-variant cursor-wait flex items-center justify-center gap-2"
+              >
+                <div className="w-4 h-4 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin" />
+                載入中...
+              </button>
+              <button
+                onClick={startSession}
+                className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-pulse"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+              >
+                <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>mic</span>
+                {retryCount > 0 ? '再試一次' : '開始朗讀'}
+              </button>
+            </div>
           ) : isTtsSpeaking ? (
             /* TTS playing — pause/stop */
             <div className="w-full flex gap-3">
@@ -911,15 +1008,28 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               </button>
             </>
           ) : !isAdvancing ? (
-            /* Idle — AI朗讀 + 開始朗讀 side by side */
+            /* Idle (or error) — AI朗讀 + 開始朗讀 side by side */
             <div className="w-full flex gap-3">
-              <button
-                onClick={() => speakCurrentParagraph()}
-                className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
-                AI 朗讀
-              </button>
+              {ttsError ? (
+                /* Error state — retry button */
+                <button
+                  onClick={() => speakCurrentParagraph()}
+                  title={ttsError}
+                  className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-tertiary-container/30 text-tertiary border border-tertiary/30 hover:bg-tertiary-container/50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-xl">refresh</span>
+                  重試朗讀
+                </button>
+              ) : (
+                /* Idle state — normal AI朗讀 button */
+                <button
+                  onClick={() => speakCurrentParagraph()}
+                  className="flex-1 h-14 rounded-full font-headline font-bold text-lg bg-surface-container-lowest shadow-editorial text-on-surface hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
+                  AI 朗讀
+                </button>
+              )}
               <button
                 onClick={startSession}
                 className="flex-1 h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-pulse"

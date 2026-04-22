@@ -216,3 +216,23 @@ export async function googleLogin(credential: string): Promise<GoogleLoginRespon
   });
   return handleAuthResponse<GoogleLoginResponse>(res);
 }
+
+export interface JunyiLoginResponse {
+  access_token: string;
+  token_type: string;
+  is_new_user: boolean;
+}
+
+/**
+ * Exchange a Junyi SSO one-time auth code for a LingoLeap JWT (issue #1198).
+ * The code is obtained from the /junyi-callback?code=<...> URL parameter.
+ * It is single-use and expires in 600 seconds — must be sent immediately.
+ */
+export async function junyiLogin(code: string): Promise<JunyiLoginResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/junyi`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  });
+  return handleAuthResponse<JunyiLoginResponse>(res);
+}

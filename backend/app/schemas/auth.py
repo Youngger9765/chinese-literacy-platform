@@ -79,3 +79,19 @@ class GoogleLoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     is_new_user: bool = False
+
+
+class JunyiLoginRequest(BaseModel):
+    """One-time auth code from Junyi SSO callback (issue #1198).
+
+    The frontend receives this code at /junyi-callback?code=<...> and immediately
+    forwards it here. The backend exchanges it with Junyi's /api/v2/auth/code
+    endpoint (code is single-use, TTL 600s).
+    """
+    code: str = Field(..., min_length=1, max_length=256)
+
+
+class JunyiLoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    is_new_user: bool = False

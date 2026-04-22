@@ -1,12 +1,19 @@
 /**
- * SentencePractice — Issue #109, #927
+ * SentencePractice — Issue #109, #927, #1203
  *
  * After stroke order practice, students compose 2 sentences using each
  * practiced vocabulary word. AI validates grammar and word usage.
+ *
+ * Persistence (#1203):
+ * - localStorage key `sentencePractice_progress_${scope}` stores wordStates,
+ *   completedWords, currentWordIndex so refreshing preserves progress.
+ * - When caller passes `saveStepProgressPatch`, DB is synced with step_data
+ *   (mid-exercise) and markCompleted (when every word is finished).
  */
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import {
   fetchExampleSentences,
   validateSentence,
@@ -67,31 +74,173 @@ interface SentencePracticeProps {
   onFinish: () => void;
   onBack: () => void;
   inline?: boolean;
+  /** Story id — used to scope localStorage key (#1203). */
+  storyId?: string | number;
+  /** Merge-based DB sync from LearningLayout (#1203). Optional — when absent,
+   *  only localStorage persistence is active (good for /tools standalone). */
+  saveStepProgressPatch?: (opts: {
+    stepId: string;
+    stepData: Record<string, unknown>;
+    currentStep?: string | null;
+    markCompleted?: boolean;
+    immediate?: boolean;
+  }) => void;
+}
+
+/* ------------------------------------------------------------------ */
+/*  localStorage helpers (#1203)                                        */
+/* ------------------------------------------------------------------ */
+
+const STATE_STORAGE_PREFIX = 'sentencePractice_progress_';
+
+interface SavedProgress {
+  wordStates: Record<string, WordPracticeState>;
+  completedWords: string[];
+  currentWordIndex: number;
+}
+
+function storageKeyFor(storyId: string | number | undefined): string | null {
+  if (storyId === undefined || storyId === null || storyId === '') return null;
+  return scopedStepStorageKey(STATE_STORAGE_PREFIX, storyId);
+}
+
+function loadSaved(storyId: string | number | undefined): SavedProgress | null {
+  const key = storageKeyFor(storyId);
+  if (!key) return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<SavedProgress>;
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      parsed.wordStates &&
+      Array.isArray(parsed.completedWords) &&
+      typeof parsed.currentWordIndex === 'number'
+    ) {
+      return parsed as SavedProgress;
+    }
+  } catch { /* non-fatal */ }
+  return null;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
 
 const SentencePractice: React.FC<SentencePracticeProps> = ({
   practicedWords, storyTitle, onFinish, onBack, inline = false,
+  storyId, saveStepProgressPatch,
 }) => {
   const { token } = useAuth();
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+
+  // Restore from localStorage (#1203) — lazy init so the disk read happens
+  // exactly once even when loadSaved returns null (no re-reads on re-render).
+  const [saved] = useState<SavedProgress | null>(() => loadSaved(storyId));
+
+  const [currentWordIndex, setCurrentWordIndex] = useState<number>(() => {
+    if (saved && saved.currentWordIndex < practicedWords.length) {
+      return saved.currentWordIndex;
+    }
+    return 0;
+  });
+
   const [wordStates, setWordStates] = useState<Record<string, WordPracticeState>>(() => {
     const init: Record<string, WordPracticeState> = {};
-    for (const w of practicedWords) init[w] = makeWordState();
+    for (const w of practicedWords) {
+      const restored = saved?.wordStates?.[w];
+      init[w] = restored ?? makeWordState();
+    }
     return init;
   });
-  const [completedWords, setCompletedWords] = useState<Set<string>>(new Set());
+
+  const [completedWords, setCompletedWords] = useState<Set<string>>(() => {
+    if (!saved) return new Set();
+    const restored = new Set<string>();
+    for (const w of saved.completedWords) {
+      if (practicedWords.includes(w)) restored.add(w);
+    }
+    return restored;
+  });
   const [pasteWarning, setPasteWarning] = useState(false);
   const loadedWordsRef = useRef<Set<string>>(new Set());
+  // True until the user actually interacts after mount. Prevents the DB sync
+  // effect from firing with restored-only state and e.g. rolling `current_step`
+  // back to 'sentence-practice' when the student has already moved on.
+  const isRestoringRef = useRef(true);
+  // Ref mirror of saveStepProgressPatch so the DB sync effect does NOT depend
+  // on its identity. The prop is recreated on every LearningLayout render
+  // (onProgressLoaded is inline), so including it in deps would make the
+  // effect fire every render and PUT until the rate limiter kicks in (429).
+  const savePatchRef = useRef(saveStepProgressPatch);
+  useEffect(() => { savePatchRef.current = saveStepProgressPatch; }, [saveStepProgressPatch]);
+  // IME composition guard (#1206): Enter during 注音選字 should not submit.
+  // Only one input is focused at a time, so a single ref is sufficient.
+  const isComposingRef = useRef(false);
+
+  // Persist progress to localStorage whenever it changes (#1203).
+  const storageKey = useMemo(() => storageKeyFor(storyId), [storyId]);
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const payload: SavedProgress = {
+        wordStates,
+        completedWords: Array.from(completedWords),
+        currentWordIndex,
+      };
+      localStorage.setItem(storageKey, JSON.stringify(payload));
+    } catch { /* non-fatal */ }
+  }, [storageKey, wordStates, completedWords, currentWordIndex]);
+
+  // DB sync (#1203): mid-exercise patch on progress change; markCompleted when every word done.
+  // Skip first fire so restored localStorage state doesn't clobber LearningLayout's
+  // current_step (e.g. student already moved to vocab-definition and just revisits).
+  // Uses savePatchRef (not the prop directly) to avoid re-running on every parent
+  // render caused by unstable `saveStepProgressPatch` identity.
+  useEffect(() => {
+    if (isRestoringRef.current) {
+      isRestoringRef.current = false;
+      return;
+    }
+    const patch = savePatchRef.current;
+    if (!patch) return;
+    const allDone =
+      practicedWords.length > 0 && practicedWords.every((w) => completedWords.has(w));
+    if (allDone) {
+      patch({
+        stepId: 'sentence-practice',
+        currentStep: 'sentence-practice',
+        markCompleted: true,
+        immediate: true,
+        stepData: {
+          completed: true,
+          completedAt: new Date().toISOString(),
+          wordCount: practicedWords.length,
+        },
+      });
+    } else if (completedWords.size > 0) {
+      patch({
+        stepId: 'sentence-practice',
+        currentStep: 'sentence-practice',
+        stepData: {
+          completedWords: Array.from(completedWords),
+          currentWordIndex,
+          partialAt: new Date().toISOString(),
+        },
+      });
+    }
+  }, [completedWords, currentWordIndex, practicedWords]);
 
   const currentWord = practicedWords[currentWordIndex] ?? '';
   const currentState = wordStates[currentWord] ?? makeWordState();
 
   const loadExamples = useCallback(async () => {
     if (!currentWord || loadedWordsRef.current.has(currentWord)) return;
+    // Skip API call if examples were restored from localStorage (#1203).
+    if (currentState.exampleSentences !== null) {
+      loadedWordsRef.current.add(currentWord);
+      return;
+    }
     loadedWordsRef.current.add(currentWord);
     setWordStates(prev => ({ ...prev, [currentWord]: { ...prev[currentWord], examplesLoading: true, examplesError: '' } }));
     try {
@@ -101,7 +250,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       loadedWordsRef.current.delete(currentWord);
       setWordStates(prev => ({ ...prev, [currentWord]: { ...prev[currentWord], examplesLoading: false, examplesError: '例句載入失敗，請稍後再試。' } }));
     }
-  }, [currentWord, storyTitle, token]);
+  }, [currentWord, currentState.exampleSentences, storyTitle, token]);
 
   React.useEffect(() => { loadExamples(); }, [loadExamples]);
 
@@ -141,6 +290,19 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       });
     }
   }, [currentWord, currentState, storyTitle, token]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>, idx: 0 | 1) => {
+    // Skip Enter while IME is composing (e.g. 注音選字) — #1206.
+    const nativeEvent = e.nativeEvent as KeyboardEvent;
+    const isImeComposing =
+      isComposingRef.current ||
+      nativeEvent.isComposing ||
+      nativeEvent.keyCode === 229;
+    const text = currentState.sentences[idx].text;
+    if (e.key === 'Enter' && !isImeComposing && text.trim()) {
+      handleValidate(idx);
+    }
+  }, [currentState, handleValidate]);
 
   const handleCompleteCurrentWord = () => {
     setCompletedWords(prev => new Set(prev).add(currentWord));
@@ -317,7 +479,9 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                   type="text"
                   value={entry.text}
                   onChange={e => updateSentenceText(idx, e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && entry.text.trim()) handleValidate(idx); }}
+                  onCompositionStart={() => { isComposingRef.current = true; }}
+                  onCompositionEnd={() => { isComposingRef.current = false; }}
+                  onKeyDown={e => handleKeyDown(e, idx)}
                   onPaste={e => { e.preventDefault(); setPasteWarning(true); setTimeout(() => setPasteWarning(false), 3000); }}
                   onDrop={e => { e.preventDefault(); setPasteWarning(true); setTimeout(() => setPasteWarning(false), 3000); }}
                   onDragOver={e => e.preventDefault()}

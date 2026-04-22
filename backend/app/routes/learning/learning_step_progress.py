@@ -7,6 +7,7 @@ from the `step_progress` JSONB column on LearningSession.
     GET  /api/learning/sessions/{session_id}/progress  — load
 """
 import logging
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -15,6 +16,10 @@ from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
 from ...schemas.session import StepProgressResponse, StepProgressSaveRequest
+from .learning_progress import STEP_NAMES, _MAX_STEP_NUM, _normalize_step_key
+
+# Reverse mapping: step key (string) → step number (int)
+_STEP_KEY_TO_NUM = {v: k for k, v in STEP_NAMES.items()}
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -54,18 +59,59 @@ def save_step_progress(
     session = _get_owned_session(session_id, current_user, db)
 
     existing_meta: dict = {}
+    stored_version: int | None = None
     if isinstance(session.step_progress, dict):
         raw_meta = session.step_progress.get("__meta")
         if isinstance(raw_meta, dict):
-            existing_meta = raw_meta
+            existing_meta = dict(raw_meta)
+        raw_version = session.step_progress.get("version")
+        if isinstance(raw_version, int):
+            stored_version = raw_version
 
+    # Optimistic concurrency check (#1187): reject stale writes.
+    # Prevents overwriting newer progress when a previous save failed and the
+    # client retries with an older snapshot.
+    if payload.version is not None and stored_version is not None:
+        if payload.version < stored_version:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error": "stale_version",
+                    "stored_version": stored_version,
+                    "incoming_version": payload.version,
+                    "message": "Incoming progress is older than stored version; refresh and retry.",
+                },
+            )
+
+    # Bump version: max(stored, incoming) + 1, or start at 1 if none.
+    next_version = max(
+        stored_version or 0,
+        payload.version or 0,
+    ) + 1
+    existing_meta["last_synced_at"] = datetime.now(tz=timezone.utc).isoformat()
+
+    # Version is stored at the top level so the frontend can read it directly
+    # from StepProgressData.version. __meta keeps other metadata (source, etc.).
     session.step_progress = {
         "current_step": payload.current_step,
         "steps_completed": payload.steps_completed,
         "step_data": payload.step_data,
+        "version": next_version,
+        "__meta": existing_meta,
     }
-    if existing_meta:
-        session.step_progress["__meta"] = existing_meta
+
+    # Sync integer current_step from steps_completed to prevent desync (#1073).
+    # Normalize frontend step IDs → backend keys before lookup.
+    if payload.steps_completed:
+        max_completed_num = max(
+            (_STEP_KEY_TO_NUM.get(_normalize_step_key(s), 0) for s in payload.steps_completed),
+            default=0,
+        )
+        if max_completed_num > 0:
+            new_current = min(max_completed_num + 1, _MAX_STEP_NUM)
+            if new_current != session.current_step:
+                session.current_step = new_current
+
     db.commit()
     db.refresh(session)
     logger.info(

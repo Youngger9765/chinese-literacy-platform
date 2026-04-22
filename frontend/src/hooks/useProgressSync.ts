@@ -19,7 +19,13 @@
  * API failures are fully non-blocking — localStorage still functions.
  */
 import { useCallback, useEffect, useRef } from 'react';
-import { saveStepProgress, saveStepProgressBeacon, loadStepProgress, StepProgressData } from '../services/learningApi';
+import {
+  saveStepProgress,
+  saveStepProgressBeacon,
+  loadStepProgress,
+  StaleVersionError,
+  StepProgressData,
+} from '../services/learningApi';
 
 const DEBOUNCE_MS = 5_000;
 
@@ -52,6 +58,13 @@ export function useProgressSync({
 }: UseProgressSyncOptions): UseProgressSyncReturn {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestDataRef = useRef<StepProgressData | null>(null);
+  // Monotonic version tracking (#1187): last-known server version + in-flight client bump
+  const lastServerVersionRef = useRef<number>(0);
+
+  const readStoredVersion = (data: StepProgressData | null | undefined): number => {
+    const v = data?.version;
+    return typeof v === 'number' && v >= 0 ? v : 0;
+  };
 
   // ── Initial load from DB ──────────────────────────────────────────────────
   useEffect(() => {
@@ -59,8 +72,10 @@ export function useProgressSync({
 
     loadStepProgress(token, dbSessionId)
       .then((res) => {
-        if (res.step_progress && onProgressLoaded) {
-          onProgressLoaded(res.step_progress);
+        const stepProgress = res.step_progress;
+        if (stepProgress) {
+          lastServerVersionRef.current = readStoredVersion(stepProgress);
+          if (onProgressLoaded) onProgressLoaded(stepProgress);
         }
       })
       .catch(() => {
@@ -74,11 +89,31 @@ export function useProgressSync({
   const doSave = useCallback(
     (data: StepProgressData) => {
       if (!token || dbSessionId === null) return;
-      saveStepProgress(token, dbSessionId, data).catch(() => {
-        // Non-fatal — localStorage already has the data
-      });
+      const withVersion: StepProgressData = {
+        ...data,
+        version: lastServerVersionRef.current,
+      };
+      saveStepProgress(token, dbSessionId, withVersion)
+        .then((res) => {
+          // Track the new server version for the next save
+          if (res.step_progress) {
+            lastServerVersionRef.current = readStoredVersion(res.step_progress);
+          }
+        })
+        .catch((err) => {
+          if (err instanceof StaleVersionError) {
+            // Refresh from server; next save will use the newer version
+            lastServerVersionRef.current = err.storedVersion;
+            loadStepProgress(token, dbSessionId)
+              .then((res) => {
+                if (res.step_progress && onProgressLoaded) onProgressLoaded(res.step_progress);
+              })
+              .catch(() => {});
+          }
+          // Other errors: non-fatal — localStorage already has the data
+        });
     },
-    [token, dbSessionId],
+    [token, dbSessionId, onProgressLoaded],
   );
 
   // Keep a ref to the latest doSave so unmount cleanup always uses the current version
@@ -125,7 +160,10 @@ export function useProgressSync({
       debounceTimerRef.current = null;
 
       if (token && dbSessionId !== null) {
-        saveStepProgressBeacon(token, dbSessionId, latestDataRef.current);
+        saveStepProgressBeacon(token, dbSessionId, {
+          ...latestDataRef.current,
+          version: lastServerVersionRef.current,
+        });
       }
     };
 

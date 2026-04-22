@@ -3,7 +3,7 @@ TTS service — three providers: Azure Speech, Google Cloud TTS, Gemini 3.1 Flas
 
 Two-layer cache: GCS (persistent) → in-memory (fast).
 1. Check in-memory dict
-2. Check GCS bucket  (azure/sentences/{hash}.mp3, gemini31-prompt-only/sentences/{hash}.mp3,
+2. Check GCS bucket  (azure/sentences/{hash}.mp3, gemini31-prompt-only-v2/sentences/{hash}.mp3,
    or tts-cache/{hash}.mp3)
 3. Call active provider API → save to GCS + in-memory
 4. If Azure fails → fall back to Google Cloud TTS
@@ -20,7 +20,7 @@ Gemini voice: Aoede (prebuilt voice, PCM→MP3 via ffmpeg subprocess)
 
 GCS paths:
   Azure    — azure/sentences/{hash}.mp3    (sentence-level, Issue #667)
-  Gemini31 — gemini31-prompt-only/sentences/{hash}.mp3 (Variant A, 2026-04-18)
+  Gemini31 — gemini31-prompt-only-v2/sentences/{hash}.mp3 (Variant A, Issue #1208 v2 segmentation)
   Google   — tts-cache/{hash}.mp3          (legacy path, unchanged for compatibility)
 
 Auth:
@@ -32,6 +32,7 @@ Auth:
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import os
 import re
@@ -82,7 +83,7 @@ def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
 
     GCS paths:
       Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
-      Gemini31 — gemini31-prompt-only/sentences/{key}.mp3 (Variant A, 2026-04-18)
+      Gemini31 — gemini31-prompt-only-v2/sentences/{key}.mp3 (Variant A, Issue #1208 v2 segmentation)
       Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
@@ -91,7 +92,7 @@ def _gcs_get(key: str, provider: str = "google") -> Optional[bytes]:
     if provider == "azure":
         blob_path = f"azure/sentences/{key}.mp3"
     elif provider == "gemini31":
-        blob_path = f"gemini31-prompt-only/sentences/{key}.mp3"
+        blob_path = f"gemini31-prompt-only-v2/sentences/{key}.mp3"
     else:
         blob_path = f"tts-cache/{key}.mp3"
     try:
@@ -110,7 +111,7 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
 
     GCS paths:
       Azure    — azure/sentences/{key}.mp3    (sentence-level, Issue #667)
-      Gemini31 — gemini31-prompt-only/sentences/{key}.mp3 (Variant A, 2026-04-18)
+      Gemini31 — gemini31-prompt-only-v2/sentences/{key}.mp3 (Variant A, Issue #1208 v2 segmentation)
       Google   — tts-cache/{key}.mp3          (legacy path, unchanged for compatibility)
     """
     bucket = _get_gcs_bucket()
@@ -119,7 +120,7 @@ def _gcs_put(key: str, audio_bytes: bytes, provider: str = "google") -> None:
     if provider == "azure":
         blob_path = f"azure/sentences/{key}.mp3"
     elif provider == "gemini31":
-        blob_path = f"gemini31-prompt-only/sentences/{key}.mp3"
+        blob_path = f"gemini31-prompt-only-v2/sentences/{key}.mp3"
     else:
         blob_path = f"tts-cache/{key}.mp3"
     try:
@@ -145,14 +146,15 @@ AZURE_TTS_VOICE = os.environ.get("AZURE_TTS_VOICE", "zh-TW-HsiaoChenNeural")
 TTS_VOICE = os.environ.get("TTS_VOICE", "cmn-CN-Chirp3-HD-Sulafat")
 TTS_LANGUAGE_CODE = "cmn-CN"
 
-# Gemini 3.1 Flash TTS (Issue #1107)
-# VARIANT A STRATEGY (decided 2026-04-18 after A/B listening test):
-#   - No homophone substitution (_clean_for_gemini is NOT called).
-#   - Raw sentence sent directly to Gemini, prepended with a prompt prefix
-#     that tells the model to use Taiwan-style pronunciation.
-#   - This produced more natural audio than variant C (rule-based replacement).
-#   - GCS path: gemini31-prompt-only/sentences/{key}.mp3 (2408 pre-generated).
-#   - If you ever want to regenerate: run batch script with --variant A.
+# Gemini 3.1 Flash TTS (Issue #1107, v2 redo in Issue #1208)
+# VARIANT A STRATEGY (finalized Issue #1208):
+#   - No homophone substitution (no _clean_for_gemini, no _apply_taiwan_pronunciation).
+#   - Raw sentence sent directly to Gemini with only _clean_for_tts applied,
+#     prepended with a prompt prefix that tells the model to use Taiwan style.
+#   - Sentences sourced from backend/data/sentences.v2.jsonl (Opus 4.7 segmentation).
+#   - GCS path: gemini31-prompt-only-v2/sentences/{key}.mp3 (2301 pre-generated).
+#   - cache_key = sha256(raw_text.strip()) — Variant A canonical (PR #1133).
+#   - Regenerate via: backend/scripts/batch_gemini_tts_v2.py
 GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview"
 GEMINI_TTS_VOICE = "Aoede"
 GEMINI_TTS_PROMPT_PREFIX = "請使用台灣用語的繁體中文，以親切且自然的語氣朗讀以下內容："
@@ -340,106 +342,19 @@ def _clean_for_tts(text: str) -> str:
 
 
 def _cache_key(text: str) -> str:
-    """Return a stable hex SHA-256 digest for *text*."""
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    """Return a stable hex SHA-256 digest for *text* (Variant A canonical).
 
-
-# ---------------------------------------------------------------------------
-# Gemini TTS — Taiwan pronunciation corrections
-# ---------------------------------------------------------------------------
-# Gemini uses China Mandarin pronunciation by default.
-# We replace specific words with homophones that sound correct in Taiwan Mandarin.
-# TTS only cares about SOUND, not meaning, so homophones are safe substitutions.
-# Reference: backend/data/tts-taiwan-pronunciation.yaml
-
-_TAIWAN_TTS_REPLACEMENTS: list[tuple[str, str]] = [
-    # --- Cat 1: 聲調不同 (high frequency) ---
-    # 垃圾: TW lè sè, CN lā jī — completely different
-    ("垃圾", "樂色"),
-    # 研究: 究 TW jiù (4th), CN jiū (1st)
-    ("研究", "研舊"),
-    # 危險: 危 TW wéi (2nd), CN wēi (1st)
-    ("危險", "圍險"),
-    # 企業: 企 TW qì (4th), CN qǐ (3rd)
-    ("企業", "氣業"),
-    # 成績: 績 TW jī (1st), CN jì (4th)
-    ("成績", "成基"),
-    # 星期: 期 TW qí (2nd), CN qī (1st)
-    ("星期", "星其"),
-    ("日期", "日其"),
-    ("期待", "其待"),
-    ("期限", "其限"),
-    ("期間", "其間"),
-    ("期末", "其末"),
-    # 法: TW fà (4th), CN fǎ (3rd) — only replace in compounds
-    ("法律", "罰律"),
-    ("法國", "罰國"),
-    ("法院", "罰院"),
-    ("法規", "罰規"),
-    ("司法", "司罰"),
-    ("方法", "方罰"),
-    ("辦法", "辦罰"),
-    # 微: TW wéi (2nd), CN wēi (1st)
-    ("微笑", "圍笑"),
-    ("微小", "圍小"),
-    # 盡: TW jìn (4th), CN jǐn (3rd)
-    ("盡量", "近量"),
-    ("盡力", "近力"),
-    # 休息: 息 TW xí (2nd), CN xī (1st)
-    ("休息", "休席"),
-    # 暫時: TW zhàn (4th), CN zàn (4th) — initial zh vs z
-    ("暫時", "站時"),
-    # 包括: TW bāo guā, CN bāo kuò — completely different
-    ("包括", "包刮"),
-    # 綜合: 綜 TW zòng (4th), CN zōng (1st)
-    ("綜合", "粽合"),
-    # 友誼: 誼 TW yí (2nd), CN yì (4th)
-    ("友誼", "友宜"),
-    # 品質: 質 TW zhí (2nd), CN zhì (4th)
-    ("品質", "品直"),
-    ("質量", "直量"),
-    # 攻擊: 擊 TW jí (2nd), CN jī (1st)
-    ("攻擊", "攻急"),
-    # 阿姨: 阿 TW ǎ (3rd), CN ā (1st)
-    ("阿姨", "啞姨"),
-
-    # --- Cat 2: 聲母/韻母不同 ---
-    # 蝸牛: TW guā niú, CN wō niú — completely different
-    ("蝸牛", "瓜牛"),
-    # 液體: 液 TW yì, CN yè
-    ("液體", "意體"),
-    # 堤防: 堤 TW tí, CN dī
-    ("堤防", "提防"),
-
-    # --- Cat 3: 多音字偏好 ---
-    # 知識: 識 TW shì (4th), CN shí (2nd)
-    ("知識", "知是"),
-    ("認識", "認是"),
-    ("常識", "常是"),
-    # 地殼: 殼 TW ké, CN qiào
-    ("地殼", "地咳"),
-
-    # --- 多音字 phoneme corrections ---
-    # 喝采/喝彩: 喝 should be hè (4th), not hē (1st)
-    ("喝采", "賀采"),
-    ("喝彩", "賀彩"),
-]
-
-
-def _apply_taiwan_pronunciation(text: str) -> str:
-    """Replace words with homophones that force Taiwan pronunciation in Gemini TTS.
-
-    Gemini TTS defaults to China Mandarin pronunciation. This function replaces
-    specific words with homophones that a Chinese TTS will naturally pronounce
-    with the correct Taiwan tone/initial/final.
-
-    Only used when TTS_PROVIDER == 'gemini31'.
-    Reference: backend/data/tts-taiwan-pronunciation.yaml
+    Strips whitespace before hashing to match batch_gemini_tts_v2.py and
+    verify_tts_alignment_v2.py. Any divergence here breaks GCS lookups
+    for pre-generated blobs.
     """
-    for original, replacement in _TAIWAN_TTS_REPLACEMENTS:
-        if original in text:
-            text = text.replace(original, replacement)
-    return text
+    return hashlib.sha256(text.strip().encode("utf-8")).hexdigest()
+
+
+# ---------------------------------------------------------------------------
+# Number normalization — used by Azure/Google TTS paths.
+# Gemini path uses Variant A (prompt-only) and does NOT apply these.
+# ---------------------------------------------------------------------------
 
 
 def _numbers_to_chinese_tw(text: str) -> str:
@@ -502,13 +417,6 @@ def _numbers_to_chinese_tw(text: str) -> str:
 
     # Match ranges (1-10), decimals (3.14), and plain integers, but not years in parentheses
     return re.sub(r"\d+(?:[.\-]\d+)?", _replace_number, text)
-
-
-def _clean_for_gemini(text: str) -> str:
-    """Additional cleaning for Gemini TTS: Taiwan numbers + pronunciation fixes."""
-    text = _numbers_to_chinese_tw(text)
-    text = _apply_taiwan_pronunciation(text)
-    return text
 
 
 # ---------------------------------------------------------------------------
@@ -752,7 +660,7 @@ def synthesize_speech(text: str) -> bytes:
     Two-layer cache: in-memory (L1) → GCS (L2) → API call.
     GCS paths:
       azure    — azure/sentences/{hash}.mp3
-      gemini31 — gemini31-prompt-only/sentences/{hash}.mp3 (Variant A)
+      gemini31 — gemini31-prompt-only-v2/sentences/{hash}.mp3 (Variant A)
       google   — tts-cache/{hash}.mp3 (legacy)
 
     Args:
@@ -865,17 +773,17 @@ def delete_tts_cache(text: str) -> dict:
         logger.info("L1 cache evicted (key=%s)", key[:8])
 
     # GCS deletion — try all provider paths.
-    # Note: gemini31 now uses `gemini31-prompt-only/sentences/` (Variant A).
-    # Old `gemini31/sentences/` files (Variant C, pre-2026-04-18) are not
-    # cleaned by this function. They remain in GCS as rollback-safety and
-    # are intentionally abandoned after the A/B switch.
+    # Note: gemini31 now uses `gemini31-prompt-only-v2/sentences/` (Variant A, Issue #1208).
+    # Older paths (`gemini31/sentences/`, `gemini31-prompt-only/sentences/`) are NOT cleaned
+    # by this function. They remain in GCS as rollback-safety and are intentionally
+    # abandoned after the v2 namespace switch.
     bucket = _get_gcs_bucket()
     if bucket is not None:
         for provider in ("azure", "gemini31", "google"):
             if provider == "azure":
                 blob_path = f"azure/sentences/{key}.mp3"
             elif provider == "gemini31":
-                blob_path = f"gemini31-prompt-only/sentences/{key}.mp3"
+                blob_path = f"gemini31-prompt-only-v2/sentences/{key}.mp3"
             else:
                 blob_path = f"tts-cache/{key}.mp3"
             try:
@@ -911,15 +819,64 @@ def synthesize_sentence(text: str) -> bytes:
 
 
 # ---------------------------------------------------------------------------
-# Lesson TTS mapping — Issue #667
+# Lesson TTS mapping — Issue #667 / #1208
 # ---------------------------------------------------------------------------
+
+# Path to the pre-generated sentence JSONL (Opus 4.7 semantic segmentation).
+# Lock file: 2301 sentences, 1:1 aligned with GCS gemini31-prompt-only-v2/.
+_SENTENCES_V2_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "..", "data", "sentences.v2.jsonl"
+)
+
+# Cached in-process: { lesson_id (int): { paragraph_idx (int): [{"text", "hash", "chars"}, ...] } }
+_SENTENCES_V2_CACHE: dict | None = None
+
+
+def _load_sentences_v2() -> dict:
+    """Load sentences.v2.jsonl into memory (once per process).
+
+    Returns dict keyed by (lesson_id, paragraph_idx) → list of sentence dicts.
+    Sentences preserve the Opus 4.7 segmentation order so hashes match GCS blobs.
+    """
+    global _SENTENCES_V2_CACHE
+    if _SENTENCES_V2_CACHE is not None:
+        return _SENTENCES_V2_CACHE
+
+    mapping: dict = {}  # { lesson_id: { para_idx: [{"text", "hash", "chars"}] } }
+    path = os.path.normpath(_SENTENCES_V2_PATH)
+    try:
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                row = json.loads(line)
+                lid = int(row["lesson_id"])
+                pidx = int(row["paragraph_idx"])
+                text = row["text"]
+                h = _cache_key(text)
+                mapping.setdefault(lid, {}).setdefault(pidx, []).append(
+                    {"text": text, "hash": h, "chars": len(text)}
+                )
+        logger.info("Loaded sentences.v2.jsonl: %d lessons", len(mapping))
+    except FileNotFoundError:
+        logger.warning("sentences.v2.jsonl not found at %s — falling back to regex split", path)
+    except Exception as exc:
+        logger.warning("Failed to load sentences.v2.jsonl: %s — falling back to regex split", exc)
+
+    _SENTENCES_V2_CACHE = mapping
+    return mapping
+
 
 def build_lesson_tts_mapping(lesson: dict) -> dict:
     """Build a sentence-level TTS mapping for a lesson.
 
-    Given a lesson dict (from lesson_loader), splits each paragraph into
-    sentences and returns a mapping structure with text, hash, and char count
-    for each sentence.
+    Loads segmentation from sentences.v2.jsonl (Opus 4.7 semantic segmentation,
+    Issue #1208) so the SHA-256 hashes match pre-generated GCS blobs at
+    gemini31-prompt-only-v2/sentences/{hash}.mp3.
+
+    Falls back to regex _split_sentences() for lessons not present in the JSONL
+    (e.g. newly added lessons not yet in the pre-generation batch).
 
     Args:
         lesson: Lesson dict with 'id', 'paragraphs' keys.
@@ -932,7 +889,7 @@ def build_lesson_tts_mapping(lesson: dict) -> dict:
                 {
                     "index": 0,
                     "sentences": [
-                        {"text": "cleaned sentence", "hash": "sha256hex", "chars": 32}
+                        {"text": "canonical sentence", "hash": "sha256hex", "chars": 32}
                     ]
                 }
             ]
@@ -941,29 +898,42 @@ def build_lesson_tts_mapping(lesson: dict) -> dict:
     lesson_id = lesson.get("id") or lesson.get("lesson_number")
     paragraphs_raw = lesson.get("paragraphs", [])
 
+    v2_index = _load_sentences_v2()
+    lesson_data = v2_index.get(int(lesson_id)) if lesson_id is not None else None
+
     mapping_paragraphs = []
-    for idx, paragraph in enumerate(paragraphs_raw):
-        if not paragraph or not str(paragraph).strip():
-            continue
-        cleaned_paragraph = _clean_for_tts(str(paragraph))
-        if not cleaned_paragraph:
-            continue
-        sentences = _split_sentences(cleaned_paragraph)
-        sentence_entries = []
-        for sent in sentences:
-            if not sent.strip():
+
+    if lesson_data:
+        # Use canonical v2 segmentation — hashes match pre-generated GCS blobs.
+        for para_idx, para_sentences in sorted(lesson_data.items()):
+            entries = [s for s in para_sentences if s["text"].strip()]
+            if entries:
+                mapping_paragraphs.append({"index": para_idx, "sentences": entries})
+    else:
+        # Fallback: regex split for lessons not in sentences.v2.jsonl.
+        logger.debug(
+            "build_lesson_tts_mapping: lesson %s not in v2 JSONL, using regex fallback",
+            lesson_id,
+        )
+        for idx, paragraph in enumerate(paragraphs_raw):
+            if not paragraph or not str(paragraph).strip():
                 continue
-            h = _cache_key(sent)
-            sentence_entries.append({
-                "text": sent,
-                "hash": h,
-                "chars": len(sent),
-            })
-        if sentence_entries:
-            mapping_paragraphs.append({
-                "index": idx,
-                "sentences": sentence_entries,
-            })
+            cleaned_paragraph = _clean_for_tts(str(paragraph))
+            if not cleaned_paragraph:
+                continue
+            sentences = _split_sentences(cleaned_paragraph)
+            sentence_entries = []
+            for sent in sentences:
+                if not sent.strip():
+                    continue
+                h = _cache_key(sent)
+                sentence_entries.append({
+                    "text": sent,
+                    "hash": h,
+                    "chars": len(sent),
+                })
+            if sentence_entries:
+                mapping_paragraphs.append({"index": idx, "sentences": sentence_entries})
 
     return {
         "lesson_id": lesson_id,

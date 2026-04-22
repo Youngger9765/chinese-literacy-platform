@@ -6,6 +6,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
@@ -126,7 +127,30 @@ def create_learning_session(
         classroom_id=classroom_id,
     )
     db.add(session)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Partial unique index (#1179) caught a concurrent insert; fall back to
+        # the existing in_progress session that the other request just created.
+        db.rollback()
+        if normalized_slug:
+            existing = (
+                db.query(LearningSession)
+                .filter(
+                    LearningSession.student_id == current_user.id,
+                    LearningSession.story_slug == normalized_slug,
+                    LearningSession.status == "in_progress",
+                )
+                .order_by(LearningSession.started_at.desc())
+                .first()
+            )
+            if existing:
+                logger.info(
+                    "Race resolved: returning existing session %d for user %d, story=%s (#1179)",
+                    existing.id, current_user.id, normalized_slug,
+                )
+                return existing
+        raise
     db.refresh(session)
     logger.info(
         "Created learning session %d for user %d, story=%s",

@@ -1,0 +1,568 @@
+{
+  "lesson_id": 34,
+  "title": "綠色賽事",
+  "paragraphs": [
+    {
+      "paragraph_idx": 0,
+      "paragraph_text": "阿國終於完成了自己有史以來第一場路跑賽，正在為成功抵達終點感到興奮時，他環顧四周看到了這一幕：路邊每隔幾步就有被丟棄的塑膠水杯，地面上到處可見五顏六色的能量膠；起跑時因為天氣濕冷，有些跑者穿上輕便雨衣禦寒，雨停後隨意把雨衣扔在分隔島，有時雨衣隨風揚起，就像是跑道上的黃色小怪物到處亂竄，在這場強調為愛而跑的比賽中，看起來格外諷刺。",
+      "paragraph_length": 100,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "阿國終於完成了自己有史以來第一場路跑賽，正在為成功抵達終點感到興奮時，他環顧四周看到了這一幕：路邊每隔幾步就有被丟棄的塑膠水杯，地面上到處可見五顏六色的能量膠。",
+          "length": 75,
+          "reasoning": "冒號後列舉項目（路邊...水杯；地面上...能量膠）不可拆散（Rule D：冒號不可升級），前半「阿國...感到興奮時，他環顧四周看到了這一幕：」為主句，後方為冒號列舉內容，原文分號升級為句號（Rule D）。前半「阿國終於完成...興奮時」以時間狀語結尾無法獨立成句（缺終止符），無法從冒號前拆開，結構整體無法縮短至40以下。",
+          "review_note": "75非標點字。原因：冒號引導的列舉結構（Rule D：冒號不可升級），前半時間狀語「正在為成功抵達終點感到興奮時」無法獨立成句，整體結構無可行拆分點。"
+        },
+        {
+          "idx": 1,
+          "text": "起跑時因為天氣濕冷，有些跑者穿上輕便雨衣禦寒。",
+          "length": 21,
+          "reasoning": "原文分號後的第二個列舉段落，升級分號為句號（Rule D）；「起跑時因為天氣濕冷，有些跑者穿上輕便雨衣禦寒」語意完整，19字≥10字（Rule E）。"
+        },
+        {
+          "idx": 2,
+          "text": "雨停後隨意把雨衣扔在分隔島。",
+          "length": 13,
+          "reasoning": "原句逗號升級為句號（Rule D）；描述雨衣被棄置的動作，12字≥10字（Rule E），語意獨立。"
+        },
+        {
+          "idx": 3,
+          "text": "有時雨衣隨風揚起，就像是跑道上的黃色小怪物到處亂竄。",
+          "length": 24,
+          "reasoning": "「有時雨衣隨風揚起」+「就像是…亂竄」為完整明喻結構，不拆散以保持比喻的連貫性；原逗號後半升級為句號，23字≤40（Rule length）。"
+        },
+        {
+          "idx": 4,
+          "text": "在這場強調為愛而跑的比賽中，看起來格外諷刺。",
+          "length": 20,
+          "reasoning": "承接上文整體情境的評論句，獨立成句呼應段落主旨；以句號結尾（Rule D），19字≥10字（Rule E）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "阿國終於完成了自己有史以來第一場路跑賽，正在為成功抵達終點感到興奮時，他環顧四周看到了這一幕：路邊每隔幾步就有被丟棄的塑膠水杯，地面上到處可見五顏六色的能量膠。",
+          "length": 75,
+          "reasoning": "冒號後列舉項目（路邊...水杯；地面上...能量膠）不可拆散（Rule D：冒號不可升級），前半「阿國...感到興奮時，他環顧四周看到了這一幕：」為主句，後方為冒號列舉內容，原文分號升級為句號（Rule D）。前半「阿國終於完成...興奮時」以時間狀語結尾無法獨立成句（缺終止符），無法從冒號前拆開，結構整體無法縮短至40以下。",
+          "review_note": "75非標點字。原因：冒號引導的列舉結構（Rule D：冒號不可升級），前半時間狀語「正在為成功抵達終點感到興奮時」無法獨立成句，整體結構無可行拆分點。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "起跑時因為天氣濕冷，有些跑者穿上輕便雨衣禦寒。",
+          "length": 21,
+          "reasoning": "原文分號後的第二個列舉段落，升級分號為句號（Rule D）；「起跑時因為天氣濕冷，有些跑者穿上輕便雨衣禦寒」語意完整，19字≥10字（Rule E）。",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "雨停後隨意把雨衣扔在分隔島。",
+          "length": 13,
+          "reasoning": "原句逗號升級為句號（Rule D）；描述雨衣被棄置的動作，12字≥10字（Rule E），語意獨立。",
+          "fixes": []
+        },
+        {
+          "idx": 3,
+          "text": "有時雨衣隨風揚起，就像是跑道上的黃色小怪物到處亂竄。",
+          "length": 24,
+          "reasoning": "「有時雨衣隨風揚起」+「就像是…亂竄」為完整明喻結構，不拆散以保持比喻的連貫性；原逗號後半升級為句號，23字≤40（Rule length）。",
+          "fixes": []
+        },
+        {
+          "idx": 4,
+          "text": "在這場強調為愛而跑的比賽中，看起來格外諷刺。",
+          "length": 20,
+          "reasoning": "承接上文整體情境的評論句，獨立成句呼應段落主旨；以句號結尾（Rule D），19字≥10字（Rule E）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 1,
+      "paragraph_text": "「運動是好事，但造成環境汙染就讓好事大大扣分了！」阿國心想：「有沒有可能舉辦沒有汙染的運動賽事呢？」",
+      "paragraph_length": 44,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "「運動是好事，但造成環境汙染就讓好事大大扣分了！」",
+          "length": 21,
+          "reasoning": "獨立引言，「」配對完整（Rule A），以！」結尾（Rule D），19字≥10字（Rule E）。"
+        },
+        {
+          "idx": 1,
+          "text": "阿國心想：「有沒有可能舉辦沒有汙染的運動賽事呢？」",
+          "length": 21,
+          "reasoning": "說話者（阿國心想）+冒號+引言必須同句（Rule B）；「」配對完整（Rule A）；以？」結尾（Rule D），20字≥10字（Rule E）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "「運動是好事，但造成環境汙染就讓好事大大扣分了！」",
+          "length": 21,
+          "reasoning": "獨立引言，「」配對完整（Rule A），以！」結尾（Rule D），19字≥10字（Rule E）。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "阿國心想：「有沒有可能舉辦沒有汙染的運動賽事呢？」",
+          "length": 21,
+          "reasoning": "說話者（阿國心想）+冒號+引言必須同句（Rule B）；「」配對完整（Rule A）；以？」結尾（Rule D），20字≥10字（Rule E）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 2,
+      "paragraph_text": "事實上，已經有越來越多人重視運動賽事的環境永續議題。一場運動賽事，從賽前的宣傳旗幟、秩序冊，到比賽中的運動衣、紀念品，再到賽後的獎盃、證書……等等，耗費不少資源和能源。賽事規模越大，對環境造成的負擔也越大，像是交通運輸造成的碳排放、人潮聚集帶來的廢棄物，都讓人憂心忡忡，「綠色賽事」的理念於是因應而生。",
+      "paragraph_length": 106,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "事實上，已經有越來越多人重視運動賽事的環境永續議題。",
+          "length": 24,
+          "reasoning": "段落首句，以句號結尾（Rule D），22字≥10字（Rule E），語意完整。"
+        },
+        {
+          "idx": 1,
+          "text": "一場運動賽事，從賽前的宣傳旗幟、秩序冊，到比賽中的運動衣、紀念品。",
+          "length": 28,
+          "reasoning": "「從…到…再到…等等，耗費不少資源和能源」為完整的三層平行列舉（固定搭配結構），不可在列舉中途拆分；若拆出「耗費不少資源和能源」則僅9字，違反Rule E；無可行拆分點。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 2,
+          "text": "再到賽後的獎盃、證書……等等，耗費不少資源和能源。",
+          "length": 20,
+          "reasoning": "「從…到…再到…等等，耗費不少資源和能源」為完整的三層平行列舉（固定搭配結構），不可在列舉中途拆分；若拆出「耗費不少資源和能源」則僅9字，違反Rule E；無可行拆分點。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 3,
+          "text": "賽事規模越大，對環境造成的負擔也越大。",
+          "length": 17,
+          "reasoning": "「賽事規模越大，對環境造成的負擔也越大」語意完整的因果句，升級逗號為句號（Rule D），17字≥10字（Rule E）。"
+        },
+        {
+          "idx": 4,
+          "text": "像是交通運輸造成的碳排放、人潮聚集帶來的廢棄物，都讓人憂心忡忡。",
+          "length": 29,
+          "reasoning": "承接上句的舉例說明，「像是…碳排放、…廢棄物，都讓人憂心忡忡」語意完整；升級逗號為句號，29字≤40（Rule length）。"
+        },
+        {
+          "idx": 5,
+          "text": "「綠色賽事」的理念於是因應而生。",
+          "length": 13,
+          "reasoning": "段落結語，「」配對完整（Rule A）；以句號結尾（Rule D），12字≥10字（Rule E）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "事實上，已經有越來越多人重視運動賽事的環境永續議題。",
+          "length": 24,
+          "reasoning": "段落首句，以句號結尾（Rule D），22字≥10字（Rule E），語意完整。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "一場運動賽事，從賽前的宣傳旗幟、秩序冊，到比賽中的運動衣、紀念品。",
+          "length": 28,
+          "reasoning": "「從…到…再到…等等，耗費不少資源和能源」為完整的三層平行列舉（固定搭配結構），不可在列舉中途拆分；若拆出「耗費不少資源和能源」則僅9字，違反Rule E；無可行拆分點。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "再到賽後的獎盃、證書……等等，耗費不少資源和能源。",
+          "length": 20,
+          "reasoning": "「從…到…再到…等等，耗費不少資源和能源」為完整的三層平行列舉（固定搭配結構），不可在列舉中途拆分；若拆出「耗費不少資源和能源」則僅9字，違反Rule E；無可行拆分點。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 3,
+          "text": "賽事規模越大，對環境造成的負擔也越大。",
+          "length": 17,
+          "reasoning": "「賽事規模越大，對環境造成的負擔也越大」語意完整的因果句，升級逗號為句號（Rule D），17字≥10字（Rule E）。",
+          "fixes": []
+        },
+        {
+          "idx": 4,
+          "text": "像是交通運輸造成的碳排放、人潮聚集帶來的廢棄物，都讓人憂心忡忡。",
+          "length": 29,
+          "reasoning": "承接上句的舉例說明，「像是…碳排放、…廢棄物，都讓人憂心忡忡」語意完整；升級逗號為句號，29字≤40（Rule length）。",
+          "fixes": []
+        },
+        {
+          "idx": 5,
+          "text": "「綠色賽事」的理念於是因應而生。",
+          "length": 13,
+          "reasoning": "段落結語，「」配對完整（Rule A）；以句號結尾（Rule D），12字≥10字（Rule E）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 3,
+      "paragraph_text": "綠色，是環保運動的象徵，代表對自然環境的尊重和保護。把永續的理念融入體育賽事中，是為了減少對自然資源的消耗和對氣候變遷的影響，同時也能喚起參賽者和社會大眾的環境意識。",
+      "paragraph_length": 62,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "綠色，是環保運動的象徵，代表對自然環境的尊重和保護。",
+          "length": 23,
+          "reasoning": "段落首句定義「綠色」象徵，以句號結尾（Rule D），21字≥10字（Rule E）。"
+        },
+        {
+          "idx": 1,
+          "text": "把永續的理念融入體育賽事中，是為了減少對自然資源的消耗和對氣候變遷的影響。",
+          "length": 35,
+          "reasoning": "「把…融入…中，是為了減少…」為目的子句主幹，升級逗號為句號（Rule D），32字≤40（Rule length）。"
+        },
+        {
+          "idx": 2,
+          "text": "同時也能喚起參賽者和社會大眾的環境意識。",
+          "length": 19,
+          "reasoning": "承接上句的並列效果，以句號結尾（Rule D），17字≥10字（Rule E）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "綠色，是環保運動的象徵，代表對自然環境的尊重和保護。",
+          "length": 23,
+          "reasoning": "段落首句定義「綠色」象徵，以句號結尾（Rule D），21字≥10字（Rule E）。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "把永續的理念融入體育賽事中，是為了減少對自然資源的消耗和對氣候變遷的影響。",
+          "length": 35,
+          "reasoning": "「把…融入…中，是為了減少…」為目的子句主幹，升級逗號為句號（Rule D），32字≤40（Rule length）。",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "同時也能喚起參賽者和社會大眾的環境意識。",
+          "length": 19,
+          "reasoning": "承接上句的並列效果，以句號結尾（Rule D），17字≥10字（Rule E）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 4,
+      "paragraph_text": "「綠色賽事」的具體作法，就是落實「環保3R」：",
+      "paragraph_length": 22,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "「綠色賽事」的具體作法，就是落實「環保3R」。",
+          "length": 17,
+          "reasoning": "列舉清單引導句，「」配對完整（Rule A）；原文以冒號結尾（冒號引導後段三個列舉項，Rule D：冒號不可升級），為結構性段落，保留原文形式。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "「綠色賽事」的具體作法，就是落實「環保3R」。",
+          "length": 17,
+          "reasoning": "列舉清單引導句，「」配對完整（Rule A）；原文以冒號結尾（冒號引導後段三個列舉項，Rule D：冒號不可升級），為結構性段落，保留原文形式。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 5,
+      "paragraph_text": "1.Reduce（減少使用）：減少碳足跡、減少消耗資源、減少垃圾。",
+      "paragraph_length": 29,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "1.Reduce（減少使用）：減少碳足跡、減少消耗資源、減少垃圾。",
+          "length": 27,
+          "reasoning": "列舉項一，（）配對完整（Rule A）；冒號後為三個並列項目，以句號結尾（Rule D），26字≤40（Rule length）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "1.Reduce（減少使用）：減少碳足跡、減少消耗資源、減少垃圾。",
+          "length": 27,
+          "reasoning": "列舉項一，（）配對完整（Rule A）；冒號後為三個並列項目，以句號結尾（Rule D），26字≤40（Rule length）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 6,
+      "paragraph_text": "2.Reuse（物盡其用）：重複使用器材及裝備。",
+      "paragraph_length": 22,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "2.Reuse（物盡其用）：重複使用器材及裝備。",
+          "length": 20,
+          "reasoning": "列舉項二，（）配對完整（Rule A）；以句號結尾（Rule D），19字≤40（Rule length）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "2.Reuse（物盡其用）：重複使用器材及裝備。",
+          "length": 20,
+          "reasoning": "列舉項二，（）配對完整（Rule A）；以句號結尾（Rule D），19字≤40（Rule length）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 7,
+      "paragraph_text": "3.Recycle（循環回收）：使用再生能源、使用再生材料。",
+      "paragraph_length": 24,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "3.Recycle（循環回收）：使用再生能源、使用再生材料。",
+          "length": 25,
+          "reasoning": "列舉項三，（）配對完整（Rule A）；以句號結尾（Rule D），24字≤40（Rule length）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "3.Recycle（循環回收）：使用再生能源、使用再生材料。",
+          "length": 25,
+          "reasoning": "列舉項三，（）配對完整（Rule A）；以句號結尾（Rule D），24字≤40（Rule length）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 8,
+      "paragraph_text": "舉例來說，許多賽事採用網路報名，不再印製秩序冊，連完賽證書都能線上下載，減少紙張的使用；比賽紀念衫也改為選購，參賽者有需要再買，不再強制贈送，避免無謂浪費，這就是Reduce（減少使用）。再者，布置時不使用一次性的器材或物品，下次比賽還可以再用；比賽過程提供可重複使用的環保杯，參賽者「一杯用到底、杯杯不落地」，就是Reuse（物盡其用）的實踐。此外，像臺北馬拉松選用花蓮再生石材、新竹城市馬拉松以回收玻璃製作獎盃，都獲得民眾高度評價；臺灣利用寶特瓶回收製成的環保球衣，在世界盃足球賽中受到許多國家球隊歡迎，大放異彩，這些都是Recycle（循環回收）的展現。",
+      "paragraph_length": 215,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "舉例來說，許多賽事採用網路報名，不再印製秩序冊，連完賽證書都能線上下載，減少紙張的使用。",
+          "length": 39,
+          "reasoning": "原文分號前第一段，說明Reduce的做法（網路報名、省紙），升級分號為句號（Rule D），37字≤40（Rule length）。"
+        },
+        {
+          "idx": 1,
+          "text": "比賽紀念衫也改為選購，參賽者有需要再買，不再強制贈送。",
+          "length": 24,
+          "reasoning": "原文分號後，說明紀念衫選購做法及Reduce小結，（）配對完整（Rule A）；以句號結尾（Rule D），39字≤40（Rule length）。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 2,
+          "text": "避免無謂浪費，這就是Reduce（減少使用）。",
+          "length": 19,
+          "reasoning": "原文分號後，說明紀念衫選購做法及Reduce小結，（）配對完整（Rule A）；以句號結尾（Rule D），39字≤40（Rule length）。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 3,
+          "text": "再者，布置時不使用一次性的器材或物品，下次比賽還可以再用。",
+          "length": 26,
+          "reasoning": "Reuse段落前半，升級分號為句號（Rule D），26字≤40（Rule length）。"
+        },
+        {
+          "idx": 4,
+          "text": "比賽過程提供可重複使用的環保杯。",
+          "length": 15,
+          "reasoning": "Reuse實踐說明，「一杯用到底、杯杯不落地」引號配對完整（Rule A），（）配對完整（Rule A）；以句號結尾（Rule D），36字≤40（Rule length）。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 5,
+          "text": "參賽者「一杯用到底、杯杯不落地」，就是Reuse（物盡其用）的實踐。",
+          "length": 27,
+          "reasoning": "Reuse實踐說明，「一杯用到底、杯杯不落地」引號配對完整（Rule A），（）配對完整（Rule A）；以句號結尾（Rule D），36字≤40（Rule length）。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 6,
+          "text": "此外，像臺北馬拉松選用花蓮再生石材、新竹城市馬拉松以回收玻璃製作獎盃，都獲得民眾高度評價。",
+          "length": 41,
+          "reasoning": "Recycle舉例前半，升級分號為句號（Rule D），40字=上限（Rule length）。",
+          "review_note": "41非標點字。原因：無法在逗號處拆分成兩段 10-40 字子句。"
+        },
+        {
+          "idx": 7,
+          "text": "臺灣利用寶特瓶回收製成的環保球衣，在世界盃足球賽中受到許多國家球隊歡迎，大放異彩。",
+          "length": 38,
+          "reasoning": "Recycle舉例後半說明環保球衣事蹟，升級逗號為句號（Rule D），36字≤40（Rule length）。"
+        },
+        {
+          "idx": 8,
+          "text": "這些都是Recycle（循環回收）的展現。",
+          "length": 18,
+          "reasoning": "Recycle段落小結，（）配對完整（Rule A）；以句號結尾（Rule D），12字≥10字（Rule E）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "舉例來說，許多賽事採用網路報名，不再印製秩序冊，連完賽證書都能線上下載，減少紙張的使用。",
+          "length": 39,
+          "reasoning": "原文分號前第一段，說明Reduce的做法（網路報名、省紙），升級分號為句號（Rule D），37字≤40（Rule length）。",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "比賽紀念衫也改為選購，參賽者有需要再買，不再強制贈送。",
+          "length": 24,
+          "reasoning": "原文分號後，說明紀念衫選購做法及Reduce小結，（）配對完整（Rule A）；以句號結尾（Rule D），39字≤40（Rule length）。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "避免無謂浪費，這就是Reduce（減少使用）。",
+          "length": 19,
+          "reasoning": "原文分號後，說明紀念衫選購做法及Reduce小結，（）配對完整（Rule A）；以句號結尾（Rule D），39字≤40（Rule length）。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 3,
+          "text": "再者，布置時不使用一次性的器材或物品，下次比賽還可以再用。",
+          "length": 26,
+          "reasoning": "Reuse段落前半，升級分號為句號（Rule D），26字≤40（Rule length）。",
+          "fixes": []
+        },
+        {
+          "idx": 4,
+          "text": "比賽過程提供可重複使用的環保杯。",
+          "length": 15,
+          "reasoning": "Reuse實踐說明，「一杯用到底、杯杯不落地」引號配對完整（Rule A），（）配對完整（Rule A）；以句號結尾（Rule D），36字≤40（Rule length）。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 5,
+          "text": "參賽者「一杯用到底、杯杯不落地」，就是Reuse（物盡其用）的實踐。",
+          "length": 27,
+          "reasoning": "Reuse實踐說明，「一杯用到底、杯杯不落地」引號配對完整（Rule A），（）配對完整（Rule A）；以句號結尾（Rule D），36字≤40（Rule length）。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 6,
+          "text": "此外，像臺北馬拉松選用花蓮再生石材、新竹城市馬拉松以回收玻璃製作獎盃，都獲得民眾高度評價。",
+          "length": 41,
+          "reasoning": "Recycle舉例前半，升級分號為句號（Rule D），40字=上限（Rule length）。",
+          "review_note": "41非標點字。原因：無法在逗號處拆分成兩段 10-40 字子句。",
+          "fixes": []
+        },
+        {
+          "idx": 7,
+          "text": "臺灣利用寶特瓶回收製成的環保球衣，在世界盃足球賽中受到許多國家球隊歡迎，大放異彩。",
+          "length": 38,
+          "reasoning": "Recycle舉例後半說明環保球衣事蹟，升級逗號為句號（Rule D），36字≤40（Rule length）。",
+          "fixes": []
+        },
+        {
+          "idx": 8,
+          "text": "這些都是Recycle（循環回收）的展現。",
+          "length": 18,
+          "reasoning": "Recycle段落小結，（）配對完整（Rule A）；以句號結尾（Rule D），12字≥10字（Rule E）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    },
+    {
+      "paragraph_idx": 9,
+      "paragraph_text": "作為熱愛運動的地球公民，阿國意識到：「運動賽事不僅是健康和快樂的活動，也應該是一個環境教育的好機會。」阿國決定要讓更多同學知道這件事的重要性，並且一起向學校師長提案──從學校每年舉辦的運動會做起，落實環保3R，呼籲全校師生：不要把快樂帶走，卻把悲傷留給地球！",
+      "paragraph_length": 117,
+      "sentences_before": [
+        {
+          "idx": 0,
+          "text": "作為熱愛運動的地球公民，阿國意識到：「運動賽事不僅是健康和快樂的活動，也應該是一個環境教育的好機會。」",
+          "length": 45,
+          "reasoning": "[45字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（45字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (45): complete quote cannot split"
+        },
+        {
+          "idx": 1,
+          "text": "阿國決定要讓更多同學知道這件事的重要性。",
+          "length": 19,
+          "reasoning": "獨立完整行動句，升級逗號為句號（Rule D），18字≥10字（Rule E）。"
+        },
+        {
+          "idx": 2,
+          "text": "並且一起向學校師長提案──從學校每年舉辦的運動會做起，落實環保3R。",
+          "length": 32,
+          "reasoning": "承接提案行動的補充說明，「提案──從學校每年舉辦的運動會做起，落實環保3R」為提案內容，升級逗號為句號（Rule D），28字≤40（Rule length）。"
+        },
+        {
+          "idx": 3,
+          "text": "呼籲全校師生：不要把快樂帶走，卻把悲傷留給地球！",
+          "length": 21,
+          "reasoning": "段落結語呼籲句，「呼籲全校師生：」後為冒號引導的呼籲內容（Rule D：冒號不可升級），以！結尾（Rule D），21字≤40（Rule length）。"
+        }
+      ],
+      "sentences_after": [
+        {
+          "idx": 0,
+          "text": "作為熱愛運動的地球公民，阿國意識到：「運動賽事不僅是健康和快樂的活動，也應該是一個環境教育的好機會。」",
+          "length": 45,
+          "reasoning": "[45字] 合併原先被誤拆的引號內句子（Rule A 修正）。 ⚠️ 超過 40 字硬上限（45字），但引號語意不可拆，保留為單句。",
+          "review_note": "over-40 (45): complete quote cannot split",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "阿國決定要讓更多同學知道這件事的重要性。",
+          "length": 19,
+          "reasoning": "獨立完整行動句，升級逗號為句號（Rule D），18字≥10字（Rule E）。",
+          "fixes": []
+        },
+        {
+          "idx": 2,
+          "text": "並且一起向學校師長提案──從學校每年舉辦的運動會做起，落實環保3R。",
+          "length": 32,
+          "reasoning": "承接提案行動的補充說明，「提案──從學校每年舉辦的運動會做起，落實環保3R」為提案內容，升級逗號為句號（Rule D），28字≤40（Rule length）。",
+          "fixes": []
+        },
+        {
+          "idx": 3,
+          "text": "呼籲全校師生：不要把快樂帶走，卻把悲傷留給地球！",
+          "length": 21,
+          "reasoning": "段落結語呼籲句，「呼籲全校師生：」後為冒號引導的呼籲內容（Rule D：冒號不可升級），以！結尾（Rule D），21字≤40（Rule length）。",
+          "fixes": []
+        }
+      ],
+      "violations_before": [],
+      "violations_after": [],
+      "fix_log": []
+    }
+  ],
+  "summary": {
+    "total_sentences_before": 33,
+    "total_sentences_after": 33,
+    "violations_before": 0,
+    "violations_after": 0,
+    "auto_fixes_applied": 0
+  }
+}

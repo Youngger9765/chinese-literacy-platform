@@ -27,6 +27,7 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ChangePasswordPage from '../pages/ChangePasswordPage';
 import ForgotPassword from '../pages/ForgotPassword';
+import JunyiCallbackPage from '../pages/JunyiCallbackPage';
 
 // ---------------------------------------------------------------------------
 // Route-level code splitting (lazy loading)
@@ -59,10 +60,10 @@ const JoinClassroomPage = lazy(() => import('../pages/JoinClassroomPage'));
 const MyAssignments = lazy(() => import('../pages/student/MyAssignments'));
 const MyVocabulary = lazy(() => import('../pages/student/MyVocabulary'));
 const AchievementsPage = lazy(() => import('../pages/student/AchievementsPage'));
-const StudentClassroomDashboard = lazy(() => import('../pages/student/StudentClassroomDashboard'));
 const StudentProfile = lazy(() => import('../pages/student/StudentProfile'));
 const SessionHistoryReportPage = lazy(() => import('../pages/student/SessionHistoryReportPage'));
 const LearningHistoryPage = lazy(() => import('../pages/student/LearningHistoryPage'));
+const PracticeToolbox = lazy(() => import('../pages/student/PracticeToolbox'));
 
 // Parent dashboard — role-specific, split separately
 const ParentDashboard = lazy(() => import('../pages/parent/ParentDashboard'));
@@ -145,6 +146,9 @@ const AppRoutes: React.FC = () => (
           </PublicOnlyRoute>
         }
       />
+
+      {/* Junyi SSO callback — public route, handles the one-time code exchange (issue #1198) */}
+      <Route path="/junyi-callback" element={<JunyiCallbackPage />} />
 
       {/* Change password (after first login) */}
       <Route
@@ -336,12 +340,20 @@ const AppRoutes: React.FC = () => (
         }
       />
       <Route
-        path="/classroom-dashboard"
+        path="/tools"
         element={
           <ProtectedRoute>
             <AppShell>
-              <StudentClassroomDashboard />
+              <PracticeToolbox />
             </AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/classroom-dashboard"
+        element={
+          <ProtectedRoute>
+            <Navigate to="/assignments" replace />
           </ProtectedRoute>
         }
       />
