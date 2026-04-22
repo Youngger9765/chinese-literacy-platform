@@ -6,12 +6,15 @@ daily activity, and completed story slugs.
 Issue #982: streak_days / longest_streak now delegate to the StudentStreak
 table via gamification_service so that this endpoint and
 GET /api/gamification/streak/{id} always return the same values.
+
+Issue #1224: Cumulative stats and daily activity now use SQL aggregates
+instead of loading all rows into Python and iterating.
 """
 import logging
-from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from sqlalchemy import case, func
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user
@@ -74,50 +77,87 @@ def get_student_dashboard(
     week_start = today_start - timedelta(days=today_start.weekday())  # Monday
     thirty_days_ago = today_start - timedelta(days=29)
 
-    def _ensure_aware(dt: datetime | None) -> datetime | None:
-        """Make naive datetimes UTC-aware to prevent comparison errors."""
-        if dt is None:
-            return None
-        return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
-
-    # All sessions for this student
-    all_sessions = (
-        db.query(LearningSession)
+    # ── Cumulative stats via SQL aggregates (Issue #1224) ─────────────────────
+    # Single query replaces: .all() + Python iteration over every row.
+    cumulative = (
+        db.query(
+            func.count(LearningSession.id).label("total_sessions"),
+            func.sum(
+                case((LearningSession.status == "completed", 1), else_=0)
+            ).label("completed_sessions"),
+            func.avg(
+                case(
+                    (LearningSession.status == "completed", LearningSession.overall_score),
+                    else_=None,
+                )
+            ).label("avg_score_raw"),
+            func.sum(
+                case(
+                    (
+                        (LearningSession.status == "completed")
+                        & (LearningSession.completed_at >= today_start),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ).label("today_sessions"),
+            func.sum(
+                case(
+                    (
+                        (LearningSession.status == "completed")
+                        & (LearningSession.completed_at >= week_start),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ).label("week_sessions"),
+        )
         .filter(LearningSession.student_id == student_id)
+        .one()
+    )
+
+    total_sessions: int = cumulative.total_sessions or 0
+    completed_sessions: int = cumulative.completed_sessions or 0
+    avg_score: float | None = (
+        round(float(cumulative.avg_score_raw), 1) if cumulative.avg_score_raw is not None else None
+    )
+    today_sessions: int = cumulative.today_sessions or 0
+    week_sessions: int = cumulative.week_sessions or 0
+
+    # ── Daily activity via SQL group_by (Issue #1224) ─────────────────────────
+    # One query groups completed sessions by date; the Python loop below only
+    # fills in the fixed 30-day window — no per-day DB round-trips.
+    daily_rows = (
+        db.query(
+            func.date(LearningSession.completed_at).label("day"),
+            func.count(LearningSession.id).label("cnt"),
+            func.avg(LearningSession.overall_score).label("avg"),
+        )
+        .filter(
+            LearningSession.student_id == student_id,
+            LearningSession.status == "completed",
+            LearningSession.completed_at >= thirty_days_ago,
+        )
+        .group_by(func.date(LearningSession.completed_at))
         .all()
     )
 
-    total_sessions = len(all_sessions)
-    completed = [s for s in all_sessions if s.status == "completed"]
-    completed_sessions = len(completed)
-
-    scores = [s.overall_score for s in completed if s.overall_score is not None]
-    avg_score = round(sum(scores) / len(scores), 1) if scores else None
-
-    today_sessions = sum(
-        1 for s in completed
-        if s.completed_at and _ensure_aware(s.completed_at) >= today_start
-    )
-    week_sessions = sum(
-        1 for s in completed
-        if s.completed_at and _ensure_aware(s.completed_at) >= week_start
-    )
-
-    # Daily activity for past 30 days
-    day_sessions: dict[str, list[float]] = defaultdict(list)
-    for s in completed:
-        if s.completed_at and _ensure_aware(s.completed_at) >= thirty_days_ago:
-            day_key = s.completed_at.strftime("%Y-%m-%d")
-            day_sessions[day_key].append(s.overall_score if s.overall_score is not None else 0)
+    # Build lookup: "YYYY-MM-DD" → (count, avg_score)
+    day_map: dict[str, tuple[int, float | None]] = {}
+    for row in daily_rows:
+        day_key = str(row.day)[:10]  # func.date may return date or str
+        cnt = row.cnt or 0
+        avg = round(float(row.avg), 1) if row.avg is not None else None
+        day_map[day_key] = (cnt, avg)
 
     daily_activity: list[DailyActivity] = []
     for i in range(30):
         day = (thirty_days_ago + timedelta(days=i)).strftime("%Y-%m-%d")
-        scores_for_day = day_sessions.get(day, [])
+        cnt, avg = day_map.get(day, (0, None))
         daily_activity.append(DailyActivity(
             date=day,
-            sessions_completed=len(scores_for_day),
-            avg_score=round(sum(scores_for_day) / len(scores_for_day), 1) if scores_for_day else None,
+            sessions_completed=cnt,
+            avg_score=avg,
         ))
 
     # Streak data — delegate to StudentStreak table (Issue #982: single source of truth).
