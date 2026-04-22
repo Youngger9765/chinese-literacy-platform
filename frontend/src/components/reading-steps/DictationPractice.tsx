@@ -115,6 +115,8 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
   const [ttsSupported, setTtsSupported] = useState(true);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // IME composition guard (#1206): Enter during 注音選字 should not submit.
+  const isComposingRef = useRef(false);
 
   // Cloud TTS is always ready immediately; mark voicesLoaded true on mount.
   // Web Speech API voice loading is handled inside ttsApi fallback.
@@ -196,9 +198,15 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
     [words, currentIndex, answer, wordResults, onFinish],
   );
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') submitAnswer();
-  };
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Skip Enter while IME is composing (e.g. 注音選字) — #1206.
+    const nativeEvent = e.nativeEvent as KeyboardEvent;
+    const isImeComposing =
+      isComposingRef.current ||
+      nativeEvent.isComposing ||
+      nativeEvent.keyCode === 229;
+    if (e.key === 'Enter' && !isImeComposing) submitAnswer();
+  }, [submitAnswer]);
 
   // ---- Phase: intro ----
   if (phase === 'intro') {
@@ -319,6 +327,8 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
                 type="text"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
+                onCompositionStart={() => { isComposingRef.current = true; }}
+                onCompositionEnd={() => { isComposingRef.current = false; }}
                 onKeyDown={handleKeyDown}
                 placeholder="在此輸入..."
                 aria-label="聽寫答案輸入框，輸入你聽到的詞語，按 Enter 提交"

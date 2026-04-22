@@ -174,6 +174,9 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   // effect fire every render and PUT until the rate limiter kicks in (429).
   const savePatchRef = useRef(saveStepProgressPatch);
   useEffect(() => { savePatchRef.current = saveStepProgressPatch; }, [saveStepProgressPatch]);
+  // IME composition guard (#1206): Enter during 注音選字 should not submit.
+  // Only one input is focused at a time, so a single ref is sufficient.
+  const isComposingRef = useRef(false);
 
   // Persist progress to localStorage whenever it changes (#1203).
   const storageKey = useMemo(() => storageKeyFor(storyId), [storyId]);
@@ -287,6 +290,19 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
       });
     }
   }, [currentWord, currentState, storyTitle, token]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>, idx: 0 | 1) => {
+    // Skip Enter while IME is composing (e.g. 注音選字) — #1206.
+    const nativeEvent = e.nativeEvent as KeyboardEvent;
+    const isImeComposing =
+      isComposingRef.current ||
+      nativeEvent.isComposing ||
+      nativeEvent.keyCode === 229;
+    const text = currentState.sentences[idx].text;
+    if (e.key === 'Enter' && !isImeComposing && text.trim()) {
+      handleValidate(idx);
+    }
+  }, [currentState, handleValidate]);
 
   const handleCompleteCurrentWord = () => {
     setCompletedWords(prev => new Set(prev).add(currentWord));
@@ -463,7 +479,9 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                   type="text"
                   value={entry.text}
                   onChange={e => updateSentenceText(idx, e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && entry.text.trim()) handleValidate(idx); }}
+                  onCompositionStart={() => { isComposingRef.current = true; }}
+                  onCompositionEnd={() => { isComposingRef.current = false; }}
+                  onKeyDown={e => handleKeyDown(e, idx)}
                   onPaste={e => { e.preventDefault(); setPasteWarning(true); setTimeout(() => setPasteWarning(false), 3000); }}
                   onDrop={e => { e.preventDefault(); setPasteWarning(true); setTimeout(() => setPasteWarning(false), 3000); }}
                   onDragOver={e => e.preventDefault()}
