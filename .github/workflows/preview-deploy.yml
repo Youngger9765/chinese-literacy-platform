@@ -179,7 +179,9 @@ jobs:
           echo "backend_url=${BACKEND_URL}" >> $GITHUB_OUTPUT
 
       - name: Update backend CORS with actual frontend URL
-        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A'
+        # Skip when backend preview service doesn't exist (frontend-only PR after
+        # prior backend cleanup) — otherwise `gcloud run services update` fails.
+        if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.backend_url != 'N/A'
         env:
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
         run: |
