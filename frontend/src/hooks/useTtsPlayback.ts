@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { cancelTts, cleanForTts, speakText as speakTextSentences } from '../services/ttsApi';
+import { cancelTts, cleanForTts, speakTextWithProgress, TtsProgressInfo } from '../services/ttsApi';
 
 /**
  * Manages TTS (Text-to-Speech) audio playback for LiveTutor.
@@ -63,12 +63,22 @@ export function useTtsPlayback(
 
     // When lesson context is available, use sentence-level sequential playback
     // so SHA-256 keys match pre-generated GCS blobs (Issue #1208 fix).
+    // Use speakTextWithProgress so onSpeakingProgress fires during playback
+    // (fixes regression: highlight stopped updating when v2 path was introduced).
     if (lessonId !== undefined && paragraphIdx !== undefined) {
-      speakTextSentences(text, lessonId, paragraphIdx)
-        .finally(() => {
-          setIsTtsSpeaking(false);
-          setIsTtsPaused(false);
-        });
+      const charCount = Array.from(cleanForTts(text)).length;
+      speakTextWithProgress(
+        text,
+        (info: TtsProgressInfo) => {
+          const pos = Math.min(Math.floor(info.progress * charCount), charCount);
+          onSpeakingProgress(pos);
+        },
+        lessonId,
+        paragraphIdx,
+      ).finally(() => {
+        setIsTtsSpeaking(false);
+        setIsTtsPaused(false);
+      });
       return;
     }
 
