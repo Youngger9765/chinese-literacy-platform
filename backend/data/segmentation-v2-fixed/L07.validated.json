@@ -455,12 +455,10 @@
         },
         {
           "idx": 11,
-          "text": "越過小溪時，還停下來喝水呢！",
-          "length": 12,
+          "text": "越過小溪時，還停下來喝水呢!",
+          "length": 15,
           "reasoning": "[長度15字] 語意完整，描述黑猩猩自在活動的另一個細節，感嘆詞「呢!」結尾，可獨立成句。",
-          "fixes": [
-            "manual: replace '!'->'！'"
-          ]
+          "fixes": []
         }
       ],
       "violations_before": [
@@ -472,7 +470,15 @@
           ]
         }
       ],
-      "violations_after": [],
+      "violations_after": [
+        {
+          "idx": 11,
+          "text": "越過小溪時，還停下來喝水呢!",
+          "violations": [
+            "D:weird_end_!"
+          ]
+        }
+      ],
       "fix_log": []
     },
     {
@@ -535,16 +541,14 @@
             "merged_next_idx_1_rule_A",
             "merged_next_idx_1_rule_A",
             "merged_next_idx_1_rule_A"
-          ],
-          "review_note": "over-40 (174字), no safe split (brackets/short-halves)"
+          ]
         },
         {
           "idx": 1,
           "text": "這一握，黑猩猩和珍古德開始彼此信任、平等相待，也讓珍古德更能深入了解黑猩猩，願意一輩子守護黑猩猩。",
           "length": 44,
           "reasoning": "[長度58字] 語意完整。此句過長，但語意連貫，描述了「這一握」帶來的結果，不宜拆分，且以句號結尾。",
-          "fixes": [],
-          "review_note": "over-40 (44字), splittable at pos 22 if desired"
+          "fixes": []
         }
       ],
       "violations_before": [
@@ -621,8 +625,7 @@
           "text": "長期相處之後，珍古德清楚的知道：黑猩猩和人類一樣，有感情、有靈性、會痛苦、會悲傷，而且能與人交流。",
           "length": 59,
           "reasoning": "[長度59字] 語意完整，冒號後內容與前文緊密關聯，不可拆分。",
-          "fixes": [],
-          "review_note": "over-40 (41字), splittable at pos 24 if desired"
+          "fixes": []
         },
         {
           "idx": 1,
@@ -765,8 +768,7 @@
           "text": "她飛遍全世界，馬不停蹄，一心一意希望能實現的是：讓所有動物能在最美麗的大地上，快快樂樂的生活。",
           "length": 50,
           "reasoning": "[長度50字] 語意完整，描述珍古德的努力與最終願景。雖然長度超過45字，但冒號「：」後的內容是前文「希望能實現的是」的具體說明，必須保持在同一句，且規則D不允許以冒號結尾，故不拆分。",
-          "fixes": [],
-          "review_note": "over-40 (42字), splittable at pos 11 if desired"
+          "fixes": []
         }
       ],
       "violations_before": [],

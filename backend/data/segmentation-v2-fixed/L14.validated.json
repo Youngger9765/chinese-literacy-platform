@@ -317,8 +317,7 @@
           "fixes": [
             "merged_next_idx_2_rule_A",
             "merged_next_idx_2_rule_A"
-          ],
-          "review_note": "over-40 (77字), no safe split (brackets/short-halves)"
+          ]
         },
         {
           "idx": 2,
@@ -469,8 +468,7 @@
           "text": "詹老師邊幫皓祥包紮，一邊說著：「最基本的    處置原則，口訣為PEACE：保護（Protection）、抬高（Elevation）、避免（Avoid）、壓迫（Compression）、教育（Education）。」",
           "length": 99,
           "reasoning": "[長度99字] 語意完整，包含說話者與其引述內容，符合對話引號及冒號規則，且為一個完整的語句。",
-          "fixes": [],
-          "review_note": "over-40 (87字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 6,

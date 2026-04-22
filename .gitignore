@@ -42,3 +42,7 @@ tests/load-testing/.venv/
 
 # Firebase deploy cache
 .firebase/
+
+# Transient logs + scratch workspace
+logs/
+workspace/

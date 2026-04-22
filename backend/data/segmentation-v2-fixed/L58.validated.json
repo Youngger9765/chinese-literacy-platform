@@ -65,51 +65,55 @@
       "sentences_after": [
         {
           "idx": 0,
-          "text": "新聞標題一：前無古人的偉大！肯亞名將基普喬吉2小時內跑完馬拉松全程，樹立人類里程碑。",
-          "length": 38,
-          "reasoning": "[合併] 半形!為非標準終止符，合併並升級為！",
-          "fixes": [
-            "merge-half-width-excl"
-          ]
+          "text": "新聞標題一：前無古人的偉大!",
+          "length": 13,
+          "reasoning": "[長度17字] 語意完整，為新聞標題的感嘆部分。",
+          "fixes": []
         },
         {
           "idx": 1,
+          "text": "肯亞名將基普喬吉2小時內跑完馬拉松全程，樹立人類里程碑。",
+          "length": 26,
+          "reasoning": "[長度38字] 語意完整，描述新聞標題的具體內容。",
+          "fixes": []
+        },
+        {
+          "idx": 2,
           "text": "「你覺得100公尺跑17秒，這樣速度快不快？」",
           "length": 19,
           "reasoning": "[長度24字] 語意完整，為一個問句，引號完整。",
           "fixes": []
         },
         {
-          "idx": 2,
+          "idx": 3,
           "text": "「很慢啦，還慢得要死。」",
           "length": 8,
           "reasoning": "[長度13字] 語意完整，為一個回答，引號完整。",
           "fixes": []
         },
         {
-          "idx": 3,
+          "idx": 4,
           "text": "「但每100公尺跑17秒，連續跑42公里呢？」",
           "length": 19,
           "reasoning": "[長度23字] 語意完整，為一個反問句，引號完整。",
           "fixes": []
         },
         {
-          "idx": 4,
+          "idx": 5,
           "text": "「神經病，哪裡有可能？」",
           "length": 8,
           "reasoning": "[長度13字] 語意完整，為一個驚訝的回答，引號完整。",
           "fixes": []
         },
         {
-          "idx": 5,
+          "idx": 6,
           "text": "「你不要不相信。2022年9月25日在柏林的馬拉松大賽，就有一個神人，用兩小時零1分鐘跑完了42公里，打破了世界紀錄。他就是基普喬吉。」",
           "length": 60,
           "reasoning": "[長度8字] 語意完整，為對話的開頭語氣，引號完整。此句雖短，但語氣獨立，且與後句之間有語氣停頓，不宜合併。",
           "fixes": [
             "merged_next_idx_7_rule_A",
             "merged_next_idx_7_rule_A"
-          ],
-          "review_note": "over-40 (60字), no safe split (brackets/short-halves)"
+          ]
         }
       ],
       "violations_before": [
@@ -396,8 +400,7 @@
           "reasoning": "[長度46字] 語意完整，包含說話者與引述內容，引號內容必須在同一句，故不拆分。",
           "fixes": [
             "absorbed_short_idx_4_rule_E"
-          ],
-          "review_note": "over-40 (45字), no safe split (brackets/short-halves)"
+          ]
         }
       ],
       "violations_before": [
@@ -701,8 +704,7 @@
           "text": "他有次在接受記者採訪時談到：「我們在訓練中心的生活很簡單，早上起床後就練跑，回來後去吃午飯，接受按摩以放鬆肌肉；下午四點再跑，晚上喝點茶，休息，和隊友交流、討論，睡覺，日復一日。」",
           "length": 76,
           "reasoning": "[長度109字] 依據規則B，冒號後的引述內容必須與說話者在同一句，且引號「」必須完整。此句雖長，但因規則限制無法拆分。",
-          "fixes": [],
-          "review_note": "over-40 (76字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 2,
@@ -712,8 +714,7 @@
           "fixes": [
             "merged_next_idx_3_rule_A",
             "merged_next_idx_3_rule_A"
-          ],
-          "review_note": "over-40 (67字), no safe split (brackets/short-halves)"
+          ]
         },
         {
           "idx": 3,
@@ -993,8 +994,7 @@
           "text": "當代最傑出的馬拉松名將基普喬吉，2019年「跑出歷史」，成為史上首位在2小時之內完成馬拉松全程的選手。",
           "length": 46,
           "reasoning": "[長度47字] 語意完整，描述基普喬吉的成就，句末逗號升級為句號以符合規則D。",
-          "fixes": [],
-          "review_note": "over-40 (46字), splittable at pos 27 if desired"
+          "fixes": []
         },
         {
           "idx": 1,
@@ -1010,8 +1010,7 @@
           "reasoning": "[長度35字] 語意完整，說明爭議的原因，句末逗號升級為句號以符合規則D。",
           "fixes": [
             "absorbed_short_idx_3_rule_E"
-          ],
-          "review_note": "over-40 (48字), no safe split (brackets/short-halves)"
+          ]
         },
         {
           "idx": 3,
@@ -1289,8 +1288,7 @@
           "text": "當牙買加選手博爾特（U. Bolt）以9.77秒的速度壓線時，歐文斯距離終點還有4.3公尺遠。",
           "length": 43,
           "reasoning": "[長度43字] 語意完整，描述歐文斯與博爾特比賽時的差距。",
-          "fixes": [],
-          "review_note": "over-40 (43字), splittable at pos 30 if desired"
+          "fixes": []
         },
         {
           "idx": 3,
@@ -1370,8 +1368,7 @@
           "reasoning": "[長度54字] 語意完整，描述專家分析與提出的解釋，冒號與其前內容必須在同一句。",
           "fixes": [
             "merged_next_idx_3_rule_D"
-          ],
-          "review_note": "over-40 (50字), splittable at pos 33 if desired"
+          ]
         }
       ],
       "violations_before": [
@@ -1494,8 +1491,7 @@
           "text": "他雙腳向前大步邁開時，輕又合腳的釘鞋踩在鋪著彩色PU塑膠粒的特製跑道上，鞋子和跑道的設計讓跑者可以用最快的速度奔馳。",
           "length": 62,
           "reasoning": "[長度62字] 語意完整，描述博爾特奔跑時的裝備和跑道優勢。",
-          "fixes": [],
-          "review_note": "over-40 (55字), splittable at pos 35 if desired"
+          "fixes": []
         },
         {
           "idx": 4,
@@ -1581,26 +1577,15 @@
           "text": "除了短跑之外，低阻力鯊魚泳衣、低風阻的輕量自行車及NIKE的高科技長跑鞋，也大幅提升了游泳、自行車和馬拉松競賽的世界紀錄。",
           "length": 56,
           "reasoning": "[長度57字] 語意完整，描述了多種科技產品對運動紀錄的提升，句子雖長但語意連貫，不宜拆分。",
-          "fixes": [],
-          "review_note": "over-40 (56字), splittable at pos 36 if desired"
+          "fixes": []
         },
         {
           "idx": 1,
-          "text": "但，科技不是唯一讓人類運動成績進步的唯一因素，另一因素是「選才」。",
-          "length": 28,
-          "reasoning": "[修正] 切除誤合併的「專項選才」小標題",
+          "text": "但，科技不是唯一讓人類運動成績進步的唯一因素，另一因素是「選才」。專項選才",
+          "length": 32,
+          "reasoning": "[長度39字] 語意完整，提出科技並非唯一因素，並引出「選才」這個新因素，對話引號完整。",
           "fixes": [
-            "absorbed_short_idx_2_rule_E",
-            "strip-subhead-专项选才"
-          ]
-        },
-        {
-          "idx": 2,
-          "text": "專項選才。",
-          "length": 4,
-          "reasoning": "[分離] 小標題獨立成句並加句號終止符",
-          "fixes": [
-            "split-subhead"
+            "absorbed_short_idx_2_rule_E"
           ]
         }
       ],
@@ -1721,8 +1706,7 @@
           "text": "高於頂尖鉛球選手的平均身高約6公分，但平均體重卻只有73公斤，比鉛球選手少了將近50公斤。",
           "length": 39,
           "reasoning": "[長度39字] 語意完整，詳細比較現代跳高選手與鉛球選手的身高和體重差異。",
-          "fixes": [],
-          "review_note": "over-40 (42字), splittable at pos 17 if desired"
+          "fixes": []
         },
         {
           "idx": 5,
@@ -1823,8 +1807,7 @@
           "text": "教練的選才，不但讓選手們該高大的愈來愈高大，該小巧的愈來愈小巧，連比例古怪的，也愈來愈古怪。",
           "length": 47,
           "reasoning": "[長度47字] 語意完整，描述教練選才的結果。",
-          "fixes": [],
-          "review_note": "over-40 (41字), splittable at pos 21 if desired"
+          "fixes": []
         },
         {
           "idx": 1,
@@ -1918,8 +1901,7 @@
           "text": "但這篇文章告訴我們，除了訓練之外，原來科技的運用和針對專項需求的選才也是得到獎牌的關鍵因素哦。",
           "length": 47,
           "reasoning": "[長度47字] 語意完整，雖然字數較長，但句中無明顯語意轉折點可拆分，且「除了...之外，...也是」為一完整句型，故保留為一句。",
-          "fixes": [],
-          "review_note": "over-40 (44字), splittable at pos 16 if desired"
+          "fixes": []
         }
       ],
       "violations_before": [],

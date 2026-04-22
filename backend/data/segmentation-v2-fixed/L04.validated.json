@@ -159,8 +159,7 @@
           "text": "蒼藍鴿醫師（本名吳其穎）從運動科學的角度，在一部影片中說明埼玉老師的訓練菜單並不是那麼妥當。",
           "length": 49,
           "reasoning": "[長度49字] 語意完整，將冒號升級為句號以符合句末標點規則。",
-          "fixes": [],
-          "review_note": "over-40 (42字), splittable at pos 20 if desired"
+          "fixes": []
         },
         {
           "idx": 1,
@@ -171,12 +170,10 @@
         },
         {
           "idx": 2,
-          "text": "有氧運動（訓練心肺功能，如長跑）與其他訓練肌肉的運動，擺在同一天進行，效果會相互抵消。",
-          "length": 37,
+          "text": "有氧運動(訓練心肺功能，如長跑）與其他訓練肌肉的運動，擺在同一天進行，效果會相互抵消。",
+          "length": 49,
           "reasoning": "[長度49字] 語意完整。",
-          "fixes": [
-            "manual: replace '('->'（'"
-          ]
+          "fixes": []
         },
         {
           "idx": 3,
@@ -204,8 +201,7 @@
           "text": "雖然一拳超人的訓練菜單中，伏地挺身、深蹲都是很不錯的徒手訓練運動，但主要是練胸肌、腿部肌肉，對於背肌跟肩膀是沒有效的，反而會使身體呈現駝背圓肩的狀態。",
           "length": 79,
           "reasoning": "[長度79字] 語意完整。",
-          "fixes": [],
-          "review_note": "over-40 (68字), splittable at pos 32 if desired"
+          "fixes": []
         }
       ],
       "violations_before": [
@@ -217,7 +213,15 @@
           ]
         }
       ],
-      "violations_after": [],
+      "violations_after": [
+        {
+          "idx": 2,
+          "text": "有氧運動(訓練心肺功能，如長跑）與其他訓練肌肉的運動，擺在同一天進行，效果會相互抵消。",
+          "violations": [
+            "A:orphan_closing"
+          ]
+        }
+      ],
       "fix_log": []
     },
     {
@@ -541,8 +545,7 @@
           "text": "他受訪時表示：「本來手會不舒服，改變機制後，現在速度比較穩定……這樣投會比較輕鬆，對手的負擔不會太大。」",
           "length": 58,
           "reasoning": "[長度58字] 語意完整，包含完整的引號內容，符合規則A和B。",
-          "fixes": [],
-          "review_note": "over-40 (43字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 10,

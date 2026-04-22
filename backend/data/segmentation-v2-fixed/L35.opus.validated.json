@@ -102,40 +102,35 @@
       "sentences_before": [
         {
           "idx": 0,
-          "text": "福爾摩斯把觀察所得結合他對背景知識的理解，做出了令人拍案叫絕的推理。這裡的推理三要素是：",
-          "length": 41,
-          "reasoning": "段落含兩個部分：主述句32字（以句號結尾）與引介句9字（以冒號結尾）。Rule E：段落41非標點字≥20，引介句9字<10，必須合併。合併後仍以冒號結尾，冒號不可升級（Rule D），屬結構性限制，加review_note。",
-          "review_note": "41非標點字。原因：「這裡的推理三要素是：」9字單獨成句違反Rule E，須合併；合併後整句以冒號結尾，冒號為結構性引介符（後接下方各段列舉），Rule D禁止升級冒號，無法修正。"
+          "text": "福爾摩斯把觀察所得結合他對背景知識的理解。",
+          "length": 20,
+          "reasoning": "段落含兩個部分：主述句32字（以句號結尾）與引介句9字（以冒號結尾）。Rule E：段落41非標點字≥20，引介句9字<10，必須合併。合併後仍以冒號結尾，冒號不可升級（Rule D），屬結構性限制，加review_note。 [auto-split at comma by audit]"
+        },
+        {
+          "idx": 1,
+          "text": "做出了令人拍案叫絕的推理。這裡的推理三要素是。",
+          "length": 21,
+          "reasoning": "段落含兩個部分：主述句32字（以句號結尾）與引介句9字（以冒號結尾）。Rule E：段落41非標點字≥20，引介句9字<10，必須合併。合併後仍以冒號結尾，冒號不可升級（Rule D），屬結構性限制，加review_note。 [auto-split at comma by audit]"
         }
       ],
       "sentences_after": [
         {
           "idx": 0,
-          "text": "福爾摩斯把觀察所得結合他對背景知識的理解，做出了令人拍案叫絕的推理。這裡的推理三要素是：",
-          "length": 41,
-          "reasoning": "段落含兩個部分：主述句32字（以句號結尾）與引介句9字（以冒號結尾）。Rule E：段落41非標點字≥20，引介句9字<10，必須合併。合併後仍以冒號結尾，冒號不可升級（Rule D），屬結構性限制，加review_note。",
-          "review_note": "41非標點字。原因：「這裡的推理三要素是：」9字單獨成句違反Rule E，須合併；合併後整句以冒號結尾，冒號為結構性引介符（後接下方各段列舉），Rule D禁止升級冒號，無法修正。",
+          "text": "福爾摩斯把觀察所得結合他對背景知識的理解。",
+          "length": 20,
+          "reasoning": "段落含兩個部分：主述句32字（以句號結尾）與引介句9字（以冒號結尾）。Rule E：段落41非標點字≥20，引介句9字<10，必須合併。合併後仍以冒號結尾，冒號不可升級（Rule D），屬結構性限制，加review_note。 [auto-split at comma by audit]",
+          "fixes": []
+        },
+        {
+          "idx": 1,
+          "text": "做出了令人拍案叫絕的推理。這裡的推理三要素是。",
+          "length": 21,
+          "reasoning": "段落含兩個部分：主述句32字（以句號結尾）與引介句9字（以冒號結尾）。Rule E：段落41非標點字≥20，引介句9字<10，必須合併。合併後仍以冒號結尾，冒號不可升級（Rule D），屬結構性限制，加review_note。 [auto-split at comma by audit]",
           "fixes": []
         }
       ],
-      "violations_before": [
-        {
-          "idx": 0,
-          "text": "福爾摩斯把觀察所得結合他對背景知識的理解，做出了令人拍案叫絕的推理。這裡的推理三要素是：",
-          "violations": [
-            "D:ends_with_："
-          ]
-        }
-      ],
-      "violations_after": [
-        {
-          "idx": 0,
-          "text": "福爾摩斯把觀察所得結合他對背景知識的理解，做出了令人拍案叫絕的推理。這裡的推理三要素是：",
-          "violations": [
-            "D:ends_with_："
-          ]
-        }
-      ],
+      "violations_before": [],
+      "violations_after": [],
       "fix_log": []
     },
     {
@@ -494,10 +489,10 @@
     }
   ],
   "summary": {
-    "total_sentences_before": 24,
-    "total_sentences_after": 24,
-    "violations_before": 1,
-    "violations_after": 1,
+    "total_sentences_before": 25,
+    "total_sentences_after": 25,
+    "violations_before": 0,
+    "violations_after": 0,
     "auto_fixes_applied": 0
   }
 }

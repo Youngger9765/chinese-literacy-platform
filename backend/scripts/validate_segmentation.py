@@ -31,7 +31,7 @@ OUT_DIR = ROOT / "backend" / "data" / "segmentation-v2-fixed"
 
 OPENING = set("「『（【《〈")
 CLOSING = set("」』）】》〉")
-TERMINATORS = set("。！？")
+TERMINATORS = set("。！？…")  # U+2026 省略號 is a valid sentence terminator in Chinese writing
 NON_TERMINAL = set("，、；：")
 PUNCTUATION = OPENING | CLOSING | TERMINATORS | NON_TERMINAL | set("—…·\"'\u201c\u201d\u2018\u2019")
 SHORT_THRESHOLD = 10

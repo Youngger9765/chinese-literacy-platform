@@ -525,24 +525,21 @@
           "text": "還好，現在全臺灣有許多愛棒球的校長及教練，運用了各種方法幫助學生球員在教室和球場間取得平衡。",
           "length": 50,
           "reasoning": "[長度50字] 語意完整，開頭「還好」與後續內容合併，避免短句。",
-          "fixes": [],
-          "review_note": "over-40 (43字), splittable at pos 20 if desired"
+          "fixes": []
         },
         {
           "idx": 5,
           "text": "例如，花蓮縣三民國中的林國源校長、張志強教練和老師們合作無間地改善了球員學習、訓練及生活的樣貌。",
           "length": 55,
           "reasoning": "[長度55字] 語意完整，開頭「例如」與後續內容合併，避免短句。",
-          "fixes": [],
-          "review_note": "over-40 (44字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 6,
           "text": "他們增加了宿舍的淋浴間及洗衣機，減少等待洗澡、洗衣服的時間，讓球員在繁重嚴格的訓練中，還能擠出讀書的時間來。",
           "length": 59,
           "reasoning": "[長度59字] 語意完整，描述具體改善措施及效果，句中逗號連接的語意緊密，不宜拆分。",
-          "fixes": [],
-          "review_note": "over-40 (49字), splittable at pos 29 if desired"
+          "fixes": []
         },
         {
           "idx": 7,
@@ -556,16 +553,14 @@
           "text": "再例如，新竹縣中山國小郭碧玄校長認為，為了確保孩子未來的人生能走得更寬廣，維持基本學力和開展運動技能同樣重要。",
           "length": 59,
           "reasoning": "[長度59字] 語意完整，開頭「再例如」與後續內容合併，避免短句，並包含校長的核心觀點。",
-          "fixes": [],
-          "review_note": "over-40 (51字), splittable at pos 18 if desired"
+          "fixes": []
         },
         {
           "idx": 9,
           "text": "他們加入中信基金會支持的「愛接棒計畫」，為棒球選手提供額外的夜間課輔，以確保學生的基本學力。",
           "length": 52,
           "reasoning": "[長度52字] 語意完整，描述具體實施的計畫及目的，對話引號「愛接棒計畫」完整包含在句中。",
-          "fixes": [],
-          "review_note": "over-40 (41字), splittable at pos 19 if desired"
+          "fixes": []
         }
       ],
       "violations_before": [],

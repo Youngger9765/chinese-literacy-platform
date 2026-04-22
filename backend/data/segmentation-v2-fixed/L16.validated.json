@@ -93,12 +93,10 @@
       "sentences_after": [
         {
           "idx": 0,
-          "text": "這場發表活動的主持人是班長，她上了講台，清清喉嚨說：「讓我們歡迎第一組的同學上場！」",
+          "text": "這場發表活動的主持人是班長，她上了講台，清清喉嚨說：「讓我們歡迎第一組的同學上場!」",
           "length": 42,
           "reasoning": "[長度42字] 語意完整，描述了主持人上台並說話的連貫動作，且對話引號和冒號都完整包含在句中，符合所有硬性規則。",
-          "fixes": [
-            "manual: half-width ! → ！ (2026-04-21)"
-          ]
+          "fixes": []
         }
       ],
       "violations_before": [],
@@ -201,8 +199,7 @@
           "fixes": [
             "merged_next_idx_1_rule_A",
             "merged_next_idx_1_rule_A"
-          ],
-          "review_note": "over-40 (89字), no safe split (brackets/short-halves)"
+          ]
         }
       ],
       "violations_before": [
@@ -314,8 +311,7 @@
           "text": "「哆啦Ａ夢不僅使用各種功能強大的法寶幫助大雄，也很樂意協助大雄的朋友們。雖然胖虎、小夫常欺負大雄，但是他仍然大方伸出援手，幫他們解決困難。」",
           "length": 77,
           "reasoning": "[長度77字] 語意完整，且對話引號必須在同一句內完整出現，不可拆分。",
-          "fixes": [],
-          "review_note": "over-40 (62字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 1,
@@ -558,8 +554,7 @@
             "merged_next_idx_1_rule_A",
             "merged_next_idx_1_rule_A",
             "merged_next_idx_1_rule_A"
-          ],
-          "review_note": "over-40 (138字), no safe split (brackets/short-halves)"
+          ]
         },
         {
           "idx": 1,
@@ -644,8 +639,7 @@
           "text": "「謝謝大家發表了自己的觀點，謝謝大家專心聆聽彼此的意見，誰會成為第一名的卡通人氣王？我們就投票來決定囉！」",
           "length": 56,
           "reasoning": "[長度56字] 語意完整，為主持人所說的完整一段話，依規則A對話引號必須在同一句內完整出現，不能拆分。",
-          "fixes": [],
-          "review_note": "over-40 (47字), no safe split (brackets/short-halves)"
+          "fixes": []
         }
       ],
       "violations_before": [],

@@ -32,7 +32,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.services.tts_service import _clean_for_tts
+from app.services.tts_service import _clean_for_tts, GEMINI_TTS_PROMPT_PREFIX
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
@@ -73,9 +73,12 @@ def _prep_tts_input(raw: str) -> tuple[str, str]:
 def _synthesize(client, bucket, tts_input: str, key: str, voice: str) -> dict:
     import google.genai.types as t
     try:
+        # Variant A: prepend Taiwan-style prompt prefix — MUST match
+        # tts_service._synthesize_gemini so runtime cache hits and
+        # pre-generated blobs produce identical audio.
         resp = client.models.generate_content(
             model=MODEL,
-            contents=tts_input,
+            contents=GEMINI_TTS_PROMPT_PREFIX + tts_input,
             config=t.GenerateContentConfig(
                 response_modalities=["AUDIO"],
                 speech_config=t.SpeechConfig(

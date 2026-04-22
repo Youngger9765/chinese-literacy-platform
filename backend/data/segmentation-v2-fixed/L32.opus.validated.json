@@ -455,9 +455,9 @@
         },
         {
           "idx": 2,
-          "text": "(2)副標題：《The Modern Prometheus》（現代普羅米修斯）",
+          "text": "(2)副標題：《The Modern Prometheus》（現代普羅米修斯）。",
           "length": 34,
-          "reasoning": "段落結構性子標題，必須保留原文形式。"
+          "reasoning": "段落結構性子標題，必須保留原文形式。 [manual fix 2026-04-21: 補上結尾句號]"
         }
       ],
       "sentences_after": [
@@ -477,9 +477,9 @@
         },
         {
           "idx": 2,
-          "text": "(2)副標題：《The Modern Prometheus》（現代普羅米修斯）",
+          "text": "(2)副標題：《The Modern Prometheus》（現代普羅米修斯）。",
           "length": 34,
-          "reasoning": "段落結構性子標題，必須保留原文形式。",
+          "reasoning": "段落結構性子標題，必須保留原文形式。 [manual fix 2026-04-21: 補上結尾句號]",
           "fixes": []
         }
       ],

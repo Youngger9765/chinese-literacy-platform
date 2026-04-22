@@ -329,8 +329,7 @@
           "text": "有了強大的下肢肌肉，才能提升周天成在球場上移動的速度、步伐的穩定性、彈跳的高度，以及擊球的表現。",
           "length": 52,
           "reasoning": "[長度52字] 語意完整，描述下肢肌肉的重要性，雖略長但語意連貫，不宜拆分。",
-          "fixes": [],
-          "review_note": "over-40 (43字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 9,
@@ -344,8 +343,7 @@
           "text": "他會去尋求運動指導員的幫助，開發身體各部分沉睡已久的肌肉，讓每塊肌肉都能發揮最大的效用，以增進自己的運動表現。",
           "length": 56,
           "reasoning": "[長度56字] 語意完整，描述他如何開發潛能，雖略長但語意連貫，不宜拆分。",
-          "fixes": [],
-          "review_note": "over-40 (51字), splittable at pos 28 if desired"
+          "fixes": []
         }
       ],
       "violations_before": [],
@@ -582,16 +580,14 @@
           "text": "他說：「雖然我有時候輸掉了比賽，但只要參賽總是可以學到很多東西，最重要的是你必須為自己奮鬥，我也會時刻提醒自己，在每場比賽中保持謙虛，每當我驕傲起來，就無法在場上打出好表現。」",
           "length": 104,
           "reasoning": "[長度104字] 語意完整，包含說話者與其完整引述內容，依規則B不可拆分。",
-          "fixes": [],
-          "review_note": "over-40 (78字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 2,
           "text": "就算現在已經是台灣羽球一哥，周天成仍然不自滿，一直在找各種進步的方法，哪怕只有百分之一的進步機會，他都會去嘗試，「只有拿了好成績，有影響力的時候，才可以去回饋、影響更多人，不然我就只是個路人。」",
           "length": 98,
           "reasoning": "[長度98字] 語意完整，前段以逗號結尾，依規則D與後續引述內容合併，確保引號完整配對。",
-          "fixes": [],
-          "review_note": "over-40 (85字), splittable at pos 48 if desired"
+          "fixes": []
         }
       ],
       "violations_before": [],

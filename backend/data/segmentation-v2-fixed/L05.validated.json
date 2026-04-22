@@ -26,8 +26,7 @@
           "text": "「一個夢想如果可以被想像，那就有存在的價值。但重點是你要怎麼計劃並且執行。」臺灣極地超級馬拉松好手陳彥博說。",
           "length": 66,
           "reasoning": "[長度66字] 語意完整，包含完整的引號內容及說話者，符合規則A和B，因此不能拆分。",
-          "fixes": [],
-          "review_note": "over-40 (48字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 1,
@@ -142,8 +141,7 @@
           "text": "2011年，二十三歲的陳彥博下了一個決定：「我要在五年內挑戰世界七大洲、八大站的超級馬拉松。」",
           "length": 48,
           "reasoning": "[長度48字] 語意完整，包含說話者與引述內容，符合對話引號與冒號規則，不可拆分。",
-          "fixes": [],
-          "review_note": "over-40 (41字), no safe split (brackets/short-halves)"
+          "fixes": []
         },
         {
           "idx": 1,
@@ -377,8 +375,7 @@
           "text": "雖然術後的體力大不如前，肌肉強度也不見了，但頑強的他，靠著漫長的訓練慢慢走出來，恢復從前狀態。",
           "length": 42,
           "reasoning": "[長度49字] 語意完整，描述術後恢復過程，雖略長但語意連貫，不宜拆分。",
-          "fixes": [],
-          "review_note": "over-40 (42字), splittable at pos 20 if desired"
+          "fixes": []
         }
       ],
       "violations_before": [
