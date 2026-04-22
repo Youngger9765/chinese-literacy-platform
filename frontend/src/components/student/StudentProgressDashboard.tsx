@@ -40,24 +40,26 @@ interface StatCardProps {
 
 const StatCard: React.FC<StatCardProps> = ({ label, value, sub, icon, highlight }) => (
   <div
-    className={`rounded-xl p-4 flex items-start gap-3 ${
-      highlight ? 'bg-accent text-white' : 'bg-white border border-gray-200'
+    className={`rounded-2xl p-4 flex items-start gap-3 ${
+      highlight
+        ? 'bg-gradient-to-br from-accent to-accent-hover text-white shadow-sm'
+        : 'bg-surface-container-lowest border border-[#E5E0D5]'
     }`}
   >
     <div
-      className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-lg ${
+      className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-lg ${
         highlight ? 'bg-white/20' : 'bg-accent-bg'
       }`}
     >
       {icon}
     </div>
     <div className="min-w-0">
-      <div className={`text-2xl font-bold leading-none ${highlight ? 'text-white' : 'text-gray-900'}`}>
+      <div className={`text-2xl font-bold leading-none ${highlight ? 'text-white' : 'text-on-surface'}`}>
         {value}
       </div>
-      <div className={`text-xs mt-0.5 ${highlight ? 'text-white/80' : 'text-gray-500'}`}>{label}</div>
+      <div className={`text-xs mt-0.5 ${highlight ? 'text-white/80' : 'text-on-surface-variant'}`}>{label}</div>
       {sub && (
-        <div className={`text-xs mt-0.5 ${highlight ? 'text-white/60' : 'text-gray-400'}`}>{sub}</div>
+        <div className={`text-xs mt-0.5 ${highlight ? 'text-white/60' : 'text-on-surface-variant/70'}`}>{sub}</div>
       )}
     </div>
   </div>
@@ -76,9 +78,9 @@ const ChartTooltip: React.FC<TooltipProps> = ({ active, payload, label }) => {
   const sessions = payload.find((p) => p.name === 'sessions')?.value ?? 0;
   const score = payload.find((p) => p.name === 'score')?.value;
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-md px-3 py-2 text-xs">
-      <p className="font-medium text-gray-700 mb-1">{label}</p>
-      <p className="text-gray-600">完成：{sessions} 篇</p>
+    <div className="bg-surface-container-lowest border border-[#E5E0D5] rounded-xl shadow-editorial px-3 py-2 text-xs">
+      <p className="font-medium text-on-surface mb-1">{label}</p>
+      <p className="text-on-surface-variant">完成：{sessions} 篇</p>
       {score != null && <p className="text-accent font-medium">平均分：{score}%</p>}
     </div>
   );
@@ -138,7 +140,7 @@ const StudentProgressDashboard: React.FC<StudentProgressDashboardProps> = ({
     return (
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-gray-100 rounded-xl h-20 animate-pulse" />
+          <div key={i} className="bg-surface-container rounded-2xl h-20 animate-pulse" />
         ))}
       </div>
     );
@@ -193,8 +195,8 @@ const StudentProgressDashboard: React.FC<StudentProgressDashboardProps> = ({
 
       {/* 30-day activity chart */}
       {hasActivity && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">近 30 天學習曲線</h3>
+        <div className="bg-surface-container-lowest rounded-2xl border border-[#E5E0D5] p-4">
+          <h3 className="text-sm font-semibold text-on-surface mb-3">近 30 天學習曲線</h3>
           <ResponsiveContainer width="100%" height={120}>
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
               <defs>
