@@ -20,6 +20,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session as DbSession
 
+from sqlalchemy.orm import joinedload
+
 from ..models.session import CharacterError, LearningSession
 from ..models.text import Text
 
@@ -44,9 +46,13 @@ def _completed_sessions_with_text(
     """Fetch all completed sessions that have an associated text record.
 
     Sessions are sorted by completion time ascending.
+
+    Uses joinedload to avoid N+1: one query fetches both sessions and their
+    associated Text rows via LEFT OUTER JOIN instead of one query per session.
     """
     sessions = (
         db.query(LearningSession)
+        .options(joinedload(LearningSession.text))
         .filter(
             LearningSession.student_id == student_id,
             LearningSession.status == "completed",
@@ -55,13 +61,7 @@ def _completed_sessions_with_text(
         .all()
     )
 
-    pairs: list[tuple[LearningSession, Text | None]] = []
-    for s in sessions:
-        text: Text | None = None
-        if s.text_id:
-            text = db.query(Text).filter(Text.id == s.text_id).first()
-        pairs.append((s, text))
-    return pairs
+    return [(s, s.text) for s in sessions]
 
 
 # ── text-type performance ─────────────────────────────────────────────────────
