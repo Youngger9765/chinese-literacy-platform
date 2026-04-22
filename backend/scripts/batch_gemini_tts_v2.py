@@ -51,9 +51,20 @@ def _cache_key(text: str) -> str:
 
 
 def _pcm_to_mp3(pcm_data: bytes) -> bytes:
+    """Convert PCM to MP3 with loudnorm applied inline.
+
+    Gemini 3.1 Flash TTS produces inconsistent volume across independent sentence
+    calls (2-6 dB mean/peak variance observed on L01). loudnorm=I=-16:TP=-1.5:LRA=11
+    targets EBU R128 broadcast loudness so adjacent sentences sound balanced.
+    Existing blobs can be retroactively normalized via normalize_tts_loudnorm.py.
+    """
     result = subprocess.run(
-        ["ffmpeg", "-f", "s16le", "-ar", "24000", "-ac", "1", "-i", "pipe:0", "-f", "mp3", "-q:a", "2", "pipe:1"],
-        input=pcm_data, capture_output=True, timeout=30,
+        [
+            "ffmpeg", "-f", "s16le", "-ar", "24000", "-ac", "1", "-i", "pipe:0",
+            "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
+            "-f", "mp3", "-q:a", "2", "pipe:1",
+        ],
+        input=pcm_data, capture_output=True, timeout=60,
     )
     if result.returncode != 0:
         raise RuntimeError(f"ffmpeg failed: {result.stderr.decode()[:200]}")
