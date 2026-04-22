@@ -198,7 +198,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
     [words, currentIndex, answer, wordResults, onFinish],
   );
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     // Skip Enter while IME is composing (e.g. 注音選字) — #1206.
     const nativeEvent = e.nativeEvent as KeyboardEvent;
     const isImeComposing =
@@ -206,7 +206,7 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
       nativeEvent.isComposing ||
       nativeEvent.keyCode === 229;
     if (e.key === 'Enter' && !isImeComposing) submitAnswer();
-  };
+  }, [submitAnswer]);
 
   // ---- Phase: intro ----
   if (phase === 'intro') {
