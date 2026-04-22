@@ -8,6 +8,35 @@
 
 （無）
 
+## 2026-04-22 ~ 2026-04-23
+
+### 效能優化（後端熱路徑大掃除）
+
+**N+1 查詢消除（routes 層）** — PR #1218 / #1221
+- `/api/assignments/my`（學生首頁）從 2N+1 → 3 queries（batch pre-load sessions + texts）
+- `/api/classrooms/{id}/assignments`（教師作業清單）從 N+1 → 2 queries
+- 教師熱力圖 + 錯字熱力圖 加 `joinedload(ClassroomStudent.student)`
+- CSV export（`/admin/reports/export`）三層 lazy load → 1 joinedload（student + classroom + school）
+- Gamification leaderboard + `_assert_can_view` 加 `joinedload(UserRole.role)`
+- 21 regression tests（含 query count bound assertions）
+
+**DB Index（熱欄位補齊）** — PR #1226
+- `LearningSession.status` 單欄 index + `(student_id, status)` compound index
+- `AssignmentSubmission.student_id` / `CharacterError.session_id` 補 SQLAlchemy `index=True` 宣告（DB 層 index 2026-04-04 已建）
+- Migration 用 `CREATE INDEX CONCURRENTLY IF NOT EXISTS` 避免 prod lock table
+
+**SQL 聚合下推（service 層）** — PR #1227
+- `learning_dashboard` cumulative stats：Python 雙 loop → 單 SQL aggregate（`func.count/avg/sum(case)`）
+- `teacher_analytics` time-stats：移除 `.limit(5000)` cap，改 SQL `group_by(func.date)`
+- `cross_text_analysis_service._completed_sessions_with_text` 漏網 N+1 修復（改 `joinedload(LearningSession.text)`）
+- 16 regression tests + before/after query count 對比
+
+**I/O 非同步化 + 查詢邊界** — PR #1228
+- TTS 三個路由（`/tts/synthesize`、`/tts/sentence`、`/tts/regenerate`）改 `async def`，內部用 `asyncio.to_thread()` 包同步 SDK 呼叫
+  - 5 concurrent requests 實測：sync 2.5s → async 0.51s（~5x speedup，mock 0.5s 延遲驗證）
+- `learning_path_service` 的 `story_slug IS NOT NULL` 過濾推 SQL WHERE
+- Teacher heatmap 超過 5,000 sessions 改 raise 400（取代靜默截斷），匹配 `_ADMIN_EXPORT_ROW_LIMIT` pattern
+
 ## 2026-03-09 ~ 2026-03-12
 
 ### 新功能
