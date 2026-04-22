@@ -44,6 +44,23 @@ export function cancelTts(): void {
 }
 
 /**
+ * Pause the currently playing sentence without aborting the queue.
+ * Next sentence will still be fetched+played when resumed.
+ * Used by the v2 sentence-level playback path where useTtsPlayback has
+ * no direct handle to the internal Audio element.
+ */
+export function pauseCurrentTts(): void {
+  _currentAudio?.pause();
+}
+
+/**
+ * Resume a previously paused sentence.
+ */
+export function resumeCurrentTts(): void {
+  _currentAudio?.play().catch(() => {});
+}
+
+/**
  * Synthesise and play *text* in Traditional Chinese via Azure/Gemini TTS.
  *
  * When lessonId + paragraphIdx are provided, fetches canonical sentence list from

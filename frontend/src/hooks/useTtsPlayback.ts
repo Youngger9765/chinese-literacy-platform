@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { cancelTts, cleanForTts, speakTextWithProgress, TtsProgressInfo } from '../services/ttsApi';
+import { cancelTts, cleanForTts, pauseCurrentTts, resumeCurrentTts, speakTextWithProgress, TtsProgressInfo } from '../services/ttsApi';
 
 /**
  * Manages TTS (Text-to-Speech) audio playback for LiveTutor.
@@ -31,6 +31,10 @@ export function useTtsPlayback(
   // Strong ref to TTS utterance — prevents Chrome GC bug where a local utterance
   // gets collected mid-playback, silencing onend/onboundary callbacks.
   const utteranceRef = useRef<SpeechSynthesisUtterance | HTMLAudioElement | null>(null);
+  // True while the v2 sentence-level playback path is active — pause/resume
+  // must talk to ttsApi._currentAudio via pauseCurrentTts/resumeCurrentTts,
+  // because the internal Audio element is not exposed on utteranceRef.
+  const v2PathActiveRef = useRef<boolean>(false);
   // rAF loop for Web Speech API fallback cursor animation (not used for Cloud TTS path)
   const ttsRafRef = useRef<number | null>(null);
   // Used only by Web Speech API fallback path
@@ -67,6 +71,8 @@ export function useTtsPlayback(
     // (fixes regression: highlight stopped updating when v2 path was introduced).
     if (lessonId !== undefined && paragraphIdx !== undefined) {
       const charCount = Array.from(cleanForTts(text)).length;
+      v2PathActiveRef.current = true;
+      utteranceRef.current = null;
       speakTextWithProgress(
         text,
         (info: TtsProgressInfo) => {
@@ -76,11 +82,14 @@ export function useTtsPlayback(
         lessonId,
         paragraphIdx,
       ).finally(() => {
+        v2PathActiveRef.current = false;
         setIsTtsSpeaking(false);
         setIsTtsPaused(false);
       });
       return;
     }
+
+    v2PathActiveRef.current = false;
 
     // Lesson context not available — use original single-shot full-paragraph path.
     // Chrome requires speechSynthesis.speak() to be called within user-gesture context.
@@ -198,6 +207,12 @@ export function useTtsPlayback(
   }, [onSpeakingProgress, onRealtimeDiffTokensClear]);
 
   const pauseTts = () => {
+    if (v2PathActiveRef.current) {
+      // v2 sentence-level path: Audio element lives inside ttsApi, pause via helper.
+      pauseCurrentTts();
+      setIsTtsPaused(true);
+      return;
+    }
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
       // Cloud TTS path: just pause. ontimeupdate stops firing automatically when paused.
@@ -215,6 +230,11 @@ export function useTtsPlayback(
   };
 
   const resumeTts = () => {
+    if (v2PathActiveRef.current) {
+      resumeCurrentTts();
+      setIsTtsPaused(false);
+      return;
+    }
     const ua = utteranceRef.current;
     if (ua && ua instanceof HTMLAudioElement) {
       // Cloud TTS path: just resume. ontimeupdate was attached in speakText and
