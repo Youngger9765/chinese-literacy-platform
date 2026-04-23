@@ -361,10 +361,15 @@ function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoi
 
   const currentDefIdx = activeDefIndices[queueIdx];
 
-  // Shuffle 4 options for current question (1 correct + 3 distractors from all vocab)
+  // Shuffle 4 options for current question (1 correct + 3 distractors from all vocab).
+  // Fix #1101: always include all vocab words as distractor candidates so that even on
+  // the last question — when few "unused" words remain — there are still at least 2
+  // visible choices (never a forced-correct single-option question).
   const options = useMemo(() => {
     const allIndices = vocab.map((_, i) => i);
-    const distractors = shuffle(allIndices.filter((i) => i !== currentDefIdx)).slice(0, 3);
+    const otherIndices = allIndices.filter((i) => i !== currentDefIdx);
+    // Aim for 3 distractors; if vocab is small, take as many as available.
+    const distractors = shuffle(otherIndices).slice(0, Math.min(3, otherIndices.length));
     return shuffle([currentDefIdx, ...distractors]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queueIdx, currentDefIdx, vocab]);
@@ -414,11 +419,13 @@ function MultipleChoiceMode({ vocab, activeDefIndices, onAllDone }: MultipleChoi
       </div>
 
       {/* Options — 2-column grid */}
+      {/* Fix #1101 (字置中): flex items-center justify-center ensures the Chinese
+          character is vertically and horizontally centered within the min-h button */}
       <div className="grid grid-cols-2 gap-3">
         {options.map((vocabIdx) => (
           <button
             key={vocabIdx}
-            className="rounded-2xl border-2 p-4 text-center font-bold text-xl transition-all duration-200 select-none active:scale-[0.97] min-h-[56px] border-surface-container-high bg-surface-container-lowest text-on-surface hover:border-accent hover:bg-accent/5 disabled:opacity-50"
+            className="rounded-2xl border-2 p-4 flex items-center justify-center font-bold text-xl transition-all duration-200 select-none active:scale-[0.97] min-h-[56px] border-surface-container-high bg-surface-container-lowest text-on-surface hover:border-accent hover:bg-accent/5 disabled:opacity-50"
             onClick={() => handleChoice(vocabIdx)}
             disabled={pendingAdvance}
           >
@@ -584,10 +591,29 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
       <div className="flex flex-wrap gap-2 min-h-[56px]">
         {activeShuffledWords.map((vocabIdx) => {
           const isPlaced = placedVocabIdxSet.has(vocabIdx);
-          if (isPlaced) return null;
+          // Fix #1101 (炮灰選項): Keep correctly-confirmed words visible as locked
+          // "cannon fodder" chips so the last drag-drop question always has multiple
+          // options in the bank — no more forced-correct final question.
+          const isConfirmedWord = confirmed.has(vocabIdx);
 
           const isDragging = draggingVocabIdx === vocabIdx;
           const isTouchSelected = touchSelected === vocabIdx;
+
+          // Confirmed words: show as locked/dimmed, not draggable
+          if (isConfirmedWord) {
+            return (
+              <div
+                key={vocabIdx}
+                className="rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-base select-none border-emerald-200 bg-emerald-50 text-emerald-400 cursor-not-allowed opacity-60 line-through"
+                aria-label={`${vocab[vocabIdx]?.word} 已配對`}
+              >
+                {vocab[vocabIdx]?.word}
+              </div>
+            );
+          }
+
+          // Placed but not yet confirmed (pending validation — bounce-back in progress)
+          if (isPlaced) return null;
 
           let cls =
             'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-base select-none transition-all duration-200 ';
