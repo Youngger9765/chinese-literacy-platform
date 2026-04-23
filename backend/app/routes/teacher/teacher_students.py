@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
+from ...auth.rate_limiter import ai_limit_5_per_min
 from ...database import get_db
 from ...dependencies.tenant import _check_classroom_access
 from ...models.school import Classroom, ClassroomStudent
@@ -558,6 +559,7 @@ def save_teacher_comment(
 @router.post(
     "/teacher/students/{student_id}/sessions/{session_id}/generate-ai-comment",
     response_model=AICommentResponse,
+    dependencies=[Depends(ai_limit_5_per_min)],
 )
 async def generate_session_ai_comment(
     student_id: int,
@@ -565,7 +567,10 @@ async def generate_session_ai_comment(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Generate AI comment for a session. Returns cached version if already generated."""
+    """Generate AI comment for a session. Returns cached version if already generated.
+
+    Rate limited: 5 requests per minute per user/IP (Issue #1254).
+    """
     from ...services.ai_generation import generate_teacher_comment
 
     session = _get_session_for_teacher(current_user.id, student_id, session_id, db)
