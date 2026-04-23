@@ -8,6 +8,62 @@
 
 ---
 
+## 4/18 ~ 4/24
+
+> ⚠️ 本週未開會，僅活動紀錄（見 [2026-04-24-record.md](./2026-04-24-record.md)）
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| Young | ✅ | PR #1143 Firebase multi-site | prod/staging/dev 分站部署 |
+| Young | ✅ | PR #1151/#1213/#1231 Release | 三次 staging → main release |
+| Young | ✅ | PR #1199 alembic | 合併 3 個 dangling heads 解封所有 PR deploy |
+| Young | ✅ | PR #1200 Junyi SSO | Junyi Academy SSO Part 3（#1198） |
+| Young | ✅ | PR #1201/#1202/#1205 SSO 修正 | callback origin + env var + login entry |
+| Young | ✅ | PR #1177 TTS 語意切分 | regex → LLM semantic chunking（#1176） |
+| Young | ✅ | PR #1209 TTS v2 | Opus segmentation + prompt-only Taiwan style |
+| Young | ✅ | PR #1212 TTS 4-state button | loading/playing/idle/error UX（#1210） |
+| Young | ✅ | PR #1214 TTS prefetch | char-weighted progress + prefetch（#1211） |
+| Young | ✅ | PR #1218 N+1 修復 | 修 6 個 route 的 N+1 query（#1217） |
+| Young | ✅ | PR #1221 N+1 regression 測試 | harden coverage |
+| Young | ✅ | PR #1226 DB indexes | 熱門查詢欄位加索引（#1223） |
+| Young | ✅ | PR #1227 dashboard aggregate | push-down to SQL + cross-text N+1（#1224） |
+| Young | ✅ | PR #1228 async TTS | async TTS routes + SQL push-down + heatmap guard（#1225） |
+| Young | ✅ | PR #1232 perf 文件 | 4/22~23 backend perf sprint log |
+| Young | ✅ | PR #1154 主頁合併 | 主頁+成就合併 + 練習工具箱（#1153） |
+| Young | ✅ | PR #1155 閱讀標記右欄 | ReadingAnnotation 右側「我的記號」面板 |
+| Young | ✅ | PR #1160 a11y | GamificationHero 對比度（#1159） |
+| Young | ✅ | PR #1161 班級 filter | 班級 pill filter on 班級作業頁（#1158） |
+| Young | ✅ | PR #1164 sidebar dedupe | 移除重複的成就 sidebar entry（#1163） |
+| Young | ✅ | PR #1166 練習工具箱 | 2-column 單課單工具 MVP（#1165） |
+| Young | ✅ | PR #1168 student home layout | 空間優化（#1167） |
+| Young | ✅ | PR #1171 gradient 修復 | 移除 broken inline style（#1170） |
+| Young | ✅ | PR #1173 DESIGN.md | 重寫為 Tactile Scholar palette |
+| Young | ✅ | PR #1216 /student polish | 頁面設計打磨（#1215） |
+| Young | ✅ | PR #1219 Book Jacket | StudentHome Book Jacket variant |
+| Young | ✅ | PR #1229 生字改名 | 字典查詢 card → 我的生字（#1222） |
+| Young | ✅ | PR #1157 login dedupe | dedupe login API calls（#1156） |
+| Young | ✅ | PR #1242 org scope | 強制 org_admin role checks（#1241） |
+| Young | ✅ | PR #1244 TTS auth | TTS endpoints auth guard（#1240） |
+| Young | ✅ | PR #1246 dev token gate | reset/verification token 僅 dev 回傳 |
+| Young | ✅ | PR #1250 學習歷史修復 | 作業紀錄顯示 + 字太小 + 得分不一致（#1245） |
+| 靖杭 | ✅ | PR #1142 Step 2 停止鈕 | 停止鈕修復 + 漏讀偵測 + 句子切分（#1096） |
+| 靖杭 | ✅ | PR #1144 跨裝置 session | GET-first + 後端 dedup（#1074） |
+| 靖杭 | ✅ | PR #1145 步驟同步 | current_step 與 steps_completed 同步（#1073） |
+| 靖杭 | ✅ | PR #1148 句子級重練 UI | 鼓勵語 + tier3 擋關 + 逐句 UI（#1096） |
+| 靖杭 | ✅ | PR #1175 無聲音提示 | Step 2 錄音後無聲音主動提示（#1174） |
+| 靖杭 | ✅ | PR #1193 unique index | LearningSession partial unique index（#1179） |
+| 靖杭 | ✅ | PR #1194 ON DELETE | AssignmentSubmission.session_id ON DELETE SET NULL（#1178） |
+| 靖杭 | ✅ | PR #1195 進度版本機制 | step_progress 版本防進度倒退（#1187） |
+| 靖杭 | ✅ | PR #1197 beforeunload 修復 | VocabApplication 覆蓋 steps_completed（#1196） |
+| 靖杭 | ✅ | PR #1204 造句持久化 | 造句練習完整持久化（#1203） |
+| 靖杭 | ✅ | PR #1207 IME Enter | 造句 + 聽寫 Enter 鍵忽略 IME composition（#1206） |
+| 靖杭 | 🔧 | PR #1233 Opus 語意切分 | 句子級重練改用 Opus JSONL（#661 refactor） |
+| 啟翔 | ✅ | PR #1128 Step 5 部件教學 | 點擊回饋 + 常用字相關字 + moedict 字義（#1099） |
+| 啟翔 | ✅ | PR #1130 Step 1 修復 | 閱讀標記選取偏移 + 紅線歪斜 + YAML 空白（#1095） |
+| 啟翔 | 🔧 | PR #1141 全域 UX | 點點箭頭 + 分數移除 + 語音輸入共用（#1094）— review 中 |
+
+---
+
 ## 4/11 ~ 4/17
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
@@ -20,16 +76,16 @@
 | Young | ✅ | Pitch 簡報 | 5/1 會議用 3+1 頁 pitch |
 | Young | ✅ | 學習單 matrix | 57 篇課文 vs 平台功能對照表 + 文言文欄位整併 |
 | Young | ✅ | Staging QA | #1082 重點表、#909 進步曲線、#1076 句子重練全驗證 |
-| 靖杭 | ✅ | PR #1075 Self-practice | 完成狀態持久化到後端（fix #1070） |
-| 靖杭 | ✅ | PR #1076 句子重練 | 逐段朗讀支援句子級重練（feat #661，方大哥長期項） |
 | Young | ✅ | PR #1088~#1091 follow-up | CORS warmup、mobile top bar 截斷、admin redirect race、LiveTutor scroll |
 | Young | ✅ | PR #1092/#1093 AR cleanup | AR cleanup 卡 1h+ 根因修復（soft deadline） |
 | Young | ✅ | 4/17 Staging QA | desktop + mobile 全掃，9 PR 驗證，health 90/100 |
+| 靖杭 | ✅ | PR #1075 Self-practice | 完成狀態持久化到後端（fix #1070） |
+| 靖杭 | ✅ | PR #1076 句子重練 | 逐段朗讀支援句子級重練（feat #661，方大哥長期項） |
 | 靖杭 | ✅ | PR #1085 跨裝置 | Self-practice 跨裝置紀錄修復（fix #1071，4/17 merged） |
 | 靖杭 | ✅ | PR #1086 Debounce | Step 進度 debounce 5 秒修復（fix #1072，4 輪 review，4/17 merged） |
 | 靖杭 | 🔧 | 5 個 bug issue | 建 #1070~#1074 進度同步系列（#1070/#1071/#1072 已解，#1073/#1074 進行中） |
 | 啟翔 | ✅ | PR #1087 沈浸式學習 | 前端 50 files 大改 + 字體改黑體（feat #1081，4/17 Young 解 conflict 後 merged） |
-| 啟翔 | ⛔ | P1 data integrity 停滯 | #984/#985/#982 連續 8+ 天未更新（beta blocker） |
+| 啟翔 | ⛔ | P1 data integrity 停滯 | #984/#985/#982 連續 8+ 天未更新（beta blocker，後 Young 4/18 接手） |
 
 ---
 

@@ -369,14 +369,19 @@ class TestReadingHistorySQLLimit:
 
 
 # ---------------------------------------------------------------------------
-# 3. Gamification _user_has_admin_role SQL COUNT helper
+# 3. Gamification access control (admin / teacher / student paths)
 # ---------------------------------------------------------------------------
 
-class TestUserHasAdminRoleSQLCount:
-    """Verify _user_has_admin_role issues a single SQL COUNT, not N lazy loads."""
+class TestGamificationAccessControl:
+    """Integration tests for /gamification/summary + /leaderboard access control.
+
+    Note: the original SQL COUNT helper `_user_has_admin_role` was removed in
+    #1261 because the conflict merge of #1247 into main resolved the admin
+    check to `is_system_admin(current_user)` (in-memory roles path), leaving
+    the helper as dead code. These tests remain as access-control contracts.
+    """
 
     def test_admin_can_view_summary(self, client):
-        """Admin user should get 200 on /gamification/summary/{student_id}."""
         token = _login(client, _state["admin_email"])
         resp = client.get(
             f"/api/gamification/summary/{_state['student_id']}",
@@ -385,8 +390,6 @@ class TestUserHasAdminRoleSQLCount:
         assert resp.status_code == 200
 
     def test_non_admin_non_teacher_cannot_view_others_summary(self, client):
-        """A plain student cannot view another user's gamification summary."""
-        # Create a second plain student
         db = TestingSessionLocal()
         other = User(
             email="p1243_other@test.com",
@@ -410,7 +413,6 @@ class TestUserHasAdminRoleSQLCount:
         assert resp.status_code == 403
 
     def test_student_can_view_own_summary(self, client):
-        """Student can always view their own gamification data."""
         token = _login(client, _state["student_email"])
         resp = client.get(
             f"/api/gamification/summary/{_state['student_id']}",
@@ -418,35 +420,7 @@ class TestUserHasAdminRoleSQLCount:
         )
         assert resp.status_code == 200
 
-    def test_admin_role_check_issues_single_count_query(self, client):
-        """_user_has_admin_role must not issue N lazy queries per UserRole row.
-
-        Before the fix: db.query(UserRole).all() loaded all rows, then accessed
-        ur.role.name which could trigger N lazy fetches for the joined Role.
-        After the fix: a single SELECT COUNT(*) JOIN roles WHERE ... is issued.
-        """
-        token = _login(client, _state["admin_email"])
-
-        # Count queries for admin viewing a student summary.
-        # The admin check path: is_teacher=False → _user_has_admin_role()
-        # Before fix: would emit O(num_user_roles) queries
-        # After fix: exactly 1 COUNT query for the role check
-        n_queries = count_queries_during(
-            lambda: client.get(
-                f"/api/gamification/summary/{_state['student_id']}",
-                headers={"Authorization": f"Bearer {token}"},
-            )
-        )
-
-        # Absolute upper bound: auth(1) + is_teacher(1) + count_check(1) + summary(~3)
-        # should be well under 20. N lazy loads would produce >5 for a user with 3+ roles.
-        assert n_queries < 15, (
-            f"gamification/summary admin path issued {n_queries} queries. "
-            f"Expected < 15 (SQL COUNT should replace N lazy role fetches)."
-        )
-
     def test_admin_leaderboard_access(self, client):
-        """Admin can view the classroom leaderboard even without being teacher/student."""
         token = _login(client, _state["admin_email"])
         resp = client.get(
             f"/api/gamification/leaderboard/{_state['classroom_id']}",
@@ -455,22 +429,9 @@ class TestUserHasAdminRoleSQLCount:
         assert resp.status_code == 200
 
     def test_teacher_leaderboard_access(self, client):
-        """Classroom teacher can view their own classroom's leaderboard."""
         token = _login(client, _state["teacher_email"])
         resp = client.get(
             f"/api/gamification/leaderboard/{_state['classroom_id']}",
             headers={"Authorization": f"Bearer {token}"},
         )
         assert resp.status_code == 200
-
-    def test_helper_function_returns_bool(self):
-        """_user_has_admin_role returns True for admin, False for student."""
-        from app.routes.gamification import _user_has_admin_role
-        db = TestingSessionLocal()
-        try:
-            admin = db.query(User).filter(User.email == _state["admin_email"]).first()
-            student = db.query(User).filter(User.email == _state["student_email"]).first()
-            assert _user_has_admin_role(db, admin.id) is True
-            assert _user_has_admin_role(db, student.id) is False
-        finally:
-            db.close()

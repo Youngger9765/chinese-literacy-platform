@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-04-09",
+  "lastReview": "2026-04-23",
   "skills": {
     "1": {
       "level": 3,
@@ -184,7 +184,7 @@
       ]
     },
     "9": {
-      "level": 2,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -201,6 +201,11 @@
           "date": "2026-04-08",
           "level": 3,
           "reason": "PR #986（自學/作業分離）和 PR #987（tab 鎖定）都是從 4/3 會議決議出發，獨立拆 issue → 開發 → PR → merge 的完整自主流程。PR 說明清楚標注對應 issue 編號，commit message 格式正確"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "4/10~4/23 共 16 個 PR，全部使用 conventional commits（fix:/feat: 分類正確），每個 PR 對應明確 issue 編號，PR 說明包含問題背景、修改方式、測試確認。#1193/#1194/#1195 三個相互關聯的 DB PR 拆分合理（partial unique index / ON DELETE SET NULL / step_progress 版本機制分開 PR），顯示對 PR 粒度的成熟判斷"
         }
       ]
     },
@@ -230,6 +235,17 @@
       ],
       "maxLevel": 5
     },
+    "11": {
+      "level": 2,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-23",
+          "level": 2,
+          "reason": "PR #1086 step 進度 debounce 5 秒使用 useRef 儲存 timer ID（不觸發 re-render），正確識別不需要 state 的場景，是 useRef 的標準用法。PR #1175 無聲音輸入主動提示使用 useEffect 監聽音訊輸入狀態，逾時後觸發 UI 提示，展現 side effect 管理的基礎能力。目前尚未見到 useMemo 或複雜 cleanup 場景"
+        }
+      ]
+    },
     "12": {
       "level": 5,
       "maxLevel": 5,
@@ -257,7 +273,7 @@
       ]
     },
     "13": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -269,6 +285,11 @@
           "date": "2026-04-08",
           "level": 3,
           "reason": "PR #986 自學/作業分離涉及前端狀態管理重新設計（assignment ID vs self-study session），需理解 LearningSession 與 Assignment 的資料模型關係。PR #987 tab 鎖定提示需設計元件間的狀態傳遞（選擇題完成狀態 → 控制拖拉配對 tab 的 disabled 狀態），展現跨元件資料流設計能力"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "PR #1148 整合鼓勵語系統 + tier3 擋關邏輯 + 逐句重練 UI 為單一視覺流，展現多行為在同一元件中的設計整合能力。PR #1204 造句練習完整持久化，設計 beforeunload → session 寫入 → 頁面恢復的完整 state lifecycle。PR #1207 IME composition 問題同時修正 Enter 鍵在造句和聽寫兩個獨立元件的行為，顯示對跨元件共同問題的識別和同步修復能力。目前尚未見到 custom hook 的獨立抽取"
         }
       ]
     },
@@ -289,7 +310,7 @@
       ]
     },
     "16": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -301,11 +322,16 @@
           "date": "2026-04-08",
           "level": 3,
           "reason": "PR #986（自學/作業分離）和 PR #987（tab 鎖定）皆從 4/3 會議決議獨立建立 issue（#925, #926）→ 開發 → merge，展現完整的自主開發流程。兩個功能都在一週內完成，速度穩定"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "PR #1144（跨裝置 session 復用）和 PR #1145（current_step 同步）是 P1 beta blocker issue #1073/#1074 的完整實作。兩個 PR 在 4/22 deadline 前 2 天提前 merge，後端新增 GET-first + dedup 邏輯，DB 加 partial unique index，前端守衛同步，形成完整的前後端 + DB 三層解決方案。這是靖杭首次獨立完成涉及 DB migration 的端對端功能"
         }
       ]
     },
     "18": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
@@ -317,17 +343,22 @@
           "date": "2026-04-09",
           "level": 2,
           "reason": "PR #1031 是靖杭第一個 backend PR！診斷全形/半形 bug 時追蹤了完整資料流（YAML 原始資料 → lesson_loader.py 載入 → API 回傳 → 前端比對），在正確的層級（lesson_loader）加入 _halfwidth() 正規化，而不是在前端 patch。同時修正 learning_vocab.py 和 ai_generation.py 的變數名稱殘留，展現跨檔案根因修復能力"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 3,
+          "reason": "PR #1193 新增 LearningSession 的 partial unique index（assignment_id + course_id 組合），PR #1194 設定 AssignmentSubmission.session_id ON DELETE SET NULL 刪除政策，PR #1195 在 step_progress 加入版本號機制防進度倒退。三個 PR 都是在 DB schema 層面做設計決策（索引策略、刪除政策、樂觀鎖），而非在應用層繞過問題，顯示對資料庫設計原則的主動應用，不是跟著 bug 修補"
         }
       ]
     }
   },
   "recommendations": [
-    "架構理解（#18）升到 level 2，PR #1031 展現跨層資料流追蹤能力。下一步：PR #1030 學習紀錄頁面涉及前端 API 串接 + 後端資料查詢，完成後可望再升",
-    "Tailwind（#8）升到 level 4，下一步挑戰響應式斷點設計（sm/md/lg 不同佈局）",
-    "PR #1030 學習紀錄頁面是目前最大的進行中功能（825 行），完成後元件設計（#13）和獨立開發（#16）可望升到 level 4",
-    "開始接觸 backend 了！可以嘗試更多 backend 任務，例如新增 API endpoint 或修改資料模型"
+    "架構理解（#18）升到 level 3，DB schema 設計（index/FK 政策/版本鎖）能力已確立。下一步：#1101 詞語定義、#1103 課文理解、#1104 知識補給站 這三個 issue 涵蓋不同步驟的資料流，完成後可嘗試畫出整個學習流程的前後端資料流圖（這是 level 4 的準備）",
+    "元件設計（#13）升到 level 4，下一步挑戰抽取 custom hook。#1102 語詞應用和 #1204 造句持久化都有重複的 beforeunload + session 寫入邏輯，可以試著抽成 useSessionPersistence hook",
+    "獨立開發（#16）升到 level 4。#1105 報告簡化是好的 level 5 候選任務：完整的需求→設計→實作→驗收流程，且涉及 UI 設計決策（不只是 bug 修復）",
+    "React 進階（#11）剛解鎖 level 2（useRef debounce + useEffect 音訊監聽）。下一步在 #1076 逐段朗讀的重練邏輯中嘗試用 useMemo 快取已處理的句子分割結果，避免每次渲染重算"
   ],
-  "summary": "4/3 至 4/9 間共 5 個 PR merge。亮點：PR #1031 是靖杭第一個 backend PR，在 lesson_loader.py 加入全形→半形正規化，展現跨層根因修復能力。PR #979 大幅簡化進度條元件（-94 行），用 flex-wrap 取代過度工程的 scrollable 元件。技能升級：#8（Tailwind level 4）、#18（架構理解 level 2）。還有 PR #988（排序）和 #1030（學習紀錄，825行大功能）進行中",
+  "summary": "4/10~4/23 共 16 個 PR merge，是靖杭迄今最密集的兩週。最大亮點：首次完成 DB schema 設計工作（#1193 partial unique index、#1194 ON DELETE SET NULL、#1195 step_progress 版本機制），顯示從前端工程師成長為全端工程師的關鍵跨越。P1 beta blocker #1073/#1074（跨裝置 session 一致性）在 deadline 前 2 天提前完成。技能升級：#9 Git 工作流（3→4）、#11 React 進階（新解鎖 2）、#13 元件設計（3→4）、#16 獨立開發（3→4）、#18 架構理解（2→3）",
   "issues": [
     {
       "id": "環境建置",
@@ -482,6 +513,96 @@
       "skillsLearned": [10, 18],
       "highlights": ["靖杭第一個 backend Python PR", "追蹤完整資料流找到根因（YAML→loader→API→frontend）", "在正確的層級修復（data loading 而非前端 patch）", "跨 3 個檔案的根因修復"],
       "linesChanged": "+21/-6"
+    },
+    {
+      "id": "#1070/#1071",
+      "title": "Self-practice 後端無紀錄 + 跨裝置失效修復（PR #1075, #1085）",
+      "date": "2026-04-15",
+      "type": "bugfix",
+      "contribution": "PR #1075 修復自學模式未建立 LearningSession 的問題（後端路徑未觸發）。PR #1085 修復跨裝置 self-practice 失效，確保不同裝置能正確恢復進度",
+      "skillsLearned": [10, 18],
+      "highlights": ["後端 session 建立邏輯診斷", "跨裝置狀態管理"]
+    },
+    {
+      "id": "#661",
+      "title": "逐段朗讀句子級重練功能（PR #1076）",
+      "date": "2026-04-15",
+      "type": "feature",
+      "contribution": "實作句子切分 + 逐句重練流程，讓學生能針對特定句子反覆練習，而非重讀整段",
+      "skillsLearned": [6, 13],
+      "highlights": ["句子級粒度設計，資料流從段→句", "完整的重練 UI 狀態管理"]
+    },
+    {
+      "id": "#1072",
+      "title": "Step 進度 debounce 防抖動（PR #1086）",
+      "date": "2026-04-17",
+      "type": "bugfix",
+      "contribution": "步驟完成事件在 5 秒內多次觸發時只送一次 API，使用 useRef 儲存 timer ID 避免不必要的 re-render",
+      "skillsLearned": [11],
+      "highlights": ["正確選用 useRef 而非 useState 儲存 timer", "debounce 實作乾淨"]
+    },
+    {
+      "id": "#1096",
+      "title": "Step 2 停止鈕 + 漏讀偵測 + 句子切分 + 視覺整合（PR #1142, #1148）",
+      "date": "2026-04-20",
+      "type": "feature",
+      "contribution": "PR #1142 新增停止錄音按鈕、漏讀句子偵測邏輯、改善句子切分精準度。PR #1148 整合鼓勵語系統 + tier3 擋關 + 逐句重練 UI 為完整視覺流",
+      "skillsLearned": [13, 16],
+      "highlights": ["多功能整合到單一流暢 UX", "tier3 擋關邏輯設計", "鼓勵語情境判斷"]
+    },
+    {
+      "id": "#1073/#1074",
+      "title": "跨裝置 session 一致性 P1 beta blocker（PR #1144, #1145）",
+      "date": "2026-04-20",
+      "type": "feature",
+      "contribution": "P1 beta blocker。PR #1144 後端 GET-first dedup 邏輯 + frontend 守衛。PR #1145 current_step 與 steps_completed 雙向同步。DB 層加 partial unique index 確保資料完整性",
+      "skillsLearned": [16, 18],
+      "highlights": ["P1 beta blocker deadline 前 2 天完成", "前後端 + DB 三層解決方案", "首次獨立完成 DB migration 端對端"]
+    },
+    {
+      "id": "#1174",
+      "title": "Step 2 無聲音輸入主動提示（PR #1175）",
+      "date": "2026-04-21",
+      "type": "feature",
+      "contribution": "使用 useEffect 監聽音訊輸入狀態，超過閾值時間沒有聲音則主動顯示提示引導學生",
+      "skillsLearned": [11],
+      "highlights": ["useEffect side effect 管理", "音訊輸入狀態監聽"]
+    },
+    {
+      "id": "#1179/#1178/#1187",
+      "title": "DB schema 三連 PR：index / FK 政策 / 版本鎖（PR #1193, #1194, #1195）",
+      "date": "2026-04-21",
+      "type": "feature",
+      "contribution": "PR #1193 LearningSession partial unique index（assignment_id + course_id）。PR #1194 AssignmentSubmission.session_id ON DELETE SET NULL。PR #1195 step_progress 版本號機制防進度倒退（樂觀鎖模式）",
+      "skillsLearned": [18],
+      "highlights": ["首次主動在 DB schema 層做設計決策", "三個 PR 拆分粒度合理", "樂觀鎖防並發問題的正確做法"]
+    },
+    {
+      "id": "#1196",
+      "title": "VocabApplication beforeunload 覆蓋修復（PR #1197）",
+      "date": "2026-04-21",
+      "type": "bugfix",
+      "contribution": "beforeunload 事件在離頁時意外覆蓋 steps_completed，導致已完成步驟被清空。修復 event handler 的寫入條件",
+      "skillsLearned": [10, 13],
+      "highlights": ["race condition 診斷（beforeunload vs session 寫入順序）", "state lifecycle 理解"]
+    },
+    {
+      "id": "#1203",
+      "title": "造句練習完整持久化（PR #1204）",
+      "date": "2026-04-22",
+      "type": "feature",
+      "contribution": "設計 beforeunload → session 寫入 → 頁面恢復的完整 state lifecycle，確保造句練習進度跨頁面、跨裝置保存",
+      "skillsLearned": [13],
+      "highlights": ["完整 state lifecycle 設計", "持久化邏輯與 UI 狀態解耦"]
+    },
+    {
+      "id": "#1206",
+      "title": "造句 + 聽寫 Enter 鍵忽略 IME composition（PR #1207）",
+      "date": "2026-04-22",
+      "type": "bugfix",
+      "contribution": "修復中文輸入法選字時 Enter 鍵誤觸提交的問題，同時修正造句和聽寫兩個獨立元件的相同行為",
+      "skillsLearned": [10],
+      "highlights": ["同一問題在兩個元件同步修復", "IME composition 事件正確處理"]
     }
   ]
 }
