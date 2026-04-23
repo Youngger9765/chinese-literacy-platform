@@ -60,7 +60,7 @@ class Classroom(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False)
-    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     grade: Mapped[int | None] = mapped_column(Integer, nullable=True)
     join_code: Mapped[str | None] = mapped_column(String(8), unique=True, nullable=True)
@@ -85,8 +85,8 @@ class ClassroomStudent(Base):
     __table_args__ = (UniqueConstraint("classroom_id", "student_id"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id"), nullable=False)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id"), nullable=False, index=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     enrolled_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

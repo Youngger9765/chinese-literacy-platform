@@ -77,7 +77,7 @@ class UserRole(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False)
     scope_type: Mapped[str] = mapped_column(String(20), nullable=False)  # platform | organization | school
     scope_id: Mapped[str | None] = mapped_column(String(100), nullable=True)  # org UUID or school ID; platform = NULL

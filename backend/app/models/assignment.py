@@ -78,7 +78,7 @@ class AssignmentSubmission(Base):
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(20), default="pending")  # "pending" | "in_progress" | "submitted" | "graded"
     session_id: Mapped[int | None] = mapped_column(
-        ForeignKey("learning_sessions.id", ondelete="SET NULL"), nullable=True
+        ForeignKey("learning_sessions.id", ondelete="SET NULL"), nullable=True, index=True
     )
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     score: Mapped[float | None] = mapped_column(Float, nullable=True)  # from LearningSession accuracy
