@@ -103,7 +103,9 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
     if (done && phase === 'exercise') setPhase('summary');
   }, [done, phase]);
 
-  const availableEntries = bankEntries.filter(([code]) => !usedCodes.has(code));
+  // Show all bank entries; used ones stay visible as decoys (greyed-out, non-selectable).
+  // This gives subsequent questions strategic distractor options (issue #1102 fix 3).
+  const availableEntries = bankEntries;
   const currentSentence = !done ? activeSentences[currentIdx] : null;
   const currentOriginalIdx = retryMode ? retryIndices[currentIdx] : currentIdx;
 
@@ -359,24 +361,39 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
           <div className="grid grid-cols-2 gap-3">
             {availableEntries.map(([code, word]) => {
               const isSelected = selected === code;
+              // Words already used for previous questions stay as decoys:
+              // greyed-out, non-interactive, but visible to add strategic difficulty.
+              const isUsedDecoy = usedCodes.has(code);
               return (
                 <button
                   key={code}
-                  onClick={() => handleSelect(code)}
-                  className={`rounded-2xl border-2 p-4 text-left flex items-center gap-3 transition-all active:scale-[0.97] min-h-[56px] ${
-                    isSelected
-                      ? 'border-accent bg-accent/5 shadow-sm'
-                      : 'border-surface-container-high bg-surface-container-lowest hover:border-on-surface-variant/30'
+                  onClick={() => !isUsedDecoy && handleSelect(code)}
+                  disabled={isUsedDecoy}
+                  aria-disabled={isUsedDecoy}
+                  className={`rounded-2xl border-2 p-4 text-left flex items-center gap-3 transition-all min-h-[56px] ${
+                    isUsedDecoy
+                      ? 'border-surface-container-high bg-surface-container-high/40 opacity-40 cursor-not-allowed'
+                      : isSelected
+                      ? 'border-accent bg-accent/5 shadow-sm active:scale-[0.97]'
+                      : 'border-surface-container-high bg-surface-container-lowest hover:border-on-surface-variant/30 active:scale-[0.97]'
                   }`}
                 >
                   <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-headline font-black ${
-                    isSelected
+                    isUsedDecoy
+                      ? 'bg-surface-container-high text-on-surface-variant/40'
+                      : isSelected
                       ? 'bg-accent text-white'
                       : 'bg-surface-container-high text-on-surface-variant'
                   }`}>
                     {code}
                   </span>
-                  <span className={`font-bold text-base ${isSelected ? 'text-accent' : 'text-on-surface'}`}>
+                  <span className={`font-bold text-base ${
+                    isUsedDecoy
+                      ? 'text-on-surface-variant/40 line-through'
+                      : isSelected
+                      ? 'text-accent'
+                      : 'text-on-surface'
+                  }`}>
                     {zh(word)}
                   </span>
                 </button>

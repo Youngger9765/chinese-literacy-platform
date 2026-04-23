@@ -455,6 +455,8 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
   const [wrongFlash, setWrongFlash] = useState<Set<number>>(new Set());
   const [hoverTarget, setHoverTarget] = useState<number | null>(null);
   const [touchSelected, setTouchSelected] = useState<number | null>(null);
+  // vocabIdx values currently playing the fly-away exit animation
+  const [flyingAway, setFlyingAway] = useState<Set<number>>(new Set());
 
   // Track last answer per slot for summary (correct ones only, since wrong bounce back)
   const answersRef = useRef<AnswerRecord[]>(
@@ -471,6 +473,7 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
     setWrongFlash(new Set());
     setHoverTarget(null);
     setTouchSelected(null);
+    setFlyingAway(new Set());
     answersRef.current = activeDefIndices.map((defIdx) => ({
       defIndex: defIdx,
       answeredWordIdx: null,
@@ -495,7 +498,7 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
       });
 
       if (vocabIdx === defIdx) {
-        // Correct
+        // Correct — trigger fly-away animation on the word chip, then mark confirmed
         const wrongAttempts = wrongAttemptCountRef.current.get(defIdx) ?? 0;
         answersRef.current = answersRef.current.map((a) =>
           a.defIndex === defIdx ? {
@@ -507,14 +510,24 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
         );
         confirmedRef.current = new Set([...confirmedRef.current, defIdx]);
 
-        setConfirmed((prev) => {
-          const next = new Set(prev);
-          next.add(defIdx);
-          if (next.size === activeDefIndices.length) {
-            setTimeout(() => onAllDone(answersRef.current), 600);
-          }
-          return next;
-        });
+        // Start fly-away animation on the chip
+        setFlyingAway((prev) => new Set([...prev, vocabIdx]));
+        // After animation completes, mark the slot as confirmed (chip is now hidden)
+        setTimeout(() => {
+          setFlyingAway((prev) => {
+            const next = new Set(prev);
+            next.delete(vocabIdx);
+            return next;
+          });
+          setConfirmed((prev) => {
+            const next = new Set(prev);
+            next.add(defIdx);
+            if (next.size === activeDefIndices.length) {
+              setTimeout(() => onAllDone(answersRef.current), 600);
+            }
+            return next;
+          });
+        }, 550);
       } else {
         // Wrong — record attempt, flash, bounce back
         const wrongAttempts = (wrongAttemptCountRef.current.get(defIdx) ?? 0) + 1;
@@ -591,6 +604,7 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
       <div className="flex flex-wrap gap-2 min-h-[56px]">
         {activeShuffledWords.map((vocabIdx) => {
           const isPlaced = placedVocabIdxSet.has(vocabIdx);
+          const isFlying = flyingAway.has(vocabIdx);
           // Fix #1101 (炮灰選項): Keep correctly-confirmed words visible as locked
           // "cannon fodder" chips so the last drag-drop question always has multiple
           // options in the bank — no more forced-correct final question.
@@ -599,8 +613,8 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
           const isDragging = draggingVocabIdx === vocabIdx;
           const isTouchSelected = touchSelected === vocabIdx;
 
-          // Confirmed words: show as locked/dimmed, not draggable
-          if (isConfirmedWord) {
+          // Confirmed words (fly-away animation already finished): show as locked/dimmed
+          if (isConfirmedWord && !isFlying) {
             return (
               <div
                 key={vocabIdx}
@@ -612,12 +626,15 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
             );
           }
 
-          // Placed but not yet confirmed (pending validation — bounce-back in progress)
-          if (isPlaced) return null;
+          // Placed but not yet confirmed (pending validation — bounce-back in progress).
+          // Fly-away in progress (#1102) still needs to render its animation chip.
+          if (isPlaced && !isFlying) return null;
 
           let cls =
             'rounded-2xl border-2 px-4 py-2.5 text-center font-bold text-base select-none transition-all duration-200 ';
-          if (isDragging) {
+          if (isFlying) {
+            cls += 'border-emerald-400 bg-emerald-100 text-emerald-700 animate-fly-away pointer-events-none';
+          } else if (isDragging) {
             cls += 'border-accent bg-accent/10 text-accent shadow-xl scale-105 opacity-80 cursor-grabbing';
           } else if (isTouchSelected) {
             cls += 'border-accent bg-accent/10 text-accent shadow-md scale-105 cursor-pointer';
@@ -628,11 +645,11 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
           return (
             <div
               key={vocabIdx}
-              draggable
-              onDragStart={() => handleDragStart(vocabIdx)}
+              draggable={!isFlying}
+              onDragStart={() => !isFlying && handleDragStart(vocabIdx)}
               onDragEnd={handleDragEnd}
-              onTouchStart={() => handleTouchStart(vocabIdx)}
-              onClick={() => handleTouchStart(vocabIdx)}
+              onTouchStart={() => !isFlying && handleTouchStart(vocabIdx)}
+              onClick={() => !isFlying && handleTouchStart(vocabIdx)}
               className={cls}
             >
               {vocab[vocabIdx]?.word}
@@ -649,7 +666,18 @@ function DragDropMode({ vocab, activeDefIndices, shuffledWords, onAllDone }: Dra
   );
 
   /* ---- Definition slots ---- */
-  const definitionSlots = activeDefIndices.map((defIdx) => {
+  // Sort: unmatched slots first so remaining options stay near the top as pairs are confirmed
+  const sortedDefIndices = useMemo(
+    () => [...activeDefIndices].sort((a, b) => {
+      const aConfirmed = confirmed.has(a) ? 1 : 0;
+      const bConfirmed = confirmed.has(b) ? 1 : 0;
+      return aConfirmed - bConfirmed;
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeDefIndices, confirmed.size],
+  );
+
+  const definitionSlots = sortedDefIndices.map((defIdx) => {
     const item = vocab[defIdx];
     const placedVocabIdx = placements.get(defIdx) ?? null;
     const isCorrect = confirmed.has(defIdx);
