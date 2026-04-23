@@ -219,6 +219,7 @@ async def get_story_structure(
 
 @router.post("/stories/{story_id}/structure/grade")
 async def grade_story_structure_endpoint(
+    request: Request,
     story_id: str,
     body: GradeStructureRequest,
     current_user: User = Depends(get_current_user),
@@ -229,8 +230,13 @@ async def grade_story_structure_endpoint(
     For fill_blank rows: fuzzy Chinese text match.
     For checkbox rows: exact index match against correct_options.
 
+    Rate limited: 5 requests per minute per user/IP (Issue #1253).
     Returns {results: [...], score: 0-100}.
     """
+    # Rate limit before the Gemini grading call (Issue #1253)
+    rl_key = f"ai:{get_client_key(request)}"
+    if not ai_rate_limiter.check(rl_key, max_requests=5, window_seconds=60):
+        raise HTTPException(status_code=429, detail="AI endpoint rate limit exceeded. Please wait before retrying.")
     try:
         numeric_id = int(normalize_story_slug(story_id))
     except (ValueError, TypeError):
