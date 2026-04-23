@@ -6,9 +6,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from ..auth.classroom_check import compute_has_classroom
-from ..auth.dependencies import get_current_user, require_role
+from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
 from ..config import settings
 from ..database import get_db
+from ..dependencies.tenant import is_system_admin
 from ..models.user import User, UserRole, Role
 from ..schemas.user import UserResponse, UserRoleResponse
 from ..schemas.user_admin import (
@@ -180,8 +181,33 @@ def list_users(
     current_user: User = require_role("system_admin", "org_admin"),
     db: Session = Depends(get_db),
 ):
-    """List all users with pagination and optional search. Admin only."""
+    """List users with pagination and optional search.
+
+    system_admin sees all users on the platform.
+    org_admin sees only users whose org-scoped UserRole matches
+    the caller's own org scope(s) — enforcing 個資法 §20.
+    """
     query = db.query(User)
+
+    # Scope restriction: org_admin may only see users within their org(s).
+    # system_admin (get_user_org_ids returns None) skips this filter.
+    if not is_system_admin(current_user):
+        caller_org_ids = get_user_org_ids(current_user)  # list[str], never None here
+        if not caller_org_ids:
+            # org_admin with no org scope → see nothing
+            return UserListResponse(items=[], total=0)
+        # Keep only users who have at least one active org-scoped role
+        # matching one of the caller's orgs.
+        query = query.filter(
+            User.id.in_(
+                db.query(UserRole.user_id)
+                .filter(
+                    UserRole.is_active == True,
+                    UserRole.scope_type == "organization",
+                    UserRole.scope_id.in_(caller_org_ids),
+                )
+            )
+        )
 
     if search:
         pattern = f"%{search}%"
@@ -222,7 +248,12 @@ def get_user_detail(
     current_user: User = require_role("system_admin", "org_admin"),
     db: Session = Depends(get_db),
 ):
-    """Get full user detail by ID. Admin only."""
+    """Get full user detail by ID.
+
+    system_admin may read any user.
+    org_admin may only read users who belong to the same org scope —
+    enforcing 個資法 §20 (cross-org reads → 403).
+    """
     user = (
         db.query(User)
         .options(
@@ -233,6 +264,20 @@ def get_user_detail(
     )
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
+
+    # Scope check for org_admin: target user must share at least one org with caller.
+    if not is_system_admin(current_user):
+        caller_org_ids = set(get_user_org_ids(current_user) or [])
+        target_org_ids = {
+            ur.scope_id
+            for ur in user.user_roles
+            if ur.is_active and ur.scope_type == "organization" and ur.scope_id
+        }
+        if not (caller_org_ids & target_org_ids):
+            raise HTTPException(
+                status_code=403,
+                detail="Not authorized to view this user",
+            )
 
     return UserDetailResponse(
         id=user.id,
