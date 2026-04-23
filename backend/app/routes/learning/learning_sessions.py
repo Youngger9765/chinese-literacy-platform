@@ -324,9 +324,15 @@ def get_reading_history(
         )
     )
 
+    # Push a SQL-level cap to avoid loading the full history for popular stories.
+    # We fetch (limit + 50) rows as a buffer because the Python-side learning_source
+    # filter (which also checks step_progress.__meta.source) may drop some rows.
+    # The final sessions[:limit] slice still caps the result to the requested limit.
+    sql_fetch_limit = limit + 50
     all_sessions = (
         sessions_query
         .order_by(LearningSession.started_at.asc())
+        .limit(sql_fetch_limit)
         .all()
     )
     assignment_session_ids = {
