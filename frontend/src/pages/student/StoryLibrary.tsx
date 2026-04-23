@@ -4,6 +4,7 @@ import { Story } from '../../types';
 import { fetchStories, fetchStory } from '../../services/api';
 import { getClassroomTexts } from '../../services/teacherApi';
 import { getGamificationPoints } from '../../services/gamificationApi';
+import { getLibraryStatus, type LibraryStoryStatus } from '../../services/progressApi';
 import { useAuth } from '../../contexts/AuthContext';
 import StoryCard, { Difficulty, DIFFICULTY_CONFIG, getDifficulty } from '../../components/student/StoryCard';
 
@@ -48,6 +49,8 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   const [allStories, setAllStories] = useState<Story[]>([]);
   const [availableGrades, setAvailableGrades] = useState<number[]>([]);
   const [classroomFilterLabel, setClassroomFilterLabel] = useState<string | null>(null);
+  // Issue #1249: per-story student status map
+  const [libraryStatus, setLibraryStatus] = useState<Record<string, LibraryStoryStatus>>({});
 
   const completedSet = new Set(completedSlugs);
 
@@ -58,6 +61,14 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
       .then((data) => setXpToNext(data.level_info.xp_to_next))
       .catch(() => {/* silently ignore — XP callout is cosmetic */});
   }, [token, user]);
+
+  // Issue #1249: fetch per-story status labels (non-blocking)
+  useEffect(() => {
+    if (!token) return;
+    getLibraryStatus(token)
+      .then((statusMap) => setLibraryStatus(statusMap))
+      .catch(() => {/* silently ignore — status labels are cosmetic */});
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -288,6 +299,7 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
                 isLoading={loadingStoryId === story.id}
                 isCompleted={completedSet.has(story.id)}
                 onClick={() => handleStoryClick(story)}
+                userStatus={libraryStatus[story.id]}
                 estimatedXP={ESTIMATED_XP}
                 closeToLevelUp={isCloseToLevelUp}
               />

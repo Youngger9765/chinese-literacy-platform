@@ -231,3 +231,18 @@ export async function getStudentProgress(
     inFlightStudentProgress.delete(key);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Library status (Issue #1249)
+// ---------------------------------------------------------------------------
+
+export type LibraryStoryStatus = 'assigned' | 'in_progress' | 'completed';
+
+/** Map of story_slug → status.  Absent key = not started. */
+export async function getLibraryStatus(token: string): Promise<Record<string, LibraryStoryStatus>> {
+  const res = await fetch(`${API_BASE}/api/library/status`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`getLibraryStatus failed: ${res.status}`);
+  return res.json() as Promise<Record<string, LibraryStoryStatus>>;
+}
