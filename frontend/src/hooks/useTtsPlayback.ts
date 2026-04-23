@@ -1,5 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
-import { cancelTts, cleanForTts } from '../services/ttsApi';
+import { cancelTts, cleanForTts, setAuthToken as _setAuthToken } from '../services/ttsApi';
+
+// Re-export for convenience (components that need to prime the token store)
+export { _setAuthToken };
 
 /**
  * Manages TTS (Text-to-Speech) audio playback for LiveTutor.
@@ -84,9 +87,15 @@ export function useTtsPlayback(
     };
 
     // Try Cloud TTS first via <audio> element for better control
+    // Include auth token if available (Issue #1234: TTS endpoint now requires auth)
+    const _ttsToken = (() => {
+      try { return localStorage.getItem('lingoleap_token'); } catch { return null; }
+    })();
+    const _ttsHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (_ttsToken) _ttsHeaders['Authorization'] = `Bearer ${_ttsToken}`;
     fetch(`${API_BASE}/api/tts/synthesize`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: _ttsHeaders,
       body: JSON.stringify({ text }),
     })
       .then((res) => {

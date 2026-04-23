@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, googleLogin as apiGoogleLogin, AuthUser, AuthError, RegisterResponse } from '../services/authApi';
 import { SESSION_UNAUTHORIZED_EVENT } from '../services/sessionGuard';
+import { setAuthToken as setTtsAuthToken } from '../services/ttsApi';
 
 const TOKEN_KEY = 'lingoleap_token';
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
@@ -53,9 +54,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Load user from stored token on mount
   useEffect(() => {
     if (!token) {
+      setTtsAuthToken(null);
       setIsLoading(false);
       return;
     }
+
+    // Prime TTS token store immediately so TTS works as soon as auth is ready
+    setTtsAuthToken(token);
 
     let cancelled = false;
 
@@ -71,6 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.removeItem(TOKEN_KEY);
           setToken(null);
           setUser(null);
+          setTtsAuthToken(null);
         }
       })
       .finally(() => {
@@ -89,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newToken = response.access_token;
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
+    setTtsAuthToken(newToken);
 
     const needsPasswordChange = !!response.must_change_password;
     if (needsPasswordChange) {
@@ -113,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newToken = response.access_token;
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
+    setTtsAuthToken(newToken);
     const userData = await getMe(newToken);
     setUser(userData);
     return { isNewUser: response.is_new_user };
@@ -120,6 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
+    setTtsAuthToken(null);
     try {
       sessionStorage.removeItem('activeAssignmentId');
       sessionStorage.removeItem('activeAssignmentGoals');

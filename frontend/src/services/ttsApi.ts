@@ -27,6 +27,31 @@ let _currentAudio: HTMLAudioElement | null = null;
 // Flag to signal cancellation mid-sequence
 let _cancelRequested = false;
 
+// Auth token for TTS requests (Issue #1234: secure TTS endpoints)
+// Set via setAuthToken() from AuthContext on login/logout.
+let _authToken: string | null = null;
+
+/**
+ * Set the auth token used for TTS backend requests.
+ * Call this from AuthContext whenever the token changes (login / logout).
+ */
+export function setAuthToken(token: string | null): void {
+  _authToken = token;
+}
+
+/**
+ * Get the current auth token, falling back to localStorage.
+ * The localStorage fallback covers the window between page load and AuthContext mount.
+ */
+function _getToken(): string | null {
+  if (_authToken) return _authToken;
+  try {
+    return localStorage.getItem('lingoleap_token');
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Stop any TTS currently in progress.
  */
@@ -96,6 +121,7 @@ export const _testInternals = {
   reset() {
     _cancelRequested = false;
     _urlCache.clear();
+    _authToken = null;
   },
   splitSentences: _splitSentences,
   cleanForTts: _cleanForTts,
@@ -164,9 +190,12 @@ function _splitSentences(text: string): string[] {
 async function _fetchAudioUrl(sentence: string): Promise<string> {
   let audioUrl = _urlCache.get(sentence);
   if (!audioUrl) {
+    const token = _getToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     const response = await fetch(`${API_BASE}/api/tts/synthesize`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ text: sentence }),
     });
 

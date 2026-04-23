@@ -29,10 +29,12 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
+from ..auth.dependencies import get_current_user, require_role
+from ..models.user import User
 from ..services.tts_service import (
     TTSError,
     build_lesson_tts_mapping,
@@ -52,11 +54,17 @@ class TTSRequest(BaseModel):
 
 
 @router.post("/synthesize")
-def synthesize(req: TTSRequest) -> Response:
+def synthesize(
+    req: TTSRequest,
+    _current_user: User = Depends(get_current_user),
+) -> Response:
     """Synthesise *text* to MP3 audio using Azure TTS (primary) or Cloud TTS (fallback).
+
+    Requires authentication (Issue #1234: prevent anonymous billing abuse).
 
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
+        401  application/json — Not authenticated.
         503  application/json — TTS unavailable; client should fall back
              to Web Speech API.
     """
@@ -81,14 +89,20 @@ def synthesize(req: TTSRequest) -> Response:
 
 
 @router.post("/synthesize-sentence")
-def synthesize_sentence_endpoint(req: TTSRequest) -> Response:
+def synthesize_sentence_endpoint(
+    req: TTSRequest,
+    _current_user: User = Depends(get_current_user),
+) -> Response:
     """Synthesise a single sentence to MP3 audio (Issue #667).
 
     Stores audio under azure/sentences/ GCS path for sentence-level caching.
     Functionally identical to /synthesize but semantically scoped to sentences.
 
+    Requires authentication (Issue #1234: prevent anonymous billing abuse).
+
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
+        401  application/json — Not authenticated.
         503  application/json — TTS unavailable.
     """
     try:
@@ -144,7 +158,7 @@ def get_tts_mapping(lesson_id: int) -> dict:
     return build_lesson_tts_mapping(lesson)
 
 
-@router.post("/regenerate")
+@router.post("/regenerate", dependencies=[require_role("system_admin")])
 def regenerate(req: TTSRequest) -> dict:
     """Delete cached audio for *text* and re-synthesise from scratch (Issue #765).
 
@@ -155,8 +169,12 @@ def regenerate(req: TTSRequest) -> dict:
       3. Calls Azure TTS (with phoneme corrections applied) to produce fresh audio.
       4. Stores the new audio in L1 + GCS.
 
+    Requires system_admin role (Issue #1234: prevent anonymous cache deletion + billing abuse).
+
     Returns:
         200  application/json — { "status": "ok", "key": "...", "gcs_deleted": [...], "bytes": N }
+        401  application/json — Not authenticated.
+        403  application/json — Insufficient permissions.
         503  application/json — TTS unavailable.
     """
     # Step 1: delete existing caches
