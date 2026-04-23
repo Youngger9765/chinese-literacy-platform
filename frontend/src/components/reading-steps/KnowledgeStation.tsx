@@ -1,18 +1,35 @@
 /**
  * 知識補給站 — 三民學習單第九步
  * 顯示課文相關的 YouTube 影片和延伸資料
+ * #1104: 加缺漏步驟提示卡片，讓學生看到哪些關卡還沒完成（但不強制）
  */
 import React, { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import type { Story } from '../../types';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
+
+export interface MissingStep {
+  id: string;
+  label: string;
+}
 
 interface KnowledgeStationProps {
   story: Story;
   onFinish: () => void;
+  /** Steps not yet completed — shown as a soft reminder above the CTA. #1104 */
+  missingSteps?: MissingStep[];
 }
 
-const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) => {
+const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish, missingSteps }) => {
   const storageKey = scopedStepStorageKey('knowledge_viewed_', story.id);
+  const navigate = useNavigate();
+  const { storyId } = useParams<{ storyId: string }>();
+
+  const hasMissingSteps = missingSteps && missingSteps.length > 0;
+
+  const handleGoToStep = (stepId: string) => {
+    navigate(`/learn/${storyId ?? story.id}/${stepId}`);
+  };
 
   useEffect(() => {
     try { localStorage.setItem(storageKey, JSON.stringify({ viewed: true })); } catch {}
@@ -72,10 +89,34 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
         </div>
       </div>
 
-      {/* Fixed bottom CTA */}
+      {/* Fixed bottom CTA — with optional missing-step reminder (#1104) */}
       <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
            style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
-        <div className="max-w-md mx-auto pointer-events-auto">
+        <div className="max-w-md mx-auto pointer-events-auto space-y-3">
+          {/* Soft reminder: steps not yet completed */}
+          {hasMissingSteps && (
+            <div className="bg-surface-container-lowest border border-surface-container-high rounded-2xl p-4 shadow-sm">
+              <div className="flex items-start gap-2 mb-3">
+                <span className="material-symbols-outlined text-base text-amber-500 mt-0.5 shrink-0">info</span>
+                <p className="text-sm font-headline font-bold text-on-surface">
+                  你還有 {missingSteps!.length} 個關卡沒有完成
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {missingSteps!.map((step) => (
+                  <button
+                    key={step.id}
+                    onClick={() => handleGoToStep(step.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-xs font-headline font-bold hover:bg-accent/20 active:scale-[0.97] transition-all"
+                  >
+                    <span className="material-symbols-outlined text-sm">play_circle</span>
+                    {step.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <button
             onClick={onFinish}
             className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
