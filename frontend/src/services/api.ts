@@ -145,6 +145,51 @@ export async function fetchStory(id: string): Promise<Story> {
   }
 }
 
+// ── Semantic sentence units (#661) ─────────────────────────────────────────
+
+export interface SentenceUnit {
+  paragraph_idx: number;
+  sentence_idx: number;
+  text: string;
+}
+
+interface SentenceListResponse {
+  lesson_id: number;
+  sentences: SentenceUnit[];
+}
+
+const inFlightSentencesById = new Map<string, Promise<SentenceUnit[]>>();
+
+/**
+ * Fetch semantic sentence split for a lesson (#661).
+ *
+ * Returns Opus 4.7's sentence boundaries from sentences.v2.jsonl, aligned 1:1
+ * with TTS mp3 cache. LiveTutor uses this for sentence-level retry so the
+ * displayed sentence matches what TTS plays. Returns empty array when the
+ * lesson has no JSONL entry; callers should fall back to local regex split.
+ */
+export async function fetchStorySentences(id: string): Promise<SentenceUnit[]> {
+  const cached = inFlightSentencesById.get(id);
+  if (cached) return cached;
+
+  const request = (async () => {
+    const res = await fetch(`${API_BASE}/api/stories/${id}/sentences`);
+    if (!res.ok) {
+      // 404 / network error → caller falls back to regex split
+      throw new Error(`fetchStorySentences failed: ${res.status}`);
+    }
+    const data: SentenceListResponse = await res.json();
+    return data.sentences;
+  })();
+
+  inFlightSentencesById.set(id, request);
+  try {
+    return await request;
+  } finally {
+    inFlightSentencesById.delete(id);
+  }
+}
+
 export async function createLearningSession(payload: {
   studentId: string;
   storyId: string;

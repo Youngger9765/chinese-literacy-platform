@@ -7,6 +7,7 @@ import { useIsMobile } from '../../../hooks/useIsMobile';
 import { READING_EXCELLENT } from '../../../utils/personaConfig';
 import ParagraphProgress, { ParagraphStatus } from '../ParagraphProgress';
 import { evaluateReading } from '../../../services/learningApi';
+import { fetchStorySentences } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
   localEvaluateParagraph,
@@ -131,6 +132,43 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   const sentenceStartTimeRef = useRef(0);
   const lastDiffTimeRef = useRef(0);
+
+  // Semantic sentence split from Opus 4.7 JSONL (#661). Null = not loaded yet
+  // or no v2 entry for this lesson → fall back to regex splitIntoSentences().
+  const [v2SentencesByParagraph, setV2SentencesByParagraph] = useState<Map<number, string[]> | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetchStorySentences(String(story.id))
+      .then((list) => {
+        if (cancelled) return;
+        if (list.length === 0) {
+          setV2SentencesByParagraph(null);
+          return;
+        }
+        const grouped = new Map<number, string[]>();
+        // Sentences are already sorted by (paragraph_idx, sentence_idx) server-side.
+        for (const s of list) {
+          if (!grouped.has(s.paragraph_idx)) grouped.set(s.paragraph_idx, []);
+          grouped.get(s.paragraph_idx)!.push(s.text);
+        }
+        setV2SentencesByParagraph(grouped);
+      })
+      .catch(() => {
+        if (!cancelled) setV2SentencesByParagraph(null);
+      });
+    return () => { cancelled = true; };
+  }, [story.id]);
+
+  /** Sentence units for a paragraph. Prefers Opus semantic split (v2 JSONL,
+   *  aligned with TTS cache); falls back to regex when v2 data is missing. */
+  const getSentencesForParagraph = useCallback(
+    (paragraphIdx: number): string[] => {
+      const fromV2 = v2SentencesByParagraph?.get(paragraphIdx);
+      if (fromV2 && fromV2.length > 0) return fromV2;
+      return splitIntoSentences(story.content[paragraphIdx] || '');
+    },
+    [v2SentencesByParagraph, story.content],
+  );
 
   // Sentence-level retry state (#1076)
   const [retrySentenceInfo, setRetrySentenceInfo] = useState<{
@@ -288,7 +326,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
 
   /* ---- init sentence targets when paragraph changes ---- */
   useEffect(() => {
-    const targets = splitIntoSentences(story.content[currentLineIndex] || '');
+    const targets = getSentencesForParagraph(currentLineIndex);
     sentenceTargetsRef.current = targets;
     sentenceResultsRef.current = new Array(targets.length).fill(null);
     nextSentenceIdxRef.current = 0;
@@ -296,7 +334,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setLastDiffTokens(null);
     setSpeakingProgress(0);
     setRealtimeDiffTokens(null);
-  }, [currentLineIndex, story.content]);
+  }, [currentLineIndex, getSentencesForParagraph]);
 
   /* ---- cleanup on unmount ---- */
   useEffect(() => {
@@ -652,7 +690,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setRealtimeDiffTokens(null);
     setLastDiffTokens(null);
     // Reset sentence tracking for fresh attempt (#1076)
-    const targets = splitIntoSentences(story.content[idx] || '');
+    const targets = getSentencesForParagraph(idx);
     sentenceTargetsRef.current = targets;
     sentenceResultsRef.current = new Array(targets.length).fill(null);
     nextSentenceIdxRef.current = 0;
@@ -662,7 +700,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setRetrySentenceInfo(null);
     if (idx === currentLineIndex) { startSession(); }
     else { setTimeout(() => startSession(), 100); }
-  }, [currentLineIndex, story.content, stopSession, startSession]);
+  }, [currentLineIndex, getSentencesForParagraph, stopSession, startSession]);
 
   /* ---- handleRetrySentence: enter single-sentence retry mode (#1076) ---- */
   const handleRetrySentence = useCallback((paragraphIdx: number, sentenceIdx: number) => {
@@ -672,7 +710,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     }
     stopSession();
 
-    const sentences = splitIntoSentences(story.content[paragraphIdx] || '');
+    const sentences = getSentencesForParagraph(paragraphIdx);
     const target = sentences[sentenceIdx];
     // Don't retry single-char sentences (issue 661: 單獨一個字不用重練)
     if (!target || target.replace(CHINESE_PUNCTUATION_REGEX, '').length <= 1) {
@@ -699,7 +737,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setRealtimeDiffTokens(null);
 
     setTimeout(() => startSession(), 100);
-  }, [currentLineIndex, story.content, stopSession, startSession]);
+  }, [currentLineIndex, getSentencesForParagraph, stopSession, startSession]);
 
   /* ---- handleSentenceRetryEval: evaluate single-sentence retry result (#1076) ---- */
   const handleSentenceRetryEval = useCallback(async (transcript: string, durationMs: number) => {

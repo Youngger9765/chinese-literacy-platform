@@ -13,6 +13,7 @@ from ..models.user import User
 from ..auth.dependencies import get_current_user
 from ..auth.rate_limiter import ai_rate_limiter, get_client_key
 from ..services.lesson_loader import search_lessons, get_lesson_by_id, get_available_grades
+from ..services import sentence_loader
 from ..utils.slug import normalize_story_slug
 from ..services.ai_service import generate_story_structure, grade_story_structure
 from ..services.ai_usage_tracker import last_usage, log_ai_usage
@@ -143,6 +144,45 @@ def get_story(story_id: str):
         text_type=story["text_type"],
         source_file=story["source_file"],
         strategy_exercise=story.get("strategy_exercise"),
+    )
+
+
+# ── Sentence units from Opus 4.7 semantic split (#661) ─────────────────────
+
+class SentenceItem(BaseModel):
+    paragraph_idx: int
+    sentence_idx: int
+    text: str
+
+
+class SentenceListResponse(BaseModel):
+    lesson_id: int
+    sentences: list[SentenceItem]
+
+
+@router.get("/stories/{story_id}/sentences", response_model=SentenceListResponse)
+def get_story_sentences(story_id: str):
+    """Return the semantic sentence split for a lesson (#661).
+
+    Source: `backend/data/sentences.v2.jsonl` produced by Opus 4.7 during the
+    TTS v2 rework (#1208). Each sentence is aligned 1:1 with the TTS mp3
+    cache, so LiveTutor's retry UI can show exactly what TTS plays without
+    fighting punctuation-based split (#1142 / #1148).
+
+    Returns an empty list when the lesson has no v2 JSONL entry; the frontend
+    then falls back to regex-based `splitIntoSentences()`.
+    """
+    try:
+        lesson_id = int(normalize_story_slug(story_id))
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=404, detail="Story not found")
+    if not get_lesson_by_id(lesson_id):
+        raise HTTPException(status_code=404, detail="Story not found")
+
+    sentences = sentence_loader.get_sentences(lesson_id)
+    return SentenceListResponse(
+        lesson_id=lesson_id,
+        sentences=[SentenceItem(**s) for s in sentences],
     )
 
 
