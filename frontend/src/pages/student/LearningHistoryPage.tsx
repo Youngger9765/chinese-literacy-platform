@@ -67,6 +67,8 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
   // All completed sessions have all steps done
   const allStepIds = useMemo(() => new Set(ACTIVE_STEPS.map((s) => s.id)), []);
 
+  // Issue #1245: unified score display — prefer overall_score, fallback to accuracy,
+  // show explicit "—" rather than empty when both are null.
   const score =
     session.overall_score != null
       ? Math.round(session.overall_score)
@@ -77,13 +79,28 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
       ? Math.round(session.accuracy * 100)
       : null;
 
+  // Unified display value: overall_score → accuracy → null (show "進行中")
+  const scoreDisplay: string | null =
+    score != null
+      ? `${score}%`
+      : accuracy != null
+        ? `${accuracy}%`
+        : null;
+
+  const scoreLabel: string =
+    score != null
+      ? '得分'
+      : accuracy != null
+        ? '準確率'
+        : '';
+
   return (
     <div className="bg-white rounded-2xl shadow-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          {/* Title + status */}
+          {/* Title + status — enlarged to text-base to match /student and /assignments/my */}
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-medium text-gray-900 truncate">
+            <h3 className="text-base font-medium text-gray-900 truncate">
               {session.story_title ?? session.story_slug ?? '未知課文'}
             </h3>
             <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
@@ -91,14 +108,13 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
             </span>
           </div>
 
-          {/* Metadata row */}
+          {/* Metadata row — enlarged date to text-sm, score always visible */}
           <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <span className="text-xs text-gray-400">{formatDate(session.started_at)}</span>
-            {score != null && (
-              <span className="text-xs font-medium text-gray-700">得分：{score}%</span>
-            )}
-            {accuracy != null && score == null && (
-              <span className="text-xs text-gray-500">準確率：{accuracy}%</span>
+            <span className="text-sm text-gray-400">{formatDate(session.started_at)}</span>
+            {scoreDisplay != null ? (
+              <span className="text-sm font-medium text-gray-700">{scoreLabel}：{scoreDisplay}</span>
+            ) : (
+              <span className="text-sm text-gray-400">—</span>
             )}
           </div>
 
@@ -106,8 +122,8 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
           {ACTIVE_STEPS.length > 0 && (
             <div className="mt-2.5">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-[11px] text-gray-500">學習關卡進度</p>
-                <p className="text-[11px] text-gray-400">
+                <p className="text-xs text-gray-500">學習關卡進度</p>
+                <p className="text-xs text-gray-400">
                   {ACTIVE_STEPS.length}/{ACTIVE_STEPS.length}
                 </p>
               </div>
@@ -122,7 +138,7 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
         {/* Read-only action */}
         <button
           onClick={() => navigate(`/sessions/${session.id}/report`)}
-          className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+          className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
         >
           查看
         </button>
@@ -228,7 +244,7 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
     <div className="space-y-6">
       {groups.map((group) => (
         <div key={group.label}>
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
             {group.label}
           </h3>
           <div className="space-y-3">
@@ -266,7 +282,7 @@ const LearningHistoryPage: React.FC = () => {
       <div className="max-w-2xl mx-auto space-y-4">
         <div>
           <h1 className="text-base font-bold text-gray-900">學習紀錄</h1>
-          <p className="text-xs text-gray-500 mt-0.5">回顧過去的學習練習</p>
+          <p className="text-sm text-gray-500 mt-0.5">回顧過去的學習練習</p>
         </div>
 
         {/* Tabs */}
@@ -276,7 +292,7 @@ const LearningHistoryPage: React.FC = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
                   activeTab === tab.key
                     ? 'border-accent text-accent'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'

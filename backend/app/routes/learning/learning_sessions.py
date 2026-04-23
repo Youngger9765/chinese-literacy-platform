@@ -178,42 +178,96 @@ def list_my_sessions(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List learning sessions for the authenticated student, newest first."""
-    assignment_session_ids_query = (
-        db.query(AssignmentSubmission.session_id)
+    """List learning sessions for the authenticated student, newest first.
+
+    For assignment sessions, "completed" status is determined by the linked
+    AssignmentSubmission.status being 'submitted' or 'graded' — NOT by
+    LearningSession.status — because submit_assignment() does not update the
+    session status to 'completed' (only process_session_completion() does).
+    Issue #1245: this mismatch caused assignment sessions to never appear in
+    the learning history page when filtering by status=completed.
+    """
+    # Fetch all assignment submissions for this student to build two maps:
+    # 1. session_id → submission_status (for assignment "completion" logic)
+    # 2. assignment_session_ids set (for _is_assignment_session checks)
+    submission_rows = (
+        db.query(AssignmentSubmission.session_id, AssignmentSubmission.status)
         .filter(
             AssignmentSubmission.student_id == current_user.id,
             AssignmentSubmission.session_id.is_not(None),
         )
+        .all()
     )
+    assignment_session_ids: set[int] = set()
+    # Maps session_id → submission status ('pending','in_progress','submitted','graded')
+    assignment_submission_status: dict[int, str] = {}
+    for sid, sub_status in submission_rows:
+        if sid is not None:
+            assignment_session_ids.add(sid)
+            assignment_submission_status[sid] = sub_status
+
+    # Whether the caller wants "completed" sessions (includes assignment-submitted ones)
+    statuses: list[str] = []
+    wants_completed = False
+    if status:
+        statuses = [s.strip() for s in status.split(",") if s.strip()]
+        wants_completed = "completed" in statuses
 
     query = db.query(LearningSession).filter(
         LearningSession.student_id == current_user.id,
     )
 
-    if status:
-        statuses = [s.strip() for s in status.split(",") if s.strip()]
-        if statuses:
-            query = query.filter(LearningSession.status.in_(statuses))
     if story_slug:
         query = query.filter(LearningSession.story_slug == normalize_story_slug(story_slug))
+
+    # For self-practice sessions, apply the LearningSession.status filter directly.
+    # For assignment sessions we apply a custom "completed" definition below.
+    # When learning_source=assignment, omit the LearningSession.status filter so
+    # we can include sessions that are 'in_progress' on LearningSession but
+    # 'submitted'/'graded' on AssignmentSubmission.
+    if statuses and learning_source != "assignment":
+        query = query.filter(LearningSession.status.in_(statuses))
 
     all_items = (
         query
         .order_by(LearningSession.started_at.desc())
         .all()
     )
-    assignment_session_ids = {
-        sid for (sid,) in assignment_session_ids_query.all() if sid is not None
-    }
 
     filtered_items: list[LearningSession] = []
     for s in all_items:
         is_assignment = _is_assignment_session(s, assignment_session_ids)
+
+        # --- source filter ---
         if learning_source == "assignment" and not is_assignment:
             continue
         if learning_source == "self" and is_assignment:
             continue
+
+        # --- status filter (assignment-aware) ---
+        if statuses:
+            if is_assignment:
+                # For assignment sessions, "completed" means the submission is
+                # submitted or graded (LearningSession.status may still be
+                # 'in_progress' because submit_assignment() does not update it).
+                sub_status = assignment_submission_status.get(s.id, "")
+                is_submission_done = sub_status in ("submitted", "graded")
+                if wants_completed:
+                    # Keep if session is completed OR submission is done
+                    session_complete = s.status == "completed"
+                    if not session_complete and not is_submission_done:
+                        continue
+                else:
+                    # For non-"completed" status filters, apply session status directly
+                    if s.status not in statuses:
+                        continue
+            else:
+                # Self-practice: already filtered by DB query above (when
+                # learning_source != 'assignment'). When no source filter is set
+                # we need to apply the status filter in Python.
+                if learning_source is None and s.status not in statuses:
+                    continue
+
         filtered_items.append(s)
 
     total = len(filtered_items)

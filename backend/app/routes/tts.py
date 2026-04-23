@@ -30,10 +30,12 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
+from ..auth.dependencies import get_current_user, require_role
+from ..models.user import User
 from ..services.tts_service import (
     TTSError,
     build_lesson_tts_mapping,
@@ -53,14 +55,21 @@ class TTSRequest(BaseModel):
 
 
 @router.post("/synthesize")
-async def synthesize(req: TTSRequest) -> Response:
+async def synthesize(
+    req: TTSRequest,
+    _current_user: User = Depends(get_current_user),
+) -> Response:
     """Synthesise *text* to MP3 audio using Azure TTS (primary) or Cloud TTS (fallback).
+
+    Requires authentication (any active user).  Anonymous requests are rejected
+    with 401 to prevent bill-washing attacks on the Azure/GCP TTS quota.
 
     Runs in a thread pool via asyncio.to_thread() so the FastAPI event loop is
     not blocked during the 8–15 s remote TTS call (Azure / Google / Gemini).
 
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
+        401  application/json — not authenticated.
         503  application/json — TTS unavailable; client should fall back
              to Web Speech API.
     """
@@ -85,8 +94,14 @@ async def synthesize(req: TTSRequest) -> Response:
 
 
 @router.post("/synthesize-sentence")
-async def synthesize_sentence_endpoint(req: TTSRequest) -> Response:
+async def synthesize_sentence_endpoint(
+    req: TTSRequest,
+    _current_user: User = Depends(get_current_user),
+) -> Response:
     """Synthesise a single sentence to MP3 audio (Issue #667).
+
+    Requires authentication (any active user).  Anonymous requests are rejected
+    with 401 to prevent bill-washing attacks via the pre-generated sentence cache.
 
     Stores audio under azure/sentences/ GCS path for sentence-level caching.
     Functionally identical to /synthesize but semantically scoped to sentences.
@@ -94,6 +109,7 @@ async def synthesize_sentence_endpoint(req: TTSRequest) -> Response:
 
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
+        401  application/json — not authenticated.
         503  application/json — TTS unavailable.
     """
     try:
@@ -149,9 +165,13 @@ def get_tts_mapping(lesson_id: int) -> dict:
     return build_lesson_tts_mapping(lesson)
 
 
-@router.post("/regenerate")
+@router.post("/regenerate", dependencies=[require_role("system_admin")])
 async def regenerate(req: TTSRequest) -> dict:
     """Delete cached audio for *text* and re-synthesise from scratch (Issue #765).
+
+    Requires system_admin role.  This endpoint deletes GCS cache objects and
+    triggers a fresh TTS synthesis — exposing it to non-admins would allow any
+    authenticated user to wipe cached audio and exhaust the TTS quota.
 
     Use this endpoint when a specific sentence has a known mispronunciation
     in its cached audio (e.g. wrong tone for 喝采). The endpoint:
@@ -163,6 +183,8 @@ async def regenerate(req: TTSRequest) -> dict:
 
     Returns:
         200  application/json — { "status": "ok", "key": "...", "gcs_deleted": [...], "bytes": N }
+        401  application/json — not authenticated.
+        403  application/json — insufficient permissions (not system_admin).
         503  application/json — TTS unavailable.
     """
     # Step 1: delete existing caches (GCS I/O — run in thread pool)

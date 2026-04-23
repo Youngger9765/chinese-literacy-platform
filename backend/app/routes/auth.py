@@ -157,7 +157,8 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
     if require_verification:
         return RegisterResponse(
             message="註冊成功！請檢查 Email 並點擊驗證連結完成驗證。（測試模式下 token 直接回傳）",
-            verification_token=verification_token,  # Dev/staging only — remove in production
+            # Gate token in response: dev/preview only. Production always returns null.
+            verification_token=verification_token if settings.is_dev else None,
         )
     return RegisterResponse(
         message="註冊成功！",
@@ -364,10 +365,11 @@ def forgot_password(req: ForgotPasswordRequest, request: Request, db: Session = 
     # Always return a success message to avoid user enumeration attacks.
     # We still generate and return the token so the flow can be tested without email.
     if user is None:
-        # Return a plausible-looking token but do nothing in DB
+        # Return a plausible-looking token but do nothing in DB.
+        # Gate token in response: dev/preview only. Production always returns null.
         return ForgotPasswordResponse(
             message="若帳號存在，重設連結已產生（測試模式下直接回傳 token）。",
-            reset_token="account-not-found",
+            reset_token="account-not-found" if settings.is_dev else None,
         )
 
     reset_token = secrets.token_hex(PASSWORD_RESET_TOKEN_BYTES)
@@ -377,7 +379,8 @@ def forgot_password(req: ForgotPasswordRequest, request: Request, db: Session = 
 
     return ForgotPasswordResponse(
         message="密碼重設 token 已產生，請在 1 小時內使用。（正式環境將寄送至您的 Email）",
-        reset_token=reset_token,
+        # Gate token in response: dev/preview only. Production always returns null.
+        reset_token=reset_token if settings.is_dev else None,
     )
 
 
@@ -508,7 +511,8 @@ def resend_verification(req: ResendVerificationRequest, request: Request, db: Se
     # TODO(production): send verification email here instead of returning token.
     return {
         "message": "驗證信已重新發送。（測試模式下 token 直接回傳）",
-        "verification_token": new_token,  # Dev/staging only — remove in production
+        # Gate token in response: dev/preview only. Production always returns null.
+        "verification_token": new_token if settings.is_dev else None,
     }
 
 

@@ -2,6 +2,8 @@
 
 ALLOWED_ORIGINS: comma-separated frontend origins (Production: lingoleap-frontend-*.run.app, lingoleap-dev.web.app)
 """
+import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -37,6 +39,25 @@ class Settings(BaseSettings):
     @property
     def origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",")]
+
+    @property
+    def is_dev(self) -> bool:
+        """True when running in a non-production environment (development or preview).
+
+        Fail-safe: unknown or missing ENVIRONMENT on Cloud Run defaults to
+        production (is_dev=False), so tokens never leak when deploy workflows
+        forget to set the var. Local runs (no K_SERVICE) default to dev.
+        """
+        env = os.environ.get("ENVIRONMENT", "").lower()
+        if env in ("development", "preview"):
+            return True
+        if env in ("production", "staging"):
+            return False
+        # Unset: Cloud Run always sets K_SERVICE. If present → treat as prod.
+        if os.environ.get("K_SERVICE"):
+            return False
+        # Local dev (no K_SERVICE, no ENVIRONMENT) → dev.
+        return True
 
 
 settings = Settings()
