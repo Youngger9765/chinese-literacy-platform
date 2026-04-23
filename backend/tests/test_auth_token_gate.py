@@ -330,9 +330,31 @@ class TestSettingsIsDev:
         s = Settings()
         assert s.is_dev is False
 
-    def test_is_dev_defaults_to_dev_when_env_unset(self, monkeypatch):
-        """Unset ENVIRONMENT defaults to 'development' — safe for local runs."""
+    def test_is_dev_true_when_local_no_env_no_k_service(self, monkeypatch):
+        """No ENVIRONMENT + no K_SERVICE → local dev (is_dev=True)."""
         monkeypatch.delenv("ENVIRONMENT", raising=False)
+        monkeypatch.delenv("K_SERVICE", raising=False)
         from app.config import Settings
         s = Settings()
         assert s.is_dev is True
+
+    def test_is_dev_false_when_cloud_run_no_environment(self, monkeypatch):
+        """K_SERVICE set (Cloud Run) without ENVIRONMENT → fail-safe to prod (is_dev=False).
+
+        This guards against deploy workflows forgetting to set ENVIRONMENT.
+        Before fix: is_dev defaulted to True → reset/verification tokens leaked
+        in prod responses. After fix: missing ENVIRONMENT on Cloud Run = prod.
+        """
+        monkeypatch.delenv("ENVIRONMENT", raising=False)
+        monkeypatch.setenv("K_SERVICE", "lingoleap-backend")
+        from app.config import Settings
+        s = Settings()
+        assert s.is_dev is False
+
+    def test_is_dev_false_for_unknown_env_on_cloud_run(self, monkeypatch):
+        """Unknown ENVIRONMENT value on Cloud Run → fail-safe to prod."""
+        monkeypatch.setenv("ENVIRONMENT", "canary")
+        monkeypatch.setenv("K_SERVICE", "lingoleap-backend")
+        from app.config import Settings
+        s = Settings()
+        assert s.is_dev is False
