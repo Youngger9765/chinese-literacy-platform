@@ -49,9 +49,9 @@ class ForgotPasswordRequest(BaseModel):
 
 class ForgotPasswordResponse(BaseModel):
     message: str
-    # P0: no email sending yet — token returned directly for testing.
-    # In production this field would be omitted and the token sent via email only.
-    reset_token: str
+    # Token is gated on environment: present in dev/preview, null in production.
+    # In production, the token would be sent via email only (not in response body).
+    reset_token: str | None = None
 
 
 class ResetPasswordRequest(BaseModel):
