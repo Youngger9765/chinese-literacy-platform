@@ -37,7 +37,7 @@ class AIUsageLog(Base):
     # ── Denormalized dimensions (snapshot at call time) ──
     student_name = Column(String(100))
     grade_level = Column(String(20))
-    teacher_id = Column(Integer)
+    teacher_id = Column(Integer, index=True)
     teacher_name = Column(String(100))
     org_id = Column(Integer)
     school_name = Column(String(100))
