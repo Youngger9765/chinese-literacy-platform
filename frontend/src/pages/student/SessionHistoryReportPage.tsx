@@ -394,8 +394,9 @@ const StepRecordsView: React.FC<{
 
   if (!hasAny) {
     return (
-      <div className="text-center py-12">
-        <p className="text-sm text-gray-500">這筆紀錄沒有儲存作答內容</p>
+      <div className="text-center py-12 space-y-2">
+        <p className="text-sm font-medium text-gray-600">尚無作答紀錄</p>
+        <p className="text-sm text-gray-400">這次學習的作答詳情未儲存，可能是較舊的紀錄或尚未完成所有步驟</p>
       </div>
     );
   }
