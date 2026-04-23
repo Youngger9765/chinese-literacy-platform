@@ -110,16 +110,27 @@ function buildSession(detail: TeacherSessionReport): LearningSession {
 
 function buildScores(detail: TeacherSessionReport): ComprehensionScoreResult | null {
   if (detail.comprehension_score == null) return null;
+
+  // comprehension_feedback is stored in the DB as a JSON string (Issue #1245 item 4)
+  let feedbackObj: { literal?: string; inferential?: string; evaluative?: string; overall?: string } = {};
+  if (detail.comprehension_feedback) {
+    try {
+      feedbackObj = JSON.parse(detail.comprehension_feedback);
+    } catch {
+      feedbackObj = { overall: detail.comprehension_feedback };
+    }
+  }
+
   return {
     comprehension_score: detail.comprehension_score,
     literal_score: detail.literal_score ?? 0,
     inferential_score: detail.inferential_score ?? 0,
     evaluative_score: detail.evaluative_score ?? 0,
     feedback: {
-      literal: '',
-      inferential: '',
-      evaluative: '',
-      overall: detail.comprehension_feedback ?? '',
+      literal: feedbackObj.literal ?? '',
+      inferential: feedbackObj.inferential ?? '',
+      evaluative: feedbackObj.evaluative ?? '',
+      overall: feedbackObj.overall ?? '',
     },
   };
 }
