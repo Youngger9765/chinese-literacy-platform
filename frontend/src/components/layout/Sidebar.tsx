@@ -389,7 +389,10 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
 
   // Targeted practice tools — shown at the BOTTOM of the student sidebar, separated by a divider (#1165)
   const toolsItems: NavItem[] = activeView === 'student'
-    ? [{ icon: '🧰', label: '練習工具箱', path: '/tools' }]
+    ? [
+        { icon: '🧰', label: '練習工具箱', path: '/tools' },
+        { icon: '📖', label: '字典查詢', path: '/dictionary' },
+      ]
     : [];
 
   const teacherItems: NavItem[] = activeView === 'teacher' || activeView === 'admin'
