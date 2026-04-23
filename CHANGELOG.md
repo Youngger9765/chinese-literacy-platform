@@ -8,6 +8,47 @@
 
 （無）
 
+## 2026-04-23（大掃除日 — 8 次 prod release）
+
+### 🔒 Security 強化
+- **TTS 三個 endpoint 加 auth** (#1244/#1240) — `/tts/synthesize` `/tts/sentence` `/tts/regenerate` 從無 auth → 加 `Depends(get_current_user)`，`/regenerate` 限 system_admin。前端 `ttsApi.ts` 同步加 auth header。堵死匿名洗 TTS 帳單 + 刪快取 attack
+- **org_admin 跨組織隔離** (#1242/#1241) — `require_role("system_admin", "org_admin")` 原只檢查角色存在，未驗 `UserRole.scope_id` 匹配。修補 `users.py` / `gamification.py` / `feedback.py` 加 org scope check（個資法 §20）
+- **Reset/verification token gating** (#1246/#1239) — `/auth/register`、`/auth/forgot-password`、`/auth/resend-verification` 之 token 僅在 dev env 返回 JSON；prod 返回 null，堵住「不需收信即可 takeover」路徑
+- **LLM endpoint rate limit 補齊** (#1254/#1266/#1270) — `/generate-ai-comment` + `/stories/{id}/structure/grade` 補 5/min rate limit。#1270 把 rate-limit 檢查移到 cache validation 之後，避免 cache-miss 400 也燒配額
+
+### ⚡ 效能優化
+- **6 N+1 查詢消除** (#1218/#1221) — routes + services 雙層，21 regression tests
+- **DB 熱欄位 index** (#1226/#1267/#1280) — `LearningSession.status` + `(student_id, status)` compound、6 個 FK 欄位（ClassroomStudent/Classroom/Assignment/UserRole）補 `index=True`、`ai_usage.teacher_id` 補 annotation
+- **SQL 聚合下推** (#1227) — `learning_dashboard` cumulative stats + `teacher_analytics` time-stats 從 Python 雙 loop 改 SQL `func.count/avg/sum(case)` + `group_by(func.date)`
+- **I/O 非同步** (#1228) — TTS 路由改 `async def` + `asyncio.to_thread()`，5 concurrent 2.5s → 0.51s（~5x）
+
+### 🎨 UX / Design
+- **/student /assignments /vocabulary 設計統一** (#1268/#1248) — 全部對齊 `/student` 主頁基準的 design tokens（`tertiary`、`accent`、`surface`），字級放大、shadcn 元件
+- **/learning-history 全修** (#1250/#1282/#1245) — 字級放大、得分/準確率統一（overall_score 優先 → accuracy fallback → 「—」）、作業紀錄不再空白（`list_my_sessions` assignment-aware status fix）、學習報告 render 空白修復（`hasNoData` 邏輯 + JSON string parse）
+- **Step 9/11 UX** (#1272/#1103/#1104) — ComprehensionChat 5 題後加「下一關 →」按鈕引導；KnowledgeStation 未完成關卡時加缺漏提示 + 快速跳轉
+- **Step 7/8 UX** (#1283/#1101/#1284/#1102) — 詞語定義保留炮灰選項 + MC 按鈕置中；拖拉配對飛掉動畫修復 + 捲動 + 填充炮灰
+- **library 課文狀態 label** (#1274/#1230 → 字典頁；library status via earlier 部分) — `/library` 每篇課文帶「作業中 / 練習中 / 已完成 / 未開始」狀態 badge
+- **/dictionary 新頁** (#1274/#1230) — 學生查字義、注音、例句；rate limit 60/min + auth，無 Redis cache
+
+### 🧹 Tech Debt 清理
+- **Dead code + heuristic hard cap** (#1263/#1261/#1262) — 移除 `_user_has_admin_role` dead code、`/learning-history` `sql_fetch_limit` 上限由 `+50` buffer 改為 `min(limit+50, 500)` 硬上限
+- **CLAUDE.md 覆寫規則** (#1276/#1273) — 14 天反覆 bug 類別註冊 PostToolUse hooks + skills：`sqlalchemy-model-safety` / `llm-endpoint-hardening` / `alembic heads` 自動檢查
+- **Backend regression test** (#1278/#1251) — `list_my_sessions` assignment 完成狀態 14 個 test case
+
+### 📝 Docs
+- **Weekly wrap-up** (#1259/#1258) — ROADMAP、meeting record、contributions、skill trees、blog
+- **Perf sprint CHANGELOG + PRD** — PRD 系統效能 table 加「現況」欄位 + 5 PR 總結
+
+### 🎯 Prod release 順序（今天 8 次）
+1. `dc3906d7` 6 N+1 修復
+2. `edb9d42c` perf + library + rate limit
+3. `49e2a20c` cleanup + docs
+4. `f06fdac6` LLM security + design unify
+5. `d42a7ec1` rate-limit fix + Step UX + FK indexes
+6. `10b75c0d` dictionary page
+7. `a0d47bdc` docs + index annotation
+8. `3e69703b` learning-history render + Step 7/8 UX
+
 ## 2026-04-22 ~ 2026-04-23
 
 ### 效能優化（後端熱路徑大掃除）
