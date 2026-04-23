@@ -221,25 +221,25 @@ const MyAssignments: React.FC = () => {
     switch (status) {
       case 'in_progress':
         return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent">
             進行中
           </span>
         );
       case 'submitted':
         return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">
             已完成
           </span>
         );
       case 'graded':
         return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
+          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-tertiary/10 text-tertiary">
             已批改
           </span>
         );
       default:
         return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">
+          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-surface-container text-on-surface-variant">
             待完成
           </span>
         );
@@ -315,7 +315,7 @@ const MyAssignments: React.FC = () => {
             const resumeStepPath = getResumeStepPath(a);
             navigate(`/learn/${textKey}/${resumeStepPath}`);
           }}
-          className="px-3 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
+          className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
         >
           繼續
         </button>
@@ -371,7 +371,7 @@ const MyAssignments: React.FC = () => {
 
           navigate(`/learn/${textKey}/report`);
         }}
-        className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+        className="px-3 py-1.5 rounded-lg border border-[#E5E0D5] text-on-surface-variant text-xs font-medium hover:bg-surface-container-low transition-colors cursor-pointer shrink-0"
       >
         查看
       </button>
@@ -392,17 +392,17 @@ const MyAssignments: React.FC = () => {
   }, [classroomNames, classroomFilter]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-      <div className="max-w-4xl mx-auto space-y-4">
+    <div className="flex-1 overflow-y-auto bg-surface">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-10 space-y-4">
         {/* Page title */}
         <div>
-          <h1 className="text-base font-bold text-gray-900">班級作業</h1>
-          <p className="text-xs text-gray-500 mt-0.5">完成老師指派的學習任務</p>
+          <h1 className="text-xl sm:text-2xl font-bold font-headline text-on-surface">班級作業</h1>
+          <p className="text-xs sm:text-sm text-on-surface-variant mt-0.5">完成老師指派的學習任務</p>
         </div>
 
         {/* Classroom summary bar */}
         {!isLoading && classrooms.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-xl text-xs text-indigo-700">
+          <div className="flex items-center gap-2 px-3 py-2 bg-accent/5 border border-accent/20 rounded-xl text-xs text-accent">
             <span aria-hidden="true">🏫</span>
             <span>
               你在 <strong>{classrooms.length}</strong> 個班級：
@@ -419,7 +419,7 @@ const MyAssignments: React.FC = () => {
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
                 classroomFilter === 'all'
                   ? 'bg-accent text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
               }`}
             >
               全部
@@ -431,7 +431,7 @@ const MyAssignments: React.FC = () => {
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
                   classroomFilter === name
                     ? 'bg-accent text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
                 }`}
               >
                 {name}
@@ -441,7 +441,7 @@ const MyAssignments: React.FC = () => {
         )}
 
         {/* Filter tabs + sort */}
-        <div className="flex items-center justify-between gap-2 border-b border-gray-200">
+        <div className="flex items-center justify-between gap-2 border-b border-[#E5E0D5]">
           <nav className="flex -mb-px" aria-label="Filter tabs">
             {FILTER_TABS.map((tab) => (
               <button
@@ -450,7 +450,7 @@ const MyAssignments: React.FC = () => {
                 className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
                   activeFilter === tab.key
                     ? 'border-accent text-accent'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-on-surface-variant hover:text-on-surface hover:border-[#E5E0D5]'
                 }`}
               >
                 {tab.label}
@@ -460,7 +460,7 @@ const MyAssignments: React.FC = () => {
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="mb-px text-xs text-gray-600 border border-gray-200 rounded-md px-2 py-1 bg-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
+            className="mb-px text-xs text-on-surface-variant border border-[#E5E0D5] rounded-md px-2 py-1 bg-surface-container-lowest cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
             aria-label="排序方式"
           >
             {SORT_OPTIONS.map((opt) => (
@@ -473,7 +473,7 @@ const MyAssignments: React.FC = () => {
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+          <div className="bg-error/5 border border-error/20 text-error text-sm rounded-lg px-4 py-3">
             {error}
             <button onClick={() => setError('')} className="ml-2 underline cursor-pointer">
               關閉
@@ -485,10 +485,10 @@ const MyAssignments: React.FC = () => {
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-card p-4">
-                <div className="h-5 bg-gray-200 animate-pulse rounded w-2/3 mb-3" />
-                <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3 mb-2" />
-                <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4" />
+              <div key={i} className="bg-surface-container-lowest border border-[#E5E0D5] rounded-2xl p-4">
+                <div className="h-5 bg-surface-container animate-pulse rounded w-2/3 mb-3" />
+                <div className="h-4 bg-surface-container animate-pulse rounded w-1/3 mb-2" />
+                <div className="h-4 bg-surface-container animate-pulse rounded w-1/4" />
               </div>
             ))}
           </div>
@@ -505,14 +505,14 @@ const MyAssignments: React.FC = () => {
                 />
               </svg>
             </div>
-            <p className="text-sm font-medium text-gray-700 mb-1">
+            <p className="text-sm font-medium text-on-surface mb-1">
               {activeFilter === 'pending'
                 ? '目前沒有待完成的作業'
                 : activeFilter === 'completed'
                   ? '還沒有已完成的作業'
                   : '還沒有已批改的作業'}
             </p>
-            <p className="text-xs text-gray-500">老師指派的作業會顯示在這裡</p>
+            <p className="text-xs text-on-surface-variant">老師指派的作業會顯示在這裡</p>
           </div>
         ) : (
           /* Assignment cards */
@@ -524,29 +524,29 @@ const MyAssignments: React.FC = () => {
               return (
                 <div
                   key={a.assignment_id}
-                  className="bg-white rounded-2xl shadow-card p-4"
+                  className="bg-surface-container-lowest border border-[#E5E0D5] rounded-2xl shadow-editorial p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                        <h3 className="text-sm font-medium text-on-surface truncate">
                           {a.title || a.story_title}
                         </h3>
                         {statusBadge(a.status)}
                       </div>
 
                       {a.title && a.title !== a.story_title && (
-                        <p className="text-xs text-gray-500 mt-0.5">
+                        <p className="text-xs text-on-surface-variant mt-0.5">
                           課文：{a.story_title}
                         </p>
                       )}
 
                       {/* Classroom + teacher badge */}
                       <div className="flex items-center gap-1.5 mt-1.5">
-                        <span className="text-xs text-indigo-600 font-medium">
+                        <span className="text-xs text-accent font-medium">
                           📍 {a.classroom_name}
                           {teacherName && (
-                            <span className="text-indigo-400 font-normal">｜{teacherName}指派</span>
+                            <span className="text-accent/60 font-normal">｜{teacherName}指派</span>
                           )}
                         </span>
                       </div>
@@ -555,12 +555,12 @@ const MyAssignments: React.FC = () => {
                         {a.due_date && (
                           <span
                             className={`text-xs ${
-                              isOverdue(a.due_date) ? 'text-red-600 font-medium' : 'text-gray-500'
+                              isOverdue(a.due_date) ? 'text-error font-medium' : 'text-on-surface-variant'
                             }`}
                           >
                             截止：{formatDate(a.due_date)}
                             {isOverdue(a.due_date) && (
-                              <span className="ml-1 inline-block px-1 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                              <span className="ml-1 inline-block px-1 py-0.5 rounded text-xs font-medium bg-error/10 text-error">
                                 已逾期
                               </span>
                             )}
@@ -568,13 +568,13 @@ const MyAssignments: React.FC = () => {
                         )}
 
                         {a.score != null && (
-                          <span className="text-xs text-gray-700 font-medium">
+                          <span className="text-xs text-on-surface font-medium">
                             分數：{Math.round(a.score)}%
                           </span>
                         )}
 
                         {a.submitted_at && (
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-on-surface-variant">
                             提交於 {formatDate(a.submitted_at)}
                           </span>
                         )}
@@ -582,17 +582,17 @@ const MyAssignments: React.FC = () => {
 
                       {/* Issue #424: per-student teacher feedback */}
                       {a.teacher_feedback && (
-                        <div className="mt-2 px-2.5 py-2 bg-purple-50 border border-purple-100 rounded-lg">
-                          <p className="text-xs font-medium text-purple-700 mb-0.5">老師評語</p>
-                          <p className="text-xs text-gray-700">{a.teacher_feedback}</p>
+                        <div className="mt-2 px-2.5 py-2 bg-tertiary/5 border border-tertiary/20 rounded-lg">
+                          <p className="text-xs font-medium text-tertiary mb-0.5">老師評語</p>
+                          <p className="text-xs text-on-surface-variant">{a.teacher_feedback}</p>
                         </div>
                       )}
 
                       {assignmentSteps.length > 0 && (
                         <div className="mt-2.5">
                           <div className="flex items-center justify-between mb-1">
-                            <p className="text-[11px] text-gray-500">學習關卡進度</p>
-                            <p className="text-[11px] text-gray-400">
+                            <p className="text-[11px] text-on-surface-variant">學習關卡進度</p>
+                            <p className="text-[11px] text-on-surface-variant/60">
                               {completedSteps.size}/{assignmentSteps.length}
                             </p>
                           </div>
@@ -605,7 +605,7 @@ const MyAssignments: React.FC = () => {
                       )}
 
                       {a.description && (
-                        <p className="text-xs text-gray-500 mt-1.5 line-clamp-2">
+                        <p className="text-xs text-on-surface-variant mt-1.5 line-clamp-2">
                           {a.description}
                         </p>
                       )}
