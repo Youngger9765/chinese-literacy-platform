@@ -8,11 +8,11 @@
  *   - 筆順字帖  → /write          (no story needed)
  *   - 聽寫挑戰  → /library        (needs story — goes to library first)
  *   - 造句練習  → /library        (needs story)
- *   - 字典查詢  → /vocabulary     (no story needed)
+ *   - 字典查詢  → /dictionary     (no story needed, Issue #1230)
  *
  * "看更多 →" links to /tools (PracticeToolbox page, Issue #1153).
  *
- * Issue #1153
+ * Issue #1153 + #1230
  */
 
 import React from 'react';
@@ -50,9 +50,9 @@ const QUICK_CARDS: PracticeCard[] = [
   },
   {
     icon: '📖',
-    title: '我的生字',
-    description: '看看哪些字需要加強',
-    route: '/vocabulary',
+    title: '字典查詢',
+    description: '查字義、注音、例句',
+    route: '/dictionary',
   },
 ];
 

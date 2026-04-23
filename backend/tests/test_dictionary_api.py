@@ -2,8 +2,10 @@
 Tests for the Dictionary API (issue #259: MOE dictionary integration).
 
 Covers:
-- GET  /api/dictionary/character/{character}  — single character lookup
-- POST /api/dictionary/batch                  — batch lookup
+- GET  /api/dictionary/character/{character}  — single character lookup (auth required)
+- GET  /api/dictionary/lookup?chars=XY        — multi-char GET convenience endpoint (auth required, issue #1230)
+- POST /api/dictionary/batch                  — batch lookup (auth required)
+- Auth gate: unauthenticated requests return 401/403
 
 Uses SQLite in-memory DB and mocked HTTP calls to avoid external API dependency.
 
@@ -28,12 +30,17 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import get_db
 from app.models import Base
+from app.models.user import User
+from app.auth.dependencies import get_current_user
 from app.services.dictionary_service import (
     _strip_markup,
     _parse_moe_response,
     lookup_character,
     lookup_characters_batch,
 )
+
+# Fake authenticated user for all route-level tests
+_FAKE_USER = User(id=1, email="dict-test-user", name="Test Student", password_hash="x")
 
 
 # ---------------------------------------------------------------------------
@@ -74,9 +81,27 @@ def client(db):
             pass
 
     app.dependency_overrides[get_db] = override_get_db
+    # Bypass auth: all dict route tests assume a logged-in student
+    app.dependency_overrides[get_current_user] = lambda: _FAKE_USER
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def unauthenticated_client(db):
+    """Client with NO auth override — verifies 401/403 is returned."""
+    def override_get_db():
+        try:
+            yield db
+        finally:
+            pass
+
+    app.dependency_overrides[get_db] = override_get_db
+    # Explicitly do NOT override get_current_user
+    with TestClient(app, raise_server_exceptions=False) as c:
+        yield c
+    app.dependency_overrides.pop(get_db, None)
 
 
 # ---------------------------------------------------------------------------
@@ -383,3 +408,106 @@ class TestBatchLookupEndpoint:
     def test_batch_rejects_empty_list(self, client):
         resp = client.post("/api/dictionary/batch", json={"characters": []})
         assert resp.status_code == 422
+
+
+# ===========================================================================
+# GET /api/dictionary/lookup?chars=  (Issue #1230)
+# ===========================================================================
+
+class TestLookupEndpoint:
+    def test_returns_200_for_multi_char_query(self, client):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = SAMPLE_MOE_RESPONSE
+
+        with patch("app.services.dictionary_service.httpx.get", return_value=mock_response):
+            resp = client.get("/api/dictionary/lookup?chars=攻擊")
+
+        assert resp.status_code == 200
+
+    def test_lookup_response_has_results_list(self, client):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = SAMPLE_MOE_RESPONSE
+
+        with patch("app.services.dictionary_service.httpx.get", return_value=mock_response):
+            resp = client.get("/api/dictionary/lookup?chars=攻擊")
+
+        data = resp.json()
+        assert "results" in data
+        # 攻 and 擊 = 2 unique CJK chars
+        assert len(data["results"]) == 2
+
+    def test_lookup_deduplicates_chars(self, client):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = SAMPLE_MOE_RESPONSE
+
+        with patch("app.services.dictionary_service.httpx.get", return_value=mock_response):
+            resp = client.get("/api/dictionary/lookup?chars=山山山")
+
+        data = resp.json()
+        # 山 repeated 3 times → deduplicated to 1
+        assert len(data["results"]) == 1
+
+    def test_lookup_single_char(self, client):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = SAMPLE_MOE_RESPONSE
+
+        with patch("app.services.dictionary_service.httpx.get", return_value=mock_response):
+            resp = client.get("/api/dictionary/lookup?chars=山")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["results"]) == 1
+        assert data["results"][0]["character"] == "山"
+
+    def test_lookup_result_schema(self, client):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = SAMPLE_MOE_RESPONSE
+
+        with patch("app.services.dictionary_service.httpx.get", return_value=mock_response):
+            resp = client.get("/api/dictionary/lookup?chars=水")
+
+        entry = resp.json()["results"][0]
+        assert "character" in entry
+        assert "zhuyin" in entry
+        assert "stroke_count" in entry
+        assert "definitions" in entry
+        assert "cached" in entry
+        assert "not_found" in entry
+
+    def test_lookup_rejects_more_than_20_unique_chars(self, client):
+        # 21 unique CJK characters
+        chars = "一二三四五六七八九十甲乙丙丁戊己庚辛壬癸黃"
+        resp = client.get(f"/api/dictionary/lookup?chars={chars}")
+        assert resp.status_code == 422
+
+    def test_lookup_rejects_missing_chars_param(self, client):
+        resp = client.get("/api/dictionary/lookup")
+        assert resp.status_code == 422
+
+
+# ===========================================================================
+# Auth gate — all endpoints require authentication (Issue #1230)
+# ===========================================================================
+
+class TestAuthGate:
+    """Verify endpoints return 401/403 without a valid token."""
+
+    def test_get_character_requires_auth(self, unauthenticated_client):
+        resp = unauthenticated_client.get("/api/dictionary/character/山")
+        assert resp.status_code in (401, 403)
+
+    def test_lookup_requires_auth(self, unauthenticated_client):
+        resp = unauthenticated_client.get("/api/dictionary/lookup?chars=山")
+        assert resp.status_code in (401, 403)
+
+    def test_batch_requires_auth(self, unauthenticated_client):
+        resp = unauthenticated_client.post(
+            "/api/dictionary/batch",
+            json={"characters": ["山"]},
+        )
+        assert resp.status_code in (401, 403)

@@ -615,20 +615,37 @@ export interface DictionaryBatchResponse {
   results: DictionaryEntry[];
 }
 
-/** Look up a single Chinese character from the MOE dictionary (cached). No auth required. */
+// Token key must match AuthContext TOKEN_KEY
+const _DICT_TOKEN_KEY = 'lingoleap_token';
+
+function _getDictAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem(_DICT_TOKEN_KEY);
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/** Look up a single Chinese character from the MOE dictionary (cached). Requires auth. */
 export async function lookupCharacter(character: string): Promise<DictionaryEntry> {
   const res = await fetch(
     `${API_BASE}/api/dictionary/character/${encodeURIComponent(character)}`,
+    { headers: _getDictAuthHeaders() },
   );
   if (!res.ok) throw new Error(`lookupCharacter failed: ${res.status}`);
   return res.json();
 }
 
-/** Batch look up multiple Chinese characters (max 20, deduplication applied). No auth required. */
+/** Batch look up multiple Chinese characters via GET ?chars= (max 20). Requires auth. */
+export async function lookupCharactersQuery(chars: string): Promise<DictionaryBatchResponse> {
+  const url = `${API_BASE}/api/dictionary/lookup?chars=${encodeURIComponent(chars)}`;
+  const res = await fetch(url, { headers: _getDictAuthHeaders() });
+  if (!res.ok) throw new Error(`lookupCharactersQuery failed: ${res.status}`);
+  return res.json();
+}
+
+/** Batch look up multiple Chinese characters (max 20, deduplication applied). Requires auth. */
 export async function lookupCharactersBatch(characters: string[]): Promise<DictionaryBatchResponse> {
   const res = await fetch(`${API_BASE}/api/dictionary/batch`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ..._getDictAuthHeaders() },
     body: JSON.stringify({ characters }),
   });
   if (!res.ok) throw new Error(`lookupCharactersBatch failed: ${res.status}`);
