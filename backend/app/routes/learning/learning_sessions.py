@@ -30,6 +30,12 @@ from ...schemas.session import (
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+# Hard cap on reading-history SQL fetch to bound memory even for abnormally
+# re-read stories. A student reading the same text 500+ times is abusive; we
+# surface up to MAX_READING_HISTORY_FETCH rows, then let the caller-supplied
+# limit cap the final result set.  See #1262 for the heuristic rationale.
+MAX_READING_HISTORY_FETCH = 500
+
 
 def _is_assignment_session(
     session: LearningSession,
@@ -324,11 +330,13 @@ def get_reading_history(
         )
     )
 
-    # Push a SQL-level cap to avoid loading the full history for popular stories.
-    # We fetch (limit + 50) rows as a buffer because the Python-side learning_source
-    # filter (which also checks step_progress.__meta.source) may drop some rows.
-    # The final sessions[:limit] slice still caps the result to the requested limit.
-    sql_fetch_limit = limit + 50
+    # Cap SQL fetch: prevent memory blowup when a single student has hundreds of
+    # sessions on the same story, but leave headroom for the Python-side
+    # learning_source filter (which checks step_progress.__meta.source — a JSON
+    # path not portably expressible in SQLite tests). Cap at MAX_READING_HISTORY_FETCH
+    # regardless of requested limit; if the caller asks for more than that we still
+    # honour their slice but prevent unbounded DB reads.
+    sql_fetch_limit = min(limit + 50, MAX_READING_HISTORY_FETCH)
     all_sessions = (
         sessions_query
         .order_by(LearningSession.started_at.asc())

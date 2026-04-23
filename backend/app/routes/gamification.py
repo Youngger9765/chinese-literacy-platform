@@ -12,14 +12,13 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user, get_user_org_ids
 from ..database import get_db
 from ..dependencies.tenant import is_system_admin
 from ..models.school import Classroom, ClassroomStudent, School
-from ..models.user import Role, User, UserRole
+from ..models.user import User, UserRole
 from ..services.gamification_service import (
     award_xp,
     get_classroom_leaderboard,
@@ -53,29 +52,6 @@ class SessionCompleteRequest(BaseModel):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
-_ADMIN_ROLES = frozenset({"system_admin", "org_admin", "org_owner"})
-
-
-def _user_has_admin_role(db: Session, user_id: int) -> bool:
-    """Return True if the user has any active admin-level role.
-
-    Issues a single SQL COUNT query (joined to the roles table) instead of
-    loading all UserRole rows into Python and doing a set intersection.
-    Before this fix each call emitted N lazy SQL fetches — one per UserRole row.
-    """
-    count = (
-        db.query(func.count(UserRole.id))
-        .join(Role, Role.id == UserRole.role_id)
-        .filter(
-            UserRole.user_id == user_id,
-            UserRole.is_active == True,
-            Role.name.in_(_ADMIN_ROLES),
-        )
-        .scalar()
-    )
-    return (count or 0) > 0
-
 
 def _get_user_org_ids_from_db(user_id: int, db: Session) -> set[str]:
     """Return the set of org scope_ids for a given user (loaded from DB).
