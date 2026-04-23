@@ -1,6 +1,19 @@
 import { useState, useRef, useCallback } from 'react';
 import { cancelTts, cleanForTts, pauseCurrentTts, resumeCurrentTts, speakTextWithProgress, TtsProgressInfo } from '../services/ttsApi';
 
+// Token key must match AuthContext TOKEN_KEY ('lingoleap_token').
+const _TTS_TOKEN_KEY = 'lingoleap_token';
+
+/** Read JWT token from localStorage and return Authorization header if present. */
+function _ttsAuthHeaders(): Record<string, string> {
+  try {
+    const token = localStorage.getItem(_TTS_TOKEN_KEY);
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
+
 /**
  * Manages TTS (Text-to-Speech) audio playback for LiveTutor.
  *
@@ -154,7 +167,7 @@ export function useTtsPlayback(
     // Try Cloud TTS first via <audio> element for better control
     fetch(`${API_BASE}/api/tts/synthesize`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ..._ttsAuthHeaders() },
       body: JSON.stringify({ text }),
     })
       .then((res) => {

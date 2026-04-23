@@ -16,6 +16,24 @@
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
+// Token key must match AuthContext TOKEN_KEY ('lingoleap_token').
+const TOKEN_KEY = 'lingoleap_token';
+
+/** Read the JWT token from localStorage (same source as AuthContext). */
+function _getAuthToken(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/** Build Authorization header if a token is available. */
+function _authHeaders(): Record<string, string> {
+  const token = _getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 // In-memory URL cache: sentence text → blob URL.
 // Avoids re-fetching the same sentence audio.
 // Blob URLs are released when the page unloads.
@@ -241,7 +259,7 @@ async function _fetchAudioUrl(sentence: string): Promise<string> {
   if (!audioUrl) {
     const response = await fetch(`${API_BASE}/api/tts/synthesize`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ..._authHeaders() },
       body: JSON.stringify({ text: sentence }),
     });
 

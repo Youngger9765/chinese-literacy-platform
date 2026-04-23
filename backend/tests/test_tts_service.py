@@ -7,6 +7,58 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+
+# ---------------------------------------------------------------------------
+# Shared helper: build a minimal FastAPI test app with auth bypassed.
+#
+# After Issue #1240 added get_current_user to the TTS endpoints, tests that
+# use a standalone mini-app (without a real DB) must override the dependency
+# so validation tests can still exercise Pydantic rejection (422) rather than
+# getting blocked at the auth layer (401).
+# ---------------------------------------------------------------------------
+
+def _make_tts_test_app():
+    """Return a FastAPI app with the TTS router and get_current_user stubbed out."""
+    from fastapi import FastAPI
+    from app.routes.tts import router
+    from app.auth.dependencies import get_current_user, require_role
+
+    # Minimal stub user — enough for the dependency to return without hitting the DB.
+    stub_user = MagicMock()
+    stub_user.id = 1
+
+    # Stub role-check dependency for /regenerate (which uses require_role("system_admin")).
+    stub_admin = MagicMock()
+    stub_admin.id = 1
+
+    mini_app = FastAPI()
+    mini_app.include_router(router)
+
+    # Override get_current_user → always succeeds (any-user endpoints).
+    mini_app.dependency_overrides[get_current_user] = lambda: stub_user
+
+    # require_role returns a Depends() object, not a callable — to stub it we
+    # need to override the inner _check_role dependency it wraps.  The simplest
+    # approach is to capture the dependency object at import time and override it.
+    # However, require_role("system_admin") is called at route-decoration time so
+    # the Depends() is already baked in.  We override get_current_user (which
+    # _check_role itself depends on) — this is sufficient because the role check
+    # queries the DB which doesn't exist in mini-app tests; skipping via override
+    # of get_current_user alone won't bypass require_role.
+    #
+    # Strategy: also override the DB dependency so the role query returns admin.
+    # Easiest: completely override require_role's inner dependency (_check_role).
+    # We locate it via the route's dependencies list.
+    from fastapi import routing as fastapi_routing
+    import fastapi
+    for route in mini_app.routes:
+        if hasattr(route, "dependencies"):
+            for dep in route.dependencies:
+                if hasattr(dep, "dependency") and hasattr(dep.dependency, "__name__") and dep.dependency.__name__ == "_check_role":
+                    mini_app.dependency_overrides[dep.dependency] = lambda: stub_admin
+
+    return mini_app
+
 # ---------------------------------------------------------------------------
 # 1. tts_service tests — cache key
 # ---------------------------------------------------------------------------
@@ -172,11 +224,7 @@ class TestTTSPydanticValidation:
     """TTSRequest model must reject empty text and text >5000 chars."""
 
     def _make_app(self):
-        from fastapi import FastAPI
-        from app.routes.tts import router
-        app = FastAPI()
-        app.include_router(router)
-        return app
+        return _make_tts_test_app()
 
     def test_empty_text_rejected(self):
         from fastapi.testclient import TestClient
@@ -427,10 +475,6 @@ class TestTTSRoute:
     @patch("app.services.tts_service._get_tts_client")
     def test_synthesize_returns_audio_response(self, mock_get_client, mock_gcs_put, mock_gcs_get):
         from fastapi.testclient import TestClient
-        from app.routes.tts import router
-        from fastapi import FastAPI
-        app = FastAPI()
-        app.include_router(router)
 
         mock_client = MagicMock()
         resp = MagicMock()
@@ -438,30 +482,22 @@ class TestTTSRoute:
         mock_client.synthesize_speech.return_value = resp
         mock_get_client.return_value = mock_client
 
-        client = TestClient(app)
+        client = TestClient(_make_tts_test_app())
         response = client.post("/api/tts/synthesize", json={"text": "你好世界"})
         assert response.status_code == 200
         assert response.headers["content-type"].startswith("audio/")
 
     def test_synthesize_rejects_empty_text(self):
         from fastapi.testclient import TestClient
-        from app.routes.tts import router
-        from fastapi import FastAPI
-        app = FastAPI()
-        app.include_router(router)
 
-        client = TestClient(app)
+        client = TestClient(_make_tts_test_app())
         response = client.post("/api/tts/synthesize", json={"text": ""})
         assert response.status_code == 422  # validation error
 
     def test_synthesize_rejects_too_long_text(self):
         from fastapi.testclient import TestClient
-        from app.routes.tts import router
-        from fastapi import FastAPI
-        app = FastAPI()
-        app.include_router(router)
 
-        client = TestClient(app)
+        client = TestClient(_make_tts_test_app())
         long_text = "你" * 5001
         response = client.post("/api/tts/synthesize", json={"text": long_text})
         assert response.status_code == 422
@@ -851,11 +887,7 @@ class TestRegenerateEndpoint:
     """POST /api/tts/regenerate must delete cache and re-synthesise."""
 
     def _make_app(self):
-        from fastapi import FastAPI
-        from app.routes.tts import router
-        app = FastAPI()
-        app.include_router(router)
-        return app
+        return _make_tts_test_app()
 
     @patch("app.services.tts_service._gcs_get", return_value=None)
     @patch("app.services.tts_service._gcs_put")
