@@ -1,9 +1,10 @@
 /**
- * StoryCard — individual story card with difficulty badge and completion indicator.
- * Issue #25
+ * StoryCard — individual story card with difficulty badge, completion indicator,
+ * and per-student status label (Issue #1249).
  */
 import React from 'react';
 import { Story } from '../../types';
+import type { LibraryStoryStatus } from '../../services/progressApi';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -25,26 +26,41 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, { label: string; className: s
   hard:   { label: '進階', className: 'bg-red-100 text-red-700' },
 };
 
+// Status badge config for Issue #1249
+const STATUS_BADGE: Record<LibraryStoryStatus, { label: string; className: string }> = {
+  assigned:    { label: '作業中', className: 'bg-orange-100 text-orange-700 border border-orange-200' },
+  in_progress: { label: '練習中', className: 'bg-blue-100 text-blue-700 border border-blue-200' },
+  completed:   { label: '已完成', className: 'bg-green-100 text-green-700 border border-green-200' },
+};
+
 interface StoryCardProps {
   story: Story;
   isLoading: boolean;
   isCompleted: boolean;
   onClick: () => void;
+  /** Per-student status label from /api/library/status (Issue #1249). Absent = not started. */
+  userStatus?: LibraryStoryStatus;
   /** Estimated XP for completing this story (e.g. 60). Shown as a small badge. */
   estimatedXP?: number;
   /** When true, shows a "level up soon" hint instead of the XP estimate. */
   closeToLevelUp?: boolean;
 }
 
-const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, onClick, estimatedXP, closeToLevelUp }) => {
+const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, onClick, userStatus, estimatedXP, closeToLevelUp }) => {
   const diff = getDifficulty(story);
   const diffConfig = DIFFICULTY_CONFIG[diff];
+  const statusBadge = userStatus ? STATUS_BADGE[userStatus] : null;
+
+  // Card border reflects status: assigned = orange, completed = green, else default
+  const borderClass = userStatus === 'assigned'
+    ? 'border-orange-300 hover:border-orange-400'
+    : isCompleted
+      ? 'border-green-300 hover:border-green-400'
+      : 'border-gray-200 hover:border-accent';
 
   return (
     <div
-      className={`bg-white rounded-xl overflow-hidden border transition-all cursor-pointer group shadow-sm ${
-        isCompleted ? 'border-green-300 hover:border-green-400' : 'border-gray-200 hover:border-accent'
-      } ${isLoading ? 'opacity-60 pointer-events-none' : ''}`}
+      className={`bg-white rounded-xl overflow-hidden border transition-all cursor-pointer group shadow-sm ${borderClass} ${isLoading ? 'opacity-60 pointer-events-none' : ''}`}
       onClick={onClick}
     >
       <div className="h-40 overflow-hidden relative">
@@ -64,12 +80,10 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
             {diffConfig.label}
           </div>
         </div>
-        {/* Completed checkmark */}
-        {isCompleted && (
-          <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shadow">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
+        {/* Status badge (top-left) — Issue #1249 */}
+        {statusBadge && (
+          <div className={`absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full ${statusBadge.className}`}>
+            {statusBadge.label}
           </div>
         )}
         {/* Loading overlay */}
@@ -87,7 +101,7 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, isLoading, isCompleted, on
               {story.genre}
             </span>
           )}
-          {isCompleted && (
+          {isCompleted && !userStatus && (
             <span className="text-xs text-green-600 font-medium">已完成</span>
           )}
         </div>
