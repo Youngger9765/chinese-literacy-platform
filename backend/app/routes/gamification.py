@@ -96,6 +96,25 @@ def _get_user_org_ids_from_db(user_id: int, db: Session) -> set[str]:
     return {r.scope_id for r in rows}
 
 
+def _get_user_org_ids_from_db(user_id: int, db: Session) -> set[str]:
+    """Return the set of org scope_ids for a given user (loaded from DB).
+
+    Used to resolve the org(s) a student belongs to without relying on
+    eagerly-loaded relationships.
+    """
+    rows = (
+        db.query(UserRole.scope_id)
+        .filter(
+            UserRole.user_id == user_id,
+            UserRole.is_active == True,
+            UserRole.scope_type == "organization",
+            UserRole.scope_id.isnot(None),
+        )
+        .all()
+    )
+    return {r.scope_id for r in rows}
+
+
 def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
     """Raise 403 if the current user cannot view the given student's gamification data.
 
