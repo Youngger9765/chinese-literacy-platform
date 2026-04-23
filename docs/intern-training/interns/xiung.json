@@ -3,7 +3,7 @@
   "github": "stgst",
   "email": "steven19790906@gmail.com",
   "startDate": "2026-03-06",
-  "lastReview": "2026-04-09",
+  "lastReview": "2026-04-23",
   "skills": {
     "1": {
       "level": 3,
@@ -101,12 +101,12 @@
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "多次修改程式碼，能理解程式邏輯。"
+          "reason": "多次修改程式碼，能理解程式邏輯"
         },
         {
           "date": "2026-03-13",
           "level": 5,
-          "reason": "能快速定位問題並提出解決方案。"
+          "reason": "能快速定位問題並提出解決方案"
         }
       ],
       "maxLevel": 5
@@ -127,23 +127,28 @@
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "獨立開發生字練習 UX，完成度高。"
+          "reason": "獨立開發生字練習 UX，完成度高"
         },
         {
           "date": "2026-03-13",
           "level": 5,
-          "reason": "多次獨立完成元件開發，並改善 UX。"
+          "reason": "多次獨立完成元件開發，並改善 UX"
         }
       ],
       "maxLevel": 5
     },
     "8": {
-      "level": 2,
+      "level": 4,
       "history": [
         {
           "date": "2026-03-10",
           "level": 2,
           "reason": "PR #229 修改含 Tailwind 樣式的元件，理解 utility-first 概念與 class 組合方式"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "PR #1087 設計完整設計系統：新增 surface token、btn-immersive、glass utility class、glassmorphic top bar。引入全域 [data-zhuyin-active] CSS 選擇器取代各元件 inline style，展現對 Tailwind 與全域 CSS 策略的統籌能力。PR #1130 改用 shadow-[inset_0_-3px_0_0_#ef4444] 精準控制紅線行為，規避 underline 受 baseline/letterSpacing 影響的限制，顯示對 Tailwind arbitrary value 的深度掌握"
         }
       ]
     },
@@ -188,12 +193,12 @@
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "多次修復 bug，能獨立 debug。"
+          "reason": "多次修復 bug，能獨立 debug"
         },
         {
           "date": "2026-03-13",
           "level": 5,
-          "reason": "能獨立 debug 並修復多種 bug。"
+          "reason": "能獨立 debug 並修復多種 bug"
         }
       ],
       "maxLevel": 5
@@ -209,18 +214,18 @@
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "能使用 useMemo 優化效能。"
+          "reason": "能使用 useMemo 優化效能"
         },
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "能熟練運用 useMemo, useCallback。"
+          "reason": "能熟練運用 useMemo, useCallback"
         }
       ],
       "maxLevel": 5
     },
     "12": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -232,11 +237,16 @@
           "date": "2026-04-08",
           "level": 3,
           "reason": "PR #959（造句以詞為單位）涉及前後端 API 串接修改：後端 vocabulary 資料結構的理解（字 vs 詞的區分）+ 前端 API call 參數調整 + 預生成快取 key 對齊。PR #969（防複製貼上）在後端加入 AI 批改驗證邏輯，理解 Gemini API 回應結構並加入真實性檢查。兩個 PR 都跨前後端完整修改"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "PR #1128 step 5 部件教學掛載時批次打 /api/dictionary/batch 取得 8 個相關字 chip 的 moedict 釋義，用 module-level Map 快取避免重複請求，字義顯示設計三層優先序（手寫 meaning → moedict 短釋義 → 通用 fallback）。同時協調三個資料來源（radicals.ts、radical-meanings.json、moedict API）在同一教學流程中無縫整合。首次獨立設計多來源資料整合的 API 串接架構"
         }
       ]
     },
     "13": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -248,6 +258,11 @@
           "date": "2026-04-09",
           "level": 3,
           "reason": "PR #959 重新設計 SentencePractice 的 props 資料流：從接收 chars（字）改為接收 words（詞），上游 App.tsx 需傳遞 vocabulary 詞組，下游需同步修改 cache key 和 API 呼叫參數。PR #969 進一步在元件中加入 paste 偵測邏輯和 UI 提示，展現在既有元件上疊加功能而不破壞原有架構的設計能力"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "PR #1087 是迄今規模最大的 PR（+3205/-4777）：實作沉浸式學習 shell，建立完整設計系統（surface token、glass utility、btn-immersive），引入全域 [data-zhuyin-active] 取代各元件 inline style，大幅瘦身 ComprehensionChat/VocabPractice/ListeningPractice 等元件（-1425 行）。展現跨元件架構整合與設計系統建立能力。PR #1128 step 5 部件教學協調三個資料來源在同一流程中整合，加入 module-level Map 快取與三層字義優先序，元件設計完整"
         }
       ]
     },
@@ -258,7 +273,7 @@
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "能給出有建設性的 code review 意見。"
+          "reason": "能給出有建設性的 code review 意見"
         }
       ]
     },
@@ -269,12 +284,12 @@
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "能獨立完成功能開發。"
+          "reason": "能獨立完成功能開發"
         },
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "獨立完成多個 feature 開發。"
+          "reason": "獨立完成多個 feature 開發"
         }
       ]
     },
@@ -285,17 +300,17 @@
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "開始有優化程式碼的意識。"
+          "reason": "開始有優化程式碼的意識"
         },
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "能進行效能優化，例如使用 useMemo。"
+          "reason": "能進行效能優化，例如使用 useMemo"
         }
       ]
     },
     "18": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
@@ -307,17 +322,22 @@
           "date": "2026-04-09",
           "level": 2,
           "reason": "PR #959 和 #969 都完整跨越前後端：前端元件 props 修改 → API 呼叫參數對齊 → 後端 route 邏輯 → AI service 整合 → 預生成快取 key 一致性。特別是 #969 的 AI 真實性驗證需要理解 Gemini API 的 prompt → response → 二次檢查的完整鏈路。兩個 PR 都在正確的層級做修改，沒有 frontend patch 的壞習慣"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 3,
+          "reason": "PR #1130 是架構理解的關鍵證據：診斷 PR #1087 把 data-para-idx 從 p 移到外層 section 後，selection walker 讀到段落號碼徽章字元導致 charStart 每次 +2、選取偏移的 regression bug。能從 HTML 結構變化追蹤到 JS DOM traversal 行為再到 UI 偏移現象，完整的跨層因果鏈。修復方式精準：把 attr 搬回 p，徽章保留在 [data-para-idx] 子樹外。這是從自己的 PR 造成的 regression 中正確做 root cause analysis 的能力"
         }
       ]
     }
   },
   "recommendations": [
-    "造句 UI 改側邊欄排版是 4/3 會議的 action item，確認是否已建 issue 或需要討論",
-    "元件設計（#13）升到 level 3，下一步挑戰抽取 custom hook（例如 useSentencePractice），管理造句的 state + cache + API 呼叫",
-    "測試（#14）尚未解鎖：下一個 PR 建議補寫一個 backend test case，例如驗證防複製貼上的 AI 真實性檢查邏輯",
-    "這週 4 個 PR 都是高品質的跨前後端工作，速度和品質都很好，可以開始挑戰更大 scope 的功能（例如完整的新頁面開發）"
+    "PR #1087 大幅瘦身元件（-1425 行）是很好的設計整理，但 #1141 全域 UX PR 卡在 review 超過一週。建議主動在 PR 留言說明目前卡點是什麼、是否需要討論，養成主動溝通 blocked 狀態的習慣",
+    "架構理解（#18）升到 level 3，靠的是從 HTML 結構追 JS DOM 行為的完整因果分析。下一步：#1097 全文朗讀和 #1098 聽力持久化都涉及前後端資料流設計，完成後可以嘗試畫出兩個步驟的 sequence diagram（level 4 的準備）",
+    "Tailwind（#8）和元件設計（#13）都升到 level 4，設計系統能力已確立。下一步挑戰：抽取 custom hook，例如把 #1128 部件教學的 moedict fetch + cache + fallback 邏輯抽成 useRadicalDictionary hook",
+    "這兩週 3 個 PR 雖然數量少，但 #1087 規模龐大（+3205/-4777）。下一步建議在 #1100 造句批改中嘗試更小粒度的 PR 拆分，練習把大功能分成 2~3 個獨立 PR（和靖杭的 DB 三連 PR 一樣）"
   ],
-  "summary": "4/3 至 4/9 間共 4 個 PR merge，全部跨前後端。PR #959（造句以詞為單位）和 #969（防複製貼上）是 4/3 會議核心決議的獨立實作。PR #913 精準將 rate limit 移到 cache miss 路徑。PR #912 修正 cache key 命中率。技能升級：#9（Git 工作流 level 4，PR 品質穩定高）、#13（元件設計 level 3）、#18（架構理解 level 2，跨前後端完整資料流追蹤）",
+  "summary": "4/10~4/23 共 3 個 PR merge（#1087、#1128、#1130）。數量少但 #1087 是迄今最大規模 PR（+3205/-4777），完整實作沉浸式學習 shell 並建立全站設計系統（surface token、glass utility、全域注音字型）。#1128 step 5 部件教學協調三個資料來源進入同一教學流程。#1130 精準追蹤並修復 #1087 引入的 HTML 結構 regression，展現 root cause analysis 能力。技能升級：#8 Tailwind（2→4）、#12 API 串接（3→4）、#13 元件設計（3→4）、#18 架構理解（2→3）。注意：#1141 全域 UX PR 已卡超過一週，需要 Young 協助或啟翔主動說明卡點",
   "issues": [
     {
       "id": "環境建置",
@@ -427,6 +447,50 @@
         "理解 Gemini API 回應結構並做二次檢查",
         "前後端協同防弊設計"
       ]
+    },
+    {
+      "id": "#1081",
+      "title": "沉浸式學習 shell + 設計系統整改（PR #1087）",
+      "date": "2026-04-16",
+      "type": "feature",
+      "contribution": "學習模式改為沉浸式全螢幕，移除 Header/Sidebar/StepperNav，改用 glassmorphic top bar + progress dots。設計系統切換至 Stitch Tactile Scholar palette，新增 surface token + btn-immersive + glass utility。注音字型改用 BpmfZihiSans-Bold，全域 [data-zhuyin-active] CSS 取代各元件 inline style。元件整體瘦身 -1425 行",
+      "skillsLearned": [8, 13, 16],
+      "highlights": [
+        "迄今最大規模 PR（+3205/-4777）",
+        "完整設計系統建立（token + utility + 全域 CSS 策略）",
+        "元件大幅精簡，去除冗余",
+        "注音字型全局切換不影響非學習頁面"
+      ],
+      "linesChanged": "+3205/-4777"
+    },
+    {
+      "id": "#1099",
+      "title": "Step 5 部件教學：點擊回饋 + 常用字相關字 + moedict 字義（PR #1128）",
+      "date": "2026-04-19",
+      "type": "feature",
+      "contribution": "修復點擊無資料部件時畫面靜默的問題，加入 fallback 卡片。重建 radical-meanings.json（227 個部件）+ radicals.ts（30→80 個熱門部件，依課文字頻排序 relatedChars）。掛載時批次打 /api/dictionary/batch 取 moedict 釋義，module-level Map 快取，字義三層優先序",
+      "skillsLearned": [12, 13, 18],
+      "highlights": [
+        "三個資料來源協調整合（radicals.ts + radical-meanings.json + moedict API）",
+        "module-level Map 快取設計",
+        "字義優先序設計（手寫→moedict→fallback）",
+        "PR 說明包含詳細的三層問題診斷"
+      ],
+      "linesChanged": "+7514/-1226"
+    },
+    {
+      "id": "#1095",
+      "title": "Step 1 閱讀標記選取偏移 + 紅線歪斜 + YAML 空白（PR #1130）",
+      "date": "2026-04-19",
+      "type": "bugfix",
+      "contribution": "診斷 PR #1087 把 data-para-idx 移到 section 導致 selection walker 讀到段落號碼字元，charStart 每次 +2 的 regression bug。修復方式：把 attr 搬回 p。紅線改用 shadow-[inset_0_-3px_0_0_#ef4444] 永遠水平。補寫 clean_lesson_whitespace.py 清理 6 篇 YAML 的誤植空白",
+      "skillsLearned": [10, 18],
+      "highlights": [
+        "從 HTML 結構變化追到 JS DOM 行為再到 UI 偏移的完整因果鏈",
+        "從自己的 PR 造成的 regression 正確做 root cause analysis",
+        "Tailwind arbitrary shadow 解決 underline 行為問題"
+      ],
+      "linesChanged": "+147/-23"
     }
   ]
 }
