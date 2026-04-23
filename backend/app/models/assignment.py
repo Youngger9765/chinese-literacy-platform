@@ -35,7 +35,7 @@ class Assignment(Base):
     classroom_id: Mapped[int] = mapped_column(
         ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
 
     # --- Text source (exactly one of the two must be set) ---
     # story_id: YAML platform text (lesson_number as string, e.g. "1", "57")
