@@ -233,10 +233,6 @@ async def grade_story_structure_endpoint(
     Rate limited: 5 requests per minute per user/IP (Issue #1253).
     Returns {results: [...], score: 0-100}.
     """
-    # Rate limit before the Gemini grading call (Issue #1253)
-    rl_key = f"ai:{get_client_key(request)}"
-    if not ai_rate_limiter.check(rl_key, max_requests=5, window_seconds=60):
-        raise HTTPException(status_code=429, detail="AI endpoint rate limit exceeded. Please wait before retrying.")
     try:
         numeric_id = int(normalize_story_slug(story_id))
     except (ValueError, TypeError):
@@ -251,6 +247,11 @@ async def grade_story_structure_endpoint(
             status_code=400,
             detail="Structure not yet generated. Call GET /api/stories/{story_id}/structure first.",
         )
+
+    # Rate limit only after all early-return checks pass, so failed pre-flight requests don't burn quota
+    rl_key = f"ai:{get_client_key(request)}"
+    if not ai_rate_limiter.check(rl_key, max_requests=5, window_seconds=60):
+        raise HTTPException(status_code=429, detail="AI endpoint rate limit exceeded. Please wait before retrying.")
 
     story_text = story.get("full_text") or "\n".join(story.get("paragraphs", []))
     answers_payload = [a.model_dump() for a in body.answers]

@@ -177,12 +177,20 @@ class TestStoryStructureGradeRateLimit:
         assert res.status_code == 401, f"Expected 401, got {res.status_code}: {res.text}"
 
     def test_rate_limit_exceeded_returns_429(self, client):
-        """When rate limiter blocks, endpoint must return 429."""
+        """When rate limiter blocks, endpoint must return 429.
+
+        The rate-limit check runs AFTER story lookup + cache validation (so
+        failed pre-flight requests don't burn quota). We mock both to reach
+        the rate-limit path.
+        """
         headers = _register_and_login(client, role="teacher")
 
-        # Patch the rate limiter to simulate limit exceeded
-        with patch("app.routes.stories.ai_rate_limiter") as mock_rl:
+        with patch("app.routes.stories.ai_rate_limiter") as mock_rl, \
+             patch("app.routes.stories.get_lesson_by_id") as mock_lesson, \
+             patch("app.routes.stories._get_cached_structure") as mock_cache:
             mock_rl.check.return_value = False
+            mock_lesson.return_value = {"id": 1, "full_text": "test", "paragraphs": ["test"]}
+            mock_cache.return_value = {"rows": []}
             res = client.post(
                 "/api/stories/1/structure/grade",
                 json={"answers": []},
