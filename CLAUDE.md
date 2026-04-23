@@ -135,6 +135,18 @@ cd frontend && npm install && npm run dev    # localhost:3000
 cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  # localhost:8000
 ```
 
+## 覆寫規則（防止反覆 bug）
+
+14 天內同類 bug 反覆出現，以下規則強制執行：
+
+| 情況 | 正確做法 | Skill |
+|------|---------|-------|
+| 新增或修改 `backend/app/models/*.py` | **先跑 `sqlalchemy-model-safety` checklist**（FK index / cascade / timestamps / alembic heads / idempotent DDL）；PostToolUse hook 會自動提醒 | `~/.claude/skills/sqlalchemy-model-safety/` |
+| 新增或修改有 LLM import 的 `backend/app/routes/*.py` | **先跑 `llm-endpoint-hardening` checklist**（rate-limit-after-cache / auth / input cap / fail-closed / reasoning field）；PostToolUse hook 會自動提醒 | `~/.claude/skills/llm-endpoint-hardening/` |
+| 新增 `backend/alembic/versions/*.py` migration | **先確認 `alembic heads` = 1**；PostToolUse hook 會自動執行 `alembic heads` 並在 multi-head 時 WARN | `~/.claude/skills/postgres-best-practices/` |
+
+> 相關 PostToolUse hooks 已在 `~/.claude/settings.json` 全域註冊（#1273）。
+
 ## 學習流程（7 步驟，StepperNav 定義）
 
 1. **簡介** — 課文背景介紹（Intro）
