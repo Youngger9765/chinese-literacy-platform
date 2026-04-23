@@ -2,6 +2,8 @@
 
 ALLOWED_ORIGINS: comma-separated frontend origins (Production: lingoleap-frontend-*.run.app, lingoleap-dev.web.app)
 """
+import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -37,6 +39,17 @@ class Settings(BaseSettings):
     @property
     def origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",")]
+
+    @property
+    def is_dev(self) -> bool:
+        """True when running in a non-production environment (development or preview).
+
+        Uses the ENVIRONMENT env var (same logic as main.py).
+        Default is "development" so local runs are always treated as dev.
+        Production Cloud Run sets ENVIRONMENT=production.
+        """
+        env = os.environ.get("ENVIRONMENT", "development")
+        return env in ("development", "preview")
 
 
 settings = Settings()
