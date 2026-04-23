@@ -14,10 +14,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..auth.dependencies import get_current_user
+from ..auth.dependencies import get_current_user, get_user_org_ids
 from ..database import get_db
-from ..models.school import Classroom, ClassroomStudent
-from ..models.user import User
+from ..dependencies.tenant import is_system_admin
+from ..models.school import Classroom, ClassroomStudent, School
+from ..models.user import User, UserRole
 from ..services.gamification_service import (
     award_xp,
     get_classroom_leaderboard,
@@ -53,14 +54,40 @@ class SessionCompleteRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+def _get_user_org_ids_from_db(user_id: int, db: Session) -> set[str]:
+    """Return the set of org scope_ids for a given user (loaded from DB).
+
+    Used to resolve the org(s) a student belongs to without relying on
+    eagerly-loaded relationships.
+    """
+    rows = (
+        db.query(UserRole.scope_id)
+        .filter(
+            UserRole.user_id == user_id,
+            UserRole.is_active == True,
+            UserRole.scope_type == "organization",
+            UserRole.scope_id.isnot(None),
+        )
+        .all()
+    )
+    return {r.scope_id for r in rows}
+
+
 def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
-    """Raise 403 if the current user is neither the student nor a teacher/admin."""
+    """Raise 403 if the current user cannot view the given student's gamification data.
+
+    Access is granted when the caller is:
+    - The student themselves
+    - A teacher who has the student in one of their classrooms
+    - system_admin (bypasses all scope checks)
+    - org_admin / org_owner scoped to an org that the student also belongs to
+
+    Cross-org access by org_admin is explicitly denied (個資法 §20).
+    """
     if current_user.id == student_id:
         return  # viewing own data
 
-    # Check if current user is a teacher who has this student
-    from ..models.school import ClassroomStudent, Classroom
-
+    # Teacher check: caller teaches a classroom that contains the student
     is_teacher = (
         db.query(Classroom)
         .join(ClassroomStudent, ClassroomStudent.classroom_id == Classroom.id)
@@ -74,18 +101,16 @@ def _assert_can_view(current_user: User, student_id: int, db: Session) -> None:
     if is_teacher:
         return
 
-    # Check admin roles
-    from ..models.user import UserRole
-    admin_roles = {"system_admin", "org_admin", "org_owner"}
-    user_role_names = {
-        ur.role.name
-        for ur in db.query(UserRole)
-        .filter(UserRole.user_id == current_user.id, UserRole.is_active == True)
-        .all()
-        if ur.role
-    }
-    if admin_roles & user_role_names:
+    # system_admin bypasses all scope checks
+    if is_system_admin(current_user):
         return
+
+    # org_admin / org_owner: must share at least one org with the student
+    caller_org_ids = set(get_user_org_ids(current_user) or [])
+    if caller_org_ids:
+        student_org_ids = _get_user_org_ids_from_db(student_id, db)
+        if caller_org_ids & student_org_ids:
+            return
 
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
@@ -179,18 +204,24 @@ def get_leaderboard(
         is not None
     )
     if not is_teacher and not is_student:
-        # Check admin roles
-        from ..models.user import UserRole
-        admin_roles = {"system_admin", "org_admin", "org_owner"}
-        user_role_names = {
-            ur.role.name
-            for ur in db.query(UserRole)
-            .filter(UserRole.user_id == current_user.id, UserRole.is_active == True)
-            .all()
-            if ur.role
-        }
-        if not (admin_roles & user_role_names):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        # system_admin bypasses all scope checks
+        if is_system_admin(current_user):
+            pass  # allowed
+        else:
+            # org_admin / org_owner: classroom's school must belong to caller's org
+            caller_org_ids = set(get_user_org_ids(current_user) or [])
+            if caller_org_ids:
+                school = db.query(School).filter(School.id == classroom.school_id).first()
+                if school and school.organization_id in caller_org_ids:
+                    pass  # allowed
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+                    )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+                )
 
     entries = get_classroom_leaderboard(db, classroom_id, limit=limit)
     return {
