@@ -1,8 +1,16 @@
 # LingoLeap Roadmap — 2026 Q1-Q3
 
-> 最後更新：2026-03-14
+> 最後更新：2026-04-23
 > 唯一真相來源：**GitHub Milestones** ([link](https://github.com/Youngger9765/chinese-literacy-platform/milestones))
 > 本文件為 milestone 的說明與策略補充，issue 清單以 GitHub 為準。
+
+## 📍 當前狀態（2026-04-23）
+
+- **Phase 5 測試驗收** ✅ 完成（延長 1 週，4/17 會議標誌收尾）
+- **Phase 6 UX 精修 + 合規** 🔧 進行中（4/21 ~ 5/18）
+- **5/1 Demo 準備中**（方大哥要的 3 帳號 + 學習單）
+- **Beta blocker 剩 1**：#461 email 同校驗證（等方大哥規則）
+- **近期重大改動**：Junyi Academy SSO 上線、Firebase multi-site 到 prod、backend N+1 衝刺（6 個修復 + DB index）、TTS 語意切分重做（regex → LLM）、學生首頁重設計（Book Jacket + 練習工具箱）
 
 ---
 
@@ -34,9 +42,10 @@
 | **Demo 2** — 自學模式 MVP | 3/16 | ✅ 完成 | 八步驟學習流程全部上線 |
 | **Demo 3** — 校班師生課完成 | 6/7 | ✅ 完成（提前） | Auth + 班級 + 教師端 + 持久化 |
 | **Demo 4** — 完整功能展示 | 7/5 | ✅ 完成（提前） | 作業系統 + 遊戲化 + 進階功能 44 PRs |
-| **Phase 5** — 測試驗收 + Bug | 4/20 | 🔧 進行中 | needs-testing 46→0, bugs 16→0 |
-| **Phase 6** — UX 精修 + 合規 | 5/18 | ⬜ | UX 分級 + 使用條款 + RWD 全頁面稽核 + UI 模組化 |
-| **Phase 7** — 安全 + 效能 + 技術品質 | 6/15 | ⬜ | 安全加固、CDN、API 重構、CI/CD 強化、自動化測試 |
+| **Phase 5** — 測試驗收 + Bug | 4/20 | ✅ 完成 | Beta roadmap 10/12 完成、4/17 會議收尾 |
+| **Phase 6** — UX 精修 + 合規 | 5/18 | 🔧 進行中（📍 NOW） | 分數移除、沈浸式設計、Junyi SSO、Firebase multi-site、TTS 重做 |
+| **5/1 Demo** — 教授 + 老師展示 | 5/1 | 🔧 準備中 | 3 帳號 + 學習單 + Gemini 3.1 TTS 評估 |
+| **Phase 7** — 安全 + 效能 + 技術品質 | 6/15 | 🔧 部分提前 | N+1 衝刺 ✅、DB index ✅、async TTS ✅；API v1、pytest 覆蓋 待做 |
 | **Phase 8** — 進階功能 + Beta 準備 | 7/13 | ⬜ | 錯題集、評量、行事曆、教師自動化、可觀測性、CMS、培訓 |
 | **Phase 9** — Beta 試點 + 交付 | 8/30 | ⬜ | 2-3 校試點、成效報告、最終交付 |
 
@@ -163,13 +172,13 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 ├──── 學校外展平行推進（4月起聯繫 CoLab KIST） ────────────────────────────────────┤
 ```
 
-| Phase | 期間 | 目標 | 關鍵指標 |
-|-------|------|------|---------|
-| **Phase 5** 測試驗收 + Bug 修復 | 3/12 ~ 4/20 (5.5w) | 全角色人工測試 + 關鍵 Bug 清零 | needs-testing 46→0, bugs 16→0 |
-| **Phase 6** UX 精修 + 合規 | 4/21 ~ 5/18 (4w) | UX 打磨 + 使用條款 + RWD 全頁面 + UI 模組化 | Tier 1 UX 全清, RWD 驗證, 共用元件庫 |
-| **Phase 7** 安全 + 效能 + 技術品質 | 5/19 ~ 6/15 (4w) | 安全加固 + CDN + API 重構 + CI/CD + 自動化測試 | API v1, pytest ≥60%, Lighthouse ≥80 |
-| **Phase 8** 進階功能 + Beta 準備 | 6/16 ~ 7/13 (4w) | 錯題集/評量/行事曆 + 教師自動化 + 可觀測性 + 培訓 | 壓力測試、Sentry+GA4、家長同意書、onboarding |
-| **Phase 9** Beta 試點 + 交付 | 7/14 ~ 8/30 (7w) | CoLab KIST 試點 + 迭代 + 交付 | 2-3 校、50+ 學生、教師滿意度 ≥4.0 |
+| Phase | 期間 | 目標 | 關鍵指標 | 狀態 |
+|-------|------|------|---------|------|
+| **Phase 5** 測試驗收 + Bug 修復 | 3/12 ~ 4/20 (5.5w) | 全角色人工測試 + 關鍵 Bug 清零 | needs-testing 46→0, bugs 16→0 | ✅ 完成 |
+| **Phase 6** UX 精修 + 合規 | 4/21 ~ 5/18 (4w) | 4/17 會議決議落地（分數移除、AI 語氣、報告分層）+ SSO + TTS 升級 + RWD | 5/1 demo 成功、Tier 1 UX 全清 | 📍 進行中 |
+| **Phase 7** 安全 + 效能 + 技術品質 | 5/19 ~ 6/15 (4w) | 安全加固 + CDN + API 重構 + CI/CD + 自動化測試 | API v1, pytest ≥60%, Lighthouse ≥80 | 🔧 部分已提前完成 |
+| **Phase 8** 進階功能 + Beta 準備 | 6/16 ~ 7/13 (4w) | 錯題集/評量/行事曆 + 教師自動化 + 可觀測性 + 培訓 | 壓力測試、Sentry+GA4、家長同意書、onboarding | ⬜ |
+| **Phase 9** Beta 試點 + 交付 | 7/14 ~ 8/30 (7w) | CoLab KIST 試點 + 迭代 + 交付 | 2-3 校、50+ 學生、教師滿意度 ≥4.0 | ⬜ |
 
 ---
 
@@ -219,9 +228,24 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 
 ---
 
-### Phase 6 — UX 精修 + 合規 (4/21 ~ 5/18)
+### Phase 6 — UX 精修 + 合規 (4/21 ~ 5/18) 📍 NOW
 
-> **目標**：從「能用」提升到「好用」。UX 分級處理 + 使用條款上線 + 無障礙達標。
+> **目標**：從「能用」提升到「好用」。落地 4/17 會議決議 + 5/1 demo + Junyi 整合。
+> **進度更新（2026-04-23）**：
+> - ✅ Junyi Academy SSO 上線（#1198 / PR #1200, #1205）
+> - ✅ Firebase multi-site 到 prod（PR #1143, #1151）
+> - ✅ 沈浸式 learning shell + design system（啟翔 PR #1087）
+> - ✅ Session 完整性強化（靖杭 PR #1193/#1194/#1195）
+> - ✅ 學生首頁重設計 Book Jacket variant（PR #1219, #1231）
+> - ✅ 練習工具箱 2-column MVP（PR #1166）
+> - ✅ TTS 系統重做：regex → LLM 語意切分（PR #1177, #1209, #1212, #1214）
+> - ✅ Tactile Scholar palette 落地到 DESIGN.md（PR #1173）
+> - 🔧 學生端分數全面移除（啟翔 PR #1141 review 中）
+> - 🔧 AI 回饋語氣 prompt 調整（待做）
+> - 🔧 報告分層（學生版 vs 老師版，#1105 待靖杭啟動）
+> - ⏳ 5/1 demo 準備：3 帳號 + 學習單審閱 + Gemini 3.1 TTS 對比
+>
+> **4/17 會議落地詳見**：[docs/meetings/2026-04-17.md](./meetings/2026-04-17.md)
 
 **6.1 UX 改善（分級處理）**
 
@@ -325,6 +349,15 @@ Demo 2-4 核心功能全部完成（44 PRs）。進入精修期：測試驗收 �
 > **目標**：把基本功做穩 — 安全、效能、程式碼品質、測試覆蓋。
 > **原則**：不加新功能。只做安全加固 + 效能優化 + 程式碼重構 + 自動化測試。
 > **進階功能**（錯題集、行事曆、評量、AI 自動化）全部推到 Phase 8+。
+>
+> **部分項目已提前完成（4/22~4/23 backend perf sprint）**：
+> - ✅ 6 個 N+1 query 修復（PR #1218）
+> - ✅ 熱門查詢欄位加 DB index（PR #1226）
+> - ✅ dashboard aggregate push-down to SQL + cross-text N+1 修復（PR #1227）
+> - ✅ async TTS routes + SQL push-down + heatmap overflow guard（PR #1228）
+> - ✅ N+1 regression 測試覆蓋（PR #1221）
+> - ✅ Security hardening：org scope enforcement（#1242）、TTS auth guard（#1244）、dev-only token（#1246）
+> - 詳見 perf sprint log：PR #1232
 
 **📅 建議開發順序（4 週）**
 
