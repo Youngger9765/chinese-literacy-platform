@@ -253,7 +253,9 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   const { readingAttempt, comprehensionResult, vocabResult, dictationResult, fullReadingResult } = session;
 
   // Determine how many of the 6 key sections the student has completed
-  const hasNoData = !readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult;
+  // Include comprehensionScores: a session with only Socratic scores (no JSONB result fields)
+  // should NOT be treated as "no data" — the score is the data. (Issue #1245 item 4)
+  const hasNoData = !readingAttempt && !comprehensionResult && !vocabResult && !fullReadingResult && !comprehensionScores;
   const completedSections = [
     !!(readingAttempt || fullReadingResult),  // 環節一 朗讀結果
     !!(readingAttempt || fullReadingResult),  // 環節二 錄音分析
