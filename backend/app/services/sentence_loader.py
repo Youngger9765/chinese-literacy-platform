@@ -75,7 +75,3 @@ def get_sentences(lesson_id: int) -> list[Sentence]:
     falls back to regex-based `splitIntoSentences()`).
     """
     return list(_BY_LESSON.get(lesson_id, []))
-
-
-def has_lesson(lesson_id: int) -> bool:
-    return lesson_id in _BY_LESSON

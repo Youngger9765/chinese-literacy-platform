@@ -153,8 +153,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         }
         setV2SentencesByParagraph(grouped);
       })
-      .catch(() => {
-        if (!cancelled) setV2SentencesByParagraph(null);
+      .catch((err) => {
+        if (cancelled) return;
+        console.warn('[LiveTutor] fetchStorySentences failed, using regex fallback:', err);
+        setV2SentencesByParagraph(null);
       });
     return () => { cancelled = true; };
   }, [story.id]);
@@ -169,6 +171,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     },
     [v2SentencesByParagraph, story.content],
   );
+
+  // Ref mirror so the paragraph-init effect can read the latest helper without
+  // re-running (and thus resetting mid-session progress) when v2 JSONL finishes
+  // loading. Next paragraph change picks up the latest data naturally.
+  const getSentencesRef = useRef(getSentencesForParagraph);
+  useEffect(() => { getSentencesRef.current = getSentencesForParagraph; }, [getSentencesForParagraph]);
 
   // Sentence-level retry state (#1076)
   const [retrySentenceInfo, setRetrySentenceInfo] = useState<{
@@ -324,9 +332,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   /* ---- keep streakRef in sync ---- */
   useEffect(() => { streakRef.current = streak; }, [streak]);
 
-  /* ---- init sentence targets when paragraph changes ---- */
+  /* ---- init sentence targets when paragraph changes ----
+   * Depends on `currentLineIndex` only. Helper is read via ref to avoid
+   * resetting progress when v2 JSONL finishes loading mid-session (#661 review). */
   useEffect(() => {
-    const targets = getSentencesForParagraph(currentLineIndex);
+    const targets = getSentencesRef.current(currentLineIndex);
     sentenceTargetsRef.current = targets;
     sentenceResultsRef.current = new Array(targets.length).fill(null);
     nextSentenceIdxRef.current = 0;
@@ -334,7 +344,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     setLastDiffTokens(null);
     setSpeakingProgress(0);
     setRealtimeDiffTokens(null);
-  }, [currentLineIndex, getSentencesForParagraph]);
+  }, [currentLineIndex]);
 
   /* ---- cleanup on unmount ---- */
   useEffect(() => {

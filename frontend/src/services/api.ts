@@ -158,7 +158,10 @@ interface SentenceListResponse {
   sentences: SentenceUnit[];
 }
 
-const inFlightSentencesById = new Map<string, Promise<SentenceUnit[]>>();
+// Sentence data is static per-lesson, so cache resolved results across the
+// session (not just in-flight dedup). Survives component remounts and route
+// switches; shared Map so multiple callers get the same list.
+const sentencesCacheById = new Map<string, Promise<SentenceUnit[]>>();
 
 /**
  * Fetch semantic sentence split for a lesson (#661).
@@ -169,7 +172,7 @@ const inFlightSentencesById = new Map<string, Promise<SentenceUnit[]>>();
  * lesson has no JSONL entry; callers should fall back to local regex split.
  */
 export async function fetchStorySentences(id: string): Promise<SentenceUnit[]> {
-  const cached = inFlightSentencesById.get(id);
+  const cached = sentencesCacheById.get(id);
   if (cached) return cached;
 
   const request = (async () => {
@@ -182,12 +185,10 @@ export async function fetchStorySentences(id: string): Promise<SentenceUnit[]> {
     return data.sentences;
   })();
 
-  inFlightSentencesById.set(id, request);
-  try {
-    return await request;
-  } finally {
-    inFlightSentencesById.delete(id);
-  }
+  // Cache the promise; on rejection drop the entry so the next caller can retry.
+  sentencesCacheById.set(id, request);
+  request.catch(() => sentencesCacheById.delete(id));
+  return request;
 }
 
 export async function createLearningSession(payload: {
