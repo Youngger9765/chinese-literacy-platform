@@ -15,6 +15,7 @@ import {
   BatchStudentInput,
   BatchCreateResult,
 } from '../../services/classroomApi';
+import { seedDemoStudents, AdminSeedApiError } from '../../services/adminSeedApi';
 
 interface ClassroomDetailPanelProps {
   classroomId: number;
@@ -62,6 +63,9 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
   const [isSubmittingBatch, setIsSubmittingBatch] = useState(false);
   const [batchResult, setBatchResult] = useState<BatchCreateResult | null>(null);
   const [batchError, setBatchError] = useState('');
+
+  // Demo seed (Issue #989)
+  const [isSeedingDemo, setIsSeedingDemo] = useState(false);
 
   const loadClassroom = useCallback(async () => {
     if (!token) return;
@@ -302,6 +306,33 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
     URL.revokeObjectURL(url);
   };
 
+  // --- Demo seed handler (Issue #989) ---
+
+  const handleSeedDemo = async () => {
+    if (!token) return;
+    const countStr = window.prompt('要建立幾個 demo 學生？(預設 3, 最多 10)', '3');
+    if (countStr === null) return; // user cancelled
+    const count = Math.min(10, Math.max(1, parseInt(countStr, 10) || 3));
+    setIsSeedingDemo(true);
+    try {
+      const result = await seedDemoStudents(token, { classroom_id: classroomId, count });
+      window.alert(
+        `Demo 學生建立完成！\n` +
+        `建立 ${result.students_created} 位學生，${result.sessions_created} 個已完成學習紀錄\n` +
+        `帳號格式：demo01@testdata.lingoleap.dev\n密碼：test1234`
+      );
+      await loadClassroom();
+    } catch (err) {
+      if (err instanceof AdminSeedApiError) {
+        window.alert(`建立失敗：${err.message}`);
+      } else {
+        window.alert('建立失敗，請稍後再試');
+      }
+    } finally {
+      setIsSeedingDemo(false);
+    }
+  };
+
   // --- Render ---
 
   if (isLoading) {
@@ -515,6 +546,15 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
                     </svg>
                     批量建立學生
+                  </button>
+                  {/* Demo seed button — Issue #989 */}
+                  <button
+                    onClick={handleSeedDemo}
+                    disabled={isSeedingDemo}
+                    title="建立 demo 學生帳號並附帶完成的學習紀錄（僅限管理員）"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSeedingDemo ? '建立中...' : '[Demo] 建立測試學生'}
                   </button>
                 </>
               )}
