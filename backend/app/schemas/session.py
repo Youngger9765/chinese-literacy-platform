@@ -1,7 +1,74 @@
 from datetime import datetime
 from typing import Any, Literal
+import logging
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
+
+logger = logging.getLogger(__name__)
+
+
+# ── StepProgressData — canonical shape of the step_progress JSONB column ─────
+
+class StepProgressData(BaseModel):
+    """Pydantic model for the expected shape of LearningSession.step_progress.
+
+    Used to explicitly validate JSONB on read, replacing silent isinstance() fallbacks.
+    When validation fails a WARNING is logged with session context so the corruption
+    is surfaced in prod logs instead of disappearing silently.
+    """
+    current_step: str | None = None
+    steps_completed: list[str] = Field(default_factory=list)
+    step_data: dict[str, Any] = Field(default_factory=dict)
+    version: int | None = None
+    # Internal metadata — preserved but not validated strictly
+    meta: dict[str, Any] = Field(default_factory=dict, alias="__meta")
+
+    model_config = {"populate_by_name": True, "extra": "allow"}
+
+
+def parse_step_progress(
+    raw: Any,
+    session_id: int | None = None,
+    *,
+    context: str = "",
+) -> StepProgressData | None:
+    """Parse a raw step_progress value from the DB.
+
+    - Returns None when raw is None (fresh session, no progress saved yet — not an error).
+    - Returns a validated StepProgressData when raw is a well-formed dict.
+    - Logs a WARNING and returns None when raw is a non-None, non-dict value or when the
+      dict fails Pydantic validation.  The caller falls back to integer current_step as before,
+      but now the corruption is visible in logs.
+
+    Args:
+        raw: The raw value from session.step_progress (may be None, dict, str, int, …)
+        session_id: DB session id for log context (pass None when not available)
+        context: Short label identifying the call site (e.g. "assignments.get_my_assignments")
+    """
+    if raw is None:
+        return None
+
+    if not isinstance(raw, dict):
+        logger.warning(
+            "step_progress corrupt (session_id=%s, site=%s): expected dict, got %s | value=%.200r",
+            session_id,
+            context or "unknown",
+            type(raw).__name__,
+            raw,
+        )
+        return None
+
+    try:
+        return StepProgressData.model_validate(raw)
+    except ValidationError as exc:
+        logger.warning(
+            "step_progress schema invalid (session_id=%s, site=%s): %s | raw=%.200r",
+            session_id,
+            context or "unknown",
+            exc,
+            raw,
+        )
+        return None
 
 
 class SessionCreateRequest(BaseModel):

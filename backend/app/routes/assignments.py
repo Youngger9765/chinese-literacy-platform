@@ -42,6 +42,7 @@ from ..services.input_sanitizer import sanitize_ai_input
 from ..services.lesson_loader import get_lesson_by_id
 from ..services.notification_service import send_assignment_submitted_notification
 from ..utils.slug import normalize_story_slug
+from ..schemas.session import parse_step_progress
 from .classrooms import _get_classroom_or_404, _require_owner_or_admin
 
 router = APIRouter(tags=["assignments"])
@@ -203,19 +204,18 @@ def _extract_assignment_progress(
     if session is None:
         return sub.session_id, None, []
 
-    current_step: str | None = None
-    steps_completed: list[str] = []
-    if isinstance(session.step_progress, dict):
-        raw_current = session.step_progress.get("current_step")
-        if isinstance(raw_current, str) and raw_current.strip():
-            current_step = raw_current.strip()
-        raw_completed = session.step_progress.get("steps_completed", [])
-        if isinstance(raw_completed, list):
-            steps_completed = [
-                step.strip()
-                for step in raw_completed
-                if isinstance(step, str) and step.strip()
-            ]
+    # parse_step_progress logs a WARNING when value is malformed (Issue #1180).
+    sp = parse_step_progress(
+        session.step_progress,
+        session_id=session.id,
+        context="assignments._get_session_step_info",
+    )
+    current_step: str | None = sp.current_step.strip() if sp is not None and sp.current_step else None
+    steps_completed: list[str] = (
+        [s.strip() for s in sp.steps_completed if s.strip()]
+        if sp is not None
+        else []
+    )
 
     return session.id, current_step, steps_completed
 
@@ -277,7 +277,8 @@ def get_my_assignments(
     for sub in submissions:
         assignment = sub.assignment
 
-        # Resolve session fields from pre-loaded map (no DB hit)
+        # Resolve session fields from pre-loaded map (no DB hit).
+        # parse_step_progress logs a WARNING when the value is malformed (Issue #1180).
         session_id: int | None = None
         current_step: str | None = None
         steps_completed: list[str] = []
@@ -285,17 +286,14 @@ def get_my_assignments(
             sess = sessions_map.get(sub.session_id)
             if sess is not None:
                 session_id = sess.id
-                if isinstance(sess.step_progress, dict):
-                    raw_current = sess.step_progress.get("current_step")
-                    if isinstance(raw_current, str) and raw_current.strip():
-                        current_step = raw_current.strip()
-                    raw_completed = sess.step_progress.get("steps_completed", [])
-                    if isinstance(raw_completed, list):
-                        steps_completed = [
-                            step.strip()
-                            for step in raw_completed
-                            if isinstance(step, str) and step.strip()
-                        ]
+                sp = parse_step_progress(
+                    sess.step_progress,
+                    session_id=sess.id,
+                    context="assignments.get_my_assignments",
+                )
+                if sp is not None:
+                    current_step = sp.current_step.strip() if sp.current_step else None
+                    steps_completed = [s.strip() for s in sp.steps_completed if s.strip()]
             else:
                 session_id = sub.session_id
 
