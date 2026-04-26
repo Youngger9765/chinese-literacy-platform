@@ -13,6 +13,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.assignment import AssignmentSubmission
 from ...models.session import CharacterError, LearningSession
+from ...services.reading_attempt_service import snapshot_reading_result
 from ...models.text import Text
 from ...models.user import User
 from ...services.lesson_loader import get_lesson_by_id
@@ -470,6 +471,10 @@ def update_session(
     # Auto-set completed_at when status changes to completed (Issue #1070)
     if update_data.get("status") == "completed" and session.completed_at is None:
         session.completed_at = datetime.now(timezone.utc)
+
+    # Snapshot previous reading_result before overwrite (Issue #1183)
+    if "reading_result" in update_data and update_data["reading_result"] is not None:
+        snapshot_reading_result(db, session)
 
     # Auto-persist CharacterError records from reading_result.error_chars (Issue #248)
     if "reading_result" in update_data:

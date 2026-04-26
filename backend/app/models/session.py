@@ -5,6 +5,41 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
 
+class ReadingAttemptHistory(Base):
+    """Versioned history of reading_result JSONB snapshots for a LearningSession.
+
+    Each time reading_result is overwritten on LearningSession, the previous
+    value is snapshotted here before the overwrite so no attempt is lost.
+    attempt_no is 1-based; attempt_no=1 is the first recorded attempt.
+
+    Issue #1183: reading_result JSONB 無版本紀錄（重練覆蓋歷史）
+    """
+    __tablename__ = "reading_attempt_history"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # FK with index=True (Rule 1) + CASCADE so rows are removed when session is deleted
+    session_id: Mapped[int] = mapped_column(
+        ForeignKey("learning_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    # 1-based attempt counter; composite index enables fast "latest attempt" lookup
+    attempt_no: Mapped[int] = mapped_column(Integer, nullable=False)
+    reading_result: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_reading_attempt_history_session_attempt", "session_id", "attempt_no"),
+    )
+
+    session: Mapped["LearningSession"] = relationship(  # type: ignore[name-defined]
+        "LearningSession",
+        back_populates="reading_attempts",
+    )
+
+
 class ErrorCorrection(Base):
     """Tracks when a student marks a character as practiced or mastered."""
     __tablename__ = "error_corrections"
@@ -74,6 +109,13 @@ class LearningSession(Base):
     classroom: Mapped["Classroom | None"] = relationship("Classroom")  # type: ignore[name-defined]
     character_errors: Mapped[list["CharacterError"]] = relationship(
         "CharacterError", back_populates="session"
+    )
+    reading_attempts: Mapped[list["ReadingAttemptHistory"]] = relationship(
+        "ReadingAttemptHistory",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+        order_by="ReadingAttemptHistory.attempt_no",
     )
     dialogue_turns: Mapped[list["DialogueTurn"]] = relationship(
         "DialogueTurn",
