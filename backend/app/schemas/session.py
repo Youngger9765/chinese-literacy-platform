@@ -91,6 +91,9 @@ class SessionUpdateRequest(BaseModel):
 class SessionSummaryResponse(BaseModel):
     id: int
     story_slug: str | None
+    # Canonical slug derived from FK relationship (#1188).  Prefers text.lesson_number;
+    # falls back to story_slug for rows without text_id.  New consumers should prefer this.
+    story_slug_derived: str | None = None
     story_title: str | None = None  # human-readable title, e.g. "第六課 牛頓的故事"
     learning_source: Literal["self", "assignment"] | None = None
     status: str

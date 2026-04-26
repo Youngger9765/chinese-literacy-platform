@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy import String, Integer, Float, Boolean, Text, ForeignKey, DateTime, Index, func, text
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
@@ -104,10 +105,29 @@ class LearningSession(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    text_id: Mapped[int | None] = mapped_column(ForeignKey("texts.id"), nullable=True)
+    text_id: Mapped[int | None] = mapped_column(ForeignKey("texts.id"), nullable=True, index=True)
     classroom_id: Mapped[int | None] = mapped_column(ForeignKey("classrooms.id"), nullable=True)
+    # DEPRECATED (#1188): story_slug is the legacy string key.  text_id FK is the
+    # canonical source of truth.  Use story_slug_derived hybrid property for reads.
+    # DO NOT write story_slug without also setting text_id.  Column will be dropped
+    # post-demo once all readers migrate to story_slug_derived.
     story_slug: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="in_progress", index=True)
+
+    @hybrid_property
+    def story_slug_derived(self) -> str | None:
+        """Canonical story slug derived from the FK relationship (#1188).
+
+        Returns ``str(text.lesson_number)`` when text_id is set and the Text
+        relationship is loaded, otherwise falls back to the legacy story_slug
+        column so existing rows with no text_id still work.
+
+        Use this property for all *reads*.  Do not write to story_slug directly.
+        """
+        if self.text is not None and self.text.lesson_number is not None:
+            return str(self.text.lesson_number)
+        return self.story_slug
+
     # DEPRECATED: use current_step_derived computed from step_progress.steps_completed (#1182).
     # Do NOT write to this column from application code. Column kept for zero-downtime
     # deprecation; will be dropped post-demo once step_progress is the sole source of truth.
