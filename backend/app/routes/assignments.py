@@ -1042,7 +1042,7 @@ def submit_assignment(
             effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
         )
 
-    # Pull score from linked LearningSession if available
+    # Pull score from linked LearningSession if available; also sync session status.
     score: float | None = None
     if submission.session_id is not None:
         learning_session = (
@@ -1050,8 +1050,15 @@ def submit_assignment(
             .filter(LearningSession.id == submission.session_id)
             .first()
         )
-        if learning_session and learning_session.overall_score is not None:
-            score = float(learning_session.overall_score)
+        if learning_session:
+            if learning_session.overall_score is not None:
+                score = float(learning_session.overall_score)
+            # Issue #1181: sync session status/completed_at at write time so all
+            # read paths (dashboard, list_sessions) agree without extra joins.
+            if learning_session.status == "in_progress":
+                learning_session.status = "completed"
+                if learning_session.completed_at is None:
+                    learning_session.completed_at = datetime.now(tz=timezone.utc)
 
     submission.status = "submitted"
     submission.submitted_at = datetime.now(tz=timezone.utc)
