@@ -9,6 +9,7 @@ import {
   DictationResult,
   FullReadingResult,
 } from '../types';
+import type { ListeningResult } from '../components/reading-steps/ListeningPractice';
 import type { AnnotationSummary } from '../components/reading-steps/ReadingAnnotation';
 import type { VocabApplicationResult } from '../components/reading-steps/VocabApplication';
 import type { VocabDefinitionMatchResult } from '../components/reading-steps/VocabDefinitionMatch';
@@ -61,6 +62,7 @@ export interface LearningContext {
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishDictation: (result: DictationResult) => void;
   handleFinishFullReading: (result: FullReadingResult) => void;
+  handleFinishListening: (result: ListeningResult) => void;
   handleFinishReadingAnnotation: (summary: AnnotationSummary) => void;
   handleFinishVocabDefinitionMatch: (result: VocabDefinitionMatchResult) => void;
   handleFinishVocabApplication: (result: VocabApplicationResult) => void;
@@ -809,6 +811,26 @@ const LearningLayout: React.FC = () => {
     [storyId, navigate, persistStep, persistStepProgressState],
   );
 
+  // Issue #1098 — listening step persistence (was missing, intern forgot to bring
+  // it over when extracting listening from full-reading as its own step).
+  const handleFinishListening = useCallback(
+    (result: ListeningResult) => {
+      persistStepProgressState(
+        {
+          completeStep: 'listening',
+          currentStep: 'vocab',
+          stepDataPatch: {
+            listening: { completed: true, score: result.score, feedback: result.feedback },
+          },
+        },
+        true,
+      );
+      persistStep(STEP_PATH_TO_NUMBER['vocab']);
+      navigate(`/learn/${storyId}/vocab`);
+    },
+    [storyId, navigate, persistStep, persistStepProgressState],
+  );
+
   const handleFinishReadingAnnotation = useCallback(
     (_summary: AnnotationSummary) => {
       setSession((prev) => (prev ? { ...prev, readingAnnotationCompleted: true } : null));
@@ -1082,6 +1104,7 @@ const LearningLayout: React.FC = () => {
     handleFinishVocab,
     handleFinishDictation,
     handleFinishFullReading,
+    handleFinishListening,
     handleFinishReadingAnnotation,
     handleFinishVocabDefinitionMatch,
     handleFinishVocabApplication,
