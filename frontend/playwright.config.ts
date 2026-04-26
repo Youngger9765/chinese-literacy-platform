@@ -1,0 +1,14 @@
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  timeout: 60000,
+  workers: 1,
+  reporter: 'list',
+  use: {
+    headless: true,
+    baseURL: 'https://lingoleap-staging.web.app',
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
+  },
+});
