@@ -1299,6 +1299,92 @@ class TestSubmitAssignment:
         )
         assert resp.status_code == 204
 
+    def test_submit_syncs_session_status_and_completed_at(
+        self, client, teacher, school_id
+    ):
+        """Regression #1181: submit must flip session.status → completed and set completed_at.
+
+        Before the fix, only submission.status was updated. The linked LearningSession
+        kept status='in_progress' and completed_at=NULL, causing dashboard queries to miss
+        the session when filtering for completed work.
+
+        Uses a fresh student to avoid unique-index collisions from earlier tests.
+        """
+        from app.models.session import LearningSession
+
+        # Use a dedicated fresh student so no existing in_progress session conflicts
+        fresh_student = _register_user(client, "stu_1181")
+        _make_student_role(fresh_student["user_id"], school_id)
+
+        # Create a private classroom for this test so we can enroll only our student
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Regression 1181 Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201
+        classroom_id = cls_resp.json()["id"]
+
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": fresh_student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        # Create assignment and start it
+        # Use story "2" (a different lesson) so this test's completed session
+        # does not collide with other tests that use story "1" via student1.
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": "2",
+                "title": "Session Sync Regression #1181",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(fresh_student["token"]),
+        )
+        assert start_resp.status_code == 200
+        session_id = start_resp.json()["session_id"]
+
+        # Confirm session is in_progress before submit
+        db = TestingSessionLocal()
+        try:
+            sess = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+            assert sess is not None
+            assert sess.status == "in_progress"
+            assert sess.completed_at is None
+        finally:
+            db.close()
+
+        # Student submits the assignment
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(fresh_student["token"]),
+        )
+        assert submit_resp.status_code == 200
+        assert submit_resp.json()["status"] == "submitted"
+
+        # Verify the linked session was synced atomically in the same transaction
+        db = TestingSessionLocal()
+        try:
+            sess = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+            assert sess is not None, "LearningSession must still exist after submit"
+            assert sess.status == "completed", (
+                f"Expected session.status='completed' after submit, got '{sess.status}'"
+            )
+            assert sess.completed_at is not None, (
+                "session.completed_at must be set after submit (was NULL before fix)"
+            )
+        finally:
+            db.close()
+
 
 # ====================================================================# Notification service — unit tests (no HTTP needed)
 # ====================================================================
@@ -1368,12 +1454,17 @@ class TestSubmissionReadingMetrics:
     pulled from the linked LearningSession when available."""
 
     def _create_assignment_and_start(self, client, teacher, student, classroom_id):
-        """Create assignment, start it as student. Returns (assignment_id, session_id)."""
+        """Create assignment, start it as student. Returns (assignment_id, session_id).
+
+        Uses story_id="2" (not VALID_STORY_ID="1") so that earlier submit tests
+        which mark story-1 sessions as 'completed' don't cause a unique-index
+        collision in SQLite (which lacks partial-index support).
+        """
         create_resp = client.post(
             f"/api/classrooms/{classroom_id}/assignments",
             json={
                 "classroom_id": classroom_id,
-                "story_id": VALID_STORY_ID,
+                "story_id": "2",
                 "title": "Reading Metrics Test",
             },
             headers=auth_header(teacher["token"]),
