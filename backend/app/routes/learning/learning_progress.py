@@ -12,6 +12,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
+from ...schemas.session import parse_step_progress
 from ...services.learning_stats_service import get_completed_story_count
 from ...services.stuck_detection_service import detect_stuck_points
 from ._helpers import verify_student_access
@@ -68,13 +69,17 @@ def _compute_step_completion(session: LearningSession) -> dict[str, str]:
     Falls back to current_step (integer) for older sessions without step_progress.
     (#1073)
     """
-    # Try to read steps_completed from step_progress JSONB first
-    sp = session.step_progress
+    # Try to read steps_completed from step_progress JSONB first.
+    # parse_step_progress logs a WARNING if the value is malformed instead of
+    # swallowing the error silently (Issue #1180).
+    sp = parse_step_progress(
+        session.step_progress,
+        session_id=session.id,
+        context="learning_progress._compute_step_completion",
+    )
     sp_completed: list[str] | None = None
-    if isinstance(sp, dict):
-        raw = sp.get("steps_completed")
-        if isinstance(raw, list):
-            sp_completed = [s for s in raw if isinstance(s, str)]
+    if sp is not None:
+        sp_completed = sp.steps_completed  # already validated as list[str]
 
     statuses: dict[str, str] = {}
 
@@ -82,7 +87,7 @@ def _compute_step_completion(session: LearningSession) -> dict[str, str]:
         # Source of truth: step_progress.steps_completed[] (#1073)
         # Normalize frontend step IDs to backend keys for comparison
         completed_set = {_normalize_step_key(s) for s in sp_completed}
-        sp_current = sp.get("current_step") if isinstance(sp, dict) else None
+        sp_current = sp.current_step if sp is not None else None
         normalized_current = _normalize_step_key(sp_current) if sp_current else None
         for _step_num, key in STEP_NAMES.items():
             if key in completed_set:

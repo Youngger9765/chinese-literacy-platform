@@ -15,7 +15,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
-from ...schemas.session import StepProgressResponse, StepProgressSaveRequest
+from ...schemas.session import StepProgressResponse, StepProgressSaveRequest, parse_step_progress
 from .learning_progress import STEP_NAMES, _MAX_STEP_NUM, _normalize_step_key
 
 # Reverse mapping: step key (string) → step number (int)
@@ -58,15 +58,15 @@ def save_step_progress(
     """
     session = _get_owned_session(session_id, current_user, db)
 
-    existing_meta: dict = {}
-    stored_version: int | None = None
-    if isinstance(session.step_progress, dict):
-        raw_meta = session.step_progress.get("__meta")
-        if isinstance(raw_meta, dict):
-            existing_meta = dict(raw_meta)
-        raw_version = session.step_progress.get("version")
-        if isinstance(raw_version, int):
-            stored_version = raw_version
+    # parse_step_progress logs a WARNING when the stored value is malformed
+    # instead of silently discarding it (Issue #1180).
+    existing_sp = parse_step_progress(
+        session.step_progress,
+        session_id=session_id,
+        context="learning_step_progress.save_step_progress",
+    )
+    existing_meta: dict = dict(existing_sp.meta) if existing_sp is not None else {}
+    stored_version: int | None = existing_sp.version if existing_sp is not None else None
 
     # Optimistic concurrency check (#1187): reject stale writes.
     # Prevents overwriting newer progress when a previous save failed and the
