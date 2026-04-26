@@ -127,7 +127,9 @@ def create_learning_session(
         story_slug=normalized_slug,
         text_id=text_id,
         status="in_progress",
-        current_step=1,
+        # DEPRECATED (#1182): current_step integer column is deprecated; step tracking
+        # is done via step_progress.steps_completed + current_step_derived property.
+        # Omitting current_step here lets the DB default (1) apply.
         classroom_id=classroom_id,
     )
     db.add(session)
@@ -435,7 +437,9 @@ def get_session_status(
     return SessionStatusResponse(
         id=session.id,
         story_slug=session.story_slug,
-        current_step=session.current_step,
+        # Use derived step so resume picks up where step_progress says, not the
+        # deprecated integer column (#1182).
+        current_step=session.current_step_derived,
         status=session.status,
         is_resumable=is_resumable,
         is_completed=is_completed,
@@ -465,6 +469,10 @@ def update_session(
 
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():
+        # DEPRECATED (#1182): silently discard writes to current_step integer column.
+        # Step tracking is now done exclusively via step_progress.steps_completed.
+        if field == "current_step":
+            continue
         setattr(session, field, value)
 
     # Auto-set completed_at when status changes to completed (Issue #1070)
