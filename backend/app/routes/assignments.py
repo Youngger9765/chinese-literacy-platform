@@ -931,11 +931,16 @@ def start_assignment(
         )
         db.add(learning_session)
         try:
-            db.flush()  # get learning_session.id
+            # Use a savepoint so that an IntegrityError (concurrent insert
+            # hitting the partial unique index from #1179) only rolls back
+            # the session INSERT — not the entire outer transaction that also
+            # holds the submission update (#1185).
+            with db.begin_nested():
+                db.flush()  # get learning_session.id; savepoint released on success
         except IntegrityError:
             # Partial unique index (#1179) caught concurrent insert; reuse existing
             # and sync assignment metadata onto it so it shows up under this assignment.
-            db.rollback()
+            # The savepoint was rolled back; the outer transaction (submission) is intact.
             learning_session = (
                 db.query(LearningSession)
                 .filter(
@@ -950,7 +955,7 @@ def start_assignment(
                 raise
             _sync_assignment_metadata(learning_session)
             logger.info(
-                "Race resolved in start_assignment: reusing session %d for assignment %d (#1179)",
+                "Race resolved in start_assignment: reusing session %d for assignment %d (#1179 #1185)",
                 learning_session.id, assignment_id,
             )
 
