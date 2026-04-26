@@ -127,7 +127,8 @@ def create_learning_session(
         story_slug=normalized_slug,
         text_id=text_id,
         status="in_progress",
-        current_step=1,
+        # current_step intentionally not set — deprecated (#1182).
+        # Step position is derived from step_progress.steps_completed.
         classroom_id=classroom_id,
     )
     db.add(session)
@@ -435,7 +436,7 @@ def get_session_status(
     return SessionStatusResponse(
         id=session.id,
         story_slug=session.story_slug,
-        current_step=session.current_step,
+        current_step=session.current_step_derived,  # derived from step_progress (#1182)
         status=session.status,
         is_resumable=is_resumable,
         is_completed=is_completed,
@@ -464,6 +465,10 @@ def update_session(
         raise HTTPException(status_code=403, detail="Not your session")
 
     update_data = payload.model_dump(exclude_unset=True)
+    # DEPRECATED (#1182): silently drop current_step integer writes from PATCH payload.
+    # Step position is derived from step_progress.steps_completed — the integer column
+    # must not be written from new code paths.
+    update_data.pop("current_step", None)
     for field, value in update_data.items():
         setattr(session, field, value)
 

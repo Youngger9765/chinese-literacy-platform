@@ -101,12 +101,14 @@ def _compute_step_completion(session: LearningSession) -> dict[str, str]:
             else:
                 statuses[key] = "not_started"
     else:
-        # Fallback: derive from integer current_step (legacy sessions)
-        completed_step = session.current_step if session.status == "completed" else session.current_step - 1
+        # Fallback: use current_step_derived (from step_progress or default=1).
+        # The legacy integer current_step column is deprecated (#1182).
+        derived = session.current_step_derived
+        completed_step = derived if session.status == "completed" else derived - 1
         for step_num, key in STEP_NAMES.items():
             if step_num <= completed_step:
                 statuses[key] = "completed"
-            elif step_num == session.current_step and session.status == "in_progress":
+            elif step_num == derived and session.status == "in_progress":
                 statuses[key] = "in_progress"
             else:
                 statuses[key] = "not_started"
@@ -134,7 +136,11 @@ def _recommend_next_step(session: LearningSession) -> dict:
 
     accuracy = session.accuracy or 0.0
 
-    if session.current_step >= 5 and session.full_reading_result:
+    # Use derived step number (from step_progress.steps_completed) — deprecated integer
+    # column must not be read here (#1182).
+    derived_step = session.current_step_derived
+
+    if derived_step >= 5 and session.full_reading_result:
         full_score = 0.0
         if isinstance(session.full_reading_result, dict):
             full_score = session.full_reading_result.get("match_rate", 0) or 0.0
@@ -146,7 +152,7 @@ def _recommend_next_step(session: LearningSession) -> dict:
                 "reason": f"全文朗讀正確率 {full_score:.0f}%，建議再練習一次。",
             }
 
-    if error_count >= 3 and session.current_step < 4:
+    if error_count >= 3 and derived_step < 4:
         return {
             "action": "retry_step",
             "step": "vocab",
@@ -154,7 +160,7 @@ def _recommend_next_step(session: LearningSession) -> dict:
             "reason": f"發現 {error_count} 個錯字，建議先做生字練習。",
         }
 
-    if accuracy > 0 and accuracy < 70 and session.current_step <= 2:
+    if accuracy > 0 and accuracy < 70 and derived_step <= 2:
         return {
             "action": "retry_step",
             "step": "live_tutor",
@@ -162,11 +168,11 @@ def _recommend_next_step(session: LearningSession) -> dict:
             "reason": f"朗讀正確率 {accuracy:.0f}%，建議重練逐段朗讀。",
         }
 
-    current_key = STEP_NAMES.get(session.current_step, "intro")
+    current_key = STEP_NAMES.get(derived_step, "intro")
     return {
         "action": "continue",
         "step": current_key,
-        "step_label": STEP_LABELS.get(session.current_step, ""),
+        "step_label": STEP_LABELS.get(derived_step, ""),
         "reason": "繼續未完成的學習步驟。",
     }
 

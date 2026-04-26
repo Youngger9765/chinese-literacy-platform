@@ -283,7 +283,7 @@ def seed_default_data():
                     classroom_id=class_3a.id,
                     story_slug="L01",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=70.0,
                     started_at=_days_ago(6),
                     completed_at=_days_ago(6),
@@ -293,7 +293,7 @@ def seed_default_data():
                     classroom_id=class_3a.id,
                     story_slug="L02",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=55.0,
                     started_at=_days_ago(5),
                     completed_at=_days_ago(5),
@@ -303,7 +303,7 @@ def seed_default_data():
                     classroom_id=class_3a.id,
                     story_slug="L03",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=80.0,
                     started_at=_days_ago(3),
                     completed_at=_days_ago(3),
@@ -313,7 +313,7 @@ def seed_default_data():
                     classroom_id=class_3a.id,
                     story_slug="L04",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=78.0,
                     started_at=_days_ago(1),
                     completed_at=_days_ago(1),
@@ -323,7 +323,7 @@ def seed_default_data():
                     classroom_id=class_3a.id,
                     story_slug="L05",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=60.0,
                     started_at=_days_ago(0),
                     completed_at=_days_ago(0),
@@ -336,7 +336,7 @@ def seed_default_data():
                     classroom_id=class_3a.id,
                     story_slug="L01",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=85.0,
                     started_at=_days_ago(4),
                     completed_at=_days_ago(4),
@@ -346,7 +346,7 @@ def seed_default_data():
                     classroom_id=class_3a.id,
                     story_slug="L02",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=90.0,
                     started_at=_days_ago(2),
                     completed_at=_days_ago(2),
@@ -356,7 +356,7 @@ def seed_default_data():
                     classroom_id=class_3a.id,
                     story_slug="L03",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=75.0,
                     started_at=_days_ago(0),
                     completed_at=_days_ago(0),
@@ -369,7 +369,7 @@ def seed_default_data():
                     classroom_id=class_5b.id,
                     story_slug="L01",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=65.0,
                     started_at=_days_ago(3),
                     completed_at=_days_ago(3),
@@ -379,7 +379,7 @@ def seed_default_data():
                     classroom_id=class_5b.id,
                     story_slug="L02",
                     status="completed",
-                    current_step=7,
+                    # current_step intentionally not set — deprecated (#1182).
                     overall_score=72.0,
                     started_at=_days_ago(1),
                     completed_at=_days_ago(1),

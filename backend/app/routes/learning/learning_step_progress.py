@@ -100,17 +100,10 @@ def save_step_progress(
         "__meta": existing_meta,
     }
 
-    # Sync integer current_step from steps_completed to prevent desync (#1073).
-    # Normalize frontend step IDs → backend keys before lookup.
-    if payload.steps_completed:
-        max_completed_num = max(
-            (_STEP_KEY_TO_NUM.get(_normalize_step_key(s), 0) for s in payload.steps_completed),
-            default=0,
-        )
-        if max_completed_num > 0:
-            new_current = min(max_completed_num + 1, _MAX_STEP_NUM)
-            if new_current != session.current_step:
-                session.current_step = new_current
+    # DEPRECATED (#1182): integer current_step sync removed.
+    # step_progress.steps_completed is now the single source of truth.
+    # Use session.current_step_derived (model property) to read the current step.
+    # The current_step integer column must NOT be written from this path.
 
     db.commit()
     db.refresh(session)

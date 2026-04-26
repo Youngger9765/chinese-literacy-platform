@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Literal
 import logging
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,10 @@ class SessionCreateRequest(BaseModel):
 
 
 class SessionUpdateRequest(BaseModel):
-    current_step: int | None = Field(None, ge=1, le=50)
+    # DEPRECATED (#1182): current_step integer writes are disabled. Field kept for
+    # backwards-compat so existing callers don't get 422, but the value is ignored
+    # when writing — step position is derived from step_progress.steps_completed.
+    current_step: int | None = Field(None, ge=1, le=50, deprecated=True)
     status: str | None = Field(None, pattern=r"^(in_progress|completed|abandoned)$")
     accuracy: float | None = Field(None, ge=0, le=100)
     overall_score: float | None = Field(None, ge=0, le=100)
@@ -101,6 +104,60 @@ class SessionSummaryResponse(BaseModel):
     completed_at: datetime | None
 
     model_config = {"from_attributes": True}
+
+    @model_validator(mode="before")
+    @classmethod
+    def _use_derived_step(cls, v: Any) -> Any:
+        """Use current_step_derived (from step_progress JSONB) instead of the
+        deprecated integer column when building from an ORM instance. (#1182)
+
+        Pydantic's from_attributes reader will access the 'current_step' attribute,
+        which is the SQLAlchemy column descriptor (stale integer).  To override it
+        without an Alembic migration, we convert the ORM object to a flat dict here
+        so Pydantic reads our overridden current_step value.
+
+        Dict inputs (e.g. unit tests constructing the response directly) are passed
+        through unchanged.
+        """
+        if isinstance(v, dict):
+            return v
+        if not hasattr(v, "current_step_derived"):
+            return v
+        # Build a dict from all attributes that SessionSummaryResponse (and its
+        # subclasses) might need.  Use getattr with a sentinel so missing attrs
+        # return None rather than raising AttributeError for optional fields.
+        _MISSING = object()
+
+        def _get(attr: str, default: Any = None) -> Any:
+            val = getattr(v, attr, _MISSING)
+            return default if val is _MISSING else val
+
+        return {
+            # identity
+            "id": _get("id"),
+            "story_slug": _get("story_slug"),
+            "story_title": _get("story_title"),
+            "learning_source": _get("learning_source"),
+            "status": _get("status"),
+            # derived (not the column) — this is the whole point of #1182
+            "current_step": v.current_step_derived,
+            "accuracy": _get("accuracy"),
+            "overall_score": _get("overall_score"),
+            "started_at": _get("started_at"),
+            "completed_at": _get("completed_at"),
+            # SessionDetailResponse extra fields (no-op for parent class)
+            "reading_result": _get("reading_result"),
+            "comprehension_result": _get("comprehension_result"),
+            "vocab_result": _get("vocab_result"),
+            "full_reading_result": _get("full_reading_result"),
+            "comprehension_score": _get("comprehension_score"),
+            "literal_score": _get("literal_score"),
+            "inferential_score": _get("inferential_score"),
+            "evaluative_score": _get("evaluative_score"),
+            "comprehension_feedback": _get("comprehension_feedback"),
+            "teacher_reviewed_at": _get("teacher_reviewed_at"),
+            "teacher_comment": _get("teacher_comment"),
+        }
 
 
 class SessionDetailResponse(SessionSummaryResponse):

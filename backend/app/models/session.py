@@ -41,6 +41,9 @@ class LearningSession(Base):
     classroom_id: Mapped[int | None] = mapped_column(ForeignKey("classrooms.id"), nullable=True)
     story_slug: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="in_progress", index=True)
+    # DEPRECATED (#1182): use step_progress.steps_completed as single source of truth.
+    # Do NOT write to this column from new code. Column retained pre-demo; drop in a post-demo PR.
+    # Read via the current_step_derived property instead.
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
     overall_score: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -68,6 +71,53 @@ class LearningSession(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # ── Derived step number from JSONB (single source of truth) ──────────────
+    # Map between integer step numbers and their string keys.
+    # Kept here so the derivation is co-located with the model.
+    _STEP_KEY_TO_NUM: dict = {
+        "intro": 1,
+        "live_tutor": 2,
+        "comprehension": 3,
+        "vocab": 4,
+        "full_reading": 5,
+        "report": 6,
+    }
+    _FRONTEND_STEP_ALIAS: dict = {
+        "tutor": "live_tutor",
+        "full-reading": "full_reading",
+        "reading-annotation": "intro",
+    }
+    _STEP_NUM_TO_KEY: dict = {v: k for k, v in _STEP_KEY_TO_NUM.items()}
+
+    @property
+    def current_step_derived(self) -> int:
+        """Derive the current step integer from step_progress.steps_completed.
+
+        Returns the step number the student is currently on:
+        - max(steps_completed) + 1  when steps_completed is non-empty
+        - 1 when no progress recorded
+
+        This is the replacement for the deprecated `current_step` integer column.
+        All new code should read this property, not the column. (#1182)
+        """
+        sp = self.step_progress
+        if not isinstance(sp, dict):
+            return 1
+        raw = sp.get("steps_completed")
+        if not isinstance(raw, list) or not raw:
+            return 1
+        max_num = 0
+        for key in raw:
+            if not isinstance(key, str):
+                continue
+            normalized = self._FRONTEND_STEP_ALIAS.get(key, key)
+            num = self._STEP_KEY_TO_NUM.get(normalized, 0)
+            if num > max_num:
+                max_num = num
+        if max_num == 0:
+            return 1
+        return min(max_num + 1, max(self._STEP_KEY_TO_NUM.values()))
 
     student: Mapped["User"] = relationship("User", back_populates="sessions")  # type: ignore[name-defined]
     text: Mapped["Text"] = relationship("Text", back_populates="sessions")  # type: ignore[name-defined]
