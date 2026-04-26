@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     # True: students without a classroom are redirected to the "no teacher" waiting screen.
     # Flip via Cloud Run env var ENFORCE_TEACHER_GATING=true when ready to enforce.
     enforce_teacher_gating: bool = False
+    # Demo / test data seeding gate (Issue #989).
+    # True (default): POST /api/admin/seed/demo-students is available.
+    # Set ENABLE_TEST_SEED=false in production Cloud Run to disable.
+    enable_test_seed: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
