@@ -76,7 +76,11 @@ class LearningSession(Base):
         "CharacterError", back_populates="session"
     )
     dialogue_turns: Mapped[list["DialogueTurn"]] = relationship(
-        "DialogueTurn", back_populates="learning_session", order_by="DialogueTurn.turn_order"
+        "DialogueTurn",
+        back_populates="learning_session",
+        order_by="DialogueTurn.turn_order",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
 
@@ -107,9 +111,9 @@ class DialogueTurn(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     # UUID string from the in-memory socratic agent session
     socratic_session_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
-    # Optional link to the DB LearningSession
-    learning_session_id: Mapped[int | None] = mapped_column(
-        ForeignKey("learning_sessions.id"), nullable=True, index=True
+    # Required link to the DB LearningSession (NOT NULL + CASCADE — Issue #1189)
+    learning_session_id: Mapped[int] = mapped_column(
+        ForeignKey("learning_sessions.id", ondelete="CASCADE"), nullable=False, index=True
     )
     # 0-based ordering within the socratic session
     turn_order: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -124,6 +128,6 @@ class DialogueTurn(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    learning_session: Mapped["LearningSession | None"] = relationship(
+    learning_session: Mapped["LearningSession"] = relationship(
         "LearningSession", back_populates="dialogue_turns"
     )
