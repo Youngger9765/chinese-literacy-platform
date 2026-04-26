@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
@@ -220,7 +220,10 @@ def list_my_sessions(
         statuses = [s.strip() for s in status.split(",") if s.strip()]
         wants_completed = "completed" in statuses
 
-    query = db.query(LearningSession).filter(
+    # joinedload(LearningSession.text) prevents N+1 when the loop accesses s.text.title
+    query = db.query(LearningSession).options(
+        joinedload(LearningSession.text)
+    ).filter(
         LearningSession.student_id == current_user.id,
     )
 
@@ -322,8 +325,10 @@ def get_reading_history(
         )
     )
 
+    # joinedload(LearningSession.text) prevents N+1 if callers access s.text downstream
     sessions_query = (
         db.query(LearningSession)
+        .options(joinedload(LearningSession.text))
         .filter(
             LearningSession.student_id == current_user.id,
             LearningSession.story_slug == normalize_story_slug(story_slug),
