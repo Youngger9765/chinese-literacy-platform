@@ -4,6 +4,32 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 
+# ---------------------------------------------------------------------------
+# Step name constants — single source of truth for step number ↔ key mapping.
+# Kept at module level so they can be imported by routes without importing the
+# full ORM model (avoids circular-import risk in lightweight scripts).
+# ---------------------------------------------------------------------------
+
+_STEP_NAMES: dict[int, str] = {
+    1: "intro",
+    2: "live_tutor",
+    3: "comprehension",
+    4: "vocab",
+    5: "full_reading",
+    6: "report",
+}
+_MAX_STEP_NUM: int = max(_STEP_NAMES)
+_STEP_KEY_TO_NUM: dict[str, int] = {v: k for k, v in _STEP_NAMES.items()}
+_STEP_NUM_TO_KEY: dict[int, str] = dict(_STEP_NAMES)  # same as _STEP_NAMES, explicit alias
+
+# Frontend step path keys differ from canonical backend STEP_NAMES values.
+# Map frontend alias → canonical key.
+_FRONTEND_STEP_ALIAS: dict[str, str] = {
+    "tutor": "live_tutor",
+    "full-reading": "full_reading",
+    "reading-annotation": "intro",
+}
+
 
 class ReadingAttemptHistory(Base):
     """Versioned history of reading_result JSONB snapshots for a LearningSession.
@@ -70,12 +96,21 @@ class LearningSession(Base):
         Index("ix_learning_sessions_student_id_status", "student_id", "status"),
     )
 
+    # ── Class-level step constants (mirrors module-level dicts; exposed here so
+    # tests and callers can access them via the model class directly) ──────────
+    _STEP_KEY_TO_NUM: dict[int, str] = _STEP_KEY_TO_NUM  # type: ignore[assignment]
+    _STEP_NUM_TO_KEY: dict[int, str] = _STEP_NUM_TO_KEY  # type: ignore[assignment]
+    _FRONTEND_STEP_ALIAS: dict[str, str] = _FRONTEND_STEP_ALIAS  # type: ignore[assignment]
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     text_id: Mapped[int | None] = mapped_column(ForeignKey("texts.id"), nullable=True)
     classroom_id: Mapped[int | None] = mapped_column(ForeignKey("classrooms.id"), nullable=True)
     story_slug: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="in_progress", index=True)
+    # DEPRECATED: use current_step_derived computed from step_progress.steps_completed (#1182).
+    # Do NOT write to this column from application code. Column kept for zero-downtime
+    # deprecation; will be dropped post-demo once step_progress is the sole source of truth.
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)
     overall_score: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -103,6 +138,42 @@ class LearningSession(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # ── Derived property — single source of truth for "current step" ─────────
+
+    @property
+    def current_step_derived(self) -> int:
+        """Compute the current step number from step_progress.steps_completed.
+
+        Returns the step number the student should be on next (= max completed + 1),
+        capped at _MAX_STEP_NUM so it never exceeds the last step.
+
+        Returns 1 (first step) when:
+        - step_progress is None (fresh session)
+        - step_progress is not a dict (corrupt value)
+        - steps_completed is empty or absent
+        - all keys in steps_completed are unknown
+
+        This is the authoritative value; do NOT read the deprecated integer
+        current_step column from application code.  (#1182)
+        """
+        sp = self.step_progress
+        if not isinstance(sp, dict):
+            return 1
+        steps_completed = sp.get("steps_completed")
+        if not isinstance(steps_completed, list) or len(steps_completed) == 0:
+            return 1
+        alias = self._FRONTEND_STEP_ALIAS
+        key_to_num = self._STEP_KEY_TO_NUM
+        max_num: int = 0
+        for s in steps_completed:
+            canonical = alias.get(s, s) if isinstance(s, str) else s
+            num = key_to_num.get(canonical, 0)
+            if num > max_num:
+                max_num = num
+        if max_num == 0:
+            return 1
+        return min(max_num + 1, _MAX_STEP_NUM)
 
     student: Mapped["User"] = relationship("User", back_populates="sessions")  # type: ignore[name-defined]
     text: Mapped["Text"] = relationship("Text", back_populates="sessions")  # type: ignore[name-defined]

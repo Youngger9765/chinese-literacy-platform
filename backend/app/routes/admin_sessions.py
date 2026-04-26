@@ -60,7 +60,7 @@ def list_sessions(
                 "student_id": s.student_id,
                 "story_slug": s.story_slug,
                 "status": s.status,
-                "current_step": s.current_step,
+                "current_step": s.current_step_derived,  # derived from step_progress (#1182)
                 "started_at": s.started_at.isoformat(),
                 "completed_at": s.completed_at.isoformat() if s.completed_at else None,
             }
