@@ -3,12 +3,13 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import func
+from sqlalchemy import func, or_, exists
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...dependencies.tenant import _check_classroom_access
+from ...models.assignment import AssignmentSubmission
 from ...models.school import Classroom, ClassroomStudent, ClassroomText
 from ...models.session import LearningSession
 from ...models.student_tag import StudentTag
@@ -229,12 +230,24 @@ def get_classroom_stats(
     )
     active_students = len(active_student_ids)
 
+    # Canonical completion predicate (Issue #1192):
+    # A session is "done" if session.status == 'completed'  OR
+    # it has an AssignmentSubmission with status IN ('submitted', 'graded').
+    # The second path covers students who submitted via assignment flow where
+    # session.status was not updated to 'completed' (see Issue #1181).
+    _submitted_sub = (
+        exists()
+        .where(AssignmentSubmission.session_id == LearningSession.id)
+        .where(AssignmentSubmission.status.in_(["submitted", "graded"]))
+    )
+    _is_done = or_(LearningSession.status == "completed", _submitted_sub)
+
     # Average accuracy from completed sessions' overall_score
     avg_accuracy = (
         db.query(func.avg(LearningSession.overall_score))
         .filter(
             LearningSession.student_id.in_(student_ids),
-            LearningSession.status == "completed",
+            _is_done,
             LearningSession.overall_score.isnot(None),
         )
         .scalar()
@@ -245,7 +258,7 @@ def get_classroom_stats(
         db.query(func.count(LearningSession.id))
         .filter(
             LearningSession.student_id.in_(student_ids),
-            LearningSession.status == "completed",
+            _is_done,
         )
         .scalar()
     )
@@ -256,7 +269,7 @@ def get_classroom_stats(
         db.query(LearningSession)
         .filter(
             LearningSession.student_id.in_(student_ids),
-            LearningSession.status == "completed",
+            _is_done,
             LearningSession.started_at.isnot(None),
             LearningSession.completed_at.isnot(None),
         )
