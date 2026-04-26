@@ -76,12 +76,10 @@ interface TooltipProps {
 const ChartTooltip: React.FC<TooltipProps> = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   const sessions = payload.find((p) => p.name === 'sessions')?.value ?? 0;
-  const score = payload.find((p) => p.name === 'score')?.value;
   return (
     <div className="bg-surface-container-lowest border border-[#E5E0D5] rounded-xl shadow-editorial px-3 py-2 text-xs">
       <p className="font-medium text-on-surface mb-1">{label}</p>
       <p className="text-on-surface-variant">完成：{sessions} 篇</p>
-      {score != null && <p className="text-accent font-medium">平均分：{score}%</p>}
     </div>
   );
 };
@@ -182,25 +180,20 @@ const StudentProgressDashboard: React.FC<StudentProgressDashboardProps> = ({
           sub={`共 ${data.total_sessions} 次練習`}
           icon={<span>📚</span>}
         />
-        <StatCard
-          label="平均分數"
-          value={data.avg_score != null ? `${data.avg_score}%` : '—'}
-          sub={data.avg_score != null ? '綜合評量' : '尚無記錄'}
-          icon={<span>⭐</span>}
-        />
+        {/* Issue #1094: 學生端不顯示平均分數；改顯示鼓勵圖示（或省略整張卡） */}
       </div>
 
       {/* New student hint */}
       {isNewStudent && <NewStudentHint />}
 
-      {/* 30-day activity chart */}
+      {/* 30-day activity chart — Issue #1094: 學生端改顯示完成篇數曲線，不顯示平均分數 */}
       {hasActivity && (
         <div className="bg-surface-container-lowest rounded-2xl border border-[#E5E0D5] p-4">
           <h3 className="text-sm font-semibold text-on-surface mb-3">近 30 天學習曲線</h3>
           <ResponsiveContainer width="100%" height={120}>
             <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
               <defs>
-                <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="sessionsGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#5B4FC4" stopOpacity={0.3} />
                   <stop offset="95%" stopColor="#5B4FC4" stopOpacity={0} />
                 </linearGradient>
@@ -214,7 +207,7 @@ const StudentProgressDashboard: React.FC<StudentProgressDashboardProps> = ({
                 axisLine={false}
               />
               <YAxis
-                domain={[0, 100]}
+                allowDecimals={false}
                 tick={{ fontSize: 10, fill: '#9ca3af' }}
                 tickLine={false}
                 axisLine={false}
@@ -222,11 +215,11 @@ const StudentProgressDashboard: React.FC<StudentProgressDashboardProps> = ({
               <Tooltip content={<ChartTooltip />} />
               <Area
                 type="monotone"
-                dataKey="score"
-                name="score"
+                dataKey="sessions"
+                name="sessions"
                 stroke="#5B4FC4"
                 strokeWidth={2}
-                fill="url(#scoreGradient)"
+                fill="url(#sessionsGradient)"
                 dot={false}
                 connectNulls
               />

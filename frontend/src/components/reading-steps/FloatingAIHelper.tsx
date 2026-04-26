@@ -8,6 +8,7 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { sendComprehensionChat, SessionExpiredError } from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
+import VoiceInputButton from '../ui/VoiceInputButton';
 
 interface FloatingAIHelperProps {
   storyTitle: string;
@@ -179,6 +180,11 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
               rows={1}
               disabled={isLoading}
               className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none disabled:opacity-50"
+            />
+            <VoiceInputButton
+              onTranscript={(text) => setInputText(text)}
+              disabled={isLoading}
+              size="sm"
             />
             <button
               onClick={handleSend}

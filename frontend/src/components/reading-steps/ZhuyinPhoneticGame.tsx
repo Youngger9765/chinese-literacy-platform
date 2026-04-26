@@ -194,8 +194,7 @@ function ScoreBanner({ score, total, onFinish, onRetry }: ScoreBannerProps) {
             {isGreat ? '太厲害了！' : '繼續加油！'}
           </h3>
           <p className="text-gray-500 text-sm mt-1">
-            答對 <span className="font-bold text-indigo-600">{score}</span> / {total} 題
-            （{pct}%）
+            {isGreat ? '幾乎全對，超級棒！' : '有答對一些，再試一次會更好'}
           </p>
         </div>
         <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
@@ -388,8 +387,8 @@ function PickGame({ mode, questions, onFinish, onBack }: PickGameProps) {
           })}
         </div>
 
-        {/* Score */}
-        <p className="text-xs text-gray-400">目前得分：{score} 分</p>
+        {/* Encouragement — Issue #1094: 學生端不顯示得分數字 */}
+        <p className="text-xs text-gray-400">繼續加油！</p>
       </div>
     </div>
   );
@@ -578,7 +577,7 @@ function ComposeGame({ questions, onFinish, onBack }: ComposeGameProps) {
           >
             清除重拼
           </button>
-          <span className="text-xs text-gray-400">得分：{score}</span>
+          <span className="text-xs text-gray-400">加油！</span>
         </div>
       </div>
     </div>

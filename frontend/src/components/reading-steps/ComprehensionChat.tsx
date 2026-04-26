@@ -229,7 +229,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               <span className="material-symbols-outlined text-3xl text-emerald-600">check_circle</span>
             </div>
             <p className="text-emerald-700 font-headline font-bold">選擇題已完成</p>
-            <p className="text-sm text-on-surface-variant">答對 {mcqScore} / {mcqTotal} 題</p>
+            <p className="text-sm text-on-surface-variant">
+              {mcqTotal > 0 && mcqScore === mcqTotal ? '全部答對，太棒了！' : '你完成了，繼續加油！'}
+            </p>
             <button
               onClick={handleMcqRedo}
               className="px-5 py-2.5 rounded-full text-sm font-bold bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-all"
@@ -292,7 +294,13 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
               <div className="mt-4 pt-4 border-t border-surface-container-high shrink-0">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-headline font-bold text-on-surface-variant">閱讀理解度</span>
-                  <span className="text-xs font-headline font-bold text-accent">{progressPercent}%</span>
+                  <span className="text-xs font-headline font-bold text-accent">
+                    {completedCount === totalTabs
+                      ? '全部完成！'
+                      : totalTabs > 0 && completedCount / totalTabs >= 0.5
+                        ? '過半了，快到了！'
+                        : '繼續加油'}
+                  </span>
                 </div>
                 <div className="h-2 bg-surface-container-high rounded-full overflow-hidden">
                   <div

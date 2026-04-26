@@ -67,33 +67,6 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
   // All completed sessions have all steps done
   const allStepIds = useMemo(() => new Set(ACTIVE_STEPS.map((s) => s.id)), []);
 
-  // Issue #1245: unified score display — prefer overall_score, fallback to accuracy,
-  // show explicit "—" rather than empty when both are null.
-  const score =
-    session.overall_score != null
-      ? Math.round(session.overall_score)
-      : null;
-
-  const accuracy =
-    session.accuracy != null
-      ? Math.round(session.accuracy * 100)
-      : null;
-
-  // Unified display value: overall_score → accuracy → null (show "進行中")
-  const scoreDisplay: string | null =
-    score != null
-      ? `${score}%`
-      : accuracy != null
-        ? `${accuracy}%`
-        : null;
-
-  const scoreLabel: string =
-    score != null
-      ? '得分'
-      : accuracy != null
-        ? '準確率'
-        : '';
-
   return (
     <div className="bg-white rounded-2xl shadow-card p-4">
       <div className="flex items-start justify-between gap-3">
@@ -108,14 +81,9 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
             </span>
           </div>
 
-          {/* Metadata row — enlarged date to text-sm, score always visible */}
+          {/* Metadata row — Issue #1094: 學生端不顯示得分 / 準確率 */}
           <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <span className="text-sm text-gray-400">{formatDate(session.started_at)}</span>
-            {scoreDisplay != null ? (
-              <span className="text-sm font-medium text-gray-700">{scoreLabel}：{scoreDisplay}</span>
-            ) : (
-              <span className="text-sm text-gray-400">—</span>
-            )}
+            <span className="text-xs text-gray-400">{formatDate(session.started_at)}</span>
           </div>
 
           {/* Step progress strip */}

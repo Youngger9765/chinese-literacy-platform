@@ -866,27 +866,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             />
           </div>
 
-          {/* Stats grid — CPM + Accuracy placeholders */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-            <div className="bg-surface-container-low p-6 rounded-3xl flex items-center gap-5">
-              <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-2xl text-emerald-700">speed</span>
-              </div>
-              <div>
-                <div className="font-headline text-on-surface-variant font-bold text-xs uppercase tracking-wider">語速 Reading Speed</div>
-                <div className="text-lg font-headline font-bold text-on-surface-variant mt-0.5">開發中</div>
-              </div>
-            </div>
-            <div className="bg-surface-container-low p-6 rounded-3xl flex items-center gap-5">
-              <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-2xl text-accent">verified</span>
-              </div>
-              <div>
-                <div className="font-headline text-on-surface-variant font-bold text-xs uppercase tracking-wider">準確度 Accuracy</div>
-                <div className="text-lg font-headline font-bold text-on-surface-variant mt-0.5">開發中</div>
-              </div>
-            </div>
-          </div>
+          {/* Issue #1094: 原「語速 / 準確度」佔位卡移除 — 學生端不顯示數據欄位；
+              教師後台（AssessmentReport readOnly）已有完整語速與準確度 */}
         </div>
       </div>
 

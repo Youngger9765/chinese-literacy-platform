@@ -20,6 +20,7 @@ import GoalAchievementCard from '../ui/GoalAchievementCard';
 import RepeatedErrorAlertModal from '../student/RepeatedErrorAlertModal';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { encourageOverall, encourageAccuracy, encourageReadingDone, encourageQuiz } from '../../utils/encouragement';
 
 /**
  * A wrapper around ResponsiveContainer that only renders the chart
@@ -169,6 +170,10 @@ const Section: React.FC<{
 
 const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onRetry, onGoToVocab, comprehensionScores, comprehensionScoresLoading, readingGoals, dbSessionId, token, readOnly }) => {
   const [expandedLine, setExpandedLine] = useState<number | null>(null);
+
+  // Issue #1094: Student-facing views hide numeric scores/accuracy/CPM and show
+  // encouragement text instead. Teacher view (readOnly) keeps all numbers.
+  const hideScores = !readOnly;
 
   // Track report viewed in localStorage
   useEffect(() => {
@@ -360,8 +365,9 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
 
       {!readOnly && <CelebrationOverlay score={overallScore} />}
 
-      {/* ============ 星星評級 Star Rating (Issue #222) ============ */}
-      {!hasNoData && !readOnly && (
+      {/* ============ 星星評級 Star Rating (Issue #222) —
+          學生端隱藏（Issue #1094：改鼓勵式，不呈現星星/分數） ============ */}
+      {!hasNoData && !hideScores && (
         <StarCelebration
           stars={starCount}
           readingAccuracy={bestReadingAccuracy}
@@ -415,83 +421,98 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
           <p className="text-sm text-gray-400 mt-1">{story.title}</p>
         )}
         {overallScore !== null ? (
-          <div className="mt-4 inline-flex items-center gap-2 bg-accent/10 text-accent px-5 py-2 rounded-full">
-            <span className="text-sm font-bold">綜合成績</span>
-            <span className="text-2xl font-black">{overallScore}%</span>
-          </div>
-        ) : (
+          hideScores ? (
+            <div className="mt-4 inline-flex items-center gap-2 bg-accent/10 text-accent px-5 py-2 rounded-full">
+              <span className="text-sm font-bold">{encourageOverall(overallScore)}</span>
+            </div>
+          ) : (
+            <div className="mt-4 inline-flex items-center gap-2 bg-accent/10 text-accent px-5 py-2 rounded-full">
+              <span className="text-sm font-bold">綜合成績</span>
+              <span className="text-2xl font-black">{overallScore}%</span>
+            </div>
+          )
+        ) : !hideScores ? (
           <div className="mt-4 inline-flex items-center gap-2 bg-gray-100 text-gray-400 px-5 py-2 rounded-full">
             <span className="text-sm font-bold">綜合成績</span>
             <span className="text-2xl font-black">--</span>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* ============ 環節一：朗讀結果總覽 ============ */}
       <Section number={1} title="朗讀結果總覽" defaultOpen={true} disabled={!readingAttempt && !fullReadingResult}>
         {readingAttempt || fullReadingResult ? (
           <div className="space-y-4">
-            {/* 3 KPI Cards */}
-            <div className="grid grid-cols-3 gap-4">
-              {/* 準確度 */}
-              <div className="text-center p-4 bg-slate-50 rounded-2xl">
-                <div className="w-24 h-24 mx-auto relative">
-                  <SafeResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={scoreData} innerRadius={30} outerRadius={42} paddingAngle={5} dataKey="value" startAngle={90} endAngle={-270}>
-                        {scoreData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                      </Pie>
-                    </PieChart>
-                  </SafeResponsiveContainer>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-lg font-black text-accent">{accuracy}%</span>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 font-bold mt-1">逐段準確度</p>
-              </div>
-
-              {/* 語速 CPM */}
-              <div className="text-center p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center">
-                <span className="text-3xl font-black text-gray-900">{cpm}</span>
-                <span className="text-xs text-gray-500 font-bold">正確字數/分鐘</span>
-                <div className="flex gap-0.5 mt-2 w-full max-w-[120px]">
-                  {speedSegments.map((seg, idx) => (
-                    <div key={idx} className={`flex-1 h-1.5 rounded-sm ${idx === currentSegment ? seg.color : 'bg-gray-200'}`} />
-                  ))}
-                </div>
-                <p className="text-[10px] text-gray-400 mt-1">
-                  {speedSegments[currentSegment]?.label}
-                </p>
-              </div>
-
-              {/* 全文匹配率 */}
-              <div className="text-center p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center">
-                {fullMatchPct !== null ? (
-                  <>
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${
-                      fullMatchPct >= 80 ? 'border-emerald-500 text-emerald-700' : fullMatchPct >= 60 ? 'border-amber-500 text-amber-700' : 'border-red-400 text-red-600'
-                    }`}>
-                      <span className="text-lg font-black">{fullMatchPct}%</span>
-                    </div>
-                    <p className="text-xs text-gray-500 font-bold mt-1">全文匹配</p>
-                    {fullReadingResult?.cpm != null && (
-                      <p className="text-[10px] text-gray-400 mt-0.5">{fullReadingResult.cpm} 正確字數/分鐘</p>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <span className="text-3xl font-black text-gray-300">--</span>
-                    <p className="text-xs text-gray-400 font-bold mt-1">全文匹配</p>
-                  </>
+            {/* KPI Cards — teacher view shows 3 cards with numbers; student view shows encouragement */}
+            {hideScores ? (
+              <div className="bg-accent/5 rounded-2xl p-6 text-center space-y-2">
+                <p className="text-lg font-bold text-accent">{encourageAccuracy(accuracy)}</p>
+                {readingAttempt && (
+                  <p className="text-sm text-gray-600">{encourageReadingDone()}</p>
                 )}
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-4">
+                {/* 準確度 */}
+                <div className="text-center p-4 bg-slate-50 rounded-2xl">
+                  <div className="w-24 h-24 mx-auto relative">
+                    <SafeResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={scoreData} innerRadius={30} outerRadius={42} paddingAngle={5} dataKey="value" startAngle={90} endAngle={-270}>
+                          {scoreData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                        </Pie>
+                      </PieChart>
+                    </SafeResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-lg font-black text-accent">{accuracy}%</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 font-bold mt-1">逐段準確度</p>
+                </div>
 
-            {/* Speed feedback */}
-            {readingAttempt && (
+                {/* 語速 CPM */}
+                <div className="text-center p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center">
+                  <span className="text-3xl font-black text-gray-900">{cpm}</span>
+                  <span className="text-xs text-gray-500 font-bold">正確字數/分鐘</span>
+                  <div className="flex gap-0.5 mt-2 w-full max-w-[120px]">
+                    {speedSegments.map((seg, idx) => (
+                      <div key={idx} className={`flex-1 h-1.5 rounded-sm ${idx === currentSegment ? seg.color : 'bg-gray-200'}`} />
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    {speedSegments[currentSegment]?.label}
+                  </p>
+                </div>
+
+                {/* 全文匹配率 */}
+                <div className="text-center p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center">
+                  {fullMatchPct !== null ? (
+                    <>
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${
+                        fullMatchPct >= 80 ? 'border-emerald-500 text-emerald-700' : fullMatchPct >= 60 ? 'border-amber-500 text-amber-700' : 'border-red-400 text-red-600'
+                      }`}>
+                        <span className="text-lg font-black">{fullMatchPct}%</span>
+                      </div>
+                      <p className="text-xs text-gray-500 font-bold mt-1">全文匹配</p>
+                      {fullReadingResult?.cpm != null && (
+                        <p className="text-[10px] text-gray-400 mt-0.5">{fullReadingResult.cpm} 正確字數/分鐘</p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-3xl font-black text-gray-300">--</span>
+                      <p className="text-xs text-gray-400 font-bold mt-1">全文匹配</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Speed feedback — text-based encouragement, shown in both views */}
+            {readingAttempt && !hideScores && (
               <p className="text-sm text-gray-600 text-center">{getCpmFeedback(cpm).text}</p>
             )}
-            {story?.readingBenchmark && (() => {
+            {!hideScores && story?.readingBenchmark && (() => {
               const levels = parseReadingBenchmark(story.readingBenchmark.levels);
               const benchCpm = fullReadingResult?.cpm ?? cpm;
               const benchFeedback = getBenchmarkFeedback(benchCpm, levels);
@@ -500,8 +521,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
               ) : null;
             })()}
 
-            {/* Goal achievement (Issue #84) — only shown when an assignment has goals */}
-            {readingGoals && (
+            {/* Goal achievement (Issue #84) — hidden for students (numbers-based) */}
+            {readingGoals && !hideScores && (
               <GoalAchievementCard
                 effectiveCpm={readingGoals.effectiveCpm}
                 effectiveAccuracy={readingGoals.effectiveAccuracy}
@@ -529,8 +550,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
               </div>
             )}
 
-            {/* 4 category cards */}
-            {lineBreakdown.length > 0 && (
+            {/* 4 category cards — hidden for students (Issue #1094) */}
+            {lineBreakdown.length > 0 && !hideScores && (
               <div>
                 <p className="text-xs text-gray-500 font-bold mb-2">朗讀分析</p>
                 <div className="grid grid-cols-4 gap-3">
@@ -586,10 +607,14 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                         <p className="text-sm text-gray-700 truncate">{line.transcript || '（未朗讀）'}</p>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className={`text-sm font-bold ${pct >= 80 ? 'text-emerald-600' : pct >= 60 ? 'text-amber-600' : 'text-red-500'}`}>
-                          {pct}%
-                        </span>
-                        <span className="text-xs text-gray-400">{line.cpm} 字/分</span>
+                        {!hideScores && (
+                          <>
+                            <span className={`text-sm font-bold ${pct >= 80 ? 'text-emerald-600' : pct >= 60 ? 'text-amber-600' : 'text-red-500'}`}>
+                              {pct}%
+                            </span>
+                            <span className="text-xs text-gray-400">{line.cpm} 字/分</span>
+                          </>
+                        )}
                         <svg className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -598,12 +623,14 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                     {isExpanded && line.diffTokens && (
                       <div className="px-6 pb-4 pt-1">
                         <DiffDisplay tokens={line.diffTokens} showLegend className="text-lg" />
-                        <div className="flex gap-4 mt-3 text-xs text-gray-400">
-                          <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
-                          <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>
-                          <span>漏讀: {line.diffTokens.filter(t => t.type === 'missing').length} 字</span>
-                          <span>多讀: {line.diffTokens.filter(t => t.type === 'extra').length} 字</span>
-                        </div>
+                        {!hideScores && (
+                          <div className="flex gap-4 mt-3 text-xs text-gray-400">
+                            <span>正確: {line.diffTokens.filter(t => t.type === 'correct').length} 字</span>
+                            <span>讀錯: {line.diffTokens.filter(t => t.type === 'wrong').length} 字</span>
+                            <span>漏讀: {line.diffTokens.filter(t => t.type === 'missing').length} 字</span>
+                            <span>多讀: {line.diffTokens.filter(t => t.type === 'extra').length} 字</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -616,7 +643,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
               <div className="border-t border-slate-200 px-6 py-4">
                 <p className="text-xs text-gray-500 font-bold mb-2">全文朗讀比對</p>
                 <DiffDisplay tokens={fullReadingResult.diffTokens} showLegend className="text-lg" />
-                {fullReadingResult.errorBreakdown && (
+                {fullReadingResult.errorBreakdown && !hideScores && (
                   <div className="flex gap-4 mt-3 text-xs text-gray-400">
                     <span>正確: {fullReadingResult.errorBreakdown.correct} 字</span>
                     <span>讀錯: {fullReadingResult.errorBreakdown.wrong} 字</span>
@@ -737,6 +764,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
             evaluativeScore={comprehensionScores?.evaluative_score ?? 0}
             feedback={comprehensionScores?.feedback ?? null}
             loading={comprehensionScoresLoading}
+            hideScores={hideScores}
           />
         ) : (
           <div className="p-6 bg-gray-50 rounded-2xl text-center">
@@ -764,7 +792,9 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
                       <div className="bg-accent h-2 rounded-full transition-all" style={{ width: vocabResult.totalWords > 0 ? `${Math.round((vocabResult.practicedWords.length / vocabResult.totalWords) * 100)}%` : '0%' }} />
                     </div>
-                    <span className="text-xs font-bold text-gray-600">{vocabResult.practicedWords.length}/{vocabResult.totalWords}</span>
+                    {!hideScores && (
+                      <span className="text-xs font-bold text-gray-600">{vocabResult.practicedWords.length}/{vocabResult.totalWords}</span>
+                    )}
                   </div>
                   {vocabResult.practicedWords.length > 0 && (
                     <div className="flex flex-wrap gap-1">
@@ -796,17 +826,25 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                         style={{ width: dictationResult.totalWords > 0 ? `${Math.round((dictationResult.correctCount / dictationResult.totalWords) * 100)}%` : '0%' }}
                       />
                     </div>
-                    <span className="text-xs font-bold text-gray-600">{dictationResult.correctCount}/{dictationResult.totalWords}</span>
-                  </div>
-                  <div className="flex gap-3 text-xs text-gray-500">
-                    <span className="text-emerald-600 font-medium">正確 {dictationResult.correctCount}</span>
-                    {dictationResult.incorrectCount > 0 && (
-                      <span className="text-red-500 font-medium">錯誤 {dictationResult.incorrectCount}</span>
-                    )}
-                    {dictationResult.skippedCount > 0 && (
-                      <span className="text-gray-400">跳過 {dictationResult.skippedCount}</span>
+                    {!hideScores && (
+                      <span className="text-xs font-bold text-gray-600">{dictationResult.correctCount}/{dictationResult.totalWords}</span>
                     )}
                   </div>
+                  {hideScores ? (
+                    <p className="text-xs text-emerald-600 font-medium">
+                      {encourageQuiz(dictationResult.correctCount, dictationResult.totalWords)}
+                    </p>
+                  ) : (
+                    <div className="flex gap-3 text-xs text-gray-500">
+                      <span className="text-emerald-600 font-medium">正確 {dictationResult.correctCount}</span>
+                      {dictationResult.incorrectCount > 0 && (
+                        <span className="text-red-500 font-medium">錯誤 {dictationResult.incorrectCount}</span>
+                      )}
+                      {dictationResult.skippedCount > 0 && (
+                        <span className="text-gray-400">跳過 {dictationResult.skippedCount}</span>
+                      )}
+                    </div>
+                  )}
                   {dictationResult.results.some(r => !r.isCorrect && !r.skipped) && (
                     <div className="mt-2 space-y-1">
                       <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">答錯的詞語</p>
@@ -841,12 +879,16 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
                       <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(100, Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100))}%` }} />
                     </div>
-                    <span className="text-xs font-bold text-gray-600">{comprehensionResult.understoodCount}/{comprehensionResult.requiredCount}</span>
+                    {!hideScores && (
+                      <span className="text-xs font-bold text-gray-600">{comprehensionResult.understoodCount}/{comprehensionResult.requiredCount}</span>
+                    )}
                   </div>
-                  <div className="flex gap-3 text-xs text-gray-500">
-                    <span>對話 {comprehensionResult.conversationLength} 回</span>
-                    <span>理解率 {Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)}%</span>
-                  </div>
+                  {!hideScores && (
+                    <div className="flex gap-3 text-xs text-gray-500">
+                      <span>對話 {comprehensionResult.conversationLength} 回</span>
+                      <span>理解率 {Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100)}%</span>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-xs text-gray-400 text-center py-2">未完成</p>
@@ -867,8 +909,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         />
       )}
 
-      {/* ============ 朗讀進步曲線 (#909) ============ */}
-      {readingHistory.length >= 2 && (
+      {/* ============ 朗讀進步曲線 (#909) — 學生端隱藏（Issue #1094，數據曲線屬教師觀察用） ============ */}
+      {!hideScores && readingHistory.length >= 2 && (
         <Section number={8} title="朗讀進步曲線" defaultOpen={true}>
           <div className="space-y-4">
             <p className="text-sm text-gray-500">

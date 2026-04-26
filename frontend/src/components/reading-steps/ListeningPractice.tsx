@@ -14,6 +14,7 @@ import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { useAuth } from '../../contexts/AuthContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { speakTextWithProgress, cancelTts, TtsProgressInfo } from '../../services/ttsApi';
+import { encourageAccuracy } from '../../utils/encouragement';
 
 export interface ListeningResult {
   score: number;
@@ -49,14 +50,6 @@ function scoreColour(score: number): string {
   if (score >= 80) return 'text-emerald-700';
   if (score >= 60) return 'text-amber-700';
   return 'text-tertiary';
-}
-
-function scoreLabel(score: number): string {
-  if (score >= 90) return '非常優秀！';
-  if (score >= 75) return '表現良好';
-  if (score >= 60) return '尚可，繼續加油';
-  if (score >= 45) return '需要多練習';
-  return '請再聽一次試試看';
 }
 
 const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, onBack }) => {
@@ -333,14 +326,16 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
           {/* ── Phase 3: Results ──────────────────────────────────── */}
           {phase === 'results' && evalResult && (
             <>
-              {/* Score card */}
+              {/* Feedback card — Issue #1094: 學生端不顯示分數，只保留鼓勵文字 + AI 回饋 */}
               <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 mt-4 flex flex-col items-center gap-4">
-                <div className={`w-28 h-28 rounded-full flex items-center justify-center border-4 ${
-                  evalResult.score >= 80 ? 'border-emerald-500' : evalResult.score >= 60 ? 'border-amber-500' : 'border-tertiary'
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center ${
+                  evalResult.score >= 80 ? 'bg-emerald-100' : evalResult.score >= 60 ? 'bg-amber-100' : 'bg-tertiary-container/30'
                 }`}>
-                  <span className={`text-3xl font-headline font-black ${scoreColour(evalResult.score)}`}>{evalResult.score}</span>
+                  <span className="material-symbols-outlined text-4xl" aria-hidden="true">
+                    {evalResult.score >= 80 ? 'celebration' : evalResult.score >= 60 ? 'thumb_up' : 'favorite'}
+                  </span>
                 </div>
-                <p className={`text-lg font-headline font-bold ${scoreColour(evalResult.score)}`}>{scoreLabel(evalResult.score)}</p>
+                <p className={`text-lg font-headline font-bold ${scoreColour(evalResult.score)}`}>{encourageAccuracy(evalResult.score)}</p>
                 <p className="text-sm text-on-surface-variant text-center leading-relaxed">{evalResult.feedback}</p>
               </div>
 
