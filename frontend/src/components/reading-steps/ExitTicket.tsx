@@ -400,7 +400,7 @@ const ExitTicket: React.FC<ExitTicketProps> = ({
                 ? 'bg-emerald-100 text-emerald-700'
                 : 'bg-amber-100 text-amber-700'
             }`}>
-              {correctCount}/{questions.length}
+              {correctCount === questions.length ? '全部答對！' : '已完成'}
             </span>
           )}
         </div>
@@ -490,11 +490,11 @@ const ExitTicket: React.FC<ExitTicketProps> = ({
                 {correctCount === questions.length ? '🎉' : '💪'}
               </p>
               <p className="font-bold text-gray-900 mt-1">
-                {correctCount}/{questions.length} 題正確
+                {correctCount === questions.length ? '太棒了，全部答對！' : '你完成了！'}
               </p>
               <p className="text-sm text-gray-500 mt-0.5">
                 {correctCount === questions.length
-                  ? '太棒了！全部答對！'
+                  ? '繼續保持！'
                   : '沒關係，多練習幾次就會進步！'}
               </p>
             </div>

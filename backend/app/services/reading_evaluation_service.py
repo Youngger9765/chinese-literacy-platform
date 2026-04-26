@@ -97,7 +97,7 @@ _SYSTEM_PROMPT = (
     "- diff_tokens 的順序必須與 target_text 字元順序對應\n"
     "- 每個 target_text 字元都要有一個對應的 token（type=missing 若未念到）\n"
     "- 若 spoken 與 char 相同則不需填 spoken 欄位\n"
-    "- feedback 用繁體中文，1-2 句鼓勵語\n"
+    "- feedback 用繁體中文，1-2 句溫柔鼓勵語，禁止提到具體數字（百分比、字數、字/分鐘），多用「不錯！」「再試試看」「繼續加油」等口吻\n"
     "- 嚴格輸出 JSON，不要加任何說明文字\n"
 )
 

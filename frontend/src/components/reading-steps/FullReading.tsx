@@ -11,12 +11,22 @@ import { getReadingHistory, type ReadingHistoryPoint } from '../../services/lear
 import { saveReadingHistory } from '../../services/readingHistoryApi';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { useAuth } from '../../contexts/AuthContext';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts';
-
-/* ------------------------------------------------------------------ */
-
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
 import { groupIdxForProgress } from '../../utils/ttsHighlight';
+
+/* ── Encouragement helper (same tier logic as ParagraphCard) ─────────────── */
+
+const FULL_READING_TIERS: Array<{ min: number; stars: number; text: string; color: string }> = [
+  { min: 0.90, stars: 5, text: '太厲害了！', color: 'text-emerald-600' },
+  { min: 0.75, stars: 4, text: '唸得很流暢！', color: 'text-green-600' },
+  { min: 0.60, stars: 3, text: '繼續練習！', color: 'text-green-600' },
+  { min: 0,    stars: 2, text: '再多練幾次就會更熟～', color: 'text-amber-600' },
+];
+
+function getFullReadingEncouragement(matchRate: number): { stars: number; text: string; color: string } {
+  const tier = FULL_READING_TIERS.find(t => matchRate >= t.min) ?? FULL_READING_TIERS[FULL_READING_TIERS.length - 1];
+  return { stars: tier.stars, text: tier.text, color: tier.color };
+}
 
 /* ------------------------------------------------------------------ */
 
@@ -259,8 +269,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
     setStreamingTranscript(cleanChineseText(transcript));
   }, [fullText, stopSession]);
 
-  const percent = result ? Math.round(result.matchRate * 100) : 0;
-
   /* ---- Render paragraph text with optional TTS highlighting ---- */
   const renderParagraph = (line: string, idx: number) => {
     const zhuyinLine = zhuyinLines ? zhuyinLines[idx] : null;
@@ -375,49 +383,30 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
           {/* ── Result section ──────────────────────────────────────── */}
           {result && (
             <div className="mt-6 space-y-6">
-              {/* Score */}
-              <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 flex flex-col items-center gap-4">
-                <div className={`w-28 h-28 rounded-full flex items-center justify-center border-4 ${
-                  percent >= 80 ? 'border-emerald-500'
-                  : percent >= 60 ? 'border-amber-500'
-                  : 'border-tertiary'
-                }`}>
-                  <span className={`text-3xl font-headline font-black ${
-                    percent >= 80 ? 'text-emerald-700'
-                    : percent >= 60 ? 'text-amber-700'
-                    : 'text-tertiary'
-                  }`}>{percent}%</span>
-                </div>
-                <p className={`text-base font-headline font-bold text-center ${
-                  percent >= 80 ? 'text-emerald-700'
-                  : percent >= 60 ? 'text-amber-700'
-                  : 'text-on-surface-variant'
-                }`}>
-                  {result.feedback}
-                </p>
-              </div>
-
-              {/* Stats grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-surface-container-low p-5 rounded-3xl flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-xl text-emerald-700">speed</span>
+              {/* Encouragement — no numbers shown to student (Issues #1094, #1097) */}
+              {(() => {
+                const enc = getFullReadingEncouragement(result.matchRate);
+                return (
+                  <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 flex flex-col items-center gap-3">
+                    <div className="flex gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className={`material-symbols-outlined text-3xl transition-colors ${
+                            i < enc.stars ? 'text-amber-400' : 'text-on-surface-variant/20'
+                          }`}
+                          style={{ fontVariationSettings: i < enc.stars ? "'FILL' 1" : "'FILL' 0" }}
+                        >
+                          star
+                        </span>
+                      ))}
+                    </div>
+                    <p className={`text-xl font-headline font-bold text-center ${enc.color}`}>
+                      {enc.text}
+                    </p>
                   </div>
-                  <div>
-                    <div className="font-headline text-on-surface-variant font-bold text-xs uppercase tracking-wider">語速</div>
-                    <div className="text-lg font-headline font-bold text-on-surface mt-0.5">{result.cpm} 字/分</div>
-                  </div>
-                </div>
-                <div className="bg-surface-container-low p-5 rounded-3xl flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-xl text-accent">verified</span>
-                  </div>
-                  <div>
-                    <div className="font-headline text-on-surface-variant font-bold text-xs uppercase tracking-wider">準確度</div>
-                    <div className="text-lg font-headline font-bold text-on-surface mt-0.5">{percent}%</div>
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
 
               {/* Transcript */}
               {streamingTranscript && (
@@ -443,44 +432,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
                 </div>
               )}
 
-              {/* Reading progress curve (#909) */}
+              {/* Reading progress curve — Issue #1094: 學生端隱藏數據曲線（教師後台可見） */}
               {readingHistory.length >= 1 && (
-                <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
-                  <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">
-                    朗讀進步曲線
-                    {readingHistory.length >= 2 && (() => {
-                      const first = readingHistory[0]?.cpm;
-                      const last = readingHistory[readingHistory.length - 1]?.cpm;
-                      if (first && last && first > 0) {
-                        const pct = Math.round(((last - first) / first) * 100);
-                        return pct > 0
-                          ? <span className="ml-1 text-emerald-600">▲{pct}%</span>
-                          : pct < 0 ? <span className="ml-1 text-tertiary">▼{Math.abs(pct)}%</span> : null;
-                      }
-                      return null;
-                    })()}
-                  </p>
-                  <ResponsiveContainer width="100%" height={160}>
-                    <LineChart data={readingHistory.map((h, i) => ({
-                      attempt: `第${i + 1}次`,
-                      cpm: h.cpm,
-                      accuracy: h.accuracy,
-                    }))}>
-                      <XAxis dataKey="attempt" tick={{ fontSize: 11 }} />
-                      <YAxis yAxisId="cpm" tick={{ fontSize: 11 }} width={32} />
-                      <Tooltip
-                        formatter={(value: number, name: string) => [
-                          name === 'cpm' ? `${value} 字/分` : `${value}%`,
-                          name === 'cpm' ? '語速' : '準確度',
-                        ]}
-                      />
-                      <ReferenceLine yAxisId="cpm" y={90} stroke="#ef4444" strokeDasharray="6 3" label={{ value: '目標 90', position: 'right', fill: '#ef4444', fontSize: 10 }} />
-                      <Line yAxisId="cpm" type="monotone" dataKey="cpm" stroke="#564ABF" strokeWidth={2.5} dot={{ r: 3, fill: '#564ABF' }} name="cpm" />
-                      <Line yAxisId="cpm" type="monotone" dataKey="accuracy" stroke="#006947" strokeWidth={2} dot={{ r: 3, fill: '#006947' }} strokeDasharray="4 2" name="accuracy" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                  <p className="text-xs text-on-surface-variant text-center mt-2">
-                    本篇已練習 {readingHistory.length} 次
+                <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 text-center">
+                  <p className="text-sm font-headline text-on-surface">
+                    本篇已練習 {readingHistory.length} 次，繼續加油！
                   </p>
                 </div>
               )}

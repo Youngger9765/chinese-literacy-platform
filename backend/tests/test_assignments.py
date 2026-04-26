@@ -849,6 +849,128 @@ class TestStartAssignment:
         resp = client.post("/api/assignments/1/start")
         assert resp.status_code == 401
 
+    def test_start_assignment_atomic_submission_linked_after_session_reuse(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        """Regression test for #1185: submission always atomically linked to session.
+
+        The fix replaces db.rollback() (which invalidated the outer transaction and
+        could leave submission.session_id=NULL if the post-rollback commit failed) with
+        db.begin_nested() (savepoint), which only rolls back the session INSERT while
+        keeping the outer transaction — including the submission — intact.
+
+        This test verifies the observable contract: after any start attempt that reuses
+        an existing session (the race-condition recovery path), the AssignmentSubmission
+        must be atomically committed with session_id pointing to the reused session.
+        """
+        # Step 1: Create the assignment.
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Atomic Savepoint Test #1185",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code in (200, 201), create_resp.text
+        assignment_id = create_resp.json()["id"]
+
+        # Step 2: A real first start creates both the LearningSession and links
+        # the submission correctly.
+        first_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student1["token"]),
+        )
+        assert first_resp.status_code == 200, first_resp.text
+        real_session_id = first_resp.json()["session_id"]
+
+        # Step 3: Reset submission → not_started (simulate: student retries after
+        # a network failure that left the DB uncommitted), while the LearningSession
+        # row was persisted by the first successful start.
+        db_reset = TestingSessionLocal()
+        try:
+            from app.models.assignment import AssignmentSubmission
+            sub = (
+                db_reset.query(AssignmentSubmission)
+                .filter(
+                    AssignmentSubmission.assignment_id == assignment_id,
+                    AssignmentSubmission.student_id == student1["user_id"],
+                )
+                .first()
+            )
+            assert sub is not None
+            sub.status = "not_started"
+            sub.session_id = None
+            db_reset.commit()
+        finally:
+            db_reset.close()
+
+        # Step 4: Second start. The LearningSession already exists in_progress
+        # for the same student+story, so the route's query at the top of the
+        # else-branch finds it and calls _sync_assignment_metadata (reuse path).
+        # This exercises the same code that a savepoint-recovered race would use.
+        second_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(student1["token"]),
+        )
+        assert second_resp.status_code == 200, (
+            f"Expected 200 got {second_resp.status_code}: {second_resp.text}"
+        )
+        data = second_resp.json()
+
+        # Step 5: Must reuse the SAME session (no orphan created).
+        assert data["session_id"] == real_session_id, (
+            f"Expected to reuse session {real_session_id}, "
+            f"got {data['session_id']} — possible orphan created"
+        )
+
+        # Step 6: Verify DB state — submission is atomically linked.
+        db_verify = TestingSessionLocal()
+        try:
+            from app.models.assignment import AssignmentSubmission as AS2
+            from app.models.session import LearningSession
+            from app.utils.slug import normalize_story_slug
+
+            story_slug = normalize_story_slug(VALID_STORY_ID)
+
+            # No orphan sessions: exactly one in_progress session for this student+story.
+            sessions = (
+                db_verify.query(LearningSession)
+                .filter(
+                    LearningSession.student_id == student1["user_id"],
+                    LearningSession.story_slug == story_slug,
+                    LearningSession.status == "in_progress",
+                )
+                .all()
+            )
+            session_ids = [s.id for s in sessions]
+            assert len(sessions) == 1, (
+                f"Expected 1 in_progress session, found {len(sessions)}: "
+                f"{session_ids} — orphan session leaked! (#1185)"
+            )
+            assert sessions[0].id == real_session_id
+
+            # Submission must be atomically committed (status + session_id together).
+            sub_verify = (
+                db_verify.query(AS2)
+                .filter(
+                    AS2.assignment_id == assignment_id,
+                    AS2.student_id == student1["user_id"],
+                )
+                .first()
+            )
+            assert sub_verify is not None
+            assert sub_verify.status == "in_progress", (
+                f"Submission.status={sub_verify.status!r}, expected 'in_progress'"
+            )
+            assert sub_verify.session_id == real_session_id, (
+                f"Submission.session_id={sub_verify.session_id} != "
+                f"expected {real_session_id} — partial/missing commit! (#1185)"
+            )
+        finally:
+            db_verify.close()
+
 
 # ====================================================================# Edge cases
 # ====================================================================
@@ -1299,6 +1421,92 @@ class TestSubmitAssignment:
         )
         assert resp.status_code == 204
 
+    def test_submit_syncs_session_status_and_completed_at(
+        self, client, teacher, school_id
+    ):
+        """Regression #1181: submit must flip session.status → completed and set completed_at.
+
+        Before the fix, only submission.status was updated. The linked LearningSession
+        kept status='in_progress' and completed_at=NULL, causing dashboard queries to miss
+        the session when filtering for completed work.
+
+        Uses a fresh student to avoid unique-index collisions from earlier tests.
+        """
+        from app.models.session import LearningSession
+
+        # Use a dedicated fresh student so no existing in_progress session conflicts
+        fresh_student = _register_user(client, "stu_1181")
+        _make_student_role(fresh_student["user_id"], school_id)
+
+        # Create a private classroom for this test so we can enroll only our student
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Regression 1181 Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201
+        classroom_id = cls_resp.json()["id"]
+
+        client.post(
+            f"/api/classrooms/{classroom_id}/students",
+            json={"student_id": fresh_student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+
+        # Create assignment and start it
+        # Use story "2" (a different lesson) so this test's completed session
+        # does not collide with other tests that use story "1" via student1.
+        create_resp = client.post(
+            f"/api/classrooms/{classroom_id}/assignments",
+            json={
+                "classroom_id": classroom_id,
+                "story_id": "2",
+                "title": "Session Sync Regression #1181",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        assignment_id = create_resp.json()["id"]
+
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(fresh_student["token"]),
+        )
+        assert start_resp.status_code == 200
+        session_id = start_resp.json()["session_id"]
+
+        # Confirm session is in_progress before submit
+        db = TestingSessionLocal()
+        try:
+            sess = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+            assert sess is not None
+            assert sess.status == "in_progress"
+            assert sess.completed_at is None
+        finally:
+            db.close()
+
+        # Student submits the assignment
+        submit_resp = client.post(
+            f"/api/assignments/{assignment_id}/submit",
+            headers=auth_header(fresh_student["token"]),
+        )
+        assert submit_resp.status_code == 200
+        assert submit_resp.json()["status"] == "submitted"
+
+        # Verify the linked session was synced atomically in the same transaction
+        db = TestingSessionLocal()
+        try:
+            sess = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+            assert sess is not None, "LearningSession must still exist after submit"
+            assert sess.status == "completed", (
+                f"Expected session.status='completed' after submit, got '{sess.status}'"
+            )
+            assert sess.completed_at is not None, (
+                "session.completed_at must be set after submit (was NULL before fix)"
+            )
+        finally:
+            db.close()
+
 
 # ====================================================================# Notification service — unit tests (no HTTP needed)
 # ====================================================================
@@ -1368,12 +1576,17 @@ class TestSubmissionReadingMetrics:
     pulled from the linked LearningSession when available."""
 
     def _create_assignment_and_start(self, client, teacher, student, classroom_id):
-        """Create assignment, start it as student. Returns (assignment_id, session_id)."""
+        """Create assignment, start it as student. Returns (assignment_id, session_id).
+
+        Uses story_id="2" (not VALID_STORY_ID="1") so that earlier submit tests
+        which mark story-1 sessions as 'completed' don't cause a unique-index
+        collision in SQLite (which lacks partial-index support).
+        """
         create_resp = client.post(
             f"/api/classrooms/{classroom_id}/assignments",
             json={
                 "classroom_id": classroom_id,
-                "story_id": VALID_STORY_ID,
+                "story_id": "2",
                 "title": "Reading Metrics Test",
             },
             headers=auth_header(teacher["token"]),

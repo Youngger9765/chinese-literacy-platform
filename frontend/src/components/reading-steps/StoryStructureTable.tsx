@@ -375,7 +375,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
                 : 'bg-amber-100 text-amber-700'
             }`}
           >
-            {score >= 80 ? '🎉' : '💪'} {score} 分
+            {score >= 80 ? '🎉 表現超棒！' : '💪 繼續加油'}
           </span>
         )}
       </div>

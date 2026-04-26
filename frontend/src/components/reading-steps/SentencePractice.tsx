@@ -20,6 +20,7 @@ import {
   type ExampleSentence,
   type ExampleSentenceSource,
 } from '../../services/learningApi';
+import VoiceInputButton from '../ui/VoiceInputButton';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -492,6 +493,10 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                     : entry.status === 'incorrect' ? 'border-tertiary/40 bg-tertiary-container/10 text-on-surface'
                     : 'border-surface-container-high bg-transparent focus:border-accent text-on-surface'
                   }`}
+                />
+                <VoiceInputButton
+                  onTranscript={(text) => updateSentenceText(idx, text)}
+                  disabled={entry.status === 'loading' || isCurrentDone}
                 />
                 <button
                   onClick={() => handleValidate(idx)}

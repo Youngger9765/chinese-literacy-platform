@@ -126,7 +126,23 @@ MOCK_EVAL_RESULT = {
     "key_points_missed": ["烏龜最後贏得比賽"],
     "feedback": "你掌握了主要角色和情節，不過結局的部分可以更完整。",
     "encouragement": "繼續努力，你做得很好！",
+    "reasoning": "Student mentioned main characters and basic plot but missed the ending.",
 }
+
+# A realistic original text (multi-sentence, long enough for meaningful similarity tests)
+_ORIGINAL_TEXT = (
+    "從前在一片茂密的森林裡，住著一隻驕傲的兔子和一隻緩慢的烏龜。"
+    "有一天，兔子嘲笑烏龜走路太慢，烏龜不服氣，提出要和兔子賽跑。"
+    "比賽開始後，兔子跑得很快，覺得自己一定會贏，就在路邊睡著了。"
+    "烏龜雖然走得慢，但是一直不停地走，最後竟然先到達終點。"
+    "這個故事告訴我們，驕傲是失敗的根源，持之以恆才能成功。"
+)
+# A paraphrase — different words, same story — intentionally distinct from _ORIGINAL_TEXT
+# so it does NOT trigger the verbatim-paste guard (similarity < 0.70).
+_VALID_RETELLING = (
+    "我聽到說森林裡的兔子和烏龜要比賽，兔子很快但是睡覺了，"
+    "烏龜慢慢走卻贏了比賽，這個故事說努力很重要。"
+)
 
 # ---------------------------------------------------------------------------
 # Unit tests: evaluate_retelling() service
@@ -163,7 +179,10 @@ async def test_evaluate_retelling_clamps_score_above_100():
     ):
         from app.services.listening_service import evaluate_retelling
 
-        result = await evaluate_retelling(original_text="課文", student_retelling="覆述")
+        result = await evaluate_retelling(
+            original_text=_ORIGINAL_TEXT,
+            student_retelling=_VALID_RETELLING,
+        )
     assert result["score"] == 100.0
 
 
@@ -176,8 +195,73 @@ async def test_evaluate_retelling_clamps_score_below_0():
     ):
         from app.services.listening_service import evaluate_retelling
 
-        result = await evaluate_retelling(original_text="課文", student_retelling="覆述")
+        result = await evaluate_retelling(
+            original_text=_ORIGINAL_TEXT,
+            student_retelling=_VALID_RETELLING,
+        )
     assert result["score"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: Issue #1098 — garbage input guard + verbatim paste guard
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_evaluate_retelling_garbage_digits_short_circuits():
+    """Random digit input short-circuits without calling the LLM (score=0)."""
+    from app.services.listening_service import evaluate_retelling
+
+    result = await evaluate_retelling(
+        original_text=_ORIGINAL_TEXT,
+        student_retelling="123",
+    )
+    assert result["score"] == 0.0
+    assert result["key_points_covered"] == []
+    assert len(result["key_points_missed"]) >= 1
+    assert "reasoning" in result
+
+
+@pytest.mark.asyncio
+async def test_evaluate_retelling_too_short_short_circuits():
+    """Input shorter than 5 chars short-circuits (score=0)."""
+    from app.services.listening_service import evaluate_retelling
+
+    result = await evaluate_retelling(
+        original_text=_ORIGINAL_TEXT,
+        student_retelling="嗯",
+    )
+    assert result["score"] == 0.0
+
+
+@pytest.mark.asyncio
+async def test_evaluate_retelling_verbatim_paste_short_circuits():
+    """Pasting the full passage verbatim short-circuits with score=95."""
+    from app.services.listening_service import evaluate_retelling
+
+    result = await evaluate_retelling(
+        original_text=_ORIGINAL_TEXT,
+        student_retelling=_ORIGINAL_TEXT,  # exact paste
+    )
+    assert result["score"] == 95.0
+    assert result["key_points_missed"] == []
+    assert "reasoning" in result
+
+
+@pytest.mark.asyncio
+async def test_evaluate_retelling_reasoning_field_present():
+    """evaluate_retelling() always includes 'reasoning' key in result."""
+    with patch(
+        "app.services.listening_service.generate_structured_response",
+        new=AsyncMock(return_value=MOCK_EVAL_RESULT),
+    ):
+        from app.services.listening_service import evaluate_retelling
+
+        result = await evaluate_retelling(
+            original_text=_ORIGINAL_TEXT,
+            student_retelling=_VALID_RETELLING,
+        )
+    assert "reasoning" in result
 
 
 # ---------------------------------------------------------------------------

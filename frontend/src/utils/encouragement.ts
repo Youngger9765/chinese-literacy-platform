@@ -22,3 +22,35 @@ export function getEncouragementMessage(): string {
   const idx = Math.floor(Math.random() * ENCOURAGEMENT_MESSAGES.length);
   return ENCOURAGEMENT_MESSAGES[idx];
 }
+
+/**
+ * Issue #1094 — student-facing views hide numeric scores/accuracy/CPM and
+ * show encouragement-only messages. Teacher dashboard still shows the numbers.
+ */
+
+export function encourageOverall(score: number): string {
+  if (score >= 85) return '表現超棒！繼續保持';
+  if (score >= 70) return '做得很好，再接再厲';
+  if (score >= 50) return '有進步喔，繼續加油';
+  return '一步一步來，你做得到';
+}
+
+export function encourageAccuracy(percent: number): string {
+  if (percent >= 90) return '唸得很清楚！';
+  if (percent >= 75) return '唸得不錯，再熟練一些';
+  if (percent >= 50) return '有唸出來囉，再試一次會更好';
+  return '慢慢來，多練幾次就會更順';
+}
+
+export function encourageReadingDone(): string {
+  return '唸完囉！';
+}
+
+export function encourageQuiz(correct: number, total: number): string {
+  if (total === 0) return '繼續加油！';
+  const ratio = correct / total;
+  if (ratio >= 0.9) return '太棒了，幾乎全對！';
+  if (ratio >= 0.7) return '答得不錯，繼續加油';
+  if (ratio >= 0.4) return '有答對一些，再想想看';
+  return '再試一次，你一定可以';
+}

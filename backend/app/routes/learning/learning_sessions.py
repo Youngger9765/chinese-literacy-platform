@@ -7,13 +7,13 @@ from datetime import datetime, timezone
 from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.assignment import AssignmentSubmission
-from ...models.school import ClassroomStudent
 from ...models.session import CharacterError, LearningSession
+from ...services.reading_attempt_service import snapshot_reading_result
 from ...models.text import Text
 from ...models.user import User
 from ...services.lesson_loader import get_lesson_by_id
@@ -105,13 +105,12 @@ def create_learning_session(
             )
             return existing
 
-    # Auto-fill classroom_id from the student's first active enrollment (if any)
-    enrollment = (
-        db.query(ClassroomStudent)
-        .filter(ClassroomStudent.student_id == current_user.id)
-        .first()
-    )
-    classroom_id = enrollment.classroom_id if enrollment else None
+    # Self-study sessions are NOT attributed to any classroom.
+    # The previous logic picked the student's *first* enrollment arbitrarily,
+    # which misattributed sessions when the student belongs to multiple classes
+    # (Issue #1184).  Assignment-based sessions get their classroom_id from the
+    # Assignment row, not here; so NULL is always correct for this code path.
+    classroom_id = None
 
     # Resolve text_id from normalized story_slug (slug already validated above)
     text_id = None
@@ -129,7 +128,9 @@ def create_learning_session(
         story_slug=normalized_slug,
         text_id=text_id,
         status="in_progress",
-        current_step=1,
+        # DEPRECATED (#1182): current_step integer column is deprecated; step tracking
+        # is done via step_progress.steps_completed + current_step_derived property.
+        # Omitting current_step here lets the DB default (1) apply.
         classroom_id=classroom_id,
     )
     db.add(session)
@@ -219,7 +220,10 @@ def list_my_sessions(
         statuses = [s.strip() for s in status.split(",") if s.strip()]
         wants_completed = "completed" in statuses
 
-    query = db.query(LearningSession).filter(
+    # joinedload(LearningSession.text) prevents N+1 when the loop accesses s.text.title
+    query = db.query(LearningSession).options(
+        joinedload(LearningSession.text)
+    ).filter(
         LearningSession.student_id == current_user.id,
     )
 
@@ -321,8 +325,10 @@ def get_reading_history(
         )
     )
 
+    # joinedload(LearningSession.text) prevents N+1 if callers access s.text downstream
     sessions_query = (
         db.query(LearningSession)
+        .options(joinedload(LearningSession.text))
         .filter(
             LearningSession.student_id == current_user.id,
             LearningSession.story_slug == normalize_story_slug(story_slug),
@@ -437,7 +443,9 @@ def get_session_status(
     return SessionStatusResponse(
         id=session.id,
         story_slug=session.story_slug,
-        current_step=session.current_step,
+        # Use derived step so resume picks up where step_progress says, not the
+        # deprecated integer column (#1182).
+        current_step=session.current_step_derived,
         status=session.status,
         is_resumable=is_resumable,
         is_completed=is_completed,
@@ -467,11 +475,19 @@ def update_session(
 
     update_data = payload.model_dump(exclude_unset=True)
     for field, value in update_data.items():
+        # DEPRECATED (#1182): silently discard writes to current_step integer column.
+        # Step tracking is now done exclusively via step_progress.steps_completed.
+        if field == "current_step":
+            continue
         setattr(session, field, value)
 
     # Auto-set completed_at when status changes to completed (Issue #1070)
     if update_data.get("status") == "completed" and session.completed_at is None:
         session.completed_at = datetime.now(timezone.utc)
+
+    # Snapshot previous reading_result before overwrite (Issue #1183)
+    if "reading_result" in update_data and update_data["reading_result"] is not None:
+        snapshot_reading_result(db, session)
 
     # Auto-persist CharacterError records from reading_result.error_chars (Issue #248)
     if "reading_result" in update_data:

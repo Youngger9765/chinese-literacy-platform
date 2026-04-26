@@ -5,17 +5,38 @@ endpoints always return consistent numbers.
 """
 from __future__ import annotations
 
-from sqlalchemy import func as sqlfunc
+from sqlalchemy import exists, func as sqlfunc, or_
 from sqlalchemy.orm import Session
 
+from ..models.assignment import AssignmentSubmission
 from ..models.session import LearningSession
+
+
+def _is_session_done_clause():
+    """Return an OR clause that matches 'canonically completed' sessions.
+
+    A session is done if:
+      (a) session.status == 'completed'  — direct completion path, OR
+      (b) it has an AssignmentSubmission with status IN ('submitted', 'graded')
+          — assignment path where session.status may still be 'in_progress'
+          because the submission endpoint did not update it (Issue #1181).
+
+    Using this helper everywhere ensures a single canonical definition across
+    dashboard, stats, and gamification endpoints (Issue #1192).
+    """
+    submitted_sub = (
+        exists()
+        .where(AssignmentSubmission.session_id == LearningSession.id)
+        .where(AssignmentSubmission.status.in_(["submitted", "graded"]))
+    )
+    return or_(LearningSession.status == "completed", submitted_sub)
 
 
 def get_completed_story_count(db: Session, student_id: int) -> int:
     """Return the number of distinct stories a student has completed.
 
-    Canonical definition: COUNT(DISTINCT story_slug) FROM learning_sessions
-    WHERE student_id = ? AND status = 'completed' AND story_slug IS NOT NULL.
+    Canonical definition: sessions where status='completed' OR the session has
+    an AssignmentSubmission with status in ('submitted', 'graded').
 
     This is the single source of truth used by the dashboard, progress, and
     gamification endpoints to ensure they all report the same value.
@@ -24,7 +45,7 @@ def get_completed_story_count(db: Session, student_id: int) -> int:
         db.query(sqlfunc.count(sqlfunc.distinct(LearningSession.story_slug)))
         .filter(
             LearningSession.student_id == student_id,
-            LearningSession.status == "completed",
+            _is_session_done_clause(),
             LearningSession.story_slug.isnot(None),
         )
         .scalar()
@@ -42,7 +63,7 @@ def get_completed_story_slugs(db: Session, student_id: int) -> list[str]:
         db.query(sqlfunc.distinct(LearningSession.story_slug))
         .filter(
             LearningSession.student_id == student_id,
-            LearningSession.status == "completed",
+            _is_session_done_clause(),
             LearningSession.story_slug.isnot(None),
         )
         .all()

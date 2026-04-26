@@ -8,6 +8,8 @@ interface ComprehensionScoreCardProps {
   evaluativeScore: number;
   feedback: ComprehensionScoreFeedback | null;
   loading?: boolean;
+  /** Issue #1094: hide numeric scores in student-facing view; show encouragement only */
+  hideScores?: boolean;
 }
 
 const levelConfig = [
@@ -54,6 +56,7 @@ const ComprehensionScoreCard: React.FC<ComprehensionScoreCardProps> = ({
   evaluativeScore,
   feedback,
   loading = false,
+  hideScores = false,
 }) => {
   if (loading) {
     return (
@@ -87,35 +90,39 @@ const ComprehensionScoreCard: React.FC<ComprehensionScoreCardProps> = ({
       {/* Header with overall score */}
       <div className="bg-gradient-to-r from-accent/5 to-violet-50 px-6 py-5 border-b border-slate-100">
         <div className="flex items-center gap-4">
-          {/* Score circle */}
-          <div className="relative w-16 h-16 shrink-0">
-            <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
-              <circle
-                cx="32" cy="32" r="28"
-                fill="none"
-                stroke="#e2e8f0"
-                strokeWidth="4"
-              />
-              <circle
-                cx="32" cy="32" r="28"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeDasharray={`${(comprehensionScore / 100) * 175.93} 175.93`}
-                strokeLinecap="round"
-                className="text-accent transition-all duration-1000"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-lg font-black text-gray-900">{Math.round(comprehensionScore)}</span>
+          {/* Score circle — teacher view only; student view just shows title + encouragement */}
+          {!hideScores && (
+            <div className="relative w-16 h-16 shrink-0">
+              <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                <circle
+                  cx="32" cy="32" r="28"
+                  fill="none"
+                  stroke="#e2e8f0"
+                  strokeWidth="4"
+                />
+                <circle
+                  cx="32" cy="32" r="28"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  strokeDasharray={`${(comprehensionScore / 100) * 175.93} 175.93`}
+                  strokeLinecap="round"
+                  className="text-accent transition-all duration-1000"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-lg font-black text-gray-900">{Math.round(comprehensionScore)}</span>
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <h3 className="text-lg font-bold text-gray-900">課文理解力評估</h3>
-            <p className={`text-sm font-bold ${overallLevel.textColor}`}>
-              {overallLevel.label}
-            </p>
+            {!hideScores && (
+              <p className={`text-sm font-bold ${overallLevel.textColor}`}>
+                {overallLevel.label}
+              </p>
+            )}
             {feedback?.overall && (
               <p className="text-xs text-gray-500 mt-1">{feedback.overall}</p>
             )}
@@ -138,8 +145,16 @@ const ComprehensionScoreCard: React.FC<ComprehensionScoreCardProps> = ({
                   <span className="text-xs text-gray-400 ml-2">{level.description}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-bold ${scoreLevel.textColor}`}>{scoreLevel.label}</span>
-                  <span className="text-lg font-black text-gray-900">{Math.round(score)}</span>
+                  {hideScores ? (
+                    <span className={`text-xs font-bold ${scoreLevel.textColor}`}>
+                      {score >= 60 ? '達成' : '再努力'}
+                    </span>
+                  ) : (
+                    <>
+                      <span className={`text-xs font-bold ${scoreLevel.textColor}`}>{scoreLevel.label}</span>
+                      <span className="text-lg font-black text-gray-900">{Math.round(score)}</span>
+                    </>
+                  )}
                 </div>
               </div>
 

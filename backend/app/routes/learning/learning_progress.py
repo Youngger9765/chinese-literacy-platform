@@ -12,6 +12,7 @@ from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.session import LearningSession
 from ...models.user import User
+from ...schemas.session import parse_step_progress
 from ...services.learning_stats_service import get_completed_story_count
 from ...services.stuck_detection_service import detect_stuck_points
 from ._helpers import verify_student_access
@@ -68,13 +69,17 @@ def _compute_step_completion(session: LearningSession) -> dict[str, str]:
     Falls back to current_step (integer) for older sessions without step_progress.
     (#1073)
     """
-    # Try to read steps_completed from step_progress JSONB first
-    sp = session.step_progress
+    # Try to read steps_completed from step_progress JSONB first.
+    # parse_step_progress logs a WARNING if the value is malformed instead of
+    # swallowing the error silently (Issue #1180).
+    sp = parse_step_progress(
+        session.step_progress,
+        session_id=session.id,
+        context="learning_progress._compute_step_completion",
+    )
     sp_completed: list[str] | None = None
-    if isinstance(sp, dict):
-        raw = sp.get("steps_completed")
-        if isinstance(raw, list):
-            sp_completed = [s for s in raw if isinstance(s, str)]
+    if sp is not None:
+        sp_completed = sp.steps_completed  # already validated as list[str]
 
     statuses: dict[str, str] = {}
 
@@ -82,7 +87,7 @@ def _compute_step_completion(session: LearningSession) -> dict[str, str]:
         # Source of truth: step_progress.steps_completed[] (#1073)
         # Normalize frontend step IDs to backend keys for comparison
         completed_set = {_normalize_step_key(s) for s in sp_completed}
-        sp_current = sp.get("current_step") if isinstance(sp, dict) else None
+        sp_current = sp.current_step if sp is not None else None
         normalized_current = _normalize_step_key(sp_current) if sp_current else None
         for _step_num, key in STEP_NAMES.items():
             if key in completed_set:
@@ -96,12 +101,14 @@ def _compute_step_completion(session: LearningSession) -> dict[str, str]:
             else:
                 statuses[key] = "not_started"
     else:
-        # Fallback: derive from integer current_step (legacy sessions)
-        completed_step = session.current_step if session.status == "completed" else session.current_step - 1
+        # Fallback: step_progress absent (legacy sessions or fresh session).
+        # Use current_step_derived (which itself falls back to 1 when no data). (#1182)
+        derived = session.current_step_derived
+        completed_step = derived if session.status == "completed" else derived - 1
         for step_num, key in STEP_NAMES.items():
             if step_num <= completed_step:
                 statuses[key] = "completed"
-            elif step_num == session.current_step and session.status == "in_progress":
+            elif step_num == derived and session.status == "in_progress":
                 statuses[key] = "in_progress"
             else:
                 statuses[key] = "not_started"
@@ -129,7 +136,11 @@ def _recommend_next_step(session: LearningSession) -> dict:
 
     accuracy = session.accuracy or 0.0
 
-    if session.current_step >= 5 and session.full_reading_result:
+    # Use derived step (single source of truth via step_progress) for all
+    # rule comparisons.  (#1182)
+    current_step = session.current_step_derived
+
+    if current_step >= 5 and session.full_reading_result:
         full_score = 0.0
         if isinstance(session.full_reading_result, dict):
             full_score = session.full_reading_result.get("match_rate", 0) or 0.0
@@ -141,7 +152,7 @@ def _recommend_next_step(session: LearningSession) -> dict:
                 "reason": f"全文朗讀正確率 {full_score:.0f}%，建議再練習一次。",
             }
 
-    if error_count >= 3 and session.current_step < 4:
+    if error_count >= 3 and current_step < 4:
         return {
             "action": "retry_step",
             "step": "vocab",
@@ -149,7 +160,7 @@ def _recommend_next_step(session: LearningSession) -> dict:
             "reason": f"發現 {error_count} 個錯字，建議先做生字練習。",
         }
 
-    if accuracy > 0 and accuracy < 70 and session.current_step <= 2:
+    if accuracy > 0 and accuracy < 70 and current_step <= 2:
         return {
             "action": "retry_step",
             "step": "live_tutor",
@@ -157,11 +168,11 @@ def _recommend_next_step(session: LearningSession) -> dict:
             "reason": f"朗讀正確率 {accuracy:.0f}%，建議重練逐段朗讀。",
         }
 
-    current_key = STEP_NAMES.get(session.current_step, "intro")
+    current_key = STEP_NAMES.get(current_step, "intro")
     return {
         "action": "continue",
         "step": current_key,
-        "step_label": STEP_LABELS.get(session.current_step, ""),
+        "step_label": STEP_LABELS.get(current_step, ""),
         "reason": "繼續未完成的學習步驟。",
     }
 

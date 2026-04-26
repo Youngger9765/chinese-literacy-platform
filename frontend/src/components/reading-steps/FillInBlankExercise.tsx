@@ -235,7 +235,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
               </span>
             </div>
             <p className="text-2xl font-headline font-black text-on-surface mb-1">
-              {allCorrect ? '全部答對！' : `一次答對 ${firstTryScore}／${firstTryTotal} 題`}
+              {allCorrect ? '全部答對！' : '你完成了！'}
             </p>
             <p className="text-sm text-on-surface-variant">
               {allCorrect ? '每一題都一次答對，表現優異！' : '以下是各題的作答結果'}
