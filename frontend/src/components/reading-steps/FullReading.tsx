@@ -11,12 +11,22 @@ import { getReadingHistory, type ReadingHistoryPoint } from '../../services/lear
 import { saveReadingHistory } from '../../services/readingHistoryApi';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { useAuth } from '../../contexts/AuthContext';
-import { encourageAccuracy } from '../../utils/encouragement';
-
-/* ------------------------------------------------------------------ */
-
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
 import { groupIdxForProgress } from '../../utils/ttsHighlight';
+
+/* ── Encouragement helper (same tier logic as ParagraphCard) ─────────────── */
+
+const FULL_READING_TIERS: Array<{ min: number; stars: number; text: string; color: string }> = [
+  { min: 0.90, stars: 5, text: '太厲害了！', color: 'text-emerald-600' },
+  { min: 0.75, stars: 4, text: '唸得很流暢！', color: 'text-green-600' },
+  { min: 0.60, stars: 3, text: '繼續練習！', color: 'text-green-600' },
+  { min: 0,    stars: 2, text: '再多練幾次就會更熟～', color: 'text-amber-600' },
+];
+
+function getFullReadingEncouragement(matchRate: number): { stars: number; text: string; color: string } {
+  const tier = FULL_READING_TIERS.find(t => matchRate >= t.min) ?? FULL_READING_TIERS[FULL_READING_TIERS.length - 1];
+  return { stars: tier.stars, text: tier.text, color: tier.color };
+}
 
 /* ------------------------------------------------------------------ */
 
@@ -259,8 +269,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
     setStreamingTranscript(cleanChineseText(transcript));
   }, [fullText, stopSession]);
 
-  const percent = result ? Math.round(result.matchRate * 100) : 0;
-
   /* ---- Render paragraph text with optional TTS highlighting ---- */
   const renderParagraph = (line: string, idx: number) => {
     const zhuyinLine = zhuyinLines ? zhuyinLines[idx] : null;
@@ -375,24 +383,30 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
           {/* ── Result section ──────────────────────────────────────── */}
           {result && (
             <div className="mt-6 space-y-6">
-              {/* Encouragement panel — Issue #1094: no numeric score/accuracy/CPM for students */}
-              <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 flex flex-col items-center gap-4">
-                <div className={`w-28 h-28 rounded-full flex items-center justify-center ${
-                  percent >= 80 ? 'bg-emerald-100'
-                  : percent >= 60 ? 'bg-amber-100'
-                  : 'bg-tertiary-container/30'
-                }`}>
-                  <span className="material-symbols-outlined text-5xl" aria-hidden="true">
-                    {percent >= 80 ? 'celebration' : percent >= 60 ? 'thumb_up' : 'favorite'}
-                  </span>
-                </div>
-                <p className="text-xl font-headline font-bold text-on-surface text-center">
-                  {encourageAccuracy(percent)}
-                </p>
-                <p className="text-base font-headline text-on-surface-variant text-center">
-                  {result.feedback}
-                </p>
-              </div>
+              {/* Encouragement — no numbers shown to student (Issues #1094, #1097) */}
+              {(() => {
+                const enc = getFullReadingEncouragement(result.matchRate);
+                return (
+                  <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-8 flex flex-col items-center gap-3">
+                    <div className="flex gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span
+                          key={i}
+                          className={`material-symbols-outlined text-3xl transition-colors ${
+                            i < enc.stars ? 'text-amber-400' : 'text-on-surface-variant/20'
+                          }`}
+                          style={{ fontVariationSettings: i < enc.stars ? "'FILL' 1" : "'FILL' 0" }}
+                        >
+                          star
+                        </span>
+                      ))}
+                    </div>
+                    <p className={`text-xl font-headline font-bold text-center ${enc.color}`}>
+                      {enc.text}
+                    </p>
+                  </div>
+                );
+              })()}
 
               {/* Transcript */}
               {streamingTranscript && (
