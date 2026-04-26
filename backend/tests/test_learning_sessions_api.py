@@ -875,3 +875,118 @@ class TestSessionFlow:
         assert report["vocab_result"] == {"correct": 9, "total": 10}
         assert report["full_reading_result"] == {"fluency": 90}
         assert report["status"] == "completed"
+
+
+# ===========================================================================
+# Issue #1184 — Self-study sessions must NOT be attributed to any classroom
+# ===========================================================================
+
+
+class TestSelfStudyClassroomIdNull:
+    """Regression tests for Issue #1184.
+
+    A self-study session (no assignment, no classroom context in the request)
+    must have classroom_id = None.  Previously the code used .first() on the
+    student's ClassroomStudent enrollments, which arbitrarily picked a classroom
+    and misattributed the session when the student was in multiple classrooms.
+    """
+
+    def test_self_study_session_has_null_classroom_id(self, client):
+        """Self-study session created without assignment context → classroom_id NULL."""
+        from app.models.session import LearningSession
+
+        user = _register_user(client, "1184_single")
+        headers = auth_header(user["token"])
+
+        resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": VALID_SLUG},
+            headers=headers,
+        )
+        assert resp.status_code == 201
+        session_id = resp.json()["id"]
+
+        # Verify directly in the DB that classroom_id is NULL
+        db = TestingSessionLocal()
+        try:
+            row = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+            assert row is not None
+            assert row.classroom_id is None, (
+                f"Expected classroom_id=None for self-study session, got {row.classroom_id}"
+            )
+        finally:
+            db.close()
+
+    def test_self_study_session_null_even_when_enrolled_in_classroom(self, client):
+        """Student enrolled in a classroom creates self-study → classroom_id stays NULL.
+
+        This is the core regression case from Issue #1184: a student in Class A
+        and Class B should NOT have their self-study session attributed to either.
+        """
+        from app.models.session import LearningSession
+        from app.models.school import ClassroomStudent, Classroom, School
+        from app.models.user import User
+
+        user = _register_user(client, "1184_enrolled")
+        headers = auth_header(user["token"])
+
+        # Seed school → classroom → enrollment directly in the DB
+        db = TestingSessionLocal()
+        try:
+            db_user = db.query(User).filter(User.email == user["email"]).first()
+            assert db_user is not None
+
+            school = School(name="Test School 1184")
+            db.add(school)
+            db.flush()
+
+            # Use the same user as teacher (valid FK; role doesn't matter for this test)
+            classroom = Classroom(
+                name="Test Class 1184",
+                grade=4,
+                teacher_id=db_user.id,
+                school_id=school.id,
+            )
+            db.add(classroom)
+            db.flush()
+
+            enrollment = ClassroomStudent(
+                student_id=db_user.id,
+                classroom_id=classroom.id,
+            )
+            db.add(enrollment)
+            db.commit()
+            classroom_id_seeded = classroom.id
+        finally:
+            db.close()
+
+        # Create a self-study session (no assignment reference in request)
+        resp = client.post(
+            "/api/learning/sessions",
+            json={"story_slug": VALID_SLUG},
+            headers=headers,
+        )
+        assert resp.status_code == 201
+        session_id = resp.json()["id"]
+
+        # classroom_id must be NULL — not the enrolled classroom
+        db = TestingSessionLocal()
+        try:
+            row = db.query(LearningSession).filter(LearningSession.id == session_id).first()
+            assert row is not None
+            assert row.classroom_id is None, (
+                f"Self-study session was misattributed to classroom {row.classroom_id} "
+                f"(expected None). Issue #1184 regression."
+            )
+            # Confirm the enrollment itself still exists (we didn't break enrollment data)
+            enroll = (
+                db.query(ClassroomStudent)
+                .filter(
+                    ClassroomStudent.student_id == row.student_id,
+                    ClassroomStudent.classroom_id == classroom_id_seeded,
+                )
+                .first()
+            )
+            assert enroll is not None, "Enrollment should not have been deleted"
+        finally:
+            db.close()

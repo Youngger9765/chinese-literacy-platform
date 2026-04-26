@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 from ...auth.dependencies import get_current_user
 from ...database import get_db
 from ...models.assignment import AssignmentSubmission
-from ...models.school import ClassroomStudent
 from ...models.session import CharacterError, LearningSession
 from ...models.text import Text
 from ...models.user import User
@@ -105,13 +104,12 @@ def create_learning_session(
             )
             return existing
 
-    # Auto-fill classroom_id from the student's first active enrollment (if any)
-    enrollment = (
-        db.query(ClassroomStudent)
-        .filter(ClassroomStudent.student_id == current_user.id)
-        .first()
-    )
-    classroom_id = enrollment.classroom_id if enrollment else None
+    # Self-study sessions are NOT attributed to any classroom.
+    # The previous logic picked the student's *first* enrollment arbitrarily,
+    # which misattributed sessions when the student belongs to multiple classes
+    # (Issue #1184).  Assignment-based sessions get their classroom_id from the
+    # Assignment row, not here; so NULL is always correct for this code path.
+    classroom_id = None
 
     # Resolve text_id from normalized story_slug (slug already validated above)
     text_id = None
