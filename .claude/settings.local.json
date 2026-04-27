@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /Users/young/project/chinese-literacy-platform && git worktree add ../chinese-literacy-platform-issue-286 -b fix/issue-286-security-critical staging 2>&1)",
+      "Bash(touch .git/security-audit-passed)",
+      "Bash(git commit -m ':*)",
+      "Bash(touch .git/claude-code-review-passed)",
+      "Bash(touch /Users/young/project/chinese-literacy-platform/.git/worktrees/fix-1208-tts-v2-redo/claude-code-review-passed)",
+      "Bash(touch /Users/young/project/chinese-literacy-platform/.claude/worktrees/fix-1208-tts-v2-redo/.git/../../../.git/worktrees/fix-1208-tts-v2-redo/claude-code-review-passed)",
+      "Bash(git -C /Users/young/project/chinese-literacy-platform/.claude/worktrees/fix-1208-tts-v2-redo rev-parse --git-dir)",
+      "Bash(touch /Users/young/project/chinese-literacy-platform/.git/worktrees/perf-1217-n1-queries/security-audit-passed)",
+      "Bash(git commit -m ' *)",
+      "Bash(touch /Users/young/project/chinese-literacy-platform/.git/worktrees/perf-1217-n1-queries/claude-code-review-passed)",
+      "Bash(touch /Users/young/project/chinese-literacy-platform/.git/worktrees/perf-1217-n1-queries/security-audit-passed /Users/young/project/chinese-literacy-platform/.git/worktrees/perf-1217-n1-queries/claude-code-review-passed)",
+      "Bash(git commit *)",
+      "Bash(cp /Users/young/project/.git/worktrees/fix-1236-org-admin-scope/backend/app/routes/feedback.py /Users/young/project/chinese-literacy-platform/backend/app/routes/feedback.py)",
+      "Bash(cp /Users/young/project/.git/worktrees/fix-1236-org-admin-scope/backend/tests/test_org_admin_scope_security.py /Users/young/project/chinese-literacy-platform/backend/tests/test_org_admin_scope_security.py)",
+      "Bash(mkdir -p ~/.claude/hooks/lib ~/.claude/logs)",
+      "Read(//Users/young/.claude/hooks/**)",
+      "Bash(touch /Users/young/project/chinese-literacy-platform/.git/worktrees/chinese-literacy-platform-issue-1243/security-audit-passed)",
+      "Bash(git -C /Users/young/project/chinese-literacy-platform-issue-1243 commit -m ' *)"
+    ]
+  }
+}
