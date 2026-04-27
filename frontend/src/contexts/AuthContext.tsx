@@ -4,6 +4,10 @@ import { SESSION_UNAUTHORIZED_EVENT } from '../services/sessionGuard';
 
 const TOKEN_KEY = 'lingoleap_token';
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
+// Set when user logs in via Junyi SSO (#1260). Read on logout to also clear
+// Junyi-side cookies via redirect to https://www.junyiacademy.org/logout —
+// without this, Junyi auto-logs the user back in on next "使用均一帳號登入".
+const JUNYI_SESSION_FLAG = 'lingoleap_junyi_session';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -25,7 +29,7 @@ interface AuthContextValue {
   teacherGatingEnforced: boolean;
   login: (email: string, password: string) => Promise<{ mustChangePassword: boolean }>;
   register: (email: string, password: string, name: string) => Promise<RegisterResponse>;
-  logout: () => void;
+  logout: (options?: { skipJunyiRedirect?: boolean }) => void;
   clearMustChangePassword: () => void;
   /** Re-fetch user data from /api/users/me and update the context. */
   refreshUser: () => Promise<void>;
@@ -112,6 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userData = await getMe(newToken);
 
     localStorage.setItem(TOKEN_KEY, newToken);
+    // Email/password login is not Junyi — clear any stale Junyi flag from a
+    // prior session in another tab to avoid logout() redirecting to Junyi.
+    localStorage.removeItem(JUNYI_SESSION_FLAG);
     setUser(userData);
     setToken(newToken);
 
@@ -136,6 +143,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // the token-change useEffect skips its redundant /me call (Issue #1156).
     const userData = await getMe(newToken);
     localStorage.setItem(TOKEN_KEY, newToken);
+    // Google login is not Junyi — clear any stale Junyi flag.
+    localStorage.removeItem(JUNYI_SESSION_FLAG);
     setUser(userData);
     setToken(newToken);
     return { isNewUser: response.is_new_user };
@@ -148,13 +157,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // sees user !== null and skips the redundant /me call (Issue #1156).
     const userData = await getMe(newToken);
     localStorage.setItem(TOKEN_KEY, newToken);
+    // Mark session as Junyi-sourced so logout() also clears Junyi cookies (#1260).
+    localStorage.setItem(JUNYI_SESSION_FLAG, '1');
     setUser(userData);
     setToken(newToken);
     return { isNewUser: response.is_new_user };
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback((options?: { skipJunyiRedirect?: boolean }) => {
+    // Capture Junyi flag BEFORE clearing localStorage so we know whether to
+    // round-trip through Junyi /logout (clears their cookies via Set-Cookie).
+    // skipJunyiRedirect is set by the SESSION_UNAUTHORIZED auto-logout path so
+    // expired-token recovery doesn't yank the user mid-page through Junyi.
+    const wasJunyiSession = localStorage.getItem(JUNYI_SESSION_FLAG) === '1';
+    const shouldRedirectToJunyi = wasJunyiSession && !options?.skipJunyiRedirect;
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(JUNYI_SESSION_FLAG);
     try {
       sessionStorage.removeItem('activeAssignmentId');
       sessionStorage.removeItem('activeAssignmentGoals');
@@ -180,13 +198,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setMustChangePassword(false);
     setLoginPassword(null);
+
+    // For Junyi-sourced sessions (#1260), redirect through Junyi /logout to
+    // clear Junyi-domain cookies (ureg_id, user_cookie_uuid, hashed_uuid, KAID).
+    // Otherwise the next "使用均一帳號登入" auto-logs back in immediately
+    // because the Junyi server sees a valid session cookie.
+    // continue= sends user back to our /login after Junyi clears its cookies.
+    if (shouldRedirectToJunyi && typeof window !== 'undefined') {
+      const continueUrl = `${window.location.origin}/login`;
+      window.location.href = `https://www.junyiacademy.org/logout?continue=${encodeURIComponent(continueUrl)}`;
+    }
   }, []);
 
   // Any service that gets 401 (expired / invalid JWT) should fire this event so we
   // don't keep showing "logged in" while classroom tabs fail.
   useEffect(() => {
     const handler = () => {
-      logout();
+      // Auto-logout from expired token: clear local state but DON'T round-trip
+      // through Junyi /logout (would yank user mid-page on API 401).
+      logout({ skipJunyiRedirect: true });
     };
     window.addEventListener(SESSION_UNAUTHORIZED_EVENT, handler);
     return () => window.removeEventListener(SESSION_UNAUTHORIZED_EVENT, handler);

@@ -49,9 +49,7 @@ export function buildJunyiLoginUrl(returnTo: string = '/'): string {
   sessionStorage.setItem(JUNYI_STATE_KEY, state);
 
   const continueUrl = `${callbackUrl}&state=${state}`;
-  // TODO: switch back to https://www.junyiacademy.org/login once Junyi Part 2 multi-RP lands on prod.
-  // Per 宥辰 2026-04-21: Part 2 currently only on ci-live; prod junyi ignores `continue` param.
-  return `https://ci-live-worktree-sso-multi-rp---rev-proxy-dg4bspkswq-de.a.run.app/login?continue=${encodeURIComponent(continueUrl)}`;
+  return `https://www.junyiacademy.org/login?continue=${encodeURIComponent(continueUrl)}`;
 }
 
 const JunyiCallbackPage: React.FC = () => {

@@ -668,9 +668,15 @@ def junyi_login(req: JunyiLoginRequest, request: Request, db: Session = Depends(
     junyi_base = settings.junyi_sso_base_url.rstrip("/")
     exchange_url = f"{junyi_base}/api/v2/auth/code"
     try:
+        # client_id="lingoleap" required after Junyi multi-RP migration (junyi#4083 / #4085).
+        # Without it, Junyi falls back to probe mode and matches the first
+        # client_secret_hash=None entry (jutor) using jutor_auth_ cache prefix,
+        # which can't find lingoleap-issued codes -> AUTH_CODE_NOT_FOUND.
+        # client_secret omitted: LINGOLEAP_CLIENT.client_secret_hash is None
+        # (Phase 1 — see junyi doc/THIRD_PARTY_SSO.md "相容模式").
         resp = httpx.post(
             exchange_url,
-            json={"code": req.code},
+            json={"code": req.code, "client_id": "lingoleap"},
             timeout=10.0,
         )
     except httpx.RequestError as exc:
