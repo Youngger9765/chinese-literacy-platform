@@ -177,7 +177,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
               onClick={handleJunyiLogin}
               className="w-full h-11 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#FF6B35] text-white text-[10px] font-black leading-none">均</span>
+              <img src="/junyi-logo.png" alt="均一" className="h-5 w-auto" />
               使用均一帳號登入
             </button>
           )}
