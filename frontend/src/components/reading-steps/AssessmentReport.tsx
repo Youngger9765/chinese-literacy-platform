@@ -363,7 +363,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         />
       )}
 
-      {!readOnly && <CelebrationOverlay score={overallScore} />}
+      {!readOnly && !hasNoData && <CelebrationOverlay score={overallScore} />}
 
       {/* ============ 星星評級 Star Rating (Issue #222) —
           學生端隱藏（Issue #1094：改鼓勵式，不呈現星星/分數） ============ */}
