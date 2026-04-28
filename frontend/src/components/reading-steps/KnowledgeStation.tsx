@@ -1,18 +1,35 @@
 /**
  * 知識補給站 — 三民學習單第九步
  * 顯示課文相關的 YouTube 影片和延伸資料
+ *
+ * #1104: 未完成關卡時顯示缺漏清單 + 快速跳轉，不強制完成
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Story } from '../../types';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
+
+interface MissingStep {
+  id: string;
+  label: string;
+}
 
 interface KnowledgeStationProps {
   story: Story;
   onFinish: () => void;
+  /** Steps not yet completed — used to show reminder before navigating to report */
+  missingSteps?: MissingStep[];
+  /** Navigate to a specific step by its id (e.g. 'tutor', 'vocab') */
+  onNavigateToStep?: (stepId: string) => void;
 }
 
-const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) => {
+const KnowledgeStation: React.FC<KnowledgeStationProps> = ({
+  story,
+  onFinish,
+  missingSteps = [],
+  onNavigateToStep,
+}) => {
   const storageKey = scopedStepStorageKey('knowledge_viewed_', story.id);
+  const [showMissingHint, setShowMissingHint] = useState(false);
 
   useEffect(() => {
     try { localStorage.setItem(storageKey, JSON.stringify({ viewed: true })); } catch {}
@@ -26,6 +43,21 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
   };
 
   const embedUrl = videoUrl ? getYouTubeEmbedUrl(videoUrl) : null;
+
+  const hasMissing = missingSteps.length > 0;
+
+  const handleContinueToReport = () => {
+    if (hasMissing) {
+      setShowMissingHint(true);
+    } else {
+      onFinish();
+    }
+  };
+
+  const handleForceToReport = () => {
+    setShowMissingHint(false);
+    onFinish();
+  };
 
   return (
     <div className="flex-1 flex flex-col bg-surface overflow-hidden">
@@ -69,6 +101,50 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
               <p className="text-on-surface-variant/60 text-sm">未來會持續新增相關影片</p>
             </div>
           )}
+
+          {/* Missing steps hint card — shown after user taps "繼續前往報告" with incomplete steps */}
+          {showMissingHint && hasMissing && (
+            <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 space-y-4 shadow-editorial">
+              <div className="flex items-start gap-3">
+                <span className="material-symbols-outlined text-2xl text-amber-500 mt-0.5 shrink-0">
+                  pending_actions
+                </span>
+                <div>
+                  <p className="font-headline font-bold text-amber-800 text-base">
+                    還有 {missingSteps.length} 個關卡尚未完成
+                  </p>
+                  <p className="text-amber-700 text-sm mt-1">
+                    完成所有關卡可以讓學習報告更完整！點擊下方關卡名稱直接跳過去
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick-jump links */}
+              <div className="flex flex-wrap gap-2">
+                {missingSteps.map((step) => (
+                  <button
+                    key={step.id}
+                    onClick={() => {
+                      setShowMissingHint(false);
+                      onNavigateToStep?.(step.id);
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-amber-300 text-amber-800 text-sm font-bold hover:bg-amber-100 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-base">arrow_forward</span>
+                    {step.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Still allow skipping to report */}
+              <button
+                onClick={handleForceToReport}
+                className="text-xs text-amber-600 underline hover:text-amber-800 transition-colors"
+              >
+                沒關係，直接看報告
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -77,7 +153,7 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish }) 
            style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
         <div className="max-w-md mx-auto pointer-events-auto">
           <button
-            onClick={onFinish}
+            onClick={handleContinueToReport}
             className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
           >

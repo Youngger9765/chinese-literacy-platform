@@ -223,6 +223,14 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     // MCQ
     if (hasMcq) {
       if (tabCompletion.mcqDone) {
+        // Determine which tabs still need attention, to guide the student
+        const nextIncompleteTab: 'structure' | 'strategy' | null = (() => {
+          if (!tabCompletion.structureVisited) return 'structure';
+          if (hasStrategy && !tabCompletion.strategyDone) return 'strategy';
+          return null;
+        })();
+        const nextTabLabel = nextIncompleteTab === 'structure' ? '文章重點表' : '閱讀策略';
+
         return (
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -230,6 +238,19 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             </div>
             <p className="text-emerald-700 font-headline font-bold">選擇題已完成</p>
             <p className="text-sm text-on-surface-variant">答對 {mcqScore} / {mcqTotal} 題</p>
+
+            {/* #1103: Guide student to next unvisited tab */}
+            {nextIncompleteTab && (
+              <button
+                onClick={() => handleTabChange(nextIncompleteTab)}
+                className="flex items-center gap-2 px-6 py-3 rounded-full font-headline font-bold text-sm text-white shadow-[0_6px_24px_rgba(86,74,191,0.25)] hover:brightness-110 active:scale-[0.98] transition-all"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+              >
+                繼續：{nextTabLabel}
+                <span className="material-symbols-outlined text-base">arrow_forward</span>
+              </button>
+            )}
+
             <button
               onClick={handleMcqRedo}
               className="px-5 py-2.5 rounded-full text-sm font-bold bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-all"
