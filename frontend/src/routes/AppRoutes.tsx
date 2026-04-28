@@ -6,7 +6,7 @@
  * only the active route's JS chunk is loaded on demand.
  */
 import React, { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { PublicOnlyRoute, ProtectedRoute, StudentClassroomGuard } from '../components/auth/RouteGuards';
 import NoTeacherPage from '../pages/app/NoTeacherPage';
@@ -21,6 +21,7 @@ import {
 } from '../pages/app/InlinePages';
 import PageLoader from '../components/ui/PageLoader';
 import { PARENT_PORTAL_ENABLED } from '../config/featureFlags';
+import { STEP_CONFIG } from '../config/stepConfig';
 
 // Auth pages — eager-loaded (small, needed immediately on first visit)
 import LoginPage from '../pages/LoginPage';
@@ -104,6 +105,28 @@ const StepRoute: React.FC<StepRouteProps> = ({ stepLabel, nextPath, children }) 
       {children}
     </StepErrorBoundary>
   );
+};
+
+// ---------------------------------------------------------------------------
+// StepEnabledGuard — redirects to the first enabled step when a step is disabled
+// in STEP_CONFIG (enabled: false).  Wrap any route whose step may be disabled.
+// ---------------------------------------------------------------------------
+
+interface StepEnabledGuardProps {
+  stepId: string;
+  children: React.ReactNode;
+}
+
+const StepEnabledGuard: React.FC<StepEnabledGuardProps> = ({ stepId, children }) => {
+  const { storyId } = useParams<{ storyId: string }>();
+  const step = STEP_CONFIG.find((s) => s.id === stepId);
+
+  if (step && !step.enabled) {
+    const fallbackId = STEP_CONFIG.find((s) => s.enabled)?.id ?? 'reading-annotation';
+    return <Navigate to={`/learn/${storyId ?? ''}/${fallbackId}`} replace />;
+  }
+
+  return <>{children}</>;
 };
 
 // ---------------------------------------------------------------------------
@@ -492,9 +515,11 @@ const AppRoutes: React.FC = () => (
         <Route
           path="dictation"
           element={
-            <StepRoute stepLabel="聽寫練習" nextPath="vocab-word-search">
-              <DictationPage />
-            </StepRoute>
+            <StepEnabledGuard stepId="dictation">
+              <StepRoute stepLabel="聽寫練習" nextPath="vocab-word-search">
+                <DictationPage />
+              </StepRoute>
+            </StepEnabledGuard>
           }
         />
         <Route
