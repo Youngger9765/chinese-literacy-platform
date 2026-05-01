@@ -93,6 +93,13 @@ export interface StrategyExercise {
   steps?: StrategyExerciseStep[];
 }
 
+/** G7 圖文整合格式：多練習清單，每項含步驟 (#1390) */
+export interface StrategyExerciseItem {
+  exercise: string;
+  description: string;
+  steps: { step: string; description: string }[];
+}
+
 export interface Story {
   id: string;
   title: string;
@@ -117,7 +124,7 @@ export interface Story {
   multipleChoice?: MultipleChoiceItem[];     // ⑦ 閱讀理解選擇題（PDF 現成資料）
   vocabBank?: Record<string, string>;        // { A: "疑難雜症", ... } for fillInBlank
   knowledgeVideoUrl?: string;               // ⑨ 知識補給站 YouTube URL
-  strategyExercise?: StrategyExercise;      // 閱讀策略練習 (#943)
+  strategyExercise?: StrategyExercise | StrategyExerciseItem[];  // 閱讀策略練習 (#943); StrategyExerciseItem[] for G7 圖文整合 (#1390)
   /**
    * Optional per-lesson step sequence loaded from YAML `step_sequence` field (#1374).
    * When present, overrides DEFAULT_STEP_SEQUENCE for StepperNav and next/prev navigation.

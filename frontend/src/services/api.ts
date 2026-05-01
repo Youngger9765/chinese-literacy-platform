@@ -61,7 +61,7 @@ interface ApiStoryDetail extends ApiStoryListItem {
   text_type: string;
   source_file: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  strategy_exercise: Record<string, any> | null;
+  strategy_exercise: Record<string, any> | any[] | null;  // list for multi-exercise lessons (G7 圖文整合, #1390)
   // Schema-driven step composition (#1374)
   step_sequence: string[] | null;
 }

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Union
 
 
 class VocabItemSchema(BaseModel):
@@ -50,7 +50,7 @@ class StoryDetail(StoryListItem):
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     text_type: str = "單"
     source_file: Optional[str] = None
-    strategy_exercise: Optional[dict] = None  # 閱讀策略練習 (#943)
+    strategy_exercise: Optional[Union[dict, list]] = None  # 閱讀策略練習 (#943); list for multi-exercise lessons (G7 圖文整合)
     # Schema-driven step composition (#1374): per-lesson step order from YAML.
     # None means frontend uses DEFAULT_STEP_SEQUENCE fallback.
     step_sequence: Optional[list[str]] = None
