@@ -198,3 +198,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 綠色賽事
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 綠色賽事是為減少對環境的負擔而生
+  interactive_type: checkbox
+  hint: 綠色賽事為何出現？
+  options:
+  - 綠色賽事是為了讓比賽更刺激
+  - 綠色賽事是為減少對環境的負擔而生
+  - 綠色賽事是為了吸引更多人參加
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 綠色賽事落實「環保3R」
+  interactive_type: checkbox
+  hint: 綠色賽事怎麼做？
+  options:
+  - 綠色賽事強調選手成績
+  - 綠色賽事落實「環保3R」
+  - 綠色賽事只在特定國家舉辦
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 環保3R包含減少使用、物盡其用、循環回收
+  interactive_type: checkbox
+  hint: 環保3R的內容是什麼？
+  options:
+  - 環保3R是減少使用、物盡其用、循環回收
+  - 環保3R是減少浪費、增加獎品、鼓勵競爭
+  - 環保3R是多用塑膠、多印紙張、多丟垃圾
+  correct_options:
+  - 0
+- label: 結論
+  value: 運動賽事應是健康快樂且能教育環保的好機會
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

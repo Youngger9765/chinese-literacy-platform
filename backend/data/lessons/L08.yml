@@ -126,20 +126,69 @@ strategy_exercise:
   instruction: 推論人物特質，我們可以從一個人說的話、做的事來推論。
   character: 楊勇緯
   clues:
-    - text: 每天清晨提早三、四十分鐘到校練習
-      source: 做的事
-    - text: 我的目標是金牌！
-      source: 說的話
-    - text: 面對失敗不氣餒，把失敗當成成長養分
-      source: 態度
+  - text: 每天清晨提早三、四十分鐘到校練習
+    source: 做的事
+  - text: 我的目標是金牌！
+    source: 說的話
+  - text: 面對失敗不氣餒，把失敗當成成長養分
+    source: 態度
   trait_options:
-    - 自律
-    - 勇敢
-    - 固執
-    - 懶散
+  - 自律
+  - 勇敢
+  - 固執
+  - 懶散
   correct_trait: 自律
 story_structure:
 - label: 主角
   value: 楊勇緯
 - label: 主題
   value: 楊勇緯從小就以自律和強韌的心理素質著稱。
+story_structure_rows:
+- label: 主角
+  value: 楊勇緯
+  interactive_type: fill_blank
+  hint: 課文中的人物
+- label: 主題
+  value: 努力不懈，將挫折化為成長養分
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 自律、心理素質強大、持續精進
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 事件發生的原因
+    options:
+    - 楊勇緯從小練習柔道，展現自律與強韌心理素質。
+    - 楊勇緯的哥哥也是柔道選手，兩人互相競爭。
+    - 楊勇緯的媽媽認為他是天才型選手。
+    correct_options:
+    - 0
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 事件發展的過程
+    options:
+    - 楊勇緯在東京奧運柔道比賽中一路過關斬將，挺進金牌戰。
+    - 楊勇緯在金牌戰中擊敗日本選手，奪得金牌。
+    - 楊勇勇緯因飲食不節制，影響了比賽表現。
+    correct_options:
+    - 0
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 事件最終的結果
+    options:
+    - 楊勇緯雖獲銀牌，但將挫折轉化為動力，後續奪得兩面大滿貫金牌。
+    - 楊勇緯因未能奪金而放棄柔道生涯。
+    - 楊勇緯在奧運後選擇休息，不再參加比賽。
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

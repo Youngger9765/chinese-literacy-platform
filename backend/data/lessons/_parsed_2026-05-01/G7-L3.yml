@@ -207,3 +207,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 女性太空人登月
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 阿波羅計畫的太空人都是男性
+  interactive_type: checkbox
+  hint: 關於阿波羅計畫
+  options:
+  - 阿波羅計畫有女性太空人
+  - 阿波羅計畫的太空人都是男性
+  - 阿波羅計畫送了兩位太空人登月
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 阿提米絲計畫以月亮女神命名
+  interactive_type: checkbox
+  hint: 關於阿提米絲計畫
+  options:
+  - 阿提米絲計畫只送男性登月
+  - 阿提米絲計畫以月亮女神命名
+  - 阿提米絲計畫在1969年啟動
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 女性在太空任務中消耗較少資源
+  interactive_type: checkbox
+  hint: 女性太空人優勢
+  options:
+  - 女性體力比男性好
+  - 女性在太空任務中消耗較少資源
+  - 女性不適合長途太空任務
+  correct_options:
+  - 1
+- label: 結論
+  value: 太空探索應重視性別與族群平等
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

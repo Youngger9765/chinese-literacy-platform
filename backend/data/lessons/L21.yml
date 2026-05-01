@@ -148,29 +148,29 @@ strategy_exercise:
   strategy_name: 自我提問－問好奇的問題
   instruction: 閱讀時，如果你能持續問自己問題，例如「他為什麼會這樣？」「這是真的嗎？」就能更深入理解文章。讓我們一起來對課文提出好奇的問題吧！
   steps:
-    - prompt: 讀到「賴桑花了三千萬買下第一座山，卻發現整座山佈滿垃圾」，你會想問什麼問題？
-      type: select
-      options:
-        - 賴桑為什麼明知是垃圾山還要買？
-        - 垃圾山有多少公斤？
-        - 賴桑的爸爸是做什麼的？
-      answer: 0
-    - prompt: 賴桑說「我的信仰就是種樹，人類過去砍了太多樹，我要把它們種回來！」讀到這裡，你心中會浮現什麼好奇的問題？
-      type: free_text
-    - prompt: 讀到「親友們都認為賴桑若不是瘋了，就是很笨」，你覺得最好的提問是哪一個？
-      type: select
-      options:
-        - 賴桑的親友有幾個人？
-        - 為什麼親友會覺得賴桑瘋了？他做了什麼讓人不理解的事？
-        - 賴桑的妻子叫什麼名字？
-      answer: 1
-    - prompt: 讀到「兒子們也開始種咖啡樹，將販售所得投入父親的種樹志業」，你會想問什麼疑惑的問題？
-      type: select
-      options:
-        - 咖啡樹可以長多高？
-        - 兒子從不理解到支持，中間發生了什麼轉變？
-        - 咖啡一杯賣多少錢？
-      answer: 1
+  - prompt: 讀到「賴桑花了三千萬買下第一座山，卻發現整座山佈滿垃圾」，你會想問什麼問題？
+    type: select
+    options:
+    - 賴桑為什麼明知是垃圾山還要買？
+    - 垃圾山有多少公斤？
+    - 賴桑的爸爸是做什麼的？
+    answer: 0
+  - prompt: 賴桑說「我的信仰就是種樹，人類過去砍了太多樹，我要把它們種回來！」讀到這裡，你心中會浮現什麼好奇的問題？
+    type: free_text
+  - prompt: 讀到「親友們都認為賴桑若不是瘋了，就是很笨」，你覺得最好的提問是哪一個？
+    type: select
+    options:
+    - 賴桑的親友有幾個人？
+    - 為什麼親友會覺得賴桑瘋了？他做了什麼讓人不理解的事？
+    - 賴桑的妻子叫什麼名字？
+    answer: 1
+  - prompt: 讀到「兒子們也開始種咖啡樹，將販售所得投入父親的種樹志業」，你會想問什麼疑惑的問題？
+    type: select
+    options:
+    - 咖啡樹可以長多高？
+    - 兒子從不理解到支持，中間發生了什麼轉變？
+    - 咖啡一杯賣多少錢？
+    answer: 1
 story_structure:
 - label: 主角
   value: 賴桑為什麼要買一座垃圾山？
@@ -180,3 +180,57 @@ story_structure:
     value: 賴倍元從小熱愛【 大自然 】 。 起因 工作之餘到山上看神木，感受自然的永恆，下決心【 種樹 】 。 1.三千萬元買下的第一座山，滿是【 垃圾 】 。 問題 1 2.這座山過去種植果樹，使用除草劑， 【 土壤 】被破壞，不能涵 養水份，難以
   - label: 結果
     value: 2.【 生態 】恢復：大雪山林場生態豐富，多樣性增加。 迴響 越來越多的人認同賴桑的理念，一起【 加入種樹的行列 】 。 閱讀時，如果你能能夠持續的問自己問題，例如「他為什麼會這樣？」 「不可思議，這是真的嗎？」 「作者為什麼要寫這篇文章？
+story_structure_rows:
+- label: 主角
+  value: 賴倍元（賴桑）
+  interactive_type: fill_blank
+  hint: 課文主要人物
+- label: 主題
+  value: 種樹愛地球，為下一代留下寶藏
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 堅持、有遠見、愛護大自然
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 事情發生的原因
+    options:
+    - 賴桑童年與大自然為伍，感受生命短暫與大自然永恆。
+    - 賴桑想經營一個不會被時間淘汰的事業。
+    - 賴桑的父親要求他種樹。
+    - 賴桑想賺大錢。
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 事情發生的過程
+    options:
+    - 賴桑買下佈滿垃圾的山，花數月清運。
+    - 賴桑諮詢木材行老闆後，決定種植肖楠。
+    - 賴桑不使用化學肥料，人工除草並鋪設水管澆灌。
+    - 賴桑的家人一開始都支持他的決定。
+    correct_options:
+    - 0
+    - 1
+    - 2
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 事情的結果
+    options:
+    - 大雪山林場生態豐富，吸引眾人認同並加入種樹行列。
+    - 賴桑的家人因為種樹而破產。
+    - 賴桑放棄種樹，改做其他事業。
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

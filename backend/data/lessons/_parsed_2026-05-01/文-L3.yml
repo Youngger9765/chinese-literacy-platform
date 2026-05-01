@@ -100,3 +100,33 @@ images:
   content_type: image/png
   caption: ''
 image_count: 6
+story_structure_rows:
+- label: 主題
+  value: 為官清廉，不貪不取
+  interactive_type: fill_blank
+  hint: 這篇文章主要在講什麼？
+- label: 重要內容 1
+  value: 縣令不量田，只收舊稅額
+  interactive_type: checkbox
+  hint: 縣令如何處理田地稅收？
+  options:
+  - 縣令重新丈量田地，增加稅收
+  - 縣令不丈量田地，沿用舊的稅額
+  - 縣令減免所有田地稅收
+  correct_options:
+  - 1
+- label: 重要內容 2
+  value: 百姓感念縣令，為他立碑
+  interactive_type: checkbox
+  hint: 百姓對於縣令的行為有什麼反應？
+  options:
+  - 百姓不滿縣令，向朝廷告狀
+  - 百姓感念縣令，為他建立紀念碑
+  - 百姓對縣令的行為無感
+  correct_options:
+  - 1
+- label: 結論
+  value: 清廉的官員會受百姓愛戴
+  interactive_type: fill_blank
+  hint: 從這個故事中，我們可以學到什麼？
+story_structure_table_source: ai-generated-2026-05-02

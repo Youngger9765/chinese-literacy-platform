@@ -183,3 +183,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 塑膠污染
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 塑膠一旦進入環境，就很難消失。
+  interactive_type: checkbox
+  hint: 塑膠的特性？
+  options:
+  - 塑膠很容易在自然界分解。
+  - 塑膠一旦進入環境，就很難消失。
+  - 塑膠只會存在於陸地環境。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 塑膠微粒會透過食物鏈進入人體。
+  interactive_type: checkbox
+  hint: 塑膠如何影響人體？
+  options:
+  - 塑膠微粒對人體健康沒有影響。
+  - 塑膠微粒會透過食物鏈進入人體。
+  - 塑膠微粒只存在於海洋生物體內。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 回收率低且減產困難是塑膠問題的挑戰。
+  interactive_type: checkbox
+  hint: 塑膠問題的難點？
+  options:
+  - 塑膠回收率高且減產容易。
+  - 回收率低且減產困難是塑膠問題的挑戰。
+  - 塑膠回收成本比製作新塑膠便宜。
+  correct_options:
+  - 1
+- label: 結論
+  value: 個人減塑行動能影響供應，成為環保倡議者。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

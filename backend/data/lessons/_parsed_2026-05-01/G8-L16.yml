@@ -165,3 +165,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 阿嬤的教養方式
+  interactive_type: fill_blank
+  hint: 這篇文章主要在寫誰？
+- label: 重要事實 1
+  value: 阿嬤的管教方式直接了當，會罵人也會打人。
+  interactive_type: checkbox
+  hint: 阿嬤如何管教小孩？
+  options:
+  - 阿嬤會用愛的教育教導孫子。
+  - 阿嬤的管教方式直接了當，會罵人也會打人。
+  - 阿嬤會用同理心和孫子溝通。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 阿嬤的教養方式對作者的心理韌性有幫助。
+  interactive_type: checkbox
+  hint: 阿嬤的教養方式有何影響？
+  options:
+  - 阿嬤的教養方式讓作者感到痛苦。
+  - 阿嬤的教養方式對作者的心理韌性有幫助。
+  - 阿嬤的教養方式讓作者學會說對不起。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 阿嬤的說話方式是受其成長經驗影響。
+  interactive_type: checkbox
+  hint: 阿嬤為何這樣說話？
+  options:
+  - 阿嬤天生就喜歡罵人。
+  - 阿嬤的說話方式是受其成長經驗影響。
+  - 阿嬤想用髒話教導孫子。
+  correct_options:
+  - 1
+- label: 結論
+  value: 我們可以決定如何詮釋童年經驗。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

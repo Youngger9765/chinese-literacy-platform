@@ -202,3 +202,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 17
+story_structure_rows:
+- label: 主題
+  value: 楊勇緯的自我鍛鍊
+  interactive_type: fill_blank
+  hint: 課文主角是誰？
+- label: 重要事實 1
+  value: 楊勇緯從小就展現自律和強韌的心理素質，勤於訓練。
+  interactive_type: checkbox
+  hint: 他從小如何？
+  options:
+  - 楊勇緯從小就展現自律和強韌的心理素質，勤於訓練。
+  - 楊勇緯從小就很有天賦，不需特別努力。
+  - 楊勇緯從小就喜歡玩樂，不愛練習。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 他對飲食有嚴格要求，並隨身攜帶小冊子記錄所學。
+  interactive_type: checkbox
+  hint: 他如何精進自己？
+  options:
+  - 他對飲食沒有特別限制，隨心所欲。
+  - 他對飲食有嚴格要求，並隨身攜帶小冊子記錄所學。
+  - 他只專注訓練，不注重飲食和記錄。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 即使奧運失利，他仍將挫折視為成長養分，持續優化。
+  interactive_type: checkbox
+  hint: 他如何面對失敗？
+  options:
+  - 奧運失利後，他感到沮喪並放棄。
+  - 即使奧運失利，他仍將挫折視為成長養分，持續優化。
+  - 奧運失利後，他認為自己不適合柔道。
+  correct_options:
+  - 1
+- label: 結論
+  value: 楊勇緯是位自律、內心強大，能將挫折轉為養分的運動員楷模。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

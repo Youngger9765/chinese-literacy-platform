@@ -162,3 +162,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 核能的兩難抉擇
+  interactive_type: fill_blank
+  hint: 課文主要在討論什麼？
+- label: 重要事實 1
+  value: 反對核能者認為核災難以收拾
+  interactive_type: checkbox
+  hint: 反對核能的原因？
+  options:
+  - 核能發電成本太高
+  - 核災一旦發生難以收拾
+  - 核能發電效率太低
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 贊成核能者認為可穩定能源供應
+  interactive_type: checkbox
+  hint: 贊成核能的原因？
+  options:
+  - 核能發電技術最先進
+  - 核能可穩定能源供應
+  - 核能發電廠數量少
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 核能有助於減碳
+  interactive_type: checkbox
+  hint: 核能的優點之一？
+  options:
+  - 核能發電廠容易建造
+  - 核能發電量小
+  - 核能排放溫室氣體極少
+  correct_options:
+  - 2
+- label: 結論
+  value: 需透過溝通權衡利弊做出決策
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

@@ -154,29 +154,29 @@ strategy_exercise:
   strategy_name: 野外求生技能
   instruction: 萊絲莉帶著弟弟妹妹在亞馬遜雨林求生了40天，靠的是從族人那裡學到的野外求生技巧。讓我們一起來整理她用了哪些求生方法吧！
   steps:
-    - prompt: 萊絲莉怎麼解決「吃」的問題？
-      type: select
-      options:
-        - 獵捕野生動物來吃
-        - 先吃飛機上帶下來的木薯粉，之後採集種子、野果和根莖類植物充飢
-        - 等搜救隊空投食物箱
-      answer: 1
-    - prompt: 萊絲莉怎麼解決「喝水」的問題？
-      type: select
-      options:
-        - 直接喝叢林裡的溪水
-        - 只喝雨水，先承接雨水等沉澱淨化後再喝
-        - 從樹幹裡擠出水分來喝
-      answer: 1
-    - prompt: 萊絲莉怎麼解決「住」的問題，保護大家的安全？
-      type: select
-      options:
-        - 住在飛機殘骸裡
-        - 挖地洞躲起來
-        - 和弟弟在樹上搭建小屋，避免地面野獸攻擊
-      answer: 2
-    - prompt: 萊絲莉能在雨林中求生，最主要是因為什麼？這對你有什麼啟發？請寫下你的想法
-      type: free_text
+  - prompt: 萊絲莉怎麼解決「吃」的問題？
+    type: select
+    options:
+    - 獵捕野生動物來吃
+    - 先吃飛機上帶下來的木薯粉，之後採集種子、野果和根莖類植物充飢
+    - 等搜救隊空投食物箱
+    answer: 1
+  - prompt: 萊絲莉怎麼解決「喝水」的問題？
+    type: select
+    options:
+    - 直接喝叢林裡的溪水
+    - 只喝雨水，先承接雨水等沉澱淨化後再喝
+    - 從樹幹裡擠出水分來喝
+    answer: 1
+  - prompt: 萊絲莉怎麼解決「住」的問題，保護大家的安全？
+    type: select
+    options:
+    - 住在飛機殘骸裡
+    - 挖地洞躲起來
+    - 和弟弟在樹上搭建小屋，避免地面野獸攻擊
+    answer: 2
+  - prompt: 萊絲莉能在雨林中求生，最主要是因為什麼？這對你有什麼啟發？請寫下你的想法
+    type: free_text
 story_structure:
 - label: 主角
   value: 萊絲莉和她的三個弟妹
@@ -193,3 +193,62 @@ story_structure:
     value: 萊絲莉帶弟妹在叢林求生40天
   - label: 結果
     value: 四名孩童奇蹟獲救，舉國歡騰
+story_structure_rows:
+- label: 主角
+  value: 萊絲莉
+  interactive_type: fill_blank
+  hint: 課文主角是誰？
+  options:
+  correct_options:
+- label: 主題
+  value: 野外求生能力的重要性
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+  options:
+  correct_options:
+- label: 特色
+  value: 熟悉野外求生技巧
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+  options:
+  correct_options:
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  options:
+  correct_options:
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: ''
+    options:
+    - 四名孩童搭乘小飛機墜毀在亞馬遜雨林
+    - 機上三位成人罹難，孩子們倖存
+    - 搜救隊很快就找到孩子們
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: ''
+    options:
+    - 萊絲莉運用族人教導的求生技巧
+    - 孩子們靠著搜救隊空投的食物生存
+    - 萊絲莉照顧弟妹，採集野果、淨化雨水
+    correct_options:
+    - 0
+    - 2
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: ''
+    options:
+    - 孩子們在叢林中生存40天後獲救
+    - 孩子們因體力不支，未能等到救援
+    - 搜救隊很快就找到孩子們，沒有經過太多困難
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

@@ -152,29 +152,29 @@ strategy_exercise:
   strategy_name: 品格力－正向思考轉換
   instruction: 我們常常覺得「別人的比較好」，但其實問題不在東西本身，而在我們怎麼看待它。讓我們一起練習辨識「負向思考」和「正向思考」，並學習把負向思考轉換成正向思考吧！
   steps:
-    - prompt: 以下哪一個是課文中作者小時候的「負向思考」？
-      type: select
-      options:
-        - 姊姊把餅分得很公平，我很滿意
-        - 不管怎麼選，我總覺得姊姊的餅比我的大
-        - 和姊姊分享餅是一件開心的事
-      answer: 1
-    - prompt: 湯姆被姨媽叫去刷籬笆油漆，他怎麼把這件苦差事變成正向的？
-      type: select
-      options:
-        - 他偷偷跑去玩，不刷了
-        - 他把自己當成正在創作偉大壁畫的藝術家，全神投入享受
-        - 他請姨媽幫他一起刷
-      answer: 1
-    - prompt: 作者長大後，回程飛機延誤，他怎麼用正向思考看待這件事？
-      type: select
-      options:
-        - 太倒楣了，浪費時間
-        - 太棒了，還可以在國外多玩一天
-        - 都是航空公司的錯
-      answer: 1
-    - prompt: 請你想一個生活中不順心的事情（例如下雨不能出去玩），試著用正向思考的方式重新看待它，寫下來
-      type: free_text
+  - prompt: 以下哪一個是課文中作者小時候的「負向思考」？
+    type: select
+    options:
+    - 姊姊把餅分得很公平，我很滿意
+    - 不管怎麼選，我總覺得姊姊的餅比我的大
+    - 和姊姊分享餅是一件開心的事
+    answer: 1
+  - prompt: 湯姆被姨媽叫去刷籬笆油漆，他怎麼把這件苦差事變成正向的？
+    type: select
+    options:
+    - 他偷偷跑去玩，不刷了
+    - 他把自己當成正在創作偉大壁畫的藝術家，全神投入享受
+    - 他請姨媽幫他一起刷
+    answer: 1
+  - prompt: 作者長大後，回程飛機延誤，他怎麼用正向思考看待這件事？
+    type: select
+    options:
+    - 太倒楣了，浪費時間
+    - 太棒了，還可以在國外多玩一天
+    - 都是航空公司的錯
+    answer: 1
+  - prompt: 請你想一個生活中不順心的事情（例如下雨不能出去玩），試著用正向思考的方式重新看待它，寫下來
+    type: free_text
 story_structure:
 - label: 主角
   value: 作者（小時候的自己）
@@ -191,3 +191,53 @@ story_structure:
     value: 總覺得姊姊的餅比較大，後來讀《湯姆歷險記》。
   - label: 結果
     value: 領悟到問題不在餅大小，而在心態。
+story_structure_rows:
+- label: 主角
+  value: 作者
+  interactive_type: fill_blank
+  hint: 課文主要人物
+- label: 主題
+  value: 轉念能讓生活更美好
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 善於從經驗中學習
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 故事發生的原因
+    options:
+    - 作者小時候常覺得姊姊的餅比較大
+    - 作者對生活中的不順心感到不滿
+    - 作者想知道如何讓餅變得更好吃
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 故事如何發展
+    options:
+    - 作者從《湯姆歷險記》中得到啟發
+    - 湯姆將刷油漆變成有趣的藝術創作
+    - 湯姆用蘋果換取刷油漆的權利
+    correct_options:
+    - 0
+    - 1
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 故事的結局或啟示
+    options:
+    - 作者學會用不同角度看待事情
+    - 作者不再跟姊姊計較餅的大小
+    - 作者成功讓別人幫他刷油漆
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

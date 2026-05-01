@@ -85,8 +85,8 @@ multiple_choice:
   - 金融業。
   - 醫療業。
   - 科技業。
-  answer: null
-  explanation: null
+  answer:
+  explanation:
 - question: 根據本文，臺灣學生棒球運動員主要面臨的困難是什麼？
   options:
   - 訓練設施不夠完善。
@@ -127,33 +127,73 @@ strategy_exercise:
   strategy_name: 時間管理
   instruction: 時間管理有四個步驟：1.計畫 2.設定優先順序 3.合理安排 4.保持彈性。請根據課文內容練習這四個步驟
   steps:
-    - prompt: 根據課文，學生棒球員面臨的最大困難是什麼？
-      type: select
-      options:
-        - 訓練太辛苦，身體受不了
-        - 學業與棒球訓練難以兼顧
-        - 教練太嚴格，壓力很大
-      answer: 1
-    - prompt: 花蓮三民國中用了哪些方法幫助球員擠出讀書時間？（可複選）
-      type: checkbox
-      options:
-        - 增加宿舍淋浴間及洗衣機
-        - 取消棒球訓練
-        - 要求學業成績達標才能出賽
-        - 減少上課時間
-      answer:
-        - 0
-        - 2
-    - prompt: 如果你是一位學生棒球員，每天放學後有4小時的自由時間，你會怎麼安排「練球」和「讀書」的優先順序？請說明理由
-      type: free_text
-    - prompt: 課文提到「愛接棒計畫」提供夜間課輔，這屬於時間管理四步驟中的哪一步？
-      type: select
-      options:
-        - 計畫
-        - 設定優先順序
-        - 合理安排
-        - 保持彈性
-      answer: 2
+  - prompt: 根據課文，學生棒球員面臨的最大困難是什麼？
+    type: select
+    options:
+    - 訓練太辛苦，身體受不了
+    - 學業與棒球訓練難以兼顧
+    - 教練太嚴格，壓力很大
+    answer: 1
+  - prompt: 花蓮三民國中用了哪些方法幫助球員擠出讀書時間？（可複選）
+    type: checkbox
+    options:
+    - 增加宿舍淋浴間及洗衣機
+    - 取消棒球訓練
+    - 要求學業成績達標才能出賽
+    - 減少上課時間
+    answer:
+    - 0
+    - 2
+  - prompt: 如果你是一位學生棒球員，每天放學後有4小時的自由時間，你會怎麼安排「練球」和「讀書」的優先順序？請說明理由
+    type: free_text
+  - prompt: 課文提到「愛接棒計畫」提供夜間課輔，這屬於時間管理四步驟中的哪一步？
+    type: select
+    options:
+    - 計畫
+    - 設定優先順序
+    - 合理安排
+    - 保持彈性
+    answer: 2
 story_structure:
 - label: 結論
   value: 力
+story_structure_rows:
+- label: 主題
+  value: 學生棒球員的生涯發展
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 學生棒球員進入職棒的機會非常少。
+  interactive_type: checkbox
+  hint: 關於職棒機會
+  options:
+  - 學生棒球員有很高的機會進入職棒。
+  - 學生棒球員進入職棒的機會非常少。
+  - 所有學生棒球員都能進入職棒。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 職棒選手職涯短，轉業困難。
+  interactive_type: checkbox
+  hint: 職棒選手的困境
+  options:
+  - 職棒選手職涯長，轉業容易。
+  - 職棒選手職涯短，轉業困難。
+  - 職棒選手職涯長，但轉業困難。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 未進入職棒的球員可能因學力不足，職涯受限。
+  interactive_type: checkbox
+  hint: 未進入職棒的球員
+  options:
+  - 未進入職棒的球員都能找到好工作。
+  - 未進入職棒的球員職涯選擇多樣。
+  - 未進入職棒的球員可能因學力不足，職涯受限。
+  correct_options:
+  - 2
+- label: 結論
+  value: 學校應幫助學生棒球員兼顧球技與學力。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

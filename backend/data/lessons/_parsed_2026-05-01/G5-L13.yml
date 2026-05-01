@@ -219,3 +219,43 @@ images:
   content_type: image/jpeg
   caption: ''
 image_count: 18
+story_structure_rows:
+- label: 主題
+  value: 小丑醫生
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 小丑醫生起源於美國，由亞當斯醫生提出構想。
+  interactive_type: checkbox
+  hint: 小丑醫生的由來
+  options:
+  - 小丑醫生起源於美國，由亞當斯醫生提出構想。
+  - 小丑醫生起源於臺灣，由志工團體推動。
+  - 小丑醫生起源於歐洲，由克里斯廷創立。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 小丑醫生透過幽默、表演和互動，幫助病童緩解焦慮。
+  interactive_type: checkbox
+  hint: 小丑醫生的工作內容
+  options:
+  - 小丑醫生只負責講笑話。
+  - 小丑醫生透過幽默、表演和互動，幫助病童緩解焦慮。
+  - 小丑醫生主要負責發藥和手術。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 小丑醫生需要接受專業訓練，了解醫院規範和心理學。
+  interactive_type: checkbox
+  hint: 小丑醫生的專業要求
+  options:
+  - 小丑醫生只要會表演即可。
+  - 小丑醫生需要接受專業訓練，了解醫院規範和心理學。
+  - 小丑醫生只需穿著鮮豔服裝。
+  correct_options:
+  - 1
+- label: 結論
+  value: 笑，本身就是最好的良藥。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

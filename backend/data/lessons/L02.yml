@@ -122,14 +122,14 @@ strategy_exercise:
   strategy_name: 順敘法
   instruction: 順敘法是按照事情的發生順序來講故事。先找到描述時間的詞，再依發生的先後順序排列。
   items:
-    - text: 楊俊瀚從小學開始練短跑
-      correct_order: 1
-    - text: 在全大運跑出十秒二二破大會紀錄
-      correct_order: 2
-    - text: 二〇一八年亞運一百公尺與金牌擦身而過
-      correct_order: 3
-    - text: 期許自己代表台灣站上奧運舞台
-      correct_order: 4
+  - text: 楊俊瀚從小學開始練短跑
+    correct_order: 1
+  - text: 在全大運跑出十秒二二破大會紀錄
+    correct_order: 2
+  - text: 二〇一八年亞運一百公尺與金牌擦身而過
+    correct_order: 3
+  - text: 期許自己代表台灣站上奧運舞台
+    correct_order: 4
 story_structure:
 - label: 主角
   value: 楊俊瀚
@@ -137,3 +137,54 @@ story_structure:
   sub_rows:
   - label: 結果
     value: □一百公尺 □四百公尺 的短跑項目的台灣選手。 1.他學會了先了解害怕的事物， 【 擁抱 恐懼 】 ， 他學到了 再戰勝它。 什麼? 2.學習和自己【 對話 】 ，找尋答案。 順敘法是按照事情的發生順序來講故事。這是一種最基本、最常用的敘述
+story_structure_rows:
+- label: 主角
+  value: 楊俊瀚
+  interactive_type: fill_blank
+  hint: 課文主要在講誰？
+- label: 主題
+  value: 堅持不懈，戰勝困難
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 不輕言放棄、勇於面對
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 事件發生的原因或時間
+    options:
+    - 2017年世大運獲得金牌
+    - 2018年亞運與金牌擦身而過
+    - 2019年世大運比賽時受傷
+    correct_options:
+    - 1
+    - 2
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 事件發展的過程
+    options:
+    - 楊俊瀚努力練習，超越自己
+    - 楊俊瀚進行漫長復健，重回賽場
+    - 楊俊瀚在低潮時與自己對話
+    correct_options:
+    - 1
+    - 2
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 事件最終的結果
+    options:
+    - 楊俊瀚獲得東京奧運參賽資格
+    - 楊俊瀚在亞運獲得金牌
+    - 楊俊瀚在世大運獲得金牌
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

@@ -196,3 +196,43 @@ images:
   content_type: image/svg+xml
   caption: ''
 image_count: 18
+story_structure_rows:
+- label: 主題
+  value: 周思齊的棒球人生
+  interactive_type: fill_blank
+  hint: 這篇文章在說誰？
+- label: 重要事實 1
+  value: 大學選擇重視學業的輔仁大學就讀，並持續打棒球。
+  interactive_type: checkbox
+  hint: 他大學做了什麼？
+  options:
+  - 大學放棄學業，專心打棒球。
+  - 大學選擇重視學業的輔仁大學就讀，並持續打棒球。
+  - 大學選擇打工賺錢，沒有繼續打棒球。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 職棒生涯曾兩度遇到假球風暴，但他堅守信念。
+  interactive_type: checkbox
+  hint: 他職棒遇到什麼？
+  options:
+  - 職棒生涯一帆風順，沒有遇到困難。
+  - 職棒生涯曾兩度遇到假球風暴，但他堅守信念。
+  - 職棒生涯因傷所困，提前引退。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 除了打球，也創辦基金會、考研究所，回饋社會。
+  interactive_type: checkbox
+  hint: 他還做了什麼？
+  options:
+  - 除了打球，他沒有其他興趣。
+  - 除了打球，也創辦基金會、考研究所，回饋社會。
+  - 除了打球，他只專注於個人發展。
+  correct_options:
+  - 1
+- label: 結論
+  value: 天分雖重要，但堅持和信念才能幫助我們成功。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

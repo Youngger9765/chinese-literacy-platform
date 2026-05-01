@@ -159,3 +159,55 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主角
+  value: 課文中的「我」
+  interactive_type: fill_blank
+  hint: 課文中的敘述者
+- label: 主題
+  value: 初次喜歡一個人的心情轉變
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 心思細膩、容易受他人影響
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: 主角對某位同學產生好感
+    interactive_type: checkbox
+    hint: 事情發生的原因
+    options:
+    - 主角最近心情起伏很大，不像平常的自己
+    - 主角上課時眼神總是不自覺飄向前排同學
+    - 主角被老師點名回答問題，感到很尷尬
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: 主角因喜歡對方而產生許多情緒
+    interactive_type: checkbox
+    hint: 事情發展的過程
+    options:
+    - 主角會偷偷觀察喜歡的同學，希望有更多相處機會
+    - 主角看到喜歡的同學和別人聊天開心，會感到難過
+    - 主角的情緒會隨著喜歡的同學一言一行而起伏
+    correct_options:
+    - 0
+    - 1
+    - 2
+  - label: 結果
+    value: 主角對喜歡的感受感到困惑
+    interactive_type: checkbox
+    hint: 事情最後的結果
+    options:
+    - 主角覺得喜歡一個人，反而讓自己不快樂
+    - 主角決定不再理會那位同學
+    - 主角向喜歡的同學告白了
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

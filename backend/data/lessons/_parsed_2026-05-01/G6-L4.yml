@@ -175,3 +175,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 孔子是一位酷老師
+  interactive_type: fill_blank
+  hint: 課文主要在介紹誰？
+- label: 重要事實 1
+  value: 孔子提倡「有教無類」，不分貧富貴賤，只要肯用功都能當他的學生。
+  interactive_type: checkbox
+  hint: 孔子的教育理念
+  options:
+  - 孔子只收貴族學生。
+  - 孔子提倡「有教無類」。
+  - 孔子只收有錢的學生。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 孔子教學「因材施教」，會根據學生的特質給予不同的教導。
+  interactive_type: checkbox
+  hint: 孔子的教學方法
+  options:
+  - 孔子對所有學生都用同一種方法教學。
+  - 孔子會根據學生特質給予不同教導。
+  - 孔子只教導聰明的學生。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 孔子教學時喜歡「問與答」，鼓勵學生提問、對談甚至辯論。
+  interactive_type: checkbox
+  hint: 孔子上課方式
+  options:
+  - 孔子不喜歡學生提問。
+  - 孔子只喜歡自己講課。
+  - 孔子喜歡用問答方式教學。
+  correct_options:
+  - 2
+- label: 結論
+  value: 孔子是位博學有智慧，為理想奉獻一生的酷老師。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

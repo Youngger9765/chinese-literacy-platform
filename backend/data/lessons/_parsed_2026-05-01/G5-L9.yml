@@ -167,3 +167,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 周天成如何透過自律成為頂尖羽球選手
+  interactive_type: fill_blank
+  hint: 課文主要在說明誰？
+- label: 重要事實 1
+  value: 周天成每天進行羽球基本訓練，包含暖身、基本練習與對打。
+  interactive_type: checkbox
+  hint: 關於羽球訓練
+  options:
+  - 周天成只練習發球與殺球。
+  - 周天成每天進行羽球基本訓練，包含暖身、基本練習與對打。
+  - 周天成只跟陪練員對打。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 周天成透過重量訓練強化肌肉，並尋求指導員協助開發潛能。
+  interactive_type: checkbox
+  hint: 關於體能訓練
+  options:
+  - 周天成只做核心肌群訓練。
+  - 周天成透過重量訓練強化肌肉，並尋求指導員協助開發潛能。
+  - 周天成只舉啞鈴強化左手肌肉。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 周天成飲食有紀律，吃原型食物，並搭乘大眾運輸避免受傷。
+  interactive_type: checkbox
+  hint: 關於生活習慣
+  options:
+  - 周天成飲食不忌口，想吃什麼就吃什麼。
+  - 周天成飲食有紀律，吃原型食物，並搭乘大眾運輸避免受傷。
+  - 周天成騎機車或開車參加公開活動。
+  correct_options:
+  - 1
+- label: 結論
+  value: 頂尖選手的養成需要極度的自律與堅持。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

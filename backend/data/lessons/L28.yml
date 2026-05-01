@@ -150,31 +150,82 @@ strategy_exercise:
   strategy_name: 品格力－用「至少、還好、很好啊」轉念
   instruction: 媽媽面對生病的痛苦，總是能用「轉念」的方式找到值得感恩的地方。我們可以學習用「至少……」「還好……」「很好啊……」這些句型，把困難的事情換個角度來看。一起來練習吧！
   steps:
-    - prompt: 媽媽全胃切除後，無法躺著睡覺。她怎麼轉念？
-      type: select
-      options:
-        - 「沒有胃真好，這樣就不會胃痛了」
-        - 「沒有胃真慘，以後什麼都不能吃」
-        - 「至少還可以站著睡」
-      answer: 0
-    - prompt: 媽媽化療後很虛弱，只能坐在沙發看電視。她怎麼轉念？
-      type: select
-      options:
-        - 「生病最大的好處就是可以整天躺在沙發看林書豪打球，一點罪惡感都沒有」
-        - 「生病真的太痛苦了」
-        - 「至少不用去上班」
-      answer: 0
-    - prompt: 作者說「很多事不是我們能掌控的，但我們還是可以決定如何面對它」。請選出最符合這句話的例子
-      type: select
-      options:
-        - 考試考不好，一直哭，覺得自己很笨
-        - 考試考不好，告訴自己「至少我知道哪裡不會了，下次可以加強」
-        - 考試考不好，假裝什麼事都沒發生
-      answer: 1
-    - prompt: 請你想一件最近遇到的不開心的事，試著用「至少……」「還好……」或「很好啊……」的句型來轉念，寫下來
-      type: free_text
+  - prompt: 媽媽全胃切除後，無法躺著睡覺。她怎麼轉念？
+    type: select
+    options:
+    - 「沒有胃真好，這樣就不會胃痛了」
+    - 「沒有胃真慘，以後什麼都不能吃」
+    - 「至少還可以站著睡」
+    answer: 0
+  - prompt: 媽媽化療後很虛弱，只能坐在沙發看電視。她怎麼轉念？
+    type: select
+    options:
+    - 「生病最大的好處就是可以整天躺在沙發看林書豪打球，一點罪惡感都沒有」
+    - 「生病真的太痛苦了」
+    - 「至少不用去上班」
+    answer: 0
+  - prompt: 作者說「很多事不是我們能掌控的，但我們還是可以決定如何面對它」。請選出最符合這句話的例子
+    type: select
+    options:
+    - 考試考不好，一直哭，覺得自己很笨
+    - 考試考不好，告訴自己「至少我知道哪裡不會了，下次可以加強」
+    - 考試考不好，假裝什麼事都沒發生
+    answer: 1
+  - prompt: 請你想一件最近遇到的不開心的事，試著用「至少……」「還好……」或「很好啊……」的句型來轉念，寫下來
+    type: free_text
 story_structure:
 - label: 事例
   sub_rows:
   - label: 經過
     value: 主 完全不能進食，只能喝一點 【 水好甜，好好喝 】 。 題 點水。 ： 紅 領 醫生建議放棄治療，接受安 有天會在天父那【 再見 】 。 帶 寧治療（面對死亡） 。 面對母親死亡的悲傷 轉換觀點 作者 打定主意【 開開心心 】陪媽 媽媽臨
+story_structure_rows:
+- label: 主角
+  value: 媽媽
+  interactive_type: fill_blank
+  hint: 課文主要人物
+- label: 主題
+  value: 轉換觀點，積極面對困境
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 樂觀、堅強、幽默
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 事情發生的原因
+    options:
+    - 媽媽罹患惡性胃癌
+    - 媽媽因病無法進食
+    - 媽媽接受全胃切除手術
+    correct_options:
+    - 0
+    - 2
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 事情發展的過程
+    options:
+    - 媽媽用黑色幽默面對病痛
+    - 媽媽用聖經話語鼓勵自己
+    - 媽媽堅持不接受安寧照護
+    correct_options:
+    - 0
+    - 1
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 事情最後的發展
+    options:
+    - 家人決定用喜氣的方式送別媽媽
+    - 家人因媽媽的離世感到悲傷
+    - 家人決定放棄治療
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

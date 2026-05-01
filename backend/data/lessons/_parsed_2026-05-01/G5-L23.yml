@@ -175,3 +175,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 電競與學習的平衡
+  interactive_type: fill_blank
+  hint: 這篇文章主要在說什麼？
+- label: 重要事實 1
+  value: 電競不只是玩遊戲，還需要邏輯、數學技巧和團隊合作。
+  interactive_type: checkbox
+  hint: 電競的內涵是什麼？
+  options:
+  - 電競只是玩遊戲，不需要思考。
+  - 電競需要邏輯、數學技巧和團隊合作。
+  - 電競只靠反應速度就能獲勝。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 嚴格的時間管理和自律是電競選手成功的關鍵。
+  interactive_type: checkbox
+  hint: 電競選手如何成功？
+  options:
+  - 只要努力練習，不用管時間。
+  - 嚴格的時間管理和自律是成功的關鍵。
+  - 只要有天賦，就能成為頂尖選手。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 電競訓練與課業學習可以互相幫助，融會貫通。
+  interactive_type: checkbox
+  hint: 電競和學習的關係？
+  options:
+  - 電競會影響學習，兩者無法兼顧。
+  - 電競訓練與課業學習可以互相幫助。
+  - 學習和電競是完全不相關的兩件事。
+  correct_options:
+  - 1
+- label: 結論
+  value: 追逐夢想不一定要放棄學業，勇於接受挑戰、採取策略、堅持努力，才能突破自我。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

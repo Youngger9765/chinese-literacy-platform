@@ -157,3 +157,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 啦啦隊
+  interactive_type: fill_blank
+  hint: 文章主要介紹誰？
+- label: 重要事實 1
+  value: 啦啦隊是帶動球場氣氛的重要推手，將球迷加油聲轉化為音浪，為運動員注入信心。
+  interactive_type: checkbox
+  hint: 啦啦隊的功能
+  options:
+  - 啦啦隊只是單純的舞蹈表演。
+  - 啦啦隊是帶動球場氣氛的重要推手，將球迷加油聲轉化為音浪，為運動員注入信心。
+  - 啦啦隊主要負責球員的休息與飲食。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 成為專業啦啦隊員需要驚人的記憶力、反應力、體力與心理韌性，並非只靠外貌。
+  interactive_type: checkbox
+  hint: 啦啦隊的專業性
+  options:
+  - 成為啦啦隊員只需長得好看、會跳舞。
+  - 啦啦隊員的工作輕鬆，不需特別訓練。
+  - 成為專業啦啦隊員需要驚人的記憶力、反應力、體力與心理韌性，並非只靠外貌。
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 啦啦隊的服裝常引發爭議，但觀眾應將焦點放回專業、紀律與勞動，給予尊重。
+  interactive_type: checkbox
+  hint: 啦啦隊的爭議
+  options:
+  - 啦啦隊的服裝爭議是因她們不夠專業。
+  - 啦啦隊的服裝常引發爭議，但觀眾應將焦點放回專業、紀律與勞動，給予尊重。
+  - 啦啦隊的服裝爭議與她們的專業能力無關。
+  correct_options:
+  - 1
+- label: 結論
+  value: 啦啦隊在俐落舞步與燦爛笑容背後，藏著長時間訓練、專注紀律與為他人加油的堅定心意。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

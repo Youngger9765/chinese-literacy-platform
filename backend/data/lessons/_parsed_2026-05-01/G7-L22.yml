@@ -204,3 +204,43 @@ images:
   content_type: image/jpeg
   caption: ''
 image_count: 22
+story_structure_rows:
+- label: 主題
+  value: 信眾與教主
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 教主預言世界末日，信眾深信不疑。
+  interactive_type: checkbox
+  hint: 教主說了什麼？
+  options:
+  - 教主預言世界末日，信眾深信不疑。
+  - 教主帶領信眾致富。
+  - 教主鼓勵信眾質疑他的言論。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 末日預言未發生，教主改口稱信眾拯救了世界。
+  interactive_type: checkbox
+  hint: 預言沒發生怎麼辦？
+  options:
+  - 末日預言未發生，教主承認錯誤。
+  - 末日預言未發生，教主改口稱信眾拯救了世界。
+  - 末日預言未發生，信眾立刻離開。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 為信仰付出代價者，更會盲目崇拜。
+  interactive_type: checkbox
+  hint: 信眾的反應是什麼？
+  options:
+  - 為信仰付出代價者，會開始質疑教主。
+  - 為信仰付出代價者，更會盲目崇拜。
+  - 信眾都會離開教主。
+  correct_options:
+  - 1
+- label: 結論
+  value: 人們心中若有信仰，可能不顧是非黑白。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

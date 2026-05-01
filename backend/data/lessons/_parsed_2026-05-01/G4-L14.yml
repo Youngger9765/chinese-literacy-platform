@@ -172,3 +172,55 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主角
+  value: 白牙
+  interactive_type: fill_blank
+  hint: 課文主要角色是誰？
+- label: 主題
+  value: 不要輕易懷疑信任的人
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 忠心、勇敢、有狼的血統
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 事情發生的原因
+    options:
+    - 獵人上山打獵，白牙在家照顧小寶
+    - 獵人妻子去世，白牙接替照顧小寶
+    - 暴風雪來襲，獵人被困在山上
+    correct_options:
+    - 0
+    - 2
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 事情發生的過程
+    options:
+    - 獵人回家看到血跡，誤以為白牙吃了小寶
+    - 白牙與闖入的灰狼搏鬥，保護小寶
+    - 獵人憤怒地用斧頭砍傷白牙
+    correct_options:
+    - 0
+    - 1
+    - 2
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 事情最後的發展
+    options:
+    - 白牙傷重而死，獵人後悔不已
+    - 獵人發現真相，白牙被救活
+    - 小寶被灰狼叼走，白牙逃跑了
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

@@ -129,24 +129,24 @@ strategy_exercise:
   strategy_name: 換位思考
   instruction: 換位思考是站在別人的角度看事情，了解對方的感受。我們可以用三個步驟來學習：1. 觀察對方的處境 2. 想想對方的感受 3. 思考怎麼做對對方最好
   steps:
-    - prompt: 老闆說老人是「第一百個客人」，他真正的用意是什麼？
-      type: select
-      options:
-        - 店裡真的有這個促銷活動
-        - 想免費請老人吃麵，又不傷害老人的自尊心
-        - 想吸引更多客人來吃麵
-      answer: 1
-    - prompt: 寒流那天，老闆打電話請朋友來吃麵，他站在誰的角度在思考？
-      type: select
-      options:
-        - 站在自己賺錢的角度
-        - 站在小男孩想請阿公吃麵的角度
-        - 站在朋友想吃免費麵的角度
-      answer: 1
-    - prompt: 小男孩最後說「我很飽，飽的像蜘蛛一樣」，他是學誰的做法？這代表他學會了什麼？
-      type: free_text
-    - prompt: 如果你是故事中的老闆娘，你會怎麼幫助這對祖孫？請站在他們的角度想一想
-      type: free_text
+  - prompt: 老闆說老人是「第一百個客人」，他真正的用意是什麼？
+    type: select
+    options:
+    - 店裡真的有這個促銷活動
+    - 想免費請老人吃麵，又不傷害老人的自尊心
+    - 想吸引更多客人來吃麵
+    answer: 1
+  - prompt: 寒流那天，老闆打電話請朋友來吃麵，他站在誰的角度在思考？
+    type: select
+    options:
+    - 站在自己賺錢的角度
+    - 站在小男孩想請阿公吃麵的角度
+    - 站在朋友想吃免費麵的角度
+    answer: 1
+  - prompt: 小男孩最後說「我很飽，飽的像蜘蛛一樣」，他是學誰的做法？這代表他學會了什麼？
+    type: free_text
+  - prompt: 如果你是故事中的老闆娘，你會怎麼幫助這對祖孫？請站在他們的角度想一想
+    type: free_text
 story_structure:
 - label: 事例
   sub_rows:
@@ -157,3 +157,55 @@ story_structure:
   - label: 結果
     value: '吃完麵後，祖孫倆【 滿足/幸福 】的離去。 「換位思考」是指站在別人的角度看事情，了解對方的感受，進而聽 懂別人的言外之意。故事中的阿公、小男孩或是麵攤老闆，他們都能夠換 位思考，懂得替別人著想。 我們可以用三個步驟來學習「換位思考」喔： '
 knowledge_video_url: https://www.youtube.com/watch?v=6-O0bddu7VQ
+story_structure_rows:
+- label: 主角
+  value: 小男孩、老人、麵攤老闆
+  interactive_type: fill_blank
+  hint: 課文主要人物
+- label: 主題
+  value: 人與人之間互助的溫暖
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 善良、體貼、懂得感恩
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 故事發生的原因
+    options:
+    - 天氣寒冷，老人帶著孫子賣麵
+    - 老人帶孫子到麵攤，點了最便宜的麵
+    - 老人經濟狀況不佳，但愛護孫子
+    correct_options:
+    - 1
+    - 2
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 故事發展過程
+    options:
+    - 老闆請客，讓老人成為第一百位客人
+    - 小男孩想讓阿公成為第一百位客人
+    - 老闆打電話請客人來吃麵幫忙
+    correct_options:
+    - 1
+    - 2
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 故事的結局
+    options:
+    - 小男孩成功請阿公吃麵，祖孫都很開心
+    - 小男孩學會了不吃東西也會飽的道理
+    - 麵攤生意興隆，老闆賺了很多錢
+    correct_options:
+    - 0
+    - 1
+story_structure_table_source: ai-generated-2026-05-02

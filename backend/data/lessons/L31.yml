@@ -161,31 +161,31 @@ strategy_exercise:
   strategy_name: 用表格整理訊息
   instruction: 用表格整理文章中的數據資料，可以幫助我們看出趨勢和變化。請根據課文內容，回答以下問題
   steps:
-    - prompt: 根據課文，1900年巴黎奧運的女性選手人數和比例分別是多少？
-      type: select
-      options:
-        - 22名，占2.2%
-        - 100名，占10%
-        - 50名，占5%
-      answer: 0
-    - prompt: 根據課文，到了2004年雅典奧運，女性選手參與率達到多少？
-      type: select
-      options:
-        - 25.3%
-        - 40.7%
-        - 50%
-      answer: 1
-    - prompt: 2024年巴黎奧運達成了什麼重要的里程碑？
-      type: select
-      options:
-        - 女性選手人數首次超過男性
-        - 男女參賽選手達到1:1
-        - 所有比賽項目都設有女子組
-      answer: 1
-    - prompt: 從1900年到2024年，女性參與奧運的比例呈現什麼趨勢？請用一句話說明
-      type: free_text
-    - prompt: 除了「人數平等」，文章提到奧運在性別平等上還有哪些仍需努力的地方？請舉一個例子
-      type: free_text
+  - prompt: 根據課文，1900年巴黎奧運的女性選手人數和比例分別是多少？
+    type: select
+    options:
+    - 22名，占2.2%
+    - 100名，占10%
+    - 50名，占5%
+    answer: 0
+  - prompt: 根據課文，到了2004年雅典奧運，女性選手參與率達到多少？
+    type: select
+    options:
+    - 25.3%
+    - 40.7%
+    - 50%
+    answer: 1
+  - prompt: 2024年巴黎奧運達成了什麼重要的里程碑？
+    type: select
+    options:
+    - 女性選手人數首次超過男性
+    - 男女參賽選手達到1:1
+    - 所有比賽項目都設有女子組
+    answer: 1
+  - prompt: 從1900年到2024年，女性參與奧運的比例呈現什麼趨勢？請用一句話說明
+    type: free_text
+  - prompt: 除了「人數平等」，文章提到奧運在性別平等上還有哪些仍需努力的地方？請舉一個例子
+    type: free_text
 story_structure:
 - label: 主題
   value: 奧運性別平等的發展與現況
@@ -197,3 +197,43 @@ story_structure:
   value: 巴黎奧運推出多項措施，提升女性在運動中的地位。
 - label: 結論
   value: 奧運是檢視性別平等的舞臺，但仍有進步空間。
+story_structure_rows:
+- label: 主題
+  value: 奧運性別平等這條路
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 1900年巴黎奧運首度有女性參加
+  interactive_type: checkbox
+  hint: 女性參賽的開端
+  options:
+  - 古希臘奧運女性可觀賽
+  - 1900年巴黎奧運首度有女性參加
+  - 古柏坦支持女性參賽
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 2024年巴黎奧運達成男女選手1:1
+  interactive_type: checkbox
+  hint: 性別比例的里程碑
+  options:
+  - 1948年奧運女性參賽率達一成
+  - 2004年奧運女性參賽率達50%
+  - 2024年巴黎奧運達成男女選手1:1
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 2024年巴黎奧運提供哺乳室
+  interactive_type: checkbox
+  hint: 性別平等的措施
+  options:
+  - 奧運選手村禁止女性運動員
+  - 奧運媒體村街道以男性命名
+  - 2024年巴黎奧運提供哺乳室
+  correct_options:
+  - 2
+- label: 結論
+  value: 奧運是實現與檢視全球性別平等的最大舞臺
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

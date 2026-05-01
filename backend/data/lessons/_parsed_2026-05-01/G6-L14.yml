@@ -215,3 +215,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 洪信介的植物獵人生涯
+  interactive_type: fill_blank
+  hint: 這篇文章在說誰的故事？
+- label: 重要事實 1
+  value: 洪信介從小過動，不擅長與人相處，但對植物的熱愛讓他自發學習。
+  interactive_type: checkbox
+  hint: 阿介的學習歷程？
+  options:
+  - 洪信介從小成績優異，是學霸。
+  - 洪信介從小過動，但對植物有熱情。
+  - 洪信介從小喜歡讀書，不愛植物。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 植物獵人需具備專業知識、體力與膽識，才能採集與辨識植物。
+  interactive_type: checkbox
+  hint: 植物獵人需要什麼能力？
+  options:
+  - 植物獵人只需要會爬樹。
+  - 植物獵人需要專業知識和體力。
+  - 植物獵人只需要有膽量。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 洪信介為進入保種中心，中年重回校園，展現對植物的執著。
+  interactive_type: checkbox
+  hint: 阿介如何進入保種中心？
+  options:
+  - 洪信介靠關係進入保種中心。
+  - 洪信介因學歷被拒，後重回校園。
+  - 洪信介直接被保種中心錄取。
+  correct_options:
+  - 1
+- label: 結論
+  value: 英雄不怕出身低，投入熱愛的事，就能找到自己的路。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

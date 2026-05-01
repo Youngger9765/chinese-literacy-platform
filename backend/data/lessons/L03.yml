@@ -122,24 +122,24 @@ strategy_exercise:
   strategy_name: 遞進複句
   instruction: 遞進複句是後面的意思比前面更進一步，常用「不但……而且……」「不只……更……」「不僅……還……」等連接詞。請找出課文中的遞進關係
   steps:
-    - prompt: 課文第四段提到運動太過激烈的後果，使用了哪一組遞進連接詞？
-      type: select
-      options:
-        - 因為……所以……
-        - 不只……更……
-        - 雖然……但是……
-      answer: 1
-    - prompt: 「運動若是太過激烈，不只容易造成運動傷害，更無法達到促進生長的效果」這句話中，哪個部分是「更進一步」的意思？
-      type: select
-      options:
-        - 容易造成運動傷害
-        - 無法達到促進生長的效果
-        - 運動若是太過激烈
-      answer: 1
-    - prompt: 課文第五段提到亂吃的後果：「不但會讓體重過重，反而不會長高」，請用「不只……更……」改寫這句話
-      type: free_text
-    - prompt: 請用「不但……而且……」造一個和長高有關的遞進複句
-      type: free_text
+  - prompt: 課文第四段提到運動太過激烈的後果，使用了哪一組遞進連接詞？
+    type: select
+    options:
+    - 因為……所以……
+    - 不只……更……
+    - 雖然……但是……
+    answer: 1
+  - prompt: 「運動若是太過激烈，不只容易造成運動傷害，更無法達到促進生長的效果」這句話中，哪個部分是「更進一步」的意思？
+    type: select
+    options:
+    - 容易造成運動傷害
+    - 無法達到促進生長的效果
+    - 運動若是太過激烈
+    answer: 1
+  - prompt: 課文第五段提到亂吃的後果：「不但會讓體重過重，反而不會長高」，請用「不只……更……」改寫這句話
+    type: free_text
+  - prompt: 請用「不但……而且……」造一個和長高有關的遞進複句
+    type: free_text
 story_structure:
 - label: 主題
   value: 長高的祕密
@@ -151,3 +151,43 @@ story_structure:
   value: 均衡飲食，多攝取蛋白質和維生素，避免甜食。
 - label: 結論
   value: 掌握睡眠、運動、飲食三關鍵，青春期才能長高。
+story_structure_rows:
+- label: 主題
+  value: 長高的祕密
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 充足的睡眠有助於長高
+  interactive_type: checkbox
+  hint: 長高的關鍵之一
+  options:
+  - 熬夜玩手機有助於長高
+  - 充足的睡眠有助於長高
+  - 睡越久越好
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 適當的運動有助於長高
+  interactive_type: checkbox
+  hint: 長高的關鍵之二
+  options:
+  - 運動越激烈越好
+  - 只有跳繩能幫助長高
+  - 適當的運動有助於長高
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 均衡的飲食有助於長高
+  interactive_type: checkbox
+  hint: 長高的關鍵之三
+  options:
+  - 多喝牛奶就能長高
+  - 均衡的飲食有助於長高
+  - 多吃甜食冰品能長高
+  correct_options:
+  - 1
+- label: 結論
+  value: 青春期把握長高關鍵，才有機會高人一等。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

@@ -172,3 +172,54 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主角
+  value: 作者
+  interactive_type: fill_blank
+  hint: 課文中的「我」
+- label: 主題
+  value: 在困境中努力學習，改變命運
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 堅毅、努力、感恩
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: 戲院經營不善，家中經濟困頓
+    interactive_type: checkbox
+    hint: 當時家裡狀況
+    options:
+    - 爸爸與伯父在南部各縣市巡迴放映電影
+    - 電視與錄影帶興起，戲院生意蕭條
+    - 家中經濟狀況良好，生活無憂
+    correct_options:
+    - 1
+  - label: 經過
+    value: 作者利用零碎時間讀書，老師也給予幫助
+    interactive_type: checkbox
+    hint: 作者如何應對
+    options:
+    - 作者放棄學業，專心幫忙家裡生意
+    - 作者在顧檳榔攤時寫功課，在戲院背課本
+    - 老師提供參考書和自習空間
+    correct_options:
+    - 1
+    - 2
+  - label: 結果
+    value: 作者考上理想學校，成為老師、校長、作家
+    interactive_type: checkbox
+    hint: 最終的成就
+    options:
+    - 作者未能考上學校，繼續經營戲院
+    - 作者順利考上臺南女中和臺南師專
+    - 作者成為老師、校長和作家
+    correct_options:
+    - 1
+    - 2
+story_structure_table_source: ai-generated-2026-05-02

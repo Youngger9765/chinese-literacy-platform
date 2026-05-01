@@ -113,42 +113,71 @@ strategy_exercise:
   strategy_name: 一字多義：聞
   instruction: "「聞」這個字在文言文中有不同的意思。請根據課文練習分辨「聞」的不同用法"
   steps:
-    - prompt: "「予聞之也久」的「聞」是什麼意思？"
-      type: select
-      options:
-        - 聽到、聽說
-        - 有名、著稱
-        - 聽見的事情、消息
-      answer: 0
-    - prompt: "「不能稱前時之聞」的「聞」是什麼意思？"
-      type: select
-      options:
-        - 聽到、聽說
-        - 有名、著稱
-        - 聽見的事情、消息（傳聞）
-      answer: 2
-    - prompt: "「風流天下聞」的「聞」是什麼意思？"
-      type: select
-      options:
-        - 聽到、聽說
-        - 有名、著稱
-        - 聽見的事情、消息
-      answer: 1
-    - prompt: 方仲永從天才變成普通人，最主要的原因是什麼？
-      type: select
-      options:
-        - 他天生的才能本來就不夠好
-        - 他的父親為了賺錢，天天帶他四處拜訪，沒有讓他學習
-        - 他自己不願意讀書學習
-      answer: 1
-    - prompt: 這個故事告訴我們什麼道理？請用自己的話寫出來
-      type: free_text
+  - prompt: "「予聞之也久」的「聞」是什麼意思？"
+    type: select
+    options:
+    - 聽到、聽說
+    - 有名、著稱
+    - 聽見的事情、消息
+    answer: 0
+  - prompt: "「不能稱前時之聞」的「聞」是什麼意思？"
+    type: select
+    options:
+    - 聽到、聽說
+    - 有名、著稱
+    - 聽見的事情、消息（傳聞）
+    answer: 2
+  - prompt: "「風流天下聞」的「聞」是什麼意思？"
+    type: select
+    options:
+    - 聽到、聽說
+    - 有名、著稱
+    - 聽見的事情、消息
+    answer: 1
+  - prompt: 方仲永從天才變成普通人，最主要的原因是什麼？
+    type: select
+    options:
+    - 他天生的才能本來就不夠好
+    - 他的父親為了賺錢，天天帶他四處拜訪，沒有讓他學習
+    - 他自己不願意讀書學習
+    answer: 1
+  - prompt: 這個故事告訴我們什麼道理？請用自己的話寫出來
+    type: free_text
 story_structure:
 - label: 主角
   value: ''
 - label: 事例
   sub_rows:
   - label: 背景
-    value: 家 世：【 世隸耕／世代種田 】 【 五 】歲開始展現天才。 天 1 不曾見過【 書具／寫字的紙筆 】 ，沒有人教， 發 卻會寫詩，還能簽名。
-      才 展 2 指定任何事物叫他作詩，都能立刻做出來。 時 或 3 寫出來的詩有【 文（采） 】也有
+    value: 家 世：【 世隸耕／世代種田 】 【 五 】歲開始展現天才。 天 1 不曾見過【 書具／寫字的紙筆 】 ，沒有人教， 發 卻會寫詩，還能簽名。 才 展 2 指定任何事物叫他作詩，都能立刻做出來。 時 或 3 寫出來的詩有【 文（采） 】也有
 knowledge_video_url: https://www.youtube.com/watch?v=KTZSWPJKpBU
+story_structure_rows:
+- label: 主題
+  value: 方仲永從天才變凡人的故事
+  interactive_type: fill_blank
+  hint: 這篇文章主要在講誰的故事？
+- label: 重要內容 1
+  value: 方仲永五歲時展現作詩天賦
+  interactive_type: checkbox
+  hint: 方仲永小時候有什麼特別的地方？
+  options:
+  - 方仲永五歲時展現作詩天賦
+  - 方仲永從小就愛讀書寫字
+  - 方仲永的父親教他作詩
+  correct_options:
+  - 0
+- label: 重要內容 2
+  value: 父親為錢財不讓仲永學習
+  interactive_type: checkbox
+  hint: 方仲永的父親做了什麼影響他的事？
+  options:
+  - 父親讓仲永專心讀書
+  - 父親為錢財不讓仲永學習
+  - 父親帶著仲永四處遊玩
+  correct_options:
+  - 1
+- label: 結論
+  value: 後天學習對才能發展很重要
+  interactive_type: fill_blank
+  hint: 這個故事告訴我們什麼道理？
+story_structure_table_source: ai-generated-2026-05-02

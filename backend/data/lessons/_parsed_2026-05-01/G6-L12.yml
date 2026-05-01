@@ -181,3 +181,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 雄性動物愛冒險逞強的原因
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 臺灣15到24歲男性因事故傷害死亡人數是女性3倍以上
+  interactive_type: checkbox
+  hint: 衛福部統計數據
+  options:
+  - 臺灣15到24歲男性因疾病死亡人數是女性3倍以上
+  - 臺灣15到24歲男性因事故傷害死亡人數是女性3倍以上
+  - 臺灣15到24歲女性因事故傷害死亡人數是男性3倍以上
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 公猴因冒險行為，成年時公母猴比例從5:5降至1:5
+  interactive_type: checkbox
+  hint: 人類學家研究
+  options:
+  - 公猴因疾病，成年時公母猴比例從5:5降至1:5
+  - 公猴因冒險行為，成年時公母猴比例從5:5降至1:5
+  - 母猴因冒險行為，成年時公母猴比例從5:5降至1:5
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 男生在有旁觀者時，套圈圈會刻意站更遠
+  interactive_type: checkbox
+  hint: 心理學實驗結果
+  options:
+  - 女生在有旁觀者時，套圈圈會刻意站更遠
+  - 男生在有旁觀者時，套圈圈會刻意站更遠
+  - 男生在獨自一人時，套圈圈會刻意站更遠
+  correct_options:
+  - 1
+- label: 結論
+  value: 雄性動物因愛冒險和逞強，導致意外發生率較高
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

@@ -169,3 +169,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 掃雷英雄馬嘎瓦
+  interactive_type: fill_blank
+  hint: 課文主要在說誰？
+- label: 重要事實 1
+  value: 馬嘎瓦是隻非洲巨鼠，嗅覺靈敏，能偵測地雷。
+  interactive_type: checkbox
+  hint: 馬嘎瓦的特點？
+  options:
+  - 馬嘎瓦是隻非洲巨鼠，嗅覺靈敏，能偵測地雷。
+  - 馬嘎瓦是隻小貓，體型很小，動作敏捷。
+  - 馬嘎瓦是隻田鼠，繁殖力強，破壞農作物。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 巨鼠掃雷比傳統方式安全、有效率、便宜又方便。
+  interactive_type: checkbox
+  hint: 巨鼠掃雷的優點？
+  options:
+  - 巨鼠掃雷比傳統方式更耗時且危險。
+  - 巨鼠掃雷比傳統方式安全、有效率、便宜又方便。
+  - 巨鼠掃雷只能偵測地雷，無法處理未爆炸物。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 馬嘎瓦因掃雷貢獻，獲頒動物勇氣金牌獎。
+  interactive_type: checkbox
+  hint: 馬嘎瓦的榮譽？
+  options:
+  - 馬嘎瓦因體型巨大，被選為掃雷鼠。
+  - 馬嘎瓦因掃雷貢獻，獲頒動物勇氣金牌獎。
+  - 馬嘎瓦因繁殖力強，被科學家研究。
+  correct_options:
+  - 1
+- label: 結論
+  value: 巨鼠從害獸轉變為拯救生命的英雄。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

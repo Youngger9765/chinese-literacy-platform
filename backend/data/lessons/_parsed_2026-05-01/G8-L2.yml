@@ -162,3 +162,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 爸爸的恩人們
+  interactive_type: fill_blank
+  hint: 課文主要在講述誰的故事？
+- label: 重要事實 1
+  value: 爸爸在初中時，戴校長允許他遲到，並訂購牛奶。
+  interactive_type: checkbox
+  hint: 關於爸爸初中時的恩人
+  options:
+  - 爸爸在初中時，戴校長因為他成績好而允許他遲到。
+  - 爸爸在初中時，戴校長允許他遲到，並訂購牛奶。
+  - 爸爸在初中時，戴校長幫他付了學費。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 爸爸的阿公阿嬤為了他賣掉菜園，卻因通膨而變廢紙。
+  interactive_type: checkbox
+  hint: 關於爸爸的阿公阿嬤
+  options:
+  - 爸爸的阿公阿嬤賣掉菜園，賺了很多錢。
+  - 爸爸的阿公阿嬤為了他賣掉菜園，卻因通膨而變廢紙。
+  - 爸爸的阿公阿嬤靠著捕魚養家。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 爸爸的阿公靠撿漂流木、劈柴養家。
+  interactive_type: checkbox
+  hint: 關於爸爸阿公的養家方式
+  options:
+  - 爸爸的阿公靠種菜養家。
+  - 爸爸的阿公靠撿漂流木、劈柴養家。
+  - 爸爸的阿公靠賣牛奶養家。
+  correct_options:
+  - 1
+- label: 結論
+  value: 在艱困時代，人們互相幫助，恩情令人難忘。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

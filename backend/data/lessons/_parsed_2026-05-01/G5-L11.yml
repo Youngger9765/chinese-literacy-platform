@@ -166,3 +166,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 陳念琴的拳擊生涯
+  interactive_type: fill_blank
+  hint: 這篇文章在說誰？
+- label: 重要事實 1
+  value: 陳念琴因被排擠而接觸技擊運動
+  interactive_type: checkbox
+  hint: 她為何開始運動？
+  options:
+  - 陳念琴從小就喜歡技擊運動
+  - 陳念琴因被排擠而接觸技擊運動
+  - 陳念琴的家人都是運動員
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 陳念琴曾罹患嚴重貧血與淋巴癌
+  interactive_type: checkbox
+  hint: 她遇過什麼困難？
+  options:
+  - 陳念琴曾因訓練過度而受傷
+  - 陳念琴曾罹患嚴重貧血與淋巴癌
+  - 陳念琴曾因學業壓力而放棄拳擊
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 陳念琴靠不服輸的心態面對挫折
+  interactive_type: checkbox
+  hint: 她如何面對困難？
+  options:
+  - 陳念琴靠教練的鼓勵堅持下去
+  - 陳念琴靠不服輸的心態面對挫折
+  - 陳念琴靠家人的支持克服難關
+  correct_options:
+  - 1
+- label: 結論
+  value: 將苦難挫折化為祝福，勇敢面對挑戰
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

@@ -166,3 +166,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 按讚
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 按讚會帶來即時回饋感，讓人覺得被重視。
+  interactive_type: checkbox
+  hint: 按讚的影響
+  options:
+  - 按讚會讓手機變慢。
+  - 按讚會帶來即時回饋感，讓人覺得被重視。
+  - 按讚會讓貼文自動消失。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 按讚數可能影響自我價值，造成情緒起伏。
+  interactive_type: checkbox
+  hint: 按讚的負面影響
+  options:
+  - 按讚數可以換錢。
+  - 按讚數可能影響自我價值，造成情緒起伏。
+  - 按讚數能讓手機電量增加。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 平台會根據按讚內容，透過演算法推播更多類似內容。
+  interactive_type: checkbox
+  hint: 按讚與演算法
+  options:
+  - 平台會根據按讚內容，透過演算法推播更多類似內容。
+  - 平台會把按讚數賣給廣告商。
+  - 平台會隨機推播內容給使用者。
+  correct_options:
+  - 0
+- label: 結論
+  value: 按讚本身沒錯，但要懂得平衡使用，別讓它左右情緒或限制視野。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

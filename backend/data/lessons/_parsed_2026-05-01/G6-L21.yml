@@ -157,3 +157,53 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主角
+  value: 作者本人
+  interactive_type: fill_blank
+  hint: 課文中的「我」
+- label: 主題
+  value: 失戀是成長的養分
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 勇敢面對情感
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: 聽到喜歡的人有另一半
+    interactive_type: checkbox
+    hint: ''
+    options:
+    - 作者在教室窗邊欣賞陽光
+    - 同學興奮地說他有另一半
+    - 作者心情沉悶，不想吃飯
+    correct_options:
+    - 1
+  - label: 經過
+    value: 心情混亂，朋友開導
+    interactive_type: checkbox
+    hint: ''
+    options:
+    - 作者感到心痛、失落
+    - 作者向朋友傾訴心事
+    - 作者決定不再喜歡他
+    correct_options:
+    - 0
+    - 1
+  - label: 結果
+    value: 坦然面對，心情轉晴
+    interactive_type: checkbox
+    hint: ''
+    options:
+    - 作者心情平靜，不再難過
+    - 作者不再喜歡那個男生
+    - 作者認為失戀是成長
+    correct_options:
+    - 2
+story_structure_table_source: ai-generated-2026-05-02

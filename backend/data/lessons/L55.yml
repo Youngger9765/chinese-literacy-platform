@@ -116,3 +116,43 @@ flags: []
 story_structure:
 - label: 結論
   value: ─高地訓練對紅血球增生的效果因人而異，但這個研究更進一步指
+story_structure_rows:
+- label: 主題
+  value: 高地訓練對運動表現的影響
+  interactive_type: fill_blank
+  hint: 這篇文章在說什麼？
+- label: 重要事實 1
+  value: 高地訓練能增加紅血球和血紅素，提升心肺功能。
+  interactive_type: checkbox
+  hint: 高地訓練的好處？
+  options:
+  - 高地訓練能增加紅血球和血紅素，提升心肺功能。
+  - 高地訓練能讓運動員肌肉變強壯。
+  - 高地訓練能讓運動員跑得更快。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 高地訓練的成效因人而異。
+  interactive_type: checkbox
+  hint: 高地訓練的效果？
+  options:
+  - 高地訓練對所有運動員都有幫助。
+  - 高地訓練的成效因人而異。
+  - 高地訓練會讓所有運動員的紅血球都增加。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 紅血球太多不見得是好事。
+  interactive_type: checkbox
+  hint: 紅血球的數量？
+  options:
+  - 紅血球越多越好。
+  - 紅血球太多不見得是好事。
+  - 紅血球數量和運動表現無關。
+  correct_options:
+  - 1
+- label: 結論
+  value: 訓練計畫需考量個別差異，量身制定才能有最佳成效。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

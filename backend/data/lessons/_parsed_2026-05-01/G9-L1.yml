@@ -199,3 +199,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 盡信書不如無書
+  interactive_type: fill_blank
+  hint: 課文主要在談什麼？
+- label: 重要事實 1
+  value: 凱蒂案的報導與真相不符
+  interactive_type: checkbox
+  hint: 關於凱蒂案的真相
+  options:
+  - 《紐約時報》報導完全屬實
+  - 凱蒂案的報導有許多不實之處
+  - 警方紀錄與報導內容一致
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 旁觀者效應的理論基礎有誤
+  interactive_type: checkbox
+  hint: 關於旁觀者效應
+  options:
+  - 旁觀者效應是無庸置疑的科學定律
+  - 旁觀者效應的理論基礎是錯誤的
+  - 旁觀者效應只發生在美國
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 科學家也會犯錯
+  interactive_type: checkbox
+  hint: 關於科學研究
+  options:
+  - 科學家永遠不會犯錯
+  - 科學研究的結果都是絕對正確的
+  - 科學家也會犯錯，需要不斷質疑檢驗
+  correct_options:
+  - 2
+- label: 結論
+  value: 要質疑、檢驗，才能逼近真相
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

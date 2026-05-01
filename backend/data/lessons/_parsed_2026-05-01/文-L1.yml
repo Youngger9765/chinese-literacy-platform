@@ -211,3 +211,33 @@ images:
   content_type: image/png
   caption: ''
 image_count: 17
+story_structure_rows:
+- label: 主題
+  value: 鞭虎救弟記的真偽探討
+  interactive_type: fill_blank
+  hint: 這篇文章主要在討論什麼？
+- label: 重要內容 1
+  value: 虎襲事件在當時很常見
+  interactive_type: checkbox
+  hint: 關於虎襲事件，課文提到什麼？
+  options:
+  - 虎襲事件從未發生過
+  - 虎襲事件在當時很常見
+  - 老虎數量稀少，不可能發生虎襲
+  correct_options:
+  - 1
+- label: 重要內容 2
+  value: 「吸血數升」是誇大說法
+  interactive_type: checkbox
+  hint: 關於吸血救弟的描述，課文怎麼說？
+  options:
+  - 「吸血數升」是真實的
+  - 「吸血數升」是誇大說法
+  - 吸血救弟是不可能發生的事
+  correct_options:
+  - 1
+- label: 結論
+  value: 故事可能為真，但部分誇大
+  interactive_type: fill_blank
+  hint: 綜合所有資訊，這個故事的真實性如何？
+story_structure_table_source: ai-generated-2026-05-02

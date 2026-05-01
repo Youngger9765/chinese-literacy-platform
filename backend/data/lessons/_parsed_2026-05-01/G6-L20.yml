@@ -166,3 +166,54 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主角
+  value: 小日記主人
+  interactive_type: fill_blank
+  hint: 課文中的「我」
+- label: 主題
+  value: 告白前的內心掙扎與考量
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 心思細膩、容易焦慮
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: 主角對某人有好感，卻不知如何是好。
+    interactive_type: checkbox
+    hint: 主角遇到什麼事？
+    options:
+    - 主角喜歡上一個人，想告白。
+    - 主角想知道對方心意，但又怕結果不如預期。
+    - 主角和喜歡的人吵架，心情很差。
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: 主角不斷思考告白可能帶來的各種後果。
+    interactive_type: checkbox
+    hint: 主角做了什麼？
+    options:
+    - 主角擔心告白後，兩人關係會變尷尬。
+    - 主角害怕告白的事情會被同學拿來開玩笑。
+    - 主角決定直接告白，不再猶豫。
+    correct_options:
+    - 0
+    - 1
+  - label: 結果
+    value: 主角仍未做出決定，希望有勇氣和智慧。
+    interactive_type: checkbox
+    hint: 事情的結局是什麼？
+    options:
+    - 主角決定勇敢告白，不再遲疑。
+    - 主角仍處於糾結狀態，尚未做出決定。
+    - 主角放棄告白，決定只當朋友。
+    correct_options:
+    - 1
+story_structure_table_source: ai-generated-2026-05-02
