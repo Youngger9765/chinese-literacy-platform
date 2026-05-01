@@ -405,25 +405,101 @@ def extract_multiple_choice(paragraphs: list) -> list[dict]:
 
 
 def extract_story_structure_table(tables: list) -> Optional[list]:
-    """問題-解決-結果表格"""
-    keywords = ["問題", "解決", "結果", "研究問題", "假說"]
+    """問題-解決-結果表格 (支援多種格式)
+
+    格式一 (G6-L22, PSR 標題行):
+        Row 0: ['課文標題', '課文標題', ...]
+        Row 1: ['問題', '問題', '內容']
+        Row 2: ['解決', '解決', '內容']
+        → Row 0/1 各有 ≥2 個 PSR keyword
+
+    格式二 (G6-L24/25, 三欄 header):
+        Row 0: ['元素/段落', '提示', '重點']
+        Row 1: ['問題/2', '描述提示', '重點內容']
+        Row 2: ['解決/3~6', '描述提示', '重點內容']
+        → Row 0 有 '元素' 或 '段落'，Row 1+ 的 col0 包含 PSR keyword
+
+    格式三 (G6-L23, 課文標題 + PSR 行):
+        Row 0: ['課文標題', '課文標題']
+        Row 1: ['問題', '...']
+        Row 2: ['解決 ...', '...']
+        → col0 中有 ≥2 行含 PSR keyword
+    """
+    # PSR keywords that appear in cell0 of content rows
+    psr_keywords = ["問題", "解決", "結果", "迴響", "研究問題", "假說"]
+    # Header keywords that indicate a 3-column structured table (format 2)
+    header_keywords = ["元素", "段落"]
+
+    def _extract_rows(t) -> list:
+        rows_data = []
+        for row in t.rows:
+            cells_clean = []
+            for c in row.cells:
+                txt = clean_text(c.text)
+                if not cells_clean or txt != cells_clean[-1]:
+                    cells_clean.append(txt)
+            if any(cells_clean):
+                rows_data.append(cells_clean)
+        return rows_data
+
     for t in tables:
         if not t.rows:
             continue
-        # 檢查 Row 0 或 Row 1
+
+        # --- Format 1: classic PSR (≥2 PSR keywords in row 0 or row 1) ---
         for ri in range(min(2, len(t.rows))):
             cells = [clean_text(c.text) for c in t.rows[ri].cells]
-            if sum(1 for c in cells if any(kw in c for kw in keywords)) >= 2:
-                rows_data = []
-                for row in t.rows:
-                    cells_clean = []
-                    for c in row.cells:
-                        txt = clean_text(c.text)
-                        if not cells_clean or txt != cells_clean[-1]:
-                            cells_clean.append(txt)
-                    if any(cells_clean):
-                        rows_data.append(cells_clean)
-                return rows_data
+            if sum(1 for c in cells if any(kw in c for kw in psr_keywords)) >= 2:
+                return _extract_rows(t)
+
+        # --- Format 2: 3-col header table (元素/段落 in row 0) ---
+        if len(t.rows) >= 2:
+            row0_cells = [clean_text(c.text) for c in t.rows[0].cells]
+            row0_flat = " ".join(row0_cells)
+            if any(hkw in row0_flat for hkw in header_keywords):
+                # Verify row 1+ col0 has PSR content
+                psr_count = 0
+                for ri in range(1, len(t.rows)):
+                    cell0 = clean_text(t.rows[ri].cells[0].text) if t.rows[ri].cells else ""
+                    if any(kw in cell0 for kw in psr_keywords):
+                        psr_count += 1
+                if psr_count >= 1:
+                    return _extract_rows(t)
+
+        # --- Format 3: 2-col table with title row + PSR content rows ---
+        # e.g. G6-L23: Row0=['課文標題'], Row1=['問題','...'], Row2=['解決 ...','...']
+        # Only ≥1 PSR keyword in row0/row1 but col0 of multiple rows has PSR keywords
+        if len(t.rows) >= 3:
+            psr_col0_count = 0
+            for ri in range(len(t.rows)):
+                cell0 = clean_text(t.rows[ri].cells[0].text) if t.rows[ri].cells else ""
+                if any(kw in cell0 for kw in psr_keywords):
+                    psr_col0_count += 1
+            if psr_col0_count >= 2:
+                return _extract_rows(t)
+
+    return None
+
+
+def extract_graphic_text_structure(paras: list, strategy_label: str) -> Optional[list]:
+    """圖文整合策略課文的結構表 — 從段落步驟文字合成 story_structure_table.
+
+    適用於 G7-L29/30 圖文整合閱讀策略（docx 內沒有 PSR 表格），
+    提取 ❶❷❸❹ 步驟說明合成結構資料，讓 fast path 可用。
+    """
+    if "圖文" not in strategy_label:
+        return None
+
+    step_pattern = re.compile(r"^[❶❷❸❹①②③④]\s*(.+)$")
+    steps = []
+    for p in paras:
+        text = clean_text(p.text)
+        m = step_pattern.match(text)
+        if m:
+            steps.append(text)
+
+    if len(steps) >= 3:
+        return [["圖文整合閱讀步驟"]] + [[s] for s in steps]
     return None
 
 
@@ -600,8 +676,10 @@ def parse_lesson(doc_path: Path, lesson_code: str, images_base: Path) -> tuple[d
     result["multiple_choice"] = mc
     result["multiple_choice_count"] = len(mc)
 
-    # --- 問題-解決-結果表格 ---
+    # --- 問題-解決-結果表格 (含圖文整合 fallback) ---
     story_struct = extract_story_structure_table(tables)
+    if not story_struct:
+        story_struct = extract_graphic_text_structure(paras, strategy_label)
     if story_struct:
         result["story_structure_table"] = story_struct
 
