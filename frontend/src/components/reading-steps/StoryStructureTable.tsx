@@ -154,7 +154,7 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex flex-col gap-2">
       {options.map((opt, idx) => {
         const isSelected = selected.includes(idx);
         const isCorrectOption = (correctOptions ?? []).includes(idx);
@@ -181,7 +181,7 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
         return (
           <label
             key={idx}
-            className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors select-none w-full min-w-0 ${rowStyle} ${
+            className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors select-none ${rowStyle} ${
               submitted ? 'cursor-default' : 'cursor-pointer'
             }`}
           >
