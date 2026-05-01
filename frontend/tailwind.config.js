@@ -7,7 +7,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // zhuyin off: 非黑體字型（楷體/明體優先）— 陳淑麗教授：黑體對近視學生不友好
+        // cwTeXKai: 台灣教育楷書（Google Fonts），視覺清晰接近教科書手寫感
+        // Noto Serif TC: 思源宋體，備援明體（Google Fonts），老眼/近視友好
+        // PingFang TC / Microsoft JhengHei: 系統字體備援（macOS/Windows）
+        sans: ['cwTeXKai', '"Noto Serif TC"', '"PingFang TC"', '"Microsoft JhengHei"', 'serif'],
         ui: ['cwTeXYen', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         headline: ['"Plus Jakarta Sans"', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         body: ['"Be Vietnam Pro"', '"Noto Sans TC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
