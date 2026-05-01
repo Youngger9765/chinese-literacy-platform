@@ -59,6 +59,10 @@ export interface LearningContext {
   handleStartReading: () => void;
   handleFinishReading: (attempt: ReadingAttempt) => void;
   handleFinishComprehension: (result: ComprehensionResult) => void;
+  /** Issue #1335: advance from 文章重點表 step to 閱讀聚光燈 */
+  handleFinishStoryStructure: () => void;
+  /** Issue #1335: advance from 閱讀聚光燈 step to 閱讀理解 */
+  handleFinishReadingStrategy: () => void;
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishDictation: (result: DictationResult) => void;
   handleFinishFullReading: (result: FullReadingResult) => void;
@@ -875,9 +879,47 @@ const LearningLayout: React.FC = () => {
       persistStepProgressState(
         {
           completeStep: 'vocab-application',
-          currentStep: 'comprehension',
+          currentStep: 'story-structure',
           stepDataPatch: {
             'vocab-application': { completed: true },
+          },
+        },
+        true,
+      );
+      persistStep(STEP_PATH_TO_NUMBER['story-structure']);
+      navigate(`/learn/${storyId}/story-structure`);
+    },
+    [storyId, navigate, persistStep, persistStepProgressState],
+  );
+
+  // Issue #1335 — advance from 文章重點表 to 閱讀聚光燈
+  const handleFinishStoryStructure = useCallback(
+    () => {
+      persistStepProgressState(
+        {
+          completeStep: 'story-structure',
+          currentStep: 'reading-strategy',
+          stepDataPatch: {
+            'story-structure': { completed: true },
+          },
+        },
+        true,
+      );
+      persistStep(STEP_PATH_TO_NUMBER['reading-strategy']);
+      navigate(`/learn/${storyId}/reading-strategy`);
+    },
+    [storyId, navigate, persistStep, persistStepProgressState],
+  );
+
+  // Issue #1335 — advance from 閱讀聚光燈 to 閱讀理解
+  const handleFinishReadingStrategy = useCallback(
+    () => {
+      persistStepProgressState(
+        {
+          completeStep: 'reading-strategy',
+          currentStep: 'comprehension',
+          stepDataPatch: {
+            'reading-strategy': { completed: true },
           },
         },
         true,
@@ -1101,6 +1143,8 @@ const LearningLayout: React.FC = () => {
     handleStartReading,
     handleFinishReading,
     handleFinishComprehension,
+    handleFinishStoryStructure,
+    handleFinishReadingStrategy,
     handleFinishVocab,
     handleFinishDictation,
     handleFinishFullReading,

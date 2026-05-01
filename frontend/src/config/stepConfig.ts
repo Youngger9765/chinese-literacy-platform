@@ -53,14 +53,19 @@ export interface StepConfig {
 }
 
 /**
- * Default step order for the 10-step learning flow (三民版).
+ * Default step order for the 12-step learning flow (三民版, aligned with 學習單).
  *
  * To customise order per lesson/teacher, override this array at runtime
  * (future: load from DB/API and pass to StepperNav as a prop).
  *
  * dbStepNumber is the value stored in the DB (learning_sessions.current_step).
- * Existing steps keep their original dbStepNumbers (1–7) to avoid a DB migration.
- * The three new 三民 steps use dbStepNumbers 8–10.
+ * Existing steps keep their original dbStepNumbers (1–14) to avoid a DB migration.
+ * New comprehension split steps use dbStepNumbers 15–16 (Issue #1335).
+ *
+ * Comprehension steps alignment with paper worksheet:
+ *   - 文章重點表 (story-structure, dbStep 15) — was tab 2 inside ComprehensionChat
+ *   - 閱讀聚光燈 (reading-strategy, dbStep 16)  — was tab 3 inside ComprehensionChat
+ *   - 閱讀理解   (comprehension, dbStep 3)       — was tab 1 inside ComprehensionChat
  */
 export const STEP_CONFIG: StepConfig[] = [
   {
@@ -143,10 +148,31 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'practice',
   },
+  // ── Issue #1335: split old "comprehension" tab-container into 3 independent steps ──
+  {
+    id: 'story-structure',
+    label: '文章重點表',
+    hint: '把課文重點填進去，讓 AI 幫你檢查',
+    view: AppView.STORY_STRUCTURE,
+    dbStepNumber: 15,
+    needsStory: true,
+    enabled: true,
+    category: 'comprehension',
+  },
+  {
+    id: 'reading-strategy',
+    label: '閱讀聚光燈',
+    hint: '練習這課的閱讀策略',
+    view: AppView.READING_STRATEGY,
+    dbStepNumber: 16,
+    needsStory: true,
+    enabled: true,
+    category: 'comprehension',
+  },
   {
     id: 'comprehension',
-    label: '課文理解',
-    hint: '回答 AI 提出的課文問題',
+    label: '閱讀理解',
+    hint: '回答課文理解選擇題',
     view: AppView.COMPREHENSION,
     dbStepNumber: 3,
     needsStory: true,
