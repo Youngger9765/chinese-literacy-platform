@@ -1,0 +1,102 @@
+lesson_code: 文-L3
+grade: 0
+grade_code: 文-L3
+reading_strategy: 判讀主語
+reading_strategy_type: classical_chinese
+source_file: 文-L3不量田（判讀主語）.docx
+parsed_at: '2026-05-01T21:10:46'
+flags:
+- vocab_empty
+genre: 文言文
+title: 不量田
+authors: 學習單： 王淑瑱
+story_text: 清朝・蒲松齡
+paragraphs:
+- 清朝・蒲松齡
+paragraph_count: 1
+char_count: 6
+vocabulary: []
+vocabulary_count: 0
+video_links: []
+multiple_choice:
+- question: 1.微風輕輕地吹拂著。
+  options:
+  - 微風 B.吹拂著
+  answer: A
+- question: 2.人類的本性是善惡摻雜的。
+  options:
+  - 人類 B.人類的本性
+  answer: B
+- question: 3.月光多麼明亮皎潔。
+  options:
+  - 月光 B.明亮皎潔
+  answer: A
+- question: 4.他是否缺席要確認一下。
+  options:
+  - 他 B.他是否缺席
+  answer: B
+- question: 1. 下列選項「」中字，何者字音、字義完全正確？
+  options:
+  - 忽大雨「雹」——ㄅㄠˋ，冰雹
+  - 償時多寡不較，「悉」納之——ㄒㄧ，吸收
+  - 「蓋」張素豐——ㄍㄞˋ，大概
+  - 獨張氏諸田無「恙」——ㄧㄤˋ，異樣
+  answer: D
+- question: 2. 課文中的商人把「不量」誤以為是「不良」，從而產生疑惑，這就是諧音雙關。請問下列何者造成誤解的原因與課文商人相同？
+  options:
+  - 店員：「請問您是付清嗎?」；
+  answer: A
+- question: 3. 「物產豐富」中的「物產」是本句的主語。下列各選項「」中的語詞，何者不做主語使用？
+  options:
+  - 「四海」昇平 B.「群魔」亂舞
+  - 「氣焰」囂張 D.「百年」樹人
+  answer: D
+- question: 4. 根據本文，「張田獨無恙」的原因最可能是下列何？
+  options:
+  - 張氏行善積德，得到護佑
+  - 貧民虔誠祈願，感動上天
+  - 張氏田產甚多無法丈量，看不出損失
+  - 賈人福澤深厚，連帶使張田倖免於難
+  answer: A
+- question: 5. 下列哪一選項與本文的主旨最接近？
+  options:
+  - 天助自助者，自助者人恆助之
+  - 好心自有好報
+  - 人在做，天在看
+  - 謀事在人，成事在天
+  answer: B
+multiple_choice_count: 9
+self_check_items: []
+discussion_content: []
+images:
+- filename: images/文-L3/文-L3-01.png
+  size_bytes: 100602
+  image_hash: d902ab030bf0
+  content_type: image/png
+  caption: ''
+- filename: images/文-L3/文-L3-02.png
+  size_bytes: 8069
+  image_hash: 7c834e8f7603
+  content_type: image/png
+  caption: ''
+- filename: images/文-L3/文-L3-03.png
+  size_bytes: 7368
+  image_hash: f8467169fe00
+  content_type: image/png
+  caption: ''
+- filename: images/文-L3/文-L3-04.png
+  size_bytes: 8495
+  image_hash: d0d187eac435
+  content_type: image/png
+  caption: ''
+- filename: images/文-L3/文-L3-05.png
+  size_bytes: 1389
+  image_hash: 4c4909300d39
+  content_type: image/png
+  caption: ''
+- filename: images/文-L3/文-L3-06.png
+  size_bytes: 1738
+  image_hash: d41b200d4a17
+  content_type: image/png
+  caption: ''
+image_count: 6

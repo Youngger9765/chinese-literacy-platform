@@ -1,0 +1,95 @@
+lesson_code: 文-L8
+grade: 0
+grade_code: 文-L8
+reading_strategy: 一字多義「少」
+reading_strategy_type: classical_chinese
+source_file: 文-L8愛讀書的顧寧人（一字多義「少」）.docx
+parsed_at: '2026-05-01T21:10:47'
+flags:
+- vocab_empty
+genre: 文言文
+title: 愛讀書的顧寧人
+authors: 學習單： 王淑瑱
+story_text: 清朝・潘耒
+paragraphs:
+- 清朝・潘耒
+paragraph_count: 1
+char_count: 5
+vocabulary: []
+vocabulary_count: 0
+video_links: []
+multiple_choice:
+- question: ( Ｃ )1.「少」不更事。
+  options: []
+  answer: C
+- question: 3.聽僕(我)之所為，「少」安勿躁(不要急)。
+  options: []
+  answer: A
+- question: 5.遙知兄弟登高處，遍插茱萸「少」一人。
+  options: []
+  answer: B
+- question: 1.下列成語，何者最適合用來形容顧寧人先生的讀書態度？
+  options:
+  - 旁徵博引
+  - 溫故知新
+  - 孳孳不倦
+  - 披星戴月
+  answer: C
+- question: 2.有關顧寧人先生的描述，下列何者沒有在本文中提及？
+  options:
+  - 家世背景
+  - 興趣嗜好
+  - 資質稟賦
+  - 學術地位
+  answer: D
+- question: 3.下列選項，何者無法證明顧寧人是愛讀書的人？
+  options:
+  - 生長世族，少負絕異之資
+  - 潛心古學，九經諸史，略能背誦
+  - 自少至老，未嘗一日廢書
+  - 旅店少休，披尋搜討，曾無倦色
+  answer: A
+- question: 4.下列何者是本文主旨？
+  options:
+  - 敘述顧寧人優秀不凡的資質
+  - 讚美顧寧人勝過一般人的精力
+  - 推崇顧寧人勤勉好學的精神
+  - 介紹顧寧人顯赫尊貴的家世
+  answer: C
+- question: 5.「旅店少休」的「少」，與下列哪一選項的「少」字意思相同？
+  options:
+  - 老「少」咸宜
+  - 「少」安勿躁
+  - 「少」管閒事
+  - 積「少」成多
+  answer: B
+multiple_choice_count: 8
+self_check_items: []
+discussion_content: []
+images:
+- filename: images/文-L8/文-L8-01.png
+  size_bytes: 1648
+  image_hash: 7ee5d3b8b36a
+  content_type: image/png
+  caption: ''
+- filename: images/文-L8/文-L8-02.png
+  size_bytes: 8495
+  image_hash: d0d187eac435
+  content_type: image/png
+  caption: ''
+- filename: images/文-L8/文-L8-03.png
+  size_bytes: 8069
+  image_hash: 7c834e8f7603
+  content_type: image/png
+  caption: ''
+- filename: images/文-L8/文-L8-04.png
+  size_bytes: 7368
+  image_hash: f8467169fe00
+  content_type: image/png
+  caption: ''
+- filename: images/文-L8/文-L8-05.png
+  size_bytes: 1389
+  image_hash: 4c4909300d39
+  content_type: image/png
+  caption: ''
+image_count: 5

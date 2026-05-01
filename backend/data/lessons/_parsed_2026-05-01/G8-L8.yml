@@ -1,0 +1,225 @@
+lesson_code: G8-L8
+grade: 8
+grade_code: G8-L8
+reading_strategy: 推論策略-找出一連串因果
+reading_strategy_type: inference
+source_file: G8-L8隱形的征服者（推論策略-找出一連串因果）.docx
+parsed_at: '2026-05-01T21:10:44'
+flags: []
+genre: 說明文
+title: 隱形的征服者
+authors: 課文 ：曾世杰 學習單：張明珠
+story_text: ''
+paragraphs: []
+paragraph_count: 0
+char_count: 0
+vocabulary:
+- word: 勢單力薄
+  definition: 人少力量弱，難以與對方抗衡。
+- word: 抗體
+  definition: 身體為了對抗病毒或細菌而產生的防禦物質。
+- word: 懸殊
+  definition: 兩者差別很大，無法相比。
+- word: 撕心裂肺
+  definition: 形容非常痛苦、難以忍受的哭聲或情緒。
+- word: 哀鴻遍野
+  definition: 比喻災難過後到處都是痛苦哭喊的人，情況非常慘重。
+- word: 區區
+  definition: 表示數量少或力量弱，有輕視的語氣。
+- word: 蔓延
+  definition: 像藤蔓一樣向外擴散，常用來形容災情、疫情、火勢等擴大。
+- word: 肆虐
+  definition: 災害或疾病到處破壞、傷害，毫不收斂。
+- word: 對峙
+  definition: 雙方相對而立，彼此不退讓，形成緊張對抗。
+- word: 不堪一󠇢擊
+  definition: 形容力量非常薄弱，經不起一次攻擊就失敗。
+vocabulary_count: 10
+reading_benchmark:
+  levels:
+  - threshold: □ ＜220字
+    feedback: 還要多加練習。
+  - threshold: □ 221~250字
+    feedback: 嗯，還不錯喲！
+  - threshold: □ ＞251字
+    feedback: 哇嗚，超級厲害！
+video_links:
+- title: 1. 168人滅了印加帝國 一個連打贏8萬人 西班牙人怎麼做到的?
+  url: ''
+- title: 2. 比流感新冠更可怕的神秘病毒-天花
+  url: ''
+multiple_choice:
+- question: 1. 請問哪一個句子的語詞使用正確?
+  options:
+  - 我今天和面試官「對峙」了十五分鐘，終於面試成功
+  - 最近校園裡的戀愛傳聞「肆虐」，讓大家沒辦法專心上課
+  - 期末考太難，班上「哀鴻遍野」，很多同學更是滿臉愁容
+  - 老師在台上「撕心裂肺」的講解題目，台下同學仍是聽不懂
+  answer: C
+- question: 2. 根據本文內容，哪一張折線圖最能呈現印加帝國在人口變化上，從西班牙人尚未入侵到入侵後的變化情形？
+  options:
+  - C. D.
+  answer: D
+- question: 3. 根據課文，下列哪一項最能概括「隱形的征服者」這個標題的意涵？
+  options:
+  - 西班牙人偷偷登陸印加地區
+  - 病菌沒有武器，卻讓整個帝國崩潰
+  - 西班牙士兵穿著盔甲讓人無法看清
+  - 印加人不敢對抗強大的神明
+  answer: B
+- question: 4. 印加人在祈求神明驅除瘟疫時，卻發現西班牙人似乎不受病菌影響，所以大量的印加人改信天主教。根據這個結果，印加人最不可能產生什麼樣的想法？
+  options:
+  - 開始懷疑自己的信仰是否可靠
+  - 認為自己的神明失靈，轉而改信天主教
+  - 認為神明不滿意祭典儀式，需舉辦更盛大的祭典
+  - 對西班牙人產生敬畏感，覺得他們受到神保護
+  answer: C
+- question: 5. 作者在開頭描寫168人對抗8萬人的場景，這樣的寫作手法可以達成什麼目的？
+  options:
+  - 可以強調歷史的偶然性，讓讀者相信小軍也有戰勝的機會
+  - 刻意營造懸殊反差，第二段揭示出乎意料的結果，製造驚奇
+  - 為了突顯西班牙軍人英勇無畏，強調以小勝大的奇蹟
+  - 為了引導讀者相信歷史發展冥冥中自有安排，無從解釋
+  answer: B
+multiple_choice_count: 5
+self_check_items: []
+discussion_content:
+- 找出可能造成印加帝國衰敗的每一個事件，不管這些事件發生的順序，我們通通先找出來！(請在□中打勾，複選，有四個答案）
+- 天花病菌傳入印加 繼承人爭奪王位，引發內戰
+- □人民改說西班牙語 多年戰亂，政治經濟崩潰
+- 印加皇帝染疫過世 □皮薩羅帶著168名士兵準備偷襲
+- 步驟❷──找因果線索
+- 1.問自己：文章中哪些地方透露出「原因結果」的線索？有哪些語句在說明事情發生的原因或帶來的後果？
+- 2.祕訣：
+- A.「有關鍵詞」的文句：
+- B.「沒有關鍵詞」的文句：
+- 判斷策略：加因果關鍵詞，判斷是否為因果句。
+- 例如：「皇帝死了，內戰爆發。」
+- 加入關鍵詞「因為皇帝死了，所以內戰爆發。」
+- 步驟❸──判斷因果，畫箭頭
+- 1.問自己：在找到的因果語句中，「原因」是哪一部分？「結果」是哪一部分？兩者之間如何連接？
+- 2.祕訣：畫一個箭頭「→」從原因指向結果，就一目了然了！
+- 根據上表，請判斷誰是因？誰是果？並畫正確箭頭方向
+- 步驟❹──連成一連串因果
+- A.以本文為例，隱含著一條重要的因果鏈。上表我們已經找到4個因果關係，接下來我們再看看它們之間的關係，請排序畫出一條因果鏈。
+- ①天花病菌傳入印加地區 ②帝國虛弱不堪，不堪一擊
+- ③皇帝染病死亡 ④帝國政治經濟瓦解
+- ⑤帝國持續內戰與分裂
+- B.一連串因果（可以寫編號或寫自己看得懂的關鍵詞）
+- ①天花病菌傳入印加 ③皇帝染病死亡 ⑤帝國持續內戰與分裂 ④帝國政治經濟瓦解 ②帝國衰弱，不堪一擊
+- |-
+  C.這條因果鏈告訴我們：印加帝國在還沒跟西班牙人真正交戰之前，早就因為天花的傳入、皇帝病死、內戰分裂等問題，變得非常虛弱、不堪一擊。如此一來，他們在戰爭中會失敗，也就不奇怪了。
+- （ C ）1. 請問哪一個句子的語詞使用正確?
+- A.我今天和面試官「對峙」了十五分鐘，終於面試成功
+- B.最近校園裡的戀愛傳聞「肆虐」，讓大家沒辦法專心上課
+- C.期末考太難，班上「哀鴻遍野」，很多同學更是滿臉愁容
+- D.老師在台上「撕心裂肺」的講解題目，台下同學仍是聽不懂
+- （ D ）2. 根據本文內容，哪一張折線圖最能呈現印加帝國在人口變化上，從西班牙人尚未入侵到入侵後的變化情形？
+- B. C. D.
+- （ B ）3. 根據課文，下列哪一項最能概括「隱形的征服者」這個標題的意涵？
+- A.西班牙人偷偷登陸印加地區
+- B.病菌沒有武器，卻讓整個帝國崩潰
+- C.西班牙士兵穿著盔甲讓人無法看清
+- D.印加人不敢對抗強大的神明
+- （ C ）4. 印加人在祈求神明驅除瘟疫時，卻發現西班牙人似乎不受病菌影響，所以大量的印加人改信天主教。根據這個結果，印加人最不可能產生什麼樣的想法？
+- A.開始懷疑自己的信仰是否可靠
+- B.認為自己的神明失靈，轉而改信天主教
+- C.認為神明不滿意祭典儀式，需舉辦更盛大的祭典
+- D.對西班牙人產生敬畏感，覺得他們受到神保護
+- （ B ）5. 作者在開頭描寫168人對抗8萬人的場景，這樣的寫作手法可以達成什麼目的？
+- A.可以強調歷史的偶然性，讓讀者相信小軍也有戰勝的機會
+- B.刻意營造懸殊反差，第二段揭示出乎意料的結果，製造驚奇
+- C.為了突顯西班牙軍人英勇無畏，強調以小勝大的奇蹟
+- D.為了引導讀者相信歷史發展冥冥中自有安排，無從解釋
+images:
+- filename: images/G8-L8/G8-L8-01.png
+  size_bytes: 10953
+  image_hash: a752879856b9
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-02.png
+  size_bytes: 11101
+  image_hash: 2ff02832a1cb
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-03.gif
+  size_bytes: 60
+  image_hash: 2bc7d82b797f
+  content_type: image/gif
+  caption: ''
+- filename: images/G8-L8/G8-L8-04.png
+  size_bytes: 8575
+  image_hash: 57d490db7791
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-05.png
+  size_bytes: 5005
+  image_hash: e4b39492eab5
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-06.png
+  size_bytes: 6724
+  image_hash: 4c0bcf61bd8a
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-07.png
+  size_bytes: 1379
+  image_hash: 808f84e4d702
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-08.gif
+  size_bytes: 57
+  image_hash: 2b4d7fb18c87
+  content_type: image/gif
+  caption: ''
+- filename: images/G8-L8/G8-L8-09.png
+  size_bytes: 4923
+  image_hash: 6bfdabd16de0
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-10.png
+  size_bytes: 9079
+  image_hash: 3dc01b2b789e
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-11.png
+  size_bytes: 8069
+  image_hash: 7c834e8f7603
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-12.png
+  size_bytes: 11062
+  image_hash: fa9982037e78
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-13.gif
+  size_bytes: 55
+  image_hash: 054dfa610bc1
+  content_type: image/gif
+  caption: ''
+- filename: images/G8-L8/G8-L8-14.png
+  size_bytes: 9835
+  image_hash: 083ac7675369
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-15.png
+  size_bytes: 54496
+  image_hash: b30532588a78
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-16.png
+  size_bytes: 7368
+  image_hash: f8467169fe00
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-17.png
+  size_bytes: 2419
+  image_hash: 4638e9932d63
+  content_type: image/png
+  caption: ''
+- filename: images/G8-L8/G8-L8-18.png
+  size_bytes: 1130
+  image_hash: e5da0637c603
+  content_type: image/png
+  caption: ''
+image_count: 18
