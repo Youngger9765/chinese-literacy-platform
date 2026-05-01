@@ -4,6 +4,7 @@ import { cleanChineseText } from '../../utils/textDiff';
 import { analyzeFluency } from '../../utils/fluencyAnalyzer';
 import DiffDisplay from '../ui/DiffDisplay';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { useKaraoke } from '../../context/KaraokeContext';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { useTtsPlayback } from '../../hooks/useTtsPlayback';
 import { cancelTts } from '../../services/ttsApi';
@@ -77,6 +78,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
   const [micError, setMicError]                 = useState('');
   const [result, setResult]                     = useState<SavedResult | null>(getInitialResult);
   const { zhuyinActive, processZhuyin } = useZhuyin();
+  const { karaokeEnabled } = useKaraoke();
 
   /* ---- Bug #1320 Bug 1: Auto-scroll to result area when result first appears ---- */
   const resultRef = useRef<HTMLDivElement | null>(null);
@@ -300,10 +302,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     setStreamingTranscript(cleanChineseText(transcript));
   }, [fullText, stopSession]);
 
-  /* ---- Render paragraph text with optional TTS highlighting ---- */
+  /* ---- Render paragraph text with optional KTV TTS highlighting ---- */
   const renderParagraph = (line: string, idx: number) => {
     const zhuyinLine = zhuyinLines ? zhuyinLines[idx] : null;
-    const isTtsHighlighting = isTtsPlaying && idx === currentTtsParagraph;
+    // KTV highlight: only when karaokeEnabled AND TTS is playing this paragraph
+    const isTtsHighlighting = karaokeEnabled && isTtsPlaying && idx === currentTtsParagraph;
 
     if (isTtsHighlighting) {
       const displayText = (zhuyinActive && typeof zhuyinLine === 'string') ? zhuyinLine : line;
@@ -324,8 +327,8 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
       );
     }
 
-    // Finished TTS paragraphs stay fully colored
-    if (isTtsPlaying && currentTtsParagraph > idx) {
+    // When karaoke is ON: finished TTS paragraphs stay fully colored
+    if (karaokeEnabled && isTtsPlaying && currentTtsParagraph > idx) {
       return <span className="text-accent font-bold">{zhuyinLine ?? line}</span>;
     }
 

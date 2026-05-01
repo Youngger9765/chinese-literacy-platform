@@ -14,6 +14,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { WorkspaceProvider } from './contexts/WorkspaceContext';
 import { LearningNavProvider } from './contexts/LearningNavContext';
 import { ZhuyinProvider } from './context/ZhuyinContext';
+import { KaraokeProvider } from './context/KaraokeContext';
 import TermsGate from './components/auth/TermsGate';
 import AppRoutes from './routes/AppRoutes';
 
@@ -26,9 +27,11 @@ const App: React.FC = () => {
           <WorkspaceProvider>
             <LearningNavProvider>
               <ZhuyinProvider>
-                <TermsGate>
-                  <AppRoutes />
-                </TermsGate>
+                <KaraokeProvider>
+                  <TermsGate>
+                    <AppRoutes />
+                  </TermsGate>
+                </KaraokeProvider>
               </ZhuyinProvider>
             </LearningNavProvider>
           </WorkspaceProvider>
