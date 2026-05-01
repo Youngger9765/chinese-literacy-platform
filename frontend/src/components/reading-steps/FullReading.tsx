@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Story, FullReadingResult, DiffToken } from '../../types';
 import { cleanChineseText } from '../../utils/textDiff';
-import { analyzeFluency } from '../../utils/fluencyAnalyzer';
+import { analyzeFluency, parseReadingBenchmark, getBenchmarkFeedback, getSecBenchmarkFeedback, type ParsedBenchmark } from '../../utils/fluencyAnalyzer';
 import DiffDisplay from '../ui/DiffDisplay';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { useKaraoke } from '../../context/KaraokeContext';
@@ -14,6 +14,8 @@ import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { useAuth } from '../../contexts/AuthContext';
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
 import { groupIdxForProgress } from '../../utils/ttsHighlight';
+import FluencyProgressChart, { type FullReadingAttempt } from './full-reading/FluencyProgressChart';
+import SelfAssessment, { type AssessmentRating } from './full-reading/SelfAssessment';
 
 /* ── Encouragement helper (same tier logic as ParagraphCard) ─────────────── */
 
@@ -37,9 +39,11 @@ interface FullReadingProps {
   onBack: () => void;
   /** Session-level result rehydrated from DB (Bug #1320 — fallback when localStorage is cleared). */
   initialResult?: FullReadingResult | null;
+  /** All reading attempts for this session from DB (Issue #1386 — 4-attempt progress chart). */
+  fullReadingAttempts?: FullReadingAttempt[];
 }
 
-const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, initialResult }) => {
+const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, initialResult, fullReadingAttempts = [] }) => {
   const { token } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
 
@@ -77,6 +81,58 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
   const [streamingTranscript, setStreamingTranscript] = useState(() => savedProgress.current?.transcript ?? '');
   const [micError, setMicError]                 = useState('');
   const [result, setResult]                     = useState<SavedResult | null>(getInitialResult);
+
+  /* ---- Self-assessment for current attempt (Issue #1386) ---- */
+  const [selfRating, setSelfRating] = useState<AssessmentRating | undefined>(undefined);
+  const [showComparison, setShowComparison] = useState(false);
+
+  /* ---- Parsed benchmark for progress chart (Issue #1386) ---- */
+  const parsedBenchmark = useMemo<ParsedBenchmark[] | null>(() => {
+    if (!story.readingBenchmark?.levels) return null;
+    try {
+      return parseReadingBenchmark(story.readingBenchmark.levels);
+    } catch {
+      return null;
+    }
+  }, [story.readingBenchmark]);
+
+  /** Whether lesson uses seconds-based benchmark (G8 文言文) */
+  const useSecUnit = useMemo(() => {
+    if (!parsedBenchmark || parsedBenchmark.length === 0) return false;
+    return 'unit' in parsedBenchmark[0] && (parsedBenchmark[0] as any).unit === 'sec';
+  }, [parsedBenchmark]);
+
+  /** AI-computed rating for the latest result */
+  const aiRating = useMemo<AssessmentRating | undefined>(() => {
+    if (!result || !parsedBenchmark || parsedBenchmark.length === 0) return undefined;
+    let feedbackText: string | null = null;
+    if (useSecUnit) {
+      const durationSec = (result.durationMs || 0) / 1000;
+      feedbackText = getSecBenchmarkFeedback(durationSec, parsedBenchmark);
+    } else {
+      feedbackText = getBenchmarkFeedback(result.cpm || 0, parsedBenchmark);
+    }
+    if (!feedbackText) return undefined;
+    // Map benchmark feedback position to rating
+    // parsedBenchmark[0] = lowest tier (slow/low), last = highest tier (fast/high)
+    const idx = parsedBenchmark.findIndex(b => {
+      if (useSecUnit && 'unit' in b) {
+        const bs = b as any;
+        const durationSec = (result.durationMs || 0) / 1000;
+        return durationSec >= bs.minSec && durationSec <= bs.maxSec;
+      } else if (!useSecUnit && !('unit' in b)) {
+        const bc = b as any;
+        return result.cpm >= bc.minCpm && result.cpm <= bc.maxCpm;
+      }
+      return false;
+    });
+    if (idx === -1) return undefined;
+    const total = parsedBenchmark.length;
+    if (total === 1) return 'mid';
+    if (idx === 0) return useSecUnit ? 'high' : 'low'; // sec: fastest = high; cpm: slowest = low
+    if (idx === total - 1) return useSecUnit ? 'low' : 'high'; // sec: slowest = low; cpm: fastest = high
+    return 'mid';
+  }, [result, parsedBenchmark, useSecUnit]);
   const { zhuyinActive, isZhuyinAny, processLinesSelective } = useZhuyin();
   const { karaokeEnabled } = useKaraoke();
   const vocabWords = useMemo(
@@ -478,6 +534,25 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
                   </p>
                 </div>
               )}
+
+              {/* ── Issue #1386: Self-assessment + 4-attempt progress chart ── */}
+              <SelfAssessment
+                onSelect={(rating) => {
+                  setSelfRating(rating);
+                  setShowComparison(true);
+                }}
+                selectedRating={selfRating}
+                aiRating={aiRating}
+                showComparison={showComparison}
+              />
+
+              {fullReadingAttempts.length > 0 && (
+                <FluencyProgressChart
+                  attempts={fullReadingAttempts}
+                  benchmark={parsedBenchmark}
+                  unit={useSecUnit ? 'sec' : 'cpm'}
+                />
+              )}
             </div>
           )}
         </div>
@@ -498,7 +573,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
           {result ? (
             <>
               <button
-                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); }}
+                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
                 className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <span className="material-symbols-outlined text-lg">refresh</span>
