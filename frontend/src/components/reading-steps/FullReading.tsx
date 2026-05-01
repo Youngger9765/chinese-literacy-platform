@@ -77,8 +77,12 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
   const [streamingTranscript, setStreamingTranscript] = useState(() => savedProgress.current?.transcript ?? '');
   const [micError, setMicError]                 = useState('');
   const [result, setResult]                     = useState<SavedResult | null>(getInitialResult);
-  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const { zhuyinActive, isZhuyinAny, processLinesSelective } = useZhuyin();
   const { karaokeEnabled } = useKaraoke();
+  const vocabWords = useMemo(
+    () => (story.vocabulary ?? []).map((v) => v.word).filter(Boolean),
+    [story.vocabulary]
+  );
 
   /* ---- Bug #1320 Bug 1: Auto-scroll to result area when result first appears ---- */
   const resultRef = useRef<HTMLDivElement | null>(null);
@@ -187,10 +191,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     } catch {}
   }, [result, streamingTranscript, storageKey]);
 
-  const zhuyinLines = useMemo(() => {
-    if (!zhuyinActive) return null;
-    return story.content.map((line) => processZhuyin(line));
-  }, [story.content, zhuyinActive, processZhuyin]);
+  const zhuyinLines = useMemo(
+    () => processLinesSelective(story.content, vocabWords),
+    [story.content, vocabWords, processLinesSelective]
+  );
 
   /* ---- Cleanup ---- */
   useEffect(() => {
@@ -309,7 +313,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     const isTtsHighlighting = karaokeEnabled && isTtsPlaying && idx === currentTtsParagraph;
 
     if (isTtsHighlighting) {
-      const displayText = (zhuyinActive && typeof zhuyinLine === 'string') ? zhuyinLine : line;
+      const displayText = (isZhuyinAny && typeof zhuyinLine === 'string') ? zhuyinLine : line;
       const chars = splitZhuyinChars(displayText);
       // groupIdxForProgress walks char groups so zhuyin PUA selectors (#1112)
       // and symbols stripped by _cleanForTts (#1110) don't push the split
@@ -343,7 +347,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
       style={{
-        fontFamily: zhuyinActive
+        fontFamily: isZhuyinAny
           ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
           : undefined,
       }}
@@ -392,7 +396,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
                   <span className="text-xs font-headline font-bold text-on-surface-variant/40 pt-2 select-none shrink-0 w-6 text-right">
                     {String(idx + 1).padStart(2, '0')}
                   </span>
-                  <p className={`text-xl md:text-2xl text-on-surface ${zhuyinActive ? 'leading-[3rem] md:leading-[3.5rem] tracking-[0.4em]' : 'leading-[1.6]'}`}>
+                  <p className={`text-xl md:text-2xl text-on-surface leading-[3rem] md:leading-[3.5rem] ${isZhuyinAny ? 'tracking-[0.4em]' : ''}`}>
                     {renderParagraph(line, idx)}
                   </p>
                 </div>

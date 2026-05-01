@@ -75,7 +75,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   fontSizePx = 22,
 }) => {
   // Zhuyin state from global context
-  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const { isZhuyinAny, processLinesSelective } = useZhuyin();
+  const vocabWords = useMemo(
+    () => (story.vocabulary ?? []).map((v) => v.word).filter(Boolean),
+    [story.vocabulary]
+  );
 
   // Annotations persisted to localStorage
   const [annotations, setAnnotations] = useState<Annotation[]>(() => {
@@ -107,10 +111,10 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   // ── Zhuyin ─────────────────────────────────────────────────────────────
 
-  const zhuyinParagraphs = useMemo(() => {
-    if (!zhuyinActive) return null;
-    return story.content.map((p) => processZhuyin(p));
-  }, [story.content, zhuyinActive, processZhuyin]);
+  const zhuyinParagraphs = useMemo(
+    () => processLinesSelective(story.content, vocabWords),
+    [story.content, vocabWords, processLinesSelective]
+  );
 
   // ── Persist annotations ────────────────────────────────────────────────
 
@@ -448,9 +452,10 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     // Fix: strip PUA selectors from the rendering string before slicing.  After stripping,
     // .length == raw char count, so raw indices and UTF-16 slice indices agree perfectly.
     //
-    // NOTE: when zhuyin is active, displayText contains BpmfIansui PUA selectors AND ruby
-    // annotations that cannot be split character-by-character, so we fall back to rawText.
-    const baseText = zhuyinActive ? rawText : displayText;
+    // NOTE: when zhuyin is active (any mode with ruby), displayText contains BpmfZihiSans PUA
+    // selectors AND ruby annotations that cannot be split character-by-character, so we fall
+    // back to rawText for annotation offset calculations.
+    const baseText = isZhuyinAny ? rawText : displayText;
     // Strip PUA Variation Selectors so that .length == raw char count and slice indices match.
     const textToRender = stripPUASelectors(baseText);
 
@@ -507,7 +512,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     <div
       className="flex-1 flex flex-col bg-surface overflow-hidden select-none"
       style={{
-        fontFamily: zhuyinActive
+        fontFamily: isZhuyinAny
           ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
           : undefined,
       }}
@@ -594,8 +599,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                     className="text-on-surface/90"
                     style={{
                       fontSize: `${fontSizePx}px`,
-                      lineHeight: zhuyinActive ? '3.8rem' : '1.6',
-                      letterSpacing: zhuyinActive ? '0.35em' : '0',
+                      lineHeight: isZhuyinAny ? '3.8rem' : '2.0',
+                      letterSpacing: isZhuyinAny ? '0.35em' : '0.02em',
                     }}
                   >
                     {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}

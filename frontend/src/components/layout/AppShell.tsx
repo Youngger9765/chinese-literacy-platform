@@ -180,7 +180,7 @@ const ImmersiveTopBar: React.FC = () => {
   const navigate = useNavigate();
   const currentView = useAppView();
   const { selectedStory, session } = useLearningNav();
-  const { zhuyinEnabled, zhuyinReady, toggleZhuyin } = useZhuyin();
+  const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
   const { karaokeEnabled, toggleKaraoke } = useKaraoke();
 
   // Find current step index and label
@@ -324,9 +324,9 @@ const ImmersiveTopBar: React.FC = () => {
         )}
         {selectedStory && (
           <ZhuyinToggle
-            enabled={zhuyinEnabled}
+            mode={zhuyinMode}
             ready={zhuyinReady}
-            onToggle={toggleZhuyin}
+            onModeChange={setZhuyinMode}
           />
         )}
       </div>
