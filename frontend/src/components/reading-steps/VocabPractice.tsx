@@ -190,6 +190,51 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           </div>
         </div>
 
+        {/* ── Character chip strip — tap any character to jump directly ── */}
+        {displayChars.length > 1 && (
+          <div
+            className="max-w-6xl mx-auto mb-5 -mx-1 px-1"
+            role="listbox"
+            aria-label="生字選擇"
+          >
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              {displayChars.map((ch, i) => {
+                const isDone = practicedChars.has(ch);
+                const isActive = i === currentIndex;
+                const isUnlocked = isDone || i === unlockedIndex;
+                return (
+                  <button
+                    key={`${ch}-${i}`}
+                    role="option"
+                    aria-selected={isActive}
+                    aria-label={`第 ${i + 1} 字：${ch}${isDone ? '（已完成）' : i === unlockedIndex ? '（練習中）' : '（未解鎖）'}`}
+                    disabled={!isUnlocked}
+                    onClick={() => isUnlocked && setCurrentIndex(i)}
+                    className={[
+                      'flex-shrink-0 w-10 h-10 rounded-xl text-base font-bold transition-all duration-200',
+                      'flex items-center justify-center relative focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                      isActive
+                        ? 'bg-accent text-white shadow-[0_4px_16px_rgba(86,74,191,0.35)] scale-105'
+                        : isDone
+                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:scale-105'
+                        : isUnlocked
+                        ? 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest hover:scale-105'
+                        : 'bg-surface-container text-on-surface-variant opacity-35 cursor-not-allowed',
+                    ].join(' ')}
+                  >
+                    {ch}
+                    {isDone && !isActive && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-white" style={{ fontSize: '10px' }}>check</span>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
 
           {/* ── Left panel: character info + radical decomposition ──── */}
@@ -241,7 +286,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           </div>
         </div>
 
-        {/* Character selector removed — progress bar at top is sufficient */}
+        {/* Character chip strip handles navigation — no separate selector needed */}
       </div>
 
       {/* ── Fixed bottom CTA — only show "完成練習" when all done ──── */}
