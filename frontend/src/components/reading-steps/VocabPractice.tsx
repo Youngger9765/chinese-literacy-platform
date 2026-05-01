@@ -1,3 +1,15 @@
+/**
+ * VocabPractice
+ *
+ * #1342 additions:
+ *  - practiceRound: 1 | 2 | 'done' state per character
+ *    - Round 1 (仿寫): left panel (character + radical) visible
+ *    - Round 2 (再生回憶): left panel hidden; student writes from memory
+ *  - RadicalDecomposition now rendered with colorMode=true in round 1,
+ *    and a brief mergeMode flash before transitioning to round 2
+ *  - Skip button for round 2 (tracked but not blocking)
+ */
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, VocabResult } from '../../types';
 import { hasStrokeData } from '../stroke-order/strokeData';
@@ -13,6 +25,9 @@ interface VocabPracticeProps {
   onFinish: (result: VocabResult) => void;
   onBack: () => void;
 }
+
+/** Per-character practice round state */
+type CharRound = 1 | 2 | 'done';
 
 /* ================================================================ */
 /*  Main component                                                   */
@@ -40,6 +55,17 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   );
   const [currentIndex, setCurrentIndex] = useState(savedProgress.current?.currentIndex ?? 0);
 
+  // ── #1342: per-character round tracking ──────────────────────────
+  // charRounds maps char → current round. Characters start at round 1.
+  // "done" = both rounds completed (or round 2 skipped).
+  const [charRounds, setCharRounds] = useState<Map<string, CharRound>>(new Map());
+
+  // Whether the "合體" merge animation is playing between round 1 → 2
+  const [showMergeAnimation, setShowMergeAnimation] = useState(false);
+
+  // Tracks which chars had round 2 skipped (for analytics / reporting)
+  const skippedRecallRef = useRef<Set<string>>(new Set());
+
   const { zhuyinActive, processZhuyin } = useZhuyin();
 
   // Persist progress
@@ -60,7 +86,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
     const optional: string[] = [];
     for (const line of story.content) {
       for (const ch of line) {
-        if (/[\u4e00-\u9fa5]/.test(ch) && hasStrokeData(ch) && !seen.has(ch)) {
+        if (/[一-龥]/.test(ch) && hasStrokeData(ch) && !seen.has(ch)) {
           optional.push(ch);
           seen.add(ch);
         }
@@ -85,11 +111,34 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   const zhuyinStr = zhuyinActive ? processZhuyin(currentChar) : null;
   const allDone = displayChars.length > 0 && displayChars.every(ch => practicedChars.has(ch));
 
+  // Current round for this character (default 1 if not set)
+  const currentRound: CharRound = charRounds.get(currentChar) ?? 1;
+
+  // ── Round helpers ─────────────────────────────────────────────────
+
+  /**
+   * Called when WriteCharacter fires onComplete (user finished all strokes).
+   * Round 1 → show 合體 animation → advance to round 2.
+   * Round 2 / done → mark as practiced and move to next char.
+   */
   const handleCharComplete = () => {
+    if (currentRound === 1) {
+      // Show merge animation for ~1.2 s then switch to round 2
+      setShowMergeAnimation(true);
+      setCharRounds(prev => new Map(prev).set(currentChar, 2));
+      setTimeout(() => setShowMergeAnimation(false), 1200);
+    } else {
+      // Round 2 complete — mark done and advance
+      markCharDone(currentChar);
+    }
+  };
+
+  const markCharDone = (ch: string) => {
+    setCharRounds(prev => new Map(prev).set(ch, 'done'));
     setPracticedChars(prev => {
-      const next = new Set(prev).add(currentChar);
+      const next = new Set(prev).add(ch);
       // Auto-advance to next unpracticed character (use updated set)
-      const nextUnpracticed = displayChars.findIndex((ch, i) => i > currentIndex && !next.has(ch));
+      const nextUnpracticed = displayChars.findIndex((c, i) => i > currentIndex && !next.has(c));
       if (nextUnpracticed >= 0) {
         setCurrentIndex(nextUnpracticed);
       } else if (currentIndex < displayChars.length - 1) {
@@ -97,6 +146,14 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       }
       return next;
     });
+  };
+
+  /**
+   * Skip round 2 — mark as done immediately, log skip.
+   */
+  const handleSkipRecall = () => {
+    skippedRecallRef.current.add(currentChar);
+    markCharDone(currentChar);
   };
 
   // The "unlocked" character: first unpracticed overall (next to complete)
@@ -147,6 +204,13 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
       </div>
     );
   }
+
+  // Whether to show left stimulus panel (hide in round 2 = recall mode)
+  const showLeftPanel = currentRound !== 2;
+  // Whether RadicalDecomposition should use colorMode
+  const radicalColorMode = currentRound === 1;
+  // Whether to show mergeMode (brief flash when transitioning 1→2)
+  const radicalMergeMode = showMergeAnimation;
 
   return (
     <div className="flex-1 flex flex-col bg-surface overflow-y-auto pb-32">
@@ -235,58 +299,109 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
           </div>
         )}
 
-        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        {/* ── Round indicator banner ─────────────────────────────────── */}
+        {!practicedChars.has(currentChar) && (
+          <div className="max-w-6xl mx-auto mb-4">
+            {currentRound === 1 ? (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 w-fit">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                <span className="text-sm font-medium text-blue-700">第 1 次：仿寫練習（參考左側提示）</span>
+              </div>
+            ) : currentRound === 2 ? (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 border border-amber-300 w-fit">
+                <span className="w-5 h-5 rounded-full bg-amber-600 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                <span className="text-sm font-medium text-amber-700">第 2 次：再生回憶（靠記憶寫，不看提示！）</span>
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        <div className={[
+          'w-full max-w-6xl mx-auto grid gap-6 items-start',
+          showLeftPanel ? 'grid-cols-1 md:grid-cols-12' : 'grid-cols-1',
+        ].join(' ')}>
 
           {/* ── Left panel: character info + radical decomposition ──── */}
-          <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-4">
-            {/* Character + zhuyin + pronunciation */}
-            <div
-              className="p-6 rounded-3xl bg-surface-container-lowest shadow-editorial flex items-center justify-center gap-5"
-              style={{
-                fontFamily: zhuyinActive
-                  ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-                  : undefined,
-              }}
-            >
-              <p className="text-7xl font-bold text-on-surface leading-none">{zhuyinActive ? zhuyinStr : currentChar}</p>
-              <button
-                onClick={() => {
-                  if (window.speechSynthesis) {
-                    const u = new SpeechSynthesisUtterance(currentChar);
-                    u.lang = 'zh-TW';
-                    u.rate = 0.8;
-                    window.speechSynthesis.speak(u);
-                  }
+          {/* Hidden in round 2 (再生回憶) */}
+          {showLeftPanel && (
+            <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-4">
+              {/* Character + zhuyin + pronunciation */}
+              <div
+                className="p-6 rounded-3xl bg-surface-container-lowest shadow-editorial flex items-center justify-center gap-5"
+                style={{
+                  fontFamily: zhuyinActive
+                    ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
+                    : undefined,
                 }}
-                className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center hover:bg-accent/15 active:scale-[0.95] transition-all shrink-0"
-                aria-label="聽發音"
               >
-                <span className="material-symbols-outlined text-accent text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
-              </button>
-            </div>
-
-            {/* Radical decomposition — inline */}
-            {decomp && (
-              <div className="rounded-3xl bg-surface-container-low">
-                <RadicalDecomposition char={currentChar} />
+                <p className="text-7xl font-bold text-on-surface leading-none">{zhuyinActive ? zhuyinStr : currentChar}</p>
+                <button
+                  onClick={() => {
+                    if (window.speechSynthesis) {
+                      const u = new SpeechSynthesisUtterance(currentChar);
+                      u.lang = 'zh-TW';
+                      u.rate = 0.8;
+                      window.speechSynthesis.speak(u);
+                    }
+                  }}
+                  className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center hover:bg-accent/15 active:scale-[0.95] transition-all shrink-0"
+                  aria-label="聽發音"
+                >
+                  <span className="material-symbols-outlined text-accent text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>volume_up</span>
+                </button>
               </div>
-            )}
-          </div>
+
+              {/* Radical decomposition — inline, with colorMode in round 1 */}
+              {decomp && (
+                <div className="rounded-3xl bg-surface-container-low">
+                  <RadicalDecomposition
+                    char={currentChar}
+                    colorMode={radicalColorMode}
+                    mergeMode={radicalMergeMode}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ── Right panel: writing canvas ─────────────────────────── */}
-          <div className="md:col-span-7 lg:col-span-8 flex flex-col gap-4">
+          <div className={showLeftPanel ? 'md:col-span-7 lg:col-span-8 flex flex-col gap-4' : 'flex flex-col gap-4'}>
+
+            {/* Round 2 recall reminder — shown above the canvas when left panel is hidden */}
+            {currentRound === 2 && (
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 px-5 py-4 flex items-start gap-3">
+                <span className="text-2xl leading-none mt-0.5">🧠</span>
+                <div>
+                  <p className="text-sm font-semibold text-amber-800">再生回憶模式</p>
+                  <p className="text-xs text-amber-700 mt-0.5">
+                    左側提示已收起。憑剛才的印象，試著把「{currentChar}」完整寫出來！
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-4 md:p-6">
               <WriteCharacter
-                key={currentChar}
+                key={`${currentChar}-round${currentRound}`}
                 character={currentChar}
                 onComplete={handleCharComplete}
                 embedded
               />
             </div>
+
+            {/* Skip round 2 button */}
+            {currentRound === 2 && (
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSkipRecall}
+                  className="text-xs text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-full hover:bg-surface-container-high transition-all"
+                >
+                  跳過第 2 次練習
+                </button>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Character chip strip handles navigation — no separate selector needed */}
       </div>
 
       {/* ── Fixed bottom CTA — only show "完成練習" when all done ──── */}
