@@ -1,0 +1,32 @@
+lesson_code: G4-L01
+display_order: 1
+original_order: 1
+title: 贏得喝采的輸家
+grade: 4
+genre: 記敘文
+text_type: 單
+unit_topic: 運動+運動家精神
+applicable_grade: 無
+strategy_id: 4
+strategy_name: 無
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/JTo5Yx8-_rs
+- title: 影片2
+  url: http://youtu.be/xC1NYoo_8ik
+vocab:
+- 喝采
+- 落寞
+- 凝聚力
+- 目不轉睛
+- 勢均力敵
+- 讚嘆不已
+- 捶胸頓足
+- 疑難雜症
+- 龍爭虎鬥
+- 摸不著頭緒
+existing_content_yaml: L01.yml
+notes: null

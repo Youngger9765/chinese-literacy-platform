@@ -1,0 +1,32 @@
+lesson_code: G6-L04
+display_order: 58
+original_order: 15
+title: 兩千五百歲的酷老師
+grade: 6
+genre: 記敘文
+text_type: 單
+unit_topic: 擴展視野
+applicable_grade: 推論文章主旨－從標題及首末段找主旨
+strategy_id: 6
+strategy_name: 推論策略──從標題及首尾段推論主旨
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/Q1TuS_Nl4ws
+- title: 影片2
+  url: http://youtu.be/JslTi0_CK6w
+vocab:
+- 直率
+- 謙和
+- 普及
+- 遲疑
+- 果斷
+- 學問淵博
+- 富可敵國
+- 名符其實
+- 應對如流
+- 朽木不可雕也
+existing_content_yaml: L15.yml
+notes: null

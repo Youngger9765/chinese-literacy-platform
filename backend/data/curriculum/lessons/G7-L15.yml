@@ -1,0 +1,32 @@
+lesson_code: G7-L15
+display_order: 94
+original_order: 35
+title: 看到了嗎？然後呢？
+grade: 7
+genre: 記敘文
+text_type: 單
+unit_topic: 觀察與推理
+applicable_grade: 簡單的推理練習
+strategy_id: 7
+strategy_name: 解決問題──簡單推理三要素
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://www.morningrefresh.com/ (網站)
+- title: 影片2
+  url: http://gameschool.cc/ (網站)
+vocab:
+- 力圖
+- 趨勢
+- 傳遞
+- 相仿
+- 津津樂道
+- 拍案叫絕
+- 家境殷實
+- 家道中落
+- 嘆為觀止
+- 結實纍纍
+existing_content_yaml: L35.yml
+notes: null

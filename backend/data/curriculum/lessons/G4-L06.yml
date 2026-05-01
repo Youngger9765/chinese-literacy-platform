@@ -1,0 +1,30 @@
+lesson_code: G4-L06
+display_order: 6
+original_order: 115
+title: 這是什麼「意思」？
+grade: 4
+genre: 應用文
+text_type: 單
+unit_topic: null
+applicable_grade: null
+strategy_id: null
+strategy_name: 推論策略──推論代名詞
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/HZS9EQAev5o
+- title: 影片2
+  url: http://youtu.be/wJnJehkiOr0
+vocab:
+- 連忙
+- 諧音
+- 不妨
+- 略表
+- 歉意
+- 好感
+- 器具
+- 總結
+existing_content_yaml: null
+notes: null

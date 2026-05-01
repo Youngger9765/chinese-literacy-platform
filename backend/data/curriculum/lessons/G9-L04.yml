@@ -1,0 +1,30 @@
+lesson_code: G9-L04
+display_order: 133
+original_order: 49
+title: 預防近視？多點戶外活動就對了！
+grade: 9
+genre: 說明文
+text_type: 單
+unit_topic: 科學知識
+applicable_grade: 用科學方法推理解決問題
+strategy_id: 9
+strategy_name: 表達看法──以科學證據說服人
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/xLWVj5uOJPM
+- title: 影片2
+  url: http://youtu.be/92Ka_jDQ4qs
+vocab:
+- 咎責
+- 罹患
+- 多巴胺
+- 望塵莫及
+- 鳳毛麟角
+- 流行疫病
+- 刻板印象
+- 不言而喻
+existing_content_yaml: L49.yml
+notes: null

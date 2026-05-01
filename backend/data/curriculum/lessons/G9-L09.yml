@@ -1,0 +1,25 @@
+lesson_code: G9-L09
+display_order: 138
+original_order: 54
+title: 力與美表現的競技體操
+grade: 9
+genre: 說明文
+text_type: 單
+unit_topic: 運動知識
+applicable_grade: 摘要-組織圖表
+strategy_id: 9
+strategy_name: 圖表繪製與判讀──圖文表綜合判讀
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/JydFMQy-sEM
+- title: 影片2
+  url: http://youtu.be/fTbB6cqbx5g
+- title: 影片3
+  url: http://youtu.be/0JjwWDdNZgw
+vocab:
+- 無
+existing_content_yaml: L54.yml
+notes: null

@@ -1,0 +1,29 @@
+lesson_code: G5-L22
+display_order: 49
+original_order: 12
+title: 我有一個棒球夢
+grade: 5
+genre: 說明文
+text_type: 單
+unit_topic: 運動知識
+applicable_grade: 時間管理－分辨事情輕重緩急及練習規劃日程
+strategy_id: 5
+strategy_name: 自我管理──時間管理四步驟
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/09VtaEhBjok
+- title: 影片2
+  url: http://youtu.be/lIPsXEbw0FQ
+vocab:
+- 汗流浹背
+- 精湛
+- 達標
+- 不外脫
+- 僧多粥少
+- 合作無間󠇡
+- 想方設法
+existing_content_yaml: L12.yml
+notes: null

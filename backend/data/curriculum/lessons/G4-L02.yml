@@ -1,0 +1,32 @@
+lesson_code: G4-L02
+display_order: 2
+original_order: 2
+title: 十秒的背後
+grade: 4
+genre: 記敘文
+text_type: 單
+unit_topic: 運動+克服挫折
+applicable_grade: 順敘法
+strategy_id: 4
+strategy_name: 寫作手法──順敘──從時間詞判斷事件順序
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/NYA5OHRks34
+- title: 影片2
+  url: http://youtu.be/gV0LXXIyG3I
+vocab:
+- 擊垮
+- 沮喪
+- 睽違
+- 孤寂感
+- 天壤之別
+- 事與願違
+- 迎刃而解
+- 血脈賁張
+- 轉瞬而逝
+- 經年累月
+existing_content_yaml: L02.yml
+notes: null

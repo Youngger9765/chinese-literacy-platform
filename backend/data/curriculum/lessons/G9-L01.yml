@@ -1,0 +1,32 @@
+lesson_code: G9-L01
+display_order: 130
+original_order: 48
+title: 盡信書不如無書：從一件殺人案談起
+grade: 9
+genre: 說明文
+text_type: 單
+unit_topic: 科學知識
+applicable_grade: 假新聞訊息真偽思辨
+strategy_id: 9
+strategy_name: 辨別假新聞有方法--辨識目的、做查證
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/8kxi0yBwYWY
+- title: 影片2
+  url: http://youtu.be/m3gLNa-fx_w
+vocab:
+- 劈頭
+- 煽情
+- 援助
+- 杜撰
+- 眼睜睜
+- 令人髮指
+- 最負盛名
+- 抽絲剝繭
+- 視若無睹
+- 鋪天蓋地
+existing_content_yaml: L48.yml
+notes: null

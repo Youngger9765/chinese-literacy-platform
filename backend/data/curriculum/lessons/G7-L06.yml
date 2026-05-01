@@ -1,0 +1,37 @@
+lesson_code: G7-L06
+display_order: 85
+original_order: 31
+title: 奧運性別平等這條路
+grade: 7
+genre: 說明文
+text_type: 單
+unit_topic: 運動-性別平權
+applicable_grade: 用表格整理訊息－整理數據資料
+strategy_id: 7
+strategy_name: 用表格整理訊息──從數據資料歸納趨勢
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/Clsy23hlXQo
+- title: 影片2
+  url: http://youtu.be/kSLvXN4wU6w
+- title: 影片3
+  url: http://youtu.be/MW4LQNHas64
+vocab:
+- 籌備
+- 開端
+- 抹滅
+- 印記
+- 彰顯
+- 侷限
+- 荊棘
+- 約莫
+- 里程碑
+- 開路先鋒
+- 大顯身手
+- 眾所矚目
+- 多多益善
+existing_content_yaml: L31.yml
+notes: null

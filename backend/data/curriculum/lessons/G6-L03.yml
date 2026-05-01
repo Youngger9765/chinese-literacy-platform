@@ -1,0 +1,32 @@
+lesson_code: G6-L03
+display_order: 57
+original_order: 24
+title: 昆蟲會思考嗎?
+grade: 6
+genre: 說明文
+text_type: 單
+unit_topic: 科學知識
+applicable_grade: 用觀察證據回答科學問題
+strategy_id: 6
+strategy_name: 解決問題──以實驗觀察找答案
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/x4DdIctCESI
+- title: 影片2
+  url: http://youtu.be/2R4UwzvlbR4
+vocab:
+- 依循
+- 覓食
+- 葉苞
+- 孵化
+- 規律
+- 臨機應變
+- 巧妙
+- 彷彿
+- 迅雷不及掩耳
+- 守株待兔
+existing_content_yaml: L24.yml
+notes: null

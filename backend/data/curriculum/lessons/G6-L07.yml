@@ -1,0 +1,33 @@
+lesson_code: G6-L07
+display_order: 61
+original_order: 7
+title: 黑猩猩的守護者
+grade: 6
+genre: 記敘文
+text_type: 單
+unit_topic: 名人楷模
+applicable_grade: 記敘文結構－故事體
+strategy_id: 5
+strategy_name: 摘要策略──從故事結構找重點
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/zWS1o6auDGw
+- title: 影片2
+  url: http://youtu.be/lLrPH6LFykk
+vocab:
+- 夢寐以求
+- 行囊
+- 深不可測
+- 迷霧
+- 迅疾如風
+- 崎嶇
+- 掛慮
+- 拒人於千里之外
+- 卸下心防
+- 舉世聞名
+- 馬不停蹄
+existing_content_yaml: L07.yml
+notes: null

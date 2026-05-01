@@ -1,0 +1,31 @@
+lesson_code: G7-L17
+display_order: 96
+original_order: 37
+title: 用科學方法伸張正義的神探
+grade: 7
+genre: 記敘文
+text_type: 單
+unit_topic: 科學邏輯推理
+applicable_grade: 用科學方法推理解決問題
+strategy_id: 7
+strategy_name: 解決問題──科學探究法
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: https://www.youtu.be/ghvb612GFyA
+- title: 影片2
+  url: http://youtu.be/6RtmRAYY74M
+vocab:
+- 逕自
+- 移駕
+- 環顧
+- 赫然
+- 惺忪
+- 孤苦伶仃
+- 一不做二不休
+- 令人髮指
+- 兵貴神速
+existing_content_yaml: L37.yml
+notes: null
