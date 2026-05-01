@@ -775,6 +775,10 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
       </Section>
 
       {/* ============ 補充資訊：生字練習 + 聽寫練習 + 課文理解 ============ */}
+      {/* TODO: Report rules to be updated when listening/sentence-practice/vocab are hidden — see #1333 follow-up.
+          Currently vocabResult still shows in "其他學習成果" even though vocab step is hidden from StepperNav.
+          Awaiting Young's clarification on whether to: (a) keep showing if student used it via ToolPicker,
+          (b) hide the card entirely, or (c) show a different label/section structure. */}
       {(vocabResult || dictationResult || comprehensionResult) && (
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">其他學習成果</h3>

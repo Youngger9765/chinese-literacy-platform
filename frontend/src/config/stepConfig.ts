@@ -100,7 +100,7 @@ export const STEP_CONFIG: StepConfig[] = [
     view: AppView.LISTENING,
     dbStepNumber: 13,
     needsStory: true,
-    enabled: true,
+    enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
     category: 'comprehension',
   },
   {
@@ -110,7 +110,7 @@ export const STEP_CONFIG: StepConfig[] = [
     view: AppView.VOCAB,
     dbStepNumber: 4,
     needsStory: true,
-    enabled: true,
+    enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
     category: 'practice',
   },
   {
@@ -120,7 +120,7 @@ export const STEP_CONFIG: StepConfig[] = [
     view: AppView.SENTENCE_PRACTICE,
     dbStepNumber: 14,
     needsStory: true,
-    enabled: true,
+    enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
     category: 'practice',
   },
   {
