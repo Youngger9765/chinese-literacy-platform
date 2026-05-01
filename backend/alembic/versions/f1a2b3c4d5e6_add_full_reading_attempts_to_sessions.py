@@ -1,12 +1,15 @@
 """add full_reading_attempts column to learning_sessions
 
-Revision ID: a1b2c3d4e5f6
-Revises: z6a7b8c9d0e1
+Revision ID: f1a2b3c4d5e6
+Revises: n4o5p6q7r8s9, ra01hist02ver03
 Create Date: 2026-05-01 00:00:00.000000
 
 Bug C fix (#1378): full_reading_result overwrites on each attempt, losing history.
 This migration adds full_reading_attempts JSONB array that appends each attempt
 (capped at 4). The existing full_reading_result scalar is kept for backward compat.
+
+Merges the two current heads (n4o5p6q7r8s9, ra01hist02ver03) to maintain a
+single head after this migration.
 
 Schema of each element in full_reading_attempts:
   {
@@ -22,13 +25,11 @@ Schema of each element in full_reading_attempts:
 from typing import Union
 
 from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import JSONB
 
 
 # revision identifiers, used by Alembic.
-revision: str = "a1b2c3d4e5f6"
-down_revision: Union[str, None] = "z6a7b8c9d0e1"
+revision: str = "f1a2b3c4d5e6"
+down_revision: Union[str, tuple] = ("n4o5p6q7r8s9", "ra01hist02ver03")
 branch_labels = None
 depends_on = None
 

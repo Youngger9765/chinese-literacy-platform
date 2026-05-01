@@ -139,6 +139,7 @@ class LearningSession(Base):
     vocab_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     full_reading_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     # Bug C fix (#1378): array of per-attempt snapshots, capped at 4.
+    # Migration: f1a2b3c4d5e6 — ADD COLUMN IF NOT EXISTS (idempotent).
     # full_reading_result above is kept as backward-compat scalar (= latest attempt).
     # Each element: { attempt_index, timestamp, cpm, accuracy, match_rate,
     #                 duration_ms, audio_url }
