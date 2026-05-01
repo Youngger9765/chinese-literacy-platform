@@ -274,7 +274,8 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   const scores: number[] = [];
   if (readingAttempt) scores.push(readingAttempt.accuracy);
   if (comprehensionResult) scores.push(Math.round((comprehensionResult.understoodCount / Math.max(comprehensionResult.requiredCount, 1)) * 100));
-  if (vocabResult) scores.push(vocabResult.totalWords > 0 ? Math.round((vocabResult.practicedWords.length / vocabResult.totalWords) * 100) : 100);
+  // vocab is now a standalone practice tool (#1333), not part of lesson grade.
+  // Excluded from report rendering and overall_score calculation.
   if (dictationResult) scores.push(dictationResult.totalWords > 0 ? Math.round((dictationResult.correctCount / dictationResult.totalWords) * 100) : 0);
   if (fullReadingResult) scores.push(Math.round(fullReadingResult.matchRate * 100));
   const overallScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
@@ -774,43 +775,13 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
         )}
       </Section>
 
-      {/* ============ 補充資訊：生字練習 + 聽寫練習 + 課文理解 ============ */}
-      {(vocabResult || dictationResult || comprehensionResult) && (
+      {/* ============ 補充資訊：聽寫練習 + 課文理解 ============ */}
+      {/* vocab (#1333): removed from report — now a standalone practice tool in 練習工具箱. */}
+      {(dictationResult || comprehensionResult) && (
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">其他學習成果</h3>
 
           <div className="grid md:grid-cols-2 gap-4">
-            {/* 生字練習 */}
-            <div className={`rounded-2xl border p-5 ${vocabResult ? 'bg-white border-slate-200 shadow-sm' : 'bg-gray-50 border-dashed border-gray-300'}`}>
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${vocabResult ? 'bg-accent text-white' : 'bg-gray-200 text-gray-400'}`}>3</span>
-                <h4 className={`text-sm font-bold ${vocabResult ? 'text-gray-900' : 'text-gray-400'}`}>生字練習</h4>
-              </div>
-              {vocabResult ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div className="bg-accent h-2 rounded-full transition-all" style={{ width: vocabResult.totalWords > 0 ? `${Math.round((vocabResult.practicedWords.length / vocabResult.totalWords) * 100)}%` : '0%' }} />
-                    </div>
-                    {!hideScores && (
-                      <span className="text-xs font-bold text-gray-600">{vocabResult.practicedWords.length}/{vocabResult.totalWords}</span>
-                    )}
-                  </div>
-                  {vocabResult.practicedWords.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {vocabResult.practicedWords.map(w => (
-                        <span key={w} className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-1.5 py-0.5 rounded">
-                          {w}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <p className="text-xs text-gray-400 text-center py-2">未完成</p>
-              )}
-            </div>
-
             {/* 聽寫練習 */}
             {dictationResult && (
               <div className="rounded-2xl border p-5 bg-white border-slate-200 shadow-sm">

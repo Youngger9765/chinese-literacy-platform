@@ -100,7 +100,7 @@ export const STEP_CONFIG: StepConfig[] = [
     view: AppView.LISTENING,
     dbStepNumber: 13,
     needsStory: true,
-    enabled: true,
+    enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
     category: 'comprehension',
   },
   {
@@ -110,7 +110,7 @@ export const STEP_CONFIG: StepConfig[] = [
     view: AppView.VOCAB,
     dbStepNumber: 4,
     needsStory: true,
-    enabled: true,
+    enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
     category: 'practice',
   },
   {
@@ -120,12 +120,12 @@ export const STEP_CONFIG: StepConfig[] = [
     view: AppView.SENTENCE_PRACTICE,
     dbStepNumber: 14,
     needsStory: true,
-    enabled: true,
+    enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
     category: 'practice',
   },
   {
     id: 'vocab-definition',
-    label: '詞語定義',
+    label: '詞語理解',
     hint: '為每個詞語找到正確的解釋',
     view: AppView.VOCAB_DEFINITION_MATCH,
     dbStepNumber: 12,
