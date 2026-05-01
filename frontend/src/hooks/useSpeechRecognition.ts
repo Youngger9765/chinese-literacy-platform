@@ -17,6 +17,8 @@ export interface SpeechRecognitionActions {
 
 /** Maximum recording duration in milliseconds (60 seconds) */
 const MAX_RECORDING_DURATION_MS = 60_000;
+/** Stop recording after this many milliseconds of silence (no new results) */
+const SILENCE_TIMEOUT_MS = 3_000;
 
 function getSpeechRecognitionConstructor(): typeof SpeechRecognition | null {
   if (typeof window === 'undefined') return null;
@@ -39,6 +41,7 @@ export function useSpeechRecognition(
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const onTranscriptRef = useRef(onTranscript);
   const maxDurationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Accumulated final results across multiple onresult events (continuous mode) */
   const accumulatedFinalRef = useRef('');
 
@@ -51,6 +54,10 @@ export function useSpeechRecognition(
     if (maxDurationTimerRef.current) {
       clearTimeout(maxDurationTimerRef.current);
       maxDurationTimerRef.current = null;
+    }
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
     }
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -74,6 +81,10 @@ export function useSpeechRecognition(
       clearTimeout(maxDurationTimerRef.current);
       maxDurationTimerRef.current = null;
     }
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
 
     setErrorMessage('');
     setTranscript('');
@@ -92,6 +103,16 @@ export function useSpeechRecognition(
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
+      // Reset silence timer — user is still speaking (#1327).
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
+      silenceTimerRef.current = setTimeout(() => {
+        if (recognitionRef.current) {
+          recognitionRef.current.stop();
+        }
+      }, SILENCE_TIMEOUT_MS);
+
       let interim = '';
       let newFinal = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -121,6 +142,10 @@ export function useSpeechRecognition(
         clearTimeout(maxDurationTimerRef.current);
         maxDurationTimerRef.current = null;
       }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
       recognitionRef.current = null;
       switch (event.error) {
         case 'not-allowed':
@@ -145,6 +170,10 @@ export function useSpeechRecognition(
       if (maxDurationTimerRef.current) {
         clearTimeout(maxDurationTimerRef.current);
         maxDurationTimerRef.current = null;
+      }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
       }
       recognitionRef.current = null;
       setStatus(prev => (prev === 'listening' ? 'idle' : prev));
@@ -180,6 +209,10 @@ export function useSpeechRecognition(
       if (maxDurationTimerRef.current) {
         clearTimeout(maxDurationTimerRef.current);
         maxDurationTimerRef.current = null;
+      }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
       }
       if (recognitionRef.current) {
         recognitionRef.current.stop();
