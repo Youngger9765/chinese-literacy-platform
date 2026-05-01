@@ -1,0 +1,108 @@
+lesson_code: 文-L7
+grade: 0
+grade_code: 文-L7
+reading_strategy: 判斷句
+reading_strategy_type: classical_chinese
+source_file: 文-L7相隔千里的約定（判斷句）.docx
+parsed_at: '2026-05-01T21:10:47'
+flags:
+- vocab_empty
+genre: 文言文
+title: 相隔千里的約定
+authors: 學習單： 王淑瑱
+story_text: ''
+paragraphs: []
+paragraph_count: 0
+char_count: 0
+vocabulary: []
+vocabulary_count: 0
+video_links: []
+multiple_choice:
+- question: 1.結成三尺厚的冰層，不是一天的寒冷所能造成的。
+  options: []
+  answer: A
+- question: 2.我如果是司馬懿，一定不會退兵。
+  options: []
+  answer: A
+- question: 3.法律是天子要跟天下人民共同遵守的。
+  options: []
+  answer: A
+- question: 4.只有來而沒有往，這不是符合禮節的行為。
+  options: []
+  answer: B
+- question: 5.弈秋是全國最擅長下棋的人。
+  options: []
+  answer: B
+- question: 1. 下列選項「」中的字，何者字義解釋錯誤？
+  options:
+  - 請設「饌」以候之——酒菜
+  - 當為「爾」醞酒——你們
+  - 「若」然——如果
+  - 必不「乖違」——遵從
+  answer: D
+- question: 2. 張劭對他的媽媽說：「巨卿信士，必不乖違」。依據對話的內容，請問：「信士」是什麼意思？
+  options:
+  - 誠實守信的人
+  - 信任朋友的人
+  - 相信報應的人
+  - 信仰神靈的人
+  answer: A
+- question: 3.「相隔千里的約定」一文的主旨與下列何者接近？
+  options:
+  - 范式與張劭都是刻苦讀書的典範
+  - 張劭的母親不輕易相信他人的承諾
+  - 范式與張劭信守約定，展現誠信精神
+  - 朋友間不要計較利害，應該互相幫助
+  answer: C
+- question: 4. 下列文句中，哪個選項的「為」字可以用白話文的「是」來解釋？
+  options:
+  - 「為」了準時到校，他很早就起床了
+  - 這件衣服的材質「為」純棉
+  - 我們應該「為」自己的行為負責
+  - 他的夢想是成「為」一名醫生
+  answer: B
+- question: 5. 下列句子中的▢▢處都缺少了主語，如果依本文文意要為句子補上主語，請問：哪一選項的主語是指元伯？
+  options:
+  - ▢▢遊太學，為諸生
+  - ▢▢後二年當還󠇡，將過拜尊親
+  - ▢▢請設饌以候之
+  - 巨卿信士，▢▢必不乖違
+  answer: C
+- question: 1.根據這段文字，下列敘述何者最恰當？
+  options: []
+  answer: A
+multiple_choice_count: 11
+story_structure_table:
+- - 第7課 相隔千里的約定
+  - 學習單： 王淑瑱
+- - |-
+    導讀：一篇好的故事要有讓人印象深刻的「賣點」，會讓人瞪大雙眼，問說：「這有可能嗎？」底下這篇用古文寫的故事，講到兩個朋友之間約了兩年後在家裡吃飯，時間到了，相隔500公里的朋友會準時出現嗎？古時候，交通非常不便，沒有公車、火車，遠距溝通的電話、網路更是不可能。兩年沒有聯絡，連媽媽都在懷疑：「你的朋友到底會不會來啊？」結果，朋友真的準時出現了。這種信守承諾的故事非常難得，因此被流傳到今天。 古文今譯 范式，字巨卿，山陽 金鄉縣人。他年少時曾到太學讀書，是一名太學生，因此跟汝南人張劭結成朋友。張劭，字元伯。後來兩人一起告假回鄉，范式對元伯說：「兩年後我會回來，到時我將拜訪你家，問候你的父母，看看你的孩子。」就一起約定了日期。 約定的日子快到了，元伯把事情詳細地告訴他的母親，請他母親準備酒菜等范式來。元伯的母親說：「你們分別兩年了，相隔千里的約定，你如何確信他一定會來呢？」元伯回答：「巨卿是有信用的人，必定不會違背承諾的。」母親說：「如果是這樣，我就為你們準備酒吧！」等到約定的那天，巨卿果然來了，入屋後，他先拜見了元伯的母親，兩人再一起喝酒，盡情歡樂後才告別」。
+self_check_items: []
+discussion_content: []
+images:
+- filename: images/文-L7/文-L7-01.png
+  size_bytes: 1664
+  image_hash: 05f926f95531
+  content_type: image/png
+  caption: ''
+- filename: images/文-L7/文-L7-02.png
+  size_bytes: 4492
+  image_hash: fba7f762a0dd
+  content_type: image/png
+  caption: ''
+- filename: images/文-L7/文-L7-03.png
+  size_bytes: 8495
+  image_hash: d0d187eac435
+  content_type: image/png
+  caption: ''
+- filename: images/文-L7/文-L7-04.png
+  size_bytes: 7368
+  image_hash: f8467169fe00
+  content_type: image/png
+  caption: ''
+- filename: images/文-L7/文-L7-05.png
+  size_bytes: 8069
+  image_hash: 7c834e8f7603
+  content_type: image/png
+  caption: ''
+image_count: 5

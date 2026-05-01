@@ -1,11 +1,12 @@
 lesson_code: G6-L23
 grade: 6
 grade_code: G6-L23
-reading_strategy: 摘要策略－問題·解決·結果結構
+reading_strategy: 摘要策略-問題.解決結構找重點
 reading_strategy_type: summary_psr
-genre: 說明文
 source_file: G6-L23老鷹紅豆的故事（摘要策略-問題.解決結構找重點）.docx
+parsed_at: '2026-05-01T21:10:38'
 flags: []
+genre: 說明文
 title: 老鷹紅豆的故事
 authors: 課文 ：曾世杰 學習單：陳淑麗
 story_text: |-
@@ -15,8 +16,30 @@ paragraphs:
   2012年10月，屏東科技大學的研究人員收到兩隻死亡的老鷹，檢驗後，確認老鷹體內含有劇毒農藥。2013年，他們在屏東縣一塊紅豆田中，發現了超過3000隻野鳥屍體。死亡的鳥類包括麻雀、紅鳩、小雲雀、斑文鳥、彩鷸、秧雞等，也包括食物鏈上層的紅隼、老鷹。 研究人員追根究柢後才知道，當地的稻子收割後，農民會利用空檔時間轉作紅豆，紅豆播種時遭到大量野鳥啄食。農民為了減少農損，便使用農藥製作毒餌，造成小型鳥類的大量死亡。而猛禽如老鷹、紅隼撿食小鳥的屍體，也因而間󠇡接受害。 其實，毒鳥事件並不只侷限在單一作物，也不只侷限在單一地區。例如，稻子收成之際，許多農民為了怕鳥群吃掉自己的心血，只好下手毒殺；又例如，採收紅豆時，農民也會噴灑落葉劑，好讓紅豆及雜草的綠葉全部枯乾，以方便採收，但這種落葉劑也會毒害小鳥。 屏東科技大學在縣政府的協助下，找上當初發現超過3000隻鳥屍的紅豆田，向地主林清源先生說明這個生態的悲劇。林先生坦承錯誤，自2014年起，開始使用機械播種將紅豆埋入土中，有效減少了播種期的鳥害；收成時也放棄使用落葉劑與除草劑。林先生雖然成為無毒農法的先驅，但這樣做成本高，18公頃紅豆田的收入，比過去少了100萬，因此無法大量推廣，只能苦撐待變。 為了支持友善耕作的農民，2015年，全聯福利中心開始與農民簽訂契作協議，以高於市場的價格收購紅豆，並將這些紅豆命名為「老鷹紅豆」。最早和全聯契作的紅豆田雖然只有25公頃，但企業和農民一起保護老鷹的故事，開始在農民間慢慢傳開。全聯販售的紅豆產品，是不毒鳥、不用落葉劑的安全紅豆，經過層層把關，不必擔心農藥殘留的問題，希望高品質的老鷹紅豆可以取得消費者的青睞。 結果，老鷹紅豆的友善耕作方式不僅保護了生態，也帶來了經濟上的成功。在各方夥伴鍥而不捨的努力後，老鷹紅豆與老鷹紅豆銅鑼燒的總銷售額從第一年的10萬元，成長到2024年的5.5億元，契作的紅豆田也超過了200公頃。這些成果都顯示出，臺灣的消費者願意付出較高的價錢，支持友善生態的農業產品。 這個美好的故事，來自許多人的努力。大學提供科學證據、倡導生態理念，農民勇敢改變耕作方式，企業願意支持友善農法的產品，當然都是關鍵的參與者。而最重要的是，每一位願意掏腰包購買老鷹紅豆的老百姓。他們沒有親自到田野去觀察、保護鳥類，但是，他們心裡有愛，用消費守護了臺灣的生態，他們和科學家、農民與企業家，一起為臺灣創造了更美好的生活。
 paragraph_count: 1
 char_count: 1005
-vocabulary: []
-vocabulary_count: 0
+vocabulary:
+- word: 食物鏈
+  definition: 自然界中，生物間「誰吃誰」的關係，像一條鏈子連接起來。像「大魚吃小魚，小魚吃蝦米」就是一個生物鏈。鳥類中食物鏈的最上層，指的是吃肉的猛禽，如老鷹。
+- word: 青睞
+  definition: 喜愛、看中某人或某事。常用在受到別人喜歡或肯定時。
+- word: 先驅
+  definition: 最早開始做改變的人或為後來者開路的人。
+- word: 侷限
+  definition: 受到限制，不能自由發揮的狀況。
+- word: 坦承錯誤
+  definition: 誠實地承認自己做錯了事。
+- word: 契作協議
+  definition: 農民與企業簽訂的書面合約，約定產品的生產方式、數量、品質與收購價格等內容。
+- word: 鍥而不捨
+  definition: 遇到困難不放棄，一直努力到底。
+- word: 追根究柢
+  definition: 徹底查清楚事情的原因或來龍去脈。
+- word: 猛禽
+  definition: 會用利爪和尖喙抓捕其他動物當食物的鳥類，例如老鷹、貓頭鷹。
+- word: 層層把關
+  definition: 每個步驟都小心檢查，不讓錯誤發生。
+- word: 苦撐待變
+  definition: 在困難中忍耐著，希望情況能改善。
+vocabulary_count: 11
 reading_benchmark:
   levels:
   - threshold: □ ＜210字
@@ -26,20 +49,10 @@ reading_benchmark:
   - threshold: □ ＞241字
     feedback: 哇嗚，超級厲害！
 video_links:
-- title: 1. 【全聯福利中心】二廚帶你去旅行－老鷹紅豆篇 ・片長：(6:52) ・來源： PX Channel
+- title: 1. 【全聯福利中心】二廚帶你去旅行－老鷹紅豆篇
   url: ''
-- title: 2. 【觀念】生態系的組成(食物鏈) ・片長：(9:54) ・來源：臺北酷課雲
+- title: 2. 【觀念】生態系的組成(食物鏈)
   url: ''
-vocab_bank:
-  A: 坦承錯誤
-  B: 鍥而不捨
-  C: 青睞
-  D: 侷限
-  E: 層層把關
-  F: 苦撐待變
-  G: 追根究柢
-  H: 先驅
-fill_in_blank: []
 multiple_choice:
 - question: 1. 文中第四段末行提到，林清源先生轉型無毒農法後「只能苦撐待變」。根據上下文推測，他面臨的主要困難是什麼？
   options:
@@ -77,9 +90,6 @@ multiple_choice:
   - 為保護田裡青蛙，農民停用農藥，企業以高價收購他的稻米
   answer: D
 multiple_choice_count: 5
-story_structure_table:
-- - |-
-    這篇故事是一篇報導式說明文，講「毒鳥事件」解決的過程。故事結構裡有明顯的問題、解決、結果。但閱讀時，如何找到文章中的「問題、解決、結果」呢？我們可以用一些線索來做判斷喔！ 我們來練習用兩步驟（❶找重點句；❷精簡重點句）找「問題、解決、結果」。
 self_check_items:
 - 我學到怎麼找出「問題」，知道故事一開始面臨什麼困境。
 - 我學到怎麼找出「解決」，了解主角/相關人物做了什麼來解決問題。
@@ -104,3 +114,80 @@ discussion_content:
 - ❷精簡重點句：想一想這句話的意思，用更簡短的方式表達重點。
 - □1.這句已經很精簡了，不用再精簡。
 - □2.我可以更精簡：友善耕作保護了生態，也帶來了經濟上的成功。
+images:
+- filename: images/G6-L23/G6-L23-01.png
+  size_bytes: 1379
+  image_hash: 808f84e4d702
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-02.png
+  size_bytes: 9079
+  image_hash: 3dc01b2b789e
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-03.png
+  size_bytes: 7368
+  image_hash: f8467169fe00
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-04.png
+  size_bytes: 8575
+  image_hash: 57d490db7791
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-05.png
+  size_bytes: 2507
+  image_hash: 434cf8f2bf07
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-06.png
+  size_bytes: 10953
+  image_hash: a752879856b9
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-07.png
+  size_bytes: 11101
+  image_hash: 2ff02832a1cb
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-08.png
+  size_bytes: 9835
+  image_hash: 083ac7675369
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-09.png
+  size_bytes: 1389
+  image_hash: 4c4909300d39
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-10.png
+  size_bytes: 8069
+  image_hash: 7c834e8f7603
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-11.png
+  size_bytes: 3164
+  image_hash: 24d3f0ca5405
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-12.png
+  size_bytes: 11062
+  image_hash: fa9982037e78
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-13.png
+  size_bytes: 2440
+  image_hash: 9f37e8a3ba9c
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-14.png
+  size_bytes: 3244
+  image_hash: 122cc9baea4a
+  content_type: image/png
+  caption: ''
+- filename: images/G6-L23/G6-L23-15.png
+  size_bytes: 6724
+  image_hash: 4c0bcf61bd8a
+  content_type: image/png
+  caption: ''
+image_count: 15
