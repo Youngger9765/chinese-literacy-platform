@@ -95,7 +95,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     savedProgress.current?.lineResults ?? []
   );
   const [streak, setStreak] = useState(0);
-  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const { zhuyinActive, processLines } = useZhuyin();
   const [isAwaitingGemini, setIsAwaitingGemini] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
   const [showRecorder, setShowRecorder] = useState(false);
@@ -243,10 +243,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   }, []);
 
   /** Pre-process each story line through the polyphonic processor for zhuyin rendering */
-  const zhuyinLines = useMemo(() => {
-    if (!zhuyinActive) return null;
-    return story.content.map((line) => processZhuyin(line));
-  }, [story.content, zhuyinActive, processZhuyin]);
+  const zhuyinLines = useMemo(
+    () => processLines(story.content),
+    [story.content, processLines]
+  );
 
   /** Compute completed/current/locked status for each paragraph. */
   const lineStatuses = useMemo<ParagraphStatus[]>(() => {
