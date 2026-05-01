@@ -798,15 +798,15 @@ const LearningLayout: React.FC = () => {
       persistStepProgressState(
         {
           completeStep: 'full-reading',
-          // currentStep stays null — navigate goes to report, not the next step
+          // currentStep advances to listening — the next enabled step after full-reading
           stepDataPatch: {
             'full-reading': { result },
           },
         },
         true,
       );
-      persistStep(STEP_PATH_TO_NUMBER['report']);
-      navigate(`/learn/${storyId}/report`);
+      persistStep(STEP_PATH_TO_NUMBER['listening']);
+      navigate(`/learn/${storyId}/listening`);
     },
     [storyId, navigate, persistStep, persistStepProgressState],
   );
