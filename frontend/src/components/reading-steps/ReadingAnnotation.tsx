@@ -594,8 +594,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                     className="text-on-surface/90"
                     style={{
                       fontSize: `${fontSizePx}px`,
-                      lineHeight: zhuyinActive ? '3.8rem' : '2.0',
-                      letterSpacing: zhuyinActive ? '0.35em' : '0.02em',
+                      lineHeight: zhuyinActive ? '3.8rem' : '1.6',
+                      letterSpacing: zhuyinActive ? '0.35em' : '0',
                     }}
                   >
                     {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}

@@ -389,7 +389,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
                   <span className="text-xs font-headline font-bold text-on-surface-variant/40 pt-2 select-none shrink-0 w-6 text-right">
                     {String(idx + 1).padStart(2, '0')}
                   </span>
-                  <p className={`text-xl md:text-2xl text-on-surface leading-[3rem] md:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                  <p className={`text-xl md:text-2xl text-on-surface ${zhuyinActive ? 'leading-[3rem] md:leading-[3.5rem] tracking-[0.4em]' : 'leading-[1.6]'}`}>
                     {renderParagraph(line, idx)}
                   </p>
                 </div>
