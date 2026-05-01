@@ -111,6 +111,9 @@ class SessionDetailResponse(SessionSummaryResponse):
     comprehension_result: dict[str, Any] | None
     vocab_result: dict[str, Any] | None
     full_reading_result: dict[str, Any] | None
+    # Bug C fix (#1378): array of per-attempt snapshots, capped at 4.
+    # Backward compat: full_reading_result above still = latest attempt.
+    full_reading_attempts: list[dict[str, Any]] = []
     # 3-level comprehension scoring (Issue #243)
     comprehension_score: float | None = None
     literal_score: float | None = None
