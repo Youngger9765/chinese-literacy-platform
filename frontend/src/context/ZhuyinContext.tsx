@@ -3,12 +3,8 @@
  *
  * THREE display states:
  *   'none'      -- no ruby annotation
- *   'difficult' -- ruby only on vocabulary words (v1: lesson YAML vocabulary field)
+ *   'difficult' -- ruby only on chars that appear in vocabulary words (char-level)
  *   'all'       -- ruby on all characters
- *
- * Internally, zhuyinMode is 'none' | 'all' for the processor gate, and
- * vocabOnly (boolean) selects between 'difficult' and 'all' when mode='all'.
- * The combined triState is the canonical 3-way value exposed to the UI.
  *
  * Backward-compat helpers:
  *   zhuyinActive  -- true when triState is 'all' AND processor is ready
@@ -17,16 +13,45 @@
  *   isZhuyinNone  -- true when triState is 'none'
  *   zhuyinEnabled -- true when triState !== 'none' (legacy boolean compat)
  *
+ * buildDifficultCharSet(vocabWords):
+ *   Extracts the Set of unique individual characters from all vocabulary words.
+ *   e.g. ["龍爭虎鬥", "捶胸頓足"] -> Set{"龍","爭","虎","鬥","捶","胸","頓","足"}
+ *   Exported for unit testing.
+ *
  * processLinesSelective(lines, vocabWords):
  *   - triState='none'      -> null
  *   - triState='all'       -> fully-processed ruby lines
- *   - triState='difficult' -> ruby only on vocab-word substrings
+ *   - triState='difficult' -> ruby only on individual chars from vocabulary words
+ *                             (empty vocabulary -> null, graceful degrade like 'none')
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { PolyphonicProcessor, buildZhuyinString } from '../components/zhuyin/polyphonicProcessor';
 
 export type ZhuyinMode = 'none' | 'difficult' | 'all';
+
+/**
+ * Extract the set of individual characters from an array of vocabulary words.
+ *
+ * In 'difficult' mode we want ruby on every occurrence of a char that belongs
+ * to any vocabulary word -- not just where the full word appears.  This gives
+ * more coverage: a char like "龍" from "龍爭虎鬥" will be annotated wherever
+ * it appears in the story text, even outside that exact phrase.
+ *
+ * Exported so it can be unit-tested independently of React.
+ *
+ * @param vocabWords  Array of vocabulary word strings (may include empty strings).
+ * @returns           Deduplicated Set of individual Chinese characters.
+ */
+export function buildDifficultCharSet(vocabWords: string[]): Set<string> {
+  const chars = new Set<string>();
+  for (const word of vocabWords) {
+    for (const ch of word) {
+      if (ch.trim()) chars.add(ch);
+    }
+  }
+  return chars;
+}
 
 const STORAGE_KEY = 'zhuyin_mode_v2';
 const LEGACY_KEY  = 'zhuyin_enabled';
@@ -160,42 +185,60 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           return null;
         }
       }
-      // 'difficult': ruby only on vocab word substrings
-      const validWords = vocabWords.filter(Boolean);
-      if (validWords.length === 0) return null;
+      // 'difficult': ruby only on individual chars extracted from vocabulary words.
+      //
+      // We annotate each occurrence of every character that belongs to any vocab
+      // word, regardless of whether the full word appears at that position.
+      // e.g. vocab=["龍爭虎鬥"] → difficultChars={"龍","爭","虎","鬥"} →
+      //   "有龍在此" → "有[ruby:龍]在此" (only 龍 gets ruby)
+      //
+      // Contiguous runs of difficult chars are processed as one span so the
+      // polyphonic processor has full context across adjacent chars.
+      //
+      // Lessons with empty vocabulary fall back to null (same as 'none').
+      const difficultChars = buildDifficultCharSet(vocabWords);
+      if (difficultChars.size === 0) return null;
       try {
         return lines.map((line) => {
-          const matches: Array<{ start: number; end: number }> = [];
-          for (const word of validWords) {
-            let pos = 0;
-            while (pos < line.length) {
-              const idx = line.indexOf(word, pos);
-              if (idx === -1) break;
-              matches.push({ start: idx, end: idx + word.length });
-              pos = idx + 1;
-            }
-          }
-          if (matches.length === 0) return line;
-          matches.sort((a, b) => a.start - b.start);
-          const deduped: typeof matches = [];
-          let cursor = 0;
-          for (const m of matches) {
-            if (m.start >= cursor) { deduped.push(m); cursor = m.end; }
-          }
           let result = '';
-          let charPos = 0;
-          for (const { start, end } of deduped) {
-            if (charPos < start) result += line.slice(charPos, start);
-            try {
-              result += buildZhuyinString(
-                PolyphonicProcessor.instance.process(line.slice(start, end))
-              );
-            } catch {
-              result += line.slice(start, end);
+          let plainCursor = 0;
+          let inSpan = false;
+          let spanStart = 0;
+
+          for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            const isDifficult = difficultChars.has(ch);
+
+            if (isDifficult && !inSpan) {
+              // Start a new difficult-char span; emit buffered plain text first
+              result += line.slice(plainCursor, i);
+              spanStart = i;
+              inSpan = true;
+            } else if (!isDifficult && inSpan) {
+              // Close the span and annotate it
+              const span = line.slice(spanStart, i);
+              try {
+                result += buildZhuyinString(PolyphonicProcessor.instance.process(span));
+              } catch {
+                result += span;
+              }
+              plainCursor = i;
+              inSpan = false;
             }
-            charPos = end;
           }
-          if (charPos < line.length) result += line.slice(charPos);
+
+          // Flush the final span or plain tail
+          if (inSpan) {
+            const span = line.slice(spanStart);
+            try {
+              result += buildZhuyinString(PolyphonicProcessor.instance.process(span));
+            } catch {
+              result += span;
+            }
+          } else {
+            result += line.slice(plainCursor);
+          }
+
           return result;
         });
       } catch {
