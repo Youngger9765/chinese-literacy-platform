@@ -282,13 +282,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
       className="flex flex-col flex-1 min-h-0 bg-surface overflow-hidden relative"
     >
       {/* ── Main content area — fills viewport, no page scroll ──── */}
-      {/* overflow-hidden is required here: without it, grid content height changes
-          (e.g. checkbox re-render in StoryStructureTable) propagate upward and
-          cause the flex parent to recalculate, collapsing both panels. (#1330) */}
-      <div className="flex-1 min-h-0 overflow-hidden px-4 md:px-6 py-6 md:py-8">
-        {/* grid-rows-[1fr] pins the single row to exactly fill h-full,
-            preventing auto-row height from re-expanding on content changes. */}
-        <div className="w-full h-full grid grid-rows-[1fr] grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8">
+        <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 gap-6">
 
           {/* ── Left: Story text card ────────────────────────────── */}
           <div className="md:col-span-7 lg:col-span-7 min-h-0 flex">
