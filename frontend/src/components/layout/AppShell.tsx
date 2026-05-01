@@ -15,6 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { useKaraoke } from '../../context/KaraokeContext';
 import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
@@ -180,6 +181,7 @@ const ImmersiveTopBar: React.FC = () => {
   const currentView = useAppView();
   const { selectedStory, session } = useLearningNav();
   const { zhuyinEnabled, zhuyinReady, toggleZhuyin } = useZhuyin();
+  const { karaokeEnabled, toggleKaraoke } = useKaraoke();
 
   // Find current step index and label
   const currentStepIndex = ACTIVE_STEPS.findIndex((s) => s.view === currentView);
@@ -299,8 +301,27 @@ const ImmersiveTopBar: React.FC = () => {
         </div>
       </div>
 
-      {/* Right: zhuyin toggle + settings */}
-      <div className="shrink-0 flex items-center">
+      {/* Right: karaoke toggle + zhuyin toggle */}
+      <div className="shrink-0 flex items-center gap-2">
+        {selectedStory && (
+          <button
+            type="button"
+            onClick={toggleKaraoke}
+            aria-pressed={karaokeEnabled}
+            aria-label={karaokeEnabled ? '關閉跟讀' : '開啟跟讀'}
+            title={karaokeEnabled ? '關閉跟讀' : '開啟跟讀'}
+            className={`relative inline-flex items-center gap-1.5 h-10 pl-3 pr-3 rounded-full font-headline font-bold text-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 active:scale-[0.95] ${
+              karaokeEnabled
+                ? 'bg-accent text-white shadow-[0_4px_16px_rgba(86,74,191,0.3)]'
+                : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+            }`}
+          >
+            <span className="material-symbols-outlined text-base leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>
+              {karaokeEnabled ? 'lyrics' : 'lyrics'}
+            </span>
+            <span className="whitespace-nowrap hidden md:inline">跟讀</span>
+          </button>
+        )}
         {selectedStory && (
           <ZhuyinToggle
             enabled={zhuyinEnabled}

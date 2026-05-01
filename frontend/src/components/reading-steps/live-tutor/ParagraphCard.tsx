@@ -7,6 +7,7 @@ import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 
 import { splitZhuyinChars } from '../../../utils/zhuyinUtils';
 import { groupIdxForProgress } from '../../../utils/ttsHighlight';
+import { useKaraoke } from '../../../context/KaraokeContext';
 
 /* ── Encouragement messages (PR #1076 / #1096) ──────────────────────────── */
 
@@ -113,6 +114,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   storyContent,
 }) => {
   const isCurrentIdx = idx === currentLineIndex;
+  const { karaokeEnabled } = useKaraoke();
   // isTtsLoading comes from useTtsPlayback hook (via LiveTutor) — no local state needed.
   // This removes the old setTimeout-based debounce that was an approximation.
 
@@ -205,8 +207,9 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
       >
         {status === 'locked' ? (
           <span className="blur-sm select-none">{zhuyinLine ?? line}</span>
-        ) : isTtsSpeaking && isCurrentIdx ? (
-          // Highlight chars up to speakingProgress during TTS playback.
+        ) : isTtsSpeaking && isCurrentIdx && karaokeEnabled ? (
+          // KTV highlight: scrolls char-by-char during TTS playback.
+          // Only shown when karaokeEnabled is true (toggle in ImmersiveTopBar).
           // groupIdxForProgress walks char groups so zhuyin PUA selectors
           // (#1112) and symbols stripped by _cleanForTts (#1110) don't push
           // the split past the real char boundary.
