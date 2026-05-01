@@ -3,8 +3,11 @@
  *
  * Layout: left=scrollable lesson text card, right=MCQ/structure/strategy tabs
  * AI 功能為獨立浮動小助手（FloatingAIHelper）
+ *
+ * Fix #1330: Scroll right panel to top on tab change to prevent position jump.
+ * FloatingAIHelper repositions above the "下一關" CTA when it is visible.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, ComprehensionResult } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import StoryStructureTable from './StoryStructureTable';
@@ -84,6 +87,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const { zhuyinActive, processLines: zhuyinProcessLines } = useZhuyin();
 
+  // Fix #1330: ref to the right-panel scroll container so we can reset scroll on tab change
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+
   const zhuyinLines = useMemo(() => {
     if (!zhuyinActive) return null;
     return zhuyinProcessLines(story.content);
@@ -91,6 +97,9 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   const handleTabChange = useCallback((tab: 'mcq' | 'structure' | 'strategy') => {
     setActiveTab(tab);
+    // Fix #1330: scroll right panel back to top when switching tabs so new content
+    // is immediately visible without the user having to manually scroll up
+    rightPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     if (tab === 'structure' && !tabCompletion.structureVisited) {
       setTabCompletion(prev => ({ ...prev, structureVisited: true }));
     }
@@ -100,6 +109,11 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     setTabCompletion(prev => ({ ...prev, mcqDone: true }));
     setMcqScore(score);
     setMcqTotal(total);
+    // Fix #1330: MCQ done → panel content swaps to completion card.
+    // Scroll right panel to top so the completion card is visible from the start.
+    requestAnimationFrame(() => {
+      rightPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }, []);
 
   const handleStructureRedo = useCallback(() => {
@@ -315,7 +329,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
           {/* ── Right: Exercise panel ─────────────────────────────── */}
           <div className="md:col-span-5 lg:col-span-5 min-h-0 flex flex-col">
             <div className="shrink-0">{renderTabs()}</div>
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+            {/* Fix #1330: attach ref so tab-change and MCQ-complete can scroll to top */}
+            <div ref={rightPanelRef} className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
               {renderRightContent()}
             </div>
           </div>
@@ -339,11 +354,12 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         </div>
       )}
 
-      {/* Floating AI helper */}
+      {/* Floating AI helper — repositions above fixed CTA when it is visible (#1330) */}
       <FloatingAIHelper
         storyTitle={story.title}
         storyText={storyText}
         dbSessionId={dbSessionId}
+        bottomOffset={isWorksheetComplete ? 'bottom-28' : 'bottom-6'}
       />
 
       {/* Skip button when worksheet not yet complete */}

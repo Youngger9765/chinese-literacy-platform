@@ -14,6 +14,10 @@ interface FloatingAIHelperProps {
   storyTitle: string;
   storyText: string;
   dbSessionId?: number;
+  /** Fix #1330: Tailwind class for button bottom position. Defaults to 'bottom-6'.
+   *  Pass 'bottom-28' when a fixed CTA occupies the viewport bottom so the button
+   *  doesn't overlap it. */
+  bottomOffset?: string;
 }
 
 type HelperMessage =
@@ -24,6 +28,7 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
   storyTitle,
   storyText,
   dbSessionId,
+  bottomOffset = 'bottom-6',
 }) => {
   const { token } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -92,11 +97,11 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
 
   return (
     <>
-      {/* Floating button */}
+      {/* Floating button — bottomOffset adjusts position to avoid fixed CTA overlap (#1330) */}
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${
+        className={`fixed ${bottomOffset} right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${
           isOpen ? 'bg-gray-500 hover:bg-gray-600' : 'bg-accent hover:bg-accent-hover'
         }`}
         title={isOpen ? '關閉 AI 小助手' : '打開 AI 小助手'}
@@ -113,9 +118,10 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
         )}
       </button>
 
-      {/* Chat popup */}
+      {/* Chat popup — sits above the floating button; bottom adjusts with button position (#1330) */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 max-h-[28rem] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
+        <div className={`fixed right-6 z-50 w-80 sm:w-96 max-h-[28rem] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden`}
+             style={{ bottom: bottomOffset === 'bottom-28' ? '8rem' : '5rem' }}>
           {/* Header */}
           <div className="shrink-0 bg-accent px-4 py-3 flex items-center gap-2">
             <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">

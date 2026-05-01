@@ -3,8 +3,11 @@
  *
  * Displays MCQ questions from the PDF-extracted YAML data.
  * Shows one question at a time; reveals correct answer + explanation after selection.
+ *
+ * Fix #1330: Show inline completion summary before calling onComplete to prevent
+ * layout shift caused by the parent swapping the entire panel DOM.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MultipleChoiceItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 
@@ -22,10 +25,20 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
+  // Fix #1330: show inline done summary so the parent panel doesn't DOM-swap abruptly
+  const [showDone, setShowDone] = useState(false);
+  const [finalScore, setFinalScore] = useState(0);
+  const doneRef = useRef<HTMLDivElement>(null);
 
   const q = questions[current];
-  const isCorrect = selected === q.answer;
   const isLast = current === questions.length - 1;
+
+  // Scroll done card into view smoothly without resetting parent scroll (#1330)
+  useEffect(() => {
+    if (showDone) {
+      doneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [showDone]);
 
   function handleSelect(label: string) {
     if (revealed) return;
@@ -36,12 +49,60 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
 
   function handleNext() {
     if (isLast) {
-      onComplete(score, questions.length);
+      // Fix #1330: show inline summary first; parent onComplete called via "確認完成" button
+      const nextScore = selected === q.answer ? score + 1 : score;
+      setFinalScore(nextScore);
+      setShowDone(true);
       return;
     }
     setCurrent((c) => c + 1);
     setSelected(null);
     setRevealed(false);
+  }
+
+  function handleConfirmDone() {
+    onComplete(finalScore, questions.length);
+  }
+
+  // Inline completion summary — keeps layout stable (#1330)
+  if (showDone) {
+    const allCorrect = finalScore === questions.length;
+    return (
+      <div
+        ref={doneRef}
+        className="flex flex-col items-center justify-center py-10 gap-5 px-4"
+        style={{ fontFamily: zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined }}
+      >
+        <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+          <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div className="text-center">
+          <p className="text-emerald-700 font-bold text-lg">
+            {allCorrect ? '全部答對，太棒了！' : '測驗完成，繼續加油！'}
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            共 {questions.length} 題，答對 {finalScore} 題
+          </p>
+        </div>
+        {/* Progress bar showing final score */}
+        <div className="w-full max-w-xs">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-emerald-500 h-2 rounded-full transition-all duration-700"
+              style={{ width: `${(finalScore / questions.length) * 100}%` }}
+            />
+          </div>
+        </div>
+        <button
+          onClick={handleConfirmDone}
+          className="rounded-lg bg-blue-500 px-8 py-2.5 text-white text-sm font-medium hover:bg-blue-600 transition-colors"
+        >
+          確認完成
+        </button>
+      </div>
+    );
   }
 
   return (
