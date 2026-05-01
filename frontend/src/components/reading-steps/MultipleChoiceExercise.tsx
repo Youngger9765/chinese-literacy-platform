@@ -7,7 +7,7 @@
  * Fix #1330: Show inline completion summary before calling onComplete to prevent
  * layout shift caused by the parent swapping the entire panel DOM.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { MultipleChoiceItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 
@@ -28,17 +28,8 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
   // Fix #1330: show inline done summary so the parent panel doesn't DOM-swap abruptly
   const [showDone, setShowDone] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
-  const doneRef = useRef<HTMLDivElement>(null);
-
   const q = questions[current];
   const isLast = current === questions.length - 1;
-
-  // Scroll done card into view smoothly without resetting parent scroll (#1330)
-  useEffect(() => {
-    if (showDone) {
-      doneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [showDone]);
 
   function handleSelect(label: string) {
     if (revealed) return;
@@ -49,9 +40,10 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
 
   function handleNext() {
     if (isLast) {
-      // Fix #1330: show inline summary first; parent onComplete called via "確認完成" button
-      const nextScore = selected === q.answer ? score + 1 : score;
-      setFinalScore(nextScore);
+      // Fix #1330: show inline summary first; parent onComplete called via "確認完成" button.
+      // Use `score` directly — handleSelect already called setScore(s => s+1) for a correct
+      // answer on this question before handleNext fires (separate click event, state committed).
+      setFinalScore(score);
       setShowDone(true);
       return;
     }
@@ -69,8 +61,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
     const allCorrect = finalScore === questions.length;
     return (
       <div
-        ref={doneRef}
-        className="flex flex-col items-center justify-center py-10 gap-5 px-4"
+        className="flex flex-col items-center justify-center min-h-full py-10 gap-5 px-4"
         style={{ fontFamily: zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined }}
       >
         <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">

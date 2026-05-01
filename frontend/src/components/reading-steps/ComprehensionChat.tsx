@@ -238,7 +238,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     if (hasMcq) {
       if (tabCompletion.mcqDone) {
         return (
-          <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <div className="flex flex-col items-center justify-center min-h-full py-12 gap-4">
             <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
               <span className="material-symbols-outlined text-3xl text-emerald-600">check_circle</span>
             </div>
@@ -279,7 +279,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
 
   return (
     <div
-      className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
+      className="flex flex-col flex-1 min-h-0 bg-surface overflow-hidden relative"
     >
       {/* ── Main content area — fills viewport, no page scroll ──── */}
       <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8">

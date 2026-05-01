@@ -271,7 +271,7 @@ export const LearningAppShell: React.FC = () => {
         id="main-content"
         role="main"
         aria-label="學習內容"
-        className="flex-1 flex flex-col overflow-y-auto"
+        className="flex-1 min-h-0 flex flex-col overflow-y-auto"
         tabIndex={-1}
       >
         <LearningLayout />
