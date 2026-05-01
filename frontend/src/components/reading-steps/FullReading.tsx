@@ -502,7 +502,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
                 className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
               >
-                <span>查看報告</span>
+                <span>下一關</span>
                 <span className="material-symbols-outlined text-xl">arrow_forward</span>
               </button>
             </>
