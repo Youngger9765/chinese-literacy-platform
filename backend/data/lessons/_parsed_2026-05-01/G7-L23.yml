@@ -3,6 +3,17 @@ grade: 7
 grade_code: G7-L23
 reading_strategy: 閱讀策略-跳過卡關，瀏覽全文
 reading_strategy_type: general
+# Schema-driven step composition (PR #1375 / Issue #1384):
+# 省略 demo — short multi-text lesson, only 5 steps (vs 11 in DEFAULT).
+# Omits: full-reading (多文本 tutor already covers each text), story-structure,
+#        vocab-definition, vocab-application, vocab-word-search (vocab: 無).
+# Proves architecture allows fewer steps without touching other lessons.
+step_sequence:
+  - reading-annotation
+  - tutor
+  - comprehension
+  - knowledge-station
+  - report
 source_file: G7-L23雨林裡的奇蹟藥物和最後一隻旅人鴿（閱讀策略-跳過卡關，瀏覽全文）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags:

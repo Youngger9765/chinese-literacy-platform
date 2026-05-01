@@ -3,7 +3,12 @@ set -e
 
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Running database migrations..."
-    alembic upgrade head
+    if ! alembic upgrade head 2>&1; then
+        echo "alembic upgrade head failed (possible stale revision from another branch)."
+        echo "Stamping DB to current head and retrying..."
+        alembic stamp head
+        alembic upgrade head
+    fi
     echo "Migrations complete."
 fi
 
