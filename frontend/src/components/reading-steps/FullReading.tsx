@@ -34,9 +34,11 @@ interface FullReadingProps {
   story: Story;
   onFinish: (result: FullReadingResult) => void;
   onBack: () => void;
+  /** Session-level result rehydrated from DB (Bug #1320 — fallback when localStorage is cleared). */
+  initialResult?: FullReadingResult | null;
 }
 
-const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) => {
+const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, initialResult }) => {
   const { token } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
 
@@ -50,12 +52,41 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
   };
   const savedProgress = useRef(loadSaved());
 
+  /* ---- Bug #1320 Bug 3: Derive initial result priority:
+   *   1. localStorage (same-browser persistence, most complete — has diffTokens)
+   *   2. session.fullReadingResult rehydrated from DB (cross-browser / cleared localStorage)
+   *   localStorage wins because it contains diffTokens which the DB result may lack. ---- */
+  const getInitialResult = (): SavedResult | null => {
+    if (savedProgress.current?.result) return savedProgress.current.result;
+    if (initialResult) {
+      return {
+        matchRate: initialResult.matchRate,
+        feedback: initialResult.feedback,
+        diffTokens: initialResult.diffTokens ?? [],
+        cpm: initialResult.cpm ?? 0,
+        durationMs: initialResult.durationMs ?? 0,
+        errorBreakdown: initialResult.errorBreakdown ?? { correct: 0, wrong: 0, missing: 0, extra: 0 },
+      };
+    }
+    return null;
+  };
+
   const [isPreparing, setIsPreparing]           = useState(false);
   const [isSessionActive, setIsSessionActive]   = useState(false);
   const [streamingTranscript, setStreamingTranscript] = useState(() => savedProgress.current?.transcript ?? '');
   const [micError, setMicError]                 = useState('');
-  const [result, setResult]                     = useState<SavedResult | null>(() => savedProgress.current?.result ?? null);
+  const [result, setResult]                     = useState<SavedResult | null>(getInitialResult);
   const { zhuyinActive, processZhuyin } = useZhuyin();
+
+  /* ---- Bug #1320 Bug 1: Auto-scroll to result area when result first appears ---- */
+  const resultRef = useRef<HTMLDivElement | null>(null);
+  const prevResultRef = useRef<SavedResult | null>(null);
+  useEffect(() => {
+    if (result && !prevResultRef.current && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    prevResultRef.current = result;
+  }, [result]);
 
   const isSessionActiveRef        = useRef(false);
   const recognitionRef            = useRef<any>(null);
@@ -382,7 +413,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
 
           {/* ── Result section ──────────────────────────────────────── */}
           {result && (
-            <div className="mt-6 space-y-6">
+            <div ref={resultRef} className="mt-6 space-y-6">
               {/* Encouragement — no numbers shown to student (Issues #1094, #1097) */}
               {(() => {
                 const enc = getFullReadingEncouragement(result.matchRate);
@@ -471,7 +502,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
                 className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
               >
-                <span>查看報告</span>
+                <span>下一關</span>
                 <span className="material-symbols-outlined text-xl">arrow_forward</span>
               </button>
             </>
