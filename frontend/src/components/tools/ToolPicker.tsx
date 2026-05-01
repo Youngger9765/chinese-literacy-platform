@@ -76,7 +76,7 @@ export const TOOL_OPTIONS: ToolOption[] = [
   },
   {
     id: 'vocab-word-search',
-    label: '詞搜尋',
+    label: '詞語搜尋',
     description: '在文章中找出目標詞語',
     icon: '🔍',
     stepPath: 'vocab-word-search',
