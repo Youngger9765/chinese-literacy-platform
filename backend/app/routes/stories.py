@@ -3,6 +3,7 @@ Stories API — serves platform lessons from in-memory YAML data.
 No database dependency for platform content.
 """
 
+import re
 import time
 from fastapi import APIRouter, Query, HTTPException, Depends, Request
 from pydantic import BaseModel
@@ -41,6 +42,108 @@ def _get_cached_structure(story_id: str):
 
 def _set_cached_structure(story_id: str, result):
     _structure_cache[_cache_key(story_id)] = (time.time(), result)
+
+
+# ---------------------------------------------------------------------------
+# YAML-first: convert story_structure_table → API response (no AI call)
+# ---------------------------------------------------------------------------
+
+_BLANK_RE = re.compile(r"【([^】]*)】")
+
+
+def _classify_cell(text: str) -> str:
+    """Return 'fill_blank' if the cell has 【…】 blanks, else 'display'."""
+    return "fill_blank" if _BLANK_RE.search(text) else "display"
+
+
+def _cell_to_row_dict(label: str, value: str) -> dict:
+    """Build a StructureRow dict from a label + value string."""
+    itype = _classify_cell(value)
+    row: dict = {
+        "label": label.strip(),
+        "value": value.strip(),
+        "interactive_type": itype,
+    }
+    if itype == "fill_blank":
+        # Extract first blank content as the reference answer hint
+        m = _BLANK_RE.search(value)
+        if m:
+            row["hint"] = m.group(1).strip()
+    return row
+
+
+def _format_yaml_structure_table(table: list) -> dict:
+    """Convert story_structure_table YAML list → {'rows': [...]} API shape.
+
+    YAML row formats:
+      [title]                   → 1-cell display row (title of the whole table)
+      [label, value]            → simple row (fill_blank if has 【…】, else display)
+      [label, sub_label, sub_value, ...]  → row with sub_rows (pairs after label)
+      [label, col1, col2, col3] → header row or row with 3 sub-cells (display)
+
+    All interactive_type values are 'fill_blank' or 'display'.
+    Checkbox interactivity is NOT reproduced from YAML (requires AI options arrays);
+    cells with □ checkbox markers are treated as 'display'.
+    """
+    rows: list[dict] = []
+
+    for raw_row in table:
+        if not isinstance(raw_row, list) or not raw_row:
+            continue
+
+        n = len(raw_row)
+
+        if n == 1:
+            # Title row — display spanning label
+            rows.append({
+                "label": str(raw_row[0]).strip(),
+                "value": "",
+                "interactive_type": "display",
+            })
+
+        elif n == 2:
+            # [label, value]
+            rows.append(_cell_to_row_dict(str(raw_row[0]), str(raw_row[1])))
+
+        elif n == 3:
+            # [label, sub_label, sub_value] — row with one sub_row
+            row = {
+                "label": str(raw_row[0]).strip(),
+                "value": "",
+                "interactive_type": "display",
+                "sub_rows": [
+                    _cell_to_row_dict(str(raw_row[1]), str(raw_row[2])),
+                ],
+            }
+            rows.append(row)
+
+        else:
+            # n >= 4: treat as row with (n-1)/2 paired sub_rows if n is odd,
+            # or as a display row with all remaining cells joined if even
+            label = str(raw_row[0]).strip()
+            remainder = [str(c) for c in raw_row[1:]]
+
+            # Try to pair as (sub_label, sub_value) only when length is even
+            if len(remainder) % 2 == 0:
+                sub_rows = []
+                for i in range(0, len(remainder), 2):
+                    sub_rows.append(_cell_to_row_dict(remainder[i], remainder[i + 1]))
+                rows.append({
+                    "label": label,
+                    "value": "",
+                    "interactive_type": "display",
+                    "sub_rows": sub_rows,
+                })
+            else:
+                # Odd remainder — join all as a single display row
+                combined = " ".join(remainder)
+                rows.append({
+                    "label": label,
+                    "value": combined,
+                    "interactive_type": "display",
+                })
+
+    return {"rows": rows}
 
 
 # ---------------------------------------------------------------------------
@@ -172,12 +275,39 @@ async def get_story_structure(
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
 
-    # Cache hit — return immediately without consuming rate limit quota
+    # ── YAML-first: use pre-stored structure table if available (#1377) ──────
+    yaml_table = story.get("story_structure_table")
+    if yaml_table:
+        result = _format_yaml_structure_table(yaml_table)
+        # Store in cache so grade endpoint can use it; log as zero-cost hit
+        _set_cached_structure(story_id, result)
+        log_ai_usage(
+            db,
+            endpoint=f"/stories/{story_id}/structure",
+            step="structure",
+            student_id=current_user.id,
+            story_id=story_id,
+            story_title=story["title"],
+            input_tokens=0,
+            output_tokens=0,
+            model="yaml",
+            latency_ms=0,
+            success=True,
+            model_version=None,
+            prompt_char_count=None,
+            response_char_count=None,
+            content_filtered=False,
+            cache_hit=True,
+            prompt_template_id="story_structure_yaml",
+        )
+        return result
+
+    # ── In-memory cache hit — return immediately without rate-limit quota ───
     cached = _get_cached_structure(story_id)
     if cached is not None:
         return cached
 
-    # Cache miss — enforce rate limit before calling AI
+    # ── Cache miss — enforce rate limit before calling AI ───────────────────
     rl_key = f"ai:{get_client_key(request)}"
     if not ai_rate_limiter.check(rl_key, max_requests=5, window_seconds=60):
         raise HTTPException(status_code=429, detail="AI endpoint rate limit exceeded. Please wait before retrying.")
