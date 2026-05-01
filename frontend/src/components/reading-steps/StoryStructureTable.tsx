@@ -1,9 +1,12 @@
 /**
- * StoryStructureTable — 互動式文章重點表 (#615, #845, #1082)
+ * StoryStructureTable — 互動式文章重點表 (#615, #845, #1082, #1330)
  *
  * Fetches AI-generated story structure from /api/stories/{id}/structure.
  * Supports interactive fill-in-the-blank and checkbox questions with AI grading.
  * Genre-aware: 記敘文 shows 主角/主題/事例, 說明文 shows concept structure, etc.
+ *
+ * Layout: pure CSS Grid (div-based). Replaced <table> to avoid the table
+ * layout algorithm fighting flex/grid height containment (#1330).
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -154,7 +157,7 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 w-full">
       {options.map((opt, idx) => {
         const isSelected = selected.includes(idx);
         const isCorrectOption = (correctOptions ?? []).includes(idx);
@@ -181,7 +184,7 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
         return (
           <label
             key={idx}
-            className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors select-none ${rowStyle} ${
+            className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors select-none w-full min-w-0 ${rowStyle} ${
               submitted ? 'cursor-default' : 'cursor-pointer'
             }`}
           >
@@ -208,6 +211,54 @@ const CheckboxCell: React.FC<CheckboxCellProps> = ({
         <p className="text-xs text-gray-500 pl-1">{gradeItem.feedback}</p>
       )}
     </div>
+  );
+};
+
+// ── CellContent ───────────────────────────────────────────────────────────────
+// Renders the interactive content for a single cell (display / fill_blank / checkbox)
+
+interface CellContentProps {
+  row: StructureRow | StructureSubRow;
+  answerVal: string | number[] | undefined;
+  submitted: boolean;
+  gradeItem: GradeResultItem | undefined;
+  onChangeString: (v: string) => void;
+  onChangeArray: (v: number[]) => void;
+}
+
+const CellContent: React.FC<CellContentProps> = ({
+  row,
+  answerVal,
+  submitted,
+  gradeItem,
+  onChangeString,
+  onChangeArray,
+}) => {
+  // Treat missing/undefined interactive_type as 'display' (backward-compatible)
+  if (!row.interactive_type || row.interactive_type === 'display') {
+    return <span className="text-gray-800 leading-relaxed">{row.value}</span>;
+  }
+  if (row.interactive_type === 'checkbox') {
+    return (
+      <CheckboxCell
+        options={row.options ?? []}
+        selected={Array.isArray(answerVal) ? (answerVal as number[]) : []}
+        onChange={onChangeArray}
+        submitted={submitted}
+        gradeItem={gradeItem}
+        correctOptions={row.correct_options}
+      />
+    );
+  }
+  // fill_blank
+  return (
+    <FillBlankCell
+      hint={row.hint}
+      value={typeof answerVal === 'string' ? answerVal : ''}
+      onChange={onChangeString}
+      submitted={submitted}
+      gradeItem={gradeItem}
+    />
   );
 };
 
@@ -362,143 +413,164 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
 
   const { rows } = structure;
 
-  return (
-    <div className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between">
-        <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>
-        {submitted && score >= 0 && (
-          <span
-            className={`text-sm font-bold px-3 py-1 rounded-full ${
-              score >= 80
-                ? 'bg-emerald-100 text-emerald-700'
-                : 'bg-amber-100 text-amber-700'
-            }`}
+  // ── CSS Grid row rendering ─────────────────────────────────────────────────
+  //
+  // Grid: 3 columns — [category label | sub-label | content]
+  // gridTemplateColumns: auto auto 1fr
+  //   col 1 (auto): category label — shrinks to content width
+  //   col 2 (auto): sub-label — shrinks to content width; empty for flat rows
+  //   col 3 (1fr): cell content — takes remaining space
+  //
+  // Row with sub_rows (e.g. 事例 → 背景/経過/結果):
+  //   Col 1 spans all sub-rows via gridRow: "N / span M"
+  //   Col 2 & 3: one pair per sub-row
+  //
+  // Flat row (no sub_rows):
+  //   Col 1: category label
+  //   Col 2+3 merged (gridColumn: "2 / span 2"): cell content
+  //
+  // Border strategy:
+  //   - right border on col 1 and col 2 (borderRight)
+  //   - bottom border on all cells except last visible row
+
+  const totalRows = rows.length;
+  const gridItems: React.ReactNode[] = [];
+  let gridRowStart = 2; // row 1 is the header (col-span-3)
+
+  rows.forEach((row, rowIdx) => {
+    const isLastRow = rowIdx === totalRows - 1;
+
+    if (row.sub_rows && row.sub_rows.length > 0) {
+      const subCount = row.sub_rows.length;
+
+      // Col 1: category label spanning all sub-rows
+      gridItems.push(
+        <div
+          key={`cat-${rowIdx}`}
+          className={`bg-amber-50 px-4 py-3 font-bold text-gray-800 text-center flex items-center justify-center border-r-[1.5px] border-gray-300 ${
+            isLastRow ? '' : 'border-b-[1.5px] border-gray-300'
+          }`}
+          style={{
+            gridColumn: 1,
+            gridRow: `${gridRowStart} / span ${subCount}`,
+          }}
+        >
+          {row.label}
+        </div>,
+      );
+
+      row.sub_rows.forEach((sub, subIdx) => {
+        const key = answerKey(rowIdx, subIdx);
+        const gradeItem = submitted
+          ? findGradeItem(gradeResults, rowIdx, subIdx)
+          : undefined;
+        const isLastSubRow = subIdx === subCount - 1;
+        const bottomBorder =
+          isLastRow && isLastSubRow ? '' : 'border-b-[1.5px] border-gray-300';
+        const currentGridRow = gridRowStart + subIdx;
+
+        // Col 2: sub-label
+        gridItems.push(
+          <div
+            key={`sub-label-${rowIdx}-${subIdx}`}
+            className={`bg-gray-50 px-3 py-3 font-semibold text-gray-600 text-center flex items-center justify-center border-r-[1.5px] border-gray-300 ${bottomBorder}`}
+            style={{ gridColumn: 2, gridRow: currentGridRow }}
           >
-            {score >= 80 ? '🎉 表現超棒！' : '💪 繼續加油'}
-          </span>
-        )}
-      </div>
+            {sub.label}
+          </div>,
+        );
 
-      {/* Table */}
-      <table className="w-full text-base" style={{ borderCollapse: 'collapse' }}>
-        <tbody>
-          {rows.map((row, rowIdx) =>
-            row.sub_rows && row.sub_rows.length > 0 ? (
-              row.sub_rows.map((sub, subIdx) => {
-                const key = answerKey(rowIdx, subIdx);
-                const gradeItem = submitted
-                  ? findGradeItem(gradeResults, rowIdx, subIdx)
-                  : undefined;
+        // Col 3: cell content
+        gridItems.push(
+          <div
+            key={`cell-${rowIdx}-${subIdx}`}
+            className={`px-4 py-3 ${bottomBorder}`}
+            style={{ gridColumn: 3, gridRow: currentGridRow }}
+          >
+            <CellContent
+              row={sub}
+              answerVal={answers[key]}
+              submitted={submitted}
+              gradeItem={gradeItem}
+              onChangeString={(v) => setAnswer(key, v)}
+              onChangeArray={(v) => setAnswer(key, v)}
+            />
+          </div>,
+        );
+      });
 
-                return (
-                  <tr
-                    key={`${rowIdx}-${subIdx}`}
-                    style={{ borderBottom: '1.5px solid #d1d5db' }}
-                  >
-                    {subIdx === 0 && (
-                      <td
-                        rowSpan={row.sub_rows!.length}
-                        className="bg-amber-50 px-4 py-3 font-bold text-gray-800 text-center align-middle w-20"
-                        style={{ borderRight: '1.5px solid #d1d5db' }}
-                      >
-                        {row.label}
-                      </td>
-                    )}
-                    <td
-                      className="bg-gray-50 px-3 py-3 font-semibold text-gray-600 text-center w-16"
-                      style={{ borderRight: '1.5px solid #d1d5db' }}
-                    >
-                      {sub.label}
-                    </td>
-                    <td className="px-4 py-3 text-gray-800 leading-relaxed">
-                      {sub.interactive_type === 'display' ? (
-                        <span>{sub.value}</span>
-                      ) : sub.interactive_type === 'checkbox' ? (
-                        <CheckboxCell
-                          options={sub.options ?? []}
-                          selected={
-                            Array.isArray(answers[key])
-                              ? (answers[key] as number[])
-                              : []
-                          }
-                          onChange={(v) => setAnswer(key, v)}
-                          submitted={submitted}
-                          gradeItem={gradeItem}
-                          correctOptions={sub.correct_options}
-                        />
-                      ) : (
-                        <FillBlankCell
-                          hint={sub.hint}
-                          value={
-                            typeof answers[key] === 'string'
-                              ? (answers[key] as string)
-                              : ''
-                          }
-                          onChange={(v) => setAnswer(key, v)}
-                          submitted={submitted}
-                          gradeItem={gradeItem}
-                        />
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr key={rowIdx} style={{ borderBottom: '1.5px solid #d1d5db' }}>
-                <td
-                  className="bg-amber-50 px-4 py-3 font-bold text-gray-800 text-center w-20"
-                  style={{ borderRight: '1.5px solid #d1d5db' }}
-                >
-                  {row.label}
-                </td>
-                {row.interactive_type === 'display' ? (
-                  <td colSpan={2} className="px-5 py-3 text-gray-800 leading-relaxed">
-                    {row.value}
-                  </td>
-                ) : (
-                  <td colSpan={2} className="px-4 py-3">
-                    {row.interactive_type === 'checkbox' ? (
-                      <CheckboxCell
-                        options={row.options ?? []}
-                        selected={
-                          Array.isArray(answers[answerKey(rowIdx)])
-                            ? (answers[answerKey(rowIdx)] as number[])
-                            : []
-                        }
-                        onChange={(v) => setAnswer(answerKey(rowIdx), v)}
-                        submitted={submitted}
-                        gradeItem={
-                          submitted
-                            ? findGradeItem(gradeResults, rowIdx)
-                            : undefined
-                        }
-                        correctOptions={row.correct_options}
-                      />
-                    ) : (
-                      <FillBlankCell
-                        hint={row.hint}
-                        value={
-                          typeof answers[answerKey(rowIdx)] === 'string'
-                            ? (answers[answerKey(rowIdx)] as string)
-                            : ''
-                        }
-                        onChange={(v) => setAnswer(answerKey(rowIdx), v)}
-                        submitted={submitted}
-                        gradeItem={
-                          submitted
-                            ? findGradeItem(gradeResults, rowIdx)
-                            : undefined
-                        }
-                      />
-                    )}
-                  </td>
-                )}
-              </tr>
-            ),
+      gridRowStart += subCount;
+    } else {
+      // Flat row
+      const bottomBorder = isLastRow ? '' : 'border-b-[1.5px] border-gray-300';
+      const key = answerKey(rowIdx);
+      const gradeItem = submitted
+        ? findGradeItem(gradeResults, rowIdx)
+        : undefined;
+
+      // Col 1: category label
+      gridItems.push(
+        <div
+          key={`cat-${rowIdx}`}
+          className={`bg-amber-50 px-4 py-3 font-bold text-gray-800 text-center flex items-center justify-center border-r-[1.5px] border-gray-300 ${bottomBorder}`}
+          style={{ gridColumn: 1, gridRow: gridRowStart }}
+        >
+          {row.label}
+        </div>,
+      );
+
+      // Col 2+3: content (col-span-2)
+      gridItems.push(
+        <div
+          key={`cell-${rowIdx}`}
+          className={`px-4 py-3 leading-relaxed ${bottomBorder}`}
+          style={{ gridColumn: '2 / span 2', gridRow: gridRowStart }}
+        >
+          <CellContent
+            row={row}
+            answerVal={answers[key]}
+            submitted={submitted}
+            gradeItem={gradeItem}
+            onChangeString={(v) => setAnswer(key, v)}
+            onChangeArray={(v) => setAnswer(key, v)}
+          />
+        </div>,
+      );
+
+      gridRowStart += 1;
+    }
+  });
+
+  return (
+    <div className="rounded-xl border-2 border-gray-300 shadow-sm max-w-2xl mx-auto overflow-hidden">
+      {/* CSS Grid container — replaces <table> to avoid table layout algorithm
+          fighting flex/grid height containment (#1330) */}
+      <div
+        className="grid w-full text-base bg-white"
+        style={{ gridTemplateColumns: 'auto auto 1fr' }}
+      >
+        {/* Header row — spans all 3 columns */}
+        <div
+          className="bg-amber-50 border-b-2 border-amber-400 px-5 py-3 flex items-center justify-between"
+          style={{ gridColumn: '1 / span 3', gridRow: 1 }}
+        >
+          <span className="text-amber-800 font-bold text-base">📋 文章重點表</span>
+          {submitted && score >= 0 && (
+            <span
+              className={`text-sm font-bold px-3 py-1 rounded-full ${
+                score >= 80
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700'
+              }`}
+            >
+              {score >= 80 ? '🎉 表現超棒！' : '💪 繼續加油'}
+            </span>
           )}
-        </tbody>
-      </table>
+        </div>
+
+        {/* Data rows (built above) */}
+        {gridItems}
+      </div>
 
       {/* Submit / Result bar */}
       <div className="px-5 py-4 border-t-2 border-gray-200 bg-gray-50">

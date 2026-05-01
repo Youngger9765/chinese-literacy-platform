@@ -2,6 +2,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import StoryStructureTable from '../StoryStructureTable';
 
+// Mock useAuth so the component can render without AuthProvider in tests
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ token: null }),
+}));
+
 const simpleRows = [
   { label: '主角', value: '小明' },
   { label: '主題', value: '友情的重要性' },
