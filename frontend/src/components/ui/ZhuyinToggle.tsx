@@ -11,9 +11,9 @@ interface ZhuyinToggleProps {
 }
 
 const SEGMENTS: Array<{ mode: ZhuyinMode; label: string; title: string }> = [
-  { mode: 'none', label: '無', title: '關閉注音' },
-  { mode: 'all',  label: '全', title: '顯示全文注音' },
-  // Future: { mode: 'difficult', label: '難字', title: '僅標示難字注音' }
+  { mode: 'none',      label: '無',   title: '關閉注音' },
+  { mode: 'difficult', label: '難字', title: '僅標示難字注音（詞彙表）' },
+  { mode: 'all',       label: '全',   title: '顯示全文注音' },
 ];
 
 export default function ZhuyinToggle({ mode, ready, onModeChange }: ZhuyinToggleProps) {

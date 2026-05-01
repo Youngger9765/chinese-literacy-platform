@@ -95,7 +95,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     savedProgress.current?.lineResults ?? []
   );
   const [streak, setStreak] = useState(0);
-  const { zhuyinActive, processLines } = useZhuyin();
+  const { zhuyinActive, isZhuyinAny, processLinesSelective } = useZhuyin();
+  const vocabWords = useMemo(
+    () => (story.vocabulary ?? []).map((v) => v.word).filter(Boolean),
+    [story.vocabulary]
+  );
   const [isAwaitingGemini, setIsAwaitingGemini] = useState(false);
   const [lastDiffTokens, setLastDiffTokens] = useState<DiffToken[] | null>(null);
   const [showRecorder, setShowRecorder] = useState(false);
@@ -242,10 +246,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       .catch(() => {});
   }, []);
 
-  /** Pre-process each story line through the polyphonic processor for zhuyin rendering */
+  /** Pre-process each story line; respects 3-state mode (none/difficult/all) */
   const zhuyinLines = useMemo(
-    () => processLines(story.content),
-    [story.content, processLines]
+    () => processLinesSelective(story.content, vocabWords),
+    [story.content, vocabWords, processLinesSelective]
   );
 
   /** Compute completed/current/locked status for each paragraph. */
@@ -815,7 +819,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
       style={{
-        fontFamily: zhuyinActive
+        fontFamily: isZhuyinAny
           ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
           : undefined,
       }}
@@ -834,7 +838,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
               isAdvancing={isAdvancing}
               fontSizePx={fontSizePx}
               zhuyinLine={zhuyinLines ? zhuyinLines[currentLineIndex] : null}
-              zhuyinActive={zhuyinActive}
+              zhuyinActive={isZhuyinAny}
               isSessionActive={stt.isSessionActive}
               isPreparing={stt.isPreparing}
               isTtsSpeaking={isTtsSpeaking}

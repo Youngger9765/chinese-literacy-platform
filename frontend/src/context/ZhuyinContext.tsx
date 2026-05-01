@@ -1,62 +1,72 @@
 /**
- * ZhuyinContext -- global zhuyin (bopomofo) segmented-control state.
+ * ZhuyinContext -- global zhuyin (bopomofo) 3-state segmented-control.
  *
- * zhuyinMode:
- *   'none' -- no ruby annotation (was zhuyinEnabled=false)
- *   'all'  -- ruby on all characters (was zhuyinEnabled=true)
+ * THREE display states:
+ *   'none'      -- no ruby annotation
+ *   'difficult' -- ruby only on vocabulary words (v1: lesson YAML vocabulary field)
+ *   'all'       -- ruby on all characters
  *
- * Visual is a 2-segment control (no zhuyin / full zhuyin).
- * A third segment for difficult-word-only mode is reserved for a future issue.
+ * Internally, zhuyinMode is 'none' | 'all' for the processor gate, and
+ * vocabOnly (boolean) selects between 'difficult' and 'all' when mode='all'.
+ * The combined triState is the canonical 3-way value exposed to the UI.
  *
  * Backward-compat helpers:
- *   zhuyinActive  -- true when mode is 'all' AND processor is ready
- *   isZhuyinAny   -- alias of zhuyinActive (components may use this)
+ *   zhuyinActive  -- true when triState is 'all' AND processor is ready
+ *   isZhuyinAny   -- true when triState is 'difficult' OR 'all' AND ready
  *   isZhuyinAll   -- alias of zhuyinActive
- *   isZhuyinNone  -- true when mode is 'none'
- *   zhuyinEnabled -- true when mode !== 'none' (legacy boolean compat)
+ *   isZhuyinNone  -- true when triState is 'none'
+ *   zhuyinEnabled -- true when triState !== 'none' (legacy boolean compat)
+ *
+ * processLinesSelective(lines, vocabWords):
+ *   - triState='none'      -> null
+ *   - triState='all'       -> fully-processed ruby lines
+ *   - triState='difficult' -> ruby only on vocab-word substrings
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { PolyphonicProcessor, buildZhuyinString } from '../components/zhuyin/polyphonicProcessor';
 
-export type ZhuyinMode = 'none' | 'all';
+export type ZhuyinMode = 'none' | 'difficult' | 'all';
 
-const STORAGE_KEY = 'zhuyin_mode';
+const STORAGE_KEY = 'zhuyin_mode_v2';
 const LEGACY_KEY  = 'zhuyin_enabled';
 
-const MODE_CYCLE: ZhuyinMode[] = ['none', 'all'];
+const MODE_CYCLE: ZhuyinMode[] = ['none', 'difficult', 'all'];
 
 function readStoredMode(): ZhuyinMode {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === 'none' || raw === 'all') return raw;
-    // Migrate from legacy boolean key
+    if (raw === 'none' || raw === 'difficult' || raw === 'all') return raw;
+    // Migrate from old boolean key
     const legacy = localStorage.getItem(LEGACY_KEY);
     if (legacy === 'false') return 'none';
-    return 'all'; // default: full zhuyin on
+    return 'all';
   } catch {
     return 'all';
   }
 }
 
 interface ZhuyinContextValue {
+  /** 3-state mode: 'none' | 'difficult' | 'all' */
   zhuyinMode: ZhuyinMode;
   zhuyinReady: boolean;
   /** true when mode='all' AND processor ready */
   zhuyinActive: boolean;
-  /** alias of zhuyinActive */
+  /** true when mode='difficult' OR 'all' AND processor ready */
   isZhuyinAny: boolean;
   isZhuyinAll: boolean;
   isZhuyinNone: boolean;
-  /** @deprecated -- use zhuyinMode; kept for backward compat */
+  /** @deprecated -- true when mode !== 'none' */
   zhuyinEnabled: boolean;
   setZhuyinMode: (mode: ZhuyinMode) => void;
   /** @deprecated -- use setZhuyinMode */
   setZhuyinEnabled: (enabled: boolean) => void;
-  /** Cycle: none -> all -> none */
+  /** Cycle: none -> difficult -> all -> none */
   toggleZhuyin: () => void;
   processZhuyin: (text: string) => string;
   processLines: (lines: string[]) => string[] | null;
+  /** 3-state selective processing: respects 'none'/'difficult'/'all' modes */
+  processLinesSelective: (lines: string[], vocabWords: string[]) => string[] | null;
 }
 
 const ZhuyinContext = createContext<ZhuyinContextValue>({
@@ -72,6 +82,7 @@ const ZhuyinContext = createContext<ZhuyinContextValue>({
   toggleZhuyin: () => {},
   processZhuyin: (t) => t,
   processLines: () => null,
+  processLinesSelective: () => null,
 });
 
 export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -79,7 +90,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [zhuyinReady, setZhuyinReady] = useState(() => PolyphonicProcessor.instance.isLoaded);
 
   const zhuyinActive = zhuyinReady && zhuyinMode === 'all';
-  const isZhuyinAny  = zhuyinActive;
+  const isZhuyinAny  = zhuyinReady && zhuyinMode !== 'none';
   const isZhuyinAll  = zhuyinActive;
   const isZhuyinNone = zhuyinMode === 'none';
   const zhuyinEnabled = zhuyinMode !== 'none';
@@ -104,7 +115,6 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, []);
 
-  // Legacy compat
   const setZhuyinEnabled = useCallback((enabled: boolean) => {
     setZhuyinMode(enabled ? 'all' : 'none');
   }, [setZhuyinMode]);
@@ -121,22 +131,79 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   const processZhuyin = useCallback((text: string): string => {
-    if (!zhuyinActive) return text;
+    if (!isZhuyinAny) return text;
     try {
       return buildZhuyinString(PolyphonicProcessor.instance.process(text));
     } catch {
       return text;
     }
-  }, [zhuyinActive]);
+  }, [isZhuyinAny]);
 
   const processLines = useCallback((lines: string[]): string[] | null => {
-    if (!zhuyinActive) return null;
+    if (!isZhuyinAny) return null;
     try {
       return lines.map((line) => buildZhuyinString(PolyphonicProcessor.instance.process(line)));
     } catch {
       return null;
     }
-  }, [zhuyinActive]);
+  }, [isZhuyinAny]);
+
+  const processLinesSelective = useCallback(
+    (lines: string[], vocabWords: string[]): string[] | null => {
+      if (!zhuyinReady || zhuyinMode === 'none') return null;
+      if (zhuyinMode === 'all') {
+        try {
+          return lines.map((line) =>
+            buildZhuyinString(PolyphonicProcessor.instance.process(line))
+          );
+        } catch {
+          return null;
+        }
+      }
+      // 'difficult': ruby only on vocab word substrings
+      const validWords = vocabWords.filter(Boolean);
+      if (validWords.length === 0) return null;
+      try {
+        return lines.map((line) => {
+          const matches: Array<{ start: number; end: number }> = [];
+          for (const word of validWords) {
+            let pos = 0;
+            while (pos < line.length) {
+              const idx = line.indexOf(word, pos);
+              if (idx === -1) break;
+              matches.push({ start: idx, end: idx + word.length });
+              pos = idx + 1;
+            }
+          }
+          if (matches.length === 0) return line;
+          matches.sort((a, b) => a.start - b.start);
+          const deduped: typeof matches = [];
+          let cursor = 0;
+          for (const m of matches) {
+            if (m.start >= cursor) { deduped.push(m); cursor = m.end; }
+          }
+          let result = '';
+          let charPos = 0;
+          for (const { start, end } of deduped) {
+            if (charPos < start) result += line.slice(charPos, start);
+            try {
+              result += buildZhuyinString(
+                PolyphonicProcessor.instance.process(line.slice(start, end))
+              );
+            } catch {
+              result += line.slice(start, end);
+            }
+            charPos = end;
+          }
+          if (charPos < line.length) result += line.slice(charPos);
+          return result;
+        });
+      } catch {
+        return null;
+      }
+    },
+    [zhuyinReady, zhuyinMode]
+  );
 
   return (
     <ZhuyinContext.Provider value={{
@@ -152,6 +219,7 @@ export const ZhuyinProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       toggleZhuyin,
       processZhuyin,
       processLines,
+      processLinesSelective,
     }}>
       {children}
     </ZhuyinContext.Provider>
