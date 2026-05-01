@@ -207,6 +207,9 @@ def _load_layer1_lessons() -> list[dict]:
             "reading_benchmark": data.get("reading_benchmark"),
             "source_file": data.get("source_file"),
             "strategy_exercise": data.get("strategy_exercise"),
+            # Schema-driven step composition (#1374): pass through if present in YAML.
+            # None (absent) means frontend uses DEFAULT_STEP_SEQUENCE.
+            "step_sequence": data.get("step_sequence") or None,
             "intro": _build_intro(data),
             "_layer": 1,
         }
@@ -321,6 +324,9 @@ def _load_layer2_lessons(
             "source_file": data.get("source_file"),
             "strategy_exercise": data.get("strategy_exercises"),  # note: parsed key differs
             "display_order": display_order,
+            # Schema-driven step composition (#1374): pass through if present in YAML.
+            # None (absent) means frontend uses DEFAULT_STEP_SEQUENCE.
+            "step_sequence": data.get("step_sequence") or None,
             "intro": _build_intro({**data, "reading_strategy": strategy}),
             "_layer": 2,
         }

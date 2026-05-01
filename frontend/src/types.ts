@@ -118,6 +118,12 @@ export interface Story {
   vocabBank?: Record<string, string>;        // { A: "疑難雜症", ... } for fillInBlank
   knowledgeVideoUrl?: string;               // ⑨ 知識補給站 YouTube URL
   strategyExercise?: StrategyExercise;      // 閱讀策略練習 (#943)
+  /**
+   * Optional per-lesson step sequence loaded from YAML `step_sequence` field (#1374).
+   * When present, overrides DEFAULT_STEP_SEQUENCE for StepperNav and next/prev navigation.
+   * Absent for all legacy (Layer-1) lessons — they use DEFAULT_STEP_SEQUENCE as fallback.
+   */
+  stepSequence?: string[];
 }
 
 export interface ReadingAttempt {

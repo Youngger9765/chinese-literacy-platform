@@ -19,6 +19,7 @@ import { useKaraoke } from '../../context/KaraokeContext';
 import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
+import { useStepSequence } from '../../hooks/useStepSequence';
 import { useAppView } from '../../hooks/useAppView';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
@@ -86,11 +87,11 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 // ---------------------------------------------------------------------------
 
 interface StepDotsProps {
-  steps: typeof ACTIVE_STEPS;
+  steps: ReturnType<typeof useStepSequence>;
   currentStepIndex: number;
   completedSet: Set<string>;
   allNonReportDone: boolean;
-  onStepClick: (step: typeof ACTIVE_STEPS[number]) => void;
+  onStepClick: (step: ReturnType<typeof useStepSequence>[number]) => void;
 }
 
 const StepDots: React.FC<StepDotsProps> = ({
@@ -183,14 +184,18 @@ const ImmersiveTopBar: React.FC = () => {
   const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
   const { karaokeEnabled, toggleKaraoke } = useKaraoke();
 
+  // Resolve the active step list driven by the current lesson's step_sequence (#1374).
+  // Falls back to DEFAULT_STEP_SEQUENCE when lesson has no step_sequence field.
+  const activeSteps = useStepSequence(selectedStory ?? null);
+
   // Find current step index and label
-  const currentStepIndex = ACTIVE_STEPS.findIndex((s) => s.view === currentView);
-  const currentStep = currentStepIndex >= 0 ? ACTIVE_STEPS[currentStepIndex] : null;
-  const totalSteps = ACTIVE_STEPS.length;
+  const currentStepIndex = activeSteps.findIndex((s) => s.view === currentView);
+  const currentStep = currentStepIndex >= 0 ? activeSteps[currentStepIndex] : null;
+  const totalSteps = activeSteps.length;
 
   // Determine completed steps
   const completedSet = new Set(session?.completedSteps ?? []);
-  const allNonReportDone = ACTIVE_STEPS.filter(s => s.id !== 'report').every(s => completedSet.has(s.id));
+  const allNonReportDone = activeSteps.filter(s => s.id !== 'report').every(s => completedSet.has(s.id));
 
   const handleBack = () => {
     if (selectedStory) {
@@ -200,7 +205,7 @@ const ImmersiveTopBar: React.FC = () => {
     }
   };
 
-  const handleStepClick = (step: typeof ACTIVE_STEPS[number]) => {
+  const handleStepClick = (step: ReturnType<typeof useStepSequence>[number]) => {
     if (!selectedStory) return;
     // Report only accessible when all other steps done
     if (step.id === 'report' && !allNonReportDone) return;
@@ -210,19 +215,19 @@ const ImmersiveTopBar: React.FC = () => {
   // Issue #1094: prev/next step arrows skip the locked report step
   const prevStep = useMemo(() => {
     for (let i = currentStepIndex - 1; i >= 0; i--) {
-      const s = ACTIVE_STEPS[i];
+      const s = activeSteps[i];
       if (!(s.id === 'report' && !allNonReportDone)) return s;
     }
     return null;
-  }, [currentStepIndex, allNonReportDone]);
+  }, [activeSteps, currentStepIndex, allNonReportDone]);
 
   const nextStep = useMemo(() => {
-    for (let i = currentStepIndex + 1; i < ACTIVE_STEPS.length; i++) {
-      const s = ACTIVE_STEPS[i];
+    for (let i = currentStepIndex + 1; i < activeSteps.length; i++) {
+      const s = activeSteps[i];
       if (!(s.id === 'report' && !allNonReportDone)) return s;
     }
     return null;
-  }, [currentStepIndex, allNonReportDone]);
+  }, [activeSteps, currentStepIndex, allNonReportDone]);
 
   return (
     <header
@@ -281,7 +286,7 @@ const ImmersiveTopBar: React.FC = () => {
           </button>
 
           <StepDots
-            steps={ACTIVE_STEPS}
+            steps={activeSteps}
             currentStepIndex={currentStepIndex}
             completedSet={completedSet}
             allNonReportDone={allNonReportDone}
