@@ -245,17 +245,25 @@ interface UnifiedQuestion {
   correctIndex: number;
   options: string[];
   explanation?: string;
-  source: 'ai' | 'local';
+  /**
+   * 'pregenerated' = pre-authored MCQ from lesson YAML (Issue #1402, default path)
+   * 'ai' = AI-generated at request time (legacy fallback)
+   * 'local' = rule-based local fallback when API unavailable
+   */
+  source: 'pregenerated' | 'ai' | 'local';
 }
 
-/** Convert API question to unified format */
-const fromApiQuestion = (q: ApiQuestion): UnifiedQuestion => ({
+/** Convert API question to unified format. Source comes from response level. */
+const fromApiQuestion = (
+  q: ApiQuestion,
+  source: 'pregenerated' | 'ai' = 'ai',
+): UnifiedQuestion => ({
   id: q.id,
   question: q.question,
   correctIndex: q.correct_index,
   options: q.options,
   explanation: q.explanation,
-  source: 'ai',
+  source,
 });
 
 /** Convert local question to unified format */
@@ -298,10 +306,14 @@ const ExitTicket: React.FC<ExitTicketProps> = ({
     try {
       const wrongChars = wrongTokens.map(t => t.expected);
       const result = await generateExitTicket(token, dbSessionId, storyContent, wrongChars);
-      if (result.source === 'ai' && result.questions.length > 0) {
-        setQuestions(result.questions.map(fromApiQuestion));
+      // Accept both 'pregenerated' (YAML, default since #1402) and 'ai' (legacy fallback)
+      if (
+        (result.source === 'pregenerated' || result.source === 'ai') &&
+        result.questions.length > 0
+      ) {
+        setQuestions(result.questions.map(q => fromApiQuestion(q, result.source as 'pregenerated' | 'ai')));
       } else {
-        // AI unavailable — fall back to local
+        // API unavailable / fallback — use local rule-based questions
         setQuestions(localQuestions.map(fromLocalQuestion));
       }
     } catch {
