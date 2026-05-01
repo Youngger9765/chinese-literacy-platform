@@ -236,17 +236,33 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     let found = false;
     const walker = document.createTreeWalker(paraEl, NodeFilter.SHOW_TEXT);
     let node: Text | null;
+    // DEBUG #1325: log all text nodes encountered by TreeWalker
+    const debugNodes: Array<{ text: string; rawLen: number; isTarget: boolean; startOffset?: number }> = [];
     while ((node = walker.nextNode() as Text | null)) {
       if (node === range.startContainer) {
         // range.startOffset is a UTF-16 offset into this text node; convert to
         // raw-character count by stripping PUA selectors up to that point.
-        charStart += countRawChars(node.textContent ?? '', range.startOffset);
+        const addedRaw = countRawChars(node.textContent ?? '', range.startOffset);
+        debugNodes.push({ text: (node.textContent ?? '').slice(0, 20), rawLen: countRawChars(node.textContent ?? ''), isTarget: true, startOffset: range.startOffset });
+        charStart += addedRaw;
         found = true;
         break;
       }
       // Accumulate raw (non-selector) character count for completed nodes.
-      charStart += countRawChars(node.textContent ?? '');
+      const rawLen = countRawChars(node.textContent ?? '');
+      debugNodes.push({ text: (node.textContent ?? '').slice(0, 20), rawLen, isTarget: false });
+      charStart += rawLen;
     }
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG #1325] getSelectionInfo:', {
+      paraIdx: paragraphIndex,
+      selectedText: selectedText.slice(0, 30),
+      charStart,
+      rawSelectedLength: countRawChars(selectedText),
+      charEnd: charStart + countRawChars(selectedText),
+      startContainerParent: (range.startContainer.parentElement?.tagName ?? 'none') + ' > ' + (range.startContainer.parentElement?.className ?? '').slice(0, 40),
+      nodes: debugNodes,
+    });
     if (!found) return null;
 
     // selectedText from range.toString() also includes PUA selector code points;
