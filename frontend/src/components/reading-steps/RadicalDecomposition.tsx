@@ -87,11 +87,11 @@ const RelatedCharCard: React.FC<RelatedCharCardProps> = ({ item, isSelected, onC
       'flex flex-col items-center gap-1 px-3 py-2 rounded-xl border transition-all active:scale-95 text-left',
       isSelected
         ? 'bg-indigo-50 border-indigo-300 ring-1 ring-indigo-200'
-        : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300',
+        : 'bg-surface-container-low border-gray-200 hover:bg-surface-container hover:border-gray-300',
     ].join(' ')}
     aria-pressed={isSelected}
   >
-    <span className="text-2xl font-bold text-gray-800 leading-none">{item.char}</span>
+    <span className="text-2xl font-bold text-on-surface leading-none">{item.char}</span>
   </button>
 );
 
@@ -115,12 +115,12 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
     // Character is an independent form (獨體字) or not in the database.
     // Show a friendly educational message instead of silently hiding the panel.
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+      <div className="bg-surface rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
         <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
-          <span className="text-base font-bold text-gray-700 whitespace-nowrap">部件拆解</span>
+          <span className="text-base font-bold text-on-surface-variant whitespace-nowrap">部件拆解</span>
         </div>
         <div className="p-4 flex flex-col items-center gap-3 text-center">
-          <span className="text-4xl font-black text-gray-900 leading-none">{char}</span>
+          <span className="text-4xl font-black text-on-surface leading-none">{char}</span>
           <p className="text-sm text-gray-600">
             此字為<span className="font-semibold text-indigo-700">獨體字</span>，無法再拆解
           </p>
@@ -198,10 +198,10 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+    <div className="bg-surface rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
       {/* Header */}
       <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-100 flex items-center gap-2">
-        <span className="text-base font-bold text-gray-700 whitespace-nowrap">部件拆解</span>
+        <span className="text-base font-bold text-on-surface-variant whitespace-nowrap">部件拆解</span>
         <span className="text-xs text-gray-400 whitespace-nowrap">點擊部件查看相關字</span>
       </div>
 
@@ -210,7 +210,7 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
         <div className="flex items-center justify-center gap-3">
           {/* The character itself */}
           <div className="flex flex-col items-center shrink-0">
-            <span className="text-3xl font-black text-gray-900 leading-none">{char}</span>
+            <span className="text-3xl font-black text-on-surface leading-none">{char}</span>
             <span className="text-[10px] text-gray-400 mt-1 whitespace-nowrap">目標字</span>
           </div>
 
@@ -234,7 +234,7 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
                     ].join(' ')}
                     title={info?.meaning ?? comp.label}
                   >
-                    <span className="text-2xl font-bold text-gray-800 leading-none">{comp.radical}</span>
+                    <span className="text-2xl font-bold text-on-surface leading-none">{comp.radical}</span>
                     <span
                       className={`text-[8px] px-1 py-0.5 rounded-full border font-medium whitespace-nowrap ${ROLE_STYLES[comp.role]}`}
                     >
@@ -263,10 +263,10 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
           </div>
         ) : displayRadical && relatedChars.length === 0 ? (
           /* 部件資料庫尚未收錄此部件 — 顯示 fallback 以免點擊無回饋（#1099） */
-          <div className="rounded-xl bg-gray-50 border border-dashed border-gray-300 px-4 py-3 space-y-1">
+          <div className="rounded-xl bg-surface-container border border-dashed border-gray-300 px-4 py-3 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-lg font-bold text-gray-700">{displayRadical}</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full border border-gray-200 bg-white text-gray-500 font-medium">
+              <span className="text-lg font-bold text-on-surface-variant">{displayRadical}</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full border border-gray-200 bg-surface-container-low text-on-surface-variant font-medium">
                 部件
               </span>
             </div>
@@ -295,8 +295,8 @@ const RadicalDecomposition: React.FC<RadicalDecompositionProps> = ({ char }) => 
 
             {/* Selected character meaning popup */}
             {selectedRelated && (
-              <div className="mt-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 text-sm text-gray-700">
-                <span className="font-bold text-gray-900">{selectedRelated.char}</span>
+              <div className="mt-2 px-3 py-2 bg-surface-container-low rounded-xl border border-gray-200 text-sm text-on-surface-variant">
+                <span className="font-bold text-on-surface">{selectedRelated.char}</span>
                 {' — '}
                 {getRelatedDisplayMeaning(selectedRelated)}
               </div>
