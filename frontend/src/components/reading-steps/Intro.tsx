@@ -106,12 +106,12 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </span>
                 <span className="text-[10px] text-gray-400">難度 {story.level}</span>
               </div>
-              <h1 className={`text-2xl font-bold text-gray-900 leading-[3rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+              <h1 className={`text-2xl font-bold text-gray-900 ${zhuyinActive ? 'leading-[3rem] tracking-[0.4em]' : 'leading-[1.5]'}`}>
                 {processZhuyin(story.title)}
               </h1>
               {story.intro && (
                 <p
-                  className={`text-base leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''} text-gray-600`}
+                  className={`text-base ${zhuyinActive ? 'leading-[2.6] tracking-[0.3em]' : 'leading-[1.5]'} text-gray-600`}
                   aria-label={`作者：${story.intro.author}`}
                 >
                   {processZhuyin(story.intro.author)}
@@ -156,7 +156,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </svg>
                 <span className="text-xs font-bold text-accent-light uppercase tracking-widest">課文簡介</span>
               </div>
-              <p className={`text-gray-900 text-2xl leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+              <p className={`text-gray-900 text-2xl ${zhuyinActive ? 'leading-[3.5rem] tracking-[0.4em]' : 'leading-[1.6]'}`}>
                 {processZhuyin(story.intro.background)}
               </p>
 

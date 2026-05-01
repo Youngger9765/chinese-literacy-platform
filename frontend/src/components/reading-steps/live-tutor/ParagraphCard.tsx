@@ -202,7 +202,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         className={`text-on-surface/90 ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}
         style={{
           fontSize: fontSizePx,
-          lineHeight: zhuyinActive ? '3.8rem' : '2.0',
+          lineHeight: zhuyinActive ? '3.8rem' : '1.6',
         }}
       >
         {status === 'locked' ? (
