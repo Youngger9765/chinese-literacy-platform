@@ -167,6 +167,11 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   // Live transcript per sentence slot — cleared when user submits / word changes.
   // Index 0 = first sentence, 1 = second sentence. (#1327)
   const [liveTranscripts, setLiveTranscripts] = useState<[string, string]>(['', '']);
+  // Imperative stop refs — one per sentence slot — so 批改 can halt the mic
+  // before submitting, preventing background recording after submit. (#1327)
+  const voiceStopRef0 = useRef<(() => void) | null>(null);
+  const voiceStopRef1 = useRef<(() => void) | null>(null);
+  const voiceStopRefs = [voiceStopRef0, voiceStopRef1] as const;
   const loadedWordsRef = useRef<Set<string>>(new Set());
   // True until the user actually interacts after mount. Prevents the DB sync
   // effect from firing with restored-only state and e.g. rolling `current_step`
@@ -277,6 +282,8 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   }, [currentWord]);
 
   const handleValidate = useCallback(async (sentenceIndex: 0 | 1) => {
+    // Stop mic immediately when 批改 is clicked — prevent background recording. (#1327)
+    voiceStopRefs[sentenceIndex].current?.();
     const sentence = currentState.sentences[sentenceIndex];
     if (!sentence.text.trim()) return;
     setWordStates(prev => {
@@ -526,6 +533,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                     });
                   }}
                   disabled={entry.status === 'loading' || isCurrentDone}
+                  stopRef={voiceStopRefs[idx]}
                 />
                 <button
                   onClick={() => handleValidate(idx)}

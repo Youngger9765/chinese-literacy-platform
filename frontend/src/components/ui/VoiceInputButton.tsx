@@ -17,6 +17,12 @@ interface VoiceInputButtonProps {
   className?: string;
   /** Size variant: default 'md' (40px), 'sm' (32px) */
   size?: 'sm' | 'md';
+  /**
+   * Optional ref that the parent can use to imperatively stop recording.
+   * Assign stopListening to this ref so e.g. the submit handler can call
+   * stopRef.current?.() before validating. Issue #1327.
+   */
+  stopRef?: React.MutableRefObject<(() => void) | null>;
 }
 
 /**
@@ -35,9 +41,17 @@ const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
   disabled = false,
   className = '',
   size = 'md',
+  stopRef,
 }) => {
   const { status, transcript, errorMessage, isSupported, startListening, stopListening } =
     useSpeechRecognition(lang, onTranscript);
+
+  // Expose stopListening to parent via stopRef so it can halt recording
+  // imperatively (e.g. when the submit / 批改 button is clicked). (#1327)
+  React.useEffect(() => {
+    if (stopRef) stopRef.current = stopListening;
+    return () => { if (stopRef) stopRef.current = null; };
+  }, [stopRef, stopListening]);
 
   // Propagate live transcript (interim + accumulated finals) to caller (#1327).
   const prevTranscriptRef = React.useRef('');
