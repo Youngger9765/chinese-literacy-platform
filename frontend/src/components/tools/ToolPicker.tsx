@@ -14,6 +14,9 @@ export interface ToolOption {
   stepPath: string;
 }
 
+// Order must match STEP_CONFIG in src/config/stepConfig.ts.
+// If you reorder steps there, reorder this array to match.
+// (Future: derive from STEP_CONFIG to avoid manual sync — see #1333)
 export const TOOL_OPTIONS: ToolOption[] = [
   {
     id: 'tutor',
@@ -23,6 +26,13 @@ export const TOOL_OPTIONS: ToolOption[] = [
     stepPath: 'tutor',
   },
   {
+    id: 'full-reading',
+    label: '全文朗讀',
+    description: '完整朗讀評估',
+    icon: '📖',
+    stepPath: 'full-reading',
+  },
+  {
     id: 'listening',
     label: '聽力理解',
     description: '聽 AI 朗讀，回答問題',
@@ -30,18 +40,18 @@ export const TOOL_OPTIONS: ToolOption[] = [
     stepPath: 'listening',
   },
   {
-    id: 'sentence-practice',
-    label: '造句練習',
-    description: 'AI 引導造句，加深語感',
-    icon: '✏️',
-    stepPath: 'sentence-practice',
-  },
-  {
     id: 'vocab',
     label: '生字書寫',
     description: '筆順練習 + 注音引導',
     icon: '🖊️',
     stepPath: 'vocab',
+  },
+  {
+    id: 'sentence-practice',
+    label: '造句練習',
+    description: 'AI 引導造句，加深語感',
+    icon: '✏️',
+    stepPath: 'sentence-practice',
   },
   {
     id: 'vocab-definition',
@@ -58,6 +68,13 @@ export const TOOL_OPTIONS: ToolOption[] = [
     stepPath: 'vocab-application',
   },
   {
+    id: 'comprehension',
+    label: '課文理解',
+    description: '蘇格拉底式 AI 對話',
+    icon: '💬',
+    stepPath: 'comprehension',
+  },
+  {
     id: 'vocab-word-search',
     label: '詞搜尋',
     description: '在文章中找出目標詞語',
@@ -70,20 +87,6 @@ export const TOOL_OPTIONS: ToolOption[] = [
     description: '延伸知識影片與補充',
     icon: '💡',
     stepPath: 'knowledge-station',
-  },
-  {
-    id: 'full-reading',
-    label: '全文朗讀',
-    description: '完整朗讀評估',
-    icon: '📖',
-    stepPath: 'full-reading',
-  },
-  {
-    id: 'comprehension',
-    label: '課文理解',
-    description: '蘇格拉底式 AI 對話',
-    icon: '💬',
-    stepPath: 'comprehension',
   },
 ];
 
