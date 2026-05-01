@@ -150,6 +150,20 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   // ── Selection helpers ──────────────────────────────────────────────────
 
   /**
+   * Strip BpmfIansui PUA Variation Selector surrogate pairs from a string.
+   *
+   * Both buildZhuyinString() and some YAML lesson files embed PUA Variation
+   * Selectors Supplement (U+E0100–U+E01EF) directly in the paragraph text.
+   * Each occupies 2 UTF-16 code units (surrogate pair: 0xDB40 + 0xDD00–0xDDEF).
+   * These have no semantic content — they are font rendering hints only.
+   * Stripping them gives a string where .length equals the raw character count,
+   * so standard Array/String slice operations work correctly with raw char indices.
+   */
+  function stripPUASelectors(text: string): string {
+    return text.replace(/\uDB40[\uDC00-\uDFFF]/g, '');
+  }
+
+  /**
    * Count raw (non-selector) characters in a string, stopping after `upTo`
    * UTF-16 code units have been consumed.  When `upTo` is omitted the entire
    * string is scanned.
@@ -236,33 +250,17 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     let found = false;
     const walker = document.createTreeWalker(paraEl, NodeFilter.SHOW_TEXT);
     let node: Text | null;
-    // DEBUG #1325: log all text nodes encountered by TreeWalker
-    const debugNodes: Array<{ text: string; rawLen: number; isTarget: boolean; startOffset?: number }> = [];
     while ((node = walker.nextNode() as Text | null)) {
       if (node === range.startContainer) {
         // range.startOffset is a UTF-16 offset into this text node; convert to
         // raw-character count by stripping PUA selectors up to that point.
-        const addedRaw = countRawChars(node.textContent ?? '', range.startOffset);
-        debugNodes.push({ text: (node.textContent ?? '').slice(0, 20), rawLen: countRawChars(node.textContent ?? ''), isTarget: true, startOffset: range.startOffset });
-        charStart += addedRaw;
+        charStart += countRawChars(node.textContent ?? '', range.startOffset);
         found = true;
         break;
       }
       // Accumulate raw (non-selector) character count for completed nodes.
-      const rawLen = countRawChars(node.textContent ?? '');
-      debugNodes.push({ text: (node.textContent ?? '').slice(0, 20), rawLen, isTarget: false });
-      charStart += rawLen;
+      charStart += countRawChars(node.textContent ?? '');
     }
-    // eslint-disable-next-line no-console
-    console.log('[DEBUG #1325] getSelectionInfo:', {
-      paraIdx: paragraphIndex,
-      selectedText: selectedText.slice(0, 30),
-      charStart,
-      rawSelectedLength: countRawChars(selectedText),
-      charEnd: charStart + countRawChars(selectedText),
-      startContainerParent: (range.startContainer.parentElement?.tagName ?? 'none') + ' > ' + (range.startContainer.parentElement?.className ?? '').slice(0, 40),
-      nodes: debugNodes,
-    });
     if (!found) return null;
 
     // selectedText from range.toString() also includes PUA selector code points;
@@ -435,12 +433,26 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       return displayText;
     }
 
-    // Build segments from raw text char offsets, render display text char-by-char
-    // NOTE: when zhuyin is active, displayText has different length than rawText.
-    // We annotate by raw char positions and render rawText characters
-    // (zhuyin adds ruby annotations which we can't easily split here).
-    // So when zhuyin is active, we fall back to rendering rawText for annotated paragraphs.
-    const textToRender = zhuyinActive ? rawText : displayText;
+    // Build segments from raw text char offsets, render display text char-by-char.
+    //
+    // ann.charStart / ann.charEnd are RAW character indices — PUA Variation Selectors
+    // (U+E0100–U+E01EF, stored as surrogate pairs) are NOT counted.  See countRawChars().
+    //
+    // However, lesson YAML files may embed these PUA selectors directly in the paragraph
+    // text (e.g. L01 paragraph 1: 「著󠇣頭緒」has a selector after 著).  This means rawText
+    // and even displayText (when zhuyin is off) may contain PUA surrogates, making their
+    // .length exceed the raw char count.  Using raw char indices directly as slice() indices
+    // would then slice the string at the wrong UTF-16 positions, putting the annotation
+    // highlight on the wrong characters — this was the regression introduced by PR #1155.
+    //
+    // Fix: strip PUA selectors from the rendering string before slicing.  After stripping,
+    // .length == raw char count, so raw indices and UTF-16 slice indices agree perfectly.
+    //
+    // NOTE: when zhuyin is active, displayText contains BpmfIansui PUA selectors AND ruby
+    // annotations that cannot be split character-by-character, so we fall back to rawText.
+    const baseText = zhuyinActive ? rawText : displayText;
+    // Strip PUA Variation Selectors so that .length == raw char count and slice indices match.
+    const textToRender = stripPUASelectors(baseText);
 
     const segments: Array<{ start: number; end: number; annotation?: Annotation }> = [];
     let cursor = 0;
