@@ -117,7 +117,9 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
 export async function fetchStories(token?: string): Promise<{ stories: Story[]; total: number; grades: number[] }> {
   const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(`${API_BASE}/api/stories`, { headers });
+  // Bounded content (~270 lessons): fetch all in one request so client-side
+  // grade/search filter responds instantly without re-querying the API.
+  const res = await fetch(`${API_BASE}/api/stories?page_size=300`, { headers });
   if (!res.ok) throw new Error(`fetchStories failed: ${res.status}`);
   const data: ApiStoryListResponse = await res.json();
   return {

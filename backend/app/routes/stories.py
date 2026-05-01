@@ -170,7 +170,7 @@ def list_stories(
     category: str | None = Query(None),
     search: str | None = Query(None, max_length=100),
     page: int = Query(1, ge=1),
-    page_size: int = Query(60, ge=1, le=100),
+    page_size: int = Query(60, ge=1, le=300),
 ):
     """List published platform stories with optional filters.
 
