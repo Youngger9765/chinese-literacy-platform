@@ -389,6 +389,7 @@ class TeacherSessionReportResponse(BaseModel):
     comprehension_result: dict | None
     vocab_result: dict | None
     full_reading_result: dict | None
+    full_reading_attempts: list[dict] = []  # Bug C fix (#1378): attempt history
     comprehension_score: float | None
     literal_score: float | None
     inferential_score: float | None
