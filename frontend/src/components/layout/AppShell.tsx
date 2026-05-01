@@ -176,19 +176,19 @@ const ImmersiveTopBar: React.FC = () => {
         )}
 
         {/* Progress dots + left/right arrows (Issue #1094) — tooltip shows step name; arrows fixed-size, dots wrap */}
-        <div className="flex items-center gap-1 max-w-full min-w-0 h-4 md:h-5" role="navigation" aria-label="學習步驟導航">
+        <div className="flex items-center gap-1 max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
           <button
             type="button"
             onClick={() => prevStep && handleStepClick(prevStep)}
             disabled={!prevStep || !selectedStory}
-            className="shrink-0 w-4 h-4 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
             title={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
           >
-            <span className="material-symbols-outlined text-sm leading-none" style={{ fontSize: '14px' }}>chevron_left</span>
+            <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_left</span>
           </button>
 
-          <div className="flex items-center gap-1 md:gap-1.5 flex-wrap justify-center min-w-0">
+          <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center min-w-0">
             {ACTIVE_STEPS.map((step, i) => {
               const isCompleted = completedSet.has(step.id);
               const isActive = i === currentStepIndex;
@@ -205,7 +205,7 @@ const ImmersiveTopBar: React.FC = () => {
                   type="button"
                   onClick={() => handleStepClick(step)}
                   disabled={isLocked}
-                  className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+                  className={`w-4 h-4 md:w-5 md:h-5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
                   title={`${i + 1}. ${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
                   aria-label={`${i + 1}. ${step.label}`}
                   aria-current={isActive ? 'step' : undefined}
@@ -218,11 +218,11 @@ const ImmersiveTopBar: React.FC = () => {
             type="button"
             onClick={() => nextStep && handleStepClick(nextStep)}
             disabled={!nextStep || !selectedStory}
-            className="shrink-0 w-4 h-4 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
             title={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
           >
-            <span className="material-symbols-outlined text-sm leading-none" style={{ fontSize: '14px' }}>chevron_right</span>
+            <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_right</span>
           </button>
         </div>
       </div>

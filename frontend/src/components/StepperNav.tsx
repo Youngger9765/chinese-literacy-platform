@@ -87,10 +87,10 @@ const StepBadge: React.FC<{
 
   return (
     <span
-      className={`w-12 h-12 text-sm rounded-full flex items-center justify-center font-bold shrink-0 ${styleMap[status]}`}
+      className={`w-6 h-6 text-xs rounded-full flex items-center justify-center font-bold shrink-0 ${styleMap[status]}`}
     >
       {status === 'completed' ? (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       ) : (
@@ -134,7 +134,7 @@ const StepperNav: React.FC<StepperNavProps> = ({
       aria-label="學習步驟導覽"
       className="font-ui bg-white border-b border-gray-200 shrink-0 overflow-x-auto scrollbar-hide"
     >
-      <div className="flex items-center gap-2 px-3 py-3 min-w-max">
+      <div className="flex items-center gap-1 px-3 py-2 min-w-max">
         {/* Story title pill — desktop only */}
         {selectedStory && (
           <div className="hidden md:flex items-center mr-2 pr-3 border-r border-gray-200">
@@ -158,7 +158,7 @@ const StepperNav: React.FC<StepperNavProps> = ({
               disabled={isDisabled}
               aria-current={isActive ? 'step' : undefined}
               aria-label={`步驟 ${stepDef.step}：${stepDef.label}（${isActive ? '目前' : isDisabled ? '未解鎖' : status === 'completed' ? '已完成' : '未完成'}）`}
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
                 isActive
                   ? `${categoryColors.activeBg} ${categoryColors.text}`
                   : isDisabled
