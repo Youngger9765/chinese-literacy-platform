@@ -1,0 +1,35 @@
+lesson_code: G6-L13
+display_order: 67
+original_order: 21
+title: 森林大軍的守護者
+grade: 6
+genre: 記敘文
+text_type: 單
+unit_topic: 品格-堅毅
+applicable_grade: 自我提問－問好奇、疑惑的問題
+strategy_id: 6
+strategy_name: 自我提問──問好奇、疑惑的問題
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/b71ib3aSlAs
+- title: 影片2
+  url: http://youtu.be/hH7MIZehdB4
+- title: 影片3
+  url: http://youtu.be/6EXARfNJIbs
+vocab:
+- 與...為伍
+- 仰望
+- 沁涼
+- 殆盡
+- 諮詢
+- 籌措
+- 震懾
+- 畏懼
+- 精神抖擻
+- 有生之年
+- 拋家棄子
+existing_content_yaml: L21.yml
+notes: null

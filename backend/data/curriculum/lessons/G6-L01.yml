@@ -1,0 +1,32 @@
+lesson_code: G6-L01
+display_order: 55
+original_order: 14
+title: 運動傷害，怎麼辦?
+grade: 6
+genre: 說明文
+text_type: 單
+unit_topic: 運動知識
+applicable_grade: 修辭－倒反法
+strategy_id: 6
+strategy_name: 寫作手法──倒反—從前後文推論隱藏意涵
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/2miUh3veYgU
+- title: 影片2
+  url: http://youtu.be/Ep3cD4zcCDs
+vocab:
+- 充斥
+- 評估
+- 僵硬
+- 處置
+- 壓迫
+- 抑制
+- 滑稽
+- 此起彼落
+- 全神貫注
+- 哄堂大笑
+existing_content_yaml: L14.yml
+notes: null

@@ -1,0 +1,33 @@
+lesson_code: G6-L05
+display_order: 59
+original_order: 16
+title: 卡通人氣王票選政見發表會
+grade: 6
+genre: 記敘文
+text_type: 單
+unit_topic: 擴展視野
+applicable_grade: 推論文章主旨－摘取文章的大意＋找出關鍵語句
+strategy_id: 6
+strategy_name: 推論策略──從摘要及關鍵句推論主旨
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: https://fashion.ettoday.net/news/1798815(文章)
+- title: 影片2
+  url: http://youtu.be/bXx2F6tCetg
+vocab:
+- 宛如
+- 政見
+- 呵護
+- 中計
+- 糾正
+- 抗拒
+- 箭步
+- 莽撞
+- 異口同聲
+- 大展身手
+- 脫口而出
+existing_content_yaml: L16.yml
+notes: null

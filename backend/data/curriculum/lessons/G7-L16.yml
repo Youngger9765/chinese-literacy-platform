@@ -1,0 +1,32 @@
+lesson_code: G7-L16
+display_order: 95
+original_order: 36
+title: 果醬男孩
+grade: 7
+genre: 記敘文
+text_type: 單
+unit_topic: 克服挫折
+applicable_grade: 用問題解決流程解決問題
+strategy_id: 7
+strategy_name: 解決問題──麥肯錫解決問題法
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/dkpNRAPUXMY
+- title: 影片2
+  url: http://youtu.be/T5EFbaUXAag
+vocab:
+- 雲集
+- 虜獲
+- 口碑
+- 籌措
+- 桂冠
+- 脫穎而出
+- 坐困愁城
+- 靈機一動
+- 兩全其美
+- 大為嘆服
+existing_content_yaml: L36.yml
+notes: null

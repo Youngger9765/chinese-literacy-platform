@@ -1,0 +1,31 @@
+lesson_code: G7-L18
+display_order: 97
+original_order: 61
+title: 一封向醫師求助的信
+grade: 7
+genre: 應用文
+text_type: 單
+unit_topic: 社經不利議題、適應與解決問題
+applicable_grade: 從事實歸納概念－從具體事實歸納要表達的抽象概念
+strategy_id: 5
+strategy_name: 從事實歸納概念－從具體事實歸納要表達的抽象概念
+strategy_dependency: null
+strategy_relation: 因與「寫信馬拉松」同為書信的力量，建議將兩課連放
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: https://youtu.be/QYRCkJA3-ZKwrlkO
+- title: 影片2
+  url: https://youtu.be/EH-CQfTk4_Q
+vocab:
+- 祈請
+- 聯手
+- 與日俱增
+- 雪上加霜
+- 病識感
+- 哄󠇡騙
+- 拮据
+- 諮詢
+- 秋祺
+existing_content_yaml: null
+notes: null

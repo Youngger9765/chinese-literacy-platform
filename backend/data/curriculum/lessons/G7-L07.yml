@@ -1,0 +1,28 @@
+lesson_code: G7-L07
+display_order: 86
+original_order: 38
+title: 你看見時代的灰犀牛了嗎？談人口負成長
+grade: 7
+genre: 說明文
+text_type: 單
+unit_topic: 社會科學
+applicable_grade: 認識折線圖
+strategy_id: 7
+strategy_name: 圖表繪製與判讀──折線圖
+strategy_dependency: null
+strategy_relation: 提及已在「L52基因的特別禮物」學過長條圖及圓形圖。
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/MRemaiESU1U
+- title: 影片2
+  url: http://youtu.be/65DLcrShGdk
+vocab:
+- 視而不見
+- 每況愈下
+- 負成長
+- 蹂躪
+- 不可逆
+- 達標
+existing_content_yaml: L38.yml
+notes: null

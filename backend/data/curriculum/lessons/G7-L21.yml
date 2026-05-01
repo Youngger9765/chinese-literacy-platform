@@ -1,0 +1,35 @@
+lesson_code: G7-L21
+display_order: 100
+original_order: 40
+title: 別上「誘餌式標題」的鉤
+grade: 7
+genre: 說明文
+text_type: 單
+unit_topic: 媒體識讀
+applicable_grade: 誘餌式新聞標題大解密
+strategy_id: 7
+strategy_name: 媒體素養與識讀──認識誘餌式新聞標題
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/JNeBKlG0cI
+- title: 影片2
+  url: http://youtu.be/0JoMqP5UwQ8
+vocab:
+- 文不󠇡對題
+- 辛辣
+- 誘餌
+- 閱聽大眾
+- 博取
+- 聳動
+- 語不驚人死不休
+- 推播
+- 帶風向
+- 核對
+- 氾濫
+- 目不暇給󠇡
+- 眼花撩亂
+existing_content_yaml: L40.yml
+notes: null

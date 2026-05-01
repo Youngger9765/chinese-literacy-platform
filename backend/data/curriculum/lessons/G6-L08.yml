@@ -1,0 +1,34 @@
+lesson_code: G6-L08
+display_order: 62
+original_order: 18
+title: 動物談情說愛的方式
+grade: 6
+genre: 說明文
+text_type: 單
+unit_topic: 自然之美
+applicable_grade: 說明文結構(主題描述)－找出舉例與細節
+strategy_id: 6
+strategy_name: 摘要策略──從結構找小主題與細節
+strategy_dependency: null
+strategy_relation: L13六塊肌六塊雞、L19祝你好眠、L18動物談情說愛的方式策略相關
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/s49P9acfDFQ
+- title: 影片2
+  url: http://youtu.be/bH2AaaoCIxc
+- title: 影片3
+  url: http://youtu.be/yTRoNgo53UY
+vocab:
+- 青睞
+- 爭強鬥勝
+- 粉墨登場
+- 嬌客
+- 耳目一󠇢新
+- 真摯
+- 雄赳赳，氣昂昂
+- 尾隨而至
+- 丰采
+- 招親
+existing_content_yaml: L18.yml
+notes: null

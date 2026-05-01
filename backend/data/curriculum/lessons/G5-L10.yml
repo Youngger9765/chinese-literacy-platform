@@ -1,0 +1,33 @@
+lesson_code: G5-L10
+display_order: 37
+original_order: 10
+title: 從童工到大學教授之路
+grade: 5
+genre: 記敘文
+text_type: 單
+unit_topic: 運動+堅持
+applicable_grade: 推論人物特質－找出人物特質及寫下支持理由
+strategy_id: 5
+strategy_name: 推論策略──從言行推論人物特質
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/01Ef9l4VM_I
+- title: 影片2
+  url: http://youtu.be/kBCYeaSrz6U
+vocab:
+- 沉著󠇤
+- 雕琢
+- 防禦
+- 監測
+- 傾訴
+- 質疑
+- 橫逆
+- 獨當一󠇡面
+- 扳回一󠇢城
+- 如魚得水
+- 心力交瘁
+existing_content_yaml: L10.yml
+notes: null

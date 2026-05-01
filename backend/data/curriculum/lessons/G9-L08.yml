@@ -1,0 +1,21 @@
+lesson_code: G9-L08
+display_order: 137
+original_order: 53
+title: 臺灣學生的閱讀力：美麗與哀愁
+grade: 9
+genre: 說明文
+text_type: 單
+unit_topic: 擴展視野
+applicable_grade: 判讀統計圖步驟與實例
+strategy_id: 9
+strategy_name: 圖表繪製與判讀──折線圖
+strategy_dependency: null
+strategy_relation: 策略提及「L52基因的特別禮物」學過長條圖及圓形圖。「L38你看見時代的灰犀牛了嗎？談人口負成長。」學過折線圖
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: 無
+vocab:
+- 無
+existing_content_yaml: L53.yml
+notes: null

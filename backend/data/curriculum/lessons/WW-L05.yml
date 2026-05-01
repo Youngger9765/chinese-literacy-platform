@@ -1,0 +1,19 @@
+lesson_code: WW-L05
+display_order: 153
+original_order: 5
+title: 不量田
+grade: 8
+genre: 文言文
+text_type: 單
+unit_topic: 類型-記敘人物
+applicable_grade: 文言文－判讀主語
+strategy_id: 8
+strategy_name: 文言文閱讀策略──判讀主語
+strategy_dependency: null
+strategy_relation: 接於L45文言文怎麼讀之後
+classical_chinese: true
+video_links: null
+vocab:
+- 無
+existing_content_yaml: L46.yml
+notes: null

@@ -1,0 +1,28 @@
+lesson_code: G4-L13
+display_order: 13
+original_order: 6
+title: 第一百碗麵
+grade: 4
+genre: 記敘文
+text_type: 單
+unit_topic: 品格-行善、仁慈
+applicable_grade: '*品格力－換位思考'
+strategy_id: 4
+strategy_name: 品格力──想法感受的換位思考
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/DaViwYCkue4
+- title: 影片2
+  url: http://youtu.be/QAHUIhcmluE
+vocab:
+- 熱氣騰騰
+- 陸續
+- 搓手踏腳
+- 漸行漸遠
+- 渲染
+- 暈󠇡黃
+existing_content_yaml: L06.yml
+notes: null
