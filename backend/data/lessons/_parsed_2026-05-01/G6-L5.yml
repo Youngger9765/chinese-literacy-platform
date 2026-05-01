@@ -214,3 +214,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 卡通人氣王票選政見發表會
+  interactive_type: fill_blank
+  hint: 這篇文章在說什麼？
+- label: 重要事實 1
+  value: 哆啦A夢是陪伴大雄成長的親密好友，會提供建議或法寶幫助大雄。
+  interactive_type: checkbox
+  hint: 關於哆啦A夢
+  options:
+  - 哆啦A夢是普通的機器貓。
+  - 哆啦A夢會從百寶袋掏出法寶幫助大雄。
+  - 哆啦A夢只會幫助大雄，不幫其他人。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 育勤認為哆啦A夢用銅鑼燒交換條件幫大雄寫作業，可能養成大雄逃避問題的習慣。
+  interactive_type: checkbox
+  hint: 育勤的看法
+  options:
+  - 育勤崇拜哆啦A夢的百寶袋。
+  - 育勤認為哆啦A夢會讓大雄養成逃避問題的習慣。
+  - 育勤覺得哆啦A夢的法寶不夠驚奇。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 魯夫吃了橡膠果實，身體可以伸縮，刀槍不入，但要遠離尖銳物品。
+  interactive_type: checkbox
+  hint: 關於魯夫
+  options:
+  - 魯夫從小父母照顧。
+  - 魯夫吃了橡膠果實，刀槍不入。
+  - 魯夫會為了追求夢想傷害別人。
+  correct_options:
+  - 1
+- label: 結論
+  value: 透過投票決定誰是卡通人氣王。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

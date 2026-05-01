@@ -154,3 +154,54 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主角
+  value: 我
+  interactive_type: fill_blank
+  hint: 課文中的「我」
+- label: 主題
+  value: 吃醋的心情與困擾
+  interactive_type: fill_blank
+  hint: 課文想告訴我們什麼
+- label: 特色
+  value: 心思細膩、重友情
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 事情發生的原因
+    options:
+    - 「我」下課想找阿葉去福利社
+    - 「我」看到阿葉和「他」在走廊上聊天
+    - 「我」和阿葉約好下課一起去福利社
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 事情的發展過程
+    options:
+    - 「我」感到胸口悶悶的，轉身回教室
+    - 「我」假裝看書，不理會回來的阿葉
+    - 「我」大聲質問阿葉為何不找「我」
+    correct_options:
+    - 0
+    - 1
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 事情的最終狀況
+    options:
+    - 「我」心情煩躁，懷疑自己是否吃醋
+    - 「我」和阿葉因此吵架，關係變差
+    - 「我」決定下次不再和阿葉說話
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

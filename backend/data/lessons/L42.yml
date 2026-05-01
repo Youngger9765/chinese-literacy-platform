@@ -106,36 +106,36 @@ strategy_exercise:
   strategy_name: 一字多義：少
   instruction: "「少」這個字在文言文中有不同的讀音和意思。請根據課文練習分辨「少」的不同用法"
   steps:
-    - prompt: "「旅店少休」的「少」是什麼意思？"
-      type: select
-      options:
-        - 稍微、短暫地（ㄕㄠˇ）
-        - 缺少、很少（ㄕㄠˇ）
-        - 年幼、年輕的（ㄕㄠˋ）
-      answer: 0
-    - prompt: "「少負絕異之資」的「少」是什麼意思？"
-      type: select
-      options:
-        - 稍微、短暫地（ㄕㄠˇ）
-        - 缺少、很少（ㄕㄠˇ）
-        - 年幼、年輕的（ㄕㄠˋ）
-      answer: 2
-    - prompt: "「自少至老，未嘗一日廢書」的「少」是什麼意思？"
-      type: select
-      options:
-        - 稍微、短暫地（ㄕㄠˇ）
-        - 缺少、很少（ㄕㄠˇ）
-        - 年幼、年輕的（ㄕㄠˋ）
-      answer: 2
-    - prompt: "「但少閑人如吾兩人耳」的「少」是什麼意思？"
-      type: select
-      options:
-        - 稍微、短暫地（ㄕㄠˇ）
-        - 缺少、很少（ㄕㄠˇ）
-        - 年幼、年輕的（ㄕㄠˋ）
-      answer: 1
-    - prompt: 請用「少」的三種不同意思，各造一個句子
-      type: free_text
+  - prompt: "「旅店少休」的「少」是什麼意思？"
+    type: select
+    options:
+    - 稍微、短暫地（ㄕㄠˇ）
+    - 缺少、很少（ㄕㄠˇ）
+    - 年幼、年輕的（ㄕㄠˋ）
+    answer: 0
+  - prompt: "「少負絕異之資」的「少」是什麼意思？"
+    type: select
+    options:
+    - 稍微、短暫地（ㄕㄠˇ）
+    - 缺少、很少（ㄕㄠˇ）
+    - 年幼、年輕的（ㄕㄠˋ）
+    answer: 2
+  - prompt: "「自少至老，未嘗一日廢書」的「少」是什麼意思？"
+    type: select
+    options:
+    - 稍微、短暫地（ㄕㄠˇ）
+    - 缺少、很少（ㄕㄠˇ）
+    - 年幼、年輕的（ㄕㄠˋ）
+    answer: 2
+  - prompt: "「但少閑人如吾兩人耳」的「少」是什麼意思？"
+    type: select
+    options:
+    - 稍微、短暫地（ㄕㄠˇ）
+    - 缺少、很少（ㄕㄠˇ）
+    - 年幼、年輕的（ㄕㄠˋ）
+    answer: 1
+  - prompt: 請用「少」的三種不同意思，各造一個句子
+    type: free_text
 story_structure:
 - label: 主角
   value: 顧寧人
@@ -144,3 +144,33 @@ story_structure:
   - label: 背景
     value: 家世
 knowledge_video_url: https://www.youtube.com/watch?v=p3SufRlafnA
+story_structure_rows:
+- label: 主題
+  value: 顧寧人勤奮讀書
+  interactive_type: fill_blank
+  hint: 這篇文章主要在講述誰的什麼事蹟？
+- label: 重要內容 1
+  value: 顧寧人從小就聰明過人，專心研究古學，能背誦儒家經典和史書。
+  interactive_type: checkbox
+  hint: 顧寧人年少時有什麼特點？
+  options:
+  - 喜歡玩樂，不愛讀書
+  - 聰明過人，能背誦經典
+  - 體弱多病，無法專心
+  correct_options:
+  - 1
+- label: 重要內容 2
+  value: 顧寧人精力旺盛，沒有其他嗜好，從小到老每天都讀書，出門也帶著書。
+  interactive_type: checkbox
+  hint: 顧寧人讀書的習慣如何？
+  options:
+  - 只在閒暇時讀書
+  - 每天都讀書，出門也帶書
+  - 只讀自己喜歡的書
+  correct_options:
+  - 1
+- label: 結論
+  value: 顧寧人是個愛讀書、勤奮好學的人。
+  interactive_type: fill_blank
+  hint: 從顧寧人的故事中，你可以學到什麼？
+story_structure_table_source: ai-generated-2026-05-02

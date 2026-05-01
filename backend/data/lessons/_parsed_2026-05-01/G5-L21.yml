@@ -187,3 +187,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 如何抗拒手機誘惑
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 短影音內容短、多樣，且會依喜好推薦，容易讓人沉迷。
+  interactive_type: checkbox
+  hint: 短影音為何吸引人？
+  options:
+  - 短影音內容很長，可以看很久。
+  - 短影音內容短、多樣，且會依喜好推薦，容易讓人沉迷。
+  - 短影音可以讓人學習很多知識。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 小睿因沉迷手機，導致作業未完成，陷入懊惱愧疚的惡性循環。
+  interactive_type: checkbox
+  hint: 小睿沉迷手機的後果？
+  options:
+  - 小睿因為手機玩得好，成績進步了。
+  - 小睿因沉迷手機，導致作業未完成，陷入懊惱愧疚的惡性循環。
+  - 小睿玩手機後，精神飽滿，效率更高。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 小睿透過晚自習、時間管理App、脫癮小組及橡皮筋彈手等方法戒除手機。
+  interactive_type: checkbox
+  hint: 小睿如何戒除手機？
+  options:
+  - 小睿靠自己意志力，完全不碰手機。
+  - 小睿透過晚自習、時間管理App、脫癮小組及橡皮筋彈手等方法戒除手機。
+  - 小睿的爸媽直接沒收他的手機。
+  correct_options:
+  - 1
+- label: 結論
+  value: 透過努力與支持，能戰勝誘惑，成為手機的主人。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

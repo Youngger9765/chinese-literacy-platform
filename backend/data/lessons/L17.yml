@@ -165,8 +165,8 @@ multiple_choice:
   - 因為他的姊姊很優秀，讓他很有壓力。
   - 因為他需要錢，改善家裡的經濟狀況。
   - 因為他覺得家庭很糟，所以自我放棄。
-  answer: null
-  explanation: null
+  answer:
+  explanation:
 - question: 故事二的鄧小姐要一輩子吃藥的事實並沒有改變，為什麼她突然不憂鬱了呢？
   options:
   - 她改變了自己對壞事的看法。
@@ -207,29 +207,29 @@ strategy_exercise:
   strategy_name: 推論段落主旨
   instruction: 推論段落主旨的方法：先找出每個段落的大意，再找出關鍵語句，歸納出段落想表達的重點
   steps:
-    - prompt: 故事一中，阿堅和小芸來自同一個家庭，但結果不同。這個段落的主旨是什麼？
-      type: select
-      options:
-        - 失能的家庭一定會害了孩子
-        - 同樣的環境，不同的想法會帶來不同的結果
-        - 姊姊比較聰明所以比較成功
-      answer: 1
-    - prompt: 故事二中，鄧小姐聽了名醫的話之後就不憂鬱了。她的「事實」改變了嗎？
-      type: select
-      options:
-        - 改變了，她不用再吃藥
-        - 沒有改變，但她改變了對這件事的看法
-        - 改變了，她的血壓恢復正常
-      answer: 1
-    - prompt: 故事三中，黃美廉在黑板上寫了很多她擁有的東西。她想表達的是什麼？
-      type: select
-      options:
-        - 她的生活比別人好
-        - 她擁有很多，不應該只看她沒有的
-        - 她最喜歡的是她的貓
-      answer: 1
-    - prompt: 最後一段的關鍵語句是「改變自己對壞事的看法」，請用自己的話解釋這三個故事的共同主旨
-      type: free_text
+  - prompt: 故事一中，阿堅和小芸來自同一個家庭，但結果不同。這個段落的主旨是什麼？
+    type: select
+    options:
+    - 失能的家庭一定會害了孩子
+    - 同樣的環境，不同的想法會帶來不同的結果
+    - 姊姊比較聰明所以比較成功
+    answer: 1
+  - prompt: 故事二中，鄧小姐聽了名醫的話之後就不憂鬱了。她的「事實」改變了嗎？
+    type: select
+    options:
+    - 改變了，她不用再吃藥
+    - 沒有改變，但她改變了對這件事的看法
+    - 改變了，她的血壓恢復正常
+    answer: 1
+  - prompt: 故事三中，黃美廉在黑板上寫了很多她擁有的東西。她想表達的是什麼？
+    type: select
+    options:
+    - 她的生活比別人好
+    - 她擁有很多，不應該只看她沒有的
+    - 她最喜歡的是她的貓
+    answer: 1
+  - prompt: 最後一段的關鍵語句是「改變自己對壞事的看法」，請用自己的話解釋這三個故事的共同主旨
+    type: free_text
 story_structure:
 - label: 主角
   value: 心理
@@ -243,3 +243,33 @@ story_structure:
   value: 緒落入萬丈深淵。
 - label: 主旨
   value: ※如果你有做到下列事項，請在□內打勾。
+story_structure_rows:
+- label: 論點
+  value: 心理出狀況不一定是壞事導致的
+  interactive_type: fill_blank
+  hint: 作者最想說的是什麼？
+- label: 論據 1
+  value: 阿堅與小芸的故事
+  interactive_type: checkbox
+  hint: 哪個故事支持論點？
+  options:
+  - 阿堅與小芸的故事
+  - 鄧小姐的故事
+  - 黃美廉的故事
+  correct_options:
+  - 0
+- label: 論據 2
+  value: 鄧小姐的故事
+  interactive_type: checkbox
+  hint: 哪個故事支持論點？
+  options:
+  - 阿堅與小芸的故事
+  - 鄧小姐的故事
+  - 黃美廉的故事
+  correct_options:
+  - 1
+- label: 結論
+  value: 改變對壞事的看法，就能改變情緒
+  interactive_type: fill_blank
+  hint: 作者希望讀者怎麼做或怎麼想？
+story_structure_table_source: ai-generated-2026-05-02

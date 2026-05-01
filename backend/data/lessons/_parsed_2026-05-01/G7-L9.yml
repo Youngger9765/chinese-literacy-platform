@@ -214,3 +214,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 吐瓦魯因全球暖化面臨淹沒危機
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 吐瓦魯是西南太平洋的島國，地勢低，最高海拔4公尺。
+  interactive_type: checkbox
+  hint: 吐瓦魯的地理特色
+  options:
+  - 吐瓦魯位於東南亞，地勢高聳。
+  - 吐瓦魯是西南太平洋的島國，地勢低，最高海拔4公尺。
+  - 吐瓦魯是個內陸國家，沒有海岸線。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 吐瓦魯提出「元宇宙國家」計畫，將國家數位化。
+  interactive_type: checkbox
+  hint: 吐瓦魯如何應對危機？
+  options:
+  - 吐瓦魯計畫興建高牆抵擋海水。
+  - 吐瓦魯決定將全國人民遷往其他國家。
+  - 吐瓦魯提出「元宇宙國家」計畫，將國家數位化。
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 吐瓦魯溫室氣體排放量極低，卻受全球暖化影響。
+  interactive_type: checkbox
+  hint: 吐瓦魯面臨的困境
+  options:
+  - 吐瓦魯是全球溫室氣體排放量最高的國家。
+  - 吐瓦魯溫室氣體排放量極低，卻受全球暖化影響。
+  - 吐瓦魯的淹沒與全球暖化無關。
+  correct_options:
+  - 1
+- label: 結論
+  value: 全球暖化影響深遠，沒有人是局外人。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

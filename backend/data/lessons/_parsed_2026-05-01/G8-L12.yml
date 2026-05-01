@@ -163,3 +163,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 南島語族的語言與遷徙
+  interactive_type: fill_blank
+  hint: 這篇文章主要在說什麼？
+- label: 重要事實 1
+  value: 萬華地名源於原住民語「manga」，意指小船或獨木舟。
+  interactive_type: checkbox
+  hint: 萬華地名的由來
+  options:
+  - 萬華地名源於原住民語「manga」，意指小船或獨木舟。
+  - 萬華地名是日治時期日本人隨意取的。
+  - 萬華地名是漢人為了紀念某位英雄而取的。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 南島語族共享許多相似語彙，如manga、mata、lina、ina、lima。
+  interactive_type: checkbox
+  hint: 南島語族的語言特色
+  options:
+  - 南島語族語言完全不同，沒有共通點。
+  - 南島語族共享許多相似語彙，如manga、mata、lina、ina、lima。
+  - 南島語族只在數字上使用相似的詞彙。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 南島語族約三千五百年前從共同祖先遷徙，語言雖演變仍留存共同語彙。
+  interactive_type: checkbox
+  hint: 南島語族語言相似的原因
+  options:
+  - 南島語族是外星人教導共同語言。
+  - 南島語族約三千五百年前從共同祖先遷徙，語言雖演變仍留存共同語彙。
+  - 南島語族透過現代科技交流，才讓語言相似。
+  correct_options:
+  - 1
+- label: 結論
+  value: 語言是記錄族群遷徙與歷史的足跡，連結遙遠的島嶼。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

@@ -211,3 +211,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 賴桑的種樹故事
+  interactive_type: fill_blank
+  hint: 課文主要在講誰？
+- label: 重要事實 1
+  value: 賴桑買下第一座山時，山上堆滿了垃圾。
+  interactive_type: checkbox
+  hint: 賴桑買山時遇到什麼困難？
+  options:
+  - 賴桑買下第一座山時，山上堆滿了垃圾。
+  - 賴桑買下第一座山時，山上都是果樹。
+  - 賴桑買下第一座山時，山上已經種滿了肖楠。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 賴桑為了種樹，不使用化學肥料及除草劑。
+  interactive_type: checkbox
+  hint: 賴桑如何照顧樹苗？
+  options:
+  - 賴桑為了種樹，使用化學肥料及除草劑。
+  - 賴桑為了種樹，不使用化學肥料及除草劑。
+  - 賴桑為了種樹，請工人幫忙除草。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 賴桑的家人從不諒解到支持他的種樹志業。
+  interactive_type: checkbox
+  hint: 賴桑的家人對他種樹的態度如何？
+  options:
+  - 賴桑的家人一開始就非常支持他的種樹志業。
+  - 賴桑的家人從不諒解到支持他的種樹志業。
+  - 賴桑的家人一直都不支持他的種樹志業。
+  correct_options:
+  - 1
+- label: 結論
+  value: 賴桑希望影響更多人一起為下一代留下美麗的森林寶藏。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

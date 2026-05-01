@@ -105,8 +105,8 @@ multiple_choice:
   - 黑猩猩用動作示意，珍古德因此了解牠不喜歡紅堅果。
   - 雖然黑猩猩不要堅果，卻依舊做出握手示好的動作。
   - 雖然黑猩猩一開始不要堅果，最後依然收下了堅果。
-  answer: null
-  explanation: null
+  answer:
+  explanation:
 - question: 根據本文，底下選項哪一個最能描述珍古德的一生？
   options:
   - 鍥而不捨地長期投入，終有所成。
@@ -147,16 +147,16 @@ strategy_exercise:
   strategy_name: 記敘文結構－故事體
   instruction: 故事體的記敘文會按照時間順序描述事件的發展。請把珍古德的故事依照發生的先後順序排列
   items:
-    - text: 珍古德小時候閱讀《杜立德醫生非洲歷險記》，夢想去非洲探險
-      correct_order: 1
-    - text: 二十三歲時從英國前往非洲，在博物館找到工作
-      correct_order: 2
-    - text: 前往岡貝研究黑猩猩，初期被黑猩猩拒於千里之外
-      correct_order: 3
-    - text: 經過長時間的耐心等待，黑猩猩終於卸下心防接受她
-      correct_order: 4
-    - text: 成立國際珍古德協會，推動環境教育和野生動物保育
-      correct_order: 5
+  - text: 珍古德小時候閱讀《杜立德醫生非洲歷險記》，夢想去非洲探險
+    correct_order: 1
+  - text: 二十三歲時從英國前往非洲，在博物館找到工作
+    correct_order: 2
+  - text: 前往岡貝研究黑猩猩，初期被黑猩猩拒於千里之外
+    correct_order: 3
+  - text: 經過長時間的耐心等待，黑猩猩終於卸下心防接受她
+    correct_order: 4
+  - text: 成立國際珍古德協會，推動環境教育和野生動物保育
+    correct_order: 5
 story_structure:
 - label: 事例
   sub_rows:
@@ -166,3 +166,54 @@ story_structure:
     value: 結果 自然段 第【 1 】段 第【2-3】段 第【４-7】段 第【8-9】段 二、 為每個故事結構做摘要（以「
   - label: 結果
     value: 自然段 第【 1 】段 第【2-3】段 第【４-7】段 第【8-9】段 二、 為每個故事結構做摘要（以「
+story_structure_rows:
+- label: 主角
+  value: 珍古德
+  interactive_type: fill_blank
+  hint: 課文主要人物
+- label: 主題
+  value: 珍古德守護黑猩猩的故事
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 熱愛動物、堅持不懈
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 故事發生的原因
+    options:
+    - 珍古德從小夢想去非洲探險
+    - 珍古德大學畢業後到非洲工作
+    - 珍古德在博物館找到研究黑猩猩的工作
+    correct_options:
+    - 0
+    - 2
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 故事發展的過程
+    options:
+    - 珍古德研究初期，黑猩猩不接受她
+    - 珍古德因病暫停研究，回英國休養
+    - 珍古德與黑猩猩建立信任關係
+    correct_options:
+    - 0
+    - 2
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 故事的最終結局
+    options:
+    - 珍古德成為黑猩猩專家，推動保育
+    - 珍古德放棄研究，轉行當老師
+    - 珍古德發現黑猩猩與人類毫無關聯
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

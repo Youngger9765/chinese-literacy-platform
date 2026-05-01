@@ -194,3 +194,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 醫師與乩童的合作
+  interactive_type: fill_blank
+  hint: 這篇文章主要在講什麼？
+- label: 重要事實 1
+  value: 醫師不排斥乩童協助，認為是家屬心意。
+  interactive_type: checkbox
+  hint: 醫師對乩童的看法？
+  options:
+  - 醫師認為乩童是迷信，不應介入。
+  - 醫師不排斥乩童協助，認為是家屬心意。
+  - 醫師認為乩童會影響醫療專業。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 乩童透過擁抱傳達病人遺言，療癒家屬。
+  interactive_type: checkbox
+  hint: 乩童如何幫助家屬？
+  options:
+  - 乩童直接治好病人的病。
+  - 乩童透過擁抱傳達病人遺言，療癒家屬。
+  - 乩童只是來看看病人，沒有實際幫助。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 醫師將乩童視為協助家屬的伙伴。
+  interactive_type: checkbox
+  hint: 醫師如何看待乩童的角色？
+  options:
+  - 醫師認為乩童是挑戰專業的對手。
+  - 醫師將乩童視為協助家屬的伙伴。
+  - 醫師對乩童的出現感到不滿。
+  correct_options:
+  - 1
+- label: 結論
+  value: 以開放心態看待不同協助，共同面對困境。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

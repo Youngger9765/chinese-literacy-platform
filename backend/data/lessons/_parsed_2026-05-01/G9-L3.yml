@@ -198,3 +198,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 國高中數學課使用計算機的必要性
+  interactive_type: fill_blank
+  hint: 課文主要在討論什麼？
+- label: 重要事實 1
+  value: 計算機是強大的「大腦工具」，能提升學習效能。
+  interactive_type: checkbox
+  hint: 計算機的功用
+  options:
+  - 計算機是強大的「大腦工具」，能提升學習效能。
+  - 計算機只適用於國小數學。
+  - 計算機讓學生變笨，不需思考。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 國高中生使用計算機，可將心力專注於數學概念理解。
+  interactive_type: checkbox
+  hint: 使用計算機的好處
+  options:
+  - 國高中生使用計算機，可將心力專注於數學概念理解。
+  - 國高中生使用計算機，會降低計算能力。
+  - 國高中生使用計算機，會讓數學課變得無聊。
+  correct_options:
+  - 0
+- label: 重要事實 3
+  value: 人類文明發展是將能力、經驗與知識「外化」的歷史。
+  interactive_type: checkbox
+  hint: 人類文明的演進
+  options:
+  - 人類文明發展是將能力、經驗與知識「外化」的歷史。
+  - 人類文明發展與工具使用無關。
+  - 人類文明發展是靠不斷的重複計算。
+  correct_options:
+  - 0
+- label: 結論
+  value: 國高中數學課應允許使用計算機，以提升學習效能。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

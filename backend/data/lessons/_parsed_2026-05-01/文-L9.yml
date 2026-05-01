@@ -95,3 +95,33 @@ images:
   content_type: image/png
   caption: ''
 image_count: 5
+story_structure_rows:
+- label: 主題
+  value: 方仲永的故事
+  interactive_type: fill_blank
+  hint: 這篇文章主要在講誰的故事？
+- label: 重要內容 1
+  value: 方仲永小時候很聰明
+  interactive_type: checkbox
+  hint: 方仲永小時候有什麼特別之處？
+  options:
+  - 方仲永小時候很聰明
+  - 方仲永小時候很調皮
+  - 方仲永小時候很愛讀書
+  correct_options:
+  - 0
+- label: 重要內容 2
+  value: 長大後變得跟普通人一樣
+  interactive_type: checkbox
+  hint: 方仲永長大後有什麼變化？
+  options:
+  - 長大後變得更聰明
+  - 長大後變得跟普通人一樣
+  - 長大後成為大官
+  correct_options:
+  - 1
+- label: 結論
+  value: 後天學習比天賦重要
+  interactive_type: fill_blank
+  hint: 這個故事告訴我們什麼道理？
+story_structure_table_source: ai-generated-2026-05-02

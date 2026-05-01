@@ -206,3 +206,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 17
+story_structure_rows:
+- label: 主題
+  value: 四名孩童叢林求生獲救的奇蹟行動
+  interactive_type: fill_blank
+  hint: 這篇文章主要在說什麼？
+- label: 重要事實 1
+  value: 四名孩童在亞馬遜雨林墜機後，歷經40天叢林求生。
+  interactive_type: checkbox
+  hint: 關於事件的經過
+  options:
+  - 四名孩童在亞馬遜雨林墜機後，歷經40天叢林求生。
+  - 四名孩童在墜機後，很快就被搜救隊找到。
+  - 四名孩童的母親也奇蹟生還。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 搜救行動艱難，因為雨林植被茂密、危機四伏。
+  interactive_type: checkbox
+  hint: 關於搜救的困難
+  options:
+  - 搜救行動很順利，很快就找到孩子。
+  - 搜救行動艱難，因為雨林植被茂密、危機四伏。
+  - 搜救隊很快就放棄了尋找孩子。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 大姊萊絲莉運用原住民野外求生技巧，帶領弟妹生存。
+  interactive_type: checkbox
+  hint: 關於孩子們如何生存
+  options:
+  - 孩子們靠著飛機上的食物撐過40天。
+  - 大姊萊絲莉運用原住民野外求生技巧，帶領弟妹生存。
+  - 孩子們在叢林中找到一個安全的村莊。
+  correct_options:
+  - 1
+- label: 結論
+  value: 萊絲莉的求生智慧與勇氣，讓大家看見生命的奇蹟。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

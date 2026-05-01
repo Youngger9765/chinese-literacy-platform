@@ -193,3 +193,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 《科學怪人》這本小說
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 弗蘭肯斯坦創造出怪物後，因驚恐而拋棄了他。
+  interactive_type: checkbox
+  hint: 關於故事大意
+  options:
+  - 弗蘭肯斯坦創造出怪物後，因驚恐而拋棄了他。
+  - 怪物一出生就擁有豐富的知識。
+  - 弗蘭肯斯坦創造怪物是為了幫助人類。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 小說中的怪物沒有名字，代表未得認同與祝福。
+  interactive_type: checkbox
+  hint: 關於書名意義
+  options:
+  - 小說中的怪物名字叫做弗蘭肯斯坦。
+  - 小說中的怪物沒有名字，代表未得認同與祝福。
+  - 「科學怪人」只指怪物，不指科學家。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 弗蘭肯斯坦被比喻為「現代普羅米修斯」。
+  interactive_type: checkbox
+  hint: 關於副標題
+  options:
+  - 普羅米修斯偷火種是為了懲罰人類。
+  - 弗蘭肯斯坦被比喻為「現代普羅米修斯」。
+  - 普羅米修斯偷火種沒有受到懲罰。
+  correct_options:
+  - 1
+- label: 結論
+  value: 科學發展應有倫理道德界線。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

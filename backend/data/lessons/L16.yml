@@ -172,23 +172,82 @@ strategy_exercise:
   strategy_name: 推論文章主旨
   instruction: 推論文章主旨的方法：摘取文章的大意＋找出關鍵語句。
   steps:
-    - prompt: 寫出本課大意（用一到兩句話說明課文在講什麼）
-      type: free_text
-    - prompt: 以下文章結尾的句子，哪一句最可能成為關鍵語句？
-      type: select
-      options:
-        - 票選活動進入最後階段，主持人為發表會做總結
-        - 謝謝大家發表了自己的觀點，謝謝大家專心聆聽彼此的意見
-        - 誰會成為第一名的卡通人氣王？我們就投票來決定囉
-      answer: 1
-    - prompt: 下列哪一個選項敘述符合本課主旨？
-      type: select
-      options:
-        - 少數服從多數，最優秀的人就是你自己
-        - 每個人都可以有不同的觀點，我們應該彼此尊重
-        - 只要我喜歡，有什麼不可以
-        - 人可以犯錯，但是不可犯同一個錯
-      answer: 1
+  - prompt: 寫出本課大意（用一到兩句話說明課文在講什麼）
+    type: free_text
+  - prompt: 以下文章結尾的句子，哪一句最可能成為關鍵語句？
+    type: select
+    options:
+    - 票選活動進入最後階段，主持人為發表會做總結
+    - 謝謝大家發表了自己的觀點，謝謝大家專心聆聽彼此的意見
+    - 誰會成為第一名的卡通人氣王？我們就投票來決定囉
+    answer: 1
+  - prompt: 下列哪一個選項敘述符合本課主旨？
+    type: select
+    options:
+    - 少數服從多數，最優秀的人就是你自己
+    - 每個人都可以有不同的觀點，我們應該彼此尊重
+    - 只要我喜歡，有什麼不可以
+    - 人可以犯錯，但是不可犯同一個錯
+    answer: 1
 story_structure:
 - label: 主旨
   value: 第一次閱讀課文時，請在不太了解的字、詞或句做記號，如： ？
+story_structure_rows:
+- label: 主角
+  value: 哆啦A夢、魯夫
+  interactive_type: fill_blank
+  hint: 課文主要介紹誰？
+  options:
+  correct_options:
+- label: 主題
+  value: 卡通人氣王票選政見發表會
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+  options:
+  correct_options:
+- label: 特色
+  value: 哆啦A夢：無私、樂於助人；魯夫：勇敢、重情義
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+  options:
+  correct_options:
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  options:
+  correct_options:
+  sub_rows:
+  - label: 背景
+    value: 班上舉辦卡通人氣王票選活動，哆啦A夢和魯夫是候選人。
+    interactive_type: checkbox
+    hint: 事情發生的原因或情境
+    options:
+    - 班上同學想選出最喜歡的卡通人物。
+    - 哆啦A夢和魯夫是經過分組討論推選出的候選人。
+    - 老師要求大家為卡通人物製作宣傳海報。
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: 各組代表上台發表政見，介紹哆啦A夢和魯夫的特色。
+    interactive_type: checkbox
+    hint: 事情發展的過程
+    options:
+    - 第一組代表介紹哆啦A夢的百寶袋和助人行為。
+    - 小妤在發表會中途打斷發言。
+    - 第二組代表夏恩介紹魯夫的勇敢和重視同伴。
+    correct_options:
+    - 0
+    - 2
+  - label: 結果
+    value: 主持人總結發表會，將由投票決定卡通人氣王。
+    interactive_type: checkbox
+    hint: 事情的最終結果
+    options:
+    - 同學們聽完發表後，對兩位候選人有更深入的了解。
+    - 育勤提出哆啦A夢和魯夫的缺點。
+    - 班長宣布哆啦A夢當選人氣王。
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

@@ -165,3 +165,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 未來的農夫
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 垂直農場的環境控制嚴格，像高科技無塵室。
+  interactive_type: checkbox
+  hint: 農場的特色？
+  options:
+  - 垂直農場的環境控制嚴格，像高科技無塵室。
+  - 垂直農場的環境充滿泥土味和蟲鳴鳥叫。
+  - 垂直農場的環境像傳統溫室，可以觀光。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 科技農夫利用數據監測與調整蔬菜生長環境。
+  interactive_type: checkbox
+  hint: 農夫的工作內容？
+  options:
+  - 科技農夫利用數據監測與調整蔬菜生長環境。
+  - 科技農夫主要工作是翻土、施肥、除草。
+  - 科技農夫的工作是觀察天氣變化來種菜。
+  correct_options:
+  - 0
+- label: 重要事實 3
+  value: 垂直農場蔬菜生長快、無農藥且乾淨。
+  interactive_type: checkbox
+  hint: 垂直農場的優點？
+  options:
+  - 垂直農場蔬菜生長快、無農藥且乾淨。
+  - 垂直農場的蔬菜生長速度慢，但風味獨特。
+  - 垂直農場的蔬菜需要大量農藥來防治蟲害。
+  correct_options:
+  - 0
+- label: 結論
+  value: 未來的農夫工作更像工程師，不再是傳統形象。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

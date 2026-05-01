@@ -175,3 +175,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 陳彥博
+  interactive_type: fill_blank
+  hint: 課文主要在說誰？
+- label: 重要事實 1
+  value: 他是第一位勇奪四大極地超級馬拉松巡迴賽總冠軍的亞洲人。
+  interactive_type: checkbox
+  hint: 關於他的成就
+  options:
+  - 他是第一位勇奪四大極地超級馬拉松巡迴賽總冠軍的亞洲人。
+  - 他曾獲得奧運馬拉松金牌。
+  - 他是臺灣馬拉松紀錄保持人。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 他曾罹患咽喉癌，術後努力復健重回跑道。
+  interactive_type: checkbox
+  hint: 關於他遇到的困難
+  options:
+  - 他曾因意外導致腿部受傷，無法跑步。
+  - 他曾罹患咽喉癌，術後努力復健重回跑道。
+  - 他曾因訓練過度，導致心臟問題。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 他克服身體不適，完成七大洲、八大站超級馬拉松的夢想。
+  interactive_type: checkbox
+  hint: 關於他如何克服困難
+  options:
+  - 他放棄跑步，轉行從事其他運動。
+  - 他克服身體不適，完成七大洲、八大站超級馬拉松的夢想。
+  - 他只參加輕鬆的馬拉松賽事。
+  correct_options:
+  - 1
+- label: 結論
+  value: 超越極限，勇敢追夢。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

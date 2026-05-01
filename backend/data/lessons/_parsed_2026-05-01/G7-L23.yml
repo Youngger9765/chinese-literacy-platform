@@ -9,11 +9,11 @@ reading_strategy_type: general
 #        vocab-definition, vocab-application, vocab-word-search (vocab: 無).
 # Proves architecture allows fewer steps without touching other lessons.
 step_sequence:
-  - reading-annotation
-  - tutor
-  - comprehension
-  - knowledge-station
-  - report
+- reading-annotation
+- tutor
+- comprehension
+- knowledge-station
+- report
 source_file: G7-L23雨林裡的奇蹟藥物和最後一隻旅人鴿（閱讀策略-跳過卡關，瀏覽全文）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags:
@@ -124,3 +124,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 6
+story_structure_rows:
+- label: 主題
+  value: 雨林裡的奇蹟藥物
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 雨林植物能提供救命藥物
+  interactive_type: checkbox
+  hint: 關於雨林藥物
+  options:
+  - 雨林植物只能提煉毒藥
+  - 雨林植物能提供救命藥物
+  - 雨林植物對人類無用
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 雨林被破壞，藥物可能消失
+  interactive_type: checkbox
+  hint: 關於雨林消失的影響
+  options:
+  - 雨林消失對人類沒影響
+  - 雨林消失會讓藥物更稀有
+  - 雨林被破壞，藥物可能消失
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 雨林破壞速度驚人
+  interactive_type: checkbox
+  hint: 關於雨林破壞的程度
+  options:
+  - 雨林破壞速度很慢
+  - 雨林破壞速度驚人
+  - 雨林破壞已停止
+  correct_options:
+  - 1
+- label: 結論
+  value: 保護雨林，才能保有珍貴藥物
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

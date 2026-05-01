@@ -165,3 +165,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 林麗怡寫信向雷醫師求助
+  interactive_type: fill_blank
+  hint: 這封信是誰寫給誰的？
+- label: 重要事實 1
+  value: 阿嬤的行為異常，頻率和嚴重程度不斷增加
+  interactive_type: checkbox
+  hint: 阿嬤的狀況如何？
+  options:
+  - 阿嬤的脾氣越來越好
+  - 阿嬤的行為異常，頻率和嚴重程度不斷增加
+  - 阿嬤只是偶爾發脾氣
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 阿嬤沒有病識感，家人經濟拮据且不知如何處理
+  interactive_type: checkbox
+  hint: 家人面臨什麼困難？
+  options:
+  - 阿嬤知道自己生病，積極配合治療
+  - 家人經濟富裕，有能力照顧阿嬤
+  - 阿嬤沒有病識感，家人經濟拮据且不知如何處理
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 林麗怡希望醫師開立診斷書並諮詢社工師
+  interactive_type: checkbox
+  hint: 林麗怡想請醫師幫什麼忙？
+  options:
+  - 林麗怡希望醫師只幫阿嬤治療
+  - 林麗怡希望醫師開立診斷書並諮詢社工師
+  - 林麗怡希望醫師幫忙找回遺失物品
+  correct_options:
+  - 1
+- label: 結論
+  value: 感謝醫師協助阿嬤入院，並希望獲得後續協助
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

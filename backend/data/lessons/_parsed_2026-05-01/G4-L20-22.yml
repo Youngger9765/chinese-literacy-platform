@@ -288,3 +288,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 26
+story_structure_rows:
+- label: 主題
+  value: 物價波動的原因
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 颱風來襲時，蔬菜供給減少，需求不變，導致菜價飆漲。
+  interactive_type: checkbox
+  hint: 颱風對菜價的影響
+  options:
+  - 颱風來襲，蔬菜供給增加，需求不變，導致菜價下跌。
+  - 颱風來襲，蔬菜供給減少，需求不變，導致菜價飆漲。
+  - 颱風來襲，蔬菜供給不變，需求減少，導致菜價下跌。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 颱風前，消費者預期菜價會漲，搶買青菜，導致需求大增，菜價上漲。
+  interactive_type: checkbox
+  hint: 颱風前菜價為何上漲？
+  options:
+  - 颱風前，消費者預期菜價會跌，不買青菜，導致需求減少，菜價下跌。
+  - 颱風前，消費者預期菜價會漲，搶買青菜，導致需求大增，菜價上漲。
+  - 颱風前，農民增加供給，導致菜價下跌。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 農民搶種高麗菜，導致市場供給過多，價格崩跌。
+  interactive_type: checkbox
+  hint: 高麗菜價崩跌的原因
+  options:
+  - 農民搶種高麗菜，導致市場供給過多，價格崩跌。
+  - 農民搶種高麗菜，導致市場需求增加，價格上漲。
+  - 農民搶種高麗菜，導致市場供給減少，價格上漲。
+  correct_options:
+  - 0
+- label: 結論
+  value: 商品價格的波動是由供給和需求決定的。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

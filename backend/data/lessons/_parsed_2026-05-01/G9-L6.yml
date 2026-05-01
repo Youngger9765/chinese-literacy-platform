@@ -199,3 +199,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 靈異現象的科學解釋
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 鬼火是磷化氫與沼氣混合燃燒的冷焰
+  interactive_type: checkbox
+  hint: 鬼火的科學解釋
+  options:
+  - 鬼火是鬼魂的靈光
+  - 鬼火是磷化氫與沼氣混合燃燒的冷焰
+  - 鬼火是盜墓賊的火把
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 鬼壓床是睡眠癱瘓症
+  interactive_type: checkbox
+  hint: 鬼壓床的醫學名稱
+  options:
+  - 鬼壓床是鬼魂壓制睡眠者
+  - 鬼壓床是睡眠癱瘓症
+  - 鬼壓床是作惡夢的反應
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 快速眼動期時肌肉會癱軟無力
+  interactive_type: checkbox
+  hint: 睡眠癱瘓症發生在哪個階段？
+  options:
+  - 快速眼動期時肌肉會癱軟無力
+  - 淺睡期時大腦最活躍
+  - 深睡期時會作惡夢
+  correct_options:
+  - 0
+- label: 結論
+  value: 科學能客觀解釋靈異現象，達到「除魅」
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

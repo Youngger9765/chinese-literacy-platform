@@ -161,3 +161,54 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主角
+  value: 一位對異性產生好感的學生
+  interactive_type: fill_blank
+  hint: 課文的主人翁是誰？
+- label: 主題
+  value: 描述青春期對異性產生好感的困惑與心情
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 心思細膩、情感豐富
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  sub_rows:
+  - label: 背景
+    value: 主角對某位同學產生了特別的感覺，但不知道這是友情還是愛情。
+    interactive_type: checkbox
+    hint: 故事發生的原因
+    options:
+    - 主角對同學產生了特別的感覺
+    - 主角和同學是好朋友
+    - 主角不確定自己的感覺是友情還是愛情
+    correct_options:
+    - 0
+    - 2
+  - label: 經過
+    value: 主角觀察對方、期待互動，並回想相處片段，心裡感到溫暖興奮。
+    interactive_type: checkbox
+    hint: 故事的發展過程
+    options:
+    - 對方幫忙交聯絡簿，主角感到害羞
+    - 體育課分組，對方對主角笑了一下，主角心跳加速
+    - 主角開始期待每天上學，想和對方有更多互動
+    correct_options:
+    - 0
+    - 1
+    - 2
+  - label: 結果
+    value: 主角對這種複雜的感覺感到困惑，不明白為何只對他有特別感受。
+    interactive_type: checkbox
+    hint: 故事的最終結果
+    options:
+    - 主角覺得腦袋要炸掉了，因為不明白這種感覺
+    - 主角決定向對方告白
+    - 主角向家人朋友詢問意見
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

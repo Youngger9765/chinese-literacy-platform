@@ -162,3 +162,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 詮釋失敗的智慧
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 心理學家塞利格曼發現，運動場上決定勝負的不只是技術或體能，還有心態。
+  interactive_type: checkbox
+  hint: 塞利格曼發現了什麼？
+  options:
+  - 技術和體能最重要
+  - 心態會影響勝負
+  - 只有教練的指導有用
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 樂觀詮釋失敗的球隊，往往能在接下來的比賽中有出色的表現。
+  interactive_type: checkbox
+  hint: 樂觀的球隊表現如何？
+  options:
+  - 表現會越來越差
+  - 表現沒有改變
+  - 表現會越來越好
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 悲觀的詮釋是把輸球歸咎於永久、普遍、難以改變的原因。
+  interactive_type: checkbox
+  hint: 悲觀的詮釋是什麼？
+  options:
+  - 認為失敗是暫時的
+  - 認為失敗是無法改變的
+  - 認為失敗是特定問題
+  correct_options:
+  - 1
+- label: 結論
+  value: 遇到挫折時，要養成樂觀詮釋的習慣，才能培養心理韌性。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

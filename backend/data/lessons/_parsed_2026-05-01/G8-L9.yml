@@ -164,3 +164,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 珍古德與黑猩猩研究
+  interactive_type: fill_blank
+  hint: 這篇文章主要在講誰？
+- label: 重要事實 1
+  value: 珍古德發現黑猩猩會使用工具，顛覆當時科學界認知。
+  interactive_type: checkbox
+  hint: 關於黑猩猩的發現
+  options:
+  - 珍古德發現黑猩猩會使用工具，顛覆當時科學界認知。
+  - 珍古德發現黑猩猩只吃水果，不吃昆蟲。
+  - 珍古德發現黑猩猩不會互相溝通。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 珍古德為黑猩猩命名，看見牠們的情感與關係。
+  interactive_type: checkbox
+  hint: 珍古德如何研究黑猩猩？
+  options:
+  - 珍古德用編號記錄黑猩猩，保持客觀。
+  - 珍古德為黑猩猩命名，看見牠們的情感與關係。
+  - 珍古德只觀察黑猩猩的行為，不關心牠們的感受。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 黑猩猩的社會有親密關係，也有激烈競爭。
+  interactive_type: checkbox
+  hint: 黑猩猩的社會是怎樣的？
+  options:
+  - 黑猩猩的社會只有美好的一面，沒有衝突。
+  - 黑猩猩的社會有親密關係，也有激烈競爭。
+  - 黑猩猩的社會和人類社會完全不同。
+  correct_options:
+  - 1
+- label: 結論
+  value: 了解、關心、行動，才能為生命帶來希望。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

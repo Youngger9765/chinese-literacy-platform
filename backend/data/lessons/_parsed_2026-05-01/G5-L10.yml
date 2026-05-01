@@ -174,3 +174,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 小花從童工到大學教授的奮鬥故事
+  interactive_type: fill_blank
+  hint: 課文主要在講誰的故事？
+- label: 重要事實 1
+  value: 小花從小家境貧困，很早就開始打工。
+  interactive_type: checkbox
+  hint: 小花小時候的生活狀況
+  options:
+  - 小花從小家境富裕，不愁吃穿。
+  - 小花從小家境貧困，很早就開始打工。
+  - 小花從小家境普通，偶爾打工賺零用錢。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 小花大學聯考落榜後，努力打工賺錢補習，最終考上師範學院。
+  interactive_type: checkbox
+  hint: 小花如何考上大學？
+  options:
+  - 小花大學聯考一次就考上理想學校。
+  - 小花大學聯考落榜後，放棄升學。
+  - 小花大學聯考落榜後，努力打工賺錢補習，最終考上師範學院。
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 小花透過教育翻轉人生，成為大學教授，並感謝姊姊的犧牲。
+  interactive_type: checkbox
+  hint: 小花成功後的心情
+  options:
+  - 小花成功後，忘記了過去的艱辛。
+  - 小花透過教育翻轉人生，成為大學教授，並感謝姊姊的犧牲。
+  - 小花成為大學教授後，對姊姊的犧牲感到不滿。
+  correct_options:
+  - 1
+- label: 結論
+  value: 教育能改變一個人的命運，翻轉人生。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

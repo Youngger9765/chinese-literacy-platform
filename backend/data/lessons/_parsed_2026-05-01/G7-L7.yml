@@ -214,3 +214,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 21
+story_structure_rows:
+- label: 主題
+  value: 人口負成長
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 臺灣是全世界少子化最嚴重的國家。
+  interactive_type: checkbox
+  hint: 關於少子化
+  options:
+  - 少子化只發生在開發中國家。
+  - 臺灣是全世界少子化最嚴重的國家。
+  - 少子化對經濟沒有影響。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 2020年起，臺灣出生人數少於死亡人數。
+  interactive_type: checkbox
+  hint: 臺灣人口變化
+  options:
+  - 2019年以前，出生人數少於死亡人數。
+  - 2020年起，臺灣出生人數少於死亡人數。
+  - 臺灣人口一直都是正成長。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 人口負成長會加重生產者的扶養負擔。
+  interactive_type: checkbox
+  hint: 人口負成長影響
+  options:
+  - 人口負成長對經濟只有好處。
+  - 人口負成長會加重生產者的扶養負擔。
+  - 人口負成長對環境沒有影響。
+  correct_options:
+  - 1
+- label: 結論
+  value: 認識人口負成長，對未來有更清楚的想像。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

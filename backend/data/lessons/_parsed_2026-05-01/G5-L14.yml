@@ -226,3 +226,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 垃圾食物
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 垃圾食物的定義是高糖、高鹽、高脂肪的食物。
+  interactive_type: checkbox
+  hint: 垃圾食物的特點
+  options:
+  - 垃圾食物是指丟棄的廢棄物。
+  - 垃圾食物是高糖、高鹽、高脂肪的食物。
+  - 垃圾食物是天然、健康的食物。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 垃圾食物會讓人快樂是因為大腦釋放多巴胺。
+  interactive_type: checkbox
+  hint: 為什麼會讓人想吃
+  options:
+  - 垃圾食物含有豐富的蛋白質。
+  - 垃圾食物能讓大腦釋放多巴胺，帶來快樂。
+  - 垃圾食物能提供身體所需的膳食纖維。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 長期吃垃圾食物可能導致肥胖、蛀牙、心臟病等問題。
+  interactive_type: checkbox
+  hint: 吃太多會怎樣
+  options:
+  - 長期吃垃圾食物能幫助身體健康成長。
+  - 長期吃垃圾食物對身體沒有任何影響。
+  - 長期吃垃圾食物可能導致肥胖、蛀牙、心臟病等問題。
+  correct_options:
+  - 2
+- label: 結論
+  value: 垃圾食物帶來的快樂是短暫的，但傷害卻是長久的。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

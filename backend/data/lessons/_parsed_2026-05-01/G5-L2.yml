@@ -159,3 +159,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 植物的生存智慧與仿生學
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 楓樹種子啟發飛行機器人
+  interactive_type: checkbox
+  hint: 關於楓樹種子
+  options:
+  - 楓樹種子像小直升機旋轉降落
+  - 楓樹種子會發出聲音吸引動物
+  - 楓樹種子會自動鑽入土壤中
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 向日葵啟發仿生太陽能板
+  interactive_type: checkbox
+  hint: 關於向日葵
+  options:
+  - 向日葵花朵會自動追逐太陽
+  - 向日葵花朵會發光吸引昆蟲
+  - 向日葵花朵會分泌甜味物質
+  correct_options:
+  - 0
+- label: 重要事實 3
+  value: 風滾草啟發火星探測器
+  interactive_type: checkbox
+  hint: 關於風滾草
+  options:
+  - 風滾草會滾動散播種子
+  - 風滾草會自動吸收空氣水分
+  - 風滾草會改變顏色躲避天敵
+  correct_options:
+  - 0
+- label: 結論
+  value: 植物提供人類無限啟發
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

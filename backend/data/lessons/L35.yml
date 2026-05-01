@@ -149,31 +149,31 @@ strategy_exercise:
   strategy_name: 推理三要素
   instruction: 推理三要素是：細心觀察、具備背景知識、慣於推論。請根據課文中的兩個故事來練習推理
   steps:
-    - prompt: 福爾摩斯從帽子上觀察到哪些細節？請選出正確的組合
-      type: select
-      options:
-        - 高級用料、灰白髮絲、補丁以墨水染黑
-        - 帽子的顏色、帽子的價錢、帽主的姓名
-        - 帽子的品牌、帽子的產地、帽主的職業
-      answer: 0
-    - prompt: 福爾摩斯推論帽主「家道中落」的依據是什麼？
-      type: select
-      options:
-        - 帽子是便宜貨
-        - 鬆緊帶壞了沒換，補丁用墨水染黑
-        - 帽子裡有灰白髮絲
-      answer: 1
-    - prompt: 王戎的故事中，他觀察到什麼現象？
-      type: select
-      options:
-        - 李子樹長在路邊，結了很多果實卻沒人採
-        - 李子樹的葉子枯黃，看起來快枯死了
-        - 李子樹上有蟲，果實都爛掉了
-      answer: 0
-    - prompt: 王戎用了什麼「背景知識」來推論李子是苦的？
-      type: free_text
-    - prompt: 請你試著用推理三要素來分析一個生活中的現象。例如：你看到教室地上有水漬，你能推論出什麼？
-      type: free_text
+  - prompt: 福爾摩斯從帽子上觀察到哪些細節？請選出正確的組合
+    type: select
+    options:
+    - 高級用料、灰白髮絲、補丁以墨水染黑
+    - 帽子的顏色、帽子的價錢、帽主的姓名
+    - 帽子的品牌、帽子的產地、帽主的職業
+    answer: 0
+  - prompt: 福爾摩斯推論帽主「家道中落」的依據是什麼？
+    type: select
+    options:
+    - 帽子是便宜貨
+    - 鬆緊帶壞了沒換，補丁用墨水染黑
+    - 帽子裡有灰白髮絲
+    answer: 1
+  - prompt: 王戎的故事中，他觀察到什麼現象？
+    type: select
+    options:
+    - 李子樹長在路邊，結了很多果實卻沒人採
+    - 李子樹的葉子枯黃，看起來快枯死了
+    - 李子樹上有蟲，果實都爛掉了
+    answer: 0
+  - prompt: 王戎用了什麼「背景知識」來推論李子是苦的？
+    type: free_text
+  - prompt: 請你試著用推理三要素來分析一個生活中的現象。例如：你看到教室地上有水漬，你能推論出什麼？
+    type: free_text
 story_structure:
 - label: 主角
   value: 家境殷實
@@ -182,3 +182,54 @@ story_structure:
   - label: 結果
     value: 推論
 knowledge_video_url: https://www.youtube.com/watch?v=uGBBCJmkeOM
+story_structure_rows:
+- label: 主角
+  value: 福爾摩斯、王戎
+  interactive_type: fill_blank
+  hint: 課文主要人物是誰？
+- label: 主題
+  value: 培養觀察與推理的能力
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 敏銳的觀察、洞察一切的推理
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 事件發生的原因或情境
+    options:
+    - 福爾摩斯正在辦案
+    - 福爾摩斯翻弄著一頂舊毛氈帽
+    - 福爾摩斯在觀察一頂新帽子
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 事件發展的過程
+    options:
+    - 福爾摩斯仔細觀察帽子細節
+    - 福爾摩斯結合背景知識進行推論
+    - 福爾摩斯直接詢問帽子的主人
+    correct_options:
+    - 0
+    - 1
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 事件最終的結果
+    options:
+    - 福爾摩斯成功推論出帽主經歷與性格
+    - 福爾摩斯無法推論出帽主的資訊
+    - 福爾摩斯發現帽子是假的
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

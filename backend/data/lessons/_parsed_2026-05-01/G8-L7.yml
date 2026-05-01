@@ -238,3 +238,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 20
+story_structure_rows:
+- label: 主題
+  value: 巧克力產業的困境與公平交易
+  interactive_type: fill_blank
+  hint: 這篇文章主要在說什麼？
+- label: 重要事實 1
+  value: 西非農民收入微薄，甚至有童工問題
+  interactive_type: checkbox
+  hint: 巧克力產業有什麼問題？
+  options:
+  - 巧克力太甜，對健康不好
+  - 西非農民收入微薄，甚至有童工問題
+  - 巧克力價格太高，大家買不起
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 氣候變遷導致可可樹病蟲害增加
+  interactive_type: checkbox
+  hint: 什麼原因影響可可豆產量？
+  options:
+  - 可可樹種植技術太難
+  - 氣候變遷導致可可樹病蟲害增加
+  - 大家不喜歡吃巧克力了
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 公平交易模式可改善農民生計
+  interactive_type: checkbox
+  hint: 如何幫助可可農民？
+  options:
+  - 多吃巧克力就能幫助農民
+  - 公平交易模式可改善農民生計
+  - 政府應該直接補助農民
+  correct_options:
+  - 1
+- label: 結論
+  value: 支持公平交易，讓甜蜜成為農民的希望
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

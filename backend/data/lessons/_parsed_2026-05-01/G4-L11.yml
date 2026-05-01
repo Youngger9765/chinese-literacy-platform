@@ -148,3 +148,56 @@ images:
   content_type: image/png
   caption: ''
 image_count: 12
+story_structure_rows:
+- label: 主角
+  value: 我
+  interactive_type: fill_blank
+  hint: 課文主要描寫誰的感受？
+- label: 主題
+  value: 不該妄下判斷
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 容易誤解他人
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 事情發生的原因
+    options:
+    - 公車上人很多，老爺爺沒位子坐
+    - 年輕人在博愛座上看書，沒有讓位
+    - 年輕人故意不讓位給老爺爺
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 事情發生的過程
+    options:
+    - 我大聲指責年輕人沒教養
+    - 年輕人臉紅，下車時露出拐杖
+    - 車上乘客一起指責年輕人
+    correct_options:
+    - 0
+    - 1
+    - 2
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 事情最後的發展
+    options:
+    - 我向年輕人道歉，感到很後悔
+    - 年輕人原諒了我，並表示習慣了
+    - 老爺爺終於有位子坐了
+    correct_options:
+    - 0
+    - 1
+story_structure_table_source: ai-generated-2026-05-02

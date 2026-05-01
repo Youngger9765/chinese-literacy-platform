@@ -217,3 +217,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 非洲巨鼠在救援工作中的應用
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 非洲巨鼠體型大，聽覺嗅覺靈敏，能鑽洞
+  interactive_type: checkbox
+  hint: 巨鼠有何特點？
+  options:
+  - 非洲巨鼠體型大，聽覺嗅覺靈敏，能鑽洞
+  - 非洲巨鼠體型小，動作緩慢，不適合救援
+  - 非洲巨鼠只會挖洞，無法找到受困者
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 巨鼠背包有麥克風、攝影機和定位追蹤器
+  interactive_type: checkbox
+  hint: 巨鼠裝備有什麼？
+  options:
+  - 巨鼠背包有水和食物，供受困者使用
+  - 巨鼠背包有麥克風、攝影機和定位追蹤器
+  - 巨鼠背包有小型炸彈，可炸開瓦礫
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 巨鼠訓練成本低，體型小，可鑽入狹窄空間
+  interactive_type: checkbox
+  hint: 巨鼠救援優點？
+  options:
+  - 巨鼠訓練成本高，且只能由一位訓練員指導
+  - 巨鼠體型大，無法進入瓦礫縫隙
+  - 巨鼠訓練成本低，體型小，可鑽入狹窄空間
+  correct_options:
+  - 2
+- label: 結論
+  value: 非洲巨鼠是救援大隊的好幫手
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

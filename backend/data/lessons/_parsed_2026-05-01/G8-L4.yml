@@ -201,3 +201,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 植物肉
+  interactive_type: fill_blank
+  hint: 課文主要在介紹什麼？
+- label: 重要事實 1
+  value: 植物肉的歷史可追溯至20世紀初的中國豆腐素肉。
+  interactive_type: checkbox
+  hint: 植物肉的起源？
+  options:
+  - 植物肉是2009年才發明的。
+  - 植物肉的歷史可追溯至20世紀初的中國豆腐素肉。
+  - 植物肉是美國康乃爾大學最先研發的。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 植物肉主要由植物蛋白、植物油、調味料等組成。
+  interactive_type: checkbox
+  hint: 植物肉的成分？
+  options:
+  - 植物肉主要由動物蛋白製成。
+  - 植物肉的成分只有植物蛋白和水。
+  - 植物肉主要由植物蛋白、植物油、調味料等組成。
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 植物肉有助於環境永續發展和動物保護。
+  interactive_type: checkbox
+  hint: 植物肉的優點？
+  options:
+  - 植物肉的營養價值比動物肉低很多。
+  - 植物肉的生產會消耗更多水資源。
+  - 植物肉有助於環境永續發展和動物保護。
+  correct_options:
+  - 2
+- label: 結論
+  value: 植物肉是創新的飲食選擇，對環境、動物和糧食安全都有正向影響。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

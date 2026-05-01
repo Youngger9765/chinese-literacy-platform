@@ -216,3 +216,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 跟蹤騷擾
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 阿哲的行為已構成跟蹤騷擾
+  interactive_type: checkbox
+  hint: 阿哲做了什麼？
+  options:
+  - 阿哲的行為是浪漫的追求
+  - 阿哲的行為已構成跟蹤騷擾
+  - 阿哲只是真心喜歡小芳
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 跟騷法保障個人自由與安全
+  interactive_type: checkbox
+  hint: 跟騷法有什麼用？
+  options:
+  - 跟騷法鼓勵大膽追求愛情
+  - 跟騷法保障個人自由與安全
+  - 跟騷法只適用於特定人士
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 尊重對方意願是關鍵
+  interactive_type: checkbox
+  hint: 如何區分浪漫與跟騷？
+  options:
+  - 送禮物越多越浪漫
+  - 尊重對方意願是關鍵
+  - 只要真心付出就不算跟騷
+  correct_options:
+  - 1
+- label: 結論
+  value: 喜歡一個人要從尊重對方開始
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

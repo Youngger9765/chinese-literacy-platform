@@ -207,3 +207,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 正太的武僧養成之路
+  interactive_type: fill_blank
+  hint: 課文主要在說誰的故事？
+- label: 重要事實 1
+  value: 正太因佩服武僧而立志學武
+  interactive_type: checkbox
+  hint: 正太為何想學武？
+  options:
+  - 正太想成為惡霸
+  - 正太佩服武僧的武功
+  - 正太想幫媽媽賣菜
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 師父讓正太養豬而非直接教武功
+  interactive_type: checkbox
+  hint: 師父如何教導正太？
+  options:
+  - 師父直接教正太武功
+  - 師父讓正太去市集賣菜
+  - 師父讓正太每天抱豬
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 正太透過每天抱豬變得強壯
+  interactive_type: checkbox
+  hint: 正太如何變強壯？
+  options:
+  - 正太每天練習打坐
+  - 正太每天抱豬上下階梯
+  - 正太每天吃很多食物
+  correct_options:
+  - 1
+- label: 結論
+  value: 循序漸進的努力能達成目標
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

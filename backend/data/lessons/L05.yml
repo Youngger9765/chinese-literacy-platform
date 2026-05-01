@@ -122,31 +122,83 @@ strategy_exercise:
   strategy_name: 推論指稱詞
   instruction: 指稱詞（代名詞）是用來代替前面提過的人或事物的詞，例如「他」「她」「它」「這」「那」。讀文章時要找出指稱詞代替的是誰或什麼事
   steps:
-    - prompt: 第一段「他跑過沙漠、高山和冰原」，這裡的「他」指的是誰？
-      type: select
-      options:
-        - 林義傑
-        - 陳彥博
-        - 劉柏園
-      answer: 1
-    - prompt: 第二段「這場比賽帶給他的感動無可言喻，也是他跨入極地賽的夢想起點」，「這場比賽」指的是哪場比賽？
-      type: select
-      options:
-        - 四大極地超級馬拉松巡迴賽
-        - 磁北極六百五十公里極限馬拉松
-        - 世界七大洲超級馬拉松
-      answer: 1
-    - prompt: 第五段「如果上天給了他再活一次的機會，怎麼能夠不痛快淋漓的享受它？」這裡的「它」指的是什麼？
-      type: select
-      options:
-        - 上天給的機會
-        - 跑步這件事
-        - 極地馬拉松比賽
-      answer: 1
-    - prompt: 第三段提到「遇到一段意外的插曲」，這個「插曲」指的是什麼事？請用自己的話說明
-      type: free_text
+  - prompt: 第一段「他跑過沙漠、高山和冰原」，這裡的「他」指的是誰？
+    type: select
+    options:
+    - 林義傑
+    - 陳彥博
+    - 劉柏園
+    answer: 1
+  - prompt: 第二段「這場比賽帶給他的感動無可言喻，也是他跨入極地賽的夢想起點」，「這場比賽」指的是哪場比賽？
+    type: select
+    options:
+    - 四大極地超級馬拉松巡迴賽
+    - 磁北極六百五十公里極限馬拉松
+    - 世界七大洲超級馬拉松
+    answer: 1
+  - prompt: 第五段「如果上天給了他再活一次的機會，怎麼能夠不痛快淋漓的享受它？」這裡的「它」指的是什麼？
+    type: select
+    options:
+    - 上天給的機會
+    - 跑步這件事
+    - 極地馬拉松比賽
+    answer: 1
+  - prompt: 第三段提到「遇到一段意外的插曲」，這個「插曲」指的是什麼事？請用自己的話說明
+    type: free_text
 story_structure:
 - label: 主角
   value: 陳彥博
 - label: 主題
   value: 限。
+story_structure_rows:
+- label: 主角
+  value: 陳彥博
+  interactive_type: fill_blank
+  hint: 課文中的主要人物
+- label: 主題
+  value: 堅持夢想，超越極限
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 永不放棄、勇敢追夢
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: 陳彥博罹患咽喉癌，身體虛弱。
+    interactive_type: checkbox
+    hint: 事情發生的原因
+    options:
+    - 陳彥博在一次重感冒後，一直咳痰且痰裡有血絲。
+    - 醫生建議陳彥博開刀治療咽喉癌。
+    - 陳彥博因訓練過度導致身體不適。
+    correct_options:
+    - 0
+    - 1
+  - label: 經過
+    value: 陳彥博手術後努力復健，恢復跑步。
+    interactive_type: checkbox
+    hint: 事情的發展過程
+    options:
+    - 陳彥博害怕手術後不能跑步，但仍接受手術。
+    - 親友勸他放棄賽事，但他堅持跑步。
+    - 陳彥博術後體力大不如前，肌肉強度也消失了。
+    correct_options:
+    - 0
+    - 1
+    - 2
+  - label: 結果
+    value: 陳彥博完成超馬夢想，超越極限。
+    interactive_type: checkbox
+    hint: 事情的最終結果
+    options:
+    - 陳彥博在五年內完成了世界七大洲、八大站的超級馬拉松。
+    - 陳彥博放棄了跑步，選擇了平靜的生活。
+    - 陳彥博因身體狀況不佳，未能再參加任何比賽。
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

@@ -169,3 +169,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 讀懂楊喚〈夏夜〉的心路歷程
+  interactive_type: fill_blank
+  hint: 這篇文章在說什麼？
+- label: 重要事實 1
+  value: 作者小時候對〈夏夜〉的「來了！來了！」感到有趣，但未能理解詩意。
+  interactive_type: checkbox
+  hint: 作者小時候的感受
+  options:
+  - 作者小時候很喜歡〈夏夜〉這首詩。
+  - 作者小時候對〈夏夜〉的「來了！來了！」感到有趣，但未能理解詩意。
+  - 作者小時候覺得〈夏夜〉很無聊。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 作者長大後才理解楊喚詩中擬人化的可貴，並發現楊喚童年悲苦。
+  interactive_type: checkbox
+  hint: 作者長大後的理解
+  options:
+  - 作者長大後才理解楊喚詩中擬人化的可貴，並發現楊喚童年悲苦。
+  - 作者長大後覺得楊喚的童年很幸福。
+  - 作者長大後認為楊喚的詩很難懂。
+  correct_options:
+  - 0
+- label: 重要事實 3
+  value: 楊喚雖童年不幸，卻致力於兒童文學創作，希望帶給孩子快樂。
+  interactive_type: checkbox
+  hint: 楊喚創作的動機
+  options:
+  - 楊喚因為童年幸福才寫童詩。
+  - 楊喚為了賺錢才寫童詩。
+  - 楊喚雖童年不幸，卻致力於兒童文學創作，希望帶給孩子快樂。
+  correct_options:
+  - 2
+- label: 結論
+  value: 楊喚透過文字治癒童年，並滋養更多孩子的心靈。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

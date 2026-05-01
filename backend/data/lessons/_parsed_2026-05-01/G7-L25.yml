@@ -175,3 +175,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 14
+story_structure_rows:
+- label: 主題
+  value: 網路霸凌的應對方式
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 安海瑟薇曾因網路霸凌而身心俱疲，甚至影響工作。
+  interactive_type: checkbox
+  hint: 安海瑟薇的遭遇
+  options:
+  - 安海瑟薇因演技不佳被網路霸凌。
+  - 安海瑟薇曾因網路霸凌而身心俱疲，甚至影響工作。
+  - 安海瑟薇因得獎太多被網路霸凌。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 面對網路霸凌，第一步是不要一個人承受，要尋求信任的大人協助。
+  interactive_type: checkbox
+  hint: 霸凌第一步
+  options:
+  - 面對網路霸凌，第一步是立刻反擊回去。
+  - 面對網路霸凌，第一步是不要一個人承受，要尋求信任的大人協助。
+  - 面對網路霸凌，第一步是假裝沒看到，讓它自己消失。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 面對網路霸凌，要冷處理，不要急著以牙還牙，並保留證據。
+  interactive_type: checkbox
+  hint: 霸凌第二步
+  options:
+  - 面對網路霸凌，要冷處理，不要急著以牙還牙，並保留證據。
+  - 面對網路霸凌，要立刻在網路上反擊回去。
+  - 面對網路霸凌，要不斷解釋自己的清白。
+  correct_options:
+  - 0
+- label: 結論
+  value: 我們不必為迎合網路意見而活，只要好好活著，終有撥雲見日的一天。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

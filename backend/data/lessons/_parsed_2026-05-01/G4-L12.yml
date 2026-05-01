@@ -147,3 +147,55 @@ images:
   content_type: image/png
   caption: ''
 image_count: 12
+story_structure_rows:
+- label: 主角
+  value: 理平頭的男人
+  interactive_type: fill_blank
+  hint: 課文主要人物
+- label: 主題
+  value: 家人原諒與重新開始
+  interactive_type: fill_blank
+  hint: 課文想告訴我們什麼
+- label: 特色
+  value: 曾誤入歧途，渴望回家
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: 男人因詐騙入獄，寫信給妻子請求原諒，並約定以黃絲帶為信號。
+    interactive_type: checkbox
+    hint: 故事發生的原因
+    options:
+    - 男人因工作不順，決定離家出走。
+    - 男人因詐騙入獄，寫信給妻子請求原諒。
+    - 男人與妻子約定，若妻子原諒，就在大榕樹綁黃絲帶。
+    correct_options:
+    - 1
+    - 2
+  - label: 經過
+    value: 男人在火車上向高中生們訴說自己的故事，高中生們為他祈禱。
+    interactive_type: checkbox
+    hint: 故事如何發展
+    options:
+    - 男人在火車上與高中生們玩牌。
+    - 男人在火車上向高中生們訴說自己的故事。
+    - 高中生們得知男人的處境後，為他祈禱。
+    correct_options:
+    - 1
+    - 2
+  - label: 結果
+    value: 大榕樹上綁滿黃絲帶，男人喜極而泣，決定回家。
+    interactive_type: checkbox
+    hint: 故事的結局
+    options:
+    - 男人沒有看到黃絲帶，繼續前往臺東。
+    - 大榕樹上綁滿黃絲帶，男人喜極而泣。
+    - 男人在高中生們的祝福下，決定回家。
+    correct_options:
+    - 1
+    - 2
+story_structure_table_source: ai-generated-2026-05-02

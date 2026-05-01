@@ -193,3 +193,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 身體是一座精密的工廠
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 身體的運作像團隊合作
+  interactive_type: checkbox
+  hint: 關於身體的描述
+  options:
+  - 身體由206塊骨頭和數百條肌肉構成
+  - 身體運作像一座工廠
+  - 身體運作像一支默契絕佳的工作團隊
+  correct_options:
+  - 2
+- label: 重要事實 2
+  value: 運動員是身體的好老闆
+  interactive_type: checkbox
+  hint: 關於身體老闆的描述
+  options:
+  - 運動員只顧提高生產
+  - 運動員會保養機器、訓練員工
+  - 運動員只知道訓練很重要
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 休息和訓練同等重要
+  interactive_type: checkbox
+  hint: 關於休息的描述
+  options:
+  - 休息就是耍廢
+  - 休息和訓練一樣重要
+  - 休息會影響運動表現
+  correct_options:
+  - 1
+- label: 結論
+  value: 要感謝身體的付出，照顧好自己
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

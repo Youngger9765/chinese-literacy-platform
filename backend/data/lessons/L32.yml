@@ -168,29 +168,60 @@ strategy_exercise:
   strategy_name: PERT表達看法
   instruction: PERT是一種表達看法的方法，包含四個步驟：P（主張）說出你的看法、E（原因）說明為什麼、R（舉例）舉出例子、T（結論）做總結。請根據課文練習
   steps:
-    - prompt: "「科學怪人」這個書名，你認為指的是誰？"
-      type: select
-      options:
-        - 指怪物，因為他是科學實驗造出來的怪物
-        - 指弗蘭肯斯坦，因為他是用瘋狂科學創造生命的人
-        - 兩者都可以，因為書中沒有明確說明
-      answer: 2
-    - prompt: 弗蘭肯斯坦被比喻為「現代普羅米修斯」，原因是什麼？
-      type: select
-      options:
-        - 他們都被鐵鍊鎖在山上
-        - 他們都觸犯了神的禁忌，帶來了後果
-        - 他們都是希臘神話中的人物
-      answer: 1
-    - prompt: 根據課文，怪物被弗蘭肯斯坦拋棄後，經歷了什麼遭遇？
-      type: select
-      options:
-        - 被人類接納，過著幸福的生活
-        - 因醜陋的外表，不斷遭受誤解與傷害
-        - 回到實驗室，找到了自己的名字
-      answer: 1
-    - prompt: 請用PERT方法表達你的看法：科學的發展應不應該有倫理道德的界線？寫出你的主張和原因
-      type: free_text
+  - prompt: "「科學怪人」這個書名，你認為指的是誰？"
+    type: select
+    options:
+    - 指怪物，因為他是科學實驗造出來的怪物
+    - 指弗蘭肯斯坦，因為他是用瘋狂科學創造生命的人
+    - 兩者都可以，因為書中沒有明確說明
+    answer: 2
+  - prompt: 弗蘭肯斯坦被比喻為「現代普羅米修斯」，原因是什麼？
+    type: select
+    options:
+    - 他們都被鐵鍊鎖在山上
+    - 他們都觸犯了神的禁忌，帶來了後果
+    - 他們都是希臘神話中的人物
+    answer: 1
+  - prompt: 根據課文，怪物被弗蘭肯斯坦拋棄後，經歷了什麼遭遇？
+    type: select
+    options:
+    - 被人類接納，過著幸福的生活
+    - 因醜陋的外表，不斷遭受誤解與傷害
+    - 回到實驗室，找到了自己的名字
+    answer: 1
+  - prompt: 請用PERT方法表達你的看法：科學的發展應不應該有倫理道德的界線？寫出你的主張和原因
+    type: free_text
 story_structure:
 - label: 主角
   value: "希臘神話-眾\n      負責！《科學怪人》                         神篇 第八期"
+story_structure_rows:
+- label: 主題
+  value: 科學怪人
+  interactive_type: fill_blank
+  hint: 這篇文章主要在介紹哪一本小說？
+- label: 重要內容 1
+  value: 弗蘭肯斯坦創造怪物的原因
+  interactive_type: checkbox
+  hint: 弗蘭肯斯坦為什麼要創造怪物？
+  options:
+  - 想證明自己是神
+  - 對生命起源感到好奇
+  - 想得到永生
+  - 想成為世界霸主
+  correct_options:
+  - 1
+- label: 重要內容 2
+  value: 書名「弗蘭肯斯坦」的意義
+  interactive_type: checkbox
+  hint: 小說書名「弗蘭肯斯坦」指的是誰？
+  options:
+  - 怪物
+  - 科學家
+  - 怪物和科學家
+  correct_options:
+  - 1
+- label: 結論
+  value: 科學發展應有倫理界線
+  interactive_type: fill_blank
+  hint: 這篇故事引發了我們對科學發展的什麼思考？
+story_structure_table_source: ai-generated-2026-05-02

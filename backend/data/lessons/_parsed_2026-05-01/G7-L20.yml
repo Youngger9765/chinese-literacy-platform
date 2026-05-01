@@ -174,3 +174,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 電子煙的偽科學陷阱
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 電子煙煙霧含有害物質
+  interactive_type: checkbox
+  hint: 電子煙的真相
+  options:
+  - 電子煙煙霧只有水蒸氣
+  - 電子煙煙霧含有害物質
+  - 電子煙比紙菸更健康
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 煙油食用與吸入影響不同
+  interactive_type: checkbox
+  hint: 煙油的食用方式
+  options:
+  - 煙油吃下肚對身體無害
+  - 煙油食用與吸入影響不同
+  - 煙油成分都是食品香料
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 電子煙廠商鎖定年輕族群
+  interactive_type: checkbox
+  hint: 廠商的行銷手法
+  options:
+  - 電子煙廠商鎖定年輕族群
+  - 電子煙已全面合法販售
+  - 電子煙能幫助戒菸
+  correct_options:
+  - 0
+- label: 結論
+  value: 多方查證，辨識網路訊息
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

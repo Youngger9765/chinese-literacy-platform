@@ -121,3 +121,33 @@ images:
   content_type: image/png
   caption: ''
 image_count: 9
+story_structure_rows:
+- label: 主題
+  value: 荀巨伯重情重義
+  interactive_type: fill_blank
+  hint: 這篇文章主要在講什麼？
+- label: 重要內容 1
+  value: 荀巨伯探望生病的朋友
+  interactive_type: checkbox
+  hint: 故事的開頭發生了什麼事？
+  options:
+  - 荀巨伯去旅行
+  - 荀巨伯探望生病的朋友
+  - 荀巨伯搬家了
+  correct_options:
+  - 1
+- label: 重要內容 2
+  value: 荀巨伯不願獨自逃走
+  interactive_type: checkbox
+  hint: 面對胡賊，荀巨伯做了什麼決定？
+  options:
+  - 荀巨伯趕快逃跑
+  - 荀巨伯與胡賊打架
+  - 荀巨伯不願獨自逃走
+  correct_options:
+  - 2
+- label: 結論
+  value: 胡賊被荀巨伯感動
+  interactive_type: fill_blank
+  hint: 最後胡賊為什麼離開了？
+story_structure_table_source: ai-generated-2026-05-02

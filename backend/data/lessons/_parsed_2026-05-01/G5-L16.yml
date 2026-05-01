@@ -175,3 +175,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 能高團
+  interactive_type: fill_blank
+  hint: 課文主要在介紹誰？
+- label: 重要事實 1
+  value: 臺灣第一支踏上日本甲子園球場的棒球隊，由阿美族原住民組成。
+  interactive_type: checkbox
+  hint: 能高團的特色
+  options:
+  - 臺灣第一支踏上日本甲子園球場的棒球隊，由阿美族原住民組成。
+  - 臺灣第一支在世界大賽奪冠的棒球隊，由漢人組成。
+  - 臺灣第一支在甲子園打進決賽的棒球隊，由日本人組成。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 能高團在日本比賽時，因體能與默契驚人，獲得「若武者」稱號。
+  interactive_type: checkbox
+  hint: 能高團在日本的表現
+  options:
+  - 能高團在日本比賽時，因體能與默契驚人，獲得「若武者」稱號。
+  - 能高團在日本比賽時，因戰術靈活，獲得「戰術大師」稱號。
+  - 能高團在日本比賽時，因打擊出色，獲得「全壘打王」稱號。
+  correct_options:
+  - 0
+- label: 重要事實 3
+  value: 伊藤正雄（羅沙威）回花蓮擔任教練，培育許多傑出棒球選手。
+  interactive_type: checkbox
+  hint: 能高團對後世的影響
+  options:
+  - 伊藤正雄（羅沙威）回花蓮擔任教練，培育許多傑出棒球選手。
+  - 能高團成員都留在日本發展，沒有回臺灣。
+  - 能高團解散後，成員都轉行做其他運動。
+  correct_options:
+  - 0
+- label: 結論
+  value: 能高團是臺灣棒球通往國際舞台的先驅，也是原住民族的驕傲。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

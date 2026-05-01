@@ -155,29 +155,29 @@ strategy_exercise:
   strategy_name: 比較異同與科學方法
   instruction: 這兩篇文章分別介紹了巨石陣和摩艾石像。我們可以比較它們的相同和不同之處，並學習用「假設→考驗→結論」的方法來思考。請跟著步驟練習
   steps:
-    - prompt: 巨石陣和摩艾石像有一個共同的未解之謎，是什麼？
-      type: select
-      options:
-        - 它們是誰建造的
-        - 古代人在沒有大型機械的情況下，如何搬運巨大的石頭
-        - 石頭是從哪裡來的
-      answer: 1
-    - prompt: 關於巨石陣設立的目的，哪個假設目前最可能成立？
-      type: select
-      options:
-        - 外星人的基地
-        - 古代的醫院
-        - 古代人為了觀測天文而建造
-      answer: 2
-    - prompt: 關於摩艾石像的移動方式，課文提到的三個假設中，哪一個有實驗支持？
-      type: select
-      options:
-        - 超自然力量移動石像
-        - 用滾輪把石像移到海邊
-        - 把石像立起來，用繩索拉扯移動
-      answer: 2
-    - prompt: 比較巨石陣和摩艾石像，寫出一個相同點和一個不同點
-      type: free_text
+  - prompt: 巨石陣和摩艾石像有一個共同的未解之謎，是什麼？
+    type: select
+    options:
+    - 它們是誰建造的
+    - 古代人在沒有大型機械的情況下，如何搬運巨大的石頭
+    - 石頭是從哪裡來的
+    answer: 1
+  - prompt: 關於巨石陣設立的目的，哪個假設目前最可能成立？
+    type: select
+    options:
+    - 外星人的基地
+    - 古代的醫院
+    - 古代人為了觀測天文而建造
+    answer: 2
+  - prompt: 關於摩艾石像的移動方式，課文提到的三個假設中，哪一個有實驗支持？
+    type: select
+    options:
+    - 超自然力量移動石像
+    - 用滾輪把石像移到海邊
+    - 把石像立起來，用繩索拉扯移動
+    answer: 2
+  - prompt: 比較巨石陣和摩艾石像，寫出一個相同點和一個不同點
+    type: free_text
 story_structure:
 - label: 主題
   value: 巨石陣與摩艾石像的未解之謎
@@ -190,3 +190,43 @@ story_structure:
 - label: 結論
   value: 人類祖先的智慧與技術，至今仍有許多未解之謎。
 knowledge_video_url: https://www.youtube.com/watch?v=EKJqvSPOXzg
+story_structure_rows:
+- label: 主題
+  value: 巨石陣與摩艾石像
+  interactive_type: fill_blank
+  hint: 課文主要在介紹什麼？
+- label: 重要事實 1
+  value: 巨石陣位於英國倫敦西南方
+  interactive_type: checkbox
+  hint: 巨石陣在哪裡？
+  options:
+  - 巨石陣位於英國倫敦西南方
+  - 巨石陣位於太平洋小島上
+  - 巨石陣位於智利海岸
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 摩艾石像背向海洋面向島內
+  interactive_type: checkbox
+  hint: 摩艾石像的特色？
+  options:
+  - 摩艾石像面向海洋背向島內
+  - 摩艾石像背向海洋面向島內
+  - 摩艾石像面向天空
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 巨石陣與摩艾石像的建造目的與方式至今仍是謎
+  interactive_type: checkbox
+  hint: 關於兩者，課文提到什麼？
+  options:
+  - 巨石陣與摩艾石像的建造目的與方式已完全解開
+  - 巨石陣與摩艾石像的建造目的與方式至今仍是謎
+  - 巨石陣與摩艾石像都是外星人建造的
+  correct_options:
+  - 1
+- label: 結論
+  value: 人類的智慧與能力超乎想像
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

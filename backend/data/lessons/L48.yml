@@ -150,29 +150,69 @@ strategy_exercise:
   strategy_name: 假新聞思辨
   instruction: 面對新聞報導，我們要學會辨別真假。這篇文章用凱蒂謀殺案告訴我們，連教科書都可能傳播錯誤資訊。請跟著步驟練習思辨
   steps:
-    - prompt: 《紐約時報》的報導說有38位目擊者看著凱蒂被殺卻未報警，後來研究者發現真相是什麼？
-      type: select
-      options:
-        - 確實有38位目擊者，但他們都害怕
-        - 根本沒有38位目擊者，而且有人打電話報警但被吃案
-        - 目擊者有報警，但警察太慢趕到
-      answer: 1
-    - prompt: 心理學家根據這則報導提出了「旁觀者效應」理論，這個理論長達43年沒人質疑，最可能的原因是什麼？
-      type: select
-      options:
-        - 沒有人看過原始的警方紀錄
-        - 大家迷信權威，不加質疑
-        - 研究者都覺得這件事不重要
-      answer: 1
-    - prompt: 作者說「盡信書不如無書」，這句話的意思是什麼？
-      type: select
-      options:
-        - 讀書沒有用，不如不讀
-        - 如果完全相信書上寫的，還不如不讀，要保有質疑精神
-        - 書本太貴了，不要買
-      answer: 1
-    - prompt: 在生活中遇到一則聳動的新聞時，你可以用哪些方法來判斷真假？請寫出至少兩個方法
-      type: free_text
+  - prompt: 《紐約時報》的報導說有38位目擊者看著凱蒂被殺卻未報警，後來研究者發現真相是什麼？
+    type: select
+    options:
+    - 確實有38位目擊者，但他們都害怕
+    - 根本沒有38位目擊者，而且有人打電話報警但被吃案
+    - 目擊者有報警，但警察太慢趕到
+    answer: 1
+  - prompt: 心理學家根據這則報導提出了「旁觀者效應」理論，這個理論長達43年沒人質疑，最可能的原因是什麼？
+    type: select
+    options:
+    - 沒有人看過原始的警方紀錄
+    - 大家迷信權威，不加質疑
+    - 研究者都覺得這件事不重要
+    answer: 1
+  - prompt: 作者說「盡信書不如無書」，這句話的意思是什麼？
+    type: select
+    options:
+    - 讀書沒有用，不如不讀
+    - 如果完全相信書上寫的，還不如不讀，要保有質疑精神
+    - 書本太貴了，不要買
+    answer: 1
+  - prompt: 在生活中遇到一則聳動的新聞時，你可以用哪些方法來判斷真假？請寫出至少兩個方法
+    type: free_text
 story_structure:
 - label: 結論
   value: 不怕權威的去檢驗、質疑舊的理論，才能使我們一步步逼近
+story_structure_rows:
+- label: 主題
+  value: 盡信書不如無書
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 凱蒂案的報導與真相不符
+  interactive_type: checkbox
+  hint: 關於凱蒂案的真相
+  options:
+  - 凱蒂案是記者杜撰的
+  - 凱蒂案是真實事件，但細節有誤
+  - 凱蒂案完全是真實的報導
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 旁觀者效應的理論基礎有誤
+  interactive_type: checkbox
+  hint: 關於旁觀者效應
+  options:
+  - 旁觀者效應是錯誤的理論
+  - 旁觀者效應的案例有問題
+  - 旁觀者效應已被推翻
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 科學家也會犯錯
+  interactive_type: checkbox
+  hint: 關於科學研究
+  options:
+  - 科學研究總是正確的
+  - 科學家不會犯錯
+  - 科學研究可能會有錯誤
+  correct_options:
+  - 2
+- label: 結論
+  value: 要抱持懷疑精神，檢驗資訊
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

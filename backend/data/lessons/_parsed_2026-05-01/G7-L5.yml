@@ -195,3 +195,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 16
+story_structure_rows:
+- label: 主題
+  value: 三代同堂的生活
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 臺灣已成為「超高齡社會」，三代同堂比例增加。
+  interactive_type: checkbox
+  hint: 關於社會現況
+  options:
+  - 臺灣人口越來越少。
+  - 臺灣已是超高齡社會。
+  - 臺灣生育率很高。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 為爺爺奶奶打造高齡友善空間，讓他們住得更安全。
+  interactive_type: checkbox
+  hint: 關於居家環境
+  options:
+  - 家裡變得更小了。
+  - 家裡裝潢變得更時尚。
+  - 家裡做了安全改動。
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 生活作息改變，從夜貓子變成早起，發現早起的好處。
+  interactive_type: checkbox
+  hint: 關於生活習慣
+  options:
+  - 作息變得更自由。
+  - 作息變得更規律。
+  - 作息變得更混亂。
+  correct_options:
+  - 1
+- label: 結論
+  value: 三代同堂只要轉換觀點，收穫會大於衝突。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

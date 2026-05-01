@@ -186,3 +186,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 數字記憶的奧秘
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 漢語數字發音比英語短
+  interactive_type: checkbox
+  hint: 實驗一的發現
+  options:
+  - 老中比老美聰明
+  - 漢語數字發音比英語短
+  - 老中比較喜歡補習
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 數字發音長度影響記憶廣度
+  interactive_type: checkbox
+  hint: 實驗一的推論
+  options:
+  - 補習對記憶廣度沒幫助
+  - 數字發音長度影響記憶廣度
+  - 老美不喜歡學數學
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 小老中記憶廣度大於小老美
+  interactive_type: checkbox
+  hint: 實驗二的結果
+  options:
+  - 小老美不喜歡唸書
+  - 小老中記憶廣度大於小老美
+  - 補習會影響記憶廣度
+  correct_options:
+  - 1
+- label: 結論
+  value: 數字發音越短，能記住的數字越多
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

@@ -197,3 +197,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 閱讀的美好
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 媽媽教導作者觀察火車上的乘客，並提醒觀察時要保持自然和尊重。
+  interactive_type: checkbox
+  hint: 媽媽的教導
+  options:
+  - 媽媽教導作者觀察火車上的乘客，並提醒觀察時要保持自然和尊重。
+  - 媽媽要求作者在火車上玩手機。
+  - 媽媽讓作者在火車上大聲聊天。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 作者發現車廂裡多數人都在滑手機，但有一位大姊姊在專心閱讀。
+  interactive_type: checkbox
+  hint: 作者的發現
+  options:
+  - 作者發現車廂裡多數人都在滑手機，但有一位大姊姊在專心閱讀。
+  - 作者發現車廂裡的人都在睡覺。
+  - 作者發現車廂裡的人都在吃零食。
+  correct_options:
+  - 0
+- label: 重要事實 3
+  value: 媽媽解釋閱讀讓人慢下來、主動思考，而滑手機常是被動接收訊息。
+  interactive_type: checkbox
+  hint: 媽媽的解釋
+  options:
+  - 媽媽解釋閱讀讓人慢下來、主動思考，而滑手機常是被動接收訊息。
+  - 媽媽認為滑手機比閱讀更有趣。
+  - 媽媽說閱讀和滑手機沒有差別。
+  correct_options:
+  - 0
+- label: 結論
+  value: 閱讀是令人賞心悅目的畫面，作者也開始隨身帶書閱讀。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

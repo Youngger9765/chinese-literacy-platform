@@ -194,3 +194,43 @@ images:
   content_type: image/x-emf
   caption: ''
 image_count: 17
+story_structure_rows:
+- label: 主題
+  value: 專注當下
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 主角因失誤而自責，腦中出現負面聲音。
+  interactive_type: checkbox
+  hint: 主角遇到什麼困難？
+  options:
+  - 主角比賽表現完美，獲得讚賞。
+  - 主角因失誤而自責，腦中出現負面聲音。
+  - 主角受到隊友責罵，心情低落。
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 教練鼓勵主角用行動取代懊悔。
+  interactive_type: checkbox
+  hint: 教練如何幫助主角？
+  options:
+  - 教練安慰主角，讓他放鬆心情。
+  - 教練責罵主角，要求他改進。
+  - 教練鼓勵主角用行動取代懊悔。
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 主角透過運動專注當下，減少內心批評。
+  interactive_type: checkbox
+  hint: 主角如何克服困難？
+  options:
+  - 主角放棄比賽，不再面對挫折。
+  - 主角透過運動專注當下，減少內心批評。
+  - 主角向隊友抱怨，尋求同情。
+  correct_options:
+  - 1
+- label: 結論
+  value: 專注當下能減少內心批評，幫助我們克服困難。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

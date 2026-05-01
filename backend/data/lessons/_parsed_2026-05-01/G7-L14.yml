@@ -206,3 +206,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 微歧視
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 微歧視的「微」是指行為微小、隱蔽、不易察覺且多半無意。
+  interactive_type: checkbox
+  hint: 微歧視的特性
+  options:
+  - 微歧視的「微」是指行為微小、隱蔽、不易察覺且多半無意。
+  - 微歧視的「微」是指行為很輕微，對人沒有任何影響。
+  - 微歧視的「微」是指行為很微小，但都是故意的。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 微歧視會加深刻板印象和偏見，讓被歧視者內化負面觀感。
+  interactive_type: checkbox
+  hint: 微歧視的影響
+  options:
+  - 微歧視對社會沒有影響，因為它無傷大雅。
+  - 微歧視會加深刻板印象和偏見，讓被歧視者內化負面觀感。
+  - 微歧視只會影響說話的人，對聽者沒有影響。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 要破除微歧視，應反思言行，避免簡化思維，謹慎選擇用詞。
+  interactive_type: checkbox
+  hint: 如何破除微歧視
+  options:
+  - 要破除微歧視，只要避免和特定群體說話就好。
+  - 要破除微歧視，應反思言行，避免簡化思維，謹慎選擇用詞。
+  - 要破除微歧視，只要大聲指出別人的錯誤即可。
+  correct_options:
+  - 1
+- label: 結論
+  value: 我們的言行反映對世界的看法，應具備尊重與包容的態度。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

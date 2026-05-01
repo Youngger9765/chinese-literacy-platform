@@ -226,3 +226,43 @@ images:
   content_type: image/png
   caption: ''
 image_count: 15
+story_structure_rows:
+- label: 主題
+  value: 古代畫家心中的仙境
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 古代畫家常在仙境畫中安排山洞、小橋、小船三種元素。
+  interactive_type: checkbox
+  hint: 仙境畫的元素
+  options:
+  - 古代畫家常在仙境畫中安排山洞、小橋、小船三種元素。
+  - 古代畫家常在仙境畫中安排亭臺樓閣、奇珍異獸兩種元素。
+  - 古代畫家常在仙境畫中安排高山、流水、漁夫三種元素。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 古代仙境畫中人物渺小，是為了表達人類在大自然面前的微不足道。
+  interactive_type: checkbox
+  hint: 人物渺小的原因
+  options:
+  - 古代仙境畫中人物渺小，是為了表達人類在大自然面前的微不足道。
+  - 古代仙境畫中人物渺小，是為了凸顯畫家高超的繪畫技巧。
+  - 古代仙境畫中人物渺小，是為了讓畫面看起來更平衡。
+  correct_options:
+  - 0
+- label: 重要事實 3
+  value: 元明時期，仙境畫開始在民間普及，庶民畫家也投入創作。
+  interactive_type: checkbox
+  hint: 仙境畫的發展
+  options:
+  - 唐宋時期，仙境畫主要由民間畫家創作。
+  - 元明時期，仙境畫開始在民間普及，庶民畫家也投入創作。
+  - 清朝時期，仙境畫逐漸沒落，不再受歡迎。
+  correct_options:
+  - 1
+- label: 結論
+  value: 好的藝術能穿越時空，引起觀畫者的共鳴。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

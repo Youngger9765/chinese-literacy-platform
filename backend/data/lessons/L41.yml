@@ -156,31 +156,71 @@ strategy_exercise:
   strategy_name: 建立思辨超能力
   instruction: 思辨能力就是不盲目相信，學會用證據來判斷。請根據課文中的心理學研究來練習思辨
   steps:
-    - prompt: 課文中的末日預言教主說1954年12月21日是世界末日，結果那天發生了什麼事？
-      type: select
-      options:
-        - 真的發生了大洪水
-        - 什麼都沒有發生，外星人沒有來，也沒有洪水
-        - 只有小規模的水災
-      answer: 1
-    - prompt: 預言失敗後，教主告訴信眾什麼？
-      type: select
-      options:
-        - 承認自己的預言是錯的
-        - 說信眾的虔誠感動了外星人，所以外星人決定不毀滅地球了
-        - 說下一次世界末日改在明年
-      answer: 1
-    - prompt: 根據課文，哪一種信眾在預言失敗後，反而更加崇拜教主？
-      type: select
-      options:
-        - 平常就會「聽其言、觀其行」的信眾
-        - 曾經為教主犧牲奉獻、付出很大代價的信眾
-        - 剛加入不久的新信眾
-      answer: 1
-    - prompt: 哈佛大學校長福斯特說「教育的目標在確保學生能夠辨別有人在胡說八道」，你覺得這句話的意思是什麼？
-      type: free_text
-    - prompt: 在日常生活中，你有沒有遇過類似的情況——有人說了不合理的話，但很多人卻相信？請舉一個例子，並說明你會怎麼判斷真假
-      type: free_text
+  - prompt: 課文中的末日預言教主說1954年12月21日是世界末日，結果那天發生了什麼事？
+    type: select
+    options:
+    - 真的發生了大洪水
+    - 什麼都沒有發生，外星人沒有來，也沒有洪水
+    - 只有小規模的水災
+    answer: 1
+  - prompt: 預言失敗後，教主告訴信眾什麼？
+    type: select
+    options:
+    - 承認自己的預言是錯的
+    - 說信眾的虔誠感動了外星人，所以外星人決定不毀滅地球了
+    - 說下一次世界末日改在明年
+    answer: 1
+  - prompt: 根據課文，哪一種信眾在預言失敗後，反而更加崇拜教主？
+    type: select
+    options:
+    - 平常就會「聽其言、觀其行」的信眾
+    - 曾經為教主犧牲奉獻、付出很大代價的信眾
+    - 剛加入不久的新信眾
+    answer: 1
+  - prompt: 哈佛大學校長福斯特說「教育的目標在確保學生能夠辨別有人在胡說八道」，你覺得這句話的意思是什麼？
+    type: free_text
+  - prompt: 在日常生活中，你有沒有遇過類似的情況——有人說了不合理的話，但很多人卻相信？請舉一個例子，並說明你會怎麼判斷真假
+    type: free_text
 story_structure:
 - label: 結論
   value: □可能會不看證據，做出匪夷所思的判斷
+story_structure_rows:
+- label: 主題
+  value: 信眾與教主
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 教主預言世界末日，信徒辭職、散盡家財追隨。
+  interactive_type: checkbox
+  hint: 關於教主預言
+  options:
+  - 教主預言世界末日，信徒辭職、散盡家財追隨。
+  - 教主預言世界末日，信徒半信半疑。
+  - 教主預言世界末日，信徒嘲笑教主。
+  correct_options:
+  - 0
+- label: 重要事實 2
+  value: 末日未發生，教主稱信徒虔誠感動外星人。
+  interactive_type: checkbox
+  hint: 末日預言結果
+  options:
+  - 末日未發生，教主承認預言錯誤。
+  - 末日未發生，教主稱信徒虔誠感動外星人。
+  - 末日未發生，信徒立刻離開教主。
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 付出代價者更崇拜教主，質疑者則離開。
+  interactive_type: checkbox
+  hint: 信眾態度轉變
+  options:
+  - 所有信眾都對教主失望。
+  - 付出代價者更崇拜教主，質疑者則離開。
+  - 所有信眾對教主的忠誠度都提高。
+  correct_options:
+  - 1
+- label: 結論
+  value: 人們可能不顧事實，盲目相信信仰。
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02
