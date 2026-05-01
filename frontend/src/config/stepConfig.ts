@@ -114,16 +114,6 @@ export const STEP_CONFIG: StepConfig[] = [
     category: 'practice',
   },
   {
-    id: 'sentence-practice',
-    label: '造句練習',
-    hint: '用學到的詞語寫出自己的句子',
-    view: AppView.SENTENCE_PRACTICE,
-    dbStepNumber: 14,
-    needsStory: true,
-    enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
-    category: 'practice',
-  },
-  {
     id: 'vocab-definition',
     label: '詞語理解',
     hint: '為每個詞語找到正確的解釋',
@@ -141,6 +131,16 @@ export const STEP_CONFIG: StepConfig[] = [
     dbStepNumber: 9,
     needsStory: true,
     enabled: true,
+    category: 'practice',
+  },
+  {
+    id: 'sentence-practice',
+    label: '造句練習',
+    hint: '用學到的詞語寫出自己的句子',
+    view: AppView.SENTENCE_PRACTICE,
+    dbStepNumber: 14,
+    needsStory: true,
+    enabled: false, // hidden per 2026-05-01 expert review — hardest vocab task, optional after 7/1
     category: 'practice',
   },
   {
