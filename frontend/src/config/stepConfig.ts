@@ -125,7 +125,7 @@ export const STEP_CONFIG: StepConfig[] = [
   },
   {
     id: 'vocab-definition',
-    label: '詞語定義',
+    label: '詞語理解',
     hint: '為每個詞語找到正確的解釋',
     view: AppView.VOCAB_DEFINITION_MATCH,
     dbStepNumber: 12,

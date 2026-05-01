@@ -491,7 +491,7 @@ const AppRoutes: React.FC = () => (
         <Route
           path="vocab-definition"
           element={
-            <StepRoute stepLabel="詞語定義" nextPath="vocab-application">
+            <StepRoute stepLabel="詞語理解" nextPath="vocab-application">
               <VocabDefinitionMatchPage />
             </StepRoute>
           }
