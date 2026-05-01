@@ -1,16 +1,28 @@
 /**
- * stepConfig.ts — single source of truth for the learning step order.
+ * stepConfig.ts — step registry and default sequence for the learning flow.
  *
- * Each entry in STEP_CONFIG defines one step in the learning flow.
- * The array order controls the display order in StepperNav and the
- * step numbers shown to students (1-based index).
+ * ## Architecture (schema-driven step composition — #1374)
  *
- * To reorder steps: move entries in the array.
- * To add a new step: append a new entry (and add its route in AppRoutes.tsx).
- * To disable a step: set `enabled: false` (StepperNav will skip it).
+ * STEP_REGISTRY: id → metadata + component.  Order has NO meaning here.
+ *   Use this for label/hint/view/dbStepNumber lookups.
  *
- * Future: this config can be fetched from the DB per-lesson or per-teacher
- * preference instead of being a static file.
+ * DEFAULT_STEP_SEQUENCE: the canonical ordered list of step IDs for legacy lessons
+ *   that do not carry their own step_sequence field.
+ *   New lessons can include `step_sequence: ['reading-annotation', 'tutor', ...]`
+ *   in their YAML to override this default.
+ *
+ * Consumers that need the active ordered list should use:
+ *   - `useStepSequence(lesson)` hook   — lesson-aware, returns per-lesson or default
+ *   - `ACTIVE_STEPS`                   — legacy compat alias = default sequence filtered to enabled
+ *
+ * To add a new step:
+ *   1. Register it in STEP_REGISTRY
+ *   2. Add its route in AppRoutes.tsx
+ *   3. Include its id in the lesson YAML step_sequence
+ *   (Default sequence is NOT changed — existing lessons are unaffected)
+ *
+ * To reorder the default flow: edit DEFAULT_STEP_SEQUENCE.
+ * To disable a step globally: set `enabled: false` in STEP_REGISTRY.
  */
 
 import { AppView } from '../types';
@@ -46,29 +58,27 @@ export interface StepConfig {
    * false only for steps that make sense without a loaded story (e.g. HOME, REPORT).
    */
   needsStory: boolean;
-  /** When false the step is excluded from StepperNav entirely (not yet implemented steps). */
+  /** When false the step is excluded from the active sequence entirely (not yet implemented steps). */
   enabled: boolean;
   /** Step category for color-coding */
   category: StepCategory;
 }
 
+// ---------------------------------------------------------------------------
+// STEP_REGISTRY — id → metadata lookup (NO ordering semantics)
+// ---------------------------------------------------------------------------
+
 /**
- * Default step order for the 12-step learning flow (三民版, aligned with 學習單).
+ * Registry of all known steps.  Use for label/hint/view/dbStepNumber lookups.
+ * Order of keys here has no meaning — step order is determined by
+ * DEFAULT_STEP_SEQUENCE (or per-lesson step_sequence from YAML).
  *
- * To customise order per lesson/teacher, override this array at runtime
- * (future: load from DB/API and pass to StepperNav as a prop).
- *
- * dbStepNumber is the value stored in the DB (learning_sessions.current_step).
- * Existing steps keep their original dbStepNumbers (1–14) to avoid a DB migration.
- * New comprehension split steps use dbStepNumbers 15–16 (Issue #1335).
- *
- * Comprehension steps alignment with paper worksheet:
- *   - 文章重點表 (story-structure, dbStep 15) — was tab 2 inside ComprehensionChat
- *   - 閱讀聚光燈 (reading-strategy, dbStep 16)  — was tab 3 inside ComprehensionChat
- *   - 閱讀理解   (comprehension, dbStep 3)       — was tab 1 inside ComprehensionChat
+ * dbStepNumber comments:
+ *   Existing steps keep their original dbStepNumbers (1–14) to avoid a DB migration.
+ *   New comprehension split steps use dbStepNumbers 15–16 (Issue #1335).
  */
-export const STEP_CONFIG: StepConfig[] = [
-  {
+export const STEP_REGISTRY: Record<string, StepConfig> = {
+  'reading-annotation': {
     id: 'reading-annotation',
     label: '讀全文-做記號',
     hint: '閱讀全文，選取不懂或重要的詞語做記號',
@@ -78,7 +88,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'reading',
   },
-  {
+  'tutor': {
     id: 'tutor',
     label: '逐段朗讀',
     hint: '跟著 AI 一段一段大聲朗讀',
@@ -88,7 +98,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'reading',
   },
-  {
+  'full-reading': {
     id: 'full-reading',
     label: '全文朗讀',
     hint: '挑戰一次唸完全篇課文',
@@ -98,7 +108,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'reading',
   },
-  {
+  'listening': {
     id: 'listening',
     label: '聽力理解',
     hint: '聽完課文後，用自己的話說出重點',
@@ -108,7 +118,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
     category: 'comprehension',
   },
-  {
+  'vocab': {
     id: 'vocab',
     label: '生字練習',
     hint: '練習課文中的生字筆順與讀音',
@@ -118,7 +128,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: false, // hidden from StepperNav per product decision 2026-05-01 — accessible via ToolPicker
     category: 'practice',
   },
-  {
+  'vocab-definition': {
     id: 'vocab-definition',
     label: '詞語理解',
     hint: '為每個詞語找到正確的解釋',
@@ -128,7 +138,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'practice',
   },
-  {
+  'vocab-application': {
     id: 'vocab-application',
     label: '語詞應用',
     hint: '把學到的詞語用在句子裡',
@@ -138,8 +148,8 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'practice',
   },
-  // ── Issue #1335: split old "comprehension" tab-container into 3 independent steps ──
-  {
+  // Issue #1335: split old "comprehension" tab-container into 3 independent steps
+  'story-structure': {
     id: 'story-structure',
     label: '文章重點表',
     hint: '把課文重點填進去，讓 AI 幫你檢查',
@@ -149,7 +159,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'comprehension',
   },
-  {
+  'reading-strategy': {
     id: 'reading-strategy',
     label: '閱讀聚光燈',
     hint: '練習這課的閱讀策略',
@@ -159,7 +169,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'comprehension',
   },
-  {
+  'sentence-practice': {
     id: 'sentence-practice',
     label: '造句練習',
     hint: '用學到的詞語寫出自己的句子',
@@ -169,7 +179,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: false, // hidden per 2026-05-01 expert review — hardest vocab task, optional after 7/1
     category: 'practice',
   },
-  {
+  'comprehension': {
     id: 'comprehension',
     label: '閱讀理解',
     hint: '回答課文理解選擇題',
@@ -179,7 +189,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'comprehension',
   },
-  {
+  'vocab-word-search': {
     id: 'vocab-word-search',
     label: '語詞複習',
     hint: '在字母格中找出學過的詞語',
@@ -189,7 +199,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'practice',
   },
-  {
+  'dictation': {
     id: 'dictation',
     label: '聽寫練習',
     hint: '聽 AI 唸字，把聽到的打出來',
@@ -199,7 +209,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: false, // hidden per product decision 2026-03-27
     category: 'practice',
   },
-  {
+  'knowledge-station': {
     id: 'knowledge-station',
     label: '知識補給站',
     hint: '探索課文相關的延伸知識',
@@ -209,7 +219,7 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'comprehension',
   },
-  {
+  'report': {
     id: 'report',
     label: '報告',
     hint: '查看這篇課文的學習成果',
@@ -219,22 +229,96 @@ export const STEP_CONFIG: StepConfig[] = [
     enabled: true,
     category: 'report',
   },
+};
+
+// ---------------------------------------------------------------------------
+// DEFAULT_STEP_SEQUENCE — canonical order for legacy lessons (no step_sequence field)
+// ---------------------------------------------------------------------------
+
+/**
+ * Default step order for the 12-step learning flow (三民版, aligned with 學習單).
+ *
+ * This list controls StepperNav display order and next/prev navigation
+ * for lessons that do NOT carry a `step_sequence` field in their YAML.
+ *
+ * New lessons can specify a custom sequence via `step_sequence: [...]` in YAML.
+ * Disabled steps (enabled: false in STEP_REGISTRY) are automatically filtered out
+ * by `resolveActiveSteps()` before rendering.
+ *
+ * Comprehension steps alignment with paper worksheet:
+ *   - 文章重點表 (story-structure, dbStep 15) — was tab 2 inside ComprehensionChat
+ *   - 閱讀聚光燈 (reading-strategy, dbStep 16)  — was tab 3 inside ComprehensionChat
+ *   - 閱讀理解   (comprehension, dbStep 3)       — was tab 1 inside ComprehensionChat
+ */
+export const DEFAULT_STEP_SEQUENCE: string[] = [
+  'reading-annotation',
+  'tutor',
+  'full-reading',
+  'listening',
+  'vocab',
+  'vocab-definition',
+  'vocab-application',
+  'story-structure',
+  'reading-strategy',
+  'sentence-practice',
+  'comprehension',
+  'vocab-word-search',
+  'dictation',
+  'knowledge-station',
+  'report',
 ];
+
+// ---------------------------------------------------------------------------
+// STEP_CONFIG — backward-compat ordered array (re-derived from registry + default sequence)
+// ---------------------------------------------------------------------------
+
+/**
+ * @deprecated Prefer STEP_REGISTRY for lookups and DEFAULT_STEP_SEQUENCE for ordering.
+ * This array is kept for backward compatibility with callers that iterate it.
+ * It is derived from STEP_REGISTRY in DEFAULT_STEP_SEQUENCE order.
+ */
+export const STEP_CONFIG: StepConfig[] = DEFAULT_STEP_SEQUENCE
+  .map((id) => STEP_REGISTRY[id])
+  .filter(Boolean);
+
+// ---------------------------------------------------------------------------
+// resolveActiveSteps — get the effective ordered+enabled steps for a lesson
+// ---------------------------------------------------------------------------
+
+/**
+ * Given an optional per-lesson step sequence (from YAML `step_sequence` field),
+ * return the ordered list of enabled StepConfig objects.
+ *
+ * - If `lessonStepSequence` is provided: use it (unknown ids are silently dropped).
+ * - If absent: fall back to DEFAULT_STEP_SEQUENCE.
+ * - In both cases, steps with `enabled: false` are excluded.
+ *
+ * This is the single resolution function — StepperNav and LearningLayout should
+ * call this (or the `useStepSequence` hook) rather than importing ACTIVE_STEPS.
+ */
+export function resolveActiveSteps(lessonStepSequence?: string[] | null): StepConfig[] {
+  const seq = (lessonStepSequence && lessonStepSequence.length > 0)
+    ? lessonStepSequence
+    : DEFAULT_STEP_SEQUENCE;
+  return seq
+    .map((id) => STEP_REGISTRY[id])
+    .filter((s): s is StepConfig => !!s && s.enabled);
+}
 
 // ---------------------------------------------------------------------------
 // Derived lookup maps — computed once from STEP_CONFIG so consumers don't
 // need to re-derive them.  Import these instead of building your own maps.
 // ---------------------------------------------------------------------------
 
-/** All enabled steps in display order. */
-export const ACTIVE_STEPS = STEP_CONFIG.filter((s) => s.enabled);
+/** All enabled steps in default display order. Equivalent to resolveActiveSteps(). */
+export const ACTIVE_STEPS = resolveActiveSteps();
 
 /** Map from URL path id (e.g. "intro") to dbStepNumber (e.g. 1). */
 export const STEP_PATH_TO_NUMBER: Record<string, number> = Object.fromEntries(
-  STEP_CONFIG.map((s) => [s.id, s.dbStepNumber]),
+  Object.values(STEP_REGISTRY).map((s) => [s.id, s.dbStepNumber]),
 );
 
 /** Map from URL path id to AppView (e.g. "intro" → AppView.INTRO). */
 export const PATH_TO_VIEW: Record<string, AppView> = Object.fromEntries(
-  STEP_CONFIG.map((s) => [s.id, s.view]),
+  Object.values(STEP_REGISTRY).map((s) => [s.id, s.view]),
 );

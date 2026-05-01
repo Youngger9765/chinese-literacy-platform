@@ -62,6 +62,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   source_file: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   strategy_exercise: Record<string, any> | null;
+  // Schema-driven step composition (#1374)
+  step_sequence: string[] | null;
 }
 
 interface ApiStoryListResponse {
@@ -108,6 +110,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     vocabBank: detail.vocab_bank ?? undefined,
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
     strategyExercise: detail.strategy_exercise ?? undefined,
+    stepSequence: detail.step_sequence ?? undefined,
   };
 }
 

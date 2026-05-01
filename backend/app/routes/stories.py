@@ -143,6 +143,7 @@ def get_story(story_id: str):
         text_type=story["text_type"],
         source_file=story["source_file"],
         strategy_exercise=story.get("strategy_exercise"),
+        step_sequence=story.get("step_sequence"),
     )
 
 

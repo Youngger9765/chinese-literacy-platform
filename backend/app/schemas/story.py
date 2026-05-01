@@ -51,6 +51,9 @@ class StoryDetail(StoryListItem):
     text_type: str = "單"
     source_file: Optional[str] = None
     strategy_exercise: Optional[dict] = None  # 閱讀策略練習 (#943)
+    # Schema-driven step composition (#1374): per-lesson step order from YAML.
+    # None means frontend uses DEFAULT_STEP_SEQUENCE fallback.
+    step_sequence: Optional[list[str]] = None
 
 
 class StoryListResponse(BaseModel):
