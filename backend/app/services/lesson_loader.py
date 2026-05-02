@@ -329,7 +329,12 @@ def _load_layer2_lessons(
             ),
             "reading_benchmark": data.get("reading_benchmark"),
             "source_file": data.get("source_file"),
-            "strategy_exercise": data.get("strategy_exercises"),  # note: parsed key differs
+            # Accept both keys: 'strategy_exercise' (singular, guided_steps shape — Gemini
+            # structured output from #1418) OR 'strategy_exercises' (plural, legacy skeleton
+            # list shape for G7 圖文整合). Singular takes priority.
+            "strategy_exercise": (
+                data.get("strategy_exercise") or data.get("strategy_exercises")
+            ),
             "story_structure_table": data.get("story_structure_table"),
             "story_structure_rows": data.get("story_structure_rows"),
             "display_order": display_order,
