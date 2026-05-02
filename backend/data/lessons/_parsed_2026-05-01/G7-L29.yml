@@ -256,3 +256,6 @@ worksheet_intro:
   target_strategy: 圖文整合閱讀策略
   level_label: Level 7・說明文
   authors: 課文：曾世杰  學習單：陳淑麗
+lesson_intro:
+  source: docx_explanation
+  text: 圖文題就是「文字帶著插圖」的題目，你不能只看文字，也不能只看插圖，眼睛必須在文字和插圖中來回移動，把文圖之間的關係弄清楚，才能又快又正確地答題。這一課我們再用地球升溫這個熱門話題，來學習如何閱讀、解答圖文題。

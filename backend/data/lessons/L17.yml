@@ -165,8 +165,8 @@ multiple_choice:
   - 因為他的姊姊很優秀，讓他很有壓力。
   - 因為他需要錢，改善家裡的經濟狀況。
   - 因為他覺得家庭很糟，所以自我放棄。
-  answer:
-  explanation:
+  answer: null
+  explanation: null
 - question: 故事二的鄧小姐要一輩子吃藥的事實並沒有改變，為什麼她突然不憂鬱了呢？
   options:
   - 她改變了自己對壞事的看法。
@@ -273,3 +273,37 @@ story_structure_rows:
   interactive_type: fill_blank
   hint: 作者希望讀者怎麼做或怎麼想？
 story_structure_table_source: ai-generated-2026-05-02
+worksheet_section_order:
+- number: 一
+  name: 讀全文-做記號
+  type: reading_annotation
+- number: 二
+  name: 逐段朗讀
+  type: tutor
+- number: 三
+  name: 全文朗讀
+  type: full_reading
+- number: 四
+  name: 詞語理解
+  type: vocab_definition
+- number: 五
+  name: 語詞應用
+  type: vocab_application
+- number: 六
+  name: 文章重點表
+  type: story_structure
+- number: 七
+  name: 閱讀聚光燈
+  type: reading_strategy
+- number: 八
+  name: 閱讀理解
+  type: comprehension
+- number: 九
+  name: 語詞複習
+  type: vocab_word_search
+- number: 十
+  name: 知識補給站
+  type: knowledge_station
+- number: 十一
+  name: 報告
+  type: report
