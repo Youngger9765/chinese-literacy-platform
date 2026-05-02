@@ -133,7 +133,7 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                       {storyImages.map((img, idx) => (
                         <figure key={idx} className="space-y-2">
                           <img
-                            src={`${GCS_IMAGE_BASE}/${story.lesson_code}/${img.filename}`}
+                            src={`${GCS_IMAGE_BASE}/${story.lesson_code}/${img.filename.split('/').pop()}`}
                             alt={img.caption ?? `圖 ${idx + 1}`}
                             loading="lazy"
                             className="w-full rounded-lg border border-outline-variant bg-surface"
