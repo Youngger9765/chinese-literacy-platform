@@ -210,3 +210,79 @@ story_structure_rows:
   interactive_type: fill_blank
   hint: 課文最後想告訴我們什麼？
 story_structure_table_source: ai-generated-2026-05-02
+vocab_bank:
+  A: 家常便飯
+  B: 微不足道
+  C: 一針見血
+  D: 力不從心
+  E: 乏善可陳
+  F: 垂頭喪氣
+  G: 耳邊風
+  H: 使喚
+fill_in_blank:
+- id: 1
+  answer: E
+  answer_word: 乏善可陳
+  context_before: 這場比賽球員們頻頻失誤，
+  context_after: 的表現讓許多球迷大失所望
+- id: 2
+  answer: H
+  answer_word: 使喚
+  context_before: 他總喜歡
+  context_after: 學弟妹幫他跑腿，讓人覺得不太尊重
+- id: 3
+  answer: F
+  answer_word: 垂頭喪氣
+  context_before: 雖然第一局不幸失分，但隊長鼓勵大家不要
+  context_after: ，繼續努力
+- id: 4
+  answer: D
+  answer_word: 力不從心
+  context_before: 因為肩膀的舊傷，他在高強度的冠亞軍賽時，感到十分
+  context_after: ''
+- id: 5
+  answer: G
+  answer_word: 耳邊風
+  context_before: 營養師一再警告青少年少喝含糖飲料，但許多人仍當成
+  context_after: ''
+- id: 6
+  answer: A
+  answer_word: 家常便飯
+  context_before: 在段考前熬夜唸書，對他來說已是
+  context_after: ，週末也幾乎沒有休息
+- id: 7
+  answer: B
+  answer_word: 微不足道
+  context_before: 這份募款儘管
+  context_after: ，但也代表我們對流浪動物的一點心意
+- id: 8
+  answer: C
+  answer_word: 一針見血
+  context_before: 議員在院會上
+  context_after: 的詢問市長有關預算的問題，引起媒體關注
+fill_in_blank_count: 8
+本課語詞:
+- 乏善可陳
+- 垂頭喪氣
+worksheet_section_order:
+- number: 二
+  name: 念順順
+  type: reading_timer
+- number: 三
+  name: 語詞我最棒
+  type: vocab_definitions
+- number: 四
+  name: 語詞應用
+  type: vocab_application
+- number: 五
+  name: 文章重點表
+  type: structure_table
+- number: 七
+  name: 閱讀理解
+  type: mcq
+- number: 八
+  name: 詞語複習
+  type: word_search
+- number: 九
+  name: 知識補給站
+  type: knowledge_station

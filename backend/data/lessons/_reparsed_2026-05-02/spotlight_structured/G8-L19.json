@@ -1,0 +1,232 @@
+{
+  "type": "guided_steps",
+  "strategy_name": "比較多元觀點",
+  "instruction": "請你運用「比較多元觀點」策略，整理兩派觀點並推論文章主旨。",
+  "reasoning": "This exercise guides students through the '比較多元觀點' strategy. It breaks down the process into identifying the issue, finding different viewpoints (stance, reasons, evidence), comparing these viewpoints based on values and risks, and finally inferring the main idea and author's intent. Each section of the original text is converted into a step, with multiple-choice questions having answers derived from the checked options (e.g., '①' vs '□②') and summary/fill-in-the-blank sections represented as free-text prompts where the answers are provided in the original material as guidance.",
+  "steps": [
+    {
+      "prompt": "這篇文章在談「哪個議題／爭議」（提示：可能出現「爭議」、「要不要」、「是否」等關鍵詞）",
+      "type": "free_text",
+      "reasoning": "The original text provides the answer '臺灣要不要核電？' directly after the question, implying it's a fill-in-the-blank or open-ended question where the answer is given as an example."
+    },
+    {
+      "prompt": "請根據課文內容勾選(單選) 或填答（內容合理即可）\n立場/主張",
+      "type": "select",
+      "options": [
+        "反對核能",
+        "贊成核能"
+      ],
+      "answer": 0,
+      "reasoning": "The original text indicates '①反對核能' is selected."
+    },
+    {
+      "prompt": "請依課文內容，判斷每個理由最主要屬於哪一類(單選)\n1.核災屬於低機率、高衝擊的系統性風險，出事難收拾",
+      "type": "select",
+      "options": [
+        "安全風險",
+        "能源供應",
+        "減碳責任",
+        "選址處置"
+      ],
+      "answer": 0,
+      "reasoning": "The original text indicates '①安全風險' is selected for this reason."
+    },
+    {
+      "prompt": "請依課文內容，判斷每個理由最主要屬於哪一類(單選)\n2.台灣人口密度高，若發生核災，會使交通與安置更困難",
+      "type": "select",
+      "options": [
+        "安全風險",
+        "能源供應",
+        "減碳責任",
+        "選址處置"
+      ],
+      "answer": 0,
+      "reasoning": "The original text indicates '①安全風險' is selected for this reason."
+    },
+    {
+      "prompt": "請依課文內容，判斷每個理由最主要屬於哪一類(單選)\n3.兩岸 情勢緊張，若核電遭飛彈轟炸，民眾更緊張",
+      "type": "select",
+      "options": [
+        "安全風險",
+        "能源供應",
+        "減碳責任",
+        "選址處置"
+      ],
+      "answer": 0,
+      "reasoning": "The original text indicates '①安全風險' is selected for this reason."
+    },
+    {
+      "prompt": "請依課文內容，判斷每個理由最主要屬於哪一類(單選)\n4.核電廠與核廢料要設在哪裡、放在哪裡，有鄰避效應",
+      "type": "select",
+      "options": [
+        "安全風險",
+        "能源供應",
+        "減碳責任",
+        "選址處置"
+      ],
+      "answer": 3,
+      "reasoning": "The original text indicates '④選址處置' is selected for this reason."
+    },
+    {
+      "prompt": "你發現了嗎？反對核能的理由主要集中在：_____",
+      "type": "free_text",
+      "reasoning": "This is a free-text question where the student is expected to summarize the main focus of the reasons. The answer '安全風險' is provided in the original text."
+    },
+    {
+      "prompt": "證據",
+      "type": "select",
+      "options": [
+        "車諾比、福島的撤離人數與範圍等案例數據",
+        "很多人認為核能一出事修復費用太昂貴，不能考慮核能"
+      ],
+      "answer": 0,
+      "reasoning": "The original text indicates '①車諾比、福島的撤離人數與範圍等案例數據' is selected."
+    },
+    {
+      "prompt": "立場/主張",
+      "type": "select",
+      "options": [
+        "反對核能",
+        "贊成核能"
+      ],
+      "answer": 1,
+      "reasoning": "The original text indicates '②贊成核能' is selected."
+    },
+    {
+      "prompt": "請依課文內容，判斷每個理由最主要屬於哪一類(單選)\n1.台灣能源多靠進口，有核能可增加穩定來源，減少依賴",
+      "type": "select",
+      "options": [
+        "安全風險",
+        "能源供應",
+        "減碳責任",
+        "選址處置"
+      ],
+      "answer": 1,
+      "reasoning": "The original text indicates '②能源供應' is selected for this reason."
+    },
+    {
+      "prompt": "請依課文內容，判斷每個理由最主要屬於哪一類(單選)\n2.減碳是趨勢，核能排放的溫室氣體極少，能減碳",
+      "type": "select",
+      "options": [
+        "安全風險",
+        "能源供應",
+        "減碳責任",
+        "選址處置"
+      ],
+      "answer": 2,
+      "reasoning": "The original text indicates '③減碳責任' is selected for this reason."
+    },
+    {
+      "prompt": "請依課文內容，判斷每個理由最主要屬於哪一類(單選)\n3.臺灣的用電 需求快速上升，需要更穩定的電力來源支撐",
+      "type": "select",
+      "options": [
+        "安全風險",
+        "能源供應",
+        "減碳責任",
+        "選址處置"
+      ],
+      "answer": 1,
+      "reasoning": "The original text indicates '②能源供應' is selected for this reason."
+    },
+    {
+      "prompt": "你發現了嗎？贊成核能的理由主要集中在：_____",
+      "type": "free_text",
+      "reasoning": "This is a free-text question where the student is expected to summarize the main focus of the reasons. The answer '能源供應' is provided in the original text."
+    },
+    {
+      "prompt": "證據",
+      "type": "select",
+      "options": [
+        "數據指出，台灣能源多靠進口、用電需求急速上升",
+        "只要擴大核能發電，就保證不缺電，不必其他電源"
+      ],
+      "answer": 0,
+      "reasoning": "The original text indicates '①數據指出，台灣能源多靠進口、用電需求急速上升' is selected."
+    },
+    {
+      "prompt": "立場: 贊成\n最優先的價值（單選）",
+      "type": "select",
+      "options": [
+        "安全優先",
+        "穩定供電",
+        "減碳目標"
+      ],
+      "answer": 1,
+      "reasoning": "The original text indicates '②穩定供電' is selected for '贊成'立場."
+    },
+    {
+      "prompt": "立場: 贊成\n最害怕的風險（單選）",
+      "type": "select",
+      "options": [
+        "核災失控",
+        "能源中斷",
+        "減碳落後"
+      ],
+      "answer": 1,
+      "reasoning": "The original text indicates '②能源中斷' is selected for '贊成'立場."
+    },
+    {
+      "prompt": "立場: 反對\n最優先的價值（單選）",
+      "type": "select",
+      "options": [
+        "安全優先",
+        "穩定供電",
+        "減碳目標"
+      ],
+      "answer": 0,
+      "reasoning": "The original text indicates '①安全優先' is selected for '反對'立場."
+    },
+    {
+      "prompt": "立場: 反對\n最害怕的風險（單選）",
+      "type": "select",
+      "options": [
+        "核災失控",
+        "能源中斷",
+        "減碳落後"
+      ],
+      "answer": 0,
+      "reasoning": "The original text indicates '①核災失控' is selected for '反對'立場."
+    },
+    {
+      "prompt": "反對核能把「_____」放第一",
+      "type": "free_text",
+      "reasoning": "This is a free-text question where the student is expected to fill in the blank. The answer '安全優先' is provided in the original text."
+    },
+    {
+      "prompt": "反對核能最怕「_____」",
+      "type": "free_text",
+      "reasoning": "This is a free-text question where the student is expected to fill in the blank. The answer '核災失控' is provided in the original text."
+    },
+    {
+      "prompt": "贊成核能把「_____」放第一",
+      "type": "free_text",
+      "reasoning": "This is a free-text question where the student is expected to fill in the blank. The answer '穩定供電' is provided in the original text."
+    },
+    {
+      "prompt": "贊成核能最怕「_____」",
+      "type": "free_text",
+      "reasoning": "This is a free-text question where the student is expected to fill in the blank. The answer '能源中斷' is provided in the original text."
+    },
+    {
+      "prompt": "你已用表格整理兩派的「理由與證據」，也用「最優先的價值／最害怕的風險」比較差異。綜合這些整理，本文主旨最可能是什麼？（單選）",
+      "type": "select",
+      "options": [
+        "列出反對與贊成的理由，提醒能源決策必須權衡利弊並持續對話",
+        "用核災案例證明核能最危險，呼籲台灣立刻全面停止使用核電",
+        "用用電需求與減碳壓力證明核能必要，主張台灣應立即擴建核電廠"
+      ],
+      "answer": 0,
+      "reasoning": "The original text indicates '①列出反對與贊成的理由，提醒能源決策必須權衡利弊並持續對話' is selected."
+    },
+    {
+      "prompt": "你在比較表中看見兩派「優先價值」與「害怕風險」不同；作者最後提出「公開透明的數據、嚴格監管與持續對話」。作者這樣收尾，最可能想達到什麼效果？（單選）",
+      "type": "select",
+      "options": [
+        "先由專家提出完整報告並公開發布，再依報告定案執行。",
+        "讓討論回到可查核資料與制度程序，降低對立與互不信任。"
+      ],
+      "answer": 1,
+      "reasoning": "The original text indicates '②讓討論回到可查核資料與制度程序，降低對立與互不信任。' is selected."
+    }
+  ]
+}
