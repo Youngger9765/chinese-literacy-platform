@@ -252,6 +252,9 @@ def get_story(story_id: str):
         layout_mode=story.get("layout_mode") or "standard",
         # Image gallery for graphic-text layout (#1341)
         images=story.get("images") or [],
+        # Worksheet metadata (#1434) — surface to API
+        worksheet_section_order=story.get("worksheet_section_order"),
+        worksheet_intro=story.get("worksheet_intro"),
     )
 
 
