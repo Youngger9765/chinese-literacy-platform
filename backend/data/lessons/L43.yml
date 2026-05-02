@@ -111,23 +111,23 @@ flags: []
 strategy_exercise:
   type: guided_steps
   strategy_name: 一字多義：聞
-  instruction: "「聞」這個字在文言文中有不同的意思。請根據課文練習分辨「聞」的不同用法"
+  instruction: 「聞」這個字在文言文中有不同的意思。請根據課文練習分辨「聞」的不同用法
   steps:
-  - prompt: "「予聞之也久」的「聞」是什麼意思？"
+  - prompt: 「予聞之也久」的「聞」是什麼意思？
     type: select
     options:
     - 聽到、聽說
     - 有名、著稱
     - 聽見的事情、消息
     answer: 0
-  - prompt: "「不能稱前時之聞」的「聞」是什麼意思？"
+  - prompt: 「不能稱前時之聞」的「聞」是什麼意思？
     type: select
     options:
     - 聽到、聽說
     - 有名、著稱
     - 聽見的事情、消息（傳聞）
     answer: 2
-  - prompt: "「風流天下聞」的「聞」是什麼意思？"
+  - prompt: 「風流天下聞」的「聞」是什麼意思？
     type: select
     options:
     - 聽到、聽說
@@ -181,3 +181,37 @@ story_structure_rows:
   interactive_type: fill_blank
   hint: 這個故事告訴我們什麼道理？
 story_structure_table_source: ai-generated-2026-05-02
+worksheet_section_order:
+- number: 一
+  name: 讀全文-做記號
+  type: reading_annotation
+- number: 二
+  name: 逐段朗讀
+  type: tutor
+- number: 三
+  name: 全文朗讀
+  type: full_reading
+- number: 四
+  name: 詞語理解
+  type: vocab_definition
+- number: 五
+  name: 語詞應用
+  type: vocab_application
+- number: 六
+  name: 文章重點表
+  type: story_structure
+- number: 七
+  name: 閱讀聚光燈
+  type: reading_strategy
+- number: 八
+  name: 閱讀理解
+  type: comprehension
+- number: 九
+  name: 語詞複習
+  type: vocab_word_search
+- number: 十
+  name: 知識補給站
+  type: knowledge_station
+- number: 十一
+  name: 報告
+  type: report

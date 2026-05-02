@@ -78,6 +78,13 @@ interface ApiStoryDetail extends ApiStoryListItem {
     lesson_label?: string;
     authors?: string;
   } | null;
+  // Lesson intro (#1443): docx 說明/導讀 or excel fallback
+  lesson_intro?: {
+    source: 'docx_explanation' | 'docx_guide' | 'excel';
+    text: string;
+    unit_topic?: string;
+    strategy_title?: string;
+  } | null;
 }
 
 interface ApiStoryListResponse {
@@ -127,6 +134,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     stepSequence: detail.step_sequence ?? undefined,
     worksheetSectionOrder: detail.worksheet_section_order ?? undefined,
     worksheetIntro: detail.worksheet_intro ?? undefined,
+    lessonIntro: detail.lesson_intro ?? undefined,
     // Plugin-pattern dispatch fields (#1404 / #1341):
     layout_mode: (detail.layout_mode as Story['layout_mode']) ?? 'standard',
     reading_strategy_type: detail.reading_strategy_type ?? 'general',

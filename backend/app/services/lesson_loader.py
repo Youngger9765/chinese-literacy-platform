@@ -221,6 +221,8 @@ def _load_layer1_lessons() -> list[dict]:
             # 學習單 section order + intro metadata (#1434) — None for Layer-1
             "worksheet_section_order": data.get("worksheet_section_order"),
             "worksheet_intro": data.get("worksheet_intro"),
+            # Lesson intro (#1443): docx 說明/導讀 or excel fallback
+            "lesson_intro": data.get("lesson_intro"),
             "_layer": 1,
         }
         lessons.append(lesson)
@@ -353,6 +355,8 @@ def _load_layer2_lessons(
             # 學習單 section order + intro metadata (#1434)
             "worksheet_section_order": data.get("worksheet_section_order"),
             "worksheet_intro": data.get("worksheet_intro"),
+            # Lesson intro (#1443): docx 說明/導讀 or excel fallback
+            "lesson_intro": data.get("lesson_intro"),
             "_layer": 2,
         }
         lessons.append(lesson)

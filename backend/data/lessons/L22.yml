@@ -142,8 +142,8 @@ multiple_choice:
   - 他考入員林農工的園藝科當學生。
   - 他用自己的野外探險經驗說服專家。
   - 保種中心力排眾議，讓他加入團隊。
-  answer:
-  explanation:
+  answer: null
+  explanation: null
 - question: 洪信介說：「有些事情還是必須要有人去做啊！」請問這件事指的是什麼？
   options:
   - 積極投入種樹的行列。
@@ -253,3 +253,37 @@ story_structure_rows:
     correct_options:
     - 0
 story_structure_table_source: ai-generated-2026-05-02
+worksheet_section_order:
+- number: 一
+  name: 讀全文-做記號
+  type: reading_annotation
+- number: 二
+  name: 逐段朗讀
+  type: tutor
+- number: 三
+  name: 全文朗讀
+  type: full_reading
+- number: 四
+  name: 詞語理解
+  type: vocab_definition
+- number: 五
+  name: 語詞應用
+  type: vocab_application
+- number: 六
+  name: 文章重點表
+  type: story_structure
+- number: 七
+  name: 閱讀聚光燈
+  type: reading_strategy
+- number: 八
+  name: 閱讀理解
+  type: comprehension
+- number: 九
+  name: 語詞複習
+  type: vocab_word_search
+- number: 十
+  name: 知識補給站
+  type: knowledge_station
+- number: 十一
+  name: 報告
+  type: report

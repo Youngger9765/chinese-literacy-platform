@@ -158,6 +158,15 @@ export interface Story {
     lesson_label?: string;
     authors?: string;
   };
+  /** Lesson intro — real course introduction (#1443).
+   *  source: 'docx_explanation' | 'docx_guide' | 'excel'
+   *  Preferred over intro.background (which is just the first story paragraph). */
+  lessonIntro?: {
+    source: 'docx_explanation' | 'docx_guide' | 'excel';
+    text: string;
+    unit_topic?: string;
+    strategy_title?: string;
+  };
 }
 
 export interface ReadingAttempt {
