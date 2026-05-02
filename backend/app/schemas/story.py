@@ -67,6 +67,10 @@ class StoryDetail(StoryListItem):
     worksheet_section_order: Optional[list[dict]] = None
     # worksheet_intro: {step_label, target_strategy, instructions, level_label, lesson_label, authors}
     worksheet_intro: Optional[dict] = None
+    # lesson_intro: real course introduction (#1443)
+    # source: 'docx_explanation' | 'docx_guide' | 'excel'
+    # {source, text, unit_topic?, strategy_title?}
+    lesson_intro: Optional[dict] = None
 
 
 class StoryListResponse(BaseModel):
