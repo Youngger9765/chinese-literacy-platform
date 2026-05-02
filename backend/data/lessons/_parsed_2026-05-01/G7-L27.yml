@@ -158,3 +158,9 @@ worksheet_section_order:
 - number: 一
   name: 閱讀聚光燈
   type: spotlight
+worksheet_intro:
+  step_label: 閱讀聚光燈
+  target_strategy: 解題策略──
+  level_label: Level 7・說明文
+  lesson_label: 第27課  帶著「血拼清單」閱讀
+  authors: 課文：曾世杰  學習單：陳淑麗

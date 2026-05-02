@@ -147,6 +147,12 @@ def merge_lesson(code: str) -> dict:
         new["worksheet_section_order"] = reparsed["worksheet_section_order"]
         changes.append(f"worksheet_section_order: {len(reparsed['worksheet_section_order'])} sections")
 
+    # ── 8b. worksheet_intro — always overwrite (metadata, #1434) ────────────
+    if reparsed.get("worksheet_intro"):
+        new["worksheet_intro"] = reparsed["worksheet_intro"]
+        strategy = reparsed["worksheet_intro"].get("target_strategy", "")[:30]
+        changes.append(f"worksheet_intro: strategy={strategy}")
+
     # ── 9. image_captions (graphic-text only) ───────────────────────────────
     if is_empty(prod.get("image_captions")) and reparsed.get("image_captions"):
         new["image_captions"] = reparsed["image_captions"]

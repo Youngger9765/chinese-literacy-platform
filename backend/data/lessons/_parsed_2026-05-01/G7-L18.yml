@@ -284,3 +284,12 @@ worksheet_section_order:
 - number: 九
   name: 知識補給站
   type: knowledge_station
+worksheet_intro:
+  step_label: 讀全文-做記號
+  target_strategy: 從事實歸納概念－從具體事實歸納要表達的抽象概念
+  instructions:
+  - 請在不太了解的字、詞或句做記號。
+  - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  level_label: Level 7・應用文
+  lesson_label: 第18課  一封向醫師求助的信
+  authors: 課文：曾世杰  學習單：張筱晴

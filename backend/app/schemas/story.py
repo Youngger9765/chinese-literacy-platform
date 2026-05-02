@@ -62,6 +62,11 @@ class StoryDetail(StoryListItem):
     # Image gallery for graphic-text layout (#1341)
     # Each image: {filename, size_bytes, image_hash, content_type, caption?}
     images: list[dict] = []
+    # 學習單 section ordering + intro metadata (#1434)
+    # worksheet_section_order: [{number: '二', name: '念順順', type: 'reading_timer'}, ...]
+    worksheet_section_order: Optional[list[dict]] = None
+    # worksheet_intro: {step_label, target_strategy, instructions, level_label, lesson_label, authors}
+    worksheet_intro: Optional[dict] = None
 
 
 class StoryListResponse(BaseModel):

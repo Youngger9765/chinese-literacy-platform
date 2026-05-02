@@ -302,3 +302,12 @@ worksheet_section_order:
 - number: 九
   name: 知識補給站
   type: knowledge_station
+worksheet_intro:
+  step_label: 讀全文-做記號
+  target_strategy: 摘要策略──科學探究文本結構
+  instructions:
+  - 請在不太了解的字、詞或句做記號
+  - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  level_label: Level 9・說明文
+  lesson_label: 第11課  見前人所未見—達爾文與長喙天蛾的故事
+  authors: 課文：曾世杰  學習單：陳淑麗

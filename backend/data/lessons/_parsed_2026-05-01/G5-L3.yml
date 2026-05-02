@@ -233,3 +233,9 @@ worksheet_section_order:
 - number: 九
   name: 知識補給站
   type: knowledge_station
+worksheet_intro:
+  step_label: 讀全文-做記號
+  target_strategy: 從上下文推測詞義
+  level_label: Level 5・記敘文
+  lesson_label: 第3課  工地大嫂
+  authors: 課文：林立青  學習單：巫怡蓉

@@ -68,6 +68,16 @@ interface ApiStoryDetail extends ApiStoryListItem {
   layout_mode?: 'standard' | 'graphic-text' | 'graphic-chart';
   reading_strategy_type?: string;
   images?: Array<{ filename: string; size_bytes: number; image_hash: string; content_type: string; caption?: string }>;
+  // 學習單 section order + intro metadata (#1434)
+  worksheet_section_order?: Array<{ number: string; name: string; type: string }> | null;
+  worksheet_intro?: {
+    step_label?: string;
+    target_strategy?: string;
+    instructions?: string[];
+    level_label?: string;
+    lesson_label?: string;
+    authors?: string;
+  } | null;
 }
 
 interface ApiStoryListResponse {
@@ -115,6 +125,8 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
     strategyExercise: detail.strategy_exercise ?? undefined,
     stepSequence: detail.step_sequence ?? undefined,
+    worksheetSectionOrder: detail.worksheet_section_order ?? undefined,
+    worksheetIntro: detail.worksheet_intro ?? undefined,
     // Plugin-pattern dispatch fields (#1404 / #1341):
     layout_mode: (detail.layout_mode as Story['layout_mode']) ?? 'standard',
     reading_strategy_type: detail.reading_strategy_type ?? 'general',

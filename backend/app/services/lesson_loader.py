@@ -218,6 +218,9 @@ def _load_layer1_lessons() -> list[dict]:
             # Image gallery for graphic-text layout (#1341)
             "images": data.get("images") or [],
             "intro": _build_intro(data),
+            # 學習單 section order + intro metadata (#1434) — None for Layer-1
+            "worksheet_section_order": data.get("worksheet_section_order"),
+            "worksheet_intro": data.get("worksheet_intro"),
             "_layer": 1,
         }
         lessons.append(lesson)
@@ -347,6 +350,9 @@ def _load_layer2_lessons(
             # Image gallery for graphic-text layout (#1341)
             "images": data.get("images") or [],
             "intro": _build_intro({**data, "reading_strategy": strategy}),
+            # 學習單 section order + intro metadata (#1434)
+            "worksheet_section_order": data.get("worksheet_section_order"),
+            "worksheet_intro": data.get("worksheet_intro"),
             "_layer": 2,
         }
         lessons.append(lesson)
