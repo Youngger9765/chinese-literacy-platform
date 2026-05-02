@@ -64,6 +64,10 @@ interface ApiStoryDetail extends ApiStoryListItem {
   strategy_exercise: Record<string, any> | any[] | null;  // list for multi-exercise lessons (G7 圖文整合, #1390)
   // Schema-driven step composition (#1374)
   step_sequence: string[] | null;
+  // Plugin-pattern dispatch fields (#1404 / #1341)
+  layout_mode?: 'standard' | 'graphic-text' | 'graphic-chart';
+  reading_strategy_type?: string;
+  images?: Array<{ filename: string; size_bytes: number; image_hash: string; content_type: string; caption?: string }>;
 }
 
 interface ApiStoryListResponse {
@@ -111,6 +115,12 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
     strategyExercise: detail.strategy_exercise ?? undefined,
     stepSequence: detail.step_sequence ?? undefined,
+    // Plugin-pattern dispatch fields (#1404 / #1341):
+    layout_mode: (detail.layout_mode as Story['layout_mode']) ?? 'standard',
+    reading_strategy_type: detail.reading_strategy_type ?? 'general',
+    images: detail.images ?? [],
+    lesson_code: detail.grade_code ?? '',
+    paragraphs: detail.paragraphs,
   };
 }
 
