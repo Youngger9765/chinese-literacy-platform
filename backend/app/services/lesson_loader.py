@@ -212,6 +212,9 @@ def _load_layer1_lessons() -> list[dict]:
             "step_sequence": data.get("step_sequence") or None,
             "story_structure_table": data.get("story_structure_table"),
             "story_structure_rows": data.get("story_structure_rows"),
+            # Plugin-pattern dispatch fields (#1404):
+            "reading_strategy_type": data.get("reading_strategy_type") or "general",
+            "layout_mode": data.get("layout_mode") or "standard",
             "intro": _build_intro(data),
             "_layer": 1,
         }
@@ -331,6 +334,9 @@ def _load_layer2_lessons(
             # Schema-driven step composition (#1374): pass through if present in YAML.
             # None (absent) means frontend uses DEFAULT_STEP_SEQUENCE.
             "step_sequence": data.get("step_sequence") or None,
+            # Plugin-pattern dispatch fields (#1404):
+            "reading_strategy_type": data.get("reading_strategy_type") or "general",
+            "layout_mode": data.get("layout_mode") or "standard",
             "intro": _build_intro({**data, "reading_strategy": strategy}),
             "_layer": 2,
         }

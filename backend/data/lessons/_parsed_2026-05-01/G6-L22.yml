@@ -3,6 +3,7 @@ grade: 6
 grade_code: G6-L22
 reading_strategy: 摘要策略-問題.解決.結果結構
 reading_strategy_type: summary_psr
+layout_mode: standard
 # Schema-driven step composition (PR #1375 / Issue #1384):
 # story-structure promoted to position 4 (immediately after full-reading)
 # so students fill the PSR table while the story is freshest in memory.

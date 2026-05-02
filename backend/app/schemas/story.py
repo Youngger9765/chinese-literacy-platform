@@ -54,6 +54,11 @@ class StoryDetail(StoryListItem):
     # Schema-driven step composition (#1374): per-lesson step order from YAML.
     # None means frontend uses DEFAULT_STEP_SEQUENCE fallback.
     step_sequence: Optional[list[str]] = None
+    # Plugin-pattern dispatch fields (#1404):
+    # canonical strategy type → backend strategy_prompts/{type}/ dispatch
+    reading_strategy_type: str = "general"
+    # frontend ComprehensionChat layout variant: 'standard' | 'graphic-text' | 'graphic-chart'
+    layout_mode: str = "standard"
 
 
 class StoryListResponse(BaseModel):
