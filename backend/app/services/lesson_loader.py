@@ -215,6 +215,8 @@ def _load_layer1_lessons() -> list[dict]:
             # Plugin-pattern dispatch fields (#1404):
             "reading_strategy_type": data.get("reading_strategy_type") or "general",
             "layout_mode": data.get("layout_mode") or "standard",
+            # Image gallery for graphic-text layout (#1341)
+            "images": data.get("images") or [],
             "intro": _build_intro(data),
             "_layer": 1,
         }
@@ -337,6 +339,8 @@ def _load_layer2_lessons(
             # Plugin-pattern dispatch fields (#1404):
             "reading_strategy_type": data.get("reading_strategy_type") or "general",
             "layout_mode": data.get("layout_mode") or "standard",
+            # Image gallery for graphic-text layout (#1341)
+            "images": data.get("images") or [],
             "intro": _build_intro({**data, "reading_strategy": strategy}),
             "_layer": 2,
         }

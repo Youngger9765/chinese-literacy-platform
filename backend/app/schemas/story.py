@@ -59,6 +59,9 @@ class StoryDetail(StoryListItem):
     reading_strategy_type: str = "general"
     # frontend ComprehensionChat layout variant: 'standard' | 'graphic-text' | 'graphic-chart'
     layout_mode: str = "standard"
+    # Image gallery for graphic-text layout (#1341)
+    # Each image: {filename, size_bytes, image_hash, content_type, caption?}
+    images: list[dict] = []
 
 
 class StoryListResponse(BaseModel):

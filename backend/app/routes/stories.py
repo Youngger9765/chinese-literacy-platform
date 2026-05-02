@@ -250,6 +250,8 @@ def get_story(story_id: str):
         # Plugin-pattern dispatch fields (#1404):
         reading_strategy_type=story.get("reading_strategy_type") or "general",
         layout_mode=story.get("layout_mode") or "standard",
+        # Image gallery for graphic-text layout (#1341)
+        images=story.get("images") or [],
     )
 
 
