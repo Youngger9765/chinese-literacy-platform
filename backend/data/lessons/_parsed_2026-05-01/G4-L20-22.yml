@@ -330,3 +330,12 @@ worksheet_section_order:
 - number: 十
   name: 念順順
   type: reading_timer
+worksheet_intro:
+  step_label: 讀全文-做記號
+  target_strategy: 多文本閱讀──
+  instructions:
+  - 請在不太了解的字、詞或句做記號。
+  - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  - 重要的地方、喜歡的語詞、句子或段落做上記號。-
+  lesson_label: 第20課 物以稀為貴：
+  authors: 課文：曾世杰  學習單：張明珠

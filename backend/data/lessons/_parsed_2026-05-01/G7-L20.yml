@@ -357,3 +357,12 @@ worksheet_section_order:
 - number: 九
   name: 閱讀聚光燈
   type: spotlight
+worksheet_intro:
+  step_label: 讀全文-做記號
+  target_strategy: 媒體素養與識讀──辨別網路訊息真偽
+  instructions:
+  - 請在不太了解的字、詞或句做記號。
+  - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  level_label: Level 7・說明文
+  lesson_label: 第20課  網紅的電子煙實驗：偽科學的陷阱
+  authors: 課文：林玫伶  學習單：巫怡蓉

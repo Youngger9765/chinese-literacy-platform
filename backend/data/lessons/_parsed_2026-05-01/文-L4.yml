@@ -158,3 +158,5 @@ worksheet_section_order:
 - number: 五
   name: 閱讀理解
   type: mcq
+worksheet_intro:
+  lesson_label: 第4課  陸公買硯

@@ -132,3 +132,5 @@ strategy_exercise:
     answer: 2
     reasoning: 此題旨在確認學生是否能正確理解故事的最終發展和結局，強調信守承諾的結果。
 strategy_exercise_source: gemini-2.5-flash-2026-05-02
+worksheet_intro:
+  lesson_label: 第7課  相隔千里的約定

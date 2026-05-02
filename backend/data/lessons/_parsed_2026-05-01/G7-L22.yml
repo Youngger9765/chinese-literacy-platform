@@ -261,3 +261,12 @@ worksheet_section_order:
 - number: 九
   name: 閱讀聚光燈
   type: spotlight
+worksheet_intro:
+  step_label: 讀全文-做記號
+  target_strategy: 媒體素養與識讀──辨識不合理的詐騙訊息
+  instructions:
+  - 請在不太了解的字、詞或句做記號。
+  - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  level_label: Level 7・說明文
+  lesson_label: 第22課 信眾與教主
+  authors: 課文：曾世杰  學習單：張明珠

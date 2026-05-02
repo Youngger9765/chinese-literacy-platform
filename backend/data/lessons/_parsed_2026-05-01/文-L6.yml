@@ -159,3 +159,5 @@ strategy_exercise:
     type: free_text
     reasoning: 這是原文中提出的開放性問題，答案未在提供的文本中直接給出，需要學生思考並在閱讀完整課文後才能得知最終結果。原文提示「答案就隱藏在本課的某一頁中」。
 strategy_exercise_source: gemini-2.5-flash-2026-05-02
+worksheet_intro:
+  lesson_label: 第6課  江乙媽媽告御狀
