@@ -296,7 +296,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
                       {String(idx + 1).padStart(2, '0')}
                     </span>
-                    <p className={`text-lg md:text-xl text-on-surface leading-[2.6rem] md:leading-[3rem] ${isZhuyinAny ? 'tracking-[0.3em]' : ''}`}>
+                    <p className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${isZhuyinAny ? 'tracking-[0.15em]' : ''}`}>
                       {zhuyinLines ? zhuyinLines[idx] : line}
                     </p>
                   </div>
