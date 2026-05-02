@@ -71,6 +71,9 @@ class StoryDetail(StoryListItem):
     # source: 'docx_explanation' | 'docx_guide' | 'excel'
     # {source, text, unit_topic?, strategy_title?}
     lesson_intro: Optional[dict] = None
+    # Public PDF URL of the original 紙本學習單 docx (#1444)
+    # Hosted at gs://lingoleap-assets/worksheets/{lesson_code}.pdf
+    worksheet_pdf_url: Optional[str] = None
 
 
 class StoryListResponse(BaseModel):

@@ -167,6 +167,11 @@ export interface Story {
     unit_topic?: string;
     strategy_title?: string;
   };
+  /** Public PDF URL of the original 紙本學習單 (#1444).
+   *  Hosted on GCS at gs://lingoleap-assets/worksheets/{lesson_code}.pdf.
+   *  Optional — lessons without a matching PDF (e.g. G8-L3a, 文-L*) leave this null,
+   *  which hides the "查看紙本學習單" button on the Intro page. */
+  worksheetPdfUrl?: string;
 }
 
 export interface ReadingAttempt {
