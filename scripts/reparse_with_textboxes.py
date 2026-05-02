@@ -178,6 +178,30 @@ def extract_worksheet_section_order(text: str) -> list[dict]:
     return seen
 
 
+def extract_lesson_intro_from_docx(text: str) -> Optional[dict]:
+    """Extract the lesson intro from 說明: or 導讀: patterns near top of docx.
+
+    These appear in ~6 lessons (e.g. G7-L29) as a genuine course introduction
+    sentence, distinct from worksheet_intro (which is the strategy/instructions
+    metadata) and from intro.background (which is the first story paragraph).
+
+    Returns dict with:
+      - source: "docx_explanation" or "docx_guide"
+      - text: the extracted sentence (30-400 chars)
+    or None if neither pattern found.
+    """
+    search_region = text[:3000]
+    # Try 說明: pattern first
+    m = re.search(r'說明[：:]\s*([^\n]{30,400})', search_region)
+    if m:
+        return {"source": "docx_explanation", "text": m.group(1).strip()}
+    # Try 導讀: pattern
+    m = re.search(r'導讀[：:]\s*([^\n]{30,400})', search_region)
+    if m:
+        return {"source": "docx_guide", "text": m.group(1).strip()}
+    return None
+
+
 def extract_worksheet_intro(text: str) -> dict:
     """Extract the 學習單 intro section from the top of the docx.
 
@@ -668,6 +692,7 @@ def parse_lesson(docx: Path) -> dict:
     sections = split_sections(text)
     worksheet_order = extract_worksheet_section_order(text)
     worksheet_intro = extract_worksheet_intro(text)
+    lesson_intro = extract_lesson_intro_from_docx(text)
 
     paragraphs = extract_paragraphs_from_table(docx)
     full_story = "\n".join(paragraphs)
@@ -729,6 +754,8 @@ def parse_lesson(docx: Path) -> dict:
         "worksheet_section_order": worksheet_order,
         # ── 學習單 intro metadata (#1434) ──────────────────────────────────
         "worksheet_intro": worksheet_intro if worksheet_intro else None,
+        # ── Lesson intro — docx 說明/導讀 (#1443) ─────────────────────────
+        "lesson_intro": lesson_intro,  # None if no 說明/導讀 found
         # ── Story body ────────────────────────────────────────────────────
         "paragraphs": paragraphs,
         "story_text": full_story,
