@@ -92,23 +92,8 @@ self_check_items:
 - 我能判斷出每段作者的主要看法/觀點。 □2.我能判斷另一句的功能是「說明／例子／做法」
 - 我能判斷每一段的主要看法的角色
 discussion_content: []
-images:
-- filename: images/G8-L10/G8-L10-08.png
-  size_bytes: 1469
-  image_hash: ead13c3363d1
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L10/G8-L10-12.png
-  size_bytes: 4850
-  image_hash: 45f7c579d75c
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L10/G8-L10-14.png
-  size_bytes: 4840
-  image_hash: 5696b368f716
-  content_type: image/png
-  caption: ''
-image_count: 3
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 按讚

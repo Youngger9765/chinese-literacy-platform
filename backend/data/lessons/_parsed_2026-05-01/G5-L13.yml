@@ -131,11 +131,6 @@ images:
   image_hash: 99bde1a5e887
   content_type: image/jpeg
   caption: ''
-- filename: images/G5-L13/G5-L13-06.png
-  size_bytes: 1232
-  image_hash: ab940236e518
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L13/G5-L13-07.x-emf
   size_bytes: 2806416
   image_hash: be7f85526be3
@@ -151,17 +146,12 @@ images:
   image_hash: c828fe0bf480
   content_type: image/png
   caption: ''
-- filename: images/G5-L13/G5-L13-15.png
-  size_bytes: 426
-  image_hash: 6eb6dd5508ff
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L13/G5-L13-18.jpg
   size_bytes: 6922
   image_hash: a5e99cadacf7
   content_type: image/jpeg
   caption: ''
-image_count: 7
+image_count: 5
 story_structure_rows:
 - label: 主題
   value: 小丑醫生

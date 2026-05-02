@@ -72,11 +72,6 @@ multiple_choice_count: 3
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G6-L21/G6-L21-05.png
-  size_bytes: 2396
-  image_hash: 00967bb18a2f
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L21/G6-L21-11.png
   size_bytes: 6125
   image_hash: c22c358e2668
@@ -87,12 +82,7 @@ images:
   image_hash: 53a142ef807c
   content_type: image/png
   caption: ''
-- filename: images/G6-L21/G6-L21-14.png
-  size_bytes: 2364
-  image_hash: 062473221181
-  content_type: image/png
-  caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主角
   value: 作者本人

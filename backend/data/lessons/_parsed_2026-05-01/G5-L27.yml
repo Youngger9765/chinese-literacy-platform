@@ -112,22 +112,12 @@ images:
   image_hash: 9efe51c8d8fd
   content_type: image/png
   caption: ''
-- filename: images/G5-L27/G5-L27-10.png
-  size_bytes: 2464
-  image_hash: 5fc52ee6358f
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-13.png
-  size_bytes: 2431
-  image_hash: b261b8231dd1
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L27/G5-L27-14.png
   size_bytes: 8294
   image_hash: 8267a37cdb11
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 重複朗讀的重要性

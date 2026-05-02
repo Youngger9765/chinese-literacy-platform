@@ -86,27 +86,12 @@ story_structure_table:
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G5-L1/G5-L1-05.png
-  size_bytes: 1265
-  image_hash: 595ec18c5ced
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L1/G5-L1-11.png
-  size_bytes: 3283
-  image_hash: 61c6762ef898
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L1/G5-L1-13.png
-  size_bytes: 431
-  image_hash: 806c0db967d7
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L1/G5-L1-14.png
   size_bytes: 19310
   image_hash: 1964ccce41c8
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 1
 vocab_bank:
   A: 施作
   B: 想方設法

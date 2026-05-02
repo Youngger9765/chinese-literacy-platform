@@ -115,28 +115,8 @@ discussion_content:
 - B.這是運用想像力讓自己度過難關的練習
 - C.這是為了他人付出而自我犧牲的感情
 - D.這是一種新的飲食型態，斷食久了就會習慣
-images:
-- filename: images/G4-L13/G4-L13-05.png
-  size_bytes: 2412
-  image_hash: 8b12149f7ef2
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L13/G4-L13-07.png
-  size_bytes: 4895
-  image_hash: 4ec0adca0367
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L13/G4-L13-11.png
-  size_bytes: 4862
-  image_hash: 1eca7ba0da42
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L13/G4-L13-13.png
-  size_bytes: 2465
-  image_hash: 382dd2bfe648
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 祖孫情與人情溫暖

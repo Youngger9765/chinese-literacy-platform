@@ -99,11 +99,6 @@ story_structure_table:
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G6-L18/G6-L18-09.png
-  size_bytes: 2416
-  image_hash: 7ac72da8ebec
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L18/G6-L18-10.png
   size_bytes: 16230
   image_hash: 19e1bf9d4e1e
@@ -114,17 +109,12 @@ images:
   image_hash: b16cd8d081ce
   content_type: image/png
   caption: ''
-- filename: images/G6-L18/G6-L18-15.png
-  size_bytes: 2402
-  image_hash: ac6775d2480f
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L18/G6-L18-16.png
   size_bytes: 10996
   image_hash: 67e23ae3d52f
   content_type: image/png
   caption: ''
-image_count: 5
+image_count: 3
 vocab_bank:
   A: 百思不解
   B: 嘀咕

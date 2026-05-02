@@ -93,19 +93,9 @@ multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G6-L6/G6-L6-09.png
-  size_bytes: 2435
-  image_hash: af92ce493afa
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L6/G6-L6-13.png
   size_bytes: 10151
   image_hash: 8d3d8bd4a59a
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L6/G6-L6-14.png
-  size_bytes: 2362
-  image_hash: 6c4b6cf1515b
   content_type: image/png
   caption: ''
 - filename: images/G6-L6/G6-L6-15.png
@@ -113,7 +103,7 @@ images:
   image_hash: 611008b5a0ad
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 心理出狀況的原因

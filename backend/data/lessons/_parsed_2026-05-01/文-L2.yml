@@ -100,13 +100,8 @@ discussion_content:
 - B.說明文言文中生字、難字、古字的字義
 - C.告訴讀者文言文的由來以及閱讀的策略
 - D.說明文言文傳承古人智慧，現代人不可不學
-images:
-- filename: images/文-L2/文-L2-04.png
-  size_bytes: 1754
-  image_hash: 8f3042e16bf0
-  content_type: image/png
-  caption: ''
-image_count: 1
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 文言文怎麼讀？

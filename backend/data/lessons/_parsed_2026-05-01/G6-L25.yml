@@ -162,28 +162,8 @@ self_check_items:
 - 我學到怎麼找出「結果」，說明解決行動帶來了哪些具體改變或成果。
 - 我發現「問題、解決、結果」結構，可以幫我掌握文章的重點。
 discussion_content: []
-images:
-- filename: images/G6-L25/G6-L25-06.png
-  size_bytes: 2421
-  image_hash: 63138b386e1e
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-09.png
-  size_bytes: 3155
-  image_hash: 1f2a75b8d813
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-13.png
-  size_bytes: 2403
-  image_hash: b7c8a7fb14b3
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-14.png
-  size_bytes: 3177
-  image_hash: e1f6f20cb83b
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 vocab_bank:
   A: 揚帆啟航
   B: 股票

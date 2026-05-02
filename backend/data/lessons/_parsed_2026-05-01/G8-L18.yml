@@ -94,23 +94,8 @@ self_check_items:
 - 我能找出本文的多元立場，及各自的主張與理由。
 - 我能用「多元觀點對照」推論主旨。
 discussion_content: []
-images:
-- filename: images/G8-L18/G8-L18-05.png
-  size_bytes: 1389
-  image_hash: 0d8f97bd2a07
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L18/G8-L18-10.png
-  size_bytes: 4886
-  image_hash: 0d102040c357
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L18/G8-L18-13.png
-  size_bytes: 4825
-  image_hash: 2adeb21ce611
-  content_type: image/png
-  caption: ''
-image_count: 3
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 石虎保育的兩難

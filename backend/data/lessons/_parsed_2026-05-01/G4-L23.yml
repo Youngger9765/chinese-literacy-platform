@@ -114,11 +114,6 @@ discussion_content:
 - C.品妤：「老師也出太難了吧，這種題目到底有幾個人可以及格啊？」
 - D.祐廷：「只要考卷不用帶回家簽名就好了，反正也就是一次考試，沒什麼大不了的。」
 images:
-- filename: images/G4-L23/G4-L23-05.png
-  size_bytes: 1808
-  image_hash: 823e8f9b65f4
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L23/G4-L23-07.png
   size_bytes: 9375
   image_hash: 47d52b4c9095
@@ -129,12 +124,7 @@ images:
   image_hash: 1b607033ff0c
   content_type: image/png
   caption: ''
-- filename: images/G4-L23/G4-L23-13.png
-  size_bytes: 1832
-  image_hash: 506b79efdc1a
-  content_type: image/png
-  caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 運動員的心理素質

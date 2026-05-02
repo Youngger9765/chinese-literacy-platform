@@ -143,28 +143,8 @@ discussion_content:
 - B.神仙居住山林，只有有緣人方能找到心中的神仙
 - C.藝術具有永恆的力量，能讓人在心中產生共鳴
 - D.神仙只是古代藝術作品中的象徵，並無現實意義
-images:
-- filename: images/G6-L11/G6-L11-09.png
-  size_bytes: 2387
-  image_hash: ffdb8e124650
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L11/G6-L11-13.png
-  size_bytes: 5003
-  image_hash: 3367773e8d09
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L11/G6-L11-14.png
-  size_bytes: 2462
-  image_hash: f6193a1d56da
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L11/G6-L11-15.png
-  size_bytes: 4789
-  image_hash: 74a72115f345
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 古代畫家心中的仙境

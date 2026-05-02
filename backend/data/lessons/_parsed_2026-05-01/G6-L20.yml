@@ -83,11 +83,6 @@ multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G6-L20/G6-L20-06.png
-  size_bytes: 2427
-  image_hash: 8b47a48a2610
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L20/G6-L20-12.png
   size_bytes: 7188
   image_hash: 5a968cf9e853
@@ -98,12 +93,7 @@ images:
   image_hash: 1384fca6bf9f
   content_type: image/png
   caption: ''
-- filename: images/G6-L20/G6-L20-15.png
-  size_bytes: 2400
-  image_hash: 6f914e64b4e5
-  content_type: image/png
-  caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主角
   value: 小日記主人

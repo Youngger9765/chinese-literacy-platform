@@ -107,28 +107,8 @@ discussion_content:
 - A.先出門玩到開心，再熬夜趕報告
 - B.無論如何週六完成報告，再出去玩
 - C.船到橋頭自然直，等到時候再說 D.報告不要求完美，簡單完成即可
-images:
-- filename: images/G5-L21/G5-L21-05.png
-  size_bytes: 1205
-  image_hash: 9abb7b9affc9
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-11.png
-  size_bytes: 4914
-  image_hash: 26d6894f8dd1
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-13.png
-  size_bytes: 436
-  image_hash: 84d6c933ac14
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-14.png
-  size_bytes: 3340
-  image_hash: ead8935235db
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 如何抗拒手機誘惑

@@ -84,11 +84,6 @@ self_check_items:
 - 我能分辨觀點（判斷句）與證據（事實描述）。 □2.我能統整主要論點／主旨，並推論作者意圖。
 discussion_content: []
 images:
-- filename: images/G8-L15/G8-L15-05.png
-  size_bytes: 1431
-  image_hash: a9ac713ce280
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L15/G8-L15-10.jpg
   size_bytes: 7187
   image_hash: 9e2b73c0be76
@@ -99,7 +94,7 @@ images:
   image_hash: 5090782af7c2
   content_type: image/jpeg
   caption: ''
-image_count: 3
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 啦啦隊

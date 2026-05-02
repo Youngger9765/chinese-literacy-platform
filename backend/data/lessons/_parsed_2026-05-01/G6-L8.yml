@@ -91,11 +91,6 @@ multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G6-L8/G6-L8-05.png
-  size_bytes: 2471
-  image_hash: 0e2cf3ed7210
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L8/G6-L8-06.png
   size_bytes: 12854
   image_hash: 3d2ee4a75aea
@@ -111,17 +106,12 @@ images:
   image_hash: 353d51048fd3
   content_type: image/png
   caption: ''
-- filename: images/G6-L8/G6-L8-14.png
-  size_bytes: 2362
-  image_hash: 9ba210cb745f
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L8/G6-L8-15.png
   size_bytes: 10949
   image_hash: e2c4d013e32c
   content_type: image/png
   caption: ''
-image_count: 6
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 動物求偶方式

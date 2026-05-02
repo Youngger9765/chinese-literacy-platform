@@ -80,18 +80,8 @@ self_check_items:
 - 我能把故事前後線索連起來，推論角色情緒的變化。
 - 我能從角色情緒的變化，明白故事想傳達的道理。
 discussion_content: []
-images:
-- filename: images/G4-L12/G4-L12-06.png
-  size_bytes: 1840
-  image_hash: a55f7a0569c8
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L12/G4-L12-12.png
-  size_bytes: 1835
-  image_hash: 446c725e8867
-  content_type: image/png
-  caption: ''
-image_count: 2
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主角
   value: 理平頭的男人

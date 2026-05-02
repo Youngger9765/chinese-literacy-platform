@@ -181,28 +181,8 @@ discussion_content:
 - ❷精簡重點句：想一想這句話的意思，用更簡短的方式表達重點。
 - □1.這句已經很精簡了，不用再精簡。
 - □2.我可以更精簡：友善耕作保護了生態，也帶來了經濟上的成功。
-images:
-- filename: images/G6-L23/G6-L23-05.png
-  size_bytes: 2507
-  image_hash: 434cf8f2bf07
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L23/G6-L23-11.png
-  size_bytes: 3164
-  image_hash: 24d3f0ca5405
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L23/G6-L23-13.png
-  size_bytes: 2440
-  image_hash: 9f37e8a3ba9c
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L23/G6-L23-14.png
-  size_bytes: 3244
-  image_hash: 122cc9baea4a
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 vocab_bank:
   A: 坦承錯誤
   B: 鍥而不捨

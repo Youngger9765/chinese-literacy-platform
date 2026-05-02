@@ -112,21 +112,6 @@ images:
   image_hash: ad7e15957b69
   content_type: image/jpeg
   caption: ''
-- filename: images/G9-L7/G9-L7-04.png
-  size_bytes: 1380
-  image_hash: 609bcc18d91d
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-07.png
-  size_bytes: 3645
-  image_hash: 235e6f848658
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-08.png
-  size_bytes: 1994
-  image_hash: 5cc332f63455
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L7/G9-L7-09.png
   size_bytes: 11127
   image_hash: e15c752e7f0c
@@ -145,16 +130,6 @@ images:
 - filename: images/G9-L7/G9-L7-15.png
   size_bytes: 6774
   image_hash: b270d859b655
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-16.png
-  size_bytes: 2164
-  image_hash: 169f067e1b11
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-17.png
-  size_bytes: 1984
-  image_hash: 13add8354081
   content_type: image/png
   caption: ''
 - filename: images/G9-L7/G9-L7-18.png
@@ -187,17 +162,7 @@ images:
   image_hash: a060b15254bf
   content_type: image/png
   caption: ''
-- filename: images/G9-L7/G9-L7-28.png
-  size_bytes: 1997
-  image_hash: 33d85afa0cca
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-29.png
-  size_bytes: 2413
-  image_hash: 523919ce1bd6
-  content_type: image/png
-  caption: ''
-image_count: 18
+image_count: 11
 vocab_bank:
   A: 職涯
   B: 效率

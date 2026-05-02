@@ -117,33 +117,8 @@ discussion_content:
 - B.舉各種例子，說明人類的溝通可以跨越時間與空間
 - C.講述電腦、網路及行動裝置的興起對書藉與圖書館的衝擊
 - D.說明心智外化是世界趨勢，不必排斥在課堂上用計算機
-images:
-- filename: images/G9-L3/G9-L3-08.png
-  size_bytes: 2427
-  image_hash: 36133f000477
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L3/G9-L3-09.png
-  size_bytes: 2633
-  image_hash: cda71ab36d72
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L3/G9-L3-12.png
-  size_bytes: 524
-  image_hash: ad41bc76ddb2
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L3/G9-L3-13.png
-  size_bytes: 2625
-  image_hash: f9bd4f05c051
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L3/G9-L3-15.png
-  size_bytes: 2573
-  image_hash: 28159be50365
-  content_type: image/png
-  caption: ''
-image_count: 5
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 國高中數學課使用計算機的必要性

@@ -41,6 +41,11 @@ def main():
 
     template_hashes = {h for h, n in hash_count.items() if n >= args.threshold}
     print(f"Template hashes (≥{args.threshold} lessons): {len(template_hashes)}")
+
+    # QR code heuristic: file size < 6KB. Most real lesson diagrams are
+    # ≥7KB (e.g. G7-L28 鵝頸瓶圖 is 69KB). QR codes are ~3-5KB.
+    QR_SIZE_MAX = 6000
+    print(f"QR threshold: <{QR_SIZE_MAX}B")
     print()
 
     # Pass 2: filter each lesson
@@ -53,7 +58,11 @@ def main():
         before = d.get("images") or []
         if not before:
             continue
-        after = [img for img in before if img["image_hash"] not in template_hashes]
+        after = [
+            img for img in before
+            if img["image_hash"] not in template_hashes
+            and img.get("size_bytes", 0) >= QR_SIZE_MAX
+        ]
         if len(after) == len(before):
             continue
         removed = len(before) - len(after)

@@ -126,11 +126,6 @@ images:
   image_hash: 349927a415ff
   content_type: image/jpeg
   caption: ''
-- filename: images/G9-L6/G9-L6-13.png
-  size_bytes: 2351
-  image_hash: 5aaa0c63dedb
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L6/G9-L6-14.png
   size_bytes: 13976
   image_hash: 6ac4f5407abf
@@ -141,7 +136,7 @@ images:
   image_hash: c0a0649f5ed7
   content_type: image/png
   caption: ''
-image_count: 5
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 靈異現象的科學解釋

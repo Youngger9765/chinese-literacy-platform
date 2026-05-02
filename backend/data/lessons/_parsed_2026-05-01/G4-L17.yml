@@ -133,28 +133,8 @@ discussion_content:
 - B.他舉出不同的例子，證明只靠打球太危險
 - C.他用誇張的說法，讓故事更精采
 - D.他請阿耀自己去體會，不直接告訴他
-images:
-- filename: images/G4-L17/G4-L17-05.png
-  size_bytes: 1847
-  image_hash: dcb1d61574fa
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L17/G4-L17-11.png
-  size_bytes: 2542
-  image_hash: d24e5b198b1e
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L17/G4-L17-13.png
-  size_bytes: 1873
-  image_hash: 23eb10f70681
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L17/G4-L17-14.png
-  size_bytes: 3275
-  image_hash: 31f2f658bbaa
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 棒球隊學生是否需要讀書

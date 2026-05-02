@@ -153,43 +153,8 @@ discussion_content:
 - B.在校慶園遊會擔任攤位主持人，隨機即席推銷商品
 - C.統計並製作全校「課後社團意向」問卷的結果海報看板
 - D.負責紀錄每次田徑隊練習的秒數並口頭提醒隊友衝刺
-images:
-- filename: images/G5-L24-25/G5-L24-25-03.png
-  size_bytes: 3847
-  image_hash: 409214cdc4a3
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L24-25/G5-L24-25-06.png
-  size_bytes: 1254
-  image_hash: f6f54777a239
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L24-25/G5-L24-25-11.png
-  size_bytes: 1232
-  image_hash: 2ad30d7b0842
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L24-25/G5-L24-25-13.png
-  size_bytes: 427
-  image_hash: af878f38609b
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L24-25/G5-L24-25-14.png
-  size_bytes: 2749
-  image_hash: 86657be5183f
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L24-25/G5-L24-25-15.png
-  size_bytes: 428
-  image_hash: 090561a4716f
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L24-25/G5-L24-25-18.png
-  size_bytes: 2661
-  image_hash: 6145bb6d3e48
-  content_type: image/png
-  caption: ''
-image_count: 7
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 牧羊少年大衛戰勝巨人歌利亞的故事

@@ -120,19 +120,9 @@ discussion_content:
 - D.「這真是天下最有『創意』的設計！」
 strategy_exercises: []
 images:
-- filename: images/G7-L13/G7-L13-09.png
-  size_bytes: 2453
-  image_hash: 7734cfaaa0be
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L13/G7-L13-13.png
   size_bytes: 11339
   image_hash: 5c95f11fcaf2
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L13/G7-L13-14.png
-  size_bytes: 2457
-  image_hash: 5ec81d259caa
   content_type: image/png
   caption: ''
 - filename: images/G7-L13/G7-L13-15.png
@@ -140,7 +130,7 @@ images:
   image_hash: 19676cb68fe1
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 綠色賽事

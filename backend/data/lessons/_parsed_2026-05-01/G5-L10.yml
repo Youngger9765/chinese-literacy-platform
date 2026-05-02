@@ -90,33 +90,8 @@ multiple_choice:
 multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
-images:
-- filename: images/G5-L10/G5-L10-05.png
-  size_bytes: 4554
-  image_hash: f880df6cf5ae
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L10/G5-L10-08.png
-  size_bytes: 4058
-  image_hash: f56eb2753352
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L10/G5-L10-09.png
-  size_bytes: 424
-  image_hash: 5beff4208878
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L10/G5-L10-12.png
-  size_bytes: 3914
-  image_hash: 9747277f3190
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L10/G5-L10-16.png
-  size_bytes: 420
-  image_hash: 47fe363ed7e9
-  content_type: image/png
-  caption: ''
-image_count: 5
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 小花從童工到大學教授的奮鬥故事

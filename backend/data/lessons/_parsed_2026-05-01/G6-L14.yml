@@ -142,22 +142,12 @@ images:
   image_hash: 0b4489206d8a
   content_type: image/png
   caption: ''
-- filename: images/G6-L14/G6-L14-10.png
-  size_bytes: 2389
-  image_hash: 9e7374eb2069
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L14/G6-L14-14.png
-  size_bytes: 2429
-  image_hash: c6d66ce77af5
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L14/G6-L14-15.png
   size_bytes: 9229
   image_hash: 5b463a4eed6c
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 洪信介的植物獵人生涯

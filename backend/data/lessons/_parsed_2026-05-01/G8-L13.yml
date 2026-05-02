@@ -100,27 +100,12 @@ story_structure_table:
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G8-L13/G8-L13-06.png
-  size_bytes: 1433
-  image_hash: 9508457d987b
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L13/G8-L13-09.png
-  size_bytes: 2588
-  image_hash: 0cb8af8721aa
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L13/G8-L13-13.jpg
   size_bytes: 172275
   image_hash: 7e91add39d42
   content_type: image/jpeg
   caption: ''
-- filename: images/G8-L13/G8-L13-14.png
-  size_bytes: 4938
-  image_hash: ed6ca852a70d
-  content_type: image/png
-  caption: ''
-image_count: 4
+image_count: 1
 vocab_bank:
   A: 廣闊無垠
   B: 星羅棋布

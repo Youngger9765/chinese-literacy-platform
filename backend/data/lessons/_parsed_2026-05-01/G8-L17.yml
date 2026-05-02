@@ -85,23 +85,8 @@ multiple_choice:
 multiple_choice_count: 4
 self_check_items: []
 discussion_content: []
-images:
-- filename: images/G8-L17/G8-L17-05.png
-  size_bytes: 1436
-  image_hash: 4def78f23e3e
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L17/G8-L17-10.png
-  size_bytes: 5303
-  image_hash: 7f84b93f3f5a
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L17/G8-L17-13.png
-  size_bytes: 4894
-  image_hash: 75cc8794202f
-  content_type: image/png
-  caption: ''
-image_count: 3
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 安樂死與協助自殺的選擇

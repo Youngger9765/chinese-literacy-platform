@@ -128,11 +128,6 @@ discussion_content:
 - D.希望大家能正視全球暖化的問題
 strategy_exercises: []
 images:
-- filename: images/G7-L9/G7-L9-09.png
-  size_bytes: 2396
-  image_hash: 1f81ed577241
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L9/G7-L9-10.png
   size_bytes: 11093
   image_hash: a1657ecc5a63
@@ -143,17 +138,12 @@ images:
   image_hash: 7c1085a37324
   content_type: image/png
   caption: ''
-- filename: images/G7-L9/G7-L9-15.png
-  size_bytes: 2476
-  image_hash: c5ac2f83ea1c
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L9/G7-L9-16.png
   size_bytes: 13554
   image_hash: 0098dfc89a6b
   content_type: image/png
   caption: ''
-image_count: 5
+image_count: 3
 story_structure_rows:
 - label: 主題
   value: 吐瓦魯因全球暖化面臨淹沒危機

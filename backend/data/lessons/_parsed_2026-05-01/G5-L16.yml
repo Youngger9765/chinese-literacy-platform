@@ -94,22 +94,12 @@ images:
   image_hash: 1a6bdb106ff8
   content_type: image/png
   caption: ''
-- filename: images/G5-L16/G5-L16-06.png
-  size_bytes: 399
-  image_hash: 49922d98e848
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L16/G5-L16-13.png
-  size_bytes: 1488
-  image_hash: 9ff59747ecb9
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L16/G5-L16-16.png
   size_bytes: 8428
   image_hash: c02b8b96be32
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 能高團

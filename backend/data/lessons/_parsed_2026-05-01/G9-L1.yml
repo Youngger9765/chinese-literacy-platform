@@ -131,17 +131,12 @@ images:
   image_hash: 9574626fd1d0
   content_type: image/png
   caption: ''
-- filename: images/G9-L1/G9-L1-12.png
-  size_bytes: 2427
-  image_hash: db77fada1e84
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L1/G9-L1-14.png
   size_bytes: 14049
   image_hash: 1b5438885e99
   content_type: image/png
   caption: ''
-image_count: 3
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 盡信書不如無書

@@ -103,11 +103,6 @@ images:
   image_hash: f19f01f56cbf
   content_type: image/png
   caption: ''
-- filename: images/G9-L2/G9-L2-12.png
-  size_bytes: 2331
-  image_hash: 2252058021b3
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L2/G9-L2-13.png
   size_bytes: 12197
   image_hash: c23364989311
@@ -118,7 +113,7 @@ images:
   image_hash: 71654dd25ef0
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 3
 vocab_bank:
   A: 嚴峻
   B: 英姿颯爽

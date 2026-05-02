@@ -115,19 +115,9 @@ discussion_content:
 - D.發展科學時不能只關注知識本身，也要留意可能帶來的後果
 strategy_exercises: []
 images:
-- filename: images/G7-L8/G7-L8-09.png
-  size_bytes: 2438
-  image_hash: 76dc09554efd
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L8/G7-L8-13.png
   size_bytes: 16655
   image_hash: d5b4f1c345c6
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L8/G7-L8-14.png
-  size_bytes: 2448
-  image_hash: 1a2a1ed62563
   content_type: image/png
   caption: ''
 - filename: images/G7-L8/G7-L8-15.png
@@ -135,7 +125,7 @@ images:
   image_hash: 5b4da0d8128b
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 《科學怪人》這本小說

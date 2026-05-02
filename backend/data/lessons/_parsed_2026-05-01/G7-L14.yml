@@ -127,19 +127,9 @@ discussion_content:
 - D.老師在課堂上鼓勵學生提出不同的意見和觀點
 strategy_exercises: []
 images:
-- filename: images/G7-L14/G7-L14-09.png
-  size_bytes: 2431
-  image_hash: d9d2ffabb7a8
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L14/G7-L14-13.png
   size_bytes: 34410
   image_hash: 1ba125db862a
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L14/G7-L14-14.png
-  size_bytes: 2444
-  image_hash: ee9bbc61d9f7
   content_type: image/png
   caption: ''
 - filename: images/G7-L14/G7-L14-15.png
@@ -147,7 +137,7 @@ images:
   image_hash: 1c6ff227fa3c
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 微歧視

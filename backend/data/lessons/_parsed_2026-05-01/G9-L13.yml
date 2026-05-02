@@ -88,23 +88,8 @@ self_check_items:
 - 我能為日常挫折找到不同的詮釋方式。
 - 我能嘗試把負面想法轉成「暫時、特定、可改變」的想法。
 discussion_content: []
-images:
-- filename: images/G9-L13/G9-L13-09.png
-  size_bytes: 3233
-  image_hash: 64efa7a082e9
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L13/G9-L13-12.png
-  size_bytes: 1403
-  image_hash: 4328a5bb51f9
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L13/G9-L13-14.png
-  size_bytes: 3256
-  image_hash: 637ded076eab
-  content_type: image/png
-  caption: ''
-image_count: 3
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 詮釋失敗的智慧

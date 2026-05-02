@@ -97,17 +97,12 @@ images:
   image_hash: 9ee58afc00ea
   content_type: image/jpeg
   caption: ''
-- filename: images/G8-L16/G8-L16-08.png
-  size_bytes: 1393
-  image_hash: 32e217940cb4
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L16/G8-L16-09.jpg
   size_bytes: 6730
   image_hash: 0778f8cb51c4
   content_type: image/jpeg
   caption: ''
-image_count: 3
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 阿嬤的教養方式

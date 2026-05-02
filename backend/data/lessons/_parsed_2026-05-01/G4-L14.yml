@@ -93,28 +93,8 @@ self_check_items:
 - 我會嘗試改變 B（想法），並觀察情緒是否因此改變。
 - 我能用改變想法的方式，避免因衝動做出錯誤決定。
 discussion_content: []
-images:
-- filename: images/G4-L14/G4-L14-05.png
-  size_bytes: 1458
-  image_hash: d10956c61764
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L14/G4-L14-11.png
-  size_bytes: 3193
-  image_hash: cc750044eb38
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L14/G4-L14-13.png
-  size_bytes: 2068
-  image_hash: 4b09bd93b4a9
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L14/G4-L14-14.png
-  size_bytes: 3178
-  image_hash: 9ff9b2bf95bd
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主角
   value: 白牙

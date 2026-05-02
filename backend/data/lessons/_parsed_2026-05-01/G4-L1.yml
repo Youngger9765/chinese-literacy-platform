@@ -96,22 +96,12 @@ images:
   image_hash: 0d36bee8abc0
   content_type: image/png
   caption: ''
-- filename: images/G4-L1/G4-L1-09.png
-  size_bytes: 2399
-  image_hash: 81b0302f03b7
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L1/G4-L1-12.png
   size_bytes: 9931
   image_hash: c3a86905e5aa
   content_type: image/png
   caption: ''
-- filename: images/G4-L1/G4-L1-14.png
-  size_bytes: 2434
-  image_hash: a9416cd75a6b
-  content_type: image/png
-  caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 戴資穎

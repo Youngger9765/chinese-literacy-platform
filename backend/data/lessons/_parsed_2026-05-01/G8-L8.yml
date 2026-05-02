@@ -131,42 +131,12 @@ discussion_content:
 - C.為了突顯西班牙軍人英勇無畏，強調以小勝大的奇蹟
 - D.為了引導讀者相信歷史發展冥冥中自有安排，無從解釋
 images:
-- filename: images/G8-L8/G8-L8-03.gif
-  size_bytes: 60
-  image_hash: 2bc7d82b797f
-  content_type: image/gif
-  caption: ''
-- filename: images/G8-L8/G8-L8-05.png
-  size_bytes: 5005
-  image_hash: e4b39492eab5
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L8/G8-L8-08.gif
-  size_bytes: 57
-  image_hash: 2b4d7fb18c87
-  content_type: image/gif
-  caption: ''
-- filename: images/G8-L8/G8-L8-09.png
-  size_bytes: 4923
-  image_hash: 6bfdabd16de0
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L8/G8-L8-13.gif
-  size_bytes: 55
-  image_hash: 054dfa610bc1
-  content_type: image/gif
-  caption: ''
 - filename: images/G8-L8/G8-L8-15.png
   size_bytes: 54496
   image_hash: b30532588a78
   content_type: image/png
   caption: ''
-- filename: images/G8-L8/G8-L8-17.png
-  size_bytes: 2419
-  image_hash: 4638e9932d63
-  content_type: image/png
-  caption: ''
-image_count: 7
+image_count: 1
 vocab_bank:
   A: 區區
   B: 對峙

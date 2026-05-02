@@ -138,33 +138,8 @@ discussion_content:
 - B.告訴大家垃圾食物有時候是好朋友，有時候是壞朋友
 - C.垃圾食物有好有壞，像交朋友一樣，需要辨別好壞
 - D.用具體比喻讓讀者更容易理解垃圾食物對人的雙重影響
-images:
-- filename: images/G5-L14/G5-L14-05.png
-  size_bytes: 1952
-  image_hash: 9ff60648c279
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L14/G5-L14-06.png
-  size_bytes: 4909
-  image_hash: 1a2c8fe6fdd1
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L14/G5-L14-12.png
-  size_bytes: 4937
-  image_hash: 5b2e0e95b4d8
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L14/G5-L14-14.png
-  size_bytes: 1999
-  image_hash: 059ca4cdbd41
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L14/G5-L14-15.png
-  size_bytes: 4871
-  image_hash: 840d4d241746
-  content_type: image/png
-  caption: ''
-image_count: 5
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 垃圾食物
