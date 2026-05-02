@@ -1,0 +1,90 @@
+lesson_code: 文-L10
+grade: 0
+grade_code: 文-L10
+reading_strategy: 固定句式：以--為.
+reading_strategy_type: classical_chinese
+source_file: 文-L10荒野救亡記（固定句式：以--為.）.docx
+parsed_at: '2026-05-01T21:10:46'
+flags:
+- vocab_empty
+genre: 文言文
+title: 荒野救亡記
+authors: 學學習單：王淑瑱
+story_text: ''
+paragraphs: []
+paragraph_count: 0
+char_count: 0
+vocabulary: []
+vocabulary_count: 0
+video_links: []
+multiple_choice:
+- question: 1. 鮑子都在荒野中遇到心絞痛的書生時，第一個動作是什麼？
+  options:
+  - 立即將他送往城裡
+  - 賣掉一個金餅買藥
+  - 下馬為他按摩心臟
+  - 向路人求助
+  answer: C
+- question: 2. 書生身上攜帶了哪些物品？
+  options:
+  - 一卷兵書和十個金餅
+  - 一袋銀子和一把劍
+  - 一把劍和十個餅
+  - 一卷佛經和九個金餅
+  answer: A
+- question: 3. 根據故事，下列哪一選項不適合用來形容鮑子都？
+  options:
+  - 懂得變通
+  - 見義勇為
+  - 光明磊落
+  - 面惡心善
+  answer: D
+- question: 4. 根據本文，書生家人對鮑子都的態度發生了怎樣的轉變？
+  options:
+  - 從「冷漠忽視」轉為「重金酬謝」
+  - 從「懷疑指責」轉為「感佩德義」
+  - 從「悲慟萬分」轉為「欣慰釋懷」
+  - 從「感激不盡」轉為「猜忌疏遠」
+  answer: B
+- question: 5. 「之」在文言中有時當代詞，有時又有白話文「的」的意思。請問：哪一選項中的「之」字當「的」使用？
+  options:
+  - 乃賣一餅，具葬書生，其餘枕󠇡「之」頭下
+  - 子都󠇡於道上，有乘驄馬者逐「之」
+  - 舉家感子都󠇡「之」德義
+  - 「之」暮行於野，見一󠇢書生卒󠇡心痛
+  answer: C
+- question: 6. 書生的家人相信鮑子都並非盜賊的關鍵原因為何？
+  options:
+  - 鮑子都長相正經，不像是會作惡的人
+  - 看到九塊金餅與素書放在屍身的頭下、身旁
+  - 鮑子都主動帶路，表現出問心無愧的樣子
+  - 鮑子都󠇡詳細描述了書生當時發病的情況
+  answer: B
+- question: 1.這段文字的主要涵義，與下列何者最接近?
+  options: []
+  answer: C
+multiple_choice_count: 7
+self_check_items: []
+discussion_content: []
+images:
+- filename: images/文-L10/文-L10-01.png
+  size_bytes: 8069
+  image_hash: 7c834e8f7603
+  content_type: image/png
+  caption: ''
+- filename: images/文-L10/文-L10-02.png
+  size_bytes: 7368
+  image_hash: f8467169fe00
+  content_type: image/png
+  caption: ''
+- filename: images/文-L10/文-L10-03.png
+  size_bytes: 8495
+  image_hash: d0d187eac435
+  content_type: image/png
+  caption: ''
+- filename: images/文-L10/文-L10-04.png
+  size_bytes: 4492
+  image_hash: fba7f762a0dd
+  content_type: image/png
+  caption: ''
+image_count: 4

@@ -1,0 +1,34 @@
+lesson_code: G6-L06
+display_order: 60
+original_order: 17
+title: 心理出狀況，是壞事導致的嗎？
+grade: 6
+genre: 議論文
+text_type: 單
+unit_topic: 正向思考
+applicable_grade: 推論段落主旨－摘取文章的大意＋找出關鍵語句
+strategy_id: 6
+strategy_name: 推論策略──從大意及關鍵句推論段旨
+strategy_dependency: null
+strategy_relation: 在L31紅領帶前，兩課為多文本群
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/djT8zAxXJig&t=1s
+- title: 影片2
+  url: http://youtu.be/-1ZDEbTal_g
+vocab:
+- 一󠇢蹶不󠇡振
+- 三頭六臂
+- 反芻
+- 茶飯不思
+- 輾󠇡轉反側
+- 倒楣
+- 無妄之災
+- 潸然淚下
+- 豁達
+- 鴉雀無聲
+- 萬丈深淵
+- 半身不遂
+existing_content_yaml: L17.yml
+notes: null

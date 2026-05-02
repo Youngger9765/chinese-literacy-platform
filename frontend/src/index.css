@@ -11,10 +11,10 @@
   font-family: 'BpmfZihiSans', 'Noto Sans TC', sans-serif !important;
 }
 
-/* Elements with .no-zhuyin and their children keep the default font */
+/* Elements with .no-zhuyin and their children keep the non-gothic font (zhuyin off default) */
 [data-zhuyin-active="true"] .no-zhuyin,
 [data-zhuyin-active="true"] .no-zhuyin * {
-  font-family: 'Noto Sans TC', sans-serif !important;
+  font-family: 'cwTeXKai', 'Noto Serif TC', 'PingFang TC', 'Microsoft JhengHei', serif !important;
 }
 
 /* Zhuyin annotations need slightly more vertical breathing room.

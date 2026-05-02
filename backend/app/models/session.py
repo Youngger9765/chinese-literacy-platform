@@ -138,6 +138,14 @@ class LearningSession(Base):
     comprehension_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     vocab_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     full_reading_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Bug C fix (#1378): array of per-attempt snapshots, capped at 4.
+    # Migration: f1a2b3c4d5e6 — ADD COLUMN IF NOT EXISTS (idempotent).
+    # full_reading_result above is kept as backward-compat scalar (= latest attempt).
+    # Each element: { attempt_index, timestamp, cpm, accuracy, match_rate,
+    #                 duration_ms, audio_url }
+    full_reading_attempts: Mapped[list] = mapped_column(
+        JSONB, nullable=False, server_default="'[]'::jsonb"
+    )
     # General step progress store for all learning steps (Issue #660)
     # Stores current_step, steps_completed[], and per-step step_data
     step_progress: Mapped[dict | None] = mapped_column(JSONB, nullable=True)

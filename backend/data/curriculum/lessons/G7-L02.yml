@@ -1,0 +1,32 @@
+lesson_code: G7-L02
+display_order: 81
+original_order: 29
+title: 澳洲奧運金牌的X機密
+grade: 7
+genre: 說明文
+text_type: 單
+unit_topic: 擴展視野
+applicable_grade: 用表格整理訊息－整理文章內容細節
+strategy_id: 7
+strategy_name: 用表格整理訊息──從細節解讀主要資訊
+strategy_dependency: null
+strategy_relation: L29澳洲奧運金牌的X機密要排在L30女太空人登月之前
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/yFk52GnXkkY
+- title: 影片2
+  url: http://youtu.be/RVNFPfx58Tk
+vocab:
+- 發掘
+- 退役
+- 熱衷
+- 斥資
+- 鞏固
+- 幅員遼闊
+- 天壤之別
+- 後顧之憂
+- 遍地開花
+- 井井有條
+existing_content_yaml: L29.yml
+notes: null

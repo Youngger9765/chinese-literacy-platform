@@ -82,12 +82,16 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
     persistedActiveTab ?? (hasMcq ? 'mcq' : 'structure'),
   );
 
-  const { zhuyinActive, processLines: zhuyinProcessLines } = useZhuyin();
+  const { isZhuyinAny, processLinesSelective } = useZhuyin();
+  const vocabWords = useMemo(
+    () => (story.vocabulary ?? []).map((v) => v.word).filter(Boolean),
+    [story.vocabulary]
+  );
 
-  const zhuyinLines = useMemo(() => {
-    if (!zhuyinActive) return null;
-    return zhuyinProcessLines(story.content);
-  }, [story.content, zhuyinActive, zhuyinProcessLines]);
+  const zhuyinLines = useMemo(
+    () => processLinesSelective(story.content, vocabWords),
+    [story.content, vocabWords, processLinesSelective]
+  );
 
   const handleTabChange = useCallback((tab: 'mcq' | 'structure' | 'strategy') => {
     setActiveTab(tab);
@@ -263,16 +267,24 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
   const totalTabs = [hasMcq, true, hasStrategy].filter(Boolean).length;
   const progressPercent = totalTabs > 0 ? Math.round((completedCount / totalTabs) * 100) : 0;
 
+  // ── #1341 Plugin pattern dispatch: graphic-text mode adds a middle image pane ──
+  // For G7-L28~30 (圖文整合策略): 3-pane layout (text 4 / images 4 / tabs 4)
+  // For other lessons (layout_mode=standard or undefined): 2-pane (text 7 / tabs 5)
+  const isGraphicText = story.layout_mode === 'graphic-text';
+  const storyImages = story.images ?? [];
+  const GCS_IMAGE_BASE = 'https://storage.googleapis.com/lingoleap-assets/lessons-images';
+
   return (
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
     >
       {/* ── Main content area — fills viewport, no page scroll ──── */}
       <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8">
-        <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className={`w-full h-full grid grid-cols-1 ${isGraphicText ? 'lg:grid-cols-12' : 'md:grid-cols-12'} gap-6`}>
 
           {/* ── Left: Story text card ────────────────────────────── */}
-          <div className="md:col-span-7 lg:col-span-7 min-h-0 flex">
+          <div className={`${isGraphicText ? 'lg:col-span-4' : 'md:col-span-7 lg:col-span-7'} min-h-0 flex`}>
+
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full">
               <div className="flex items-center gap-2 mb-4 shrink-0">
                 <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
@@ -284,7 +296,7 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
                     <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
                       {String(idx + 1).padStart(2, '0')}
                     </span>
-                    <p className={`text-lg md:text-xl text-on-surface leading-[2.6rem] md:leading-[3rem] ${zhuyinActive ? 'tracking-[0.3em]' : ''}`}>
+                    <p className={`text-lg md:text-xl text-on-surface leading-[2.6rem] md:leading-[3rem] ${isZhuyinAny ? 'tracking-[0.3em]' : ''}`}>
                       {zhuyinLines ? zhuyinLines[idx] : line}
                     </p>
                   </div>
@@ -312,8 +324,52 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
             </div>
           </div>
 
+          {/* ── Middle: Image gallery (graphic-text mode only) ─────── #1341 */}
+          {isGraphicText && (
+            <div data-testid="graphic-text-image-pane" className="lg:col-span-4 min-h-0 flex">
+              <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full">
+                <div className="flex items-center gap-2 mb-4 shrink-0">
+                  <span className="material-symbols-outlined text-accent text-xl">photo_library</span>
+                  <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">圖文對照</span>
+                  <span className="text-xs text-on-surface-variant ml-2">{storyImages.length} 張</span>
+                </div>
+                <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar">
+                  {storyImages.length === 0 ? (
+                    <div className="flex items-center justify-center h-48 text-on-surface-variant text-sm">
+                      暫無圖片
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {storyImages.map((img, idx) => (
+                        <figure key={idx} className="space-y-2">
+                          <img
+                            src={`${GCS_IMAGE_BASE}/${story.lesson_code}/${img.filename}`}
+                            alt={img.caption ?? `圖 ${idx + 1}`}
+                            loading="lazy"
+                            className="w-full rounded-lg border border-outline-variant bg-surface"
+                            onError={(e) => {
+                              // Graceful fallback: hide broken image
+                              const el = e.currentTarget;
+                              el.style.display = 'none';
+                            }}
+                          />
+                          {img.caption && (
+                            <figcaption className="text-xs text-on-surface-variant">
+                              {img.caption}
+                            </figcaption>
+                          )}
+                        </figure>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── Right: Exercise panel ─────────────────────────────── */}
-          <div className="md:col-span-5 lg:col-span-5 min-h-0 flex flex-col">
+          <div className={`${isGraphicText ? 'lg:col-span-4' : 'md:col-span-5 lg:col-span-5'} min-h-0 flex flex-col`}>
+
             <div className="shrink-0">{renderTabs()}</div>
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
               {renderRightContent()}

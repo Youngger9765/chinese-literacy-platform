@@ -15,6 +15,8 @@ from ...models.session import LearningSession
 from ...models.user import User
 from ...services.ai_usage_tracker import last_usage, log_ai_usage
 from ...services.exit_ticket_service import generate_exit_ticket_questions, calculate_score  # noqa: F401
+from ...services.lesson_loader import get_lesson_by_id
+from ...utils.slug import normalize_story_slug
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -35,7 +37,7 @@ class ExitTicketQuestion(BaseModel):
 
 class ExitTicketGenerateResponse(BaseModel):
     questions: list[ExitTicketQuestion]
-    source: str  # "ai" | "fallback"
+    source: str  # "pregenerated" | "ai" | "fallback"
 
 
 class ExitTicketAnswer(BaseModel):
@@ -84,10 +86,21 @@ async def generate_session_exit_ticket(
     if session.student_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
 
+    # YAML-first (Issue #1402): resolve session.story_slug -> lesson dict so
+    # the service can serve pre-authored multiple_choice without calling AI.
+    # Pattern matches learning_sessions.py:295.
+    lesson_data = None
+    if session.story_slug:
+        try:
+            lesson_data = get_lesson_by_id(int(normalize_story_slug(session.story_slug)))
+        except (ValueError, TypeError):
+            lesson_data = None
+
     start_time = time.monotonic()
     result = await generate_exit_ticket_questions(
         story_content=payload.story_content,
         wrong_chars=payload.wrong_chars or [],
+        lesson_data=lesson_data,
     )
     latency_ms = int((time.monotonic() - start_time) * 1000)
 

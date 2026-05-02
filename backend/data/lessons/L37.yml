@@ -170,33 +170,86 @@ strategy_exercise:
   strategy_name: 科學方法思考歷程
   instruction: 科學方法的步驟是：發現問題、提出假設、驗證假設、得到解答。請根據李昌鈺博士的辦案過程來練習
   steps:
-    - prompt: "【發現問題】李昌鈺到現場後，發現了什麼不尋常的地方？"
-      type: select
-      options:
-        - 老太太身上沒有傷口
-        - 老太太被刺了18刀，但地上卻看不到血
-        - 凶器不見了
-      answer: 1
-    - prompt: "【提出假設】李昌鈺對「地上沒有血」提出了哪兩個假設？"
-      type: select
-      options:
-        - 老太太可能不是被刺死的；或是法醫搞錯了
-        - 血跡已經被清理過了；或者這裡不是第一現場
-        - 血液可能滲透到地板下面了；或是被水沖走了
-      answer: 1
-    - prompt: "【驗證假設】李昌鈺用什麼方法來驗證假設？"
-      type: select
-      options:
-        - 在地板上噴化學藥品，藥品和血液中的鐵離子反應後會發出藍色螢光
-        - 用放大鏡仔細觀察地板上的每一個角落
-        - 請法醫重新檢查老太太的傷口
-      answer: 0
-    - prompt: "【推論】李昌鈺為什麼判斷凶手是老太太的熟人？"
-      type: free_text
-    - prompt: 李昌鈺為什麼堅持當晚就要派200名刑警去搜垃圾箱？他說了什麼理由？
-      type: free_text
+  - prompt: "【發現問題】李昌鈺到現場後，發現了什麼不尋常的地方？"
+    type: select
+    options:
+    - 老太太身上沒有傷口
+    - 老太太被刺了18刀，但地上卻看不到血
+    - 凶器不見了
+    answer: 1
+  - prompt: "【提出假設】李昌鈺對「地上沒有血」提出了哪兩個假設？"
+    type: select
+    options:
+    - 老太太可能不是被刺死的；或是法醫搞錯了
+    - 血跡已經被清理過了；或者這裡不是第一現場
+    - 血液可能滲透到地板下面了；或是被水沖走了
+    answer: 1
+  - prompt: "【驗證假設】李昌鈺用什麼方法來驗證假設？"
+    type: select
+    options:
+    - 在地板上噴化學藥品，藥品和血液中的鐵離子反應後會發出藍色螢光
+    - 用放大鏡仔細觀察地板上的每一個角落
+    - 請法醫重新檢查老太太的傷口
+    answer: 0
+  - prompt: "【推論】李昌鈺為什麼判斷凶手是老太太的熟人？"
+    type: free_text
+  - prompt: 李昌鈺為什麼堅持當晚就要派200名刑警去搜垃圾箱？他說了什麼理由？
+    type: free_text
 story_structure:
 - label: 事例
   sub_rows:
   - label: 背景
     value: 2. 當天晚上十二點，李昌鈺博士趕到現場。 1. 警方已在現場調查【 十 】小時。 案發 2. 老太太死因：【 被刺十八刀/失血過多 】 。 現場 3. 凶器：【 廚房的刀 】。 問題 假設 假設驗證 解答 被刺了十 一、血跡【已 噴【化學
+story_structure_rows:
+- label: 主角
+  value: 李昌鈺博士
+  interactive_type: fill_blank
+  hint: 課文主要人物是誰？
+- label: 主題
+  value: 科學方法能幫助破案
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 善用科學方法、觀察力敏銳
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: ''
+    interactive_type: checkbox
+    hint: 命案發生的情境
+    options:
+    - 感恩節下大雪
+    - 老太太獨居家中
+    - 鄰居小孩發現命案
+    correct_options:
+    - 0
+    - 1
+    - 2
+  - label: 經過
+    value: ''
+    interactive_type: checkbox
+    hint: 李博士如何辦案
+    options:
+    - 發現血跡被清理過
+    - 推斷凶手是熟人
+    - 找到凶手球鞋與信用卡資料
+    correct_options:
+    - 0
+    - 1
+    - 2
+  - label: 結果
+    value: ''
+    interactive_type: checkbox
+    hint: 案件的結局
+    options:
+    - 凶手是老太太遠親，因錢財起爭執殺人
+    - 凶手是陌生人，隨機犯案
+    - 凶手是鄰居，因不滿老太太而殺人
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

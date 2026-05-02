@@ -1,0 +1,30 @@
+lesson_code: G6-L09
+display_order: 63
+original_order: 19
+title: 祝你好眠
+grade: 6
+genre: 說明文
+text_type: 單
+unit_topic: 科學知識
+applicable_grade: 說明文結構(主題描述)－找小標題
+strategy_id: 6
+strategy_name: 摘要策略──從關鍵句找小主題
+strategy_dependency: null
+strategy_relation: L13六塊肌六塊雞、L19祝你好眠、L18動物談情說愛的方式策略相關
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/uBFTJ6MAmlo
+- title: 影片2
+  url: http://youtu.be/DsRqWxSE40s
+vocab:
+- 小酌
+- 新陳代謝
+- 流連忘返
+- 得不償失
+- 懸梁刺股
+- 去蕪存菁
+- 睡眼惺忪
+- 生理時鐘
+existing_content_yaml: L19.yml
+notes: null

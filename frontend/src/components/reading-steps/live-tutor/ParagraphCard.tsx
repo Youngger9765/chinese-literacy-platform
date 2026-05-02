@@ -7,6 +7,7 @@ import { CHINESE_PUNCTUATION_REGEX } from '../../../utils/liveTutorHelpers';
 
 import { splitZhuyinChars } from '../../../utils/zhuyinUtils';
 import { groupIdxForProgress } from '../../../utils/ttsHighlight';
+import { useKaraoke } from '../../../context/KaraokeContext';
 
 /* ── Encouragement messages (PR #1076 / #1096) ──────────────────────────── */
 
@@ -113,6 +114,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
   storyContent,
 }) => {
   const isCurrentIdx = idx === currentLineIndex;
+  const { karaokeEnabled } = useKaraoke();
   // isTtsLoading comes from useTtsPlayback hook (via LiveTutor) — no local state needed.
   // This removes the old setTimeout-based debounce that was an approximation.
 
@@ -200,13 +202,14 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
         className={`text-on-surface/90 ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}
         style={{
           fontSize: fontSizePx,
-          lineHeight: zhuyinActive ? '3.8rem' : '2.0',
+          lineHeight: zhuyinActive ? '3.8rem' : '1.6',
         }}
       >
         {status === 'locked' ? (
           <span className="blur-sm select-none">{zhuyinLine ?? line}</span>
-        ) : isTtsSpeaking && isCurrentIdx ? (
-          // Highlight chars up to speakingProgress during TTS playback.
+        ) : isTtsSpeaking && isCurrentIdx && karaokeEnabled ? (
+          // KTV highlight: scrolls char-by-char during TTS playback.
+          // Only shown when karaokeEnabled is true (toggle in ImmersiveTopBar).
           // groupIdxForProgress walks char groups so zhuyin PUA selectors
           // (#1112) and symbols stripped by _cleanForTts (#1110) don't push
           // the split past the real char boundary.
@@ -324,20 +327,50 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
             const totalRetryable = targets.filter(t => t.replace(CHINESE_PUNCTUATION_REGEX, '').length > 1).length;
 
-            // Rule 2: if > half the sentences failed → suggest redo entire paragraph
+            // Rule 2: if > half the sentences failed → suggest redo, but still show next-segment
+            // if paragraph-level evaluation passed (matchRate >= 0.5 or already completed).
+            // Sentence retry is advisory — never block paragraph-level progress. (#1318)
             if (failedSentences.length > totalRetryable / 2) {
+              const canAdvanceRule2 = paragraphSummary.matchRate >= 0.5
+                || completedParagraphs.has(idx);
               return (
                 <div className="pt-3 border-t border-on-surface/10">
                   <p className="text-sm text-on-surface-variant text-center">
                     這段有比較多地方需要加強，我們重新唸一次吧！
                   </p>
-                  <div className="flex justify-center pt-3">
+                  <div className="flex gap-3 justify-center pt-3">
                     <button
                       onClick={() => onRetryParagraph(idx)}
                       className="btn-encourage !text-sm !py-2.5 !px-6 !min-h-0"
                     >
                       重練這段
                     </button>
+                    {idx < storyLength - 1 && canAdvanceRule2 && (
+                      <button
+                        onClick={() => {
+                          if (!completedParagraphs.has(idx)) {
+                            onAdvanceParagraph(idx, lineResults);
+                          } else {
+                            onSelectParagraph(idx + 1);
+                          }
+                        }}
+                        className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
+                        style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+                      >
+                        下一段
+                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                      </button>
+                    )}
+                    {idx >= storyLength - 1 && !completedParagraphs.has(idx) && canAdvanceRule2 && (
+                      <button
+                        onClick={() => onAdvanceParagraph(idx, lineResults)}
+                        className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"
+                        style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+                      >
+                        完成朗讀
+                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -393,14 +426,10 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
           {/* Action buttons — hidden during sentence retry */}
           {retrySentenceIdx === undefined && (() => {
-            // Check if there are still failed sentences (same threshold as retry list)
-            const results = paragraphSummary.sentenceResults ?? [];
-            const SENTENCE_FAIL = 0.5;
-            const remainingFailed = results.filter(r => r !== null && r.matchRate < SENTENCE_FAIL).length;
-            const canAdvance = (paragraphSummary.matchRate >= 0.5 && remainingFailed === 0)
+            // canAdvance is based on paragraph-level matchRate only.
+            // Sentence retry suggestions are advisory and must not block paragraph progress. (#1318)
+            const canAdvance = paragraphSummary.matchRate >= 0.5
               || completedParagraphs.has(idx);
-            // Block if still have any failed sentences (except already-completed paragraphs)
-            const blockedByRetry = remainingFailed > 0 && !completedParagraphs.has(idx);
 
             return (
             <div className="flex gap-3 justify-center pt-2">
@@ -410,8 +439,8 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
               >
                 重練這段
               </button>
-              {/* Rule 3: 重讀後大多數對了（matchRate >= 0.5）就放行 */}
-              {idx < storyLength - 1 && canAdvance && !blockedByRetry && (
+              {/* Always show 下一段 when paragraph-level passed (matchRate >= 0.5) */}
+              {idx < storyLength - 1 && canAdvance && (
                 <button
                   onClick={() => {
                     if (!completedParagraphs.has(idx)) {
@@ -427,7 +456,7 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
                   <span className="material-symbols-outlined text-lg">arrow_forward</span>
                 </button>
               )}
-              {idx >= storyLength - 1 && !completedParagraphs.has(idx) && canAdvance && !blockedByRetry && (
+              {idx >= storyLength - 1 && !completedParagraphs.has(idx) && canAdvance && (
                 <button
                   onClick={() => onAdvanceParagraph(idx, lineResults)}
                   className="px-6 py-2.5 rounded-full text-sm font-bold text-white transition-all active:scale-95 flex items-center gap-2"

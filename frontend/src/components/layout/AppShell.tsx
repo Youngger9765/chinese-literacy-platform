@@ -9,15 +9,17 @@
  * Header removed (2026-04-18): all header functionality (logo, story title,
  * notification bell, zhuyin toggle, logout) is now integrated into Sidebar.
  */
-import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useLearningNav } from '../../contexts/LearningNavContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { useKaraoke } from '../../context/KaraokeContext';
 import { getMyAssignments } from '../../services/assignmentApi';
 import { AppView } from '../../types';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
+import { useStepSequence } from '../../hooks/useStepSequence';
 import { useAppView } from '../../hooks/useAppView';
 import Sidebar from './Sidebar';
 import LearningLayout from '../../layouts/LearningLayout';
@@ -81,6 +83,96 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 };
 
 // ---------------------------------------------------------------------------
+// StepDots — progress dot row with per-dot hover/tap tooltip
+// ---------------------------------------------------------------------------
+
+interface StepDotsProps {
+  steps: ReturnType<typeof useStepSequence>;
+  currentStepIndex: number;
+  completedSet: Set<string>;
+  allNonReportDone: boolean;
+  onStepClick: (step: ReturnType<typeof useStepSequence>[number]) => void;
+}
+
+const StepDots: React.FC<StepDotsProps> = ({
+  steps,
+  currentStepIndex,
+  completedSet,
+  allNonReportDone,
+  onStepClick,
+}) => {
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close tooltip when clicking outside (mobile tap-away)
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setActiveTooltip(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="flex items-center gap-2 md:gap-3 flex-wrap justify-center min-w-0">
+      {steps.map((step, i) => {
+        const isCompleted = completedSet.has(step.id);
+        const isActive = i === currentStepIndex;
+        const isReport = step.id === 'report';
+        const isLocked = isReport && !allNonReportDone;
+        const tooltipVisible = activeTooltip === step.id;
+
+        let dotClass = 'bg-on-surface-variant/20';
+        if (isCompleted) dotClass = 'bg-emerald-500';
+        if (isActive) dotClass = 'bg-accent scale-125';
+
+        return (
+          <span key={step.id} className="relative flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                if (isLocked) return;
+                // Mobile: toggle tooltip on tap; navigation on second tap if tooltip already showing
+                if (activeTooltip === step.id) {
+                  setActiveTooltip(null);
+                  onStepClick(step);
+                } else {
+                  setActiveTooltip(step.id);
+                }
+              }}
+              onMouseEnter={() => !isLocked && setActiveTooltip(step.id)}
+              onMouseLeave={() => setActiveTooltip(null)}
+              disabled={isLocked}
+              className={`w-4 h-4 md:w-5 md:h-5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+              aria-label={`${i + 1}. ${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
+              aria-current={isActive ? 'step' : undefined}
+            />
+            {/* Tooltip — shown on hover (desktop) or tap (mobile) */}
+            {tooltipVisible && (
+              <span
+                role="tooltip"
+                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none"
+              >
+                <span className="block bg-gray-900 text-white text-sm font-medium px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap leading-tight">
+                  {step.label}
+                </span>
+                {/* Arrow pointing down toward dot */}
+                <span
+                  className="block w-0 h-0 mx-auto border-x-4 border-x-transparent border-t-4 border-t-gray-900"
+                  aria-hidden="true"
+                />
+              </span>
+            )}
+          </span>
+        );
+      })}
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // ImmersiveTopBar — minimal glassmorphic bar for learning mode
 // Shows: ← back | step label (N/total) | progress dots | zhuyin toggle
 // ---------------------------------------------------------------------------
@@ -89,16 +181,21 @@ const ImmersiveTopBar: React.FC = () => {
   const navigate = useNavigate();
   const currentView = useAppView();
   const { selectedStory, session } = useLearningNav();
-  const { zhuyinEnabled, zhuyinReady, toggleZhuyin } = useZhuyin();
+  const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
+  const { karaokeEnabled, toggleKaraoke } = useKaraoke();
+
+  // Resolve the active step list driven by the current lesson's step_sequence (#1374).
+  // Falls back to DEFAULT_STEP_SEQUENCE when lesson has no step_sequence field.
+  const activeSteps = useStepSequence(selectedStory ?? null);
 
   // Find current step index and label
-  const currentStepIndex = ACTIVE_STEPS.findIndex((s) => s.view === currentView);
-  const currentStep = currentStepIndex >= 0 ? ACTIVE_STEPS[currentStepIndex] : null;
-  const totalSteps = ACTIVE_STEPS.length;
+  const currentStepIndex = activeSteps.findIndex((s) => s.view === currentView);
+  const currentStep = currentStepIndex >= 0 ? activeSteps[currentStepIndex] : null;
+  const totalSteps = activeSteps.length;
 
   // Determine completed steps
   const completedSet = new Set(session?.completedSteps ?? []);
-  const allNonReportDone = ACTIVE_STEPS.filter(s => s.id !== 'report').every(s => completedSet.has(s.id));
+  const allNonReportDone = activeSteps.filter(s => s.id !== 'report').every(s => completedSet.has(s.id));
 
   const handleBack = () => {
     if (selectedStory) {
@@ -108,7 +205,7 @@ const ImmersiveTopBar: React.FC = () => {
     }
   };
 
-  const handleStepClick = (step: typeof ACTIVE_STEPS[number]) => {
+  const handleStepClick = (step: ReturnType<typeof useStepSequence>[number]) => {
     if (!selectedStory) return;
     // Report only accessible when all other steps done
     if (step.id === 'report' && !allNonReportDone) return;
@@ -118,19 +215,19 @@ const ImmersiveTopBar: React.FC = () => {
   // Issue #1094: prev/next step arrows skip the locked report step
   const prevStep = useMemo(() => {
     for (let i = currentStepIndex - 1; i >= 0; i--) {
-      const s = ACTIVE_STEPS[i];
+      const s = activeSteps[i];
       if (!(s.id === 'report' && !allNonReportDone)) return s;
     }
     return null;
-  }, [currentStepIndex, allNonReportDone]);
+  }, [activeSteps, currentStepIndex, allNonReportDone]);
 
   const nextStep = useMemo(() => {
-    for (let i = currentStepIndex + 1; i < ACTIVE_STEPS.length; i++) {
-      const s = ACTIVE_STEPS[i];
+    for (let i = currentStepIndex + 1; i < activeSteps.length; i++) {
+      const s = activeSteps[i];
       if (!(s.id === 'report' && !allNonReportDone)) return s;
     }
     return null;
-  }, [currentStepIndex, allNonReportDone]);
+  }, [activeSteps, currentStepIndex, allNonReportDone]);
 
   return (
     <header
@@ -176,64 +273,65 @@ const ImmersiveTopBar: React.FC = () => {
         )}
 
         {/* Progress dots + left/right arrows (Issue #1094) — tooltip shows step name; arrows fixed-size, dots wrap */}
-        <div className="flex items-center gap-1 max-w-full min-w-0 h-4 md:h-5" role="navigation" aria-label="學習步驟導航">
+        <div className="flex items-center gap-1 max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
           <button
             type="button"
             onClick={() => prevStep && handleStepClick(prevStep)}
             disabled={!prevStep || !selectedStory}
-            className="shrink-0 w-4 h-4 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
             title={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
           >
-            <span className="material-symbols-outlined text-sm leading-none" style={{ fontSize: '14px' }}>chevron_left</span>
+            <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_left</span>
           </button>
 
-          <div className="flex items-center gap-1 md:gap-1.5 flex-wrap justify-center min-w-0">
-            {ACTIVE_STEPS.map((step, i) => {
-              const isCompleted = completedSet.has(step.id);
-              const isActive = i === currentStepIndex;
-              const isReport = step.id === 'report';
-              const isLocked = isReport && !allNonReportDone;
-
-              let dotClass = 'bg-on-surface-variant/20';
-              if (isCompleted) dotClass = 'bg-emerald-500';
-              if (isActive) dotClass = 'bg-accent scale-125';
-
-              return (
-                <button
-                  key={step.id}
-                  type="button"
-                  onClick={() => handleStepClick(step)}
-                  disabled={isLocked}
-                  className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
-                  title={`${i + 1}. ${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
-                  aria-label={`${i + 1}. ${step.label}`}
-                  aria-current={isActive ? 'step' : undefined}
-                />
-              );
-            })}
-          </div>
+          <StepDots
+            steps={activeSteps}
+            currentStepIndex={currentStepIndex}
+            completedSet={completedSet}
+            allNonReportDone={allNonReportDone}
+            onStepClick={handleStepClick}
+          />
 
           <button
             type="button"
             onClick={() => nextStep && handleStepClick(nextStep)}
             disabled={!nextStep || !selectedStory}
-            className="shrink-0 w-4 h-4 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
             title={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
           >
-            <span className="material-symbols-outlined text-sm leading-none" style={{ fontSize: '14px' }}>chevron_right</span>
+            <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_right</span>
           </button>
         </div>
       </div>
 
-      {/* Right: zhuyin toggle + settings */}
-      <div className="shrink-0 flex items-center">
+      {/* Right: karaoke toggle + zhuyin toggle */}
+      <div className="shrink-0 flex items-center gap-2">
+        {selectedStory && (
+          <button
+            type="button"
+            onClick={toggleKaraoke}
+            aria-pressed={karaokeEnabled}
+            aria-label={karaokeEnabled ? '關閉跟讀' : '開啟跟讀'}
+            title={karaokeEnabled ? '關閉跟讀' : '開啟跟讀'}
+            className={`relative inline-flex items-center gap-1.5 h-10 pl-3 pr-3 rounded-full font-headline font-bold text-sm transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 active:scale-[0.95] ${
+              karaokeEnabled
+                ? 'bg-accent text-white shadow-[0_4px_16px_rgba(86,74,191,0.3)]'
+                : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+            }`}
+          >
+            <span className="material-symbols-outlined text-base leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>
+              {karaokeEnabled ? 'lyrics' : 'lyrics'}
+            </span>
+            <span className="whitespace-nowrap hidden md:inline">跟讀</span>
+          </button>
+        )}
         {selectedStory && (
           <ZhuyinToggle
-            enabled={zhuyinEnabled}
+            mode={zhuyinMode}
             ready={zhuyinReady}
-            onToggle={toggleZhuyin}
+            onModeChange={setZhuyinMode}
           />
         )}
       </div>

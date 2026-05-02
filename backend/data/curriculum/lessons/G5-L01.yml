@@ -1,0 +1,33 @@
+lesson_code: G5-L01
+display_order: 28
+original_order: 62
+title: 兵來將擋，水來土掩
+grade: 5
+genre: 說明文
+text_type: 單
+unit_topic: 擴展視野——用科技解決問題
+applicable_grade: null
+strategy_id: null
+strategy_name: 拆詞釋義──藉由拆解字詞來推測詞義
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: https://youtu.be/H0CarKG9ark
+- title: 影片2
+  url: https://youtu.be/mr9BOoNbAEk
+vocab:
+- 翼展
+- 蔓延
+- 抗藥性
+- 兵來將󠇡擋，水來土掩
+- 蠕動
+- 剋星
+- 宿主
+- 想方設法
+- 日新月異
+- 施作
+- 演化
+existing_content_yaml: null
+notes: null

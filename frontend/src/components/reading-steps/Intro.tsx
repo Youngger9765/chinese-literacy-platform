@@ -69,7 +69,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
       }}
     >
       {/* Top bar */}
-      <nav aria-label="麵包屑導覽" className="h-9 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
+      <nav aria-label="麵包屑導覽" className="h-9 bg-surface-container-lowest border-b border-gray-200 flex items-center px-4 gap-3">
         <button
           type="button"
           onClick={onBack}
@@ -106,12 +106,12 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                 </span>
                 <span className="text-[10px] text-gray-400">難度 {story.level}</span>
               </div>
-              <h1 className={`text-2xl font-bold text-gray-900 leading-[3rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+              <h1 className={`text-2xl font-bold text-on-surface ${zhuyinActive ? 'leading-[3rem] tracking-[0.4em]' : 'leading-[1.5]'}`}>
                 {processZhuyin(story.title)}
               </h1>
               {story.intro && (
                 <p
-                  className={`text-base leading-[2.6] ${zhuyinActive ? 'tracking-[0.3em]' : ''} text-gray-600`}
+                  className={`text-base ${zhuyinActive ? 'leading-[2.6] tracking-[0.3em]' : 'leading-[1.5]'} text-gray-600`}
                   aria-label={`作者：${story.intro.author}`}
                 >
                   {processZhuyin(story.intro.author)}
@@ -127,7 +127,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             const videoId = match?.[1];
             if (!videoId) return null;
             return (
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-3">
+              <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
                 <div className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
@@ -149,14 +149,14 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
           {/* Background section */}
           {story.intro ? (
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+            <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-4">
               <div className="flex items-center gap-2">
                 <svg className="w-4 h-4 text-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span className="text-xs font-bold text-accent-light uppercase tracking-widest">課文簡介</span>
               </div>
-              <p className={`text-gray-900 text-2xl leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+              <p className={`text-on-surface text-2xl ${zhuyinActive ? 'leading-[3.5rem] tracking-[0.4em]' : 'leading-[1.6]'}`}>
                 {processZhuyin(story.intro.background)}
               </p>
 
@@ -193,7 +193,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               </div>
             </div>
           ) : (
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
+            <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
               這篇課文目前沒有簡介資料。
             </div>
           )}
@@ -202,7 +202,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
       </div>
 
       {/* Bottom action */}
-      <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-surface-container-lowest border-t border-gray-200 px-6 py-4 flex items-center justify-between">
         <button
           type="button"
           onClick={onBack}

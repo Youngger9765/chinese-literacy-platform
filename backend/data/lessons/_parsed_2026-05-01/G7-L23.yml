@@ -1,0 +1,166 @@
+lesson_code: G7-L23
+grade: 7
+grade_code: G7-L23
+reading_strategy: 閱讀策略-跳過卡關，瀏覽全文
+reading_strategy_type: general
+# Schema-driven step composition (PR #1375 / Issue #1384):
+# 省略 demo — short multi-text lesson, only 5 steps (vs 11 in DEFAULT).
+# Omits: full-reading (多文本 tutor already covers each text), story-structure,
+#        vocab-definition, vocab-application, vocab-word-search (vocab: 無).
+# Proves architecture allows fewer steps without touching other lessons.
+step_sequence:
+- reading-annotation
+- tutor
+- comprehension
+- knowledge-station
+- report
+source_file: G7-L23雨林裡的奇蹟藥物和最後一隻旅人鴿（閱讀策略-跳過卡關，瀏覽全文）.docx
+parsed_at: '2026-05-01T21:10:40'
+flags:
+- vocab_empty
+genre: 說明文
+title: 第一篇 雨林裡的奇蹟藥物
+authors: 課文 ：曾世杰 學習單：陳淑麗
+story_text: |-
+  亞馬遜雨林的原住民，會用藤蔓中提煉出的「箭毒」製作毒箭。箭毒屬神經肌肉阻斷劑，拮抗乙醯膽鹼受體，它會阻斷神經肌肉傳導，中毒箭的動物會全身肌肉鬆弛，最後因呼吸衰竭而死。如今，現代醫院的外科醫師在手術中，卻把箭毒當作救命的藥物來使用，另外還有許多能治療各種癌症的強效藥物，也同樣來自雨林的植物。這讓科學家在世界各地的雨林中探索，尋找新的「奇蹟」藥物。 1987年，一位植物學家在馬來西亞雨林採集到一種樹木樣本。美國 國家癌症研究院的研究結果顯示：從這棵樹提取的萃取物，能強力保護人體細胞免受愛滋病病毒的侵害！ 科學家立刻趕往馬來西亞，想採集更多樹木樣本。然而不幸的是，在那片孕育出可以對抗愛滋病藥物的雨林，早已被清除，改作農地，他們只找到一根根枯死的樹樁。 這些樹樁提醒人們：珍貴的治療方法或藥物，真的可能在一夜間消失。每一年，被破壞的雨林面積相當於四分之三個臺灣那麼大。全球雨林持續遭到破壞，已導致成千上萬種動植物滅絕。
+paragraphs:
+- |-
+  亞馬遜雨林的原住民，會用藤蔓中提煉出的「箭毒」製作毒箭。箭毒屬神經肌肉阻斷劑，拮抗乙醯膽鹼受體，它會阻斷神經肌肉傳導，中毒箭的動物會全身肌肉鬆弛，最後因呼吸衰竭而死。如今，現代醫院的外科醫師在手術中，卻把箭毒當作救命的藥物來使用，另外還有許多能治療各種癌症的強效藥物，也同樣來自雨林的植物。這讓科學家在世界各地的雨林中探索，尋找新的「奇蹟」藥物。 1987年，一位植物學家在馬來西亞雨林採集到一種樹木樣本。美國 國家癌症研究院的研究結果顯示：從這棵樹提取的萃取物，能強力保護人體細胞免受愛滋病病毒的侵害！ 科學家立刻趕往馬來西亞，想採集更多樹木樣本。然而不幸的是，在那片孕育出可以對抗愛滋病藥物的雨林，早已被清除，改作農地，他們只找到一根根枯死的樹樁。 這些樹樁提醒人們：珍貴的治療方法或藥物，真的可能在一夜間消失。每一年，被破壞的雨林面積相當於四分之三個臺灣那麼大。全球雨林持續遭到破壞，已導致成千上萬種動植物滅絕。
+paragraph_count: 1
+char_count: 405
+vocabulary: []
+vocabulary_count: 0
+video_links:
+- title: 如果亞馬遜雨林消失了？| 大膽科學
+  url: ''
+- title: 【動物瀕友會】EP12名偵探鴿南之滅絕事件旅鴿篇
+  url: ''
+multiple_choice:
+- question: 1. 科學家回到馬來西亞想採集更多樣本時，為何只找到枯死的樹樁？
+  options:
+  - 因為原始雨林已被清除，被改作農地
+  - 因為有人聽說樹能治病，先下手為強
+  - 樹木孕育出愛滋病藥物後，會自然死亡
+  - 因為科學家走錯地點，找錯森林區域
+  answer: A
+- question: 2. 依文章脈絡，作者最可能想影響讀者的想法或態度是什麼？
+  options:
+  - 鼓勵多向原住民學習各種雨林草藥的使用方法
+  - 謹慎進行所有醫學研究，因為採集樣本會破壞自然
+  - 重新重視雨林保育，因為雨林可能帶來救命藥物
+  - 呼籲大家，要接近大自然才能找到各種治療方法
+  answer: C
+- question: 3. 第一段大量描寫旅人鴿成群飛過天空、讓日光失色，主要想讓讀者感受到什麼？
+  options:
+  - 旅人鴿能長途飛行、耐力驚人，值得研究
+  - 旅人鴿有特別的飛行特色，很容易辨識
+  - 旅人鴿曾經數量驚人，景象非常震撼
+  - 旅人鴿遷徙路線複雜，很難追蹤研究
+  answer: C
+- question: 4. 旅人鴿「性情出奇溫馴」在文中最可能用來暗示什麼影響？
+  options:
+  - 牠們容易被獵捕，族群更快減少
+  - 牠們更會躲藏，所以不容易被抓到
+  - 牠們更愛獨居，所以不會成群出現
+  - 牠們更能適應環境，所以不怕獵人
+  answer: A
+- question: 5. 如果你要用這篇文章設計一則「保育提醒」，最符合文意的主張是？
+  options:
+  - 只要禁止所有狩獵活動，就能完全解決滅絕問
+  - 等數量明顯變少再處理，才不會浪費資源人力
+  - 把動物送進動物園就好，棲地保護不是最重要
+  - 提前保護棲地並限制獵捕，避免物種走向滅絕題
+  answer: D
+multiple_choice_count: 5
+self_check_items:
+- 重點句：第一段最關鍵的一句話？（單選）
+- 段意二選一（單選）
+- 這段最想強調的「反差」是什麼？（單選）
+- 作者提到「科學家在雨林探索」主要想表達什麼？（單選）
+- 你是否發現：跳過看不懂的粗體，仍能抓到第一段重點？（單選）
+- 為什麼粗體字跳過沒關係？（單選）
+- 完成一句話（方法回顧）：
+- 任務：只抓「這一段大概在講什麼？」（約10–15字）
+- 請在框框中把你覺得讀不懂、會卡住的地方圈起來或畫線。
+- 你覺得你卡住的主要原因是什麼？（單選）
+- 再讀一次卡關那段：先略過你圈起來的地方，直接往下讀，不要停。
+- 重點句：第一段最關鍵的一句話？（單選）
+- 段意二選一（單選）
+- 作者寫「超過十億隻、飛過天空要好幾個小時、讓日光失色」主要想讓讀者產生什麼感覺？（單選）
+- 你是否發現：就算你圈起來的地方先跳過，仍能抓到重點？（單選）
+- 為什麼圈起來的地方跳過沒關係？（單選）
+- 這次練習，你最重要的學習是什麼？（方法回顧）
+discussion_content: []
+strategy_exercises: []
+images:
+- filename: images/G7-L23/G7-L23-01.png
+  size_bytes: 6724
+  image_hash: 4c0bcf61bd8a
+  content_type: image/png
+  caption: ''
+- filename: images/G7-L23/G7-L23-02.png
+  size_bytes: 9835
+  image_hash: 083ac7675369
+  content_type: image/png
+  caption: ''
+- filename: images/G7-L23/G7-L23-03.png
+  size_bytes: 7368
+  image_hash: f8467169fe00
+  content_type: image/png
+  caption: ''
+- filename: images/G7-L23/G7-L23-04.png
+  size_bytes: 8575
+  image_hash: 57d490db7791
+  content_type: image/png
+  caption: ''
+- filename: images/G7-L23/G7-L23-05.png
+  size_bytes: 4946
+  image_hash: a2b6fe7622e1
+  content_type: image/png
+  caption: ''
+- filename: images/G7-L23/G7-L23-06.png
+  size_bytes: 4896
+  image_hash: 3579e140afd0
+  content_type: image/png
+  caption: ''
+image_count: 6
+story_structure_rows:
+- label: 主題
+  value: 雨林裡的奇蹟藥物
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 雨林植物能提供救命藥物
+  interactive_type: checkbox
+  hint: 關於雨林藥物
+  options:
+  - 雨林植物只能提煉毒藥
+  - 雨林植物能提供救命藥物
+  - 雨林植物對人類無用
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 雨林被破壞，藥物可能消失
+  interactive_type: checkbox
+  hint: 關於雨林消失的影響
+  options:
+  - 雨林消失對人類沒影響
+  - 雨林消失會讓藥物更稀有
+  - 雨林被破壞，藥物可能消失
+  correct_options:
+  - 2
+- label: 重要事實 3
+  value: 雨林破壞速度驚人
+  interactive_type: checkbox
+  hint: 關於雨林破壞的程度
+  options:
+  - 雨林破壞速度很慢
+  - 雨林破壞速度驚人
+  - 雨林破壞已停止
+  correct_options:
+  - 1
+- label: 結論
+  value: 保護雨林，才能保有珍貴藥物
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

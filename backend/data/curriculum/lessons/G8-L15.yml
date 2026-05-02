@@ -1,0 +1,32 @@
+lesson_code: G8-L15
+display_order: 129
+original_order: 153
+title: 核能的兩難抉擇
+grade: 8
+genre: 議論文
+text_type: 單
+unit_topic: null
+applicable_grade: null
+strategy_id: null
+strategy_name: 比較多元觀點
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: https://www.youtube.com/watch?v=K7NjIXgj57s
+- title: 影片2
+  url: https://www.youtube.com/watch?v=qOIvuoVfwDM
+vocab:
+- 眾說紛紜
+- 系統性風險
+- 尤有甚者
+- 兵凶戰危
+- 鄰避效應
+- 因噎廢食
+- 置身事外
+- 風靡
+- 捉襟見肘
+- 權衡
+existing_content_yaml: null
+notes: null

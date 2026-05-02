@@ -1,0 +1,19 @@
+lesson_code: WW-L06
+display_order: 154
+original_order: 6
+title: 陸公買硯
+grade: 8
+genre: 文言文
+text_type: 單
+unit_topic: 類型-記敘人物
+applicable_grade: 文言文－斷句及判讀主語II
+strategy_id: 8
+strategy_name: 文言文閱讀策略──斷句及判讀主語II
+strategy_dependency: null
+strategy_relation: 策略順序  L46不量田→L47陸公買硯
+classical_chinese: true
+video_links: null
+vocab:
+- 無
+existing_content_yaml: L47.yml
+notes: null

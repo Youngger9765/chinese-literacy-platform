@@ -276,8 +276,8 @@ jobs:
             done
           done
 
-  close-issues:
-    name: Auto-close resolved issues
+  notify-issues:
+    name: Notify resolved issues (label + comment, no close)
     runs-on: ubuntu-latest
     needs: [deploy-backend, deploy-frontend]
     if: always() && !cancelled() && !contains(needs.*.result, 'failure')
@@ -289,11 +289,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Find and close issues from merge commit
+      - name: Add deployed-to-prod label + comment (NEVER auto-close)
         uses: actions/github-script@v8
         with:
           script: |
-            // Get commits in this push (staging→main merge)
+            // Per LingoLeap policy: only Young closes issues. CI may comment + label
+            // ("ai-qa-passed", "deployed-to-prod") but must leave issues OPEN so Young
+            // can verify with human eyes before closing.
+
             const compare = await github.rest.repos.compareCommits({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -301,7 +304,6 @@ jobs:
               head: context.payload.after,
             });
 
-            // Extract issue numbers from commit messages and PR titles
             const issueNumbers = new Set();
             const patterns = [
               /(?:fixes|closes|resolves|related to)\s+#(\d+)/gi,
@@ -325,7 +327,6 @@ jobs:
 
             console.log(`Found issue references: ${[...issueNumbers].join(', ')}`);
 
-            // Close open issues that have "Fixes/Closes" in their PR
             for (const num of issueNumbers) {
               try {
                 const issue = await github.rest.issues.get({
@@ -334,14 +335,13 @@ jobs:
                   issue_number: num,
                 });
 
-                // Skip if already closed, or if it's a PR
                 if (issue.data.state === 'closed' || issue.data.pull_request) {
                   console.log(`#${num}: already closed or is a PR, skipping`);
                   continue;
                 }
 
-                // Only auto-close if commit message has explicit "Fixes/Closes #N"
                 const hasExplicitClose = compare.data.commits.some(c =>
+                  /(?:fixes|closes|resolves)\s+#/i.test(c.message) &&
                   new RegExp(`(?:fixes|closes|resolves)\\s+#${num}`, 'i').test(c.message)
                 );
 
@@ -354,17 +354,21 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: num,
-                  body: `Deployed to production via ${context.sha.substring(0, 7)}. Auto-closing.`,
+                  body: `Deployed to production via ${context.sha.substring(0, 7)}. Awaiting Young's manual close (per LingoLeap policy: only Young closes issues).`,
                 });
 
-                await github.rest.issues.update({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: num,
-                  state: 'closed',
-                });
+                try {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: num,
+                    labels: ['deployed-to-prod'],
+                  });
+                } catch (labelErr) {
+                  console.log(`#${num}: could not add deployed-to-prod label (${labelErr.message}); continuing`);
+                }
 
-                console.log(`#${num}: closed`);
+                console.log(`#${num}: commented + labeled (NOT closed — Young's verification queue)`);
               } catch (e) {
                 console.log(`#${num}: error - ${e.message}`);
               }

@@ -1,0 +1,33 @@
+lesson_code: G4-L08
+display_order: 8
+original_order: 81
+title: 最美的畫面
+grade: 4
+genre: 記敘文
+text_type: 單
+unit_topic: 閱讀力
+applicable_grade: null
+strategy_id: null
+strategy_name: 推論策略──找出文章主旨
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/qMwm7zXChlo
+- title: 影片2
+  url: http://youtu.be/ih7f3K3LJXk
+vocab:
+- 優雅
+- 區間車
+- 索然無味
+- 趣味橫生
+- 集體催眠
+- 與眾不同
+- 遙遙領先
+- 偶有所見
+- 不為所動
+- 賞心悅目
+- 老神在在
+existing_content_yaml: null
+notes: null

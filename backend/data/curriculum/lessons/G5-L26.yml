@@ -1,0 +1,29 @@
+lesson_code: G5-L26
+display_order: 53
+original_order: 63
+title: 數字記憶的奧秘
+grade: 5
+genre: 說明文
+text_type: 單
+unit_topic: null
+applicable_grade: null
+strategy_id: null
+strategy_name: 用表格整理訊息──比較異同
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: https://youtu.be/ncrFLRcWZmE
+- title: 影片2
+  url: https://youtu.be/zjA5Hr9sx7A
+vocab:
+- 推論
+- 差距
+- 異議
+- 差異
+- 複製
+- 平均值
+- 年齡層
+existing_content_yaml: null
+notes: null

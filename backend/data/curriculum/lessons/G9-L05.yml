@@ -1,0 +1,34 @@
+lesson_code: G9-L05
+display_order: 134
+original_order: 50
+title: ＃MeToo運動與我們的權利
+grade: 9
+genre: 說明文
+text_type: 單
+unit_topic: 性別教育
+applicable_grade: 性別平等教育－遠離性騷擾
+strategy_id: 9
+strategy_name: 性別平等──認識性騷擾
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/OTSIsm4zXIA
+- title: 影片2
+  url: http://youtu.be/dvCL4iBIFjc
+- title: 影片3
+  url: http://youtu.be/jh6jMXQ65OY
+vocab:
+- 冒犯
+- 凝視
+- 鏈結
+- 開黃腔
+- 走出陰霾
+- 一󠇡片譁然
+- 保持沉默
+- 茶餘飯後
+- 難以舉證
+- 有所忌憚
+existing_content_yaml: L50.yml
+notes: null

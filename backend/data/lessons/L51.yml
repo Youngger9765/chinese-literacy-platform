@@ -140,29 +140,69 @@ strategy_exercise:
   strategy_name: 科學方法解決問題
   instruction: 遇到無法解釋的現象時，可以用「提問→假設→檢驗」的科學方法來找答案。請跟著步驟，用科學方法分析課文中的靈異現象
   steps:
-    - prompt: 對於「鬼火」現象，科學家提出的解釋是什麼？
-      type: select
-      options:
-        - 鬼魂在夜晚出來活動發出的光
-        - 屍體腐化產生的磷化氫和沼氣混合，在低溫就能燃燒的「冷焰」
-        - 地底下的火山氣體噴出來
-      answer: 1
-    - prompt: 為什麼鬼火最常出現在夏天的墳場？
-      type: select
-      options:
-        - 夏天氣溫高，容易達到冷焰的燃點（攝氏30度），墳場有腐化的遺骸產生磷化氫
-        - 夏天鬼魂比較活躍
-        - 夏天的月亮比較亮
-      answer: 0
-    - prompt: 「鬼壓床」在醫學上叫什麼？它發生在睡眠週期的哪個階段？
-      type: select
-      options:
-        - 睡眠障礙症，發生在深睡期
-        - 睡眠癱瘓症，發生在快速眼動期
-        - 夢遊症，發生在淺睡期
-      answer: 1
-    - prompt: 課文說睡覺時動彈不得其實是身體的「保護機制」，為什麼？請用自己的話回答
-      type: free_text
+  - prompt: 對於「鬼火」現象，科學家提出的解釋是什麼？
+    type: select
+    options:
+    - 鬼魂在夜晚出來活動發出的光
+    - 屍體腐化產生的磷化氫和沼氣混合，在低溫就能燃燒的「冷焰」
+    - 地底下的火山氣體噴出來
+    answer: 1
+  - prompt: 為什麼鬼火最常出現在夏天的墳場？
+    type: select
+    options:
+    - 夏天氣溫高，容易達到冷焰的燃點（攝氏30度），墳場有腐化的遺骸產生磷化氫
+    - 夏天鬼魂比較活躍
+    - 夏天的月亮比較亮
+    answer: 0
+  - prompt: 「鬼壓床」在醫學上叫什麼？它發生在睡眠週期的哪個階段？
+    type: select
+    options:
+    - 睡眠障礙症，發生在深睡期
+    - 睡眠癱瘓症，發生在快速眼動期
+    - 夢遊症，發生在淺睡期
+    answer: 1
+  - prompt: 課文說睡覺時動彈不得其實是身體的「保護機制」，為什麼？請用自己的話回答
+    type: free_text
 story_structure:
 - label: 結論
   value: 理性的科學方法，讓我們不再害怕，對現象有更客觀的認識。
+story_structure_rows:
+- label: 主題
+  value: 靈異現象的科學解釋
+  interactive_type: fill_blank
+  hint: 課文主要在講什麼？
+- label: 重要事實 1
+  value: 鬼火是冷焰現象
+  interactive_type: checkbox
+  hint: 鬼火的科學解釋是什麼？
+  options:
+  - 鬼火是鬼魂的火焰
+  - 鬼火是冷焰現象
+  - 鬼火是磷化氫燃燒
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 鬼壓床是睡眠癱瘓症
+  interactive_type: checkbox
+  hint: 鬼壓床的科學解釋是什麼？
+  options:
+  - 鬼壓床是鬼魂壓制
+  - 鬼壓床是睡眠癱瘓症
+  - 鬼壓床是作惡夢
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 快速眼動期肌肉癱軟
+  interactive_type: checkbox
+  hint: 睡眠癱瘓症發生在哪個時期？
+  options:
+  - 淺睡期肌肉放鬆
+  - 快速眼動期肌肉癱軟
+  - 深睡期大腦活躍
+  correct_options:
+  - 1
+- label: 結論
+  value: 科學能解釋靈異現象
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

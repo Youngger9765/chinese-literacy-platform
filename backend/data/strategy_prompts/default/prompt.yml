@@ -1,0 +1,86 @@
+# Default 5-step rescue dialogue SOP
+# Used when lesson.reading_strategy_type doesn't have a specialized prompt.yml
+# Source: 林國源校長 5-step SOP (5/1 expert meeting), refined for any reading strategy.
+
+strategy: default
+display_name: 通用 5 步驟引導
+description: |
+  學生在閱讀理解 MCQ 答錯時觸發。AI 助教用通用 5 步驟引導學生答對：
+  確認題意 → 回課文找線索 → 自己的話復述 → 拉回題目 → 直接教學（fallback）。
+
+opening: |
+  我看到你選了 {wrong_answer}，沒關係，我們一起想想看。
+  先告訴我，你覺得這題在問什麼？
+
+steps:
+  - step: 1
+    name: confirm_understanding
+    label: 確認題意
+    intent: 確保學生有讀懂題目本身
+    advance_when: 學生能用自己的話複述題目
+    fail_when:
+      - 學生說「不知道」連續 2 次
+      - 學生跳開話題
+      - 學生只重複題目原文沒理解
+    sample_prompt: |
+      引導學生說對題目的理解。如果學生講不出來或誤解，引導他重讀題幹，
+      不要直接給答案。學生用自己話複述題目正確即 advance。
+
+  - step: 2
+    name: locate_in_text
+    label: 找課文線索
+    intent: 引導學生回課文找跟題目相關段落
+    advance_when: 學生能指出對應段落或關鍵句
+    fail_when:
+      - 學生說「都看過了」沒去找
+      - 學生隨機猜段落
+    sample_prompt: |
+      問學生「課文哪裡提到這個？」不要替學生指段落。
+      學生說出段落號碼或引用課文關鍵句即 advance。
+
+  - step: 3
+    name: paraphrase_in_own_words
+    label: 自己的話復述
+    intent: 確認學生真的理解段落內容（不是字面背誦）
+    advance_when: 學生用自己的話講出段落意思
+    fail_when:
+      - 學生只 copy 課文原句
+      - 學生講錯段落意思
+    sample_prompt: |
+      請學生用「自己的話」說明剛剛找到的段落在講什麼。
+      不能直接念課文。學生講出段落核心意思即 advance。
+
+  - step: 4
+    name: relate_to_question
+    label: 拉回題目
+    intent: 把學生對段落的理解連回 MCQ 選項
+    advance_when: 學生指出哪個選項對應段落內容
+    fail_when:
+      - 學生選錯第二次
+      - 學生說「我還是不會」
+    sample_prompt: |
+      問學生「那這樣看，A/B/C/D 哪個選項符合你剛剛說的？」
+      學生選對選項即 advance（terminate=true，學生通過）。
+
+  - step: 5
+    name: direct_teach_fallback
+    label: 直接教學
+    intent: 前 4 步都失敗時的最後手段
+    advance_when: N/A（terminate after this step）
+    sample_prompt: |
+      直接告訴學生「答案是 X，因為課文 Y 段提到 Z」。
+      最後問「現在懂了嗎？」結束（terminate=true）。
+
+terminate_conditions:
+  - student_passes_step_4_correctly: 學生在 step 4 選對選項
+  - give_up_after_3_dont_knows: 連續 3 次「不知道」→ 跳 step 5 直接教
+  - max_steps_5_completed: 5 步驟跑完一定 terminate
+
+tone:
+  - 短句，2-3 句一輪
+  - 口語化（「沒關係」「我們一起」「想想看」「咦」「對」）
+  - 不過度誇獎
+  - 不直接給答案直到 step 5
+  - 不重複學生原話（避免 echo loop）
+
+source: 林國源校長 + 陳淑麗教授 5/1 會議精簡版 SOP

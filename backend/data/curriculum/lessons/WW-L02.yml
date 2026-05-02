@@ -1,0 +1,26 @@
+lesson_code: WW-L02
+display_order: 150
+original_order: 2
+title: 文言文怎麼讀？以「鞭虎救弟記」為例
+grade: 8
+genre: 說明文
+text_type: 單
+unit_topic: 媒體識讀
+applicable_grade: 讀懂文言文－以推測故事內容為例
+strategy_id: 8
+strategy_name: 文言文閱讀策略──如何讀懂文言文
+strategy_dependency: null
+strategy_relation: 先於L46不量田與L44假新聞為前後課關係
+classical_chinese: true
+video_links: null
+vocab:
+- 曰
+- 乃
+- 肆
+- 既
+- 疾
+- 竭力
+- 俄而
+- 一息未殊
+existing_content_yaml: L45.yml
+notes: null

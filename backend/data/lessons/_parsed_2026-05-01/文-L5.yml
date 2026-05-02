@@ -1,0 +1,153 @@
+lesson_code: 文-L5
+grade: 0
+grade_code: 文-L5
+reading_strategy: 人稱代詞
+reading_strategy_type: classical_chinese
+source_file: 文-L5重義的荀巨伯（人稱代詞）.docx
+parsed_at: '2026-05-01T21:10:47'
+flags:
+- vocab_empty
+genre: 文言文
+title: 重義的荀巨伯
+authors: 學習單： 王淑瑱
+story_text: 南朝宋・劉義慶(編)
+paragraphs:
+- 南朝宋・劉義慶(編)
+paragraph_count: 1
+char_count: 10
+vocabulary: []
+vocabulary_count: 0
+video_links: []
+multiple_choice:
+- question: 1. 下列選項「」中字，何者字音、字義完全正確？
+  options:
+  - 「豈」荀巨伯所行邪——ㄎㄞˇ，難道
+  - 友人有疾，不忍「委」之——ㄊㄨㄛ，委託
+  - 「寧」以我身代友人命——ㄋㄧㄥˊ，寧願
+  - 「遂」班軍而還——ㄓㄨˊ，於是
+  answer: C
+- question: 2. 關於「重義的荀巨伯」一文的寫作手法，下列敘述何者最恰當？
+  options:
+  - 運用對話，凸顯人物個性
+  - 夾敘夾議，事理分析清楚
+  - 全文採第一人稱敘述
+  - 以設問法結尾，激發讀者思考
+  answer: A
+- question: 3. 下列哪一個選項，最能看出荀巨伯的人格特質？
+  options:
+  - 荀巨伯遠看友人疾，值胡賊攻郡
+  - 我輩無義之人，而入有義之國
+  - 大軍至，一郡盡空，汝何男子，而敢獨止
+  - 友人有疾，不忍委之，寧以我身代友人命
+  answer: D
+- question: 4. 下列哪一個選項中的代詞代表荀巨伯的朋友？
+  options:
+  - 「吾今死矣，子可去」的「子」
+  - 「友人有疾，不忍委之」的「之」
+  - 「汝何男子，而敢獨止」的「汝」
+  - 「遠來相󠇡視，子令吾去」的「吾」
+  answer: B
+- question: 5.「重義的荀巨伯」一文的主旨近似於下列何者？
+  options:
+  - 勿以善小而不為，勿以惡小而為之
+  - 改變自己是自救，影響別人是救人
+  - 良藥苦口利於病，忠言逆耳利於行
+  - 為人若真誠有德，自能感召人心
+  answer: D
+- question: 6. 武俠小說中的人物，常以謙遜的口吻自稱。下列哪個人物沒有使用自謙詞？
+  options:
+  - 鐵心蘭：「妾身就此告退。」
+  - 花無缺：「承蒙閣下對本人的指點。」
+  - 燕南天：「這劍法確實是在下自創。」
+  - 小魚兒：「敝人這就前往一探究竟。」
+  answer: B
+- question: |-
+    （ Ｃ ）1. 關於本文，下列敘述何者正確？ A.「渡河」、「亡其舟」、「號呼救命」的人都是漁夫 B.漁夫是因為商人重賞才去救人的 C.依據文意，「向許百金」的「許」意思是「許諾」 D.商人的情緒變化依序是驚恐、高傲、憤怒、心虛
+  options: []
+  answer: C
+- question: 3. 這個故事的主旨為何？ A.有錢能使鬼推磨
+  options:
+  - 人須言而有信
+  - 得饒人處且饒人
+  - 多行不義必自斃
+  answer: B
+multiple_choice_count: 8
+self_check_items: []
+discussion_content: []
+images:
+- filename: images/文-L5/文-L5-01.png
+  size_bytes: 203608
+  image_hash: 09458c5992f5
+  content_type: image/png
+  caption: ''
+- filename: images/文-L5/文-L5-02.png
+  size_bytes: 8069
+  image_hash: 7c834e8f7603
+  content_type: image/png
+  caption: ''
+- filename: images/文-L5/文-L5-03.png
+  size_bytes: 7368
+  image_hash: f8467169fe00
+  content_type: image/png
+  caption: ''
+- filename: images/文-L5/文-L5-04.png
+  size_bytes: 4492
+  image_hash: fba7f762a0dd
+  content_type: image/png
+  caption: ''
+- filename: images/文-L5/文-L5-05.png
+  size_bytes: 1568
+  image_hash: 04f2e367f318
+  content_type: image/png
+  caption: ''
+- filename: images/文-L5/文-L5-06.png
+  size_bytes: 2806
+  image_hash: d5fee033222e
+  content_type: image/png
+  caption: ''
+- filename: images/文-L5/文-L5-07.png
+  size_bytes: 8495
+  image_hash: d0d187eac435
+  content_type: image/png
+  caption: ''
+- filename: images/文-L5/文-L5-08.png
+  size_bytes: 1389
+  image_hash: 4c4909300d39
+  content_type: image/png
+  caption: ''
+- filename: images/文-L5/文-L5-09.png
+  size_bytes: 1702
+  image_hash: e049f66e7861
+  content_type: image/png
+  caption: ''
+image_count: 9
+story_structure_rows:
+- label: 主題
+  value: 荀巨伯重情重義
+  interactive_type: fill_blank
+  hint: 這篇文章主要在講什麼？
+- label: 重要內容 1
+  value: 荀巨伯探望生病的朋友
+  interactive_type: checkbox
+  hint: 故事的開頭發生了什麼事？
+  options:
+  - 荀巨伯去旅行
+  - 荀巨伯探望生病的朋友
+  - 荀巨伯搬家了
+  correct_options:
+  - 1
+- label: 重要內容 2
+  value: 荀巨伯不願獨自逃走
+  interactive_type: checkbox
+  hint: 面對胡賊，荀巨伯做了什麼決定？
+  options:
+  - 荀巨伯趕快逃跑
+  - 荀巨伯與胡賊打架
+  - 荀巨伯不願獨自逃走
+  correct_options:
+  - 2
+- label: 結論
+  value: 胡賊被荀巨伯感動
+  interactive_type: fill_blank
+  hint: 最後胡賊為什麼離開了？
+story_structure_table_source: ai-generated-2026-05-02

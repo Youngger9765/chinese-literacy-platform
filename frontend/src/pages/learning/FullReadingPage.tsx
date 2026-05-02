@@ -8,6 +8,7 @@ const FullReadingPage: React.FC = () => {
   const {
     selectedStory,
     handleFinishFullReading,
+    session,
   } = useLearningContext();
   const navigate = useNavigate();
 
@@ -17,7 +18,8 @@ const FullReadingPage: React.FC = () => {
     <FullReading
       story={selectedStory}
       onFinish={handleFinishFullReading}
-      onBack={() => navigate(`/learn/${storyId}/vocab`)}
+      onBack={() => navigate(`/learn/${storyId}/tutor`)}
+      initialResult={session?.fullReadingResult ?? null}
     />
   );
 };

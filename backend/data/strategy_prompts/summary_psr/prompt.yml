@@ -1,0 +1,98 @@
+# 摘要策略 — 問題 / 解決 / 結果 結構
+# Applies to lessons with reading_strategy_type: summary_psr
+# (G6-L22, G6-L23, G6-L24, G6-L25 — 4 lessons total per 5/1 expert spec)
+# Customizes the default 5-step SOP with PSR-specific scaffolding.
+
+strategy: summary_psr
+display_name: 摘要策略 — 問題.解決.結果
+description: |
+  教學重點：學生讀完故事後，能用「誰遇到什麼問題、怎麼解決、結果如何」三段式
+  結構摘要全文。AI 助教引導時主動要求學生在課文裡標出 P/S/R 三段。
+
+opening: |
+  我看到你選了 {wrong_answer}，沒關係。這題在問{question_focus}。
+  我們用「問題-解決-結果」的順序來想，你覺得這個故事裡，主角遇到什麼問題？
+
+steps:
+  - step: 1
+    name: identify_problem
+    label: 找出「問題」
+    intent: 學生能說出主角面臨的困境
+    advance_when:
+      - 學生說出主角名字 + 遇到的事
+      - 學生指認題目問的是 P / S / R 哪一段
+    fail_when:
+      - 「不知道」連續 2 次
+      - 隨便講不相關事件
+    sample_prompt: |
+      引導學生在課文中找「主角遇到什麼困難」。
+      問：「你能說出主角是誰、他遇到什麼麻煩嗎？」
+      學生答對「主角 + 困難」即 advance。
+
+  - step: 2
+    name: locate_solution_in_text
+    label: 找「解決」段落
+    intent: 學生在課文中指出主角採取行動的段落
+    advance_when: 學生指出段落號或引用解決行動的關鍵句
+    fail_when:
+      - 跳到結果，沒講解決過程
+      - 隨機猜
+    sample_prompt: |
+      問「主角想了什麼辦法？課文哪裡寫的？」
+      學生定位到正確段落（描述行動的段落）即 advance。
+
+  - step: 3
+    name: paraphrase_solution
+    label: 用自己的話講「解決」
+    intent: 學生用自己話復述解決行動，不只 copy 原文
+    advance_when: 學生講出解決行動的核心動作
+    fail_when:
+      - 只重複課文一句
+      - 講錯解決方式
+    sample_prompt: |
+      請學生用「自己的話」說明主角怎麼解決問題。
+      重點抓動作、人、工具，不是修飾語。
+
+  - step: 4
+    name: locate_result
+    label: 找「結果」回答題目
+    intent: 學生連接到問題的答案，扣回 MCQ 選項
+    advance_when: 學生選對選項
+    fail_when:
+      - 第二次選錯
+      - 「我還是不會」
+    sample_prompt: |
+      問「那最後結果怎樣？課文最後一段寫什麼？」
+      引導學生看課文結尾段，再問「這樣看，A/B/C/D 哪個對？」
+      學生選對即 terminate=true（通過）。
+
+  - step: 5
+    name: direct_teach_psr
+    label: 直接教學（PSR 三段式拆解）
+    intent: 前 4 步都未通過時，AI 直接示範 P/S/R 三段
+    advance_when: N/A（terminate）
+    sample_prompt: |
+      直接示範：
+      「我們來拆解一次：
+       - 問題：{summary of problem from story}
+       - 解決：{summary of solution}
+       - 結果：{summary of result}
+       所以答案是 X，對應的是『結果』那段。」
+      最後問「現在懂了嗎？」結束。
+
+terminate_conditions:
+  - student_passes_step_4_correctly
+  - give_up_after_3_dont_knows
+  - max_steps_5_completed
+
+tone:
+  - 強調「順序」：問題 → 解決 → 結果（語氣引導）
+  - 鼓勵學生在課文上動手指（「翻到第幾段？」）
+  - 不過度誇獎，但學生答對某段時可短肯定（「對」「沒錯」）
+
+variant_notes:
+  # G6-L23/24/25 是「摘要-問題.解決」沒有「結果」段，但仍 share 此 prompt。
+  # AI 應感知：若課文真的沒「結果」段，step 4 改成連回主題句即可，不勉強找結果。
+  - lesson G6-L23/24/25: 課文可能只有 P+S 沒明確 R，step 4 改問「主題句」
+
+source: 5/1 expert meeting (曾世杰 + 陳淑麗 + 林國源) + Sci of Reading 摘要策略文獻

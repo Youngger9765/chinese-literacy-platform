@@ -1,0 +1,34 @@
+lesson_code: G9-L06
+display_order: 135
+original_order: 51
+title: 靈異與科學
+grade: 9
+genre: 說明文
+text_type: 單
+unit_topic: 科學知識
+applicable_grade: 用科學方法提問－分析解決問題
+strategy_id: 9
+strategy_name: 解決問題──科學探究法
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/iAQdDHG58lc
+- title: 影片2
+  url: http://youtu.be/ISjSdBwTffU
+- title: 影片3
+  url: http://youtu.be/4S60pEKGxZc
+vocab:
+- 閃爍
+- 乍見
+- 週期
+- 癱瘓
+- 引人入勝
+- 毛骨悚然
+- 啟人疑竇
+- 睡眼惺忪
+- 窮凶極惡
+- 喑啞無聲
+existing_content_yaml: L51.yml
+notes: null

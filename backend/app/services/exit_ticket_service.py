@@ -17,34 +17,77 @@ logger = logging.getLogger(__name__)
 PASSING_SCORE = 60
 
 
+def _from_lesson_yaml(lesson_data: dict) -> list[dict]:
+    """Transform lesson YAML multiple_choice into exit-ticket schema (Issue #1402).
+
+    YAML schema (from #1369 docx parser):
+        multiple_choice:
+          - question: "..."
+            options: [A_text, B_text, C_text, D_text]
+            answer: "A" | "B" | "C" | "D"
+
+    Exit-ticket schema:
+        {id, question, options[4], correct_index 0-3, explanation}
+
+    Drops malformed entries (fewer than 4 options).
+    """
+    questions: list[dict] = []
+    for i, q in enumerate(lesson_data.get("multiple_choice") or []):
+        options = q.get("options") or []
+        if len(options) < 4:
+            continue
+        answer = (q.get("answer") or "A").strip().upper()
+        first = answer[:1]
+        correct_index = ord(first) - ord("A") if first.isalpha() else 0
+        correct_index = max(0, min(3, correct_index))
+        questions.append({
+            "id": i + 1,
+            "question": (q.get("question") or "").strip(),
+            "options": options[:4],
+            "correct_index": correct_index,
+            "explanation": "",
+        })
+    return questions
+
+
 async def generate_exit_ticket_questions(
     story_content: list[str],
     wrong_chars: list[str] | None = None,
+    lesson_data: dict | None = None,
 ) -> dict:
     """
     Generate exit-ticket questions for a story.
 
-    Tries AI generation first. If AI fails (fallback=True), returns an
-    empty questions list so the frontend can use its local rule-based fallback.
+    YAML-first (Issue #1402): if lesson_data carries pre-authored
+    multiple_choice from the lesson YAML (158 lessons all do, courtesy of
+    #1369 docx parser), serve those without calling AI. Saves ~24M tokens
+    per month at 100 students x 158 lessons x 1 session/day.
+
+    Falls back to AI generation only when YAML has no MCQ (rare/never).
+    If AI also fails, returns empty list so the frontend can use its
+    local rule-based fallback.
 
     Args:
         story_content: List of paragraphs from the story
         wrong_chars: Characters the student mispronounced during reading
+        lesson_data: Optional pre-loaded lesson YAML dict (carries multiple_choice)
 
     Returns:
         {
-            "questions": [
-                {
-                    "id": int,
-                    "question": str,
-                    "options": [str, str, str, str],
-                    "correct_index": int,   # 0-3
-                    "explanation": str,
-                }
-            ],
-            "source": "ai" | "fallback"
+            "questions": [{"id", "question", "options"[4], "correct_index", "explanation"}],
+            "source": "pregenerated" | "ai" | "fallback"
         }
     """
+    if lesson_data:
+        questions = _from_lesson_yaml(lesson_data)
+        if questions:
+            logger.info(
+                "exit_ticket_service: served %d questions from YAML (lesson=%s, no AI call)",
+                len(questions),
+                lesson_data.get("lesson_code") or lesson_data.get("title", "?"),
+            )
+            return {"questions": questions, "source": "pregenerated"}
+
     full_text = "\n".join(story_content)
     try:
         result = await _ai_generate(text=full_text, wrong_chars=wrong_chars or [])

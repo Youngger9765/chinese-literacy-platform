@@ -4,6 +4,7 @@ import { cleanChineseText } from '../../utils/textDiff';
 import { analyzeFluency } from '../../utils/fluencyAnalyzer';
 import DiffDisplay from '../ui/DiffDisplay';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { useKaraoke } from '../../context/KaraokeContext';
 import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { useTtsPlayback } from '../../hooks/useTtsPlayback';
 import { cancelTts } from '../../services/ttsApi';
@@ -34,9 +35,11 @@ interface FullReadingProps {
   story: Story;
   onFinish: (result: FullReadingResult) => void;
   onBack: () => void;
+  /** Session-level result rehydrated from DB (Bug #1320 — fallback when localStorage is cleared). */
+  initialResult?: FullReadingResult | null;
 }
 
-const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) => {
+const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, initialResult }) => {
   const { token } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
 
@@ -50,12 +53,46 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
   };
   const savedProgress = useRef(loadSaved());
 
+  /* ---- Bug #1320 Bug 3: Derive initial result priority:
+   *   1. localStorage (same-browser persistence, most complete — has diffTokens)
+   *   2. session.fullReadingResult rehydrated from DB (cross-browser / cleared localStorage)
+   *   localStorage wins because it contains diffTokens which the DB result may lack. ---- */
+  const getInitialResult = (): SavedResult | null => {
+    if (savedProgress.current?.result) return savedProgress.current.result;
+    if (initialResult) {
+      return {
+        matchRate: initialResult.matchRate,
+        feedback: initialResult.feedback,
+        diffTokens: initialResult.diffTokens ?? [],
+        cpm: initialResult.cpm ?? 0,
+        durationMs: initialResult.durationMs ?? 0,
+        errorBreakdown: initialResult.errorBreakdown ?? { correct: 0, wrong: 0, missing: 0, extra: 0 },
+      };
+    }
+    return null;
+  };
+
   const [isPreparing, setIsPreparing]           = useState(false);
   const [isSessionActive, setIsSessionActive]   = useState(false);
   const [streamingTranscript, setStreamingTranscript] = useState(() => savedProgress.current?.transcript ?? '');
   const [micError, setMicError]                 = useState('');
-  const [result, setResult]                     = useState<SavedResult | null>(() => savedProgress.current?.result ?? null);
-  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const [result, setResult]                     = useState<SavedResult | null>(getInitialResult);
+  const { zhuyinActive, isZhuyinAny, processLinesSelective } = useZhuyin();
+  const { karaokeEnabled } = useKaraoke();
+  const vocabWords = useMemo(
+    () => (story.vocabulary ?? []).map((v) => v.word).filter(Boolean),
+    [story.vocabulary]
+  );
+
+  /* ---- Bug #1320 Bug 1: Auto-scroll to result area when result first appears ---- */
+  const resultRef = useRef<HTMLDivElement | null>(null);
+  const prevResultRef = useRef<SavedResult | null>(null);
+  useEffect(() => {
+    if (result && !prevResultRef.current && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    prevResultRef.current = result;
+  }, [result]);
 
   const isSessionActiveRef        = useRef(false);
   const recognitionRef            = useRef<any>(null);
@@ -154,10 +191,10 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
     } catch {}
   }, [result, streamingTranscript, storageKey]);
 
-  const zhuyinLines = useMemo(() => {
-    if (!zhuyinActive) return null;
-    return story.content.map((line) => processZhuyin(line));
-  }, [story.content, zhuyinActive, processZhuyin]);
+  const zhuyinLines = useMemo(
+    () => processLinesSelective(story.content, vocabWords),
+    [story.content, vocabWords, processLinesSelective]
+  );
 
   /* ---- Cleanup ---- */
   useEffect(() => {
@@ -269,13 +306,14 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
     setStreamingTranscript(cleanChineseText(transcript));
   }, [fullText, stopSession]);
 
-  /* ---- Render paragraph text with optional TTS highlighting ---- */
+  /* ---- Render paragraph text with optional KTV TTS highlighting ---- */
   const renderParagraph = (line: string, idx: number) => {
     const zhuyinLine = zhuyinLines ? zhuyinLines[idx] : null;
-    const isTtsHighlighting = isTtsPlaying && idx === currentTtsParagraph;
+    // KTV highlight: only when karaokeEnabled AND TTS is playing this paragraph
+    const isTtsHighlighting = karaokeEnabled && isTtsPlaying && idx === currentTtsParagraph;
 
     if (isTtsHighlighting) {
-      const displayText = (zhuyinActive && typeof zhuyinLine === 'string') ? zhuyinLine : line;
+      const displayText = (isZhuyinAny && typeof zhuyinLine === 'string') ? zhuyinLine : line;
       const chars = splitZhuyinChars(displayText);
       // groupIdxForProgress walks char groups so zhuyin PUA selectors (#1112)
       // and symbols stripped by _cleanForTts (#1110) don't push the split
@@ -293,8 +331,8 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
       );
     }
 
-    // Finished TTS paragraphs stay fully colored
-    if (isTtsPlaying && currentTtsParagraph > idx) {
+    // When karaoke is ON: finished TTS paragraphs stay fully colored
+    if (karaokeEnabled && isTtsPlaying && currentTtsParagraph > idx) {
       return <span className="text-accent font-bold">{zhuyinLine ?? line}</span>;
     }
 
@@ -309,7 +347,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
       style={{
-        fontFamily: zhuyinActive
+        fontFamily: isZhuyinAny
           ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
           : undefined,
       }}
@@ -358,7 +396,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
                   <span className="text-xs font-headline font-bold text-on-surface-variant/40 pt-2 select-none shrink-0 w-6 text-right">
                     {String(idx + 1).padStart(2, '0')}
                   </span>
-                  <p className={`text-xl md:text-2xl text-on-surface leading-[3rem] md:leading-[3.5rem] ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}>
+                  <p className={`text-xl md:text-2xl text-on-surface leading-[3rem] md:leading-[3.5rem] ${isZhuyinAny ? 'tracking-[0.4em]' : ''}`}>
                     {renderParagraph(line, idx)}
                   </p>
                 </div>
@@ -382,7 +420,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
 
           {/* ── Result section ──────────────────────────────────────── */}
           {result && (
-            <div className="mt-6 space-y-6">
+            <div ref={resultRef} className="mt-6 space-y-6">
               {/* Encouragement — no numbers shown to student (Issues #1094, #1097) */}
               {(() => {
                 const enc = getFullReadingEncouragement(result.matchRate);
@@ -471,7 +509,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack }) =>
                 className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
               >
-                <span>查看報告</span>
+                <span>下一關</span>
                 <span className="material-symbols-outlined text-xl">arrow_forward</span>
               </button>
             </>

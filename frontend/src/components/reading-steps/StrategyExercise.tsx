@@ -138,13 +138,13 @@ function OrderingExercise({
                     : 'bg-gray-50 border-gray-200'
                   : dragOverIndex === index
                   ? 'bg-violet-50 border-violet-300 scale-[1.02]'
-                  : 'bg-white border-gray-200 cursor-grab hover:border-violet-200 hover:bg-violet-50/30',
+                  : 'bg-surface-container-low border-gray-200 cursor-grab hover:border-violet-200 hover:bg-violet-50/30',
               ].join(' ')}
             >
               <span className="w-6 h-6 flex-shrink-0 rounded-full bg-gray-100 text-gray-500 text-xs font-bold flex items-center justify-center">
                 {index + 1}
               </span>
-              <span className="flex-1 text-sm text-gray-800">{item.text}</span>
+              <span className="flex-1 text-sm text-on-surface">{item.text}</span>
               {submitted && itemCorrect && (
                 <span className="text-emerald-500 text-base flex-shrink-0">&#10003;</span>
               )}
@@ -242,11 +242,11 @@ function TraitInferenceExercise({
 
       <div className="space-y-2 mb-5">
         {(exercise.clues ?? []).map((clue, idx) => (
-          <div key={idx} className="flex gap-3 bg-white rounded-xl border border-gray-200 px-4 py-3">
+          <div key={idx} className="flex gap-3 bg-surface-container-low rounded-xl border border-gray-200 px-4 py-3">
             <span className="flex-shrink-0 px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-xs font-semibold">
               {clue.source}
             </span>
-            <span className="text-sm text-gray-800">{clue.text}</span>
+            <span className="text-sm text-on-surface">{clue.text}</span>
           </div>
         ))}
       </div>
@@ -269,7 +269,7 @@ function TraitInferenceExercise({
                   ? 'bg-red-50 border-red-300 text-red-600'
                   : isSelected
                   ? 'bg-violet-50 border-violet-400 text-violet-700'
-                  : 'bg-white border-gray-200 text-gray-700 hover:border-violet-300 hover:bg-violet-50/30',
+                  : 'bg-surface-container-low border-gray-200 text-on-surface-variant hover:border-violet-300 hover:bg-violet-50/30',
               ].join(' ')}
             >
               {trait}
@@ -387,12 +387,12 @@ function GuidedStepsExercise({
           const feedback = stepFeedback[stepIdx];
           const isDone = feedback !== null;
           return (
-            <div key={stepIdx} className="rounded-xl border border-gray-200 bg-white p-4">
+            <div key={stepIdx} className="rounded-xl border border-gray-200 bg-surface-container-low p-4">
               <div className="flex items-start gap-2 mb-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center mt-0.5">
                   {stepIdx + 1}
                 </span>
-                <p className="text-sm font-medium text-gray-700">{step.prompt}</p>
+                <p className="text-sm font-medium text-on-surface-variant">{step.prompt}</p>
               </div>
 
               {step.type === 'free_text' ? (
@@ -434,7 +434,7 @@ function GuidedStepsExercise({
                             ? 'bg-red-50 border-red-300 text-red-600'
                             : isSelected
                             ? 'bg-violet-50 border-violet-400 text-violet-700'
-                            : 'bg-white border-gray-200 text-gray-700 hover:border-violet-200',
+                            : 'bg-surface-container-low border-gray-200 text-on-surface-variant hover:border-violet-200',
                         ].join(' ')}
                       >
                         <span className="font-semibold mr-2">

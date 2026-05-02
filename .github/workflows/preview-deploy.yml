@@ -178,12 +178,16 @@ jobs:
           echo "frontend_url=${FRONTEND_URL}" >> $GITHUB_OUTPUT
           echo "backend_url=${BACKEND_URL}" >> $GITHUB_OUTPUT
 
-      - name: Update backend CORS with actual frontend URL
+      - name: Update backend CORS + refresh DATABASE_URL from GH secret
         # Skip when backend preview service doesn't exist (frontend-only PR after
         # prior backend cleanup) — otherwise `gcloud run services update` fails.
+        # DATABASE_URL is re-injected on every run so GH secret rotations propagate
+        # to long-lived preview services without needing manual service rebuild
+        # (Fixes #1396).
         if: always() && steps.preview-urls.outputs.frontend_url != 'N/A' && steps.preview-urls.outputs.backend_url != 'N/A'
         env:
           FRONTEND_URL: ${{ steps.preview-urls.outputs.frontend_url }}
+          DATABASE_URL_SECRET: ${{ secrets.PREVIEW_DATABASE_URL }}
         run: |
           STAGING_URL="https://lingoleap-frontend-staging-958347263320.asia-east1.run.app"
           FIREBASE_URL="https://lingoleap-dev.web.app"
@@ -192,7 +196,7 @@ jobs:
           gcloud run services update ${{ env.BACKEND_SERVICE }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
-            --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}"
+            --update-env-vars "^::^ALLOWED_ORIGINS=${FRONTEND_URL},${ALT_URL},${STAGING_URL},${FIREBASE_URL}::DATABASE_URL=${DATABASE_URL_SECRET}"
 
       - name: Warm backend to avoid cold-start CORS errors
         if: always() && steps.preview-urls.outputs.backend_url != 'N/A'

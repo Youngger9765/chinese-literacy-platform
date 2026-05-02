@@ -164,6 +164,14 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
     return restored;
   });
   const [pasteWarning, setPasteWarning] = useState(false);
+  // Live transcript per sentence slot — cleared when user submits / word changes.
+  // Index 0 = first sentence, 1 = second sentence. (#1327)
+  const [liveTranscripts, setLiveTranscripts] = useState<[string, string]>(['', '']);
+  // Imperative stop refs — one per sentence slot — so 批改 can halt the mic
+  // before submitting, preventing background recording after submit. (#1327)
+  const voiceStopRef0 = useRef<(() => void) | null>(null);
+  const voiceStopRef1 = useRef<(() => void) | null>(null);
+  const voiceStopRefs = [voiceStopRef0, voiceStopRef1] as const;
   const loadedWordsRef = useRef<Set<string>>(new Set());
   // True until the user actually interacts after mount. Prevents the DB sync
   // effect from firing with restored-only state and e.g. rolling `current_step`
@@ -235,6 +243,15 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   const currentWord = practicedWords[currentWordIndex] ?? '';
   const currentState = wordStates[currentWord] ?? makeWordState();
 
+  // Clear live transcript display whenever the active word changes (#1327).
+  const prevWordRef = useRef(currentWord);
+  useEffect(() => {
+    if (prevWordRef.current !== currentWord) {
+      prevWordRef.current = currentWord;
+      setLiveTranscripts(['', '']);
+    }
+  }, [currentWord]);
+
   const loadExamples = useCallback(async () => {
     if (!currentWord || loadedWordsRef.current.has(currentWord)) return;
     // Skip API call if examples were restored from localStorage (#1203).
@@ -265,6 +282,8 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   }, [currentWord]);
 
   const handleValidate = useCallback(async (sentenceIndex: 0 | 1) => {
+    // Stop mic immediately when 批改 is clicked — prevent background recording. (#1327)
+    voiceStopRefs[sentenceIndex].current?.();
     const sentence = currentState.sentences[sentenceIndex];
     if (!sentence.text.trim()) return;
     setWordStates(prev => {
@@ -495,8 +514,26 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                   }`}
                 />
                 <VoiceInputButton
-                  onTranscript={(text) => updateSentenceText(idx, text)}
+                  key={currentWord + String(idx)}
+                  onTranscript={(text) => {
+                    updateSentenceText(idx, text);
+                    // Clear live display once final transcript is committed (#1327).
+                    setLiveTranscripts(prev => {
+                      const next: [string, string] = [prev[0], prev[1]];
+                      next[idx] = '';
+                      return next;
+                    });
+                  }}
+                  onLiveTranscript={(text) => {
+                    // Show interim transcript below the input field (#1327).
+                    setLiveTranscripts(prev => {
+                      const next: [string, string] = [prev[0], prev[1]];
+                      next[idx] = text;
+                      return next;
+                    });
+                  }}
                   disabled={entry.status === 'loading' || isCurrentDone}
+                  stopRef={voiceStopRefs[idx]}
                 />
                 <button
                   onClick={() => handleValidate(idx)}
@@ -515,18 +552,28 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                 </button>
               </div>
 
-              {/* Feedback */}
+              {/* Live transcript display — shown while mic is active (#1327) */}
+              {liveTranscripts[idx] && (
+                <div className="mt-2 flex items-start gap-1.5 px-2">
+                  <span className="material-symbols-outlined text-sm text-red-400 animate-pulse mt-0.5 shrink-0">mic</span>
+                  <p className="text-sm text-on-surface-variant italic leading-snug">
+                    {liveTranscripts[idx]}
+                  </p>
+                </div>
+              )}
+
+              {/* Feedback — font sizes bumped to text-base / text-sm (#1327) */}
               {(entry.status === 'correct' || entry.status === 'incorrect') && (
-                <div className={`mt-3 rounded-2xl px-4 py-3 ${
+                <div className={`mt-3 rounded-2xl px-4 py-4 ${
                   entry.status === 'correct' ? 'bg-emerald-50' : 'bg-tertiary-container/10'
                 }`}>
                   <div className="flex items-start gap-2">
-                    <span className={`material-symbols-outlined text-lg mt-0.5 ${entry.status === 'correct' ? 'text-emerald-600' : 'text-tertiary'}`}>
+                    <span className={`material-symbols-outlined text-xl mt-0.5 ${entry.status === 'correct' ? 'text-emerald-600' : 'text-tertiary'}`}>
                       {entry.status === 'correct' ? 'check_circle' : 'lightbulb'}
                     </span>
                     <div>
-                      <p className={`text-sm font-medium ${entry.status === 'correct' ? 'text-emerald-800' : 'text-on-surface'}`}>{entry.feedback}</p>
-                      {entry.suggestion && <p className="mt-1 text-xs text-on-surface-variant">{entry.suggestion}</p>}
+                      <p className={`text-base font-medium leading-relaxed ${entry.status === 'correct' ? 'text-emerald-800' : 'text-on-surface'}`}>{entry.feedback}</p>
+                      {entry.suggestion && <p className="mt-1.5 text-sm text-on-surface-variant leading-relaxed">{entry.suggestion}</p>}
                     </div>
                   </div>
                 </div>

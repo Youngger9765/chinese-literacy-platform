@@ -303,7 +303,7 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { selectedStory: navStory } = useLearningNav();
-  const { zhuyinEnabled, zhuyinReady, toggleZhuyin } = useZhuyin();
+  const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
 
   // Determine initial collapsed state from localStorage
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -578,9 +578,9 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
           {navStory && (
             <div className={collapsed ? '' : 'w-full px-1'}>
               <ZhuyinToggle
-                enabled={zhuyinEnabled}
+                mode={zhuyinMode}
                 ready={zhuyinReady}
-                onToggle={toggleZhuyin}
+                onModeChange={setZhuyinMode}
               />
             </div>
           )}

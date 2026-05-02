@@ -21,9 +21,9 @@
 | A10 | Step 8 vocab-application (語詞應用) | 填空 | Saves |
 | A11 | Step 9 comprehension (課文理解) | 蘇格拉底對話 5 題 | 完成觸發 score |
 | A12 | Step 10 vocab-word-search | 找字 | Time recorded |
-| A13 | Step 11 dictation | 聽寫 (hidden default — skip if hidden) | - |
+| A13 | Step 11 dictation | (a) hidden from StepperNav (b) URL `/learn/:id/dictation` 直接打 | (a) StepperNav 看不到 (b) 自動 redirect 到第一個 enabled step (#1312 fix) |
 | A14 | Step 12 knowledge-station | 看影片 | Marks viewed |
-| A15 | Step 13 report | 看報告 | **學生版不顯示分數 numbers** (per #1094 #1097) |
+| A15 | Step 13 report | (a) 看報告 (b) 沒做朗讀時打開報告 | (a) **學生版不顯示分數 numbers** (per #1094 #1097) (b) 不彈「★★★ 恭喜完成」popup，只顯示黃色警告 + 「回到課文」CTA (#1311 fix) |
 | A16 | Learning history | /learning-history | NO 得分/準確率 column for students |
 | A17 | Student dashboard chart tooltip | hover 30 天圖 | Shows "完成: N 篇", NO 平均分 |
 
@@ -69,3 +69,5 @@
 - #1188 → invisible (story_slug derived)
 - #1189 → invisible (DialogueTurn FK)
 - #1192 → B3
+- #1311 → A15(b) — popup suppress when no reading data（4/28 QA matrix finding，已 fix + prod verified）
+- #1312 → A13(b) — disabled step route guard（4/28 QA matrix finding，已 fix + prod verified）

@@ -131,26 +131,66 @@ strategy_exercise:
   strategy_name: 條件複句
   instruction: 條件複句是用「如果……就……」「只要……就……」「除非……否則……」等連接詞，表示在某個條件下會有某個結果。請從課文中找出條件關係
   steps:
-    - prompt: 課文第二段提到有氧運動和肌肉訓練的關係，哪一句話包含條件關係？
-      type: select
-      options:
-        - 這四種運動方式是相互衝突的
-        - 把肌肉鍛鍊跟有氧運動的時間分開，才會達到較好的訓練效果
-        - 仰臥起坐對腰部容易造成很大的壓力
-      answer: 1
-    - prompt: 「把肌肉鍛鍊跟有氧運動的時間分開，才會達到較好的訓練效果」，這句話的「條件」是什麼？
-      type: select
-      options:
-        - 達到較好的訓練效果
-        - 把肌肉鍛鍊跟有氧運動的時間分開
-        - 這四種運動方式相互衝突
-      answer: 1
-    - prompt: 課文最後一段說運動科學的目標是讓每個人都有機會參與，請用「只要……就……」寫一個和運動科學有關的條件複句
-      type: free_text
-    - prompt: 請用「如果……就……」寫一個和運動訓練有關的條件複句
-      type: free_text
+  - prompt: 課文第二段提到有氧運動和肌肉訓練的關係，哪一句話包含條件關係？
+    type: select
+    options:
+    - 這四種運動方式是相互衝突的
+    - 把肌肉鍛鍊跟有氧運動的時間分開，才會達到較好的訓練效果
+    - 仰臥起坐對腰部容易造成很大的壓力
+    answer: 1
+  - prompt: 「把肌肉鍛鍊跟有氧運動的時間分開，才會達到較好的訓練效果」，這句話的「條件」是什麼？
+    type: select
+    options:
+    - 達到較好的訓練效果
+    - 把肌肉鍛鍊跟有氧運動的時間分開
+    - 這四種運動方式相互衝突
+    answer: 1
+  - prompt: 課文最後一段說運動科學的目標是讓每個人都有機會參與，請用「只要……就……」寫一個和運動科學有關的條件複句
+    type: free_text
+  - prompt: 請用「如果……就……」寫一個和運動訓練有關的條件複句
+    type: free_text
 story_structure:
 - label: 事例
   sub_rows:
   - label: 結果
     value: 321 成效斐然，林逸達的球速在很短的時間內恢復過來，他受訪時表 347 示：「本來手會不舒服，改變機制後，現在速度比較穩定……這樣投 371 會比較輕鬆，對手的負擔不會太大。」這就是運動科學的應用實例。 397 六 最後，運動科學並不專屬
+story_structure_rows:
+- label: 主題
+  value: 運動科學
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 一拳超人訓練菜單不妥當
+  interactive_type: checkbox
+  hint: 關於一拳超人訓練
+  options:
+  - 一拳超人訓練菜單非常有效
+  - 一拳超人訓練菜單不妥當
+  - 一拳超人訓練菜單適合所有人
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 運動科學是分析體育活動的學科
+  interactive_type: checkbox
+  hint: 運動科學是什麼？
+  options:
+  - 運動科學是研究漫畫的學科
+  - 運動科學是分析體育活動的學科
+  - 運動科學是競技運動的名稱
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 運動科學能幫助選手提升表現
+  interactive_type: checkbox
+  hint: 運動科學的應用
+  options:
+  - 運動科學只適用於漫畫人物
+  - 運動科學能幫助選手提升表現
+  - 運動科學與現代科技無關
+  correct_options:
+  - 1
+- label: 結論
+  value: 運動科學讓每個人都能有效、健康地享受運動
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

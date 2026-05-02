@@ -1,0 +1,30 @@
+lesson_code: G9-L10
+display_order: 139
+original_order: 55
+title: 高地訓練有助於運動表現嗎？
+grade: 9
+genre: 說明文
+text_type: 單
+unit_topic: 擴展視野
+applicable_grade: 無
+strategy_id: 9
+strategy_name: 無
+strategy_dependency: null
+strategy_relation: null
+classical_chinese: false
+video_links:
+- title: 影片1
+  url: http://youtu.be/0IDzUpQcw9Q
+- title: 影片2
+  url: http://youtu.be/VujFSKqDWJk
+vocab:
+- 囊括
+- 稀薄
+- 濃稠
+- 血栓
+- 堵住
+- 功不可沒
+- 因人而異
+- 凝血現象
+existing_content_yaml: L55.yml
+notes: null

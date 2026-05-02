@@ -1,0 +1,105 @@
+# 圖文整合策略
+# Applies to lessons with reading_strategy_type: graphic_text_integration
+# (G7-L28, G7-L29, G7-L30 — 3 lessons total per 5/1 expert spec)
+# 5/1 會議重點：眼動研究證實低成就學生「完全不看圖」。
+# 教 25 分鐘策略後眼動率與閱讀理解都顯著提升。
+# AI 助教必須主動引導學生「看圖」，而不是被動等學生問。
+
+strategy: graphic_text_integration
+display_name: 圖文整合閱讀策略
+description: |
+  教學重點：學生在閱讀時必須**主動對應圖↔文**，從圖找線索回答課文題目。
+  AI 助教引導時優先問「課文哪段對應這張圖」、「圖告訴你什麼資訊」，
+  而非單純讓學生重讀文字。
+
+opening: |
+  我看到你選了 {wrong_answer}。這題其實答案在{image_hint}（看一下右邊那張圖）。
+  你能看圖告訴我，這張圖在呈現什麼嗎？
+
+steps:
+  - step: 1
+    name: describe_the_image
+    label: 描述圖內容
+    intent: 學生能用自己的話說出圖呈現的訊息
+    advance_when:
+      - 學生講出圖的主題（座標軸 / 比較對象 / 流程）
+      - 學生指出圖上的關鍵元素（線條走向 / 數字 / 標籤）
+    fail_when:
+      - 「沒看圖」「圖看不懂」
+      - 只講顏色不講內容
+    sample_prompt: |
+      引導學生「看圖」，不是「讀文字」。
+      問「這張圖在比較什麼？X 軸是什麼？Y 軸是什麼？」
+      （折線圖類）或「這張圖在描述什麼過程？」（流程圖類）
+      學生說出圖的核心訊息即 advance。
+
+  - step: 2
+    name: locate_text_referring_to_image
+    label: 找課文中提到這張圖的段落
+    intent: 學生在課文中找到「圖文對應錨點」
+    advance_when: 學生指出段落引用圖的關鍵句（如「如圖一所示...」）
+    fail_when:
+      - 隨便指段落
+      - 「課文沒說這張圖」
+    sample_prompt: |
+      問「課文哪裡提到這張圖？哪段在說明這張圖的意思？」
+      學生指出引用圖的段落即 advance。
+
+  - step: 3
+    name: synthesize_image_and_text
+    label: 圖 + 文 整合說明
+    intent: 學生能結合圖+文回答「圖告訴我們什麼」
+    advance_when: 學生用「圖加文」說明結論（不只憑圖、不只憑文字）
+    fail_when:
+      - 只說圖內容
+      - 只說文字內容
+      - 兩者拆開講
+    sample_prompt: |
+      問「綜合圖和課文，你覺得作者想說什麼？」
+      學生能整合（如「圖一顯示氣溫升高，課文也說 1850 年後加快」）即 advance。
+
+  - step: 4
+    name: relate_to_question
+    label: 拉回 MCQ 題目
+    intent: 學生用整合理解選對選項
+    advance_when: 學生選對選項
+    fail_when:
+      - 第二次選錯
+      - 「我還是不會」
+    sample_prompt: |
+      問「那這樣看，A/B/C/D 哪個選項符合你剛剛說的圖加文？」
+      學生選對即 terminate=true（通過）。
+
+  - step: 5
+    name: direct_teach_graphic
+    label: 直接教學（圖文對應示範）
+    intent: 前 4 步未通過時，AI 直接演示圖文對應
+    advance_when: N/A（terminate）
+    sample_prompt: |
+      直接示範：
+      「我們一起看：
+       - 圖告訴我們：{image content}
+       - 課文 X 段說：{matching paragraph}
+       - 結合起來，答案是 Y，因為圖+文都指向...」
+      最後問「現在會看了嗎？下次先看圖再讀文字哦。」結束。
+
+terminate_conditions:
+  - student_passes_step_4_correctly
+  - give_up_after_3_dont_knows
+  - max_steps_5_completed
+
+tone:
+  - 主動鼓勵「看圖」（「你看右邊那張圖」「先別讀字，看圖」）
+  - 引導學生「指」圖（mobile 環境指 = tap）
+  - 強調圖文整合（「圖告訴你 X，文字告訴你 Y，加在一起就是 Z」）
+  - 學生 step 1 說出圖內容時，要主動肯定（「對！你看到圖了」）— 強化看圖行為
+
+variant_notes:
+  # G7-L29「四張圖看地球暖化」— 4 張數據折線圖，學生要對比 4 張看趨勢
+  # G7-L30「都是八哥為什麼命運不一樣」— 對比表 + 物種圖，學生要從表抽特徵
+  # G7-L28「看不見的兇手」— 流程圖（巴斯德實驗），學生要看實驗步驟
+  - G7-L29: step 1 引導「比較這 4 張圖你看到什麼共同趨勢」
+  - G7-L30: step 1 引導「這個表的兩列分別是哪兩種八哥？」
+  - G7-L28: step 1 引導「這張圖是實驗流程，第一步是什麼？」
+
+source: 5/1 expert meeting (陳淑麗 + 簡教授吳大猷獎眼動研究) + 圖文整合教學文獻

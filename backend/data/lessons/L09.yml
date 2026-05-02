@@ -127,20 +127,72 @@ strategy_exercise:
   instruction: 推論人物特質，我們可以從一個人說的話、做的事、態度來推論他是什麼樣的人
   character: 周天成
   clues:
-    - text: 日復一日進行基本訓練，完成羽球訓練後直奔健身房繼續重量訓練
-      source: 做的事
-    - text: 連吃飯都是有設計、有紀律的，每口慢慢咀嚼
-      source: 做的事
-    - text: 每當我驕傲起來，就無法在場上打出好表現
-      source: 說的話
-    - text: 哪怕只有百分之一的進步機會，他都會去嘗試
-      source: 態度
+  - text: 日復一日進行基本訓練，完成羽球訓練後直奔健身房繼續重量訓練
+    source: 做的事
+  - text: 連吃飯都是有設計、有紀律的，每口慢慢咀嚼
+    source: 做的事
+  - text: 每當我驕傲起來，就無法在場上打出好表現
+    source: 說的話
+  - text: 哪怕只有百分之一的進步機會，他都會去嘗試
+    source: 態度
   trait_options:
-    - 自律
-    - 聰明
-    - 隨性
-    - 驕傲
+  - 自律
+  - 聰明
+  - 隨性
+  - 驕傲
   correct_trait: 自律
 story_structure:
 - label: 主角
   value: 周天成
+story_structure_rows:
+- label: 主角
+  value: 周天成
+  interactive_type: fill_blank
+  hint: 課文主要寫誰？
+- label: 主題
+  value: 自律是頂尖選手的成功關鍵
+  interactive_type: fill_blank
+  hint: 一句話說明課文想告訴我們什麼
+- label: 特色
+  value: 極度自律、追求進步
+  interactive_type: fill_blank
+  hint: 主角有什麼特別的地方？
+- label: 事例
+  value: ''
+  interactive_type: display
+  hint: ''
+  sub_rows:
+  - label: 背景
+    value: 周天成是台灣羽球一哥
+    interactive_type: checkbox
+    hint: 主角的身份是什麼？
+    options:
+    - 他是台灣第一位在世界羽聯超級系列賽奪冠的男單選手
+    - 他曾是世界排名第一的羽球選手
+    - 他多年穩居世界排名前十
+    correct_options:
+    - 0
+    - 2
+  - label: 經過
+    value: 透過多方面自律訓練
+    interactive_type: checkbox
+    hint: 他如何維持頂尖？
+    options:
+    - 每天進行羽球基本訓練和重量訓練
+    - 飲食嚴格控制，只吃原型食物
+    - 為了避免受傷，不騎車也不開車
+    correct_options:
+    - 0
+    - 1
+    - 2
+  - label: 結果
+    value: 成為世界級頂尖選手
+    interactive_type: checkbox
+    hint: 這些努力帶來了什麼？
+    options:
+    - 成為台灣羽球一哥，並能回饋社會
+    - 獲得許多企業贊助，生活無虞
+    - 贏得所有比賽，從未輸過
+    correct_options:
+    - 0
+story_structure_table_source: ai-generated-2026-05-02

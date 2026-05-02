@@ -75,7 +75,11 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   fontSizePx = 22,
 }) => {
   // Zhuyin state from global context
-  const { zhuyinActive, processZhuyin } = useZhuyin();
+  const { isZhuyinAny, processLinesSelective } = useZhuyin();
+  const vocabWords = useMemo(
+    () => (story.vocabulary ?? []).map((v) => v.word).filter(Boolean),
+    [story.vocabulary]
+  );
 
   // Annotations persisted to localStorage
   const [annotations, setAnnotations] = useState<Annotation[]>(() => {
@@ -107,10 +111,10 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   // ── Zhuyin ─────────────────────────────────────────────────────────────
 
-  const zhuyinParagraphs = useMemo(() => {
-    if (!zhuyinActive) return null;
-    return story.content.map((p) => processZhuyin(p));
-  }, [story.content, zhuyinActive, processZhuyin]);
+  const zhuyinParagraphs = useMemo(
+    () => processLinesSelective(story.content, vocabWords),
+    [story.content, vocabWords, processLinesSelective]
+  );
 
   // ── Persist annotations ────────────────────────────────────────────────
 
@@ -148,6 +152,20 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   }, [annotations, story.content]);
 
   // ── Selection helpers ──────────────────────────────────────────────────
+
+  /**
+   * Strip BpmfIansui PUA Variation Selector surrogate pairs from a string.
+   *
+   * Both buildZhuyinString() and some YAML lesson files embed PUA Variation
+   * Selectors Supplement (U+E0100–U+E01EF) directly in the paragraph text.
+   * Each occupies 2 UTF-16 code units (surrogate pair: 0xDB40 + 0xDD00–0xDDEF).
+   * These have no semantic content — they are font rendering hints only.
+   * Stripping them gives a string where .length equals the raw character count,
+   * so standard Array/String slice operations work correctly with raw char indices.
+   */
+  function stripPUASelectors(text: string): string {
+    return text.replace(/\uDB40[\uDC00-\uDFFF]/g, '');
+  }
 
   /**
    * Count raw (non-selector) characters in a string, stopping after `upTo`
@@ -419,12 +437,27 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       return displayText;
     }
 
-    // Build segments from raw text char offsets, render display text char-by-char
-    // NOTE: when zhuyin is active, displayText has different length than rawText.
-    // We annotate by raw char positions and render rawText characters
-    // (zhuyin adds ruby annotations which we can't easily split here).
-    // So when zhuyin is active, we fall back to rendering rawText for annotated paragraphs.
-    const textToRender = zhuyinActive ? rawText : displayText;
+    // Build segments from raw text char offsets, render display text char-by-char.
+    //
+    // ann.charStart / ann.charEnd are RAW character indices — PUA Variation Selectors
+    // (U+E0100–U+E01EF, stored as surrogate pairs) are NOT counted.  See countRawChars().
+    //
+    // However, lesson YAML files may embed these PUA selectors directly in the paragraph
+    // text (e.g. L01 paragraph 1: 「著󠇣頭緒」has a selector after 著).  This means rawText
+    // and even displayText (when zhuyin is off) may contain PUA surrogates, making their
+    // .length exceed the raw char count.  Using raw char indices directly as slice() indices
+    // would then slice the string at the wrong UTF-16 positions, putting the annotation
+    // highlight on the wrong characters — this was the regression introduced by PR #1155.
+    //
+    // Fix: strip PUA selectors from the rendering string before slicing.  After stripping,
+    // .length == raw char count, so raw indices and UTF-16 slice indices agree perfectly.
+    //
+    // NOTE: when zhuyin is active (any mode with ruby), displayText contains BpmfZihiSans PUA
+    // selectors AND ruby annotations that cannot be split character-by-character, so we fall
+    // back to rawText for annotation offset calculations.
+    const baseText = isZhuyinAny ? rawText : displayText;
+    // Strip PUA Variation Selectors so that .length == raw char count and slice indices match.
+    const textToRender = stripPUASelectors(baseText);
 
     const segments: Array<{ start: number; end: number; annotation?: Annotation }> = [];
     let cursor = 0;
@@ -479,7 +512,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     <div
       className="flex-1 flex flex-col bg-surface overflow-hidden select-none"
       style={{
-        fontFamily: zhuyinActive
+        fontFamily: isZhuyinAny
           ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
           : undefined,
       }}
@@ -566,8 +599,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                     className="text-on-surface/90"
                     style={{
                       fontSize: `${fontSizePx}px`,
-                      lineHeight: zhuyinActive ? '3.8rem' : '2.0',
-                      letterSpacing: zhuyinActive ? '0.35em' : '0.02em',
+                      lineHeight: isZhuyinAny ? '3.8rem' : '2.0',
+                      letterSpacing: isZhuyinAny ? '0.35em' : '0.02em',
                     }}
                   >
                     {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}

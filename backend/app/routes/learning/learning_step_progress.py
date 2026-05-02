@@ -8,6 +8,7 @@ from the `step_progress` JSONB column on LearningSession.
 """
 import logging
 from datetime import datetime, timezone
+from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -103,6 +104,11 @@ def save_step_progress(
     # session.current_step_derived computes the step number on the fly.
     # Do NOT add writes to session.current_step here.
 
+    # Bug C fix (#1378): Append full-reading attempt to full_reading_attempts array.
+    # When step_data contains 'full-reading'.result, extract it and append as a new
+    # attempt snapshot (capped at 4).  Also update full_reading_result for backward compat.
+    _maybe_append_full_reading_attempt(session, payload.step_data)
+
     db.commit()
     db.refresh(session)
     logger.info(
@@ -110,6 +116,79 @@ def save_step_progress(
         session_id, current_user.id, payload.current_step, len(payload.steps_completed),
     )
     return StepProgressResponse(session_id=session.id, step_progress=session.step_progress)
+
+
+# ── Bug C fix helpers ─────────────────────────────────────────────────────────
+
+_MAX_FULL_READING_ATTEMPTS = 4
+
+
+def _maybe_append_full_reading_attempt(
+    session: "LearningSession",  # type: ignore[name-defined]
+    step_data: dict[str, Any] | None,
+) -> None:
+    """If step_data includes a full-reading result, append it to full_reading_attempts.
+
+    Rules:
+    - Extract from step_data['full-reading']['result']
+    - Build attempt snapshot with attempt_index, timestamp, cpm, accuracy, match_rate,
+      duration_ms, audio_url
+    - Append to session.full_reading_attempts (capped at _MAX_FULL_READING_ATTEMPTS)
+    - Also update full_reading_result (scalar, backward compat) = latest attempt result
+    - If the incoming result is identical to the last stored attempt (same cpm + duration_ms),
+      skip to avoid duplicates from page reloads
+    """
+    if not step_data:
+        return
+
+    full_reading_data = step_data.get("full-reading")
+    if not isinstance(full_reading_data, dict):
+        return
+
+    result = full_reading_data.get("result")
+    if not isinstance(result, dict):
+        return
+
+    # Read current attempts (default to [] if missing/None/malformed)
+    existing: list = session.full_reading_attempts  # type: ignore[assignment]
+    if not isinstance(existing, list):
+        existing = []
+
+    # Deduplicate: skip if identical to the last attempt (prevent page-reload duplicates)
+    if existing:
+        last = existing[-1]
+        if (
+            last.get("cpm") == result.get("cpm")
+            and last.get("duration_ms") == result.get("durationMs")
+        ):
+            return  # same attempt — no-op
+
+    attempt_index = len(existing) + 1
+    now_iso = datetime.now(tz=timezone.utc).isoformat()
+
+    snapshot: dict[str, Any] = {
+        "attempt_index": attempt_index,
+        "timestamp": now_iso,
+        "cpm": result.get("cpm"),
+        "accuracy": result.get("accuracy"),
+        "match_rate": result.get("matchRate"),
+        "duration_ms": result.get("durationMs"),
+        "audio_url": result.get("audioUrl") or result.get("audio_url"),
+    }
+
+    updated = existing + [snapshot]
+
+    # Cap at 4 (per learning design: 超過 4 次只是背起來)
+    if len(updated) > _MAX_FULL_READING_ATTEMPTS:
+        updated = updated[-_MAX_FULL_READING_ATTEMPTS:]
+        # Re-index attempt_index fields
+        for i, attempt in enumerate(updated, start=1):
+            attempt["attempt_index"] = i
+
+    session.full_reading_attempts = updated
+
+    # Backward compat: keep full_reading_result as the latest attempt's raw result
+    session.full_reading_result = result
 
 
 @router.get(

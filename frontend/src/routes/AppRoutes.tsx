@@ -42,7 +42,10 @@ const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
 // Learning step pages — split per step so only the active step's code loads
 const IntroPage = lazy(() => import('../pages/learning/IntroPage'));
 const TutorPage = lazy(() => import('../pages/learning/TutorPage'));
-const ComprehensionPage = lazy(() => import('../pages/learning/ComprehensionPage'));
+// Issue #1335: old ComprehensionPage (tab container) replaced by 3 independent pages
+const ComprehensionMcqPage = lazy(() => import('../pages/learning/ComprehensionMcqPage'));
+const StoryStructurePage = lazy(() => import('../pages/learning/StoryStructurePage'));
+const StrategyExercisePage = lazy(() => import('../pages/learning/StrategyExercisePage'));
 const VocabPage = lazy(() => import('../pages/learning/VocabPage'));
 const DictationPage = lazy(() => import('../pages/learning/DictationPage'));
 const ListeningPage = lazy(() => import('../pages/learning/ListeningPage'));
@@ -491,7 +494,7 @@ const AppRoutes: React.FC = () => (
         <Route
           path="vocab-definition"
           element={
-            <StepRoute stepLabel="詞語定義" nextPath="vocab-application">
+            <StepRoute stepLabel="詞語理解" nextPath="vocab-application">
               <VocabDefinitionMatchPage />
             </StepRoute>
           }
@@ -499,16 +502,33 @@ const AppRoutes: React.FC = () => (
         <Route
           path="vocab-application"
           element={
-            <StepRoute stepLabel="語詞應用" nextPath="comprehension">
+            <StepRoute stepLabel="語詞應用" nextPath="story-structure">
               <VocabApplicationPage />
+            </StepRoute>
+          }
+        />
+        {/* Issue #1335: 3 independent steps replacing the old tabbed comprehension step */}
+        <Route
+          path="story-structure"
+          element={
+            <StepRoute stepLabel="文章重點表" nextPath="reading-strategy">
+              <StoryStructurePage />
+            </StepRoute>
+          }
+        />
+        <Route
+          path="reading-strategy"
+          element={
+            <StepRoute stepLabel="閱讀聚光燈" nextPath="comprehension">
+              <StrategyExercisePage />
             </StepRoute>
           }
         />
         <Route
           path="comprehension"
           element={
-            <StepRoute stepLabel="課文理解" nextPath="vocab-word-search">
-              <ComprehensionPage />
+            <StepRoute stepLabel="閱讀理解" nextPath="vocab-word-search">
+              <ComprehensionMcqPage />
             </StepRoute>
           }
         />

@@ -129,24 +129,24 @@ strategy_exercise:
   strategy_name: 自我提問－事實、感受、反思、行動
   instruction: 讀完一篇文章後，我們可以用「事實→感受→反思→行動」四個步驟來整理自己的想法。事實是文章告訴我們的事情，感受是讀完後的心情，反思是我們從中學到什麼，行動是我們可以做什麼。一起來練習吧！
   steps:
-    - prompt: 【事實】小藍鯨死亡的原因是什麼？
-      type: select
-      options:
-        - 被捕鯨者用鯨砲獵殺
-        - 被海廢漁具繩索纏繞頭部，無法進食而餓死
-        - 因為海水溫度太高而生病死亡
-      answer: 1
-    - prompt: 【感受】讀到「小藍鯨近乎空腹，食道和胃裡只有一隻半消化的魚眼睛」，你的感受是什麼？
-      type: free_text
-    - prompt: 【反思】小藍鯨之死讓我們反思什麼問題？
-      type: select
-      options:
-        - 海洋博物館應該收集更多標本
-        - 人類隨意丟棄漁具會傷害海洋生物
-        - 藍鯨游泳的速度不夠快
-      answer: 1
-    - prompt: 【行動】讀完這篇文章後，你覺得我們可以採取什麼行動來保護海洋？請寫出你的想法
-      type: free_text
+  - prompt: 【事實】小藍鯨死亡的原因是什麼？
+    type: select
+    options:
+    - 被捕鯨者用鯨砲獵殺
+    - 被海廢漁具繩索纏繞頭部，無法進食而餓死
+    - 因為海水溫度太高而生病死亡
+    answer: 1
+  - prompt: 【感受】讀到「小藍鯨近乎空腹，食道和胃裡只有一隻半消化的魚眼睛」，你的感受是什麼？
+    type: free_text
+  - prompt: 【反思】小藍鯨之死讓我們反思什麼問題？
+    type: select
+    options:
+    - 海洋博物館應該收集更多標本
+    - 人類隨意丟棄漁具會傷害海洋生物
+    - 藍鯨游泳的速度不夠快
+    answer: 1
+  - prompt: 【行動】讀完這篇文章後，你覺得我們可以採取什麼行動來保護海洋？請寫出你的想法
+    type: free_text
 story_structure:
 - label: 主題
   value: 小藍鯨擱淺死亡事件
@@ -158,3 +158,43 @@ story_structure:
   value: 藍鯨是瀕危物種，曾因捕獵數量銳減。
 - label: 結論
   value: 人類應反省並行動，共同保育海洋環境。
+story_structure_rows:
+- label: 主題
+  value: 小藍鯨之死
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 小藍鯨因漁具纏繞餓死
+  interactive_type: checkbox
+  hint: 小藍鯨怎麼死的？
+  options:
+  - 小藍鯨被漁船撞死
+  - 小藍鯨因漁具纏繞餓死
+  - 小藍鯨被其他海洋生物攻擊
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 藍鯨是瀕危物種
+  interactive_type: checkbox
+  hint: 藍鯨的保育狀況？
+  options:
+  - 藍鯨數量穩定成長
+  - 藍鯨是瀕危物種
+  - 藍鯨已滅絕
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 小藍鯨標本在海生館展出
+  interactive_type: checkbox
+  hint: 小藍鯨的去處？
+  options:
+  - 小藍鯨被放回大海
+  - 小藍鯨標本在海生館展出
+  - 小藍鯨被製成藝術品
+  correct_options:
+  - 1
+- label: 結論
+  value: 人類應反省並保育海洋
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-02

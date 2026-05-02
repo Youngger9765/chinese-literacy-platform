@@ -18,7 +18,7 @@ import { completeSelfPracticeSession, SessionExpiredError } from '../services/le
 import { submitAssignment } from '../services/assignmentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearningNav } from '../contexts/LearningNavContext';
-import { STEP_PATH_TO_NUMBER as STEP_CONFIG_PATH_TO_NUMBER } from '../config/stepConfig';
+import { STEP_PATH_TO_NUMBER as STEP_CONFIG_PATH_TO_NUMBER, resolveActiveSteps } from '../config/stepConfig';
 import { ACTIVE_STEPS } from '../config/stepConfig';
 import { useIdleTimer } from '../hooks/useIdleTimer';
 import { useProgressSync } from '../hooks/useProgressSync';
@@ -59,6 +59,10 @@ export interface LearningContext {
   handleStartReading: () => void;
   handleFinishReading: (attempt: ReadingAttempt) => void;
   handleFinishComprehension: (result: ComprehensionResult) => void;
+  /** Issue #1335: advance from 文章重點表 step to 閱讀聚光燈 */
+  handleFinishStoryStructure: () => void;
+  /** Issue #1335: advance from 閱讀聚光燈 step to 閱讀理解 */
+  handleFinishReadingStrategy: () => void;
   handleFinishVocab: (result: VocabResult) => void;
   handleFinishDictation: (result: DictationResult) => void;
   handleFinishFullReading: (result: FullReadingResult) => void;
@@ -260,9 +264,17 @@ const LearningLayout: React.FC = () => {
     step_data: {},
   });
 
+  // Resolve active steps for the current lesson (#1374).
+  // Uses lesson.stepSequence if present, otherwise falls back to DEFAULT_STEP_SEQUENCE.
+  // Note: selectedStory may be null while loading — resolveActiveSteps(null) returns the default.
+  const lessonActiveSteps = useMemo(
+    () => resolveActiveSteps(selectedStory?.stepSequence),
+    [selectedStory?.stepSequence],
+  );
+
   const requiredAssignmentSteps = useMemo(
-    () => ACTIVE_STEPS.filter((s) => s.id !== 'report').map((s) => ({ id: s.id, label: s.label })),
-    [],
+    () => lessonActiveSteps.filter((s) => s.id !== 'report').map((s) => ({ id: s.id, label: s.label })),
+    [lessonActiveSteps],
   );
   const completedStepsSet = useMemo(
     () => new Set(stepProgressState.steps_completed ?? []),
@@ -798,15 +810,15 @@ const LearningLayout: React.FC = () => {
       persistStepProgressState(
         {
           completeStep: 'full-reading',
-          currentStep: 'vocab',
+          // currentStep advances to listening — the next enabled step after full-reading
           stepDataPatch: {
             'full-reading': { result },
           },
         },
         true,
       );
-      persistStep(STEP_PATH_TO_NUMBER['vocab']);
-      navigate(`/learn/${storyId}/vocab`);
+      persistStep(STEP_PATH_TO_NUMBER['listening']);
+      navigate(`/learn/${storyId}/listening`);
     },
     [storyId, navigate, persistStep, persistStepProgressState],
   );
@@ -875,9 +887,47 @@ const LearningLayout: React.FC = () => {
       persistStepProgressState(
         {
           completeStep: 'vocab-application',
-          currentStep: 'comprehension',
+          currentStep: 'story-structure',
           stepDataPatch: {
             'vocab-application': { completed: true },
+          },
+        },
+        true,
+      );
+      persistStep(STEP_PATH_TO_NUMBER['story-structure']);
+      navigate(`/learn/${storyId}/story-structure`);
+    },
+    [storyId, navigate, persistStep, persistStepProgressState],
+  );
+
+  // Issue #1335 — advance from 文章重點表 to 閱讀聚光燈
+  const handleFinishStoryStructure = useCallback(
+    () => {
+      persistStepProgressState(
+        {
+          completeStep: 'story-structure',
+          currentStep: 'reading-strategy',
+          stepDataPatch: {
+            'story-structure': { completed: true },
+          },
+        },
+        true,
+      );
+      persistStep(STEP_PATH_TO_NUMBER['reading-strategy']);
+      navigate(`/learn/${storyId}/reading-strategy`);
+    },
+    [storyId, navigate, persistStep, persistStepProgressState],
+  );
+
+  // Issue #1335 — advance from 閱讀聚光燈 to 閱讀理解
+  const handleFinishReadingStrategy = useCallback(
+    () => {
+      persistStepProgressState(
+        {
+          completeStep: 'reading-strategy',
+          currentStep: 'comprehension',
+          stepDataPatch: {
+            'reading-strategy': { completed: true },
           },
         },
         true,
@@ -1101,6 +1151,8 @@ const LearningLayout: React.FC = () => {
     handleStartReading,
     handleFinishReading,
     handleFinishComprehension,
+    handleFinishStoryStructure,
+    handleFinishReadingStrategy,
     handleFinishVocab,
     handleFinishDictation,
     handleFinishFullReading,

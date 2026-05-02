@@ -31,6 +31,8 @@ export enum AppView {
   KNOWLEDGE_STATION = 'KNOWLEDGE_STATION',
   LISTENING = 'LISTENING',
   SENTENCE_PRACTICE = 'SENTENCE_PRACTICE',
+  STORY_STRUCTURE = 'STORY_STRUCTURE',
+  READING_STRATEGY = 'READING_STRATEGY',
 }
 
 export interface StoryIntro {
@@ -91,6 +93,13 @@ export interface StrategyExercise {
   steps?: StrategyExerciseStep[];
 }
 
+/** G7 圖文整合格式：多練習清單，每項含步驟 (#1390) */
+export interface StrategyExerciseItem {
+  exercise: string;
+  description: string;
+  steps: { step: string; description: string }[];
+}
+
 export interface Story {
   id: string;
   title: string;
@@ -115,7 +124,29 @@ export interface Story {
   multipleChoice?: MultipleChoiceItem[];     // ⑦ 閱讀理解選擇題（PDF 現成資料）
   vocabBank?: Record<string, string>;        // { A: "疑難雜症", ... } for fillInBlank
   knowledgeVideoUrl?: string;               // ⑨ 知識補給站 YouTube URL
-  strategyExercise?: StrategyExercise;      // 閱讀策略練習 (#943)
+  strategyExercise?: StrategyExercise | StrategyExerciseItem[];  // 閱讀策略練習 (#943); StrategyExerciseItem[] for G7 圖文整合 (#1390)
+  /**
+   * Optional per-lesson step sequence loaded from YAML `step_sequence` field (#1374).
+   * When present, overrides DEFAULT_STEP_SEQUENCE for StepperNav and next/prev navigation.
+   * Absent for all legacy (Layer-1) lessons — they use DEFAULT_STEP_SEQUENCE as fallback.
+   */
+  stepSequence?: string[];
+  /** Layout variant for ComprehensionChat (#1341). Default: 'standard'. */
+  layout_mode?: 'standard' | 'graphic-text' | 'graphic-chart';
+  /** Canonical strategy type for backend dispatch (#1404). */
+  reading_strategy_type?: string;
+  /** Lesson code (e.g. 'G7-L28'), used for image URL construction (#1341). */
+  lesson_code?: string;
+  /** Images for graphic-text layout (#1341). */
+  images?: {
+    filename: string;
+    size_bytes: number;
+    image_hash: string;
+    content_type: string;
+    caption?: string;
+  }[];
+  /** Paragraphs array (Layer-2 lessons use this instead of content). */
+  paragraphs?: string[];
 }
 
 export interface ReadingAttempt {

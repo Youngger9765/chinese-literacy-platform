@@ -60,7 +60,7 @@ const ComprehensionScoreCard: React.FC<ComprehensionScoreCardProps> = ({
 }) => {
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 animate-pulse">
+      <div className="rounded-2xl border border-slate-200 bg-surface p-6 animate-pulse">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-16 h-16 rounded-full bg-gray-200" />
           <div className="space-y-2">
@@ -86,7 +86,7 @@ const ComprehensionScoreCard: React.FC<ComprehensionScoreCardProps> = ({
   const overallLevel = getScoreLevel(comprehensionScore);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+    <div className="rounded-2xl border border-slate-200 bg-surface overflow-hidden">
       {/* Header with overall score */}
       <div className="bg-gradient-to-r from-accent/5 to-violet-50 px-6 py-5 border-b border-slate-100">
         <div className="flex items-center gap-4">
@@ -111,13 +111,13 @@ const ComprehensionScoreCard: React.FC<ComprehensionScoreCardProps> = ({
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-lg font-black text-gray-900">{Math.round(comprehensionScore)}</span>
+                <span className="text-lg font-black text-on-surface">{Math.round(comprehensionScore)}</span>
               </div>
             </div>
           )}
 
           <div>
-            <h3 className="text-lg font-bold text-gray-900">課文理解力評估</h3>
+            <h3 className="text-lg font-bold text-on-surface">課文理解力評估</h3>
             {!hideScores && (
               <p className={`text-sm font-bold ${overallLevel.textColor}`}>
                 {overallLevel.label}
@@ -152,7 +152,7 @@ const ComprehensionScoreCard: React.FC<ComprehensionScoreCardProps> = ({
                   ) : (
                     <>
                       <span className={`text-xs font-bold ${scoreLevel.textColor}`}>{scoreLevel.label}</span>
-                      <span className="text-lg font-black text-gray-900">{Math.round(score)}</span>
+                      <span className="text-lg font-black text-on-surface">{Math.round(score)}</span>
                     </>
                   )}
                 </div>
