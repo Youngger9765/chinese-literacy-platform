@@ -137,25 +137,10 @@ discussion_content:
 - C.小強因為家人支持，從不擔心成績問題，隨遇而安的生活
 - D.小玲學習講求效率，專注自己擅長的科目，弱科順其自然
 images:
-- filename: images/G5-L5/G5-L5-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L5/G5-L5-03.svg+xml
   size_bytes: 122982
   image_hash: a715fba9b682
   content_type: image/svg+xml
-  caption: ''
-- filename: images/G5-L5/G5-L5-04.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
   caption: ''
 - filename: images/G5-L5/G5-L5-05.png
   size_bytes: 4908
@@ -177,49 +162,137 @@ images:
   image_hash: 88feb411d737
   content_type: image/png
   caption: ''
-- filename: images/G5-L5/G5-L5-09.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-10.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-11.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-12.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-13.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-14.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-15.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L5/G5-L5-16.png
   size_bytes: 434
   image_hash: 7a10c3118cf2
   content_type: image/png
   caption: ''
-- filename: images/G5-L5/G5-L5-17.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-image_count: 17
+image_count: 6
+vocab_bank:
+  A: 詼諧
+  B: 歸咎
+  C: 瞥見
+  D: 傾注
+  E: 蛻變
+  F: 脫穎而出
+  G: 有條不紊
+  H: 貴人相助
+fill_in_blank:
+- id: 1
+  answer: B
+  answer_word: 歸咎
+  context_before: 創業失敗後，他沒有
+  context_after: 於環境，而是反思自己的不足
+- id: 2
+  answer: G
+  answer_word: 有條不紊
+  context_before: 她在考試前做好計畫，
+  context_after: 的複習每一個重點，最後獲得好成績
+- id: 3
+  answer: A
+  answer_word: 詼諧
+  context_before: 這位作家的文筆
+  context_after: 有趣，讓讀者閱讀時忍不住發笑
+- id: 4
+  answer: E
+  answer_word: 蛻變
+  context_before: 經過多年努力，他從一名害羞的學生
+  context_after: 為優秀的演講者
+- id: 5
+  answer: H
+  answer_word: 貴人相助
+  context_before: 疫情時，店裡的生意一落千丈，多虧有
+  context_after: ，幫助他度過難關
+- id: 6
+  answer: F
+  answer_word: 脫穎而出
+  context_before: 他在這次英文測驗中
+  context_after: ，名列前茅
+- id: 7
+  answer: D
+  answer_word: 傾注
+  context_before: 他為了這場比賽，
+  context_after: 了無數的心血與努力，終於獲得了冠軍
+fill_in_blank_count: 7
+spotlight_raw_text: "閱讀聚光燈\n觀點找支持理由\n    本課課文強調一個觀點：「幸運除了靠貴人相助，自己的努力也很重要」。為了讓這個觀點更有說服力，課文舉了好幾個支持這個觀點的支持理由。觀點和支持理由的關係，就像插圖中的桌子一樣，桌子要有腳才站得穩，觀點要有支持理由，才有說服力。 底下說明什麼是觀點和支持理由：\n觀    點：就是對事情的看法、意見。\n支持理由：可以說服別人接受觀點的「證據（事實）」\n7556506477000\n\n　　當我們提出觀點時，提供合理的證據或理由會讓我們的說法更具說服力！\n◎"
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 閱讀聚光燈 - 觀點找支持理由
+  instruction: 本策略練習將引導你辨識文章中的核心觀點，並找出支持該觀點的具體理由或證據，以提升閱讀理解與分析能力。
+  reasoning: 原文主要在解釋「閱讀聚光燈」策略中的「觀點找支持理由」子策略。我從原文中提取了策略名稱、核心教學目標作為 instruction。由於原文沒有提供具體的練習題目，我根據原文對「觀點」、「支持理由」的定義、課文強調的觀點以及其比喻關係，設計了數個選擇題來測試學生對策略概念的理解，並加入一個開放題來鼓勵學生思考其重要性。
+  steps:
+  - prompt: 根據原文，本課課文主要強調的觀點是什麼？
+    type: select
+    options:
+    - 幸運主要來自貴人相助。
+    - 個人的努力是成功的唯一因素。
+    - 幸運除了靠貴人相助，自己的努力也很重要。
+    - 貴人相助和努力都不重要。
+    answer: 2
+    reasoning: 此題旨在測試學生是否能從原文中辨識出課文所強調的核心觀點。答案直接取自原文：「本課課文強調一個觀點：『幸運除了靠貴人相助，自己的努力也很重要』」。
+  - prompt: 根據原文的定義，「觀點」指的是什麼？
+    type: select
+    options:
+    - 可以說服別人的證據。
+    - 對事情的看法、意見。
+    - 課文中的插圖。
+    - 貴人相助的例子。
+    answer: 1
+    reasoning: 此題旨在測試學生對「觀點」定義的理解。答案直接取自原文：「觀點：就是對事情的看法、意見。」
+  - prompt: 根據原文的定義，「支持理由」指的是什麼？
+    type: select
+    options:
+    - 對事情的看法、意見。
+    - 課文的標題。
+    - 可以說服別人接受觀點的證據（事實）。
+    - 主角的個人經歷。
+    answer: 2
+    reasoning: 此題旨在測試學生對「支持理由」定義的理解。答案直接取自原文：「支持理由：可以說服別人接受觀點的『證據（事實）』」。
+  - prompt: 原文中，觀點和支持理由的關係被比喻成什麼？
+    type: select
+    options:
+    - 一本書和它的封面。
+    - 一棵樹和它的果實。
+    - 一張桌子和它的桌腳。
+    - 一個故事和它的結局。
+    answer: 2
+    reasoning: 此題旨在測試學生對原文中比喻關係的理解。答案直接取自原文：「觀點和支持理由的關係，就像插圖中的桌子一樣，桌子要有腳才站得穩，觀點要有支持理由，才有說服力。」
+  - prompt: 為什麼在提出觀點時，提供合理的證據或理由會讓說法更具說服力？請說明你的看法。
+    type: free_text
+    reasoning: 此題為開放題，旨在鼓勵學生思考並闡述提供支持理由的重要性，呼應原文結尾：「當我們提出觀點時，提供合理的證據或理由會讓我們的說法更具說服力！」
+strategy_exercise_source: gemini-2.5-flash-2026-05-02
+本課語詞:
+- 資助
+- 貴人相助
+- 瞥見
+- 詼諧
+- 傾注
+- 歸咎
+- 低微
+- 有條不󠇡紊
+- 蛻變
+worksheet_section_order:
+- number: 二
+  name: 念順順
+  type: reading_timer
+- number: 三
+  name: 語詞我最棒
+  type: vocab_definitions
+- number: 四
+  name: 語詞應用
+  type: vocab_application
+- number: 五
+  name: 文章重點表
+  type: structure_table
+- number: 六
+  name: 閱讀聚光燈
+  type: spotlight
+- number: 七
+  name: 閱讀理解
+  type: mcq
+- number: 八
+  name: 詞語複習
+  type: word_search
+- number: 九
+  name: 知識補給站
+  type: knowledge_station

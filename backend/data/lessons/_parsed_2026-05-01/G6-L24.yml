@@ -146,49 +146,9 @@ self_check_items:
 - 我學到怎麼找出「結果」，說明解決行動帶來了哪些具體改變或成果。
 discussion_content: []
 images:
-- filename: images/G6-L24/G6-L24-01.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-02.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-03.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-04.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L24/G6-L24-05.png
   size_bytes: 2393
   image_hash: 9e776d53b421
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-06.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-07.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-08.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-09.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
   content_type: image/png
   caption: ''
 - filename: images/G6-L24/G6-L24-10.png
@@ -201,22 +161,12 @@ images:
   image_hash: a93be23d07f7
   content_type: image/png
   caption: ''
-- filename: images/G6-L24/G6-L24-12.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-13.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L24/G6-L24-14.png
   size_bytes: 4902
   image_hash: 6cd84868f765
   content_type: image/png
   caption: ''
-image_count: 14
+image_count: 4
 vocab_bank:
   A: 翻騰
   B: 凜冽

@@ -61,8 +61,7 @@ multiple_choice:
   - 燕南天：「這劍法確實是在下自創。」
   - 小魚兒：「敝人這就前往一探究竟。」
   answer: B
-- question: |-
-    （ Ｃ ）1. 關於本文，下列敘述何者正確？ A.「渡河」、「亡其舟」、「號呼救命」的人都是漁夫 B.漁夫是因為商人重賞才去救人的 C.依據文意，「向許百金」的「許」意思是「許諾」 D.商人的情緒變化依序是驚恐、高傲、憤怒、心虛
+- question: （ Ｃ ）1. 關於本文，下列敘述何者正確？ A.「渡河」、「亡其舟」、「號呼救命」的人都是漁夫 B.漁夫是因為商人重賞才去救人的 C.依據文意，「向許百金」的「許」意思是「許諾」 D.商人的情緒變化依序是驚恐、高傲、憤怒、心虛
   options: []
   answer: C
 - question: 3. 這個故事的主旨為何？ A.有錢能使鬼推磨
@@ -80,16 +79,6 @@ images:
   image_hash: 09458c5992f5
   content_type: image/png
   caption: ''
-- filename: images/文-L5/文-L5-02.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/文-L5/文-L5-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
 - filename: images/文-L5/文-L5-04.png
   size_bytes: 4492
   image_hash: fba7f762a0dd
@@ -105,22 +94,12 @@ images:
   image_hash: d5fee033222e
   content_type: image/png
   caption: ''
-- filename: images/文-L5/文-L5-07.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
-- filename: images/文-L5/文-L5-08.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
 - filename: images/文-L5/文-L5-09.png
   size_bytes: 1702
   image_hash: e049f66e7861
   content_type: image/png
   caption: ''
-image_count: 9
+image_count: 5
 story_structure_rows:
 - label: 主題
   value: 荀巨伯重情重義
@@ -151,3 +130,90 @@ story_structure_rows:
   interactive_type: fill_blank
   hint: 最後胡賊為什麼離開了？
 story_structure_table_source: ai-generated-2026-05-02
+spotlight_raw_text: "文言聚光燈：人稱代詞\n文言文類型\n記敘人物\t\n\n-27940-18224500第5課  重義的荀巨伯  \n學習單：\n王淑瑱\n古文今譯\n荀巨伯到很遠的地方去看望生病的朋友，正巧遇上胡兵準備攻打這座城。朋友告訴荀巨伯說：「我就要死了，你趕快離開吧！」荀巨伯說：「我遠道來看你，現在有危險了，你就叫我丟下你自己逃命去，這種敗壞道義而求取生路的事，難道我荀巨伯做得出來嗎？」\n胡兵進城後，一看見荀巨伯就說：「大軍到來，整座城全部都空了，你是什麼人？竟敢獨自留在這裏？」荀巨伯說：「我的朋友身患重病，我不忍心拋下他，寧願用我的命換我朋友的命。」\n在場的胡兵聽了這番話相互議論說：「我們這些不懂道義的人，竟然入侵了這樣重道義的國家！」於是撤軍回去，整座城的人因此全都獲得了保全。\n73850544894500\n\n南朝宋・劉義慶(編)\n \n荀巨伯.遠看.友人疾，值胡賊.1攻郡。友人語\U000E01E1巨伯.曰：「吾今.死矣，子可去！」巨伯曰：「遠來.相\U000E01E1視2，子令.吾去；敗義.以求生，豈.荀巨伯所行邪？」\n賊既至，謂巨伯曰：「大軍至，一\U000E01E1郡.盡空，汝何.男子，而敢獨止？」巨伯曰：「友人有疾，不忍.委之，寧以我身.代友人命。」賊相\U000E01E1謂曰：「我輩.無義之人，而入.有義之國！」遂.班軍而還\U000E01E1，一\U000E01E1郡並獲全。\n487643185345注釋\n1.胡賊：胡，古代對外族的通稱，秦、漢時多指北方的匈奴。因外族入侵中國，中國屬於「被侵略者」，所以稱外族的軍隊為「胡賊」，表示鄙視、憤怒的情緒。\n2.「相」視：具代詞功能的助詞。這裡的代詞指的是「你」；「相視」的意思是「看你」。\n-4953090301\n1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！\n2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。00\n1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！\n2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。\n\n第1次計時\n第2次計時\n第3次計時\n裁判計時\n秒\n秒\n秒\n秒\n\n裁判簽名:                \n\n◎"
+worksheet_section_order:
+- number: 三
+  name: 文章重點表
+  type: structure_table
+- number: 五
+  name: 閱讀理解
+  type: mcq
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 文言聚光燈：人稱代詞
+  instruction: 請閱讀課文，並辨識文中人稱代詞所指涉的對象。
+  reasoning: 根據原文「文言聚光燈：人稱代詞」的策略主題，設計題目以辨識文中人稱代詞的指涉對象。題目選取了原文中包含人稱代詞的關鍵句子，並參考課文摘要的段落劃分，但修正了摘要中可能存在的斷句或標示問題，以確保題目的準確性。
+  steps:
+  - prompt: 在「友人語󠇡巨伯曰：『吾今死矣，子可去！』」這句話中，『吾』指的是誰？
+    type: select
+    options:
+    - 友人
+    - 荀巨伯
+    - 胡兵
+    answer: 0
+    reasoning: 友人對荀巨伯說話，故「吾」指友人。
+  - prompt: 在「友人語󠇡巨伯曰：『吾今死矣，子可去！』」這句話中，『子』指的是誰？
+    type: select
+    options:
+    - 友人
+    - 荀巨伯
+    - 胡兵
+    answer: 1
+    reasoning: 友人對荀巨伯說話，故「子」指荀巨伯。
+  - prompt: 在「遠來相󠇡視，子令吾去」這句話中，『相』指的是誰？
+    type: select
+    options:
+    - 友人
+    - 荀巨伯
+    - 胡兵
+    answer: 0
+    reasoning: 荀巨伯說「遠來相視」，根據注釋，「相」在此作「你」解，指友人。
+  - prompt: 在「遠來相󠇡視，子令吾去」這句話中，『子』指的是誰？
+    type: select
+    options:
+    - 友人
+    - 荀巨伯
+    - 胡兵
+    answer: 0
+    reasoning: 荀巨伯說「子令吾去」，此處「子」指友人。
+  - prompt: 在「遠來相󠇡視，子令吾去」這句話中，『吾』指的是誰？
+    type: select
+    options:
+    - 友人
+    - 荀巨伯
+    - 胡兵
+    answer: 1
+    reasoning: 荀巨伯說「子令吾去」，此處「吾」指荀巨伯自己。
+  - prompt: 在「汝何男子，而敢獨止？」這句話中，『汝』指的是誰？
+    type: select
+    options:
+    - 友人
+    - 荀巨伯
+    - 胡兵
+    answer: 1
+    reasoning: 胡兵進城後對荀巨伯說話，故「汝」指荀巨伯。
+  - prompt: 在「友人有疾，不忍委之」這句話中，『之』指的是誰？
+    type: select
+    options:
+    - 友人
+    - 荀巨伯
+    - 胡兵
+    answer: 0
+    reasoning: 荀巨伯說不忍心拋下「友人」，故「之」指友人。
+  - prompt: 在「寧以我身代友人命」這句話中，『我』指的是誰？
+    type: select
+    options:
+    - 友人
+    - 荀巨伯
+    - 胡兵
+    answer: 1
+    reasoning: 荀巨伯說「寧以我身代友人命」，故「我」指荀巨伯自己。
+  - prompt: 在「我輩無義之人，而入有義之國！」這句話中，『我輩』指的是誰？
+    type: select
+    options:
+    - 友人
+    - 荀巨伯
+    - 胡兵
+    answer: 2
+    reasoning: 胡兵相互議論說「我輩無義之人」，故「我輩」指胡兵。
+strategy_exercise_source: gemini-2.5-flash-2026-05-02

@@ -107,8 +107,7 @@ discussion_content:
 - ⑤帝國持續內戰與分裂
 - B.一連串因果（可以寫編號或寫自己看得懂的關鍵詞）
 - ①天花病菌傳入印加 ③皇帝染病死亡 ⑤帝國持續內戰與分裂 ④帝國政治經濟瓦解 ②帝國衰弱，不堪一擊
-- |-
-  C.這條因果鏈告訴我們：印加帝國在還沒跟西班牙人真正交戰之前，早就因為天花的傳入、皇帝病死、內戰分裂等問題，變得非常虛弱、不堪一擊。如此一來，他們在戰爭中會失敗，也就不奇怪了。
+- C.這條因果鏈告訴我們：印加帝國在還沒跟西班牙人真正交戰之前，早就因為天花的傳入、皇帝病死、內戰分裂等問題，變得非常虛弱、不堪一擊。如此一來，他們在戰爭中會失敗，也就不奇怪了。
 - （ C ）1. 請問哪一個句子的語詞使用正確?
 - A.我今天和面試官「對峙」了十五分鐘，終於面試成功
 - B.最近校園裡的戀愛傳聞「肆虐」，讓大家沒辦法專心上課
@@ -132,39 +131,14 @@ discussion_content:
 - C.為了突顯西班牙軍人英勇無畏，強調以小勝大的奇蹟
 - D.為了引導讀者相信歷史發展冥冥中自有安排，無從解釋
 images:
-- filename: images/G8-L8/G8-L8-01.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L8/G8-L8-02.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L8/G8-L8-03.gif
   size_bytes: 60
   image_hash: 2bc7d82b797f
   content_type: image/gif
   caption: ''
-- filename: images/G8-L8/G8-L8-04.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L8/G8-L8-05.png
   size_bytes: 5005
   image_hash: e4b39492eab5
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L8/G8-L8-06.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L8/G8-L8-07.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
   content_type: image/png
   caption: ''
 - filename: images/G8-L8/G8-L8-08.gif
@@ -177,39 +151,14 @@ images:
   image_hash: 6bfdabd16de0
   content_type: image/png
   caption: ''
-- filename: images/G8-L8/G8-L8-10.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L8/G8-L8-11.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L8/G8-L8-12.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L8/G8-L8-13.gif
   size_bytes: 55
   image_hash: 054dfa610bc1
   content_type: image/gif
   caption: ''
-- filename: images/G8-L8/G8-L8-14.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L8/G8-L8-15.png
   size_bytes: 54496
   image_hash: b30532588a78
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L8/G8-L8-16.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
   content_type: image/png
   caption: ''
 - filename: images/G8-L8/G8-L8-17.png
@@ -217,9 +166,99 @@ images:
   image_hash: 4638e9932d63
   content_type: image/png
   caption: ''
-- filename: images/G8-L8/G8-L8-18.png
-  size_bytes: 1130
-  image_hash: e5da0637c603
-  content_type: image/png
-  caption: ''
-image_count: 18
+image_count: 7
+vocab_bank:
+  A: 區區
+  B: 對峙
+  C: 蔓延
+  D: 勢單力薄
+  E: 哀鴻遍野
+  F: 懸殊
+  G: 肆虐
+  H: 抗體
+  I: 不堪一
+  J: 撕心裂肺
+fill_in_blank:
+- id: 2
+  answer: I
+  answer_word: 不堪一
+  context_before: 他的論點漏洞百出，一再被大眾質疑，簡直是
+  context_after: ''
+- id: 3
+  answer: C
+  answer_word: 蔓延
+  context_before: 網路上的謠言正在
+  context_after: ，令人擔憂
+- id: 4
+  answer: D
+  answer_word: 勢單力薄
+  context_before: 在國際談判中，我國代表團人數稀少，與其他大國相比顯得
+  context_after: ，談判過程格外艱難
+- id: 5
+  answer: E
+  answer_word: 哀鴻遍野
+  context_before: 戰火過後，死傷慘重
+  context_after: ，百姓無家可歸
+- id: 6
+  answer: F
+  answer_word: 懸殊
+  context_before: 這場比賽雙方實力
+  context_after: ，還沒開打便可預見結果
+- id: 7
+  answer: H
+  answer_word: 抗體
+  context_before: 打過疫苗，身體產生
+  context_after: ，罹患新冠病毒的機率才會下降
+- id: 8
+  answer: J
+  answer_word: 撕心裂肺
+  context_before: 她聽到媽媽過世的消息，心裡湧出
+  context_after: 的悲傷，忍不住痛哭失聲
+fill_in_blank_count: 7
+spotlight_raw_text: "閱讀聚光燈\n一連串因果\n    你有沒有想過，有些事情不是突然發生的，而是一件事接著一件事，像骨牌一樣推下去？我們讀的這篇課文〈隱形的征服者〉，就是這樣。    西班牙人只有168人，怎麼可能打敗8萬印加軍？答案不是因為他們比較厲害，而是印加帝國早就被其他事情打垮了。\n    這些事情不是同時發生的，而是一件接著一件來，形成「一連串因果關係」。\n　　在前一課：「讓你口中的甜蜜成為遠方農民的希望」我們學到了如何找出「一連串因果」，可以用❶～❹四個步驟，幫助你把文章裡的前因後果看得更清楚。現在我們再來練習看看吧！\n16395707620000\n\n推論本文的因果關係\n步驟❶──找事件\n1.問自己：這段文字提到的重要事件或現象？\n◎"
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 閱讀聚光燈 - 一連串因果
+  instruction: 本練習將引導你運用四個步驟，找出文章中的一連串因果關係，讓前因後果更清晰。
+  reasoning: 此練習旨在引導學生透過步驟式提問，從課文〈隱形的征服者〉中識別並分析事件間的因果鏈。原文強調事件並非獨立發生，而是像骨牌效應般相互影響，因此透過「找事件」等步驟，能幫助學生理解複雜的歷史事件背後的深層原因。
+  steps:
+  - prompt: 問自己：這段文字提到的重要事件或現象？
+    type: free_text
+    reasoning: 此步驟旨在引導學生從課文摘要中提取關鍵事件或現象，這是建立因果鏈的第一步。學生需從西班牙人與印加帝國的對峙、印加帝國的崩潰、以及賈德•戴蒙提出的病菌傳播等資訊中，找出核心事件。
+strategy_exercise_source: gemini-2.5-flash-2026-05-02
+本課語詞:
+- 區區
+- 懸殊
+- 對峙
+- 勢單力薄
+- 不堪一󠇢擊
+- 蔓延
+- 肆虐
+- 哀鴻遍野
+- 撕心裂肺
+- 抗體
+worksheet_section_order:
+- number: 二
+  name: 念順順
+  type: reading_timer
+- number: 三
+  name: 語詞我最棒
+  type: vocab_definitions
+- number: 四
+  name: 語詞應用
+  type: vocab_application
+- number: 五
+  name: 文章重點表
+  type: structure_table
+- number: 六
+  name: 閱讀聚光燈
+  type: spotlight
+- number: 七
+  name: 閱讀理解
+  type: mcq
+- number: 八
+  name: 詞語複習
+  type: word_search
+- number: 九
+  name: 知識補給站
+  type: knowledge_station

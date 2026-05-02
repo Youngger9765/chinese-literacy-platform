@@ -163,64 +163,14 @@ self_check_items:
 - 我發現「問題、解決、結果」結構，可以幫我掌握文章的重點。
 discussion_content: []
 images:
-- filename: images/G6-L25/G6-L25-01.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-02.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-03.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-04.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-05.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L25/G6-L25-06.png
   size_bytes: 2421
   image_hash: 63138b386e1e
   content_type: image/png
   caption: ''
-- filename: images/G6-L25/G6-L25-07.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-08.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L25/G6-L25-09.png
   size_bytes: 3155
   image_hash: 1f2a75b8d813
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-10.png
-  size_bytes: 1130
-  image_hash: e5da0637c603
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-11.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L25/G6-L25-12.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
   content_type: image/png
   caption: ''
 - filename: images/G6-L25/G6-L25-13.png
@@ -233,7 +183,7 @@ images:
   image_hash: e1f6f20cb83b
   content_type: image/png
   caption: ''
-image_count: 14
+image_count: 4
 vocab_bank:
   A: 揚帆啟航
   B: 股票
