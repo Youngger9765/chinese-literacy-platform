@@ -199,10 +199,10 @@ const ParagraphCard: React.FC<ParagraphCardProps> = ({
 
       {/* Paragraph text — with TTS character highlight */}
       <p
-        className={`text-on-surface/90 ${zhuyinActive ? 'tracking-[0.4em]' : ''}`}
+        className={`text-on-surface/90 ${zhuyinActive ? 'tracking-[0.15em]' : ''}`}
         style={{
           fontSize: fontSizePx,
-          lineHeight: zhuyinActive ? '3.8rem' : '1.6',
+          lineHeight: zhuyinActive ? '2.4rem' : '1.6', /* ruby annotations need 2.4rem minimum to avoid clipping */
         }}
       >
         {status === 'locked' ? (
