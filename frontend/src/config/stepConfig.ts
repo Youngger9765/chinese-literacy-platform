@@ -251,6 +251,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
  *   - 閱讀理解   (comprehension, dbStep 3)       — was tab 1 inside ComprehensionChat
  */
 export const DEFAULT_STEP_SEQUENCE: string[] = [
+  'intro',
   'reading-annotation',
   'tutor',
   'full-reading',
