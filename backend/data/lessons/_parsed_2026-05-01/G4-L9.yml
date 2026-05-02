@@ -130,33 +130,8 @@ discussion_content:
 - B.借助高科技儀器才能精準預測天氣
 - C.動物與天氣無關，真正可靠的是氣象局資料
 - D.古代諺語早已精準掌握天氣預測法
-images:
-- filename: images/G4-L9/G4-L9-05.png
-  size_bytes: 1436
-  image_hash: 8d5b8cea1382
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-06.png
-  size_bytes: 3225
-  image_hash: 152d61796cec
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-12.png
-  size_bytes: 3267
-  image_hash: 5320f6b90d20
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-14.png
-  size_bytes: 1432
-  image_hash: 3ebc3758759f
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-15.png
-  size_bytes: 3272
-  image_hash: a6890a257e40
-  content_type: image/png
-  caption: ''
-image_count: 5
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 大自然的氣象小幫手

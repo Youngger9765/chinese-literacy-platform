@@ -87,19 +87,9 @@ self_check_items: []
 discussion_content: []
 strategy_exercises: []
 images:
-- filename: images/G7-L15/G7-L15-09.png
-  size_bytes: 2444
-  image_hash: 4b3c2b1cfab5
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L15/G7-L15-13.png
   size_bytes: 13316
   image_hash: 15078e10cf58
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L15/G7-L15-14.png
-  size_bytes: 2435
-  image_hash: eab429a2c98d
   content_type: image/png
   caption: ''
 - filename: images/G7-L15/G7-L15-15.png
@@ -107,7 +97,7 @@ images:
   image_hash: 81864b6bf222
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 觀察與推理

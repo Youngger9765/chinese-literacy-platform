@@ -104,11 +104,6 @@ discussion_content:
 - D.增加公立幼兒托育中心
 strategy_exercises: []
 images:
-- filename: images/G7-L7/G7-L7-01.png
-  size_bytes: 2452
-  image_hash: b683339bef7f
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L7/G7-L7-06.png
   size_bytes: 6526
   image_hash: 469bb2440ee1
@@ -118,16 +113,6 @@ images:
   size_bytes: 41280
   image_hash: e2ef6a6ab88c
   content_type: image/jpeg
-  caption: ''
-- filename: images/G7-L7/G7-L7-11.png
-  size_bytes: 593
-  image_hash: f8400c95437d
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L7/G7-L7-12.png
-  size_bytes: 4676
-  image_hash: 2d25d08f5e19
-  content_type: image/png
   caption: ''
 - filename: images/G7-L7/G7-L7-14.png
   size_bytes: 10228
@@ -149,12 +134,7 @@ images:
   image_hash: 580e2ef39e35
   content_type: image/png
   caption: ''
-- filename: images/G7-L7/G7-L7-21.png
-  size_bytes: 2433
-  image_hash: cefb210c2f00
-  content_type: image/png
-  caption: ''
-image_count: 10
+image_count: 6
 story_structure_rows:
 - label: 主題
   value: 人口負成長

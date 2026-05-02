@@ -80,28 +80,8 @@ multiple_choice_count: 4
 self_check_items: []
 discussion_content:
 - ☆勾完後，再看看沒有勾選的選項，那樣的想法所帶來的情緒有什麼不同呢？
-images:
-- filename: images/G4-L16/G4-L16-05.png
-  size_bytes: 2411
-  image_hash: c36c4bbe5234
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-07.png
-  size_bytes: 2460
-  image_hash: dfc64b067895
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-11.png
-  size_bytes: 2514
-  image_hash: 073af588a951
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-13.png
-  size_bytes: 2459
-  image_hash: 646735dfc035
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主角
   value: 課文中的「我」

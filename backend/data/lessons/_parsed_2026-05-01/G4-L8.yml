@@ -117,28 +117,8 @@ discussion_content:
 - 你見過被壓在石塊下的小草嗎？它為了成長，為了接近陽光，不管上面的石塊如何重，縫隙如何窄，它還是會從彎彎曲曲的縫隙中，跑到地面上來。它的根往土裡扎，芽往地面挺，這是一種不可思議的力量。 （本文出自國立編譯館）
 - A.說明種子強靭的生命力 B.舉證種子的力大無窮
 - C.說明種子發育的過程 D.瓦礫與石塊才能造就小草
-images:
-- filename: images/G4-L8/G4-L8-09.png
-  size_bytes: 2441
-  image_hash: e951047234bd
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L8/G4-L8-13.png
-  size_bytes: 3318
-  image_hash: 25fabb7eb074
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L8/G4-L8-14.png
-  size_bytes: 2369
-  image_hash: fa8027e7cd10
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L8/G4-L8-15.png
-  size_bytes: 3383
-  image_hash: 9f5d6780213f
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 閱讀的美好

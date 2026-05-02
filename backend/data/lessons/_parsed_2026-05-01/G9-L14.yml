@@ -93,22 +93,12 @@ self_check_items:
 - 我能把悲觀的想法，改成樂觀的詮釋，讓自己能重新站起來。
 discussion_content: []
 images:
-- filename: images/G9-L14/G9-L14-08.png
-  size_bytes: 1403
-  image_hash: 1886228cc2d6
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L14/G9-L14-12.png
   size_bytes: 6485
   image_hash: d0cabda31e7b
   content_type: image/png
   caption: ''
-- filename: images/G9-L14/G9-L14-14.png
-  size_bytes: 3267
-  image_hash: 6f22349efef1
-  content_type: image/png
-  caption: ''
-image_count: 3
+image_count: 1
 story_structure_rows:
 - label: 主題
   value: 倫敦大轟炸

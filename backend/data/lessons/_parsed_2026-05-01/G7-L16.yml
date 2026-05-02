@@ -91,11 +91,6 @@ images:
   image_hash: 79eeb2250ebb
   content_type: image/png
   caption: ''
-- filename: images/G7-L16/G7-L16-09.png
-  size_bytes: 2483
-  image_hash: 4a1dbd2c5284
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L16/G7-L16-10.png
   size_bytes: 12925
   image_hash: 150107be83a0
@@ -106,12 +101,7 @@ images:
   image_hash: 92bfcbf1c061
   content_type: image/png
   caption: ''
-- filename: images/G7-L16/G7-L16-16.png
-  size_bytes: 2411
-  image_hash: 5920ef7b1328
-  content_type: image/png
-  caption: ''
-image_count: 5
+image_count: 3
 vocab_bank:
   A: 脫穎而出
   B: 靈機一動

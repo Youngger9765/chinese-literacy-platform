@@ -80,19 +80,9 @@ multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G5-L22/G5-L22-09.png
-  size_bytes: 435
-  image_hash: 91793940f040
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L22/G5-L22-13.png
   size_bytes: 15705
   image_hash: 4d0c77052bdf
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-14.png
-  size_bytes: 433
-  image_hash: '801365122899'
   content_type: image/png
   caption: ''
 - filename: images/G5-L22/G5-L22-15.png
@@ -100,7 +90,7 @@ images:
   image_hash: cf451108f96a
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 學生棒球員的困境與出路

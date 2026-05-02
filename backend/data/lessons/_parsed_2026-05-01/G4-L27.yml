@@ -83,11 +83,6 @@ images:
   image_hash: f6342206f590
   content_type: image/png
   caption: ''
-- filename: images/G4-L27/G4-L27-06.png
-  size_bytes: 1874
-  image_hash: ac0aeb5fc2b6
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L27/G4-L27-08.png
   size_bytes: 8765
   image_hash: 0e2ea20f8c08
@@ -98,12 +93,7 @@ images:
   image_hash: 605350cae15e
   content_type: image/png
   caption: ''
-- filename: images/G4-L27/G4-L27-15.png
-  size_bytes: 1365
-  image_hash: 2358915890e3
-  content_type: image/png
-  caption: ''
-image_count: 5
+image_count: 3
 story_structure_rows:
 - label: 主題
   value: 學習與念頭和平相處

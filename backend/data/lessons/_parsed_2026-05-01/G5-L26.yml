@@ -106,27 +106,12 @@ discussion_content:
 - C.發音越短，大腦處理和記住訊息越容易
 - D.發音長度不會影響大腦的記憶容量
 images:
-- filename: images/G5-L26/G5-L26-09.png
-  size_bytes: 2435
-  image_hash: a33fd9292fcf
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L26/G5-L26-13.png
-  size_bytes: 3372
-  image_hash: 0c0e754af013
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L26/G5-L26-14.png
-  size_bytes: 2429
-  image_hash: 5a9daca70a5e
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L26/G5-L26-15.png
   size_bytes: 14295
   image_hash: da0a02cbd14a
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 1
 story_structure_rows:
 - label: 主題
   value: 數字記憶的奧秘

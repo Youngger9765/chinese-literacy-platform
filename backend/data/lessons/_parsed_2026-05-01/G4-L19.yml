@@ -137,28 +137,8 @@ discussion_content:
 - B.請受難者家屬錄下來的呼喊聲「ＯＯＯ，你在哪裡？」
 - C.廣播電台或電視台新聞報導節目的當天新聞
 - D.語音：「這隻老鼠是救援大隊的幫手，我們來救你了。」
-images:
-- filename: images/G4-L19/G4-L19-09.png
-  size_bytes: 2402
-  image_hash: bf1ce0beb8fc
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L19/G4-L19-13.png
-  size_bytes: 5034
-  image_hash: e857a5d2ed46
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L19/G4-L19-14.png
-  size_bytes: 2475
-  image_hash: 4caa4594a83b
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L19/G4-L19-15.png
-  size_bytes: 4968
-  image_hash: 4246bd5a2e7f
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 非洲巨鼠在救援工作中的應用

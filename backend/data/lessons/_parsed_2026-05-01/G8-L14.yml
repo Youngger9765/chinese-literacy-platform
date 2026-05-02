@@ -112,23 +112,8 @@ story_structure_table:
   - 低溫，溫度26度以下，持續30-40天，就能成功催花
 self_check_items: []
 discussion_content: []
-images:
-- filename: images/G8-L14/G8-L14-08.png
-  size_bytes: 4842
-  image_hash: ae081266ad69
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L14/G8-L14-09.png
-  size_bytes: 1409
-  image_hash: cfa0ed800d47
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L14/G8-L14-12.png
-  size_bytes: 4907
-  image_hash: 4b1db1b2b5df
-  content_type: image/png
-  caption: ''
-image_count: 3
+images: []
+image_count: 0
 vocab_bank:
   A: 首屈一指
   B: 花團錦簇

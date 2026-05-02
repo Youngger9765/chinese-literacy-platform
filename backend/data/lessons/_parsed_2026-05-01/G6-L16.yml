@@ -123,11 +123,6 @@ images:
   image_hash: 671a22d4d9ac
   content_type: image/png
   caption: ''
-- filename: images/G6-L16/G6-L16-10.png
-  size_bytes: 2376
-  image_hash: f8a03fca746f
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L16/G6-L16-11.png
   size_bytes: 18302
   image_hash: 01ae678b920d
@@ -138,17 +133,12 @@ images:
   image_hash: 1c9908f5cd3a
   content_type: image/png
   caption: ''
-- filename: images/G6-L16/G6-L16-16.png
-  size_bytes: 2400
-  image_hash: 1dff0732dbf5
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L16/G6-L16-17.png
   size_bytes: 14535
   image_hash: 504d85086380
   content_type: image/png
   caption: ''
-image_count: 6
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 四名孩童叢林求生獲救的奇蹟行動

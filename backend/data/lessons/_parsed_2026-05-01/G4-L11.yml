@@ -84,18 +84,8 @@ self_check_items:
 - 我會根據人物說的話、語氣、表情、動作，推測情緒或感受。
 - 我能把故事前後線索連起來，推論角色情緒的變化，並明白故事想傳達的道理。
 discussion_content: []
-images:
-- filename: images/G4-L11/G4-L11-06.png
-  size_bytes: 1705
-  image_hash: 3130e941c92e
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L11/G4-L11-12.png
-  size_bytes: 1665
-  image_hash: 8925714e8aab
-  content_type: image/png
-  caption: ''
-image_count: 2
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主角
   value: 我

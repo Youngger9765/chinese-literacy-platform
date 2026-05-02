@@ -94,28 +94,8 @@ discussion_content:
 - B.我主張晚上過十點就不能放鞭炮：因為第二天大家都要上班上學，這會讓大家不能好好休息
 - C.我主張保護蜜蜂：因為蜜蜂變少，許多植物無法授粉，自然界食物來源就會變少
 - D.我主張營養午餐多點蔬菜：因為蔬菜有豐富的纖維素和維生素Ｃ，可以幫助消化和健康
-images:
-- filename: images/G9-L4/G9-L4-11.png
-  size_bytes: 3315
-  image_hash: 9b8b705e0cdb
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L4/G9-L4-12.png
-  size_bytes: 2421
-  image_hash: d53299f3eba6
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L4/G9-L4-13.png
-  size_bytes: 3964
-  image_hash: b63c607fa62e
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L4/G9-L4-15.png
-  size_bytes: 3932
-  image_hash: 3d867d28f425
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 預防近視的方法

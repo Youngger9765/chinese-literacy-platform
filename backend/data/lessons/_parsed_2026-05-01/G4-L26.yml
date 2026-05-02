@@ -110,11 +110,6 @@ images:
   image_hash: 45b67e5aef3c
   content_type: image/png
   caption: ''
-- filename: images/G4-L26/G4-L26-06.png
-  size_bytes: 1908
-  image_hash: 98ff811fcd2c
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L26/G4-L26-07.png
   size_bytes: 1138034
   image_hash: 6c919cec23a0
@@ -125,12 +120,7 @@ images:
   image_hash: 7b19cd0fc839
   content_type: image/png
   caption: ''
-- filename: images/G4-L26/G4-L26-15.png
-  size_bytes: 1374
-  image_hash: 407ccc8be852
-  content_type: image/png
-  caption: ''
-image_count: 5
+image_count: 3
 story_structure_rows:
 - label: 主題
   value: 專注當下

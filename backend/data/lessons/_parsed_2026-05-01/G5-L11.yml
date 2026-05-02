@@ -88,19 +88,9 @@ multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G5-L11/G5-L11-09.png
-  size_bytes: 1236
-  image_hash: 0b467b685ebc
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L11/G5-L11-13.png
   size_bytes: 10051
   image_hash: 6d6df29e6f0b
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L11/G5-L11-14.png
-  size_bytes: 431
-  image_hash: 2b3deeaf2a8a
   content_type: image/png
   caption: ''
 - filename: images/G5-L11/G5-L11-15.png
@@ -108,7 +98,7 @@ images:
   image_hash: d6de21381f1b
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 陳念琴的拳擊生涯

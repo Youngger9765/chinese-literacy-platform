@@ -219,28 +219,8 @@ discussion_content:
 - B.秦昭王心軟，主動赦免孟嘗君讓他自由離開
 - C.食客們發揮各自的專長，幫助孟嘗君化解危機
 - D.齊國軍隊立刻出兵支援，幫助孟嘗君逃出秦國
-images:
-- filename: images/G6-L22/G6-L22-05.png
-  size_bytes: 2390
-  image_hash: 756f34945e2f
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-11.png
-  size_bytes: 4969
-  image_hash: 4512f6436250
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-13.png
-  size_bytes: 2439
-  image_hash: 2bbbd6ba3129
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-14.png
-  size_bytes: 4909
-  image_hash: 24ff9064d068
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 vocab_bank:
   A: 互比苗頭
   B: 津津樂道

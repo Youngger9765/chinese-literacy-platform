@@ -116,11 +116,6 @@ images:
   image_hash: da6acac99ec0
   content_type: image/png
   caption: ''
-- filename: images/G5-L12/G5-L12-09.png
-  size_bytes: 1236
-  image_hash: 1cfe1d494fd7
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L12/G5-L12-13.png
   size_bytes: 58036
   image_hash: b1841f100dec
@@ -129,11 +124,6 @@ images:
 - filename: images/G5-L12/G5-L12-15.png
   size_bytes: 9517
   image_hash: 8dd0a33dd5fb
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L12/G5-L12-16.png
-  size_bytes: 433
-  image_hash: 9ed208c03989
   content_type: image/png
   caption: ''
 - filename: images/G5-L12/G5-L12-17.png
@@ -151,7 +141,7 @@ images:
   image_hash: ccff81a39ab1
   content_type: image/png
   caption: ''
-image_count: 8
+image_count: 6
 story_structure_rows:
 - label: 主題
   value: 如何擁有六塊肌

@@ -122,11 +122,6 @@ discussion_content:
 - D.使用兩具假人的目的是為了對比背心的防護效果
 strategy_exercises: []
 images:
-- filename: images/G7-L3/G7-L3-09.png
-  size_bytes: 2437
-  image_hash: 25ca4d79ec3b
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L3/G7-L3-10.png
   size_bytes: 8121
   image_hash: ab260ec61a19
@@ -137,17 +132,12 @@ images:
   image_hash: 167997b598f6
   content_type: image/png
   caption: ''
-- filename: images/G7-L3/G7-L3-15.png
-  size_bytes: 2464
-  image_hash: 45c08ff84df3
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L3/G7-L3-16.png
   size_bytes: 7544
   image_hash: 30a776e4afdb
   content_type: image/png
   caption: ''
-image_count: 5
+image_count: 3
 story_structure_rows:
 - label: 主題
   value: 女性太空人登月

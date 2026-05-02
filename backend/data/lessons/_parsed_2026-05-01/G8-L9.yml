@@ -90,23 +90,8 @@ self_check_items:
 - 我能找到文本裡的對比訊息，並歸納出重點。
 - 我能根據歸納出的重點，進一步推論出本文的重點和作者意圖。
 discussion_content: []
-images:
-- filename: images/G8-L9/G8-L9-05.png
-  size_bytes: 1401
-  image_hash: ec404bb91c7a
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L9/G8-L9-10.png
-  size_bytes: 5098
-  image_hash: 65cdfc28ce32
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L9/G8-L9-13.png
-  size_bytes: 4880
-  image_hash: ea511900f3fe
-  content_type: image/png
-  caption: ''
-image_count: 3
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 珍古德與黑猩猩研究

@@ -136,19 +136,9 @@ discussion_content:
 - C.斯瓦爾巴群島是最適合儲存種子的地方
 - D.用種子庫來提醒人們保護生態的重要性
 images:
-- filename: images/G6-L10/G6-L10-09.png
-  size_bytes: 2432
-  image_hash: 2e7435b49f20
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L10/G6-L10-13.png
   size_bytes: 9013
   image_hash: 5f81d5f0b75d
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L10/G6-L10-14.png
-  size_bytes: 2419
-  image_hash: 4c248f50fb48
   content_type: image/png
   caption: ''
 - filename: images/G6-L10/G6-L10-15.png
@@ -156,7 +146,7 @@ images:
   image_hash: 0408b405be10
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 斯瓦爾巴全球種子庫

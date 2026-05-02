@@ -97,32 +97,12 @@ discussion_content:
 - 如果你有失眠的困擾，不妨試試看下列的做法：每天適量的運動，幫助新陳代謝；晚餐後到睡前不宜飲用酒、咖啡、茶、可樂等刺激物，睡前可飲用一杯牛奶或小點心有益於安眠；養成規律的睡眠時間的時間，固定的時間上床躺平，讓腦袋放空，遠離3C產品，相信你的睡眠品質一定能大幅提升。
 - 請將關鍵句畫起來，這段的小主題是【 改善失眠的方法 】。
 images:
-- filename: images/G6-L9/G6-L9-08.png
-  size_bytes: 2399
-  image_hash: fc06eda7eae7
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L9/G6-L9-09.png
   size_bytes: 75753
   image_hash: 0547fa268628
   content_type: image/png
   caption: ''
-- filename: images/G6-L9/G6-L9-10.png
-  size_bytes: 5315
-  image_hash: 43c4657d36bf
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L9/G6-L9-15.png
-  size_bytes: 5351
-  image_hash: 4463d71b4b03
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L9/G6-L9-16.png
-  size_bytes: 2387
-  image_hash: 6658f2714c00
-  content_type: image/png
-  caption: ''
-image_count: 5
+image_count: 1
 story_structure_rows:
 - label: 主題
   value: 睡眠的重要性

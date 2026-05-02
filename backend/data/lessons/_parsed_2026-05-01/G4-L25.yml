@@ -114,22 +114,12 @@ images:
   image_hash: ee3964f5ef59
   content_type: image/png
   caption: ''
-- filename: images/G4-L25/G4-L25-06.png
-  size_bytes: 1816
-  image_hash: 26c303af4818
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-13.png
-  size_bytes: 1748
-  image_hash: 72da749b5778
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L25/G4-L25-16.png
   size_bytes: 9234
   image_hash: 9182f424463d
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 身體是一座精密的工廠

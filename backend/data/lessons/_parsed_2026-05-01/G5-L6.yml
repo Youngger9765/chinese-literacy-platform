@@ -125,19 +125,9 @@ images:
   image_hash: 731a6a324103
   content_type: image/png
   caption: ''
-- filename: images/G5-L6/G5-L6-06.png
-  size_bytes: 1806
-  image_hash: 1220987a925f
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L6/G5-L6-13.png
   size_bytes: 8270
   image_hash: cbd750442e39
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L6/G5-L6-15.png
-  size_bytes: 1438
-  image_hash: 344cedb5e6df
   content_type: image/png
   caption: ''
 - filename: images/G5-L6/G5-L6-18.svg+xml
@@ -145,7 +135,7 @@ images:
   image_hash: a715fba9b682
   content_type: image/svg+xml
   caption: ''
-image_count: 6
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 周思齊的棒球人生

@@ -139,19 +139,9 @@ discussion_content:
 - D.萬物靜觀皆自得
 strategy_exercises: []
 images:
-- filename: images/G7-L17/G7-L17-09.png
-  size_bytes: 2393
-  image_hash: a5a5712380b7
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L17/G7-L17-13.png
   size_bytes: 13120
   image_hash: 80b13f522131
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L17/G7-L17-14.png
-  size_bytes: 2420
-  image_hash: cbf2fdc04be7
   content_type: image/png
   caption: ''
 - filename: images/G7-L17/G7-L17-15.png
@@ -159,7 +149,7 @@ images:
   image_hash: b799e6349a1f
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 vocab_bank:
   A: 令人髮指
   B: 孤苦伶仃

@@ -80,28 +80,8 @@ multiple_choice:
 multiple_choice_count: 4
 self_check_items: []
 discussion_content: []
-images:
-- filename: images/G5-L2/G5-L2-05.png
-  size_bytes: 1233
-  image_hash: c4cd12139119
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L2/G5-L2-11.png
-  size_bytes: 4826
-  image_hash: 6ce93c2026f0
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L2/G5-L2-13.png
-  size_bytes: 435
-  image_hash: bb8922a5d7f3
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L2/G5-L2-14.png
-  size_bytes: 5009
-  image_hash: dafa094f0160
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 植物的生存智慧與仿生學
