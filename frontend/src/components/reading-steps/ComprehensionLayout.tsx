@@ -46,6 +46,7 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
   // ── #1341 plugin-pattern dispatch: graphic-text adds middle image pane ────
   // For G7-L28~30 (圖文整合策略): 3-pane (story 4 / images 4 / exercise 4)
   // For other lessons: 2-pane (story 7 / exercise 5) — unchanged
+  // #1416 basename fix needs frontend rebuild (detect-changes skipped prior staging deploys)
   const isGraphicText = story.layout_mode === 'graphic-text';
   const storyImages = story.images ?? [];
   const GCS_IMAGE_BASE = 'https://storage.googleapis.com/lingoleap-assets/lessons-images';
