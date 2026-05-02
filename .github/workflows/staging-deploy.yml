@@ -381,11 +381,15 @@ jobs:
     needs: smoke-test
     if: success()
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
       - name: Comment on referenced issues
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMMIT_MSG: ${{ github.event.head_commit.message }}
