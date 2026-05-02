@@ -99,32 +99,12 @@ discussion_content:
 - ①從日常小行動開始減塑，成為推動改變的人 □②等待政府或國際協議解決塑膠問題。
 strategy_exercises: []
 images:
-- filename: images/G7-L10/G7-L10-05.png
-  size_bytes: 1907
-  image_hash: 025c80c5da2c
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L10/G7-L10-11.png
   size_bytes: 38400
   image_hash: bb3c73fe1599
   content_type: image/png
   caption: ''
-- filename: images/G7-L10/G7-L10-12.png
-  size_bytes: 1798
-  image_hash: 89e14b5ba7b1
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L10/G7-L10-13.png
-  size_bytes: 3245
-  image_hash: 294c213bd43f
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L10/G7-L10-15.png
-  size_bytes: 3270
-  image_hash: 73024d674f39
-  content_type: image/png
-  caption: ''
-image_count: 5
+image_count: 1
 story_structure_rows:
 - label: 主題
   value: 塑膠污染

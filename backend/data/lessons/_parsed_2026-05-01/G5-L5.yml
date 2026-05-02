@@ -142,32 +142,12 @@ images:
   image_hash: a715fba9b682
   content_type: image/svg+xml
   caption: ''
-- filename: images/G5-L5/G5-L5-05.png
-  size_bytes: 4908
-  image_hash: 95c17a5353c2
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-06.png
-  size_bytes: 1251
-  image_hash: 2bd93571626a
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L5/G5-L5-07.png
   size_bytes: 285936
   image_hash: 3ee7c53ea07a
   content_type: image/png
   caption: ''
-- filename: images/G5-L5/G5-L5-08.png
-  size_bytes: 4901
-  image_hash: 88feb411d737
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-16.png
-  size_bytes: 434
-  image_hash: 7a10c3118cf2
-  content_type: image/png
-  caption: ''
-image_count: 6
+image_count: 2
 vocab_bank:
   A: 詼諧
   B: 歸咎

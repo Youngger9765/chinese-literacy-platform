@@ -100,22 +100,12 @@ images:
   image_hash: 214a5577eea0
   content_type: image/png
   caption: ''
-- filename: images/G7-L20/G7-L20-09.png
-  size_bytes: 2433
-  image_hash: 0083c6a1bba5
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L20/G7-L20-12.png
   size_bytes: 12129
   image_hash: e4fc1a622a07
   content_type: image/png
   caption: ''
-- filename: images/G7-L20/G7-L20-15.png
-  size_bytes: 2460
-  image_hash: 74340c4681f0
-  content_type: image/png
-  caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 電子煙的偽科學陷阱

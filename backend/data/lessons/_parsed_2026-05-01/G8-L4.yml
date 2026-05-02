@@ -130,17 +130,12 @@ images:
   image_hash: ab92f95f2105
   content_type: image/png
   caption: ''
-- filename: images/G8-L4/G8-L4-12.png
-  size_bytes: 2426
-  image_hash: 4e6bbde919d2
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L4/G8-L4-14.png
   size_bytes: 6187
   image_hash: 6058fa79d27e
   content_type: image/png
   caption: ''
-image_count: 3
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 植物肉

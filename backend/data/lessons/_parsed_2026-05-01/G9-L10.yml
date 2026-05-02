@@ -123,17 +123,12 @@ images:
   image_hash: 5d60ce2ea5d7
   content_type: image/jpeg
   caption: ''
-- filename: images/G9-L10/G9-L10-15.png
-  size_bytes: 2323
-  image_hash: 6c36ec48c4d8
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L10/G9-L10-16.png
   size_bytes: 11033
   image_hash: b7abe26e2fba
   content_type: image/png
   caption: ''
-image_count: 7
+image_count: 6
 vocab_bank:
   A: 囊括
   B: 堵住

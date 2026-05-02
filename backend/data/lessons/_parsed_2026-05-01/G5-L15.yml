@@ -129,11 +129,6 @@ discussion_content:
 - C.三人皆來自不同國家，突顯援助對象不分國界。
 - D.蓉是成年人，搭配琪哈姆與米基塔這兩位青少年，展現援助對象年齡層的多元性。
 images:
-- filename: images/G5-L15/G5-L15-05.png
-  size_bytes: 1262
-  image_hash: 78eadfcd2851
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L15/G5-L15-06.png
   size_bytes: 6992
   image_hash: b7b439a80a4a
@@ -144,17 +139,7 @@ images:
   image_hash: b7e06e20af6c
   content_type: image/png
   caption: ''
-- filename: images/G5-L15/G5-L15-14.png
-  size_bytes: 433
-  image_hash: 3b3977f9bc39
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L15/G5-L15-15.png
-  size_bytes: 5827
-  image_hash: 696ea81675d3
-  content_type: image/png
-  caption: ''
-image_count: 5
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 寫信馬拉松

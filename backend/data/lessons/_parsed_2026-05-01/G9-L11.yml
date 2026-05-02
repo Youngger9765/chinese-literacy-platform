@@ -70,23 +70,8 @@ self_check_items:
 - 我學會找出驗證推測的證據或結果，知道推測是如何被證實的。（驗證）
 - 我學會找出故事的啟示，了解這篇文章傳達的科學精神。（啟示）
 discussion_content: []
-images:
-- filename: images/G9-L11/G9-L11-08.png
-  size_bytes: 1855
-  image_hash: 114905a4f0d0
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L11/G9-L11-12.png
-  size_bytes: 3239
-  image_hash: 853cfbf9f98c
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L11/G9-L11-14.png
-  size_bytes: 3255
-  image_hash: e8f0859ec221
-  content_type: image/png
-  caption: ''
-image_count: 3
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 達爾文與長喙天蛾的故事

@@ -117,22 +117,12 @@ images:
   image_hash: 1a24f0c14927
   content_type: image/png
   caption: ''
-- filename: images/G7-L2/G7-L2-07.png
-  size_bytes: 2409
-  image_hash: 42ba0b07e40a
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L2/G7-L2-10.png
   size_bytes: 9305
   image_hash: 88caaa10423d
   content_type: image/png
   caption: ''
-- filename: images/G7-L2/G7-L2-15.png
-  size_bytes: 2442
-  image_hash: 33ae78d804e9
-  content_type: image/png
-  caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 澳洲奧運金牌的機密

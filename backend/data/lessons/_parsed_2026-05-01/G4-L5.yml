@@ -102,19 +102,9 @@ discussion_content:
 - C.不屈不撓，永不放棄（第六段）
 - D.身體強壯，精力過人
 images:
-- filename: images/G4-L5/G4-L5-01.png
-  size_bytes: 2424
-  image_hash: 9a67b604240f
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L5/G4-L5-04.png
   size_bytes: 14922
   image_hash: 7e58bb4f8a88
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L5/G4-L5-11.png
-  size_bytes: 2380
-  image_hash: 90c43b735e6a
   content_type: image/png
   caption: ''
 - filename: images/G4-L5/G4-L5-14.png
@@ -122,7 +112,7 @@ images:
   image_hash: addb606224fc
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 陳彥博

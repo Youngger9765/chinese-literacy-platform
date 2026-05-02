@@ -108,35 +108,15 @@ discussion_content:
 - C.強調事件發生的日期，呼籲當天可以成為臺灣的特別節日
 - D.透過小藍鯨重生的故事，凸顯人類創意可以化腐朽為神奇
 images:
-- filename: images/G6-L15/G6-L15-06.png
-  size_bytes: 2403
-  image_hash: 5c6d4fcbc709
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L15/G6-L15-09.jpg
   size_bytes: 19830
   image_hash: dc565f7e2cba
   content_type: image/jpeg
   caption: ''
-- filename: images/G6-L15/G6-L15-13.png
-  size_bytes: 4187
-  image_hash: 135832de9576
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L15/G6-L15-14.jpg
   size_bytes: 15286
   image_hash: 98e2dba0c040
   content_type: image/jpeg
-  caption: ''
-- filename: images/G6-L15/G6-L15-15.png
-  size_bytes: 4264
-  image_hash: dedfe426bd31
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L15/G6-L15-16.png
-  size_bytes: 2387
-  image_hash: e5e9f943d139
-  content_type: image/png
   caption: ''
 - filename: images/G6-L15/G6-L15-18.jpg
   size_bytes: 15756
@@ -148,12 +128,7 @@ images:
   image_hash: a5645e796f33
   content_type: image/jpeg
   caption: ''
-- filename: images/G6-L15/G6-L15-20.png
-  size_bytes: 5365
-  image_hash: c38c5f4ac35c
-  content_type: image/png
-  caption: ''
-image_count: 9
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 小藍鯨之死

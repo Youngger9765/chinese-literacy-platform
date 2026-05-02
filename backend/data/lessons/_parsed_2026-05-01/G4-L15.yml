@@ -82,28 +82,8 @@ multiple_choice:
 multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
-images:
-- filename: images/G4-L15/G4-L15-05.png
-  size_bytes: 2394
-  image_hash: 22d45eda4e33
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L15/G4-L15-07.png
-  size_bytes: 2016
-  image_hash: 29a4b86c47e1
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L15/G4-L15-11.png
-  size_bytes: 2090
-  image_hash: c29f40f866cb
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L15/G4-L15-13.png
-  size_bytes: 2430
-  image_hash: 5bfc989ca6e1
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主角
   value: 一位對異性產生好感的學生

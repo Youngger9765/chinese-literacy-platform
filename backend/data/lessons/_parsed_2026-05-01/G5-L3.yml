@@ -142,28 +142,8 @@ discussion_content:
 - B.男人粗野陽剛功夫一流，這是女人辦不到的
 - C.說明大嫂在工地的弱勢，希望推動性別平等
 - D.強調大嫂們在工地的重要貢獻，表達敬意
-images:
-- filename: images/G5-L3/G5-L3-05.png
-  size_bytes: 1855
-  image_hash: ec89b8ff189c
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L3/G5-L3-11.png
-  size_bytes: 3228
-  image_hash: 15047c9e4d01
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L3/G5-L3-13.png
-  size_bytes: 1394
-  image_hash: ab7d3b1de7bf
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L3/G5-L3-14.png
-  size_bytes: 3185
-  image_hash: 2b7114951db1
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 工地大嫂

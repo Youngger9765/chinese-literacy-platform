@@ -93,28 +93,8 @@ self_check_items:
 - 我學到怎麼找出「解決」，了解主角/相關人物做了什麼來解決問題。
 - 我學到怎麼找出「結果」，說明解決行動帶來了哪些具體改變或成果。
 discussion_content: []
-images:
-- filename: images/G5-L18/G5-L18-05.png
-  size_bytes: 1262
-  image_hash: f07e3ebb12d4
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L18/G5-L18-11.png
-  size_bytes: 3169
-  image_hash: 7b2fca011cee
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L18/G5-L18-13.png
-  size_bytes: 429
-  image_hash: 3ddb636012aa
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L18/G5-L18-14.png
-  size_bytes: 3198
-  image_hash: 91f0f20bfe88
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 魚門鈴

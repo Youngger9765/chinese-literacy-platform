@@ -85,18 +85,8 @@ self_check_items:
 - 這次練習，你最重要的學習是什麼？（方法回顧）
 discussion_content: []
 strategy_exercises: []
-images:
-- filename: images/G7-L23/G7-L23-05.png
-  size_bytes: 4946
-  image_hash: a2b6fe7622e1
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L23/G7-L23-06.png
-  size_bytes: 4896
-  image_hash: 3579e140afd0
-  content_type: image/png
-  caption: ''
-image_count: 2
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 雨林裡的奇蹟藥物

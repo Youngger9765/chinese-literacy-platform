@@ -119,22 +119,12 @@ images:
   image_hash: 7ee6ddbc12e2
   content_type: image/png
   caption: ''
-- filename: images/G6-L17/G6-L17-09.png
-  size_bytes: 2373
-  image_hash: 58f8d1083f3b
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L17/G6-L17-10.png
   size_bytes: 9769
   image_hash: 093b21c47c8f
   content_type: image/png
   caption: ''
-- filename: images/G6-L17/G6-L17-15.png
-  size_bytes: 2415
-  image_hash: 8beef03683ca
-  content_type: image/png
-  caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 醫師與乩童的合作

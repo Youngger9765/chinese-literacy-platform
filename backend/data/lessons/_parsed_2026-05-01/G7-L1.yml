@@ -89,28 +89,8 @@ multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
 strategy_exercises: []
-images:
-- filename: images/G7-L1/G7-L1-06.png
-  size_bytes: 2432
-  image_hash: c69b99d5584d
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L1/G7-L1-11.png
-  size_bytes: 3648
-  image_hash: 3166818fc32d
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L1/G7-L1-14.png
-  size_bytes: 4580
-  image_hash: 04694fb352c9
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L1/G7-L1-15.png
-  size_bytes: 2437
-  image_hash: 0f31e55e0fcd
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 讀懂楊喚〈夏夜〉的心路歷程

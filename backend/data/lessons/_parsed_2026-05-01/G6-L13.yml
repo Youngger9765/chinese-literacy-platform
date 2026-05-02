@@ -127,11 +127,6 @@ discussion_content:
 - C.吸引總統等名人，創造品牌形象
 - D.留下森林造福下一代子孫
 images:
-- filename: images/G6-L13/G6-L13-09.png
-  size_bytes: 2413
-  image_hash: 0202a7d8f2fe
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L13/G6-L13-10.png
   size_bytes: 10482
   image_hash: f31d916409c9
@@ -142,17 +137,12 @@ images:
   image_hash: c6b964191326
   content_type: image/png
   caption: ''
-- filename: images/G6-L13/G6-L13-15.png
-  size_bytes: 2397
-  image_hash: 32fef8607451
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L13/G6-L13-16.png
   size_bytes: 17322
   image_hash: 787c5f1b031d
   content_type: image/png
   caption: ''
-image_count: 5
+image_count: 3
 story_structure_rows:
 - label: 主題
   value: 賴桑的種樹故事

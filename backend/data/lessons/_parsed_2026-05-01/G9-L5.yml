@@ -135,28 +135,8 @@ discussion_content:
 - B.教導讀者如何用「＃MeToo」在社群網站上建立運動標識
 - C.教導讀者遇到壞事，如何以牙還牙，以眼還眼
 - D.作者比較「＃MeToo」在西方和臺灣社會的異同
-images:
-- filename: images/G9-L5/G9-L5-09.png
-  size_bytes: 3941
-  image_hash: 291997ee41b6
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L5/G9-L5-12.png
-  size_bytes: 2403
-  image_hash: e5f1723d9ad0
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L5/G9-L5-13.png
-  size_bytes: 3912
-  image_hash: ccdf356ababa
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L5/G9-L5-15.png
-  size_bytes: 5273
-  image_hash: 7c56c734a85f
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: '#MeToo運動與我們的權利'

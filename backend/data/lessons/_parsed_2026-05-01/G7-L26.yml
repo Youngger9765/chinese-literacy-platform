@@ -96,28 +96,8 @@ self_check_items:
 - 我能綜合各段重點和文化意義，推論出作者想表達的觀點。
 discussion_content: []
 strategy_exercises: []
-images:
-- filename: images/G7-L26/G7-L26-06.png
-  size_bytes: 1759
-  image_hash: 0df719ba3db6
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L26/G7-L26-09.png
-  size_bytes: 3269
-  image_hash: 32d35ce864e8
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L26/G7-L26-13.png
-  size_bytes: 1830
-  image_hash: d1e3a7d7265d
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L26/G7-L26-14.png
-  size_bytes: 3281
-  image_hash: ef7559b2b407
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 小米酒的文化意義

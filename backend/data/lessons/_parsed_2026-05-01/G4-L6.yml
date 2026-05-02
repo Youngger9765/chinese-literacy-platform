@@ -90,22 +90,12 @@ images:
   image_hash: 10d88a86894b
   content_type: image/png
   caption: ''
-- filename: images/G4-L6/G4-L6-06.png
-  size_bytes: 1987
-  image_hash: 354cb24ac561
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L6/G4-L6-13.png
-  size_bytes: 2032
-  image_hash: 75bb7606fa0e
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L6/G4-L6-16.png
   size_bytes: 8421
   image_hash: e2c0943dfe2e
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 「意思」的多元用法

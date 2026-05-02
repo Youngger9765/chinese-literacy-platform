@@ -118,33 +118,8 @@ discussion_content:
 - C.認為遊民不一定是好吃懶做，也許他們遭遇了不得已的困境
 - D.認為穿粉紅色衣服的男生，有女性化的傾向
 strategy_exercises: []
-images:
-- filename: images/G7-L4/G7-L4-05.png
-  size_bytes: 2423
-  image_hash: 05454b904dba
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L4/G7-L4-06.png
-  size_bytes: 3391
-  image_hash: c8d3ecf8d967
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L4/G7-L4-12.png
-  size_bytes: 3338
-  image_hash: 2d466f696488
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L4/G7-L4-14.png
-  size_bytes: 2472
-  image_hash: bc7a93a98ff1
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L4/G7-L4-15.png
-  size_bytes: 3393
-  image_hash: '560273844925'
-  content_type: image/png
-  caption: ''
-image_count: 5
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 螞蟻與蟋蟀的生命策略

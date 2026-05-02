@@ -136,19 +136,9 @@ discussion_content:
 - C.評論各候選人的政見(需立場中立)
 - D.針對不守秩序的人給予懲罰(主持人只能適時規勸)
 images:
-- filename: images/G6-L5/G6-L5-05.png
-  size_bytes: 2463
-  image_hash: 3b3ff07f28b9
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L5/G6-L5-11.png
   size_bytes: 9108
   image_hash: 5b9efec3ceb8
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L5/G6-L5-13.png
-  size_bytes: 2373
-  image_hash: 43a46b5412f0
   content_type: image/png
   caption: ''
 - filename: images/G6-L5/G6-L5-14.png
@@ -156,7 +146,7 @@ images:
   image_hash: a1f1fe2e21f4
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 卡通人氣王票選政見發表會

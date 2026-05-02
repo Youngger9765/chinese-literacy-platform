@@ -116,11 +116,6 @@ images:
   image_hash: 2892bfd379ad
   content_type: image/jpeg
   caption: ''
-- filename: images/G7-L22/G7-L22-14.png
-  size_bytes: 2474
-  image_hash: 6e1af557abcb
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L22/G7-L22-17.png
   size_bytes: 76564
   image_hash: ea0b95437b5a
@@ -129,11 +124,6 @@ images:
 - filename: images/G7-L22/G7-L22-19.png
   size_bytes: 7954
   image_hash: a3920c77af83
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L22/G7-L22-20.png
-  size_bytes: 2463
-  image_hash: 7bc614b0a027
   content_type: image/png
   caption: ''
 - filename: images/G7-L22/G7-L22-21.jpg
@@ -146,7 +136,7 @@ images:
   image_hash: f36d882455f2
   content_type: image/jpeg
   caption: ''
-image_count: 11
+image_count: 9
 story_structure_rows:
 - label: 主題
   value: 信眾與教主

@@ -117,19 +117,9 @@ discussion_content:
 - Ｄ.想要教導讀者寫作時如何下標
 strategy_exercises: []
 images:
-- filename: images/G7-L21/G7-L21-09.png
-  size_bytes: 2440
-  image_hash: e63a900d9977
-  content_type: image/png
-  caption: ''
 - filename: images/G7-L21/G7-L21-13.png
   size_bytes: 7954
   image_hash: a3920c77af83
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L21/G7-L21-14.png
-  size_bytes: 2427
-  image_hash: 2c9e8a66da5b
   content_type: image/png
   caption: ''
 - filename: images/G7-L21/G7-L21-15.png
@@ -137,7 +127,7 @@ images:
   image_hash: 6b2257d59621
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 誘餌式標題

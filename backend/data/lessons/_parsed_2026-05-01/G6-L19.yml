@@ -115,19 +115,9 @@ discussion_content:
 - C.他桌面太乾淨了，一定沒有創意
 - D.好的演講要像女人的裙子，愈短愈好
 images:
-- filename: images/G6-L19/G6-L19-09.png
-  size_bytes: 2397
-  image_hash: 70965c144375
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L19/G6-L19-13.png
   size_bytes: 20047
   image_hash: 6b69bea5a133
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L19/G6-L19-14.png
-  size_bytes: 2410
-  image_hash: cd3c11a0c56c
   content_type: image/png
   caption: ''
 - filename: images/G6-L19/G6-L19-15.png
@@ -135,7 +125,7 @@ images:
   image_hash: 746a6c5d3efc
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 面對生命中的困難與挑戰

@@ -105,28 +105,8 @@ discussion_content:
 - 芸涵最喜歡跳舞，每天都期待熱舞社的時間。
 - 但這學期功課變多，爸媽說：「社團先停一下，考好再跳。」
 - 她很矛盾，一方面想聽父母的話，一方面又捨不得放下練舞。
-images:
-- filename: images/G4-L18/G4-L18-05.png
-  size_bytes: 1784
-  image_hash: 9eb67f3b70a9
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-11.png
-  size_bytes: 3076
-  image_hash: 8fc53c61969d
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-13.png
-  size_bytes: 1793
-  image_hash: a4678814c65c
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-14.png
-  size_bytes: 3237
-  image_hash: 460efeaea573
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 vocab_bank:
   A: 興味盎然
   B: 欲罷不能

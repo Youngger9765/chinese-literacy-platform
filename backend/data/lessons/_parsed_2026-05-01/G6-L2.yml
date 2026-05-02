@@ -114,42 +114,7 @@ images:
   image_hash: dbb2cbb7c882
   content_type: image/png
   caption: ''
-- filename: images/G6-L2/G6-L2-09.png
-  size_bytes: 1277
-  image_hash: ae1ecfe02810
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L2/G6-L2-10.png
-  size_bytes: 3922
-  image_hash: 45037f091e53
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L2/G6-L2-11.png
-  size_bytes: 2414
-  image_hash: 497b3c3c3acb
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L2/G6-L2-13.png
-  size_bytes: 566
-  image_hash: 741e2e7c955c
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L2/G6-L2-16.png
-  size_bytes: 1085
-  image_hash: 41f1b82e5336
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L2/G6-L2-17.png
-  size_bytes: 2371
-  image_hash: 47a4c0c0d97d
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L2/G6-L2-18.png
-  size_bytes: 1411
-  image_hash: 034a423ddf26
-  content_type: image/png
-  caption: ''
-image_count: 8
+image_count: 1
 story_structure_rows:
 - label: 主題
   value: 告別小學生活

@@ -97,19 +97,9 @@ self_check_items:
 - 我能設定可行的反拖延方法
 discussion_content: []
 images:
-- filename: images/G5-L23/G5-L23-05.png
-  size_bytes: 2419
-  image_hash: 1c4dceec0d16
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L23/G5-L23-11.png
   size_bytes: 12408
   image_hash: 51da99b9970c
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L23/G5-L23-13.png
-  size_bytes: 2447
-  image_hash: 795cc64d92fe
   content_type: image/png
   caption: ''
 - filename: images/G5-L23/G5-L23-14.png
@@ -117,7 +107,7 @@ images:
   image_hash: 67c5f8d939e5
   content_type: image/png
   caption: ''
-image_count: 4
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 電競與學習的平衡

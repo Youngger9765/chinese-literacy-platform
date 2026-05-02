@@ -98,23 +98,8 @@ discussion_content:
 - 父親賣東西的動機是想要【 多賺點錢/填補戲院虧損 】。
 - ❷第三段：後來他們甚至到賭場碰運氣，妄想一夜致富。
 - 他們去賭場的動機是【想要解決財務的困難/妄想一夜致富 】。
-images:
-- filename: images/G8-L6/G8-L6-08.png
-  size_bytes: 2353
-  image_hash: 681ac3e5b6bf
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L6/G8-L6-12.png
-  size_bytes: 3162
-  image_hash: 91b9af4b6317
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L6/G8-L6-14.png
-  size_bytes: 3232
-  image_hash: be9806b02da5
-  content_type: image/png
-  caption: ''
-image_count: 3
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主角
   value: 作者

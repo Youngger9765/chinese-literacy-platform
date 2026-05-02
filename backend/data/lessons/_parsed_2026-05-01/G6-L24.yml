@@ -145,28 +145,8 @@ self_check_items:
 - 我學到怎麼找出「解決」，了解主角/相關人物做了什麼來解決問題。
 - 我學到怎麼找出「結果」，說明解決行動帶來了哪些具體改變或成果。
 discussion_content: []
-images:
-- filename: images/G6-L24/G6-L24-05.png
-  size_bytes: 2393
-  image_hash: 9e776d53b421
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-10.png
-  size_bytes: 4963
-  image_hash: 1922aa748d0c
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-11.png
-  size_bytes: 2400
-  image_hash: a93be23d07f7
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L24/G6-L24-14.png
-  size_bytes: 4902
-  image_hash: 6cd84868f765
-  content_type: image/png
-  caption: ''
-image_count: 4
+images: []
+image_count: 0
 vocab_bank:
   A: 翻騰
   B: 凜冽

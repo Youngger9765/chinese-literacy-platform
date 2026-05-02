@@ -91,23 +91,8 @@ self_check_items:
 - 第5段你跳過的地方，是哪一類訊息？為什麼可以跳過？（單選）
 discussion_content: []
 strategy_exercises: []
-images:
-- filename: images/G7-L24/G7-L24-09.png
-  size_bytes: 4920
-  image_hash: d99463ec6510
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L24/G7-L24-12.png
-  size_bytes: 4765
-  image_hash: f4413e76e882
-  content_type: image/png
-  caption: ''
-- filename: images/G7-L24/G7-L24-14.png
-  size_bytes: 1413
-  image_hash: ad08faa402fd
-  content_type: image/png
-  caption: ''
-image_count: 3
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 未來的農夫

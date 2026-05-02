@@ -128,32 +128,12 @@ images:
   image_hash: a77e62def7dd
   content_type: image/png
   caption: ''
-- filename: images/文-L1/文-L1-07.png
-  size_bytes: 3708
-  image_hash: 64e5656aee82
-  content_type: image/png
-  caption: ''
-- filename: images/文-L1/文-L1-12.png
-  size_bytes: 4624
-  image_hash: 7c5e01235642
-  content_type: image/png
-  caption: ''
-- filename: images/文-L1/文-L1-13.png
-  size_bytes: 4437
-  image_hash: ebf3a9315644
-  content_type: image/png
-  caption: ''
-- filename: images/文-L1/文-L1-14.png
-  size_bytes: 2922
-  image_hash: 992ccd780822
-  content_type: image/png
-  caption: ''
 - filename: images/文-L1/文-L1-17.png
   size_bytes: 9578
   image_hash: 8c2152656c43
   content_type: image/png
   caption: ''
-image_count: 6
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 鞭虎救弟記的真偽探討

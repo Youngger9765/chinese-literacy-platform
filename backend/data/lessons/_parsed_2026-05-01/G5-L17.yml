@@ -85,33 +85,8 @@ multiple_choice:
 multiple_choice_count: 4
 self_check_items: []
 discussion_content: []
-images:
-- filename: images/G5-L17/G5-L17-05.png
-  size_bytes: 1970
-  image_hash: 479ea8bde251
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L17/G5-L17-06.png
-  size_bytes: 2301
-  image_hash: d5ac3252dc44
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L17/G5-L17-12.png
-  size_bytes: 3311
-  image_hash: ff928b767df8
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L17/G5-L17-14.png
-  size_bytes: 1948
-  image_hash: 03a82748b6a8
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L17/G5-L17-15.png
-  size_bytes: 4539
-  image_hash: c365392357ee
-  content_type: image/png
-  caption: ''
-image_count: 5
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 掃雷英雄馬嘎瓦

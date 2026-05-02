@@ -80,19 +80,9 @@ images:
   image_hash: 6464cccf3838
   content_type: image/png
   caption: ''
-- filename: images/G9-L17-19/G9-L17-19-06.png
-  size_bytes: 3142
-  image_hash: 46e2a3d917c2
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L17-19/G9-L17-19-09.png
   size_bytes: 197021
   image_hash: 76c4b3caddbb
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L17-19/G9-L17-19-10.png
-  size_bytes: 3897
-  image_hash: 2e9de454f9c0
   content_type: image/png
   caption: ''
 - filename: images/G9-L17-19/G9-L17-19-11.png
@@ -105,12 +95,7 @@ images:
   image_hash: de4229ac530d
   content_type: image/jpeg
   caption: ''
-- filename: images/G9-L17-19/G9-L17-19-13.png
-  size_bytes: 3994
-  image_hash: 290aa5324005
-  content_type: image/png
-  caption: ''
-image_count: 8
+image_count: 5
 story_structure_rows:
 - label: 主題
   value: 馬拉松王者基普喬吉
