@@ -575,7 +575,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
           {/* Title */}
           <div className="text-center mb-8 px-6">
-            <h1 className="font-headline font-extrabold text-3xl md:text-4xl text-on-surface tracking-tight leading-tight">
+            <h1 className="font-headline font-medium text-3xl md:text-4xl text-on-surface tracking-tight leading-tight">
               {story.title}
             </h1>
           </div>
@@ -599,8 +599,8 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                     className="text-on-surface/90"
                     style={{
                       fontSize: `${fontSizePx}px`,
-                      lineHeight: isZhuyinAny ? '3.8rem' : '2.0',
-                      letterSpacing: isZhuyinAny ? '0.35em' : '0.02em',
+                      lineHeight: isZhuyinAny ? '2.4rem' : '1.6', /* ruby annotations need 2.4rem minimum to avoid clipping */
+                      letterSpacing: isZhuyinAny ? '0.15em' : '0',
                     }}
                   >
                     {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}

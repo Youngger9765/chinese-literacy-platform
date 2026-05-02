@@ -129,3 +129,5 @@ strategy_exercise:
     answer: 0
     reasoning: 原文「自少至老」在古文今譯中為「從小到老」，故「少」在此處意指「年輕時」。
 strategy_exercise_source: gemini-2.5-flash-2026-05-02
+worksheet_intro:
+  lesson_label: 第8課  愛讀書的顧寧人

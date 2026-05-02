@@ -80,8 +80,8 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     <p
-                      className={`text-lg md:text-xl text-on-surface leading-[2.6rem] md:leading-[3rem] ${
-                        zhuyinActive ? 'tracking-[0.3em]' : ''
+                      className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+                        zhuyinActive ? 'tracking-[0.15em]' : ''
                       }`}
                     >
                       {zhuyinLines ? zhuyinLines[idx] : line}

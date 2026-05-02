@@ -360,3 +360,12 @@ image_captions:
 - figure_number: 二
   figure_index: 2
   caption: 完成下面的表格
+worksheet_intro:
+  step_label: 讀全文-做記號
+  target_strategy: 圖表繪製與判讀
+  instructions:
+  - 請在不太了解的字、詞或句做記號。
+  - 重要的地方、喜歡的語詞、句子或段落做上記號。
+  level_label: Level 9・說明文
+  lesson_label: 第8課  臺灣學生的閱讀力：美麗與哀愁
+  authors: 課文：陳淑麗  學習單：陳允捷

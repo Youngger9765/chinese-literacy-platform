@@ -136,3 +136,5 @@ strategy_exercise:
     type: free_text
     reasoning: 此開放題旨在鼓勵學生歸納總結「聞」字在課文不同語境下的多重意義，加深對「一字多義」策略的理解與應用。
 strategy_exercise_source: gemini-2.5-flash-2026-05-02
+worksheet_intro:
+  lesson_label: 第9課  從天才跌為凡人的神童

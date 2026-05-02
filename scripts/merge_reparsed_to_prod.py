@@ -73,6 +73,18 @@ def merge_lesson(code: str) -> dict:
     changes: list[str] = []
     new = dict(prod)  # shallow copy
 
+    # ── 0. paragraphs / story_text — fill if prod empty ────────────────────
+    # Critical: 6 lessons (G5-L1, G5-L5, G8-L8, G9-L2, 文-L7, 文-L10) had
+    # paragraphs=[] in prod yml because old parser couldn't extract from
+    # their docx structure. New raw-XML parser handles them.
+    prod_paragraphs = prod.get("paragraphs") or []
+    if not prod_paragraphs and reparsed.get("paragraphs"):
+        new["paragraphs"] = reparsed["paragraphs"]
+        new["story_text"] = reparsed.get("story_text") or "\n".join(reparsed["paragraphs"])
+        new["paragraph_count"] = len(reparsed["paragraphs"])
+        new["char_count"] = reparsed.get("char_count") or sum(len(p) for p in reparsed["paragraphs"])
+        changes.append(f"paragraphs: {len(reparsed['paragraphs'])} (was 0)")
+
     # ── 1. vocab_bank — fill if prod empty ─────────────────────────────────
     if is_empty(prod.get("vocab_bank")) and reparsed.get("vocab_bank"):
         new["vocab_bank"] = reparsed["vocab_bank"]
@@ -134,6 +146,12 @@ def merge_lesson(code: str) -> dict:
     if reparsed.get("worksheet_section_order"):
         new["worksheet_section_order"] = reparsed["worksheet_section_order"]
         changes.append(f"worksheet_section_order: {len(reparsed['worksheet_section_order'])} sections")
+
+    # ── 8b. worksheet_intro — always overwrite (metadata, #1434) ────────────
+    if reparsed.get("worksheet_intro"):
+        new["worksheet_intro"] = reparsed["worksheet_intro"]
+        strategy = reparsed["worksheet_intro"].get("target_strategy", "")[:30]
+        changes.append(f"worksheet_intro: strategy={strategy}")
 
     # ── 9. image_captions (graphic-text only) ───────────────────────────────
     if is_empty(prod.get("image_captions")) and reparsed.get("image_captions"):

@@ -197,3 +197,5 @@ strategy_exercise:
     answer: 2
     reasoning: 胡兵相互議論說「我輩無義之人」，故「我輩」指胡兵。
 strategy_exercise_source: gemini-2.5-flash-2026-05-02
+worksheet_intro:
+  lesson_label: 第5課  重義的荀巨伯

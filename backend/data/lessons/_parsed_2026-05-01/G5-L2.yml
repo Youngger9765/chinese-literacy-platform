@@ -290,3 +290,9 @@ worksheet_section_order:
 - number: 九
   name: 知識補給站
   type: knowledge_station
+worksheet_intro:
+  step_label: 讀全文-做記號
+  target_strategy: 拆詞釋義──藉由拆解字詞來推測詞義
+  level_label: Level 5・說明文
+  lesson_label: 第2課  以植物為師的科學
+  authors: 課文：林玫伶  學習單：陳允捷

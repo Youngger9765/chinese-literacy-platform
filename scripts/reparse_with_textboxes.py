@@ -178,6 +178,111 @@ def extract_worksheet_section_order(text: str) -> list[dict]:
     return seen
 
 
+def extract_worksheet_intro(text: str) -> dict:
+    """Extract the 學習單 intro section from the top of the docx.
+
+    The intro lives BEFORE the lesson body — it contains:
+    - step_label:       e.g. "讀全文-做記號" (from "一\\n讀全文-做記號" header)
+    - target_strategy:  e.g. "摘要策略──問題.解決.結果結構"
+    - instructions:     lines starting with □ (full-width checkbox)
+    - level_label:      e.g. "Level 6・記敘文"
+    - lesson_label:     e.g. "第22課 小兵立大功：雞鳴狗盜的故事"
+    - authors:          e.g. "課文：曾世杰  學習單：張明珠"
+
+    Typical raw text (G6-L22):
+      "一\\n讀全文-做記號00\\n目標策略：摘要策略──...\\n□ 請在...\\nLevel 6・記敘文..."
+
+    The Word object ID digits (e.g. "00") appear between real content lines.
+    We strip those before matching.
+    """
+    # Limit search to the first ~3000 chars (intro is near top of doc)
+    intro_region = text[:3000]
+
+    # Strip Word object IDs — digit-only tokens between Chinese content.
+    # Pattern: 2+ digits at a line boundary, alone or adjacent to newlines.
+    cleaned = re.sub(r"\n\s*\d{2,}\s*(?=\n)", "\n", intro_region)
+
+    result: dict = {}
+
+    # step_label: "一\n讀全文-做記號" or "一 讀全文-做記號"
+    # The leading Chinese numeral "一" marks the first section of the worksheet.
+    step_m = re.search(r"[一]\s*\n\s*([^\n0-9]{2,30})", cleaned)
+    if not step_m:
+        step_m = re.search(r"[一]\s+([^\n0-9]{2,30})", cleaned)
+    if step_m:
+        result["step_label"] = step_m.group(1).strip()
+
+    # target_strategy: line with "目標策略：" prefix (may have trailing digits stripped)
+    strategy_m = re.search(r"目標策略[：:]\s*([^\n]+)", cleaned)
+    if strategy_m:
+        val = strategy_m.group(1).strip()
+        # Strip trailing Word object ID digits
+        val = re.sub(r"\s*\d{2,}\s*$", "", val).strip()
+        if val:
+            result["target_strategy"] = val
+
+    # instructions: lines starting with □ (U+25A1 or half-width □)
+    # Only capture lines that begin with Chinese text (not numeric benchmarks like "＜210字").
+    # Docx may have "□ text00\n□ text" — strip trailing digits.
+    instructions = []
+    seen_instr: set[str] = set()
+    for m in re.finditer(r"[□]\s+([^\n□]{2,100})", cleaned):
+        line = m.group(1).strip()
+        # Strip trailing Word object IDs
+        line = re.sub(r"\s*\d{2,}\s*$", "", line).strip()
+        # Skip numeric/symbol benchmarks (e.g. "＜210字", "211~240字")
+        # Valid instructions start with a CJK character or punctuation like 「
+        if not line or line in seen_instr:
+            continue
+        first_char = line[0]
+        if re.match(r"[一-鿿「」《》【】]", first_char):
+            instructions.append(line)
+            seen_instr.add(line)
+    if instructions:
+        result["instructions"] = instructions
+
+    # level_label: "Level N・文類" pattern
+    level_m = re.search(r"(Level\s+\d+\s*[・·]\s*[^\n0-9]{1,20})", cleaned)
+    if level_m:
+        val = level_m.group(1).strip()
+        val = re.sub(r"\s*\d{2,}\s*$", "", val).strip()
+        if val:
+            result["level_label"] = val
+
+    # lesson_label: "第N課 title" — lesson title line
+    lesson_m = re.search(r"(第\d+課\s+[^\n]{1,60})", cleaned)
+    if lesson_m:
+        val = lesson_m.group(1).strip()
+        # Strip trailing Word object ID digits and position markers
+        val = re.sub(r"\s+\d{1,5}\s*$", "", val).strip()
+        if val:
+            result["lesson_label"] = val
+
+    # authors: "課文 ：A\n學習單：B" — may span two lines in docx
+    # Approach: find "課文" occurrence, grab next 2 lines
+    authors_m = re.search(
+        r"課文\s*[：:]\s*([^\n]{1,40})\n\s*學習單[：:]\s*([^\n]{1,40})",
+        cleaned,
+    )
+    if authors_m:
+        c = re.sub(r"\s*\d{2,}\s*$", "", authors_m.group(1)).strip()
+        w = re.sub(r"\s*\d{2,}\s*$", "", authors_m.group(2)).strip()
+        if c or w:
+            result["authors"] = f"課文：{c}  學習單：{w}"
+    else:
+        # Single-line: "課文：A 學習單：B"
+        authors_single = re.search(
+            r"(課文\s*[：:][^\n]{1,40}學習單[：:][^\n]{1,30})",
+            cleaned,
+        )
+        if authors_single:
+            raw = authors_single.group(1).strip()
+            raw = re.sub(r"\s{2,}", "  ", raw)
+            result["authors"] = raw
+
+    return result if result else {}
+
+
 EXCLUDE_MARKERS = (
     "計時", "影片", "閱讀聚光燈", "文章重點表", "知識補給站", "詞語複習",
     "步驟❶", "目標策略", "Level ", "字數", "完讀時間", "□", "請根據文章",
@@ -483,7 +588,7 @@ def parse_video_links(section: str) -> list[dict]:
     if not section:
         return []
     # Strip Word object IDs (long digit runs) that prefix video index numbers.
-    # Pattern: "196469057150001. 成語任務" → "1. 成語任務"
+    # e.g. docx export adds "XXXXXX1. 成語任務" → strip leading digits to get "1. 成語任務"
     cleaned = re.sub(r"\d{6,}(?=[1-9][.．])", "", section)
     videos: list[dict] = []
     pat = re.compile(
@@ -562,6 +667,7 @@ def parse_lesson(docx: Path) -> dict:
     text = extract_full_text(docx)
     sections = split_sections(text)
     worksheet_order = extract_worksheet_section_order(text)
+    worksheet_intro = extract_worksheet_intro(text)
 
     paragraphs = extract_paragraphs_from_table(docx)
     full_story = "\n".join(paragraphs)
@@ -621,6 +727,8 @@ def parse_lesson(docx: Path) -> dict:
         # frontend can render the worksheet in its native order, OR reorder
         # for customization (e.g. demo skipping word_search).
         "worksheet_section_order": worksheet_order,
+        # ── 學習單 intro metadata (#1434) ──────────────────────────────────
+        "worksheet_intro": worksheet_intro if worksheet_intro else None,
         # ── Story body ────────────────────────────────────────────────────
         "paragraphs": paragraphs,
         "story_text": full_story,

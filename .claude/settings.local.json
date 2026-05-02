@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(touch .git/security-audit-passed)",
+      "Bash(git commit -m ' *)",
+      "Bash(/Users/young/project/chinese-literacy-platform/backend/.venv/bin/python -m pytest backend/tests/test_stories_pagination.py -v)",
+      "Bash(git add *)",
+      "Bash(touch .git/claude-code-review-passed)",
+      "Bash(touch /Users/young/project/chinese-literacy-platform/.git/worktrees/clp-issue-1417/security-audit-passed)"
+    ]
+  }
+}
