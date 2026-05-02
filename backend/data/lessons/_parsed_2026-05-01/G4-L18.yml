@@ -106,64 +106,14 @@ discussion_content:
 - 但這學期功課變多，爸媽說：「社團先停一下，考好再跳。」
 - 她很矛盾，一方面想聽父母的話，一方面又捨不得放下練舞。
 images:
-- filename: images/G4-L18/G4-L18-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-04.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L18/G4-L18-05.png
   size_bytes: 1784
   image_hash: 9eb67f3b70a9
   content_type: image/png
   caption: ''
-- filename: images/G4-L18/G4-L18-06.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-07.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-08.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-09.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-10.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L18/G4-L18-11.png
   size_bytes: 3076
   image_hash: 8fc53c61969d
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L18/G4-L18-12.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
   content_type: image/png
   caption: ''
 - filename: images/G4-L18/G4-L18-13.png
@@ -176,12 +126,7 @@ images:
   image_hash: 460efeaea573
   content_type: image/png
   caption: ''
-- filename: images/G4-L18/G4-L18-15.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-image_count: 15
+image_count: 4
 vocab_bank:
   A: 興味盎然
   B: 欲罷不能

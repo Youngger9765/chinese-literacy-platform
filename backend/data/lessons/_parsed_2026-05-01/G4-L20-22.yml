@@ -151,16 +151,6 @@ discussion_content:
 - C.政府應通過法令創造更多高薪職業，解決收入不平等的問題
 - D.市場通常能依靠供需調節價格，但在特殊情況下可能需要適度的政府干預
 images:
-- filename: images/G4-L20-22/G4-L20-22-01.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L20-22/G4-L20-22-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L20-22/G4-L20-22-03.jpg
   size_bytes: 93924
   image_hash: 074477790829
@@ -170,16 +160,6 @@ images:
   size_bytes: 53086
   image_hash: 2293b4e5def3
   content_type: image/jpeg
-  caption: ''
-- filename: images/G4-L20-22/G4-L20-22-05.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L20-22/G4-L20-22-06.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
   caption: ''
 - filename: images/G4-L20-22/G4-L20-22-07.jpg
   size_bytes: 47048
@@ -191,24 +171,9 @@ images:
   image_hash: d54d47b28ca1
   content_type: image/png
   caption: ''
-- filename: images/G4-L20-22/G4-L20-22-09.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L20-22/G4-L20-22-10.png
   size_bytes: 2475
   image_hash: 65e20b522a57
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L20-22/G4-L20-22-11.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L20-22/G4-L20-22-12.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
   content_type: image/png
   caption: ''
 - filename: images/G4-L20-22/G4-L20-22-13.jpg
@@ -220,11 +185,6 @@ images:
   size_bytes: 43467
   image_hash: a257ae7ac963
   content_type: image/jpeg
-  caption: ''
-- filename: images/G4-L20-22/G4-L20-22-15.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
   caption: ''
 - filename: images/G4-L20-22/G4-L20-22-16.png
   size_bytes: 187291
@@ -244,21 +204,6 @@ images:
 - filename: images/G4-L20-22/G4-L20-22-19.png
   size_bytes: 2449
   image_hash: fffa9c09d6b8
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L20-22/G4-L20-22-20.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L20-22/G4-L20-22-21.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L20-22/G4-L20-22-22.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
   content_type: image/png
   caption: ''
 - filename: images/G4-L20-22/G4-L20-22-23.png
@@ -281,7 +226,7 @@ images:
   image_hash: fd00a369bf10
   content_type: image/png
   caption: ''
-image_count: 26
+image_count: 15
 story_structure_rows:
 - label: 主題
   value: 物價波動的原因

@@ -115,16 +115,6 @@ discussion_content:
 - （ C ）4. 這篇文章開頭先描述了周思齊引退賽的現場及他的頭銜，這樣的寫作安排主要想要產生什麼效果？ A.直接揭示文章的結局，避免讀者產生疑問 B.以熱鬧氛圍吸引讀者，讓人感到身歷其境 C.引起讀者興趣，也凸顯文章人物的代表性 D.藉頭銜強調文章人物的成就與引退的可惜
 - （ D ）5. 體育記者對李教練的描述是「他是位看重團隊紀律的教練」，請問底下哪一選項「不能支持」這個觀點？ A.他要求球員晨操絶對準時，不能遲到早退 B.出外比賽，嚴格要求每位球員的服裝儀容 C.要求球隊自訂球隊公約，及違規的處罰方式 D.他鼓勵球員大量閱讀，發現自己的潛能
 images:
-- filename: images/G5-L6/G5-L6-01.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L6/G5-L6-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L6/G5-L6-03.png
   size_bytes: 285936
   image_hash: 3ee7c53ea07a
@@ -135,54 +125,14 @@ images:
   image_hash: 731a6a324103
   content_type: image/png
   caption: ''
-- filename: images/G5-L6/G5-L6-05.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L6/G5-L6-06.png
   size_bytes: 1806
   image_hash: 1220987a925f
   content_type: image/png
   caption: ''
-- filename: images/G5-L6/G5-L6-07.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L6/G5-L6-08.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L6/G5-L6-09.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L6/G5-L6-10.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L6/G5-L6-11.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L6/G5-L6-12.x-emf
-  size_bytes: 6284
-  image_hash: 0c7139b3616c
-  content_type: image/x-emf
-  caption: ''
 - filename: images/G5-L6/G5-L6-13.png
   size_bytes: 8270
   image_hash: cbd750442e39
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L6/G5-L6-14.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
   content_type: image/png
   caption: ''
 - filename: images/G5-L6/G5-L6-15.png
@@ -190,22 +140,12 @@ images:
   image_hash: 344cedb5e6df
   content_type: image/png
   caption: ''
-- filename: images/G5-L6/G5-L6-16.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L6/G5-L6-17.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L6/G5-L6-18.svg+xml
   size_bytes: 122982
   image_hash: a715fba9b682
   content_type: image/svg+xml
   caption: ''
-image_count: 18
+image_count: 6
 story_structure_rows:
 - label: 主題
   value: 周思齊的棒球人生

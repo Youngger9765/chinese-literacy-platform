@@ -109,26 +109,6 @@ discussion_content:
 - 如果你的身體會說話，你覺得以下哪些句子是他最常說的？(可複選)
 - □ ①「我有點累，可以讓我休息一下嗎？」 □ ②「我好渴，請幫我喝點水。」 □ ③「肚子餓了，該補充能量囉！」 □ ④「好緊繃喔，幫我伸展一下吧。」 □ ⑤「今天太久沒動了，帶我出去走一走！」 □ ⑥「太久盯著螢幕了，讓眼睛休息一下。」 □ ⑦「呼吸一下，別那麼趕。」 □ ⑧「我表現得不錯吧？可以稱讚我一下！」 □ ⑨「別再勉強我了，我真的需要放慢腳步。」 □ ⑩其他：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 images:
-- filename: images/G4-L25/G4-L25-01.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-04.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L25/G4-L25-05.png
   size_bytes: 9361
   image_hash: ee3964f5ef59
@@ -139,49 +119,9 @@ images:
   image_hash: 26c303af4818
   content_type: image/png
   caption: ''
-- filename: images/G4-L25/G4-L25-07.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-08.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-09.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-10.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-11.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-12.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L25/G4-L25-13.png
   size_bytes: 1748
   image_hash: 72da749b5778
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L25/G4-L25-14.x-emf
-  size_bytes: 6284
-  image_hash: 0c7139b3616c
-  content_type: image/x-emf
-  caption: ''
-- filename: images/G4-L25/G4-L25-15.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
   content_type: image/png
   caption: ''
 - filename: images/G4-L25/G4-L25-16.png
@@ -189,7 +129,7 @@ images:
   image_hash: 9182f424463d
   content_type: image/png
   caption: ''
-image_count: 16
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 身體是一座精密的工廠

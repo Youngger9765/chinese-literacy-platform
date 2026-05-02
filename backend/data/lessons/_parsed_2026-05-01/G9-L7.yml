@@ -112,29 +112,9 @@ images:
   image_hash: ad7e15957b69
   content_type: image/jpeg
   caption: ''
-- filename: images/G9-L7/G9-L7-02.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L7/G9-L7-04.png
   size_bytes: 1380
   image_hash: 609bcc18d91d
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-05.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-06.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
   content_type: image/png
   caption: ''
 - filename: images/G9-L7/G9-L7-07.png
@@ -157,24 +137,9 @@ images:
   image_hash: f7b1ef244fd6
   content_type: image/png
   caption: ''
-- filename: images/G9-L7/G9-L7-11.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-12.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L7/G9-L7-13.png
   size_bytes: 39604
   image_hash: bae3972320d6
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-14.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
   content_type: image/png
   caption: ''
 - filename: images/G9-L7/G9-L7-15.png
@@ -207,34 +172,14 @@ images:
   image_hash: dcdd508ff6b3
   content_type: image/x-emf
   caption: ''
-- filename: images/G9-L7/G9-L7-21.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-22.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L7/G9-L7-23.png
   size_bytes: 14145
   image_hash: c7d33f2a184a
   content_type: image/png
   caption: ''
-- filename: images/G9-L7/G9-L7-24.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L7/G9-L7-25.png
   size_bytes: 10557
   image_hash: 6b3fb42a68f5
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L7/G9-L7-26.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
   content_type: image/png
   caption: ''
 - filename: images/G9-L7/G9-L7-27.png
@@ -252,7 +197,7 @@ images:
   image_hash: 523919ce1bd6
   content_type: image/png
   caption: ''
-image_count: 29
+image_count: 18
 vocab_bank:
   A: 職涯
   B: 效率

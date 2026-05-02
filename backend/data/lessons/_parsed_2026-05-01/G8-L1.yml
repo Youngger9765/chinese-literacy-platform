@@ -120,51 +120,6 @@ discussion_content:
 - C.從「情書」可知此信主要訴說對台東的情感
 - D.從本文標題可知作者預計未來仍會拜訪台東
 images:
-- filename: images/G8-L1/G8-L1-01.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L1/G8-L1-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L1/G8-L1-03.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L1/G8-L1-04.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L1/G8-L1-05.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L1/G8-L1-06.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L1/G8-L1-07.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L1/G8-L1-08.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L1/G8-L1-09.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L1/G8-L1-10.png
   size_bytes: 13084
   image_hash: 9c75f6c1b34e
@@ -175,17 +130,12 @@ images:
   image_hash: 047817bb174d
   content_type: image/png
   caption: ''
-- filename: images/G8-L1/G8-L1-12.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L1/G8-L1-13.png
   size_bytes: 10080
   image_hash: 87ae0ee866c8
   content_type: image/png
   caption: ''
-image_count: 13
+image_count: 3
 story_structure_rows:
 - label: 主題
   value: 對台東的真摯情感與美好回憶

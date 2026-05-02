@@ -131,26 +131,6 @@ discussion_content:
 - C.動物與天氣無關，真正可靠的是氣象局資料
 - D.古代諺語早已精準掌握天氣預測法
 images:
-- filename: images/G4-L9/G4-L9-01.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-04.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L9/G4-L9-05.png
   size_bytes: 1436
   image_hash: 8d5b8cea1382
@@ -161,39 +141,9 @@ images:
   image_hash: 152d61796cec
   content_type: image/png
   caption: ''
-- filename: images/G4-L9/G4-L9-07.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-08.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-09.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-10.png
-  size_bytes: 1130
-  image_hash: e5da0637c603
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-11.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L9/G4-L9-12.png
   size_bytes: 3267
   image_hash: 5320f6b90d20
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L9/G4-L9-13.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
   content_type: image/png
   caption: ''
 - filename: images/G4-L9/G4-L9-14.png
@@ -206,12 +156,7 @@ images:
   image_hash: a6890a257e40
   content_type: image/png
   caption: ''
-- filename: images/G4-L9/G4-L9-16.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-image_count: 16
+image_count: 5
 story_structure_rows:
 - label: 主題
   value: 大自然的氣象小幫手

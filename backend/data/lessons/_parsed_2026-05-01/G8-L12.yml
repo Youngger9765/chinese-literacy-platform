@@ -90,59 +90,9 @@ self_check_items:
 - 我能找出文章中作者反覆舉出的例子。 □ 2.我能把這些例子合起來看，找出它們的共同點。 □ 3.我能根據例子與共同點，推論出作者想表達的觀點（隱含意義）
 discussion_content: []
 images:
-- filename: images/G8-L12/G8-L12-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L12/G8-L12-02.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L12/G8-L12-03.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L12/G8-L12-04.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L12/G8-L12-05.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L12/G8-L12-06.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L12/G8-L12-07.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L12/G8-L12-08.png
   size_bytes: 1428
   image_hash: 3c367793a4f3
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L12/G8-L12-09.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L12/G8-L12-10.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L12/G8-L12-11.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
   content_type: image/png
   caption: ''
 - filename: images/G8-L12/G8-L12-12.png
@@ -150,17 +100,12 @@ images:
   image_hash: 0e561d65d451
   content_type: image/png
   caption: ''
-- filename: images/G8-L12/G8-L12-13.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L12/G8-L12-14.png
   size_bytes: 3298
   image_hash: 1c800ac11363
   content_type: image/png
   caption: ''
-image_count: 14
+image_count: 3
 story_structure_rows:
 - label: 主題
   value: 南島語族的語言與遷徙

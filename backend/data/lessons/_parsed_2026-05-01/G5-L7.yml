@@ -100,16 +100,6 @@ discussion_content:
 - (C)他不違背良心，在每場比賽全力以赴，並獲得肯定
 - (D)持續努力並堅守信念，才能走完長久的職業生涯
 images:
-- filename: images/G5-L7/G5-L7-01.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L7/G5-L7-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L7/G5-L7-03.png
   size_bytes: 285936
   image_hash: 3ee7c53ea07a
@@ -120,54 +110,14 @@ images:
   image_hash: 0fff3c5815a9
   content_type: image/png
   caption: ''
-- filename: images/G5-L7/G5-L7-05.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L7/G5-L7-06.png
   size_bytes: 1488
   image_hash: d31c7c5adb13
   content_type: image/png
   caption: ''
-- filename: images/G5-L7/G5-L7-07.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L7/G5-L7-08.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L7/G5-L7-09.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L7/G5-L7-10.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L7/G5-L7-11.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L7/G5-L7-12.x-emf
-  size_bytes: 6284
-  image_hash: 0c7139b3616c
-  content_type: image/x-emf
-  caption: ''
 - filename: images/G5-L7/G5-L7-13.png
   size_bytes: 8807
   image_hash: 8eb2d392fc84
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L7/G5-L7-14.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
   content_type: image/png
   caption: ''
 - filename: images/G5-L7/G5-L7-15.png
@@ -175,22 +125,12 @@ images:
   image_hash: 453c4534c50d
   content_type: image/png
   caption: ''
-- filename: images/G5-L7/G5-L7-16.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L7/G5-L7-17.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L7/G5-L7-18.svg+xml
   size_bytes: 122982
   image_hash: a715fba9b682
   content_type: image/svg+xml
   caption: ''
-image_count: 18
+image_count: 6
 story_structure_rows:
 - label: 主題
   value: 周思齊的棒球人生

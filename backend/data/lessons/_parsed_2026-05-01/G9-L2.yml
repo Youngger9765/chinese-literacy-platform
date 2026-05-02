@@ -98,59 +98,9 @@ multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G9-L2/G9-L2-01.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L2/G9-L2-02.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L2/G9-L2-03.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L2/G9-L2-04.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L2/G9-L2-05.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L2/G9-L2-06.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L2/G9-L2-07.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L2/G9-L2-08.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L2/G9-L2-09.png
   size_bytes: 17814
   image_hash: f19f01f56cbf
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L2/G9-L2-10.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L2/G9-L2-11.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
   content_type: image/png
   caption: ''
 - filename: images/G9-L2/G9-L2-12.png
@@ -163,17 +113,12 @@ images:
   image_hash: c23364989311
   content_type: image/png
   caption: ''
-- filename: images/G9-L2/G9-L2-14.png
-  size_bytes: 1130
-  image_hash: e5da0637c603
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L2/G9-L2-15.png
   size_bytes: 13945
   image_hash: 71654dd25ef0
   content_type: image/png
   caption: ''
-image_count: 15
+image_count: 4
 vocab_bank:
   A: 嚴峻
   B: 英姿颯爽

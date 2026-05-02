@@ -107,46 +107,6 @@ discussion_content:
 - C.告訴讀者，重複朗讀可以提升閱讀速度與理解能力
 - D.教導讀者重複朗讀的訓練方法
 images:
-- filename: images/G5-L27/G5-L27-01.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-02.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-03.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-04.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-05.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-06.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-07.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-08.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L27/G5-L27-09.png
   size_bytes: 8526
   image_hash: 9efe51c8d8fd
@@ -155,16 +115,6 @@ images:
 - filename: images/G5-L27/G5-L27-10.png
   size_bytes: 2464
   image_hash: 5fc52ee6358f
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-11.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L27/G5-L27-12.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
   content_type: image/png
   caption: ''
 - filename: images/G5-L27/G5-L27-13.png
@@ -177,7 +127,7 @@ images:
   image_hash: 8267a37cdb11
   content_type: image/png
   caption: ''
-image_count: 14
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 重複朗讀的重要性
