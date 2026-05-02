@@ -131,6 +131,22 @@ export interface Story {
    * Absent for all legacy (Layer-1) lessons — they use DEFAULT_STEP_SEQUENCE as fallback.
    */
   stepSequence?: string[];
+  /** Layout variant for ComprehensionChat (#1341). Default: 'standard'. */
+  layout_mode?: 'standard' | 'graphic-text' | 'graphic-chart';
+  /** Canonical strategy type for backend dispatch (#1404). */
+  reading_strategy_type?: string;
+  /** Lesson code (e.g. 'G7-L28'), used for image URL construction (#1341). */
+  lesson_code?: string;
+  /** Images for graphic-text layout (#1341). */
+  images?: {
+    filename: string;
+    size_bytes: number;
+    image_hash: string;
+    content_type: string;
+    caption?: string;
+  }[];
+  /** Paragraphs array (Layer-2 lessons use this instead of content). */
+  paragraphs?: string[];
 }
 
 export interface ReadingAttempt {
