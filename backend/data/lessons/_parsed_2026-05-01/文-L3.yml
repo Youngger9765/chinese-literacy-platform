@@ -74,32 +74,7 @@ images:
   image_hash: d902ab030bf0
   content_type: image/png
   caption: ''
-- filename: images/文-L3/文-L3-02.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/文-L3/文-L3-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/文-L3/文-L3-04.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
-- filename: images/文-L3/文-L3-05.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/文-L3/文-L3-06.png
-  size_bytes: 1738
-  image_hash: d41b200d4a17
-  content_type: image/png
-  caption: ''
-image_count: 6
+image_count: 1
 story_structure_rows:
 - label: 主題
   value: 為官清廉，不貪不取
@@ -130,3 +105,59 @@ story_structure_rows:
   interactive_type: fill_blank
   hint: 從這個故事中，我們可以學到什麼？
 story_structure_table_source: ai-generated-2026-05-02
+spotlight_raw_text: "文言聚光燈：判讀主語\n文言文類型\n記敘人物\t\n\n-27940-18224500第3課　不量田  \n學習單：\n王淑瑱\n古文今譯\n某位商人，來到直隸省的邊界附近，忽然下起大冰雹，他連忙躲到田間。突然，他聽到空中有聲音說：「這是張不量的田，不要傷了他的莊稼。」商人心想：這張氏既然叫「不良」，為何反而受上天庇佑？等冰雹停止，商人進入村子，向人打聽那個人，並且詢問那人叫這名字的意思。\n原來張氏素來富有，積蓄的穀物很多。每到春天，窮人就來找他借貸穀物，償還時，不管還了多少也不計較，全都收下，不曾拿工具測量，要人還到足夠的數量，所以才叫他「不量」，並非「不良」啊！後來眾人趕到田中，只見麥子被冰雹砸得像亂麻一樣，只有張氏的田一點事也沒有。\n　　　　　　　　　　　　\n清朝・蒲松齡\n  \n賈人.某，至.直隸1界，忽.大雨\U000E01E12雹，伏.禾中。聞.空中.云：「此.張不量\U000E01E1田，勿傷.其稼。」賈.私意.張氏既云「不良」，何反.佑護？雹止，入村，訪問.其人，且問.取名之義。\n蓋.張素豐，積粟.甚富。每春間.貧民就貸，償時.多寡不較，悉納之，未嘗.執概3取盈4，故名.「不量\U000E01E1」，非.不良也。眾趨.田中，見稞穗.摧折如麻，獨.張氏諸田.無恙5。\n\n487643185345注釋\n1.直隸：清代的直隸省，現在中國的河北省。\n2.大雨雹：雨，當動詞，表示落下的意思。「大雨雹」的意思是下了很大的冰雹。\n3 \t概：用來刮平「米斗」的工具。米斗，交易時用來測量米量的容器。\n4 \t盈：有「滿」的意思，課文是指足夠的數量。\n5 \t恙：疾病或異樣。「無恙」的意思是沒有病痛、憂慮，課文是指沒事。\ncenter145938\n1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！\n2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。00\n1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！\n2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。\n\n第1次計時\n第2次計時\n第3次計時\n裁判計時\n秒\n秒\n秒\n秒\n\n裁判簽名:                \n\n◎"
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 文言聚光燈：判讀主語
+  instruction: 請閱讀課文「不量田」，並依據文章內容，判讀故事的主角、問題、解決方式與結果，以練習「判讀主語」的閱讀策略。
+  reasoning: 此練習旨在引導學生透過判讀文言文中的關鍵敘事元素（主角、問題、解決、結果），來理解文章主旨與人物特質，並特別聚焦於「判讀主語」以釐清故事脈絡。透過結構化提問，強化學生對文言文內容的理解與分析能力。
+  steps:
+  - prompt: 請問這篇故事的主角是誰？
+    type: select
+    options:
+    - 商人
+    - 張不量
+    - 村民
+    - 天上的聲音
+    answer: 1
+    reasoning: 故事主要圍繞著張不量的名字由來、行為及其田地受庇佑的事件展開，商人是引導讀者進入故事的視角，但核心人物是張不量。
+  - prompt: 故事中，商人最初遇到的「問題」或「疑惑」是什麼？
+    type: select
+    options:
+    - 冰雹太大，商人無處可躲。
+    - 張不量的田地被冰雹砸壞了。
+    - 商人不理解為何名叫「不良」的張氏反而受上天庇佑。
+    - 村民不願意告訴商人張不量的故事。
+    answer: 2
+    reasoning: 原文中商人聽到空中的聲音後，心想：「這張氏既然叫『不良』，為何反而受上天庇佑？」這是推動故事發展的核心疑問。
+  - prompt: 商人如何解決他的疑惑？
+    type: select
+    options:
+    - 他自己想通了「不量」的真正意思。
+    - 他向村民打聽張不量其人，並詢問其名字的意義。
+    - 他向上天祈禱，請求解釋。
+    - 他直接去問張不量本人。
+    answer: 1
+    reasoning: 原文提到「雹止，入村，訪問其人，且問取名之義」，明確指出商人透過向村民打聽來解決疑惑。
+  - prompt: 故事的最終結果是什麼？
+    type: select
+    options:
+    - 張不量的田地也和其他人的田地一樣被冰雹砸壞了。
+    - 商人發現張不量其實是個壞人。
+    - 商人理解了「不量」的真正含義，且張不量的田地毫髮無傷。
+    - 張不量因為不量田而變得貧窮。
+    answer: 2
+    reasoning: 原文結尾「故名『不量』，非不良也。眾趨田中，見稞穗摧折如麻，獨張氏諸田無恙」，清楚說明了名字的真相和張氏田地完好無損的結果。
+  - prompt: 請思考：張不量的故事給你什麼啟發？這與「判讀主語」的策略有何關聯？
+    type: free_text
+    reasoning: 此開放題旨在引導學生反思故事的寓意，並連結到本次策略練習的核心——判讀主語的重要性，即透過理解主語的行為與特質來掌握故事的深層意義。
+strategy_exercise_source: gemini-2.5-flash-2026-05-02
+worksheet_section_order:
+- number: 三
+  name: 文章重點表
+  type: structure_table
+- number: 五
+  name: 閱讀理解
+  type: mcq
+worksheet_intro:
+  lesson_label: 第3課　不量田

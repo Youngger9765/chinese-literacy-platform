@@ -147,6 +147,17 @@ export interface Story {
   }[];
   /** Paragraphs array (Layer-2 lessons use this instead of content). */
   paragraphs?: string[];
+  /** 學習單 section ordering (#1434). e.g. [{number: '二', name: '念順順', type: 'reading_timer'}, ...] */
+  worksheetSectionOrder?: Array<{ number: string; name: string; type: string }>;
+  /** 學習單 intro metadata (#1434). Present only for Layer-2 lessons parsed from docx. */
+  worksheetIntro?: {
+    step_label?: string;
+    target_strategy?: string;
+    instructions?: string[];
+    level_label?: string;
+    lesson_label?: string;
+    authors?: string;
+  };
 }
 
 export interface ReadingAttempt {

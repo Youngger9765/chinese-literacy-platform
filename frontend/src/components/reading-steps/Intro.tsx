@@ -147,7 +147,34 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             );
           })()}
 
-          {/* Background section */}
+          {/* 學習目標 banner — worksheet_intro.target_strategy (#1434) */}
+          {story.worksheetIntro?.target_strategy && (
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+                <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">學習目標</span>
+              </div>
+              <p className={`text-blue-800 text-xl font-semibold ${zhuyinActive ? 'leading-[3rem] tracking-[0.3em]' : 'leading-[1.5]'}`}>
+                {processZhuyin(story.worksheetIntro.target_strategy)}
+              </p>
+
+              {/* 學習提示 checklist */}
+              {story.worksheetIntro.instructions && story.worksheetIntro.instructions.length > 0 && (
+                <ul className="space-y-1.5 pt-1" aria-label="學習提示">
+                  {story.worksheetIntro.instructions.map((item, idx) => (
+                    <li key={idx} className={`flex items-start gap-2 text-blue-700 ${zhuyinActive ? 'text-lg leading-[2.8rem] tracking-[0.2em]' : 'text-base leading-[1.6]'}`}>
+                      <span className="mt-1 flex-shrink-0 text-blue-400" aria-hidden="true">&#9655;</span>
+                      <span>{processZhuyin(item)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* Background section — story.intro.background (Layer-1 backward compat) */}
           {story.intro ? (
             <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-4">
               <div className="flex items-center gap-2">
@@ -193,8 +220,36 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               </div>
             </div>
           ) : (
-            <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
-              這篇課文目前沒有簡介資料。
+            !story.worksheetIntro && (
+              <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
+                這篇課文目前沒有簡介資料。
+              </div>
+            )
+          )}
+
+          {/* 學習單流程 — worksheet_section_order (#1434) */}
+          {story.worksheetSectionOrder && story.worksheetSectionOrder.length > 0 && (
+            <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span className="text-xs font-bold text-accent-light uppercase tracking-widest">
+                  本課 {story.worksheetSectionOrder.length} 個學習步驟
+                </span>
+              </div>
+              <ol className="space-y-2" aria-label="學習單流程">
+                {story.worksheetSectionOrder.map((section, idx) => (
+                  <li key={idx} className="flex items-center gap-3">
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-accent-bg-subtle text-accent-hover text-sm font-bold flex items-center justify-center">
+                      {section.number}
+                    </span>
+                    <span className={`text-on-surface ${zhuyinActive ? 'text-lg leading-[2.8rem] tracking-[0.2em]' : 'text-base'}`}>
+                      {processZhuyin(section.name)}
+                    </span>
+                  </li>
+                ))}
+              </ol>
             </div>
           )}
 
