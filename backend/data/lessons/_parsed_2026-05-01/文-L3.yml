@@ -74,32 +74,12 @@ images:
   image_hash: d902ab030bf0
   content_type: image/png
   caption: ''
-- filename: images/文-L3/文-L3-02.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/文-L3/文-L3-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/文-L3/文-L3-04.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
-- filename: images/文-L3/文-L3-05.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
 - filename: images/文-L3/文-L3-06.png
   size_bytes: 1738
   image_hash: d41b200d4a17
   content_type: image/png
   caption: ''
-image_count: 6
+image_count: 2
 story_structure_rows:
 - label: 主題
   value: 為官清廉，不貪不取

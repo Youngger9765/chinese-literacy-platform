@@ -81,34 +81,9 @@ self_check_items: []
 discussion_content:
 - ☆勾完後，再看看沒有勾選的選項，那樣的想法所帶來的情緒有什麼不同呢？
 images:
-- filename: images/G4-L16/G4-L16-01.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-04.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L16/G4-L16-05.png
   size_bytes: 2411
   image_hash: c36c4bbe5234
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-06.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
   content_type: image/png
   caption: ''
 - filename: images/G4-L16/G4-L16-07.png
@@ -116,29 +91,9 @@ images:
   image_hash: dfc64b067895
   content_type: image/png
   caption: ''
-- filename: images/G4-L16/G4-L16-08.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-09.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-10.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L16/G4-L16-11.png
   size_bytes: 2514
   image_hash: 073af588a951
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-12.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
   content_type: image/png
   caption: ''
 - filename: images/G4-L16/G4-L16-13.png
@@ -146,17 +101,7 @@ images:
   image_hash: 646735dfc035
   content_type: image/png
   caption: ''
-- filename: images/G4-L16/G4-L16-14.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L16/G4-L16-15.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-image_count: 15
+image_count: 4
 story_structure_rows:
 - label: 主角
   value: 課文中的「我」

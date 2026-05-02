@@ -72,27 +72,7 @@ images:
   image_hash: 7ee5d3b8b36a
   content_type: image/png
   caption: ''
-- filename: images/文-L8/文-L8-02.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
-- filename: images/文-L8/文-L8-03.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/文-L8/文-L8-04.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/文-L8/文-L8-05.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-image_count: 5
+image_count: 1
 story_structure_rows:
 - label: 主題
   value: 顧寧人愛讀書

@@ -118,49 +118,9 @@ discussion_content:
 - C.描述四名孩童在雨林中40天如何求生、獲救的經歷
 - D.說明亞馬遜雨林惡劣的環境，讓人難以生存
 images:
-- filename: images/G6-L16/G6-L16-01.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-02.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-03.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-04.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-05.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-06.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-07.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L16/G6-L16-08.png
   size_bytes: 15778
   image_hash: 671a22d4d9ac
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-09.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
   content_type: image/png
   caption: ''
 - filename: images/G6-L16/G6-L16-10.png
@@ -171,21 +131,6 @@ images:
 - filename: images/G6-L16/G6-L16-11.png
   size_bytes: 18302
   image_hash: 01ae678b920d
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-12.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-13.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L16/G6-L16-14.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
   content_type: image/png
   caption: ''
 - filename: images/G6-L16/G6-L16-15.png
@@ -203,7 +148,7 @@ images:
   image_hash: 504d85086380
   content_type: image/png
   caption: ''
-image_count: 17
+image_count: 6
 story_structure_rows:
 - label: 主題
   value: 四名孩童叢林求生獲救的奇蹟行動

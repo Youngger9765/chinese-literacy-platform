@@ -135,45 +135,15 @@ discussion_content:
 - 氣候變遷 + 農民貧困 砍伐森林 破壞生態 病蟲害增加 可可產量不穩 農民更貧困
 - 2.這條因果鏈告訴我們：環境變遷和農民貧困問題交織在一起，最終讓農民更貧困
 images:
-- filename: images/G8-L7/G8-L7-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L7/G8-L7-02.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L7/G8-L7-03.gif
   size_bytes: 60
   image_hash: 2bc7d82b797f
   content_type: image/gif
   caption: ''
-- filename: images/G8-L7/G8-L7-04.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L7/G8-L7-05.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L7/G8-L7-06.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L7/G8-L7-07.gif
   size_bytes: 57
   image_hash: 2b4d7fb18c87
   content_type: image/gif
-  caption: ''
-- filename: images/G8-L7/G8-L7-08.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
   caption: ''
 - filename: images/G8-L7/G8-L7-09.png
   size_bytes: 2424
@@ -185,19 +155,9 @@ images:
   image_hash: 054dfa610bc1
   content_type: image/gif
   caption: ''
-- filename: images/G8-L7/G8-L7-11.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L7/G8-L7-12.png
   size_bytes: 5706
   image_hash: bb98739d05c2
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L7/G8-L7-13.png
-  size_bytes: 10953
-  image_hash: a752879856b9
   content_type: image/png
   caption: ''
 - filename: images/G8-L7/G8-L7-14.png
@@ -205,24 +165,9 @@ images:
   image_hash: f70abeb55ada
   content_type: image/png
   caption: ''
-- filename: images/G8-L7/G8-L7-15.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
 - filename: images/G8-L7/G8-L7-16.png
   size_bytes: 2723
   image_hash: 5cb9bc08693f
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L7/G8-L7-17.png
-  size_bytes: 1130
-  image_hash: e5da0637c603
-  content_type: image/png
-  caption: ''
-- filename: images/G8-L7/G8-L7-18.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
   content_type: image/png
   caption: ''
 - filename: images/G8-L7/G8-L7-19.png
@@ -235,7 +180,7 @@ images:
   image_hash: ab2663988fb1
   content_type: image/png
   caption: ''
-image_count: 20
+image_count: 9
 story_structure_rows:
 - label: 主題
   value: 巧克力產業的困境與公平交易

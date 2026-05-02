@@ -71,11 +71,6 @@ images:
   image_hash: ef9e7cdce1e4
   content_type: image/png
   caption: ''
-- filename: images/G9-L8/G9-L8-05.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L8/G9-L8-06.png
   size_bytes: 5343
   image_hash: ed70b43adb51
@@ -86,11 +81,6 @@ images:
   image_hash: 25507644c374
   content_type: image/png
   caption: ''
-- filename: images/G9-L8/G9-L8-08.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
 - filename: images/G9-L8/G9-L8-09.x-emf
   size_bytes: 46808
   image_hash: 5d9a2b7e4144
@@ -99,11 +89,6 @@ images:
 - filename: images/G9-L8/G9-L8-10.png
   size_bytes: 152555
   image_hash: dc448f91bf6c
-  content_type: image/png
-  caption: ''
-- filename: images/G9-L8/G9-L8-11.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
   content_type: image/png
   caption: ''
 - filename: images/G9-L8/G9-L8-12.png
@@ -121,7 +106,7 @@ images:
   image_hash: a71439391adf
   content_type: image/jpeg
   caption: ''
-image_count: 14
+image_count: 11
 story_structure_rows:
 - label: 主題
   value: 臺灣學生的閱讀力

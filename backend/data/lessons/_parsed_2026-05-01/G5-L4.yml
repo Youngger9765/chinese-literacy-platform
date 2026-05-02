@@ -84,21 +84,6 @@ self_check_items:
 - 如果只用一種方法還不能確定意思，我可以兩種方法一起用。
 discussion_content: []
 images:
-- filename: images/G5-L4/G5-L4-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L4/G5-L4-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L4/G5-L4-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L4/G5-L4-04.png
   size_bytes: 60559
   image_hash: 87fac6c4dd3a
@@ -114,34 +99,9 @@ images:
   image_hash: b8f6423f03c1
   content_type: image/png
   caption: ''
-- filename: images/G5-L4/G5-L4-07.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L4/G5-L4-08.png
   size_bytes: 3304
   image_hash: 9034b211747e
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L4/G5-L4-09.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L4/G5-L4-10.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L4/G5-L4-11.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L4/G5-L4-12.png
-  size_bytes: 1130
-  image_hash: e5da0637c603
   content_type: image/png
   caption: ''
 - filename: images/G5-L4/G5-L4-13.png
@@ -149,27 +109,12 @@ images:
   image_hash: ada7e9f9ca1c
   content_type: image/png
   caption: ''
-- filename: images/G5-L4/G5-L4-14.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L4/G5-L4-15.png
   size_bytes: 1496
   image_hash: 75cc875574a3
   content_type: image/png
   caption: ''
-- filename: images/G5-L4/G5-L4-16.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L4/G5-L4-17.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-image_count: 17
+image_count: 6
 story_structure_rows:
 - label: 主題
   value: 災難預言

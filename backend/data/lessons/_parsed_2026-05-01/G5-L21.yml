@@ -108,64 +108,14 @@ discussion_content:
 - B.無論如何週六完成報告，再出去玩
 - C.船到橋頭自然直，等到時候再說 D.報告不要求完美，簡單完成即可
 images:
-- filename: images/G5-L21/G5-L21-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-04.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L21/G5-L21-05.png
   size_bytes: 1205
   image_hash: 9abb7b9affc9
   content_type: image/png
   caption: ''
-- filename: images/G5-L21/G5-L21-06.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-07.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-08.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-09.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-10.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L21/G5-L21-11.png
   size_bytes: 4914
   image_hash: 26d6894f8dd1
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L21/G5-L21-12.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
   content_type: image/png
   caption: ''
 - filename: images/G5-L21/G5-L21-13.png
@@ -178,12 +128,7 @@ images:
   image_hash: ead8935235db
   content_type: image/png
   caption: ''
-- filename: images/G5-L21/G5-L21-15.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-image_count: 15
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 如何抗拒手機誘惑

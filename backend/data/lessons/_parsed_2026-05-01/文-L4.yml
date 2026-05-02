@@ -78,11 +78,6 @@ images:
   image_hash: 664b5708972e
   content_type: image/png
   caption: ''
-- filename: images/文-L4/文-L4-02.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
 - filename: images/文-L4/文-L4-03.png
   size_bytes: 342
   image_hash: 332a5d796cd5
@@ -96,11 +91,6 @@ images:
 - filename: images/文-L4/文-L4-05.png
   size_bytes: 160649
   image_hash: 6d03f3e46e8b
-  content_type: image/png
-  caption: ''
-- filename: images/文-L4/文-L4-06.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
   content_type: image/png
   caption: ''
 - filename: images/文-L4/文-L4-07.png
@@ -118,11 +108,6 @@ images:
   image_hash: 110cc75a50ec
   content_type: image/png
   caption: ''
-- filename: images/文-L4/文-L4-10.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
 - filename: images/文-L4/文-L4-11.png
   size_bytes: 305
   image_hash: 8292ec5ec5db
@@ -138,12 +123,7 @@ images:
   image_hash: 1576b537cfdd
   content_type: image/png
   caption: ''
-- filename: images/文-L4/文-L4-14.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-image_count: 14
+image_count: 10
 spotlight_raw_text: "文言聚光燈：斷句與判讀主語II\n文言文類型\n記敘人物\t\n\n-27940-18224500第4課  陸公買硯  \n學習單：\n王淑瑱\n古文今譯\n明朝有位叫陸盧峰的人，在京城等待朝廷的任用。他曾在市集上見到一塊上好的硯臺，可是議價沒有成功。回到官邸之後，他還是派僕人前往，用一兩銀子買硯臺回來。\n僕人拿著硯臺回來，陸公驚訝它不像自己想買的那個，僕人卻堅持說它就是。陸公說：「剛才我看的硯臺有個八哥眼，現在為何沒有了？」僕人回答說：「我嫌棄它有點凸，路上正好遇見石工，幸好有剩餘的銀子，就叫他打磨讓微凸的地方平整了。」陸公感到十分可惜。\n-2101337118\n故事賞析00\n故事賞析\n-275694410300\n    好的故事都會有它吸引人的「賣點」，如有趣的地方、出人意料之外的轉折、發人深省的啟示等，這篇文章也不例外。\n　　硯臺是古代的讀書人每日用品，這位陸先生在市場上看到一方好硯，非常喜歡，但因價錢談不攏，沒有買成。但他回家後，念念不忘，最後終於叫來僕人，給他錢，叫他去買硯。\n　　故事到這裡，作者告訴你兩件事：1、陸先生有多麼喜歡這方硯臺；2、它的價錢貴到讓陸先生猶豫再三。\n　　再來是故事的轉折。\n　　僕人買硯回來了，陸先生一看就說：「它不像我想買的那個硯啊！我要買那個硯有個漂亮的八哥眼喔！」僕人這時卻答道：「我覺得那個突起不好看，就請石匠把它磨掉了。」陸先生花了一大筆錢買硯，結果不識貨的僕人出自好心，竟把主人最喜愛的部分破壞掉了。\n明朝・馮夢龍\n  \n明.有陸盧峰者，於京城.待用。嘗於市.遇一佳硯，議價.未定。既還\U000E01E1邸，使門人.往，以一\U000E01E2金.易歸。\n門人.持硯歸，公.訝其不\U000E01E1類，門人.堅稱其是。公曰：「向觀硯.有鴝鵒眼，今何.無之？」答曰：「吾.嫌其微凸，路值.石工，幸有.餘銀，令.磨而平之。」公.大惋惜。\n487643185345注釋\n1. 鴝鵒眼：一種硯石。這種硯石上有圓點形狀的花紋，就像是鴝鵒鳥的眼睛，所以叫「鴝鵒眼」。\n\nleft79433\n1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！\n2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。00\n1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！\n2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。\n\n第1次計時\n第2次計時\n第3次計時\n裁判計時\n秒\n秒\n秒\n秒\n\n裁判簽名:                \n\n◎"
 strategy_exercise:
   type: guided_steps

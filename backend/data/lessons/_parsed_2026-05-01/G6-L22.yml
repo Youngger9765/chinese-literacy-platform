@@ -220,64 +220,14 @@ discussion_content:
 - C.食客們發揮各自的專長，幫助孟嘗君化解危機
 - D.齊國軍隊立刻出兵支援，幫助孟嘗君逃出秦國
 images:
-- filename: images/G6-L22/G6-L22-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-04.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L22/G6-L22-05.png
   size_bytes: 2390
   image_hash: 756f34945e2f
   content_type: image/png
   caption: ''
-- filename: images/G6-L22/G6-L22-06.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-07.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-08.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-09.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-10.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
 - filename: images/G6-L22/G6-L22-11.png
   size_bytes: 4969
   image_hash: 4512f6436250
-  content_type: image/png
-  caption: ''
-- filename: images/G6-L22/G6-L22-12.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
   content_type: image/png
   caption: ''
 - filename: images/G6-L22/G6-L22-13.png
@@ -290,12 +240,7 @@ images:
   image_hash: 24ff9064d068
   content_type: image/png
   caption: ''
-- filename: images/G6-L22/G6-L22-15.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-image_count: 15
+image_count: 4
 vocab_bank:
   A: 互比苗頭
   B: 津津樂道

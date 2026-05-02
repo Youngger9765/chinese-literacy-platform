@@ -80,64 +80,9 @@ multiple_choice_count: 5
 self_check_items: []
 discussion_content: []
 images:
-- filename: images/G5-L22/G5-L22-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-02.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-03.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-04.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-05.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-06.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-07.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-08.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L22/G5-L22-09.png
   size_bytes: 435
   image_hash: 91793940f040
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-10.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-11.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L22/G5-L22-12.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
   content_type: image/png
   caption: ''
 - filename: images/G5-L22/G5-L22-13.png
@@ -155,7 +100,7 @@ images:
   image_hash: cf451108f96a
   content_type: image/png
   caption: ''
-image_count: 15
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 學生棒球員的困境與出路

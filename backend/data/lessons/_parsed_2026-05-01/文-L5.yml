@@ -79,16 +79,6 @@ images:
   image_hash: 09458c5992f5
   content_type: image/png
   caption: ''
-- filename: images/文-L5/文-L5-02.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/文-L5/文-L5-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
 - filename: images/文-L5/文-L5-04.png
   size_bytes: 4492
   image_hash: fba7f762a0dd
@@ -104,22 +94,12 @@ images:
   image_hash: d5fee033222e
   content_type: image/png
   caption: ''
-- filename: images/文-L5/文-L5-07.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
-- filename: images/文-L5/文-L5-08.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
 - filename: images/文-L5/文-L5-09.png
   size_bytes: 1702
   image_hash: e049f66e7861
   content_type: image/png
   caption: ''
-image_count: 9
+image_count: 5
 story_structure_rows:
 - label: 主題
   value: 荀巨伯重情重義

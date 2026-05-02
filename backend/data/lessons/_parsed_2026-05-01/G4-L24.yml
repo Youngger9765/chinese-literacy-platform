@@ -94,34 +94,9 @@ discussion_content:
 - 雙腳自然放地面，感覺哪一隻腳踩得比較實？ □右腳 □左腳 □一樣踏實
 - 感受一下臀部與椅子接觸的感覺，觀察身體重量放在哪一邊比較多？ □右半邊 □左半邊 □一樣多
 images:
-- filename: images/G4-L24/G4-L24-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L24/G4-L24-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L24/G4-L24-03.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L24/G4-L24-04.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L24/G4-L24-05.png
   size_bytes: 1797
   image_hash: 1eae0e79e602
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L24/G4-L24-06.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
   content_type: image/png
   caption: ''
 - filename: images/G4-L24/G4-L24-07.png
@@ -129,29 +104,9 @@ images:
   image_hash: 9e89a766c8b6
   content_type: image/png
   caption: ''
-- filename: images/G4-L24/G4-L24-08.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L24/G4-L24-09.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L24/G4-L24-10.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
 - filename: images/G4-L24/G4-L24-11.png
   size_bytes: 9106
   image_hash: 62b261ed333e
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L24/G4-L24-12.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
   content_type: image/png
   caption: ''
 - filename: images/G4-L24/G4-L24-13.png
@@ -159,17 +114,7 @@ images:
   image_hash: 04274c1a2ddc
   content_type: image/png
   caption: ''
-- filename: images/G4-L24/G4-L24-14.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G4-L24/G4-L24-15.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-image_count: 15
+image_count: 4
 story_structure_rows:
 - label: 主題
   value: 成為身體的最佳夥伴

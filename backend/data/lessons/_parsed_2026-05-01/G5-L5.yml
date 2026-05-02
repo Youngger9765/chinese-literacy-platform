@@ -137,25 +137,10 @@ discussion_content:
 - C.小強因為家人支持，從不擔心成績問題，隨遇而安的生活
 - D.小玲學習講求效率，專注自己擅長的科目，弱科順其自然
 images:
-- filename: images/G5-L5/G5-L5-01.png
-  size_bytes: 1379
-  image_hash: 808f84e4d702
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-02.png
-  size_bytes: 9079
-  image_hash: 3dc01b2b789e
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L5/G5-L5-03.svg+xml
   size_bytes: 122982
   image_hash: a715fba9b682
   content_type: image/svg+xml
-  caption: ''
-- filename: images/G5-L5/G5-L5-04.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
   caption: ''
 - filename: images/G5-L5/G5-L5-05.png
   size_bytes: 4908
@@ -177,52 +162,12 @@ images:
   image_hash: 88feb411d737
   content_type: image/png
   caption: ''
-- filename: images/G5-L5/G5-L5-09.png
-  size_bytes: 10953
-  image_hash: a752879856b9
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-10.png
-  size_bytes: 11101
-  image_hash: 2ff02832a1cb
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-11.png
-  size_bytes: 11062
-  image_hash: fa9982037e78
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-12.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-13.png
-  size_bytes: 8575
-  image_hash: 57d490db7791
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-14.png
-  size_bytes: 9835
-  image_hash: 083ac7675369
-  content_type: image/png
-  caption: ''
-- filename: images/G5-L5/G5-L5-15.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
 - filename: images/G5-L5/G5-L5-16.png
   size_bytes: 434
   image_hash: 7a10c3118cf2
   content_type: image/png
   caption: ''
-- filename: images/G5-L5/G5-L5-17.png
-  size_bytes: 6724
-  image_hash: 4c0bcf61bd8a
-  content_type: image/png
-  caption: ''
-image_count: 17
+image_count: 6
 vocab_bank:
   A: 詼諧
   B: 歸咎
