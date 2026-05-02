@@ -142,37 +142,107 @@ def get_title_from_table0(table: docx.table.Table) -> tuple[str, str, str]:
                 authors = txt
 
     # 找課文 — Row 2, Col 1（標準）
+    # NOTE: 保留換行符號（\n），讓 split_story_paragraphs 能按段分割。
+    #       只清除每行內部的多餘空格，不壓縮跨行的 \n。
     if len(table.rows) >= 3:
         row2_cells = table.rows[2].cells
         # 跳過第一欄（通常是段落標號）
         for col_idx in range(1, len(row2_cells)):
             cell_txt = row2_cells[col_idx].text.strip()
             if len(cell_txt) > 30:  # 課文通常較長
-                story_text = clean_text(cell_txt)
+                # 保留換行：只清理每一行的首尾空白和行內多餘空格
+                lines = [re.sub(r"[ \t　]+", " ", line).strip()
+                         for line in cell_txt.split("\n")]
+                story_text = "\n".join(line for line in lines if line)
                 break
         # 如果 col 1 是空白，試 col 0
         if not story_text and row2_cells:
-            story_text = clean_text(row2_cells[0].text)
+            cell_txt0 = row2_cells[0].text.strip()
+            lines = [re.sub(r"[ \t　]+", " ", line).strip()
+                     for line in cell_txt0.split("\n")]
+            story_text = "\n".join(line for line in lines if line)
 
     return title, authors, story_text
 
 
 def split_story_paragraphs(story_text: str) -> list[str]:
-    """拆分課文段落"""
+    """拆分課文段落
+
+    優先策略（按順序，第一個產出 >=2 段即停）:
+    1. 換行分段（docx table cell 的自然換行）
+    2. 雙空格分段（部分格式用空格取代換行）
+    3. 句號+換行分段
+    """
     if not story_text:
         return []
-    # 嘗試雙空格分段
+    # 策略1: 換行分段（docx table cell 原生換行，最可靠）
+    paras = [p.strip() for p in story_text.split("\n") if p.strip()]
+    if len(paras) >= 2:
+        return paras
+    # 策略2: 雙空格分段
     paras = [p.strip() for p in story_text.split("  ") if p.strip()]
-    if len(paras) <= 1:
-        # 以句號+換行分段
-        paras = [p.strip() for p in story_text.replace("。\n", "。\n\n").split("\n\n") if p.strip()]
-    if len(paras) <= 1:
-        # 以換行分段
-        paras = [p.strip() for p in story_text.split("\n") if p.strip()]
-    return paras
+    if len(paras) >= 2:
+        return paras
+    # 策略3: 句號+換行分段
+    paras = [p.strip() for p in story_text.replace("。\n", "。\n\n").split("\n\n") if p.strip()]
+    if len(paras) >= 2:
+        return paras
+    # 最後: 整段當單一段落
+    return [story_text.strip()] if story_text.strip() else []
 
 
 # ---------- field extractors ----------
+
+def extract_fill_in_blank(tables: list, story_table_idx: int = 0) -> list[dict]:
+    """
+    從學習單 tables 抽取填空題（【answer】格式）。
+
+    跳過 story_table_idx 所指的課文主表（Table 0 或 1），
+    掃描其餘 tables 的所有 cell，以 regex 抽出 【...】 markers。
+
+    Returns list of:
+      {
+        "id": int (1-based),
+        "answer": str,
+        "context_before": str (前 50 字，供 OMO AI 比對位置),
+        "context_after": str (後 50 字),
+        "context_paragraph_idx": int (該 blank 在第幾個 cell 段),
+      }
+    """
+    BLANK_RE = re.compile(r"【([^】]*)】")
+    results = []
+    blank_id = 1
+
+    for ti, t in enumerate(tables):
+        if ti == story_table_idx:
+            continue  # 跳過課文主表
+        for row in t.rows:
+            # Deduplicate merged cells by tracking seen cell ids
+            seen_cell_ids = set()
+            for cell in row.cells:
+                cell_id = id(cell._tc)
+                if cell_id in seen_cell_ids:
+                    continue
+                seen_cell_ids.add(cell_id)
+
+                cell_text = cell.text
+                for m in BLANK_RE.finditer(cell_text):
+                    answer = clean_text(m.group(1))
+                    start = m.start()
+                    end = m.end()
+                    before = clean_text(cell_text[max(0, start - 50):start])
+                    after = clean_text(cell_text[end:end + 50])
+                    results.append({
+                        "id": blank_id,
+                        "answer": answer,
+                        "context_before": before,
+                        "context_after": after,
+                        "context_paragraph_idx": ti,
+                    })
+                    blank_id += 1
+
+    return results
+
 
 def extract_video_links(tables: list, paragraphs: list) -> list[dict]:
     """影片連結：先查表格，再 fallback 到段落純文字"""
@@ -654,6 +724,11 @@ def parse_lesson(doc_path: Path, lesson_code: str, images_base: Path) -> tuple[d
         warnings.append("no_tables: Cannot extract story text")
         result["flags"].append("no_tables")
 
+    # --- 填空題 (fill_in_blank) ---
+    fill_in_blank = extract_fill_in_blank(tables, story_table_idx=table_idx)
+    result["fill_in_blank"] = fill_in_blank
+    result["fill_in_blank_count"] = len(fill_in_blank)
+
     # --- 生字 ---
     vocab = extract_vocabulary(paras, tables)
     result["vocabulary"] = vocab
@@ -814,6 +889,14 @@ def main():
     parser.add_argument(
         "--lesson", default=None, help="Only parse specific lesson code (e.g. G4-L1)"
     )
+    parser.add_argument(
+        "--filter", default=None, dest="filter_re",
+        help="Only parse lesson codes matching this regex (e.g. 'G6-L2[2-5]|G7-L(28|29|30)')"
+    )
+    parser.add_argument(
+        "--confirm", action="store_true",
+        help="Required when using --filter to confirm selective re-parse"
+    )
     args = parser.parse_args()
 
     source_dir = Path(args.source)
@@ -836,6 +919,21 @@ def main():
         if not all_files:
             print(f"ERROR: lesson {args.lesson} not found", file=sys.stderr)
             sys.exit(1)
+
+    if args.filter_re:
+        if not args.confirm:
+            print(f"ERROR: --filter requires --confirm to prevent accidental bulk re-parse", file=sys.stderr)
+            sys.exit(1)
+        try:
+            filter_pattern = re.compile(args.filter_re)
+        except re.error as e:
+            print(f"ERROR: invalid --filter regex: {e}", file=sys.stderr)
+            sys.exit(1)
+        all_files = [(p, c) for p, c in all_files if filter_pattern.search(c)]
+        if not all_files:
+            print(f"ERROR: no lessons match filter '{args.filter_re}'", file=sys.stderr)
+            sys.exit(1)
+        print(f"Filter '{args.filter_re}' matched {len(all_files)} lessons: {[c for _, c in all_files]}")
 
     # Tracking
     success = []
