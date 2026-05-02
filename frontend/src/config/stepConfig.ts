@@ -78,6 +78,16 @@ export interface StepConfig {
  *   New comprehension split steps use dbStepNumbers 15–16 (Issue #1335).
  */
 export const STEP_REGISTRY: Record<string, StepConfig> = {
+  'intro': {
+    id: 'intro',
+    label: '課程簡介',
+    hint: '看看這堂課要學什麼策略，以及有哪些步驟',
+    view: AppView.INTRO,
+    dbStepNumber: 1,
+    needsStory: true,
+    enabled: true,
+    category: 'reading',
+  },
   'reading-annotation': {
     id: 'reading-annotation',
     label: '讀全文-做記號',
