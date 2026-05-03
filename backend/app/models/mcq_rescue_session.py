@@ -1,15 +1,7 @@
 """
 MCQ Rescue Session model — tracks per-student rescue dialogue outcomes.
 
-TODO: Alembic migration pending Young's approval — see #1387 acceptance criteria.
-      Run `alembic revision --autogenerate -m "add mcq_rescue_session table"` after approval.
-      Must follow LingoLeap SQLAlchemy safety rules:
-        - FK index=True (already set below)
-        - server_default for timestamps
-        - cascade + lazy on relationships
-        - Idempotent DDL (IF NOT EXISTS) in migration
-
-This stub is import-safe and will not create the table until a migration runs.
+Migration: backend/alembic/versions/<rev>_add_mcq_rescue_session_table.py
 """
 
 from __future__ import annotations
@@ -43,7 +35,7 @@ class McqRescueSession(Base):
     # Who did the rescue?
     user_id = Column(
         Integer,
-        ForeignKey("user.id", ondelete="CASCADE"),
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,  # LingoLeap rule: FK always has index=True
     )
