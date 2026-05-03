@@ -249,6 +249,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         <MultipleChoiceExercise
           questions={story.multipleChoice!}
           onComplete={handleMcqComplete}
+          lessonId={story.id}
+          readingStrategy={story.readingStrategy}
         />
       );
     }
