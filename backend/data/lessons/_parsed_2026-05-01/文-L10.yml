@@ -138,3 +138,4 @@ worksheet_section_order:
 - number: 五
   name: 閱讀理解
   type: mcq
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/文-L10.pdf

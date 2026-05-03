@@ -88,9 +88,11 @@ def extract_lesson_code(filename: str) -> str | None:
         'G6-L22小兵立大功.docx' → 'G6-L22'
         'G4-L20-22物以稀為貴.docx' → 'G4-L20-22'
         'G9-L15-16.docx' → 'G9-L15-16'
+        '文-L1假新聞.docx' → '文-L1'
     """
-    # Match G{grade}-L{num} optionally followed by -L{num} or -{num} for ranges
-    m = re.match(r"^(G\d+-L\d+(?:-L?\d+)?)", filename)
+    # Match G{grade}-L{num} optionally followed by -L{num} or -{num} for ranges,
+    # or 文-L{num} for 文言文 lessons.
+    m = re.match(r"^(G\d+-L\d+(?:-L?\d+)?|文-L\d+)", filename)
     if m:
         return m.group(1)
     return None
