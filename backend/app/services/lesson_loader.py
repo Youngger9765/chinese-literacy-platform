@@ -223,6 +223,8 @@ def _load_layer1_lessons() -> list[dict]:
             "worksheet_intro": data.get("worksheet_intro"),
             # Lesson intro (#1443): docx 說明/導讀 or excel fallback
             "lesson_intro": data.get("lesson_intro"),
+            # Public PDF URL of the original 紙本學習單 (#1444)
+            "worksheet_pdf_url": data.get("worksheet_pdf_url"),
             "_layer": 1,
         }
         lessons.append(lesson)
@@ -357,6 +359,8 @@ def _load_layer2_lessons(
             "worksheet_intro": data.get("worksheet_intro"),
             # Lesson intro (#1443): docx 說明/導讀 or excel fallback
             "lesson_intro": data.get("lesson_intro"),
+            # Public PDF URL of the original 紙本學習單 (#1444)
+            "worksheet_pdf_url": data.get("worksheet_pdf_url"),
             "_layer": 2,
         }
         lessons.append(lesson)

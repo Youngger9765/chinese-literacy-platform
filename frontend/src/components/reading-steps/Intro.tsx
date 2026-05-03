@@ -1,7 +1,8 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -18,7 +19,26 @@ interface IntroProps {
 
 const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showWorksheetModal, setShowWorksheetModal] = useState(false);
   const { zhuyinActive, processZhuyin } = useZhuyin();
+  const worksheetModalRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(worksheetModalRef, showWorksheetModal);
+
+  useEffect(() => {
+    if (!showWorksheetModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowWorksheetModal(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [showWorksheetModal]);
+
+  const handleBackdropClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === worksheetModalRef.current) {
+      setShowWorksheetModal(false);
+    }
+  }, []);
 
   const speakIntro = useCallback(() => {
     if (!window.speechSynthesis) return;
@@ -130,6 +150,23 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           </div>
 
           {/* 知識補給站 YouTube embed was removed — intro page shows course intro only */}
+
+          {/* 紙本學習單 PDF button (#1444) — only shown when a matching PDF exists */}
+          {story.worksheetPdfUrl && (
+            <div className="flex justify-start">
+              <button
+                type="button"
+                onClick={() => setShowWorksheetModal(true)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                aria-label="查看紙本學習單 PDF"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                查看紙本學習單
+              </button>
+            </div>
+          )}
 
           {/* 學習目標 banner — worksheet_intro.target_strategy (#1434) */}
           {story.worksheetIntro?.target_strategy && (
@@ -286,6 +323,45 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           </svg>
         </button>
       </div>
+
+      {/* 紙本學習單 PDF Modal (#1444) */}
+      {showWorksheetModal && story.worksheetPdfUrl && (
+        <div
+          ref={worksheetModalRef}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-0 sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="紙本學習單"
+          onClick={handleBackdropClick}
+        >
+          <div className="relative flex flex-col bg-white w-full h-full sm:rounded-2xl sm:max-w-4xl sm:h-[90vh] shadow-2xl overflow-hidden">
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 sm:rounded-t-2xl">
+              <div className="flex items-center gap-2 min-w-0">
+                <svg className="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-sm font-bold text-gray-700 flex-shrink-0">紙本學習單</span>
+                <span className="text-xs text-gray-400 hidden sm:inline truncate">— {story.title}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowWorksheetModal(false)}
+                className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 flex-shrink-0"
+                aria-label="關閉學習單"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <iframe
+              src={story.worksheetPdfUrl}
+              title="紙本學習單"
+              className="flex-1 w-full bg-gray-100"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
