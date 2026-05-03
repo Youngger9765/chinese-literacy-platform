@@ -83,6 +83,13 @@ jobs:
             --add-cloudsql-instances=lingoleap-dev:asia-east1:lingoleap-db \
             --set-env-vars="^::^ALLOWED_ORIGINS=https://lingoleap-frontend-staging-958347263320.asia-east1.run.app,https://lingoleap-frontend-958347263320.asia-east1.run.app,https://lingoleap-staging.web.app,https://lingoleap-dev.web.app::DATABASE_URL=${{ secrets.DATABASE_URL }}::RUN_MIGRATIONS=true::AZURE_SPEECH_KEY=${{ secrets.AZURE_SPEECH_KEY }}::AZURE_SPEECH_REGION=eastus::TTS_PROVIDER=gemini31"
 
+      - name: Promote backend traffic to latest revision (Fixes #1449)
+        run: |
+          gcloud run services update-traffic ${{ env.BACKEND_SERVICE }} \
+            --to-latest \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
       - name: Verify backend health
         run: |
           URL=$(gcloud run services describe ${{ env.BACKEND_SERVICE }} \
@@ -164,6 +171,13 @@ jobs:
             --min-instances=0 \
             --max-instances=1 \
             --timeout=300s
+
+      - name: Promote frontend traffic to latest revision (Fixes #1449)
+        run: |
+          gcloud run services update-traffic ${{ env.FRONTEND_SERVICE }} \
+            --to-latest \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
 
       - name: Verify frontend health
         run: |
