@@ -112,6 +112,8 @@ const ComprehensionMcqPage: React.FC = () => {
           <MultipleChoiceExercise
             questions={selectedStory.multipleChoice!}
             onComplete={handleMcqComplete}
+            lessonId={selectedStory.id}
+            readingStrategy={selectedStory.readingStrategy}
           />
         )
       ) : (
