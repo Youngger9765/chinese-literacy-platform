@@ -394,3 +394,9 @@ worksheet_intro:
   level_label: Level 8・說明文
   lesson_label: 第7課  讓你口中的甜蜜成為遠方農民的希望
   authors: 課文：林玫伶  學習單：陳淑麗
+lesson_intro:
+  source: excel
+  strategy_title: 認識文言文代詞—人稱代詞
+  text: 本課探討「類型-記敘人物」主題，學習「認識文言文代詞—人稱代詞」的閱讀方法。
+  unit_topic: 類型-記敘人物
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G8-L7.pdf

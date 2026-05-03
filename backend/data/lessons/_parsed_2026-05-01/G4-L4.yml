@@ -399,3 +399,9 @@ worksheet_intro:
   level_label: Level 4・說明文
   lesson_label: 第4課  運動科學
   authors: 課文：吳漢庭  學習單：張明珠
+lesson_intro:
+  source: excel
+  strategy_title: 條件複句
+  text: 本課探討「運動知識」主題，學習「條件複句」的閱讀方法。
+  unit_topic: 運動知識
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G4-L4.pdf

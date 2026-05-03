@@ -158,6 +158,20 @@ export interface Story {
     lesson_label?: string;
     authors?: string;
   };
+  /** Lesson intro — real course introduction (#1443).
+   *  source: 'docx_explanation' | 'docx_guide' | 'excel'
+   *  Preferred over intro.background (which is just the first story paragraph). */
+  lessonIntro?: {
+    source: 'docx_explanation' | 'docx_guide' | 'excel';
+    text: string;
+    unit_topic?: string;
+    strategy_title?: string;
+  };
+  /** Public PDF URL of the original 紙本學習單 (#1444).
+   *  Hosted on GCS at gs://lingoleap-assets/worksheets/{lesson_code}.pdf.
+   *  Optional — lessons without a matching PDF (e.g. G8-L3a, 文-L*) leave this null,
+   *  which hides the "查看紙本學習單" button on the Intro page. */
+  worksheetPdfUrl?: string;
 }
 
 export interface ReadingAttempt {

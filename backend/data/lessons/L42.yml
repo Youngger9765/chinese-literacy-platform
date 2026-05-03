@@ -104,30 +104,30 @@ flags: []
 strategy_exercise:
   type: guided_steps
   strategy_name: 一字多義：少
-  instruction: "「少」這個字在文言文中有不同的讀音和意思。請根據課文練習分辨「少」的不同用法"
+  instruction: 「少」這個字在文言文中有不同的讀音和意思。請根據課文練習分辨「少」的不同用法
   steps:
-  - prompt: "「旅店少休」的「少」是什麼意思？"
+  - prompt: 「旅店少休」的「少」是什麼意思？
     type: select
     options:
     - 稍微、短暫地（ㄕㄠˇ）
     - 缺少、很少（ㄕㄠˇ）
     - 年幼、年輕的（ㄕㄠˋ）
     answer: 0
-  - prompt: "「少負絕異之資」的「少」是什麼意思？"
+  - prompt: 「少負絕異之資」的「少」是什麼意思？
     type: select
     options:
     - 稍微、短暫地（ㄕㄠˇ）
     - 缺少、很少（ㄕㄠˇ）
     - 年幼、年輕的（ㄕㄠˋ）
     answer: 2
-  - prompt: "「自少至老，未嘗一日廢書」的「少」是什麼意思？"
+  - prompt: 「自少至老，未嘗一日廢書」的「少」是什麼意思？
     type: select
     options:
     - 稍微、短暫地（ㄕㄠˇ）
     - 缺少、很少（ㄕㄠˇ）
     - 年幼、年輕的（ㄕㄠˋ）
     answer: 2
-  - prompt: "「但少閑人如吾兩人耳」的「少」是什麼意思？"
+  - prompt: 「但少閑人如吾兩人耳」的「少」是什麼意思？
     type: select
     options:
     - 稍微、短暫地（ㄕㄠˇ）
@@ -174,3 +174,37 @@ story_structure_rows:
   interactive_type: fill_blank
   hint: 從顧寧人的故事中，你可以學到什麼？
 story_structure_table_source: ai-generated-2026-05-02
+worksheet_section_order:
+- number: 一
+  name: 讀全文-做記號
+  type: reading_annotation
+- number: 二
+  name: 逐段朗讀
+  type: tutor
+- number: 三
+  name: 全文朗讀
+  type: full_reading
+- number: 四
+  name: 詞語理解
+  type: vocab_definition
+- number: 五
+  name: 語詞應用
+  type: vocab_application
+- number: 六
+  name: 文章重點表
+  type: story_structure
+- number: 七
+  name: 閱讀聚光燈
+  type: reading_strategy
+- number: 八
+  name: 閱讀理解
+  type: comprehension
+- number: 九
+  name: 語詞複習
+  type: vocab_word_search
+- number: 十
+  name: 知識補給站
+  type: knowledge_station
+- number: 十一
+  name: 報告
+  type: report

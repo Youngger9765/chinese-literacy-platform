@@ -1,7 +1,8 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -18,13 +19,41 @@ interface IntroProps {
 
 const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showWorksheetModal, setShowWorksheetModal] = useState(false);
   const { zhuyinActive, processZhuyin } = useZhuyin();
+  const worksheetModalRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(worksheetModalRef, showWorksheetModal);
+
+  useEffect(() => {
+    if (!showWorksheetModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowWorksheetModal(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [showWorksheetModal]);
+
+  const handleBackdropClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === worksheetModalRef.current) {
+      setShowWorksheetModal(false);
+    }
+  }, []);
 
   const speakIntro = useCallback(() => {
-    if (!window.speechSynthesis || !story.intro) return;
+    if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
 
-    const text = `${story.title}。作者：${story.intro.author}。${story.intro.background}`;
+    // Fallback chain: lessonIntro.text → worksheetIntro.target_strategy → intro.background
+    const introText =
+      story.lessonIntro?.text ||
+      story.worksheetIntro?.target_strategy ||
+      story.intro?.background ||
+      '';
+    if (!introText) return;
+
+    const authorPart = story.intro ? `作者：${story.intro.author}。` : '';
+    const text = `${story.title}。${authorPart}${introText}`;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'zh-TW';
     utterance.rate = 0.95;
@@ -120,32 +149,24 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             </div>
           </div>
 
-          {/* ⑨ 知識補給站 — YouTube embed */}
-          {story.knowledgeVideoUrl && (() => {
-            const url = story.knowledgeVideoUrl!;
-            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-            const videoId = match?.[1];
-            if (!videoId) return null;
-            return (
-              <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                  </svg>
-                  <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">⑨ 知識補給站</span>
-                </div>
-                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                  <iframe
-                    className="absolute inset-0 w-full h-full rounded-xl"
-                    src={`https://www.youtube.com/embed/${videoId}`}
-                    title="知識補給站影片"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              </div>
-            );
-          })()}
+          {/* 知識補給站 YouTube embed was removed — intro page shows course intro only */}
+
+          {/* 紙本學習單 PDF button (#1444) — only shown when a matching PDF exists */}
+          {story.worksheetPdfUrl && (
+            <div className="flex justify-start">
+              <button
+                type="button"
+                onClick={() => setShowWorksheetModal(true)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                aria-label="查看紙本學習單 PDF"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                查看紙本學習單
+              </button>
+            </div>
+          )}
 
           {/* 學習目標 banner — worksheet_intro.target_strategy (#1434) */}
           {story.worksheetIntro?.target_strategy && (
@@ -174,60 +195,83 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             </div>
           )}
 
-          {/* Background section — story.intro.background (Layer-1 backward compat) */}
-          {story.intro ? (
-            <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-xs font-bold text-accent-light uppercase tracking-widest">課文簡介</span>
-              </div>
-              <p className={`text-on-surface text-2xl ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.6]'}`}>
-                {processZhuyin(story.intro.background)}
-              </p>
+          {/* Background section — fallback chain: lessonIntro.text → worksheetIntro.target_strategy → intro.background (#1443) */}
+          {(() => {
+            const introText =
+              story.lessonIntro?.text ||
+              story.worksheetIntro?.target_strategy ||
+              story.intro?.background;
 
-              {/* TTS button */}
-              <div className="pt-2">
-                {isSpeaking ? (
-                  <button
-                    type="button"
-                    onClick={stopSpeaking}
-                    aria-label="停止朗讀課文簡介"
-                    aria-pressed={true}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
-                  >
-                    <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
-                    </svg>
-                    停止朗讀
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={speakIntro}
-                    aria-label="朗讀課文簡介"
-                    aria-pressed={false}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
-                    </svg>
-                    朗讀簡介
-                  </button>
+            // Source provenance label for reviewers/教授
+            const sourceLabel = story.lessonIntro
+              ? story.lessonIntro.source === 'docx_explanation'
+                ? '資料來源：學習單說明'
+                : story.lessonIntro.source === 'docx_guide'
+                  ? '資料來源：學習單導讀'
+                  : '資料來源：教材總表'
+              : null;
+
+            if (!introText) {
+              return !story.worksheetIntro ? (
+                <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
+                  這篇課文目前沒有簡介資料。
+                </div>
+              ) : null;
+            }
+
+            return (
+              <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-xs font-bold text-accent-light uppercase tracking-widest">課文簡介</span>
+                </div>
+                <p className={`text-on-surface text-2xl ${zhuyinActive ? 'leading-[2.4rem] tracking-[0.15em]' : 'leading-[1.6]'}`}>
+                  {processZhuyin(introText)}
+                </p>
+
+                {/* Source provenance label (#1443) — unobtrusive, for reviewers */}
+                {sourceLabel && (
+                  <p className="text-xs text-on-surface-variant">{sourceLabel}</p>
                 )}
-              </div>
-            </div>
-          ) : (
-            !story.worksheetIntro && (
-              <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
-                這篇課文目前沒有簡介資料。
-              </div>
-            )
-          )}
 
-          {/* 學習單流程 — worksheet_section_order (#1434) */}
+                {/* TTS button */}
+                <div className="pt-2">
+                  {isSpeaking ? (
+                    <button
+                      type="button"
+                      onClick={stopSpeaking}
+                      aria-label="停止朗讀課文簡介"
+                      aria-pressed={true}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-amber-800/50 text-amber-800 border border-amber-300 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
+                    >
+                      <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 10h6v4H9z" />
+                      </svg>
+                      停止朗讀
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={speakIntro}
+                      aria-label="朗讀課文簡介"
+                      aria-pressed={false}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-800 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072" />
+                      </svg>
+                      朗讀簡介
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 學習單流程 — worksheet_section_order from yml (Layer-1 and Layer-2) */}
           {story.worksheetSectionOrder && story.worksheetSectionOrder.length > 0 && (
             <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
               <div className="flex items-center gap-2">
@@ -279,6 +323,45 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
           </svg>
         </button>
       </div>
+
+      {/* 紙本學習單 PDF Modal (#1444) */}
+      {showWorksheetModal && story.worksheetPdfUrl && (
+        <div
+          ref={worksheetModalRef}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-0 sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="紙本學習單"
+          onClick={handleBackdropClick}
+        >
+          <div className="relative flex flex-col bg-white w-full h-full sm:rounded-2xl sm:max-w-4xl sm:h-[90vh] shadow-2xl overflow-hidden">
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 sm:rounded-t-2xl">
+              <div className="flex items-center gap-2 min-w-0">
+                <svg className="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-sm font-bold text-gray-700 flex-shrink-0">紙本學習單</span>
+                <span className="text-xs text-gray-400 hidden sm:inline truncate">— {story.title}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowWorksheetModal(false)}
+                className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 flex-shrink-0"
+                aria-label="關閉學習單"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <iframe
+              src={story.worksheetPdfUrl}
+              title="紙本學習單"
+              className="flex-1 w-full bg-gray-100"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

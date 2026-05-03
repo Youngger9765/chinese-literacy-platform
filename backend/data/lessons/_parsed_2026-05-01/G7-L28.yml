@@ -351,3 +351,7 @@ worksheet_intro:
   level_label: Level 7・說明文
   lesson_label: 第28課 看不見的兇手:以實驗破解肉湯腐敗之謎
   authors: 課文：曾世杰  學習單：陳淑麗
+lesson_intro:
+  source: docx_explanation
+  text: 圖文題在近年會考國文科的比重大幅增加——114年會考圖文題有9題，但十年前（105年）的會考卻只有1題。圖文題就是「文字帶著插圖」的題目，你不能只看文字，也不能只看插圖，眼睛必須在文字和插圖中來回移動，把文圖之間的關係弄清楚，才能又快又正確地答題。這一課我們就用一個科學史上有名的實驗，來學習如何閱讀、解答圖文題。
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L28.pdf

@@ -255,6 +255,10 @@ def get_story(story_id: str):
         # Worksheet metadata (#1434) — surface to API
         worksheet_section_order=story.get("worksheet_section_order"),
         worksheet_intro=story.get("worksheet_intro"),
+        # Lesson intro (#1443) — docx 說明/導讀 or excel fallback
+        lesson_intro=story.get("lesson_intro"),
+        # 紙本學習單 PDF (#1444) — public GCS URL or None
+        worksheet_pdf_url=story.get("worksheet_pdf_url"),
     )
 
 

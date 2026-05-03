@@ -148,30 +148,30 @@ strategy_exercise:
   strategy_name: 4F反思法
   instruction: 4F反思法幫助我們深入思考一個議題，包含四個步驟：事實（Fact）發生了什麼事、感受（Feeling）你有什麼感覺、反思（Finding）你發現了什麼道理、行動（Future）你可以怎麼做。請根據課文練習
   steps:
-  - prompt: "【事實】根據課文，吐瓦魯面臨什麼危機？"
+  - prompt: 【事實】根據課文，吐瓦魯面臨什麼危機？
     type: select
     options:
     - 因為戰爭，人民被迫離開家園
     - 因為全球暖化、海平面上升，國土即將被淹沒
     - 因為經濟衰退，人民生活困難
     answer: 1
-  - prompt: "【事實】吐瓦魯部長柯飛提出了什麼計畫來因應危機？"
+  - prompt: 【事實】吐瓦魯部長柯飛提出了什麼計畫來因應危機？
     type: select
     options:
     - 搬遷到其他國家
     - 建造巨大海堤保護島嶼
     - 建立「元宇宙國家」，把國家轉移到雲端
     answer: 2
-  - prompt: "【感受】讀到吐瓦魯的溫室氣體排放僅占全球0.03%，卻要承受國土被淹沒的後果，你有什麼感受？"
+  - prompt: 【感受】讀到吐瓦魯的溫室氣體排放僅占全球0.03%，卻要承受國土被淹沒的後果，你有什麼感受？
     type: free_text
-  - prompt: "【反思】文章提到臺灣海平面也在上升，你覺得這跟吐瓦魯的處境有什麼關聯？"
+  - prompt: 【反思】文章提到臺灣海平面也在上升，你覺得這跟吐瓦魯的處境有什麼關聯？
     type: select
     options:
     - 臺灣也可能面臨類似的問題，全球暖化影響每個人
     - 臺灣面積比較大，所以完全不用擔心
     - 臺灣應該幫吐瓦魯搬家
     answer: 0
-  - prompt: "【行動】為了減緩全球暖化，你在日常生活中可以做什麼？請舉出一個具體行動"
+  - prompt: 【行動】為了減緩全球暖化，你在日常生活中可以做什麼？請舉出一個具體行動
     type: free_text
 story_structure:
 - label: 結論
@@ -206,3 +206,37 @@ story_structure_rows:
   interactive_type: fill_blank
   hint: 這篇文章最後想傳達什麼訊息？
 story_structure_table_source: ai-generated-2026-05-02
+worksheet_section_order:
+- number: 一
+  name: 讀全文-做記號
+  type: reading_annotation
+- number: 二
+  name: 逐段朗讀
+  type: tutor
+- number: 三
+  name: 全文朗讀
+  type: full_reading
+- number: 四
+  name: 詞語理解
+  type: vocab_definition
+- number: 五
+  name: 語詞應用
+  type: vocab_application
+- number: 六
+  name: 文章重點表
+  type: story_structure
+- number: 七
+  name: 閱讀聚光燈
+  type: reading_strategy
+- number: 八
+  name: 閱讀理解
+  type: comprehension
+- number: 九
+  name: 語詞複習
+  type: vocab_word_search
+- number: 十
+  name: 知識補給站
+  type: knowledge_station
+- number: 十一
+  name: 報告
+  type: report

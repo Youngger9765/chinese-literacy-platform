@@ -277,3 +277,9 @@ worksheet_intro:
   level_label: Level 6・說明文
   lesson_label: 第23課  老鷹紅豆的故事
   authors: 課文：曾世杰  學習單：陳淑麗
+lesson_intro:
+  source: excel
+  strategy_title: 自我提問
+  text: 本課探討「環境永續」主題，學習「自我提問」的閱讀方法。
+  unit_topic: 環境永續
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L23.pdf

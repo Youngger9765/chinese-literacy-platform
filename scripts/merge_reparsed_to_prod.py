@@ -5,6 +5,7 @@ Merge re-parsed content into prod yml — additive only, no overwrites.
 Source:
   - re-parsed yml: backend/data/lessons/_reparsed_2026-05-02/{LESSON}.yml
   - structured spotlight JSON: backend/data/lessons/_reparsed_2026-05-02/spotlight_structured/{LESSON}.json
+  - excel intro map: /tmp/excel_intro_map.json (from build_lesson_intro_from_excel.py)
 
 Target:
   - prod yml: backend/data/lessons/_parsed_2026-05-01/{LESSON}.yml
@@ -22,10 +23,12 @@ Fields merged (if missing in prod):
   - videos / video_links             (only if prod has none)
   - worksheet_section_order          (always overwrite — order metadata)
   - image_captions                   (graphic-text only)
+  - lesson_intro                     (#1443: docx 說明/導讀 preferred; excel fallback)
 
 Usage:
   python3 scripts/merge_reparsed_to_prod.py --demo  # 7 demo lessons (preview/dry-run)
   python3 scripts/merge_reparsed_to_prod.py --demo --apply  # actually write
+  python3 scripts/merge_reparsed_to_prod.py --all --apply   # all lessons
 """
 from __future__ import annotations
 import argparse
@@ -42,6 +45,23 @@ STRUCTURED_DIR = REPARSED_DIR / "spotlight_structured"
 PROD_DIR = REPO / "backend/data/lessons/_parsed_2026-05-01"
 
 DEMO_LESSONS = ["G6-L22", "G6-L23", "G6-L24", "G6-L25", "G7-L28", "G7-L29", "G7-L30"]
+EXCEL_INTRO_MAP_PATH = Path("/tmp/excel_intro_map.json")
+
+# Lazily loaded excel intro map — populated once on first use
+_excel_intro_map: dict | None = None
+
+
+def get_excel_intro_map() -> dict:
+    """Load and cache the excel intro map from /tmp/excel_intro_map.json."""
+    global _excel_intro_map
+    if _excel_intro_map is None:
+        if EXCEL_INTRO_MAP_PATH.exists():
+            _excel_intro_map = json.loads(EXCEL_INTRO_MAP_PATH.read_text(encoding="utf-8"))
+            print(f"  [excel_intro] Loaded {len(_excel_intro_map)} entries from {EXCEL_INTRO_MAP_PATH}")
+        else:
+            _excel_intro_map = {}
+            print(f"  [excel_intro] WARNING: {EXCEL_INTRO_MAP_PATH} not found — excel fallback disabled")
+    return _excel_intro_map
 
 
 def is_empty(v) -> bool:
@@ -157,6 +177,29 @@ def merge_lesson(code: str) -> dict:
     if is_empty(prod.get("image_captions")) and reparsed.get("image_captions"):
         new["image_captions"] = reparsed["image_captions"]
         changes.append(f"image_captions: {len(reparsed['image_captions'])}")
+
+    # ── 10. lesson_intro (#1443) — docx 說明/導讀 preferred, excel fallback ─
+    # Always set (overwrite) lesson_intro from the best available source.
+    # Docx intro is more specific and authoritatively written; excel is generic.
+    existing_intro = prod.get("lesson_intro")
+    # Prefer docx-sourced intro from reparsed yml
+    docx_intro = reparsed.get("lesson_intro")
+    if docx_intro and docx_intro.get("source") in ("docx_explanation", "docx_guide"):
+        if not existing_intro or existing_intro.get("source") != docx_intro["source"]:
+            new["lesson_intro"] = docx_intro
+            changes.append(f"lesson_intro (docx): source={docx_intro['source']} text={docx_intro['text'][:40]!r}")
+    else:
+        # Fall back to excel map
+        excel_map = get_excel_intro_map()
+        excel_intro = excel_map.get(code)
+        if excel_intro:
+            if not existing_intro:
+                new["lesson_intro"] = excel_intro
+                changes.append(f"lesson_intro (excel): topic={excel_intro.get('unit_topic','')[:30]!r}")
+        else:
+            # No source available — keep existing (if any), else leave absent
+            if not existing_intro:
+                changes.append(f"lesson_intro: no source found (neither docx nor excel)")
 
     return {
         "code": code,
