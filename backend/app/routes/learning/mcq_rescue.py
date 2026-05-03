@@ -68,7 +68,7 @@ class McqRescueRespondResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.post(
-    "/mcq-rescue/start",
+    "/learning/mcq-rescue/start",
     response_model=McqRescueStartResponse,
     dependencies=[Depends(ai_limit_10_per_min)],
 )
@@ -111,7 +111,7 @@ async def mcq_rescue_start(
 
 
 @router.post(
-    "/mcq-rescue/respond",
+    "/learning/mcq-rescue/respond",
     response_model=McqRescueRespondResponse,
     dependencies=[Depends(ai_limit_10_per_min)],
 )
