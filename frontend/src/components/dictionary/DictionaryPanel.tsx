@@ -109,7 +109,7 @@ const DictionaryPanel: React.FC<DictionaryPanelProps> = ({ character, className 
         {entry.zhuyin && (
           <span
             className="text-lg text-indigo-700 font-medium"
-            style={{ fontFamily: "'BpmfZihiSans', 'Noto Sans TC', sans-serif" }}
+            style={{ fontFamily: "'BpmfZihiSerif', 'Noto Serif TC', serif" }}
           >
             {entry.zhuyin}
           </span>

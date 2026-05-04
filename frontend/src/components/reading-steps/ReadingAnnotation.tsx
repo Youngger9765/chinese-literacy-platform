@@ -453,7 +453,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     // Fix: strip PUA selectors from the rendering string before slicing.  After stripping,
     // .length == raw char count, so raw indices and UTF-16 slice indices agree perfectly.
     //
-    // NOTE: when zhuyin is active (any mode with ruby), displayText contains BpmfZihiSans PUA
+    // NOTE: when zhuyin is active (any mode with ruby), displayText contains BpmfZihiSerif PUA
     // selectors AND ruby annotations that cannot be split character-by-character, so we fall
     // back to rawText for annotation offset calculations.
     const baseText = isZhuyinAny ? rawText : displayText;
