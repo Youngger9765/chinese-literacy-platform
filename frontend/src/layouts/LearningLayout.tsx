@@ -24,7 +24,7 @@ import { useIdleTimer } from '../hooks/useIdleTimer';
 import { useProgressSync } from '../hooks/useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
-import { scopedStepStorageKey } from '../services/learningStorageScope';
+import { scopedStepStorageKey, isToolboxMode } from '../services/learningStorageScope';
 
 /** Idle time before showing warning modal (15 minutes). */
 const IDLE_WARNING_TIMEOUT_MS = 15 * 60 * 1000;
@@ -295,6 +295,14 @@ const LearningLayout: React.FC = () => {
   }, [isAssignmentFlow]);
 
   useEffect(() => {
+    // #1460: Toolbox mode never reads or creates a learning_sessions row.
+    // Skip the dbSessionId restore so useProgressSync below never loads
+    // step_progress / past attempts from a self-practice or assignment session.
+    if (isToolboxMode()) {
+      setDbSessionId(null);
+      return;
+    }
+
     if (!storyId || !activeDbSessionStorageKey) {
       setDbSessionId(null);
       return;
@@ -620,6 +628,10 @@ const LearningLayout: React.FC = () => {
   // GET avoids creating sessions when one already exists with a different source
   // (assignment vs self-practice).
   useEffect(() => {
+    // #1460: Toolbox mode skips session GET/POST entirely so no learning_sessions
+    // data leaks into the practice toolbox UI. Phase 2 will hook up the dedicated
+    // toolbox_*_sessions tables instead.
+    if (isToolboxMode()) return;
     if (!token || !storyId || dbSessionId !== null || isLoading) return;
     if (isCreatingSession.current) return;
 
@@ -695,7 +707,8 @@ const LearningLayout: React.FC = () => {
 
     // Create a DB learning session so dialogue can be persisted (Issue #242).
     // Skip if a session already exists or another creation is in flight (Issue #984).
-    if (token && storyId && dbSessionId === null && !isCreatingSession.current) {
+    // #1460: Skip in toolbox mode — those rows belong in toolbox_*_sessions (Phase 2).
+    if (token && storyId && dbSessionId === null && !isCreatingSession.current && !isToolboxMode()) {
       isCreatingSession.current = true;
       fetch(`${API_BASE}/api/learning/sessions`, {
         method: 'POST',
