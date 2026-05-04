@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { fontForZhuyin } from '../../constants/fonts';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -92,9 +93,7 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
     <div
       className="flex-1 flex flex-col bg-amber-50 overflow-hidden"
       style={{
-        fontFamily: zhuyinActive
-          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-          : undefined,
+        fontFamily: fontForZhuyin(zhuyinActive),
       }}
     >
       {/* Top bar */}

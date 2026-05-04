@@ -23,6 +23,7 @@ import { Lock } from 'lucide-react';
 import { Story, VocabItem } from '../../types';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { fontForZhuyin } from '../../constants/fonts';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -789,9 +790,7 @@ const VocabDefinitionMatch: React.FC<VocabDefinitionMatchProps> = ({
 }) => {
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
-  const zhuyinFont = zhuyinActive
-    ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-    : undefined;
+  const zhuyinFont = fontForZhuyin(zhuyinActive);
 
   const progressStorageKey = scopedStepStorageKey('vocabDef_progress_', story.id);
   const vocab: VocabItem[] = story.vocabulary ?? [];

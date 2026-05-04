@@ -8,6 +8,7 @@ import React, {
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { fontForZhuyin } from '../../constants/fonts';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -512,9 +513,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     <div
       className="flex-1 flex flex-col bg-surface overflow-hidden select-none"
       style={{
-        fontFamily: isZhuyinAny
-          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-          : undefined,
+        fontFamily: fontForZhuyin(isZhuyinAny),
       }}
     >
       {/* ── Two-column layout: article left, panel right ──────────────── */}

@@ -13,6 +13,7 @@
 import React, { useEffect, useState } from 'react';
 import { FillInBlankItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { fontForZhuyin } from '../../constants/fonts';
 
 interface Props {
   sentences: FillInBlankItem[];
@@ -189,9 +190,7 @@ const FillInBlankExercise: React.FC<Props> = ({ sentences, vocabBank, onComplete
 
   // ── Zhuyin helper ────────────────────────────────────────────────
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
-  const zhuyinFont = zhuyinActive
-    ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-    : undefined;
+  const zhuyinFont = fontForZhuyin(zhuyinActive);
 
   // ── Render sentence with inline blank ─────────────────────────────
   function renderSentence(sentence: string) {

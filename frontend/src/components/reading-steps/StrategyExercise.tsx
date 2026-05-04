@@ -11,6 +11,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { StrategyExercise as StrategyExerciseType, StrategyExerciseOrderingItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { fontForZhuyin } from '../../constants/fonts';
 
 interface Props {
   exercise: StrategyExerciseType;
@@ -502,7 +503,7 @@ function GuidedStepsExercise({
 
 const StrategyExercise: React.FC<Props> = ({ exercise, onComplete }) => {
   const { zhuyinActive, processZhuyin } = useZhuyin();
-  const zhuyinFont = zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined;
+  const zhuyinFont = fontForZhuyin(zhuyinActive);
 
   const handleComplete = useCallback(() => {
     onComplete?.();
