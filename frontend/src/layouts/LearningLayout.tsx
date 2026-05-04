@@ -541,11 +541,12 @@ const LearningLayout: React.FC = () => {
     idleResetRef.current?.();
   }, []);
 
-  /** User clicked "離開並儲存" or the countdown expired — navigate to library. */
+  /** User clicked "離開並儲存" or the countdown expired — navigate to library
+   * (or to /tools when in toolbox mode, #1460). */
   const handleSessionExpired = useCallback(() => {
     setShowTimeoutWarning(false);
     // Progress was saved by persistStep; just navigate away.
-    navigate('/library');
+    navigate(isToolboxMode() ? '/tools' : '/library');
   }, [navigate]);
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1025,7 +1026,8 @@ const LearningLayout: React.FC = () => {
     setSession(null);
     setLastAttempt(null);
     setSelectedStory(null);
-    navigate('/library');
+    // #1460: in toolbox mode, retry returns to the tool picker, not the library.
+    navigate(isToolboxMode() ? '/tools' : '/library');
   }, [navigate, clearPersistedSession]);
 
   /** Called when a session is fully completed (report viewed). Auto-submits if assignment active. */
@@ -1153,15 +1155,17 @@ const LearningLayout: React.FC = () => {
   }
 
   if (error || !selectedStory) {
+    // #1460: error fallback button label + destination follow toolbox mode.
+    const inToolbox = isToolboxMode();
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-red-600">{error || '找不到此課文'}</p>
           <button
-            onClick={() => navigate('/library')}
+            onClick={() => navigate(inToolbox ? '/tools' : '/library')}
             className="text-accent hover:text-accent-hover font-medium text-sm"
           >
-            返回圖書館
+            {inToolbox ? '回到練習工具箱' : '返回圖書館'}
           </button>
         </div>
       </div>

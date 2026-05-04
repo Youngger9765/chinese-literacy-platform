@@ -72,9 +72,14 @@ export function isToolboxMode(): boolean {
  *
  * Self-practice (`${storyId}`) and assignment (`${storyId}__a_${id}`) keys
  * are unaffected because they don't end with `__t`.
+ *
+ * The suffix includes a leading underscore so `storyId=3` doesn't match keys
+ * ending in `13__t`, `23__t`, etc. All scopedStepStorageKey prefixes end with
+ * an underscore (e.g. `vocabDef_progress_`), so this is a safe and precise
+ * boundary marker.
  */
 export function clearToolboxScopeForStory(storyId: string | number): void {
-  const suffix = `${String(storyId)}__t`;
+  const suffix = `_${String(storyId)}__t`;
   try {
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
