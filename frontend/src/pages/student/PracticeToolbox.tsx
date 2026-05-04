@@ -9,21 +9,31 @@
  *
  * Issue #1165 (replaces #1153 card-grid design)
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Story } from '../../types';
 import LessonPicker from '../../components/tools/LessonPicker';
 import ToolPicker, { ToolOption } from '../../components/tools/ToolPicker';
+import { setToolboxMode } from '../../services/learningStorageScope';
 
 const PracticeToolbox: React.FC = () => {
   const navigate = useNavigate();
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [selectedTool, setSelectedTool] = useState<ToolOption | null>(null);
 
+  // Returning to /tools means leaving toolbox-mode — clear the flag so
+  // subsequent self-practice / assignment flows aren't scoped under "__t".
+  useEffect(() => {
+    setToolboxMode(false);
+  }, []);
+
   const canStart = selectedStory != null && selectedTool != null;
 
   const handleStart = () => {
     if (!canStart) return;
+    // Activate toolbox-mode before navigation so the tool component reads
+    // localStorage under the isolated "__t" scope from first render (#1460).
+    setToolboxMode(true);
     navigate(`/learn/${selectedStory.id}/${selectedTool.stepPath}`, {
       state: { returnTo: '/tools' },
     });
