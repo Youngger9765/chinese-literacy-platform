@@ -62,3 +62,31 @@ export function isToolboxMode(): boolean {
     return false;
   }
 }
+
+/**
+ * Wipe every localStorage entry scoped under `${storyId}__t` (#1460).
+ *
+ * Called on each entry from /tools so consecutive practices of the same tool
+ * always start blank — "每一次練習都是獨立的，紀錄不會留到下一次"
+ * (UX spec, 2026-05-04).
+ *
+ * Self-practice (`${storyId}`) and assignment (`${storyId}__a_${id}`) keys
+ * are unaffected because they don't end with `__t`.
+ */
+export function clearToolboxScopeForStory(storyId: string | number): void {
+  const suffix = `${String(storyId)}__t`;
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.endsWith(suffix)) {
+        keysToRemove.push(key);
+      }
+    }
+    for (const k of keysToRemove) {
+      localStorage.removeItem(k);
+    }
+  } catch {
+    // localStorage unavailable (private mode, SSR) — best-effort
+  }
+}
