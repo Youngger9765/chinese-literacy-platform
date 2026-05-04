@@ -738,7 +738,7 @@ const LearningLayout: React.FC = () => {
         });
     }
 
-    navigate(`/learn/${storyId}/reading-annotation`);
+    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/reading-annotation`);
   }, [
     storyId,
     selectedStory,
@@ -749,6 +749,19 @@ const LearningLayout: React.FC = () => {
     activeDbSessionStorageKey,
     legacyDbSessionStorageKey,
   ]);
+
+  // #1460: when finishing any step in toolbox mode, return to /tools instead
+  // of advancing to the next step in the lesson sequence. Single-shot UX.
+  const navigateAfterFinish = useCallback(
+    (nextStep: string) => {
+      if (isToolboxMode()) {
+        navigate('/tools');
+        return;
+      }
+      navigate(`/learn/${storyId}/${nextStep}`);
+    },
+    [navigate, storyId],
+  );
 
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
@@ -765,9 +778,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['full-reading']);
-      navigate(`/learn/${storyId}/full-reading`);
+      navigateAfterFinish('full-reading');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishComprehension = useCallback(
@@ -784,9 +797,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
-      navigate(`/learn/${storyId}/vocab-word-search`);
+      navigateAfterFinish('vocab-word-search');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishVocab = useCallback(
@@ -803,18 +816,18 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['vocab-definition']);
-      navigate(`/learn/${storyId}/vocab-definition`);
+      navigateAfterFinish('vocab-definition');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishDictation = useCallback(
     (result: DictationResult) => {
       setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
       persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
-      navigate(`/learn/${storyId}/vocab-word-search`);
+      navigateAfterFinish('vocab-word-search');
     },
-    [storyId, navigate, persistStep],
+    [navigateAfterFinish, persistStep],
   );
 
   const handleFinishFullReading = useCallback(
@@ -831,9 +844,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['listening']);
-      navigate(`/learn/${storyId}/listening`);
+      navigateAfterFinish('listening');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   // Issue #1098 — listening step persistence (was missing, intern forgot to bring
@@ -851,9 +864,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['vocab']);
-      navigate(`/learn/${storyId}/vocab`);
+      navigateAfterFinish('vocab');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishReadingAnnotation = useCallback(
@@ -870,9 +883,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['tutor']);
-      navigate(`/learn/${storyId}/tutor`);
+      navigateAfterFinish('tutor');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishVocabDefinitionMatch = useCallback(
@@ -889,9 +902,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
-      navigate(`/learn/${storyId}/vocab-application`);
+      navigateAfterFinish('vocab-application');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishVocabApplication = useCallback(
@@ -908,9 +921,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['story-structure']);
-      navigate(`/learn/${storyId}/story-structure`);
+      navigateAfterFinish('story-structure');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   // Issue #1335 — advance from 文章重點表 to 閱讀聚光燈
@@ -927,9 +940,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['reading-strategy']);
-      navigate(`/learn/${storyId}/reading-strategy`);
+      navigateAfterFinish('reading-strategy');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   // Issue #1335 — advance from 閱讀聚光燈 to 閱讀理解
@@ -946,9 +959,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['comprehension']);
-      navigate(`/learn/${storyId}/comprehension`);
+      navigateAfterFinish('comprehension');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishSentencePractice = useCallback(
@@ -964,9 +977,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['sentence-practice']);
-      navigate(`/learn/${storyId}/vocab-definition`);
+      navigateAfterFinish('vocab-definition');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishVocabWordSearch = useCallback(
@@ -983,9 +996,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
-      navigate(`/learn/${storyId}/knowledge-station`);
+      navigateAfterFinish('knowledge-station');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishKnowledgeStation = useCallback(
@@ -1002,9 +1015,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['report']);
-      navigate(`/learn/${storyId}/report`);
+      navigateAfterFinish('report');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleRetry = useCallback(() => {
