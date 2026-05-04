@@ -250,7 +250,7 @@ const ImmersiveTopBar: React.FC = () => {
         type="button"
         onClick={handleBack}
         className="shrink-0 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-90 duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        aria-label="返回圖書館"
+        aria-label={inToolbox ? '返回練習工具箱' : '返回圖書館'}
       >
         <span className="material-symbols-outlined text-on-surface text-xl md:text-2xl">arrow_back</span>
       </button>
