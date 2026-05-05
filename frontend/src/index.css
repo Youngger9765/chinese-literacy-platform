@@ -2,13 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* When zhuyin is active, force BpmfZihiSans as the primary font on ALL elements
-   inside the learning shell. This overrides Tailwind font-family utilities
-   (font-headline, font-body, font-sans) which would otherwise take precedence
-   over an ancestor's inline style.
-   Exclude .material-symbols-outlined which needs its own icon font. */
+/* When zhuyin is active, force BpmfZihiSerif (字嗨宋體) as the primary font on
+   ALL elements inside the learning shell. This overrides Tailwind font-family
+   utilities (font-headline, font-body, font-sans) which would otherwise take
+   precedence over an ancestor's inline style. The font carries Bopomofo IVS
+   variant selectors so zhuyin annotations render on each base Chinese glyph.
+   Exclude .material-symbols-outlined which needs its own icon font.
+   Issue #1351 — replaced previous 黑體 (BpmfGenYoGothic) per 陳淑麗教授. */
 [data-zhuyin-active="true"] *:not(.material-symbols-outlined) {
-  font-family: 'BpmfZihiSans', 'Noto Sans TC', sans-serif !important;
+  font-family: 'BpmfZihiSerif', 'Noto Serif TC', serif !important;
 }
 
 /* Elements with .no-zhuyin and their children keep the non-gothic font (zhuyin off default) */

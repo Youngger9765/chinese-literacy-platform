@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { MultipleChoiceItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { fontForZhuyin } from '../../constants/fonts';
 import McqRescueDialog, { McqRescueContext } from '../reading-spotlight/McqRescueDialog';
 
 interface Props {
@@ -87,7 +88,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({
       onComplete={() => setRescueOpen(false)}
     />
     <div className="flex flex-col gap-4 p-4 max-w-2xl mx-auto"
-      style={{ fontFamily: zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined }}>
+      style={{ fontFamily: fontForZhuyin(zhuyinActive) }}>
       {/* Progress — Issue #1094: 學生端不顯示「答對 N 題」數字 */}
       <div className="flex items-center justify-between text-sm text-gray-500">
         <span>第 {current + 1} 題／共 {questions.length} 題</span>

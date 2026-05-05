@@ -22,6 +22,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Story } from '../../types';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { fontForZhuyin } from '../../constants/fonts';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -248,7 +249,7 @@ function getCellsBetween(start: CellPos, end: CellPos): CellPos[] {
 export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProps) {
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
-  const zhuyinFont = zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined;
+  const zhuyinFont = fontForZhuyin(zhuyinActive);
   const storageKey = scopedStepStorageKey('wordSearch_progress_', story.id);
   const loadSaved = () => {
     try {

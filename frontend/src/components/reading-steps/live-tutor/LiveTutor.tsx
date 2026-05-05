@@ -28,6 +28,7 @@ import { useResizablePanel } from '../../../hooks/useResizablePanel';
 import { useLiveTutorSpeech } from '../../../hooks/useLiveTutorSpeech';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 import { LineResult, ParagraphSummaryData } from './liveTutorTypes';
+import { fontForZhuyin } from '../../../constants/fonts';
 import ParagraphCard from './ParagraphCard';
 import TutorFeedbackPanel from './TutorFeedbackPanel';
 
@@ -819,9 +820,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
       style={{
-        fontFamily: isZhuyinAny
-          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-          : undefined,
+        fontFamily: fontForZhuyin(isZhuyinAny),
       }}
     >
       {/* ── Single-column centered layout ─────────────────────────────── */}

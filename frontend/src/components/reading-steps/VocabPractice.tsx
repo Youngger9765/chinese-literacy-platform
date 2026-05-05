@@ -15,6 +15,7 @@ import { Story, ReadingAttempt, VocabResult } from '../../types';
 import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { fontForZhuyin } from '../../constants/fonts';
 import RadicalDecomposition from './RadicalDecomposition';
 import { getDecomposition, initGeneratedDecompositions, initRadicalMeanings } from '../../data/radicals';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
@@ -329,9 +330,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
               <div
                 className="p-6 rounded-3xl bg-surface-container-lowest shadow-editorial flex items-center justify-center gap-5"
                 style={{
-                  fontFamily: zhuyinActive
-                    ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-                    : undefined,
+                  fontFamily: fontForZhuyin(zhuyinActive),
                 }}
               >
                 <p className="text-7xl font-bold text-on-surface leading-none">{zhuyinActive ? zhuyinStr : currentChar}</p>

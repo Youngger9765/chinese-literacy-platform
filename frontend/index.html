@@ -18,9 +18,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=cwTeXYen&family=cwTeXKai&family=Noto+Serif+TC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
+      /* Issue #1351 — zhuyin-active uses BpmfZihiSerif (字嗨宋體, ButTaiwan/bpmfvs)
+         instead of the previous BpmfGenYoGothic (源樣黑體). The new font carries
+         the same Bopomofo IVS variant selectors (U+E0100–E01EF) so PUA-based
+         zhuyin annotations still render, while the base CJK glyphs are now serif
+         (宋體) — matching 陳淑麗教授 readability requirement for nearsighted
+         students. License: Apache 2.0 (see /fonts/licenses/). */
       @font-face {
-        font-family: 'BpmfZihiSans';
-        src: url('/fonts/BpmfGenYoGothic-R.ttf') format('truetype');
+        font-family: 'BpmfZihiSerif';
+        src: url('/fonts/BpmfZihiSerif-Regular.ttf') format('truetype');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
@@ -30,7 +36,7 @@
         background-color: #FBF6EE;
       }
       .zhuyin-text {
-        font-family: 'BpmfZihiSans', 'Noto Sans TC', sans-serif;
+        font-family: 'BpmfZihiSerif', 'Noto Serif TC', serif;
       }
     </style>
   </head>

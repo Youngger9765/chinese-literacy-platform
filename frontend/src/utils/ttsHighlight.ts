@@ -10,7 +10,7 @@
  * causing highlights to lag.
  *
  * Problem 2 — zhuyin PUA variant selectors (#1112):
- * Polyphonic chars carry U+E01E1–U+E01E5 selectors (BpmfZihiSans font). These
+ * Polyphonic chars carry U+E01E1–U+E01E5 selectors (BpmfZihiSerif font). These
  * are surrogate pairs (2 UTF-16 code units each) invisible to TTS. Walking
  * displayText by UTF-16 index inflates `effective` by 2 per polyphonic char,
  * pushing the highlight split past the real char boundary onto adjacent

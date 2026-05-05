@@ -13,6 +13,7 @@ import { saveReadingHistory } from '../../services/readingHistoryApi';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { useAuth } from '../../contexts/AuthContext';
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
+import { fontForZhuyin } from '../../constants/fonts';
 import { groupIdxForProgress } from '../../utils/ttsHighlight';
 import FluencyProgressChart, { type FullReadingAttempt } from './full-reading/FluencyProgressChart';
 import SelfAssessment, { type AssessmentRating } from './full-reading/SelfAssessment';
@@ -403,9 +404,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
       style={{
-        fontFamily: isZhuyinAny
-          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-          : undefined,
+        fontFamily: fontForZhuyin(isZhuyinAny),
       }}
     >
       {/* ── Single-column centered layout ─────────────────────────────── */}
