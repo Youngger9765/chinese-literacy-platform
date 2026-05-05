@@ -123,6 +123,11 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish, mi
               onRetry={() => {
                 // Knowledge Station is content-only — "retry" just reloads
                 // the page to re-render the video from a fresh viewer state.
+                // TODO(#1462 follow-up): replace `window.location.reload()`
+                // with a soft React reset (e.g. bump a key on the iframe).
+                // Hard reload is acceptable here because there's no in-flight
+                // state to lose on this terminal step, but a soft reset would
+                // avoid the full-page flash.
                 try { localStorage.removeItem(storageKey); } catch {}
                 window.location.reload();
               }}

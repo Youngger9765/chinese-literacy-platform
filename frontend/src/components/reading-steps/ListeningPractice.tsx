@@ -472,6 +472,9 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
               <ToolboxCompletionActions
                 onRetry={() => {
                   // Toolbox retry: reset eval state + put student back at the play stage.
+                  // TODO(#1462 follow-up): if ListeningPractice ever adds
+                  // localStorage persistence, also clear the corresponding
+                  // scopedStepStorageKey here so a redo starts truly blank.
                   setEvalResult(null);
                   setRetelling('');
                   setParagraphIdx(0);
