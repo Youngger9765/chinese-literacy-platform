@@ -143,7 +143,11 @@ const ToolboxSessionCard: React.FC<{ session: ToolboxSession }> = ({ session }) 
           <div className="flex items-center gap-3 mt-2 flex-wrap text-xs text-gray-400">
             <span>{formatDate(session.started_at)}</span>
             {storySlug && <span>課文：{storySlug}</span>}
-            {session.score != null && <span>分數：{Math.round(session.score * 100) / 100}</span>}
+            {session.score != null && (
+              // Toolbox tools normalize score to [0, 1] (accuracy / matchRate).
+              // Render as a percentage so the value is readable at a glance.
+              <span>分數：{Math.round(session.score * 100)}%</span>
+            )}
           </div>
         </div>
       </div>
@@ -171,26 +175,25 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
       else setIsLoadingMore(true);
       setError('');
       try {
-        const result = await fetchLearningSessions(token, {
+        // #1463 Phase 3: in 自學 tab, fire learning-sessions and toolbox-sessions
+        // requests in parallel to avoid waterfall latency. Toolbox load is
+        // wrapped so a failure there doesn't block the main self-practice list.
+        const sessionsPromise = fetchLearningSessions(token, {
           learning_source: source,
           limit: PAGE_SIZE,
           offset,
           status: 'completed',
         });
+        const toolboxPromise =
+          source === 'self' && offset === 0
+            ? listAllToolboxSessions(token, 100).catch(() => [])
+            : Promise.resolve(null);
+
+        const [result, toolbox] = await Promise.all([sessionsPromise, toolboxPromise]);
+
         setSessions((prev) => (append ? [...prev, ...result.items] : result.items));
         setTotal(result.total);
-
-        // #1463 Phase 3: in 自學 tab, also fetch toolbox sessions and render
-        // them inline tagged "練習工具箱". Only on first page (offset=0).
-        if (source === 'self' && offset === 0) {
-          try {
-            const toolbox = await listAllToolboxSessions(token, 100);
-            setToolboxSessions(toolbox);
-          } catch {
-            // non-fatal — main self-practice list still renders
-            setToolboxSessions([]);
-          }
-        }
+        if (toolbox !== null) setToolboxSessions(toolbox);
       } catch {
         setError('無法載入學習紀錄，請稍後再試');
       } finally {

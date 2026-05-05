@@ -219,6 +219,13 @@ def list_all_toolbox_sessions(
 
     Used by the 學習紀錄 page to show "練習工具箱" sessions inline with
     self-practice ones (#1463 Phase 3). Per-tool tag is in `tool_id`.
+
+    TODO(#1463 follow-up): the current implementation pulls up to `limit`
+    rows from EACH of the 10 tables and then truncates after sorting, so
+    a heavy user could miss recent rows from one table when an older table
+    has many rows. For a small/early-traffic period this is acceptable;
+    once usage grows, replace with a single SQL UNION ALL keyset paginated
+    by started_at, or move toolbox tables behind a unified view.
     """
     limit = max(1, min(limit, 500))
     items: list[ToolboxSessionItem] = []

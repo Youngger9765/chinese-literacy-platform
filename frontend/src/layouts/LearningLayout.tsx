@@ -25,7 +25,6 @@ import { useProgressSync } from '../hooks/useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
 import { scopedStepStorageKey, isToolboxMode } from '../services/learningStorageScope';
-import type { ToolId as ToolboxToolId } from '../services/toolboxApi';
 
 /** Idle time before showing warning modal (15 minutes). */
 const IDLE_WARNING_TIMEOUT_MS = 15 * 60 * 1000;
@@ -765,36 +764,15 @@ const LearningLayout: React.FC = () => {
     [navigate, storyId],
   );
 
-  // #1463: when finishing any step in toolbox mode, persist the practice
-  // attempt to the dedicated toolbox table (one of 10 toolbox_*_sessions)
-  // before navigating away. Fire-and-forget — failure is logged but does
-  // not block the navigation. Self-practice / assignment writes still
-  // flow through the existing learning_sessions path (#1460 cuts that).
-  const recordToolboxCompletion = useCallback(
-    async (toolId: ToolboxToolId, result: Record<string, unknown>, score?: number | null) => {
-      if (!isToolboxMode() || !token) return;
-      try {
-        const { recordToolboxCompletion: doRecord } = await import('../services/toolboxApi');
-        // text_id stays null in Phase 2 — Story.id is a slug, not the FK int.
-        // The backend route accepts null and the frontend can resolve text via
-        // story_slug from `result` when displaying history (#1463 Phase 3).
-        await doRecord(toolId, token, {
-          text_id: null,
-          result: { ...result, story_slug: selectedStory?.id ?? null },
-          score: score ?? null,
-        });
-      } catch (err) {
-        console.warn('[LearningLayout] toolbox completion save failed:', err);
-      }
-    },
-    [token, selectedStory],
-  );
+  // #1463: toolbox completions are persisted by ToolboxCompletionActions on
+  // mount (single source of truth). LearningLayout no longer wires recording
+  // into handleFinish*, since #1462's tool patterns short-circuit onFinish in
+  // toolbox mode and the handlers never run there.
 
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
       setLastAttempt(attempt);
       setSession((prev) => (prev ? { ...prev, readingAttempt: attempt } : null));
-      void recordToolboxCompletion('tutor', { attempt }, attempt.accuracy);
       persistStepProgressState(
         {
           completeStep: 'tutor',
@@ -814,11 +792,6 @@ const LearningLayout: React.FC = () => {
   const handleFinishComprehension = useCallback(
     (result: ComprehensionResult) => {
       setSession((prev) => (prev ? { ...prev, comprehensionResult: result } : null));
-      void recordToolboxCompletion(
-        'comprehension',
-        { result },
-        result.requiredCount > 0 ? result.understoodCount / result.requiredCount : null,
-      );
       persistStepProgressState(
         {
           completeStep: 'comprehension',
@@ -838,7 +811,6 @@ const LearningLayout: React.FC = () => {
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
       setSession((prev) => (prev ? { ...prev, vocabResult: result } : null));
-      void recordToolboxCompletion('vocab', { result });
       persistStepProgressState(
         {
           completeStep: 'vocab',
@@ -867,7 +839,6 @@ const LearningLayout: React.FC = () => {
   const handleFinishFullReading = useCallback(
     (result: FullReadingResult) => {
       setSession((prev) => (prev ? { ...prev, fullReadingResult: result } : null));
-      void recordToolboxCompletion('full-reading', { result }, result.matchRate ?? null);
       persistStepProgressState(
         {
           completeStep: 'full-reading',
@@ -888,7 +859,6 @@ const LearningLayout: React.FC = () => {
   // it over when extracting listening from full-reading as its own step).
   const handleFinishListening = useCallback(
     (result: ListeningResult) => {
-      void recordToolboxCompletion('listening', { result }, result.score ?? null);
       persistStepProgressState(
         {
           completeStep: 'listening',
@@ -927,7 +897,6 @@ const LearningLayout: React.FC = () => {
   const handleFinishVocabDefinitionMatch = useCallback(
     (result: VocabDefinitionMatchResult) => {
       setSession((prev) => (prev ? { ...prev, vocabDefinitionMatchCompleted: true } : null));
-      void recordToolboxCompletion('vocab-definition', { result });
       persistStepProgressState(
         {
           completeStep: 'vocab-definition',
@@ -947,7 +916,6 @@ const LearningLayout: React.FC = () => {
   const handleFinishVocabApplication = useCallback(
     (result: VocabApplicationResult) => {
       setSession((prev) => (prev ? { ...prev, vocabApplicationCompleted: true } : null));
-      void recordToolboxCompletion('vocab-application', { result }, result.completionRate ?? null);
       persistStepProgressState(
         {
           completeStep: 'vocab-application',
@@ -1004,7 +972,6 @@ const LearningLayout: React.FC = () => {
 
   const handleFinishSentencePractice = useCallback(
     () => {
-      void recordToolboxCompletion('sentence-practice', {});
       persistStepProgressState(
         {
           completeStep: 'sentence-practice',
@@ -1024,7 +991,6 @@ const LearningLayout: React.FC = () => {
   const handleFinishVocabWordSearch = useCallback(
     (elapsedSeconds: number) => {
       setSession((prev) => (prev ? { ...prev, vocabWordSearchCompleted: true } : null));
-      void recordToolboxCompletion('vocab-word-search', { elapsedSeconds });
       persistStepProgressState(
         {
           completeStep: 'vocab-word-search',
@@ -1044,7 +1010,6 @@ const LearningLayout: React.FC = () => {
   const handleFinishKnowledgeStation = useCallback(
     () => {
       setSession((prev) => (prev ? { ...prev, knowledgeStationCompleted: true } : null));
-      void recordToolboxCompletion('knowledge-station', {});
       persistStepProgressState(
         {
           completeStep: 'knowledge-station',
