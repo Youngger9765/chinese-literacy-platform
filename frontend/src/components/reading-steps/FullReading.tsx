@@ -14,6 +14,8 @@ import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { useAuth } from '../../contexts/AuthContext';
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
 import { fontForZhuyin } from '../../constants/fonts';
+import { isToolboxMode } from '../../services/learningStorageScope';
+import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { groupIdxForProgress } from '../../utils/ttsHighlight';
 import FluencyProgressChart, { type FullReadingAttempt } from './full-reading/FluencyProgressChart';
 import SelfAssessment, { type AssessmentRating } from './full-reading/SelfAssessment';
@@ -47,6 +49,8 @@ interface FullReadingProps {
 const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, initialResult, fullReadingAttempts = [] }) => {
   const { token } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
+  // #1462: in toolbox mode, completion screen shows 重做/回工具箱 instead of 下一關.
+  const inToolbox = isToolboxMode();
 
   type SavedResult = { matchRate: number; feedback: string; diffTokens: DiffToken[]; cpm: number; durationMs: number; errorBreakdown: { correct: number; wrong: number; missing: number; extra: number } };
   const loadSaved = (): { result: SavedResult; transcript: string } | null => {
@@ -570,23 +574,30 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
         <div className="max-w-md mx-auto pointer-events-auto flex flex-col items-center gap-3">
 
           {result ? (
-            <>
-              <button
-                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
-                className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-lg">refresh</span>
-                再讀一次
-              </button>
-              <button
-                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
-                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-              >
-                <span>下一關</span>
-                <span className="material-symbols-outlined text-xl">arrow_forward</span>
-              </button>
-            </>
+            inToolbox ? (
+              <ToolboxCompletionActions
+                onRetry={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
+                className="w-full"
+              />
+            ) : (
+              <>
+                <button
+                  onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
+                  className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-lg">refresh</span>
+                  再讀一次
+                </button>
+                <button
+                  onClick={() => { try { localStorage.removeItem(storageKey); } catch {} onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
+                  className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+                >
+                  <span>下一關</span>
+                  <span className="material-symbols-outlined text-xl">arrow_forward</span>
+                </button>
+              </>
+            )
           ) : isPreparing ? (
             <button disabled className="w-full h-14 rounded-full font-headline font-bold text-lg bg-surface-container-high text-on-surface-variant cursor-wait flex items-center justify-center gap-2">
               <div className="w-4 h-4 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin" />

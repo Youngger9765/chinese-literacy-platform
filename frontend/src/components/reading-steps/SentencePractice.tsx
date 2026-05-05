@@ -13,7 +13,8 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
-import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
+import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import {
   fetchExampleSentences,
   validateSentence,
@@ -654,12 +655,24 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
              style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
           <div className="max-w-md mx-auto pointer-events-auto">
-            <button onClick={onFinish}
-              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
-              繼續下一步
-              <span className="material-symbols-outlined text-xl">arrow_forward</span>
-            </button>
+            {isToolboxMode() ? (
+              <ToolboxCompletionActions
+                onRetry={() => {
+                  // Toolbox retry: reset all completion state, back to first word.
+                  setCompletedWords(new Set());
+                  setCurrentWordIndex(0);
+                  if (storageKey) try { localStorage.removeItem(storageKey); } catch {}
+                }}
+                className="w-full"
+              />
+            ) : (
+              <button onClick={onFinish}
+                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
+                繼續下一步
+                <span className="material-symbols-outlined text-xl">arrow_forward</span>
+              </button>
+            )}
           </div>
         </div>
       )}

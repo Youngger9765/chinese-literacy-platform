@@ -31,6 +31,8 @@ import { LineResult, ParagraphSummaryData } from './liveTutorTypes';
 import { fontForZhuyin } from '../../../constants/fonts';
 import ParagraphCard from './ParagraphCard';
 import TutorFeedbackPanel from './TutorFeedbackPanel';
+import { isToolboxMode } from '../../../services/learningStorageScope';
+import ToolboxCompletionActions from '../../tools/ToolboxCompletionActions';
 
 /* ------------------------------------------------------------------ */
 /*  Component props                                                    */
@@ -381,6 +383,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         );
         const totalDurationSec = allLineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
         const overallCpm = totalDurationSec > 0 ? Math.round((totalCorrectChars / totalDurationSec) * 60) : 0;
+        // #1462: in toolbox mode, do NOT auto-call onFinish. Instead surface a
+        // completion overlay so the student can choose 重做 or 回到練習工具箱.
+        if (isToolboxMode()) {
+          setToolboxComplete(true);
+          return;
+        }
         onFinish({
           storyId: story.id, accuracy: Math.round(avgMatchRate * 100), fluency: overallCpm,
           cpm: overallCpm, mispronouncedWords: extractPracticeChars(allLineResults, story.content),
@@ -393,6 +401,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       }, 2000);
     }
   }, [story, onFinish, onParagraphComplete, saveParagraphReading]);
+
+  // #1462: toolbox-mode completion gate — replaces auto-onFinish at the
+  // end of the last paragraph so the student sees explicit retry / exit CTAs.
+  const [toolboxComplete, setToolboxComplete] = useState(false);
 
   /* ---- Hybrid evaluation: local first, Gemini only on FAIL ---- */
   const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
@@ -1062,6 +1074,27 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {/* Background decoration */}
       <div className="fixed -bottom-16 -right-16 w-64 h-64 bg-tertiary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
       <div className="fixed top-1/4 -left-32 w-80 h-80 bg-accent/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+
+      {/* #1462 Toolbox completion overlay — replaces auto-onFinish navigate */}
+      {toolboxComplete && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="bg-surface rounded-3xl shadow-editorial p-8 max-w-md w-full text-center">
+            <h2 className="text-2xl font-headline font-bold text-on-surface mb-3">朗讀練習完成！</h2>
+            <p className="text-sm text-on-surface-variant mb-6">想再練一次，或回到工具箱選別的工具？</p>
+            <ToolboxCompletionActions
+              onRetry={() => {
+                setToolboxComplete(false);
+                setCurrentLineIndex(0);
+                setLineResults([]);
+                setCelebratingIndex(null);
+                setCompletedParagraphs(new Set());
+                setParagraphSummaries({});
+                try { localStorage.removeItem(storageKey); } catch {}
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }

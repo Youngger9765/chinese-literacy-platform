@@ -15,6 +15,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { speakTextWithProgress, cancelTts, TtsProgressInfo } from '../../services/ttsApi';
 import { encourageAccuracy } from '../../utils/encouragement';
+import { isToolboxMode } from '../../services/learningStorageScope';
+import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 
 export interface ListeningResult {
   score: number;
@@ -466,12 +468,25 @@ const ListeningPractice: React.FC<ListeningPracticeProps> = ({ story, onFinish, 
           )}
 
           {phase === 'results' && (
-            <button onClick={handleFinish}
-              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
-              繼續下一步
-              <span className="material-symbols-outlined text-xl">arrow_forward</span>
-            </button>
+            isToolboxMode() ? (
+              <ToolboxCompletionActions
+                onRetry={() => {
+                  // Toolbox retry: reset eval state + put student back at the play stage.
+                  setEvalResult(null);
+                  setRetelling('');
+                  setParagraphIdx(0);
+                  setPhase('play');
+                }}
+                className="w-full"
+              />
+            ) : (
+              <button onClick={handleFinish}
+                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
+                繼續下一步
+                <span className="material-symbols-outlined text-xl">arrow_forward</span>
+              </button>
+            )
           )}
         </div>
       </div>
