@@ -261,7 +261,12 @@ export default function VocabWordSearch({ story, onFinish }: VocabWordSearchProp
   const savedRef = useRef(loadSaved());
 
   const vocabWords = useMemo(
-    () => (story.vocabulary ?? []).map((v) => v.word).filter((w) => [...w].length >= 2),
+    // Strip all whitespace from vocab words before grid generation.
+    // Defensive guard: some YAML files historically stored words with spaces
+    // between characters (e.g. '孤 寂 感' → '孤寂感', '提 案' → '提案').
+    // Without stripping, space characters become blank-looking grid cells and
+    // drag-selection never matches because selectedText !== word-with-spaces.
+    () => (story.vocabulary ?? []).map((v) => v.word.replace(/\s+/g, '')).filter((w) => [...w].length >= 2),
     [story.vocabulary]
   );
 
