@@ -14,6 +14,7 @@ import React, { useEffect, useState } from 'react';
 import { FillInBlankItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
+import { scopedStepStorageKey } from '../../services/learningStorageScope';
 
 interface Props {
   sentences: FillInBlankItem[];
@@ -29,9 +30,10 @@ export interface QuestionResult {
   correctAnswer: string;
 }
 
-// localStorage helpers
+// localStorage helpers — must use scopedStepStorageKey so toolbox/assignment
+// runs are isolated from self-practice (#1460).
 function storageKey(storyId: string | number | undefined): string | null {
-  return storyId != null ? `vocab_app_progress_${storyId}` : null;
+  return storyId != null ? scopedStepStorageKey('vocab_app_progress_', storyId) : null;
 }
 
 interface SavedProgress {

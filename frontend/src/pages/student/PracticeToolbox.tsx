@@ -9,21 +9,35 @@
  *
  * Issue #1165 (replaces #1153 card-grid design)
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Story } from '../../types';
 import LessonPicker from '../../components/tools/LessonPicker';
 import ToolPicker, { ToolOption } from '../../components/tools/ToolPicker';
+import { clearToolboxScopeForStory, setToolboxMode } from '../../services/learningStorageScope';
 
 const PracticeToolbox: React.FC = () => {
   const navigate = useNavigate();
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [selectedTool, setSelectedTool] = useState<ToolOption | null>(null);
 
+  // Returning to /tools means leaving toolbox-mode — clear the flag so
+  // subsequent self-practice / assignment flows aren't scoped under "__t".
+  useEffect(() => {
+    setToolboxMode(false);
+  }, []);
+
   const canStart = selectedStory != null && selectedTool != null;
 
   const handleStart = () => {
     if (!canStart) return;
+    // Wipe any leftover "__t"-scoped localStorage from a previous toolbox run
+    // so this practice starts blank (#1460 — "每一次練習都是獨立的"). Toolbox
+    // sessions are single-shot; previous progress must never resurface.
+    clearToolboxScopeForStory(selectedStory.id);
+    // Activate toolbox-mode before navigation so the tool component reads
+    // localStorage under the isolated "__t" scope from first render.
+    setToolboxMode(true);
     navigate(`/learn/${selectedStory.id}/${selectedTool.stepPath}`, {
       state: { returnTo: '/tools' },
     });

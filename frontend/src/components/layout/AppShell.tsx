@@ -26,6 +26,7 @@ import LearningLayout from '../../layouts/LearningLayout';
 import ZhuyinToggle from '../ui/ZhuyinToggle';
 import DevSkipButton from '../ui/DevSkipButton';
 import { OnboardingWrapper } from '../../pages/app/InlinePages';
+import { isToolboxMode, setToolboxMode } from '../../services/learningStorageScope';
 
 /** The authenticated app shell with sidebar only (header removed 2026-04-18). */
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -184,6 +185,11 @@ const ImmersiveTopBar: React.FC = () => {
   const { zhuyinMode, zhuyinReady, setZhuyinMode } = useZhuyin();
   const { karaokeEnabled, toggleKaraoke } = useKaraoke();
 
+  // #1460 — toolbox mode: single-shot practice from /tools picker.
+  // Hide multi-step navigation (dots + arrows) and route the back button
+  // to /tools instead of /library.
+  const inToolbox = isToolboxMode();
+
   // Resolve the active step list driven by the current lesson's step_sequence (#1374).
   // Falls back to DEFAULT_STEP_SEQUENCE when lesson has no step_sequence field.
   const activeSteps = useStepSequence(selectedStory ?? null);
@@ -198,6 +204,11 @@ const ImmersiveTopBar: React.FC = () => {
   const allNonReportDone = activeSteps.filter(s => s.id !== 'report').every(s => completedSet.has(s.id));
 
   const handleBack = () => {
+    if (inToolbox) {
+      setToolboxMode(false);
+      navigate('/tools');
+      return;
+    }
     if (selectedStory) {
       navigate('/library');
     } else {
@@ -239,7 +250,7 @@ const ImmersiveTopBar: React.FC = () => {
         type="button"
         onClick={handleBack}
         className="shrink-0 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-90 duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        aria-label="返回圖書館"
+        aria-label={inToolbox ? '返回練習工具箱' : '返回圖書館'}
       >
         <span className="material-symbols-outlined text-on-surface text-xl md:text-2xl">arrow_back</span>
       </button>
@@ -260,7 +271,8 @@ const ImmersiveTopBar: React.FC = () => {
             <>
               {selectedStory && <span className="text-on-surface-variant/40 shrink-0">·</span>}
               <span className="font-headline font-bold text-accent tracking-wide shrink-0">
-                {currentStep.label} {currentStepIndex + 1}/{totalSteps}
+                {/* Toolbox mode: single-shot, hide N/total counter (#1460) */}
+                {inToolbox ? currentStep.label : `${currentStep.label} ${currentStepIndex + 1}/${totalSteps}`}
               </span>
             </>
           )}
@@ -272,38 +284,42 @@ const ImmersiveTopBar: React.FC = () => {
           </span>
         )}
 
-        {/* Progress dots + left/right arrows (Issue #1094) — tooltip shows step name; arrows fixed-size, dots wrap */}
-        <div className="flex items-center gap-1 max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
-          <button
-            type="button"
-            onClick={() => prevStep && handleStepClick(prevStep)}
-            disabled={!prevStep || !selectedStory}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            aria-label={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
-            title={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
-          >
-            <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_left</span>
-          </button>
+        {/* Progress dots + left/right arrows (Issue #1094).
+            Toolbox mode (#1460): hide entirely — single-shot practice has no
+            cross-step navigation. Other steps remain unreachable from here. */}
+        {!inToolbox && (
+          <div className="flex items-center gap-1 max-w-full min-w-0 h-8 md:h-10" role="navigation" aria-label="學習步驟導航">
+            <button
+              type="button"
+              onClick={() => prevStep && handleStepClick(prevStep)}
+              disabled={!prevStep || !selectedStory}
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              aria-label={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
+              title={prevStep ? `上一步：${prevStep.label}` : '已是第一步'}
+            >
+              <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_left</span>
+            </button>
 
-          <StepDots
-            steps={activeSteps}
-            currentStepIndex={currentStepIndex}
-            completedSet={completedSet}
-            allNonReportDone={allNonReportDone}
-            onStepClick={handleStepClick}
-          />
+            <StepDots
+              steps={activeSteps}
+              currentStepIndex={currentStepIndex}
+              completedSet={completedSet}
+              allNonReportDone={allNonReportDone}
+              onStepClick={handleStepClick}
+            />
 
-          <button
-            type="button"
-            onClick={() => nextStep && handleStepClick(nextStep)}
-            disabled={!nextStep || !selectedStory}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            aria-label={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
-            title={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
-          >
-            <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_right</span>
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => nextStep && handleStepClick(nextStep)}
+              disabled={!nextStep || !selectedStory}
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              aria-label={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
+              title={nextStep ? `下一步：${nextStep.label}` : '已是最後一步'}
+            >
+              <span className="material-symbols-outlined leading-none" style={{ fontSize: '28px' }}>chevron_right</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Right: karaoke toggle + zhuyin toggle */}
