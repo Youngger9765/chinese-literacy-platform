@@ -251,9 +251,9 @@ async def validate_student_sentence(
 - 否則 → is_correct=false
 
 回覆規則（非常重要）：
-- feedback **只能一句話**，先肯定再溫柔提醒，不要用「錯」「不對」「不行」「不正確」等否定字眼
-- is_correct=true：feedback 是一句鼓勵；suggestion 留空字串
-- is_correct=false：feedback 是一句溫柔提醒（例如「再想想看…」「換個說法可能更順喔」）；suggestion 是一句改寫提示
+- feedback **只能一句話**，不要用「錯」「不對」「不行」「不正確」等否定字眼
+- is_correct=true：feedback 是一句純鼓勵（不要加提醒）；suggestion 留空字串
+- is_correct=false：feedback 是一句溫柔提醒（先肯定再提示，例如「再想想看…」「換個說法可能更順喔」）；suggestion 是一句改寫提示
 - 一律使用臺灣繁體中文（zh-TW）"""
 
     if passage_sentences:
