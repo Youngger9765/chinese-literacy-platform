@@ -66,33 +66,8 @@ multiple_choice:
 multiple_choice_count: 8
 self_check_items: []
 discussion_content: []
-images:
-- filename: images/文-L8/文-L8-01.png
-  size_bytes: 1648
-  image_hash: 7ee5d3b8b36a
-  content_type: image/png
-  caption: ''
-- filename: images/文-L8/文-L8-02.png
-  size_bytes: 8495
-  image_hash: d0d187eac435
-  content_type: image/png
-  caption: ''
-- filename: images/文-L8/文-L8-03.png
-  size_bytes: 8069
-  image_hash: 7c834e8f7603
-  content_type: image/png
-  caption: ''
-- filename: images/文-L8/文-L8-04.png
-  size_bytes: 7368
-  image_hash: f8467169fe00
-  content_type: image/png
-  caption: ''
-- filename: images/文-L8/文-L8-05.png
-  size_bytes: 1389
-  image_hash: 4c4909300d39
-  content_type: image/png
-  caption: ''
-image_count: 5
+images: []
+image_count: 0
 story_structure_rows:
 - label: 主題
   value: 顧寧人愛讀書
@@ -123,3 +98,36 @@ story_structure_rows:
   interactive_type: fill_blank
   hint: 從顧寧人的故事中，我們可以學到讀書有什麼好處？
 story_structure_table_source: ai-generated-2026-05-02
+spotlight_raw_text: "文言聚光燈：一字多義：「少」\n文言文類型\n記敘人物\t\n\n-27940-18224500第8課  愛讀書的顧寧人  \n學習單：\n王淑瑱\n古文今譯\n崑山有一位顧寧人先生，生長在世代做官的家族，年少時就擁有超越其他人的資質，他專注於研究古代的學問，儒家的書及各種史書，差不多都能背誦。\n他的精力超越一般人，沒有其他嗜好，從小到老，從來沒有一天不讀書。出門時，車上一定要帶上幾箱的書隨行，到旅店稍微休息後，就翻找書箱拿書出來讀，從不曾表現出疲倦的樣子來。\n清朝・潘耒\n  \n崑山.顧寧人.先生，生長\U000E01E1.世族，少\U000E01E1負.絕異之資，潛心古學，九經.諸史，略能.背誦。\n精力.絕人，無他.嗜好\U000E01E1，自少\U000E01E1.至老，未嘗.一\U000E01E1日.廢書。出.必載書.數簏1.自隨，旅店少休，披尋.搜討，曾無.倦色。\n487643185345注釋\n1.\t簏：竹子編成的箱子。\n-46930163830\n1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！\n2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。00\n1. 請用計時器，朗讀原文，並將讀完的時間記錄在表格中。如果你計時3次後，對自己還不滿意，可以自己多練幾次喔。最後一次，找一位同學，請他來計時、記錄並簽名！\n2. 文章中的「.」是表示斷詞的地方，朗讀時，不要把「同組的詞」分開。\n\n第1次計時\n第2次計時\n第3次計時\n裁判計時\n秒\n秒\n秒\n秒\n\n裁判簽名:                \n\n◎"
+worksheet_section_order:
+- number: 三
+  name: 文章重點表
+  type: structure_table
+- number: 五
+  name: 閱讀理解
+  type: mcq
+strategy_exercise:
+  type: guided_steps
+  strategy_name: 文言聚光燈：一字多義：「少」
+  instruction: 請判斷文中「少」字的意義。
+  reasoning: 此練習旨在引導學生理解文言文中「少」字的一字多義現象。原文中「少」字出現兩次，皆取「年輕時」之意。透過選擇題，學生需辨識其在特定語境下的意義。課文摘要部分僅供理解上下文，不作為獨立的練習步驟。
+  steps:
+  - prompt: 請判斷「少負絕異之資」中的「少」字，其意義為何？
+    type: select
+    options:
+    - 年輕時
+    - 數量不多
+    - 缺少
+    answer: 0
+    reasoning: 原文「少負絕異之資」在古文今譯中為「年少時就擁有超越其他人的資質」，故「少」在此處意指「年輕時」。
+  - prompt: 請判斷「自少至老」中的「少」字，其意義為何？
+    type: select
+    options:
+    - 年輕時
+    - 數量不多
+    - 缺少
+    answer: 0
+    reasoning: 原文「自少至老」在古文今譯中為「從小到老」，故「少」在此處意指「年輕時」。
+strategy_exercise_source: gemini-2.5-flash-2026-05-02
+worksheet_intro:
+  lesson_label: 第8課  愛讀書的顧寧人
