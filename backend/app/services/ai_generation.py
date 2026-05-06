@@ -289,8 +289,8 @@ async def validate_student_sentence(
         temperature=0.3,
     )
 
-    # Ensure suggestion is empty string if correct
-    if result.get("is_correct") and not result.get("suggestion"):
+    # Ensure suggestion is empty string if correct (defensive, in case model violates prompt)
+    if result.get("is_correct"):
         result["suggestion"] = ""
 
     return result
