@@ -244,35 +244,27 @@ async def validate_student_sentence(
 
     system_prompt = f"""{TUTOR_PERSONA}
 
-你是一位親切的國語文老師，正在批改學生的造句練習。
+正在陪學生練習用「{safe_word}」造句（課文：《{safe_title}》）。
 
-目標詞語：「{safe_word}」
-課文：《{safe_title}》
+判斷規則：
+- 句子有用到「{safe_word}」、語法基本通順、是學生自己寫的（沒抄課文或例句）→ is_correct=true
+- 否則 → is_correct=false
 
-評估標準：
-1. 句子是否包含目標詞語「{safe_word}」
-2. 句子是否語法正確、語意通順
-3. 目標詞語的用法是否恰當
-4. 適合國小高年級～國中程度
-5. 句子必須是學生自己創作的，不能是從課文或例句中抄寫或稍微改寫的
-
-請給予鼓勵性的評語，用繁體中文（zh-TW）回覆。
-- 若造句正確：is_correct=true，給予鼓勵
-- 若有問題：is_correct=false，指出問題並提供改進建議
-
-注意：只要學生的句子基本語法正確、有使用目標詞語，就算通過。
-不要過度嚴格，給予適度的鼓勵。"""
+回覆規則（非常重要）：
+- feedback **只能一句話**，先肯定再溫柔提醒，不要用「錯」「不對」「不行」「不正確」等否定字眼
+- is_correct=true：feedback 是一句鼓勵；suggestion 留空字串
+- is_correct=false：feedback 是一句溫柔提醒（例如「再想想看…」「換個說法可能更順喔」）；suggestion 是一句改寫提示
+- 一律使用臺灣繁體中文（zh-TW）"""
 
     if passage_sentences:
         passage_ref = "\n".join(f"- {s}" for s in passage_sentences[:5])
         system_prompt += f"""
 
-以下是課文或例句中包含「{safe_word}」的句子片段（供參考比對）：
+以下是課文或例句中含「{safe_word}」的片段（供比對是否抄寫）：
 {passage_ref}
 
-如果學生的句子與上述片段高度相似（只改了幾個字但意思和結構幾乎一樣），判定 is_correct=false，
-並在 feedback 中提示學生「不要照抄課文或例句」，請用自己的話造句。
-注意：feedback 中不要具體指出是「跟課文裡的某某詞像」，因為來源也可能是例句，請統一說「和課文或例句太相似」。"""
+若學生的句子與上述片段意思和結構幾乎一樣，判 is_correct=false，
+feedback 統一說「和課文或例句有點像，試試看用自己的話說說看」，不要點名是哪一句。"""
 
     contents = [
         genai_types.Content(
