@@ -764,6 +764,11 @@ const LearningLayout: React.FC = () => {
     [navigate, storyId],
   );
 
+  // #1463: toolbox completions are persisted by ToolboxCompletionActions on
+  // mount (single source of truth). LearningLayout no longer wires recording
+  // into handleFinish*, since #1462's tool patterns short-circuit onFinish in
+  // toolbox mode and the handlers never run there.
+
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
       setLastAttempt(attempt);
@@ -909,7 +914,7 @@ const LearningLayout: React.FC = () => {
   );
 
   const handleFinishVocabApplication = useCallback(
-    (_result: VocabApplicationResult) => {
+    (result: VocabApplicationResult) => {
       setSession((prev) => (prev ? { ...prev, vocabApplicationCompleted: true } : null));
       persistStepProgressState(
         {
@@ -984,7 +989,7 @@ const LearningLayout: React.FC = () => {
   );
 
   const handleFinishVocabWordSearch = useCallback(
-    (_elapsedSeconds: number) => {
+    (elapsedSeconds: number) => {
       setSession((prev) => (prev ? { ...prev, vocabWordSearchCompleted: true } : null));
       persistStepProgressState(
         {

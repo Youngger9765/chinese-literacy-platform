@@ -12,10 +12,40 @@
  *
  * Self-practice / assignment flows render the tool's normal "繼續/下一步"
  * CTA (this component is NOT rendered in those flows).
+ *
+ * Side effect (#1463 Phase 2): on mount this component fires
+ * `recordToolboxCompletion()` so the completed practice is persisted to
+ * the matching `toolbox_*_sessions` table. The toolId is auto-detected
+ * from the URL path; tools may pass `recordPayload` to enrich the result
+ * blob and score. Mounting once guarantees a single record per
+ * completion (re-mounts after "重做" record a NEW session).
  */
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { setToolboxMode } from '../../services/learningStorageScope';
+import { recordToolboxCompletion, type ToolId } from '../../services/toolboxApi';
+
+// Order matches backend TOOL_MODEL_MAP and frontend TOOL_OPTIONS.
+const TOOLBOX_TOOL_IDS: readonly ToolId[] = [
+  'tutor',
+  'full-reading',
+  'listening',
+  'vocab',
+  'sentence-practice',
+  'vocab-definition',
+  'vocab-application',
+  'comprehension',
+  'vocab-word-search',
+  'knowledge-station',
+] as const;
+
+function detectToolIdFromPath(pathname: string): ToolId | null {
+  // Toolbox practice URL: /learn/:storyId/:toolPath — toolPath is the last segment.
+  const parts = pathname.split('/').filter(Boolean);
+  const last = parts[parts.length - 1];
+  return (TOOLBOX_TOOL_IDS as readonly string[]).includes(last) ? (last as ToolId) : null;
+}
 
 interface ToolboxCompletionActionsProps {
   /**
@@ -25,13 +55,53 @@ interface ToolboxCompletionActionsProps {
   onRetry: () => void;
   /** Optional className applied to the wrapper div for layout control. */
   className?: string;
+  /**
+   * Optional payload recorded into the toolbox session row when this
+   * completion screen mounts (#1463). Tools that have a result/score
+   * available pass them here; the rest record an empty `{}` blob.
+   * `storySlug` is also persisted inside `result` so the 學習紀錄 page
+   * can link the row back to a lesson without an extra FK lookup.
+   */
+  recordPayload?: {
+    result?: Record<string, unknown>;
+    score?: number | null;
+    storySlug?: string | null;
+  };
 }
 
 const ToolboxCompletionActions: React.FC<ToolboxCompletionActionsProps> = ({
   onRetry,
   className = '',
+  recordPayload,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { token } = useAuth();
+  const recordedRef = useRef(false);
+
+  // #1463: persist the toolbox session on mount. Fire-and-forget — failures
+  // only console.warn, the navigation still works. Ref guard ensures we only
+  // record once even if React re-mounts the component for any reason.
+  useEffect(() => {
+    if (recordedRef.current) return;
+    if (!token) return;
+    const toolId = detectToolIdFromPath(location.pathname);
+    if (!toolId) return;
+    recordedRef.current = true;
+    const result = {
+      ...(recordPayload?.result ?? {}),
+      story_slug: recordPayload?.storySlug ?? null,
+    };
+    recordToolboxCompletion(toolId, token, {
+      text_id: null,
+      result,
+      score: recordPayload?.score ?? null,
+    }).catch((err) =>
+      console.warn('[ToolboxCompletionActions] record failed:', err),
+    );
+    // Once-only: deps intentionally omitted — re-mounts (after 重做) get a new ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleBackToToolbox = () => {
     // Clear toolbox-mode flag so subsequent self-practice / assignment
