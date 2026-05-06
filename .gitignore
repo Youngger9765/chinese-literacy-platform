@@ -46,3 +46,6 @@ tests/load-testing/.venv/
 # Transient logs + scratch workspace
 logs/
 workspace/
+
+# /issue-fix skill outputs — work-progress notes, posted to PRs/issues, not committed
+issue*done.md
