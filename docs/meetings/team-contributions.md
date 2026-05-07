@@ -8,6 +8,23 @@
 
 ---
 
+## 5/2 ~ 5/8
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| 靖杭 | ✅ | PR #1459 字體（#1351）| zhuyin-off 場景 BpmfZihiSerif 字嗨宋體 + 11 元件 + fonts.ts helper |
+| 靖杭 | ✅ | PR #1461 toolbox Phase 1（#1460）| 10 獨立 toolbox session tables + AppShell a11y aria-label toolbox-aware |
+| 靖杭 | ✅ | PR #1464 toolbox CTA polish（#1462）| per-tool 完成畫面「重做 + 回到工具箱」共用元件 + 9 個 reading-step 接入 |
+| 靖杭 | ✅ | PR #1465 toolbox Phase 2+3（#1463）| 後端 toolbox.py + 前端 toolboxApi.ts + 學習紀錄頁分區，useEffect mount + recordedRef guard 解設計衝突 |
+| 啟翔 | ✅ | PR #1480 造句練習 polish | AI 評估語氣軟化（拆 is_correct=true/false 規則）+ amber 配色（badge/border/feedback/paste warning）+ 麥克風 wrapper layout 修正 |
+| Young | ✅ | PR #1470 VocabWordSearch（#1469）| 「孤寂感」grid 空白 root cause = L02.yml YAML 含 U+0020 空格；fix L02 + L34 + 前端 .replace defensive guard |
+| Young | ✅ | PR #1472 alembic infra（#1471）| preview deploy 容器 exit 255 = stale alembic_version；entrypoint.sh truncate + re-stamp + retry |
+| Young | ✅ | PR #1479 parser tools | 5/2 WIP triage：scripts/generate_layer2_thumbnails.py + spotlight _REVIEW.md |
+| Young | ✅ | 5 follow-up issues（#1473–#1477）| toolbox tech-debt（POST+PATCH 合併、JSONB DEFAULT '{}'、text_id FK、route order、entrypoint env guard）|
+| Young | ✅ | 流程改善 | intern-review label（11 個 ai-qa-passed 標保留實習生眼驗）+ needs-rebase/needs-fix labels |
+
+---
+
 ## 4/18 ~ 4/24
 
 > ⚠️ 本週未開會，僅活動紀錄（見 [2026-04-24-record.md](./2026-04-24-record.md)）

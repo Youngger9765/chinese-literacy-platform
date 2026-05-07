@@ -3,7 +3,7 @@
   "github": "stgst",
   "email": "steven19790906@gmail.com",
   "startDate": "2026-03-06",
-  "lastReview": "2026-04-23",
+  "lastReview": "2026-05-08",
   "skills": {
     "1": {
       "level": 3,
@@ -332,12 +332,12 @@
     }
   },
   "recommendations": [
-    "PR #1087 大幅瘦身元件（-1425 行）是很好的設計整理，但 #1141 全域 UX PR 卡在 review 超過一週。建議主動在 PR 留言說明目前卡點是什麼、是否需要討論，養成主動溝通 blocked 狀態的習慣",
-    "架構理解（#18）升到 level 3，靠的是從 HTML 結構追 JS DOM 行為的完整因果分析。下一步：#1097 全文朗讀和 #1098 聽力持久化都涉及前後端資料流設計，完成後可以嘗試畫出兩個步驟的 sequence diagram（level 4 的準備）",
-    "Tailwind（#8）和元件設計（#13）都升到 level 4，設計系統能力已確立。下一步挑戰：抽取 custom hook，例如把 #1128 部件教學的 moedict fetch + cache + fallback 邏輯抽成 useRadicalDictionary hook",
-    "這兩週 3 個 PR 雖然數量少，但 #1087 規模龐大（+3205/-4777）。下一步建議在 #1100 造句批改中嘗試更小粒度的 PR 拆分，練習把大功能分成 2~3 個獨立 PR（和靖杭的 DB 三連 PR 一樣）"
+    "PR #1480 展現 AI prompt engineering 意識（拆 is_correct=true/false 分別給語氣規則）。下一步：在 #1458 驗收的 AI 助教相關工作中，嘗試設計更結構化的 prompt schema，例如加入 reasoning field（方大哥和 Young 可稽核），這是 AI prompt engineering 升到 level 3 的機會",
+    "架構理解（#18）穩在 level 3。下一步：#1458 剩餘的圖文整合呈現工作涉及前後端 YAML 解析 + layout 分支邏輯，完成後可以嘗試畫出圖文整合的資料流（YAML → loader → API → frontend layout）作為 level 4 的準備",
+    "Tailwind（#8）已升到 level 4，amber palette 整包一致是很好的設計系統實踐。下一步挑戰：把造句練習的 amber 配色邏輯抽成 Tailwind plugin 或 design token，做到不散落在各處 className",
+    "PR #1480 的 1 輪 @claude review 快速 LGTM 是迭代效率提升的好信號。繼續保持，下一個 PR 目標：PR 說明補上「testing steps」清單（這是 level 4 → 5 的一個標誌）"
   ],
-  "summary": "4/10~4/23 共 3 個 PR merge（#1087、#1128、#1130）。數量少但 #1087 是迄今最大規模 PR（+3205/-4777），完整實作沉浸式學習 shell 並建立全站設計系統（surface token、glass utility、全域注音字型）。#1128 step 5 部件教學協調三個資料來源進入同一教學流程。#1130 精準追蹤並修復 #1087 引入的 HTML 結構 regression，展現 root cause analysis 能力。技能升級：#8 Tailwind（2→4）、#12 API 串接（3→4）、#13 元件設計（3→4）、#18 架構理解（2→3）。注意：#1141 全域 UX PR 已卡超過一週，需要 Young 協助或啟翔主動說明卡點",
+  "summary": "5/2~5/8 共 1 個 PR merge（#1480）。PR #1480 修造句練習三個獨立問題：AI 評估語氣歧義（拆 is_correct=true/false 規則，是 AI prompt engineering 意識的展現）、amber palette 配色全包一致、麥克風 wrapper layout 擠壓修正（shrink-0 + flex-col/sm:flex-row）。1 輪 @claude review 快速 LGTM，顯示從上一次多輪迭代進步到快速收斂。本週無技能升級（#8/#13 已在 level 4），但 #1480 的 prompt engineering 拆分思維為新技能維度打下基礎",
   "issues": [
     {
       "id": "環境建置",
@@ -491,6 +491,20 @@
         "Tailwind arbitrary shadow 解決 underline 行為問題"
       ],
       "linesChanged": "+147/-23"
+    },
+    {
+      "id": "造句 polish",
+      "title": "造句練習語氣軟化 + amber 配色 + 麥克風擠壓修正（PR #1480）",
+      "date": "2026-05-07",
+      "type": "feature",
+      "contribution": "修正造句練習三個獨立問題：(1) AI 評估回饋語氣歧義 — 拆分 is_correct=true 和 is_correct=false 兩組語氣規則，避免 prompt 語意模糊；(2) amber 配色不一致 — badge、border、feedback 文字、paste warning 全部對齊 amber palette；(3) 麥克風 wrapper 在窄螢幕被壓縮 — 加 shrink-0 + flex-col/sm:flex-row 自適應佈局",
+      "skillsLearned": [8, 13],
+      "highlights": [
+        "AI prompt engineering：拆 is_correct=true/false 規則解決語氣歧義，顯示對 LLM 輸出結構的設計意識",
+        "amber palette 一致性：4 個使用點全部對齊，展現設計系統紀律",
+        "responsive layout：shrink-0 + flex-col/sm:flex-row 正確處理窄螢幕",
+        "1 輪 @claude review 快速 LGTM，迭代效率提升"
+      ]
     }
   ]
 }
