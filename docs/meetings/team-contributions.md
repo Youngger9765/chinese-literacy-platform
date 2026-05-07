@@ -8,7 +8,7 @@
 
 ---
 
-## 5/2 ~ 5/8
+## 5/4 ~ 5/8
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |
 |----|------|-------------|---------|
@@ -22,6 +22,9 @@
 | Young | ✅ | PR #1479 parser tools | 5/2 WIP triage：scripts/generate_layer2_thumbnails.py + spotlight _REVIEW.md |
 | Young | ✅ | 5 follow-up issues（#1473–#1477）| toolbox tech-debt（POST+PATCH 合併、JSONB DEFAULT '{}'、text_id FK、route order、entrypoint env guard）|
 | Young | ✅ | 流程改善 | intern-review label（11 個 ai-qa-passed 標保留實習生眼驗）+ needs-rebase/needs-fix labels |
+| Young | ✅ | PR #1482 fix(ai)（#1481）| is_correct=True 時強制 suggestion=""（ai_generation.py L292 一行 defensive fix，#1480 claude-bot L285 finding）|
+| Young | ✅ | PR #1485 feat(skill) | meeting-prep skill 首建：4 份文件自動產出 + worktree + PR 到 staging 全流程 |
+| Young | ✅ | PR #1487 feat(skill)（#1486）| 泛化 meeting-prep：不假設週五、AskUserQuestion 問日期、DOW_ZH case 支援週一到週日 |
 
 ---
 

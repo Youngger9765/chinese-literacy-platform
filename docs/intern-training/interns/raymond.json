@@ -368,7 +368,7 @@
     "元件設計（#13）已穩在 level 4。#1464 的 ToolboxCompletionActions 共用元件 + 9 個 reading-step 接入是好的證據。下一步挑戰：把 toolbox session 寫入邏輯抽成 useToolboxSession custom hook，這是 level 5 的證明",
     "獨立開發（#16）已穩在 level 4。#1457 驗收簽結是好的 level 5 候選機會：完整經歷需求→設計→實作→現場驗收的全循環，且是跨 4 個 PR 的大型功能"
   ],
-  "summary": "5/2~5/8 共 4 個 PR merge，全部圍繞練習工具箱完整落地：Phase 1 Alembic 建 10 張 DB tables → per-tool CTA 共用元件 → Phase 2+3 後端 API + 前端 toolboxApi.ts + 學習紀錄頁整合。技術亮點：PR #1465 用 useEffect mount + useRef recordedRef 優雅解決 #1463 和 #1464 的設計衝突，展現跨 PR 架構思維。靖杭首次獨立設計後端 feature API（POST/GET/PATCH）並走完 DB → route → frontend 完整鏈路。技能升級：#11 React 進階（2→3）、#18 架構理解（3→4）",
+  "summary": "5/4~5/8 共 4 個 PR merge，全部圍繞練習工具箱完整落地：Phase 1 Alembic 建 10 張 DB tables → per-tool CTA 共用元件 → Phase 2+3 後端 API + 前端 toolboxApi.ts + 學習紀錄頁整合。技術亮點：PR #1465 用 useEffect mount + useRef recordedRef 優雅解決 #1463 和 #1464 的設計衝突，展現跨 PR 架構思維。靖杭首次獨立設計後端 feature API（POST/GET/PATCH）並走完 DB → route → frontend 完整鏈路。技能升級：#11 React 進階（2→3）、#18 架構理解（3→4）。[5/7 補充] Young 補了 #1482（PR #1480 follow-up，is_correct=True 強制 suggestion=\"\"）+ #1485/#1487 meeting-prep skill 建立，靖杭本週無新 intern PR",
   "issues": [
     {
       "id": "環境建置",

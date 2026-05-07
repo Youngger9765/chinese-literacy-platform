@@ -337,7 +337,7 @@
     "Tailwind（#8）已升到 level 4，amber palette 整包一致是很好的設計系統實踐。下一步挑戰：把造句練習的 amber 配色邏輯抽成 Tailwind plugin 或 design token，做到不散落在各處 className",
     "PR #1480 的 1 輪 @claude review 快速 LGTM 是迭代效率提升的好信號。繼續保持，下一個 PR 目標：PR 說明補上「testing steps」清單（這是 level 4 → 5 的一個標誌）"
   ],
-  "summary": "5/2~5/8 共 1 個 PR merge（#1480）。PR #1480 修造句練習三個獨立問題：AI 評估語氣歧義（拆 is_correct=true/false 規則，是 AI prompt engineering 意識的展現）、amber palette 配色全包一致、麥克風 wrapper layout 擠壓修正（shrink-0 + flex-col/sm:flex-row）。1 輪 @claude review 快速 LGTM，顯示從上一次多輪迭代進步到快速收斂。本週無技能升級（#8/#13 已在 level 4），但 #1480 的 prompt engineering 拆分思維為新技能維度打下基礎",
+  "summary": "5/4~5/8 共 1 個 PR merge（#1480）。PR #1480 修造句練習三個獨立問題：AI 評估語氣歧義（拆 is_correct=true/false 規則，是 AI prompt engineering 意識的展現）、amber palette 配色全包一致、麥克風 wrapper layout 擠壓修正（shrink-0 + flex-col/sm:flex-row）。1 輪 @claude review 快速 LGTM，顯示從上一次多輪迭代進步到快速收斂。本週無技能升級（#8/#13 已在 level 4），但 #1480 的 prompt engineering 拆分思維為新技能維度打下基礎。[5/7 補充] Young 補了 #1482（是 #1480 claude-bot 找到的 L285 follow-up fix）+ #1485/#1487 meeting-prep skill 建立，啟翔本週無新 intern PR",
   "issues": [
     {
       "id": "環境建置",
