@@ -281,8 +281,8 @@ feedback 統一說「和課文或例句有點像，試試看用自己的話說�
         temperature=0.3,
     )
 
-    # Ensure suggestion is empty string if correct
-    if result.get("is_correct") and not result.get("suggestion"):
+    # Ensure suggestion is empty string if correct (defensive, in case model violates prompt)
+    if result.get("is_correct"):
         result["suggestion"] = ""
 
     return result
