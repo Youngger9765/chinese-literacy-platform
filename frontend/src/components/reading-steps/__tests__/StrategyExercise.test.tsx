@@ -29,6 +29,10 @@ function pickOption(label: string) {
 }
 
 function clickConfirm() {
+  // 已確認的步驟會隱藏確認按鈕（!isDone），所以 confirms[0] 永遠是「第一個未確認步驟」的按鈕
+  const confirms = screen.getAllByRole('button', { name: /確認/ });
+  fireEvent.click(confirms[0]);
+}
   const confirms = screen.getAllByRole('button', { name: /確認/ });
   fireEvent.click(confirms[0]);
 }
