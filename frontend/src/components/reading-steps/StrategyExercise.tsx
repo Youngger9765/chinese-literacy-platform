@@ -369,7 +369,7 @@ function GuidedStepsExercise({
     });
     if (nextFeedback.every((f) => f !== null)) {
       setAllDone(true);
-      if (nextFeedback.every((f) => f === true)) onComplete?.();
+      onComplete?.();
     }
   };
 
