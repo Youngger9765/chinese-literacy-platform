@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-04-23",
+  "lastReview": "2026-05-08",
   "skills": {
     "1": {
       "level": 3,
@@ -236,13 +236,18 @@
       "maxLevel": 5
     },
     "11": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-23",
           "level": 2,
           "reason": "PR #1086 step 進度 debounce 5 秒使用 useRef 儲存 timer ID（不觸發 re-render），正確識別不需要 state 的場景，是 useRef 的標準用法。PR #1175 無聲音輸入主動提示使用 useEffect 監聽音訊輸入狀態，逾時後觸發 UI 提示，展現 side effect 管理的基礎能力。目前尚未見到 useMemo 或複雜 cleanup 場景"
+        },
+        {
+          "date": "2026-05-08",
+          "level": 3,
+          "reason": "PR #1465 toolbox Phase 2+3：useEffect mount-only（空 deps []）觸發後端 toolbox session 建立，同時用 useRef recordedRef 防止 #1464 完成畫面的 CTA 重複觸發寫入。兩個 hook 協同解決跨 PR 的設計衝突（#1463 需要 mount 時記錄，#1464 需要 completion 時記錄），展現對 useEffect 生命週期與 useRef 穩定性的組合應用，已超出 debounce 的單一 hook 場景"
         }
       ]
     },
@@ -331,7 +336,7 @@
       ]
     },
     "18": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -348,17 +353,22 @@
           "date": "2026-04-23",
           "level": 3,
           "reason": "PR #1193 新增 LearningSession 的 partial unique index（assignment_id + course_id 組合），PR #1194 設定 AssignmentSubmission.session_id ON DELETE SET NULL 刪除政策，PR #1195 在 step_progress 加入版本號機制防進度倒退。三個 PR 都是在 DB schema 層面做設計決策（索引策略、刪除政策、樂觀鎖），而非在應用層繞過問題，顯示對資料庫設計原則的主動應用，不是跟著 bug 修補"
+        },
+        {
+          "date": "2026-05-08",
+          "level": 4,
+          "reason": "PR #1461 用 Alembic 建立 10 張獨立 toolbox session tables，每張對應一個練習工具，schema 設計包含 FK 關聯與索引。PR #1465 獨立設計後端 toolbox.py routes（POST 建立 session、GET 查詢、PATCH 更新完成狀態）+ 前端 toolboxApi.ts 對應呼叫 + 學習紀錄頁 UI 分區整合。這是靖杭首次從零開始設計一個完整 feature 的後端 API，包含 DB schema → route → service → frontend API layer 的完整鏈路，並自主決定 HTTP method 語意（POST/GET/PATCH 各自職責），達到全端架構理解的 level 4"
         }
       ]
     }
   },
   "recommendations": [
-    "架構理解（#18）升到 level 3，DB schema 設計（index/FK 政策/版本鎖）能力已確立。下一步：#1101 詞語定義、#1103 課文理解、#1104 知識補給站 這三個 issue 涵蓋不同步驟的資料流，完成後可嘗試畫出整個學習流程的前後端資料流圖（這是 level 4 的準備）",
-    "元件設計（#13）升到 level 4，下一步挑戰抽取 custom hook。#1102 語詞應用和 #1204 造句持久化都有重複的 beforeunload + session 寫入邏輯，可以試著抽成 useSessionPersistence hook",
-    "獨立開發（#16）升到 level 4。#1105 報告簡化是好的 level 5 候選任務：完整的需求→設計→實作→驗收流程，且涉及 UI 設計決策（不只是 bug 修復）",
-    "React 進階（#11）剛解鎖 level 2（useRef debounce + useEffect 音訊監聽）。下一步在 #1076 逐段朗讀的重練邏輯中嘗試用 useMemo 快取已處理的句子分割結果，避免每次渲染重算"
+    "架構理解（#18）升到 level 4，首次獨立設計完整 feature 後端 API（toolbox POST/GET/PATCH）。下一步：嘗試為 toolbox API 補寫 contract test（pytest）驗證各 endpoint 的 status code + response schema，這是 level 5 的準備——不只能設計 API，也能用測試鎖定合約",
+    "React 進階（#11）升到 level 3（useEffect + useRef 跨 PR 協同）。下一步：在 #1190 或 #1186 中嘗試用 useMemo 快取計算結果，或抽取 custom hook，完成後 #11 有機會升到 level 4",
+    "元件設計（#13）已穩在 level 4。#1464 的 ToolboxCompletionActions 共用元件 + 9 個 reading-step 接入是好的證據。下一步挑戰：把 toolbox session 寫入邏輯抽成 useToolboxSession custom hook，這是 level 5 的證明",
+    "獨立開發（#16）已穩在 level 4。#1457 驗收簽結是好的 level 5 候選機會：完整經歷需求→設計→實作→現場驗收的全循環，且是跨 4 個 PR 的大型功能"
   ],
-  "summary": "4/10~4/23 共 16 個 PR merge，是靖杭迄今最密集的兩週。最大亮點：首次完成 DB schema 設計工作（#1193 partial unique index、#1194 ON DELETE SET NULL、#1195 step_progress 版本機制），顯示從前端工程師成長為全端工程師的關鍵跨越。P1 beta blocker #1073/#1074（跨裝置 session 一致性）在 deadline 前 2 天提前完成。技能升級：#9 Git 工作流（3→4）、#11 React 進階（新解鎖 2）、#13 元件設計（3→4）、#16 獨立開發（3→4）、#18 架構理解（2→3）",
+  "summary": "5/2~5/8 共 4 個 PR merge，全部圍繞練習工具箱完整落地：Phase 1 Alembic 建 10 張 DB tables → per-tool CTA 共用元件 → Phase 2+3 後端 API + 前端 toolboxApi.ts + 學習紀錄頁整合。技術亮點：PR #1465 用 useEffect mount + useRef recordedRef 優雅解決 #1463 和 #1464 的設計衝突，展現跨 PR 架構思維。靖杭首次獨立設計後端 feature API（POST/GET/PATCH）並走完 DB → route → frontend 完整鏈路。技能升級：#11 React 進階（2→3）、#18 架構理解（3→4）",
   "issues": [
     {
       "id": "環境建置",
@@ -603,6 +613,60 @@
       "contribution": "修復中文輸入法選字時 Enter 鍵誤觸提交的問題，同時修正造句和聽寫兩個獨立元件的相同行為",
       "skillsLearned": [10],
       "highlights": ["同一問題在兩個元件同步修復", "IME composition 事件正確處理"]
+    },
+    {
+      "id": "#1351",
+      "title": "zhuyin-off 場景明確 serif fallback（PR #1459）",
+      "date": "2026-05-07",
+      "type": "bugfix",
+      "contribution": "修復非注音模式下缺乏明確字體 fallback 的問題。新增 BpmfZihiSerif（字嗨宋體）作為 zhuyin-off 場景的 serif fallback，建立 fonts.ts helper 集中管理字體 class，更新 11 個相關元件",
+      "skillsLearned": [8, 9],
+      "highlights": [
+        "建立 fonts.ts 集中字體管理，不散落各元件",
+        "理解 IVS variant selector 對 CJK 字體選擇的影響",
+        "11 個元件統一套用，修改範圍廣但邏輯一致"
+      ],
+      "linesChanged": "+多行（11 元件 + fonts.ts helper）"
+    },
+    {
+      "id": "#1460",
+      "title": "toolbox session tables — Phase 1（PR #1461）",
+      "date": "2026-05-07",
+      "type": "feature",
+      "contribution": "用 Alembic migration 建立 10 張獨立 toolbox session tables，每張對應一個練習工具（LiveTutor、FullReading、Listening、VocabPractice 等），包含 FK 關聯與索引。同時為 AppShell 加入 toolbox-aware aria-label 改善 a11y",
+      "skillsLearned": [9, 18],
+      "highlights": [
+        "Alembic 一次建 10 張 table，schema 設計清楚",
+        "FK + index 設計符合 sqlalchemy-model-safety checklist",
+        "a11y aria-label 細節在第 6 輪 @claude review 後補上，展現對細節的追蹤"
+      ]
+    },
+    {
+      "id": "#1462",
+      "title": "toolbox per-tool 完成畫面 CTA（PR #1464）",
+      "date": "2026-05-07",
+      "type": "feature",
+      "contribution": "設計並實作 ToolboxCompletionActions 共用元件，提供「重做」和「回到練習工具箱」兩個 CTA 按鈕。將元件接入 9 個 reading-step 元件，形成統一的完成體驗",
+      "skillsLearned": [6, 13],
+      "highlights": [
+        "共用元件設計，9 個元件接入點統一",
+        "4 輪 @claude review 迭代改善元件 API 設計",
+        "解決與 Phase 2+3 (#1465) 的設計衝突：CTA 的 recordedRef guard 防重複觸發"
+      ]
+    },
+    {
+      "id": "#1463",
+      "title": "toolbox Phase 2+3 — 後端 API + 前端整合 + 學習紀錄頁（PR #1465）",
+      "date": "2026-05-07",
+      "type": "feature",
+      "contribution": "完整實作練習工具箱的資料記錄層：後端 toolbox.py（POST/GET/PATCH routes）、前端 toolboxApi.ts（API 呼叫層）、學習紀錄頁分區顯示工具箱完成紀錄。用 useEffect mount（空 deps）+ useRef recordedRef guard 解決 #1463 和 #1464 的設計衝突",
+      "skillsLearned": [11, 12, 13, 18],
+      "highlights": [
+        "首次獨立設計完整 feature 後端 API（POST/GET/PATCH 語意清楚）",
+        "useEffect + useRef 跨 PR 協同解決設計衝突，展現 React lifecycle 成熟理解",
+        "前後端 + DB 三層完整走完",
+        "4 輪 @claude review 迭代"
+      ]
     }
   ]
 }
