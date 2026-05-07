@@ -33,6 +33,7 @@ from sqlalchemy import (
     Index,
     Integer,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import declared_attr
@@ -69,7 +70,8 @@ class ToolboxSessionMixin:
 
     # Tool-specific result blob; schema varies per tool. Tools document their
     # own JSON shape in their respective route handler.
-    result = Column(JSONB, nullable=False)
+    # nullable=False + server_default enforced at DB level (#1474).
+    result = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
 
     # Primary metric (e.g. accuracy 0–1, score 0–100); semantics defined by tool.
     score = Column(Float, nullable=True)

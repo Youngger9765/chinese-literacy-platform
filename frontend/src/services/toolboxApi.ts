@@ -5,6 +5,10 @@
  * practice rows to its own dedicated table (one of 10 `toolbox_*_sessions`).
  * Rows are independent — there is no progression / next-step concept.
  *
+ * #1473: Recording a completion is now a single atomic POST. The backend
+ * creates the row already in completed state, eliminating orphan rows from
+ * the previous two-step POST-then-PATCH pattern.
+ *
  * Tool-specific result shapes live inside the `result` JSONB blob; the API
  * surface is generic so adding a new tool only requires registering it on
  * the backend (TOOL_MODEL_MAP) and updating ToolId here.
@@ -43,16 +47,12 @@ export interface ToolboxSession {
   tool_id: ToolId;
 }
 
+/** Full payload for a completed toolbox practice (#1473). */
 interface CreatePayload {
   text_id?: number | null;
   result?: Record<string, unknown>;
-}
-
-interface UpdatePayload {
-  result?: Record<string, unknown>;
   score?: number | null;
   duration_ms?: number | null;
-  completed_at?: string | null;
 }
 
 async function authedFetch(
@@ -73,8 +73,11 @@ async function authedFetch(
 }
 
 /**
- * Open a new toolbox session row. Returns the row's id so the caller can
- * PATCH it on completion. `result` may be empty at this point.
+ * Record a completed toolbox practice in a single atomic request (#1473).
+ *
+ * The backend creates the row already in completed state (completed_at = NOW()).
+ * All practice data — result blob, score, duration — is submitted together
+ * to avoid orphan rows from the previous two-step POST-then-PATCH pattern.
  */
 export async function createToolboxSession(
   toolId: ToolId,
@@ -90,44 +93,16 @@ export async function createToolboxSession(
 }
 
 /**
- * Patch result / score / duration / completion timestamp. Setting
- * `completed_at` marks the practice as finished. The backend rejects
- * sessions belonging to a different student.
- */
-export async function updateToolboxSession(
-  toolId: ToolId,
-  sessionId: number,
-  token: string,
-  payload: UpdatePayload,
-): Promise<ToolboxSession> {
-  const res = await authedFetch(
-    `/api/toolbox/${toolId}/sessions/${sessionId}`,
-    token,
-    { method: 'PATCH', body: JSON.stringify(payload) },
-  );
-  if (!res.ok) throw new Error(`updateToolboxSession(${toolId}, ${sessionId}) failed: ${res.status}`);
-  return res.json();
-}
-
-/**
- * Convenience wrapper — write a complete practice in a single call:
- * POST then PATCH with completed_at = now. The toolbox-mode finishHandler
- * usually wants this rather than two separate round-trips.
+ * Convenience alias — record a complete practice in a single call.
+ * Replaces the previous POST-then-PATCH two-step pattern (#1473).
+ * Kept as a named export so callers using this name require no changes.
  */
 export async function recordToolboxCompletion(
   toolId: ToolId,
   token: string,
-  payload: CreatePayload & { score?: number | null; duration_ms?: number | null },
+  payload: CreatePayload,
 ): Promise<ToolboxSession> {
-  const created = await createToolboxSession(toolId, token, {
-    text_id: payload.text_id,
-    result: payload.result ?? {},
-  });
-  return updateToolboxSession(toolId, created.id, token, {
-    score: payload.score ?? null,
-    duration_ms: payload.duration_ms ?? null,
-    completed_at: new Date().toISOString(),
-  });
+  return createToolboxSession(toolId, token, payload);
 }
 
 /** List the current student's sessions for one tool, newest first. */
