@@ -33,9 +33,6 @@ function clickConfirm() {
   const confirms = screen.getAllByRole('button', { name: /確認/ });
   fireEvent.click(confirms[0]);
 }
-  const confirms = screen.getAllByRole('button', { name: /確認/ });
-  fireEvent.click(confirms[0]);
-}
 
 describe('StrategyExercise — guided_steps', () => {
   it('does not call onComplete after only Q1 confirmed', () => {
