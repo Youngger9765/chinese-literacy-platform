@@ -216,7 +216,9 @@ fill_in_blank:
   context_before: 他為了這場比賽，
   context_after: 了無數的心血與努力，終於獲得了冠軍
 fill_in_blank_count: 7
-spotlight_raw_text: "閱讀聚光燈\n觀點找支持理由\n    本課課文強調一個觀點：「幸運除了靠貴人相助，自己的努力也很重要」。為了讓這個觀點更有說服力，課文舉了好幾個支持這個觀點的支持理由。觀點和支持理由的關係，就像插圖中的桌子一樣，桌子要有腳才站得穩，觀點要有支持理由，才有說服力。 底下說明什麼是觀點和支持理由：\n觀    點：就是對事情的看法、意見。\n支持理由：可以說服別人接受觀點的「證據（事實）」\n7556506477000\n\n　　當我們提出觀點時，提供合理的證據或理由會讓我們的說法更具說服力！\n◎"
+spotlight_raw_text: "閱讀聚光燈\n觀點找支持理由\n    本課課文強調一個觀點：「幸運除了靠貴人相助，自己的努力也很重要」。為了讓這個觀點更有說服力，課文舉了好幾個支持這個觀點的支持理由。觀點和支持理由的關係，就像插圖中的桌子一樣，桌子要有腳才站得穩，觀點要有支持理由，才有說服力。\
+  \ 底下說明什麼是觀點和支持理由：\n觀    點：就是對事情的看法、意見。\n支持理由：可以說服別人接受觀點的「證據（事實）」\n7556506477000\n\
+  \n　　當我們提出觀點時，提供合理的證據或理由會讓我們的說法更具說服力！\n◎"
 strategy_exercise:
   type: guided_steps
   strategy_name: 閱讀聚光燈 - 觀點找支持理由
@@ -308,3 +310,43 @@ worksheet_intro:
   lesson_label: 第5課  比運氣更重要的事：《長腿叔叔》的啟發
   authors: 課文：林玫伶  學習單：巫怡蓉
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G5-L5.pdf
+story_structure_rows:
+- label: 主題
+  value: 《長腿叔叔》的啟發
+  interactive_type: fill_blank
+  hint: 課文主要在說明什麼？
+- label: 重要事實 1
+  value: 朱蒂勤奮不懈、自立自強
+  interactive_type: checkbox
+  hint: 朱蒂的特質
+  options:
+  - 朱蒂天生聰明，學習不費力
+  - 朱蒂勤奮不懈、自立自強
+  - 朱蒂只靠長腿叔叔的資助
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 朱蒂樂觀不怕失敗
+  interactive_type: checkbox
+  hint: 朱蒂的態度
+  options:
+  - 朱蒂因貧窮而自卑逃避
+  - 朱蒂樂觀不怕失敗
+  - 朱蒂把挫折歸咎於出身
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 朱蒂感恩並生活儉樸
+  interactive_type: checkbox
+  hint: 朱蒂的品格
+  options:
+  - 朱蒂濫用資助，揮霍無度
+  - 朱蒂不感謝資助人
+  - 朱蒂感恩並生活儉樸
+  correct_options:
+  - 2
+- label: 結論
+  value: 努力比運氣更重要
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-08
