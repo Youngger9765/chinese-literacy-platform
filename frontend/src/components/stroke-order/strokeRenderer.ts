@@ -10,6 +10,13 @@ export interface RenderState {
   showOutline: boolean;
   correctPaths: Point[][];
   activeBrush: Point[];
+  /**
+   * #1342 round-1 stimulus: when true, color completed strokes by their
+   * radical group (radical strokes = one colour, body strokes = another)
+   * so the student visually sees the character is built from parts.
+   * After all strokes done, the colors merge into the unified default.
+   */
+  radicalColorMode?: boolean;
 }
 
 const COLORS = {
@@ -20,6 +27,10 @@ const COLORS = {
   outline: 'rgba(48,47,42,0.12)',
   hint:    '#564ABF',
   brush:   '#564ABF',
+  // #1342 radical-color palette — high-contrast pair so the radical group
+  // pops against the body. Same palette as RadicalDecomposition's left panel.
+  radical: '#5B4FC4',  // accent purple (matches design system)
+  body:    '#10B981',  // emerald
 };
 
 export function renderStrokes(
@@ -30,7 +41,23 @@ export function renderStrokes(
   const {
     data, completedStrokes, animStroke, animProgress,
     hintStroke, hintProgress, showOutline, correctPaths, activeBrush,
+    radicalColorMode = false,
   } = state;
+
+  // #1342: pick a fill colour for stroke `i` — radical strokes get the
+  // accent purple, body strokes get emerald. After every stroke is done
+  // we drop back to the unified COLORS.stroke ("合體" effect).
+  // Guard `hasRadicalData`: hanzi-writer-data sometimes ships characters
+  // without radStrokes; falling back to the unified ink colour avoids the
+  // misleading "all strokes are green" rendering when there is genuinely
+  // no part decomposition to show.
+  const radSet = new Set(data.radicalIndices);
+  const hasRadicalData = data.radicalIndices.length > 0;
+  const allDone = completedStrokes >= data.nStrokes;
+  const colourFor = (i: number): string => {
+    if (!radicalColorMode || !hasRadicalData || allDone) return COLORS.stroke;
+    return radSet.has(i) ? COLORS.radical : COLORS.body;
+  };
 
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
   ctx.fillStyle = COLORS.bg;
@@ -45,23 +72,33 @@ export function renderStrokes(
   }
 
   for (let i = 0; i < completedStrokes && i < data.nStrokes; i++) {
-    strokePath(ctx, data.strokePaths[i], COLORS.stroke, 'fill');
+    strokePath(ctx, data.strokePaths[i], colourFor(i), 'fill');
   }
 
   if (animStroke >= 0 && animStroke < data.nStrokes && animProgress > 0) {
-    animatedStroke(ctx, offCanvas, data.strokePaths[animStroke], data.medians[animStroke], animProgress, COLORS.stroke);
+    animatedStroke(ctx, offCanvas, data.strokePaths[animStroke], data.medians[animStroke], animProgress, colourFor(animStroke));
   }
 
   if (hintStroke >= 0 && hintStroke < data.nStrokes && hintProgress > 0) {
     animatedStroke(ctx, offCanvas, data.strokePaths[hintStroke], data.medians[hintStroke], hintProgress, COLORS.hint);
   }
 
-  for (const path of correctPaths) {
-    if (path.length > 1) brushLine(ctx, path, COLORS.brush, 8);
+  // Brush trails on top of completed strokes share the stroke's radical colour.
+  for (let pi = 0; pi < correctPaths.length; pi++) {
+    const path = correctPaths[pi];
+    if (path.length > 1) brushLine(ctx, path, colourFor(pi), 8);
   }
 
   if (activeBrush.length > 1) {
-    brushLine(ctx, activeBrush, COLORS.brush, 8);
+    // The active brush is whichever stroke index the student is drawing right now,
+    // which equals completedStrokes in the quiz flow. Use the same colour rule —
+    // but when the character has no radical data, fall back to the default
+    // accent brush (purple) instead of the unified ink so the active stroke
+    // still matches the hint colour.
+    const activeColour = radicalColorMode && hasRadicalData && !allDone
+      ? colourFor(completedStrokes)
+      : COLORS.brush;
+    brushLine(ctx, activeBrush, activeColour, 8);
   }
 }
 
