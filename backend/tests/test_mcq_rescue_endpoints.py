@@ -1,5 +1,5 @@
 """
-Contract tests for MCQ Rescue AI tutor endpoints (Issue #1387).
+Contract tests for MCQ Rescue AI tutor endpoints (Issue #1387 / #1494).
 
 Tests cover:
   1. POST /api/learning/mcq-rescue/start  — start rescue session
@@ -13,14 +13,17 @@ Contract checks:
   - Rate limiter: ai_limit_10_per_min FastAPI dependency enforced (11th request → 429)
   - Session ownership: respond rejects mismatched session_id
 
+Bug #1494 regression tests (4 new tests):
+  - test_unexpected_exception_bubbles_500: KeyError in agent → 500, not friendly fallback
+  - test_empty_reasoning_triggers_ai_error_path: Gemini omits reasoning → ValueError fallback
+  - test_start_session_yaml_missing_raises_503: strategy_prompts failure → 503 from start
+  - test_resume_returns_last_assistant_message: resume after page reload returns last AI text
+
 Architecture notes:
-  - Tests for fail-closed and circuit breaker patch `generate_structured_response`
-    (the underlying Gemini call) and let the REAL process_response run, so the
-    actual fallback branch (mcq_rescue_agent.py:412-447) is exercised.
-  - Tests for rate limiting send real requests against the actual ai_rate_limiter
-    singleton, not a ValueError mock.
-  - Other tests mock mcq_rescue_agent.start_session / process_response at the
-    route layer for speed.
+  - Fail-closed and circuit-breaker tests patch generate_structured_response using a
+    genai_errors.APIError side_effect (post-#1494 fix: RuntimeError is no longer caught
+    by the narrowed except clause and would bubble to 500, NOT the 200 fallback).
+  - Other tests mock mcq_rescue_agent at the route layer for speed.
 
 Run with:
     cd backend && python -m pytest tests/test_mcq_rescue_endpoints.py -v
@@ -37,6 +40,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
 from fastapi.testclient import TestClient
+from google.genai import errors as genai_errors
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -218,6 +222,11 @@ def _seed_rescue_session(question_id: str = "G6-L23-Q1") -> str:
     state.conversation.append({"role": "ai", "text": "Opening message."})
     _rescue_store.save(state)
     return session_id
+
+
+def _make_api_error(msg: str = "Simulated Gemini API failure") -> genai_errors.APIError:
+    """Construct a genai_errors.APIError for use as test side_effect."""
+    return genai_errors.APIError(429, {"error": {"message": msg}})
 
 
 # ---------------------------------------------------------------------------
@@ -455,12 +464,11 @@ class TestMcqRescueRespond:
     def test_fail_closed_ai_error_should_advance_false(self, client):
         """CRITICAL: real agent fallback branch sets should_advance=False on AI exception.
 
-        This test patches generate_structured_response (the underlying Gemini call)
-        to raise, then lets the REAL process_response run. This exercises the actual
-        fallback branch in mcq_rescue_agent.py so a future refactor that mistakenly
-        sets should_advance=True on error will be caught.
+        Uses genai_errors.APIError (a known AI-layer error) as the side_effect.
+        Post-#1494 fix: RuntimeError is no longer caught by the narrowed except clause
+        and would bubble to 500. This test verifies the REAL fallback path using an
+        error type that IS in _AI_ERRORS.
         """
-        # Seed a real session so process_response can find it in _store
         session_id = _seed_rescue_session(question_id="G6-L23-fail-closed")
         payload = {
             "session_id": session_id,
@@ -470,7 +478,7 @@ class TestMcqRescueRespond:
         with patch(
             "app.services.mcq_rescue_agent.generate_structured_response",
             new_callable=AsyncMock,
-            side_effect=RuntimeError("Simulated Gemini failure"),
+            side_effect=_make_api_error("Quota exceeded — simulated"),
         ):
             resp = client.post(RESPOND_URL, json=payload)
 
@@ -482,7 +490,6 @@ class TestMcqRescueRespond:
             "Fail-closed: should_advance must be False on AI error — "
             "auto-passing students on error is catastrophic"
         )
-        # The reasoning field should acknowledge the error state
         assert "reasoning" in data
 
     def test_circuit_breaker_triggers_after_3_consecutive_errors(self, client):
@@ -493,8 +500,7 @@ class TestMcqRescueRespond:
           - Attempt 2: consecutive_errors=2 < 3 → 200 fallback, should_advance=False
           - Attempt 3: consecutive_errors=3 >= 3 → raise RuntimeError → 503
 
-        This test uses the real process_response with a patched Gemini call
-        so the actual counter and threshold are exercised.
+        Uses genai_errors.APIError (a known AI-layer error).
         """
         session_id = _seed_rescue_session(question_id="G6-L23-circuit")
         payload = {
@@ -505,27 +511,20 @@ class TestMcqRescueRespond:
         with patch(
             "app.services.mcq_rescue_agent.generate_structured_response",
             new_callable=AsyncMock,
-            side_effect=RuntimeError("Simulated Gemini failure"),
+            side_effect=_make_api_error("Rate limit — simulated"),
         ):
-            # Attempt 1: should be 200 fallback
             resp1 = client.post(RESPOND_URL, json=payload)
             assert resp1.status_code == 200, (
                 f"Attempt 1 should be 200 fallback, got {resp1.status_code}"
             )
-            assert resp1.json()["should_advance"] is False, (
-                "Fail-closed: attempt 1 must have should_advance=False"
-            )
+            assert resp1.json()["should_advance"] is False
 
-            # Attempt 2: should be 200 fallback
             resp2 = client.post(RESPOND_URL, json=payload)
             assert resp2.status_code == 200, (
                 f"Attempt 2 should be 200 fallback, got {resp2.status_code}"
             )
-            assert resp2.json()["should_advance"] is False, (
-                "Fail-closed: attempt 2 must have should_advance=False"
-            )
+            assert resp2.json()["should_advance"] is False
 
-            # Attempt 3: circuit breaker fires → 503
             resp3 = client.post(RESPOND_URL, json=payload)
             assert resp3.status_code == 503, (
                 f"Attempt 3 (3rd consecutive error) should be 503, got {resp3.status_code}"
@@ -533,7 +532,7 @@ class TestMcqRescueRespond:
 
     def test_session_id_ownership_check(self, client):
         """Session ID belonging to a different user is rejected with 403."""
-        other_user_session_id = "mcq_rescue_9999_G6-L23-Q1"  # user_id 9999, not FAKE_USER_ID
+        other_user_session_id = "mcq_rescue_9999_G6-L23-Q1"
         resp = client.post(RESPOND_URL, json={
             "session_id": other_user_session_id,
             "student_text": "Some answer",
@@ -598,52 +597,28 @@ class TestMcqRescueRespond:
         assert "reasoning" in data
 
     def test_rate_limit_dependency_enforced_after_10_requests(self, client):
-        """ai_limit_10_per_min FastAPI dependency blocks the 11th request with 429.
-
-        This test sends 10 real requests (each returning 403 because there is no
-        matching session — we only care about reaching the rate limiter), then
-        sends an 11th and checks for 429 from the dependency.
-
-        We use the ownership-check payload (session_id for user 9999) so that
-        all 10 allowed requests are rejected at the ownership layer (403) without
-        needing real sessions. The 11th request is rate-limited BEFORE ownership
-        checking because ai_limit_10_per_min is a route-level dependency.
-
-        Note: the rate limiter keys on get_client_key(request).  In the TestClient
-        there is no real JWT, so it falls back to IP ("testclient" / "127.0.0.1").
-        We reset ai_rate_limiter before this test (via the autouse fixture) so the
-        window is clean.
-        """
-        # Use a session_id that fails ownership (403) fast without hitting real agent
+        """ai_limit_10_per_min FastAPI dependency blocks the 11th request with 429."""
         payload = {
             "session_id": "mcq_rescue_9999_rate-limit-test",
             "student_text": "答案是 A",
         }
 
-        # Send 10 requests — all should be rejected at 403 (ownership), not 429
         for i in range(10):
             r = client.post(RESPOND_URL, json=payload)
             assert r.status_code == 403, (
                 f"Request {i+1}: expected 403 (ownership), got {r.status_code}"
             )
 
-        # 11th request should be rate-limited before reaching ownership check
         r11 = client.post(RESPOND_URL, json=payload)
         assert r11.status_code == 429, (
             f"11th request should be 429 (rate limited), got {r11.status_code}"
         )
 
     def test_rate_limit_dependency_registered_on_route(self):
-        """Structural check: ai_limit_10_per_min is registered as a dependency.
-
-        Complements the live-fire test above: if the dependency is accidentally
-        removed from the route decorator, this test catches it immediately
-        without needing to count requests.
-        """
+        """Structural check: ai_limit_10_per_min is registered as a dependency."""
         from app.auth.rate_limiter import ai_limit_10_per_min
         from app.routes.learning.mcq_rescue import router
 
-        # Collect all dependency callables across all routes
         all_dep_callables = set()
         for route in router.routes:
             deps = getattr(route, "dependencies", []) or []
@@ -662,9 +637,7 @@ class TestMcqRescueRespond:
 
 
 class TestStrategyPromptLoaderIntegration:
-    """Verify that the strategy_prompts loader returns correct data for MCQ rescue.
-    These tests don't hit any AI endpoint — just test the YAML loading.
-    """
+    """Verify that the strategy_prompts loader returns correct data for MCQ rescue."""
 
     def test_summary_psr_has_5_steps(self):
         from app.services.strategy_prompts import load_strategy_prompt, clear_cache
@@ -692,3 +665,172 @@ class TestStrategyPromptLoaderIntegration:
         clear_cache()
         prompt = load_strategy_prompt("default")
         assert "{wrong_answer}" in prompt["opening"]
+
+
+# ---------------------------------------------------------------------------
+# Bug #1494 regression tests (4 new tests)
+# ---------------------------------------------------------------------------
+
+
+class TestBug1494Regressions:
+    """Regression tests for the 4 silent-failure bugs fixed in #1494."""
+
+    # --- Bug 1: narrow except — unexpected exceptions must bubble ---
+
+    def test_unexpected_exception_bubbles_500(self, client):
+        """Bug 1 fix: KeyError inside generate_structured_response must bubble to 500.
+
+        Before fix: blanket `except Exception` swallowed KeyError as an AI error,
+        returning a friendly 200 fallback. Student saw 'Let me think again' while
+        the schema bug went unreported to Sentry.
+
+        After fix: only `_AI_ERRORS` (genai_errors.APIError, asyncio.TimeoutError,
+        ValueError) are caught. A KeyError is a code bug and must reach the route's
+        generic `except Exception → 500` handler.
+        """
+        session_id = _seed_rescue_session(question_id="G6-L23-bug1-keyerror")
+        payload = {
+            "session_id": session_id,
+            "student_text": "這題在問什麼",
+        }
+
+        with patch(
+            "app.services.mcq_rescue_agent.generate_structured_response",
+            new_callable=AsyncMock,
+            side_effect=KeyError("missing_key"),
+        ):
+            resp = client.post(RESPOND_URL, json=payload)
+
+        assert resp.status_code == 500, (
+            f"Bug 1: KeyError must bubble to 500, not be swallowed as AI error. "
+            f"Got {resp.status_code}: {resp.text}"
+        )
+
+    # --- Bug 2: empty reasoning raises ValueError (caught as AI error, not silently ignored) ---
+
+    def test_empty_reasoning_triggers_ai_error_path(self, client):
+        """Bug 2 fix: Gemini response with empty reasoning raises ValueError.
+
+        Before fix: result.get('reasoning', '') allowed empty string through,
+        silently losing the audit trail.
+
+        After fix: empty reasoning raises ValueError, which is in _AI_ERRORS,
+        so it goes through the circuit-breaker fallback path (200 with
+        should_advance=False) on the first occurrence.
+        """
+        session_id = _seed_rescue_session(question_id="G6-L23-bug2-empty-reasoning")
+        payload = {
+            "session_id": session_id,
+            "student_text": "這題在問什麼",
+        }
+
+        # Gemini returns all required fields EXCEPT reasoning (empty string)
+        bad_gemini_result = {
+            "ai_feedback": "你說得對！",
+            "next_question": "那課文哪一段說到？",
+            "should_advance": True,   # Gemini claims to advance
+            "should_terminate": False,
+            "give_up_detected": False,
+            "current_step": 2,
+            "reasoning": "",  # <-- schema violation: required field is empty
+        }
+
+        with patch(
+            "app.services.mcq_rescue_agent.generate_structured_response",
+            new_callable=AsyncMock,
+            return_value=bad_gemini_result,
+        ):
+            resp = client.post(RESPOND_URL, json=payload)
+
+        assert resp.status_code == 200, (
+            f"Empty reasoning should trigger fallback (200), got {resp.status_code}"
+        )
+        data = resp.json()
+        assert data["should_advance"] is False, (
+            "Bug 2: empty reasoning must trigger fail-closed (should_advance=False), "
+            "not silently pass through with should_advance=True"
+        )
+        assert data["reasoning"] != "", (
+            "Fallback response must still have a non-empty reasoning string"
+        )
+
+    # --- Bug 3: start_session YAML failure raises RuntimeError → 503 ---
+
+    def test_start_session_yaml_missing_raises_503(self, client):
+        """Bug 3 fix: StrategyPromptError in start_session → 503.
+
+        Before fix: start_session had no try/except around load_strategy_prompt.
+        After fix: explicit try/except wraps StrategyPromptError in RuntimeError,
+        the route catches it → 503.
+        """
+        from app.services.strategy_prompts import StrategyPromptError
+
+        with patch(
+            "app.services.mcq_rescue_agent.load_strategy_prompt",
+            side_effect=StrategyPromptError("No prompt.yml found for strategy_type='missing'"),
+        ):
+            resp = client.post(START_URL, json={
+                **VALID_START_PAYLOAD,
+                "question_id": "G6-L23-bug3-yaml-missing",
+                "strategy_type": "missing",
+            })
+
+        assert resp.status_code == 503, (
+            f"Bug 3: StrategyPromptError in start_session must return 503. "
+            f"Got {resp.status_code}: {resp.text}"
+        )
+
+    # --- Bug 4: idempotent resume returns last assistant message, not blank ---
+
+    def test_resume_returns_last_assistant_message(self, client):
+        """Bug 4 fix: calling start twice on the same session returns last AI text.
+
+        Before fix: the idempotent resume path returned ai_feedback='' (empty).
+        Frontend showed a blank bubble after page reload.
+
+        After fix: ai_feedback is populated from the last assistant turn in
+        state.conversation.
+        """
+        from app.services.mcq_rescue_agent import RescueSessionState, RescueSessionStore
+        question_id = "G6-L23-bug4-resume"
+        session_id = RescueSessionStore.make_key(FAKE_USER_ID, question_id)
+
+        last_ai_message = "你說得不錯！課文的哪一段提到了這個概念？"
+        state = RescueSessionState(
+            session_id=session_id,
+            user_id=FAKE_USER_ID,
+            question_id=question_id,
+            lesson_id="G6-L23",
+            wrong_choice="B",
+            question_text="本文主要在說什麼？",
+            correct_answer="D",
+            strategy_type="summary_psr",
+            current_step=2,
+        )
+        state.conversation = [
+            {"role": "ai", "text": "Opening message."},
+            {"role": "student", "text": "這題在問主要意思"},
+            {"role": "ai", "text": last_ai_message},
+        ]
+        _rescue_store.save(state)
+
+        # Call start again — should resume, not create a new session
+        resp = client.post(START_URL, json={
+            **VALID_START_PAYLOAD,
+            "question_id": question_id,
+        })
+
+        assert resp.status_code == 200, f"Expected 200 on resume, got {resp.status_code}"
+        data = resp.json()
+
+        assert data["ai_first_message"] != "", (
+            "Bug 4: resumed session must return non-empty ai_first_message. "
+            "Empty string causes blank bubble on page reload."
+        )
+        assert data["ai_first_message"] == last_ai_message, (
+            f"Bug 4: resumed session must return last assistant message. "
+            f"Expected {last_ai_message!r}, got {data['ai_first_message']!r}"
+        )
+        assert data["current_step"] == 2, (
+            "Resumed session must preserve current_step from existing state"
+        )

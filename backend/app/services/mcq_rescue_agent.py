@@ -16,16 +16,27 @@ Session key: mcq_rescue_{user_id}_{question_id}
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
 
+from google.genai import errors as genai_errors
 from google.genai import types as genai_types
 
 from .ai_service import generate_structured_response
 from .input_sanitizer import sanitize_ai_input
 from .persona import TUTOR_PERSONA
-from .strategy_prompts import load_strategy_prompt
+from .strategy_prompts import StrategyPromptError, load_strategy_prompt
+
+# AI-layer exceptions we expect and handle gracefully.
+# Any other exception (KeyError, TypeError, AttributeError, JSONDecodeError, …)
+# is a *code bug* or SDK regression and must bubble so Sentry sees it.
+_AI_ERRORS = (
+    genai_errors.APIError,
+    asyncio.TimeoutError,
+    ValueError,  # sanitize_ai_input may raise
+)
 
 logger = logging.getLogger(__name__)
 
@@ -272,21 +283,51 @@ fail 條件：{current_step_data.get("fail_when", "")}
         # Idempotent: if session already exists, return the last AI message
         existing = _store.get(session_id)
         if existing is not None and not existing.is_terminated:
-            last_ai = next(
-                (t for t in reversed(existing.conversation) if t["role"] == "ai"),
+            last_ai_text = next(
+                (t["text"] for t in reversed(existing.conversation) if t["role"] == "ai"),
                 None,
             )
+            # Bug 4 fix: populate ai_feedback from history so the frontend
+            # never renders a blank bubble when the student reloads.
+            resume_msg = last_ai_text or "讓我們繼續——你能告訴我，這題在問什麼嗎？"
             return session_id, RescueResponse(
                 current_step=existing.current_step,
                 should_advance=False,
                 should_terminate=False,
                 give_up_detected=False,
-                ai_feedback="",
-                next_question=last_ai["text"] if last_ai else "讓我們繼續——你能告訴我，這題在問什麼嗎？",
+                ai_feedback=resume_msg,
+                next_question="",
                 reasoning="Session resumed from memory.",
             )
 
-        prompt_data = load_strategy_prompt(strategy_type)
+        # Bug 3 fix: StrategyPromptError means a required YAML file is missing
+        # or malformed — treat as a server-side configuration error (500).
+        # Re-raise as RuntimeError so the route's `except RuntimeError → 503`
+        # path fires and the frontend gets an explicit error instead of silence.
+        try:
+            prompt_data = load_strategy_prompt(strategy_type)
+        except StrategyPromptError as exc:
+            logger.error(
+                "Strategy prompt unavailable for strategy_type=%r: %s",
+                strategy_type,
+                exc,
+                extra={"event": "mcq_rescue_strategy_prompt_error", "strategy_type": strategy_type},
+            )
+            raise RuntimeError(
+                f"Strategy prompt unavailable for '{strategy_type}': {exc}"
+            ) from exc
+
+        # Validate that the required 'opening' key exists.
+        opening_template = prompt_data.get("opening", "")
+        if not opening_template:
+            logger.error(
+                "Strategy prompt missing 'opening' key for strategy_type=%r",
+                strategy_type,
+                extra={"event": "mcq_rescue_strategy_prompt_error", "strategy_type": strategy_type},
+            )
+            raise RuntimeError(
+                f"Strategy prompt for '{strategy_type}' is missing required 'opening' key"
+            )
 
         state = RescueSessionState(
             session_id=session_id,
@@ -300,7 +341,6 @@ fail 條件：{current_step_data.get("fail_when", "")}
         )
 
         # Build opening message from template
-        opening_template = prompt_data.get("opening", "")
         opening = opening_template.replace("{wrong_answer}", wrong_choice)
         # Remove image_hint placeholder if present (text-only phase)
         opening = opening.replace("{image_hint}", "圖示")
@@ -396,7 +436,16 @@ fail 條件：{current_step_data.get("fail_when", "")}
             should_terminate = bool(result.get("should_terminate", False))
             give_up_detected = bool(result.get("give_up_detected", False))
             returned_step = result.get("current_step", state.current_step)
-            reasoning = result.get("reasoning", "")
+
+            # Bug 2 fix: reasoning is required for audit trail.
+            # An empty/missing reasoning means the schema contract was violated —
+            # raise so this surfaces in Sentry rather than silently losing audit data.
+            reasoning = result.get("reasoning", "").strip()
+            if not reasoning:
+                raise ValueError(
+                    "Gemini response is missing required 'reasoning' field — "
+                    "audit trail cannot be maintained"
+                )
 
             # Validate returned step
             if not isinstance(returned_step, int) or not (1 <= returned_step <= 5):
@@ -409,13 +458,19 @@ fail 條件：{current_step_data.get("fail_when", "")}
 
             state.consecutive_errors = 0  # Reset on success
 
-        except Exception as e:
+        except _AI_ERRORS as e:
+            # Bug 1 fix: only catch known AI-layer errors here.
+            # KeyError / TypeError / AttributeError / JSONDecodeError and other
+            # unexpected exceptions are NOT caught — they bubble up to the route's
+            # generic `except Exception → 500` handler so Sentry sees them
+            # immediately instead of on the 3rd consecutive failure.
             state.consecutive_errors += 1
-            logger.warning(
+            logger.error(
                 "AI service error in mcq_rescue process_response (attempt %d/%d): %s",
                 state.consecutive_errors,
                 self.MAX_CONSECUTIVE_ERRORS,
                 e,
+                exc_info=True,
                 extra={
                     "event": "mcq_rescue_ai_error",
                     "consecutive_errors": state.consecutive_errors,
