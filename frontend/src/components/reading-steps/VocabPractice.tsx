@@ -386,6 +386,9 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                 character={currentChar}
                 onComplete={handleCharComplete}
                 embedded
+                // #1342 再生回憶模式: round 2 skips animation + outline preview
+                // so the student writes from memory with no visual aids.
+                noOutline={currentRound === 2}
               />
             </div>
 

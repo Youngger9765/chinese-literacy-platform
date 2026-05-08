@@ -16,6 +16,13 @@ interface WriteCharacterProps {
   onBack?: () => void;
   /** When true, only renders the canvas + minimal controls (no header/back/progress dots). */
   embedded?: boolean;
+  /**
+   * #1342 round-2 recall mode: skip the animation preview and the three
+   * outlined practice rounds, jump straight to PRACTICE_NO_OUTLINE so the
+   * student writes from memory with no visual aids. The component still
+   * fires onComplete after a single successful no-outline pass.
+   */
+  noOutline?: boolean;
 }
 
 enum Step {
@@ -179,7 +186,7 @@ function Toast({ message, type }: { message: string; type: 'success' | 'error' |
 /*  Main component                                                   */
 /* ================================================================ */
 
-const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, onBack, embedded = false }) => {
+const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, onBack, embedded = false, noOutline = false }) => {
   /* ---- React state (drives UI controls) ---- */
   const [data, setData] = useState<CharacterStrokeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -267,20 +274,22 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
 
   /* ---- Shared state reset (used by both initial load and retry) ---- */
   const resetState = useCallback((nStrokes: number) => {
-    setStep(Step.ANIMATION);
+    // #1342 round-2 recall: start at PRACTICE_NO_OUTLINE with showOutline off
+    // so the student gets no animation preview and no stroke outlines.
+    setStep(noOutline ? Step.PRACTICE_NO_OUTLINE : Step.ANIMATION);
     setMode('idle');
-    setPracticeLeft(4);
-    setShowOutline(true);
+    setPracticeLeft(noOutline ? 1 : 4);
+    setShowOutline(!noOutline);
     setToast('');
     setCompletedStrokesUI(0);
     r.current = {
       completedStrokes: 0, animStroke: -1, animProgress: 0,
       hintStroke: -1, hintProgress: 0, correctPaths: [], activeBrush: [],
     };
-    m.current.showOutline = true;
+    m.current.showOutline = !noOutline;
     m.current.mistakes = new Array(nStrokes).fill(0);
     m.current.quizStroke = 0;
-  }, []);
+  }, [noOutline]);
 
   /* ---- Load character data ---- */
   useEffect(() => {
@@ -403,13 +412,23 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   }, [data, resetState, startAnimation]);
 
   /* ---- Auto-start animation loop when data first loads ---- */
+  // Forward-ref pattern: startQuiz is defined below; capture its current value
+  // through a ref so this effect can call it without a hoisting error.
+  const startQuizRef = useRef<() => void>(() => {});
   useEffect(() => {
     if (data && pendingAutoStartRef.current) {
       pendingAutoStartRef.current = false;
-      isAutoLoopingRef.current = true;
-      startAnimation();
+      // #1342 round-2 recall: skip the animation preview, drop the user
+      // straight into the no-outline practice quiz.
+      if (noOutline) {
+        isAutoLoopingRef.current = false;
+        startQuizRef.current();
+      } else {
+        isAutoLoopingRef.current = true;
+        startAnimation();
+      }
     }
-  }, [data, startAnimation]);
+  }, [data, noOutline, startAnimation]);
 
   /* ================================================================ */
   /*  Quiz (writing practice)                                          */
@@ -430,6 +449,9 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
     setCompletedStrokesUI(0);
     doRender();
   }, [doRender]);
+
+  // Keep startQuizRef pointing at the latest startQuiz (#1342 forward-ref).
+  useEffect(() => { startQuizRef.current = startQuiz; }, [startQuiz]);
 
   const handleBeginPractice = useCallback(() => {
     isAutoLoopingRef.current = false;
