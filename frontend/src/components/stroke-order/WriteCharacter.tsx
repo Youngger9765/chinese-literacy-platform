@@ -17,12 +17,24 @@ interface WriteCharacterProps {
   /** When true, only renders the canvas + minimal controls (no header/back/progress dots). */
   embedded?: boolean;
   /**
-   * #1342 round-2 recall mode: skip the animation preview and the three
-   * outlined practice rounds, jump straight to PRACTICE_NO_OUTLINE so the
-   * student writes from memory with no visual aids. The component still
-   * fires onComplete after a single successful no-outline pass.
+   * Practice flow shape (#1342 / VocabPractice rounds):
+   *   - 'standard' (default): animation preview + 3 outlined practices +
+   *     1 no-outline practice. The historical 4-trace flow.
+   *   - 'outlined-once': skip animation; one outlined practice only;
+   *     fire onComplete on success. Used for round-1 仿寫.
+   *   - 'no-outline-once': skip animation + outline; one no-outline
+   *     practice only; fire onComplete on success. Used for round-2 再生回憶.
+   *
+   * Named `practiceMode` rather than `mode` to avoid shadowing the internal
+   * `mode` state variable ('idle' | 'animating' | 'quizzing').
    */
-  noOutline?: boolean;
+  practiceMode?: 'standard' | 'outlined-once' | 'no-outline-once';
+  /**
+   * #1342: colour completed strokes by their radical group on the canvas
+   * (radical strokes = accent purple, body strokes = emerald). Once every
+   * stroke is done the colours unify into the default ink colour ("合體").
+   */
+  radicalColorMode?: boolean;
 }
 
 enum Step {
@@ -186,7 +198,18 @@ function Toast({ message, type }: { message: string; type: 'success' | 'error' |
 /*  Main component                                                   */
 /* ================================================================ */
 
-const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, onBack, embedded = false, noOutline = false }) => {
+const WriteCharacter: React.FC<WriteCharacterProps> = ({
+  character,
+  onComplete,
+  onBack,
+  embedded = false,
+  practiceMode = 'standard',
+  radicalColorMode = false,
+}) => {
+  // #1342: derived flags for the simplified single-shot rounds.
+  const isOutlinedOnce = practiceMode === 'outlined-once';
+  const isNoOutlineOnce = practiceMode === 'no-outline-once';
+  const isSingleShot = isOutlinedOnce || isNoOutlineOnce;
   /* ---- React state (drives UI controls) ---- */
   const [data, setData] = useState<CharacterStrokeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -268,28 +291,43 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
       showOutline: m.current.showOutline,
       correctPaths: r.current.correctPaths,
       activeBrush: r.current.activeBrush,
+      radicalColorMode,
     };
     renderStrokes(ctx, getOffCanvas(), state);
-  }, [getOffCanvas]);
+  }, [getOffCanvas, radicalColorMode]);
 
   /* ---- Shared state reset (used by both initial load and retry) ---- */
   const resetState = useCallback((nStrokes: number) => {
-    // #1342 round-2 recall: start at PRACTICE_NO_OUTLINE with showOutline off
-    // so the student gets no animation preview and no stroke outlines.
-    setStep(noOutline ? Step.PRACTICE_NO_OUTLINE : Step.ANIMATION);
+    // #1342 single-shot rounds:
+    //   outlined-once → PRACTICE_1 with outline still visible
+    //   no-outline-once → PRACTICE_NO_OUTLINE, outline hidden
+    // standard preserves the original animation-led 4-trace flow.
+    let initialStep = Step.ANIMATION;
+    let outlineOn = true;
+    let leftCount = 4;
+    if (isOutlinedOnce) {
+      initialStep = Step.PRACTICE_1;
+      outlineOn = true;
+      leftCount = 1;
+    } else if (isNoOutlineOnce) {
+      initialStep = Step.PRACTICE_NO_OUTLINE;
+      outlineOn = false;
+      leftCount = 1;
+    }
+    setStep(initialStep);
     setMode('idle');
-    setPracticeLeft(noOutline ? 1 : 4);
-    setShowOutline(!noOutline);
+    setPracticeLeft(leftCount);
+    setShowOutline(outlineOn);
     setToast('');
     setCompletedStrokesUI(0);
     r.current = {
       completedStrokes: 0, animStroke: -1, animProgress: 0,
       hintStroke: -1, hintProgress: 0, correctPaths: [], activeBrush: [],
     };
-    m.current.showOutline = !noOutline;
+    m.current.showOutline = outlineOn;
     m.current.mistakes = new Array(nStrokes).fill(0);
     m.current.quizStroke = 0;
-  }, [noOutline]);
+  }, [isOutlinedOnce, isNoOutlineOnce]);
 
   /* ---- Load character data ---- */
   useEffect(() => {
@@ -418,9 +456,9 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
   useEffect(() => {
     if (data && pendingAutoStartRef.current) {
       pendingAutoStartRef.current = false;
-      // #1342 round-2 recall: skip the animation preview, drop the user
-      // straight into the no-outline practice quiz.
-      if (noOutline) {
+      // #1342 single-shot rounds skip the animation preview and drop the
+      // student straight into the practice quiz (outlined or no-outline).
+      if (isSingleShot) {
         isAutoLoopingRef.current = false;
         startQuizRef.current();
       } else {
@@ -428,7 +466,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         startAnimation();
       }
     }
-  }, [data, noOutline, startAnimation]);
+  }, [data, isSingleShot, startAnimation]);
 
   /* ================================================================ */
   /*  Quiz (writing practice)                                          */
@@ -508,20 +546,26 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({ character, onComplete, 
         const pl = m.current.practiceLeft;
 
         if (s >= Step.PRACTICE_1 && s <= Step.PRACTICE_3) {
-          const newLeft = pl - 1;
-          setPracticeLeft(newLeft);
-          if (s === Step.PRACTICE_3) {
-            // Auto-advance to no-outline practice
-            m.current.showOutline = false;
-            setShowOutline(false);
-            setStep(Step.PRACTICE_NO_OUTLINE);
-            showToast('👏 很棒！現在試著不看邊框，憑記憶寫一次！', 'info');
-            startQuiz();
+          // #1342: outlined-once mode finishes after a single PRACTICE_1 pass.
+          if (isOutlinedOnce) {
+            setStep(Step.COMPLETE);
+            showToast('恭喜筆畫正確！寫字練習完成！', 'success');
           } else {
-            const nextStep = (s + 1) as Step;
-            setStep(nextStep);
-            showToast(`恭喜筆畫正確！讓我們再練習 ${newLeft} 次哦！`, 'success');
-            startQuiz();
+            const newLeft = pl - 1;
+            setPracticeLeft(newLeft);
+            if (s === Step.PRACTICE_3) {
+              // Auto-advance to no-outline practice
+              m.current.showOutline = false;
+              setShowOutline(false);
+              setStep(Step.PRACTICE_NO_OUTLINE);
+              showToast('👏 很棒！現在試著不看邊框，憑記憶寫一次！', 'info');
+              startQuiz();
+            } else {
+              const nextStep = (s + 1) as Step;
+              setStep(nextStep);
+              showToast(`恭喜筆畫正確！讓我們再練習 ${newLeft} 次哦！`, 'success');
+              startQuiz();
+            }
           }
         } else if (s === Step.PRACTICE_NO_OUTLINE) {
           setPracticeLeft(pl - 1);
