@@ -236,7 +236,7 @@
       "maxLevel": 5
     },
     "11": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -248,6 +248,11 @@
           "date": "2026-05-08",
           "level": 3,
           "reason": "PR #1465 toolbox Phase 2+3：useEffect mount-only（空 deps []）觸發後端 toolbox session 建立，同時用 useRef recordedRef 防止 #1464 完成畫面的 CTA 重複觸發寫入。兩個 hook 協同解決跨 PR 的設計衝突（#1463 需要 mount 時記錄，#1464 需要 completion 時記錄），展現對 useEffect 生命週期與 useRef 穩定性的組合應用，已超出 debounce 的單一 hook 場景"
+        },
+        {
+          "date": "2026-05-08",
+          "level": 4,
+          "reason": "PR #1499 VocabPractice multi-mode：新增 `practiceMode` prop（3 variants: standard/toolbox/quiz）+ `radicalColorMode` prop，Round 1 顯示筆順輪廓 + 部首顏色，Round 2 隱藏所有輔助。命名時刻意避免與元件內部 `mode` state 衝突，顯示對 prop vs internal state 邊界的清晰判斷。4 輪 @claude review 全部解決，含最後 brush color 一致性問題（commit 9bad640a）。已超出單純 useEffect/useRef，展現 prop 設計 + multi-mode 元件架構整合能力"
         }
       ]
     },
@@ -311,6 +316,11 @@
           "date": "2026-04-05",
           "level": 2,
           "reason": "PR #899 在修復 ReadingAnnotation 的同時更新 __tests__/ReadingAnnotation.test.tsx（+41/-6），不只修 bug 還同步維護測試，開始建立「改完要更新測試」的習慣。PR #805 也補寫 test_auth_api.py 測試家長角色登入被封鎖的情境（+48 行），涵蓋多個 test case"
+        },
+        {
+          "date": "2026-05-08",
+          "level": 2,
+          "reason": "PR #1498 G7-L29/L30 文章重點表重構：把 22 行純文字平鋪輸出拆解為 5 個結構化行（主題/觀察/推論/趨勢/反論/結論）+ fill-blank 格式，對應方大哥 #1388 的教學設計目標。2 輪 review 迭代（第一輪靖杭寫了「證據→趨勢」，Claude 指出語義不精準，第二輪改為「是否怕人」句式）。這是主動理解教學規格→轉換資料結構的問題拆解，而非機械式修改。level 維持 2，原因：目前是 1 個 YAML 的資料結構轉換，尚未見到跨多個複雜問題類型的拆解"
         }
       ]
     },
@@ -332,6 +342,17 @@
           "date": "2026-04-23",
           "level": 4,
           "reason": "PR #1144（跨裝置 session 復用）和 PR #1145（current_step 同步）是 P1 beta blocker issue #1073/#1074 的完整實作。兩個 PR 在 4/22 deadline 前 2 天提前 merge，後端新增 GET-first + dedup 邏輯，DB 加 partial unique index，前端守衛同步，形成完整的前後端 + DB 三層解決方案。這是靖杭首次獨立完成涉及 DB migration 的端對端功能"
+        }
+      ]
+    },
+    "17": {
+      "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-05-08",
+          "level": 1,
+          "reason": "PR #1497 fix(csp)：閱讀 SecurityHeadersMiddleware 的 CSP header 建構邏輯，定位 `frame-src` directive 缺少 `https://storage.googleapis.com` 的根因（PDF iframe popup 被 CSP 封鎖），在正確位置加入白名單並附說明 CSP path-restriction limitation（GCS bucket 無法做到 path 級限制）。這是靖杭首次讀懂並修改 Python middleware 層的安全設定，Level 1：能在引導下讀懂既有 middleware 邏輯並做定點修改"
         }
       ]
     },
@@ -364,11 +385,12 @@
   },
   "recommendations": [
     "架構理解（#18）升到 level 4，首次獨立設計完整 feature 後端 API（toolbox POST/GET/PATCH）。下一步：嘗試為 toolbox API 補寫 contract test（pytest）驗證各 endpoint 的 status code + response schema，這是 level 5 的準備——不只能設計 API，也能用測試鎖定合約",
-    "React 進階（#11）升到 level 3（useEffect + useRef 跨 PR 協同）。下一步：在 #1190 或 #1186 中嘗試用 useMemo 快取計算結果，或抽取 custom hook，完成後 #11 有機會升到 level 4",
+    "React 進階（#11）升到 level 4（PR #1499 multi-mode prop 設計 + 命名衝突解決）。下一步：在 #1190 或 #1186 中嘗試用 useMemo 快取計算結果，或抽取 custom hook，完成後 #11 有機會升到 level 5",
     "元件設計（#13）已穩在 level 4。#1464 的 ToolboxCompletionActions 共用元件 + 9 個 reading-step 接入是好的證據。下一步挑戰：把 toolbox session 寫入邏輯抽成 useToolboxSession custom hook，這是 level 5 的證明",
-    "獨立開發（#16）已穩在 level 4。#1457 驗收簽結是好的 level 5 候選機會：完整經歷需求→設計→實作→現場驗收的全循環，且是跨 4 個 PR 的大型功能"
+    "獨立開發（#16）已穩在 level 4。#1457 驗收簽結是好的 level 5 候選機會：完整經歷需求→設計→實作→現場驗收的全循環，且是跨 4 個 PR 的大型功能",
+    "後端 Python 閱讀（#17）新增 level 1。下一步：在 #1494 silent-failure 修復中繼續讀懂 mcq_rescue_agent 的錯誤處理邏輯，這是 level 2 的機會（能獨立追蹤 middleware → route → service 的控制流）"
   ],
-  "summary": "5/4~5/8 共 4 個 PR merge，全部圍繞練習工具箱完整落地：Phase 1 Alembic 建 10 張 DB tables → per-tool CTA 共用元件 → Phase 2+3 後端 API + 前端 toolboxApi.ts + 學習紀錄頁整合。技術亮點：PR #1465 用 useEffect mount + useRef recordedRef 優雅解決 #1463 和 #1464 的設計衝突，展現跨 PR 架構思維。靖杭首次獨立設計後端 feature API（POST/GET/PATCH）並走完 DB → route → frontend 完整鏈路。技能升級：#11 React 進階（2→3）、#18 架構理解（3→4）。[5/7 補充] Young 補了 #1482（PR #1480 follow-up，is_correct=True 強制 suggestion=\"\"）+ #1485/#1487 meeting-prep skill 建立，靖杭本週無新 intern PR",
+  "summary": "5/4~5/8 共 7 個 PR merge（5/4~5/7: 4 個 toolbox PR；5/8 新增: #1497/#1498/#1499）。5/8 亮點：PR #1499 VocabPractice multi-mode（practiceMode + radicalColorMode 雙 prop，4 輪 review）展現跨 mode 元件架構設計；PR #1498 G7-L29/L30 文章重點表結構化重構（22 行平文字 → 5 行填空）；PR #1497 CSP middleware fix（首次讀懂並修改 Python security middleware）。技能升級：#11 React 進階（3→4，multi-mode prop 設計 + 命名邊界清晰）；#17 後端 Python 閱讀（新增 level 1）。技能 #14 質量提升（無升級，1498 證據待後續積累）。累計本週 7 PR，是歷週最高產之一",
   "issues": [
     {
       "id": "環境建置",
@@ -667,6 +689,49 @@
         "前後端 + DB 三層完整走完",
         "4 輪 @claude review 迭代"
       ]
+    },
+    {
+      "id": "#1496",
+      "title": "fix(csp): GCS frame-src 允許，解除 PDF popup 封鎖（PR #1497）",
+      "date": "2026-05-08",
+      "type": "bugfix",
+      "contribution": "閱讀 SecurityHeadersMiddleware 的 CSP header 建構邏輯，定位 frame-src 缺少 storage.googleapis.com，在正確位置加入白名單。說明了 CSP 無法做 GCS path-restriction 的限制，修改精準（+3/-1）",
+      "skillsLearned": [17],
+      "highlights": [
+        "首次讀懂並修改 Python middleware 安全設定",
+        "正確定位 CSP directive 在 header 建構中的位置",
+        "附說明 GCS path-restriction 限制，展現對 CSP 語意的理解"
+      ],
+      "linesChanged": "+3/-1"
+    },
+    {
+      "id": "#1388",
+      "title": "fix(content): G7-L29/L30 文章重點表結構化重構（PR #1498）",
+      "date": "2026-05-08",
+      "type": "bugfix",
+      "contribution": "將 G7-L29/L30 的文章重點表從 22 行純文字平鋪重構為 5 個結構化行（主題/觀察/推論/趨勢/反論）並加入 fill-blank 格式，符合方大哥 #1388 的教學設計規格。2 輪 review 迭代（改善「證據→趨勢」語意、「怕人→是否怕人」句式）",
+      "skillsLearned": [14],
+      "highlights": [
+        "主動理解教學規格，將平文字轉換為結構化填空",
+        "2 輪 review 迭代，精修欄位語意",
+        "staging 驗證 6 個填空格正確渲染（HTTP 200）"
+      ],
+      "linesChanged": "+35/-47"
+    },
+    {
+      "id": "#1342",
+      "title": "feat(vocab): 第二次練習隱藏輔助 + 部首顏色（PR #1499）",
+      "date": "2026-05-08",
+      "type": "feature",
+      "contribution": "VocabPractice 新增 practiceMode prop（standard/toolbox/quiz 三種）+ radicalColorMode prop，Round 1 顯示筆順輪廓 + 部首顏色標示，Round 2 隱藏所有輔助（筆順/注音/筆畫數）。命名刻意避免與元件內部 mode state 衝突，4 輪 @claude review 全部解決含最後 brush color 一致性",
+      "skillsLearned": [6, 11],
+      "highlights": [
+        "prop vs internal state 邊界設計清晰，避免命名衝突",
+        "3 variants + 雙 prop 的 multi-mode 元件架構",
+        "4 輪 @claude review 全部追蹤到底，含 commit 9bad640a brush color 修正",
+        "162+/32- 規模適中，設計乾淨"
+      ],
+      "linesChanged": "+162/-32"
     }
   ]
 }

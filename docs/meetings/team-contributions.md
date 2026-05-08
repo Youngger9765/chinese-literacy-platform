@@ -25,6 +25,11 @@
 | Young | ✅ | PR #1482 fix(ai)（#1481）| is_correct=True 時強制 suggestion=""（ai_generation.py L292 一行 defensive fix，#1480 claude-bot L285 finding）|
 | Young | ✅ | PR #1485 feat(skill) | meeting-prep skill 首建：4 份文件自動產出 + worktree + PR 到 staging 全流程 |
 | Young | ✅ | PR #1487 feat(skill)（#1486）| 泛化 meeting-prep：不假設週五、AskUserQuestion 問日期、DOW_ZH case 支援週一到週日 |
+| Young | ✅ | PR #1493 test(mcq-rescue)（#1387）| 28 contract tests for Phase 1 backend：fail-closed 驗證、empty reasoning 偵測、start_session error path、blank resume fallback |
+| Young | ✅ | PR #1495 feat(data)（#1398 #1444）| infill 4 missing story_structure YAMLs（G5-L5/G8-L8/G9-L2/文-L10）+ 2 worksheet PDFs（G9-L15-16/G9-L17-19）→ 208/208 coverage |
+| 靖杭 | ✅ | PR #1497 fix(csp)（#1496）| SecurityHeadersMiddleware frame-src 加入 `storage.googleapis.com`，解除 GCS PDF popup 被 CSP 封鎖 |
+| 靖杭 | ✅ | PR #1498 fix(content)（#1388）| G7-L29/L30 文章重點表從 22 行平文字重構為 5 行結構化填空（主題/觀察/推論/趨勢/反論）+ fill-blanks，2 輪 review 精修 |
+| 靖杭 | ✅ | PR #1499 feat(vocab)（#1342）| VocabPractice `practiceMode` prop（3 variants）+ `radicalColorMode` prop，Round 1 outlined+radical colors / Round 2 no-aids，4 輪 @claude review |
 
 ---
 
