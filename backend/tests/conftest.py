@@ -3,6 +3,9 @@ Shared test configuration.
 
 Patches PostgreSQL-specific column types (JSONB) to SQLite-compatible types (JSON)
 before table creation, so all tests can use SQLite in-memory databases.
+
+Also patches server_default values that contain PostgreSQL-specific syntax (::jsonb casts)
+which SQLite cannot parse.
 """
 import sys
 import os
@@ -23,8 +26,29 @@ def _patch_jsonb_columns():
                 column.type = JSON()
 
 
+def _patch_pg_server_defaults():
+    """Remove PostgreSQL-specific server_default values (e.g. ::jsonb casts).
+
+    SQLite cannot parse expressions like ``'{}'::jsonb``, so we strip any
+    server_default whose text contains '::', leaving Python-side defaults intact.
+    """
+    for table in Base.metadata.sorted_tables:
+        for column in table.columns:
+            sd = column.server_default
+            if sd is None:
+                continue
+            # server_default is a DefaultClause; its .arg may be a text() object
+            arg = getattr(sd, "arg", None)
+            if arg is None:
+                continue
+            arg_text = getattr(arg, "text", None)
+            if isinstance(arg_text, str) and "::" in arg_text:
+                column.server_default = None
+
+
 # Run once at import time, before any test creates tables.
 _patch_jsonb_columns()
+_patch_pg_server_defaults()
 
 
 def pytest_runtest_setup(item):
