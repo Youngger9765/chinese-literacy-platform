@@ -264,6 +264,11 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
   const pendingAutoStartRef = useRef(false);
   const loopTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const shakeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  // #1342: holds the auto-onComplete timer for single-shot rounds so we can
+  // cancel it on character change / unmount, preventing a stale closure from
+  // firing onComplete after the parent has already advanced (e.g. the user
+  // tapped "跳過第 2 次練習" inside the 600 ms window).
+  const completionTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   /* ---- Off-screen canvas (created once, reused) ---- */
   const getOffCanvas = useCallback(() => {
@@ -353,6 +358,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
       cancelAnimationFrame(hintFrameRef.current);
       clearTimeout(loopTimerRef.current);
       clearTimeout(shakeTimerRef.current);
+      clearTimeout(completionTimerRef.current);
     };
   }, [character, resetState]);
 
@@ -555,7 +561,8 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
           // (allDone branch in strokeRenderer's colourFor).
           if (isOutlinedOnce) {
             showToast('恭喜筆畫正確！', 'success');
-            setTimeout(() => onComplete?.(), 600);
+            clearTimeout(completionTimerRef.current);
+            completionTimerRef.current = setTimeout(() => onComplete?.(), 600);
           } else {
             const newLeft = pl - 1;
             setPracticeLeft(newLeft);
@@ -579,7 +586,8 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
           // when they have finished BOTH rounds (= the whole character is done).
           if (isNoOutlineOnce) {
             showToast('恭喜筆畫正確！這個字完成了！', 'success');
-            setTimeout(() => onComplete?.(), 600);
+            clearTimeout(completionTimerRef.current);
+            completionTimerRef.current = setTimeout(() => onComplete?.(), 600);
           } else {
             setPracticeLeft(pl - 1);
             setStep(Step.COMPLETE);

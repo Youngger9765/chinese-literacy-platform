@@ -47,10 +47,15 @@ export function renderStrokes(
   // #1342: pick a fill colour for stroke `i` — radical strokes get the
   // accent purple, body strokes get emerald. After every stroke is done
   // we drop back to the unified COLORS.stroke ("合體" effect).
+  // Guard `hasRadicalData`: hanzi-writer-data sometimes ships characters
+  // without radStrokes; falling back to the unified ink colour avoids the
+  // misleading "all strokes are green" rendering when there is genuinely
+  // no part decomposition to show.
   const radSet = new Set(data.radicalIndices);
+  const hasRadicalData = data.radicalIndices.length > 0;
   const allDone = completedStrokes >= data.nStrokes;
   const colourFor = (i: number): string => {
-    if (!radicalColorMode || allDone) return COLORS.stroke;
+    if (!radicalColorMode || !hasRadicalData || allDone) return COLORS.stroke;
     return radSet.has(i) ? COLORS.radical : COLORS.body;
   };
 
