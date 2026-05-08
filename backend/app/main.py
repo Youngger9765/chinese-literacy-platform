@@ -95,6 +95,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "https://us-central1-aiplatform.googleapis.com; "
         # Issue #1496: allow GCS bucket for the worksheet PDF iframe (#1444),
         # plus YouTube embeds for the knowledge-station videos.
+        # NOTE: CSP frame-src cannot restrict by path (spec limitation), so the
+        # entire storage.googleapis.com host is whitelisted. The actual PDFs
+        # live under public-read `lingoleap-assets/worksheets/`; tighter scoping
+        # would require proxying PDFs through our own origin.
         "frame-src 'self' "
         "https://storage.googleapis.com "
         "https://www.youtube.com "
