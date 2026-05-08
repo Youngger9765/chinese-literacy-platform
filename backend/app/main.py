@@ -93,6 +93,12 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "https://*.firebaseapp.com "
         "https://*.cloudfunctions.net "
         "https://us-central1-aiplatform.googleapis.com; "
+        # Issue #1496: allow GCS bucket for the worksheet PDF iframe (#1444),
+        # plus YouTube embeds for the knowledge-station videos.
+        "frame-src 'self' "
+        "https://storage.googleapis.com "
+        "https://www.youtube.com "
+        "https://www.youtube-nocookie.com; "
         "frame-ancestors 'none';"
     )
 
