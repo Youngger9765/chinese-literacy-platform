@@ -91,8 +91,11 @@ export function renderStrokes(
 
   if (activeBrush.length > 1) {
     // The active brush is whichever stroke index the student is drawing right now,
-    // which equals completedStrokes in the quiz flow. Use the same colour rule.
-    const activeColour = radicalColorMode && !allDone
+    // which equals completedStrokes in the quiz flow. Use the same colour rule —
+    // but when the character has no radical data, fall back to the default
+    // accent brush (purple) instead of the unified ink so the active stroke
+    // still matches the hint colour.
+    const activeColour = radicalColorMode && hasRadicalData && !allDone
       ? colourFor(completedStrokes)
       : COLORS.brush;
     brushLine(ctx, activeBrush, activeColour, 8);
