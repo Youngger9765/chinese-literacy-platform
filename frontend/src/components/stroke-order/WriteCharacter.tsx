@@ -546,10 +546,16 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         const pl = m.current.practiceLeft;
 
         if (s >= Step.PRACTICE_1 && s <= Step.PRACTICE_3) {
-          // #1342: outlined-once mode finishes after a single PRACTICE_1 pass.
+          // #1342: outlined-once mode auto-advances to whatever the parent
+          // wires onComplete to (round 2 in VocabPractice). The COMPLETE
+          // overlay's "下一個字" button was misleading — it actually moves
+          // to the same character's round 2, not the next character — so we
+          // skip the overlay entirely here. The 600 ms pause lets the
+          // student see the radical-coloured strokes merge into one colour
+          // (allDone branch in strokeRenderer's colourFor).
           if (isOutlinedOnce) {
-            setStep(Step.COMPLETE);
-            showToast('恭喜筆畫正確！寫字練習完成！', 'success');
+            showToast('恭喜筆畫正確！', 'success');
+            setTimeout(() => onComplete?.(), 600);
           } else {
             const newLeft = pl - 1;
             setPracticeLeft(newLeft);
@@ -568,9 +574,17 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
             }
           }
         } else if (s === Step.PRACTICE_NO_OUTLINE) {
-          setPracticeLeft(pl - 1);
-          setStep(Step.COMPLETE);
-          showToast('恭喜筆畫正確！寫字練習完成！', 'success');
+          // #1342: same auto-advance for no-outline-once (round 2). Standard
+          // flow keeps the COMPLETE overlay so users have a "下一個字" CTA
+          // when they have finished BOTH rounds (= the whole character is done).
+          if (isNoOutlineOnce) {
+            showToast('恭喜筆畫正確！這個字完成了！', 'success');
+            setTimeout(() => onComplete?.(), 600);
+          } else {
+            setPracticeLeft(pl - 1);
+            setStep(Step.COMPLETE);
+            showToast('恭喜筆畫正確！寫字練習完成！', 'success');
+          }
         } else {
           showToast('恭喜筆畫正確！', 'success');
         }
@@ -582,7 +596,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         showHint();
       }
     }
-  }, [doRender, showHint, startQuiz, triggerShake, showToast]);
+  }, [doRender, showHint, startQuiz, triggerShake, showToast, isOutlinedOnce, isNoOutlineOnce, onComplete]);
 
   /* ================================================================ */
   /*  Pointer events (drawing)                                         */
