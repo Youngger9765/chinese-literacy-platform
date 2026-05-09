@@ -33,6 +33,7 @@ import ParagraphCard from './ParagraphCard';
 import TutorFeedbackPanel from './TutorFeedbackPanel';
 import { isToolboxMode } from '../../../services/learningStorageScope';
 import ToolboxCompletionActions from '../../tools/ToolboxCompletionActions';
+import ReadingMetricsCard from '../full-reading/ReadingMetricsCard';
 
 /* ------------------------------------------------------------------ */
 /*  Component props                                                    */
@@ -272,6 +273,18 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     }
     return max;
   }, [completedParagraphs, currentLineIndex]);
+
+  /** Overall accuracy + CPM computed from all completed paragraphs (Issue #1505) */
+  const overallMetrics = useMemo(() => {
+    if (lineResults.length === 0) return null;
+    const avgMatchRate = lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length;
+    const totalCorrectChars = lineResults.reduce(
+      (s, r) => s + r.diffTokens.filter(t => t.type === 'correct' || t.type === 'forgiven').length, 0
+    );
+    const totalDurationSec = lineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
+    const cpm = totalDurationSec > 0 ? Math.round((totalCorrectChars / totalDurationSec) * 60) : 0;
+    return { accuracy: Math.round(avgMatchRate * 100), cpm };
+  }, [lineResults]);
 
   // ── Save progress to localStorage whenever key state changes ──────────────
   useEffect(() => {
@@ -881,8 +894,15 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             />
           </div>
 
-          {/* Issue #1094: 原「語速 / 準確度」佔位卡移除 — 學生端不顯示數據欄位；
-              教師後台（AssessmentReport readOnly）已有完整語速與準確度 */}
+          {/* Issue #1505: show overall metrics once all paragraphs are done (non-toolbox mode) */}
+          {!isToolboxMode() && completedParagraphs.size === story.content.length && overallMetrics && (
+            <div className="mt-4">
+              <ReadingMetricsCard
+                accuracy={overallMetrics.accuracy}
+                cpm={overallMetrics.cpm}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -1078,9 +1098,16 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {/* #1462 Toolbox completion overlay — replaces auto-onFinish navigate */}
       {toolboxComplete && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="bg-surface rounded-3xl shadow-editorial p-8 max-w-md w-full text-center">
-            <h2 className="text-2xl font-headline font-bold text-on-surface mb-3">朗讀練習完成！</h2>
-            <p className="text-sm text-on-surface-variant mb-6">想再練一次，或回到工具箱選別的工具？</p>
+          <div className="bg-surface rounded-3xl shadow-editorial p-8 max-w-md w-full text-center space-y-4">
+            <h2 className="text-2xl font-headline font-bold text-on-surface">朗讀練習完成！</h2>
+            {/* Issue #1505: show metrics in toolbox completion overlay */}
+            {overallMetrics && (
+              <ReadingMetricsCard
+                accuracy={overallMetrics.accuracy}
+                cpm={overallMetrics.cpm}
+              />
+            )}
+            <p className="text-sm text-on-surface-variant">想再練一次，或回到工具箱選別的工具？</p>
             <ToolboxCompletionActions
               onRetry={() => {
                 setToolboxComplete(false);

@@ -9,7 +9,8 @@ import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { useTtsPlayback } from '../../hooks/useTtsPlayback';
 import { cancelTts } from '../../services/ttsApi';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
-import { saveReadingHistory } from '../../services/readingHistoryApi';
+import { saveReadingHistory, getReadingHistory as getReadingHistoryDedicated, type ReadingHistoryItem } from '../../services/readingHistoryApi';
+import ReadingMetricsCard from './full-reading/ReadingMetricsCard';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import { useAuth } from '../../contexts/AuthContext';
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
@@ -46,7 +47,7 @@ interface FullReadingProps {
 }
 
 const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, initialResult, fullReadingAttempts = [] }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
   // #1462: in toolbox mode, completion screen shows 重做/回工具箱 instead of 下一關.
   const inToolbox = isToolboxMode();
@@ -217,6 +218,15 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     if (!token || !story.id) return;
     getReadingHistory(token, String(story.id)).then(setReadingHistory).catch(() => {});
   }, [token, story.id, historyRefreshKey]);
+
+  /* ---- Dedicated reading history for metrics card (#1505) ---- */
+  const [dedicatedHistory, setDedicatedHistory] = useState<ReadingHistoryItem[]>([]);
+  useEffect(() => {
+    if (!token || !user?.id || !story.id) return;
+    getReadingHistoryDedicated(user.id, String(story.id), token, 'full')
+      .then(res => setDedicatedHistory(res.history))
+      .catch(() => {});
+  }, [token, user?.id, story.id, historyRefreshKey]);
 
   /* ---- Save reading attempt to dedicated reading_history table (#909) ---- */
   const savedResultRef = useRef(false);
@@ -528,14 +538,12 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
                 </div>
               )}
 
-              {/* Reading progress curve — Issue #1094: 學生端隱藏數據曲線（教師後台可見） */}
-              {readingHistory.length >= 1 && (
-                <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 text-center">
-                  <p className="text-sm font-headline text-on-surface">
-                    本篇已練習 {readingHistory.length} 次，繼續加油！
-                  </p>
-                </div>
-              )}
+              {/* 正確率 + 語速 metrics card (Issue #1505) */}
+              <ReadingMetricsCard
+                accuracy={Math.round(result.matchRate * 100)}
+                cpm={result.cpm || 0}
+                history={dedicatedHistory}
+              />
 
               {/* ── Issue #1386: Self-assessment + 4-attempt progress chart ── */}
               <SelfAssessment
