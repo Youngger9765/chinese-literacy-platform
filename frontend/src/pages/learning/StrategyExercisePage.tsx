@@ -19,9 +19,12 @@ const StrategyExercisePage: React.FC = () => {
     handleFinishReadingStrategy,
     dbSessionId,
     saveStepProgressPatch,
+    stepProgressData,
   } = useLearningContext();
 
-  const [strategyDone, setStrategyDone] = useState(false);
+  const savedStrategyData = stepProgressData.step_data?.['reading-strategy'] as Record<string, unknown> | undefined;
+
+  const [strategyDone, setStrategyDone] = useState(() => !!(savedStrategyData?.allDone));
 
   const handleProgressChange = useCallback(
     (stepData: Record<string, unknown>, immediate = false) => {
@@ -33,6 +36,13 @@ const StrategyExercisePage: React.FC = () => {
       });
     },
     [saveStepProgressPatch],
+  );
+
+  const handleAnswerChange = useCallback(
+    (exerciseState: Record<string, unknown>) => {
+      handleProgressChange(exerciseState, false);
+    },
+    [handleProgressChange],
   );
 
   const handleStrategyComplete = useCallback(() => {
@@ -58,6 +68,8 @@ const StrategyExercisePage: React.FC = () => {
           <StrategyExercise
             exercise={selectedStory.strategyExercise!}
             onComplete={handleStrategyComplete}
+            onChange={handleAnswerChange}
+            initialState={savedStrategyData}
           />
           {/* Show "下一關" once the strategy exercise is done (or always allow skip) */}
           <div className="mt-6 shrink-0">
