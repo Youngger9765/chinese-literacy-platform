@@ -8,7 +8,7 @@
  *
  * Designed to feel like part of the existing worksheet (matches MCQ / StoryStructure UI).
  */
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StrategyExercise as StrategyExerciseType, StrategyExerciseOrderingItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
@@ -16,6 +16,8 @@ import { fontForZhuyin } from '../../constants/fonts';
 interface Props {
   exercise: StrategyExerciseType;
   onComplete?: () => void;
+  onChange?: (exerciseState: Record<string, unknown>) => void;
+  initialState?: Record<string, unknown>;
 }
 
 // ── Shared helpers ──────────────────────────────────────────────────────────
@@ -323,18 +325,28 @@ function TraitInferenceExercise({
 function GuidedStepsExercise({
   exercise,
   onComplete,
+  onChange,
+  initialState,
 }: {
   exercise: StrategyExerciseType;
   onComplete?: () => void;
+  onChange?: (exerciseState: Record<string, unknown>) => void;
+  initialState?: Record<string, unknown>;
 }) {
   const steps = exercise.steps ?? [];
   const [answers, setAnswers] = useState<(string | number | null)[]>(
-    () => steps.map(() => null),
+    () => (initialState?.answers as (string | number | null)[]) ?? steps.map(() => null),
   );
   const [stepFeedback, setStepFeedback] = useState<(boolean | null)[]>(
-    () => steps.map(() => null),
+    () => (initialState?.stepFeedback as (boolean | null)[]) ?? steps.map(() => null),
   );
-  const [allDone, setAllDone] = useState(false);
+  const [allDone, setAllDone] = useState(
+    () => !!(initialState?.allDone as boolean),
+  );
+
+  useEffect(() => {
+    onChange?.({ answers, stepFeedback, allDone, exerciseType: 'guided_steps' });
+  }, [answers, stepFeedback, allDone]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTextChange = (stepIdx: number, value: string) => {
     if (stepFeedback[stepIdx] !== null) return;
@@ -501,7 +513,7 @@ function GuidedStepsExercise({
 
 // ── Main Component ──────────────────────────────────────────────────────────
 
-const StrategyExercise: React.FC<Props> = ({ exercise, onComplete }) => {
+const StrategyExercise: React.FC<Props> = ({ exercise, onComplete, onChange, initialState }) => {
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zhuyinFont = fontForZhuyin(zhuyinActive);
 
@@ -512,7 +524,7 @@ const StrategyExercise: React.FC<Props> = ({ exercise, onComplete }) => {
   const content = (() => {
     if (exercise.type === 'ordering') return <OrderingExercise exercise={exercise} onComplete={handleComplete} />;
     if (exercise.type === 'trait_inference') return <TraitInferenceExercise exercise={exercise} onComplete={handleComplete} />;
-    if (exercise.type === 'guided_steps') return <GuidedStepsExercise exercise={exercise} onComplete={handleComplete} />;
+    if (exercise.type === 'guided_steps') return <GuidedStepsExercise exercise={exercise} onComplete={handleComplete} onChange={onChange} initialState={initialState} />;
     return <div className="p-4 text-on-surface-variant text-sm text-center">不支援的練習類型：{exercise.type}</div>;
   })();
 
