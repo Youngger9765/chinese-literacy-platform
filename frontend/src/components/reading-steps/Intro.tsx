@@ -4,6 +4,7 @@ import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { fontForZhuyin } from '../../constants/fonts';
+import { resolveActiveSteps } from '../../config/stepConfig';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -270,31 +271,37 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             );
           })()}
 
-          {/* 學習單流程 — worksheet_section_order from yml (Layer-1 and Layer-2) */}
-          {story.worksheetSectionOrder && story.worksheetSectionOrder.length > 0 && (
-            <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span className="text-xs font-bold text-accent-light uppercase tracking-widest">
-                  本課 {story.worksheetSectionOrder.length} 個學習步驟
-                </span>
+          {/* 數位學習步驟 — derived from step_sequence (same source as StepperNav dots, #1508) */}
+          {(() => {
+            // Resolve from lesson's step_sequence (or DEFAULT_STEP_SEQUENCE),
+            // then exclude the 'intro' step itself (this page IS the intro).
+            const digitalSteps = resolveActiveSteps(story.stepSequence).filter(s => s.id !== 'intro');
+            if (digitalSteps.length === 0) return null;
+            return (
+              <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-3">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span className="text-xs font-bold text-accent-light uppercase tracking-widest">
+                    本課 {digitalSteps.length} 個學習步驟
+                  </span>
+                </div>
+                <ol className="space-y-2" aria-label="數位學習步驟">
+                  {digitalSteps.map((step, idx) => (
+                    <li key={step.id} className="flex items-center gap-3">
+                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-accent-bg-subtle text-accent-hover text-sm font-bold flex items-center justify-center">
+                        {idx + 1}
+                      </span>
+                      <span className={`text-on-surface ${zhuyinActive ? 'text-lg leading-[2.8rem] tracking-[0.2em]' : 'text-base'}`}>
+                        {processZhuyin(step.label)}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
               </div>
-              <ol className="space-y-2" aria-label="學習單流程">
-                {story.worksheetSectionOrder.map((section, idx) => (
-                  <li key={idx} className="flex items-center gap-3">
-                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-accent-bg-subtle text-accent-hover text-sm font-bold flex items-center justify-center">
-                      {section.number}
-                    </span>
-                    <span className={`text-on-surface ${zhuyinActive ? 'text-lg leading-[2.8rem] tracking-[0.2em]' : 'text-base'}`}>
-                      {processZhuyin(section.name)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
+            );
+          })()}
 
         </div>
       </div>
