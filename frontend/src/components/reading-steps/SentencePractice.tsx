@@ -13,7 +13,8 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useZhuyin } from '../../context/ZhuyinContext';
-import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
+import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import {
   fetchExampleSentences,
   validateSentence,
@@ -484,7 +485,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
               <div className="flex items-center gap-2 mb-3">
                 <span className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-headline font-black ${
                   entry.status === 'correct' ? 'bg-emerald-500 text-white'
-                  : entry.status === 'incorrect' ? 'bg-tertiary text-white'
+                  : entry.status === 'incorrect' ? 'bg-amber-400 text-amber-900'
                   : 'bg-surface-container-high text-on-surface-variant'
                 }`}>
                   {entry.status === 'correct' ? <span className="material-symbols-outlined text-sm">check</span>
@@ -494,7 +495,7 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                 <span className="text-sm font-headline font-bold text-on-surface-variant">第 {idx + 1} 句</span>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
                 <input
                   type="text"
                   value={entry.text}
@@ -507,49 +508,49 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                   onDragOver={e => e.preventDefault()}
                   disabled={entry.status === 'loading' || isCurrentDone}
                   placeholder={`用「${zh(currentWord)}」造一個句子…`}
-                  className={`flex-1 rounded-2xl border-2 px-4 py-3 text-base outline-none transition-all ${
+                  className={`flex-1 min-w-0 rounded-2xl border-2 px-4 py-3 text-base outline-none transition-all ${
                     entry.status === 'correct' ? 'border-emerald-400 bg-emerald-50 text-emerald-900'
-                    : entry.status === 'incorrect' ? 'border-tertiary/40 bg-tertiary-container/10 text-on-surface'
+                    : entry.status === 'incorrect' ? 'border-amber-300 bg-amber-50 text-on-surface'
                     : 'border-surface-container-high bg-transparent focus:border-accent text-on-surface'
                   }`}
                 />
-                <VoiceInputButton
-                  key={currentWord + String(idx)}
-                  onTranscript={(text) => {
-                    updateSentenceText(idx, text);
-                    // Clear live display once final transcript is committed (#1327).
-                    setLiveTranscripts(prev => {
-                      const next: [string, string] = [prev[0], prev[1]];
-                      next[idx] = '';
-                      return next;
-                    });
-                  }}
-                  onLiveTranscript={(text) => {
-                    // Show interim transcript below the input field (#1327).
-                    setLiveTranscripts(prev => {
-                      const next: [string, string] = [prev[0], prev[1]];
-                      next[idx] = text;
-                      return next;
-                    });
-                  }}
-                  disabled={entry.status === 'loading' || isCurrentDone}
-                  stopRef={voiceStopRefs[idx]}
-                />
-                <button
-                  onClick={() => handleValidate(idx)}
-                  disabled={!entry.text.trim() || entry.status === 'loading' || isCurrentDone}
-                  className={`px-5 py-3 rounded-2xl text-sm font-headline font-bold transition-all active:scale-[0.97] shrink-0 ${
-                    entry.status === 'loading' ? 'bg-surface-container-high text-on-surface-variant cursor-wait'
-                    : entry.status === 'correct' ? 'bg-emerald-500 text-white'
-                    : 'bg-accent hover:brightness-110 text-white disabled:opacity-40 disabled:cursor-not-allowed'
-                  }`}
-                >
-                  {entry.status === 'loading' ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : entry.status === 'correct' ? (
-                    <span className="material-symbols-outlined text-lg">check</span>
-                  ) : '批改'}
-                </button>
+                <div className="flex gap-2 justify-end sm:shrink-0">
+                  <VoiceInputButton
+                    key={currentWord + String(idx)}
+                    onTranscript={(text) => {
+                      updateSentenceText(idx, text);
+                      setLiveTranscripts(prev => {
+                        const next: [string, string] = [prev[0], prev[1]];
+                        next[idx] = '';
+                        return next;
+                      });
+                    }}
+                    onLiveTranscript={(text) => {
+                      setLiveTranscripts(prev => {
+                        const next: [string, string] = [prev[0], prev[1]];
+                        next[idx] = text;
+                        return next;
+                      });
+                    }}
+                    disabled={entry.status === 'loading' || isCurrentDone}
+                    stopRef={voiceStopRefs[idx]}
+                  />
+                  <button
+                    onClick={() => handleValidate(idx)}
+                    disabled={!entry.text.trim() || entry.status === 'loading' || isCurrentDone}
+                    className={`px-5 py-3 rounded-2xl text-sm font-headline font-bold transition-all active:scale-[0.97] shrink-0 ${
+                      entry.status === 'loading' ? 'bg-surface-container-high text-on-surface-variant cursor-wait'
+                      : entry.status === 'correct' ? 'bg-emerald-500 text-white'
+                      : 'bg-accent hover:brightness-110 text-white disabled:opacity-40 disabled:cursor-not-allowed'
+                    }`}
+                  >
+                    {entry.status === 'loading' ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : entry.status === 'correct' ? (
+                      <span className="material-symbols-outlined text-lg">check</span>
+                    ) : '送出'}
+                  </button>
+                </div>
               </div>
 
               {/* Live transcript display — shown while mic is active (#1327) */}
@@ -562,17 +563,16 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
                 </div>
               )}
 
-              {/* Feedback — font sizes bumped to text-base / text-sm (#1327) */}
               {(entry.status === 'correct' || entry.status === 'incorrect') && (
                 <div className={`mt-3 rounded-2xl px-4 py-4 ${
-                  entry.status === 'correct' ? 'bg-emerald-50' : 'bg-tertiary-container/10'
+                  entry.status === 'correct' ? 'bg-emerald-50' : 'bg-amber-50'
                 }`}>
                   <div className="flex items-start gap-2">
-                    <span className={`material-symbols-outlined text-xl mt-0.5 ${entry.status === 'correct' ? 'text-emerald-600' : 'text-tertiary'}`}>
+                    <span className={`material-symbols-outlined text-xl mt-0.5 ${entry.status === 'correct' ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {entry.status === 'correct' ? 'check_circle' : 'lightbulb'}
                     </span>
                     <div>
-                      <p className={`text-base font-medium leading-relaxed ${entry.status === 'correct' ? 'text-emerald-800' : 'text-on-surface'}`}>{entry.feedback}</p>
+                      <p className={`text-base font-medium leading-relaxed ${entry.status === 'correct' ? 'text-emerald-800' : 'text-amber-900'}`}>{entry.feedback}</p>
                       {entry.suggestion && <p className="mt-1.5 text-sm text-on-surface-variant leading-relaxed">{entry.suggestion}</p>}
                     </div>
                   </div>
@@ -584,8 +584,8 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
 
         {/* Paste warning */}
         {pasteWarning && (
-          <div className="rounded-2xl bg-tertiary-container/15 border border-tertiary/20 px-5 py-3 text-center animate-fade-in">
-            <span className="text-sm text-tertiary font-medium">請用自己的話造句，不要複製貼上喔！</span>
+          <div className="rounded-2xl bg-amber-50 border border-amber-200 px-5 py-3 text-center animate-fade-in">
+            <span className="text-sm text-amber-700 font-medium">請用自己的話造句，不要複製貼上喔！</span>
           </div>
         )}
 
@@ -625,17 +625,19 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
   // ── Standalone mode — two-column: content left + word tabs right ──
   return (
     <div className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative">
-      <div className="flex-1 min-h-0 px-4 md:px-6 py-6 md:py-8">
-        <div className="w-full h-full flex gap-6">
+      <div className="flex-1 min-h-0 px-4 md:px-8 py-6 md:py-8">
+        <div className="w-full h-full flex gap-4">
 
-          {/* Left: main content (scrollable) */}
+          {/* Left: main content (scrollable, max-w-2xl centered) */}
           <div className="flex-1 min-w-0 overflow-y-auto pb-32 custom-scrollbar">
-            {renderContent()}
+            <div className="max-w-2xl mx-auto w-full">
+              {renderContent()}
+            </div>
           </div>
 
           {/* Right: vertical word tab sidebar */}
           {practicedWords.length > 1 && (
-            <div className="hidden md:block w-48 lg:w-56 shrink-0 overflow-y-auto custom-scrollbar">
+            <div className="hidden md:block w-40 lg:w-48 shrink-0 overflow-y-auto custom-scrollbar">
               {wordSidebar}
             </div>
           )}
@@ -654,12 +656,24 @@ const SentencePractice: React.FC<SentencePracticeProps> = ({
         <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
              style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
           <div className="max-w-md mx-auto pointer-events-auto">
-            <button onClick={onFinish}
-              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
-              繼續下一步
-              <span className="material-symbols-outlined text-xl">arrow_forward</span>
-            </button>
+            {isToolboxMode() ? (
+              <ToolboxCompletionActions
+                onRetry={() => {
+                  // Toolbox retry: reset all completion state, back to first word.
+                  setCompletedWords(new Set());
+                  setCurrentWordIndex(0);
+                  if (storageKey) try { localStorage.removeItem(storageKey); } catch {}
+                }}
+                className="w-full"
+              />
+            ) : (
+              <button onClick={onFinish}
+                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}>
+                繼續下一步
+                <span className="material-symbols-outlined text-xl">arrow_forward</span>
+              </button>
+            )}
           </div>
         </div>
       )}

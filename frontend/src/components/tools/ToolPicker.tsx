@@ -55,7 +55,8 @@ export const TOOL_OPTIONS: ToolOption[] = [
   },
   {
     id: 'vocab-definition',
-    label: '詞語配對',
+    // Issue #1460: unify naming with stepConfig.ts ("詞語理解") — was "詞語配對"
+    label: '詞語理解',
     description: '詞語與定義連連看',
     icon: '🔗',
     stepPath: 'vocab-definition',

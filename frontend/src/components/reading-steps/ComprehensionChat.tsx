@@ -11,7 +11,8 @@ import StoryStructureTable from './StoryStructureTable';
 import MultipleChoiceExercise from './MultipleChoiceExercise';
 import FloatingAIHelper from './FloatingAIHelper';
 import StrategyExercise from './StrategyExercise';
-import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
+import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 
 interface ComprehensionChatProps {
   story: Story;
@@ -249,6 +250,8 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         <MultipleChoiceExercise
           questions={story.multipleChoice!}
           onComplete={handleMcqComplete}
+          lessonId={story.id}
+          readingStrategy={story.readingStrategy}
         />
       );
     }
@@ -383,14 +386,26 @@ const ComprehensionChat: React.FC<ComprehensionChatProps> = ({
         <div className="fixed bottom-0 left-0 w-full px-6 pb-8 pt-6 pointer-events-none z-20"
              style={{ background: 'linear-gradient(to top, #FBF6EE 60%, transparent)' }}>
           <div className="max-w-md mx-auto pointer-events-auto">
-            <button
-              onClick={handleFinish}
-              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-            >
-              <span>下一關</span>
-              <span className="material-symbols-outlined text-xl">arrow_forward</span>
-            </button>
+            {isToolboxMode() ? (
+              <ToolboxCompletionActions
+                onRetry={() => {
+                  // Toolbox retry: clear MCQ + structure completion so the
+                  // student can run through the comprehension flow again.
+                  setTabCompletion({ mcqDone: false, structureVisited: false, strategyDone: false });
+                  try { localStorage.removeItem(completionKey); } catch {}
+                }}
+                className="w-full"
+              />
+            ) : (
+              <button
+                onClick={handleFinish}
+                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+              >
+                <span>下一關</span>
+                <span className="material-symbols-outlined text-xl">arrow_forward</span>
+              </button>
+            )}
           </div>
         </div>
       )}

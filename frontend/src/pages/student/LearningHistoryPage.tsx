@@ -14,6 +14,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchLearningSessions, type LearningSummary } from '../../services/learningApi';
+import { listAllToolboxSessions, type ToolboxSession } from '../../services/toolboxApi';
+import { TOOL_OPTIONS } from '../../components/tools/ToolPicker';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
 import StepProgressStrip from '../../components/ui/StepProgressStrip';
 
@@ -116,12 +118,51 @@ const SessionCard: React.FC<{ session: LearningSummary }> = ({ session }) => {
 };
 
 // ---------------------------------------------------------------------------
+// Toolbox session card — single-shot practice from /tools (#1463)
+// ---------------------------------------------------------------------------
+
+const TOOL_LABEL_BY_ID = new Map(TOOL_OPTIONS.map((t) => [t.id, t.label] as const));
+
+const ToolboxSessionCard: React.FC<{ session: ToolboxSession }> = ({ session }) => {
+  const toolLabel = TOOL_LABEL_BY_ID.get(session.tool_id) ?? session.tool_id;
+  const storySlug = (session.result?.story_slug as string | null | undefined) ?? null;
+
+  return (
+    <div className="bg-white rounded-2xl shadow-card p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-base font-medium text-gray-900 truncate">{toolLabel}</h3>
+            <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+              已完成
+            </span>
+            <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-accent-bg text-accent">
+              練習工具箱
+            </span>
+          </div>
+          <div className="flex items-center gap-3 mt-2 flex-wrap text-xs text-gray-400">
+            <span>{formatDate(session.started_at)}</span>
+            {storySlug && <span>課文：{storySlug}</span>}
+            {session.score != null && (
+              // Toolbox tools normalize score to [0, 1] (accuracy / matchRate).
+              // Render as a percentage so the value is readable at a glance.
+              <span>分數：{Math.round(session.score * 100)}%</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Tab content
 // ---------------------------------------------------------------------------
 
 const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
   const { token } = useAuth();
   const [sessions, setSessions] = useState<LearningSummary[]>([]);
+  const [toolboxSessions, setToolboxSessions] = useState<ToolboxSession[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -134,14 +175,25 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
       else setIsLoadingMore(true);
       setError('');
       try {
-        const result = await fetchLearningSessions(token, {
+        // #1463 Phase 3: in 自學 tab, fire learning-sessions and toolbox-sessions
+        // requests in parallel to avoid waterfall latency. Toolbox load is
+        // wrapped so a failure there doesn't block the main self-practice list.
+        const sessionsPromise = fetchLearningSessions(token, {
           learning_source: source,
           limit: PAGE_SIZE,
           offset,
           status: 'completed',
         });
+        const toolboxPromise =
+          source === 'self' && offset === 0
+            ? listAllToolboxSessions(token, 100).catch(() => [])
+            : Promise.resolve(null);
+
+        const [result, toolbox] = await Promise.all([sessionsPromise, toolboxPromise]);
+
         setSessions((prev) => (append ? [...prev, ...result.items] : result.items));
         setTotal(result.total);
+        if (toolbox !== null) setToolboxSessions(toolbox);
       } catch {
         setError('無法載入學習紀錄，請稍後再試');
       } finally {
@@ -154,6 +206,7 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
 
   useEffect(() => {
     setSessions([]);
+    setToolboxSessions([]);
     setTotal(0);
     load(0, false);
   }, [load]);
@@ -180,7 +233,7 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
     );
   }
 
-  if (sessions.length === 0) {
+  if (sessions.length === 0 && toolboxSessions.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="inline-flex items-center justify-center w-14 h-14 bg-accent-bg rounded-xl mb-4">
@@ -199,7 +252,7 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
         <p className="text-xs text-gray-500">
           {source === 'assignment'
             ? '完成老師指派的作業後會出現在這裡'
-            : '在圖書館自主練習後會出現在這裡'}
+            : '在圖書館或練習工具箱練習後會出現在這裡'}
         </p>
       </div>
     );
@@ -222,6 +275,21 @@ const TabContent: React.FC<{ source: TabKey }> = ({ source }) => {
           </div>
         </div>
       ))}
+
+      {/* #1463 Phase 3: toolbox sessions in the 自學 tab. Independent section
+          so completed self-practice and toolbox runs are visually separated. */}
+      {source === 'self' && toolboxSessions.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">
+            練習工具箱
+          </h3>
+          <div className="space-y-3">
+            {toolboxSessions.map((s) => (
+              <ToolboxSessionCard key={`${s.tool_id}-${s.id}`} session={s} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {hasMore && (
         <div className="text-center pt-2">

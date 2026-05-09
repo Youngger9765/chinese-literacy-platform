@@ -9,10 +9,13 @@ import { useAudioRecorder } from '../../hooks/useAudioRecorder';
 import { useTtsPlayback } from '../../hooks/useTtsPlayback';
 import { cancelTts } from '../../services/ttsApi';
 import { getReadingHistory, type ReadingHistoryPoint } from '../../services/learningApi';
-import { saveReadingHistory } from '../../services/readingHistoryApi';
-import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { saveReadingHistory, getReadingHistory as getReadingHistoryDedicated, type ReadingHistoryItem } from '../../services/readingHistoryApi';
+import ReadingMetricsCard from './full-reading/ReadingMetricsCard';
+import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import { useAuth } from '../../contexts/AuthContext';
 import { splitZhuyinChars } from '../../utils/zhuyinUtils';
+import { fontForZhuyin } from '../../constants/fonts';
+import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 import { groupIdxForProgress } from '../../utils/ttsHighlight';
 import FluencyProgressChart, { type FullReadingAttempt } from './full-reading/FluencyProgressChart';
 import SelfAssessment, { type AssessmentRating } from './full-reading/SelfAssessment';
@@ -44,8 +47,10 @@ interface FullReadingProps {
 }
 
 const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, initialResult, fullReadingAttempts = [] }) => {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const storageKey = scopedStepStorageKey('fullReading_progress_', story.id);
+  // #1462: in toolbox mode, completion screen shows 重做/回工具箱 instead of 下一關.
+  const inToolbox = isToolboxMode();
 
   type SavedResult = { matchRate: number; feedback: string; diffTokens: DiffToken[]; cpm: number; durationMs: number; errorBreakdown: { correct: number; wrong: number; missing: number; extra: number } };
   const loadSaved = (): { result: SavedResult; transcript: string } | null => {
@@ -213,6 +218,15 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     if (!token || !story.id) return;
     getReadingHistory(token, String(story.id)).then(setReadingHistory).catch(() => {});
   }, [token, story.id, historyRefreshKey]);
+
+  /* ---- Dedicated reading history for metrics card (#1505) ---- */
+  const [dedicatedHistory, setDedicatedHistory] = useState<ReadingHistoryItem[]>([]);
+  useEffect(() => {
+    if (!token || !user?.id || !story.id) return;
+    getReadingHistoryDedicated(user.id, String(story.id), token, 'full')
+      .then(res => setDedicatedHistory(res.history))
+      .catch(() => {});
+  }, [token, user?.id, story.id, historyRefreshKey]);
 
   /* ---- Save reading attempt to dedicated reading_history table (#909) ---- */
   const savedResultRef = useRef(false);
@@ -403,9 +417,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
       style={{
-        fontFamily: isZhuyinAny
-          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-          : undefined,
+        fontFamily: fontForZhuyin(isZhuyinAny),
       }}
     >
       {/* ── Single-column centered layout ─────────────────────────────── */}
@@ -526,14 +538,12 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
                 </div>
               )}
 
-              {/* Reading progress curve — Issue #1094: 學生端隱藏數據曲線（教師後台可見） */}
-              {readingHistory.length >= 1 && (
-                <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 text-center">
-                  <p className="text-sm font-headline text-on-surface">
-                    本篇已練習 {readingHistory.length} 次，繼續加油！
-                  </p>
-                </div>
-              )}
+              {/* 正確率 + 語速 metrics card (Issue #1505) */}
+              <ReadingMetricsCard
+                accuracy={Math.round(result.matchRate * 100)}
+                cpm={result.cpm || 0}
+                history={dedicatedHistory}
+              />
 
               {/* ── Issue #1386: Self-assessment + 4-attempt progress chart ── */}
               <SelfAssessment
@@ -571,23 +581,30 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
         <div className="max-w-md mx-auto pointer-events-auto flex flex-col items-center gap-3">
 
           {result ? (
-            <>
-              <button
-                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
-                className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-lg">refresh</span>
-                再讀一次
-              </button>
-              <button
-                onClick={() => { try { localStorage.removeItem(storageKey); } catch {} onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
-                className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-              >
-                <span>下一關</span>
-                <span className="material-symbols-outlined text-xl">arrow_forward</span>
-              </button>
-            </>
+            inToolbox ? (
+              <ToolboxCompletionActions
+                onRetry={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
+                className="w-full"
+              />
+            ) : (
+              <>
+                <button
+                  onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
+                  className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-lg">refresh</span>
+                  再讀一次
+                </button>
+                <button
+                  onClick={() => { try { localStorage.removeItem(storageKey); } catch {} onFinish({ matchRate: result.matchRate, feedback: result.feedback, diffTokens: result.diffTokens, transcript: streamingTranscript, cpm: result.cpm, durationMs: result.durationMs, errorBreakdown: result.errorBreakdown }); }}
+                  className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+                >
+                  <span>下一關</span>
+                  <span className="material-symbols-outlined text-xl">arrow_forward</span>
+                </button>
+              </>
+            )
           ) : isPreparing ? (
             <button disabled className="w-full h-14 rounded-full font-headline font-bold text-lg bg-surface-container-high text-on-surface-variant cursor-wait flex items-center justify-center gap-2">
               <div className="w-4 h-4 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin" />

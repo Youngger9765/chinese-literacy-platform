@@ -28,8 +28,12 @@ import { useResizablePanel } from '../../../hooks/useResizablePanel';
 import { useLiveTutorSpeech } from '../../../hooks/useLiveTutorSpeech';
 import { useTtsPlayback } from '../../../hooks/useTtsPlayback';
 import { LineResult, ParagraphSummaryData } from './liveTutorTypes';
+import { fontForZhuyin } from '../../../constants/fonts';
 import ParagraphCard from './ParagraphCard';
 import TutorFeedbackPanel from './TutorFeedbackPanel';
+import { isToolboxMode } from '../../../services/learningStorageScope';
+import ToolboxCompletionActions from '../../tools/ToolboxCompletionActions';
+import ReadingMetricsCard from '../full-reading/ReadingMetricsCard';
 
 /* ------------------------------------------------------------------ */
 /*  Component props                                                    */
@@ -270,6 +274,18 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     return max;
   }, [completedParagraphs, currentLineIndex]);
 
+  /** Overall accuracy + CPM computed from all completed paragraphs (Issue #1505) */
+  const overallMetrics = useMemo(() => {
+    if (lineResults.length === 0) return null;
+    const avgMatchRate = lineResults.reduce((s, r) => s + r.matchRate, 0) / lineResults.length;
+    const totalCorrectChars = lineResults.reduce(
+      (s, r) => s + r.diffTokens.filter(t => t.type === 'correct' || t.type === 'forgiven').length, 0
+    );
+    const totalDurationSec = lineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
+    const cpm = totalDurationSec > 0 ? Math.round((totalCorrectChars / totalDurationSec) * 60) : 0;
+    return { accuracy: Math.round(avgMatchRate * 100), cpm };
+  }, [lineResults]);
+
   // ── Save progress to localStorage whenever key state changes ──────────────
   useEffect(() => {
     try {
@@ -380,6 +396,12 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
         );
         const totalDurationSec = allLineResults.reduce((s, r) => s + r.durationMs, 0) / 1000;
         const overallCpm = totalDurationSec > 0 ? Math.round((totalCorrectChars / totalDurationSec) * 60) : 0;
+        // #1462: in toolbox mode, do NOT auto-call onFinish. Instead surface a
+        // completion overlay so the student can choose 重做 or 回到練習工具箱.
+        if (isToolboxMode()) {
+          setToolboxComplete(true);
+          return;
+        }
         onFinish({
           storyId: story.id, accuracy: Math.round(avgMatchRate * 100), fluency: overallCpm,
           cpm: overallCpm, mispronouncedWords: extractPracticeChars(allLineResults, story.content),
@@ -392,6 +414,10 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       }, 2000);
     }
   }, [story, onFinish, onParagraphComplete, saveParagraphReading]);
+
+  // #1462: toolbox-mode completion gate — replaces auto-onFinish at the
+  // end of the last paragraph so the student sees explicit retry / exit CTAs.
+  const [toolboxComplete, setToolboxComplete] = useState(false);
 
   /* ---- Hybrid evaluation: local first, Gemini only on FAIL ---- */
   const evaluateAndRespond = useCallback(async (rawTranscript: string, rawStt: string, durationMs: number, lineIdx: number) => {
@@ -819,9 +845,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     <div
       className="flex flex-col flex-1 h-full bg-surface overflow-hidden relative"
       style={{
-        fontFamily: isZhuyinAny
-          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-          : undefined,
+        fontFamily: fontForZhuyin(isZhuyinAny),
       }}
     >
       {/* ── Single-column centered layout ─────────────────────────────── */}
@@ -870,8 +894,15 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
             />
           </div>
 
-          {/* Issue #1094: 原「語速 / 準確度」佔位卡移除 — 學生端不顯示數據欄位；
-              教師後台（AssessmentReport readOnly）已有完整語速與準確度 */}
+          {/* Issue #1505: show overall metrics once all paragraphs are done (non-toolbox mode) */}
+          {!isToolboxMode() && completedParagraphs.size === story.content.length && overallMetrics && (
+            <div className="mt-4">
+              <ReadingMetricsCard
+                accuracy={overallMetrics.accuracy}
+                cpm={overallMetrics.cpm}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -1063,6 +1094,34 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
       {/* Background decoration */}
       <div className="fixed -bottom-16 -right-16 w-64 h-64 bg-tertiary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
       <div className="fixed top-1/4 -left-32 w-80 h-80 bg-accent/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+
+      {/* #1462 Toolbox completion overlay — replaces auto-onFinish navigate */}
+      {toolboxComplete && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="bg-surface rounded-3xl shadow-editorial p-8 max-w-md w-full text-center space-y-4">
+            <h2 className="text-2xl font-headline font-bold text-on-surface">朗讀練習完成！</h2>
+            {/* Issue #1505: show metrics in toolbox completion overlay */}
+            {overallMetrics && (
+              <ReadingMetricsCard
+                accuracy={overallMetrics.accuracy}
+                cpm={overallMetrics.cpm}
+              />
+            )}
+            <p className="text-sm text-on-surface-variant">想再練一次，或回到工具箱選別的工具？</p>
+            <ToolboxCompletionActions
+              onRetry={() => {
+                setToolboxComplete(false);
+                setCurrentLineIndex(0);
+                setLineResults([]);
+                setCelebratingIndex(null);
+                setCompletedParagraphs(new Set());
+                setParagraphSummaries({});
+                try { localStorage.removeItem(storageKey); } catch {}
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }

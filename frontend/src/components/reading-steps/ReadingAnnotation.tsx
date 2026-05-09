@@ -8,6 +8,7 @@ import React, {
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { fontForZhuyin } from '../../constants/fonts';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -452,7 +453,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     // Fix: strip PUA selectors from the rendering string before slicing.  After stripping,
     // .length == raw char count, so raw indices and UTF-16 slice indices agree perfectly.
     //
-    // NOTE: when zhuyin is active (any mode with ruby), displayText contains BpmfZihiSans PUA
+    // NOTE: when zhuyin is active (any mode with ruby), displayText contains BpmfZihiSerif PUA
     // selectors AND ruby annotations that cannot be split character-by-character, so we fall
     // back to rawText for annotation offset calculations.
     const baseText = isZhuyinAny ? rawText : displayText;
@@ -512,9 +513,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     <div
       className="flex-1 flex flex-col bg-surface overflow-hidden select-none"
       style={{
-        fontFamily: isZhuyinAny
-          ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif"
-          : undefined,
+        fontFamily: fontForZhuyin(isZhuyinAny),
       }}
     >
       {/* ── Two-column layout: article left, panel right ──────────────── */}

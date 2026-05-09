@@ -24,7 +24,7 @@ import { useIdleTimer } from '../hooks/useIdleTimer';
 import { useProgressSync } from '../hooks/useProgressSync';
 import type { StepProgressData } from '../services/learningApi';
 import SessionTimeoutWarning from '../components/SessionTimeoutWarning';
-import { scopedStepStorageKey } from '../services/learningStorageScope';
+import { scopedStepStorageKey, isToolboxMode } from '../services/learningStorageScope';
 
 /** Idle time before showing warning modal (15 minutes). */
 const IDLE_WARNING_TIMEOUT_MS = 15 * 60 * 1000;
@@ -295,6 +295,14 @@ const LearningLayout: React.FC = () => {
   }, [isAssignmentFlow]);
 
   useEffect(() => {
+    // #1460: Toolbox mode never reads or creates a learning_sessions row.
+    // Skip the dbSessionId restore so useProgressSync below never loads
+    // step_progress / past attempts from a self-practice or assignment session.
+    if (isToolboxMode()) {
+      setDbSessionId(null);
+      return;
+    }
+
     if (!storyId || !activeDbSessionStorageKey) {
       setDbSessionId(null);
       return;
@@ -533,11 +541,12 @@ const LearningLayout: React.FC = () => {
     idleResetRef.current?.();
   }, []);
 
-  /** User clicked "離開並儲存" or the countdown expired — navigate to library. */
+  /** User clicked "離開並儲存" or the countdown expired — navigate to library
+   * (or to /tools when in toolbox mode, #1460). */
   const handleSessionExpired = useCallback(() => {
     setShowTimeoutWarning(false);
     // Progress was saved by persistStep; just navigate away.
-    navigate('/library');
+    navigate(isToolboxMode() ? '/tools' : '/library');
   }, [navigate]);
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -620,6 +629,10 @@ const LearningLayout: React.FC = () => {
   // GET avoids creating sessions when one already exists with a different source
   // (assignment vs self-practice).
   useEffect(() => {
+    // #1460: Toolbox mode skips session GET/POST entirely so no learning_sessions
+    // data leaks into the practice toolbox UI. Phase 2 will hook up the dedicated
+    // toolbox_*_sessions tables instead.
+    if (isToolboxMode()) return;
     if (!token || !storyId || dbSessionId !== null || isLoading) return;
     if (isCreatingSession.current) return;
 
@@ -695,7 +708,8 @@ const LearningLayout: React.FC = () => {
 
     // Create a DB learning session so dialogue can be persisted (Issue #242).
     // Skip if a session already exists or another creation is in flight (Issue #984).
-    if (token && storyId && dbSessionId === null && !isCreatingSession.current) {
+    // #1460: Skip in toolbox mode — those rows belong in toolbox_*_sessions (Phase 2).
+    if (token && storyId && dbSessionId === null && !isCreatingSession.current && !isToolboxMode()) {
       isCreatingSession.current = true;
       fetch(`${API_BASE}/api/learning/sessions`, {
         method: 'POST',
@@ -725,7 +739,7 @@ const LearningLayout: React.FC = () => {
         });
     }
 
-    navigate(`/learn/${storyId}/reading-annotation`);
+    navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/reading-annotation`);
   }, [
     storyId,
     selectedStory,
@@ -736,6 +750,24 @@ const LearningLayout: React.FC = () => {
     activeDbSessionStorageKey,
     legacyDbSessionStorageKey,
   ]);
+
+  // #1460: when finishing any step in toolbox mode, return to /tools instead
+  // of advancing to the next step in the lesson sequence. Single-shot UX.
+  const navigateAfterFinish = useCallback(
+    (nextStep: string) => {
+      if (isToolboxMode()) {
+        navigate('/tools');
+        return;
+      }
+      navigate(`/learn/${storyId}/${nextStep}`);
+    },
+    [navigate, storyId],
+  );
+
+  // #1463: toolbox completions are persisted by ToolboxCompletionActions on
+  // mount (single source of truth). LearningLayout no longer wires recording
+  // into handleFinish*, since #1462's tool patterns short-circuit onFinish in
+  // toolbox mode and the handlers never run there.
 
   const handleFinishReading = useCallback(
     (attempt: ReadingAttempt) => {
@@ -752,9 +784,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['full-reading']);
-      navigate(`/learn/${storyId}/full-reading`);
+      navigateAfterFinish('full-reading');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishComprehension = useCallback(
@@ -771,9 +803,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
-      navigate(`/learn/${storyId}/vocab-word-search`);
+      navigateAfterFinish('vocab-word-search');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishVocab = useCallback(
@@ -790,18 +822,18 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['vocab-definition']);
-      navigate(`/learn/${storyId}/vocab-definition`);
+      navigateAfterFinish('vocab-definition');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishDictation = useCallback(
     (result: DictationResult) => {
       setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
       persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
-      navigate(`/learn/${storyId}/vocab-word-search`);
+      navigateAfterFinish('vocab-word-search');
     },
-    [storyId, navigate, persistStep],
+    [navigateAfterFinish, persistStep],
   );
 
   const handleFinishFullReading = useCallback(
@@ -818,9 +850,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['listening']);
-      navigate(`/learn/${storyId}/listening`);
+      navigateAfterFinish('listening');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   // Issue #1098 — listening step persistence (was missing, intern forgot to bring
@@ -838,9 +870,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['vocab']);
-      navigate(`/learn/${storyId}/vocab`);
+      navigateAfterFinish('vocab');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishReadingAnnotation = useCallback(
@@ -857,9 +889,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['tutor']);
-      navigate(`/learn/${storyId}/tutor`);
+      navigateAfterFinish('tutor');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishVocabDefinitionMatch = useCallback(
@@ -876,13 +908,13 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
-      navigate(`/learn/${storyId}/vocab-application`);
+      navigateAfterFinish('vocab-application');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishVocabApplication = useCallback(
-    (_result: VocabApplicationResult) => {
+    (result: VocabApplicationResult) => {
       setSession((prev) => (prev ? { ...prev, vocabApplicationCompleted: true } : null));
       persistStepProgressState(
         {
@@ -895,9 +927,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['story-structure']);
-      navigate(`/learn/${storyId}/story-structure`);
+      navigateAfterFinish('story-structure');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   // Issue #1335 — advance from 文章重點表 to 閱讀聚光燈
@@ -914,9 +946,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['reading-strategy']);
-      navigate(`/learn/${storyId}/reading-strategy`);
+      navigateAfterFinish('reading-strategy');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   // Issue #1335 — advance from 閱讀聚光燈 to 閱讀理解
@@ -933,9 +965,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['comprehension']);
-      navigate(`/learn/${storyId}/comprehension`);
+      navigateAfterFinish('comprehension');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishSentencePractice = useCallback(
@@ -951,13 +983,13 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['sentence-practice']);
-      navigate(`/learn/${storyId}/vocab-definition`);
+      navigateAfterFinish('vocab-definition');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishVocabWordSearch = useCallback(
-    (_elapsedSeconds: number) => {
+    (elapsedSeconds: number) => {
       setSession((prev) => (prev ? { ...prev, vocabWordSearchCompleted: true } : null));
       persistStepProgressState(
         {
@@ -970,9 +1002,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
-      navigate(`/learn/${storyId}/knowledge-station`);
+      navigateAfterFinish('knowledge-station');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleFinishKnowledgeStation = useCallback(
@@ -989,9 +1021,9 @@ const LearningLayout: React.FC = () => {
         true,
       );
       persistStep(STEP_PATH_TO_NUMBER['report']);
-      navigate(`/learn/${storyId}/report`);
+      navigateAfterFinish('report');
     },
-    [storyId, navigate, persistStep, persistStepProgressState],
+    [navigateAfterFinish, persistStep, persistStepProgressState],
   );
 
   const handleRetry = useCallback(() => {
@@ -999,7 +1031,8 @@ const LearningLayout: React.FC = () => {
     setSession(null);
     setLastAttempt(null);
     setSelectedStory(null);
-    navigate('/library');
+    // #1460: in toolbox mode, retry returns to the tool picker, not the library.
+    navigate(isToolboxMode() ? '/tools' : '/library');
   }, [navigate, clearPersistedSession]);
 
   /** Called when a session is fully completed (report viewed). Auto-submits if assignment active. */
@@ -1127,15 +1160,17 @@ const LearningLayout: React.FC = () => {
   }
 
   if (error || !selectedStory) {
+    // #1460: error fallback button label + destination follow toolbox mode.
+    const inToolbox = isToolboxMode();
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-red-600">{error || '找不到此課文'}</p>
           <button
-            onClick={() => navigate('/library')}
+            onClick={() => navigate(inToolbox ? '/tools' : '/library')}
             className="text-accent hover:text-accent-hover font-medium text-sm"
           >
-            返回圖書館
+            {inToolbox ? '回到練習工具箱' : '返回圖書館'}
           </button>
         </div>
       </div>

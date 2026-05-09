@@ -216,7 +216,10 @@ fill_in_blank:
   context_before: 她聽到媽媽過世的消息，心裡湧出
   context_after: 的悲傷，忍不住痛哭失聲
 fill_in_blank_count: 7
-spotlight_raw_text: "閱讀聚光燈\n一連串因果\n    你有沒有想過，有些事情不是突然發生的，而是一件事接著一件事，像骨牌一樣推下去？我們讀的這篇課文〈隱形的征服者〉，就是這樣。    西班牙人只有168人，怎麼可能打敗8萬印加軍？答案不是因為他們比較厲害，而是印加帝國早就被其他事情打垮了。\n    這些事情不是同時發生的，而是一件接著一件來，形成「一連串因果關係」。\n　　在前一課：「讓你口中的甜蜜成為遠方農民的希望」我們學到了如何找出「一連串因果」，可以用❶～❹四個步驟，幫助你把文章裡的前因後果看得更清楚。現在我們再來練習看看吧！\n16395707620000\n\n推論本文的因果關係\n步驟❶──找事件\n1.問自己：這段文字提到的重要事件或現象？\n◎"
+spotlight_raw_text: "閱讀聚光燈\n一連串因果\n    你有沒有想過，有些事情不是突然發生的，而是一件事接著一件事，像骨牌一樣推下去？我們讀的這篇課文〈隱形的征服者〉，就是這樣。\
+  \    西班牙人只有168人，怎麼可能打敗8萬印加軍？答案不是因為他們比較厲害，而是印加帝國早就被其他事情打垮了。\n    這些事情不是同時發生的，而是一件接著一件來，形成「一連串因果關係」。\n\
+  　　在前一課：「讓你口中的甜蜜成為遠方農民的希望」我們學到了如何找出「一連串因果」，可以用❶～❹四個步驟，幫助你把文章裡的前因後果看得更清楚。現在我們再來練習看看吧！\n\
+  16395707620000\n\n推論本文的因果關係\n步驟❶──找事件\n1.問自己：這段文字提到的重要事件或現象？\n◎"
 strategy_exercise:
   type: guided_steps
   strategy_name: 閱讀聚光燈 - 一連串因果
@@ -278,3 +281,43 @@ lesson_intro:
   text: 本課探討「類型-記敘人物」主題，學習「指示代詞、疑問代詞」的閱讀方法。
   unit_topic: 類型-記敘人物
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G8-L8.pdf
+story_structure_rows:
+- label: 主題
+  value: 病菌如何影響歷史
+  interactive_type: fill_blank
+  hint: 課文主要在說什麼？
+- label: 重要事實 1
+  value: 西班牙人靠病菌征服印加帝國
+  interactive_type: checkbox
+  hint: 西班牙人如何征服印加？
+  options:
+  - 西班牙人靠強大軍力征服印加帝國
+  - 西班牙人靠病菌征服印加帝國
+  - 西班牙人靠談判征服印加帝國
+  correct_options:
+  - 1
+- label: 重要事實 2
+  value: 天花使印加人口銳減
+  interactive_type: checkbox
+  hint: 天花對印加造成什麼影響？
+  options:
+  - 天花使印加人口增加
+  - 天花使印加人口銳減
+  - 天花對印加人口沒有影響
+  correct_options:
+  - 1
+- label: 重要事實 3
+  value: 歐洲人對病菌有抵抗力
+  interactive_type: checkbox
+  hint: 為何歐洲人不易生病？
+  options:
+  - 歐洲人從未接觸過病菌
+  - 歐洲人對病菌有抵抗力
+  - 歐洲人有特殊的治療方法
+  correct_options:
+  - 1
+- label: 結論
+  value: 看不見的病菌能改變歷史
+  interactive_type: fill_blank
+  hint: 課文最後想告訴我們什麼？
+story_structure_table_source: ai-generated-2026-05-08

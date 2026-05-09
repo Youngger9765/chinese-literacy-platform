@@ -6,7 +6,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Story } from '../../types';
-import { scopedStepStorageKey } from '../../services/learningStorageScope';
+import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
+import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
 
 export interface MissingStep {
   id: string;
@@ -117,14 +118,31 @@ const KnowledgeStation: React.FC<KnowledgeStationProps> = ({ story, onFinish, mi
             </div>
           )}
 
-          <button
-            onClick={onFinish}
-            className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
-          >
-            繼續前往報告
-            <span className="material-symbols-outlined text-xl">arrow_forward</span>
-          </button>
+          {isToolboxMode() ? (
+            <ToolboxCompletionActions
+              onRetry={() => {
+                // Knowledge Station is content-only — "retry" just reloads
+                // the page to re-render the video from a fresh viewer state.
+                // TODO(#1462 follow-up): replace `window.location.reload()`
+                // with a soft React reset (e.g. bump a key on the iframe).
+                // Hard reload is acceptable here because there's no in-flight
+                // state to lose on this terminal step, but a soft reset would
+                // avoid the full-page flash.
+                try { localStorage.removeItem(storageKey); } catch {}
+                window.location.reload();
+              }}
+              className="w-full"
+            />
+          ) : (
+            <button
+              onClick={onFinish}
+              className="w-full h-14 rounded-full font-headline font-bold text-xl text-white shadow-[0_12px_48px_rgba(86,74,191,0.3)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+            >
+              繼續前往報告
+              <span className="material-symbols-outlined text-xl">arrow_forward</span>
+            </button>
+          )}
         </div>
       </div>
 

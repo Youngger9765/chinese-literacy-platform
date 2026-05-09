@@ -3,25 +3,43 @@
  *
  * Displays MCQ questions from the PDF-extracted YAML data.
  * Shows one question at a time; reveals correct answer + explanation after selection.
+ *
+ * Issue #1387: On wrong answer, opens McqRescueDialog (AI rescue tutor).
+ * Runs in parallel with existing socratic chat per #1373 decision.
  */
 import React, { useState } from 'react';
 import { MultipleChoiceItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
+import { fontForZhuyin } from '../../constants/fonts';
+import McqRescueDialog, { McqRescueContext } from '../reading-spotlight/McqRescueDialog';
 
 interface Props {
   questions: MultipleChoiceItem[];
   onComplete: (score: number, total: number) => void;
+  /** Lesson/story ID — passed through to rescue agent for session keying. */
+  lessonId?: string;
+  /** Reading strategy type (e.g. 'summary_psr') — selects strategy-specific rescue prompt. */
+  readingStrategy?: string | null;
 }
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 
-const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
+const MultipleChoiceExercise: React.FC<Props> = ({
+  questions,
+  onComplete,
+  lessonId = '',
+  readingStrategy,
+}) => {
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
+
+  // MCQ Rescue dialog state (Issue #1387)
+  const [rescueOpen, setRescueOpen] = useState(false);
+  const [rescueContext, setRescueContext] = useState<McqRescueContext | null>(null);
 
   const q = questions[current];
   const isCorrect = selected === q.answer;
@@ -31,7 +49,23 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
     if (revealed) return;
     setSelected(label);
     setRevealed(true);
-    if (label === q.answer) setScore((s) => s + 1);
+    const correct = label === q.answer;
+    if (correct) {
+      setScore((s) => s + 1);
+    } else {
+      // Wrong answer — open MCQ rescue dialog (Issue #1387)
+      // Use question index as stable question_id within this lesson
+      const questionId = `${lessonId}-q${current}`;
+      setRescueContext({
+        questionId,
+        lessonId,
+        wrongChoice: label,
+        questionText: q.question,
+        correctAnswer: q.answer ?? '',
+        strategyType: readingStrategy ?? null,
+      });
+      setRescueOpen(true);
+    }
   }
 
   function handleNext() {
@@ -45,8 +79,16 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
   }
 
   return (
+    <>
+    {/* MCQ Rescue dialog — parallel feature, doesn't disrupt existing socratic chat (#1373) */}
+    <McqRescueDialog
+      isOpen={rescueOpen}
+      context={rescueContext}
+      onClose={() => setRescueOpen(false)}
+      onComplete={() => setRescueOpen(false)}
+    />
     <div className="flex flex-col gap-4 p-4 max-w-2xl mx-auto"
-      style={{ fontFamily: zhuyinActive ? "'BpmfZihiSans', 'Noto Sans TC', sans-serif" : undefined }}>
+      style={{ fontFamily: fontForZhuyin(zhuyinActive) }}>
       {/* Progress — Issue #1094: 學生端不顯示「答對 N 題」數字 */}
       <div className="flex items-center justify-between text-sm text-gray-500">
         <span>第 {current + 1} 題／共 {questions.length} 題</span>
@@ -124,6 +166,7 @@ const MultipleChoiceExercise: React.FC<Props> = ({ questions, onComplete }) => {
         </button>
       )}
     </div>
+    </>
   );
 };
 

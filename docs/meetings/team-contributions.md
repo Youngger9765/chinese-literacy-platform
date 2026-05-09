@@ -8,6 +8,31 @@
 
 ---
 
+## 5/4 ~ 5/8
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| 靖杭 | ✅ | PR #1459 字體（#1351）| zhuyin-off 場景 BpmfZihiSerif 字嗨宋體 + 11 元件 + fonts.ts helper |
+| 靖杭 | ✅ | PR #1461 toolbox Phase 1（#1460）| 10 獨立 toolbox session tables + AppShell a11y aria-label toolbox-aware |
+| 靖杭 | ✅ | PR #1464 toolbox CTA polish（#1462）| per-tool 完成畫面「重做 + 回到工具箱」共用元件 + 9 個 reading-step 接入 |
+| 靖杭 | ✅ | PR #1465 toolbox Phase 2+3（#1463）| 後端 toolbox.py + 前端 toolboxApi.ts + 學習紀錄頁分區，useEffect mount + recordedRef guard 解設計衝突 |
+| 啟翔 | ✅ | PR #1480 造句練習 polish | AI 評估語氣軟化（拆 is_correct=true/false 規則）+ amber 配色（badge/border/feedback/paste warning）+ 麥克風 wrapper layout 修正 |
+| Young | ✅ | PR #1470 VocabWordSearch（#1469）| 「孤寂感」grid 空白 root cause = L02.yml YAML 含 U+0020 空格；fix L02 + L34 + 前端 .replace defensive guard |
+| Young | ✅ | PR #1472 alembic infra（#1471）| preview deploy 容器 exit 255 = stale alembic_version；entrypoint.sh truncate + re-stamp + retry |
+| Young | ✅ | PR #1479 parser tools | 5/2 WIP triage：scripts/generate_layer2_thumbnails.py + spotlight _REVIEW.md |
+| Young | ✅ | 5 follow-up issues（#1473–#1477）| toolbox tech-debt（POST+PATCH 合併、JSONB DEFAULT '{}'、text_id FK、route order、entrypoint env guard）|
+| Young | ✅ | 流程改善 | intern-review label（11 個 ai-qa-passed 標保留實習生眼驗）+ needs-rebase/needs-fix labels |
+| Young | ✅ | PR #1482 fix(ai)（#1481）| is_correct=True 時強制 suggestion=""（ai_generation.py L292 一行 defensive fix，#1480 claude-bot L285 finding）|
+| Young | ✅ | PR #1485 feat(skill) | meeting-prep skill 首建：4 份文件自動產出 + worktree + PR 到 staging 全流程 |
+| Young | ✅ | PR #1487 feat(skill)（#1486）| 泛化 meeting-prep：不假設週五、AskUserQuestion 問日期、DOW_ZH case 支援週一到週日 |
+| Young | ✅ | PR #1493 test(mcq-rescue)（#1387）| 28 contract tests for Phase 1 backend：fail-closed 驗證、empty reasoning 偵測、start_session error path、blank resume fallback |
+| Young | ✅ | PR #1495 feat(data)（#1398 #1444）| infill 4 missing story_structure YAMLs（G5-L5/G8-L8/G9-L2/文-L10）+ 2 worksheet PDFs（G9-L15-16/G9-L17-19）→ 208/208 coverage |
+| 靖杭 | ✅ | PR #1497 fix(csp)（#1496）| SecurityHeadersMiddleware frame-src 加入 `storage.googleapis.com`，解除 GCS PDF popup 被 CSP 封鎖 |
+| 靖杭 | ✅ | PR #1498 fix(content)（#1388）| G7-L29/L30 文章重點表從 22 行平文字重構為 5 行結構化填空（主題/觀察/推論/趨勢/反論）+ fill-blanks，2 輪 review 精修 |
+| 靖杭 | ✅ | PR #1499 feat(vocab)（#1342）| VocabPractice `practiceMode` prop（3 variants）+ `radicalColorMode` prop，Round 1 outlined+radical colors / Round 2 no-aids，4 輪 @claude review |
+
+---
+
 ## 4/18 ~ 4/24
 
 > ⚠️ 本週未開會，僅活動紀錄（見 [2026-04-24-record.md](./2026-04-24-record.md)）
