@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingoleap.example/schemas/lesson-content-v2.schema.json",
+  "title": "LingoLeap Lesson Content Schema v2",
+  "description": "Validates the content standardization fields defined in docs/specs/content-schema-2026-05-09.md (Refs #1509). Covers learning_goal, lesson_intro, step_sequence, and intro_step_count.",
+  "type": "object",
+  "properties": {
+
+    "learning_goal": {
+      "description": "Teacher-filled learning goal statement shown on the Intro page 'Learning Goal' banner. Null when teacher has not yet filled. NOT auto-parsed from docx.",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "examples": [
+        "學習透過「圖文比對」策略，整合文字與圖表資訊，精確回答說明文問題",
+        null
+      ],
+      "counterexamples": [
+        "巴斯德鵝頸瓶實驗的設計與程序"
+      ]
+    },
+
+    "lesson_intro": {
+      "description": "Course introduction shown on the Intro page 'Course Introduction' section. Auto-parsed from docx explanation or guide sections, or from Excel strategy table. Distinct from learning_goal: describes what the lesson is about (background), not what the student will learn to do.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["source", "text"],
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": ["docx_explanation", "docx_guide", "excel", "ai_generated"],
+              "description": "Provenance of the intro text. 'ai_generated' reserved for post-7/1 batch generation."
+            },
+            "text": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 300,
+              "description": "The narrative intro text shown to students. Should read as a paragraph, not a strategy code tag."
+            },
+            "unit_topic": {
+              "type": "string",
+              "maxLength": 50,
+              "description": "Optional topic tag from Excel strategy table (e.g. '運動+運動家精神')."
+            },
+            "strategy_title": {
+              "type": "string",
+              "maxLength": 80,
+              "description": "Optional strategy name from Excel (e.g. '自我提問'). Not shown directly to students — used for filtering."
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "examples": [
+        {
+          "source": "docx_explanation",
+          "text": "圖文題在近年會考國文科的比重大幅增加——114年會考圖文題有9題，但十年前（105年）的會考卻只有1題。圖文題就是「文字帶著插圖」的題目，你不能只看文字，也不能只看插圖，眼睛必須在文字和插圖中來回移動，把文圖之間的關係弄清楚，才能又快又正確地答題。這一課我們就用一個科學史上有名的實驗，來學習如何閱讀、解答圖文題。"
+        },
+        {
+          "source": "excel",
+          "text": "本課探討「品格-堅毅」主題，學習「自我提問」的閱讀方法。",
+          "unit_topic": "品格-堅毅",
+          "strategy_title": "自我提問"
+        },
+        null
+      ]
+    },
+
+    "step_sequence": {
+      "description": "Per-lesson override of the default digital step order. Null means use DEFAULT_STEP_SEQUENCE (11 enabled steps). Values must be valid step IDs from STEP_REGISTRY in stepConfig.ts.",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "reading-annotation",
+              "tutor",
+              "full-reading",
+              "listening",
+              "vocab-practice",
+              "sentence-practice",
+              "vocab-definition-match",
+              "vocab-application",
+              "comprehension",
+              "vocab-word-search",
+              "knowledge-station",
+              "report"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "examples": [
+        ["reading-annotation", "tutor", "comprehension", "knowledge-station", "report"],
+        null
+      ]
+    },
+
+    "intro_step_count": {
+      "description": "ESCAPE HATCH ONLY. Override the computed digital step count shown on Intro page as '本課 N 個學習步驟'. Null (recommended) means compute from resolveActiveSteps(). Do NOT set to paper worksheet section count — that was the 5/8 bug. Only needed if display label must differ from actual step count.",
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "examples": [null],
+      "counterexamples": [
+        3,
+        4,
+        6
+      ]
+    }
+
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "validation_notes": {
+      "description": "Notes for validators and engineers.",
+      "content": [
+        "This schema validates only the 3 fields defined in spec #1509.",
+        "It does NOT validate the full lesson YAML (see lesson-content-v1 or the Pydantic StoryDetail schema in backend/app/schemas/story.py).",
+        "Use with ajv or jsonschema: extract only the 4 keys from each YAML before validating.",
+        "lesson_intro.source='ai_generated' is reserved for post-7/1 batch generation and should trigger educator review label in admin UI.",
+        "intro_step_count should remain null for all lessons unless there is a specific display override requirement."
+      ]
+    }
+  }
+}
