@@ -362,10 +362,6 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
 
   const { rows } = structure;
 
-  // ── Cell renderer (#1534) ─────────────────────────────────────────────────
-  // Renders a value/input for either a top-level row or a sub_row. Extracted
-  // so the new card layout can reuse the same logic for both shapes without
-  // the prior table colSpan branching.
   const renderCellContent = useCallback(
     (
       cell: StructureRow | StructureSubRow,
@@ -420,19 +416,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
         )}
       </div>
 
-      {/* Rows — card layout (#1534) ───────────────────────────────────────
-          Replaces the prior <table> with `w-20` / `w-16` label columns,
-          which squeezed Chinese labels into single-character vertical
-          stacks. Each top-level row is now a stacked card:
-            - Yellow banner: row.label (full width, horizontal)
-            - Body (per sub_row if any, else single section):
-                · Gray banner: sub.label (only for sub_rows)
-                · Value / input area
-          A top-level row that is `display` with empty value AND no
-          sub_rows renders only the yellow banner — used for section
-          intro / leading question — so we don't leave a huge empty
-          value area below it (the original bug).
-      */}
+      {/* #1534: card layout — yellow row banner + per-sub_row body; bare banner when display with empty value (avoids huge blank cell). */}
       <div className="divide-y-2 divide-gray-200 text-base">
         {rows.map((row, rowIdx) => {
           const hasSubRows = !!(row.sub_rows && row.sub_rows.length > 0);
@@ -449,7 +433,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
               {hasSubRows ? (
                 <div className="divide-y divide-gray-200">
                   {(row.sub_rows ?? []).map((sub, subIdx) => (
-                    <div key={subIdx}>
+                    <div key={`${subIdx}-${sub.label}`}>
                       {/* Gray sub-label — horizontal banner */}
                       <div className="bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-600 leading-snug">
                         {sub.label}
