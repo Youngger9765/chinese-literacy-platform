@@ -323,8 +323,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
     let outlineOn = true;
     let leftCount = 4;
     if (isOutlinedOnce) {
-      initialStep = Step.ANIMATION;
-      outlineOn = true;
       leftCount = 1;
     } else if (isNoOutlineOnce) {
       initialStep = Step.PRACTICE_NO_OUTLINE;
