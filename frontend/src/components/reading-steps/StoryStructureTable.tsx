@@ -342,26 +342,8 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   const gradeResults = gradeResult?.results ?? [];
   const score = gradeResult?.score ?? 0;
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8 text-gray-400 text-sm">
-        <span className="animate-spin mr-2">⏳</span> 正在整理文章重點…
-      </div>
-    );
-  }
-
-  if (fetchError || !structure) {
-    return (
-      <div className="p-4 text-sm text-red-500 text-center">
-        無法載入文章重點表，請重新整理頁面
-      </div>
-    );
-  }
-
-  const { rows } = structure;
-
+  // renderCellContent must be declared BEFORE any early returns to satisfy Rules of Hooks.
+  // When loading=true or structure=null, this hook still runs but is never called.
   const renderCellContent = useCallback(
     (
       cell: StructureRow | StructureSubRow,
@@ -397,6 +379,26 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
     },
     [answers, submitted, gradeResults, setAnswer],
   );
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8 text-gray-400 text-sm">
+        <span className="animate-spin mr-2">⏳</span> 正在整理文章重點…
+      </div>
+    );
+  }
+
+  if (fetchError || !structure) {
+    return (
+      <div className="p-4 text-sm text-red-500 text-center">
+        無法載入文章重點表，請重新整理頁面
+      </div>
+    );
+  }
+
+  const { rows } = structure;
 
   return (
     <div className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm max-w-2xl mx-auto">
