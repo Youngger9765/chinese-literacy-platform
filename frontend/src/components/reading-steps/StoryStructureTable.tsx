@@ -223,7 +223,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   const [submitting, setSubmitting] = useState(false);
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
 
-  const API_BASE = import.meta.env.VITE_API_URL || '';
+  const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
   useEffect(() => {
     setLoading(true);
