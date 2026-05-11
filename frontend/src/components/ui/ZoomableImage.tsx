@@ -7,7 +7,8 @@
  *
  * Esc + backdrop click close the modal. Body scroll is locked while open.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface ZoomableImageProps {
   src: string;
@@ -18,6 +19,11 @@ interface ZoomableImageProps {
 
 const ZoomableImage: React.FC<ZoomableImageProps> = ({ src, alt, caption, className }) => {
   const [open, setOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  // WAI-ARIA Dialog focus management — trap Tab inside modal, restore focus on close.
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
 
   useEffect(() => {
     if (!open) return;
@@ -35,24 +41,35 @@ const ZoomableImage: React.FC<ZoomableImageProps> = ({ src, alt, caption, classN
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        className={`group relative block w-full overflow-hidden rounded-lg border border-outline-variant bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${className ?? ''}`}
-        aria-label={`放大圖片：${alt}`}
+        onClick={() => { if (!imgError) setOpen(true); }}
+        disabled={imgError}
+        className={`group relative block w-full overflow-hidden rounded-lg border border-outline-variant bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed ${className ?? ''}`}
+        aria-label={imgError ? `${alt}（圖片載入失敗）` : `放大圖片：${alt}`}
       >
-        <img
-          src={src}
-          alt={alt}
-          loading="lazy"
-          className="w-full h-full object-contain transition-transform duration-200 group-hover:scale-[1.02]"
-          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-        />
-        <span className="pointer-events-none absolute top-1.5 right-1.5 inline-flex items-center justify-center w-7 h-7 rounded-full bg-on-surface/60 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="material-symbols-outlined text-base">zoom_in</span>
-        </span>
+        {imgError ? (
+          <div className="w-full h-full min-h-[80px] flex flex-col items-center justify-center gap-1 text-on-surface-variant/50">
+            <span className="material-symbols-outlined text-3xl">broken_image</span>
+            <span className="text-[10px]">圖片載入失敗</span>
+          </div>
+        ) : (
+          <>
+            <img
+              src={src}
+              alt={alt}
+              loading="lazy"
+              className="w-full h-full object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+              onError={() => setImgError(true)}
+            />
+            <span className="pointer-events-none absolute top-1.5 right-1.5 inline-flex items-center justify-center w-7 h-7 rounded-full bg-on-surface/60 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="material-symbols-outlined text-base">zoom_in</span>
+            </span>
+          </>
+        )}
       </button>
 
       {open && (
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label={alt}
