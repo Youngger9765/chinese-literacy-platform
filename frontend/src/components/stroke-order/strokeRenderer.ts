@@ -12,11 +12,17 @@ export interface RenderState {
   activeBrush: Point[];
   /**
    * #1342 round-1 stimulus: when true, color completed strokes by their
-   * radical group (radical strokes = one colour, body strokes = another)
-   * so the student visually sees the character is built from parts.
-   * After all strokes done, the colors merge into the unified default.
+   * component (radical) group so the student visually sees the character
+   * is built from parts. After every stroke is done the palette unifies
+   * into the default ink ("合體" effect).
    */
   radicalColorMode?: boolean;
+  /**
+   * #1529 multi-component coloring: number of components in this character
+   * from getDecomposition. Defaults to 2 (primary radical + body) when not
+   * passed. We support up to RADICAL_PALETTE.length colours.
+   */
+  componentCount?: number;
 }
 
 const COLORS = {
@@ -27,11 +33,21 @@ const COLORS = {
   outline: 'rgba(48,47,42,0.12)',
   hint:    '#564ABF',
   brush:   '#564ABF',
-  // #1342 radical-color palette — high-contrast pair so the radical group
-  // pops against the body. Same palette as RadicalDecomposition's left panel.
-  radical: '#5B4FC4',  // accent purple (matches design system)
-  body:    '#10B981',  // emerald
 };
+
+/**
+ * #1529: per-component palette. Hex values match the Tailwind classes used
+ * by RadicalDecomposition.tsx (emerald-700, blue-700, amber-700, rose-700,
+ * violet-700) so the canvas colors visually match the left-side panel.
+ * WCAG AAA contrast against the white canvas, color-blind friendly order.
+ */
+const RADICAL_PALETTE: readonly string[] = [
+  '#047857',  // position 0 — emerald (primary radical / first component)
+  '#1D4ED8',  // position 1 — blue
+  '#B45309',  // position 2 — amber
+  '#BE123C',  // position 3 — rose
+  '#6D28D9',  // position 4 — violet
+];
 
 export function renderStrokes(
   ctx: CanvasRenderingContext2D,
@@ -42,21 +58,51 @@ export function renderStrokes(
     data, completedStrokes, animStroke, animProgress,
     hintStroke, hintProgress, showOutline, correctPaths, activeBrush,
     radicalColorMode = false,
+    componentCount = 2,
   } = state;
 
-  // #1342: pick a fill colour for stroke `i` — radical strokes get the
-  // accent purple, body strokes get emerald. After every stroke is done
-  // we drop back to the unified COLORS.stroke ("合體" effect).
+  // #1342 / #1529: pick a fill colour for stroke `i` — assign each stroke to
+  // its component (0 = primary radical from radStrokes, 1..N-1 = body parts
+  // distributed in stroke order across the remaining components). After every
+  // stroke is done we drop back to the unified COLORS.stroke ("合體" effect).
+  //
   // Guard `hasRadicalData`: hanzi-writer-data sometimes ships characters
   // without radStrokes; falling back to the unified ink colour avoids the
-  // misleading "all strokes are green" rendering when there is genuinely
-  // no part decomposition to show.
+  // misleading "all body" rendering when there is genuinely no part
+  // decomposition to show.
   const radSet = new Set(data.radicalIndices);
   const hasRadicalData = data.radicalIndices.length > 0;
   const allDone = completedStrokes >= data.nStrokes;
+  const N = Math.min(Math.max(componentCount, 1), RADICAL_PALETTE.length);
+
+  // Pre-compute body stroke order for each non-radical stroke, then bucket
+  // them into N-1 sequential groups.
+  const bodyTotal = data.nStrokes - radSet.size;
+  const bodyOrder = new Array<number>(data.nStrokes).fill(-1);
+  {
+    let order = 0;
+    for (let i = 0; i < data.nStrokes; i++) {
+      if (!radSet.has(i)) {
+        bodyOrder[i] = order;
+        order++;
+      }
+    }
+  }
+  const remainingComponents = Math.max(N - 1, 1);
+  const perComponent = Math.max(1, Math.ceil(bodyTotal / remainingComponents));
+
+  const componentForStroke = (i: number): number => {
+    if (N <= 1) return 0;
+    if (radSet.has(i)) return 0;
+    if (N === 2) return 1;
+    const bo = bodyOrder[i];
+    if (bo < 0) return 0;
+    return 1 + Math.min(remainingComponents - 1, Math.floor(bo / perComponent));
+  };
+
   const colourFor = (i: number): string => {
     if (!radicalColorMode || !hasRadicalData || allDone) return COLORS.stroke;
-    return radSet.has(i) ? COLORS.radical : COLORS.body;
+    return RADICAL_PALETTE[componentForStroke(i)];
   };
 
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
