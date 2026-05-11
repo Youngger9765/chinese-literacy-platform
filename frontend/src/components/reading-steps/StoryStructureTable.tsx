@@ -366,38 +366,41 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
   // Renders a value/input for either a top-level row or a sub_row. Extracted
   // so the new card layout can reuse the same logic for both shapes without
   // the prior table colSpan branching.
-  const renderCellContent = (
-    cell: StructureRow | StructureSubRow,
-    rowIdx: number,
-    subIdx?: number,
-  ) => {
-    if (cell.interactive_type === 'display') {
-      return <span className="text-gray-800 leading-relaxed">{cell.value}</span>;
-    }
-    const key = answerKey(rowIdx, subIdx);
-    const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx) : undefined;
-    if (cell.interactive_type === 'checkbox') {
+  const renderCellContent = useCallback(
+    (
+      cell: StructureRow | StructureSubRow,
+      rowIdx: number,
+      subIdx?: number,
+    ) => {
+      if (cell.interactive_type === 'display') {
+        return <span className="text-gray-800 leading-relaxed">{cell.value}</span>;
+      }
+      const key = answerKey(rowIdx, subIdx);
+      const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx) : undefined;
+      if (cell.interactive_type === 'checkbox') {
+        return (
+          <CheckboxCell
+            options={cell.options ?? []}
+            selected={Array.isArray(answers[key]) ? (answers[key] as number[]) : []}
+            onChange={(v) => setAnswer(key, v)}
+            submitted={submitted}
+            gradeItem={gradeItem}
+            correctOptions={cell.correct_options}
+          />
+        );
+      }
       return (
-        <CheckboxCell
-          options={cell.options ?? []}
-          selected={Array.isArray(answers[key]) ? (answers[key] as number[]) : []}
+        <FillBlankCell
+          hint={cell.hint}
+          value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
           onChange={(v) => setAnswer(key, v)}
           submitted={submitted}
           gradeItem={gradeItem}
-          correctOptions={cell.correct_options}
         />
       );
-    }
-    return (
-      <FillBlankCell
-        hint={cell.hint}
-        value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
-        onChange={(v) => setAnswer(key, v)}
-        submitted={submitted}
-        gradeItem={gradeItem}
-      />
-    );
-  };
+    },
+    [answers, submitted, gradeResults, setAnswer],
+  );
 
   return (
     <div className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm max-w-2xl mx-auto">
@@ -434,10 +437,10 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
         {rows.map((row, rowIdx) => {
           const hasSubRows = !!(row.sub_rows && row.sub_rows.length > 0);
           const topLevelEmptyDisplay =
-            !hasSubRows && row.interactive_type === 'display' && !row.value;
+            !hasSubRows && row.interactive_type === 'display' && !row.value?.trim();
 
           return (
-            <section key={rowIdx}>
+            <section key={`${rowIdx}-${row.label}`}>
               {/* Yellow header — row.label as horizontal banner */}
               <div className="bg-amber-50 px-4 py-2.5 font-bold text-gray-800 leading-snug">
                 {row.label}
@@ -445,7 +448,7 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
 
               {hasSubRows ? (
                 <div className="divide-y divide-gray-200">
-                  {row.sub_rows!.map((sub, subIdx) => (
+                  {(row.sub_rows ?? []).map((sub, subIdx) => (
                     <div key={subIdx}>
                       {/* Gray sub-label — horizontal banner */}
                       <div className="bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-600 leading-snug">
