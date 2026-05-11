@@ -362,6 +362,43 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
 
   const { rows } = structure;
 
+  // ── Cell renderer (#1534) ─────────────────────────────────────────────────
+  // Renders a value/input for either a top-level row or a sub_row. Extracted
+  // so the new card layout can reuse the same logic for both shapes without
+  // the prior table colSpan branching.
+  const renderCellContent = (
+    cell: StructureRow | StructureSubRow,
+    rowIdx: number,
+    subIdx?: number,
+  ) => {
+    if (cell.interactive_type === 'display') {
+      return <span className="text-gray-800 leading-relaxed">{cell.value}</span>;
+    }
+    const key = answerKey(rowIdx, subIdx);
+    const gradeItem = submitted ? findGradeItem(gradeResults, rowIdx, subIdx) : undefined;
+    if (cell.interactive_type === 'checkbox') {
+      return (
+        <CheckboxCell
+          options={cell.options ?? []}
+          selected={Array.isArray(answers[key]) ? (answers[key] as number[]) : []}
+          onChange={(v) => setAnswer(key, v)}
+          submitted={submitted}
+          gradeItem={gradeItem}
+          correctOptions={cell.correct_options}
+        />
+      );
+    }
+    return (
+      <FillBlankCell
+        hint={cell.hint}
+        value={typeof answers[key] === 'string' ? (answers[key] as string) : ''}
+        onChange={(v) => setAnswer(key, v)}
+        submitted={submitted}
+        gradeItem={gradeItem}
+      />
+    );
+  };
+
   return (
     <div className="overflow-hidden rounded-xl border-2 border-gray-300 shadow-sm max-w-2xl mx-auto">
       {/* Header */}
@@ -380,125 +417,55 @@ const StoryStructureTable: React.FC<Props> = ({ storyId }) => {
         )}
       </div>
 
-      {/* Table */}
-      <table className="w-full text-base" style={{ borderCollapse: 'collapse' }}>
-        <tbody>
-          {rows.map((row, rowIdx) =>
-            row.sub_rows && row.sub_rows.length > 0 ? (
-              row.sub_rows.map((sub, subIdx) => {
-                const key = answerKey(rowIdx, subIdx);
-                const gradeItem = submitted
-                  ? findGradeItem(gradeResults, rowIdx, subIdx)
-                  : undefined;
+      {/* Rows — card layout (#1534) ───────────────────────────────────────
+          Replaces the prior <table> with `w-20` / `w-16` label columns,
+          which squeezed Chinese labels into single-character vertical
+          stacks. Each top-level row is now a stacked card:
+            - Yellow banner: row.label (full width, horizontal)
+            - Body (per sub_row if any, else single section):
+                · Gray banner: sub.label (only for sub_rows)
+                · Value / input area
+          A top-level row that is `display` with empty value AND no
+          sub_rows renders only the yellow banner — used for section
+          intro / leading question — so we don't leave a huge empty
+          value area below it (the original bug).
+      */}
+      <div className="divide-y-2 divide-gray-200 text-base">
+        {rows.map((row, rowIdx) => {
+          const hasSubRows = !!(row.sub_rows && row.sub_rows.length > 0);
+          const topLevelEmptyDisplay =
+            !hasSubRows && row.interactive_type === 'display' && !row.value;
 
-                return (
-                  <tr
-                    key={`${rowIdx}-${subIdx}`}
-                    style={{ borderBottom: '1.5px solid #d1d5db' }}
-                  >
-                    {subIdx === 0 && (
-                      <td
-                        rowSpan={row.sub_rows!.length}
-                        className="bg-amber-50 px-4 py-3 font-bold text-gray-800 text-center align-middle w-20"
-                        style={{ borderRight: '1.5px solid #d1d5db' }}
-                      >
-                        {row.label}
-                      </td>
-                    )}
-                    <td
-                      className="bg-gray-50 px-3 py-3 font-semibold text-gray-600 text-center w-16"
-                      style={{ borderRight: '1.5px solid #d1d5db' }}
-                    >
-                      {sub.label}
-                    </td>
-                    <td className="px-4 py-3 text-gray-800 leading-relaxed">
-                      {sub.interactive_type === 'display' ? (
-                        <span>{sub.value}</span>
-                      ) : sub.interactive_type === 'checkbox' ? (
-                        <CheckboxCell
-                          options={sub.options ?? []}
-                          selected={
-                            Array.isArray(answers[key])
-                              ? (answers[key] as number[])
-                              : []
-                          }
-                          onChange={(v) => setAnswer(key, v)}
-                          submitted={submitted}
-                          gradeItem={gradeItem}
-                          correctOptions={sub.correct_options}
-                        />
-                      ) : (
-                        <FillBlankCell
-                          hint={sub.hint}
-                          value={
-                            typeof answers[key] === 'string'
-                              ? (answers[key] as string)
-                              : ''
-                          }
-                          onChange={(v) => setAnswer(key, v)}
-                          submitted={submitted}
-                          gradeItem={gradeItem}
-                        />
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr key={rowIdx} style={{ borderBottom: '1.5px solid #d1d5db' }}>
-                <td
-                  className="bg-amber-50 px-4 py-3 font-bold text-gray-800 text-center w-20"
-                  style={{ borderRight: '1.5px solid #d1d5db' }}
-                >
-                  {row.label}
-                </td>
-                {row.interactive_type === 'display' ? (
-                  <td colSpan={2} className="px-5 py-3 text-gray-800 leading-relaxed">
-                    {row.value}
-                  </td>
-                ) : (
-                  <td colSpan={2} className="px-4 py-3">
-                    {row.interactive_type === 'checkbox' ? (
-                      <CheckboxCell
-                        options={row.options ?? []}
-                        selected={
-                          Array.isArray(answers[answerKey(rowIdx)])
-                            ? (answers[answerKey(rowIdx)] as number[])
-                            : []
-                        }
-                        onChange={(v) => setAnswer(answerKey(rowIdx), v)}
-                        submitted={submitted}
-                        gradeItem={
-                          submitted
-                            ? findGradeItem(gradeResults, rowIdx)
-                            : undefined
-                        }
-                        correctOptions={row.correct_options}
-                      />
-                    ) : (
-                      <FillBlankCell
-                        hint={row.hint}
-                        value={
-                          typeof answers[answerKey(rowIdx)] === 'string'
-                            ? (answers[answerKey(rowIdx)] as string)
-                            : ''
-                        }
-                        onChange={(v) => setAnswer(answerKey(rowIdx), v)}
-                        submitted={submitted}
-                        gradeItem={
-                          submitted
-                            ? findGradeItem(gradeResults, rowIdx)
-                            : undefined
-                        }
-                      />
-                    )}
-                  </td>
-                )}
-              </tr>
-            ),
-          )}
-        </tbody>
-      </table>
+          return (
+            <section key={rowIdx}>
+              {/* Yellow header — row.label as horizontal banner */}
+              <div className="bg-amber-50 px-4 py-2.5 font-bold text-gray-800 leading-snug">
+                {row.label}
+              </div>
+
+              {hasSubRows ? (
+                <div className="divide-y divide-gray-200">
+                  {row.sub_rows!.map((sub, subIdx) => (
+                    <div key={subIdx}>
+                      {/* Gray sub-label — horizontal banner */}
+                      <div className="bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-600 leading-snug">
+                        {sub.label}
+                      </div>
+                      <div className="px-4 py-3">
+                        {renderCellContent(sub, rowIdx, subIdx)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : topLevelEmptyDisplay ? null : (
+                <div className="px-4 py-3">
+                  {renderCellContent(row, rowIdx)}
+                </div>
+              )}
+            </section>
+          );
+        })}
+      </div>
 
       {/* Submit / Result bar */}
       <div className="px-5 py-4 border-t-2 border-gray-200 bg-gray-50">
