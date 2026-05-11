@@ -15,6 +15,7 @@ import React, { useMemo } from 'react';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import FloatingAIHelper from './FloatingAIHelper';
+import ZoomableImage from '../ui/ZoomableImage';
 
 interface ComprehensionLayoutProps {
   story: Story;
@@ -43,10 +44,11 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
 
   const storyText = useMemo(() => story.content.join('\n'), [story.content]);
 
-  // ── #1341 plugin-pattern dispatch: graphic-text adds middle image pane ────
-  // For G7-L28~30 (圖文整合策略): 3-pane (story 4 / images 4 / exercise 4)
-  // For other lessons: 2-pane (story 7 / exercise 5) — unchanged
-  // #1416 basename fix needs frontend rebuild (detect-changes skipped prior staging deploys)
+  // ── #1504 layout decongestion: graphic-text now stacks 課文 + 圖文 in the
+  // left column instead of a third middle panel (Young 5/8 review: "電梯超
+  // 載"). Right panel takes col-span-7 so the structure table has breathing
+  // room while answering. Click any image to open a fullscreen zoom modal.
+  // #1341 introduced the 3-pane variant this replaces.
   const isGraphicText = story.layout_mode === 'graphic-text';
   const storyImages = story.images ?? [];
   const GCS_IMAGE_BASE = 'https://storage.googleapis.com/lingoleap-assets/lessons-images';
@@ -62,10 +64,13 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
         */}
         <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 grid-rows-[1fr] gap-6">
 
-          {/* ── Left: Story text card ─────────────────────────────────────────── */}
-          <div className={`${isGraphicText ? 'md:col-span-4' : 'md:col-span-7'} min-h-0 flex`}>
+          {/* ── Left column ──────────────────────────────────────────────────── */
+          /* graphic-text: text top + images bottom (stacked, 60/40 split)        */
+          /* standard:     text only, col-span-7                                  */}
+          <div className={`${isGraphicText ? 'md:col-span-5' : 'md:col-span-7'} min-h-0 flex flex-col gap-4`}>
 
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full min-h-0">
+            {/* Story text card */}
+            <div className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full min-h-0 ${isGraphicText ? 'flex-[3]' : 'flex-1'}`}>
               <div className="flex items-center gap-2 mb-4 shrink-0">
                 <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
                 <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
@@ -110,55 +115,54 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 </div>
               )}
             </div>
-          </div>
 
-          {/* ── Right: Exercise panel ─────────────────────────────────────────── */}
-          {/* ── Middle: Image gallery (graphic-text mode only) ─────── #1341 */}
-          {isGraphicText && (
-            <div data-testid="graphic-text-image-pane" className="md:col-span-4 min-h-0 flex">
-              <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full min-h-0">
-                <div className="flex items-center gap-2 mb-4 shrink-0">
-                  <span className="material-symbols-outlined text-accent text-xl">photo_library</span>
-                  <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
+            {/* Image strip (graphic-text only) — horizontally scrollable, click to zoom */}
+            {isGraphicText && (
+              <div
+                data-testid="graphic-text-image-pane"
+                className="bg-surface-container-lowest rounded-3xl shadow-editorial p-4 md:p-5 flex flex-col w-full min-h-0 flex-[2]"
+              >
+                <div className="flex items-center gap-2 mb-3 shrink-0">
+                  <span className="material-symbols-outlined text-accent text-lg">photo_library</span>
+                  <span className="font-headline font-bold text-on-surface text-xs uppercase tracking-wider">
                     圖文對照
                   </span>
                   <span className="text-xs text-on-surface-variant ml-2">{storyImages.length} 張</span>
+                  <span className="text-[11px] text-on-surface-variant ml-auto hidden md:inline">點圖可放大</span>
                 </div>
-                <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar">
-                  {storyImages.length === 0 ? (
-                    <div className="flex items-center justify-center h-48 text-on-surface-variant text-sm">
-                      暫無圖片
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-4">
+                {storyImages.length === 0 ? (
+                  <div className="flex-1 min-h-0 flex items-center justify-center text-on-surface-variant text-sm">
+                    暫無圖片
+                  </div>
+                ) : (
+                  <div className="flex-1 min-h-0 overflow-x-auto custom-scrollbar">
+                    <div className="flex gap-3 h-full pr-2">
                       {storyImages.map((img, idx) => (
-                        <figure key={idx} className="space-y-2">
-                          <img
-                            src={`${GCS_IMAGE_BASE}/${story.lesson_code}/${img.filename.split('/').pop()}`}
-                            alt={img.caption ?? `圖 ${idx + 1}`}
-                            loading="lazy"
-                            className="w-full rounded-lg border border-outline-variant bg-surface"
-                            onError={(e) => {
-                              const el = e.currentTarget;
-                              el.style.display = 'none';
-                            }}
-                          />
+                        <figure key={idx} className="flex flex-col items-stretch shrink-0 h-full" style={{ width: 'clamp(180px, 22vw, 260px)' }}>
+                          <div className="flex-1 min-h-0">
+                            <ZoomableImage
+                              src={`${GCS_IMAGE_BASE}/${story.lesson_code}/${img.filename.split('/').pop()}`}
+                              alt={img.caption ?? `圖 ${idx + 1}`}
+                              caption={img.caption}
+                              className="h-full"
+                            />
+                          </div>
                           {img.caption && (
-                            <figcaption className="text-xs text-on-surface-variant">
+                            <figcaption className="text-[11px] text-on-surface-variant mt-1.5 line-clamp-2 shrink-0">
                               {img.caption}
                             </figcaption>
                           )}
                         </figure>
                       ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* ── Right: Exercise panel ─────────────────────────────────────────── */}
-          <div className={`${isGraphicText ? 'md:col-span-4' : 'md:col-span-5'} min-h-0 flex flex-col`}>
+          <div className={`${isGraphicText ? 'md:col-span-7' : 'md:col-span-5'} min-h-0 flex flex-col`}>
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
               {children}
             </div>
