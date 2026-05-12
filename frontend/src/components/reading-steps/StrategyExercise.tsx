@@ -12,7 +12,7 @@
  *
  * Designed to feel like part of the existing worksheet (matches MCQ / StoryStructure UI).
  */
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StrategyExercise as StrategyExerciseType, StrategyExerciseOrderingItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
@@ -29,6 +29,9 @@ interface Props {
   lessonId?: string;
   /** Reading strategy type — selects strategy-specific rescue prompt. */
   readingStrategy?: string | null;
+  /** Persist answer state to parent (Issue #1505 — survive page refresh). */
+  onChange?: (exerciseState: Record<string, unknown>) => void;
+  initialState?: Record<string, unknown>;
 }
 
 // ── Shared helpers ──────────────────────────────────────────────────────────
@@ -400,25 +403,35 @@ function GuidedStepsExercise({
   onComplete,
   lessonId,
   readingStrategy,
+  onChange,
+  initialState,
 }: {
   exercise: StrategyExerciseType;
   onComplete?: () => void;
   lessonId?: string;
   readingStrategy?: string | null;
+  onChange?: (exerciseState: Record<string, unknown>) => void;
+  initialState?: Record<string, unknown>;
 }) {
   const { token } = useAuth();
   const steps = exercise.steps ?? [];
   const [answers, setAnswers] = useState<(string | number | null)[]>(
-    () => steps.map(() => null),
+    () => (initialState?.answers as (string | number | null)[]) ?? steps.map(() => null),
   );
   const [stepFeedback, setStepFeedback] = useState<(boolean | null)[]>(
-    () => steps.map(() => null),
+    () => (initialState?.stepFeedback as (boolean | null)[]) ?? steps.map(() => null),
   );
-  const [allDone, setAllDone] = useState(false);
+  const [allDone, setAllDone] = useState(
+    () => !!(initialState?.allDone as boolean),
+  );
   // Track which step's rescue is open (null = none). Per-step state so that
   // opening rescue for step 1 doesn't hide the button on step 2.
   const [rescueStepIdx, setRescueStepIdx] = useState<number | null>(null);
   const [rescueContext, setRescueContext] = useState<McqRescueContext | null>(null);
+
+  useEffect(() => {
+    onChange?.({ answers, stepFeedback, allDone, exerciseType: 'guided_steps' });
+  }, [answers, stepFeedback, allDone]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openRescueForStep = (stepIdx: number) => {
     const step = steps[stepIdx];
@@ -635,7 +648,14 @@ function GuidedStepsExercise({
 
 // ── Main Component ──────────────────────────────────────────────────────────
 
-const StrategyExercise: React.FC<Props> = ({ exercise, onComplete, lessonId, readingStrategy }) => {
+const StrategyExercise: React.FC<Props> = ({
+  exercise,
+  onComplete,
+  lessonId,
+  readingStrategy,
+  onChange,
+  initialState,
+}) => {
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zhuyinFont = fontForZhuyin(zhuyinActive);
 
@@ -661,6 +681,8 @@ const StrategyExercise: React.FC<Props> = ({ exercise, onComplete, lessonId, rea
           onComplete={handleComplete}
           lessonId={lessonId}
           readingStrategy={readingStrategy}
+          onChange={onChange}
+          initialState={initialState}
         />
       );
     return <div className="p-4 text-on-surface-variant text-sm text-center">不支援的練習類型：{exercise.type}</div>;
