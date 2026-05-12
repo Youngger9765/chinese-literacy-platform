@@ -1,7 +1,21 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import MultipleChoiceExercise from '../MultipleChoiceExercise';
 import { MultipleChoiceItem } from '../../../types';
+import { recordMcqAttempt } from '../../../services/learningApi';
+
+// MultipleChoiceExercise + the McqRescueDialog it mounts both call useAuth();
+// also #1507 added a fire-and-forget recordMcqAttempt on every click. Stub
+// both so tests don't need an AuthProvider and don't hit the network.
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ token: 'test-token' }),
+}));
+vi.mock('../../../services/learningApi', () => ({
+  recordMcqAttempt: vi.fn(),
+  mcqRescueStart: vi.fn(),
+  mcqRescueRespond: vi.fn(),
+  SessionExpiredError: class SessionExpiredError extends Error {},
+}));
 
 const questions: MultipleChoiceItem[] = [
   {
@@ -19,6 +33,10 @@ const questions: MultipleChoiceItem[] = [
 ];
 
 describe('MultipleChoiceExercise', () => {
+  beforeEach(() => {
+    vi.mocked(recordMcqAttempt).mockClear();
+  });
+
   it('renders first question and all options', () => {
     render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} />);
     expect(screen.getByText(/文章的主題是什麼？/)).toBeTruthy();
@@ -98,5 +116,49 @@ describe('MultipleChoiceExercise', () => {
       .getAllByRole('button')
       .filter((btn) => ['自然環境', '科技發展', '人際關係', '歷史文化'].some((t) => btn.textContent?.includes(t)));
     allOptionButtons.forEach((btn) => expect(btn).toBeDisabled());
+  });
+
+  // ── Issue #1507 — opt-in rescue + telemetry ──────────────────────────
+
+  it('wrong answer shows the 「問 AI 助教」 button', () => {
+    render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} lessonId="g7-l29" />);
+
+    fireEvent.click(screen.getByText('自然環境').closest('button')!);
+
+    expect(screen.getByRole('button', { name: /問 AI 助教/ })).toBeTruthy();
+  });
+
+  it('correct answer does NOT show the 「問 AI 助教」 button', () => {
+    render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} lessonId="g7-l29" />);
+
+    // B = 科技發展 is correct
+    fireEvent.click(screen.getByText('科技發展').closest('button')!);
+
+    expect(screen.queryByRole('button', { name: /問 AI 助教/ })).toBeNull();
+  });
+
+  it('records each MCQ attempt with the correct payload', () => {
+    render(<MultipleChoiceExercise questions={questions} onComplete={() => {}} lessonId="g7-l29" />);
+
+    // Wrong pick first
+    fireEvent.click(screen.getByText('自然環境').closest('button')!);
+    expect(recordMcqAttempt).toHaveBeenCalledWith('test-token', {
+      lesson_id: 'g7-l29',
+      question_id: 'g7-l29-q0',
+      choice: 'A',
+      is_correct: false,
+    });
+
+    // Next question, then correct pick
+    fireEvent.click(screen.getByRole('button', { name: /下一題/ }));
+    fireEvent.click(screen.getByText('樂觀').closest('button')!);
+    expect(recordMcqAttempt).toHaveBeenCalledWith('test-token', {
+      lesson_id: 'g7-l29',
+      question_id: 'g7-l29-q1',
+      choice: 'A',
+      is_correct: true,
+    });
+
+    expect(recordMcqAttempt).toHaveBeenCalledTimes(2);
   });
 });

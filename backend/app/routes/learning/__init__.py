@@ -15,6 +15,7 @@ Splits the original monolithic learning.py (1,881 lines) into focused sub-module
 - learning_vocab.py                — Sentence practice + listening comprehension
 - learning_exit_ticket.py          — Exit ticket generate + submit (Issue #463)
 - mcq_rescue.py                    — MCQ rescue AI tutor endpoints (Issue #1387)
+- mcq_attempt.py                   — MCQ attempt telemetry endpoint (Issue #1507)
 - toolbox.py                       — Practice toolbox session endpoints (Issue #1463 / #1460)
 
 The composed router is re-exported as `router` so that main.py's existing
@@ -37,6 +38,7 @@ from .learning_vocab import router as vocab_router
 from .learning_exit_ticket import router as exit_ticket_router
 from .learning_reading_history import router as reading_history_router
 from .mcq_rescue import router as mcq_rescue_router
+from .mcq_attempt import router as mcq_attempt_router
 from .toolbox import router as toolbox_router
 
 router = APIRouter(tags=["learning"])
@@ -54,6 +56,7 @@ router.include_router(vocab_router)
 router.include_router(exit_ticket_router)
 router.include_router(reading_history_router)
 router.include_router(mcq_rescue_router)
+router.include_router(mcq_attempt_router)
 router.include_router(toolbox_router)
 
 __all__ = ["router"]
