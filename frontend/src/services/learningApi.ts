@@ -990,3 +990,42 @@ export async function mcqRescueRespond(
   }
   return res.json();
 }
+
+// ---------------------------------------------------------------------------
+// MCQ Attempt telemetry (Issue #1507)
+// ---------------------------------------------------------------------------
+
+export interface McqAttemptPayload {
+  lesson_id: string;
+  question_id: string;
+  choice: string;
+  is_correct: boolean;
+  rescue_offered?: boolean;
+}
+
+/**
+ * Log a single MCQ choice click. Fire-and-forget — callers should not block
+ * UI on this. Errors are swallowed and console-warned so a flaky network
+ * never breaks the quiz flow.
+ */
+export function recordMcqAttempt(
+  token: string,
+  payload: McqAttemptPayload,
+): void {
+  fetch(`${API_BASE}/api/learning/mcq-attempt`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => {
+      if (!res.ok) {
+        console.warn(`recordMcqAttempt failed: ${res.status}`);
+      }
+    })
+    .catch((err) => {
+      console.warn('recordMcqAttempt error:', err);
+    });
+}

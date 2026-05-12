@@ -58,6 +58,8 @@ const StrategyExercisePage: React.FC = () => {
           <StrategyExercise
             exercise={selectedStory.strategyExercise!}
             onComplete={handleStrategyComplete}
+            lessonId={selectedStory.id}
+            readingStrategy={selectedStory.readingStrategy}
           />
           {/* Show "下一關" once the strategy exercise is done (or always allow skip) */}
           <div className="mt-6 shrink-0">

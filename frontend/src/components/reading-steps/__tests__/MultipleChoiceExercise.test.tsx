@@ -3,6 +3,19 @@ import { describe, it, expect, vi } from 'vitest';
 import MultipleChoiceExercise from '../MultipleChoiceExercise';
 import { MultipleChoiceItem } from '../../../types';
 
+// MultipleChoiceExercise + the McqRescueDialog it mounts both call useAuth();
+// also #1507 added a fire-and-forget recordMcqAttempt on every click. Stub
+// both so tests don't need an AuthProvider and don't hit the network.
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ token: 'test-token' }),
+}));
+vi.mock('../../../services/learningApi', () => ({
+  recordMcqAttempt: vi.fn(),
+  mcqRescueStart: vi.fn(),
+  mcqRescueRespond: vi.fn(),
+  SessionExpiredError: class SessionExpiredError extends Error {},
+}));
+
 const questions: MultipleChoiceItem[] = [
   {
     question: '文章的主題是什麼？',

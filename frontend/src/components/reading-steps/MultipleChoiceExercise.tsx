@@ -4,13 +4,18 @@
  * Displays MCQ questions from the PDF-extracted YAML data.
  * Shows one question at a time; reveals correct answer + explanation after selection.
  *
- * Issue #1387: On wrong answer, opens McqRescueDialog (AI rescue tutor).
- * Runs in parallel with existing socratic chat per #1373 decision.
+ * Issue #1387: McqRescueDialog (AI rescue tutor) reachable via button.
+ * Issue #1507: Wrong answer no longer auto-opens the dialog — instead a
+ *   「問 AI 助教」button appears so the student opts in. Every click is
+ *   logged to mcq_attempt for teacher visibility on students who skip
+ *   the rescue.
  */
 import React, { useState } from 'react';
 import { MultipleChoiceItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
+import { useAuth } from '../../contexts/AuthContext';
+import { recordMcqAttempt } from '../../services/learningApi';
 import McqRescueDialog, { McqRescueContext } from '../reading-spotlight/McqRescueDialog';
 
 interface Props {
@@ -31,19 +36,21 @@ const MultipleChoiceExercise: React.FC<Props> = ({
   readingStrategy,
 }) => {
   const { zhuyinActive, processZhuyin } = useZhuyin();
+  const { token } = useAuth();
   const zh = (text: string) => zhuyinActive ? processZhuyin(text) : text;
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
 
-  // MCQ Rescue dialog state (Issue #1387)
+  // MCQ Rescue dialog state (Issue #1387 / #1507)
   const [rescueOpen, setRescueOpen] = useState(false);
   const [rescueContext, setRescueContext] = useState<McqRescueContext | null>(null);
 
   const q = questions[current];
   const isCorrect = selected === q.answer;
   const isLast = current === questions.length - 1;
+  const questionId = `${lessonId}-q${current}`;
 
   function handleSelect(label: string) {
     if (revealed) return;
@@ -52,20 +59,38 @@ const MultipleChoiceExercise: React.FC<Props> = ({
     const correct = label === q.answer;
     if (correct) {
       setScore((s) => s + 1);
-    } else {
-      // Wrong answer — open MCQ rescue dialog (Issue #1387)
-      // Use question index as stable question_id within this lesson
-      const questionId = `${lessonId}-q${current}`;
-      setRescueContext({
-        questionId,
-        lessonId,
-        wrongChoice: label,
-        questionText: q.question,
-        correctAnswer: q.answer ?? '',
-        strategyType: readingStrategy ?? null,
-      });
-      setRescueOpen(true);
     }
+
+    // Telemetry — every click, including wrong answers where the student
+    // never opens the rescue dialog (Issue #1507 / Young 5/8 meeting).
+    if (token) {
+      recordMcqAttempt(token, {
+        lesson_id: lessonId,
+        question_id: questionId,
+        choice: label,
+        is_correct: correct,
+        rescue_offered: !correct,
+      });
+    }
+  }
+
+  function openRescue() {
+    if (!selected) return;
+    const wrongIdx = OPTION_LABELS.indexOf(selected);
+    const correctIdx = q.answer ? OPTION_LABELS.indexOf(q.answer) : -1;
+    setRescueContext({
+      questionId,
+      lessonId,
+      wrongChoice: selected,
+      wrongChoiceText: wrongIdx >= 0 ? q.options[wrongIdx] : undefined,
+      questionText: q.question,
+      correctAnswer: q.answer ?? '',
+      correctAnswerText: correctIdx >= 0 ? q.options[correctIdx] : undefined,
+      options: q.options,
+      optionLabels: OPTION_LABELS.slice(0, q.options.length),
+      strategyType: readingStrategy ?? null,
+    });
+    setRescueOpen(true);
   }
 
   function handleNext() {
@@ -153,6 +178,17 @@ const MultipleChoiceExercise: React.FC<Props> = ({
           <div className="mt-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2 text-sm text-amber-800">
             💡 {zh(q.explanation)}
           </div>
+        )}
+
+        {/* 問 AI 助教 — only on wrong answers, opt-in (Issue #1507) */}
+        {revealed && !isCorrect && !rescueOpen && (
+          <button
+            onClick={openRescue}
+            className="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-100 hover:border-amber-400 transition-colors"
+          >
+            <span aria-hidden="true">🦉</span>
+            問 AI 助教，一起想想看
+          </button>
         )}
       </div>
 
