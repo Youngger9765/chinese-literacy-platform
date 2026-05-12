@@ -1000,7 +1000,6 @@ export interface McqAttemptPayload {
   question_id: string;
   choice: string;
   is_correct: boolean;
-  rescue_offered?: boolean;
 }
 
 /**

@@ -39,7 +39,6 @@ class McqAttemptRequest(BaseModel):
     question_id: str = Field(..., max_length=128)
     choice: str = Field(..., max_length=8)
     is_correct: bool
-    rescue_offered: bool = False
 
 
 class McqAttemptResponse(BaseModel):
@@ -63,7 +62,6 @@ async def record_mcq_attempt(
         question_id=payload.question_id,
         choice=payload.choice,
         is_correct=payload.is_correct,
-        rescue_offered=payload.rescue_offered,
     )
     try:
         db.add(attempt)

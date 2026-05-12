@@ -253,12 +253,14 @@ function TraitInferenceExercise({
 
     if (token) {
       const labelIdx = traitOptions.indexOf(selected);
+      // Defensive slice — backend choice column is VARCHAR(8); fallback to
+      // selected text could exceed that if the option somehow isn't found
+      const choice = (labelIdx >= 0 ? OPTION_LABELS[labelIdx] : selected).slice(0, 8);
       recordMcqAttempt(token, {
         lesson_id: lessonId ?? '',
         question_id: questionId,
-        choice: labelIdx >= 0 ? OPTION_LABELS[labelIdx] : selected,
+        choice,
         is_correct: correctAnswer,
-        rescue_offered: !correctAnswer,
       });
     }
   };
@@ -413,7 +415,9 @@ function GuidedStepsExercise({
     () => steps.map(() => null),
   );
   const [allDone, setAllDone] = useState(false);
-  const [rescueOpen, setRescueOpen] = useState(false);
+  // Track which step's rescue is open (null = none). Per-step state so that
+  // opening rescue for step 1 doesn't hide the button on step 2.
+  const [rescueStepIdx, setRescueStepIdx] = useState<number | null>(null);
   const [rescueContext, setRescueContext] = useState<McqRescueContext | null>(null);
 
   const openRescueForStep = (stepIdx: number) => {
@@ -435,7 +439,7 @@ function GuidedStepsExercise({
       optionLabels: labels,
       strategyType: readingStrategy ?? null,
     });
-    setRescueOpen(true);
+    setRescueStepIdx(stepIdx);
   };
 
   const handleTextChange = (stepIdx: number, value: string) => {
@@ -466,9 +470,8 @@ function GuidedStepsExercise({
         recordMcqAttempt(token, {
           lesson_id: lessonId ?? '',
           question_id: `${lessonId ?? ''}-spotlight-guided-${stepIdx}`,
-          choice: labels[idx] ?? String(idx),
+          choice: (labels[idx] ?? String(idx)).slice(0, 8),
           is_correct: isCorrect,
-          rescue_offered: !isCorrect,
         });
       }
     }
@@ -569,7 +572,7 @@ function GuidedStepsExercise({
                         : `還不對，正確答案是 ${String.fromCharCode(65 + (step.answer ?? 0))}`}
                     </p>
                   )}
-                  {isDone && feedback === false && !rescueOpen && (
+                  {isDone && feedback === false && rescueStepIdx !== stepIdx && (
                     <button
                       onClick={() => openRescueForStep(stepIdx)}
                       className="mt-2 w-full flex items-center justify-center gap-2 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 hover:border-amber-400 transition-colors"
@@ -621,10 +624,10 @@ function GuidedStepsExercise({
       )}
 
       <McqRescueDialog
-        isOpen={rescueOpen}
+        isOpen={rescueStepIdx !== null}
         context={rescueContext}
-        onClose={() => setRescueOpen(false)}
-        onComplete={() => setRescueOpen(false)}
+        onClose={() => setRescueStepIdx(null)}
+        onComplete={() => setRescueStepIdx(null)}
       />
     </div>
   );

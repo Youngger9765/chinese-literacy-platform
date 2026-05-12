@@ -34,7 +34,6 @@ def upgrade() -> None:
             question_id VARCHAR(128) NOT NULL,
             choice VARCHAR(8) NOT NULL,
             is_correct BOOLEAN NOT NULL,
-            rescue_offered BOOLEAN NOT NULL DEFAULT FALSE,
             created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
         )
     """)

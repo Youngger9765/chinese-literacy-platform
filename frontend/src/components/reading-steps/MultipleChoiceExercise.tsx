@@ -69,7 +69,6 @@ const MultipleChoiceExercise: React.FC<Props> = ({
         question_id: questionId,
         choice: label,
         is_correct: correct,
-        rescue_offered: !correct,
       });
     }
   }

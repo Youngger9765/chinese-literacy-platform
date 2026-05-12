@@ -3,9 +3,9 @@
 Records every MCQ choice (right or wrong) so teachers can see students who
 keep getting questions wrong without engaging the AI rescue tutor (Issue #1507).
 
-`rescue_engaged` is derivable by joining `mcq_rescue_session` on
-`(user_id, lesson_id, question_id)`, so this table only stores the raw
-attempt event.
+Whether the student actually engaged the rescue tutor is derivable by
+joining mcq_rescue_session on (user_id, lesson_id, question_id); no
+dedicated flag is needed on this table.
 
 Migration: backend/alembic/versions/j5e6f7a8b9c0_create_mcq_attempt.py
 """
@@ -46,8 +46,6 @@ class McqAttempt(Base):
 
     choice = Column(String(8), nullable=False)
     is_correct = Column(Boolean, nullable=False)
-
-    rescue_offered = Column(Boolean, nullable=False, default=False)
 
     created_at = Column(
         DateTime(timezone=True),
