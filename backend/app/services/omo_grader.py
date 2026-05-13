@@ -42,21 +42,47 @@ class GradedAnswer:
     source_attempt_id: Optional[int] = None
 
 
+def _resolve_letter_answer(letter: str, vocabulary: list) -> str:
+    """Resolve A/B/C/... letter to vocabulary word.
+
+    L22-L30 YAML uses ordered letter (A=0, B=1, ...) as placeholder for the
+    vocabulary list index. So `answer: A` for fill_in_blank means the student
+    should fill in vocabulary[0].word (e.g. '奠定').
+
+    Returns the actual word if letter matches a vocab index, else returns
+    the letter as-is (for backward compatibility with non-vocab grading).
+    """
+    if not isinstance(letter, str) or len(letter) != 1 or not letter.isalpha():
+        return str(letter)
+    if not isinstance(vocabulary, list) or not vocabulary:
+        return letter
+    idx = ord(letter.upper()) - ord("A")
+    if not (0 <= idx < len(vocabulary)):
+        return letter
+    v = vocabulary[idx]
+    if isinstance(v, dict):
+        return str(v.get("word") or v.get("term") or letter)
+    return str(v)
+
+
 def _build_question_schema(lesson: dict) -> list[dict]:
     """Extract expected-answer schema from lesson YAML for the grading prompt."""
     questions = []
+    vocabulary = lesson.get("vocabulary") or []
 
     # fill_in_blank section — accepts list[dict] or dict[str, dict]
+    # YAML pattern (L22-L30): answer is a letter A/B/C... that indexes into vocabulary list.
     fb = lesson.get("fill_in_blank") or []
     fb_items = fb.items() if isinstance(fb, dict) else enumerate(fb)
     for key, item in fb_items:
         qid = str(key) if isinstance(fb, dict) else f"fb_{key+1}"
         if isinstance(item, dict):
-            correct = item.get("answer", "")
+            raw_answer = item.get("answer", "")
             context = item.get("context", item.get("sentence", ""))
         else:
-            correct = str(item)
+            raw_answer = str(item)
             context = ""
+        correct = _resolve_letter_answer(raw_answer, vocabulary)
         questions.append({
             "id": qid,
             "type": "fill_blank",
