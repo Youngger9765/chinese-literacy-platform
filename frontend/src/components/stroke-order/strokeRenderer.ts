@@ -33,6 +33,10 @@ const COLORS = {
   outline: 'rgba(48,47,42,0.12)',
   hint:    '#564ABF',
   brush:   '#564ABF',
+  // #1342 radical-color palette — high-contrast pair so the radical group
+  // pops against the body. Same palette as RadicalDecomposition's left panel.
+  radical: '#5B4FC4',  // accent purple (matches design system)
+  body:    '#10B981',  // emerald
 };
 
 /**
