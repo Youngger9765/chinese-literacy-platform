@@ -55,6 +55,24 @@ def _halfwidth(code: str) -> str:
     )
 
 
+def _normalize_fill_in_blank_item(item: dict) -> dict:
+    """Normalize a fill_in_blank item to always carry a 'sentence' field.
+
+    New-format YAMLs (5/1 batch onwards) use context_before/context_after
+    instead of a pre-composed sentence string.  FillInBlankExercise.tsx
+    expects item.sentence; missing 'sentence' → undefined → runtime crash
+    (caught by StepErrorBoundary, shows ERR-* error screen).
+
+    Synthesis rule: sentence = context_before + "（　　）" + context_after
+    The blank placeholder matches what renderSentence() splits on (Issue #1559).
+    """
+    if "sentence" not in item and "context_before" in item:
+        before = item.get("context_before") or ""
+        after = item.get("context_after") or ""
+        item = {**item, "sentence": f"{before}（　　）{after}"}
+    return item
+
+
 _GENRE_TO_CATEGORY = {
     "記敘文": "Fable",
     "說明文": "Science",
@@ -198,7 +216,7 @@ def _load_layer1_lessons() -> list[dict]:
             ),
             "vocabulary": data.get("vocabulary") or [],
             "fill_in_blank": [
-                {**item, "answer": _halfwidth(item.get("answer", ""))}
+                {**_normalize_fill_in_blank_item(item), "answer": _halfwidth(item.get("answer", ""))}
                 for item in (data.get("fill_in_blank") or [])
             ] or None,
             "multiple_choice": data.get("multiple_choice"),
@@ -326,7 +344,7 @@ def _load_layer2_lessons(
             ),
             "vocabulary": vocabulary,
             "fill_in_blank": [
-                {**item, "answer": _halfwidth(item.get("answer", ""))}
+                {**_normalize_fill_in_blank_item(item), "answer": _halfwidth(item.get("answer", ""))}
                 for item in (data.get("fill_in_blank") or [])
             ] or None,
             "multiple_choice": data.get("multiple_choice"),
