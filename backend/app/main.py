@@ -34,6 +34,7 @@ from .routes.tts_audit import router as tts_audit_router
 from .routes.admin_sessions import router as admin_sessions_router
 from .routes.library import router as library_router
 from .routes.admin_seed import router as admin_seed_router
+from .routes.omo import router as omo_router
 from .utils.logging_config import setup_logging
 from .auth.rate_limiter import general_rate_limiter
 from .services.seed import seed_default_data
@@ -351,6 +352,7 @@ app.include_router(tts_audit_router)
 app.include_router(admin_sessions_router, prefix="/api", tags=["admin-sessions"])
 app.include_router(library_router, prefix="/api", tags=["library"])
 app.include_router(admin_seed_router, prefix="/api", tags=["admin-seed"])
+app.include_router(omo_router, prefix="/api", tags=["omo"])
 
 
 @app.get("/")

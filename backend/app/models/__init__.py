@@ -18,6 +18,7 @@ from .semester import Semester  # noqa: F401
 from .ai_usage import AIUsageLog  # noqa: F401
 from .reading_history import ReadingHistory, ReadingTarget  # noqa: F401
 from .mcq_attempt import McqAttempt  # noqa: F401
+from .omo_upload import OmoUpload  # noqa: F401
 from .toolbox import (  # noqa: F401
     ToolboxComprehensionSession,
     ToolboxFullReadingSession,
