@@ -179,11 +179,26 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
             ],
             config=genai_types.GenerateContentConfig(
                 temperature=0.1,  # Low temperature for deterministic identification
-                max_output_tokens=512,
+                max_output_tokens=2048,  # bumped from 512 — 7 lessons × top-3 with reasoning can exceed 512
             ),
         )
 
-        raw_text = response.text.strip()
+        # Gemini may return response.text == None when safety filter blocks
+        # or when finish_reason is MAX_TOKENS / RECITATION etc. Handle gracefully.
+        raw_text = (response.text or "").strip() if response is not None else ""
+        if not raw_text:
+            finish_reason = "unknown"
+            try:
+                if response and response.candidates:
+                    finish_reason = str(response.candidates[0].finish_reason)
+            except Exception:
+                pass
+            logger.warning(
+                "OMO identification: Gemini returned empty response (finish_reason=%s)",
+                finish_reason,
+            )
+            _consecutive_errors = 0  # Not a transient error
+            return []
 
         # Strip markdown code fences if present
         if raw_text.startswith("```"):
@@ -192,7 +207,16 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
                 line for line in lines if not line.startswith("```")
             ).strip()
 
-        data = json.loads(_repair_json(raw_text))
+        repaired = _repair_json(raw_text)
+        if repaired is None:
+            logger.warning(
+                "OMO identification: could not repair malformed JSON | raw=%s",
+                raw_text[:200],
+            )
+            _consecutive_errors = 0
+            return []
+
+        data = json.loads(repaired)
 
         if data.get("error") == "image_unclear":
             logger.warning("OMO identification: image too unclear for OCR")
