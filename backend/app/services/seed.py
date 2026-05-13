@@ -174,9 +174,17 @@ def _gen_code(k: int) -> str:
 def seed_default_data():
     """Seed complete demo data: org -> school -> teacher -> classroom -> students.
 
-    Only runs when users table is empty (fresh DB).
+    Only runs when users table is empty (fresh DB) AND ENABLE_TEST_SEED is true.
+    On production (ENABLE_TEST_SEED=false / ENVIRONMENT=production) only the
+    idempotent startup tasks run (YAML sync, migration patches) — demo accounts
+    are never created or re-created (Issue #1575 security fix).
     Wrapped in try/except so it doesn't crash during tests.
     """
+    import os as _os
+    _enable_seed = _os.environ.get("ENABLE_TEST_SEED", "true").lower() not in ("false", "0", "no")
+    _is_prod = _os.environ.get("ENVIRONMENT", "").lower() == "production"
+    _allow_demo_seed = _enable_seed and not _is_prod
+
     try:
         db = SessionLocal()
         try:
@@ -187,25 +195,30 @@ def seed_default_data():
                 "admin@test.com", "teacher@test.com", "teacher2@test.com",
                 "student@test.com", "student2@test.com", "student3@test.com",
             ]
-            unverified = (
-                db.query(User)
-                .filter(User.email.in_(SEED_EMAILS), User.email_verified.is_(False))
-                .all()
-            )
-            if unverified:
-                for u in unverified:
-                    u.email_verified = True
-                db.commit()
-                logger.info("seed_default_data: patched %d seed accounts to email_verified=True", len(unverified))
+            if _allow_demo_seed:
+                unverified = (
+                    db.query(User)
+                    .filter(User.email.in_(SEED_EMAILS), User.email_verified.is_(False))
+                    .all()
+                )
+                if unverified:
+                    for u in unverified:
+                        u.email_verified = True
+                    db.commit()
+                    logger.info("seed_default_data: patched %d seed accounts to email_verified=True", len(unverified))
 
-            # Repair (#528): patch missing assignment seed data on existing DBs.
-            # Runs before the early-return so staging DBs get the fix even if
-            # users were already seeded before assignments were added.
-            _patch_seed_assignments(db)
+                # Repair (#528): patch missing assignment seed data on existing DBs.
+                # Runs before the early-return so staging DBs get the fix even if
+                # users were already seeded before assignments were added.
+                _patch_seed_assignments(db)
 
             # Sync YAML lessons → texts table (idempotent, uses lesson_number unique key).
             # Runs on every startup so new lessons are picked up automatically.
             _sync_yaml_lessons_to_texts(db)
+
+            if not _allow_demo_seed:
+                logger.info("seed_default_data: ENABLE_TEST_SEED=false or ENVIRONMENT=production — skipping demo account seeding")
+                return
 
             if db.query(User).count() > 0:
                 return  # Already seeded
