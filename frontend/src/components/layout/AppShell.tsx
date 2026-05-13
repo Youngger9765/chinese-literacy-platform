@@ -110,9 +110,10 @@ const StepDots: React.FC<StepDotsProps> = ({
         const isReport = step.id === 'report';
         const isLocked = isReport && !allNonReportDone;
 
-        let dotClass = 'bg-on-surface-variant/20';
-        if (isCompleted) dotClass = 'bg-emerald-500';
-        if (isActive) dotClass = 'bg-accent scale-125';
+        let dotClass = 'bg-on-surface-variant/20 text-on-surface-variant';
+        if (isCompleted) dotClass = 'bg-emerald-500 text-white';
+        if (isActive) dotClass = 'bg-accent text-white scale-110';
+        const displayChar = step.displayChar ?? String(i + 1);
 
         return (
           <span key={step.id} className="group relative flex items-center justify-center">
@@ -123,11 +124,19 @@ const StepDots: React.FC<StepDotsProps> = ({
                 onStepClick(step);
               }}
               disabled={isLocked}
-              className={`w-4 h-4 md:w-5 md:h-5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
+              className={`w-8 h-8 md:w-9 md:h-9 rounded-full text-sm md:text-base font-bold flex items-center justify-center transition-all hover:scale-110 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
               aria-label={`${i + 1}. ${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
               aria-current={isActive ? 'step' : undefined}
               title={isLocked ? `${step.label}（完成所有階段後解鎖）` : step.label}
-            />
+            >
+              {isCompleted ? (
+                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                displayChar
+              )}
+            </button>
             <span
               role="tooltip"
               className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none opacity-0 translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0"
