@@ -43,6 +43,8 @@ export interface StepConfig {
   id: string;
   /** Display label shown in StepperNav */
   label: string;
+  /** Single-char hint shown inside the step badge circle (mobile / compact view). Pick the most representative character of the step, not necessarily label[0]. */
+  displayChar: string;
   /** Brief one-line instruction shown at the top of the immersive learning page */
   hint: string;
   /** AppView enum value used by the legacy view routing system */
@@ -81,6 +83,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'intro': {
     id: 'intro',
     label: '課程簡介',
+    displayChar: '簡',
     hint: '看看這堂課要學什麼策略，以及有哪些步驟',
     view: AppView.INTRO,
     dbStepNumber: 1,
@@ -91,6 +94,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'reading-annotation': {
     id: 'reading-annotation',
     label: '讀全文-做記號',
+    displayChar: '記',
     hint: '閱讀全文，選取不懂或重要的詞語做記號',
     view: AppView.READING_ANNOTATION,
     dbStepNumber: 8,
@@ -101,6 +105,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'tutor': {
     id: 'tutor',
     label: '逐段朗讀',
+    displayChar: '段',
     hint: '跟著 AI 一段一段大聲朗讀',
     view: AppView.TUTOR,
     dbStepNumber: 2,
@@ -111,6 +116,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'full-reading': {
     id: 'full-reading',
     label: '全文朗讀',
+    displayChar: '讀',
     hint: '挑戰一次唸完全篇課文',
     view: AppView.FULL_READING,
     dbStepNumber: 6,
@@ -121,6 +127,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'listening': {
     id: 'listening',
     label: '聽力理解',
+    displayChar: '聽',
     hint: '聽完課文後，用自己的話說出重點',
     view: AppView.LISTENING,
     dbStepNumber: 13,
@@ -131,6 +138,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'vocab': {
     id: 'vocab',
     label: '生字練習',
+    displayChar: '字',
     hint: '練習課文中的生字筆順與讀音',
     view: AppView.VOCAB,
     dbStepNumber: 4,
@@ -141,6 +149,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'vocab-definition': {
     id: 'vocab-definition',
     label: '詞語理解',
+    displayChar: '詞',
     hint: '為每個詞語找到正確的解釋',
     view: AppView.VOCAB_DEFINITION_MATCH,
     dbStepNumber: 12,
@@ -151,6 +160,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'vocab-application': {
     id: 'vocab-application',
     label: '語詞應用',
+    displayChar: '用',
     hint: '把學到的詞語用在句子裡',
     view: AppView.VOCAB_APPLICATION,
     dbStepNumber: 9,
@@ -162,6 +172,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'story-structure': {
     id: 'story-structure',
     label: '文章重點表',
+    displayChar: '重',
     hint: '把課文重點填進去，讓 AI 幫你檢查',
     view: AppView.STORY_STRUCTURE,
     dbStepNumber: 15,
@@ -172,6 +183,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'reading-strategy': {
     id: 'reading-strategy',
     label: '閱讀聚光燈',
+    displayChar: '光',
     hint: '練習這課的閱讀策略',
     view: AppView.READING_STRATEGY,
     dbStepNumber: 16,
@@ -182,6 +194,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'sentence-practice': {
     id: 'sentence-practice',
     label: '造句練習',
+    displayChar: '造',
     hint: '用學到的詞語寫出自己的句子',
     view: AppView.SENTENCE_PRACTICE,
     dbStepNumber: 14,
@@ -192,6 +205,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'comprehension': {
     id: 'comprehension',
     label: '閱讀理解',
+    displayChar: '解',
     hint: '回答課文理解選擇題',
     view: AppView.COMPREHENSION,
     dbStepNumber: 3,
@@ -202,6 +216,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'vocab-word-search': {
     id: 'vocab-word-search',
     label: '語詞複習',
+    displayChar: '複',
     hint: '在字母格中找出學過的詞語',
     view: AppView.VOCAB_WORD_SEARCH,
     dbStepNumber: 10,
@@ -212,6 +227,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'dictation': {
     id: 'dictation',
     label: '聽寫練習',
+    displayChar: '聽',
     hint: '聽 AI 唸字，把聽到的打出來',
     view: AppView.DICTATION,
     dbStepNumber: 5,
@@ -222,6 +238,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'knowledge-station': {
     id: 'knowledge-station',
     label: '知識補給站',
+    displayChar: '補',
     hint: '探索課文相關的延伸知識',
     view: AppView.KNOWLEDGE_STATION,
     dbStepNumber: 11,
@@ -232,6 +249,7 @@ export const STEP_REGISTRY: Record<string, StepConfig> = {
   'report': {
     id: 'report',
     label: '報告',
+    displayChar: '報',
     hint: '查看這篇課文的學習成果',
     view: AppView.REPORT,
     dbStepNumber: 7,
