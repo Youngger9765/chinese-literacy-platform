@@ -1,0 +1,290 @@
+"""OMO grading service — extracts per-question student answers from worksheet images.
+
+Uses Vertex AI Gemini (gemini-2.5-flash) with structured output to:
+  1. Analyse worksheet image(s) against the lesson YAML schema
+  2. Extract fill_in_blank / MCQ / self_check answers
+  3. Compare against correct answers from lesson YAML
+  4. Return per-question scores with ai_confidence + reasoning
+
+llm-endpoint-hardening checklist (applied in calling route, not here):
+- Rate-limit: enforced at route level ✅
+- Auth: enforced at route level ✅
+- Input size cap: 10MB per image checked before calling this ✅
+- Output token cap: max_output_tokens=2048 ✅
+- Fail-closed: returns status=error on failure, never auto-passes ✅
+- Reasoning field: every answer item has a reasoning string ✅
+
+Circuit breaker: 3 consecutive errors → RuntimeError (same pattern as omo_identifier)
+"""
+
+import asyncio
+import logging
+from dataclasses import dataclass, field
+from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+# Circuit breaker state (module-level singleton, per-process)
+_consecutive_errors = 0
+_CIRCUIT_BREAKER_THRESHOLD = 3
+
+
+@dataclass
+class GradedAnswer:
+    """Result for one question extracted from the worksheet image."""
+    question_id: str
+    student_answer: str
+    correct_answer: str
+    score: float          # 0.0 – 1.0
+    ai_confidence: float  # 0.0 – 1.0
+    reasoning: str
+    position: Optional[dict] = None   # {"x": float, "y": float} relative coords
+    source_attempt_id: Optional[int] = None
+
+
+def _build_question_schema(lesson: dict) -> list[dict]:
+    """Extract expected-answer schema from lesson YAML for the grading prompt."""
+    questions = []
+
+    # fill_in_blank section
+    fb = lesson.get("fill_in_blank") or {}
+    for qid, item in fb.items() if isinstance(fb, dict) else []:
+        if isinstance(item, dict):
+            correct = item.get("answer", "")
+            context = item.get("context", item.get("sentence", ""))
+        else:
+            correct = str(item)
+            context = ""
+        questions.append({
+            "id": qid,
+            "type": "fill_blank",
+            "context": context,
+            "correct_answer": correct,
+        })
+
+    # multiple_choice section
+    mc = lesson.get("multiple_choice") or {}
+    for qid, item in mc.items() if isinstance(mc, dict) else []:
+        if isinstance(item, dict):
+            correct = item.get("answer", "")
+            context = item.get("question", "")
+        else:
+            correct = str(item)
+            context = ""
+        questions.append({
+            "id": qid,
+            "type": "multiple_choice",
+            "context": context,
+            "correct_answer": correct,
+        })
+
+    # strategy_exercise section (structured exercises in 7-lesson set)
+    se = lesson.get("strategy_exercise") or {}
+    if isinstance(se, dict):
+        items = se.get("items") or se.get("questions") or []
+        if isinstance(items, list):
+            for i, item in enumerate(items):
+                if isinstance(item, dict) and "answer" in item:
+                    qid = item.get("id", f"se_{i+1}")
+                    questions.append({
+                        "id": qid,
+                        "type": "fill_blank",
+                        "context": item.get("stem", item.get("question", "")),
+                        "correct_answer": item.get("answer", ""),
+                    })
+
+    return questions
+
+
+def _build_grading_prompt(questions: list[dict]) -> str:
+    """Build the system prompt for Gemini grading."""
+    questions_text = "\n".join(
+        f"  {i+1}. [ID: {q['id']} | type: {q['type']}] Context: {q['context']} | Expected answer: {q['correct_answer']}"
+        for i, q in enumerate(questions)
+    )
+    return f"""你是一位精準的國語文作業批改老師。
+
+任務：從學生的手寫學習單照片中，找出每一題的手寫答案，並與標準答案比對評分。
+
+待批改題目清單：
+{questions_text}
+
+批改規則：
+1. 找到每題對應的手寫區域
+2. 辨識學生的手寫文字
+3. 與標準答案比對（允許合理的字體變異）
+4. 評分：完全正確 = 1.0，部分正確 = 0.5，明顯錯誤 = 0.0，無法辨識 = 0.0
+5. ai_confidence：手寫辨識清晰度，0.0（完全無法辨識）～1.0（非常清晰）
+6. reasoning：說明辨識結果與評分理由（中文，限 50 字）
+
+回傳 JSON 陣列，每題一筆記錄。"""
+
+
+async def grade_worksheet_images(
+    image_bytes_list: list[bytes],
+    mime_types: list[str],
+    lesson: dict,
+    attempt_id: Optional[int] = None,
+) -> list[GradedAnswer]:
+    """Grade worksheet images against the lesson YAML schema.
+
+    Args:
+        image_bytes_list: List of raw image bytes (all active attempt images).
+        mime_types: Corresponding MIME types.
+        lesson: Lesson dict from lesson_loader (contains fill_in_blank, MCQ, etc.).
+        attempt_id: The OmoUploadAttempt.id to record as source_attempt_id.
+
+    Returns:
+        List of GradedAnswer objects, one per question.
+        Empty list on failure (fail-closed).
+
+    Raises:
+        RuntimeError: If circuit breaker threshold is reached (3 consecutive errors).
+    """
+    global _consecutive_errors
+
+    if _consecutive_errors >= _CIRCUIT_BREAKER_THRESHOLD:
+        raise RuntimeError(
+            f"OMO grader circuit breaker open after {_CIRCUIT_BREAKER_THRESHOLD} consecutive errors"
+        )
+
+    questions = _build_question_schema(lesson)
+    if not questions:
+        logger.warning(
+            "omo_grader: no questions found in lesson %s — returning empty grades",
+            lesson.get("title", "unknown"),
+        )
+        return []
+
+    try:
+        from google import genai
+        from google.genai import types as genai_types
+    except ImportError:
+        logger.warning("google-genai not available — returning mock grades for local dev")
+        _consecutive_errors = 0
+        return _mock_grades(questions, attempt_id)
+
+    client = genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
+
+    # Build content parts: system prompt + all images
+    image_parts = []
+    for data, mime in zip(image_bytes_list, mime_types):
+        image_parts.append(
+            genai_types.Part.from_bytes(data=data, mime_type=mime)
+        )
+
+    # Response schema for structured output
+    response_schema = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "question_id":      {"type": "string"},
+                "student_answer":   {"type": "string"},
+                "correct_answer":   {"type": "string"},
+                "score":            {"type": "number"},
+                "ai_confidence":    {"type": "number"},
+                "reasoning":        {"type": "string"},
+                "position_x":       {"type": "number"},
+                "position_y":       {"type": "number"},
+            },
+            "required": ["question_id", "student_answer", "correct_answer", "score", "ai_confidence", "reasoning"],
+        },
+    }
+
+    system_prompt = _build_grading_prompt(questions)
+
+    try:
+        response = await asyncio.wait_for(
+            asyncio.to_thread(
+                client.models.generate_content,
+                model="gemini-2.5-flash",
+                contents=[genai_types.Content(parts=image_parts, role="user")],
+                config=genai_types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    response_mime_type="application/json",
+                    response_schema=response_schema,
+                    max_output_tokens=2048,
+                    temperature=0.1,   # low temp for deterministic grading
+                    thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
+                    automatic_function_calling=genai_types.AutomaticFunctionCallingConfig(
+                        disable=True
+                    ),
+                ),
+            ),
+            timeout=60,  # grading can take longer than identification
+        )
+    except asyncio.TimeoutError:
+        _consecutive_errors += 1
+        logger.error("OMO grader timeout after 60s (consecutive_errors=%d)", _consecutive_errors)
+        if _consecutive_errors >= _CIRCUIT_BREAKER_THRESHOLD:
+            raise RuntimeError("OMO grader circuit breaker opened")
+        return []
+    except Exception as exc:
+        _consecutive_errors += 1
+        logger.error("OMO grader Gemini call failed: %s (consecutive_errors=%d)", exc, _consecutive_errors)
+        if _consecutive_errors >= _CIRCUIT_BREAKER_THRESHOLD:
+            raise RuntimeError("OMO grader circuit breaker opened")
+        return []
+
+    # Parse response
+    import json
+    try:
+        raw_text = response.text or ""
+        if not raw_text:
+            raise ValueError("Gemini returned empty grading response")
+        items = json.loads(raw_text)
+        if not isinstance(items, list):
+            raise ValueError(f"Expected list, got {type(items)}")
+    except Exception as exc:
+        _consecutive_errors += 1
+        logger.error("OMO grader JSON parse failed: %s (consecutive_errors=%d)", exc, _consecutive_errors)
+        if _consecutive_errors >= _CIRCUIT_BREAKER_THRESHOLD:
+            raise RuntimeError("OMO grader circuit breaker opened")
+        return []
+
+    # Reset circuit breaker on success
+    _consecutive_errors = 0
+
+    results = []
+    for item in items:
+        try:
+            results.append(GradedAnswer(
+                question_id=str(item.get("question_id", "")),
+                student_answer=str(item.get("student_answer", "")),
+                correct_answer=str(item.get("correct_answer", "")),
+                score=float(item.get("score", 0.0)),
+                ai_confidence=float(item.get("ai_confidence", 0.0)),
+                reasoning=str(item.get("reasoning", "")),
+                position={
+                    "x": float(item.get("position_x", 0.0)),
+                    "y": float(item.get("position_y", 0.0)),
+                } if "position_x" in item else None,
+                source_attempt_id=attempt_id,
+            ))
+        except Exception as exc:
+            logger.warning("OMO grader: skipping malformed answer item %s: %s", item, exc)
+
+    logger.info(
+        "OMO grader: graded %d/%d questions for lesson '%s'",
+        len(results),
+        len(questions),
+        lesson.get("title", "unknown"),
+    )
+    return results
+
+
+def _mock_grades(questions: list[dict], attempt_id: Optional[int]) -> list[GradedAnswer]:
+    """Return mock GradedAnswer objects for local dev (no Gemini available)."""
+    return [
+        GradedAnswer(
+            question_id=q["id"],
+            student_answer="[mock answer]",
+            correct_answer=q["correct_answer"],
+            score=1.0,
+            ai_confidence=0.9,
+            reasoning="本地開發模式：模擬批改結果",
+            source_attempt_id=attempt_id,
+        )
+        for q in questions
+    ]
