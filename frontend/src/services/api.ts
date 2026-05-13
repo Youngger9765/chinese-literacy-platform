@@ -53,7 +53,10 @@ interface ApiStoryListItem {
 interface ApiStoryDetail extends ApiStoryListItem {
   paragraphs: string[];
   vocabulary: ApiVocabItem[] | null;
-  fill_in_blank: Array<{ sentence: string; answer: string }> | null;
+  // New-format items (5/1 curriculum batch) use context_before/context_after instead of sentence.
+  // Both schemas coexist; normalization in apiDetailToStory filters to legacy-format only (#1563).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fill_in_blank: Array<Record<string, any>> | null;
   multiple_choice: Array<{ question: string; options: string[]; answer: string | null; explanation: string | null }> | null;
   vocab_bank: Record<string, string> | null;
   knowledge_video_url: string | null;
@@ -128,7 +131,14 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     vocabulary: detail.vocabulary ?? undefined,
     charCount: detail.char_count,
     readingBenchmark: detail.reading_benchmark ?? undefined,
-    fillInBlank: detail.fill_in_blank ?? undefined,
+    // Filter to legacy-format items only (those with a `sentence` field).
+    // New-format items from the 5/1 curriculum batch use context_before/context_after
+    // which FillInBlankExercise does not yet support — passing them causes a TypeError
+    // crash when the component accesses `.sentence` (#1563).
+    // Filtering to [] causes VocabApplication.hasData to return false → NoDataFallback.
+    fillInBlank: detail.fill_in_blank
+      ? detail.fill_in_blank.filter((item) => typeof item['sentence'] === 'string') as Array<{ sentence: string; answer: string }>
+      : undefined,
     multipleChoice: detail.multiple_choice ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
