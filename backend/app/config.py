@@ -37,6 +37,12 @@ class Settings(BaseSettings):
     # True (default): POST /api/admin/seed/demo-students is available.
     # Set ENABLE_TEST_SEED=false in production Cloud Run to disable.
     enable_test_seed: bool = True
+    # GCS bucket for OMO (photo upload) feature (Issue #1575).
+    # Per-environment: prod → lingoleap-omo-uploads-prod,
+    #                  staging → lingoleap-omo-uploads-staging,
+    #                  preview → lingoleap-omo-uploads-preview.
+    # Falls back to original shared bucket for backward compat / local dev.
+    gcs_omo_bucket: str = "lingoleap-omo-uploads"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

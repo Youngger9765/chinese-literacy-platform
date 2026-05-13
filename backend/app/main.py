@@ -290,6 +290,9 @@ class GlobalRateLimitMiddleware:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # seed_default_data() internally respects ENABLE_TEST_SEED and ENVIRONMENT:
+    # on prod (ENABLE_TEST_SEED=false) it only runs non-seeding startup tasks
+    # (YAML → texts sync, migration patches) without creating demo accounts.
     seed_default_data()
     yield
 
