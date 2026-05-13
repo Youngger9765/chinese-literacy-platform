@@ -62,8 +62,9 @@ function readStoredMode(): ZhuyinMode {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw === 'none' || raw === 'difficult' || raw === 'all') return raw;
-    // Migrate from old boolean key
+    // Migrate from old boolean key (preserve returning users' existing choice)
     const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy === 'true') return 'all';
     if (legacy === 'false') return 'none';
     // Default for first-time visitors: no annotation (cleaner reading surface)
     return 'none';
