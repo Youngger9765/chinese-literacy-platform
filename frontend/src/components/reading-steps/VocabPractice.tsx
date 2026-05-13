@@ -391,6 +391,7 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
                 //   round 2 再生回憶 → one no-outline practice, no aids
                 practiceMode={currentRound === 2 ? 'no-outline-once' : 'outlined-once'}
                 radicalColorMode={currentRound === 1}
+                componentCount={decomp?.components.length ?? 2}
               />
             </div>
 

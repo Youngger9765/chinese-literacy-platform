@@ -1,10 +1,14 @@
 /**
- * StrategyExercise — 閱讀策略練習 (#943)
+ * StrategyExercise — 閱讀策略練習 (#943) / 閱讀聚光燈
  *
  * Renders one of three exercise types based on `exercise.type`:
  *   - ordering      : drag-and-drop (HTML5 native) to sort items in correct order
  *   - trait_inference: show clues, pick correct character trait from options
  *   - guided_steps  : multi-step exercise with free_text and select steps
+ *
+ * Issue #1507: trait_inference + guided_steps' select-type steps wire to
+ *   McqRescueDialog (AI tutor) on wrong answer — same pattern as the
+ *   閱讀理解 MCQ. ordering has no MCQ shape and is skipped.
  *
  * Designed to feel like part of the existing worksheet (matches MCQ / StoryStructure UI).
  */
@@ -12,10 +16,20 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StrategyExercise as StrategyExerciseType, StrategyExerciseOrderingItem } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
+import { useAuth } from '../../contexts/AuthContext';
+import { recordMcqAttempt } from '../../services/learningApi';
+import McqRescueDialog, { McqRescueContext } from '../reading-spotlight/McqRescueDialog';
+
+const OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 interface Props {
   exercise: StrategyExerciseType;
   onComplete?: () => void;
+  /** Lesson/story ID — passed through to rescue agent for session keying. */
+  lessonId?: string;
+  /** Reading strategy type — selects strategy-specific rescue prompt. */
+  readingStrategy?: string | null;
+  /** Persist answer state to parent (Issue #1505 — survive page refresh). */
   onChange?: (exerciseState: Record<string, unknown>) => void;
   initialState?: Record<string, unknown>;
 }
@@ -210,14 +224,24 @@ function OrderingExercise({
 function TraitInferenceExercise({
   exercise,
   onComplete,
+  lessonId,
+  readingStrategy,
 }: {
   exercise: StrategyExerciseType;
   onComplete?: () => void;
+  lessonId?: string;
+  readingStrategy?: string | null;
 }) {
+  const { token } = useAuth();
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [rescueOpen, setRescueOpen] = useState(false);
+  const [rescueContext, setRescueContext] = useState<McqRescueContext | null>(null);
 
   const correct = exercise.correct_trait ?? '';
+  const traitOptions = exercise.trait_options ?? [];
+  const isWrong = submitted && selected !== null && selected !== correct;
+  const questionId = `${lessonId ?? ''}-spotlight-trait`;
 
   const handleSelect = (trait: string) => {
     if (submitted) return;
@@ -227,12 +251,46 @@ function TraitInferenceExercise({
   const handleSubmit = () => {
     if (!selected) return;
     setSubmitted(true);
-    if (selected === correct) onComplete?.();
+    const correctAnswer = selected === correct;
+    if (correctAnswer) onComplete?.();
+
+    if (token) {
+      const labelIdx = traitOptions.indexOf(selected);
+      // Defensive slice — backend choice column is VARCHAR(8); fallback to
+      // selected text could exceed that if the option somehow isn't found
+      const choice = (labelIdx >= 0 ? OPTION_LABELS[labelIdx] : selected).slice(0, 8);
+      recordMcqAttempt(token, {
+        lesson_id: lessonId ?? '',
+        question_id: questionId,
+        choice,
+        is_correct: correctAnswer,
+      });
+    }
   };
 
   const handleReset = () => {
     setSelected(null);
     setSubmitted(false);
+  };
+
+  const openRescue = () => {
+    if (!selected) return;
+    const wrongIdx = traitOptions.indexOf(selected);
+    const correctIdx = traitOptions.indexOf(correct);
+    const labels = OPTION_LABELS.slice(0, traitOptions.length);
+    setRescueContext({
+      questionId,
+      lessonId: lessonId ?? '',
+      wrongChoice: wrongIdx >= 0 ? labels[wrongIdx] : selected,
+      wrongChoiceText: selected,
+      questionText: `根據線索推論${exercise.character ?? '主角'}的人物特質`,
+      correctAnswer: correctIdx >= 0 ? labels[correctIdx] : correct,
+      correctAnswerText: correct,
+      options: traitOptions,
+      optionLabels: labels,
+      strategyType: readingStrategy ?? null,
+    });
+    setRescueOpen(true);
   };
 
   return (
@@ -297,6 +355,24 @@ function TraitInferenceExercise({
         </div>
       )}
 
+      {/* 問 AI 助教 — opt-in on wrong answer (Issue #1507) */}
+      {isWrong && !rescueOpen && (
+        <button
+          onClick={openRescue}
+          className="w-full mb-3 flex items-center justify-center gap-2 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-100 hover:border-amber-400 transition-colors"
+        >
+          <span aria-hidden="true">🦉</span>
+          問 AI 助教，一起想想看
+        </button>
+      )}
+
+      <McqRescueDialog
+        isOpen={rescueOpen}
+        context={rescueContext}
+        onClose={() => setRescueOpen(false)}
+        onComplete={() => setRescueOpen(false)}
+      />
+
       <div className="flex gap-2">
         {!submitted && (
           <button
@@ -325,14 +401,19 @@ function TraitInferenceExercise({
 function GuidedStepsExercise({
   exercise,
   onComplete,
+  lessonId,
+  readingStrategy,
   onChange,
   initialState,
 }: {
   exercise: StrategyExerciseType;
   onComplete?: () => void;
+  lessonId?: string;
+  readingStrategy?: string | null;
   onChange?: (exerciseState: Record<string, unknown>) => void;
   initialState?: Record<string, unknown>;
 }) {
+  const { token } = useAuth();
   const steps = exercise.steps ?? [];
   const [answers, setAnswers] = useState<(string | number | null)[]>(
     () => (initialState?.answers as (string | number | null)[]) ?? steps.map(() => null),
@@ -343,10 +424,36 @@ function GuidedStepsExercise({
   const [allDone, setAllDone] = useState(
     () => !!(initialState?.allDone as boolean),
   );
+  // Track which step's rescue is open (null = none). Per-step state so that
+  // opening rescue for step 1 doesn't hide the button on step 2.
+  const [rescueStepIdx, setRescueStepIdx] = useState<number | null>(null);
+  const [rescueContext, setRescueContext] = useState<McqRescueContext | null>(null);
 
   useEffect(() => {
     onChange?.({ answers, stepFeedback, allDone, exerciseType: 'guided_steps' });
   }, [answers, stepFeedback, allDone]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openRescueForStep = (stepIdx: number) => {
+    const step = steps[stepIdx];
+    if (!step || step.type !== 'select') return;
+    const opts = step.options ?? [];
+    const labels = OPTION_LABELS.slice(0, opts.length);
+    const correctIdx = step.answer ?? 0;
+    const wrongIdx = typeof answers[stepIdx] === 'number' ? (answers[stepIdx] as number) : -1;
+    setRescueContext({
+      questionId: `${lessonId ?? ''}-spotlight-guided-${stepIdx}`,
+      lessonId: lessonId ?? '',
+      wrongChoice: wrongIdx >= 0 ? labels[wrongIdx] : '',
+      wrongChoiceText: wrongIdx >= 0 ? opts[wrongIdx] : undefined,
+      questionText: step.prompt ?? '',
+      correctAnswer: labels[correctIdx] ?? '',
+      correctAnswerText: opts[correctIdx],
+      options: opts,
+      optionLabels: labels,
+      strategyType: readingStrategy ?? null,
+    });
+    setRescueStepIdx(stepIdx);
+  };
 
   const handleTextChange = (stepIdx: number, value: string) => {
     if (stepFeedback[stepIdx] !== null) return;
@@ -368,6 +475,18 @@ function GuidedStepsExercise({
       if (answer === null) return;
       const isCorrect = answer === (step.answer ?? 0);
       setStepFeedback((prev) => prev.map((f, i) => (i === stepIdx ? isCorrect : f)));
+
+      // Telemetry — record select-step attempts (Issue #1507)
+      if (token) {
+        const labels = OPTION_LABELS.slice(0, (step.options ?? []).length);
+        const idx = answer as number;
+        recordMcqAttempt(token, {
+          lesson_id: lessonId ?? '',
+          question_id: `${lessonId ?? ''}-spotlight-guided-${stepIdx}`,
+          choice: (labels[idx] ?? String(idx)).slice(0, 8),
+          is_correct: isCorrect,
+        });
+      }
     }
 
     // Check if all steps done
@@ -466,6 +585,15 @@ function GuidedStepsExercise({
                         : `還不對，正確答案是 ${String.fromCharCode(65 + (step.answer ?? 0))}`}
                     </p>
                   )}
+                  {isDone && feedback === false && rescueStepIdx !== stepIdx && (
+                    <button
+                      onClick={() => openRescueForStep(stepIdx)}
+                      className="mt-2 w-full flex items-center justify-center gap-2 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 hover:border-amber-400 transition-colors"
+                    >
+                      <span aria-hidden="true">🦉</span>
+                      問 AI 助教，一起想想看
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -507,13 +635,27 @@ function GuidedStepsExercise({
           </button>
         </div>
       )}
+
+      <McqRescueDialog
+        isOpen={rescueStepIdx !== null}
+        context={rescueContext}
+        onClose={() => setRescueStepIdx(null)}
+        onComplete={() => setRescueStepIdx(null)}
+      />
     </div>
   );
 }
 
 // ── Main Component ──────────────────────────────────────────────────────────
 
-const StrategyExercise: React.FC<Props> = ({ exercise, onComplete, onChange, initialState }) => {
+const StrategyExercise: React.FC<Props> = ({
+  exercise,
+  onComplete,
+  lessonId,
+  readingStrategy,
+  onChange,
+  initialState,
+}) => {
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const zhuyinFont = fontForZhuyin(zhuyinActive);
 
@@ -523,8 +665,26 @@ const StrategyExercise: React.FC<Props> = ({ exercise, onComplete, onChange, ini
 
   const content = (() => {
     if (exercise.type === 'ordering') return <OrderingExercise exercise={exercise} onComplete={handleComplete} />;
-    if (exercise.type === 'trait_inference') return <TraitInferenceExercise exercise={exercise} onComplete={handleComplete} />;
-    if (exercise.type === 'guided_steps') return <GuidedStepsExercise exercise={exercise} onComplete={handleComplete} onChange={onChange} initialState={initialState} />;
+    if (exercise.type === 'trait_inference')
+      return (
+        <TraitInferenceExercise
+          exercise={exercise}
+          onComplete={handleComplete}
+          lessonId={lessonId}
+          readingStrategy={readingStrategy}
+        />
+      );
+    if (exercise.type === 'guided_steps')
+      return (
+        <GuidedStepsExercise
+          exercise={exercise}
+          onComplete={handleComplete}
+          lessonId={lessonId}
+          readingStrategy={readingStrategy}
+          onChange={onChange}
+          initialState={initialState}
+        />
+      );
     return <div className="p-4 text-on-surface-variant text-sm text-center">不支援的練習類型：{exercise.type}</div>;
   })();
 

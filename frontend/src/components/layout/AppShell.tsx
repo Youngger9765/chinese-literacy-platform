@@ -9,7 +9,7 @@
  * Header removed (2026-04-18): all header functionality (logo, story title,
  * notification bell, zhuyin toggle, logout) is now integrated into Sidebar.
  */
-import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -84,7 +84,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 };
 
 // ---------------------------------------------------------------------------
-// StepDots — progress dot row with per-dot hover/tap tooltip
+// StepDots — progress dot row with desktop hover/focus tooltip
 // ---------------------------------------------------------------------------
 
 interface StepDotsProps {
@@ -102,70 +102,44 @@ const StepDots: React.FC<StepDotsProps> = ({
   allNonReportDone,
   onStepClick,
 }) => {
-  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Close tooltip when clicking outside (mobile tap-away)
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setActiveTooltip(null);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
   return (
-    <div ref={containerRef} className="flex items-center gap-2 md:gap-3 flex-wrap justify-center min-w-0">
+    <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center min-w-0">
       {steps.map((step, i) => {
         const isCompleted = completedSet.has(step.id);
         const isActive = i === currentStepIndex;
         const isReport = step.id === 'report';
         const isLocked = isReport && !allNonReportDone;
-        const tooltipVisible = activeTooltip === step.id;
 
         let dotClass = 'bg-on-surface-variant/20';
         if (isCompleted) dotClass = 'bg-emerald-500';
         if (isActive) dotClass = 'bg-accent scale-125';
 
         return (
-          <span key={step.id} className="relative flex items-center justify-center">
+          <span key={step.id} className="group relative flex items-center justify-center">
             <button
               type="button"
               onClick={() => {
                 if (isLocked) return;
-                // Mobile: toggle tooltip on tap; navigation on second tap if tooltip already showing
-                if (activeTooltip === step.id) {
-                  setActiveTooltip(null);
-                  onStepClick(step);
-                } else {
-                  setActiveTooltip(step.id);
-                }
+                onStepClick(step);
               }}
-              onMouseEnter={() => !isLocked && setActiveTooltip(step.id)}
-              onMouseLeave={() => setActiveTooltip(null)}
               disabled={isLocked}
               className={`w-4 h-4 md:w-5 md:h-5 rounded-full transition-all hover:scale-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${dotClass}`}
               aria-label={`${i + 1}. ${step.label}${isLocked ? '（完成所有階段後解鎖）' : ''}`}
               aria-current={isActive ? 'step' : undefined}
+              title={isLocked ? `${step.label}（完成所有階段後解鎖）` : step.label}
             />
-            {/* Tooltip — shown on hover (desktop) or tap (mobile) */}
-            {tooltipVisible && (
-              <span
-                role="tooltip"
-                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none"
-              >
-                <span className="block bg-gray-900 text-white text-sm font-medium px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap leading-tight">
-                  {step.label}
-                </span>
-                {/* Arrow pointing down toward dot */}
-                <span
-                  className="block w-0 h-0 mx-auto border-x-4 border-x-transparent border-t-4 border-t-gray-900"
-                  aria-hidden="true"
-                />
+            <span
+              role="tooltip"
+              className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none opacity-0 translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0"
+            >
+              <span className="block bg-gray-900 text-white text-sm font-medium px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap leading-tight">
+                {step.label}
               </span>
-            )}
+              <span
+                className="block w-0 h-0 mx-auto border-x-4 border-x-transparent border-t-4 border-t-gray-900"
+                aria-hidden="true"
+              />
+            </span>
           </span>
         );
       })}

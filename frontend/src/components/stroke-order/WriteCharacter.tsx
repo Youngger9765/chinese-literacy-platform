@@ -30,11 +30,17 @@ interface WriteCharacterProps {
    */
   practiceMode?: 'standard' | 'outlined-once' | 'no-outline-once';
   /**
-   * #1342: colour completed strokes by their radical group on the canvas
-   * (radical strokes = accent purple, body strokes = emerald). Once every
-   * stroke is done the colours unify into the default ink colour ("合體").
+   * #1342: colour completed strokes by their component group on the canvas.
+   * Once every stroke is done the colours unify into the default ink colour
+   * ("合體"). Number of distinct colours is driven by `componentCount` below.
    */
   radicalColorMode?: boolean;
+  /**
+   * #1529: number of components for this character (from getDecomposition).
+   * One colour per component, up to the palette length (5). Defaults to 2
+   * (primary radical + body) when omitted, matching the previous behaviour.
+   */
+  componentCount?: number;
 }
 
 enum Step {
@@ -205,11 +211,13 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
   embedded = false,
   practiceMode = 'standard',
   radicalColorMode = false,
+  componentCount = 2,
 }) => {
-  // #1342: derived flags for the simplified single-shot rounds.
+  // #1342 / #1529: derived flags for the simplified single-shot rounds.
+  // outlined-once still plays the animation preview (#1529); only the recall
+  // round (no-outline-once) skips it.
   const isOutlinedOnce = practiceMode === 'outlined-once';
   const isNoOutlineOnce = practiceMode === 'no-outline-once';
-  const isSingleShot = isOutlinedOnce || isNoOutlineOnce;
   /* ---- React state (drives UI controls) ---- */
   const [data, setData] = useState<CharacterStrokeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -297,22 +305,24 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
       correctPaths: r.current.correctPaths,
       activeBrush: r.current.activeBrush,
       radicalColorMode,
+      componentCount,
     };
     renderStrokes(ctx, getOffCanvas(), state);
-  }, [getOffCanvas, radicalColorMode]);
+  }, [getOffCanvas, radicalColorMode, componentCount]);
 
   /* ---- Shared state reset (used by both initial load and retry) ---- */
   const resetState = useCallback((nStrokes: number) => {
-    // #1342 single-shot rounds:
-    //   outlined-once → PRACTICE_1 with outline still visible
-    //   no-outline-once → PRACTICE_NO_OUTLINE, outline hidden
+    // #1342 / #1529 single-shot rounds:
+    //   outlined-once → ANIMATION first (preview stroke order), then a single
+    //     PRACTICE_1 trace once the student clicks 開始練習. Restored in #1529
+    //     so children see the correct stroke order before writing — without
+    //     having to wait the full animation out (skip button stays available).
+    //   no-outline-once → PRACTICE_NO_OUTLINE, outline hidden, no preview.
     // standard preserves the original animation-led 4-trace flow.
     let initialStep = Step.ANIMATION;
     let outlineOn = true;
     let leftCount = 4;
     if (isOutlinedOnce) {
-      initialStep = Step.PRACTICE_1;
-      outlineOn = true;
       leftCount = 1;
     } else if (isNoOutlineOnce) {
       initialStep = Step.PRACTICE_NO_OUTLINE;
@@ -462,9 +472,10 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
   useEffect(() => {
     if (data && pendingAutoStartRef.current) {
       pendingAutoStartRef.current = false;
-      // #1342 single-shot rounds skip the animation preview and drop the
-      // student straight into the practice quiz (outlined or no-outline).
-      if (isSingleShot) {
+      // #1529: only the recall round (no-outline-once) skips the animation.
+      // outlined-once now plays the stroke-order preview (with a 開始 button)
+      // so children see the correct stroke order before writing.
+      if (isNoOutlineOnce) {
         isAutoLoopingRef.current = false;
         startQuizRef.current();
       } else {
@@ -472,7 +483,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         startAnimation();
       }
     }
-  }, [data, isSingleShot, startAnimation]);
+  }, [data, isNoOutlineOnce, startAnimation]);
 
   /* ================================================================ */
   /*  Quiz (writing practice)                                          */

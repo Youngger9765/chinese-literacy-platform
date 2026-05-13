@@ -68,6 +68,8 @@ const StrategyExercisePage: React.FC = () => {
           <StrategyExercise
             exercise={selectedStory.strategyExercise!}
             onComplete={handleStrategyComplete}
+            lessonId={selectedStory.id}
+            readingStrategy={selectedStory.readingStrategy}
             onChange={handleAnswerChange}
             initialState={savedStrategyData}
           />
