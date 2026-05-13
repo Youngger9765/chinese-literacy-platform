@@ -65,7 +65,7 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
           {/* ── Left column ──────────────────────────────────────────────────── */
           /* graphic-text: text top + images bottom (stacked, 60/40 split)        */
           /* standard:     text only, col-span-7                                  */}
-          <div className={`${isGraphicText ? 'md:col-span-5' : 'md:col-span-7'} min-h-0 flex flex-col gap-4`}>
+          <div className={`${isGraphicText ? 'md:col-span-8' : 'md:col-span-7'} min-h-0 flex flex-col gap-4`}>
 
             {/* Story text card */}
             <div className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full min-h-0 ${isGraphicText ? 'flex-[3]' : 'flex-1'}`}>
@@ -124,7 +124,7 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
           </div>
 
           {/* ── Right: Exercise panel ─────────────────────────────────────────── */}
-          <div className={`${isGraphicText ? 'md:col-span-7' : 'md:col-span-5'} min-h-0 flex flex-col`}>
+          <div className={`${isGraphicText ? 'md:col-span-4' : 'md:col-span-5'} min-h-0 flex flex-col`}>
             <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
               {children}
             </div>
