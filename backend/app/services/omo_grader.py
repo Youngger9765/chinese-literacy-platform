@@ -46,9 +46,11 @@ def _build_question_schema(lesson: dict) -> list[dict]:
     """Extract expected-answer schema from lesson YAML for the grading prompt."""
     questions = []
 
-    # fill_in_blank section
-    fb = lesson.get("fill_in_blank") or {}
-    for qid, item in fb.items() if isinstance(fb, dict) else []:
+    # fill_in_blank section — accepts list[dict] or dict[str, dict]
+    fb = lesson.get("fill_in_blank") or []
+    fb_items = fb.items() if isinstance(fb, dict) else enumerate(fb)
+    for key, item in fb_items:
+        qid = str(key) if isinstance(fb, dict) else f"fb_{key+1}"
         if isinstance(item, dict):
             correct = item.get("answer", "")
             context = item.get("context", item.get("sentence", ""))
@@ -62,12 +64,14 @@ def _build_question_schema(lesson: dict) -> list[dict]:
             "correct_answer": correct,
         })
 
-    # multiple_choice section
-    mc = lesson.get("multiple_choice") or {}
-    for qid, item in mc.items() if isinstance(mc, dict) else []:
+    # multiple_choice section — accepts list[dict] or dict[str, dict]
+    mc = lesson.get("multiple_choice") or []
+    mc_items = mc.items() if isinstance(mc, dict) else enumerate(mc)
+    for key, item in mc_items:
+        qid = str(key) if isinstance(mc, dict) else f"mc_{key+1}"
         if isinstance(item, dict):
             correct = item.get("answer", "")
-            context = item.get("question", "")
+            context = item.get("question", item.get("sentence", ""))
         else:
             correct = str(item)
             context = ""
