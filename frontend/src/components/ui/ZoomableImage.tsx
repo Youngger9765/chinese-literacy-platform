@@ -26,6 +26,10 @@ const ZoomableImage: React.FC<ZoomableImageProps> = ({ src, alt, caption, classN
   useFocusTrap(dialogRef, open);
 
   useEffect(() => {
+    setImgError(false);
+  }, [src]);
+
+  useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
     document.addEventListener('keydown', onKey);
