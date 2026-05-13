@@ -9,7 +9,7 @@
 /* ── viewport base (per frontend-slides skill) ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { overflow-x: hidden; }
-html { scroll-snap-type: y mandatory; scroll-behavior: smooth; height: 100%; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; height: 100%; font-size: 32px; }
 body { min-height: 100vh; }
 body {
   font-family: "Noto Serif TC", "Songti TC", serif;
@@ -93,7 +93,7 @@ body {
   flex-direction: column;
   justify-content: center;
   max-height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* ── slide 1 cover ── */
@@ -172,18 +172,9 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* ── PDCA badge ── */
+/* ── PDCA badge (hidden — slide-step at top-right already conveys phase) ── */
 .pdca {
-  display: inline-block;
-  font-family: "Noto Sans TC", sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  padding: 4px 14px;
-  border-radius: 999px;
-  background: var(--purple);
-  color: white;
-  margin-bottom: 1.5vh;
+  display: none;
 }
 .pdca.plan { background: var(--purple); }
 .pdca.do { background: var(--emerald); }
