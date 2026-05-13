@@ -1,3 +1,29 @@
+<!-- BEGIN:codex-claude-bridge -->
+# AGENTS.md - Codex Project Bridge
+
+This repo has project-specific Claude Code instructions in `CLAUDE.md`
+
+## Load Order
+
+1. Follow global `/Users/young/.codex/AGENTS.md`
+2. Follow this `AGENTS.md`
+3. Read `./CLAUDE.md` before edits, commands, commits, deploys, repo routing, or project decisions
+
+## Claude To Codex Translation
+
+- Treat `CLAUDE.md` as the project source of truth for architecture, commands, branch rules, safety rules, client boundaries, and verification requirements
+- Claude slash commands are intent labels. In Codex, execute the equivalent scripts, tests, or documented commands directly
+- Claude hooks and cron reminders are not guaranteed in Codex. Manually perform the same checks before claiming completion
+- Claude subagents are not automatically available in Codex. Use Codex built-in tools and only delegate when explicitly allowed by active Codex instructions
+- If `CLAUDE.md` conflicts with global Codex instructions, follow the stricter safety rule and mention the conflict
+- Do not copy secrets from Claude config, `.env`, credentials, or local auth files into output
+
+## Project Source
+
+- Project: `chinese-literacy-platform`
+- Claude project file: `CLAUDE.md`
+<!-- END:codex-claude-bridge -->
+
 # AGENTS.md — OpenAI Codex 規則
 
 > 此檔案供 OpenAI Codex / Copilot Agent 使用
