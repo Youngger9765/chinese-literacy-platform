@@ -73,9 +73,10 @@ function getStepStatus(
 // -- Step badge sub-component --
 const StepBadge: React.FC<{
   step: number;
+  displayChar: string;
   status: StepStatus;
   category?: 'reading' | 'comprehension' | 'practice' | 'report';
-}> = ({ step, status, category }) => {
+}> = ({ displayChar, status, category }) => {
   const categoryColors = category ? STEP_CATEGORY_COLORS[category] : null;
 
   const styleMap: Record<StepStatus, string> = {
@@ -87,14 +88,14 @@ const StepBadge: React.FC<{
 
   return (
     <span
-      className={`w-6 h-6 text-xs rounded-full flex items-center justify-center font-bold shrink-0 ${styleMap[status]}`}
+      className={`w-10 h-10 text-lg rounded-full flex items-center justify-center font-bold shrink-0 ${styleMap[status]}`}
     >
       {status === 'completed' ? (
-        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       ) : (
-        step
+        displayChar
       )}
     </span>
   );
@@ -145,35 +146,47 @@ const StepperNav: React.FC<StepperNavProps> = ({
         )}
 
         {/* Step pills */}
-        {steps.map((stepDef) => {
-          const status = getStepStatus(stepDef, currentView, session, selectedStory);
-          const isActive = status === 'active';
-          const isDisabled = status === 'disabled';
-          const categoryColors = STEP_CATEGORY_COLORS[stepDef.category];
+        {(() => {
+          // Detect duplicate first-char among enabled steps; for collisions fall back to step number
+          // so the compact mobile badge stays uniquely identifiable.
+          const firstCharCount = new Map<string, number>();
+          steps.forEach((s) => {
+            const c = s.label.charAt(0);
+            firstCharCount.set(c, (firstCharCount.get(c) ?? 0) + 1);
+          });
 
-          return (
-            <button
-              key={stepDef.view}
-              onClick={() => !isDisabled && onNavigate(stepDef.view)}
-              disabled={isDisabled}
-              aria-current={isActive ? 'step' : undefined}
-              aria-label={`步驟 ${stepDef.step}：${stepDef.label}（${isActive ? '目前' : isDisabled ? '未解鎖' : status === 'completed' ? '已完成' : '未完成'}）`}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
-                isActive
-                  ? `${categoryColors.activeBg} ${categoryColors.text}`
-                  : isDisabled
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`}
-            >
-              <StepBadge step={stepDef.step} status={status} category={stepDef.category} />
-              {/* Show label on desktop, hide on mobile to save space */}
-              <span className={`hidden md:inline text-xs leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
-                {stepDef.label}
-              </span>
-            </button>
-          );
-        })}
+          return steps.map((stepDef) => {
+            const status = getStepStatus(stepDef, currentView, session, selectedStory);
+            const isActive = status === 'active';
+            const isDisabled = status === 'disabled';
+            const categoryColors = STEP_CATEGORY_COLORS[stepDef.category];
+            const firstChar = stepDef.label.charAt(0);
+            const displayChar = (firstCharCount.get(firstChar) ?? 0) > 1 ? String(stepDef.step) : firstChar;
+
+            return (
+              <button
+                key={stepDef.view}
+                onClick={() => !isDisabled && onNavigate(stepDef.view)}
+                disabled={isDisabled}
+                aria-current={isActive ? 'step' : undefined}
+                aria-label={`步驟 ${stepDef.step}：${stepDef.label}（${isActive ? '目前' : isDisabled ? '未解鎖' : status === 'completed' ? '已完成' : '未完成'}）`}
+                className={`flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 ${
+                  isActive
+                    ? `${categoryColors.activeBg} ${categoryColors.text}`
+                    : isDisabled
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:scale-105'
+                }`}
+              >
+                <StepBadge step={stepDef.step} displayChar={displayChar} status={status} category={stepDef.category} />
+                {/* Show full label text on desktop alongside the circle */}
+                <span className={`hidden md:inline text-xs leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                  {stepDef.label}
+                </span>
+              </button>
+            );
+          });
+        })()}
       </div>
     </nav>
   );
