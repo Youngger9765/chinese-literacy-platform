@@ -81,6 +81,9 @@ const TeacherAssignmentsPage = lazy(() => import('../pages/teacher/TeacherAssign
 const TeacherSessionReportPage = lazy(() => import('../pages/teacher/TeacherSessionReportPage'));
 const ProjectHubPage = lazy(() => import('../pages/ProjectHubPage'));
 
+// OMO (Online-Merge-Offline) paper worksheet upload (Issue #1343)
+const OmoPage = lazy(() => import('../pages/omo/OmoPage'));
+
 // Utility pages — rarely visited after first load
 const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
 const HelpPage = lazy(() => import('../pages/HelpPage'));
@@ -437,6 +440,15 @@ const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <JoinClassroomPage />
+          </ProtectedRoute>
+        }
+      />
+      {/* OMO — paper worksheet upload + AI lesson identification (Phase 1, Issue #1343) */}
+      <Route
+        path="/omo"
+        element={
+          <ProtectedRoute>
+            <OmoPage />
           </ProtectedRoute>
         }
       />
