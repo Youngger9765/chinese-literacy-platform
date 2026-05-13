@@ -65,9 +65,10 @@ function readStoredMode(): ZhuyinMode {
     // Migrate from old boolean key
     const legacy = localStorage.getItem(LEGACY_KEY);
     if (legacy === 'false') return 'none';
-    return 'all';
+    // Default for first-time visitors: no annotation (cleaner reading surface)
+    return 'none';
   } catch {
-    return 'all';
+    return 'none';
   }
 }
 
@@ -95,13 +96,13 @@ interface ZhuyinContextValue {
 }
 
 const ZhuyinContext = createContext<ZhuyinContextValue>({
-  zhuyinMode: 'all',
+  zhuyinMode: 'none',
   zhuyinReady: false,
   zhuyinActive: false,
   isZhuyinAny: false,
   isZhuyinAll: false,
-  isZhuyinNone: false,
-  zhuyinEnabled: true,
+  isZhuyinNone: true,
+  zhuyinEnabled: false,
   setZhuyinMode: () => {},
   setZhuyinEnabled: () => {},
   toggleZhuyin: () => {},
