@@ -43,7 +43,7 @@ router = APIRouter(tags=["omo"])
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 _MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024   # 10MB per image
-_MAX_FILES_PER_UPLOAD = 5                  # max files per single upload call
+_MAX_FILES_PER_UPLOAD = 20                  # max files per single upload call
 _MAX_TOTAL_ATTEMPTS = 5                    # max attempts per upload session
 _OMO_GCS_BUCKET = os.environ.get("GCS_OMO_BUCKET", "lingoleap-omo-uploads")
 _ALLOWED_MIME_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
