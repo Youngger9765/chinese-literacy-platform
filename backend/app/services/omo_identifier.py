@@ -102,12 +102,13 @@ Known lessons:
 Instructions:
 1. Read all visible text in the image, especially the large title text at the top.
 2. Compare the extracted title, opening sentences, and vocabulary words against the known lessons above.
-3. Return your top-3 best-matching candidates, sorted by confidence (highest first).
+3. Return AT MOST 3 best-matching candidates, sorted by confidence (highest first).
 4. Use confidence 0.0–1.0 where:
    - 0.9+ = title matches exactly or near-exactly
    - 0.7–0.89 = partial title match or story text matches
    - 0.4–0.69 = vocabulary or content theme matches
    - <0.4 = weak or speculative match
+5. Keep each `reasoning` to ≤ 15 Chinese characters. Be terse — do not explain at length.
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation outside JSON):
 {{
@@ -118,7 +119,7 @@ Respond ONLY with valid JSON in this exact format (no markdown, no explanation o
       "grade_code": "<string>",
       "title": "<string>",
       "confidence": <float 0.0-1.0>,
-      "reasoning": "<one sentence explaining why you matched this lesson>"
+      "reasoning": "<≤15 Chinese characters>"
     }}
   ]
 }}
@@ -179,7 +180,7 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
             ],
             config=genai_types.GenerateContentConfig(
                 temperature=0.1,  # Low temperature for deterministic identification
-                max_output_tokens=2048,  # bumped from 512 — 7 lessons × top-3 with reasoning can exceed 512
+                max_output_tokens=3072,  # bumped 2048→3072: terse prompt still needs buffer for 158-lesson corpus
             ),
         )
 
