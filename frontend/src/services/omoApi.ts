@@ -85,12 +85,6 @@ export interface OmoFlagResponse {
   flagged: boolean;
 }
 
-export interface OmoFlagResponse {
-  upload_id: number;
-  question_id: string;
-  flagged: boolean;
-}
-
 // ---------------------------------------------------------------------------
 // API calls
 // ---------------------------------------------------------------------------
@@ -220,31 +214,4 @@ export async function getOmoLessons(token: string): Promise<OmoLessonSummary[]> 
     throw new Error(`Lessons fetch failed (${res.status}): ${text}`);
   }
   return res.json() as Promise<OmoLessonSummary[]>;
-}
-
-/**
- * Flag a question as incorrectly graded.
- */
-export async function flagOmoAnswer(
-  uploadId: number,
-  questionId: string,
-  reason: string,
-  token: string,
-): Promise<OmoFlagResponse> {
-  const res = await fetch(
-    `${API_BASE}/api/omo/${uploadId}/answers/${encodeURIComponent(questionId)}/flag`,
-    {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ reason }),
-    },
-  );
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Flag failed (${res.status}): ${text}`);
-  }
-  return res.json() as Promise<OmoFlagResponse>;
 }
