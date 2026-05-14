@@ -158,12 +158,17 @@ export interface Story {
     lesson_label?: string;
     authors?: string;
   };
-  /** Lesson intro — real course introduction (#1443).
-   *  source: 'docx_explanation' | 'docx_guide' | 'excel'
-   *  Preferred over intro.background (which is just the first story paragraph). */
+  /** Lesson intro — real course introduction (#1443, refined by #1598).
+   *  - `course_intro`: AI/PDF 課文簡介（教師 6/1 review 期望內容；the "what is this lesson about")
+   *  - `text`: legacy field, repurposed by #1598 as 學習策略 explanation
+   *    (e.g. "圖文題就是文字帶著插圖的題目..."); rendered in the 學習策略 hint section
+   *  - `source`: provenance of legacy `text` only
+   *  - `course_intro_source`: provenance of `course_intro` (e.g. "ai-generated-2026-05-14") */
   lessonIntro?: {
     source: 'docx_explanation' | 'docx_guide' | 'excel';
     text: string;
+    course_intro?: string;
+    course_intro_source?: string;
     unit_topic?: string;
     strategy_title?: string;
   };
