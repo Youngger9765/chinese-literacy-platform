@@ -10,7 +10,7 @@
  *  - Skip button for round 2 (tracked but not blocking)
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Story, ReadingAttempt, VocabResult } from '../../types';
 import { hasStrokeData } from '../stroke-order/strokeData';
 import WriteCharacter from '../stroke-order/WriteCharacter';
@@ -20,22 +20,45 @@ import RadicalDecomposition from './RadicalDecomposition';
 import { getDecomposition, initGeneratedDecompositions, initRadicalMeanings } from '../../data/radicals';
 import { scopedStepStorageKey, isToolboxMode } from '../../services/learningStorageScope';
 import ToolboxCompletionActions from '../tools/ToolboxCompletionActions';
+import type { VocabStepData } from '../../types/stepProgress';
 
 interface VocabPracticeProps {
   story: Story;
   attempt: ReadingAttempt | null;
   onFinish: (result: VocabResult) => void;
   onBack: () => void;
+  /** Rehydrate from previously saved step_progress.step_data['vocab']. */
+  initialProgress?: VocabStepData;
+  /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
+  onProgressChange?: (stepData: VocabStepData, immediate?: boolean) => void;
 }
 
 /** Per-character practice round state */
 type CharRound = 1 | 2 | 'done';
 
+/** Convert in-memory round state to wire format (1=round1, 2=round2, 3=done). */
+function roundToCode(r: CharRound): number {
+  return r === 'done' ? 3 : r;
+}
+
+function codeToRound(c: number): CharRound {
+  if (c === 3) return 'done';
+  if (c === 2) return 2;
+  return 1;
+}
+
 /* ================================================================ */
 /*  Main component                                                   */
 /* ================================================================ */
 
-const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish, onBack }) => {
+const VocabPractice: React.FC<VocabPracticeProps> = ({
+  story,
+  attempt,
+  onFinish,
+  onBack,
+  initialProgress,
+  onProgressChange,
+}) => {
   // Load generated decomposition data
   const [decompReady, setDecompReady] = useState(false);
   useEffect(() => {
@@ -43,34 +66,66 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   }, []);
 
   const storageKey = scopedStepStorageKey('vocabPractice_progress_', story.id);
-  const loadSaved = () => {
+
+  // Rehydration order: DB-loaded initialProgress → localStorage → empty (Issue #1549).
+  const loadFromLocalStorage = () => {
     try {
       const raw = localStorage.getItem(storageKey);
       if (!raw) return null;
       return JSON.parse(raw) as { practicedChars: string[]; currentIndex: number };
     } catch { return null; }
   };
-  const savedProgress = useRef(loadSaved());
+  const savedProgress = useRef(loadFromLocalStorage());
 
-  const [practicedChars, setPracticedChars] = useState<Set<string>>(
-    () => new Set(savedProgress.current?.practicedChars ?? [])
-  );
-  const [currentIndex, setCurrentIndex] = useState(savedProgress.current?.currentIndex ?? 0);
+  const [practicedChars, setPracticedChars] = useState<Set<string>>(() => {
+    if (initialProgress?.practiced_chars?.length) return new Set(initialProgress.practiced_chars);
+    return new Set(savedProgress.current?.practicedChars ?? []);
+  });
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    if (typeof initialProgress?.current_index === 'number') return initialProgress.current_index;
+    return savedProgress.current?.currentIndex ?? 0;
+  });
 
   // ── #1342: per-character round tracking ──────────────────────────
   // charRounds maps char → current round. Characters start at round 1.
   // "done" = both rounds completed (or round 2 skipped).
-  const [charRounds, setCharRounds] = useState<Map<string, CharRound>>(new Map());
+  const [charRounds, setCharRounds] = useState<Map<string, CharRound>>(() => {
+    const m = new Map<string, CharRound>();
+    if (initialProgress?.char_rounds) {
+      for (const [ch, code] of Object.entries(initialProgress.char_rounds)) {
+        m.set(ch, codeToRound(code as number));
+      }
+    }
+    return m;
+  });
 
   // Whether the "合體" merge animation is playing between round 1 → 2
   const [showMergeAnimation, setShowMergeAnimation] = useState(false);
 
   // Tracks which chars had round 2 skipped (for analytics / reporting)
-  const skippedRecallRef = useRef<Set<string>>(new Set());
+  const skippedRecallRef = useRef<Set<string>>(
+    new Set(initialProgress?.skipped_recall ?? [])
+  );
 
   const { zhuyinActive, processZhuyin } = useZhuyin();
 
-  // Persist progress
+  // Build the step_data payload from current state — pure, called by the persist effect.
+  const buildStepData = useCallback(
+    (overrides?: Partial<VocabStepData>): VocabStepData => {
+      const charRoundsObj: Record<string, number> = {};
+      charRounds.forEach((r, ch) => { charRoundsObj[ch] = roundToCode(r); });
+      return {
+        practiced_chars: Array.from(practicedChars),
+        current_index: currentIndex,
+        char_rounds: charRoundsObj,
+        skipped_recall: Array.from(skippedRecallRef.current),
+        ...(overrides ?? {}),
+      };
+    },
+    [practicedChars, currentIndex, charRounds],
+  );
+
+  // Persist progress — localStorage (immediate) + DB (debounced).
   useEffect(() => {
     try {
       localStorage.setItem(storageKey, JSON.stringify({
@@ -78,7 +133,8 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
         currentIndex,
       }));
     } catch {}
-  }, [practicedChars, currentIndex, storageKey]);
+    onProgressChange?.(buildStepData(), false);
+  }, [practicedChars, currentIndex, charRounds, storageKey, onProgressChange, buildStepData]);
 
   // Characters to practice
   const displayChars = useMemo(() => {
@@ -191,6 +247,12 @@ const VocabPractice: React.FC<VocabPracticeProps> = ({ story, attempt, onFinish,
   })();
 
   const handleFinish = () => {
+    // Immediate flush with the result summary so teacher dashboard can read it
+    // directly from step_data['vocab'].result (Issue #1549).
+    onProgressChange?.(
+      buildStepData({ result: { practiced_words: vocabWords, total_words: vocabWords.length } }),
+      true,
+    );
     onFinish({ practicedWords: vocabWords, totalWords: vocabWords.length });
   };
 

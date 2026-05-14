@@ -43,10 +43,15 @@ export interface ComprehensionStepData {
 export interface VocabStepData {
   practiced_chars: string[];
   current_index: number;
-  /** Map of character → completed round number (1-3). */
+  /** Map of character → round-state code: 1 = round 1, 2 = round 2, 3 = done. */
   char_rounds?: Record<string, number>;
   /** Characters the learner skipped during recall round (round 2). */
   skipped_recall?: string[];
+  /** Summary written on completion. */
+  result?: {
+    practiced_words: string[];
+    total_words: number;
+  };
 }
 
 /** Step 5 — DictationPractice (听写). */

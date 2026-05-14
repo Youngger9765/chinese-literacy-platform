@@ -261,6 +261,8 @@ const LearningLayout: React.FC = () => {
   // ── Loading / error states ────────────────────────────────────────────────
 
 
+
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
