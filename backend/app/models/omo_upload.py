@@ -1,6 +1,7 @@
 """OMO (Online-Merge-Offline) upload models.
 
 Phase 1a: upload + AI lesson identification + multi-attempt + grading.
+Phase 1b: image_hash dedup on OmoUploadAttempt.
 
 sqlalchemy-model-safety checklist:
 - FK with index=True (Rule 1) ✅
@@ -8,6 +9,7 @@ sqlalchemy-model-safety checklist:
 - relationship with cascade + lazy (Rule 3) ✅
 - JSONB columns with server_default (Rule 4) ✅
 - status enum as String(32) with server_default (Rule 5) ✅
+- image_hash index=True (Rule 1) ✅
 """
 
 from datetime import datetime
@@ -149,6 +151,14 @@ class OmoUploadAttempt(Base):
         JSONB, nullable=False, server_default="'[]'::jsonb"
     )
 
+    # SHA-256 content hash of the primary uploaded image (first file).
+    # Used for dedup: if same hash + same student already exists, skip re-identification.
+    # Empty string for legacy records that pre-date Phase 1b.
+    # index=False here — the index is declared in __table_args__ below to avoid duplication.
+    image_hash: Mapped[str] = mapped_column(
+        String(64), nullable=False, server_default=""
+    )
+
     # Short OCR preview text extracted from the image (for display before grading)
     ocr_preview: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
@@ -169,4 +179,5 @@ class OmoUploadAttempt(Base):
 
     __table_args__ = (
         Index("ix_omo_upload_attempts_upload_id", "omo_upload_id"),
+        Index("ix_omo_upload_attempts_image_hash", "image_hash"),
     )
