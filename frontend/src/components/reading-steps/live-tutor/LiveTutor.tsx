@@ -64,6 +64,10 @@ interface LiveTutorProps {
   onParagraphComplete?: (completedParagraphIndex: number) => void;
   /** Initial set of completed paragraph indices (for session resume). */
   initialCompletedParagraphs?: Set<number>;
+  /** Rehydrate from previously saved step_progress.step_data['tutor'] (Issue #1549). */
+  initialProgress?: TutorStepData;
+  /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
+  onProgressChange?: (stepData: TutorStepData, immediate?: boolean) => void;
 }
 
 const LiveTutor: React.FC<LiveTutorProps> = ({
@@ -74,6 +78,8 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
   onCancel: _onCancel,
   onParagraphComplete,
   initialCompletedParagraphs,
+  initialProgress,
+  onProgressChange,
 }) => {
   const { px: fontSizePx } = useFontSize();
   const { isZhuyinAny, processLinesSelective } = useZhuyin();

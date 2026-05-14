@@ -16,15 +16,27 @@ export interface IntroStepData {
 /** Step 2 — LiveTutor (per-paragraph reading evaluation). */
 export interface TutorParagraphSummary {
   paragraph_index: number;
-  cpm: number | null;
-  accuracy: number | null;
+  /** Cumulative attempts on this paragraph. */
   attempts: number;
-  completed_at?: string;
+  /** Match-rate of the latest attempt (0..1). */
+  match_rate: number;
+  cpm: number;
+  duration_ms: number;
 }
 
 export interface TutorStepData {
   completed_paragraphs: number[];
   paragraph_summaries: TutorParagraphSummary[];
+  /** Current paragraph the learner is on (for resume). */
+  current_line_index?: number;
+  /** Final reading attempt summary, written when the whole flow finishes. */
+  reading_attempt?: {
+    storyId: string;
+    accuracy: number;
+    cpm: number;
+    transcription?: string;
+    timestamp: number;
+  };
 }
 
 /** Step 3 — Comprehension (multi-tab chat / mcq / strategy). */
