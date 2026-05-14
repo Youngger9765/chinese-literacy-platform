@@ -13,7 +13,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { getOmoStatus, confirmOmoLesson, regradeOmo, getOmoLessons } from '../../services/omoApi';
-import type { OmoCandidate, OmoStatus, OmoLessonSummary } from '../../services/omoApi';
+import type { OmoCandidate, OmoStatus, OmoLessonSummary, OmoAnswerItem } from '../../services/omoApi';
 import { OMO_CONF_HIGH, OMO_CONF_MEDIUM } from './omoConfidenceThresholds';
 
 const POLL_INTERVAL_MS = 2000;
@@ -31,7 +31,7 @@ interface OmoIdentifyResultProps {
   /** Called if user wants to go back and re-upload */
   onRetry: () => void;
   /** Called when grading completes (status=graded) */
-  onGraded?: (uploadId: number) => void;
+  onGraded?: (answers: OmoAnswerItem[], score: number | null, title?: string) => void;
 }
 
 const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
@@ -50,6 +50,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
   const [confirmed, setConfirmed] = useState(false);
   const [regrading, setRegrading] = useState(false);
   const [showAlreadyGraded, setShowAlreadyGraded] = useState(alreadyGraded);
+  const [confirmedTitle, setConfirmedTitle] = useState<string | undefined>(undefined);
 
   // Manual picker state (for low-confidence / unclear case)
   const [showManualPicker, setShowManualPicker] = useState(false);
@@ -80,7 +81,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
         if (data.error_message) setErrorMessage(data.error_message);
         if (data.status === 'graded') {
           if (intervalRef.current) clearInterval(intervalRef.current);
-          onGraded?.(uploadId);
+          onGraded?.(data.answers ?? [], data.overall_score ?? null, confirmedTitle);
         } else if (
           data.status !== 'pending' &&
           data.status !== 'identifying' &&
@@ -96,14 +97,15 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
     void poll();
     intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [uploadId, token, alreadyGraded, onGraded]);
+  }, [uploadId, token, alreadyGraded, onGraded, confirmedTitle]);
 
   // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------
-  const handleConfirm = async (lessonId: number) => {
+  const handleConfirm = async (lessonId: number, lessonTitle?: string) => {
     setConfirming(true);
     setShowManualPicker(false);
+    if (lessonTitle) setConfirmedTitle(lessonTitle);
     try {
       await confirmOmoLesson(uploadId, lessonId, token);
       setConfirmed(true);
@@ -136,7 +138,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
           setStatus(data.status);
           if (data.status === 'graded') {
             if (intervalRef.current) clearInterval(intervalRef.current);
-            onGraded?.(uploadId);
+            onGraded?.(data.answers ?? [], data.overall_score ?? null, confirmedTitle);
           }
         } catch { /* ignore transient */ }
       }, POLL_INTERVAL_MS);
@@ -184,7 +186,14 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
         </div>
         <button
           type="button"
-          onClick={() => onGraded?.(uploadId)}
+          onClick={async () => {
+            try {
+              const data = await getOmoStatus(uploadId, token);
+              onGraded?.(data.answers ?? [], data.overall_score ?? null, undefined);
+            } catch {
+              onGraded?.([], cachedScore ?? null, undefined);
+            }
+          }}
           className="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
         >
           看上次結果
@@ -314,7 +323,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
                 key={lesson.lesson_id}
                 type="button"
                 disabled={confirming}
-                onClick={() => handleConfirm(lesson.lesson_id)}
+                onClick={() => handleConfirm(lesson.lesson_id, `${lesson.grade_code} ${lesson.title}`)}
                 className="flex items-center gap-3 w-full bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 rounded-xl px-4 py-3 text-left transition-colors disabled:opacity-60"
               >
                 <span className="shrink-0 text-xs font-semibold text-blue-600 bg-blue-100 rounded-lg px-2 py-1">
@@ -394,7 +403,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
         {/* Prominent confirm */}
         <button
           type="button"
-          onClick={() => handleConfirm(topCandidate.lesson_id)}
+          onClick={() => handleConfirm(topCandidate.lesson_id, `${topCandidate.grade_code} ${topCandidate.title}`)}
           disabled={confirming}
           className="w-full py-4 px-6 bg-green-600 hover:bg-green-700 disabled:opacity-60
             text-white font-bold text-lg rounded-xl transition-colors
@@ -436,7 +445,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
             key={c.lesson_id}
             type="button"
             disabled={confirming}
-            onClick={() => handleConfirm(c.lesson_id)}
+            onClick={() => handleConfirm(c.lesson_id, `${c.grade_code} ${c.title}`)}
             className={`
               flex items-start gap-3 w-full rounded-2xl px-4 py-4 text-left transition-all
               border-2 hover:border-blue-400 hover:bg-blue-50
