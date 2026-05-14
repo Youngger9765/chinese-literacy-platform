@@ -46,12 +46,9 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
 
-    // Fallback chain: lessonIntro.text → worksheetIntro.target_strategy → intro.background
-    const introText =
-      story.lessonIntro?.text ||
-      story.worksheetIntro?.target_strategy ||
-      story.intro?.background ||
-      '';
+    // #1598: 課文簡介 only — never fall back to strategy/target text (which would
+    // read aloud "圖文題就是..." instead of the actual lesson topic).
+    const introText = story.lessonIntro?.course_intro || story.intro?.background || '';
     if (!introText) return;
 
     const authorPart = story.intro ? `作者：${story.intro.author}。` : '';
@@ -168,56 +165,22 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
             </div>
           )}
 
-          {/* 學習目標 banner — worksheet_intro.target_strategy (#1434) */}
-          {story.worksheetIntro?.target_strategy && (
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 space-y-3">
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
-                <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">學習目標</span>
-              </div>
-              <p className={`text-blue-800 text-xl font-semibold ${zhuyinActive ? 'leading-[3rem] tracking-[0.3em]' : 'leading-[1.5]'}`}>
-                {processZhuyin(story.worksheetIntro.target_strategy)}
-              </p>
-
-              {/* 學習提示 checklist */}
-              {story.worksheetIntro.instructions && story.worksheetIntro.instructions.length > 0 && (
-                <ul className="space-y-1.5 pt-1" aria-label="學習提示">
-                  {story.worksheetIntro.instructions.map((item, idx) => (
-                    <li key={idx} className={`flex items-start gap-2 text-blue-700 ${zhuyinActive ? 'text-lg leading-[2.8rem] tracking-[0.2em]' : 'text-base leading-[1.6]'}`}>
-                      <span className="mt-1 flex-shrink-0 text-blue-400" aria-hidden="true">&#9655;</span>
-                      <span>{processZhuyin(item)}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-
-          {/* Background section — fallback chain: lessonIntro.text → worksheetIntro.target_strategy → intro.background (#1443) */}
+          {/* 課文簡介 — #1598: only uses lessonIntro.course_intro (AI/PDF generated)
+              or intro.background fallback. No longer falls back to strategy
+              content (which used to leak into 課文簡介 and confuse students). */}
           {(() => {
-            const introText =
-              story.lessonIntro?.text ||
-              story.worksheetIntro?.target_strategy ||
-              story.intro?.background;
-
-            // Source provenance label for reviewers/教授
-            const sourceLabel = story.lessonIntro
-              ? story.lessonIntro.source === 'docx_explanation'
-                ? '資料來源：學習單說明'
-                : story.lessonIntro.source === 'docx_guide'
-                  ? '資料來源：學習單導讀'
-                  : '資料來源：教材總表'
-              : null;
-
+            const introText = story.lessonIntro?.course_intro || story.intro?.background;
             if (!introText) {
-              return !story.worksheetIntro ? (
+              return (
                 <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 text-gray-500 text-sm">
                   這篇課文目前沒有簡介資料。
                 </div>
-              ) : null;
+              );
             }
+
+            const sourceLabel = story.lessonIntro?.course_intro_source?.startsWith('ai-generated')
+              ? `資料來源：AI 生成（${story.lessonIntro.course_intro_source.replace('ai-generated-', '')}）`
+              : null;
 
             return (
               <div className="bg-surface-container-low border border-gray-200 rounded-2xl p-6 space-y-4">
@@ -231,12 +194,10 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
                   {processZhuyin(introText)}
                 </p>
 
-                {/* Source provenance label (#1443) — unobtrusive, for reviewers */}
                 {sourceLabel && (
                   <p className="text-xs text-on-surface-variant">{sourceLabel}</p>
                 )}
 
-                {/* TTS button */}
                 <div className="pt-2">
                   {isSpeaking ? (
                     <button
@@ -270,6 +231,43 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               </div>
             );
           })()}
+
+          {/* 💡 本課學習策略 — #1598: hint-style banner combining the strategy
+              name (worksheetIntro.target_strategy), instructions checklist,
+              and the longer strategy explanation (lessonIntro.text, which
+              used to leak into 課文簡介). */}
+          {(story.worksheetIntro?.target_strategy ||
+            (story.lessonIntro?.text && story.lessonIntro.source !== 'excel')) && (
+            <div className="bg-amber-100/60 border-2 border-amber-300 rounded-2xl p-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg" aria-hidden="true">💡</span>
+                <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">本課學習策略</span>
+              </div>
+
+              {story.worksheetIntro?.target_strategy && (
+                <p className={`text-amber-900 text-lg font-semibold ${zhuyinActive ? 'leading-[2.8rem] tracking-[0.25em]' : 'leading-[1.5]'}`}>
+                  {processZhuyin(story.worksheetIntro.target_strategy)}
+                </p>
+              )}
+
+              {story.lessonIntro?.text && story.lessonIntro.source !== 'excel' && (
+                <p className={`text-amber-800 ${zhuyinActive ? 'text-base leading-[2.4rem] tracking-[0.2em]' : 'text-sm leading-[1.7]'}`}>
+                  {processZhuyin(story.lessonIntro.text)}
+                </p>
+              )}
+
+              {story.worksheetIntro?.instructions && story.worksheetIntro.instructions.length > 0 && (
+                <ul className="space-y-1.5 pt-1" aria-label="學習提示">
+                  {story.worksheetIntro.instructions.map((item, idx) => (
+                    <li key={idx} className={`flex items-start gap-2 text-amber-800 ${zhuyinActive ? 'text-base leading-[2.8rem] tracking-[0.2em]' : 'text-sm leading-[1.6]'}`}>
+                      <span className="mt-1 flex-shrink-0 text-amber-500" aria-hidden="true">&#9655;</span>
+                      <span>{processZhuyin(item)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           {/* 數位學習步驟 — derived from step_sequence (same source as StepperNav dots, #1508) */}
           {(() => {
