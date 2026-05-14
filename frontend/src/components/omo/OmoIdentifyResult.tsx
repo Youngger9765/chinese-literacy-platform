@@ -141,6 +141,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
   onConfirmed,
   onGraded,
   onRetry,
+  onGraded,
 }) => {
   const [status, setStatus] = useState<OmoStatus>('identifying');
   const [candidates, setCandidates] = useState<OmoCandidate[]>([]);
@@ -183,9 +184,8 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
             onGraded?.(uploadId);
           }
         }
-      } catch (err) {
+      } catch {
         // Transient network error — keep polling
-        console.error('OMO poll error:', err);
       }
     };
 
@@ -235,12 +235,12 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
       await regradeOmo(uploadId, token);
       setShowAlreadyGraded(false);
       setStatus('grading');
-      // Start polling for grading completion
       pollCount.current = 0;
       intervalRef.current = setInterval(async () => {
         pollCount.current += 1;
         if (pollCount.current > MAX_POLLS) {
           if (intervalRef.current) clearInterval(intervalRef.current);
+          setErrorMessage('批改超時，請稍後重試');
           return;
         }
         try {
@@ -316,11 +316,13 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
       <div className="flex flex-col items-center gap-6 px-4 py-12 max-w-md mx-auto">
         <div
           className="w-16 h-16 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"
-          aria-label="AI 辨識中"
+          aria-label={status === 'grading' ? 'AI 批改中' : 'AI 辨識中'}
           role="status"
         />
         <div className="text-center">
-          <p className="font-semibold text-gray-800">AI 正在辨識你的學習單</p>
+          <p className="font-semibold text-gray-800">
+            {status === 'grading' ? 'AI 正在批改你的學習單' : 'AI 正在辨識你的學習單'}
+          </p>
           <p className="mt-1 text-sm text-gray-500">通常需要 10～30 秒，請稍候…</p>
         </div>
       </div>
@@ -343,6 +345,7 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
     );
   }
 
+  // ── Error / failed ──────────────────────────────────────────────────────────
   if (status === 'failed' || status === 'error') {
     return (
       <div className="flex flex-col items-center gap-6 px-4 py-8 max-w-md mx-auto">
@@ -353,19 +356,15 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
             {errorMessage ?? '無法辨識學習單，請重新拍照（確保光線充足、文字清晰）'}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
-        >
+        <button type="button" onClick={onRetry} className="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
           重新上傳
         </button>
       </div>
     );
   }
 
+  // ── Graded — should already have triggered onGraded via polling; fallback render ──
   if (status === 'graded') {
-    // Should already have triggered onGraded via polling; this is a fallback render
     return (
       <div className="flex flex-col items-center gap-6 px-4 py-12 max-w-md mx-auto">
         <div className="text-5xl" aria-hidden="true">✅</div>

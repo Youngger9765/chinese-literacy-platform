@@ -51,6 +51,13 @@ _ALLOWED_MIME_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
 
 # ── Pydantic schemas ───────────────────────────────────────────────────────────
 
+class LessonSummaryResponse(BaseModel):
+    """Simplified lesson entry for the manual picker in the 3-tier confidence UX."""
+    lesson_id: int
+    grade_code: str
+    title: str
+
+
 class LessonCandidateResponse(BaseModel):
     lesson_id: int
     grade_code: str

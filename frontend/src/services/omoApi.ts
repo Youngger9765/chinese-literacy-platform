@@ -85,6 +85,9 @@ export interface OmoLessonItem {
   title: string;
 }
 
+/** @deprecated Use OmoLessonItem — kept for backward compatibility. */
+export type OmoLessonSummary = OmoLessonItem;
+
 // ---------------------------------------------------------------------------
 // API calls
 // ---------------------------------------------------------------------------
