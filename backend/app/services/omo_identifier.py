@@ -27,8 +27,8 @@ from .ai_base import _get_client, _repair_json, GeminiContentFilterError
 
 logger = logging.getLogger(__name__)
 
-# OMO lesson IDs (lesson_number field in L*.yml)
-_OMO_LESSON_IDS = [22, 23, 24, 25, 28, 29, 30]
+# OMO identifies against ALL lessons in backend/data/lessons/ (158 lessons as of 2026-05-14).
+# Previously hardcoded to 7 lessons — wrong scope; OMO is for the whole 158-lesson catalog.
 
 # Max consecutive AI errors before raising RuntimeError (circuit breaker)
 _MAX_CONSECUTIVE_ERRORS = 3
@@ -48,37 +48,93 @@ class LessonCandidate:
 
 
 def _load_omo_lessons() -> list[dict]:
-    """Load the 7 OMO lesson metadata from YAML files. Cached after first call."""
+    """Load metadata for ALL lessons in the full curriculum catalog.
+
+    Source priority:
+    1. backend/data/curriculum/lessons/G*-L*.yml — 158 catalog entries (lesson_code, title, vocab, strategy_name)
+    2. Fallback: backend/data/lessons/L*.yml — 57 content lessons with story_text (for any lessons not in catalog)
+
+    Catalog entries provide title + vocab only (no story_text). Content lessons additionally provide story snippet.
+    """
     global _LESSON_CACHE
     if _LESSON_CACHE:
         return _LESSON_CACHE
 
-    lessons_dir = Path(__file__).parent.parent.parent / "data" / "lessons"
-    result = []
-    for lesson_id in _OMO_LESSON_IDS:
-        yml_path = lessons_dir / f"L{lesson_id}.yml"
-        if not yml_path.exists():
-            logger.warning("OMO lesson file not found: %s", yml_path)
-            continue
+    base_dir = Path(__file__).parent.parent.parent / "data"
+    catalog_dir = base_dir / "curriculum" / "lessons"
+    content_dir = base_dir / "lessons"
+
+    # Build content lookup by title (to enrich catalog entries with story_text)
+    content_by_title = {}
+    for yml_path in content_dir.glob("L*.yml"):
         try:
             with open(yml_path, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
-            result.append(
-                {
-                    "lesson_id": lesson_id,
-                    "grade_code": data.get("grade_code", f"L{lesson_id}"),
-                    "title": data.get("title", "").lstrip("-").strip(),
-                    "story_snippet": (data.get("story_text", "") or "")[:200],
-                    "vocabulary": [
-                        v.get("word", "") for v in (data.get("vocabulary") or [])[:8]
-                    ],
-                }
-            )
+                data = yaml.safe_load(f) or {}
+            title = (data.get("title", "") or "").lstrip("-").strip()
+            if title:
+                content_by_title[title] = data
+        except Exception:
+            continue
+
+    result = []
+    # 1) Catalog scan (preferred — 158 lessons)
+    for yml_path in sorted(catalog_dir.glob("G*-L*.yml")):
+        try:
+            with open(yml_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            title = (data.get("title", "") or "").strip()
+            if not title:
+                continue
+            lesson_code = data.get("lesson_code", yml_path.stem)
+            # Use lesson_code hash for lesson_id (stable int per lesson_code)
+            # Or parse from order field
+            lesson_id = data.get("display_order") or data.get("original_order") or 0
+            vocab_list = data.get("vocab") or []
+            # Enrich with story snippet if content YAML exists
+            story_snippet = ""
+            content_data = content_by_title.get(title)
+            if content_data:
+                story_snippet = (content_data.get("story_text", "") or "")[:120]
+            result.append({
+                "lesson_id": int(lesson_id) if lesson_id else 0,
+                "lesson_code": lesson_code,
+                "grade_code": lesson_code,
+                "title": title,
+                "story_snippet": story_snippet,
+                "vocabulary": [str(v) for v in vocab_list[:5]],
+            })
         except Exception as exc:
-            logger.warning("Failed to load OMO lesson %d: %s", lesson_id, exc)
+            logger.warning("Failed to load OMO catalog %s: %s", yml_path.name, exc)
+
+    # 2) Add any content-only lessons not in catalog (rare)
+    catalog_titles = {r["title"] for r in result}
+    for yml_path in content_dir.glob("L*.yml"):
+        try:
+            with open(yml_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            title = (data.get("title", "") or "").lstrip("-").strip()
+            if not title or title in catalog_titles:
+                continue
+            stem = yml_path.stem
+            try:
+                lesson_id = int(stem[1:])
+            except ValueError:
+                continue
+            result.append({
+                "lesson_id": lesson_id,
+                "lesson_code": data.get("grade_code", f"L{lesson_id}"),
+                "grade_code": data.get("grade_code", f"L{lesson_id}"),
+                "title": title,
+                "story_snippet": (data.get("story_text", "") or "")[:120],
+                "vocabulary": [
+                    v.get("word", "") for v in (data.get("vocabulary") or [])[:5]
+                ],
+            })
+        except Exception as exc:
+            logger.warning("Failed to load fallback content lesson %s: %s", yml_path.name, exc)
 
     _LESSON_CACHE = result
-    logger.info("Loaded %d OMO lesson entries for identification", len(result))
+    logger.info("Loaded %d OMO lesson entries (curriculum catalog + content fallback)", len(result))
     return result
 
 
@@ -94,7 +150,7 @@ def _build_identification_prompt(lessons: list[dict]) -> str:
 
     return f"""You are an AI reading assistant for a Taiwanese elementary/junior-high school platform.
 
-A student uploaded a photo of a paper worksheet. Your task is to identify which of the following 7 known lessons this worksheet belongs to, by reading visible text in the image.
+A student uploaded a photo of a paper worksheet. Your task is to identify which of the known lessons (listed below) this worksheet belongs to, by reading visible text in the image.
 
 Known lessons:
 {lesson_list}
