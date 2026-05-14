@@ -1,5 +1,5 @@
 /**
- * OmoUpload — Phase 1 paper worksheet upload UI.
+ * OmoUpload — Phase 1b paper worksheet upload UI.
  *
  * Renders a single-page upload experience:
  *  - "拍照" button (camera capture on mobile: capture="environment")
@@ -8,6 +8,7 @@
  *  - Error display
  *
  * After upload returns 201 the parent routes to OmoIdentifyResult with the upload_id.
+ * Phase 1b: passes from_cache/already_graded opts to parent for dedup prompt.
  * Max 5 images, 10MB each — validated client-side for UX (backend re-validates).
  */
 import React, { useRef, useState } from 'react';
@@ -19,8 +20,13 @@ const ACCEPTED_MIME = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 interface OmoUploadProps {
   token: string;
-  /** Called once upload succeeds, with the new upload_id */
-  onUploaded: (uploadId: number) => void;
+  /** Called once upload succeeds, with the new upload_id.
+   *  Phase 1b: opts contains alreadyGraded + cachedScore for dedup cache hits.
+   */
+  onUploaded: (
+    uploadId: number,
+    opts?: { alreadyGraded?: boolean; cachedScore?: number | null },
+  ) => void;
 }
 
 const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded }) => {
@@ -61,7 +67,10 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded }) => {
     setUploading(true);
     try {
       const result = await uploadOmoImages(fileArray, token);
-      onUploaded(result.upload_id);
+      onUploaded(result.upload_id, {
+        alreadyGraded: result.already_graded ?? false,
+        cachedScore: result.overall_score ?? null,
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : '上傳失敗，請再試一次';
       setError(msg);

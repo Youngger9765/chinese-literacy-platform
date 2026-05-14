@@ -1,9 +1,8 @@
 /**
  * omoApi.ts — OMO (Online-Merge-Offline) API client.
  *
- * Wraps POST /api/omo/upload, GET /api/omo/:id, POST /api/omo/:id/confirm.
- * Phase 1: upload + AI lesson identification only.
- * Phase 2 stubs: confirm/grade are no-ops until backend implements them.
+ * Phase 1b: upload + dedup (from_cache/already_graded) + regrade + lessons list.
+ * Phase 2 stubs: full result page wiring.
  */
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
@@ -20,28 +19,70 @@ export interface OmoCandidate {
   reasoning: string;
 }
 
-export type OmoStatus = 'pending' | 'identifying' | 'identified' | 'failed';
+export type OmoStatus =
+  | 'pending'
+  | 'identifying'
+  | 'identified'
+  | 'grading'
+  | 'graded'
+  | 'error'
+  | 'failed'; // frontend-only timeout sentinel
+
+export interface OmoAnswerItem {
+  question_id: string;
+  student_answer: string;
+  correct_answer: string;
+  score: number;
+  ai_confidence: number;
+  reasoning: string;
+  source_attempt_id?: number | null;
+  position?: { x: number; y: number } | null;
+  flag?: { flagged_by: number; reason: string; flagged_at: string } | null;
+}
 
 export interface OmoUploadResponse {
   upload_id: number;
   status: OmoStatus;
   candidates: OmoCandidate[];
+  answers: OmoAnswerItem[];
+  overall_score?: number | null;
+  ai_overall_confidence?: number | null;
+  progress?: Record<string, unknown> | null;
+  error_message?: string | null;
+  /** Phase 1b: true if this response is from a dedup cache hit (same image hash) */
+  from_cache?: boolean;
+  /** Phase 1b: true if the cached upload has already been graded */
+  already_graded?: boolean;
 }
 
-export interface OmoStatusResponse {
-  upload_id: number;
-  status: OmoStatus;
-  lesson_id: number | null;
-  candidates: OmoCandidate[];
-  error_message: string | null;
-  created_at: string;
-  updated_at: string;
-}
+export type OmoStatusResponse = OmoUploadResponse & {
+  lesson_id?: number | null;
+};
 
 export interface OmoConfirmResponse {
   upload_id: number;
   lesson_id: number;
-  status: OmoStatus;
+  status: string;
+  message: string;
+}
+
+export interface OmoRegradeResponse {
+  upload_id: number;
+  status: string;
+  message: string;
+}
+
+export interface OmoFlagResponse {
+  upload_id: number;
+  question_id: string;
+  flagged: boolean;
+}
+
+/** One lesson entry returned by GET /api/omo/lessons (for the manual lesson picker modal). */
+export interface OmoLessonItem {
+  lesson_id: number;
+  grade_code: string;
+  title: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -49,8 +90,24 @@ export interface OmoConfirmResponse {
 // ---------------------------------------------------------------------------
 
 /**
+ * List all available lessons for the manual lesson picker.
+ * No auth required.
+ */
+export async function getOmoLessons(
+  _token?: string,
+): Promise<OmoLessonItem[]> {
+  const res = await fetch(`${API_BASE}/api/omo/lessons`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Lessons fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<OmoLessonItem[]>;
+}
+
+/**
  * Upload one or more worksheet images. Returns 201 with status=identifying.
- * The backend fires AI identification asynchronously.
+ * Phase 1b: if same hash exists for this user, returns the existing record
+ * with from_cache=true (and possibly already_graded=true if status=graded).
  */
 export async function uploadOmoImages(
   files: File[],
@@ -73,7 +130,7 @@ export async function uploadOmoImages(
 }
 
 /**
- * Poll identification status. Returns current status + candidates once identified.
+ * Poll identification + grading status.
  */
 export async function getOmoStatus(
   uploadId: number,
@@ -90,8 +147,8 @@ export async function getOmoStatus(
 }
 
 /**
- * Confirm which lesson was identified. Phase 1 stub — Phase 2 will wire this
- * to grade submission.
+ * Confirm which lesson was identified. Kicks off grading job.
+ * Phase 1b: returns 409 if status=grading or status=graded (use regradeOmo instead).
  */
 export async function confirmOmoLesson(
   uploadId: number,
@@ -111,4 +168,50 @@ export async function confirmOmoLesson(
     throw new Error(`Confirm failed (${res.status}): ${text}`);
   }
   return res.json() as Promise<OmoConfirmResponse>;
+}
+
+/**
+ * Re-trigger grading for an already-graded upload.
+ * Phase 1b: student-initiated intentional re-grade.
+ */
+export async function regradeOmo(
+  uploadId: number,
+  token: string,
+): Promise<OmoRegradeResponse> {
+  const res = await fetch(`${API_BASE}/api/omo/${uploadId}/regrade`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Regrade failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<OmoRegradeResponse>;
+}
+
+/**
+ * Flag a question as incorrectly graded.
+ */
+export async function flagOmoAnswer(
+  uploadId: number,
+  questionId: string,
+  reason: string,
+  token: string,
+): Promise<OmoFlagResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/omo/${uploadId}/answers/${encodeURIComponent(questionId)}/flag`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ reason }),
+    },
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Flag failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<OmoFlagResponse>;
 }

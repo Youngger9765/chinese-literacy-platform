@@ -1,6 +1,7 @@
-"""OMO (Online-Merge-Offline) API routes — Phase 1b: dedup + regrade.
+"""OMO (Online-Merge-Offline) API routes — Phase 1b: dedup + regrade + confirm UX.
 
 Endpoints:
+    GET    /api/omo/lessons                         — list all lessons (for manual lesson picker)
     POST   /api/omo/upload                          — upload images, trigger AI identification
                                                        (Phase 1b: SHA-256 dedup → skip Gemini if cached)
     POST   /api/omo/{upload_id}/attempt             — add another image to existing upload
@@ -116,6 +117,35 @@ class FlagRequest(BaseModel):
 class SignedUrlResponse(BaseModel):
     url: Optional[str]
     expires_in_seconds: int = 3600
+
+
+class OmoLessonItem(BaseModel):
+    """One lesson entry for the manual lesson picker modal."""
+    lesson_id: int
+    grade_code: str
+    title: str
+
+
+# ── Lesson list endpoint (no auth — public lookup for picker modal) ────────────
+
+@router.get("/omo/lessons", response_model=list[OmoLessonItem])
+def list_omo_lessons():
+    """Return all available lessons for the manual lesson picker.
+
+    Returns [{lesson_id, grade_code, title}] sorted by lesson_id.
+    No auth required — lesson metadata is not sensitive.
+    """
+    from ..services.lesson_loader import get_all_lessons
+    lessons = get_all_lessons()
+    items: list[OmoLessonItem] = []
+    for lesson in lessons:
+        lesson_id = lesson.get("lesson_number") or lesson.get("id")
+        grade_code = lesson.get("grade_code", "")
+        title = lesson.get("title", "")
+        if lesson_id and title:
+            items.append(OmoLessonItem(lesson_id=int(lesson_id), grade_code=grade_code, title=title))
+    items.sort(key=lambda x: x.lesson_id)
+    return items
 
 
 # ── GCS helpers ───────────────────────────────────────────────────────────────
