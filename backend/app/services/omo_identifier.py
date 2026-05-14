@@ -247,6 +247,11 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
         # Sort by confidence descending
         candidates.sort(key=lambda x: x.confidence, reverse=True)
 
+        # Filter out near-zero confidence candidates (Gemini sometimes returns
+        # placeholders with conf=0 instead of {error:"image_unclear"}).
+        # Threshold 0.4 matches prompt's "weak/speculative" boundary.
+        candidates = [c for c in candidates if c.confidence >= 0.4]
+
         _consecutive_errors = 0
         logger.info(
             "OMO identification complete: top candidate=%s confidence=%.2f",
