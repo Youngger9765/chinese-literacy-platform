@@ -1,0 +1,41 @@
+active_version: '2026-05-01'
+source_dir: private/curriculum-source/2026-05-01/1.L1-158新版完成學習單1150415
+source_excel: 自學教材清單.xlsx
+parsed_at: '2026-05-14T16:25:55Z'
+parser_version: 1.0.0
+stats:
+  total_lessons: 157
+  catalog_yml_count: 157
+  content_yml_count: 157
+  docx_matched: 140
+  missing_docx: 17
+  missing_story_text: 0
+  白話: 147
+  文言文: 10
+schema_note: MANIFEST tracks the active 教授 source version. Use scripts/check_curriculum_drift.py to verify backend/data/ matches what parser would generate from this source.
+parser_managed_catalog_fields:
+- lesson_code
+- display_order
+- original_order
+- title
+- grade
+- genre
+- text_type
+- unit_topic
+- applicable_grade
+- strategy_name
+- classical_chinese
+- vocab
+parser_managed_content_fields:
+- lesson_number
+- grade
+- grade_code
+- title
+- genre
+- text_type
+- reading_strategy
+- story_text
+- paragraphs
+- paragraph_count
+- char_count
+- vocab_keywords
