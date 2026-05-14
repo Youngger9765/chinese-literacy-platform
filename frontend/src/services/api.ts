@@ -81,10 +81,12 @@ interface ApiStoryDetail extends ApiStoryListItem {
     lesson_label?: string;
     authors?: string;
   } | null;
-  // Lesson intro (#1443): docx 說明/導讀 or excel fallback
+  // Lesson intro (#1443, refined by #1598)
   lesson_intro?: {
     source: 'docx_explanation' | 'docx_guide' | 'excel';
     text: string;
+    course_intro?: string;
+    course_intro_source?: string;
     unit_topic?: string;
     strategy_title?: string;
   } | null;
