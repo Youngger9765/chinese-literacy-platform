@@ -1,16 +1,19 @@
-"""OMO (Online-Merge-Offline) API routes — Phase 1a: upload, identify, grade.
+"""OMO (Online-Merge-Offline) API routes — Phase 1b: dedup + regrade + 3-tier UX.
 
 Endpoints:
+    GET    /api/omo/lessons                         — list of OMO-eligible lessons (for manual picker)
     POST   /api/omo/upload                          — upload images, trigger AI identification
+                                                       (Phase 1b: SHA-256 dedup → skip Gemini if cached)
     POST   /api/omo/{upload_id}/attempt             — add another image to existing upload
     POST   /api/omo/{upload_id}/confirm             — confirm lesson + kick off grading
     GET    /api/omo/{upload_id}                     — poll status + get result
+    POST   /api/omo/{upload_id}/regrade             — re-trigger grading for an already-graded upload
     PATCH  /api/omo/{upload_id}/answers/{q_id}/flag — student flags a question
     GET    /api/omo/{upload_id}/images/{attempt_id}/{n} — signed GCS URL (1-hr TTL)
     DELETE /api/omo/{upload_id}                     — privacy delete
 
 llm-endpoint-hardening checklist:
-- Rate-limit: 10/minute on AI-triggering endpoints (upload, attempt, confirm) ✅
+- Rate-limit: 10/minute on AI-triggering endpoints (upload, attempt, confirm, regrade) ✅
 - Auth Depends: get_current_user on all write endpoints ✅
 - Input size cap: 10MB per file, max 5 files total ✅
 - Output token cap: enforced in omo_identifier (512) + omo_grader (2048) ✅
@@ -18,6 +21,7 @@ llm-endpoint-hardening checklist:
 - Reasoning field: every candidate and every answer has reasoning ✅
 """
 
+import hashlib
 import logging
 import os
 from datetime import datetime, timezone
@@ -46,6 +50,13 @@ _ALLOWED_MIME_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
 
 
 # ── Pydantic schemas ───────────────────────────────────────────────────────────
+
+class LessonSummaryResponse(BaseModel):
+    """Simplified lesson entry for the manual picker in the 3-tier confidence UX."""
+    lesson_id: int
+    grade_code: str
+    title: str
+
 
 class LessonCandidateResponse(BaseModel):
     lesson_id: int
@@ -82,6 +93,9 @@ class OmoUploadResponse(BaseModel):
     ai_overall_confidence: Optional[float] = None
     progress: Optional[dict] = None
     error_message: Optional[str] = None
+    # Phase 1b dedup fields
+    from_cache: bool = False         # True if this response reuses a prior upload (same image hash)
+    already_graded: bool = False     # True if the cached upload already has status=graded
 
 
 class OmoAttemptResponse(BaseModel):
@@ -405,6 +419,8 @@ def _build_upload_response(upload: OmoUpload) -> OmoUploadResponse:
         ai_overall_confidence=upload.ai_overall_confidence,
         progress=upload.progress or {},
         error_message=upload.error_message,
+        from_cache=False,
+        already_graded=False,
     )
 
 
@@ -420,6 +436,38 @@ def _get_upload_or_404(upload_id: int, user: User, db: Session) -> OmoUpload:
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
+
+@router.get(
+    "/omo/lessons",
+    response_model=list[LessonSummaryResponse],
+)
+def list_omo_lessons(
+    current_user: User = Depends(get_current_user),
+):
+    """Return all lessons available for the OMO manual picker.
+
+    Called when AI identification returns low confidence and the student
+    wants to pick the lesson manually.
+
+    Returns grade_code + title for each lesson, sorted by grade then title.
+    """
+    from ..services.lesson_loader import get_all_lessons
+    lessons = get_all_lessons()
+    result = []
+    for lesson in lessons:
+        lesson_id = lesson.get("id") or lesson.get("lesson_number")
+        grade_code = lesson.get("lesson_code") or lesson.get("grade_code", "")
+        title = lesson.get("title", "")
+        if lesson_id and title:
+            result.append(LessonSummaryResponse(
+                lesson_id=int(lesson_id),
+                grade_code=str(grade_code),
+                title=title,
+            ))
+    # Sort by grade_code then title for a predictable picker order
+    result.sort(key=lambda x: (x.grade_code, x.title))
+    return result
+
 
 @router.post(
     "/omo/upload",
@@ -473,7 +521,36 @@ async def upload_worksheet(
         image_bytes_list.append(data)
         mime_types.append(content_type)
 
-    # Create upload record (status=identifying)
+    # ── Phase 1b: SHA-256 dedup check ────────────────────────────────────────
+    # Hash the primary (first) image to detect duplicate uploads.
+    primary_hash = hashlib.sha256(image_bytes_list[0]).hexdigest()
+
+    existing_attempt = (
+        db.query(OmoUploadAttempt)
+        .join(OmoUpload, OmoUploadAttempt.omo_upload_id == OmoUpload.id)
+        .filter(
+            OmoUploadAttempt.image_hash == primary_hash,
+            OmoUpload.student_id == current_user.id,
+        )
+        .first()
+    )
+
+    if existing_attempt:
+        existing_upload = db.query(OmoUpload).filter(
+            OmoUpload.id == existing_attempt.omo_upload_id
+        ).first()
+        if existing_upload:
+            already_graded = existing_upload.status == "graded"
+            logger.info(
+                "OMO dedup hit: student=%d hash=%s existing_upload_id=%d already_graded=%s",
+                current_user.id, primary_hash[:16], existing_upload.id, already_graded,
+            )
+            response = _build_upload_response(existing_upload)
+            response.from_cache = True
+            response.already_graded = already_graded
+            return response
+
+    # ── Create new upload record (status=identifying) ─────────────────────────
     upload = OmoUpload(
         student_id=current_user.id,
         status="identifying",
@@ -484,7 +561,7 @@ async def upload_worksheet(
     db.flush()   # get id before commit
     upload_id = upload.id
 
-    # Create first attempt
+    # Create first attempt (with hash stored for future dedup)
     image_paths = []
     for i, (data, mime) in enumerate(zip(image_bytes_list, mime_types)):
         path = _upload_to_gcs(current_user.id, upload_id, 0, i, data, mime)
@@ -494,6 +571,7 @@ async def upload_worksheet(
         omo_upload_id=upload_id,
         attempt_idx=0,
         image_paths=image_paths,
+        image_hash=primary_hash,
         is_active=True,
     )
     db.add(attempt)
@@ -502,8 +580,8 @@ async def upload_worksheet(
     background_tasks.add_task(_run_identification, upload_id, image_bytes_list, mime_types)
 
     logger.info(
-        "OMO upload created: id=%d student=%d files=%d",
-        upload_id, current_user.id, len(files),
+        "OMO upload created: id=%d student=%d files=%d hash=%s",
+        upload_id, current_user.id, len(files), primary_hash[:16],
     )
 
     return OmoUploadResponse(
@@ -511,6 +589,8 @@ async def upload_worksheet(
         status="identifying",
         candidates=[],
         answers=[],
+        from_cache=False,
+        already_graded=False,
     )
 
 
@@ -635,6 +715,18 @@ async def confirm_lesson(
     """
     upload = _get_upload_or_404(upload_id, current_user, db)
 
+    # Phase 1b: guard against re-confirming an already in-progress or graded upload
+    if upload.status == "grading":
+        raise HTTPException(
+            status_code=409,
+            detail="批改正在進行中，請稍候",
+        )
+    if upload.status == "graded":
+        raise HTTPException(
+            status_code=409,
+            detail="此學習單已批改完成，如需重新批改請使用 /regrade",
+        )
+
     if upload.status not in ("identified", "error"):
         raise HTTPException(
             status_code=409,
@@ -685,6 +777,68 @@ def get_upload_status(
     """
     upload = _get_upload_or_404(upload_id, current_user, db)
     return _build_upload_response(upload)
+
+
+class OmoRegradeResponse(BaseModel):
+    upload_id: int
+    status: str
+    message: str
+
+
+@router.post(
+    "/omo/{upload_id}/regrade",
+    response_model=OmoRegradeResponse,
+    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=10, window_seconds=60))],
+)
+async def regrade_upload(
+    upload_id: int,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Re-trigger grading for an already-graded upload.
+
+    Student-initiated intentional re-grade (e.g. after flagging answers).
+    Resets status to grading and kicks off a new grading job using the
+    existing lesson_id and active attempt images.
+
+    Returns 409 if the upload is still grading.
+    """
+    upload = _get_upload_or_404(upload_id, current_user, db)
+
+    if upload.status == "grading":
+        raise HTTPException(
+            status_code=409,
+            detail="批改正在進行中，請稍候",
+        )
+    if upload.status not in ("graded", "error", "identified"):
+        raise HTTPException(
+            status_code=409,
+            detail=f"無法重新批改（目前狀態：{upload.status}）",
+        )
+    if not upload.lesson_id:
+        raise HTTPException(
+            status_code=409,
+            detail="尚未確認課程，請先確認課程後再批改",
+        )
+
+    upload.status = "grading"
+    upload.progress = {"stage": "queued", "total": 0, "graded": 0}
+    upload.error_message = None
+    db.commit()
+
+    background_tasks.add_task(_run_grading, upload_id, upload.lesson_id)
+
+    logger.info(
+        "OMO regrade queued: upload_id=%d student=%d lesson_id=%d",
+        upload_id, current_user.id, upload.lesson_id,
+    )
+
+    return OmoRegradeResponse(
+        upload_id=upload_id,
+        status="grading",
+        message="重新批改中，請稍候（約 15-20 秒）",
+    )
 
 
 @router.patch("/omo/{upload_id}/answers/{question_id}/flag", status_code=200)
