@@ -24,9 +24,30 @@ const ReportPage: React.FC = () => {
     missingAssignmentSteps,
     firstIncompleteStepPath,
     hasActiveAssignment,
+    saveStepProgressPatch,
   } = useLearningContext();
   const { user, token } = useAuth();
   const navigate = useNavigate();
+
+  // Issue #1549 — mark report as viewed in step_progress on mount, so the
+  // teacher dashboard can confirm the student reached the final report.
+  // Runs once per (story, dbSessionId) pair.
+  const reportMarkedRef = React.useRef<string | null>(null);
+  useEffect(() => {
+    if (!selectedStory?.id) return;
+    const key = `${selectedStory.id}-${dbSessionId ?? 'no-session'}`;
+    if (reportMarkedRef.current === key) return;
+    reportMarkedRef.current = key;
+    saveStepProgressPatch({
+      stepId: 'report',
+      stepData: {
+        viewed_at: new Date().toISOString(),
+        exit_ticket_id: null,
+      },
+      markCompleted: true,
+      immediate: true,
+    });
+  }, [selectedStory?.id, dbSessionId, saveStepProgressPatch]);
 
   const [xpResult, setXpResult] = useState<XPAwardResult | null>(null);
   const [showXpToast, setShowXpToast] = useState(false);
