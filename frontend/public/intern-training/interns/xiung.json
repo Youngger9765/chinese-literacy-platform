@@ -3,7 +3,7 @@
   "github": "stgst",
   "email": "steven19790906@gmail.com",
   "startDate": "2026-03-06",
-  "lastReview": "2026-04-04",
+  "lastReview": "2026-05-14",
   "skills": {
     "1": {
       "level": 3,
@@ -138,28 +138,38 @@
       "maxLevel": 5
     },
     "7": {
-      "level": 1,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-04",
           "level": 1,
           "reason": "2796b942（造句練習 cache key 修正 #910/#912）在 VocabPractice.tsx 新增 vocabChars，明確使用 Set<string> 和 string[] 型別標注，for...of 迴圈中對 item.word 使用正規表達式過濾 CJK 字元。TypeScript 基本型別標注已掌握，解鎖 level 1"
+        },
+        {
+          "date": "2026-05-14",
+          "level": 3,
+          "reason": "PR #1547（MCQ rescue dialog）在 McqRescueDialog.tsx、MultipleChoiceExercise.tsx、StrategyExercise.tsx 使用完整 interface 定義 props，API layer 的 request/response 型別清楚標注，Alembic migration 用 Python typing。PR #1141（全域 UX）定義 VoiceInputButton 的 `size: 'md' | 'sm'` union type。TypeScript 使用範圍從單一檔案擴展到多個模組，升至 level 3"
         }
       ]
     },
     "8": {
-      "level": 2,
+      "level": 4,
       "history": [
         {
           "date": "2026-03-10",
           "level": 2,
           "reason": "PR #229 修改含 Tailwind 樣式的元件，理解 utility-first 概念與 class 組合方式"
+        },
+        {
+          "date": "2026-05-14",
+          "level": 4,
+          "reason": "PR #1141（全域 UX）大規模使用 glassmorphic utilities（backdrop-blur、bg-white/20）、響應式 prefix（md:h-20）、Tailwind arbitrary values（shadow-[inset_0_-3px_0_0_#ef4444]）修復紅線歪斜問題（PR #1130）。PR #1480 用 shrink-0 / max-w-2xl / mx-auto 做排版約束，對 Tailwind 的設計系統語意理解清晰，升至 level 4"
         }
       ]
     },
     "9": {
-      "level": 3,
+      "level": 4,
       "history": [
         {
           "date": "2026-03-08",
@@ -175,6 +185,11 @@
           "date": "2026-03-13",
           "level": 3,
           "reason": "commit message 品質佳（feat/fix/refactor 正確分類），PR #448 完整走完 branch → PR → merge 流程"
+        },
+        {
+          "date": "2026-05-14",
+          "level": 4,
+          "reason": "11 個 merged PR 全部使用 feat/fix + scope 格式，PR #1547 的 description 含完整 Summary / 後端 / 前端 / Acceptance / Test plan 分段，PR #1130 的根本原因分析（root cause）清楚交代三層問題並分別說明修補方式，PR 品質穩定達到 code review 可接受標準，升至 level 4"
         }
       ]
     },
@@ -205,7 +220,7 @@
       "maxLevel": 5
     },
     "11": {
-      "level": 4,
+      "level": 5,
       "history": [
         {
           "date": "2026-03-13",
@@ -221,9 +236,47 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "能熟練運用 useMemo, useCallback。"
+        },
+        {
+          "date": "2026-05-14",
+          "level": 5,
+          "reason": "PR #1547（MCQ rescue dialog）useRef 保存 chat history 跨關閉重開不消失，useState 管理 dialog open/close + message list + loading 多個非同步狀態，useEffect 在 mount 時初始化 rescue session。PR #1492（guided_steps）正確診斷 onComplete 觸發條件導致學生卡關，修改後邏輯清楚。useEffect/useRef/useState 在複雜互動場景的綜合應用，升至 level 5"
         }
       ],
       "maxLevel": 5
+    },
+    "12": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-05-14",
+          "level": 3,
+          "reason": "PR #1547 新建 FastAPI route `POST /api/learning/mcq-attempt`，含 auth Depends、rate limit 100/min、request body 型別，並新建對應 SQLAlchemy model（mcq_attempt.py）和 Alembic migration。PR #969（造句驗證）在後端 AI 呼叫前加入確定性子字串比對，理解 API 前置 guard 的設計思路。首次完整實作後端 API endpoint，解鎖 level 3"
+        }
+      ]
+    },
+    "13": {
+      "level": 2,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-05-14",
+          "level": 2,
+          "reason": "PR #1141（全域 UX）抽出 VoiceInputButton.tsx 共用元件，支援 md/sm 兩種尺寸，接入 SentencePractice 和 FloatingAIHelper 兩個不同使用場景，並刻意不加到 DictationPractice（違背聽寫目的）——這個判斷展示元件設計的責任邊界意識。PR #1547 的 McqRescueDialog 獨立成可重用的 dialog，不綁定特定 MCQ 邏輯，解鎖 level 2"
+        }
+      ]
+    },
+    "14": {
+      "level": 2,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-05-14",
+          "level": 2,
+          "reason": "PR #1547 補 MultipleChoiceExercise.test.tsx 共 7 個 Vitest tests，涵蓋正確/錯誤選項、rescue button 顯示、dialog 開關等多種情境。PR #1492（guided_steps）補 StrategyExercise.test.tsx 3 個 tests：all-correct / only-Q1-confirmed / wrong-but-all-answered，明確驗證 regression。開始主動為新功能補測試，解鎖 level 2"
+        }
+      ]
     },
     "15": {
       "level": 4,
@@ -237,7 +290,7 @@
       ]
     },
     "16": {
-      "level": 4,
+      "level": 2,
       "maxLevel": 5,
       "history": [
         {
@@ -249,6 +302,11 @@
           "date": "2026-03-13",
           "level": 4,
           "reason": "獨立完成多個 feature 開發。"
+        },
+        {
+          "date": "2026-05-14",
+          "level": 2,
+          "reason": "注意：重新評估。先前 level 3/4 缺乏具體 PR 佐證，退至有實際 PR 支撐的水準。PR #1547（MCQ rescue）是目前最完整的端對端 feature：從 issue #1507 出發 → DB table → migration → API → UI → 測試，首次獨立走完完整 issue → merged PR 流程，解鎖 level 2"
         }
       ]
     },
@@ -267,15 +325,26 @@
           "reason": "能進行效能優化，例如使用 useMemo。"
         }
       ]
+    },
+    "18": {
+      "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-05-14",
+          "level": 1,
+          "reason": "PR #1547 從 DB Schema（mcq_attempt）→ SQLAlchemy model → Alembic migration → FastAPI route → React component → API service 完整走一遍，理解資料如何在各層流動。PR #1128（部件教學）同時修改 dictionary_service.py（後端 heteronym 挑選邏輯）+ RadicalDecomposition.tsx（前端 UI）+ 資料檔案，展示跨層問題的診斷能力，首次展現全端資料流理解，解鎖 level 1"
+        }
+      ]
     }
   },
   "recommendations": [
-    "TypeScript（#7）剛解鎖，下一步試著為 VocabPractice 的 props 介面加上明確型別定義（interface VocabPracticeProps），或為 vocabChars hook 抽出 custom hook 並標注回傳型別，進一步深化 TS 使用",
-    "本期只有 1 個 commit 被 merge，產出量明顯少於靖杭。PR #913（rate limit fix）還在 open 狀態，優先把它收尾 merge",
-    "測試（#14）還未解鎖，可以為 vocabChars 的邏輯撰寫一個 Vitest 單元測試：給定不同的 story.vocabulary 輸入，驗證重複字元被去除、非中文字元被過濾。這個邏輯很適合作為第一個 pure function 測試",
-    "架構理解（#18）還未解鎖，試著追蹤一個 API call 的完整路徑：從 SentencePractice 呼叫 API → backend route → cache 查詢 → 回應，用自己的話寫下來，這會幫助你更快診斷像 #910 這樣的 cache key 問題"
+    "TypeScript（#7）升至 level 3，下一步試著為 McqRescueDialog 的 messages state 抽出專屬的 type（`type RescueMessage = { role: 'user' | 'ai'; content: string }`），練習用 discriminated union 表達更複雜的狀態",
+    "API 串接（#12）剛解鎖 level 3，下一步可以嘗試為 mcq-attempt endpoint 加上 input size cap（防止超長 answer 字串），並在 fail 時回傳有意義的錯誤訊息，而不是 500",
+    "測試（#14）解鎖 level 2，下一步嘗試為 PR #1128 的 dictionary_service.py heteronym 挑選邏輯補一個 pytest：給定多音字回傳、驗證挑到有真實定義的那個，而不是 pronunciation-disambiguation",
+    "架構理解（#18）剛解鎖，試著看 mcq_attempt 這個 table 的 4 個 indexes（user_id / lesson_id / question_id / created_at），解釋為什麼每個都需要，什麼查詢場景會用到它"
   ],
-  "summary": "本期 1 個 commit merge（#910/#912），精準定位 SentencePractice 使用錯誤字元集導致 cache 命中率低的根本原因，用 useMemo 抽出 vocabChars 解決，展現對資料流的理解。首次使用明確 TypeScript 型別標注，解鎖技能 #7（TypeScript）。PR #913 仍 open 中。目前已確認解鎖 13 項技能",
+  "summary": "5 週內 11 個 merged PR，重大突破是 PR #1547（MCQ rescue dialog）首次端對端開發：DB table → Alembic → FastAPI → React → Vitest，新解鎖技能 12（API 串接）、13（元件設計模式）、14（測試）、18（架構理解），React 進階（#11）升 level 5，Tailwind（#8）升 level 4，Git 工作流（#9）升 level 4，TypeScript（#7）升 level 3。目前已確認解鎖 16 項技能",
   "issues": [
     {
       "id": "環境建置",
