@@ -12,6 +12,7 @@
 
 import React from 'react';
 import type { ReadingHistoryItem } from '../../../services/readingHistoryApi';
+import ReadingTrendChart from './ReadingTrendChart';
 
 interface ReadingMetricsCardProps {
   /** 正確率 0–100 (integer %) */
@@ -99,6 +100,11 @@ const ReadingMetricsCard: React.FC<ReadingMetricsCardProps> = ({ accuracy, cpm, 
           </div>
         </div>
       )}
+
+      {/* #1597 Trend chart — all-history dual-axis line. Renders an inline
+          encouragement message when < 2 points (the chart component handles
+          its own empty state). */}
+      {history && history.length > 0 && <ReadingTrendChart history={history} />}
     </div>
   );
 };
