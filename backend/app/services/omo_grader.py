@@ -127,27 +127,62 @@ def _build_question_schema(lesson: dict) -> list[dict]:
 
 
 def _build_grading_prompt(questions: list[dict]) -> str:
-    """Build the system prompt for Gemini grading."""
+    """Build the system prompt for Gemini grading.
+
+    Design principles (fixes 100% false-positive bug — Issue #1614):
+    - Expected answers are NOT shown inline per question to prevent Gemini from
+      copying them into student_answer. They are listed in a separate "grading
+      reference" section used only for comparison AFTER reading the handwriting.
+    - The opening instruction explicitly forbids referencing the expected answer
+      when extracting what the student wrote.
+    - Red-pen correction marks are treated as evidence the student was wrong;
+      the student's ORIGINAL (pre-correction) answer should be captured.
+    - If handwriting is unclear, return empty student_answer + score/confidence=0.
+    """
+    # Question list shown to Gemini: context only, NO correct_answer inline
     questions_text = "\n".join(
-        f"  {i+1}. [ID: {q['id']} | type: {q['type']}] Context: {q['context']} | Expected answer: {q['correct_answer']}"
+        f"  {i+1}. [ID: {q['id']} | type: {q['type']}] {q['context']}"
         for i, q in enumerate(questions)
     )
-    return f"""你是一位精準的國語文作業批改老師。
+    # Separate reference block — used for scoring comparison only
+    reference_text = "\n".join(
+        f"  {i+1}. [ID: {q['id']}] 標準答案：{q['correct_answer']}"
+        for i, q in enumerate(questions)
+    )
+    return f"""你是一位國語文作業批改老師。你的唯一任務是**讀取學生在學習單上的手寫筆跡**，然後與標準答案比對評分。
 
-任務：從學生的手寫學習單照片中，找出每一題的手寫答案，並與標準答案比對評分。
+== 絕對禁止 ==
+- 禁止把標準答案複製到 student_answer 欄位
+- 禁止猜測學生「應該」寫什麼、「可能」寫什麼
+- 如果你看不清楚學生手寫，必須回傳 student_answer="" 且 score=0.0 且 ai_confidence=0.0
+- 禁止把印刷文字（題目說明、選項文字）當作學生的作答
 
-待批改題目清單：
+== 手寫辨識規則 ==
+1. 只讀學生用鉛筆或原子筆填寫的手寫部分，忽略印刷文字
+2. 選擇題：報告學生用筆圈選的選項字母（A/B/C/D），不管哪個是正確答案
+3. 填充題：逐字辨識學生手寫的文字
+4. 如果看到紅筆批改痕跡（✗ 記號、紅筆劃線、紅筆覆寫）：
+   - 這表示老師已標記學生答錯
+   - student_answer 填學生的**原始手寫**（紅筆訂正前的字），不是老師的修改
+   - 直接給 score=0.0
+5. 作答欄位空白 → student_answer="" 且 score=0.0
+
+== 評分規則（比對標準答案後） ==
+- 完全正確（允許合理字體變異）= 1.0
+- 部分正確（答對概念但有筆誤）= 0.5
+- 明顯錯誤 = 0.0
+- 無法辨識 / 空白 = 0.0
+- ai_confidence：你對手寫辨識結果的信心（0.0=完全看不到筆跡，1.0=非常清晰）
+- reasoning（中文，限 50 字）：必須說明「看到什麼筆跡」例如「學生圈了 B」「答案欄空白」「字跡為『注目』但被紅筆畫掉」
+
+== 待批改題目（按題號對應學習單） ==
 {questions_text}
 
-批改規則：
-1. 找到每題對應的手寫區域
-2. 辨識學生的手寫文字
-3. 與標準答案比對（允許合理的字體變異）
-4. 評分：完全正確 = 1.0，部分正確 = 0.5，明顯錯誤 = 0.0，無法辨識 = 0.0
-5. ai_confidence：手寫辨識清晰度，0.0（完全無法辨識）～1.0（非常清晰）
-6. reasoning：說明辨識結果與評分理由（中文，限 50 字）
+== 標準答案參考（僅用於比對，不可複製到 student_answer） ==
+{reference_text}
 
-回傳 JSON 陣列，每題一筆記錄。"""
+回傳 JSON 陣列，每題一筆記錄，格式：
+[{{"question_id": "...", "student_answer": "學生實際寫的", "correct_answer": "標準答案", "score": 0.0, "ai_confidence": 0.0, "reasoning": "..."}}]"""
 
 
 async def grade_worksheet_images(
@@ -285,14 +320,10 @@ async def grade_worksheet_images(
             ai_conf = float(item.get("ai_confidence", 0.0))
             reasoning = str(item.get("reasoning", ""))
 
-            # Safety override: if Gemini gave score=0 but answers match literally,
-            # force score=1.0. Observed on messy handwriting where Gemini extracted
-            # the exact correct text but assigned conf=0 / score=0 inconsistently.
-            if student_ans and correct_ans and student_ans == correct_ans and score < 1.0:
-                score = 1.0
-                if ai_conf < 0.5:
-                    ai_conf = 0.95
-                reasoning = (reasoning + " [自動校正：學生答案與標準答案完全一致]").strip()
+            # NOTE: No "safety override" here. Matching student_answer == correct_answer
+            # does NOT prove correctness — Gemini may have copied the expected answer
+            # instead of reading the handwriting (Issue #1614 root cause).
+            # Trust Gemini's score as returned; the new prompt explicitly forbids copying.
 
             results.append(GradedAnswer(
                 question_id=str(item.get("question_id", "")),
