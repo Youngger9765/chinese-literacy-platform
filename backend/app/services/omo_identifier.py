@@ -16,6 +16,7 @@ llm-endpoint-hardening checklist:
 """
 
 import base64
+import difflib
 import json
 import logging
 from dataclasses import dataclass, field
@@ -37,6 +38,10 @@ _consecutive_errors = 0
 # Lesson metadata cache (loaded once at import)
 _LESSON_CACHE: list[dict] = []
 
+# Full curriculum title cache: {lesson_code -> {title, grade_code}} for all 158 lessons
+# Used by fuzzy-match fallback (stdlib difflib, no extra deps)
+_CURRICULUM_TITLE_CACHE: dict[str, dict] = {}
+
 
 @dataclass
 class LessonCandidate:
@@ -48,11 +53,56 @@ class LessonCandidate:
 
 
 def _load_omo_lessons() -> list[dict]:
-    """Load the 7 OMO lesson metadata from YAML files. Cached after first call."""
+    """Load all curriculum lesson metadata for identification.
+
+    Previously loaded only 7 OMO lessons; now loads the full curriculum
+    (backend/data/curriculum/lessons/*.yml, ~158 lessons) so Gemini can
+    match against the complete known-title corpus.
+
+    Falls back to legacy data/lessons/ if curriculum dir is missing.
+    """
     global _LESSON_CACHE
     if _LESSON_CACHE:
         return _LESSON_CACHE
 
+    # Prefer the full curriculum directory (158 lessons)
+    curriculum_dir = Path(__file__).parent.parent.parent / "data" / "curriculum" / "lessons"
+    if curriculum_dir.exists():
+        result = []
+        for yml_path in sorted(curriculum_dir.glob("*.yml")):
+            lesson_code = yml_path.stem  # e.g. "G5-L25"
+            try:
+                with open(yml_path, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f)
+                title = (data.get("title") or "").lstrip("-").strip()
+                if not title:
+                    continue
+                # Derive numeric lesson_id from code suffix (e.g. G5-L25 → 25)
+                try:
+                    lesson_id = int(lesson_code.split("-L")[1])
+                except (IndexError, ValueError):
+                    lesson_id = 0
+                result.append(
+                    {
+                        "lesson_id": lesson_id,
+                        "grade_code": lesson_code,
+                        "title": title,
+                    }
+                )
+            except Exception as exc:
+                logger.warning("Failed to load curriculum lesson %s: %s", lesson_code, exc)
+
+        _LESSON_CACHE = result
+        logger.info(
+            "Loaded %d curriculum lesson titles for identification (full corpus)",
+            len(result),
+        )
+        return result
+
+    # Legacy fallback: 7 OMO lessons from data/lessons/
+    logger.warning(
+        "Curriculum dir not found (%s); falling back to 7 OMO lessons", curriculum_dir
+    )
     lessons_dir = Path(__file__).parent.parent.parent / "data" / "lessons"
     result = []
     for lesson_id in _OMO_LESSON_IDS:
@@ -68,56 +118,179 @@ def _load_omo_lessons() -> list[dict]:
                     "lesson_id": lesson_id,
                     "grade_code": data.get("grade_code", f"L{lesson_id}"),
                     "title": data.get("title", "").lstrip("-").strip(),
-                    "story_snippet": (data.get("story_text", "") or "")[:200],
-                    "vocabulary": [
-                        v.get("word", "") for v in (data.get("vocabulary") or [])[:8]
-                    ],
                 }
             )
         except Exception as exc:
             logger.warning("Failed to load OMO lesson %d: %s", lesson_id, exc)
 
     _LESSON_CACHE = result
-    logger.info("Loaded %d OMO lesson entries for identification", len(result))
+    logger.info("Loaded %d OMO lesson entries for identification (legacy fallback)", len(result))
     return result
 
 
+def _load_curriculum_titles() -> dict[str, dict]:
+    """Load all curriculum lesson titles for fuzzy-match fallback.
+
+    Returns a dict of {lesson_code: {"title": str, "grade_code": str}} for all
+    lessons in backend/data/curriculum/lessons/*.yml.  Cached after first call.
+    Uses stdlib only (no extra deps).
+    """
+    global _CURRICULUM_TITLE_CACHE
+    if _CURRICULUM_TITLE_CACHE:
+        return _CURRICULUM_TITLE_CACHE
+
+    curriculum_dir = Path(__file__).parent.parent.parent / "data" / "curriculum" / "lessons"
+    if not curriculum_dir.exists():
+        logger.warning("Curriculum lessons dir not found: %s", curriculum_dir)
+        return {}
+
+    result: dict[str, dict] = {}
+    for yml_path in curriculum_dir.glob("*.yml"):
+        lesson_code = yml_path.stem  # e.g. "G5-L25"
+        try:
+            with open(yml_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            title = (data.get("title") or "").lstrip("-").strip()
+            grade_code = data.get("lesson_code") or lesson_code
+            if title:
+                result[lesson_code] = {"title": title, "grade_code": grade_code}
+        except Exception as exc:
+            logger.warning("Failed to load curriculum lesson %s: %s", lesson_code, exc)
+
+    _CURRICULUM_TITLE_CACHE = result
+    logger.info("Loaded %d curriculum titles for fuzzy-match fallback", len(result))
+    return result
+
+
+def _normalize_title(s: str) -> str:
+    """Normalize punctuation for fuzzy matching.
+
+    Covers two known mismatch classes:
+    1. Half-width ASCII vs full-width CJK (e.g. '?' vs '？')
+    2. Dash variants: YAML uses '──' (BOX DRAWINGS LIGHT HORIZONTAL U+2500×2)
+       while Gemini OCR returns '——' (EM DASH U+2014×2). Collapse both to '—'.
+    """
+    return (
+        s.replace("?", "？")
+         .replace("!", "！")
+         .replace(",", "，")
+         .replace("──", "—")   # BOX DRAWINGS ×2 → em-dash
+         .replace("——", "—")   # EM DASH ×2 → em-dash
+         .replace("─", "—")    # single BOX DRAWINGS → em-dash
+         .strip()
+    )
+
+
+def _fuzzy_match_title(extracted_title: str) -> list[LessonCandidate]:
+    """Match extracted_title against all known curriculum titles using difflib.
+
+    Args:
+        extracted_title: Title string extracted by Gemini OCR.
+
+    Returns:
+        Up to 1 LessonCandidate:
+        - ratio >= 0.85 → confidence 0.95
+        - ratio 0.70-0.84 → confidence 0.70
+        - ratio < 0.70 → empty list
+    """
+    if not extracted_title:
+        return []
+
+    curriculum = _load_curriculum_titles()
+    if not curriculum:
+        return []
+
+    best_code = ""
+    best_ratio = 0.0
+    normalized_extracted = _normalize_title(extracted_title)
+
+    for code, info in curriculum.items():
+        ratio = difflib.SequenceMatcher(
+            None, normalized_extracted, _normalize_title(info["title"])
+        ).ratio()
+        if ratio > best_ratio:
+            best_ratio = ratio
+            best_code = code
+
+    if best_ratio < 0.70:
+        logger.info(
+            "Fuzzy match: extracted_title=%r best_ratio=%.3f < 0.70 — no match",
+            extracted_title,
+            best_ratio,
+        )
+        return []
+
+    info = curriculum[best_code]
+    confidence = 0.95 if best_ratio >= 0.85 else 0.70
+
+    # lesson_id is the numeric part of the code (e.g. G5-L25 → 25)
+    try:
+        lesson_id = int(best_code.split("-L")[1])
+    except (IndexError, ValueError):
+        lesson_id = 0
+
+    logger.info(
+        "Fuzzy match: extracted_title=%r → %s %r ratio=%.3f conf=%.2f",
+        extracted_title,
+        best_code,
+        info["title"],
+        best_ratio,
+        confidence,
+    )
+    return [
+        LessonCandidate(
+            lesson_id=lesson_id,
+            grade_code=info["grade_code"],
+            title=info["title"],
+            confidence=confidence,
+            reasoning=f"標題模糊匹配 ratio={best_ratio:.2f}",
+        )
+    ]
+
+
 def _build_identification_prompt(lessons: list[dict]) -> str:
-    """Build the structured Gemini prompt for lesson identification."""
+    """Build the structured Gemini prompt for lesson identification.
+
+    With the full 158-lesson corpus, we list only grade_code + title per entry
+    (no story snippet or vocab) to keep prompt size manageable (~1300 tokens).
+    Gemini matches by reading the visible title from the worksheet image.
+    """
     lesson_list = "\n".join(
-        f"  - lesson_id={l['lesson_id']}, grade={l['grade_code']}, "
-        f"title=\"{l['title']}\", "
-        f"opening_words=\"{l['story_snippet'][:80]}...\", "
-        f"vocab_hints=[{', '.join(l['vocabulary'][:5])}]"
+        f"  - {l['grade_code']}: \"{l['title']}\""
         for l in lessons
     )
+    n = len(lessons)
 
     return f"""You are an AI reading assistant for a Taiwanese elementary/junior-high school platform.
 
-A student uploaded a photo of a paper worksheet. Your task is to identify which of the following 7 known lessons this worksheet belongs to, by reading visible text in the image.
+A student uploaded a photo of a paper worksheet. Your task is to identify which of the following {n} known lessons this worksheet belongs to, by reading visible text in the image.
 
 Known lessons:
 {lesson_list}
 
 Instructions:
 1. Read all visible text in the image, especially the large title text at the top.
-2. Compare the extracted title, opening sentences, and vocabulary words against the known lessons above.
-3. Return AT MOST 3 best-matching candidates, sorted by confidence (highest first).
-4. Use confidence 0.0–1.0 where:
-   - 0.9+ = title matches exactly or near-exactly
-   - 0.7–0.89 = partial title match or story text matches
-   - 0.4–0.69 = vocabulary or content theme matches
-   - <0.4 = weak or speculative match
-5. Keep each `reasoning` to ≤ 15 Chinese characters. Be terse — do not explain at length.
+2. Extract the exact title you can read from the image. Put it in "extracted_title".
+3. Find the best matching lesson from the known list by comparing the extracted title verbatim.
+   IMPORTANT: If the extracted_title matches any known lesson title exactly or near-exactly,
+   that candidate MUST have confidence >= 0.9. Do NOT assign low confidence to an exact match.
+4. Return AT MOST 3 best-matching candidates, sorted by confidence (highest first).
+5. Use confidence 0.0–1.0 where:
+   - 0.95+ = extracted_title matches the lesson title exactly (character-for-character)
+   - 0.85–0.94 = extracted_title is nearly identical (1-2 char difference)
+   - 0.7–0.84 = partial title match
+   - 0.4–0.69 = content/theme match without title
+   - <0.4 = weak or speculative
+6. Keep each `reasoning` to ≤ 15 Chinese characters. Be terse.
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation outside JSON):
 {{
   "extracted_title": "<title text you could read from the image, or empty string>",
   "candidates": [
     {{
-      "lesson_id": <integer>,
-      "grade_code": "<string>",
-      "title": "<string>",
+      "lesson_id": <integer from grade_code suffix, e.g. G5-L25 → 25>,
+      "grade_code": "<string e.g. G5-L25>",
+      "title": "<string matching the known lesson title exactly>",
       "confidence": <float 0.0-1.0>,
       "reasoning": "<≤15 Chinese characters>"
     }}
@@ -248,10 +421,44 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
         # Sort by confidence descending
         candidates.sort(key=lambda x: x.confidence, reverse=True)
 
+        # Boost: if top candidate confidence is near the threshold but its title
+        # verbatim-matches the extracted_title, Gemini found the right lesson but
+        # under-reported confidence.  Boost to 0.95 so it survives the filter.
+        extracted_title = str(data.get("extracted_title") or "").strip()
+        if candidates and extracted_title:
+            top = candidates[0]
+            if top.title.strip() == extracted_title and top.confidence < 0.4:
+                logger.info(
+                    "OMO identification: boosting verbatim-matched candidate %r "
+                    "from conf=%.2f → 0.95",
+                    top.title,
+                    top.confidence,
+                )
+                candidates[0] = LessonCandidate(
+                    lesson_id=top.lesson_id,
+                    grade_code=top.grade_code,
+                    title=top.title,
+                    confidence=0.95,
+                    reasoning=top.reasoning + " (title-boosted)",
+                )
+
         # Filter out near-zero confidence candidates (Gemini sometimes returns
         # placeholders with conf=0 instead of {error:"image_unclear"}).
         # Threshold 0.4 matches prompt's "weak/speculative" boundary.
         candidates = [c for c in candidates if c.confidence >= 0.4]
+
+        # Fuzzy-match fallback: if all candidates were filtered out but Gemini
+        # did OCR a title, do local string matching against all 158 known titles.
+        # Synthetic worksheets have clear black text → OCR is reliable.
+        # This handles the case where Gemini extracts the correct title but
+        # fails to map it to a high-confidence candidate entry.
+        if not candidates and extracted_title:
+            logger.info(
+                "OMO identification: no candidates after filter, "
+                "attempting fuzzy-match on extracted_title=%r",
+                extracted_title,
+            )
+            candidates = _fuzzy_match_title(extracted_title)
 
         _consecutive_errors = 0
         logger.info(
