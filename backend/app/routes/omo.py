@@ -1,6 +1,7 @@
-"""OMO (Online-Merge-Offline) API routes — Phase 1b: dedup + regrade.
+"""OMO (Online-Merge-Offline) API routes — Phase 1b: dedup + regrade + 3-tier UX.
 
 Endpoints:
+    GET    /api/omo/lessons                         — list of OMO-eligible lessons (for manual picker)
     POST   /api/omo/upload                          — upload images, trigger AI identification
                                                        (Phase 1b: SHA-256 dedup → skip Gemini if cached)
     POST   /api/omo/{upload_id}/attempt             — add another image to existing upload
@@ -49,6 +50,13 @@ _ALLOWED_MIME_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
 
 
 # ── Pydantic schemas ───────────────────────────────────────────────────────────
+
+class LessonSummaryResponse(BaseModel):
+    """Simplified lesson entry for the manual picker in the 3-tier confidence UX."""
+    lesson_id: int
+    grade_code: str
+    title: str
+
 
 class LessonCandidateResponse(BaseModel):
     lesson_id: int
@@ -428,6 +436,38 @@ def _get_upload_or_404(upload_id: int, user: User, db: Session) -> OmoUpload:
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
+
+@router.get(
+    "/omo/lessons",
+    response_model=list[LessonSummaryResponse],
+)
+def list_omo_lessons(
+    current_user: User = Depends(get_current_user),
+):
+    """Return all lessons available for the OMO manual picker.
+
+    Called when AI identification returns low confidence and the student
+    wants to pick the lesson manually.
+
+    Returns grade_code + title for each lesson, sorted by grade then title.
+    """
+    from ..services.lesson_loader import get_all_lessons
+    lessons = get_all_lessons()
+    result = []
+    for lesson in lessons:
+        lesson_id = lesson.get("id") or lesson.get("lesson_number")
+        grade_code = lesson.get("lesson_code") or lesson.get("grade_code", "")
+        title = lesson.get("title", "")
+        if lesson_id and title:
+            result.append(LessonSummaryResponse(
+                lesson_id=int(lesson_id),
+                grade_code=str(grade_code),
+                title=title,
+            ))
+    # Sort by grade_code then title for a predictable picker order
+    result.sort(key=lambda x: (x.grade_code, x.title))
+    return result
+
 
 @router.post(
     "/omo/upload",
