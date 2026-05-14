@@ -151,9 +151,15 @@ export function useProgressSync({
     [doSave],
   );
 
-  // Flush pending data on page unload (refresh / close / navigate away)
+  // Flush pending data on page unload (refresh / close / navigate away / tab hide).
+  //
+  // We listen to three events because no single one is reliable across browsers:
+  //   - beforeunload : desktop refresh / close (ignored on iOS Safari)
+  //   - pagehide     : reliable replacement for beforeunload on mobile + bfcache
+  //   - visibilitychange→hidden : fires when user switches apps on mobile
+  //     (the only signal an iOS Safari → home-screen transition produces)
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    const flushBeacon = () => {
       if (!latestDataRef.current || !debounceTimerRef.current) return;
 
       clearTimeout(debounceTimerRef.current);
@@ -167,9 +173,17 @@ export function useProgressSync({
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') flushBeacon();
+    };
+
+    window.addEventListener('beforeunload', flushBeacon);
+    window.addEventListener('pagehide', flushBeacon);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('beforeunload', flushBeacon);
+      window.removeEventListener('pagehide', flushBeacon);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [token, dbSessionId]);
 

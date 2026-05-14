@@ -3,6 +3,7 @@ import { Story } from '../../types';
 import { speakText as cloudSpeakText, cancelTts } from '../../services/ttsApi';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { fontForZhuyin } from '../../constants/fonts';
+import type { DictationStepData } from '../../types/stepProgress';
 
 export interface DictationResult {
   totalWords: number;
@@ -17,12 +18,17 @@ interface WordResult {
   studentAnswer: string;
   isCorrect: boolean;
   skipped: boolean;
+  durationMs?: number;
 }
 
 interface DictationPracticeProps {
   story: Story;
   onFinish: (result: DictationResult) => void;
   onBack: () => void;
+  /** Rehydrate from previously saved step_progress.step_data['dictation']. */
+  initialProgress?: DictationStepData;
+  /** Persist incremental progress to LearningSession.step_progress (Issue #1549). */
+  onProgressChange?: (stepData: DictationStepData, immediate?: boolean) => void;
 }
 
 type Phase = 'intro' | 'practice' | 'results';
@@ -103,21 +109,48 @@ const SpeakerIcon: React.FC<{ animate: boolean }> = ({ animate }) => (
 
 // ---- Main component ----
 
-const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, onBack }) => {
+const DictationPractice: React.FC<DictationPracticeProps> = ({
+  story,
+  onFinish,
+  onBack,
+  initialProgress,
+  onProgressChange,
+}) => {
   const { zhuyinActive } = useZhuyin();
   const zhuyinFont = fontForZhuyin(zhuyinActive);
   const words = React.useMemo(() => extractDictationWords(story), [story]);
 
-  const [phase, setPhase] = useState<Phase>('intro');
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // Rehydrate from DB-loaded step_data['dictation'] when available.
+  // Only resume mid-flight if a) we have results, b) we hadn't already finished.
+  const canResume = !!initialProgress
+    && Array.isArray(initialProgress.word_results)
+    && initialProgress.word_results.length > 0
+    && initialProgress.phase !== 'results';
+
+  const initialResults: WordResult[] = canResume
+    ? (initialProgress!.word_results as DictationStepData['word_results']).map((r) => ({
+        word: r.word,
+        studentAnswer: r.user_answer,
+        isCorrect: r.correct,
+        skipped: r.user_answer === '' && !r.correct,
+        durationMs: r.duration_ms,
+      }))
+    : [];
+
+  const [phase, setPhase] = useState<Phase>(canResume ? 'practice' : 'intro');
+  const [currentIndex, setCurrentIndex] = useState(
+    canResume ? Math.min(initialProgress!.current_index ?? 0, words.length - 1) : 0,
+  );
   const [answer, setAnswer] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [wordResults, setWordResults] = useState<WordResult[]>([]);
+  const [wordResults, setWordResults] = useState<WordResult[]>(initialResults);
   const [ttsSupported, setTtsSupported] = useState(true);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   // IME composition guard (#1206): Enter during 注音選字 should not submit.
   const isComposingRef = useRef(false);
+  // Track when the current word was first shown so we can record duration.
+  const wordStartTsRef = useRef<number>(Date.now());
 
   // Cloud TTS is always ready immediately; mark voicesLoaded true on mount.
   // Web Speech API voice loading is handled inside ttsApi fallback.
@@ -154,6 +187,13 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, currentIndex, voicesLoaded]);
 
+  // Reset per-word timer when phase enters practice or the word advances.
+  useEffect(() => {
+    if (phase === 'practice') {
+      wordStartTsRef.current = Date.now();
+    }
+  }, [phase, currentIndex]);
+
   const handleStartPractice = () => {
     setPhase('practice');
     setCurrentIndex(0);
@@ -161,28 +201,57 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
     setWordResults([]);
   };
 
+  const buildStepData = useCallback(
+    (results: WordResult[], nextIndex: number, nextPhase: Phase): DictationStepData => ({
+      word_results: results.map((r) => ({
+        word: r.word,
+        user_answer: r.studentAnswer,
+        correct: r.isCorrect,
+        attempts: 1,
+        duration_ms: r.durationMs,
+      })),
+      current_index: nextIndex,
+      phase: nextPhase,
+    }),
+    [],
+  );
+
   const submitAnswer = useCallback(
     (skipped = false) => {
       const word = words[currentIndex];
       const trimmed = answer.trim();
       const isCorrect = !skipped && trimmed === word;
+      const durationMs = Math.max(0, Date.now() - wordStartTsRef.current);
 
       const result: WordResult = {
         word,
         studentAnswer: skipped ? '' : trimmed,
         isCorrect,
         skipped,
+        durationMs,
       };
 
       const updatedResults = [...wordResults, result];
       setWordResults(updatedResults);
 
-      if (currentIndex + 1 >= words.length) {
-        // Done — show results
+      const isLast = currentIndex + 1 >= words.length;
+      if (isLast) {
         cancelTts();
         const correct = updatedResults.filter((r) => r.isCorrect).length;
         const skippedCount = updatedResults.filter((r) => r.skipped).length;
         const incorrect = updatedResults.length - correct - skippedCount;
+        // Final flush to DB (immediate) — include summary so the report view
+        // and teacher dashboard can read it directly from step_data.
+        const finalStepData: DictationStepData = {
+          ...buildStepData(updatedResults, currentIndex, 'results'),
+          result: {
+            total_words: words.length,
+            correct_count: correct,
+            incorrect_count: incorrect,
+            skipped_count: skippedCount,
+          },
+        };
+        onProgressChange?.(finalStepData, true);
         onFinish({
           totalWords: words.length,
           correctCount: correct,
@@ -192,11 +261,13 @@ const DictationPractice: React.FC<DictationPracticeProps> = ({ story, onFinish, 
         });
         setPhase('results');
       } else {
+        // Mid-flight: debounced DB write.
+        onProgressChange?.(buildStepData(updatedResults, currentIndex + 1, 'practice'), false);
         setCurrentIndex((i) => i + 1);
         setAnswer('');
       }
     },
-    [words, currentIndex, answer, wordResults, onFinish],
+    [words, currentIndex, answer, wordResults, onFinish, onProgressChange, buildStepData],
   );
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
