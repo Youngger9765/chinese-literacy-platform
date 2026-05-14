@@ -279,13 +279,28 @@ async def grade_worksheet_images(
     results = []
     for item in items:
         try:
+            student_ans = str(item.get("student_answer", "")).strip()
+            correct_ans = str(item.get("correct_answer", "")).strip()
+            score = float(item.get("score", 0.0))
+            ai_conf = float(item.get("ai_confidence", 0.0))
+            reasoning = str(item.get("reasoning", ""))
+
+            # Safety override: if Gemini gave score=0 but answers match literally,
+            # force score=1.0. Observed on messy handwriting where Gemini extracted
+            # the exact correct text but assigned conf=0 / score=0 inconsistently.
+            if student_ans and correct_ans and student_ans == correct_ans and score < 1.0:
+                score = 1.0
+                if ai_conf < 0.5:
+                    ai_conf = 0.95
+                reasoning = (reasoning + " [自動校正：學生答案與標準答案完全一致]").strip()
+
             results.append(GradedAnswer(
                 question_id=str(item.get("question_id", "")),
-                student_answer=str(item.get("student_answer", "")),
-                correct_answer=str(item.get("correct_answer", "")),
-                score=float(item.get("score", 0.0)),
-                ai_confidence=float(item.get("ai_confidence", 0.0)),
-                reasoning=str(item.get("reasoning", "")),
+                student_answer=student_ans,
+                correct_answer=correct_ans,
+                score=score,
+                ai_confidence=ai_conf,
+                reasoning=reasoning,
                 position={
                     "x": float(item.get("position_x", 0.0)),
                     "y": float(item.get("position_y", 0.0)),
