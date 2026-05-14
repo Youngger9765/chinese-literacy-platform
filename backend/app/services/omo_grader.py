@@ -127,62 +127,57 @@ def _build_question_schema(lesson: dict) -> list[dict]:
 
 
 def _build_grading_prompt(questions: list[dict]) -> str:
-    """Build the system prompt for Gemini grading.
+    """Build OCR-only prompt. Gemini does NOT see correct answers.
 
-    Design principles (fixes 100% false-positive bug — Issue #1614):
-    - Expected answers are NOT shown inline per question to prevent Gemini from
-      copying them into student_answer. They are listed in a separate "grading
-      reference" section used only for comparison AFTER reading the handwriting.
-    - The opening instruction explicitly forbids referencing the expected answer
-      when extracting what the student wrote.
-    - Red-pen correction marks are treated as evidence the student was wrong;
-      the student's ORIGINAL (pre-correction) answer should be captured.
-    - If handwriting is unclear, return empty student_answer + score/confidence=0.
+    Design (fixes #1616 — round 2 of #1614):
+    - Reference answers REMOVED from prompt entirely. Gemini's only job is OCR.
+    - Scoring happens in Python (`_score_answer`) using YAML correct_answer.
+    - Without seeing expected answers, Gemini cannot copy them — verified by A/B
+      test: with reference block, 14/15 false-positive; without, true handwriting.
     """
-    # Question list shown to Gemini: context only, NO correct_answer inline
     questions_text = "\n".join(
-        f"  {i+1}. [ID: {q['id']} | type: {q['type']}] {q['context']}"
-        for i, q in enumerate(questions)
+        f"  - {q['id']} ({q['type']}): {q['context']}" for q in questions
     )
-    # Separate reference block — used for scoring comparison only
-    reference_text = "\n".join(
-        f"  {i+1}. [ID: {q['id']}] 標準答案：{q['correct_answer']}"
-        for i, q in enumerate(questions)
-    )
-    return f"""你是一位國語文作業批改老師。你的唯一任務是**讀取學生在學習單上的手寫筆跡**，然後與標準答案比對評分。
+    return f"""你是 OCR 識字員。讀學生在學習單照片上的**手寫筆跡**。
 
-== 絕對禁止 ==
-- 禁止把標準答案複製到 student_answer 欄位
-- 禁止猜測學生「應該」寫什麼、「可能」寫什麼
-- 如果你看不清楚學生手寫，必須回傳 student_answer="" 且 score=0.0 且 ai_confidence=0.0
-- 禁止把印刷文字（題目說明、選項文字）當作學生的作答
+== 絕對規則 ==
+- 只報告學生**實際用鉛筆/原子筆寫**的字
+- 禁止猜測「應該寫什麼」
+- 看不到手寫 → student_answer=""，ai_confidence=0.0
+- 禁止把印刷的題目文字當作學生作答
 
-== 手寫辨識規則 ==
-1. 只讀學生用鉛筆或原子筆填寫的手寫部分，忽略印刷文字
-2. 選擇題：報告學生用筆圈選的選項字母（A/B/C/D），不管哪個是正確答案
-3. 填充題：逐字辨識學生手寫的文字
-4. 如果看到紅筆批改痕跡（✗ 記號、紅筆劃線、紅筆覆寫）：
-   - 這表示老師已標記學生答錯
-   - student_answer 填學生的**原始手寫**（紅筆訂正前的字），不是老師的修改
-   - 直接給 score=0.0
-5. 作答欄位空白 → student_answer="" 且 score=0.0
+== 辨識規則 ==
+1. 選擇題：報告學生圈選的字母（A/B/C/D）
+2. 填充題：逐字辨識學生手寫文字
+3. 紅筆批改痕跡（✗ / 紅線 / 紅筆覆寫）：
+   - 紅筆是老師標記學生答錯
+   - student_answer 填**學生原本手寫**（紅筆訂正前的字），不是老師修改的字
+4. 作答欄空白 → student_answer=""
 
-== 評分規則（比對標準答案後） ==
-- 完全正確（允許合理字體變異）= 1.0
-- 部分正確（答對概念但有筆誤）= 0.5
-- 明顯錯誤 = 0.0
-- 無法辨識 / 空白 = 0.0
-- ai_confidence：你對手寫辨識結果的信心（0.0=完全看不到筆跡，1.0=非常清晰）
-- reasoning（中文，限 50 字）：必須說明「看到什麼筆跡」例如「學生圈了 B」「答案欄空白」「字跡為『注目』但被紅筆畫掉」
-
-== 待批改題目（按題號對應學習單） ==
+== 題目清單 ==
 {questions_text}
 
-== 標準答案參考（僅用於比對，不可複製到 student_answer） ==
-{reference_text}
+回傳 JSON 陣列：
+[{{"question_id":"...","student_answer":"學生實際手寫的字","ai_confidence":0.0,"reasoning":"50字內描述看到的筆跡"}}]"""
 
-回傳 JSON 陣列，每題一筆記錄，格式：
-[{{"question_id": "...", "student_answer": "學生實際寫的", "correct_answer": "標準答案", "score": 0.0, "ai_confidence": 0.0, "reasoning": "..."}}]"""
+
+def _score_answer(student: str, correct: str, qtype: str) -> float:
+    """Compare student OCR output against YAML correct_answer. Pure Python — no LLM.
+
+    Rules:
+    - Empty student → 0.0 (could not OCR / blank)
+    - Exact match (after strip + lowercase for letters) → 1.0
+    - MC: letter comparison case-insensitive
+    - Fill-blank: exact string match required (educational rigor)
+    - Otherwise → 0.0
+    """
+    s = (student or "").strip()
+    c = (correct or "").strip()
+    if not s:
+        return 0.0
+    if qtype == "multiple_choice":
+        return 1.0 if s.upper() == c.upper() else 0.0
+    return 1.0 if s == c else 0.0
 
 
 async def grade_worksheet_images(
@@ -238,22 +233,21 @@ async def grade_worksheet_images(
             genai_types.Part.from_bytes(data=data, mime_type=mime)
         )
 
-    # Response schema for structured output
+    # OCR-only schema: Gemini returns handwriting + confidence + reasoning.
+    # correct_answer + score are computed in Python (see _score_answer).
     response_schema = {
         "type": "array",
         "items": {
             "type": "object",
             "properties": {
-                "question_id":      {"type": "string"},
-                "student_answer":   {"type": "string"},
-                "correct_answer":   {"type": "string"},
-                "score":            {"type": "number"},
-                "ai_confidence":    {"type": "number"},
-                "reasoning":        {"type": "string"},
-                "position_x":       {"type": "number"},
-                "position_y":       {"type": "number"},
+                "question_id":   {"type": "string"},
+                "student_answer":{"type": "string"},
+                "ai_confidence": {"type": "number"},
+                "reasoning":     {"type": "string"},
+                "position_x":    {"type": "number"},
+                "position_y":    {"type": "number"},
             },
-            "required": ["question_id", "student_answer", "correct_answer", "score", "ai_confidence", "reasoning"],
+            "required": ["question_id", "student_answer", "ai_confidence", "reasoning"],
         },
     }
 
@@ -311,22 +305,22 @@ async def grade_worksheet_images(
     # Reset circuit breaker on success
     _consecutive_errors = 0
 
+    # Lookup table: question_id → (correct_answer, type) for Python-side scoring
+    qmap = {q["id"]: (q["correct_answer"], q["type"]) for q in questions}
+
     results = []
     for item in items:
         try:
+            qid = str(item.get("question_id", ""))
             student_ans = str(item.get("student_answer", "")).strip()
-            correct_ans = str(item.get("correct_answer", "")).strip()
-            score = float(item.get("score", 0.0))
             ai_conf = float(item.get("ai_confidence", 0.0))
             reasoning = str(item.get("reasoning", ""))
 
-            # NOTE: No "safety override" here. Matching student_answer == correct_answer
-            # does NOT prove correctness — Gemini may have copied the expected answer
-            # instead of reading the handwriting (Issue #1614 root cause).
-            # Trust Gemini's score as returned; the new prompt explicitly forbids copying.
+            correct_ans, qtype = qmap.get(qid, ("", "fill_blank"))
+            score = _score_answer(student_ans, correct_ans, qtype)
 
             results.append(GradedAnswer(
-                question_id=str(item.get("question_id", "")),
+                question_id=qid,
                 student_answer=student_ans,
                 correct_answer=correct_ans,
                 score=score,
