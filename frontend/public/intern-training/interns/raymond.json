@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-04-04",
+  "lastReview": "2026-05-14",
   "skills": {
     "1": {
       "level": 3,
@@ -179,7 +179,7 @@
       ]
     },
     "9": {
-      "level": 2,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -191,6 +191,11 @@
           "date": "2026-04-04",
           "level": 2,
           "reason": "8 個 commit 全部使用 feat:/fix: 前綴，涵蓋多個不同 issue 的獨立 PR，工作流程持續穩定。部分 commit message 夾雜中英文（如 WIP-fix: 逐段朗讀不準確的BUG），conventional commit 格式尚未完全一致，保守升至 level 2"
+        },
+        {
+          "date": "2026-05-14",
+          "level": 4,
+          "reason": "5 週內 33 個 merged PR 全部使用 feat/fix/refactor scope 格式（如 feat(toolbox) / fix(db) / fix(csp)），無 WIP 混入，每個 PR 對應一個 issue，描述清楚包含 Summary / Changes / Test plan，PR 流程已達專業水準，升至 level 4"
         }
       ]
     },
@@ -247,18 +252,23 @@
       ]
     },
     "13": {
-      "level": 1,
+      "level": 2,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-04",
           "level": 1,
           "reason": "feat: hide-parent-page (#805) 新建 featureFlags.ts 集中管理前端功能開關，並在 auth.py / AppRoutes.tsx 各層正確引用，展現將設定邏輯抽離元件的意識。18ffa845 也顯示能理解跨元件的 props/context 資料流。首次展現元件設計模式的雛形，解鎖 level 1"
+        },
+        {
+          "date": "2026-05-14",
+          "level": 2,
+          "reason": "PR #1461（toolbox Phase 1）新建 toolbox.py 模型、Alembic migration、獨立 PracticeToolbox.tsx 頁面與 learningStorageScope.ts 服務，各層職責分離清晰。PR #1030（+761/-92）獨立建立學生練習紀錄查詢頁，從 API → hook → 頁面元件結構完整。已能主動拆分元件，升至 level 2"
         }
       ]
     },
     "14": {
-      "level": 2,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
@@ -270,28 +280,71 @@
           "date": "2026-04-04",
           "level": 2,
           "reason": "a08b2b40（標記課文紀錄欄位 #899）擴充 ReadingAnnotation.test.tsx：新增 scrollIntoView mock、修正 aria-label 斷言、加入 act() + fireEvent.click 的非同步測試，還新增側邊面板顯示和跳轉功能的兩個完整 test case。9d97a3c1 也補了 test_reading_evaluation_service.py。測試不只是 happy path，有測互動行為，升至 level 2"
+        },
+        {
+          "date": "2026-05-14",
+          "level": 3,
+          "reason": "PR #1600（朗讀趨勢圖）主動補 ReadingTrendChart.test.tsx 共 5 個 unit tests，含 empty state / single point / normal rendering 三種情境。PR #969（造句驗證）後端補 5 個複製偵測測試並修正 test 互相干擾的 rate limiter override。已養成「新功能附帶測試」習慣，升至 level 3"
+        }
+      ]
+    },
+    "11": {
+      "level": 2,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-05-14",
+          "level": 2,
+          "reason": "PR #1600（朗讀趨勢圖）使用 recharts 建立雙 Y 軸 LineChart，正確使用 useMemo 處理資料 sort+cap，理解 chart 的 empty state 情境（< 2 點時顯示鼓勵文字）。PR #1195（step_progress 版本機制）使用 useEffect 處理 session 版本比對。已展示 useEffect/useMemo 在真實功能中的正確應用，解鎖 level 2"
+        }
+      ]
+    },
+    "16": {
+      "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-05-14",
+          "level": 1,
+          "reason": "PR #1030（學生練習紀錄查詢頁 #416）從 issue → 設計 API → 實作前端頁面完整走完，+761/-92 行，功能從無到有。PR #1461（toolbox Phase 1）獨立設計 10 個 DB tables + migration + API + 前端頁面，是目前最大規模的端對端功能開發，解鎖 level 1"
+        }
+      ]
+    },
+    "19": {
+      "level": 1,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-05-14",
+          "level": 1,
+          "reason": "PR #1461 附帶 issue1460done.md 說明各 phase 完成狀態。多個 PR 的 description 含清楚的 Summary 表格、Changes 說明、Test plan checklist，技術文件意識良好。PR #1128 的 radical coverage 對照表（Before/After 數字）是量化說明改動效果的好範例，解鎖 level 1"
         }
       ]
     },
     "18": {
-      "level": 1,
+      "level": 2,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-04-04",
           "level": 1,
           "reason": "18ffa845（作業進度條 #645/#898）同時修改 backend routes/assignments.py、schemas/assignment.py，以及 frontend LearningLayout、ComprehensionChat、MyAssignments、ReportPage 等多個層，顯示理解資料從 API → context → 元件顯示的完整路徑。d4e11a98 類似，從 backend config → auth route → frontend featureFlags → AppRoutes 全端串通。首次展現全端資料流理解，解鎖 level 1"
+        },
+        {
+          "date": "2026-05-14",
+          "level": 2,
+          "reason": "PR #1461（toolbox）從 DB Schema → SQLAlchemy model → Alembic migration → FastAPI route → React 頁面完整走一遍，並理解 learningStorageScope.ts 在前端的 session 隔離設計。PR #1193/#1194（DB index）展示能判斷何時需要加 partial unique index 防止 race condition，資料庫層的設計判斷力提升，升至 level 2"
         }
       ]
     }
   },
   "recommendations": [
-    "Git 工作流（#9）升至 level 2，下一步練習讓每個 PR 只包含單一 issue 的改動，commit message 全部統一用英文描述（例如 fix: reading annotation scroll behavior），避免 WIP- 前綴混入 main branch",
-    "測試（#14）升至 level 2，下一步挑戰 TDD 流程：先寫一個會 fail 的測試，再實作功能讓它通過。下一個 bug fix 可以從測試先寫起",
-    "元件設計模式（#13）剛解鎖，下一步可以嘗試把 18ffa845 裡的學習進度邏輯抽出成 custom hook（例如 useAssignmentProgress），讓元件本身更乾淨",
-    "架構理解（#18）剛解鎖，試著畫出一個功能的完整資料流圖（從 DB schema → API endpoint → frontend hook → UI），用文字或圖解說明，這會幫助你更快定位未來的 bug"
+    "元件設計模式（#13）升至 level 2，下一步嘗試把 toolbox 各練習的重複邏輯（session 建立 / 完成 CTA）抽出成 custom hook（例如 useToolboxSession），讓各工具頁元件本身更薄",
+    "測試（#14）升至 level 3，下一步挑戰 integration test：用 pytest 測試一個完整 API flow（建 session → 更新進度 → 查詢歷史），而不只是 unit test 單一函式",
+    "獨立開發（#16）剛解鎖 level 1，下一步嘗試自己從 issue description 出發，畫出 DB schema + API 設計再實作，而不是直接進 coding。這個習慣能讓複雜功能更不容易返工",
+    "架構理解（#18）升至 level 2，下一步可以看一個現有 LLM endpoint（如造句批改）的完整防護層（rate limit → auth → input cap → fail-closed），理解為什麼每層都需要，試著寫一份簡短說明給啟翔看"
   ],
-  "summary": "本期 8 個 commit 涵蓋全端：後端 AI 服務修正、feature flag 架構、作業進度全端串接、loading skeleton、閱讀標記測試擴充。新解鎖技能 13（元件設計模式）、18（架構理解），測試技能升至 level 2，Git 工作流升至 level 2。目前已確認解鎖 14 項技能",
+  "summary": "5 週內 33 個 merged PR，涵蓋 toolbox 全端架構（DB tables → Alembic → FastAPI → React）、朗讀趨勢圖、session 版本機制、CSP 修復、字型 fallback 等。新解鎖技能 11（React 進階）、16（獨立開發功能）、19（技術文件），Git 工作流升 level 4，測試升 level 3，元件設計模式升 level 2，架構理解升 level 2。目前已確認解鎖 16 項技能",
   "issues": [
     {
       "id": "環境建置",

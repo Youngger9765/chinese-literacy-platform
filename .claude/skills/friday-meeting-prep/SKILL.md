@@ -96,8 +96,8 @@ gh issue list \
 ### 1d. 讀取 intern JSON 現狀
 
 ```bash
-cat docs/intern-training/interns/raymond.json | jq '{lastReview,skills_summary: (.skills | to_entries | map({(.key): .value.level}) | add)}'
-cat docs/intern-training/interns/xiung.json   | jq '{lastReview,skills_summary: (.skills | to_entries | map({(.key): .value.level}) | add)}'
+cat frontend/public/intern-training/interns/raymond.json | jq '{lastReview,skills_summary: (.skills | to_entries | map({(.key): .value.level}) | add)}'
+cat frontend/public/intern-training/interns/xiung.json   | jq '{lastReview,skills_summary: (.skills | to_entries | map({(.key): .value.level}) | add)}'
 ```
 
 ### 1e. 最近 agenda 範本
@@ -322,8 +322,8 @@ cd ../chinese-literacy-platform-issue-${ISSUE_NUM}
 git add \
   docs/meetings/${FRIDAY}-agenda.md \
   docs/meetings/team-contributions.md \
-  docs/intern-training/interns/raymond.json \
-  docs/intern-training/interns/xiung.json
+  frontend/public/intern-training/interns/raymond.json \
+  frontend/public/intern-training/interns/xiung.json
 
 git commit -m "docs(meeting): ${FRIDAY} agenda + contributions + skill trees (Related to #${ISSUE_NUM})"
 
@@ -332,8 +332,8 @@ git push -u origin "$BRANCH"
 
 **驗證 JSON 格式（push 前必跑）**：
 ```bash
-jq . docs/intern-training/interns/raymond.json > /dev/null && echo "raymond.json OK"
-jq . docs/intern-training/interns/xiung.json   > /dev/null && echo "xiung.json OK"
+jq . frontend/public/intern-training/interns/raymond.json > /dev/null && echo "raymond.json OK"
+jq . frontend/public/intern-training/interns/xiung.json   > /dev/null && echo "xiung.json OK"
 ```
 
 若 `jq` 報 parse error，先修再 push。
@@ -352,8 +352,8 @@ gh pr create \
 
 - Add \`docs/meetings/{FRIDAY}-agenda.md\` — agenda with 7/1 deadline risk table, action items
 - Update \`docs/meetings/team-contributions.md\` — prepend {WEEK_LABEL} week section
-- Update \`docs/intern-training/interns/raymond.json\` — lastReview + history entries + skill bumps (if evidence)
-- Update \`docs/intern-training/interns/xiung.json\` — lastReview + history entries + skill bumps (if evidence)
+- Update \`frontend/public/intern-training/interns/raymond.json\` — lastReview + history entries + skill bumps (if evidence)
+- Update \`frontend/public/intern-training/interns/xiung.json\` — lastReview + history entries + skill bumps (if evidence)
 
 ## Key agenda items
 
@@ -394,8 +394,8 @@ Issue #${ISSUE_NUM} / PR #{PR_NUM} 已開
 4 份文件：
 - docs/meetings/${FRIDAY}-agenda.md（新增）
 - docs/meetings/team-contributions.md（${WEEK_LABEL} 週區段插入）
-- docs/intern-training/interns/raymond.json（lastReview ${FRIDAY}）
-- docs/intern-training/interns/xiung.json（lastReview ${FRIDAY}）
+- frontend/public/intern-training/interns/raymond.json（lastReview ${FRIDAY}）
+- frontend/public/intern-training/interns/xiung.json（lastReview ${FRIDAY}）
 
 議程重點：{1 句總結本週最重要的議題}
 

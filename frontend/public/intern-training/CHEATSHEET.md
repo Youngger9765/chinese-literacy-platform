@@ -7,35 +7,14 @@
 ## 📁 檔案結構
 
 ```
-docs/intern-training/
-├── skill-tree.html              ← 互動式技能樹（瀏覽器開啟）
-├── PBL-curriculum.md            ← PBL 課程綱要
+frontend/public/intern-training/   ← SOT（staging dashboard 從此讀）
+├── dashboard.html               ← 互動式技能樹儀表板（staging 可見）
 ├── CHEATSHEET.md                ← 本文件
-├── interns/
-│   ├── raymond.json             ← 靖杭進度 (completed, reviewNotes)
-│   └── xiung.json               ← 啟翔進度
-└── courses/                     ← 20 堂教材
-    ├── README.md                ← 教材索引
-    ├── tier1-git-basics.md
-    ├── tier1-html-css.md
-    ├── tier1-javascript.md
-    ├── tier1-dev-environment.md
-    ├── tier1-reading-code.md
-    ├── tier2-react-components.md
-    ├── tier2-typescript.md
-    ├── tier2-tailwind.md
-    ├── tier2-git-workflow.md
-    ├── tier2-bug-fixing.md
-    ├── tier3-react-advanced.md
-    ├── tier3-api-integration.md
-    ├── tier3-component-patterns.md
-    ├── tier3-testing.md
-    ├── tier3-code-review.md
-    ├── tier4-feature-development.md
-    ├── tier4-performance.md
-    ├── tier4-architecture.md
-    ├── tier4-documentation.md
-    └── tier4-mentoring.md
+└── interns/
+    ├── raymond.json             ← 靖杭進度 (skills, lastReview, history)
+    └── xiung.json               ← 啟翔進度
+
+docs/intern-training/            ← ⚠️ DEPRECATED（舊版 mirror，不要更新這裡）
 ```
 
 ---
@@ -135,33 +114,18 @@ open docs/intern-training/skill-tree.html
 
 ---
 
-## 👥 目前進度 (2026-03-13)
+## 👥 目前進度 (2026-05-14)
+
+> 最新進度請看 staging dashboard：
+> https://lingoleap-frontend-staging-958347263300.asia-east1.run.app/intern-training/dashboard.html
 
 ### Raymond (靖杭 @if-else-master)
 
-```
-已解鎖：6/20 (85 XP)
-Tier 1: ████████████████████ 5/5
-Tier 2: ██                   1/5 (#10 Bug修復)
-Tier 3: ─────────────────── 0/5
-Tier 4: ─────────────────── 0/5
-```
-
-**強項**：積極嘗試新功能、能獨立修 bug
-**建議**：學 React 元件開發 (#6)、改善 commit message 格式
+5 週 33 個 merged PR，新解鎖 #11（React 進階）、#16（獨立開發）、#19（技術文件），Git #9 升 level 4，測試 #14 升 level 3
 
 ### Steven (啟翔 @stgst)
 
-```
-已解鎖：10/20 (215 XP)
-Tier 1: ████████████████████ 5/5
-Tier 2: ████████████████     4/5 (缺 #7 TypeScript)
-Tier 3: ████                 1/5 (#11 React 進階)
-Tier 4: ─────────────────── 0/5
-```
-
-**強項**：程式碼品質高、React hooks 理解深、UX 改善有深度
-**建議**：學 TypeScript (#7)、嘗試 API 串接 (#12)
+5 週 11 個 merged PR，新解鎖 #12（API 串接）、#13（設計模式）、#14（測試）、#18（架構理解），React 進階 #11 升 level 5，Tailwind #8 升 level 4
 
 ---
 
@@ -177,20 +141,27 @@ Tier 4: ─────────────────── 0/5
 如果要手動調整（不透過 agent）：
 
 ```bash
-# 編輯靖杭的進度
-vim docs/intern-training/interns/raymond.json
+# SOT path（staging dashboard 從此讀）
+vim frontend/public/intern-training/interns/raymond.json
 
-# 編輯啟翔的進度
-vim docs/intern-training/interns/xiung.json
+# 啟翔
+vim frontend/public/intern-training/interns/xiung.json
 ```
 
-JSON 格式：
+JSON 格式（現行 schema）：
 ```json
 {
-  "completed": [1, 2, 3],       // 已完成的技能 ID
-  "lastReview": "2026-03-13",   // 上次評估日期
-  "reviewNotes": { "1": "證據" }, // 每個技能的通過證據
-  "recommendations": ["建議"]    // 下一步建議
+  "name": "Raymond",
+  "lastReview": "2026-05-14",   // 上次評估日期
+  "skills": {
+    "1": {
+      "level": 3,
+      "maxLevel": 5,
+      "history": [{ "date": "...", "level": 3, "reason": "..." }]
+    }
+  },
+  "recommendations": ["建議"],
+  "summary": "本次評估摘要"
 }
 ```
 
