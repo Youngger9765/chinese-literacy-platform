@@ -1628,7 +1628,10 @@ function renderTimelineStats() {
 
 function renderTimeline() {
   const container = document.getElementById('timeline-container');
-  const issues = INTERNS[currentIntern].issues || [];
+  // Sort by date descending so latest contributions appear first
+  const issues = [...(INTERNS[currentIntern].issues || [])].sort((a, b) =>
+    (b.date || '').localeCompare(a.date || '')
+  );
 
   if (issues.length === 0) {
     container.innerHTML = '<div class="t-milestone"><div class="t-milestone-icon">\u{1F331}</div><div class="t-milestone-text">尚未有貢獻記錄...</div></div>';

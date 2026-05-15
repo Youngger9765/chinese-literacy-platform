@@ -3,7 +3,7 @@
   "github": "stgst",
   "email": "steven19790906@gmail.com",
   "startDate": "2026-03-06",
-  "lastReview": "2026-05-14",
+  "lastReview": "2026-05-08",
   "skills": {
     "1": {
       "level": 3,
@@ -101,12 +101,12 @@
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "多次修改程式碼，能理解程式邏輯。"
+          "reason": "多次修改程式碼，能理解程式邏輯"
         },
         {
           "date": "2026-03-13",
           "level": 5,
-          "reason": "能快速定位問題並提出解決方案。"
+          "reason": "能快速定位問題並提出解決方案"
         }
       ],
       "maxLevel": 5
@@ -127,31 +127,15 @@
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "獨立開發生字練習 UX，完成度高。"
+          "reason": "獨立開發生字練習 UX，完成度高"
         },
         {
           "date": "2026-03-13",
           "level": 5,
-          "reason": "多次獨立完成元件開發，並改善 UX。"
+          "reason": "多次獨立完成元件開發，並改善 UX"
         }
       ],
       "maxLevel": 5
-    },
-    "7": {
-      "level": 3,
-      "maxLevel": 5,
-      "history": [
-        {
-          "date": "2026-04-04",
-          "level": 1,
-          "reason": "2796b942（造句練習 cache key 修正 #910/#912）在 VocabPractice.tsx 新增 vocabChars，明確使用 Set<string> 和 string[] 型別標注，for...of 迴圈中對 item.word 使用正規表達式過濾 CJK 字元。TypeScript 基本型別標注已掌握，解鎖 level 1"
-        },
-        {
-          "date": "2026-05-14",
-          "level": 3,
-          "reason": "PR #1547（MCQ rescue dialog）在 McqRescueDialog.tsx、MultipleChoiceExercise.tsx、StrategyExercise.tsx 使用完整 interface 定義 props，API layer 的 request/response 型別清楚標注，Alembic migration 用 Python typing。PR #1141（全域 UX）定義 VoiceInputButton 的 `size: 'md' | 'sm'` union type。TypeScript 使用範圍從單一檔案擴展到多個模組，升至 level 3"
-        }
-      ]
     },
     "8": {
       "level": 4,
@@ -162,9 +146,9 @@
           "reason": "PR #229 修改含 Tailwind 樣式的元件，理解 utility-first 概念與 class 組合方式"
         },
         {
-          "date": "2026-05-14",
+          "date": "2026-04-23",
           "level": 4,
-          "reason": "PR #1141（全域 UX）大規模使用 glassmorphic utilities（backdrop-blur、bg-white/20）、響應式 prefix（md:h-20）、Tailwind arbitrary values（shadow-[inset_0_-3px_0_0_#ef4444]）修復紅線歪斜問題（PR #1130）。PR #1480 用 shrink-0 / max-w-2xl / mx-auto 做排版約束，對 Tailwind 的設計系統語意理解清晰，升至 level 4"
+          "reason": "PR #1087 設計完整設計系統：新增 surface token、btn-immersive、glass utility class、glassmorphic top bar。引入全域 [data-zhuyin-active] CSS 選擇器取代各元件 inline style，展現對 Tailwind 與全域 CSS 策略的統籌能力。PR #1130 改用 shadow-[inset_0_-3px_0_0_#ef4444] 精準控制紅線行為，規避 underline 受 baseline/letterSpacing 影響的限制，顯示對 Tailwind arbitrary value 的深度掌握"
         }
       ]
     },
@@ -187,9 +171,9 @@
           "reason": "commit message 品質佳（feat/fix/refactor 正確分類），PR #448 完整走完 branch → PR → merge 流程"
         },
         {
-          "date": "2026-05-14",
+          "date": "2026-04-09",
           "level": 4,
-          "reason": "11 個 merged PR 全部使用 feat/fix + scope 格式，PR #1547 的 description 含完整 Summary / 後端 / 前端 / Acceptance / Test plan 分段，PR #1130 的根本原因分析（root cause）清楚交代三層問題並分別說明修補方式，PR 品質穩定達到 code review 可接受標準，升至 level 4"
+          "reason": "4/3~4/10 一週 4 個 PR 全部高品質：每個 PR 都有結構化問題分析、修改說明、完整 test plan 含邊界情境。PR #913 的 test plan 列出 cache hit/miss/validate 三種路徑。PR #959 和 #969 都從 4/3 會議決議獨立建 issue → 開發 → merge，自主開發流程成熟"
         }
       ]
     },
@@ -209,18 +193,18 @@
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "多次修復 bug，能獨立 debug。"
+          "reason": "多次修復 bug，能獨立 debug"
         },
         {
           "date": "2026-03-13",
           "level": 5,
-          "reason": "能獨立 debug 並修復多種 bug。"
+          "reason": "能獨立 debug 並修復多種 bug"
         }
       ],
       "maxLevel": 5
     },
     "11": {
-      "level": 5,
+      "level": 4,
       "history": [
         {
           "date": "2026-03-13",
@@ -230,51 +214,55 @@
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "能使用 useMemo 優化效能。"
+          "reason": "能使用 useMemo 優化效能"
         },
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "能熟練運用 useMemo, useCallback。"
-        },
-        {
-          "date": "2026-05-14",
-          "level": 5,
-          "reason": "PR #1547（MCQ rescue dialog）useRef 保存 chat history 跨關閉重開不消失，useState 管理 dialog open/close + message list + loading 多個非同步狀態，useEffect 在 mount 時初始化 rescue session。PR #1492（guided_steps）正確診斷 onComplete 觸發條件導致學生卡關，修改後邏輯清楚。useEffect/useRef/useState 在複雜互動場景的綜合應用，升至 level 5"
+          "reason": "能熟練運用 useMemo, useCallback"
         }
       ],
       "maxLevel": 5
     },
     "12": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
-          "date": "2026-05-14",
+          "date": "2026-04-05",
+          "level": 2,
+          "reason": "PR #913 修改 backend rate_limiter.py 和 learning_vocab.py/stories.py，理解 FastAPI route decorator 的執行順序與 rate limiting 機制，知道如何在特定程式碼路徑內套用 rate limit 而非全局套用。展現後端 API 結構的理解，但主要是修改既有邏輯，非獨立設計 API"
+        },
+        {
+          "date": "2026-04-08",
           "level": 3,
-          "reason": "PR #1547 新建 FastAPI route `POST /api/learning/mcq-attempt`，含 auth Depends、rate limit 100/min、request body 型別，並新建對應 SQLAlchemy model（mcq_attempt.py）和 Alembic migration。PR #969（造句驗證）在後端 AI 呼叫前加入確定性子字串比對，理解 API 前置 guard 的設計思路。首次完整實作後端 API endpoint，解鎖 level 3"
+          "reason": "PR #959（造句以詞為單位）涉及前後端 API 串接修改：後端 vocabulary 資料結構的理解（字 vs 詞的區分）+ 前端 API call 參數調整 + 預生成快取 key 對齊。PR #969（防複製貼上）在後端加入 AI 批改驗證邏輯，理解 Gemini API 回應結構並加入真實性檢查。兩個 PR 都跨前後端完整修改"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "PR #1128 step 5 部件教學掛載時批次打 /api/dictionary/batch 取得 8 個相關字 chip 的 moedict 釋義，用 module-level Map 快取避免重複請求，字義顯示設計三層優先序（手寫 meaning → moedict 短釋義 → 通用 fallback）。同時協調三個資料來源（radicals.ts、radical-meanings.json、moedict API）在同一教學流程中無縫整合。首次獨立設計多來源資料整合的 API 串接架構"
         }
       ]
     },
     "13": {
-      "level": 2,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
-          "date": "2026-05-14",
+          "date": "2026-04-05",
           "level": 2,
-          "reason": "PR #1141（全域 UX）抽出 VoiceInputButton.tsx 共用元件，支援 md/sm 兩種尺寸，接入 SentencePractice 和 FloatingAIHelper 兩個不同使用場景，並刻意不加到 DictationPractice（違背聽寫目的）——這個判斷展示元件設計的責任邊界意識。PR #1547 的 McqRescueDialog 獨立成可重用的 dialog，不綁定特定 MCQ 邏輯，解鎖 level 2"
-        }
-      ]
-    },
-    "14": {
-      "level": 2,
-      "maxLevel": 5,
-      "history": [
+          "reason": "PR #912 新增 vocabChars memo，從 story.vocabulary 拆出去重的 CJK 字並向下傳給 SentencePractice，修正 cache key 不匹配問題。正確識別資料來源問題（story.content 前 12 字 vs vocabulary 生字），並透過新增 memo 而非修改既有邏輯來解決，顯示對元件資料流的設計意識。尚未見到 custom hook 的抽取"
+        },
         {
-          "date": "2026-05-14",
-          "level": 2,
-          "reason": "PR #1547 補 MultipleChoiceExercise.test.tsx 共 7 個 Vitest tests，涵蓋正確/錯誤選項、rescue button 顯示、dialog 開關等多種情境。PR #1492（guided_steps）補 StrategyExercise.test.tsx 3 個 tests：all-correct / only-Q1-confirmed / wrong-but-all-answered，明確驗證 regression。開始主動為新功能補測試，解鎖 level 2"
+          "date": "2026-04-09",
+          "level": 3,
+          "reason": "PR #959 重新設計 SentencePractice 的 props 資料流：從接收 chars（字）改為接收 words（詞），上游 App.tsx 需傳遞 vocabulary 詞組，下游需同步修改 cache key 和 API 呼叫參數。PR #969 進一步在元件中加入 paste 偵測邏輯和 UI 提示，展現在既有元件上疊加功能而不破壞原有架構的設計能力"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "PR #1087 是迄今規模最大的 PR（+3205/-4777）：實作沉浸式學習 shell，建立完整設計系統（surface token、glass utility、btn-immersive），引入全域 [data-zhuyin-active] 取代各元件 inline style，大幅瘦身 ComprehensionChat/VocabPractice/ListeningPractice 等元件（-1425 行）。展現跨元件架構整合與設計系統建立能力。PR #1128 step 5 部件教學協調三個資料來源在同一流程中整合，加入 module-level Map 快取與三層字義優先序，元件設計完整"
         }
       ]
     },
@@ -285,28 +273,23 @@
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "能給出有建設性的 code review 意見。"
+          "reason": "能給出有建設性的 code review 意見"
         }
       ]
     },
     "16": {
-      "level": 2,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "能獨立完成功能開發。"
+          "reason": "能獨立完成功能開發"
         },
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "獨立完成多個 feature 開發。"
-        },
-        {
-          "date": "2026-05-14",
-          "level": 2,
-          "reason": "注意：重新評估。先前 level 3/4 缺乏具體 PR 佐證，退至有實際 PR 支撐的水準。PR #1547（MCQ rescue）是目前最完整的端對端 feature：從 issue #1507 出發 → DB table → migration → API → UI → 測試，首次獨立走完完整 issue → merged PR 流程，解鎖 level 2"
+          "reason": "獨立完成多個 feature 開發"
         }
       ]
     },
@@ -317,34 +300,44 @@
         {
           "date": "2026-03-13",
           "level": 3,
-          "reason": "開始有優化程式碼的意識。"
+          "reason": "開始有優化程式碼的意識"
         },
         {
           "date": "2026-03-13",
           "level": 4,
-          "reason": "能進行效能優化，例如使用 useMemo。"
+          "reason": "能進行效能優化，例如使用 useMemo"
         }
       ]
     },
     "18": {
-      "level": 1,
+      "level": 3,
       "maxLevel": 5,
       "history": [
         {
-          "date": "2026-05-14",
+          "date": "2026-04-05",
           "level": 1,
-          "reason": "PR #1547 從 DB Schema（mcq_attempt）→ SQLAlchemy model → Alembic migration → FastAPI route → React component → API service 完整走一遍，理解資料如何在各層流動。PR #1128（部件教學）同時修改 dictionary_service.py（後端 heteronym 挑選邏輯）+ RadicalDecomposition.tsx（前端 UI）+ 資料檔案，展示跨層問題的診斷能力，首次展現全端資料流理解，解鎖 level 1"
+          "reason": "PR #913 的問題分析顯示能理解 request → rate limiter → cache check → AI call 的後端執行流程，並知道 rate limit 應套在 AI 呼叫而非 request 入口。PR #912 能追蹤 story.vocabulary → vocabChars → SentencePractice → cache key 的完整資料流。但目前對全端架構（前端 API call → backend route → DB）的整體視野尚未完整，保守給 level 1"
+        },
+        {
+          "date": "2026-04-09",
+          "level": 2,
+          "reason": "PR #959 和 #969 都完整跨越前後端：前端元件 props 修改 → API 呼叫參數對齊 → 後端 route 邏輯 → AI service 整合 → 預生成快取 key 一致性。特別是 #969 的 AI 真實性驗證需要理解 Gemini API 的 prompt → response → 二次檢查的完整鏈路。兩個 PR 都在正確的層級做修改，沒有 frontend patch 的壞習慣"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 3,
+          "reason": "PR #1130 是架構理解的關鍵證據：診斷 PR #1087 把 data-para-idx 從 p 移到外層 section 後，selection walker 讀到段落號碼徽章字元導致 charStart 每次 +2、選取偏移的 regression bug。能從 HTML 結構變化追蹤到 JS DOM traversal 行為再到 UI 偏移現象，完整的跨層因果鏈。修復方式精準：把 attr 搬回 p，徽章保留在 [data-para-idx] 子樹外。這是從自己的 PR 造成的 regression 中正確做 root cause analysis 的能力"
         }
       ]
     }
   },
   "recommendations": [
-    "TypeScript（#7）升至 level 3，下一步試著為 McqRescueDialog 的 messages state 抽出專屬的 type（`type RescueMessage = { role: 'user' | 'ai'; content: string }`），練習用 discriminated union 表達更複雜的狀態",
-    "API 串接（#12）剛解鎖 level 3，下一步可以嘗試為 mcq-attempt endpoint 加上 input size cap（防止超長 answer 字串），並在 fail 時回傳有意義的錯誤訊息，而不是 500",
-    "測試（#14）解鎖 level 2，下一步嘗試為 PR #1128 的 dictionary_service.py heteronym 挑選邏輯補一個 pytest：給定多音字回傳、驗證挑到有真實定義的那個，而不是 pronunciation-disambiguation",
-    "架構理解（#18）剛解鎖，試著看 mcq_attempt 這個 table 的 4 個 indexes（user_id / lesson_id / question_id / created_at），解釋為什麼每個都需要，什麼查詢場景會用到它"
+    "PR #1480 展現 AI prompt engineering 意識（拆 is_correct=true/false 分別給語氣規則）。下一步：在 #1458 驗收的 AI 助教相關工作中，嘗試設計更結構化的 prompt schema，例如加入 reasoning field（方大哥和 Young 可稽核），這是 AI prompt engineering 升到 level 3 的機會",
+    "架構理解（#18）穩在 level 3。下一步：#1458 剩餘的圖文整合呈現工作涉及前後端 YAML 解析 + layout 分支邏輯，完成後可以嘗試畫出圖文整合的資料流（YAML → loader → API → frontend layout）作為 level 4 的準備",
+    "Tailwind（#8）已升到 level 4，amber palette 整包一致是很好的設計系統實踐。下一步挑戰：把造句練習的 amber 配色邏輯抽成 Tailwind plugin 或 design token，做到不散落在各處 className",
+    "PR #1480 的 1 輪 @claude review 快速 LGTM 是迭代效率提升的好信號。繼續保持，下一個 PR 目標：PR 說明補上「testing steps」清單（這是 level 4 → 5 的一個標誌）"
   ],
-  "summary": "5 週內 11 個 merged PR，重大突破是 PR #1547（MCQ rescue dialog）首次端對端開發：DB table → Alembic → FastAPI → React → Vitest，新解鎖技能 12（API 串接）、13（元件設計模式）、14（測試）、18（架構理解），React 進階（#11）升 level 5，Tailwind（#8）升 level 4，Git 工作流（#9）升 level 4，TypeScript（#7）升 level 3。目前已確認解鎖 16 項技能",
+  "summary": "5/4~5/8 共 1 個 PR merge（#1480）。PR #1480 修造句練習三個獨立問題：AI 評估語氣歧義（拆 is_correct=true/false 規則，是 AI prompt engineering 意識的展現）、amber palette 配色全包一致、麥克風 wrapper layout 擠壓修正（shrink-0 + flex-col/sm:flex-row）。1 輪 @claude review 快速 LGTM，顯示從上一次多輪迭代進步到快速收斂。本週無技能升級（#8/#13 已在 level 4），但 #1480 的 prompt engineering 拆分思維為新技能維度打下基礎。[5/7 補充] Young 補了 #1482（是 #1480 claude-bot 找到的 L285 follow-up fix）+ #1485/#1487 meeting-prep skill 建立，啟翔本週無新 intern PR",
   "issues": [
     {
       "id": "環境建置",
@@ -352,8 +345,13 @@
       "date": "2026-03-06",
       "type": "setup",
       "contribution": "完成專案 fork、本地環境建置，獨立啟動 frontend/backend",
-      "skillsLearned": [1, 4],
-      "highlights": ["環境建置順利完成"]
+      "skillsLearned": [
+        1,
+        4
+      ],
+      "highlights": [
+        "環境建置順利完成"
+      ]
     },
     {
       "id": "#229",
@@ -361,8 +359,19 @@
       "date": "2026-03-10",
       "type": "refactor",
       "contribution": "重構 WriteCharacter 元件（+99/-120 行），改善生字練習的寫字 UX 體驗",
-      "skillsLearned": [2, 3, 6, 8, 9],
-      "highlights": ["大規模重構（+99/-120 行）", "正確使用 state、event handling", "元件設計清晰", "PR 流程完整"],
+      "skillsLearned": [
+        2,
+        3,
+        6,
+        8,
+        9
+      ],
+      "highlights": [
+        "大規模重構（+99/-120 行）",
+        "正確使用 state、event handling",
+        "元件設計清晰",
+        "PR 流程完整"
+      ],
       "linesChanged": "+99/-120"
     },
     {
@@ -371,8 +380,16 @@
       "date": "2026-03-13",
       "type": "feature",
       "contribution": "使用 StorageEvent、setTimeout 等進階技巧持續優化生字練習體驗",
-      "skillsLearned": [3, 6, 16],
-      "highlights": ["使用 StorageEvent 跨 tab 同步", "複雜 state 管理", "JS 進階能力已具備"]
+      "skillsLearned": [
+        3,
+        6,
+        16
+      ],
+      "highlights": [
+        "使用 StorageEvent 跨 tab 同步",
+        "複雜 state 管理",
+        "JS 進階能力已具備"
+      ]
     },
     {
       "id": "#448",
@@ -380,8 +397,17 @@
       "date": "2026-03-13",
       "type": "bugfix",
       "contribution": "精準定位並修復 useMemo 在 conditional return 之前的 React Hooks 順序 bug",
-      "skillsLearned": [10, 11, 17],
-      "highlights": ["精準定位 hooks 順序問題", "正確使用 useMemo 優化效能", "理解 hooks 執行規則", "從重現到修復到驗證流程完整"],
+      "skillsLearned": [
+        10,
+        11,
+        17
+      ],
+      "highlights": [
+        "精準定位 hooks 順序問題",
+        "正確使用 useMemo 優化效能",
+        "理解 hooks 執行規則",
+        "從重現到修復到驗證流程完整"
+      ],
       "linesChanged": "+25/-15"
     },
     {
@@ -390,7 +416,10 @@
       "date": "2026-03-20",
       "type": "bugfix",
       "contribution": "診斷 useFontSize() hook 監聽 window.storage 事件的跨 tab 限制，透過手動 dispatch synthetic StorageEvent 解決同頁面即時更新問題",
-      "skillsLearned": [3, 10],
+      "skillsLearned": [
+        3,
+        10
+      ],
       "highlights": [
         "精準指出 StorageEvent 只在其他 tab 寫入時才觸發的瀏覽器限制",
         "使用 new StorageEvent() + window.dispatchEvent() 手動觸發同頁面監聽",
@@ -400,19 +429,143 @@
       "linesChanged": "+5/-1"
     },
     {
-      "id": "#910/#912",
-      "title": "造句練習改用 vocabulary 生字，修正 cache 命中率",
+      "id": "#910",
+      "title": "造句練習改用 vocabulary 生字修正 cache 命中率（PR #912）",
       "date": "2026-04-03",
       "type": "bugfix",
-      "contribution": "診斷 SentencePractice 使用 displayChars（從課文提取的字）而非 vocabulary 詞彙表的字，導致與 example_sentence_cache.json 的 key 不符，cache 命中率低。新增 vocabChars useMemo 提取詞彙表中的中文字元，修正傳入來源。同時將 SentencePractice 的字元 tab 改為 flex-wrap 排列，避免溢出",
-      "skillsLearned": [7, 10, 11],
-      "highlights": [
-        "正確診斷 cache key 不符的根本原因",
-        "Set<string>、string[] 的 TypeScript 型別標注清晰",
-        "useMemo 依賴陣列設計正確",
-        "CJK 字元過濾正則 /[\\u4e00-\\u9fa5]/ 使用準確"
+      "contribution": "發現 SentencePractice 從 story.content 取前 12 個字作為造句字，與 example_sentence_cache.json 的 vocabulary 生字 key 完全不匹配，導致 1490 筆預生成快取從未被使用。新增 vocabChars memo 從 story.vocabulary 拆出去重 CJK 字傳給 SentencePractice，同步修正 tab 容器 flex-wrap 防止溢出",
+      "skillsLearned": [
+        11,
+        13
       ],
-      "linesChanged": "+19/-2"
+      "highlights": [
+        "清楚識別 cache key 不匹配的根本原因",
+        "用 memo 而非修改既有邏輯解決問題，影響最小",
+        "PR 附上截圖驗證修正結果",
+        "PR 說明包含完整 test plan 清單"
+      ],
+      "linesChanged": "+18/-2"
+    },
+    {
+      "id": "#911",
+      "title": "造句例句、課文重點表 rate limit 改為僅限 cache miss（PR #913）",
+      "date": "2026-04-04",
+      "type": "bugfix",
+      "contribution": "診斷 rate limiter 設在 route decorator 導致 cache hit 請求也消耗額度，快速切換生字時觸發 429。將 rate limit 從 decorator 移到 cache miss 的 AI 呼叫路徑內，同時修正 rate_limiter.py 的 DRY 問題。修改 backend 三個檔案：rate_limiter.py、learning_vocab.py、stories.py",
+      "skillsLearned": [
+        12,
+        18
+      ],
+      "highlights": [
+        "精準理解 FastAPI decorator 執行時機與 rate limiting 的關係",
+        "修正範圍最小化（只移動 rate limit 的位置）",
+        "PR 說明包含完整 test plan 含邊界情境（cache hit/miss/validate endpoint）",
+        "既有 13 個 test_sentence_practice 測試全部通過"
+      ],
+      "linesChanged": "+22/-15"
+    },
+    {
+      "id": "#927",
+      "title": "造句練習改以詞為最小單位（PR #959）",
+      "date": "2026-04-07",
+      "type": "feature",
+      "contribution": "實作 4/3 會議核心決議：造句練習從「字」改為「詞」為最小單位。前端修改 SentencePractice 元件接收 vocabulary 詞組、後端修改預生成快取 key 對齊、確保預生成例句也以詞為單位",
+      "skillsLearned": [
+        12,
+        13
+      ],
+      "highlights": [
+        "跨前後端完整修改（vocabulary 資料結構 + 快取 key）",
+        "理解字 vs 詞的語言學差異並正確反映在程式碼中",
+        "確保預生成快取與即時 API 的 key 一致"
+      ]
+    },
+    {
+      "id": "#928",
+      "title": "造句批改驗證真實性 + 防複製貼上（PR #969）",
+      "date": "2026-04-07",
+      "type": "feature",
+      "contribution": "實作 4/3 會議決議：防止學生複製貼上範例句獲得正面回饋。後端加入 AI 批改真實性檢查邏輯，前端加入複製貼上偵測，作業模式下禁用",
+      "skillsLearned": [
+        12
+      ],
+      "highlights": [
+        "後端 AI 批改加入真實性驗證",
+        "理解 Gemini API 回應結構並做二次檢查",
+        "前後端協同防弊設計"
+      ]
+    },
+    {
+      "id": "#1081",
+      "title": "沉浸式學習 shell + 設計系統整改（PR #1087）",
+      "date": "2026-04-16",
+      "type": "feature",
+      "contribution": "學習模式改為沉浸式全螢幕，移除 Header/Sidebar/StepperNav，改用 glassmorphic top bar + progress dots。設計系統切換至 Stitch Tactile Scholar palette，新增 surface token + btn-immersive + glass utility。注音字型改用 BpmfZihiSans-Bold，全域 [data-zhuyin-active] CSS 取代各元件 inline style。元件整體瘦身 -1425 行",
+      "skillsLearned": [
+        8,
+        13,
+        16
+      ],
+      "highlights": [
+        "迄今最大規模 PR（+3205/-4777）",
+        "完整設計系統建立（token + utility + 全域 CSS 策略）",
+        "元件大幅精簡，去除冗余",
+        "注音字型全局切換不影響非學習頁面"
+      ],
+      "linesChanged": "+3205/-4777"
+    },
+    {
+      "id": "#1099",
+      "title": "Step 5 部件教學：點擊回饋 + 常用字相關字 + moedict 字義（PR #1128）",
+      "date": "2026-04-19",
+      "type": "feature",
+      "contribution": "修復點擊無資料部件時畫面靜默的問題，加入 fallback 卡片。重建 radical-meanings.json（227 個部件）+ radicals.ts（30→80 個熱門部件，依課文字頻排序 relatedChars）。掛載時批次打 /api/dictionary/batch 取 moedict 釋義，module-level Map 快取，字義三層優先序",
+      "skillsLearned": [
+        12,
+        13,
+        18
+      ],
+      "highlights": [
+        "三個資料來源協調整合（radicals.ts + radical-meanings.json + moedict API）",
+        "module-level Map 快取設計",
+        "字義優先序設計（手寫→moedict→fallback）",
+        "PR 說明包含詳細的三層問題診斷"
+      ],
+      "linesChanged": "+7514/-1226"
+    },
+    {
+      "id": "#1095",
+      "title": "Step 1 閱讀標記選取偏移 + 紅線歪斜 + YAML 空白（PR #1130）",
+      "date": "2026-04-19",
+      "type": "bugfix",
+      "contribution": "診斷 PR #1087 把 data-para-idx 移到 section 導致 selection walker 讀到段落號碼字元，charStart 每次 +2 的 regression bug。修復方式：把 attr 搬回 p。紅線改用 shadow-[inset_0_-3px_0_0_#ef4444] 永遠水平。補寫 clean_lesson_whitespace.py 清理 6 篇 YAML 的誤植空白",
+      "skillsLearned": [
+        10,
+        18
+      ],
+      "highlights": [
+        "從 HTML 結構變化追到 JS DOM 行為再到 UI 偏移的完整因果鏈",
+        "從自己的 PR 造成的 regression 正確做 root cause analysis",
+        "Tailwind arbitrary shadow 解決 underline 行為問題"
+      ],
+      "linesChanged": "+147/-23"
+    },
+    {
+      "id": "造句 polish",
+      "title": "造句練習語氣軟化 + amber 配色 + 麥克風擠壓修正（PR #1480）",
+      "date": "2026-05-07",
+      "type": "feature",
+      "contribution": "修正造句練習三個獨立問題：(1) AI 評估回饋語氣歧義 — 拆分 is_correct=true 和 is_correct=false 兩組語氣規則，避免 prompt 語意模糊；(2) amber 配色不一致 — badge、border、feedback 文字、paste warning 全部對齊 amber palette；(3) 麥克風 wrapper 在窄螢幕被壓縮 — 加 shrink-0 + flex-col/sm:flex-row 自適應佈局",
+      "skillsLearned": [
+        8,
+        13
+      ],
+      "highlights": [
+        "AI prompt engineering：拆 is_correct=true/false 規則解決語氣歧義，顯示對 LLM 輸出結構的設計意識",
+        "amber palette 一致性：4 個使用點全部對齊，展現設計系統紀律",
+        "responsive layout：shrink-0 + flex-col/sm:flex-row 正確處理窄螢幕",
+        "1 輪 @claude review 快速 LGTM，迭代效率提升"
+      ]
     }
   ]
 }
