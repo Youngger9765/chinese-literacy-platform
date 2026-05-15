@@ -1491,6 +1491,68 @@ function isAvailable(skill) {
 // DATA LOADING
 // =============================================
 
+/**
+ * Build timeline entries dynamically from skills[*].history in JSON.
+ * Groups entries by PR number (extracted from reason "PR #XXXX ...").
+ * Falls back to ISSUE_DATA hardcoded entries for any date not covered.
+ */
+function buildTimelineFromHistory(skills, fallbackIssues) {
+  // Extract PR-keyed entries from all skill history
+  const prMap = {};  // key: PR id string → {id, date, title, type, contribution, skillsLearned, highlights}
+
+  for (const [skillId, skillData] of Object.entries(skills || {})) {
+    for (const h of (skillData.history || [])) {
+      const reason = h.reason || '';
+      const dateStr = h.date || '';
+
+      // Extract PR number: "PR #1234" or "PR #1234/#5678" or fallback to date bucket
+      const prMatch = reason.match(/PR #(\d+(?:\/\d+)*)/);
+      const key = prMatch ? prMatch[0] : ('date:' + dateStr);
+
+      if (!prMap[key]) {
+        // Infer type from conventional commit prefix in reason
+        let type = 'feature';
+        if (/fix\(|^修復|^修正|bug fix|regression/i.test(reason)) type = 'bugfix';
+        else if (/refactor\(|^重構/i.test(reason)) type = 'refactor';
+        else if (/^環境|setup|fork|clone/i.test(reason)) type = 'setup';
+
+        prMap[key] = {
+          id: prMatch ? prMatch[0].replace('PR ', '') : key,
+          date: dateStr,
+          title: reason.split('：')[0].split(':')[0].slice(0, 60) || key,
+          type,
+          contribution: reason.slice(0, 120),
+          skillsLearned: [],
+          highlights: []
+        };
+      }
+
+      // Merge: use earliest date as canonical, collect skills, keep longest contribution
+      if (dateStr < prMap[key].date || !prMap[key].date) prMap[key].date = dateStr;
+      if (dateStr > prMap[key].date) {
+        // keep the entry date as the most recent activity for this PR
+        prMap[key].date = dateStr;
+      }
+      if (reason.length > prMap[key].contribution.length) {
+        prMap[key].contribution = reason.slice(0, 200);
+      }
+      const sid = parseInt(skillId, 10);
+      if (!isNaN(sid) && !prMap[key].skillsLearned.includes(sid)) {
+        prMap[key].skillsLearned.push(sid);
+      }
+    }
+  }
+
+  // Merge with fallback ISSUE_DATA: use fallback entries for dates not covered by history
+  const historyDates = new Set(Object.values(prMap).map(e => e.date));
+  const fallback = (fallbackIssues || []).filter(i => !historyDates.has(i.date));
+
+  const merged = [...Object.values(prMap), ...fallback];
+  // Sort descending by date
+  merged.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  return merged;
+}
+
 async function loadInternData(internKey) {
   const intern = INTERNS[internKey];
   // Always load hardcoded issue data first (works on file:// too)
@@ -1511,11 +1573,13 @@ async function loadInternData(internKey) {
     if (!res.ok) throw new Error('fetch failed');
     const data = await res.json();
     intern.skills = data.skills || intern.skills;
-    intern.issues = data.issues || intern.issues;
     intern.lastReview = data.lastReview || intern.lastReview;
     intern.recommendations = data.recommendations || intern.recommendations;
+    // Build timeline dynamically from skills[*].history (ignores stale data.issues)
+    intern.issues = buildTimelineFromHistory(intern.skills, ISSUE_DATA[internKey]);
   } catch {
     // fetch failed (e.g. file:// protocol) — fallback data already loaded above
+    // Keep intern.issues from ISSUE_DATA hardcoded (set above)
   }
 }
 
@@ -1628,7 +1692,10 @@ function renderTimelineStats() {
 
 function renderTimeline() {
   const container = document.getElementById('timeline-container');
-  const issues = INTERNS[currentIntern].issues || [];
+  // Sort by date descending so latest contributions appear first
+  const issues = [...(INTERNS[currentIntern].issues || [])].sort((a, b) =>
+    (b.date || '').localeCompare(a.date || '')
+  );
 
   if (issues.length === 0) {
     container.innerHTML = '<div class="t-milestone"><div class="t-milestone-icon">\u{1F331}</div><div class="t-milestone-text">尚未有貢獻記錄...</div></div>';
