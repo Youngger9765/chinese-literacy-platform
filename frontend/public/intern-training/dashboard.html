@@ -1507,7 +1507,7 @@ async function loadInternData(internKey) {
   }
   // Then try fetch for latest data (overrides fallback if successful)
   try {
-    const res = await fetch(intern.jsonFile);
+    const res = await fetch(intern.jsonFile + '?t=' + Date.now(), {cache: 'no-store'});
     if (!res.ok) throw new Error('fetch failed');
     const data = await res.json();
     intern.skills = data.skills || intern.skills;
