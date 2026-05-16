@@ -208,10 +208,14 @@ export interface AIAnalysisResponse {
 }
 
 /**
- * Fetch AI reading analysis. Uses session-based endpoint when sessionId is
- * available (with server-side caching), otherwise the standalone endpoint.
+ * Fetch AI reading analysis using the session-scoped cached endpoint.
  *
  * Issue #415: accepts optional comprehension/vocab data for richer analysis.
+ * Issue #1648: sessionId is now required — always uses the session-scoped
+ * endpoint with server-side caching. The no-cache standalone endpoint
+ * /api/learning/ai-analysis is deprecated and must not be called from here.
+ * Callers (AIAnalysisSection) must guard against null dbSessionId before
+ * calling this function.
  */
 export async function getAIAnalysis(
   token: string,
@@ -227,11 +231,9 @@ export async function getAIAnalysis(
     dictationCorrectCount?: number | null;
     dictationTotalCount?: number | null;
   },
-  sessionId?: number,
+  sessionId: number,
 ): Promise<AIAnalysisResponse> {
-  const url = sessionId
-    ? `${API_BASE}/api/learning/sessions/${sessionId}/ai-analysis`
-    : `${API_BASE}/api/learning/ai-analysis`;
+  const url = `${API_BASE}/api/learning/sessions/${sessionId}/ai-analysis`;
   const res = await fetch(url, {
     method: 'POST',
     headers: {
