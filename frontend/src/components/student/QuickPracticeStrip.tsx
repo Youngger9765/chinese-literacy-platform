@@ -8,7 +8,8 @@
  *   - 筆順字帖  → /write          (no story needed)
  *   - 聽寫挑戰  → /library        (needs story — goes to library first)
  *   - 造句練習  → /library        (needs story)
- *   - 字典查詢  → /dictionary     (no story needed, Issue #1230)
+ * Hidden (Issue #1638): 字典查詢 removed from UI per 5/15 meeting.
+ *   Backend DictionaryService preserved; /dictionary route still accessible directly.
  *
  * "看更多 →" links to /tools (PracticeToolbox page, Issue #1153).
  *
@@ -48,12 +49,9 @@ const QUICK_CARDS: PracticeCard[] = [
     route: '/library',
     needsStory: true,
   },
-  {
-    icon: '📖',
-    title: '字典查詢',
-    description: '查字義、注音、例句',
-    route: '/dictionary',
-  },
+  // Hidden: 字典查詢 — removed from UI per 5/15 meeting (Issue #1638).
+  // Backend DictionaryService and /api/dictionary/* endpoints are preserved.
+  // The /dictionary route in AppRoutes.tsx is also preserved for direct access.
 ];
 
 const QuickPracticeStrip: React.FC = () => {

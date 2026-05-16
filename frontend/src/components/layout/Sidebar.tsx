@@ -389,10 +389,11 @@ const Sidebar: React.FC<SidebarProps> = ({ pendingAssignmentCount }) => {
     : [];
 
   // Targeted practice tools — shown at the BOTTOM of the student sidebar, separated by a divider (#1165)
+  // Hidden: 字典查詢 — removed from sidebar per 5/15 meeting (Issue #1638).
+  // Backend DictionaryService and /api/dictionary/* endpoints are preserved.
   const toolsItems: NavItem[] = activeView === 'student'
     ? [
         { icon: '🧰', label: '練習工具箱', path: '/tools' },
-        { icon: '📖', label: '字典查詢', path: '/dictionary' },
       ]
     : [];
 
