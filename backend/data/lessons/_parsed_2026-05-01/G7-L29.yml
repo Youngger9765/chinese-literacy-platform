@@ -7,8 +7,6 @@ layout_mode: graphic-text
 step_sequence:
 - intro
 - reading-annotation
-- tutor
-- full-reading
 - reading-strategy
 - knowledge-station
 - comprehension
