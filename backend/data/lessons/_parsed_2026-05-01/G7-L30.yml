@@ -4,6 +4,16 @@ grade_code: G7-L30
 reading_strategy: 圖文表整合閱讀策略
 reading_strategy_type: graphic_text_integration
 layout_mode: graphic-text
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- knowledge-station
+- reading-strategy
+- story-structure
+- comprehension
+- report
 source_file: G7-L30都是八哥為什麼命運不一樣（圖文表整合閱讀策略）.docx
 parsed_at: '2026-05-02T16:24:35'
 flags:

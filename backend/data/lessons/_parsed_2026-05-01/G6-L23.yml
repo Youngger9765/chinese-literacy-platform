@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L23
 reading_strategy: 摘要策略-問題.解決結構找重點
 reading_strategy_type: summary_psr
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L23老鷹紅豆的故事（摘要策略-問題.解決結構找重點）.docx
 parsed_at: '2026-05-02T16:24:34'
 flags: []
