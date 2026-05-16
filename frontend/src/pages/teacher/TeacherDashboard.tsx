@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import {
@@ -18,6 +19,9 @@ interface TeacherDashboardProps {
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }) => {
   const { token, user } = useAuth();
   const { activeSchoolId: teacherSchoolId, hasMultipleSchools } = useWorkspace();
+  const location = useLocation();
+  // Fix #1545: detect intent:'reports' navigation from TeacherHome quick-action
+  const isReportsIntent = (location.state as { intent?: string } | null)?.intent === 'reports';
   const [classrooms, setClassrooms] = useState<ClassroomResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -128,7 +132,9 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">班級管理</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isReportsIntent ? '查看學習報告' : '班級管理'}
+            </h1>
             {isLoading ? (
               <Skeleton className="mt-2 h-4 w-28 rounded" />
             ) : (
@@ -146,6 +152,21 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onSelectClassroom }
             </button>
           </div>
         </div>
+
+        {/* Fix #1545: Reports intent banner — shown when navigating from "查看報告" quick-action */}
+        {isReportsIntent && (
+          <div
+            data-testid="reports-intent-banner"
+            className="flex items-start gap-3 bg-purple-50 border border-purple-200 rounded-xl px-4 py-3"
+            role="status"
+          >
+            <span className="text-xl shrink-0" aria-hidden="true">📊</span>
+            <div>
+              <p className="text-sm font-semibold text-purple-800">選擇班級以查看報告</p>
+              <p className="text-xs text-purple-600 mt-0.5">點擊下方班級卡片，即可進入該班級的學習報告</p>
+            </div>
+          </div>
+        )}
 
         {/* Search & sort */}
         {!isLoading && classrooms.length > 0 && (
