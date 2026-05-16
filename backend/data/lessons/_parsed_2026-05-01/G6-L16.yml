@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L16
 reading_strategy: 生活素養-野外求生技能
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L16奇蹟行動（生活素養-野外求生技能）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []

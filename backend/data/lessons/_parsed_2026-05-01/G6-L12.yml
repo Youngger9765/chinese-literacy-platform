@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L12
 reading_strategy: 摘要策略-從段落找主題句
 reading_strategy_type: summary
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L12愛冒險逞強的雄性動物（摘要策略-從段落找主題句）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []

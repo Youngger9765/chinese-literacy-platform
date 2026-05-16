@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L17
 reading_strategy: 跨文化接納理解
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L17給神明發會診單（跨文化接納理解）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []
