@@ -3,6 +3,19 @@ grade: 8
 grade_code: G8-L18
 reading_strategy: 比較多元觀點
 reading_strategy_type: compare_contrast
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G8-L18石虎保育：遷移與否的兩難（比較多元觀點）.docx
 parsed_at: '2026-05-01T21:10:43'
 flags: []
