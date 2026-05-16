@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L14
 reading_strategy: 情緒管理ＡＢＣ
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L14白牙的最後一戰（情緒管理ＡＢＣ）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []

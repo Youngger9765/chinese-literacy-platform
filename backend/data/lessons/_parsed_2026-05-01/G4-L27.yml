@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L27
 reading_strategy: 念頭覺察
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L27從白熊到藍海豚：學習與念頭和平相處（念頭覺察）.docx
 parsed_at: '2026-05-01T21:10:34'
 flags: []

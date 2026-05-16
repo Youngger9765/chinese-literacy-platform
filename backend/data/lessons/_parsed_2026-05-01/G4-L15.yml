@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L15
 reading_strategy: 自我覺察-是友情還是愛情
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L15感情小日記1──是友情還是愛情？（自我覺察-是友情還是愛情）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []

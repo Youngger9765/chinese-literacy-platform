@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L26
 reading_strategy: 念頭覺察
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L26專注當下：關掉內心的批評噪音（念頭覺察）.docx
 parsed_at: '2026-05-01T21:10:34'
 flags: []

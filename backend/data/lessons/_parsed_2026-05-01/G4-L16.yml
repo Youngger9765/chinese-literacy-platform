@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L16
 reading_strategy: 自我覺察─想法與情緒的關係
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L16感情小日記2──喜歡是什麼？（自我覺察─想法與情緒的關係）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []

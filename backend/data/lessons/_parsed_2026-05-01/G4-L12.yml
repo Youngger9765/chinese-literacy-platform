@@ -3,6 +3,18 @@ grade: 4
 grade_code: G4-L12
 reading_strategy: 推論策略-推論情緒和感受
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- report
 source_file: G4-L12黃絲帶（推論策略-推論情緒和感受）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []
