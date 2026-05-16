@@ -7,6 +7,9 @@
  * - Quick action cards: 管理班級, 建立作業, 查看報告
  *
  * Route: /teacher-home
+ *
+ * Fix #1545: 查看報告 now navigates to /teacher with state { intent: 'reports' }
+ * so TeacherDashboard renders a "請選擇班級以查看報告" selection banner.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -32,7 +35,10 @@ interface QuickAction {
   icon: string;
   label: string;
   description: string;
+  /** Navigation path for this action */
   path: string;
+  /** Optional router state to pass with navigation (e.g. { intent: 'reports' }) */
+  state?: Record<string, unknown>;
   colorClass: string;
 }
 
@@ -54,8 +60,10 @@ const QUICK_ACTIONS: QuickAction[] = [
   {
     icon: '📊',
     label: '查看報告',
-    description: '了解學生的學習狀況',
+    description: '選擇班級以查看學生學習報告',
     path: '/teacher',
+    // Fix #1545: pass intent so TeacherDashboard shows a report-selection banner
+    state: { intent: 'reports' },
     colorClass: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700',
   },
 ];
@@ -250,7 +258,11 @@ const TeacherHome: React.FC = () => {
               <button
                 key={action.label}
                 type="button"
-                onClick={() => navigate(action.path)}
+                onClick={() =>
+                  action.state
+                    ? navigate(action.path, { state: action.state })
+                    : navigate(action.path)
+                }
                 aria-label={`${action.label}：${action.description}`}
                 className={`
                   flex items-center gap-4 p-4 rounded-xl border text-left transition-colors

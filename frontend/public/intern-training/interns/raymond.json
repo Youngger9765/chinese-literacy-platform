@@ -3,7 +3,7 @@
   "github": "if-else-master",
   "email": "78069313+if-else-master@users.noreply.github.com",
   "startDate": "2026-03-02",
-  "lastReview": "2026-04-04",
+  "lastReview": "2026-05-08",
   "skills": {
     "1": {
       "level": 3,
@@ -163,7 +163,7 @@
       ]
     },
     "8": {
-      "level": 3,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -175,11 +175,16 @@
           "date": "2026-03-13",
           "level": 3,
           "reason": "在元件中使用 Tailwind CSS"
+        },
+        {
+          "date": "2026-04-09",
+          "level": 4,
+          "reason": "PR #979 使用進階 Tailwind：w-[calc((100%-1.5rem)/5)] 自訂寬度計算實現 5 格換行佈局，flex-wrap 響應式設計取代複雜的 scrollable 元件"
         }
       ]
     },
     "9": {
-      "level": 2,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
@@ -188,9 +193,19 @@
           "reason": "PR #573 和 PR #575 皆使用 feature branch + PR 流程，commit message 格式遵循 conventional commits（fix: 前綴），工作流程完整"
         },
         {
-          "date": "2026-04-04",
+          "date": "2026-04-05",
           "level": 2,
-          "reason": "8 個 commit 全部使用 feat:/fix: 前綴，涵蓋多個不同 issue 的獨立 PR，工作流程持續穩定。部分 commit message 夾雜中英文（如 WIP-fix: 逐段朗讀不準確的BUG），conventional commit 格式尚未完全一致，保守升至 level 2"
+          "reason": "PR #898/#899/#900/#905 持續穩定使用 feature branch + conventional commits（fix:/feat: 前綴正確分類），每個 PR 都有清楚的問題描述與修改說明，工作流已成習慣"
+        },
+        {
+          "date": "2026-04-08",
+          "level": 3,
+          "reason": "PR #986（自學/作業分離）和 PR #987（tab 鎖定）都是從 4/3 會議決議出發，獨立拆 issue → 開發 → PR → merge 的完整自主流程。PR 說明清楚標注對應 issue 編號，commit message 格式正確"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "4/10~4/23 共 16 個 PR，全部使用 conventional commits（fix:/feat: 分類正確），每個 PR 對應明確 issue 編號，PR 說明包含問題背景、修改方式、測試確認。#1193/#1194/#1195 三個相互關聯的 DB PR 拆分合理（partial unique index / ON DELETE SET NULL / step_progress 版本機制分開 PR），顯示對 PR 粒度的成熟判斷"
         }
       ]
     },
@@ -220,6 +235,27 @@
       ],
       "maxLevel": 5
     },
+    "11": {
+      "level": 4,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-23",
+          "level": 2,
+          "reason": "PR #1086 step 進度 debounce 5 秒使用 useRef 儲存 timer ID（不觸發 re-render），正確識別不需要 state 的場景，是 useRef 的標準用法。PR #1175 無聲音輸入主動提示使用 useEffect 監聽音訊輸入狀態，逾時後觸發 UI 提示，展現 side effect 管理的基礎能力。目前尚未見到 useMemo 或複雜 cleanup 場景"
+        },
+        {
+          "date": "2026-05-08",
+          "level": 3,
+          "reason": "PR #1465 toolbox Phase 2+3：useEffect mount-only（空 deps []）觸發後端 toolbox session 建立，同時用 useRef recordedRef 防止 #1464 完成畫面的 CTA 重複觸發寫入。兩個 hook 協同解決跨 PR 的設計衝突（#1463 需要 mount 時記錄，#1464 需要 completion 時記錄），展現對 useEffect 生命週期與 useRef 穩定性的組合應用，已超出 debounce 的單一 hook 場景"
+        },
+        {
+          "date": "2026-05-08",
+          "level": 4,
+          "reason": "PR #1499 VocabPractice multi-mode：新增 `practiceMode` prop（3 variants: standard/toolbox/quiz）+ `radicalColorMode` prop，Round 1 顯示筆順輪廓 + 部首顏色，Round 2 隱藏所有輔助。命名時刻意避免與元件內部 `mode` state 衝突，顯示對 prop vs internal state 邊界的清晰判斷。4 輪 @claude review 全部解決，含最後 brush color 一致性問題（commit 9bad640a）。已超出單純 useEffect/useRef，展現 prop 設計 + multi-mode 元件架構整合能力"
+        }
+      ]
+    },
     "12": {
       "level": 5,
       "maxLevel": 5,
@@ -247,13 +283,23 @@
       ]
     },
     "13": {
-      "level": 1,
+      "level": 4,
       "maxLevel": 5,
       "history": [
         {
-          "date": "2026-04-04",
-          "level": 1,
-          "reason": "feat: hide-parent-page (#805) 新建 featureFlags.ts 集中管理前端功能開關，並在 auth.py / AppRoutes.tsx 各層正確引用，展現將設定邏輯抽離元件的意識。18ffa845 也顯示能理解跨元件的 props/context 資料流。首次展現元件設計模式的雛形，解鎖 level 1"
+          "date": "2026-04-05",
+          "level": 2,
+          "reason": "PR #805 設計前後端 feature flag 系統：後端 config.py 新增 PARENT_PORTAL_ENABLED 旗標、auth.py 加入 guard、前端建立 featureFlags.ts 集中管理，前後端職責分離清晰。PR #898 跨越 backend schemas/routes + 多個 frontend 元件（LearningLayout/MyAssignments/StepperNav 等），元件間資料流設計合理，但尚未見到 custom hook 抽取或共用元件重構"
+        },
+        {
+          "date": "2026-04-08",
+          "level": 3,
+          "reason": "PR #986 自學/作業分離涉及前端狀態管理重新設計（assignment ID vs self-study session），需理解 LearningSession 與 Assignment 的資料模型關係。PR #987 tab 鎖定提示需設計元件間的狀態傳遞（選擇題完成狀態 → 控制拖拉配對 tab 的 disabled 狀態），展現跨元件資料流設計能力"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "PR #1148 整合鼓勵語系統 + tier3 擋關邏輯 + 逐句重練 UI 為單一視覺流，展現多行為在同一元件中的設計整合能力。PR #1204 造句練習完整持久化，設計 beforeunload → session 寫入 → 頁面恢復的完整 state lifecycle。PR #1207 IME composition 問題同時修正 Enter 鍵在造句和聽寫兩個獨立元件的行為，顯示對跨元件共同問題的識別和同步修復能力。目前尚未見到 custom hook 的獨立抽取"
         }
       ]
     },
@@ -267,31 +313,84 @@
           "reason": "PR #573 新增 backend/tests/test_assignments.py，第一次主動撰寫測試，覆蓋作業發派的 API 行為驗證"
         },
         {
-          "date": "2026-04-04",
+          "date": "2026-04-05",
           "level": 2,
-          "reason": "a08b2b40（標記課文紀錄欄位 #899）擴充 ReadingAnnotation.test.tsx：新增 scrollIntoView mock、修正 aria-label 斷言、加入 act() + fireEvent.click 的非同步測試，還新增側邊面板顯示和跳轉功能的兩個完整 test case。9d97a3c1 也補了 test_reading_evaluation_service.py。測試不只是 happy path，有測互動行為，升至 level 2"
+          "reason": "PR #899 在修復 ReadingAnnotation 的同時更新 __tests__/ReadingAnnotation.test.tsx（+41/-6），不只修 bug 還同步維護測試，開始建立「改完要更新測試」的習慣。PR #805 也補寫 test_auth_api.py 測試家長角色登入被封鎖的情境（+48 行），涵蓋多個 test case"
+        },
+        {
+          "date": "2026-05-08",
+          "level": 2,
+          "reason": "PR #1498 G7-L29/L30 文章重點表重構：把 22 行純文字平鋪輸出拆解為 5 個結構化行（主題/觀察/推論/趨勢/反論/結論）+ fill-blank 格式，對應方大哥 #1388 的教學設計目標。2 輪 review 迭代（第一輪靖杭寫了「證據→趨勢」，Claude 指出語義不精準，第二輪改為「是否怕人」句式）。這是主動理解教學規格→轉換資料結構的問題拆解，而非機械式修改。level 維持 2，原因：目前是 1 個 YAML 的資料結構轉換，尚未見到跨多個複雜問題類型的拆解"
         }
       ]
     },
-    "18": {
+    "16": {
+      "level": 4,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-05",
+          "level": 2,
+          "reason": "PR #805（隱藏家長功能）和 PR #898（作業進度條）都是從 Issue 出發、跨越前後端完整實作並 merge 的功能。PR #898 規模特別大（+1248/-256，涉及 16 個檔案），顯示能獨立推進複雜任務。但目前兩個 PR 都沒有明確看到從 issue 開立到最終驗收的完整自主流程紀錄，保守給 level 2"
+        },
+        {
+          "date": "2026-04-08",
+          "level": 3,
+          "reason": "PR #986（自學/作業分離）和 PR #987（tab 鎖定）皆從 4/3 會議決議獨立建立 issue（#925, #926）→ 開發 → merge，展現完整的自主開發流程。兩個功能都在一週內完成，速度穩定"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 4,
+          "reason": "PR #1144（跨裝置 session 復用）和 PR #1145（current_step 同步）是 P1 beta blocker issue #1073/#1074 的完整實作。兩個 PR 在 4/22 deadline 前 2 天提前 merge，後端新增 GET-first + dedup 邏輯，DB 加 partial unique index，前端守衛同步，形成完整的前後端 + DB 三層解決方案。這是靖杭首次獨立完成涉及 DB migration 的端對端功能"
+        }
+      ]
+    },
+    "17": {
       "level": 1,
       "maxLevel": 5,
       "history": [
         {
-          "date": "2026-04-04",
+          "date": "2026-05-08",
           "level": 1,
-          "reason": "18ffa845（作業進度條 #645/#898）同時修改 backend routes/assignments.py、schemas/assignment.py，以及 frontend LearningLayout、ComprehensionChat、MyAssignments、ReportPage 等多個層，顯示理解資料從 API → context → 元件顯示的完整路徑。d4e11a98 類似，從 backend config → auth route → frontend featureFlags → AppRoutes 全端串通。首次展現全端資料流理解，解鎖 level 1"
+          "reason": "PR #1497 fix(csp)：閱讀 SecurityHeadersMiddleware 的 CSP header 建構邏輯，定位 `frame-src` directive 缺少 `https://storage.googleapis.com` 的根因（PDF iframe popup 被 CSP 封鎖），在正確位置加入白名單並附說明 CSP path-restriction limitation（GCS bucket 無法做到 path 級限制）。這是靖杭首次讀懂並修改 Python middleware 層的安全設定，Level 1：能在引導下讀懂既有 middleware 邏輯並做定點修改"
+        }
+      ]
+    },
+    "18": {
+      "level": 4,
+      "maxLevel": 5,
+      "history": [
+        {
+          "date": "2026-04-05",
+          "level": 1,
+          "reason": "PR #898 的問題說明中清楚描述了 LearningSession.current_step → assignment API → 前端進度條的完整資料流，顯示已開始理解全端架構。但目前是「能描述問題」的程度，尚未看到主動追蹤或重構整體資料流的行動，保守給 level 1"
+        },
+        {
+          "date": "2026-04-09",
+          "level": 2,
+          "reason": "PR #1031 是靖杭第一個 backend PR！診斷全形/半形 bug 時追蹤了完整資料流（YAML 原始資料 → lesson_loader.py 載入 → API 回傳 → 前端比對），在正確的層級（lesson_loader）加入 _halfwidth() 正規化，而不是在前端 patch。同時修正 learning_vocab.py 和 ai_generation.py 的變數名稱殘留，展現跨檔案根因修復能力"
+        },
+        {
+          "date": "2026-04-23",
+          "level": 3,
+          "reason": "PR #1193 新增 LearningSession 的 partial unique index（assignment_id + course_id 組合），PR #1194 設定 AssignmentSubmission.session_id ON DELETE SET NULL 刪除政策，PR #1195 在 step_progress 加入版本號機制防進度倒退。三個 PR 都是在 DB schema 層面做設計決策（索引策略、刪除政策、樂觀鎖），而非在應用層繞過問題，顯示對資料庫設計原則的主動應用，不是跟著 bug 修補"
+        },
+        {
+          "date": "2026-05-08",
+          "level": 4,
+          "reason": "PR #1461 用 Alembic 建立 10 張獨立 toolbox session tables，每張對應一個練習工具，schema 設計包含 FK 關聯與索引。PR #1465 獨立設計後端 toolbox.py routes（POST 建立 session、GET 查詢、PATCH 更新完成狀態）+ 前端 toolboxApi.ts 對應呼叫 + 學習紀錄頁 UI 分區整合。這是靖杭首次從零開始設計一個完整 feature 的後端 API，包含 DB schema → route → service → frontend API layer 的完整鏈路，並自主決定 HTTP method 語意（POST/GET/PATCH 各自職責），達到全端架構理解的 level 4"
         }
       ]
     }
   },
   "recommendations": [
-    "Git 工作流（#9）升至 level 2，下一步練習讓每個 PR 只包含單一 issue 的改動，commit message 全部統一用英文描述（例如 fix: reading annotation scroll behavior），避免 WIP- 前綴混入 main branch",
-    "測試（#14）升至 level 2，下一步挑戰 TDD 流程：先寫一個會 fail 的測試，再實作功能讓它通過。下一個 bug fix 可以從測試先寫起",
-    "元件設計模式（#13）剛解鎖，下一步可以嘗試把 18ffa845 裡的學習進度邏輯抽出成 custom hook（例如 useAssignmentProgress），讓元件本身更乾淨",
-    "架構理解（#18）剛解鎖，試著畫出一個功能的完整資料流圖（從 DB schema → API endpoint → frontend hook → UI），用文字或圖解說明，這會幫助你更快定位未來的 bug"
+    "架構理解（#18）升到 level 4，首次獨立設計完整 feature 後端 API（toolbox POST/GET/PATCH）。下一步：嘗試為 toolbox API 補寫 contract test（pytest）驗證各 endpoint 的 status code + response schema，這是 level 5 的準備——不只能設計 API，也能用測試鎖定合約",
+    "React 進階（#11）升到 level 4（PR #1499 multi-mode prop 設計 + 命名衝突解決）。下一步：在 #1190 或 #1186 中嘗試用 useMemo 快取計算結果，或抽取 custom hook，完成後 #11 有機會升到 level 5",
+    "元件設計（#13）已穩在 level 4。#1464 的 ToolboxCompletionActions 共用元件 + 9 個 reading-step 接入是好的證據。下一步挑戰：把 toolbox session 寫入邏輯抽成 useToolboxSession custom hook，這是 level 5 的證明",
+    "獨立開發（#16）已穩在 level 4。#1457 驗收簽結是好的 level 5 候選機會：完整經歷需求→設計→實作→現場驗收的全循環，且是跨 4 個 PR 的大型功能",
+    "後端 Python 閱讀（#17）新增 level 1。下一步：在 #1494 silent-failure 修復中繼續讀懂 mcq_rescue_agent 的錯誤處理邏輯，這是 level 2 的機會（能獨立追蹤 middleware → route → service 的控制流）"
   ],
-  "summary": "本期 8 個 commit 涵蓋全端：後端 AI 服務修正、feature flag 架構、作業進度全端串接、loading skeleton、閱讀標記測試擴充。新解鎖技能 13（元件設計模式）、18（架構理解），測試技能升至 level 2，Git 工作流升至 level 2。目前已確認解鎖 14 項技能",
+  "summary": "5/4~5/8 共 7 個 PR merge（5/4~5/7: 4 個 toolbox PR；5/8 新增: #1497/#1498/#1499）。5/8 亮點：PR #1499 VocabPractice multi-mode（practiceMode + radicalColorMode 雙 prop，4 輪 review）展現跨 mode 元件架構設計；PR #1498 G7-L29/L30 文章重點表結構化重構（22 行平文字 → 5 行填空）；PR #1497 CSP middleware fix（首次讀懂並修改 Python security middleware）。技能升級：#11 React 進階（3→4，multi-mode prop 設計 + 命名邊界清晰）；#17 後端 Python 閱讀（新增 level 1）。技能 #14 質量提升（無升級，1498 證據待後續積累）。累計本週 7 PR，是歷週最高產之一",
   "issues": [
     {
       "id": "環境建置",
@@ -299,8 +398,13 @@
       "date": "2026-03-02",
       "type": "setup",
       "contribution": "完成專案 fork、本地環境建置",
-      "skillsLearned": [1, 4],
-      "highlights": ["順利完成 fork 和 push"]
+      "skillsLearned": [
+        1,
+        4
+      ],
+      "highlights": [
+        "順利完成 fork 和 push"
+      ]
     },
     {
       "id": "#224",
@@ -308,8 +412,15 @@
       "date": "2026-03-05",
       "type": "feature",
       "contribution": "修改閱讀理解頁面 UI/UX，改善互動體驗",
-      "skillsLearned": [2, 3, 5],
-      "highlights": ["第一個 PR", "能讀懂基本 HTML/JS"]
+      "skillsLearned": [
+        2,
+        3,
+        5
+      ],
+      "highlights": [
+        "第一個 PR",
+        "能讀懂基本 HTML/JS"
+      ]
     },
     {
       "id": "#216",
@@ -317,8 +428,16 @@
       "date": "2026-03-10",
       "type": "bugfix",
       "contribution": "修復中文輸入法在聊天介面的 composition 事件處理問題，影響所有中文使用者",
-      "skillsLearned": [3, 5, 10],
-      "highlights": ["完整執行 重現→定位→修復→驗證 流程", "處理 isComposing event 和 async 語音功能", "Bug 修復流程扎實"],
+      "skillsLearned": [
+        3,
+        5,
+        10
+      ],
+      "highlights": [
+        "完整執行 重現→定位→修復→驗證 流程",
+        "處理 isComposing event 和 async 語音功能",
+        "Bug 修復流程扎實"
+      ],
       "linesChanged": "+32/-8"
     },
     {
@@ -327,8 +446,12 @@
       "date": "2026-03-10",
       "type": "bugfix",
       "contribution": "修復本地開發環境的資料庫連線問題，讓開發流程更順暢",
-      "skillsLearned": [4],
-      "highlights": ["本地開發環境完全跑通"]
+      "skillsLearned": [
+        4
+      ],
+      "highlights": [
+        "本地開發環境完全跑通"
+      ]
     },
     {
       "id": "語音功能",
@@ -336,8 +459,18 @@
       "date": "2026-03-13",
       "type": "feature",
       "contribution": "為閱讀理解聊天介面新增語音輸入和語音輸出功能，大幅提升無障礙使用體驗",
-      "skillsLearned": [6, 7, 8, 12],
-      "highlights": ["獨立完成完整功能", "成功串接語音 API", "React 元件設計清晰", "TypeScript 使用正確"],
+      "skillsLearned": [
+        6,
+        7,
+        8,
+        12
+      ],
+      "highlights": [
+        "獨立完成完整功能",
+        "成功串接語音 API",
+        "React 元件設計清晰",
+        "TypeScript 使用正確"
+      ],
       "linesChanged": "+180/-20"
     },
     {
@@ -346,8 +479,18 @@
       "date": "2026-03-20",
       "type": "bugfix",
       "contribution": "定位並修復作業 API 的 422 錯誤：後端 schema 仍要求 classroom_id 在 body，但 API 已改為 path parameter 傳遞，導致教師無法發派作業。修改 assignments.py、assignment.py schema，並補寫 test_assignments.py 驗證修正",
-      "skillsLearned": [9, 10, 12, 14],
-      "highlights": ["跨越 frontend + backend + 測試三個層面", "第一次主動撰寫後端測試", "理解 API schema 設計與 path parameter 差異", "conventional commit 格式正確"],
+      "skillsLearned": [
+        9,
+        10,
+        12,
+        14
+      ],
+      "highlights": [
+        "跨越 frontend + backend + 測試三個層面",
+        "第一次主動撰寫後端測試",
+        "理解 API schema 設計與 path parameter 差異",
+        "conventional commit 格式正確"
+      ],
       "linesChanged": "+多行/-多行"
     },
     {
@@ -356,83 +499,433 @@
       "date": "2026-03-20",
       "type": "bugfix",
       "contribution": "主動發現教師留言功能只有 emoji，使用者不容易識別，改為文字按鈕提升可讀性",
-      "skillsLearned": [2, 8],
-      "highlights": ["主動發現 UX 問題並提 issue 修復", "改善按鈕語意與可讀性"]
+      "skillsLearned": [
+        2,
+        8
+      ],
+      "highlights": [
+        "主動發現 UX 問題並提 issue 修復",
+        "改善按鈕語意與可讀性"
+      ]
     },
     {
-      "id": "#642",
-      "title": "逐段朗讀評分 bug 修正（WIP）",
-      "date": "2026-03-22",
+      "id": "#804",
+      "title": "隱藏家長功能（PR #805）",
+      "date": "2026-04-02",
+      "type": "feature",
+      "contribution": "設計前後端 feature flag 系統，預設關閉家長入口。後端 config.py 新增旗標、auth.py 封鎖家長角色登入；前端建立 featureFlags.ts 集中管理，AppRoutes.tsx 依旗標動態註冊路由。補寫 test_auth_api.py 驗證封鎖邏輯（+48 行）",
+      "skillsLearned": [
+        9,
+        13,
+        14,
+        16
+      ],
+      "highlights": [
+        "前後端 feature flag 設計職責分離",
+        "補寫測試覆蓋邊界情境",
+        "首次在 frontend 建立 config/featureFlags.ts 集中管理旗標"
+      ],
+      "linesChanged": "+114/-15"
+    },
+    {
+      "id": "#645",
+      "title": "作業進度條與對話紀錄顯示學習進度（PR #898）",
+      "date": "2026-04-02",
+      "type": "feature",
+      "contribution": "診斷進度條顯示 0% 的根因：assignment API 未聚合 LearningSession.current_step，在後端 assignments.py 新增查詢邏輯、更新 schema，前端同步修改 LearningLayout、MyAssignments、StepperNav 等 16 個檔案。同時修復 VocabDefinitionMatch 的互動 bug",
+      "skillsLearned": [
+        13,
+        16,
+        18
+      ],
+      "highlights": [
+        "PR 規模最大（+1248/-256，16 個檔案）",
+        "清楚分析 API 資料流問題並跨前後端修復",
+        "補寫 test_assignments.py 驗證新 API 行為",
+        "能完整推進複雜多檔案功能"
+      ],
+      "linesChanged": "+1248/-256"
+    },
+    {
+      "id": "#862",
+      "title": "修復閱讀標記側邊 panel 詞語 bug（PR #899）",
+      "date": "2026-04-02",
       "type": "bugfix",
-      "contribution": "修改 ai_service.py 和 reading_evaluation_service.py 改善逐段朗讀評分準確度，同時補寫 test_reading_evaluation_service.py 測試案例",
-      "skillsLearned": [10, 14],
-      "highlights": ["觸及後端 AI 服務層", "主動補測試"]
-    },
-    {
-      "id": "#643/#644",
-      "title": "合併學生三大頁面（我的作業＋學習進度＋對話紀錄）",
-      "date": "2026-03-29",
-      "type": "feature",
-      "contribution": "整合學生端三個分散頁面為統一的「我的作業」頁，刪除 DialogueHistory.tsx，修改後端 assignments/learning_sessions 路由，更新 E2E fixtures",
-      "skillsLearned": [6, 9, 13, 18],
-      "highlights": ["跨 frontend + backend 的大型整合", "刪除冗餘元件展現架構判斷", "E2E fixture 更新"],
-      "linesChanged": "+多行/-217 (DialogueHistory.tsx)"
-    },
-    {
-      "id": "#411/#662",
-      "title": "新增 Loading Skeleton",
-      "date": "2026-03-29",
-      "type": "feature",
-      "contribution": "為頁面載入新增 skeleton 佔位元件，改善用戶等待體驗",
-      "skillsLearned": [6, 8],
-      "highlights": ["主動改善 UX 細節"]
-    },
-    {
-      "id": "#805",
-      "title": "隱藏家長頁面（feature flag 架構）",
-      "date": "2026-04-02",
-      "type": "feature",
-      "contribution": "新建 featureFlags.ts 集中管理前端功能開關，透過 VITE_PARENT_PORTAL_ENABLED 環境變數控制家長頁面顯示，同時在 backend auth.py 新增對應路由保護並補寫 test_auth_api.py",
-      "skillsLearned": [13, 18],
-      "highlights": ["首次建立專案級 feature flag 系統", "從 backend config 到 frontend routing 全端串通", "有寫 JSDoc 說明用法"]
-    },
-    {
-      "id": "#645/#898",
-      "title": "作業進度條與對話紀錄顯示學習進度",
-      "date": "2026-04-02",
-      "type": "feature",
-      "contribution": "修改 backend assignments 路由新增進度欄位，更新 assignment schema，擴充 frontend LearningLayout、ComprehensionChat、VocabDefinitionMatch、MyAssignments、ReportPage 等多個元件顯示進度資料",
-      "skillsLearned": [6, 12, 18],
-      "highlights": ["最大規模的全端整合 commit", "理解 DB schema → API → context → UI 完整資料流", "同時補寫後端測試"],
-      "linesChanged": "+多行（16 個檔案）"
-    },
-    {
-      "id": "#899",
-      "title": "標記課文紀錄欄位（ReadingAnnotation 側邊面板）",
-      "date": "2026-04-02",
-      "type": "feature",
-      "contribution": "大幅擴充 ReadingAnnotation.tsx 新增標記紀錄側邊面板，同步擴充測試案例：新增 scrollIntoView mock、aria-label 斷言、act()+fireEvent 的互動測試",
-      "skillsLearned": [6, 14],
-      "highlights": ["+200/-69 行的大型元件開發", "測試涵蓋非同步互動和 DOM 行為", "aria-label 設計顯示無障礙意識"],
+      "contribution": "修復標記詞語點擊後無法 scroll 到正確位置、以及按鈕在滾動後位置跑偏的問題。在 ReadingAnnotation.tsx 修正座標計算邏輯，同步更新測試（+41/-6）",
+      "skillsLearned": [
+        10,
+        14
+      ],
+      "highlights": [
+        "修正滾動容器的 scrollTop 座標偏移計算",
+        "同步更新測試，不讓 test 過時",
+        "PR 說明清楚列出兩個修復目標並打勾確認"
+      ],
       "linesChanged": "+200/-69"
     },
     {
-      "id": "#905",
-      "title": "閱讀標記按鈕修正",
+      "id": "#904",
+      "title": "修復閱讀標記按鈕跟隨滾動位置（PR #905）",
       "date": "2026-04-02",
       "type": "bugfix",
-      "contribution": "修正 ReadingAnnotation.tsx 按鈕邏輯，精準小改動",
-      "skillsLearned": [10],
-      "highlights": ["精準定位問題，不亂改"]
+      "contribution": "在 ReadingAnnotation.tsx 加入可捲動容器的 scrollTop/scrollLeft 偏移補償，修正文章往下滑後浮動按鈕位置跑偏的問題",
+      "skillsLearned": [
+        10
+      ],
+      "highlights": [
+        "精準定位座標計算問題（scrollTop/scrollLeft 補償）",
+        "修改範圍小（+8/-6）但影響精準"
+      ],
+      "linesChanged": "+8/-6"
     },
     {
-      "id": "#88/#900",
-      "title": "生字練習「部件拆解」修正",
+      "id": "#88",
+      "title": "生字練習部件拆解修正（PR #900）",
       "date": "2026-04-03",
       "type": "bugfix",
-      "contribution": "修正 RadicalDecomposition.tsx 功能 bug 並同步修正 TypeScript 錯誤，調整 LearningLayout.tsx 對應位置",
-      "skillsLearned": [7, 10],
-      "highlights": ["主動修正 TypeScript 型別錯誤", "跨兩個檔案的精準修改"]
+      "contribution": "修正 RadicalDecomposition.tsx 中 JSON fallback 資料缺少 meaning 導致說明空白的問題，加入 fallback 顯示文案，並移除按鈕內重複說明",
+      "skillsLearned": [
+        5,
+        10
+      ],
+      "highlights": [
+        "清楚分析兩種資料來源的差異",
+        "PR 說明詳盡，分兩階段解釋修正思路"
+      ],
+      "linesChanged": "+8/-7"
+    },
+    {
+      "id": "#925",
+      "title": "詞語定義 tab 前置鎖定提示（PR #987）",
+      "date": "2026-04-08",
+      "type": "feature",
+      "contribution": "實作 4/3 會議決議：選擇題完成才能做拖拉配對，加入 tab 鎖定提示 UI，引導學生按順序完成",
+      "skillsLearned": [
+        9,
+        13,
+        16
+      ],
+      "highlights": [
+        "從會議決議獨立建 issue → 開發 → merge",
+        "跨元件狀態傳遞設計（完成狀態控制 tab disabled）"
+      ]
+    },
+    {
+      "id": "#926",
+      "title": "自學和作業記錄分離（PR #986）",
+      "date": "2026-04-08",
+      "type": "feature",
+      "contribution": "實作 4/3 會議決議：自學 session 與作業 session 分離，作業跟 assignment ID 走，刪除作業也刪記錄",
+      "skillsLearned": [
+        9,
+        13,
+        16
+      ],
+      "highlights": [
+        "涉及前端狀態管理重設計",
+        "理解 LearningSession 與 Assignment 資料模型關係",
+        "一週內完成"
+      ]
+    },
+    {
+      "id": "#924",
+      "title": "作業進度條顏色改綠色 + 排版每5格換行（PR #979）",
+      "date": "2026-04-09",
+      "type": "feature",
+      "contribution": "移除複雜的 horizontal scroll 進度條（左右箭頭 + gradient mask），改用 flex-wrap 每5格換行的簡潔佈局。完成→綠色、進行中→黃色、未完成→灰色",
+      "skillsLearned": [
+        8
+      ],
+      "highlights": [
+        "大幅簡化元件（-94/+26 行）",
+        "w-[calc((100%-1.5rem)/5)] 自訂寬度計算",
+        "用簡單方案取代過度工程"
+      ],
+      "linesChanged": "+26/-94"
+    },
+    {
+      "id": "#1029",
+      "title": "詞語應用全形/半形答案修正（PR #1031）",
+      "date": "2026-04-09",
+      "type": "bugfix",
+      "contribution": "第一個 backend PR！診斷詞語應用選項中無正確答案的 bug，根因是 YAML 中全形字母（Ａ）與 vocab_bank 半形 key（A）不匹配。在 lesson_loader.py 加入 _halfwidth() 正規化函數，同時修正 learning_vocab.py 的 payload.character→payload.word 殘留",
+      "skillsLearned": [
+        10,
+        18
+      ],
+      "highlights": [
+        "靖杭第一個 backend Python PR",
+        "追蹤完整資料流找到根因（YAML→loader→API→frontend）",
+        "在正確的層級修復（data loading 而非前端 patch）",
+        "跨 3 個檔案的根因修復"
+      ],
+      "linesChanged": "+21/-6"
+    },
+    {
+      "id": "#1070/#1071",
+      "title": "Self-practice 後端無紀錄 + 跨裝置失效修復（PR #1075, #1085）",
+      "date": "2026-04-15",
+      "type": "bugfix",
+      "contribution": "PR #1075 修復自學模式未建立 LearningSession 的問題（後端路徑未觸發）。PR #1085 修復跨裝置 self-practice 失效，確保不同裝置能正確恢復進度",
+      "skillsLearned": [
+        10,
+        18
+      ],
+      "highlights": [
+        "後端 session 建立邏輯診斷",
+        "跨裝置狀態管理"
+      ]
+    },
+    {
+      "id": "#661",
+      "title": "逐段朗讀句子級重練功能（PR #1076）",
+      "date": "2026-04-15",
+      "type": "feature",
+      "contribution": "實作句子切分 + 逐句重練流程，讓學生能針對特定句子反覆練習，而非重讀整段",
+      "skillsLearned": [
+        6,
+        13
+      ],
+      "highlights": [
+        "句子級粒度設計，資料流從段→句",
+        "完整的重練 UI 狀態管理"
+      ]
+    },
+    {
+      "id": "#1072",
+      "title": "Step 進度 debounce 防抖動（PR #1086）",
+      "date": "2026-04-17",
+      "type": "bugfix",
+      "contribution": "步驟完成事件在 5 秒內多次觸發時只送一次 API，使用 useRef 儲存 timer ID 避免不必要的 re-render",
+      "skillsLearned": [
+        11
+      ],
+      "highlights": [
+        "正確選用 useRef 而非 useState 儲存 timer",
+        "debounce 實作乾淨"
+      ]
+    },
+    {
+      "id": "#1096",
+      "title": "Step 2 停止鈕 + 漏讀偵測 + 句子切分 + 視覺整合（PR #1142, #1148）",
+      "date": "2026-04-20",
+      "type": "feature",
+      "contribution": "PR #1142 新增停止錄音按鈕、漏讀句子偵測邏輯、改善句子切分精準度。PR #1148 整合鼓勵語系統 + tier3 擋關 + 逐句重練 UI 為完整視覺流",
+      "skillsLearned": [
+        13,
+        16
+      ],
+      "highlights": [
+        "多功能整合到單一流暢 UX",
+        "tier3 擋關邏輯設計",
+        "鼓勵語情境判斷"
+      ]
+    },
+    {
+      "id": "#1073/#1074",
+      "title": "跨裝置 session 一致性 P1 beta blocker（PR #1144, #1145）",
+      "date": "2026-04-20",
+      "type": "feature",
+      "contribution": "P1 beta blocker。PR #1144 後端 GET-first dedup 邏輯 + frontend 守衛。PR #1145 current_step 與 steps_completed 雙向同步。DB 層加 partial unique index 確保資料完整性",
+      "skillsLearned": [
+        16,
+        18
+      ],
+      "highlights": [
+        "P1 beta blocker deadline 前 2 天完成",
+        "前後端 + DB 三層解決方案",
+        "首次獨立完成 DB migration 端對端"
+      ]
+    },
+    {
+      "id": "#1174",
+      "title": "Step 2 無聲音輸入主動提示（PR #1175）",
+      "date": "2026-04-21",
+      "type": "feature",
+      "contribution": "使用 useEffect 監聽音訊輸入狀態，超過閾值時間沒有聲音則主動顯示提示引導學生",
+      "skillsLearned": [
+        11
+      ],
+      "highlights": [
+        "useEffect side effect 管理",
+        "音訊輸入狀態監聽"
+      ]
+    },
+    {
+      "id": "#1179/#1178/#1187",
+      "title": "DB schema 三連 PR：index / FK 政策 / 版本鎖（PR #1193, #1194, #1195）",
+      "date": "2026-04-21",
+      "type": "feature",
+      "contribution": "PR #1193 LearningSession partial unique index（assignment_id + course_id）。PR #1194 AssignmentSubmission.session_id ON DELETE SET NULL。PR #1195 step_progress 版本號機制防進度倒退（樂觀鎖模式）",
+      "skillsLearned": [
+        18
+      ],
+      "highlights": [
+        "首次主動在 DB schema 層做設計決策",
+        "三個 PR 拆分粒度合理",
+        "樂觀鎖防並發問題的正確做法"
+      ]
+    },
+    {
+      "id": "#1196",
+      "title": "VocabApplication beforeunload 覆蓋修復（PR #1197）",
+      "date": "2026-04-21",
+      "type": "bugfix",
+      "contribution": "beforeunload 事件在離頁時意外覆蓋 steps_completed，導致已完成步驟被清空。修復 event handler 的寫入條件",
+      "skillsLearned": [
+        10,
+        13
+      ],
+      "highlights": [
+        "race condition 診斷（beforeunload vs session 寫入順序）",
+        "state lifecycle 理解"
+      ]
+    },
+    {
+      "id": "#1203",
+      "title": "造句練習完整持久化（PR #1204）",
+      "date": "2026-04-22",
+      "type": "feature",
+      "contribution": "設計 beforeunload → session 寫入 → 頁面恢復的完整 state lifecycle，確保造句練習進度跨頁面、跨裝置保存",
+      "skillsLearned": [
+        13
+      ],
+      "highlights": [
+        "完整 state lifecycle 設計",
+        "持久化邏輯與 UI 狀態解耦"
+      ]
+    },
+    {
+      "id": "#1206",
+      "title": "造句 + 聽寫 Enter 鍵忽略 IME composition（PR #1207）",
+      "date": "2026-04-22",
+      "type": "bugfix",
+      "contribution": "修復中文輸入法選字時 Enter 鍵誤觸提交的問題，同時修正造句和聽寫兩個獨立元件的相同行為",
+      "skillsLearned": [
+        10
+      ],
+      "highlights": [
+        "同一問題在兩個元件同步修復",
+        "IME composition 事件正確處理"
+      ]
+    },
+    {
+      "id": "#1351",
+      "title": "zhuyin-off 場景明確 serif fallback（PR #1459）",
+      "date": "2026-05-07",
+      "type": "bugfix",
+      "contribution": "修復非注音模式下缺乏明確字體 fallback 的問題。新增 BpmfZihiSerif（字嗨宋體）作為 zhuyin-off 場景的 serif fallback，建立 fonts.ts helper 集中管理字體 class，更新 11 個相關元件",
+      "skillsLearned": [
+        8,
+        9
+      ],
+      "highlights": [
+        "建立 fonts.ts 集中字體管理，不散落各元件",
+        "理解 IVS variant selector 對 CJK 字體選擇的影響",
+        "11 個元件統一套用，修改範圍廣但邏輯一致"
+      ],
+      "linesChanged": "+多行（11 元件 + fonts.ts helper）"
+    },
+    {
+      "id": "#1460",
+      "title": "toolbox session tables — Phase 1（PR #1461）",
+      "date": "2026-05-07",
+      "type": "feature",
+      "contribution": "用 Alembic migration 建立 10 張獨立 toolbox session tables，每張對應一個練習工具（LiveTutor、FullReading、Listening、VocabPractice 等），包含 FK 關聯與索引。同時為 AppShell 加入 toolbox-aware aria-label 改善 a11y",
+      "skillsLearned": [
+        9,
+        18
+      ],
+      "highlights": [
+        "Alembic 一次建 10 張 table，schema 設計清楚",
+        "FK + index 設計符合 sqlalchemy-model-safety checklist",
+        "a11y aria-label 細節在第 6 輪 @claude review 後補上，展現對細節的追蹤"
+      ]
+    },
+    {
+      "id": "#1462",
+      "title": "toolbox per-tool 完成畫面 CTA（PR #1464）",
+      "date": "2026-05-07",
+      "type": "feature",
+      "contribution": "設計並實作 ToolboxCompletionActions 共用元件，提供「重做」和「回到練習工具箱」兩個 CTA 按鈕。將元件接入 9 個 reading-step 元件，形成統一的完成體驗",
+      "skillsLearned": [
+        6,
+        13
+      ],
+      "highlights": [
+        "共用元件設計，9 個元件接入點統一",
+        "4 輪 @claude review 迭代改善元件 API 設計",
+        "解決與 Phase 2+3 (#1465) 的設計衝突：CTA 的 recordedRef guard 防重複觸發"
+      ]
+    },
+    {
+      "id": "#1463",
+      "title": "toolbox Phase 2+3 — 後端 API + 前端整合 + 學習紀錄頁（PR #1465）",
+      "date": "2026-05-07",
+      "type": "feature",
+      "contribution": "完整實作練習工具箱的資料記錄層：後端 toolbox.py（POST/GET/PATCH routes）、前端 toolboxApi.ts（API 呼叫層）、學習紀錄頁分區顯示工具箱完成紀錄。用 useEffect mount（空 deps）+ useRef recordedRef guard 解決 #1463 和 #1464 的設計衝突",
+      "skillsLearned": [
+        11,
+        12,
+        13,
+        18
+      ],
+      "highlights": [
+        "首次獨立設計完整 feature 後端 API（POST/GET/PATCH 語意清楚）",
+        "useEffect + useRef 跨 PR 協同解決設計衝突，展現 React lifecycle 成熟理解",
+        "前後端 + DB 三層完整走完",
+        "4 輪 @claude review 迭代"
+      ]
+    },
+    {
+      "id": "#1496",
+      "title": "fix(csp): GCS frame-src 允許，解除 PDF popup 封鎖（PR #1497）",
+      "date": "2026-05-08",
+      "type": "bugfix",
+      "contribution": "閱讀 SecurityHeadersMiddleware 的 CSP header 建構邏輯，定位 frame-src 缺少 storage.googleapis.com，在正確位置加入白名單。說明了 CSP 無法做 GCS path-restriction 的限制，修改精準（+3/-1）",
+      "skillsLearned": [
+        17
+      ],
+      "highlights": [
+        "首次讀懂並修改 Python middleware 安全設定",
+        "正確定位 CSP directive 在 header 建構中的位置",
+        "附說明 GCS path-restriction 限制，展現對 CSP 語意的理解"
+      ],
+      "linesChanged": "+3/-1"
+    },
+    {
+      "id": "#1388",
+      "title": "fix(content): G7-L29/L30 文章重點表結構化重構（PR #1498）",
+      "date": "2026-05-08",
+      "type": "bugfix",
+      "contribution": "將 G7-L29/L30 的文章重點表從 22 行純文字平鋪重構為 5 個結構化行（主題/觀察/推論/趨勢/反論）並加入 fill-blank 格式，符合方大哥 #1388 的教學設計規格。2 輪 review 迭代（改善「證據→趨勢」語意、「怕人→是否怕人」句式）",
+      "skillsLearned": [
+        14
+      ],
+      "highlights": [
+        "主動理解教學規格，將平文字轉換為結構化填空",
+        "2 輪 review 迭代，精修欄位語意",
+        "staging 驗證 6 個填空格正確渲染（HTTP 200）"
+      ],
+      "linesChanged": "+35/-47"
+    },
+    {
+      "id": "#1342",
+      "title": "feat(vocab): 第二次練習隱藏輔助 + 部首顏色（PR #1499）",
+      "date": "2026-05-08",
+      "type": "feature",
+      "contribution": "VocabPractice 新增 practiceMode prop（standard/toolbox/quiz 三種）+ radicalColorMode prop，Round 1 顯示筆順輪廓 + 部首顏色標示，Round 2 隱藏所有輔助（筆順/注音/筆畫數）。命名刻意避免與元件內部 mode state 衝突，4 輪 @claude review 全部解決含最後 brush color 一致性",
+      "skillsLearned": [
+        6,
+        11
+      ],
+      "highlights": [
+        "prop vs internal state 邊界設計清晰，避免命名衝突",
+        "3 variants + 雙 prop 的 multi-mode 元件架構",
+        "4 輪 @claude review 全部追蹤到底，含 commit 9bad640a brush color 修正",
+        "162+/32- 規模適中，設計乾淨"
+      ],
+      "linesChanged": "+162/-32"
     }
   ]
 }

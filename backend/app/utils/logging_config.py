@@ -4,6 +4,17 @@ Structured JSON logging configuration for LingoLeap backend.
 Configures Python logging with JSON formatter so that Cloud Logging
 can parse structured fields (request_id, user_id, endpoint, duration, etc.)
 as first-class log metadata.
+
+Every structured log entry emits an ``env`` field sourced from the ENVIRONMENT
+env var (values: production | staging | preview | development).  This lets
+Cloud Logging filter queries distinguish noise from different environments:
+
+    jsonPayload.env="staging"
+    jsonPayload.env="production"
+
+JSON logging is enabled for production, staging, and preview environments so
+that Cloud Run log entries from all three are machine-parseable.  Local
+development falls back to a human-readable format.
 """
 
 import logging
@@ -17,33 +28,52 @@ try:
 except ImportError:
     from pythonjsonlogger import jsonlogger  # type: ignore[no-redef]
 
+# ---------------------------------------------------------------------------
+# EnvFilter — injects ``env`` into every LogRecord so the JSON formatter can
+# emit it as a top-level field.  This is simpler than subclassing the formatter
+# because it works transparently with any handler attached to the root logger.
+# ---------------------------------------------------------------------------
+
+class _EnvFilter(logging.Filter):
+    """Attach the current ENVIRONMENT value to every log record."""
+
+    def __init__(self, env: str) -> None:
+        super().__init__()
+        self._env = env
+
+    def filter(self, record: logging.LogRecord) -> bool:  # noqa: A003
+        record.env = self._env  # type: ignore[attr-defined]
+        return True
+
 
 def setup_logging() -> None:
     """Configure root logger with JSON formatter.
 
-    In development (ENVIRONMENT != 'production'), falls back to a
-    human-readable format so local terminal output stays readable.
+    JSON mode is used for production, staging, and preview so that Cloud Logging
+    can parse structured fields.  Local development (ENVIRONMENT unset or
+    'development') falls back to human-readable output.
     """
     environment = os.environ.get("ENVIRONMENT", "development")
 
-    if environment == "production":
-        _configure_json_logging()
+    if environment in ("production", "staging", "preview"):
+        _configure_json_logging(environment)
     else:
         _configure_development_logging()
 
 
-def _configure_json_logging() -> None:
-    """Structured JSON output — used in Cloud Run production."""
+def _configure_json_logging(environment: str) -> None:
+    """Structured JSON output — used in Cloud Run (production / staging / preview)."""
     handler = logging.StreamHandler()
 
     # Cloud Logging picks up 'severity' as the log level field.
-    # Include standard structured fields that every log entry should carry.
+    # %(env)s is injected by _EnvFilter so it appears as a top-level JSON key.
     formatter = jsonlogger.JsonFormatter(
-        fmt="%(asctime)s %(name)s %(levelname)s %(message)s",
+        fmt="%(asctime)s %(name)s %(levelname)s %(env)s %(message)s",
         rename_fields={"levelname": "severity", "asctime": "timestamp"},
         datefmt="%Y-%m-%dT%H:%M:%S",
     )
     handler.setFormatter(formatter)
+    handler.addFilter(_EnvFilter(environment))
 
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)

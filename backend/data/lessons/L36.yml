@@ -1,6 +1,6 @@
 lesson_number: 36
 grade: 7
-grade_code: G7-8
+grade_code: G7-L16
 title: 果醬男孩
 genre: 記敘文
 text_type: 單
@@ -272,3 +272,4 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L16.pdf

@@ -81,10 +81,12 @@ interface ApiStoryDetail extends ApiStoryListItem {
     lesson_label?: string;
     authors?: string;
   } | null;
-  // Lesson intro (#1443): docx 說明/導讀 or excel fallback
+  // Lesson intro (#1443, refined by #1598)
   lesson_intro?: {
     source: 'docx_explanation' | 'docx_guide' | 'excel';
     text: string;
+    course_intro?: string;
+    course_intro_source?: string;
     unit_topic?: string;
     strategy_title?: string;
   } | null;
@@ -131,13 +133,24 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     vocabulary: detail.vocabulary ?? undefined,
     charCount: detail.char_count,
     readingBenchmark: detail.reading_benchmark ?? undefined,
-    // Filter to legacy-format items only (those with a `sentence` field).
-    // New-format items from the 5/1 curriculum batch use context_before/context_after
-    // which FillInBlankExercise does not yet support — passing them causes a TypeError
-    // crash when the component accesses `.sentence` (#1563).
-    // Filtering to [] causes VocabApplication.hasData to return false → NoDataFallback.
+    // Filter to legacy-format items only.
+    // Two fill_in_blank schemas coexist (#1559, #1563):
+    //   Legacy: { sentence, answer: "A" } — answer is a vocab_bank letter code.
+    //   New-format (5/1 batch): { id, context_before, context_after, answer: "模仿雞叫" }
+    //     answer is freetext (strategy cloze), NOT a vocab_bank letter code.
+    //
+    // lesson_loader.py _normalize_fill_in_blank_item() synthesizes `sentence` for
+    // new-format items and tags both schemas with `_schema` ("legacy" | "context_fill").
+    //
+    // FillInBlankExercise requires legacy format: answer must match a vocab_bank key.
+    // New-format items cause a broken exercise (no answer ever matches) or crash on
+    // `.sentence` access when normalization is absent. Drop them here so
+    // VocabApplication.hasData returns false → NoDataFallback renders.
+    // When a cloze exercise component is built for new-format, remove this filter.
     fillInBlank: detail.fill_in_blank
-      ? detail.fill_in_blank.filter((item) => typeof item['sentence'] === 'string') as Array<{ sentence: string; answer: string }>
+      ? detail.fill_in_blank.filter((item) =>
+          item['_schema'] === 'legacy' || typeof item['sentence'] === 'string' && !('context_before' in item)
+        ) as Array<{ sentence: string; answer: string }>
       : undefined,
     multipleChoice: detail.multiple_choice ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,

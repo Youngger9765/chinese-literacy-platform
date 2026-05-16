@@ -1,6 +1,6 @@
 lesson_number: 5
 grade: 4
-grade_code: G4-5
+grade_code: G4-L05
 title: 穿越極限的跑者
 genre: 記敘文
 text_type: 單
@@ -236,3 +236,4 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G4-L05.pdf

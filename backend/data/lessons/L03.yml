@@ -1,6 +1,6 @@
 lesson_number: 3
 grade: 4
-grade_code: G4-3
+grade_code: G4-L03
 title: 長高的祕密
 genre: 說明文
 text_type: 單
@@ -225,3 +225,4 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G4-L03.pdf

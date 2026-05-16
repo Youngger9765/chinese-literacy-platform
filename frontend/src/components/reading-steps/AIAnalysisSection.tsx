@@ -42,6 +42,11 @@ const AIAnalysisSection: React.FC<AIAnalysisSectionProps> = ({
 
   const fetchAnalysis = useCallback(async () => {
     if (!token) return;
+    // Issue #1648: dbSessionId must be a valid number to use the session-scoped
+    // cached endpoint. If null/undefined (error/reset state), do not call any
+    // AI endpoint — the deprecated standalone no-cache endpoint is removed from
+    // this call site.
+    if (dbSessionId === null || dbSessionId === undefined) return;
     setLoading(true);
     setError(null);
     try {
@@ -59,7 +64,7 @@ const AIAnalysisSection: React.FC<AIAnalysisSectionProps> = ({
           dictationCorrectCount,
           dictationTotalCount,
         },
-        dbSessionId ?? undefined,
+        dbSessionId,
       );
       setAnalysis(result);
     } catch (err) {
@@ -74,6 +79,22 @@ const AIAnalysisSection: React.FC<AIAnalysisSectionProps> = ({
     return (
       <div className="p-6 bg-gray-50 rounded-2xl text-center">
         <p className="text-sm text-gray-400">請先登入以使用 AI 分析功能</p>
+      </div>
+    );
+  }
+
+  // Issue #1648: No session ID — show graceful empty state instead of calling
+  // the deprecated no-cache standalone endpoint. This state occurs when the
+  // DB session hasn't been created yet or was reset (error/lesson-switch).
+  if (dbSessionId === null || dbSessionId === undefined) {
+    return (
+      <div
+        data-testid="ai-analysis-no-session"
+        className="p-6 bg-gray-50 rounded-2xl text-center"
+      >
+        <p className="text-sm text-gray-400">
+          分析資料載入中...若持續顯示請重新整理頁面
+        </p>
       </div>
     );
   }

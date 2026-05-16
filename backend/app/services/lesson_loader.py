@@ -55,6 +55,42 @@ def _halfwidth(code: str) -> str:
     )
 
 
+def _normalize_fill_in_blank_item(item: dict) -> dict:
+    """Normalize a fill_in_blank item, tagging new-format items for frontend detection.
+
+    Two schemas coexist in the data:
+      Legacy (Layer-1 / old parsed):
+        { sentence: "孟嘗君（　　）逃離秦國。", answer: "A" }
+        answer is a letter code that matches a vocab_bank key.
+
+      New-format (5/1 curriculum batch, Layer-2):
+        { id, answer: "模仿雞叫", context_before: "...", context_after: "...",
+          context_paragraph_idx: N }
+        answer is freetext (strategy worksheet cloze), NOT a vocab_bank letter code.
+
+    FillInBlankExercise.tsx expects legacy format: item.sentence (string) and
+    item.answer (letter code matching vocab_bank). New-format items cannot be used
+    with the current exercise component because answers are freetext, not letter codes.
+
+    This function:
+    1. Synthesizes a sentence string for new-format items (context_before + blank + context_after)
+       so the sentence text is available for future exercise types.
+    2. Adds _schema flag to distinguish schema types without fragile duck-typing in callers.
+
+    Frontend api.ts filters by _schema: items with _schema="context_fill" are dropped
+    from fillInBlank → hasData=false → NoDataFallback renders (correct for 6/1 demo).
+    When a proper cloze exercise component is built, this flag enables clean routing.
+
+    Related: #1559, #1563
+    """
+    if "context_before" in item and "sentence" not in item:
+        before = item.get("context_before") or ""
+        after = item.get("context_after") or ""
+        return {**item, "sentence": f"{before}（　　）{after}", "_schema": "context_fill"}
+    # Legacy format: no change needed, but tag it too for symmetry.
+    return {**item, "_schema": "legacy"}
+
+
 _GENRE_TO_CATEGORY = {
     "記敘文": "Fable",
     "說明文": "Science",
@@ -198,7 +234,7 @@ def _load_layer1_lessons() -> list[dict]:
             ),
             "vocabulary": data.get("vocabulary") or [],
             "fill_in_blank": [
-                {**item, "answer": _halfwidth(item.get("answer", ""))}
+                {**_normalize_fill_in_blank_item(item), "answer": _halfwidth(item.get("answer", ""))}
                 for item in (data.get("fill_in_blank") or [])
             ] or None,
             "multiple_choice": data.get("multiple_choice"),
@@ -326,7 +362,7 @@ def _load_layer2_lessons(
             ),
             "vocabulary": vocabulary,
             "fill_in_blank": [
-                {**item, "answer": _halfwidth(item.get("answer", ""))}
+                {**_normalize_fill_in_blank_item(item), "answer": _halfwidth(item.get("answer", ""))}
                 for item in (data.get("fill_in_blank") or [])
             ] or None,
             "multiple_choice": data.get("multiple_choice"),

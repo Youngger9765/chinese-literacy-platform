@@ -33,8 +33,10 @@ python3 scripts/skill-tree-updater.py --intern all --days 7
 ```
 
 This updates:
-- `docs/intern-training/interns/raymond.json`（靖杭）
-- `docs/intern-training/interns/xiung.json`（啟翔）
+- `frontend/public/intern-training/interns/raymond.json`（靖杭，SOT — staging dashboard 從此讀）
+- `frontend/public/intern-training/interns/xiung.json`（啟翔）
+
+> ⚠️ `docs/intern-training/` 是舊版 mirror，**deprecated**。staging `https://lingoleap-frontend-staging-958347263320.asia-east1.run.app/intern-training/dashboard.html` 從 `frontend/public/intern-training/` 讀。寫錯 path = staging 看不到更新。
 
 If the script fails (e.g. no Vertex AI auth locally), manually review their recent PRs and update the JSON skill levels + history entries.
 

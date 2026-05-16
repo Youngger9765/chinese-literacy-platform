@@ -42,7 +42,7 @@ const JoinClassroomPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       const result = await joinClassroomByCode(token, joinCode);
-      setSuccessMessage(`成功加入「${result.classroom_name}」！`);
+      setSuccessMessage(`成功加入「${result.name}」！`);
     } catch (err) {
       if (err instanceof ClassroomApiError) {
         if (err.status === 404) {

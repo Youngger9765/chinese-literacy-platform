@@ -1,6 +1,6 @@
 lesson_number: 6
 grade: 4
-grade_code: G4-6
+grade_code: G4-L13
 title: 第一百碗麵
 genre: 記敘文
 text_type: 單
@@ -243,3 +243,4 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G4-L13.pdf

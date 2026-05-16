@@ -1,6 +1,6 @@
 lesson_number: 34
 grade: 7
-grade_code: G7-6
+grade_code: G7-L13
 title: 綠色賽事
 genre: 說明文
 text_type: 單
@@ -265,3 +265,4 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L13.pdf

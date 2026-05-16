@@ -8,6 +8,24 @@
 
 ---
 
+## 5/12 ~ 5/15
+
+| 人 | 狀態 | Issue / 項目 | 做了什麼 |
+|----|------|-------------|---------|
+| 啟翔 | ✅ | PR #1547 MCQ rescue（#1387）| MCQ rescue dialog 重設計 + 接入閱讀聚光燈 + log attempts，#1387 Phase 1 體驗端關鍵組件 |
+| 啟翔 | 🔧 | PR #1601 open（#1549）| 統一 learning-step 進度儲存到 step_progress，待 review |
+| 靖杭 | 🔧 | PR #1599 open（#1598）| 課文簡介 AI 生成 + 學習策略獨立 hint 區，待 review |
+| 靖杭 | 🔧 | PR #1600 open（#1597）| 朗讀歷史趨勢線圖 — 自己跟自己比，待 review |
+| Young | ✅ | OMO Phase 1a backend（#1573，refs #1343）| upload / attempt / identify / grade 4 個核心 endpoint，7/1 demo 主軸 |
+| Young | ✅ | OMO Phase 1b 學生 UX sprint（#1583 umbrella）| #1588 image hash dedup + regrade、#1590 3-tier 信心度確認 + GET /api/omo/lessons、#1592 結果頁 per-question + flag modal、#1593 loading/toast/image resize |
+| Young | ✅ | OMO 品質修正 | #1581 conf<0.4 過濾、#1602 逐字相同強制 score=1、#1606 上傳上限 5→20、#1607 identify 對齊全 168 課 |
+| Young | ✅ | OMO test + docs | #1596 3-tier confirm contract + render tests、#1589 master docs、#1595 test plan |
+| Young | ✅ | 環境分隔（Phase 1c env hardening）| #1579 staging Cloud SQL 從 prod 拆、#1576 prod demo accounts 關 + OMO GCS bucket 拆、#1580 staging JWT_SECRET_KEY 注入、#1604 logging env tag + cron audit + OAuth docs |
+| Young | ✅ | Pitch deck（5/13 評審用）| #1551/#1557/#1567/#1574 七課 7/1 deadline 進度簡報 + 字體 2x + 修破圖 |
+| Young | ✅ | UX 小修 | #1564 預設無注音、#1566 stepper 放大 + 首字 label、#1568 vocab-application filter、#1570/#1572 displayChar per step、#1546/#1548 stepper 單擊導航、#1555 G7 圖文 2:1 ratio |
+
+---
+
 ## 5/4 ~ 5/8
 
 | 人 | 狀態 | Issue / 項目 | 做了什麼 |

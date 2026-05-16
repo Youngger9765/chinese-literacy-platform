@@ -103,10 +103,12 @@ def _repair_json(raw: str) -> str | None:
     1. Strip markdown code fences (```json ... ```)
     2. Walk forward tracking bracket depth and string state, recording every
        position where the outermost bracket closes (depth == 0).
-    3. If the outermost bracket never closes (truncated mid-content), scan
-       backwards from the end for the last close bracket (`}` or `]`) that is
-       not inside a string. Truncate there, strip trailing commas, then append
-       the closing brackets needed to balance the open bracket stack.
+    3. If the outermost bracket never closes (truncated mid-content):
+       a. If still inside a string at the end (common MAX_TOKENS case where a
+          `reasoning` value is cut mid-word), close the string first with `"`,
+          then find the last close bracket outside that closed string.
+       b. Truncate at the last close bracket, strip trailing commas, then append
+          the closing brackets needed to balance the open bracket stack.
 
     Returns the repaired JSON string if successful, None otherwise.
     """
@@ -130,8 +132,6 @@ def _repair_json(raw: str) -> str | None:
     # Walk forward tracking brackets and string state.
     # Build a stack of open brackets and record positions where depth returns to 0.
     last_balanced_pos = -1
-    # close_positions: list of (pos, bracket_stack_snapshot_after_close)
-    # We only need the last close position outside a string.
     last_outer_close_pos = -1  # last pos of any `}` or `]` outside a string
     in_string = False
     escape_next = False
@@ -163,29 +163,123 @@ def _repair_json(raw: str) -> str | None:
     if last_balanced_pos != -1:
         return text[: last_balanced_pos + 1]
 
-    # Case 2: Truncated — find the last close bracket, truncate there,
-    # strip trailing comma/whitespace, then close all open brackets.
+    # Case 2: Truncated — handle unclosed string first (MAX_TOKENS mid-value cut)
+    # If we ended inside a string, append `"` to close it, then re-scan for the
+    # last safe close bracket.  This is the dominant failure mode for OMO
+    # identifier where Gemini cuts the `reasoning` field mid-word.
+    working = text
+    if in_string:
+        working = working + '"'
+        # Re-scan to find last outer close bracket in the string-closed version
+        last_outer_close_pos = -1
+        _in_string = False
+        _escape_next = False
+        for i, ch in enumerate(working):
+            if _escape_next:
+                _escape_next = False
+                continue
+            if ch == "\\" and _in_string:
+                _escape_next = True
+                continue
+            if ch == '"':
+                _in_string = not _in_string
+                continue
+            if _in_string:
+                continue
+            if ch in ("}", "]"):
+                last_outer_close_pos = i
+
+    # Case 2b: still no close bracket (truncated before any `}` or `]`).
+    # This happens when Gemini cuts mid-key-name inside the first candidate.
+    # Strategy: strip back to the last complete value before the truncation point
+    # by finding the last comma that is outside a string and outside any nested
+    # brackets, then inject the minimum closing brackets.
     if last_outer_close_pos == -1:
+        # Walk working text to find last comma at top-level of innermost object
+        last_comma_pos = -1
+        _in_string = False
+        _escape_next = False
+        _stack: list[str] = []
+        for i, ch in enumerate(working):
+            if _escape_next:
+                _escape_next = False
+                continue
+            if ch == "\\" and _in_string:
+                _escape_next = True
+                continue
+            if ch == '"':
+                _in_string = not _in_string
+                continue
+            if _in_string:
+                continue
+            if ch in ("{", "["):
+                _stack.append(ch)
+            elif ch in ("}", "]"):
+                if _stack:
+                    _stack.pop()
+            elif ch == "," and _stack:
+                last_comma_pos = i
+
+        if last_comma_pos == -1:
+            return None
+
+        # Truncate at last comma, strip trailing whitespace
+        stripped = working[:last_comma_pos].rstrip()
+
+        # Rebuild bracket stack for this stripped version
+        _in_string = False
+        _escape_next = False
+        close_stack2: list[str] = []
+        for ch in stripped:
+            if _escape_next:
+                _escape_next = False
+                continue
+            if ch == "\\" and _in_string:
+                _escape_next = True
+                continue
+            if ch == '"':
+                _in_string = not _in_string
+                continue
+            if _in_string:
+                continue
+            if ch in ("{", "["):
+                close_stack2.append(ch)
+            elif ch in ("}", "]"):
+                if close_stack2:
+                    close_stack2.pop()
+
+        closing2 = ""
+        for opener in reversed(close_stack2):
+            closing2 += "}" if opener == "{" else "]"
+
+        candidate2 = stripped + closing2
+        try:
+            parsed2 = json.loads(candidate2)
+            # Only accept if we got at least an empty candidates array
+            if isinstance(parsed2, dict) and "candidates" in parsed2:
+                return candidate2
+        except (json.JSONDecodeError, ValueError):
+            pass
         return None
 
-    truncated = text[: last_outer_close_pos + 1].rstrip().rstrip(",").rstrip()
+    truncated = working[: last_outer_close_pos + 1].rstrip().rstrip(",").rstrip()
 
-    # Rebuild bracket_stack for the truncated portion to know what to close
-    in_string = False
-    escape_next = False
+    # Rebuild bracket stack for the truncated portion to know what to close
+    _in_string = False
+    _escape_next = False
     close_stack: list[str] = []
 
     for ch in truncated:
-        if escape_next:
-            escape_next = False
+        if _escape_next:
+            _escape_next = False
             continue
-        if ch == "\\" and in_string:
-            escape_next = True
+        if ch == "\\" and _in_string:
+            _escape_next = True
             continue
         if ch == '"':
-            in_string = not in_string
+            _in_string = not _in_string
             continue
-        if in_string:
+        if _in_string:
             continue
         if ch in ("{", "["):
             close_stack.append(ch)

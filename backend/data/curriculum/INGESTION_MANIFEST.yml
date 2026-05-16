@@ -1,0 +1,37 @@
+active_version: '2026-05-01'
+source_dir: private/curriculum-source/2026-05-01/1.L1-158新版完成學習單1150415
+source_excel: 自學教材清單.xlsx
+parsed_at: '2026-05-14T16:25:55Z'
+parser_version: 2.0.0
+stats:
+  total_lessons: 158
+  catalog_yml_count: 158
+  content_yml_count: 51
+  content_skipped_no_stem: 107
+  docx_matched: 154
+  missing_docx: 4
+  missing_story_text: 0
+  白話: 148
+  文言文: 10
+  mode: manifest-driven
+schema_note: MANIFEST tracks the active 教授 source version. Use scripts/check_curriculum_drift.py to verify backend/data/ matches what parser would generate from this source. Round 2 (#1628) — parser is manifest-driven (uses canonical manifest.yml as identity source) and only enriches from xlsx by title match.
+parser_managed_catalog_fields:
+- lesson_code
+- display_order
+- original_order
+- title
+- grade
+- genre
+- text_type
+- unit_topic
+- applicable_grade
+- strategy_name
+- classical_chinese
+- vocab
+parser_managed_content_fields:
+- lesson_number
+- grade
+- grade_code
+- title
+- genre
+- text_type

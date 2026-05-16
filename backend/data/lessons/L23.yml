@@ -1,6 +1,6 @@
 lesson_number: 23
 grade: 6
-grade_code: G6-10
+grade_code: G6-L15
 title: 小藍鯨之死
 genre: 說明文
 text_type: 單
@@ -232,3 +232,4 @@ worksheet_section_order:
 - number: 十一
   name: 報告
   type: report
+worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L15.pdf

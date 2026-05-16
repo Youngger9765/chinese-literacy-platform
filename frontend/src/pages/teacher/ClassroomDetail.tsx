@@ -6,6 +6,7 @@ import {
   addStudent,
   removeStudent,
   exportClassroomReport,
+  regenerateClassroomCode,
   ClassroomDetailResponse,
   StudentInClassroomResponse,
   ClassroomApiError,
@@ -64,6 +65,11 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
 
   // Remove confirmation
   const [removingStudentId, setRemovingStudentId] = useState<number | null>(null);
+
+  // Join code state
+  const [isCopied, setIsCopied] = useState(false);
+  const [showRegenConfirm, setShowRegenConfirm] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   const loadClassroom = useCallback(async () => {
     if (!token) return;
@@ -193,6 +199,36 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
         setError('移除學生失敗');
       }
       setRemovingStudentId(null);
+    }
+  };
+
+  const handleCopyJoinCode = async () => {
+    if (!classroom?.join_code) return;
+    try {
+      await navigator.clipboard.writeText(classroom.join_code);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch {
+      // clipboard API unavailable (non-HTTPS dev env)
+      setIsCopied(false);
+    }
+  };
+
+  const handleRegenerateCode = async () => {
+    if (!token || !classroom) return;
+    setIsRegenerating(true);
+    setShowRegenConfirm(false);
+    try {
+      await regenerateClassroomCode(token, classroom.id);
+      await loadClassroom();
+    } catch (err) {
+      if (err instanceof ClassroomApiError) {
+        setError(err.message);
+      } else {
+        setError('重新產生代碼失敗');
+      }
+    } finally {
+      setIsRegenerating(false);
     }
   };
 
@@ -371,6 +407,95 @@ const ClassroomDetail: React.FC<ClassroomDetailProps> = ({ classroomId, onBack }
             </div>
           )}
         </div>
+
+        {/* Join Code card */}
+        <div className="bg-white rounded-2xl shadow-card p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-700 mb-1">加入代碼</h3>
+              {classroom.join_code ? (
+                <p className="font-mono text-2xl font-bold tracking-widest text-accent select-all">
+                  {classroom.join_code}
+                </p>
+              ) : (
+                <p className="font-mono text-2xl font-bold tracking-widest text-gray-300">—</p>
+              )}
+              <p className="text-xs text-gray-400 mt-1.5">
+                把此代碼給學生，他們從首頁「加入班級」輸入即可加入
+              </p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={handleCopyJoinCode}
+                disabled={!classroom.join_code}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isCopied ? (
+                  <>
+                    <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-emerald-600">已複製</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    複製代碼
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setShowRegenConfirm(true)}
+                disabled={isRegenerating}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 text-amber-700 text-sm hover:bg-amber-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isRegenerating ? (
+                  '產生中...'
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    重生代碼
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Confirm regenerate dialog */}
+        {showRegenConfirm && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="regen-dialog-title"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          >
+            <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
+              <h3 id="regen-dialog-title" className="text-base font-bold text-gray-900 mb-2">確認重新產生代碼？</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                舊代碼將立即失效，學生需重新輸入新代碼才能加入此班級。
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowRegenConfirm(false)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleRegenerateCode}
+                  className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium transition-colors cursor-pointer"
+                >
+                  確定
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Tabbed content card */}
         <div className="bg-white rounded-2xl shadow-card">
