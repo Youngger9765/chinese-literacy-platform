@@ -231,19 +231,31 @@ async def get_ai_analysis(
     "/learning/ai-analysis",
     response_model=AIAnalysisResponse,
     dependencies=[Depends(ai_limit_5_per_min)],
+    deprecated=True,
 )
 async def get_ai_analysis_standalone(
     payload: AIAnalysisRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Generate AI reading diagnosis without requiring a backend session.
+    """DEPRECATED — will be removed in a future release.
 
-    This endpoint is for the frontend learning flow which manages sessions
-    in-memory. No caching — analysis is generated fresh each call.
+    Use the session-scoped endpoint instead:
+        POST /api/learning/sessions/{session_id}/ai-analysis
+
+    This endpoint was the fallback for frontend flows without a DB session ID.
+    All callers have been updated to use the session-scoped cached endpoint (Issue #1648).
+
+    Original: Generate AI reading diagnosis without requiring a backend session.
+    No caching — analysis is generated fresh each call.
 
     Rate limited: 5 requests per minute per user/IP.
     """
+    logger.warning(
+        "DEPRECATED: /api/learning/ai-analysis called — frontend should use "
+        "/api/learning/sessions/{id}/ai-analysis instead. (Issue #1648)"
+    )
+
     # Sanitize user-provided text before sending to AI
     safe_story_title, _ = sanitize_ai_input(payload.story_title, user_id=str(current_user.id))
 
