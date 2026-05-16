@@ -3,6 +3,18 @@ grade: 9
 grade_code: G9-L10
 reading_strategy: ''
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L10高地訓練有助於運動表現嗎？.docx
 parsed_at: '2026-05-01T21:10:44'
 flags: []

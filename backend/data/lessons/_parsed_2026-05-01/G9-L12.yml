@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L12
 reading_strategy: 摘要策略-小標題的作用：找細節
 reading_strategy_type: summary
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L12臺灣的太空之眼（摘要策略-小標題的作用：找細節）.docx
 parsed_at: '2026-05-01T21:10:45'
 flags: []
