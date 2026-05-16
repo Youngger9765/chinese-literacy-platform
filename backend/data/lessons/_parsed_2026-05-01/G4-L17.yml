@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L17
 reading_strategy: 一
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L17把球打好，就夠了嗎？—阿耀與健豪學長的通信（一）（生涯探索-讀書，讓夢想多一條路）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []

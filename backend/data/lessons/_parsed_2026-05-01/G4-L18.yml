@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L18
 reading_strategy: 二
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L18想讀書，該從哪裡著手？—阿耀與健豪學長的通信(二)（生涯探索-轉個彎，熱愛還在前方）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []

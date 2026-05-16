@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L24
 reading_strategy: 身體覺察與照護
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L24成為身體的最佳夥伴（身體覺察與照護）.docx
 parsed_at: '2026-05-01T21:10:34'
 flags: []
