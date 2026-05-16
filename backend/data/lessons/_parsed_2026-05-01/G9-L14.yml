@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L14
 reading_strategy: 正向思考-培養心理韌性
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L14焚而不毀的倫敦（正向思考-培養心理韌性）.docx
 parsed_at: '2026-05-01T21:10:45'
 flags: []

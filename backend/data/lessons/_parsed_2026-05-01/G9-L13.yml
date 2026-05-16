@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L13
 reading_strategy: 正向思考-學習樂觀思考
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L13樂觀者勝：向NBA球員學習「詮釋失敗」的智慧（正向思考-學習樂觀思考）.docx
 parsed_at: '2026-05-01T21:10:45'
 flags: []
