@@ -3,6 +3,18 @@ grade: 4
 grade_code: G4-L1
 reading_strategy: ''
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L1贏得喝采的輸家.docx
 parsed_at: '2026-05-01T21:10:32'
 flags: []
