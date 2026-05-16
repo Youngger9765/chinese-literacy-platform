@@ -3,6 +3,11 @@ grade: 7
 grade_code: G7-L27
 reading_strategy: 解題策略-帶著問題讀
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-strategy
+- comprehension
+- report
 source_file: G7-L27帶著血拼清單閱讀（解題策略-帶著問題讀）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags: []
