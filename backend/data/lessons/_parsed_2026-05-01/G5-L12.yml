@@ -1,3 +1,16 @@
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 lesson_code: G5-L12
 grade: 5
 grade_code: G5-L12
