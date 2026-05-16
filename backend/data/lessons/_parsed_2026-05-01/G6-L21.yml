@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L21
 reading_strategy: 情緒管理-悲傷五階段
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L21感情小日記6──我失戀了（情緒管理-悲傷五階段）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []

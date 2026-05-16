@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L15
 reading_strategy: 自我提問-4F思考法自我提問
 reading_strategy_type: self_questioning
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L15小藍鯨之死（自我提問-4F思考法自我提問）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []

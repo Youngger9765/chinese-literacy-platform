@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L20
 reading_strategy: 負責任的決定-區辨控制圈
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L20感情小日記5──我該告白嗎？（負責任的決定-區辨控制圈）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []

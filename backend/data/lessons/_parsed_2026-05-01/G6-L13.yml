@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L13
 reading_strategy: 自我提問-問好奇、疑惑的問題
 reading_strategy_type: self_questioning
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L13森林大軍的守護者（自我提問-問好奇、疑惑的問題）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []

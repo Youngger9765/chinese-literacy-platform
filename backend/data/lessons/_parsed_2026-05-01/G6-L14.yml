@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L14
 reading_strategy: 自我提問-問重要的問題
 reading_strategy_type: self_questioning
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L14植物獵人（自我提問-問重要的問題）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []
