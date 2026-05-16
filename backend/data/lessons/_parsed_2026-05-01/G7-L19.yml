@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L19
 reading_strategy: 自我提問-詰問作者的步驟
 reading_strategy_type: self_questioning
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L19「背影」讀書會（自我提問-詰問作者的步驟）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags: []

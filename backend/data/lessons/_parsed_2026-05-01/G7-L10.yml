@@ -3,6 +3,18 @@ grade: 7
 grade_code: G7-L10
 reading_strategy: 推論策略-找作者觀點和支持理由
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L10塑膠，好用不好甩（推論策略-找作者觀點和支持理由）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []

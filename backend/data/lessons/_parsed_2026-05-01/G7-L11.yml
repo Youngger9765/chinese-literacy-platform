@@ -3,6 +3,18 @@ grade: 7
 grade_code: G7-L11
 reading_strategy: 推論策略-找作者觀點和支持理由
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L11AI什麼都會，我們還要學什麼？（推論策略-找作者觀點和支持理由）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []

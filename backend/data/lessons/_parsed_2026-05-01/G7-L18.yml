@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L18
 reading_strategy: 從事實歸納概念-從具體事實歸納要表達的抽象概念
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L18一封向醫師求助的信（從事實歸納概念-從具體事實歸納要表達的抽象概念）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags: []

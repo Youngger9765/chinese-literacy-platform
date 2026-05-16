@@ -3,6 +3,18 @@ grade: 7
 grade_code: G7-L25
 reading_strategy: 摘要策略-問題解決結構找重點
 reading_strategy_type: summary_psr
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L25當全世界都在笑你，你可以怎麼做（摘要策略-問題解決結構找重點）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags: []

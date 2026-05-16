@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L12
 reading_strategy: 推論策略-推論作者觀點和寫作目的
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L12你以為的浪漫可能是跟騷（推論策略-推論作者觀點和寫作目的）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []

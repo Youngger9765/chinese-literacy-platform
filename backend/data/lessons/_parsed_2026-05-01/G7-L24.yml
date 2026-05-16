@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L24
 reading_strategy: 閱讀策略-跳過卡關，瀏覽全文
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L24未來的農夫（閱讀策略-跳過卡關，瀏覽全文）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags: []

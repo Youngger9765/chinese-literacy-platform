@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L13
 reading_strategy: 落實環保3R
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L13綠色賽事（落實環保3R）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []

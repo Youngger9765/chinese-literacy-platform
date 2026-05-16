@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L22
 reading_strategy: 媒體素養與識讀-辨識不合理的詐騙訊息
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L22信眾與教主（媒體素養與識讀-辨識不合理的詐騙訊息）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags: []
