@@ -41,7 +41,6 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
   cachedScore = null,
   onConfirmed,
   onRetry,
-  onGraded,
 }) => {
   const [status, setStatus] = useState<OmoStatus>('identifying');
   const [candidates, setCandidates] = useState<OmoCandidate[]>([]);
