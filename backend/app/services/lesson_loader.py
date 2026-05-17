@@ -415,6 +415,65 @@ def _load_lessons() -> list[dict]:
     # Layer 2: new parsed lessons
     layer2 = _load_layer2_lessons(manifest_index, layer1_titles)
 
+    # Merge Layer-2 enrichment into Layer-1 entries with matching title (#1666).
+    #
+    # Problem: when a curriculum slot has BOTH a Layer-1 L*.yml (legacy, no
+    # step_sequence) AND a Layer-2 _parsed_/G*-L*.yml (new SOT with
+    # step_sequence + worksheet_* + lesson_intro + layout_mode), `_load_layer2_lessons`
+    # skips the Layer-2 entry on title match to avoid duplicate cards. Result:
+    # /api/stories/G6-L10 resolves to Layer-1 entry with step_sequence=null.
+    #
+    # Fix: build a title→Layer-2 lookup from _parsed_ files (regardless of
+    # whether the Layer-2 entry was kept after dedup), then copy the enrichment
+    # fields onto matching Layer-1 entries. Layer-1 keeps its id/lesson_number
+    # /title/paragraphs (preserves DB Text FK + session.story_slug back-compat).
+    #
+    # Enrichment fields inherited from Layer-2 (when source has a non-None value):
+    #   - step_sequence (#1374)
+    #   - worksheet_section_order, worksheet_intro (#1434)
+    #   - lesson_intro (#1443)
+    #   - worksheet_pdf_url (#1444)
+    #   - layout_mode, reading_strategy_type (#1404)
+    #   - images (#1341)
+    #   - strategy_exercise (#1418, structured Gemini output — Layer-2 richer)
+    #   - story_structure_table, story_structure_rows
+    layer2_by_title: dict[str, dict] = {}
+    if _PARSED_DIR.exists():
+        for yml_path in _PARSED_DIR.glob("*.yml"):
+            with open(yml_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            if not data:
+                continue
+            title = data.get("title", "")
+            if title:
+                layer2_by_title[title] = data
+
+    _ENRICHMENT_FIELDS = (
+        "step_sequence",
+        "worksheet_section_order",
+        "worksheet_intro",
+        "lesson_intro",
+        "worksheet_pdf_url",
+        "layout_mode",
+        "reading_strategy_type",
+        "images",
+        "strategy_exercise",
+        "story_structure_table",
+        "story_structure_rows",
+    )
+
+    for lesson in layer1:
+        l2_data = layer2_by_title.get(lesson["title"])
+        if not l2_data:
+            continue
+        for field in _ENRICHMENT_FIELDS:
+            l2_value = l2_data.get(field)
+            # strategy_exercise: Layer-2 may use plural key (legacy G7 圖文整合)
+            if field == "strategy_exercise" and l2_value is None:
+                l2_value = l2_data.get("strategy_exercises")
+            if l2_value:  # only override when Layer-2 has a truthy value
+                lesson[field] = l2_value
+
     all_lessons = layer1 + layer2
 
     # Sort: Layer-1 by lesson_number, Layer-2 by display_order, then mix
