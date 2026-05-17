@@ -6,7 +6,11 @@
  * Uses the existing /api/comprehension/chat endpoint for AI responses.
  */
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { sendComprehensionChat, SessionExpiredError } from '../../services/learningApi';
+import {
+  sendComprehensionChat,
+  SessionExpiredError,
+  fetchDialogueHistory,
+} from '../../services/learningApi';
 import { useAuth } from '../../contexts/AuthContext';
 import VoiceInputButton from '../ui/VoiceInputButton';
 
@@ -34,12 +38,40 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
   const [messages, setMessages] = useState<HelperMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [sessionId] = useState(() =>
     dbSessionId ? `helper-${dbSessionId}` : `helper-${crypto.randomUUID()}`
   );
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isComposingRef = useRef(false);
+
+  // Rehydrate dialogue history on mount (Issue #1549) — when the student
+  // re-enters a course/session, we pull existing dialogue_turns so the chat
+  // panel resumes from where they left off instead of showing an empty box.
+  //
+  // Race guard: if the user opens the helper and sends a message before this
+  // GET resolves, `messages.length > 0` means we'd clobber their new message.
+  // Use a ref so the guard sees the latest length without re-running the effect.
+  const userHasInteractedRef = useRef(false);
+  useEffect(() => {
+    if (!token || !dbSessionId) return;
+    setIsHistoryLoading(true);
+    fetchDialogueHistory(token, dbSessionId)
+      .then((res) => {
+        if (userHasInteractedRef.current) return;
+        const restored: HelperMessage[] = res.turns
+          .slice()
+          .sort((a, b) => a.turn_order - b.turn_order)
+          .filter((t) => t.role === 'ai' || t.role === 'student')
+          .map((t) => ({ role: t.role as 'ai' | 'student', text: t.text }));
+        if (restored.length > 0) setMessages(restored);
+      })
+      .catch(() => {
+        // Silent — first-time learners simply see an empty chat
+      })
+      .finally(() => setIsHistoryLoading(false));
+  }, [token, dbSessionId]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -57,6 +89,7 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
     const text = inputText.trim();
     if (!text || isLoading) return;
 
+    userHasInteractedRef.current = true;
     const studentMsg: HelperMessage = { role: 'student', text };
     setMessages(prev => [...prev, studentMsg]);
     setInputText('');
@@ -133,7 +166,13 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
 
           {/* Messages */}
           <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3 bg-gray-50">
-            {messages.length === 0 && (
+            {isHistoryLoading && messages.length === 0 && (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+
+            {!isHistoryLoading && messages.length === 0 && (
               <div className="text-center text-gray-400 text-xs py-8">
                 <p>對課文有疑問嗎？</p>
                 <p className="mt-1">輸入你的問題，AI 會幫你解答</p>
