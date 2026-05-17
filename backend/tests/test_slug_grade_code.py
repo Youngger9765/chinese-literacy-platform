@@ -81,3 +81,55 @@ def test_publisher_slug_unchanged():
 
 def test_empty_or_falsy_slug():
     assert normalize_story_slug("") == ""
+
+
+# ---------------------------------------------------------------------------
+# Bug #1666 — Layer-2 enrichment shadow
+# ---------------------------------------------------------------------------
+
+
+def test_shadowed_grade_codes_inherit_layer2_step_sequence():
+    """Layer-1 lessons with matching-title Layer-2 yml must inherit step_sequence.
+
+    Before #1666: _load_layer2_lessons skipped Layer-2 entries when title matched
+    a Layer-1 lesson, leaving the catalogue with Layer-1 entry only (no
+    step_sequence). API returned step_sequence=null for 14+ lessons.
+
+    Fix: _load_lessons now merges Layer-2 enrichment fields (step_sequence,
+    worksheet_*, lesson_intro, layout_mode, etc.) into matching Layer-1 entries.
+    """
+    # Sample 3 known-shadowed codes from the #1666 audit
+    shadowed_codes = ["G6-L10", "G4-L13", "G6-L13"]
+    for code in shadowed_codes:
+        lesson = get_lesson_by_code(code)
+        assert lesson is not None, f"{code} must exist in catalogue"
+        assert lesson.get("step_sequence"), (
+            f"{code} (Layer-1 id={lesson['id']}, title={lesson['title']!r}) "
+            f"must inherit step_sequence from Layer-2 _parsed_ yml. "
+            f"Got: {lesson.get('step_sequence')!r}"
+        )
+        # Sanity: Layer-1 id preserved (DB FK back-compat)
+        assert lesson["id"] < 1000, (
+            f"{code} should keep Layer-1 id (< 1000) for session FK compat, "
+            f"got id={lesson['id']}"
+        )
+
+
+def test_layer2_only_lessons_still_resolve():
+    """Layer-2-only lessons (no Layer-1 equivalent) must still work post-fix."""
+    # G7-L30 (八哥, Layer-2 only) — verified by #1654 test, but re-check
+    lesson = get_lesson_by_code("G7-L30")
+    assert lesson is not None
+    assert lesson["id"] == 1110
+    assert lesson.get("step_sequence"), "Layer-2 G7-L30 must have step_sequence"
+
+
+def test_no_duplicate_titles_after_merge():
+    """Merging Layer-2 enrichment into Layer-1 must not cause duplicate catalogue entries."""
+    from app.services.lesson_loader import get_all_lessons
+    from collections import Counter
+
+    titles = [l["title"] for l in get_all_lessons() if l.get("title")]
+    counts = Counter(titles)
+    duplicates = {t: c for t, c in counts.items() if c > 1}
+    assert not duplicates, f"Duplicate titles after merge: {duplicates}"
