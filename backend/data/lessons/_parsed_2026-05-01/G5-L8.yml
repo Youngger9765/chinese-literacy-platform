@@ -3,6 +3,19 @@ grade: 5
 grade_code: G5-L8
 reading_strategy: 推論策略-認識推論人物特質策略
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G5-L8奧運銀牌的自我鍛鍊（推論策略-認識推論人物特質策略）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []
