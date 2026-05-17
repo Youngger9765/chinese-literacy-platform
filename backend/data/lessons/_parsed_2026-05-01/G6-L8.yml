@@ -3,6 +3,18 @@ grade: 6
 grade_code: G6-L8
 reading_strategy: 摘要策略-從結構找小主題與細節
 reading_strategy_type: summary
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L8動物談情說愛的方式（摘要策略-從結構找小主題與細節）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []

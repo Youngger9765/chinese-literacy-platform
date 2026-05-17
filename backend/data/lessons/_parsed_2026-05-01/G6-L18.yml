@@ -3,6 +3,18 @@ grade: 6
 grade_code: G6-L18
 reading_strategy: 正向思考-辨識與轉念練習
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L18把手上的餅吃香一點（正向思考-辨識與轉念練習）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []

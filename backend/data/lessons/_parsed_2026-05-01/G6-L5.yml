@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L5
 reading_strategy: 推論策略-從摘要及關鍵句推論主旨
 reading_strategy_type: summary
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L5卡通人氣王票選政見發表會（推論策略-從摘要及關鍵句推論主旨）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []
