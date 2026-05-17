@@ -3,6 +3,19 @@ grade: 8
 grade_code: G8-L1
 reading_strategy: 寫作手法：擬人－從擬人推論文章意涵
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G8-L1致台東：一封過客的情書（寫作手法：擬人－從擬人推論文章意涵）.docx
 parsed_at: '2026-05-01T21:10:42'
 flags: []
