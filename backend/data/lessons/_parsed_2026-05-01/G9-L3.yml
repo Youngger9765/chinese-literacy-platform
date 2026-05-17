@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L3
 reading_strategy: 議論文結構-支持論點的論據
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L3國高中數學當然可以使用計算機（議論文結構-支持論點的論據）.docx
 parsed_at: '2026-05-01T21:10:45'
 flags: []

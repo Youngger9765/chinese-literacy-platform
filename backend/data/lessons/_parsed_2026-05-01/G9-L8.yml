@@ -3,6 +3,12 @@ grade: 9
 grade_code: G9-L8
 reading_strategy: 圖表繪製與判讀-折線圖
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- reading-strategy
+- comprehension
+- report
 source_file: G9-L8臺灣學生的閱讀力：美麗與哀愁（圖表繪製與判讀-折線圖）.docx
 parsed_at: '2026-05-01T21:10:46'
 flags:

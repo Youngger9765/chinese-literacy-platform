@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L6
 reading_strategy: 解決問題-科學探究法
 reading_strategy_type: problem_solving
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L6靈異與科學（解決問題-科學探究法）.docx
 parsed_at: '2026-05-01T21:10:46'
 flags: []

@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L2
 reading_strategy: 分辨事實與判斷
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L2帝國家書：一個普通家庭的生與死（分辨事實與判斷）.docx
 parsed_at: '2026-05-01T21:10:45'
 flags: []

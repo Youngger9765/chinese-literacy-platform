@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L1
 reading_strategy: 媒體素養與識讀-辨識假新聞
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L1盡信書不如無書：從一件殺人案談起（媒體素養與識讀-辨識假新聞）.docx
 parsed_at: '2026-05-01T21:10:44'
 flags: []
