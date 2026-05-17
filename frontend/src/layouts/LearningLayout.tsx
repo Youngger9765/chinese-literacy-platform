@@ -331,9 +331,25 @@ const LearningLayout: React.FC = () => {
     hasActiveAssignment,
   };
 
+  // Issue #1549 — when a DB session exists but step_progress is still loading,
+  // delay child render so pages don't initialise local state from an empty
+  // snapshot. Without this gate the async DB load lands after the child has
+  // already useState-initialised with undefined, and the rehydrated answers
+  // never appear in the UI even though they're stored correctly.
+  const waitingForProgress = dbSessionId !== null && isProgressLoading;
+
   return (
     <>
-      <Outlet context={ctx} />
+      {waitingForProgress ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm text-gray-400">載入學習進度中...</span>
+          </div>
+        </div>
+      ) : (
+        <Outlet context={ctx} />
+      )}
       <SessionTimeoutWarning
         visible={showTimeoutWarning}
         countdownSeconds={WARNING_COUNTDOWN_SECONDS}
