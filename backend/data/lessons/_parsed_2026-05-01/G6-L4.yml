@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L4
 reading_strategy: 推論策略-從標題及首尾段推論主旨
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L4兩千五百歲的酷老師（推論策略-從標題及首尾段推論主旨）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []

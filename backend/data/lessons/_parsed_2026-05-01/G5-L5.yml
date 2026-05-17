@@ -3,6 +3,19 @@ grade: 5
 grade_code: G5-L5
 reading_strategy: 推論策略-觀點找支持理由
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G5-L5比運氣更重要的事：《長腿叔叔》的啟發（推論策略-觀點找支持理由）.docx
 parsed_at: '2026-05-01T21:10:36'
 flags: []

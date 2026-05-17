@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L4
 reading_strategy: 表達看法-以科學證據說服人
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L4預防近視？多點戶外活動就對了！（表達看法-以科學證據說服人）.docx
 parsed_at: '2026-05-01T21:10:45'
 flags: []

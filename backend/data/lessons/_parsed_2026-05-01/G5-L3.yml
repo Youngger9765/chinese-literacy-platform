@@ -3,6 +3,19 @@ grade: 5
 grade_code: G5-L3
 reading_strategy: 從上下文推測詞義
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G5-L3工地大嫂（從上下文推測詞義）.docx
 parsed_at: '2026-05-01T21:10:36'
 flags: []

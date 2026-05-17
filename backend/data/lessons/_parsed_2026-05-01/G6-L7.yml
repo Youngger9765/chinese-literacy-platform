@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L7
 reading_strategy: 摘要策略-從故事結構找重點
 reading_strategy_type: summary
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L7黑猩猩的守護者（摘要策略-從故事結構找重點）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []

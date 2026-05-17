@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L1
 reading_strategy: 寫作手法：倒反-從前後文推論隱藏意涵
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L1運動傷害，怎麼辦（寫作手法：倒反-從前後文推論隱藏意涵）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []

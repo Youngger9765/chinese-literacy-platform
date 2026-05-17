@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L2
 reading_strategy: 用表格整理訊息-從細節解讀主要資訊
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L2澳洲奧運金牌的X機密（用表格整理訊息-從細節解讀主要資訊）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags: []

@@ -3,6 +3,19 @@ grade: 5
 grade_code: G5-L7
 reading_strategy: 後篇
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G5-L7堅持到底的棒球人生──周思齊(後篇)（推論策略-觀點找支持理由）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []

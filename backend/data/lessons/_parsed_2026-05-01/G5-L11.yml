@@ -3,6 +3,18 @@ grade: 5
 grade_code: G5-L11
 reading_strategy: 推論策略-從言行推論人物特質
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G5-L11拳力出擊──陳念琴（推論策略-從言行推論人物特質）.docx
 parsed_at: '2026-05-01T21:10:35'
 flags: []

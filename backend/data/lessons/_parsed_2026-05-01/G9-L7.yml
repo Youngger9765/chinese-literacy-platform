@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L7
 reading_strategy: 圖表繪製與判讀-長條圖與圓形圖
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L7從基因來的特別禮物（圖表繪製與判讀-長條圖與圓形圖）.docx
 parsed_at: '2026-05-01T21:10:46'
 flags: []
