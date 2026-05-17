@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L7
 reading_strategy: 圖表繪製與判讀-折線圖
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L7你看見時代的灰犀牛了嗎談人口負成長（圖表繪製與判讀-折線圖）.docx
 parsed_at: '2026-05-01T21:10:41'
 flags: []

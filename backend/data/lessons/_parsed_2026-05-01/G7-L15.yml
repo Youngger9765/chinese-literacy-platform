@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L15
 reading_strategy: 解決問題-簡單推理三要素
 reading_strategy_type: problem_solving
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L15看到了嗎，然後呢（解決問題-簡單推理三要素）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []

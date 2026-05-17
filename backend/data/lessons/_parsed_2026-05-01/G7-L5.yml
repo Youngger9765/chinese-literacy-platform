@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L5
 reading_strategy: 用表格整理訊息-從細節歸納標題列名稱
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L5爺爺奶奶來了以後（用表格整理訊息-從細節歸納標題列名稱）.docx
 parsed_at: '2026-05-01T21:10:41'
 flags: []

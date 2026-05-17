@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L1
 reading_strategy: 寫作手法：排比─從排比歸納文意重點
 reading_strategy_type: writing_technique
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L1長大後，我才讀懂〈夏夜〉（寫作手法：排比─從排比歸納文意重點）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []
