@@ -162,9 +162,16 @@ gcloud artifacts docker images list \
 - Frontend: 300 images
 - Expected drop within 48h: ≥ ~50 GB (issue-* older than 14d + v0.* older than 60d + staging-* older than 30d)
 
+### Verified 24h later (2026-05-18 10:12)
+
+- Repo size: **108 GB** (-161 GB / **-60%** vs baseline) — policies proven effective
+- Backend: prod=26 / staging=102 / issue=72 / untagged=0 / total=200 (proportions shifted, total stable)
+- Frontend: 429 images (+129 — preview PR builds outpacing v0.* deletion this cycle; expect further drop)
+- Real drop **3× the conservative ≥50 GB estimate**. Realistic monthly cost now **~$11/month** vs original $27/month projection
+
 ### Cost note
 
-asia-east1 standard storage: ~$0.10/GB-month. 269 GB ≈ $27/month, expected ~$5-10/month post-cleanup. Net savings ~$200-250/year.
+asia-east1 standard storage: ~$0.10/GB-month. 269 GB ≈ $27/month, dropped to ~$11/month at 108 GB. Net savings ~$190/year proven (originally projected $200-250).
 
 ### Modify policies
 
