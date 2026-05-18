@@ -101,7 +101,8 @@ reading_benchmark:
   - threshold: □ ＞241字
     feedback: 哇嗚，超級厲害！
 video_links:
-- title: '1. 白鯨救援Frozen Crisis: The 1984 Rescue of 3,000 Beluga Whales Trapped in Ice'
+- title: '1. 白鯨救援Frozen Crisis: The 1984 Rescue of 3,000 Beluga Whales Trapped in
+    Ice'
   url: ''
 - title: 2. 柴可夫斯基《天鵝湖》四小天鵝舞 - 柏林國家歌劇院獻演
   url: ''
@@ -170,7 +171,11 @@ vocab_bank:
   G: 屏氣凝神
   H: 緩不濟急
   I: 僧多粥少
-spotlight_raw_text: "閱讀聚光燈\n摘要策略—問題.解決結構找重點\n    這篇故事是一篇報導式說明文，講「救援白鯨」的過程。故事結構裡有明顯的問題、解決、結果。上一課我們已經學過怎麼用線索，來找到文章中的「問題、解決、結果」，你還記得祕訣嗎？請你連連看。\n\n策略\n\n祕訣\n(1)\n問題\n● 　　　 　　 　\n通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變，可能出現「結果」、「最後」等關鍵詞。\n\n8001018351500●         ●\n\n(2)\n解決\n    　　  　          ●           ●\n　　　　     　\n通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。\n(3)\n結果\n         　　●         ●\n　     　　　　\n通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。\n\n◎"
+spotlight_raw_text: "閱讀聚光燈\n摘要策略—問題.解決結構找重點\n    這篇故事是一篇報導式說明文，講「救援白鯨」的過程。故事結構裡有明顯的問題、解決、結果。上一課我們已經學過怎麼用線索，來找到文章中的「問題、解決、結果」，你還記得祕訣嗎？請你連連看。\n\
+  \n策略\n\n祕訣\n(1)\n問題\n● 　　　 　　 　\n通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變，可能出現「結果」、「最後」等關鍵詞。\n\
+  \n8001018351500●         ●\n\n(2)\n解決\n    　　  　          ●           ●\n　　　　  \
+  \   　\n通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。\n(3)\n結果\n         　　●         ●\n　     　　　　\n\
+  通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。\n\n◎"
 strategy_exercise:
   type: guided_steps
   strategy_name: 摘要策略-問題.解決結構
@@ -247,3 +252,4 @@ lesson_intro:
   course_intro: 這篇文章記錄了一場發生在北極海的白鯨救援行動。故事描述了數千頭白鯨因氣候驟變受困於冰層中，面臨生命威脅的緊急情況。從當地居民的初步嘗試，到政府出動破冰船，救援過程一波三折，充滿了意想不到的挑戰。文章將帶領讀者了解人類如何運用智慧與創意，與大自然中的生命進行溝通與互動，最終共同譜寫出一段特別的經歷。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L24.pdf
+knowledge_video_url: http://youtu.be/s83wzgxhewI
