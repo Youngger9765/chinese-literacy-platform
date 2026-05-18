@@ -227,3 +227,37 @@ lesson_intro:
   course_intro: 這篇文章將帶你認識兩種在臺灣常見的八哥鳥——白尾八哥和臺灣冠八哥。雖然牠們外形相似，但其實有著不同的身世和習性。文章會介紹如何分辨這兩種八哥，並透過數據和圖表，探討為什麼外來種白尾八哥的數量，近年來會大幅超越臺灣原生種的臺灣冠八哥。讀完這篇文章，你將對這兩種鳥類有更深入的了解，並思考牠們在臺灣生態環境中的處境。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L30.pdf
+# Tables extracted from 紙本學習單 PDF (#1685) — yml `paragraphs` only kept
+# table titles, full row data was lost during docx → yml parse.
+# Source: /tmp/worksheets-7priority/G7-L30.pdf pages 2-3 (manual extract from 紙本).
+tables:
+  - id: table-1
+    title: 表一 白尾八哥與臺灣冠八哥比較異同表
+    headers: [比較項目, 白尾八哥, 臺灣冠八哥]
+    section_label_col: 異同
+    rows:
+      - { section: 相同處, cells: [外形, 全身大致為黑色, 全身大致為黑色] }
+      - { section: 相同處, cells: [體型, 身形大小接近, 身形大小接近] }
+      - { section: 相同處, cells: [行動與食物, 常在地面走動覓食，吃昆蟲、果實, 常在地面走動覓食，吃昆蟲、果實] }
+      - { section: 相同處, cells: [棲息地, 低海拔平地, 低海拔平地] }
+      - { section: 相同處, cells: [生物分類, 八哥屬、留鳥, 八哥屬、留鳥] }
+      - { section: 相異處, cells: [嘴喙顏色, 黃色, 象牙白色] }
+      - { section: 相異處, cells: [尾羽顏色, 末段白色, 只有部分白色] }
+      - { section: 相異處, cells: [冠羽, 冠羽不明顯, 冠羽較明顯] }
+      - { section: 相異處, cells: [來源, 外來種, 原生種] }
+      - { section: 相異處, cells: [族群數量, 較多, 較少] }
+      - { section: 相異處, cells: [習性, 較不怕人, 較怕人] }
+      - { section: 相異處, cells: [築巢地點, 常利用人造設施築巢, 較少利用人造設施築巢] }
+      - { section: 相異處, cells: [適應都市環境, 較強, 較弱] }
+      - { section: 相異處, cells: [保育身分, 非保育類野生動物, 保育類野生動物] }
+  - id: table-2
+    title: 表二 近年兩種臺灣常見八哥之族群數量之變化
+    headers: [指標, 白尾八哥, 臺灣冠八哥, 解讀重點]
+    rows:
+      - { cells: ['近年數量變化（2009-2020）（註1）', 成長 250%, 無明顯變化, 原生種的數量沒有增加，外來種快速擴張] }
+      - { cells: ['看得到的地點數／總調查地點數（2009-2021）', 341/584, '84/584（註2）', 外來種分布更廣，可見度更高，比原生種更容易看見 4.1 倍。] }
+      - { cells: [2021 年看得到的地點數, 225 個地點, 23 個地點, 2021 年外來種仍明顯多於原生種約 9.8 倍。] }
+      - { cells: [2018 年花蓮調查結果, 674 隻, 0 隻, 某些區域幾乎看不到原生種] }
+    notes:
+      - 註1. 資料來源：我們的島（2022）；環境資訊中心（2023）
+      - 註2. 「84 / 584」表示：研究人員一共調查了 584 個地點，其中有 84 個地點看得到臺灣冠八哥。

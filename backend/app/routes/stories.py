@@ -259,6 +259,8 @@ def get_story(story_id: str):
         lesson_intro=story.get("lesson_intro"),
         # 紙本學習單 PDF (#1444) — public GCS URL or None
         worksheet_pdf_url=story.get("worksheet_pdf_url"),
+        # 紙本表格 (#1685) — extracted tables for 圖文表整合 lessons; None for others
+        tables=story.get("tables"),
     )
 
 
