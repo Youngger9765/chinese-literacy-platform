@@ -5,10 +5,14 @@
  *   upload  → result (AI identify + confirm + grading poll)
  *          → graded (per-question result page)
  *
+ * Issue #1637: when navigated from a lesson reading page, `?lesson_code=G5-L25`
+ * is appended to the URL.  OmoPage reads this query param and forwards it to
+ * OmoUpload → uploadOmoImages so the backend can skip Gemini fuzzy-match.
+ *
  * Route: /omo
  */
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import OmoUpload from '../../components/omo/OmoUpload';
 import OmoIdentifyResult from '../../components/omo/OmoIdentifyResult';
@@ -20,6 +24,9 @@ type PageState = 'upload' | 'result' | 'graded';
 const OmoPage: React.FC = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  /** Lesson code hint supplied by the lesson reading page (Issue #1637). */
+  const lessonCodeHint = searchParams.get('lesson_code') ?? undefined;
   const [pageState, setPageState] = useState<PageState>('upload');
   const [uploadId, setUploadId] = useState<number | null>(null);
   const [lessonTitle, setLessonTitle] = useState<string | undefined>(undefined);
@@ -93,7 +100,11 @@ const OmoPage: React.FC = () => {
       {/* Content */}
       <div className="pb-20">
         {pageState === 'upload' && (
-          <OmoUpload token={token} onUploaded={handleUploaded} />
+          <OmoUpload
+            token={token}
+            onUploaded={handleUploaded}
+            lessonCodeHint={lessonCodeHint}
+          />
         )}
 
         {pageState === 'result' && uploadId !== null && (

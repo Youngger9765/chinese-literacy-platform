@@ -508,3 +508,52 @@ def _check_circuit_breaker() -> None:
             f"OMO identifier circuit breaker tripped: "
             f"{_consecutive_errors} consecutive errors"
         )
+
+
+def identify_lesson_from_hint(lesson_code: str) -> list[LessonCandidate]:
+    """Resolve a lesson by its known lesson_code (hint path — skips AI fuzzy match).
+
+    Used when the student uploads from within a lesson reading page, so the
+    system already knows which lesson they're working on.  The upload route
+    uses this function when ``lesson_code_hint`` is provided in the request,
+    saving ~6-24 s of Vertex AI latency and ~$0.0003 per call.
+
+    Args:
+        lesson_code: Canonical lesson code from the YAML catalog (e.g. "G5-L25").
+
+    Returns:
+        A single LessonCandidate with confidence=1.0, or [] if the code is not
+        found in the curriculum catalog.
+    """
+    curriculum = _load_curriculum_titles()
+    if not curriculum:
+        logger.warning("identify_lesson_from_hint: curriculum cache empty")
+        return []
+
+    info = curriculum.get(lesson_code)
+    if not info:
+        logger.warning(
+            "identify_lesson_from_hint: lesson_code=%r not found in catalog", lesson_code
+        )
+        return []
+
+    try:
+        lesson_id = int(lesson_code.split("-L")[1])
+    except (IndexError, ValueError):
+        lesson_id = 0
+
+    logger.info(
+        "identify_lesson_from_hint: lesson_code=%r → id=%d title=%r (hint path, no AI call)",
+        lesson_code,
+        lesson_id,
+        info["title"],
+    )
+    return [
+        LessonCandidate(
+            lesson_id=lesson_id,
+            grade_code=info["grade_code"],
+            title=info["title"],
+            confidence=1.0,
+            reasoning="user-provided lesson hint (課文頁面內上傳)",
+        )
+    ]

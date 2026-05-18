@@ -93,14 +93,23 @@ export interface OmoFlagResponse {
  * Upload one or more worksheet images. Returns 201 with status=identifying.
  * Phase 1b: if same hash exists for this user, returns the existing record
  * with from_cache=true (and possibly already_graded=true if status=graded).
+ *
+ * Issue #1637: when `lessonCodeHint` is provided (student uploads from within
+ * a lesson reading page), the backend skips Gemini fuzzy-match and resolves
+ * the lesson directly — faster (~0 latency vs 6-24 s) and cheaper (~$0 vs
+ * ~$0.0003 per call).
  */
 export async function uploadOmoImages(
   files: File[],
   token: string,
+  lessonCodeHint?: string,
 ): Promise<OmoUploadResponse> {
   const form = new FormData();
   for (const f of files) {
     form.append('files', f);
+  }
+  if (lessonCodeHint) {
+    form.append('lesson_code_hint', lessonCodeHint);
   }
   const res = await fetch(`${API_BASE}/api/omo/upload`, {
     method: 'POST',

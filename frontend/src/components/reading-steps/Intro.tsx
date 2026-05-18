@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
@@ -24,8 +25,19 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   const [showWorksheetModal, setShowWorksheetModal] = useState(false);
   const { zhuyinActive, processZhuyin } = useZhuyin();
   const worksheetModalRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useFocusTrap(worksheetModalRef, showWorksheetModal);
+
+  /**
+   * Issue #1637: navigate to /omo with lesson_code query param so OmoPage
+   * can pass it as a hint to the backend (skip Gemini fuzzy-match).
+   */
+  const handleUploadWorksheet = useCallback(() => {
+    const lessonCode = story.lesson_code ?? '';
+    const params = lessonCode ? `?lesson_code=${encodeURIComponent(lessonCode)}` : '';
+    navigate(`/omo${params}`);
+  }, [navigate, story.lesson_code]);
 
   useEffect(() => {
     if (!showWorksheetModal) return;
@@ -148,20 +160,38 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
           {/* 知識補給站 YouTube embed was removed — intro page shows course intro only */}
 
-          {/* 紙本學習單 PDF button (#1444) — only shown when a matching PDF exists */}
-          {story.worksheetPdfUrl && (
-            <div className="flex justify-start">
-              <button
-                type="button"
-                onClick={() => setShowWorksheetModal(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
-                aria-label="查看紙本學習單 PDF"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                查看紙本學習單
-              </button>
+          {/* 紙本學習單 PDF button (#1444) + 上傳學習單 button (#1637) */}
+          {(story.worksheetPdfUrl || story.lesson_code) && (
+            <div className="flex flex-wrap items-center gap-2">
+              {/* PDF view button — only when a PDF is available */}
+              {story.worksheetPdfUrl && (
+                <button
+                  type="button"
+                  onClick={() => setShowWorksheetModal(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1"
+                  aria-label="查看紙本學習單 PDF"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  查看紙本學習單
+                </button>
+              )}
+
+              {/* Upload button — #1637: available for any lesson with a lesson_code */}
+              {story.lesson_code && (
+                <button
+                  type="button"
+                  onClick={handleUploadWorksheet}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-green-300 bg-green-50 hover:bg-green-100 text-green-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
+                  aria-label="上傳學習單"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  上傳學習單
+                </button>
+              )}
             </div>
           )}
 

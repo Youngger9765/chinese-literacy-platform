@@ -38,6 +38,12 @@ interface OmoUploadProps {
   token: string;
   /** Called once upload succeeds, with the new upload_id */
   onUploaded: (uploadId: number) => void;
+  /**
+   * Issue #1637: optional lesson code hint (e.g. "G5-L25") passed when the
+   * student uploads from within a lesson reading page.  Forwarded to the
+   * backend so it can skip Gemini fuzzy-match (faster + cheaper).
+   */
+  lessonCodeHint?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -126,7 +132,7 @@ function useLoadingMessage(active: boolean): string {
 // OmoUpload component
 // ---------------------------------------------------------------------------
 
-const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded }) => {
+const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded, lessonCodeHint }) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -169,8 +175,8 @@ const OmoUpload: React.FC<OmoUploadProps> = ({ token, onUploaded }) => {
       // ── Client-side resize ────────────────────────────────────────────────
       const resized = await Promise.all(fileArray.map(resizeImage));
 
-      // ── Upload ────────────────────────────────────────────────────────────
-      const result = await uploadOmoImages(resized, token);
+      // ── Upload (pass lesson hint if available — Issue #1637) ─────────────
+      const result = await uploadOmoImages(resized, token, lessonCodeHint);
       onUploaded(result.upload_id);
     } catch (err) {
       const raw = err instanceof Error ? err.message : '';
