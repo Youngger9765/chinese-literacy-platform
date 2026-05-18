@@ -35,58 +35,49 @@ paragraphs:
 paragraph_count: 12
 char_count: 1112
 vocabulary:
-- word: 直率
-  definition: 性情直爽不虛偽。
-- word: 普及
-  definition: 普遍推行。
-- word: 遲疑
-  definition: 猶豫難以決定。
-- word: 富可敵國
-  definition: 個人擁有的財富可與國家財富相比。
-- word: 謙和
-  definition: 謙恭和藹。
-- word: 果斷
-  definition: 下決定很快。
-- word: 學問淵博
-  definition: 學識豐富。
-- word: 應󠇡對如流
-  definition: 思考敏捷、對答順暢流利。
-- word: 朽木不可雕也
-  definition: 腐朽的木頭不能雕刻。比喻一個人資質不好，不能培養成人才。
 - word: 名符其實
   definition: 名聲與實際相符合。
+- word: 富可敵國
+  definition: 個人擁有的財富可與國家財富相比。
+- word: 直率
+  definition: 性情直爽不虛偽。
+- word: 學問淵博
+  definition: 學識豐富。
+- word: 應對如流
+  definition: 思考敏捷、對答順暢流利。
+- word: 果斷
+  definition: 下決定很快。
+- word: 遲疑
+  definition: 猶豫難以決定。
+- word: 朽木不可雕也
+  definition: 腐朽的木頭不能雕刻。比喻一個人資質不好，不能培養成人才。
+- word: 普及
+  definition: 普遍推行。
+- word: 謙和
+  definition: 謙恭和藹。
 vocabulary_count: 10
 vocab_bank:
-  A: 直率
-  B: 普及
-  C: 遲疑
-  D: 富可敵國
-  E: 謙和
+  A: 名符其實
+  B: 富可敵國
+  C: 直率
+  D: 學問淵博
+  E: 應對如流
   F: 果斷
-  G: 學問淵博
-  I: 朽木不可雕也
-  J: 名符其實
+  G: 遲疑
+  H: 朽木不可雕也
 fill_in_blank:
-- sentence: 小明總是（　　）地說出自己的想法，從不拐彎抹角。
-  answer: A
-- sentence: 隨著科技發展，智慧型手機已在我們生活中（　　）。
-  answer: B
-- sentence: 面對兩個同樣誘人的選項，他（　　）了許久才做出決定。
-  answer: C
-- sentence: 那位商人累積了龐大的財富，據說他的個人資產甚至足以（　　）。
-  answer: D
-- sentence: 儘管王老師知識淵博，但他對待學生卻總是那麼（　　），從不擺架子。
-  answer: E
-- sentence: 隊長在緊急時刻展現出（　　）的判斷力，帶領大家脫離險境。
-  answer: F
-- sentence: 爺爺讀遍了古今中外許多書籍，什麼問題都難不倒他，真是（　　）。
-  answer: G
-- sentence: 辯論比賽中，小華面對對手的提問，總是（　　），讓評審印象深刻。
+- sentence: 面對多次勸說卻不聽的學生，老師不禁大嘆（　　）。
   answer: H
-- sentence: 老師苦口婆心勸導他，但他依然故我，真是（　　），讓人感到無奈。
-  answer: I
-- sentence: 這家餐廳的招牌菜果然美味，吃過之後才發現它（　　），廣受好評不是沒有原因的。
-  answer: J
+- sentence: 他熱心公益，樂於助人，真是（　　）的大善人。
+  answer: A
+- sentence: 因為事前準備充分，今天的口試我才能（　　）。
+  answer: E
+- sentence: 他個性（　　），從不拘泥小節，同學都喜歡和他一起做朋友。
+  answer: C
+- sentence: 我聽了價錢（　　）了一會兒，她卻沒有猶豫，＿的付錢了。
+  answer: G
+- sentence: 我聽了價錢＿了一會兒，她卻沒有猶豫，（　　）的付錢了。
+  answer: F
 multiple_choice:
 - question: 下列哪個詞語使用正確?
   options:

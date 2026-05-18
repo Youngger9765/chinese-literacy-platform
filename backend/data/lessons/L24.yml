@@ -44,59 +44,46 @@ paragraphs:
 paragraph_count: 9
 char_count: 994
 vocabulary:
-- word: 覓食
-  definition: 尋找食物。
-- word: 彷彿
-  definition: 似乎、好像。
-- word: 守株待兔
-  definition: 比喻不知變通或想要不勞而獲。在本課指等著目標自己送上門來。
-- word: 巧妙
-  definition: 神奇美妙的方式。
-- word: 葉苞
-  definition: 本文指將葉子捲成如同花苞的形狀。
-- word: 孵化
-  definition: 卵變成幼蟲或小動物的過程。
 - word: 依循
   definition: 依照遵循。
 - word: 規律
   definition: 事物或現象反覆出現的秩序。
-- word: 臨機應變
-  definition: 看現況的變化來做反應。
+- word: 彷彿
+  definition: 似乎、好像。
+- word: 覓食
+  definition: 尋找食物。
+- word: 巧妙
+  definition: 神奇美妙的方式。
+- word: 守株待兔
+  definition: 比喻不知變通或想要不勞而獲。在本課指等著目標自己送上門來。
 - word: 迅雷不及掩耳
   definition: 雷聲突然響起，來不及掩住耳朵。比喻行動迅速，來不及防範準備。
+- word: 葉苞
+  definition: 本文指將葉子捲成如同花苞的形狀。
+- word: 孵化
+  definition: 卵變成幼蟲或小動物的過程。
+- word: 臨機應變
+  definition: 看現況的變化來做反應。
 vocabulary_count: 10
 vocab_bank:
-  A: 覓食
-  B: 彷彿
-  C: 守株待兔
-  D: 巧妙
-  E: 葉苞
-  F: 孵化
-  G: 依循
-  H: 規律
-  I: 臨機應變
-  J: 迅雷不及掩耳
+  A: 依循
+  B: 規律
+  C: 彷彿
+  D: 覓食
+  E: 巧妙
+  F: 守株待兔
+  G: 迅雷不及掩耳
 fill_in_blank:
-- sentence: 小鳥在樹林裡四處（　　），希望能找到蟲子餵飽自己。
-  answer: A
-- sentence: 夕陽西下，天空被染成一片橘紅色，（　　）一幅美麗的油畫。
+- sentence: 他每週固定運動三天，（　　）的運動習慣，讓他能保持身體健康。
   answer: B
-- sentence: 老師提醒我們，學習不能（　　），要主動思考和探索新知。
-  answer: C
-- sentence: 魔術師用他（　　）的手法，變出了一朵又一朵的鮮花，讓觀眾驚呼連連。
-  answer: D
-- sentence: 清晨的露珠掛在（　　）上，晶瑩剔透，十分可愛。
+- sentence: 這本小說情節安排的很（　　），讓讀者在閱讀過程中驚喜連連。
   answer: E
-- sentence: 小雞從蛋殼裡鑽出來，完成了（　　）的過程，開始探索這個世界。
+- sentence: 他不去推銷，只希望客人上門，這是（　　），太異想天開了。
   answer: F
-- sentence: 我們必須（　　）交通規則，才能確保行車安全，避免意外發生。
+- sentence: 下課鐘聲一響，同學們以（　　）的速度衝向籃球場。
   answer: G
-- sentence: 大自然的變化有著一定的（　　），例如日出日落、潮起潮落。
-  answer: H
-- sentence: 比賽中遇到突發狀況，選手必須（　　），才能找到獲勝的機會。
-  answer: I
-- sentence: 警方（　　）地展開突襲行動，讓歹徒措手不及，順利將其逮捕。
-  answer: J
+- sentence: 飄動的雲朵，（　　）大自然的畫筆，在空中畫下一幅又一幅的畫作。
+  answer: C
 multiple_choice:
 - question: 根據這篇文章，請問下列哪個選項不是動物的本能?
   options:
