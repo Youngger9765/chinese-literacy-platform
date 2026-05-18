@@ -248,18 +248,20 @@ Tune `olderThan` values per tag prefix as cost vs rollback safety trade-off requ
 
 ---
 
-## 4.1 ⚠️ Preview env JWT security note
+## 4.1 Preview env JWT (fixed 2026-05-18 PR #1664)
 
-**As of 2026-05-17**: `.github/workflows/preview-deploy.yml` does NOT inject `JWT_SECRET_KEY` env var (verified `grep -c JWT_SECRET_KEY preview-deploy.yml` = 0). Preview Cloud Run revisions run with `ENVIRONMENT=preview` AND the `dev-secret-change-in-production` default secret.
+**Original concern (before fix)**: `.github/workflows/preview-deploy.yml` did NOT inject `JWT_SECRET_KEY`. Preview Cloud Run ran with `settings.jwt_secret_key = ""` (empty string default in `config.py`).
 
-This is the same security hole that prod had pre-PR #1651 (5/16 hotfix). The startup check `main.py:72` raises if `ENVIRONMENT != "development"` AND default secret is in use — preview should be crashing on startup but PR previews work in practice. Either the check tolerates `"preview"` as dev-like, or some other path keeps it alive.
+**Why preview didn't crash on startup**: `main.py:67` defines `_is_dev = _env in ("development", "preview")`. The startup check only raises `RuntimeError` for `not _is_dev` — preview is treated as dev-like by design and only emits a warning when secret is empty. **Not a "mysterious bug" — intentional dev-tolerance.**
 
-**Fix needed**:
-1. Create `PREVIEW_JWT_SECRET_KEY` GitHub secret
-2. Inject in `preview-deploy.yml` `--set-env-vars` (mirror staging-deploy.yml line 84 pattern)
-3. Verify next PR preview deploys with new secret
+**Real impact**: preview JWTs were signed with empty string → trivially forgeable. Mitigated by ephemeral preview lifetime + isolated `lingoleap-preview-db`, but inconsistent security posture vs staging + prod.
 
-Tracked at: Issue #1664 — `fix(infra): inject PREVIEW_JWT_SECRET_KEY for preview Cloud Run`
+**Fix applied** (Issue #1664 / PR fix/issue-1664-preview-jwt-inject):
+- New GitHub secret `PREVIEW_JWT_SECRET_KEY` (32-byte hex from `openssl rand -hex 32`)
+- `preview-deploy.yml` `--set-env-vars` now includes `JWT_SECRET_KEY=${{ secrets.PREVIEW_JWT_SECRET_KEY }}`
+- Effective on next preview deploy (existing previews keep old behavior until redeployed)
+
+Verify post-fix: `grep -c JWT_SECRET_KEY .github/workflows/preview-deploy.yml` returns 1.
 
 ---
 
