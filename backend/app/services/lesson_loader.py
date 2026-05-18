@@ -163,15 +163,51 @@ _MULTI_LESSON_MAP: dict[str, str] = {
     "G9-L19": "G9-L17-19",
 }
 
-# Curriculum a/b slots that share a single parsed YAML (without the suffix).
-# Key: normalized curriculum code (e.g. "G8-L3b")
-# Value: parsed lesson_code (e.g. "G8-L3a") that is the primary exposed lesson
-_AB_SECONDARY_MAP: dict[str, str] = {
-    "G8-L3b": "G8-L3a",
-    "G8-L6b": "G8-L6a",
-    "G8-L9b": "G8-L9a",
-    "G8-L12b": "G8-L12a",
+# Catalog code → parsed YAML lesson_code overrides (#1669).
+#
+# Two distinct correction patterns covered here:
+#
+# 1. G8 catalog↔Layer-2 offset (5 課): catalog uses curriculum sub-letter
+#    numbering (G8-L03a/03b/04/05/...), Layer-2 uses sequential parse-order
+#    (G8-L1/L2/L3/...). The default _normalize_manifest_code produces the
+#    wrong file (e.g. G8-L04 → G8-L4 = 植物肉, real story is G8-L5 = 玻璃娃娃).
+#
+# 2. G8 a/b sub-letter (8 課): each catalog a/b code maps to its own
+#    distinct Layer-2 file (a/b are SEPARATE stories, NOT shared content).
+#    This replaces the older _AB_SECONDARY_MAP design which incorrectly
+#    assumed a/b sub-letters share one parsed file.
+#
+# 3. G7-L31 (1 課): shares Layer-2 G7-L23 (multi-text 第一篇/第二篇).
+_CATALOG_TO_PARSED_OVERRIDE: dict[str, str] = {
+    # Category A: G8 offset (#1669) — catalog uses curriculum sub-letter
+    # numbering, Layer-2 uses sequential parse-order. The offset grows by 1
+    # each time an a/b split occurs in the curriculum.
+    "G8-L4": "G8-L5",    # 好心沒好報玻璃娃娃 (catalog G8-L04 after normalize)
+    "G8-L5": "G8-L6",    # 戲院賭場檳榔攤 (catalog G8-L05 after normalize)
+    "G8-L7": "G8-L9",    # 讓黑猩猩被看見 (catalog G8-L07 after normalize)
+    "G8-L8": "G8-L10",   # 按讚背後的真相 (catalog G8-L08 after normalize)
+    "G8-L10": "G8-L13",  # 構樹 (catalog G8-L10 after normalize)
+    "G8-L11": "G8-L14",  # 蝴蝶蘭花期密碼 (catalog G8-L11 after normalize)
+    "G8-L13": "G8-L17",  # 我能不能選擇告別方式 (catalog G8-L13 after normalize)
+    "G8-L14": "G8-L18",  # 石虎保育 (catalog G8-L14 after normalize)
+    "G8-L15": "G8-L19",  # 核能的兩難抉擇 (catalog G8-L15 after normalize)
+    # Category B: G8 sub-letter (each a/b has own parsed file)
+    "G8-L3a": "G8-L3",   # 集中營的一門課
+    "G8-L3b": "G8-L4",   # 新奇植物肉
+    "G8-L6a": "G8-L7",   # 讓你口中的甜蜜
+    "G8-L6b": "G8-L8",   # 隱形的征服者
+    "G8-L9a": "G8-L11",  # 虎襲事件的真相
+    "G8-L9b": "G8-L12",  # 語言的足跡
+    "G8-L12a": "G8-L15", # 球場上的另類指揮家
+    "G8-L12b": "G8-L16", # 我的阿嬤
+    # Category C: G7-L31 (旅人鴿 = 第二篇 of G7-L23 multi-text docx)
+    "G7-L31": "G7-L23",
 }
+
+# Legacy: kept for backward compat; superseded by _CATALOG_TO_PARSED_OVERRIDE.
+# G8-L*b entries are now correctly routed to their own Layer-2 files (not
+# shared with the a slot). Other entries here remain inert.
+_AB_SECONDARY_MAP: dict[str, str] = {}
 
 
 def _load_curriculum_manifest() -> dict[str, dict]:
@@ -306,6 +342,10 @@ def _load_layer2_lessons(
         if norm_code in _MULTI_LESSON_PRIMARY:
             parsed_code = _MULTI_LESSON_PRIMARY[norm_code]
 
+        # Catalog→parsed override (#1669): G8 offset + G8 a/b + G7-L31
+        if norm_code in _CATALOG_TO_PARSED_OVERRIDE:
+            parsed_code = _CATALOG_TO_PARSED_OVERRIDE[norm_code]
+
         if parsed_code not in parsed_index:
             # For a/b primary slots (e.g. G8-L3a), the parsed file is G8-L3 (no suffix)
             # Try stripping trailing 'a' suffix → base code (e.g. G8-L3a → G8-L3)
@@ -313,13 +353,20 @@ def _load_layer2_lessons(
             if base_code != parsed_code and base_code in parsed_index:
                 parsed_code = base_code
             else:
-                # No parsed YAML available (e.g. G7-L31)
+                # No parsed YAML available
                 continue
 
         data, _ = parsed_index[parsed_code]
 
+        # Title: prefer catalog manifest title when a catalog→parsed override
+        # is in effect (#1669). This prevents catalog G7-L31 from displaying
+        # parsed G7-L23.yml's title (which would collide with G7-L23's own
+        # entry and confuse the lesson card UI).
+        if norm_code in _CATALOG_TO_PARSED_OVERRIDE:
+            title = meta.get("title") or data.get("title", "")
+        else:
+            title = data.get("title", "")
         # Deduplicate: if title already in Layer-1, skip
-        title = data.get("title", "")
         if title in layer1_titles:
             continue
 
@@ -521,13 +568,29 @@ def get_lesson_by_code(lesson_code: str) -> dict | None:
     """Lookup by lesson_code (e.g. 'G4-L1', 'G4-L01', '文-L3').
 
     Accepts both zero-padded (G4-L01) and non-zero-padded (G4-L1) forms.
+
+    For multi-text secondary slots (G4-L21/L22, G5-L25, G9-L16/L18/L19),
+    which are skipped at catalogue load time but appear in the curriculum
+    manifest, fall back to the primary slot's lesson dict (#1669). This
+    keeps `normalize_story_slug('G4-L21')` from cascading into the
+    `_PUBLISHER_RE` fallback and matching Layer-1 #21 (forest guard).
     """
     lesson = _LESSONS_BY_CODE.get(lesson_code)
     if lesson:
         return lesson
     # Normalize zero-padded variant: G4-L01 → G4-L1
     normalized = _normalize_manifest_code(lesson_code)
-    return _LESSONS_BY_CODE.get(normalized)
+    lesson = _LESSONS_BY_CODE.get(normalized)
+    if lesson:
+        return lesson
+    # Multi-text secondary slot fallback: look up the primary slot (#1669).
+    # G4-L21 → G4-L20-22 → primary code G4-L20
+    primary_compound = _MULTI_LESSON_MAP.get(normalized)
+    if primary_compound:
+        for primary_code, compound in _MULTI_LESSON_PRIMARY.items():
+            if compound == primary_compound:
+                return _LESSONS_BY_CODE.get(primary_code)
+    return None
 
 
 def get_available_grades() -> list[int]:
