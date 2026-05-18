@@ -110,6 +110,8 @@ reading_benchmark:
 video_links:
 - title: 影片1
   url: http://youtu.be/grz1KFqUHPw
+- title: 影片2
+  url: http://youtu.be/MAyDpYHoGWY
 multiple_choice:
 - question: 1. 下列句子中，哪一個語詞使用是錯誤的？
   options:

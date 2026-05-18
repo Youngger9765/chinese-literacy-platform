@@ -60,6 +60,8 @@ vocabulary_count: 0
 video_links:
 - title: 影片1
   url: https://www.youtube.com/watch?v=UPDbd-FUzfM
+- title: 影片2
+  url: https://www.youtube.com/watch?v=RNEXGmgQC9k&t=480s
 multiple_choice:
 - question: 1.根據表一，下列哪一項最能正確分辨白尾八哥和臺灣冠八哥？
   options:

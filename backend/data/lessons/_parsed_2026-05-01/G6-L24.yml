@@ -94,6 +94,8 @@ reading_benchmark:
 video_links:
 - title: 影片1
   url: http://youtu.be/s83wzgxhewI
+- title: 影片2
+  url: http://youtu.be/UeYJAnTWJYA
 multiple_choice:
 - question: 1. 文中第三段提到「資源僧多粥少」，根據上下文，「僧多粥少」最可能的意思是：
   options:

@@ -276,6 +276,12 @@ def _load_layer1_lessons() -> list[dict]:
             "multiple_choice": data.get("multiple_choice"),
             "vocab_bank": data.get("vocab_bank"),
             "knowledge_video_url": data.get("knowledge_video_url"),
+            # Full video list (#1683) — for Layer-1 lessons, derive single-item
+            # list from knowledge_video_url if no explicit video_links field.
+            "video_links": data.get("video_links") or (
+                [{"title": "影片", "url": data["knowledge_video_url"]}]
+                if data.get("knowledge_video_url") else None
+            ),
             "reading_benchmark": data.get("reading_benchmark"),
             "source_file": data.get("source_file"),
             "strategy_exercise": data.get("strategy_exercise"),
@@ -417,6 +423,8 @@ def _load_layer2_lessons(
             "knowledge_video_url": (
                 video_links[0].get("url") if video_links else None
             ),
+            # Full video list (#1683) — KnowledgeStation renders all videos.
+            "video_links": video_links,
             "reading_benchmark": data.get("reading_benchmark"),
             "source_file": data.get("source_file"),
             # Accept both keys: 'strategy_exercise' (singular, guided_steps shape — Gemini

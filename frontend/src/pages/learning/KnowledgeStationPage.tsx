@@ -3,21 +3,16 @@ import KnowledgeStation from '../../components/reading-steps/KnowledgeStation';
 import { useLearningContext } from '../../layouts/LearningLayout';
 
 const KnowledgeStationPage: React.FC = () => {
-  const { selectedStory, handleFinishKnowledgeStation, missingAssignmentSteps } = useLearningContext();
+  const { selectedStory, handleFinishKnowledgeStation } = useLearningContext();
 
   if (!selectedStory) return null;
 
-  // Exclude 'knowledge-station' and 'report' from the missing list shown in the reminder
-  // (student is already on knowledge-station; report is the destination)
-  const missingStepsForReminder = missingAssignmentSteps.filter(
-    (s) => s.id !== 'knowledge-station' && s.id !== 'report',
-  );
-
+  // #1683: removed missingSteps prop — the "N 個關卡沒有完成" reminder is no longer
+  // shown per Young 5/19. missingAssignmentSteps is still consumed by other consumers.
   return (
     <KnowledgeStation
       story={selectedStory}
       onFinish={handleFinishKnowledgeStation}
-      missingSteps={missingStepsForReminder}
     />
   );
 };

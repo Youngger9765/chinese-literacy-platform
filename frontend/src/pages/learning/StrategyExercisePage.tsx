@@ -1,19 +1,21 @@
 /**
  * StrategyExercisePage — Step: 閱讀聚光燈 (reading-strategy, dbStep 16)
  *
- * Wraps ComprehensionLayout + StrategyExercise.
+ * Wraps ComprehensionLayout + StrategyExercise (single-exercise schema) or
+ * GraphicTextIntegrationExercise (G7 圖文整合, list schema, #1683).
+ *
  * When the lesson has no strategyExercise, shows a friendly placeholder
  * and allows the student to advance with one click.
  * Calls handleFinishReadingStrategy from LearningContext when done.
  */
 import React, { useCallback, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import ComprehensionLayout from '../../components/reading-steps/ComprehensionLayout';
 import StrategyExercise from '../../components/reading-steps/StrategyExercise';
+import GraphicTextIntegrationExercise from '../../components/reading-steps/GraphicTextIntegrationExercise';
 import { useLearningContext } from '../../layouts/LearningLayout';
+import type { StrategyExercise as StrategyExerciseType, StrategyExerciseItem } from '../../types';
 
 const StrategyExercisePage: React.FC = () => {
-  const { storyId } = useParams<{ storyId: string }>();
   const {
     selectedStory,
     handleFinishReadingStrategy,
@@ -56,7 +58,18 @@ const StrategyExercisePage: React.FC = () => {
 
   if (!selectedStory) return null;
 
-  const hasStrategy = !!selectedStory.strategyExercise;
+  const rawExercise = selectedStory.strategyExercise;
+  const hasStrategy = !!rawExercise;
+
+  // G7 圖文整合 schema is a list of {exercise, description, steps} items with
+  // no `type` field — different from the single-object StrategyExercise schema.
+  // Detect via Array.isArray and the absence of `type` on the first element.
+  // #1683: render with GraphicTextIntegrationExercise to avoid the
+  // "不支援的練習類型" fallthrough in StrategyExercise.
+  const isGraphicTextList =
+    Array.isArray(rawExercise) &&
+    rawExercise.length > 0 &&
+    !('type' in (rawExercise[0] as object));
 
   return (
     <ComprehensionLayout
@@ -65,14 +78,23 @@ const StrategyExercisePage: React.FC = () => {
     >
       {hasStrategy ? (
         <>
-          <StrategyExercise
-            exercise={selectedStory.strategyExercise!}
-            onComplete={handleStrategyComplete}
-            lessonId={selectedStory.id}
-            readingStrategy={selectedStory.readingStrategy}
-            onChange={handleAnswerChange}
-            initialState={savedStrategyData}
-          />
+          {isGraphicTextList ? (
+            <GraphicTextIntegrationExercise
+              exercises={rawExercise as StrategyExerciseItem[]}
+              onComplete={handleStrategyComplete}
+              onChange={handleAnswerChange}
+              initialState={savedStrategyData}
+            />
+          ) : (
+            <StrategyExercise
+              exercise={rawExercise as StrategyExerciseType}
+              onComplete={handleStrategyComplete}
+              lessonId={selectedStory.id}
+              readingStrategy={selectedStory.readingStrategy}
+              onChange={handleAnswerChange}
+              initialState={savedStrategyData}
+            />
+          )}
           {/* Show "下一關" once the strategy exercise is done (or always allow skip) */}
           <div className="mt-6 shrink-0">
             <button

@@ -123,7 +123,10 @@ export interface Story {
   fillInBlank?: FillInBlankItem[];           // ④ 語詞應用（PDF 現成資料）
   multipleChoice?: MultipleChoiceItem[];     // ⑦ 閱讀理解選擇題（PDF 現成資料）
   vocabBank?: Record<string, string>;        // { A: "疑難雜症", ... } for fillInBlank
-  knowledgeVideoUrl?: string;               // ⑨ 知識補給站 YouTube URL
+  knowledgeVideoUrl?: string;               // ⑨ 知識補給站 — first video URL only (#615, legacy)
+  /** Full video list for knowledge-station (#1683). Catalog has multiple videos per lesson;
+   *  KnowledgeStation renders all of them. Each item: { title: '影片1', url: 'https://...' }. */
+  videoLinks?: { title: string; url: string }[];
   strategyExercise?: StrategyExercise | StrategyExerciseItem[];  // 閱讀策略練習 (#943); StrategyExerciseItem[] for G7 圖文整合 (#1390)
   /**
    * Optional per-lesson step sequence loaded from YAML `step_sequence` field (#1374).
