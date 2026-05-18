@@ -3,12 +3,30 @@ import ZoomableImage from '../ui/ZoomableImage';
 
 interface GraphicTextImageStripProps {
   images: { filename: string; caption?: string }[];
-  lessonCode: string;
+  /**
+   * Lesson code (e.g. 'G7-L28') used to build GCS image URL.
+   * Optional — falls back to the first path segment of `images[0].filename`
+   * (e.g. 'images/G7-L28/G7-L28-08.jpg' → 'G7-L28') when not supplied.
+   * Many lessons have `story.lesson_code === undefined` but `images[i].filename`
+   * always carries the lesson directory, so the fallback is reliable (#1681).
+   */
+  lessonCode?: string;
 }
 
 const GCS_IMAGE_BASE = 'https://storage.googleapis.com/lingoleap-assets/lessons-images';
 
+/** Derive lesson code from an image filename like `images/G7-L28/G7-L28-08.jpg`. */
+function deriveLessonCodeFromFilename(filename: string): string {
+  const parts = filename.split('/').filter(Boolean);
+  // Skip leading 'images/' prefix when present.
+  if (parts.length >= 2 && parts[0] === 'images') return parts[1];
+  if (parts.length >= 2) return parts[parts.length - 2];
+  return '';
+}
+
 const GraphicTextImageStrip: React.FC<GraphicTextImageStripProps> = ({ images, lessonCode }) => {
+  const resolvedLessonCode =
+    lessonCode || (images[0] ? deriveLessonCodeFromFilename(images[0].filename) : '');
   return (
     <div
       data-testid="graphic-text-image-pane"
@@ -37,7 +55,7 @@ const GraphicTextImageStrip: React.FC<GraphicTextImageStripProps> = ({ images, l
               >
                 <div className="flex-1 min-h-0">
                   <ZoomableImage
-                    src={`${GCS_IMAGE_BASE}/${lessonCode}/${img.filename.split('/').pop()}`}
+                    src={`${GCS_IMAGE_BASE}/${resolvedLessonCode}/${img.filename.split('/').pop()}`}
                     alt={img.caption ?? `圖 ${idx + 1}`}
                     caption={img.caption}
                     className="h-full"
