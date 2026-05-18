@@ -62,10 +62,12 @@ def _get_title_index() -> dict[str, str]:
 _PUBLISHER_RE = re.compile(r"[Ll](\d+)\s*$")
 
 # ---------------------------------------------------------------------------
-# Regex: Layer-2 grade_code, e.g. "G7-L30" / "G4-L01" (#1654)
+# Regex: Layer-2 grade_code, e.g. "G7-L30" / "G4-L01" / "G8-L03a" (#1654, #1669)
+# Optional trailing a/b suffix handles curriculum sub-letter codes
+# (G8-L03a/G8-L03b for stories that share a docx but have own learning paths).
 # Must be tried before _PUBLISHER_RE to avoid mis-matching the trailing L\d+.
 # ---------------------------------------------------------------------------
-_GRADE_CODE_RE = re.compile(r"^G\d+-L\d+$")
+_GRADE_CODE_RE = re.compile(r"^G\d+-L\d+[ab]?$")
 
 
 def normalize_story_slug(slug: str) -> str:
