@@ -9,6 +9,7 @@ import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { fontForZhuyin } from '../../constants/fonts';
+import GraphicTextImageStrip from './GraphicTextImageStrip';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -608,6 +609,23 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
               );
             })}
           </article>
+
+          {/* Graphic-text layout: images strip below the article (#1681).
+              Stacked layout (per Young 5/18 rule for ReadingAnnotation) — side
+              panel '我的記號' already occupies the right column, so images sit
+              under the text instead of beside it. */}
+          {story.layout_mode === 'graphic-text' && (story.images?.length ?? 0) > 0 && (
+            <div
+              className="max-w-4xl mx-auto px-6 md:px-16 mt-10 h-72 md:h-80 flex"
+              data-testid="reading-annotation-graphic-text-images"
+              style={{ WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties}
+            >
+              <GraphicTextImageStrip
+                images={story.images ?? []}
+                lessonCode={story.lesson_code}
+              />
+            </div>
+          )}
 
           {/* ── Floating selection toolbar ─────────────────────────────── */}
           {toolbar.visible && (
