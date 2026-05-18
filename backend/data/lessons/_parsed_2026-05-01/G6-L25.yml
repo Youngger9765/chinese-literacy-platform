@@ -58,31 +58,22 @@ paragraphs:
 paragraph_count: 11
 char_count: 1145
 fill_in_blank:
-- id: 1
-  answer: 想要航行到亞洲買香料回來賣，但遠洋探險不容易，費用高，任何人都無法單獨承擔
-  context_before: 歐洲人遇到什麼困難? 歐洲人
-  context_after: ''
-  context_paragraph_idx: 5
-- id: 2
-  answer: 大家一起出錢，讓一家公司主導遠洋行動
-  context_before: 1. 荷蘭人提出一個構想：
-  context_after: （可省略） 2.荷蘭人成立【 荷蘭東印度公司，並發行股票，把經營公司需要的錢，分成許多小份，讓大
-  context_paragraph_idx: 5
-- id: 3
-  answer: 荷蘭東印度公司，並發行股票，把經營公司需要的錢，分成許多小份，讓大家投資
-  context_before: 荷蘭人提出一個構想：【大家一起出錢，讓一家公司主導遠洋行動 】（可省略） 2.荷蘭人成立
-  context_after: ''
-  context_paragraph_idx: 5
-- id: 4
-  answer: 參與買股票，成為公司的股東
-  context_before: 1.許多人
-  context_after: 2.最後【荷蘭東印度公司有了龐大的資金能派遣船隊遠洋航行 】
-  context_paragraph_idx: 5
-- id: 5
-  answer: 荷蘭東印度公司有了龐大的資金能派遣船隊遠洋航行
-  context_before: 1.許多人【參與買股票，成為公司的股東 】 2.最後
-  context_after: ''
-  context_paragraph_idx: 5
+- sentence: 公司今年（　　　）大增，大家都有獎金。
+  answer: F
+- sentence: 大學畢業後，他準備（　　　），踏上人生新旅程。
+  answer: A
+- sentence: 農夫長年在田裡工作，粗重的農事讓他（　　　）。
+  answer: D
+- sentence: 我們想（　　　）開一家新的飲料店，股東們都各投資一點吧。
+  answer: E
+- sentence: 公司（　　　）他到海外受訓。
+  answer: I
+- sentence: 雖然家裡經濟不寬裕，爸媽仍靠著（　　　），努力供我念書。
+  answer: C
+- sentence: 富有的企業家（　　　），當場答應贊助全校一年的午餐費用。
+  answer: H
+- sentence: 他每天關注（　　　）市場的變化，希望找到投資機會。
+  answer: B
 fill_in_blank_count: 5
 vocabulary:
 - word: 股票
@@ -163,8 +154,7 @@ story_structure_table:
   - 歐洲人遇到什麼困難? 歐洲人【想要航行到亞洲買香料回來賣，但遠洋探險不容易，費用高，任何人都無法單獨承擔 】
 - - 解決 /（3 ）
   - 有人想出辦法或行動 (誰＋做什麼)
-  - 1. 荷蘭人提出一個構想：【大家一起出錢，讓一家公司主導遠洋行動 】（可省略） 2.荷蘭人成立【 荷蘭東印度公司，並發行股票，把經營公司需要的錢，分成許多小份，讓大家投資
-    】
+  - 1. 荷蘭人提出一個構想：【大家一起出錢，讓一家公司主導遠洋行動 】（可省略） 2.荷蘭人成立【 荷蘭東印度公司，並發行股票，把經營公司需要的錢，分成許多小份，讓大家投資 】
 - - 結果 / 5. 10
   - 行動後，造成了什麼改變？
   - 1.許多人【參與買股票，成為公司的股東 】 2.最後【荷蘭東印度公司有了龐大的資金能派遣船隊遠洋航行 】
@@ -186,11 +176,7 @@ vocab_bank:
   G: 股東
   H: 大手一揮
   I: 派遣
-spotlight_raw_text: "閱讀聚光燈\n摘要策略—問題.解決結構找重點\n\n    這篇故事也是一篇說明文，講「全世界第一張股票」是怎麼誕生的。故事結構裡有明顯的問題、解決、結果。前面兩課我們已經學過怎麼用線索，來找到文章中的「問題、解決、結果」，我們再來複習這個祕訣，請你連連看。\n\
-  \n策略\n\n祕訣\n(1)\n問題\n● 　　　 　　 　\n通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變，可能出現「結果」、「最後」等關鍵詞。\n\
-  \n8001018351500●         ●\n\n(2)\n解決\n    　　  　          ●           ●\n　　　　  \
-  \   　\n通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。\n(3)\n結果\n         　　●         ●\n　     　　　　\n\
-  通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。\n\n◎"
+spotlight_raw_text: "閱讀聚光燈\n摘要策略—問題.解決結構找重點\n\n    這篇故事也是一篇說明文，講「全世界第一張股票」是怎麼誕生的。故事結構裡有明顯的問題、解決、結果。前面兩課我們已經學過怎麼用線索，來找到文章中的「問題、解決、結果」，我們再來複習這個祕訣，請你連連看。\n\n策略\n\n祕訣\n(1)\n問題\n● 　　　 　　 　\n通常出現在文章的後段，常接在「解決」之後，說明行動後，造成了什麼改變，可能出現「結果」、「最後」等關鍵詞。\n\n8001018351500●         ●\n\n(2)\n解決\n    　　  　          ●           ●\n　　　　     　\n通常出現在文章的開頭，描述一個「不好的事或困難」需要解決。\n(3)\n結果\n         　　●         ●\n　     　　　　\n通常出現在文章中段，你可以找找「有人想出辦法或行動」的句子在哪裡。\n\n◎"
 strategy_exercise:
   type: guided_steps
   strategy_name: 摘要策略—問題.解決結構找重點
@@ -273,3 +259,29 @@ lesson_intro:
   course_intro: 這篇文章將帶我們回到十七世紀，認識當時荷蘭人如何運用智慧，解決遠洋貿易所需龐大資金的問題。文中會介紹「股票」這種金融工具的誕生背景，以及它如何讓一般民眾也能參與投資，共同成就大型商業計畫。透過荷蘭東印度公司的例子，我們將了解股票如何運作，以及它對當時社會和經濟發展帶來的影響。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L25.pdf
+spotlight_answers:
+- id: 1
+  answer: 想要航行到亞洲買香料回來賣，但遠洋探險不容易，費用高，任何人都無法單獨承擔
+  context_before: 歐洲人遇到什麼困難? 歐洲人
+  context_after: ''
+  context_paragraph_idx: 5
+- id: 2
+  answer: 大家一起出錢，讓一家公司主導遠洋行動
+  context_before: 1. 荷蘭人提出一個構想：
+  context_after: （可省略） 2.荷蘭人成立【 荷蘭東印度公司，並發行股票，把經營公司需要的錢，分成許多小份，讓大
+  context_paragraph_idx: 5
+- id: 3
+  answer: 荷蘭東印度公司，並發行股票，把經營公司需要的錢，分成許多小份，讓大家投資
+  context_before: 荷蘭人提出一個構想：【大家一起出錢，讓一家公司主導遠洋行動 】（可省略） 2.荷蘭人成立
+  context_after: ''
+  context_paragraph_idx: 5
+- id: 4
+  answer: 參與買股票，成為公司的股東
+  context_before: 1.許多人
+  context_after: 2.最後【荷蘭東印度公司有了龐大的資金能派遣船隊遠洋航行 】
+  context_paragraph_idx: 5
+- id: 5
+  answer: 荷蘭東印度公司有了龐大的資金能派遣船隊遠洋航行
+  context_before: 1.許多人【參與買股票，成為公司的股東 】 2.最後
+  context_after: ''
+  context_paragraph_idx: 5
