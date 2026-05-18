@@ -132,10 +132,8 @@ reading_benchmark:
   - threshold: □ ＞241字
     feedback: 哇嗚，超級厲害！
 video_links:
-- title: 1. 成語任務22-雞鳴狗盜
-  url: ''
-- title: 2.15 曹沖秤象
-  url: ''
+- title: 影片1
+  url: http://youtu.be/70xwR2CUvO8
 multiple_choice:
 - question: 1. 下列語詞，何者使用正確？
   options:
@@ -381,4 +379,3 @@ lesson_intro:
   course_intro: 這篇文章講述了戰國時期齊國孟嘗君的故事。孟嘗君以養士聞名，門下食客眾多。當他被秦昭王軟禁並面臨生命危險時，兩位看似擁有微不足道技能的食客，如何運用他們的「雞鳴狗盜」之術，幫助孟嘗君化險為夷，成功脫離秦國。故事展現了在關鍵時刻，小人物的特殊才能也能發揮意想不到的巨大作用。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L22.pdf
-knowledge_video_url: http://youtu.be/70xwR2CUvO8

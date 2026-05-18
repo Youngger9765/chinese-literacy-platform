@@ -120,10 +120,8 @@ reading_benchmark:
   - threshold: □ ＞241字
     feedback: 哇嗚，超級厲害！
 video_links:
-- title: 1. 【全聯福利中心】二廚帶你去旅行－老鷹紅豆篇
-  url: ''
-- title: 2. 【觀念】生態系的組成(食物鏈)
-  url: ''
+- title: 影片1
+  url: http://youtu.be/fGWQ6y4hI5U
 multiple_choice:
 - question: 1. 文中第四段末行提到，林清源先生轉型無毒農法後「只能苦撐待變」。根據上下文推測，他面臨的主要困難是什麼？
   options:
@@ -312,4 +310,3 @@ lesson_intro:
   course_intro: 這篇文章從老鷹中毒事件談起，帶我們認識了農民在種植紅豆時，為了減少鳥害和方便採收，可能使用毒餌或落葉劑，進而對生態環境造成傷害。文中也介紹了各方人士如何共同努力，推動友善耕作方式，讓紅豆生產與生態保育得以並存，並探討了消費者在其中扮演的角色。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L23.pdf
-knowledge_video_url: http://youtu.be/fGWQ6y4hI5U

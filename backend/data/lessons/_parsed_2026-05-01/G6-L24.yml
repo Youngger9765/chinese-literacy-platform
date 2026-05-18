@@ -101,11 +101,8 @@ reading_benchmark:
   - threshold: □ ＞241字
     feedback: 哇嗚，超級厲害！
 video_links:
-- title: '1. 白鯨救援Frozen Crisis: The 1984 Rescue of 3,000 Beluga Whales Trapped in
-    Ice'
-  url: ''
-- title: 2. 柴可夫斯基《天鵝湖》四小天鵝舞 - 柏林國家歌劇院獻演
-  url: ''
+- title: 影片1
+  url: http://youtu.be/s83wzgxhewI
 multiple_choice:
 - question: 1. 文中第三段提到「資源僧多粥少」，根據上下文，「僧多粥少」最可能的意思是：
   options:
@@ -252,4 +249,3 @@ lesson_intro:
   course_intro: 這篇文章記錄了一場發生在北極海的白鯨救援行動。故事描述了數千頭白鯨因氣候驟變受困於冰層中，面臨生命威脅的緊急情況。從當地居民的初步嘗試，到政府出動破冰船，救援過程一波三折，充滿了意想不到的挑戰。文章將帶領讀者了解人類如何運用智慧與創意，與大自然中的生命進行溝通與互動，最終共同譜寫出一段特別的經歷。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L24.pdf
-knowledge_video_url: http://youtu.be/s83wzgxhewI

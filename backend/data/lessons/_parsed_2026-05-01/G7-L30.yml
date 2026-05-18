@@ -58,10 +58,8 @@ fill_in_blank_count: 1
 vocabulary: []
 vocabulary_count: 0
 video_links:
-- title: 外來鳥界流氓「八哥」入侵 繁衍神速生態災難超囂張？
-  url: ''
-- title: 【外來種】到處都看到八哥越來越多？你知道八哥有分本土和外來種嗎？｜八哥「隻」多少
-  url: ''
+- title: 影片1
+  url: https://www.youtube.com/watch?v=UPDbd-FUzfM
 multiple_choice:
 - question: 1.根據表一，下列哪一項最能正確分辨白尾八哥和臺灣冠八哥？
   options:
@@ -229,4 +227,3 @@ lesson_intro:
   course_intro: 這篇文章將帶你認識兩種在臺灣常見的八哥鳥——白尾八哥和臺灣冠八哥。雖然牠們外形相似，但其實有著不同的身世和習性。文章會介紹如何分辨這兩種八哥，並透過數據和圖表，探討為什麼外來種白尾八哥的數量，近年來會大幅超越臺灣原生種的臺灣冠八哥。讀完這篇文章，你將對這兩種鳥類有更深入的了解，並思考牠們在臺灣生態環境中的處境。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L30.pdf
-knowledge_video_url: https://www.youtube.com/watch?v=UPDbd-FUzfM
