@@ -242,6 +242,8 @@ def get_story(story_id: str):
         multiple_choice=story["multiple_choice"],
         vocab_bank=story.get("vocab_bank"),
         knowledge_video_url=story.get("knowledge_video_url"),
+        # Full video list (#1683): catalog has multiple videos; frontend KnowledgeStation renders all.
+        video_links=story.get("video_links"),
         reading_benchmark=story["reading_benchmark"],
         text_type=story["text_type"],
         source_file=story["source_file"],

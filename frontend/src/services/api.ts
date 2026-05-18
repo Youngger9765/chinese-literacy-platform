@@ -60,6 +60,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   multiple_choice: Array<{ question: string; options: string[]; answer: string | null; explanation: string | null }> | null;
   vocab_bank: Record<string, string> | null;
   knowledge_video_url: string | null;
+  // Full video list (#1683). null for legacy lessons without video_links field.
+  video_links: { title: string; url: string }[] | null;
   reading_benchmark: { levels: { threshold: string; feedback: string }[] } | null;
   text_type: string;
   source_file: string;
@@ -155,6 +157,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     multipleChoice: detail.multiple_choice ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
+    videoLinks: detail.video_links ?? undefined,
     strategyExercise: detail.strategy_exercise ?? undefined,
     stepSequence: detail.step_sequence ?? undefined,
     worksheetSectionOrder: detail.worksheet_section_order ?? undefined,

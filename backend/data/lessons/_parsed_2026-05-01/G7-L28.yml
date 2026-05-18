@@ -121,6 +121,8 @@ vocabulary_count: 0
 video_links:
 - title: 影片1
   url: https://www.youtube.com/watch?v=91wsXTHXuwE
+- title: 影片2
+  url: https://www.youtube.com/watch?v=RIBiF0BBQp0
 multiple_choice:
 - question: 1.根據第三段的說明，在哪一選項的情況下，肉湯很快就發臭了？
   options:
