@@ -568,13 +568,29 @@ def get_lesson_by_code(lesson_code: str) -> dict | None:
     """Lookup by lesson_code (e.g. 'G4-L1', 'G4-L01', '文-L3').
 
     Accepts both zero-padded (G4-L01) and non-zero-padded (G4-L1) forms.
+
+    For multi-text secondary slots (G4-L21/L22, G5-L25, G9-L16/L18/L19),
+    which are skipped at catalogue load time but appear in the curriculum
+    manifest, fall back to the primary slot's lesson dict (#1669). This
+    keeps `normalize_story_slug('G4-L21')` from cascading into the
+    `_PUBLISHER_RE` fallback and matching Layer-1 #21 (forest guard).
     """
     lesson = _LESSONS_BY_CODE.get(lesson_code)
     if lesson:
         return lesson
     # Normalize zero-padded variant: G4-L01 → G4-L1
     normalized = _normalize_manifest_code(lesson_code)
-    return _LESSONS_BY_CODE.get(normalized)
+    lesson = _LESSONS_BY_CODE.get(normalized)
+    if lesson:
+        return lesson
+    # Multi-text secondary slot fallback: look up the primary slot (#1669).
+    # G4-L21 → G4-L20-22 → primary code G4-L20
+    primary_compound = _MULTI_LESSON_MAP.get(normalized)
+    if primary_compound:
+        for primary_code, compound in _MULTI_LESSON_PRIMARY.items():
+            if compound == primary_compound:
+                return _LESSONS_BY_CODE.get(primary_code)
+    return None
 
 
 def get_available_grades() -> list[int]:

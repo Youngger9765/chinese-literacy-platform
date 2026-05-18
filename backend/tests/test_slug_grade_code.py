@@ -267,3 +267,41 @@ def test_g9_l15_l17_multi_text_step_sequence():
         assert step_seq, f"{code} must have step_sequence"
         assert step_seq[0] == "intro"
         assert step_seq[-1] == "report"
+
+
+def test_multi_text_secondary_slots_resolve_to_primary(monkeypatch=None):
+    """G4-L21/L22, G5-L25, G9-L16/L18/L19 must resolve via the primary slot
+    (#1669). Previously they cascaded into the _PUBLISHER_RE fallback and
+    matched Layer-1 lesson_number=21/22/25/etc — unrelated stories."""
+    secondary_to_primary = {
+        "G4-L21": "G4-L20",
+        "G4-L22": "G4-L20",
+        "G5-L25": "G5-L24",
+        "G9-L16": "G9-L15",
+        "G9-L18": "G9-L17",
+        "G9-L19": "G9-L17",
+    }
+    for sec, prim in secondary_to_primary.items():
+        sec_lesson = get_lesson_by_code(sec)
+        prim_lesson = get_lesson_by_code(prim)
+        assert sec_lesson is not None, f"{sec} secondary slot should resolve"
+        assert prim_lesson is not None, f"{prim} primary slot should exist"
+        assert sec_lesson["id"] == prim_lesson["id"], (
+            f"{sec} should share id with primary {prim}, "
+            f"got sec.id={sec_lesson['id']} vs prim.id={prim_lesson['id']}"
+        )
+        assert sec_lesson.get("step_sequence"), (
+            f"{sec} must have step_sequence (inherited from primary)"
+        )
+
+
+def test_g4_l21_normalize_slug_no_collision_with_layer1():
+    """normalize_story_slug('G4-L21') must NOT match Layer-1 #21 via
+    _PUBLISHER_RE fallback (#1669, same class as #1654)."""
+    result = normalize_story_slug("G4-L21")
+    # G4-L21 resolves to G4-L20's primary (multi-text), lesson_id should
+    # be Layer-2 (>= 1000), NOT Layer-1 #21
+    assert result != "21", (
+        f"G4-L21 must not collide with Layer-1 #21 (森林大軍的守護者). "
+        f"Got: {result!r}"
+    )
