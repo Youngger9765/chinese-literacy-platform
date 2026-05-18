@@ -27,7 +27,7 @@ import os
 from datetime import datetime, timezone
 from typing import Literal, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Path, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Path, UploadFile, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -192,8 +192,59 @@ def _update_upload(upload_id: int, **kwargs):
         db.close()
 
 
-async def _run_identification(upload_id: int, image_bytes_list: list[bytes], mime_types: list[str]):
-    """Background task: call AI to identify lesson, write result back to DB."""
+async def _run_identification(
+    upload_id: int,
+    image_bytes_list: list[bytes],
+    mime_types: list[str],
+    lesson_code_hint: Optional[str] = None,
+):
+    """Background task: identify lesson and write result back to DB.
+
+    If ``lesson_code_hint`` is provided (student uploaded from within a lesson
+    page), use the fast hint path (no AI call, conf=1.0).  Otherwise fall back
+    to the Gemini-powered fuzzy-match path.
+    """
+    # ── Hint path: lesson is already known, skip AI identification ────────────
+    if lesson_code_hint:
+        try:
+            from ..services.omo_identifier import identify_lesson_from_hint
+            candidates = identify_lesson_from_hint(lesson_code_hint)
+        except ImportError as exc:
+            logger.error("OMO identifier import failed: %s", exc)
+            candidates = []
+
+        if not candidates:
+            logger.warning(
+                "OMO hint path: lesson_code=%r not found — falling back to AI",
+                lesson_code_hint,
+            )
+            # Fall through to AI path below
+        else:
+            _update_upload(
+                upload_id,
+                identification=[
+                    {
+                        "lesson_id": c.lesson_id,
+                        "grade_code": c.grade_code,
+                        "title": c.title,
+                        "confidence": c.confidence,
+                        "reasoning": c.reasoning,
+                    }
+                    for c in candidates
+                ],
+                ai_confidence=candidates[0].confidence,
+                status="identified",
+            )
+            logger.info(
+                "OMO upload %d hint-identified: lesson_code=%r title=%s conf=%.2f",
+                upload_id,
+                lesson_code_hint,
+                candidates[0].title,
+                candidates[0].confidence,
+            )
+            return
+
+    # ── AI path: fuzzy match via Gemini ──────────────────────────────────────
     try:
         from ..services.omo_identifier import identify_lesson_from_image
     except ImportError as exc:
@@ -481,10 +532,19 @@ async def upload_worksheet(
         ...,
         description="Worksheet photos (JPEG/PNG, max 10MB each, max 5 files)",
     ),
+    lesson_code_hint: Optional[str] = Form(
+        default=None,
+        description=(
+            "Optional lesson code hint (e.g. 'G5-L25'). "
+            "When provided (student uploads from within a lesson page), "
+            "skips AI fuzzy-match and resolves directly — faster + cheaper. "
+            "Without hint, falls back to full Gemini identification."
+        ),
+    ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Upload worksheet photos and kick off AI lesson identification.
+    """Upload worksheet photos and kick off lesson identification.
 
     Returns immediately with status=identifying. Poll GET /api/omo/{id} for result.
 
@@ -492,6 +552,10 @@ async def upload_worksheet(
     - Max 5 files per call
     - Max 10MB per file
     - JPEG / PNG / WebP only
+
+    Hint path (#1637): if ``lesson_code_hint`` is supplied, identification
+    completes synchronously in the background task without any AI call
+    (confidence=1.0, ~0 latency vs 6-24 s for Gemini).
     """
     if not files:
         raise HTTPException(status_code=400, detail="最少需要上傳 1 張照片")
@@ -577,11 +641,14 @@ async def upload_worksheet(
     db.add(attempt)
     db.commit()
 
-    background_tasks.add_task(_run_identification, upload_id, image_bytes_list, mime_types)
+    background_tasks.add_task(
+        _run_identification, upload_id, image_bytes_list, mime_types, lesson_code_hint
+    )
 
     logger.info(
-        "OMO upload created: id=%d student=%d files=%d hash=%s",
+        "OMO upload created: id=%d student=%d files=%d hash=%s hint=%s",
         upload_id, current_user.id, len(files), primary_hash[:16],
+        lesson_code_hint or "none",
     )
 
     return OmoUploadResponse(
