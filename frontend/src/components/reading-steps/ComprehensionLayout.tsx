@@ -3,9 +3,9 @@
  *
  * Left panel: scrollable lesson text card with zhuyin toggle + progress bar.
  * Right panel: vertical stack of 3 accordion-style CollapsibleRefPanels
- *   1. Exercise (children — StoryStructureTable / StrategyExercise / MCQ) — defaultOpen
- *   2. 圖文對照 (graphic-text only) — default collapsed
- *   3. 紙本表格 (lessons with tables) — default collapsed
+ *   1. 圖文對照 (graphic-text only) — defaultOpen (reference material first)
+ *   2. 紙本表格 (lessons with tables) — defaultOpen (reference material first)
+ *   3. Exercise (children — StoryStructureTable / StrategyExercise / MCQ) — defaultOpen
  *
  * All 3 panels are pure flow siblings inside a single overflow-y-auto outer
  * container, so they never overlap and there's only one scrollbar for the
@@ -28,6 +28,9 @@
  *     (defaultOpen=true) so all 3 right-col panels share the same accordion style,
  *     and removes the inner flex-1/min-h-0 nesting that caused the panels to
  *     visually overlap the exercise questions on scroll.
+ *   - #1701 reorders right-col panels: 圖文對照 → 紙本表格 → 練習 (exercise last),
+ *     and sets all 3 panels to defaultOpen=true so students see reference material
+ *     immediately without manually expanding.
  */
 import React, { useMemo } from 'react';
 import { Story } from '../../types';
@@ -144,28 +147,22 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
             </div>
           </div>
 
-          {/* ── Right: 3 sibling accordion panels (exercise + ref material) ──
+          {/* ── Right: 3 sibling accordion panels (ref material + exercise) ──
+              #1701: reorder so reference panels (圖文/紙本) come first, then
+              exercise. All 3 default to open so students see everything
+              immediately without needing to manually expand panels.
               #1699: all 3 panels are CollapsibleRefPanel siblings in a vertical
               flow stack. Outer div is the single scroll container; each panel
               is shrink-0 so they take only the height they need. No flex-1,
-              no nested overflow, no z-index — purely natural document flow,
-              which fixes the visual overlap Young hit on staging 5/19. */}
+              no nested overflow, no z-index — purely natural document flow. */}
           <div className="md:col-span-5 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
-            {/* Exercise — default expanded (primary task on this step) */}
-            <CollapsibleRefPanel
-              icon={exerciseIcon}
-              label={exerciseLabel}
-              defaultOpen={true}
-            >
-              {children}
-            </CollapsibleRefPanel>
-
-            {/* Reference panels — default collapsed; expand on demand. */}
+            {/* Reference panels first — students consult images/tables before filling exercise. */}
             {hasImages && (
               <CollapsibleRefPanel
                 icon="photo_library"
                 label="圖文對照"
                 count={`${images.length} 張`}
+                defaultOpen={true}
               >
                 {/* Constrain image strip height when expanded so it doesn't push
                     the exercise off-screen. ZoomableImage modal still works for
@@ -184,10 +181,20 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 icon="table_chart"
                 label="紙本表格"
                 count={`${tables.length} 張`}
+                defaultOpen={true}
               >
                 <TableDisplay tables={tables} layout="stacked" />
               </CollapsibleRefPanel>
             )}
+
+            {/* Exercise — after reference material (primary task, also default expanded) */}
+            <CollapsibleRefPanel
+              icon={exerciseIcon}
+              label={exerciseLabel}
+              defaultOpen={true}
+            >
+              {children}
+            </CollapsibleRefPanel>
           </div>
         </div>
       </div>
