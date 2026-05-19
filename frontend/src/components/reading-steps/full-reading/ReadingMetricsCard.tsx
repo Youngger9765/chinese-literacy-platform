@@ -10,7 +10,7 @@
  * - Style: amber/blue cards matching existing design system
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { ReadingHistoryItem } from '../../../services/readingHistoryApi';
 import ReadingTrendChart from './ReadingTrendChart';
 
@@ -19,19 +19,26 @@ interface ReadingMetricsCardProps {
   accuracy: number;
   /** 語速 字/分鐘 */
   cpm: number;
-  /** Past attempts (ordered newest-first from caller) — optional */
+  /** Past attempts — caller passes API order (oldest-first); this component
+   *  re-orders to newest-first for display (#1633). */
   history?: ReadingHistoryItem[];
 }
+
+const HISTORY_DEFAULT_ROWS = 4;
 
 const ReadingMetricsCard: React.FC<ReadingMetricsCardProps> = ({ accuracy, cpm, history }) => {
   const roundedAccuracy = Math.round(accuracy);
   const roundedCpm = Math.round(cpm);
 
-  // History: show at most 5, newest first (skip the very first call since the
-  // current attempt may not have been saved yet when the component first mounts).
-  const displayHistory = history && history.length > 0
-    ? [...history].reverse().slice(0, 5)
-    : null;
+  /* #1633: table shows newest at the top, defaults to 4 rows with 「載入更多」
+   * to progressively unfold older attempts. */
+  const newestFirst = history && history.length > 0 ? [...history].reverse() : [];
+  const [expanded, setExpanded] = useState(false);
+  const visibleRowCount = expanded
+    ? newestFirst.length
+    : Math.min(newestFirst.length, HISTORY_DEFAULT_ROWS);
+  const displayHistory = newestFirst.slice(0, visibleRowCount);
+  const remaining = newestFirst.length - visibleRowCount;
 
   return (
     <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 space-y-4">
@@ -71,8 +78,9 @@ const ReadingMetricsCard: React.FC<ReadingMetricsCardProps> = ({ accuracy, cpm, 
         </div>
       </div>
 
-      {/* History table — only when we have ≥ 2 past attempts */}
-      {displayHistory && displayHistory.length >= 2 && (
+      {/* History table — only when we have ≥ 2 past attempts. Newest at the
+          top (#1633), default 4 rows then 「載入更多」. */}
+      {newestFirst.length >= 2 && (
         <div>
           <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-2">
             歷史紀錄
@@ -98,6 +106,15 @@ const ReadingMetricsCard: React.FC<ReadingMetricsCardProps> = ({ accuracy, cpm, 
               );
             })}
           </div>
+          {remaining > 0 && (
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="w-full mt-2 text-xs font-headline text-on-surface-variant bg-surface-container-low hover:bg-surface-container rounded-full py-2 transition-colors"
+            >
+              載入更多（還有 {remaining} 筆）
+            </button>
+          )}
         </div>
       )}
 

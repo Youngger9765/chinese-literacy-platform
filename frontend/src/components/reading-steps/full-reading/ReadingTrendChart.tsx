@@ -3,10 +3,15 @@
  *
  * Young 5/8 ask: 「累積自己跟自己比的那個排行榜...一個那個線圖，就是慢慢
  * 上去都可以的」. Renders dual-axis line chart of accuracy (%) + CPM over
- * attempts so students see their own progression. Caps to the most recent
- * 20 points for chart readability (older points still appear in the table).
+ * attempts so students see their own progression.
+ *
+ * #1633: default to the most recent DEFAULT_POINTS attempts (curve was getting
+ * too crowded after 10+ practices). Students can press 「載入更多」 to
+ * progressively expand back into history. MAX_POINTS still caps the absolute
+ * maximum so the chart stays readable. X-axis numbers always reflect the
+ * actual attempt position in full history (e.g. attempt #37 → labelled 37).
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   LineChart,
   Line,
@@ -32,19 +37,26 @@ interface ChartPoint {
   fullDate: string;
 }
 
+const DEFAULT_POINTS = 4;
 const MAX_POINTS = 20;
 
-function buildChartData(history: ReadingHistoryItem[]): ChartPoint[] {
+function buildChartData(
+  history: ReadingHistoryItem[],
+  visiblePoints: number,
+): ChartPoint[] {
   const sorted = [...history].sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   );
-  const points = sorted.slice(-MAX_POINTS);
+  const totalAttempts = sorted.length;
+  const sliceCount = Math.min(visiblePoints, totalAttempts);
+  const points = sorted.slice(-sliceCount);
+  const firstAttemptNo = totalAttempts - sliceCount + 1;
   return points.map((item, i) => {
     const date = new Date(item.created_at);
     const dateLabel = `${date.getMonth() + 1}/${date.getDate()}`;
     const fullDate = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
     return {
-      attempt: i + 1,
+      attempt: firstAttemptNo + i,
       accuracy: Math.round(item.accuracy),
       cpm: Math.round(item.cpm),
       dateLabel,
@@ -77,7 +89,14 @@ function CustomTooltip({ active, payload }: TooltipProps) {
 }
 
 const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
-  const data = useMemo(() => buildChartData(history), [history]);
+  const totalAttempts = history.length;
+  /* #1633: start with the latest 4 attempts; 「載入更多」 unlocks more. */
+  const [visiblePoints, setVisiblePoints] = useState(DEFAULT_POINTS);
+  const effectiveVisible = Math.min(visiblePoints, totalAttempts, MAX_POINTS);
+  const data = useMemo(
+    () => buildChartData(history, effectiveVisible),
+    [history, effectiveVisible],
+  );
 
   if (data.length < 2) {
     return (
@@ -87,7 +106,8 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
     );
   }
 
-  const truncated = history.length > MAX_POINTS;
+  const expandable = effectiveVisible < Math.min(totalAttempts, MAX_POINTS);
+  const remaining = Math.min(totalAttempts, MAX_POINTS) - effectiveVisible;
 
   return (
     <div className="space-y-2">
@@ -95,9 +115,10 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
         <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider">
           進步趨勢
         </p>
-        {truncated && (
-          <span className="text-[10px] text-on-surface-variant">最近 {MAX_POINTS} 次</span>
-        )}
+        <span className="text-[10px] text-on-surface-variant">
+          顯示最近 {effectiveVisible} 次
+          {totalAttempts > MAX_POINTS && `（共 ${totalAttempts} 次，最多顯示 ${MAX_POINTS} 次）`}
+        </span>
       </div>
       <div className="h-48 w-full">
         <ResponsiveContainer width="100%" height="100%">
@@ -146,6 +167,15 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
           </LineChart>
         </ResponsiveContainer>
       </div>
+      {expandable && (
+        <button
+          type="button"
+          onClick={() => setVisiblePoints((v) => Math.min(v + DEFAULT_POINTS, MAX_POINTS))}
+          className="w-full text-xs font-headline text-on-surface-variant bg-surface-container-low hover:bg-surface-container rounded-full py-2 transition-colors"
+        >
+          載入更多（還有 {remaining} 筆）
+        </button>
+      )}
     </div>
   );
 };

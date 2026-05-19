@@ -16,6 +16,10 @@ interface SelfAssessmentProps {
   aiRating?: AssessmentRating;
   /** Whether to show comparison (true after student has selected) */
   showComparison?: boolean;
+  /** Which practice attempt this self-assessment is for (1-indexed).
+   *  Per #1633: self-assessment overwrites, so only the latest one is kept —
+   *  the attempt number provides the missing context. */
+  attemptNumber?: number;
 }
 
 const RATING_CONFIG: Record<AssessmentRating, { label: string; icon: string; bg: string; border: string; text: string }> = {
@@ -89,14 +93,22 @@ const SelfAssessment: React.FC<SelfAssessmentProps> = ({
   selectedRating,
   aiRating,
   showComparison = false,
+  attemptNumber,
 }) => {
   const ratings: AssessmentRating[] = ['low', 'mid', 'high'];
 
   return (
     <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6">
-      <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-        自我評估
-      </p>
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider">
+          自我評估
+        </p>
+        {attemptNumber && attemptNumber > 0 && (
+          <span className="text-[10px] font-headline text-on-surface-variant">
+            第 {attemptNumber} 次練習
+          </span>
+        )}
+      </div>
       <p className="text-base font-headline text-on-surface mb-4">
         你覺得這次讀得怎麼樣？
       </p>

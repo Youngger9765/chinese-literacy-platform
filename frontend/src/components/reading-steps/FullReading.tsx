@@ -545,7 +545,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
                 history={dedicatedHistory}
               />
 
-              {/* ── Issue #1386: Self-assessment + 4-attempt progress chart ── */}
+              {/* ── Issue #1386: Self-assessment + 4-attempt progress chart ──
+                  #1633: dedicatedHistory may not yet contain the in-flight
+                  current attempt (save runs in parallel with the UI render),
+                  so use max(history.length, 1) — first render after submit is
+                  always 「第 1 次」 at minimum. */}
               <SelfAssessment
                 onSelect={(rating) => {
                   setSelfRating(rating);
@@ -554,6 +558,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
                 selectedRating={selfRating}
                 aiRating={aiRating}
                 showComparison={showComparison}
+                attemptNumber={Math.max(dedicatedHistory.length, 1)}
               />
 
               {fullReadingAttempts.length > 0 && (
