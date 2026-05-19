@@ -185,14 +185,8 @@ const TableDisplay: React.FC<TableDisplayProps> = ({ tables, layout = 'stacked' 
       data-testid="lesson-tables"
       className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-4 md:p-5 flex flex-col w-full min-h-0 ${layout === 'strip' ? 'flex-[2]' : ''}`}
     >
-      <div className="flex items-center gap-2 mb-3 shrink-0">
-        <span className="material-symbols-outlined text-accent text-lg">table_view</span>
-        <span className="font-headline font-bold text-on-surface text-xs uppercase tracking-wider">
-          紙本表格
-        </span>
-        <span className="text-xs text-on-surface-variant ml-2">{tables.length} 張</span>
-        <span className="text-[11px] text-on-surface-variant ml-auto hidden md:inline">點表可放大</span>
-      </div>
+      {/* #1706: header removed — collapsible parent shows icon/title/count. */}
+      <div className="text-[11px] text-on-surface-variant text-right mb-2 shrink-0 hidden md:block">點表可放大</div>
       <div className={`flex-1 min-h-0 ${layout === 'strip' ? 'overflow-x-auto custom-scrollbar' : 'overflow-y-auto custom-scrollbar'}`}>
         <div className={`${layout === 'strip' ? 'flex gap-3 pr-2' : 'flex flex-col gap-3 pr-2'}`}>
           {tables.map((t) => (
