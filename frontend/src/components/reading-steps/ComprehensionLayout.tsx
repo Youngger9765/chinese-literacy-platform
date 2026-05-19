@@ -121,16 +121,20 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
             </div>
 
             {/* Image strip (graphic-text only) — horizontally scrollable, click to zoom */}
-            {isGraphicText && (
-              <GraphicTextImageStrip
-                images={story.images ?? []}
-                lessonCode={story.lesson_code}
-              />
+            {isGraphicText && (story.images?.length ?? 0) > 0 && (
+              <div className="h-64 md:h-72 flex shrink-0">
+                <GraphicTextImageStrip
+                  images={story.images ?? []}
+                  lessonCode={story.lesson_code}
+                />
+              </div>
             )}
 
             {/* 紙本表格 (#1685) — appears for 圖文表整合 lessons (e.g. G7-L28, G7-L30). */}
             {hasTables && (
-              <TableDisplay tables={story.tables!} layout="stacked" />
+              <div className="shrink-0">
+                <TableDisplay tables={story.tables!} layout="stacked" />
+              </div>
             )}
           </div>
 
