@@ -228,12 +228,6 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
       .catch(() => {});
   }, [token, user?.id, story.id, historyRefreshKey]);
 
-  /* ---- Save reading attempt to dedicated reading_history table (#909)
-   *   #1632: save is invoked inside submitReading (on actual completion),
-   *   NOT in a useEffect on `result` — because `result` is also rehydrated
-   *   from localStorage / initialResult on every re-mount, which previously
-   *   produced a duplicate fake record each time the user returned to the page. */
-
   /* ---- Audio recorder (for student playback review) ---- */
   const audioRecorder = useAudioRecorder(120);
 
@@ -338,6 +332,9 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
 
   /* ---- Submit & evaluate ---- */
   const submitReading = useCallback(() => {
+    /* #1632 double-click guard: stopSession() flips this to false synchronously,
+     * so a second click during the same tick exits before re-saving. */
+    if (!isSessionActiveRef.current) return;
     const transcript = currentTranscriptRef.current;
     const durationMs = Date.now() - startTimeRef.current;
     stopSession();
