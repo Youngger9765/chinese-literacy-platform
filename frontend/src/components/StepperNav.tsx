@@ -1,6 +1,6 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { AppView, Story, LearningSession } from '../types';
-import { ACTIVE_STEPS, STEP_CATEGORY_COLORS } from '../config/stepConfig';
+import { resolveActiveSteps, STEP_CATEGORY_COLORS } from '../config/stepConfig';
 
 interface StepperNavProps {
   currentView: AppView;
@@ -14,32 +14,18 @@ type StepStatus = 'disabled' | 'idle' | 'active' | 'completed';
 interface StepDef {
   step: number;
   label: string;
+  displayChar: string;
   view: AppView;
   needsStory: boolean;
   category: 'reading' | 'comprehension' | 'practice' | 'report';
 }
-
-/**
- * Steps are derived from the central ACTIVE_STEPS config so that reordering
- * or adding steps only requires editing stepConfig.ts.
- */
-const steps: StepDef[] = ACTIVE_STEPS.map((s, i) => ({
-  step: i + 1,
-  label: s.label,
-  view: s.view,
-  needsStory: s.needsStory,
-  category: s.category,
-}));
-
-const VIEW_TO_STEP_ID: Record<string, string> = Object.fromEntries(
-  ACTIVE_STEPS.map((s) => [s.view, s.id]),
-);
 
 function getStepStatus(
   stepDef: StepDef,
   currentView: AppView,
   session: LearningSession | null,
   selectedStory: Story | null,
+  viewToStepId: Record<string, string>,
 ): StepStatus {
   if (currentView === stepDef.view) return 'active';
   if (stepDef.needsStory && !selectedStory) return 'disabled';
@@ -48,7 +34,7 @@ function getStepStatus(
   const isCompleted = (() => {
     if (!session) return false;
     const completedSet = new Set(session.completedSteps ?? []);
-    const stepId = VIEW_TO_STEP_ID[stepDef.view];
+    const stepId = viewToStepId[stepDef.view];
     if (stepId && completedSet.has(stepId)) return true;
     switch (stepDef.view) {
       case AppView.INTRO:                    return session.introCompleted;
@@ -119,6 +105,31 @@ const StepperNav: React.FC<StepperNavProps> = ({
 }) => {
   const scrollRef = useRef<HTMLElement>(null);
 
+  /* #1634: derive steps from this lesson's step_sequence (yaml-driven), so
+   * lessons that omit reading / vocab / etc. don't expose dead steps in the
+   * top stepper. Falls back to DEFAULT_STEP_SEQUENCE when the lesson lacks
+   * a step_sequence field. */
+  const activeSteps = useMemo(
+    () => resolveActiveSteps(selectedStory?.stepSequence),
+    [selectedStory?.stepSequence],
+  );
+  const steps: StepDef[] = useMemo(
+    () =>
+      activeSteps.map((s, i) => ({
+        step: i + 1,
+        label: s.label,
+        displayChar: s.displayChar,
+        view: s.view,
+        needsStory: s.needsStory,
+        category: s.category,
+      })),
+    [activeSteps],
+  );
+  const viewToStepId = useMemo(
+    () => Object.fromEntries(activeSteps.map((s) => [s.view, s.id])) as Record<string, string>,
+    [activeSteps],
+  );
+
   // Auto-scroll the active step into view
   useEffect(() => {
     const container = scrollRef.current;
@@ -147,7 +158,7 @@ const StepperNav: React.FC<StepperNavProps> = ({
 
         {/* Step pills */}
         {steps.map((stepDef) => {
-          const status = getStepStatus(stepDef, currentView, session, selectedStory);
+          const status = getStepStatus(stepDef, currentView, session, selectedStory, viewToStepId);
           const isActive = status === 'active';
           const isDisabled = status === 'disabled';
           const categoryColors = STEP_CATEGORY_COLORS[stepDef.category];
