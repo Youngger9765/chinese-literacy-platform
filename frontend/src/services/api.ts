@@ -94,6 +94,15 @@ interface ApiStoryDetail extends ApiStoryListItem {
   } | null;
   // 紙本學習單 PDF URL (#1444) — null when no matching PDF exists
   worksheet_pdf_url?: string | null;
+  // 紙本表格 HTML render (#1685) — null when lesson has no extracted tables
+  tables?: Array<{
+    id: string;
+    title: string;
+    headers: string[];
+    rows: Array<{ cells: string[]; section?: string }>;
+    section_label_col?: string;
+    notes?: string[];
+  }> | null;
 }
 
 interface ApiStoryListResponse {
@@ -164,6 +173,7 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     worksheetIntro: detail.worksheet_intro ?? undefined,
     lessonIntro: detail.lesson_intro ?? undefined,
     worksheetPdfUrl: detail.worksheet_pdf_url ?? undefined,
+    tables: detail.tables ?? undefined,
     // Plugin-pattern dispatch fields (#1404 / #1341):
     layout_mode: (detail.layout_mode as Story['layout_mode']) ?? 'standard',
     reading_strategy_type: detail.reading_strategy_type ?? 'general',

@@ -16,6 +16,7 @@ import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import FloatingAIHelper from './FloatingAIHelper';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
+import TableDisplay from './TableDisplay';
 
 interface ComprehensionLayoutProps {
   story: Story;
@@ -50,6 +51,11 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
   // room while answering. Click any image to open a fullscreen zoom modal.
   // #1341 introduced the 3-pane variant this replaces.
   const isGraphicText = story.layout_mode === 'graphic-text';
+  // 紙本表格 (#1685) — render inline below image strip (graphic-text) or below
+  // text card (standard). Currently used by G7-L28 (文章重點表) and G7-L30
+  // (異同比較表 + 族群變化表). Tables are missing from yml.paragraphs because
+  // the docx → yml parser dropped row data; this surfaces them properly.
+  const hasTables = !!(story.tables && story.tables.length > 0);
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-surface relative">
@@ -120,6 +126,11 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 images={story.images ?? []}
                 lessonCode={story.lesson_code}
               />
+            )}
+
+            {/* 紙本表格 (#1685) — appears for 圖文表整合 lessons (e.g. G7-L28, G7-L30). */}
+            {hasTables && (
+              <TableDisplay tables={story.tables!} layout="stacked" />
             )}
           </div>
 

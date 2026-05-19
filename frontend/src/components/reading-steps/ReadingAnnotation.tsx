@@ -10,6 +10,7 @@ import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { fontForZhuyin } from '../../constants/fonts';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
+import TableDisplay from './TableDisplay';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -624,6 +625,19 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                 images={story.images ?? []}
                 lessonCode={story.lesson_code}
               />
+            </div>
+          )}
+
+          {/* 紙本表格 (#1685) — appears for 圖文表整合 lessons (G7-L28, G7-L30).
+              Stacked below images using the same max-width/padding rhythm so the
+              article + images + tables read top-down in paper order. */}
+          {(story.tables?.length ?? 0) > 0 && (
+            <div
+              className="max-w-4xl mx-auto px-6 md:px-16 mt-10"
+              data-testid="reading-annotation-tables"
+              style={{ WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties}
+            >
+              <TableDisplay tables={story.tables!} layout="stacked" />
             </div>
           )}
 

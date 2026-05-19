@@ -77,6 +77,12 @@ class StoryDetail(StoryListItem):
     # Public PDF URL of the original 紙本學習單 docx (#1444)
     # Hosted at gs://lingoleap-assets/worksheets/{lesson_code}.pdf
     worksheet_pdf_url: Optional[str] = None
+    # Tables extracted from 紙本學習單 PDF (#1685).
+    # Each item: {id, title, headers: list[str], rows: list[{cells: list[str], section?: str}],
+    #             section_label_col?: str, notes?: list[str]}
+    # Used by 圖文表整合 lessons (G7-L28, G7-L30) where docx → yml parser dropped
+    # table row data; frontend renders via TableDisplay component with zoom modal.
+    tables: Optional[list[dict]] = None
 
 
 class StoryListResponse(BaseModel):

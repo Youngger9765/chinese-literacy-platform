@@ -303,6 +303,8 @@ def _load_layer1_lessons() -> list[dict]:
             "lesson_intro": data.get("lesson_intro"),
             # Public PDF URL of the original 紙本學習單 (#1444)
             "worksheet_pdf_url": data.get("worksheet_pdf_url"),
+            # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
+            "tables": data.get("tables"),
             "_layer": 1,
         }
         lessons.append(lesson)
@@ -452,6 +454,8 @@ def _load_layer2_lessons(
             "lesson_intro": data.get("lesson_intro"),
             # Public PDF URL of the original 紙本學習單 (#1444)
             "worksheet_pdf_url": data.get("worksheet_pdf_url"),
+            # 紙本表格 HTML render (#1685) — None when lesson has no extracted tables
+            "tables": data.get("tables"),
             "_layer": 2,
         }
         lessons.append(lesson)
@@ -515,6 +519,9 @@ def _load_lessons() -> list[dict]:
         "strategy_exercise",
         "story_structure_table",
         "story_structure_rows",
+        # 紙本表格 (#1685): some Layer-2 lessons (G7-L28, G7-L30) carry extracted
+        # tables; copy onto matching Layer-1 entries to preserve back-compat.
+        "tables",
     )
 
     for lesson in layer1:
