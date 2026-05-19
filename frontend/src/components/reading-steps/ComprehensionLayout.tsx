@@ -2,7 +2,11 @@
  * ComprehensionLayout — shared left-right layout for the 3 comprehension steps.
  *
  * Left panel: scrollable lesson text card with zhuyin toggle + progress bar.
- * Right panel: children (StoryStructureTable / StrategyExercise / MultipleChoiceExercise).
+ * Right panel:
+ *   - Top: exercise (children — StoryStructureTable / StrategyExercise / MCQ)
+ *   - Below (graphic-text / lessons with tables): CollapsibleRefPanel(s) with
+ *     圖文對照 + 紙本表格. Default collapsed so the exercise gets full space;
+ *     students expand on demand when they need to consult the reference material.
  *
  * Layout design notes (avoids #1332 / #1331 height-collapse bug):
  *   - Outer wrapper: flex flex-col flex-1 min-h-0 — NO scrollIntoView, NO min-h-full on children
@@ -10,6 +14,13 @@
  *   - Grid: grid-rows-[1fr] — CRITICAL: locks row height to 1fr so children cannot push it out
  *   - Panels: min-h-0 — allows them to shrink within the 1fr boundary
  *   - Children area: flex-1 min-h-0 overflow-y-auto — scrolls internally, never grows parent
+ *
+ * History:
+ *   - #1341 introduced a 3-pane layout (text / image strip / exercise)
+ *   - #1504 collapsed to 2 panes (text+image stacked left, exercise right)
+ *   - #1692 inlined images/tables right after their 圖 N / 表 N caption paragraph
+ *   - #1697 (Young 5/19) moves all images + tables to the right column inside a
+ *     collapsible accordion so the left column stays focused on the text.
  */
 import React, { useMemo } from 'react';
 import { Story } from '../../types';
@@ -17,14 +28,7 @@ import { useZhuyin } from '../../context/ZhuyinContext';
 import FloatingAIHelper from './FloatingAIHelper';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
 import TableDisplay from './TableDisplay';
-import InlineImageCard from './InlineImageCard';
-import InlineTableCard from './InlineTableCard';
-import {
-  detectImageMarker,
-  detectTableMarker,
-  resolveImageIndex,
-  resolveTableIndex,
-} from '../../utils/paragraphMarkers';
+import CollapsibleRefPanel from './CollapsibleRefPanel';
 
 interface ComprehensionLayoutProps {
   story: Story;
@@ -53,64 +57,14 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
 
   const storyText = useMemo(() => story.content.join('\n'), [story.content]);
 
-  // ── #1504 layout decongestion: graphic-text now stacks 課文 + 圖文 in the
-  // left column instead of a third middle panel (Young 5/8 review: "電梯超
-  // 載"). Right panel takes col-span-7 so the structure table has breathing
-  // room while answering. Click any image to open a fullscreen zoom modal.
-  // #1341 introduced the 3-pane variant this replaces.
   const isGraphicText = story.layout_mode === 'graphic-text';
-  // 紙本表格 (#1685) — render inline below image strip (graphic-text) or below
-  // text card (standard). Currently used by G7-L28 (文章重點表) and G7-L30
-  // (異同比較表 + 族群變化表). Tables are missing from yml.paragraphs because
-  // the docx → yml parser dropped row data; this surfaces them properly.
-
-  // Inline figure/table placement (#1692): if a paragraph is a 圖 N / 表 N
-  // caption row, the matching image/table renders right after that paragraph
-  // inside the scrollable text card. Un-referenced assets fall back to the
-  // strip + table block under the card (preserves G7-L29 behavior where no
-  // captions appear in body paragraphs).
-  const { inlineImageIdxByPara, inlineTableIdxByPara, usedImageIdx, usedTableIdx } = useMemo(() => {
-    const imgMap = new Map<number, number>();
-    const tblMap = new Map<number, number>();
-    const usedImg = new Set<number>();
-    const usedTbl = new Set<number>();
-    story.content.forEach((para, paraIdx) => {
-      const imgN = detectImageMarker(para);
-      if (imgN !== null) {
-        const imgIdx = resolveImageIndex(story.images, imgN);
-        if (imgIdx !== null && !usedImg.has(imgIdx)) {
-          imgMap.set(paraIdx, imgIdx);
-          usedImg.add(imgIdx);
-        }
-      }
-      const tblN = detectTableMarker(para);
-      if (tblN !== null) {
-        const tblIdx = resolveTableIndex(story.tables, tblN);
-        if (tblIdx !== null && !usedTbl.has(tblIdx)) {
-          tblMap.set(paraIdx, tblIdx);
-          usedTbl.add(tblIdx);
-        }
-      }
-    });
-    return {
-      inlineImageIdxByPara: imgMap,
-      inlineTableIdxByPara: tblMap,
-      usedImageIdx: usedImg,
-      usedTableIdx: usedTbl,
-    };
-  }, [story.content, story.images, story.tables]);
-
-  const fallbackImages = useMemo(
-    () => (story.images ?? []).filter((_, i) => !usedImageIdx.has(i)),
-    [story.images, usedImageIdx],
-  );
-  const fallbackTables = useMemo(
-    () => (story.tables ?? []).filter((_, i) => !usedTableIdx.has(i)),
-    [story.tables, usedTableIdx],
-  );
-
-  const hasFallbackImages = fallbackImages.length > 0;
-  const hasFallbackTables = fallbackTables.length > 0;
+  const images = story.images ?? [];
+  const tables = story.tables ?? [];
+  const hasImages = isGraphicText && images.length > 0;
+  const hasTables = tables.length > 0;
+  // Lessons without any reference material → text-only left col, plain right
+  // col exercise. Standard reading lessons (G6 摘要策略) take this path so
+  // there's no regression for them.
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-surface relative">
@@ -123,13 +77,12 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
         */}
         <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 grid-rows-[1fr] gap-6">
 
-          {/* ── Left column ──────────────────────────────────────────────────── */
-          /* graphic-text: text top + images bottom (stacked, 60/40 split)        */
-          /* standard:     text only, col-span-7                                  */}
-          <div className={`${isGraphicText ? 'md:col-span-8' : 'md:col-span-7'} min-h-0 ${isGraphicText ? 'overflow-y-auto custom-scrollbar' : 'flex flex-col'} gap-4 pr-1`}>
-
-            {/* Story text card — explicit min-height for graphic-text so it doesn't get squeezed by tables */}
-            <div className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full ${isGraphicText ? 'min-h-[45vh] mb-4' : 'flex-1 min-h-0'}`}>
+          {/* ── Left: Text-only card ───────────────────────────────────────────
+              #1697: images + tables moved to right column. Left always col-span-7
+              now (wider when there are no images/tables; previously col-span-8 for
+              graphic-text so the bottom image strip had room). */}
+          <div className="md:col-span-7 min-h-0 flex flex-col">
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full flex-1 min-h-0">
               <div className="flex items-center gap-2 mb-4 shrink-0">
                 <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
                 <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
@@ -137,42 +90,23 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 </span>
               </div>
               {/* Scrollable story content — overflow-y-auto on the inner div only.
-                  Inline images/tables (#1692) appear right after their caption
-                  paragraph to match the printed worksheet's reading order. */}
+                  #1697 removes inline image/table placement (was #1692) — students
+                  now consult them from the right column collapsibles instead. */}
               <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar space-y-6">
-                {story.content.map((line, idx) => {
-                  const inlineImgIdx = inlineImageIdxByPara.get(idx);
-                  const inlineTblIdx = inlineTableIdxByPara.get(idx);
-                  return (
-                    <React.Fragment key={idx}>
-                      <div className="flex gap-3 items-start">
-                        <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
-                          {String(idx + 1).padStart(2, '0')}
-                        </span>
-                        <p
-                          className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
-                            zhuyinActive ? 'tracking-[0.15em]' : ''
-                          }`}
-                        >
-                          {zhuyinLines ? zhuyinLines[idx] : line}
-                        </p>
-                      </div>
-                      {inlineImgIdx !== undefined && story.images?.[inlineImgIdx] && (
-                        <div data-testid={`comprehension-inline-image-after-para-${idx}`}>
-                          <InlineImageCard
-                            image={story.images[inlineImgIdx]}
-                            lessonCode={story.lesson_code}
-                          />
-                        </div>
-                      )}
-                      {inlineTblIdx !== undefined && story.tables?.[inlineTblIdx] && (
-                        <div data-testid={`comprehension-inline-table-after-para-${idx}`}>
-                          <InlineTableCard table={story.tables[inlineTblIdx]} />
-                        </div>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
+                {story.content.map((line, idx) => (
+                  <div key={idx} className="flex gap-3 items-start">
+                    <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <p
+                      className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+                        zhuyinActive ? 'tracking-[0.15em]' : ''
+                      }`}
+                    >
+                      {zhuyinLines ? zhuyinLines[idx] : line}
+                    </p>
+                  </div>
+                ))}
               </div>
 
               {/* Progress bar — only shown when progressPercent >= 0 */}
@@ -195,32 +129,49 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 </div>
               )}
             </div>
-
-            {/* Fallback image strip — only un-referenced images. Preserves the
-                graphic-text bottom strip for lessons whose body sentences mention
-                圖 N without dedicated caption rows (e.g. G7-L29). */}
-            {isGraphicText && hasFallbackImages && (
-              <div className="h-64 md:h-72 flex shrink-0">
-                <GraphicTextImageStrip
-                  images={fallbackImages}
-                  lessonCode={story.lesson_code}
-                />
-              </div>
-            )}
-
-            {/* Fallback 紙本表格 — only un-referenced tables. */}
-            {hasFallbackTables && (
-              <div className="shrink-0">
-                <TableDisplay tables={fallbackTables} layout="stacked" />
-              </div>
-            )}
           </div>
 
-          {/* ── Right: Exercise panel ─────────────────────────────────────────── */}
-          <div className={`${isGraphicText ? 'md:col-span-4' : 'md:col-span-5'} min-h-0 flex flex-col`}>
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+          {/* ── Right: Exercise + collapsible reference panels ─────────────────
+              #1697: exercise card on top (kept its rounded-3xl editorial styling
+              so the existing children layouts look identical). Reference
+              collapsibles render below — they're shrink-0 so they take only the
+              height they need and the exercise scrolls within its own min-h-0
+              box. When the lesson has no images/tables (e.g. G6 摘要策略 課文),
+              the right column reduces to just the exercise card — no regression. */}
+          <div className="md:col-span-5 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
+            {/* Exercise card */}
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex-1 min-h-0">
               {children}
             </div>
+
+            {/* Reference panels — default collapsed; expand on demand. */}
+            {hasImages && (
+              <CollapsibleRefPanel
+                icon="photo_library"
+                label="圖文對照"
+                count={`${images.length} 張`}
+              >
+                {/* Constrain image strip height when expanded so it doesn't push
+                    the exercise off-screen. ZoomableImage modal still works for
+                    full-screen viewing. */}
+                <div className="h-64 flex">
+                  <GraphicTextImageStrip
+                    images={images}
+                    lessonCode={story.lesson_code}
+                  />
+                </div>
+              </CollapsibleRefPanel>
+            )}
+
+            {hasTables && (
+              <CollapsibleRefPanel
+                icon="table_chart"
+                label="紙本表格"
+                count={`${tables.length} 張`}
+              >
+                <TableDisplay tables={tables} layout="stacked" />
+              </CollapsibleRefPanel>
+            )}
           </div>
         </div>
       </div>
