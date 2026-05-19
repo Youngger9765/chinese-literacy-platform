@@ -106,8 +106,13 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
     );
   }
 
-  const expandable = effectiveVisible < Math.min(totalAttempts, MAX_POINTS);
-  const remaining = Math.min(totalAttempts, MAX_POINTS) - effectiveVisible;
+  const totalDisplayable = Math.min(totalAttempts, MAX_POINTS);
+  const expandable = effectiveVisible < totalDisplayable;
+  const remaining = totalDisplayable - effectiveVisible;
+  const cappedByMax = totalAttempts > MAX_POINTS;
+  /* Only show the count hint when something is actually hidden — for ≤ 4
+   * attempts every point is visible, so 「顯示最近 N 次」 reads awkwardly. */
+  const showCountHint = totalAttempts > DEFAULT_POINTS;
 
   return (
     <div className="space-y-2">
@@ -115,10 +120,12 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
         <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider">
           進步趨勢
         </p>
-        <span className="text-[10px] text-on-surface-variant">
-          顯示最近 {effectiveVisible} 次
-          {totalAttempts > MAX_POINTS && `（共 ${totalAttempts} 次，最多顯示 ${MAX_POINTS} 次）`}
-        </span>
+        {showCountHint && (
+          <span className="text-[10px] text-on-surface-variant">
+            顯示最近 {effectiveVisible} 次
+            {cappedByMax && `（共 ${totalAttempts} 次，最多顯示 ${MAX_POINTS} 次）`}
+          </span>
+        )}
       </div>
       <div className="h-48 w-full">
         <ResponsiveContainer width="100%" height="100%">
@@ -173,7 +180,7 @@ const ReadingTrendChart: React.FC<ReadingTrendChartProps> = ({ history }) => {
           onClick={() => setVisiblePoints((v) => Math.min(v + DEFAULT_POINTS, MAX_POINTS))}
           className="w-full text-xs font-headline text-on-surface-variant bg-surface-container-low hover:bg-surface-container rounded-full py-2 transition-colors"
         >
-          載入更多（還有 {remaining} 筆）
+          載入更多（還有 {remaining} 筆{cappedByMax ? `，圖表最多顯示 ${MAX_POINTS} 筆` : ''}）
         </button>
       )}
     </div>
