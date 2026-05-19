@@ -96,7 +96,7 @@ const TableBody: React.FC<{ table: LessonTable; compact?: boolean }> = ({ table,
 
 // ── Single-card with zoom modal ─────────────────────────────────────────────
 
-const TableCard: React.FC<{ table: LessonTable; compact?: boolean }> = ({ table, compact }) => {
+export const TableCard: React.FC<{ table: LessonTable; compact?: boolean }> = ({ table, compact }) => {
   const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, open);
