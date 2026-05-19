@@ -17,6 +17,14 @@ import { useZhuyin } from '../../context/ZhuyinContext';
 import FloatingAIHelper from './FloatingAIHelper';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
 import TableDisplay from './TableDisplay';
+import InlineImageCard from './InlineImageCard';
+import InlineTableCard from './InlineTableCard';
+import {
+  detectImageMarker,
+  detectTableMarker,
+  resolveImageIndex,
+  resolveTableIndex,
+} from '../../utils/paragraphMarkers';
 
 interface ComprehensionLayoutProps {
   story: Story;
@@ -55,7 +63,54 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
   // text card (standard). Currently used by G7-L28 (文章重點表) and G7-L30
   // (異同比較表 + 族群變化表). Tables are missing from yml.paragraphs because
   // the docx → yml parser dropped row data; this surfaces them properly.
-  const hasTables = !!(story.tables && story.tables.length > 0);
+
+  // Inline figure/table placement (#1692): if a paragraph is a 圖 N / 表 N
+  // caption row, the matching image/table renders right after that paragraph
+  // inside the scrollable text card. Un-referenced assets fall back to the
+  // strip + table block under the card (preserves G7-L29 behavior where no
+  // captions appear in body paragraphs).
+  const { inlineImageIdxByPara, inlineTableIdxByPara, usedImageIdx, usedTableIdx } = useMemo(() => {
+    const imgMap = new Map<number, number>();
+    const tblMap = new Map<number, number>();
+    const usedImg = new Set<number>();
+    const usedTbl = new Set<number>();
+    story.content.forEach((para, paraIdx) => {
+      const imgN = detectImageMarker(para);
+      if (imgN !== null) {
+        const imgIdx = resolveImageIndex(story.images, imgN);
+        if (imgIdx !== null && !usedImg.has(imgIdx)) {
+          imgMap.set(paraIdx, imgIdx);
+          usedImg.add(imgIdx);
+        }
+      }
+      const tblN = detectTableMarker(para);
+      if (tblN !== null) {
+        const tblIdx = resolveTableIndex(story.tables, tblN);
+        if (tblIdx !== null && !usedTbl.has(tblIdx)) {
+          tblMap.set(paraIdx, tblIdx);
+          usedTbl.add(tblIdx);
+        }
+      }
+    });
+    return {
+      inlineImageIdxByPara: imgMap,
+      inlineTableIdxByPara: tblMap,
+      usedImageIdx: usedImg,
+      usedTableIdx: usedTbl,
+    };
+  }, [story.content, story.images, story.tables]);
+
+  const fallbackImages = useMemo(
+    () => (story.images ?? []).filter((_, i) => !usedImageIdx.has(i)),
+    [story.images, usedImageIdx],
+  );
+  const fallbackTables = useMemo(
+    () => (story.tables ?? []).filter((_, i) => !usedTableIdx.has(i)),
+    [story.tables, usedTableIdx],
+  );
+
+  const hasFallbackImages = fallbackImages.length > 0;
+  const hasFallbackTables = fallbackTables.length > 0;
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-surface relative">
@@ -81,22 +136,43 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                   參考課文
                 </span>
               </div>
-              {/* Scrollable story content — overflow-y-auto on the inner div only */}
+              {/* Scrollable story content — overflow-y-auto on the inner div only.
+                  Inline images/tables (#1692) appear right after their caption
+                  paragraph to match the printed worksheet's reading order. */}
               <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar space-y-6">
-                {story.content.map((line, idx) => (
-                  <div key={idx} className="flex gap-3 items-start">
-                    <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
-                      {String(idx + 1).padStart(2, '0')}
-                    </span>
-                    <p
-                      className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
-                        zhuyinActive ? 'tracking-[0.15em]' : ''
-                      }`}
-                    >
-                      {zhuyinLines ? zhuyinLines[idx] : line}
-                    </p>
-                  </div>
-                ))}
+                {story.content.map((line, idx) => {
+                  const inlineImgIdx = inlineImageIdxByPara.get(idx);
+                  const inlineTblIdx = inlineTableIdxByPara.get(idx);
+                  return (
+                    <React.Fragment key={idx}>
+                      <div className="flex gap-3 items-start">
+                        <span className="text-xs font-headline font-bold text-on-surface-variant/30 pt-1 select-none shrink-0 w-5 text-right">
+                          {String(idx + 1).padStart(2, '0')}
+                        </span>
+                        <p
+                          className={`text-lg md:text-xl text-on-surface leading-[2rem] md:leading-[2.2rem] ${
+                            zhuyinActive ? 'tracking-[0.15em]' : ''
+                          }`}
+                        >
+                          {zhuyinLines ? zhuyinLines[idx] : line}
+                        </p>
+                      </div>
+                      {inlineImgIdx !== undefined && story.images?.[inlineImgIdx] && (
+                        <div data-testid={`comprehension-inline-image-after-para-${idx}`}>
+                          <InlineImageCard
+                            image={story.images[inlineImgIdx]}
+                            lessonCode={story.lesson_code}
+                          />
+                        </div>
+                      )}
+                      {inlineTblIdx !== undefined && story.tables?.[inlineTblIdx] && (
+                        <div data-testid={`comprehension-inline-table-after-para-${idx}`}>
+                          <InlineTableCard table={story.tables[inlineTblIdx]} />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </div>
 
               {/* Progress bar — only shown when progressPercent >= 0 */}
@@ -120,20 +196,22 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
               )}
             </div>
 
-            {/* Image strip (graphic-text only) — horizontally scrollable, click to zoom */}
-            {isGraphicText && (story.images?.length ?? 0) > 0 && (
+            {/* Fallback image strip — only un-referenced images. Preserves the
+                graphic-text bottom strip for lessons whose body sentences mention
+                圖 N without dedicated caption rows (e.g. G7-L29). */}
+            {isGraphicText && hasFallbackImages && (
               <div className="h-64 md:h-72 flex shrink-0">
                 <GraphicTextImageStrip
-                  images={story.images ?? []}
+                  images={fallbackImages}
                   lessonCode={story.lesson_code}
                 />
               </div>
             )}
 
-            {/* 紙本表格 (#1685) — appears for 圖文表整合 lessons (e.g. G7-L28, G7-L30). */}
-            {hasTables && (
+            {/* Fallback 紙本表格 — only un-referenced tables. */}
+            {hasFallbackTables && (
               <div className="shrink-0">
-                <TableDisplay tables={story.tables!} layout="stacked" />
+                <TableDisplay tables={fallbackTables} layout="stacked" />
               </div>
             )}
           </div>
