@@ -162,7 +162,7 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 icon="photo_library"
                 label="圖文對照"
                 count={`${images.length} 張`}
-                defaultOpen={true}
+                defaultOpen={false}
               >
                 {/* Constrain image strip height when expanded so it doesn't push
                     the exercise off-screen. ZoomableImage modal still works for
@@ -181,17 +181,18 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 icon="table_chart"
                 label="紙本表格"
                 count={`${tables.length} 張`}
-                defaultOpen={true}
+                defaultOpen={false}
               >
                 <TableDisplay tables={tables} layout="stacked" />
               </CollapsibleRefPanel>
             )}
 
-            {/* Exercise — after reference material (primary task, also default expanded) */}
+            {/* Exercise — after reference material. #1703: default collapsed
+                so right column starts compact; students expand panels they need. */}
             <CollapsibleRefPanel
               icon={exerciseIcon}
               label={exerciseLabel}
-              defaultOpen={true}
+              defaultOpen={false}
             >
               {children}
             </CollapsibleRefPanel>
