@@ -228,27 +228,11 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
       .catch(() => {});
   }, [token, user?.id, story.id, historyRefreshKey]);
 
-  /* ---- Save reading attempt to dedicated reading_history table (#909) ---- */
-  const savedResultRef = useRef(false);
-  useEffect(() => {
-    if (!result || savedResultRef.current || !token) return;
-    savedResultRef.current = true;
-    const durationSec = (result.durationMs || 0) / 1000;
-    if (durationSec > 0) {
-      saveReadingHistory(
-        {
-          lesson_id: String(story.id),
-          reading_type: 'full',
-          cpm: result.cpm || 0,
-          accuracy: Math.round((result.matchRate || 0) * 100),
-          duration_seconds: durationSec,
-        },
-        token,
-      )
-        .then(() => setHistoryRefreshKey(k => k + 1))
-        .catch((err) => console.error('Failed to save reading history:', err));
-    }
-  }, [result, token, story.id]);
+  /* ---- Save reading attempt to dedicated reading_history table (#909)
+   *   #1632: save is invoked inside submitReading (on actual completion),
+   *   NOT in a useEffect on `result` — because `result` is also rehydrated
+   *   from localStorage / initialResult on every re-mount, which previously
+   *   produced a duplicate fake record each time the user returned to the page. */
 
   /* ---- Audio recorder (for student playback review) ---- */
   const audioRecorder = useAudioRecorder(120);
@@ -374,7 +358,25 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
       errorBreakdown: fluency.errorBreakdown,
     });
     setStreamingTranscript(cleanChineseText(transcript));
-  }, [fullText, stopSession]);
+
+    /* #1632: persist this attempt to reading_history HERE — fired by the actual
+     * completion event, so re-mounts (page revisit) won't add fake rows. */
+    const durationSec = fluency.durationMs / 1000;
+    if (token && durationSec > 0) {
+      saveReadingHistory(
+        {
+          lesson_id: String(story.id),
+          reading_type: 'full',
+          cpm: fluency.cpm || 0,
+          accuracy: Math.round((fluency.accuracy || 0) * 100),
+          duration_seconds: durationSec,
+        },
+        token,
+      )
+        .then(() => setHistoryRefreshKey(k => k + 1))
+        .catch((err) => console.error('Failed to save reading history:', err));
+    }
+  }, [fullText, stopSession, token, story.id]);
 
   /* ---- Render paragraph text with optional KTV TTS highlighting ---- */
   const renderParagraph = (line: string, idx: number) => {
@@ -583,13 +585,13 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
           {result ? (
             inToolbox ? (
               <ToolboxCompletionActions
-                onRetry={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
+                onRetry={() => { try { localStorage.removeItem(storageKey); } catch {} setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
                 className="w-full"
               />
             ) : (
               <>
                 <button
-                  onClick={() => { try { localStorage.removeItem(storageKey); } catch {} savedResultRef.current = false; setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
+                  onClick={() => { try { localStorage.removeItem(storageKey); } catch {} setResult(null); setStreamingTranscript(''); audioRecorder.clearRecording(); setSelfRating(undefined); setShowComparison(false); }}
                   className="w-full h-12 rounded-full font-headline font-bold text-base text-on-surface bg-surface-container-lowest shadow-editorial hover:bg-surface-container-low active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                   <span className="material-symbols-outlined text-lg">refresh</span>
