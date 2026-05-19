@@ -20,6 +20,10 @@ type HelperMessage =
   | { role: 'ai'; text: string }
   | { role: 'student'; text: string };
 
+// #1707: Young 5/19 — hide AI helper globally until UX is reworked.
+// Flip back to true to re-enable everywhere without touching call sites.
+const FLOATING_AI_HELPER_ENABLED = false;
+
 const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
   storyTitle,
   storyText,
@@ -89,6 +93,8 @@ const FloatingAIHelper: React.FC<FloatingAIHelperProps> = ({
       handleSend();
     }
   };
+
+  if (!FLOATING_AI_HELPER_ENABLED) return null;
 
   return (
     <>
