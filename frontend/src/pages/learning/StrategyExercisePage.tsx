@@ -75,6 +75,8 @@ const StrategyExercisePage: React.FC = () => {
     <ComprehensionLayout
       story={selectedStory}
       dbSessionId={dbSessionId ?? undefined}
+      exerciseIcon="lightbulb"
+      exerciseLabel="閱讀聚光燈"
     >
       {hasStrategy ? (
         <>
