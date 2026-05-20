@@ -43,6 +43,11 @@ export interface AssignmentResponse extends ReadingGoals {
   due_date: string | null;
   is_active: boolean;
   created_at: string;
+  /** Issue #1764 Fix 3: precise counts — prefer these over submission_count/completed_count. */
+  assigned_student_count: number;
+  submitted_student_count: number;
+  total_attempts: number;
+  /** Back-compat aliases — same as total_attempts and submitted_student_count respectively. */
   submission_count: number;
   completed_count: number;
   /** Issue #1762: teacher can enable smart-skip of already-completed steps. */
@@ -65,8 +70,34 @@ export interface SubmissionResponse {
   teacher_feedback: string | null;
 }
 
+/** Issue #1764 Fix 4: a single submission attempt row for one student. */
+export interface AttemptResponse {
+  id: number;
+  attempt_number: number;
+  status: string;
+  submitted_at: string | null;
+  score: number | null;
+  reading_accuracy: number | null;
+  reading_cpm: number | null;
+  reading_error_chars: string[];
+  teacher_feedback: string | null;
+}
+
+/** Issue #1764 Fix 4: all attempts by one student, grouped for teacher dashboard. */
+export interface StudentAttemptGroup {
+  student_id: number;
+  student_name: string;
+  latest_status: string;
+  latest_score: number | null;
+  latest_attempt_number: number;
+  /** Ordered descending by attempt_number (latest first). */
+  attempts: AttemptResponse[];
+}
+
 export interface AssignmentDetailResponse extends AssignmentResponse {
   submissions: SubmissionResponse[];
+  /** Issue #1764 Fix 4: grouped by student. Empty list for older API versions. */
+  submissions_by_student: StudentAttemptGroup[];
 }
 
 export interface StudentAssignmentResponse extends ReadingGoals {
