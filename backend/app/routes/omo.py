@@ -156,21 +156,48 @@ def _upload_to_gcs(
 
 
 def _get_signed_url(object_path: str) -> Optional[str]:
-    """Generate a 1-hour signed URL for a GCS object. Returns None if unavailable."""
+    """Generate a 1-hour signed URL for a GCS object. Returns None if unavailable.
+
+    Uses IAM-based signing (service_account_email + access_token) so it works on
+    Cloud Run where the default ADC has no private key file. Falls back to bare
+    generate_signed_url() for local dev where credentials may already include a
+    private key.
+    """
     import datetime as dt
     try:
         from google.cloud import storage  # type: ignore[import]
+        from google.auth import default as google_auth_default  # type: ignore[import]
+        from google.auth.transport.requests import Request as GoogleAuthRequest  # type: ignore[import]
+
         client = storage.Client()
         bucket = client.bucket(_OMO_GCS_BUCKET)
         blob = bucket.blob(object_path)
-        url = blob.generate_signed_url(
-            version="v4",
-            expiration=dt.timedelta(hours=1),
-            method="GET",
-        )
-        return url
+
+        sa_email = None
+        access_token = None
+        try:
+            credentials, _proj = google_auth_default()
+            if credentials and not getattr(credentials, "valid", False):
+                credentials.refresh(GoogleAuthRequest())
+            sa_email = getattr(credentials, "service_account_email", None)
+            access_token = getattr(credentials, "token", None)
+        except Exception as cred_exc:
+            logger.warning("OMO signed URL: failed to fetch ADC for IAM signing: %s", cred_exc)
+
+        kwargs = {
+            "version": "v4",
+            "expiration": dt.timedelta(hours=1),
+            "method": "GET",
+        }
+        # Only pass IAM signing kwargs when both are available — otherwise let the
+        # SDK pick its default (private key path for local dev).
+        if sa_email and access_token:
+            kwargs["service_account_email"] = sa_email
+            kwargs["access_token"] = access_token
+
+        return blob.generate_signed_url(**kwargs)
     except Exception as exc:
-        logger.debug("OMO signed URL failed for %s: %s", object_path, exc)
+        logger.warning("OMO signed URL failed for %s: %s", object_path, exc)
         return None
 
 
