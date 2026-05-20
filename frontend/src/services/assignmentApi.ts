@@ -45,6 +45,8 @@ export interface AssignmentResponse extends ReadingGoals {
   created_at: string;
   submission_count: number;
   completed_count: number;
+  /** Issue #1762: teacher can enable smart-skip of already-completed steps. */
+  skip_completed_steps: boolean;
 }
 
 export interface SubmissionResponse {
@@ -86,6 +88,12 @@ export interface StudentAssignmentResponse extends ReadingGoals {
   score: number | null;
   /** Per-student teacher feedback visible to the student (Issue #424). */
   teacher_feedback: string | null;
+  // Issue #1762
+  attempt_number: number;
+  session_mode: string;
+  skip_completed_steps: boolean;
+  /** Steps auto-skipped because student completed them in a prior session. */
+  skipped_steps: string[];
 }
 
 export interface StartAssignmentResponse {
@@ -99,6 +107,11 @@ export interface StartAssignmentResponse {
   difficulty_label: string | null;
   effective_cpm: number;
   effective_accuracy: number;
+  // Issue #1762
+  session_mode: string;
+  attempt_number: number;
+  /** Steps auto-skipped because student completed them in a prior session. */
+  skipped_steps: string[];
 }
 
 // --- Error class ---
@@ -157,6 +170,8 @@ export async function createAssignment(
     target_cpm?: number | null;
     target_accuracy?: number | null;
     difficulty_label?: string | null;
+    // Issue #1762: smart-skip already-completed steps
+    skip_completed_steps?: boolean;
   },
 ): Promise<AssignmentResponse> {
   const res = await fetch(
@@ -336,4 +351,23 @@ export async function submitAssignment(
     },
   );
   return handleResponse<StudentAssignmentResponse>(res);
+}
+
+/**
+ * Restart a previously submitted/graded assignment (Issue #1762).
+ * Creates a new submission with attempt_number incremented.
+ * Only allowed when the assignment is still active.
+ */
+export async function restartAssignment(
+  token: string,
+  assignmentId: number,
+): Promise<StartAssignmentResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/assignments/${assignmentId}/restart`,
+    {
+      method: 'POST',
+      headers: authHeaders(token),
+    },
+  );
+  return handleResponse<StartAssignmentResponse>(res);
 }
