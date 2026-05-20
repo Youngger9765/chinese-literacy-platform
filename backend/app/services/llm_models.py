@@ -21,29 +21,29 @@ from __future__ import annotations
 TASK_MODELS: dict[str, tuple[str, str]] = {
     # ── Chat / Question generation tasks ─────────────────────────────────────
     # Tested: 3/3 complete, -36% latency vs 2.5-flash
-    "socratic_question": ("gemini-flash-lite-latest", "global"),
+    "socratic_question": ("gemini-2.5-flash-lite", "global"),
     # Tested: 3/3 complete JSON, -36% latency vs 2.5-flash
-    "socratic_agent_process": ("gemini-flash-lite-latest", "global"),
+    "socratic_agent_process": ("gemini-2.5-flash-lite", "global"),
 
     # ── Scoring / Evaluation tasks ────────────────────────────────────────────
     # Tested: 3/3 complete JSON (all required fields), -32% latency
-    "comprehension_score": ("gemini-flash-lite-latest", "global"),
+    "comprehension_score": ("gemini-2.5-flash-lite", "global"),
     # Tested: 3/3 complete JSON, -35% latency, correct is_correct logic
-    "sentence_validate": ("gemini-flash-lite-latest", "global"),
+    "sentence_validate": ("gemini-2.5-flash-lite", "global"),
 
     # ── Generation tasks ──────────────────────────────────────────────────────
     # Tested: 3/3 complete (≥3 MCQ with correct_index), -31% latency
-    "exit_ticket_generate": ("gemini-flash-lite-latest", "global"),
+    "exit_ticket_generate": ("gemini-2.5-flash-lite", "global"),
     # Tested: 3/3 complete (2 sentences each), -31% latency
-    "example_sentences": ("gemini-flash-lite-latest", "global"),
+    "example_sentences": ("gemini-2.5-flash-lite", "global"),
     # Tested: 3/3 complete (≥3 rows), -29% latency
-    "story_structure": ("gemini-flash-lite-latest", "global"),
+    "story_structure": ("gemini-2.5-flash-lite", "global"),
     # Tested: 3/3 complete (all 5 required fields), -49% latency
-    "reading_analysis": ("gemini-flash-lite-latest", "global"),
+    "reading_analysis": ("gemini-2.5-flash-lite", "global"),
 
     # ── Support tasks ─────────────────────────────────────────────────────────
     # Not A/B tested separately — same category as generation tasks, quality parity confirmed
-    "teacher_comment": ("gemini-flash-lite-latest", "global"),
+    "teacher_comment": ("gemini-2.5-flash-lite", "global"),
 
     # ── Vision / Multimodal tasks ─────────────────────────────────────────────
     # Per #1729 A/B (5/18): flash-lite-latest at global = 15/16 accuracy parity with 2.5-flash

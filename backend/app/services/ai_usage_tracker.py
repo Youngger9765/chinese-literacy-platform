@@ -18,8 +18,9 @@ logger = logging.getLogger("ai_usage")
 
 # Gemini pricing (per 1M tokens) — as of 2026-05
 PRICING = {
-    "gemini-2.5-flash": {"input": 0.30, "output": 2.50},      # used by OMO services
-    "gemini-flash-lite-latest": {"input": 0.25, "output": 1.50},  # default for non-OMO
+    "gemini-2.5-flash": {"input": 0.30, "output": 2.50},           # used by OMO grader (LOCKED per #1730)
+    "gemini-flash-lite-latest": {"input": 0.25, "output": 1.50},   # legacy; identifier per #1729
+    "gemini-2.5-flash-lite": {"input": 0.075, "output": 0.30},     # default for non-OMO (updated per #1744)
 }
 
 STEP_LABELS = {
@@ -43,7 +44,7 @@ class UsageMetadata:
     input_tokens: int = 0
     output_tokens: int = 0
     total_tokens: int = 0
-    model: str = "gemini-flash-lite-latest"
+    model: str = "gemini-2.5-flash-lite"
     model_version: str | None = None
     finish_reason: str | None = None
     prompt_char_count: int | None = None
@@ -58,7 +59,7 @@ last_usage: contextvars.ContextVar[UsageMetadata | None] = contextvars.ContextVa
 )
 
 
-def _extract_usage(response, model: str = "gemini-flash-lite-latest") -> UsageMetadata:
+def _extract_usage(response, model: str = "gemini-2.5-flash-lite") -> UsageMetadata:
     """Extract token counts from a single Gemini response into a UsageMetadata."""
     meta = UsageMetadata(model=model)
     try:
@@ -102,7 +103,7 @@ def _extract_usage(response, model: str = "gemini-flash-lite-latest") -> UsageMe
     return meta
 
 
-def capture_usage(response, model: str = "gemini-flash-lite-latest") -> UsageMetadata:
+def capture_usage(response, model: str = "gemini-2.5-flash-lite") -> UsageMetadata:
     """Capture and accumulate usage metadata from a Gemini response.
 
     Call this inside ai_service right after a successful generate_content call.
@@ -135,7 +136,7 @@ def capture_usage(response, model: str = "gemini-flash-lite-latest") -> UsageMet
 
 def estimate_cost(model: str, input_tokens: int, output_tokens: int) -> float:
     """Calculate estimated USD cost from token counts."""
-    pricing = PRICING.get(model, PRICING["gemini-flash-lite-latest"])
+    pricing = PRICING.get(model, PRICING["gemini-2.5-flash-lite"])
     return (input_tokens * pricing["input"] + output_tokens * pricing["output"]) / 1_000_000
 
 
@@ -215,7 +216,7 @@ def log_ai_usage(
     request_url: str | None = None,
     input_tokens: int = 0,
     output_tokens: int = 0,
-    model: str = "gemini-flash-lite-latest",
+    model: str = "gemini-2.5-flash-lite",
     latency_ms: int = 0,
     success: bool = True,
     error_type: str | None = None,

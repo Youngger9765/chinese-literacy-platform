@@ -376,7 +376,7 @@ async def get_story_structure(
         story_title=story["title"],
         input_tokens=usage.input_tokens if usage else 0,
         output_tokens=usage.output_tokens if usage else 0,
-        model=usage.model if usage else "gemini-flash-lite-latest",
+        model=usage.model if usage else "gemini-2.5-flash-lite",
         latency_ms=latency_ms,
         success=True,
         model_version=usage.model_version if usage else None,
