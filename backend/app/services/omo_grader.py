@@ -27,6 +27,10 @@ logger = logging.getLogger(__name__)
 # Circuit breaker state (module-level singleton, per-process)
 _consecutive_errors = 0
 _CIRCUIT_BREAKER_THRESHOLD = 3
+# #1715: answers with self-reported confidence below this threshold are coerced
+# to empty + flagged for teacher review. Chosen generic (not tuned to specific
+# PDFs/handwriting/devices) so it generalizes across student worksheets.
+_LOW_CONFIDENCE_THRESHOLD = 0.7
 
 
 @dataclass
@@ -197,6 +201,12 @@ def _build_grading_prompt(questions: list[dict]) -> str:
 4. 不要把印刷的題目文字、題目選項、或正確答案當作學生作答。
 5. 紅筆批改痕跡（✗ / 紅線 / 紅筆覆寫）= 老師批改 — student_answer 填學生**原本**寫的字（紅筆修改前），不是老師訂正的字。
 6. 對 lettered 題（A/B/C/D…），只能回字母本身（單一大寫字母）— 不能回詞語。
+
+== 模糊情況的處理（#1715 disambiguation） ==
+7. **多個圈/猶豫筆跡**：學生圈了又劃掉、或同時圈兩個字母 → 取**最終確定**的那個（最濃、最完整、沒被劃掉的）；無法判斷哪個是最終 → student_answer=""，ai_confidence 標低。
+8. **圈圈跨越兩個字母邊界**：圈圈中心離哪個字母最近就選哪個；若無法決定 → 回空。
+9. **筆跡淡 / 模糊 / 被擦過**：勉強看到也不要硬猜 → 不確定就回空 + ai_confidence ≤ 0.5。
+10. **ai_confidence 校準**：清楚看到 → 0.85-1.0；尚可辨識但有疑慮 → 0.5-0.85；勉強猜 → 0.0-0.5（後端會把 < 0.7 的視為無作答，請誠實標註不要灌水）。
 
 == 題目清單（含合法答案清單） ==
 {questions_text}
@@ -385,6 +395,7 @@ async def grade_worksheet_images(
 
     results = []
     fabricated_count = 0
+    low_confidence_count = 0
     for item in items:
         try:
             qid = str(item.get("question_id", ""))
@@ -406,6 +417,18 @@ async def grade_worksheet_images(
                     f"{question.get('allowed_values', [])[:5]}… 內，視為無作答。"
                 )
                 ai_conf = 0.0
+
+            # #1715 low-confidence threshold: when Gemini self-reports doubt,
+            # don't grade — flag for teacher review. Threshold is intentionally
+            # generic (no PDF / device / handwriting-specific tuning) so it
+            # generalizes across student worksheets.
+            if student_ans and ai_conf < _LOW_CONFIDENCE_THRESHOLD:
+                low_confidence_count += 1
+                reasoning = (
+                    f"[low-confidence] AI 看到 '{student_ans}' 但 confidence={ai_conf:.2f} < "
+                    f"{_LOW_CONFIDENCE_THRESHOLD}，建議老師判讀。原因：{reasoning}"
+                )
+                student_ans = ""
 
             correct_ans = question["correct_answer"]
             qtype = question["type"]
@@ -431,6 +454,12 @@ async def grade_worksheet_images(
         logger.warning(
             "OMO grader: coerced %d/%d fabricated answers to empty for lesson '%s'",
             fabricated_count, len(results), lesson.get("title", "unknown"),
+        )
+    if low_confidence_count:
+        logger.info(
+            "OMO grader: flagged %d/%d low-confidence (< %.2f) answers for teacher review on lesson '%s'",
+            low_confidence_count, len(results), _LOW_CONFIDENCE_THRESHOLD,
+            lesson.get("title", "unknown"),
         )
 
     logger.info(
