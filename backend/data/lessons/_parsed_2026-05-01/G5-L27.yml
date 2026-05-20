@@ -172,26 +172,31 @@ story_structure_rows:
   hint: 課文最後想告訴我們什麼？
 story_structure_table_source: ai-generated-2026-05-02
 vocab_bank:
-  A: 負擔
-  B: 負荷
-  C: 負責
+  A: 扇子
+  B: 眼睛
+  C: 小喇叭
+  D: 水蜜桃
+  E: 機關槍
+  F: 降落傘
+  G: 鑽石
 fill_in_blank:
-- id: 1
+- sentence: '他做事認真確實又（　　），是個值得託付的人。'
   answer: C
-  answer_word: 負責
-  context_before: 他做事認真確實又
-  context_after: ，是個值得託付的人
-- id: 2
+- sentence: '他一個人要（　　）全家人的生活費，真的很辛苦。'
   answer: A
-  answer_word: 負擔
-  context_before: 他一個人要
-  context_after: 全家人的生活費，真的很辛苦
-- id: 3
+- sentence: '張老師的工作太多了，已經超過他的（　　）。'
   answer: B
-  answer_word: 負荷
-  context_before: 張老師的工作太多了，已經超過他的
-  context_after: ''
-fill_in_blank_count: 3
+- sentence: '打電動練出來的技能，將來可能（　　）到無人機的操作上。'
+  answer: D
+- sentence: '紫斑蝶是極少數會遠距離搬遷過冬的蝴蝶，臺灣每年可觀察到紫斑蝶三次大規模的（　　）。'
+  answer: G
+- sentence: '他鬼鬼祟祟的躲在角落，讓人很（　　）他想做什麼。'
+  answer: F
+- sentence: '現代科技發達，AI取代大量人力，人們（　　）「AI會不會取代人類的工作？」引發各界大量的討論。'
+  answer: E
+- sentence: '學會騎腳踏車時，使用的肢體平衡和協調技巧，有助於學騎機車，這就是學習（　　）的好例子。'
+  answer: D
+fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n譬喻法\n\n　　譬喻法是一種寫作手法，就是用大家熟悉的事物去說明另一件事（Ａ比喻Ｂ），例如：我家的貓，像精明幹練的警察，緊盯著老鼠的腳步。把「貓」比喻成「警察」，就是譬喻的寫作手法，它會使文章變得更生動，更容易理解。\n　　使用譬喻法時，句子裡常會出現「好像」、「像」、「似的」、「如同」、「一樣」、「A（像）是B」。例如：（1）「工作記憶」好像大腦裡的「籃子」。（2）小歐讀得慢，工作記憶裡裝的是「文旦」。\n注意：如果沒有把Ａ比喻成Ｂ的話，即使句子裡有「好像」，也不能算喻句。\n例如：（Ｏ）夜空裡的星星好像寶石一樣，閃閃發亮。\t\n（Ｘ）小寶寶哭個不停，好像肚子餓了。  \n（Ｘ）小峻長得好像他爸爸。\n\n◎"
 strategy_exercise:
   type: guided_steps

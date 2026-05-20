@@ -199,42 +199,23 @@ vocab_bank:
   G: 自立自強
   H: 寄予厚望
 fill_in_blank:
-- id: 1
+- sentence: '這位球員在受傷後決定（　　），轉為擔任教練。'
   answer: D
-  answer_word: 引退
-  context_before: 這位球員在受傷後決定
-  context_after: ，轉為擔任教練
-- id: 2
+- sentence: '隨著時代變遷，親子之間想法的（　　）似乎越來越深。'
   answer: A
-  answer_word: 鴻溝
-  context_before: 隨著時代變遷，親子之間想法的
-  context_after: 似乎越來越深
-- id: 3
+- sentence: '他一向以敢於（　　）聞名，時常提出關鍵的建議。'
   answer: E
-  answer_word: 直言
-  context_before: 他一向以敢於
-  context_after: 聞名，時常提出關鍵的建議
-- id: 4
+- sentence: '這場演講內容充實、情感真誠，深深（　　）在場所有聽眾。'
   answer: B
-  answer_word: 激勵
-  context_before: 這場演講內容充實、情感真誠，深深
-  context_after: 在場所有聽眾
-- id: 5
+- sentence: '國家隊的教練對新加入的選手（　　），希望他能奪冠。'
   answer: H
-  answer_word: 寄予厚望
-  context_before: 國家隊的教練對新加入的選手
-  context_after: ，希望他能奪冠
-- id: 6
+- sentence: '她在沒有幫手的情況下，靠著（　　）精神，創造不凡成績。'
   answer: G
-  answer_word: 自立自強
-  context_before: 她在沒有幫手的情況下，靠著
-  context_after: 精神，創造不凡成績
-- id: 7
+- sentence: '面對世界級選手，我們只能承認（　　），並設法迎頭趕上。'
   answer: F
-  answer_word: 技不如人
-  context_before: 面對世界級選手，我們只能承認
-  context_after: ，並設法迎頭趕上
-fill_in_blank_count: 7
+- sentence: '訓練上，儘管沒人監督，他仍然毫不（　　），盡力完成每份菜單。'
+  answer: C
+fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈
 
   觀點找支持理由

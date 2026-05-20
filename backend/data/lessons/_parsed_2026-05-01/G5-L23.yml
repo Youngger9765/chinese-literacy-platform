@@ -171,41 +171,20 @@ vocab_bank:
   G: 出爐
   H: 沸騰
 fill_in_blank:
-- id: 1
+- sentence: '朋友有難時，不能及時援救，讓他感到非常的（　　）。'
   answer: E
-  answer_word: 愧疚
-  context_before: 朋友有難時，不能及時援救，讓他感到非常的
-  context_after: ''
-- id: 3
+- sentence: '閱讀和寫作（　　），兩者並進可以提升語文能力。'
   answer: B
-  answer_word: 相輔相成
-  context_before: 閱讀和寫作
-  context_after: ，兩者並進可以提升語文能力
-- id: 4
+- sentence: '這場音樂會吸引了很多觀眾，整個劇院（　　），人滿為患。'
   answer: D
-  answer_word: 座無虛席
-  context_before: 這場音樂會吸引了很多觀眾，整個劇院
-  context_after: ，人滿為患
-- id: 5
+- sentence: '這齣連續劇以內容情節取勝，吸引大批民眾收看，收視率（　　）。'
   answer: A
-  answer_word: 節節攀升
-  context_before: 這齣連續劇以內容情節取勝，吸引大批民眾收看，收視率
-  context_after: ''
-- id: 6
+- sentence: '他不僅學習成績優秀，還是學校籃球隊的主力，真是（　　）。'
   answer: C
-  answer_word: 允文允武
-  context_before: 他不僅學習成績優秀，還是學校籃球隊的主力，真是
-  context_after: ''
-- id: 7
+- sentence: '當球隊獲勝時，現場觀眾的熱血（　　），響起了雷鳴般的掌聲。'
   answer: H
-  answer_word: 沸騰
-  context_before: 當球隊獲勝時，現場觀眾的熱血
-  context_after: ，響起了雷鳴般的掌聲
-- id: 8
+- sentence: '在畢業典禮上，優秀校友的演講（　　），激勵了所有的畢業生。'
   answer: F
-  answer_word: 激情洋溢
-  context_before: 在畢業典禮上，優秀校友的演講
-  context_after: ，激勵了所有的畢業生
 fill_in_blank_count: 7
 本課語詞:
 - 愧疚

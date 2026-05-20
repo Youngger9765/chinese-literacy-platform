@@ -148,36 +148,21 @@ vocab_bank:
   A: 汗流浹背
   B: 精湛
   C: 不外乎
-  D: 合作無間
+  D: 合作無間󠇡
   E: 僧多粥少
   F: 想方設法
   G: 朝思暮想
 fill_in_blank:
-- id: 1
+- sentence: '他們兩人（　　），順利完成了這項艱難的任務。'
   answer: D
-  answer_word: 合作無間
-  context_before: 他們兩人
-  context_after: ，順利完成了這項艱難的任務
-- id: 2
+- sentence: '這家公司提供的職位有限，應徵者卻很多，真是（　　）。'
   answer: E
-  answer_word: 僧多粥少
-  context_before: 這家公司提供的職位有限，應徵者卻很多，真是
-  context_after: ''
-- id: 3
+- sentence: '他的球技非常（　　），讓人驚嘆不已。'
   answer: B
-  answer_word: 精湛
-  context_before: 他的球技非常
-  context_after: ，讓人驚嘆不已
-- id: 4
+- sentence: '在烈日下訓練，他們個個都（　　），卻不輕言放棄。'
   answer: A
-  answer_word: 汗流浹背
-  context_before: 在烈日下訓練，他們個個都
-  context_after: ，卻不輕言放棄
-- id: 5
+- sentence: '問起一般男生的興趣，（　　）是打球和玩手機遊戲。'
   answer: C
-  answer_word: 不外乎
-  context_before: 問起一般男生的興趣，
-  context_after: 是打球和玩手機遊戲
 fill_in_blank_count: 5
 本課語詞:
 - 汗流浹背

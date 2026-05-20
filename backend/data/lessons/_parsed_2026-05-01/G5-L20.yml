@@ -172,46 +172,22 @@ vocab_bank:
   G: 尷尬
   H: 忽視
 fill_in_blank:
-- id: 1
+- sentence: '面對網友的批評，他心裡一陣（　　），朋友勸他要冷靜回應。'
   answer: E
-  answer_word: 惱怒
-  context_before: 面對網友的批評，他心裡一陣
-  context_after: ，朋友勸他要冷靜回應
-- id: 2
+- sentence: '她不小心叫錯了對方的名字，場面頓時變得（　　）無比。'
   answer: G
-  answer_word: 尷尬
-  context_before: 她不小心叫錯了對方的名字，場面頓時變得
-  context_after: 無比
-- id: 3
+- sentence: '打開窗戶，一大片綠油油的田野（　　）。'
   answer: A
-  answer_word: 映入眼簾
-  context_before: 打開窗戶，一大片綠油油的田野
-  context_after: ''
-- id: 4
+- sentence: '期末作業終於完成繳交後，他如釋重負般（　　）了滿腹的焦慮與壓力。'
   answer: F
-  answer_word: 卸下
-  context_before: 期末作業終於完成繳交後，他如釋重負般
-  context_after: 了滿腹的焦慮與壓力
-- id: 5
+- sentence: '他總是（　　）別人的建議，結果吃了大虧。'
   answer: H
-  answer_word: 忽視
-  context_before: 他總是
-  context_after: 別人的建議，結果吃了大虧
-- id: 6
+- sentence: '他在眾人面前（　　）承認自己的錯誤，贏得尊敬。'
   answer: B
-  answer_word: 坦然
-  context_before: 他在眾人面前
-  context_after: 承認自己的錯誤，贏得尊敬
-- id: 7
-  answer: C
-  answer_word: 悸動
-  context_before: 第一次收到他的情書，心中泛起一陣甜蜜而不確定的
-  context_after: ''
-- id: 8
+- sentence: '第一次收到他的情書，心中泛起一陣甜蜜而不確定的（　　）。'
+  answer: B
+- sentence: '雖然參賽機會難得，但會無法參加期末考，他因此而（　　）不決。'
   answer: D
-  answer_word: 猶豫
-  context_before: 雖然參賽機會難得，但會無法參加期末考，他因此而
-  context_after: 不決
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈的練習，下列何者對於「拒絕」的想法與表達較為合適？ \nA.阿健：不喜歡的事要當面果斷拒絕，不要為了對方委屈自己 \nB.安安：與其直接拒絕，不如保持模糊空間，這樣就不會尷尬\nC.小明：拒絕別人的時候一定要記得道歉，才不會讓對方生氣\n720969128807\n(A)不一定要當面(B)建議要表達立場與界線(C)不該為了怕對方生氣而道歉。00\n(A)不一定要當面(B)建議要表達立場與界線(C)不該為了怕對方生氣而道歉。D.大宇：感謝對方勇敢表達心意，也真誠回覆自己的立場看法\n75517573405"
 strategy_exercise:
