@@ -181,7 +181,10 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 
 ### Config fairness（之前漏的，必設）
 
-- ⚠️ **`thinking_budget=0`** 給所有 Gemini 2.5+ models（不設 2.5 Flash 會偷吃 token，輸出截斷 → 不公平）
+- ⚠️ **Thinking control API differs per model family** (per Codex fact-check 2026-05-20, [Gemini thinking docs](https://ai.google.dev/gemini-api/docs/thinking)):
+  - Gemini **2.5 series** → `thinking_config=ThinkingConfig(thinking_budget=0)` 才能 disable thinking
+  - Gemini **3.5+ series** → `thinking_config=ThinkingConfig(thinking_level="minimal")` (default `"medium"`); `thinking_budget=0` 對 3.5+ 系列**無效**，reasoning tokens 仍計費 + 仍 consume budget → A/B 不公平
+  - 加新 3.5+ / 4.0 model 進 A/B 時必須切對 API，不然測完結論不可信
 - ⚠️ Models 不同 region 時標 location bias
 - Shuffle model 順序避免 cold start bias
 - 同 `max_output_tokens` / `temperature` per task
