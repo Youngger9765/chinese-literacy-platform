@@ -30,6 +30,8 @@ class AssignmentCreateRequest(BaseModel):
     target_cpm: int | None = Field(None, ge=30, le=600)
     target_accuracy: float | None = Field(None, ge=0, le=100)
     difficulty_label: str | None = None
+    # Issue #1762: teacher can enable smart-skip of already-completed steps
+    skip_completed_steps: bool = False
 
     @model_validator(mode="after")
     def _exactly_one_text_source(self) -> "AssignmentCreateRequest":
@@ -96,6 +98,8 @@ class AssignmentResponse(BaseModel):
     # Effective goals — defaults filled in when teacher hasn't set custom ones
     effective_cpm: int
     effective_accuracy: float
+    # Issue #1762
+    skip_completed_steps: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -134,6 +138,12 @@ class StudentAssignmentResponse(BaseModel):
     difficulty_label: str | None
     effective_cpm: int
     effective_accuracy: float
+    # Issue #1762
+    attempt_number: int = 1
+    session_mode: str = "self_study"
+    skip_completed_steps: bool = False
+    # Steps that are auto-skipped because student already completed them in a prior session
+    skipped_steps: list[str] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}
 
@@ -149,3 +159,7 @@ class StartAssignmentResponse(BaseModel):
     difficulty_label: str | None = None
     effective_cpm: int = DEFAULT_TARGET_CPM
     effective_accuracy: float = DEFAULT_TARGET_ACCURACY
+    # Issue #1762
+    session_mode: str = "assignment"
+    attempt_number: int = 1
+    skipped_steps: list[str] = Field(default_factory=list)
