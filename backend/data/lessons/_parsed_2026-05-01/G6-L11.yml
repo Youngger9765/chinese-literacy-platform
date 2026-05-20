@@ -207,41 +207,20 @@ vocab_bank:
   F: 精雕細琢
   G: 不食人間煙火
 fill_in_blank:
-- id: 1
+- sentence: '夜晚的星空（　　），令人感嘆自然的偉大。'
   answer: B
-  answer_word: 浩瀚無垠
-  context_before: 夜晚的星空
-  context_after: ，令人感嘆自然的偉大
-- id: 2
+- sentence: '這件玉雕作品經過工匠（　　），每一個細節都栩栩如生。'
   answer: F
-  answer_word: 精雕細琢
-  context_before: 這件玉雕作品經過工匠
-  context_after: ，每一個細節都栩栩如生
-- id: 3
+- sentence: '在浩瀚的宇宙面前，人類的力量顯得（　　）。'
   answer: A
-  answer_word: 微不足道
-  context_before: 在浩瀚的宇宙面前，人類的力量顯得
-  context_after: ''
-- id: 4
+- sentence: '他厭倦了城市的（　　），決定搬到鄉村過簡單的生活。'
   answer: D
-  answer_word: 塵囂
-  context_before: 他厭倦了城市的
-  context_after: ，決定搬到鄉村過簡單的生活
-- id: 5
+- sentence: '在工作了一整天後，他感到（　　），只想好好休息。'
   answer: E
-  answer_word: 疲憊不堪
-  context_before: 在工作了一整天後，他感到
-  context_after: ，只想好好休息
-- id: 6
+- sentence: '那位隱居山林的藝術家，生活簡樸，宛如（　　）的世外高人。'
   answer: G
-  answer_word: 不食人間煙火
-  context_before: 那位隱居山林的藝術家，生活簡樸，宛如
-  context_after: 的世外高人
-- id: 7
+- sentence: '這個關於仙境的傳說，是村民們（　　）的故事。'
   answer: C
-  answer_word: 口耳相傳
-  context_before: 這個關於仙境的傳說，是村民們
-  context_after: 的故事
 fill_in_blank_count: 7
 spotlight_raw_text: '閱讀聚光燈
 

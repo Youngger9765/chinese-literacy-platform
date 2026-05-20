@@ -168,46 +168,22 @@ vocab_bank:
   G: 渾身
   H: 眼睜睜
 fill_in_blank:
-- id: 1
+- sentence: '他從惡夢中驚醒，（　　）冷汗，喘著氣回想剛才的恐懼。'
   answer: G
-  answer_word: 渾身
-  context_before: 他從惡夢中驚醒，
-  context_after: 冷汗，喘著氣回想剛才的恐懼
-- id: 2
+- sentence: '她毫無（　　）的提出反對意見，不怕得罪不同想法的人。'
   answer: F
-  answer_word: 顧忌
-  context_before: 她毫無
-  context_after: 的提出反對意見，不怕得罪不同想法的人
-- id: 3
+- sentence: '他總是習慣在背後（　　），卻從不願直接找當事人說清楚。'
   answer: B
-  answer_word: 指指點點
-  context_before: 他總是習慣在背後
-  context_after: ，卻從不願直接找當事人說清楚
-- id: 4
+- sentence: '他們的互動方式非常（　　），讓人無法輕易解讀。'
   answer: C
-  answer_word: 曖昧
-  context_before: 他們的互動方式非常
-  context_after: ，讓人無法輕易解讀
-- id: 5
+- sentence: '面對突如其來的選擇，他（　　）了，停頓了幾秒，才緩緩做出決定。'
   answer: D
-  answer_word: 遲疑
-  context_before: 面對突如其來的選擇，他
-  context_after: 了，停頓了幾秒，才緩緩做出決定
-- id: 6
+- sentence: '我們只能（　　）看著颱風摧毀農作物，卻對災情無能為力。'
   answer: H
-  answer_word: 眼睜睜
-  context_before: 我們只能
-  context_after: 看著颱風摧毀農作物，卻對災情無能為力
-- id: 7
+- sentence: '手術進行中，家屬在候診區（　　），不斷看向時鐘。'
   answer: A
-  answer_word: 坐立難安
-  context_before: 手術進行中，家屬在候診區
-  context_after: ，不斷看向時鐘
-- id: 8
+- sentence: '他穿著正式的西裝參加面試，一言一行都比平常（　　）許多。'
   answer: E
-  answer_word: 拘謹
-  context_before: 他穿著正式的西裝參加面試，一言一行都比平常
-  context_after: 許多
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈的練習，下列何者關注的面向屬於自己的「控制圈」？\nA.吉伊：家中有遺傳性疾病，我很擔心有一天會發病\nB.兔兔：朋友都脫單了，我很期待有更多喜歡我的人\n1109980176530\n(A)發病時機不可控制(B)他人的喜歡不可控制 (D對手的強度不可控制00\n(A)發病時機不可控制(B)他人的喜歡不可控制 (D對手的強度不可控制C.小八：物價近年快速上漲，我想知道更多理財方法 \nD.栗子：這是最後一年的比賽，希望對手都比我們弱\n75517573405"
 strategy_exercise:
