@@ -30,9 +30,11 @@ from ..schemas.assignment import (
     AssignmentListResponse,
     AssignmentResponse,
     AssignmentUpdateRequest,
+    AttemptResponse,
     GradeSubmissionRequest,
     StartAssignmentResponse,
     StudentAssignmentResponse,
+    StudentAttemptGroup,
     SubmissionResponse,
     DEFAULT_TARGET_CPM,
     DEFAULT_TARGET_ACCURACY,
@@ -90,18 +92,24 @@ def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentRe
     """Convert an Assignment ORM object to an AssignmentResponse."""
     story_title = _resolve_title_for_assignment(assignment, db)
 
-    submission_count = (
-        db.query(func.count(AssignmentSubmission.id))
-        .filter(AssignmentSubmission.assignment_id == assignment.id)
-        .scalar()
+    # Issue #1764 Fix 3: precise student counts
+    assigned_student_count: int = (
+        db.query(func.count(func.distinct(ClassroomStudent.student_id)))
+        .filter(ClassroomStudent.classroom_id == assignment.classroom_id)
+        .scalar() or 0
     )
-    completed_count = (
-        db.query(func.count(AssignmentSubmission.id))
+    submitted_student_count: int = (
+        db.query(func.count(func.distinct(AssignmentSubmission.student_id)))
         .filter(
             AssignmentSubmission.assignment_id == assignment.id,
             AssignmentSubmission.status.in_(["submitted", "graded"]),
         )
-        .scalar()
+        .scalar() or 0
+    )
+    total_attempts: int = (
+        db.query(func.count(AssignmentSubmission.id))
+        .filter(AssignmentSubmission.assignment_id == assignment.id)
+        .scalar() or 0
     )
 
     return AssignmentResponse(
@@ -117,8 +125,13 @@ def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentRe
         due_date=assignment.due_date,
         is_active=assignment.is_active,
         created_at=assignment.created_at,
-        submission_count=submission_count,
-        completed_count=completed_count,
+        # Issue #1764 Fix 3: split counts
+        assigned_student_count=assigned_student_count,
+        submitted_student_count=submitted_student_count,
+        total_attempts=total_attempts,
+        # Back-compat aliases for existing frontend
+        submission_count=total_attempts,
+        completed_count=submitted_student_count,
         # Reading goals (Issue #84)
         target_cpm=assignment.target_cpm,
         target_accuracy=assignment.target_accuracy,
@@ -610,9 +623,48 @@ def get_assignment_detail(
             )
         )
 
+    # Issue #1764 Fix 4: group submissions by student
+    from collections import defaultdict
+    student_subs: dict[int, list[AssignmentSubmission]] = defaultdict(list)
+    for sub in submissions:
+        student_subs[sub.student_id].append(sub)
+
+    groups: list[StudentAttemptGroup] = []
+    for student_id, subs in student_subs.items():
+        student = db.query(User).filter(User.id == student_id).first()
+        subs_sorted = sorted(subs, key=lambda s: s.attempt_number, reverse=True)
+        latest = subs_sorted[0]
+        attempt_list: list[AttemptResponse] = []
+        for sub in subs_sorted:
+            r_acc, r_cpm, r_err = _extract_reading_metrics(sub, db)
+            attempt_list.append(
+                AttemptResponse(
+                    id=sub.id,
+                    attempt_number=sub.attempt_number,
+                    status=sub.status,
+                    submitted_at=sub.submitted_at,
+                    score=sub.score,
+                    reading_accuracy=r_acc,
+                    reading_cpm=r_cpm,
+                    reading_error_chars=r_err,
+                    teacher_feedback=sub.teacher_feedback,
+                )
+            )
+        groups.append(
+            StudentAttemptGroup(
+                student_id=student_id,
+                student_name=student.name if student else "Unknown",
+                latest_status=latest.status,
+                latest_score=latest.score,
+                latest_attempt_number=latest.attempt_number,
+                attempts=attempt_list,
+            )
+        )
+
     return AssignmentDetailResponse(
         **base.model_dump(),
         submissions=submission_responses,
+        submissions_by_student=groups,
     )
 
 
@@ -890,18 +942,32 @@ def start_assignment(
     raw_slug = assignment.story_id or str(assignment.text_id)
     story_slug = normalize_story_slug(raw_slug)
 
-    # Issue #1762: compute skipped steps if skip_completed_steps is enabled
+    # Issue #1762 + Fix 1 #1764: compute skipped steps if skip_completed_steps is enabled.
+    # EXCLUDE sessions linked to THIS assignment's own prior submissions so that
+    # attempt N+1 does not inherit skipped steps from attempt N.
     skipped_steps: list[str] = []
     if assignment.skip_completed_steps:
-        prior_sessions = (
-            db.query(LearningSession)
+        own_session_ids: set[int] = {
+            sub.session_id
+            for sub in db.query(AssignmentSubmission)
             .filter(
-                LearningSession.student_id == current_user.id,
-                LearningSession.story_slug == story_slug,
-                LearningSession.status == "completed",
+                AssignmentSubmission.assignment_id == assignment.id,
+                AssignmentSubmission.student_id == current_user.id,
+                AssignmentSubmission.session_id.isnot(None),
             )
             .all()
+            if sub.session_id is not None
+        }
+        prior_sessions_query = db.query(LearningSession).filter(
+            LearningSession.student_id == current_user.id,
+            LearningSession.story_slug == story_slug,
+            LearningSession.status == "completed",
         )
+        if own_session_ids:
+            prior_sessions_query = prior_sessions_query.filter(
+                LearningSession.id.not_in(own_session_ids)
+            )
+        prior_sessions = prior_sessions_query.all()
         completed_union: set[str] = set()
         for ps in prior_sessions:
             sp = ps.step_progress
@@ -956,6 +1022,7 @@ def start_assignment(
             "__meta": {
                 "source": "assignment",
                 "assignment_id": assignment.id,
+                "skip_policy": "snapshot_at_session_creation",  # Fix 2 #1764
             }
         }
         if skipped_steps:
@@ -1219,18 +1286,32 @@ def restart_assignment(
     raw_slug = assignment.story_id or str(assignment.text_id)
     story_slug = normalize_story_slug(raw_slug)
 
-    # Issue #1762: compute skipped steps if enabled
+    # Issue #1762 + Fix 1 #1764: compute skipped steps if enabled.
+    # EXCLUDE sessions linked to THIS assignment's own prior submissions so that
+    # restart attempt N+1 does not inherit skipped steps from attempt N.
     skipped_steps: list[str] = []
     if assignment.skip_completed_steps:
-        prior_sessions = (
-            db.query(LearningSession)
+        own_session_ids: set[int] = {
+            sub.session_id
+            for sub in db.query(AssignmentSubmission)
             .filter(
-                LearningSession.student_id == current_user.id,
-                LearningSession.story_slug == story_slug,
-                LearningSession.status == "completed",
+                AssignmentSubmission.assignment_id == assignment.id,
+                AssignmentSubmission.student_id == current_user.id,
+                AssignmentSubmission.session_id.isnot(None),
             )
             .all()
+            if sub.session_id is not None
+        }
+        prior_sessions_query = db.query(LearningSession).filter(
+            LearningSession.student_id == current_user.id,
+            LearningSession.story_slug == story_slug,
+            LearningSession.status == "completed",
         )
+        if own_session_ids:
+            prior_sessions_query = prior_sessions_query.filter(
+                LearningSession.id.not_in(own_session_ids)
+            )
+        prior_sessions = prior_sessions_query.all()
         completed_union: set[str] = set()
         for ps in prior_sessions:
             sp = ps.step_progress
@@ -1245,6 +1326,7 @@ def restart_assignment(
             "source": "assignment",
             "assignment_id": assignment.id,
             "attempt_number": next_attempt,
+            "skip_policy": "snapshot_at_session_creation",  # Fix 2 #1764
         }
     }
     if skipped_steps:

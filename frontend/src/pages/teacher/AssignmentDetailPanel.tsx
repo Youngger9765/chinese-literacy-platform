@@ -11,6 +11,7 @@ import {
   AssignmentDetailResponse,
   SubmissionResponse,
   AssignmentApiError,
+  StudentAttemptGroup,
 } from '../../services/assignmentApi';
 import { useToast } from '../../components/ui/Toast';
 
@@ -75,6 +76,8 @@ const AssignmentDetailPanel: React.FC<Props> = ({
   const [gradeError, setGradeError] = useState('');
   // Track which submission row has reading metrics expanded (Issue #423)
   const [expandedMetricsId, setExpandedMetricsId] = useState<number | null>(null);
+  // Issue #1764 Fix 4: expand attempt history per student
+  const [expandedStudentId, setExpandedStudentId] = useState<number | null>(null);
 
   // Bulk comment state
   const [showBulkComment, setShowBulkComment] = useState(false);
@@ -83,14 +86,17 @@ const AssignmentDetailPanel: React.FC<Props> = ({
   const [bulkCommentError, setBulkCommentError] = useState('');
   const [bulkCommentDone, setBulkCommentDone] = useState(false);
 
-  // Stats
-  const pending = detail.submissions.filter(
-    (s) => s.status === 'pending',
-  ).length;
+  // Stats — use grouped view when available (Fix 3 #1764)
+  const groups: StudentAttemptGroup[] = detail.submissions_by_student ?? [];
+  const useGrouped = groups.length > 0;
 
-  const submitted = detail.submissions.filter(
-    (s) => s.status === 'submitted',
-  ).length;
+  const pending = useGrouped
+    ? groups.filter((g) => g.latest_status === 'pending').length
+    : detail.submissions.filter((s) => s.status === 'pending').length;
+
+  const submitted = useGrouped
+    ? groups.filter((g) => g.latest_status === 'submitted').length
+    : detail.submissions.filter((s) => s.status === 'submitted').length;
 
   const handleGradeClick = (sub: SubmissionResponse) => {
     setGradingId(sub.id);
@@ -197,20 +203,30 @@ const AssignmentDetailPanel: React.FC<Props> = ({
       {/* Stats bar + actions */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex gap-4 text-xs text-gray-500">
+          {/* Issue #1764 Fix 3: show distinct student counts, not raw attempt rows */}
           <span>
             已完成:{' '}
-            <strong className="text-gray-700">{detail.completed_count}</strong>
-          </span>
-          <span>
-            未完成:{' '}
-            <strong className={pending > 0 ? 'text-amber-600' : 'text-gray-700'}>
-              {pending}
+            <strong className="text-gray-700">
+              {detail.submitted_student_count ?? detail.completed_count}
             </strong>
           </span>
           <span>
             總學生:{' '}
-            <strong className="text-gray-700">{detail.submission_count}</strong>
+            <strong className="text-gray-700">
+              {detail.assigned_student_count ?? detail.submission_count}
+            </strong>
           </span>
+          {pending > 0 && (
+            <span>
+              未完成:{' '}
+              <strong className="text-amber-600">{pending}</strong>
+            </span>
+          )}
+          {(detail.total_attempts ?? 0) > (detail.submitted_student_count ?? detail.completed_count) && (
+            <span className="text-gray-400">
+              共 {detail.total_attempts} 次作答
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {/* Bulk comment button — only shows when there are submitted submissions */}
@@ -449,22 +465,187 @@ const AssignmentDetailPanel: React.FC<Props> = ({
         ))}
       </div>
 
-      {/* Desktop table view */}
+      {/* Desktop table view — Issue #1764 Fix 4: grouped by student when available */}
       <div className="hidden md:block overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
           <tr className="text-left text-gray-400">
             <th className="pb-1.5 font-medium">學生姓名</th>
-            <th className="pb-1.5 font-medium text-center">狀態</th>
-            <th className="pb-1.5 font-medium">提交時間</th>
-            <th className="pb-1.5 font-medium text-center">分數</th>
+            <th className="pb-1.5 font-medium text-center">最新狀態</th>
+            <th className="pb-1.5 font-medium text-center">作答次數</th>
+            <th className="pb-1.5 font-medium text-center">最新分數</th>
             <th className="pb-1.5 font-medium text-center">朗讀數據</th>
             <th className="pb-1.5 font-medium">評語</th>
             <th className="pb-1.5 font-medium text-center">批改</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {detail.submissions.map((sub) => (
+          {useGrouped ? groups.map((group) => {
+            const latest = group.attempts[0]; // already sorted desc by attempt_number
+            const isExpanded = expandedStudentId === group.student_id;
+            return (
+              <React.Fragment key={group.student_id}>
+                <tr>
+                  <td className="py-1.5 text-gray-700">
+                    <div className="flex items-center gap-1">
+                      {group.attempts.length > 1 && (
+                        <button
+                          onClick={() =>
+                            setExpandedStudentId((prev) =>
+                              prev === group.student_id ? null : group.student_id
+                            )
+                          }
+                          className="inline-flex items-center justify-center w-4 h-4 rounded border border-gray-300 text-gray-500 hover:bg-gray-50 cursor-pointer transition-colors"
+                          title={isExpanded ? '收合歷史作答' : '展開歷史作答'}
+                        >
+                          {isExpanded ? '−' : '+'}
+                        </button>
+                      )}
+                      {group.student_name}
+                    </div>
+                  </td>
+                  <td className="py-1.5 text-center">{statusBadge(group.latest_status)}</td>
+                  <td className="py-1.5 text-center text-gray-500">{group.attempts.length}</td>
+                  <td className="py-1.5 text-gray-700 text-center font-medium">
+                    {gradingId === latest.id ? (
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={gradeInput[latest.id] ?? ''}
+                        onChange={(e) =>
+                          setGradeInput((prev) => ({ ...prev, [latest.id]: e.target.value }))
+                        }
+                        className="w-16 h-6 px-1.5 rounded border border-gray-300 text-center text-xs focus:outline-none focus:border-accent"
+                        placeholder="0-100"
+                      />
+                    ) : latest.score != null ? (
+                      `${Math.round(latest.score)}%`
+                    ) : (
+                      '-'
+                    )}
+                  </td>
+                  <td className="py-1.5 text-center">
+                    {latest.reading_accuracy != null || latest.reading_cpm != null || latest.reading_error_chars.length > 0 ? (
+                      <button
+                        onClick={() =>
+                          setExpandedMetricsId((prev) => (prev === latest.id ? null : latest.id))
+                        }
+                        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-blue-200 text-blue-600 text-xs hover:bg-blue-50 cursor-pointer transition-colors"
+                        title="展開朗讀數據"
+                      >
+                        {expandedMetricsId === latest.id ? '收合' : '查看'}
+                      </button>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
+                  </td>
+                  <td className="py-1.5 max-w-[200px]">
+                    {gradingId === latest.id ? (
+                      <textarea
+                        value={feedbackInput[latest.id] ?? ''}
+                        onChange={(e) =>
+                          setFeedbackInput((prev) => ({ ...prev, [latest.id]: e.target.value }))
+                        }
+                        placeholder="輸入個別評語（選填）"
+                        rows={2}
+                        className="w-full px-1.5 py-1 rounded border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-accent resize-none"
+                      />
+                    ) : latest.teacher_feedback ? (
+                      <span className="text-gray-600 line-clamp-2" title={latest.teacher_feedback}>
+                        {latest.teacher_feedback}
+                      </span>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
+                  </td>
+                  <td className="py-1.5 text-center">
+                    {gradingId === latest.id ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => handleSaveGrade(latest as unknown as SubmissionResponse)}
+                          disabled={savingId === latest.id}
+                          className="px-2 py-0.5 rounded bg-accent text-white text-xs font-medium hover:bg-accent-hover disabled:opacity-50 cursor-pointer transition-colors"
+                        >
+                          {savingId === latest.id ? '...' : '儲存'}
+                        </button>
+                        <button
+                          onClick={() => { setGradingId(null); setGradeError(''); }}
+                          className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                        >
+                          取消
+                        </button>
+                      </div>
+                    ) : latest.status === 'submitted' || latest.status === 'graded' ? (
+                      <button
+                        onClick={() => handleGradeClick(latest as unknown as SubmissionResponse)}
+                        className="px-2 py-0.5 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
+                      >
+                        {latest.status === 'graded' ? '重新批改' : '批改'}
+                      </button>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
+                  </td>
+                </tr>
+                {expandedMetricsId === latest.id && (
+                  <tr>
+                    <td colSpan={7} className="pb-2 pt-0">
+                      <div className="mx-1 p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
+                        <p className="text-xs font-medium text-blue-800 mb-2">朗讀學習數據 — {group.student_name}</p>
+                        <div className="flex flex-wrap gap-4">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-blue-700">
+                              {latest.reading_accuracy != null ? `${latest.reading_accuracy.toFixed(1)}%` : '—'}
+                            </div>
+                            <div className="text-xs text-gray-500">正確率</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-blue-700">
+                              {latest.reading_cpm != null ? `${Math.round(latest.reading_cpm)}` : '—'}
+                            </div>
+                            <div className="text-xs text-gray-500">語速（字/分）</div>
+                          </div>
+                          {latest.reading_error_chars.length > 0 && (
+                            <div>
+                              <div className="text-xs text-gray-500 mb-1">
+                                錯誤字詞（{latest.reading_error_chars.length} 個）
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {latest.reading_error_chars.map((ch, i) => (
+                                  <span key={i} className="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-xs font-medium">
+                                    {ch}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                {/* Expanded history rows for prior attempts */}
+                {isExpanded && group.attempts.slice(1).map((attempt) => (
+                  <tr key={attempt.id} className="bg-gray-50">
+                    <td className="py-1 pl-6 text-gray-400">
+                      第 {attempt.attempt_number} 次
+                    </td>
+                    <td className="py-1 text-center">{statusBadge(attempt.status)}</td>
+                    <td className="py-1 text-center text-gray-400">—</td>
+                    <td className="py-1 text-gray-500 text-center">
+                      {attempt.score != null ? `${Math.round(attempt.score)}%` : '-'}
+                    </td>
+                    <td className="py-1 text-center text-gray-300">—</td>
+                    <td className="py-1 max-w-[200px] text-gray-400">
+                      {attempt.teacher_feedback ?? '—'}
+                    </td>
+                    <td className="py-1 text-center text-gray-300">—</td>
+                  </tr>
+                ))}
+              </React.Fragment>
+            );
+          }) : detail.submissions.map((sub) => (
             <React.Fragment key={sub.id}>
               <tr>
                 <td className="py-1.5 text-gray-700">{sub.student_name}</td>
@@ -621,5 +802,6 @@ const AssignmentDetailPanel: React.FC<Props> = ({
     </div>
   );
 };
+
 
 export default AssignmentDetailPanel;
