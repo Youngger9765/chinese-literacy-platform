@@ -858,22 +858,43 @@ async def confirm_lesson(
             upload_id, payload.confirmed_lesson_id, candidate_ids,
         )
 
-    upload.lesson_id = payload.confirmed_lesson_id
+    # #1740 fix: identifier returns synthetic lesson_id (yml display_order)
+    # which does not match canonical Story.id used by frontend /api/stories.
+    # Translate via candidate's grade_code so OmoUpload.lesson_id is queryable
+    # via /api/omo/by-lesson/{Story.id} and _run_grading finds the right schema.
+    real_lesson_id = payload.confirmed_lesson_id
+    if upload.identification and isinstance(upload.identification, list):
+        matched = next(
+            (c for c in upload.identification if c.get("lesson_id") == payload.confirmed_lesson_id),
+            None,
+        )
+        grade_code = (matched or {}).get("grade_code") if matched else None
+        if grade_code:
+            from ..services.lesson_loader import get_lesson_by_code
+            story = get_lesson_by_code(grade_code)
+            if story and story.get("id"):
+                real_lesson_id = story["id"]
+                logger.info(
+                    "OMO #1740 lesson_id mapping: synthetic %d → Story.id %d via grade_code %s",
+                    payload.confirmed_lesson_id, real_lesson_id, grade_code,
+                )
+
+    upload.lesson_id = real_lesson_id
     upload.status = "grading"
     upload.progress = {"stage": "queued", "total": 0, "graded": 0}
     db.commit()
 
-    # Kick off grading in background
-    background_tasks.add_task(_run_grading, upload_id, payload.confirmed_lesson_id)
+    # Kick off grading in background — pass real Story.id so grader picks correct schema
+    background_tasks.add_task(_run_grading, upload_id, real_lesson_id)
 
     logger.info(
-        "OMO upload %d confirmed + grading queued: student=%d lesson_id=%d",
-        upload_id, current_user.id, payload.confirmed_lesson_id,
+        "OMO upload %d confirmed + grading queued: student=%d lesson_id=%d (was synthetic %d)",
+        upload_id, current_user.id, real_lesson_id, payload.confirmed_lesson_id,
     )
 
     return OmoConfirmResponse(
         upload_id=upload_id,
-        lesson_id=payload.confirmed_lesson_id,
+        lesson_id=real_lesson_id,
         status="grading",
         message="確認成功！AI 正在批改中，請稍候（約 15-20 秒）",
     )
