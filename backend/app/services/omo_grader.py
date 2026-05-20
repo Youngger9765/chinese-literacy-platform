@@ -20,6 +20,7 @@ Circuit breaker: 3 consecutive errors → RuntimeError (same pattern as omo_iden
 import asyncio
 import io
 import logging
+import os
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -44,6 +45,7 @@ class GradedAnswer:
     ai_confidence: float  # 0.0 – 1.0
     reasoning: str
     position: Optional[dict] = None   # {"x": float, "y": float} relative coords
+    crop_image_url: Optional[str] = None
     source_attempt_id: Optional[int] = None
 
 
@@ -306,11 +308,91 @@ def _validate_student_answer(student: str, question: dict) -> tuple[str, bool]:
     return "", True
 
 
+def _crop_and_upload(
+    image_bytes_list: list[bytes],
+    question: dict,
+    upload_id: int,
+    question_id: str,
+    gcs_bucket: Optional[str] = None,
+) -> Optional[str]:
+    """Crop a generous strip around the question position and upload to GCS.
+
+    Position comes from the grader's position_x / position_y fields (relative 0-1 coords).
+    For fill_blank (fb_*): full-width strip (0, y-200, W, y+200), clipped to bounds.
+    For multiple_choice (mc_*): full-width strip (0, y-300, W, y+400), clipped to bounds.
+
+    Falls back to page 0 if no position or position_y=0.
+    Uploads as JPEG q85 to gs://{gcs_bucket}/crops/{upload_id}/{question_id}.jpg
+    Returns gs:// URI on success, None on any failure (fail-open: crop failure must not block grading).
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+
+    position = question.get('position') or {}
+    pos_y = float(position.get('y', 0.0))
+
+    # Use first image as source (page 0 fallback)
+    source_bytes = image_bytes_list[0] if image_bytes_list else None
+    if not source_bytes or source_bytes == b'placeholder':
+        return None
+
+    try:
+        img = Image.open(io.BytesIO(source_bytes))
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        W, H = img.size
+
+        # Convert relative y to pixel coordinate
+        py = int(pos_y * H)
+
+        qtype = question.get('type', 'fill_blank')
+        if qtype == 'multiple_choice':
+            top = max(0, py - 300)
+            bottom = min(H, py + 400)
+        else:
+            top = max(0, py - 200)
+            bottom = min(H, py + 200)
+
+        # Full-width strip
+        cropped = img.crop((0, top, W, bottom))
+        buf = io.BytesIO()
+        cropped.save(buf, format='JPEG', quality=85)
+        crop_bytes = buf.getvalue()
+    except Exception as exc:
+        logger.warning('omo_grader crop failed for %s q=%s: %s', upload_id, question_id, exc)
+        return None
+
+    # Upload to GCS
+    bucket_name = gcs_bucket or os.environ.get("GCS_OMO_BUCKET", "lingoleap-omo-uploads")
+    object_path = f'crops/{upload_id}/{question_id}.jpg'
+    try:
+        from google.cloud import storage  # type: ignore[import]
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(object_path)
+        blob.upload_from_string(crop_bytes, content_type='image/jpeg')
+        gs_uri = f'gs://{bucket_name}/{object_path}'
+        logger.info('omo_grader: uploaded crop %s', gs_uri)
+        return gs_uri
+    except ImportError:
+        logger.debug('google-cloud-storage not available — skipping crop upload (local dev)')
+        return None
+    except Exception as exc:
+        logger.warning('omo_grader: GCS crop upload failed for %s: %s', object_path, exc)
+        return None
+
+
+_crop_and_upload_answer_image = _crop_and_upload
+
+
 async def grade_worksheet_images(
     image_bytes_list: list[bytes],
     mime_types: list[str],
     lesson: dict,
     attempt_id: Optional[int] = None,
+    upload_id: Optional[int] = None,
 ) -> list[GradedAnswer]:
     """Grade worksheet images against the lesson YAML schema.
 
@@ -319,6 +401,7 @@ async def grade_worksheet_images(
         mime_types: Corresponding MIME types.
         lesson: Lesson dict from lesson_loader (contains fill_in_blank, MCQ, etc.).
         attempt_id: The OmoUploadAttempt.id to record as source_attempt_id.
+        upload_id: The OmoUpload.id used for crop provenance object paths.
 
     Returns:
         List of GradedAnswer objects, one per question.
@@ -514,6 +597,26 @@ async def grade_worksheet_images(
             lesson.get("title", "unknown"),
         )
 
+    # Crop provenance: upload image strips for each non-empty answered question
+    # when the caller provides a real upload id.
+    if upload_id is not None:
+        for result in results:
+            if not (result.student_answer or "").strip():
+                continue
+            if not result.position or not image_bytes_list:
+                continue
+            q_info = {
+                'type': 'multiple_choice' if result.question_id.startswith('mc_') else 'fill_blank',
+                'position': result.position,
+            }
+            gs_uri = _crop_and_upload(
+                image_bytes_list,
+                q_info,
+                upload_id,
+                result.question_id,
+            )
+            result.crop_image_url = gs_uri
+
     logger.info(
         "OMO grader: graded %d/%d questions for lesson '%s'",
         len(results),
@@ -533,6 +636,7 @@ def _mock_grades(questions: list[dict], attempt_id: Optional[int]) -> list[Grade
             score=1.0,
             ai_confidence=0.9,
             reasoning="本地開發模式：模擬批改結果",
+            crop_image_url=None,
             source_attempt_id=attempt_id,
         )
         for q in questions

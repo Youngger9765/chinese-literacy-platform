@@ -44,6 +44,7 @@ export interface OmoAnswerItem {
   reasoning: string;
   source_attempt_id?: number | null;
   position?: { x: number; y: number } | null;
+  crop_image_url?: string | null;
   flag?: { flagged_by: number; reason: string; flagged_at: string } | null;
 }
 
@@ -83,6 +84,24 @@ export interface OmoFlagResponse {
   upload_id: number;
   question_id: string;
   flagged: boolean;
+}
+
+export interface OmoSignedImageInfo {
+  attempt_id: number;
+  index: number;
+  url?: string | null;
+}
+
+export interface OmoPriorUploadResponse {
+  upload_id?: number | null;
+  status?: OmoStatus | null;
+  has_prior_upload: boolean;
+  images: OmoSignedImageInfo[];
+}
+
+export interface OmoSignedUrlResponse {
+  url?: string | null;
+  expires_in_seconds: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -223,4 +242,50 @@ export async function getOmoLessons(token: string): Promise<OmoLessonSummary[]> 
     throw new Error(`Lessons fetch failed (${res.status}): ${text}`);
   }
   return res.json() as Promise<OmoLessonSummary[]>;
+}
+
+export async function getPriorOmoUploadByLesson(
+  lessonId: number,
+  token: string,
+): Promise<OmoPriorUploadResponse> {
+  const res = await fetch(`${API_BASE}/api/omo/by-lesson/${lessonId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Prior upload fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<OmoPriorUploadResponse>;
+}
+
+export async function getOmoImageSignedUrl(
+  uploadId: number,
+  attemptId: number,
+  index: number,
+  token: string,
+): Promise<OmoSignedUrlResponse> {
+  const res = await fetch(`${API_BASE}/api/omo/${uploadId}/images/${attemptId}/${index}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Image fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<OmoSignedUrlResponse>;
+}
+
+export async function getOmoCropSignedUrl(
+  uploadId: number,
+  questionId: string,
+  token: string,
+): Promise<OmoSignedUrlResponse> {
+  const res = await fetch(
+    `${API_BASE}/api/omo/${uploadId}/crops/${encodeURIComponent(questionId)}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Crop fetch failed (${res.status}): ${text}`);
+  }
+  return res.json() as Promise<OmoSignedUrlResponse>;
 }
