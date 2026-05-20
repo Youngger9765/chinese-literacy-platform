@@ -213,46 +213,22 @@ vocab_bank:
   I: 暗無天日
   J: 地力耗盡
 fill_in_blank:
-- id: 1
+- sentence: '做一個瓷器要經過十幾道（　　），每一道都要小心處理。'
   answer: D
-  answer_word: 工序
-  context_before: 做一個瓷器要經過十幾道
-  context_after: ，每一道都要小心處理
-- id: 2
+- sentence: 'AI可以幫忙處理很多事情而（　　），世界各地的人都在使用AI。'
   answer: A
-  answer_word: 風靡全球
-  context_before: AI可以幫忙處理很多事情而
-  context_after: ，世界各地的人都在使用AI
-- id: 3
+- sentence: '被剝削的漁工在船上過著（　　）的生活，非常痛苦。'
   answer: I
-  answer_word: 暗無天日
-  context_before: 被剝削的漁工在船上過著
-  context_after: 的生活，非常痛苦
-- id: 4
+- sentence: '每天早晨喝到熱騰騰的咖啡，是我生活中最簡單的（　　）。'
   answer: B
-  answer_word: 小確幸
-  context_before: 每天早晨喝到熱騰騰的咖啡，是我生活中最簡單的
-  context_after: ''
-- id: 5
+- sentence: '辦理出國簽證的手續非常（　　），需要準備很多資料。'
   answer: C
-  answer_word: 繁瑣
-  context_before: 辦理出國簽證的手續非常
-  context_after: ，需要準備很多資料
-- id: 6
+- sentence: '他打兩份工，每天辛苦只為了（　　），讓孩子生活無虞。'
   answer: E
-  answer_word: 養家活口
-  context_before: 他打兩份工，每天辛苦只為了
-  context_after: ，讓孩子生活無虞
-- id: 7
+- sentence: '炎熱的夏天他提著（　　）的行李，一步步走上樓梯，揮汗如雨。'
   answer: F
-  answer_word: 沈甸甸
-  context_before: 炎熱的夏天他提著
-  context_after: 的行李，一步步走上樓梯，揮汗如雨
-- id: 8
+- sentence: '這家餐廳（　　）使用天然食材，吸引很多看重健康的顧客。'
   answer: G
-  answer_word: 標榜
-  context_before: 這家餐廳
-  context_after: 使用天然食材，吸引很多看重健康的顧客
 fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈你已經學會用「一連串因果」整理事件的脈絡，接著，我們就來整理本課的重點嘍！
 

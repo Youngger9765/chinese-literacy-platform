@@ -127,49 +127,25 @@ vocab_bank:
   F: 支離破碎
   G: 一目了然
   H: 掛一漏萬
-  I: 天各一
+  I: 天各一󠇢方
   J: 耐人尋味
 fill_in_blank:
-- id: 1
+- sentence: '從飛機上往下看台北市，街燈（　　），整個城市看起來閃閃發亮。'
   answer: B
-  answer_word: 星羅棋布
-  context_before: 從飛機上往下看台北市，街燈
-  context_after: ，整個城市看起來閃閃發亮
-- id: 2
+- sentence: '放眼望去，山脈一座接著一座，（　　）到遠方，看不到盡頭。'
   answer: E
-  answer_word: 綿延
-  context_before: 放眼望去，山脈一座接著一座，
-  context_after: 到遠方，看不到盡頭
-- id: 3
+- sentence: '老師提醒我們，整理筆記時不要（　　），重要資訊都要記錄下來。'
   answer: H
-  answer_word: 掛一漏萬
-  context_before: 老師提醒我們，整理筆記時不要
-  context_after: ，重要資訊都要記錄下來
-- id: 4
+- sentence: '老師用圖表整理重點，整個內容（　　），非常清楚。'
   answer: G
-  answer_word: 一目了然
-  context_before: 老師用圖表整理重點，整個內容
-  context_after: ，非常清楚
-- id: 5
+- sentence: '飛機起飛後，窗外是一片（　　）的雲海，非常美麗。'
   answer: A
-  answer_word: 廣闊無垠
-  context_before: 飛機起飛後，窗外是一片
-  context_after: 的雲海，非常美麗
-- id: 6
+- sentence: '在這次合作中，他的角色（　　），負責最關鍵工作，。'
   answer: C
-  answer_word: 舉足輕重
-  context_before: 在這次合作中，他的角色
-  context_after: ，負責最關鍵工作，
-- id: 7
+- sentence: '讀書如果只記零散的重點，沒有整理，理解就會變得（　　），容易遺忘。'
   answer: F
-  answer_word: 支離破碎
-  context_before: 讀書如果只記零散的重點，沒有整理，理解就會變得
-  context_after: ，容易遺忘
-- id: 8
+- sentence: '他在比賽中展現出（　　）的球技，讓全場觀眾不斷拍手叫好。'
   answer: D
-  answer_word: 精湛
-  context_before: 他在比賽中展現出
-  context_after: 的球技，讓全場觀眾不斷拍手叫好
 fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈
 
