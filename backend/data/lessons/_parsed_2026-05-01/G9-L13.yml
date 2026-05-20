@@ -153,42 +153,23 @@ vocab_bank:
   G: 峰迴路轉
   H: 心理韌性
 fill_in_blank:
-- id: 1
+- sentence: '他經歷一段低潮後，終於（　　），順利找到理想的工作與方向。'
   answer: E
-  answer_word: 否極泰來
-  context_before: 他經歷一段低潮後，終於
-  context_after: ，順利找到理想的工作與方向
-- id: 2
+- sentence: '正當大家以為兇手是他，電影情節突然（　　），他反而變成受害者。'
   answer: G
-  answer_word: 峰迴路轉
-  context_before: 正當大家以為兇手是他，電影情節突然
-  context_after: ，他反而變成受害者
-- id: 3
+- sentence: '他在科學實驗中歷經無數失敗，依然（　　）的嘗試，最終發現了突破性的成果。'
   answer: C
-  answer_word: 百折不撓
-  context_before: 他在科學實驗中歷經無數失敗，依然
-  context_after: 的嘗試，最終發現了突破性的成果
-- id: 5
+- sentence: '擁有良好的（　　），能讓人在困難中保持冷靜，並找到重新前進的方向。'
+  answer: H
+- sentence: '面對錯誤，他選擇努力改變，而不是（　　）的陷在後悔之中，這才是真正的成長。'
   answer: D
-  answer_word: 自怨自艾
-  context_before: 面對錯誤，他選擇努力改變，而不是
-  context_after: 的陷在後悔之中，這才是真正的成長
-- id: 6
+- sentence: '他沒有把失敗 （　　）於同伴，而是冷靜的檢討自己不足之處，準備重新出發。'
   answer: F
-  answer_word: 歸咎
-  context_before: 他沒有把失敗
-  context_after: 於同伴，而是冷靜的檢討自己不足之處，準備重新出發
-- id: 7
+- sentence: '他等待比賽結果公布的那一刻，心中（　　），連呼吸都變得急促起來。'
   answer: A
-  answer_word: 忐忑難安
-  context_before: 他等待比賽結果公布的那一刻，心中
-  context_after: ，連呼吸都變得急促起來
-- id: 8
+- sentence: '醫生全力搶救，但病情惡化太快，病人終究（　　），讓家屬悲痛不已。'
   answer: B
-  answer_word: 迴天乏術
-  context_before: 醫生全力搶救，但病情惡化太快，病人終究
-  context_after: ，讓家屬悲痛不已
-fill_in_blank_count: 7
+fill_in_blank_count: 8
 worksheet_section_order:
 - number: 二
   name: 念順順
