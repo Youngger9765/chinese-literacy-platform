@@ -611,6 +611,7 @@ def _synthesize_gemini(text: str) -> bytes:
             contents=tts_contents,
             config=genai_types.GenerateContentConfig(
                 response_modalities=["AUDIO"],
+                thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
                 speech_config=genai_types.SpeechConfig(
                     voice_config=genai_types.VoiceConfig(
                         prebuilt_voice_config=genai_types.PrebuiltVoiceConfig(
