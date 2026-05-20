@@ -24,7 +24,8 @@ from pathlib import Path
 
 import yaml
 
-from .ai_base import _get_client, _repair_json, GeminiContentFilterError
+from .ai_base import _repair_json, GeminiContentFilterError
+from .llm_models import get_model_for_task
 
 logger = logging.getLogger(__name__)
 
@@ -341,17 +342,19 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
         logger.error("No OMO lessons loaded — cannot identify")
         return []
 
-    client = _get_client()
+    _identifier_model, _identifier_location = get_model_for_task("omo_identifier")
     prompt = _build_identification_prompt(lessons)
 
     # Encode image for inline content part
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
     try:
+        from google import genai
         from google.genai import types as genai_types
 
+        client = genai.Client(vertexai=True, project="lingoleap-dev", location=_identifier_location)
         response = await client.aio.models.generate_content(
-            model="gemini-flash-lite-latest",
+            model=_identifier_model,
             contents=[
                 genai_types.Content(
                     role="user",
