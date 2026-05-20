@@ -111,6 +111,7 @@ async def generate_socratic_question(
             system_instruction=system_prompt,
             max_output_tokens=128,
             temperature=0.7,
+            thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
         ),
     )
     # Guard against safety filter before accessing response.text (#526)

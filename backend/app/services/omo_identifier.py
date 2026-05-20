@@ -372,6 +372,7 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
             config=genai_types.GenerateContentConfig(
                 temperature=0.1,  # Low temperature for deterministic identification
                 max_output_tokens=3072,  # bumped 2048→3072: terse prompt still needs buffer for 158-lesson corpus
+                thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
             ),
         )
 
