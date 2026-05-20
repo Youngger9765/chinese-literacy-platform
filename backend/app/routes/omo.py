@@ -75,7 +75,9 @@ class AnswerFlagInfo(BaseModel):
 class AnswerItem(BaseModel):
     question_id: str
     student_answer: str
-    correct_answer: str
+    # Optional: multiple_choice questions can have answer=null (no correct answer
+    # in YAML — used for open-ended questions like mc_2 in L24).
+    correct_answer: Optional[str] = None
     score: float
     ai_confidence: float
     reasoning: str
