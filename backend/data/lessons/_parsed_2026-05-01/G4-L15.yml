@@ -159,46 +159,22 @@ vocab_bank:
   H: 心跳漏了一拍
   I: 瞬間
 fill_in_blank:
-- id: 1
+- sentence: '多年後，她贏得冠軍的燦爛笑容仍然在我（　　）揮之不去。'
   answer: D
-  answer_word: 腦海
-  context_before: 多年後，她贏得冠軍的燦爛笑容仍然在我
-  context_after: 揮之不去
-- id: 2
+- sentence: '迷路的他，站在人來人往的車站中，頓時感到一陣（　　）。'
   answer: A
-  answer_word: 茫然
-  context_before: 迷路的他，站在人來人往的車站中，頓時感到一陣
-  context_after: ''
-- id: 3
+- sentence: '他努力想解開和朋友的誤會，但卻緊張的（　　）說不清楚。'
   answer: G
-  answer_word: 結結巴巴
-  context_before: 他努力想解開和朋友的誤會，但卻緊張的
-  context_after: 說不清楚
-- id: 4
+- sentence: '這部電影的某些 （　　）並不適合年幼的兒童觀賞。'
   answer: C
-  answer_word: 片段
-  context_before: 這部電影的某些
-  context_after: 並不適合年幼的兒童觀賞
-- id: 5
+- sentence: '他開了一個誇張的玩笑，所有人的（　　）都集中在他身上。'
   answer: B
-  answer_word: 目光
-  context_before: 他開了一個誇張的玩笑，所有人的
-  context_after: 都集中在他身上
-- id: 6
+- sentence: '集訓結束後，老師（　　）的一句肯定和鼓勵，讓我開心了一整個暑假。'
   answer: E
-  answer_word: 不經意
-  context_before: 集訓結束後，老師
-  context_after: 的一句肯定和鼓勵，讓我開心了一整個暑假
-- id: 7
+- sentence: '當他突然接到爸爸出車禍的壞消息時，表情（　　）轉為沉重。'
   answer: I
-  answer_word: 瞬間
-  context_before: 當他突然接到爸爸出車禍的壞消息時，表情
-  context_after: 轉為沉重
-- id: 8
+- sentence: '聽到「立正！」時，他（　　）挺直了腰桿，顯得很有精神。'
   answer: F
-  answer_word: 不自覺
-  context_before: 聽到「立正！」時，他
-  context_after: 挺直了腰桿，顯得很有精神
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈的練習，下列何者對待感情的態度較為合適？ \nA.小新：交朋友不需要想太多，反正船到橋頭自然直\nB.大雄：為了避免被他人誤會，保持適當距離比較安全\nC.柯南：友情和愛情必須有很清楚的界線，一看就知道\nD.小智：比起為關係命名，更重要的是了解自己的感受\n（ A ）5. 關於本文的行為與心理感受描述，下列詮釋何者正確？ \n38100263525\n(B)是驚喜與害羞\n(C)是突顯心中的暖意\n(D)是指心煩意亂00\n(B)是驚喜與害羞\n(C)是突顯心中的暖意\n(D)是指心煩意亂A.「像是在腦袋裡播一部只屬於自己的小電影（第五段）」──表達心中對美好回憶的陶醉\nB.「像心臟被什麼輕輕撞了一下（第三段）」──表示受到攻擊而委屈\nC.「像被陽光輕輕照到一樣（第五段）」──突顯作者因害羞而臉紅\nD.「我覺得我的腦袋要炸掉了（第六段）」──是指作者出現頭痛症狀\n75517573405"
 strategy_exercise:

@@ -195,31 +195,16 @@ vocab_bank:
   D: 不可逆
   E: 負成長
 fill_in_blank:
-- id: 1
+- sentence: '他因為沉迷遊戲，荒廢課業，導致成績（　　）。'
   answer: B
-  answer_word: 每況愈下
-  context_before: 他因為沉迷遊戲，荒廢課業，導致成績
-  context_after: ''
-- id: 2
+- sentence: '村莊經過暴風雨的（　　），房屋都被摧毀了'
   answer: C
-  answer_word: 蹂躪
-  context_before: 村莊經過暴風雨的
-  context_after: ，房屋都被摧毀了
-- id: 3
+- sentence: '最近幾個月，我們公司的業績出現了（　　），銷售額比去年同期少了三成，許多員工被迫裁員。'
   answer: E
-  answer_word: 負成長
-  context_before: 最近幾個月，我們公司的業績出現了
-  context_after: ，銷售額比去年同期少了三成，許多員工被迫裁員
-- id: 4
+- sentence: '生命中的某些決定是（　　）的，我們必須慎重考慮。'
   answer: D
-  answer_word: 不可逆
-  context_before: 生命中的某些決定是
-  context_after: 的，我們必須慎重考慮
-- id: 5
+- sentence: '如果我們對社會上發生的壞事件 （　　），可能會導致人們越來越冷漠。'
   answer: A
-  answer_word: 視而不見
-  context_before: 如果我們對社會上發生的壞事件
-  context_after: ，可能會導致人們越來越冷漠
 fill_in_blank_count: 5
 spotlight_raw_text: '閱讀聚光燈
 

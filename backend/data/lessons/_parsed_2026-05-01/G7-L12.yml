@@ -200,48 +200,24 @@ vocab_bank:
   F: 觸犯
   G: 保護令
   H: 死纏爛打
-  I: 精誠所至
+  I: 精誠所至，金石為開
 fill_in_blank:
-- id: 1
+- sentence: '做科展過程雖然艱辛，但她以（　　）的態度完成了研究。'
   answer: C
-  answer_word: 鍥而不捨
-  context_before: 做科展過程雖然艱辛，但她以
-  context_after: 的態度完成了研究
-- id: 2
+- sentence: '明天要上台報告，他很焦慮，一整晚（　　）。'
   answer: B
-  answer_word: 輾轉難眠
-  context_before: 明天要上台報告，他很焦慮，一整晚
-  context_after: ''
-- id: 3
+- sentence: '經歷那場火災後，他變得像（　　），一聽到警鈴就害怕。'
   answer: A
-  answer_word: 驚弓之鳥
-  context_before: 經歷那場火災後，他變得像
-  context_after: ，一聽到警鈴就害怕
-- id: 4
+- sentence: '她的前男友（　　），使她不得不報警以保護自己。'
   answer: H
-  answer_word: 死纏爛打
-  context_before: 她的前男友
-  context_after: ，使她不得不報警以保護自己
-- id: 5
+- sentence: '她不懂得與人相處的（　　），常讓人覺得不舒服。'
   answer: E
-  answer_word: 界線
-  context_before: 她不懂得與人相處的
-  context_after: ，常讓人覺得不舒服
-- id: 6
+- sentence: '丈夫對她家暴，她只能向法院申請（　　），以避免遭到傷害。'
   answer: G
-  answer_word: 保護令
-  context_before: 丈夫對她家暴，她只能向法院申請
-  context_after: ，以避免遭到傷害
-- id: 7
+- sentence: '他開車肇事逃逸的行為已經（　　）了法律，因此被法院定罪。'
   answer: F
-  answer_word: 觸犯
-  context_before: 他開車肇事逃逸的行為已經
-  context_after: 了法律，因此被法院定罪
-- id: 8
+- sentence: '看見暗戀的人走來，他不禁（　　），臉紅到了耳根。'
   answer: D
-  answer_word: 怦然心動
-  context_before: 看見暗戀的人走來，他不禁
-  context_after: ，臉紅到了耳根
 fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈你已經學會怎麼推論作者的觀點和目的，接著，我們就來完整的整理本課的重點嘍！
 

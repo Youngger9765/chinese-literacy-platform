@@ -153,39 +153,24 @@ story_structure_rows:
 story_structure_table_source: ai-generated-2026-05-02
 vocab_bank:
   A: 如魚得水
-  B: 沉著
+  B: 沉著󠇤
   C: 質疑
   D: 傾訴
-  E: 扳回一
-  F: 獨當一
+  E: 扳回一󠇢城
+  F: 獨當一󠇡面
   G: 雕琢
   H: 心力交瘁
 fill_in_blank:
-- id: 1
+- sentence: '性情穩重的人，做事（　　），絕不急躁。'
   answer: B
-  answer_word: 沉著
-  context_before: 性情穩重的人，做事
-  context_after: ，絕不急躁
-- id: 2
+- sentence: '經過多年努力，他從一個小職員，終於晉升為可以（　　）的主管。'
   answer: F
-  answer_word: 獨當一
-  context_before: 經過多年努力，他從一個小職員，終於晉升為可以
-  context_after: 的主管
-- id: 3
+- sentence: '在這局比賽中，教練使用打帶跑戰術，終於使我隊（　　）。'
   answer: E
-  answer_word: 扳回一
-  context_before: 在這局比賽中，教練使用打帶跑戰術，終於使我隊
-  context_after: ''
-- id: 4
+- sentence: '你就像一塊璞玉，擁有無限可能，但是要自己的努力將它（　　）出來。'
   answer: G
-  answer_word: 雕琢
-  context_before: 你就像一塊璞玉，擁有無限可能，但是要自己的努力將它
-  context_after: 出來
-- id: 5
+- sentence: '這份工作他做起來得心應手，（　　）。'
   answer: A
-  answer_word: 如魚得水
-  context_before: 這份工作他做起來得心應手，
-  context_after: ''
 fill_in_blank_count: 5
 本課語詞:
 - 獨當一󠇡面

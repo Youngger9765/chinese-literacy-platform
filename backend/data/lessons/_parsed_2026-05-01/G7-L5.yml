@@ -175,51 +175,24 @@ vocab_bank:
   F: 躡手躡腳
   G: 典型
 fill_in_blank:
-- id: 1
+- sentence: '老師這番話（　　）了許多人生哲理，值得我們深思。'
   answer: A
-  answer_word: 蘊含
-  context_before: 老師這番話
-  context_after: 了許多人生哲理，值得我們深思
-- id: 2
+- sentence: '面對臺海危機，民眾們（　　）起來，捍衛國家的主權。'
   answer: B
-  answer_word: 動員
-  context_before: 面對臺海危機，民眾們
-  context_after: 起來，捍衛國家的主權
-- id: 3
+- sentence: '風一吹，卡在樹枝上的塑膠袋就發出（　　）的聲音。'
   answer: E
-  answer_word: 窸窸窣窣
-  context_before: 風一吹，卡在樹枝上的塑膠袋就發出
-  context_after: 的聲音
-- id: 4
+- sentence: '這個問題，他（　　）了一整夜，終於找到兩全其美的方法了。'
   answer: C
-  answer_word: 琢磨
-  context_before: 這個問題，他
-  context_after: 了一整夜，終於找到兩全其美的方法了
-- id: 5
+- sentence: '「人有（　　），月有陰晴圓缺，此事古難全。」是宋朝．蘇軾〈水調歌頭．明月幾時有〉的詞。'
   answer: D
-  answer_word: 悲歡離合
-  context_before: 「人有
-  context_after: ，月有陰晴圓缺，此事古難全。」是宋朝．蘇軾〈水調歌頭．明月幾時有〉的詞
-- id: 6
+- sentence: '選舉期間，候選人幾乎（　　）了所有的親朋好友幫忙拉票。'
   answer: B
-  answer_word: 動員
-  context_before: 選舉期間，候選人幾乎
-  context_after: 了所有的親朋好友幫忙拉票
-- id: 7
+- sentence: '午休時間，他（　　）的去上廁所，擔心吵醒睡著的同學。'
   answer: F
-  answer_word: 躡手躡腳
-  context_before: 午休時間，他
-  context_after: 的去上廁所，擔心吵醒睡著的同學
-- id: 8
+- sentence: '醫生從他腹瀉、腹痛、噁心和嘔吐的情形判斷，他感染諾羅病毒的機率很大，這些都是感染諾羅病毒（　　）的症狀。'
   answer: G
-  answer_word: 典型
-  context_before: 醫生從他腹瀉、腹痛、噁心和嘔吐的情形判斷，他感染諾羅病毒的機率很大，這些都是感染諾羅病毒
-  context_after: 的症狀
-- id: 9
+- sentence: '人生充滿了（　　），每一次的相聚和分別都讓人感慨萬千，所以我們要學習珍惜當下。'
   answer: D
-  answer_word: 悲歡離合
-  context_before: 人生充滿了
-  context_after: ，每一次的相聚和分別都讓人感慨萬千，所以我們要學習珍惜當下
 fill_in_blank_count: 9
 spotlight_raw_text: '閱讀聚光燈
 

@@ -193,41 +193,20 @@ vocab_bank:
   G: 有條不紊
   H: 貴人相助
 fill_in_blank:
-- id: 1
+- sentence: '創業失敗後，他沒有（　　）於環境，而是反思自己的不足。'
   answer: B
-  answer_word: 歸咎
-  context_before: 創業失敗後，他沒有
-  context_after: 於環境，而是反思自己的不足
-- id: 2
+- sentence: '她在考試前做好計畫，（　　）的複習每一個重點，最後獲得好成績。'
   answer: G
-  answer_word: 有條不紊
-  context_before: 她在考試前做好計畫，
-  context_after: 的複習每一個重點，最後獲得好成績
-- id: 3
+- sentence: '這位作家的文筆（　　）有趣，讓讀者閱讀時忍不住發笑。'
   answer: A
-  answer_word: 詼諧
-  context_before: 這位作家的文筆
-  context_after: 有趣，讓讀者閱讀時忍不住發笑
-- id: 4
+- sentence: '經過多年努力，他從一名害羞的學生（　　）為優秀的演講者。'
   answer: E
-  answer_word: 蛻變
-  context_before: 經過多年努力，他從一名害羞的學生
-  context_after: 為優秀的演講者
-- id: 5
+- sentence: '疫情時，店裡的生意一落千丈，多虧有（　　），幫助他度過難關。'
   answer: H
-  answer_word: 貴人相助
-  context_before: 疫情時，店裡的生意一落千丈，多虧有
-  context_after: ，幫助他度過難關
-- id: 6
+- sentence: '他在這次英文測驗中（　　），名列前茅。'
   answer: F
-  answer_word: 脫穎而出
-  context_before: 他在這次英文測驗中
-  context_after: ，名列前茅
-- id: 7
+- sentence: '他為了這場比賽，（　　）了無數的心血與努力，終於獲得了冠軍。'
   answer: D
-  answer_word: 傾注
-  context_before: 他為了這場比賽，
-  context_after: 了無數的心血與努力，終於獲得了冠軍
 fill_in_blank_count: 7
 spotlight_raw_text: "閱讀聚光燈\n觀點找支持理由\n    本課課文強調一個觀點：「幸運除了靠貴人相助，自己的努力也很重要」。為了讓這個觀點更有說服力，課文舉了好幾個支持這個觀點的支持理由。觀點和支持理由的關係，就像插圖中的桌子一樣，桌子要有腳才站得穩，觀點要有支持理由，才有說服力。\
   \ 底下說明什麼是觀點和支持理由：\n觀    點：就是對事情的看法、意見。\n支持理由：可以說服別人接受觀點的「證據（事實）」\n7556506477000\n\

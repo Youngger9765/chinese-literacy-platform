@@ -193,26 +193,24 @@ vocab_bank:
   A: 有所忌憚
   B: 冒犯
   C: 茶餘飯後
+  D: 一󠇡片譁然
   E: 凝視
   F: 陰霾
   G: 難以舉證
 fill_in_blank:
-- id: 2
+- sentence: '這件賄選案一經媒體揭發，輿論（　　）。'
+  answer: D
+- sentence: '我們一家喜歡在（　　）聊聊生活瑣事，分享彼此的看法。'
   answer: C
-  answer_word: 茶餘飯後
-  context_before: 我們一家喜歡在
-  context_after: 聊聊生活瑣事，分享彼此的看法
-- id: 3
+- sentence: '他專注地（　　）這幅畫，不發一語，不知道在思考什麼。'
   answer: E
-  answer_word: 凝視
-  context_before: 他專注地
-  context_after: 這幅畫，不發一語，不知道在思考什麼
-- id: 4
+- sentence: '看到她揮別往事，重拾往日笑容，終於走出（　　），真是替她開心。'
   answer: F
-  answer_word: 陰霾
-  context_before: 看到她揮別往事，重拾往日笑容，終於走出
-  context_after: ，真是替她開心
-fill_in_blank_count: 3
+- sentence: '今天火車站有警察巡邏，小偷（　　），不敢行竊。'
+  answer: A
+- sentence: '不敲門就闖進別人的家，是極為（　　）的行為。'
+  answer: B
+fill_in_blank_count: 6
 worksheet_section_order:
 - number: 二
   name: 念順順

@@ -224,3 +224,17 @@ lesson_intro:
   text: 本課探討「科學知識」主題，學習「摘要策略──主題描述結構」的閱讀方法。
   unit_topic: 科學知識
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L19.pdf
+fill_in_blank:
+- sentence: '這條山路（　　），充滿許多未知的危險，只有當地人才敢上山。'
+  answer: C
+- sentence: '小華訓練時遇到瓶頸，隨著比賽時間愈來愈近，焦慮和壓力（　　）的籠罩著他，讓他心煩意亂。'
+  answer: D
+- sentence: '在魔鬼般的訓練中，他經歷了（　　），終於成為一名優秀的運動員。'
+  answer: A
+- sentence: '在這部恐怖片中，導演巧妙的運用（　　），讓觀眾在看似可笑的劇情中，也對社會現況產生反思。'
+  answer: G
+- sentence: '這間醫院提供高品質的（　　），讓病人在生命的最後階段能夠得到溫暖和尊重。'
+  answer: F
+- sentence: '在小美的（　　）會上，好友在影片中再次看見小美的身影，想起和她的種種回憶，不禁流下眼淚。'
+  answer: B
+fill_in_blank_count: 6

@@ -241,3 +241,15 @@ worksheet_intro:
   lesson_label: 第9課  祝你好眠
   authors: 課文：林玫伶  學習單：張明珠
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L9.pdf
+fill_in_blank:
+- sentence: '良好的睡眠有助於身體的（　　），防止老化。'
+  answer: C
+- sentence: '爸爸喜愛在夜晚獨自（　　），釋放工作壓力。'
+  answer: B
+- sentence: '他每天熬夜打電動，導致白天上學時（　　），無法吸收新知。'
+  answer: A
+- sentence: '這篇文章經過老師的（　　）之後，顯得簡潔有力。'
+  answer: F
+- sentence: '日月潭風光秀麗，讓無數遊客（　　），讚嘆不已。'
+  answer: G
+fill_in_blank_count: 5

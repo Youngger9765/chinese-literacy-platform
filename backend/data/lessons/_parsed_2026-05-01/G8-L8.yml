@@ -190,45 +190,26 @@ vocab_bank:
   F: 懸殊
   G: 肆虐
   H: 抗體
-  I: 不堪一
+  I: 不堪一󠇢擊
   J: 撕心裂肺
 fill_in_blank:
-- id: 2
+- sentence: '（　　）小病竟然拖了這麼久，真令人煩惱。'
+  answer: A
+- sentence: '他的論點漏洞百出，一再被大眾質疑，簡直是（　　）。'
   answer: I
-  answer_word: 不堪一
-  context_before: 他的論點漏洞百出，一再被大眾質疑，簡直是
-  context_after: ''
-- id: 3
+- sentence: '網路上的謠言正在（　　），令人擔憂。'
   answer: C
-  answer_word: 蔓延
-  context_before: 網路上的謠言正在
-  context_after: ，令人擔憂
-- id: 4
+- sentence: '在國際談判中，我國代表團人數稀少，與其他大國相比顯得（　　），談判過程格外艱難。'
   answer: D
-  answer_word: 勢單力薄
-  context_before: 在國際談判中，我國代表團人數稀少，與其他大國相比顯得
-  context_after: ，談判過程格外艱難
-- id: 5
+- sentence: '戰火過後，死傷慘重（　　），百姓無家可歸。'
   answer: E
-  answer_word: 哀鴻遍野
-  context_before: 戰火過後，死傷慘重
-  context_after: ，百姓無家可歸
-- id: 6
+- sentence: '這場比賽雙方實力（　　），還沒開打便可預見結果。'
   answer: F
-  answer_word: 懸殊
-  context_before: 這場比賽雙方實力
-  context_after: ，還沒開打便可預見結果
-- id: 7
+- sentence: '打過疫苗，身體產生（　　），罹患新冠病毒的機率才會下降。'
   answer: H
-  answer_word: 抗體
-  context_before: 打過疫苗，身體產生
-  context_after: ，罹患新冠病毒的機率才會下降
-- id: 8
+- sentence: '她聽到媽媽過世的消息，心裡湧出（　　）的悲傷，忍不住痛哭失聲。'
   answer: J
-  answer_word: 撕心裂肺
-  context_before: 她聽到媽媽過世的消息，心裡湧出
-  context_after: 的悲傷，忍不住痛哭失聲
-fill_in_blank_count: 7
+fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n一連串因果\n    你有沒有想過，有些事情不是突然發生的，而是一件事接著一件事，像骨牌一樣推下去？我們讀的這篇課文〈隱形的征服者〉，就是這樣。    西班牙人只有168人，怎麼可能打敗8萬印加軍？答案不是因為他們比較厲害，而是印加帝國早就被其他事情打垮了。\n    這些事情不是同時發生的，而是一件接著一件來，形成「一連串因果關係」。\n　　在前一課：「讓你口中的甜蜜成為遠方農民的希望」我們學到了如何找出「一連串因果」，可以用❶～❹四個步驟，幫助你把文章裡的前因後果看得更清楚。現在我們再來練習看看吧！\n16395707620000\n\n推論本文的因果關係\n步驟❶──找事件\n1.問自己：這段文字提到的重要事件或現象？\n◎"
 strategy_exercise:
   type: guided_steps

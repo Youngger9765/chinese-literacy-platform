@@ -260,3 +260,15 @@ worksheet_intro:
   lesson_label: 第1課  運動傷害，怎麼辦？
   authors: 課文：吳漢庭  學習單：巫怡蓉
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L1.pdf
+fill_in_blank:
+- sentence: '他終究（　　）不住心中的悲傷，流下了眼淚。'
+  answer: G
+- sentence: '這件事經他適當的（　　）後，終於平安無事了。'
+  answer: C
+- sentence: '過年時鞭炮聲（　　），真是熱鬧。'
+  answer: F
+- sentence: '疫情期間，網路（　　）著許多不實的消息，一定要小心查證。'
+  answer: B
+- sentence: '他 （　　）的表情和動作，惹得眾人哄堂大笑。'
+  answer: A
+fill_in_blank_count: 5

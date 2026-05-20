@@ -168,46 +168,22 @@ vocab_bank:
   G: 耳邊風
   H: 使喚
 fill_in_blank:
-- id: 1
+- sentence: '這場比賽球員們頻頻失誤，（　　）的表現讓許多球迷大失所望。'
   answer: E
-  answer_word: 乏善可陳
-  context_before: 這場比賽球員們頻頻失誤，
-  context_after: 的表現讓許多球迷大失所望
-- id: 2
+- sentence: '他總喜歡（　　）學弟妹幫他跑腿，讓人覺得不太尊重。'
   answer: H
-  answer_word: 使喚
-  context_before: 他總喜歡
-  context_after: 學弟妹幫他跑腿，讓人覺得不太尊重
-- id: 3
+- sentence: '雖然第一局不幸失分，但隊長鼓勵大家不要（　　），繼續努力。'
   answer: F
-  answer_word: 垂頭喪氣
-  context_before: 雖然第一局不幸失分，但隊長鼓勵大家不要
-  context_after: ，繼續努力
-- id: 4
+- sentence: '因為肩膀的舊傷，他在高強度的冠亞軍賽時，感到十分（　　）。'
   answer: D
-  answer_word: 力不從心
-  context_before: 因為肩膀的舊傷，他在高強度的冠亞軍賽時，感到十分
-  context_after: ''
-- id: 5
+- sentence: '營養師一再警告青少年少喝含糖飲料，但許多人仍當成（　　）。'
   answer: G
-  answer_word: 耳邊風
-  context_before: 營養師一再警告青少年少喝含糖飲料，但許多人仍當成
-  context_after: ''
-- id: 6
+- sentence: '在段考前熬夜唸書，對他來說已是（　　），週末也幾乎沒有休息。'
   answer: A
-  answer_word: 家常便飯
-  context_before: 在段考前熬夜唸書，對他來說已是
-  context_after: ，週末也幾乎沒有休息
-- id: 7
+- sentence: '這份募款儘管 （　　），但也代表我們對流浪動物的一點心意。'
   answer: B
-  answer_word: 微不足道
-  context_before: 這份募款儘管
-  context_after: ，但也代表我們對流浪動物的一點心意
-- id: 8
+- sentence: '議員在院會上（　　）的詢問市長有關預算的問題，引起媒體關注。'
   answer: C
-  answer_word: 一針見血
-  context_before: 議員在院會上
-  context_after: 的詢問市長有關預算的問題，引起媒體關注
 fill_in_blank_count: 8
 本課語詞:
 - 乏善可陳

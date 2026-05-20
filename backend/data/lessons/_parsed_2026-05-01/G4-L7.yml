@@ -176,51 +176,27 @@ vocab_bank:
   D: 金風送爽
   E: 滴水穿石
   F: 萬紫千紅
-  G: 身材魁梧
+  G: 身材魁梧󠇠
   H: 囑咐
   I: 暑氣蒸人
   J: 敢怒不敢言
 fill_in_blank:
-- id: 1
+- sentence: '每當（　　）的時候，爺爺總是喜歡在院子裡喝茶，欣賞秋天的景色。'
   answer: D
-  answer_word: 金風送爽
-  context_before: 每當
-  context_after: 的時候，爺爺總是喜歡在院子裡喝茶，欣賞秋天的景色
-- id: 2
+- sentence: '他們吵架時，常常（　　），最後誰也不開心，兩人都很後悔。'
   answer: C
-  answer_word: 惡言相向
-  context_before: 他們吵架時，常常
-  context_after: ，最後誰也不開心，兩人都很後悔
-- id: 3
+- sentence: '妹妹學習游泳時，從基本動作開始（　　）的練習，最後能游完整個泳池。'
   answer: A
-  answer_word: 循序漸進
-  context_before: 妹妹學習游泳時，從基本動作開始
-  context_after: 的練習，最後能游完整個泳池
-- id: 4
+- sentence: '他每天都練習寫書法，終於像（　　）一樣，寫得越來越好。'
   answer: E
-  answer_word: 滴水穿石
-  context_before: 他每天都練習寫書法，終於像
-  context_after: 一樣，寫得越來越好
-- id: 5
+- sentence: '天氣冷了，媽媽（　　）我要加件外套。'
   answer: H
-  answer_word: 囑咐
-  context_before: 天氣冷了，媽媽
-  context_after: 我要加件外套
-- id: 6
+- sentence: '春天一到，百花盛開，一片（　　），美不勝收。'
   answer: F
-  answer_word: 萬紫千紅
-  context_before: 春天一到，百花盛開，一片
-  context_after: ，美不勝收
-- id: 7
+- sentence: '一聽到警笛聲，聚賭的一群人立即（　　），逃之夭夭。'
   answer: B
-  answer_word: 抱頭鼠竄
-  context_before: 一聽到警笛聲，聚賭的一群人立即
-  context_after: ，逃之夭夭
-- id: 8
+- sentence: '他們個個都是（　　）、強悍有力的士兵。'
   answer: G
-  answer_word: 身材魁梧
-  context_before: 他們個個都是
-  context_after: 、強悍有力的士兵
 fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈
 

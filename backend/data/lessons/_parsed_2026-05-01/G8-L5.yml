@@ -180,41 +180,20 @@ vocab_bank:
   H: 感同身受
   I: 好心沒好報
 fill_in_blank:
-- id: 1
+- sentence: '小明幫忙澆花，卻不小心打破花瓶，因而被同學責怪，真是（　　）。'
   answer: I
-  answer_word: 好心沒好報
-  context_before: 小明幫忙澆花，卻不小心打破花瓶，因而被同學責怪，真是
-  context_after: ''
-- id: 2
+- sentence: '聽到愛妻離世的消息，他（　　），久久不能平復悲傷的心情。'
   answer: F
-  answer_word: 悲痛欲絕
-  context_before: 聽到愛妻離世的消息，他
-  context_after: ，久久不能平復悲傷的心情
-- id: 3
+- sentence: '班級大掃除時，小美（　　）擔任組長，帶領大家分工合作。'
   answer: A
-  answer_word: 自告奮勇
-  context_before: 班級大掃除時，小美
-  context_after: 擔任組長，帶領大家分工合作
-- id: 4
+- sentence: '他遲到卻沒有被老師處罰，是因為遇上了突發的交通事故，（　　）。'
   answer: D
-  answer_word: 情有可原
-  context_before: 他遲到卻沒有被老師處罰，是因為遇上了突發的交通事故，
-  context_after: ''
-- id: 5
+- sentence: '馬路如虎口，如果大家不遵守交通規則，後果將（　　）。'
   answer: C
-  answer_word: 不堪設想
-  context_before: 馬路如虎口，如果大家不遵守交通規則，後果將
-  context_after: ''
-- id: 6
+- sentence: '雖然這次籃球比賽失敗了，但你不能（　　），放棄所有的練習。'
   answer: E
-  answer_word: 因噎廢食
-  context_before: 雖然這次籃球比賽失敗了，但你不能
-  context_after: ，放棄所有的練習
-- id: 7
+- sentence: '雖然考試不容易，但（　　），只要努力學習，一定能取得好成績。'
   answer: B
-  answer_word: 事在人為
-  context_before: 雖然考試不容易，但
-  context_after: ，只要努力學習，一定能取得好成績
 fill_in_blank_count: 7
 spotlight_raw_text: "閱讀聚光燈\n    你若在新聞裡看到「中學生墜樓輕生」或「國中學長霸凌新生」的標題，你難免就會想進一步了解「為什麼他（她）會做這件事？」也就是說，人們總是還會想進一步了解行為（如墜樓或霸凌）背後的「動機」。而在文章中，人物的動機可能會「明白的寫在文句裡（明示）」，但也可能「隱含在情節中」，要讀者自己推敲出來，例如：\n(1)明示：陳同學基於熱心抱顏同學到地下室上課。\n　　　　→陳同學抱顏同學到地下室的動機是熱心助人。\n(2)隱含：❶每當入秋，媽媽總是會在我出門前給我一件外套。\n　　　　→媽媽的動機：擔心我會冷。\n       ❷他今天帶了一把傘出門。\n　　　　→他的動機：擔心今天會下雨。／想拿傘遮擋陽光。\n2184404381500　　小叮嚀：隱含動機的答案可能不只一個，但要符合邏輯，合理推論，才能令人信服。\n    因此，推測行為背後的動機時，我們需要掌握故事背景、人物間的關係和人物的特質，才能做出合理的推論，這可以讓我們更了解文章內容喔！\n◎"
 strategy_exercise:
