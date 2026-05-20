@@ -186,46 +186,22 @@ vocab_bank:
   I: 懊悔
   J: 士氣
 fill_in_blank:
-- id: 1
+- sentence: '接獲老師生病過世的消息，教室裡（　　）著悲傷的氣氛，許多人都默默拭淚。'
   answer: G
-  answer_word: 瀰漫
-  context_before: 接獲老師生病過世的消息，教室裡
-  context_after: 著悲傷的氣氛，許多人都默默拭淚
-- id: 2
+- sentence: '冠亞軍賽結果出爐，現場歡呼聲（　　），球迷們雀躍的互相擁抱。'
   answer: E
-  answer_word: 震耳欲聾
-  context_before: 冠亞軍賽結果出爐，現場歡呼聲
-  context_after: ，球迷們雀躍的互相擁抱
-- id: 3
+- sentence: '早期的傳染病經常被解釋成有妖魔鬼怪在（　　），危害百姓健康。'
   answer: F
-  answer_word: 作祟
-  context_before: 早期的傳染病經常被解釋成有妖魔鬼怪在
-  context_after: ，危害百姓健康
-- id: 4
+- sentence: '餐廳販賣過期商品的新聞一出，網路負評（　　）而來，讓老闆不得不暫時關閉社群媒體。'
   answer: I
-  answer_word: 懊悔
-  context_before: 餐廳販賣過期商品的新聞一出，網路負評
-  context_after: 而來，讓老闆不得不暫時關閉社群媒體
-- id: 5
+- sentence: '儘管他們前面接棒失誤連連，仍在最後一刻（　　），拿下冠軍。'
   answer: D
-  answer_word: 扳回一城
-  context_before: 儘管他們前面接棒失誤連連，仍在最後一刻
-  context_after: ，拿下冠軍
-- id: 6
+- sentence: '祭典時，長老一聲（　　），眾人便一起高聲回應，場面十分震撼。'
   answer: H
-  answer_word: 吆喝
-  context_before: 祭典時，長老一聲
-  context_after: ，眾人便一起高聲回應，場面十分震撼
-- id: 7
+- sentence: '校慶大隊接力，跑道上的選手們個個摩拳擦掌、 （　　）。'
   answer: C
-  answer_word: 蓄勢待發
-  context_before: 校慶大隊接力，跑道上的選手們個個摩拳擦掌、
-  context_after: ''
-- id: 8
+- sentence: '那條重要的運河讓周圍國家（　　），卻因情勢複雜，誰都不敢輕舉妄動。'
   answer: A
-  answer_word: 虎視眈眈
-  context_before: 那條重要的運河讓周圍國家
-  context_after: ，卻因情勢複雜，誰都不敢輕舉妄動
 fill_in_blank_count: 8
 本課語詞:
 - 瀰漫

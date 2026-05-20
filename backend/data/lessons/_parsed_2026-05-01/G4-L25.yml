@@ -183,46 +183,22 @@ vocab_bank:
   G: 輸人一截
   H: 突如其來
 fill_in_blank:
-- id: 1
+- sentence: '手機（　　）為生活帶來許多便利，也可能造成專注力下降的問題。'
   answer: A
-  answer_word: 固然
-  context_before: 手機
-  context_after: 為生活帶來許多便利，也可能造成專注力下降的問題
-- id: 2
+- sentence: '他（　　）的演技，讓台下的觀眾目不轉睛，也因此獲得許多好評。'
   answer: C
-  answer_word: 精湛
-  context_before: 他
-  context_after: 的演技，讓台下的觀眾目不轉睛，也因此獲得許多好評
-- id: 3
+- sentence: '考試前夕，（　　）提早就寢，讓大腦消化和運用知識更有效率。'
   answer: B
-  answer_word: 不妨
-  context_before: 考試前夕，
-  context_after: 提早就寢，讓大腦消化和運用知識更有效率
-- id: 4
+- sentence: '他做事（　　），又常推卸責任，讓同組同學都感到氣憤不已。'
   answer: D
-  answer_word: 馬虎
-  context_before: 他做事
-  context_after: ，又常推卸責任，讓同組同學都感到氣憤不已
-- id: 5
+- sentence: '「健康」是探索世界的（　　），唯有顧好身體，才能走得更遠。'
   answer: E
-  answer_word: 本錢
-  context_before: 「健康」是探索世界的
-  context_after: ，唯有顧好身體，才能走得更遠
-- id: 6
+- sentence: '保持良好人際關係的（　　），其實就是多傾聽與尊重他人。'
   answer: F
-  answer_word: 祕訣
-  context_before: 保持良好人際關係的
-  context_after: ，其實就是多傾聽與尊重他人
-- id: 7
+- sentence: '面對同學（　　）的公開告白，他一時不知所措，惹得全班哄堂大笑。'
   answer: H
-  answer_word: 突如其來
-  context_before: 面對同學
-  context_after: 的公開告白，他一時不知所措，惹得全班哄堂大笑
-- id: 8
+- sentence: '在籃球場上，我們的默契明顯（　　），也因此最終無緣晉級。'
   answer: G
-  answer_word: 輸人一截
-  context_before: 在籃球場上，我們的默契明顯
-  context_after: ，也因此最終無緣晉級
 fill_in_blank_count: 8
 本課語詞:
 - 精湛

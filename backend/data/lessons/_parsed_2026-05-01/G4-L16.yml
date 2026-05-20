@@ -158,46 +158,22 @@ vocab_bank:
   H: 起伏
   I: 雀躍
 fill_in_blank:
-- id: 1
+- sentence: '這次總統大選競爭激烈，記者們都密切注意選舉的（　　）。'
   answer: G
-  answer_word: 動向
-  context_before: 這次總統大選競爭激烈，記者們都密切注意選舉的
-  context_after: ''
-- id: 2
+- sentence: '看到自己努力畫的作品被老師認為是抄襲，小偉心裡真的很（　　）。'
   answer: C
-  answer_word: 不是滋味
-  context_before: 看到自己努力畫的作品被老師認為是抄襲，小偉心裡真的很
-  context_after: ''
-- id: 3
+- sentence: '那天比賽失誤的畫面一直（　　），讓她晚上翻來覆去睡不著。'
   answer: A
-  answer_word: 揮之不去
-  context_before: 那天比賽失誤的畫面一直
-  context_after: ，讓她晚上翻來覆去睡不著
-- id: 4
+- sentence: '經過真誠的溝通後，原本的誤會像（　　）般消失了，兩人終於重於和好'
   answer: B
-  answer_word: 煙消雲散
-  context_before: 經過真誠的溝通後，原本的誤會像
-  context_after: 般消失了，兩人終於重於和好
-- id: 5
+- sentence: '被喜歡的同學加好友後，她（　　），笑得好開心。'
   answer: D
-  answer_word: 心花怒放
-  context_before: 被喜歡的同學加好友後，她
-  context_after: ，笑得好開心
-- id: 6
+- sentence: '這部電影的劇情充滿（　　）轉折，觀眾的情緒也隨著角色的命運緊張不已。'
   answer: H
-  answer_word: 起伏
-  context_before: 這部電影的劇情充滿
-  context_after: 轉折，觀眾的情緒也隨著角色的命運緊張不已
-- id: 7
+- sentence: '身為班長，他深知自己的（　　）都會影響同學，因此更加謹言慎行。'
   answer: E
-  answer_word: 一言一行
-  context_before: 身為班長，他深知自己的
-  context_after: 都會影響同學，因此更加謹言慎行
-- id: 8
+- sentence: '幸好他及時尋求幫助，他才沒有一步步走向憂鬱的（　　）。'
   answer: F
-  answer_word: 深淵
-  context_before: 幸好他及時尋求幫助，他才沒有一步步走向憂鬱的
-  context_after: ''
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈的練習，下列何者對於「事件─想法─感受」 的理解較為合適？ \nA.橘子：每個人在相同的事件中都有相同的感受 \nB.步美：比起想法，事件對感受的影響更為直接 \nC.靜香：越快對事件下判斷就越能保持平靜喜悅\nD.小葵：釐清對事件的想法有助於自己調適心情\n75517573405"
 strategy_exercise:

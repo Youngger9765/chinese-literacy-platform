@@ -162,17 +162,17 @@ vocab_bank:
   F: 征服
   G: 痛快淋漓
 fill_in_blank:
-- id: 2
+- sentence: '聽到這個不幸的消息，他幾乎（　　）了。'
+  answer: A
+- sentence: '本著對舞蹈的（　　），她日夜苦練從不以為苦。'
   answer: B
-  answer_word: 執著
-  context_before: 本著對舞蹈的
-  context_after: ，她日夜苦練從不以為苦
-- id: 5
+- sentence: '許多登山者皆以（　　）世界第一高峰為終極目標，落差很大。'
+  answer: F
+- sentence: '他個性（　　），從不願服輸。'
+  answer: D
+- sentence: '人生的路上，總是有許多（　　），令人意想不到。'
   answer: C
-  answer_word: 插曲
-  context_before: 人生的路上，總是有許多
-  context_after: ，令人意想不到
-fill_in_blank_count: 2
+fill_in_blank_count: 5
 spotlight_raw_text: "閱讀聚光燈\n推論代名詞\n   指稱詞(又叫代名詞)是「代替前面提過的名詞（人物或物品），避免一個詞重複出現」。例如：你、我、他、牠（動物）、它（沒有生命的物體）。若能正確推論代名詞所對應的指稱對象，就能讀懂文章。\n◎"
 strategy_exercise:
   type: guided_steps
