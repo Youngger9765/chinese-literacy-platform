@@ -182,41 +182,20 @@ vocab_bank:
   F: 鎮日
   G: 此起彼落
 fill_in_blank:
-- id: 1
+- sentence: '熊在河邊（　　），捕捉鮭魚作為晚餐。'
   answer: A
-  answer_word: 覓食
-  context_before: 熊在河邊
-  context_after: ，捕捉鮭魚作為晚餐
-- id: 2
+- sentence: '他（　　）忙於工作，幾乎沒有時間休息。'
   answer: F
-  answer_word: 鎮日
-  context_before: 他
-  context_after: 忙於工作，幾乎沒有時間休息
-- id: 3
+- sentence: '雄孔雀為了（　　），開屏展現美麗的羽毛來吸引異性。'
   answer: E
-  answer_word: 求偶
-  context_before: 雄孔雀為了
-  context_after: ，開屏展現美麗的羽毛來吸引異性
-- id: 4
+- sentence: '這些植物在適宜的環境中迅速（　　），覆蓋了整個花園。'
   answer: B
-  answer_word: 繁衍
-  context_before: 這些植物在適宜的環境中迅速
-  context_after: ，覆蓋了整個花園
-- id: 5
+- sentence: '良好的（　　）能幫助團隊達成目標。'
   answer: C
-  answer_word: 紀律
-  context_before: 良好的
-  context_after: 能幫助團隊達成目標
-- id: 6
+- sentence: '他為朋友兩肋插刀，充分（　　）了他對朋友的義氣。'
   answer: D
-  answer_word: 體現
-  context_before: 他為朋友兩肋插刀，充分
-  context_after: 了他對朋友的義氣
-- id: 7
+- sentence: '過年時鞭炮聲 （　　），不絕於耳。'
   answer: G
-  answer_word: 此起彼落
-  context_before: 過年時鞭炮聲
-  context_after: ，不絕於耳
 fill_in_blank_count: 7
 spotlight_raw_text: "閱讀聚光燈\n用表格整理訊息\n    之前我們學過可以將文章內容整理成表格。表格的優點有(1)幫助讀者快速看到文章的重點。(2)藉由訊息分類，將文章化繁為簡。(3)讓讀者能發現訊息的共同點或差異處。\n　　在「L3女性太空人登月」，我們已經學過整理表格的步驟：\n(1)確認比較的對象：是什麼和什麼比較？寫在表格第一列。\n(2)找重點：先用鉛筆將每段可能的重點句（行為特徵）畫起來。\n(3)想主題1.2…的名稱：從重點句判斷「主題」。 \n(4)寫表格左欄：將「主題」寫在表格左欄項目中。\n(5)將文章細節填入表格內。\n項目           　　 對象\n對象１\n對象２\n228178317500主題１\n文章細節\n文章細節\n主題２\n文章細節\n文章細節\n　　現在就讓我們利用本課文章來練習看看吧！\n◎"
 strategy_exercise:

@@ -192,32 +192,25 @@ vocab_bank:
   H: 氾濫
   I: 語不驚人死不休
 fill_in_blank:
-- id: 1
+- sentence: '他用哭泣來（　　）同情，希望老師能原諒他作弊的行為。'
   answer: A
-  answer_word: 博取
-  context_before: 他用哭泣來
-  context_after: 同情，希望老師能原諒他作弊的行為
-- id: 3
+- sentence: '老師用（　　）的言詞來批評同學的作品，讓大家很挫折。'
+  answer: C
+- sentence: '網路上的不實訊息（　　），容易誤導人們的判斷，引發社會問題。'
   answer: H
-  answer_word: 氾濫
-  context_before: 網路上的不實訊息
-  context_after: ，容易誤導人們的判斷，引發社會問題
-- id: 4
+- sentence: '他做任何事都想要與眾不同，說話也是（　　）。'
   answer: I
-  answer_word: 語不驚人死不休
-  context_before: 他做任何事都想要與眾不同，說話也是
-  context_after: ''
-- id: 7
+- sentence: '在寫作文前，要先弄清楚題目的意思，才不會寫出（　　）的文章。'
+  answer: E
+- sentence: '他發的這篇文章很明顯在（　　），想要影響大家對這件事的看法。'
+  answer: G
+- sentence: '詐騙集團都以高薪的工作當作（　　），實際上卻是一場騙局。'
   answer: D
-  answer_word: 誘餌
-  context_before: 詐騙集團都以高薪的工作當作
-  context_after: ，實際上卻是一場騙局
-- id: 9
+- sentence: '電視節目為了收視率，常常使用（　　）的內容來吸引觀眾。'
+  answer: F
+- sentence: '初次體驗潛水，海底世界的奇妙景觀令人（　　），讓人流連忘返。'
   answer: B
-  answer_word: 目不暇給
-  context_before: 初次體驗潛水，海底世界的奇妙景觀令人
-  context_after: ，讓人流連忘返
-fill_in_blank_count: 5
+fill_in_blank_count: 9
 spotlight_raw_text: '閱讀聚光燈
 
   認識誘餌式新聞標題

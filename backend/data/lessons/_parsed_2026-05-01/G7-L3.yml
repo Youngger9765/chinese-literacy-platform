@@ -200,31 +200,16 @@ vocab_bank:
   F: 幽閉
   G: 輻射
 fill_in_blank:
-- id: 1
+- sentence: '一個人若無法克服（　　），就難以真正理解不同文化的價值觀。'
   answer: B
-  answer_word: 偏見
-  context_before: 一個人若無法克服
-  context_after: ，就難以真正理解不同文化的價值觀
-- id: 2
+- sentence: '環保意識的提升有助於減少能源（　　），讓地球可以永續發展。'
   answer: C
-  answer_word: 消耗
-  context_before: 環保意識的提升有助於減少能源
-  context_after: ，讓地球可以永續發展
-- id: 3
+- sentence: '畢業典禮前一天的彩排，（　　）了當天所有可能遇到的情況。'
   answer: A
-  answer_word: 模擬
-  context_before: 畢業典禮前一天的彩排，
-  context_after: 了當天所有可能遇到的情況
-- id: 4
+- sentence: '在核能發電廠附近，我們必須密切關注是否有（　　）對周邊環境造成潛在威脅。'
   answer: G
-  answer_word: 輻射
-  context_before: 在核能發電廠附近，我們必須密切關注是否有
-  context_after: 對周邊環境造成潛在威脅
-- id: 5
+- sentence: '他患有（　　）恐懼症，所以無法長時間待在狹窄的房間。'
   answer: F
-  answer_word: 幽閉
-  context_before: 他患有
-  context_after: 恐懼症，所以無法長時間待在狹窄的房間
 fill_in_blank_count: 5
 spotlight_raw_text: "閱讀聚光燈\n用表格整理訊息\n　　之前我們學過閱讀文章時，可以將文章內容整理成表格。表格的優點有(1)能更快速查找文章重點。(2)可以幫助大腦更有效的分類資訊，鞏固長期記憶。\n※整理比較表格的步驟：\n(1)確認比較的對象：是什麼和什麼比較？寫在表格對象列。\n(2)找重點：先用鉛筆將每段可能的「重點句」畫起來。\n(3)想項目欄內的主題名稱：從重點句判斷「主題名稱」，並用標示或寫出，例如：「阿波羅計畫從1969年~1972年」及「2022年NASA重啟阿提米絲登月計畫」，這二者的比較，主題名稱可以命名為「年代」。\n(4)將主題寫在項目欄內：將「主題」寫在表格左欄。\n(5)將文章細節填入細格。\n項目           對象                   \n對象１\n對象２\n2115531441000主題１\n文章細節\n文章細節\n主題２\n文章細節\n文章細節\n\n◎"
 strategy_exercise:

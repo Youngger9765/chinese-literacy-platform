@@ -170,3 +170,12 @@ worksheet_intro:
   lesson_label: 第27課  帶著「血拼清單」閱讀
   authors: 課文：曾世杰  學習單：陳淑麗
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G7-L27.pdf
+vocab_bank: {}
+fill_in_blank:
+- sentence: '我排除了（　　）（　　）（　　），（　　）最合理，所以選（　　）。'
+  answer: B
+- sentence: '依照（　　）（　　）（　　）（　　）的順序，一一確認「它說的對嗎？」，記得，閱讀時，要一直要「主動搜集資訊、回答問題」哦！'
+  answer: A
+- sentence: '這4個選項裡，只有（　　）是對的，答案當然就是（　　）囉。'
+  answer: B
+fill_in_blank_count: 3

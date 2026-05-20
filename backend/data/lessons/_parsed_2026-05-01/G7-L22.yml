@@ -199,31 +199,16 @@ vocab_bank:
   F: 自圓其說
   G: 匪夷所思
 fill_in_blank:
-- id: 1
+- sentence: '如果騙人的話說太多，就無法（　　）。'
   answer: F
-  answer_word: 自圓其說
-  context_before: 如果騙人的話說太多，就無法
-  context_after: ''
-- id: 2
+- sentence: '將軍率領著千軍萬馬（　　），一舉將敵人徹底殲滅。'
   answer: B
-  answer_word: 衝鋒陷陣
-  context_before: 將軍率領著千軍萬馬
-  context_after: ，一舉將敵人徹底殲滅
-- id: 3
+- sentence: '這場冠軍爭霸戰，兩隊勢均力敵，（　　）得非常厲害。'
   answer: A
-  answer_word: 廝殺
-  context_before: 這場冠軍爭霸戰，兩隊勢均力敵，
-  context_after: 得非常厲害
-- id: 4
+- sentence: '自從經過老師的指點和鼓勵後，他的學習（　　）努力。'
   answer: E
-  answer_word: 益發
-  context_before: 自從經過老師的指點和鼓勵後，他的學習
-  context_after: 努力
-- id: 5
+- sentence: '他明明做錯事，卻得到大家的讚賞，真是令人（　　）。'
   answer: G
-  answer_word: 匪夷所思
-  context_before: 他明明做錯事，卻得到大家的讚賞，真是令人
-  context_after: ''
 fill_in_blank_count: 5
 spotlight_raw_text: "閱讀聚光燈\n辨識不合理的詐騙訊息\n    生活中，許多消息來源不一定可靠，怎麼判斷消息是否正確或可信，考驗大家的智慧。若能擁有思考與辨別的能力，將會讓你做出正確的判斷。\nＱ1：如何建立思辨力？\nＱ2：如何辨別假消息？\n(1)勤觀察：對事物多一點觀察。\n(2)有意見：練習說出自己的想法。\n(3)多觀點：聽聽不同的看法。\n(4)常質疑：問自己這樣是對的嗎？\n(1)真的嗎？眼見，不一定為真，對事物保持懷疑態度。\n(2)合理嗎？發覺資訊不合理之處。\n(3)誰說的？做資訊的查證。\n\n◎"
 strategy_exercise:
