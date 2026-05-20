@@ -14,6 +14,7 @@ from google.genai import types as genai_types
 from ..config import settings
 from .ai_usage_tracker import capture_usage, last_usage
 from .input_sanitizer import sanitize_ai_input, sanitize_dialogue_turns
+from .llm_models import get_model_for_task
 from .persona import TUTOR_PERSONA
 
 logger = logging.getLogger(__name__)
@@ -92,8 +93,29 @@ def _check_safety_filter(response) -> None:
 
 
 def _get_client() -> genai.Client:
-    """Return a Gemini client via Vertex AI (uses Cloud Run service account)."""
+    """Return a Gemini client via Vertex AI (uses Cloud Run service account).
+
+    Uses global location for non-OMO tasks. For task-specific routing use
+    _get_client_for_task() which respects TASK_MODELS config.
+    """
     return genai.Client(vertexai=True, project="lingoleap-dev", location="global")
+
+
+def _get_client_for_task(task: str) -> tuple[genai.Client, str]:
+    """Return (client, model_name) for a registered task.
+
+    Looks up the (model, location) from llm_models.TASK_MODELS and creates
+    the appropriate Vertex AI client for that location.
+
+    Args:
+        task: Task name key — must be registered in TASK_MODELS.
+
+    Returns:
+        Tuple of (genai.Client, model_name_str).
+    """
+    model, location = get_model_for_task(task)
+    client = genai.Client(vertexai=True, project="lingoleap-dev", location=location)
+    return client, model
 
 
 def _repair_json(raw: str) -> str | None:
@@ -308,11 +330,17 @@ async def generate_structured_response(
     response_schema: dict,
     max_tokens: int = 4096,
     temperature: float = 0.7,
+    task: str = "comprehension_score",
 ) -> dict:
     """Call Gemini with JSON mode, return parsed dict.
 
     Uses response_mime_type="application/json" and response_schema
     to get structured JSON output from Gemini.
+
+    Args:
+        task: Task name registered in llm_models.TASK_MODELS. Determines which
+              model + location to use. Defaults to "comprehension_score" (flash-lite,
+              global) for backward compatibility with untagged callers.
 
         Notes:
         - Disable thinking for deterministic schema-bound JSON tasks so token
@@ -324,7 +352,7 @@ async def generate_structured_response(
     # a previous request (FAIL-3 review fix).
     last_usage.set(None)
 
-    client = _get_client()
+    client, _model = _get_client_for_task(task)
     last_error = None
 
     for attempt in range(MAX_RETRIES):
@@ -332,7 +360,7 @@ async def generate_structured_response(
             response = await asyncio.wait_for(
                 asyncio.to_thread(
                     client.models.generate_content,
-                    model="gemini-flash-lite-latest",
+                    model=_model,
                     contents=contents,
                     config=genai_types.GenerateContentConfig(
                         system_instruction=system_prompt,
@@ -364,7 +392,7 @@ async def generate_structured_response(
                             _prompt_chars += len(p.text)
             except Exception:
                 pass
-            usage_meta = capture_usage(response, model="gemini-flash-lite-latest")
+            usage_meta = capture_usage(response, model=_model)
             usage_meta.prompt_char_count = _prompt_chars
 
             # Extract finish_reason for diagnostics (MAX_TOKENS = truncated output)

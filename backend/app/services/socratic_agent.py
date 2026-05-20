@@ -503,6 +503,7 @@ Bridge 三步驟錯誤處理（understood = false 時必須遵守）：
                 system_prompt=system_prompt,
                 contents=contents,
                 response_schema=EVALUATION_SCHEMA,
+                task="socratic_question",
             )
             question = result.get("question", "這篇課文的主角是誰？")
             phase = result.get("phase", "factual")
@@ -675,6 +676,7 @@ Bridge 三步驟錯誤處理（understood = false 時必須遵守）：
                 system_prompt=system_prompt,
                 contents=contents,
                 response_schema=EVALUATION_SCHEMA,
+                task="socratic_agent_process",
             )
             understood = result.get("understood", False)
             feedback = result.get("feedback", "")

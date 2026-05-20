@@ -123,6 +123,7 @@ async def generate_exit_ticket(
             response_schema=EXIT_TICKET_SCHEMA,
             max_tokens=2048,
             temperature=0.5,
+            task="exit_ticket_generate",
         )
         questions = result.get("questions", [])
         if not questions:
@@ -221,6 +222,7 @@ async def generate_example_sentences(word: str, story_title: str) -> dict:
         response_schema=EXAMPLE_SENTENCES_SCHEMA,
         max_tokens=2048,
         temperature=0.8,
+        task="example_sentences",
     )
     return result
 
@@ -278,6 +280,7 @@ feedback 統一說「和課文或例句有點像，試試看用自己的話說�
         contents=contents,
         response_schema=SENTENCE_VALIDATION_SCHEMA,
         max_tokens=1024,
+        task="sentence_validate",
         temperature=0.3,
     )
 
@@ -474,6 +477,7 @@ async def generate_story_structure(
             response_schema=STORY_STRUCTURE_SCHEMA,
             max_tokens=2048,
             temperature=0.3,
+            task="story_structure",
         )
         # Ensure every row has interactive_type (backward compat guard)
         for row in result.get("rows", []):
@@ -676,6 +680,7 @@ async def generate_teacher_comment(
             response_schema=TEACHER_COMMENT_SCHEMA,
             max_tokens=512,
             temperature=0.7,
+            task="teacher_comment",
         )
         return result.get("comment", "")
     except Exception as e:

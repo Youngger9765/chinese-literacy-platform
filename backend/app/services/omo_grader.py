@@ -24,6 +24,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Optional
 
+from .llm_models import get_model_for_task
+
 logger = logging.getLogger(__name__)
 
 # Circuit breaker state (module-level singleton, per-process)
@@ -433,7 +435,8 @@ async def grade_worksheet_images(
         _consecutive_errors = 0
         return _mock_grades(questions, attempt_id)
 
-    client = genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
+    _grader_model, _grader_location = get_model_for_task("omo_grader")
+    client = genai.Client(vertexai=True, project="lingoleap-dev", location=_grader_location)
 
     # #1717: split 2-page worksheet spreads (Sharp scanners etc.) into single
     # page halves so Gemini doesn't have to attend across the spine. Generic —
@@ -473,7 +476,7 @@ async def grade_worksheet_images(
         response = await asyncio.wait_for(
             asyncio.to_thread(
                 client.models.generate_content,
-                model="gemini-2.5-flash",
+                model=_grader_model,
                 contents=[genai_types.Content(parts=image_parts, role="user")],
                 config=genai_types.GenerateContentConfig(
                     system_instruction=system_prompt,
