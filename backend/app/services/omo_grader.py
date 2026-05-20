@@ -18,6 +18,7 @@ Circuit breaker: 3 consecutive errors → RuntimeError (same pattern as omo_iden
 """
 
 import asyncio
+import io
 import logging
 from dataclasses import dataclass, field
 from typing import Optional
@@ -44,6 +45,46 @@ class GradedAnswer:
     reasoning: str
     position: Optional[dict] = None   # {"x": float, "y": float} relative coords
     source_attempt_id: Optional[int] = None
+
+
+def _split_spread(image_bytes: bytes, mime: str) -> list[tuple[bytes, str]]:
+    """Split a 2-page worksheet spread into single-page halves (#1717).
+
+    Many scanners output a single image containing two facing worksheet pages
+    (e.g. Sharp MX-M4050 default). Sending the spread as one image forces the
+    OCR model to attend across the spine, which hurts letter-position accuracy.
+    Splitting into left/right halves gives each page focused attention.
+
+    Generic policy: only split when aspect ratio suggests a landscape spread
+    (width > 1.3 × height). Portrait single pages pass through untouched.
+    Falls back to the original image on any error — no PDF-specific tuning.
+
+    Returns:
+        List of (bytes, mime) tuples — 1 element if single-page, 2 if spread.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return [(image_bytes, mime)]
+
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        w, h = img.size
+        if w <= h * 1.3:
+            return [(image_bytes, mime)]
+        mid = w // 2
+        out_mime = "image/jpeg"
+        halves = []
+        for box in [(0, 0, mid, h), (mid, 0, w, h)]:
+            half = img.crop(box)
+            if half.mode != "RGB":
+                half = half.convert("RGB")
+            buf = io.BytesIO()
+            half.save(buf, format="JPEG", quality=92)
+            halves.append((buf.getvalue(), out_mime))
+        return halves
+    except Exception:
+        return [(image_bytes, mime)]
 
 
 def _resolve_letter_answer(letter: str, vocabulary: list) -> str:
@@ -311,12 +352,19 @@ async def grade_worksheet_images(
 
     client = genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
 
-    # Build content parts: system prompt + all images
-    image_parts = []
+    # #1717: split 2-page worksheet spreads (Sharp scanners etc.) into single
+    # page halves so Gemini doesn't have to attend across the spine. Generic —
+    # only triggers when aspect ratio looks landscape; passes portrait through.
+    expanded: list[tuple[bytes, str]] = []
     for data, mime in zip(image_bytes_list, mime_types):
-        image_parts.append(
-            genai_types.Part.from_bytes(data=data, mime_type=mime)
-        )
+        expanded.extend(_split_spread(data, mime))
+
+    image_parts = [
+        genai_types.Part.from_bytes(data=data, mime_type=mime)
+        for data, mime in expanded
+    ]
+    logger.info("OMO grader: prepared %d image parts (from %d input images)",
+                len(image_parts), len(image_bytes_list))
 
     # OCR-only schema: Gemini returns handwriting + confidence + reasoning.
     # correct_answer + score are computed in Python (see _score_answer).
@@ -348,15 +396,19 @@ async def grade_worksheet_images(
                     system_instruction=system_prompt,
                     response_mime_type="application/json",
                     response_schema=response_schema,
-                    max_output_tokens=2048,
+                    max_output_tokens=4096,  # #1717: room for split-image responses
                     temperature=0.0,   # #1712: deterministic — no creative completion
+                    # #1717: thinking_budget=0 — experiment showed thinking did
+                    # not improve OCR letter location (4/5→4/5 unchanged) but
+                    # doubled cost. Keep disabled. The real improvement came
+                    # from split-image preprocessing (see _split_spread).
                     thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
                     automatic_function_calling=genai_types.AutomaticFunctionCallingConfig(
                         disable=True
                     ),
                 ),
             ),
-            timeout=60,  # grading can take longer than identification
+            timeout=120,  # #1717: thinking enabled — give it room (was 60)
         )
     except asyncio.TimeoutError:
         _consecutive_errors += 1
