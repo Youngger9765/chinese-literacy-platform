@@ -28,8 +28,13 @@
 |-------|-------------|---------------|----------|--------|
 | `gemini-2.5-flash` | $0.30 | $2.50 | us-central1 | OMO grader only (LOCKED) |
 | `gemini-flash-lite-latest` | $0.25 | $1.50 | global | OMO identifier (LOCKED per #1729) |
-| `gemini-2.5-flash-lite` | $0.075 | $0.30 | global | **Default for all 8 text/JSON tasks** |
-| `gemini-3.5-flash` | ~$0.50 | ~$3.75 | global | REJECTED — no quality gain, 2x cost |
+| `gemini-2.5-flash-lite` | $0.10 | $0.40 | global | **Default for all 8 text/JSON tasks** |
+| `gemini-3.5-flash` | $1.50 | $9.00 | global | REJECTED — no quality gain, 15-22.5x more expensive than 2.5-flash-lite |
+
+> **Pricing corrections** (2026-05-20 via Codex fact-check, [Vertex AI pricing](https://cloud.google.com/vertex-ai/generative-ai/pricing)):
+> - 2.5-flash-lite was stated as $0.075/$0.30 — actual is $0.10/$0.40 (~33% higher than initial estimate)
+> - 3.5-flash was stated as ~$0.50/$3.75 — actual is $1.50/$9.00 (3-2.4x higher than initial estimate)
+> - Real cost gap is **15x input / 22.5x output** between 3.5-flash and 2.5-flash-lite
 
 ---
 
@@ -198,6 +203,12 @@ omo_grader:     gemini-2.5-flash @ us-central1     # per #1730
 ### Key Lesson from #1738
 
 ALL `call_text` and `call_json` calls MUST include `thinking_budget=0` for ALL models. Without this, 2.5-flash and 3.5-flash default to extended thinking mode which consumes token budget on thinking tokens, leaving insufficient budget for visible output — causing empty or truncated responses on text tasks.
+
+> **⚠️ Important caveat (2026-05-20 via Codex fact-check, [Gemini thinking docs](https://ai.google.dev/gemini-api/docs/thinking)):**
+> - `thinking_budget=0` is documented for **2.5 series** models
+> - **Gemini 3.5 Flash uses `thinkingLevel`** (default "medium"; setting "minimal" "does not guarantee that thinking is off")
+> - Implication: our 3.5 Flash A/B may have been **partially unfair** — even with `thinking_budget=0` set, 3.5 Flash reasoning tokens were potentially still billed/consumed via the new `thinkingLevel` API
+> - The 3.5 Flash REJECTED conclusion holds because the 15-22.5x cost gap is too large to be closed by any quality improvement, but the **per-token latency/quality numbers should be re-measured with proper `thinkingLevel=minimal`** before any future 3.5 Flash consideration
 
 ---
 
