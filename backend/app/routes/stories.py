@@ -263,6 +263,11 @@ def get_story(story_id: str):
         worksheet_pdf_url=story.get("worksheet_pdf_url"),
         # 紙本表格 (#1685) — extracted tables for 圖文表整合 lessons; None for others
         tables=story.get("tables"),
+        # Story structure scaffold (#1683 item 4): YAML data for StoryStructure step.
+        # story_structure_table: list-of-lists from docx parser (G7-L28/L29/L30).
+        # story_structure_rows: AI-generated dict rows (richer shape). Both may be None.
+        story_structure_table=story.get("story_structure_table"),
+        story_structure_rows=story.get("story_structure_rows"),
     )
 
 

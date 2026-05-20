@@ -83,6 +83,12 @@ class StoryDetail(StoryListItem):
     # Used by 圖文表整合 lessons (G7-L28, G7-L30) where docx → yml parser dropped
     # table row data; frontend renders via TableDisplay component with zoom modal.
     tables: Optional[list[dict]] = None
+    # Story structure scaffold for StoryStructure step (#1683 item 4):
+    # story_structure_table — docx-parsed list-of-lists (ground truth for G7 graphic-text lessons)
+    # story_structure_rows — AI-generated dict rows (richer, with checkbox support)
+    # Both None for lessons without this step; StoryStructure endpoint uses whichever is present.
+    story_structure_table: Optional[list] = None
+    story_structure_rows: Optional[list] = None
 
 
 class StoryListResponse(BaseModel):
