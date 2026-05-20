@@ -207,3 +207,49 @@ ALL `call_text` and `call_json` calls MUST include `thinking_budget=0` for ALL m
 - 4th column re-run: `private/omo-real-samples/2026-05-20-systematic-ab/with-2.5-lite/summary.md`
 - Raw JSON results: `private/omo-real-samples/2026-05-20-systematic-ab/with-2.5-lite/*.json`
 - Decision deltas: `private/omo-real-samples/2026-05-20-systematic-ab/with-2.5-lite/decision-deltas.md`
+
+---
+
+## Test 3: OMO Grader Spatial Test — gemini-2.5-flash-lite (#1730, 2026-05-20)
+
+**Question**: Does `gemini-2.5-flash-lite` (winner of all 8 text/JSON tasks) also fail on grader's lettered circle detection?
+**Focus**: G6-L03, 5 lettered fill_blank questions (student circles one letter A-G)
+**Total cost**: $0.003537 (3 models × 1 target, plus Phase 3 enhanced prompt)
+
+### Results
+
+| Model | Lettered Circle Accuracy | Total Correct | Cost/call | Latency |
+|-------|-------------------------|--------------|-----------|---------|
+| gemini-2.5-flash (baseline) | **5/5** ✅ | 6/10 | $0.002313 | 8090ms |
+| gemini-flash-lite-latest | 2/5 ❌ | 4/10 | $0.000413 | 6176ms |
+| gemini-2.5-flash-lite | 2/5 ❌ | 3/10 | $0.000395 | 3887ms |
+
+### Phase 3: Enhanced Prompt (gemini-2.5-flash-lite only)
+
+Added explicit spatial guidance: "判斷時看圈圈的圓心，找出圈圈包圍的字母，不是旁邊相鄰的字母"
+
+Result: **0/5** (worse than default 2/5) — problem is model capability, not prompt wording.
+
+### Conclusion
+
+**LOCKED decision confirmed — both lite model variants fail grader spatial reasoning.**
+
+- `gemini-flash-lite-latest`: 1/5 (prev test) → 2/5 (this test) = avg ~1.5/5 across two runs
+- `gemini-2.5-flash-lite`: 2/5 (default) → 0/5 (enhanced prompt)
+- `gemini-2.5-flash`: 5/5 consistently
+
+The spatial reasoning gap is a fundamental capability difference between 2.5-flash and lite-class models, not a prompting issue. `omo_grader` remains locked on `gemini-2.5-flash` (us-central1).
+
+### Strategy Summary
+
+| Task category | Model choice | Rationale |
+|--------------|-------------|-----------|
+| Vision/spatial (grader) | gemini-2.5-flash | Only model with reliable lettered circle detection (5/5) |
+| Vision/identifier | gemini-flash-lite-latest | Non-spatial, 15/16 accuracy parity (per #1729) |
+| Text/JSON (8 tasks) | gemini-2.5-flash-lite | 78% cheaper + faster (per #1744) |
+
+### Test Artifacts
+
+- Full report: `private/omo-real-samples/2026-05-20-grader-ab/with-2.5-lite/report.md`
+- Raw JSON: `private/omo-real-samples/2026-05-20-grader-ab/with-2.5-lite/*.json`
+- Grader original A/B: `private/omo-real-samples/2026-05-20-grader-ab/summary.md`
