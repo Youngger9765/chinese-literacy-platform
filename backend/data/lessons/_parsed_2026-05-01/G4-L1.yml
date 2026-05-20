@@ -151,6 +151,16 @@ vocab_bank:
   F: 凝聚力
   G: 摸不著頭緒
 fill_in_blank:
+- sentence: '這個問題很複雜，一時之間讓人（　　），無法解決。'
+  answer: G
+- sentence: '他精湛的演出，贏得全場觀眾的 （　　）。'
+  answer: D
+- sentence: '班上同學經過幾年相處下來，彼此的 （　　）很強。'
+  answer: F
+- sentence: '奧運會上各國選手（　　），競爭非常激烈。'
+  answer: B
+- sentence: '上國文課時，同學們都（　　）的盯著臺上新來的老師。'
+  answer: C
 - id: 1
   answer: G
   answer_word: 摸不著頭緒

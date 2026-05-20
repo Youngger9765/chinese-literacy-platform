@@ -172,6 +172,22 @@ vocab_bank:
   G: 尷尬
   H: 忽視
 fill_in_blank:
+- sentence: '面對網友的批評，他心裡一陣（　　），朋友勸他要冷靜回應。'
+  answer: E
+- sentence: '她不小心叫錯了對方的名字，場面頓時變得（　　）無比。'
+  answer: G
+- sentence: '打開窗戶，一大片綠油油的田野（　　）。'
+  answer: A
+- sentence: '期末作業終於完成繳交後，他如釋重負般（　　）了滿腹的焦慮與壓力。'
+  answer: F
+- sentence: '他總是（　　）別人的建議，結果吃了大虧。'
+  answer: H
+- sentence: '他在眾人面前（　　）承認自己的錯誤，贏得尊敬。'
+  answer: B
+- sentence: '第一次收到他的情書，心中泛起一陣甜蜜而不確定的（　　）。'
+  answer: B
+- sentence: '雖然參賽機會難得，但會無法參加期末考，他因此而（　　）不決。'
+  answer: D
 - id: 1
   answer: E
   answer_word: 惱怒

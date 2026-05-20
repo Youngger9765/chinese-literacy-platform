@@ -176,11 +176,27 @@ vocab_bank:
   D: 金風送爽
   E: 滴水穿石
   F: 萬紫千紅
-  G: 身材魁梧
+  G: 身材魁梧󠇠
   H: 囑咐
   I: 暑氣蒸人
   J: 敢怒不敢言
 fill_in_blank:
+- sentence: '每當（　　）的時候，爺爺總是喜歡在院子裡喝茶，欣賞秋天的景色。'
+  answer: D
+- sentence: '他們吵架時，常常（　　），最後誰也不開心，兩人都很後悔。'
+  answer: C
+- sentence: '妹妹學習游泳時，從基本動作開始（　　）的練習，最後能游完整個泳池。'
+  answer: A
+- sentence: '他每天都練習寫書法，終於像（　　）一樣，寫得越來越好。'
+  answer: E
+- sentence: '天氣冷了，媽媽（　　）我要加件外套。'
+  answer: H
+- sentence: '春天一到，百花盛開，一片（　　），美不勝收。'
+  answer: F
+- sentence: '一聽到警笛聲，聚賭的一群人立即（　　），逃之夭夭。'
+  answer: B
+- sentence: '他們個個都是（　　）、強悍有力的士兵。'
+  answer: G
 - id: 1
   answer: D
   answer_word: 金風送爽

@@ -125,6 +125,16 @@ vocab_bank:
   G: 籌措
   H: 口碑
 fill_in_blank:
+- sentence: '阿明在比賽中的優異表現讓他（　　），受到球團和球迷的矚目。'
+  answer: A
+- sentence: '面對舊傷復發和醜聞纏身的困境，他（　　），感到不知所措。'
+  answer: E
+- sentence: '她的美貌深深的（　　）了他的心，讓他陷入了愛情的漩渦。'
+  answer: C
+- sentence: '淨山活動不但能維持環境整潔，還能訓練體能，這不是 （　　）嗎？'
+  answer: F
+- sentence: '為了（　　）資金興建棒球場，學校舉辦募捐活動，獲得大家的支持。'
+  answer: G
 - id: 1
   answer: A
   answer_word: 脫穎而出
@@ -135,7 +145,7 @@ fill_in_blank:
   answer_word: 籌措
   context_before: 為了
   context_after: 資金興建棒球場，學校舉辦募捐活動，獲得大家的支持
-fill_in_blank_count: 2
+fill_in_blank_count: 5
 spotlight_raw_text: '閱讀聚光燈
 
   解決問題—麥肯錫解決問題法

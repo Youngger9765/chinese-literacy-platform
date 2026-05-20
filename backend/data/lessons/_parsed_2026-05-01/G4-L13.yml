@@ -177,6 +177,16 @@ vocab_bank:
   D: 渲染
   E: 言外之意
 fill_in_blank:
+- sentence: '剛出爐的肉包（　　）的樣子，看得我口水直流。'
+  answer: C
+- sentence: '煙火在空中（　　）綻放，天空好像開滿了一朵又一朵的花。'
+  answer: B
+- sentence: '這位畫家用漸層的色彩來（　　）天空，讓整幅畫看起來更加夢幻。'
+  answer: D
+- sentence: '自從小學畢業後，他們的聯絡越來越少，因此關係也（　　）了。'
+  answer: A
+- sentence: '當志明說：「春嬌這麼美，這麼好，是不可能看上我的。」志明的（　　）是他好希望春嬌可以喜歡他。'
+  answer: E
 - id: 4
   answer: A
   answer_word: 漸行漸遠
@@ -187,7 +197,7 @@ fill_in_blank:
   answer_word: 言外之意
   context_before: 當志明說：「春嬌這麼美，這麼好，是不可能看上我的。」志明的
   context_after: 是他好希望春嬌可以喜歡他
-fill_in_blank_count: 2
+fill_in_blank_count: 5
 本課語詞:
 - 熱氣騰騰
 - 搓手踏腳

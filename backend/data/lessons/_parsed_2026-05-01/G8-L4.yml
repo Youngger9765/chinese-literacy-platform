@@ -192,14 +192,25 @@ story_structure_rows:
   hint: 課文最後想告訴我們什麼？
 story_structure_table_source: ai-generated-2026-05-02
 vocab_bank:
+  A: 應󠇡運而生
   B: 媲美
   C: 不分軒輊
   D: 蓬勃
   E: 悄然興起
   F: 追溯
-  G: 刮目相
+  G: 刮目相󠇡看
   H: 屠宰
 fill_in_blank:
+- sentence: '近年來，東部觀光（　　）發展，進而提升了當地的就業率。'
+  answer: D
+- sentence: '由於國人健康意識抬頭，於是各式各樣的運動中心（　　）。'
+  answer: A
+- sentence: '媽媽烹煮的餐點色香味俱全，和餐廳大廚（　　），烹飪的技術足以（　　）米其林三星級名廚。'
+  answer: C
+- sentence: '這學期他的數學成績突飛猛進，令人（　　）。'
+  answer: G
+- sentence: '農業部目前推動農糧產品可（　　）生產機制，讓消費者在選購時可知道產品的來源，購買時更加安心。'
+  answer: F
 - id: 1
   answer: D
   answer_word: 蓬勃
@@ -220,7 +231,7 @@ fill_in_blank:
   answer_word: 追溯
   context_before: 農業部目前推動農糧產品可
   context_after: 生產機制，讓消費者在選購時可知道產品的來源，購買時更加安心
-fill_in_blank_count: 4
+fill_in_blank_count: 5
 spotlight_raw_text: "閱讀聚光燈\n由觀點找出支持理由\n    這一課是說明文，作者先告訴讀者植物肉引發的風潮，再用具體的例子去支持作者種種的看法（觀點），讓文章更有說服力。所以，閱讀時，如果能找出作者觀點，並從文章中找出支持觀點的理由，你會更容易讀出文章的重點喔。\n    ※什麼是觀點和理由？\n\n「觀點」\n「支持理由」\n定義\n個人的意見、看法，跟個人價值觀有關，通常帶有一點評論。\n指支持觀點的例子、事例。\n例如\n他很用功。\n他每天都讀書四小時以上、他在假日都到圖書館念書、他上課都會做筆記。\n\n這份英文作業很困難。\n他花好久的時間查字典、\n大多數同學無法完成作業。\n\n◎"
 strategy_exercise:
   type: guided_steps

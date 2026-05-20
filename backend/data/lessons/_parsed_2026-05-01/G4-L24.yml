@@ -168,6 +168,22 @@ vocab_bank:
   G: 耳邊風
   H: 使喚
 fill_in_blank:
+- sentence: '這場比賽球員們頻頻失誤，（　　）的表現讓許多球迷大失所望。'
+  answer: E
+- sentence: '他總喜歡（　　）學弟妹幫他跑腿，讓人覺得不太尊重。'
+  answer: H
+- sentence: '雖然第一局不幸失分，但隊長鼓勵大家不要（　　），繼續努力。'
+  answer: F
+- sentence: '因為肩膀的舊傷，他在高強度的冠亞軍賽時，感到十分（　　）。'
+  answer: D
+- sentence: '營養師一再警告青少年少喝含糖飲料，但許多人仍當成（　　）。'
+  answer: G
+- sentence: '在段考前熬夜唸書，對他來說已是（　　），週末也幾乎沒有休息。'
+  answer: A
+- sentence: '這份募款儘管 （　　），但也代表我們對流浪動物的一點心意。'
+  answer: B
+- sentence: '議員在院會上（　　）的詢問市長有關預算的問題，引起媒體關注。'
+  answer: C
 - id: 1
   answer: E
   answer_word: 乏善可陳

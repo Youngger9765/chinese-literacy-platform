@@ -183,6 +183,22 @@ vocab_bank:
   G: 輸人一截
   H: 突如其來
 fill_in_blank:
+- sentence: '手機（　　）為生活帶來許多便利，也可能造成專注力下降的問題。'
+  answer: A
+- sentence: '他（　　）的演技，讓台下的觀眾目不轉睛，也因此獲得許多好評。'
+  answer: C
+- sentence: '考試前夕，（　　）提早就寢，讓大腦消化和運用知識更有效率。'
+  answer: B
+- sentence: '他做事（　　），又常推卸責任，讓同組同學都感到氣憤不已。'
+  answer: D
+- sentence: '「健康」是探索世界的（　　），唯有顧好身體，才能走得更遠。'
+  answer: E
+- sentence: '保持良好人際關係的（　　），其實就是多傾聽與尊重他人。'
+  answer: F
+- sentence: '面對同學（　　）的公開告白，他一時不知所措，惹得全班哄堂大笑。'
+  answer: H
+- sentence: '在籃球場上，我們的默契明顯（　　），也因此最終無緣晉級。'
+  answer: G
 - id: 1
   answer: A
   answer_word: 固然

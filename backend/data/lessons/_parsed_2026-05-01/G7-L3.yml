@@ -200,6 +200,16 @@ vocab_bank:
   F: 幽閉
   G: 輻射
 fill_in_blank:
+- sentence: '一個人若無法克服（　　），就難以真正理解不同文化的價值觀。'
+  answer: B
+- sentence: '環保意識的提升有助於減少能源（　　），讓地球可以永續發展。'
+  answer: C
+- sentence: '畢業典禮前一天的彩排，（　　）了當天所有可能遇到的情況。'
+  answer: A
+- sentence: '在核能發電廠附近，我們必須密切關注是否有（　　）對周邊環境造成潛在威脅。'
+  answer: G
+- sentence: '他患有（　　）恐懼症，所以無法長時間待在狹窄的房間。'
+  answer: F
 - id: 1
   answer: B
   answer_word: 偏見

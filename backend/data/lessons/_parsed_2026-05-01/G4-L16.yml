@@ -158,6 +158,22 @@ vocab_bank:
   H: 起伏
   I: 雀躍
 fill_in_blank:
+- sentence: '這次總統大選競爭激烈，記者們都密切注意選舉的（　　）。'
+  answer: G
+- sentence: '看到自己努力畫的作品被老師認為是抄襲，小偉心裡真的很（　　）。'
+  answer: C
+- sentence: '那天比賽失誤的畫面一直（　　），讓她晚上翻來覆去睡不著。'
+  answer: A
+- sentence: '經過真誠的溝通後，原本的誤會像（　　）般消失了，兩人終於重於和好'
+  answer: B
+- sentence: '被喜歡的同學加好友後，她（　　），笑得好開心。'
+  answer: D
+- sentence: '這部電影的劇情充滿（　　）轉折，觀眾的情緒也隨著角色的命運緊張不已。'
+  answer: H
+- sentence: '身為班長，他深知自己的（　　）都會影響同學，因此更加謹言慎行。'
+  answer: E
+- sentence: '幸好他及時尋求幫助，他才沒有一步步走向憂鬱的（　　）。'
+  answer: F
 - id: 1
   answer: G
   answer_word: 動向

@@ -203,6 +203,22 @@ vocab_bank:
   G: 素未謀面
   H: 充耳不聞
 fill_in_blank:
+- sentence: '在討論運動會進場表演時，小明（　　），提了一個好點子，大家紛紛拍手叫好。'
+  answer: C
+- sentence: '最近兩位消防人員，因裝備老舊，不幸在救災中殉職，因此老師帶著同學們一起製作海報，（　　）消防人員的權益。'
+  answer: D
+- sentence: '面對同學們的玩笑話，小強選擇（　　），繼續專心做自己的事情。'
+  answer: H
+- sentence: '這個國家被（　　）政府統治，人民的自由與人權受到嚴重限制。'
+  answer: B
+- sentence: '面對他人不合理的（　　），我們應該站出來為自己爭取權益。'
+  answer: F
+- sentence: '透過多間學校共同舉辦的「跨校筆友」寫信活動，使我和（　　）的小華建立了深厚的友誼。'
+  answer: G
+- sentence: '這場二手義賣活動的（　　），與一群關心流浪狗的學生們有關。'
+  answer: A
+- sentence: '妹妹在醫院縫合傷口，家屬不能進入陪同，爸爸只能在外面（　　）。'
+  answer: E
 - id: 1
   answer: C
   answer_word: 突發奇想

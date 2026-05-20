@@ -158,6 +158,22 @@ vocab_bank:
   I: 飛馳而過
   J: 調侃
 fill_in_blank:
+- sentence: '他遲到害大家等了很久，因而感到非常（　　）。'
+  answer: C
+- sentence: '說故事比賽，害羞的她走上台，雖然（　　）緊張，還是努力講完故事。'
+  answer: H
+- sentence: '阿宏在全班面前（　　）小傑的國語腔調，讓小傑很難堪。'
+  answer: G
+- sentence: '馬路上響起警笛聲，救護車（　　），大家自動讓路。'
+  answer: I
+- sentence: '她瞄了我一眼，冷笑一聲，那種（　　）的表情讓我很不舒服。'
+  answer: B
+- sentence: '他努力改變自己，段考成績從全班倒數進步到前五名，令人（　　）。'
+  answer: E
+- sentence: '棒球比賽前一天晚上，他睡不著，心裡（　　），怕明天表現不好。'
+  answer: F
+- sentence: '他被三振兩次已經很不好意思了，大家就別再用「台灣巨棒」（　　）他了。'
+  answer: J
 - id: 1
   answer: C
   answer_word: 歉咎

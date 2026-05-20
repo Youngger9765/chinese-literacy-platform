@@ -170,6 +170,22 @@ vocab_bank:
   H: 趣味橫生
   I: 老神在在
 fill_in_blank:
+- sentence: '當新聞媒體不斷炒作這個老話題時，讓人感到（　　）。'
+  answer: B
+- sentence: '跑在最前面的選手，一馬當先，已經（　　）其他對手。'
+  answer: A
+- sentence: '捏麵人已越來越少在市集出現，但在古早味夜市中，仍（　　）。'
+  answer: G
+- sentence: '她總能在對話中展現出（　　）的儀態，讓人覺得親切又受尊重。'
+  answer: D
+- sentence: '她的設計風格總是（　　） ，讓人在眾多作品中一眼就能認出。'
+  answer: E
+- sentence: '他精心布置的花園四季常青，每一處讓人看了都覺得（　　）。'
+  answer: F
+- sentence: '即使商店推出了促銷活動，她仍然（　　），只買需要的東西。'
+  answer: C
+- sentence: '別人都緊張得說不出話來，他卻（　　），好像一切盡在掌握中。'
+  answer: I
 - id: 1
   answer: B
   answer_word: 索然無味

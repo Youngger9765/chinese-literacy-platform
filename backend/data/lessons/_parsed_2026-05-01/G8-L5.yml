@@ -180,6 +180,20 @@ vocab_bank:
   H: 感同身受
   I: 好心沒好報
 fill_in_blank:
+- sentence: '小明幫忙澆花，卻不小心打破花瓶，因而被同學責怪，真是（　　）。'
+  answer: I
+- sentence: '聽到愛妻離世的消息，他（　　），久久不能平復悲傷的心情。'
+  answer: F
+- sentence: '班級大掃除時，小美（　　）擔任組長，帶領大家分工合作。'
+  answer: A
+- sentence: '他遲到卻沒有被老師處罰，是因為遇上了突發的交通事故，（　　）。'
+  answer: D
+- sentence: '馬路如虎口，如果大家不遵守交通規則，後果將（　　）。'
+  answer: C
+- sentence: '雖然這次籃球比賽失敗了，但你不能（　　），放棄所有的練習。'
+  answer: E
+- sentence: '雖然考試不容易，但（　　），只要努力學習，一定能取得好成績。'
+  answer: B
 - id: 1
   answer: I
   answer_word: 好心沒好報

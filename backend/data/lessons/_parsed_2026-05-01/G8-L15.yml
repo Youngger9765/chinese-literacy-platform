@@ -162,6 +162,22 @@ vocab_bank:
   I: 訕笑
   J: 無遠弗屆
 fill_in_blank:
+- sentence: '他剛開口談夢想，就被同儕（　　），讓他非常挫折。'
+  answer: I
+- sentence: '這部紀錄片呈現一個落後村落在十年間（　　）為觀光重鎮的歷程。'
+  answer: D
+- sentence: '輸球後，媒體的負面評論以（　　）之勢而來，讓球員承受巨大壓力。'
+  answer: F
+- sentence: '球迷的鼓聲和口號（　　）在一起，整個球場的氣氛熱血沸騰。'
+  answer: C
+- sentence: '昨晚一夜未睡，今天他整日的精神都（　　）。'
+  answer: H
+- sentence: '那位美麗的演員昔日被譏為（　　），但在演技大幅提升後，終於蛻變為能挑大樑的實力派。'
+  answer: G
+- sentence: '數位時代，資訊傳播的速度與範圍（　　），傳統媒體面臨巨大挑戰。'
+  answer: J
+- sentence: '比賽最後十秒我們逆轉得分，全班（　　），拍手叫好。'
+  answer: B
 - id: 1
   answer: I
   answer_word: 訕笑

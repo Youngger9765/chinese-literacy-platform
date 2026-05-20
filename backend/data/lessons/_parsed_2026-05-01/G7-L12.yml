@@ -200,8 +200,24 @@ vocab_bank:
   F: 觸犯
   G: 保護令
   H: 死纏爛打
-  I: 精誠所至
+  I: 精誠所至，金石為開
 fill_in_blank:
+- sentence: '做科展過程雖然艱辛，但她以（　　）的態度完成了研究。'
+  answer: C
+- sentence: '明天要上台報告，他很焦慮，一整晚（　　）。'
+  answer: B
+- sentence: '經歷那場火災後，他變得像（　　），一聽到警鈴就害怕。'
+  answer: A
+- sentence: '她的前男友（　　），使她不得不報警以保護自己。'
+  answer: H
+- sentence: '她不懂得與人相處的（　　），常讓人覺得不舒服。'
+  answer: E
+- sentence: '丈夫對她家暴，她只能向法院申請（　　），以避免遭到傷害。'
+  answer: G
+- sentence: '他開車肇事逃逸的行為已經（　　）了法律，因此被法院定罪。'
+  answer: F
+- sentence: '看見暗戀的人走來，他不禁（　　），臉紅到了耳根。'
+  answer: D
 - id: 1
   answer: C
   answer_word: 鍥而不捨

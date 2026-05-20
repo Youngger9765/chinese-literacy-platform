@@ -170,6 +170,22 @@ vocab_bank:
   I: 薰陶
   J: 拮据
 fill_in_blank:
+- sentence: '爸媽都是畫家，他從小受到藝術的（　　），一眼就看出配色的好壞。'
+  answer: I
+- sentence: '兩棲蛙人部隊受過最嚴格的訓練，敵人聞風喪膽，是國軍中最（　　）的一支部隊。'
+  answer: E
+- sentence: '他在群組的話讓我不舒服，我決定（　　）告訴他別再開這種玩笑。'
+  answer: A
+- sentence: '她對食物非常（　　），連湯的鹹淡都要精確掌握。'
+  answer: C
+- sentence: '多年前移民之後，家鄉實在太遠，只能靠著泛黃的老照片 （　　）。'
+  answer: H
+- sentence: '教室裡的臭襪子味非常令人（　　），老師聞到就立刻開窗散味。'
+  answer: G
+- sentence: '她求學時，為了活下去，必須打三份工，雖然相當（　　），卻始終沒有放棄夢想。'
+  answer: J
+- sentence: '比賽輸了之後，我曾經覺得自己（　　），但在老師的鼓勵下，終於轉念，開心起來。'
+  answer: B
 - id: 1
   answer: I
   answer_word: 薰陶

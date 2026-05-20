@@ -152,6 +152,22 @@ vocab_bank:
   I: 眾說紛紜
   J: 莫衷一是
 fill_in_blank:
+- sentence: '他年輕時在球場上（　　），帶隊拿下好幾次冠軍。'
+  answer: A
+- sentence: '報告明天要交，時間（　　），我們決定今晚熬夜做報告。'
+  answer: H
+- sentence: '和父母家人意見不同時，我試著（　　）理解他們的想法與立場。'
+  answer: F
+- sentence: '他照顧住院的家人好幾週，整個人（　　），看起來很累。'
+  answer: C
+- sentence: '事件真相尚未釐清，外界對原因（　　），凸顯儘早釐清事實的重要。'
+  answer: I
+- sentence: '這件事還在調查中，別用（　　）的想法，過早把人判定成好或壞。'
+  answer: G
+- sentence: '題目做得越多越熟練，練習的重要（　　）。'
+  answer: D
+- sentence: '這部動畫在臺灣（　　），大家對它的經典情節都能舉出例子。'
+  answer: B
 - id: 1
   answer: A
   answer_word: 叱吒風雲

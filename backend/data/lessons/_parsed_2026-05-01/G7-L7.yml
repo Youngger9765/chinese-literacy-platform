@@ -195,6 +195,16 @@ vocab_bank:
   D: 不可逆
   E: 負成長
 fill_in_blank:
+- sentence: '他因為沉迷遊戲，荒廢課業，導致成績（　　）。'
+  answer: B
+- sentence: '村莊經過暴風雨的（　　），房屋都被摧毀了'
+  answer: C
+- sentence: '最近幾個月，我們公司的業績出現了（　　），銷售額比去年同期少了三成，許多員工被迫裁員。'
+  answer: E
+- sentence: '生命中的某些決定是（　　）的，我們必須慎重考慮。'
+  answer: D
+- sentence: '如果我們對社會上發生的壞事件 （　　），可能會導致人們越來越冷漠。'
+  answer: A
 - id: 1
   answer: B
   answer_word: 每況愈下

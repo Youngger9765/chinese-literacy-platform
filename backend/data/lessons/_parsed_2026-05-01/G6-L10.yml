@@ -212,6 +212,16 @@ vocab_bank:
   I: 森嚴
   J: 多樣性
 fill_in_blank:
+- sentence: '這場金融風暴（　　），許多員工因而失業。'
+  answer: C
+- sentence: '這次空難事件，機上乘客無一（　　）。'
+  answer: B
+- sentence: '戰爭時（　　），人們被迫逃離家園。'
+  answer: H
+- sentence: '由於可能會有強烈餘震，居民們都保持高度（　　），隨時準備撤離。'
+  answer: D
+- sentence: '颱風將至，各大媒體提醒海邊民眾 （　　） 及早撤離，以降低災損。'
+  answer: E
 - id: 1
   answer: C
   answer_word: 殃及池魚

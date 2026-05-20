@@ -159,6 +159,16 @@ vocab_bank:
   E: 諮詢
   F: 與日俱增
 fill_in_blank:
+- sentence: '儘管離開家鄉已數十年，他對家人的思念還是 （　　）。'
+  answer: F
+- sentence: '乾旱時，全村會舉行祭典，（　　）老天爺降下大雨。'
+  answer: A
+- sentence: '面對同學的職涯（　　），輔導老師很有耐心的一一解答。'
+  answer: E
+- sentence: '如果病人缺乏（　　），會很難說服他們接受醫療協助。'
+  answer: B
+- sentence: '這把火燒掉了他大半輩子的心血，讓他原先拮据的生活更是（　　）'
+  answer: C
 - id: 1
   answer: F
   answer_word: 與日俱增

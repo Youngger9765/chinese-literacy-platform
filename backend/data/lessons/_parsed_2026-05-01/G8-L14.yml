@@ -140,6 +140,16 @@ vocab_bank:
   H: 暑氣蒸人
   I: 大放異彩
 fill_in_blank:
+- sentence: '他薪水太少，常（　　），吃飯都得選便宜的。'
+  answer: E
+- sentence: '在世界木工的淘汰賽中，臺灣選手（　　），是表現最優的團隊。'
+  answer: A
+- sentence: '教室冷氣壞了，（　　），大家一直流汗。'
+  answer: H
+- sentence: '她在國際鋼琴大賽中（　　），讓世界看見了臺灣的音樂實力。'
+  answer: I
+- sentence: '他很衝動，（　　）為小事發火，同學都怕跟他相處。'
+  answer: D
 - id: 2
   answer: E
   answer_word: 入不敷出

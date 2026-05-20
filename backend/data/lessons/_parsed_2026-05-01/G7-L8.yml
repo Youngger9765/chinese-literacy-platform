@@ -188,12 +188,22 @@ vocab_bank:
   F: 哀鳴
   G: 離群索居
 fill_in_blank:
+- sentence: '她厭倦了都市嘈雜的生活，決定隱居山林，過著 （　　）的生活。'
+  answer: G
+- sentence: '當火災鈴聲一響，他立刻（　　）。'
+  answer: C
+- sentence: '學校的校舍工程，因為接連來兩個颱風，導致進度嚴重（　　），恐怕無法及時完工。'
+  answer: D
+- sentence: '他做了一個錯誤的決策，還想（　　），扭曲事實的真相。'
+  answer: B
+- sentence: '他的身材（　　），又經過專業的武術訓練，十分適合擔任保全人員。'
+  answer: A
 - id: 2
   answer: C
   answer_word: 奪門而出
   context_before: 當火災鈴聲一響，他立刻
   context_after: ''
-fill_in_blank_count: 1
+fill_in_blank_count: 5
 spotlight_raw_text: '閱讀聚光燈
 
   表達看法—PREP架構

@@ -193,6 +193,20 @@ vocab_bank:
   G: 有條不紊
   H: 貴人相助
 fill_in_blank:
+- sentence: '創業失敗後，他沒有（　　）於環境，而是反思自己的不足。'
+  answer: B
+- sentence: '她在考試前做好計畫，（　　）的複習每一個重點，最後獲得好成績。'
+  answer: G
+- sentence: '這位作家的文筆（　　）有趣，讓讀者閱讀時忍不住發笑。'
+  answer: A
+- sentence: '經過多年努力，他從一名害羞的學生（　　）為優秀的演講者。'
+  answer: E
+- sentence: '疫情時，店裡的生意一落千丈，多虧有（　　），幫助他度過難關。'
+  answer: H
+- sentence: '他在這次英文測驗中（　　），名列前茅。'
+  answer: F
+- sentence: '他為了這場比賽，（　　）了無數的心血與努力，終於獲得了冠軍。'
+  answer: D
 - id: 1
   answer: B
   answer_word: 歸咎

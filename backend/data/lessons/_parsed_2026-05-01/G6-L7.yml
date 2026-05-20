@@ -164,6 +164,20 @@ vocab_bank:
   F: 舉世聞名
   G: 拒人於千里之外
 fill_in_blank:
+- sentence: '科學家們仍不斷研究宇宙的奧秘，因為它實在是（　　）。'
+  answer: B
+- sentence: '他們舉辦世界巡迴演唱會，才剛完成一場演出，又（　　）的趕往下個城市巡演。'
+  answer: D
+- sentence: '在羽毛球比賽中，戴資穎選手的優異表現（　　）。'
+  answer: F
+- sentence: '經過長久的努力，他終於得到了（　　）的冠軍獎盃。'
+  answer: A
+- sentence: '儘管大家都很熱情，但轉學生仍然（　　），不願意和人多交談。'
+  answer: G
+- sentence: '這條山路十分（　　），開車要特別小心！'
+  answer: C
+- sentence: '當她聽到朋友真誠的關心和鼓勵，終於（　　），說出心裡的秘密。'
+  answer: E
 - id: 1
   answer: B
   answer_word: 深不可測

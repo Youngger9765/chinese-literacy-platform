@@ -197,6 +197,16 @@ vocab_bank:
   F: 過關斬將
   G: 不得閒
 fill_in_blank:
+- sentence: '夜深了，請把電視機的音量轉小，以免（　　）他人的睡眠。'
+  answer: D
+- sentence: '（　　）強的人，工作效率更高、產出品質更好，也更有競爭力。'
+  answer: A
+- sentence: '這次的辯論比賽，反方陷入（　　），勝算不大。，落差很大。'
+  answer: E
+- sentence: '他（　　）甚嚴，從不做損人利己或違法犯紀的事。'
+  answer: B
+- sentence: '隨著國民平均所得的提高，國人也越來越（　　）生活品質。'
+  answer: C
 - id: 1
   answer: D
   answer_word: 干擾
@@ -207,7 +217,7 @@ fill_in_blank:
   answer_word: 劣勢
   context_before: 這次的辯論比賽，反方陷入
   context_after: ，勝算不大。，落差很大
-fill_in_blank_count: 2
+fill_in_blank_count: 5
 spotlight_raw_text: "閱讀聚光燈\n推論人物特質\n我們可以從一個人說的話、做的事來推論人物特質。閱讀時，讀者若能從文中線索推論人物特質，就能對文章有更好的掌握。\n\n1.我們可以從課文中楊勇緯做的事、說的話和他呈現的態度，來推論他的人物特質是    自律       。\n\n2.我們也可以把它整理成表格。\n文中線索\n人物特質\n◤勤於訓練，每天都提早三、四十分鐘到校練習。◢ \n(做的事)\n自律\n◤老師給他課表，他就按部就班去做。◢          (做的事)\n\n◤飲食克制，身體保持最佳狀態。◢             (做的事)\n\n◤隨時用工整的字記錄所學。◢                    (做的事)\n\n3."
 strategy_exercise:
   type: guided_steps

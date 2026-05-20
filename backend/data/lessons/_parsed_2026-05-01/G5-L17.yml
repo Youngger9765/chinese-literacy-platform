@@ -151,8 +151,27 @@ vocab_bank:
   H: 刻不容緩
   I: 晝伏夜出
   J: 成效斐然
-  K: 刨地
 fill_in_blank:
+- sentence: '這個花園多年無人管理，已經（　　），整理恐怕要花一段時間。'
+  answer: C
+- sentence: '貓頭鷹和老鼠都是（　　）的生物，白天休息，晚上才出來覓食。'
+  answer: I
+- sentence: '這種昆蟲的（　　）力很強，短短幾週就能孵化成千上萬的幼蟲。'
+  answer: G
+- sentence: '地震導致大量人員受困，救援行動（　　），每分每秒都攸關生死。'
+  answer: H
+- sentence: '這種生物體形太小，（　　）無法觀察，必須使用顯微鏡。'
+  answer: D
+- sentence: '這款新型手機的（　　）十分強大，照相品質佳，還能修復老相片。'
+  answer: E
+- sentence: '總統今日上午頒獎給舉重國手郭婞淳，以（　　）其榮獲奧運金牌。'
+  answer: A
+- sentence: '由於詐騙案件（　　），警方提醒民眾不要輕信來路不明的訊息。'
+  answer: B
+- sentence: '這位護理師致力於偏鄉醫療工作，被譽為（　　）的白衣天使。'
+  answer: F
+- sentence: '新的訓練方式（　　），選手的成績都大幅進步。'
+  answer: J
 - id: 1
   answer: C
   answer_word: 雜草叢生
@@ -208,7 +227,7 @@ fill_in_blank:
   answer_word: 成效斐然
   context_before: 新的訓練方式
   context_after: ，選手的成績都大幅進步
-fill_in_blank_count: 11
+fill_in_blank_count: 10
 spotlight_raw_text: '閱讀聚光燈
 
   表格閱讀策略

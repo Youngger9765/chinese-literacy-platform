@@ -183,6 +183,12 @@ vocab_bank:
   D: 水滴石穿
   E: 事半功倍
 fill_in_blank:
+- sentence: '每天堅持十分鐘的練習，日積月累，（　　），讓他獲得好成果。'
+  answer: D
+- sentence: '我們得先思考問題在哪兒，才能讓事情處理得更有（　　）。'
+  answer: B
+- sentence: '（　　）規畫要先掌握自己的興趣、能力、價值觀，再看看有什樣的機會適合自己。'
+  answer: A
 - id: 1
   answer: D
   answer_word: 水滴石穿
@@ -193,7 +199,7 @@ fill_in_blank:
   answer_word: 效率
   context_before: 我們得先思考問題在哪兒，才能讓事情處理得更有
   context_after: ''
-fill_in_blank_count: 2
+fill_in_blank_count: 3
 spotlight_raw_text: '閱讀聚光燈2645410313359
 
   長條圖與圓形圖0

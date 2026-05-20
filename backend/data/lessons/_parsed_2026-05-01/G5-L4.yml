@@ -151,9 +151,26 @@ vocab_bank:
   E: 恐慌
   F: 熱議
   G: 點閱率
+  H: 應󠇡驗
   I: 風險意識
   J: 預言
 fill_in_blank:
+- sentence: '網路謠言引發不必要的（　　），政府呼籲大家要冷靜。'
+  answer: E
+- sentence: '他（　　）的描述昨晚的驚悚電影，讓人聽得毛骨悚然。'
+  answer: D
+- sentence: '當裁判舉起手準備宣布比賽結果時，全場（　　），等待裁判的宣布。'
+  answer: B
+- sentence: '他看到幾個成功的創業故事，就以為創業一定能賺大錢，這種想法有（　　），因為他忽略了失敗的案例。'
+  answer: C
+- sentence: '這款手機的外型與前一代產品（　　），消費者反應平平。'
+  answer: A
+- sentence: '奧運選手的表現成為社群媒體上的（　　）話題。'
+  answer: F
+- sentence: '這支影片上線不到一天，（　　）就突破十萬，太驚人了！'
+  answer: G
+- sentence: '政府推動防災演練、疫情預警系統、食品安全檢驗等，都是提升全民（　　）的措施。'
+  answer: I
 - id: 1
   answer: E
   answer_word: 恐慌

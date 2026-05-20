@@ -145,6 +145,22 @@ vocab_bank:
   H: 一溜煙
   I: 路見不平
 fill_in_blank:
+- sentence: '老師用眼神（　　）我要站起來回答問題，我趕緊從座位上站起來。'
+  answer: C
+- sentence: '下課鐘一響，學生們（　　）跑出教室，衝向福利社買點心。'
+  answer: H
+- sentence: '他在網路上亂留言，如果不及早處理，後果恐怕（　　）。'
+  answer: G
+- sentence: '他看不慣班上霸凌的行為，所以（　　），出面說了幾句公道話。'
+  answer: I
+- sentence: '他在火車上大聲講電話，引來大家（　　）相看。'
+  answer: B
+- sentence: '他剛生完大病，走路時還是（　　），需要人扶著。'
+  answer: E
+- sentence: '比賽最後幾分鐘，雙方攻防激烈，（　　）變得非常緊張。'
+  answer: F
+- sentence: '學校開會討論要不要取消早自修，學生和學校立場不同，誰也不讓誰，會議室裡充滿（　　）。'
+  answer: D
 - id: 1
   answer: C
   answer_word: 示意

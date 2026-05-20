@@ -168,6 +168,16 @@ vocab_bank:
   F: 迷魂陣
   G: 相提並論
 fill_in_blank:
+- sentence: '這兩件事情性質完全不同，怎麼可以（　　）。'
+  answer: G
+- sentence: '他的論點（　　），缺乏實際的事實支持，難以令人信服。'
+  answer: D
+- sentence: '警方每天都在（　　）走私毒品，杜絕犯罪活動，維護社會秩序。'
+  answer: B
+- sentence: '如果對網路上的虛假消息（　　），就容易成為網路詐騙的對象。'
+  answer: C
+- sentence: '誇大不實的廣告，容易使民眾對產品的療效產生 （　　）。'
+  answer: A
 - id: 1
   answer: G
   answer_word: 相提並論

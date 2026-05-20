@@ -160,6 +160,22 @@ vocab_bank:
   I: 契機
   J: 命脈
 fill_in_blank:
+- sentence: '這座老橋已無法（　　）大量車輛的重量。'
+  answer: C
+- sentence: '砍伐森林會破壞許多生物的（　　），使牠們失去生存的地方。'
+  answer: H
+- sentence: '他因颱風（　　）在機場兩天，無法返家。'
+  answer: G
+- sentence: '台積電的晶片被視為護國神山，是臺灣經濟的（　　）。'
+  answer: J
+- sentence: '他展現出（　　）的節奏感，即使沒學過打鼓，也能輕鬆跟上節拍。'
+  answer: B
+- sentence: '演唱會開場前，會場外已是（　　），密密麻麻的人潮擠滿了大巨蛋。'
+  answer: E
+- sentence: '有了通行證後，他們便能（　　）的進出原本禁止通行的管制區。'
+  answer: D
+- sentence: '那次運動會的成功經驗成為他全心投入田徑競技的重要（　　）。'
+  answer: I
 - id: 1
   answer: C
   answer_word: 承載

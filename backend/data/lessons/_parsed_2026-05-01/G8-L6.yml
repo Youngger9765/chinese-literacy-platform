@@ -178,6 +178,22 @@ vocab_bank:
   I: 驚駭不已
   J: 蕭條
 fill_in_blank:
+- sentence: '他整天（　　）能中大樂透，卻不願腳踏實地的工作。'
+  answer: C
+- sentence: '她在路上親眼目睹車禍現場，（　　），好一會兒才回過神來。'
+  answer: I
+- sentence: '火警警報一響，大家（　　）的離開大樓，有人甚至連包包都沒拿。'
+  answer: D
+- sentence: '一場午後雷陣雨讓他全身濕透，樣子非常（　　）。'
+  answer: E
+- sentence: '只要聽聞偶像出現在車站，粉絲們必定（　　），場面非常熱鬧。'
+  answer: A
+- sentence: '這幾年東南亞國家的經濟快速（　　），備受關注。'
+  answer: B
+- sentence: '這場電影的爆破場面實在是（　　），非常刺激。'
+  answer: G
+- sentence: '圖書館內應保持安靜，不可大聲（　　）。'
+  answer: H
 - id: 1
   answer: C
   answer_word: 妄想
@@ -213,7 +229,7 @@ fill_in_blank:
   answer_word: 喧嘩
   context_before: 圖書館內應保持安靜，不可大聲
   context_after: ''
-fill_in_blank_count: 7
+fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n    讀故事，不能只看角色「做了什麼」，還要思考角色「為何會這麼做」。唯有深入探索人物內心，推敲他的動機、情緒與想法，我們才能真正讀懂情節和作者的用心。現在就讓我們練習看看。\n　　1.推測人物的動機：在文章中，人物的動機可能會「明示」，但也可能「隱含在情節中」。例如：第九段\n(1)明示──文章直接說明原因\n   例如：奶奶嫌電費貴，不准我開燈。\n　　　奶奶不准我開燈的動機是【　　怕電費太貴　　　】。\n(2)隱含──原因沒寫明，要根據上下文情節推論\n例如：導師了解我的處境，每學期都會悄悄送我參考書。\n請推測導師這樣做的動機是什麼？（請打勾，單選）\n知道作者家裡沒有錢，希望作者不用花太多錢買書\n□想提升班級整體成績，以獲得優良導師獎\n◎"
 strategy_exercise:
   type: guided_steps

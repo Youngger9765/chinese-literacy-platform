@@ -156,6 +156,22 @@ vocab_bank:
   I: 開枝散葉
   J: 浩瀚無垠
 fill_in_blank:
+- sentence: '大家把握時間，不要把話題扯得太遠，趕緊（　　）吧！'
+  answer: B
+- sentence: '如果想了解這項傳統文化，就要（　　）它最早的發展背景。'
+  answer: E
+- sentence: '老師鼓勵我們先（　　）地提出想法，再一起討論哪些點子可行。'
+  answer: H
+- sentence: '期末考快到了，作業和考試（　　），大家都很忙碌。'
+  answer: G
+- sentence: '老師講的那句話看似輕鬆，其實（　　），讓我想了很久。'
+  answer: A
+- sentence: '每到冬天，候鳥會隨著氣候變化進行（　　），飛往較溫暖的地區。'
+  answer: C
+- sentence: '這部電影的劇情和上一部（　　），觀眾一開始就猜到結局。'
+  answer: F
+- sentence: '這家店總是大排長龍，對附近的居民來說早已（　　）。'
+  answer: D
 - id: 1
   answer: B
   answer_word: 言歸正傳

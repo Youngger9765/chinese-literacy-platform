@@ -199,6 +199,16 @@ vocab_bank:
   F: 自圓其說
   G: 匪夷所思
 fill_in_blank:
+- sentence: '如果騙人的話說太多，就無法（　　）。'
+  answer: F
+- sentence: '將軍率領著千軍萬馬（　　），一舉將敵人徹底殲滅。'
+  answer: B
+- sentence: '這場冠軍爭霸戰，兩隊勢均力敵，（　　）得非常厲害。'
+  answer: A
+- sentence: '自從經過老師的指點和鼓勵後，他的學習（　　）努力。'
+  answer: E
+- sentence: '他明明做錯事，卻得到大家的讚賞，真是令人（　　）。'
+  answer: G
 - id: 1
   answer: F
   answer_word: 自圓其說

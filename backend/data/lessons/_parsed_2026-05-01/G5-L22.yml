@@ -148,11 +148,21 @@ vocab_bank:
   A: 汗流浹背
   B: 精湛
   C: 不外乎
-  D: 合作無間
+  D: 合作無間󠇡
   E: 僧多粥少
   F: 想方設法
   G: 朝思暮想
 fill_in_blank:
+- sentence: '他們兩人（　　），順利完成了這項艱難的任務。'
+  answer: D
+- sentence: '這家公司提供的職位有限，應徵者卻很多，真是（　　）。'
+  answer: E
+- sentence: '他的球技非常（　　），讓人驚嘆不已。'
+  answer: B
+- sentence: '在烈日下訓練，他們個個都（　　），卻不輕言放棄。'
+  answer: A
+- sentence: '問起一般男生的興趣，（　　）是打球和玩手機遊戲。'
+  answer: C
 - id: 1
   answer: D
   answer_word: 合作無間

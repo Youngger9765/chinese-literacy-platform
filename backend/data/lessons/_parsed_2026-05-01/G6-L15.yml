@@ -192,6 +192,16 @@ vocab_bank:
   G: 束縛
   H: 蛻變
 fill_in_blank:
+- sentence: '埃及斑蚊開始（　　）到城市的其他地區，可能引起登革熱的大流行。'
+  answer: F
+- sentence: '這隻被遺棄的貓變得越來越（　　），看起來非常可憐。'
+  answer: C
+- sentence: '這座城市經歷數十年的發展，終於（　　）成為一個現代化的大都市。'
+  answer: H
+- sentence: '熊熊烈火燃燒，最後將木屋（　　），只剩下一片灰燼。'
+  answer: B
+- sentence: '她覺得自己被過去的傷痛和回憶（　　）住了，無法向前邁進。'
+  answer: G
 - id: 1
   answer: F
   answer_word: 流竄
