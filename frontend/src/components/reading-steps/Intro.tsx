@@ -6,6 +6,9 @@ import { useZhuyin } from '../../context/ZhuyinContext';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { fontForZhuyin } from '../../constants/fonts';
 import { resolveActiveSteps } from '../../config/stepConfig';
+import { useAuth } from '../../contexts/AuthContext';
+import { getOmoImageSignedUrl, getPriorOmoUploadByLesson } from '../../services/omoApi';
+import type { OmoPriorUploadResponse } from '../../services/omoApi';
 
 const CATEGORY_LABEL: Record<string, string> = {
   Fable: '寓言故事',
@@ -23,11 +26,16 @@ interface IntroProps {
 const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showWorksheetModal, setShowWorksheetModal] = useState(false);
+  const [showUploadedModal, setShowUploadedModal] = useState(false);
+  const [priorUpload, setPriorUpload] = useState<OmoPriorUploadResponse | null>(null);
   const { zhuyinActive, processZhuyin } = useZhuyin();
+  const { token } = useAuth();
   const worksheetModalRef = useRef<HTMLDivElement>(null);
+  const uploadedModalRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   useFocusTrap(worksheetModalRef, showWorksheetModal);
+  useFocusTrap(uploadedModalRef, showUploadedModal);
 
   /**
    * Issue #1637: navigate to /omo with lesson_code query param so OmoPage
@@ -40,19 +48,75 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
   }, [navigate, story.lesson_code]);
 
   useEffect(() => {
-    if (!showWorksheetModal) return;
+    if (!showWorksheetModal && !showUploadedModal) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setShowWorksheetModal(false);
+      if (e.key === 'Escape') {
+        setShowWorksheetModal(false);
+        setShowUploadedModal(false);
+      }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [showWorksheetModal]);
+  }, [showUploadedModal, showWorksheetModal]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const lessonId = Number.parseInt(story.id, 10);
+    setPriorUpload(null);
+
+    if (!token || !story.lesson_code || !Number.isFinite(lessonId)) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    getPriorOmoUploadByLesson(lessonId, token)
+      .then((data) => {
+        if (!cancelled) {
+          setPriorUpload(data.has_prior_upload ? data : null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPriorUpload(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [story.id, story.lesson_code, token]);
 
   const handleBackdropClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === worksheetModalRef.current) {
       setShowWorksheetModal(false);
     }
   }, []);
+
+  const handleUploadedBackdropClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === uploadedModalRef.current) {
+      setShowUploadedModal(false);
+    }
+  }, []);
+
+  const handleOpenUploadedModal = useCallback(() => {
+    setShowUploadedModal(true);
+    if (!token || !priorUpload?.upload_id || priorUpload.images.length === 0) return;
+
+    const uploadId = priorUpload.upload_id;
+    void Promise.all(
+      priorUpload.images.map(async (image) => {
+        try {
+          const signed = await getOmoImageSignedUrl(uploadId, image.attempt_id, image.index, token);
+          return { ...image, url: signed.url ?? image.url ?? null };
+        } catch {
+          return image;
+        }
+      }),
+    ).then((images) => {
+      setPriorUpload((current) => (
+        current?.upload_id === uploadId ? { ...current, images } : current
+      ));
+    });
+  }, [priorUpload, token]);
 
   const speakIntro = useCallback(() => {
     if (!window.speechSynthesis) return;
@@ -180,17 +244,40 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
 
               {/* Upload button — #1637: available for any lesson with a lesson_code */}
               {story.lesson_code && (
-                <button
-                  type="button"
-                  onClick={handleUploadWorksheet}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-green-300 bg-green-50 hover:bg-green-100 text-green-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
-                  aria-label="上傳學習單"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                  上傳學習單
-                </button>
+                priorUpload?.has_prior_upload ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleOpenUploadedModal}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-1"
+                      aria-label="檢視已上傳學習單"
+                    >
+                      <span aria-hidden="true">📷</span>
+                      檢視已上傳
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleUploadWorksheet}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-green-300 bg-green-50 hover:bg-green-100 text-green-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
+                      aria-label="重新上傳學習單"
+                    >
+                      <span aria-hidden="true">📤</span>
+                      重新上傳
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleUploadWorksheet}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border border-green-300 bg-green-50 hover:bg-green-100 text-green-700 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
+                    aria-label="上傳學習單"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    上傳學習單
+                  </button>
+                )
               )}
             </div>
           )}
@@ -393,6 +480,65 @@ const Intro: React.FC<IntroProps> = ({ story, onStartReading, onBack }) => {
               title="紙本學習單"
               className="flex-1 w-full bg-gray-100"
             />
+          </div>
+        </div>
+      )}
+
+      {showUploadedModal && priorUpload?.has_prior_upload && (
+        <div
+          ref={uploadedModalRef}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="已上傳學習單"
+          onClick={handleUploadedBackdropClick}
+        >
+          <div className="relative flex flex-col bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden">
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-gray-800">已上傳學習單</p>
+                <p className="text-xs text-gray-400 truncate">{story.title}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowUploadedModal(false)}
+                className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 flex-shrink-0"
+                aria-label="關閉已上傳學習單"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="overflow-y-auto p-4">
+              {priorUpload.images.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {priorUpload.images.map((image) => (
+                    <div
+                      key={`${image.attempt_id}-${image.index}`}
+                      className="aspect-[3/4] rounded-xl border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center"
+                    >
+                      {image.url ? (
+                        <img
+                          src={image.url}
+                          alt={`已上傳學習單第 ${image.index + 1} 張`}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <span className="px-3 text-center text-xs text-gray-400">
+                          圖片暫時無法預覽
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-10 text-center text-sm text-gray-400">
+                  目前沒有可預覽的圖片
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

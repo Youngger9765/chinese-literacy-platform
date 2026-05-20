@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 from typing import Literal, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Path, UploadFile, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
@@ -81,6 +81,7 @@ class AnswerItem(BaseModel):
     reasoning: str
     source_attempt_id: Optional[int] = None
     position: Optional[dict] = None
+    crop_image_url: Optional[str] = None
     flag: Optional[AnswerFlagInfo] = None
 
 
@@ -373,7 +374,7 @@ async def _run_grading(upload_id: int, lesson_id: int):
     try:
         from ..services.omo_grader import grade_worksheet_images
         attempt_id = active_attempt.id if active_attempt else None
-        graded = await grade_worksheet_images(image_bytes_list, mime_types, lesson, attempt_id)
+        graded = await grade_worksheet_images(image_bytes_list, mime_types, lesson, attempt_id, upload_id=upload_id)
     except RuntimeError as exc:
         logger.error("OMO grader circuit breaker: %s", exc)
         _update_upload(upload_id, status="error", error_message="批改服務暫時無法使用")
@@ -401,6 +402,7 @@ async def _run_grading(upload_id: int, lesson_id: int):
             "reasoning": g.reasoning,
             "source_attempt_id": g.source_attempt_id,
             "position": g.position,
+            "crop_image_url": g.crop_image_url,
             "flag": None,
         }
         for g in graded
@@ -458,6 +460,7 @@ def _build_upload_response(upload: OmoUpload) -> OmoUploadResponse:
                 reasoning=a.get("reasoning", ""),
                 source_attempt_id=a.get("source_attempt_id"),
                 position=a.get("position"),
+                crop_image_url=a.get("crop_image_url"),
                 flag=flag_info,
             ))
 
@@ -640,6 +643,22 @@ async def upload_worksheet(
     )
     db.add(attempt)
     db.commit()
+
+    # Upload-replace UX: supersede any existing active upload for this lesson+student
+    # (only when we know the lesson upfront via hint — avoids superseding during identification)
+    if lesson_code_hint:
+        from ..services.omo_identifier import identify_lesson_from_hint
+        hint_candidates = identify_lesson_from_hint(lesson_code_hint)
+        if hint_candidates:
+            hinted_lesson_id = hint_candidates[0].lesson_id
+            now_ts = datetime.now(timezone.utc)
+            db.query(OmoUpload).filter(
+                OmoUpload.student_id == current_user.id,
+                OmoUpload.lesson_id == hinted_lesson_id,
+                OmoUpload.superseded_at.is_(None),
+                OmoUpload.id != upload_id,
+            ).update({'superseded_at': now_ts})
+            db.commit()
 
     background_tasks.add_task(
         _run_identification, upload_id, image_bytes_list, mime_types, lesson_code_hint
@@ -1023,3 +1042,106 @@ def delete_upload(
     db.delete(upload)
     db.commit()
     logger.info("OMO upload %d deleted by student %d", upload_id, current_user.id)
+
+
+class CropSignedUrlResponse(BaseModel):
+    url: Optional[str]
+    expires_in_seconds: int = 3600
+
+
+@router.get('/omo/{upload_id}/crops/{question_id}', response_model=CropSignedUrlResponse)
+def get_crop_signed_url(
+    upload_id: int,
+    question_id: str = Path(..., description='question_id from answers (e.g. fb_1, mc_2)'),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    '''Get a 1-hour signed GCS URL for a question crop image.
+
+    Returns url=null if crop not available (legacy upload or crop upload failed).
+    '''
+    upload = _get_upload_or_404(upload_id, current_user, db)
+
+    # Find crop_image_url in answers JSONB
+    gs_uri = None
+    for a in (upload.answers or []):
+        if a.get('question_id') == question_id:
+            gs_uri = a.get('crop_image_url')
+            break
+
+    if not gs_uri:
+        return CropSignedUrlResponse(url=None)
+
+    # gs://bucket/path -> extract object path
+    # Format: gs://lingoleap-omo-uploads/crops/{upload_id}/{question_id}.jpg
+    try:
+        object_path = gs_uri.split('/', 3)[-1]  # strip gs://bucket/
+    except Exception:
+        return CropSignedUrlResponse(url=None)
+
+    signed_url = _get_signed_url(object_path)
+    return CropSignedUrlResponse(url=signed_url)
+
+
+class OmoSignedImageInfo(BaseModel):
+    attempt_id: int
+    index: int
+    url: Optional[str] = None
+
+
+class OmoByLessonResponse(BaseModel):
+    upload_id: Optional[int] = None
+    status: Optional[str] = None
+    has_prior_upload: bool = False
+    images: list[OmoSignedImageInfo] = Field(default_factory=list)
+
+
+@router.get('/omo/by-lesson/{lesson_id}', response_model=OmoByLessonResponse)
+def get_upload_by_lesson(
+    lesson_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    '''Check if the current student has a non-superseded upload for this lesson.
+
+    Used by the Intro page upload-replace UX to detect prior uploads.
+    Returns has_prior_upload=False if no upload exists or all are superseded.
+    '''
+    upload = (
+        db.query(OmoUpload)
+        .filter(
+            OmoUpload.student_id == current_user.id,
+            OmoUpload.lesson_id == lesson_id,
+            OmoUpload.superseded_at.is_(None),
+            OmoUpload.status.in_(['identified', 'grading', 'graded']),
+        )
+        .order_by(OmoUpload.created_at.desc())
+        .first()
+    )
+
+    if not upload:
+        return OmoByLessonResponse(has_prior_upload=False)
+
+    images: list[OmoSignedImageInfo] = []
+    active_attempts = [
+        attempt
+        for attempt in (upload.attempts or [])
+        if attempt.is_active and attempt.image_paths
+    ]
+    attempts = active_attempts or [
+        attempt for attempt in (upload.attempts or []) if attempt.image_paths
+    ]
+    for attempt in attempts:
+        for idx, object_path in enumerate(attempt.image_paths or []):
+            images.append(OmoSignedImageInfo(
+                attempt_id=attempt.id,
+                index=idx,
+                url=_get_signed_url(object_path),
+            ))
+
+    return OmoByLessonResponse(
+        upload_id=upload.id,
+        status=upload.status,
+        has_prior_upload=True,
+        images=images,
+    )

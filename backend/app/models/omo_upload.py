@@ -94,6 +94,11 @@ class OmoUpload(Base):
     # AI error message (if status == "error")
     error_message: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
+    # Upload-replace UX: timestamp when a newer upload supersedes this one
+    superseded_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
     # Top-1 candidate confidence (denormalised for quick filtering)
     ai_confidence: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 

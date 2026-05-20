@@ -15,7 +15,7 @@
  *   onRetry   — go back to upload screen
  */
 import React, { useState } from 'react';
-import { flagOmoAnswer } from '../../services/omoApi';
+import { flagOmoAnswer, getOmoCropSignedUrl } from '../../services/omoApi';
 import type { OmoAnswerItem } from '../../services/omoApi';
 
 // ---------------------------------------------------------------------------
@@ -138,6 +138,68 @@ const FlagModal: React.FC<FlagModalProps> = ({
 };
 
 // ---------------------------------------------------------------------------
+// Crop Modal
+// ---------------------------------------------------------------------------
+
+interface CropModalProps {
+  imageUrl: string | null;
+  questionId: string;
+  error: string | null;
+  loading: boolean;
+  onClose: () => void;
+}
+
+const CropModal: React.FC<CropModalProps> = ({
+  imageUrl,
+  questionId,
+  error,
+  loading,
+  onClose,
+}) => (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+    onClick={onClose}
+    role="dialog"
+    aria-modal="true"
+    aria-label={`題目 ${questionId} 截圖`}
+  >
+    <div
+      className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-xl overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+        <p className="text-sm font-bold text-gray-800">題目 {questionId} 截圖</p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="p-1.5 rounded-full hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+          aria-label="關閉截圖"
+        >
+          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div className="p-4 max-h-[calc(90vh-56px)] overflow-auto bg-gray-100">
+        {loading && (
+          <div className="py-16 text-center text-sm text-gray-500">載入截圖中…</div>
+        )}
+        {!loading && error && (
+          <div className="py-16 text-center text-sm text-red-600">{error}</div>
+        )}
+        {!loading && !error && imageUrl && (
+          <img
+            src={imageUrl}
+            alt={`題目 ${questionId} 作答截圖`}
+            className="mx-auto max-w-full rounded-lg bg-white"
+          />
+        )}
+      </div>
+    </div>
+  </div>
+);
+
+// ---------------------------------------------------------------------------
 // Score badge helper
 // ---------------------------------------------------------------------------
 
@@ -164,10 +226,11 @@ function ScoreBadge({ score }: { score: number }) {
 interface AnswerCardProps {
   answer: OmoAnswerItem;
   onFlag: (questionId: string) => void;
+  onViewCrop: (questionId: string) => void;
   flagged: boolean;
 }
 
-const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, flagged }) => {
+const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, onViewCrop, flagged }) => {
   const confPct = Math.round(answer.ai_confidence * 100);
 
   return (
@@ -211,8 +274,18 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, flagged }) => {
         <span className="text-[10px] text-gray-400 shrink-0">AI {confPct}%</span>
       </div>
 
-      {/* Flag button */}
-      <div className="flex justify-end">
+      {/* Action buttons */}
+      <div className="flex justify-end gap-3">
+        {answer.crop_image_url && (
+          <button
+            type="button"
+            onClick={() => onViewCrop(answer.question_id)}
+            className="text-xs text-gray-500 hover:text-sky-600 transition-colors flex items-center gap-1"
+          >
+            <span aria-hidden="true">📷</span>
+            看截圖
+          </button>
+        )}
         {flagged || answer.flag ? (
           <span className="text-xs text-orange-500 font-medium flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5" aria-hidden="true">
@@ -260,11 +333,37 @@ const OmoResultPage: React.FC<OmoResultPageProps> = ({
 }) => {
   const [flaggingQuestionId, setFlaggingQuestionId] = useState<string | null>(null);
   const [flaggedIds, setFlaggedIds] = useState<Set<string>>(new Set());
+  const [cropModal, setCropModal] = useState<{
+    questionId: string;
+    imageUrl: string | null;
+    loading: boolean;
+    error: string | null;
+  } | null>(null);
 
   const overallPct = overallScore !== null ? Math.round(overallScore * 100) : null;
 
   const handleFlagged = (questionId: string) => {
     setFlaggedIds((prev) => new Set(prev).add(questionId));
+  };
+
+  const handleViewCrop = async (questionId: string) => {
+    setCropModal({ questionId, imageUrl: null, loading: true, error: null });
+    try {
+      const signed = await getOmoCropSignedUrl(uploadId, questionId, token);
+      setCropModal({
+        questionId,
+        imageUrl: signed.url ?? null,
+        loading: false,
+        error: signed.url ? null : '這題暫時沒有可預覽的截圖',
+      });
+    } catch (err) {
+      setCropModal({
+        questionId,
+        imageUrl: null,
+        loading: false,
+        error: '截圖載入失敗，請稍後再試',
+      });
+    }
   };
 
   // Score emoji
@@ -300,6 +399,7 @@ const OmoResultPage: React.FC<OmoResultPageProps> = ({
               key={answer.question_id}
               answer={answer}
               onFlag={(qid) => setFlaggingQuestionId(qid)}
+              onViewCrop={handleViewCrop}
               flagged={flaggedIds.has(answer.question_id)}
             />
           ))}
@@ -327,6 +427,16 @@ const OmoResultPage: React.FC<OmoResultPageProps> = ({
           token={token}
           onClose={() => setFlaggingQuestionId(null)}
           onFlagged={handleFlagged}
+        />
+      )}
+
+      {cropModal && (
+        <CropModal
+          imageUrl={cropModal.imageUrl}
+          questionId={cropModal.questionId}
+          error={cropModal.error}
+          loading={cropModal.loading}
+          onClose={() => setCropModal(null)}
         />
       )}
     </div>
