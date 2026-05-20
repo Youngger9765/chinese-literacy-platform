@@ -66,15 +66,36 @@ def _resolve_letter_answer(letter: str, vocabulary: list) -> str:
 
 
 def _build_question_schema(lesson: dict) -> list[dict]:
-    """Extract expected-answer schema from lesson YAML for the grading prompt."""
+    """Extract expected-answer schema from lesson YAML for the grading prompt.
+
+    Each question dict includes `allowed_values` — the only legal student_answer
+    values for that question (#1712 fix: prevents Gemini fabrication by giving
+    it a finite value space to choose from).
+    """
     questions = []
     vocabulary = lesson.get("vocabulary") or []
+    vocab_words = [v.get("word", "") for v in vocabulary if v.get("word")]
 
-    # fill_in_blank section — accepts list[dict] or dict[str, dict]
-    # YAML pattern (L22-L30): answer is a letter A/B/C... that indexes into vocabulary list.
+    # Detect fill_in_blank mode: 'lettered' (student circles A-G) vs 'free_form'
+    # (student handwrites a word). Mode is determined by whether ALL fb answers
+    # in the lesson are single A-G letters — that pattern is used by L22-L30
+    # 「四 語詞應用」style where vocabulary letters are the choice set.
     fb = lesson.get("fill_in_blank") or []
-    fb_items = fb.items() if isinstance(fb, dict) else enumerate(fb)
-    for key, item in fb_items:
+    fb_raw_items = list(fb.items()) if isinstance(fb, dict) else list(enumerate(fb))
+    fb_answers = []
+    for _, item in fb_raw_items:
+        ans = item.get("answer", "") if isinstance(item, dict) else str(item)
+        fb_answers.append(ans)
+    fb_lettered = bool(fb_answers) and all(
+        isinstance(a, str) and len(a.strip()) == 1 and a.strip().upper() in "ABCDEFG"
+        for a in fb_answers if a
+    )
+    # Lettered choices use the vocabulary as the A-G mapping; allowed letters
+    # equal min(len(vocab), 7) so we don't claim more letters than choices.
+    n_letters = min(len(vocab_words), 7) if fb_lettered else 0
+    fb_allowed_letters = [chr(ord("A") + i) for i in range(n_letters)]
+
+    for key, item in fb_raw_items:
         qid = str(key) if isinstance(fb, dict) else f"fb_{key+1}"
         if isinstance(item, dict):
             raw_answer = item.get("answer", "")
@@ -82,12 +103,22 @@ def _build_question_schema(lesson: dict) -> list[dict]:
         else:
             raw_answer = str(item)
             context = ""
-        correct = _resolve_letter_answer(raw_answer, vocabulary)
+        correct_word = _resolve_letter_answer(raw_answer, vocabulary)
+        # #1712: lettered fb compares letter-vs-letter (student circles a letter).
+        # `correct_answer` is what we score against in _score_answer.
+        # `correct_word` is kept for display ("正解：規律").
+        if fb_lettered:
+            correct_for_scoring = str(raw_answer).strip().upper()
+        else:
+            correct_for_scoring = correct_word
         questions.append({
             "id": qid,
             "type": "fill_blank",
             "context": context,
-            "correct_answer": correct,
+            "correct_answer": correct_for_scoring,
+            "correct_word": correct_word,
+            "mode": "lettered" if fb_lettered else "free_form",
+            "allowed_values": fb_allowed_letters if fb_lettered else vocab_words,
         })
 
     # multiple_choice section — accepts list[dict] or dict[str, dict]
@@ -106,6 +137,8 @@ def _build_question_schema(lesson: dict) -> list[dict]:
             "type": "multiple_choice",
             "context": context,
             "correct_answer": correct,
+            "mode": "lettered",
+            "allowed_values": ["A", "B", "C", "D"],
         })
 
     # strategy_exercise section (structured exercises in 7-lesson set)
@@ -127,38 +160,49 @@ def _build_question_schema(lesson: dict) -> list[dict]:
 
 
 def _build_grading_prompt(questions: list[dict]) -> str:
-    """Build OCR-only prompt. Gemini does NOT see correct answers.
+    """Build OCR-only prompt with per-question allowed-value constraints.
 
-    Design (fixes #1616 — round 2 of #1614):
-    - Reference answers REMOVED from prompt entirely. Gemini's only job is OCR.
-    - Scoring happens in Python (`_score_answer`) using YAML correct_answer.
-    - Without seeing expected answers, Gemini cannot copy them — verified by A/B
-      test: with reference block, 14/15 false-positive; without, true handwriting.
+    Design (fixes #1712 — round 3 of #1614/#1616):
+    - Each question explicitly lists the legal student_answer values so Gemini
+      cannot return a plausible-but-fabricated answer like 「良好」 when the
+      choice set is A-G letters.
+    - Reference (correct) answers stay HIDDEN per #1616 — Gemini sees the value
+      SPACE but not which value is correct.
+    - Empty answer is always legal — if Gemini can't see handwriting, it should
+      say so instead of inventing.
     """
-    questions_text = "\n".join(
-        f"  - {q['id']} ({q['type']}): {q['context']}" for q in questions
-    )
+    def _format(q: dict) -> str:
+        mode = q.get("mode", "free_form")
+        allowed = q.get("allowed_values") or []
+        if mode == "lettered":
+            value_hint = "{" + ", ".join(allowed) + ', ""}'
+            instr = "學生在題號旁圈一個字母。逐筆檢查圈圈/勾選/箭頭標記。"
+        else:
+            sample = "、".join(allowed[:6]) + ("…" if len(allowed) > 6 else "")
+            value_hint = f'{{{sample}, ""}}'
+            instr = "學生用鉛筆/原子筆在空格內手寫一個詞。逐字 OCR。"
+        return (
+            f"  - {q['id']} ({q['type']}): {q['context']}\n"
+            f"      合法答案 = {value_hint}\n"
+            f"      做法：{instr}"
+        )
+
+    questions_text = "\n".join(_format(q) for q in questions)
     return f"""你是 OCR 識字員。讀學生在學習單照片上的**手寫筆跡**。
 
 == 絕對規則 ==
-- 只報告學生**實際用鉛筆/原子筆寫**的字
-- 禁止猜測「應該寫什麼」
-- 看不到手寫 → student_answer=""，ai_confidence=0.0
-- 禁止把印刷的題目文字當作學生作答
+1. 只報告學生**實際用鉛筆/原子筆寫**的字 — 從照片像素讀出來的。
+2. **禁止編造**：student_answer 必須是該題「合法答案」清單裡的值，或空字串 ""。
+3. 看不到手寫、看不清、學生跳過 → student_answer=""，ai_confidence=0.0。
+4. 不要把印刷的題目文字、題目選項、或正確答案當作學生作答。
+5. 紅筆批改痕跡（✗ / 紅線 / 紅筆覆寫）= 老師批改 — student_answer 填學生**原本**寫的字（紅筆修改前），不是老師訂正的字。
+6. 對 lettered 題（A/B/C/D…），只能回字母本身（單一大寫字母）— 不能回詞語。
 
-== 辨識規則 ==
-1. 選擇題：報告學生圈選的字母（A/B/C/D）
-2. 填充題：逐字辨識學生手寫文字
-3. 紅筆批改痕跡（✗ / 紅線 / 紅筆覆寫）：
-   - 紅筆是老師標記學生答錯
-   - student_answer 填**學生原本手寫**（紅筆訂正前的字），不是老師修改的字
-4. 作答欄空白 → student_answer=""
-
-== 題目清單 ==
+== 題目清單（含合法答案清單） ==
 {questions_text}
 
-回傳 JSON 陣列：
-[{{"question_id":"...","student_answer":"學生實際手寫的字","ai_confidence":0.0,"reasoning":"50字內描述看到的筆跡"}}]"""
+回傳 JSON 陣列，每題一筆：
+[{{"question_id":"fb_1","student_answer":"<合法值或空字串>","ai_confidence":0.0~1.0,"reasoning":"50字內描述照片裡看到的筆跡"}}]"""
 
 
 def _score_answer(student: str, correct: str, qtype: str) -> float:
@@ -178,6 +222,37 @@ def _score_answer(student: str, correct: str, qtype: str) -> float:
     if qtype == "multiple_choice":
         return 1.0 if s.upper() == c.upper() else 0.0
     return 1.0 if s == c else 0.0
+
+
+def _validate_student_answer(student: str, question: dict) -> tuple[str, bool]:
+    """Coerce fabricated student_answer to empty (#1712 fix).
+
+    A valid answer is either:
+    - Empty string (Gemini saw nothing / wasn't sure)
+    - A value in `question['allowed_values']` (case-insensitive for letters,
+      exact match for words; also accepts a letter that resolves to a vocab
+      word in the lettered list — Gemini sometimes returns the word instead).
+
+    Anything else (e.g. 「良好」when allowed = {A,B,C,D,E,F,G,""}) is treated
+    as fabrication: coerce to "" and signal coercion happened.
+
+    Returns:
+        (sanitized_answer, was_fabricated)
+    """
+    s = (student or "").strip()
+    if not s:
+        return "", False
+    allowed = question.get("allowed_values") or []
+    mode = question.get("mode", "free_form")
+    if mode == "lettered":
+        # Accept the letter itself
+        if len(s) == 1 and s.upper() in [a.upper() for a in allowed]:
+            return s.upper(), False
+        return "", True
+    # free_form: exact word match (case-sensitive — Chinese characters)
+    if s in allowed:
+        return s, False
+    return "", True
 
 
 async def grade_worksheet_images(
@@ -264,7 +339,7 @@ async def grade_worksheet_images(
                     response_mime_type="application/json",
                     response_schema=response_schema,
                     max_output_tokens=2048,
-                    temperature=0.1,   # low temp for deterministic grading
+                    temperature=0.0,   # #1712: deterministic — no creative completion
                     thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
                     automatic_function_calling=genai_types.AutomaticFunctionCallingConfig(
                         disable=True
@@ -305,18 +380,35 @@ async def grade_worksheet_images(
     # Reset circuit breaker on success
     _consecutive_errors = 0
 
-    # Lookup table: question_id → (correct_answer, type) for Python-side scoring
-    qmap = {q["id"]: (q["correct_answer"], q["type"]) for q in questions}
+    # Lookup table: question_id → full question dict (for validation + scoring)
+    qmap = {q["id"]: q for q in questions}
 
     results = []
+    fabricated_count = 0
     for item in items:
         try:
             qid = str(item.get("question_id", ""))
-            student_ans = str(item.get("student_answer", "")).strip()
+            raw_student_ans = str(item.get("student_answer", "")).strip()
             ai_conf = float(item.get("ai_confidence", 0.0))
             reasoning = str(item.get("reasoning", ""))
 
-            correct_ans, qtype = qmap.get(qid, ("", "fill_blank"))
+            question = qmap.get(qid)
+            if not question:
+                logger.warning("OMO grader: skipping unknown question_id %s", qid)
+                continue
+
+            # #1712 anti-fabrication: coerce to empty if outside allowed_values.
+            student_ans, was_fabricated = _validate_student_answer(raw_student_ans, question)
+            if was_fabricated:
+                fabricated_count += 1
+                reasoning = (
+                    f"[anti-fabrication] AI 回傳 '{raw_student_ans}' 不在合法答案 "
+                    f"{question.get('allowed_values', [])[:5]}… 內，視為無作答。"
+                )
+                ai_conf = 0.0
+
+            correct_ans = question["correct_answer"]
+            qtype = question["type"]
             score = _score_answer(student_ans, correct_ans, qtype)
 
             results.append(GradedAnswer(
@@ -334,6 +426,12 @@ async def grade_worksheet_images(
             ))
         except Exception as exc:
             logger.warning("OMO grader: skipping malformed answer item %s: %s", item, exc)
+
+    if fabricated_count:
+        logger.warning(
+            "OMO grader: coerced %d/%d fabricated answers to empty for lesson '%s'",
+            fabricated_count, len(results), lesson.get("title", "unknown"),
+        )
 
     logger.info(
         "OMO grader: graded %d/%d questions for lesson '%s'",
