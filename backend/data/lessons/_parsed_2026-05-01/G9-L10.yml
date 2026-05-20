@@ -151,6 +151,36 @@ vocab_bank:
   G: 功不可沒
   H: 血栓
 fill_in_blank:
+- sentence: '每個人的體質不同，對藥物的反應也（　　）。'
+  answer: D
+- sentence: '豚骨拉麵的湯底是由（　　）的豬骨湯調製而成。'
+  answer: E
+- sentence: '天氣一冷，血管彈性不佳的老人，很容易造成（　　），引發腦中風。'
+  answer: H
+- sentence: '愛迪生眾多的發明，為人類帶來了新文明，真是（　　）。'
+  answer: G
+- sentence: '哥哥是體育健將，只要是他參加的比賽，幾乎（　　）所有金牌。'
+  answer: A
+- sentence: '每個人的體質不同，對藥物的反應也（　　）。'
+  answer: D
+- sentence: '豚骨拉麵的湯底是由（　　）的豬骨湯調製而成。'
+  answer: E
+- sentence: '天氣一冷，血管彈性不佳的老人，很容易造成（　　），引發腦中風。'
+  answer: H
+- sentence: '愛迪生眾多的發明，為人類帶來了新文明，真是（　　）。'
+  answer: G
+- sentence: '哥哥是體育健將，只要是他參加的比賽，幾乎（　　）所有金牌。'
+  answer: A
+- sentence: '每個人的體質不同，對藥物的反應也（　　）。'
+  answer: D
+- sentence: '豚骨拉麵的湯底是由（　　）的豬骨湯調製而成。'
+  answer: E
+- sentence: '天氣一冷，血管彈性不佳的老人，很容易造成（　　），引發腦中風。'
+  answer: H
+- sentence: '愛迪生眾多的發明，為人類帶來了新文明，真是（　　）。'
+  answer: G
+- sentence: '哥哥是體育健將，只要是他參加的比賽，幾乎（　　）所有金牌。'
+  answer: A
 - id: 1
   answer: D
   answer_word: 因人而異
@@ -171,7 +201,7 @@ fill_in_blank:
   answer_word: 功不可沒
   context_before: 愛迪生眾多的發明，為人類帶來了新文明，真是
   context_after: ''
-fill_in_blank_count: 4
+fill_in_blank_count: 5
 本課語詞:
 - 囊括
 - 稀薄

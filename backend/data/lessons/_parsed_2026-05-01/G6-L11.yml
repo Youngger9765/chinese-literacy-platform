@@ -207,6 +207,48 @@ vocab_bank:
   F: 精雕細琢
   G: 不食人間煙火
 fill_in_blank:
+- sentence: '夜晚的星空（　　），令人感嘆自然的偉大。'
+  answer: B
+- sentence: '這件玉雕作品經過工匠（　　），每一個細節都栩栩如生。'
+  answer: F
+- sentence: '在浩瀚的宇宙面前，人類的力量顯得（　　）。'
+  answer: A
+- sentence: '他厭倦了城市的（　　），決定搬到鄉村過簡單的生活。'
+  answer: D
+- sentence: '在工作了一整天後，他感到（　　），只想好好休息。'
+  answer: E
+- sentence: '那位隱居山林的藝術家，生活簡樸，宛如（　　）的世外高人。'
+  answer: G
+- sentence: '這個關於仙境的傳說，是村民們（　　）的故事。'
+  answer: C
+- sentence: '夜晚的星空（　　），令人感嘆自然的偉大。'
+  answer: B
+- sentence: '這件玉雕作品經過工匠（　　），每一個細節都栩栩如生。'
+  answer: F
+- sentence: '在浩瀚的宇宙面前，人類的力量顯得（　　）。'
+  answer: A
+- sentence: '他厭倦了城市的（　　），決定搬到鄉村過簡單的生活。'
+  answer: D
+- sentence: '在工作了一整天後，他感到（　　），只想好好休息。'
+  answer: E
+- sentence: '那位隱居山林的藝術家，生活簡樸，宛如（　　）的世外高人。'
+  answer: G
+- sentence: '這個關於仙境的傳說，是村民們（　　）的故事。'
+  answer: C
+- sentence: '夜晚的星空（　　），令人感嘆自然的偉大。'
+  answer: B
+- sentence: '這件玉雕作品經過工匠（　　），每一個細節都栩栩如生。'
+  answer: F
+- sentence: '在浩瀚的宇宙面前，人類的力量顯得（　　）。'
+  answer: A
+- sentence: '他厭倦了城市的（　　），決定搬到鄉村過簡單的生活。'
+  answer: D
+- sentence: '在工作了一整天後，他感到（　　），只想好好休息。'
+  answer: E
+- sentence: '那位隱居山林的藝術家，生活簡樸，宛如（　　）的世外高人。'
+  answer: G
+- sentence: '這個關於仙境的傳說，是村民們（　　）的故事。'
+  answer: C
 - id: 1
   answer: B
   answer_word: 浩瀚無垠

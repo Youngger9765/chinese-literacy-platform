@@ -172,6 +172,36 @@ vocab_bank:
   D: 異議
   E: 差異
 fill_in_blank:
+- sentence: '這對雙胞胎姐妹的外表幾乎一模一樣，只有髮型有所（　　）。'
+  answer: E
+- sentence: '警察根據凶殺現場的鞋印，（　　）出嫌犯的身高和性別。'
+  answer: A
+- sentence: '在討論校外教學的地點時，幾位同學對老師的安排提出了（　　），他們覺得去動物園更好。'
+  answer: D
+- sentence: '電視節目透過不同的分級制度（例如：普遍級、保護級等），確保不同（　　）的觀眾能夠觀賞適合自己的節目。'
+  answer: C
+- sentence: '7-11有標準化的經營步驟，讓每一家分店都可以（　　）。'
+  answer: B
+- sentence: '這對雙胞胎姐妹的外表幾乎一模一樣，只有髮型有所（　　）。'
+  answer: E
+- sentence: '警察根據凶殺現場的鞋印，（　　）出嫌犯的身高和性別。'
+  answer: A
+- sentence: '在討論校外教學的地點時，幾位同學對老師的安排提出了（　　），他們覺得去動物園更好。'
+  answer: D
+- sentence: '電視節目透過不同的分級制度（例如：普遍級、保護級等），確保不同（　　）的觀眾能夠觀賞適合自己的節目。'
+  answer: C
+- sentence: '7-11有標準化的經營步驟，讓每一家分店都可以（　　）。'
+  answer: B
+- sentence: '這對雙胞胎姐妹的外表幾乎一模一樣，只有髮型有所（　　）。'
+  answer: E
+- sentence: '警察根據凶殺現場的鞋印，（　　）出嫌犯的身高和性別。'
+  answer: A
+- sentence: '在討論校外教學的地點時，幾位同學對老師的安排提出了（　　），他們覺得去動物園更好。'
+  answer: D
+- sentence: '電視節目透過不同的分級制度（例如：普遍級、保護級等），確保不同（　　）的觀眾能夠觀賞適合自己的節目。'
+  answer: C
+- sentence: '7-11有標準化的經營步驟，讓每一家分店都可以（　　）。'
+  answer: B
 - id: 1
   answer: E
   answer_word: 差異
@@ -192,7 +222,7 @@ fill_in_blank:
   answer_word: 複製
   context_before: 7-11有標準化的經營步驟，讓每一家分店都可以
   context_after: ''
-fill_in_blank_count: 4
+fill_in_blank_count: 5
 spotlight_raw_text: "閱讀聚光燈\n用表格整理訊息—比較異同\n    這篇說明文介紹了「說漢語」和「說英語」的大學生和幼兒在記憶數字上的不同表現，一整篇文章讀下來，訊息很多，容易讓讀者抓不到重點。底下透過「比較異同」的表格整理策略，幫助我們更清楚的看到文章中訊息的關連喔！       \n　　※比較異同：找出兩個或多個事物之間的「不同點」和「相同點」。\n\n◎"
 strategy_exercise:
   type: guided_steps

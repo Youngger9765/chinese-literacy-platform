@@ -188,6 +188,54 @@ vocab_bank:
   G: 較勁
   H: 左右
 fill_in_blank:
+- sentence: '那位朝我微笑的女子感覺（　　），卻怎麼也想不起她是誰。'
+  answer: D
+- sentence: '他看到教練臉色嚴肅，心中就開始上演 （　　），以為自己犯了錯。'
+  answer: F
+- sentence: '兩位同學在數學上總是暗中（　　），每次考試都想分個勝負。'
+  answer: G
+- sentence: '這場籃球比賽打得非常激烈，兩隊實力（　　），雙方互不相讓。'
+  answer: E
+- sentence: '為了避免自己成為（　　），妮妮投注了許多心力和時間準備表演。'
+  answer: C
+- sentence: '他看到好友和別人走得很近，臉上裝作若無其事，心裡卻（　　）。'
+  answer: A
+- sentence: '他缺乏信心與主見，因此想法常常被身邊的人（　　），一遇到不同意見就立刻改變主張。'
+  answer: H
+- sentence: '面對網路眾多的謠言與批評，他能夠（　　）沉住氣，真是不容易。'
+  answer: B
+- sentence: '那位朝我微笑的女子感覺（　　），卻怎麼也想不起她是誰。'
+  answer: D
+- sentence: '他看到教練臉色嚴肅，心中就開始上演 （　　），以為自己犯了錯。'
+  answer: F
+- sentence: '兩位同學在數學上總是暗中（　　），每次考試都想分個勝負。'
+  answer: G
+- sentence: '這場籃球比賽打得非常激烈，兩隊實力（　　），雙方互不相讓。'
+  answer: E
+- sentence: '為了避免自己成為（　　），妮妮投注了許多心力和時間準備表演。'
+  answer: C
+- sentence: '他看到好友和別人走得很近，臉上裝作若無其事，心裡卻（　　）。'
+  answer: A
+- sentence: '他缺乏信心與主見，因此想法常常被身邊的人（　　），一遇到不同意見就立刻改變主張。'
+  answer: H
+- sentence: '面對網路眾多的謠言與批評，他能夠（　　）沉住氣，真是不容易。'
+  answer: B
+- sentence: '那位朝我微笑的女子感覺（　　），卻怎麼也想不起她是誰。'
+  answer: D
+- sentence: '他看到教練臉色嚴肅，心中就開始上演 （　　），以為自己犯了錯。'
+  answer: F
+- sentence: '兩位同學在數學上總是暗中（　　），每次考試都想分個勝負。'
+  answer: G
+- sentence: '這場籃球比賽打得非常激烈，兩隊實力（　　），雙方互不相讓。'
+  answer: E
+- sentence: '為了避免自己成為（　　），妮妮投注了許多心力和時間準備表演。'
+  answer: C
+- sentence: '他看到好友和別人走得很近，臉上裝作若無其事，心裡卻（　　）。'
+  answer: A
+- sentence: '他缺乏信心與主見，因此想法常常被身邊的人（　　），一遇到不同意見就立刻改變主張。'
+  answer: H
+- sentence: '面對網路眾多的謠言與批評，他能夠（　　）沉住氣，真是不容易。'
+  answer: B
 - id: 1
   answer: D
   answer_word: 似曾相識

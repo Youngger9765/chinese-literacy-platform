@@ -167,6 +167,54 @@ vocab_bank:
   I: 得不償失
   J: 進退維谷
 fill_in_blank:
+- sentence: '有人發現他就是謠言的源頭，他因此成為（　　），大家都罵他。'
+  answer: A
+- sentence: '校際盃連敗兩場後，球隊（　　），把失誤逐項檢討。'
+  answer: E
+- sentence: '她故意捏著嗓音說：「哎呀，對不起啦，人家又不是故意的。」表現得非常（　　）。'
+  answer: F
+- sentence: '他被闖紅燈的摩托車嚇到，把剛買的雞蛋破了一地，真是（　　）。'
+  answer: I
+- sentence: '他校隊選拔遭到淘汰後，雖然難過，仍然（　　）安慰隊友。'
+  answer: C
+- sentence: '經過完整調查，事情終於（　　），被冤枉的人也得以澄清。'
+  answer: G
+- sentence: '大家都想開冷氣，卻沒有人希望發電廠蓋在附近，政府真是（　　）。'
+  answer: J
+- sentence: '導師叫我下課找她說明作弊的事，我這節課（　　），無法專心上課。'
+  answer: B
+- sentence: '有人發現他就是謠言的源頭，他因此成為（　　），大家都罵他。'
+  answer: A
+- sentence: '校際盃連敗兩場後，球隊（　　），把失誤逐項檢討。'
+  answer: E
+- sentence: '她故意捏著嗓音說：「哎呀，對不起啦，人家又不是故意的。」表現得非常（　　）。'
+  answer: F
+- sentence: '他被闖紅燈的摩托車嚇到，把剛買的雞蛋破了一地，真是（　　）。'
+  answer: I
+- sentence: '他校隊選拔遭到淘汰後，雖然難過，仍然（　　）安慰隊友。'
+  answer: C
+- sentence: '經過完整調查，事情終於（　　），被冤枉的人也得以澄清。'
+  answer: G
+- sentence: '大家都想開冷氣，卻沒有人希望發電廠蓋在附近，政府真是（　　）。'
+  answer: J
+- sentence: '導師叫我下課找她說明作弊的事，我這節課（　　），無法專心上課。'
+  answer: B
+- sentence: '有人發現他就是謠言的源頭，他因此成為（　　），大家都罵他。'
+  answer: A
+- sentence: '校際盃連敗兩場後，球隊（　　），把失誤逐項檢討。'
+  answer: E
+- sentence: '她故意捏著嗓音說：「哎呀，對不起啦，人家又不是故意的。」表現得非常（　　）。'
+  answer: F
+- sentence: '他被闖紅燈的摩托車嚇到，把剛買的雞蛋破了一地，真是（　　）。'
+  answer: I
+- sentence: '他校隊選拔遭到淘汰後，雖然難過，仍然（　　）安慰隊友。'
+  answer: C
+- sentence: '經過完整調查，事情終於（　　），被冤枉的人也得以澄清。'
+  answer: G
+- sentence: '大家都想開冷氣，卻沒有人希望發電廠蓋在附近，政府真是（　　）。'
+  answer: J
+- sentence: '導師叫我下課找她說明作弊的事，我這節課（　　），無法專心上課。'
+  answer: B
 - id: 1
   answer: A
   answer_word: 眾矢之的

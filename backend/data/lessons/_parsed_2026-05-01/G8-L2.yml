@@ -155,6 +155,54 @@ vocab_bank:
   I: 經濟蕭條
   J: 走投無路
 fill_in_blank:
+- sentence: '小鎮因（　　），街上店家一間間收起來，連想找份打工都不容易。'
+  answer: I
+- sentence: '民國38年惡性（　　）時，一碗麵漲到12萬元，真是民不聊生。'
+  answer: E
+- sentence: '爺爺拿出一個（　　）的舊鐵盒，裡面裝著他最珍惜的老照片。'
+  answer: F
+- sentence: '醫生說病人已經到了（　　）階段，建議家屬可以準備好好道別。'
+  answer: C
+- sentence: '我摔車了，一位（　　）的路人停下來扶我，確認我沒受傷才離開。'
+  answer: I
+- sentence: '他破產後（　　），常不捨得花錢，有一頓沒一頓的過著辛苦日子。'
+  answer: G
+- sentence: '叔叔欠債，被逼著還錢，這時卻又不幸失業，真的（　　）了，只好向親友伸手求助。'
+  answer: J
+- sentence: '外公以前走路很快，這兩年（　　），爬樓時得扶著扶手慢慢走。'
+  answer: B
+- sentence: '小鎮因（　　），街上店家一間間收起來，連想找份打工都不容易。'
+  answer: I
+- sentence: '民國38年惡性（　　）時，一碗麵漲到12萬元，真是民不聊生。'
+  answer: E
+- sentence: '爺爺拿出一個（　　）的舊鐵盒，裡面裝著他最珍惜的老照片。'
+  answer: F
+- sentence: '醫生說病人已經到了（　　）階段，建議家屬可以準備好好道別。'
+  answer: C
+- sentence: '我摔車了，一位（　　）的路人停下來扶我，確認我沒受傷才離開。'
+  answer: I
+- sentence: '他破產後（　　），常不捨得花錢，有一頓沒一頓的過著辛苦日子。'
+  answer: G
+- sentence: '叔叔欠債，被逼著還錢，這時卻又不幸失業，真的（　　）了，只好向親友伸手求助。'
+  answer: J
+- sentence: '外公以前走路很快，這兩年（　　），爬樓時得扶著扶手慢慢走。'
+  answer: B
+- sentence: '小鎮因（　　），街上店家一間間收起來，連想找份打工都不容易。'
+  answer: I
+- sentence: '民國38年惡性（　　）時，一碗麵漲到12萬元，真是民不聊生。'
+  answer: E
+- sentence: '爺爺拿出一個（　　）的舊鐵盒，裡面裝著他最珍惜的老照片。'
+  answer: F
+- sentence: '醫生說病人已經到了（　　）階段，建議家屬可以準備好好道別。'
+  answer: C
+- sentence: '我摔車了，一位（　　）的路人停下來扶我，確認我沒受傷才離開。'
+  answer: I
+- sentence: '他破產後（　　），常不捨得花錢，有一頓沒一頓的過著辛苦日子。'
+  answer: G
+- sentence: '叔叔欠債，被逼著還錢，這時卻又不幸失業，真的（　　）了，只好向親友伸手求助。'
+  answer: J
+- sentence: '外公以前走路很快，這兩年（　　），爬樓時得扶著扶手慢慢走。'
+  answer: B
 - id: 1
   answer: I
   answer_word: 經濟蕭條

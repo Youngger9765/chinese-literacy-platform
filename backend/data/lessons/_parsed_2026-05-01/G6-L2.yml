@@ -178,6 +178,48 @@ vocab_bank:
   G: 眷戀
   H: 韶光
 fill_in_blank:
+- sentence: '他穿著體育服裝出現在結婚喜宴上，顯得非常（　　）。'
+  answer: F
+- sentence: '這十年來，科技的進步讓我們的生活發生（　　）的變化。。'
+  answer: C
+- sentence: '自從他在眾人面前出糗後，犯錯的焦慮就（　　）的纏著他。'
+  answer: A
+- sentence: '「盛年不重來，一日難再晨」，年輕的（　　）要好好把握。'
+  answer: H
+- sentence: '畢業多年，他依然（　　）著校園的一草一木。'
+  answer: G
+- sentence: '這場（　　）的演講讓台下的人感到不耐煩，紛紛開始聊天。'
+  answer: E
+- sentence: '經過多年的苦練與突破後，進入決賽的門票對他來說是（　　）。'
+  answer: B
+- sentence: '他穿著體育服裝出現在結婚喜宴上，顯得非常（　　）。'
+  answer: F
+- sentence: '這十年來，科技的進步讓我們的生活發生（　　）的變化。。'
+  answer: C
+- sentence: '自從他在眾人面前出糗後，犯錯的焦慮就（　　）的纏著他。'
+  answer: A
+- sentence: '「盛年不重來，一日難再晨」，年輕的（　　）要好好把握。'
+  answer: H
+- sentence: '畢業多年，他依然（　　）著校園的一草一木。'
+  answer: G
+- sentence: '這場（　　）的演講讓台下的人感到不耐煩，紛紛開始聊天。'
+  answer: E
+- sentence: '經過多年的苦練與突破後，進入決賽的門票對他來說是（　　）。'
+  answer: B
+- sentence: '他穿著體育服裝出現在結婚喜宴上，顯得非常（　　）。'
+  answer: F
+- sentence: '這十年來，科技的進步讓我們的生活發生（　　）的變化。。'
+  answer: C
+- sentence: '自從他在眾人面前出糗後，犯錯的焦慮就（　　）的纏著他。'
+  answer: A
+- sentence: '「盛年不重來，一日難再晨」，年輕的（　　）要好好把握。'
+  answer: H
+- sentence: '畢業多年，他依然（　　）著校園的一草一木。'
+  answer: G
+- sentence: '這場（　　）的演講讓台下的人感到不耐煩，紛紛開始聊天。'
+  answer: E
+- sentence: '經過多年的苦練與突破後，進入決賽的門票對他來說是（　　）。'
+  answer: B
 - id: 1
   answer: F
   answer_word: 格格不入

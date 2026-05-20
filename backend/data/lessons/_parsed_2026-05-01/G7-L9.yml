@@ -207,6 +207,54 @@ vocab_bank:
   G: 雲端
   H: 沒有人是局外人
 fill_in_blank:
+- sentence: '運動團隊中，（　　），每個隊員的努力對團隊的成功都很重要。'
+  answer: H
+- sentence: '「九二一大地震」有不少房子倒塌，導致許多人（　　）、無家可歸。'
+  answer: D
+- sentence: '學校運動場改建，田徑隊（　　），需要重新尋找訓練地點。'
+  answer: B
+- sentence: '從飛機上（　　）大地，夜晚城市的燈火，如閃爍的星星般美麗。'
+  answer: E
+- sentence: '同學打架時，小華在一旁湊熱鬧，沒想到不慎被打傷，遭受（　　）。'
+  answer: C
+- sentence: '照片和影片上傳（　　）後，家人和朋友就可以立即查看和分享了。'
+  answer: G
+- sentence: '俄羅斯製片商首開（　　）到太空取景，拍攝第一部太空實景電影。'
+  answer: F
+- sentence: '大地震過後的豪雨，讓土石鬆動，山坡上的住戶顯得（　　）。'
+  answer: A
+- sentence: '運動團隊中，（　　），每個隊員的努力對團隊的成功都很重要。'
+  answer: H
+- sentence: '「九二一大地震」有不少房子倒塌，導致許多人（　　）、無家可歸。'
+  answer: D
+- sentence: '學校運動場改建，田徑隊（　　），需要重新尋找訓練地點。'
+  answer: B
+- sentence: '從飛機上（　　）大地，夜晚城市的燈火，如閃爍的星星般美麗。'
+  answer: E
+- sentence: '同學打架時，小華在一旁湊熱鬧，沒想到不慎被打傷，遭受（　　）。'
+  answer: C
+- sentence: '照片和影片上傳（　　）後，家人和朋友就可以立即查看和分享了。'
+  answer: G
+- sentence: '俄羅斯製片商首開（　　）到太空取景，拍攝第一部太空實景電影。'
+  answer: F
+- sentence: '大地震過後的豪雨，讓土石鬆動，山坡上的住戶顯得（　　）。'
+  answer: A
+- sentence: '運動團隊中，（　　），每個隊員的努力對團隊的成功都很重要。'
+  answer: H
+- sentence: '「九二一大地震」有不少房子倒塌，導致許多人（　　）、無家可歸。'
+  answer: D
+- sentence: '學校運動場改建，田徑隊（　　），需要重新尋找訓練地點。'
+  answer: B
+- sentence: '從飛機上（　　）大地，夜晚城市的燈火，如閃爍的星星般美麗。'
+  answer: E
+- sentence: '同學打架時，小華在一旁湊熱鬧，沒想到不慎被打傷，遭受（　　）。'
+  answer: C
+- sentence: '照片和影片上傳（　　）後，家人和朋友就可以立即查看和分享了。'
+  answer: G
+- sentence: '俄羅斯製片商首開（　　）到太空取景，拍攝第一部太空實景電影。'
+  answer: F
+- sentence: '大地震過後的豪雨，讓土石鬆動，山坡上的住戶顯得（　　）。'
+  answer: A
 - id: 1
   answer: H
   answer_word: 沒有人是局外人

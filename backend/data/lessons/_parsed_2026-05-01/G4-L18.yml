@@ -132,6 +132,48 @@ vocab_bank:
   I: 不相上下
   J: 受挫
 fill_in_blank:
+- sentence: '在決賽中，兩隊實力（　　），比分一度僵持，現場氣氛十分緊張。'
+  answer: I
+- sentence: '他長年受氣喘困擾，後來勤讀醫書、調整生活，減少氣喘發作的頻率，真是（　　）。'
+  answer: F
+- sentence: '弟弟看到滿桌的美食，立刻（　　），吃了好幾碗飯。'
+  answer: G
+- sentence: '老師教我們要（　　）玩樂和學習，不能只玩不讀書。'
+  answer: E
+- sentence: '為了完成科展作品，他連續幾天（　　）的研究程式設計，直到成功才露出笑容。'
+  answer: D
+- sentence: '妹妹收到那隻手工縫製的小熊娃娃後，整天抱在懷裡，（　　），連睡覺都不放開。'
+  answer: H
+- sentence: '他雖然數學基礎薄弱，但每天堅持練習題目，終於以（　　）的毅力取得好成績。'
+  answer: C
+- sentence: '在決賽中，兩隊實力（　　），比分一度僵持，現場氣氛十分緊張。'
+  answer: I
+- sentence: '他長年受氣喘困擾，後來勤讀醫書、調整生活，減少氣喘發作的頻率，真是（　　）。'
+  answer: F
+- sentence: '弟弟看到滿桌的美食，立刻（　　），吃了好幾碗飯。'
+  answer: G
+- sentence: '老師教我們要（　　）玩樂和學習，不能只玩不讀書。'
+  answer: E
+- sentence: '為了完成科展作品，他連續幾天（　　）的研究程式設計，直到成功才露出笑容。'
+  answer: D
+- sentence: '妹妹收到那隻手工縫製的小熊娃娃後，整天抱在懷裡，（　　），連睡覺都不放開。'
+  answer: H
+- sentence: '他雖然數學基礎薄弱，但每天堅持練習題目，終於以（　　）的毅力取得好成績。'
+  answer: C
+- sentence: '在決賽中，兩隊實力（　　），比分一度僵持，現場氣氛十分緊張。'
+  answer: I
+- sentence: '他長年受氣喘困擾，後來勤讀醫書、調整生活，減少氣喘發作的頻率，真是（　　）。'
+  answer: F
+- sentence: '弟弟看到滿桌的美食，立刻（　　），吃了好幾碗飯。'
+  answer: G
+- sentence: '老師教我們要（　　）玩樂和學習，不能只玩不讀書。'
+  answer: E
+- sentence: '為了完成科展作品，他連續幾天（　　）的研究程式設計，直到成功才露出笑容。'
+  answer: D
+- sentence: '妹妹收到那隻手工縫製的小熊娃娃後，整天抱在懷裡，（　　），連睡覺都不放開。'
+  answer: H
+- sentence: '他雖然數學基礎薄弱，但每天堅持練習題目，終於以（　　）的毅力取得好成績。'
+  answer: C
 - id: 1
   answer: I
   answer_word: 不相上下

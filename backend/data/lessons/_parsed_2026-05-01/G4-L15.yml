@@ -159,6 +159,54 @@ vocab_bank:
   H: 心跳漏了一拍
   I: 瞬間
 fill_in_blank:
+- sentence: '多年後，她贏得冠軍的燦爛笑容仍然在我（　　）揮之不去。'
+  answer: D
+- sentence: '迷路的他，站在人來人往的車站中，頓時感到一陣（　　）。'
+  answer: A
+- sentence: '他努力想解開和朋友的誤會，但卻緊張的（　　）說不清楚。'
+  answer: G
+- sentence: '這部電影的某些 （　　）並不適合年幼的兒童觀賞。'
+  answer: C
+- sentence: '他開了一個誇張的玩笑，所有人的（　　）都集中在他身上。'
+  answer: B
+- sentence: '集訓結束後，老師（　　）的一句肯定和鼓勵，讓我開心了一整個暑假。'
+  answer: E
+- sentence: '當他突然接到爸爸出車禍的壞消息時，表情（　　）轉為沉重。'
+  answer: I
+- sentence: '聽到「立正！」時，他（　　）挺直了腰桿，顯得很有精神。'
+  answer: F
+- sentence: '多年後，她贏得冠軍的燦爛笑容仍然在我（　　）揮之不去。'
+  answer: D
+- sentence: '迷路的他，站在人來人往的車站中，頓時感到一陣（　　）。'
+  answer: A
+- sentence: '他努力想解開和朋友的誤會，但卻緊張的（　　）說不清楚。'
+  answer: G
+- sentence: '這部電影的某些 （　　）並不適合年幼的兒童觀賞。'
+  answer: C
+- sentence: '他開了一個誇張的玩笑，所有人的（　　）都集中在他身上。'
+  answer: B
+- sentence: '集訓結束後，老師（　　）的一句肯定和鼓勵，讓我開心了一整個暑假。'
+  answer: E
+- sentence: '當他突然接到爸爸出車禍的壞消息時，表情（　　）轉為沉重。'
+  answer: I
+- sentence: '聽到「立正！」時，他（　　）挺直了腰桿，顯得很有精神。'
+  answer: F
+- sentence: '多年後，她贏得冠軍的燦爛笑容仍然在我（　　）揮之不去。'
+  answer: D
+- sentence: '迷路的他，站在人來人往的車站中，頓時感到一陣（　　）。'
+  answer: A
+- sentence: '他努力想解開和朋友的誤會，但卻緊張的（　　）說不清楚。'
+  answer: G
+- sentence: '這部電影的某些 （　　）並不適合年幼的兒童觀賞。'
+  answer: C
+- sentence: '他開了一個誇張的玩笑，所有人的（　　）都集中在他身上。'
+  answer: B
+- sentence: '集訓結束後，老師（　　）的一句肯定和鼓勵，讓我開心了一整個暑假。'
+  answer: E
+- sentence: '當他突然接到爸爸出車禍的壞消息時，表情（　　）轉為沉重。'
+  answer: I
+- sentence: '聽到「立正！」時，他（　　）挺直了腰桿，顯得很有精神。'
+  answer: F
 - id: 1
   answer: D
   answer_word: 腦海

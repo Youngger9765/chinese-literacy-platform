@@ -153,14 +153,44 @@ story_structure_rows:
 story_structure_table_source: ai-generated-2026-05-02
 vocab_bank:
   A: 如魚得水
-  B: 沉著
+  B: 沉著󠇤
   C: 質疑
   D: 傾訴
-  E: 扳回一
-  F: 獨當一
+  E: 扳回一󠇢城
+  F: 獨當一󠇡面
   G: 雕琢
   H: 心力交瘁
 fill_in_blank:
+- sentence: '性情穩重的人，做事（　　），絕不急躁。'
+  answer: B
+- sentence: '經過多年努力，他從一個小職員，終於晉升為可以（　　）的主管。'
+  answer: F
+- sentence: '在這局比賽中，教練使用打帶跑戰術，終於使我隊（　　）。'
+  answer: E
+- sentence: '你就像一塊璞玉，擁有無限可能，但是要自己的努力將它（　　）出來。'
+  answer: G
+- sentence: '這份工作他做起來得心應手，（　　）。'
+  answer: A
+- sentence: '性情穩重的人，做事（　　），絕不急躁。'
+  answer: B
+- sentence: '經過多年努力，他從一個小職員，終於晉升為可以（　　）的主管。'
+  answer: F
+- sentence: '在這局比賽中，教練使用打帶跑戰術，終於使我隊（　　）。'
+  answer: E
+- sentence: '你就像一塊璞玉，擁有無限可能，但是要自己的努力將它（　　）出來。'
+  answer: G
+- sentence: '這份工作他做起來得心應手，（　　）。'
+  answer: A
+- sentence: '性情穩重的人，做事（　　），絕不急躁。'
+  answer: B
+- sentence: '經過多年努力，他從一個小職員，終於晉升為可以（　　）的主管。'
+  answer: F
+- sentence: '在這局比賽中，教練使用打帶跑戰術，終於使我隊（　　）。'
+  answer: E
+- sentence: '你就像一塊璞玉，擁有無限可能，但是要自己的努力將它（　　）出來。'
+  answer: G
+- sentence: '這份工作他做起來得心應手，（　　）。'
+  answer: A
 - id: 1
   answer: B
   answer_word: 沉著

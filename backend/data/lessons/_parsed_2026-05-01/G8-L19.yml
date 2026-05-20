@@ -154,6 +154,54 @@ vocab_bank:
   I: 風靡
   J: 權衡
 fill_in_blank:
+- sentence: '事件真相尚未釐清，網路上的說法（　　），讀者反而更難判斷對錯。'
+  answer: A
+- sentence: '供應鏈環節一斷，影響不只一家公司，可能蔓延成（　　），讓整個產業連帶停擺。'
+  answer: H
+- sentence: '他被詐騙過一次，就拒絕所有線上交易，這樣未免（　　），反而失去許多便利。'
+  answer: F
+- sentence: '他不但拒絕道歉，（　　），還把責任推給受害者，引發了更大反感。'
+  answer: C
+- sentence: '這款手遊一上架就（　　）全校，走到哪都聽到同學在討論。'
+  answer: I
+- sentence: '動手術花了太多錢，整個家庭的生活費用（　　），必須非常節省。'
+  answer: B
+- sentence: '面對兩難選擇，他反覆（　　）利弊，最後選擇較能長期承擔的方案。'
+  answer: J
+- sentence: '團隊出現問題，主管若（　　），只會讓衝突擴大。'
+  answer: G
+- sentence: '事件真相尚未釐清，網路上的說法（　　），讀者反而更難判斷對錯。'
+  answer: A
+- sentence: '供應鏈環節一斷，影響不只一家公司，可能蔓延成（　　），讓整個產業連帶停擺。'
+  answer: H
+- sentence: '他被詐騙過一次，就拒絕所有線上交易，這樣未免（　　），反而失去許多便利。'
+  answer: F
+- sentence: '他不但拒絕道歉，（　　），還把責任推給受害者，引發了更大反感。'
+  answer: C
+- sentence: '這款手遊一上架就（　　）全校，走到哪都聽到同學在討論。'
+  answer: I
+- sentence: '動手術花了太多錢，整個家庭的生活費用（　　），必須非常節省。'
+  answer: B
+- sentence: '面對兩難選擇，他反覆（　　）利弊，最後選擇較能長期承擔的方案。'
+  answer: J
+- sentence: '團隊出現問題，主管若（　　），只會讓衝突擴大。'
+  answer: G
+- sentence: '事件真相尚未釐清，網路上的說法（　　），讀者反而更難判斷對錯。'
+  answer: A
+- sentence: '供應鏈環節一斷，影響不只一家公司，可能蔓延成（　　），讓整個產業連帶停擺。'
+  answer: H
+- sentence: '他被詐騙過一次，就拒絕所有線上交易，這樣未免（　　），反而失去許多便利。'
+  answer: F
+- sentence: '他不但拒絕道歉，（　　），還把責任推給受害者，引發了更大反感。'
+  answer: C
+- sentence: '這款手遊一上架就（　　）全校，走到哪都聽到同學在討論。'
+  answer: I
+- sentence: '動手術花了太多錢，整個家庭的生活費用（　　），必須非常節省。'
+  answer: B
+- sentence: '面對兩難選擇，他反覆（　　）利弊，最後選擇較能長期承擔的方案。'
+  answer: J
+- sentence: '團隊出現問題，主管若（　　），只會讓衝突擴大。'
+  answer: G
 - id: 1
   answer: A
   answer_word: 眾說紛紜

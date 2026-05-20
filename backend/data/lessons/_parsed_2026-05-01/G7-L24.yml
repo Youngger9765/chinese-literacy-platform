@@ -158,6 +158,54 @@ vocab_bank:
   I: 徒手
   J: 雞皮疙瘩
 fill_in_blank:
+- sentence: '儘管環境困難，他追求夢想的態度 （　　），令人敬佩。'
+  answer: A
+- sentence: '在使用儀器前，必須先進行（　　），以確保精準。'
+  answer: E
+- sentence: '古蹟的修復 （　　） ，還要投入大量的人力，只為喚回歷史的光彩。'
+  answer: F
+- sentence: '這公司在創新策略的推動下，展現出（　　）的成長動能，前景看好。'
+  answer: D
+- sentence: '他（　　）攀爬台北101大樓，展現出驚人的體能與技術。'
+  answer: I
+- sentence: '面對這項提議，他露出（　　）的神情，心中質疑「這有可能嗎？」'
+  answer: G
+- sentence: '上台前，我先在家（　　） 報告一次，練習說話的速度和抑揚頓挫。'
+  answer: H
+- sentence: '北風雖然（　　），發生山難時，消防勇士們仍冒著嚴寒上山搜救。'
+  answer: B
+- sentence: '儘管環境困難，他追求夢想的態度 （　　），令人敬佩。'
+  answer: A
+- sentence: '在使用儀器前，必須先進行（　　），以確保精準。'
+  answer: E
+- sentence: '古蹟的修復 （　　） ，還要投入大量的人力，只為喚回歷史的光彩。'
+  answer: F
+- sentence: '這公司在創新策略的推動下，展現出（　　）的成長動能，前景看好。'
+  answer: D
+- sentence: '他（　　）攀爬台北101大樓，展現出驚人的體能與技術。'
+  answer: I
+- sentence: '面對這項提議，他露出（　　）的神情，心中質疑「這有可能嗎？」'
+  answer: G
+- sentence: '上台前，我先在家（　　） 報告一次，練習說話的速度和抑揚頓挫。'
+  answer: H
+- sentence: '北風雖然（　　），發生山難時，消防勇士們仍冒著嚴寒上山搜救。'
+  answer: B
+- sentence: '儘管環境困難，他追求夢想的態度 （　　），令人敬佩。'
+  answer: A
+- sentence: '在使用儀器前，必須先進行（　　），以確保精準。'
+  answer: E
+- sentence: '古蹟的修復 （　　） ，還要投入大量的人力，只為喚回歷史的光彩。'
+  answer: F
+- sentence: '這公司在創新策略的推動下，展現出（　　）的成長動能，前景看好。'
+  answer: D
+- sentence: '他（　　）攀爬台北101大樓，展現出驚人的體能與技術。'
+  answer: I
+- sentence: '面對這項提議，他露出（　　）的神情，心中質疑「這有可能嗎？」'
+  answer: G
+- sentence: '上台前，我先在家（　　） 報告一次，練習說話的速度和抑揚頓挫。'
+  answer: H
+- sentence: '北風雖然（　　），發生山難時，消防勇士們仍冒著嚴寒上山搜救。'
+  answer: B
 - id: 1
   answer: A
   answer_word: 始終如一

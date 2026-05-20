@@ -175,6 +175,60 @@ vocab_bank:
   F: 躡手躡腳
   G: 典型
 fill_in_blank:
+- sentence: '老師這番話（　　）了許多人生哲理，值得我們深思。'
+  answer: A
+- sentence: '面對臺海危機，民眾們（　　）起來，捍衛國家的主權。'
+  answer: B
+- sentence: '風一吹，卡在樹枝上的塑膠袋就發出（　　）的聲音。'
+  answer: E
+- sentence: '這個問題，他（　　）了一整夜，終於找到兩全其美的方法了。'
+  answer: C
+- sentence: '「人有（　　），月有陰晴圓缺，此事古難全。」是宋朝．蘇軾〈水調歌頭．明月幾時有〉的詞。'
+  answer: D
+- sentence: '選舉期間，候選人幾乎（　　）了所有的親朋好友幫忙拉票。'
+  answer: B
+- sentence: '午休時間，他（　　）的去上廁所，擔心吵醒睡著的同學。'
+  answer: F
+- sentence: '醫生從他腹瀉、腹痛、噁心和嘔吐的情形判斷，他感染諾羅病毒的機率很大，這些都是感染諾羅病毒（　　）的症狀。'
+  answer: G
+- sentence: '人生充滿了（　　），每一次的相聚和分別都讓人感慨萬千，所以我們要學習珍惜當下。'
+  answer: D
+- sentence: '老師這番話（　　）了許多人生哲理，值得我們深思。'
+  answer: A
+- sentence: '面對臺海危機，民眾們（　　）起來，捍衛國家的主權。'
+  answer: B
+- sentence: '風一吹，卡在樹枝上的塑膠袋就發出（　　）的聲音。'
+  answer: E
+- sentence: '這個問題，他（　　）了一整夜，終於找到兩全其美的方法了。'
+  answer: C
+- sentence: '「人有（　　），月有陰晴圓缺，此事古難全。」是宋朝．蘇軾〈水調歌頭．明月幾時有〉的詞。'
+  answer: D
+- sentence: '選舉期間，候選人幾乎（　　）了所有的親朋好友幫忙拉票。'
+  answer: B
+- sentence: '午休時間，他（　　）的去上廁所，擔心吵醒睡著的同學。'
+  answer: F
+- sentence: '醫生從他腹瀉、腹痛、噁心和嘔吐的情形判斷，他感染諾羅病毒的機率很大，這些都是感染諾羅病毒（　　）的症狀。'
+  answer: G
+- sentence: '人生充滿了（　　），每一次的相聚和分別都讓人感慨萬千，所以我們要學習珍惜當下。'
+  answer: D
+- sentence: '老師這番話（　　）了許多人生哲理，值得我們深思。'
+  answer: A
+- sentence: '面對臺海危機，民眾們（　　）起來，捍衛國家的主權。'
+  answer: B
+- sentence: '風一吹，卡在樹枝上的塑膠袋就發出（　　）的聲音。'
+  answer: E
+- sentence: '這個問題，他（　　）了一整夜，終於找到兩全其美的方法了。'
+  answer: C
+- sentence: '「人有（　　），月有陰晴圓缺，此事古難全。」是宋朝．蘇軾〈水調歌頭．明月幾時有〉的詞。'
+  answer: D
+- sentence: '選舉期間，候選人幾乎（　　）了所有的親朋好友幫忙拉票。'
+  answer: B
+- sentence: '午休時間，他（　　）的去上廁所，擔心吵醒睡著的同學。'
+  answer: F
+- sentence: '醫生從他腹瀉、腹痛、噁心和嘔吐的情形判斷，他感染諾羅病毒的機率很大，這些都是感染諾羅病毒（　　）的症狀。'
+  answer: G
+- sentence: '人生充滿了（　　），每一次的相聚和分別都讓人感慨萬千，所以我們要學習珍惜當下。'
+  answer: D
 - id: 1
   answer: A
   answer_word: 蘊含

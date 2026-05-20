@@ -168,6 +168,54 @@ vocab_bank:
   G: 渾身
   H: 眼睜睜
 fill_in_blank:
+- sentence: '他從惡夢中驚醒，（　　）冷汗，喘著氣回想剛才的恐懼。'
+  answer: G
+- sentence: '她毫無（　　）的提出反對意見，不怕得罪不同想法的人。'
+  answer: F
+- sentence: '他總是習慣在背後（　　），卻從不願直接找當事人說清楚。'
+  answer: B
+- sentence: '他們的互動方式非常（　　），讓人無法輕易解讀。'
+  answer: C
+- sentence: '面對突如其來的選擇，他（　　）了，停頓了幾秒，才緩緩做出決定。'
+  answer: D
+- sentence: '我們只能（　　）看著颱風摧毀農作物，卻對災情無能為力。'
+  answer: H
+- sentence: '手術進行中，家屬在候診區（　　），不斷看向時鐘。'
+  answer: A
+- sentence: '他穿著正式的西裝參加面試，一言一行都比平常（　　）許多。'
+  answer: E
+- sentence: '他從惡夢中驚醒，（　　）冷汗，喘著氣回想剛才的恐懼。'
+  answer: G
+- sentence: '她毫無（　　）的提出反對意見，不怕得罪不同想法的人。'
+  answer: F
+- sentence: '他總是習慣在背後（　　），卻從不願直接找當事人說清楚。'
+  answer: B
+- sentence: '他們的互動方式非常（　　），讓人無法輕易解讀。'
+  answer: C
+- sentence: '面對突如其來的選擇，他（　　）了，停頓了幾秒，才緩緩做出決定。'
+  answer: D
+- sentence: '我們只能（　　）看著颱風摧毀農作物，卻對災情無能為力。'
+  answer: H
+- sentence: '手術進行中，家屬在候診區（　　），不斷看向時鐘。'
+  answer: A
+- sentence: '他穿著正式的西裝參加面試，一言一行都比平常（　　）許多。'
+  answer: E
+- sentence: '他從惡夢中驚醒，（　　）冷汗，喘著氣回想剛才的恐懼。'
+  answer: G
+- sentence: '她毫無（　　）的提出反對意見，不怕得罪不同想法的人。'
+  answer: F
+- sentence: '他總是習慣在背後（　　），卻從不願直接找當事人說清楚。'
+  answer: B
+- sentence: '他們的互動方式非常（　　），讓人無法輕易解讀。'
+  answer: C
+- sentence: '面對突如其來的選擇，他（　　）了，停頓了幾秒，才緩緩做出決定。'
+  answer: D
+- sentence: '我們只能（　　）看著颱風摧毀農作物，卻對災情無能為力。'
+  answer: H
+- sentence: '手術進行中，家屬在候診區（　　），不斷看向時鐘。'
+  answer: A
+- sentence: '他穿著正式的西裝參加面試，一言一行都比平常（　　）許多。'
+  answer: E
 - id: 1
   answer: G
   answer_word: 渾身

@@ -186,6 +186,54 @@ vocab_bank:
   I: 懊悔
   J: 士氣
 fill_in_blank:
+- sentence: '接獲老師生病過世的消息，教室裡（　　）著悲傷的氣氛，許多人都默默拭淚。'
+  answer: G
+- sentence: '冠亞軍賽結果出爐，現場歡呼聲（　　），球迷們雀躍的互相擁抱。'
+  answer: E
+- sentence: '早期的傳染病經常被解釋成有妖魔鬼怪在（　　），危害百姓健康。'
+  answer: F
+- sentence: '餐廳販賣過期商品的新聞一出，網路負評（　　）而來，讓老闆不得不暫時關閉社群媒體。'
+  answer: I
+- sentence: '儘管他們前面接棒失誤連連，仍在最後一刻（　　），拿下冠軍。'
+  answer: D
+- sentence: '祭典時，長老一聲（　　），眾人便一起高聲回應，場面十分震撼。'
+  answer: H
+- sentence: '校慶大隊接力，跑道上的選手們個個摩拳擦掌、 （　　）。'
+  answer: C
+- sentence: '那條重要的運河讓周圍國家（　　），卻因情勢複雜，誰都不敢輕舉妄動。'
+  answer: A
+- sentence: '接獲老師生病過世的消息，教室裡（　　）著悲傷的氣氛，許多人都默默拭淚。'
+  answer: G
+- sentence: '冠亞軍賽結果出爐，現場歡呼聲（　　），球迷們雀躍的互相擁抱。'
+  answer: E
+- sentence: '早期的傳染病經常被解釋成有妖魔鬼怪在（　　），危害百姓健康。'
+  answer: F
+- sentence: '餐廳販賣過期商品的新聞一出，網路負評（　　）而來，讓老闆不得不暫時關閉社群媒體。'
+  answer: I
+- sentence: '儘管他們前面接棒失誤連連，仍在最後一刻（　　），拿下冠軍。'
+  answer: D
+- sentence: '祭典時，長老一聲（　　），眾人便一起高聲回應，場面十分震撼。'
+  answer: H
+- sentence: '校慶大隊接力，跑道上的選手們個個摩拳擦掌、 （　　）。'
+  answer: C
+- sentence: '那條重要的運河讓周圍國家（　　），卻因情勢複雜，誰都不敢輕舉妄動。'
+  answer: A
+- sentence: '接獲老師生病過世的消息，教室裡（　　）著悲傷的氣氛，許多人都默默拭淚。'
+  answer: G
+- sentence: '冠亞軍賽結果出爐，現場歡呼聲（　　），球迷們雀躍的互相擁抱。'
+  answer: E
+- sentence: '早期的傳染病經常被解釋成有妖魔鬼怪在（　　），危害百姓健康。'
+  answer: F
+- sentence: '餐廳販賣過期商品的新聞一出，網路負評（　　）而來，讓老闆不得不暫時關閉社群媒體。'
+  answer: I
+- sentence: '儘管他們前面接棒失誤連連，仍在最後一刻（　　），拿下冠軍。'
+  answer: D
+- sentence: '祭典時，長老一聲（　　），眾人便一起高聲回應，場面十分震撼。'
+  answer: H
+- sentence: '校慶大隊接力，跑道上的選手們個個摩拳擦掌、 （　　）。'
+  answer: C
+- sentence: '那條重要的運河讓周圍國家（　　），卻因情勢複雜，誰都不敢輕舉妄動。'
+  answer: A
 - id: 1
   answer: G
   answer_word: 瀰漫

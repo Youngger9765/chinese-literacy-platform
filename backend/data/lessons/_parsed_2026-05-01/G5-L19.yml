@@ -151,6 +151,54 @@ vocab_bank:
   G: 異樣
   H: 一如往常
 fill_in_blank:
+- sentence: '他心愛的吊飾被同學弄髒，他卻一點也不（　　），真是不容易。'
+  answer: E
+- sentence: '看著泛黃的舊照片，他的（　　）飄回了在公園玩耍的童年時光。'
+  answer: F
+- sentence: '雖然風雨交加，交通警察還是（　　）的站在路口指揮，十分敬業。'
+  answer: H
+- sentence: '在作品得獎後，面對大家的稱讚，她露出了（　　）的笑容。'
+  answer: C
+- sentence: '講者勵志的人生故事，在我心中起了小小的（　　），也讓我更有勇氣。'
+  answer: D
+- sentence: '走在黑漆漆且空無一人的學校，他感到（　　）的緊張，想趕緊離開。'
+  answer: B
+- sentence: '幸好同學及時發現他的（　　），才來得及在他暈倒前扶住他。'
+  answer: G
+- sentence: '看見多年不見的老友，他開心的（　　）腳步向前迎接。'
+  answer: A
+- sentence: '他心愛的吊飾被同學弄髒，他卻一點也不（　　），真是不容易。'
+  answer: E
+- sentence: '看著泛黃的舊照片，他的（　　）飄回了在公園玩耍的童年時光。'
+  answer: F
+- sentence: '雖然風雨交加，交通警察還是（　　）的站在路口指揮，十分敬業。'
+  answer: H
+- sentence: '在作品得獎後，面對大家的稱讚，她露出了（　　）的笑容。'
+  answer: C
+- sentence: '講者勵志的人生故事，在我心中起了小小的（　　），也讓我更有勇氣。'
+  answer: D
+- sentence: '走在黑漆漆且空無一人的學校，他感到（　　）的緊張，想趕緊離開。'
+  answer: B
+- sentence: '幸好同學及時發現他的（　　），才來得及在他暈倒前扶住他。'
+  answer: G
+- sentence: '看見多年不見的老友，他開心的（　　）腳步向前迎接。'
+  answer: A
+- sentence: '他心愛的吊飾被同學弄髒，他卻一點也不（　　），真是不容易。'
+  answer: E
+- sentence: '看著泛黃的舊照片，他的（　　）飄回了在公園玩耍的童年時光。'
+  answer: F
+- sentence: '雖然風雨交加，交通警察還是（　　）的站在路口指揮，十分敬業。'
+  answer: H
+- sentence: '在作品得獎後，面對大家的稱讚，她露出了（　　）的笑容。'
+  answer: C
+- sentence: '講者勵志的人生故事，在我心中起了小小的（　　），也讓我更有勇氣。'
+  answer: D
+- sentence: '走在黑漆漆且空無一人的學校，他感到（　　）的緊張，想趕緊離開。'
+  answer: B
+- sentence: '幸好同學及時發現他的（　　），才來得及在他暈倒前扶住他。'
+  answer: G
+- sentence: '看見多年不見的老友，他開心的（　　）腳步向前迎接。'
+  answer: A
 - id: 1
   answer: E
   answer_word: 計較

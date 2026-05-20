@@ -202,6 +202,54 @@ vocab_bank:
   I: 有朝一日
   J: 疲憊
 fill_in_blank:
+- sentence: '今天爬山爬了一整天，我一回家就（　　）在沙發上。'
+  answer: C
+- sentence: '姐姐弄丟了珍貴的項鍊，只要一想起這件事，那種難過的感覺（　　）。'
+  answer: D
+- sentence: '這次比賽的獎品非常（　　），有玩具、文具，還有禮券！'
+  answer: G
+- sentence: '公司面臨倒閉危機，老闆（　　），拿出全部資金研發新產品。'
+  answer: B
+- sentence: '他做事總是猶豫不決，每次下定決心時，機會早就和他（　　）。'
+  answer: E
+- sentence: '班上要選班長，大家都投票給小華，他（　　），成為新班長。'
+  answer: F
+- sentence: '姊姊（　　）哥哥不要一直玩手機，要注意眼睛健康。'
+  answer: A
+- sentence: '走了一整天的路，我已經（　　）不堪，只想躺下休息。'
+  answer: J
+- sentence: '今天爬山爬了一整天，我一回家就（　　）在沙發上。'
+  answer: C
+- sentence: '姐姐弄丟了珍貴的項鍊，只要一想起這件事，那種難過的感覺（　　）。'
+  answer: D
+- sentence: '這次比賽的獎品非常（　　），有玩具、文具，還有禮券！'
+  answer: G
+- sentence: '公司面臨倒閉危機，老闆（　　），拿出全部資金研發新產品。'
+  answer: B
+- sentence: '他做事總是猶豫不決，每次下定決心時，機會早就和他（　　）。'
+  answer: E
+- sentence: '班上要選班長，大家都投票給小華，他（　　），成為新班長。'
+  answer: F
+- sentence: '姊姊（　　）哥哥不要一直玩手機，要注意眼睛健康。'
+  answer: A
+- sentence: '走了一整天的路，我已經（　　）不堪，只想躺下休息。'
+  answer: J
+- sentence: '今天爬山爬了一整天，我一回家就（　　）在沙發上。'
+  answer: C
+- sentence: '姐姐弄丟了珍貴的項鍊，只要一想起這件事，那種難過的感覺（　　）。'
+  answer: D
+- sentence: '這次比賽的獎品非常（　　），有玩具、文具，還有禮券！'
+  answer: G
+- sentence: '公司面臨倒閉危機，老闆（　　），拿出全部資金研發新產品。'
+  answer: B
+- sentence: '他做事總是猶豫不決，每次下定決心時，機會早就和他（　　）。'
+  answer: E
+- sentence: '班上要選班長，大家都投票給小華，他（　　），成為新班長。'
+  answer: F
+- sentence: '姊姊（　　）哥哥不要一直玩手機，要注意眼睛健康。'
+  answer: A
+- sentence: '走了一整天的路，我已經（　　）不堪，只想躺下休息。'
+  answer: J
 - id: 1
   answer: C
   answer_word: 累癱

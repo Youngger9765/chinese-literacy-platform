@@ -193,6 +193,48 @@ vocab_bank:
   F: 汲汲營營
   G: 遣返
 fill_in_blank:
+- sentence: '週年慶期間，購物中心裡的人潮（　　），非常熱鬧。'
+  answer: D
+- sentence: '圖書館書架（　　），各類書籍應有盡有，讓人目不暇給。。'
+  answer: C
+- sentence: '人生不應該只為名聲利益（　　），還要懂得享受生活。'
+  answer: F
+- sentence: '他（　　）的從國外趕回來，只為參加好友的婚禮。'
+  answer: A
+- sentence: '這裡的美麗風景讓遊客們，（　　），捨不得離去。'
+  answer: E
+- sentence: '看見他滿面春風，令我不禁（　　） 他是否有了新戀情。'
+  answer: B
+- sentence: '由於違反當地法律，幾名外國遊客被（　　）出境。'
+  answer: G
+- sentence: '週年慶期間，購物中心裡的人潮（　　），非常熱鬧。'
+  answer: D
+- sentence: '圖書館書架（　　），各類書籍應有盡有，讓人目不暇給。。'
+  answer: C
+- sentence: '人生不應該只為名聲利益（　　），還要懂得享受生活。'
+  answer: F
+- sentence: '他（　　）的從國外趕回來，只為參加好友的婚禮。'
+  answer: A
+- sentence: '這裡的美麗風景讓遊客們，（　　），捨不得離去。'
+  answer: E
+- sentence: '看見他滿面春風，令我不禁（　　） 他是否有了新戀情。'
+  answer: B
+- sentence: '由於違反當地法律，幾名外國遊客被（　　）出境。'
+  answer: G
+- sentence: '週年慶期間，購物中心裡的人潮（　　），非常熱鬧。'
+  answer: D
+- sentence: '圖書館書架（　　），各類書籍應有盡有，讓人目不暇給。。'
+  answer: C
+- sentence: '人生不應該只為名聲利益（　　），還要懂得享受生活。'
+  answer: F
+- sentence: '他（　　）的從國外趕回來，只為參加好友的婚禮。'
+  answer: A
+- sentence: '這裡的美麗風景讓遊客們，（　　），捨不得離去。'
+  answer: E
+- sentence: '看見他滿面春風，令我不禁（　　） 他是否有了新戀情。'
+  answer: B
+- sentence: '由於違反當地法律，幾名外國遊客被（　　）出境。'
+  answer: G
 - id: 1
   answer: D
   answer_word: 絡繹不絕

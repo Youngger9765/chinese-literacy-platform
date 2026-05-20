@@ -173,6 +173,36 @@ vocab_bank:
   F: 睽違
   G: 擊垮
 fill_in_blank:
+- sentence: '這精采的比賽看得大家（　　），緊張萬分。'
+  answer: D
+- sentence: '小美一直想考第一名，但總是（　　），每次都只差一點。'
+  answer: B
+- sentence: '哥哥的運動能力與弟弟有著（　　），落差很大。'
+  answer: E
+- sentence: '燦爛的煙火，雖然漂亮但（　　），令人惋惜。'
+  answer: C
+- sentence: '這座壯麗的峽谷是河流（　　）向下侵蝕的結果。'
+  answer: A
+- sentence: '這精采的比賽看得大家（　　），緊張萬分。'
+  answer: D
+- sentence: '小美一直想考第一名，但總是（　　），每次都只差一點。'
+  answer: B
+- sentence: '哥哥的運動能力與弟弟有著（　　），落差很大。'
+  answer: E
+- sentence: '燦爛的煙火，雖然漂亮但（　　），令人惋惜。'
+  answer: C
+- sentence: '這座壯麗的峽谷是河流（　　）向下侵蝕的結果。'
+  answer: A
+- sentence: '這精采的比賽看得大家（　　），緊張萬分。'
+  answer: D
+- sentence: '小美一直想考第一名，但總是（　　），每次都只差一點。'
+  answer: B
+- sentence: '哥哥的運動能力與弟弟有著（　　），落差很大。'
+  answer: E
+- sentence: '燦爛的煙火，雖然漂亮但（　　），令人惋惜。'
+  answer: C
+- sentence: '這座壯麗的峽谷是河流（　　）向下侵蝕的結果。'
+  answer: A
 - id: 1
   answer: D
   answer_word: 血脈賁張

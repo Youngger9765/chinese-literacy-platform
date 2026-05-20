@@ -171,6 +171,48 @@ vocab_bank:
   G: 出爐
   H: 沸騰
 fill_in_blank:
+- sentence: '朋友有難時，不能及時援救，讓他感到非常的（　　）。'
+  answer: E
+- sentence: '閱讀和寫作（　　），兩者並進可以提升語文能力。'
+  answer: B
+- sentence: '這場音樂會吸引了很多觀眾，整個劇院（　　），人滿為患。'
+  answer: D
+- sentence: '這齣連續劇以內容情節取勝，吸引大批民眾收看，收視率（　　）。'
+  answer: A
+- sentence: '他不僅學習成績優秀，還是學校籃球隊的主力，真是（　　）。'
+  answer: C
+- sentence: '當球隊獲勝時，現場觀眾的熱血（　　），響起了雷鳴般的掌聲。'
+  answer: H
+- sentence: '在畢業典禮上，優秀校友的演講（　　），激勵了所有的畢業生。'
+  answer: F
+- sentence: '朋友有難時，不能及時援救，讓他感到非常的（　　）。'
+  answer: E
+- sentence: '閱讀和寫作（　　），兩者並進可以提升語文能力。'
+  answer: B
+- sentence: '這場音樂會吸引了很多觀眾，整個劇院（　　），人滿為患。'
+  answer: D
+- sentence: '這齣連續劇以內容情節取勝，吸引大批民眾收看，收視率（　　）。'
+  answer: A
+- sentence: '他不僅學習成績優秀，還是學校籃球隊的主力，真是（　　）。'
+  answer: C
+- sentence: '當球隊獲勝時，現場觀眾的熱血（　　），響起了雷鳴般的掌聲。'
+  answer: H
+- sentence: '在畢業典禮上，優秀校友的演講（　　），激勵了所有的畢業生。'
+  answer: F
+- sentence: '朋友有難時，不能及時援救，讓他感到非常的（　　）。'
+  answer: E
+- sentence: '閱讀和寫作（　　），兩者並進可以提升語文能力。'
+  answer: B
+- sentence: '這場音樂會吸引了很多觀眾，整個劇院（　　），人滿為患。'
+  answer: D
+- sentence: '這齣連續劇以內容情節取勝，吸引大批民眾收看，收視率（　　）。'
+  answer: A
+- sentence: '他不僅學習成績優秀，還是學校籃球隊的主力，真是（　　）。'
+  answer: C
+- sentence: '當球隊獲勝時，現場觀眾的熱血（　　），響起了雷鳴般的掌聲。'
+  answer: H
+- sentence: '在畢業典禮上，優秀校友的演講（　　），激勵了所有的畢業生。'
+  answer: F
 - id: 1
   answer: E
   answer_word: 愧疚

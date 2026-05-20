@@ -185,6 +185,36 @@ vocab_bank:
   F: 鞏固
   G: 井井有條
 fill_in_blank:
+- sentence: '因為建物老舊，政府決定 （　　）兩千萬修建新的體育館。'
+  answer: A
+- sentence: '因全家人的支持，讓他能專心從事體育工作，毫無（　　）。'
+  answer: C
+- sentence: '他的藏書很多但不雜亂， 整理得（　　）。'
+  answer: G
+- sentence: '教練善於（　　）學員的潛能，然後根據他的專長進行培訓。'
+  answer: E
+- sentence: '俄羅斯是世界上土地面積最大的國家， （　　），資源相當豐富。'
+  answer: D
+- sentence: '因為建物老舊，政府決定 （　　）兩千萬修建新的體育館。'
+  answer: A
+- sentence: '因全家人的支持，讓他能專心從事體育工作，毫無（　　）。'
+  answer: C
+- sentence: '他的藏書很多但不雜亂， 整理得（　　）。'
+  answer: G
+- sentence: '教練善於（　　）學員的潛能，然後根據他的專長進行培訓。'
+  answer: E
+- sentence: '俄羅斯是世界上土地面積最大的國家， （　　），資源相當豐富。'
+  answer: D
+- sentence: '因為建物老舊，政府決定 （　　）兩千萬修建新的體育館。'
+  answer: A
+- sentence: '因全家人的支持，讓他能專心從事體育工作，毫無（　　）。'
+  answer: C
+- sentence: '他的藏書很多但不雜亂， 整理得（　　）。'
+  answer: G
+- sentence: '教練善於（　　）學員的潛能，然後根據他的專長進行培訓。'
+  answer: E
+- sentence: '俄羅斯是世界上土地面積最大的國家， （　　），資源相當豐富。'
+  answer: D
 - id: 1
   answer: A
   answer_word: 斥資
@@ -200,7 +230,7 @@ fill_in_blank:
   answer_word: 發掘
   context_before: 教練善於
   context_after: 學員的潛能，然後根據他的專長進行培訓
-fill_in_blank_count: 3
+fill_in_blank_count: 5
 spotlight_raw_text: "閱讀聚光燈\n用表格整理訊息\n    閱讀一篇文章時，當訊息很多時，容易讓人眼花撩亂，若能善用表格做訊息的整理，就能更清楚文章的重點。整理比較表格，是把兩類事物放在一起進行比較，找出兩者之間的相同或相異處，是很常用的整理訊息的方式喔。\n732790820420\n第一欄00\n第一欄整理表格步驟：A.先畫出表格，「第一列」先寫出比較的對象，「第一欄」列出重點主題項目；B.再根據文章在空白格子內填入比較的訊息\n\n4748530288290\n第一列00\n第一列           \n\n對象1\n對象2\n主題1\n\n主題2\n\n總結：根據這個表格進行分析，提出結論。\n ◎"
 strategy_exercise:
   type: guided_steps

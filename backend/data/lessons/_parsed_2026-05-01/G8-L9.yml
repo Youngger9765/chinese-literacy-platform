@@ -159,6 +159,54 @@ vocab_bank:
   I: 命運共同體
   J: 大聲疾呼
 fill_in_blank:
+- sentence: '出國比賽差點因經費不足無法成行，多虧家長會（　　），在募款後才順利出國參賽。'
+  answer: D
+- sentence: '他每天又是珍奶又是炸雞，卻誇口要減肥5公斤，同學都（　　），說他不可能辦到。'
+  answer: E
+- sentence: 'COVID-19疫情（　　）了我們的學習方式，線上上課、線上會議變得很常見。'
+  answer: F
+- sentence: '走進昏暗的地下停車場，他先（　　）四周，確認是否有風險。'
+  answer: C
+- sentence: '他失業後，沒有收入，生活（　　），必須省吃儉用。'
+  answer: H
+- sentence: '颱風後菜價上漲，市場供應變得很（　　），大家擔心買不到蔬菜。'
+  answer: G
+- sentence: '塑膠垃圾不會自動分解，環保團體（　　），希望政府加強減塑。'
+  answer: J
+- sentence: '公司毫無預警宣布裁撤部門，這顆（　　）讓許多員工措手不及。'
+  answer: B
+- sentence: '出國比賽差點因經費不足無法成行，多虧家長會（　　），在募款後才順利出國參賽。'
+  answer: D
+- sentence: '他每天又是珍奶又是炸雞，卻誇口要減肥5公斤，同學都（　　），說他不可能辦到。'
+  answer: E
+- sentence: 'COVID-19疫情（　　）了我們的學習方式，線上上課、線上會議變得很常見。'
+  answer: F
+- sentence: '走進昏暗的地下停車場，他先（　　）四周，確認是否有風險。'
+  answer: C
+- sentence: '他失業後，沒有收入，生活（　　），必須省吃儉用。'
+  answer: H
+- sentence: '颱風後菜價上漲，市場供應變得很（　　），大家擔心買不到蔬菜。'
+  answer: G
+- sentence: '塑膠垃圾不會自動分解，環保團體（　　），希望政府加強減塑。'
+  answer: J
+- sentence: '公司毫無預警宣布裁撤部門，這顆（　　）讓許多員工措手不及。'
+  answer: B
+- sentence: '出國比賽差點因經費不足無法成行，多虧家長會（　　），在募款後才順利出國參賽。'
+  answer: D
+- sentence: '他每天又是珍奶又是炸雞，卻誇口要減肥5公斤，同學都（　　），說他不可能辦到。'
+  answer: E
+- sentence: 'COVID-19疫情（　　）了我們的學習方式，線上上課、線上會議變得很常見。'
+  answer: F
+- sentence: '走進昏暗的地下停車場，他先（　　）四周，確認是否有風險。'
+  answer: C
+- sentence: '他失業後，沒有收入，生活（　　），必須省吃儉用。'
+  answer: H
+- sentence: '颱風後菜價上漲，市場供應變得很（　　），大家擔心買不到蔬菜。'
+  answer: G
+- sentence: '塑膠垃圾不會自動分解，環保團體（　　），希望政府加強減塑。'
+  answer: J
+- sentence: '公司毫無預警宣布裁撤部門，這顆（　　）讓許多員工措手不及。'
+  answer: B
 - id: 1
   answer: D
   answer_word: 鼎力相助

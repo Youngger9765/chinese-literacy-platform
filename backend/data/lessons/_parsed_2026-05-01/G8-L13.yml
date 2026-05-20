@@ -127,9 +127,57 @@ vocab_bank:
   F: 支離破碎
   G: 一目了然
   H: 掛一漏萬
-  I: 天各一
+  I: 天各一󠇢方
   J: 耐人尋味
 fill_in_blank:
+- sentence: '從飛機上往下看台北市，街燈（　　），整個城市看起來閃閃發亮。'
+  answer: B
+- sentence: '放眼望去，山脈一座接著一座，（　　）到遠方，看不到盡頭。'
+  answer: E
+- sentence: '老師提醒我們，整理筆記時不要（　　），重要資訊都要記錄下來。'
+  answer: H
+- sentence: '老師用圖表整理重點，整個內容（　　），非常清楚。'
+  answer: G
+- sentence: '飛機起飛後，窗外是一片（　　）的雲海，非常美麗。'
+  answer: A
+- sentence: '在這次合作中，他的角色（　　），負責最關鍵工作，。'
+  answer: C
+- sentence: '讀書如果只記零散的重點，沒有整理，理解就會變得（　　），容易遺忘。'
+  answer: F
+- sentence: '他在比賽中展現出（　　）的球技，讓全場觀眾不斷拍手叫好。'
+  answer: D
+- sentence: '從飛機上往下看台北市，街燈（　　），整個城市看起來閃閃發亮。'
+  answer: B
+- sentence: '放眼望去，山脈一座接著一座，（　　）到遠方，看不到盡頭。'
+  answer: E
+- sentence: '老師提醒我們，整理筆記時不要（　　），重要資訊都要記錄下來。'
+  answer: H
+- sentence: '老師用圖表整理重點，整個內容（　　），非常清楚。'
+  answer: G
+- sentence: '飛機起飛後，窗外是一片（　　）的雲海，非常美麗。'
+  answer: A
+- sentence: '在這次合作中，他的角色（　　），負責最關鍵工作，。'
+  answer: C
+- sentence: '讀書如果只記零散的重點，沒有整理，理解就會變得（　　），容易遺忘。'
+  answer: F
+- sentence: '他在比賽中展現出（　　）的球技，讓全場觀眾不斷拍手叫好。'
+  answer: D
+- sentence: '從飛機上往下看台北市，街燈（　　），整個城市看起來閃閃發亮。'
+  answer: B
+- sentence: '放眼望去，山脈一座接著一座，（　　）到遠方，看不到盡頭。'
+  answer: E
+- sentence: '老師提醒我們，整理筆記時不要（　　），重要資訊都要記錄下來。'
+  answer: H
+- sentence: '老師用圖表整理重點，整個內容（　　），非常清楚。'
+  answer: G
+- sentence: '飛機起飛後，窗外是一片（　　）的雲海，非常美麗。'
+  answer: A
+- sentence: '在這次合作中，他的角色（　　），負責最關鍵工作，。'
+  answer: C
+- sentence: '讀書如果只記零散的重點，沒有整理，理解就會變得（　　），容易遺忘。'
+  answer: F
+- sentence: '他在比賽中展現出（　　）的球技，讓全場觀眾不斷拍手叫好。'
+  answer: D
 - id: 1
   answer: B
   answer_word: 星羅棋布

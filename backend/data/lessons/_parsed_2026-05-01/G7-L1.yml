@@ -152,6 +152,42 @@ vocab_bank:
   E: 乏味
   F: 感佩
 fill_in_blank:
+- sentence: '在花蓮居住多年後，他已經對頻繁的小地震（　　）。'
+  answer: D
+- sentence: '為了改變（　　）的生活，她決定重拾年輕時的吉他夢。'
+  answer: E
+- sentence: '走失的阿公平安返家後，全家都非常（　　）警察的幫忙。'
+  answer: F
+- sentence: '雖然薪水（　　），但他依然堅持這份富有意義的工作。'
+  answer: C
+- sentence: '聽到最喜愛的老師即將調校，同學們都（　　）、不知所措。'
+  answer: A
+- sentence: '這群年輕人（　　）於參與社區服務，為社會貢獻心力。'
+  answer: B
+- sentence: '在花蓮居住多年後，他已經對頻繁的小地震（　　）。'
+  answer: D
+- sentence: '為了改變（　　）的生活，她決定重拾年輕時的吉他夢。'
+  answer: E
+- sentence: '走失的阿公平安返家後，全家都非常（　　）警察的幫忙。'
+  answer: F
+- sentence: '雖然薪水（　　），但他依然堅持這份富有意義的工作。'
+  answer: C
+- sentence: '聽到最喜愛的老師即將調校，同學們都（　　）、不知所措。'
+  answer: A
+- sentence: '這群年輕人（　　）於參與社區服務，為社會貢獻心力。'
+  answer: B
+- sentence: '在花蓮居住多年後，他已經對頻繁的小地震（　　）。'
+  answer: D
+- sentence: '為了改變（　　）的生活，她決定重拾年輕時的吉他夢。'
+  answer: E
+- sentence: '走失的阿公平安返家後，全家都非常（　　）警察的幫忙。'
+  answer: F
+- sentence: '雖然薪水（　　），但他依然堅持這份富有意義的工作。'
+  answer: C
+- sentence: '聽到最喜愛的老師即將調校，同學們都（　　）、不知所措。'
+  answer: A
+- sentence: '這群年輕人（　　）於參與社區服務，為社會貢獻心力。'
+  answer: B
 - id: 1
   answer: D
   answer_word: 習以為常

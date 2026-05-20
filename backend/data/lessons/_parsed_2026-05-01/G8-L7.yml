@@ -213,6 +213,54 @@ vocab_bank:
   I: 暗無天日
   J: 地力耗盡
 fill_in_blank:
+- sentence: '做一個瓷器要經過十幾道（　　），每一道都要小心處理。'
+  answer: D
+- sentence: 'AI可以幫忙處理很多事情而（　　），世界各地的人都在使用AI。'
+  answer: A
+- sentence: '被剝削的漁工在船上過著（　　）的生活，非常痛苦。'
+  answer: I
+- sentence: '每天早晨喝到熱騰騰的咖啡，是我生活中最簡單的（　　）。'
+  answer: B
+- sentence: '辦理出國簽證的手續非常（　　），需要準備很多資料。'
+  answer: C
+- sentence: '他打兩份工，每天辛苦只為了（　　），讓孩子生活無虞。'
+  answer: E
+- sentence: '炎熱的夏天他提著（　　）的行李，一步步走上樓梯，揮汗如雨。'
+  answer: F
+- sentence: '這家餐廳（　　）使用天然食材，吸引很多看重健康的顧客。'
+  answer: G
+- sentence: '做一個瓷器要經過十幾道（　　），每一道都要小心處理。'
+  answer: D
+- sentence: 'AI可以幫忙處理很多事情而（　　），世界各地的人都在使用AI。'
+  answer: A
+- sentence: '被剝削的漁工在船上過著（　　）的生活，非常痛苦。'
+  answer: I
+- sentence: '每天早晨喝到熱騰騰的咖啡，是我生活中最簡單的（　　）。'
+  answer: B
+- sentence: '辦理出國簽證的手續非常（　　），需要準備很多資料。'
+  answer: C
+- sentence: '他打兩份工，每天辛苦只為了（　　），讓孩子生活無虞。'
+  answer: E
+- sentence: '炎熱的夏天他提著（　　）的行李，一步步走上樓梯，揮汗如雨。'
+  answer: F
+- sentence: '這家餐廳（　　）使用天然食材，吸引很多看重健康的顧客。'
+  answer: G
+- sentence: '做一個瓷器要經過十幾道（　　），每一道都要小心處理。'
+  answer: D
+- sentence: 'AI可以幫忙處理很多事情而（　　），世界各地的人都在使用AI。'
+  answer: A
+- sentence: '被剝削的漁工在船上過著（　　）的生活，非常痛苦。'
+  answer: I
+- sentence: '每天早晨喝到熱騰騰的咖啡，是我生活中最簡單的（　　）。'
+  answer: B
+- sentence: '辦理出國簽證的手續非常（　　），需要準備很多資料。'
+  answer: C
+- sentence: '他打兩份工，每天辛苦只為了（　　），讓孩子生活無虞。'
+  answer: E
+- sentence: '炎熱的夏天他提著（　　）的行李，一步步走上樓梯，揮汗如雨。'
+  answer: F
+- sentence: '這家餐廳（　　）使用天然食材，吸引很多看重健康的顧客。'
+  answer: G
 - id: 1
   answer: D
   answer_word: 工序

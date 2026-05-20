@@ -167,6 +167,54 @@ vocab_bank:
   G: 無遠弗屆
   H: 倡議者
 fill_in_blank:
+- sentence: '我決定少用一次性餐具，因為它們最後可能變成（　　）進入海洋。'
+  answer: C
+- sentence: '代表隊一路打進決賽，卻在關鍵時刻失手，眼看勝利就在眼前卻失之交臂，真是一個（　　）的案例。'
+  answer: B
+- sentence: '海灘垃圾太多，靠一兩個人撿拾只是（　　），要見到成效，必須由社區長期動員清理。'
+  answer: A
+- sentence: '反霸凌的（　　）設計了匿名投訴信箱，讓同學更願意求助。'
+  answer: H
+- sentence: '參加校外教學前，家長要先（　　）同意書。'
+  answer: E
+- sentence: '網路的影響（　　），一個影片能在幾小時內傳到全世界。'
+  answer: G
+- sentence: '教練要求全隊遵守比賽戰術安排，不能（　　），破壞整個比賽的默契。'
+  answer: F
+- sentence: '這份報告的參考資料仍（　　），需要再補上出處。'
+  answer: D
+- sentence: '我決定少用一次性餐具，因為它們最後可能變成（　　）進入海洋。'
+  answer: C
+- sentence: '代表隊一路打進決賽，卻在關鍵時刻失手，眼看勝利就在眼前卻失之交臂，真是一個（　　）的案例。'
+  answer: B
+- sentence: '海灘垃圾太多，靠一兩個人撿拾只是（　　），要見到成效，必須由社區長期動員清理。'
+  answer: A
+- sentence: '反霸凌的（　　）設計了匿名投訴信箱，讓同學更願意求助。'
+  answer: H
+- sentence: '參加校外教學前，家長要先（　　）同意書。'
+  answer: E
+- sentence: '網路的影響（　　），一個影片能在幾小時內傳到全世界。'
+  answer: G
+- sentence: '教練要求全隊遵守比賽戰術安排，不能（　　），破壞整個比賽的默契。'
+  answer: F
+- sentence: '這份報告的參考資料仍（　　），需要再補上出處。'
+  answer: D
+- sentence: '我決定少用一次性餐具，因為它們最後可能變成（　　）進入海洋。'
+  answer: C
+- sentence: '代表隊一路打進決賽，卻在關鍵時刻失手，眼看勝利就在眼前卻失之交臂，真是一個（　　）的案例。'
+  answer: B
+- sentence: '海灘垃圾太多，靠一兩個人撿拾只是（　　），要見到成效，必須由社區長期動員清理。'
+  answer: A
+- sentence: '反霸凌的（　　）設計了匿名投訴信箱，讓同學更願意求助。'
+  answer: H
+- sentence: '參加校外教學前，家長要先（　　）同意書。'
+  answer: E
+- sentence: '網路的影響（　　），一個影片能在幾小時內傳到全世界。'
+  answer: G
+- sentence: '教練要求全隊遵守比賽戰術安排，不能（　　），破壞整個比賽的默契。'
+  answer: F
+- sentence: '這份報告的參考資料仍（　　），需要再補上出處。'
+  answer: D
 - id: 1
   answer: C
   answer_word: 塑膠微粒

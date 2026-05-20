@@ -173,6 +173,54 @@ vocab_bank:
   G: 惺忪
   H: 兵貴神速
 fill_in_blank:
+- sentence: '她睡眼（　　）的走到廚房倒水喝，沒發現屋裡進來了不速之客。'
+  answer: G
+- sentence: '二十年前的那場車禍，他失去所有的家人，只能（　　）的長大。'
+  answer: B
+- sentence: '他原以為自己被淘汰，沒想到名單公布，他（　　）看見自己的名字在選手名單中，不禁讓他欣喜若狂。'
+  answer: F
+- sentence: '廣播：「年終感恩特賣已經開始，有需要的顧客請（　　）到十樓特賣現場搶購，再次感謝您的光臨！」'
+  answer: D
+- sentence: '他不理會旁人的勸告，（　　）跨過禁止線拍照，最終發生意外。'
+  answer: C
+- sentence: '他（　　）球場，赫然發現觀眾席上全是對手的粉絲，心涼了一半。'
+  answer: E
+- sentence: '這個獨居的男人，只因為夜裡貓叫擾人，居然拿了毒藥毒殺街頭的流浪貓，行徑（　　）。'
+  answer: A
+- sentence: '（　　），我們要乘勝追擊，不給敵人喘息的機會。'
+  answer: H
+- sentence: '她睡眼（　　）的走到廚房倒水喝，沒發現屋裡進來了不速之客。'
+  answer: G
+- sentence: '二十年前的那場車禍，他失去所有的家人，只能（　　）的長大。'
+  answer: B
+- sentence: '他原以為自己被淘汰，沒想到名單公布，他（　　）看見自己的名字在選手名單中，不禁讓他欣喜若狂。'
+  answer: F
+- sentence: '廣播：「年終感恩特賣已經開始，有需要的顧客請（　　）到十樓特賣現場搶購，再次感謝您的光臨！」'
+  answer: D
+- sentence: '他不理會旁人的勸告，（　　）跨過禁止線拍照，最終發生意外。'
+  answer: C
+- sentence: '他（　　）球場，赫然發現觀眾席上全是對手的粉絲，心涼了一半。'
+  answer: E
+- sentence: '這個獨居的男人，只因為夜裡貓叫擾人，居然拿了毒藥毒殺街頭的流浪貓，行徑（　　）。'
+  answer: A
+- sentence: '（　　），我們要乘勝追擊，不給敵人喘息的機會。'
+  answer: H
+- sentence: '她睡眼（　　）的走到廚房倒水喝，沒發現屋裡進來了不速之客。'
+  answer: G
+- sentence: '二十年前的那場車禍，他失去所有的家人，只能（　　）的長大。'
+  answer: B
+- sentence: '他原以為自己被淘汰，沒想到名單公布，他（　　）看見自己的名字在選手名單中，不禁讓他欣喜若狂。'
+  answer: F
+- sentence: '廣播：「年終感恩特賣已經開始，有需要的顧客請（　　）到十樓特賣現場搶購，再次感謝您的光臨！」'
+  answer: D
+- sentence: '他不理會旁人的勸告，（　　）跨過禁止線拍照，最終發生意外。'
+  answer: C
+- sentence: '他（　　）球場，赫然發現觀眾席上全是對手的粉絲，心涼了一半。'
+  answer: E
+- sentence: '這個獨居的男人，只因為夜裡貓叫擾人，居然拿了毒藥毒殺街頭的流浪貓，行徑（　　）。'
+  answer: A
+- sentence: '（　　），我們要乘勝追擊，不給敵人喘息的機會。'
+  answer: H
 - id: 7
   answer: A
   answer_word: 令人髮指
@@ -183,7 +231,7 @@ fill_in_blank:
   answer_word: 兵貴神速
   context_before: ''
   context_after: ，我們要乘勝追擊，不給敵人喘息的機會
-fill_in_blank_count: 2
+fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈
 
   解決問題—科學探究法

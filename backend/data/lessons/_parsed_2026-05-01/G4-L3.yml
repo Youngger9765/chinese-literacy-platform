@@ -169,6 +169,30 @@ vocab_bank:
   F: 分泌
   G: 前提
 fill_in_blank:
+- sentence: '飯前的開胃菜可以（　　）食慾。'
+  answer: D
+- sentence: '每天攝取（　　）的營養，才能常保身體的健康。'
+  answer: C
+- sentence: '那一群人（　　）的，不知道在討論什麼？'
+  answer: E
+- sentence: '我們不管到哪裡旅遊，都應該以安全為（　　）。'
+  answer: G
+- sentence: '飯前的開胃菜可以（　　）食慾。'
+  answer: D
+- sentence: '每天攝取（　　）的營養，才能常保身體的健康。'
+  answer: C
+- sentence: '那一群人（　　）的，不知道在討論什麼？'
+  answer: E
+- sentence: '我們不管到哪裡旅遊，都應該以安全為（　　）。'
+  answer: G
+- sentence: '飯前的開胃菜可以（　　）食慾。'
+  answer: D
+- sentence: '每天攝取（　　）的營養，才能常保身體的健康。'
+  answer: C
+- sentence: '那一群人（　　）的，不知道在討論什麼？'
+  answer: E
+- sentence: '我們不管到哪裡旅遊，都應該以安全為（　　）。'
+  answer: G
 - id: 1
   answer: D
   answer_word: 促進
@@ -179,7 +203,7 @@ fill_in_blank:
   answer_word: 嘰嘰喳喳
   context_before: 那一群人
   context_after: 的，不知道在討論什麼？
-fill_in_blank_count: 2
+fill_in_blank_count: 4
 spotlight_raw_text: "閱讀聚光燈\n遞進複句\n\n    「我愛吃冰棒，更愛吃冰淇淋。」在這兩個句子裡，「後一句」比「前一句」有更大的強度，像這樣的句子，就是遞進複句。後一句通常數量更多、時間更長、程度更深、範圍更廣。遞進複句可以表達由小到大、由簡單到複雜…等等的描述。\n    常見的遞進複句使用的連接詞有:「還」、「更」、「不但…還…」、「不只…更…」、「不但…而且…」、「除了…還…」。\n2514600167500◎"
 strategy_exercise:
   type: guided_steps

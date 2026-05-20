@@ -182,6 +182,48 @@ vocab_bank:
   F: 鎮日
   G: 此起彼落
 fill_in_blank:
+- sentence: '熊在河邊（　　），捕捉鮭魚作為晚餐。'
+  answer: A
+- sentence: '他（　　）忙於工作，幾乎沒有時間休息。'
+  answer: F
+- sentence: '雄孔雀為了（　　），開屏展現美麗的羽毛來吸引異性。'
+  answer: E
+- sentence: '這些植物在適宜的環境中迅速（　　），覆蓋了整個花園。'
+  answer: B
+- sentence: '良好的（　　）能幫助團隊達成目標。'
+  answer: C
+- sentence: '他為朋友兩肋插刀，充分（　　）了他對朋友的義氣。'
+  answer: D
+- sentence: '過年時鞭炮聲 （　　），不絕於耳。'
+  answer: G
+- sentence: '熊在河邊（　　），捕捉鮭魚作為晚餐。'
+  answer: A
+- sentence: '他（　　）忙於工作，幾乎沒有時間休息。'
+  answer: F
+- sentence: '雄孔雀為了（　　），開屏展現美麗的羽毛來吸引異性。'
+  answer: E
+- sentence: '這些植物在適宜的環境中迅速（　　），覆蓋了整個花園。'
+  answer: B
+- sentence: '良好的（　　）能幫助團隊達成目標。'
+  answer: C
+- sentence: '他為朋友兩肋插刀，充分（　　）了他對朋友的義氣。'
+  answer: D
+- sentence: '過年時鞭炮聲 （　　），不絕於耳。'
+  answer: G
+- sentence: '熊在河邊（　　），捕捉鮭魚作為晚餐。'
+  answer: A
+- sentence: '他（　　）忙於工作，幾乎沒有時間休息。'
+  answer: F
+- sentence: '雄孔雀為了（　　），開屏展現美麗的羽毛來吸引異性。'
+  answer: E
+- sentence: '這些植物在適宜的環境中迅速（　　），覆蓋了整個花園。'
+  answer: B
+- sentence: '良好的（　　）能幫助團隊達成目標。'
+  answer: C
+- sentence: '他為朋友兩肋插刀，充分（　　）了他對朋友的義氣。'
+  answer: D
+- sentence: '過年時鞭炮聲 （　　），不絕於耳。'
+  answer: G
 - id: 1
   answer: A
   answer_word: 覓食

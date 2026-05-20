@@ -167,6 +167,54 @@ vocab_bank:
   G: 英姿煥發
   H: 有過之而無不及
 fill_in_blank:
+- sentence: '這兩種茶葉喝起來的口感（　　），讓人難以分辨。'
+  answer: F
+- sentence: '小華明知自己的體力有限，卻（　　）參加了連續三天的登山活動，導致體力不支，緊急送醫。'
+  answer: C
+- sentence: '這次比賽參賽的選手（　　）都是年輕人，平均年齡不超過二十歲，充滿了青春的氣息和活力。'
+  answer: D
+- sentence: '在運動會的開幕式上，運動員穿著整齊劃一的服裝，（　　）的接受大家的喝采。'
+  answer: G
+- sentence: '電影中的武俠人物經常能（　　），讓觀眾驚嘆不已。'
+  answer: A
+- sentence: '他是全校第一名，但為人謙虛，從不（　　）。'
+  answer: E
+- sentence: '企業在面對市場激烈競爭時，必須（　　），因應時代變化隨時調整。'
+  answer: B
+- sentence: '她比姐姐多花兩倍的錢買化妝品，愛漂亮的程度真是（　　）。'
+  answer: H
+- sentence: '這兩種茶葉喝起來的口感（　　），讓人難以分辨。'
+  answer: F
+- sentence: '小華明知自己的體力有限，卻（　　）參加了連續三天的登山活動，導致體力不支，緊急送醫。'
+  answer: C
+- sentence: '這次比賽參賽的選手（　　）都是年輕人，平均年齡不超過二十歲，充滿了青春的氣息和活力。'
+  answer: D
+- sentence: '在運動會的開幕式上，運動員穿著整齊劃一的服裝，（　　）的接受大家的喝采。'
+  answer: G
+- sentence: '電影中的武俠人物經常能（　　），讓觀眾驚嘆不已。'
+  answer: A
+- sentence: '他是全校第一名，但為人謙虛，從不（　　）。'
+  answer: E
+- sentence: '企業在面對市場激烈競爭時，必須（　　），因應時代變化隨時調整。'
+  answer: B
+- sentence: '她比姐姐多花兩倍的錢買化妝品，愛漂亮的程度真是（　　）。'
+  answer: H
+- sentence: '這兩種茶葉喝起來的口感（　　），讓人難以分辨。'
+  answer: F
+- sentence: '小華明知自己的體力有限，卻（　　）參加了連續三天的登山活動，導致體力不支，緊急送醫。'
+  answer: C
+- sentence: '這次比賽參賽的選手（　　）都是年輕人，平均年齡不超過二十歲，充滿了青春的氣息和活力。'
+  answer: D
+- sentence: '在運動會的開幕式上，運動員穿著整齊劃一的服裝，（　　）的接受大家的喝采。'
+  answer: G
+- sentence: '電影中的武俠人物經常能（　　），讓觀眾驚嘆不已。'
+  answer: A
+- sentence: '他是全校第一名，但為人謙虛，從不（　　）。'
+  answer: E
+- sentence: '企業在面對市場激烈競爭時，必須（　　），因應時代變化隨時調整。'
+  answer: B
+- sentence: '她比姐姐多花兩倍的錢買化妝品，愛漂亮的程度真是（　　）。'
+  answer: H
 - id: 1
   answer: F
   answer_word: 相去無幾

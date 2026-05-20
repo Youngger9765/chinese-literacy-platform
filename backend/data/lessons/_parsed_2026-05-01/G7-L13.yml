@@ -191,6 +191,30 @@ vocab_bank:
   D: 氣候變遷
   E: 環境永續
 fill_in_blank:
+- sentence: '許多人對地球暖化及氣候異常的情況感到（　　）。'
+  answer: B
+- sentence: '為了實現（　　）的目標，我們需要共同努力，力行節能減碳。'
+  answer: E
+- sentence: '這位網紅以（　　）的言論批評了社會上的不公平現象。'
+  answer: C
+- sentence: '這部精采的國片在世界各地的影展中（　　），獲得不少殊榮。'
+  answer: A
+- sentence: '許多人對地球暖化及氣候異常的情況感到（　　）。'
+  answer: B
+- sentence: '為了實現（　　）的目標，我們需要共同努力，力行節能減碳。'
+  answer: E
+- sentence: '這位網紅以（　　）的言論批評了社會上的不公平現象。'
+  answer: C
+- sentence: '這部精采的國片在世界各地的影展中（　　），獲得不少殊榮。'
+  answer: A
+- sentence: '許多人對地球暖化及氣候異常的情況感到（　　）。'
+  answer: B
+- sentence: '為了實現（　　）的目標，我們需要共同努力，力行節能減碳。'
+  answer: E
+- sentence: '這位網紅以（　　）的言論批評了社會上的不公平現象。'
+  answer: C
+- sentence: '這部精采的國片在世界各地的影展中（　　），獲得不少殊榮。'
+  answer: A
 - id: 1
   answer: B
   answer_word: 憂心忡忡
@@ -206,7 +230,7 @@ fill_in_blank:
   answer_word: 大放異彩
   context_before: 這部精采的國片在世界各地的影展中
   context_after: ，獲得不少殊榮
-fill_in_blank_count: 3
+fill_in_blank_count: 4
 本課語詞:
 - 禦寒
 - 環境永續

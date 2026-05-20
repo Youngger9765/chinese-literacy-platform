@@ -161,6 +161,54 @@ vocab_bank:
   I: 補償機制
   J: 緩不濟急
 fill_in_blank:
+- sentence: '機場附近居民深受噪音困擾，民航局啟動（　　），補助加裝隔音窗。'
+  answer: I
+- sentence: '這段靠山小路剛設置了減速標誌，希望降低野生動物（　　）事件。'
+  answer: E
+- sentence: '球員起衝突時，裁判立刻（　　），吹哨制止並要求雙方退開。'
+  answer: F
+- sentence: '棲地（　　）後，動物被迫穿越道路與聚落，意外與衝突增加。'
+  answer: C
+- sentence: '因為棲地被開發，石虎在臺灣成了（　　）物種。'
+  answer: A
+- sentence: '森林火災後，（　　）嚴重破壞，整片森林光禿禿的。'
+  answer: G
+- sentence: '校園霸凌已有人受傷，透過班會宣導恐怕（　　），得立刻介入處理。'
+  answer: J
+- sentence: '豆棗幼年喪母，復育野放後又遭犬殺，真是命運（　　）。'
+  answer: B
+- sentence: '機場附近居民深受噪音困擾，民航局啟動（　　），補助加裝隔音窗。'
+  answer: I
+- sentence: '這段靠山小路剛設置了減速標誌，希望降低野生動物（　　）事件。'
+  answer: E
+- sentence: '球員起衝突時，裁判立刻（　　），吹哨制止並要求雙方退開。'
+  answer: F
+- sentence: '棲地（　　）後，動物被迫穿越道路與聚落，意外與衝突增加。'
+  answer: C
+- sentence: '因為棲地被開發，石虎在臺灣成了（　　）物種。'
+  answer: A
+- sentence: '森林火災後，（　　）嚴重破壞，整片森林光禿禿的。'
+  answer: G
+- sentence: '校園霸凌已有人受傷，透過班會宣導恐怕（　　），得立刻介入處理。'
+  answer: J
+- sentence: '豆棗幼年喪母，復育野放後又遭犬殺，真是命運（　　）。'
+  answer: B
+- sentence: '機場附近居民深受噪音困擾，民航局啟動（　　），補助加裝隔音窗。'
+  answer: I
+- sentence: '這段靠山小路剛設置了減速標誌，希望降低野生動物（　　）事件。'
+  answer: E
+- sentence: '球員起衝突時，裁判立刻（　　），吹哨制止並要求雙方退開。'
+  answer: F
+- sentence: '棲地（　　）後，動物被迫穿越道路與聚落，意外與衝突增加。'
+  answer: C
+- sentence: '因為棲地被開發，石虎在臺灣成了（　　）物種。'
+  answer: A
+- sentence: '森林火災後，（　　）嚴重破壞，整片森林光禿禿的。'
+  answer: G
+- sentence: '校園霸凌已有人受傷，透過班會宣導恐怕（　　），得立刻介入處理。'
+  answer: J
+- sentence: '豆棗幼年喪母，復育野放後又遭犬殺，真是命運（　　）。'
+  answer: B
 - id: 1
   answer: I
   answer_word: 補償機制

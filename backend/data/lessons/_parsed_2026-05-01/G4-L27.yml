@@ -159,6 +159,48 @@ vocab_bank:
   I: 效應
   J: 俯仰
 fill_in_blank:
+- sentence: '這台冷氣機因過於老舊，不斷發出（　　）的聲音，讓人難以入眠。'
+  answer: B
+- sentence: '為了賺流量，他在社群網站上（　　）散播假消息，造成許多誤解。'
+  answer: D
+- sentence: '有些人總喜歡（　　）別人的努力，卻不曾付出行動。'
+  answer: G
+- sentence: '真正的勇敢並不是沒有恐懼，而是在害怕時不輕易（　　）。'
+  answer: F
+- sentence: '有些人的（　　）其實是種偽裝，用來掩飾自己的不安與嫉妒。'
+  answer: A
+- sentence: '校園限制手機使用的新政策才剛（　　），還需要時間觀察成效。'
+  answer: H
+- sentence: '現在的社群媒體上（　　）著謠言與偏見，需要仔細分辨真假。'
+  answer: E
+- sentence: '這台冷氣機因過於老舊，不斷發出（　　）的聲音，讓人難以入眠。'
+  answer: B
+- sentence: '為了賺流量，他在社群網站上（　　）散播假消息，造成許多誤解。'
+  answer: D
+- sentence: '有些人總喜歡（　　）別人的努力，卻不曾付出行動。'
+  answer: G
+- sentence: '真正的勇敢並不是沒有恐懼，而是在害怕時不輕易（　　）。'
+  answer: F
+- sentence: '有些人的（　　）其實是種偽裝，用來掩飾自己的不安與嫉妒。'
+  answer: A
+- sentence: '校園限制手機使用的新政策才剛（　　），還需要時間觀察成效。'
+  answer: H
+- sentence: '現在的社群媒體上（　　）著謠言與偏見，需要仔細分辨真假。'
+  answer: E
+- sentence: '這台冷氣機因過於老舊，不斷發出（　　）的聲音，讓人難以入眠。'
+  answer: B
+- sentence: '為了賺流量，他在社群網站上（　　）散播假消息，造成許多誤解。'
+  answer: D
+- sentence: '有些人總喜歡（　　）別人的努力，卻不曾付出行動。'
+  answer: G
+- sentence: '真正的勇敢並不是沒有恐懼，而是在害怕時不輕易（　　）。'
+  answer: F
+- sentence: '有些人的（　　）其實是種偽裝，用來掩飾自己的不安與嫉妒。'
+  answer: A
+- sentence: '校園限制手機使用的新政策才剛（　　），還需要時間觀察成效。'
+  answer: H
+- sentence: '現在的社群媒體上（　　）著謠言與偏見，需要仔細分辨真假。'
+  answer: E
 - id: 1
   answer: B
   answer_word: 惱人

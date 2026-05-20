@@ -155,6 +155,54 @@ vocab_bank:
   I: 吞沒
   J: 蹣跚
 fill_in_blank:
+- sentence: '颱風來襲，巨浪瞬間（　　）了堤岸，街道立刻淹成一片。'
+  answer: I
+- sentence: '他剛開完刀，身體很（　　），走一小段路就氣喘吁吁。'
+  answer: E
+- sentence: '朋友逼他一起惡作劇，他怕被排擠，只好（　　），跟著做。'
+  answer: F
+- sentence: '他作弊得高分，但他一直害怕被揭穿，焦慮（　　），睡也睡不好。'
+  answer: C
+- sentence: '演唱會散場時，出口被人群塞得（　　），大家只能慢慢往前挪。'
+  answer: A
+- sentence: '颱風後道路坍方，救難隊（　　）數日才抵達山上的村落，進行救援。'
+  answer: G
+- sentence: '等待癌症檢查結果的幾天，對全家都是（　　），害怕聽到壞消息。'
+  answer: D
+- sentence: '他明知資料造假遲早會被揭穿，卻仍心存僥倖，最後（　　），被查獲。'
+  answer: B
+- sentence: '颱風來襲，巨浪瞬間（　　）了堤岸，街道立刻淹成一片。'
+  answer: I
+- sentence: '他剛開完刀，身體很（　　），走一小段路就氣喘吁吁。'
+  answer: E
+- sentence: '朋友逼他一起惡作劇，他怕被排擠，只好（　　），跟著做。'
+  answer: F
+- sentence: '他作弊得高分，但他一直害怕被揭穿，焦慮（　　），睡也睡不好。'
+  answer: C
+- sentence: '演唱會散場時，出口被人群塞得（　　），大家只能慢慢往前挪。'
+  answer: A
+- sentence: '颱風後道路坍方，救難隊（　　）數日才抵達山上的村落，進行救援。'
+  answer: G
+- sentence: '等待癌症檢查結果的幾天，對全家都是（　　），害怕聽到壞消息。'
+  answer: D
+- sentence: '他明知資料造假遲早會被揭穿，卻仍心存僥倖，最後（　　），被查獲。'
+  answer: B
+- sentence: '颱風來襲，巨浪瞬間（　　）了堤岸，街道立刻淹成一片。'
+  answer: I
+- sentence: '他剛開完刀，身體很（　　），走一小段路就氣喘吁吁。'
+  answer: E
+- sentence: '朋友逼他一起惡作劇，他怕被排擠，只好（　　），跟著做。'
+  answer: F
+- sentence: '他作弊得高分，但他一直害怕被揭穿，焦慮（　　），睡也睡不好。'
+  answer: C
+- sentence: '演唱會散場時，出口被人群塞得（　　），大家只能慢慢往前挪。'
+  answer: A
+- sentence: '颱風後道路坍方，救難隊（　　）數日才抵達山上的村落，進行救援。'
+  answer: G
+- sentence: '等待癌症檢查結果的幾天，對全家都是（　　），害怕聽到壞消息。'
+  answer: D
+- sentence: '他明知資料造假遲早會被揭穿，卻仍心存僥倖，最後（　　），被查獲。'
+  answer: B
 - id: 1
   answer: I
   answer_word: 吞沒

@@ -174,8 +174,38 @@ vocab_bank:
   D: 抵消
   E: 大同小異
   F: 徒手訓練
-  G: 失之毫釐
+  G: 失之毫釐，差之千里
 fill_in_blank:
+- sentence: '收到這次測驗的結果，他的心情（　　）到極點，完全提不起勁了。'
+  answer: A
+- sentence: '這兩種藥不能同時服用，否則藥效會互相（　　）。'
+  answer: D
+- sentence: '「 （　　）」，做事只要有一點小錯，結果可能會有大大不同。'
+  answer: G
+- sentence: '根據調查（　　）顯示，青少年的犯罪年齡逐年下降的趨勢。'
+  answer: B
+- sentence: '這兩本書的題材和內容（　　），只是文字風格較為不同罷了'
+  answer: E
+- sentence: '收到這次測驗的結果，他的心情（　　）到極點，完全提不起勁了。'
+  answer: A
+- sentence: '這兩種藥不能同時服用，否則藥效會互相（　　）。'
+  answer: D
+- sentence: '「 （　　）」，做事只要有一點小錯，結果可能會有大大不同。'
+  answer: G
+- sentence: '根據調查（　　）顯示，青少年的犯罪年齡逐年下降的趨勢。'
+  answer: B
+- sentence: '這兩本書的題材和內容（　　），只是文字風格較為不同罷了'
+  answer: E
+- sentence: '收到這次測驗的結果，他的心情（　　）到極點，完全提不起勁了。'
+  answer: A
+- sentence: '這兩種藥不能同時服用，否則藥效會互相（　　）。'
+  answer: D
+- sentence: '「 （　　）」，做事只要有一點小錯，結果可能會有大大不同。'
+  answer: G
+- sentence: '根據調查（　　）顯示，青少年的犯罪年齡逐年下降的趨勢。'
+  answer: B
+- sentence: '這兩本書的題材和內容（　　），只是文字風格較為不同罷了'
+  answer: E
 - id: 1
   answer: A
   answer_word: 沮喪
