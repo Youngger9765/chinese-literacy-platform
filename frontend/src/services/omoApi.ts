@@ -7,6 +7,18 @@
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
+export class OmoApiError extends Error {
+  status: number;
+  responseText: string;
+
+  constructor(message: string, status: number, responseText: string) {
+    super(message);
+    this.name = 'OmoApiError';
+    this.status = status;
+    this.responseText = responseText;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Response types
 // ---------------------------------------------------------------------------
@@ -154,7 +166,7 @@ export async function getOmoStatus(
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Status fetch failed (${res.status}): ${text}`);
+    throw new OmoApiError(`Status fetch failed (${res.status}): ${text}`, res.status, text);
   }
   return res.json() as Promise<OmoStatusResponse>;
 }

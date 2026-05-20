@@ -232,13 +232,27 @@ interface AnswerCardProps {
 
 const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, onViewCrop, flagged }) => {
   const confPct = Math.round(answer.ai_confidence * 100);
+  // #1721: low confidence (< 0.7) → orange ⚠️ flag so teacher knows to manually verify
+  const lowConfidence = answer.ai_confidence < 0.7;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+    <div className={`bg-white rounded-2xl border shadow-sm p-4 ${lowConfidence ? 'border-amber-300 ring-1 ring-amber-200' : 'border-gray-100'}`}>
       {/* Header row */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-400 mb-0.5">題目 {answer.question_id}</p>
+          <p className="text-xs text-gray-400 mb-0.5 flex items-center gap-1">
+            題目 {answer.question_id}
+            {lowConfidence && (
+              <span
+                title={`AI 信心度 ${confPct}% 偏低，建議老師確認。理由：${answer.reasoning}`}
+                aria-label={`AI 信心度偏低 (${confPct}%) — 需老師確認`}
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium cursor-help"
+              >
+                <span aria-hidden="true">⚠️</span>
+                需老師確認
+              </span>
+            )}
+          </p>
           <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
             {answer.reasoning}
           </p>
