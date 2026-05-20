@@ -105,7 +105,7 @@ async def generate_socratic_question(
 
     client = _get_client()
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-flash-lite-latest",
         contents=contents,
         config=genai_types.GenerateContentConfig(
             system_instruction=system_prompt,
@@ -124,7 +124,7 @@ async def generate_socratic_question(
                     _prompt_chars += len(p.text)
     except Exception:
         pass
-    usage_meta = capture_usage(response, model="gemini-2.5-flash")
+    usage_meta = capture_usage(response, model="gemini-flash-lite-latest")
     usage_meta.prompt_char_count = _prompt_chars
     return response.text.strip()
 
