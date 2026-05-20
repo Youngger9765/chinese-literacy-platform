@@ -1,7 +1,7 @@
 """Central per-task LLM model config.
 
 Each task has its own (model, location) tuple chosen by A/B test.
-See: private/omo-real-samples/2026-05-20-systematic-ab/summary.md
+See: docs/ai/llm-model-ab-2026-05.md
 
 Decision rules (Issue #1734 — 2026-05-20):
   - gemini-flash-lite-latest @ global  →  all text/JSON generation tasks + OMO identifier
