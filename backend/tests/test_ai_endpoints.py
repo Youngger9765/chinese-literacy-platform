@@ -753,9 +753,9 @@ class TestAIUsageTracker:
 
     def test_estimate_cost(self):
         from app.services.ai_usage_tracker import estimate_cost
-        # Gemini 2.5 Flash: input $0.15/1M, output $0.60/1M
+        # Gemini 2.5 Flash: input $0.30/1M, output $2.50/1M (updated 2026-05)
         cost = estimate_cost("gemini-2.5-flash", 1_000_000, 1_000_000)
-        assert abs(cost - 0.75) < 0.001
+        assert abs(cost - 2.80) < 0.001
 
     def test_estimate_cost_small_values(self):
         from app.services.ai_usage_tracker import estimate_cost

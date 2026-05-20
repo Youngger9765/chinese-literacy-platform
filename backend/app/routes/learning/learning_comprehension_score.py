@@ -170,7 +170,7 @@ async def score_comprehension(
         session_id=session_id,
         input_tokens=usage.input_tokens if usage else 0,
         output_tokens=usage.output_tokens if usage else 0,
-        model=usage.model if usage else "gemini-2.5-flash",
+        model=usage.model if usage else "gemini-flash-lite-latest",
         latency_ms=latency_ms,
         success=True,
         model_version=usage.model_version if usage else None,

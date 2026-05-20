@@ -93,7 +93,7 @@ def _check_safety_filter(response) -> None:
 
 def _get_client() -> genai.Client:
     """Return a Gemini client via Vertex AI (uses Cloud Run service account)."""
-    return genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
+    return genai.Client(vertexai=True, project="lingoleap-dev", location="global")
 
 
 def _repair_json(raw: str) -> str | None:
@@ -332,7 +332,7 @@ async def generate_structured_response(
             response = await asyncio.wait_for(
                 asyncio.to_thread(
                     client.models.generate_content,
-                    model="gemini-2.5-flash",
+                    model="gemini-flash-lite-latest",
                     contents=contents,
                     config=genai_types.GenerateContentConfig(
                         system_instruction=system_prompt,
@@ -364,7 +364,7 @@ async def generate_structured_response(
                             _prompt_chars += len(p.text)
             except Exception:
                 pass
-            usage_meta = capture_usage(response, model="gemini-2.5-flash")
+            usage_meta = capture_usage(response, model="gemini-flash-lite-latest")
             usage_meta.prompt_char_count = _prompt_chars
 
             # Extract finish_reason for diagnostics (MAX_TOKENS = truncated output)
