@@ -141,16 +141,24 @@ def test_pdf2_identifier_hits_zhou_siqi():
 
 
 # ---------------------------------------------------------------------------
-# 3. PDF #1 — grader fill_in_blank not 100% false-positive
+# 3. PDF #1 — grader must read real PDF text, not fabricate student_answer
 # ---------------------------------------------------------------------------
 
 @pytest.mark.real
-def test_pdf1_grader_fill_in_blank_not_all_perfect():
-    """Ground truth: fb_1/fb_9/fb_10 are wrong (red-pen corrected) — grader must
-    NOT return score=1.0 for all 10 fill_in_blank questions."""
+def test_pdf1_grader_student_answer_not_fabricated():
+    """The 5 fill_in_blank questions in L24.yml are 「四 語詞應用」section
+    (lettered choices A-G). PDF #1 shows the student circled B/E/F/G/C — all
+    correct. Therefore grader.student_answer MUST be one of:
+      - A letter A-G (the student's circled choice), OR
+      - A word from lesson vocabulary (resolved choice), OR
+      - Empty string (no answer)
+
+    Any other string proves the grader is fabricating answers without reading
+    the PDF (#1614 follow-up — 'not all 1.0' is not enough; we must verify the
+    answer text matches what's actually on the page).
+    """
     _require_vertex_ai()
 
-    # fb questions are spread across pages 4-5; grade all 8 pages to cover them
     images = []
     for page in range(1, 9):
         path = IMAGES_DIR / f"135902-p-{page}.jpg"
@@ -164,6 +172,7 @@ def test_pdf1_grader_fill_in_blank_not_all_perfect():
     if not lesson_path.exists():
         pytest.skip(f"L24.yml not found at {lesson_path}")
     lesson = yaml.safe_load(lesson_path.read_text(encoding="utf-8"))
+    vocab_words = {v.get("word", "") for v in lesson.get("vocabulary", [])}
 
     from app.services.omo_grader import grade_worksheet_images
 
@@ -176,10 +185,20 @@ def test_pdf1_grader_fill_in_blank_not_all_perfect():
     fb_results = [r for r in results if r.question_id.startswith("fb_")]
     assert fb_results, "Grader returned no fill_in_blank results"
 
-    perfect = [r for r in fb_results if r.score == 1.0]
-    assert len(perfect) < len(fb_results), (
-        f"REGRESSION (#1614): all {len(fb_results)} fill_in_blank questions returned "
-        f"score=1.0. Ground truth: fb_1 (寛食), fb_9 (crossed out), fb_10 (red ✗) "
-        f"are all wrong. Grader is fabricating scores again.\n"
-        f"Results: {[(r.question_id, r.student_answer, r.score) for r in fb_results]}"
+    fabricated = []
+    for r in fb_results:
+        sa = (r.student_answer or "").strip()
+        is_letter = len(sa) == 1 and sa.upper() in "ABCDEFG"
+        is_vocab = sa in vocab_words
+        is_empty = sa == ""
+        if not (is_letter or is_vocab or is_empty):
+            fabricated.append((r.question_id, sa))
+
+    assert not fabricated, (
+        f"FABRICATION: {len(fabricated)}/{len(fb_results)} fill_in_blank answers "
+        f"are not letters (A-G), not vocab words, not empty — grader invented them.\n"
+        f"Vocab list: {sorted(vocab_words)}\n"
+        f"Fabricated: {fabricated}\n"
+        f"PDF page 18-19「四 語詞應用」shows student circled B/E/F/G/C (all correct). "
+        f"#1614 'not all 1.0' fix is incomplete — grader still doesn't read PDF."
     )
