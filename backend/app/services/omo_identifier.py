@@ -351,7 +351,7 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
         from google.genai import types as genai_types
 
         response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-flash-lite-latest",
             contents=[
                 genai_types.Content(
                     role="user",
