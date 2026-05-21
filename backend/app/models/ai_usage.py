@@ -12,7 +12,7 @@ class AIUsageLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    student_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     user_role = Column(String(20))
     endpoint = Column(String(80))
     action = Column(String(30))

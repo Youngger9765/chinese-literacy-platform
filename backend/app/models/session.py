@@ -106,7 +106,7 @@ class LearningSession(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     text_id: Mapped[int | None] = mapped_column(ForeignKey("texts.id"), nullable=True, index=True)
-    classroom_id: Mapped[int | None] = mapped_column(ForeignKey("classrooms.id"), nullable=True)
+    classroom_id: Mapped[int | None] = mapped_column(ForeignKey("classrooms.id"), nullable=True, index=True)
     # DEPRECATED (#1188): story_slug is the legacy string key.  text_id FK is the
     # canonical source of truth.  Use story_slug_derived hybrid property for reads.
     # DO NOT write story_slug without also setting text_id.  Column will be dropped
