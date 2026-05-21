@@ -34,6 +34,12 @@ function getFullReadingEncouragement(matchRate: number): { stars: number; text: 
   return { stars: tier.stars, text: tier.text, color: tier.color };
 }
 
+/* #1780: module-level noop so useTtsPlayback receives a stable callback ref
+ * across renders. Inline `() => {}` would be a new function every render,
+ * which invalidates the hook's useCallback deps and re-creates speakText,
+ * defeating the memoized return value's reference stability. */
+const NOOP = () => {};
+
 /* ------------------------------------------------------------------ */
 
 interface FullReadingProps {
@@ -166,7 +172,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
   /* ---- TTS playback (Cloud TTS + cursor animation, same as LiveTutor) ---- */
   const [speakingProgress, setSpeakingProgress] = useState(0);
   const [currentTtsParagraph, setCurrentTtsParagraph] = useState(-1);
-  const tts = useTtsPlayback(setSpeakingProgress, () => {});
+  const tts = useTtsPlayback(setSpeakingProgress, NOOP);
 
   /* Speak paragraph by paragraph to track which paragraph is highlighted */
   const ttsQueueRef = useRef<string[]>([]);

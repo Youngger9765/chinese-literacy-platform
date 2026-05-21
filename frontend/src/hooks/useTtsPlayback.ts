@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { cancelTts, cleanForTts, pauseCurrentTts, resumeCurrentTts, speakTextWithProgress, TtsProgressInfo } from '../services/ttsApi';
 
 // Token key must match AuthContext TOKEN_KEY ('lingoleap_token').
@@ -348,18 +348,26 @@ export function useTtsPlayback(
     setTtsError(null);
   }, []);
 
-  return {
-    isTtsSpeaking,
-    isTtsPaused,
-    isTtsLoading,
-    ttsError,
-    setIsTtsSpeaking,
-    setIsTtsPaused,
-    utteranceRef,
-    ttsRafRef,
-    speakText,
-    pauseTts,
-    resumeTts,
-    stopTts,
-  };
+  /* #1780: wrap the return value in useMemo so consumers can put the whole
+   * `tts` object in a useEffect/useCallback dep array without re-firing every
+   * render. The underlying callbacks (speakText / pauseTts / resumeTts /
+   * stopTts) are already useCallback'd; the only thing that changes between
+   * renders without this memo is the object literal itself. */
+  return useMemo(
+    () => ({
+      isTtsSpeaking,
+      isTtsPaused,
+      isTtsLoading,
+      ttsError,
+      setIsTtsSpeaking,
+      setIsTtsPaused,
+      utteranceRef,
+      ttsRafRef,
+      speakText,
+      pauseTts,
+      resumeTts,
+      stopTts,
+    }),
+    [isTtsSpeaking, isTtsPaused, isTtsLoading, ttsError, speakText, pauseTts, resumeTts, stopTts],
+  );
 }

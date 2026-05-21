@@ -154,7 +154,11 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     async () => { throw new Error('handleSentenceRetryEval called before initialization'); }
   );
 
-  /* ---- TTS playback hook ---- */
+  /* ---- TTS playback hook ----
+   * #1780: pass stable callback refs so the hook's internal useCallback deps
+   * don't churn every render. setSpeakingProgress is already stable (React
+   * setter); the diff-clear closure is wrapped in useCallback. */
+  const handleRealtimeDiffClear = useCallback(() => setRealtimeDiffTokens(null), []);
   const {
     isTtsSpeaking,
     isTtsPaused,
@@ -168,10 +172,7 @@ const LiveTutor: React.FC<LiveTutorProps> = ({
     pauseTts,
     resumeTts,
     stopTts,
-  } = useTtsPlayback(
-    (pos) => setSpeakingProgress(pos),
-    () => setRealtimeDiffTokens(null),
-  );
+  } = useTtsPlayback(setSpeakingProgress, handleRealtimeDiffClear);
 
   /** Use Cloud TTS to read the current paragraph aloud.
    *  Passes lessonId + paragraphIdx so the TTS hook fetches canonical v2 sentences
