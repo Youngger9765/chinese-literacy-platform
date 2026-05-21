@@ -527,6 +527,43 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     }
   }, [expandedStudentId, token]);
 
+  /* #1784 retry helpers — re-fetch sessions / curve for the expanded student
+   * without toggling the collapse state. Used by inline error banners. */
+  const retrySessions = useCallback(async (studentId: number) => {
+    if (!token) return;
+    delete sessionCache.current[studentId];
+    setIsLoadingSessions(true);
+    setSessions([]);
+    setSessionsError(null);
+    try {
+      const data = await getStudentSessions(token, studentId);
+      sessionCache.current[studentId] = data;
+      setSessions(data);
+    } catch (err) {
+      setSessionsError(err instanceof Error ? err.message : '無法載入學習紀錄');
+    } finally {
+      setIsLoadingSessions(false);
+    }
+  }, [token]);
+
+  const retryCurve = useCallback(async (studentId: number, filter: string) => {
+    if (!token) return;
+    const cacheKey = `${studentId}:${filter}`;
+    delete curveCache.current[cacheKey];
+    setIsLoadingCurve(true);
+    setLearningCurve([]);
+    setCurveError(null);
+    try {
+      const curveData = await getStudentLearningCurve(token, studentId, filter || undefined);
+      curveCache.current[cacheKey] = curveData.data;
+      setLearningCurve(curveData.data);
+    } catch (err) {
+      setCurveError(err instanceof Error ? err.message : '無法載入學習曲線');
+    } finally {
+      setIsLoadingCurve(false);
+    }
+  }, [token]);
+
   // Load and show dialogue history for a session (Issue #418)
   const handleViewDialogue = useCallback(async (
     studentId: number,
@@ -542,8 +579,10 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
       setDialogueModal({ data, storyTitle, studentName });
     } catch (err) {
       // #1784: was silently failing → teacher clicked the dialogue button and
-      // nothing happened. Now surface the error inline.
-      setDialogueError(err instanceof Error ? err.message : '無法載入對話紀錄');
+      // nothing happened. Now surface the error inline with student context
+      // so teacher knows which click failed when multiple are in-flight.
+      const msg = err instanceof Error ? err.message : '無法載入對話紀錄';
+      setDialogueError(`${studentName}：${msg}`);
     } finally {
       setLoadingDialogueSessionId(null);
     }
@@ -785,8 +824,9 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                   {isLoadingCurve ? (
                     <div className="h-40 bg-gray-200 animate-pulse rounded" />
                   ) : curveError ? (
-                    <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700">
-                      學習曲線載入失敗：{curveError}（請收合此學生後再展開重試）
+                    <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700 flex items-center justify-between gap-2">
+                      <span>學習曲線載入失敗：{curveError}</span>
+                      <button type="button" onClick={() => retryCurve(s.student_id, curveStoryFilter)} className="underline shrink-0">重試</button>
                     </div>
                   ) : learningCurve.length >= 2 ? (
                     <div>
@@ -847,8 +887,9 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                       ))}
                     </div>
                   ) : sessionsError ? (
-                    <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700">
-                      學習紀錄載入失敗：{sessionsError}（請收合此學生後再展開重試）
+                    <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700 flex items-center justify-between gap-2">
+                      <span>學習紀錄載入失敗：{sessionsError}</span>
+                      <button type="button" onClick={() => retrySessions(s.student_id)} className="underline shrink-0">重試</button>
                     </div>
                   ) : sessions.length === 0 ? (
                     <p className="text-xs text-gray-500 text-center py-2">尚無練習記錄</p>
@@ -1017,8 +1058,9 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                         {isLoadingCurve ? (
                           <div className="h-40 bg-gray-200 animate-pulse rounded" />
                         ) : curveError ? (
-                          <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700">
-                            學習曲線載入失敗：{curveError}（請收合此學生後再展開重試）
+                          <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700 flex items-center justify-between gap-2">
+                            <span>學習曲線載入失敗：{curveError}</span>
+                            <button type="button" onClick={() => retryCurve(s.student_id, curveStoryFilter)} className="underline shrink-0">重試</button>
                           </div>
                         ) : learningCurve.length >= 2 ? (
                           <div>
@@ -1087,8 +1129,9 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                             ))}
                           </div>
                         ) : sessionsError ? (
-                          <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700">
-                            學習紀錄載入失敗：{sessionsError}（請收合此學生後再展開重試）
+                          <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700 flex items-center justify-between gap-2">
+                            <span>學習紀錄載入失敗：{sessionsError}</span>
+                            <button type="button" onClick={() => retrySessions(s.student_id)} className="underline shrink-0">重試</button>
                           </div>
                         ) : sessions.length === 0 ? (
                           <p className="text-xs text-gray-500 text-center py-2">尚無練習記錄</p>
