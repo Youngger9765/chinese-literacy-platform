@@ -69,13 +69,25 @@ def _resolve_story_title_from_yaml(story_id: str) -> str | None:
 
 
 def _resolve_title_for_assignment(assignment: Assignment, db: Session) -> str:
-    """Return the display title for an assignment's text source."""
+    """Return the display title for an assignment's text source.
+
+    Uses the already-loaded ``assignment.text`` relationship when available
+    (e.g. after a ``joinedload(Assignment.text)`` / ``selectinload(Assignment.text)``
+    in the calling query) to avoid an extra SELECT per assignment.  Falls back
+    to an explicit DB query only when the relationship attribute is absent or
+    unloaded — for example when the assignment was fetched without eager-loading.
+    """
     if assignment.story_id is not None:
         return _resolve_story_title_from_yaml(assignment.story_id) or assignment.story_id
     if assignment.text_id is not None:
-        text = db.query(Text).filter(Text.id == assignment.text_id).first()
-        if text:
-            return text.title
+        # Prefer the already-loaded relationship (no extra query).
+        text_obj = assignment.text  # type: ignore[attr-defined]
+        if text_obj is not None:
+            return text_obj.title
+        # Fallback: relationship not loaded — hit DB once.
+        text_row = db.query(Text).filter(Text.id == assignment.text_id).first()
+        if text_row:
+            return text_row.title
     return "(Unknown)"
 
 
