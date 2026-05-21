@@ -88,29 +88,46 @@ def _resolve_story_slug_for_assignment(assignment: Assignment) -> str | None:
     return None
 
 
-def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentResponse:
-    """Convert an Assignment ORM object to an AssignmentResponse."""
+def _assignment_to_response(
+    assignment: Assignment,
+    db: Session,
+    *,
+    precomputed_counts: dict | None = None,
+) -> AssignmentResponse:
+    """Convert an Assignment ORM object to an AssignmentResponse.
+
+    precomputed_counts — optional dict keyed by assignment.id with keys:
+      assigned_student_count, submitted_student_count, total_attempts.
+    When provided (bulk list path) the per-row COUNT queries are skipped,
+    eliminating the N+1 pattern (Issue #1766).
+    """
     story_title = _resolve_title_for_assignment(assignment, db)
 
-    # Issue #1764 Fix 3: precise student counts
-    assigned_student_count: int = (
-        db.query(func.count(func.distinct(ClassroomStudent.student_id)))
-        .filter(ClassroomStudent.classroom_id == assignment.classroom_id)
-        .scalar() or 0
-    )
-    submitted_student_count: int = (
-        db.query(func.count(func.distinct(AssignmentSubmission.student_id)))
-        .filter(
-            AssignmentSubmission.assignment_id == assignment.id,
-            AssignmentSubmission.status.in_(["submitted", "graded"]),
+    if precomputed_counts is not None and assignment.id in precomputed_counts:
+        counts = precomputed_counts[assignment.id]
+        assigned_student_count: int = counts["assigned_student_count"]
+        submitted_student_count: int = counts["submitted_student_count"]
+        total_attempts: int = counts["total_attempts"]
+    else:
+        # Single-assignment path: fall back to per-row queries (Issue #1764 Fix 3)
+        assigned_student_count = (
+            db.query(func.count(func.distinct(ClassroomStudent.student_id)))
+            .filter(ClassroomStudent.classroom_id == assignment.classroom_id)
+            .scalar() or 0
         )
-        .scalar() or 0
-    )
-    total_attempts: int = (
-        db.query(func.count(AssignmentSubmission.id))
-        .filter(AssignmentSubmission.assignment_id == assignment.id)
-        .scalar() or 0
-    )
+        submitted_student_count = (
+            db.query(func.count(func.distinct(AssignmentSubmission.student_id)))
+            .filter(
+                AssignmentSubmission.assignment_id == assignment.id,
+                AssignmentSubmission.status.in_(["submitted", "graded"]),
+            )
+            .scalar() or 0
+        )
+        total_attempts = (
+            db.query(func.count(AssignmentSubmission.id))
+            .filter(AssignmentSubmission.assignment_id == assignment.id)
+            .scalar() or 0
+        )
 
     return AssignmentResponse(
         id=assignment.id,
@@ -176,15 +193,27 @@ def _extract_reading_metrics(
 
     Returns (reading_accuracy, reading_cpm, reading_error_chars).
     All values are None/[] when no session exists or data hasn't been recorded yet.
+
+    Issue #1767: uses sub.session (already eager-loaded via joinedload in
+    get_assignment_detail) when available, avoiding a per-row DB query.
+    Falls back to an explicit query for callers that did not eager-load.
     """
     if sub.session_id is None:
         return None, None, []
 
-    session = (
-        db.query(LearningSession)
-        .filter(LearningSession.id == sub.session_id)
-        .first()
-    )
+    # Use already-loaded relationship value if present (avoids N+1)
+    from sqlalchemy.orm.base import instance_state
+    state = instance_state(sub)
+    if "session" in state.dict:
+        # relationship was eager-loaded
+        session = sub.session
+    else:
+        session = (
+            db.query(LearningSession)
+            .filter(LearningSession.id == sub.session_id)
+            .first()
+        )
+
     if session is None:
         return None, None, []
 
@@ -571,8 +600,58 @@ def list_classroom_assignments(
 
     assignments = query.order_by(Assignment.created_at.desc()).all()
 
+    if not assignments:
+        return AssignmentListResponse(items=[], total=0)
+
+    assignment_ids = [a.id for a in assignments]
+
+    # ── Issue #1766: bulk-precompute counts to avoid N+1 ──────────────────────
+    # assigned_student_count: classroom-level (same for all assignments in classroom)
+    enrolled_count: int = (
+        db.query(func.count(func.distinct(ClassroomStudent.student_id)))
+        .filter(ClassroomStudent.classroom_id == classroom_id)
+        .scalar() or 0
+    )
+
+    # submitted_student_count per assignment
+    submitted_rows = (
+        db.query(
+            AssignmentSubmission.assignment_id,
+            func.count(func.distinct(AssignmentSubmission.student_id)).label("cnt"),
+        )
+        .filter(
+            AssignmentSubmission.assignment_id.in_(assignment_ids),
+            AssignmentSubmission.status.in_(["submitted", "graded"]),
+        )
+        .group_by(AssignmentSubmission.assignment_id)
+        .all()
+    )
+    submitted_map: dict[int, int] = {row.assignment_id: row.cnt for row in submitted_rows}
+
+    # total_attempts per assignment
+    attempts_rows = (
+        db.query(
+            AssignmentSubmission.assignment_id,
+            func.count(AssignmentSubmission.id).label("cnt"),
+        )
+        .filter(AssignmentSubmission.assignment_id.in_(assignment_ids))
+        .group_by(AssignmentSubmission.assignment_id)
+        .all()
+    )
+    attempts_map: dict[int, int] = {row.assignment_id: row.cnt for row in attempts_rows}
+
+    precomputed: dict[int, dict] = {
+        a_id: {
+            "assigned_student_count": enrolled_count,
+            "submitted_student_count": submitted_map.get(a_id, 0),
+            "total_attempts": attempts_map.get(a_id, 0),
+        }
+        for a_id in assignment_ids
+    }
+    # ─────────────────────────────────────────────────────────────────────────
+
     return AssignmentListResponse(
-        items=[_assignment_to_response(a, db) for a in assignments],
+        items=[_assignment_to_response(a, db, precomputed_counts=precomputed) for a in assignments],
         total=len(assignments),
     )
 
@@ -596,15 +675,23 @@ def get_assignment_detail(
     # Build base response
     base = _assignment_to_response(assignment, db)
 
-    # Build submissions list
+    # Issue #1767: eager-load student + session to avoid per-row N+1 queries.
+    # joinedload(AssignmentSubmission.student) eliminates per-row User lookups.
+    # joinedload(AssignmentSubmission.session) eliminates per-row LearningSession
+    # lookups inside _extract_reading_metrics.
     submissions = (
         db.query(AssignmentSubmission)
+        .options(
+            joinedload(AssignmentSubmission.student),
+            joinedload(AssignmentSubmission.session),
+        )
         .filter(AssignmentSubmission.assignment_id == assignment_id)
         .all()
     )
     submission_responses = []
     for sub in submissions:
-        student = db.query(User).filter(User.id == sub.student_id).first()
+        # student already loaded via joinedload — no extra query
+        student = sub.student
         r_accuracy, r_cpm, r_error_chars = _extract_reading_metrics(sub, db)
         submission_responses.append(
             SubmissionResponse(
@@ -631,7 +718,8 @@ def get_assignment_detail(
 
     groups: list[StudentAttemptGroup] = []
     for student_id, subs in student_subs.items():
-        student = db.query(User).filter(User.id == student_id).first()
+        # student already loaded via joinedload — no extra query
+        student = subs[0].student
         subs_sorted = sorted(subs, key=lambda s: s.attempt_number, reverse=True)
         latest = subs_sorted[0]
         attempt_list: list[AttemptResponse] = []
