@@ -471,7 +471,10 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     }
 
     setExpandedStudentId(studentId);
-    setCurveStoryFilter(''); // reset story filter when switching students
+    // #1778: explicit nextFilter — was using stale curveStoryFilter from closure
+    // (UI showed 'all stories' but cache key + API call used previous filter)
+    const nextFilter = '';
+    setCurveStoryFilter(nextFilter);
     if (!token) return;
 
     // Load session history (with cache)
@@ -491,15 +494,15 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
       }
     }
 
-    // Load learning curve (with cache)
-    const cacheKey = `${studentId}:${curveStoryFilter}`;
+    // Load learning curve (with cache) — use nextFilter not stale closure value
+    const cacheKey = `${studentId}:${nextFilter}`;
     if (curveCache.current[cacheKey]) {
       setLearningCurve(curveCache.current[cacheKey]);
     } else {
       setIsLoadingCurve(true);
       setLearningCurve([]);
       try {
-        const curveData = await getStudentLearningCurve(token, studentId, curveStoryFilter || undefined);
+        const curveData = await getStudentLearningCurve(token, studentId, nextFilter || undefined);
         curveCache.current[cacheKey] = curveData.data;
         setLearningCurve(curveData.data);
       } catch {
@@ -508,7 +511,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
         setIsLoadingCurve(false);
       }
     }
-  }, [expandedStudentId, token, curveStoryFilter]);
+  }, [expandedStudentId, token]);
 
   // Load and show dialogue history for a session (Issue #418)
   const handleViewDialogue = useCallback(async (
