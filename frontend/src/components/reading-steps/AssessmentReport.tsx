@@ -203,9 +203,13 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
   const [showRepeatedAlert, setShowRepeatedAlert] = useState(false);
   const alertFetchedRef = useRef(false);
 
+  // #1781: derive hasReadingData outside useCallback so the effect re-runs
+  // when session fields populate after mount. Previously deps omitted these
+  // session fields → callback identity stayed same → effect skipped fetch
+  // when readingAttempt/fullReadingResult arrived late.
+  const hasReadingData = !!(session?.readingAttempt || session?.fullReadingResult);
+
   const fetchRepeatedAlerts = useCallback(async () => {
-    // Only check for repeated errors when the student has actual session data
-    const hasReadingData = !!(session?.readingAttempt || session?.fullReadingResult);
     if (!token || !dbSessionId || alertFetchedRef.current || !hasReadingData) return;
     alertFetchedRef.current = true;
     try {
@@ -224,7 +228,7 @@ const AssessmentReport: React.FC<AssessmentReportProps> = ({ session, story, onR
     } catch {
       // Non-critical: silently ignore errors so the report page still works
     }
-  }, [token, dbSessionId]);
+  }, [token, dbSessionId, hasReadingData]);
 
   // Track lesson completion when a valid report is viewed.
   useEffect(() => {
