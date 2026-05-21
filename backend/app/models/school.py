@@ -25,13 +25,13 @@ class School(Base):
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     domain: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True, index=True)
     organization_id: Mapped[str | None] = mapped_column(
-        ForeignKey("organizations.id"), nullable=True
+        ForeignKey("organizations.id"), nullable=True, index=True
     )
     display_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     address: Mapped[str | None] = mapped_column(String(500), nullable=True)
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     admin_user_id: Mapped[int | None] = mapped_column(
-        ForeignKey("users.id"), nullable=True
+        ForeignKey("users.id"), nullable=True, index=True
     )
     join_code: Mapped[str | None] = mapped_column(String(20), unique=True, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -59,7 +59,7 @@ class Classroom(Base):
     __tablename__ = "classrooms"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False)
+    school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False, index=True)
     teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     grade: Mapped[int | None] = mapped_column(Integer, nullable=True)
@@ -109,9 +109,9 @@ class ClassroomTeacher(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     classroom_id: Mapped[int] = mapped_column(
-        ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     # "primary" = owner (Classroom.teacher_id), "assistant" = co-teacher
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="assistant")
     invited_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
@@ -131,11 +131,11 @@ class ClassroomText(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     classroom_id: Mapped[int] = mapped_column(
-        ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("classrooms.id", ondelete="CASCADE"), nullable=False, index=True
     )
     text_id: Mapped[str] = mapped_column(String(50), nullable=False)
     assigned_by: Mapped[int | None] = mapped_column(
-        ForeignKey("users.id"), nullable=True
+        ForeignKey("users.id"), nullable=True, index=True
     )
     assigned_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

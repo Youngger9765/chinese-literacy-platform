@@ -91,21 +91,21 @@ class Text(Base):
         index=True,
     )
     school_id: Mapped[int | None] = mapped_column(
-        ForeignKey("schools.id"), nullable=True
+        ForeignKey("schools.id"), nullable=True, index=True
     )
     class_id: Mapped[int | None] = mapped_column(
-        ForeignKey("classrooms.id"), nullable=True
+        ForeignKey("classrooms.id"), nullable=True, index=True
     )
     teacher_id: Mapped[int | None] = mapped_column(
-        ForeignKey("users.id"), nullable=True
+        ForeignKey("users.id"), nullable=True, index=True
     )
     created_by_id: Mapped[int | None] = mapped_column(
-        ForeignKey("users.id"), nullable=True
+        ForeignKey("users.id"), nullable=True, index=True
     )
 
     # === Fork/Copy ===
     forked_from_id: Mapped[int | None] = mapped_column(
-        ForeignKey("texts.id"), nullable=True
+        ForeignKey("texts.id"), nullable=True, index=True
     )
 
     # === Status ===

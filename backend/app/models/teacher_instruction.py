@@ -15,9 +15,9 @@ class TeacherInstruction(Base):
     __tablename__ = "teacher_instructions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    teacher_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    classroom_id = Column(Integer, ForeignKey("classrooms.id"), nullable=False)
+    teacher_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    classroom_id = Column(Integer, ForeignKey("classrooms.id"), nullable=False, index=True)
     instruction_type = Column(String(50), default="general")  # general, reading, comprehension, vocabulary
     content = Column(Text, nullable=False)
     is_active = Column(Boolean, default=True)
