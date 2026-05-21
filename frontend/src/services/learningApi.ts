@@ -7,12 +7,11 @@
 
 import type { ReadingEvaluateResponse } from '../types';
 import { SessionExpiredError } from './api';
+import { API_BASE } from './apiConfig';
 
 // Re-export so consumers can import SessionExpiredError from learningApi without
 // needing to know it lives in api.ts.
 export { SessionExpiredError };
-
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // ---------------------------------------------------------------------------
 // Learning session creation + reading evaluation

@@ -2,6 +2,7 @@
 AI comprehension evaluation — Socratic dialogue and comprehension scoring.
 """
 
+import asyncio
 import logging
 
 from google.genai import types as genai_types
@@ -104,15 +105,24 @@ async def generate_socratic_question(
         )
 
     client, _model = _get_client_for_task("socratic_question")
-    response = client.models.generate_content(
-        model=_model,
-        contents=contents,
-        config=genai_types.GenerateContentConfig(
-            system_instruction=system_prompt,
-            max_output_tokens=128,
-            temperature=0.7,
-            thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
+    # Wrap the synchronous SDK call in a thread so it does not block the
+    # FastAPI event loop (Issue #1774).  A 30-second timeout guards against
+    # hung connections — Gemini's max_output_tokens=128 should respond in
+    # well under 10 s in practice.
+    response = await asyncio.wait_for(
+        asyncio.to_thread(
+            lambda: client.models.generate_content(
+                model=_model,
+                contents=contents,
+                config=genai_types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    max_output_tokens=128,
+                    temperature=0.7,
+                    thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
+                ),
+            )
         ),
+        timeout=30,
     )
     # Guard against safety filter before accessing response.text (#526)
     _check_safety_filter(response)

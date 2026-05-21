@@ -1,9 +1,9 @@
+import { API_BASE } from './apiConfig';
 /**
  * Role API service -- admin role management.
  * Follows the same pattern as classroomApi.ts.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // --- Response types ---
 

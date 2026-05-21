@@ -1,9 +1,9 @@
+import { API_BASE } from './apiConfig';
 /**
  * Auth API service — login, register, user info, password change.
  * Uses the same VITE_API_URL as api.ts.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export interface UserRole {
   role_name: string;

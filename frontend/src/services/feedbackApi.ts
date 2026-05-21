@@ -2,7 +2,8 @@
  * Feedback API service — in-app feedback submission.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+import { API_BASE } from './apiConfig';
+import { handle401Response } from './apiUnauthorized';
 
 export type FeedbackCategory = 'bug' | 'feature' | 'question' | 'other';
 export type FeedbackStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
@@ -54,6 +55,7 @@ export async function submitFeedback(data: FeedbackSubmitRequest): Promise<Feedb
     body: JSON.stringify(data),
   });
 
+  if (resp.status === 401) await handle401Response(resp, 'submitFeedback: session expired');
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
     throw new Error(err.detail ?? `Submit feedback failed: ${resp.status}`);

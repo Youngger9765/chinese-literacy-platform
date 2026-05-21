@@ -35,7 +35,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
 from ..auth.dependencies import get_current_user, require_role
-from ..auth.rate_limiter import tts_rate_limit
+from ..auth.rate_limiter import make_ai_rate_limit_dependency, tts_rate_limit
 from ..models.user import User
 from ..services.tts_service import (
     TTSError,
@@ -219,7 +219,13 @@ def get_tts_mapping(lesson_id: int) -> dict:
     return build_lesson_tts_mapping(lesson)
 
 
-@router.post("/regenerate", dependencies=[require_role("system_admin")])
+@router.post(
+    "/regenerate",
+    dependencies=[
+        require_role("system_admin"),
+        Depends(make_ai_rate_limit_dependency(max_requests=10, window_seconds=60)),
+    ],
+)
 async def regenerate(req: TTSRequest) -> dict:
     """Delete cached audio for *text* and re-synthesise from scratch (Issue #765).
 

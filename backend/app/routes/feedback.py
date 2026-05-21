@@ -9,7 +9,7 @@ Endpoints:
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
 from ..database import get_db
@@ -133,8 +133,11 @@ def list_feedback(
         query = query.filter(Feedback.status == status_filter)
 
     total = query.count()
+    # Issue #1768: joinedload(Feedback.user) avoids per-row lazy User query in
+    # _feedback_to_response, which accesses feedback.user.name.
     items = (
-        query.order_by(Feedback.created_at.desc())
+        query.options(joinedload(Feedback.user))
+        .order_by(Feedback.created_at.desc())
         .offset((page - 1) * page_size)
         .limit(page_size)
         .all()
