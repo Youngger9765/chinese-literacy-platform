@@ -35,6 +35,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
 from ..auth.dependencies import get_current_user, require_role
+from ..auth.rate_limiter import make_ai_rate_limit_dependency
 from ..models.user import User
 from ..services.tts_service import (
     TTSError,
@@ -54,7 +55,10 @@ class TTSRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000, description="Plain text to synthesise (zh-TW)")
 
 
-@router.post("/synthesize")
+@router.post(
+    "/synthesize",
+    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=30, window_seconds=60))],
+)
 async def synthesize(
     req: TTSRequest,
     _current_user: User = Depends(get_current_user),
@@ -64,12 +68,17 @@ async def synthesize(
     Requires authentication (any active user).  Anonymous requests are rejected
     with 401 to prevent bill-washing attacks on the Azure/GCP TTS quota.
 
+    Rate-limited to 30 requests / 60 s per user: TTS fires per paragraph so
+    bursts are expected, but with TTS_PROVIDER=gemini31 each cache miss is an
+    LLM call — 30 RPM balances UX (≤ 30 paragraphs/minute) with cost safety.
+
     Runs in a thread pool via asyncio.to_thread() so the FastAPI event loop is
     not blocked during the 8–15 s remote TTS call (Azure / Google / Gemini).
 
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
         401  application/json — not authenticated.
+        429  application/json — rate limit exceeded.
         503  application/json — TTS unavailable; client should fall back
              to Web Speech API.
     """
@@ -93,7 +102,10 @@ async def synthesize(
     )
 
 
-@router.post("/synthesize-sentence")
+@router.post(
+    "/synthesize-sentence",
+    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=30, window_seconds=60))],
+)
 async def synthesize_sentence_endpoint(
     req: TTSRequest,
     _current_user: User = Depends(get_current_user),
@@ -103,6 +115,8 @@ async def synthesize_sentence_endpoint(
     Requires authentication (any active user).  Anonymous requests are rejected
     with 401 to prevent bill-washing attacks via the pre-generated sentence cache.
 
+    Rate-limited to 30 requests / 60 s per user (same budget as /synthesize).
+
     Stores audio under azure/sentences/ GCS path for sentence-level caching.
     Functionally identical to /synthesize but semantically scoped to sentences.
     Runs in a thread pool via asyncio.to_thread() to avoid blocking the event loop.
@@ -110,6 +124,7 @@ async def synthesize_sentence_endpoint(
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
         401  application/json — not authenticated.
+        429  application/json — rate limit exceeded.
         503  application/json — TTS unavailable.
     """
     try:
@@ -165,7 +180,13 @@ def get_tts_mapping(lesson_id: int) -> dict:
     return build_lesson_tts_mapping(lesson)
 
 
-@router.post("/regenerate", dependencies=[require_role("system_admin")])
+@router.post(
+    "/regenerate",
+    dependencies=[
+        require_role("system_admin"),
+        Depends(make_ai_rate_limit_dependency(max_requests=10, window_seconds=60)),
+    ],
+)
 async def regenerate(req: TTSRequest) -> dict:
     """Delete cached audio for *text* and re-synthesise from scratch (Issue #765).
 
