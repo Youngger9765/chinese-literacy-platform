@@ -45,10 +45,24 @@ function safeRemove(area: Storage | null, key: string): void {
   }
 }
 
-const _localStorage: Storage | null =
-  typeof window !== 'undefined' && 'localStorage' in window ? window.localStorage : null;
-const _sessionStorage: Storage | null =
-  typeof window !== 'undefined' && 'sessionStorage' in window ? window.sessionStorage : null;
+/* The `window.localStorage` property access itself can throw `SecurityError`
+ * in Firefox when "block all cookies" is set, even though `'localStorage' in
+ * window` returns true. Wrap each lookup in try/catch so this module can be
+ * imported safely under any privacy setting. */
+const _localStorage: Storage | null = (() => {
+  try {
+    return typeof window !== 'undefined' ? window.localStorage : null;
+  } catch {
+    return null;
+  }
+})();
+const _sessionStorage: Storage | null = (() => {
+  try {
+    return typeof window !== 'undefined' ? window.sessionStorage : null;
+  } catch {
+    return null;
+  }
+})();
 
 export const safeStorage = {
   local: {
@@ -90,11 +104,22 @@ export const AUTH_TOKEN_KEY = 'lingoleap_token';
 
 export const authToken = {
   get: (): string | null => safeStorage.local.get(AUTH_TOKEN_KEY),
-  set: (token: string): boolean => safeStorage.local.set(AUTH_TOKEN_KEY, token),
+  set: (token: string): boolean => {
+    const ok = safeStorage.local.set(AUTH_TOKEN_KEY, token);
+    if (!ok && import.meta.env.DEV) {
+      // Surface storage failures in dev (private mode / quota) — silent in
+      // prod so we don't pollute users' consoles with a known degraded mode.
+      // eslint-disable-next-line no-console
+      console.warn('[storage] authToken.set failed — session will not persist across reload');
+    }
+    return ok;
+  },
   remove: (): void => safeStorage.local.remove(AUTH_TOKEN_KEY),
-  /** Build an Authorization header from the stored token. Empty object if not present. */
+  /** Build an Authorization header from the stored token. Empty object if not present.
+   *  Goes through `authToken.get()` so any future logic added to get (refresh /
+   *  expiry check) propagates here automatically. */
   authHeader: (): Record<string, string> => {
-    const t = safeStorage.local.get(AUTH_TOKEN_KEY);
+    const t = authToken.get();
     return t ? { Authorization: `Bearer ${t}` } : {};
   },
 };
