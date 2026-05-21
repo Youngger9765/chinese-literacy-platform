@@ -71,6 +71,12 @@ const MyTextsTab: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
+  // #1782: stable row keys to prevent React reusing DOM nodes after deletion.
+  // Kept in sync with form.paragraphs / form.vocabulary length on every mutation.
+  const newRowId = () => `r-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  const [paragraphIds, setParagraphIds] = useState<string[]>(() => [newRowId()]);
+  const [vocabularyIds, setVocabularyIds] = useState<string[]>([]);
+
   // Preview state
   const [previewText, setPreviewText] = useState<TeacherTextDetail | null>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
@@ -115,6 +121,8 @@ const MyTextsTab: React.FC = () => {
   function openCreateForm() {
     setEditingId(null);
     setForm(defaultForm());
+    setParagraphIds([newRowId()]);
+    setVocabularyIds([]);
     setFormError('');
     setShowForm(true);
   }
@@ -125,17 +133,21 @@ const MyTextsTab: React.FC = () => {
     try {
       const detail = await getMyText(token, textId);
       setEditingId(detail.id);
+      const paras = detail.paragraphs.length > 0 ? detail.paragraphs : [''];
+      const vocab = detail.vocabulary
+        ? detail.vocabulary.map((v) => ({ word: v.word, definition: v.definition, note: v.note ?? '' }))
+        : [];
       setForm({
         title: detail.title,
         grade: detail.grade,
         genre: detail.genre,
         text_type: detail.text_type,
         reading_strategy: detail.reading_strategy ?? '',
-        paragraphs: detail.paragraphs.length > 0 ? detail.paragraphs : [''],
-        vocabulary: detail.vocabulary
-          ? detail.vocabulary.map((v) => ({ word: v.word, definition: v.definition, note: v.note ?? '' }))
-          : [],
+        paragraphs: paras,
+        vocabulary: vocab,
       });
+      setParagraphIds(paras.map(() => newRowId()));
+      setVocabularyIds(vocab.map(() => newRowId()));
       setShowForm(true);
     } catch (err) {
       setListError(err instanceof TeacherTextsApiError ? err.message : '無法載入課文');
@@ -146,6 +158,8 @@ const MyTextsTab: React.FC = () => {
     setShowForm(false);
     setEditingId(null);
     setForm(defaultForm());
+    setParagraphIds([newRowId()]);
+    setVocabularyIds([]);
     setFormError('');
   }
 
@@ -159,6 +173,7 @@ const MyTextsTab: React.FC = () => {
 
   function addParagraph() {
     setForm((prev) => ({ ...prev, paragraphs: [...prev.paragraphs, ''] }));
+    setParagraphIds((prev) => [...prev, newRowId()]);
   }
 
   function removeParagraph(index: number) {
@@ -167,10 +182,12 @@ const MyTextsTab: React.FC = () => {
       const paragraphs = prev.paragraphs.filter((_, i) => i !== index);
       return { ...prev, paragraphs };
     });
+    setParagraphIds((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
   }
 
   function addVocabItem() {
     setForm((prev) => ({ ...prev, vocabulary: [...prev.vocabulary, emptyVocabItem()] }));
+    setVocabularyIds((prev) => [...prev, newRowId()]);
   }
 
   function updateVocabItem(index: number, field: keyof VocabFormItem, value: string) {
@@ -186,6 +203,7 @@ const MyTextsTab: React.FC = () => {
       ...prev,
       vocabulary: prev.vocabulary.filter((_, i) => i !== index),
     }));
+    setVocabularyIds((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -508,7 +526,7 @@ const MyTextsTab: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   {form.paragraphs.map((para, idx) => (
-                    <div key={idx} className="flex gap-2 items-start">
+                    <div key={paragraphIds[idx] ?? `p-${idx}`} className="flex gap-2 items-start">
                       <span className="text-xs text-gray-400 mt-2.5 w-5 shrink-0 text-right">
                         {idx + 1}
                       </span>
@@ -551,7 +569,7 @@ const MyTextsTab: React.FC = () => {
                 {form.vocabulary.length > 0 && (
                   <div className="space-y-2">
                     {form.vocabulary.map((vocab, idx) => (
-                      <div key={idx} className="flex gap-2 items-center">
+                      <div key={vocabularyIds[idx] ?? `v-${idx}`} className="flex gap-2 items-center">
                         <input
                           type="text"
                           value={vocab.word}
