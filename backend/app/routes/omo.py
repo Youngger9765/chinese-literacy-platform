@@ -64,6 +64,10 @@ class LessonCandidateResponse(BaseModel):
     title: str
     confidence: float
     reasoning: str
+    # #1775: canonical Story.id resolved at identifier service boundary.
+    # None when the lesson exists in the YAML catalog but has no matching DB row.
+    # Frontend should prefer story_id over lesson_id for /api/stories lookups.
+    story_id: Optional[int] = None
 
 
 class AnswerFlagInfo(BaseModel):
@@ -466,6 +470,9 @@ def _build_upload_response(upload: OmoUpload) -> OmoUploadResponse:
                 title=c.get("title", ""),
                 confidence=c.get("confidence", 0.0),
                 reasoning=c.get("reasoning", ""),
+                # #1775: story_id may already be in the stored JSON (new uploads)
+                # or absent for uploads made before this fix (None is acceptable).
+                story_id=c.get("story_id"),
             )
             for c in upload.identification
         ]
