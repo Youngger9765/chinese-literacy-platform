@@ -49,6 +49,51 @@ let _currentAudio: HTMLAudioElement | null = null;
 // Flag to signal cancellation mid-sequence
 let _cancelRequested = false;
 
+// ---------------------------------------------------------------------------
+// Issue #1808: 429 rate-limit state
+// ---------------------------------------------------------------------------
+
+/**
+ * When the backend returns 429, we pause the TTS queue until Retry-After elapses.
+ * _rateLimitUntil holds the timestamp (ms) after which requests can resume.
+ * 0 = not rate-limited.
+ */
+let _rateLimitUntil = 0;
+
+/**
+ * Optional callback invoked when TTS hits a 429 rate limit.
+ * Callers (e.g. useTtsPlayback) can use this to show a toast / disable the
+ * play button without needing to catch an exception.
+ * Receives the number of seconds until the limit resets.
+ */
+let _onRateLimit: ((retryAfterSeconds: number) => void) | null = null;
+
+/**
+ * Register a callback to be called when TTS is rate-limited (429).
+ *
+ * Usage:
+ *   setTtsRateLimitCallback((secs) => showToast(`AI 助教暫時忙線，請 ${secs} 秒後再試`, 'warning'));
+ */
+export function setTtsRateLimitCallback(cb: ((retryAfterSeconds: number) => void) | null): void {
+  _onRateLimit = cb;
+}
+
+/**
+ * Return true if TTS requests are currently paused due to a 429 response.
+ * Useful for disabling the play button in the UI.
+ */
+export function isTtsRateLimited(): boolean {
+  return Date.now() < _rateLimitUntil;
+}
+
+/**
+ * Remaining seconds until the TTS rate limit resets, or 0 if not limited.
+ */
+export function ttsRateLimitRemainingSeconds(): number {
+  const remaining = _rateLimitUntil - Date.now();
+  return remaining > 0 ? Math.ceil(remaining / 1000) : 0;
+}
+
 /**
  * Stop any TTS currently in progress.
  */
@@ -148,6 +193,8 @@ export const cleanForTts = _cleanForTts;
 export const _testInternals = {
   reset() {
     _cancelRequested = false;
+    _rateLimitUntil = 0;
+    _onRateLimit = null;
     _urlCache.clear();
     _mappingCache.clear();
   },
@@ -254,14 +301,42 @@ async function _fetchLessonSentences(
 // Private: backend sequential playback
 // ---------------------------------------------------------------------------
 
-async function _fetchAudioUrl(sentence: string): Promise<string> {
+/**
+ * Fetch audio URL for a sentence, or null if rate-limited (429).
+ *
+ * On 429 (Issue #1808):
+ * - Reads Retry-After header (default 60s).
+ * - Sets _rateLimitUntil so subsequent sentences in the queue skip fetching.
+ * - Fires _onRateLimit callback so the UI can show a toast.
+ * - Returns null — callers skip playback for this sentence instead of throwing.
+ *
+ * On any other error: throws (existing behaviour, caught by outer try/catch in
+ * speakText callers or surfaced to the user as a silent skip).
+ */
+async function _fetchAudioUrl(sentence: string): Promise<string | null> {
   let audioUrl = _urlCache.get(sentence);
   if (!audioUrl) {
+    // If still within a rate-limit window, skip this sentence silently.
+    if (isTtsRateLimited()) {
+      return null;
+    }
+
     const response = await fetch(`${API_BASE}/api/tts/synthesize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ..._authHeaders() },
       body: JSON.stringify({ text: sentence }),
     });
+
+    // Issue #1808 Fix #3: Handle 429 gracefully — pause queue, notify UI.
+    if (response.status === 429) {
+      const retryAfterHeader = response.headers.get('Retry-After');
+      const retryAfterSeconds = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 60;
+      _rateLimitUntil = Date.now() + retryAfterSeconds * 1000;
+      if (_onRateLimit) {
+        _onRateLimit(retryAfterSeconds);
+      }
+      return null; // don't throw — caller skips playback for this sentence
+    }
 
     if (!response.ok) {
       throw new Error(`TTS backend responded ${response.status}`);
@@ -302,6 +377,8 @@ async function _speakViaBackend(
     if (!sentence.trim()) continue;
 
     const audioUrl = await _fetchAudioUrl(sentence);
+    // null = 429 rate-limited — skip this sentence (toast already fired)
+    if (audioUrl === null) continue;
     if (_cancelRequested) break;
     await _playSingleAudio(audioUrl);
   }
@@ -346,7 +423,7 @@ async function _speakViaBackendWithProgress(
   // Bug 2 (#1211): prefetch next sentence's audio URL while current plays
   // so 100-500ms inter-sentence fetch doesn't freeze the highlight.
   const firstIdx = sentences.findIndex((s) => s?.trim());
-  let pending: { idx: number; promise: Promise<string> } | null =
+  let pending: { idx: number; promise: Promise<string | null> } | null =
     firstIdx >= 0
       ? { idx: firstIdx, promise: _fetchAudioUrl(sentences[firstIdx]) }
       : null;
@@ -365,6 +442,8 @@ async function _speakViaBackendWithProgress(
     const audioUrl = pending && pending.idx === i
       ? await pending.promise
       : await _fetchAudioUrl(sentence);
+    // null = 429 rate-limited — skip playback for this sentence
+    if (audioUrl === null) continue;
     if (_cancelRequested) break;
 
     // Start prefetch for next non-empty sentence BEFORE awaiting playback.
