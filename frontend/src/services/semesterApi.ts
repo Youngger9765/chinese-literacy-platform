@@ -1,9 +1,9 @@
+import { API_BASE } from './apiConfig';
 /**
  * Semester API service — school semester management.
  * Follows the same pattern as schoolApi.ts.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

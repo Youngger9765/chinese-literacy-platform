@@ -51,6 +51,26 @@ class LessonCandidate:
     title: str
     confidence: float
     reasoning: str = field(default="")
+    # #1775: canonical Story.id resolved at service boundary — None when grade_code
+    # is not in lesson_loader (e.g. fallback content-only lessons without a DB row).
+    story_id: int | None = field(default=None)
+
+
+def _resolve_story_id(grade_code: str) -> int | None:
+    """Resolve canonical Story.id from grade_code via lesson_loader.
+
+    Called once per candidate at identifier output construction so callers
+    receive story_id without needing to do a second lookup (#1775).
+    Returns None when grade_code has no matching DB-loaded lesson.
+    """
+    try:
+        from .lesson_loader import get_lesson_by_code
+        story = get_lesson_by_code(grade_code)
+        if story and story.get("id"):
+            return int(story["id"])
+    except Exception as exc:
+        logger.debug("_resolve_story_id: grade_code=%r lookup failed: %s", grade_code, exc)
+    return None
 
 
 def _load_omo_lessons() -> list[dict]:
@@ -253,13 +273,15 @@ def _fuzzy_match_title(extracted_title: str) -> list[LessonCandidate]:
         best_ratio,
         confidence,
     )
+    resolved_grade_code = info["grade_code"]
     return [
         LessonCandidate(
             lesson_id=lesson_id,
-            grade_code=info["grade_code"],
+            grade_code=resolved_grade_code,
             title=info["title"],
             confidence=confidence,
             reasoning=f"標題模糊匹配 ratio={best_ratio:.2f}",
+            story_id=_resolve_story_id(resolved_grade_code),
         )
     ]
 
@@ -425,13 +447,15 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
         candidates = []
         for c in candidates_raw[:3]:
             try:
+                gc = str(c.get("grade_code", ""))
                 candidates.append(
                     LessonCandidate(
                         lesson_id=int(c["lesson_id"]),
-                        grade_code=str(c.get("grade_code", "")),
+                        grade_code=gc,
                         title=str(c.get("title", "")),
                         confidence=float(c.get("confidence", 0.0)),
                         reasoning=str(c.get("reasoning", "")),
+                        story_id=_resolve_story_id(gc),
                     )
                 )
             except (KeyError, ValueError, TypeError) as parse_err:
@@ -459,6 +483,7 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
                     title=top.title,
                     confidence=0.95,
                     reasoning=top.reasoning + " (title-boosted)",
+                    story_id=top.story_id,  # already resolved — reuse
                 )
 
         # Filter out near-zero confidence candidates (Gemini sometimes returns
@@ -552,12 +577,14 @@ def identify_lesson_from_hint(lesson_code: str) -> list[LessonCandidate]:
         lesson_id,
         info["title"],
     )
+    resolved_grade_code = info["grade_code"]
     return [
         LessonCandidate(
             lesson_id=lesson_id,
-            grade_code=info["grade_code"],
+            grade_code=resolved_grade_code,
             title=info["title"],
             confidence=1.0,
             reasoning="user-provided lesson hint (課文頁面內上傳)",
+            story_id=_resolve_story_id(resolved_grade_code),
         )
     ]

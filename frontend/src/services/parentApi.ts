@@ -5,8 +5,8 @@
  */
 
 import type { StudentDashboardData } from './learningApi';
+import { API_BASE } from './apiConfig';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export interface ParentInviteCode {
   id: number;

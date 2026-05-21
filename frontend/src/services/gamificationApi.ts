@@ -1,9 +1,9 @@
+import { API_BASE } from './apiConfig';
 /**
  * Gamification API service.
  * Wraps all calls to /api/gamification/* endpoints.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export interface LevelInfo {
   level: number;
