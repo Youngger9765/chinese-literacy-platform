@@ -257,7 +257,11 @@ export function useTtsPlayback(
       });
   }, [onSpeakingProgress, onRealtimeDiffTokensClear]);
 
-  const pauseTts = () => {
+  // #1780: wrap in useCallback so downstream effects depending on these
+  // functions don't re-fire every render. State setters + refs are stable;
+  // onSpeakingProgress is the only varying dep (caller's responsibility to
+  // pass a stable callback — already memoized in FullReading per existing code).
+  const pauseTts = useCallback(() => {
     if (v2PathActiveRef.current) {
       // v2 sentence-level path: Audio element lives inside ttsApi, pause via helper.
       pauseCurrentTts();
@@ -278,9 +282,9 @@ export function useTtsPlayback(
       }
     }
     setIsTtsPaused(true);
-  };
+  }, []);
 
-  const resumeTts = () => {
+  const resumeTts = useCallback(() => {
     if (v2PathActiveRef.current) {
       resumeCurrentTts();
       setIsTtsPaused(false);
@@ -306,9 +310,9 @@ export function useTtsPlayback(
       ttsRafRef.current = requestAnimationFrame(animate);
     }
     setIsTtsPaused(false);
-  };
+  }, [onSpeakingProgress]);
 
-  const stopTts = () => {
+  const stopTts = useCallback(() => {
     if (ttsRafRef.current !== null) {
       cancelAnimationFrame(ttsRafRef.current);
       ttsRafRef.current = null;
@@ -342,7 +346,7 @@ export function useTtsPlayback(
     setIsTtsPaused(false);
     setIsTtsLoading(false);
     setTtsError(null);
-  };
+  }, []);
 
   return {
     isTtsSpeaking,
