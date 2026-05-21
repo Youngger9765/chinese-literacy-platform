@@ -47,34 +47,44 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
   const [selectedGrade, setSelectedGrade] = useState<number | null>(() => {
     try {
       const v = sessionStorage.getItem('library_filter_grade');
-      return v && v !== 'null' ? Number(v) : null;
-    } catch { return null; }
+      if (!v || v === 'null') return null;
+      const n = Number(v);
+      // Guard against junk in storage (e.g. someone manually set 'NaN').
+      return Number.isFinite(n) ? n : null;
+    } catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return null; }
   });
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(() => {
     try {
       const v = sessionStorage.getItem('library_filter_difficulty');
-      return v && v !== 'null' ? (v as Difficulty) : null;
-    } catch { return null; }
+      // Whitelist-check the stored value so stale entries from a renamed
+      // Difficulty enum get silently discarded instead of as-casted.
+      const valid: Difficulty[] = ['easy', 'medium', 'hard'];
+      return v && (valid as string[]).includes(v) ? (v as Difficulty) : null;
+    } catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return null; }
   });
   const [searchQuery, setSearchQuery] = useState<string>(() => {
-    try { return sessionStorage.getItem('library_filter_search') ?? ''; } catch { return ''; }
+    try { return sessionStorage.getItem('library_filter_search') ?? ''; }
+    catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return ''; }
   });
   const [showOnlyUnread, setShowOnlyUnread] = useState<boolean>(() => {
-    try { return sessionStorage.getItem('library_filter_unread') === '1'; } catch { return false; }
+    try { return sessionStorage.getItem('library_filter_unread') === '1'; }
+    catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return false; }
   });
 
-  /* Persist whenever any filter changes. */
+  /* Persist whenever any filter changes. Empty catch is intentional: when
+   * sessionStorage is unavailable (private browsing / quota exceeded) we
+   * silently fall back to in-memory state for this mount. */
   useEffect(() => {
-    try { sessionStorage.setItem('library_filter_grade', String(selectedGrade)); } catch {}
+    try { sessionStorage.setItem('library_filter_grade', String(selectedGrade)); } catch { /* sessionStorage unavailable */ }
   }, [selectedGrade]);
   useEffect(() => {
-    try { sessionStorage.setItem('library_filter_difficulty', String(selectedDifficulty)); } catch {}
+    try { sessionStorage.setItem('library_filter_difficulty', String(selectedDifficulty)); } catch { /* sessionStorage unavailable */ }
   }, [selectedDifficulty]);
   useEffect(() => {
-    try { sessionStorage.setItem('library_filter_search', searchQuery); } catch {}
+    try { sessionStorage.setItem('library_filter_search', searchQuery); } catch { /* sessionStorage unavailable */ }
   }, [searchQuery]);
   useEffect(() => {
-    try { sessionStorage.setItem('library_filter_unread', showOnlyUnread ? '1' : '0'); } catch {}
+    try { sessionStorage.setItem('library_filter_unread', showOnlyUnread ? '1' : '0'); } catch { /* sessionStorage unavailable */ }
   }, [showOnlyUnread]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadingStoryId, setLoadingStoryId] = useState<string | null>(null);
