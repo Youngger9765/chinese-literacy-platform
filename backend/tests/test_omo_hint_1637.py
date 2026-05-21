@@ -127,7 +127,7 @@ class TestRunIdentificationRouting:
     @pytest.mark.asyncio
     async def test_hint_path_skips_ai_call(self):
         """T4: with valid hint, identify_lesson_from_image is NEVER called."""
-        from app.routes.omo import _run_identification
+        from app.services.omo_jobs import _run_identification
 
         mock_candidate = MagicMock()
         mock_candidate.lesson_id = 25
@@ -137,7 +137,7 @@ class TestRunIdentificationRouting:
         mock_candidate.reasoning = "user-provided lesson hint"
 
         with patch(
-            "app.routes.omo._update_upload"
+            "app.services.omo_jobs._update_upload"
         ) as mock_update, patch(
             "app.services.omo_identifier.identify_lesson_from_hint",
             return_value=[mock_candidate],
@@ -166,7 +166,7 @@ class TestRunIdentificationRouting:
     @pytest.mark.asyncio
     async def test_no_hint_uses_ai_path(self):
         """T6: without hint, identify_lesson_from_image IS called (backward compat)."""
-        from app.routes.omo import _run_identification
+        from app.services.omo_jobs import _run_identification
 
         mock_candidate = MagicMock()
         mock_candidate.lesson_id = 25
@@ -176,7 +176,7 @@ class TestRunIdentificationRouting:
         mock_candidate.reasoning = "fuzzy match"
 
         with patch(
-            "app.routes.omo._update_upload"
+            "app.services.omo_jobs._update_upload"
         ), patch(
             "app.services.omo_identifier.identify_lesson_from_image",
             return_value=[mock_candidate],
@@ -193,7 +193,7 @@ class TestRunIdentificationRouting:
     @pytest.mark.asyncio
     async def test_hint_not_found_falls_back_to_ai(self):
         """T4b: if hint lookup returns [], AI path is used as fallback."""
-        from app.routes.omo import _run_identification
+        from app.services.omo_jobs import _run_identification
 
         mock_candidate = MagicMock()
         mock_candidate.lesson_id = 25
@@ -203,7 +203,7 @@ class TestRunIdentificationRouting:
         mock_candidate.reasoning = "fuzzy"
 
         with patch(
-            "app.routes.omo._update_upload"
+            "app.services.omo_jobs._update_upload"
         ), patch(
             "app.services.omo_identifier.identify_lesson_from_hint",
             return_value=[],  # hint lookup failed
