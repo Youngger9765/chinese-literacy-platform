@@ -42,6 +42,8 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formDueDate, setFormDueDate] = useState('');
+  // Issue #1762: smart-skip already-completed steps
+  const [formSkipCompleted, setFormSkipCompleted] = useState(false);
   const [formGoals, setFormGoals] = useState<GoalsFormState>({
     target_cpm: null,
     target_accuracy: null,
@@ -170,6 +172,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
         target_cpm: formGoals.target_cpm,
         target_accuracy: formGoals.target_accuracy,
         difficulty_label: formGoals.difficulty_label,
+        skip_completed_steps: formSkipCompleted,  // Issue #1762
       });
       setShowCreateForm(false);
       await loadAssignments();
@@ -481,6 +484,20 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                 onChange={(e) => setFormDueDate(e.target.value)}
                 className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
+            </div>
+
+            {/* Issue #1762: smart-skip setting */}
+            <div className="flex items-center gap-2">
+              <input
+                id="assign-skip-completed"
+                type="checkbox"
+                checked={formSkipCompleted}
+                onChange={(e) => setFormSkipCompleted(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent"
+              />
+              <label htmlFor="assign-skip-completed" className="text-sm text-gray-700 cursor-pointer select-none">
+                跳過已完成步驟（學生重做作業時自動略過上次完成的環節）
+              </label>
             </div>
 
             {/* Reading goals */}

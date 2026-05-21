@@ -1,3 +1,16 @@
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 lesson_code: G5-L19
 grade: 5
 grade_code: G5-L19
@@ -138,46 +151,22 @@ vocab_bank:
   G: 異樣
   H: 一如往常
 fill_in_blank:
-- id: 1
+- sentence: '他心愛的吊飾被同學弄髒，他卻一點也不（　　），真是不容易。'
   answer: E
-  answer_word: 計較
-  context_before: 他心愛的吊飾被同學弄髒，他卻一點也不
-  context_after: ，真是不容易
-- id: 2
+- sentence: '看著泛黃的舊照片，他的（　　）飄回了在公園玩耍的童年時光。'
   answer: F
-  answer_word: 思緒
-  context_before: 看著泛黃的舊照片，他的
-  context_after: 飄回了在公園玩耍的童年時光
-- id: 3
+- sentence: '雖然風雨交加，交通警察還是（　　）的站在路口指揮，十分敬業。'
   answer: H
-  answer_word: 一如往常
-  context_before: 雖然風雨交加，交通警察還是
-  context_after: 的站在路口指揮，十分敬業
-- id: 4
+- sentence: '在作品得獎後，面對大家的稱讚，她露出了（　　）的笑容。'
   answer: C
-  answer_word: 靦腆
-  context_before: 在作品得獎後，面對大家的稱讚，她露出了
-  context_after: 的笑容
-- id: 5
+- sentence: '講者勵志的人生故事，在我心中起了小小的（　　），也讓我更有勇氣。'
   answer: D
-  answer_word: 漣漪
-  context_before: 講者勵志的人生故事，在我心中起了小小的
-  context_after: ，也讓我更有勇氣
-- id: 6
+- sentence: '走在黑漆漆且空無一人的學校，他感到（　　）的緊張，想趕緊離開。'
   answer: B
-  answer_word: 莫名
-  context_before: 走在黑漆漆且空無一人的學校，他感到
-  context_after: 的緊張，想趕緊離開
-- id: 7
+- sentence: '幸好同學及時發現他的（　　），才來得及在他暈倒前扶住他。'
   answer: G
-  answer_word: 異樣
-  context_before: 幸好同學及時發現他的
-  context_after: ，才來得及在他暈倒前扶住他
-- id: 8
+- sentence: '看見多年不見的老友，他開心的（　　）腳步向前迎接。'
   answer: A
-  answer_word: 邁開
-  context_before: 看見多年不見的老友，他開心的
-  context_after: 腳步向前迎接
 fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈的練習，下列何者對於「吃醋」的理解較為合適？
 

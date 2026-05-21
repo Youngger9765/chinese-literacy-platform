@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L17
 reading_strategy: 一
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L17把球打好，就夠了嗎？—阿耀與健豪學長的通信（一）（生涯探索-讀書，讓夢想多一條路）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []
@@ -189,46 +202,22 @@ vocab_bank:
   I: 有朝一日
   J: 疲憊
 fill_in_blank:
-- id: 1
+- sentence: '今天爬山爬了一整天，我一回家就（　　）在沙發上。'
   answer: C
-  answer_word: 累癱
-  context_before: 今天爬山爬了一整天，我一回家就
-  context_after: 在沙發上
-- id: 2
+- sentence: '姐姐弄丟了珍貴的項鍊，只要一想起這件事，那種難過的感覺（　　）。'
   answer: D
-  answer_word: 揮之不去
-  context_before: 姐姐弄丟了珍貴的項鍊，只要一想起這件事，那種難過的感覺
-  context_after: ''
-- id: 3
+- sentence: '這次比賽的獎品非常（　　），有玩具、文具，還有禮券！'
   answer: G
-  answer_word: 豐厚
-  context_before: 這次比賽的獎品非常
-  context_after: ，有玩具、文具，還有禮券！
-- id: 4
+- sentence: '公司面臨倒閉危機，老闆（　　），拿出全部資金研發新產品。'
   answer: B
-  answer_word: 孤注一擲
-  context_before: 公司面臨倒閉危機，老闆
-  context_after: ，拿出全部資金研發新產品
-- id: 5
+- sentence: '他做事總是猶豫不決，每次下定決心時，機會早就和他（　　）。'
   answer: E
-  answer_word: 擦身而過
-  context_before: 他做事總是猶豫不決，每次下定決心時，機會早就和他
-  context_after: ''
-- id: 6
+- sentence: '班上要選班長，大家都投票給小華，他（　　），成為新班長。'
   answer: F
-  answer_word: 雀屏中選
-  context_before: 班上要選班長，大家都投票給小華，他
-  context_after: ，成為新班長
-- id: 7
+- sentence: '姊姊（　　）哥哥不要一直玩手機，要注意眼睛健康。'
   answer: A
-  answer_word: 勸誡
-  context_before: 姊姊
-  context_after: 哥哥不要一直玩手機，要注意眼睛健康
-- id: 8
+- sentence: '走了一整天的路，我已經（　　）不堪，只想躺下休息。'
   answer: J
-  answer_word: 疲憊
-  context_before: 走了一整天的路，我已經
-  context_after: 不堪，只想躺下休息
 fill_in_blank_count: 8
 本課語詞:
 - 揮之不󠇡去

@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L13
 reading_strategy: 落實環保3R
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L13綠色賽事（落實環保3R）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []
@@ -178,22 +191,15 @@ vocab_bank:
   D: 氣候變遷
   E: 環境永續
 fill_in_blank:
-- id: 1
+- sentence: '許多人對地球暖化及氣候異常的情況感到（　　）。'
   answer: B
-  answer_word: 憂心忡忡
-  context_before: 許多人對地球暖化及氣候異常的情況感到
-  context_after: ''
-- id: 3
+- sentence: '為了實現（　　）的目標，我們需要共同努力，力行節能減碳。'
+  answer: E
+- sentence: '這位網紅以（　　）的言論批評了社會上的不公平現象。'
   answer: C
-  answer_word: 諷刺
-  context_before: 這位網紅以
-  context_after: 的言論批評了社會上的不公平現象
-- id: 4
+- sentence: '這部精采的國片在世界各地的影展中（　　），獲得不少殊榮。'
   answer: A
-  answer_word: 大放異彩
-  context_before: 這部精采的國片在世界各地的影展中
-  context_after: ，獲得不少殊榮
-fill_in_blank_count: 3
+fill_in_blank_count: 4
 本課語詞:
 - 禦寒
 - 環境永續

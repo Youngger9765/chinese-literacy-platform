@@ -1,3 +1,16 @@
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 lesson_code: G5-L21
 grade: 5
 grade_code: G5-L21
@@ -160,37 +173,23 @@ vocab_bank:
   H: 蠢蠢欲動
   I: 菁華
 fill_in_blank:
-- id: 2
+- sentence: '他考試作弊受良心折磨，在（　　）後，他終於主動向老師認錯。'
+  answer: E
+- sentence: '我們必須從失敗中學習，避免（　　）。'
   answer: G
-  answer_word: 重蹈覆轍
-  context_before: 我們必須從失敗中學習，避免
-  context_after: ''
-- id: 3
+- sentence: '這部動畫片迅速（　　）全球，成為熱門話題。'
   answer: A
-  answer_word: 風靡
-  context_before: 這部動畫片迅速
-  context_after: 全球，成為熱門話題
-- id: 4
+- sentence: '敵軍在邊界（　　），準備攻打我國，戰爭一觸即發。'
   answer: H
-  answer_word: 蠢蠢欲動
-  context_before: 敵軍在邊界
-  context_after: ，準備攻打我國，戰爭一觸即發
-- id: 5
+- sentence: '病人的情況終於有了（　　），守在病房外的家屬都放心了。'
   answer: D
-  answer_word: 起色
-  context_before: 病人的情況終於有了
-  context_after: ，守在病房外的家屬都放心了
-- id: 6
+- sentence: '面對她明裡暗裡的告白，他卻（　　），真是個不解風情的大木頭！'
   answer: F
-  answer_word: 渾然不覺
-  context_before: 面對她明裡暗裡的告白，他卻
-  context_after: ，真是個不解風情的大木頭！
-- id: 7
+- sentence: '研究人員為了解開謎團，日夜專注工作，幾乎到了（　　）的地步。'
   answer: B
-  answer_word: 廢寢忘食
-  context_before: 研究人員為了解開謎團，日夜專注工作，幾乎到了
-  context_after: 的地步
-fill_in_blank_count: 6
+- sentence: '新婚半年的她，至今仍（　　）在幸福喜悅中。'
+  answer: C
+fill_in_blank_count: 8
 worksheet_section_order:
 - number: 二
   name: 念順順

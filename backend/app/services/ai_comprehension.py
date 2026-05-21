@@ -10,7 +10,7 @@ from .ai_base import (
     CONTENT_FILTER_FRIENDLY_MSG,
     GeminiContentFilterError,
     _check_safety_filter,
-    _get_client,
+    _get_client_for_task,
     generate_structured_response,
     capture_usage,
     last_usage,
@@ -103,14 +103,15 @@ async def generate_socratic_question(
             )
         )
 
-    client = _get_client()
+    client, _model = _get_client_for_task("socratic_question")
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=_model,
         contents=contents,
         config=genai_types.GenerateContentConfig(
             system_instruction=system_prompt,
             max_output_tokens=128,
             temperature=0.7,
+            thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
         ),
     )
     # Guard against safety filter before accessing response.text (#526)
@@ -124,7 +125,7 @@ async def generate_socratic_question(
                     _prompt_chars += len(p.text)
     except Exception:
         pass
-    usage_meta = capture_usage(response, model="gemini-2.5-flash")
+    usage_meta = capture_usage(response, model=_model)
     usage_meta.prompt_char_count = _prompt_chars
     return response.text.strip()
 
@@ -238,6 +239,7 @@ async def evaluate_comprehension(
         response_schema=COMPREHENSION_SCORE_SCHEMA,
         max_tokens=2048,
         temperature=0.3,
+        task="comprehension_score",
     )
 
     # Clamp scores to 0-100 range

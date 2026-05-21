@@ -113,6 +113,9 @@ class LearningSession(Base):
     # post-demo once all readers migrate to story_slug_derived.
     story_slug: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="in_progress", index=True)
+    # Issue #1762: distinguish assignment vs self-study sessions
+    # Values: "self_study" (default) | "assignment"
+    session_mode: Mapped[str] = mapped_column(String(20), nullable=False, server_default="self_study")
 
     @hybrid_property
     def story_slug_derived(self) -> str | None:

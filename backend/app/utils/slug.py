@@ -19,6 +19,12 @@ Publisher-style (e.g. sanmin/nani textbook codes):
     "nani-6b-L10"    -> "10"
     Any trailing "L<digits>" pattern -> extract the number after L
 
+Grade-code (Layer-2 lesson_code, #1654):
+    "G7-L30"         -> "1110"  (Layer-2 八哥, looked up via get_lesson_by_code)
+    "G4-L1"          -> "<lesson_id>"
+    Must be tried BEFORE _PUBLISHER_RE — otherwise the trailing "L30" of
+    "G7-L30" matches and yields "30", colliding with Layer-1 lesson_number=30.
+
 Story title (Chinese):
     "贏得喝采的輸家"  -> "1"   (looked up from YAML catalogue)
     Unknown title     -> returned as-is (safe fallback)
@@ -55,6 +61,14 @@ def _get_title_index() -> dict[str, str]:
 # ---------------------------------------------------------------------------
 _PUBLISHER_RE = re.compile(r"[Ll](\d+)\s*$")
 
+# ---------------------------------------------------------------------------
+# Regex: Layer-2 grade_code, e.g. "G7-L30" / "G4-L01" / "G8-L03a" (#1654, #1669)
+# Optional trailing a/b suffix handles curriculum sub-letter codes
+# (G8-L03a/G8-L03b for stories that share a docx but have own learning paths).
+# Must be tried before _PUBLISHER_RE to avoid mis-matching the trailing L\d+.
+# ---------------------------------------------------------------------------
+_GRADE_CODE_RE = re.compile(r"^G\d+-L\d+[ab]?$")
+
 
 def normalize_story_slug(slug: str) -> str:
     """Normalize *slug* to canonical plain-number string.
@@ -62,24 +76,43 @@ def normalize_story_slug(slug: str) -> str:
     Resolution order
     ----------------
     1. Strip whitespace.
-    2. Strip leading "L"/"l" and try direct int parse (handles "L06" -> "6").
-    3. Match publisher-style suffix "L<num>" (handles "sanmin-5a-L02" -> "2").
-    4. Look up in the title catalogue (handles Chinese title slugs).
-    5. Return original stripped value as safe fallback.
+    2. Match Layer-2 grade_code (``^G\\d+-L\\d+$``) and resolve via
+       ``get_lesson_by_code()`` — returns the integer lesson_id as string
+       (#1654). Must run before step 4, otherwise the trailing ``L30`` of
+       ``G7-L30`` is mis-extracted as ``"30"``.
+    3. Strip leading "L"/"l" and try direct int parse (handles "L06" -> "6").
+    4. Match publisher-style suffix "L<num>" (handles "sanmin-5a-L02" -> "2").
+    5. Look up in the title catalogue (handles Chinese title slugs).
+    6. Return original stripped value as safe fallback.
     """
     if not slug:
         return slug
 
     slug = slug.strip()
 
-    # --- Step 1: direct L-prefix / plain numeric ---
+    # --- Step 1: Layer-2 grade_code lookup (#1654) ---
+    # Run BEFORE _PUBLISHER_RE: "G7-L30" must resolve to lesson_id=1110
+    # (八哥, Layer-2), not "30" (女性太空人登月, Layer-1).
+    if _GRADE_CODE_RE.match(slug):
+        try:
+            # Local import avoids circular dependency with lesson_loader.
+            from app.services.lesson_loader import get_lesson_by_code  # type: ignore[import]
+            lesson = get_lesson_by_code(slug)
+            if lesson and lesson.get("id") is not None:
+                return str(lesson["id"])
+        except Exception:
+            # Catalogue unavailable (e.g. partial test env) — fall through
+            # to legacy regex behaviour rather than 500.
+            pass
+
+    # --- Step 2: direct L-prefix / plain numeric ---
     stripped = slug.lstrip("Ll")
     try:
         return str(int(stripped))
     except ValueError:
         pass
 
-    # --- Step 2: publisher-style "sanmin-5a-L02" -> "2" ---
+    # --- Step 3: publisher-style "sanmin-5a-L02" -> "2" ---
     m = _PUBLISHER_RE.search(slug)
     if m:
         try:
@@ -87,7 +120,7 @@ def normalize_story_slug(slug: str) -> str:
         except ValueError:
             pass
 
-    # --- Step 3: Chinese title lookup ---
+    # --- Step 4: Chinese title lookup ---
     title_index = _get_title_index()
     if slug in title_index:
         return title_index[slug]

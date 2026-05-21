@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L14
 reading_strategy: 向微歧視說不
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L14隱藏在日常對話中的微歧視（向微歧視說不）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []
@@ -187,31 +200,16 @@ vocab_bank:
   F: 滴水穿石
   G: 滲透
 fill_in_blank:
-- id: 1
+- sentence: '他總是喜歡開些（　　）的玩笑，讓大家都笑得很開心。'
   answer: E
-  answer_word: 無傷大雅
-  context_before: 他總是喜歡開些
-  context_after: 的玩笑，讓大家都笑得很開心
-- id: 2
+- sentence: '日本的動漫和遊戲逐漸（　　）到我們的生活中，改變了年輕人的喜好和生活方式。'
   answer: G
-  answer_word: 滲透
-  context_before: 日本的動漫和遊戲逐漸
-  context_after: 到我們的生活中，改變了年輕人的喜好和生活方式
-- id: 3
+- sentence: '這種奇特的髮型流行很久了，大家早就（　　），見怪不怪了。'
   answer: A
-  answer_word: 屢見不鮮
-  context_before: 這種奇特的髮型流行很久了，大家早就
-  context_after: ，見怪不怪了
-- id: 4
+- sentence: '她靠著一次次自我練習，將教練教導的技能 （　　）成自己的招式。'
   answer: D
-  answer_word: 內化
-  context_before: 她靠著一次次自我練習，將教練教導的技能
-  context_after: 成自己的招式
-- id: 5
+- sentence: '只要每天努力學習，即使每次的進步很小，（　　），最終也能達成目標。'
   answer: F
-  answer_word: 滴水穿石
-  context_before: 只要每天努力學習，即使每次的進步很小，
-  context_after: ，最終也能達成目標
 fill_in_blank_count: 5
 本課語詞:
 - 屢見不鮮

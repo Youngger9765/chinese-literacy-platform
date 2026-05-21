@@ -3,6 +3,19 @@ grade: 8
 grade_code: G8-L11
 reading_strategy: 推論策略-從例子推論作者觀點
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: Ｇ8-L11虎襲事件的真相：誰才是受害者？0213（推論策略-從例子推論作者觀點）.docx
 parsed_at: '2026-05-01T21:10:42'
 flags: []
@@ -133,3 +146,32 @@ story_structure_rows:
   interactive_type: fill_blank
   hint: 課文最後想告訴我們什麼？
 story_structure_table_source: ai-generated-2026-05-02
+vocab_bank:
+  A: 日益猖獗
+  B: 束手無策
+  C: 攫取
+  D: 人心惶惶
+  E: 殘骸
+  F: 眾目睽睽
+  G: 蠶食鯨吞
+  H: 荒蕪
+  I: 霧靄
+  J: 邊陲
+fill_in_blank:
+- sentence: '搜救隊找到飛機的（　　），才確認失事飛機撞山的地點。'
+  answer: E
+- sentence: '老鷹俯衝（　　）水面的魚，動作又快又準。'
+  answer: C
+- sentence: '操場被清晨的（　　）罩住，遠處看不清楚。'
+  answer: I
+- sentence: '對方防守太嚴，我們（　　），找不到進攻方法。'
+  answer: B
+- sentence: '他在（　　）下推人犯規，很多同學都看見了。'
+  answer: F
+- sentence: '近期詐騙簡訊（　　），班導提醒別亂點不明連結。'
+  answer: A
+- sentence: '外來種入侵後迅速繁殖，正（　　）原本的生態空間。'
+  answer: G
+- sentence: '老房子人去樓空，院子（　　）多年，長滿了雜草。'
+  answer: H
+fill_in_blank_count: 8

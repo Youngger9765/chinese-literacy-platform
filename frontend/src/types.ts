@@ -123,7 +123,10 @@ export interface Story {
   fillInBlank?: FillInBlankItem[];           // ④ 語詞應用（PDF 現成資料）
   multipleChoice?: MultipleChoiceItem[];     // ⑦ 閱讀理解選擇題（PDF 現成資料）
   vocabBank?: Record<string, string>;        // { A: "疑難雜症", ... } for fillInBlank
-  knowledgeVideoUrl?: string;               // ⑨ 知識補給站 YouTube URL
+  knowledgeVideoUrl?: string;               // ⑨ 知識補給站 — first video URL only (#615, legacy)
+  /** Full video list for knowledge-station (#1683). Catalog has multiple videos per lesson;
+   *  KnowledgeStation renders all of them. Each item: { title: '影片1', url: 'https://...' }. */
+  videoLinks?: { title: string; url: string }[];
   strategyExercise?: StrategyExercise | StrategyExerciseItem[];  // 閱讀策略練習 (#943); StrategyExerciseItem[] for G7 圖文整合 (#1390)
   /**
    * Optional per-lesson step sequence loaded from YAML `step_sequence` field (#1374).
@@ -177,6 +180,30 @@ export interface Story {
    *  Optional — lessons without a matching PDF (e.g. G8-L3a, 文-L*) leave this null,
    *  which hides the "查看紙本學習單" button on the Intro page. */
   worksheetPdfUrl?: string;
+  /** Tables extracted from 紙本學習單 PDF (#1685).
+   *  Used by 圖文表整合 lessons (G7-L28, G7-L30) where docx → yml parser dropped
+   *  table row data. Frontend renders via TableDisplay with click-to-zoom.
+   *  Absent for lessons without tables (摘要策略 / 推論策略 課文 etc.). */
+  tables?: LessonTable[];
+}
+
+/** Row of a lesson table. `section` (optional) groups rows visually
+ *  — e.g. G7-L30 表一 splits "相同處" vs "相異處". */
+export interface LessonTableRow {
+  cells: string[];
+  section?: string;
+}
+
+/** Table extracted from 紙本學習單 PDF (#1685).
+ *  `section_label_col` — if present, renders an extra leftmost column carrying the
+ *  `section` label spanning consecutive rows in the same section (G7-L30 異同). */
+export interface LessonTable {
+  id: string;
+  title: string;
+  headers: string[];
+  rows: LessonTableRow[];
+  section_label_col?: string;
+  notes?: string[];
 }
 
 export interface ReadingAttempt {

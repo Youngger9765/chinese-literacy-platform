@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L2
 reading_strategy: 分辨事實與判斷
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L2帝國家書：一個普通家庭的生與死（分辨事實與判斷）.docx
 parsed_at: '2026-05-01T21:10:45'
 flags: []
@@ -164,41 +177,20 @@ vocab_bank:
   G: 贍養
   H: 搏命
 fill_in_blank:
-- id: 1
+- sentence: '這位演員常在電影中（　　）演出，從不使用替身。'
   answer: H
-  answer_word: 搏命
-  context_before: 這位演員常在電影中
-  context_after: 演出，從不使用替身
-- id: 2
+- sentence: '戰爭開始了，許多士兵（　　），就為了保衛自己的國家。'
   answer: F
-  answer_word: 拋頭顱灑
-  context_before: 戰爭開始了，許多士兵
-  context_after: ，就為了保衛自己的國家
-- id: 3
+- sentence: '近日腸病毒疫情（　　），感染人數高達2.5萬人。'
   answer: A
-  answer_word: 嚴峻
-  context_before: 近日腸病毒疫情
-  context_after: ，感染人數高達2.5萬人
-- id: 4
+- sentence: '他獨自去登山後失聯十天了，（　　），讓家人很擔心。'
   answer: D
-  answer_word: 生死未卜
-  context_before: 他獨自去登山後失聯十天了，
-  context_after: ，讓家人很擔心
-- id: 5
+- sentence: '不肖商人將自己的營業稅（　　）給消費者，加重消費者的負擔。'
   answer: E
-  answer_word: 轉嫁
-  context_before: 不肖商人將自己的營業稅
-  context_after: 給消費者，加重消費者的負擔
-- id: 6
+- sentence: '國慶大典上，（　　）的三軍儀隊邁著整齊的步伐，朝司令臺敬禮。'
   answer: B
-  answer_word: 英姿颯爽
-  context_before: 國慶大典上，
-  context_after: 的三軍儀隊邁著整齊的步伐，朝司令臺敬禮
-- id: 7
+- sentence: '她的前夫在離婚後，承諾繼續 （　　）她們母女二人。'
   answer: G
-  answer_word: 贍養
-  context_before: 她的前夫在離婚後，承諾繼續
-  context_after: 她們母女二人
 fill_in_blank_count: 7
 spotlight_raw_text: "閱讀聚光燈\n分辨事實與判斷\n    本篇文章是作者讀完兩封來自秦朝時期的家書後，做了一些推論，最後一段再加上自己的感想後寫成的。\n\
   　　也就是說，文章中的訊息主要有兩大類，第一類是「兩兄弟的處境（以下稱事實）」，第二類是「作者對兩兄弟處境的推論（以下稱判斷）」。閱讀這樣的文章，如果能分辨哪些是客觀的事實，哪些是作者的判斷，就能幫助自己有比較好的理解。\n\

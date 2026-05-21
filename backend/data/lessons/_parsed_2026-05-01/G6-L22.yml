@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L22
 reading_strategy: 摘要策略-問題.解決.結果結構
 reading_strategy_type: summary_psr
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L22小兵立大功：雞鳴狗盜的故事（摘要策略-問題.解決.結果結構）.docx
 parsed_at: '2026-05-02T16:24:34'
 flags: []
@@ -39,46 +52,22 @@ paragraphs:
 paragraph_count: 9
 char_count: 1402
 fill_in_blank:
-- id: 1
-  answer: 模仿雞叫
-  context_before: 生 ❷主角遇到了什麼「問題」？□被追兵追到 天沒亮，城門不能開 ❸問題如何「解決」？孟嘗君的食客
-  context_after: ，引來附近公雞也一起叫。 ❹最後得到什麼「結果」？主角 成功出關 □沒有出關。
-  context_paragraph_idx: 4
-- id: 2
-  answer: 凶多吉少
-  context_before: 孟嘗君求幸姬幫忙，幸姬要求孟嘗君給她白狐裘，但大衣已經送給秦昭王，不給，自己就
-  context_after: ，孟嘗君去哪裡再找一件皮大衣呢?
-  context_paragraph_idx: 5
-- id: 3
-  answer: 狗
-  context_before: 食客中有一位會模仿
-  context_after: 的樣子和動作潛入家戶偷東西，他可以潛入寶庫中偷出白狐裘。
-  context_paragraph_idx: 5
-- id: 4
-  answer: 軟禁
-  context_before: 幸姬得到了白狐裘，替孟嘗君求情，秦昭王解除了對孟嘗君的
-  context_after: 。
-  context_paragraph_idx: 5
-- id: 5
-  answer: 天亮
-  context_before: 一行人想趕快逃離秦國，他們到了函谷關，但是規定
-  context_after: 時，士兵才能把城門打開，現在他們【出不了關 】。
-  context_paragraph_idx: 5
-- id: 6
-  answer: 出不了關
-  context_before: 一行人想趕快逃離秦國，他們到了函谷關，但是規定【天亮 】時，士兵才能把城門打開，現在他們
-  context_after: 。
-  context_paragraph_idx: 5
-- id: 7
-  answer: 公雞叫
-  context_before: 食客中有一位會模仿
-  context_after: 的人，他唯妙唯肖的叫聲，讓公雞們以為天亮了，也都跟著鳴叫，騙過守門人。
-  context_paragraph_idx: 5
-- id: 8
-  answer: 終於打開／提前開啟
-  context_before: 城門
-  context_after: ，孟嘗君也順利出關。
-  context_paragraph_idx: 5
+- sentence: 考試時，教室裡（　　　），只有筆尖劃過紙面的聲音。
+  answer: F
+- sentence: 他（　　　）的說明來意，立刻講到重點，毫不拖泥帶水。
+  answer: C
+- sentence: 那位登山者失聯多日，恐怕（　　　）。
+  answer: D
+- sentence: 他們雖然嘴上說合作，實際上卻彼此（　　　），誰也不肯示弱。
+  answer: A
+- sentence: 那場經典籃球比賽至今仍然令人（　　　），印象十分深刻。
+  answer: B
+- sentence: 我們必須（　　　），才能如期完成這份重要的報告。
+  answer: J
+- sentence: 他模仿老師講話的聲音和動作（　　　），全班笑成一團。
+  answer: I
+- sentence: 她明明有更好的機會卻選擇放棄，真讓人（　　　）。
+  answer: H
 fill_in_blank_count: 8
 vocabulary:
 - word: 開門見山
@@ -119,10 +108,10 @@ reading_benchmark:
   - threshold: □ ＞241字
     feedback: 哇嗚，超級厲害！
 video_links:
-- title: 1. 成語任務22-雞鳴狗盜
-  url: ''
-- title: 2.15 曹沖秤象
-  url: ''
+- title: 影片1
+  url: http://youtu.be/70xwR2CUvO8
+- title: 影片2
+  url: http://youtu.be/nY7TypRdEEg
 multiple_choice:
 - question: 1. 下列語詞，何者使用正確？
   options:
@@ -362,3 +351,44 @@ lesson_intro:
   course_intro: 這篇文章講述了戰國時期齊國孟嘗君的故事。孟嘗君以養士聞名，門下食客眾多。當他被秦昭王軟禁並面臨生命危險時，兩位看似擁有微不足道技能的食客，如何運用他們的「雞鳴狗盜」之術，幫助孟嘗君化險為夷，成功脫離秦國。故事展現了在關鍵時刻，小人物的特殊才能也能發揮意想不到的巨大作用。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L22.pdf
+spotlight_answers:
+- id: 1
+  answer: 模仿雞叫
+  context_before: 生 ❷主角遇到了什麼「問題」？□被追兵追到 天沒亮，城門不能開 ❸問題如何「解決」？孟嘗君的食客
+  context_after: ，引來附近公雞也一起叫。 ❹最後得到什麼「結果」？主角 成功出關 □沒有出關。
+  context_paragraph_idx: 4
+- id: 2
+  answer: 凶多吉少
+  context_before: 孟嘗君求幸姬幫忙，幸姬要求孟嘗君給她白狐裘，但大衣已經送給秦昭王，不給，自己就
+  context_after: ，孟嘗君去哪裡再找一件皮大衣呢?
+  context_paragraph_idx: 5
+- id: 3
+  answer: 狗
+  context_before: 食客中有一位會模仿
+  context_after: 的樣子和動作潛入家戶偷東西，他可以潛入寶庫中偷出白狐裘。
+  context_paragraph_idx: 5
+- id: 4
+  answer: 軟禁
+  context_before: 幸姬得到了白狐裘，替孟嘗君求情，秦昭王解除了對孟嘗君的
+  context_after: 。
+  context_paragraph_idx: 5
+- id: 5
+  answer: 天亮
+  context_before: 一行人想趕快逃離秦國，他們到了函谷關，但是規定
+  context_after: 時，士兵才能把城門打開，現在他們【出不了關 】。
+  context_paragraph_idx: 5
+- id: 6
+  answer: 出不了關
+  context_before: 一行人想趕快逃離秦國，他們到了函谷關，但是規定【天亮 】時，士兵才能把城門打開，現在他們
+  context_after: 。
+  context_paragraph_idx: 5
+- id: 7
+  answer: 公雞叫
+  context_before: 食客中有一位會模仿
+  context_after: 的人，他唯妙唯肖的叫聲，讓公雞們以為天亮了，也都跟著鳴叫，騙過守門人。
+  context_paragraph_idx: 5
+- id: 8
+  answer: 終於打開／提前開啟
+  context_before: 城門
+  context_after: ，孟嘗君也順利出關。
+  context_paragraph_idx: 5

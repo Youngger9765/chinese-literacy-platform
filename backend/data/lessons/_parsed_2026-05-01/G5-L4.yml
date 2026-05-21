@@ -3,6 +3,19 @@ grade: 5
 grade_code: G5-L4
 reading_strategy: 拆詞釋義、從上下文推測詞義
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G5-L4災難預言準不準（拆詞釋義、從上下文推測詞義）.docx
 parsed_at: '2026-05-01T21:10:36'
 flags: []
@@ -138,49 +151,26 @@ vocab_bank:
   E: 恐慌
   F: 熱議
   G: 點閱率
+  H: 應󠇡驗
   I: 風險意識
   J: 預言
 fill_in_blank:
-- id: 1
+- sentence: '網路謠言引發不必要的（　　），政府呼籲大家要冷靜。'
   answer: E
-  answer_word: 恐慌
-  context_before: 網路謠言引發不必要的
-  context_after: ，政府呼籲大家要冷靜
-- id: 2
+- sentence: '他（　　）的描述昨晚的驚悚電影，讓人聽得毛骨悚然。'
   answer: D
-  answer_word: 繪聲繪影
-  context_before: 他
-  context_after: 的描述昨晚的驚悚電影，讓人聽得毛骨悚然
-- id: 3
+- sentence: '當裁判舉起手準備宣布比賽結果時，全場（　　），等待裁判的宣布。'
   answer: B
-  answer_word: 屏息以待
-  context_before: 當裁判舉起手準備宣布比賽結果時，全場
-  context_after: ，等待裁判的宣布
-- id: 4
+- sentence: '他看到幾個成功的創業故事，就以為創業一定能賺大錢，這種想法有（　　），因為他忽略了失敗的案例。'
   answer: C
-  answer_word: 偏誤
-  context_before: 他看到幾個成功的創業故事，就以為創業一定能賺大錢，這種想法有
-  context_after: ，因為他忽略了失敗的案例
-- id: 5
+- sentence: '這款手機的外型與前一代產品（　　），消費者反應平平。'
   answer: A
-  answer_word: 雷同
-  context_before: 這款手機的外型與前一代產品
-  context_after: ，消費者反應平平
-- id: 6
+- sentence: '奧運選手的表現成為社群媒體上的（　　）話題。'
   answer: F
-  answer_word: 熱議
-  context_before: 奧運選手的表現成為社群媒體上的
-  context_after: 話題
-- id: 7
+- sentence: '這支影片上線不到一天，（　　）就突破十萬，太驚人了！'
   answer: G
-  answer_word: 點閱率
-  context_before: 這支影片上線不到一天，
-  context_after: 就突破十萬，太驚人了！
-- id: 8
+- sentence: '政府推動防災演練、疫情預警系統、食品安全檢驗等，都是提升全民（　　）的措施。'
   answer: I
-  answer_word: 風險意識
-  context_before: 政府推動防災演練、疫情預警系統、食品安全檢驗等，都是提升全民
-  context_after: 的措施
 fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈
 

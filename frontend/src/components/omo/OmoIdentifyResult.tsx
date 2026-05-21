@@ -99,6 +99,14 @@ const OmoIdentifyResult: React.FC<OmoIdentifyResultProps> = ({
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [uploadId, token, alreadyGraded, onGraded, confirmedTitle]);
 
+  // #1779: unmount safety net — main effect early-returns for alreadyGraded
+  // path so its cleanup isn't registered, but handleRegrade may then start
+  // an interval. This guarantees cleanup regardless of which code path armed
+  // the interval.
+  useEffect(() => {
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
+
   // ---------------------------------------------------------------------------
   // Handlers
   // ---------------------------------------------------------------------------

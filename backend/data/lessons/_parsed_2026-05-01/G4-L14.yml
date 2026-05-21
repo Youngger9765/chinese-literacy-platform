@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L14
 reading_strategy: 情緒管理ＡＢＣ
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L14白牙的最後一戰（情緒管理ＡＢＣ）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []
@@ -150,6 +163,7 @@ story_structure_table_source: ai-generated-2026-05-02
 vocab_bank:
   A: 凌亂
   B: 不寒而慄
+  C: 蹭
   D: 凜冽
   E: 威風凜凜
   F: 忠心耿耿
@@ -157,17 +171,23 @@ vocab_bank:
   H: 輾轉難眠
   I: 淚水奪眶而出
 fill_in_blank:
-- id: 3
+- sentence: '小貓一直（　　）我的腳，好像在說「摸我！」'
+  answer: C
+- sentence: '即使遭到懷疑，他仍然（　　）的為團隊付出。'
+  answer: F
+- sentence: '聽完那個可怕的故事，我整個人都（　　）。'
   answer: B
-  answer_word: 不寒而慄
-  context_before: 聽完那個可怕的故事，我整個人都
-  context_after: ''
-- id: 4
+- sentence: '想到明天要比賽，他因緊張而整夜（　　）。'
   answer: H
-  answer_word: 輾轉難眠
-  context_before: 想到明天要比賽，他因緊張而整夜
-  context_after: ''
-fill_in_blank_count: 2
+- sentence: '他裹緊大衣、縮著脖子，仍無法抵擋（　　）的寒風。'
+  answer: D
+- sentence: '癌症檢驗的結果明天才出來，他一直 （　　），擔心有不好的結果。'
+  answer: G
+- sentence: '突發狀況發生，她的思緒（　　），一時不知道到底該怎麼辦。'
+  answer: A
+- sentence: '努力了這麼久，當聽到得獎的名字是自己時，她高興得（　　）。'
+  answer: I
+fill_in_blank_count: 8
 本課語詞:
 - 忠心耿耿
 - 威風凜凜

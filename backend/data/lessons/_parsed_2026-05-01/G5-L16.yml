@@ -1,3 +1,16 @@
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 lesson_code: G5-L16
 grade: 5
 grade_code: G5-L16
@@ -150,46 +163,22 @@ vocab_bank:
   G: 跌破眼鏡
   H: 一絲不苟
 fill_in_blank:
-- id: 1
+- sentence: '他接受的是（　　）音樂訓練，因此技巧非常扎實。'
   answer: C
-  answer_word: 正統
-  context_before: 他接受的是
-  context_after: 音樂訓練，因此技巧非常扎實
-- id: 2
+- sentence: '在這次科技展中，許多年輕設計師（　　），受到企業關注。'
   answer: F
-  answer_word: 嶄露頭角
-  context_before: 在這次科技展中，許多年輕設計師
-  context_after: ，受到企業關注
-- id: 3
+- sentence: '人高馬大的他，看到蟑螂卻尖叫逃走，讓同學們都（　　）。'
   answer: G
-  answer_word: 跌破眼鏡
-  context_before: 人高馬大的他，看到蟑螂卻尖叫逃走，讓同學們都
-  context_after: ''
-- id: 4
+- sentence: '這間小吃攤以料多味美（　　），受到當地人和觀光客的喜愛。'
   answer: A
-  answer_word: 著稱
-  context_before: 這間小吃攤以料多味美
-  context_after: ，受到當地人和觀光客的喜愛
-- id: 5
+- sentence: '經過前人的努力，台積電如今已經成為半導體產業的（　　）。'
   answer: B
-  answer_word: 先驅
-  context_before: 經過前人的努力，台積電如今已經成為半導體產業的
-  context_after: ''
-- id: 6
+- sentence: '這位教練帶著球隊走過低潮，創下了最（　　）的戰績。'
   answer: E
-  answer_word: 輝煌
-  context_before: 這位教練帶著球隊走過低潮，創下了最
-  context_after: 的戰績
-- id: 7
+- sentence: '他長期投入偏鄉教育，不計時間、心力，令人由衷（　　）。'
   answer: D
-  answer_word: 敬仰
-  context_before: 他長期投入偏鄉教育，不計時間、心力，令人由衷
-  context_after: ''
-- id: 8
+- sentence: '他對實驗數據的處理（　　），絲毫不容許誤差。'
   answer: H
-  answer_word: 一絲不苟
-  context_before: 他對實驗數據的處理
-  context_after: ，絲毫不容許誤差
 fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈
 

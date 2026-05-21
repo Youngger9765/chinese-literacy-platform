@@ -151,4 +151,5 @@ async def generate_reading_analysis(session_data: dict) -> dict:
         response_schema=response_schema,
         max_tokens=2048,
         temperature=0.7,
+        task="reading_analysis",
     )

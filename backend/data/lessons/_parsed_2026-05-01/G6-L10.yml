@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L10
 reading_strategy: 摘要策略-從關鍵句找小主題與細節
 reading_strategy_type: summary
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L10末日種子庫（摘要策略-從關鍵句找小主題與細節）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []
@@ -199,31 +212,16 @@ vocab_bank:
   I: 森嚴
   J: 多樣性
 fill_in_blank:
-- id: 1
+- sentence: '這場金融風暴（　　），許多員工因而失業。'
   answer: C
-  answer_word: 殃及池魚
-  context_before: 這場金融風暴
-  context_after: ，許多員工因而失業
-- id: 2
+- sentence: '這次空難事件，機上乘客無一（　　）。'
   answer: B
-  answer_word: 倖免
-  context_before: 這次空難事件，機上乘客無一
-  context_after: ''
-- id: 3
+- sentence: '戰爭時（　　），人們被迫逃離家園。'
   answer: H
-  answer_word: 烽火漫天
-  context_before: 戰爭時
-  context_after: ，人們被迫逃離家園
-- id: 4
+- sentence: '由於可能會有強烈餘震，居民們都保持高度（　　），隨時準備撤離。'
   answer: D
-  answer_word: 戒備
-  context_before: 由於可能會有強烈餘震，居民們都保持高度
-  context_after: ，隨時準備撤離
-- id: 5
+- sentence: '颱風將至，各大媒體提醒海邊民眾 （　　） 及早撤離，以降低災損。'
   answer: E
-  answer_word: 未雨綢繆
-  context_before: 颱風將至，各大媒體提醒海邊民眾
-  context_after: 及早撤離，以降低災損
 fill_in_blank_count: 5
 spotlight_raw_text: "閱讀聚光燈\n摘要策略—主題描述結構\n    本課是一個說明文，主要是介紹和末日種子庫有關的知識。這個文章有清楚的結構，在「末日種子庫」的大主題下，介紹幾個小主題，每一個小主題都補充了許多說明的細節，這是說明文很常見的呈現方式。如果掌握大主題和小主題之間的關係，就有助於理解和記憶。\n    之前我們曾經在「G5-L12六塊肌六塊雞」學過說明文章結構、「L8動物談情說愛的方式」學習舉例、整理細節內容及條列整理訊息、「L9祝你好眠」學習如何用關鍵句子找小主題。\n    現在我們用本課的文章練習：\n1.找出大主題（可從標題找，只要找一次即可）：   末日種子庫   \n2.找出小主題：\n2679703175000第三段：\n由於全球氣候變遷越來越劇烈，對生物多樣性造成威脅，不僅影響動物的生存，連植物也難以倖免。萬一發生大區域性或全球性的災害時，某些農作物可能從此滅絕，興建種子庫的目的，就是在預防這樣的末日景象，以保護農業作物的多樣性，因此它也被稱為「末日種子庫」\n將關鍵句畫起來，本段的小主題是　興建種子庫的目的  。\n3.找出小主題下方的重要細節\n萬一大規模災害發生時，預防某些種子的基因因此而消失，以保護農業多樣性。\n \n\n◎"
 strategy_exercise:

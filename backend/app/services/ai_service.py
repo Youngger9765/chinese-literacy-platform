@@ -19,6 +19,7 @@ from .ai_base import (  # noqa: F401
     GEMINI_TIMEOUT,
     _check_safety_filter,
     _get_client,
+    _get_client_for_task,
     _repair_json,
     generate_structured_response,
 )

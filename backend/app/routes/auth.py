@@ -161,8 +161,9 @@ def register(req: RegisterRequest, request: Request, db: Session = Depends(get_d
             verification_token=verification_token if settings.is_dev else None,
         )
     return RegisterResponse(
-        message="註冊成功！",
+        message="註冊成功！此環境帳號已自動驗證，請直接登入。",
         verification_token=None,
+        auto_verified=True,
     )
 
 

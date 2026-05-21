@@ -46,7 +46,10 @@ class StoryDetail(StoryListItem):
     fill_in_blank: Optional[list[dict]] = None
     multiple_choice: Optional[list[dict]] = None
     vocab_bank: Optional[dict] = None  # letter → word mapping for fill_in_blank (#615)
-    knowledge_video_url: Optional[str] = None  # ⑨ 知識補給站 YouTube URL (#615)
+    knowledge_video_url: Optional[str] = None  # ⑨ 知識補給站 — first video URL only (#615, legacy)
+    # Full video list (#1683): catalog has multiple videos per lesson; KnowledgeStation renders all.
+    # Each item: {title: '影片1', url: 'https://...'}
+    video_links: Optional[list[dict]] = None
     reading_benchmark: Optional[ReadingBenchmarkSchema] = None
     text_type: str = "單"
     source_file: Optional[str] = None
@@ -74,6 +77,18 @@ class StoryDetail(StoryListItem):
     # Public PDF URL of the original 紙本學習單 docx (#1444)
     # Hosted at gs://lingoleap-assets/worksheets/{lesson_code}.pdf
     worksheet_pdf_url: Optional[str] = None
+    # Tables extracted from 紙本學習單 PDF (#1685).
+    # Each item: {id, title, headers: list[str], rows: list[{cells: list[str], section?: str}],
+    #             section_label_col?: str, notes?: list[str]}
+    # Used by 圖文表整合 lessons (G7-L28, G7-L30) where docx → yml parser dropped
+    # table row data; frontend renders via TableDisplay component with zoom modal.
+    tables: Optional[list[dict]] = None
+    # Story structure scaffold for StoryStructure step (#1683 item 4):
+    # story_structure_table — docx-parsed list-of-lists (ground truth for G7 graphic-text lessons)
+    # story_structure_rows — AI-generated dict rows (richer, with checkbox support)
+    # Both None for lessons without this step; StoryStructure endpoint uses whichever is present.
+    story_structure_table: Optional[list] = None
+    story_structure_rows: Optional[list] = None
 
 
 class StoryListResponse(BaseModel):

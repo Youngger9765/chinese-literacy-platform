@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L18
 reading_strategy: 二
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L18想讀書，該從哪裡著手？—阿耀與健豪學長的通信(二)（生涯探索-轉個彎，熱愛還在前方）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []
@@ -119,41 +132,20 @@ vocab_bank:
   I: 不相上下
   J: 受挫
 fill_in_blank:
-- id: 1
+- sentence: '在決賽中，兩隊實力（　　），比分一度僵持，現場氣氛十分緊張。'
   answer: I
-  answer_word: 不相上下
-  context_before: 在決賽中，兩隊實力
-  context_after: ，比分一度僵持，現場氣氛十分緊張
-- id: 2
+- sentence: '他長年受氣喘困擾，後來勤讀醫書、調整生活，減少氣喘發作的頻率，真是（　　）。'
   answer: F
-  answer_word: 久病而成良醫
-  context_before: 他長年受氣喘困擾，後來勤讀醫書、調整生活，減少氣喘發作的頻率，真是
-  context_after: ''
-- id: 4
+- sentence: '弟弟看到滿桌的美食，立刻（　　），吃了好幾碗飯。'
   answer: G
-  answer_word: 胃口大開
-  context_before: 弟弟看到滿桌的美食，立刻
-  context_after: ，吃了好幾碗飯
-- id: 5
+- sentence: '老師教我們要（　　）玩樂和學習，不能只玩不讀書。'
   answer: E
-  answer_word: 兼顧
-  context_before: 老師教我們要
-  context_after: 玩樂和學習，不能只玩不讀書
-- id: 6
+- sentence: '為了完成科展作品，他連續幾天（　　）的研究程式設計，直到成功才露出笑容。'
   answer: D
-  answer_word: 廢寢忘食
-  context_before: 為了完成科展作品，他連續幾天
-  context_after: 的研究程式設計，直到成功才露出笑容
-- id: 7
+- sentence: '妹妹收到那隻手工縫製的小熊娃娃後，整天抱在懷裡，（　　），連睡覺都不放開。'
   answer: H
-  answer_word: 愛不釋手
-  context_before: 妹妹收到那隻手工縫製的小熊娃娃後，整天抱在懷裡，
-  context_after: ，連睡覺都不放開
-- id: 8
+- sentence: '他雖然數學基礎薄弱，但每天堅持練習題目，終於以（　　）的毅力取得好成績。'
   answer: C
-  answer_word: 滴水穿石
-  context_before: 他雖然數學基礎薄弱，但每天堅持練習題目，終於以
-  context_after: 的毅力取得好成績
 fill_in_blank_count: 7
 本課語詞:
 - 興󠇡味盎然

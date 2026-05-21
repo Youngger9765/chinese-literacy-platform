@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L12
 reading_strategy: 摘要策略-從段落找主題句
 reading_strategy_type: summary
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L12愛冒險逞強的雄性動物（摘要策略-從段落找主題句）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []
@@ -154,46 +167,22 @@ vocab_bank:
   G: 英姿煥發
   H: 有過之而無不及
 fill_in_blank:
-- id: 1
+- sentence: '這兩種茶葉喝起來的口感（　　），讓人難以分辨。'
   answer: F
-  answer_word: 相去無幾
-  context_before: 這兩種茶葉喝起來的口感
-  context_after: ，讓人難以分辨
-- id: 2
+- sentence: '小華明知自己的體力有限，卻（　　）參加了連續三天的登山活動，導致體力不支，緊急送醫。'
   answer: C
-  answer_word: 逞強
-  context_before: 小華明知自己的體力有限，卻
-  context_after: 參加了連續三天的登山活動，導致體力不支，緊急送醫
-- id: 3
+- sentence: '這次比賽參賽的選手（　　）都是年輕人，平均年齡不超過二十歲，充滿了青春的氣息和活力。'
   answer: D
-  answer_word: 清一色
-  context_before: 這次比賽參賽的選手
-  context_after: 都是年輕人，平均年齡不超過二十歲，充滿了青春的氣息和活力
-- id: 4
+- sentence: '在運動會的開幕式上，運動員穿著整齊劃一的服裝，（　　）的接受大家的喝采。'
   answer: G
-  answer_word: 英姿煥發
-  context_before: 在運動會的開幕式上，運動員穿著整齊劃一的服裝，
-  context_after: 的接受大家的喝采
-- id: 5
+- sentence: '電影中的武俠人物經常能（　　），讓觀眾驚嘆不已。'
   answer: A
-  answer_word: 飛簷走壁
-  context_before: 電影中的武俠人物經常能
-  context_after: ，讓觀眾驚嘆不已
-- id: 6
+- sentence: '他是全校第一名，但為人謙虛，從不（　　）。'
   answer: E
-  answer_word: 自命不凡
-  context_before: 他是全校第一名，但為人謙虛，從不
-  context_after: ''
-- id: 7
+- sentence: '企業在面對市場激烈競爭時，必須（　　），因應時代變化隨時調整。'
   answer: B
-  answer_word: 審時度勢
-  context_before: 企業在面對市場激烈競爭時，必須
-  context_after: ，因應時代變化隨時調整
-- id: 8
+- sentence: '她比姐姐多花兩倍的錢買化妝品，愛漂亮的程度真是（　　）。'
   answer: H
-  answer_word: 有過之而無不及
-  context_before: 她比姐姐多花兩倍的錢買化妝品，愛漂亮的程度真是
-  context_after: ''
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈2598420318893\n摘要策略──從段落找主題句0\n摘要策略──從段落找主題句\n    主題句指的是段落中最重要的句子，能夠簡單的說明整段的意思。有的作者在寫作時，會有清楚的主題句，我們在閱讀時，如果可以找出各段落的主題句，就能快速掌握文章要傳達的重點。底下是找出主題句的兩個步驟：\n一、切句子：找出段落中的句號、驚嘆號、分號與問號，運用這些標點符號，將一個段落分成幾個句子。\n二、找主題句：找出最能說明段落重點的句子，這個句子通常會和文章主題相互呼應。\n例如：&lt;如何製作好喝的烏龍茶?&gt;\n第一步：切句子（把段落裡的句子區分出來）\n❶我們今天去參觀烏龍茶的製作過程。／❷師傅們先將剛摘下來的茶葉曬過，以減少水分；／❸接著讓茶葉發酵，高溫處理，保留茶葉的香氣；／❹最後，將茶葉乾燥、烘焙為好喝又清香的烏龍茶。\n→我總共分出（　4　）句。\n第二步：找主題句（最能說明段落重點的句子）\n(1)想想句子的關係，第❶句先告訴讀者今天參觀烏龍茶的製作過程，第❷、❸、❹句再仔細解釋製作的過程。\n(2)哪一個句子最能說明段落的重點？→因為我發現第❶句已包含第❷、❸、❹的內容，所以第（　１　）句為主題句。\n\n◎"
 strategy_exercise:

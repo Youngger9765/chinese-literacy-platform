@@ -3,6 +3,19 @@ grade: 5
 grade_code: G5-L7
 reading_strategy: 後篇
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G5-L7堅持到底的棒球人生──周思齊(後篇)（推論策略-觀點找支持理由）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []
@@ -171,42 +184,23 @@ vocab_bank:
   G: 膽戰心驚
   H: 大展身手
 fill_in_blank:
-- id: 1
+- sentence: '他不眠不休的練習，只為不（　　）父母的支持。'
   answer: E
-  answer_word: 辜負
-  context_before: 他不眠不休的練習，只為不
-  context_after: 父母的支持
-- id: 2
+- sentence: '因為現場沒有留下任何線索，讓警方難以判斷誰有（　　）。'
   answer: D
-  answer_word: 嫌疑
-  context_before: 因為現場沒有留下任何線索，讓警方難以判斷誰有
-  context_after: ''
-- id: 3
+- sentence: '儘管大家都勸他換一個方法試試，但他依然（　　）的不肯改變。'
   answer: A
-  answer_word: 倔強
-  context_before: 儘管大家都勸他換一個方法試試，但他依然
-  context_after: 的不肯改變
-- id: 4
+- sentence: '即使遭受各種威脅（　　），他從未心動，更不曾改變自己的信念。'
   answer: B
-  answer_word: 利誘
-  context_before: 即使遭受各種威脅
-  context_after: ，他從未心動，更不曾改變自己的信念
-- id: 5
+- sentence: '他終於等到上場機會，準備在國際舞台上（　　）。'
   answer: H
-  answer_word: 大展身手
-  context_before: 他終於等到上場機會，準備在國際舞台上
-  context_after: ''
-- id: 6
+- sentence: '各國在關稅議題上經過數輪談判，終於在部分條件上（　　）。'
   answer: C
-  answer_word: 妥協
-  context_before: 各國在關稅議題上經過數輪談判，終於在部分條件上
-  context_after: ''
-- id: 7
+- sentence: '詐騙集團假裝政府人員取得民眾的（　　），再進行詐騙操作。'
   answer: F
-  answer_word: 身家資料
-  context_before: 詐騙集團假裝政府人員取得民眾的
-  context_after: ，再進行詐騙操作
-fill_in_blank_count: 7
+- sentence: '每當回想當時事故發生的瞬間，她仍（　　）。'
+  answer: G
+fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n觀點找支持理由\n　　　本課課文主要描述周思齊在職棒時的歷程，不僅凸顯了周思齊的人格特質，也傳達了作者的觀點。底下再次複習什麼是觀點和支持理由：\n觀    點：就是對事情的看法、意見。\n支持理由：可以說服別人接受觀點的「證據（事實）」\n7556506477000\n\n   接著讓我們再次回到文章，找出觀點及搭配的支持理由吧！\n◎"
 strategy_exercise:
   type: guided_steps

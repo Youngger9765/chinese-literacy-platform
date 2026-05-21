@@ -18,15 +18,23 @@ Circuit breaker: 3 consecutive errors → RuntimeError (same pattern as omo_iden
 """
 
 import asyncio
+import io
 import logging
+import os
 from dataclasses import dataclass, field
 from typing import Optional
+
+from .llm_models import get_model_for_task
 
 logger = logging.getLogger(__name__)
 
 # Circuit breaker state (module-level singleton, per-process)
 _consecutive_errors = 0
 _CIRCUIT_BREAKER_THRESHOLD = 3
+# #1715: answers with self-reported confidence below this threshold are coerced
+# to empty + flagged for teacher review. Chosen generic (not tuned to specific
+# PDFs/handwriting/devices) so it generalizes across student worksheets.
+_LOW_CONFIDENCE_THRESHOLD = 0.7
 
 
 @dataclass
@@ -39,7 +47,48 @@ class GradedAnswer:
     ai_confidence: float  # 0.0 – 1.0
     reasoning: str
     position: Optional[dict] = None   # {"x": float, "y": float} relative coords
+    crop_image_url: Optional[str] = None
     source_attempt_id: Optional[int] = None
+
+
+def _split_spread(image_bytes: bytes, mime: str) -> list[tuple[bytes, str]]:
+    """Split a 2-page worksheet spread into single-page halves (#1717).
+
+    Many scanners output a single image containing two facing worksheet pages
+    (e.g. Sharp MX-M4050 default). Sending the spread as one image forces the
+    OCR model to attend across the spine, which hurts letter-position accuracy.
+    Splitting into left/right halves gives each page focused attention.
+
+    Generic policy: only split when aspect ratio suggests a landscape spread
+    (width > 1.3 × height). Portrait single pages pass through untouched.
+    Falls back to the original image on any error — no PDF-specific tuning.
+
+    Returns:
+        List of (bytes, mime) tuples — 1 element if single-page, 2 if spread.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return [(image_bytes, mime)]
+
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        w, h = img.size
+        if w <= h * 1.3:
+            return [(image_bytes, mime)]
+        mid = w // 2
+        out_mime = "image/jpeg"
+        halves = []
+        for box in [(0, 0, mid, h), (mid, 0, w, h)]:
+            half = img.crop(box)
+            if half.mode != "RGB":
+                half = half.convert("RGB")
+            buf = io.BytesIO()
+            half.save(buf, format="JPEG", quality=92)
+            halves.append((buf.getvalue(), out_mime))
+        return halves
+    except Exception:
+        return [(image_bytes, mime)]
 
 
 def _resolve_letter_answer(letter: str, vocabulary: list) -> str:
@@ -66,15 +115,36 @@ def _resolve_letter_answer(letter: str, vocabulary: list) -> str:
 
 
 def _build_question_schema(lesson: dict) -> list[dict]:
-    """Extract expected-answer schema from lesson YAML for the grading prompt."""
+    """Extract expected-answer schema from lesson YAML for the grading prompt.
+
+    Each question dict includes `allowed_values` — the only legal student_answer
+    values for that question (#1712 fix: prevents Gemini fabrication by giving
+    it a finite value space to choose from).
+    """
     questions = []
     vocabulary = lesson.get("vocabulary") or []
+    vocab_words = [v.get("word", "") for v in vocabulary if v.get("word")]
 
-    # fill_in_blank section — accepts list[dict] or dict[str, dict]
-    # YAML pattern (L22-L30): answer is a letter A/B/C... that indexes into vocabulary list.
+    # Detect fill_in_blank mode: 'lettered' (student circles A-G) vs 'free_form'
+    # (student handwrites a word). Mode is determined by whether ALL fb answers
+    # in the lesson are single A-G letters — that pattern is used by L22-L30
+    # 「四 語詞應用」style where vocabulary letters are the choice set.
     fb = lesson.get("fill_in_blank") or []
-    fb_items = fb.items() if isinstance(fb, dict) else enumerate(fb)
-    for key, item in fb_items:
+    fb_raw_items = list(fb.items()) if isinstance(fb, dict) else list(enumerate(fb))
+    fb_answers = []
+    for _, item in fb_raw_items:
+        ans = item.get("answer", "") if isinstance(item, dict) else str(item)
+        fb_answers.append(ans)
+    fb_lettered = bool(fb_answers) and all(
+        isinstance(a, str) and len(a.strip()) == 1 and a.strip().upper() in "ABCDEFG"
+        for a in fb_answers if a
+    )
+    # Lettered choices use the vocabulary as the A-G mapping; allowed letters
+    # equal min(len(vocab), 7) so we don't claim more letters than choices.
+    n_letters = min(len(vocab_words), 7) if fb_lettered else 0
+    fb_allowed_letters = [chr(ord("A") + i) for i in range(n_letters)]
+
+    for key, item in fb_raw_items:
         qid = str(key) if isinstance(fb, dict) else f"fb_{key+1}"
         if isinstance(item, dict):
             raw_answer = item.get("answer", "")
@@ -82,12 +152,22 @@ def _build_question_schema(lesson: dict) -> list[dict]:
         else:
             raw_answer = str(item)
             context = ""
-        correct = _resolve_letter_answer(raw_answer, vocabulary)
+        correct_word = _resolve_letter_answer(raw_answer, vocabulary)
+        # #1712: lettered fb compares letter-vs-letter (student circles a letter).
+        # `correct_answer` is what we score against in _score_answer.
+        # `correct_word` is kept for display ("正解：規律").
+        if fb_lettered:
+            correct_for_scoring = str(raw_answer).strip().upper()
+        else:
+            correct_for_scoring = correct_word
         questions.append({
             "id": qid,
             "type": "fill_blank",
             "context": context,
-            "correct_answer": correct,
+            "correct_answer": correct_for_scoring,
+            "correct_word": correct_word,
+            "mode": "lettered" if fb_lettered else "free_form",
+            "allowed_values": fb_allowed_letters if fb_lettered else vocab_words,
         })
 
     # multiple_choice section — accepts list[dict] or dict[str, dict]
@@ -106,6 +186,8 @@ def _build_question_schema(lesson: dict) -> list[dict]:
             "type": "multiple_choice",
             "context": context,
             "correct_answer": correct,
+            "mode": "lettered",
+            "allowed_values": ["A", "B", "C", "D"],
         })
 
     # strategy_exercise section (structured exercises in 7-lesson set)
@@ -127,38 +209,55 @@ def _build_question_schema(lesson: dict) -> list[dict]:
 
 
 def _build_grading_prompt(questions: list[dict]) -> str:
-    """Build OCR-only prompt. Gemini does NOT see correct answers.
+    """Build OCR-only prompt with per-question allowed-value constraints.
 
-    Design (fixes #1616 — round 2 of #1614):
-    - Reference answers REMOVED from prompt entirely. Gemini's only job is OCR.
-    - Scoring happens in Python (`_score_answer`) using YAML correct_answer.
-    - Without seeing expected answers, Gemini cannot copy them — verified by A/B
-      test: with reference block, 14/15 false-positive; without, true handwriting.
+    Design (fixes #1712 — round 3 of #1614/#1616):
+    - Each question explicitly lists the legal student_answer values so Gemini
+      cannot return a plausible-but-fabricated answer like 「良好」 when the
+      choice set is A-G letters.
+    - Reference (correct) answers stay HIDDEN per #1616 — Gemini sees the value
+      SPACE but not which value is correct.
+    - Empty answer is always legal — if Gemini can't see handwriting, it should
+      say so instead of inventing.
     """
-    questions_text = "\n".join(
-        f"  - {q['id']} ({q['type']}): {q['context']}" for q in questions
-    )
+    def _format(q: dict) -> str:
+        mode = q.get("mode", "free_form")
+        allowed = q.get("allowed_values") or []
+        if mode == "lettered":
+            value_hint = "{" + ", ".join(allowed) + ', ""}'
+            instr = "學生在題號旁圈一個字母。逐筆檢查圈圈/勾選/箭頭標記。"
+        else:
+            sample = "、".join(allowed[:6]) + ("…" if len(allowed) > 6 else "")
+            value_hint = f'{{{sample}, ""}}'
+            instr = "學生用鉛筆/原子筆在空格內手寫一個詞。逐字 OCR。"
+        return (
+            f"  - {q['id']} ({q['type']}): {q['context']}\n"
+            f"      合法答案 = {value_hint}\n"
+            f"      做法：{instr}"
+        )
+
+    questions_text = "\n".join(_format(q) for q in questions)
     return f"""你是 OCR 識字員。讀學生在學習單照片上的**手寫筆跡**。
 
 == 絕對規則 ==
-- 只報告學生**實際用鉛筆/原子筆寫**的字
-- 禁止猜測「應該寫什麼」
-- 看不到手寫 → student_answer=""，ai_confidence=0.0
-- 禁止把印刷的題目文字當作學生作答
+1. 只報告學生**實際用鉛筆/原子筆寫**的字 — 從照片像素讀出來的。
+2. **禁止編造**：student_answer 必須是該題「合法答案」清單裡的值，或空字串 ""。
+3. 看不到手寫、看不清、學生跳過 → student_answer=""，ai_confidence=0.0。
+4. 不要把印刷的題目文字、題目選項、或正確答案當作學生作答。
+5. 紅筆批改痕跡（✗ / 紅線 / 紅筆覆寫）= 老師批改 — student_answer 填學生**原本**寫的字（紅筆修改前），不是老師訂正的字。
+6. 對 lettered 題（A/B/C/D…），只能回字母本身（單一大寫字母）— 不能回詞語。
 
-== 辨識規則 ==
-1. 選擇題：報告學生圈選的字母（A/B/C/D）
-2. 填充題：逐字辨識學生手寫文字
-3. 紅筆批改痕跡（✗ / 紅線 / 紅筆覆寫）：
-   - 紅筆是老師標記學生答錯
-   - student_answer 填**學生原本手寫**（紅筆訂正前的字），不是老師修改的字
-4. 作答欄空白 → student_answer=""
+== 模糊情況的處理（#1715 disambiguation） ==
+7. **多個圈/猶豫筆跡**：學生圈了又劃掉、或同時圈兩個字母 → 取**最終確定**的那個（最濃、最完整、沒被劃掉的）；無法判斷哪個是最終 → student_answer=""，ai_confidence 標低。
+8. **圈圈跨越兩個字母邊界**：圈圈中心離哪個字母最近就選哪個；若無法決定 → 回空。
+9. **筆跡淡 / 模糊 / 被擦過**：勉強看到也不要硬猜 → 不確定就回空 + ai_confidence ≤ 0.5。
+10. **ai_confidence 校準**：清楚看到 → 0.85-1.0；尚可辨識但有疑慮 → 0.5-0.85；勉強猜 → 0.0-0.5（後端會把 < 0.7 的視為無作答，請誠實標註不要灌水）。
 
-== 題目清單 ==
+== 題目清單（含合法答案清單） ==
 {questions_text}
 
-回傳 JSON 陣列：
-[{{"question_id":"...","student_answer":"學生實際手寫的字","ai_confidence":0.0,"reasoning":"50字內描述看到的筆跡"}}]"""
+回傳 JSON 陣列，每題一筆：
+[{{"question_id":"fb_1","student_answer":"<合法值或空字串>","ai_confidence":0.0~1.0,"reasoning":"50字內描述照片裡看到的筆跡"}}]"""
 
 
 def _score_answer(student: str, correct: str, qtype: str) -> float:
@@ -180,11 +279,122 @@ def _score_answer(student: str, correct: str, qtype: str) -> float:
     return 1.0 if s == c else 0.0
 
 
+def _validate_student_answer(student: str, question: dict) -> tuple[str, bool]:
+    """Coerce fabricated student_answer to empty (#1712 fix).
+
+    A valid answer is either:
+    - Empty string (Gemini saw nothing / wasn't sure)
+    - A value in `question['allowed_values']` (case-insensitive for letters,
+      exact match for words; also accepts a letter that resolves to a vocab
+      word in the lettered list — Gemini sometimes returns the word instead).
+
+    Anything else (e.g. 「良好」when allowed = {A,B,C,D,E,F,G,""}) is treated
+    as fabrication: coerce to "" and signal coercion happened.
+
+    Returns:
+        (sanitized_answer, was_fabricated)
+    """
+    s = (student or "").strip()
+    if not s:
+        return "", False
+    allowed = question.get("allowed_values") or []
+    mode = question.get("mode", "free_form")
+    if mode == "lettered":
+        # Accept the letter itself
+        if len(s) == 1 and s.upper() in [a.upper() for a in allowed]:
+            return s.upper(), False
+        return "", True
+    # free_form: exact word match (case-sensitive — Chinese characters)
+    if s in allowed:
+        return s, False
+    return "", True
+
+
+def _crop_and_upload(
+    image_bytes_list: list[bytes],
+    question: dict,
+    upload_id: int,
+    question_id: str,
+    gcs_bucket: Optional[str] = None,
+) -> Optional[str]:
+    """Crop a generous strip around the question position and upload to GCS.
+
+    Position comes from the grader's position_x / position_y fields (relative 0-1 coords).
+    For fill_blank (fb_*): full-width strip (0, y-200, W, y+200), clipped to bounds.
+    For multiple_choice (mc_*): full-width strip (0, y-300, W, y+400), clipped to bounds.
+
+    Falls back to page 0 if no position or position_y=0.
+    Uploads as JPEG q85 to gs://{gcs_bucket}/crops/{upload_id}/{question_id}.jpg
+    Returns gs:// URI on success, None on any failure (fail-open: crop failure must not block grading).
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+
+    position = question.get('position') or {}
+    pos_y = float(position.get('y', 0.0))
+
+    # Use first image as source (page 0 fallback)
+    source_bytes = image_bytes_list[0] if image_bytes_list else None
+    if not source_bytes or source_bytes == b'placeholder':
+        return None
+
+    try:
+        img = Image.open(io.BytesIO(source_bytes))
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        W, H = img.size
+
+        # Convert relative y to pixel coordinate
+        py = int(pos_y * H)
+
+        qtype = question.get('type', 'fill_blank')
+        if qtype == 'multiple_choice':
+            top = max(0, py - 300)
+            bottom = min(H, py + 400)
+        else:
+            top = max(0, py - 200)
+            bottom = min(H, py + 200)
+
+        # Full-width strip
+        cropped = img.crop((0, top, W, bottom))
+        buf = io.BytesIO()
+        cropped.save(buf, format='JPEG', quality=85)
+        crop_bytes = buf.getvalue()
+    except Exception as exc:
+        logger.warning('omo_grader crop failed for %s q=%s: %s', upload_id, question_id, exc)
+        return None
+
+    # Upload to GCS
+    bucket_name = gcs_bucket or os.environ.get("GCS_OMO_BUCKET", "lingoleap-omo-uploads")
+    object_path = f'crops/{upload_id}/{question_id}.jpg'
+    try:
+        from google.cloud import storage  # type: ignore[import]
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(object_path)
+        blob.upload_from_string(crop_bytes, content_type='image/jpeg')
+        gs_uri = f'gs://{bucket_name}/{object_path}'
+        logger.info('omo_grader: uploaded crop %s', gs_uri)
+        return gs_uri
+    except ImportError:
+        logger.debug('google-cloud-storage not available — skipping crop upload (local dev)')
+        return None
+    except Exception as exc:
+        logger.warning('omo_grader: GCS crop upload failed for %s: %s', object_path, exc)
+        return None
+
+
+_crop_and_upload_answer_image = _crop_and_upload
+
+
 async def grade_worksheet_images(
     image_bytes_list: list[bytes],
     mime_types: list[str],
     lesson: dict,
     attempt_id: Optional[int] = None,
+    upload_id: Optional[int] = None,
 ) -> list[GradedAnswer]:
     """Grade worksheet images against the lesson YAML schema.
 
@@ -193,6 +403,7 @@ async def grade_worksheet_images(
         mime_types: Corresponding MIME types.
         lesson: Lesson dict from lesson_loader (contains fill_in_blank, MCQ, etc.).
         attempt_id: The OmoUploadAttempt.id to record as source_attempt_id.
+        upload_id: The OmoUpload.id used for crop provenance object paths.
 
     Returns:
         List of GradedAnswer objects, one per question.
@@ -224,14 +435,22 @@ async def grade_worksheet_images(
         _consecutive_errors = 0
         return _mock_grades(questions, attempt_id)
 
-    client = genai.Client(vertexai=True, project="lingoleap-dev", location="us-central1")
+    _grader_model, _grader_location = get_model_for_task("omo_grader")
+    client = genai.Client(vertexai=True, project="lingoleap-dev", location=_grader_location)
 
-    # Build content parts: system prompt + all images
-    image_parts = []
+    # #1717: split 2-page worksheet spreads (Sharp scanners etc.) into single
+    # page halves so Gemini doesn't have to attend across the spine. Generic —
+    # only triggers when aspect ratio looks landscape; passes portrait through.
+    expanded: list[tuple[bytes, str]] = []
     for data, mime in zip(image_bytes_list, mime_types):
-        image_parts.append(
-            genai_types.Part.from_bytes(data=data, mime_type=mime)
-        )
+        expanded.extend(_split_spread(data, mime))
+
+    image_parts = [
+        genai_types.Part.from_bytes(data=data, mime_type=mime)
+        for data, mime in expanded
+    ]
+    logger.info("OMO grader: prepared %d image parts (from %d input images)",
+                len(image_parts), len(image_bytes_list))
 
     # OCR-only schema: Gemini returns handwriting + confidence + reasoning.
     # correct_answer + score are computed in Python (see _score_answer).
@@ -257,21 +476,25 @@ async def grade_worksheet_images(
         response = await asyncio.wait_for(
             asyncio.to_thread(
                 client.models.generate_content,
-                model="gemini-2.5-flash",
+                model=_grader_model,
                 contents=[genai_types.Content(parts=image_parts, role="user")],
                 config=genai_types.GenerateContentConfig(
                     system_instruction=system_prompt,
                     response_mime_type="application/json",
                     response_schema=response_schema,
-                    max_output_tokens=2048,
-                    temperature=0.1,   # low temp for deterministic grading
+                    max_output_tokens=4096,  # #1717: room for split-image responses
+                    temperature=0.0,   # #1712: deterministic — no creative completion
+                    # #1717: thinking_budget=0 — experiment showed thinking did
+                    # not improve OCR letter location (4/5→4/5 unchanged) but
+                    # doubled cost. Keep disabled. The real improvement came
+                    # from split-image preprocessing (see _split_spread).
                     thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
                     automatic_function_calling=genai_types.AutomaticFunctionCallingConfig(
                         disable=True
                     ),
                 ),
             ),
-            timeout=60,  # grading can take longer than identification
+            timeout=120,  # #1717: thinking enabled — give it room (was 60)
         )
     except asyncio.TimeoutError:
         _consecutive_errors += 1
@@ -305,18 +528,48 @@ async def grade_worksheet_images(
     # Reset circuit breaker on success
     _consecutive_errors = 0
 
-    # Lookup table: question_id → (correct_answer, type) for Python-side scoring
-    qmap = {q["id"]: (q["correct_answer"], q["type"]) for q in questions}
+    # Lookup table: question_id → full question dict (for validation + scoring)
+    qmap = {q["id"]: q for q in questions}
 
     results = []
+    fabricated_count = 0
+    low_confidence_count = 0
     for item in items:
         try:
             qid = str(item.get("question_id", ""))
-            student_ans = str(item.get("student_answer", "")).strip()
+            raw_student_ans = str(item.get("student_answer", "")).strip()
             ai_conf = float(item.get("ai_confidence", 0.0))
             reasoning = str(item.get("reasoning", ""))
 
-            correct_ans, qtype = qmap.get(qid, ("", "fill_blank"))
+            question = qmap.get(qid)
+            if not question:
+                logger.warning("OMO grader: skipping unknown question_id %s", qid)
+                continue
+
+            # #1712 anti-fabrication: coerce to empty if outside allowed_values.
+            student_ans, was_fabricated = _validate_student_answer(raw_student_ans, question)
+            if was_fabricated:
+                fabricated_count += 1
+                reasoning = (
+                    f"[anti-fabrication] AI 回傳 '{raw_student_ans}' 不在合法答案 "
+                    f"{question.get('allowed_values', [])[:5]}… 內，視為無作答。"
+                )
+                ai_conf = 0.0
+
+            # #1715 low-confidence threshold: when Gemini self-reports doubt,
+            # don't grade — flag for teacher review. Threshold is intentionally
+            # generic (no PDF / device / handwriting-specific tuning) so it
+            # generalizes across student worksheets.
+            if student_ans and ai_conf < _LOW_CONFIDENCE_THRESHOLD:
+                low_confidence_count += 1
+                reasoning = (
+                    f"[low-confidence] AI 看到 '{student_ans}' 但 confidence={ai_conf:.2f} < "
+                    f"{_LOW_CONFIDENCE_THRESHOLD}，建議老師判讀。原因：{reasoning}"
+                )
+                student_ans = ""
+
+            correct_ans = question["correct_answer"]
+            qtype = question["type"]
             score = _score_answer(student_ans, correct_ans, qtype)
 
             results.append(GradedAnswer(
@@ -334,6 +587,38 @@ async def grade_worksheet_images(
             ))
         except Exception as exc:
             logger.warning("OMO grader: skipping malformed answer item %s: %s", item, exc)
+
+    if fabricated_count:
+        logger.warning(
+            "OMO grader: coerced %d/%d fabricated answers to empty for lesson '%s'",
+            fabricated_count, len(results), lesson.get("title", "unknown"),
+        )
+    if low_confidence_count:
+        logger.info(
+            "OMO grader: flagged %d/%d low-confidence (< %.2f) answers for teacher review on lesson '%s'",
+            low_confidence_count, len(results), _LOW_CONFIDENCE_THRESHOLD,
+            lesson.get("title", "unknown"),
+        )
+
+    # Crop provenance: upload image strips for each non-empty answered question
+    # when the caller provides a real upload id.
+    if upload_id is not None:
+        for result in results:
+            if not (result.student_answer or "").strip():
+                continue
+            if not result.position or not image_bytes_list:
+                continue
+            q_info = {
+                'type': 'multiple_choice' if result.question_id.startswith('mc_') else 'fill_blank',
+                'position': result.position,
+            }
+            gs_uri = _crop_and_upload(
+                image_bytes_list,
+                q_info,
+                upload_id,
+                result.question_id,
+            )
+            result.crop_image_url = gs_uri
 
     logger.info(
         "OMO grader: graded %d/%d questions for lesson '%s'",
@@ -354,6 +639,7 @@ def _mock_grades(questions: list[dict], attempt_id: Optional[int]) -> list[Grade
             score=1.0,
             ai_confidence=0.9,
             reasoning="本地開發模式：模擬批改結果",
+            crop_image_url=None,
             source_attempt_id=attempt_id,
         )
         for q in questions

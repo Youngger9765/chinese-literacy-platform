@@ -16,7 +16,7 @@ class AIUsageLog(Base):
     user_role = Column(String(20))
     endpoint = Column(String(80))
     action = Column(String(30))
-    model = Column(String(50), default="gemini-2.5-flash")
+    model = Column(String(50), default="gemini-2.5-flash-lite")
     latency_ms = Column(Integer)
     story_id = Column(String(30))
     story_title = Column(String(100))

@@ -242,6 +242,8 @@ def get_story(story_id: str):
         multiple_choice=story["multiple_choice"],
         vocab_bank=story.get("vocab_bank"),
         knowledge_video_url=story.get("knowledge_video_url"),
+        # Full video list (#1683): catalog has multiple videos; frontend KnowledgeStation renders all.
+        video_links=story.get("video_links"),
         reading_benchmark=story["reading_benchmark"],
         text_type=story["text_type"],
         source_file=story["source_file"],
@@ -259,6 +261,13 @@ def get_story(story_id: str):
         lesson_intro=story.get("lesson_intro"),
         # 紙本學習單 PDF (#1444) — public GCS URL or None
         worksheet_pdf_url=story.get("worksheet_pdf_url"),
+        # 紙本表格 (#1685) — extracted tables for 圖文表整合 lessons; None for others
+        tables=story.get("tables"),
+        # Story structure scaffold (#1683 item 4): YAML data for StoryStructure step.
+        # story_structure_table: list-of-lists from docx parser (G7-L28/L29/L30).
+        # story_structure_rows: AI-generated dict rows (richer shape). Both may be None.
+        story_structure_table=story.get("story_structure_table"),
+        story_structure_rows=story.get("story_structure_rows"),
     )
 
 
@@ -372,7 +381,7 @@ async def get_story_structure(
         story_title=story["title"],
         input_tokens=usage.input_tokens if usage else 0,
         output_tokens=usage.output_tokens if usage else 0,
-        model=usage.model if usage else "gemini-2.5-flash",
+        model=usage.model if usage else "gemini-2.5-flash-lite",
         latency_ms=latency_ms,
         success=True,
         model_version=usage.model_version if usage else None,

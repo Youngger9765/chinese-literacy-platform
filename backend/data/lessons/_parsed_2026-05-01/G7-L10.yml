@@ -3,6 +3,18 @@ grade: 7
 grade_code: G7-L10
 reading_strategy: 推論策略-找作者觀點和支持理由
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L10塑膠，好用不好甩（推論策略-找作者觀點和支持理由）.docx
 parsed_at: '2026-05-01T21:10:39'
 flags: []
@@ -155,46 +167,22 @@ vocab_bank:
   G: 無遠弗屆
   H: 倡議者
 fill_in_blank:
-- id: 1
+- sentence: '我決定少用一次性餐具，因為它們最後可能變成（　　）進入海洋。'
   answer: C
-  answer_word: 塑膠微粒
-  context_before: 我決定少用一次性餐具，因為它們最後可能變成
-  context_after: 進入海洋
-- id: 2
+- sentence: '代表隊一路打進決賽，卻在關鍵時刻失手，眼看勝利就在眼前卻失之交臂，真是一個（　　）的案例。'
   answer: B
-  answer_word: 功敗垂成
-  context_before: 代表隊一路打進決賽，卻在關鍵時刻失手，眼看勝利就在眼前卻失之交臂，真是一個
-  context_after: 的案例
-- id: 3
+- sentence: '海灘垃圾太多，靠一兩個人撿拾只是（　　），要見到成效，必須由社區長期動員清理。'
   answer: A
-  answer_word: 杯水車薪
-  context_before: 海灘垃圾太多，靠一兩個人撿拾只是
-  context_after: ，要見到成效，必須由社區長期動員清理
-- id: 4
+- sentence: '反霸凌的（　　）設計了匿名投訴信箱，讓同學更願意求助。'
   answer: H
-  answer_word: 倡議者
-  context_before: 反霸凌的
-  context_after: 設計了匿名投訴信箱，讓同學更願意求助
-- id: 5
+- sentence: '參加校外教學前，家長要先（　　）同意書。'
   answer: E
-  answer_word: 簽署
-  context_before: 參加校外教學前，家長要先
-  context_after: 同意書
-- id: 6
+- sentence: '網路的影響（　　），一個影片能在幾小時內傳到全世界。'
   answer: G
-  answer_word: 無遠弗屆
-  context_before: 網路的影響
-  context_after: ，一個影片能在幾小時內傳到全世界
-- id: 7
+- sentence: '教練要求全隊遵守比賽戰術安排，不能（　　），破壞整個比賽的默契。'
   answer: F
-  answer_word: 自行其是
-  context_before: 教練要求全隊遵守比賽戰術安排，不能
-  context_after: ，破壞整個比賽的默契
-- id: 8
+- sentence: '這份報告的參考資料仍（　　），需要再補上出處。'
   answer: D
-  answer_word: 闕如
-  context_before: 這份報告的參考資料仍
-  context_after: ，需要再補上出處
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n推論策略—找作者觀點與支持理由\n閱讀說明文或議論文時，讀出「作者的觀點」和「支持觀點的理由」，以及推論出隱含的意義，才能完全理解文章。觀點和支持理由間的關係，就像插圖中的桌子一樣，桌子要有腳才站得穩，觀點要有支持理由，才有說服力。\n\n我們用底下❶～❸的步驟來讀出「作者的觀點、支持理由和隱含的意義」。\n   【❶確認觀點】   【❷找支持理由】   【❸推論隱含意義】\n(作者提出什麼主張？)  (用哪些證據支持？)  (隱含什麼深層意義？)\n接下來，我們來運用這個策略，分析〈塑膠，好用不好甩〉這篇文章的內容。\n一、找作者觀點、支持理由與隱含意義\n步驟❶──找作者觀點\n祕訣：觀點常是判斷句；先看標題與開頭段。\n◎"
 strategy_exercise:

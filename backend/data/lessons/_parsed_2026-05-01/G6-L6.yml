@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L6
 reading_strategy: 推論策略-從大意及關鍵句推論段旨
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L6心理出狀況,是壞事導致的嗎（推論策略-從大意及關鍵句推論段旨）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []
@@ -152,13 +165,23 @@ vocab_bank:
   E: 潸然淚下
   F: 反芻
   G: 鴉雀無聲
+  H: 萬丈深淵
 fill_in_blank:
-- id: 2
+- sentence: '我只是走在路上，沒想到卻被飛來的磚頭砸到進醫院，簡直是（　　）。'
+  answer: D
+- sentence: '自從他上次比賽慘敗，從此就（　　），連平日的練習都不參加了。'
   answer: A
-  answer_word: 一蹶不振
-  context_before: 自從他上次比賽慘敗，從此就
-  context_after: ，連平日的練習都不參加了
-fill_in_blank_count: 1
+- sentence: '每次比賽過後，他總會不斷（　　）跑步中的每個動作，期待下次能有更好的表現。'
+  answer: F
+- sentence: '這個廚師彷彿有（　　），居然能一手炒菜，一手煮湯，還能同時完成擺盤，真是太厲害了！'
+  answer: B
+- sentence: '他不僅被騙光積蓄，還被裁員，情緒一下子跌入（　　）。'
+  answer: H
+- sentence: '他想到因腳傷，運動生涯就此結束，不禁（　　）。'
+  answer: E
+- sentence: '原本吵鬧的教室，在老師進門後，瞬間變得（　　）。'
+  answer: G
+fill_in_blank_count: 7
 spotlight_raw_text: "閱讀聚光燈\n推論段落主旨\n\n    主旨是作者在寫文章時，想要告訴別人的主要想法或道理。\n    這篇文章屬於議論文，文章主題在討論：心理生病了，是「壞事」導致的嗎？作者用三個故事來說明他的想法，卻未在故事中直接說出他的答案。\n因此這課我們要來練習：推論段落主旨。\n推論文章主旨的方法有兩種：\n1.\t從標題找線索、從文章第一段或最後一段找主題句。\n2.\t摘取文章的大意和關鍵語句。\n（忘記方法可以翻到第4、5課"
 strategy_exercise:
   type: guided_steps

@@ -8,7 +8,6 @@ from sqlalchemy import (
     Text,
     DateTime,
     ForeignKey,
-    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -54,6 +53,8 @@ class Assignment(Base):
     target_cpm: Mapped[int | None] = mapped_column(Integer, nullable=True)       # target chars/min; None = use default
     target_accuracy: Mapped[float | None] = mapped_column(Float, nullable=True)  # 0-100 %; None = use default
     difficulty_label: Mapped[str | None] = mapped_column(String(10), nullable=True)  # 初級/中級/高級
+    # Issue #1762: teacher can enable smart-skip of steps the student already completed
+    skip_completed_steps: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -68,14 +69,22 @@ class Assignment(Base):
 
 
 class AssignmentSubmission(Base):
+    """A student's submission for an assignment.
+
+    Issue #1762: UNIQUE constraint on (assignment_id, student_id) has been dropped
+    to allow students to redo assignments (repeatable submissions).
+    attempt_number tracks which attempt this submission represents (1-based).
+    """
     __tablename__ = "assignment_submissions"
-    __table_args__ = (UniqueConstraint("assignment_id", "student_id", name="uq_assignment_student"),)
+    # Issue #1762: UNIQUE constraint dropped — see migration 4a7b5ead6b8f
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     assignment_id: Mapped[int] = mapped_column(
         ForeignKey("assignments.id", ondelete="CASCADE"), nullable=False, index=True
     )
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    # Issue #1762: tracks which attempt this is (1 = first, 2 = second redo, …)
+    attempt_number: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="pending")  # "pending" | "in_progress" | "submitted" | "graded"
     session_id: Mapped[int | None] = mapped_column(
         ForeignKey("learning_sessions.id", ondelete="SET NULL"), nullable=True, index=True

@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L24
 reading_strategy: 摘要策略-問題.解決結構找重點
 reading_strategy_type: summary_psr
+step_sequence:
+- intro
+- reading-annotation
+- knowledge-station
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- report
 source_file: G6-L24白鯨救援（摘要策略-問題.解決結構找重點）.docx
 parsed_at: '2026-05-02T16:24:34'
 flags: []
@@ -33,31 +46,22 @@ paragraphs:
 paragraph_count: 7
 char_count: 1059
 fill_in_blank:
-- id: 1
-  answer: 困在冰原裡，冰洞愈來愈小，因為無法換氣快要窒息了
-  context_before: 白鯨怎麼了? 白鯨群
-  context_after: ''
-  context_paragraph_idx: 6
-- id: 2
-  answer: 用鐵鍬和鏟子鑿開冰洞，並且餵食白鯨冷凍魚類
-  context_before: 1.村民
-  context_after: 2.政府【派破冰船救援，開出一條20公里的水道 】 3.船員【播
-  context_paragraph_idx: 6
-- id: 3
-  answer: 派破冰船救援，開出一條20公里的水道
-  context_before: 1.村民【用鐵鍬和鏟子鑿開冰洞，並且餵食白鯨冷凍魚類 】 2.政府
-  context_after: 3.船員【播放古典音樂引導白鯨前進 】
-  context_paragraph_idx: 6
-- id: 4
-  answer: 播放古典音樂引導白鯨前進
-  context_before: 】 2.政府【派破冰船救援，開出一條20公里的水道 】 3.船員
-  context_after: ''
-  context_paragraph_idx: 6
-- id: 5
-  answer: 數千頭白鯨游出冰原，回到大海
-  context_before: ''
-  context_after: ''
-  context_paragraph_idx: 6
+- sentence: 教師職缺的名額只有十個，報名者卻有百人，（　　　）錄取不易。
+  answer: I
+- sentence: 颱風即將到來，岸邊巨浪（　　　），聲勢真是嚇人。
+  answer: A
+- sentence: 北風（　　　）地吹著，即使裹緊大衣，還是覺得很冷。
+  answer: B
+- sentence: 學校原本要把週三第八節改成「興趣探索課」，但家長反對，這項改革（　　　），令人遺憾。
+  answer: D
+- sentence: 面對突如其來的危機，大家一時（　　　），不知道該怎麼辦。
+  answer: F
+- sentence: 忙完畢業展的佈置後，大家都（　　　），希望好好休息。
+  answer: E
+- sentence: 災後援助若拖延太久，恐怕（　　　），災民的食物與醫療需求將受影響。
+  answer: H
+- sentence: 他白天忙著工作、晚上又得照顧生病的母親，雙重壓力讓他覺得快要（　　　）了，很辛苦。
+  answer: C
 fill_in_blank_count: 5
 vocabulary:
 - word: 束手無策
@@ -88,10 +92,10 @@ reading_benchmark:
   - threshold: □ ＞241字
     feedback: 哇嗚，超級厲害！
 video_links:
-- title: '1. 白鯨救援Frozen Crisis: The 1984 Rescue of 3,000 Beluga Whales Trapped in Ice'
-  url: ''
-- title: 2. 柴可夫斯基《天鵝湖》四小天鵝舞 - 柏林國家歌劇院獻演
-  url: ''
+- title: 影片1
+  url: http://youtu.be/s83wzgxhewI
+- title: 影片2
+  url: http://youtu.be/UeYJAnTWJYA
 multiple_choice:
 - question: 1. 文中第三段提到「資源僧多粥少」，根據上下文，「僧多粥少」最可能的意思是：
   options:
@@ -234,3 +238,29 @@ lesson_intro:
   course_intro: 這篇文章記錄了一場發生在北極海的白鯨救援行動。故事描述了數千頭白鯨因氣候驟變受困於冰層中，面臨生命威脅的緊急情況。從當地居民的初步嘗試，到政府出動破冰船，救援過程一波三折，充滿了意想不到的挑戰。文章將帶領讀者了解人類如何運用智慧與創意，與大自然中的生命進行溝通與互動，最終共同譜寫出一段特別的經歷。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L24.pdf
+spotlight_answers:
+- id: 1
+  answer: 困在冰原裡，冰洞愈來愈小，因為無法換氣快要窒息了
+  context_before: 白鯨怎麼了? 白鯨群
+  context_after: ''
+  context_paragraph_idx: 6
+- id: 2
+  answer: 用鐵鍬和鏟子鑿開冰洞，並且餵食白鯨冷凍魚類
+  context_before: 1.村民
+  context_after: 2.政府【派破冰船救援，開出一條20公里的水道 】 3.船員【播
+  context_paragraph_idx: 6
+- id: 3
+  answer: 派破冰船救援，開出一條20公里的水道
+  context_before: 1.村民【用鐵鍬和鏟子鑿開冰洞，並且餵食白鯨冷凍魚類 】 2.政府
+  context_after: 3.船員【播放古典音樂引導白鯨前進 】
+  context_paragraph_idx: 6
+- id: 4
+  answer: 播放古典音樂引導白鯨前進
+  context_before: 】 2.政府【派破冰船救援，開出一條20公里的水道 】 3.船員
+  context_after: ''
+  context_paragraph_idx: 6
+- id: 5
+  answer: 數千頭白鯨游出冰原，回到大海
+  context_before: ''
+  context_after: ''
+  context_paragraph_idx: 6

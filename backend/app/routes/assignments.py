@@ -30,9 +30,11 @@ from ..schemas.assignment import (
     AssignmentListResponse,
     AssignmentResponse,
     AssignmentUpdateRequest,
+    AttemptResponse,
     GradeSubmissionRequest,
     StartAssignmentResponse,
     StudentAssignmentResponse,
+    StudentAttemptGroup,
     SubmissionResponse,
     DEFAULT_TARGET_CPM,
     DEFAULT_TARGET_ACCURACY,
@@ -90,18 +92,24 @@ def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentRe
     """Convert an Assignment ORM object to an AssignmentResponse."""
     story_title = _resolve_title_for_assignment(assignment, db)
 
-    submission_count = (
-        db.query(func.count(AssignmentSubmission.id))
-        .filter(AssignmentSubmission.assignment_id == assignment.id)
-        .scalar()
+    # Issue #1764 Fix 3: precise student counts
+    assigned_student_count: int = (
+        db.query(func.count(func.distinct(ClassroomStudent.student_id)))
+        .filter(ClassroomStudent.classroom_id == assignment.classroom_id)
+        .scalar() or 0
     )
-    completed_count = (
-        db.query(func.count(AssignmentSubmission.id))
+    submitted_student_count: int = (
+        db.query(func.count(func.distinct(AssignmentSubmission.student_id)))
         .filter(
             AssignmentSubmission.assignment_id == assignment.id,
             AssignmentSubmission.status.in_(["submitted", "graded"]),
         )
-        .scalar()
+        .scalar() or 0
+    )
+    total_attempts: int = (
+        db.query(func.count(AssignmentSubmission.id))
+        .filter(AssignmentSubmission.assignment_id == assignment.id)
+        .scalar() or 0
     )
 
     return AssignmentResponse(
@@ -117,14 +125,21 @@ def _assignment_to_response(assignment: Assignment, db: Session) -> AssignmentRe
         due_date=assignment.due_date,
         is_active=assignment.is_active,
         created_at=assignment.created_at,
-        submission_count=submission_count,
-        completed_count=completed_count,
+        # Issue #1764 Fix 3: split counts
+        assigned_student_count=assigned_student_count,
+        submitted_student_count=submitted_student_count,
+        total_attempts=total_attempts,
+        # Back-compat aliases for existing frontend
+        submission_count=total_attempts,
+        completed_count=submitted_student_count,
         # Reading goals (Issue #84)
         target_cpm=assignment.target_cpm,
         target_accuracy=assignment.target_accuracy,
         difficulty_label=assignment.difficulty_label,
         effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
         effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
+        # Issue #1762
+        skip_completed_steps=assignment.skip_completed_steps,
     )
 
 
@@ -349,6 +364,7 @@ def get_my_assignment_detail(
             AssignmentSubmission.assignment_id == assignment_id,
             AssignmentSubmission.student_id == current_user.id,
         )
+        .order_by(AssignmentSubmission.attempt_number.desc())  # P0-2: always get latest attempt
         .first()
     )
     if submission is None:
@@ -465,6 +481,8 @@ def create_assignment(
         target_cpm=payload.target_cpm,
         target_accuracy=payload.target_accuracy,
         difficulty_label=payload.difficulty_label,
+        # Issue #1762: smart skip setting
+        skip_completed_steps=payload.skip_completed_steps,
     )
     db.add(assignment)
     db.flush()  # get assignment.id
@@ -605,9 +623,48 @@ def get_assignment_detail(
             )
         )
 
+    # Issue #1764 Fix 4: group submissions by student
+    from collections import defaultdict
+    student_subs: dict[int, list[AssignmentSubmission]] = defaultdict(list)
+    for sub in submissions:
+        student_subs[sub.student_id].append(sub)
+
+    groups: list[StudentAttemptGroup] = []
+    for student_id, subs in student_subs.items():
+        student = db.query(User).filter(User.id == student_id).first()
+        subs_sorted = sorted(subs, key=lambda s: s.attempt_number, reverse=True)
+        latest = subs_sorted[0]
+        attempt_list: list[AttemptResponse] = []
+        for sub in subs_sorted:
+            r_acc, r_cpm, r_err = _extract_reading_metrics(sub, db)
+            attempt_list.append(
+                AttemptResponse(
+                    id=sub.id,
+                    attempt_number=sub.attempt_number,
+                    status=sub.status,
+                    submitted_at=sub.submitted_at,
+                    score=sub.score,
+                    reading_accuracy=r_acc,
+                    reading_cpm=r_cpm,
+                    reading_error_chars=r_err,
+                    teacher_feedback=sub.teacher_feedback,
+                )
+            )
+        groups.append(
+            StudentAttemptGroup(
+                student_id=student_id,
+                student_name=student.name if student else "Unknown",
+                latest_status=latest.status,
+                latest_score=latest.score,
+                latest_attempt_number=latest.attempt_number,
+                attempts=attempt_list,
+            )
+        )
+
     return AssignmentDetailResponse(
         **base.model_dump(),
         submissions=submission_responses,
+        submissions_by_student=groups,
     )
 
 
@@ -845,13 +902,14 @@ def start_assignment(
     if not assignment.is_active:
         raise HTTPException(status_code=400, detail="Assignment is not active")
 
-    # Find the student's submission
+    # Find the student's latest submission (highest attempt_number)
     submission = (
         db.query(AssignmentSubmission)
         .filter(
             AssignmentSubmission.assignment_id == assignment_id,
             AssignmentSubmission.student_id == current_user.id,
         )
+        .order_by(AssignmentSubmission.attempt_number.desc())
         .first()
     )
     if submission is None:
@@ -861,7 +919,7 @@ def start_assignment(
 
     if submission.status in ("submitted", "graded"):
         raise HTTPException(
-            status_code=400, detail="Assignment already submitted"
+            status_code=400, detail="Assignment already submitted. Use /restart to redo."
         )
 
     # If already in progress with a session, return it (idempotent)
@@ -876,11 +934,48 @@ def start_assignment(
             difficulty_label=assignment.difficulty_label,
             effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
             effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
+            session_mode="assignment",
+            attempt_number=submission.attempt_number,
         )
 
     # story_slug for LearningSession: use normalized story_id (YAML) or text_id as string
     raw_slug = assignment.story_id or str(assignment.text_id)
     story_slug = normalize_story_slug(raw_slug)
+
+    # Issue #1762 + Fix 1 #1764: compute skipped steps if skip_completed_steps is enabled.
+    # EXCLUDE sessions linked to THIS assignment's own prior submissions so that
+    # attempt N+1 does not inherit skipped steps from attempt N.
+    skipped_steps: list[str] = []
+    if assignment.skip_completed_steps:
+        own_session_ids: set[int] = {
+            sub.session_id
+            for sub in db.query(AssignmentSubmission)
+            .filter(
+                AssignmentSubmission.assignment_id == assignment.id,
+                AssignmentSubmission.student_id == current_user.id,
+                AssignmentSubmission.session_id.isnot(None),
+            )
+            .all()
+            if sub.session_id is not None
+        }
+        prior_sessions_query = db.query(LearningSession).filter(
+            LearningSession.student_id == current_user.id,
+            LearningSession.story_slug == story_slug,
+            LearningSession.status == "completed",
+        )
+        if own_session_ids:
+            prior_sessions_query = prior_sessions_query.filter(
+                LearningSession.id.not_in(own_session_ids)
+            )
+        prior_sessions = prior_sessions_query.all()
+        completed_union: set[str] = set()
+        for ps in prior_sessions:
+            sp = ps.step_progress
+            if isinstance(sp, dict):
+                steps = sp.get("steps_completed", [])
+                if isinstance(steps, list):
+                    completed_union.update(s for s in steps if isinstance(s, str) and s.strip())
+        skipped_steps = sorted(completed_union)
 
     def _sync_assignment_metadata(session: LearningSession) -> None:
         """Attach assignment metadata + classroom_id to a reused session.
@@ -891,20 +986,27 @@ def start_assignment(
         progress = session.step_progress or {}
         if not isinstance(progress.get("__meta"), dict) or progress["__meta"].get("assignment_id") != assignment.id:
             progress["__meta"] = {"source": "assignment", "assignment_id": assignment.id}
+            if skipped_steps:
+                progress["skipped_steps"] = skipped_steps
             session.step_progress = progress
             flag_modified(session, "step_progress")
         if session.classroom_id is None and assignment.classroom_id is not None:
             session.classroom_id = assignment.classroom_id
+        # Issue #1762: mark session as assignment mode
+        session.session_mode = "assignment"
 
     # Reuse existing in_progress session for same student + story to avoid
     # duplicates when switching devices (#1074).  Attach assignment metadata
     # so the session is associated with this assignment.
+    # Issue #1762 P0-1: filter by session_mode="assignment" — NEVER reuse a
+    # self-study session as an assignment session; they are separate contexts.
     learning_session = (
         db.query(LearningSession)
         .filter(
             LearningSession.student_id == current_user.id,
             LearningSession.story_slug == story_slug,
             LearningSession.status == "in_progress",
+            LearningSession.session_mode == "assignment",  # P0-1: never reuse self-study sessions
         )
         .order_by(LearningSession.started_at.desc())
         .first()
@@ -916,18 +1018,24 @@ def start_assignment(
             learning_session.id, assignment.id, current_user.id, story_slug,
         )
     else:
+        initial_step_progress: dict = {
+            "__meta": {
+                "source": "assignment",
+                "assignment_id": assignment.id,
+                "skip_policy": "snapshot_at_session_creation",  # Fix 2 #1764
+            }
+        }
+        if skipped_steps:
+            initial_step_progress["skipped_steps"] = skipped_steps
+
         learning_session = LearningSession(
             student_id=current_user.id,
             story_slug=story_slug,
             classroom_id=assignment.classroom_id,
             status="in_progress",
             current_step=1,
-            step_progress={
-                "__meta": {
-                    "source": "assignment",
-                    "assignment_id": assignment.id,
-                }
-            },
+            session_mode="assignment",  # Issue #1762
+            step_progress=initial_step_progress,
         )
         db.add(learning_session)
         try:
@@ -966,8 +1074,9 @@ def start_assignment(
     db.commit()
 
     logger.info(
-        "Student %d started assignment %d (session=%d)",
+        "Student %d started assignment %d (session=%d, attempt=%d, skipped=%d steps)",
         current_user.id, assignment_id, learning_session.id,
+        submission.attempt_number, len(skipped_steps),
     )
     return StartAssignmentResponse(
         session_id=learning_session.id,
@@ -979,6 +1088,9 @@ def start_assignment(
         difficulty_label=assignment.difficulty_label,
         effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
         effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
+        session_mode="assignment",
+        attempt_number=submission.attempt_number,
+        skipped_steps=skipped_steps,
     )
 
 
@@ -1008,6 +1120,7 @@ def submit_assignment(
             AssignmentSubmission.assignment_id == assignment_id,
             AssignmentSubmission.student_id == current_user.id,
         )
+        .order_by(AssignmentSubmission.attempt_number.desc())  # P0-2: always get latest attempt
         .first()
     )
     if submission is None:
@@ -1117,4 +1230,145 @@ def submit_assignment(
         difficulty_label=assignment.difficulty_label,
         effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
         effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
+        attempt_number=submission.attempt_number,
+    )
+
+
+# ── Issue #1762: Restart Assignment (repeatable submission) ───────────────────
+
+
+@router.post(
+    "/assignments/{assignment_id}/restart",
+    response_model=StartAssignmentResponse,
+    status_code=201,
+)
+def restart_assignment(
+    assignment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Restart an already-submitted assignment. Creates a new AssignmentSubmission
+    with attempt_number = max existing + 1, plus a fresh LearningSession.
+
+    Only available once the current submission is in 'submitted' or 'graded' state.
+    """
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+
+    if not assignment.is_active:
+        raise HTTPException(status_code=400, detail="Assignment is not active")
+
+    # Find the student's latest submission
+    latest_submission = (
+        db.query(AssignmentSubmission)
+        .filter(
+            AssignmentSubmission.assignment_id == assignment_id,
+            AssignmentSubmission.student_id == current_user.id,
+        )
+        .order_by(AssignmentSubmission.attempt_number.desc())
+        .first()
+    )
+    if latest_submission is None:
+        raise HTTPException(
+            status_code=403, detail="You are not enrolled in this assignment"
+        )
+
+    if latest_submission.status not in ("submitted", "graded"):
+        raise HTTPException(
+            status_code=400,
+            detail="Assignment must be submitted or graded before restarting",
+        )
+
+    next_attempt = latest_submission.attempt_number + 1
+
+    # story_slug for new LearningSession
+    raw_slug = assignment.story_id or str(assignment.text_id)
+    story_slug = normalize_story_slug(raw_slug)
+
+    # Issue #1762 + Fix 1 #1764: compute skipped steps if enabled.
+    # EXCLUDE sessions linked to THIS assignment's own prior submissions so that
+    # restart attempt N+1 does not inherit skipped steps from attempt N.
+    skipped_steps: list[str] = []
+    if assignment.skip_completed_steps:
+        own_session_ids: set[int] = {
+            sub.session_id
+            for sub in db.query(AssignmentSubmission)
+            .filter(
+                AssignmentSubmission.assignment_id == assignment.id,
+                AssignmentSubmission.student_id == current_user.id,
+                AssignmentSubmission.session_id.isnot(None),
+            )
+            .all()
+            if sub.session_id is not None
+        }
+        prior_sessions_query = db.query(LearningSession).filter(
+            LearningSession.student_id == current_user.id,
+            LearningSession.story_slug == story_slug,
+            LearningSession.status == "completed",
+        )
+        if own_session_ids:
+            prior_sessions_query = prior_sessions_query.filter(
+                LearningSession.id.not_in(own_session_ids)
+            )
+        prior_sessions = prior_sessions_query.all()
+        completed_union: set[str] = set()
+        for ps in prior_sessions:
+            sp = ps.step_progress
+            if isinstance(sp, dict):
+                steps = sp.get("steps_completed", [])
+                if isinstance(steps, list):
+                    completed_union.update(s for s in steps if isinstance(s, str) and s.strip())
+        skipped_steps = sorted(completed_union)
+
+    initial_step_progress: dict = {
+        "__meta": {
+            "source": "assignment",
+            "assignment_id": assignment.id,
+            "attempt_number": next_attempt,
+            "skip_policy": "snapshot_at_session_creation",  # Fix 2 #1764
+        }
+    }
+    if skipped_steps:
+        initial_step_progress["skipped_steps"] = skipped_steps
+
+    new_session = LearningSession(
+        student_id=current_user.id,
+        story_slug=story_slug,
+        classroom_id=assignment.classroom_id,
+        status="in_progress",
+        current_step=1,
+        session_mode="assignment",  # Issue #1762
+        step_progress=initial_step_progress,
+    )
+    db.add(new_session)
+    db.flush()  # get new_session.id
+
+    new_submission = AssignmentSubmission(
+        assignment_id=assignment_id,
+        student_id=current_user.id,
+        attempt_number=next_attempt,
+        status="in_progress",
+        session_id=new_session.id,
+    )
+    db.add(new_submission)
+    db.commit()
+
+    logger.info(
+        "Student %d restarted assignment %d (new_session=%d, attempt=%d, skipped=%d steps)",
+        current_user.id, assignment_id, new_session.id, next_attempt, len(skipped_steps),
+    )
+    return StartAssignmentResponse(
+        session_id=new_session.id,
+        story_id=assignment.story_id,
+        text_id=assignment.text_id,
+        status="in_progress",
+        target_cpm=assignment.target_cpm,
+        target_accuracy=assignment.target_accuracy,
+        difficulty_label=assignment.difficulty_label,
+        effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
+        effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
+        session_mode="assignment",
+        attempt_number=next_attempt,
+        skipped_steps=skipped_steps,
     )

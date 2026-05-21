@@ -24,7 +24,8 @@ from pathlib import Path
 
 import yaml
 
-from .ai_base import _get_client, _repair_json, GeminiContentFilterError
+from .ai_base import _repair_json, GeminiContentFilterError
+from .llm_models import get_model_for_task
 
 logger = logging.getLogger(__name__)
 
@@ -341,17 +342,19 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
         logger.error("No OMO lessons loaded — cannot identify")
         return []
 
-    client = _get_client()
+    _identifier_model, _identifier_location = get_model_for_task("omo_identifier")
     prompt = _build_identification_prompt(lessons)
 
     # Encode image for inline content part
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
     try:
+        from google import genai
         from google.genai import types as genai_types
 
+        client = genai.Client(vertexai=True, project="lingoleap-dev", location=_identifier_location)
         response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash",
+            model=_identifier_model,
             contents=[
                 genai_types.Content(
                     role="user",
@@ -369,6 +372,7 @@ async def identify_lesson_from_image(image_bytes: bytes, mime_type: str = "image
             config=genai_types.GenerateContentConfig(
                 temperature=0.1,  # Low temperature for deterministic identification
                 max_output_tokens=3072,  # bumped 2048→3072: terse prompt still needs buffer for 158-lesson corpus
+                thinking_config=genai_types.ThinkingConfig(thinking_budget=0),
             ),
         )
 
@@ -508,3 +512,52 @@ def _check_circuit_breaker() -> None:
             f"OMO identifier circuit breaker tripped: "
             f"{_consecutive_errors} consecutive errors"
         )
+
+
+def identify_lesson_from_hint(lesson_code: str) -> list[LessonCandidate]:
+    """Resolve a lesson by its known lesson_code (hint path — skips AI fuzzy match).
+
+    Used when the student uploads from within a lesson reading page, so the
+    system already knows which lesson they're working on.  The upload route
+    uses this function when ``lesson_code_hint`` is provided in the request,
+    saving ~6-24 s of Vertex AI latency and ~$0.0003 per call.
+
+    Args:
+        lesson_code: Canonical lesson code from the YAML catalog (e.g. "G5-L25").
+
+    Returns:
+        A single LessonCandidate with confidence=1.0, or [] if the code is not
+        found in the curriculum catalog.
+    """
+    curriculum = _load_curriculum_titles()
+    if not curriculum:
+        logger.warning("identify_lesson_from_hint: curriculum cache empty")
+        return []
+
+    info = curriculum.get(lesson_code)
+    if not info:
+        logger.warning(
+            "identify_lesson_from_hint: lesson_code=%r not found in catalog", lesson_code
+        )
+        return []
+
+    try:
+        lesson_id = int(lesson_code.split("-L")[1])
+    except (IndexError, ValueError):
+        lesson_id = 0
+
+    logger.info(
+        "identify_lesson_from_hint: lesson_code=%r → id=%d title=%r (hint path, no AI call)",
+        lesson_code,
+        lesson_id,
+        info["title"],
+    )
+    return [
+        LessonCandidate(
+            lesson_id=lesson_id,
+            grade_code=info["grade_code"],
+            title=info["title"],
+            confidence=1.0,
+            reasoning="user-provided lesson hint (課文頁面內上傳)",
+        )
+    ]

@@ -30,6 +30,8 @@ class AssignmentCreateRequest(BaseModel):
     target_cpm: int | None = Field(None, ge=30, le=600)
     target_accuracy: float | None = Field(None, ge=0, le=100)
     difficulty_label: str | None = None
+    # Issue #1762: teacher can enable smart-skip of already-completed steps
+    skip_completed_steps: bool = False
 
     @model_validator(mode="after")
     def _exactly_one_text_source(self) -> "AssignmentCreateRequest":
@@ -87,8 +89,13 @@ class AssignmentResponse(BaseModel):
     due_date: datetime | None
     is_active: bool
     created_at: datetime
-    submission_count: int
-    completed_count: int
+    # Issue #1764 Fix 3: precise student counts
+    assigned_student_count: int        # DISTINCT enrolled students
+    submitted_student_count: int       # DISTINCT students with submitted/graded attempt
+    total_attempts: int                # raw row count for analytics
+    # Back-compat aliases — existing frontend reads these two fields
+    submission_count: int              # mirrors total_attempts
+    completed_count: int               # mirrors submitted_student_count
     # Reading goals (Issue #84)
     target_cpm: int | None
     target_accuracy: float | None
@@ -96,12 +103,45 @@ class AssignmentResponse(BaseModel):
     # Effective goals — defaults filled in when teacher hasn't set custom ones
     effective_cpm: int
     effective_accuracy: float
+    # Issue #1762
+    skip_completed_steps: bool = False
+
+    model_config = {"from_attributes": True}
+
+
+# Issue #1764 Fix 4: attempt group for one student visible to teacher
+class AttemptResponse(BaseModel):
+    """A single submission attempt (row in assignment_submissions)."""
+    id: int
+    attempt_number: int
+    status: str
+    submitted_at: datetime | None
+    score: float | None
+    reading_accuracy: float | None = None
+    reading_cpm: float | None = None
+    reading_error_chars: list[str] = []
+    teacher_feedback: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class StudentAttemptGroup(BaseModel):
+    """All attempts by one student, grouped for teacher dashboard."""
+    student_id: int
+    student_name: str
+    latest_status: str
+    latest_score: float | None
+    latest_attempt_number: int
+    attempts: list[AttemptResponse]   # ordered desc by attempt_number
 
     model_config = {"from_attributes": True}
 
 
 class AssignmentDetailResponse(AssignmentResponse):
+    # Legacy flat list kept for backward compat (grading endpoint uses SubmissionResponse)
     submissions: list[SubmissionResponse]
+    # Fix 4: grouped view — one entry per student
+    submissions_by_student: list[StudentAttemptGroup] = Field(default_factory=list)
 
 
 class AssignmentListResponse(BaseModel):
@@ -134,6 +174,12 @@ class StudentAssignmentResponse(BaseModel):
     difficulty_label: str | None
     effective_cpm: int
     effective_accuracy: float
+    # Issue #1762
+    attempt_number: int = 1
+    session_mode: str = "self_study"
+    skip_completed_steps: bool = False
+    # Steps that are auto-skipped because student already completed them in a prior session
+    skipped_steps: list[str] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}
 
@@ -149,3 +195,7 @@ class StartAssignmentResponse(BaseModel):
     difficulty_label: str | None = None
     effective_cpm: int = DEFAULT_TARGET_CPM
     effective_accuracy: float = DEFAULT_TARGET_ACCURACY
+    # Issue #1762
+    session_mode: str = "assignment"
+    attempt_number: int = 1
+    skipped_steps: list[str] = Field(default_factory=list)

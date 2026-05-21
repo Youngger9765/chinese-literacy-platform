@@ -34,7 +34,9 @@ export interface FeedbackListResponse {
 }
 
 function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('token');
+  // #1777: AuthContext stores JWT under 'lingoleap_token', not 'token'.
+  // This used to silently return no Authorization header → all feedback 401.
+  const token = localStorage.getItem('lingoleap_token');
   if (!token) return {};
   return { Authorization: `Bearer ${token}` };
 }

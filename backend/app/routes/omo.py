@@ -27,8 +27,8 @@ import os
 from datetime import datetime, timezone
 from typing import Literal, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Path, UploadFile, status
-from pydantic import BaseModel
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Path, UploadFile, status
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
@@ -75,12 +75,15 @@ class AnswerFlagInfo(BaseModel):
 class AnswerItem(BaseModel):
     question_id: str
     student_answer: str
-    correct_answer: str
+    # Optional: multiple_choice questions can have answer=null (no correct answer
+    # in YAML — used for open-ended questions like mc_2 in L24).
+    correct_answer: Optional[str] = None
     score: float
     ai_confidence: float
     reasoning: str
     source_attempt_id: Optional[int] = None
     position: Optional[dict] = None
+    crop_image_url: Optional[str] = None
     flag: Optional[AnswerFlagInfo] = None
 
 
@@ -153,21 +156,48 @@ def _upload_to_gcs(
 
 
 def _get_signed_url(object_path: str) -> Optional[str]:
-    """Generate a 1-hour signed URL for a GCS object. Returns None if unavailable."""
+    """Generate a 1-hour signed URL for a GCS object. Returns None if unavailable.
+
+    Uses IAM-based signing (service_account_email + access_token) so it works on
+    Cloud Run where the default ADC has no private key file. Falls back to bare
+    generate_signed_url() for local dev where credentials may already include a
+    private key.
+    """
     import datetime as dt
     try:
         from google.cloud import storage  # type: ignore[import]
+        from google.auth import default as google_auth_default  # type: ignore[import]
+        from google.auth.transport.requests import Request as GoogleAuthRequest  # type: ignore[import]
+
         client = storage.Client()
         bucket = client.bucket(_OMO_GCS_BUCKET)
         blob = bucket.blob(object_path)
-        url = blob.generate_signed_url(
-            version="v4",
-            expiration=dt.timedelta(hours=1),
-            method="GET",
-        )
-        return url
+
+        sa_email = None
+        access_token = None
+        try:
+            credentials, _proj = google_auth_default()
+            if credentials and not getattr(credentials, "valid", False):
+                credentials.refresh(GoogleAuthRequest())
+            sa_email = getattr(credentials, "service_account_email", None)
+            access_token = getattr(credentials, "token", None)
+        except Exception as cred_exc:
+            logger.warning("OMO signed URL: failed to fetch ADC for IAM signing: %s", cred_exc)
+
+        kwargs = {
+            "version": "v4",
+            "expiration": dt.timedelta(hours=1),
+            "method": "GET",
+        }
+        # Only pass IAM signing kwargs when both are available — otherwise let the
+        # SDK pick its default (private key path for local dev).
+        if sa_email and access_token:
+            kwargs["service_account_email"] = sa_email
+            kwargs["access_token"] = access_token
+
+        return blob.generate_signed_url(**kwargs)
     except Exception as exc:
-        logger.debug("OMO signed URL failed for %s: %s", object_path, exc)
+        logger.warning("OMO signed URL failed for %s: %s", object_path, exc)
         return None
 
 
@@ -192,8 +222,59 @@ def _update_upload(upload_id: int, **kwargs):
         db.close()
 
 
-async def _run_identification(upload_id: int, image_bytes_list: list[bytes], mime_types: list[str]):
-    """Background task: call AI to identify lesson, write result back to DB."""
+async def _run_identification(
+    upload_id: int,
+    image_bytes_list: list[bytes],
+    mime_types: list[str],
+    lesson_code_hint: Optional[str] = None,
+):
+    """Background task: identify lesson and write result back to DB.
+
+    If ``lesson_code_hint`` is provided (student uploaded from within a lesson
+    page), use the fast hint path (no AI call, conf=1.0).  Otherwise fall back
+    to the Gemini-powered fuzzy-match path.
+    """
+    # ── Hint path: lesson is already known, skip AI identification ────────────
+    if lesson_code_hint:
+        try:
+            from ..services.omo_identifier import identify_lesson_from_hint
+            candidates = identify_lesson_from_hint(lesson_code_hint)
+        except ImportError as exc:
+            logger.error("OMO identifier import failed: %s", exc)
+            candidates = []
+
+        if not candidates:
+            logger.warning(
+                "OMO hint path: lesson_code=%r not found — falling back to AI",
+                lesson_code_hint,
+            )
+            # Fall through to AI path below
+        else:
+            _update_upload(
+                upload_id,
+                identification=[
+                    {
+                        "lesson_id": c.lesson_id,
+                        "grade_code": c.grade_code,
+                        "title": c.title,
+                        "confidence": c.confidence,
+                        "reasoning": c.reasoning,
+                    }
+                    for c in candidates
+                ],
+                ai_confidence=candidates[0].confidence,
+                status="identified",
+            )
+            logger.info(
+                "OMO upload %d hint-identified: lesson_code=%r title=%s conf=%.2f",
+                upload_id,
+                lesson_code_hint,
+                candidates[0].title,
+                candidates[0].confidence,
+            )
+            return
+
+    # ── AI path: fuzzy match via Gemini ──────────────────────────────────────
     try:
         from ..services.omo_identifier import identify_lesson_from_image
     except ImportError as exc:
@@ -322,7 +403,7 @@ async def _run_grading(upload_id: int, lesson_id: int):
     try:
         from ..services.omo_grader import grade_worksheet_images
         attempt_id = active_attempt.id if active_attempt else None
-        graded = await grade_worksheet_images(image_bytes_list, mime_types, lesson, attempt_id)
+        graded = await grade_worksheet_images(image_bytes_list, mime_types, lesson, attempt_id, upload_id=upload_id)
     except RuntimeError as exc:
         logger.error("OMO grader circuit breaker: %s", exc)
         _update_upload(upload_id, status="error", error_message="批改服務暫時無法使用")
@@ -350,6 +431,7 @@ async def _run_grading(upload_id: int, lesson_id: int):
             "reasoning": g.reasoning,
             "source_attempt_id": g.source_attempt_id,
             "position": g.position,
+            "crop_image_url": g.crop_image_url,
             "flag": None,
         }
         for g in graded
@@ -407,6 +489,7 @@ def _build_upload_response(upload: OmoUpload) -> OmoUploadResponse:
                 reasoning=a.get("reasoning", ""),
                 source_attempt_id=a.get("source_attempt_id"),
                 position=a.get("position"),
+                crop_image_url=a.get("crop_image_url"),
                 flag=flag_info,
             ))
 
@@ -481,10 +564,19 @@ async def upload_worksheet(
         ...,
         description="Worksheet photos (JPEG/PNG, max 10MB each, max 5 files)",
     ),
+    lesson_code_hint: Optional[str] = Form(
+        default=None,
+        description=(
+            "Optional lesson code hint (e.g. 'G5-L25'). "
+            "When provided (student uploads from within a lesson page), "
+            "skips AI fuzzy-match and resolves directly — faster + cheaper. "
+            "Without hint, falls back to full Gemini identification."
+        ),
+    ),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Upload worksheet photos and kick off AI lesson identification.
+    """Upload worksheet photos and kick off lesson identification.
 
     Returns immediately with status=identifying. Poll GET /api/omo/{id} for result.
 
@@ -492,6 +584,10 @@ async def upload_worksheet(
     - Max 5 files per call
     - Max 10MB per file
     - JPEG / PNG / WebP only
+
+    Hint path (#1637): if ``lesson_code_hint`` is supplied, identification
+    completes synchronously in the background task without any AI call
+    (confidence=1.0, ~0 latency vs 6-24 s for Gemini).
     """
     if not files:
         raise HTTPException(status_code=400, detail="最少需要上傳 1 張照片")
@@ -577,11 +673,30 @@ async def upload_worksheet(
     db.add(attempt)
     db.commit()
 
-    background_tasks.add_task(_run_identification, upload_id, image_bytes_list, mime_types)
+    # Upload-replace UX: supersede any existing active upload for this lesson+student
+    # (only when we know the lesson upfront via hint — avoids superseding during identification)
+    if lesson_code_hint:
+        from ..services.omo_identifier import identify_lesson_from_hint
+        hint_candidates = identify_lesson_from_hint(lesson_code_hint)
+        if hint_candidates:
+            hinted_lesson_id = hint_candidates[0].lesson_id
+            now_ts = datetime.now(timezone.utc)
+            db.query(OmoUpload).filter(
+                OmoUpload.student_id == current_user.id,
+                OmoUpload.lesson_id == hinted_lesson_id,
+                OmoUpload.superseded_at.is_(None),
+                OmoUpload.id != upload_id,
+            ).update({'superseded_at': now_ts})
+            db.commit()
+
+    background_tasks.add_task(
+        _run_identification, upload_id, image_bytes_list, mime_types, lesson_code_hint
+    )
 
     logger.info(
-        "OMO upload created: id=%d student=%d files=%d hash=%s",
+        "OMO upload created: id=%d student=%d files=%d hash=%s hint=%s",
         upload_id, current_user.id, len(files), primary_hash[:16],
+        lesson_code_hint or "none",
     )
 
     return OmoUploadResponse(
@@ -743,22 +858,43 @@ async def confirm_lesson(
             upload_id, payload.confirmed_lesson_id, candidate_ids,
         )
 
-    upload.lesson_id = payload.confirmed_lesson_id
+    # #1740 fix: identifier returns synthetic lesson_id (yml display_order)
+    # which does not match canonical Story.id used by frontend /api/stories.
+    # Translate via candidate's grade_code so OmoUpload.lesson_id is queryable
+    # via /api/omo/by-lesson/{Story.id} and _run_grading finds the right schema.
+    real_lesson_id = payload.confirmed_lesson_id
+    if upload.identification and isinstance(upload.identification, list):
+        matched = next(
+            (c for c in upload.identification if c.get("lesson_id") == payload.confirmed_lesson_id),
+            None,
+        )
+        grade_code = (matched or {}).get("grade_code") if matched else None
+        if grade_code:
+            from ..services.lesson_loader import get_lesson_by_code
+            story = get_lesson_by_code(grade_code)
+            if story and story.get("id"):
+                real_lesson_id = story["id"]
+                logger.info(
+                    "OMO #1740 lesson_id mapping: synthetic %d → Story.id %d via grade_code %s",
+                    payload.confirmed_lesson_id, real_lesson_id, grade_code,
+                )
+
+    upload.lesson_id = real_lesson_id
     upload.status = "grading"
     upload.progress = {"stage": "queued", "total": 0, "graded": 0}
     db.commit()
 
-    # Kick off grading in background
-    background_tasks.add_task(_run_grading, upload_id, payload.confirmed_lesson_id)
+    # Kick off grading in background — pass real Story.id so grader picks correct schema
+    background_tasks.add_task(_run_grading, upload_id, real_lesson_id)
 
     logger.info(
-        "OMO upload %d confirmed + grading queued: student=%d lesson_id=%d",
-        upload_id, current_user.id, payload.confirmed_lesson_id,
+        "OMO upload %d confirmed + grading queued: student=%d lesson_id=%d (was synthetic %d)",
+        upload_id, current_user.id, real_lesson_id, payload.confirmed_lesson_id,
     )
 
     return OmoConfirmResponse(
         upload_id=upload_id,
-        lesson_id=payload.confirmed_lesson_id,
+        lesson_id=real_lesson_id,
         status="grading",
         message="確認成功！AI 正在批改中，請稍候（約 15-20 秒）",
     )
@@ -956,3 +1092,106 @@ def delete_upload(
     db.delete(upload)
     db.commit()
     logger.info("OMO upload %d deleted by student %d", upload_id, current_user.id)
+
+
+class CropSignedUrlResponse(BaseModel):
+    url: Optional[str]
+    expires_in_seconds: int = 3600
+
+
+@router.get('/omo/{upload_id}/crops/{question_id}', response_model=CropSignedUrlResponse)
+def get_crop_signed_url(
+    upload_id: int,
+    question_id: str = Path(..., description='question_id from answers (e.g. fb_1, mc_2)'),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    '''Get a 1-hour signed GCS URL for a question crop image.
+
+    Returns url=null if crop not available (legacy upload or crop upload failed).
+    '''
+    upload = _get_upload_or_404(upload_id, current_user, db)
+
+    # Find crop_image_url in answers JSONB
+    gs_uri = None
+    for a in (upload.answers or []):
+        if a.get('question_id') == question_id:
+            gs_uri = a.get('crop_image_url')
+            break
+
+    if not gs_uri:
+        return CropSignedUrlResponse(url=None)
+
+    # gs://bucket/path -> extract object path
+    # Format: gs://lingoleap-omo-uploads/crops/{upload_id}/{question_id}.jpg
+    try:
+        object_path = gs_uri.split('/', 3)[-1]  # strip gs://bucket/
+    except Exception:
+        return CropSignedUrlResponse(url=None)
+
+    signed_url = _get_signed_url(object_path)
+    return CropSignedUrlResponse(url=signed_url)
+
+
+class OmoSignedImageInfo(BaseModel):
+    attempt_id: int
+    index: int
+    url: Optional[str] = None
+
+
+class OmoByLessonResponse(BaseModel):
+    upload_id: Optional[int] = None
+    status: Optional[str] = None
+    has_prior_upload: bool = False
+    images: list[OmoSignedImageInfo] = Field(default_factory=list)
+
+
+@router.get('/omo/by-lesson/{lesson_id}', response_model=OmoByLessonResponse)
+def get_upload_by_lesson(
+    lesson_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    '''Check if the current student has a non-superseded upload for this lesson.
+
+    Used by the Intro page upload-replace UX to detect prior uploads.
+    Returns has_prior_upload=False if no upload exists or all are superseded.
+    '''
+    upload = (
+        db.query(OmoUpload)
+        .filter(
+            OmoUpload.student_id == current_user.id,
+            OmoUpload.lesson_id == lesson_id,
+            OmoUpload.superseded_at.is_(None),
+            OmoUpload.status.in_(['identified', 'grading', 'graded']),
+        )
+        .order_by(OmoUpload.created_at.desc())
+        .first()
+    )
+
+    if not upload:
+        return OmoByLessonResponse(has_prior_upload=False)
+
+    images: list[OmoSignedImageInfo] = []
+    active_attempts = [
+        attempt
+        for attempt in (upload.attempts or [])
+        if attempt.is_active and attempt.image_paths
+    ]
+    attempts = active_attempts or [
+        attempt for attempt in (upload.attempts or []) if attempt.image_paths
+    ]
+    for attempt in attempts:
+        for idx, object_path in enumerate(attempt.image_paths or []):
+            images.append(OmoSignedImageInfo(
+                attempt_id=attempt.id,
+                index=idx,
+                url=_get_signed_url(object_path),
+            ))
+
+    return OmoByLessonResponse(
+        upload_id=upload.id,
+        status=upload.status,
+        has_prior_upload=True,
+        images=images,
+    )

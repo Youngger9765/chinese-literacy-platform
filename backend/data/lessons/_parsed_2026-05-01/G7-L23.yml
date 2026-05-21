@@ -4,8 +4,9 @@ grade_code: G7-L23
 reading_strategy: 閱讀策略-跳過卡關，瀏覽全文
 reading_strategy_type: general
 step_sequence:
+- intro
 - reading-annotation
-- tutor
+- reading-strategy
 - comprehension
 - knowledge-station
 - report

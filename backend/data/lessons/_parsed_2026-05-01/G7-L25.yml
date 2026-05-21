@@ -3,6 +3,18 @@ grade: 7
 grade_code: G7-L25
 reading_strategy: 摘要策略-問題解決結構找重點
 reading_strategy_type: summary_psr
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L25當全世界都在笑你，你可以怎麼做（摘要策略-問題解決結構找重點）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags: []
@@ -155,46 +167,22 @@ vocab_bank:
   I: 得不償失
   J: 進退維谷
 fill_in_blank:
-- id: 1
+- sentence: '有人發現他就是謠言的源頭，他因此成為（　　），大家都罵他。'
   answer: A
-  answer_word: 眾矢之的
-  context_before: 有人發現他就是謠言的源頭，他因此成為
-  context_after: ，大家都罵他
-- id: 2
+- sentence: '校際盃連敗兩場後，球隊（　　），把失誤逐項檢討。'
   answer: E
-  answer_word: 重整旗鼓
-  context_before: 校際盃連敗兩場後，球隊
-  context_after: ，把失誤逐項檢討
-- id: 3
+- sentence: '她故意捏著嗓音說：「哎呀，對不起啦，人家又不是故意的。」表現得非常（　　）。'
   answer: F
-  answer_word: 作做
-  context_before: 她故意捏著嗓音說：「哎呀，對不起啦，人家又不是故意的。」表現得非常
-  context_after: ''
-- id: 4
+- sentence: '他被闖紅燈的摩托車嚇到，把剛買的雞蛋破了一地，真是（　　）。'
   answer: I
-  answer_word: 得不償失
-  context_before: 他被闖紅燈的摩托車嚇到，把剛買的雞蛋破了一地，真是
-  context_after: ''
-- id: 5
+- sentence: '他校隊選拔遭到淘汰後，雖然難過，仍然（　　）安慰隊友。'
   answer: C
-  answer_word: 強顏歡笑
-  context_before: 他校隊選拔遭到淘汰後，雖然難過，仍然
-  context_after: 安慰隊友
-- id: 6
+- sentence: '經過完整調查，事情終於（　　），被冤枉的人也得以澄清。'
   answer: G
-  answer_word: 撥雲見日
-  context_before: 經過完整調查，事情終於
-  context_after: ，被冤枉的人也得以澄清
-- id: 7
+- sentence: '大家都想開冷氣，卻沒有人希望發電廠蓋在附近，政府真是（　　）。'
   answer: J
-  answer_word: 進退維谷
-  context_before: 大家都想開冷氣，卻沒有人希望發電廠蓋在附近，政府真是
-  context_after: ''
-- id: 8
+- sentence: '導師叫我下課找她說明作弊的事，我這節課（　　），無法專心上課。'
   answer: B
-  answer_word: 如坐針氈
-  context_before: 導師叫我下課找她說明作弊的事，我這節課
-  context_after: ，無法專心上課
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n摘要策略——\n問題-解決結構找重點\n你以前學過用「問題—解決—結果」抓文章重點。這篇文章也有相同結構，只是換了比較貼近生活的名稱：\n困擾=問題；策略=解決；改變=結果\n閱讀時，只要掌握這個結構，就可以快速抓到文章的重點，並進一步推論出主旨或作者意圖喔。\n請你先試著連連看，把左邊「元素」和右邊「關鍵概念」連起來。\n\n元素\n\n關鍵概念或提示\n(1)\n困擾\n● 　　　 　　 　\n9041113450400●         ●\n作者建議你怎麼做？\n（可能出現第一、第二、最後等關鍵詞）\n(2)\n策略\n    　　  　          ●           ●\n　　　　     　\n遇到什麼困擾？（常在開頭段）\n(3)\n改變\n        　　●         ●\n　     　　　　\n做了之後會出現什麼改變？\n（常在最後段）\n\n一、找重點：困擾→策略→改變\n表：本課的結構：困擾→策略→改變\n元素\n根據課文內容，請填寫答案（答案合理即可）\n❶困擾\n❶作者說生活中，你可能會遇到什麼困擾？\n   網路霸凌                   \n❷策略\n(段6~8）\n❷遇到這個困擾，你可以怎麼做？（根據課文寫下具體的作法）\n1. 不要一個人扛，可以向信任的大人求助                         \n2.冷處理，不要急著以牙還牙，截圖留下證據                      \n3.照顧好自己的情緒，找到方法紓壓，需要時找專業的人陪伴                                            \n❸改變\n❸做了之後，會出現什麼改變？\n   只要願意好好活著、慢慢走下去，終有撥雲見日的一天                       \n\n二、推論主旨與作者意圖\n  1.根據你找到的重點，這篇文章的主旨是什麼（本文在說什麼）？（單選）\n□①安海瑟薇得獎後被討厭，所以名人都很辛苦。\n②網路霸凌會擴散放大並傷人，作者教你自保並走向復原。\n□③遇到霸凌時，只要退出群組就能立刻解決問題。\n□④網路世界太可怕，所以最好完全不上網。\n  2.本文作者意圖（作者想影響你什麼？）（4選2）\n①讓你知道「求助不是示弱」，遇到霸凌不要獨自硬撐。\n□②鼓勵你立刻回嗆到底，才不會被看扁。\n③提醒你先停損、冷處理並蒐證，避免衝突升溫。\n□④要你學會模仿明星受訪的表情管理，避免被剪短片。\n※區分主旨和作者意圖（很重要）\n主旨：這篇「在說什麼重點」。\n意圖：作者「希望你怎麼想、怎麼做」。\n\n◎"
 strategy_exercise:

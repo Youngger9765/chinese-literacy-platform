@@ -609,6 +609,23 @@
 - [x] 錯誤偵測與分類（讀錯 / 漏讀 / 多讀）
 - [x] LCS 文字差異比對演算法（DiffDisplay 元件，#80）
 
+**OMO 紙本學習單橋接（Online Merge Offline，5/16 + 5/20 milestone shipped to staging）**：
+- [x] 學習單上傳入口（Intro page，#1684）— 學生在課程簡介點「上傳學習單」進入 OMO flow
+- [x] 拍照／相簿選圖（JPG/PNG/WebP，每張 ≤10MB，最多 5 張，#1605）
+- [x] AI 自動辨識課文（Vertex AI Gemini）— 對全 158 課 catalog 比對標題，回 top-3 candidates + confidence + reasoning（#1343, #1607, #1733 model swap）
+- [x] 信心地板 0.4 — 低信心 fail-closed，避免誤判（#1581）
+- [x] AI 自動批改（per-question OCR + score）— 填空題＋選擇題，每題回 student_answer / correct_answer / score / ai_confidence / reasoning（#1614, #1712 fabrication fix）
+- [x] **Anti-fabrication grader**（2026-05-20 #1714 / #1716 / #1719）— allowed_values constraint + ambiguity prompt + confidence threshold 阻止 Gemini 編造學生答案
+- [x] **每題截圖證明**（crop provenance，2026-05-20 #1728）— 寬鬆裁切 fb row ±200px / mc block ±300/+400px 上傳 GCS，UI per-question「📷 看截圖」modal lightbox
+- [x] **重新上傳 UX**（upload-replace，2026-05-20 #1728）— Intro 偵測 prior upload 顯示「📷 檢視已上傳」+「🆕 重新上傳」buttons；新上傳 supersede 舊紀錄保留 audit trail
+- [x] **IAM-based signed URL**（Cloud Run 不需 private key，2026-05-20 #1737）— SA `roles/iam.serviceAccountTokenCreator` 解 signBlob 權限
+- [x] 學生 flag 題目（爭議答案標註，#1591）
+- [x] 老師審核頁（播放驗證 + 反饋）
+- [x] 隱私刪除（學生主動刪除上傳，#1577）
+- [ ] **UI flag low-confidence 答案**（#1721, backlog）— ai_confidence < 0.7 顯示「⚠️ 需老師確認」icon
+- [ ] **Identifier→DB Story.id mapping**（#1740, foundational）— 解 OmoUpload.lesson_id 跟 Story.id 不同 namespace 問題
+- [ ] **OmoResultPage URL routing**（#1741, backlog）— `/omo/result/{upload_id}` 直接 view 任意已批改 upload
+
 ---
 
 ### P1 功能（重要但非必要 - Phase 2 & 3）

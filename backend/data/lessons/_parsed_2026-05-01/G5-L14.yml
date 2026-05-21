@@ -1,3 +1,16 @@
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 lesson_code: G5-L14
 grade: 5
 grade_code: G5-L14
@@ -190,32 +203,19 @@ vocab_bank:
   G: 戰友
   H: 損友
 fill_in_blank:
-- id: 1
+- sentence: '春天來了，公園裡百花齊放，（　　），宛如一幅美麗的畫卷。'
   answer: C
-  answer_word: 色彩繽紛
-  context_before: 春天來了，公園裡百花齊放，
-  context_after: ，宛如一幅美麗的畫卷
-- id: 2
+- sentence: '小明為了準備各科的期末考試，忙到（　　），連睡覺的時間都不夠。'
   answer: A
-  answer_word: 焦頭爛額
-  context_before: 小明為了準備各科的期末考試，忙到
-  context_after: ，連睡覺的時間都不夠
-- id: 3
+- sentence: '朋友聚會開一點小玩笑（　　），但要注意分寸，以免傷了感情。'
   answer: F
-  answer_word: 無傷大雅
-  context_before: 朋友聚會開一點小玩笑
-  context_after: ，但要注意分寸，以免傷了感情
-- id: 4
+- sentence: '姐姐求職不順，最近一直（　　），臉上沒有一點開心的表情。'
   answer: D
-  answer_word: 愁眉不展
-  context_before: 姐姐求職不順，最近一直
-  context_after: ，臉上沒有一點開心的表情
-- id: 5
+- sentence: '媽媽煮了滿桌的美味佳餚，香氣四溢，讓人（　　），我又可以（　　）一番了。'
   answer: E
-  answer_word: 垂涎欲滴
-  context_before: 媽媽煮了滿桌的美味佳餚，香氣四溢，讓人
-  context_after: ，我又可以
-fill_in_blank_count: 5
+- sentence: '我在減肥，你卻帶全糖珍奶來害我？你到底是我的戰友，還是（　　）？'
+  answer: H
+fill_in_blank_count: 6
 spotlight_raw_text: "閱讀聚光燈\n摘要策略—刪除法找重點\n本課是一個說明文，為了讓讀者更容易理解文章，說明文的作者常會加入許多細節作為補充說明。然而，這可能使重點變得不明顯。因此，我們可以運用刪除法把不重要的訊息刪除，留下文章段落的重點。\n哪些細節可以刪除呢？首先可以刪的，就是「舉例」的文字。\n作者舉例時，經常會用「舉例」、「例如」、「如」、「像」這樣的關鍵詞。\n來看看下面這段文字，我們可以用❶❷❸的步驟，刪除舉例的文字：\n1843764236500臺東有名的風景區，如鹿野高台、池上伯朗大道等，都是遊客們流連忘返的地方。\n❶我們可以刪除「如」後面的文字，因為鹿野高台、池上伯朗大道都是「舉例」說明臺東有哪些風景區。注意，這些補充說明的文字，刪除後，也必須保留原文的意思，不能改變。\n1843773914300臺東有名的風景區，如鹿野高台、池上伯朗大道等，都是遊客們流連忘返的地方。\n❷留下段落重點臺東有名的風景區都是遊客們流連忘返的地方。     \n❸判斷❷留下的重點，它主要的意思是否和原文相同？（打勾）\n是，留下的重點，主要的意思和原文相同。\n□否，留下的重點，主要的意思和原文不同。\n　　你發現了嗎，文章段落經過刪除法後，就可以更快找到重點，接下來就讓我們來練習看看吧！\n\n◎"
 strategy_exercise:
   type: guided_steps

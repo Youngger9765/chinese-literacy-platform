@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L3
 reading_strategy: 議論文結構-支持論點的論據
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L3國高中數學當然可以使用計算機（議論文結構-支持論點的論據）.docx
 parsed_at: '2026-05-01T21:10:45'
 flags: []
@@ -169,42 +182,23 @@ vocab_bank:
   G: 繁複
   H: 躍升
 fill_in_blank:
-- id: 1
+- sentence: '泰雅族以苧麻編織出名，共有十四道（　　）的程序。'
   answer: G
-  answer_word: 繁複
-  context_before: 泰雅族以苧麻編織出名，共有十四道
-  context_after: 的程序
-- id: 3
+- sentence: '體育班學生同時要準備聯賽及期中考，這兩星期已經（　　）了。'
+  answer: C
+- sentence: '球隊的訓練要有（　　），從了解對手到精準規劃訓練，才能掌握先機。'
   answer: E
-  answer_word: 前瞻性
-  context_before: 球隊的訓練要有
-  context_after: ，從了解對手到精準規劃訓練，才能掌握先機
-- id: 4
+- sentence: '臺灣巨棒陳金鋒說，他四年級就「都在打球，沒有讀書……連字都不寫」，打球造成他讀寫能力（　　）的遺憾。'
   answer: B
-  answer_word: 闕如
-  context_before: 臺灣巨棒陳金鋒說，他四年級就「都在打球，沒有讀書……連字都不寫」，打球造成他讀寫能力
-  context_after: 的遺憾
-- id: 5
+- sentence: '善良待人、誠實守信是（　　）的做人原則，無論在哪個國家都受人尊重。'
   answer: F
-  answer_word: 放諸四海皆準
-  context_before: 善良待人、誠實守信是
-  context_after: 的做人原則，無論在哪個國家都受人尊重
-- id: 6
+- sentence: '這個計畫有些部分仍然（　　），需要再多加討論。'
   answer: A
-  answer_word: 有待商榷
-  context_before: 這個計畫有些部分仍然
-  context_after: ，需要再多加討論
-- id: 7
+- sentence: '只要學會這個數學公式，這道難題就能（　　），一點也不難。'
   answer: D
-  answer_word: 迎刃而解
-  context_before: 只要學會這個數學公式，這道難題就能
-  context_after: ，一點也不難
-- id: 8
+- sentence: '2024年世界十二強棒球賽中，臺灣隊的名次從前一次的第五名（　　）為第一名。'
   answer: H
-  answer_word: 躍升
-  context_before: 2024年世界十二強棒球賽中，臺灣隊的名次從前一次的第五名
-  context_after: 為第一名
-fill_in_blank_count: 7
+fill_in_blank_count: 8
 spotlight_raw_text: '閱讀聚光燈
 
   支持論點的論據

@@ -2,20 +2,43 @@
  * ComprehensionLayout — shared left-right layout for the 3 comprehension steps.
  *
  * Left panel: scrollable lesson text card with zhuyin toggle + progress bar.
- * Right panel: children (StoryStructureTable / StrategyExercise / MultipleChoiceExercise).
+ * Right panel: vertical stack of 3 accordion-style CollapsibleRefPanels
+ *   1. 圖文對照 (graphic-text only) — defaultOpen (reference material first)
+ *   2. 紙本表格 (lessons with tables) — defaultOpen (reference material first)
+ *   3. Exercise (children — StoryStructureTable / StrategyExercise / MCQ) — defaultOpen
+ *
+ * All 3 panels are pure flow siblings inside a single overflow-y-auto outer
+ * container, so they never overlap and there's only one scrollbar for the
+ * right column. Each panel sizes to its own content via shrink-0 (collapsed
+ * collapsibles are tiny; expanded ones grow naturally).
  *
  * Layout design notes (avoids #1332 / #1331 height-collapse bug):
  *   - Outer wrapper: flex flex-col flex-1 min-h-0 — NO scrollIntoView, NO min-h-full on children
  *   - Body: flex-1 min-h-0 overflow-hidden — establishes height boundary
  *   - Grid: grid-rows-[1fr] — CRITICAL: locks row height to 1fr so children cannot push it out
- *   - Panels: min-h-0 — allows them to shrink within the 1fr boundary
- *   - Children area: flex-1 min-h-0 overflow-y-auto — scrolls internally, never grows parent
+ *   - Right col: min-h-0 overflow-y-auto, children shrink-0 → natural flow stack
+ *
+ * History:
+ *   - #1341 introduced a 3-pane layout (text / image strip / exercise)
+ *   - #1504 collapsed to 2 panes (text+image stacked left, exercise right)
+ *   - #1692 inlined images/tables right after their 圖 N / 表 N caption paragraph
+ *   - #1697 moves all images + tables to the right column inside a
+ *     collapsible accordion so the left column stays focused on the text.
+ *   - #1699 (Young 5/19 follow-up) wraps the exercise itself in a CollapsibleRefPanel
+ *     (defaultOpen=true) so all 3 right-col panels share the same accordion style,
+ *     and removes the inner flex-1/min-h-0 nesting that caused the panels to
+ *     visually overlap the exercise questions on scroll.
+ *   - #1701 reorders right-col panels: 圖文對照 → 紙本表格 → 練習 (exercise last),
+ *     and sets all 3 panels to defaultOpen=true so students see reference material
+ *     immediately without manually expanding.
  */
 import React, { useMemo } from 'react';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import FloatingAIHelper from './FloatingAIHelper';
 import GraphicTextImageStrip from './GraphicTextImageStrip';
+import TableDisplay from './TableDisplay';
+import CollapsibleRefPanel from './CollapsibleRefPanel';
 
 interface ComprehensionLayoutProps {
   story: Story;
@@ -26,6 +49,10 @@ interface ComprehensionLayoutProps {
   progressPercent?: number;
   /** Label shown next to the progress percent. Defaults to empty. */
   progressLabel?: string;
+  /** Material Symbols icon for the exercise collapsible header. */
+  exerciseIcon?: string;
+  /** Header label for the exercise collapsible. */
+  exerciseLabel?: string;
 }
 
 const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
@@ -34,6 +61,8 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
   children,
   progressPercent = -1,
   progressLabel = '',
+  exerciseIcon = 'edit_note',
+  exerciseLabel = '練習',
 }) => {
   const { zhuyinActive, processLines: zhuyinProcessLines } = useZhuyin();
 
@@ -44,12 +73,14 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
 
   const storyText = useMemo(() => story.content.join('\n'), [story.content]);
 
-  // ── #1504 layout decongestion: graphic-text now stacks 課文 + 圖文 in the
-  // left column instead of a third middle panel (Young 5/8 review: "電梯超
-  // 載"). Right panel takes col-span-7 so the structure table has breathing
-  // room while answering. Click any image to open a fullscreen zoom modal.
-  // #1341 introduced the 3-pane variant this replaces.
   const isGraphicText = story.layout_mode === 'graphic-text';
+  const images = story.images ?? [];
+  const tables = story.tables ?? [];
+  const hasImages = isGraphicText && images.length > 0;
+  const hasTables = tables.length > 0;
+  // Lessons without any reference material (e.g. G6 摘要策略 課文) still render
+  // the exercise inside its own CollapsibleRefPanel for consistent visual
+  // styling — there's just nothing below it.
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-surface relative">
@@ -62,20 +93,21 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
         */}
         <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 grid-rows-[1fr] gap-6">
 
-          {/* ── Left column ──────────────────────────────────────────────────── */
-          /* graphic-text: text top + images bottom (stacked, 60/40 split)        */
-          /* standard:     text only, col-span-7                                  */}
-          <div className={`${isGraphicText ? 'md:col-span-8' : 'md:col-span-7'} min-h-0 flex flex-col gap-4`}>
-
-            {/* Story text card */}
-            <div className={`bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full min-h-0 ${isGraphicText ? 'flex-[3]' : 'flex-1'}`}>
+          {/* ── Left: Text-only card ───────────────────────────────────────────
+              #1697: images + tables moved to right column. Left always col-span-7
+              now (wider when there are no images/tables; previously col-span-8 for
+              graphic-text so the bottom image strip had room). */}
+          <div className="md:col-span-7 min-h-0 flex flex-col">
+            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex flex-col w-full flex-1 min-h-0">
               <div className="flex items-center gap-2 mb-4 shrink-0">
                 <span className="material-symbols-outlined text-accent text-xl">menu_book</span>
                 <span className="font-headline font-bold text-on-surface text-sm uppercase tracking-wider">
                   參考課文
                 </span>
               </div>
-              {/* Scrollable story content — overflow-y-auto on the inner div only */}
+              {/* Scrollable story content — overflow-y-auto on the inner div only.
+                  #1697 removes inline image/table placement (was #1692) — students
+                  now consult them from the right column collapsibles instead. */}
               <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar space-y-6">
                 {story.content.map((line, idx) => (
                   <div key={idx} className="flex gap-3 items-start">
@@ -113,21 +145,57 @@ const ComprehensionLayout: React.FC<ComprehensionLayoutProps> = ({
                 </div>
               )}
             </div>
-
-            {/* Image strip (graphic-text only) — horizontally scrollable, click to zoom */}
-            {isGraphicText && (
-              <GraphicTextImageStrip
-                images={story.images ?? []}
-                lessonCode={story.lesson_code}
-              />
-            )}
           </div>
 
-          {/* ── Right: Exercise panel ─────────────────────────────────────────── */}
-          <div className={`${isGraphicText ? 'md:col-span-4' : 'md:col-span-5'} min-h-0 flex flex-col`}>
-            <div className="bg-surface-container-lowest rounded-3xl shadow-editorial p-6 md:p-8 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+          {/* ── Right: 3 sibling accordion panels (ref material + exercise) ──
+              #1701: reorder so reference panels (圖文/紙本) come first, then
+              exercise. All 3 default to open so students see everything
+              immediately without needing to manually expand panels.
+              #1699: all 3 panels are CollapsibleRefPanel siblings in a vertical
+              flow stack. Outer div is the single scroll container; each panel
+              is shrink-0 so they take only the height they need. No flex-1,
+              no nested overflow, no z-index — purely natural document flow. */}
+          <div className="md:col-span-5 min-h-0 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-1">
+            {/* Reference panels first — students consult images/tables before filling exercise. */}
+            {hasImages && (
+              <CollapsibleRefPanel
+                icon="photo_library"
+                label="圖文對照"
+                count={`${images.length} 張`}
+                defaultOpen={false}
+              >
+                {/* Constrain image strip height when expanded so it doesn't push
+                    the exercise off-screen. ZoomableImage modal still works for
+                    full-screen viewing. */}
+                <div className="h-64 flex">
+                  <GraphicTextImageStrip
+                    images={images}
+                    lessonCode={story.lesson_code}
+                  />
+                </div>
+              </CollapsibleRefPanel>
+            )}
+
+            {hasTables && (
+              <CollapsibleRefPanel
+                icon="table_chart"
+                label="紙本表格"
+                count={`${tables.length} 張`}
+                defaultOpen={false}
+              >
+                <TableDisplay tables={tables} layout="stacked" />
+              </CollapsibleRefPanel>
+            )}
+
+            {/* Exercise — after reference material. #1703: default collapsed
+                so right column starts compact; students expand panels they need. */}
+            <CollapsibleRefPanel
+              icon={exerciseIcon}
+              label={exerciseLabel}
+              defaultOpen={false}
+            >
               {children}
-            </div>
+            </CollapsibleRefPanel>
           </div>
         </div>
       </div>

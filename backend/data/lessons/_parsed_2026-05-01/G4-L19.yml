@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L19
 reading_strategy: 用表格整理兩組對象的細節
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L19救援大隊的好幫手（用表格整理兩組對象的細節）.docx
 parsed_at: '2026-05-01T21:10:33'
 flags: []
@@ -190,46 +203,22 @@ vocab_bank:
   H: 訓練有素
   I: 縫隙
 fill_in_blank:
-- id: 1
+- sentence: '這道數學題對他來說（　　），他只花幾秒鐘就算出答案。'
   answer: C
-  answer_word: 輕而易舉
-  context_before: 這道數學題對他來說
-  context_after: ，他只花幾秒鐘就算出答案
-- id: 2
+- sentence: '她精通三種語言，擁有這項（　　），讓她在職場上十分吃香。'
   answer: A
-  answer_word: 本領
-  context_before: 她精通三種語言，擁有這項
-  context_after: ，讓她在職場上十分吃香
-- id: 3
+- sentence: '在這場飛機失事的空難中，只有少數乘客（　　）。'
   answer: D
-  answer_word: 倖存
-  context_before: 在這場飛機失事的空難中，只有少數乘客
-  context_after: ''
-- id: 4
+- sentence: '消防員奮不顧身的衝進火場，成功（　　）了受困的居民。'
   answer: E
-  answer_word: 拯救
-  context_before: 消防員奮不顧身的衝進火場，成功
-  context_after: 了受困的居民
-- id: 5
+- sentence: '這款新手機的觸控螢幕非常（　　），輕輕一碰就能迅速反應。'
   answer: B
-  answer_word: 靈敏
-  context_before: 這款新手機的觸控螢幕非常
-  context_after: ，輕輕一碰就能迅速反應
-- id: 6
+- sentence: '她的數字能力很好，絕對能（　　）這份會󠇡計工作。'
   answer: G
-  answer_word: 勝任
-  context_before: 她的數字能力很好，絕對能
-  context_after: 這份會󠇡計工作
-- id: 7
+- sentence: '這支隊伍（　　），在危急的災難現場，仍能冷靜做出正確的決策。'
   answer: H
-  answer_word: 訓練有素
-  context_before: 這支隊伍
-  context_after: ，在危急的災難現場，仍能冷靜做出正確的決策
-- id: 8
+- sentence: '春雨降臨後萬物滋長，連水泥地的（　　）也長出青綠的小草。'
   answer: I
-  answer_word: 縫隙
-  context_before: 春雨降臨後萬物滋長，連水泥地的
-  context_after: 也長出青綠的小草
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n用表格整理訊息\n    當文章的內容讓人看得眼花撩亂時，讀者可以試著用表格整理訊息。這樣做不但可以幫助我們掌握重點，還可以培養訊息整理的能力。在本課提到，救援行動中使用巨鼠好處多多，這時，我們就可以把狗與巨鼠放在一起進行比較，做成表格，就可以讓人一目了然兩者的差異囉。\n整理表格步驟：\nA.請在表格的「第一列」先寫出比較的對象：巨鼠與狗\nB.找出比較的重點，當文章中出現像是「但是」、「不同」、\n「比較」這些語詞時，就表示作者可能正在拿兩件事來比較喔！\n　範例：訓練有素的巨鼠可以跟多位訓練員合作，\n        但狗通常只接受一位訓練員的指導。\n❶現在我們來看這句話，請你找出巨鼠與狗不同的地方。（單選）\n  巨鼠可以跟　多位　□一位　訓練員合作，\n　狗只接受　　□多位　一位　訓練員指導。\n❷這句話比較的重點是什麼？\n　可合作訓練員數量　　□嗅覺能力　\nC.將比較重點：「可合作訓練員數量」填入「第一欄」\nD.在空白格子內填入比較的結果\n846455287020\n第一欄00\n第一欄276987131115100     巨鼠可合作訓練員數量多位，狗可合作訓練員數量只有一位。\n\t\n5029835309880\n第一列00\n第一列　　\n-577851333500\n對象1：巨鼠\n對象2：狗\n94615-170116500重點1：\n可合作訓練員數量\n多位\n一位\n重點2：嗅覺能力\n\n總結：根據這個表格進行分析，提出結論。\n◎"
 strategy_exercise:

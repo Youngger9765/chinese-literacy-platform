@@ -3,6 +3,19 @@ grade: 8
 grade_code: G8-L18
 reading_strategy: 比較多元觀點
 reading_strategy_type: compare_contrast
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G8-L18石虎保育：遷移與否的兩難（比較多元觀點）.docx
 parsed_at: '2026-05-01T21:10:43'
 flags: []
@@ -148,46 +161,22 @@ vocab_bank:
   I: 補償機制
   J: 緩不濟急
 fill_in_blank:
-- id: 1
+- sentence: '機場附近居民深受噪音困擾，民航局啟動（　　），補助加裝隔音窗。'
   answer: I
-  answer_word: 補償機制
-  context_before: 機場附近居民深受噪音困擾，民航局啟動
-  context_after: ，補助加裝隔音窗
-- id: 2
+- sentence: '這段靠山小路剛設置了減速標誌，希望降低野生動物（　　）事件。'
   answer: E
-  answer_word: 路殺
-  context_before: 這段靠山小路剛設置了減速標誌，希望降低野生動物
-  context_after: 事件
-- id: 3
+- sentence: '球員起衝突時，裁判立刻（　　），吹哨制止並要求雙方退開。'
   answer: F
-  answer_word: 干預
-  context_before: 球員起衝突時，裁判立刻
-  context_after: ，吹哨制止並要求雙方退開
-- id: 4
+- sentence: '棲地（　　）後，動物被迫穿越道路與聚落，意外與衝突增加。'
   answer: C
-  answer_word: 破碎化
-  context_before: 棲地
-  context_after: 後，動物被迫穿越道路與聚落，意外與衝突增加
-- id: 5
+- sentence: '因為棲地被開發，石虎在臺灣成了（　　）物種。'
   answer: A
-  answer_word: 瀕危
-  context_before: 因為棲地被開發，石虎在臺灣成了
-  context_after: 物種
-- id: 6
+- sentence: '森林火災後，（　　）嚴重破壞，整片森林光禿禿的。'
   answer: G
-  answer_word: 植被
-  context_before: 森林火災後，
-  context_after: 嚴重破壞，整片森林光禿禿的
-- id: 7
+- sentence: '校園霸凌已有人受傷，透過班會宣導恐怕（　　），得立刻介入處理。'
   answer: J
-  answer_word: 緩不濟急
-  context_before: 校園霸凌已有人受傷，透過班會宣導恐怕
-  context_after: ，得立刻介入處理
-- id: 8
+- sentence: '豆棗幼年喪母，復育野放後又遭犬殺，真是命運（　　）。'
   answer: B
-  answer_word: 坎坷
-  context_before: 豆棗幼年喪母，復育野放後又遭犬殺，真是命運
-  context_after: ''
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n比較多元觀點\n上篇文章我們已經學過「比較多元觀點」的閱讀策略。這篇文章，我們要再學一次。讀議題類文章，重點是：「找到個別的觀點，再比較不同觀點的差異或相同在哪裡？」最後再推論文章想要說什麼（主旨）。\n一、確定議題\n  這篇文章在談「哪個議題／爭議」（提示：可能出現「爭議」、「該不該」、「是否」等關鍵詞）\n   是否應把石虎「遷移」到較安全的地方                                 \n二、找觀點\n  議題文章像在辯論：每一方都有自己的立場或觀點，並提出有說服力的理由與作法。底下請你整理對這個議題的不同立場／觀點，每個觀點的核心想法與理由、作法是什麼？\n立場\n觀點要素\n請根據課文內容填答或勾選(單選)\n反對   \n遷移   \n主張\n  遷移可能造成新風險，先讓原棲地變安全             \n\n理由\n□①遷移花費高、而且把動物搬走治標不治本，無法改善人與自然的衝突。\n②遷移到新地區，可能會有新的風險（食物不足、地形植被不合、其他掠食者/競爭者、疾病、人為風險）。\n\n主要作法\n①讓原地變得安全：建廊道、車輛減速、犬隻管理、補償與雞舍防護等。\n□②加強石虎野放前的訓練與追蹤監測，讓牠更會避開危險、提高存活率。\n支持   \n遷移    \n主張\n   先把死亡風險降到最低       （先救命、爭取時間）\n\n理由\n(複選)\n①棲地已被切割成孤島，石虎移動有危險。\n②危險來自人類活動，人類有責任先把風險降到最低。\n□③遷移後就能一勞永逸，石虎不必再面對任何威脅。\n\n主要作法\n□①先在原棲地加強巡護與宣導，降低人為干擾，讓石虎自然擴散就好。\n②把石虎移到較安全、人為干擾較少、管制更嚴格的區域。\n三、比較觀點差異（用優先順序／介入焦點／判準原則」三個角度）\n  上表我們已經掌握每一方在說什麼；接著請做兩方觀點的比較。\n比較角度\n反對遷移\n支持遷移\n相異\n優先順序\n（單選）\n□①先移到安全處　\n②先讓原棲地變安全\n①先移到安全處　\n□②先讓原棲地變安全\n\n介入焦點\n（單選）\n□①動物搬家\n②原地環境改善\n①動物搬家\n□②原地環境改善\n\n判斷準則\n（單選）\n①怕做錯更危險　\n□②怕不做來不及\n□①怕做錯更危險　\n②怕不做來不及\n相同\n兩派都想降低死亡風險、讓族群更穩定                     \n\n＊歸納觀點差異：\n兩派都看重石虎的安全，但是反對派先做          原地環境改善     ；支持派先做       移動到安全處     。\n\n四、推論主旨（從「觀點差異」推論整篇重點）\n根據你整理的「共同點＋差異」，下列何者最能概括本文主旨？（單選）\n□①介紹石虎的生活習性與野放過程，證明野放一定會失敗\n②比較遷移與不遷移兩派觀點，凸顯保育決策的兩難與取捨\n□③呼籲政府立刻把所有石虎移到保護區，避免再發生路殺犬殺\n\n◎"
 strategy_exercise:

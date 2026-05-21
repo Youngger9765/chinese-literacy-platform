@@ -1,3 +1,16 @@
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 lesson_code: G5-L12
 grade: 5
 grade_code: G5-L12
@@ -191,22 +204,17 @@ vocab_bank:
   F: 分量
   G: 一步登天
 fill_in_blank:
-- id: 1
+- sentence: '要贏球，球隊裡每位球員的貢獻都是（　　）的。'
   answer: E
-  answer_word: 不可或缺
-  context_before: 要贏球，球隊裡每位球員的貢獻都是
-  context_after: 的
-- id: 2
+- sentence: '氣低溫加上水氣足夠，讓玉山步道沿線都（　　）白雪，好像灑了糖霜般的童話世界。'
   answer: B
-  answer_word: 覆蓋
-  context_before: 氣低溫加上水氣足夠，讓玉山步道沿線都
-  context_after: 白雪，好像灑了糖霜般的童話世界
-- id: 4
+- sentence: '我們做事要腳踏實地，不要老是想（　　）。'
+  answer: G
+- sentence: '他長期舉重，因此鍛鍊出一身（　　）的肌肉。'
   answer: A
-  answer_word: 結實
-  context_before: 他長期舉重，因此鍛鍊出一身
-  context_after: 的肌肉
-fill_in_blank_count: 3
+- sentence: '（　　）這件事不是你做的，為什麼你一見到我就跑？'
+  answer: C
+fill_in_blank_count: 5
 spotlight_raw_text: '閱讀聚光燈
 
   摘要策略—主題描述結構

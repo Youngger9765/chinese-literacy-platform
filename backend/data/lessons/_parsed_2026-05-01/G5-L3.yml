@@ -3,6 +3,19 @@ grade: 5
 grade_code: G5-L3
 reading_strategy: 從上下文推測詞義
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G5-L3工地大嫂（從上下文推測詞義）.docx
 parsed_at: '2026-05-01T21:10:36'
 flags: []
@@ -240,3 +253,32 @@ worksheet_intro:
   lesson_label: 第3課  工地大嫂
   authors: 課文：林立青  學習單：巫怡蓉
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G5-L3.pdf
+vocab_bank:
+  A: 粗野陽剛
+  B: 溫柔婉約
+  C: 長袖善舞
+  D: 無虞
+  E: 度量胸襟
+  F: 使臂使指
+  G: 指點迷津
+  H: 穿梭
+  I: 當面戳破
+  J: 心知肚明
+fill_in_blank:
+- sentence: '她說話總是（　　），輕聲細語，讓人感到如沐春風。'
+  answer: B
+- sentence: '老師的一番話，正好為處在人生低潮中的我（　　）。'
+  answer: G
+- sentence: '她每天（　　）於各科教室之間，忙碌得像個小蜜蜂。'
+  answer: H
+- sentence: '他（　　）對方的藉口，場面一度尷尬。'
+  answer: I
+- sentence: '區間車準時到站，我們轉乘高鐵銜接（　　），時間很充裕。'
+  answer: D
+- sentence: '領導者應有開闊的（　　），接納不同的看法，才能服眾。'
+  answer: E
+- sentence: '他（　　），交際手腕高明，一下子就能和各方談成合作。'
+  answer: C
+- sentence: '他喜歡把大家（　　）的想法直接說出來，常常弄得現場很尷尬。'
+  answer: J
+fill_in_blank_count: 8

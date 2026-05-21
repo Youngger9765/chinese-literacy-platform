@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L3
 reading_strategy: 解決問題-以實驗觀察找答案
 reading_strategy_type: problem_solving
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L3昆蟲會思考嗎？（解決問題-以實驗觀察找答案）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []

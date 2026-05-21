@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L14
 reading_strategy: 正向思考-培養心理韌性
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L14焚而不毀的倫敦（正向思考-培養心理韌性）.docx
 parsed_at: '2026-05-01T21:10:45'
 flags: []
@@ -151,46 +164,22 @@ vocab_bank:
   I: 生死與共
   J: 心神不寧
 fill_in_blank:
-- id: 1
+- sentence: '在疫情的艱難時期，全國人民（　　），互相支援，共同守護家園的安全。'
   answer: H
-  answer_word: 同舟共濟
-  context_before: 在疫情的艱難時期，全國人民
-  context_after: ，互相支援，共同守護家園的安全
-- id: 2
+- sentence: '明天就要公佈會考成績，他整晚（　　），腦中不斷浮現各種可能的結果。'
   answer: J
-  answer_word: 心神不寧
-  context_before: 明天就要公佈會考成績，他整晚
-  context_after: ，腦中不斷浮現各種可能的結果
-- id: 3
+- sentence: '古城經過數百年風雨侵蝕，只剩（　　），旅人只能從碎裂的牆面想像昔日風華。'
   answer: A
-  answer_word: 殘垣敗瓦
-  context_before: 古城經過數百年風雨侵蝕，只剩
-  context_after: ，旅人只能從碎裂的牆面想像昔日風華
-- id: 4
+- sentence: '即使在眾人質疑的壓力下，他仍（　　）回答每一個問題，展現自信的神情。'
   answer: E
-  answer_word: 面不改色
-  context_before: 即使在眾人質疑的壓力下，他仍
-  context_after: 回答每一個問題，展現自信的神情
-- id: 5
+- sentence: '野外教學時突然下起大雨，隊伍一陣混亂，領隊卻（　　），迅速指揮大家躲到安全的地方。'
   answer: D
-  answer_word: 處變不驚
-  context_before: 野外教學時突然下起大雨，隊伍一陣混亂，領隊卻
-  context_after: ，迅速指揮大家躲到安全的地方
-- id: 6
+- sentence: '當他確認溺水的孩子已無生命跡象時，悲痛得（　　），旁人都忍不住跟著掉淚。'
   answer: F
-  answer_word: 呼天搶地
-  context_before: 當他確認溺水的孩子已無生命跡象時，悲痛得
-  context_after: ，旁人都忍不住跟著掉淚
-- id: 7
+- sentence: '長期砍伐讓整片山林（　　），禿山與泥流成為大自然被破壞的證據。'
   answer: G
-  answer_word: 滿目瘡痍
-  context_before: 長期砍伐讓整片山林
-  context_after: ，禿山與泥流成為大自然被破壞的證據
-- id: 8
+- sentence: '大地震過後，城市基礎設施幾乎全面損毀，政府必須在（　　）的局面中，逐步恢復交通、水電與民生機能。'
   answer: B
-  answer_word: 百廢待舉
-  context_before: 大地震過後，城市基礎設施幾乎全面損毀，政府必須在
-  context_after: 的局面中，逐步恢復交通、水電與民生機能
 fill_in_blank_count: 8
 worksheet_section_order:
 - number: 二

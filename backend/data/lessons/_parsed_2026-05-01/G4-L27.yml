@@ -3,6 +3,19 @@ grade: 4
 grade_code: G4-L27
 reading_strategy: 念頭覺察
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G4-L27從白熊到藍海豚：學習與念頭和平相處（念頭覺察）.docx
 parsed_at: '2026-05-01T21:10:34'
 flags: []
@@ -146,41 +159,20 @@ vocab_bank:
   I: 效應
   J: 俯仰
 fill_in_blank:
-- id: 1
+- sentence: '這台冷氣機因過於老舊，不斷發出（　　）的聲音，讓人難以入眠。'
   answer: B
-  answer_word: 惱人
-  context_before: 這台冷氣機因過於老舊，不斷發出
-  context_after: 的聲音，讓人難以入眠
-- id: 2
+- sentence: '為了賺流量，他在社群網站上（　　）散播假消息，造成許多誤解。'
   answer: D
-  answer_word: 大肆
-  context_before: 為了賺流量，他在社群網站上
-  context_after: 散播假消息，造成許多誤解
-- id: 3
+- sentence: '有些人總喜歡（　　）別人的努力，卻不曾付出行動。'
   answer: G
-  answer_word: 唱衰
-  context_before: 有些人總喜歡
-  context_after: 別人的努力，卻不曾付出行動
-- id: 4
+- sentence: '真正的勇敢並不是沒有恐懼，而是在害怕時不輕易（　　）。'
   answer: F
-  answer_word: 退縮
-  context_before: 真正的勇敢並不是沒有恐懼，而是在害怕時不輕易
-  context_after: ''
-- id: 6
+- sentence: '有些人的（　　）其實是種偽裝，用來掩飾自己的不安與嫉妒。'
   answer: A
-  answer_word: 酸言酸語
-  context_before: 有些人的
-  context_after: 其實是種偽裝，用來掩飾自己的不安與嫉妒
-- id: 7
+- sentence: '校園限制手機使用的新政策才剛（　　），還需要時間觀察成效。'
   answer: H
-  answer_word: 起步
-  context_before: 校園限制手機使用的新政策才剛
-  context_after: ，還需要時間觀察成效
-- id: 8
+- sentence: '現在的社群媒體上（　　）著謠言與偏見，需要仔細分辨真假。'
   answer: E
-  answer_word: 充斥
-  context_before: 現在的社群媒體上
-  context_after: 著謠言與偏見，需要仔細分辨真假
 fill_in_blank_count: 7
 本課語詞:
 - 邋󠇢遢

@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L21
 reading_strategy: 情緒管理-悲傷五階段
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L21感情小日記6──我失戀了（情緒管理-悲傷五階段）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []
@@ -143,46 +156,22 @@ vocab_bank:
   G: 反駁
   H: 苦澀
 fill_in_blank:
-- id: 1
+- sentence: '這部電影討論的議題比較嚴肅，因此有的人覺得劇情太過（　　）。'
   answer: C
-  answer_word: 沉悶
-  context_before: 這部電影討論的議題比較嚴肅，因此有的人覺得劇情太過
-  context_after: ''
-- id: 2
+- sentence: '看著喜歡的人和別人一起離開校園，我心裡湧上一股說不出的（　　）。'
   answer: H
-  answer_word: 苦澀
-  context_before: 看著喜歡的人和別人一起離開校園，我心裡湧上一股說不出的
-  context_after: ''
-- id: 3
+- sentence: '看著孫子上台領獎的身影，阿婆的眼神中（　　）著感動與驕傲。'
   answer: E
-  answer_word: 交織
-  context_before: 看著孫子上台領獎的身影，阿婆的眼神中
-  context_after: 著感動與驕傲
-- id: 4
+- sentence: '我們國家的自由與民主，是依靠許多前人（　　）的犧牲而換來的。'
   answer: F
-  answer_word: 悲壯
-  context_before: 我們國家的自由與民主，是依靠許多前人
-  context_after: 的犧牲而換來的
-- id: 5
+- sentence: '科技的日新月異，使得人類探索宇宙的夢想不再是（　　）的事了。'
   answer: A
-  answer_word: 遙不可及
-  context_before: 科技的日新月異，使得人類探索宇宙的夢想不再是
-  context_after: 的事了
-- id: 6
+- sentence: '他遭受誤會而感到委屈，即使還他清白後，他的不滿仍（　　）。'
   answer: B
-  answer_word: 難以平息
-  context_before: 他遭受誤會而感到委屈，即使還他清白後，他的不滿仍
-  context_after: ''
-- id: 7
+- sentence: '雖然理想與現實的（　　）從未停歇，但他仍選擇堅持夢想。'
   answer: D
-  answer_word: 拉扯
-  context_before: 雖然理想與現實的
-  context_after: 從未停歇，但他仍選擇堅持夢想
-- id: 8
+- sentence: '面對沒有根據的指控，他冷靜提出具體證據（　　）對方。'
   answer: G
-  answer_word: 反駁
-  context_before: 面對沒有根據的指控，他冷靜提出具體證據
-  context_after: 對方
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈的練習，關於悲傷五階段的調適，下列敘述何者正確？\nA.處於否認階段時，要求對方提出證據或公開來讓大家知道\nB.處於憤怒階段時，可以用適當方法抒發、宣洩自己的怒氣\nC.處於討價還價階段時，面對無法掌控的事仍要嘗試和調整 \n2097741295462\n(A)找人聊聊、討論 (Ｃ)專注於控制圈內的事\n(D)允許自己脆弱，也尋求他人支持00\n(A)找人聊聊、討論 (Ｃ)專注於控制圈內的事\n(D)允許自己脆弱，也尋求他人支持D.處於沮喪階段時，提醒自己不可以讓別人看見自己的脆弱\n-2270665495817\n九"
 strategy_exercise:

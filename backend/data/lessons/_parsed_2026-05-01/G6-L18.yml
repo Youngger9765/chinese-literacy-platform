@@ -3,6 +3,18 @@ grade: 6
 grade_code: G6-L18
 reading_strategy: 正向思考-辨識與轉念練習
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L18把手上的餅吃香一點（正向思考-辨識與轉念練習）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []
@@ -163,3 +175,23 @@ lesson_intro:
   text: 本課探討「自然之美」主題，學習「摘要策略──主題描述結構」的閱讀方法。
   unit_topic: 自然之美
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L18.pdf
+fill_in_blank:
+- sentence: '教練要小夫每天多練習半小時，小夫不滿的（　　）幾句，讓教練大發雷霆。'
+  answer: B
+- sentence: '他向來小氣，你想要他請你吃東西，簡直就（　　）。'
+  answer: D
+- sentence: '詐騙集團騙人的手法不斷更新，被騙的案例（　　），大家應該多加小心。'
+  answer: C
+- sentence: '她總是認為自己受到了不公平的對待，因此內心充滿了 （　　）。'
+  answer: F
+- sentence: '集合時間快要到了，同組的同學們還（　　）的收拾行李，讓我好著急。'
+  answer: H
+- sentence: '胖虎邀請大家去參加他的新歌發表會，舞台上，他臉上自信的表情，（　　）認為自己是大歌星。'
+  answer: G
+- sentence: '輸球後，他每天（　　），後悔當天出現大失誤，才會與冠軍擦肩而過。'
+  answer: E
+- sentence: '我們本來是無話不談的好朋友，為什麼她突然變得冷淡，這讓我（　　）。'
+  answer: A
+- sentence: '我最近真是（　　）了，居然有人跑去跟老師告我的狀，說我作弊，根本是造謠生事！'
+  answer: I
+fill_in_blank_count: 9

@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L15
 reading_strategy: 自我提問-4F思考法自我提問
 reading_strategy_type: self_questioning
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L15小藍鯨之死（自我提問-4F思考法自我提問）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []
@@ -179,31 +192,16 @@ vocab_bank:
   G: 束縛
   H: 蛻變
 fill_in_blank:
-- id: 1
+- sentence: '埃及斑蚊開始（　　）到城市的其他地區，可能引起登革熱的大流行。'
   answer: F
-  answer_word: 流竄
-  context_before: 埃及斑蚊開始
-  context_after: 到城市的其他地區，可能引起登革熱的大流行
-- id: 2
+- sentence: '這隻被遺棄的貓變得越來越（　　），看起來非常可憐。'
   answer: C
-  answer_word: 削瘦
-  context_before: 這隻被遺棄的貓變得越來越
-  context_after: ，看起來非常可憐
-- id: 3
+- sentence: '這座城市經歷數十年的發展，終於（　　）成為一個現代化的大都市。'
   answer: H
-  answer_word: 蛻變
-  context_before: 這座城市經歷數十年的發展，終於
-  context_after: 成為一個現代化的大都市
-- id: 4
+- sentence: '熊熊烈火燃燒，最後將木屋（　　），只剩下一片灰燼。'
   answer: B
-  answer_word: 燃燒殆盡
-  context_before: 熊熊烈火燃燒，最後將木屋
-  context_after: ，只剩下一片灰燼
-- id: 5
+- sentence: '她覺得自己被過去的傷痛和回憶（　　）住了，無法向前邁進。'
   answer: G
-  answer_word: 束縛
-  context_before: 她覺得自己被過去的傷痛和回憶
-  context_after: 住了，無法向前邁進
 fill_in_blank_count: 5
 spotlight_raw_text: "閱讀聚光燈\n自我提問\n\n    看完一篇文章，相信你的心中一定會有一些想法，我們可以將這些想法有組織地整理出來，藉由簡單的自我提問，運用句型，寫出答案，也會幫助你更有邏輯的思考，深入理解文章內容喔。\n※注意：每個人的想法、感受、行動不一定會相同，沒有對錯之分。\n\n事實\n感受\n反思\n行動\n問自己?\n這篇文章／事件什麼地方令我印象深刻？\n對於這個事情，我感受到了什麼情緒？\n我們做了什麼事，才會導致這件事的發生？\n我們未來應該怎麼做？才能避免這種情況發生？\n答案\n（句型）\n我看到了．．．\n這個事件，我到．．．\n（情緒）\n因為．．．，\n才會．．．。\n未來我們可以．．．\n本文\n例子\n我看到了人類為了方便，亂丟漁網到海裡，造成小藍鯨的死亡事件。\n對於小藍鯨的死亡，我感到很震驚又難過。\n因為人類貪圖方便，亂丟垃圾，才會汙染海洋。\n未來我們可以宣導環境保護，不亂丟垃圾，多參與淨灘活動。\n其他例子：\n學習不佳\n我看到這次的數學成績不好。\n我覺得很難過，而且很丟臉。\n因為考試前，我沒有複習功課，還打電動，平時上課也不認真，才會導致我數學不及格。\n未來我可以改掉不好的學習行為，上課認真，不會的再去問師長，電動利用空閒時間再玩。\n\n◎"
 strategy_exercise:

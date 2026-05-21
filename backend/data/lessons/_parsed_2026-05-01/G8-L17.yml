@@ -3,6 +3,19 @@ grade: 8
 grade_code: G8-L17
 reading_strategy: 比較多元觀點
 reading_strategy_type: compare_contrast
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G8-L17我能不能選擇告別方式0225(比較多元觀點).docx
 parsed_at: '2026-05-01T21:10:43'
 flags: []
@@ -139,46 +152,22 @@ vocab_bank:
   I: 眾說紛紜
   J: 莫衷一是
 fill_in_blank:
-- id: 1
+- sentence: '他年輕時在球場上（　　），帶隊拿下好幾次冠軍。'
   answer: A
-  answer_word: 叱吒風雲
-  context_before: 他年輕時在球場上
-  context_after: ，帶隊拿下好幾次冠軍
-- id: 2
+- sentence: '報告明天要交，時間（　　），我們決定今晚熬夜做報告。'
   answer: H
-  answer_word: 迫在眉睫
-  context_before: 報告明天要交，時間
-  context_after: ，我們決定今晚熬夜做報告
-- id: 3
+- sentence: '和父母家人意見不同時，我試著（　　）理解他們的想法與立場。'
   answer: F
-  answer_word: 設身處地
-  context_before: 和父母家人意見不同時，我試著
-  context_after: 理解他們的想法與立場
-- id: 4
+- sentence: '他照顧住院的家人好幾週，整個人（　　），看起來很累。'
   answer: C
-  answer_word: 形容枯槁
-  context_before: 他照顧住院的家人好幾週，整個人
-  context_after: ，看起來很累
-- id: 5
+- sentence: '事件真相尚未釐清，外界對原因（　　），凸顯儘早釐清事實的重要。'
   answer: I
-  answer_word: 眾說紛紜
-  context_before: 事件真相尚未釐清，外界對原因
-  context_after: ，凸顯儘早釐清事實的重要
-- id: 6
+- sentence: '這件事還在調查中，別用（　　）的想法，過早把人判定成好或壞。'
   answer: G
-  answer_word: 非黑即白
-  context_before: 這件事還在調查中，別用
-  context_after: 的想法，過早把人判定成好或壞
-- id: 7
+- sentence: '題目做得越多越熟練，練習的重要（　　）。'
   answer: D
-  answer_word: 不言而喻
-  context_before: 題目做得越多越熟練，練習的重要
-  context_after: ''
-- id: 8
+- sentence: '這部動畫在臺灣（　　），大家對它的經典情節都能舉出例子。'
   answer: B
-  answer_word: 家喻戶曉
-  context_before: 這部動畫在臺灣
-  context_after: ，大家對它的經典情節都能舉出例子
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n比較多元觀點\n本文主要談一個人生重要的議題：能不能選擇告別方式。這種議題文章，就像一場「辯論」，你會看見多元的觀點的討論。讀這類文章，重點是：「找到個別的觀點，再比較不同觀點的差異在哪裡？」最後再推論文章想要說什麼（主旨）。\n\n一、確定議題\n1.這篇文章在談「哪個議題／爭議」\n   對安樂死或協助自殺的看法                                         \n二、找觀點\n    議題文章是在「說服」讀者：每一方會先表明立場與主張，再用理由說服。接著請你整理這個議題有哪些立場？每個立場的主張和理由是什麼？\n立場\n觀點要素\n請根據課文內容填答或勾選(單選)\n贊成   \n主張\n在法律監督下開放讓病人選擇如何結束己的生命               \n\n主要\n理由\n①病人意願清楚且堅定時，應尊重其自主與尊嚴，讓他有選擇權。\n□②病人意願清楚且堅定時，應先把照護資源做足再討論\n\n條件\n①應有多位醫師評估、冷靜期、完整紀錄等程序，避免草率決定。\n□②先把疼痛控制與長照資源做足，再談是否開放。\n反對    \n主張\n不開放安樂死／協助自殺\n\n主要\n理由\n□①一旦開放且程序夠嚴格，就能避免界線擴大與被迫選擇。\n②一旦開放，適用範圍可能擴大；弱勢病患也可能承受壓力而被迫選擇。\n保留   \n主張\n先落實臨終照顧：                                         \n讓疼痛控制、心理支持、長照與照顧者喘息服務更普及         \n\n主要\n理由\n①很多「想走」可能只是太痛太孤單，資源到位選項就不會只有極端選項。\n□②很多「想走」可能因程序不夠嚴格；所以應先補強審查監督，再討論是否開放。\n\n三、比較觀點差異（用「價值／風險」兩個角度）\n我們先用「主張＋理由」掌握每一方在說什麼；再追問理由在強調什麼──重視的價值與擔心的風險。用這兩個角度看，就能清楚比較觀點差異。\n立場\n重視的價值（單選）\n擔心的風險（單選）\n贊成\n①自主與尊嚴　\n□②保護弱勢、避免被迫\n①草率決定、意願不清　\n□②界線擴大、範圍越放越寬\n反對\n□①自主與尊嚴　\n②保護弱勢、避免被迫\n□①草率決定、意願不清　\n②弱勢受壓、被迫選擇死亡\n保留\n①先把照護做到位　□②盡快立法開放選擇\n①照護不足，逼人只剩極端選項\n□②界線擴大，導致濫用難以收回\n＊歸納觀點差異：\n贊成者重視    自主與尊嚴     ；反對者最擔心   弱勢受壓、被迫選擇   ；保留者強調先    把照護做到位     。\n\n四、推論主旨（從「觀點差異」推論整篇重點）\n根據你整理的觀點差異（自主尊嚴／弱勢被迫／先補照護），下列哪一項最能概括本文主旨？（單選）\n □①說明末期病人的自主選擇，並提醒制度應降低風險、補足照護資源\n ②透過多元觀點對照，凸顯此議題在權利、風險與照護之間的兩難\n\n◎"
 strategy_exercise:

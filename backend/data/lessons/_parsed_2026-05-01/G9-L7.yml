@@ -3,6 +3,19 @@ grade: 9
 grade_code: G9-L7
 reading_strategy: 圖表繪製與判讀-長條圖與圓形圖
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G9-L7從基因來的特別禮物（圖表繪製與判讀-長條圖與圓形圖）.docx
 parsed_at: '2026-05-01T21:10:46'
 flags: []
@@ -170,17 +183,13 @@ vocab_bank:
   D: 水滴石穿
   E: 事半功倍
 fill_in_blank:
-- id: 1
+- sentence: '每天堅持十分鐘的練習，日積月累，（　　），讓他獲得好成果。'
   answer: D
-  answer_word: 水滴石穿
-  context_before: 每天堅持十分鐘的練習，日積月累，
-  context_after: ，讓他獲得好成果
-- id: 2
+- sentence: '我們得先思考問題在哪兒，才能讓事情處理得更有（　　）。'
   answer: B
-  answer_word: 效率
-  context_before: 我們得先思考問題在哪兒，才能讓事情處理得更有
-  context_after: ''
-fill_in_blank_count: 2
+- sentence: '（　　）規畫要先掌握自己的興趣、能力、價值觀，再看看有什樣的機會適合自己。'
+  answer: A
+fill_in_blank_count: 3
 spotlight_raw_text: '閱讀聚光燈2645410313359
 
   長條圖與圓形圖0

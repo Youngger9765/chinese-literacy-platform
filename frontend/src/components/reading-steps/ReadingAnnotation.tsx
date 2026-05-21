@@ -9,6 +9,16 @@ import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
 import { scopedStepStorageKey } from '../../services/learningStorageScope';
 import { fontForZhuyin } from '../../constants/fonts';
+import GraphicTextImageStrip from './GraphicTextImageStrip';
+import TableDisplay from './TableDisplay';
+import InlineImageCard from './InlineImageCard';
+import InlineTableCard from './InlineTableCard';
+import {
+  detectImageMarker,
+  detectTableMarker,
+  resolveImageIndex,
+  resolveTableIndex,
+} from '../../utils/paragraphMarkers';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -134,6 +144,50 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     unknownCount: annotations.filter((a) => a.type === 'unknown').length,
     importantCount: annotations.filter((a) => a.type === 'important').length,
   }), [annotations]);
+
+  // Pre-compute which images/tables get rendered inline (caption-matched) so the
+  // fallback strip at the bottom only emits the un-referenced ones. Avoids the
+  // duplicate-render trap when a lesson labels every figure in its paragraphs.
+  // See utils/paragraphMarkers.ts for the caption rule.
+  const { inlineImageIdxByPara, inlineTableIdxByPara, usedImageIdx, usedTableIdx } = useMemo(() => {
+    const imgMap = new Map<number, number>();
+    const tblMap = new Map<number, number>();
+    const usedImg = new Set<number>();
+    const usedTbl = new Set<number>();
+    story.content.forEach((para, paraIdx) => {
+      const imgN = detectImageMarker(para);
+      if (imgN !== null) {
+        const imgIdx = resolveImageIndex(story.images, imgN);
+        if (imgIdx !== null && !usedImg.has(imgIdx)) {
+          imgMap.set(paraIdx, imgIdx);
+          usedImg.add(imgIdx);
+        }
+      }
+      const tblN = detectTableMarker(para);
+      if (tblN !== null) {
+        const tblIdx = resolveTableIndex(story.tables, tblN);
+        if (tblIdx !== null && !usedTbl.has(tblIdx)) {
+          tblMap.set(paraIdx, tblIdx);
+          usedTbl.add(tblIdx);
+        }
+      }
+    });
+    return {
+      inlineImageIdxByPara: imgMap,
+      inlineTableIdxByPara: tblMap,
+      usedImageIdx: usedImg,
+      usedTableIdx: usedTbl,
+    };
+  }, [story.content, story.images, story.tables]);
+
+  const fallbackImages = useMemo(
+    () => (story.images ?? []).filter((_, i) => !usedImageIdx.has(i)),
+    [story.images, usedImageIdx],
+  );
+  const fallbackTables = useMemo(
+    () => (story.tables ?? []).filter((_, i) => !usedTableIdx.has(i)),
+    [story.tables, usedTableIdx],
+  );
 
   const annotationsForPanel = useMemo<AnnotationWithText[]>(() => {
     return [...annotations]
@@ -579,35 +633,85 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
             </h1>
           </div>
 
-          {/* Article paragraphs */}
+          {/* Article paragraphs.
+              Images/tables whose captions appear inside paragraphs render inline
+              right after the caption row (#1692). Un-referenced assets fall back
+              to the strip/table block below the article. */}
           <article className="max-w-4xl mx-auto px-6 md:px-16 space-y-10">
             {story.content.map((rawPara, paraIdx) => {
               const displayText = zhuyinParagraphs?.[paraIdx] ?? rawPara;
+              const inlineImgIdx = inlineImageIdxByPara.get(paraIdx);
+              const inlineTblIdx = inlineTableIdxByPara.get(paraIdx);
               return (
-                <section key={paraIdx} className="relative group">
-                  {/* Paragraph number — lives outside the [data-para-idx] subtree
-                      so its text doesn't inflate selection offsets. */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute -left-8 md:-left-12 top-2 text-sm font-headline font-bold text-on-surface-variant/30 select-none pointer-events-none"
-                  >
-                    {String(paraIdx + 1).padStart(2, '0')}
-                  </span>
-                  <p
-                    data-para-idx={paraIdx}
-                    className="text-on-surface/90"
-                    style={{
-                      fontSize: `${fontSizePx}px`,
-                      lineHeight: isZhuyinAny ? '2.4rem' : '1.6', /* ruby annotations need 2.4rem minimum to avoid clipping */
-                      letterSpacing: isZhuyinAny ? '0.15em' : '0',
-                    }}
-                  >
-                    {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}
-                  </p>
-                </section>
+                <React.Fragment key={paraIdx}>
+                  <section className="relative group">
+                    {/* Paragraph number — lives outside the [data-para-idx] subtree
+                        so its text doesn't inflate selection offsets. */}
+                    <span
+                      aria-hidden="true"
+                      className="absolute -left-8 md:-left-12 top-2 text-sm font-headline font-bold text-on-surface-variant/30 select-none pointer-events-none"
+                    >
+                      {String(paraIdx + 1).padStart(2, '0')}
+                    </span>
+                    <p
+                      data-para-idx={paraIdx}
+                      className="text-on-surface/90"
+                      style={{
+                        fontSize: `${fontSizePx}px`,
+                        lineHeight: isZhuyinAny ? '2.4rem' : '1.6', /* ruby annotations need 2.4rem minimum to avoid clipping */
+                        letterSpacing: isZhuyinAny ? '0.15em' : '0',
+                      }}
+                    >
+                      {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}
+                    </p>
+                  </section>
+                  {inlineImgIdx !== undefined && story.images?.[inlineImgIdx] && (
+                    <div
+                      data-testid={`inline-image-after-para-${paraIdx}`}
+                      className="max-w-3xl mx-auto"
+                    >
+                      <InlineImageCard
+                        image={story.images[inlineImgIdx]}
+                        lessonCode={story.lesson_code}
+                      />
+                    </div>
+                  )}
+                  {inlineTblIdx !== undefined && story.tables?.[inlineTblIdx] && (
+                    <div data-testid={`inline-table-after-para-${paraIdx}`}>
+                      <InlineTableCard table={story.tables[inlineTblIdx]} />
+                    </div>
+                  )}
+                </React.Fragment>
               );
             })}
           </article>
+
+          {/* Fallback image strip — only un-referenced images (no caption match).
+              Preserves G7-L29 behavior where paragraphs reference 圖 N inside body
+              sentences but never as standalone caption rows. */}
+          {story.layout_mode === 'graphic-text' && fallbackImages.length > 0 && (
+            <div
+              className="max-w-4xl mx-auto px-6 md:px-16 mt-10 h-72 md:h-80 flex"
+              data-testid="reading-annotation-graphic-text-images"
+              style={{ WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties}
+            >
+              <GraphicTextImageStrip
+                images={fallbackImages}
+                lessonCode={story.lesson_code}
+              />
+            </div>
+          )}
+
+          {/* Fallback tables — only un-referenced tables. */}
+          {fallbackTables.length > 0 && (
+            <div
+              className="max-w-4xl mx-auto px-6 md:px-16 mt-10"
+              data-testid="reading-annotation-tables"
+              style={{ WebkitUserSelect: 'none', userSelect: 'none' } as React.CSSProperties}
+            >
+              <TableDisplay tables={fallbackTables} layout="stacked" />
+            </div>
+          )}
 
           {/* ── Floating selection toolbar ─────────────────────────────── */}
           {toolbar.visible && (

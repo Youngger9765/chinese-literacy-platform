@@ -3,6 +3,11 @@ grade: 9
 grade_code: G9-L9
 reading_strategy: 圖表繪製與判讀-圖文表綜合判讀
 reading_strategy_type: graphic_text_integration
+step_sequence:
+- intro
+- reading-annotation
+- knowledge-station
+- report
 source_file: G9-L9力與美表現的競技體操（圖表繪製與判讀-圖文表綜合判讀）.docx
 parsed_at: '2026-05-01T21:10:46'
 flags: []

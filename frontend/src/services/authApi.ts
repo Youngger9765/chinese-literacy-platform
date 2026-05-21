@@ -99,6 +99,8 @@ export interface RegisterResponse {
   message: string;
   /** Dev/staging mode only: token returned directly for testing. Null in production. */
   verification_token: string | null;
+  /** True when REQUIRE_EMAIL_VERIFICATION=false (staging/preview) — skip verify screen. */
+  auto_verified?: boolean;
 }
 
 export async function register(

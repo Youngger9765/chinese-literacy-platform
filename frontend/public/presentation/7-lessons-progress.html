@@ -9,10 +9,10 @@
 /* ── viewport base (per frontend-slides skill) ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { overflow-x: hidden; }
-html { scroll-snap-type: y mandatory; scroll-behavior: smooth; height: 100%; font-size: 32px; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; height: 100%; font-size: 22px; }
 body { min-height: 100vh; }
 body {
-  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-family: "Noto Sans TC", "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
   background: #FAF7F0;
   color: #1a1a2e;
   -webkit-font-smoothing: antialiased;
@@ -49,7 +49,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 4vh clamp(2rem, 5vw, 5rem);
+  padding: 8vh clamp(2rem, 5vw, 5rem) 4vh;
 }
 
 .slide-num {
@@ -242,6 +242,62 @@ body {
   font-weight: 600;
 }
 
+/* ── slide 2 strategy split (左右兩策略，不顯示每課細節) ── */
+.strategy-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin-top: 2vh;
+}
+.strategy-col {
+  background: var(--paper-2);
+  border-radius: 14px;
+  padding: clamp(1.5rem, 2.4vw, 2rem) clamp(1.4rem, 2.2vw, 1.8rem);
+  box-shadow: var(--shadow);
+  border-top: 4px solid;
+}
+.strategy-col.a { border-top-color: var(--purple); }
+.strategy-col.b { border-top-color: var(--emerald); }
+.strategy-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1.2vh;
+  flex-wrap: wrap;
+  gap: 0.6em;
+}
+.strategy-tag {
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: var(--h3-size);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.strategy-meta {
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: var(--small-size);
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.strategy-codes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6em;
+}
+.lesson-chip {
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: var(--small-size);
+  font-weight: 600;
+  padding: 0.4em 0.9em;
+  border-radius: 999px;
+  background: rgba(91,79,196,0.08);
+  color: var(--purple);
+  letter-spacing: 0.04em;
+}
+.lesson-chip.b {
+  background: rgba(16,185,129,0.1);
+  color: var(--emerald);
+}
+
 /* ── slide 3 do: top URL block + bottom 2 demo grids ── */
 .url-block {
   background: var(--paper-2);
@@ -342,6 +398,25 @@ body {
   min-height: 0;
   overflow: hidden;
   margin: 0.5vh 0 0;
+  border: 4px solid var(--purple);
+  border-radius: 8px;
+  background: var(--paper-2);
+}
+.demo-card .thumb::before {
+  content: "📷 截圖";
+  position: absolute;
+  background: var(--purple);
+  color: white;
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 0 0 8px 0;
+  letter-spacing: 0.08em;
+  z-index: 2;
+}
+.demo-card .thumb {
+  position: relative;
 }
 .demo-card .thumb img {
   width: 100%;
@@ -417,7 +492,7 @@ body {
 /* ── slide 4 check (SOP 對應) ── */
 .check-layout {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 1fr 1.35fr;
   gap: clamp(1.5rem, 3vw, 2.5rem);
   align-items: center;
 }
@@ -428,14 +503,31 @@ body {
 }
 .ss-frame {
   background: var(--paper-2);
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: var(--shadow);
+  border: 4px solid var(--purple);
+  position: relative;
+}
+.ss-frame::before {
+  content: "📷 截圖";
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--purple);
+  color: white;
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 0 0 8px 0;
+  letter-spacing: 0.08em;
+  z-index: 2;
 }
 .ss-frame img {
   width: 100%;
   display: block;
-  max-height: 28vh;
+  max-height: 22vh;
   object-fit: cover;
   object-position: top;
 }
@@ -465,9 +557,10 @@ body {
   color: var(--ink-2);
 }
 .sop-table td {
-  padding: 9px 14px;
+  padding: 6px 12px;
   border-top: 1px solid var(--paper-3);
-  line-height: 1.55;
+  line-height: 1.4;
+  font-size: 0.95rem;
 }
 .sop-table .step-n {
   font-family: "Noto Sans TC", sans-serif;
@@ -568,6 +661,38 @@ body {
 }
 .ask-box ol li { margin-bottom: 0.4em; }
 
+/* ── slide 6 todo (剩餘工作 + 對外協調) ── */
+.todo-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: clamp(1rem, 2vw, 1.8rem);
+  margin-top: 2vh;
+}
+.todo-box {
+  background: var(--paper-2);
+  border-radius: 12px;
+  padding: clamp(1.2rem, 2vw, 1.6rem);
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--purple);
+}
+.todo-box.amber { border-left-color: var(--amber); }
+.todo-box h4 {
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: var(--small-size);
+  color: var(--ink-2);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.8em;
+}
+.todo-box ol {
+  list-style: decimal;
+  padding-left: 1.2em;
+  font-size: var(--small-size);
+  color: var(--ink);
+  line-height: 1.7;
+}
+.todo-box ol li { margin-bottom: 0.4em; }
+
 footer {
   position: absolute;
   bottom: 2vh;
@@ -636,7 +761,7 @@ footer {
         <h3>1. 兩個核心模組</h3>
         <p>
           <span class="em">閱讀聚光燈 AI 助教</span>：答錯時主動引導學生<br>
-          <span class="em">圖文整合介面</span>：文字與圖片左右並陳
+          <span class="em">圖文整合介面</span>：文字與圖片並陳 + 右側答題
         </p>
       </div>
       <div class="plan-card b">
@@ -655,25 +780,30 @@ footer {
       </div>
     </div>
 
-    <div class="plan-table">
-      <table>
-        <thead>
-          <tr>
-            <th style="width: 12%;">單元</th>
-            <th style="width: 12%;">年級課次</th>
-            <th>課文標題</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="unit" style="color: var(--purple);">A · 摘要</td><td>G6-L22</td><td>小兵立大功：雞鳴狗盜的故事</td></tr>
-          <tr><td class="unit" style="color: var(--purple);">A · 摘要</td><td>G6-L23</td><td>老鷹紅豆的故事</td></tr>
-          <tr><td class="unit" style="color: var(--purple);">A · 摘要</td><td>G6-L24</td><td>白鯨救援：一場人與自然的協奏曲</td></tr>
-          <tr><td class="unit" style="color: var(--purple);">A · 摘要</td><td>G6-L25</td><td>荷蘭東印度公司：全世界第一張股票的誕生</td></tr>
-          <tr><td class="unit" style="color: var(--emerald);">B · 圖文</td><td>G7-L28</td><td>看不見的兇手：以實驗破解肉湯腐敗之謎</td></tr>
-          <tr><td class="unit" style="color: var(--emerald);">B · 圖文</td><td>G7-L29</td><td>從四張圖，看地球暖化的現象</td></tr>
-          <tr><td class="unit" style="color: var(--emerald);">B · 圖文</td><td>G7-L30</td><td>都是八哥，為什麼命運不一樣？</td></tr>
-        </tbody>
-      </table>
+    <div class="strategy-split">
+      <div class="strategy-col a">
+        <div class="strategy-head">
+          <span class="strategy-tag" style="color: var(--purple);">A · 摘要策略</span>
+          <span class="strategy-meta">6 年級・4 課</span>
+        </div>
+        <div class="strategy-codes">
+          <span class="lesson-chip">雞鳴狗盜的故事</span>
+          <span class="lesson-chip">老鷹紅豆的故事</span>
+          <span class="lesson-chip">白鯨救援</span>
+          <span class="lesson-chip">荷蘭東印度公司</span>
+        </div>
+      </div>
+      <div class="strategy-col b">
+        <div class="strategy-head">
+          <span class="strategy-tag" style="color: var(--emerald);">B · 圖文整合</span>
+          <span class="strategy-meta">7 年級・3 課</span>
+        </div>
+        <div class="strategy-codes">
+          <span class="lesson-chip b">看不見的兇手</span>
+          <span class="lesson-chip b">從四張圖看地球暖化</span>
+          <span class="lesson-chip b">都是八哥</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -707,10 +837,6 @@ footer {
       </div>
     </div>
 
-    <div class="access-note">
-      <strong>登入</strong>：點任一連結 → 跳登入頁 → 按「<strong>學生 小明</strong>」按鈕 → 自動跳回。
-    </div>
-
     <div class="demo-row">
       <div class="demo-card">
         <div class="head">
@@ -725,11 +851,11 @@ footer {
       <div class="demo-card b">
         <div class="head">
           <div class="feat-tag">單元 B 核心功能</div>
-          <h3 class="feat-name">🖼️ 圖文左右並陳</h3>
-          <p class="feat-why">課文與圖同畫面，可獨立滾動 — 不用像紙本來回翻頁找對應段落</p>
+          <h3 class="feat-name">🖼️ 圖文上下並陳 + 右側答題</h3>
+          <p class="feat-why">課文與圖上下並陳，右側是答題系統 — 學生看完即可作答</p>
         </div>
         <div class="thumb">
-          <img src="screenshots/g7-graphic-text.png" alt="圖文左右並陳畫面">
+          <img src="screenshots/g7-graphic-text.png" alt="圖文上下並陳畫面">
         </div>
       </div>
     </div>
@@ -797,8 +923,8 @@ footer {
             <tr>
               <td class="step-n">5</td>
               <td>都失敗才直接教學</td>
-              <td>3 次失敗後解鎖正解（系統計次）</td>
-              <td class="partial">△ 邏輯做完<br>prompt 待校正</td>
+              <td>3 次失敗後解鎖正解</td>
+              <td class="partial">△ prompt 待校正</td>
             </tr>
           </tbody>
         </table>
@@ -816,14 +942,14 @@ footer {
   <div class="content">
     <span class="pdca check">CHECK</span>
     <h2 class="slide-title">5 月 1 日會議所有功能 — 對照表</h2>
-    <p class="slide-subtitle">分六大類，✓ 已做｜⧗ 7/1 前要做｜◎ 5/1 拍板暫不做｜… 後續疊代。</p>
+    <p class="slide-subtitle">分六大類，✓ 已做｜⧗ 7/1 前要做｜… 後續疊代。</p>
 
     <div class="check-grid">
       <div class="check-cat">
         <div class="cat-name">介面 / 字型</div>
         <ul>
           <li><span class="ck ok">✓</span> 字體改非黑體 · 默認無注音</li>
-          <li><span class="ck ok">✓</span> 圖文左右並陳</li>
+          <li><span class="ck ok">✓</span> 圖文並陳</li>
           <li><span class="ck ok">✓</span> 步驟圓圈代表字（簡記段讀詞用…）</li>
         </ul>
       </div>
@@ -838,8 +964,10 @@ footer {
       <div class="check-cat">
         <div class="cat-name">朗讀 / 聽力</div>
         <ul>
-          <li><span class="ck ok">✓</span> AI 朗讀 + 跟讀（選項）</li>
-          <li><span class="ck ok">✓</span> 聽力理解（已做 · 5/1 後隱藏）</li>
+          <li><span class="ck ok">✓</span> AI 朗讀引導 + 跟讀練習</li>
+          <li><span class="ck ok">✓</span> 朗讀量化：每分鐘字數、準確率、時長</li>
+          <li><span class="ck ok">✓</span> 朗讀能力趨勢圖：跨次數追蹤進步</li>
+          <li><span class="ck off">◎</span> 聽力理解（5/1 後依會議決議隱藏）</li>
         </ul>
       </div>
       <div class="check-cat hi">
@@ -861,7 +989,6 @@ footer {
       <div class="check-cat">
         <div class="cat-name">整合 / 後續</div>
         <ul>
-          <li><span class="ck wait">⧗</span> 體育班暑期試用</li>
           <li><span class="ck wait">⧗</span> OMO 紙本拍照（Phase 1 開工中）</li>
           <li><span class="ck later">…</span> 推薦下一篇難度（後續）</li>
         </ul>
@@ -877,25 +1004,25 @@ footer {
 
   <div class="content">
     <span class="pdca act">ACT</span>
-    <h2 class="slide-title">剩 49 天 — 6/1 教授校正、7/1 上線</h2>
-    <p class="slide-subtitle">時程確定，剩餘工作三條清楚。6/1 review 時請教授校長協助校正兩件事。</p>
+    <h2 class="slide-title">剩 49 天 — 7/1 上線</h2>
+    <p class="slide-subtitle">時程確定，剩餘工作三條清楚。</p>
 
     <div class="timeline">
       <div class="t-node past">
-        <div class="date">5 月 13 日</div>
+        <div class="date">5 月中</div>
         <div class="pct">75%</div>
         <div class="label">
           七課線上可用<br>
-          圖文左右並陳完成<br>
-          小語老師 SOP 4/5 已做
+          圖文上下並陳完成<br>
+          AI 小語老師 SOP 4/5 已做
         </div>
       </div>
       <div class="t-node now">
-        <div class="date">6 月 1 日 教授 review</div>
+        <div class="date">6 月初</div>
         <div class="pct">90%</div>
         <div class="label">
-          SOP prompt 教授校正<br>
-          體育班試用配合事項<br>
+          AI 小語老師第 5 步補完<br>
+          合適班級試用配合事項<br>
           對話品質升級
         </div>
       </div>
@@ -903,32 +1030,34 @@ footer {
         <div class="date">7 月 1 日 上線</div>
         <div class="pct">100%</div>
         <div class="label">
-          體育班暑期試用啟用<br>
+          合適班級暑期試用啟用<br>
           教師後台初版上線<br>
-          紙本與數位串接
+          OMO 紙本與數位串接
         </div>
       </div>
     </div>
 
-    <div class="ask-grid">
-      <div class="ask-box">
-        <h4>請教授團隊協助校正</h4>
+    <div class="todo-grid">
+      <div class="todo-box">
+        <h4>剩餘 TODO（自己做）</h4>
         <ol>
-          <li>小語老師 5 步驟引導語句 — 講話像不像老師</li>
-          <li>七課文章重點表內容 — 是否對應學習單</li>
+          <li>AI 小語老師第 5 步補完（3 次失敗解鎖正解）</li>
+          <li>對話品質升級 + prompt 細調</li>
+          <li>教師後台初版（看學生進度 / 報告）</li>
+          <li>OMO 紙本拍照辨識 Phase 1 收尾</li>
         </ol>
       </div>
-      <div class="ask-box amber">
-        <h4>想請教林校長</h4>
+      <div class="todo-box amber">
+        <h4>對外協調</h4>
         <ol>
-          <li>體育班暑期試用 — 想共商可行的時段安排</li>
-          <li>「AI + 老師」現場分工方式，想聽校長建議</li>
+          <li>合適班級暑期試用 — 時段安排</li>
+          <li>「AI + 老師」現場分工方式</li>
         </ol>
       </div>
     </div>
   </div>
 
-  <footer>朗朗上口 · Young Tsai · 2026-05-13 · 5/1 拍板 → 7/1 上線　·　↑↓ 切換頁面</footer>
+  <footer>朗朗上口 · Young Tsai · 5 月中 · 5/1 拍板 → 7/1 上線　·　↑↓ 切換頁面</footer>
 </section>
 
 <script>

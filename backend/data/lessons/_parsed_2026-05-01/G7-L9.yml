@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L9
 reading_strategy: 表達看法-4F思考法
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L9吐瓦魯：逐漸被淹沒的島國（表達看法-4F思考法）.docx
 parsed_at: '2026-05-01T21:10:41'
 flags: []
@@ -194,46 +207,22 @@ vocab_bank:
   G: 雲端
   H: 沒有人是局外人
 fill_in_blank:
-- id: 1
+- sentence: '運動團隊中，（　　），每個隊員的努力對團隊的成功都很重要。'
   answer: H
-  answer_word: 沒有人是局外人
-  context_before: 運動團隊中，
-  context_after: ，每個隊員的努力對團隊的成功都很重要
-- id: 2
+- sentence: '「九二一大地震」有不少房子倒塌，導致許多人（　　）、無家可歸。'
   answer: D
-  answer_word: 流離失所
-  context_before: 「九二一大地震」有不少房子倒塌，導致許多人
-  context_after: 、無家可歸
-- id: 3
+- sentence: '學校運動場改建，田徑隊（　　），需要重新尋找訓練地點。'
   answer: B
-  answer_word: 首當其衝
-  context_before: 學校運動場改建，田徑隊
-  context_after: ，需要重新尋找訓練地點
-- id: 4
+- sentence: '從飛機上（　　）大地，夜晚城市的燈火，如閃爍的星星般美麗。'
   answer: E
-  answer_word: 鳥瞰
-  context_before: 從飛機上
-  context_after: 大地，夜晚城市的燈火，如閃爍的星星般美麗
-- id: 5
+- sentence: '同學打架時，小華在一旁湊熱鬧，沒想到不慎被打傷，遭受（　　）。'
   answer: C
-  answer_word: 池魚之殃
-  context_before: 同學打架時，小華在一旁湊熱鬧，沒想到不慎被打傷，遭受
-  context_after: ''
-- id: 6
+- sentence: '照片和影片上傳（　　）後，家人和朋友就可以立即查看和分享了。'
   answer: G
-  answer_word: 雲端
-  context_before: 照片和影片上傳
-  context_after: 後，家人和朋友就可以立即查看和分享了
-- id: 7
+- sentence: '俄羅斯製片商首開（　　）到太空取景，拍攝第一部太空實景電影。'
   answer: F
-  answer_word: 先例
-  context_before: 俄羅斯製片商首開
-  context_after: 到太空取景，拍攝第一部太空實景電影
-- id: 8
+- sentence: '大地震過後的豪雨，讓土石鬆動，山坡上的住戶顯得（　　）。'
   answer: A
-  answer_word: 岌岌可危
-  context_before: 大地震過後的豪雨，讓土石鬆動，山坡上的住戶顯得
-  context_after: ''
 fill_in_blank_count: 8
 spotlight_raw_text: "閱讀聚光燈\n表達看法—4F思考法\n    反思的能力很重要，它能幫助我們發現自己的問題，進而思考：我可以怎麼做？\n    作者看到吐瓦魯的報導也進行了反思，他想到臺灣也受到全球暖化的威脅，認為對抗全球暖化是全人類的共同議題。\n    反思很重要，但該怎麼做呢？反思也可以透過步驟來練習喔！接下來我們要介紹「4F反思法」。\n1.事實（Facts）：看見了什麼事實？可以透過不同角度來描述這個事件。\n2.感受（Feeling）：對於你所看見的事實，你有什麼樣的感受？\n3.發現（Finding）：做更深入的思考，有新的發現。像是為什麼這件事會發生？從這個事件你學到什麼？過去生活中有沒有發生類似的事件？\n4.未來（Future）：將前面的思考應用在未來的生活中。這個事件對你的未來有什麼影響？你可以有哪些行動來預防不好的結果？或是有哪些行動可以複製他人的成功？\n◎"
 strategy_exercise:

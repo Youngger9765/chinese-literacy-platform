@@ -80,6 +80,8 @@ const ComprehensionMcqPage: React.FC = () => {
       story={selectedStory}
       dbSessionId={dbSessionId ?? undefined}
       progressPercent={mcqDone ? 100 : hasMcq ? -1 : -1}
+      exerciseIcon="quiz"
+      exerciseLabel="閱讀理解"
     >
       {hasMcq ? (
         mcqDone ? (

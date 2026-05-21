@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L16
 reading_strategy: 生活素養-野外求生技能
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L16奇蹟行動（生活素養-野外求生技能）.docx
 parsed_at: '2026-05-01T21:10:37'
 flags: []
@@ -191,17 +204,19 @@ vocab_bank:
   I: 倖存
   J: 罹難
 fill_in_blank:
-- id: 2
+- sentence: '在這麼惡劣的環境中，生還的機會非常（　　），但大家沒有放棄。'
+  answer: G
+- sentence: '那次地震造成數百人（　　），成為全國性的悲劇。。'
   answer: J
-  answer_word: 罹難
-  context_before: 那次地震造成數百人
-  context_after: ，成為全國性的悲劇
-- id: 5
+- sentence: '經歷長時間的飢餓和疲勞，讓他變得（　　）。'
+  answer: A
+- sentence: '這片山谷的 （　　）非常茂盛，為許多動物提供舒適的棲息地。'
+  answer: E
+- sentence: '搜救隊在森林中找到了飛機的（　　），並開始進行搜索工作。'
   answer: B
-  answer_word: 殘骸
-  context_before: 搜救隊在森林中找到了飛機的
-  context_after: ，並開始進行搜索工作
-fill_in_blank_count: 2
+- sentence: '這片叢林（　　），裡面有許多毒蛇和猛獸。'
+  answer: F
+fill_in_blank_count: 6
 spotlight_raw_text: "閱讀聚光燈\n野外求生技能\n    在野外迷路時，首先要保持冷靜。等待救援的過程中，盡量減少身體能量的消耗。等待救援還有一個非常重要的「333原則」：人可以3週沒有食物，3天沒有水，但失溫3個小時就會致命。因此，在發生迷路、山難的狀況下，最重要的就是要預防失溫，所以登山時切記穿著防風保暖的衣物。\n    了解在野外迷路等待救援的333原則後，基本的求生技巧也是重要的。課文中孩童之所以得以奇蹟生存，主要是因為萊絲莉掌握了保命原則並運用了族人教導的野外求生技巧。\n    在野外的環境求生存，有些原則、技能是必備的。現在就讓我們看看野外求生的注意事項及補充知識，或許將來有機會救你一命呢！\n 1.野外求生必備知識\n\n食物\n水源\n火\n避難所\n求救信號\n功用\n提供能量。\n維持身體機能。\n取暖、煮食、驅蟲、照明。\n預防野獸侵襲、避寒、避雨。\n增加被救援的機會。\n種類\n野果、根莖植物、魚類和小動物。\n雨水、溪流、河流和湖泊。\n無。\n山洞、堅固粗壯的樹上方。\n火、信號彈、反光鏡、石頭鮮豔布條。\n方法\n可設陷阱、捕魚和收集野果。\n先過濾(去除雜質)，後煮沸。\n使用打火機、火柴、放大鏡和摩擦生火法。\n使用樹枝、樹葉和其他天然材料建造。\n燃營火或狼煙、用鏡子發出信號、用石頭排SOS、布條標記位置。\n注意事項\n先學會辨識哪些東西可食用。\n即使水看起來乾淨，也需要進一步處理才能安全飲用。\n保持火源乾燥和準備足夠的燃料是成功生火的關鍵。\n盡量在白天完成搭建，避難所應該避免積水。\n若是四周無人，保留體力，不要大肆呼喊。\n２."
 strategy_exercise:
   type: guided_steps

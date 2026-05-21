@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L17
 reading_strategy: 跨文化接納理解
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L17給神明發會診單（跨文化接納理解）.docx
 parsed_at: '2026-05-01T21:10:38'
 flags: []
@@ -174,25 +187,26 @@ vocab_bank:
   F: 刻板印象
   G: 喬裝
   H: 預後
-  I: 會診
+  I: 稱職
   J: 由衷
 fill_in_blank:
-- id: 5
+- sentence: '我有一個 （　　），希望你能幫我代班。'
+  answer: A
+- sentence: '奶奶身體不舒服，虛弱無力，走路需要有人在旁（　　）。'
+  answer: D
+- sentence: '警察（　　）成路人、攤販，經過幾天的埋伏，一舉破獲販毒集團。'
+  answer: G
+- sentence: '聽到有人呼救，救生員（　　），立刻跳下泳池救人。'
+  answer: E
+- sentence: '真讓人（　　），氣溫35度，居然還有人穿厚夾克在街上走動？'
   answer: B
-  answer_word: 納悶
-  context_before: 真讓人
-  context_after: ，氣溫35度，居然還有人穿厚夾克在街上走動？
-- id: 7
+- sentence: '這個病房的護理長是位男士，翻轉了許多人對護理師的（　　）。'
+  answer: F
+- sentence: '我（　　）的感謝您多年來的照顧。'
   answer: J
-  answer_word: 由衷
-  context_before: 我
-  context_after: 的感謝您多年來的照顧
-- id: 8
+- sentence: '他的病情十分嚴重，需要多名醫生同時（　　）。'
   answer: I
-  answer_word: 會診
-  context_before: 他的病情十分嚴重，需要多名醫生同時
-  context_after: ''
-fill_in_blank_count: 3
+fill_in_blank_count: 8
 本課語詞:
 - 觸怒
 - 不假思索

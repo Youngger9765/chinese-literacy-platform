@@ -60,6 +60,8 @@ interface ApiStoryDetail extends ApiStoryListItem {
   multiple_choice: Array<{ question: string; options: string[]; answer: string | null; explanation: string | null }> | null;
   vocab_bank: Record<string, string> | null;
   knowledge_video_url: string | null;
+  // Full video list (#1683). null for legacy lessons without video_links field.
+  video_links: { title: string; url: string }[] | null;
   reading_benchmark: { levels: { threshold: string; feedback: string }[] } | null;
   text_type: string;
   source_file: string;
@@ -92,6 +94,15 @@ interface ApiStoryDetail extends ApiStoryListItem {
   } | null;
   // 紙本學習單 PDF URL (#1444) — null when no matching PDF exists
   worksheet_pdf_url?: string | null;
+  // 紙本表格 HTML render (#1685) — null when lesson has no extracted tables
+  tables?: Array<{
+    id: string;
+    title: string;
+    headers: string[];
+    rows: Array<{ cells: string[]; section?: string }>;
+    section_label_col?: string;
+    notes?: string[];
+  }> | null;
 }
 
 interface ApiStoryListResponse {
@@ -155,12 +166,14 @@ function apiDetailToStory(detail: ApiStoryDetail): Story {
     multipleChoice: detail.multiple_choice ?? undefined,
     vocabBank: detail.vocab_bank ?? undefined,
     knowledgeVideoUrl: detail.knowledge_video_url ?? undefined,
+    videoLinks: detail.video_links ?? undefined,
     strategyExercise: detail.strategy_exercise ?? undefined,
     stepSequence: detail.step_sequence ?? undefined,
     worksheetSectionOrder: detail.worksheet_section_order ?? undefined,
     worksheetIntro: detail.worksheet_intro ?? undefined,
     lessonIntro: detail.lesson_intro ?? undefined,
     worksheetPdfUrl: detail.worksheet_pdf_url ?? undefined,
+    tables: detail.tables ?? undefined,
     // Plugin-pattern dispatch fields (#1404 / #1341):
     layout_mode: (detail.layout_mode as Story['layout_mode']) ?? 'standard',
     reading_strategy_type: detail.reading_strategy_type ?? 'general',

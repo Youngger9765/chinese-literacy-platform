@@ -1,3 +1,16 @@
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 lesson_code: G5-L17
 grade: 5
 grade_code: G5-L17
@@ -138,64 +151,28 @@ vocab_bank:
   H: 刻不容緩
   I: 晝伏夜出
   J: 成效斐然
-  K: 刨地
 fill_in_blank:
-- id: 1
+- sentence: '這個花園多年無人管理，已經（　　），整理恐怕要花一段時間。'
   answer: C
-  answer_word: 雜草叢生
-  context_before: 這個花園多年無人管理，已經
-  context_after: ，整理恐怕要花一段時間
-- id: 2
+- sentence: '貓頭鷹和老鼠都是（　　）的生物，白天休息，晚上才出來覓食。'
   answer: I
-  answer_word: 晝伏夜出
-  context_before: 貓頭鷹和老鼠都是
-  context_after: 的生物，白天休息，晚上才出來覓食
-- id: 3
+- sentence: '這種昆蟲的（　　）力很強，短短幾週就能孵化成千上萬的幼蟲。'
   answer: G
-  answer_word: 繁殖
-  context_before: 這種昆蟲的
-  context_after: 力很強，短短幾週就能孵化成千上萬的幼蟲
-- id: 4
+- sentence: '地震導致大量人員受困，救援行動（　　），每分每秒都攸關生死。'
   answer: H
-  answer_word: 刻不容緩
-  context_before: 地震導致大量人員受困，救援行動
-  context_after: ，每分每秒都攸關生死
-- id: 5
+- sentence: '這種生物體形太小，（　　）無法觀察，必須使用顯微鏡。'
   answer: D
-  answer_word: 肉眼
-  context_before: 這種生物體形太小，
-  context_after: 無法觀察，必須使用顯微鏡
-- id: 6
+- sentence: '這款新型手機的（　　）十分強大，照相品質佳，還能修復老相片。'
   answer: E
-  answer_word: 效能
-  context_before: 這款新型手機的
-  context_after: 十分強大，照相品質佳，還能修復老相片
-- id: 7
-  answer: K
-  answer_word: 刨地
-  context_before: 春雨後，農夫開始以鋤頭
-  context_after: ，準備種下花生
-- id: 8
+- sentence: '總統今日上午頒獎給舉重國手郭婞淳，以（　　）其榮獲奧運金牌。'
   answer: A
-  answer_word: 表彰
-  context_before: 總統今日上午頒獎給舉重國手郭婞淳，以
-  context_after: 其榮獲奧運金牌
-- id: 9
+- sentence: '由於詐騙案件（　　），警方提醒民眾不要輕信來路不明的訊息。'
   answer: B
-  answer_word: 層出不窮
-  context_before: 由於詐騙案件
-  context_after: ，警方提醒民眾不要輕信來路不明的訊息
-- id: 10
+- sentence: '這位護理師致力於偏鄉醫療工作，被譽為（　　）的白衣天使。'
   answer: F
-  answer_word: 救苦救難
-  context_before: 這位護理師致力於偏鄉醫療工作，被譽為
-  context_after: 的白衣天使
-- id: 11
+- sentence: '新的訓練方式（　　），選手的成績都大幅進步。'
   answer: J
-  answer_word: 成效斐然
-  context_before: 新的訓練方式
-  context_after: ，選手的成績都大幅進步
-fill_in_blank_count: 11
+fill_in_blank_count: 10
 spotlight_raw_text: '閱讀聚光燈
 
   表格閱讀策略

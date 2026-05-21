@@ -147,6 +147,85 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 
 > 相關 PostToolUse hooks 已在 `~/.claude/settings.json` 全域註冊（#1273）。
 
+## LLM Model 比較與更換流程
+
+**換 model（新 Gemini 版本 / Claude / GPT 等）前，必跑系統性 A/B**。SOT: `docs/ai/llm-model-ab-2026-05.md`。
+
+### 現用 model 配置（`backend/app/services/llm_models.py` TASK_MODELS）
+
+| Task | Model | Region | 鎖定原因 |
+|------|-------|--------|---------|
+| 8 個 text/JSON tasks（socratic / comprehension / vocab / reading / story / exit_ticket / sentence_validate / teacher_comment）| `gemini-2.5-flash-lite` | global | 4-way A/B：quality tie, cost -78% (#1744) |
+| `omo_identifier` | `gemini-flash-lite-latest` (=3.1 Lite) | global | Fair A/B conf 0.973 vs 0.934 (#1729) |
+| **`omo_grader`** | **`gemini-2.5-flash`** | **us-central1** | **LOCKED — lettered circle 5/5 vs 1/5 spatial (#1730)** |
+
+### 比較維度 checklist（換 model 前測這些）
+
+**P0 必測**：
+- Latency (p50 / p95 / TTFT)
+- Cost per call（用 `usage_metadata` × PRICING 算）
+- Schema validity（JSON parse + required fields）
+- Output completeness（length + finish_reason — 抓 MAX_TOKENS 截斷）
+- Domain accuracy（grader 對錯 / identifier hit / classifier label）
+- Fabrication rate（OMO 特有）
+- OCR accuracy（vision — 中文手寫字）
+- Spatial reasoning（vision — lettered circle / boxed answer 位置定位）
+
+**P1 該測**：
+- 繁體中文 fluency
+- 教學引導性（pedagogical — warm tone / scaffolded）
+- Output length / verbosity
+- Determinism / variance（同 prompt N 次差異）
+- Cold start vs warm
+- Region latency delta
+
+### Config fairness（之前漏的，必設）
+
+- ⚠️ **Thinking control API differs per model family** (per Codex fact-check 2026-05-20, [Gemini thinking docs](https://ai.google.dev/gemini-api/docs/thinking)):
+  - Gemini **2.5 series** → `thinking_config=ThinkingConfig(thinking_budget=0)` 才能 disable thinking
+  - Gemini **3.5+ series** → `thinking_config=ThinkingConfig(thinking_level="minimal")` (default `"medium"`); `thinking_budget=0` 對 3.5+ 系列**無效**，reasoning tokens 仍計費 + 仍 consume budget → A/B 不公平
+  - 加新 3.5+ / 4.0 model 進 A/B 時必須切對 API，不然測完結論不可信
+- ⚠️ Models 不同 region 時標 location bias
+- Shuffle model 順序避免 cold start bias
+- 同 `max_output_tokens` / `temperature` per task
+- 多 sample（≥3，quality-critical 用 5+）
+
+### 既有測試 scripts（可直接改參數重跑）
+
+```
+private/omo-real-samples/2026-05-20-systematic-ab/
+├── run_ab_test.py             # 8-task text/JSON A/B 框架（call_text + call_json）
+├── inventory.md               # 所有 LLM call sites 清單
+└── (per-task JSON outputs)
+
+private/omo-real-samples/2026-05-20-grader-ab/
+├── run_grader_ab.py           # OMO grader vision A/B 框架
+└── summary.md                 # spatial reasoning verdict
+
+private/omo-real-samples/2026-05-18-batch-results/
+├── eval_3_1_lite.py           # 快速 6-test A/B（小範圍）
+├── run_omo_batch.py           # 16-page identifier batch
+├── fair_identifier_rerun.py   # Identifier fair re-run（post #1738）
+└── fair_socratic_rerun.py     # socratic fair re-run（post #1738）
+```
+
+### 換 model SOP
+
+1. 開新 issue 列要測的 model + tasks
+2. Copy 既有 `run_ab_test.py` → 新 model column 加進去（一律設 `thinking_budget=0`）
+3. 跑 24-48 calls，budget ≤ $0.10
+4. 更新 `docs/ai/llm-model-ab-2026-05.md` 加新 column / decision deltas
+5. 如有 winner flip → 改 `llm_models.py` TASK_MODELS dict（不要 hardcode model string 在 service file）
+6. PR + 6-point QA（health / revision / per-task model verify / OMO grader 不變 / pytest / staging API）
+
+### 反模式（不要做）
+
+- ❌ 比一兩個 sample 就下結論（quality 有 variance）
+- ❌ 沒設 `thinking_budget=0` 就比 quality（2.5 系列會偷吃 token）
+- ❌ Hardcode model string 在 service file（用 `get_model_for_task("xxx")`）
+- ❌ 用「貴 = 好」邏輯（3.5 Flash $9 完敗 2.5-flash-lite $0.30）
+- ❌ Skip 便宜的 model（之前漏測 2.5-flash-lite 差點省不到 78%）
+
 ## 學習流程（7 步驟，StepperNav 定義）
 
 1. **簡介** — 課文背景介紹（Intro）

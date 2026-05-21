@@ -44,6 +44,8 @@ const StoryStructurePage: React.FC = () => {
     <ComprehensionLayout
       story={selectedStory}
       dbSessionId={dbSessionId ?? undefined}
+      exerciseIcon="summarize"
+      exerciseLabel="文章重點表"
     >
       <StoryStructureTable storyId={selectedStory.id} />
 

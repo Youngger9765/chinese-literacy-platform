@@ -3,6 +3,19 @@ grade: 7
 grade_code: G7-L20
 reading_strategy: 媒體素養與識讀-辨別網路訊息真偽
 reading_strategy_type: general
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- story-structure
+- reading-strategy
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G7-L20網紅的電子煙實驗：偽科學的陷阱（媒體素養與識讀-辨別網路訊息真偽）.docx
 parsed_at: '2026-05-01T21:10:40'
 flags: []
@@ -155,31 +168,16 @@ vocab_bank:
   F: 迷魂陣
   G: 相提並論
 fill_in_blank:
-- id: 1
+- sentence: '這兩件事情性質完全不同，怎麼可以（　　）。'
   answer: G
-  answer_word: 相提並論
-  context_before: 這兩件事情性質完全不同，怎麼可以
-  context_after: ''
-- id: 2
+- sentence: '他的論點（　　），缺乏實際的事實支持，難以令人信服。'
   answer: D
-  answer_word: 似是而非
-  context_before: 他的論點
-  context_after: ，缺乏實際的事實支持，難以令人信服
-- id: 3
+- sentence: '警方每天都在（　　）走私毒品，杜絕犯罪活動，維護社會秩序。'
   answer: B
-  answer_word: 查緝
-  context_before: 警方每天都在
-  context_after: 走私毒品，杜絕犯罪活動，維護社會秩序
-- id: 4
+- sentence: '如果對網路上的虛假消息（　　），就容易成為網路詐騙的對象。'
   answer: C
-  answer_word: 信以為真
-  context_before: 如果對網路上的虛假消息
-  context_after: ，就容易成為網路詐騙的對象
-- id: 5
+- sentence: '誇大不實的廣告，容易使民眾對產品的療效產生 （　　）。'
   answer: A
-  answer_word: 混淆
-  context_before: 誇大不實的廣告，容易使民眾對產品的療效產生
-  context_after: ''
 fill_in_blank_count: 5
 spotlight_raw_text: '閱讀聚光燈
 

@@ -3,6 +3,19 @@ grade: 6
 grade_code: G6-L23
 reading_strategy: 摘要策略-問題.解決結構找重點
 reading_strategy_type: summary_psr
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G6-L23老鷹紅豆的故事（摘要策略-問題.解決結構找重點）.docx
 parsed_at: '2026-05-02T16:24:34'
 flags: []
@@ -33,46 +46,22 @@ paragraphs:
 paragraph_count: 7
 char_count: 1011
 fill_in_blank:
-- id: 1
-  answer: 中毒
-  context_before: 農民種的紅豆遭到大量野鳥啄食，為了減少農損，農民製作毒餌，導致大量鳥類
-  context_after: 死亡。
-  context_paragraph_idx: 5
-- id: 2
-  answer: 無毒農法
-  context_before: 1.團隊實地調查、與農民溝通。 2.農民改用
-  context_after: 種植紅豆，播種時將紅豆埋入土中，減少播種期的鳥害，收成時放棄使用農藥。 3.全聯與農民簽訂契作協議，
-  context_paragraph_idx: 5
-- id: 3
-  answer: 高價
-  context_before: 種植紅豆，播種時將紅豆埋入土中，減少播種期的鳥害，收成時放棄使用農藥。 3.全聯與農民簽訂契作協議，
-  context_after: 收購紅豆
-  context_paragraph_idx: 5
-- id: 4
-  answer: 生態
-  context_before: 老鷹紅豆的友善耕作方式保護了
-  context_after: ，也帶來了【 經濟 】的成功，友善紅豆面積大幅增加，紅豆產品總銷售額大幅成長。
-  context_paragraph_idx: 5
-- id: 5
-  answer: 經濟
-  context_before: 老鷹紅豆的友善耕作方式保護了【 生態 】，也帶來了
-  context_after: 的成功，友善紅豆面積大幅增加，紅豆產品總銷售額大幅成長。
-  context_paragraph_idx: 5
-- id: 6
-  answer: 消費者
-  context_before: 老鷹紅豆的成功，除了大學、農民和企業，還有許多
-  context_after: ，支持購買老鷹紅豆，用行動守護臺灣生態。
-  context_paragraph_idx: 5
-- id: 7
-  answer: 全聯福利中心
-  context_before: '1.'
-  context_after: 二廚帶你去旅行－老鷹紅豆篇 ・片長：(6:52) ・來源： PX Channel
-  context_paragraph_idx: 7
-- id: 8
-  answer: 觀念
-  context_before: '2.'
-  context_after: 生態系的組成(食物鏈) ・片長：(9:54) ・來源：臺北酷課雲
-  context_paragraph_idx: 7
+- sentence: 面對這次實驗室爆炸，我們需要（　　　），找出真正的原因。
+  answer: G
+- sentence: 體育館的面積（　　　）了搖滾音樂會的入場人數。
+  answer: D
+- sentence: 面對批評，我們應該學會（　　　），而不是推卸責任。
+  answer: A
+- sentence: 這間老店在疫情中（　　　），不輕言放棄，希望有轉機。
+  answer: F
+- sentence: 新產品一上市，就立刻獲得消費者的（　　　），賣得很好。
+  answer: C
+- sentence: 他靠著（　　　）的精神，終於克服種種困難，完成學業。
+  answer: B
+- sentence: 學校對午餐的採購與烹煮（　　　），以確保食物的品質與安全。
+  answer: E
+- sentence: 阿姆斯壯是太空探索的（　　　），他是第一個登上月球的人。
+  answer: H
 fill_in_blank_count: 8
 vocabulary:
 - word: 食物鏈
@@ -107,10 +96,10 @@ reading_benchmark:
   - threshold: □ ＞241字
     feedback: 哇嗚，超級厲害！
 video_links:
-- title: 1. 【全聯福利中心】二廚帶你去旅行－老鷹紅豆篇
-  url: ''
-- title: 2. 【觀念】生態系的組成(食物鏈)
-  url: ''
+- title: 影片1
+  url: http://youtu.be/fGWQ6y4hI5U
+- title: 影片2
+  url: http://youtu.be/btu-UgQdDdE
 multiple_choice:
 - question: 1. 文中第四段末行提到，林清源先生轉型無毒農法後「只能苦撐待變」。根據上下文推測，他面臨的主要困難是什麼？
   options:
@@ -286,3 +275,44 @@ lesson_intro:
   course_intro: 這篇文章從老鷹中毒事件談起，帶我們認識了農民在種植紅豆時，為了減少鳥害和方便採收，可能使用毒餌或落葉劑，進而對生態環境造成傷害。文中也介紹了各方人士如何共同努力，推動友善耕作方式，讓紅豆生產與生態保育得以並存，並探討了消費者在其中扮演的角色。
   course_intro_source: ai-generated-2026-05-14
 worksheet_pdf_url: https://storage.googleapis.com/lingoleap-assets/worksheets/G6-L23.pdf
+spotlight_answers:
+- id: 1
+  answer: 中毒
+  context_before: 農民種的紅豆遭到大量野鳥啄食，為了減少農損，農民製作毒餌，導致大量鳥類
+  context_after: 死亡。
+  context_paragraph_idx: 5
+- id: 2
+  answer: 無毒農法
+  context_before: 1.團隊實地調查、與農民溝通。 2.農民改用
+  context_after: 種植紅豆，播種時將紅豆埋入土中，減少播種期的鳥害，收成時放棄使用農藥。 3.全聯與農民簽訂契作協議，
+  context_paragraph_idx: 5
+- id: 3
+  answer: 高價
+  context_before: 種植紅豆，播種時將紅豆埋入土中，減少播種期的鳥害，收成時放棄使用農藥。 3.全聯與農民簽訂契作協議，
+  context_after: 收購紅豆
+  context_paragraph_idx: 5
+- id: 4
+  answer: 生態
+  context_before: 老鷹紅豆的友善耕作方式保護了
+  context_after: ，也帶來了【 經濟 】的成功，友善紅豆面積大幅增加，紅豆產品總銷售額大幅成長。
+  context_paragraph_idx: 5
+- id: 5
+  answer: 經濟
+  context_before: 老鷹紅豆的友善耕作方式保護了【 生態 】，也帶來了
+  context_after: 的成功，友善紅豆面積大幅增加，紅豆產品總銷售額大幅成長。
+  context_paragraph_idx: 5
+- id: 6
+  answer: 消費者
+  context_before: 老鷹紅豆的成功，除了大學、農民和企業，還有許多
+  context_after: ，支持購買老鷹紅豆，用行動守護臺灣生態。
+  context_paragraph_idx: 5
+- id: 7
+  answer: 全聯福利中心
+  context_before: '1.'
+  context_after: 二廚帶你去旅行－老鷹紅豆篇 ・片長：(6:52) ・來源： PX Channel
+  context_paragraph_idx: 7
+- id: 8
+  answer: 觀念
+  context_before: '2.'
+  context_after: 生態系的組成(食物鏈) ・片長：(9:54) ・來源：臺北酷課雲
+  context_paragraph_idx: 7

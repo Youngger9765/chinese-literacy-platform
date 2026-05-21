@@ -3,6 +3,19 @@ grade: 8
 grade_code: G8-L1
 reading_strategy: 寫作手法：擬人－從擬人推論文章意涵
 reading_strategy_type: inference
+step_sequence:
+- intro
+- reading-annotation
+- tutor
+- full-reading
+- vocab-definition
+- vocab-application
+- reading-strategy
+- story-structure
+- comprehension
+- vocab-word-search
+- knowledge-station
+- report
 source_file: G8-L1致台東：一封過客的情書（寫作手法：擬人－從擬人推論文章意涵）.docx
 parsed_at: '2026-05-01T21:10:42'
 flags: []
@@ -180,41 +193,20 @@ vocab_bank:
   F: 汲汲營營
   G: 遣返
 fill_in_blank:
-- id: 1
+- sentence: '週年慶期間，購物中心裡的人潮（　　），非常熱鬧。'
   answer: D
-  answer_word: 絡繹不絕
-  context_before: 週年慶期間，購物中心裡的人潮
-  context_after: ，非常熱鬧
-- id: 2
+- sentence: '圖書館書架（　　），各類書籍應有盡有，讓人目不暇給。。'
   answer: C
-  answer_word: 林立
-  context_before: 圖書館書架
-  context_after: ，各類書籍應有盡有，讓人目不暇給
-- id: 3
+- sentence: '人生不應該只為名聲利益（　　），還要懂得享受生活。'
   answer: F
-  answer_word: 汲汲營營
-  context_before: 人生不應該只為名聲利益
-  context_after: ，還要懂得享受生活
-- id: 4
+- sentence: '他（　　）的從國外趕回來，只為參加好友的婚禮。'
   answer: A
-  answer_word: 風塵僕僕
-  context_before: 他
-  context_after: 的從國外趕回來，只為參加好友的婚禮
-- id: 5
+- sentence: '這裡的美麗風景讓遊客們，（　　），捨不得離去。'
   answer: E
-  answer_word: 流連忘返
-  context_before: 這裡的美麗風景讓遊客們，
-  context_after: ，捨不得離去
-- id: 6
+- sentence: '看見他滿面春風，令我不禁（　　） 他是否有了新戀情。'
   answer: B
-  answer_word: 揣想
-  context_before: 看見他滿面春風，令我不禁
-  context_after: 他是否有了新戀情
-- id: 7
+- sentence: '由於違反當地法律，幾名外國遊客被（　　）出境。'
   answer: G
-  answer_word: 遣返
-  context_before: 由於違反當地法律，幾名外國遊客被
-  context_after: 出境
 fill_in_blank_count: 7
 spotlight_raw_text: "閱讀聚光燈\n寫作手法－擬人\n    寫作常見的手法--譬喻、轉化和誇飾修辭，都是運用聯想、想像力的方式，來聯想連結讀者普遍的經驗，以引起讀者共鳴，讓讀者感同身受。\n　　轉化修辭中的擬人是常見的聯想方式。擬人主要將動、植物或無生命之物想像成人，或是對它投射情感，就像我們對小時候的玩具或娃娃一樣，可能會幫它命名、跟它說話，把它當作人一樣對待。\n    而文章使用擬人之處，也是作者投入想像和感情之重點處，像是這篇文章將台東聯想成心愛的對象，進而對其傾訴，因此閱讀時我們可以留意擬人的句子，推論作者主要想傳達的感受或意涵。\n\n◎"
 strategy_exercise:
