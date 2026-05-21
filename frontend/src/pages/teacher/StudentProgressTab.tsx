@@ -374,6 +374,9 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [sessions, setSessions] = useState<StudentSession[]>([]);
   const sessionCache = useRef<Record<number, StudentSession[]>>({});
+  /* #1784: separate fetch-failed from no-data so teacher doesn't mistake
+   * an API error for "student hasn't done any sessions". */
+  const [sessionsError, setSessionsError] = useState<string | null>(null);
 
   // Dialogue modal state (Issue #418)
   const [dialogueModal, setDialogueModal] = useState<{
@@ -382,6 +385,8 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     studentName: string;
   } | null>(null);
   const [loadingDialogueSessionId, setLoadingDialogueSessionId] = useState<number | null>(null);
+  // #1784: surface dialogue-fetch failures (was silent → opened blank modal)
+  const [dialogueError, setDialogueError] = useState<string | null>(null);
 
   // Instruction panel state
   const [instructionTarget, setInstructionTarget] = useState<{ id: number; name: string } | null>(null);
@@ -394,6 +399,8 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   const [learningCurve, setLearningCurve] = useState<LearningCurvePoint[]>([]);
   const [isLoadingCurve, setIsLoadingCurve] = useState(false);
   const curveCache = useRef<Record<string, LearningCurvePoint[]>>({});
+  // #1784: surface learning-curve fetch failures
+  const [curveError, setCurveError] = useState<string | null>(null);
   const [curveStoryFilter, setCurveStoryFilter] = useState<string>(''); // empty = all stories
 
   const loadProgress = useCallback(async () => {
@@ -480,15 +487,19 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     // Load session history (with cache)
     if (sessionCache.current[studentId]) {
       setSessions(sessionCache.current[studentId]);
+      setSessionsError(null);
     } else {
       setIsLoadingSessions(true);
       setSessions([]);
+      setSessionsError(null);
       try {
         const data = await getStudentSessions(token, studentId);
         sessionCache.current[studentId] = data;
         setSessions(data);
-      } catch {
-        setSessions([]);
+      } catch (err) {
+        // #1784: keep sessions empty but surface the failure so teacher
+        // doesn't conclude the student hasn't done any practice.
+        setSessionsError(err instanceof Error ? err.message : '無法載入學習紀錄');
       } finally {
         setIsLoadingSessions(false);
       }
@@ -498,15 +509,18 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
     const cacheKey = `${studentId}:${nextFilter}`;
     if (curveCache.current[cacheKey]) {
       setLearningCurve(curveCache.current[cacheKey]);
+      setCurveError(null);
     } else {
       setIsLoadingCurve(true);
       setLearningCurve([]);
+      setCurveError(null);
       try {
         const curveData = await getStudentLearningCurve(token, studentId, nextFilter || undefined);
         curveCache.current[cacheKey] = curveData.data;
         setLearningCurve(curveData.data);
-      } catch {
-        setLearningCurve([]);
+      } catch (err) {
+        // #1784: surface curve fetch failure instead of pretending data is empty
+        setCurveError(err instanceof Error ? err.message : '無法載入學習曲線');
       } finally {
         setIsLoadingCurve(false);
       }
@@ -522,11 +536,14 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
   ) => {
     if (!token) return;
     setLoadingDialogueSessionId(sessionId);
+    setDialogueError(null);
     try {
       const data = await getTeacherStudentDialogue(token, studentId, sessionId);
       setDialogueModal({ data, storyTitle, studentName });
-    } catch {
-      // Non-fatal — silently fail
+    } catch (err) {
+      // #1784: was silently failing → teacher clicked the dialogue button and
+      // nothing happened. Now surface the error inline.
+      setDialogueError(err instanceof Error ? err.message : '無法載入對話紀錄');
     } finally {
       setLoadingDialogueSessionId(null);
     }
@@ -670,6 +687,14 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
           onClose={() => setDialogueModal(null)}
         />
       )}
+      {/* #1784: dialogue fetch errors used to be silent; surface them as a
+          dismissible banner so the teacher doesn't think "button doesn't work". */}
+      {dialogueError && (
+        <div className="mb-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-sm text-red-700">
+          <span>對話紀錄載入失敗：{dialogueError}</span>
+          <button type="button" onClick={() => setDialogueError(null)} className="underline text-xs">關閉</button>
+        </div>
+      )}
 
       <div className="flex justify-end mb-3">
         <button
@@ -759,6 +784,10 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                 <div className="mt-2 bg-gray-50 rounded-lg p-3 space-y-4">
                   {isLoadingCurve ? (
                     <div className="h-40 bg-gray-200 animate-pulse rounded" />
+                  ) : curveError ? (
+                    <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700">
+                      學習曲線載入失敗：{curveError}（請收合此學生後再展開重試）
+                    </div>
                   ) : learningCurve.length >= 2 ? (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -816,6 +845,10 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                       {Array.from({ length: 3 }).map((_, i) => (
                         <div key={i} className="h-16 bg-gray-200 animate-pulse rounded-lg" />
                       ))}
+                    </div>
+                  ) : sessionsError ? (
+                    <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700">
+                      學習紀錄載入失敗：{sessionsError}（請收合此學生後再展開重試）
                     </div>
                   ) : sessions.length === 0 ? (
                     <p className="text-xs text-gray-500 text-center py-2">尚無練習記錄</p>
@@ -983,6 +1016,10 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                         {/* Learning curve chart */}
                         {isLoadingCurve ? (
                           <div className="h-40 bg-gray-200 animate-pulse rounded" />
+                        ) : curveError ? (
+                          <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700">
+                            學習曲線載入失敗：{curveError}（請收合此學生後再展開重試）
+                          </div>
                         ) : learningCurve.length >= 2 ? (
                           <div>
                             <div className="flex items-center justify-between mb-2">
@@ -1048,6 +1085,10 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
                                 <div className="h-3 bg-gray-200 animate-pulse rounded w-1/6" />
                               </div>
                             ))}
+                          </div>
+                        ) : sessionsError ? (
+                          <div className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-xs text-red-700">
+                            學習紀錄載入失敗：{sessionsError}（請收合此學生後再展開重試）
                           </div>
                         ) : sessions.length === 0 ? (
                           <p className="text-xs text-gray-500 text-center py-2">尚無練習記錄</p>
