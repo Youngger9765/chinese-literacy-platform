@@ -6,9 +6,10 @@
     "Each entry MUST include a justification comment in the _justifications section"
   ],
   "npm": [],
-  "pip": [],
+  "pip": ["PYSEC-2025-183"],
   "_justifications": {
     "_example_npm_1234567": "esbuild dev-only advisory, not exploitable in production build output",
-    "_example_CVE-2023-99999": "affects feature X which we do not use; vendor patch not yet available"
+    "_example_CVE-2023-99999": "affects feature X which we do not use; vendor patch not yet available",
+    "PYSEC-2025-183": "pyjwt 2.12.1 is latest PyPI release; no patched version available yet. Vulnerability does not affect runtime token verification path used by app. Re-evaluate when pyjwt 2.13+ ships. Filed 2026-05-21 (#1765)."
   }
 }
