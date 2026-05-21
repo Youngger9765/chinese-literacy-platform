@@ -7,6 +7,7 @@
 
 import type { ReadingEvaluateResponse } from '../types';
 import { SessionExpiredError } from './api';
+import { authToken } from '../utils/storage';
 
 // Re-export so consumers can import SessionExpiredError from learningApi without
 // needing to know it lives in api.ts.
@@ -617,12 +618,9 @@ export interface DictionaryBatchResponse {
   results: DictionaryEntry[];
 }
 
-// Token key must match AuthContext TOKEN_KEY
-const _DICT_TOKEN_KEY = 'lingoleap_token';
-
+// #1786: TOKEN_KEY centralised in utils/storage; this helper now delegates.
 function _getDictAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem(_DICT_TOKEN_KEY);
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return authToken.authHeader();
 }
 
 /** Look up a single Chinese character from the MOE dictionary (cached). Requires auth. */

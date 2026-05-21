@@ -1,6 +1,7 @@
 /**
  * Feedback API service — in-app feedback submission.
  */
+import { authToken } from '../utils/storage';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
@@ -34,11 +35,9 @@ export interface FeedbackListResponse {
 }
 
 function getAuthHeaders(): Record<string, string> {
-  // #1777: AuthContext stores JWT under 'lingoleap_token', not 'token'.
-  // This used to silently return no Authorization header → all feedback 401.
-  const token = localStorage.getItem('lingoleap_token');
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
+  // #1786: token key centralised in authToken — guards against #1777-style
+  // regressions where this file hardcoded 'token' instead of 'lingoleap_token'.
+  return authToken.authHeader();
 }
 
 /**

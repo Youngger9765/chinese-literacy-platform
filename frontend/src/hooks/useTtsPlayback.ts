@@ -1,17 +1,11 @@
 import { useState, useRef, useCallback } from 'react';
 import { cancelTts, cleanForTts, pauseCurrentTts, resumeCurrentTts, speakTextWithProgress, TtsProgressInfo } from '../services/ttsApi';
+import { authToken } from '../utils/storage';
 
-// Token key must match AuthContext TOKEN_KEY ('lingoleap_token').
-const _TTS_TOKEN_KEY = 'lingoleap_token';
-
-/** Read JWT token from localStorage and return Authorization header if present. */
+/** Read JWT token via storage helper and return Authorization header if present.
+ *  #1786: previously duplicated TOKEN_KEY locally → centralised in authToken. */
 function _ttsAuthHeaders(): Record<string, string> {
-  try {
-    const token = localStorage.getItem(_TTS_TOKEN_KEY);
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  } catch {
-    return {};
-  }
+  return authToken.authHeader();
 }
 
 /**

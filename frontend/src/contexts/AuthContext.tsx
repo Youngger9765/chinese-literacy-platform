@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { login as apiLogin, register as apiRegister, getMe, acceptTerms as apiAcceptTerms, googleLogin as apiGoogleLogin, junyiLogin as apiJunyiLogin, AuthUser, AuthError, RegisterResponse } from '../services/authApi';
 import { SESSION_UNAUTHORIZED_EVENT } from '../services/sessionGuard';
+import { authToken, safeStorage } from '../utils/storage';
 
-const TOKEN_KEY = 'lingoleap_token';
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 // Set when user logs in via Junyi SSO (#1260). Read on logout to also clear
 // Junyi-side cookies via redirect to https://www.junyiacademy.org/logout —
@@ -51,7 +51,7 @@ export function useAuth(): AuthContextValue {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
+  const [token, setToken] = useState<string | null>(() => authToken.get());
   const [isLoading, setIsLoading] = useState(true);
   const [mustChangePassword, setMustChangePassword] = useState(false);
   const [loginPassword, setLoginPassword] = useState<string | null>(null);
@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .catch(() => {
         // Token is invalid or expired — clear it
         if (!cancelled) {
-          localStorage.removeItem(TOKEN_KEY);
+          authToken.remove();
           setToken(null);
           setUser(null);
         }
@@ -115,10 +115,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // causing a duplicate /api/users/me on every login (Issue #1156).
     const userData = await getMe(newToken);
 
-    localStorage.setItem(TOKEN_KEY, newToken);
+    authToken.set(newToken);
     // Email/password login is not Junyi — clear any stale Junyi flag from a
     // prior session in another tab to avoid logout() redirecting to Junyi.
-    localStorage.removeItem(JUNYI_SESSION_FLAG);
+    safeStorage.local.remove(JUNYI_SESSION_FLAG);
     setUser(userData);
     setToken(newToken);
 
@@ -142,9 +142,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Same ordering as login(): fetch user first, then set user before token so
     // the token-change useEffect skips its redundant /me call (Issue #1156).
     const userData = await getMe(newToken);
-    localStorage.setItem(TOKEN_KEY, newToken);
+    authToken.set(newToken);
     // Google login is not Junyi — clear any stale Junyi flag.
-    localStorage.removeItem(JUNYI_SESSION_FLAG);
+    safeStorage.local.remove(JUNYI_SESSION_FLAG);
     setUser(userData);
     setToken(newToken);
     return { isNewUser: response.is_new_user };
@@ -156,9 +156,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Same ordering as loginWithGoogle: pre-fetch user so token-change useEffect
     // sees user !== null and skips the redundant /me call (Issue #1156).
     const userData = await getMe(newToken);
-    localStorage.setItem(TOKEN_KEY, newToken);
+    authToken.set(newToken);
     // Mark session as Junyi-sourced so logout() also clears Junyi cookies (#1260).
-    localStorage.setItem(JUNYI_SESSION_FLAG, '1');
+    safeStorage.local.set(JUNYI_SESSION_FLAG, '1');
     setUser(userData);
     setToken(newToken);
     return { isNewUser: response.is_new_user };
@@ -169,10 +169,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // round-trip through Junyi /logout (clears their cookies via Set-Cookie).
     // skipJunyiRedirect is set by the SESSION_UNAUTHORIZED auto-logout path so
     // expired-token recovery doesn't yank the user mid-page through Junyi.
-    const wasJunyiSession = localStorage.getItem(JUNYI_SESSION_FLAG) === '1';
+    const wasJunyiSession = safeStorage.local.get(JUNYI_SESSION_FLAG) === '1';
     const shouldRedirectToJunyi = wasJunyiSession && !options?.skipJunyiRedirect;
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(JUNYI_SESSION_FLAG);
+    authToken.remove();
+    safeStorage.local.remove(JUNYI_SESSION_FLAG);
     try {
       sessionStorage.removeItem('activeAssignmentId');
       sessionStorage.removeItem('activeAssignmentGoals');
@@ -228,7 +228,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const refreshUser = useCallback(async () => {
-    const storedToken = localStorage.getItem(TOKEN_KEY);
+    const storedToken = authToken.get();
     if (!storedToken) return;
     try {
       const userData = await getMe(storedToken);

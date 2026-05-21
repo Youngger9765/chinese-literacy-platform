@@ -14,24 +14,14 @@
  *   cancelTts();   // stop any in-progress playback
  */
 
+import { authToken } from '../utils/storage';
+
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
-// Token key must match AuthContext TOKEN_KEY ('lingoleap_token').
-const TOKEN_KEY = 'lingoleap_token';
-
-/** Read the JWT token from localStorage (same source as AuthContext). */
-function _getAuthToken(): string | null {
-  try {
-    return localStorage.getItem(TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-/** Build Authorization header if a token is available. */
+/** Build Authorization header if a token is available.
+ *  #1786: previously duplicated TOKEN_KEY locally → centralised in authToken. */
 function _authHeaders(): Record<string, string> {
-  const token = _getAuthToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return authToken.authHeader();
 }
 
 // In-memory URL cache: sentence text → blob URL.
