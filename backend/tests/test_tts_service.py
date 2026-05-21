@@ -886,6 +886,13 @@ class TestDeleteTtsCache:
 class TestRegenerateEndpoint:
     """POST /api/tts/regenerate must delete cache and re-synthesise."""
 
+    def setup_method(self):
+        # Reset the shared in-memory rate-limiter singleton so state from
+        # earlier tests (e.g. synthesize calls in other test classes) does not
+        # cause this class's first request to be throttled (Issue #1773 fix).
+        from app.auth.rate_limiter import ai_rate_limiter
+        ai_rate_limiter.reset()
+
     def _make_app(self):
         return _make_tts_test_app()
 
