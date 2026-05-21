@@ -36,6 +36,10 @@ class RegisterResponse(BaseModel):
     # Dev/staging mode: token returned directly so the flow can be tested without email.
     # In production this field would be omitted and the token sent via email only.
     verification_token: str | None = None
+    # True when REQUIRE_EMAIL_VERIFICATION=false (staging/preview) — account is
+    # auto-verified and user can log in immediately. Frontend uses this to skip
+    # the "check your email" waiting screen (no email pipeline implemented yet).
+    auto_verified: bool = False
 
 
 class ResendVerificationRequest(BaseModel):

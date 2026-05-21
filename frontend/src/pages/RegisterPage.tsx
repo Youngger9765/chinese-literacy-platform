@@ -59,7 +59,13 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
     setIsSubmitting(true);
     try {
       const result = await register(email.trim(), password, name.trim());
-      // Registration successful — user must verify email before logging in (issue #460)
+      // Staging/preview auto_verified=true → skip "check your email" screen, go straight to login
+      // (no email pipeline exists; account is already verified server-side)
+      if (result.auto_verified) {
+        navigate('/login', { replace: true, state: { autoVerifiedEmail: email.trim() } });
+        return;
+      }
+      // Production flow: user must verify email before logging in (issue #460)
       setRegisteredEmail(email.trim());
       if (result.verification_token) {
         setDevToken(result.verification_token);
