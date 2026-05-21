@@ -189,7 +189,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     setCurrentTtsParagraph(idx);
     setSpeakingProgress(0);
     tts.speakText(queue[idx]);
-  }, [tts]);
+  }, [tts.speakText]);
 
   const speakFullStory = useCallback(() => {
     ttsQueueRef.current = [...story.content];
@@ -213,7 +213,7 @@ const FullReading: React.FC<FullReadingProps> = ({ story, onFinish, onBack, init
     ttsQueueIdxRef.current = 0;
     setCurrentTtsParagraph(-1);
     setSpeakingProgress(0);
-  }, [tts]);
+  }, [tts.stopTts]);
 
   const isTtsPlaying = tts.isTtsSpeaking || currentTtsParagraph >= 0;
 
