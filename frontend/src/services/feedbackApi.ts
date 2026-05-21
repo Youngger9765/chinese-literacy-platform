@@ -83,6 +83,7 @@ export async function listFeedback(params?: {
     headers: getAuthHeaders(),
   });
 
+  if (resp.status === 401) await handle401Response(resp, 'feedback list/update: session expired');
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
     throw new Error(err.detail ?? `List feedback failed: ${resp.status}`);
@@ -107,6 +108,7 @@ export async function updateFeedbackStatus(
     body: JSON.stringify({ status }),
   });
 
+  if (resp.status === 401) await handle401Response(resp, 'feedback list/update: session expired');
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
     throw new Error(err.detail ?? `Update feedback failed: ${resp.status}`);

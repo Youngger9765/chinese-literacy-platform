@@ -5,15 +5,26 @@ import { AuthError } from '../services/authApi';
 import { trackEvent } from '../utils/analytics';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 import { buildJunyiLoginUrl, isSsoSupported } from './JunyiCallbackPage';
+import { RETURN_URL_KEY } from '../services/sessionGuard';
 
 interface LoginPageProps {
   onSwitchToRegister?: () => void;
 }
 
+/** Pop the return URL saved by sessionGuard on mid-session 401. */
+function consumeReturnUrl(): string | null {
+  const url = sessionStorage.getItem(RETURN_URL_KEY);
+  if (url) sessionStorage.removeItem(RETURN_URL_KEY);
+  return url;
+}
+
 const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+  // Prefer the sessionStorage return URL (set on mid-session 401) over the
+  // router state (set by ProtectedRoute on unauthenticated access).
+  const storedReturnUrl = consumeReturnUrl();
+  const from = storedReturnUrl ?? (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/';
   const { login, loginWithGoogle } = useAuth();
 
   const handleJunyiLogin = () => {

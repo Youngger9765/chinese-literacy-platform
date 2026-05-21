@@ -19,16 +19,20 @@ llm-endpoint-hardening checklist:
 - Output token cap: enforced in omo_identifier (512) + omo_grader (2048) ✅
 - Fail-closed: status=error on AI failure, never auto-passes ✅
 - Reasoning field: every candidate and every answer has reasoning ✅
+
+AnalysisBy: issue #1770 — split from 1197-line monolith into 4 focused modules:
+  - routes/omo.py       (this file) — FastAPI router + thin handler bodies
+  - services/omo_storage.py        — GCS upload, signing, bucket constant
+  - services/omo_responses.py      — Pydantic schemas + response builders
+  - services/omo_jobs.py           — background tasks, _update_upload helper
 """
 
 import hashlib
 import logging
-import os
 from datetime import datetime, timezone
-from typing import Literal, Optional
+from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Path, UploadFile, status
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Path, UploadFile
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
@@ -36,6 +40,27 @@ from ..auth.rate_limiter import make_ai_rate_limit_dependency
 from ..database import get_db
 from ..models.omo_upload import OmoUpload, OmoUploadAttempt
 from ..models.user import User
+
+# Delegated to focused service modules (issue #1770 split)
+from ..services.omo_storage import _OMO_GCS_BUCKET, _get_signed_url, _upload_to_gcs
+from ..services.omo_responses import (
+    AnswerFlagInfo,
+    AnswerItem,
+    CropSignedUrlResponse,
+    FlagRequest,
+    LessonCandidateResponse,
+    LessonSummaryResponse,
+    OmoAttemptResponse,
+    OmoByLessonResponse,
+    OmoConfirmRequest,
+    OmoConfirmResponse,
+    OmoRegradeResponse,
+    OmoSignedImageInfo,
+    OmoUploadResponse,
+    SignedUrlResponse,
+    _build_upload_response,
+)
+from ..services.omo_jobs import _run_grading, _run_identification, _update_upload
 
 logger = logging.getLogger(__name__)
 
@@ -45,474 +70,10 @@ router = APIRouter(tags=["omo"])
 _MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024   # 10MB per image
 _MAX_FILES_PER_UPLOAD = 20                  # max files per single upload call
 _MAX_TOTAL_ATTEMPTS = 5                    # max attempts per upload session
-_OMO_GCS_BUCKET = os.environ.get("GCS_OMO_BUCKET", "lingoleap-omo-uploads")
 _ALLOWED_MIME_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
 
 
-# ── Pydantic schemas ───────────────────────────────────────────────────────────
-
-class LessonSummaryResponse(BaseModel):
-    """Simplified lesson entry for the manual picker in the 3-tier confidence UX."""
-    lesson_id: int
-    grade_code: str
-    title: str
-
-
-class LessonCandidateResponse(BaseModel):
-    lesson_id: int
-    grade_code: str
-    title: str
-    confidence: float
-    reasoning: str
-    # #1775: canonical Story.id resolved at identifier service boundary.
-    # None when the lesson exists in the YAML catalog but has no matching DB row.
-    # Frontend should prefer story_id over lesson_id for /api/stories lookups.
-    story_id: Optional[int] = None
-
-
-class AnswerFlagInfo(BaseModel):
-    flagged_by: int
-    reason: str
-    flagged_at: str
-
-
-class AnswerItem(BaseModel):
-    question_id: str
-    student_answer: str
-    # Optional: multiple_choice questions can have answer=null (no correct answer
-    # in YAML — used for open-ended questions like mc_2 in L24).
-    correct_answer: Optional[str] = None
-    score: float
-    ai_confidence: float
-    reasoning: str
-    source_attempt_id: Optional[int] = None
-    position: Optional[dict] = None
-    crop_image_url: Optional[str] = None
-    flag: Optional[AnswerFlagInfo] = None
-
-
-class OmoUploadResponse(BaseModel):
-    upload_id: int
-    status: Literal["pending", "identifying", "identified", "grading", "graded", "error"]
-    candidates: list[LessonCandidateResponse]
-    answers: list[AnswerItem]
-    overall_score: Optional[float] = None
-    ai_overall_confidence: Optional[float] = None
-    progress: Optional[dict] = None
-    error_message: Optional[str] = None
-    # Phase 1b dedup fields
-    from_cache: bool = False         # True if this response reuses a prior upload (same image hash)
-    already_graded: bool = False     # True if the cached upload already has status=graded
-
-
-class OmoAttemptResponse(BaseModel):
-    upload_id: int
-    attempt_id: int
-    attempt_idx: int
-    status: str
-    message: str
-
-
-class OmoConfirmRequest(BaseModel):
-    confirmed_lesson_id: int
-
-
-class OmoConfirmResponse(BaseModel):
-    upload_id: int
-    lesson_id: int
-    status: str
-    message: str
-
-
-class FlagRequest(BaseModel):
-    reason: str = "AI 辨識不正確"
-
-
-class SignedUrlResponse(BaseModel):
-    url: Optional[str]
-    expires_in_seconds: int = 3600
-
-
-# ── GCS helpers ───────────────────────────────────────────────────────────────
-
-def _upload_to_gcs(
-    user_id: int, upload_id: int, attempt_idx: int, file_index: int,
-    data: bytes, mime_type: str
-) -> str:
-    """Upload image bytes to GCS. Returns the GCS object path.
-
-    Path format: {user_id}/{upload_id}/{attempt_idx}/{file_index}.jpg
-    Falls back gracefully if google-cloud-storage is not installed (local dev).
-    """
-    object_path = f"{user_id}/{upload_id}/{attempt_idx}/{file_index}.jpg"
-    try:
-        from google.cloud import storage  # type: ignore[import]
-        client = storage.Client()
-        bucket = client.bucket(_OMO_GCS_BUCKET)
-        blob = bucket.blob(object_path)
-        blob.upload_from_string(data, content_type=mime_type)
-        logger.info("OMO: uploaded gs://%s/%s", _OMO_GCS_BUCKET, object_path)
-    except ImportError:
-        logger.warning("google-cloud-storage not available — skipping GCS upload (local dev)")
-    except Exception as exc:
-        logger.warning("OMO GCS upload failed for %s: %s — continuing without GCS", object_path, exc)
-    return object_path
-
-
-def _get_signed_url(object_path: str) -> Optional[str]:
-    """Generate a 1-hour signed URL for a GCS object. Returns None if unavailable.
-
-    Uses IAM-based signing (service_account_email + access_token) so it works on
-    Cloud Run where the default ADC has no private key file. Falls back to bare
-    generate_signed_url() for local dev where credentials may already include a
-    private key.
-    """
-    import datetime as dt
-    try:
-        from google.cloud import storage  # type: ignore[import]
-        from google.auth import default as google_auth_default  # type: ignore[import]
-        from google.auth.transport.requests import Request as GoogleAuthRequest  # type: ignore[import]
-
-        client = storage.Client()
-        bucket = client.bucket(_OMO_GCS_BUCKET)
-        blob = bucket.blob(object_path)
-
-        sa_email = None
-        access_token = None
-        try:
-            credentials, _proj = google_auth_default()
-            if credentials and not getattr(credentials, "valid", False):
-                credentials.refresh(GoogleAuthRequest())
-            sa_email = getattr(credentials, "service_account_email", None)
-            access_token = getattr(credentials, "token", None)
-        except Exception as cred_exc:
-            logger.warning("OMO signed URL: failed to fetch ADC for IAM signing: %s", cred_exc)
-
-        kwargs = {
-            "version": "v4",
-            "expiration": dt.timedelta(hours=1),
-            "method": "GET",
-        }
-        # Only pass IAM signing kwargs when both are available — otherwise let the
-        # SDK pick its default (private key path for local dev).
-        if sa_email and access_token:
-            kwargs["service_account_email"] = sa_email
-            kwargs["access_token"] = access_token
-
-        return blob.generate_signed_url(**kwargs)
-    except Exception as exc:
-        logger.warning("OMO signed URL failed for %s: %s", object_path, exc)
-        return None
-
-
-# ── Background task helpers ───────────────────────────────────────────────────
-
-def _update_upload(upload_id: int, **kwargs):
-    """Open a short-lived DB session to update an OmoUpload record.
-    Used in background tasks that run outside the request scope.
-    """
-    from ..database import SessionLocal
-    db = SessionLocal()
-    try:
-        upload = db.query(OmoUpload).filter(OmoUpload.id == upload_id).first()
-        if upload:
-            for k, v in kwargs.items():
-                setattr(upload, k, v)
-            db.commit()
-    except Exception as exc:
-        logger.error("OMO _update_upload id=%d failed: %s", upload_id, exc)
-        db.rollback()
-    finally:
-        db.close()
-
-
-async def _run_identification(
-    upload_id: int,
-    image_bytes_list: list[bytes],
-    mime_types: list[str],
-    lesson_code_hint: Optional[str] = None,
-):
-    """Background task: identify lesson and write result back to DB.
-
-    If ``lesson_code_hint`` is provided (student uploaded from within a lesson
-    page), use the fast hint path (no AI call, conf=1.0).  Otherwise fall back
-    to the Gemini-powered fuzzy-match path.
-    """
-    # ── Hint path: lesson is already known, skip AI identification ────────────
-    if lesson_code_hint:
-        try:
-            from ..services.omo_identifier import identify_lesson_from_hint
-            candidates = identify_lesson_from_hint(lesson_code_hint)
-        except ImportError as exc:
-            logger.error("OMO identifier import failed: %s", exc)
-            candidates = []
-
-        if not candidates:
-            logger.warning(
-                "OMO hint path: lesson_code=%r not found — falling back to AI",
-                lesson_code_hint,
-            )
-            # Fall through to AI path below
-        else:
-            _update_upload(
-                upload_id,
-                identification=[
-                    {
-                        "lesson_id": c.lesson_id,
-                        "grade_code": c.grade_code,
-                        "title": c.title,
-                        "confidence": c.confidence,
-                        "reasoning": c.reasoning,
-                    }
-                    for c in candidates
-                ],
-                ai_confidence=candidates[0].confidence,
-                status="identified",
-            )
-            logger.info(
-                "OMO upload %d hint-identified: lesson_code=%r title=%s conf=%.2f",
-                upload_id,
-                lesson_code_hint,
-                candidates[0].title,
-                candidates[0].confidence,
-            )
-            return
-
-    # ── AI path: fuzzy match via Gemini ──────────────────────────────────────
-    try:
-        from ..services.omo_identifier import identify_lesson_from_image
-    except ImportError as exc:
-        logger.error("OMO identifier import failed: %s", exc)
-        _update_upload(upload_id, status="error", error_message="AI identifier unavailable")
-        return
-
-    primary_image = image_bytes_list[0]
-    primary_mime = mime_types[0] if mime_types else "image/jpeg"
-
-    try:
-        candidates = await identify_lesson_from_image(primary_image, primary_mime)
-    except RuntimeError as exc:
-        logger.error("OMO identification circuit breaker: %s", exc)
-        _update_upload(upload_id, status="error", error_message="AI 服務暫時無法使用，請稍後再試")
-        return
-    except Exception as exc:
-        logger.error("OMO identification error: %s", exc, exc_info=True)
-        _update_upload(upload_id, status="error", error_message="辨識失敗，請重新上傳")
-        return
-
-    if not candidates:
-        _update_upload(
-            upload_id,
-            status="error",
-            error_message="照片不清楚或無法辨識課程，請重新拍攝",
-        )
-        return
-
-    _update_upload(
-        upload_id,
-        identification=[
-            {
-                "lesson_id": c.lesson_id,
-                "grade_code": c.grade_code,
-                "title": c.title,
-                "confidence": c.confidence,
-                "reasoning": c.reasoning,
-            }
-            for c in candidates
-        ],
-        ai_confidence=candidates[0].confidence,
-        status="identified",
-    )
-    logger.info(
-        "OMO upload %d identified: top=%s (%.2f)",
-        upload_id,
-        candidates[0].title,
-        candidates[0].confidence,
-    )
-
-
-async def _run_grading(upload_id: int, lesson_id: int):
-    """Background task: extract + grade per-question answers, write to DB."""
-    from ..database import SessionLocal
-    from ..services.lesson_loader import get_lesson_by_id
-
-    lesson = get_lesson_by_id(lesson_id)
-    if not lesson:
-        _update_upload(upload_id, status="error", error_message=f"找不到課程 ID {lesson_id}")
-        return
-
-    # Collect active attempt images from DB
-    db = SessionLocal()
-    active_attempt = None
-    image_paths = []
-    try:
-        upload = db.query(OmoUpload).filter(OmoUpload.id == upload_id).first()
-        if not upload:
-            return
-
-        # Find the latest active attempt
-        for attempt in reversed(upload.attempts or []):
-            if attempt.is_active:
-                active_attempt = attempt
-                image_paths = attempt.image_paths or []
-                break
-
-        # Fallback: if no attempt, use legacy image_paths on upload (Phase 1 compat)
-        if not active_attempt:
-            # Try old-style image_paths column
-            old_paths = getattr(upload, "image_paths", []) or []
-            if old_paths:
-                image_paths = old_paths
-
-    except Exception as exc:
-        logger.error("OMO grading DB fetch failed for upload %d: %s", upload_id, exc)
-        db.rollback()
-    finally:
-        db.close()
-
-    if not image_paths:
-        _update_upload(
-            upload_id,
-            status="error",
-            error_message="找不到可批改的圖片",
-        )
-        return
-
-    # Load image bytes from GCS (or skip GCS if local dev)
-    image_bytes_list: list[bytes] = []
-    mime_types: list[str] = []
-    for path in image_paths:
-        try:
-            from google.cloud import storage  # type: ignore[import]
-            client = storage.Client()
-            bucket = client.bucket(_OMO_GCS_BUCKET)
-            blob = bucket.blob(path)
-            data = blob.download_as_bytes()
-            image_bytes_list.append(data)
-            mime_types.append("image/jpeg")
-        except Exception as exc:
-            logger.warning("OMO grading: could not load image %s: %s — using placeholder", path, exc)
-            # Use a tiny placeholder for local dev (grader will return mock grades)
-            image_bytes_list.append(b"placeholder")
-            mime_types.append("image/jpeg")
-
-    # Update progress: grading started
-    _update_upload(
-        upload_id,
-        status="grading",
-        progress={"stage": "grading", "total": 0, "graded": 0},
-    )
-
-    # Call grader
-    try:
-        from ..services.omo_grader import grade_worksheet_images
-        attempt_id = active_attempt.id if active_attempt else None
-        graded = await grade_worksheet_images(image_bytes_list, mime_types, lesson, attempt_id, upload_id=upload_id)
-    except RuntimeError as exc:
-        logger.error("OMO grader circuit breaker: %s", exc)
-        _update_upload(upload_id, status="error", error_message="批改服務暫時無法使用")
-        return
-    except Exception as exc:
-        logger.error("OMO grading error for upload %d: %s", upload_id, exc, exc_info=True)
-        _update_upload(upload_id, status="error", error_message="批改失敗，請稍後重試")
-        return
-
-    # Compute overall score
-    if graded:
-        overall_score = sum(g.score for g in graded) / len(graded)
-        overall_confidence = sum(g.ai_confidence for g in graded) / len(graded)
-    else:
-        overall_score = None
-        overall_confidence = None
-
-    answers_payload = [
-        {
-            "question_id": g.question_id,
-            "student_answer": g.student_answer,
-            "correct_answer": g.correct_answer,
-            "score": g.score,
-            "ai_confidence": g.ai_confidence,
-            "reasoning": g.reasoning,
-            "source_attempt_id": g.source_attempt_id,
-            "position": g.position,
-            "crop_image_url": g.crop_image_url,
-            "flag": None,
-        }
-        for g in graded
-    ]
-
-    _update_upload(
-        upload_id,
-        status="graded",
-        answers=answers_payload,
-        overall_score=overall_score,
-        ai_overall_confidence=overall_confidence,
-        progress={"stage": "done", "total": len(graded), "graded": len(graded)},
-    )
-    logger.info(
-        "OMO upload %d graded: %d questions, overall_score=%.2f",
-        upload_id,
-        len(graded),
-        overall_score or 0.0,
-    )
-
-
-# ── Internal helpers ───────────────────────────────────────────────────────────
-
-def _build_upload_response(upload: OmoUpload) -> OmoUploadResponse:
-    """Convert ORM object to response schema."""
-    candidates = []
-    if upload.identification and isinstance(upload.identification, list):
-        candidates = [
-            LessonCandidateResponse(
-                lesson_id=c["lesson_id"],
-                grade_code=c.get("grade_code", ""),
-                title=c.get("title", ""),
-                confidence=c.get("confidence", 0.0),
-                reasoning=c.get("reasoning", ""),
-                # #1775: story_id may already be in the stored JSON (new uploads)
-                # or absent for uploads made before this fix (None is acceptable).
-                story_id=c.get("story_id"),
-            )
-            for c in upload.identification
-        ]
-
-    answers = []
-    if upload.answers and isinstance(upload.answers, list):
-        for a in upload.answers:
-            flag_info = None
-            if a.get("flag"):
-                flag_info = AnswerFlagInfo(
-                    flagged_by=a["flag"].get("flagged_by", 0),
-                    reason=a["flag"].get("reason", ""),
-                    flagged_at=a["flag"].get("flagged_at", ""),
-                )
-            answers.append(AnswerItem(
-                question_id=a.get("question_id", ""),
-                student_answer=a.get("student_answer", ""),
-                correct_answer=a.get("correct_answer", ""),
-                score=a.get("score", 0.0),
-                ai_confidence=a.get("ai_confidence", 0.0),
-                reasoning=a.get("reasoning", ""),
-                source_attempt_id=a.get("source_attempt_id"),
-                position=a.get("position"),
-                crop_image_url=a.get("crop_image_url"),
-                flag=flag_info,
-            ))
-
-    return OmoUploadResponse(
-        upload_id=upload.id,
-        status=upload.status,  # type: ignore[arg-type]
-        candidates=candidates,
-        answers=answers,
-        overall_score=upload.overall_score,
-        ai_overall_confidence=upload.ai_overall_confidence,
-        progress=upload.progress or {},
-        error_message=upload.error_message,
-        from_cache=False,
-        already_graded=False,
-    )
-
+# ── Internal route helpers ─────────────────────────────────────────────────────
 
 def _get_upload_or_404(upload_id: int, user: User, db: Session) -> OmoUpload:
     """Fetch OmoUpload by id + student_id, raise 404 if missing."""
@@ -922,12 +483,6 @@ def get_upload_status(
     return _build_upload_response(upload)
 
 
-class OmoRegradeResponse(BaseModel):
-    upload_id: int
-    status: str
-    message: str
-
-
 @router.post(
     "/omo/{upload_id}/regrade",
     response_model=OmoRegradeResponse,
@@ -1101,11 +656,6 @@ def delete_upload(
     logger.info("OMO upload %d deleted by student %d", upload_id, current_user.id)
 
 
-class CropSignedUrlResponse(BaseModel):
-    url: Optional[str]
-    expires_in_seconds: int = 3600
-
-
 @router.get('/omo/{upload_id}/crops/{question_id}', response_model=CropSignedUrlResponse)
 def get_crop_signed_url(
     upload_id: int,
@@ -1138,19 +688,6 @@ def get_crop_signed_url(
 
     signed_url = _get_signed_url(object_path)
     return CropSignedUrlResponse(url=signed_url)
-
-
-class OmoSignedImageInfo(BaseModel):
-    attempt_id: int
-    index: int
-    url: Optional[str] = None
-
-
-class OmoByLessonResponse(BaseModel):
-    upload_id: Optional[int] = None
-    status: Optional[str] = None
-    has_prior_upload: bool = False
-    images: list[OmoSignedImageInfo] = Field(default_factory=list)
 
 
 @router.get('/omo/by-lesson/{lesson_id}', response_model=OmoByLessonResponse)

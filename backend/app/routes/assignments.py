@@ -7,13 +7,18 @@ Assignment System API — teachers create assignments, students complete them.
 - DB texts with non-platform visibility: at creation we fork the text
   (see services/assignment_copy_strategy.py) and assignment.text_id
   points to the fork.
+
+Split (Issue #1771):
+- Response builders → services/assignment_responses.py
+- Title/slug query helpers → services/assignment_queries.py
 """
 import logging
+from collections import defaultdict
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.orm.attributes import flag_modified
 
@@ -40,6 +45,16 @@ from ..schemas.assignment import (
     DEFAULT_TARGET_ACCURACY,
 )
 from ..services.assignment_copy_strategy import resolve_text_for_assignment
+from ..services.assignment_queries import (
+    resolve_story_title_from_yaml,
+    resolve_title_for_assignment,
+    resolve_story_slug_for_assignment,
+)
+from ..services.assignment_responses import (
+    build_assignment_response,
+    extract_reading_metrics,
+    extract_assignment_progress,
+)
 from ..services.input_sanitizer import sanitize_ai_input
 from ..services.lesson_loader import get_lesson_by_id
 from ..services.notification_service import send_assignment_submitted_notification
@@ -51,41 +66,18 @@ router = APIRouter(tags=["assignments"])
 logger = logging.getLogger(__name__)
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
-
+# ── Module-private aliases (kept for readability inside this file) ─────────────
 
 def _resolve_story_title_from_yaml(story_id: str) -> str | None:
-    """Resolve a YAML story_id (lesson_number) to its title.
-
-    Accepts both numeric strings ("6") and L-prefixed format ("L06").
-    """
-    try:
-        story = get_lesson_by_id(int(normalize_story_slug(story_id)))
-        if story:
-            return story["title"]
-    except (ValueError, TypeError):
-        pass
-    return None
+    return resolve_story_title_from_yaml(story_id)
 
 
 def _resolve_title_for_assignment(assignment: Assignment, db: Session) -> str:
-    """Return the display title for an assignment's text source."""
-    if assignment.story_id is not None:
-        return _resolve_story_title_from_yaml(assignment.story_id) or assignment.story_id
-    if assignment.text_id is not None:
-        text = db.query(Text).filter(Text.id == assignment.text_id).first()
-        if text:
-            return text.title
-    return "(Unknown)"
+    return resolve_title_for_assignment(assignment, db)
 
 
 def _resolve_story_slug_for_assignment(assignment: Assignment) -> str | None:
-    """Return the LearningSession story_slug key used for this assignment."""
-    if assignment.story_id is not None:
-        return assignment.story_id
-    if assignment.text_id is not None:
-        return str(assignment.text_id)
-    return None
+    return resolve_story_slug_for_assignment(assignment)
 
 
 def _assignment_to_response(
@@ -94,70 +86,10 @@ def _assignment_to_response(
     *,
     precomputed_counts: dict | None = None,
 ) -> AssignmentResponse:
-    """Convert an Assignment ORM object to an AssignmentResponse.
+    return build_assignment_response(assignment, db, precomputed_counts=precomputed_counts)
 
-    precomputed_counts — optional dict keyed by assignment.id with keys:
-      assigned_student_count, submitted_student_count, total_attempts.
-    When provided (bulk list path) the per-row COUNT queries are skipped,
-    eliminating the N+1 pattern (Issue #1766).
-    """
-    story_title = _resolve_title_for_assignment(assignment, db)
 
-    if precomputed_counts is not None and assignment.id in precomputed_counts:
-        counts = precomputed_counts[assignment.id]
-        assigned_student_count: int = counts["assigned_student_count"]
-        submitted_student_count: int = counts["submitted_student_count"]
-        total_attempts: int = counts["total_attempts"]
-    else:
-        # Single-assignment path: fall back to per-row queries (Issue #1764 Fix 3)
-        assigned_student_count = (
-            db.query(func.count(func.distinct(ClassroomStudent.student_id)))
-            .filter(ClassroomStudent.classroom_id == assignment.classroom_id)
-            .scalar() or 0
-        )
-        submitted_student_count = (
-            db.query(func.count(func.distinct(AssignmentSubmission.student_id)))
-            .filter(
-                AssignmentSubmission.assignment_id == assignment.id,
-                AssignmentSubmission.status.in_(["submitted", "graded"]),
-            )
-            .scalar() or 0
-        )
-        total_attempts = (
-            db.query(func.count(AssignmentSubmission.id))
-            .filter(AssignmentSubmission.assignment_id == assignment.id)
-            .scalar() or 0
-        )
-
-    return AssignmentResponse(
-        id=assignment.id,
-        classroom_id=assignment.classroom_id,
-        teacher_id=assignment.teacher_id,
-        story_id=assignment.story_id,
-        text_id=assignment.text_id,
-        story_title=story_title,
-        title=assignment.title,
-        description=assignment.description,
-        assignment_type=assignment.assignment_type,
-        due_date=assignment.due_date,
-        is_active=assignment.is_active,
-        created_at=assignment.created_at,
-        # Issue #1764 Fix 3: split counts
-        assigned_student_count=assigned_student_count,
-        submitted_student_count=submitted_student_count,
-        total_attempts=total_attempts,
-        # Back-compat aliases for existing frontend
-        submission_count=total_attempts,
-        completed_count=submitted_student_count,
-        # Reading goals (Issue #84)
-        target_cpm=assignment.target_cpm,
-        target_accuracy=assignment.target_accuracy,
-        difficulty_label=assignment.difficulty_label,
-        effective_cpm=assignment.target_cpm if assignment.target_cpm is not None else DEFAULT_TARGET_CPM,
-        effective_accuracy=assignment.target_accuracy if assignment.target_accuracy is not None else DEFAULT_TARGET_ACCURACY,
-        # Issue #1762
-        skip_completed_steps=assignment.skip_completed_steps,
-    )
+# ── Auth helpers ──────────────────────────────────────────────────────────────
 
 
 def _require_assignment_owner_or_admin(
@@ -189,79 +121,14 @@ def _has_role(user_id: int, role_name: str, db: Session) -> bool:
 def _extract_reading_metrics(
     sub: AssignmentSubmission, db: Session
 ) -> tuple[float | None, float | None, list[str]]:
-    """Extract reading metrics (accuracy, cpm, error_chars) from the linked LearningSession.
-
-    Returns (reading_accuracy, reading_cpm, reading_error_chars).
-    All values are None/[] when no session exists or data hasn't been recorded yet.
-
-    Issue #1767: uses sub.session (already eager-loaded via joinedload in
-    get_assignment_detail) when available, avoiding a per-row DB query.
-    Falls back to an explicit query for callers that did not eager-load.
-    """
-    if sub.session_id is None:
-        return None, None, []
-
-    # Use already-loaded relationship value if present (avoids N+1)
-    from sqlalchemy.orm.base import instance_state
-    state = instance_state(sub)
-    if "session" in state.dict:
-        # relationship was eager-loaded
-        session = sub.session
-    else:
-        session = (
-            db.query(LearningSession)
-            .filter(LearningSession.id == sub.session_id)
-            .first()
-        )
-
-    if session is None:
-        return None, None, []
-
-    accuracy = session.accuracy  # stored directly on session
-    cpm: float | None = None
-    error_chars: list[str] = []
-
-    if session.reading_result and isinstance(session.reading_result, dict):
-        cpm = session.reading_result.get("cpm")
-        raw_errors = session.reading_result.get("error_chars", [])
-        if isinstance(raw_errors, list):
-            error_chars = [str(c) for c in raw_errors]
-
-    return accuracy, cpm, error_chars
+    return extract_reading_metrics(sub, db)
 
 
 def _extract_assignment_progress(
     sub: AssignmentSubmission, db: Session
 ) -> tuple[int | None, str | None, list[str]]:
-    """Extract durable step progress for assignment list/resume UI.
+    return extract_assignment_progress(sub, db)
 
-    Returns (session_id, current_step_path, steps_completed).
-    """
-    if sub.session_id is None:
-        return None, None, []
-
-    session = (
-        db.query(LearningSession)
-        .filter(LearningSession.id == sub.session_id)
-        .first()
-    )
-    if session is None:
-        return sub.session_id, None, []
-
-    # parse_step_progress logs a WARNING when value is malformed (Issue #1180).
-    sp = parse_step_progress(
-        session.step_progress,
-        session_id=session.id,
-        context="assignments._get_session_step_info",
-    )
-    current_step: str | None = sp.current_step.strip() if sp is not None and sp.current_step else None
-    steps_completed: list[str] = (
-        [s.strip() for s in sp.steps_completed if s.strip()]
-        if sp is not None
-        else []
-    )
-
-    return session.id, current_step, steps_completed
 
 
 # ── Student Endpoints (registered first to avoid path parameter conflicts) ───
@@ -711,7 +578,6 @@ def get_assignment_detail(
         )
 
     # Issue #1764 Fix 4: group submissions by student
-    from collections import defaultdict
     student_subs: dict[int, list[AssignmentSubmission]] = defaultdict(list)
     for sub in submissions:
         student_subs[sub.student_id].append(sub)

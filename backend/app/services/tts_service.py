@@ -752,6 +752,27 @@ def _l1_put(key: str, audio_bytes: bytes) -> None:
     _TTS_CACHE[key] = audio_bytes
 
 
+def get_cached_tts(text: str) -> Optional[bytes]:
+    """Return cached audio bytes for *text* without touching the rate limiter.
+
+    Checks L1 (in-memory) only — the fast synchronous path the route uses to
+    short-circuit rate-limit checks before doing any I/O.  GCS (L2) is checked
+    later inside :func:`synthesize_speech` when this returns None.
+
+    This is intentionally L1-only so the cache check stays synchronous and
+    non-blocking (no thread pool needed).  A GCS hit will still save the remote
+    TTS API call; only the L1 warm-up round-trip is skipped.
+
+    Args:
+        text: The exact text to look up (hashed identically to synthesize_speech).
+
+    Returns:
+        Audio bytes if an L1 cache entry exists, otherwise None.
+    """
+    key = _cache_key(text)
+    return _TTS_CACHE.get(key)
+
+
 def delete_tts_cache(text: str) -> dict:
     """Delete cached audio for *text* from L1 and GCS (both azure and google paths).
 
