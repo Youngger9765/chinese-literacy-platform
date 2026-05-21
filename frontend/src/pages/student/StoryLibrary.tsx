@@ -39,10 +39,53 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
 }) => {
   const { token, user } = useAuth();
   const [xpToNext, setXpToNext] = useState<number | null>(null);
-  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [showOnlyUnread, setShowOnlyUnread] = useState(false);
+
+  /* #1725: persist filter selections across the lesson round-trip so that
+   * exiting a story returns to the same grade / difficulty / search the
+   * student was browsing. Stored in sessionStorage so each tab keeps its own
+   * view and a fresh tab starts clean. */
+  const [selectedGrade, setSelectedGrade] = useState<number | null>(() => {
+    try {
+      const v = sessionStorage.getItem('library_filter_grade');
+      if (!v || v === 'null') return null;
+      const n = Number(v);
+      // Guard against junk in storage (e.g. someone manually set 'NaN').
+      return Number.isFinite(n) ? n : null;
+    } catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return null; }
+  });
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | null>(() => {
+    try {
+      const v = sessionStorage.getItem('library_filter_difficulty');
+      // Whitelist-check the stored value so stale entries from a renamed
+      // Difficulty enum get silently discarded instead of as-casted.
+      const valid: Difficulty[] = ['easy', 'medium', 'hard'];
+      return v && (valid as string[]).includes(v) ? (v as Difficulty) : null;
+    } catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return null; }
+  });
+  const [searchQuery, setSearchQuery] = useState<string>(() => {
+    try { return sessionStorage.getItem('library_filter_search') ?? ''; }
+    catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return ''; }
+  });
+  const [showOnlyUnread, setShowOnlyUnread] = useState<boolean>(() => {
+    try { return sessionStorage.getItem('library_filter_unread') === '1'; }
+    catch { /* sessionStorage unavailable (e.g. private browsing) — degrade to default */ return false; }
+  });
+
+  /* Persist whenever any filter changes. Empty catch is intentional: when
+   * sessionStorage is unavailable (private browsing / quota exceeded) we
+   * silently fall back to in-memory state for this mount. */
+  useEffect(() => {
+    try { sessionStorage.setItem('library_filter_grade', String(selectedGrade)); } catch { /* sessionStorage unavailable */ }
+  }, [selectedGrade]);
+  useEffect(() => {
+    try { sessionStorage.setItem('library_filter_difficulty', String(selectedDifficulty)); } catch { /* sessionStorage unavailable */ }
+  }, [selectedDifficulty]);
+  useEffect(() => {
+    try { sessionStorage.setItem('library_filter_search', searchQuery); } catch { /* sessionStorage unavailable */ }
+  }, [searchQuery]);
+  useEffect(() => {
+    try { sessionStorage.setItem('library_filter_unread', showOnlyUnread ? '1' : '0'); } catch { /* sessionStorage unavailable */ }
+  }, [showOnlyUnread]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadingStoryId, setLoadingStoryId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -106,10 +149,15 @@ const StoryLibrary: React.FC<StoryLibraryProps> = ({
     }
   }, [token, classroomId]);
 
-  // Chain of filters
+  // Chain of filters. In classroom mode the grade/difficulty controls are
+  // hidden (#1725: also skipping their application so a persisted grade=7
+  // doesn't wipe out a grade=0 classroom view).
+  const inClassroomMode = classroomId != null && !isNaN(classroomId);
   let filtered = allStories;
-  if (selectedGrade != null) filtered = filtered.filter((s) => s.grade === selectedGrade);
-  if (selectedDifficulty != null) filtered = filtered.filter((s) => getDifficulty(s) === selectedDifficulty);
+  if (!inClassroomMode) {
+    if (selectedGrade != null) filtered = filtered.filter((s) => s.grade === selectedGrade);
+    if (selectedDifficulty != null) filtered = filtered.filter((s) => getDifficulty(s) === selectedDifficulty);
+  }
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     filtered = filtered.filter(

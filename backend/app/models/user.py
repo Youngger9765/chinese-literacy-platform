@@ -78,11 +78,11 @@ class UserRole(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False)
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False, index=True)
     scope_type: Mapped[str] = mapped_column(String(20), nullable=False)  # platform | organization | school
     scope_id: Mapped[str | None] = mapped_column(String(100), nullable=True)  # org UUID or school ID; platform = NULL
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    granted_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    granted_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -103,7 +103,7 @@ class StudentProfile(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
-    school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False)
+    school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False, index=True)
     student_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
     birthdate: Mapped[date | None] = mapped_column(Date, nullable=True)
     password_changed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
