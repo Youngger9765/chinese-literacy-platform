@@ -1,3 +1,4 @@
+import { API_BASE } from './apiConfig';
 /**
  * ttsApi.ts — TTS client with sentence-level sequential playback (Issue #667)
  *
@@ -14,7 +15,6 @@
  *   cancelTts();   // stop any in-progress playback
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // Token key must match AuthContext TOKEN_KEY ('lingoleap_token').
 const TOKEN_KEY = 'lingoleap_token';

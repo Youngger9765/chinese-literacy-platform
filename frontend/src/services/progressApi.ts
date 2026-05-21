@@ -1,3 +1,4 @@
+import { API_BASE } from './apiConfig';
 /**
  * progressApi.ts — Student progress, error patterns, vocab recommendations, story slugs.
  *
@@ -5,7 +6,6 @@
  * related to tracking what a student has done and what they need to practice.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // ---------------------------------------------------------------------------
 // Error patterns + vocab recommendations (Issue #248)
