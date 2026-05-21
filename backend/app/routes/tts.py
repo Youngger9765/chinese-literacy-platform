@@ -35,12 +35,13 @@ from fastapi.responses import Response
 from pydantic import BaseModel, Field
 
 from ..auth.dependencies import get_current_user, require_role
-from ..auth.rate_limiter import make_ai_rate_limit_dependency
+from ..auth.rate_limiter import make_ai_rate_limit_dependency, tts_rate_limit
 from ..models.user import User
 from ..services.tts_service import (
     TTSError,
     build_lesson_tts_mapping,
     delete_tts_cache,
+    get_cached_tts,
     synthesize_sentence,
     synthesize_speech,
 )
@@ -55,22 +56,23 @@ class TTSRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000, description="Plain text to synthesise (zh-TW)")
 
 
-@router.post(
-    "/synthesize",
-    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=30, window_seconds=60))],
-)
+@router.post("/synthesize")
 async def synthesize(
     req: TTSRequest,
-    _current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> Response:
     """Synthesise *text* to MP3 audio using Azure TTS (primary) or Cloud TTS (fallback).
 
     Requires authentication (any active user).  Anonymous requests are rejected
     with 401 to prevent bill-washing attacks on the Azure/GCP TTS quota.
 
-    Rate-limited to 30 requests / 60 s per user: TTS fires per paragraph so
-    bursts are expected, but with TTS_PROVIDER=gemini31 each cache miss is an
-    LLM call — 30 RPM balances UX (≤ 30 paragraphs/minute) with cost safety.
+    Rate limiting (Issue #1808):
+    - Cache check happens FIRST — a cache hit returns immediately without
+      touching the rate limiter, so repeated classroom sentences are free.
+    - Rate limit is keyed on user_id (not IP) — avoids entire classroom sharing
+      one 30 RPM bucket when behind a school NAT.
+    - Uses a dedicated ai:tts:user:{id} bucket, separate from the shared ai:
+      bucket, so TTS bursts cannot starve socratic/comprehension quota.
 
     Runs in a thread pool via asyncio.to_thread() so the FastAPI event loop is
     not blocked during the 8–15 s remote TTS call (Azure / Google / Gemini).
@@ -78,10 +80,30 @@ async def synthesize(
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
         401  application/json — not authenticated.
-        429  application/json — rate limit exceeded.
+        429  application/json — rate limit exceeded; Retry-After header present.
         503  application/json — TTS unavailable; client should fall back
              to Web Speech API.
     """
+    # Fix #3: Check L1 cache BEFORE rate limit — cached audio returns immediately
+    # without burning the user's TTS quota (Issue #1808).
+    cached = get_cached_tts(req.text)
+    if cached is not None:
+        logger.debug("TTS L1 cache hit — skipping rate limit check (user=%d)", current_user.id)
+        return Response(
+            content=cached,
+            media_type="audio/mpeg",
+            headers={"Cache-Control": "public, max-age=3600"},
+        )
+
+    # Fix #1 & #2: Rate limit keyed on user_id, dedicated ai:tts: bucket.
+    rl_info = tts_rate_limit(current_user.id)
+    if not rl_info.allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="TTS rate limit exceeded. Please wait before retrying.",
+            headers={"Retry-After": str(rl_info.retry_after)},
+        )
+
     try:
         audio_bytes = await asyncio.to_thread(synthesize_speech, req.text)
     except TTSError as exc:
@@ -102,20 +124,18 @@ async def synthesize(
     )
 
 
-@router.post(
-    "/synthesize-sentence",
-    dependencies=[Depends(make_ai_rate_limit_dependency(max_requests=30, window_seconds=60))],
-)
+@router.post("/synthesize-sentence")
 async def synthesize_sentence_endpoint(
     req: TTSRequest,
-    _current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ) -> Response:
     """Synthesise a single sentence to MP3 audio (Issue #667).
 
     Requires authentication (any active user).  Anonymous requests are rejected
     with 401 to prevent bill-washing attacks via the pre-generated sentence cache.
 
-    Rate-limited to 30 requests / 60 s per user (same budget as /synthesize).
+    Applies the same cache-before-rate-limit and user_id-keyed rate limiting
+    as /synthesize (Issue #1808 fix).
 
     Stores audio under azure/sentences/ GCS path for sentence-level caching.
     Functionally identical to /synthesize but semantically scoped to sentences.
@@ -124,9 +144,28 @@ async def synthesize_sentence_endpoint(
     Returns:
         200  audio/mpeg — MP3 bytes ready for the browser <audio> element.
         401  application/json — not authenticated.
-        429  application/json — rate limit exceeded.
+        429  application/json — rate limit exceeded; Retry-After header present.
         503  application/json — TTS unavailable.
     """
+    # Fix #3: Cache check BEFORE rate limit (Issue #1808).
+    cached = get_cached_tts(req.text)
+    if cached is not None:
+        logger.debug("TTS L1 cache hit (sentence) — skipping rate limit (user=%d)", current_user.id)
+        return Response(
+            content=cached,
+            media_type="audio/mpeg",
+            headers={"Cache-Control": "public, max-age=3600"},
+        )
+
+    # Fix #1 & #2: Per-user TTS rate limit (Issue #1808).
+    rl_info = tts_rate_limit(current_user.id)
+    if not rl_info.allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="TTS rate limit exceeded. Please wait before retrying.",
+            headers={"Retry-After": str(rl_info.retry_after)},
+        )
+
     try:
         audio_bytes = await asyncio.to_thread(synthesize_sentence, req.text)
     except TTSError as exc:

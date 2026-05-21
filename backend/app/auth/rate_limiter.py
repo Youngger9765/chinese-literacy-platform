@@ -173,3 +173,33 @@ ai_limit_10_per_min = make_ai_rate_limit_dependency(max_requests=10, window_seco
 ai_limit_5_per_min = make_ai_rate_limit_dependency(max_requests=5, window_seconds=60)
 # General API: 100 requests / minute per IP
 general_limit_100_per_min = make_general_rate_limit_dependency(max_requests=100, window_seconds=60)
+
+
+# ---------------------------------------------------------------------------
+# TTS-specific rate limiter (Issue #1808)
+# ---------------------------------------------------------------------------
+
+# Dedicated in-memory limiter for TTS — isolated from the shared ai_rate_limiter
+# so that TTS bursts do NOT consume the socratic/comprehension/reading quota.
+tts_rate_limiter = InMemoryRateLimiter()
+
+# TTS limits per user_id (not IP — avoids classroom NAT collapse problem).
+TTS_MAX_REQUESTS = 30
+TTS_WINDOW_SECONDS = 60
+
+
+def tts_rate_limit(user_id: int) -> RateLimitInfo:
+    """Check TTS rate limit for *user_id* using the dedicated TTS bucket.
+
+    Key: ``ai:tts:user:{user_id}`` — completely separate from the shared
+    ``ai:`` bucket so TTS bursts cannot starve socratic/comprehension quota.
+
+    Args:
+        user_id: The authenticated user's integer ID.
+
+    Returns:
+        RateLimitInfo with allowed=True if under limit, False if exceeded.
+        When allowed=False, retry_after contains seconds until the window resets.
+    """
+    key = f"ai:tts:user:{user_id}"
+    return tts_rate_limiter.check_with_info(key, TTS_MAX_REQUESTS, TTS_WINDOW_SECONDS)
