@@ -4,8 +4,7 @@
  */
 
 import { onApiUnauthorized } from './sessionGuard';
-
-const API_BASE = import.meta.env.VITE_API_URL ?? '';
+import { API_BASE } from './apiConfig';
 
 export class TeacherTextsApiError extends Error {
   constructor(

@@ -1,9 +1,9 @@
+import { API_BASE } from './apiConfig';
 /**
  * Admin Story API service -- CRUD operations for platform story management.
  * Endpoints require system_admin JWT token.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // --- Types ---
 

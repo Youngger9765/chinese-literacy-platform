@@ -1,9 +1,9 @@
+import { API_BASE } from './apiConfig';
 /**
  * User API service -- admin user management.
  * Follows the same pattern as roleApi.ts / organizationApi.ts.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // --- Response types ---
 

@@ -17,9 +17,8 @@
  * write to `learning_sessions` — this file is toolbox-only.
  */
 
-import { SessionExpiredError } from './api';
-
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+import { API_BASE } from './apiConfig';
+import { handle401Response } from './apiUnauthorized';
 
 // Order matches frontend/src/components/tools/ToolPicker.tsx TOOL_OPTIONS
 // and backend/app/routes/learning/toolbox.py TOOL_MODEL_MAP.
@@ -68,7 +67,7 @@ async function authedFetch(
       Authorization: `Bearer ${token}`,
     },
   });
-  if (res.status === 401) throw new SessionExpiredError('Toolbox API session expired');
+  if (res.status === 401) await handle401Response(res, 'Toolbox API session expired');
   return res;
 }
 

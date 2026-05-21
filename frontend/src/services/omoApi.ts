@@ -1,3 +1,4 @@
+import { API_BASE } from './apiConfig';
 /**
  * omoApi.ts — OMO (Online-Merge-Offline) API client.
  *
@@ -5,7 +6,6 @@
  * Phase 2 stubs: full result page wiring.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export class OmoApiError extends Error {
   status: number;

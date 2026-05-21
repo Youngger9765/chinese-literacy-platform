@@ -1,10 +1,10 @@
+import { API_BASE } from './apiConfig';
 /**
  * readingHistoryApi.ts — Reading history and progress tracking APIs.
  *
  * Issue #909: 重複朗讀 + 進步曲線
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
