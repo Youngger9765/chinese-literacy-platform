@@ -38,6 +38,7 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [allStories, setAllStories] = useState<Story[]>([]);
   const [isLoadingStories, setIsLoadingStories] = useState(false);
+  const [storiesError, setStoriesError] = useState<string | null>(null);
   const [selectedStoryId, setSelectedStoryId] = useState('');
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
@@ -90,11 +91,12 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
   const loadStories = useCallback(async () => {
     if (allStories.length > 0) return;
     setIsLoadingStories(true);
+    setStoriesError(null);
     try {
       const data = await fetchStories();
       setAllStories(data.stories);
-    } catch {
-      // silent
+    } catch (err) {
+      setStoriesError(err instanceof Error ? err.message : '無法載入課文列表');
     } finally {
       setIsLoadingStories(false);
     }
@@ -425,6 +427,17 @@ const AssignmentTab: React.FC<AssignmentTabProps> = ({ classroomId }) => {
                 <div className="flex items-center gap-2 py-2">
                   <div className="w-3 h-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
                   <span className="text-xs text-gray-400">載入課文列表...</span>
+                </div>
+              ) : storiesError ? (
+                <div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+                  <span>載入課文失敗：{storiesError}</span>
+                  <button
+                    type="button"
+                    onClick={() => { setStoriesError(null); setAllStories([]); loadStories(); }}
+                    className="ml-auto text-xs underline hover:no-underline"
+                  >
+                    重試
+                  </button>
                 </div>
               ) : (
                 <select

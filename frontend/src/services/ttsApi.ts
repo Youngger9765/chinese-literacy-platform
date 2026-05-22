@@ -1,4 +1,5 @@
 import { API_BASE } from './apiConfig';
+import { authToken } from '../utils/storage';
 /**
  * ttsApi.ts — TTS client with sentence-level sequential playback (Issue #667)
  *
@@ -16,22 +17,9 @@ import { API_BASE } from './apiConfig';
  */
 
 
-// Token key must match AuthContext TOKEN_KEY ('lingoleap_token').
-const TOKEN_KEY = 'lingoleap_token';
-
-/** Read the JWT token from localStorage (same source as AuthContext). */
-function _getAuthToken(): string | null {
-  try {
-    return localStorage.getItem(TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
 /** Build Authorization header if a token is available. */
 function _authHeaders(): Record<string, string> {
-  const token = _getAuthToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return authToken.authHeader();
 }
 
 // In-memory URL cache: sentence text → blob URL.

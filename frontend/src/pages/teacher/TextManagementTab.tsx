@@ -34,6 +34,7 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
   // All available stories
   const [allStories, setAllStories] = useState<Story[]>([]);
   const [isLoadingStories, setIsLoadingStories] = useState(false);
+  const [storiesError, setStoriesError] = useState<string | null>(null);
 
   // Assign flow
   const [showAssignSelector, setShowAssignSelector] = useState(false);
@@ -70,11 +71,12 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
   const loadStories = useCallback(async () => {
     if (allStories.length > 0) return; // already loaded
     setIsLoadingStories(true);
+    setStoriesError(null);
     try {
       const data = await fetchStories();
       setAllStories(data.stories);
-    } catch {
-      // silent -- selector will show empty
+    } catch (err) {
+      setStoriesError(err instanceof Error ? err.message : '無法載入課文列表');
     } finally {
       setIsLoadingStories(false);
     }
@@ -285,6 +287,17 @@ const TextManagementTab: React.FC<TextManagementTabProps> = ({ classroomId }) =>
             <div className="flex items-center gap-2 py-4">
               <div className="w-3 h-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
               <span className="text-xs text-gray-400">載入課文列表...</span>
+            </div>
+          ) : storiesError ? (
+            <div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+              <span>載入課文失敗：{storiesError}</span>
+              <button
+                type="button"
+                onClick={() => { setStoriesError(null); setAllStories([]); loadStories(); }}
+                className="ml-auto text-xs underline hover:no-underline"
+              >
+                重試
+              </button>
             </div>
           ) : availableStories.length === 0 ? (
             <p className="text-xs text-gray-400 py-4">所有課文皆已指派</p>
