@@ -78,6 +78,14 @@ export function useProgressSync({
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const isProgressLoading = !!token && dbSessionId !== null && !hasLoadedOnce;
 
+  // Stash onProgressLoaded behind a ref so the doSave / syncProgress / flushProgress
+  // identities don't change every render when the caller passes an inline arrow.
+  // Without this, every LearningLayout re-render minted new callback references,
+  // which propagated through useOutletContext → child useEffect deps → fired the
+  // step-data sync on every render, bursting the rate-limited PUT endpoint.
+  const onProgressLoadedRef = useRef(onProgressLoaded);
+  useEffect(() => { onProgressLoadedRef.current = onProgressLoaded; }, [onProgressLoaded]);
+
   const readStoredVersion = (data: StepProgressData | null | undefined): number => {
     const v = data?.version;
     return typeof v === 'number' && v >= 0 ? v : 0;
@@ -96,7 +104,7 @@ export function useProgressSync({
         const stepProgress = res.step_progress;
         if (stepProgress) {
           lastServerVersionRef.current = readStoredVersion(stepProgress);
-          if (onProgressLoaded) onProgressLoaded(stepProgress);
+          onProgressLoadedRef.current?.(stepProgress);
         }
       })
       .catch(() => {
@@ -128,14 +136,14 @@ export function useProgressSync({
             lastServerVersionRef.current = err.storedVersion;
             loadStepProgress(token, dbSessionId)
               .then((res) => {
-                if (res.step_progress && onProgressLoaded) onProgressLoaded(res.step_progress);
+                if (res.step_progress) onProgressLoadedRef.current?.(res.step_progress);
               })
               .catch(() => {});
           }
           // Other errors: non-fatal — localStorage already has the data
         });
     },
-    [token, dbSessionId, onProgressLoaded],
+    [token, dbSessionId],
   );
 
   // Keep a ref to the latest doSave so unmount cleanup always uses the current version
