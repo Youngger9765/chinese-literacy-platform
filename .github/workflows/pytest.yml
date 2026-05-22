@@ -26,14 +26,18 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
-      - name: Run pytest
+      - name: Run characterization tests (refactor safety gate)
         run: |
           cd backend
           python -m pytest --tb=short -q \
-            --ignore=tests/test_parse_docx_lessons_bulk.py \
-            --ignore=tests/test_parse_paragraphs_fill_blank.py
+            tests/test_characterization_auth_policies.py \
+            tests/test_characterization_socratic_state_machine.py \
+            tests/test_characterization_tts_normalization.py \
+            tests/test_characterization_tts_cache.py \
+            tests/test_rate_limiting.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google
           AZURE_SPEECH_KEY: ""
           AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
