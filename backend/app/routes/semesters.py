@@ -21,6 +21,7 @@ from pydantic import BaseModel, field_validator, model_validator
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
+from ..auth.policies import is_admin
 from ..database import get_db
 from ..models.school import School
 from ..models.semester import Semester
@@ -103,39 +104,8 @@ def _get_school_or_404(school_id: int, db: Session) -> School:
 
 def _require_school_write_access(school: School, current_user: User, db: Session) -> None:
     """Allow system_admin, org_admin; block others."""
-    from ..auth.dependencies import get_user_org_ids
-    from ..models.user import UserRole, Role
-
-    # Check system_admin
-    is_sys_admin = (
-        db.query(UserRole)
-        .join(Role)
-        .filter(
-            UserRole.user_id == current_user.id,
-            UserRole.is_active == True,  # noqa: E712
-            Role.name == "system_admin",
-        )
-        .first()
-    ) is not None
-
-    if is_sys_admin:
+    if is_admin(current_user.id, db):
         return
-
-    # Check org_admin for the org that owns this school
-    is_org_admin = (
-        db.query(UserRole)
-        .join(Role)
-        .filter(
-            UserRole.user_id == current_user.id,
-            UserRole.is_active == True,  # noqa: E712
-            Role.name == "org_admin",
-        )
-        .first()
-    ) is not None
-
-    if is_org_admin:
-        return
-
     raise HTTPException(status_code=403, detail="Insufficient permissions")
 
 

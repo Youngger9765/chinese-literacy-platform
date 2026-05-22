@@ -11,10 +11,15 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
 from ..auth.dependencies import get_current_user
+from ..auth.policies import (
+    is_admin,
+    require_classroom_member,
+    require_classroom_owner,
+)
 from ..database import get_db
 from ..models.school import Classroom, ClassroomTeacher
-from ..models.user import Role, User, UserRole
-from .classrooms import _get_classroom_or_404, _is_admin
+from ..models.user import User
+from .classrooms import _get_classroom_or_404
 
 router = APIRouter(tags=["co-teaching"])
 logger = logging.getLogger(__name__)
@@ -37,23 +42,6 @@ class ClassroomTeacherResponse(BaseModel):
 
 class InviteTeacherRequest(BaseModel):
     email: EmailStr
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-
-def _require_owner_or_admin_for_classroom(
-    classroom: Classroom, current_user: User, db: Session
-) -> None:
-    """Only the primary teacher (owner) or admin may manage co-teachers."""
-    if classroom.teacher_id == current_user.id:
-        return
-    if _is_admin(current_user.id, db):
-        return
-    raise HTTPException(
-        status_code=403,
-        detail="Only the classroom owner can manage co-teachers",
-    )
 
 
 def _classroom_teacher_to_response(ct: ClassroomTeacher) -> ClassroomTeacherResponse:
@@ -87,18 +75,7 @@ def list_classroom_teachers(
     classroom = _get_classroom_or_404(classroom_id, db)
 
     # Allow owner, co-teachers, and admins to view
-    is_owner = classroom.teacher_id == current_user.id
-    is_member = (
-        db.query(ClassroomTeacher)
-        .filter(
-            ClassroomTeacher.classroom_id == classroom_id,
-            ClassroomTeacher.teacher_id == current_user.id,
-        )
-        .first()
-        is not None
-    )
-    if not is_owner and not is_member and not _is_admin(current_user.id, db):
-        raise HTTPException(status_code=403, detail="Not your classroom")
+    require_classroom_member(classroom, current_user, db)
 
     teachers = (
         db.query(ClassroomTeacher)
@@ -125,7 +102,7 @@ def invite_co_teacher(
     have a teacher account. Invited teacher gets role='assistant'.
     """
     classroom = _get_classroom_or_404(classroom_id, db)
-    _require_owner_or_admin_for_classroom(classroom, current_user, db)
+    require_classroom_owner(classroom, current_user, db)
 
     # Look up the invited teacher by email
     invitee = db.query(User).filter(User.email == payload.email, User.is_active == True).first()
@@ -200,13 +177,10 @@ def remove_co_teacher(
         )
 
     # Permission: owner, admin, or the co-teacher themselves
-    is_owner = classroom.teacher_id == current_user.id
+    # require_classroom_owner covers owner+admin; self-removal is a co-teaching-specific rule.
     is_self = teacher_id == current_user.id
-    if not is_owner and not is_self and not _is_admin(current_user.id, db):
-        raise HTTPException(
-            status_code=403,
-            detail="Only the classroom owner or the teacher themselves can remove a co-teacher",
-        )
+    if not is_self:
+        require_classroom_owner(classroom, current_user, db)
 
     ct = (
         db.query(ClassroomTeacher)

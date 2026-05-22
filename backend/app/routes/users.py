@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from ..auth.classroom_check import compute_has_classroom
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
+from ..auth.policies import is_admin
 from ..config import settings
 from ..database import get_db
-from ..dependencies.tenant import is_system_admin
 from ..models.user import User, UserRole, Role
 from ..schemas.user import UserResponse, UserRoleResponse
 from ..schemas.user_admin import (
@@ -191,7 +191,7 @@ def list_users(
 
     # Scope restriction: org_admin may only see users within their org(s).
     # system_admin (get_user_org_ids returns None) skips this filter.
-    if not is_system_admin(current_user):
+    if not is_admin(current_user.id, db):
         caller_org_ids = get_user_org_ids(current_user)  # list[str], never None here
         if not caller_org_ids:
             # org_admin with no org scope → see nothing
@@ -266,7 +266,7 @@ def get_user_detail(
         raise HTTPException(status_code=404, detail="User not found")
 
     # Scope check for org_admin: target user must share at least one org with caller.
-    if not is_system_admin(current_user):
+    if not is_admin(current_user.id, db):
         caller_org_ids = set(get_user_org_ids(current_user) or [])
         target_org_ids = {
             ur.scope_id
