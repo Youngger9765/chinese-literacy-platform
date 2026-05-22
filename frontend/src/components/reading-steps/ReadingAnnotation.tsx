@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useRef,
   useMemo,
+  useReducer,
 } from 'react';
 import { Story } from '../../types';
 import { useZhuyin } from '../../context/ZhuyinContext';
@@ -20,62 +21,40 @@ import {
   resolveTableIndex,
 } from '../../utils/paragraphMarkers';
 
-// ── Types ──────────────────────────────────────────────────────────────────
+// Sub-components and utilities extracted as part of #1855 refactor
+import { getSelectionInfo } from './annotationOffsets';
+import {
+  annotationReducer,
+  computeSummary,
+  Annotation,
+  AnnotationType,
+} from './annotationReducer';
+import { type AnnotationWithText } from './AnnotationSidePanel';
+import AnnotationSidePanel from './AnnotationSidePanel';
+import AnnotationToolbar from './AnnotationToolbar';
+import AnnotatedParagraph from './AnnotatedParagraph';
 
-export type AnnotationType = 'unknown' | 'important';
-
-export interface Annotation {
-  id: string;
-  paragraphIndex: number;
-  charStart: number;
-  charEnd: number;
-  type: AnnotationType;
-}
-
-export interface AnnotationSummary {
-  totalMarks: number;
-  unknownCount: number;
-  importantCount: number;
-}
-
-interface ReadingAnnotationProps {
-  story: Story;
-  onFinish: (summary: AnnotationSummary) => void;
-  fontSizePx?: number;
-}
-
-interface AnnotationWithText {
-  annotation: Annotation;
-  text: string;
-}
+// Re-export types for consumers that import from ReadingAnnotation
+export type { AnnotationType, Annotation };
+export type { AnnotationSummary } from './annotationReducer';
 
 // ── Config ─────────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = (storyId: string) => scopedStepStorageKey('annotations_', storyId);
-
-const TYPE_CONFIG: Record<AnnotationType, { label: string; icon: string; className: string; activeClass: string }> = {
-  unknown: {
-    label: '不懂',
-    icon: '❓',
-    // Bottom red line drawn via inset box-shadow so it tracks the inline-box edge
-    // (always straight), unaffected by letter-spacing, ruby baselines, or PUA
-    // variation selectors that can make text-decoration: underline look tilted.
-    className: 'shadow-[inset_0_-3px_0_0_#ef4444]',
-    activeClass: 'bg-red-100 border-red-400 text-red-800',
-  },
-  important: {
-    label: '重要',
-    icon: '💛',
-    className: 'bg-yellow-200',
-    activeClass: 'bg-yellow-300 border-yellow-500 text-yellow-900',
-  },
-};
 
 // ── ID generator ───────────────────────────────────────────────────────────
 
 let _idCounter = 0;
 function genId(): string {
   return `ann-${Date.now()}-${++_idCounter}`;
+}
+
+// ── Props ──────────────────────────────────────────────────────────────────
+
+interface ReadingAnnotationProps {
+  story: Story;
+  onFinish: (summary: ReturnType<typeof computeSummary>) => void;
+  fontSizePx?: number;
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────
@@ -92,14 +71,17 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     [story.vocabulary]
   );
 
-  // Annotations persisted to localStorage
-  const [annotations, setAnnotations] = useState<Annotation[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY(story.id));
-      return raw ? (JSON.parse(raw) as Annotation[]) : [];
-    } catch {
-      return [];
-    }
+  // Annotation state managed via reducer
+  const [{ annotations, undoStack }, dispatch] = useReducer(annotationReducer, {
+    annotations: (() => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY(story.id));
+        return raw ? (JSON.parse(raw) as Annotation[]) : [];
+      } catch {
+        return [];
+      }
+    })(),
+    undoStack: [],
   });
 
   // Floating toolbar state
@@ -111,9 +93,6 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     charStart: number;
     charEnd: number;
   }>({ visible: false, x: 0, y: 0, paragraphIndex: -1, charStart: 0, charEnd: 0 });
-
-  // Undo stack
-  const [undoStack, setUndoStack] = useState<Annotation[][]>([]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -139,11 +118,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
   // ── Summary ────────────────────────────────────────────────────────────
 
-  const summary = useMemo<AnnotationSummary>(() => ({
-    totalMarks: annotations.length,
-    unknownCount: annotations.filter((a) => a.type === 'unknown').length,
-    importantCount: annotations.filter((a) => a.type === 'important').length,
-  }), [annotations]);
+  const summary = useMemo(() => computeSummary(annotations), [annotations]);
 
   // Pre-compute which images/tables get rendered inline (caption-matched) so the
   // fallback strip at the bottom only emits the un-referenced ones. Avoids the
@@ -206,133 +181,6 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
       });
   }, [annotations, story.content]);
 
-  // ── Selection helpers ──────────────────────────────────────────────────
-
-  /**
-   * Strip BpmfIansui PUA Variation Selector surrogate pairs from a string.
-   *
-   * Both buildZhuyinString() and some YAML lesson files embed PUA Variation
-   * Selectors Supplement (U+E0100–U+E01EF) directly in the paragraph text.
-   * Each occupies 2 UTF-16 code units (surrogate pair: 0xDB40 + 0xDD00–0xDDEF).
-   * These have no semantic content — they are font rendering hints only.
-   * Stripping them gives a string where .length equals the raw character count,
-   * so standard Array/String slice operations work correctly with raw char indices.
-   */
-  function stripPUASelectors(text: string): string {
-    return text.replace(/\uDB40[\uDC00-\uDFFF]/g, '');
-  }
-
-  /**
-   * Count raw (non-selector) characters in a string, stopping after `upTo`
-   * UTF-16 code units have been consumed.  When `upTo` is omitted the entire
-   * string is scanned.
-   *
-   * BpmfIansui uses Unicode Variation Selectors Supplement (U+E0100–U+E01EF)
-   * to select polyphonic-character pronunciation variants.  buildZhuyinString()
-   * appends one of U+E01E1–U+E01E5 after each non-default character.  These
-   * code points are above U+FFFF so each occupies 2 UTF-16 code units (a
-   * surrogate pair).  The browser's Selection API reports offsets in UTF-16
-   * code units, so without correction the reported charStart is inflated by
-   * 2 × (number of PUA selectors before the selection point).
-   *
-   * This helper strips those selectors so we always get an index into the
-   * original raw paragraph text.
-   */
-  function countRawChars(text: string, upTo?: number): number {
-    // PUA range used by BpmfIansui variant selectors: U+E0100–U+E01EF.
-    // In UTF-16 these are the surrogate pair: high D83C + low DC00..DCEF.
-    const limit = upTo ?? text.length;
-    let rawCount = 0;
-    let i = 0;
-    while (i < limit) {
-      const code = text.charCodeAt(i);
-      // High surrogate of the PUA Variation Selectors Supplement block
-      // U+E0100–U+E01EF encodes as high surrogate 0xDB40 + low 0xDD00–0xDDEF.
-      if (code === 0xDB40 && i + 1 < text.length) {
-        const low = text.charCodeAt(i + 1);
-        if (low >= 0xDD00 && low <= 0xDDEF) {
-          // This is a PUA selector — skip both code units, don't count
-          i += 2;
-          continue;
-        }
-      }
-      rawCount++;
-      i++;
-    }
-    return rawCount;
-  }
-
-  /**
-   * Given a Selection that spans inside a paragraph <p data-para-idx="N">,
-   * compute character offsets into the raw paragraph text.
-   * Returns null if selection is empty or crosses paragraph boundaries.
-   */
-  function getSelectionInfo(): {
-    paragraphIndex: number;
-    charStart: number;
-    charEnd: number;
-    rect: DOMRect;
-  } | null {
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed || sel.rangeCount === 0) return null;
-
-    const range = sel.getRangeAt(0);
-    if (range.collapsed) return null;
-
-    // Find the paragraph element from start container
-    const startEl = range.startContainer.parentElement?.closest('[data-para-idx]') as HTMLElement | null;
-    const endEl = range.endContainer.parentElement?.closest('[data-para-idx]') as HTMLElement | null;
-    if (!startEl || !endEl) return null;
-
-    // Must be same paragraph
-    const paraIdxStr = startEl.getAttribute('data-para-idx');
-    if (!paraIdxStr || startEl !== endEl) return null;
-
-    const paragraphIndex = parseInt(paraIdxStr, 10);
-    const paraEl = startEl; // same element
-
-    // Compute char offsets relative to the original paragraph text.
-    // Walk text nodes with a TreeWalker to get the actual character offset from
-    // the Range, so duplicate text in the same paragraph is handled correctly.
-    const selectedText = range.toString();
-    if (!selectedText.trim()) return null;
-
-    // Walk all text nodes inside the paragraph to find where range.startContainer
-    // sits and accumulate the character offset up to range.startOffset.
-    //
-    // When zhuyin is active, each text node may contain BpmfIansui PUA variant
-    // selectors (U+E01E1–U+E01E5, stored as surrogate pairs = 2 UTF-16 units
-    // each).  These inflate node.textContent.length and range.startOffset
-    // compared to the raw paragraph text.  countRawChars() strips them so the
-    // stored annotation indices always refer to raw-text positions.
-    let charStart = 0;
-    let found = false;
-    const walker = document.createTreeWalker(paraEl, NodeFilter.SHOW_TEXT);
-    let node: Text | null;
-    while ((node = walker.nextNode() as Text | null)) {
-      if (node === range.startContainer) {
-        // range.startOffset is a UTF-16 offset into this text node; convert to
-        // raw-character count by stripping PUA selectors up to that point.
-        charStart += countRawChars(node.textContent ?? '', range.startOffset);
-        found = true;
-        break;
-      }
-      // Accumulate raw (non-selector) character count for completed nodes.
-      charStart += countRawChars(node.textContent ?? '');
-    }
-    if (!found) return null;
-
-    // selectedText from range.toString() also includes PUA selector code points;
-    // strip them to get the raw character count of the selection.
-    const rawSelectedLength = countRawChars(selectedText);
-    const charEnd = charStart + rawSelectedLength;
-
-    if (charStart >= charEnd) return null;
-
-    const rect = range.getBoundingClientRect();
-    return { paragraphIndex, charStart, charEnd, rect };
-  }
-
   // ── Text selection events ──────────────────────────────────────────────
 
   const hideToolbar = useCallback(() => {
@@ -391,27 +239,21 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
     if (!toolbar.visible) return;
     const { paragraphIndex, charStart, charEnd } = toolbar;
 
-    setAnnotations((prev) => {
-      const snapshot = prev;
-      setUndoStack((stack) => [...stack.slice(-19), snapshot]);
-
-      // Remove any existing annotations that fully overlap
-      const filtered = prev.filter(
-        (a) =>
-          a.paragraphIndex !== paragraphIndex ||
-          a.charEnd <= charStart ||
-          a.charStart >= charEnd
-      );
-
-      const newAnn: Annotation = {
-        id: genId(),
+    dispatch({
+      type: 'ADD',
+      payload: {
         paragraphIndex,
         charStart,
         charEnd,
-        type,
-      };
-
-      return [...filtered, newAnn];
+        annotationType: type,
+        newAnnotation: {
+          id: genId(),
+          paragraphIndex,
+          charStart,
+          charEnd,
+          type,
+        },
+      },
     });
 
     // Clear selection
@@ -422,10 +264,7 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   // ── Remove annotation on click ─────────────────────────────────────────
 
   const removeAnnotation = useCallback((id: string) => {
-    setAnnotations((prev) => {
-      setUndoStack((stack) => [...stack.slice(-19), prev]);
-      return prev.filter((a) => a.id !== id);
-    });
+    dispatch({ type: 'REMOVE', payload: { id } });
 
     if (focusedAnnotationId === id) {
       setFocusedAnnotationId(null);
@@ -436,22 +275,16 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
   // ── Undo ──────────────────────────────────────────────────────────────
 
   const undo = useCallback(() => {
-    setUndoStack((stack) => {
-      if (stack.length === 0) return stack;
-      const prev = stack[stack.length - 1];
-      setAnnotations(prev);
-      return stack.slice(0, -1);
-    });
+    dispatch({ type: 'UNDO' });
   }, []);
 
   // ── Clear all ─────────────────────────────────────────────────────────
 
   const clearAll = useCallback(() => {
-    setUndoStack((stack) => [...stack.slice(-19), annotations]);
-    setAnnotations([]);
+    dispatch({ type: 'CLEAR' });
     setFocusedAnnotationId(null);
     annotationElementRefs.current.clear();
-  }, [annotations]);
+  }, []);
 
   const jumpToAnnotation = useCallback((annotationId: string) => {
     const targetElement = annotationElementRefs.current.get(annotationId);
@@ -470,96 +303,6 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
     return () => window.clearTimeout(timer);
   }, [focusedAnnotationId]);
-
-  // ── Render paragraph with annotation spans ─────────────────────────────
-
-  /**
-   * Splits a paragraph's raw text into segments:
-   * plain text and annotated ranges.
-   * Then wraps annotated segments in styled <span> elements.
-   */
-  function renderAnnotatedParagraph(
-    rawText: string,
-    displayText: string,
-    paraIdx: number
-  ): React.ReactNode {
-    const paraAnnotations = annotations
-      .filter((a) => a.paragraphIndex === paraIdx)
-      .sort((a, b) => a.charStart - b.charStart);
-
-    if (paraAnnotations.length === 0) {
-      // No annotations — render plain (possibly zhuyin) text
-      return displayText;
-    }
-
-    // Build segments from raw text char offsets, render display text char-by-char.
-    //
-    // ann.charStart / ann.charEnd are RAW character indices — PUA Variation Selectors
-    // (U+E0100–U+E01EF, stored as surrogate pairs) are NOT counted.  See countRawChars().
-    //
-    // However, lesson YAML files may embed these PUA selectors directly in the paragraph
-    // text (e.g. L01 paragraph 1: 「著󠇣頭緒」has a selector after 著).  This means rawText
-    // and even displayText (when zhuyin is off) may contain PUA surrogates, making their
-    // .length exceed the raw char count.  Using raw char indices directly as slice() indices
-    // would then slice the string at the wrong UTF-16 positions, putting the annotation
-    // highlight on the wrong characters — this was the regression introduced by PR #1155.
-    //
-    // Fix: strip PUA selectors from the rendering string before slicing.  After stripping,
-    // .length == raw char count, so raw indices and UTF-16 slice indices agree perfectly.
-    //
-    // NOTE: when zhuyin is active (any mode with ruby), displayText contains BpmfZihiSerif PUA
-    // selectors AND ruby annotations that cannot be split character-by-character, so we fall
-    // back to rawText for annotation offset calculations.
-    const baseText = isZhuyinAny ? rawText : displayText;
-    // Strip PUA Variation Selectors so that .length == raw char count and slice indices match.
-    const textToRender = stripPUASelectors(baseText);
-
-    const segments: Array<{ start: number; end: number; annotation?: Annotation }> = [];
-    let cursor = 0;
-
-    for (const ann of paraAnnotations) {
-      const s = Math.min(ann.charStart, textToRender.length);
-      const e = Math.min(ann.charEnd, textToRender.length);
-      if (s > cursor) {
-        segments.push({ start: cursor, end: s });
-      }
-      if (e > s) {
-        segments.push({ start: s, end: e, annotation: ann });
-      }
-      cursor = Math.max(cursor, e);
-    }
-    if (cursor < textToRender.length) {
-      segments.push({ start: cursor, end: textToRender.length });
-    }
-
-    return segments.map((seg) => {
-      const chars = textToRender.slice(seg.start, seg.end);
-      if (!seg.annotation) {
-        return <React.Fragment key={seg.start}>{chars}</React.Fragment>;
-      }
-      const cfg = TYPE_CONFIG[seg.annotation.type];
-      return (
-        <span
-          key={seg.annotation.id}
-          ref={(element) => {
-            if (element) {
-              annotationElementRefs.current.set(seg.annotation!.id, element);
-            } else {
-              annotationElementRefs.current.delete(seg.annotation!.id);
-            }
-          }}
-          className={`cursor-pointer transition-all duration-300 ${cfg.className} ${focusedAnnotationId === seg.annotation.id ? 'ring-4 ring-lime-300 ring-offset-2 shadow-[0_0_0_4px_rgba(190,242,100,0.35)]' : ''}`}
-          title={`${cfg.icon} ${cfg.label} (點擊移除)`}
-          onClick={() => removeAnnotation(seg.annotation!.id)}
-          role="mark"
-          aria-label={`${cfg.label}標記：${chars}`}
-          data-annotation-id={seg.annotation.id}
-        >
-          {chars}
-        </span>
-      );
-    });
-  }
 
   // ── Render ─────────────────────────────────────────────────────────────
 
@@ -653,17 +396,17 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
                     >
                       {String(paraIdx + 1).padStart(2, '0')}
                     </span>
-                    <p
-                      data-para-idx={paraIdx}
-                      className="text-on-surface/90"
-                      style={{
-                        fontSize: `${fontSizePx}px`,
-                        lineHeight: isZhuyinAny ? '2.4rem' : '1.6', /* ruby annotations need 2.4rem minimum to avoid clipping */
-                        letterSpacing: isZhuyinAny ? '0.15em' : '0',
-                      }}
-                    >
-                      {renderAnnotatedParagraph(rawPara, displayText, paraIdx)}
-                    </p>
+                    <AnnotatedParagraph
+                      rawText={rawPara}
+                      displayText={displayText}
+                      paraIdx={paraIdx}
+                      annotations={annotations}
+                      focusedAnnotationId={focusedAnnotationId}
+                      isZhuyinAny={isZhuyinAny}
+                      fontSizePx={fontSizePx}
+                      annotationElementRefs={annotationElementRefs}
+                      onRemoveAnnotation={removeAnnotation}
+                    />
                   </section>
                   {inlineImgIdx !== undefined && story.images?.[inlineImgIdx] && (
                     <div
@@ -715,80 +458,22 @@ const ReadingAnnotation: React.FC<ReadingAnnotationProps> = ({
 
           {/* ── Floating selection toolbar ─────────────────────────────── */}
           {toolbar.visible && (
-            <div
-              ref={toolbarRef}
-              role="toolbar"
-              aria-label="標記選取文字"
-              className="absolute z-50 flex items-center gap-2 bg-surface-container-lowest rounded-2xl shadow-editorial px-3 py-2.5 -translate-x-1/2 -translate-y-full"
-              style={{ left: toolbar.x, top: toolbar.y }}
-            >
-              {(Object.entries(TYPE_CONFIG) as Array<[AnnotationType, typeof TYPE_CONFIG[AnnotationType]]>).map(
-                ([type, cfg]) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onPointerDown={(e) => {
-                      e.preventDefault();
-                      applyAnnotation(type);
-                    }}
-                    className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-[48px] active:scale-95 ${cfg.activeClass}`}
-                  >
-                    <span aria-hidden="true">{cfg.icon}</span>
-                    {cfg.label}
-                  </button>
-                )
-              )}
-              <button
-                type="button"
-                onPointerDown={(e) => {
-                  e.preventDefault();
-                  window.getSelection()?.removeAllRanges();
-                  hideToolbar();
-                }}
-                className="ml-1 px-3 py-2.5 rounded-xl text-base text-on-surface-variant hover:bg-surface-container-high transition-all min-h-[48px]"
-                aria-label="取消"
-              >
-                ✕
-              </button>
-            </div>
+            <AnnotationToolbar
+              x={toolbar.x}
+              y={toolbar.y}
+              toolbarRef={toolbarRef}
+              onApply={applyAnnotation}
+              onCancel={hideToolbar}
+            />
           )}
         </div>
 
         {/* ── Right panel: 我的記號 ──────────────────────────────────────── */}
-        <aside
-          className="hidden md:flex flex-col w-56 shrink-0 border-l border-outline-variant bg-surface-container-low overflow-y-auto"
-          aria-label="我的記號清單"
-        >
-          {/* Panel header */}
-          <div className="px-4 pt-5 pb-3">
-            <h2 className="font-headline font-bold text-base text-on-surface">我的記號</h2>
-            <p className="text-xs text-on-surface-variant mt-0.5">
-              共 <strong>{summary.totalMarks}</strong> 個標記
-            </p>
-          </div>
-
-          <div className="flex-1 px-3 pb-4 space-y-2">
-            {annotationsForPanel.length === 0 ? (
-              <p className="text-sm text-on-surface-variant/70 px-1 py-2">還沒有標記</p>
-            ) : (
-              annotationsForPanel.map(({ annotation, text }) => {
-                const cfg = TYPE_CONFIG[annotation.type];
-                return (
-                  <button
-                    key={annotation.id}
-                    type="button"
-                    onClick={() => jumpToAnnotation(annotation.id)}
-                    aria-label={`跳轉到${cfg.label}標記：${text}`}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-all hover:brightness-95 active:scale-[0.98] ${cfg.activeClass}`}
-                  >
-                    <span aria-hidden="true" className="mr-1">{cfg.icon}</span>
-                    {text}
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </aside>
+        <AnnotationSidePanel
+          summary={summary}
+          annotationsForPanel={annotationsForPanel}
+          onJump={jumpToAnnotation}
+        />
       </div>
 
       {/* ── Fixed bottom CTA — gradient fade ─────────────────────────── */}
