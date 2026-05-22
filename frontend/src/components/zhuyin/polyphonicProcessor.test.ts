@@ -304,3 +304,232 @@ describe('一 tone sandhi regression tests (Issue #638)', () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// 不 tone sandhi characterization tests (Issue #1843)
+// ---------------------------------------------------------------------------
+//
+// 不 tone sandhi rules:
+//   Before 4th tone → 2nd tone (ss01)  e.g. 不是 bú shì
+//   Before 1st/2nd/3rd/5th tone → remain 4th tone (0000)  e.g. 不知 bù zhī
+//   Special phrases: 不禁/不菲/不勝/不著/不了/不好/不假 → 0000 (unchanged)
+//   Special phrase: 不當 → ss01 (2nd tone)
+//   Standalone → 0000 (4th tone)
+
+describe('不 tone sandhi characterization tests (Issue #1843)', () => {
+  let proc: import('./polyphonicProcessor').PolyphonicProcessor;
+
+  beforeAll(async () => {
+    const { PolyphonicProcessor } = await import('./polyphonicProcessor');
+    (PolyphonicProcessor as unknown as { _instance: unknown })._instance = undefined;
+    proc = PolyphonicProcessor.instance;
+    (proc as unknown as { polyphonicData: unknown; _loaded: boolean }).polyphonicData = { data: {} };
+    (proc as unknown as { _loaded: boolean })._loaded = true;
+  });
+
+  const ssOfBu = (text: string) =>
+    proc.process(text).find(c => c.char === '不')?.styleSet;
+
+  it('standalone 不 → 0000 (4th tone)', () => {
+    expect(ssOfBu('不')).toBe('0000');
+  });
+
+  it('不是 → 0000 (是 is 4th tone but nextTone=4 → ss01, BUT 是 is in nextCharSet1 check? No — let test document actual)', () => {
+    // 是 is in nextCharSet1, so 一 before 是 is special-cased.
+    // For 不, we check specialBuCases first (是 not in it), then nextTone.
+    // getToneForChar('是') = 4, so → ss01
+    expect(getToneForChar('是')).toBe(4);
+    expect(ssOfBu('不是')).toBe('ss01');
+  });
+
+  it('不知 → 0000 (知 is 1st tone → remain 4th)', () => {
+    expect(getToneForChar('知')).toBe(1);
+    expect(ssOfBu('不知')).toBe('0000');
+  });
+
+  it('不同 → 0000 (同 is 2nd tone → remain 4th)', () => {
+    expect(getToneForChar('同')).toBe(2);
+    expect(ssOfBu('不同')).toBe('0000');
+  });
+
+  it('不好 → 0000 (specialBuCases: 好 → 0000)', () => {
+    expect(ssOfBu('不好')).toBe('0000');
+  });
+
+  it('不當 → ss01 (specialBuCases: 當 → ss01, 2nd tone)', () => {
+    expect(ssOfBu('不當')).toBe('ss01');
+  });
+
+  it('不禁 → 0000 (specialBuCases override)', () => {
+    expect(ssOfBu('不禁')).toBe('0000');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 地 special phrase (de5) characterization tests (Issue #1843)
+// ---------------------------------------------------------------------------
+//
+// 地 is special-cased: PHRASES_ENDS_WITH_DI set determines de5 vs di4.
+// Three-char phrase = prev2Char + prevChar + '地'
+//   If phrase in PHRASES_ENDS_WITH_DI → ss01 (index=1, de5)
+//   Otherwise → 0000 (index=0, di4, the default)
+
+describe('地 de5/di4 characterization tests (Issue #1843)', () => {
+  let proc: import('./polyphonicProcessor').PolyphonicProcessor;
+
+  beforeAll(async () => {
+    const { PolyphonicProcessor } = await import('./polyphonicProcessor');
+    (PolyphonicProcessor as unknown as { _instance: unknown })._instance = undefined;
+    proc = PolyphonicProcessor.instance;
+    (proc as unknown as { polyphonicData: unknown; _loaded: boolean }).polyphonicData = {
+      data: {
+        '地': { s: 2, v: ['', '成功*'] },
+      },
+    };
+    (proc as unknown as { _loaded: boolean })._loaded = true;
+  });
+
+  it('大地 → 0000 (di4, not in PHRASES_ENDS_WITH_DI)', () => {
+    const result = proc.process('大地');
+    expect(result.find(c => c.char === '地')?.styleSet).toBe('0000');
+  });
+
+  it('快樂地 → ss01 (de5, in PHRASES_ENDS_WITH_DI)', () => {
+    const result = proc.process('快樂地');
+    expect(result.find(c => c.char === '地')?.styleSet).toBe('ss01');
+  });
+
+  it('靜靜地 → ss01 (de5, in PHRASES_ENDS_WITH_DI)', () => {
+    const result = proc.process('靜靜地');
+    expect(result.find(c => c.char === '地')?.styleSet).toBe('ss01');
+  });
+
+  it('走在地上 → 0000 (di4, 在地 not in PHRASES_ENDS_WITH_DI)', () => {
+    // prev2=在, prevChar=地, but we look at char=地: prev2=走, prevChar=在
+    // threeCharPhrase = '走在地' — not in set
+    const result = proc.process('走在地上');
+    expect(result.find(c => c.char === '地')?.styleSet).toBe('0000');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// double-character special pairs characterization tests (Issue #1843)
+// ---------------------------------------------------------------------------
+//
+// SPECIAL_DOUBLE_CHARACTERS: pair → styleSet
+// Both chars in the pair get the SAME styleSet (or 0000 when ss00).
+// Context overrides exist for some pairs.
+
+describe('double-character special pairs (Issue #1843)', () => {
+  let proc: import('./polyphonicProcessor').PolyphonicProcessor;
+
+  beforeAll(async () => {
+    const { PolyphonicProcessor } = await import('./polyphonicProcessor');
+    (PolyphonicProcessor as unknown as { _instance: unknown })._instance = undefined;
+    proc = PolyphonicProcessor.instance;
+    (proc as unknown as { polyphonicData: unknown; _loaded: boolean }).polyphonicData = {
+      data: {
+        '重': { s: 2, v: ['', ''] },
+        '行': { s: 4, d: 1, v: ['流*', '銀*', '品*', '**如也'] },
+        '好': { s: 2, v: ['', ''] },
+        '數': { s: 2, v: ['', ''] },
+        '晃': { s: 2, v: ['', ''] },
+      },
+    };
+    (proc as unknown as { _loaded: boolean })._loaded = true;
+  });
+
+  it('重重 → both chars get ss01 (SPECIAL_DOUBLE_CHARACTERS default)', () => {
+    const result = proc.process('重重');
+    expect(result[0].char).toBe('重');
+    expect(result[0].styleSet).toBe('ss01');
+    expect(result[1].char).toBe('重');
+    expect(result[1].styleSet).toBe('ss01');
+  });
+
+  it('重重的 → both chars get 0000 (context override: nextChar=的)', () => {
+    const result = proc.process('重重的');
+    expect(result[0].char).toBe('重');
+    expect(result[0].styleSet).toBe('0000');
+    expect(result[1].char).toBe('重');
+    expect(result[1].styleSet).toBe('0000');
+  });
+
+  it('好好 → both chars get 0000 (ss00 in map → renders as 0000)', () => {
+    const result = proc.process('好好');
+    expect(result[0].char).toBe('好');
+    expect(result[0].styleSet).toBe('0000');
+    expect(result[1].char).toBe('好');
+    expect(result[1].styleSet).toBe('0000');
+  });
+
+  it('數數 → both chars get ss01', () => {
+    const result = proc.process('數數');
+    expect(result[0].char).toBe('數');
+    expect(result[0].styleSet).toBe('ss01');
+    expect(result[1].char).toBe('數');
+    expect(result[1].styleSet).toBe('ss01');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildZhuyinString PUA selector characterization tests (Issue #1843)
+// ---------------------------------------------------------------------------
+//
+// buildZhuyinString appends a PUA variant selector for non-default style sets.
+// Only ss01–ss05 trigger PUA (SS_MAPPING). '0000' = no selector appended.
+
+import { buildZhuyinString } from './polyphonicProcessor';
+import { SS_MAPPING } from './bopomoConstants';
+
+describe('buildZhuyinString PUA selector (Issue #1843)', () => {
+  it('0000 styleSet → no PUA selector appended', () => {
+    const result = buildZhuyinString([{ char: '行', styleSet: '0000' }]);
+    expect(result).toBe('行');
+    expect(result.length).toBe(1);
+  });
+
+  it('ss01 styleSet → PUA selector E01E1 appended after char', () => {
+    const result = buildZhuyinString([{ char: '行', styleSet: 'ss01' }]);
+    // U+E01E1 is above U+FFFF → surrogate pair (2 UTF-16 code units)
+    // result.length = 1 (行) + 2 (surrogate pair for U+E01E1) = 3
+    expect(result.length).toBe(3);
+    expect(result[0]).toBe('行');
+    expect(result.codePointAt(1)).toBe(parseInt(SS_MAPPING['ss01'], 16));
+  });
+
+  it('ss02 styleSet → PUA selector E01E2 appended', () => {
+    const result = buildZhuyinString([{ char: '著', styleSet: 'ss02' }]);
+    // U+E01E2 → surrogate pair → length 3
+    expect(result.length).toBe(3);
+    expect(result.codePointAt(1)).toBe(parseInt(SS_MAPPING['ss02'], 16));
+  });
+
+  it('mixed: 0000 + ss01 + 0000 → only middle char gets PUA', () => {
+    const result = buildZhuyinString([
+      { char: '銀', styleSet: '0000' },
+      { char: '行', styleSet: 'ss01' },
+      { char: '家', styleSet: '0000' },
+    ]);
+    // 銀(1) + 行(1) + PUA(1) + 家(1) = 4 code units
+    // But PUA is in supplementary plane (U+E01E1), so it's 2 UTF-16 code units
+    // result.length = 1 + 1 + 2 + 1 = 5? No: U+E01E1 is BMP? 0xE01E1 > 0xFFFF → surrogate pair → 2 code units
+    // Actually let's use codePointAt to verify
+    expect(result).toContain('銀');
+    expect(result).toContain('行');
+    expect(result).toContain('家');
+    // 銀 has no PUA
+    const yinIdx = result.indexOf('銀');
+    expect(result.codePointAt(yinIdx + 1)).toBe('行'.codePointAt(0)); // next is 行, not PUA
+    // 行 has PUA selector
+    const hangIdx = result.indexOf('行');
+    expect(result.codePointAt(hangIdx + 1)).toBe(parseInt(SS_MAPPING['ss01'], 16));
+  });
+
+  it('unknown styleSet (not in SS_MAPPING) → no PUA appended (graceful)', () => {
+    // 'ss00' is used internally as sentinel but not in SS_MAPPING
+    const result = buildZhuyinString([{ char: '行', styleSet: 'ss00' }]);
+    expect(result).toBe('行');
+    expect(result.length).toBe(1);
+  });
+});
