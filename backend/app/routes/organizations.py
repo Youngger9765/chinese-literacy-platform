@@ -9,6 +9,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from ..auth.dependencies import get_current_user, get_user_org_ids, require_role
+from ..auth.policies import is_admin
 from ..dependencies.tenant import _check_org_member
 from ..models.user import UserRole, Role
 from ..database import get_db
@@ -277,11 +278,7 @@ def get_organization_dashboard(
     org = _get_org_or_404(org_id, db)
 
     # Permission check: system_admin, org_owner, or org_admin only
-    is_system_admin = any(
-        ur.is_active and ur.role and ur.role.name == "system_admin"
-        for ur in current_user.user_roles
-    )
-    if not is_system_admin:
+    if not is_admin(current_user.id, db):
         has_org_role = any(
             ur.is_active
             and ur.scope_type == "organization"
@@ -500,24 +497,22 @@ def get_points_logs(
     """List points usage logs for an organization."""
     org = _get_org_or_404(org_id, db)
 
-    # Permission: system_admin (sees all) or org_owner/org_admin for this org specifically
-    _ADMIN_ROLES = ("system_admin", "org_owner", "org_admin")
-    has_permission = (
-        db.query(UserRole)
-        .join(Role, UserRole.role_id == Role.id)
-        .filter(
-            UserRole.user_id == current_user.id,
-            UserRole.is_active == True,
-            Role.name.in_(_ADMIN_ROLES),
+    # Permission: system_admin/org_admin (sees all) or org_owner for this org specifically
+    if not is_admin(current_user.id, db):
+        has_org_role = (
+            db.query(UserRole)
+            .join(Role, UserRole.role_id == Role.id)
+            .filter(
+                UserRole.user_id == current_user.id,
+                UserRole.is_active == True,
+                Role.name == "org_owner",
+                UserRole.scope_type == "organization",
+                UserRole.scope_id == str(org.id),
+            )
+            .first()
         )
-        .filter(
-            (Role.name == "system_admin") |
-            ((UserRole.scope_type == "organization") & (UserRole.scope_id == org.id))
-        )
-        .first()
-    )
-    if not has_permission:
-        raise HTTPException(status_code=403, detail="Not authorized for this organization")
+        if not has_org_role:
+            raise HTTPException(status_code=403, detail="Not authorized for this organization")
 
     base_query = db.query(OrganizationPointsLog).filter(
         OrganizationPointsLog.organization_id == org_id
