@@ -8,48 +8,17 @@ import {
   CANVAS_SIZE,
   HINT_THRESHOLD,
 } from './strokeData';
-import { renderStrokes, RenderState } from './strokeRenderer';
+import { Step, useWriteCharacterMachine } from './useWriteCharacterMachine';
+import { useStrokeCanvasRenderer } from './useStrokeCanvasRenderer';
 
 interface WriteCharacterProps {
   character: string;
   onComplete?: () => void;
   onBack?: () => void;
-  /** When true, only renders the canvas + minimal controls (no header/back/progress dots). */
   embedded?: boolean;
-  /**
-   * Practice flow shape (#1342 / VocabPractice rounds):
-   *   - 'standard' (default): animation preview + 3 outlined practices +
-   *     1 no-outline practice. The historical 4-trace flow.
-   *   - 'outlined-once': skip animation; one outlined practice only;
-   *     fire onComplete on success. Used for round-1 仿寫.
-   *   - 'no-outline-once': skip animation + outline; one no-outline
-   *     practice only; fire onComplete on success. Used for round-2 再生回憶.
-   *
-   * Named `practiceMode` rather than `mode` to avoid shadowing the internal
-   * `mode` state variable ('idle' | 'animating' | 'quizzing').
-   */
   practiceMode?: 'standard' | 'outlined-once' | 'no-outline-once';
-  /**
-   * #1342: colour completed strokes by their component group on the canvas.
-   * Once every stroke is done the colours unify into the default ink colour
-   * ("合體"). Number of distinct colours is driven by `componentCount` below.
-   */
   radicalColorMode?: boolean;
-  /**
-   * #1529: number of components for this character (from getDecomposition).
-   * One colour per component, up to the palette length (5). Defaults to 2
-   * (primary radical + body) when omitted, matching the previous behaviour.
-   */
   componentCount?: number;
-}
-
-enum Step {
-  ANIMATION,
-  PRACTICE_1,
-  PRACTICE_2,
-  PRACTICE_3,
-  PRACTICE_NO_OUTLINE,
-  COMPLETE,
 }
 
 /* ================================================================ */
@@ -90,7 +59,6 @@ interface ProgressDotsProps {
 function ProgressDots({ step, practiceLeft }: ProgressDotsProps) {
   if (step === Step.ANIMATION || step === Step.COMPLETE) return null;
 
-  // 3 bordered rounds + 1 no-outline round = 4 total
   const dots = [
     { label: '1', filled: practiceLeft < 4, isNoOutline: false },
     { label: '2', filled: practiceLeft < 3, isNoOutline: false },
@@ -214,135 +182,58 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
   componentCount = 2,
 }) => {
   // #1342 / #1529: derived flags for the simplified single-shot rounds.
-  // outlined-once still plays the animation preview (#1529); only the recall
-  // round (no-outline-once) skips it.
   const isOutlinedOnce = practiceMode === 'outlined-once';
   const isNoOutlineOnce = practiceMode === 'no-outline-once';
-  /* ---- React state (drives UI controls) ---- */
+
+  /* ---- Step/mode state (via useWriteCharacterMachine) ---- */
+  const [machineState, machineActions] = useWriteCharacterMachine();
+  const {
+    step, mode, practiceLeft, showOutline, completedStrokesUI,
+    toast, toastType, canvasShake,
+  } = machineState;
+  const {
+    setStep, setMode, setPracticeLeft, setShowOutline,
+    setCompletedStrokesUI, setToast, setToastType, setCanvasShake,
+    resetMachineState,
+  } = machineActions;
+
+  /* ---- Data loading state ---- */
   const [data, setData] = useState<CharacterStrokeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [step, setStep] = useState(Step.ANIMATION);
-  const [mode, setMode] = useState<'idle' | 'animating' | 'quizzing'>('idle');
-  const [practiceLeft, setPracticeLeft] = useState(4);
-  const [toast, setToast] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
-  const [showOutline, setShowOutline] = useState(true);
-  const [canvasShake, setCanvasShake] = useState(false);
-  const [completedStrokesUI, setCompletedStrokesUI] = useState(0);
 
-  /* ---- Refs for imperative canvas rendering ---- */
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const offCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  /* ---- Canvas refs / rendering (via useStrokeCanvasRenderer) ---- */
+  const renderer = useStrokeCanvasRenderer({ radicalColorMode, componentCount });
+  const {
+    canvasRef, r, m,
+    animFrameRef, hintFrameRef,
+    loopTimerRef, shakeTimerRef, completionTimerRef,
+    isDrawingRef, isAutoLoopingRef, pendingAutoStartRef,
+    doRender,
+  } = renderer;
 
-  // Rendering state (read by the render function, written by animation/quiz/drawing)
-  const r = useRef({
-    completedStrokes: 0,
-    animStroke: -1,
-    animProgress: 0,
-    hintStroke: -1,
-    hintProgress: 0,
-    correctPaths: [] as Point[][],
-    activeBrush: [] as Point[],
-  });
+  // Animation start timestamps are attached to the renderer's `r` ref
+  const animStartRef = (r as any).animStartRef as React.MutableRefObject<number>;
+  const hintStartRef = (r as any).hintStartRef as React.MutableRefObject<number>;
 
-  // Mirrors of React state for async/imperative callbacks
-  const m = useRef({
-    data: null as CharacterStrokeData | null,
-    step: Step.ANIMATION,
-    mode: 'idle' as string,
-    practiceLeft: 4,
-    showOutline: true,
-    mistakes: [] as number[],
-    quizStroke: 0,
-  });
+  // Sync mirrors every render so async callbacks see latest React state
   m.current.data = data;
   m.current.step = step;
   m.current.mode = mode;
   m.current.practiceLeft = practiceLeft;
   m.current.showOutline = showOutline;
 
-  // Animation & drawing refs
-  const animFrameRef = useRef(0);
-  const animStartRef = useRef(0);
-  const hintFrameRef = useRef(0);
-  const hintStartRef = useRef(0);
-  const isDrawingRef = useRef(false);
-  const isAutoLoopingRef = useRef(false);
-  const pendingAutoStartRef = useRef(false);
-  const loopTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const shakeTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  // #1342: holds the auto-onComplete timer for single-shot rounds so we can
-  // cancel it on character change / unmount, preventing a stale closure from
-  // firing onComplete after the parent has already advanced (e.g. the user
-  // tapped "跳過第 2 次練習" inside the 600 ms window).
-  const completionTimerRef = useRef<ReturnType<typeof setTimeout>>();
-
-  /* ---- Off-screen canvas (created once, reused) ---- */
-  const getOffCanvas = useCallback(() => {
-    if (!offCanvasRef.current) {
-      offCanvasRef.current = document.createElement('canvas');
-      offCanvasRef.current.width = CANVAS_SIZE;
-      offCanvasRef.current.height = CANVAS_SIZE;
-    }
-    return offCanvasRef.current;
-  }, []);
-
-  /* ---- Render to canvas ---- */
-  const doRender = useCallback(() => {
-    const canvas = canvasRef.current;
-    const d = m.current.data;
-    if (!canvas || !d) return;
-    const ctx = canvas.getContext('2d')!;
-    const state: RenderState = {
-      data: d,
-      completedStrokes: r.current.completedStrokes,
-      animStroke: r.current.animStroke,
-      animProgress: r.current.animProgress,
-      hintStroke: r.current.hintStroke,
-      hintProgress: r.current.hintProgress,
-      showOutline: m.current.showOutline,
-      correctPaths: r.current.correctPaths,
-      activeBrush: r.current.activeBrush,
-      radicalColorMode,
-      componentCount,
-    };
-    renderStrokes(ctx, getOffCanvas(), state);
-  }, [getOffCanvas, radicalColorMode, componentCount]);
-
-  /* ---- Shared state reset (used by both initial load and retry) ---- */
+  /* ---- Shared state reset ---- */
   const resetState = useCallback((nStrokes: number) => {
-    // #1342 / #1529 single-shot rounds:
-    //   outlined-once → ANIMATION first (preview stroke order), then a single
-    //     PRACTICE_1 trace once the student clicks 開始練習. Restored in #1529
-    //     so children see the correct stroke order before writing — without
-    //     having to wait the full animation out (skip button stays available).
-    //   no-outline-once → PRACTICE_NO_OUTLINE, outline hidden, no preview.
-    // standard preserves the original animation-led 4-trace flow.
-    let initialStep = Step.ANIMATION;
-    let outlineOn = true;
-    let leftCount = 4;
-    if (isOutlinedOnce) {
-      leftCount = 1;
-    } else if (isNoOutlineOnce) {
-      initialStep = Step.PRACTICE_NO_OUTLINE;
-      outlineOn = false;
-      leftCount = 1;
-    }
-    setStep(initialStep);
-    setMode('idle');
-    setPracticeLeft(leftCount);
-    setShowOutline(outlineOn);
-    setToast('');
-    setCompletedStrokesUI(0);
+    const result = resetMachineState({ nStrokes, isOutlinedOnce, isNoOutlineOnce });
     r.current = {
       completedStrokes: 0, animStroke: -1, animProgress: 0,
       hintStroke: -1, hintProgress: 0, correctPaths: [], activeBrush: [],
     };
-    m.current.showOutline = outlineOn;
+    m.current.showOutline = result.outlineOn;
     m.current.mistakes = new Array(nStrokes).fill(0);
     m.current.quizStroke = 0;
-  }, [isOutlinedOnce, isNoOutlineOnce]);
+  }, [isOutlinedOnce, isNoOutlineOnce, resetMachineState, r, m]);
 
   /* ---- Load character data ---- */
   useEffect(() => {
@@ -370,7 +261,8 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
       clearTimeout(shakeTimerRef.current);
       clearTimeout(completionTimerRef.current);
     };
-  }, [character, resetState]);
+  }, [character, resetState, isAutoLoopingRef, pendingAutoStartRef, m,
+      animFrameRef, hintFrameRef, loopTimerRef, shakeTimerRef, completionTimerRef]);
 
   /* ---- Re-render when declarative state changes ---- */
   useEffect(() => {
@@ -382,27 +274,26 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
     if (!toast) return;
     const t = setTimeout(() => setToast(''), 3500);
     return () => clearTimeout(t);
-  }, [toast]);
+  }, [toast, setToast]);
 
-  /* ---- Trigger shake animation ---- */
+  /* ---- Shake animation ---- */
   const triggerShake = useCallback(() => {
     setCanvasShake(false);
     clearTimeout(shakeTimerRef.current);
-    // Use rAF to allow React to clear the class first
     requestAnimationFrame(() => {
       setCanvasShake(true);
       shakeTimerRef.current = setTimeout(() => setCanvasShake(false), 450);
     });
-  }, []);
+  }, [setCanvasShake, shakeTimerRef]);
 
   const showToast = useCallback((msg: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast('');
-    // slight delay to re-trigger animation
+    setToastType(type);
     requestAnimationFrame(() => {
       setToast(msg);
       setToastType(type);
     });
-  }, []);
+  }, [setToast, setToastType]);
 
   /* ================================================================ */
   /*  Animation                                                        */
@@ -453,7 +344,8 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
       animFrameRef.current = requestAnimationFrame(tick);
     };
     animFrameRef.current = requestAnimationFrame(tick);
-  }, [doRender]);
+  }, [doRender, setMode, setStep, animFrameRef, hintFrameRef,
+      animStartRef, isAutoLoopingRef, loopTimerRef, r, m]);
 
   const handleRetry = useCallback(() => {
     if (!data) return;
@@ -463,18 +355,13 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
     resetState(data.nStrokes);
     isAutoLoopingRef.current = true;
     startAnimation();
-  }, [data, resetState, startAnimation]);
+  }, [data, resetState, startAnimation, animFrameRef, hintFrameRef, loopTimerRef, isAutoLoopingRef]);
 
-  /* ---- Auto-start animation loop when data first loads ---- */
-  // Forward-ref pattern: startQuiz is defined below; capture its current value
-  // through a ref so this effect can call it without a hoisting error.
+  /* ---- Auto-start when data loads ---- */
   const startQuizRef = useRef<() => void>(() => {});
   useEffect(() => {
     if (data && pendingAutoStartRef.current) {
       pendingAutoStartRef.current = false;
-      // #1529: only the recall round (no-outline-once) skips the animation.
-      // outlined-once now plays the stroke-order preview (with a 開始 button)
-      // so children see the correct stroke order before writing.
       if (isNoOutlineOnce) {
         isAutoLoopingRef.current = false;
         startQuizRef.current();
@@ -483,7 +370,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         startAnimation();
       }
     }
-  }, [data, isNoOutlineOnce, startAnimation]);
+  }, [data, isNoOutlineOnce, startAnimation, pendingAutoStartRef, isAutoLoopingRef]);
 
   /* ================================================================ */
   /*  Quiz (writing practice)                                          */
@@ -503,9 +390,8 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
     m.current.quizStroke = 0;
     setCompletedStrokesUI(0);
     doRender();
-  }, [doRender]);
+  }, [doRender, setMode, setCompletedStrokesUI, animFrameRef, hintFrameRef, r, m]);
 
-  // Keep startQuizRef pointing at the latest startQuiz (#1342 forward-ref).
   useEffect(() => { startQuizRef.current = startQuiz; }, [startQuiz]);
 
   const handleBeginPractice = useCallback(() => {
@@ -516,7 +402,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
     r.current.animProgress = 0;
     setStep(Step.PRACTICE_1);
     startQuiz();
-  }, [startQuiz]);
+  }, [startQuiz, setStep, isAutoLoopingRef, animFrameRef, loopTimerRef, r]);
 
   const showHint = useCallback(() => {
     const d = m.current.data;
@@ -542,7 +428,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
       }
     };
     hintFrameRef.current = requestAnimationFrame(tick);
-  }, [doRender]);
+  }, [doRender, hintFrameRef, hintStartRef, r, m]);
 
   const handleStrokeDrawn = useCallback((points: Point[]) => {
     const d = m.current.data;
@@ -563,13 +449,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         const pl = m.current.practiceLeft;
 
         if (s >= Step.PRACTICE_1 && s <= Step.PRACTICE_3) {
-          // #1342: outlined-once mode auto-advances to whatever the parent
-          // wires onComplete to (round 2 in VocabPractice). The COMPLETE
-          // overlay's "下一個字" button was misleading — it actually moves
-          // to the same character's round 2, not the next character — so we
-          // skip the overlay entirely here. The 600 ms pause lets the
-          // student see the radical-coloured strokes merge into one colour
-          // (allDone branch in strokeRenderer's colourFor).
           if (isOutlinedOnce) {
             showToast('恭喜筆畫正確！', 'success');
             clearTimeout(completionTimerRef.current);
@@ -578,7 +457,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
             const newLeft = pl - 1;
             setPracticeLeft(newLeft);
             if (s === Step.PRACTICE_3) {
-              // Auto-advance to no-outline practice
               m.current.showOutline = false;
               setShowOutline(false);
               setStep(Step.PRACTICE_NO_OUTLINE);
@@ -592,9 +470,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
             }
           }
         } else if (s === Step.PRACTICE_NO_OUTLINE) {
-          // #1342: same auto-advance for no-outline-once (round 2). Standard
-          // flow keeps the COMPLETE overlay so users have a "下一個字" CTA
-          // when they have finished BOTH rounds (= the whole character is done).
           if (isNoOutlineOnce) {
             showToast('恭喜筆畫正確！這個字完成了！', 'success');
             clearTimeout(completionTimerRef.current);
@@ -615,7 +490,10 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         showHint();
       }
     }
-  }, [doRender, showHint, startQuiz, triggerShake, showToast, isOutlinedOnce, isNoOutlineOnce, onComplete]);
+  }, [doRender, showHint, startQuiz, triggerShake, showToast,
+      isOutlinedOnce, isNoOutlineOnce, onComplete,
+      setMode, setCompletedStrokesUI, setPracticeLeft, setShowOutline, setStep,
+      completionTimerRef, r, m]);
 
   /* ================================================================ */
   /*  Pointer events (drawing)                                         */
@@ -628,7 +506,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
       x: ((e.clientX - rect.left) / rect.width) * CANVAS_SIZE,
       y: ((e.clientY - rect.top) / rect.height) * CANVAS_SIZE,
     };
-  }, []);
+  }, [canvasRef]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (m.current.mode !== 'quizzing') return;
@@ -637,7 +515,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
     isDrawingRef.current = true;
     r.current.activeBrush = [pt];
     canvasRef.current?.setPointerCapture(e.pointerId);
-  }, [toCanvasCoords]);
+  }, [toCanvasCoords, isDrawingRef, r, m, canvasRef]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDrawingRef.current) return;
@@ -647,7 +525,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
       r.current.activeBrush.push(pt);
     }
     doRender();
-  }, [toCanvasCoords, doRender]);
+  }, [toCanvasCoords, doRender, isDrawingRef, r]);
 
   const handlePointerUp = useCallback(() => {
     if (!isDrawingRef.current) return;
@@ -656,7 +534,7 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
     r.current.activeBrush = [];
     doRender();
     if (points.length > 1) handleStrokeDrawn(points);
-  }, [doRender, handleStrokeDrawn]);
+  }, [doRender, handleStrokeDrawn, isDrawingRef, r]);
 
   /* ================================================================ */
   /*  Derived values                                                   */
@@ -695,7 +573,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
 
   return (
     <div className={`flex-1 flex flex-col items-center ${embedded ? 'gap-3' : 'p-4 gap-4 overflow-auto'}`}>
-      {/* Header — hidden in embedded mode */}
       {!embedded && (
         <div className="flex items-center gap-4 w-full max-w-lg">
           {onBack && (
@@ -719,10 +596,8 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         </div>
       )}
 
-      {/* Progress dots — hidden in embedded mode */}
       {!embedded && <ProgressDots step={step} practiceLeft={practiceLeft} />}
 
-      {/* Stroke progress bar (during quiz) */}
       {mode === 'quizzing' && nStrokes > 0 && (
         <div className={`w-full ${embedded ? '' : 'max-w-lg'}`}>
           <div className="flex justify-between text-[10px] text-on-surface-variant mb-1">
@@ -738,11 +613,9 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         </div>
       )}
 
-      {/* Canvas */}
       <div
         className={`relative w-full max-w-lg aspect-square ${canvasShake ? 'animate-shake' : ''}`}
       >
-        {/* Completion overlay */}
         {isComplete && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface/95 rounded-xl z-10 gap-4 p-6 animate-fade-in" style={{ backdropFilter: 'blur(8px)' }}>
             <ConfettiParticles />
@@ -786,7 +659,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         />
       </div>
 
-      {/* Begin practice button (animation phase) */}
       {step === Step.ANIMATION && (
         <button
           onClick={handleBeginPractice}
@@ -798,7 +670,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         </button>
       )}
 
-      {/* Step guidance — hidden in embedded mode */}
       {!embedded && (
         <StepGuidance
           step={step}
@@ -808,7 +679,6 @@ const WriteCharacter: React.FC<WriteCharacterProps> = ({
         />
       )}
 
-      {/* Toast */}
       {toast && <Toast message={toast} type={toastType} />}
     </div>
   );
