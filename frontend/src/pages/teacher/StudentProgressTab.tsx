@@ -730,7 +730,7 @@ const StudentProgressTab: React.FC<StudentProgressTabProps> = ({ classroomId }) 
           dismissible banner so the teacher doesn't think "button doesn't work". */}
       {dialogueError && (
         <div className="mb-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-sm text-red-700">
-          <span>對話紀錄載入失敗：{dialogueError}</span>
+          <span>對話紀錄載入失敗 — {dialogueError}</span>
           <button type="button" onClick={() => setDialogueError(null)} className="underline text-xs">關閉</button>
         </div>
       )}
