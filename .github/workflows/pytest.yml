@@ -1,0 +1,43 @@
+name: Pytest
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  pytest:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run characterization tests (refactor safety gate)
+        run: |
+          cd backend
+          python -m pytest --tb=short -q \
+            tests/test_characterization_auth_policies.py \
+            tests/test_characterization_socratic_state_machine.py \
+            tests/test_characterization_tts_normalization.py \
+            tests/test_characterization_tts_cache.py \
+            tests/test_rate_limiting.py
+        env:
+          DATABASE_URL: sqlite://
+          TTS_PROVIDER: google
+          AZURE_SPEECH_KEY: ""
+          AZURE_SPEECH_REGION: eastus
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
