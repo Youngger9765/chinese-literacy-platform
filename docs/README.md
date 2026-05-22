@@ -50,7 +50,6 @@ BRD ──────▶ MRD ──────▶ PRD ──────▶ TR
 | 文件 | 說明 |
 |------|------|
 | [production/](production/) | 部署指南、監控設定、Runbook |
-| [beta-launch/](beta-launch/) | Beta 上線套件（FAQ、回饋表、支援模板） |
 | [TESTING_GUIDE.md](TESTING_GUIDE.md) | 人工測試指南（User Journey） |
 
 ### 使用手冊
