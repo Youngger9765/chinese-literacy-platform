@@ -16,6 +16,11 @@ import {
   BatchCreateResult,
 } from '../../services/classroomApi';
 import { seedDemoStudents, AdminSeedApiError } from '../../services/adminSeedApi';
+import ClassroomInfoCard from './ClassroomInfoCard';
+import ClassroomJoinCodeSection from './ClassroomJoinCodeSection';
+import StudentSearchSection from './StudentSearchSection';
+import BatchCreateStudentsPanel from './BatchCreateStudentsPanel';
+import { parseBatchInput, downloadCredentialsCsv } from './classroomUtils';
 
 interface ClassroomDetailPanelProps {
   classroomId: number;
@@ -75,7 +80,6 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
       const data = await getClassroomDetail(token, classroomId);
       setClassroom(data);
       setJoinCode(data.join_code ?? null);
-
       setSchoolName(data.school_name || '');
     } catch (err) {
       if (err instanceof ClassroomApiError) {
@@ -251,19 +255,6 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
 
   // --- Batch create ---
 
-  const parseBatchInput = (input: string): BatchStudentInput[] => {
-    return input
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0)
-      .map((line) => {
-        const parts = line.split(/\s+/);
-        const name = parts[0];
-        const seat_number = parts[1] || undefined;
-        return { name, seat_number };
-      });
-  };
-
   const handleBatchInputChange = (value: string) => {
     setBatchInput(value);
     setBatchPreview(parseBatchInput(value));
@@ -291,19 +282,8 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
   };
 
   const handleDownloadCredentials = () => {
-    if (!batchResult) return;
-    const header = '姓名,座號,帳號,密碼';
-    const rows = batchResult.created.map(
-      (s) => `${s.name},${s.seat_number},${s.username},${s.password}`
-    );
-    const csv = [header, ...rows].join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `班級學生帳號_${classroom?.name || classroomId}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (!batchResult || !classroom) return;
+    downloadCredentialsCsv(batchResult, classroom.name, classroomId);
   };
 
   // --- Demo seed handler (Issue #989) ---
@@ -311,7 +291,7 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
   const handleSeedDemo = async () => {
     if (!token) return;
     const countStr = window.prompt('要建立幾個 demo 學生？(預設 3, 最多 10)', '3');
-    if (countStr === null) return; // user cancelled
+    if (countStr === null) return;
     const count = Math.min(10, Math.max(1, parseInt(countStr, 10) || 3));
     setIsSeedingDemo(true);
     try {
@@ -392,136 +372,30 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
         )}
 
         {/* Classroom info card */}
-        <div className="bg-white rounded-2xl shadow-card p-6">
-          {isEditing ? (
-            <form onSubmit={handleSaveEdit} className="space-y-4">
-              <h2 className="text-base font-bold text-gray-900">編輯班級</h2>
-              {editError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-                  {editError}
-                </div>
-              )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="edit-classroom-name" className="block text-sm font-medium text-gray-700 mb-1">
-                    班級名稱 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="edit-classroom-name"
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    required
-                    autoFocus
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="edit-classroom-grade" className="block text-sm font-medium text-gray-700 mb-1">
-                    年級
-                  </label>
-                  <input
-                    id="edit-classroom-grade"
-                    type="number"
-                    min={1}
-                    max={12}
-                    value={editGrade}
-                    onChange={(e) => setEditGrade(e.target.value)}
-                    placeholder="例：5"
-                    className="w-full h-11 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  取消
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving || !editName.trim()}
-                  className="bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
-                >
-                  {isSaving ? '儲存中...' : '儲存'}
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">{classroom.name}</h2>
-                <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-gray-500">
-                  {classroom.grade != null && <span>{classroom.grade} 年級</span>}
-                  <span className={classroom.is_active ? 'text-emerald-600' : 'text-gray-400'}>
-                    {classroom.is_active ? '使用中' : '已停用'}
-                  </span>
-                  <span>{classroom.student_count} 位學生</span>
-                </div>
-              </div>
-              <div className="flex gap-2 shrink-0">
-                <button
-                  onClick={startEditing}
-                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  編輯
-                </button>
-                <button
-                  onClick={handleToggleActive}
-                  disabled={isTogglingActive}
-                  className={`px-3 py-1.5 rounded-lg border text-sm transition-colors cursor-pointer ${
-                    isTogglingActive ? 'opacity-50 cursor-not-allowed' : ''
-                  } ${
-                    classroom.is_active
-                      ? 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                      : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50'
-                  }`}
-                >
-                  {isTogglingActive ? '更新中...' : classroom.is_active ? '停用' : '啟用'}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        <ClassroomInfoCard
+          classroom={classroom}
+          isEditing={isEditing}
+          editName={editName}
+          editGrade={editGrade}
+          isSaving={isSaving}
+          editError={editError}
+          isTogglingActive={isTogglingActive}
+          onEdit={startEditing}
+          onSaveEdit={handleSaveEdit}
+          onCancelEdit={() => setIsEditing(false)}
+          onToggleActive={handleToggleActive}
+          onChangeEditName={setEditName}
+          onChangeEditGrade={setEditGrade}
+        />
 
-        {/* Join code card */}
-        <div className="bg-white rounded-2xl shadow-card p-6">
-          <h3 className="font-bold text-gray-900 mb-4">加入代碼</h3>
-          {joinCode ? (
-            <div className="flex items-center gap-3">
-              <div className="bg-gray-100 font-mono text-lg tracking-widest px-4 py-2 rounded-lg text-gray-900">
-                {joinCode}
-              </div>
-              <button
-                onClick={handleCopyCode}
-                className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer"
-                title="複製代碼"
-              >
-                {codeCopied ? '已複製' : '複製'}
-              </button>
-              <button
-                onClick={handleRegenerateCode}
-                disabled={isRegeneratingCode}
-                className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isRegeneratingCode ? '產生中...' : '重新產生'}
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-400">尚無加入代碼</span>
-              <button
-                onClick={handleRegenerateCode}
-                disabled={isRegeneratingCode}
-                className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isRegeneratingCode ? '產生中...' : '產生代碼'}
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Join code section */}
+        <ClassroomJoinCodeSection
+          joinCode={joinCode}
+          codeCopied={codeCopied}
+          isRegeneratingCode={isRegeneratingCode}
+          onCopyCode={handleCopyCode}
+          onRegenerateCode={handleRegenerateCode}
+        />
 
         {/* Student list */}
         <div className="bg-white rounded-2xl shadow-card">
@@ -563,230 +437,31 @@ const ClassroomDetailPanel: React.FC<ClassroomDetailPanelProps> = ({ classroomId
 
           {/* Student search panel */}
           {showStudentSearch && (
-            <div className="p-5 border-b border-gray-100 bg-gray-50/50">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-bold text-gray-900">搜尋並新增學生</h4>
-                <button
-                  onClick={() => { setShowStudentSearch(false); setSearchQuery(''); setSearchResults([]); }}
-                  className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
-                >
-                  關閉
-                </button>
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => handleSearchInputChange(e.target.value)}
-                placeholder="輸入姓名或 email 搜尋..."
-                autoFocus
-                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
-              />
-              {isSearching && (
-                <div className="flex items-center gap-2 mt-3">
-                  <div className="w-3 h-3 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-xs text-gray-400">搜尋中...</span>
-                </div>
-              )}
-              {!isSearching && searchResults.length > 0 && (
-                <div className="mt-3 divide-y divide-gray-100 border border-gray-200 rounded-lg bg-white overflow-hidden">
-                  {searchResults.map((student) => (
-                    <div key={student.id} className="px-4 py-2.5 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{student.name}</p>
-                        <p className="text-xs text-gray-500">{student.email}</p>
-                      </div>
-                      <button
-                        onClick={() => handleAddStudent(student.id)}
-                        disabled={addingStudentId === student.id}
-                        className="px-3 py-1 rounded-md bg-accent hover:bg-accent-hover text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {addingStudentId === student.id ? '加入中...' : '加入'}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {!isSearching && searchQuery.trim().length >= 2 && searchResults.length === 0 && (
-                <p className="mt-3 text-xs text-gray-400">找不到符合的使用者</p>
-              )}
-            </div>
+            <StudentSearchSection
+              searchQuery={searchQuery}
+              searchResults={searchResults}
+              isSearching={isSearching}
+              addingStudentId={addingStudentId}
+              onSearchInputChange={handleSearchInputChange}
+              onAddStudent={handleAddStudent}
+              onClose={() => { setShowStudentSearch(false); setSearchQuery(''); setSearchResults([]); }}
+            />
           )}
 
           {/* Batch create panel */}
           {showBatchCreate && (
-            <div className="p-5 border-b border-gray-100 bg-gray-50/50">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-bold text-gray-900">批量建立學生</h4>
-                <button
-                  onClick={() => { setShowBatchCreate(false); setBatchInput(''); setBatchPreview([]); setBatchError(''); setBatchResult(null); }}
-                  className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
-                >
-                  關閉
-                </button>
-              </div>
-
-              {batchResult ? (
-                // Show results after successful creation
-                <div className="space-y-4">
-                  {batchResult.created.length > 0 && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm font-medium text-green-800">
-                          成功建立 {batchResult.created.length} 位學生
-                        </p>
-                        <button
-                          onClick={handleDownloadCredentials}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium transition-colors cursor-pointer"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                          </svg>
-                          下載登入資訊
-                        </button>
-                      </div>
-                      {/* Mobile card view */}
-                      <div className="md:hidden space-y-2">
-                        {batchResult.created.map((s) => (
-                          <div key={s.user_id} className="bg-green-50 rounded-lg border border-green-200 p-3 space-y-1.5 text-xs">
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium text-green-900">{s.name}</span>
-                              <span className="text-green-600">座號 {s.seat_number || '-'}</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <span className="text-green-500">帳號</span>
-                                <p className="text-green-800 font-mono break-all">{s.username}</p>
-                              </div>
-                              <div>
-                                <span className="text-green-500">密碼</span>
-                                <p className="text-green-800 font-mono break-all">{s.password}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Desktop table view */}
-                      <div className="hidden md:block overflow-x-auto">
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="border-b border-green-200 text-left text-green-700">
-                              <th className="pb-1.5 font-medium">姓名</th>
-                              <th className="pb-1.5 font-medium">座號</th>
-                              <th className="pb-1.5 font-medium">帳號</th>
-                              <th className="pb-1.5 font-medium">密碼</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-green-100">
-                            {batchResult.created.map((s) => (
-                              <tr key={s.user_id}>
-                                <td className="py-1.5 text-green-900">{s.name}</td>
-                                <td className="py-1.5 text-green-700">{s.seat_number || '-'}</td>
-                                <td className="py-1.5 text-green-700 font-mono">{s.username}</td>
-                                <td className="py-1.5 text-green-700 font-mono">{s.password}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-                  {batchResult.errors.length > 0 && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <p className="text-sm font-medium text-red-800 mb-2">
-                        {batchResult.errors.length} 筆錯誤
-                      </p>
-                      <ul className="list-disc list-inside text-xs text-red-700 space-y-1">
-                        {batchResult.errors.map((err, i) => (
-                          <li key={i}>{err}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => { setBatchResult(null); }}
-                    className="text-sm text-accent hover:text-accent-hover cursor-pointer"
-                  >
-                    繼續建立
-                  </button>
-                </div>
-              ) : (
-                // Input form
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="batch-students" className="block text-sm text-gray-600 mb-1">
-                      每行一位學生，格式：姓名 座號（座號可省略）
-                    </label>
-                    <textarea
-                      id="batch-students"
-                      value={batchInput}
-                      onChange={(e) => handleBatchInputChange(e.target.value)}
-                      placeholder={'王小明 1\n李小華 2\n陳大文 3'}
-                      className="w-full min-h-[120px] px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors resize-y"
-                    />
-                  </div>
-
-                  {batchPreview.length > 0 && (
-                    <div>
-                      <p className="text-xs text-gray-500 mb-2">預覽：將建立 {batchPreview.length} 位學生</p>
-
-                      {/* Mobile card view */}
-                      <div className="md:hidden space-y-1.5">
-                        {batchPreview.map((s, i) => (
-                          <div key={i} className="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-3 py-2 text-xs">
-                            <span className="text-gray-900 font-medium">{s.name}</span>
-                            <span className="text-gray-500">座號 {s.seat_number || '-'}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Desktop table view */}
-                      <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-lg">
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="border-b border-gray-100 text-left text-gray-500 bg-gray-50">
-                              <th className="px-3 py-1.5 font-medium">姓名</th>
-                              <th className="px-3 py-1.5 font-medium">座號</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-50">
-                            {batchPreview.map((s, i) => (
-                              <tr key={i}>
-                                <td className="px-3 py-1.5 text-gray-900">{s.name}</td>
-                                <td className="px-3 py-1.5 text-gray-600">{s.seat_number || '-'}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-
-                  {batchError && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-                      {batchError}
-                    </div>
-                  )}
-
-                  <div className="flex gap-3 justify-end">
-                    <button
-                      type="button"
-                      onClick={() => { setShowBatchCreate(false); setBatchInput(''); setBatchPreview([]); setBatchError(''); }}
-                      className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
-                    >
-                      取消
-                    </button>
-                    <button
-                      onClick={handleSubmitBatch}
-                      disabled={isSubmittingBatch || batchPreview.length === 0}
-                      className="bg-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer"
-                    >
-                      {isSubmittingBatch ? '建立中...' : `建立 ${batchPreview.length} 位學生`}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <BatchCreateStudentsPanel
+              batchInput={batchInput}
+              batchPreview={batchPreview}
+              isSubmittingBatch={isSubmittingBatch}
+              batchResult={batchResult}
+              batchError={batchError}
+              onBatchInputChange={handleBatchInputChange}
+              onSubmitBatch={handleSubmitBatch}
+              onDownloadCredentials={handleDownloadCredentials}
+              onContinue={() => setBatchResult(null)}
+              onClose={() => { setShowBatchCreate(false); setBatchInput(''); setBatchPreview([]); setBatchError(''); setBatchResult(null); }}
+            />
           )}
 
           {/* Student list rows */}
