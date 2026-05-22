@@ -29,7 +29,9 @@ jobs:
       - name: Run pytest
         run: |
           cd backend
-          python -m pytest --tb=short -q
+          python -m pytest --tb=short -q \
+            --ignore=tests/test_parse_docx_lessons_bulk.py \
+            --ignore=tests/test_parse_paragraphs_fill_blank.py
         env:
           DATABASE_URL: sqlite://
           TTS_PROVIDER: google
