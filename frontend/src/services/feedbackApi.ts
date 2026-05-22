@@ -4,6 +4,7 @@
 
 import { API_BASE } from './apiConfig';
 import { handle401Response } from './apiUnauthorized';
+import { authToken } from '../utils/storage';
 
 export type FeedbackCategory = 'bug' | 'feature' | 'question' | 'other';
 export type FeedbackStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
@@ -35,11 +36,9 @@ export interface FeedbackListResponse {
 }
 
 function getAuthHeaders(): Record<string, string> {
-  // #1777: AuthContext stores JWT under 'lingoleap_token', not 'token'.
-  // This used to silently return no Authorization header → all feedback 401.
-  const token = localStorage.getItem('lingoleap_token');
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
+  // #1777 ground zero: previously hardcoded 'token' key → all feedback 401.
+  // #1786: migrated to authToken.authHeader() — cannot hardcode wrong key again.
+  return authToken.authHeader();
 }
 
 /**
