@@ -25,11 +25,15 @@ AnalysisBy: issue #1770 — split from 1197-line monolith into 4 focused modules
   - services/omo_storage.py        — GCS upload, signing, bucket constant
   - services/omo_responses.py      — Pydantic schemas + response builders
   - services/omo_jobs.py           — background tasks, _update_upload helper
+
+AnalysisBy: issue #1857 — second-pass split into 3 more focused modules:
+  - services/omo_upload_validator.py — file-count/size/MIME guards (sync, no DB/GCS)
+  - services/omo_upload_service.py   — dedup/create/supersede DB helpers
+  - services/omo_state_service.py    — confirm/regrade/flag/lesson-id mapping
 """
 
 import hashlib
 import logging
-from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Path, UploadFile
@@ -62,15 +66,29 @@ from ..services.omo_responses import (
 )
 from ..services.omo_jobs import _run_grading, _run_identification, _update_upload
 
+# Delegated to focused service modules (issue #1857 split)
+from ..services.omo_upload_validator import (
+    _MAX_FILES_PER_UPLOAD,
+    _MAX_TOTAL_ATTEMPTS,
+    validate_attempt_files,
+    validate_upload_files,
+)
+from ..services.omo_upload_service import (
+    check_dedup,
+    create_attempt_record,
+    create_upload_record,
+    supersede_existing_uploads,
+)
+from ..services.omo_state_service import (
+    apply_confirm,
+    apply_flag,
+    apply_regrade,
+    resolve_lesson_id,
+)
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["omo"])
-
-# ── Constants ──────────────────────────────────────────────────────────────────
-_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024   # 10MB per image
-_MAX_FILES_PER_UPLOAD = 20                  # max files per single upload call
-_MAX_TOTAL_ATTEMPTS = 5                    # max attempts per upload session
-_ALLOWED_MIME_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
 
 
 # ── Internal route helpers ─────────────────────────────────────────────────────
@@ -157,89 +175,53 @@ async def upload_worksheet(
     completes synchronously in the background task without any AI call
     (confidence=1.0, ~0 latency vs 6-24 s for Gemini).
     """
-    if not files:
-        raise HTTPException(status_code=400, detail="最少需要上傳 1 張照片")
-    if len(files) > _MAX_FILES_PER_UPLOAD:
-        raise HTTPException(
-            status_code=400,
-            detail=f"最多只能上傳 {_MAX_FILES_PER_UPLOAD} 張照片",
-        )
-
-    image_bytes_list: list[bytes] = []
-    mime_types: list[str] = []
+    # ── Read all file bytes (required for async UploadFile) ──────────────────
+    files_data: list[tuple[bytes, str]] = []
     for f in files:
         content_type = f.content_type or "image/jpeg"
-        if content_type not in _ALLOWED_MIME_TYPES:
-            raise HTTPException(
-                status_code=400,
-                detail=f"不支援的圖片格式 {content_type}，請上傳 JPEG 或 PNG",
-            )
         data = await f.read()
-        if len(data) > _MAX_FILE_SIZE_BYTES:
-            raise HTTPException(
-                status_code=413,
-                detail=f"圖片太大（{len(data) // (1024*1024)}MB），最大允許 10MB",
-            )
-        if len(data) == 0:
-            raise HTTPException(status_code=400, detail="上傳的圖片是空的")
-        image_bytes_list.append(data)
-        mime_types.append(content_type)
+        files_data.append((data, content_type))
+
+    # ── Validate (raises 400/413 before any GCS work) ────────────────────────
+    validate_upload_files(files_data)
+
+    image_bytes_list = [d for d, _ in files_data]
+    mime_types = [m for _, m in files_data]
 
     # ── Phase 1b: SHA-256 dedup check ────────────────────────────────────────
     # Hash the primary (first) image to detect duplicate uploads.
     primary_hash = hashlib.sha256(image_bytes_list[0]).hexdigest()
 
-    existing_attempt = (
-        db.query(OmoUploadAttempt)
-        .join(OmoUpload, OmoUploadAttempt.omo_upload_id == OmoUpload.id)
-        .filter(
-            OmoUploadAttempt.image_hash == primary_hash,
-            OmoUpload.student_id == current_user.id,
+    existing_upload = check_dedup(db, current_user.id, primary_hash)
+    if existing_upload:
+        already_graded = existing_upload.status == "graded"
+        logger.info(
+            "OMO dedup hit: student=%d hash=%s existing_upload_id=%d already_graded=%s",
+            current_user.id, primary_hash[:16], existing_upload.id, already_graded,
         )
-        .first()
-    )
-
-    if existing_attempt:
-        existing_upload = db.query(OmoUpload).filter(
-            OmoUpload.id == existing_attempt.omo_upload_id
-        ).first()
-        if existing_upload:
-            already_graded = existing_upload.status == "graded"
-            logger.info(
-                "OMO dedup hit: student=%d hash=%s existing_upload_id=%d already_graded=%s",
-                current_user.id, primary_hash[:16], existing_upload.id, already_graded,
-            )
-            response = _build_upload_response(existing_upload)
-            response.from_cache = True
-            response.already_graded = already_graded
-            return response
+        response = _build_upload_response(existing_upload)
+        response.from_cache = True
+        response.already_graded = already_graded
+        return response
 
     # ── Create new upload record (status=identifying) ─────────────────────────
-    upload = OmoUpload(
-        student_id=current_user.id,
-        status="identifying",
-        answers=[],
-        progress={},
-    )
-    db.add(upload)
-    db.flush()   # get id before commit
+    upload = create_upload_record(db, current_user.id)
     upload_id = upload.id
 
     # Create first attempt (with hash stored for future dedup)
     image_paths = []
-    for i, (data, mime) in enumerate(zip(image_bytes_list, mime_types)):
+    for i, (data, mime) in enumerate(files_data):
         path = _upload_to_gcs(current_user.id, upload_id, 0, i, data, mime)
         image_paths.append(path)
 
-    attempt = OmoUploadAttempt(
-        omo_upload_id=upload_id,
+    create_attempt_record(
+        db,
+        upload_id=upload_id,
         attempt_idx=0,
         image_paths=image_paths,
         image_hash=primary_hash,
         is_active=True,
     )
-    db.add(attempt)
-    db.commit()
 
     # Upload-replace UX: supersede any existing active upload for this lesson+student
     # (only when we know the lesson upfront via hint — avoids superseding during identification)
@@ -248,14 +230,7 @@ async def upload_worksheet(
         hint_candidates = identify_lesson_from_hint(lesson_code_hint)
         if hint_candidates:
             hinted_lesson_id = hint_candidates[0].lesson_id
-            now_ts = datetime.now(timezone.utc)
-            db.query(OmoUpload).filter(
-                OmoUpload.student_id == current_user.id,
-                OmoUpload.lesson_id == hinted_lesson_id,
-                OmoUpload.superseded_at.is_(None),
-                OmoUpload.id != upload_id,
-            ).update({'superseded_at': now_ts})
-            db.commit()
+            supersede_existing_uploads(db, current_user.id, hinted_lesson_id, upload_id)
 
     background_tasks.add_task(
         _run_identification, upload_id, image_bytes_list, mime_types, lesson_code_hint
@@ -305,36 +280,19 @@ async def add_attempt(
     existing_attempts = db.query(OmoUploadAttempt).filter(
         OmoUploadAttempt.omo_upload_id == upload_id
     ).count()
-    if existing_attempts >= _MAX_TOTAL_ATTEMPTS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"最多 {_MAX_TOTAL_ATTEMPTS} 次重拍機會",
-        )
 
-    if not files:
-        raise HTTPException(status_code=400, detail="最少需要上傳 1 張照片")
-    if len(files) > _MAX_FILES_PER_UPLOAD:
-        raise HTTPException(
-            status_code=400,
-            detail=f"每次最多上傳 {_MAX_FILES_PER_UPLOAD} 張照片",
-        )
-
-    image_bytes_list: list[bytes] = []
-    mime_types: list[str] = []
+    # ── Read all file bytes ───────────────────────────────────────────────────
+    files_data: list[tuple[bytes, str]] = []
     for f in files:
         content_type = f.content_type or "image/jpeg"
-        if content_type not in _ALLOWED_MIME_TYPES:
-            raise HTTPException(
-                status_code=400,
-                detail=f"不支援的圖片格式 {content_type}",
-            )
         data = await f.read()
-        if len(data) > _MAX_FILE_SIZE_BYTES:
-            raise HTTPException(status_code=413, detail="圖片超過 10MB")
-        if not data:
-            raise HTTPException(status_code=400, detail="空的圖片檔案")
-        image_bytes_list.append(data)
-        mime_types.append(content_type)
+        files_data.append((data, content_type))
+
+    # ── Validate (attempt count + file constraints) ───────────────────────────
+    validate_attempt_files(files_data, existing_attempts)
+
+    image_bytes_list = [d for d, _ in files_data]
+    mime_types = [m for _, m in files_data]
 
     attempt_idx = existing_attempts  # 0-based
 
@@ -345,23 +303,22 @@ async def add_attempt(
 
     # Upload images
     image_paths = []
-    for i, (data, mime) in enumerate(zip(image_bytes_list, mime_types)):
+    for i, (data, mime) in enumerate(files_data):
         path = _upload_to_gcs(current_user.id, upload_id, attempt_idx, i, data, mime)
         image_paths.append(path)
-
-    new_attempt = OmoUploadAttempt(
-        omo_upload_id=upload_id,
-        attempt_idx=attempt_idx,
-        image_paths=image_paths,
-        is_active=True,
-    )
-    db.add(new_attempt)
 
     # Reset upload status for re-identification
     upload.status = "identifying"
     upload.error_message = None
     db.commit()
-    db.refresh(new_attempt)
+
+    new_attempt = create_attempt_record(
+        db,
+        upload_id=upload_id,
+        attempt_idx=attempt_idx,
+        image_paths=image_paths,
+        is_active=True,
+    )
 
     # Re-trigger identification
     background_tasks.add_task(_run_identification, upload_id, image_bytes_list, mime_types)
@@ -426,31 +383,13 @@ async def confirm_lesson(
             upload_id, payload.confirmed_lesson_id, candidate_ids,
         )
 
-    # #1740 fix: identifier returns synthetic lesson_id (yml display_order)
-    # which does not match canonical Story.id used by frontend /api/stories.
-    # Translate via candidate's grade_code so OmoUpload.lesson_id is queryable
-    # via /api/omo/by-lesson/{Story.id} and _run_grading finds the right schema.
-    real_lesson_id = payload.confirmed_lesson_id
-    if upload.identification and isinstance(upload.identification, list):
-        matched = next(
-            (c for c in upload.identification if c.get("lesson_id") == payload.confirmed_lesson_id),
-            None,
-        )
-        grade_code = (matched or {}).get("grade_code") if matched else None
-        if grade_code:
-            from ..services.lesson_loader import get_lesson_by_code
-            story = get_lesson_by_code(grade_code)
-            if story and story.get("id"):
-                real_lesson_id = story["id"]
-                logger.info(
-                    "OMO #1740 lesson_id mapping: synthetic %d → Story.id %d via grade_code %s",
-                    payload.confirmed_lesson_id, real_lesson_id, grade_code,
-                )
+    # #1740 fix: translate synthetic lesson_id → canonical Story.id via grade_code
+    real_lesson_id = resolve_lesson_id(
+        payload.confirmed_lesson_id,
+        upload.identification if isinstance(upload.identification, list) else None,
+    )
 
-    upload.lesson_id = real_lesson_id
-    upload.status = "grading"
-    upload.progress = {"stage": "queued", "total": 0, "graded": 0}
-    db.commit()
+    apply_confirm(db, upload, real_lesson_id)
 
     # Kick off grading in background — pass real Story.id so grader picks correct schema
     background_tasks.add_task(_run_grading, upload_id, real_lesson_id)
@@ -520,10 +459,7 @@ async def regrade_upload(
             detail="尚未確認課程，請先確認課程後再批改",
         )
 
-    upload.status = "grading"
-    upload.progress = {"stage": "queued", "total": 0, "graded": 0}
-    upload.error_message = None
-    db.commit()
+    apply_regrade(db, upload)
 
     background_tasks.add_task(_run_grading, upload_id, upload.lesson_id)
 
@@ -560,31 +496,7 @@ def flag_answer(
             detail="批改尚未完成，無法標記問題",
         )
 
-    answers = list(upload.answers or [])
-    found = False
-    for a in answers:
-        if a.get("question_id") == question_id:
-            a["flag"] = {
-                "flagged_by": current_user.id,
-                "reason": payload.reason,
-                "flagged_at": datetime.now(timezone.utc).isoformat(),
-            }
-            found = True
-            logger.info(
-                "OMO answer flagged: upload_id=%d question_id=%s student=%d reason=%s",
-                upload_id, question_id, current_user.id, payload.reason,
-            )
-            break
-
-    if not found:
-        raise HTTPException(status_code=404, detail=f"找不到題目 {question_id}")
-
-    # SQLAlchemy needs explicit reassignment + flag_modified to detect JSON mutation
-    # (especially on SQLite test DB which uses JSON not JSONB)
-    from sqlalchemy.orm.attributes import flag_modified
-    upload.answers = answers
-    flag_modified(upload, "answers")
-    db.commit()
+    apply_flag(db, upload, question_id, current_user.id, payload.reason)
 
     return {"upload_id": upload_id, "question_id": question_id, "flagged": True}
 
