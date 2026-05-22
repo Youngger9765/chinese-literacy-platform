@@ -12,80 +12,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { PlusIcon } from '../../components/icons';
+import AdminPageShell from '../../components/admin/AdminPageShell';
+import AdminTable, { ColumnDef } from '../../components/admin/AdminTable';
+import ConfirmDialog from '../../components/admin/ConfirmDialog';
 import {
   listAdminStories,
   createStory,
   updateStory,
   deleteStory,
   StoryAdminListItem,
-  StoryCreateRequest,
   StoryUpdateRequest,
   AdminStoryApiError,
 } from '../../services/adminStoryApi';
-
-// ── Types ────────────────────────────────────────────────────────────────────
-
-type ModalMode = 'create' | 'edit';
-
-interface StoryFormState {
-  lesson_number: string;
-  title: string;
-  grade: string;
-  grade_code: string;
-  genre: string;
-  text_type: string;
-  reading_strategy: string;
-  paragraphs: string; // newline-separated
-  source_file: string;
-}
-
-const EMPTY_FORM: StoryFormState = {
-  lesson_number: '',
-  title: '',
-  grade: '4',
-  grade_code: '',
-  genre: '記敘文',
-  text_type: '單',
-  reading_strategy: '',
-  paragraphs: '',
-  source_file: '',
-};
-
-const GENRE_OPTIONS = ['記敘文', '說明文', '議論文', '文言文', '應用文'];
-const TEXT_TYPE_OPTIONS = ['單', '多*2', '多*3'];
-
-// ── Helper ───────────────────────────────────────────────────────────────────
-
-function formToCreateRequest(form: StoryFormState): StoryCreateRequest {
-  return {
-    lesson_number: parseInt(form.lesson_number, 10),
-    title: form.title.trim(),
-    grade: parseInt(form.grade, 10),
-    grade_code: form.grade_code.trim(),
-    genre: form.genre,
-    text_type: form.text_type,
-    reading_strategy: form.reading_strategy.trim() || undefined,
-    paragraphs: form.paragraphs
-      .split('\n')
-      .map((p) => p.trim())
-      .filter(Boolean),
-    source_file: form.source_file.trim() || undefined,
-  };
-}
-
-function storyToFormState(story: StoryAdminListItem): StoryFormState {
-  return {
-    lesson_number: String(story.lesson_number),
-    title: story.title,
-    grade: String(story.grade),
-    grade_code: story.grade_code,
-    genre: story.genre,
-    text_type: story.text_type,
-    reading_strategy: story.reading_strategy ?? '',
-    paragraphs: '',
-    source_file: story.source_file ?? '',
-  };
-}
+import {
+  EMPTY_FORM,
+  GENRE_OPTIONS,
+  ModalMode,
+  StoryFormState,
+  TEXT_TYPE_OPTIONS,
+  formToCreateRequest,
+  storyToFormState,
+} from './storyFormMapper';
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
@@ -257,20 +204,79 @@ const StoryManagementPanel: React.FC = () => {
     }
   };
 
+  const storyColumns: ColumnDef<StoryAdminListItem>[] = [
+    {
+      key: 'lesson_number',
+      header: '編號',
+      render: (story) => (
+        <span className="font-mono text-gray-500">{story.lesson_number}</span>
+      ),
+      className: 'w-16',
+    },
+    {
+      key: 'title',
+      header: '標題',
+      render: (story) => (
+        <span className="font-medium text-gray-900">{story.title}</span>
+      ),
+    },
+    {
+      key: 'grade_code',
+      header: '年級',
+      className: 'w-20',
+    },
+    {
+      key: 'genre',
+      header: '文體',
+      className: 'w-24',
+    },
+    {
+      key: 'paragraph_count',
+      header: '段落數',
+      className: 'w-20',
+    },
+    {
+      key: 'char_count',
+      header: '字數',
+      className: 'w-20',
+    },
+    {
+      key: 'actions',
+      header: '操作',
+      className: 'w-28 text-right',
+      render: (story) => (
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => openEditModal(story)}
+            className="text-accent hover:underline text-xs font-medium cursor-pointer"
+          >
+            編輯
+          </button>
+          <button
+            type="button"
+            onClick={() => openDeleteConfirm(story)}
+            className="text-red-500 hover:underline text-xs font-medium cursor-pointer"
+          >
+            刪除
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="p-6 sm:p-8">
-      <div className="max-w-5xl mx-auto space-y-6">
-
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">課文管理</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {isLoading ? '載入中...' : `共 ${total} 篇課文`}
-            </p>
-          </div>
+    <>
+      <AdminPageShell
+        title="課文管理"
+        subtitle={isLoading ? '載入中...' : `共 ${total} 篇課文`}
+        isLoading={false}
+        error=""
+        isEmpty={false}
+        emptyMessage="尚無課文"
+        headerActions={(
           <button
             onClick={openCreateModal}
             className="flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent/90 transition-colors cursor-pointer"
@@ -278,9 +284,8 @@ const StoryManagementPanel: React.FC = () => {
             <PlusIcon className="w-4 h-4" />
             新增課文
           </button>
-        </div>
-
-        {/* Filters */}
+        )}
+      >
         <div className="flex items-center gap-3 flex-wrap">
           <input
             type="text"
@@ -303,7 +308,6 @@ const StoryManagementPanel: React.FC = () => {
           </select>
         </div>
 
-        {/* Error */}
         {loadError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
             {loadError}
@@ -316,7 +320,6 @@ const StoryManagementPanel: React.FC = () => {
           </div>
         )}
 
-        {/* Loading skeleton */}
         {isLoading && (
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -325,134 +328,21 @@ const StoryManagementPanel: React.FC = () => {
           </div>
         )}
 
-        {/* Table */}
-        {!isLoading && !loadError && (
-          <>
-            {stories.length === 0 ? (
-              <div className="rounded-2xl shadow-card px-4 py-12 text-center text-gray-400 text-sm bg-white">
-                {searchQuery || gradeFilter ? '找不到符合條件的課文' : '尚無課文'}
-              </div>
-            ) : (
-              <>
-                {/* Mobile card view */}
-                <div className="md:hidden space-y-3">
-                  {stories.map((story) => (
-                    <div key={story.lesson_number} className="bg-white rounded-2xl shadow-card p-4 space-y-2.5">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-medium text-gray-900 text-sm">{story.title}</p>
-                          <p className="text-xs text-gray-400 font-mono mt-0.5">L{story.lesson_number}</p>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            onClick={() => openEditModal(story)}
-                            className="text-accent hover:underline text-xs font-medium cursor-pointer"
-                          >
-                            編輯
-                          </button>
-                          <button
-                            onClick={() => openDeleteConfirm(story)}
-                            className="text-red-500 hover:underline text-xs font-medium cursor-pointer"
-                          >
-                            刪除
-                          </button>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-4 gap-2 text-xs">
-                        <div>
-                          <span className="text-gray-400">年級</span>
-                          <p className="text-gray-700">{story.grade_code}</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-400">文體</span>
-                          <p className="text-gray-700">{story.genre}</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-400">段落</span>
-                          <p className="text-gray-700">{story.paragraph_count}</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-400">字數</span>
-                          <p className="text-gray-700">{story.char_count}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Desktop table view */}
-                <div className="hidden md:block overflow-x-auto rounded-2xl shadow-card">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-16">
-                          編號
-                        </th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                          標題
-                        </th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">
-                          年級
-                        </th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-24">
-                          文體
-                        </th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">
-                          段落數
-                        </th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-20">
-                          字數
-                        </th>
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-28">
-                          操作
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {stories.map((story) => (
-                        <tr key={story.lesson_number} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 font-mono text-gray-500">
-                            {story.lesson_number}
-                          </td>
-                          <td className="px-4 py-3 font-medium text-gray-900">
-                            {story.title}
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">
-                            {story.grade_code}
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">
-                            {story.genre}
-                          </td>
-                          <td className="px-4 py-3 text-gray-500">
-                            {story.paragraph_count}
-                          </td>
-                          <td className="px-4 py-3 text-gray-500">
-                            {story.char_count}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <button
-                              onClick={() => openEditModal(story)}
-                              className="text-accent hover:underline text-xs font-medium cursor-pointer mr-3"
-                            >
-                              編輯
-                            </button>
-                            <button
-                              onClick={() => openDeleteConfirm(story)}
-                              className="text-red-500 hover:underline text-xs font-medium cursor-pointer"
-                            >
-                              刪除
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </>
+        {!isLoading && !loadError && stories.length === 0 && (
+          <div className="rounded-2xl shadow-card px-4 py-12 text-center text-gray-400 text-sm bg-white">
+            {searchQuery || gradeFilter ? '找不到符合條件的課文' : '尚無課文'}
+          </div>
         )}
-      </div>
+
+        {!isLoading && !loadError && stories.length > 0 && (
+          <AdminTable
+            columns={storyColumns}
+            rows={stories}
+            rowKey={(story) => story.lesson_number}
+            cardTitle={(story) => story.title}
+          />
+        )}
+      </AdminPageShell>
 
       {/* Create / Edit Modal */}
       {showModal && (
@@ -468,16 +358,28 @@ const StoryManagementPanel: React.FC = () => {
       )}
 
       {/* Delete Confirmation Dialog */}
-      {deleteTarget && (
-        <DeleteConfirmDialog
-          story={deleteTarget}
-          isDeleting={isDeleting}
-          deleteError={deleteError}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      )}
-    </div>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="確認刪除"
+        variant="destructive"
+        message={deleteTarget && (
+          <>
+            確定要刪除課文「<strong>{deleteTarget.title}</strong>」（L{deleteTarget.lesson_number}）嗎？
+            <br />
+            <span className="text-gray-400 text-xs mt-1 block">課文將移至歸檔目錄，不會永久刪除。</span>
+            {deleteError && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-3">
+                {deleteError}
+              </p>
+            )}
+          </>
+        )}
+        confirmLabel={isDeleting ? '刪除中...' : '確認刪除'}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        isLoading={isDeleting}
+      />
+    </>
   );
 };
 
@@ -661,58 +563,6 @@ const StoryFormModal: React.FC<StoryFormModalProps> = ({
     </div>
   );
 };
-
-// ── Delete Confirm Dialog ─────────────────────────────────────────────────────
-
-interface DeleteConfirmDialogProps {
-  story: StoryAdminListItem;
-  isDeleting: boolean;
-  deleteError: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
-  story,
-  isDeleting,
-  deleteError,
-  onConfirm,
-  onCancel,
-}) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 space-y-4">
-      <h3 className="text-lg font-bold text-gray-900">確認刪除</h3>
-      <p className="text-sm text-gray-600">
-        確定要刪除課文「<strong>{story.title}</strong>」（L{story.lesson_number}）嗎？
-        <br />
-        <span className="text-gray-400 text-xs mt-1 block">課文將移至歸檔目錄，不會永久刪除。</span>
-      </p>
-      {deleteError && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-          {deleteError}
-        </p>
-      )}
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isDeleting}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg cursor-pointer"
-        >
-          取消
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          disabled={isDeleting}
-          className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg cursor-pointer disabled:opacity-60"
-        >
-          {isDeleting ? '刪除中...' : '確認刪除'}
-        </button>
-      </div>
-    </div>
-  </div>
-);
 
 // ── Field helper ──────────────────────────────────────────────────────────────
 
