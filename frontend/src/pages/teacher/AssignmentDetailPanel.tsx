@@ -3,6 +3,8 @@
  * Used inside AssignmentTab when a row is expanded.
  *
  * Issue #424: per-student teacher feedback textarea added to the grading UI.
+ * Issue #1853: refactored — logic extracted to assignmentDetailLogic.ts,
+ *   UI primitives to components/ReadingMetricsPanel, BulkCommentPanel, AttemptHistoryPanel.
  */
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -14,6 +16,15 @@ import {
   StudentAttemptGroup,
 } from '../../services/assignmentApi';
 import { useToast } from '../../components/ui/Toast';
+import {
+  countGroupedStats,
+  validateScore,
+  buildGradeClickState,
+  filterSubmittedForBulk,
+} from './assignmentDetailLogic';
+import ReadingMetricsPanel from './components/ReadingMetricsPanel';
+import BulkCommentPanel from './components/BulkCommentPanel';
+import AttemptHistoryPanel from './components/AttemptHistoryPanel';
 
 interface Props {
   assignmentId: number;
@@ -90,37 +101,31 @@ const AssignmentDetailPanel: React.FC<Props> = ({
   const groups: StudentAttemptGroup[] = detail.submissions_by_student ?? [];
   const useGrouped = groups.length > 0;
 
-  const pending = useGrouped
-    ? groups.filter((g) => g.latest_status === 'pending').length
-    : detail.submissions.filter((s) => s.status === 'pending').length;
-
-  const submitted = useGrouped
-    ? groups.filter((g) => g.latest_status === 'submitted').length
-    : detail.submissions.filter((s) => s.status === 'submitted').length;
+  const { pending, submitted } = useGrouped
+    ? countGroupedStats(groups)
+    : {
+        pending: detail.submissions.filter((s) => s.status === 'pending').length,
+        submitted: detail.submissions.filter((s) => s.status === 'submitted').length,
+      };
 
   const handleGradeClick = (sub: SubmissionResponse) => {
     setGradingId(sub.id);
-    setGradeInput((prev) => ({
-      ...prev,
-      [sub.id]: sub.score != null ? String(Math.round(sub.score)) : '',
-    }));
-    // Pre-fill feedback with existing value so teacher can edit it
-    setFeedbackInput((prev) => ({
-      ...prev,
-      [sub.id]: sub.teacher_feedback ?? '',
-    }));
+    const { gradeInput: gi, feedbackInput: fi } = buildGradeClickState(sub);
+    setGradeInput((prev) => ({ ...prev, [sub.id]: gi }));
+    setFeedbackInput((prev) => ({ ...prev, [sub.id]: fi }));
     setGradeError('');
   };
 
   const handleSaveGrade = async (sub: SubmissionResponse) => {
     if (!token) return;
     const raw = gradeInput[sub.id] ?? '';
-    const score = raw.trim() === '' ? null : parseFloat(raw);
-    if (score !== null && (isNaN(score) || score < 0 || score > 100)) {
-      setGradeError('分數需介於 0–100');
+    const validationError = validateScore(raw);
+    if (validationError) {
+      setGradeError(validationError);
       return;
     }
 
+    const score = raw.trim() === '' ? null : parseFloat(raw);
     const feedback = feedbackInput[sub.id]?.trim() || null;
 
     setSavingId(sub.id);
@@ -141,11 +146,9 @@ const AssignmentDetailPanel: React.FC<Props> = ({
   };
 
   // Bulk grade: mark all submitted (ungraded) submissions as graded.
-  // The bulk comment text is shown to the teacher as confirmation; actual
-  // push notification to students requires a future backend service.
   const handleBulkCommentSubmit = async () => {
     if (!token) return;
-    const ungraded = detail.submissions.filter((s) => s.status === 'submitted');
+    const ungraded = filterSubmittedForBulk(detail.submissions);
     if (ungraded.length === 0) {
       setBulkCommentError('目前沒有待批改的提交');
       return;
@@ -276,44 +279,16 @@ const AssignmentDetailPanel: React.FC<Props> = ({
 
       {/* Bulk comment panel */}
       {showBulkComment && (
-        <div className="mb-3 p-3 bg-purple-50 border border-purple-100 rounded-lg">
-          <p className="text-xs font-medium text-purple-800 mb-2">
-            批次評語 — 將對 {submitted} 位已提交學生標記為「已批改」
-          </p>
-          {bulkCommentDone ? (
-            <p className="text-xs text-green-700 font-medium">
-              已完成批次批改
-            </p>
-          ) : (
-            <>
-              <textarea
-                value={bulkComment}
-                onChange={(e) => setBulkComment(e.target.value)}
-                placeholder="輸入共同評語（選填）&#10;例：整體表現良好，請繼續加油！"
-                rows={3}
-                className="w-full px-3 py-2 rounded-lg border border-purple-200 text-gray-900 bg-white placeholder-gray-400 text-xs focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-purple-300 transition-colors resize-none mb-2"
-              />
-              {bulkCommentError && (
-                <p className="text-xs text-red-600 mb-2">{bulkCommentError}</p>
-              )}
-              <div className="flex gap-2 justify-end">
-                <button
-                  onClick={() => setShowBulkComment(false)}
-                  className="px-2.5 py-1 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-50 cursor-pointer transition-colors"
-                >
-                  取消
-                </button>
-                <button
-                  onClick={handleBulkCommentSubmit}
-                  disabled={isBulkSubmitting}
-                  className="px-2.5 py-1 rounded bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 disabled:opacity-50 cursor-pointer transition-colors"
-                >
-                  {isBulkSubmitting ? '處理中...' : `確認批改 ${submitted} 人`}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+        <BulkCommentPanel
+          submittedCount={submitted}
+          bulkComment={bulkComment}
+          setBulkComment={setBulkComment}
+          isBulkSubmitting={isBulkSubmitting}
+          bulkCommentError={bulkCommentError}
+          bulkCommentDone={bulkCommentDone}
+          onSubmit={handleBulkCommentSubmit}
+          onCancel={() => setShowBulkComment(false)}
+        />
       )}
 
       {/* Grade error */}
@@ -400,41 +375,13 @@ const AssignmentDetailPanel: React.FC<Props> = ({
                   {expandedMetricsId === sub.id ? '收合朗讀數據' : '查看朗讀數據'}
                 </button>
                 {expandedMetricsId === sub.id && (
-                  <div className="mt-2 p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
-                    <p className="text-xs font-medium text-blue-800 mb-2">
-                      朗讀學習數據 — {sub.student_name}
-                    </p>
-                    <div className="flex flex-wrap gap-4">
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-blue-700">
-                          {sub.reading_accuracy != null ? `${sub.reading_accuracy.toFixed(1)}%` : '—'}
-                        </div>
-                        <div className="text-xs text-gray-500">正確率</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-blue-700">
-                          {sub.reading_cpm != null ? `${Math.round(sub.reading_cpm)}` : '—'}
-                        </div>
-                        <div className="text-xs text-gray-500">語速（字/分）</div>
-                      </div>
-                      {sub.reading_error_chars.length > 0 && (
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">
-                            錯誤字詞（{sub.reading_error_chars.length} 個）
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {sub.reading_error_chars.map((ch, i) => (
-                              <span
-                                key={i}
-                                className="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-xs font-medium"
-                              >
-                                {ch}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                  <div className="mt-2">
+                    <ReadingMetricsPanel
+                      studentName={sub.student_name}
+                      readingAccuracy={sub.reading_accuracy}
+                      readingCpm={sub.reading_cpm}
+                      readingErrorChars={sub.reading_error_chars}
+                    />
                   </div>
                 )}
               </div>
@@ -591,58 +538,19 @@ const AssignmentDetailPanel: React.FC<Props> = ({
                 {expandedMetricsId === latest.id && (
                   <tr>
                     <td colSpan={7} className="pb-2 pt-0">
-                      <div className="mx-1 p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
-                        <p className="text-xs font-medium text-blue-800 mb-2">朗讀學習數據 — {group.student_name}</p>
-                        <div className="flex flex-wrap gap-4">
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-blue-700">
-                              {latest.reading_accuracy != null ? `${latest.reading_accuracy.toFixed(1)}%` : '—'}
-                            </div>
-                            <div className="text-xs text-gray-500">正確率</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-blue-700">
-                              {latest.reading_cpm != null ? `${Math.round(latest.reading_cpm)}` : '—'}
-                            </div>
-                            <div className="text-xs text-gray-500">語速（字/分）</div>
-                          </div>
-                          {latest.reading_error_chars.length > 0 && (
-                            <div>
-                              <div className="text-xs text-gray-500 mb-1">
-                                錯誤字詞（{latest.reading_error_chars.length} 個）
-                              </div>
-                              <div className="flex flex-wrap gap-1">
-                                {latest.reading_error_chars.map((ch, i) => (
-                                  <span key={i} className="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-xs font-medium">
-                                    {ch}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      <ReadingMetricsPanel
+                        studentName={group.student_name}
+                        readingAccuracy={latest.reading_accuracy}
+                        readingCpm={latest.reading_cpm}
+                        readingErrorChars={latest.reading_error_chars}
+                      />
                     </td>
                   </tr>
                 )}
                 {/* Expanded history rows for prior attempts */}
-                {isExpanded && group.attempts.slice(1).map((attempt) => (
-                  <tr key={attempt.id} className="bg-gray-50">
-                    <td className="py-1 pl-6 text-gray-400">
-                      第 {attempt.attempt_number} 次
-                    </td>
-                    <td className="py-1 text-center">{statusBadge(attempt.status)}</td>
-                    <td className="py-1 text-center text-gray-400">—</td>
-                    <td className="py-1 text-gray-500 text-center">
-                      {attempt.score != null ? `${Math.round(attempt.score)}%` : '-'}
-                    </td>
-                    <td className="py-1 text-center text-gray-300">—</td>
-                    <td className="py-1 max-w-[200px] text-gray-400">
-                      {attempt.teacher_feedback ?? '—'}
-                    </td>
-                    <td className="py-1 text-center text-gray-300">—</td>
-                  </tr>
-                ))}
+                {isExpanded && (
+                  <AttemptHistoryPanel attempts={group.attempts.slice(1)} />
+                )}
               </React.Fragment>
             );
           }) : detail.submissions.map((sub) => (
@@ -751,46 +659,12 @@ const AssignmentDetailPanel: React.FC<Props> = ({
               {expandedMetricsId === sub.id && (
                 <tr>
                   <td colSpan={7} className="pb-2 pt-0">
-                    <div className="mx-1 p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
-                      <p className="text-xs font-medium text-blue-800 mb-2">
-                        朗讀學習數據 — {sub.student_name}
-                      </p>
-                      <div className="flex flex-wrap gap-4">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-700">
-                            {sub.reading_accuracy != null
-                              ? `${sub.reading_accuracy.toFixed(1)}%`
-                              : '—'}
-                          </div>
-                          <div className="text-xs text-gray-500">正確率</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-700">
-                            {sub.reading_cpm != null
-                              ? `${Math.round(sub.reading_cpm)}`
-                              : '—'}
-                          </div>
-                          <div className="text-xs text-gray-500">語速（字/分）</div>
-                        </div>
-                        {sub.reading_error_chars.length > 0 && (
-                          <div>
-                            <div className="text-xs text-gray-500 mb-1">
-                              錯誤字詞（{sub.reading_error_chars.length} 個）
-                            </div>
-                            <div className="flex flex-wrap gap-1">
-                              {sub.reading_error_chars.map((ch, i) => (
-                                <span
-                                  key={i}
-                                  className="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-xs font-medium"
-                                >
-                                  {ch}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <ReadingMetricsPanel
+                      studentName={sub.student_name}
+                      readingAccuracy={sub.reading_accuracy}
+                      readingCpm={sub.reading_cpm}
+                      readingErrorChars={sub.reading_error_chars}
+                    />
                   </td>
                 </tr>
               )}
