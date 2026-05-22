@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session, joinedload
 
 from ...auth.dependencies import get_current_user
+from ...auth.policies import require_student_visible_to_teacher
 from ...auth.rate_limiter import ai_limit_5_per_min
 from ...database import get_db
 from ...dependencies.tenant import _check_classroom_access
@@ -41,21 +42,11 @@ logger = logging.getLogger(__name__)
 def _require_teacher_owns_student(
     teacher_id: int, student_id: int, db: Session
 ) -> None:
-    """Raise 403 if the teacher does not own any classroom that contains this student."""
-    enrollment = (
-        db.query(ClassroomStudent)
-        .join(Classroom, ClassroomStudent.classroom_id == Classroom.id)
-        .filter(
-            ClassroomStudent.student_id == student_id,
-            Classroom.teacher_id == teacher_id,
-        )
-        .first()
-    )
-    if not enrollment:
-        raise HTTPException(
-            status_code=403,
-            detail="Not authorized to manage tags for this student",
-        )
+    """Deprecated: Use require_student_visible_to_teacher from auth.policies instead."""
+    user = db.query(User).filter(User.id == teacher_id).first()
+    if user is None:
+        raise HTTPException(status_code=403, detail="Teacher not found")
+    require_student_visible_to_teacher(student_id, user, db)
 
 
 @router.get(
@@ -72,18 +63,7 @@ def get_student_sessions(
 
     Teacher must own a classroom that contains this student.
     """
-    # Verify teacher owns a classroom containing this student
-    enrollment = (
-        db.query(ClassroomStudent)
-        .join(Classroom, ClassroomStudent.classroom_id == Classroom.id)
-        .filter(
-            ClassroomStudent.student_id == student_id,
-            Classroom.teacher_id == current_user.id,
-        )
-        .first()
-    )
-    if not enrollment:
-        raise HTTPException(status_code=403, detail="Not authorized to view this student's sessions")
+    require_student_visible_to_teacher(student_id, current_user, db)
 
     audit_log_endpoint(
         request=request,
@@ -141,18 +121,7 @@ def get_teacher_student_dialogue(
     The requesting teacher must own a classroom that contains the student.
     Returns an empty turns list if the session exists but has no recorded dialogue.
     """
-    # Verify teacher owns a classroom containing this student
-    enrollment = (
-        db.query(ClassroomStudent)
-        .join(Classroom, ClassroomStudent.classroom_id == Classroom.id)
-        .filter(
-            ClassroomStudent.student_id == student_id,
-            Classroom.teacher_id == current_user.id,
-        )
-        .first()
-    )
-    if not enrollment:
-        raise HTTPException(status_code=403, detail="Not authorized to view this student's sessions")
+    require_student_visible_to_teacher(student_id, current_user, db)
 
     audit_log_endpoint(
         request=request,
@@ -300,18 +269,7 @@ def get_student_learning_curve(
     Optionally filter by story_slug to see reading progress for a specific text.
     Teacher must own a classroom containing this student.
     """
-    # Verify teacher access
-    enrollment = (
-        db.query(ClassroomStudent)
-        .join(Classroom, ClassroomStudent.classroom_id == Classroom.id)
-        .filter(
-            ClassroomStudent.student_id == student_id,
-            Classroom.teacher_id == current_user.id,
-        )
-        .first()
-    )
-    if not enrollment:
-        raise HTTPException(status_code=403, detail="Not authorized to view this student's data")
+    require_student_visible_to_teacher(student_id, current_user, db)
 
     audit_log_endpoint(
         request=request,

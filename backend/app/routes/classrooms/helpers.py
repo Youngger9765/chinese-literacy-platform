@@ -8,6 +8,11 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from ...auth.dependencies import get_current_user  # noqa: F401 — re-exported for convenience
+from ...auth.policies import (
+    is_admin as _is_admin_policy,
+    require_classroom_member as _require_classroom_member,
+    require_classroom_owner as _require_classroom_owner,
+)
 from ...models.assignment import Assignment, AssignmentSubmission
 from ...models.school import Classroom, ClassroomStudent, ClassroomTeacher
 from ...models.user import Role, User, UserRole
@@ -58,71 +63,18 @@ def get_classroom_or_404(classroom_id: int, db: Session) -> Classroom:
 
 
 def require_owner_or_admin(classroom: Classroom, current_user: User, db: Session) -> None:
-    """Allow classroom teacher (primary) OR system/org admin. Raise 403 otherwise.
-
-    For co-teachers (assistants) use require_member_or_admin which also allows assistants.
-    """
-    if classroom.teacher_id == current_user.id:
-        return
-    admin_role = (
-        db.query(UserRole)
-        .join(Role)
-        .filter(
-            UserRole.user_id == current_user.id,
-            UserRole.is_active == True,
-            Role.name.in_(["system_admin", "org_admin"]),
-        )
-        .first()
-    )
-    if admin_role:
-        return
-    raise HTTPException(status_code=403, detail="Not your classroom")
+    """Delegate to centralized policies. Kept for backwards compatibility."""
+    _require_classroom_owner(classroom, current_user, db)
 
 
 def require_member_or_admin(classroom: Classroom, current_user: User, db: Session) -> None:
-    """Allow classroom owner, co-teachers (assistants), or system/org admins.
-
-    Used for read-only endpoints like viewing student progress.
-    """
-    if classroom.teacher_id == current_user.id:
-        return
-    ct = (
-        db.query(ClassroomTeacher)
-        .filter(
-            ClassroomTeacher.classroom_id == classroom.id,
-            ClassroomTeacher.teacher_id == current_user.id,
-        )
-        .first()
-    )
-    if ct:
-        return
-    admin_role = (
-        db.query(UserRole)
-        .join(Role)
-        .filter(
-            UserRole.user_id == current_user.id,
-            UserRole.is_active == True,
-            Role.name.in_(["system_admin", "org_admin"]),
-        )
-        .first()
-    )
-    if admin_role:
-        return
-    raise HTTPException(status_code=403, detail="Not your classroom")
+    """Delegate to centralized policies. Kept for backwards compatibility."""
+    _require_classroom_member(classroom, current_user, db)
 
 
 def is_admin(user_id: int, db: Session) -> bool:
-    """Check if a user has system_admin or org_admin role."""
-    return (
-        db.query(UserRole)
-        .join(Role)
-        .filter(
-            UserRole.user_id == user_id,
-            UserRole.is_active == True,
-            Role.name.in_(["system_admin", "org_admin"]),
-        )
-        .first()
-    ) is not None
+    """Delegate to centralized policies. Kept for backwards compatibility."""
+    return _is_admin_policy(user_id, db)
 
 
 # ── Email Helpers ─────────────────────────────────────────────────────────────
