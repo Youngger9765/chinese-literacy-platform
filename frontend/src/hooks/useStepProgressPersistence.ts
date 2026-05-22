@@ -1,0 +1,365 @@
+import { useCallback, useMemo, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import type { AuthUser } from '../services/authApi';
+import { clearActiveSession, saveActiveSession } from '../services/api';
+import { resolveActiveSteps, STEP_PATH_TO_NUMBER } from '../config/stepConfig';
+import { useProgressSync } from './useProgressSync';
+import type { StepProgressData } from '../services/learningApi';
+import type {
+  ComprehensionResult,
+  FullReadingResult,
+  LearningSession,
+  ReadingAttempt,
+  Story,
+  VocabResult,
+} from '../types';
+import { scopedStepStorageKey } from '../services/learningStorageScope';
+
+const LEGACY_DB_SESSION_KEY_PREFIX = 'db-session-';
+const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
+const SELF_DB_SESSION_KEY_PREFIX = 'self-db-session-';
+
+const STEP_NUMBER_TO_PATH: Record<number, string> = Object.fromEntries(
+  Object.entries(STEP_PATH_TO_NUMBER).map(([path, n]) => [n, path]),
+);
+
+interface PersistStepProgressOptions {
+  currentStep?: string | null;
+  completeStep?: string;
+  stepDataPatch?: Record<string, unknown>;
+}
+
+interface SaveStepProgressPatchOptions {
+  stepId: string;
+  stepData: Record<string, unknown>;
+  currentStep?: string | null;
+  markCompleted?: boolean;
+  immediate?: boolean;
+}
+
+interface UseStepProgressPersistenceOptions {
+  storyId: string | undefined;
+  user: AuthUser | null;
+  token: string | null;
+  dbSessionId: number | null;
+  selectedStory: Story | null;
+  isAssignmentFlow: boolean;
+  setSession: Dispatch<SetStateAction<LearningSession | null>>;
+}
+
+interface UseStepProgressPersistenceReturn {
+  stepProgressState: StepProgressData;
+  persistStepProgressState: (opts: PersistStepProgressOptions, immediate: boolean) => void;
+  persistStep: (step: number) => void;
+  saveStepProgressPatch: (opts: SaveStepProgressPatchOptions) => void;
+  clearPersistedSession: () => void;
+  completedParagraphsSet: Set<number>;
+  setCompletedParagraphsSet: Dispatch<SetStateAction<Set<number>>>;
+  handleParagraphComplete: (paragraphIndex: number) => void;
+  lessonActiveSteps: ReturnType<typeof resolveActiveSteps>;
+  completedStepsSet: Set<string>;
+  missingAssignmentSteps: Array<{ id: string; label: string }>;
+  isAssignmentReadyForSubmit: boolean;
+  firstIncompleteStepPath: string;
+  hasActiveAssignment: boolean;
+  syncProgress: (data: StepProgressData) => void;
+  flushProgress: (data: StepProgressData) => void;
+}
+
+export function useStepProgressPersistence({
+  storyId,
+  user,
+  token,
+  dbSessionId,
+  selectedStory,
+  isAssignmentFlow,
+  setSession,
+}: UseStepProgressPersistenceOptions): UseStepProgressPersistenceReturn {
+  const activeDbSessionStorageKey = useMemo(() => {
+    if (!storyId) return null;
+    if (isAssignmentFlow) {
+      const assignmentId = sessionStorage.getItem('activeAssignmentId');
+      if (assignmentId) {
+        return `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${assignmentId}-${storyId}`;
+      }
+      return `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${storyId}`;
+    }
+    return `${SELF_DB_SESSION_KEY_PREFIX}${storyId}`;
+  }, [isAssignmentFlow, storyId]);
+
+  const tutorCompletedStorageKey = useMemo(() => {
+    if (!storyId) return null;
+    return scopedStepStorageKey('tutor_completed_', storyId);
+  }, [storyId, isAssignmentFlow]);
+
+  const liveTutorProgressStorageKey = useMemo(() => {
+    if (!storyId) return null;
+    return scopedStepStorageKey('liveTutor_progress_', storyId);
+  }, [storyId, isAssignmentFlow]);
+
+  const legacyDbSessionStorageKey = useMemo(() => {
+    if (!storyId) return null;
+    return `${LEGACY_DB_SESSION_KEY_PREFIX}${storyId}`;
+  }, [storyId]);
+
+  const [completedParagraphsSet, setCompletedParagraphsSet] = useState<Set<number>>(() => {
+    const scopedTutorKey = storyId ? scopedStepStorageKey('tutor_completed_', storyId) : null;
+    const scopedLiveTutorKey = storyId ? scopedStepStorageKey('liveTutor_progress_', storyId) : null;
+    try {
+      const raw = scopedTutorKey ? localStorage.getItem(scopedTutorKey) : null;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && (parsed as number[]).length > 0) {
+          return new Set<number>(parsed as number[]);
+        }
+      }
+    } catch {
+      // Non-fatal — continue to fallback
+    }
+    try {
+      const liveTutorRaw = scopedLiveTutorKey ? localStorage.getItem(scopedLiveTutorKey) : null;
+      if (liveTutorRaw) {
+        const liveTutorParsed = JSON.parse(liveTutorRaw) as {
+          completedParagraphs?: unknown;
+        };
+        if (
+          Array.isArray(liveTutorParsed.completedParagraphs) &&
+          (liveTutorParsed.completedParagraphs as number[]).length > 0
+        ) {
+          return new Set<number>(liveTutorParsed.completedParagraphs as number[]);
+        }
+      }
+    } catch {
+      // Non-fatal — start fresh
+    }
+    return new Set<number>();
+  });
+
+  const [stepProgressState, setStepProgressState] = useState<StepProgressData>({
+    current_step: null,
+    steps_completed: [],
+    step_data: {},
+  });
+
+  const lessonActiveSteps = useMemo(
+    () => resolveActiveSteps(selectedStory?.stepSequence),
+    [selectedStory?.stepSequence],
+  );
+
+  const requiredAssignmentSteps = useMemo(
+    () => lessonActiveSteps.filter((s) => s.id !== 'report').map((s) => ({ id: s.id, label: s.label })),
+    [lessonActiveSteps],
+  );
+  const completedStepsSet = useMemo(
+    () => new Set(stepProgressState.steps_completed ?? []),
+    [stepProgressState.steps_completed],
+  );
+  const missingAssignmentSteps = useMemo(
+    () => requiredAssignmentSteps.filter((s) => !completedStepsSet.has(s.id)),
+    [requiredAssignmentSteps, completedStepsSet],
+  );
+  const isAssignmentReadyForSubmit = missingAssignmentSteps.length === 0;
+  const firstIncompleteStepPath = missingAssignmentSteps[0]?.id ?? 'reading-annotation';
+  const hasActiveAssignment = useMemo(() => {
+    try {
+      return isAssignmentFlow;
+    } catch {
+      return false;
+    }
+  }, [isAssignmentFlow]);
+
+  const { syncProgress, flushProgress } = useProgressSync({
+    token: token ?? null,
+    dbSessionId,
+    onProgressLoaded: (data) => {
+      const loadedCompleted = Array.isArray(data.steps_completed) ? data.steps_completed : [];
+      const loadedStepData = (data.step_data ?? {}) as Record<string, unknown>;
+
+      setStepProgressState({
+        current_step: data.current_step ?? null,
+        steps_completed: loadedCompleted,
+        step_data: loadedStepData,
+      });
+
+      if (loadedStepData.tutor) {
+        const tutorData = loadedStepData.tutor as Record<string, unknown>;
+        const completedIdxs = tutorData.completedParagraphs;
+        if (Array.isArray(completedIdxs)) {
+          setCompletedParagraphsSet(new Set(completedIdxs as number[]));
+        }
+      }
+
+      setSession((prev) => {
+        if (!prev) return prev;
+        const tutorData = (loadedStepData.tutor ?? {}) as Record<string, unknown>;
+        const fullReadingData = (loadedStepData['full-reading'] ?? {}) as Record<string, unknown>;
+        const vocabData = (loadedStepData.vocab ?? {}) as Record<string, unknown>;
+        const comprehensionData = (loadedStepData.comprehension ?? {}) as Record<string, unknown>;
+        const readingAnnotationData = (loadedStepData['reading-annotation'] ?? {}) as Record<string, unknown>;
+        const vocabDefinitionData = (loadedStepData['vocab-definition'] ?? {}) as Record<string, unknown>;
+        const vocabApplicationData = (loadedStepData['vocab-application'] ?? {}) as Record<string, unknown>;
+        const vocabWordSearchData = (loadedStepData['vocab-word-search'] ?? {}) as Record<string, unknown>;
+        const knowledgeStationData = (loadedStepData['knowledge-station'] ?? {}) as Record<string, unknown>;
+
+        return {
+          ...prev,
+          completedSteps: loadedCompleted,
+          readingAttempt: (tutorData.readingAttempt as ReadingAttempt | undefined) ?? prev.readingAttempt,
+          fullReadingResult: (fullReadingData.result as FullReadingResult | undefined) ?? prev.fullReadingResult,
+          vocabResult: (vocabData.result as VocabResult | undefined) ?? prev.vocabResult,
+          comprehensionResult: (comprehensionData.result as ComprehensionResult | undefined) ?? prev.comprehensionResult,
+          readingAnnotationCompleted:
+            (readingAnnotationData.completed as boolean | undefined) ?? loadedCompleted.includes('reading-annotation') ?? prev.readingAnnotationCompleted,
+          vocabDefinitionMatchCompleted:
+            (vocabDefinitionData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-definition') ?? prev.vocabDefinitionMatchCompleted,
+          vocabApplicationCompleted:
+            (vocabApplicationData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-application') ?? prev.vocabApplicationCompleted,
+          vocabWordSearchCompleted:
+            (vocabWordSearchData.completed as boolean | undefined) ?? loadedCompleted.includes('vocab-word-search') ?? prev.vocabWordSearchCompleted,
+          knowledgeStationCompleted:
+            (knowledgeStationData.completed as boolean | undefined) ?? loadedCompleted.includes('knowledge-station') ?? prev.knowledgeStationCompleted,
+        };
+      });
+    },
+  });
+
+  const persistStepProgressState = useCallback(
+    (opts: PersistStepProgressOptions, immediate: boolean) => {
+      setStepProgressState((prev) => {
+        const completed = new Set<string>(prev.steps_completed);
+        if (opts.completeStep) completed.add(opts.completeStep);
+
+        const next: StepProgressData = {
+          current_step: opts.currentStep ?? prev.current_step,
+          steps_completed: Array.from(completed),
+          step_data: {
+            ...prev.step_data,
+            ...(opts.stepDataPatch ?? {}),
+          },
+        };
+
+        const prevSig = JSON.stringify(prev);
+        const nextSig = JSON.stringify(next);
+        if (prevSig === nextSig) {
+          return prev;
+        }
+
+        if (immediate) {
+          flushProgress(next);
+        } else {
+          syncProgress(next);
+        }
+
+        setSession((prevSession) => {
+          if (!prevSession) return prevSession;
+          return {
+            ...prevSession,
+            completedSteps: Array.from(completed),
+          };
+        });
+        return next;
+      });
+    },
+    [flushProgress, syncProgress, setSession],
+  );
+
+  const saveStepProgressPatch = useCallback(
+    (opts: SaveStepProgressPatchOptions) => {
+      persistStepProgressState(
+        {
+          currentStep: opts.currentStep,
+          completeStep: opts.markCompleted ? opts.stepId : undefined,
+          stepDataPatch: {
+            [opts.stepId]: {
+              ...opts.stepData,
+            },
+          },
+        },
+        opts.immediate ?? false,
+      );
+    },
+    [persistStepProgressState],
+  );
+
+  const persistStep = useCallback(
+    (step: number) => {
+      if (!user || !storyId) return;
+      saveActiveSession(String(user.id), {
+        sessionId: 0,
+        storyId,
+        currentStep: step,
+        timestamp: Date.now(),
+      });
+      persistStepProgressState(
+        { currentStep: STEP_NUMBER_TO_PATH[step] ?? null },
+        false,
+      );
+    },
+    [user, storyId, persistStepProgressState],
+  );
+
+  const clearPersistedSession = useCallback(() => {
+    if (!user) return;
+    clearActiveSession(String(user.id));
+    if (activeDbSessionStorageKey) {
+      try { sessionStorage.removeItem(activeDbSessionStorageKey); } catch { /* non-fatal */ }
+    }
+    if (legacyDbSessionStorageKey) {
+      try { sessionStorage.removeItem(legacyDbSessionStorageKey); } catch { /* non-fatal */ }
+    }
+    if (tutorCompletedStorageKey) {
+      try { localStorage.removeItem(tutorCompletedStorageKey); } catch { /* non-fatal */ }
+    }
+    if (liveTutorProgressStorageKey) {
+      try { localStorage.removeItem(liveTutorProgressStorageKey); } catch { /* non-fatal */ }
+    }
+  }, [
+    user,
+    activeDbSessionStorageKey,
+    legacyDbSessionStorageKey,
+    tutorCompletedStorageKey,
+    liveTutorProgressStorageKey,
+  ]);
+
+  const handleParagraphComplete = useCallback((paragraphIndex: number) => {
+    setCompletedParagraphsSet((prev) => {
+      if (prev.has(paragraphIndex)) return prev;
+      const updated = new Set(prev);
+      updated.add(paragraphIndex);
+      if (tutorCompletedStorageKey) {
+        try {
+          localStorage.setItem(tutorCompletedStorageKey, JSON.stringify(Array.from(updated)));
+        } catch {
+          // Non-fatal — in-memory state still updated
+        }
+      }
+      return updated;
+    });
+    setSession((prev) => {
+      if (!prev) return prev;
+      const existing = new Set(prev.completedParagraphs ?? []);
+      if (existing.has(paragraphIndex)) return prev;
+      existing.add(paragraphIndex);
+      return { ...prev, completedParagraphs: Array.from(existing) };
+    });
+  }, [setSession, tutorCompletedStorageKey]);
+
+  return {
+    stepProgressState,
+    persistStepProgressState,
+    persistStep,
+    saveStepProgressPatch,
+    clearPersistedSession,
+    completedParagraphsSet,
+    setCompletedParagraphsSet,
+    handleParagraphComplete,
+    lessonActiveSteps,
+    completedStepsSet,
+    missingAssignmentSteps,
+    isAssignmentReadyForSubmit,
+    firstIncompleteStepPath,
+    hasActiveAssignment,
+    syncProgress,
+    flushProgress,
+  };
+}
