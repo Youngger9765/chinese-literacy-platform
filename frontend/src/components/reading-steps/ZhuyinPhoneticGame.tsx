@@ -9,12 +9,23 @@
  *
  * Uses the MOE dictionary batch API to fetch zhuyin for story characters.
  * Falls back gracefully when zhuyin data is unavailable.
+ *
+ * Refactored (issue-1859): pure logic extracted to zhuyinGameLogic.ts.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { lookupCharactersBatch } from '../../services/learningApi';
 import { INITIALS, PRENUCLEAR, FINALS } from '../zhuyin/bopomoConstants';
 import { Story } from '../../types';
+import {
+  CharZhuyin,
+  parseZhuyin,
+  shuffle,
+  buildChoices,
+  getInitialModeAnswer,
+  getFinalModeAnswer,
+  composeTargetSeq,
+} from './zhuyinGameLogic';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -30,79 +41,6 @@ interface ZhuyinPhoneticGameProps {
 
 type GameMode = 'initial' | 'final' | 'compose';
 type AnswerState = 'idle' | 'correct' | 'wrong';
-
-interface CharZhuyin {
-  char: string;
-  zhuyin: string;          // full zhuyin string e.g. "ㄑㄧㄥ"
-  initial: string;         // 聲母 e.g. "ㄑ" (empty string if none)
-  medial: string;          // 介母 e.g. "ㄧ"
-  finalPart: string;       // 韻母 e.g. "ㄥ"
-  tone: string;            // tone mark e.g. "ˊ" or ""
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Zhuyin parsing helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-const TONE_MARKS = new Set(['ˊ', 'ˇ', 'ˋ', '˙']);
-const ALL_INITIALS = new Set(INITIALS);
-const ALL_PRENUCLEAR = new Set(PRENUCLEAR);
-
-/**
- * Parse a raw zhuyin string (e.g. "ㄑㄧㄥ" or "ㄑㄧㄥˊ") into components.
- * The MOE dictionary returns zhuyin as bopomofo characters with optional tone mark at end.
- */
-function parseZhuyin(raw: string): { initial: string; medial: string; finalPart: string; tone: string } {
-  let s = raw.trim();
-  // Extract trailing tone mark
-  let tone = '';
-  if (s.length > 0 && TONE_MARKS.has(s[s.length - 1])) {
-    tone = s[s.length - 1];
-    s = s.slice(0, -1);
-  }
-
-  let initial = '';
-  let medial = '';
-  let finalPart = '';
-
-  let i = 0;
-  // Initial (聲母) — first symbol if it's in INITIALS
-  if (i < s.length && ALL_INITIALS.has(s[i])) {
-    initial = s[i];
-    i++;
-  }
-  // Medial (介母) — next symbol if it's in PRENUCLEAR
-  if (i < s.length && ALL_PRENUCLEAR.has(s[i])) {
-    medial = s[i];
-    i++;
-  }
-  // Final (韻母) — rest
-  finalPart = s.slice(i);
-
-  return { initial, medial, finalPart, tone };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Shuffle helper
-// ─────────────────────────────────────────────────────────────────────────────
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Build 4 answer choices for a question
-// ─────────────────────────────────────────────────────────────────────────────
-
-function buildChoices(correct: string, pool: string[], count = 4): string[] {
-  const distractors = shuffle(pool.filter(x => x !== correct)).slice(0, count - 1);
-  return shuffle([correct, ...distractors]);
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Loading / Error states
@@ -244,10 +182,8 @@ function PickGame({ mode, questions, onFinish, onBack }: PickGameProps) {
 
   // Build correct answer and choice pool for the current mode
   const correctAnswer = useMemo(() => {
-    if (mode === 'initial') return q.initial || q.medial; // use medial as initial if no initial (e.g. ㄧ)
-    // For final mode: medial + finalPart + tone
-    const fin = (q.medial && !q.finalPart) ? q.medial : (q.finalPart || q.medial);
-    return fin + q.tone;
+    if (mode === 'initial') return getInitialModeAnswer(q);
+    return getFinalModeAnswer(q);
   }, [q, mode]);
 
   const choicePool = useMemo(() => {
@@ -414,14 +350,7 @@ function ComposeGame({ questions, onFinish, onBack }: ComposeGameProps) {
   const q = questions[qIdx];
 
   // Target sequence: [initial, medial, finalPart, tone] — non-empty parts
-  const targetSeq = useMemo(() => {
-    const parts: string[] = [];
-    if (q.initial) parts.push(q.initial);
-    if (q.medial) parts.push(q.medial);
-    if (q.finalPart) parts.push(q.finalPart);
-    if (q.tone) parts.push(q.tone);
-    return parts;
-  }, [q]);
+  const targetSeq = useMemo(() => composeTargetSeq(q), [q]);
 
   // Build a palette of symbols to tap from
   const palette = useMemo(() => {
