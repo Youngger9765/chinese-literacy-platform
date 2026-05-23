@@ -1,20 +1,22 @@
 /**
  * StoryManagementPanel — Admin CRUD interface for platform stories.
  *
- * Features:
- * - Table listing all stories (lesson_number, title, grade, genre, paragraph_count)
- * - Search/filter by title and grade
- * - "新增課文" modal with form
- * - Edit button per row -> edit modal
- * - Delete button with confirmation dialog
+ * Orchestrator only — state management + API calls.
+ * Sub-components handle rendering:
+ *   - StoryListTable  → filter bar + sortable table
+ *   - StoryFormModal  → create / edit form modal
+ *   - ConfirmDialog   → delete confirmation (from shared admin components)
+ *
+ * Refactored in #1944 (original 576 LOC → slim orchestrator).
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { PlusIcon } from '../../components/icons';
 import AdminPageShell from '../../components/admin/AdminPageShell';
-import AdminTable, { ColumnDef } from '../../components/admin/AdminTable';
 import ConfirmDialog from '../../components/admin/ConfirmDialog';
+import StoryListTable from './StoryListTable';
+import StoryFormModal from './StoryFormModal';
 import {
   listAdminStories,
   createStory,
@@ -26,10 +28,8 @@ import {
 } from '../../services/adminStoryApi';
 import {
   EMPTY_FORM,
-  GENRE_OPTIONS,
   ModalMode,
   StoryFormState,
-  TEXT_TYPE_OPTIONS,
   formToCreateRequest,
   storyToFormState,
 } from './storyFormMapper';
@@ -204,67 +204,6 @@ const StoryManagementPanel: React.FC = () => {
     }
   };
 
-  const storyColumns: ColumnDef<StoryAdminListItem>[] = [
-    {
-      key: 'lesson_number',
-      header: '編號',
-      render: (story) => (
-        <span className="font-mono text-gray-500">{story.lesson_number}</span>
-      ),
-      className: 'w-16',
-    },
-    {
-      key: 'title',
-      header: '標題',
-      render: (story) => (
-        <span className="font-medium text-gray-900">{story.title}</span>
-      ),
-    },
-    {
-      key: 'grade_code',
-      header: '年級',
-      className: 'w-20',
-    },
-    {
-      key: 'genre',
-      header: '文體',
-      className: 'w-24',
-    },
-    {
-      key: 'paragraph_count',
-      header: '段落數',
-      className: 'w-20',
-    },
-    {
-      key: 'char_count',
-      header: '字數',
-      className: 'w-20',
-    },
-    {
-      key: 'actions',
-      header: '操作',
-      className: 'w-28 text-right',
-      render: (story) => (
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => openEditModal(story)}
-            className="text-accent hover:underline text-xs font-medium cursor-pointer"
-          >
-            編輯
-          </button>
-          <button
-            type="button"
-            onClick={() => openDeleteConfirm(story)}
-            className="text-red-500 hover:underline text-xs font-medium cursor-pointer"
-          >
-            刪除
-          </button>
-        </div>
-      ),
-    },
-  ];
-
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
@@ -286,62 +225,18 @@ const StoryManagementPanel: React.FC = () => {
           </button>
         )}
       >
-        <div className="flex items-center gap-3 flex-wrap">
-          <input
-            type="text"
-            placeholder="搜尋課文標題..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48 focus:outline-none focus:ring-2 focus:ring-accent/50"
-          />
-          <select
-            value={gradeFilter}
-            onChange={(e) => setGradeFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 cursor-pointer"
-          >
-            <option value="">所有年級</option>
-            {[4, 5, 6, 7, 8, 9].map((g) => (
-              <option key={g} value={String(g)}>
-                {g} 年級
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {loadError && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
-            {loadError}
-            <button
-              onClick={loadStories}
-              className="ml-2 underline text-red-600 hover:text-red-800 cursor-pointer"
-            >
-              重試
-            </button>
-          </div>
-        )}
-
-        {isLoading && (
-          <div className="space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-12 bg-gray-200 animate-pulse rounded-lg" />
-            ))}
-          </div>
-        )}
-
-        {!isLoading && !loadError && stories.length === 0 && (
-          <div className="rounded-2xl shadow-card px-4 py-12 text-center text-gray-400 text-sm bg-white">
-            {searchQuery || gradeFilter ? '找不到符合條件的課文' : '尚無課文'}
-          </div>
-        )}
-
-        {!isLoading && !loadError && stories.length > 0 && (
-          <AdminTable
-            columns={storyColumns}
-            rows={stories}
-            rowKey={(story) => story.lesson_number}
-            cardTitle={(story) => story.title}
-          />
-        )}
+        <StoryListTable
+          stories={stories}
+          isLoading={isLoading}
+          loadError={loadError}
+          searchQuery={searchQuery}
+          gradeFilter={gradeFilter}
+          onSearchChange={setSearchQuery}
+          onGradeChange={setGradeFilter}
+          onRetry={loadStories}
+          onEdit={openEditModal}
+          onDelete={openDeleteConfirm}
+        />
       </AdminPageShell>
 
       {/* Create / Edit Modal */}
@@ -382,195 +277,5 @@ const StoryManagementPanel: React.FC = () => {
     </>
   );
 };
-
-// ── Story Form Modal ──────────────────────────────────────────────────────────
-
-interface StoryFormModalProps {
-  mode: ModalMode;
-  formState: StoryFormState;
-  formError: string;
-  isSubmitting: boolean;
-  onFieldChange: (field: keyof StoryFormState, value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onClose: () => void;
-}
-
-const StoryFormModal: React.FC<StoryFormModalProps> = ({
-  mode,
-  formState,
-  formError,
-  isSubmitting,
-  onFieldChange,
-  onSubmit,
-  onClose,
-}) => {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h3 className="text-lg font-bold text-gray-900">
-            {mode === 'create' ? '新增課文' : '編輯課文'}
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={onSubmit} className="px-6 py-5 space-y-4">
-          {/* Lesson number (read-only in edit mode) */}
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="課文編號">
-              <input
-                type="number"
-                value={formState.lesson_number}
-                onChange={(e) => onFieldChange('lesson_number', e.target.value)}
-                disabled={mode === 'edit'}
-                required
-                min={1}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:bg-gray-100 disabled:text-gray-500"
-                placeholder="例：58"
-              />
-            </Field>
-            <Field label="年級 (4-9)">
-              <select
-                value={formState.grade}
-                onChange={(e) => onFieldChange('grade', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 cursor-pointer"
-              >
-                {[4, 5, 6, 7, 8, 9].map((g) => (
-                  <option key={g} value={String(g)}>{g} 年級</option>
-                ))}
-              </select>
-            </Field>
-          </div>
-
-          <Field label="標題">
-            <input
-              type="text"
-              value={formState.title}
-              onChange={(e) => onFieldChange('title', e.target.value)}
-              required
-              maxLength={200}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
-              placeholder="例：第一百碗麵"
-            />
-          </Field>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="年級代碼">
-              <input
-                type="text"
-                value={formState.grade_code}
-                onChange={(e) => onFieldChange('grade_code', e.target.value)}
-                required
-                maxLength={10}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
-                placeholder="例：G5-10"
-              />
-            </Field>
-            <Field label="文體">
-              <select
-                value={formState.genre}
-                onChange={(e) => onFieldChange('genre', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 cursor-pointer"
-              >
-                {GENRE_OPTIONS.map((g) => (
-                  <option key={g} value={g}>{g}</option>
-                ))}
-              </select>
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="文本類型">
-              <select
-                value={formState.text_type}
-                onChange={(e) => onFieldChange('text_type', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 cursor-pointer"
-              >
-                {TEXT_TYPE_OPTIONS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="原始檔案名稱 (選填)">
-              <input
-                type="text"
-                value={formState.source_file}
-                onChange={(e) => onFieldChange('source_file', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
-                placeholder="例：G5-10-L58.docx"
-              />
-            </Field>
-          </div>
-
-          <Field label="閱讀策略 (選填)">
-            <input
-              type="text"
-              value={formState.reading_strategy}
-              onChange={(e) => onFieldChange('reading_strategy', e.target.value)}
-              maxLength={200}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
-              placeholder="例：掌握段落大意"
-            />
-          </Field>
-
-          <Field label={mode === 'edit' ? '段落內容 (每行一段，留空表示不更新)' : '段落內容 (每行一段，至少一段)'}>
-            <textarea
-              value={formState.paragraphs}
-              onChange={(e) => onFieldChange('paragraphs', e.target.value)}
-              rows={6}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
-              placeholder={"第一段內容...\n第二段內容...\n第三段內容..."}
-            />
-          </Field>
-
-          {/* Error */}
-          {formError && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              {formError}
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
-            >
-              取消
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors cursor-pointer disabled:opacity-60"
-            >
-              {isSubmitting ? '儲存中...' : mode === 'create' ? '新增課文' : '儲存變更'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-// ── Field helper ──────────────────────────────────────────────────────────────
-
-const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <div>
-    <label className="block text-xs font-semibold text-gray-600 mb-1">{label}</label>
-    {children}
-  </div>
-);
 
 export default StoryManagementPanel;
