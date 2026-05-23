@@ -4,14 +4,20 @@
  * Extracts the <Routes> tree from App.tsx to keep App.tsx under 50 lines.
  * All heavy pages use React.lazy() for route-level code splitting so that
  * only the active route's JS chunk is loaded on demand.
+ *
+ * ## Learning routes (Issue #1891)
+ *
+ * The /learn/:storyId nested routes are generated automatically from STEP_CONFIG
+ * via `learningRoutes.tsx`.  This eliminates the previous duplication where
+ * step order and nextPath were hardcoded here instead of being derived from
+ * the single source of truth in stepConfig.ts.
  */
 import React, { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { PublicOnlyRoute, ProtectedRoute, StudentClassroomGuard } from '../components/auth/RouteGuards';
 import NoTeacherPage from '../pages/app/NoTeacherPage';
 import { AppShell, LearningAppShell } from '../components/layout/AppShell';
-import StepErrorBoundary from '../components/StepErrorBoundary';
 import {
   HomePage,
   LibraryPage,
@@ -21,7 +27,9 @@ import {
 } from '../pages/app/InlinePages';
 import PageLoader from '../components/ui/PageLoader';
 import { PARENT_PORTAL_ENABLED } from '../config/featureFlags';
-import { STEP_CONFIG } from '../config/stepConfig';
+
+// Learning step routes — generated from STEP_CONFIG (Issue #1891)
+import { learningRoutes } from './learningRoutes';
 
 // Auth pages — eager-loaded (small, needed immediately on first visit)
 import LoginPage from '../pages/LoginPage';
@@ -38,26 +46,6 @@ import JunyiCallbackPage from '../pages/JunyiCallbackPage';
 
 // Admin page — loaded only for system_admin / org_admin roles
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
-
-// Learning step pages — split per step so only the active step's code loads
-const IntroPage = lazy(() => import('../pages/learning/IntroPage'));
-const TutorPage = lazy(() => import('../pages/learning/TutorPage'));
-// Issue #1335: old ComprehensionPage (tab container) replaced by 3 independent pages
-const ComprehensionMcqPage = lazy(() => import('../pages/learning/ComprehensionMcqPage'));
-const StoryStructurePage = lazy(() => import('../pages/learning/StoryStructurePage'));
-const StrategyExercisePage = lazy(() => import('../pages/learning/StrategyExercisePage'));
-const VocabPage = lazy(() => import('../pages/learning/VocabPage'));
-const DictationPage = lazy(() => import('../pages/learning/DictationPage'));
-const ListeningPage = lazy(() => import('../pages/learning/ListeningPage'));
-const FullReadingPage = lazy(() => import('../pages/learning/FullReadingPage'));
-const ReportPage = lazy(() => import('../pages/learning/ReportPage'));
-// 三民 steps (Issue #676)
-const ReadingAnnotationPage = lazy(() => import('../pages/learning/ReadingAnnotationPage'));
-const VocabApplicationPage = lazy(() => import('../pages/learning/VocabApplicationPage'));
-const VocabDefinitionMatchPage = lazy(() => import('../pages/learning/VocabDefinitionMatchPage'));
-const VocabWordSearchPage = lazy(() => import('../pages/learning/VocabWordSearchPage'));
-const KnowledgeStationPage = lazy(() => import('../pages/learning/KnowledgeStationPage'));
-const SentencePracticePage = lazy(() => import('../pages/learning/SentencePracticePage'));
 
 // Student pages — infrequently accessed, split to reduce initial load
 const JoinClassroomPage = lazy(() => import('../pages/JoinClassroomPage'));
@@ -91,50 +79,6 @@ const HelpPage = lazy(() => import('../pages/HelpPage'));
 
 // ToS consent page (issue #1013)
 const TermsOfService = lazy(() => import('../pages/app/TermsOfService'));
-
-// ---------------------------------------------------------------------------
-// StepRoute — wraps a learning step page in StepErrorBoundary.
-// The `nextPath` prop wires the "跳過此步驟" button to navigate to the next step.
-// ---------------------------------------------------------------------------
-
-interface StepRouteProps {
-  stepLabel: string;
-  nextPath?: string;
-  children: React.ReactNode;
-}
-
-const StepRoute: React.FC<StepRouteProps> = ({ stepLabel, nextPath, children }) => {
-  const navigate = useNavigate();
-  const handleSkip = nextPath ? () => navigate(nextPath, { replace: true }) : undefined;
-
-  return (
-    <StepErrorBoundary stepLabel={stepLabel} onSkip={handleSkip}>
-      {children}
-    </StepErrorBoundary>
-  );
-};
-
-// ---------------------------------------------------------------------------
-// StepEnabledGuard — redirects to the first enabled step when a step is disabled
-// in STEP_CONFIG (enabled: false).  Wrap any route whose step may be disabled.
-// ---------------------------------------------------------------------------
-
-interface StepEnabledGuardProps {
-  stepId: string;
-  children: React.ReactNode;
-}
-
-const StepEnabledGuard: React.FC<StepEnabledGuardProps> = ({ stepId, children }) => {
-  const { storyId } = useParams<{ storyId: string }>();
-  const step = STEP_CONFIG.find((s) => s.id === stepId);
-
-  if (step && !step.enabled) {
-    const fallbackId = STEP_CONFIG.find((s) => s.enabled)?.id ?? 'reading-annotation';
-    return <Navigate to={`/learn/${storyId ?? ''}/${fallbackId}`} replace />;
-  }
-
-  return <>{children}</>;
-};
 
 // ---------------------------------------------------------------------------
 
@@ -462,7 +406,9 @@ const AppRoutes: React.FC = () => (
         }
       />
 
-      {/* Learning flow — nested routes under LearningLayout */}
+      {/* Learning flow — nested routes under LearningAppShell.
+          Step routes are generated from STEP_CONFIG via learningRoutes.tsx (Issue #1891).
+          Default index redirects to the first step in DEFAULT_STEP_SEQUENCE. */}
       <Route
         path="/learn/:storyId"
         element={
@@ -471,130 +417,7 @@ const AppRoutes: React.FC = () => (
           </ProtectedRoute>
         }
       >
-        <Route path="intro" element={<IntroPage />} />
-        <Route
-          path="reading-annotation"
-          element={
-            <StepRoute stepLabel="讀全文-做記號" nextPath="tutor">
-              <ReadingAnnotationPage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="tutor"
-          element={
-            <StepRoute stepLabel="逐段朗讀" nextPath="full-reading">
-              <TutorPage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="full-reading"
-          element={
-            <StepRoute stepLabel="全文朗讀" nextPath="listening">
-              <FullReadingPage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="vocab"
-          element={
-            <StepRoute stepLabel="生字練習" nextPath="sentence-practice">
-              <VocabPage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="sentence-practice"
-          element={
-            <StepRoute stepLabel="造句練習" nextPath="vocab-definition">
-              <SentencePracticePage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="vocab-definition"
-          element={
-            <StepRoute stepLabel="詞語理解" nextPath="vocab-application">
-              <VocabDefinitionMatchPage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="vocab-application"
-          element={
-            <StepRoute stepLabel="語詞應用" nextPath="story-structure">
-              <VocabApplicationPage />
-            </StepRoute>
-          }
-        />
-        {/* Issue #1335: 3 independent steps replacing the old tabbed comprehension step */}
-        <Route
-          path="story-structure"
-          element={
-            <StepRoute stepLabel="文章重點表" nextPath="reading-strategy">
-              <StoryStructurePage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="reading-strategy"
-          element={
-            <StepRoute stepLabel="閱讀聚光燈" nextPath="comprehension">
-              <StrategyExercisePage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="comprehension"
-          element={
-            <StepRoute stepLabel="閱讀理解" nextPath="vocab-word-search">
-              <ComprehensionMcqPage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="dictation"
-          element={
-            <StepEnabledGuard stepId="dictation">
-              <StepRoute stepLabel="聽寫練習" nextPath="vocab-word-search">
-                <DictationPage />
-              </StepRoute>
-            </StepEnabledGuard>
-          }
-        />
-        <Route
-          path="vocab-word-search"
-          element={
-            <StepRoute stepLabel="語詞複習" nextPath="knowledge-station">
-              <VocabWordSearchPage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="listening"
-          element={
-            <StepRoute stepLabel="聽力理解" nextPath="vocab">
-              <ListeningPage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="knowledge-station"
-          element={
-            <StepRoute stepLabel="知識站" nextPath="report">
-              <KnowledgeStationPage />
-            </StepRoute>
-          }
-        />
-        <Route
-          path="report"
-          element={
-            <StepRoute stepLabel="學習報告">
-              <ReportPage />
-            </StepRoute>
-          }
-        />
+        {learningRoutes}
         {/* Default: redirect to reading-annotation (new first step) */}
         <Route index element={<Navigate to="reading-annotation" replace />} />
       </Route>
