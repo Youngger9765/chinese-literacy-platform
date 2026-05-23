@@ -9,6 +9,7 @@
  * Calls handleFinishReadingStrategy from LearningContext when done.
  */
 import React, { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ComprehensionLayout from '../../components/reading-steps/ComprehensionLayout';
 import StrategyExercise from '../../components/reading-steps/StrategyExercise';
 import GraphicTextIntegrationExercise from '../../components/reading-steps/GraphicTextIntegrationExercise';
@@ -16,6 +17,7 @@ import { useLearningContext } from '../../layouts/LearningLayout';
 import type { StrategyExercise as StrategyExerciseType, StrategyExerciseItem } from '../../types';
 
 const StrategyExercisePage: React.FC = () => {
+  const navigate = useNavigate();
   const {
     selectedStory,
     handleFinishReadingStrategy,
@@ -120,14 +122,26 @@ const StrategyExercisePage: React.FC = () => {
           </div>
         </>
       ) : (
-        /* Lesson has no strategy exercise — show placeholder + skip */
+        /* Lesson has no strategy exercise — warm reassuring empty-state + CTA */
         <div className="flex flex-col items-center justify-center py-12 gap-5 text-on-surface-variant">
           <span className="material-symbols-outlined text-5xl opacity-30">lightbulb</span>
-          <p className="text-sm font-medium">此課文尚未有閱讀聚光燈練習</p>
+          <div className="text-center">
+            <p className="text-sm font-medium text-on-surface">本課暫無閱讀聚光燈練習 — 老師團隊正在整理中</p>
+            <p className="text-xs mt-1 opacity-60">你可以先去其他課文練習，或直接跳到下一個步驟</p>
+          </div>
+          {/* Primary CTA: navigate to library */}
           <button
-            onClick={handleNext}
+            onClick={() => navigate('/library')}
             className="px-8 h-11 rounded-full font-headline font-bold text-sm text-white shadow-[0_8px_32px_rgba(86,74,191,0.25)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center gap-2"
             style={{ background: 'linear-gradient(135deg, #564ABF, #9D93FF)' }}
+          >
+            <span className="material-symbols-outlined text-sm">library_books</span>
+            <span>找其他課文練習</span>
+          </button>
+          {/* Secondary: skip to next step */}
+          <button
+            onClick={handleNext}
+            className="px-6 h-9 rounded-full font-headline text-sm text-on-surface-variant border border-outline-variant hover:bg-surface-variant active:scale-[0.98] transition-all flex items-center gap-1"
           >
             <span>跳過，下一關</span>
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
