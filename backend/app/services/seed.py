@@ -4,7 +4,7 @@ Seed data for demo / staging environments.
 Extracted from main.py to keep the app entry point thin.
 Functions:
   - seed_default_data()          — full demo data (org, schools, users, sessions, etc.)
-  - repair_pii_accounts(db)      — one-time repair: deactivate real gmail PII accounts (#1920)
+  - repair_pii_accounts(db)      — idempotent repair: anonymize gmail PII + fix admin roles (#1920 #1931)
   - _patch_seed_assignments(db)  — idempotent patch for assignment seed data (#528)
   - _sync_yaml_lessons_to_texts(db) — sync YAML lessons → texts table
 """
@@ -39,23 +39,40 @@ _PII_GMAIL_ACCOUNTS = [
 
 
 def repair_pii_accounts(db) -> None:
-    """Idempotent: deactivate real gmail PII accounts from the staging DB.
+    """Idempotent: anonymize real gmail PII accounts from the staging DB.
 
-    Safe to call on every startup — does nothing if accounts don't exist or
-    are already inactive.  Introduced in #1920 to remove PII that was
-    accidentally inserted during early dogfood sessions.
+    Safe to call on every startup.  Belt-and-suspenders companion to the
+    Alembic migration pii01rep02air03 (#1931):
+
+    - Deactivates any remaining gmail accounts (original #1920 behaviour).
+    - Anonymizes their email to inactive_{id}@test.com so PII is not
+      returned by /api/users or visible in admin UI (#1931 fix).
+
+    The Alembic migration handles the one-time SQL UPDATE; this function
+    guards against any edge cases where the migration was not yet applied.
     """
     affected = 0
     for email in _PII_GMAIL_ACCOUNTS:
         user = db.query(User).filter(User.email == email).first()
-        if user and user.is_active:
-            user.is_active = False
-            affected += 1
-            logger.info("repair_pii_accounts: deactivated PII account %s (#1920)", email)
+        if user:
+            changed = False
+            if user.is_active:
+                user.is_active = False
+                changed = True
+            # Anonymize email if still holding PII (migration may not have run yet)
+            if "@gmail.com" in user.email:
+                user.email = f"inactive_{user.id}@test.com"
+                changed = True
+            if changed:
+                affected += 1
+                logger.info(
+                    "repair_pii_accounts: anonymized PII account id=%s (#1920/#1931)",
+                    user.id,
+                )
     if affected:
         db.commit()
     else:
-        logger.debug("repair_pii_accounts: no active PII accounts found")
+        logger.debug("repair_pii_accounts: no PII accounts to repair")
 
 
 def _patch_seed_assignments(db) -> None:
