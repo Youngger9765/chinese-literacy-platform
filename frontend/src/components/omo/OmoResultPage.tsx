@@ -3,20 +3,24 @@
  *
  * Shown after grading completes (status=graded). Displays:
  *   - Overall score banner
+ *   - Gap 1: "not a worksheet" banner if every answer is blank (issue #1921)
+ *   - Gap 2: identifier candidates chip list (issue #1921)
  *   - Per-question cards: student answer, correct answer, AI score, confidence bar
+ *   - Gap 3: "批改有誤?" expands reasoning + ai_confidence (issue #1921)
  *   - Flag button on each card → opens FlagModal to report incorrect grading
  *
  * Props:
- *   uploadId  — the graded OmoUpload id
- *   token     — JWT for API calls
+ *   uploadId    — the graded OmoUpload id
+ *   token       — JWT for API calls
  *   lessonTitle — display name for the header
- *   answers   — OmoAnswerItem[] from the graded upload
+ *   answers     — OmoAnswerItem[] from the graded upload
  *   overallScore — 0–1 float, percentage shown as 0–100
- *   onRetry   — go back to upload screen
+ *   onRetry     — go back to upload screen
+ *   candidates  — OmoCandidate[] identifier results (Gap 2)
  */
 import React, { useState } from 'react';
 import { flagOmoAnswer, getOmoCropSignedUrl } from '../../services/omoApi';
-import type { OmoAnswerItem } from '../../services/omoApi';
+import type { OmoAnswerItem, OmoCandidate } from '../../services/omoApi';
 
 // ---------------------------------------------------------------------------
 // Flag Modal
@@ -220,6 +224,83 @@ function ScoreBadge({ score }: { score: number }) {
 }
 
 // ---------------------------------------------------------------------------
+// Gap 1: All-blank detector
+// Condition: every answer either has empty student_answer AND
+// reasoning contains "空白" (indicating AI saw nothing).
+// Only when ALL answers match do we show the banner.
+// ---------------------------------------------------------------------------
+
+function computeIsAllBlank(answers: OmoAnswerItem[]): boolean {
+  if (answers.length === 0) return false;
+  return answers.every(
+    (a) => !a.student_answer && a.reasoning.includes('空白'),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Gap 2: Candidate chips
+// ---------------------------------------------------------------------------
+
+interface CandidateChipsProps {
+  candidates: OmoCandidate[];
+}
+
+const CandidateChips: React.FC<CandidateChipsProps> = ({ candidates }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  if (candidates.length === 0) return null;
+
+  const primary = candidates[0];
+  const rest = candidates.slice(1);
+  const primaryPct = Math.round(primary.confidence * 100);
+
+  return (
+    <div className="bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3">
+      <p className="text-xs text-blue-500 font-medium mb-1.5">AI 辨識結果</p>
+      {/* Primary candidate */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <span className="text-sm font-semibold text-gray-800">
+          {primary.grade_code}·{primary.title}
+        </span>
+        <span className="text-xs text-blue-600 font-medium bg-blue-100 px-2 py-0.5 rounded-full shrink-0">
+          信心 {primaryPct}%
+        </span>
+      </div>
+
+      {/* "不是這課？" expander — only when there are additional candidates */}
+      {rest.length > 0 && (
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="text-xs text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-1"
+            aria-expanded={expanded}
+          >
+            <span aria-hidden="true">{expanded ? '▲' : '▼'}</span>
+            不是這課？
+          </button>
+
+          {expanded && (
+            <div className="mt-2 flex flex-col gap-1.5 pl-2 border-l-2 border-blue-200">
+              {rest.map((c) => (
+                <div key={c.lesson_id} className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-gray-600">
+                    {c.grade_code}·{c.title}
+                  </span>
+                  <span className="text-[10px] text-gray-400 shrink-0">
+                    {Math.round(c.confidence * 100)}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Answer Card
 // ---------------------------------------------------------------------------
 
@@ -234,6 +315,13 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, onViewCrop, fla
   const confPct = Math.round(answer.ai_confidence * 100);
   // #1721: low confidence (< 0.7) → orange ⚠️ flag so teacher knows to manually verify
   const lowConfidence = answer.ai_confidence < 0.7;
+
+  // Gap 3: reasoning panel toggle (replaces direct flag modal open on click)
+  const [reasoningExpanded, setReasoningExpanded] = useState(false);
+
+  const handleFlagButtonClick = () => {
+    setReasoningExpanded((v) => !v);
+  };
 
   return (
     <div className={`bg-white rounded-2xl border shadow-sm p-4 ${lowConfidence ? 'border-amber-300 ring-1 ring-amber-200' : 'border-gray-100'}`}>
@@ -288,6 +376,25 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, onViewCrop, fla
         <span className="text-[10px] text-gray-400 shrink-0">AI {confPct}%</span>
       </div>
 
+      {/* Gap 3: Reasoning expansion panel */}
+      {reasoningExpanded && (
+        <div
+          role="region"
+          aria-label="AI 批改依據"
+          className="mb-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5"
+        >
+          <p className="text-[10px] text-amber-700 font-semibold uppercase tracking-wide mb-1">
+            AI 批改依據
+          </p>
+          <p className="text-sm text-gray-700 leading-relaxed">
+            {answer.reasoning}
+          </p>
+          <p className="text-xs text-gray-400 mt-1.5">
+            AI 信心度：<span className="font-semibold text-gray-600">{confPct}%</span>
+          </p>
+        </div>
+      )}
+
       {/* Action buttons */}
       <div className="flex justify-end gap-3">
         {answer.crop_image_url && (
@@ -310,8 +417,9 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, onViewCrop, fla
         ) : (
           <button
             type="button"
-            onClick={() => onFlag(answer.question_id)}
+            onClick={handleFlagButtonClick}
             className="text-xs text-gray-400 hover:text-orange-500 transition-colors flex items-center gap-1"
+            aria-expanded={reasoningExpanded}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5" aria-hidden="true">
               <path d="M2 3a1 1 0 011-1h10a1 1 0 01.707 1.707L10.414 7l3.293 3.293A1 1 0 0113 12H3a1 1 0 01-1-1V3z" />
@@ -320,6 +428,23 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ answer, onFlag, onViewCrop, fla
           </button>
         )}
       </div>
+
+      {/* Flag Modal (opened from reasoning panel via separate CTA) */}
+      {/* Keep FlagModal accessible: show a "送出標記" button inside the expanded panel */}
+      {reasoningExpanded && !flagged && !answer.flag && (
+        <div className="mt-2 flex justify-end">
+          <button
+            type="button"
+            onClick={() => {
+              setReasoningExpanded(false);
+              onFlag(answer.question_id);
+            }}
+            className="text-xs text-orange-500 hover:text-orange-700 underline transition-colors"
+          >
+            送出標記給老師
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -335,6 +460,8 @@ interface OmoResultPageProps {
   answers: OmoAnswerItem[];
   overallScore: number | null;
   onRetry: () => void;
+  /** Gap 2: identifier candidates from backend */
+  candidates?: OmoCandidate[];
 }
 
 const OmoResultPage: React.FC<OmoResultPageProps> = ({
@@ -344,6 +471,7 @@ const OmoResultPage: React.FC<OmoResultPageProps> = ({
   answers,
   overallScore,
   onRetry,
+  candidates = [],
 }) => {
   const [flaggingQuestionId, setFlaggingQuestionId] = useState<string | null>(null);
   const [flaggedIds, setFlaggedIds] = useState<Set<string>>(new Set());
@@ -355,6 +483,9 @@ const OmoResultPage: React.FC<OmoResultPageProps> = ({
   } | null>(null);
 
   const overallPct = overallScore !== null ? Math.round(overallScore * 100) : null;
+
+  // Gap 1: detect all-blank submission
+  const isAllBlank = computeIsAllBlank(answers);
 
   const handleFlagged = (questionId: string) => {
     setFlaggedIds((prev) => new Set(prev).add(questionId));
@@ -403,6 +534,36 @@ const OmoResultPage: React.FC<OmoResultPageProps> = ({
         )}
         <p className="text-xs text-gray-400 mt-2">共 {answers.length} 題</p>
       </div>
+
+      {/* Gap 1: All-blank warning banner */}
+      {isAllBlank && (
+        <div
+          role="alert"
+          className="bg-amber-50 border border-amber-300 rounded-2xl px-4 py-4 flex flex-col items-center gap-3 text-center"
+        >
+          <div className="text-3xl" aria-hidden="true">📷</div>
+          <div>
+            <p className="text-sm font-semibold text-amber-800">
+              這張看起來不是填寫過的學習單，請重拍學生作答
+            </p>
+            <p className="text-xs text-amber-600 mt-1">
+              AI 在所有作答欄位都找不到手寫字跡
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onRetry}
+            className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition-colors"
+          >
+            重新上傳
+          </button>
+        </div>
+      )}
+
+      {/* Gap 2: Candidate chips */}
+      {candidates.length > 0 && (
+        <CandidateChips candidates={candidates} />
+      )}
 
       {/* Per-question cards */}
       {answers.length > 0 ? (

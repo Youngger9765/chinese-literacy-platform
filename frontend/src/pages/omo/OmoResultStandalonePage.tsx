@@ -122,6 +122,7 @@ const OmoResultStandalonePage: React.FC = () => {
           answers={result.answers ?? []}
           overallScore={result.overall_score ?? null}
           onRetry={() => navigate('/omo')}
+          candidates={result.candidates ?? []}
         />
       );
     }
