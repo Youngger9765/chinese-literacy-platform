@@ -12,54 +12,10 @@ import {
   type StudentEnrolledClassroom,
 } from '../../services/learningApi';
 import { ACTIVE_STEPS } from '../../config/stepConfig';
-import StepProgressStrip from '../../components/ui/StepProgressStrip';
-
-type FilterTab = 'pending' | 'completed' | 'graded';
-
-const FILTER_TABS: { key: FilterTab; label: string }[] = [
-  { key: 'pending', label: '待完成' },
-  { key: 'completed', label: '已完成' },
-  { key: 'graded', label: '已批改' },
-];
-
-type SortKey = 'newest' | 'due_asc' | 'score_desc';
-
-interface SortOption {
-  key: SortKey;
-  label: string;
-  compareFn: (a: StudentAssignmentResponse, b: StudentAssignmentResponse) => number;
-}
-
-const SORT_OPTIONS: SortOption[] = [
-  {
-    key: 'newest',
-    label: '最新指派',
-    compareFn: (a, b) => b.assignment_id - a.assignment_id,
-  },
-  {
-    key: 'due_asc',
-    label: '截止日期（由近到遠）',
-    compareFn: (a, b) => {
-      if (!a.due_date && !b.due_date) return 0;
-      if (!a.due_date) return 1;
-      if (!b.due_date) return -1;
-      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-    },
-  },
-  {
-    key: 'score_desc',
-    label: '分數（高到低）',
-    compareFn: (a, b) => {
-      if (a.score == null && b.score == null) return 0;
-      if (a.score == null) return 1;
-      if (b.score == null) return -1;
-      return b.score - a.score;
-    },
-  },
-];
-
-const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
-const ASSIGNMENT_DB_SESSION_KEY_PREFIX = 'assignment-db-session-';
+import { writeAssignmentSessionContext } from '../../utils/assignmentSessionContext';
+import AssignmentCard from './AssignmentCard';
+import AssignmentFilters, { type FilterTab } from './AssignmentFilters';
+import { type SortKey, SORT_OPTIONS } from './assignmentSort';
 
 const MyAssignments: React.FC = () => {
   const navigate = useNavigate();
@@ -74,10 +30,7 @@ const MyAssignments: React.FC = () => {
   const [startingId, setStartingId] = useState<number | null>(null);
   const [classroomFilter, setClassroomFilter] = useState<string>('all');
 
-  const assignmentSteps = useMemo(
-    () => ACTIVE_STEPS,
-    [],
-  );
+  const assignmentSteps = useMemo(() => ACTIVE_STEPS, []);
   const defaultStepPath = assignmentSteps[0]?.id ?? 'reading-annotation';
   const stepIdSet = useMemo(() => new Set(assignmentSteps.map((s) => s.id)), [assignmentSteps]);
 
@@ -103,7 +56,6 @@ const MyAssignments: React.FC = () => {
     if (a.current_step && stepIdSet.has(a.current_step)) {
       return a.current_step;
     }
-
     return defaultStepPath;
   };
 
@@ -148,49 +100,41 @@ const MyAssignments: React.FC = () => {
     return sortOption ? [...filtered].sort(sortOption.compareFn) : filtered;
   }, [assignments, activeFilter, sortKey, classroomFilter]);
 
+  // Summary bar: unique classroom names from enrolled classrooms
+  const classroomNames = useMemo(() => classrooms.map((c) => c.name), [classrooms]);
+  // Show pill filter when student is in 2+ classrooms (#1158)
+  const showClassroomFilter = classrooms.length >= 2;
+
+  // Reset classroom filter if the selected classroom is no longer in the list
+  useEffect(() => {
+    if (classroomFilter !== 'all' && !classroomNames.includes(classroomFilter)) {
+      setClassroomFilter('all');
+    }
+  }, [classroomNames, classroomFilter]);
+
+  // ------------------------------------------------------------------
+  // Action handlers — delegate sessionStorage writes to the context util
+  // ------------------------------------------------------------------
+
   const handleStart = async (assignmentId: number) => {
     if (!token) return;
     setStartingId(assignmentId);
     try {
       const result = await startAssignment(token, assignmentId);
-      // Store assignment ID in sessionStorage so LearningLayout can auto-submit on completion.
-      sessionStorage.setItem('activeAssignmentId', String(assignmentId));
-      // Store reading goals so LearningLayout can pass them to AssessmentReport (Issue #414).
-      sessionStorage.setItem(
-        'activeAssignmentGoals',
-        JSON.stringify({
+      const textKey = result.story_id ?? String(result.text_id);
+      writeAssignmentSessionContext({
+        assignmentId,
+        storyKey: textKey,
+        userId: user ? String(user.id) : null,
+        goals: {
           target_cpm: result.target_cpm,
           target_accuracy: result.target_accuracy,
           difficulty_label: result.difficulty_label,
           effective_cpm: result.effective_cpm,
           effective_accuracy: result.effective_accuracy,
-        }),
-      );
-      // story_id is set for YAML texts; text_id for DB texts
-      const textKey = result.story_id ?? String(result.text_id);
-      try {
-        sessionStorage.setItem(
-          ACTIVE_ASSIGNMENT_CONTEXT_KEY,
-          JSON.stringify({
-            assignmentId,
-            userId: user ? String(user.id) : null,
-            storyKey: String(textKey),
-            startedAt: Date.now(),
-          }),
-        );
-      } catch {
-        // non-fatal
-      }
-      try {
-        sessionStorage.setItem(
-          `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${assignmentId}-${textKey}`,
-          String(result.session_id),
-        );
-        sessionStorage.removeItem(`${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${textKey}`);
-        sessionStorage.removeItem(`db-session-${textKey}`);
-      } catch {
-        // non-fatal
-      }
+        },
+        sessionId: result.session_id,
+      });
       navigate(`/learn/${textKey}/${defaultStepPath}`);
     } catch (err) {
       if (err instanceof AssignmentApiError) {
@@ -203,193 +147,53 @@ const MyAssignments: React.FC = () => {
     }
   };
 
-  const formatDate = (dateStr: string | null): string => {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('zh-TW', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+  const handleResume = async (a: StudentAssignmentResponse) => {
+    let sessionId = a.session_id;
+    // Backfill missing linkage for legacy in_progress rows without session_id.
+    if (sessionId == null && token) {
+      try {
+        const started = await startAssignment(token, a.assignment_id);
+        sessionId = started.session_id;
+      } catch {
+        // non-fatal: proceed with existing data paths
+      }
+    }
+    const textKey = a.story_id ?? a.text_id;
+    writeAssignmentSessionContext({
+      assignmentId: a.assignment_id,
+      storyKey: textKey ?? '',
+      userId: user ? String(user.id) : null,
+      goals: {
+        target_cpm: a.target_cpm,
+        target_accuracy: a.target_accuracy,
+        difficulty_label: a.difficulty_label,
+        effective_cpm: a.effective_cpm,
+        effective_accuracy: a.effective_accuracy,
+      },
+      sessionId,
     });
+    const resumeStepPath = getResumeStepPath(a);
+    navigate(`/learn/${textKey}/${resumeStepPath}`);
   };
 
-  const isOverdue = (dueDateStr: string | null): boolean => {
-    if (!dueDateStr) return false;
-    return new Date(dueDateStr) < new Date();
+  const handleViewReport = (a: StudentAssignmentResponse) => {
+    const textKey = a.story_id ?? a.text_id;
+    if (textKey == null) return;
+    writeAssignmentSessionContext({
+      assignmentId: a.assignment_id,
+      storyKey: textKey,
+      userId: user ? String(user.id) : null,
+      goals: {
+        target_cpm: a.target_cpm,
+        target_accuracy: a.target_accuracy,
+        difficulty_label: a.difficulty_label,
+        effective_cpm: a.effective_cpm,
+        effective_accuracy: a.effective_accuracy,
+      },
+      sessionId: a.session_id,
+    });
+    navigate(`/learn/${textKey}/report`);
   };
-
-  const statusBadge = (status: string) => {
-    switch (status) {
-      case 'in_progress':
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent">
-            進行中
-          </span>
-        );
-      case 'submitted':
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700">
-            已完成
-          </span>
-        );
-      case 'graded':
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-tertiary/10 text-tertiary">
-            已批改
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-block px-1.5 py-0.5 rounded text-xs font-medium bg-surface-container text-on-surface-variant">
-            待完成
-          </span>
-        );
-    }
-  };
-
-  const actionButton = (a: StudentAssignmentResponse) => {
-    if (a.status === 'pending') {
-      return (
-        <button
-          onClick={() => handleStart(a.assignment_id)}
-          disabled={startingId === a.assignment_id}
-          className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-        >
-          {startingId === a.assignment_id ? '啟動中...' : '開始'}
-        </button>
-      );
-    }
-    if (a.status === 'in_progress') {
-      return (
-        <button
-          onClick={async () => {
-            // Restore assignment ID so LearningLayout can auto-submit on completion.
-            sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
-            // Restore reading goals so AssessmentReport can show goal comparison (Issue #414).
-            sessionStorage.setItem(
-              'activeAssignmentGoals',
-              JSON.stringify({
-                target_cpm: a.target_cpm,
-                target_accuracy: a.target_accuracy,
-                difficulty_label: a.difficulty_label,
-                effective_cpm: a.effective_cpm,
-                effective_accuracy: a.effective_accuracy,
-              }),
-            );
-            let sessionId = a.session_id;
-            // Backfill missing linkage for legacy in_progress rows without session_id.
-            if (sessionId == null && token) {
-              try {
-                const started = await startAssignment(token, a.assignment_id);
-                sessionId = started.session_id;
-              } catch {
-                // non-fatal: proceed with existing data paths
-              }
-            }
-            // story_id is set for YAML texts; text_id for DB texts
-            const textKey = a.story_id ?? a.text_id;
-            try {
-              sessionStorage.setItem(
-                ACTIVE_ASSIGNMENT_CONTEXT_KEY,
-                JSON.stringify({
-                  assignmentId: a.assignment_id,
-                  userId: user ? String(user.id) : null,
-                  storyKey: String(textKey),
-                  startedAt: Date.now(),
-                }),
-              );
-            } catch {
-              // non-fatal
-            }
-            if (sessionId != null) {
-              try {
-                sessionStorage.setItem(
-                  `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${a.assignment_id}-${textKey}`,
-                  String(sessionId),
-                );
-                sessionStorage.removeItem(`${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${textKey}`);
-                sessionStorage.removeItem(`db-session-${textKey}`);
-              } catch {
-                // non-fatal
-              }
-            }
-            const resumeStepPath = getResumeStepPath(a);
-            navigate(`/learn/${textKey}/${resumeStepPath}`);
-          }}
-          className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-medium transition-colors cursor-pointer shrink-0"
-        >
-          繼續
-        </button>
-      );
-    }
-    // submitted or graded
-    return (
-      <button
-        onClick={() => {
-          const textKey = a.story_id ?? a.text_id;
-          if (textKey == null) {
-            return;
-          }
-
-          sessionStorage.setItem('activeAssignmentId', String(a.assignment_id));
-          sessionStorage.setItem(
-            'activeAssignmentGoals',
-            JSON.stringify({
-              target_cpm: a.target_cpm,
-              target_accuracy: a.target_accuracy,
-              difficulty_label: a.difficulty_label,
-              effective_cpm: a.effective_cpm,
-              effective_accuracy: a.effective_accuracy,
-            }),
-          );
-
-          try {
-            sessionStorage.setItem(
-              ACTIVE_ASSIGNMENT_CONTEXT_KEY,
-              JSON.stringify({
-                assignmentId: a.assignment_id,
-                userId: user ? String(user.id) : null,
-                storyKey: String(textKey),
-                startedAt: Date.now(),
-              }),
-            );
-          } catch {
-            // non-fatal
-          }
-
-          if (a.session_id != null) {
-            try {
-              sessionStorage.setItem(
-                `${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${a.assignment_id}-${textKey}`,
-                String(a.session_id),
-              );
-              sessionStorage.removeItem(`${ASSIGNMENT_DB_SESSION_KEY_PREFIX}${textKey}`);
-              sessionStorage.removeItem(`db-session-${textKey}`);
-            } catch {
-              // non-fatal
-            }
-          }
-
-          navigate(`/learn/${textKey}/report`);
-        }}
-        className="px-3 py-1.5 rounded-lg border border-[#E5E0D5] text-on-surface-variant text-xs font-medium hover:bg-surface-container-low transition-colors cursor-pointer shrink-0"
-      >
-        查看
-      </button>
-    );
-  };
-
-  // Summary bar: unique classroom names from enrolled classrooms
-  const classroomNames = useMemo(() => classrooms.map((c) => c.name), [classrooms]);
-  // Show pill filter when student is in 2+ classrooms (#1158)
-  const showClassroomFilter = classrooms.length >= 2;
-
-  // Reset classroom filter if the selected classroom is no longer in the list
-  // (e.g. after classroom API failure returns empty or student left a classroom)
-  useEffect(() => {
-    if (classroomFilter !== 'all' && !classroomNames.includes(classroomFilter)) {
-      setClassroomFilter('all');
-    }
-  }, [classroomNames, classroomFilter]);
 
   return (
     <div className="flex-1 overflow-y-auto bg-surface">
@@ -411,65 +215,19 @@ const MyAssignments: React.FC = () => {
           </div>
         )}
 
-        {/* Classroom pill filter — visible when student is in 2+ classrooms (#1158) */}
-        {showClassroomFilter && !isLoading && (
-          <div className="flex items-center gap-2 flex-wrap" role="group" aria-label="依班級篩選">
-            <button
-              onClick={() => setClassroomFilter('all')}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-                classroomFilter === 'all'
-                  ? 'bg-accent text-white'
-                  : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-              }`}
-            >
-              全部
-            </button>
-            {classroomNames.map((name) => (
-              <button
-                key={name}
-                onClick={() => setClassroomFilter(name)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
-                  classroomFilter === name
-                    ? 'bg-accent text-white'
-                    : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                }`}
-              >
-                {name}
-              </button>
-            ))}
-          </div>
+        {/* Filters + sort — hidden while loading to avoid layout jump */}
+        {!isLoading && (
+          <AssignmentFilters
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            sortKey={sortKey}
+            onSortChange={setSortKey}
+            classroomNames={classroomNames}
+            classroomFilter={classroomFilter}
+            onClassroomFilterChange={setClassroomFilter}
+            showClassroomFilter={showClassroomFilter}
+          />
         )}
-
-        {/* Filter tabs + sort */}
-        <div className="flex items-center justify-between gap-2 border-b border-[#E5E0D5]">
-          <nav className="flex -mb-px" aria-label="Filter tabs">
-            {FILTER_TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveFilter(tab.key)}
-                className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors cursor-pointer ${
-                  activeFilter === tab.key
-                    ? 'border-accent text-accent'
-                    : 'border-transparent text-on-surface-variant hover:text-on-surface hover:border-[#E5E0D5]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-          <select
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="mb-px text-xs text-on-surface-variant border border-[#E5E0D5] rounded-md px-2 py-1 bg-surface-container-lowest cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent"
-            aria-label="排序方式"
-          >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.key} value={opt.key}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
 
         {/* Error */}
         {error && (
@@ -481,7 +239,7 @@ const MyAssignments: React.FC = () => {
           </div>
         )}
 
-        {/* Loading */}
+        {/* Loading skeleton */}
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -517,105 +275,20 @@ const MyAssignments: React.FC = () => {
         ) : (
           /* Assignment cards */
           <div className="space-y-3">
-            {filteredAssignments.map((a) => {
-              const completedSteps = getCompletedSteps(a);
-              const currentStepPath = a.status === 'in_progress' ? getResumeStepPath(a) : null;
-              const teacherName = classroomTeacherMap.get(a.classroom_name);
-              return (
-                <div
-                  key={a.assignment_id}
-                  className="bg-surface-container-lowest border border-[#E5E0D5] rounded-2xl shadow-editorial p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-sm font-medium text-on-surface truncate">
-                          {a.title || a.story_title}
-                        </h3>
-                        {statusBadge(a.status)}
-                      </div>
-
-                      {a.title && a.title !== a.story_title && (
-                        <p className="text-xs text-on-surface-variant mt-0.5">
-                          課文：{a.story_title}
-                        </p>
-                      )}
-
-                      {/* Classroom + teacher badge */}
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <span className="text-xs text-accent font-medium">
-                          📍 {a.classroom_name}
-                          {teacherName && (
-                            <span className="text-accent/60 font-normal">｜{teacherName}指派</span>
-                          )}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                        {a.due_date && (
-                          <span
-                            className={`text-xs ${
-                              isOverdue(a.due_date) ? 'text-error font-medium' : 'text-on-surface-variant'
-                            }`}
-                          >
-                            截止：{formatDate(a.due_date)}
-                            {isOverdue(a.due_date) && (
-                              <span className="ml-1 inline-block px-1 py-0.5 rounded text-xs font-medium bg-error/10 text-error">
-                                已逾期
-                              </span>
-                            )}
-                          </span>
-                        )}
-
-                        {a.score != null && (
-                          <span className="text-xs text-on-surface font-medium">
-                            分數：{Math.round(a.score)}%
-                          </span>
-                        )}
-
-                        {a.submitted_at && (
-                          <span className="text-xs text-on-surface-variant">
-                            提交於 {formatDate(a.submitted_at)}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Issue #424: per-student teacher feedback */}
-                      {a.teacher_feedback && (
-                        <div className="mt-2 px-2.5 py-2 bg-tertiary/5 border border-tertiary/20 rounded-lg">
-                          <p className="text-xs font-medium text-tertiary mb-0.5">老師評語</p>
-                          <p className="text-xs text-on-surface-variant">{a.teacher_feedback}</p>
-                        </div>
-                      )}
-
-                      {assignmentSteps.length > 0 && (
-                        <div className="mt-2.5">
-                          <div className="flex items-center justify-between mb-1">
-                            <p className="text-[11px] text-on-surface-variant">學習關卡進度</p>
-                            <p className="text-[11px] text-on-surface-variant/60">
-                              {completedSteps.size}/{assignmentSteps.length}
-                            </p>
-                          </div>
-                          <StepProgressStrip
-                            steps={assignmentSteps}
-                            completedSteps={completedSteps}
-                            currentStepPath={currentStepPath}
-                          />
-                        </div>
-                      )}
-
-                      {a.description && (
-                        <p className="text-xs text-on-surface-variant mt-1.5 line-clamp-2">
-                          {a.description}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="shrink-0">{actionButton(a)}</div>
-                  </div>
-                </div>
-              );
-            })}
+            {filteredAssignments.map((a) => (
+              <AssignmentCard
+                key={a.assignment_id}
+                assignment={a}
+                steps={assignmentSteps}
+                completedSteps={getCompletedSteps(a)}
+                currentStepPath={a.status === 'in_progress' ? getResumeStepPath(a) : null}
+                teacherName={classroomTeacherMap.get(a.classroom_name)}
+                startingId={startingId}
+                onStart={handleStart}
+                onResume={handleResume}
+                onViewReport={handleViewReport}
+              />
+            ))}
           </div>
         )}
       </div>
