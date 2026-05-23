@@ -383,6 +383,7 @@ class TeacherSessionReportResponse(BaseModel):
     story_slug: str | None
     story_title: str | None
     status: str
+    is_complete: bool  # True when status == 'completed' — matches progress table criterion (#1911)
     accuracy: float | None
     overall_score: float | None
     reading_result: dict | None

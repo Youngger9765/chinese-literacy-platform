@@ -64,6 +64,7 @@ def get_teacher_session_report(
         story_slug=session.story_slug,
         story_title=story_title,
         status=session.status,
+        is_complete=session.status == "completed",  # #1911: same criterion as progress table
         accuracy=session.accuracy,
         overall_score=session.overall_score,
         reading_result=session.reading_result,
