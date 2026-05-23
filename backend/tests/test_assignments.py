@@ -2017,3 +2017,194 @@ class TestReadingGoalsInStartResponse:
         data = resp.json()
         assert "effective_cpm" in data
         assert data["effective_cpm"] == 160
+
+
+# ====================================================================
+# Issue #1910 — P0 regression: freshly-created assignment 403 + CORS
+# ====================================================================
+
+class TestIssue1910AssignmentStartAndCORS:
+    """
+    Three characterization tests for #1910.
+
+    Sub-bug A: enrolled student gets 403 on freshly-created assignment
+    because no AssignmentSubmission row was created at assignment creation time.
+
+    Sub-bug B: 4xx error responses are missing Access-Control-Allow-Origin
+    header because RequestLoggingMiddleware (BaseHTTPMiddleware) returns a raw
+    JSONResponse that bypasses CORSMiddleware's send wrapper.
+    """
+
+    def test_create_assignment_creates_submission_for_each_enrolled_student(
+        self, client, teacher, student1, student2, classroom_with_students
+    ):
+        """
+        TDD Red (Sub-bug A): When a teacher creates a new assignment,
+        AssignmentSubmission rows MUST be created for every enrolled student.
+
+        Expected to FAIL before fix: if create_assignment_with_submissions()
+        is broken, submission_count will be 0.
+        """
+        resp = client.post(
+            f"/api/classrooms/{classroom_with_students}/assignments",
+            json={
+                "classroom_id": classroom_with_students,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 1910 — submission row test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert resp.status_code == 201, resp.text
+        data = resp.json()
+        assignment_id = data["id"]
+
+        # The classroom has 2 enrolled students (student1 + student2).
+        # submission_count must equal 2 immediately after creation.
+        assert data["submission_count"] == 2, (
+            f"Expected 2 submission rows for 2 enrolled students, got {data['submission_count']}. "
+            "Sub-bug A: create_assignment_with_submissions() didn't create submission rows."
+        )
+
+        # Verify via direct DB query that both rows exist
+        db = TestingSessionLocal()
+        try:
+            from app.models.assignment import AssignmentSubmission as AS_1910
+            rows = (
+                db.query(AS_1910)
+                .filter(AS_1910.assignment_id == assignment_id)
+                .all()
+            )
+            student_ids_in_db = {r.student_id for r in rows}
+            assert student1["user_id"] in student_ids_in_db, (
+                f"No submission for student1 (id={student1['user_id']}). "
+                f"Found student_ids: {student_ids_in_db}"
+            )
+            assert student2["user_id"] in student_ids_in_db, (
+                f"No submission for student2 (id={student2['user_id']}). "
+                f"Found student_ids: {student_ids_in_db}"
+            )
+        finally:
+            db.close()
+
+    def test_enrolled_student_can_start_freshly_created_assignment_with_200(
+        self, client, teacher, school_id
+    ):
+        """
+        TDD Red (Sub-bug A): An enrolled student MUST be able to start
+        a freshly-created assignment and receive HTTP 200.
+
+        Uses a dedicated classroom + student to avoid unique-constraint
+        collisions with other tests that use the shared classroom/story.
+        """
+        # Create a dedicated classroom for this test
+        cls_resp = client.post(
+            "/api/classrooms",
+            json={"name": "Issue 1910 Start Test Classroom", "school_id": school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert cls_resp.status_code == 201, cls_resp.text
+        dedicated_classroom_id = cls_resp.json()["id"]
+
+        # Register a fresh student enrolled in this classroom only
+        fresh_student = _register_user(client, "issue1910_stu")
+        _make_student_role(fresh_student["user_id"], school_id)
+        enroll_resp = client.post(
+            f"/api/classrooms/{dedicated_classroom_id}/students",
+            json={"student_id": fresh_student["user_id"]},
+            headers=auth_header(teacher["token"]),
+        )
+        assert enroll_resp.status_code in (200, 201), enroll_resp.text
+
+        # Teacher creates a brand-new assignment — submissions created at this point
+        create_resp = client.post(
+            f"/api/classrooms/{dedicated_classroom_id}/assignments",
+            json={
+                "classroom_id": dedicated_classroom_id,
+                "story_id": VALID_STORY_ID,
+                "title": "Issue 1910 — fresh assignment start test",
+            },
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201, create_resp.text
+        assignment_id = create_resp.json()["id"]
+
+        # Enrolled student tries to start — MUST return 200, not 403
+        start_resp = client.post(
+            f"/api/assignments/{assignment_id}/start",
+            headers=auth_header(fresh_student["token"]),
+        )
+        assert start_resp.status_code == 200, (
+            f"Expected 200, got {start_resp.status_code}: {start_resp.text}. "
+            "Sub-bug A: student is enrolled but server returned 403."
+        )
+        data = start_resp.json()
+        assert "session_id" in data, f"Missing session_id in response: {data}"
+        assert data["status"] == "in_progress", f"Expected in_progress, got: {data.get('status')}"
+
+    def test_malformed_start_request_returns_4xx_WITH_cors_headers(
+        self, client, teacher, student1, classroom_with_students
+    ):
+        """
+        TDD Red (Sub-bug B): Any 4xx error response from the backend MUST
+        include the Access-Control-Allow-Origin header so browsers can
+        display the error message.
+
+        We trigger a deliberate 403/404/400 by trying to start a non-existent
+        assignment as an authenticated user, then check the ACAO header.
+
+        Expected to FAIL before fix: CORS middleware's send wrapper is bypassed
+        by RequestLoggingMiddleware's exception handler, so ACAO header is absent.
+        """
+        # Use an allowed origin so CORSMiddleware has a chance to inject ACAO.
+        # In test/dev the default allowed_origins = "http://localhost:3000,..."
+        # In production this would be the frontend Cloud Run domain.
+        ALLOWED_ORIGIN = "http://localhost:3000"
+
+        # Trigger a 404: assignment does not exist
+        resp = client.post(
+            "/api/assignments/999999/start",
+            headers={
+                **auth_header(student1["token"]),
+                "Origin": ALLOWED_ORIGIN,
+            },
+        )
+        assert resp.status_code == 404, f"Expected 404 for non-existent assignment, got {resp.status_code}"
+
+        acao = resp.headers.get("access-control-allow-origin")
+        assert acao is not None, (
+            f"Sub-bug B: 4xx response missing Access-Control-Allow-Origin header. "
+            f"Headers present: {dict(resp.headers)}"
+        )
+
+        # Also verify a 403 path (unenrolled user trying to start assignment
+        # they have no submission for)
+        create_resp = client.post(
+            "/api/classrooms",
+            json={"name": "CORS test classroom", "school_id": _test_school_id},
+            headers=auth_header(teacher["token"]),
+        )
+        assert create_resp.status_code == 201
+        empty_classroom_id = create_resp.json()["id"]
+
+        asn_resp = client.post(
+            f"/api/classrooms/{empty_classroom_id}/assignments",
+            json={"story_id": VALID_STORY_ID, "title": "CORS 403 test"},
+            headers=auth_header(teacher["token"]),
+        )
+        assert asn_resp.status_code == 201
+        asn_id = asn_resp.json()["id"]
+
+        # student1 is NOT enrolled in this classroom → start returns 403
+        resp_403 = client.post(
+            f"/api/assignments/{asn_id}/start",
+            headers={
+                **auth_header(student1["token"]),
+                "Origin": ALLOWED_ORIGIN,
+            },
+        )
+        assert resp_403.status_code == 403, f"Expected 403, got {resp_403.status_code}: {resp_403.text}"
+        acao_403 = resp_403.headers.get("access-control-allow-origin")
+        assert acao_403 is not None, (
+            f"Sub-bug B: 403 response missing Access-Control-Allow-Origin header. "
+            f"Headers: {dict(resp_403.headers)}"
+        )

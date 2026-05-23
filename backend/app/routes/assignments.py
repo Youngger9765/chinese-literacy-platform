@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session, joinedload
 from ..auth.dependencies import get_current_user
 from ..database import get_db
 from ..models.assignment import Assignment, AssignmentSubmission
-from ..models.school import Classroom
+from ..models.school import Classroom, ClassroomStudent
 from ..models.session import LearningSession
 from ..models.user import User, UserRole, Role
 from ..schemas.assignment import (
@@ -517,9 +517,36 @@ def start_assignment(
         .first()
     )
     if submission is None:
-        raise HTTPException(
-            status_code=403, detail="You are not enrolled in this assignment"
+        # Defensive on-demand backfill (#1910): student may have joined the
+        # classroom AFTER the assignment was created (late-joiner race condition).
+        # If the student IS enrolled in the assignment's classroom, create a
+        # pending submission now rather than returning a spurious 403.
+        enrollment = (
+            db.query(ClassroomStudent)
+            .filter(
+                ClassroomStudent.classroom_id == assignment.classroom_id,
+                ClassroomStudent.student_id == current_user.id,
+            )
+            .first()
         )
+        if enrollment is None:
+            raise HTTPException(
+                status_code=403, detail="You are not enrolled in this assignment"
+            )
+        # Student is enrolled — create the missing submission on-demand.
+        logger.warning(
+            "On-demand submission backfill for student %d, assignment %d "
+            "(student joined after assignment was created). #1910",
+            current_user.id, assignment_id,
+        )
+        submission = AssignmentSubmission(
+            assignment_id=assignment_id,
+            student_id=current_user.id,
+            status="pending",
+            attempt_number=1,
+        )
+        db.add(submission)
+        db.flush()  # get submission.id for subsequent operations
 
     if submission.status in ("submitted", "graded"):
         raise HTTPException(
