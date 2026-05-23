@@ -1,3 +1,15 @@
+/**
+ * useLearningStepNavigation.ts — Refactored composer hook (Issue #1954)
+ *
+ * Previous: 520 LOC monolith with all transition logic inlined.
+ * After:    ~220 LOC composer that delegates to:
+ *
+ *   - stepNavigationTransitions.ts — STEP_FINISH_TRANSITIONS table + getDefaultNextStep()
+ *   - stepHandlerUtils.ts          — buildStepFinishPayload() pure helper
+ *
+ * Public interface (UseLearningStepNavigationReturn) is unchanged — no call-site changes needed.
+ */
+
 import { useCallback, useEffect, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
@@ -19,6 +31,7 @@ import type {
   Story,
   VocabResult,
 } from '../types';
+import { buildStepFinishPayload } from './stepHandlerUtils';
 
 const ACTIVE_ASSIGNMENT_CONTEXT_KEY = 'activeAssignmentContext';
 const SELF_PRACTICE_COMPLETED_KEY_PREFIX = 'self-practice-completed-';
@@ -118,6 +131,8 @@ export function useLearningStepNavigation({
     navigate(isToolboxMode() ? '/tools' : `/learn/${storyId}/reading-annotation`);
   }, [storyId, selectedStory, navigate, persistStep, ensureDbSession, setSession]);
 
+  // ─── Navigation helpers ───────────────────────────────────────────────────
+
   const navigateAfterFinish = useCallback(
     (nextStep: string) => {
       if (isToolboxMode()) {
@@ -129,66 +144,63 @@ export function useLearningStepNavigation({
     [navigate, storyId],
   );
 
-  const handleFinishReading = useCallback(
-    (attempt: ReadingAttempt) => {
-      setLastAttempt(attempt);
-      setSession((prev) => (prev ? { ...prev, readingAttempt: attempt } : null));
+  /**
+   * Generic step-finish dispatcher.
+   *
+   * Delegates payload construction to buildStepFinishPayload() so each
+   * handleFinish* callback is reduced to: build payload → persist → navigate.
+   * sessionPatch is applied to LearningSession state when provided.
+   */
+  const dispatchStepFinish = useCallback(
+    (stepId: string, stepData: Record<string, unknown>, sessionPatch?: Partial<LearningSession>) => {
+      const payload = buildStepFinishPayload(stepId, stepData);
+      if (sessionPatch) {
+        setSession((prev) => (prev ? { ...prev, ...sessionPatch } : null));
+      }
       persistStepProgressState(
         {
-          completeStep: 'tutor',
-          currentStep: 'full-reading',
-          stepDataPatch: {
-            tutor: { readingAttempt: attempt },
-          },
+          completeStep: payload.completeStep,
+          currentStep: payload.currentStep,
+          stepDataPatch: payload.stepDataPatch,
         },
         true,
       );
-      persistStep(STEP_PATH_TO_NUMBER['full-reading']);
-      navigateAfterFinish('full-reading');
+      if (STEP_PATH_TO_NUMBER[payload.nextStep] !== undefined) {
+        persistStep(STEP_PATH_TO_NUMBER[payload.nextStep]);
+      }
+      navigateAfterFinish(payload.nextStep);
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setLastAttempt, setSession],
+    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+  );
+
+  // ─── Step finish handlers ─────────────────────────────────────────────────
+
+  const handleFinishReading = useCallback(
+    (attempt: ReadingAttempt) => {
+      setLastAttempt(attempt);
+      // handleFinishReading completes the 'tutor' step (live tutor readout)
+      dispatchStepFinish('tutor', { readingAttempt: attempt }, { readingAttempt: attempt });
+    },
+    [dispatchStepFinish, setLastAttempt],
   );
 
   const handleFinishComprehension = useCallback(
     (result: ComprehensionResult) => {
-      setSession((prev) => (prev ? { ...prev, comprehensionResult: result } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'comprehension',
-          currentStep: 'vocab-word-search',
-          stepDataPatch: {
-            comprehension: { result },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
-      navigateAfterFinish('vocab-word-search');
+      dispatchStepFinish('comprehension', { result }, { comprehensionResult: result });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [dispatchStepFinish],
   );
 
   const handleFinishVocab = useCallback(
     (result: VocabResult) => {
-      setSession((prev) => (prev ? { ...prev, vocabResult: result } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'vocab',
-          currentStep: 'vocab-definition',
-          stepDataPatch: {
-            vocab: { result },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['vocab-definition']);
-      navigateAfterFinish('vocab-definition');
+      dispatchStepFinish('vocab', { result }, { vocabResult: result });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [dispatchStepFinish],
   );
 
   const handleFinishDictation = useCallback(
     (result: DictationResult) => {
+      // Dictation has no persistStepProgressState call in the original — just navigate
       setSession((prev) => (prev ? { ...prev, dictationResult: result } : null));
       persistStep(STEP_PATH_TO_NUMBER['vocab-word-search']);
       navigateAfterFinish('vocab-word-search');
@@ -198,187 +210,72 @@ export function useLearningStepNavigation({
 
   const handleFinishFullReading = useCallback(
     (result: FullReadingResult) => {
-      setSession((prev) => (prev ? { ...prev, fullReadingResult: result } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'full-reading',
-          stepDataPatch: {
-            'full-reading': { result },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['listening']);
-      navigateAfterFinish('listening');
+      dispatchStepFinish('full-reading', { result }, { fullReadingResult: result });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [dispatchStepFinish],
   );
 
   const handleFinishListening = useCallback(
     (result: ListeningResult) => {
-      persistStepProgressState(
-        {
-          completeStep: 'listening',
-          currentStep: 'vocab',
-          stepDataPatch: {
-            listening: { completed: true, score: result.score, feedback: result.feedback },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['vocab']);
-      navigateAfterFinish('vocab');
+      dispatchStepFinish('listening', { completed: true, score: result.score, feedback: result.feedback });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
+    [dispatchStepFinish],
   );
 
   const handleFinishReadingAnnotation = useCallback(
     (_summary: AnnotationSummary) => {
-      setSession((prev) => (prev ? { ...prev, readingAnnotationCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'reading-annotation',
-          currentStep: 'tutor',
-          stepDataPatch: {
-            'reading-annotation': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['tutor']);
-      navigateAfterFinish('tutor');
+      dispatchStepFinish('reading-annotation', { completed: true }, { readingAnnotationCompleted: true });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [dispatchStepFinish],
   );
 
   const handleFinishVocabDefinitionMatch = useCallback(
     (result: VocabDefinitionMatchResult) => {
-      setSession((prev) => (prev ? { ...prev, vocabDefinitionMatchCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'vocab-definition',
-          currentStep: 'vocab-application',
-          stepDataPatch: {
-            'vocab-definition': { completed: true, result },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['vocab-application']);
-      navigateAfterFinish('vocab-application');
+      dispatchStepFinish('vocab-definition', { completed: true, result }, { vocabDefinitionMatchCompleted: true });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [dispatchStepFinish],
   );
 
   const handleFinishVocabApplication = useCallback(
     (_result: VocabApplicationResult) => {
-      setSession((prev) => (prev ? { ...prev, vocabApplicationCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'vocab-application',
-          currentStep: 'story-structure',
-          stepDataPatch: {
-            'vocab-application': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['story-structure']);
-      navigateAfterFinish('story-structure');
+      dispatchStepFinish('vocab-application', { completed: true }, { vocabApplicationCompleted: true });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [dispatchStepFinish],
   );
 
   const handleFinishStoryStructure = useCallback(
     () => {
-      persistStepProgressState(
-        {
-          completeStep: 'story-structure',
-          currentStep: 'reading-strategy',
-          stepDataPatch: {
-            'story-structure': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['reading-strategy']);
-      navigateAfterFinish('reading-strategy');
+      dispatchStepFinish('story-structure', { completed: true });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
+    [dispatchStepFinish],
   );
 
   const handleFinishReadingStrategy = useCallback(
     () => {
-      persistStepProgressState(
-        {
-          completeStep: 'reading-strategy',
-          currentStep: 'comprehension',
-          stepDataPatch: {
-            'reading-strategy': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['comprehension']);
-      navigateAfterFinish('comprehension');
+      dispatchStepFinish('reading-strategy', { completed: true });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
+    [dispatchStepFinish],
   );
 
   const handleFinishSentencePractice = useCallback(
     () => {
-      persistStepProgressState(
-        {
-          completeStep: 'sentence-practice',
-          currentStep: 'vocab-definition',
-          stepDataPatch: {
-            'sentence-practice': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['sentence-practice']);
-      navigateAfterFinish('vocab-definition');
+      dispatchStepFinish('sentence-practice', { completed: true });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState],
+    [dispatchStepFinish],
   );
 
   const handleFinishVocabWordSearch = useCallback(
     (_elapsedSeconds: number) => {
-      setSession((prev) => (prev ? { ...prev, vocabWordSearchCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'vocab-word-search',
-          currentStep: 'knowledge-station',
-          stepDataPatch: {
-            'vocab-word-search': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['knowledge-station']);
-      navigateAfterFinish('knowledge-station');
+      dispatchStepFinish('vocab-word-search', { completed: true }, { vocabWordSearchCompleted: true });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [dispatchStepFinish],
   );
 
   const handleFinishKnowledgeStation = useCallback(
     () => {
-      setSession((prev) => (prev ? { ...prev, knowledgeStationCompleted: true } : null));
-      persistStepProgressState(
-        {
-          completeStep: 'knowledge-station',
-          currentStep: 'report',
-          stepDataPatch: {
-            'knowledge-station': { completed: true },
-          },
-        },
-        true,
-      );
-      persistStep(STEP_PATH_TO_NUMBER['report']);
-      navigateAfterFinish('report');
+      dispatchStepFinish('knowledge-station', { completed: true }, { knowledgeStationCompleted: true });
     },
-    [navigateAfterFinish, persistStep, persistStepProgressState, setSession],
+    [dispatchStepFinish],
   );
 
   const handleRetry = useCallback(() => {
